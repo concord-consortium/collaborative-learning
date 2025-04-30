@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 
@@ -32,8 +32,9 @@ export interface IOpenDocumentsGroupMetadata {
 
 export const SortedSection: React.FC<IProps> = observer(function SortedSection(props: IProps) {
   const { docFilter, documentGroup, idx, secondarySort } = props;
-  const { persistentUI, sortedDocuments } = useStores();
-  const [showDocuments, setShowDocuments] = useState(false);
+  const { persistentUI, sortedDocuments, ui } = useStores();
+  const { expandedSortWorkSections, setExpandedSortWorkSections, setHighlightedSortWorkDocument } = ui;
+  const showDocuments = expandedSortWorkSections.includes(documentGroup.label);
   const documentCount = documentGroup.documents?.length || 0;
 
   const getDocument = (docKey: string) => {
@@ -61,19 +62,18 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
       const documentGroupId = JSON.stringify(openDocGroupMetadata);
       const tabState = persistentUI.getOrCreateTabState(ENavTab.kSortWork);
       tabState.openDocumentGroupPrimaryDocument(documentGroupId, document.key);
-
+      setHighlightedSortWorkDocument(document.key);
       logDocumentViewEvent(document);
     };
   };
 
   const handleToggleShowDocuments = () => {
-    setShowDocuments(!showDocuments);
+    setExpandedSortWorkSections(documentGroup.label, !showDocuments);
   };
 
   const renderUngroupedDocument = (doc: IDocumentMetadataModel) => {
     const fullDocument = getDocument(doc.key);
     if (!fullDocument) return <div key={doc.key} className="loading-spinner"/>;
-
     return <DecoratedDocumentThumbnailItem
              key={doc.key}
              scale={0.1}
@@ -81,6 +81,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
              tab={ENavTab.kSortWork}
              shouldHandleStarClick
              allowDelete={false}
+             selectedDocument={ui.highlightedSortWorkDocument}
              onSelectDocument={handleSelectDocument(documentGroup)}
            />;
   };

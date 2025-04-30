@@ -89,7 +89,6 @@ describe('SortWorkView Tests', () => {
     resourcesPanel.getDocumentSwitchBtnNext().should('exist').and('not.have.class', 'disabled');
 
     resourcesPanel.getDocumentCloseButton().click();
-    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().should('be.visible'); // Verify the document is closed
   });
 
@@ -243,13 +242,11 @@ describe('SortWorkView Tests', () => {
     resourcesPanel.getDocumentCloseButton().should("exist").click();
 
     cy.log("open personal doc and make sure Edit button doesn't show and Close button shows");
-    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().contains(studentPersonalDocs[0]).click();
     resourcesPanel.getDocumentEditButton().should("not.exist");
     resourcesPanel.getDocumentCloseButton().should("exist").click();
 
     cy.log("open exemplar doc and make sure Edit button doesn't show and Close button shows");
-    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().contains(exemplarDocs[0]).click();
     resourcesPanel.getDocumentEditButton().should("not.exist");
     resourcesPanel.getDocumentCloseButton().should("exist");
@@ -261,7 +258,6 @@ describe('SortWorkView Tests', () => {
     resourcesPanel.getDocumentCloseButton().click();
 
     cy.log("check all problem and personal docs show in the correct group");
-    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     studentProblemDocs.forEach(doc => {
       sortWork.checkDocumentInGroup("Group 5", doc);
     });
@@ -323,7 +319,6 @@ describe('SortWorkView Tests', () => {
     chatPanel.getChatCloseButton().click();
     cy.openTopTab('sort-work');
 
-    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Diverging Designs", exemplarDocs[0]);
 
     cy.log("remove the teacher added tag and reload");
@@ -395,5 +390,50 @@ describe('SortWorkView Tests', () => {
     cy.openTopTab("sort-work");
     sortWork.getPrimarySortByNameOption().should("have.class", "selected");
     sortWork.getSecondarySortByGroupOption().should("have.class", "selected");
+  });
+
+  it("should retain selection state when going between sort options and viewing a sorted document", () => {
+    beforeTest(queryParams1);
+
+    cy.log("expand a section and verify that the section remains expanded after selecting a new secondary sort option");
+    cy.get('.section-header-arrow').eq(1).click();
+    cy.get('.section-header-arrow').eq(1).should("have.class", "up");
+    sortWork.getSecondarySortByMenu().click();
+    sortWork.getSecondarySortByNameOption().click();
+    sortWork.getSecondarySortByNameOption().should("have.class", "selected");
+    cy.get('.section-header-arrow').eq(1).should("have.class", "up");
+
+    cy.log("open a document and verify that the section remains expanded and the document is highlighted");
+    sortWork.getSecondarySortByMenu().click();
+    sortWork.getSecondarySortByNoneOption().click();
+    sortWork.getSecondarySortByNoneOption().should("have.class", "selected");
+    cy.get('.section-header-arrow').eq(1).should("have.class", "up");
+    let prevFocusDocTitle = "";
+    sortWork.getSortWorkItem().first().find('div').invoke('text').then((docText) => {
+      prevFocusDocTitle = docText.trim();
+    });
+    sortWork.getSortWorkItem().first().click();
+    cy.get('.close-doc-button').click();
+    cy.get('.section-header-arrow').eq(1).should("have.class", "up");
+    cy.get(".sort-work-view .sorted-sections .list-item").first().should("have.class", "selected");
+
+    cy.log("change the secondary sort and verify that the section remains expanded and the document is highlighted");
+    sortWork.getSecondarySortByMenu().click();
+    sortWork.getSecondarySortByNameOption().click();
+    cy.get(".sort-work-view .sorted-sections .simple-document-item.selected")
+      .should("exist")
+      .invoke("attr", "title")
+      .then((docTitle2) => {
+        expect(docTitle2).to.equal(prevFocusDocTitle);
+      });
+
+    cy.log("when primary sort is switched, there should be no expanded sections, and no highlighted documents");
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByTagOption().click();
+    cy.get('.section-header-arrow').should("not.have.class", "up");
+    sortWork.getSecondarySortByMenu().click();
+    sortWork.getSecondarySortByNoneOption().click();
+    cy.get('.section-header-arrow').click({multiple: true});
+    cy.get(".sort-work-view .sorted-sections .list-item").should("not.have.class", "selected");
   });
 });
