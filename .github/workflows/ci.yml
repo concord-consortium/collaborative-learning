@@ -156,6 +156,8 @@ jobs:
           prefix: collaborative-learning
           awsAccessKeyId: ${{ secrets.AWS_ACCESS_KEY_ID }}
           awsSecretAccessKey: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          deployRunUrl: https://collaborative-learning.concord.org/__deployPath__/?demo
           # Parameters to GHActions have to be strings, so a regular yaml array cannot
           # be used. Instead the `|` turns the following lines into a string
           topBranches: |
