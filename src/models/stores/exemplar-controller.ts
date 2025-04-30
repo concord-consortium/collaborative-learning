@@ -40,7 +40,8 @@ export const BaseExemplarControllerModel = types
   .volatile((self) => ({
     documentsStore: undefined as DocumentsModelType | undefined,
     db: undefined as DB|undefined,
-    firebasePath: undefined as string|undefined
+    firebasePath: undefined as string|undefined,
+    isIdeasButtonPressed: false
   }))
   .actions((self) => ({
     /**
@@ -171,6 +172,12 @@ export const ExemplarControllerModel = BaseExemplarControllerModel
         }
       }
 
+      if (logMessage.event === LogEventName[LogEventName.REQUEST_IDEA]) {
+        // The user pressed the "Ideas" button, so we want to show an exemplar.
+        self.isIdeasButtonPressed = true;
+        needsUpdate = true;
+      }
+
       if (needsUpdate) {
         self.runAllRules();
       }
@@ -193,6 +200,7 @@ export const ExemplarControllerModel = BaseExemplarControllerModel
       if (state) {
         applySnapshot(self, state);
       }
+
       Logger.Instance.registerLogListener(self.processLogMessage);
 
       onSnapshot(self, (snapshot)=>{

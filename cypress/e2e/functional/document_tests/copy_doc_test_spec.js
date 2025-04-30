@@ -12,6 +12,7 @@ import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
 import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
+import QuestionToolTile from '../../../support/elements/tile/QuestionToolTile';
 
 let tableTile = new TableToolTile;
 let textTile = new TextToolTile;
@@ -25,6 +26,7 @@ let diagramTile = new DiagramToolTile;
 let dataflowTile = new DataflowToolTile;
 let simulatorTile = new SimulatorTile;
 let xyTile = new XYPlotToolTile;
+let questionTile = new QuestionToolTile;
 
 let clueCanvas = new ClueCanvas;
 let canvas = new Canvas;
@@ -129,14 +131,19 @@ context('Copy Document', () => {
     xyTile.linkProgram("Program 1");
     xyTile.getGraphDot().should('have.length.greaterThan', 3);
 
+    cy.log("Add default question tile");
+    clueCanvas.addTile("question");
+    questionTile.getQuestionTile().should("exist");
+    questionTile.getQuestionTileEmbeddedTiles().should("have.length", 2); // prompt and placeholder
+
     cy.log("Copy Document");
     const copyTitle = 'Personal Workspace Copy';
     canvas.copyDocument(copyTitle);
     canvas.getPersonalDocTitle().should('contain', copyTitle);
 
     cy.log("Check all tiles are restored in copied document");
-    textTile.getTextTile().scrollIntoView().should('be.visible');
-    textTile.getTextEditor().last().should('contain', 'Hello World');
+    textTile.getTextTile().first().scrollIntoView().should('be.visible');
+    textTile.getTextEditor().first().should('contain', 'Hello World');
 
     tableTile.getTableTile().scrollIntoView().should('be.visible');
     tableTile.getTableCell().eq(1).should('contain', '3');
@@ -174,6 +181,9 @@ context('Copy Document', () => {
 
     xyTile.getTile().scrollIntoView().should('be.visible');
     xyTile.getGraphDot().should('have.length.greaterThan', 3);
+
+    questionTile.getQuestionTile().scrollIntoView().should('be.visible');
+    questionTile.getQuestionTileEmbeddedTiles().should("have.length", 2);
   });
 });
 

@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import { ObservableMap } from "mobx";
 import { observer } from "mobx-react";
 import React, { MouseEvent, MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 import useResizeObserver from "use-resize-observer";
@@ -13,7 +14,7 @@ import { ArrowAnnotation, ArrowShape, isArrowShape } from "../../models/annotati
 import { ClueObjectModel, IClueObject, IOffsetModel, ObjectBoundingBox, OffsetModel
 } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
-import { midpoint, Point } from "../../utilities/math-utils";
+import { isFiniteNumber, midpoint, Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { HotKeys } from "../../utilities/hot-keys";
 import { boundingBoxCenter } from "../../models/annotations/annotation-utils";
@@ -26,7 +27,7 @@ interface IAnnotationLayerProps {
   documentScrollX?: number;
   documentScrollY?: number;
   readOnly?: boolean;
-  boundingBoxCache: Map<string,Map<string,ObjectBoundingBox>>;
+  boundingBoxCache: ObservableMap<string, ObservableMap<string, ObjectBoundingBox>>;
 }
 
 export const AnnotationLayer = observer(function AnnotationLayer({
@@ -107,6 +108,14 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   // Force rerenders when the layer's size changes
   useResizeObserver({ref: divRef, box: "border-box"});
 
+  function getDocumentScale(el?: HTMLElement | null) {
+    if (!el) return 1;
+    const s = el.getBoundingClientRect().width / el.offsetWidth;
+    return isFiniteNumber(s) ? s : 1;
+  }
+
+  const scale = getDocumentScale(canvasElement);
+
   function getRowElement(rowId?: string) {
     if (rowId === undefined) return undefined;
     const rowSelector = `[data-row-id='${rowId}']`;
@@ -122,7 +131,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   if (rows) {
     Array.from(rows).forEach(row => {
       const boundingBox = row.getBoundingClientRect();
-      documentHeight += boundingBox.height;
+      documentHeight += (boundingBox.height / scale);
     });
   }
   const documentLeft = 0;

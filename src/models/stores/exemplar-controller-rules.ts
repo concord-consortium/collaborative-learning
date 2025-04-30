@@ -13,8 +13,8 @@ import { BaseExemplarControllerModelType } from "./exemplar-controller";
 
 interface IExemplarControllerRule {
   name: string;
-  test: (model: BaseExemplarControllerModelType) => string[] | false;
-  reset: (model: BaseExemplarControllerModelType, tiles: string[]) => void;
+  test: (model: BaseExemplarControllerModelType) => string[] | boolean;
+  reset: (model: BaseExemplarControllerModelType, result: string[]|boolean) => void;
 }
 
 // "2 drawings/2 labels" Rule: reveal an exemplar for each:
@@ -23,12 +23,21 @@ interface IExemplarControllerRule {
 
 const kDrawingMinActivityLevel = 3;
 const kLabelMinWords = 5;
-const kNumDrawings = 2;
-const kNumLabels = 2;
+const kNumDrawings = 1;
+const kNumLabels = 1;
 
+const isIdeasButtonPressedRule: IExemplarControllerRule = {
+  name: "Ideas button pressed",
+  test: (model: BaseExemplarControllerModelType) => {
+    return model.isIdeasButtonPressed === true;
+  },
+  reset: (model: BaseExemplarControllerModelType) => {
+    model.isIdeasButtonPressed = false;
+  }
+};
 
 const threeDrawingsRule: IExemplarControllerRule = {
-  name: "2 drawings/2 labels",
+  name: "1 drawings/1 label",
   test: (model: BaseExemplarControllerModelType) => {
     let foundDrawings = 0, foundLabels = 0;
     const tileIds: string[] = [];
@@ -54,9 +63,10 @@ const threeDrawingsRule: IExemplarControllerRule = {
     }
     return false;
   },
-  reset: (model: BaseExemplarControllerModelType, tiles: string[]) => {
+  reset: (model: BaseExemplarControllerModelType, tiles: string[]|boolean) => {
+    if (!Array.isArray(tiles)) return;
     model.markTilesComplete(tiles);
   }
 };
 
-export const allExemplarControllerRules = [ threeDrawingsRule ];
+export const allExemplarControllerRules = [ isIdeasButtonPressedRule, threeDrawingsRule ];

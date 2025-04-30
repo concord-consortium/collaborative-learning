@@ -141,6 +141,9 @@ export const TileModel = types
       if (self.display) {
         builder.pushLine(`"display": "${self.display}",`, 2);
       }
+      if (self.fixedPosition) {
+        builder.pushLine(`"fixedPosition": true,`, 2);
+      }
       builder.pushBlock(`"content": ${contentJson}`, 2);
       options?.rowHeight && builder.pushLine(`"layout": { "height": ${options.rowHeight} }`, 2);
       const comma = options?.appendComma ? ',' : '';
