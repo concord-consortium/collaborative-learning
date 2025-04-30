@@ -1,4 +1,5 @@
-import { QuestionContentModel, kQuestionTileType } from "./question-content";
+import { QuestionContentModel } from "./question-content";
+import { kQuestionTileType } from "./question-types";
 import { DocumentContentModel } from "../../document/document-content";
 import { defaultTextContent } from "../text/text-content";
 
@@ -34,6 +35,7 @@ describe("QuestionContentModel", () => {
       type: "Question",
       version: 2,
       locked: true,
+      questionId: expect.stringMatching(/^.{6}$/),
       tiles: []
     });
   });
@@ -75,6 +77,7 @@ describe("QuestionContentModel", () => {
             type: "Question",
             version: 2,
             locked: false,
+            questionId: expect.stringMatching(/^.{6}$/),
             tiles: [
               {
                 title: "Text 2",

@@ -13,7 +13,6 @@ jest.mock("../../tiles/log/log-tile-copy-event", () => ({
   logTileCopyEvent: (...args: any[]) => mockLogTileCopyEvent(...args)
 }));
 
-
 registerTileTypes(["Question", "Text", "Expression", "Table", "Drawing"]);
 
 import questionTileExample from "./question-tile-example.json";
@@ -253,7 +252,7 @@ describe("Question tile operations", () => {
       expect(documentContent.debugDescribeThis(documentContent.tileMap, "")).
 toMatchInlineSnapshot(`
 "testid-6: [Text: text-1]
-testid-28: [Question: testid-25]
+testid-29: [Question: testid-25]
 Contents of embedded row list:
   testid-26: [Text: testid-22]
   testid-27: [Table: testid-23] [Drawing: testid-24]
