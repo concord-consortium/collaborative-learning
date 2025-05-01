@@ -9,7 +9,7 @@ import { getDefaultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
-import { usePersistentUIStore, useUIStore } from "../../hooks/use-stores";
+import { useStores } from "../../hooks/use-stores";
 import { ArrowAnnotation, ArrowShape, isArrowShape } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, IOffsetModel, ObjectBoundingBox, OffsetModel
 } from "../../models/annotations/clue-object";
@@ -18,6 +18,7 @@ import { isFiniteNumber, midpoint, Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { HotKeys } from "../../utilities/hot-keys";
 import { boundingBoxCenter } from "../../models/annotations/annotation-utils";
+import { kQuestionTileType, QuestionContentModelType } from "../../models/tiles/question/question-content";
 
 import "./annotation-layer.scss";
 
@@ -46,8 +47,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [mouseY, setMouseY] = useState<number | undefined>();
   const [isBackgroundClick, setIsBackgroundClick] = useState(false);
   const divRef = useRef<Element|null>(null);
-  const ui = useUIStore();
-  const persistentUI = usePersistentUIStore();
+  const { ui, persistentUI,  } = useStores();
   const tileApiInterface = useContext(TileApiInterfaceContext);
   const hotKeys = useMemoOne(() => new HotKeys(), []);
   const shape: ArrowShape = isArrowShape(ui.annotationMode) ? ui.annotationMode : ArrowShape.curved;
@@ -416,8 +416,37 @@ export const AnnotationLayer = observer(function AnnotationLayer({
           if (row) {
             const tiles = row.tiles;
             return tiles.map(tileInfo => {
-              const tile = content?.tileMap.get(tileInfo.tileId);
-              if (tile) {
+              const tile = content?.tileMap?.get(tileInfo.tileId);
+              if ( tile && tile.content?.type === kQuestionTileType && content?.tileMap) {
+                const _content = tile.content as QuestionContentModelType;
+                return _content.rowOrder.map((_rowId) => {
+                  const _row = _content.rowMap.get(_rowId);
+                  if (_row) {
+                    const _tiles = _row.tiles;
+                    return _tiles.map(_tileInfo => {
+                      const _tile = content?.tileMap?.get(_tileInfo.tileId);
+                      if (_tile && _rowId) {
+                        return _tile.content.annotatableObjects.map(({ objectId, objectType }) => {
+                          return (
+                            <AnnotationButton
+                              getObjectBoundingBox={getObjectBoundingBox}
+                              getTileOffset={() => getTileOffset(_rowId, _tileInfo.tileId)}
+                              key={`${_tile.id}-${objectId}-button`}
+                              objectId={objectId}
+                              objectType={objectType}
+                              onClick={handleAnnotationButtonClick}
+                              sourceObjectId={sourceObjectId}
+                              sourceTileId={sourceTileId}
+                              tileId={_tile.id}
+                            />
+                          );
+                        });
+                      }
+                    });
+                  }
+
+                });
+              } else if (tile) {
                 return tile.content.annotatableObjects.map(({ objectId, objectType }) => {
                   return (
                     <AnnotationButton
