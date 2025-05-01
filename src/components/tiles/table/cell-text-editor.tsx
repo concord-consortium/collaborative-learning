@@ -77,15 +77,13 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
         style={{top, left, width: column.width}}
         autoFocus={true}
         onChange={event => {
+          // Ignore newline inserted when editor first opens via Enter/Return key
+          if (event.target.value === "\n") return;
+
           updateValue(event.target.value);
         }}
         onFocus={event => {
-          // Select all text when focused, but not until after the current event
-          // has been processed. Otherwise, starting to edit a cell with a
-          // keystroke will select the text and then overwrite it all immediately.
-          setTimeout(() => {
-            event.target.select();
-          }, 1);
+          event.target.select();
         }}
         onBlur={event => {
           finishAndSave(true);
