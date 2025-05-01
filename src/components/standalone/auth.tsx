@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import jwt_decode from "jwt-decode";
 import { observer } from "mobx-react";
 import { getPortalStandaloneSignInOrRegisterUrl, removeAuthParams } from "../../utilities/auth-utils";
@@ -108,7 +108,8 @@ export const createPortalOfferingForUnit = async (
   if (!problem) {
     throw new Error(`Problem ${problemOrdinal} not found in unit ${unitJson.title}`);
   }
-  const name = problem.title;
+  // NOTE: CLUE is added so that the offering can be found in portal-api.ts#isClueAssignment
+  const name = `CLUE ${problem.title}`;
 
   // the class is removed from the URL so that it doesn't get passed to the offering
   // as the url is used to create a single external activity for the unit
@@ -188,7 +189,22 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
           appConfig
         } = stores;
   const [authenticatedState, setAuthenticatedState] = React.useState<AuthenticatedState>({state: "start"});
-  const startingCLUERef = React.useRef(false);
+  const hasStartedCLUERef = useRef(false);
+  const autoStartingCLUE = useMemo(() => {
+    // when the user selects a new offering in the problem dropdown a autoLogin=true hash
+    // parameter value is added to the URL to tell us to automatically login
+    // so that the user doesn't have to click the button again to login
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    return hashParams.get("autoLogin") === "true";
+  }, []);
+
+  useEffect(() => {
+    if (autoStartingCLUE) {
+      // If the autoLogin hash param is set immediately redirect to the standalone sign in or register page.
+      // This will also have the side effect of removing the hash param from the URL.
+      window.location.assign(getPortalStandaloneSignInOrRegisterUrl());
+    }
+  }, [autoStartingCLUE]);
 
   useEffect(() => {
     if (standaloneAuth?.state === "authenticated") {
@@ -249,10 +265,9 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
 
   useEffect(() => {
     const loadApp = async () => {
-      if (authenticatedState.state === "startingCLUE" && !startingCLUERef.current) {
-        // only start CLUE once - this useEffect will be called twice since the
-        // authenticatedState is a dependency and is updated in this useEffect
-        startingCLUERef.current = true;
+      if (authenticatedState.state === "startingCLUE" && !hasStartedCLUERef.current) {
+        // ensure that we only start CLUE once
+        hasStartedCLUERef.current = true;
 
         try {
           const { classId, classWord, offeringId, portalInfo } = authenticatedState;
@@ -342,6 +357,10 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
 
     if (standaloneAuth?.state === "error") {
       return <div data-testid="standalone-error">{standaloneAuth.message}</div>;
+    }
+
+    if (autoStartingCLUE) {
+      return <div data-testid="standalone-auto-starting-clue">Starting CLUE...</div>;
     }
 
     if (standaloneAuth?.state === "haveBearerToken") {
