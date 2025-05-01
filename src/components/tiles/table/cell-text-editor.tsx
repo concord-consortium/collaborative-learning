@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, KeyboardEvent, useContext } from "react";
 import { EditorProps } from "react-data-grid";
-import { Portal } from "@chakra-ui/react";
 import TextareaAutosize from "react-textarea-autosize";
+import { createPortal } from "react-dom";
 import { TColumn } from "./table-types";
 import { TableContext } from "../hooks/table-context";
 
@@ -40,6 +40,20 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   const [value, setValue] = useState(origValueRef.current);
   const tableContext = useContext(TableContext);
   const linked = tableContext?.linked;
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  // Get RDG grid position and adjust editor coordinates accordingly.
+  useEffect(() => {
+    const gridElement = document.querySelector(".rdg") as HTMLElement;
+    if (gridElement && editorRef.current) {
+      const gridRect = gridElement.getBoundingClientRect();
+      const scrollLeft = gridElement.scrollLeft;
+      const scrollTop = gridElement.scrollTop;
+
+      editorRef.current.style.left = `${gridRect.left + left - scrollLeft}px`;
+      editorRef.current.style.top = `${gridRect.top + top - scrollTop}px`;
+    }
+  }, [top, left]);
 
   const updateValue = (val: string) => {
     if (val !== valueRef.current) {
@@ -69,23 +83,38 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return (
-    <Portal>
+  const editor = (
+    <div
+      ref={editorRef}
+      className={`rdg-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`}
+      style={{
+        position: "absolute",
+        top,
+        left,
+        width: column.width,
+        display: "block",
+        background: "white",
+        minHeight: "34px" // matches the default row height
+      }}
+    >
       <TextareaAutosize
         value={value}
         className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
-        style={{top, left, width: column.width}}
+        style={{
+          width: "100%",
+          display: "block",
+          background: "white"
+        }}
         autoFocus={true}
+        minRows={1}
         onChange={event => {
+          // Ignore newline inserted when editor first opens via Enter/Return key
+          if (event.target.value === "\n") return;
+
           updateValue(event.target.value);
         }}
         onFocus={event => {
-          // Select all text when focused, but not until after the current event
-          // has been processed. Otherwise, starting to edit a cell with a
-          // keystroke will select the text and then overwrite it all immediately.
-          setTimeout(() => {
-            event.target.select();
-          }, 1);
+          event.target.select();
         }}
         onBlur={event => {
           finishAndSave(true);
@@ -96,15 +125,14 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
             case 'Escape':
               finishAndSave(false);
               break;
-            case 'Tab':
-              event.preventDefault(); // keep focus in table
-              // fall through
             case 'Enter':
               finishAndSave(true);
               break;
           }
         }}
       />
-    </Portal>
+    </div>
   );
+
+  return createPortal(editor, document.body);
 }
