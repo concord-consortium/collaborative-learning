@@ -76,6 +76,19 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     }
   };
 
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    // Ignore newline inserted when editor first opens via Enter/Return key.
+    if (event.target.value === "\n") {
+      // Select existing text in the editor.
+      setTimeout(() => {
+        event.target.select();
+      }, 1);
+      return;
+    }
+
+    updateValue(event.target.value);
+  };
+
   useEffect(() => {
     _column.appData?.onBeginBodyCellEdit?.();
     return () => {
@@ -87,32 +100,14 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     <div
       ref={editorRef}
       className={`rdg-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`}
-      style={{
-        position: "absolute",
-        top,
-        left,
-        width: column.width,
-        display: "block",
-        background: "white",
-        minHeight: "34px" // matches the default row height
-      }}
+      style={{left, top, width: column.width}}
     >
       <TextareaAutosize
         value={value}
         className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
-        style={{
-          width: "100%",
-          display: "block",
-          background: "white"
-        }}
         autoFocus={true}
         minRows={1}
-        onChange={event => {
-          // Ignore newline inserted when editor first opens via Enter/Return key
-          if (event.target.value === "\n") return;
-
-          updateValue(event.target.value);
-        }}
+        onChange={handleChange}
         onFocus={event => {
           event.target.select();
         }}
