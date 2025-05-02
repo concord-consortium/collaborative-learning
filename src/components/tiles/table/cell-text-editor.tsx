@@ -100,11 +100,24 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     <div
       ref={editorRef}
       className={`rdg-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`}
-      style={{left, top, width: column.width}}
+      style={{
+        background: "white",
+        display: "block",
+        left,
+        minHeight: "34px", // matches the default row height
+        position: "absolute",
+        top,
+        width: column.width
+      }}
     >
       <TextareaAutosize
         value={value}
         className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
+        style={{
+          width: "100%",
+          display: "block",
+          background: "white"
+        }}
         autoFocus={true}
         minRows={1}
         onChange={handleChange}

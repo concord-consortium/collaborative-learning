@@ -237,6 +237,13 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   useEffect(() => {
     const portalDiv = document.createElement("div");
     portalDiv.className = "rdg-editor-portal-container";
+    portalDiv.style.position = "absolute";
+    portalDiv.style.top = "0";
+    portalDiv.style.left = "0";
+    portalDiv.style.width = "0";
+    portalDiv.style.height = "0";
+    portalDiv.style.overflow = "visible";
+    portalDiv.style.pointerEvents = "none";
     document.body.appendChild(portalDiv);
     setEditorPortalDiv(portalDiv);
 
