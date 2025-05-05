@@ -202,7 +202,9 @@ export const getPortalStandaloneSignInOrRegisterUrl = () => {
 
 type RemoveAutParamsOptions = {
   removeClass?: boolean;
+  addParams?: Record<string, string>;
 }
+
 export const removeAuthParams = (url: string, options?: RemoveAutParamsOptions) => {
   const newUrl = new URL(url);
   const searchParams = newUrl.searchParams;
@@ -213,6 +215,11 @@ export const removeAuthParams = (url: string, options?: RemoveAutParamsOptions) 
   searchParams.delete("token");
   if (options?.removeClass) {
     searchParams.delete("class");
+  }
+  if (options?.addParams) {
+    Object.entries(options.addParams).forEach(([key, value]) => {
+      searchParams.set(key, value);
+    });
   }
   newUrl.search = searchParams.toString();
   return newUrl.toString();
