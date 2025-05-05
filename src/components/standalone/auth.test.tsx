@@ -9,7 +9,16 @@ describe("Standalone Auth helpers", () => {
   const portalInfo = { domain: "https://example.com/", rawPortalJWT: "jwt", teacher: true, student: false };
   const classId = 1;
   const unit = "test-unit";
-  const unitJson = { title: "Test Unit" };
+  const unitJson = { title: "Test Unit", investigations: [{
+    description: "Investigation 1",
+    ordinal: 1,
+    title: "Test Investigation",
+    problems: [{
+      description: "Problem 1.1",
+      ordinal: 1,
+      title: "TEST 1.1 First Problem",
+    }]
+  }]};
   const problem = "1.1";
   const classWord = "test-class";
   const externalUrl = `https://localhost?unit=${unit}&problem=${problem}`;
