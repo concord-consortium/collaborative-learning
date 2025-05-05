@@ -72,12 +72,9 @@ export const findMatchingClassAndOfferingIds =
   }
   if (!matchingClass) {
     // if we didn't find a class with the classWord or unit, just use the first class
-    // whose class word starts with clue_ or fall back to the first class if no CLUE classes
-    // have already been automatically created
+    // whose class word starts with clue_ which may have been previously created by the teacher
+    // when launching in standalone mode for another unit
     matchingClass = classes.find((clazz) => clazz.class_word.startsWith(`${kClassWordPrefix}_`));
-    if (!matchingClass) {
-      matchingClass = classes[0];
-    }
   }
   const matchingOfferingId = matchingClass && unit && problem
     ? findMatchingOffering(matchingClass, unit, problem)?.id
@@ -158,7 +155,7 @@ export const getFinalAuthenticatedState = (authenticatedState: AuthenticatedStat
     return authenticatedState;
   }
 
-  const {classId, offeringId, classWord, classes, unitJson, problem, portalInfo} = authenticatedState;
+  const {classId, offeringId, classWord, unitJson, problem, portalInfo} = authenticatedState;
   const { teacher } = portalInfo;
 
   if (classId && offeringId && classWord) {
@@ -167,10 +164,6 @@ export const getFinalAuthenticatedState = (authenticatedState: AuthenticatedStat
 
   if (classId && teacher && classWord) {
     return {state: "creatingOffering", classId, classWord, unitJson, problem, portalInfo};
-  }
-
-  if (teacher && classes.length > 0 && classWord) {
-    return {state: "creatingOffering", classId: classes[0].id, classWord, unitJson, problem, portalInfo};
   }
 
   if (teacher) {
