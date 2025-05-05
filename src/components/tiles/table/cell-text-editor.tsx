@@ -87,7 +87,10 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
       <div
         className={`rdg-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`}
         style={{
+          background: "white",
+          display: "block",
           left,
+          position: "absolute",
           top,
           width: column.width
         }}

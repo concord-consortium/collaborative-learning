@@ -323,23 +323,9 @@ $controls-hover-background: #c0dfe7;
   }
 }
 
-.rdg-editor-portal-container {
-  height: 0;
-  left: 0;
-  overflow: visible;
-  pointer-events: none;
-  position: absolute;
-  top: 0;
-  width: 0;
-  z-index: 1000;
-}
-
 .rdg-editor-container {
-  background: white;
-  display: block;
   overflow: visible;
   pointer-events: auto;
-  position: absolute;
   z-index: 1000;
 }
 
