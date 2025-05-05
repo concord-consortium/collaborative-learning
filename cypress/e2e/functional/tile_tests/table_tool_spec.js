@@ -125,6 +125,13 @@ context('Table Tool Tile', function () {
     tableToolTile.getTableCell().eq(1).should('contain', 'third value');
     tableToolTile.getTableCell().eq(1).should('not.contain', 'abandon this edit');
 
+    cy.log('can press enter key for edit mode without altering content');
+    tableToolTile.typeInTableCell(1, '333');
+    tableToolTile.getTableCell().eq(1).should('contain', '333');
+    tableToolTile.getTableCell().eq(1).click(); // puts cell in focus but not in edit mode
+    tableToolTile.getTableCellEdit().trigger('keydown', { keyCode: 13 }); // enter (puts cell in edit mode)
+    tableToolTile.getTableCell().eq(1).should('contain', '333');
+
     // reset to previous value
     tableToolTile.typeInTableCell(1, '5');
 
