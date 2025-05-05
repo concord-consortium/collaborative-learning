@@ -15,6 +15,7 @@ import { useStores } from "../../hooks/use-stores";
 import { ArrowAnnotation, ArrowShape, isArrowShape } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, IOffsetModel, ObjectBoundingBox, OffsetModel
 } from "../../models/annotations/clue-object";
+import { ITileModel } from "../../models/tiles/tile-model";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { isFiniteNumber, midpoint, Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
@@ -407,6 +408,64 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const hidden = !persistentUI.showAnnotations;
   const classes = classNames("annotation-layer",
     { editing, hidden, 'show-buttons': showButtons, 'show-handles': showDragHandles });
+
+  const renderAnnotationButtons = (params: {
+    tile: ITileModel;
+    rowId: string;
+    tileId: string;
+    parentOffsetParams?: { rowId: string; tileId: string };
+  }) => {
+    const { tile, rowId, tileId, parentOffsetParams } = params;
+
+    return tile.content.annotatableObjects.map(({ objectId, objectType }) => (
+      <AnnotationButton
+        key={`${tile.id}-${objectId}-button`}
+        getObjectBoundingBox={getObjectBoundingBox}
+        getTileOffset={() => getTileOffset(rowId, tileId, parentOffsetParams)}
+        objectId={objectId}
+        objectType={objectType}
+        onClick={handleAnnotationButtonClick}
+        sourceObjectId={sourceObjectId}
+        sourceTileId={sourceTileId}
+        tileId={tile.id}
+      />
+    ));
+  };
+
+  const collectButtonsForRow = (
+    rowId: string,
+    parentOffsetParams?: { rowId: string; tileId: string },
+    tileContent?: DocumentContentModelType | QuestionContentModelType
+  ): JSX.Element[] => {
+
+    const docContent = content;
+    const row = tileContent ? tileContent?.rowMap.get(rowId) : docContent?.rowMap.get(rowId);
+
+    if (!row) return [];
+    return row.tiles.flatMap((tileInfo) => {
+      const tile = docContent?.tileMap?.get(tileInfo.tileId);
+      if (!tile) return [];
+
+      // Question tile: dive into its own rows
+      if (tile.content.type === kQuestionTileType) {
+        const qTileContent = tile.content as QuestionContentModelType;
+        const newParentOffset = { rowId, tileId: tile.id };
+        return qTileContent.rowOrder.flatMap((nestedRowId) => {
+          return collectButtonsForRow(nestedRowId, newParentOffset, qTileContent);
+        });
+      }
+
+      // Regular tile: render buttons
+      return renderAnnotationButtons({
+        tile,
+        rowId,
+        tileId: tileInfo.tileId,
+        parentOffsetParams
+      });
+
+    });
+  };
+
   return (
     <div
       className={classes}
@@ -421,62 +480,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       }}
     >
       <svg className="annotation-svg">
-        { editing && !readOnly && rowIds.map(rowId => {
-          const row = content?.rowMap.get(rowId);
-          if (row) {
-            const tiles = row.tiles;
-            return tiles.map(tileInfo => {
-              const tile = content?.tileMap?.get(tileInfo.tileId);
-              if ( tile && tile.content?.type === kQuestionTileType && content?.tileMap) {
-                const _content = tile.content as QuestionContentModelType;
-                return _content.rowOrder.map((_rowId) => {
-                  const _row = _content.rowMap.get(_rowId);
-                  if (_row) {
-                    const _tiles = _row.tiles;
-                    return _tiles.map(_tileInfo => {
-                      const _tile = content?.tileMap?.get(_tileInfo.tileId);
-                      if (_tile && _rowId) {
-                        const parentOffsetParams = { rowId, tileId: tileInfo.tileId };
-                        return _tile.content.annotatableObjects.map(({ objectId, objectType }) => {
-                          return (
-                            <AnnotationButton
-                              getObjectBoundingBox={getObjectBoundingBox}
-                              getTileOffset={() => getTileOffset(_rowId, _tileInfo.tileId, parentOffsetParams)}
-                              key={`${_tile.id}-${objectId}-button`}
-                              objectId={objectId}
-                              objectType={objectType}
-                              onClick={handleAnnotationButtonClick}
-                              sourceObjectId={sourceObjectId}
-                              sourceTileId={sourceTileId}
-                              tileId={_tile.id}
-                            />
-                          );
-                        });
-                      }
-                    });
-                  }
-
-                });
-              } else if (tile) {
-                return tile.content.annotatableObjects.map(({ objectId, objectType }) => {
-                  return (
-                    <AnnotationButton
-                      getObjectBoundingBox={getObjectBoundingBox}
-                      getTileOffset={() => getTileOffset(rowId, tileInfo.tileId)}
-                      key={`${tile.id}-${objectId}-button`}
-                      objectId={objectId}
-                      objectType={objectType}
-                      onClick={handleAnnotationButtonClick}
-                      sourceObjectId={sourceObjectId}
-                      sourceTileId={sourceTileId}
-                      tileId={tile.id}
-                    />
-                  );
-                });
-              }
-            });
-          }
-        })}
+        { editing && !readOnly && rowIds.flatMap(rowId => collectButtonsForRow(rowId)) }
         { Array.from(content?.annotations.values() ?? []).map(arrow => {
           const key = `sparrow-${arrow.id}`;
           return (
