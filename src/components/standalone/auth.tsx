@@ -6,7 +6,8 @@ import { useStores } from "../../hooks/use-stores";
 import { urlParams } from "../../utilities/url-params";
 import { createPortalClass, createPortalOffering, getLearnerJWT, getPortalClasses,
          getTeacherJWT,
-         joinClass} from "../../lib/portal-api";
+         joinClass,
+         kClassWordPrefix} from "../../lib/portal-api";
 import { IPortalClassInfo, PortalJWT } from "../../lib/portal-types";
 import { getUnitJson } from "../../models/curriculum/unit-utils";
 import { authAndConnect } from "../app";
@@ -68,6 +69,15 @@ export const findMatchingClassAndOfferingIds =
   if (!matchingClass && unit && problem) {
     // if we didn't find a class with the classWord, try to find one with the unit
     matchingClass = classes.find((clazz) => !!findMatchingOffering(clazz, unit, problem));
+  }
+  if (!matchingClass) {
+    // if we didn't find a class with the classWord or unit, just use the first class
+    // whose class word starts with clue_ or fall back to the first class if no CLUE classes
+    // have already been automatically created
+    matchingClass = classes.find((clazz) => clazz.class_word.startsWith(`${kClassWordPrefix}_`));
+    if (!matchingClass) {
+      matchingClass = classes[0];
+    }
   }
   const matchingOfferingId = matchingClass && unit && problem
     ? findMatchingOffering(matchingClass, unit, problem)?.id

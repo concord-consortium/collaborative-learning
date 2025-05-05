@@ -10,6 +10,8 @@ import { getAuthParams } from "../utilities/auth-utils";
 import { ICurriculumConfig, getProblemOrdinal } from "../models/stores/curriculum-config";
 import { maybeAddResearcherParam } from "../utilities/researcher-param";
 
+export const kClassWordPrefix = "clue";
+
 const isClueAssignment = (offering: IPortalOffering) => {
   const clueActivityUrlRegex = /collaborative-learning/;
   const clueActivityNameRegex = /CLUE/;
@@ -160,7 +162,7 @@ export const createPortalClass = (domain: string, rawPortalJWT: any) => {
       .post(`${domain}api/v1/classes`)
       .send({
         name: "CLUE",
-        class_word_prefix: "clue",
+        class_word_prefix: kClassWordPrefix,
         auto_generate_class_word: true,
       })
       .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
