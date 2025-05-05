@@ -41,7 +41,7 @@ export const QuestionContentModel = types.compose(
     // When locked, the title and prompt cannot be edited.
     locked: types.optional(types.boolean, false),
     // Used in reporting; should be left unchanged for all locked copies of the same question
-    questionId: types.optional(types.string, generateQuestionId()),
+    questionId: types.optional(types.string, () => generateQuestionId()),
   })
   .views(self => ({
     exportJson(options: ITileExportOptions, tileMap: Map<string, ITileModel>) {

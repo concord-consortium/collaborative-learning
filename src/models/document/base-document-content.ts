@@ -1165,11 +1165,11 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       }
     },
     userMoveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      self.moveTiles(tiles, rowInfo);
       tiles.forEach(tileItem => {
         const tile = self.getTile(tileItem.tileId);
         tile && logTileDocumentEvent(LogEventName.MOVE_TILE, { tile });
       });
-      self.moveTiles(tiles, rowInfo);
     },
     userCopyTiles(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
       const rowList = (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self;
