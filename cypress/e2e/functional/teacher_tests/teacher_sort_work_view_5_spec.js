@@ -1,30 +1,7 @@
-import TeacherDashboard from "../../../support/elements/common/TeacherDashboard";
 import SortedWork from "../../../support/elements/common/SortedWork";
-import ResourcesPanel from "../../../support/elements/common/ResourcesPanel";
-import Canvas from '../../../support/elements/common/Canvas';
-import ClueHeader from '../../../support/elements/common/cHeader';
-import ChatPanel from "../../../support/elements/common/ChatPanel";
 import { visitQaSubtabsUnit } from "../../../support/visit_params";
 
 let sortWork = new SortedWork;
-let resourcesPanel = new ResourcesPanel;
-let dashboard = new TeacherDashboard;
-let header = new ClueHeader;
-let chatPanel = new ChatPanel;
-
-const canvas = new Canvas;
-const title = "1.1 Unit Toolbar Configuration";
-const copyTitle = "Personal Workspace";
-const queryParams1 = `${Cypress.config("clueTestqaConfigSubtabsUnitTeacher6")}`;
-
-function beforeTest(params) {
-  cy.visit(params);
-  cy.waitForLoad();
-  dashboard.switchView("Workspace & Resources");
-  cy.wait(2000);
-  cy.openTopTab('sort-work');
-  cy.wait(1000);
-}
 
 //TODO: For QA (1/24)
 // Write a test that confirms correct behavior for "Sort by Tools"

@@ -1,19 +1,11 @@
 import TeacherDashboard from "../../../support/elements/common/TeacherDashboard";
 import SortedWork from "../../../support/elements/common/SortedWork";
 import ResourcesPanel from "../../../support/elements/common/ResourcesPanel";
-import Canvas from '../../../support/elements/common/Canvas';
-import ClueHeader from '../../../support/elements/common/cHeader';
-import ChatPanel from "../../../support/elements/common/ChatPanel";
 
 let sortWork = new SortedWork;
 let resourcesPanel = new ResourcesPanel;
 let dashboard = new TeacherDashboard;
-let header = new ClueHeader;
-let chatPanel = new ChatPanel;
 
-const canvas = new Canvas;
-const title = "1.1 Unit Toolbar Configuration";
-const copyTitle = "Personal Workspace";
 const queryParams1 = `${Cypress.config("clueTestqaConfigSubtabsUnitTeacher6")}`;
 
 function beforeTest(params) {
