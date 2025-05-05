@@ -123,6 +123,7 @@ const RAW_CLASS_INFO: IPortalClassInfo = {
   uri: "https://foo.bar",
   name: "test name",
   class_hash: CLASS_HASH,
+  class_word: "test word",
   students: [RAW_CORRECT_STUDENT, RAW_INCORRECT_STUDENT ],
   teachers: [RAW_CORRECT_TEACHER],
   offerings: []

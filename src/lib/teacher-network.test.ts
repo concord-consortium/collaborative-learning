@@ -83,6 +83,7 @@ const portalClass1: IPortalClassInfo = {
   uri: kClass1Url,
   name: kClass1Name,
   class_hash: kClass1Hash,
+  class_word: "class-word-1",
   teachers: [kTeacher1User],
   students: [],
   offerings: []

@@ -1,7 +1,7 @@
 import initials from "initials";
 import { Instance, types } from "mobx-state-tree";
 import { AuthenticatedUser, isAuthenticatedTeacher } from "../../lib/auth";
-import { PortalFirebaseStudentJWT, PortalJWT } from "../../lib/portal-types";
+import { PortalFirebaseStudentJWT, PortalUserJWT } from "../../lib/portal-types";
 import { UserType, UserTypeEnum } from "./user-types";
 
 export const UserPortalOffering = types
@@ -28,7 +28,7 @@ export const UserPortalOffering = types
 export type IStandaloneAuth = undefined |
   {state: "waiting"} |
   {state: "haveBearerToken", bearerToken: string, authDomain: string} |
-  {state: "authenticated", portalJWT: PortalJWT} |
+  {state: "authenticated", rawPortalJWT: string, portalJWT: PortalUserJWT} |
   {state: "error", message: string}
 const undefinedStandaloneAuth: IStandaloneAuth = undefined;
 

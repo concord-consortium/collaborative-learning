@@ -9,7 +9,7 @@ import { UserType } from "../models/stores/user-types";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser,
    } from "./portal-api";
-import { PortalJWT, PortalFirebaseJWT } from "./portal-types";
+import { PortalJWT, PortalFirebaseJWT, PortalUserJWT } from "./portal-types";
 import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import { uniqueId } from "../utilities/js-utils";
@@ -221,7 +221,11 @@ export const authenticate = async (
       bearerToken: user.standaloneAuth.bearerToken,
       basePortalUrl: user.standaloneAuth.authDomain
     });
-    user.setStandaloneAuth({state: "authenticated", portalJWT: result});
+    user.setStandaloneAuth({
+      state: "authenticated",
+      rawPortalJWT: result.rawPortalJWT,
+      portalJWT: result.portalJWT as PortalUserJWT
+    });
   }
 
   if (user?.standaloneAuth || appMode !== "authed") {
