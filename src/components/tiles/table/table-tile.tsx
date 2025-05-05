@@ -43,7 +43,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const content = useMemo(() => getContent(), [getContent]);
   const imagePromises = useMemo(() => new Map<string, Promise<ImageMapEntry>>(), []);
   const [imageUrls, setImageUrls] = useState(new Map<string,string>());
-  const [editorPortalDiv, setEditorPortalDiv] = useState<HTMLDivElement | null>(null);
   verifyAlive(content, "TableToolComponent");
   const metadata = getContent().metadata;
   const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
@@ -233,25 +232,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     deleteSelected,
   };
 
-  // Create portal container for CellTextEditor on mount
-  useEffect(() => {
-    const portalDiv = document.createElement("div");
-    portalDiv.className = "rdg-editor-portal-container";
-    portalDiv.style.position = "absolute";
-    portalDiv.style.top = "0";
-    portalDiv.style.left = "0";
-    portalDiv.style.width = "0";
-    portalDiv.style.height = "0";
-    portalDiv.style.overflow = "visible";
-    portalDiv.style.pointerEvents = "none";
-    document.body.appendChild(portalDiv);
-    setEditorPortalDiv(portalDiv);
-
-    return () => {
-      document.body.removeChild(portalDiv);
-    };
-  }, []);
-
   return (
     <div className="table-tool">
       <TableToolbarContext.Provider value={toolbarContext}>
@@ -273,7 +253,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
             onEndEdit={onEndTitleEdit} />
           <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
             headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
-            {...dataGridProps} {...rowProps} editorPortalTarget={editorPortalDiv || undefined} />
+            {...dataGridProps} {...rowProps} />
         </div>
       </TableContext.Provider>
     </div>

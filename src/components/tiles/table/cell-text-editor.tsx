@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, KeyboardEvent, useContext } from "react";
 import { EditorProps } from "react-data-grid";
+import { Portal } from "@chakra-ui/react";
 import TextareaAutosize from "react-textarea-autosize";
-import { createPortal } from "react-dom";
 import { TColumn } from "./table-types";
 import { TableContext } from "../hooks/table-context";
 
@@ -41,19 +41,6 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   const tableContext = useContext(TableContext);
   const linked = tableContext?.linked;
   const editorRef = useRef<HTMLDivElement>(null);
-
-  // Get RDG grid position and adjust editor coordinates accordingly.
-  useEffect(() => {
-    const gridElement = document.querySelector(".rdg") as HTMLElement;
-    if (gridElement && editorRef.current) {
-      const gridRect = gridElement.getBoundingClientRect();
-      const scrollLeft = gridElement.scrollLeft;
-      const scrollTop = gridElement.scrollTop;
-
-      editorRef.current.style.left = `${gridRect.left + left - scrollLeft}px`;
-      editorRef.current.style.top = `${gridRect.top + top - scrollTop}px`;
-    }
-  }, [top, left]);
 
   const updateValue = (val: string) => {
     if (val !== valueRef.current) {
@@ -96,51 +83,50 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const editor = (
-    <div
-      ref={editorRef}
-      className={`rdg-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`}
-      style={{
-        background: "white",
-        display: "block",
-        left,
-        minHeight: "34px", // matches the default row height
-        position: "absolute",
-        top,
-        width: column.width
-      }}
-    >
-      <TextareaAutosize
-        value={value}
-        className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
+  return (
+    <Portal>
+      <div
+        ref={editorRef}
+        className={`rdg-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`}
         style={{
-          width: "100%",
+          background: "white",
           display: "block",
-          background: "white"
+          left,
+          position: "absolute",
+          top,
+          width: column.width
         }}
-        autoFocus={true}
-        minRows={1}
-        onChange={handleChange}
-        onFocus={event => {
-          event.target.select();
-        }}
-        onBlur={event => {
-          finishAndSave(true);
-        }}
-        onKeyDown={(event: KeyboardEvent) => {
-          const { key } = event;
-          switch (key) {
-            case 'Escape':
-              finishAndSave(false);
-              break;
-            case 'Enter':
-              finishAndSave(true);
-              break;
-          }
-        }}
-      />
-    </div>
+      >
+        <TextareaAutosize
+          value={value}
+          className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
+          style={{
+            width: "100%",
+            display: "block",
+            background: "white"
+          }}
+          autoFocus={true}
+          minRows={1}
+          onChange={handleChange}
+          onFocus={event => {
+            event.target.select();
+          }}
+          onBlur={event => {
+            finishAndSave(true);
+          }}
+          onKeyDown={(event: KeyboardEvent) => {
+            const { key } = event;
+            switch (key) {
+              case 'Escape':
+                finishAndSave(false);
+                break;
+              case 'Enter':
+                finishAndSave(true);
+                break;
+            }
+          }}
+        />
+      </div>
+    </Portal>
   );
-
-  return createPortal(editor, document.body);
 }
