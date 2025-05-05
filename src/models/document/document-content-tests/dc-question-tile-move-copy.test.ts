@@ -161,7 +161,7 @@ describe("Question tile operations", () => {
         "Contents of embedded row list:\n" +
         "  testid-9: [Text: text-2]\n" +
         "  testid-10: [Table: table-2]\n" +
-        "testid-16: [Drawing: sketch-1]");
+        "testid-17: [Drawing: sketch-1]");
     });
 
     it("can move multiple tiles out of a question tile", () => {
@@ -252,10 +252,10 @@ describe("Question tile operations", () => {
       expect(documentContent.debugDescribeThis(documentContent.tileMap, "")).
 toMatchInlineSnapshot(`
 "testid-6: [Text: text-1]
-testid-29: [Question: testid-25]
+testid-30: [Question: testid-26]
 Contents of embedded row list:
-  testid-26: [Text: testid-22]
-  testid-27: [Table: testid-23] [Drawing: testid-24]
+  testid-27: [Text: testid-23]
+  testid-28: [Table: testid-24] [Drawing: testid-25]
 testid-7: [Table: table-1] [Expression: expression-1]
 testid-8: [Question: question-1]
 Contents of embedded row list:
