@@ -40,7 +40,6 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   const [value, setValue] = useState(origValueRef.current);
   const tableContext = useContext(TableContext);
   const linked = tableContext?.linked;
-  const editorRef = useRef<HTMLDivElement>(null);
 
   const updateValue = (val: string) => {
     if (val !== valueRef.current) {
@@ -86,7 +85,6 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   return (
     <Portal>
       <div
-        ref={editorRef}
         className={`rdg-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`}
         style={{
           left,
