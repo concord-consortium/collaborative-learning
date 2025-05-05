@@ -17,6 +17,9 @@ function beforeTest(params) {
   cy.wait(1000);
 }
 
+// NOTE: this test file was split from the original teacher_sort_work_view_spec.js file into
+// separate files for each test due to Cypress running out of memory when running all tests.
+
 //TODO: For QA (1/24)
 // Write a test that confirms correct behavior for "Sort by Tools"
 // • Create a network URL (or clear all documents from existing one from the previous test) that has no documents in Sort Work view (doesn't matter which filter we sort by)
