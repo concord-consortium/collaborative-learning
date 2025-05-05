@@ -11,6 +11,7 @@ import { createPortalClass, createPortalOffering, getLearnerJWT, getPortalClasse
 import { IPortalClassInfo, PortalJWT } from "../../lib/portal-types";
 import { getUnitJson } from "../../models/curriculum/unit-utils";
 import { authAndConnect } from "../app";
+import { UnitModel } from "../../models/curriculum/unit";
 
 import "./auth.scss";
 
@@ -98,10 +99,16 @@ export const startCLUE = (options: StartCLUEOptions): AuthenticatedState =>
 };
 
 export const createPortalOfferingForUnit = async (
-  portalInfo: PortalInfo, classId: number, unitJson: PartialUnitJson, problem: string
+  portalInfo: PortalInfo, classId: number, unitJson: PartialUnitJson, problemOrdinal: string
 ) => {
   const { domain, rawPortalJWT } = portalInfo;
-  const name = unitJson.title;
+
+  const unit = UnitModel.create(unitJson);
+  const { problem } = unit.getProblem(problemOrdinal);
+  if (!problem) {
+    throw new Error(`Problem ${problemOrdinal} not found in unit ${unitJson.title}`);
+  }
+  const name = problem.title;
 
   // the class is removed from the URL so that it doesn't get passed to the offering
   // as the url is used to create a single external activity for the unit
@@ -109,7 +116,7 @@ export const createPortalOfferingForUnit = async (
     removeClass: true,
     addParams: {
       // the problem is required for students
-      problem,
+      problem: problemOrdinal,
     }
   });
 
