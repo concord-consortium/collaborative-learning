@@ -88,7 +88,14 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
         <TextareaAutosize
           value={value}
           className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
-          style={{left, top, width: column.width}}
+          style={{
+            background: "white",
+            display: "block",
+            left,
+            position: "absolute",
+            top,
+            width: column.width
+          }}
           autoFocus={true}
           onChange={handleChange}
           onFocus={event => {
