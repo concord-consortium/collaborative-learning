@@ -62,6 +62,19 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     }
   };
 
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    // Ignore newline inserted when editor first opens via Enter/Return key.
+    if (event.target.value === "\n") {
+      // Select existing text in the editor.
+      setTimeout(() => {
+        event.target.select();
+      }, 1);
+      return;
+    }
+
+    updateValue(event.target.value);
+  };
+
   useEffect(() => {
     _column.appData?.onBeginBodyCellEdit?.();
     return () => {
@@ -71,40 +84,42 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
 
   return (
     <Portal>
-      <TextareaAutosize
-        value={value}
-        className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
-        style={{top, left, width: column.width}}
-        autoFocus={true}
-        onChange={event => {
-          updateValue(event.target.value);
-        }}
-        onFocus={event => {
-          // Select all text when focused, but not until after the current event
-          // has been processed. Otherwise, starting to edit a cell with a
-          // keystroke will select the text and then overwrite it all immediately.
-          setTimeout(() => {
+      <div className={`rdg-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`}>
+        <TextareaAutosize
+          value={value}
+          className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
+          // The background, display, and position styles are included here instead of in table-tile.scss because
+          // they will not otherwise be applied consistently in all environments. It's not clear why, but it's
+          // possibly related to the editor being rendered in a portal.
+          style={{
+            background: "white",
+            display: "block",
+            left,
+            position: "absolute",
+            top,
+            width: column.width
+          }}
+          autoFocus={true}
+          onChange={handleChange}
+          onFocus={event => {
             event.target.select();
-          }, 1);
-        }}
-        onBlur={event => {
-          finishAndSave(true);
-        }}
-        onKeyDown={(event: KeyboardEvent) => {
-          const { key } = event;
-          switch (key) {
-            case 'Escape':
-              finishAndSave(false);
-              break;
-            case 'Tab':
-              event.preventDefault(); // keep focus in table
-              // fall through
-            case 'Enter':
-              finishAndSave(true);
-              break;
-          }
-        }}
-      />
+          }}
+          onBlur={event => {
+            finishAndSave(true);
+          }}
+          onKeyDown={(event: KeyboardEvent) => {
+            const { key } = event;
+            switch (key) {
+              case 'Escape':
+                finishAndSave(false);
+                break;
+              case 'Enter':
+                finishAndSave(true);
+                break;
+            }
+          }}
+        />
+      </div>
     </Portal>
   );
 }
