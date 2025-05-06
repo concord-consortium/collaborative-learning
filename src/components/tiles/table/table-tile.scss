@@ -323,7 +323,9 @@ $controls-hover-background: #c0dfe7;
   }
 }
 
-.rdg-text-editor {
+// Use :global here because the editor is rendered inside a Portal. In some environemnts
+// these styles won't apply to the portal-mounted DOM elements without it.
+:global(.rdg-text-editor) {
   background: white;
   border: none;
   box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
