@@ -188,6 +188,7 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
           appConfig
         } = stores;
   const [authenticatedState, setAuthenticatedState] = React.useState<AuthenticatedState>({state: "start"});
+  const startingCLUERef = React.useRef(false);
 
   useEffect(() => {
     if (standaloneAuth?.state === "authenticated") {
@@ -248,7 +249,11 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
 
   useEffect(() => {
     const loadApp = async () => {
-      if (authenticatedState.state === "startingCLUE") {
+      if (authenticatedState.state === "startingCLUE" && !startingCLUERef.current) {
+        // only start CLUE once - this useEffect will be called twice since the
+        // authenticatedState is a dependency and is updated in this useEffect
+        startingCLUERef.current = true;
+
         try {
           const { classId, classWord, offeringId, portalInfo } = authenticatedState;
           const {domain, teacher, rawPortalJWT} = portalInfo;
