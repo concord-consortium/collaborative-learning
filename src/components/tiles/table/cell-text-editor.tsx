@@ -88,6 +88,9 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
         <TextareaAutosize
           value={value}
           className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
+          // The background, display, and position styles are included here instead of in table-tile.scss because
+          // they will not otherwise be applied consistently in all environments. It's not clear why, but it's
+          // possibly related to the editor being rendered in a portal.
           style={{
             background: "white",
             display: "block",
