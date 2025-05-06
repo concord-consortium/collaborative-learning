@@ -312,8 +312,8 @@ export const getRowOffsets = (canvasElement: HTMLDivElement, rowId: string) => {
 
 export const getTileOffsets = (canvasElement: HTMLDivElement, tileId: string) => {
   const tileSelector = `[data-tool-id='${tileId}']`;
-  const tileElements = canvasElement.querySelectorAll(tileSelector);
-  const tileElement = tileElements && tileElements.length === 1 ? tileElements[0] as HTMLElement : undefined;
+  const tileElements = canvasElement.querySelectorAll<HTMLElement>(tileSelector);
+  const tileElement = tileElements && tileElements.length === 1 ? tileElements[0] : undefined;
   if (!tileElement) return;
 
   const offsets = {

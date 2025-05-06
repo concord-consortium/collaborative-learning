@@ -16,12 +16,12 @@ import { ArrowAnnotation, ArrowShape, isArrowShape } from "../../models/annotati
 import { ClueObjectModel, IClueObject, IOffsetModel, ObjectBoundingBox, OffsetModel
 } from "../../models/annotations/clue-object";
 import { ITileModel } from "../../models/tiles/tile-model";
+import { isRowListContainer } from "../../models/document/row-list";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { isFiniteNumber, midpoint, Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { HotKeys } from "../../utilities/hot-keys";
 import { boundingBoxCenter } from "../../models/annotations/annotation-utils";
-import { kQuestionTileType, QuestionContentModelType } from "../../models/tiles/question/question-content";
 
 import "./annotation-layer.scss";
 
@@ -50,7 +50,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [mouseY, setMouseY] = useState<number | undefined>();
   const [isBackgroundClick, setIsBackgroundClick] = useState(false);
   const divRef = useRef<Element|null>(null);
-  const { ui, persistentUI,  } = useStores();
+  const { ui, persistentUI } = useStores();
   const tileApiInterface = useContext(TileApiInterfaceContext);
   const hotKeys = useMemoOne(() => new HotKeys(), []);
   const shape: ArrowShape = isArrowShape(ui.annotationMode) ? ui.annotationMode : ArrowShape.curved;
@@ -234,7 +234,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       parentRowId = content.findRowIdContainingTile(parentQuestionTileModel.id);
     }
     const parent = parentRowId && parentTileId ? { rowId: parentRowId, tileId: parentTileId } : undefined;
-    return getTileAdjustedBoundingBox(rowId ?? "", tileId, objectId, objectType, parent);
+    return getTileAdjustedBoundingBox(rowId, tileId, objectId, objectType, parent);
   }
 
   let sourceBoundingBox: ObjectBoundingBox|undefined = undefined;
@@ -435,23 +435,21 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const collectButtonsForRow = (
     rowId: string,
     parentOffsetParams?: { rowId: string; tileId: string },
-    tileContent?: DocumentContentModelType | QuestionContentModelType
   ): JSX.Element[] => {
 
     const docContent = content;
-    const row = tileContent ? tileContent?.rowMap.get(rowId) : docContent?.rowMap.get(rowId);
+    const row = docContent?.getRowRecursive(rowId);
 
     if (!row) return [];
     return row.tiles.flatMap((tileInfo) => {
       const tile = docContent?.tileMap?.get(tileInfo.tileId);
       if (!tile) return [];
 
-      // Question tile: dive into its own rows
-      if (tile.content.type === kQuestionTileType) {
-        const qTileContent = tile.content as QuestionContentModelType;
+      // Container tile: dive into its own rows
+      if (isRowListContainer(tile.content)) {
         const newParentOffset = { rowId, tileId: tile.id };
-        return qTileContent.rowOrder.flatMap((nestedRowId) => {
-          return collectButtonsForRow(nestedRowId, newParentOffset, qTileContent);
+        return tile.content.rowOrder.flatMap((nestedRowId) => {
+          return collectButtonsForRow(nestedRowId, newParentOffset);
         });
       }
 
