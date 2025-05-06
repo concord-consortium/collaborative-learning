@@ -146,6 +146,10 @@ class SortedWork {
               .siblings('[data-testid="doc-group-label"]')
               .eq(0);
   }
+
+  getHeaderTexts() {
+    return cy.get('.document-scroller-header .header-text');
+  }
 }
 
 export default SortedWork;

@@ -19,8 +19,6 @@ function beforeTest(params) {
 // separate files for each test due to Cypress running out of memory when running all tests.
 
 describe('SortWorkView Tests', () => {
-  const headerTexts = () => cy.get('.document-scroller-header .header-text');
-
   it("shows the current sort selections in the document-scroller header", () => {
     beforeTest(queryParams1);
 
@@ -37,13 +35,13 @@ describe('SortWorkView Tests', () => {
         /* header exists and shows the expected strings */
         cy.get('.document-scroller-header').should('exist');
 
-        headerTexts().eq(0)
+        sortWork.getHeaderTexts().eq(0)
           .should('contain', 'Sorted by')
           .find('span').should('contain', 'Group')
           .parent().should('not.contain', 'None') // don't show "None" in the header
           .should('contain', primaryLabel);      // dynamic bit
 
-          headerTexts().eq(1)
+          sortWork.getHeaderTexts().eq(1)
             .should('contain', 'Shown for')
             .find('span').should('contain', 'Problem');
       }
@@ -75,14 +73,14 @@ describe('SortWorkView Tests', () => {
             /* header exists and shows the expected strings */
             cy.get('.document-scroller-header').should('exist');
 
-            headerTexts().eq(0)
+            sortWork.getHeaderTexts().eq(0)
               .should('contain', 'Sorted by')
               .find('span').eq(0).should('contain', 'Strategy')
               .parent().should('contain', primaryLabel)
               .find('span').eq(1).should('contain', 'Name')
               .parent().should('contain', secondaryLabel);
 
-              headerTexts().eq(1)
+              sortWork.getHeaderTexts().eq(1)
                 .should('contain', 'Shown for')
                 .find('span').should('contain', 'Investigation');
           }
