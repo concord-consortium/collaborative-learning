@@ -112,9 +112,13 @@ export interface QueryParams {
   noStorage?: boolean
 
   //
-  // Standalone auth options
+  // Standalone options
   //
+
+  // URL to the portal domain to use for authentication
   portalDomain?: string;
+  // the class word for the class that the user is in
+  classWord?: string;
 }
 
 // Make a union of all of the boolean params from the QueryParams
