@@ -84,22 +84,20 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
 
   return (
     <Portal>
-      <div
-        className={`rdg-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`}
-        style={{
-          background: "white",
-          display: "block",
-          left,
-          position: "absolute",
-          top,
-          width: column.width
-        }}
-      >
+      <div className={`rdg-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`}>
         <TextareaAutosize
           value={value}
           className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
           autoFocus={true}
           minRows={1}
+          style={{
+            background: "white",
+            display: "block",
+            left,
+            position: "absolute",
+            top,
+            width: column.width
+          }}
           onChange={handleChange}
           onFocus={event => {
             event.target.select();
