@@ -177,9 +177,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                 onScroll={this.handleScroll}
                 onClick={this.handleClick}
                 onDragOver={this.handleDragOver}
-              onDragLeave={this.handleDragLeave}
-              onDrop={this.handleDrop}
-              ref={(elt) => this.domElement = elt}
+                onDragLeave={this.handleDragLeave}
+                onDrop={this.handleDrop}
+                ref={(elt) => this.domElement = elt}
               >
                 {this.renderRows()}
                 {this.renderSpacer()}
