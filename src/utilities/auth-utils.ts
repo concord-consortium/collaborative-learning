@@ -171,20 +171,17 @@ export const getPortalStandaloneSignInOrRegisterUrl = () => {
     }
   }
 
-  // in standalone mode we need to keep the offering and class params (if present)
-  const loginUrlParams = new URLSearchParams({
-    authDomain: basePortalUrl
-  });
+  // pass all the current parameters to the login URL, minus any current auth params
+  const cleanedUrl = new URL(removeAuthParams(window.location.href));
+  const loginUrlParams = cleanedUrl.searchParams;
+
+  // update the authDomain to be the portal URL
+  loginUrlParams.set("authDomain", basePortalUrl);
+
   if (urlParams.portalDomain) {
     // the portalDomain is passed so that is kept in the return url during development
     // so the developer doesn't have to keep adding it back after the login to retest
-    loginUrlParams.append("portalDomain", urlParams.portalDomain);
-  }
-  if (urlParams.offering) {
-    loginUrlParams.append("offering", urlParams.offering);
-  }
-  if (urlParams.class) {
-    loginUrlParams.append("class", urlParams.class);
+    loginUrlParams.set("portalDomain", urlParams.portalDomain);
   }
   const loginUrlQueryString = loginUrlParams.toString();
   const loginUrl = `${window.location.origin}${window.location.pathname}${
@@ -201,5 +198,30 @@ export const getPortalStandaloneSignInOrRegisterUrl = () => {
   }
 
   return `${basePortalUrl}${PORTAL_SIGNIN_OR_REGISTER_PATH}?${authParams.toString()}`;
+};
+
+type RemoveAutParamsOptions = {
+  removeClass?: boolean;
+  addParams?: Record<string, string>;
+}
+
+export const removeAuthParams = (url: string, options?: RemoveAutParamsOptions) => {
+  const newUrl = new URL(url);
+  const searchParams = newUrl.searchParams;
+  searchParams.delete("authDomain");
+  searchParams.delete("resourceLinkId");
+  searchParams.delete("domain");
+  searchParams.delete("domain_uid");
+  searchParams.delete("token");
+  if (options?.removeClass) {
+    searchParams.delete("class");
+  }
+  if (options?.addParams) {
+    Object.entries(options.addParams).forEach(([key, value]) => {
+      searchParams.set(key, value);
+    });
+  }
+  newUrl.search = searchParams.toString();
+  return newUrl.toString();
 };
 

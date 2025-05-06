@@ -5,10 +5,12 @@ import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { QueryParams } from "../utilities/url-params";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { IUserPortalOffering, UserPortalOffering } from "../models/stores/user";
-import { IPortalOffering } from "./portal-types";
+import { IPortalClassInfo, IPortalOffering } from "./portal-types";
 import { getAuthParams } from "../utilities/auth-utils";
 import { ICurriculumConfig, getProblemOrdinal } from "../models/stores/curriculum-config";
 import { maybeAddResearcherParam } from "../utilities/researcher-param";
+
+export const kClassWordPrefix = "clue";
 
 const isClueAssignment = (offering: IPortalOffering) => {
   const clueActivityUrlRegex = /collaborative-learning/;
@@ -98,6 +100,79 @@ export const getPortalOfferings = (
     else {
       resolve([]);
     }
+  });
+};
+
+export const joinClass = (domain: string, rawPortalJWT: any, classWord: string) => {
+  return new Promise<void> ((resolve, reject) => {
+    superagent
+      .post(`${domain}api/v1/students/join_class`)
+      .send({class_word: classWord})
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          resolve();
+        }
+      });
+    });
+};
+
+export const getPortalClasses = (domain: string, rawPortalJWT: any) => {
+  return new Promise<IPortalClassInfo[]> ((resolve, reject) => {
+    superagent
+      .get(`${domain}api/v1/classes/mine`)
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          const classes = (res.body.classes ?? []) as IPortalClassInfo[];
+          resolve(classes);
+        }
+      });
+    });
+};
+
+export const createPortalOffering = (domain: string, rawPortalJWT: any, classId: number, url: string, name: string) => {
+  return new Promise<number>((resolve, reject) => {
+    superagent
+      .post(`${domain}api/v1/offerings/create_for_external_activity`)
+      .send({
+        class_id: classId,
+        name,
+        url,
+        append_auth_token: true
+      })
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          resolve(res.body.id);
+        }
+      });
+  });
+};
+
+export const createPortalClass = (domain: string, rawPortalJWT: any) => {
+  return new Promise<{id: number, classWord: string}>((resolve, reject) => {
+    superagent
+      .post(`${domain}api/v1/classes`)
+      .send({
+        name: "CLUE",
+        class_word_prefix: kClassWordPrefix,
+        auto_generate_class_word: true,
+      })
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          resolve({id: res.body.id, classWord: res.body.class_word});
+        }
+      });
   });
 };
 
@@ -198,3 +273,36 @@ function numericOrdinal(offering: IUserPortalOffering) {
   const ord = offering.problemOrdinal.split(".");
   return parseInt(ord[0], 10) * 1000 + parseInt(ord[1], 10);
 }
+
+export const getTeacherJWT = (domain: string, rawPortalJWT: string) => {
+  return new Promise<string>((resolve, reject) => {
+    superagent
+      .get(`${domain}api/v1/jwt/portal?as_teacher=true`)
+      .send({
+        as_teacher: true
+      })
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          resolve(res.body.token);
+        }
+      });
+  });
+};
+
+export const getLearnerJWT = (domain: string, rawPortalJWT: string, offeringId: number) => {
+  return new Promise<string>((resolve, reject) => {
+    superagent
+      .get(`${domain}api/v1/jwt/portal?as_learner=true&offering_id=${offeringId}`)
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          resolve(res.body.token);
+        }
+      });
+  });
+};

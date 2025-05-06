@@ -25,6 +25,7 @@ export interface IPortalClassOffering {
   id: number;
   name: string;
   url: string;
+  external_url: string;
   active: boolean;
   locked: boolean;
 }
@@ -42,6 +43,7 @@ export interface IPortalClassInfo {
   uri: string;              // "https://learn.staging.concord.org/api/v1/classes/553"
   name: string;
   class_hash: string;
+  class_word: string;
   teachers: IPortalClassUser[];
   students: IPortalClassUser[];
   offerings: IPortalClassOffering[];
@@ -86,6 +88,8 @@ export interface PortalUserJWT extends BasePortalJWT {
   user_id: string;
   first_name: string;
   last_name: string;
+  teacher: boolean;
+  student: boolean;
 }
 
 // firebase JWT claims are available to firestore security rules under request.auth.token
