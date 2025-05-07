@@ -425,7 +425,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { content } = this.props;
     const dragResizeRow = this.getDragResizeRowInfo(e);
     if (content && dragResizeRow?.id && dragResizeRow.newHeight != null) {
-      const row = content.rowMap.get(dragResizeRow.id);
+      const row = content.getRowRecursive(dragResizeRow.id);
       row?.setRowHeight(dragResizeRow.newHeight);
       this.setState({ dragResizeRow: undefined });
     }
