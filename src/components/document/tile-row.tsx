@@ -95,7 +95,7 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
 
   // Image to use as the image dragged when user operates the resize handle.
   // Note we used to use a transparent pixel, but in the Chromebook browser
-  // this resulted in an immedite dragEnd when the image was set.
+  // this resulted in an immediate dragEnd when the image was set.
   const dragImage = useRef<HTMLImageElement>(document.createElement("img"));
   useEffect(() => {
     dragImage.current.src = resizeDragIcon;
