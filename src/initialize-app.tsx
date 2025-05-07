@@ -60,6 +60,12 @@ export const initializeApp = ({authoring, standalone, authDomain}: IInitializeAp
     // and update the standaloneAuth state
     if (appMode === "authed" && standalone) {
       appMode = "dev";
+
+      // when launched from the portal the authDomain is the "domain" query param
+      // so fall back to that if the authDomain is not set in the hash parameters
+      // checked in auth-utils.ts#initializeAuthorization and passed to this function
+      authDomain = authDomain ?? urlParams.domain;
+
       if (bearerToken && authDomain) {
         standaloneAuth = {state: "haveBearerToken", bearerToken, authDomain};
       } else if (!bearerToken){
