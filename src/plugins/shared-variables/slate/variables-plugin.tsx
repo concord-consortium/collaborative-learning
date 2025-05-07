@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import classNames from "classnames/dedupe";
 
 import {
-  BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
+  BaseElement, CustomEditor, CustomElement, Editor, isCustomElement, kSlateVoidClass, registerElementComponent,
   RenderElementProps, useSelected, useSerializing
 } from "@concord-consortium/slate-editor";
 import { action, autorun, computed, IReactionDisposer, makeObservable, observable } from "mobx";
@@ -110,8 +110,10 @@ export class VariablesPlugin implements ITextPlugin {
     const variableIds: string[] = [];
     if (editor) {
       for (const [node] of Editor.nodes(editor, {at: [], mode: 'all'})) {
-        if (Editor.isInline(editor, node) && isVariableElement(node)) {
-          variableIds.push(node.reference);
+        if (isCustomElement(node)) {
+          if (Editor.isInline(editor, node) && isVariableElement(node)) {
+            variableIds.push(node.reference);
+          }
         }
       }
     }
