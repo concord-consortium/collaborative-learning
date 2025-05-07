@@ -162,7 +162,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {renderPanelButtons()}
         </div>
         <div className="right">
-          <div className="version">Version {appVersion}</div>
+          <div className="version">CLUE v{appVersion}</div>
           <div className="user teacher" title={getUserTitle()}>
             <div className="class" data-test="user-class">
               <ClassMenuContainer />
