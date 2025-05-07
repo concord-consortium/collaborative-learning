@@ -13,6 +13,9 @@ export const getTileTitleForLogging = (tileId: string, docOrSection?: ModelTypeU
  */
 export const getTileContainerForLogging = (tileId: string, docOrSection?: ModelTypeUnion) => {
   const row = docOrSection?.content?.getRowForTile(tileId);
-  const container = getParentWithTypeName(row, "TileModel");
-  return container?.id;
+  if (row) {
+    const container = getParentWithTypeName(row, "TileModel");
+    return container?.id;
+  }
+  return undefined;
 };

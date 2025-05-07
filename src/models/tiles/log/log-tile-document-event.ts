@@ -26,12 +26,16 @@ function processTileDocumentEventParams(params: ITileDocumentLogEvent, context: 
   return { document, tileId, tileType, ...legacyTileProps, tileTitle, ...others };
 }
 
-export function logTileDocumentEvent(event: LogEventName, _params: ITileDocumentLogEvent) {
+export function logTileDocumentEvent(event: LogEventName, _params: ITileDocumentLogEvent,
+  runBeforeContainerLogging?: () => void) {
   const params = processTileDocumentEventParams(_params, Logger.stores);
   if (isTileBaseEvent(params)) {
-    logTileBaseEvent(event, params);
+    logTileBaseEvent(event, params, runBeforeContainerLogging);
   }
   else {
     Logger.log(event, params);
+    if (runBeforeContainerLogging) {
+      runBeforeContainerLogging();
+    }
   }
 }

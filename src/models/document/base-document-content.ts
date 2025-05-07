@@ -29,6 +29,7 @@ import {
   SharedModelEntry, SharedModelEntrySnapshotType, SharedModelEntryType, SharedModelMap
 } from "./shared-model-entry";
 import { RowList, isRowListContainer, RowListType } from "./row-list";
+import { getParentWithTypeName } from "../../utilities/mst-utils";
 
 /**
  * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
@@ -338,6 +339,13 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         return tileIds.every(id => rowList.tileIds.includes(id));
       });
       return found ?? self;
+    },
+    getTileContainingTileId(tileId: string): ITileModel | undefined {
+      const row = self.getRowForTile(tileId);
+      if (row) {
+        return getParentWithTypeName(row, "TileModel");
+      }
+      return undefined;
     },
     rowHasTileId(rowId: string, tileId: string) {
       return self.getAllTilesInRow(rowId).some(tile => tile.id === tileId);
@@ -1160,15 +1168,24 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     userDeleteTile(tileId: string) {
       const tile = self.getTile(tileId);
       if (tile) {
-        logTileDocumentEvent(LogEventName.DELETE_TILE, { tile });
-        self.deleteTile(tileId);
+        logTileDocumentEvent(LogEventName.DELETE_TILE, { tile }, () => {
+          self.deleteTile(tileId);
+        });
       }
     },
     userMoveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      // Get the container of each tile before it is moved.
+      const containers = new Map<string, string>();
+      tiles.forEach(tileItem => {
+        const container = self.getTileContainingTileId(tileItem.tileId);
+        if (container) {
+          containers.set(tileItem.tileId, container.id);
+        }
+      });
       self.moveTiles(tiles, rowInfo);
       tiles.forEach(tileItem => {
         const tile = self.getTile(tileItem.tileId);
-        tile && logTileDocumentEvent(LogEventName.MOVE_TILE, { tile });
+        tile && logTileDocumentEvent(LogEventName.MOVE_TILE, { tile, containerId: containers.get(tileItem.tileId) });
       });
     },
     userCopyTiles(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {

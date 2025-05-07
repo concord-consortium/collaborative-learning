@@ -15,7 +15,12 @@ registerTileTypes(["Geometry", "Text"]);
 // mock Logger calls
 const mockLogTileDocumentEvent = jest.fn();
 jest.mock("../tiles/log/log-tile-document-event", () => ({
-  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent(...args)
+  logTileDocumentEvent: (event: LogEventName, _params: any, runBeforeContainerLogging?: () => void) => {
+    mockLogTileDocumentEvent(event, _params, runBeforeContainerLogging);
+    if (runBeforeContainerLogging) {
+      runBeforeContainerLogging();
+    }
+  }
 }));
 const mockLogDocumentEvent = jest.fn();
 jest.mock("./log-document-event", () => ({

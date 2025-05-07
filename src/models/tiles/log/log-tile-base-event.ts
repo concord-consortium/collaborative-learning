@@ -21,27 +21,50 @@ function processTileBaseEventParams(params: ITileBaseLogEvent) {
   const sectionId = document?.content?.getSectionIdForTile(tileId);
   const tileTitle = getTileTitleForLogging(tileId, document);
   const parameters: ITileBaseLogEvent = { document, tileId, sectionId, tileTitle, ...others };
-  const containerId = getTileContainerForLogging(tileId, document);
-  if (containerId) {
-    parameters.containerId = containerId;
-  }
+  // There may be a containerId specified in the parameters,
+  // but we need to see if it has changed (ie, tile moved); if so, include both.
+  // Since we may have more than one, this method always returns a list-valued containerIds property.
+  const newContainerId = getTileContainerForLogging(tileId, document);
+  parameters.containerIds = Array.from(new Set([params.containerId, newContainerId].filter(id => id !== undefined)));
   return parameters;
 }
 
-export function logTileBaseEvent(event: LogEventName, _params: ITileBaseLogEvent) {
+/**
+ * Log any sort of event that is associated with a tile (and therefore a document).
+ * In addition to the main event, if the tile is inside a question tile, an additional
+ * "question answers change" event is logged.
+ * For "delete" events in particular, this function gets called before the actual deletion,
+ * since it needs to access information from the tile about to be deleted. But the "question answers change"
+ * event is logged after the deletion, so that the deleted tile is not included in the question answers.
+ * So in this case, a callback function is passed in that will be called in between the two logging calls.
+ * This callback is what will actually do the deletion.
+ * @param event - The event type to log.
+ * @param _params - The parameters for the event.
+ * @param runBeforeContainerLogging - A function to run before logging the container events.
+ */
+export function logTileBaseEvent(event: LogEventName, _params: ITileBaseLogEvent,
+    runBeforeContainerLogging?: () => void) {
   const params = processTileBaseEventParams(_params);
   if (isDocumentLogEvent(params)) {
     logDocumentEvent(event, params);
 
-    if (params.containerId) {
-      const containerTile = params.document.content?.getTile(params.containerId);
-      if (containerTile && isQuestionModel(containerTile.content)) {
-        logAnswerChange(containerTile, params.document);
+    if (runBeforeContainerLogging) {
+      runBeforeContainerLogging();
+    }
+    if (params.containerIds) {
+      for (const containerId of params.containerIds) {
+        const containerTile = params.document.content?.getTile(containerId);
+        if (containerTile && isQuestionModel(containerTile.content)) {
+          logAnswerChange(containerTile, params.document);
+        }
       }
     }
   }
   else {
     Logger.log(event, params);
+    if (runBeforeContainerLogging) {
+      runBeforeContainerLogging();
+    }
   }
 }
 

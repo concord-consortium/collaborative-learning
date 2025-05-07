@@ -7,6 +7,7 @@ import { TextContentModel } from "../../tiles/text/text-content";
 import { IDocumentExportOptions } from "../../tiles/tile-content-info";
 import { parsedExport, getColumnWidths, getAllRows } from "./dc-test-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
+import { LogEventName } from "../../../lib/logger-types";
 
 jest.mock("../../../utilities/mst-utils", () => {
   return {
@@ -18,7 +19,12 @@ jest.mock("../../../utilities/mst-utils", () => {
 // mock Logger calls
 const mockLogTileDocumentEvent = jest.fn();
 jest.mock("../../tiles/log/log-tile-document-event", () => ({
-  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
+  logTileDocumentEvent: (event: LogEventName, _params: any, runBeforeContainerLogging?: () => void) => {
+    mockLogTileDocumentEvent(event, _params, runBeforeContainerLogging);
+    if (runBeforeContainerLogging) {
+      runBeforeContainerLogging();
+    }
+  }
 }));
 
 describe("DocumentContentModel", () => {
