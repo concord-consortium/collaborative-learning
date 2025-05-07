@@ -6,6 +6,11 @@ import {
 export const kAnnotationNodeDefaultRadius = 24;
 export const kSmallAnnotationNodeRadius = 7;
 
+export type IParent = {
+  rowId: string,
+  tileId: string,
+}
+
 /**
  * Find the point on the line from source to target that is closest to the input point.
  * @param source - The start point of the line.
@@ -283,3 +288,58 @@ export function getSparrowCurve(
   };
   return curveData;
 }
+
+export const getRowElement = (canvasElement: HTMLDivElement, rowId?: string) => {
+  if (rowId === undefined) return undefined;
+
+  const rowSelector = `[data-row-id='${rowId}']`;
+  const rowElements = canvasElement.querySelectorAll(rowSelector);
+
+  if (rowElements && rowElements.length === 1) {
+    return rowElements[0] as HTMLElement;
+  }
+
+  return undefined;
+};
+
+export const getRowOffsets = (canvasElement: HTMLDivElement, rowId: string) => {
+  const rowElement = getRowElement(canvasElement, rowId);
+  if (!rowElement) return;
+  const rowOffsetLeft = rowElement.offsetLeft;
+  const rowOffsetTop = rowElement.offsetTop;
+  return { left: rowOffsetLeft, top: rowOffsetTop };
+};
+
+export const getTileOffsets = (canvasElement: HTMLDivElement, tileId: string) => {
+  const tileSelector = `[data-tool-id='${tileId}']`;
+  const tileElements = canvasElement.querySelectorAll<HTMLElement>(tileSelector);
+  const tileElement = tileElements && tileElements.length === 1 ? tileElements[0] : undefined;
+  if (!tileElement) return;
+
+  const offsets = {
+    left: tileElement.offsetLeft,
+    top: tileElement.offsetTop,
+    scrollLeft: tileElement.scrollLeft,
+    scrollTop: tileElement.scrollTop,
+  };
+
+  return offsets;
+};
+
+export const getParentOffsets = (canvasElement: HTMLDivElement, parentRowId: string, parentTileId: string) => {
+  const parentRowOffsets = getRowOffsets(canvasElement, parentRowId);
+  const parentTileOffsets = getTileOffsets(canvasElement, parentTileId);
+  const parentFound = parentRowOffsets && parentTileOffsets;
+
+  const parentXOffsets = parentFound ?
+    parentRowOffsets.left + parentTileOffsets.left :
+    0;
+  const parentYOffsets = parentFound ?
+    parentRowOffsets.top + parentTileOffsets.top :
+    0;
+
+  return {
+    left: parentXOffsets,
+    top: parentYOffsets
+  };
+};

@@ -226,6 +226,15 @@ export class SortedDocuments {
                               }));
   }
 
+  getDocSortLabel(docKey: string, sortBy: string): string|undefined {
+    const sortKey = `by${sortBy}` as keyof SortedDocuments;
+    const sortedDocs = this[sortKey] as DocumentGroup[];
+    const docGroup = sortedDocs?.find(group => group.documents.some(doc => doc.key === docKey));
+    if (docGroup) {
+      return docGroup.label;
+    }
+  }
+
   getMSTSnapshotFromFBSnapshot(snapshot: firebase.firestore.QuerySnapshot<IDocumentMetadata>) {
     const mstSnapshot: SnapshotIn<typeof MetadataDocMapModel> = {};
     snapshot.docs.forEach(doc => {
