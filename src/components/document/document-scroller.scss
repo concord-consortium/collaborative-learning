@@ -1,5 +1,26 @@
 @import "../vars";
 
+.document-scroller-header {
+  background-color: $classwork-purple-light-5;
+  border: solid 1.5px $classwork-purple;
+  border-top: none;
+  border-bottom: none;
+  align-items: center;
+  display: flex;
+  padding: 0px 8px;
+  justify-content: space-between;
+
+  .header-text {
+    display: flex;
+    gap: 5px;
+    height: 36px;
+    align-items: center;
+    span {
+      font-weight: bold;
+    }
+  }
+}
+
 .document-thumbnail-scroller {
   background: white;
   border: solid 1.5px $classwork-purple;

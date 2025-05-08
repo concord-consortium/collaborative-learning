@@ -47,6 +47,8 @@ export const UIModel = types
   .model("UI", {
     annotationMode: types.maybe(types.string),
     error: types.maybeNull(types.string),
+    expandedSortWorkSections: types.optional(types.array(types.string), []),
+    highlightedSortWorkDocument: types.maybe(types.string),
     selectedTileIds: types.array(types.string),
     selectedCommentId: types.maybe(types.string),
     scrollTo: types.maybe(ScrollToModel),
@@ -64,7 +66,7 @@ export const UIModel = types
   .views((self) => ({
     isSelectedTile(tile: ITileModel) {
       return self.selectedTileIds.indexOf(tile.id) !== -1;
-    },
+    }
   }))
   .actions((self) => {
     const alert = (textOrOpts: string | UIDialogModelSnapshotWithoutType, title?: string) => {
@@ -218,7 +220,25 @@ export const UIModel = types
       self.selectedTileIds.forEach(tileId => self.removeTileIdFromSelection(tileId));
     },
 
+    setExpandedSortWorkSections(docGroupLabel: string, expand: boolean) {
+      if (expand) {
+        self.expandedSortWorkSections.push(docGroupLabel);
+      } else {
+        self.expandedSortWorkSections.remove(docGroupLabel);
+      }
+    },
 
+    setHighlightedSortWorkDocument(docId: string) {
+      self.highlightedSortWorkDocument = docId;
+    },
+
+    clearHighlightedSortWorkDocument() {
+      self.highlightedSortWorkDocument = undefined;
+    },
+
+    clearExpandedSortWorkSections() {
+      self.expandedSortWorkSections.clear();
+    }
 }));
 export type UIModelType = typeof UIModel.Type;
 export type UIDialogModelType = typeof UIDialogModel.Type;

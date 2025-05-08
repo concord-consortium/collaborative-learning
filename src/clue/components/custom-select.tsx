@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import { VisuallyHidden } from "@chakra-ui/react";
 import { IDropdownItem } from "@concord-consortium/react-components";
+import classNames from "classnames";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
 import "./custom-select.sass";
@@ -8,6 +9,8 @@ import "./custom-select.sass";
 export interface ICustomDropdownItem extends IDropdownItem {
   id?: string;
   itemIcon?: ReactNode;
+  hideItemCheck?: boolean;
+  italicize?: boolean;
 }
 
 function getItemId(item: ICustomDropdownItem) {
@@ -122,9 +125,12 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
               onClick={this.handleListClick(item)}
               data-test={`list-item-${itemId}`}
             >
-              {(showItemChecks !== false) && <div className={`check ${selectedClass}`} />}
+              {(showItemChecks !== false) &&
+                <div className={classNames("check", selectedClass, {
+                  "hidden-item-check": item.hideItemCheck})}
+                />}
               {this.renderItemIcon(item)}
-              <div className="item">{item.text}</div>
+              <div className={classNames("item", {italicize: item.italicize })}>{item.text}</div>
             </div>
           );
         }) }

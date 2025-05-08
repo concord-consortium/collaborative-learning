@@ -85,7 +85,7 @@ const FIREBASE_JWT_PATH = `/${FIREBASE_JWT_URL_SUFFIX}`;
 const OFFERING_INFO_PATH = "/api/v1/offerings/1033";
 const CLASS_INFO_PATH = "/api/v1/classes/66";
 const CLASSES_MINE_PATH = "/api/v1/classes/mine";
-// const OFFERINGS_PATH = "/api/v1/offerings";
+const OFFERINGS_PATH = "/api/v1/offerings/";
 
 const CLASS_INFO_URL = BASE_PORTAL_HOST + CLASS_INFO_PATH;
 const OFFERING_INFO_URL = BASE_PORTAL_HOST + OFFERING_INFO_PATH;
@@ -123,6 +123,7 @@ const RAW_CLASS_INFO: IPortalClassInfo = {
   uri: "https://foo.bar",
   name: "test name",
   class_hash: CLASS_HASH,
+  class_word: "test word",
   students: [RAW_CORRECT_STUDENT, RAW_INCORRECT_STUDENT ],
   teachers: [RAW_CORRECT_TEACHER],
   offerings: []
@@ -324,6 +325,14 @@ describe("student authentication", () => {
     .reply(200, {
       token: RAW_STUDENT_FIREBASE_JWT,
     });
+
+    nock(BASE_PORTAL_HOST, {
+      reqheaders: {
+        authorization: `Bearer/JWT ${RAW_STUDENT_PORTAL_JWT}`
+      }
+    })
+    .get(OFFERINGS_PATH)
+    .reply(200, []);
 
     const urlParams = {token: GOOD_STUDENT_TOKEN, domain: BASE_PORTAL_URL};
     const portal = new Portal(urlParams);

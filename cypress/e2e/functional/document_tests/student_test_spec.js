@@ -95,11 +95,9 @@ context("check public/private document access", function() {
     sortWork.checkGroupDocumentVisibility("Group 1", false, true);
 
     cy.log("verify other user's shared documents are not marked as private and are accessible");
-    openAllGroupSections();
     sortWork.checkGroupDocumentVisibility("Group 2", false, true);
 
     cy.log("verify private documents are marked as private and are not accessible");
-    openAllGroupSections();
     sortWork.checkGroupDocumentVisibility("Group 3", true, true);
 
     // Check the same conditions in a view that contains compact document items
@@ -112,11 +110,9 @@ context("check public/private document access", function() {
     sortWork.checkGroupDocumentVisibility("Group 1", false);
 
     cy.log("verify other user's shared documents are not marked as private and are accessible in the compact view");
-    openAllGroupSections();
     sortWork.checkGroupDocumentVisibility("Group 2", false);
 
     cy.log("verify private documents are marked as private and are not accessible in the compact view");
-    openAllGroupSections();
     sortWork.checkGroupDocumentVisibility("Group 3", true);
   });
 });

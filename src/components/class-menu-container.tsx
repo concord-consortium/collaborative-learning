@@ -3,7 +3,7 @@ import React from "react";
 import { uniq } from "lodash";
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";
-import { CustomSelect } from "../clue/components/custom-select";
+import { CustomSelect, ICustomDropdownItem } from "../clue/components/custom-select";
 import { Logger } from "../lib/logger";
 import { LogEventMethod, LogEventName } from "../lib/logger-types";
 import { IUserPortalOffering } from "../models/stores/user";
@@ -14,8 +14,28 @@ interface IProps extends IBaseProps {}
 @observer
 export class ClassMenuContainer extends BaseComponent <IProps> {
   public render() {
-    const links = this.getPortalClasses();
-    const { user } = this.stores;
+    const links = this.getPortalClasses() as ICustomDropdownItem[];
+    const { user, ui } = this.stores;
+
+    // if the user authenticated in standalone mode, we add a link to copy the shareable link
+    // of the current URL as it contains all the information needed to join the class
+    if (user.standaloneAuthUser) {
+      links.unshift({
+        text: "Copy Shareable Link",
+        selected: false,
+        hideItemCheck: true,
+        italicize: true,
+        onClick: () => {
+          // in standalone mode the shareable link is the current URL
+          navigator.clipboard.writeText(window.location.href).then(() => {
+            ui.alert("The shareable link has been copied to the clipboard.", "Copy Shareable Link");
+          }).catch(err => {
+            ui.alert(`Failed to copy sharable link: ${err.toString()}.`, "Copy Shareable Link");
+          });
+        }
+      });
+    }
+
     return(
       <CustomSelect
         titlePrefix={user.name}

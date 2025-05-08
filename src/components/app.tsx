@@ -105,6 +105,14 @@ export const authAndConnect = async (stores: IStores) => {
       }
     }
 
+    // We don't want to connect to the database while we are authenticating the user in standalone mode.
+    // Once that finishes user.standaloneAuth will be undefined and this function will be called
+    // again to connect to the database
+    if (user.standaloneAuth) {
+      removeLoadingMessage("Connecting");
+      return;
+    }
+
     await resolveAppMode(stores, authenticatedUser.rawFirebaseJWT);
 
     if (classInfo) {

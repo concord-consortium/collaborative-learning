@@ -19,7 +19,7 @@ import "./sort-work-view.scss";
  * Various options for sorting the display are available - by user, by group, by tools used, etc.
  */
 export const SortWorkView: React.FC = observer(function SortWorkView() {
-  const { appConfig, investigation, persistentUI, problem, sortedDocuments, unit } = useStores();
+  const { appConfig, investigation, persistentUI, problem, sortedDocuments, ui, unit } = useStores();
   const { tagPrompt } = appConfig;
   const { docFilter: persistentUIDocFilter, primarySortBy, secondarySortBy } = persistentUI;
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
@@ -40,6 +40,8 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     if (sort === secondarySortBy) {
       persistentUI.setSecondarySortBy("None");
     }
+    ui.clearHighlightedSortWorkDocument();
+    ui.clearExpandedSortWorkSections();
   };
 
   const primarySortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({

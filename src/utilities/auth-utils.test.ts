@@ -38,7 +38,7 @@ describe("auth-utils", () => {
 
     it("uses the portalDomain param if present", () => {
       setLocation("https://collaborative-learning.concord.org/standalone/?portalDomain=https://example.com");
-      const expectedURL = "https://example.com/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FauthDomain%3Dhttps%253A%252F%252Fexample.com%26portalDomain%3Dhttps%253A%252F%252Fexample.com";
+      const expectedURL = "https://example.com/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FportalDomain%3Dhttps%253A%252F%252Fexample.com%26authDomain%3Dhttps%253A%252F%252Fexample.com";
       const actualURL = getPortalStandaloneSignInOrRegisterUrl();
       expect(actualURL).toBe(expectedURL);
     });
@@ -71,16 +71,16 @@ describe("auth-utils", () => {
       expect(actualURL).toBe(expectedURL);
     });
 
-    it("adds the class and offering params to the redirect URL if present", () => {
-      setLocation("https://collaborative-learning.concord.org/standalone/?offering=test&class=m2studio");
-      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FauthDomain%3Dhttps%253A%252F%252Flearn.concord.org%26offering%3Dtest%26class%3Dm2studio&class_word=m2studio";
+    it("adds the class param to the redirect URL if present", () => {
+      setLocation("https://collaborative-learning.concord.org/standalone/?class=m2studio");
+      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3Fclass%3Dm2studio%26authDomain%3Dhttps%253A%252F%252Flearn.concord.org&class_word=m2studio";
       const actualURL = getPortalStandaloneSignInOrRegisterUrl();
       expect(actualURL).toBe(expectedURL);
     });
 
     it("adds the classWord param to the auth URL if class is present", () => {
       setLocation("https://collaborative-learning.concord.org/standalone/?class=m2studio");
-      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FauthDomain%3Dhttps%253A%252F%252Flearn.concord.org%26class%3Dm2studio&class_word=m2studio";
+      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3Fclass%3Dm2studio%26authDomain%3Dhttps%253A%252F%252Flearn.concord.org&class_word=m2studio";
       const actualURL = getPortalStandaloneSignInOrRegisterUrl();
       expect(actualURL).toBe(expectedURL);
     });

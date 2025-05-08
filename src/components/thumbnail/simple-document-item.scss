@@ -15,7 +15,7 @@
   &:hover {
     background: $classwork-purple-light-4;
   }
-  &:active {
+  &:active, &.selected {
     background: $classwork-purple-light-2;
   }
 

@@ -162,7 +162,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {renderPanelButtons()}
         </div>
         <div className="right">
-          <div className="version">Version {appVersion}</div>
+          <div className="version">CLUE v{appVersion}</div>
           <div className="user teacher" title={getUserTitle()}>
             <div className="class" data-test="user-class">
               <ClassMenuContainer />
@@ -180,7 +180,10 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     return renderNonStudentHeader({showProblemMenu: false});
   }
 
-  if (user.isTeacher && appConfig.showClassSwitcher) {
+  // in standalone mode students can navigate between problems because all the
+  // information is in the URL and it doesn't need to be launched from the portal.
+  const isAuthedStandaloneStudent = user.isStudent && user.standaloneAuthUser;
+  if ((user.isTeacher || isAuthedStandaloneStudent) && appConfig.showClassSwitcher) {
     return renderNonStudentHeader({showProblemMenu: true});
   }
 

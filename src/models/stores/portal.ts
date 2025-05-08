@@ -5,7 +5,7 @@ import { getErrorMessage } from "../../utilities/super-agent-helpers";
 import { convertURLToOAuth2, getBearerToken } from "../../utilities/auth-utils";
 import { QueryParams, urlParams as pageUrlParams } from "../../utilities/url-params";
 import initials from "initials";
-import { IUserPortalOffering } from "./user";
+import { IStandaloneAuthUser, IUserPortalOffering } from "./user";
 import { maybeAddResearcherParam } from "../../utilities/researcher-param";
 
 export const parseUrl = (url: string) => {
@@ -108,8 +108,26 @@ export class Portal {
     }
   }
 
-  requestPortalJWT({basePortalUrl, bearerToken}: {basePortalUrl?: string, bearerToken?: string} = {}) {
-    return new Promise<PortalJWT>((resolve, reject) => {
+  requestPortalJWT({standaloneAuthUser, basePortalUrl, bearerToken}:
+    {standaloneAuthUser?: IStandaloneAuthUser, basePortalUrl?: string, bearerToken?: string} = {}) {
+    return new Promise<{rawPortalJWT: string, portalJWT: PortalJWT}>((resolve, reject) => {
+
+      const done = (rawJWT: string) => {
+        const portalJWT = jwt_decode(rawJWT);
+        if (portalJWT) {
+          this.portalJWT = portalJWT as PortalJWT;
+          this.rawPortalJWT = rawJWT;
+          resolve({rawPortalJWT: rawJWT, portalJWT: this.portalJWT});
+        } else {
+          reject("Invalid portal token");
+        }
+      };
+
+      if (standaloneAuthUser) {
+        done(standaloneAuthUser.rawJWT);
+        return;
+      }
+
       const params = new URLSearchParams();
       if (pageUrlParams.resourceLinkId) {
         params.append("resource_link_id", pageUrlParams.resourceLinkId);
@@ -129,28 +147,24 @@ export class Portal {
           } else if (!res.body || !res.body.token) {
             reject("No token found in JWT request response");
           } else {
-            const rawJWT = res.body.token;
-            const portalJWT = jwt_decode(rawJWT);
-            if (portalJWT) {
-              this.portalJWT = portalJWT as PortalJWT;
-              this.rawPortalJWT = rawJWT;
-              resolve(this.portalJWT);
-            } else {
-              reject("Invalid portal token");
-            }
+            done(res.body.token);
           }
         });
     });
   }
 
-  async initialize() {
+  async initialize(standaloneAuthUser?: IStandaloneAuthUser) {
     if (!this.bearerToken) {
       throw "No token provided for authentication (must launch from Portal)";
     }
 
-    this.basePortalUrl = this.getBasePortalUrl();
+    if (standaloneAuthUser?.jwt) {
+      this.basePortalUrl = standaloneAuthUser?.jwt.domain;
+    } else {
+      this.basePortalUrl = this.getBasePortalUrl();
+    }
 
-    await this.requestPortalJWT();
+    await this.requestPortalJWT({ standaloneAuthUser });
 
     const {basePortalUrl, portalJWT, urlParams} = this;
 
@@ -164,10 +178,12 @@ export class Portal {
     if (portalJWT.user_type === "learner") {
       this.classInfoUrl = portalJWT.class_info_url;
       this.offeringId = `${portalJWT.offering_id}`;
-    }
-    else if (urlParams && urlParams.class && urlParams.offering) {
+    } else if (urlParams && urlParams.class && urlParams.offering) {
       this.classInfoUrl = urlParams.class;
       this.offeringId = urlParams.offering.split("/").pop() as string;
+    } else if (standaloneAuthUser) {
+      this.classInfoUrl = `${basePortalUrl}api/v1/classes/${standaloneAuthUser.classId}`;
+      this.offeringId = String(standaloneAuthUser.offeringId);
     }
 
     if (!this.classInfoUrl || !this.offeringId) {

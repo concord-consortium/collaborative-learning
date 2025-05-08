@@ -100,6 +100,9 @@
         width: fit-content
         margin-right: 10px
 
+        &.italicize
+          font-style: italic
+
       &:hover
         background-color: $workspace-teal-light-3
 
@@ -119,6 +122,10 @@
         background-position: center
         &.selected
           background-image: url("../../assets/icons/check/check-selected.svg")
+
+      &:active .hidden-item-check, .hidden-item-check, .hidden-item-check.selected
+        background-image: none
+
 
     .list-item:last-child
       border-radius: 0 0 5px 5px

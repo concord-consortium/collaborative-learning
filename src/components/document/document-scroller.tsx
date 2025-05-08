@@ -96,23 +96,52 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
     return () => obs?.disconnect();
   }, []);
 
-  return (
-    <div ref={documentScrollerRef} className="document-thumbnail-scroller" data-testid="document-thumbnail-scroller">
-      {scrollToLocation > 0 &&
-        <button className="scroll-arrow left" data-testid="scroll-arrow-left" onClick={handleScrollTo("left")}>
-          <ScrollArrowIcon />
-        </button>
-      }
-      <div ref={documentListRef} className="document-thumbnail-list documents-list">
-        {documentGroup?.documents.map((doc) => (
-          renderThumbnail(doc.key)
-        ))}
+  const renderHeader = () => {
+    if (!openDocumentKey) return;
+    const { primarySortBy, secondarySortBy } = persistentUI;
+    const hasSecondarySort = secondarySortBy !== "None";
+
+    // The document group passed down to this component will be the secondary sort group if it exists.
+    // Otherwise, it will be the primary sort group.
+    const primaryLabel = hasSecondarySort
+      ? sortedDocuments.getDocSortLabel(openDocumentKey, primarySortBy)
+      : documentGroup?.label;
+    const secondaryLabel = hasSecondarySort ? documentGroup?.label : "";
+
+    return (
+      <div className="document-scroller-header">
+        <div className="header-text">
+          Sorted by
+          <span> {primarySortBy}: </span>{primaryLabel}{" "}
+          { secondaryLabel && <><span> {secondarySortBy}: </span>{secondaryLabel}</> }
+        </div>
+        <div className="header-text">
+          Shown for <span>{persistentUI.docFilter}</span>
+        </div>
       </div>
-      {scrollToLocation < maxScrollTo &&
-        <button className="scroll-arrow right" data-testid="scroll-arrow-right" onClick={handleScrollTo("right")}>
-          <ScrollArrowIcon />
-        </button>
-      }
-    </div>
+    );
+  };
+
+  return (
+    <>
+      {renderHeader()}
+      <div ref={documentScrollerRef} className="document-thumbnail-scroller" data-testid="document-thumbnail-scroller">
+        {scrollToLocation > 0 &&
+          <button className="scroll-arrow left" data-testid="scroll-arrow-left" onClick={handleScrollTo("left")}>
+            <ScrollArrowIcon />
+          </button>
+        }
+        <div ref={documentListRef} className="document-thumbnail-list documents-list">
+          {documentGroup?.documents.map((doc) => (
+            renderThumbnail(doc.key)
+          ))}
+        </div>
+        {scrollToLocation < maxScrollTo &&
+          <button className="scroll-arrow right" data-testid="scroll-arrow-right" onClick={handleScrollTo("right")}>
+            <ScrollArrowIcon />
+          </button>
+        }
+      </div>
+    </>
   );
 });

@@ -9,7 +9,7 @@ import { UserType } from "../models/stores/user-types";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser,
    } from "./portal-api";
-import { PortalJWT, PortalFirebaseJWT } from "./portal-types";
+import { PortalJWT, PortalFirebaseJWT, PortalUserJWT } from "./portal-types";
 import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import { uniqueId } from "../utilities/js-utils";
@@ -163,13 +163,18 @@ export const authenticate = async (
     user?: UserModelType
   ): Promise<IAuthenticateResponse> => {
   urlParams = urlParams || pageUrlParams;
+
+  // if there is an existing JWT (from standalone auth), we are authed
+  if (user?.standaloneAuthUser?.jwt) {
+    appMode = "authed";
+  }
+
   // TODO: we should be defaulting to appConfig.defaultUnit here rather than the empty string,
   // but some cypress tests rely on the fact that in demo mode the offeringId is prefixed with
   // the unit code, which results in an offeringId of `101` instead of `sas101`.
   const unitCode = urlParams.unit || "";
   // when launched as a report, the params will not contain the problemOrdinal
   const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
-  const offeringId = urlParams.resourceLinkId || undefined;
 
   let {fakeClass, fakeUser} = urlParams;
   // handle preview launch from portal
@@ -221,14 +226,18 @@ export const authenticate = async (
       bearerToken: user.standaloneAuth.bearerToken,
       basePortalUrl: user.standaloneAuth.authDomain
     });
-    user.setStandaloneAuth({state: "authenticated", portalJWT: result});
+    user.setStandaloneAuth({
+      state: "authenticated",
+      rawPortalJWT: result.rawPortalJWT,
+      portalJWT: result.portalJWT as PortalUserJWT
+    });
   }
 
   if (user?.standaloneAuth || appMode !== "authed") {
     return generateDevAuthentication(unitCode || curriculumConfig.defaultUnit || "", problemOrdinal);
   }
 
-  await portalService.initialize();
+  await portalService.initialize(user?.standaloneAuthUser);
   const { portalJWT, rawPortalJWT, basePortalUrl, bearerToken, portalHost } = portalService;
 
   if (!basePortalUrl || !bearerToken) {
@@ -240,8 +249,12 @@ export const authenticate = async (
   const { user_type, uid, domain } = portalJWT;
   const { classHash } = classInfo;
   const uidAsString = `${portalJWT.uid}`;
-  const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classHash);
-  const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT, offeringId);
+  // TODO: figure out why we need to use bearer tokens here in normal mode
+  // when we already have the portalJWT in all cases
+  const tokenType = user?.standaloneAuthUser ? "Bearer/JWT" : "Bearer";
+  const rawToken = user?.standaloneAuthUser?.rawJWT ?? bearerToken;
+  const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, tokenType, rawToken, classHash);
+  const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT);
   const problemIdPromise = getProblemIdForAuthenticatedUser(rawPortalJWT, curriculumConfig, urlParams);
 
   const [firebaseJWTResult, portalOfferingsResult, problemIdResult] =
@@ -294,6 +307,7 @@ export const authenticate = async (
   Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal: portalHost});
 
   return {
+    appMode,
     authenticatedUser,
     classInfo,
     unitCode: newUnitCode,
