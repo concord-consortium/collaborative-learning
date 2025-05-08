@@ -790,18 +790,22 @@ exports[`Drawing Layer Zoom zooms in 1`] = `
     data-testid="drawing-layer-object-canvas"
     transform="translate(0, 0) scale(2)"
   >
-    <rect
-      class="rectangle"
-      fill="#cccccc"
-      height="10"
-      pointer-events="visible"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
-      width="10"
-      x="10"
-      y="10"
-    />
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <rect
+        class="rectangle"
+        fill="#cccccc"
+        height="10"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+        width="10"
+        x="10"
+        y="10"
+      />
+    </g>
   </g>
 </svg>
 `;
@@ -815,18 +819,22 @@ exports[`Drawing Layer Zoom zooms out 1`] = `
     data-testid="drawing-layer-object-canvas"
     transform="translate(0, 0) scale(0.5)"
   >
-    <rect
-      class="rectangle"
-      fill="#cccccc"
-      height="10"
-      pointer-events="visible"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
-      width="10"
-      x="10"
-      y="10"
-    />
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <rect
+        class="rectangle"
+        fill="#cccccc"
+        height="10"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+        width="10"
+        x="10"
+        y="10"
+      />
+    </g>
   </g>
 </svg>
 `;
