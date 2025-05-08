@@ -7,7 +7,6 @@ import { NetworkStatus } from "../../components/network-status";
 import { ProblemMenuContainer } from "../../components/problem-menu-container";
 import { ToggleGroup } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
-import { CustomSelect } from "./custom-select";
 import { useStores } from "../../hooks/use-stores";
 import AppModeIndicator from "./app-mode-indicator";
 
@@ -180,15 +179,11 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     return renderNonStudentHeader({showProblemMenu: false});
   }
 
-  // in standalone mode students can navigate between problems because all the
-  // information is in the URL and it doesn't need to be launched from the portal.
-  const isAuthedStandaloneStudent = user.isStudent && user.standaloneAuthUser;
-  if ((user.isTeacher || isAuthedStandaloneStudent) && appConfig.showClassSwitcher) {
+  if (user.isTeacher && appConfig.showClassSwitcher) {
     return renderNonStudentHeader({showProblemMenu: true});
   }
 
   const showUserInfo = !(ui.standalone && user.standaloneAuth);
-  const showProblemInfo = showUserInfo;
   const showAppMode = showUserInfo;
   const showGroupInfo = showUserInfo;
   const showUnitInfo = unit.title !== "Null Unit";
@@ -209,12 +204,9 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
             <div className="separator"/>
           </>
           }
-          {showProblemInfo &&
-          <CustomSelect
-            items={[{text: `${problem.title}${problem.subtitle ? `: ${problem.subtitle}`: ""}`}]}
-            isDisabled={true}
-          />
-          }
+          <div className="problem-dropdown" data-test="user-problem">
+            <ProblemMenuContainer />
+          </div>
         </div>
         <div className="middle student">
           {renderPanelButtons()}
