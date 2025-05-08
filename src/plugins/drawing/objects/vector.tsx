@@ -8,6 +8,7 @@ import {
 import { BoundingBoxSides, Point, VectorEndShape,
   endShapesForVectorType, getVectorTypeIcon, vectorTypeForEndShapes }
   from "../model/drawing-basic-types";
+import { Transformable } from "../components/transformable";
 
 // Line or arrow
 export const VectorObject = StrokedObject.named("VectorObject")
@@ -102,20 +103,21 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
     const tail = tailShape ? placeEndShape(tailShape, x, y, angle+180) : null; // tail points backwards
     // Set fill to stroke since arrowheads should be drawn in stroke color
   return (
-    <g
-      className="vector"
-      key={id}
-      stroke={stroke}
-      fill={stroke}
-      strokeWidth={strokeWidth}
-      strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-      onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-      onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-      onPointerDown={(e) => handleDrag?.(e, model)}
-      pointerEvents={handleHover ? "visible" : "none"}
-    >
-      {line}{head}{tail}
-    </g>
+    <Transformable key={id} transform={model.transform}>
+      <g
+        className="vector"
+        stroke={stroke}
+        fill={stroke}
+        strokeWidth={strokeWidth}
+        strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+        onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+        onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+        onPointerDown={(e) => handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      >
+        {line}{head}{tail}
+      </g>
+    </Transformable>
   );
 });
 

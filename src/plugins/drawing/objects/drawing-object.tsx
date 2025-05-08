@@ -9,6 +9,8 @@ import ErrorIcon from "../../../assets/icons/error.svg";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "text" | "stamp" | "variable";
 
+export type Transform = { tx: number, ty: number, sx: number, sy: number };
+
 export const ObjectTypeIconViewBox = "0 0 36 34";
 
 // This interface is a subset of what the DrawingContentModel provides.
@@ -48,6 +50,8 @@ export const DrawingObject = types.model("DrawingObject", {
   id: types.optional(types.identifier, () => uniqueId()),
   x: types.number,
   y: types.number,
+  hFlip: types.optional(types.boolean, false),
+  vFlip: types.optional(types.boolean, false),
   visible: true
 })
 .volatile(self => ({
@@ -91,6 +95,23 @@ export const DrawingObject = types.model("DrawingObject", {
   },
   get supportsResize() {
     return true;
+  },
+  get transform(): Transform {
+    const {boundingBox, hFlip, vFlip} = self;
+    const center: Point = {
+      x: (boundingBox.nw.x + boundingBox.se.x) / 2,
+      y: (boundingBox.nw.y + boundingBox.se.y) / 2
+    };
+    const transform = { tx: 0, ty: 0, sx: 1, sy: 1 };
+    if (hFlip) {
+      transform.tx = center.x*2;
+      transform.sx = -1;
+    }
+    if (vFlip) {
+      transform.ty = center.y*2;
+      transform.sy = -1;
+    }
+    return transform;
   }
 }))
 .actions(self => ({

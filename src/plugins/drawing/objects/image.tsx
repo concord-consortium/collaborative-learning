@@ -7,6 +7,7 @@ import { DrawingObject, DrawingObjectSnapshot, DrawingTool,
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import ImageToolIcon from "../../../clue/assets/icons/image-tool.svg";
+import { Transformable } from "../components/transformable";
 
 export const ImageObject = DrawingObject.named("ImageObject")
   .props({
@@ -93,19 +94,22 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
   const width = image.dragWidth ?? image.width;
   const height = image.dragHeight ?? image.height;
 
-  return <image
-    key={id}
-    href={displayUrl}
-    x={x}
-    y={y}
-    width={width}
-    height={height}
-    preserveAspectRatio="none"
-    onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onPointerDown={(e)=> handleDrag?.(e, model)}
-    pointerEvents={handleHover ? "visible" : "none"}
-  />;
+  return (
+    <Transformable key={id} transform={image.transform}>
+      <image
+        href={displayUrl}
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        preserveAspectRatio="none"
+        onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+        onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+        onPointerDown={(e)=> handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      />
+    </Transformable>
+  );
 
 });
 

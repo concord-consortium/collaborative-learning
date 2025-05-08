@@ -7,6 +7,7 @@ import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 import { uniqueId } from "../../../../src/utilities/js-utils";
 import { WrappedSvgText } from "../components/wrapped-svg-text";
+import { Transformable } from "../components/transformable";
 
 export const TextObject = EditableObject.named("TextObject")
   .props({
@@ -96,7 +97,7 @@ interface IContentProps {
   textColor: string;
 }
 
-const TextContent: React.FC<IContentProps> = ({
+const TextContent: React.FC<IContentProps> = observer(({
   editing, clip, text, model,
   x, y, width, height, margin,
   handleTextAreaPointerDown, textColor
@@ -169,14 +170,16 @@ const TextContent: React.FC<IContentProps> = ({
     );
   } else {
     return(
-      <g clipPath={'url(#'+clip+')'}>
-        <WrappedSvgText text={text}
-            x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}
-            style={{fill: textColor}} />
-      </g>
+      <Transformable transform={model.transform}>
+        <g clipPath={'url(#'+clip+')'}>
+          <WrappedSvgText text={text}
+              x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}
+              style={{fill: textColor}} />
+        </g>
+      </Transformable>
     );
   }
-};
+});
 
 export const TextComponent = observer(
     function TextComponent({model, readOnly, handleHover, handleDrag} : IDrawingComponentProps) {
@@ -200,10 +203,12 @@ export const TextComponent = observer(
           onPointerDown={(e)=> handleDrag?.(e, model)}
           pointerEvents={handleHover ? "visible" : "none"}
          >
-          <rect x={x} y={y}
-              width={width} height={height}
-              stroke={stroke} fill="#FFFFFF" opacity="80%"
-              rx="5" ry="5" />
+          <Transformable transform={model.transform}>
+            <rect x={x} y={y}
+                width={width} height={height}
+                stroke={stroke} fill="#FFFFFF" opacity="80%"
+                rx="5" ry="5" />
+          </Transformable>
           <clipPath id={clipId}>
             <rect x={x} y={y} width={width} height={height} />
           </clipPath>

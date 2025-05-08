@@ -4,11 +4,14 @@ import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button"
 import { IToolbarButtonComponentProps } from "../../components/toolbar/toolbar-button-manager";
 import { DrawingContentModelContext } from "./components/drawing-content-context";
 import { OpenPaletteValues } from "./model/drawing-content";
+import { isGroupObject } from "./objects/group";
+
 import DeleteIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import GroupObjectsIcon from "./assets/group-objects-icon.svg";
 import UngroupObjectsIcon from "./assets/ungroup-objects-icon.svg";
 import DuplicateIcon from "./assets/duplicate-icon.svg";
-import { isGroupObject } from "./objects/group";
+import FlipHorizontalIcon from "./assets/flip-horizontal-icon.svg";
+import FlipVerticalIcon from "./assets/flip-vertical-icon.svg";
 
 import "./drawing-toolbar.scss";
 
@@ -98,6 +101,48 @@ export const DeleteButton = observer(({ name }: IToolbarButtonComponentProps) =>
       disabled={!enabled}
     >
       <DeleteIcon />
+    </TileToolbarButton>
+  );
+});
+
+export const FlipHorizontalButton = observer(({ name }: IToolbarButtonComponentProps) => {
+  const drawingModel = useContext(DrawingContentModelContext);
+  const enabled = drawingModel.selection.length > 0;
+
+  function flipHorizontal() {
+    console.log("flipHorizontal");
+    drawingModel.flipHorizontal(drawingModel.selection);
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title={"Flip Horizontal"}
+      onClick={flipHorizontal}
+      disabled={!enabled}
+    >
+      <FlipHorizontalIcon />
+    </TileToolbarButton>
+  );
+});
+
+export const FlipVerticalButton = observer(({ name }: IToolbarButtonComponentProps) => {
+  const drawingModel = useContext(DrawingContentModelContext);
+  const enabled = drawingModel.selection.length > 0;
+
+  function flipVertical() {
+    console.log("flipVertical");
+    drawingModel.flipVertical(drawingModel.selection);
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title={"Flip Vertical"}
+      onClick={flipVertical}
+      disabled={!enabled}
+    >
+      <FlipVerticalIcon />
     </TileToolbarButton>
   );
 });

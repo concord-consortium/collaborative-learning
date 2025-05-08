@@ -40,7 +40,9 @@ describe("exportDrawingTileSpec", () => {
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
 
     const v1Data: VectorObjectSnapshot = { ...vectorData, id: "v1" };

@@ -9,17 +9,21 @@ exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
     data-testid="drawing-layer-object-canvas"
     transform="translate(0, 0) scale(1)"
   >
-    <ellipse
-      cx="10"
-      cy="10"
-      fill="#cccccc"
-      pointer-events="visible"
-      rx="10"
-      ry="10"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
-    />
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <ellipse
+        cx="10"
+        cy="10"
+        fill="#cccccc"
+        pointer-events="visible"
+        rx="10"
+        ry="10"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      />
+    </g>
   </g>
 </svg>
 `;
@@ -45,17 +49,21 @@ exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
     data-testid="drawing-layer-object-canvas"
     transform="translate(0, 0) scale(1)"
   >
-    <ellipse
-      cx="5"
-      cy="5"
-      fill="#cccccc"
-      pointer-events="visible"
-      rx="10"
-      ry="10"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
-    />
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <ellipse
+        cx="5"
+        cy="5"
+        fill="#cccccc"
+        pointer-events="visible"
+        rx="10"
+        ry="10"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      />
+    </g>
   </g>
 </svg>
 `;
@@ -69,14 +77,19 @@ exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
     data-testid="drawing-layer-object-canvas"
     transform="translate(0, 0) scale(1)"
   >
-    <path
-      d="M 10 10 l 1 1 l 2 2"
-      fill="none"
-      pointer-events="visible"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
-    />
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <path
+        d="M 10 10 l 1 1 l 2 2"
+        data-object-id="123"
+        fill="none"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      />
+    </g>
   </g>
 </svg>
 `;
@@ -102,14 +115,19 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
     data-testid="drawing-layer-object-canvas"
     transform="translate(0, 0) scale(1)"
   >
-    <path
-      d="M 5 5 l 1 1 l 2 2"
-      fill="none"
-      pointer-events="visible"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
-    />
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <path
+        d="M 5 5 l 1 1 l 2 2"
+        data-object-id="123"
+        fill="none"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      />
+    </g>
   </g>
 </svg>
 `;
@@ -133,29 +151,37 @@ exports[`Drawing Layer Components Group creates a group 1`] = `
       x="0"
       y="0"
     />
-    <rect
-      class="rectangle"
-      fill="#cccccc"
-      height="10"
-      pointer-events="none"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
-      width="10"
-      x="10"
-      y="10"
-    />
-    <ellipse
-      cx="10"
-      cy="10"
-      fill="#cccccc"
-      pointer-events="none"
-      rx="10"
-      ry="10"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
-    />
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <rect
+        class="rectangle"
+        fill="#cccccc"
+        height="10"
+        pointer-events="none"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+        width="10"
+        x="10"
+        y="10"
+      />
+    </g>
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <ellipse
+        cx="10"
+        cy="10"
+        fill="#cccccc"
+        pointer-events="none"
+        rx="10"
+        ry="10"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      />
+    </g>
     <g>
       <rect
         data-testid="selection-box"
@@ -256,29 +282,37 @@ exports[`Drawing Layer Components Group moves a group 1`] = `
       x="0"
       y="0"
     />
-    <rect
-      class="rectangle"
-      fill="#cccccc"
-      height="10"
-      pointer-events="none"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
-      width="10"
-      x="10"
-      y="10"
-    />
-    <ellipse
-      cx="10"
-      cy="10"
-      fill="#cccccc"
-      pointer-events="none"
-      rx="10"
-      ry="10"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
-    />
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <rect
+        class="rectangle"
+        fill="#cccccc"
+        height="10"
+        pointer-events="none"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+        width="10"
+        x="10"
+        y="10"
+      />
+    </g>
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <ellipse
+        cx="10"
+        cy="10"
+        fill="#cccccc"
+        pointer-events="none"
+        rx="10"
+        ry="10"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      />
+    </g>
     <g>
       <rect
         data-testid="selection-box"
@@ -357,15 +391,19 @@ exports[`Drawing Layer Components Image adds an image 1`] = `
     data-testid="drawing-layer-object-canvas"
     transform="translate(0, 0) scale(1)"
   >
-    <image
-      height="10"
-      href="test-file-stub"
-      pointer-events="visible"
-      preserveAspectRatio="none"
-      width="10"
-      x="10"
-      y="10"
-    />
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <image
+        height="10"
+        href="test-file-stub"
+        pointer-events="visible"
+        preserveAspectRatio="none"
+        width="10"
+        x="10"
+        y="10"
+      />
+    </g>
   </g>
 </svg>
 `;
@@ -391,15 +429,19 @@ exports[`Drawing Layer Components Image moves a image 1`] = `
     data-testid="drawing-layer-object-canvas"
     transform="translate(0, 0) scale(1)"
   >
-    <image
-      height="10"
-      href="assets/logo_tw.png"
-      pointer-events="visible"
-      preserveAspectRatio="none"
-      width="10"
-      x="5"
-      y="5"
-    />
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <image
+        height="10"
+        href="assets/logo_tw.png"
+        pointer-events="visible"
+        preserveAspectRatio="none"
+        width="10"
+        x="5"
+        y="5"
+      />
+    </g>
   </g>
 </svg>
 `;
@@ -413,18 +455,22 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
     data-testid="drawing-layer-object-canvas"
     transform="translate(0, 0) scale(1)"
   >
-    <rect
-      class="rectangle"
-      fill="#cccccc"
-      height="10"
-      pointer-events="visible"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
-      width="10"
-      x="10"
-      y="10"
-    />
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <rect
+        class="rectangle"
+        fill="#cccccc"
+        height="10"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+        width="10"
+        x="10"
+        y="10"
+      />
+    </g>
   </g>
 </svg>
 `;
@@ -450,18 +496,22 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
     data-testid="drawing-layer-object-canvas"
     transform="translate(0, 0) scale(1)"
   >
-    <rect
-      class="rectangle"
-      fill="#cccccc"
-      height="10"
-      pointer-events="visible"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
-      width="10"
-      x="5"
-      y="5"
-    />
+    <g
+      transform="translate(0,0) scale(1,1)"
+    >
+      <rect
+        class="rectangle"
+        fill="#cccccc"
+        height="10"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+        width="10"
+        x="5"
+        y="5"
+      />
+    </g>
   </g>
 </svg>
 `;
@@ -476,32 +526,36 @@ exports[`Drawing Layer Components Vector arrow adds a Vector arrow 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      class="vector"
-      fill="#777777"
-      pointer-events="visible"
-      stroke="#777777"
-      stroke-dasharray=""
-      stroke-width="2"
+      transform="translate(0,0) scale(1,1)"
     >
-      <line
-        x1="20"
-        x2="40"
-        y1="20"
-        y2="40"
-      />
       <g
-        transform="translate(40 40) rotate(135)"
+        class="vector"
+        fill="#777777"
+        pointer-events="visible"
+        stroke="#777777"
+        stroke-dasharray=""
+        stroke-width="2"
       >
-        <polygon
-          points="0 0 4.5 9 -4.5 9 0 0"
+        <line
+          x1="20"
+          x2="40"
+          y1="20"
+          y2="40"
         />
-      </g>
-      <g
-        transform="translate(20 20) rotate(315)"
-      >
-        <polygon
-          points="0 0 4.5 9 -4.5 9 0 0"
-        />
+        <g
+          transform="translate(40 40) rotate(135)"
+        >
+          <polygon
+            points="0 0 4.5 9 -4.5 9 0 0"
+          />
+        </g>
+        <g
+          transform="translate(20 20) rotate(315)"
+        >
+          <polygon
+            points="0 0 4.5 9 -4.5 9 0 0"
+          />
+        </g>
       </g>
     </g>
   </g>
@@ -518,32 +572,36 @@ exports[`Drawing Layer Components Vector arrow changes vector to double arrow 1`
     transform="translate(0, 0) scale(1)"
   >
     <g
-      class="vector"
-      fill="#777777"
-      pointer-events="visible"
-      stroke="#777777"
-      stroke-dasharray=""
-      stroke-width="2"
+      transform="translate(0,0) scale(1,1)"
     >
-      <line
-        x1="20"
-        x2="40"
-        y1="20"
-        y2="40"
-      />
       <g
-        transform="translate(40 40) rotate(135)"
+        class="vector"
+        fill="#777777"
+        pointer-events="visible"
+        stroke="#777777"
+        stroke-dasharray=""
+        stroke-width="2"
       >
-        <polygon
-          points="0 0 4.5 9 -4.5 9 0 0"
+        <line
+          x1="20"
+          x2="40"
+          y1="20"
+          y2="40"
         />
-      </g>
-      <g
-        transform="translate(20 20) rotate(315)"
-      >
-        <polygon
-          points="0 0 4.5 9 -4.5 9 0 0"
-        />
+        <g
+          transform="translate(40 40) rotate(135)"
+        >
+          <polygon
+            points="0 0 4.5 9 -4.5 9 0 0"
+          />
+        </g>
+        <g
+          transform="translate(20 20) rotate(315)"
+        >
+          <polygon
+            points="0 0 4.5 9 -4.5 9 0 0"
+          />
+        </g>
       </g>
     </g>
   </g>
@@ -560,25 +618,29 @@ exports[`Drawing Layer Components Vector arrow changes vector to single arrow 1`
     transform="translate(0, 0) scale(1)"
   >
     <g
-      class="vector"
-      fill="#777777"
-      pointer-events="visible"
-      stroke="#777777"
-      stroke-dasharray=""
-      stroke-width="2"
+      transform="translate(0,0) scale(1,1)"
     >
-      <line
-        x1="20"
-        x2="40"
-        y1="20"
-        y2="40"
-      />
       <g
-        transform="translate(40 40) rotate(135)"
+        class="vector"
+        fill="#777777"
+        pointer-events="visible"
+        stroke="#777777"
+        stroke-dasharray=""
+        stroke-width="2"
       >
-        <polygon
-          points="0 0 4.5 9 -4.5 9 0 0"
+        <line
+          x1="20"
+          x2="40"
+          y1="20"
+          y2="40"
         />
+        <g
+          transform="translate(40 40) rotate(135)"
+        >
+          <polygon
+            points="0 0 4.5 9 -4.5 9 0 0"
+          />
+        </g>
       </g>
     </g>
   </g>
@@ -607,32 +669,36 @@ exports[`Drawing Layer Components Vector arrow moves a vector arrow 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      class="vector"
-      fill="#777777"
-      pointer-events="visible"
-      stroke="#777777"
-      stroke-dasharray=""
-      stroke-width="2"
+      transform="translate(0,0) scale(1,1)"
     >
-      <line
-        x1="5"
-        x2="25"
-        y1="5"
-        y2="25"
-      />
       <g
-        transform="translate(25 25) rotate(135)"
+        class="vector"
+        fill="#777777"
+        pointer-events="visible"
+        stroke="#777777"
+        stroke-dasharray=""
+        stroke-width="2"
       >
-        <polygon
-          points="0 0 4.5 9 -4.5 9 0 0"
+        <line
+          x1="5"
+          x2="25"
+          y1="5"
+          y2="25"
         />
-      </g>
-      <g
-        transform="translate(5 5) rotate(315)"
-      >
-        <polygon
-          points="0 0 4.5 9 -4.5 9 0 0"
-        />
+        <g
+          transform="translate(25 25) rotate(135)"
+        >
+          <polygon
+            points="0 0 4.5 9 -4.5 9 0 0"
+          />
+        </g>
+        <g
+          transform="translate(5 5) rotate(315)"
+        >
+          <polygon
+            points="0 0 4.5 9 -4.5 9 0 0"
+          />
+        </g>
       </g>
     </g>
   </g>
@@ -649,19 +715,23 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      class="vector"
-      fill="#888888"
-      pointer-events="visible"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
+      transform="translate(0,0) scale(1,1)"
     >
-      <line
-        x1="10"
-        x2="20"
-        y1="10"
-        y2="20"
-      />
+      <g
+        class="vector"
+        fill="#888888"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      >
+        <line
+          x1="10"
+          x2="20"
+          y1="10"
+          y2="20"
+        />
+      </g>
     </g>
   </g>
 </svg>
@@ -689,19 +759,23 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      class="vector"
-      fill="#888888"
-      pointer-events="visible"
-      stroke="#888888"
-      stroke-dasharray=""
-      stroke-width="1"
+      transform="translate(0,0) scale(1,1)"
     >
-      <line
-        x1="5"
-        x2="15"
-        y1="5"
-        y2="15"
-      />
+      <g
+        class="vector"
+        fill="#888888"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      >
+        <line
+          x1="5"
+          x2="15"
+          y1="5"
+          y2="15"
+        />
+      </g>
     </g>
   </g>
 </svg>
