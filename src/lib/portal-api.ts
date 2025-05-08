@@ -33,73 +33,66 @@ export const getPortalOfferings = (
   userType: string,
   userId: number,
   domain: string,
-  rawPortalJWT: any,
-  offeringId?: string) => {
+  rawPortalJWT: any) => {
   return new Promise<IPortalOffering[]> ((resolve, reject) => {
-    if (userType === "teacher") {
-      superagent
-      .get(`${domain}api/v1/offerings/?user_id=${userId}`)
-      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
-      .end((err, res) => {
-        if (err) {
-          reject(getErrorMessage(err, res));
-        } else {
-          const thisUsersOfferings = res.body as IPortalOffering[];
-          const clueOfferings = thisUsersOfferings.filter(isClueAssignment);
-          // clazz_hash is a recent addition to the offerings API -- if it's
-          // not present then we have to map from class ID to class hash ourselves
-          const hasMissingClassHashes = clueOfferings.some(o => !o.clazz_hash);
-          if (hasMissingClassHashes) {
-            superagent
-            .get(`${domain}api/v1/classes/mine`)
-            .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
-            .end((err2, res2) => {
-              if (err2) {
-                reject(getErrorMessage(err2, res2));
-              } else {
-                const mineClasses = res2.body as IMineClasses;
-                // create map from class ID to class hash
-                const classHashMap: Record<string, string> = {};
-                mineClasses.classes.forEach(c => {
-                  const match = /\/([^/]+)$/.exec(c.uri);
-                  const classId = match && match[1];
-                  if (classId) {
-                    classHashMap[classId] = c.class_hash;
-                  }
-                });
-                // fill in missing class hashes from map
-                clueOfferings.forEach(o => {
-                  if (!o.clazz_hash && classHashMap[o.clazz_id]) {
-                    o.clazz_hash = classHashMap[o.clazz_id];
-                  }
-                });
-                resolve(clueOfferings);
-              }
-            });
-          }
-          else {
-            // class hashes are already present so no further work required
-            resolve(clueOfferings);
-          }
-        }
-      });
-    }
-    else if (userType === "learner" && offeringId) {
-      // For learner, just look up the single current offering
-      superagent
-      .get(`${domain}api/v1/offerings/${offeringId}`)
-      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
-      .end((err, res) => {
-        if (err) {
-          reject(getErrorMessage(err, res));
-        } else {
-          resolve([res.body]);
-        }
-      });
-    }
-    else {
+    if (userType !== "teacher" && userType !== "learner") {
+      // If the user is not a teacher or learner (currently could just be a researcher),
+      // they have no offerings so just return an empty array.
       resolve([]);
+      return;
     }
+
+    // teachers can get their own offerings or those of another user in their classes
+    // but learners can only get their own offerings so only pass the user ID
+    // if the user is a teacher
+    const url = `${domain}api/v1/offerings/${userType === "teacher" ? `?user_id=${userId}` : ""}`;
+
+    superagent
+    .get(url)
+    .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+    .end((err, res) => {
+      if (err) {
+        reject(getErrorMessage(err, res));
+      } else {
+        const thisUsersOfferings = res.body as IPortalOffering[];
+        const clueOfferings = thisUsersOfferings.filter(isClueAssignment);
+        // clazz_hash is a recent addition to the offerings API -- if it's
+        // not present then we have to map from class ID to class hash ourselves
+        const hasMissingClassHashes = clueOfferings.some(o => !o.clazz_hash);
+        if (hasMissingClassHashes) {
+          superagent
+          .get(`${domain}api/v1/classes/mine`)
+          .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+          .end((err2, res2) => {
+            if (err2) {
+              reject(getErrorMessage(err2, res2));
+            } else {
+              const mineClasses = res2.body as IMineClasses;
+              // create map from class ID to class hash
+              const classHashMap: Record<string, string> = {};
+              mineClasses.classes.forEach(c => {
+                const match = /\/([^/]+)$/.exec(c.uri);
+                const classId = match && match[1];
+                if (classId) {
+                  classHashMap[classId] = c.class_hash;
+                }
+              });
+              // fill in missing class hashes from map
+              clueOfferings.forEach(o => {
+                if (!o.clazz_hash && classHashMap[o.clazz_id]) {
+                  o.clazz_hash = classHashMap[o.clazz_id];
+                }
+              });
+              resolve(clueOfferings);
+            }
+          });
+        }
+        else {
+          // class hashes are already present so no further work required
+          resolve(clueOfferings);
+        }
+      }
+    });
   });
 };
 
@@ -236,6 +229,10 @@ export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
         const authParams = getAuthParams(urlParams);
         Object.assign(newLocationParams, authParams);
         newLocationUrl = `?${(new URLSearchParams(newLocationParams)).toString()}`;
+      } else if (offering.activity_url.includes("/standalone")) {
+        // This is a special case for standalone CLUE activities - they have
+        // all the information in the URL already, so we can just use that.
+        newLocationUrl = offering.activity_url;
       }
       result.push(UserPortalOffering.create({
         classId: `${offering.clazz_id}`,

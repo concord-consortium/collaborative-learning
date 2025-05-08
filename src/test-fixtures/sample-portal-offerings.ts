@@ -550,3 +550,59 @@ export const TeacherOfferings = [
     students: []
   }
 ];
+
+
+export const StudentOfferings = [
+  {
+    id: 1190,
+    teacher: "Dave Love",
+    clazz: "ClueClass1",
+    clazz_id: 242,
+    clazz_info_url: "https://learn.staging.concord.org/api/v1/classes/242",
+    activity: "CLUE 1.2: Stretching a Figure - Comparing Similar Figures",
+    activity_url: "https://collaborative-learning.concord.org/branch/master/?unit=sas&problem=1.2",
+    material_type: "Activity",
+    report_url: null,
+    rubric_url: "",
+    preview_url: "https://learn.staging.concord.org/eresources/1129.run_resource_html?logging=true",
+    external_report: {
+      id: 14,
+      name: "CLUE Dashboard",
+      url: "https://learn.staging.concord.org/portal/offerings/1190/external_report/14",
+      launch_text: "CLUE Dashboard"
+    },
+    external_reports: [
+      {
+        id: 14,
+        name: "CLUE Dashboard",
+        url: "https://learn.staging.concord.org/portal/offerings/1190/external_report/14",
+        launch_text: "CLUE Dashboard"
+      }
+    ],
+    reportable: false,
+    reportable_activities: null,
+    students: [
+      {
+        name: "first1 last1",
+        first_name: "first1",
+        last_name: "last1",
+        username: "flast1",
+        user_id: 4866,
+        started_activity: true,
+        endpoint_url: "https://learn.staging.concord.org/dataservice/external_activity_data/c23e58c4-6bb3-456a-af47-05a48597e129",
+        learner_report_url: null,
+        last_run: null,
+        total_progress: 0,
+        detailed_progress: [
+          {
+            activity_id: 1237,
+            activity_name: "CLUE: Stretching a Figure - Comparing Similar Figures",
+            progress: 0,
+            learner_activity_report_url: null,
+            feedback: null
+          }
+        ]
+      },
+    ]
+  },
+];

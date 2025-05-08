@@ -180,7 +180,10 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     return renderNonStudentHeader({showProblemMenu: false});
   }
 
-  if (user.isTeacher && appConfig.showClassSwitcher) {
+  // in standalone mode students can navigate between problems because all the
+  // information is in the URL and it doesn't need to be launched from the portal.
+  const isAuthedStandaloneStudent = user.isStudent && user.standaloneAuthUser;
+  if ((user.isTeacher || isAuthedStandaloneStudent) && appConfig.showClassSwitcher) {
     return renderNonStudentHeader({showProblemMenu: true});
   }
 
