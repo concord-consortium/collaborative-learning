@@ -112,9 +112,8 @@ describe("tile dragging", () => {
       ]
     });
 
-    // set the idCount to 1000, this way any future uniqueIds created will be
-    // consistent regardless of how many uniqueIds the
-    // createDocumentContentModel called
+    // Set the idCount to 999, this way any future uniqueIds created will be consistent
+    // regardless of how many uniqueIds the createDocumentContentModel called
     resetMockUniqueId(999);
   });
 
