@@ -12,7 +12,7 @@ interface IProps extends IBaseProps {}
 
 export const ProblemMenuContainer: React.FC<IProps> = observer(function ProblemMenuContainer(props) {
   const stores = useStores();
-  const { problem, ui, unit, user } = stores;
+  const { problem, ui, unit, user, isProblemLoaded } = stores;
   const [problemMenuItems, setProblemMenuItems] = useState<IDropdownItem[]>([]);
 
   useEffect(() => {
@@ -116,6 +116,11 @@ export const ProblemMenuContainer: React.FC<IProps> = observer(function ProblemM
     const showPreviewItems = ui.standalone && user.standaloneAuth;
     setProblemMenuItems(showPreviewItems ? getPreviewProblemMenuItems() : getAssignedProblemMenuItems());
   }, [unit, problem, ui, user, stores]);
+
+  // don't render anything if the problem is not loaded yet
+  if (!isProblemLoaded) {
+    return null;
+  }
 
   return <CustomSelect items={problemMenuItems} />;
 });

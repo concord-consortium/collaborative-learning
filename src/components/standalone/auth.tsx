@@ -186,7 +186,8 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
   const { curriculumConfig,
           ui: { setStandalone },
           user: { standaloneAuth, setStandaloneAuth, setStandaloneAuthUser },
-          appConfig
+          appConfig,
+          isProblemLoaded
         } = stores;
   const [authenticatedState, setAuthenticatedState] = React.useState<AuthenticatedState>({state: "start"});
   const hasStartedCLUERef = useRef(false);
@@ -369,6 +370,10 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
 
     if (standaloneAuth?.state === "authenticated") {
       return renderAuthenticatedState();
+    }
+
+    if (!isProblemLoaded) {
+      return <div data-testid="standalone-loading">Loading...</div>;
     }
 
     return (
