@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps,
   IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
@@ -81,9 +81,105 @@ export function isTextObject(model: DrawingObjectType): model is TextObjectType 
   return model.type === "text";
 }
 
+// Content component for editing and displaying text objects
+interface IContentProps {
+  editing: boolean;
+  clip: string;
+  text: string;
+  model: TextObjectType;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  margin: number;
+  handleTextAreaPointerDown: (e: React.PointerEvent<HTMLTextAreaElement>) => void;
+  textColor: string;
+}
+
+const TextContent: React.FC<IContentProps> = ({
+  editing, clip, text, model,
+  x, y, width, height, margin,
+  handleTextAreaPointerDown, textColor
+}) => {
+  // Local ref for textarea
+  const textEditor = React.useRef<HTMLTextAreaElement>(null);
+
+  // Local state for controlled textarea
+  const [originalText, setOriginalText] = React.useState(text);
+  const [currentText, setCurrentText] = React.useState(text);
+
+  // When editing starts, initialize both original and current text
+  React.useEffect(() => {
+    if (editing) {
+      setOriginalText(text);
+      setCurrentText(text);
+    }
+  }, [editing, text]);
+
+  // Focus text area when it opens, to avoid need for user to click it again.
+  React.useEffect(() => {
+    if (editing) {
+      setTimeout(() => textEditor.current?.focus());
+    }
+  }, [editing]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCurrentText(e.target.value);
+  };
+
+  const handleAccept = () => {
+    model.setText(currentText);
+    model.setEditing(false);
+  };
+
+  const handleCancel = () => {
+    setCurrentText(originalText); // Not strictly necessary, but keeps state in sync
+    model.setEditing(false);
+  };
+
+  const handleTextAreaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    e.stopPropagation();
+    const { key } = e;
+    switch (key) {
+      case "Escape":
+        handleCancel();
+        break;
+      case "Enter":
+      case "Tab":
+        handleAccept();
+        break;
+    }
+  };
+
+  const handleBlur = () => {
+    handleAccept();
+  };
+
+  if (editing) {
+    return (
+      <foreignObject x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}>
+        <textarea ref={textEditor}
+          value={currentText}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          onKeyDown={handleTextAreaKeyDown}
+          onPointerDown={handleTextAreaPointerDown}>
+        </textarea>
+      </foreignObject>
+    );
+  } else {
+    return(
+      <g clipPath={'url(#'+clip+')'}>
+        <WrappedSvgText text={text}
+            x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}
+            style={{fill: textColor}} />
+      </g>
+    );
+  }
+};
+
 export const TextComponent = observer(
     function TextComponent({model, readOnly, handleHover, handleDrag} : IDrawingComponentProps) {
-  const textEditor = useRef<HTMLTextAreaElement>(null);
   if (!isTextObject(model)) return null;
   const textobj = model as TextObjectType;
   const { id, stroke, text } = textobj;
@@ -92,66 +188,8 @@ export const TextComponent = observer(
   const clipId = uniqueId();
   const margin = 5;
 
-  interface IContentProps {
-    editing: boolean,
-    clip: string
-  }
-  const Content = function({editing, clip}: IContentProps) {
-
-    useEffect(() => {
-      // Focus text area when it opens, to avoid need for user to click it again.
-      if (editing) {
-        setTimeout(() => textEditor.current?.focus());
-      }
-    }, [editing]);
-
-    if (editing) {
-      return (
-        <foreignObject x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}>
-          <textarea ref={textEditor}
-            defaultValue={text}
-            onBlur={(e) => handleClose(true)}
-            onKeyDown={handleTextAreaKeyDown}
-            onPointerDown={handleTextAreaPointerDown}>
-          </textarea>
-        </foreignObject>);
-    } else {
-      // Note that SVG text is generally 'filled', not 'stroked'.
-      // But we use the stroke color for text since we think that's more intuitive. Thus the odd-looking 'style' below.
-      return(<g clipPath={'url(#'+clip+')'}>
-              <WrappedSvgText text={text}
-                  x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}
-                  style={{fill: stroke}} />
-             </g>);
-    }
-  };
-
   const handleTextAreaPointerDown = (e: React.PointerEvent<HTMLTextAreaElement>) => {
     e.stopPropagation();
-  };
-
-  const handleTextAreaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    e.stopPropagation();
-    const { key } = e;
-    switch (key) {
-      case "Escape":
-        handleClose(false);
-        break;
-      case "Enter":
-      case "Tab":
-        handleClose(true);
-        break;
-    }
-  };
-
-  const handleClose = (accept: boolean) => {
-    if (accept) {
-      const textarea = textEditor.current;
-      if (textarea) {
-        model.setText(textarea.value);
-      }
-    }
-    model.setEditing(false);
   };
 
   return <g
@@ -169,7 +207,19 @@ export const TextComponent = observer(
           <clipPath id={clipId}>
             <rect x={x} y={y} width={width} height={height} />
           </clipPath>
-          <Content clip={clipId} editing={model.isEditing && !readOnly} />
+          <TextContent
+            editing={model.isEditing && !readOnly}
+            clip={clipId}
+            text={text}
+            model={textobj}
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            margin={margin}
+            handleTextAreaPointerDown={handleTextAreaPointerDown}
+            textColor={stroke}
+          />
          </g>;
 
 });
