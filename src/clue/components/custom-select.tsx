@@ -56,6 +56,17 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
     document.removeEventListener("touchstart", this.handleDown, true);
   }
 
+  public componentDidUpdate(prevProps: IProps) {
+    if (prevProps.items !== this.props.items) {
+      const selectedItem = this.props.items.find(i => i.selected);
+      this.setState((prevState) => {
+        return {
+          selected: selectedItem ? selectedItem.text : prevState.selected
+        };
+      });
+    }
+  }
+
   public render() {
     const { className, isDisabled, items } = this.props;
     return (

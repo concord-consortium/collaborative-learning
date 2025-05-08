@@ -8,6 +8,13 @@
       "webRoot": "${workspaceFolder}"
     },
     {
+      "name": "Debug Standalone (using MSA unit)",
+      "request": "launch",
+      "type": "chrome",
+      "url": "http://localhost:8080/standalone/?unit=msa",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "name": "Debug test",
       "request": "launch",
       "type": "node",
