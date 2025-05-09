@@ -24,7 +24,7 @@ interface IProps extends IBaseProps {
 
 export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAppHeaderComponent(props) {
   const { showGroup } = props;
-  const { appConfig, appMode, appVersion, db, user, problem, groups, investigation, ui, unit } = useStores();
+  const { appConfig, appMode, appVersion, db, user, groups, investigation, ui, unit } = useStores();
   const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
   const getUserTitle = () => {
     switch(appMode){
