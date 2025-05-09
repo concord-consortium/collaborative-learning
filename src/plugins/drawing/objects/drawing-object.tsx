@@ -56,7 +56,7 @@ export const DrawingObject = types.model("DrawingObject", {
 })
 .volatile(self => ({
   dragX: undefined as number | undefined,
-  dragY: undefined as number | undefined
+  dragY: undefined as number | undefined,
 }))
 .views(self => ({
   get position() {
@@ -97,18 +97,19 @@ export const DrawingObject = types.model("DrawingObject", {
     return true;
   },
   get transform(): Transform {
-    const {boundingBox, hFlip, vFlip} = self;
+    const {boundingBox, hFlip, vFlip, position} = self;
+    // Center of the object relative to its bounding box
     const center: Point = {
-      x: (boundingBox.nw.x + boundingBox.se.x) / 2,
-      y: (boundingBox.nw.y + boundingBox.se.y) / 2
+      x: (boundingBox.nw.x + boundingBox.se.x) / 2 - position.x,
+      y: (boundingBox.nw.y + boundingBox.se.y) / 2 - position.y
     };
     const transform = { tx: 0, ty: 0, sx: 1, sy: 1 };
     if (hFlip) {
-      transform.tx = center.x*2;
+      transform.tx = center.x*2; // aka width
       transform.sx = -1;
     }
     if (vFlip) {
-      transform.ty = center.y*2;
+      transform.ty = center.y*2; // aka height
       transform.sy = -1;
     }
     return transform;

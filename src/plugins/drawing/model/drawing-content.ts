@@ -339,11 +339,17 @@ export const DrawingContentModel = NavigatableTileModel
         flipHorizontal(ids: string[]) {
           forEachObjectId(ids, object => {
             object.hFlip = !object.hFlip;
+            // Position of the object {x,y} relative to its bounding box
+            // const xOffset = object.x - object.boundingBox.nw.x;
+            // const newOffset = object.boundingBox.se.x - xOffset;
+            // Move object right by its own width + 10px
+            object.x = object.x + object.boundingBox.se.x - object.boundingBox.nw.x + 10;
           });
         },
         flipVertical(ids: string[]) {
           forEachObjectId(ids, object => {
             object.vFlip = !object.vFlip;
+            object.y = object.y + object.boundingBox.se.y - object.boundingBox.nw.y + 10;
           });
         },
         deleteObjects(ids: string[]) {
@@ -355,7 +361,7 @@ export const DrawingContentModel = NavigatableTileModel
           });
         },
 
-        duplicateObjects(ids: string[]) {
+        duplicateObjects(ids: string[], offset: Point = {x: 10, y: 10}) {
           const newIds: string[] = [];
           forEachObjectId(ids, (object) => {
             if (object) {
@@ -368,16 +374,16 @@ export const DrawingContentModel = NavigatableTileModel
                   y: 0,
                   objects: getSnapshot(object.objects).map((s) => {
                     const {id, ...params} = s;
-                    params.x += 10;
-                    params.y += 10;
+                    params.x += offset.x;
+                    params.y += offset.y;
                     return params;
                   })
                 };
                 newObject = self.addObject(newGroup);
               } else {
                 const {id, ...newParams} = snap; // remove existing ID
-                newParams.x = snap.x + 10;     // offset by 10 pixels so it is not hidden
-                newParams.y = snap.y + 10;
+                newParams.x = snap.x + offset.x; // offset by 10 pixels so it is not hidden
+                newParams.y = snap.y + offset.y;
                 newObject = self.addObject(newParams);
               }
               newIds.push(newObject.id);

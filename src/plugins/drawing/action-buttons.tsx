@@ -110,8 +110,10 @@ export const FlipHorizontalButton = observer(({ name }: IToolbarButtonComponentP
   const enabled = drawingModel.selection.length > 0;
 
   function flipHorizontal() {
-    console.log("flipHorizontal");
-    drawingModel.flipHorizontal(drawingModel.selection);
+    drawingModel.duplicateObjects(drawingModel.selection, { x: 0, y: 0 });
+    setTimeout(() => {
+      drawingModel.flipHorizontal(drawingModel.selection);
+    }, 0);
   }
 
   return (
@@ -131,8 +133,10 @@ export const FlipVerticalButton = observer(({ name }: IToolbarButtonComponentPro
   const enabled = drawingModel.selection.length > 0;
 
   function flipVertical() {
-    console.log("flipVertical");
-    drawingModel.flipVertical(drawingModel.selection);
+    drawingModel.duplicateObjects(drawingModel.selection, { x: 0, y: 0 });
+    setTimeout(() => {
+      drawingModel.flipVertical(drawingModel.selection);
+    }, 0);
   }
 
   return (

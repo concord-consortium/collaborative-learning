@@ -96,11 +96,11 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
   const { x, y } = rect.position;
   const { width, height } = rect.currentDims;
   return (
-    <Transformable key={id} transform={rect.transform}>
+    <Transformable key={id} position={rect.position} transform={rect.transform}>
       <rect
         className="rectangle"
-        x={x}
-        y={y}
+        x={0}
+        y={0}
         width={width}
         height={height}
         stroke={stroke}

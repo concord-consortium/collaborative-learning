@@ -10,11 +10,11 @@ exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      transform="translate(0,0) scale(1,1)"
+      transform="translate(10,10) scale(1,1)"
     >
       <ellipse
-        cx="10"
-        cy="10"
+        cx="0"
+        cy="0"
         fill="#cccccc"
         pointer-events="visible"
         rx="10"
@@ -50,11 +50,11 @@ exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      transform="translate(0,0) scale(1,1)"
+      transform="translate(5,5) scale(1,1)"
     >
       <ellipse
-        cx="5"
-        cy="5"
+        cx="0"
+        cy="0"
         fill="#cccccc"
         pointer-events="visible"
         rx="10"
@@ -78,10 +78,10 @@ exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      transform="translate(0,0) scale(1,1)"
+      transform="translate(10,10) scale(1,1)"
     >
       <path
-        d="M 10 10 l 1 1 l 2 2"
+        d="M 0 0 l 1 1 l 2 2"
         data-object-id="123"
         fill="none"
         pointer-events="visible"
@@ -116,10 +116,10 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      transform="translate(0,0) scale(1,1)"
+      transform="translate(5,5) scale(1,1)"
     >
       <path
-        d="M 5 5 l 1 1 l 2 2"
+        d="M 0 0 l 1 1 l 2 2"
         data-object-id="123"
         fill="none"
         pointer-events="visible"
@@ -142,7 +142,7 @@ exports[`Drawing Layer Components Image adds an image 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      transform="translate(0,0) scale(1,1)"
+      transform="translate(10,10) scale(1,1)"
     >
       <image
         height="10"
@@ -150,8 +150,8 @@ exports[`Drawing Layer Components Image adds an image 1`] = `
         pointer-events="visible"
         preserveAspectRatio="none"
         width="10"
-        x="10"
-        y="10"
+        x="0"
+        y="0"
       />
     </g>
   </g>
@@ -180,7 +180,7 @@ exports[`Drawing Layer Components Image moves a image 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      transform="translate(0,0) scale(1,1)"
+      transform="translate(5,5) scale(1,1)"
     >
       <image
         height="10"
@@ -188,8 +188,8 @@ exports[`Drawing Layer Components Image moves a image 1`] = `
         pointer-events="visible"
         preserveAspectRatio="none"
         width="10"
-        x="5"
-        y="5"
+        x="0"
+        y="0"
       />
     </g>
   </g>
@@ -206,7 +206,7 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      transform="translate(0,0) scale(1,1)"
+      transform="translate(10,10) scale(1,1)"
     >
       <rect
         class="rectangle"
@@ -217,8 +217,8 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
         stroke-dasharray=""
         stroke-width="1"
         width="10"
-        x="10"
-        y="10"
+        x="0"
+        y="0"
       />
     </g>
   </g>
@@ -247,7 +247,7 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      transform="translate(0,0) scale(1,1)"
+      transform="translate(5,5) scale(1,1)"
     >
       <rect
         class="rectangle"
@@ -258,8 +258,8 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
         stroke-dasharray=""
         stroke-width="1"
         width="10"
-        x="5"
-        y="5"
+        x="0"
+        y="0"
       />
     </g>
   </g>
@@ -276,7 +276,7 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      transform="translate(0,0) scale(1,1)"
+      transform="translate(10,10) scale(1,1)"
     >
       <g
         class="vector"
@@ -287,10 +287,10 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
         stroke-width="1"
       >
         <line
-          x1="10"
-          x2="20"
-          y1="10"
-          y2="20"
+          x1="0"
+          x2="10"
+          y1="0"
+          y2="10"
         />
       </g>
     </g>
@@ -320,7 +320,7 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      transform="translate(0,0) scale(1,1)"
+      transform="translate(5,5) scale(1,1)"
     >
       <g
         class="vector"
@@ -331,10 +331,10 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
         stroke-width="1"
       >
         <line
-          x1="5"
-          x2="15"
-          y1="5"
-          y2="15"
+          x1="0"
+          x2="10"
+          y1="0"
+          y2="10"
         />
       </g>
     </g>

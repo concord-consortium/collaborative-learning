@@ -67,14 +67,13 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
   handleDrag} : IDrawingComponentProps) {
   if (!isEllipseObject(model)) return null;
   const { id, stroke, strokeWidth, strokeDashArray, fill } = model;
-  const {x, y} = model.position;
   const rx = model.dragRx ?? model.rx;
   const ry = model.dragRy ?? model.ry;
   return (
-    <Transformable key={id} transform={model.transform}>
+    <Transformable key={id} position={model.position} transform={model.transform}>
       <ellipse
-        cx={x}
-        cy={y}
+        cx={0}
+        cy={0}
         rx={rx}
         ry={ry}
         stroke={stroke}

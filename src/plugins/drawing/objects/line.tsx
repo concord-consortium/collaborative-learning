@@ -147,15 +147,13 @@ export const LineComponent = observer(function LineComponent({model, handleHover
   if (model.type !== "line") return null;
   const line = model as LineObjectType;
   const { id, deltaPoints, stroke, strokeWidth, strokeDashArray } = line;
-  const { x, y } = line.position;
   const scaleX = line.dragScaleX ?? 1;
   const scaleY = line.dragScaleY ?? 1;
-  const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
+  const commands = `M 0 0 ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
 
   return (
-    <Transformable key={id} transform={line.transform}>
+    <Transformable key={id} position={line.position} transform={line.transform}>
       <path
-
         data-object-id={id}
         d={commands}
         stroke={stroke}

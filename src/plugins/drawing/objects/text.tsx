@@ -170,13 +170,11 @@ const TextContent: React.FC<IContentProps> = observer(({
     );
   } else {
     return(
-      <Transformable transform={model.transform}>
-        <g clipPath={'url(#'+clip+')'}>
-          <WrappedSvgText text={text}
-              x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}
-              style={{fill: textColor}} />
-        </g>
-      </Transformable>
+      <g clipPath={'url(#'+clip+')'}>
+        <WrappedSvgText text={text}
+            x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}
+            style={{fill: textColor}} />
+      </g>
     );
   }
 });
@@ -185,8 +183,7 @@ export const TextComponent = observer(
     function TextComponent({model, readOnly, handleHover, handleDrag} : IDrawingComponentProps) {
   if (!isTextObject(model)) return null;
   const textobj = model as TextObjectType;
-  const { id, stroke, text } = textobj;
-  const { x, y } = model.position;
+  const { id, stroke, text, position, transform } = textobj;
   const { width, height } = textobj.currentDims;
   const clipId = uniqueId();
   const margin = 5;
@@ -195,37 +192,39 @@ export const TextComponent = observer(
     e.stopPropagation();
   };
 
-  return <g
-          key={id}
-          className="text"
-          onMouseEnter={(e) => handleHover?.(e, model, true)}
-          onMouseLeave={(e) => handleHover?.(e, model, false)}
-          onPointerDown={(e)=> handleDrag?.(e, model)}
-          pointerEvents={handleHover ? "visible" : "none"}
-         >
-          <Transformable transform={model.transform}>
-            <rect x={x} y={y}
-                width={width} height={height}
-                stroke={stroke} fill="#FFFFFF" opacity="80%"
-                rx="5" ry="5" />
-          </Transformable>
-          <clipPath id={clipId}>
-            <rect x={x} y={y} width={width} height={height} />
-          </clipPath>
-          <TextContent
-            editing={model.isEditing && !readOnly}
-            clip={clipId}
-            text={text}
-            model={textobj}
-            x={x}
-            y={y}
-            width={width}
-            height={height}
-            margin={margin}
-            handleTextAreaPointerDown={handleTextAreaPointerDown}
-            textColor={stroke}
-          />
-         </g>;
+  return (
+    <Transformable position={position} transform={transform}>
+      <g
+        key={id}
+        className="text"
+        onMouseEnter={(e) => handleHover?.(e, model, true)}
+        onMouseLeave={(e) => handleHover?.(e, model, false)}
+        onPointerDown={(e) => handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      >
+        <rect x={0} y={0}
+          width={width} height={height}
+          stroke={stroke} fill="#FFFFFF" opacity="80%"
+          rx="5" ry="5" />
+        <clipPath id={clipId}>
+          <rect x={0} y={0} width={width} height={height} />
+        </clipPath>
+        <TextContent
+          editing={model.isEditing && !readOnly}
+          clip={clipId}
+          text={text}
+          model={textobj}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          margin={margin}
+          handleTextAreaPointerDown={handleTextAreaPointerDown}
+          textColor={stroke}
+        />
+      </g>
+    </Transformable>
+  );
 
 });
 

@@ -88,22 +88,21 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
   if (!isVectorObject(model)) return null;
   const vector = model as VectorObjectType;
   const { id, headShape, tailShape, stroke, strokeWidth, strokeDashArray } = vector;
-  const { x, y } = vector.position;
   const dx = vector.dragDx ?? vector.dx;
   const dy = vector.dragDy ?? vector.dy;
   const line = <line
-    x1={x}
-    y1={y}
-    x2={x + dx}
-    y2={y + dy}
+    x1={0}
+    y1={0}
+    x2={dx}
+    y2={dy}
     />;
     // Angle of this line as SVG likes to measure it (degrees clockwise from vertical)
     const angle = 90-Math.atan2(-dy, dx)*180/Math.PI;
-    const head = headShape ? placeEndShape(headShape, x+dx, y+dy, angle) : null;
-    const tail = tailShape ? placeEndShape(tailShape, x, y, angle+180) : null; // tail points backwards
+    const head = headShape ? placeEndShape(headShape, dx, dy, angle) : null;
+    const tail = tailShape ? placeEndShape(tailShape, 0, 0, angle+180) : null; // tail points backwards
     // Set fill to stroke since arrowheads should be drawn in stroke color
   return (
-    <Transformable key={id} transform={model.transform}>
+    <Transformable key={id} position={model.position} transform={model.transform}>
       <g
         className="vector"
         stroke={stroke}

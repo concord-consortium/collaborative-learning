@@ -90,16 +90,15 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
   if (model.type !== "image") return null;
   const image = model as ImageObjectType;
   const { id, displayUrl } = image;
-  const { x, y } = image.position;
   const width = image.dragWidth ?? image.width;
   const height = image.dragHeight ?? image.height;
 
   return (
-    <Transformable key={id} transform={image.transform}>
+    <Transformable key={id} position={image.position} transform={image.transform}>
       <image
         href={displayUrl}
-        x={x}
-        y={y}
+        x={0}
+        y={0}
         width={width}
         height={height}
         preserveAspectRatio="none"
