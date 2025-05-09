@@ -5,6 +5,7 @@ import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentPro
   IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import RectToolIcon from "../assets/rectangle-icon.svg";
+import { Transformable } from "../components/transformable";
 
 export const RectangleObject = types.compose("RectangleObject", StrokedObject, FilledObject)
   .props({
@@ -94,22 +95,25 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
   const { id, stroke, strokeWidth, strokeDashArray, fill } = rect;
   const { x, y } = rect.position;
   const { width, height } = rect.currentDims;
-  return <rect
-    key={id}
-    className="rectangle"
-    x={x}
-    y={y}
-    width={width}
-    height={height}
-    stroke={stroke}
-    fill={fill}
-    strokeWidth={strokeWidth}
-    strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-    onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onPointerDown={(e)=> handleDrag?.(e, model)}
-    pointerEvents={handleHover ? "visible" : "none"}
-  />;
+  return (
+    <Transformable key={id} transform={rect.transform}>
+      <rect
+        className="rectangle"
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        stroke={stroke}
+        fill={fill}
+        strokeWidth={strokeWidth}
+        strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+        onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+        onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+        onPointerDown={(e)=> handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      />
+    </Transformable>
+  );
 
 });
 

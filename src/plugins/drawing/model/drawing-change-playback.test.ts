@@ -34,7 +34,9 @@ describe("playbackChanges", () => {
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: vectorData }
@@ -83,7 +85,9 @@ describe("playbackChanges", () => {
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: lineData }
@@ -128,7 +132,9 @@ describe("playbackChanges", () => {
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: rectData }
@@ -177,7 +183,9 @@ describe("playbackChanges", () => {
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: ellipseData }
@@ -222,14 +230,16 @@ describe("playbackChanges", () => {
       type: "image",
       url: "my/image/url",
       // Note: There used to be an originalUrl in the image data.
-      // This originalUrl was set when the image drawing object was created from the 
-      // serialized image data. As far as I can tell this originalUrl should not 
+      // This originalUrl was set when the image drawing object was created from the
+      // serialized image data. As far as I can tell this originalUrl should not
       // have been stored back in the serialized data. Additionally even if it was
       // stored and then loaded back in, it seems it would have only caused problems.
       // So it seems safe to ignore it here.
       x: 10, y: 10,
       width: 10, height: 10,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: imageData }

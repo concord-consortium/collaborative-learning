@@ -5,6 +5,7 @@ import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, I
   ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import EllipseToolIcon from "../assets/ellipse-icon.svg";
+import { Transformable } from "../components/transformable";
 
 export const EllipseObject = types.compose("EllipseObject", StrokedObject, FilledObject)
   .props({
@@ -69,21 +70,24 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
   const {x, y} = model.position;
   const rx = model.dragRx ?? model.rx;
   const ry = model.dragRy ?? model.ry;
-  return <ellipse
-    key={id}
-    cx={x}
-    cy={y}
-    rx={rx}
-    ry={ry}
-    stroke={stroke}
-    fill={fill}
-    strokeWidth={strokeWidth}
-    strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-    onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onPointerDown={(e)=> handleDrag?.(e, model)}
-    pointerEvents={handleHover ? "visible" : "none"}
-  />;
+  return (
+    <Transformable key={id} transform={model.transform}>
+      <ellipse
+        cx={x}
+        cy={y}
+        rx={rx}
+        ry={ry}
+        stroke={stroke}
+        fill={fill}
+        strokeWidth={strokeWidth}
+        strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+        onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+        onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+        onPointerDown={(e)=> handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      />
+    </Transformable>
+  );
 });
 
 export class EllipseDrawingTool extends DrawingTool {

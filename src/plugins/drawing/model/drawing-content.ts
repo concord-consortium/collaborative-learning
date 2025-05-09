@@ -336,7 +336,16 @@ export const DrawingContentModel = NavigatableTileModel
             }
           });
         },
-
+        flipHorizontal(ids: string[]) {
+          forEachObjectId(ids, object => {
+            object.hFlip = !object.hFlip;
+          });
+        },
+        flipVertical(ids: string[]) {
+          forEachObjectId(ids, object => {
+            object.vFlip = !object.vFlip;
+          });
+        },
         deleteObjects(ids: string[]) {
           forEachObjectId(ids, (object, id) => {
             if (object) {
