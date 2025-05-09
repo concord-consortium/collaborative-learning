@@ -62,6 +62,7 @@ export const ProblemMenuContainer: React.FC<IProps> = observer(function ProblemM
               offering.unitCode === unitCode
             );
           });
+          let linkLocation = portalOffering?.location;
           if (portalOffering && portalOffering.location.includes("/standalone")) {
             // Add autoLogin hash param to any standalone links.  This isn't done in the portal API
             // function to keep the links "pure" for other uses.  The autoLogin hash param signals
@@ -71,13 +72,13 @@ export const ProblemMenuContainer: React.FC<IProps> = observer(function ProblemM
             const hashParams = new URLSearchParams(offeringLocation.hash.substring(1));
             hashParams.set("autoLogin", "true");
             offeringLocation.hash = hashParams.toString();
-            portalOffering.location = offeringLocation.toString();
+            linkLocation = offeringLocation.toString();
           }
           const fullTitle = invProb.subtitle ? `${invProb.title}: ${invProb.subtitle}` : invProb.title;
           const link: IDropdownItem = {
             selected: problem.title === invProb.title,
             text: portalOffering ? fullTitle : `${fullTitle} (N/A)`,
-            link: portalOffering ? portalOffering.location : undefined,
+            link: linkLocation,
             disabled: false
           };
           link.onClick = () => handleAssignedMenuItemClick(link, invProb.title);
