@@ -103,6 +103,14 @@ const ModernUnitModel = types
         investigation,
         problem: investigation?.getProblem(problemOrdinal)
       };
+    },
+    getAllProblemOrdinals() {
+      return self.investigations.reduce<string[]>((acc, investigation) => {
+        return investigation.problems.reduce<string[]>((innerAcc, problem) => {
+          const problemOrdinal = `${investigation.ordinal}.${problem.ordinal}`;
+          return [...innerAcc, problemOrdinal];
+        }, acc);
+      }, []);
     }
   }));
 export interface LegacyUnitSnapshot extends SnapshotIn<typeof LegacyUnitModel> {}
