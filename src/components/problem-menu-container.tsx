@@ -31,26 +31,18 @@ export const ProblemMenuContainer: React.FC<IProps> = observer(function ProblemM
       } else {
         showUnassignedLinkAlert(problemName);
       }
-      const logItem = {
-        event: LogEventName.DASHBOARD_SWITCH_CLASS,
-        parameters: {text, link}
-      };
-      Logger.log(logItem.event, logItem.parameters, LogEventMethod.DO);
+      Logger.log(LogEventName.DASHBOARD_SWITCH_CLASS, {text, link}, LogEventMethod.DO);
     };
 
-    const handlePreviewMenuItemClick = (problemPath: string) => {
-      stores.loadUnitAndProblem(unit.code, problemPath);
+    const handlePreviewMenuItemClick = (problemOrdinal: string) => {
+      stores.loadUnitAndProblem(unit.code, problemOrdinal);
 
-      // Update the URL with the new problem path so that reloading the page
+      // Update the URL with the new problem so that reloading the page
       // will show the selected problem and the problem will be selected when
       // the user logs in.
-      addUrlParams({problem: problemPath});
+      addUrlParams({problem: problemOrdinal});
 
-      const logItem = {
-        event: LogEventName.STANDALONE_SWITCH_PREVIEW_PROBLEM,
-        parameters: {problemPath}
-      };
-      Logger.log(logItem.event, logItem.parameters, LogEventMethod.DO);
+      Logger.log(LogEventName.STANDALONE_SWITCH_PREVIEW_PROBLEM, {problemOrdinal}, LogEventMethod.DO);
     };
 
     const getAssignedProblemMenuItems = () => {
