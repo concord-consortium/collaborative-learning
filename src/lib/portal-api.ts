@@ -136,7 +136,8 @@ export const createPortalOffering = (domain: string, rawPortalJWT: any, classId:
         class_id: classId,
         name,
         url,
-        append_auth_token: true
+        append_auth_token: true,
+        rule: "clue-standalone"
       })
       .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
       .end((err, res) => {
