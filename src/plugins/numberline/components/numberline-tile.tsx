@@ -446,7 +446,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           readOnly={!!readOnly}
         />
         <div
-          className="numberline-tool"
+          className="tile-content numberline-tool"
           ref={documentScrollerRef}
           data-testid="numberline-tool"
           style={{"height": `${kNumberLineContainerHeight}`}}

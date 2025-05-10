@@ -17,7 +17,7 @@ export const StarterToolComponent: React.FC<ITileProps> = observer((props) => {
   };
 
   return (
-    <div className="starter-tool">
+    <div className="tile-content starter-tool">
       <textarea value={content.text} onChange={handleChange} />
     </div>
   );

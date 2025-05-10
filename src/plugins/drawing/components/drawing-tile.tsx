@@ -194,7 +194,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       <BasicEditableTileTitle />
       <div
         ref={drawingToolElement}
-        className={classNames("drawing-tool", { "read-only": readOnly, "overflow-visible": overflowVisible })}
+        className={classNames("tile-content", "drawing-tool", { "overflow-visible": overflowVisible })}
         data-testid="drawing-tool"
         tabIndex={0}
         onKeyDown={(e) => hotKeys.current.dispatch(e)}

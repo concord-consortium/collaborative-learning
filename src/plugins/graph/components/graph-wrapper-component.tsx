@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import { ScaleLinear } from "d3";
 
@@ -198,7 +197,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     <GraphSettingsContext.Provider value={graphSettings}>
       <LocationSetterContext.Provider value={{ set: content.setAnnotationLocation }}>
         <div
-          className={classNames("graph-wrapper", { "read-only": readOnly })}
+          className="tile-content graph-wrapper"
           onKeyDown={(e) => hotKeys.current.dispatch(e)}
           tabIndex={0} // must be able to take focus so that it can receive keyDown events
         >
