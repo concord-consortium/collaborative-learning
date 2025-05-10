@@ -172,32 +172,27 @@ export const getPortalStandaloneSignInOrRegisterUrl = () => {
   }
 
   // pass all the current parameters to the login URL, minus any current auth params
-  const cleanedUrl = new URL(removeAuthParams(window.location.href));
-  const loginUrlParams = cleanedUrl.searchParams;
+  const loginUrl = new URL(removeAuthParams(window.location.href));
 
   // update the authDomain to be the portal URL
-  loginUrlParams.set("authDomain", basePortalUrl);
+  loginUrl.searchParams.set("authDomain", basePortalUrl);
 
   if (urlParams.portalDomain) {
     // the portalDomain is passed so that is kept in the return url during development
     // so the developer doesn't have to keep adding it back after the login to retest
-    loginUrlParams.set("portalDomain", urlParams.portalDomain);
+    loginUrl.searchParams.set("portalDomain", urlParams.portalDomain);
   }
-  const loginUrlQueryString = loginUrlParams.toString();
-  const loginUrl = `${window.location.origin}${window.location.pathname}${
-    loginUrlQueryString.length > 0 ? `?${loginUrlQueryString}` : ""}`;
 
-  const authParams: URLSearchParams = new URLSearchParams({
-    app_name: "CLUE",
-    login_url: loginUrl
-  });
+  const authUrl = new URL(`${basePortalUrl}${PORTAL_SIGNIN_OR_REGISTER_PATH}`);
+  authUrl.searchParams.set("app_name", "CLUE");
+  authUrl.searchParams.set("login_url", loginUrl.toString());
   if (urlParams.class) {
     // if a class word is passed in (as class), add it to the params so
     // that it can be pre-filled in the student registration
-    authParams.append("class_word", urlParams.class);
+    authUrl.searchParams.set("class_word", urlParams.class);
   }
 
-  return `${basePortalUrl}${PORTAL_SIGNIN_OR_REGISTER_PATH}?${authParams.toString()}`;
+  return authUrl.toString();
 };
 
 type RemoveAutParamsOptions = {
