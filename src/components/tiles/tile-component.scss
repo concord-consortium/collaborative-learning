@@ -13,7 +13,7 @@
     border: 1px solid white;
   }
 
-  &.problem-panel:not(.teacher) {
+  &.problem-panel {
     &.readonly {
       border: 1px solid white;
 
@@ -35,32 +35,57 @@
         }
       }
     }
+
+    &.teacher, &.teacher.readonly {
+      background-color: $learninglog-green-light-8;
+      margin: 5px 0 10px 20px;
+      padding: 10px;
+      border-left: $half-border-width solid $learninglog-green;
+      border-right: 0;
+      border-top: 0;
+      border-bottom: 0;
+
+      .tile-content {
+        border: 0;
+        background-color: $learninglog-green-light-8;
+      }
+    }
   }
 
-  &.readonly:not(.teacher):not(.placeholder) {
+  &.readonly, &.readonly.hovered {
     border: 1px solid $tool-tile-readonly-border-color;
     .tile-content {
       border: 1px solid $tool-tile-readonly-border-color;
     }
   }
 
-  &.teacher {
-    background-color: $learninglog-green-light-8;
-    margin: 5px 0 10px 20px;
-    padding: 10px;
-    border-left: $half-border-width solid $learninglog-green;
-    border-right: 0;
-    border-top: 0;
-    border-bottom: 0;
+   &:focus {
+    outline: none;
+  }
 
+  &.hovered {
+    border: 1px solid $tool-tile-hover-border-color;
     .tile-content {
-      border: 0;
-      background-color: $learninglog-green-light-8;
+      border: 1px solid $tool-tile-hover-border-color;
     }
+  }
 
-    &:not(.text-tool-tile) {
-      padding: 10px;
+  &.selected {
+    border: 1px solid $workspace-teal;
+    .tile-content {
+      border: 1px solid $workspace-teal;
     }
+  }
+
+  &.annotatable {
+    border: 1px solid $annotation-blue;
+    .tile-content {
+      border: 1px solid $annotation-blue;
+    }
+  }
+
+  &.selected-for-comment.readonly {
+    background-color: $comment-select-background;
   }
 
   .tool-tile-drag-handle {
@@ -119,34 +144,5 @@
     &:focus {
       outline: none;
     }
-  }
-
-  &:focus {
-    outline: none;
-  }
-
-  &.hovered:not(.readonly):not(.teacher) {
-    border: 1px solid $tool-tile-hover-border-color;
-    .tile-content {
-      border: 1px solid $tool-tile-hover-border-color;
-    }
-  }
-
-  &.selected:not(.teacher) {
-    border: 1px solid $workspace-teal;
-    .tile-content {
-      border: 1px solid $workspace-teal;
-    }
-  }
-
-  &.annotatable {
-    border: 1px solid $annotation-blue;
-    .tile-content {
-      border: 1px solid $annotation-blue;
-    }
-  }
-
-  &.selected-for-comment.readonly {
-    background-color: $comment-select-background;
   }
 }

@@ -198,7 +198,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       // and then replace the drawing one with that as well
       <TextContentModelContext.Provider value={this.getContent()} >
         <TextPluginsContext.Provider value={this.plugins} >
-          <div className="tile-content text-tool-wrapper"
+          <div className={`tile-content text-tool-wrapper ${!readOnly && "editable"}`}
             data-testid="text-tool-wrapper"
             ref={elt => this.textTileDiv = elt}
             onMouseDown={this.handleMouseDownInWrapper}
