@@ -4,16 +4,11 @@
   width: 100%;
   height: 100%;
 
-  &.editable {
-    border: 1px solid #cccccc;
-  }
-
   .text-tool {
     width: 100%;
     min-height: 52px;
     text-align: left;
     padding: 3px;
-    margin: 3px;
   }
 
   .tool-tile.fixed & {

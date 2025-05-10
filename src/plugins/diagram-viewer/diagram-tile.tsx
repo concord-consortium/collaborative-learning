@@ -159,7 +159,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   return (
     <DiagramHelperContext.Provider value={diagramHelper}>
       <DiagramTileMethodsContext.Provider value={diagramMethods}>
-        <div className="diagram-tool">
+        <div className="tile-content diagram-tool">
           <BasicEditableTileTitle />
           <TileToolbar tileType="diagram" readOnly={!!readOnly} tileElement={tileElt} />
           <div className="drop-target" ref={setNodeRef} style={dropTargetStyle}>

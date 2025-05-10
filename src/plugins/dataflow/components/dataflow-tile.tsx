@@ -47,8 +47,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
   public render() {
     const { readOnly, height, model, onRegisterTileApi, tileElt } = this.props;
-    const editableClass = readOnly ? "read-only" : "editable";
-    const classes = `dataflow-tool ${editableClass}`;
     const { program, programDataRate } = this.getContent();
     const tileContent = this.getContent();
 
@@ -57,7 +55,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         <TileTitleArea>
           {this.renderTitle()}
         </TileTitleArea>
-        <div className={classes}>
+        <div className="tile-content dataflow-tool">
           <SizeMe monitorHeight={true}>
             {({ size }: SizeMeProps) => {
               return (

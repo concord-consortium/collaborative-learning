@@ -183,6 +183,7 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
                   key={tileModel.id}
                   model={tileModel}
                   widthPct={tileWidthPct}
+                  typeClass={typeClass}
                   height={tileHeight}
                   isUserResizable={!readOnly && model.isUserResizable}
                   onResizeRow={handleStartResizeRow}

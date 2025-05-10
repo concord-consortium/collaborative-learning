@@ -1,4 +1,3 @@
-import classNames from "classnames";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
 import { observer, inject } from "mobx-react";
@@ -158,7 +157,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
     return (
       <>
-        <div className={classNames("image-tool", readOnly ? "read-only" : "editable")}
+        <div
+          className={"tile-content image-tool"}
           data-image-tool-id={this.imageToolId}
           onMouseDown={this.handleMouseDown}
           onDragOver={this.handleDragOver}

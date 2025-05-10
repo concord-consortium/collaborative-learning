@@ -141,7 +141,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   }, [mf, mathLiveContainerRef, handleMathfieldInput, content, readOnly, handleFocus]);
 
   return (
-    <div className="expression-tool">
+    <div className="tile-content expression-tool">
       <ExpressionToolbar
         model={model}
         mf={mf}

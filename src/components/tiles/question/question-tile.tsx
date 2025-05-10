@@ -29,21 +29,22 @@ export const QuestionTileComponent: React.FC<ITileProps> = observer(function Que
 
   return (
     <LockedContainerContext.Provider value={content.locked}>
-      <div className="question-tile-content"
-          data-testid="question-tile"
-          ref={domElement}
-          onMouseDown={handlePointerDown}
-          onMouseUp={handlePointerUp}
+      <div className="question-badge">
+        <QuestionBadge />
+      </div>
+      <div
+        className="tile-content question-tile-content"
+        data-testid="question-tile"
+        ref={domElement}
+        onMouseDown={handlePointerDown}
+        onMouseUp={handlePointerUp}
       >
-        <div className="question-badge">
-          <QuestionBadge />
-        </div>
         <div className="question-tile-spacer" />
-        {content.locked ? (
-          <ReadOnlyTileTitle />
-        ) : (
-          <BasicEditableTileTitle />
-        )}
+          {content.locked ? (
+            <ReadOnlyTileTitle />
+          ) : (
+            <BasicEditableTileTitle />
+          )}
         <div className="question-tile-rows focusable">
           <RowListComponent
             rowListModel={content}

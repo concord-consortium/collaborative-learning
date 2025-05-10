@@ -233,7 +233,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   };
 
   return (
-    <div className="table-tool">
+    <div className="tile-content table-tool">
       <TableToolbarContext.Provider value={toolbarContext}>
         <TileToolbar
           tileType="table"

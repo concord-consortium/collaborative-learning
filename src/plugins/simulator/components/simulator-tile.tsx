@@ -63,7 +63,7 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   const component = content.simulationData.component;
 
   return (
-    <div ref={simRef} className="simulator-content-container">
+    <div ref={simRef} className="tile-content simulator-content-container">
       <BasicEditableTileTitle />
       <div className="simulator-content">
         <div className="simulator-variables">
