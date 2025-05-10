@@ -6,8 +6,8 @@ import { isPlaceholderContent, kPlaceholderTileType } from "../placeholder/place
 import { StringBuilder } from "../../../utilities/string-builder";
 import { ITileModel } from "../tile-model";
 import { kTextTileType } from "../text/text-content";
-
-export const kQuestionTileType = "Question";
+import { generateQuestionId } from "./question-utils";
+import { kQuestionTileType } from "./question-types";
 
 export function defaultQuestionContent(options?: IDefaultContentOptions) {
   // Create prompt
@@ -38,7 +38,10 @@ export const QuestionContentModel = types.compose(
   .props({
     type: types.optional(types.literal(kQuestionTileType), kQuestionTileType),
     version: types.optional(types.number, 1),
+    // When locked, the title and prompt cannot be edited.
     locked: types.optional(types.boolean, false),
+    // Used in reporting; should be left unchanged for all locked copies of the same question
+    questionId: types.optional(types.string, () => generateQuestionId()),
   })
   .views(self => ({
     exportJson(options: ITileExportOptions, tileMap: Map<string, ITileModel>) {
@@ -47,6 +50,7 @@ export const QuestionContentModel = types.compose(
       builder.pushLine(`"type": "${self.type}",`, 2);
       builder.pushLine(`"version": ${self.version},`, 2);
       builder.pushLine(`"locked": ${self.locked},`, 2);
+      builder.pushLine(`"questionId": "${self.questionId}",`, 2);
       builder.pushBlock(self.exportRowsAsJson(self.exportableRows(tileMap), tileMap,
         { ...options, appendComma: false }), 2);
       builder.pushLine("}");

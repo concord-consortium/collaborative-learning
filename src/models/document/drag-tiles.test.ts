@@ -1,5 +1,6 @@
+// Must be first so mocks are set up before any other imports
+import { resetMockUniqueId } from "./document-content-tests/dc-test-utils";
 import { DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType } from "./document-content";
-
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../register-tile-types";
 import { IDocumentImportSnapshot } from "./document-content-import-types";
@@ -10,16 +11,6 @@ import { IDragTileItem } from "../tiles/tile-model";
 import { IDragTilesData } from "./document-content-types";
 
 registerTileTypes(["Text"]);
-
-// mock uniqueId so auto-generated IDs are consistent
-let idCount = 0;
-jest.mock("../../utilities/js-utils", () => {
-  const { uniqueId, ...others } = jest.requireActual("../../utilities/js-utils");
-  return {
-    uniqueId: () => `testid-${idCount++}`,
-    ...others
-  };
-});
 
 // Utility function to help with typing and also to setup the sharedModelManager
 function createDocumentContentModel(snapshot: IDocumentImportSnapshot) {
@@ -58,7 +49,7 @@ describe("tile dragging", () => {
   beforeEach(() => {
     // The DocumentContentModel.create will trigger a calls to uniqueId which
     // increment idCount. So all of these ids will start at 0.
-    idCount = 0;
+    resetMockUniqueId(-1);
 
     // This has to happen after the types have been registered
     // Jest takes care of this because registerTileTypes is async and
@@ -121,10 +112,9 @@ describe("tile dragging", () => {
       ]
     });
 
-    // set the idCount to 1000, this way any future uniqueIds created will be
-    // consistent regardless of how many uniqueIds the
-    // createDocumentContentModel called
-    idCount = 1000;
+    // Set the idCount to 999, this way any future uniqueIds created will be consistent
+    // regardless of how many uniqueIds the createDocumentContentModel called
+    resetMockUniqueId(999);
   });
 
   describe("getDragTileItems", () => {
