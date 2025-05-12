@@ -196,7 +196,6 @@ context('Draw Tool Tile', function () {
 
     cy.log("verify change fill color");
     drawToolTile.getFreehandDrawing().first().should("not.have.attr", "fill-color");
-    // The rectangle is already selected, so we don't need to select it again
     drawToolTile.getDrawToolFillColor().click();
     cy.get(".toolbar-palette.fill-color .palette-buttons").should("be.visible");
     cy.get(".toolbar-palette.fill-color .palette-buttons .color-swatch").last().click();
