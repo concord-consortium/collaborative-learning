@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/selection-box";
-import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps,
+import { computeStrokeDashArray, DeltaPoint, DrawingTool, FilledObject, IDrawingComponentProps,
    IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import FreehandToolIcon from "../assets/freehand-icon.svg";
@@ -26,7 +26,7 @@ function* pointIterator(line: LineObjectType): Generator<Point, string, unknown>
 }
 
 // polyline
-export const LineObject = StrokedObject.named("LineObject")
+export const LineObject = types.compose("LineObject", StrokedObject, FilledObject)
   .props({
     type: typeField("line"),
     deltaPoints: types.array(DeltaPoint)
@@ -127,7 +127,7 @@ export const LineComponent = observer(function LineComponent({model, handleHover
   : IDrawingComponentProps) {
   if (model.type !== "line") return null;
   const line = model as LineObjectType;
-  const { id, deltaPoints, stroke, strokeWidth, strokeDashArray } = line;
+  const { id, deltaPoints, stroke, fill, strokeWidth, strokeDashArray } = line;
   const { x, y } = line.position;
   const scaleX = line.dragScaleX ?? 1;
   const scaleY = line.dragScaleY ?? 1;
@@ -136,7 +136,8 @@ export const LineComponent = observer(function LineComponent({model, handleHover
     key={id}
     d={commands}
     stroke={stroke}
-    fill="none"
+    fill={fill}
+    fillRule="nonzero"
     strokeWidth={strokeWidth}
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
@@ -163,9 +164,9 @@ export class LineDrawingTool extends DrawingTool {
 
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
+    const {stroke, strokeWidth, strokeDashArray, fill} = this.drawingLayer.toolbarSettings();
     const line = LineObject.create({x: start.x, y: start.y,
-      deltaPoints: [], stroke, strokeWidth, strokeDashArray});
+      deltaPoints: [], stroke, strokeWidth, strokeDashArray, fill});
 
     let lastPoint = start;
     const addPoint = (e2: PointerEvent|React.PointerEvent<HTMLDivElement>) => {

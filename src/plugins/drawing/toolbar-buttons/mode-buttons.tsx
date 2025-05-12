@@ -18,13 +18,14 @@ interface IModeButtonProps extends IToolbarButtonComponentProps {
   Icon: React.ElementType;
 }
 
+//
 function getSvgPropertiesForType(type: ToolbarModalButton, drawingModel: any) {
   switch (type) {
-    case "line":
     case "text":
       return {
         fill: drawingModel.stroke
       };
+    case "line":
     case "rectangle":
     case "ellipse":
       return {
