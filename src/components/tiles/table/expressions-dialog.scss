@@ -2,15 +2,12 @@
 
 .custom-modal.set-expression {
   width: 512px;
-  height: 237px;
   outline: none;
 
   .modal-content {
     justify-content: flex-start;
 
     .prompt {
-      margin-top: 15px;
-
       select {
         margin: 0 3px;
         padding: 0 3px;
