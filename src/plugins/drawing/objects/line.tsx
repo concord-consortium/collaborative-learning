@@ -37,7 +37,6 @@ export const LineObject = types.compose("LineObject", StrokedObject, FilledObjec
   }))
   .preProcessSnapshot(snap => {
     if (typeof snap.fill !== 'string') {
-      console.log("Adding fill to line");
       const snapClone = { ...snap };
       snapClone.fill = "none";
       return snapClone;
