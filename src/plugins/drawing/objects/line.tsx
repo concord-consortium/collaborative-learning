@@ -35,6 +35,15 @@ export const LineObject = types.compose("LineObject", StrokedObject, FilledObjec
     dragScaleX: undefined as number | undefined,
     dragScaleY: undefined as number | undefined
   }))
+  .preProcessSnapshot(snap => {
+    if (typeof snap.fill !== 'string') {
+      console.log("Adding fill to line");
+      const snapClone = { ...snap };
+      snapClone.fill = "none";
+      return snapClone;
+    }
+    return snap;
+  })
   .views(self => ({
     inSelection(selectionBox: SelectionBox) {
       for (const point of pointIterator(self as LineObjectType)){
