@@ -1,7 +1,5 @@
 import { observer } from "mobx-react";
 import React from "react";
-import classNames from "classnames";
-import { useUIStore } from "../../hooks/use-stores";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { StarterContentModelType } from "./starter-content";
 import "./starter-tile.scss";
@@ -13,19 +11,13 @@ export const StarterToolComponent: React.FC<ITileProps> = observer((props) => {
   // (https://github.com/concord-consortium/collaborative-learning/pull/1222/files#r824873678
   // and following comments) for details. We should be on the lookout for such issues.
   const content = props.model.content as StarterContentModelType;
-  const ui = useUIStore();
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     content.setText(event.target.value);
   };
 
-  const classes = classNames("tile-content", "starter-tile-content", {
-    hovered: props.hovered,
-    selected: ui.isSelectedTile(props.model),
-  });
-
   return (
-    <div className={classes}>
+    <div className="tile-content starter-tile-content">
       <textarea value={content.text} onChange={handleChange} />
     </div>
   );
