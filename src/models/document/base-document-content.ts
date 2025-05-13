@@ -594,7 +594,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
   }))
   .actions(self => ({
     afterCreate() {
-      self.rowMap.forEach(row => {
+      self.allRows.forEach(row => {
         row.updateLayout(self.tileMap);
       });
       // fix any "collapsed" sections
