@@ -235,7 +235,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     deleteSelected,
   };
 
-  const classes = classNames("tile-content", "table-tile-wrapper", {
+  const classes = classNames("tile-content", "table-tool", {
     hovered,
     selected: ui.isSelectedTile(model),
   });
