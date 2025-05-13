@@ -195,7 +195,9 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       <div
         ref={drawingToolElement}
         className={classNames("tile-content", "drawing-tool", {
+          hovered: props.hovered,
           "read-only": readOnly,
+          selected: ui.isSelectedTile(model),
           "overflow-visible": overflowVisible
         })}
         data-testid="drawing-tool"

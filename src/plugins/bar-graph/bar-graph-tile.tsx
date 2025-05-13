@@ -10,6 +10,7 @@ import { ITileProps } from "../../components/tiles/tile-component";
 import { BarGraphModelContext } from "./bar-graph-content-context";
 import { isBarGraphModel } from "./bar-graph-content";
 import { TileToolbar } from "../../components/toolbar/tile-toolbar";
+import { useUIStore } from "../../hooks/use-stores";
 
 import "./bar-graph.scss";
 
@@ -19,6 +20,7 @@ const legendWidth = 190;
 
 export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITileProps) => {
   const { model, readOnly, onRequestRowHeight } = props;
+  const ui = useUIStore();
   const content = isBarGraphModel(model.content) ? model.content : null;
 
   const requestedHeight = useRef<number|undefined>(undefined);
@@ -64,9 +66,14 @@ export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITilePro
     }
   }
 
+  const classes = classNames("tile-content", "bar-graph-tile-wrapper", {
+    hovered: props.hovered,
+    selected: ui.isSelectedTile(model),
+  });
+
   return (
     <BarGraphModelContext.Provider value={content}>
-      <div className="tile-content bar-graph-tile-wrapper">
+      <div className={classes}>
         <BasicEditableTileTitle />
         <TileToolbar tileType="bargraph" readOnly={!!readOnly} tileElement={props.tileElt} />
         <div

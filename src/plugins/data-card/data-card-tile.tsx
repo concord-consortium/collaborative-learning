@@ -155,7 +155,10 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const addCardClasses = classNames("add-card", "teal-bg", { hidden: !shouldShowAddCase });
   const removeCardClasses = classNames("remove-card", { hidden: !shouldShowDeleteCase });
   const toolClasses = classNames(
-    "tile-content", "data-card-tool", `display-as-${ displaySingle ? 'single' : 'sorted'}`
+    "tile-content",
+    "data-card-tool",
+    `display-as-${ displaySingle ? 'single' : 'sorted'}`,
+    { hovered: props.hovered, selected: isTileSelected }
   );
   const toolbarProps = useToolbarTileApi(
     {

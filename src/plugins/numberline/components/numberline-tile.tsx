@@ -430,9 +430,15 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     toolbarOption
   };
 
+  const containerClasses = classNames("tile-content", "numberline-tool", {
+    hovered: props.hovered,
+    "read-only": readOnly,
+    selected: isTileSelected
+  });
+
   return (
     <div
-      className={classNames("numberline-wrapper", { "read-only": readOnly })}
+      className={containerClasses}
       onKeyDown={(e) => hotKeys.current.dispatch(e)}
       tabIndex={0}
     >

@@ -23,14 +23,14 @@
 
       &.hovered {
         border: 1px solid rgba(191, 191, 191, 0.5);
-        .tile-content {
+        .tile-content.hovered {
           border: 1px solid rgba(191, 191, 191, 0.5);
         }
       }
 
       &.selected {
         border: 1px solid $charcoal-light-2;
-        .tile-content {
+        .tile-content.selected {
           border: 1px solid $charcoal-light-2;
         }
       }
@@ -65,14 +65,14 @@
 
   &.hovered {
     border: 1px solid $tool-tile-hover-border-color;
-    .tile-content {
+    .tile-content.hovered {
       border: 1px solid $tool-tile-hover-border-color;
     }
   }
 
   &.selected {
     border: 1px solid $workspace-teal;
-    .tile-content {
+    .tile-content.selected {
       border: 1px solid $workspace-teal;
     }
   }

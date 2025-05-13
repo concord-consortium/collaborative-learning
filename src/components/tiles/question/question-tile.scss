@@ -2,9 +2,12 @@
 
 .question-badge {
   position: absolute;
-  top: 1px;
-  left: 1px;
+  top: 0px;
+  left: 0px;
   z-index: 1;
+  width: 2px;
+  height: 100%;
+  background-color: $workspace-teal;
 }
 
 .question-tile-content {
@@ -35,7 +38,6 @@
       // The prompt element should blend in seamlessly with the spacer unless selected.
       .tool-tile.fixed {
         margin-top: 0;
-
 
         &:not(.selected) {
           border: 1px solid $workspace-teal-light-7;

@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import { isEqual } from "lodash";
 
@@ -22,7 +23,7 @@ import "./geometry-toolbar-registration";
 import "./geometry-tile.scss";
 
 const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _GeometryToolComponent(props) {
-  const { model, readOnly, navigatorAllowed = true, ...others } = props;
+  const { model, readOnly, navigatorAllowed = true, hovered, ...others } = props;
   const { tileElt } = others;
   const modelRef = useCurrent(model);
   const domElement = useRef<HTMLDivElement>(null);
@@ -92,6 +93,11 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
     domElement
   );
 
+  const classes = classNames("tile-content", "geometry-tool-content", {
+    hovered,
+    selected: ui.isSelectedTile(modelRef.current)
+  });
+
   // We must listen for pointer events because we want to get the events before
   // JSXGraph, which appears to listen to pointer events on browsers that support them.
   // We must listen for mouse events because some browsers (notably Safari) don't
@@ -99,7 +105,7 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
   return (
     <GeometryTileContext.Provider value={context}>
       <div
-        className="tile-content geometry-tool"
+        className={classes}
         data-testid="geometry-tool"
         ref={domElement} tabIndex={0}
         onPointerDownCapture={handlePointerDown}

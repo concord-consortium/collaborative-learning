@@ -1,4 +1,5 @@
 import { observer } from "mobx-react";
+import classNames from "classnames";
 import React, { DOMAttributes, useRef, useEffect, FormEvent, useCallback } from "react";
 import { onSnapshot } from "mobx-state-tree";
 import { pick } from "lodash";
@@ -140,8 +141,13 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     };
   }, [mf, mathLiveContainerRef, handleMathfieldInput, content, readOnly, handleFocus]);
 
+  const classes = classNames("tile-content", "expression-tool-content", {
+    hovered: props.hovered,
+    selected: ui.isSelectedTile(model),
+  });
+
   return (
-    <div className="tile-content expression-tool">
+    <div className={classes}>
       <ExpressionToolbar
         model={model}
         mf={mf}

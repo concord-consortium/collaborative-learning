@@ -1,11 +1,11 @@
 import React, { useCallback, useRef } from "react";
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import { ITileProps } from "../tile-component";
 import { QuestionContentModelType } from "../../../models/tiles/question/question-content";
 import { BasicEditableTileTitle } from "../basic-editable-tile-title";
 import { ReadOnlyTileTitle } from "../read-only-tile-title";
 import { RowListComponent } from "../../document/row-list";
-import QuestionBadge from "../../../assets/icons/question-badge.svg";
 import { useCurrent } from "../../../hooks/use-current";
 import { useUIStore } from "../../../hooks/use-stores";
 import { useTileSelectionPointerEvents } from "../geometry/use-tile-selection-pointer-events";
@@ -27,13 +27,15 @@ export const QuestionTileComponent: React.FC<ITileProps> = observer(function Que
     domElement
   );
 
+  const classes = classNames("tile-content", "question-tile-content", {
+    hovered: props.hovered,
+    selected: ui.isSelectedTile(modelRef.current),
+  });
+
   return (
     <LockedContainerContext.Provider value={content.locked}>
-      <div className="question-badge">
-        <QuestionBadge />
-      </div>
       <div
-        className="tile-content question-tile-content"
+        className={classes}
         data-testid="question-tile"
         ref={domElement}
         onMouseDown={handlePointerDown}

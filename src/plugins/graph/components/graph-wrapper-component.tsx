@@ -12,7 +12,7 @@ import {
   GraphSettingsContext, IGraphSettings, IGraphSettingsFromStores, kDefaultGraphSettings
 } from "../hooks/use-graph-settings-context";
 import { useInitGraphLayout } from "../hooks/use-init-graph-layout";
-import { useSettingFromStores } from "../../../hooks/use-stores";
+import { useSettingFromStores, useUIStore } from "../../../hooks/use-stores";
 import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
@@ -29,6 +29,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const {
     model, readOnly, tileElt, onRegisterTileApi, onRequestRowHeight
   } = props;
+  const ui = useUIStore();
   const graphSettingsFromStores = useSettingFromStores("graph") as IGraphSettingsFromStores;
   const graphSettings: IGraphSettings = { ...kDefaultGraphSettings, ...graphSettingsFromStores };
   const content = model.content as IGraphModel;
@@ -194,11 +195,17 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     };
   }, [layout]);
 
+  const wrapperClasses = classNames("tile-content", "graph-wrapper", {
+    hovered: props.hovered,
+    "read-only": readOnly,
+    selected: ui.isSelectedTile(model),
+  });
+
   return (
     <GraphSettingsContext.Provider value={graphSettings}>
       <LocationSetterContext.Provider value={{ set: content.setAnnotationLocation }}>
         <div
-          className={classNames("tile-content", "graph-wrapper", { "read-only": readOnly })}
+          className={wrapperClasses}
           onKeyDown={(e) => hotKeys.current.dispatch(e)}
           tabIndex={0} // must be able to take focus so that it can receive keyDown events
         >

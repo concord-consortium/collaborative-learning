@@ -7,6 +7,7 @@ import ResizeObserver from "resize-observer-polyfill";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { ITileModel } from "../../models/tiles/tile-model";
+import { isQuestionModel } from "../../models/tiles/question/question-content";
 import { BaseComponent } from "../base";
 import PlaceholderTileComponent from "./placeholder/placeholder-tile";
 import { ITileApi, TileResizeEntry, TileApiInterfaceContext, TileModelContext } from "./tile-api";
@@ -20,6 +21,7 @@ import "../../utilities/dom-utils";
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
 import TileResizeHandle from "../../assets/icons/resize-tile/expand-handle.svg";
 import dragPlaceholderImage from "../../assets/image_drag.png";
+import QuestionBadge from "../../assets/icons/question-badge.svg";
 
 import "./tile-component.scss";
 
@@ -80,6 +82,7 @@ export interface IRegisterTileApiProps {
 export interface ITileProps extends ITileBaseProps, IRegisterTileApiProps {
   tileElt: HTMLElement | null;
   navigatorAllowed?: boolean;
+  hovered?: boolean;
 }
 
 interface IProps extends ITileBaseProps {
@@ -228,6 +231,14 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                                 hovered={hoverTile}
                                 selected={isTileSelected}
                                 onDragStart={e => this.props.onResizeRow(e)} />;
+    const questionBadge = isQuestionModel(model.content) &&
+                            <>
+                            <div className="question-badge">
+                              <QuestionBadge />
+                            </div>
+                            <div className="question-border-bumpout">
+                            </div>
+                            </>;
 
     const style: React.CSSProperties = {};
     if (widthPct) {
@@ -235,14 +246,16 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
     return (
       <TileModelContext.Provider value={model}>
-        <div className={classes} data-testid="tool-tile"
-            ref={elt => this.domElement = elt}
-            data-tool-id={model.id}
-            style={style}
-            tabIndex={-1}
-            onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
-            onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
-            onKeyDown={this.handleKeyDown}
+        {questionBadge}
+        <div
+          className={classes} data-testid="tool-tile"
+          ref={elt => this.domElement = elt}
+          data-tool-id={model.id}
+          style={style}
+          tabIndex={-1}
+          onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
+          onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
+          onKeyDown={this.handleKeyDown}
         >
           {this.renderLinkIndicators()}
           {dragTileButton}
@@ -260,6 +273,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
             ? <Component
                 key={`tile-component-${tileId}`}
                 tileElt={this.domElement}
+                hovered={this.state.hoverTile}
                 {...this.props}
                 readOnly={this.props.readOnly}
                 onRegisterTileApi={this.handleRegisterTileApi}

@@ -1,4 +1,5 @@
 import React, { createContext, useState } from "react";
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import { DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
 import { Diagram, DiagramHelper, Variable, VariableType } from "@concord-consortium/diagram-view";
@@ -38,7 +39,7 @@ export interface DiagramTileMethods {
 export const DiagramTileMethodsContext = createContext<DiagramTileMethods|undefined>(undefined);
 
 export const DiagramToolComponent: React.FC<ITileProps> = observer((
-  { documentContent, model, onRegisterTileApi, onUnregisterTileApi, readOnly, scale, tileElt }
+  { documentContent, model, onRegisterTileApi, onUnregisterTileApi, hovered, readOnly, scale, tileElt }
 ) => {
   const content = model.content as DiagramContentModelType;
   const ui = useUIStore();
@@ -155,11 +156,16 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
     }
   });
 
+  const classes = classNames("tile-content", "diagram-tool", {
+    hovered,
+    selected: isTileSelected,
+  });
+
   const preventKeyboardDelete = dialogOpen || !isTileSelected || readOnly;
   return (
     <DiagramHelperContext.Provider value={diagramHelper}>
       <DiagramTileMethodsContext.Provider value={diagramMethods}>
-        <div className="tile-content diagram-tool">
+        <div className={classes}>
           <BasicEditableTileTitle />
           <TileToolbar tileType="diagram" readOnly={!!readOnly} tileElement={tileElt} />
           <div className="drop-target" ref={setNodeRef} style={dropTargetStyle}>

@@ -156,10 +156,17 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       imageDisplayStyle.height = `${defaultImagePlaceholderSize.height}px`;
     }
 
+    const classes = classNames("title-content", "image-tool", {
+      hovered: this.props.hovered,
+      "read-only": readOnly,
+      "editable": !readOnly,
+      "selected": this.stores.ui.isSelectedTile(this.props.model),
+    });
+
     return (
       <>
         <div
-          className={classNames("tile-content", "image-tool", readOnly ? "read-only" : "editable")}
+          className={classes}
           data-image-tool-id={this.imageToolId}
           onMouseDown={this.handleMouseDown}
           onDragOver={this.handleDragOver}
