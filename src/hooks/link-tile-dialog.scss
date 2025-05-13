@@ -3,19 +3,15 @@
 .custom-modal.link-tile,
 .custom-modal.merge-tile {
   width: 420px;
-  height: 200px;
   outline: none;
 
   .modal-content {
     justify-content: flex-start;
-
-    .prompt {
-      margin-top: 15px;
-    }
   }
 
   select {
-    margin: 15px 20px;
+    padding: 5px 10px;
+    margin: 10px 0;
     font-style: italic;
   }
 
