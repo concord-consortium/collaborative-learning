@@ -482,21 +482,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       try {
       const dragTiles: IDragTilesData = JSON.parse(dragTilesJson);
 
-      // filter out tiles with fixedPosition set to true
-      const nonFixedTiles = dragTiles.tiles.filter(tile => {
-        const tileContent = safeJsonParse(tile.tileContent);
-        return !(tileContent && tileContent.fixedPosition);
-      });
-
-      const filteredDragTiles: IDragTilesData = {
-        ...dragTiles,
-        tiles: nonFixedTiles
-      };
-
-      if (filteredDragTiles.sourceDocId === content.contentId && !e.altKey) {
-        this.handleMoveTilesDrop(e, filteredDragTiles);
+      if (dragTiles.sourceDocId === content.contentId && !e.altKey) {
+        this.handleMoveTilesDrop(e, dragTiles);
       } else {
-        this.handleCopyTilesDrop(e, filteredDragTiles);
+        this.handleCopyTilesDrop(e, dragTiles);
       }
       } catch (ex) {
       console.error(ex);
