@@ -93,7 +93,7 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
     domElement
   );
 
-  const classes = classNames("tile-content", "geometry-tool-content", {
+  const classes = classNames("tile-content", "geometry-tool", {
     hovered,
     selected: ui.isSelectedTile(modelRef.current)
   });

@@ -430,7 +430,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     toolbarOption
   };
 
-  const containerClasses = classNames("tile-content", "numberline-tool", {
+  const containerClasses = classNames("tile-content", "numberline-wrapper", {
     hovered: props.hovered,
     "read-only": readOnly,
     selected: isTileSelected

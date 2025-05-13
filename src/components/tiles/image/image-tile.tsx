@@ -156,7 +156,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       imageDisplayStyle.height = `${defaultImagePlaceholderSize.height}px`;
     }
 
-    const classes = classNames("title-content", "image-tool", {
+    const classes = classNames("tile-content", "image-tool", {
       hovered: this.props.hovered,
       "read-only": readOnly,
       "editable": !readOnly,

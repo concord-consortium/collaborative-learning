@@ -141,7 +141,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     };
   }, [mf, mathLiveContainerRef, handleMathfieldInput, content, readOnly, handleFocus]);
 
-  const classes = classNames("tile-content", "expression-tool-content", {
+  const classes = classNames("tile-content", "expression-tool", {
     hovered: props.hovered,
     selected: ui.isSelectedTile(model),
   });
