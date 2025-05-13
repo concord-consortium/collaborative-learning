@@ -282,7 +282,16 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const stickyNotes = supports.getStickyNotesForUserProblem({
       userId: user.id,
       groupId: user.currentGroupId
-    }).filter((support) => support.supportType === SupportType.teacher) as TeacherSupportModelType[];
+    }).filter((support) => support.supportType === SupportType.teacher).filter((tSupport) => {
+      // NOTE: at one point exemplar documents were being added as supports for the wrong problems in the DB
+      // this is a fix to prevent showing sticky notes that are not for the current problem
+      if (tSupport.support.linkedDocumentKey) {
+        // check that the linked document is for the current problem
+        return !!this.stores.documents.getDocument(tSupport.support.linkedDocumentKey);
+      } else {
+        return true;
+      }
+    }) as TeacherSupportModelType[];
     stickyNotes.sort((a, b) => b.authoredTime - a.authoredTime);
 
     const hasNotes = stickyNotes.length > 0;
@@ -358,6 +367,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               : user.name;
             const authoredTimeAsDate = new Date(authoredTime);
             const sentOn = `${authoredTimeAsDate.toLocaleDateString()}, ${authoredTimeAsDate.toLocaleTimeString()}`;
+            // console.log("support", support);
             return (
               <div key={index} className={`sticky-note-popup-item ${index > 0 ? "border-top" : ""} `}>
                 <div className="sticky-note-popup-item-meta">
