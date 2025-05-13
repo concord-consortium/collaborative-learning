@@ -72,7 +72,7 @@ export const DrawingObject = types.model("DrawingObject", {
     // the box. Additionally if the implementation doesn't access the x or y of
     // self then MobX observation is not triggered so moving the element doesn't
     // cause the selection highlight to update.
-    throw "Subclass needs to implement this";
+    throw "Subclass needs to implement boundingBox";
   },
   get label(): string {
     // Object types should implement this to return a user-friendly short label,
@@ -132,6 +132,56 @@ export interface ObjectMap {
   [key: string]: DrawingObjectType|null;
 }
 
+/** Sized objects have a width and height. */
+export const SizedObject = DrawingObject.named("SizedObject")
+.props({
+  width: types.number,
+  height: types.number
+})
+.volatile(self => ({
+  dragWidth: undefined as number | undefined,
+  dragHeight: undefined as number | undefined
+}))
+.views(self => ({
+  get currentDims() {
+    const { width, height, dragWidth, dragHeight } = self;
+    return {
+      width: dragWidth ?? width,
+      height: dragHeight ?? height
+    };
+  }
+}))
+.views(self => ({
+  get boundingBox() {
+    const { x, y } = self.position;
+    const { width, height } = self.currentDims;
+    const nw: Point = {x, y};
+    const se: Point = {x: x + width, y: y + height};
+    return {nw, se};
+  }
+}))
+.actions(self => ({
+  setDragBounds(deltas: BoundingBoxSides) {
+    self.dragX = self.x + deltas.left;
+    self.dragY = self.y + deltas.top;
+    self.dragWidth  = Math.max(self.width  + deltas.right - deltas.left, 1);
+    self.dragHeight = Math.max(self.height + deltas.bottom - deltas.top, 1);
+  },
+  resizeObject() {
+    self.repositionObject();
+    self.width = self.dragWidth ?? self.width;
+    self.height = self.dragHeight ?? self.height;
+    self.dragWidth = self.dragHeight = undefined;
+  }
+}));
+
+export interface SizedObjectType extends Instance<typeof SizedObject> {}
+
+export function isSizedObject(object: DrawingObjectType): object is SizedObjectType {
+  return "width" in object && "height" in object;
+}
+
+/** Stroked objects have a stroke color, stroke width, and stroke dash array. */
 export const StrokedObject = DrawingObject.named("StrokedObject")
 .props({
   stroke: types.string,
@@ -158,6 +208,7 @@ export function isStrokedObject(object: DrawingObjectType): object is StrokedObj
   return getMembers(object).actions.includes("setStroke");
 }
 
+/** Filled objects have a fill color. */
 export const FilledObject = DrawingObject.named("FilledObject")
 .props({
   fill: types.string
@@ -171,8 +222,9 @@ export function isFilledObject(object: DrawingObjectType): object is FilledObjec
   return getMembers(object).actions.includes("setFill");
 }
 
-// "Editable" objects go into an "editing" state if you click them while they are already selected.
-// For example, text labels go into a state where you can edit the text.
+/** "Editable" objects go into an "editing" state if you click them while they are already selected.
+ * For example, text labels go into a state where you can edit the text.
+ */
 export const EditableObject = DrawingObject.named("EditableObject")
 .volatile(self => ({
   isEditing: false
