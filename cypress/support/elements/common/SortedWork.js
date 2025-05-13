@@ -122,6 +122,34 @@ class SortedWork {
     return this.getFocusDocument().find('.document-title');
   }
 
+  getSimpleDocumentItem() {
+    return cy.get('.sort-work-view .sorted-sections .simple-document-item');
+  }
+
+  getPrimarySortLabelForItem(sortWorkItemIdx, isSimpleDocument = false) {
+    const selector = isSimpleDocument ?
+      '.sort-work-view .sorted-sections .simple-document-item' :
+      '.sort-work-view .sorted-sections .list-item';
+    return cy.get(selector)
+              .eq(sortWorkItemIdx)
+              .parents('.documents-list')
+              .eq(0)
+              .siblings('.section-header')
+              .eq(0)
+              .find('.section-header-left');
+  }
+
+  getSecondarySortLabelForItem(sortWorkItemIdx) {
+    return cy.get('.sort-work-view .sorted-sections .simple-document-item')
+              .eq(sortWorkItemIdx)
+              .parent()
+              .siblings('[data-testid="doc-group-label"]')
+              .eq(0);
+  }
+
+  getHeaderTexts() {
+    return cy.get('.document-scroller-header .header-text');
+  }
 }
 
 export default SortedWork;

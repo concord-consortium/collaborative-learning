@@ -5,6 +5,7 @@ import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
 import NumberlineToolTile from '../../../support/elements/tile/NumberlineToolTile';
+import QuestionToolTile from '../../../support/elements/tile/QuestionToolTile';
 import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
@@ -16,6 +17,7 @@ const diagramToolTile = new DiagramToolTile;
 const drawToolTile = new DrawToolTile;
 const geometryToolTile = new GeometryToolTile;
 const numberlineToolTile = new NumberlineToolTile;
+const questionToolTile = new QuestionToolTile;
 const simulatorTile = new SimulatorTile;
 const tableToolTile = new TableToolTile;
 const xyTile = new XYPlotToolTile;
@@ -597,5 +599,39 @@ context('Arrow Annotations (Sparrows)', function () {
     dataflowTile.getClearDataWarningClear().click();
     dataflowTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
     aa.getAnnotationArrows().should("have.length", 2);
+  });
+
+  it("Can add annotations to tiles nested within a question tile", () => {
+    const qTileParams = `${Cypress.config("qaUnitStudent5")}`;
+    cy.visit(qTileParams);
+    cy.waitForLoad();
+
+    cy.log("Add a question tile with a nested drawing tile");
+    clueCanvas.addTile('question');
+    clueCanvas.addTileByDrag('drawing', 'top');
+    drawToolTile.drawRectangle(50, 50);
+    drawToolTile.drawEllipse(200, 50);
+
+    cy.log("Add another drawing tile outside the question tile");
+    clueCanvas.addTile('drawing');
+    drawToolTile.drawRectangle(50, 50);
+    drawToolTile.drawEllipse(200, 50);
+
+    cy.log("Create annotation from drawing tile nested within the question tile to the other drawing tile");
+    aa.getAnnotationModeButton().click();
+    aa.getAnnotationButtons().should("have.length", 4);
+    aa.getAnnotationButtons().first().click({ force: true });
+    aa.getAnnotationButtons().eq(3).click();
+    aa.getAnnotationArrows().should("have.length", 1);
+
+    cy.log("Create annotation from outer drawing tile to the drawing tile inside question tile");
+    aa.getAnnotationButtons().eq(2).click();
+    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationArrows().should("have.length", 2);
+
+    cy.log("Create annotation between objects in nested drawing tile");
+    aa.getAnnotationButtons().first().click({ force: true });
+    aa.getAnnotationButtons().eq(1).click({ force: true });
+    aa.getAnnotationArrows().should("have.length", 3);
   });
 });

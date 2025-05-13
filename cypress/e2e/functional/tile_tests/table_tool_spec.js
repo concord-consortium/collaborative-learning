@@ -125,6 +125,29 @@ context('Table Tool Tile', function () {
     tableToolTile.getTableCell().eq(1).should('contain', 'third value');
     tableToolTile.getTableCell().eq(1).should('not.contain', 'abandon this edit');
 
+    cy.log('can press enter key for edit mode without adding newline or otherwise altering text');
+    tableToolTile.typeInTableCell(1, '333');
+    tableToolTile.getTableCell().eq(1).should('contain', '333');
+    // press enter key to put cell in edit mode
+    tableToolTile.getTableCell().eq(1).trigger('keydown', { keyCode: 13 }); // enter
+    tableToolTile.getTableCellEdit().should('exist').then($el => {
+      const textarea = $el[0];
+      const isSelected = textarea.selectionStart === 0 &&
+                         textarea.selectionEnd === textarea.value.length;
+      expect(isSelected).to.be.true;
+      expect(textarea.value).to.equal('333');
+    });
+    tableToolTile.getTableCellEdit().trigger('keydown', { keyCode: 13 }); // enter
+    tableToolTile.getTableCell().eq(1).should('contain', '333');
+
+    cy.log('can press tab key to navigate between cells');
+    tableToolTile.getTableCell().eq(1).trigger('keydown', { keyCode: 9 }); // tab
+    tableToolTile.getTableCell().eq(2).should('have.attr', 'aria-selected', 'true');
+    tableToolTile.getTableCell().eq(1).should('not.have.attr', 'aria-selected', 'true');
+    tableToolTile.getTableCell().eq(2).trigger('keydown', { keyCode: 9, shiftKey: true }); // shift+tab
+    tableToolTile.getTableCell().eq(1).should('have.attr', 'aria-selected', 'true');
+    tableToolTile.getTableCell().eq(2).should('not.have.attr', 'aria-selected', 'true');
+
     // reset to previous value
     tableToolTile.typeInTableCell(1, '5');
 

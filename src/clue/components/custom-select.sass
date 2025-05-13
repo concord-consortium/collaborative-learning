@@ -96,6 +96,9 @@
       overflow: hidden
       text-overflow: ellipsis
 
+      &.bottomBorder
+        border-bottom: 1px dashed $workspace-teal-light-5
+
       .item
         width: fit-content
         margin-right: 10px
@@ -119,6 +122,10 @@
         background-position: center
         &.selected
           background-image: url("../../assets/icons/check/check-selected.svg")
+
+      &:active .hidden-item-check, .hidden-item-check, .hidden-item-check.selected
+        background-image: none
+
 
     .list-item:last-child
       border-radius: 0 0 5px 5px

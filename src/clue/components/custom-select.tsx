@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import { VisuallyHidden } from "@chakra-ui/react";
 import { IDropdownItem } from "@concord-consortium/react-components";
+import classNames from "classnames";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
 import "./custom-select.sass";
@@ -8,6 +9,8 @@ import "./custom-select.sass";
 export interface ICustomDropdownItem extends IDropdownItem {
   id?: string;
   itemIcon?: ReactNode;
+  hideItemCheck?: boolean;
+  bottomBorder?: boolean;
 }
 
 function getItemId(item: ICustomDropdownItem) {
@@ -51,6 +54,17 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
   public componentWillUnmount() {
     document.removeEventListener("mousedown", this.handleDown, true);
     document.removeEventListener("touchstart", this.handleDown, true);
+  }
+
+  public componentDidUpdate(prevProps: IProps) {
+    if (prevProps.items !== this.props.items) {
+      const selectedItem = this.props.items.find(i => i.selected);
+      this.setState((prevState) => {
+        return {
+          selected: selectedItem ? selectedItem.text : prevState.selected
+        };
+      });
+    }
   }
 
   public render() {
@@ -118,11 +132,14 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
           return (
             <div
               key={`item-${i}-${itemId}`}
-              className={`list-item ${disabledClass} ${selectedClass}`}
+              className={classNames(`list-item ${disabledClass} ${selectedClass}`, {bottomBorder: item.bottomBorder })}
               onClick={this.handleListClick(item)}
               data-test={`list-item-${itemId}`}
             >
-              {(showItemChecks !== false) && <div className={`check ${selectedClass}`} />}
+              {(showItemChecks !== false) &&
+                <div className={classNames("check", selectedClass, {
+                  "hidden-item-check": item.hideItemCheck})}
+                />}
               {this.renderItemIcon(item)}
               <div className="item">{item.text}</div>
             </div>

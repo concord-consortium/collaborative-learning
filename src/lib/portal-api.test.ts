@@ -1,7 +1,7 @@
 import nock from "nock";
 import { getPortalClassOfferings, getPortalOfferings } from "./portal-api";
 import { IPortalOffering } from "./portal-types";
-import { TeacherMineClasses, TeacherOfferings } from "../test-fixtures/sample-portal-offerings";
+import { StudentOfferings, TeacherMineClasses, TeacherOfferings } from "../test-fixtures/sample-portal-offerings";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { CurriculumConfig } from "../models/stores/curriculum-config";
 
@@ -15,6 +15,9 @@ describe("Portal Offerings", () => {
     nock(/superfake/)
       .get(/\/api\/v1\/offerings\/\?user_id=22/)
       .reply(200, TeacherOfferings);
+    nock(/superfake/)
+      .get(/\/api\/v1\/offerings\//)
+      .reply(200, StudentOfferings);
     nock(/superfake/)
       .get(/\/api\/v1\/offerings\/1190/)
       .reply(200, TeacherOfferings[0]);
@@ -42,13 +45,12 @@ describe("Portal Offerings", () => {
   });
 
   describe("getPortalOfferings for learner or other", () => {
-    it("should return a single offering for learner", async () => {
-      const offerings = await getPortalOfferings("learner", userID, domain, fakeJWT, "1190");
+    it("should return all the offerings for the learner", async () => {
+      const offerings = await getPortalOfferings("learner", userID, domain, fakeJWT);
       expect(offerings.length).toEqual(1);
       expect(offerings[0].id).toEqual(1190);
       expect(offerings[0].activity_url).toEqual("https://collaborative-learning.concord.org/branch/master/?unit=sas&problem=1.2");
     });
-
 
     it("should not return anything for researcher", async () => {
       expect(await getPortalOfferings("researcher", userID, domain, fakeJWT)).toEqual([]);

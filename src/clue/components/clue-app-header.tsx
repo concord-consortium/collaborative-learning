@@ -7,7 +7,6 @@ import { NetworkStatus } from "../../components/network-status";
 import { ProblemMenuContainer } from "../../components/problem-menu-container";
 import { ToggleGroup } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
-import { CustomSelect } from "./custom-select";
 import { useStores } from "../../hooks/use-stores";
 import AppModeIndicator from "./app-mode-indicator";
 
@@ -25,7 +24,7 @@ interface IProps extends IBaseProps {
 
 export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAppHeaderComponent(props) {
   const { showGroup } = props;
-  const { appConfig, appMode, appVersion, db, user, problem, groups, investigation, ui, unit } = useStores();
+  const { appConfig, appMode, appVersion, db, user, groups, investigation, ui, unit } = useStores();
   const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
   const getUserTitle = () => {
     switch(appMode){
@@ -162,7 +161,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {renderPanelButtons()}
         </div>
         <div className="right">
-          <div className="version">Version {appVersion}</div>
+          <div className="version">CLUE v{appVersion}</div>
           <div className="user teacher" title={getUserTitle()}>
             <div className="class" data-test="user-class">
               <ClassMenuContainer />
@@ -185,7 +184,6 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   }
 
   const showUserInfo = !(ui.standalone && user.standaloneAuth);
-  const showProblemInfo = showUserInfo;
   const showAppMode = showUserInfo;
   const showGroupInfo = showUserInfo;
   const showUnitInfo = unit.title !== "Null Unit";
@@ -206,12 +204,9 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
             <div className="separator"/>
           </>
           }
-          {showProblemInfo &&
-          <CustomSelect
-            items={[{text: `${problem.title}${problem.subtitle ? `: ${problem.subtitle}`: ""}`}]}
-            isDisabled={true}
-          />
-          }
+          <div className="problem-dropdown" data-test="user-problem">
+            <ProblemMenuContainer />
+          </div>
         </div>
         <div className="middle student">
           {renderPanelButtons()}

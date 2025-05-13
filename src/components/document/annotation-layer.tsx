@@ -5,14 +5,18 @@ import React, { MouseEvent, MouseEventHandler, useContext, useEffect, useRef, us
 import useResizeObserver from "use-resize-observer";
 import { useMemoOne } from "use-memo-one";
 import { AnnotationButton } from "../annotations/annotation-button";
-import { getDefaultPeak } from "../annotations/annotation-utilities";
+import { getParentWithTypeName } from "../../utilities/mst-utils";
+import { getDefaultPeak, getParentOffsets, getRowOffsets, getTileOffsets,
+  IParent } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
-import { usePersistentUIStore, useUIStore } from "../../hooks/use-stores";
+import { useStores } from "../../hooks/use-stores";
 import { ArrowAnnotation, ArrowShape, isArrowShape } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, IOffsetModel, ObjectBoundingBox, OffsetModel
 } from "../../models/annotations/clue-object";
+import { ITileModel } from "../../models/tiles/tile-model";
+import { isRowListContainer } from "../../models/document/row-list";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { isFiniteNumber, midpoint, Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
@@ -46,8 +50,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [mouseY, setMouseY] = useState<number | undefined>();
   const [isBackgroundClick, setIsBackgroundClick] = useState(false);
   const divRef = useRef<Element|null>(null);
-  const ui = useUIStore();
-  const persistentUI = usePersistentUIStore();
+  const { ui, persistentUI } = useStores();
   const tileApiInterface = useContext(TileApiInterfaceContext);
   const hotKeys = useMemoOne(() => new HotKeys(), []);
   const shape: ArrowShape = isArrowShape(ui.annotationMode) ? ui.annotationMode : ArrowShape.curved;
@@ -116,15 +119,6 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   const scale = getDocumentScale(canvasElement);
 
-  function getRowElement(rowId?: string) {
-    if (rowId === undefined) return undefined;
-    const rowSelector = `[data-row-id='${rowId}']`;
-    const rowElements = canvasElement?.querySelectorAll(rowSelector);
-    if (rowElements && rowElements.length === 1) {
-      return rowElements[0] as HTMLElement;
-    }
-  }
-
   const documentWidth = canvasElement?.offsetWidth ?? 0;
   let documentHeight = 0;
   const rows = canvasElement?.getElementsByClassName("tile-row");
@@ -164,22 +158,25 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   };
 
   // Returns the x and y offset of the top left corner of a tile with respect to the document
-  function getTileOffset(rowId: string, tileId: string): Point | undefined {
-    const tileBorder = 2;
+  function getTileOffset (rowId: string, tileId: string, parent?: IParent): Point | undefined {
+    if (!canvasElement) return;
 
-    const rowElement = getRowElement(rowId);
-    if (!rowElement) return;
+    const kBorder = parent ? 4 : 2; // double the border if nested in question tile
+    const kLeftBorder = parent ? 2 : 0; // question tiles have an extra 2 pixels of border on the left
+    const scrollX = documentScrollX ?? 0;
+    const scrollY = documentScrollY ?? 0;
 
-    const tileSelector = `[data-tool-id='${tileId}']`;
-    const tileElements = canvasElement?.querySelectorAll(tileSelector);
-    const tileElement = tileElements && tileElements.length === 1 ? tileElements[0] as HTMLElement : undefined;
-    if (!tileElement) return;
+    const rOffsets = getRowOffsets(canvasElement, rowId);
+    const tOffsets = getTileOffsets(canvasElement, tileId);
+    if (!rOffsets || !tOffsets) return;
 
-    const x = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
-      + tileBorder - (documentScrollX ?? 0);
-    const y = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
-      + tileBorder - (documentScrollY ?? 0);
-    return [x, y];
+    const pOffsets = parent ? getParentOffsets(canvasElement, parent.rowId, parent.tileId) : {left: 0, top: 0,};
+
+    if (rOffsets && tOffsets) {
+      const x = rOffsets.left + tOffsets.left + pOffsets.left - tOffsets.scrollLeft + kBorder + kLeftBorder - scrollX;
+      const y = rOffsets.top + tOffsets.top + pOffsets.top - tOffsets.scrollTop + kBorder - scrollY;
+      return [x, y];
+    }
   }
 
   function getObjectNodeRadii(object?: IClueObject) {
@@ -203,11 +200,11 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   // Returns an object bounding box with respect to the containing document
   function getTileAdjustedBoundingBox(
-    rowId: string, tileId: string, objectId: string, objectType?: string
+    rowId: string, tileId: string, objectId: string, objectType?: string, parent?: IParent
   ) {
     const unadjustedBoundingBox = getObjectBoundingBox(tileId, objectId, objectType);
     if (!unadjustedBoundingBox) return;
-    const tileOffset = getTileOffset(rowId, tileId);
+    const tileOffset = getTileOffset(rowId, tileId, parent);
     if (!tileOffset) return;
 
     const [left, top] = [unadjustedBoundingBox.left + tileOffset[0], unadjustedBoundingBox.top + tileOffset[1]];
@@ -223,7 +220,21 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     if (!content) return undefined;
 
     const rowId = content.findRowIdContainingTile(tileId);
-    return getTileAdjustedBoundingBox(rowId ?? "", tileId, objectId, objectType);
+    if (!rowId) return undefined;
+
+    // the tile might be nested inside of a question tile, so we need to find the parent tileId and rowId
+    // to accurately calculate the bounding box and offsets
+    let parentRowId = undefined;
+    let parentTileId = undefined;
+
+    const rowList = content.getRowListForRow(rowId);
+    const parentQuestionTileModel = getParentWithTypeName(rowList, "TileModel");
+    if (parentQuestionTileModel) {
+      parentTileId = parentQuestionTileModel.id;
+      parentRowId = content.findRowIdContainingTile(parentQuestionTileModel.id);
+    }
+    const parent = parentRowId && parentTileId ? { rowId: parentRowId, tileId: parentTileId } : undefined;
+    return getTileAdjustedBoundingBox(rowId, tileId, objectId, objectType, parent);
   }
 
   let sourceBoundingBox: ObjectBoundingBox|undefined = undefined;
@@ -397,6 +408,62 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const hidden = !persistentUI.showAnnotations;
   const classes = classNames("annotation-layer",
     { editing, hidden, 'show-buttons': showButtons, 'show-handles': showDragHandles });
+
+  const renderAnnotationButtons = (params: {
+    tile: ITileModel;
+    rowId: string;
+    tileId: string;
+    parentOffsetParams?: { rowId: string; tileId: string };
+  }) => {
+    const { tile, rowId, tileId, parentOffsetParams } = params;
+
+    return tile.content.annotatableObjects.map(({ objectId, objectType }) => (
+      <AnnotationButton
+        key={`${tile.id}-${objectId}-button`}
+        getObjectBoundingBox={getObjectBoundingBox}
+        getTileOffset={() => getTileOffset(rowId, tileId, parentOffsetParams)}
+        objectId={objectId}
+        objectType={objectType}
+        onClick={handleAnnotationButtonClick}
+        sourceObjectId={sourceObjectId}
+        sourceTileId={sourceTileId}
+        tileId={tile.id}
+      />
+    ));
+  };
+
+  const collectButtonsForRow = (
+    rowId: string,
+    parentOffsetParams?: { rowId: string; tileId: string },
+  ): JSX.Element[] => {
+
+    const docContent = content;
+    const row = docContent?.getRowRecursive(rowId);
+
+    if (!row) return [];
+    return row.tiles.flatMap((tileInfo) => {
+      const tile = docContent?.tileMap?.get(tileInfo.tileId);
+      if (!tile) return [];
+
+      // Container tile: dive into its own rows
+      if (isRowListContainer(tile.content)) {
+        const newParentOffset = { rowId, tileId: tile.id };
+        return tile.content.rowOrder.flatMap((nestedRowId) => {
+          return collectButtonsForRow(nestedRowId, newParentOffset);
+        });
+      }
+
+      // Regular tile: render buttons
+      return renderAnnotationButtons({
+        tile,
+        rowId,
+        tileId: tileInfo.tileId,
+        parentOffsetParams
+      });
+
+    });
+  };
+
   return (
     <div
       className={classes}
@@ -411,32 +478,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       }}
     >
       <svg className="annotation-svg">
-        { editing && !readOnly && rowIds.map(rowId => {
-          const row = content?.rowMap.get(rowId);
-          if (row) {
-            const tiles = row.tiles;
-            return tiles.map(tileInfo => {
-              const tile = content?.tileMap.get(tileInfo.tileId);
-              if (tile) {
-                return tile.content.annotatableObjects.map(({ objectId, objectType }) => {
-                  return (
-                    <AnnotationButton
-                      getObjectBoundingBox={getObjectBoundingBox}
-                      getTileOffset={() => getTileOffset(rowId, tileInfo.tileId)}
-                      key={`${tile.id}-${objectId}-button`}
-                      objectId={objectId}
-                      objectType={objectType}
-                      onClick={handleAnnotationButtonClick}
-                      sourceObjectId={sourceObjectId}
-                      sourceTileId={sourceTileId}
-                      tileId={tile.id}
-                    />
-                  );
-                });
-              }
-            });
-          }
-        })}
+        { editing && !readOnly && rowIds.flatMap(rowId => collectButtonsForRow(rowId)) }
         { Array.from(content?.annotations.values() ?? []).map(arrow => {
           const key = `sparrow-${arrow.id}`;
           return (

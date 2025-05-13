@@ -45,6 +45,7 @@ export interface IStores extends IBaseStores {
   documentToDisplay?: string;
   documentHistoryId?: string;
   isShowingTeacherContent: boolean;
+  isProblemLoaded: boolean;
   studentWorkTabSelectedGroupId: string | undefined;
   setAppMode: (appMode: AppMode) => void;
   initializeStudentWorkTab: () => void;
@@ -207,6 +208,10 @@ class Stores implements IStores{
     return removeNonCurriculumTabs
       ? tabs.filter(t => t.tab === "problems" || t.tab === "teacher-guide")
       : tabs;
+  }
+
+  get isProblemLoaded() {
+    return this.problem && this.problem.ordinal !== 0;
   }
 
   get problemPath() {
