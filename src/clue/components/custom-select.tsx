@@ -10,7 +10,7 @@ export interface ICustomDropdownItem extends IDropdownItem {
   id?: string;
   itemIcon?: ReactNode;
   hideItemCheck?: boolean;
-  underline?: boolean;
+  bottomBorder?: boolean;
 }
 
 function getItemId(item: ICustomDropdownItem) {
@@ -132,7 +132,7 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
           return (
             <div
               key={`item-${i}-${itemId}`}
-              className={classNames(`list-item ${disabledClass} ${selectedClass}`, {underline: item.underline })}
+              className={classNames(`list-item ${disabledClass} ${selectedClass}`, {bottomBorder: item.bottomBorder })}
               onClick={this.handleListClick(item)}
               data-test={`list-item-${itemId}`}
             >

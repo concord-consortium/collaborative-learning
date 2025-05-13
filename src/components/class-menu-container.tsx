@@ -24,7 +24,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
         text: "Copy Shareable Link",
         selected: false,
         hideItemCheck: true,
-        underline: true,
+        bottomBorder: true,
         onClick: () => {
           // in standalone mode the shareable link is the current URL
           navigator.clipboard.writeText(window.location.href).then(() => {
