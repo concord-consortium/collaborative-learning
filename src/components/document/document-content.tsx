@@ -171,15 +171,16 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         <DropRowContext.Provider value={dropRow}>
           <LockedContainerContext.Provider value={false}>
             <RowRefsContext.Provider value={{ addRowRef: this.addRowRef }}>
-              <div className={documentClass}
+              <div
+                className={documentClass}
                 data-testid="document-content"
                 data-document-key={this.props.documentId}
                 onScroll={this.handleScroll}
                 onClick={this.handleClick}
                 onDragOver={this.handleDragOver}
-              onDragLeave={this.handleDragLeave}
-              onDrop={this.handleDrop}
-              ref={(elt) => this.domElement = elt}
+                onDragLeave={this.handleDragLeave}
+                onDrop={this.handleDrop}
+                ref={(elt) => this.domElement = elt}
               >
                 {this.renderRows()}
                 {this.renderSpacer()}
@@ -479,15 +480,26 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const dragTilesJson = e.dataTransfer.getData(kDragTiles);
     if (dragTilesJson) {
       try {
-        const dragTiles: IDragTilesData = JSON.parse(dragTilesJson);
-        if ((dragTiles.sourceDocId === content.contentId) && !e.altKey) {
-          this.handleMoveTilesDrop(e, dragTiles);
-        }
-        else {
-          this.handleCopyTilesDrop(e, dragTiles);
-        }
+      const dragTiles: IDragTilesData = JSON.parse(dragTilesJson);
+
+      // filter out tiles with fixedPosition set to true
+      const nonFixedTiles = dragTiles.tiles.filter(tile => {
+        const tileContent = safeJsonParse(tile.tileContent);
+        return !(tileContent && tileContent.fixedPosition);
+      });
+
+      const filteredDragTiles: IDragTilesData = {
+        ...dragTiles,
+        tiles: nonFixedTiles
+      };
+
+      if (filteredDragTiles.sourceDocId === content.contentId && !e.altKey) {
+        this.handleMoveTilesDrop(e, filteredDragTiles);
+      } else {
+        this.handleCopyTilesDrop(e, filteredDragTiles);
+      }
       } catch (ex) {
-        console.error(ex);
+      console.error(ex);
       }
 
       this.clearDropRowInfo();
