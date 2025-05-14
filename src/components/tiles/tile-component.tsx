@@ -246,7 +246,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
     return (
       <TileModelContext.Provider value={model}>
-        {questionBadge}
         <div
           className={classes} data-testid="tool-tile"
           ref={elt => this.domElement = elt}
@@ -260,6 +259,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
           {this.renderLinkIndicators()}
           {dragTileButton}
           {resizeTileButton}
+          {questionBadge}
           {this.renderTile(Component)}
           {this.renderTileComments()}
         </div>
