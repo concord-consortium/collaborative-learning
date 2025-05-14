@@ -10,6 +10,7 @@ exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <ellipse
+      class="drawing-object"
       cx="10"
       cy="10"
       fill="#cccccc"
@@ -46,6 +47,7 @@ exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <ellipse
+      class="drawing-object"
       cx="5"
       cy="5"
       fill="#cccccc"
@@ -70,6 +72,7 @@ exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <path
+      class="drawing-object"
       d="M 10 10 l 1 1 l 2 2"
       fill="none"
       pointer-events="visible"
@@ -103,6 +106,7 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <path
+      class="drawing-object"
       d="M 5 5 l 1 1 l 2 2"
       fill="none"
       pointer-events="visible"
@@ -180,7 +184,7 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <rect
-      class="rectangle"
+      class="drawing-object rectangle"
       fill="#cccccc"
       height="10"
       pointer-events="visible"
@@ -217,7 +221,7 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <rect
-      class="rectangle"
+      class="drawing-object rectangle"
       fill="#cccccc"
       height="10"
       pointer-events="visible"
@@ -250,6 +254,7 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
       stroke-width="1"
     >
       <line
+        class="drawing-object"
         x1="10"
         x2="20"
         y1="10"
@@ -290,6 +295,7 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
       stroke-width="1"
     >
       <line
+        class="drawing-object"
         x1="5"
         x2="15"
         y1="5"

@@ -117,6 +117,13 @@ export const DrawingObject = types.model("DrawingObject", {
     // Implementated in subclasses since this will affect object types differently.
     console.error("setDragBounds is unimplemented for this type");
   },
+  setDragBoundsAbsolute(bounds: BoundingBoxSides) {
+    // Temporarily set the edges of the object's bounding box to the given bounds.
+    // This will change the size and origin position of the object, with changes stored as volatile fields.
+
+    // Implementated in subclasses since this will affect object types differently.
+    console.error("setDragBoundsAbsolute is unimplemented for this type");
+  },
   resizeObject() {
     // Move any volatile resizing into the persisted object model.
     console.error("resizeObject is unimplemented for this type");
@@ -166,6 +173,12 @@ export const SizedObject = DrawingObject.named("SizedObject")
     self.dragY = self.y + deltas.top;
     self.dragWidth  = Math.max(self.width  + deltas.right - deltas.left, 1);
     self.dragHeight = Math.max(self.height + deltas.bottom - deltas.top, 1);
+  },
+  setDragBoundsAbsolute(bounds: BoundingBoxSides) {
+    self.dragX = bounds.left;
+    self.dragY = bounds.top;
+    self.dragWidth = bounds.right - bounds.left;
+    self.dragHeight = bounds.bottom - bounds.top;
   },
   resizeObject() {
     self.repositionObject();
