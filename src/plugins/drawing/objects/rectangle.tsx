@@ -64,7 +64,7 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
   const { width, height } = rect.currentDims;
   return <rect
     key={id}
-    className="rectangle"
+    className="drawing-object rectangle"
     x={x}
     y={y}
     width={width}
