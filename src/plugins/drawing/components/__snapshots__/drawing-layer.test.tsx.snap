@@ -128,6 +128,7 @@ exports[`Drawing Layer Components Group creates a group 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      class="group"
       transform="translate(0, 0) scale(20, 20)"
     >
       <rect
@@ -155,12 +156,12 @@ exports[`Drawing Layer Components Group creates a group 1`] = `
         stroke-width="1"
       />
       <rect
-        class="group"
+        class="group-rect"
         fill="none"
         height="1"
         pointer-events="visible"
-        stroke="red"
-        stroke-width="0.01"
+        stroke="none"
+        stroke-width="0"
         width="1"
         x="0"
         y="0"
@@ -257,6 +258,7 @@ exports[`Drawing Layer Components Group moves a group 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      class="group"
       transform="translate(5, 5) scale(20, 20)"
     >
       <rect
@@ -284,12 +286,12 @@ exports[`Drawing Layer Components Group moves a group 1`] = `
         stroke-width="1"
       />
       <rect
-        class="group"
+        class="group-rect"
         fill="none"
         height="1"
         pointer-events="visible"
-        stroke="red"
-        stroke-width="0.01"
+        stroke="none"
+        stroke-width="0"
         width="1"
         x="0"
         y="0"
@@ -739,7 +741,7 @@ exports[`Drawing Layer Zoom zooms in 1`] = `
     transform="translate(0, 0) scale(2)"
   >
     <rect
-      class="rectangle"
+      class="drawing-object rectangle"
       fill="#cccccc"
       height="10"
       pointer-events="visible"
@@ -764,7 +766,7 @@ exports[`Drawing Layer Zoom zooms out 1`] = `
     transform="translate(0, 0) scale(0.5)"
   >
     <rect
-      class="rectangle"
+      class="drawing-object rectangle"
       fill="#cccccc"
       height="10"
       pointer-events="visible"

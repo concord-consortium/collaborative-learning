@@ -117,6 +117,17 @@ export const GroupObject = SizedObject.named("GroupObject")
         obj.resizeObject();
       });
     }
+  }))
+  .actions(self => ({
+    afterCreate() {
+      // Group models migrated from v1 to v2 will initially have a width and height of 0.
+      // It would be challenging to do the object assimilation in the snapshots, so the migration
+      // leaves width and height at 0 to signal that it needs to be done after object creation.
+      if (self.objects.length > 0 && self.width === 0 && self.height === 0) {
+        console.log("GroupObject: afterCreate: assimilating objects");
+        self.assimilateObjects();
+      }
+    }
   }));
 export interface GroupObjectType extends Instance<typeof GroupObject> {}
 export interface GroupObjectSnapshot extends SnapshotIn<typeof GroupObject> {}
