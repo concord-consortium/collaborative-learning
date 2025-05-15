@@ -119,8 +119,8 @@ jobs:
           # pass GitHub token to allow accurately detecting a build vs a re-run build
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Portal credentials
-          PORTAL_USERNAME: ${{ secrets.PORTAL_USERNAME }}
-          PORTAL_PASSWORD: ${{ secrets.PORTAL_PASSWORD }}
+          CYPRESS_PORTAL_USERNAME: ${{ secrets.PORTAL_USERNAME }}
+          CYPRESS_PORTAL_PASSWORD: ${{ secrets.PORTAL_PASSWORD }}
           # turn on code coverage when running npm start
           # so far we've been using a webpack coverage-istanbul-loader for this
           # but there has been work on using the code coverage support in the browser directly,
