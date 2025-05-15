@@ -266,6 +266,10 @@ Cypress.Commands.add('portalLogin', () => {
 
     cy.visit('/users/sign_in');
 
+    // Debug log to help diagnose CI credential issues
+    // eslint-disable-next-line no-console
+    console.log('DEBUG Cypress.env:', Cypress.env());
+
     if (!originUsername || !originPassword) {
       throw new Error('Portal credentials not found. Set PORTAL_USERNAME and PORTAL_PASSWORD in cypress.env.json or CI environment variables.');
     }
