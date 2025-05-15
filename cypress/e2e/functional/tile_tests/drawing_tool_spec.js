@@ -605,18 +605,10 @@ context('Draw Tool Tile', function () {
     cy.log("can group and ungroup");
     drawToolTile.drawRectangle(100, 50, 150, 100);
     drawToolTile.drawEllipse(50, 100, 50, 50);
-    drawToolTile.getDrawToolFreehand().click();
-    drawToolTile.getDrawTile()
-      .trigger("pointerdown", 150, 50, { isPrimary: true })
-      .trigger("pointermove", 200, 150, { isPrimary: true })
-      .trigger("pointerup", 200, 150, { isPrimary: true });
+    drawToolTile.drawFreehand([ {x: 150, y: 50}, {x: 200, y: 150} ]);
 
     // Select all 3 objects
-    drawToolTile.getDrawToolSelect().click();
-    drawToolTile.getDrawTile()
-      .trigger("pointerdown", 40, 40, { isPrimary: true })
-      .trigger("pointermove", 250, 150, { isPrimary: true })
-      .trigger("pointerup", 250, 150, { isPrimary: true });
+    drawToolTile.dragSelectionRectangle(40, 40, 220, 110);
     drawToolTile.getSelectionBox().should("have.length", 3);
 
     // Group the 3 objects
@@ -632,14 +624,9 @@ context('Draw Tool Tile', function () {
 
     // Select the group and the new rectangle
     drawToolTile.getDrawToolSelect().click();
-    // Click on the group (should be at a location covered by the group)
-    drawToolTile.getDrawTile()
-      .trigger("pointerdown", 120, 100, { isPrimary: true })
-      .trigger("pointerup", 120, 100, { isPrimary: true });
+    drawToolTile.getGroupDrawing().eq(0).click({ force: true });
     // Shift+click the new rectangle to add it to the selection
-    drawToolTile.getDrawTile()
-      .trigger("pointerdown", 320, 120, { isPrimary: true, shiftKey: true })
-      .trigger("pointerup", 320, 120, { isPrimary: true, shiftKey: true });
+    drawToolTile.getRectangleDrawing().eq(1).click({ force: true, shiftKey: true });
 
     drawToolTile.getSelectionBox().should("have.length", 2);
     // Group the group and the new rectangle
