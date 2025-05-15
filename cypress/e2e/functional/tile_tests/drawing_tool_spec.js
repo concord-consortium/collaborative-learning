@@ -597,6 +597,7 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click();
     drawToolTile.getTextDrawing().should("not.exist");
   });
+
   it("Group", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
@@ -610,16 +611,15 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 200, 150, { isPrimary: true })
       .trigger("pointerup", 200, 150, { isPrimary: true });
 
-    // Select all 3
+    // Select all 3 objects
     drawToolTile.getDrawToolSelect().click();
     drawToolTile.getDrawTile()
       .trigger("pointerdown", 40, 40, { isPrimary: true })
       .trigger("pointermove", 250, 150, { isPrimary: true })
       .trigger("pointerup", 250, 150, { isPrimary: true });
-    cy.wait(1000);
     drawToolTile.getSelectionBox().should("have.length", 3);
 
-    // Group the 3
+    // Group the 3 objects
     drawToolTile.getDrawToolUngroup().should("have.class", "disabled");
     drawToolTile.getDrawToolGroup().should("not.have.class", "disabled").click();
     drawToolTile.getSelectionBox().should("have.length", 1);
@@ -636,25 +636,25 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTile()
       .trigger("pointerdown", 120, 100, { isPrimary: true })
       .trigger("pointerup", 120, 100, { isPrimary: true });
-    // Ctrl/Cmd+click the new rectangle to add it to the selection
+    // Shift+click the new rectangle to add it to the selection
     drawToolTile.getDrawTile()
       .trigger("pointerdown", 320, 120, { isPrimary: true, shiftKey: true })
       .trigger("pointerup", 320, 120, { isPrimary: true, shiftKey: true });
-    cy.wait(1000);
-    // Should have 2 selected (the group and the new rectangle)
+
     drawToolTile.getSelectionBox().should("have.length", 2);
     // Group the group and the new rectangle
     drawToolTile.getDrawToolGroup().should("not.have.class", "disabled").click();
     drawToolTile.getSelectionBox().should("have.length", 1);
-    // DrawToolUngroup should now be enabled
     drawToolTile.getDrawToolUngroup().should("not.have.class", "disabled");
-    // Optionally, ungroup and check that 2 objects are selected (the group and the rectangle)
+
+    // Ungroup the outer group
     drawToolTile.getDrawToolUngroup().click();
     drawToolTile.getSelectionBox().should("have.length", 2);
     // Ungroup again to get back to 4 separate objects
     drawToolTile.getDrawToolUngroup().click();
     drawToolTile.getSelectionBox().should("have.length", 4);
   });
+
   it("Image", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
