@@ -247,3 +247,41 @@ Cypress.Commands.add('unlinkTableToDataflow', (program, table) => {
 Cypress.Commands.add("deleteDocumentThumbnail", (tab, section,title) => {
   cy.get('.'+tab+' .documents-list.'+section+' [data-test='+section+'-list-items] .footer .icon-delete-document').eq(1).click({force:true});
 });
+
+Cypress.Commands.add('portalLogin', () => {
+  // Handle cross-origin errors during login
+  cy.on('uncaught:exception', () => {
+    return false; // We want to handle all uncaught exceptions during login
+  });
+
+  // Visit the portal login page directly with cross-origin handling
+  cy.origin('https://learn.portal.staging.concord.org', () => {
+    cy.on('uncaught:exception', () => {
+      return false;
+    });
+
+    cy.visit('/users/sign_in');
+
+    // Get credentials from environment variables
+    // This will work with both cypress.env.json and CI environment variables
+    const username = Cypress.env('PORTAL_USERNAME') || Cypress.env('auth')?.username;
+    const password = Cypress.env('PORTAL_PASSWORD') || Cypress.env('auth')?.password;
+
+    if (!username || !password) {
+      throw new Error('Portal credentials not found. Set PORTAL_USERNAME and PORTAL_PASSWORD in cypress.env.json or CI environment variables.');
+    }
+
+    // Fill in the login form
+    cy.get('#user_login', { timeout: 30000 }).type(username);
+    cy.get('#user_password').type(password);
+
+    // Submit the form
+    cy.get('input[type="submit"]').click();
+
+    // Wait for successful login with longer timeout
+    cy.url({ timeout: 60000 }).should('not.include', '/users/sign_in');
+  });
+
+  // Wait for any post-login redirects to complete
+  cy.wait(2000);
+});

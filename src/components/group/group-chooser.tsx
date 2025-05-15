@@ -38,7 +38,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
   public render() {
     const {user, groups} = this.stores;
     return (
-      <div className="join">
+      <div className="join" data-testid="group-select">
         <div className="join-title">Join Group</div>
         <div className="join-content">
           {user ? <div className="welcome">Welcome {user.name}</div> : null}
@@ -61,11 +61,11 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
       }
     }
     return (
-      <form className="create-group" onSubmit={this.handleChooseGroup}>
+      <form className="create-group" onSubmit={this.handleChooseGroup} data-testid="create-group-form">
         <div>{haveExistingGroups ? "Or create a new group" : "Please create your group"}</div>
         <div>
-          <select ref={(el) => this.groupSelect = el}>{items}</select>
-          <input type="submit" className="button" value="Create Group" />
+          <select ref={(el) => this.groupSelect = el} data-testid="new-group-select">{items}</select>
+          <input type="submit" className="button" value="Create Group" data-testid="create-group-button" />
         </div>
       </form>
     );
@@ -84,6 +84,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
           className="group"
           key={group.id}
           onClick={this.handleChooseExistingGroup(group)}
+          data-testid={`existing-group-${group.id}`}
         >
           <div className="group-title">{`Group ${group.id}`}</div>
           <div className="group-users">
@@ -94,7 +95,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
     });
 
     return (
-      <div className="groups">
+      <div className="groups" data-testid="existing-groups">
         <div>Click to select an existing group</div>
         <div className="group-list">
           {groupElements}

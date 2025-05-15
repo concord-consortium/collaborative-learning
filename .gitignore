@@ -24,3 +24,6 @@ src/public/ai/screenshotDataset*
 !.vscode/settings.json
 !.vscode/extensions.json
 !.vscode/tasks.json
+
+# Cypress env file with sensitive data
+cypress.env.json
