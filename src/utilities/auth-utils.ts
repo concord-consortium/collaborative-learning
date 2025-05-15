@@ -186,10 +186,10 @@ export const getPortalStandaloneSignInOrRegisterUrl = () => {
   const authUrl = new URL(`${basePortalUrl}${PORTAL_SIGNIN_OR_REGISTER_PATH}`);
   authUrl.searchParams.set("app_name", "CLUE");
   authUrl.searchParams.set("login_url", loginUrl.toString());
-  if (urlParams.class) {
-    // if a class word is passed in (as class), add it to the params so
+  if (urlParams.classWord) {
+    // if a class word is passed in, add it to the params so
     // that it can be pre-filled in the student registration
-    authUrl.searchParams.set("class_word", urlParams.class);
+    authUrl.searchParams.set("class_word", urlParams.classWord);
   }
 
   return authUrl.toString();

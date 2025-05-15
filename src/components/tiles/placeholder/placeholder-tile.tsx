@@ -18,7 +18,8 @@ const PlaceholderTileComponent: React.FC<ITileProps> = (props) => {
 
   const renderPlaceholderText = () => {
     const content = props.model.content as PlaceholderContentModelType;
-    const { sectionId, containerType } = content;
+    const { sectionId } = content;
+    const containerType = content.containerType || "DocumentContent";
     let placeholderText = undefined;
     // First see if there is a section-specific placeholder
     if (containerType === "DocumentContent") {

@@ -10,7 +10,7 @@ export interface ICustomDropdownItem extends IDropdownItem {
   id?: string;
   itemIcon?: ReactNode;
   hideItemCheck?: boolean;
-  italicize?: boolean;
+  bottomBorder?: boolean;
 }
 
 function getItemId(item: ICustomDropdownItem) {
@@ -132,7 +132,7 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
           return (
             <div
               key={`item-${i}-${itemId}`}
-              className={`list-item ${disabledClass} ${selectedClass}`}
+              className={classNames(`list-item ${disabledClass} ${selectedClass}`, {bottomBorder: item.bottomBorder })}
               onClick={this.handleListClick(item)}
               data-test={`list-item-${itemId}`}
             >
@@ -141,7 +141,7 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
                   "hidden-item-check": item.hideItemCheck})}
                 />}
               {this.renderItemIcon(item)}
-              <div className={classNames("item", {italicize: item.italicize })}>{item.text}</div>
+              <div className="item">{item.text}</div>
             </div>
           );
         }) }

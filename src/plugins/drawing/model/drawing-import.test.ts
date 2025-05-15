@@ -57,6 +57,7 @@ describe("import drawing", () => {
       x: 10, y: 10,
       deltaPoints: [{ dx: 10, dy: 10 }, { dx: 5, dy: 5 }],
       stroke: "#888888",
+      fill: "none",
       strokeDashArray: "3,3",
       strokeWidth: 1,
       visible: true

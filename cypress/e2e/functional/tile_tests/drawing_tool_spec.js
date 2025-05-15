@@ -29,7 +29,7 @@ function beforeTest() {
 //   so cypress+chrome simply cannot scroll the container.
 
 context('Draw Tool Tile', function () {
-  it("renders draw tool tile", () => {
+  it("renders draw tool tile and supports freehand tool", () => {
     beforeTest();
 
     cy.window().then(win => {
@@ -193,6 +193,13 @@ context('Draw Tool Tile', function () {
     cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
     cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(1).click();
     drawToolTile.getFreehandDrawing().first().should("have.attr", "stroke").and("eq", "#eb0000");
+
+    cy.log("verify change fill color");
+    drawToolTile.getFreehandDrawing().first().should("not.have.attr", "fill-color");
+    drawToolTile.getDrawToolFillColor().click();
+    cy.get(".toolbar-palette.fill-color .palette-buttons").should("be.visible");
+    cy.get(".toolbar-palette.fill-color .palette-buttons .color-swatch").last().click();
+    drawToolTile.getFreehandDrawing().first().should("have.attr", "fill").and("eq", "#d100d1");
 
     cy.log("deletes freehand drawing");
     // Without the previous test this is how to select it, using the simple click

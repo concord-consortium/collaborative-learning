@@ -71,16 +71,16 @@ describe("auth-utils", () => {
       expect(actualURL).toBe(expectedURL);
     });
 
-    it("adds the class param to the redirect URL if present", () => {
-      setLocation("https://collaborative-learning.concord.org/standalone/?class=m2studio");
-      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3Fclass%3Dm2studio%26authDomain%3Dhttps%253A%252F%252Flearn.concord.org&class_word=m2studio";
+    it("adds the classWord param to the redirect URL if present", () => {
+      setLocation("https://collaborative-learning.concord.org/standalone/?classWord=m2studio");
+      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FclassWord%3Dm2studio%26authDomain%3Dhttps%253A%252F%252Flearn.concord.org&class_word=m2studio";
       const actualURL = getPortalStandaloneSignInOrRegisterUrl();
       expect(actualURL).toBe(expectedURL);
     });
 
-    it("adds the classWord param to the auth URL if class is present", () => {
-      setLocation("https://collaborative-learning.concord.org/standalone/?class=m2studio");
-      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3Fclass%3Dm2studio%26authDomain%3Dhttps%253A%252F%252Flearn.concord.org&class_word=m2studio";
+    it("adds the classWord param to the auth URL if classWord is present", () => {
+      setLocation("https://collaborative-learning.concord.org/standalone/?classWord=m2studio");
+      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FclassWord%3Dm2studio%26authDomain%3Dhttps%253A%252F%252Flearn.concord.org&class_word=m2studio";
       const actualURL = getPortalStandaloneSignInOrRegisterUrl();
       expect(actualURL).toBe(expectedURL);
     });

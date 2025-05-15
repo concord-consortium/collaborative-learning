@@ -81,6 +81,7 @@ describe("playbackChanges", () => {
       x: 10, y: 10,
       deltaPoints: [{ dx: 1, dy: 1 }, { dx: 2, dy: 2 }],
       stroke: "#888888",
+      fill: "none",
       strokeDashArray: "3,3",
       strokeWidth: 1,
       visible: true
@@ -222,8 +223,8 @@ describe("playbackChanges", () => {
       type: "image",
       url: "my/image/url",
       // Note: There used to be an originalUrl in the image data.
-      // This originalUrl was set when the image drawing object was created from the 
-      // serialized image data. As far as I can tell this originalUrl should not 
+      // This originalUrl was set when the image drawing object was created from the
+      // serialized image data. As far as I can tell this originalUrl should not
       // have been stored back in the serialized data. Additionally even if it was
       // stored and then loaded back in, it seems it would have only caused problems.
       // So it seems safe to ignore it here.
