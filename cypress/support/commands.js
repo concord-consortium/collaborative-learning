@@ -254,26 +254,25 @@ Cypress.Commands.add('portalLogin', () => {
     return false; // We want to handle all uncaught exceptions during login
   });
 
-  // Visit the portal login page directly with cross-origin handling
-  cy.origin('https://learn.portal.staging.concord.org', () => {
+  // Get credentials from environment variables
+  // This will work with both cypress.env.json and CI environment variables
+  const username = Cypress.env('PORTAL_USERNAME') || Cypress.env('auth')?.username;
+  const password = Cypress.env('PORTAL_PASSWORD') || Cypress.env('auth')?.password;
+
+  cy.origin('https://learn.portal.staging.concord.org', { args: { username, password } }, ({ username: originUsername, password: originPassword }) => {
     cy.on('uncaught:exception', () => {
       return false;
     });
 
     cy.visit('/users/sign_in');
 
-    // Get credentials from environment variables
-    // This will work with both cypress.env.json and CI environment variables
-    const username = Cypress.env('PORTAL_USERNAME') || Cypress.env('auth')?.username;
-    const password = Cypress.env('PORTAL_PASSWORD') || Cypress.env('auth')?.password;
-
-    if (!username || !password) {
+    if (!originUsername || !originPassword) {
       throw new Error('Portal credentials not found. Set PORTAL_USERNAME and PORTAL_PASSWORD in cypress.env.json or CI environment variables.');
     }
 
     // Fill in the login form
-    cy.get('#user_login', { timeout: 30000 }).type(username);
-    cy.get('#user_password').type(password);
+    cy.get('#user_login', { timeout: 30000 }).type(originUsername);
+    cy.get('#user_password').type(originPassword);
 
     // Submit the form
     cy.get('input[type="submit"]').click();

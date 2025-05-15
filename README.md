@@ -157,6 +157,8 @@ For automated testing in CI, the credentials are set as GitHub Secrets:
 - `PORTAL_USERNAME`: The portal username for test authentication
 - `PORTAL_PASSWORD`: The portal password for test authentication
 
+The user names and passwords are stored in the 1Password shared `Developer` vault.
+
 These secrets are automatically used by the CI workflow for running tests.
 
 The tests are run automatically on PRs and Codecov is configured to track coverage. Codecov will report on whether a given PR increases or decreases overall coverage to encourage good testing habits.
