@@ -72,6 +72,7 @@ exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
     <path
       d="M 10 10 l 1 1 l 2 2"
       fill="none"
+      fill-rule="nonzero"
       pointer-events="visible"
       stroke="#888888"
       stroke-dasharray=""
@@ -105,6 +106,7 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
     <path
       d="M 5 5 l 1 1 l 2 2"
       fill="none"
+      fill-rule="nonzero"
       pointer-events="visible"
       stroke="#888888"
       stroke-dasharray=""

@@ -20,11 +20,11 @@ interface IModeButtonProps extends IToolbarButtonComponentProps {
 
 function getSvgPropertiesForType(type: ToolbarModalButton, drawingModel: any) {
   switch (type) {
-    case "line":
     case "text":
       return {
         fill: drawingModel.stroke
       };
+    case "line":
     case "rectangle":
     case "ellipse":
       return {
