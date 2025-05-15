@@ -8,16 +8,6 @@ const textToolTile = new TextToolTile();
 const clueCanvas = new ClueCanvas();
 const standaloneHelper = new StandaloneHelper();
 
-function beforeTest(url) {
-  // Handle cross-origin errors
-  cy.on('uncaught:exception', () => {
-    return false; // We want to handle all uncaught exceptions in this test file
-  });
-
-  // Visit with cross-origin handling
-  cy.visit(url);
-}
-
 context('Standalone', () => {
   beforeEach(() => {
     // Load test data from fixture
