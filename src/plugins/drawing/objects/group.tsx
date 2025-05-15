@@ -11,8 +11,9 @@ import { DrawingObjectType, IDrawingComponentProps,
 import { VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion, renderDrawingObject } from "../components/drawing-object-manager";
 import { isVectorObject } from "./vector";
-import GroupObjectsIcon from "../assets/group-objects-icon.svg";
 import { useReadOnlyContext } from "../../../components/document/read-only-context";
+
+import GroupObjectsIcon from "../assets/group-objects-icon.svg";
 
 export const GroupObject = SizedObject.named("GroupObject")
   .props({
