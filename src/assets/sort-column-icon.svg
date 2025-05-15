@@ -1,7 +1,5 @@
-<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <g fill="none" fill-rule="evenodd">
-        <circle class="border" cx="12" cy="12" r="12"/>
-        <path class="inner-circle" d="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm0 2c-4.41 0-8 3.59-8 8s3.59 8 8 8 8-3.59 8-8-3.59-8-8-8z" fill="#0481A0"/>
-        <path class="sort-arrow" fill="#0481A0" d="m11.95 7-5.025 5.05 1.425 1.425 2.6-2.6V17h2v-6.125l2.575 2.575L16.95 12z"/>
-    </g>
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="none" fill="none">
+  <circle class="background sort" cx="12" cy="12" r="12"/>
+  <path class="foreground sort circle" d="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm0 2c-4.41 0-8 3.59-8 8s3.59 8 8 8 8-3.59 8-8-3.59-8-8-8z" fill="none"/>
+  <path class="foreground sort arrow" fill="none" d="m11.95 7-5.025 5.05 1.425 1.425 2.6-2.6V17h2v-6.125l2.575 2.575L16.95 12z"/>
 </svg>

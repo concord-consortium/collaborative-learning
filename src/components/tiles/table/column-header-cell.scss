@@ -77,22 +77,6 @@
       display: none;  // overridden when tile is selected
       justify-content: center;
       align-items: center;
-      svg {
-        fill: var(--header-background-color);
-        stroke: $highlight-blue;
-      }
-      &:hover {
-        svg {
-          fill: $highlight-blue-25;
-          stroke: $highlight-blue;
-        }
-      }
-      &:active {
-        svg {
-          fill: $highlight-blue;
-          stroke: var(--header-background-color);
-        }
-      }
     }
 
     .sort-column-button {
@@ -105,23 +89,17 @@
       justify-content: center;
       align-items: center;
 
-      &.ascending, .descending {
-        display: flex !important;
-      }
-
       &.ascending {
-        svg {
-          .border, .inner-circle {
-            display: none !important;
-          }
+        .foreground.arrow {
+          display: flex !important;
+          fill: $workspace-teal-dark-1;
         }
       }
       &.descending {
         transform: rotate(180deg);
-        svg {
-          .border, .inner-circle {
-            display: none !important;
-          }
+        .foreground.arrow {
+          display: flex !important;
+          fill: $workspace-teal-dark-1;
         }
       }
     }
@@ -129,38 +107,130 @@
 
   &:hover {
     background-color: $highlight-blue-20;
-    // .remove-column-button,
-    .sort-column-button {
+    .column-button {
       display: flex !important;
-      svg {
-        fill: var(--header-background-color);
-        stroke: $highlight-blue;
-        opacity: 0.35;
-      }
-    }
-  }
-  &.selected-column {
-    .remove-column-button,
-    .sort-column-button {
-      display: flex !important;
-      svg {
-        fill: var(--header-background-color);
-        // stroke: $highlight-blue;
-        .border {
-          stroke: $highlight-blue;
+      &.remove-column-button {
+        display: flex !important;
+        svg {
+          .background {
+            fill: var(--header-background-color);
+            // stroke: var(--header-background-color);
+            opacity: 0.35;
+          }
+          .foreground {
+            // fill: $workspace-teal-dark-1;
+            stroke: $workspace-teal-dark-1;
+            opacity: 0.35;
+          }
         }
-        // opacity: 0.35;
+      }
+      &.sort-column-button {
+        display: flex !important;
+        svg {
+          .background {
+            fill: var(--header-background-color);
+            // stroke: var(--header-background-color);
+            opacity: 0.35;
+          }
+          .foreground {
+            fill: $workspace-teal-dark-1;
+            // stroke: $workspace-teal-dark-1;
+            opacity: 0.35;
+          }
+        }
       }
     }
   }
+
+  // &.selected-column {
+  //   background-color: $highlight-blue-20;
+
+  //   .remove-column-button {
+  //     display: flex !important;
+  //     svg {
+  //       .background {
+  //         fill: var(--header-background-color);
+  //         // stroke: var(--header-background-color);
+  //         opacity: 1;
+  //       }
+  //       .foreground {
+  //         // fill: $workspace-teal-dark-1;
+  //         stroke: $workspace-teal-dark-1;
+  //         opacity: 1;
+  //       }
+  //     }
+  //   }
+  //   .sort-column-button {
+  //     display: flex !important;
+  //     svg {
+  //       .background {
+  //         fill: var(--header-background-color);
+  //         // stroke: var(--header-background-color);
+  //         opacity: 1;
+  //       }
+  //       .foreground {
+  //         fill: $workspace-teal-dark-1;
+  //         // stroke: $workspace-teal-dark-1;
+  //         opacity: 0.35;
+  //       }
+  //     }
+  //   }
+  // }
 }
 
-.tool-tile.selected {
-  .table-tool {
-    .selected-column {
-      .remove-column-button, .sort-column-button {
-        // show buttons only when tile and column are selected
-        display: flex !important;
+// .tool-tile.selected {
+//   .table-tool {
+//     .selected-column {
+//       .remove-column-button,
+//       .sort-column-button {
+//         // show buttons only when tile and column are selected
+//         display: flex !important;
+//       }
+//     }
+//   }
+// }
+
+.selected-column {
+  .column-header-cell {
+    .column-button {
+      display: flex !important;
+
+      &.remove-column-button {
+        // display: flex !important;
+        svg {
+          .background {
+            fill: var(--header-background-color);
+            // stroke: var(--header-background-color);
+            opacity: 1;
+          }
+          .foreground {
+            // fill: $workspace-teal-dark-1;
+            stroke: $workspace-teal-dark-1;
+            opacity: 1;
+          }
+        }
+      }
+      &.sort-column-button {
+        // display: flex !important;
+        svg {
+          .background {
+            fill: var(--header-background-color);
+            // stroke: var(--header-background-color);
+            opacity: 1;
+          }
+          .foreground {
+            fill: $workspace-teal-dark-1;
+            // stroke: $workspace-teal-dark-1;
+            opacity: 0.35;
+
+            &.sort.circle {
+              fill: $workspace-teal-dark-1;
+              // stroke: $workspace-teal-dark-1;
+              opacity: 1;
+            }
+
+          }
+        }
       }
     }
   }

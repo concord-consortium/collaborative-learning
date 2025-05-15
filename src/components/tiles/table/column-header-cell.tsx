@@ -36,6 +36,12 @@ export const useColumnHeaderCell = (height: number) => {
           cell.classList.remove("hovered-column");
         });
       };
+      const handleHeaderClick = (e: React.MouseEvent) => {
+        if (!gridContext?.isColumnSelected(column.key)) {
+          e.stopPropagation();
+          gridContext?.onSelectColumn(column.key);
+        }
+      };
 
       const handleSort = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -50,18 +56,20 @@ export const useColumnHeaderCell = (height: number) => {
       console.log("gridContext.isColumnSelected", gridContext?.isColumnSelected(column.key));
       return (
         <div className={classes} onMouseOver={handleColumnHeaderCellMouseOver}
-              onMouseLeave={handleColumnHeaderCellMouseLeave}>
+              onMouseLeave={handleColumnHeaderCellMouseLeave} onClick={handleHeaderClick}>
           <div className="header-cell-container">
             {!isEditing && isRemovable &&
-              <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}/>}
+              <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}
+                isColumnSelected={gridContext?.isColumnSelected(column.key) ?? false}/>
+            }
             <div className="flex-container">
               <EditableHeaderCell height={height} {...props} />
               {showExpressions && <ExpressionCell readOnly={readOnly} column={column} />}
             </div>
-            <div className={clsx("sort-column-button", { "ascending": sortDirection === "ascending",
+            <div className={clsx("column-button sort-column-button", { "ascending": sortDirection === "ascending",
                                       "descending": sortDirection === "descending"})}
                   onClick={handleSort}>
-              <SortIcon className={clsx("sort-icon")}
+              <SortIcon className={clsx("column-icon sort-column-icon")}
               />
             </div>
           </div>
@@ -75,9 +83,11 @@ export const useColumnHeaderCell = (height: number) => {
 interface IRemoveColumnButtonProps {
   colId: string;
   colName: string;
+  isColumnSelected: boolean;
   onRemoveColumn?: (colId: string) => void;
 }
-const RemoveColumnButton: React.FC<IRemoveColumnButtonProps> = ({ colId, colName, onRemoveColumn }) => {
+const RemoveColumnButton: React.FC<IRemoveColumnButtonProps> =
+        ({ colId, colName, isColumnSelected, onRemoveColumn }) => {
   const AlertContent = () => {
     return <p>Remove column <b>{colName}</b> and its contents from the table?</p>;
   };
@@ -87,9 +97,15 @@ const RemoveColumnButton: React.FC<IRemoveColumnButtonProps> = ({ colId, colName
     confirmLabel: "Remove Column",
     onConfirm: () => onRemoveColumn?.(colId)
   });
+
+  const handleClick = () => {
+    if (isColumnSelected) {
+      showAlert();
+    }
+  };
   return (
-    <div className="remove-column-button" onClick={showAlert}>
-      <RemoveColumnSvg className="remove-column-icon"/>
+    <div className="column-button remove-column-button" onClick={handleClick}>
+      <RemoveColumnSvg className="column-icon remove-column-icon"/>
     </div>
   );
 };
