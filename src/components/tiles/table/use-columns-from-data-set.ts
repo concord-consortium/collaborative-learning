@@ -42,7 +42,8 @@ export const useColumnsFromDataSet = ({
     };
     dataSet.selectedAttributeIds; // eslint-disable-line no-unused-expressions
     return {
-      cellClass: classNames({ "has-expression": metadata?.hasExpression(attrId), ...selectedColumnClass }),
+      cellClass: classNames(`column-${attrId}`,
+                            { "has-expression": metadata?.hasExpression(attrId), ...selectedColumnClass }),
       headerCellClass: classNames({ "rdg-cell-editing": columnEditingName === attrId, ...selectedColumnClass })
     };
   }, [columnEditingName, dataSet.selectedAttributeIds, gridContext, isLinked, metadata]);

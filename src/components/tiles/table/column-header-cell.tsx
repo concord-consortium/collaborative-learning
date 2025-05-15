@@ -1,9 +1,11 @@
 import classNames from "classnames";
+import clsx from "clsx";
 import React, { useMemo } from "react";
 import { EditableHeaderCell } from "./editable-header-cell";
 import { kHeaderRowHeight, THeaderRendererProps, TColumn } from "./table-types";
 import { useCautionAlert } from "../../utilities/use-caution-alert";
 import RemoveColumnSvg from "../../../assets/icons/remove/remove.nosvgo.svg";
+import SortIcon from "../../../assets/sort-column-icon.svg";
 
 import "./column-header-cell.scss";
 
@@ -13,16 +15,56 @@ export const useColumnHeaderCell = (height: number) => {
   return useMemo(() => {
     const ColumnHeaderCell: React.FC<IProps> = (props: IProps) => {
       const column = props.column as unknown as TColumn;
-      const { readOnly, isEditing, isRemovable, showExpressions, onRemoveColumn } = column.appData || {};
+      const { gridContext, readOnly, isEditing, isRemovable, showExpressions, onRemoveColumn } = column.appData || {};
+      const [ columnHeaderHover, setColumnHeaderHover ] = React.useState(false);
       const classes = classNames("column-header-cell", { "show-expression": showExpressions });
+
+      // FIXME: temporary local state
+      const [sortDirection, setSortDirection] = React.useState<"ascending" | "descending" | undefined>(undefined);
+
+      const handleColumnHeaderCellMouseOver = (e: React.MouseEvent) => {
+        if (!gridContext?.isColumnSelected(column.key)) {
+          setColumnHeaderHover(true);
+          document.querySelectorAll(`.column-${column.key}`).forEach(cell => {
+            cell.classList.add("hovered-column");
+          });
+        }
+      };
+      const handleColumnHeaderCellMouseLeave = (e: React.MouseEvent) => {
+        setColumnHeaderHover(false);
+        document.querySelectorAll(`.column-${column.key}`).forEach(cell => {
+          cell.classList.remove("hovered-column");
+        });
+      };
+
+      const handleSort = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (sortDirection === "ascending") {
+          setSortDirection("descending");
+        } else if (sortDirection === "descending") {
+          setSortDirection(undefined);
+        } else {
+          setSortDirection("ascending");
+        }
+      };
+      console.log("gridContext.isColumnSelected", gridContext?.isColumnSelected(column.key));
       return (
-        <div className={classes}>
-          <div className="flex-container">
-            <EditableHeaderCell height={height} {...props} />
-            {showExpressions && <ExpressionCell readOnly={readOnly} column={column} />}
+        <div className={classes} onMouseOver={handleColumnHeaderCellMouseOver}
+              onMouseLeave={handleColumnHeaderCellMouseLeave}>
+          <div className="header-cell-container">
+            {!isEditing && isRemovable &&
+              <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}/>}
+            <div className="flex-container">
+              <EditableHeaderCell height={height} {...props} />
+              {showExpressions && <ExpressionCell readOnly={readOnly} column={column} />}
+            </div>
+            <div className={clsx("sort-column-button", { "ascending": sortDirection === "ascending",
+                                      "descending": sortDirection === "descending"})}
+                  onClick={handleSort}>
+              <SortIcon className={clsx("sort-icon")}
+              />
+            </div>
           </div>
-          {!isEditing && isRemovable &&
-            <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}/>}
         </div>
       );
     };

@@ -13,78 +13,143 @@
     }
   }
 
-  .flex-container {
+  .header-cell-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center ;
 
-    .editable-header-cell {
-      width: 100%;
-      height: var(--header-row-height);
+    .flex-container {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      white-space: normal;
-      word-break: break-word;
-      text-align: center;
-      line-height: 18px;
+      flex-direction: column;
 
-      .header-name {
-        margin: 0 16px;
-      }
+      .editable-header-cell {
+        width: 100%;
+        height: var(--header-row-height);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: normal;
+        word-break: break-word;
+        text-align: center;
+        line-height: 18px;
 
-      &.table-title-editing {
-        padding: 0 !important;
-
-        .rdg-text-editor:focus {
-          border-color: $highlight-blue;
-          outline: 0
+        .header-name {
+          margin: 0 16px;
         }
 
-        input {
-          text-align: center;
+        &.table-title-editing {
+          padding: 0 !important;
+
+          .rdg-text-editor:focus {
+            border-color: $highlight-blue;
+            outline: 0
+          }
+
+          input {
+            text-align: center;
+          }
+        }
+      }
+
+      .expression-cell {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-style: italic;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 18px;
+        &.has-expression {
+          border-top: 1px solid white;
         }
       }
     }
 
-    .expression-cell {
-      width: 100%;
-      display: flex;
-      align-items: center;
+    .remove-column-button {
+      position: absolute;
+      left: -4px;
+      top: 0;
+      width: 36px;
+      height: 34px;
+      display: none;  // overridden when tile is selected
       justify-content: center;
-      font-style: italic;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 18px;
-      &.has-expression {
-        border-top: 1px solid white;
+      align-items: center;
+      svg {
+        fill: var(--header-background-color);
+        stroke: $highlight-blue;
+      }
+      &:hover {
+        svg {
+          fill: $highlight-blue-25;
+          stroke: $highlight-blue;
+        }
+      }
+      &:active {
+        svg {
+          fill: $highlight-blue;
+          stroke: var(--header-background-color);
+        }
+      }
+    }
+
+    .sort-column-button {
+      position: absolute;
+      right: -4px;
+      top: 0;
+      width: 36px;
+      height: 34px;
+      display: none;  // overridden when tile is selected
+      justify-content: center;
+      align-items: center;
+
+      &.ascending, .descending {
+        display: flex !important;
+      }
+
+      &.ascending {
+        svg {
+          .border, .inner-circle {
+            display: none !important;
+          }
+        }
+      }
+      &.descending {
+        transform: rotate(180deg);
+        svg {
+          .border, .inner-circle {
+            display: none !important;
+          }
+        }
       }
     }
   }
 
-  .remove-column-button {
-    position: absolute;
-    left: -4px;
-    top: 0;
-    width: 36px;
-    height: 34px;
-    display: none;  // overridden when tile is selected
-    justify-content: center;
-    align-items: center;
-    svg {
-      fill: var(--header-background-color);
-      stroke: $highlight-blue;
-    }
-    &:hover {
+  &:hover {
+    background-color: $highlight-blue-20;
+    // .remove-column-button,
+    .sort-column-button {
+      display: flex !important;
       svg {
-        fill: $highlight-blue-25;
+        fill: var(--header-background-color);
         stroke: $highlight-blue;
+        opacity: 0.35;
       }
     }
-    &:active {
+  }
+  &.selected-column {
+    .remove-column-button,
+    .sort-column-button {
+      display: flex !important;
       svg {
-        fill: $highlight-blue;
-        stroke: var(--header-background-color);
+        fill: var(--header-background-color);
+        // stroke: $highlight-blue;
+        .border {
+          stroke: $highlight-blue;
+        }
+        // opacity: 0.35;
       }
     }
   }
@@ -93,7 +158,7 @@
 .tool-tile.selected {
   .table-tool {
     .selected-column {
-      .remove-column-button {
+      .remove-column-button, .sort-column-button {
         // show buttons only when tile and column are selected
         display: flex !important;
       }
