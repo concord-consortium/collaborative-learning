@@ -1,5 +1,5 @@
-import classNames from "classnames";
 import React from "react";
+import classNames from "classnames";
 import ResizeObserver from "resize-observer-polyfill";
 import { observer, inject } from "mobx-react";
 import { debounce } from "lodash";
@@ -156,9 +156,17 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       imageDisplayStyle.height = `${defaultImagePlaceholderSize.height}px`;
     }
 
+    const classes = classNames("tile-content", "image-tool", {
+      hovered: this.props.hovered,
+      "read-only": readOnly,
+      "editable": !readOnly,
+      "selected": this.stores.ui.isSelectedTile(this.props.model),
+    });
+
     return (
       <>
-        <div className={classNames("image-tool", readOnly ? "read-only" : "editable")}
+        <div
+          className={classes}
           data-image-tool-id={this.imageToolId}
           onMouseDown={this.handleMouseDown}
           onDragOver={this.handleDragOver}

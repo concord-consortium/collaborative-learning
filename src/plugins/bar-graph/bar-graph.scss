@@ -3,6 +3,10 @@
 $color-button-hover: rgba(20, 244, 158, .25); // 25% #14f49e
 $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
 
+.bar-graph-tile-wrapper {
+  height: 100%;
+}
+
 .bar-graph-content {
   width: 100%;
   height: 100%;

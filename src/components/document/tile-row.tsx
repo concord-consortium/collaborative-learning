@@ -175,31 +175,32 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
   }, [props, model, dragImage]);
 
   const renderTiles = useCallback((tileRefs: TileLayoutModelType[], tileHeight?: number) => {
-      const { docId, documentContent, scale, documentId } = props;
+    const { docId, documentContent, scale, documentId } = props;
     return tileRefs.map((tileRef, index) => {
       const tileModel = getTile(tileRef.tileId);
       const tileWidthPct = getTileWidth(tileRef.tileId, tileRefs);
       return tileModel
-              ? <TileComponent
-                  key={tileModel.id}
-                  model={tileModel}
-                  widthPct={tileWidthPct}
-                  height={tileHeight}
-                  isUserResizable={!readOnly && model.isUserResizable}
-                  onResizeRow={handleStartResizeRow}
-                  onSetCanAcceptDrop={handleSetCanAcceptDrop}
-                  onRequestRowHeight={handleRequestRowHeight}
-                  documentId={documentId}
-                  docId={docId}
-                  documentContent={documentContent}
-                  scale={scale}
-                  readOnly={readOnly}
-                  context={props.context}
-                />
-              : null;
+        ? <TileComponent
+          key={tileModel.id}
+          model={tileModel}
+          widthPct={tileWidthPct}
+          typeClass={typeClass}
+          height={tileHeight}
+          isUserResizable={!readOnly && model.isUserResizable}
+          onResizeRow={handleStartResizeRow}
+          onSetCanAcceptDrop={handleSetCanAcceptDrop}
+          onRequestRowHeight={handleRequestRowHeight}
+          documentId={documentId}
+          docId={docId}
+          documentContent={documentContent}
+          scale={scale}
+          readOnly={readOnly}
+          context={props.context}
+        />
+        : null;
     });
-  }, [props, getTile, getTileWidth, model.isUserResizable, handleStartResizeRow, handleSetCanAcceptDrop,
-    handleRequestRowHeight, readOnly]);
+  }, [props, getTile, getTileWidth, typeClass, readOnly, model.isUserResizable,
+    handleStartResizeRow, handleSetCanAcceptDrop, handleRequestRowHeight]);
 
   const renderDragDropHandles = useCallback(() => {
     const { isUserResizable } = model;

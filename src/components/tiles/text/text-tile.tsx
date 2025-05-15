@@ -1,4 +1,5 @@
 import React from "react";
+import classNames from "classnames";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
@@ -184,10 +185,15 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const readOnly = this.props.readOnly || (this.props.model.fixedPosition && inLockedContainer);
 
     const editableClass = readOnly ? "read-only" : "editable";
+    const containerClasses = classNames("tile-content", "text-tool-wrapper", {
+      editable: !readOnly,
+      hovered: this.props.hovered,
+      selected: this.stores.ui.isSelectedTile(this.props.model),
+    });
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
     // used here for a while now and cypress tests depend on it. Should transition
     // to using 'text-tool-editor' for these purposes moving forward.
-    const classes = `text-tool text-tool-editor ${editableClass}`;
+    const slateClasses = `text-tool text-tool-editor ${editableClass}`;
     if (!this.state.initialValue) return null;
 
     return (
@@ -198,7 +204,8 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       // and then replace the drawing one with that as well
       <TextContentModelContext.Provider value={this.getContent()} >
         <TextPluginsContext.Provider value={this.plugins} >
-          <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
+          <div
+            className={containerClasses}
             data-testid="text-tool-wrapper"
             ref={elt => this.textTileDiv = elt}
             onMouseDown={this.handleMouseDownInWrapper}
@@ -214,7 +221,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                 readOnly={readOnly}
                 onFocus={this.handleFocus}
                 onBlur={this.handleBlur}
-                className={`ccrte-editor slate-editor ${classes || ""}`}
+                className={`ccrte-editor slate-editor ${slateClasses || ""}`}
               />
               <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
             </Slate>

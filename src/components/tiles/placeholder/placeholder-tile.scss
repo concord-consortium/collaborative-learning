@@ -1,7 +1,13 @@
 @import "../../vars";
 
 .tool-tile.placeholder {
-  outline: none;
+  border: 0;
+  &.readonly {
+    border: 0;
+    .placeholder-tool {
+      border: none;
+    }
+  }
 }
 
 .placeholder-tool {

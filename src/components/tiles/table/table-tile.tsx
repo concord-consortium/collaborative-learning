@@ -1,4 +1,5 @@
 import { observer } from "mobx-react";
+import classNames from "classnames";
 import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
@@ -28,17 +29,19 @@ import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
 import { ITableContext, TableContext } from "../hooks/table-context";
+import { useUIStore } from "../../../hooks/use-stores";
 
 import "./table-tile.scss";
 import "./table-toolbar-registration";
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
-  documentContent, tileElt, model, readOnly, height, scale,
+  documentContent, tileElt, model, readOnly, height, hovered, scale,
   onRequestRowHeight, onRegisterTileApi, onUnregisterTileApi
 }) {
   // Gather data from the model
   const modelRef = useCurrent(model);
+  const ui = useUIStore();
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const content = useMemo(() => getContent(), [getContent]);
   const imagePromises = useMemo(() => new Map<string, Promise<ImageMapEntry>>(), []);
@@ -232,8 +235,13 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     deleteSelected,
   };
 
+  const classes = classNames("tile-content", "table-tool", {
+    hovered,
+    selected: ui.isSelectedTile(model),
+  });
+
   return (
-    <div className="table-tool">
+    <div className={classes}>
       <TableToolbarContext.Provider value={toolbarContext}>
         <TileToolbar
           tileType="table"

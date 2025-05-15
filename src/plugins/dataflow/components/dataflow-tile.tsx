@@ -1,6 +1,7 @@
 import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
+import classNames from "classnames";
 
 import { DataflowProgram } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
@@ -48,7 +49,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   public render() {
     const { readOnly, height, model, onRegisterTileApi, tileElt } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
-    const classes = `dataflow-tool ${editableClass}`;
+    const classes = classNames("tile-content", "dataflow-tool", editableClass, {
+      hovered: this.props.hovered,
+      selected: this.stores.ui.isSelectedTile(model)
+    });
     const { program, programDataRate } = this.getContent();
     const tileContent = this.getContent();
 
