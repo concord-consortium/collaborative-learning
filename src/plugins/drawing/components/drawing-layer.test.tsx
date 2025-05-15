@@ -44,6 +44,7 @@ describe("Drawing Layer Components", () => {
         x: 10, y: 10,
         deltaPoints: [{ dx: 1, dy: 1 }, { dx: 2, dy: 2 }],
         stroke: "#888888",
+        fill: "none",
         strokeDashArray: "3,3",
         strokeWidth: 1
       });
