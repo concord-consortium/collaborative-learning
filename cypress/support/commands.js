@@ -259,6 +259,11 @@ Cypress.Commands.add('portalLogin', () => {
   const username = Cypress.env('PORTAL_USERNAME') || Cypress.env('auth')?.username;
   const password = Cypress.env('PORTAL_PASSWORD') || Cypress.env('auth')?.password;
 
+  // Debug logs in parent scope
+  cy.log('DEBUG parent Cypress.env: ' + JSON.stringify(Cypress.env()));
+  cy.log('DEBUG parent username: ' + username);
+  cy.log('DEBUG parent password: ' + password);
+
   cy.origin('https://learn.portal.staging.concord.org', { args: { username, password } }, ({ username: originUsername, password: originPassword }) => {
     cy.on('uncaught:exception', () => {
       return false;
