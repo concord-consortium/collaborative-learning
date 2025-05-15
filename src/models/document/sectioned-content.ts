@@ -16,7 +16,7 @@ export function createDefaultSectionedContent({ sections, content }: ISectionedC
       tiles.push(...(content[section.type].tiles || []));
     }
     else {
-      tiles.push({ content: { type: "Placeholder", sectionId: section.type }});
+      tiles.push({ content: { type: "Placeholder", sectionId: section.type, containerType: "DocumentContent" }});
     }
   });
   // cast required because we're using the import format
