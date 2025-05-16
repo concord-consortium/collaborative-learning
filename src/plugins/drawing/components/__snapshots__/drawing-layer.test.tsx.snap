@@ -151,30 +151,38 @@ exports[`Drawing Layer Components Group creates a group 1`] = `
       class="group"
       transform="translate(0, 0) scale(20, 20)"
     >
-      <rect
-        class="drawing-object rectangle"
-        fill="#cccccc"
-        height="0.5"
-        pointer-events="none"
-        stroke="#888888"
-        stroke-dasharray=""
-        stroke-width="1"
-        width="0.5"
-        x="0.5"
-        y="0.5"
-      />
-      <ellipse
-        class="drawing-object"
-        cx="0.5"
-        cy="0.5"
-        fill="#cccccc"
-        pointer-events="none"
-        rx="0.5"
-        ry="0.5"
-        stroke="#888888"
-        stroke-dasharray=""
-        stroke-width="1"
-      />
+      <g
+        transform="translate(0.5,0.5) scale(1,1)"
+      >
+        <rect
+          class="drawing-object rectangle"
+          fill="#cccccc"
+          height="0.5"
+          pointer-events="none"
+          stroke="#888888"
+          stroke-dasharray=""
+          stroke-width="1"
+          width="0.5"
+          x="0"
+          y="0"
+        />
+      </g>
+      <g
+        transform="translate(0.5,0.5) scale(1,1)"
+      >
+        <ellipse
+          class="drawing-object"
+          cx="0"
+          cy="0"
+          fill="#cccccc"
+          pointer-events="none"
+          rx="0.5"
+          ry="0.5"
+          stroke="#888888"
+          stroke-dasharray=""
+          stroke-width="1"
+        />
+      </g>
       <rect
         class="group-rect"
         fill="none"
@@ -281,30 +289,38 @@ exports[`Drawing Layer Components Group moves a group 1`] = `
       class="group"
       transform="translate(5, 5) scale(20, 20)"
     >
-      <rect
-        class="drawing-object rectangle"
-        fill="#cccccc"
-        height="0.5"
-        pointer-events="none"
-        stroke="#888888"
-        stroke-dasharray=""
-        stroke-width="1"
-        width="0.5"
-        x="0.5"
-        y="0.5"
-      />
-      <ellipse
-        class="drawing-object"
-        cx="0.5"
-        cy="0.5"
-        fill="#cccccc"
-        pointer-events="none"
-        rx="0.5"
-        ry="0.5"
-        stroke="#888888"
-        stroke-dasharray=""
-        stroke-width="1"
-      />
+      <g
+        transform="translate(0.5,0.5) scale(1,1)"
+      >
+        <rect
+          class="drawing-object rectangle"
+          fill="#cccccc"
+          height="0.5"
+          pointer-events="none"
+          stroke="#888888"
+          stroke-dasharray=""
+          stroke-width="1"
+          width="0.5"
+          x="0"
+          y="0"
+        />
+      </g>
+      <g
+        transform="translate(0.5,0.5) scale(1,1)"
+      >
+        <ellipse
+          class="drawing-object"
+          cx="0"
+          cy="0"
+          fill="#cccccc"
+          pointer-events="none"
+          rx="0.5"
+          ry="0.5"
+          stroke="#888888"
+          stroke-dasharray=""
+          stroke-width="1"
+        />
+      </g>
       <rect
         class="group-rect"
         fill="none"

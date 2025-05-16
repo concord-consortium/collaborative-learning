@@ -147,6 +147,8 @@ describe("import drawing", () => {
       type: "group",
       x: 0, y: 0,
       width: 40, height: 40,
+      hFlip: false,
+      vFlip: false,
       visible: true,
       objects: [
         {
@@ -157,6 +159,8 @@ describe("import drawing", () => {
           stroke: "#888888",
           strokeDashArray: "3,3",
           strokeWidth: 1,
+          hFlip: false,
+          vFlip: false,
           visible: true
         },
         {
@@ -167,6 +171,8 @@ describe("import drawing", () => {
           stroke: "#000000",
           strokeDashArray: "",
           strokeWidth: 2,
+          hFlip: false,
+          vFlip: false,
           fill: "none"
         }
       ]
