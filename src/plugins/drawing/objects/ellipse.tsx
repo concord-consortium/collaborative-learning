@@ -9,6 +9,7 @@ import EllipseToolIcon from "../assets/ellipse-icon.svg";
 export const EllipseObject = types.compose("EllipseObject", StrokedObject, FilledObject)
   .props({
     type: typeField("ellipse"),
+    // X and Y radius of the ellipse.
     rx: types.number,
     ry: types.number,
   })
@@ -18,6 +19,7 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
   }))
   .views(self => ({
     get boundingBox() {
+      // The position of the ellipse is its center.
       const {x, y} = self.position;
       const rx = self.dragRx ?? self.rx;
       const ry = self.dragRy ?? self.ry;
@@ -48,6 +50,12 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
       self.dragRx  = self.rx  + deltas.right/2 - deltas.left/2;
       self.dragRy = self.ry + deltas.bottom/2 - deltas.top/2;
     },
+    setDragBoundsAbsolute(bounds: BoundingBoxSides) {
+      self.dragRx = (bounds.right - bounds.left) / 2;
+      self.dragRy = (bounds.bottom - bounds.top) / 2;
+      self.dragX = bounds.left + self.dragRx;
+      self.dragY = bounds.top + self.dragRy;
+    },
     resizeObject() {
       self.repositionObject();
       self.rx = self.dragRx ?? self.rx;
@@ -71,6 +79,7 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
   const ry = model.dragRy ?? model.ry;
   return <ellipse
     key={id}
+    className="drawing-object"
     cx={x}
     cy={y}
     rx={rx}

@@ -604,43 +604,51 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click();
     drawToolTile.getTextDrawing().should("not.exist");
   });
+
   it("Group", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
 
     cy.log("can group and ungroup");
-    drawToolTile.getDrawToolRectangle().click();
-    drawToolTile.getDrawTile()
-      .trigger("pointerdown", 250, 50, { isPrimary: true })
-      .trigger("pointermove", 100, 150, { isPrimary: true })
-      .trigger("pointerup", 100, 150, { isPrimary: true });
-    drawToolTile.getDrawToolEllipse().click();
-    drawToolTile.getDrawTile()
-      .trigger("pointerdown", 50, 100, { isPrimary: true })
-      .trigger("pointermove", 100, 150, { isPrimary: true })
-      .trigger("pointerup", 100, 150, { isPrimary: true });
-    drawToolTile.getDrawToolFreehand().click();
-    drawToolTile.getDrawTile()
-      .trigger("pointerdown", 150, 50, { isPrimary: true })
-      .trigger("pointermove", 200, 150, { isPrimary: true })
-      .trigger("pointerup", 200, 150, { isPrimary: true });
+    drawToolTile.drawRectangle(100, 50, 150, 100);
+    drawToolTile.drawEllipse(50, 100, 50, 50);
+    drawToolTile.drawFreehand([ {x: 150, y: 50}, {x: 200, y: 150} ]);
 
-    // Select all 3
-    drawToolTile.getDrawToolSelect().click();
-    drawToolTile.getDrawTile()
-      .trigger("pointerdown", 40, 40, { isPrimary: true })
-      .trigger("pointermove", 250, 150, { isPrimary: true })
-      .trigger("pointerup", 250, 150, { isPrimary: true });
-    cy.wait(1000);
+    // Select all 3 objects
+    drawToolTile.dragSelectionRectangle(40, 40, 220, 110);
     drawToolTile.getSelectionBox().should("have.length", 3);
 
+    // Group the 3 objects
     drawToolTile.getDrawToolUngroup().should("have.class", "disabled");
     drawToolTile.getDrawToolGroup().should("not.have.class", "disabled").click();
     drawToolTile.getSelectionBox().should("have.length", 1);
     drawToolTile.getDrawToolGroup().should("have.class", "disabled");
-    drawToolTile.getDrawToolUngroup().should("not.have.class", "disabled").click();
-    drawToolTile.getSelectionBox().should("have.length", 3);
+    drawToolTile.getDrawToolUngroup().should("not.have.class", "disabled");
+
+    // --- Nested group test ---
+    // Draw a fourth rectangle
+    drawToolTile.drawRectangle(300, 100, 50, 50);
+
+    // Select the group and the new rectangle
+    drawToolTile.getDrawToolSelect().click();
+    drawToolTile.getGroupDrawing().eq(0).click({ force: true });
+    // Shift+click the new rectangle to add it to the selection
+    drawToolTile.getRectangleDrawing().eq(1).click({ force: true, shiftKey: true });
+
+    drawToolTile.getSelectionBox().should("have.length", 2);
+    // Group the group and the new rectangle
+    drawToolTile.getDrawToolGroup().should("not.have.class", "disabled").click();
+    drawToolTile.getSelectionBox().should("have.length", 1);
+    drawToolTile.getDrawToolUngroup().should("not.have.class", "disabled");
+
+    // Ungroup the outer group
+    drawToolTile.getDrawToolUngroup().click();
+    drawToolTile.getSelectionBox().should("have.length", 2);
+    // Ungroup again to get back to 4 separate objects
+    drawToolTile.getDrawToolUngroup().click();
+    drawToolTile.getSelectionBox().should("have.length", 4);
   });
+
   it("Image", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");

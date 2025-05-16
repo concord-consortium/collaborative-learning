@@ -653,10 +653,43 @@ describe("DrawingContentModel", () => {
 
     expect(model.objects).toHaveLength(1);
     expect(group.objects).toHaveLength(2);
+    // Check group bounding box and dimensions
+    expect(group.x).toBe(0);
+    expect(group.y).toBe(0);
+    expect(group.width).toBe(100);
+    expect(group.height).toBe(100);
     expect(group.boundingBox).toStrictEqual({ nw: { x: 0, y: 0}, se: { x: 100, y: 100}});
-    expect(group.objectExtents.get('r2')).toStrictEqual({ top: 0.5, right: 1, bottom: 1, left: .1 });
+    // Check member rectangles' relative positions and sizes
+    // r1: x:0, y:0, width:0.3, height:0.4 (relative to group)
+    // r2: x:0.1, y:0.5, width:0.9, height:0.5 (relative to group)
+    const [rect1, rect2] = group.objects;
+    // Cast to RectangleObjectType for property access in test
+    const rect1Rel = rect1 as RectangleObjectType;
+    const rect2Rel = rect2 as RectangleObjectType;
+    expect(rect1Rel.type).toBe("rectangle");
+    expect(rect1Rel.x).toBeCloseTo(0);
+    expect(rect1Rel.y).toBeCloseTo(0);
+    expect(rect1Rel.width).toBeCloseTo(0.3);
+    expect(rect1Rel.height).toBeCloseTo(0.4);
+    expect(rect2Rel.type).toBe("rectangle");
+    expect(rect2Rel.x).toBeCloseTo(0.1);
+    expect(rect2Rel.y).toBeCloseTo(0.5);
+    expect(rect2Rel.width).toBeCloseTo(0.9);
+    expect(rect2Rel.height).toBeCloseTo(0.5);
 
     model.ungroupGroups([groupId]);
+
+    // After ungrouping, the rectangles should have their original absolute coordinates and sizes
+    const rect1After = model.objectMap.r1 as RectangleObjectType;
+    const rect2After = model.objectMap.r2 as RectangleObjectType;
+    expect(rect1After.x).toBe(0);
+    expect(rect1After.y).toBe(0);
+    expect(rect1After.width).toBe(30);
+    expect(rect1After.height).toBe(40);
+    expect(rect2After.x).toBe(10);
+    expect(rect2After.y).toBe(50);
+    expect(rect2After.width).toBe(90);
+    expect(rect2After.height).toBe(50);
 
     expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(4);
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
@@ -775,18 +808,47 @@ describe("DrawingContentModel", () => {
 
     const group = model.objects[0] as GroupObjectType;
     expect(group.boundingBox).toStrictEqual({ nw: {x: 0, y: 0}, se: {x: 60, y: 60}});
-    expect(ellipse.boundingBox).toStrictEqual({ nw: {x: 30, y: 30}, se: {x: 40, y: 40}});
+    // After grouping, ellipse coordinates are relative to the group
+    // The bounding box should be in relative coordinates (use toBeCloseTo for floating point precision)
+    expect(ellipse.boundingBox.nw.x).toBeCloseTo(0.5);
+    expect(ellipse.boundingBox.nw.y).toBeCloseTo(0.5);
+    expect(ellipse.boundingBox.se.x).toBeCloseTo(0.6667, 3);
+    expect(ellipse.boundingBox.se.y).toBeCloseTo(0.6667, 3);
 
     group.setDragBounds({ top: 0, right: 60, bottom: 60, left: 0});
     group.resizeObject();
     expect(group.boundingBox).toStrictEqual({ nw: {x: 0, y: 0}, se: {x: 120, y: 120}});
+    // After resizing, bounding boxes are relative to the group size (120x120)
+    // Use toBeCloseTo for floating point precision
+    expect(line.boundingBox.nw.x).toBeCloseTo(0);
+    expect(line.boundingBox.nw.y).toBeCloseTo(0);
+    expect(line.boundingBox.se.x).toBeCloseTo(0.1667, 3);
+    expect(line.boundingBox.se.y).toBeCloseTo(0.1667, 3);
 
-    expect(line.boundingBox).toStrictEqual({ nw: {x: 0, y: 0}, se: {x: 20, y: 20}});
-    expect(vector.boundingBox).toStrictEqual({ nw: {x: 20, y: 20}, se: {x: 40, y: 40}});
-    expect(rect.boundingBox).toStrictEqual({ nw: {x: 40, y: 40}, se: {x: 60, y: 60}});
-    expect(ellipse.boundingBox).toStrictEqual({ nw: {x: 60, y: 60}, se: {x: 80, y: 80}});
-    expect(image.boundingBox).toStrictEqual({ nw: {x: 80, y: 80}, se: {x: 100, y: 100}});
-    expect(text.boundingBox).toStrictEqual({ nw: {x: 100, y: 100}, se: {x: 120, y: 120}});
+    expect(vector.boundingBox.nw.x).toBeCloseTo(0.1667, 3);
+    expect(vector.boundingBox.nw.y).toBeCloseTo(0.1667, 3);
+    expect(vector.boundingBox.se.x).toBeCloseTo(0.3333, 3);
+    expect(vector.boundingBox.se.y).toBeCloseTo(0.3333, 3);
+
+    expect(rect.boundingBox.nw.x).toBeCloseTo(0.3333, 3);
+    expect(rect.boundingBox.nw.y).toBeCloseTo(0.3333, 3);
+    expect(rect.boundingBox.se.x).toBeCloseTo(0.5, 3);
+    expect(rect.boundingBox.se.y).toBeCloseTo(0.5, 3);
+
+    expect(ellipse.boundingBox.nw.x).toBeCloseTo(0.5, 3);
+    expect(ellipse.boundingBox.nw.y).toBeCloseTo(0.5, 3);
+    expect(ellipse.boundingBox.se.x).toBeCloseTo(0.6667, 3);
+    expect(ellipse.boundingBox.se.y).toBeCloseTo(0.6667, 3);
+
+    expect(image.boundingBox.nw.x).toBeCloseTo(0.6667, 3);
+    expect(image.boundingBox.nw.y).toBeCloseTo(0.6667, 3);
+    expect(image.boundingBox.se.x).toBeCloseTo(0.8333, 3);
+    expect(image.boundingBox.se.y).toBeCloseTo(0.8333, 3);
+
+    expect(text.boundingBox.nw.x).toBeCloseTo(0.8333, 3);
+    expect(text.boundingBox.nw.y).toBeCloseTo(0.8333, 3);
+    expect(text.boundingBox.se.x).toBeCloseTo(1, 3);
+    expect(text.boundingBox.se.y).toBeCloseTo(1, 3);
 
     group.setStroke('#abcdef');
     group.setStrokeDashArray('1 2');
@@ -803,6 +865,82 @@ describe("DrawingContentModel", () => {
 
     group.setEndShapes(VectorEndShape.triangle, VectorEndShape.triangle);
     expect([vector.headShape, vector.tailShape]).toEqual([VectorEndShape.triangle, VectorEndShape.triangle]);
+  });
+
+  test("duplicateObjects removes all ids from groups and nested groups", () => {
+    // Create a rectangle and an ellipse
+    const rect = {
+      type: "rectangle",
+      id: "rect1",
+      x: 0,
+      y: 0,
+      width: 20,
+      height: 10,
+      ...mockSettings
+    };
+    const ellipse = {
+      type: "ellipse",
+      id: "ellipse1",
+      x: 5,
+      y: 5,
+      rx: 5,
+      ry: 3,
+      ...mockSettings
+    };
+    // Create a nested group containing the ellipse
+    const nestedGroup = {
+      type: "group",
+      id: "group2",
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      objects: [ellipse]
+    };
+    // Create a top-level group containing the rectangle and the nested group
+    const topGroup = {
+      type: "group",
+      id: "group1",
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      objects: [rect, nestedGroup]
+    };
+    // Create the model with the top-level group
+    const model = createDrawingContentWithMetadata({ objects: [topGroup] });
+    expect(model.objects).toHaveLength(1);
+    const originalGroup = model.objects[0];
+    // Duplicate the top-level group
+    model.duplicateObjects([originalGroup.id]);
+    // There should now be two groups
+    expect(model.objects).toHaveLength(2);
+    const duplicatedGroup = model.objects[1];
+    // Helper to collect all ids in a group (recursively)
+    // Use 'as any' for test-only recursive property access
+    function collectIds(obj: any): string[] {
+      let ids: string[] = [];
+      if (obj.id) ids.push(obj.id);
+      if (Array.isArray((obj as any).objects)) {
+        (obj as any).objects.forEach((child: any) => {
+          ids = ids.concat(collectIds(child));
+        });
+      }
+      return ids;
+    }
+    const originalIds = collectIds(originalGroup);
+    const duplicatedIds = collectIds(duplicatedGroup);
+    // All ids in the duplicate should be unique and not in the original
+    duplicatedIds.forEach(id => {
+      expect(originalIds).not.toContain(id);
+    });
+    // Structure should be preserved: group > [rect, group > [ellipse]]
+    expect((duplicatedGroup as any).type).toBe("group");
+    expect((duplicatedGroup as any).objects).toHaveLength(2);
+    expect((duplicatedGroup as any).objects[0].type).toBe("rectangle");
+    expect((duplicatedGroup as any).objects[1].type).toBe("group");
+    expect((duplicatedGroup as any).objects[1].objects).toHaveLength(1);
+    expect((duplicatedGroup as any).objects[1].objects[0].type).toBe("ellipse");
   });
 
 });

@@ -15,7 +15,6 @@ import { BoundingBox, Point, ToolbarSettings } from "../model/drawing-basic-type
 import { getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
 import { debounce } from "lodash";
-import { isGroupObject } from "../objects/group";
 import { combineBoundingBoxes } from "../../../models/tiles/geometry/geometry-utils";
 import { useTileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 
@@ -284,30 +283,24 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
     let moved = false;
     const {hoverObject } = this.state;
     const selectedObjects = this.getSelectedObjects();
-    let objectsToSelect: DrawingObjectType[];
     let objectsToMove: DrawingObjectType[];
     let needToAddHoverToSelection = false;
 
-    //If the object you are dragging is selected then the selection should not be cleared
-    //and all objects should be moved.
-    //If the object you are dragging was not selected then only then all of the other objects
-    //should be deselected and just the object you are dragging should be selected.
+    // If the object you are dragging is selected then the selection should not be cleared
+    // and all objects should be moved.
+    // If the object you are dragging was not selected then only then all of the other objects
+    // should be deselected and just the object you are dragging should be selected.
     if (hoverObject && !selectedObjects.some(object => object.id === hoverObject.id)) {
       needToAddHoverToSelection = true;
       if (e.shiftKey || e.metaKey){
-        objectsToSelect = [hoverObject, ...selectedObjects];
+        objectsToMove = [hoverObject, ...selectedObjects];
       }
       else {
-        objectsToSelect = [hoverObject];
+        objectsToMove = [hoverObject];
       }
     } else {
-      objectsToSelect = selectedObjects;
+      objectsToMove = selectedObjects;
     }
-    // If any objects are groups, then their members also get moved.
-    objectsToMove = [...objectsToSelect];
-    objectsToSelect.filter(isGroupObject).forEach((group) => {
-      objectsToMove = [...objectsToMove, ...group.objects];
-    });
 
     const starting = this.getWorkspacePoint(e);
     if (!starting) return;
@@ -337,7 +330,7 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
       if (needToAddHoverToSelection) {
         // we delay until we confirm that the user is dragging the objects before adding the hover object
         // to the selection, to avoid messing with the click to select/deselect logic
-        this.setSelectedObjects(objectsToSelect);
+        this.setSelectedObjects(objectsToMove);
         // Note: the hoverObject could be kind of in a weird state here. It might
         // be both selected and hovered at the same time. However it is more
         // simple to keep the hoverObject independent of the selection. It just
@@ -411,11 +404,6 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
     return content.objects.reduce((result, object) => {
       const selected = content.isIdSelected(object.id);
       result.push(this.conditionallyRenderObject(object, selected, false));
-      if (isGroupObject(object)) {
-        object.objects.forEach((member) => {
-          result.push(this.conditionallyRenderObject(member, selected, true));
-        });
-      }
       return result;
     }, [] as (JSX.Element|null)[]);
   }
