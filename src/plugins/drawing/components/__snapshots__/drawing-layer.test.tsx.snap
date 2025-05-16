@@ -1507,6 +1507,7 @@ exports[`Drawing Layer Zoom zooms in 1`] = `
     transform="translate(0, 0) scale(2)"
   >
     <g
+      class="transformable transformable-rectangle"
       transform="translate(10,10) scale(1,1)"
     >
       <rect
@@ -1536,6 +1537,7 @@ exports[`Drawing Layer Zoom zooms out 1`] = `
     transform="translate(0, 0) scale(0.5)"
   >
     <g
+      class="transformable transformable-rectangle"
       transform="translate(10,10) scale(1,1)"
     >
       <rect
