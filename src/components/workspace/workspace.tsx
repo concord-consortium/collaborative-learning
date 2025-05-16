@@ -46,7 +46,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   // RESEARCHER-ACCESS: this is a temporary solution to show only the the nav panel for researchers
   // until we decide where to store researcher docs that are automatically created in the
   // DocumentWorkspaceComponent component.
-  const showLeftPanel = isResearcher || navTabSpecs.showNavPanel;
+  const showLeftPanel =  stores.isProblemLoaded && (isResearcher || navTabSpecs.showNavPanel);
   const showRightPanel = !isResearcher;
 
   return (

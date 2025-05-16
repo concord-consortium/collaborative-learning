@@ -1,7 +1,8 @@
 import { registerTileComponentInfo } from "../tile-component-info";
 import { registerTileContentInfo } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
-import { kQuestionTileType, QuestionContentModel, defaultQuestionContent } from "./question-content";
+import { QuestionContentModel, defaultQuestionContent } from "./question-content";
+import { kQuestionTileType } from "./question-types";
 import { QuestionTileComponent } from "../../../components/tiles/question/question-tile";
 import { updateQuestionContentForCopy } from "./question-utils";
 
