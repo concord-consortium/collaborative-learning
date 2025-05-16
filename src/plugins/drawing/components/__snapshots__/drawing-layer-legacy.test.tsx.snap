@@ -10,6 +10,7 @@ exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      class="transformable transformable-ellipse"
       transform="translate(10,10) scale(1,1)"
     >
       <ellipse
@@ -51,6 +52,7 @@ exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      class="transformable transformable-ellipse"
       transform="translate(5,5) scale(1,1)"
     >
       <ellipse
@@ -80,6 +82,7 @@ exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      class="transformable transformable-line"
       transform="translate(10,10) scale(1,1)"
     >
       <path
@@ -120,6 +123,7 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      class="transformable transformable-line"
       transform="translate(5,5) scale(1,1)"
     >
       <path
@@ -148,6 +152,7 @@ exports[`Drawing Layer Components Image adds an image 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      class="transformable transformable-image"
       transform="translate(10,10) scale(1,1)"
     >
       <image
@@ -186,6 +191,7 @@ exports[`Drawing Layer Components Image moves a image 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      class="transformable transformable-image"
       transform="translate(5,5) scale(1,1)"
     >
       <image
@@ -212,6 +218,7 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      class="transformable transformable-rectangle"
       transform="translate(10,10) scale(1,1)"
     >
       <rect
@@ -253,6 +260,7 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      class="transformable transformable-rectangle"
       transform="translate(5,5) scale(1,1)"
     >
       <rect
@@ -282,6 +290,7 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      class="transformable transformable-vector"
       transform="translate(10,10) scale(1,1)"
     >
       <g
@@ -327,6 +336,7 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      class="transformable transformable-vector"
       transform="translate(5,5) scale(1,1)"
     >
       <g
