@@ -51,7 +51,7 @@ export const useColumnHeaderCell = (height: number) => {
       };
 
       const handleSort = (e: React.MouseEvent) => {
-        if (!gridContext?.isColumnSelected(column.key)) {
+        if (gridContext?.isColumnSelected(column.key)) {
           e.stopPropagation();
           if (sortDirection === "ascending") {
             setSortDirection("descending");
@@ -62,7 +62,9 @@ export const useColumnHeaderCell = (height: number) => {
           }
         }
       };
-      
+      console.log("sortDirection", sortDirection);
+      console.log("gridContext.isColumnSelected", gridContext?.isColumnSelected(column.key));
+
       return (
         <div className={classes} onMouseOver={handleColumnHeaderCellMouseOver}
               onMouseLeave={handleColumnHeaderCellMouseLeave} onClick={handleHeaderClick}>
@@ -76,10 +78,8 @@ export const useColumnHeaderCell = (height: number) => {
               {showExpressions && <ExpressionCell readOnly={readOnly} column={column} />}
             </div>
             <div className={clsx("column-button sort-column-button", { "ascending": sortDirection === "ascending",
-                                      "descending": sortDirection === "descending"})}
-                  onClick={handleSort}>
-              <SortIcon className={clsx("column-icon sort-column-icon")}
-              />
+                                  "descending": sortDirection === "descending" })} onClick={handleSort}>
+              <SortIcon className={clsx("column-icon sort-column-icon")} />
             </div>
           </div>
         </div>

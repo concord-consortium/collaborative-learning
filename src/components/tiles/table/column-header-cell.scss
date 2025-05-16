@@ -85,21 +85,45 @@
       top: 0;
       width: 36px;
       height: 34px;
-      display: none;  // overridden when tile is selected
       justify-content: center;
       align-items: center;
 
       &.ascending {
-        .foreground.arrow {
-          display: flex !important;
-          fill: $workspace-teal-dark-1;
+        svg {
+          .background {
+            fill: var(--header-background-color);
+          }
+          .sort.circle {
+            fill: var(--header-background-color);
+          }
+          .sort.arrow {
+            display: flex !important;
+            fill: $workspace-teal-dark-1;
+            opacity: 1;
+          }
         }
       }
       &.descending {
         transform: rotate(180deg);
-        .foreground.arrow {
-          display: flex !important;
-          fill: $workspace-teal-dark-1;
+        svg {
+          .background {
+            fill: var(--header-background-color);
+          }
+          .sort.circle {
+            fill: var(--header-background-color);
+          }
+          .sort.arrow {
+            display: flex !important;
+            fill: $workspace-teal-dark-1;
+            opacity: 1;
+          }
+        }
+      }
+      &:not(.selected-column):hover {
+        svg {
+          .sort.arrow {
+            opacity: 0.35; // Semi-transparent on hover
+          }
         }
       }
     }
@@ -205,6 +229,11 @@
               }
             }
           }
+        }
+      }
+      &.ascending, .descending {
+        .foreground.arrow {
+          fill: $workspace-teal-dark-1;
         }
       }
 
