@@ -78,7 +78,7 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
   const rx = model.dragRx ?? model.rx;
   const ry = model.dragRy ?? model.ry;
   return (
-    <Transformable key={id} position={model.position} transform={model.transform}>
+    <Transformable type="ellipse" key={id} position={model.position} transform={model.transform}>
       <ellipse
         className="drawing-object"
         cx={0}

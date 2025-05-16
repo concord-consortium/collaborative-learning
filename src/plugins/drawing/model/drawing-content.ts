@@ -1,6 +1,7 @@
 import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach, destroy} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
+import { flow } from "mobx";
 
 import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType }
   from "./drawing-basic-types";
@@ -344,10 +345,6 @@ export const DrawingContentModel = NavigatableTileModel
         flipHorizontal(ids: string[]) {
           forEachObjectId(ids, object => {
             object.hFlip = !object.hFlip;
-            // Position of the object {x,y} relative to its bounding box
-            // const xOffset = object.x - object.boundingBox.nw.x;
-            // const newOffset = object.boundingBox.se.x - xOffset;
-            // Move object right by its own width + 10px
             object.x = object.x + object.boundingBox.se.x - object.boundingBox.nw.x + 10;
           });
         },
@@ -414,6 +411,20 @@ export const DrawingContentModel = NavigatableTileModel
     };
   })
   .actions(self => ({
+    flipHorizontalMaybeCopy: flow(function* (ids: string[], copy: boolean = false) {
+      if (copy) {
+        self.duplicateObjects(ids, { x: 0, y: 0 });
+        yield Promise.resolve(); // Let React render the duplicated objects
+      }
+      self.flipHorizontal(ids);
+    }),
+    flipVerticalMaybeCopy: flow(function* (ids: string[], copy: boolean = false) {
+      if (copy) {
+        self.duplicateObjects(ids, { x: 0, y: 0 });
+        yield Promise.resolve(); // Let React render the duplicated objects
+      }
+      self.flipVertical(ids);
+    }),
     // sets the model to how we want it to appear when a user first opens a document
     reset() {
       self.setSelectedButton("select");

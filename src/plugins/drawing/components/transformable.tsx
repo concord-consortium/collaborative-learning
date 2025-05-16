@@ -2,13 +2,14 @@ import React from "react";
 import { Point } from "../model/drawing-basic-types";
 import { Transform } from "../objects/drawing-object";
 
-const duration = 500; // ms
+const duration = 250; // ms
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
 
 export interface TransformableProps {
+  type: string;
   position: Point;
   transform: Transform;
   children: React.ReactNode;
@@ -17,10 +18,12 @@ export interface TransformableProps {
 /** Renders an SVG group with an optional translate and scale transform.
  * When the transform changes, the group animates to the new transform.
  *
+ * @param type - Type of object being rendered; used to generate a class attribute.
+ * @param position - The x,y position of the object.
  * @param transform - The transform to apply to the group.
  * @param children - The children to render inside the group.
  */
-export const Transformable: React.FC<TransformableProps> = ({ position, transform, children }) => {
+export const Transformable: React.FC<TransformableProps> = ({ type, position, transform, children }) => {
   const prevTransform = React.useRef(transform);
   const prevPosition = React.useRef(position);
   const [animated, setAnimated] = React.useState(transform);
@@ -53,16 +56,13 @@ export const Transformable: React.FC<TransformableProps> = ({ position, transfor
         });
         prevTransform.current = targetTrans;
         prevPosition.current = targetPos;
-        console.log("animation complete");
       }
     }
 
     // Only animate flips
     if (prevTrans.sx !== targetTrans.sx || prevTrans.sy !== targetTrans.sy) {
-      console.log("starting animation", prevTrans, targetTrans);
       rafId = requestAnimationFrame(animate);
     } else {
-      console.log("no animation", prevTrans, targetTrans);
       setAnimated({
         tx: targetTrans.tx + targetPos.x,
         ty: targetTrans.ty + targetPos.y,
@@ -76,8 +76,10 @@ export const Transformable: React.FC<TransformableProps> = ({ position, transfor
   }, [transform, position]);
 
   return (
-    // eslint-disable-next-line max-len
-    <g transform={`translate(${animated.tx},${animated.ty}) scale(${animated.sx},${animated.sy})`}>
+    <g
+      className={`transformable transformable-${type}`}
+      transform={`translate(${animated.tx},${animated.ty}) scale(${animated.sx},${animated.sy})`}
+    >
       {children}
     </g>
   );

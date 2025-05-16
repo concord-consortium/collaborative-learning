@@ -61,10 +61,9 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
   if (model.type !== "rectangle") return null;
   const rect = model as RectangleObjectType;
   const { id, stroke, strokeWidth, strokeDashArray, fill } = rect;
-  const { x, y } = rect.position;
   const { width, height } = rect.currentDims;
   return (
-    <Transformable key={id} position={rect.position} transform={rect.transform}>
+    <Transformable type="rectangle" key={id} position={rect.position} transform={rect.transform}>
       <rect
         className="drawing-object rectangle"
         x={0}

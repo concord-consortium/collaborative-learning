@@ -12,6 +12,7 @@ import { VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion, renderDrawingObject } from "../components/drawing-object-manager";
 import { isVectorObject } from "./vector";
 import { useReadOnlyContext } from "../../../components/document/read-only-context";
+import { Transformable } from "../components/transformable";
 
 import GroupObjectsIcon from "../assets/group-objects-icon.svg";
 
@@ -148,28 +149,30 @@ export const GroupComponent = observer(function GroupComponent(
   const readOnly = useReadOnlyContext();
   if (!isGroupObject(model)) return null;
   const group = model as GroupObjectType;
-  const {id, position, currentDims} = group;
+  const {id, currentDims} = group;
 
   return (
-    <g className="group"
-       transform={`translate(${position.x}, ${position.y}) scale(${currentDims.width}, ${currentDims.height})`}>
-      {renderChildDrawingObjects(group, readOnly)}
-      {/* A rectangle that is invisible, but reacts to mouse events for the group*/}
-      <rect
-        key={id}
-        className="group-rect"
-        x={0}
-        y={0}
-        width={1}
-        height={1}
-        stroke="none" strokeWidth={0}
-        fill="none"
-        onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-        onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-        onPointerDown={(e) => handleDrag?.(e, model)}
-        pointerEvents={"visible"}
-      />
-    </g>
+    <Transformable type="group" key={id} position={group.position} transform={group.transform}>
+      <g className="group"
+         transform={`scale(${currentDims.width}, ${currentDims.height})`}>
+        {renderChildDrawingObjects(group, readOnly)}
+        {/* A rectangle that is invisible, but reacts to mouse events for the group*/}
+        <rect
+          key={id}
+          className="group-rect"
+          x={0}
+          y={0}
+          width={1}
+          height={1}
+          stroke="none" strokeWidth={0}
+          fill="none"
+          onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+          onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+          onPointerDown={(e) => handleDrag?.(e, model)}
+          pointerEvents={"visible"}
+        />
+      </g>
+    </Transformable>
   );
 
 

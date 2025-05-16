@@ -5,6 +5,7 @@ import { IToolbarButtonComponentProps } from "../../components/toolbar/toolbar-b
 import { DrawingContentModelContext } from "./components/drawing-content-context";
 import { OpenPaletteValues } from "./model/drawing-content";
 import { isGroupObject } from "./objects/group";
+import { hasCopyModifier } from "../../utilities/event-utils";
 
 import DeleteIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import GroupObjectsIcon from "./assets/group-objects-icon.svg";
@@ -109,11 +110,8 @@ export const FlipHorizontalButton = observer(({ name }: IToolbarButtonComponentP
   const drawingModel = useContext(DrawingContentModelContext);
   const enabled = drawingModel.selection.length > 0;
 
-  function flipHorizontal() {
-    drawingModel.duplicateObjects(drawingModel.selection, { x: 0, y: 0 });
-    setTimeout(() => {
-      drawingModel.flipHorizontal(drawingModel.selection);
-    }, 0);
+  function flipHorizontal(event: React.MouseEvent<Element>) {
+    drawingModel.flipHorizontalMaybeCopy(drawingModel.selection, hasCopyModifier(event));
   }
 
   return (
@@ -132,11 +130,8 @@ export const FlipVerticalButton = observer(({ name }: IToolbarButtonComponentPro
   const drawingModel = useContext(DrawingContentModelContext);
   const enabled = drawingModel.selection.length > 0;
 
-  function flipVertical() {
-    drawingModel.duplicateObjects(drawingModel.selection, { x: 0, y: 0 });
-    setTimeout(() => {
-      drawingModel.flipVertical(drawingModel.selection);
-    }, 0);
+  function flipVertical(event: React.MouseEvent<Element>) {
+    drawingModel.flipVerticalMaybeCopy(drawingModel.selection, hasCopyModifier(event));
   }
 
   return (

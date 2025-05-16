@@ -144,24 +144,6 @@ export const LineObject = types.compose("LineObject", StrokedObject, FilledObjec
 export interface LineObjectType extends Instance<typeof LineObject> {}
 export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 
-// Helper to parse transform string
-function parseTransform(transform: string | undefined) {
-  let tx = 0, ty = 0, sx = 1, sy = 1;
-  if (transform) {
-    const translateMatch = transform.match(/translate\(([-\d.]+),\s*([-\d.]+)\)/);
-    if (translateMatch) {
-      tx = parseFloat(translateMatch[1]);
-      ty = parseFloat(translateMatch[2]);
-    }
-    const scaleMatch = transform.match(/scale\(([-\d.]+),\s*([-\d.]+)\)/);
-    if (scaleMatch) {
-      sx = parseFloat(scaleMatch[1]);
-      sy = parseFloat(scaleMatch[2]);
-    }
-  }
-  return { tx, ty, sx, sy };
-}
-
 export const LineComponent = observer(function LineComponent({model, handleHover, handleDrag}
   : IDrawingComponentProps) {
   if (model.type !== "line") return null;
@@ -172,7 +154,7 @@ export const LineComponent = observer(function LineComponent({model, handleHover
   const commands = `M 0 0 ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
 
   return (
-    <Transformable key={id} position={line.position} transform={line.transform}>
+    <Transformable type="line" key={id} position={line.position} transform={line.transform}>
       <path
         data-object-id={id}
         className="drawing-object"

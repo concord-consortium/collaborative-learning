@@ -41,6 +41,64 @@ exports[`Drawing Layer Components Ellipse deletes a ellipse 1`] = `
 </svg>
 `;
 
+exports[`Drawing Layer Components Ellipse flips an ellipse horizontally 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(40,10) scale(-1,1)"
+    >
+      <ellipse
+        class="drawing-object"
+        cx="0"
+        cy="0"
+        fill="#cccccc"
+        pointer-events="visible"
+        rx="10"
+        ry="10"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      />
+    </g>
+  </g>
+</svg>
+`;
+
+exports[`Drawing Layer Components Ellipse flips an ellipse vertically 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(10,40) scale(1,-1)"
+    >
+      <ellipse
+        class="drawing-object"
+        cx="0"
+        cy="0"
+        fill="#cccccc"
+        pointer-events="visible"
+        rx="10"
+        ry="10"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      />
+    </g>
+  </g>
+</svg>
+`;
+
 exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
 <svg
   xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -110,6 +168,62 @@ exports[`Drawing Layer Components Freehand Line deletes a freehand line 1`] = `
 </svg>
 `;
 
+exports[`Drawing Layer Components Freehand Line flips a freehand line horizontally 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(26,10) scale(-1,1)"
+    >
+      <path
+        class="drawing-object"
+        d="M 0 0 l 1 1 l 2 2"
+        data-object-id="123"
+        fill="none"
+        fill-rule="nonzero"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      />
+    </g>
+  </g>
+</svg>
+`;
+
+exports[`Drawing Layer Components Freehand Line flips a freehand line vertically 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(10,26) scale(1,-1)"
+    >
+      <path
+        class="drawing-object"
+        d="M 0 0 l 1 1 l 2 2"
+        data-object-id="123"
+        fill="none"
+        fill-rule="nonzero"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      />
+    </g>
+  </g>
+</svg>
+`;
+
 exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
 <svg
   xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -148,52 +262,56 @@ exports[`Drawing Layer Components Group creates a group 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      class="group"
-      transform="translate(0, 0) scale(20, 20)"
+      transform="translate(0,0) scale(1,1)"
     >
       <g
-        transform="translate(0.5,0.5) scale(1,1)"
+        class="group"
+        transform="scale(20, 20)"
       >
+        <g
+          transform="translate(0.5,0.5) scale(1,1)"
+        >
+          <rect
+            class="drawing-object rectangle"
+            fill="#cccccc"
+            height="0.5"
+            pointer-events="none"
+            stroke="#888888"
+            stroke-dasharray=""
+            stroke-width="1"
+            width="0.5"
+            x="0"
+            y="0"
+          />
+        </g>
+        <g
+          transform="translate(0.5,0.5) scale(1,1)"
+        >
+          <ellipse
+            class="drawing-object"
+            cx="0"
+            cy="0"
+            fill="#cccccc"
+            pointer-events="none"
+            rx="0.5"
+            ry="0.5"
+            stroke="#888888"
+            stroke-dasharray=""
+            stroke-width="1"
+          />
+        </g>
         <rect
-          class="drawing-object rectangle"
-          fill="#cccccc"
-          height="0.5"
-          pointer-events="none"
-          stroke="#888888"
-          stroke-dasharray=""
-          stroke-width="1"
-          width="0.5"
+          class="group-rect"
+          fill="none"
+          height="1"
+          pointer-events="visible"
+          stroke="none"
+          stroke-width="0"
+          width="1"
           x="0"
           y="0"
         />
       </g>
-      <g
-        transform="translate(0.5,0.5) scale(1,1)"
-      >
-        <ellipse
-          class="drawing-object"
-          cx="0"
-          cy="0"
-          fill="#cccccc"
-          pointer-events="none"
-          rx="0.5"
-          ry="0.5"
-          stroke="#888888"
-          stroke-dasharray=""
-          stroke-width="1"
-        />
-      </g>
-      <rect
-        class="group-rect"
-        fill="none"
-        height="1"
-        pointer-events="visible"
-        stroke="none"
-        stroke-width="0"
-        width="1"
-        x="0"
-        y="0"
-      />
     </g>
     <g>
       <rect
@@ -276,6 +394,266 @@ exports[`Drawing Layer Components Group deletes a group 1`] = `
 </svg>
 `;
 
+exports[`Drawing Layer Components Group flips a group horizontally 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(50,0) scale(-1,1)"
+    >
+      <g
+        class="group"
+        transform="scale(20, 20)"
+      >
+        <g
+          transform="translate(0.5,0.5) scale(1,1)"
+        >
+          <rect
+            class="drawing-object rectangle"
+            fill="#cccccc"
+            height="0.5"
+            pointer-events="none"
+            stroke="#888888"
+            stroke-dasharray=""
+            stroke-width="1"
+            width="0.5"
+            x="0"
+            y="0"
+          />
+        </g>
+        <g
+          transform="translate(0.5,0.5) scale(1,1)"
+        >
+          <ellipse
+            class="drawing-object"
+            cx="0"
+            cy="0"
+            fill="#cccccc"
+            pointer-events="none"
+            rx="0.5"
+            ry="0.5"
+            stroke="#888888"
+            stroke-dasharray=""
+            stroke-width="1"
+          />
+        </g>
+        <rect
+          class="group-rect"
+          fill="none"
+          height="1"
+          pointer-events="visible"
+          stroke="none"
+          stroke-width="0"
+          width="1"
+          x="0"
+          y="0"
+        />
+      </g>
+    </g>
+    <g>
+      <rect
+        data-testid="selection-box"
+        fill="#777"
+        fill-opacity="0"
+        height="40"
+        pointer-events="none"
+        stroke="#777"
+        stroke-dasharray="10 5"
+        stroke-width="1.5"
+        width="40"
+        x="20"
+        y="-10"
+      />
+      <g>
+        <rect
+          class="resize-handle nw"
+          data-corner="nw"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="15"
+          y="-15"
+        />
+        <rect
+          class="resize-handle ne"
+          data-corner="ne"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="55"
+          y="-15"
+        />
+        <rect
+          class="resize-handle sw"
+          data-corner="sw"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="15"
+          y="25"
+        />
+        <rect
+          class="resize-handle se"
+          data-corner="se"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="55"
+          y="25"
+        />
+      </g>
+    </g>
+  </g>
+</svg>
+`;
+
+exports[`Drawing Layer Components Group flips a group vertically 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(0,50) scale(1,-1)"
+    >
+      <g
+        class="group"
+        transform="scale(20, 20)"
+      >
+        <g
+          transform="translate(0.5,0.5) scale(1,1)"
+        >
+          <rect
+            class="drawing-object rectangle"
+            fill="#cccccc"
+            height="0.5"
+            pointer-events="none"
+            stroke="#888888"
+            stroke-dasharray=""
+            stroke-width="1"
+            width="0.5"
+            x="0"
+            y="0"
+          />
+        </g>
+        <g
+          transform="translate(0.5,0.5) scale(1,1)"
+        >
+          <ellipse
+            class="drawing-object"
+            cx="0"
+            cy="0"
+            fill="#cccccc"
+            pointer-events="none"
+            rx="0.5"
+            ry="0.5"
+            stroke="#888888"
+            stroke-dasharray=""
+            stroke-width="1"
+          />
+        </g>
+        <rect
+          class="group-rect"
+          fill="none"
+          height="1"
+          pointer-events="visible"
+          stroke="none"
+          stroke-width="0"
+          width="1"
+          x="0"
+          y="0"
+        />
+      </g>
+    </g>
+    <g>
+      <rect
+        data-testid="selection-box"
+        fill="#777"
+        fill-opacity="0"
+        height="40"
+        pointer-events="none"
+        stroke="#777"
+        stroke-dasharray="10 5"
+        stroke-width="1.5"
+        width="40"
+        x="-10"
+        y="20"
+      />
+      <g>
+        <rect
+          class="resize-handle nw"
+          data-corner="nw"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="-15"
+          y="15"
+        />
+        <rect
+          class="resize-handle ne"
+          data-corner="ne"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="25"
+          y="15"
+        />
+        <rect
+          class="resize-handle sw"
+          data-corner="sw"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="-15"
+          y="55"
+        />
+        <rect
+          class="resize-handle se"
+          data-corner="se"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="25"
+          y="55"
+        />
+      </g>
+    </g>
+  </g>
+</svg>
+`;
+
 exports[`Drawing Layer Components Group moves a group 1`] = `
 <svg
   xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -286,52 +664,56 @@ exports[`Drawing Layer Components Group moves a group 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
-      class="group"
-      transform="translate(5, 5) scale(20, 20)"
+      transform="translate(5,5) scale(1,1)"
     >
       <g
-        transform="translate(0.5,0.5) scale(1,1)"
+        class="group"
+        transform="scale(20, 20)"
       >
+        <g
+          transform="translate(0.5,0.5) scale(1,1)"
+        >
+          <rect
+            class="drawing-object rectangle"
+            fill="#cccccc"
+            height="0.5"
+            pointer-events="none"
+            stroke="#888888"
+            stroke-dasharray=""
+            stroke-width="1"
+            width="0.5"
+            x="0"
+            y="0"
+          />
+        </g>
+        <g
+          transform="translate(0.5,0.5) scale(1,1)"
+        >
+          <ellipse
+            class="drawing-object"
+            cx="0"
+            cy="0"
+            fill="#cccccc"
+            pointer-events="none"
+            rx="0.5"
+            ry="0.5"
+            stroke="#888888"
+            stroke-dasharray=""
+            stroke-width="1"
+          />
+        </g>
         <rect
-          class="drawing-object rectangle"
-          fill="#cccccc"
-          height="0.5"
-          pointer-events="none"
-          stroke="#888888"
-          stroke-dasharray=""
-          stroke-width="1"
-          width="0.5"
+          class="group-rect"
+          fill="none"
+          height="1"
+          pointer-events="visible"
+          stroke="none"
+          stroke-width="0"
+          width="1"
           x="0"
           y="0"
         />
       </g>
-      <g
-        transform="translate(0.5,0.5) scale(1,1)"
-      >
-        <ellipse
-          class="drawing-object"
-          cx="0"
-          cy="0"
-          fill="#cccccc"
-          pointer-events="none"
-          rx="0.5"
-          ry="0.5"
-          stroke="#888888"
-          stroke-dasharray=""
-          stroke-width="1"
-        />
-      </g>
-      <rect
-        class="group-rect"
-        fill="none"
-        height="1"
-        pointer-events="visible"
-        stroke="none"
-        stroke-width="0"
-        width="1"
-        x="0"
-        y="0"
-      />
     </g>
     <g>
       <rect
@@ -440,6 +822,58 @@ exports[`Drawing Layer Components Image deletes a image 1`] = `
 </svg>
 `;
 
+exports[`Drawing Layer Components Image flips an image horizontally 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(40,10) scale(-1,1)"
+    >
+      <image
+        height="10"
+        href="assets/logo_tw.png"
+        pointer-events="visible"
+        preserveAspectRatio="none"
+        width="10"
+        x="0"
+        y="0"
+      />
+    </g>
+  </g>
+</svg>
+`;
+
+exports[`Drawing Layer Components Image flips an image vertically 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(10,40) scale(1,-1)"
+    >
+      <image
+        height="10"
+        href="assets/logo_tw.png"
+        pointer-events="visible"
+        preserveAspectRatio="none"
+        width="10"
+        x="0"
+        y="0"
+      />
+    </g>
+  </g>
+</svg>
+`;
+
 exports[`Drawing Layer Components Image moves a image 1`] = `
 <svg
   xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -504,6 +938,64 @@ exports[`Drawing Layer Components Rectangle deletes a rectangle 1`] = `
     data-testid="drawing-layer-object-canvas"
     transform="translate(0, 0) scale(1)"
   />
+</svg>
+`;
+
+exports[`Drawing Layer Components Rectangle flips a Rectangle horizontally 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(40,10) scale(-1,1)"
+    >
+      <rect
+        class="drawing-object rectangle"
+        fill="#cccccc"
+        height="10"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+        width="10"
+        x="0"
+        y="0"
+      />
+    </g>
+  </g>
+</svg>
+`;
+
+exports[`Drawing Layer Components Rectangle flips a Rectangle vertically 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(10,40) scale(1,-1)"
+    >
+      <rect
+        class="drawing-object rectangle"
+        fill="#cccccc"
+        height="10"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+        width="10"
+        x="0"
+        y="0"
+      />
+    </g>
+  </g>
 </svg>
 `;
 
@@ -682,6 +1174,100 @@ exports[`Drawing Layer Components Vector arrow deletes a vector arrow 1`] = `
 </svg>
 `;
 
+exports[`Drawing Layer Components Vector arrow flips a Vector arrow horizontally 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(70,20) scale(-1,1)"
+    >
+      <g
+        class="vector"
+        fill="#777777"
+        pointer-events="visible"
+        stroke="#777777"
+        stroke-dasharray=""
+        stroke-width="2"
+      >
+        <line
+          class="drawing-object"
+          x1="0"
+          x2="20"
+          y1="0"
+          y2="20"
+        />
+        <g
+          transform="translate(20 20) rotate(135)"
+        >
+          <polygon
+            points="0 0 4.5 9 -4.5 9 0 0"
+          />
+        </g>
+        <g
+          transform="translate(0 0) rotate(315)"
+        >
+          <polygon
+            points="0 0 4.5 9 -4.5 9 0 0"
+          />
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
+`;
+
+exports[`Drawing Layer Components Vector arrow flips a Vector arrow vertically 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(20,70) scale(1,-1)"
+    >
+      <g
+        class="vector"
+        fill="#777777"
+        pointer-events="visible"
+        stroke="#777777"
+        stroke-dasharray=""
+        stroke-width="2"
+      >
+        <line
+          class="drawing-object"
+          x1="0"
+          x2="20"
+          y1="0"
+          y2="20"
+        />
+        <g
+          transform="translate(20 20) rotate(135)"
+        >
+          <polygon
+            points="0 0 4.5 9 -4.5 9 0 0"
+          />
+        </g>
+        <g
+          transform="translate(0 0) rotate(315)"
+        >
+          <polygon
+            points="0 0 4.5 9 -4.5 9 0 0"
+          />
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
+`;
+
 exports[`Drawing Layer Components Vector arrow moves a vector arrow 1`] = `
 <svg
   xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -771,6 +1357,72 @@ exports[`Drawing Layer Components Vector line deletes a vector line 1`] = `
     data-testid="drawing-layer-object-canvas"
     transform="translate(0, 0) scale(1)"
   />
+</svg>
+`;
+
+exports[`Drawing Layer Components Vector line flips a Vector line horizontally 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(40,10) scale(-1,1)"
+    >
+      <g
+        class="vector"
+        fill="#888888"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      >
+        <line
+          class="drawing-object"
+          x1="0"
+          x2="10"
+          y1="0"
+          y2="10"
+        />
+      </g>
+    </g>
+  </g>
+</svg>
+`;
+
+exports[`Drawing Layer Components Vector line flips a Vector line vertically 1`] = `
+<svg
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    data-testid="drawing-layer-object-canvas"
+    transform="translate(0, 0) scale(1)"
+  >
+    <g
+      transform="translate(10,40) scale(1,-1)"
+    >
+      <g
+        class="vector"
+        fill="#888888"
+        pointer-events="visible"
+        stroke="#888888"
+        stroke-dasharray=""
+        stroke-width="1"
+      >
+        <line
+          class="drawing-object"
+          x1="0"
+          x2="10"
+          y1="0"
+          y2="10"
+        />
+      </g>
+    </g>
+  </g>
 </svg>
 `;
 

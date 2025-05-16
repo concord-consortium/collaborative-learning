@@ -2,6 +2,7 @@ import ClueCanvas from '../../../support/elements/common/cCanvas';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
 import { LogEventName } from '../../../../src/lib/logger-types';
+import { parseTransform } from '../../../support/helpers/transform';
 
 const clueCanvas = new ClueCanvas;
 const drawToolTile = new DrawToolTile;
@@ -192,14 +193,14 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawToolStrokeColor().click();
     cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
     cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(1).click();
-    drawToolTile.getFreehandDrawing().first().should("have.attr", "stroke").and("eq", "#eb0000");
+    drawToolTile.getFreehandDrawing().first().find("path").should("have.attr", "stroke").and("eq", "#eb0000");
 
     cy.log("verify change fill color");
-    drawToolTile.getFreehandDrawing().first().should("not.have.attr", "fill-color");
+    drawToolTile.getFreehandDrawing().first().find("path").should("not.have.attr", "fill-color");
     drawToolTile.getDrawToolFillColor().click();
     cy.get(".toolbar-palette.fill-color .palette-buttons").should("be.visible");
     cy.get(".toolbar-palette.fill-color .palette-buttons .color-swatch").last().click();
-    drawToolTile.getFreehandDrawing().first().should("have.attr", "fill").and("eq", "#d100d1");
+    drawToolTile.getFreehandDrawing().first().find("path").should("have.attr", "fill").and("eq", "#d100d1");
 
     cy.log("deletes freehand drawing");
     // Without the previous test this is how to select it, using the simple click
@@ -256,18 +257,19 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawToolStrokeColor().click();
     cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
     cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(2).click();
-    drawToolTile.getVectorDrawing().first().should("have.attr", "stroke").and("eq", "#008a00");
+    drawToolTile.getVectorDrawing().first().get("g.vector").should("have.attr", "stroke").and("eq", "#008a00");
     drawToolTile.getDrawToolStrokeColor().click();
     cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
     cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").first().click();
 
     cy.log("change line to arrow");
-    drawToolTile.getVectorDrawing().children().its("length").should("eq", 1); // Only a line, no arrowheads yet.
+    drawToolTile.getVectorDrawing().first().find("line").its("length").should("eq", 1); // Only a line
+    drawToolTile.getVectorDrawing().first().find("polygon").should("not.exist"); // No arrowheads yet
     drawToolTile.getDrawToolVectorSubmenu().click();
     cy.get(".toolbar-palette.vectors .palette-buttons").should("be.visible");
     cy.get(".toolbar-palette.vectors .palette-buttons div:nth-child(3) button").click();
-    drawToolTile.getVectorDrawing().children().its("length").should("eq", 3); // Now three items in group...
-    drawToolTile.getVectorDrawing().find("polygon").its("length").should("eq", 2); // including two arrowheads.
+    drawToolTile.getVectorDrawing().first().find("line").its("length").should("eq", 1); // Line is still there
+    drawToolTile.getVectorDrawing().first().find("polygon").its("length").should("eq", 2); // plus two arrowheads.
     // selecting from this submenu activates the vector tool, which de-selects the object.
 
     cy.log("deletes vector drawing");
@@ -287,9 +289,9 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 200, 110, { shiftKey: true, isPrimary: true }) // Y value is different, but should be constrained to horizontal
       .trigger("pointerup",   200, 110, { shiftKey: true, isPrimary: true });
     drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
-    drawToolTile.getVectorDrawing().get('line').invoke('attr', 'y1')
+    drawToolTile.getVectorDrawing().get("line").invoke('attr', 'y1')
       .then(y1 => {
-        drawToolTile.getVectorDrawing().get('line').invoke('attr', 'y2')
+        drawToolTile.getVectorDrawing().get("line").invoke('attr', 'y2')
         .should('eq', y1);
       });
     drawToolTile.getDrawToolDelete().click();
@@ -302,9 +304,9 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 110, 125, { shiftKey: true, isPrimary: true }) // X value is different, but should be constrained to vertical
       .trigger("pointerup",   110, 125, { shiftKey: true, isPrimary: true });
     drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
-    drawToolTile.getVectorDrawing().get('line').invoke('attr', 'x1')
+    drawToolTile.getVectorDrawing().get("line").invoke('attr', 'x1')
       .then(x1 => {
-        drawToolTile.getVectorDrawing().get('line').invoke('attr', 'x2')
+        drawToolTile.getVectorDrawing().get("line").invoke('attr', 'x2')
         .should('eq', x1);
       });
     drawToolTile.getDrawToolDelete().click();
@@ -328,19 +330,19 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
 
     cy.log("verify change outline color");
-    drawToolTile.getRectangleDrawing().first().should("have.attr", "stroke").and("eq", "#000000");
+    drawToolTile.getRectangleDrawing().first().find("rect").should("have.attr", "stroke").and("eq", "#000000");
     drawToolTile.getDrawToolStrokeColor().click();
     cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
     cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").last().click();
-    drawToolTile.getRectangleDrawing().first().should("have.attr", "stroke").and("eq", "#d100d1");
+    drawToolTile.getRectangleDrawing().first().find("rect").should("have.attr", "stroke").and("eq", "#d100d1");
 
     cy.log("verify change fill color");
-    drawToolTile.getRectangleDrawing().first().should("not.have.attr", "fill-color");
+    drawToolTile.getRectangleDrawing().first().find("rect").should("not.have.attr", "fill-color");
     // The rectangle is already selected, so we don't need to select it again
     drawToolTile.getDrawToolFillColor().click();
     cy.get(".toolbar-palette.fill-color .palette-buttons").should("be.visible");
     cy.get(".toolbar-palette.fill-color .palette-buttons .color-swatch").last().click();
-    drawToolTile.getRectangleDrawing().first().should("have.attr", "fill").and("eq", "#d100d1");
+    drawToolTile.getRectangleDrawing().first().find("rect").should("have.attr", "fill").and("eq", "#d100d1");
 
     cy.log("verify moving pre-selected object");
     drawToolTile.getDrawToolSelect().click();
@@ -349,7 +351,11 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 200, 100, { isPrimary: true })
       .trigger("pointerup", 200, 100, { isPrimary: true });
     // For some reason the move isn't very accurate in cypress so often the final location off
-    drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 160, 220);
+    drawToolTile.getRectangleDrawing().first().should("have.attr", "transform");
+    drawToolTile.getRectangleDrawing().first()
+      .invoke('attr', 'transform')
+      .then(parseTransform)
+      .then(transform => expect(transform.tx).to.be.within(160, 220));
 
     cy.log("verify hovering objects");
     drawToolTile.getDrawTile()
@@ -393,7 +399,10 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 200, 135, { isPrimary: true })
       .trigger("pointerup", 200, 135, { isPrimary: true });
 
-    drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 150, 250);
+    drawToolTile.getRectangleDrawing().first()
+      .invoke('attr', 'transform')
+      .then(parseTransform)
+      .then(transform => expect(transform.tx).to.be.within(150, 250));
 
     // The best way I found to remove the hover was to delete the rectangle
     drawToolTile.getDrawToolDelete().click();
@@ -410,8 +419,8 @@ context('Draw Tool Tile', function () {
       .trigger("pointerup", 100, 70, { isPrimary: true });
 
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
-    drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "20");
-    drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "20");
+    drawToolTile.getRectangleDrawing().last().find("rect").should("have.attr", "width").and("eq", "20");
+    drawToolTile.getRectangleDrawing().last().find("rect").should("have.attr", "height").and("eq", "20");
 
     // starting from the left edge
     drawToolTile.getDrawToolRectangle().click();
@@ -420,8 +429,8 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 230, 50, { altKey: true, isPrimary: true })
       .trigger("pointerup", 230, 50, { isPrimary: true });
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
-    drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "30");
-    drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "30");
+    drawToolTile.getRectangleDrawing().last().find("rect").should("have.attr", "width").and("eq", "30");
+    drawToolTile.getRectangleDrawing().last().find("rect").should("have.attr", "height").and("eq", "30");
 
     // draw a square starting at the bottom edge
     drawToolTile.getDrawToolRectangle().click();
@@ -430,8 +439,8 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 300, 50, { altKey: true, isPrimary: true })
       .trigger("pointerup", 300, 50, { isPrimary: true });
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 3);
-    drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "40");
-    drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "40");
+    drawToolTile.getRectangleDrawing().last().find("rect").should("have.attr", "width").and("eq", "40");
+    drawToolTile.getRectangleDrawing().last().find("rect").should("have.attr", "height").and("eq", "40");
 
     // draw a square starting at the right edge
     drawToolTile.getDrawToolRectangle().click();
@@ -440,8 +449,8 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 400, 50, { altKey: true, isPrimary: true })
       .trigger("pointerup", 400, 50, { isPrimary: true });
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 4);
-    drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "50");
-    drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "50");
+    drawToolTile.getRectangleDrawing().last().find("rect").should("have.attr", "width").and("eq", "50");
+    drawToolTile.getRectangleDrawing().last().find("rect").should("have.attr", "height").and("eq", "50");
 
     // Diagonal from top right to bottom left with the width 60 and height 50
     drawToolTile.getDrawToolRectangle().click();
@@ -450,8 +459,8 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 500, 100, { altKey: true, isPrimary: true })
       .trigger("pointerup", 500, 100, { isPrimary: true });
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 5);
-    drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "60");
-    drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "60");
+    drawToolTile.getRectangleDrawing().last().find("rect").should("have.attr", "width").and("eq", "60");
+    drawToolTile.getRectangleDrawing().last().find("rect").should("have.attr", "height").and("eq", "60");
 
     // Diagonal from bottom right to top left with the width 50 and the height 70
     drawToolTile.getDrawToolRectangle().click();
@@ -460,9 +469,8 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 600, 50, { altKey: true, isPrimary: true })
       .trigger("pointerup", 600, 50, { isPrimary: true });
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 6);
-    drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "70");
-    drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "70");
-
+    drawToolTile.getRectangleDrawing().last().find("rect").should("have.attr", "width").and("eq", "70");
+    drawToolTile.getRectangleDrawing().last().find("rect").should("have.attr", "height").and("eq", "70");
 
     cy.log("deletes rectangle drawings");
     drawToolTile.getDrawTile().click();
@@ -508,8 +516,8 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 450, 150, { altKey: true, isPrimary: true })
       .trigger("pointerup", 450, 150, { isPrimary: true });
     drawToolTile.getEllipseDrawing().should("exist").and("have.length", 2);
-    drawToolTile.getEllipseDrawing().last().should("have.attr", "rx").and("eq", "100");
-    drawToolTile.getEllipseDrawing().last().should("have.attr", "ry").and("eq", "100");
+    drawToolTile.getEllipseDrawing().last().find("ellipse").should("have.attr", "rx").and("eq", "100");
+    drawToolTile.getEllipseDrawing().last().find("ellipse").should("have.attr", "ry").and("eq", "100");
 
     cy.log("deletes ellipse drawing");
     drawToolTile.getDrawTile().click();
@@ -541,21 +549,21 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
 
     cy.log("verify stamp images");
-    drawToolTile.getImageDrawing().eq(0).should("have.attr", "href").and("contain", "plus.png");
+    drawToolTile.getImageDrawing().eq(0).find("image").should("have.attr", "href").and("contain", "plus.png");
     drawToolTile.getDrawToolStampExpand().click();
     cy.get(".toolbar-palette.stamps .palette-buttons .stamp-button").eq(1).click();
     drawToolTile.getDrawTile()
       .trigger("pointerdown", 250, 100, { isPrimary: true })
       .trigger("pointerup", { isPrimary: true });
     drawToolTile.getImageDrawing().should("exist").and("have.length", 2);
-    drawToolTile.getImageDrawing().eq(1).should("have.attr", "href").and("contain", "equals.png");
+    drawToolTile.getImageDrawing().eq(1).find("image").should("have.attr", "href").and("contain", "equals.png");
     drawToolTile.getDrawToolStampExpand().click();
     cy.get(".toolbar-palette.stamps .palette-buttons .stamp-button").eq(2).click();
     drawToolTile.getDrawTile()
       .trigger("pointerdown", 250, 150, { isPrimary: true })
       .trigger("pointerup", { isPrimary: true });
     drawToolTile.getImageDrawing().should("exist").and("have.length", 3);
-    drawToolTile.getImageDrawing().eq(2).should("have.attr", "href").and("contain", "lparen.png");
+    drawToolTile.getImageDrawing().eq(2).find("image").should("have.attr", "href").and("contain", "lparen.png");
 
     cy.log("deletes stamp drawing");
     drawToolTile.getDrawToolSelect().click();
@@ -633,7 +641,7 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawToolSelect().click();
     drawToolTile.getGroupDrawing().eq(0).click({ force: true });
     // Shift+click the new rectangle to add it to the selection
-    drawToolTile.getRectangleDrawing().eq(1).click({ force: true, shiftKey: true });
+    drawToolTile.getRectangleDrawing().eq(1).find("rect").click({ force: true, shiftKey: true });
 
     drawToolTile.getSelectionBox().should("have.length", 2);
     // Group the group and the new rectangle
@@ -768,14 +776,14 @@ context('Draw Tool Tile', function () {
     drawToolTile.getSelectionBox().should("exist");
 
     // Try to move with non-primary events
-    drawToolTile.getRectangleDrawing().invoke('attr', 'x').then(x => {
+    drawToolTile.getRectangleDrawing().find("rect").invoke('attr', 'x').then(x => {
       const originalX = parseInt(x, 10);
       drawToolTile.getDrawTile()
         .trigger("pointerdown", 150, 100, { isPrimary: false })
         .trigger("pointermove", 250, 100, { isPrimary: false })
         .trigger("pointerup", 250, 100, { isPrimary: false });
 
-      drawToolTile.getRectangleDrawing().invoke('attr', 'x').then(newX => {
+      drawToolTile.getRectangleDrawing().find("rect").invoke('attr', 'x').then(newX => {
         expect(parseInt(newX, 10)).to.equal(originalX);
       });
     });
