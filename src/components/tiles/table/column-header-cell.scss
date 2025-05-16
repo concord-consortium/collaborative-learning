@@ -80,6 +80,7 @@
     }
 
     .sort-column-button {
+      display: flex;
       position: absolute;
       right: -4px;
       top: 0;
@@ -97,7 +98,6 @@
             fill: var(--header-background-color);
           }
           .sort.arrow {
-            display: flex !important;
             fill: $workspace-teal-dark-1;
             opacity: 1;
           }
@@ -113,7 +113,6 @@
             fill: var(--header-background-color);
           }
           .sort.arrow {
-            display: flex !important;
             fill: $workspace-teal-dark-1;
             opacity: 1;
           }
@@ -122,7 +121,7 @@
       &:not(.selected-column):hover {
         svg {
           .sort.arrow {
-            opacity: 0.35; // Semi-transparent on hover
+            opacity: 0.35;
           }
         }
       }
@@ -140,11 +139,9 @@
         svg {
           .background {
             fill: var(--header-background-color);
-            // stroke: var(--header-background-color);
             opacity: 0.35;
           }
           .foreground {
-            // fill: $workspace-teal-dark-1;
             stroke: $workspace-teal-dark-1;
             opacity: 0.35;
           }
@@ -152,16 +149,13 @@
       }
 
       &.sort-column-button {
-        display: flex !important;
         svg {
           .background {
             fill: var(--header-background-color);
-            // stroke: var(--header-background-color);
             opacity: 0.35;
           }
           .foreground {
             fill: $workspace-teal-dark-1;
-            // stroke: $workspace-teal-dark-1;
             opacity: 0.35;
           }
         }
@@ -241,7 +235,6 @@
         svg {
           .background {
             fill: $workspace-teal-light-3;
-            // stroke: var(--header-background-color);
             opacity: 1;
           }
         }
