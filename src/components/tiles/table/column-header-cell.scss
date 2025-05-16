@@ -107,8 +107,10 @@
 
   &:not(.selected-column):hover {
     background-color: $highlight-blue-20;
+
     .column-button {
       display: flex !important;
+
       &.remove-column-button {
         display: flex !important;
         svg {
@@ -124,6 +126,7 @@
           }
         }
       }
+
       &.sort-column-button {
         display: flex !important;
         svg {
@@ -141,95 +144,66 @@
       }
     }
   }
-
-  // &.selected-column {
-  //   background-color: $highlight-blue-20;
-
-  //   .remove-column-button {
-  //     display: flex !important;
-  //     svg {
-  //       .background {
-  //         fill: var(--header-background-color);
-  //         // stroke: var(--header-background-color);
-  //         opacity: 1;
-  //       }
-  //       .foreground {
-  //         // fill: $workspace-teal-dark-1;
-  //         stroke: $workspace-teal-dark-1;
-  //         opacity: 1;
-  //       }
-  //     }
-  //   }
-  //   .sort-column-button {
-  //     display: flex !important;
-  //     svg {
-  //       .background {
-  //         fill: var(--header-background-color);
-  //         // stroke: var(--header-background-color);
-  //         opacity: 1;
-  //       }
-  //       .foreground {
-  //         fill: $workspace-teal-dark-1;
-  //         // stroke: $workspace-teal-dark-1;
-  //         opacity: 0.35;
-  //       }
-  //     }
-  //   }
-  // }
 }
-
-// .tool-tile.selected {
-//   .table-tool {
-//     .selected-column {
-//       .remove-column-button,
-//       .sort-column-button {
-//         // show buttons only when tile and column are selected
-//         display: flex !important;
-//       }
-//     }
-//   }
-// }
 
 .selected-column {
   background-color: $highlight-blue-40;
+
   .column-header-cell {
     .column-button {
       display: flex !important;
 
       &.remove-column-button {
-        // display: flex !important;
         svg {
           .background {
             fill: var(--header-background-color);
-            // stroke: var(--header-background-color);
             opacity: 1;
           }
           .foreground {
-            // fill: $workspace-teal-dark-1;
             stroke: $workspace-teal-dark-1;
             opacity: 1;
           }
         }
+        &:active {
+          svg {
+            .background {
+              fill: $workspace-teal-dark-1;
+            }
+            .foreground {
+              stroke: var(--header-background-color);
+            }
+          }
+        }
       }
       &.sort-column-button {
-        // display: flex !important;
         svg {
           .background {
             fill: var(--header-background-color);
-            // stroke: var(--header-background-color);
             opacity: 1;
           }
           .foreground {
             fill: $workspace-teal-dark-1;
-            // stroke: $workspace-teal-dark-1;
             opacity: 0.35;
 
             &.sort.circle {
               fill: $workspace-teal-dark-1;
-              // stroke: $workspace-teal-dark-1;
               opacity: 1;
             }
-
+          }
+        }
+        &:active {
+          svg {
+            .background {
+              fill: $workspace-teal-dark-1;
+            }
+            .foreground {
+              fill: var(--header-background-color);
+              opacity: 1;
+              &.sort.circle {
+                fill: var(--header-background-color);
+                opacity: 1;
+              }
+            }
           }
         }
       }
@@ -241,9 +215,9 @@
             // stroke: var(--header-background-color);
             opacity: 1;
           }
-
         }
       }
     }
   }
 }
+

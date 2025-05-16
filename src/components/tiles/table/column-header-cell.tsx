@@ -51,15 +51,18 @@ export const useColumnHeaderCell = (height: number) => {
       };
 
       const handleSort = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (sortDirection === "ascending") {
-          setSortDirection("descending");
-        } else if (sortDirection === "descending") {
-          setSortDirection(undefined);
-        } else {
-          setSortDirection("ascending");
+        if (!gridContext?.isColumnSelected(column.key)) {
+          e.stopPropagation();
+          if (sortDirection === "ascending") {
+            setSortDirection("descending");
+          } else if (sortDirection === "descending") {
+            setSortDirection(undefined);
+          } else {
+            setSortDirection("ascending");
+          }
         }
       };
+      
       return (
         <div className={classes} onMouseOver={handleColumnHeaderCellMouseOver}
               onMouseLeave={handleColumnHeaderCellMouseLeave} onClick={handleHeaderClick}>
