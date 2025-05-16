@@ -161,6 +161,10 @@
         height: 100%;
         overflow: visible;
 
+       .drawing-object {
+          vector-effect: non-scaling-stroke;
+        }
+
         .ghost {
           opacity: 0.1;
         }

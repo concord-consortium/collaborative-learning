@@ -13,6 +13,7 @@ exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
       transform="translate(10,10) scale(1,1)"
     >
       <ellipse
+        class="drawing-object"
         cx="0"
         cy="0"
         fill="#cccccc"
@@ -53,6 +54,7 @@ exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
       transform="translate(5,5) scale(1,1)"
     >
       <ellipse
+        class="drawing-object"
         cx="0"
         cy="0"
         fill="#cccccc"
@@ -81,6 +83,7 @@ exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
       transform="translate(10,10) scale(1,1)"
     >
       <path
+        class="drawing-object"
         d="M 0 0 l 1 1 l 2 2"
         data-object-id="123"
         fill="none"
@@ -120,6 +123,7 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
       transform="translate(5,5) scale(1,1)"
     >
       <path
+        class="drawing-object"
         d="M 0 0 l 1 1 l 2 2"
         data-object-id="123"
         fill="none"
@@ -211,7 +215,7 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
       transform="translate(10,10) scale(1,1)"
     >
       <rect
-        class="rectangle"
+        class="drawing-object rectangle"
         fill="#cccccc"
         height="10"
         pointer-events="visible"
@@ -252,7 +256,7 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
       transform="translate(5,5) scale(1,1)"
     >
       <rect
-        class="rectangle"
+        class="drawing-object rectangle"
         fill="#cccccc"
         height="10"
         pointer-events="visible"
@@ -289,6 +293,7 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
         stroke-width="1"
       >
         <line
+          class="drawing-object"
           x1="0"
           x2="10"
           y1="0"
@@ -333,6 +338,7 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
         stroke-width="1"
       >
         <line
+          class="drawing-object"
           x1="0"
           x2="10"
           y1="0"

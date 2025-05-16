@@ -18,6 +18,7 @@ import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tile
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
 import { NavigatableTileModel } from "../../../models/tiles/navigatable-tile-model";
+import { removeIdsFromSnapshot } from "./drawing-utils";
 
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
@@ -60,14 +61,18 @@ export const DrawingContentModel = NavigatableTileModel
     get objectMap() {
       // TODO this will rebuild the map when any of the objects change
       // We could handle this more efficiently
-      return self.objects.reduce((map, obj) => {
+      const addObjectToMap = (map: ObjectMap, obj: any) => {
         map[obj.id] = obj;
         if (isGroupObject(obj)) {
-          obj.objects.forEach((member) => {
-            map[member.id] = member;
+          obj.objects.forEach((member: any) => {
+            addObjectToMap(map, member);
           });
         }
         return map;
+      };
+
+      return self.objects.reduce((map, obj) => {
+        return addObjectToMap(map, obj);
       }, {} as ObjectMap);
     },
     get isUserResizable() {
@@ -208,9 +213,9 @@ export const DrawingContentModel = NavigatableTileModel
     },
 
     moveObjectsOutOfGroup(group: GroupObjectType): string[] {
-      const ids: string[] = [];
+      const ids = group.objects.map((member) => member.id);
+      group.unassimilateObjects();
       group.objects.forEach((member) => {
-        ids.push(member.id);
         self.objects.push(detach(member));
       });
       return ids;
@@ -365,58 +370,45 @@ export const DrawingContentModel = NavigatableTileModel
           const newIds: string[] = [];
           forEachObjectId(ids, (object) => {
             if (object) {
-              let newObject: DrawingObjectType;
               const snap = getSnapshot(object);
-              if (isGroupObject(object)) {
-                const newGroup = {
-                  type: "group",
-                  x: 0,
-                  y: 0,
-                  objects: getSnapshot(object.objects).map((s) => {
-                    const {id, ...params} = s;
-                    params.x += offset.x;
-                    params.y += offset.y;
-                    return params;
-                  })
-                };
-                newObject = self.addObject(newGroup);
-              } else {
-                const {id, ...newParams} = snap; // remove existing ID
-                newParams.x = snap.x + offset.x; // offset by 10 pixels so it is not hidden
-                newParams.y = snap.y + offset.y;
-                newObject = self.addObject(newParams);
-              }
+              // Remove all IDs from the snapshot and any nested objects before duplicating
+              const snapWithoutIds = removeIdsFromSnapshot(snap);
+              snapWithoutIds.x = snap.x + offset.x;
+              snapWithoutIds.y = snap.y + offset.y;
+              const newObject = self.addObject(snapWithoutIds);
               newIds.push(newObject.id);
             }
           });
           self.setSelectedIds(newIds);
         },
 
+        /**
+         * Move the referenced objects into a new group and select the group.
+         * Note that although groups can be nested, new groups are always created
+         * from top-level objects (including other groups), not objects that
+         * are already nested elsewhere.
+         * @param objectIds
+         */
         createGroup(objectIds: string[]) {
           const props: GroupObjectSnapshotForAdd = {
             type: "group",
             x: 0,
-            y: 0
+            y: 0,
+            width: 0,
+            height: 0
           };
           const group = self.addAndSelectObject(props) as GroupObjectType;
           let hasVisibleMember = false;
-          forEachObjectId(objectIds, (obj) => {
-            if (isGroupObject(obj)) {
-              // Adding a group to a group:
-              // Transfer old group's members into new group; delete old group.
-              obj.objects.forEach((member) => {
-                group.objects.push(detach(member));
-                if (member.visible) hasVisibleMember = true;
-              });
-              destroy(obj);
-            } else {
-              // Adding a regular object - just move node.
+          // We have to add elements in order to preserve the layering, so we can't just
+          // iterate over the list of objectIds we are given.
+          self.objects.forEach((obj) => {
+            if (objectIds.includes(obj.id)) {
               group.objects.push(detach(obj));
               if (obj.visible) hasVisibleMember = true;
             }
           });
           group.visible = hasVisibleMember;
-          group.computeExtents();
+          group.assimilateObjects();
         },
       }
     };

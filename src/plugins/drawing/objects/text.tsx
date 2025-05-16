@@ -2,42 +2,22 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps,
-  IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
-import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
+  IDrawingLayer, ObjectTypeIconViewBox, SizedObject, typeField } from "./drawing-object";
+import { Point } from "../model/drawing-basic-types";
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 import { uniqueId } from "../../../../src/utilities/js-utils";
 import { WrappedSvgText } from "../components/wrapped-svg-text";
 import { Transformable } from "../components/transformable";
 
-export const TextObject = EditableObject.named("TextObject")
+// Note - TextObject has a stroke color, but is not implementing StrokedObject
+// because it doesn't support stroke width or dashArray.
+export const TextObject = types.compose("TextObject", EditableObject, SizedObject)
   .props({
     type: typeField("text"),
-    width: types.number,
-    height: types.number,
     stroke: types.string,
     text: types.string
   })
-  .volatile(self => ({
-    dragWidth: undefined as number | undefined,
-    dragHeight: undefined as number | undefined
-  }))
   .views(self => ({
-    get currentDims() {
-      const { width, height, dragWidth, dragHeight } = self;
-      return {
-        width: dragWidth ?? width,
-        height: dragHeight ?? height
-      };
-    }
-  }))
-  .views(self => ({
-    get boundingBox() {
-      const { x, y } = self.position;
-      const { width, height } = self.currentDims;
-      const nw: Point = {x, y};
-      const se: Point = {x: x + width, y: y + height};
-      return {nw, se};
-    },
     get label() {
       return "Text";
     },
@@ -58,21 +38,6 @@ export const TextObject = EditableObject.named("TextObject")
       self.width = Math.max(start.x, end.x) - self.x;
       self.height = Math.max(start.y, end.y) - self.y;
     },
-    setDragBounds(deltas: BoundingBoxSides) {
-      self.dragX = self.x + deltas.left;
-      self.dragY = self.y + deltas.top;
-      self.dragWidth  = self.width  + deltas.right - deltas.left;
-      self.dragHeight = self.height + deltas.bottom - deltas.top;
-    },
-    resizeObject() {
-      self.repositionObject();
-      self.width = self.dragWidth ?? self.width;
-      self.height = self.dragHeight ?? self.height;
-      self.dragWidth = self.dragHeight = undefined;
-    },
-    setEditing(editing: boolean) {
-      self.isEditing = editing;
-    }
   }));
 
 export interface TextObjectType extends Instance<typeof TextObject> {}
