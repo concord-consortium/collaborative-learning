@@ -60,6 +60,12 @@ export class DBExemplarsListener extends BaseListener {
   };
 
   private updateExemplarBasedOnValue = (exemplarId: string, value: any) => {
+    // check that the linked document is in scope for the current problem
+    const isInScope = !!this.db.stores.documents.getDocument(exemplarId);
+    if (!isInScope) {
+      // exemplar is not for the current problem, so we don't need to do anything
+      return;
+    }
     const visible = typeof value === "object" && value !== null && "visible" in value && value.visible;
     this.db.stores.documents.setExemplarVisible(exemplarId, visible);
     if (visible) {
