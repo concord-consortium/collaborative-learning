@@ -17,12 +17,18 @@ export const useColumnHeaderCell = (height: number) => {
       const column = props.column as unknown as TColumn;
       const { gridContext, readOnly, isEditing, isRemovable, showExpressions, onRemoveColumn } = column.appData || {};
       const [ columnHeaderHover, setColumnHeaderHover ] = React.useState(false);
-      const classes = classNames("column-header-cell", { "show-expression": showExpressions });
+      const classes = classNames("column-header-cell",
+                        { "show-expression": showExpressions,
+                          "selected-column": gridContext?.isColumnSelected(column.key),}
+                      );
 
       // FIXME: temporary local state
       const [sortDirection, setSortDirection] = React.useState<"ascending" | "descending" | undefined>(undefined);
 
       const handleColumnHeaderCellMouseOver = (e: React.MouseEvent) => {
+        console.log("in handleColumnHeaderCellMouseOver gridContext.isColumnSelected",
+            gridContext?.isColumnSelected(column.key));
+
         if (!gridContext?.isColumnSelected(column.key)) {
           setColumnHeaderHover(true);
           document.querySelectorAll(`.column-${column.key}`).forEach(cell => {
@@ -40,6 +46,7 @@ export const useColumnHeaderCell = (height: number) => {
         if (!gridContext?.isColumnSelected(column.key)) {
           e.stopPropagation();
           gridContext?.onSelectColumn(column.key);
+          setColumnHeaderHover(false);
         }
       };
 
@@ -53,7 +60,6 @@ export const useColumnHeaderCell = (height: number) => {
           setSortDirection("ascending");
         }
       };
-      console.log("gridContext.isColumnSelected", gridContext?.isColumnSelected(column.key));
       return (
         <div className={classes} onMouseOver={handleColumnHeaderCellMouseOver}
               onMouseLeave={handleColumnHeaderCellMouseLeave} onClick={handleHeaderClick}>
