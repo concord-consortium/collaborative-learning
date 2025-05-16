@@ -30,6 +30,25 @@ export const pasteClipboardImage = async (imageData: IClipboardContents, onCompl
   }
 };
 
+export const pasteClipboardImage2 = (imageData: IClipboardContents) => {
+  if (imageData.image) {
+    return gImageMap.addFileImage2(imageData.image);
+  } else if (imageData.text) {
+    const url = imageData.text.match(/curriculum\/([^/]+\/images\/.*)/);
+    if (!url) {
+      console.error(`ERROR: invalid image URL: ${imageData.text}`);
+      return;
+    }
+    const fileUrl = url[1];
+    const filename = fileUrl.split("/").pop();
+    const promise = gImageMap.getImage(fileUrl, {filename});
+    const entry = gImageMap.getCachedImage(fileUrl);
+    return { promise, entry };
+  } else {
+    console.error(`ERROR: unknown clipboard content type(s): ${imageData.types}`);
+  }
+};
+
 export const getClipboardContent = async (clipboardData?: DataTransfer) => {
   const clipboardContent: IClipboardContents = {
     image: null,

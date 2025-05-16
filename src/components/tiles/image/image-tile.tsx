@@ -10,9 +10,8 @@ import { ImageComponent } from "./image-component";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
-import { IDocumentContext } from "../../../models/document/document-types";
 import { debouncedSelectTile } from "../../../models/stores/ui";
-import { gImageMap, ImageMapEntry } from "../../../models/image-map";
+import { EntryStatus, gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { ImageContentModelType } from "../../../models/tiles/image/image-content";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
@@ -20,17 +19,14 @@ import { ImageDragDrop } from "../../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import { HotKeys } from "../../../utilities/hot-keys";
-import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
+import { getClipboardContent, pasteClipboardImage2 } from "../../../utilities/clipboard-utils";
 
 import "./image-tile.sass";
+import { autorun, IReactionDisposer } from "mobx";
 
 type IProps = ITileProps;
 
 interface IState {
-  isLoading?: boolean;
-  imageContentUrl?: string;
-  imageFilename?: string;
-  documentContext?: IDocumentContext;
   imageEntry?: ImageMapEntry;
   imageEltWidth?: number;
   imageEltHeight?: number;
@@ -45,42 +41,42 @@ let nextImageToolId = 0;
 @inject("stores")
 @observer
 export default class ImageToolComponent extends BaseComponent<IProps, IState> {
-  public state: IState = { isLoading: true,
-                           imageContentUrl: this.getContent().url,
+  public state: IState = {
                            isEditingTitle: false
                          };
   // give each component instance a unique id
   private imageToolId = ++nextImageToolId;
-  private _isMounted = false;
   private toolbarToolApi: ITileApi | undefined;
   private resizeObserver: ResizeObserver;
   private imageElt: HTMLDivElement | null;
-  private updateImage = (url: string, filename?: string) => {
+  private contentObserverDisposer: IReactionDisposer | null;
 
-    gImageMap.getImage(url, { filename })
-      .then(image => {
-        if (!this._isMounted) return;
-        // update react state
-        this.setState({
-          isLoading: false,
-          imageContentUrl: undefined,
-          imageFilename: undefined,
-          imageEntry: image
-        });
-        // update mst content if conversion occurred
-        if (image.contentUrl && (url !== image.contentUrl)) {
-          this.getContent().updateImageUrl(url, image.contentUrl);
-        }
-      })
-      .catch(() => {
-        this.setState({
-          isLoading: false,
-          imageContentUrl: undefined,
-          imageFilename: undefined,
-          imageEntry: undefined
-        });
-      });
+  private updateImage = (url: string, filename?: string) => {
+    const promise = gImageMap.getImage(url, { filename });
+    const entry = gImageMap.getCachedImage(url);
+    this.setState({ imageEntry: entry });
+    promise.then(image => {
+      // update mst content if conversion occurred
+      // FIXME: this might result in an extra action in the undo history.
+      // This would be handled better by moving this updateImage into the model
+      // as a flow action. This way the final URL change should be grouped in
+      // the history event of which ever action caused the url to change in the
+      // first place. The trick with that approach is how to handle the state
+      // update. If the imageEntry was put in the model's volatile then the code
+      // here could use that property instead of state.
+      // Perhaps the imageEntry could be a view on the model. This way it would
+      // only be loaded when the render requests it.
+      // The trick with that is how to handle the upload file code path.
+      // In that case we probably need to move the addFile action into the
+      // image model. That way it could update an entry stored in volatile or
+      // could store the temporary url which is then used by the view to get the
+      // the current entry.
+      if (image.contentUrl && (url !== image.contentUrl)) {
+        this.getContent().updateImageUrl(url, image.contentUrl);
+      }
+    });
   };
+
   private imageDragDrop: ImageDragDrop;
   private hotKeys = new HotKeys();
 
@@ -93,10 +89,15 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidMount() {
-    this._isMounted = true;
-    if (this.state.imageContentUrl) {
-      this.updateImageUrl(this.state.imageContentUrl, this.state.imageFilename);
-    }
+    // We do this as an autorun here instead of relying on render observation
+    // This is because we don't want trigger a new image request on each render
+    // If the image request was moved into the model, then this would be simplified
+    this.contentObserverDisposer = autorun(() => {
+      const { url, filename } = this.getContent();
+      if (url) {
+        this.updateImage(url, filename);
+      }
+    });
 
     this.resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
@@ -126,12 +127,13 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   public componentWillUnmount() {
     this.resizeObserver.disconnect();
     this.handleResizeDebounced.cancel();
-    this._isMounted = false;
+    this.contentObserverDisposer?.();
   }
+
   public componentDidUpdate(prevProps: IProps, prevState: IState) {
-    if (this.state.imageContentUrl) {
-      this.updateImageUrl(this.state.imageContentUrl, this.state.imageFilename);
-    }
+    // If the url changes, the autorun registered in componentDidMount
+    // will take care of fetching the new image and updating the imageEntry
+
     // if we have a new image, or the image height has changed, request an explicit height
     const desiredHeight = this.getDesiredHeight();
     if (desiredHeight && (desiredHeight !== this.state.requestedHeight)) {
@@ -142,11 +144,21 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { documentContent, tileElt, readOnly, scale } = this.props;
-    const { isLoading, imageEntry } = this.state;
+    const { imageEntry } = this.state;
     const showEmptyImagePrompt = !this.getContent().hasValidImage;
 
+    const isLoading =
+      imageEntry?.status === EntryStatus.PendingStorage || imageEntry?.status === EntryStatus.PendingDimensions;
+
+    // TODO: I don't know what this comment means:
     // Include states for selected and editing separately to clean up UI a little
-    const imageToUseForDisplay = imageEntry?.displayUrl || (isLoading ? "" : placeholderImage as string);
+
+    // TODO: check the change in behavior here. Previously if the imageEntry had a displayUrl
+    // that would be shown. This would be the case even if the image was loading.
+    // This might have had the effect that an old image would continue to be shown with a
+    // a spinner on top, when the image was replaced. Now this isn't possible becasue the
+    // imageEntry is updated immediately when the image is replaced.
+    const imageToUseForDisplay = isLoading ? "" : imageEntry?.displayUrl || placeholderImage as string;
     // Set image display properties for the div, since this won't resize automatically when the image changes
     const imageDisplayStyle: React.CSSProperties = {
       backgroundImage: "url(" + imageToUseForDisplay + ")"
@@ -156,9 +168,10 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       imageDisplayStyle.height = `${defaultImagePlaceholderSize.height}px`;
     }
 
-    return (
+        return (
       <>
         <div className={classNames("image-tool", readOnly ? "read-only" : "editable")}
+          data-testid="image-tile"
           data-image-tool-id={this.imageToolId}
           onMouseDown={this.handleMouseDown}
           onDragOver={this.handleDragOver}
@@ -179,10 +192,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
           <BasicEditableTileTitle />
           <ImageComponent
             ref={elt => this.imageElt = elt}
-            content={this.getContent()}
             style={imageDisplayStyle}
             onMouseDown={this.handleMouseDown}
-            onUrlChange={this.handleUrlChange}
           />
         </div>
         <EmptyImagePrompt show={showEmptyImagePrompt} />
@@ -190,29 +201,32 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private handlePaste = () => {
-    this.setState({ isLoading: true }, async () => {
-      const osClipboardContents = await getClipboardContent();
-      if (osClipboardContents) {
-        pasteClipboardImage(osClipboardContents, ({ image }) => this.handleNewImage(image));
-      }
-    });
+  private handlePaste = async () => {
+    // FIXME: With this new approach there will be a brief period of time when
+    // displayed image is not updated. This will happen while waiting for the clipboard
+    // content.
+    const osClipboardContents = await getClipboardContent();
+    if (osClipboardContents) {
+      const result = pasteClipboardImage2(osClipboardContents);
+      if (!result) return;
+      result.promise.then(image => this.handleNewImage(image));
+      this.setState({ imageEntry: result.entry });
+    }
   };
 
   private handleUploadImageFile = (file: File) => {
-    this.setState({ isLoading: true }, () => {
-      gImageMap.addFileImage(file)
-        .then(image => this.handleNewImage(image));
-    });
+    // This also returns the image map entry which should be put in the state instead
+    // of isLoading
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    const { promise, entry } = gImageMap.addFileImage2(file);
+    promise.then(image => this.handleNewImage(image));
+    this.setState({ imageEntry: entry });
   };
 
   private handleNewImage = (image: ImageMapEntry) => {
-    if (this._isMounted) {
-      const content = this.getContent();
-      this.setState({ isLoading: false, imageEntry: image });
-      if (image.contentUrl && (image.contentUrl !== content.url)) {
-        content.setUrl(image.contentUrl, image.filename);
-      }
+    const content = this.getContent();
+    if (image.contentUrl && (image.contentUrl !== content.url)) {
+      content.setUrl(image.contentUrl, image.filename);
     }
   };
 
@@ -229,6 +243,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.setState({ imageEltWidth: Math.ceil(width), imageEltHeight: Math.ceil(height) });
   }, 100);
 
+  // TODO: test that this is still working. It is called from componentDidUpdate
+  // this should happen when the state, props, or the an observed property has changed
+  // With the new approach we are observing the status of the imageEntry so that means
+  // we should re-render when the dimensions change. And that should trigger
+  // componentDidUpdate
   private getDesiredHeight() {
     const kMarginsAndBorders = 26;
     const { imageEntry, imageEltWidth } = this.state;
@@ -243,22 +262,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   private getContent() {
     return this.props.model.content as ImageContentModelType;
   }
-
-  private updateImageUrl(url: string, filename?: string) {
-    if (!this.state.isLoading) {
-      this.setState({ isLoading: true });
-    }
-    this.updateImage(url, filename);
-  }
-
-  private handleUrlChange = (url: string, filename?: string, context?: IDocumentContext) => {
-    this.setState({
-      isLoading: true,
-      imageContentUrl: url,
-      imageFilename: filename,
-      documentContext: context
-    });
-  };
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     debouncedSelectTile(this.stores.ui, this.props.model, hasSelectionModifier(e));
