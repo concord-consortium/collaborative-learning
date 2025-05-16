@@ -100,7 +100,6 @@ export class Portal {
       return this.ensureTrailingSlash(urlParams.domain);
     }
     else if (urlParams.authDomain) {
-      // TODO: check if this change is still needed (added during development)
       return this.ensureTrailingSlash(urlParams.authDomain);
     }
     else {

@@ -127,3 +127,15 @@ describe("getDisabledFeaturesOfTile()", () => {
     expect(appConfig.getDisabledFeaturesOfTile("foo")).toEqual(["fooFeature1", "fooFeature3"]);
   });
 });
+
+describe("isProblemLoaded()", () => {
+  it("returns false if the problem is not loaded", () => {
+    const { isProblemLoaded } = specStores();
+    expect(isProblemLoaded).toBe(false);
+  });
+
+  it("returns true if the problem is loaded", () => {
+    const { isProblemLoaded } = specStores({ problem: ProblemModel.create({ ordinal: 1, title: "Problem" }) });
+    expect(isProblemLoaded).toBe(true);
+  });
+});
