@@ -20,7 +20,7 @@
           accessToken: "<%= rollbarAccessToken %>",
           captureUncaught: true,
           captureUnhandledRejections: true,
-          enabled: !isLocalhost && (isAuthed || (isDemo && isMasterBranch)),
+          enabled: isProduction,
           payload: {
             environment: isProduction ? "production" : "staging"
           }
