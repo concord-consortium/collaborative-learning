@@ -416,7 +416,7 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
         <div className="instructions">
           Click below to get started with an account.
         </div>
-        <a className="button" onClick={handleLoginClick}>
+        <a className="button" data-testid="standalone-get-started-button" onClick={handleLoginClick}>
           Get Started
         </a>
       </div>
