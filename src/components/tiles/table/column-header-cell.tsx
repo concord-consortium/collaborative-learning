@@ -15,29 +15,23 @@ export const useColumnHeaderCell = (height: number) => {
   return useMemo(() => {
     const ColumnHeaderCell: React.FC<IProps> = (props: IProps) => {
       const column = props.column as unknown as TColumn;
-      const { gridContext, readOnly, isEditing, isRemovable, showExpressions, onRemoveColumn } = column.appData || {};
-      const [ columnHeaderHover, setColumnHeaderHover ] = React.useState(false);
+      const { gridContext, readOnly, isEditing, isRemovable, showExpressions, hasData,
+              onRemoveColumn } = column.appData || {};
       const classes = classNames("column-header-cell",
                         { "show-expression": showExpressions,
                           "selected-column": gridContext?.isColumnSelected(column.key),}
                       );
-
       // FIXME: temporary local state
       const [sortDirection, setSortDirection] = React.useState<"ascending" | "descending" | undefined>(undefined);
 
       const handleColumnHeaderCellMouseOver = (e: React.MouseEvent) => {
-        console.log("in handleColumnHeaderCellMouseOver gridContext.isColumnSelected",
-            gridContext?.isColumnSelected(column.key));
-
         if (!gridContext?.isColumnSelected(column.key)) {
-          setColumnHeaderHover(true);
           document.querySelectorAll(`.column-${column.key}`).forEach(cell => {
             cell.classList.add("hovered-column");
           });
         }
       };
       const handleColumnHeaderCellMouseLeave = (e: React.MouseEvent) => {
-        setColumnHeaderHover(false);
         document.querySelectorAll(`.column-${column.key}`).forEach(cell => {
           cell.classList.remove("hovered-column");
         });
@@ -46,7 +40,6 @@ export const useColumnHeaderCell = (height: number) => {
         if (!gridContext?.isColumnSelected(column.key)) {
           e.stopPropagation();
           gridContext?.onSelectColumn(column.key);
-          setColumnHeaderHover(false);
         }
       };
 
@@ -77,10 +70,12 @@ export const useColumnHeaderCell = (height: number) => {
               <EditableHeaderCell height={height} {...props} />
               {showExpressions && <ExpressionCell readOnly={readOnly} column={column} />}
             </div>
-            <div className={clsx("column-button sort-column-button", { "ascending": sortDirection === "ascending",
-                                  "descending": sortDirection === "descending" })} onClick={handleSort}>
-              <SortIcon className={clsx("column-icon sort-column-icon")} />
-            </div>
+            {hasData &&
+              <div className={clsx("column-button sort-column-button", { "ascending": sortDirection === "ascending",
+                                    "descending": sortDirection === "descending" })} onClick={handleSort}>
+                <SortIcon className={clsx("column-icon sort-column-icon")} />
+              </div>
+            }
           </div>
         </div>
       );
