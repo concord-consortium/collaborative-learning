@@ -89,6 +89,16 @@
       justify-content: center;
       align-items: center;
 
+      svg {
+        .background {
+          fill: var(--header-background-color);
+        }
+        .sort.circle {
+          fill: var(--header-background-color);
+        }
+
+      }
+
       &.ascending {
         svg {
           .background {
@@ -159,6 +169,14 @@
             opacity: 0.35;
           }
         }
+        &.ascending, &.descending {
+          svg {
+            .foreground.arrow {
+              fill: $workspace-teal-dark-1;
+              opacity: 1;
+            }
+          }
+        }
       }
     }
   }
@@ -217,17 +235,37 @@
             .foreground {
               fill: var(--header-background-color);
               opacity: 1;
-              &.sort.circle {
+              &.sort {
                 fill: var(--header-background-color);
                 opacity: 1;
+              }
+            }
+          }
+          &.ascending {
+            transform: rotate(180deg);
+            svg {
+              .foreground.arrow {
+                fill: var(--header-background-color);
+                opacity: 1;
+              }
+            }
+          }
+          &.descending {
+            transform: rotate(0deg);
+            svg {
+              .foreground.arrow {
+                fill: var(--header-background-color);
+                opacity: 0.35;
               }
             }
           }
         }
       }
       &.ascending, .descending {
-        .foreground.arrow {
-          fill: $workspace-teal-dark-1;
+        svg {
+          .foreground.arrow {
+            fill: $workspace-teal-dark-1;
+          }
         }
       }
 
@@ -236,6 +274,14 @@
           .background {
             fill: $workspace-teal-light-3;
             opacity: 1;
+          }
+        }
+        &.ascending, .descending {
+          svg {
+            .foreground.arrow {
+              fill: $workspace-teal-dark-1;
+              opacity: 1;
+            }
           }
         }
       }
