@@ -60,31 +60,31 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTileShowSortPanelOpenButton().click({ scrollBehavior: false });
     drawToolTile.getDrawTileShowSortPanel().should("have.class", "open").and("contain.text", "Rectangle").and("contain.text", "Circle");
     // Click to select
-    drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Circle").click({ scrollBehavior: false });
+    drawToolTile.getDrawTileShowSortPanel().find('li:first').should("contain.text", "Circle").click({ scrollBehavior: false });
     drawToolTile.getSelectionBox().should("exist");
 
     cy.log("can hide and show objects");
     drawToolTile.getEllipseDrawing().should("exist");
     // Click 'hide' button - unselects ellipse and makes it invisible
-    drawToolTile.getDrawTileShowSortPanel().get('li:first button.visibility-icon').click();
+    drawToolTile.getDrawTileShowSortPanel().find('li:first button.visibility-icon').click();
     drawToolTile.getEllipseDrawing().should("not.exist");
     drawToolTile.getSelectionBox().should("not.exist");
     // Now select it - should show as a faint 'ghost'
-    drawToolTile.getDrawTileShowSortPanel().get('li:first').click();
+    drawToolTile.getDrawTileShowSortPanel().find('li:first').click();
     drawToolTile.getSelectionBox().should("exist");
-    drawToolTile.getGhostGroup().should("exist").get('ellipse').should("exist");
+    drawToolTile.getGhostGroup().should("exist").find('ellipse').should("exist");
     // Make visible again
-    drawToolTile.getDrawTileShowSortPanel().get('li:first button.visibility-icon').click();
+    drawToolTile.getDrawTileShowSortPanel().find('li:first button.visibility-icon').click();
     drawToolTile.getEllipseDrawing().should("exist");
     drawToolTile.getGhostGroup().should("not.exist");
 
     cy.log("can re-order objects");
     // Test via keyboard since dragging is harder
-    drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Circle");
-    drawToolTile.getDrawTileShowSortPanel().get('li:last').should("contain.text", "Rectangle");
-    drawToolTile.getDrawTileShowSortPanel().get('li:first svg.move-icon').focus().type(' {downArrow}{enter}');
-    drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Rectangle");
-    drawToolTile.getDrawTileShowSortPanel().get('li:last').should("contain.text", "Circle");
+    drawToolTile.getDrawTileShowSortPanel().find('li:first').should("contain.text", "Circle");
+    drawToolTile.getDrawTileShowSortPanel().find('li:last').should("contain.text", "Rectangle");
+    drawToolTile.getDrawTileShowSortPanel().find('li:first svg.move-icon').focus().type(' {downArrow}{enter}');
+    drawToolTile.getDrawTileShowSortPanel().find('li:first').should("contain.text", "Rectangle");
+    drawToolTile.getDrawTileShowSortPanel().find('li:last').should("contain.text", "Circle");
 
     cy.log("can zoom in, zoom out, and fit objects");
     drawToolTile.getDrawTileObjectCanvas().should('have.attr', 'transform', 'translate(0, 0) scale(1)');
@@ -146,12 +146,12 @@ context('Draw Tool Tile', function () {
     clueCanvas.clickToolbarButton('drawing', 'zoom-in');
     clueCanvas.clickToolbarButton('drawing', 'zoom-in');
     // Delete objects
-    drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Rectangle").click();
+    drawToolTile.getDrawTileShowSortPanel().find('li:first').should("contain.text", "Rectangle").click();
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click();
-    drawToolTile.getDrawTileShowSortPanel().get('li').should("have.length", 1);
-    drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Circle").click();
+    drawToolTile.getDrawTileShowSortPanel().find('li').should("have.length", 1);
+    drawToolTile.getDrawTileShowSortPanel().find('li:first').should("contain.text", "Circle").click();
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click();
-    drawToolTile.getDrawTileShowSortPanel().get('li').should("not.exist");
+    drawToolTile.getDrawTileShowSortPanel().find('li').should("not.exist");
     // Close panel
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
     drawToolTile.getDrawTileShowSortPanel().should("have.class", "closed");
@@ -170,7 +170,7 @@ context('Draw Tool Tile', function () {
     cy.log("shows up in show/sort panel");
     drawToolTile.getDrawTileShowSortPanelOpenButton().click();
     drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
-      .get("li").should("have.length", 1).and("contain.text", "Freehand");
+      .find("li").should("have.length", 1).and("contain.text", "Freehand");
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
 
     cy.log("selects freehand drawing");
@@ -244,7 +244,7 @@ context('Draw Tool Tile', function () {
     cy.log("shows up in show/sort panel");
     drawToolTile.getDrawTileShowSortPanelOpenButton().click();
     drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
-      .get("li").should("have.length", 1).and("contain.text", "Line");
+      .find("li").should("have.length", 1).and("contain.text", "Line");
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
 
     cy.log("verify after creation, object is selected");
@@ -257,7 +257,7 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawToolStrokeColor().click();
     cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
     cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(2).click();
-    drawToolTile.getVectorDrawing().first().get("g.vector").should("have.attr", "stroke").and("eq", "#008a00");
+    drawToolTile.getVectorDrawing().first().find("g.vector").should("have.attr", "stroke").and("eq", "#008a00");
     drawToolTile.getDrawToolStrokeColor().click();
     cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
     cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").first().click();
@@ -289,9 +289,9 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 200, 110, { shiftKey: true, isPrimary: true }) // Y value is different, but should be constrained to horizontal
       .trigger("pointerup",   200, 110, { shiftKey: true, isPrimary: true });
     drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
-    drawToolTile.getVectorDrawing().get("line").invoke('attr', 'y1')
+    drawToolTile.getVectorDrawing().find("line").invoke('attr', 'y1')
       .then(y1 => {
-        drawToolTile.getVectorDrawing().get("line").invoke('attr', 'y2')
+        drawToolTile.getVectorDrawing().find("line").invoke('attr', 'y2')
         .should('eq', y1);
       });
     drawToolTile.getDrawToolDelete().click();
@@ -304,9 +304,9 @@ context('Draw Tool Tile', function () {
       .trigger("pointermove", 110, 125, { shiftKey: true, isPrimary: true }) // X value is different, but should be constrained to vertical
       .trigger("pointerup",   110, 125, { shiftKey: true, isPrimary: true });
     drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
-    drawToolTile.getVectorDrawing().get("line").invoke('attr', 'x1')
+    drawToolTile.getVectorDrawing().find("line").invoke('attr', 'x1')
       .then(x1 => {
-        drawToolTile.getVectorDrawing().get("line").invoke('attr', 'x2')
+        drawToolTile.getVectorDrawing().find("line").invoke('attr', 'x2')
         .should('eq', x1);
       });
     drawToolTile.getDrawToolDelete().click();
@@ -326,7 +326,7 @@ context('Draw Tool Tile', function () {
     cy.log("shows up in show/sort panel");
     drawToolTile.getDrawTileShowSortPanelOpenButton().click();
     drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
-      .get("li").should("have.length", 1).and("contain.text", "Rectangle");
+      .find("li").should("have.length", 1).and("contain.text", "Rectangle");
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
 
     cy.log("verify change outline color");
@@ -506,7 +506,7 @@ context('Draw Tool Tile', function () {
     cy.log("shows up in show/sort panel");
     drawToolTile.getDrawTileShowSortPanelOpenButton().click();
     drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
-      .get("li").should("have.length", 1).and("contain.text", "Ellipse");
+      .find("li").should("have.length", 1).and("contain.text", "Ellipse");
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
 
     cy.log("verify draw circle");
@@ -545,7 +545,7 @@ context('Draw Tool Tile', function () {
     cy.log("shows up in show/sort panel");
     drawToolTile.getDrawTileShowSortPanelOpenButton().click();
     drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
-      .get("li").should("have.length", 1).and("contain.text", "Image");
+      .find("li").should("have.length", 1).and("contain.text", "Image");
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
 
     cy.log("verify stamp images");
@@ -592,7 +592,7 @@ context('Draw Tool Tile', function () {
     cy.log("shows up in show/sort panel");
     drawToolTile.getDrawTileShowSortPanelOpenButton().click();
     drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
-      .get("li").should("have.length", 1).and("contain.text", "Text");
+      .find("li").should("have.length", 1).and("contain.text", "Text");
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
 
     cy.log("edits text content of object");

@@ -5,7 +5,7 @@ import { flow } from "mobx";
 
 import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType }
   from "./drawing-basic-types";
-import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
+import { kDrawingStateVersion, kDrawingTileType, kDuplicateOffset, kFlipOffset } from "./drawing-types";
 import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType,
@@ -345,13 +345,13 @@ export const DrawingContentModel = NavigatableTileModel
         flipHorizontal(ids: string[]) {
           forEachObjectId(ids, object => {
             object.hFlip = !object.hFlip;
-            object.x = object.x + object.boundingBox.se.x - object.boundingBox.nw.x + 10;
+            object.x = object.x + object.boundingBox.se.x - object.boundingBox.nw.x + kFlipOffset;
           });
         },
         flipVertical(ids: string[]) {
           forEachObjectId(ids, object => {
             object.vFlip = !object.vFlip;
-            object.y = object.y + object.boundingBox.se.y - object.boundingBox.nw.y + 10;
+            object.y = object.y + object.boundingBox.se.y - object.boundingBox.nw.y + kFlipOffset;
           });
         },
         deleteObjects(ids: string[]) {
@@ -363,7 +363,7 @@ export const DrawingContentModel = NavigatableTileModel
           });
         },
 
-        duplicateObjects(ids: string[], offset: Point = {x: 10, y: 10}) {
+        duplicateObjects(ids: string[], offset: Point = {x: kDuplicateOffset, y: kDuplicateOffset}) {
           const newIds: string[] = [];
           forEachObjectId(ids, (object) => {
             if (object) {
