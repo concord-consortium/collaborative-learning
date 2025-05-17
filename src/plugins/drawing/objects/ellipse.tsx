@@ -5,6 +5,7 @@ import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, I
   ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import EllipseToolIcon from "../assets/ellipse-icon.svg";
+import { Transformable } from "../components/transformable";
 
 export const EllipseObject = types.compose("EllipseObject", StrokedObject, FilledObject)
   .props({
@@ -74,25 +75,27 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
   handleDrag} : IDrawingComponentProps) {
   if (!isEllipseObject(model)) return null;
   const { id, stroke, strokeWidth, strokeDashArray, fill } = model;
-  const {x, y} = model.position;
   const rx = model.dragRx ?? model.rx;
   const ry = model.dragRy ?? model.ry;
-  return <ellipse
-    key={id}
-    className="drawing-object"
-    cx={x}
-    cy={y}
-    rx={rx}
-    ry={ry}
-    stroke={stroke}
-    fill={fill}
-    strokeWidth={strokeWidth}
-    strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-    onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onPointerDown={(e)=> handleDrag?.(e, model)}
-    pointerEvents={handleHover ? "visible" : "none"}
-  />;
+  return (
+    <Transformable type="ellipse" key={id} position={model.position} transform={model.transform}>
+      <ellipse
+        className="drawing-object"
+        cx={0}
+        cy={0}
+        rx={rx}
+        ry={ry}
+        stroke={stroke}
+        fill={fill}
+        strokeWidth={strokeWidth}
+        strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+        onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+        onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+        onPointerDown={(e)=> handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      />
+    </Transformable>
+  );
 });
 
 export class EllipseDrawingTool extends DrawingTool {

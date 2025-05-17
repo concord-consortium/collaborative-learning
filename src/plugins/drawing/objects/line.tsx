@@ -6,6 +6,7 @@ import { computeStrokeDashArray, DeltaPoint, DrawingTool, FilledObject, IDrawing
    IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import FreehandToolIcon from "../assets/freehand-icon.svg";
+import { Transformable } from "../components/transformable";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
   const { x, y } = line.position;
@@ -148,24 +149,28 @@ export const LineComponent = observer(function LineComponent({model, handleHover
   if (model.type !== "line") return null;
   const line = model as LineObjectType;
   const { id, deltaPoints, stroke, fill, strokeWidth, strokeDashArray } = line;
-  const { x, y } = line.position;
   const scaleX = line.dragScaleX ?? 1;
   const scaleY = line.dragScaleY ?? 1;
-  const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
-  return <path
-    key={id}
-    className="drawing-object"
-    d={commands}
-    stroke={stroke}
-    fill={fill}
-    fillRule="nonzero"
-    strokeWidth={strokeWidth}
-    strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-    onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onPointerDown={(e)=> handleDrag?.(e, model)}
-    pointerEvents={handleHover ? "visible" : "none"}
-  />;
+  const commands = `M 0 0 ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
+
+  return (
+    <Transformable type="line" key={id} position={line.position} transform={line.transform}>
+      <path
+        data-object-id={id}
+        className="drawing-object"
+        d={commands}
+        stroke={stroke}
+        fill={fill}
+        fillRule="nonzero"
+        strokeWidth={strokeWidth}
+        strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+        onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+        onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+        onPointerDown={(e)=> handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      />
+    </Transformable>
+  );
 });
 
 export class LineDrawingTool extends DrawingTool {

@@ -80,25 +80,25 @@ class DrawToolTile{
     }
 
     getFreehandDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg path');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-line');
     }
     getVectorDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg g.vector');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-vector');
     }
     getRectangleDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg rect.rectangle');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-rectangle');
     }
     getEllipseDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg ellipse');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-ellipse');
     }
     getImageDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg image');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-image');
     }
     getTextDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg g.text');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-text');
     }
     getGroupDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg g.group');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-group');
     }
 
     getSelectionBox(){

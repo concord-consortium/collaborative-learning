@@ -5,6 +5,7 @@ import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentPro
   IDrawingLayer, ObjectTypeIconViewBox, SizedObject, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import RectToolIcon from "../assets/rectangle-icon.svg";
+import { Transformable } from "../components/transformable";
 
 // Note: SizedObject must be listed last because it overrides the default implementation
 // of the boundingBox property.
@@ -60,24 +61,26 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
   if (model.type !== "rectangle") return null;
   const rect = model as RectangleObjectType;
   const { id, stroke, strokeWidth, strokeDashArray, fill } = rect;
-  const { x, y } = rect.position;
   const { width, height } = rect.currentDims;
-  return <rect
-    key={id}
-    className="drawing-object rectangle"
-    x={x}
-    y={y}
-    width={width}
-    height={height}
-    stroke={stroke}
-    fill={fill}
-    strokeWidth={strokeWidth}
-    strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-    onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onPointerDown={(e)=> handleDrag?.(e, model)}
-    pointerEvents={handleHover ? "visible" : "none"}
-  />;
+  return (
+    <Transformable type="rectangle" key={id} position={rect.position} transform={rect.transform}>
+      <rect
+        className="drawing-object rectangle"
+        x={0}
+        y={0}
+        width={width}
+        height={height}
+        stroke={stroke}
+        fill={fill}
+        strokeWidth={strokeWidth}
+        strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+        onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+        onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+        onPointerDown={(e)=> handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      />
+    </Transformable>
+  );
 
 });
 
