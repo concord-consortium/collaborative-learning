@@ -4,8 +4,9 @@ import React from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer,
   ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
-import EllipseToolIcon from "../assets/ellipse-icon.svg";
 import { Transformable } from "../components/transformable";
+
+import EllipseToolIcon from "../assets/ellipse-icon.svg";
 
 export const EllipseObject = types.compose("EllipseObject", StrokedObject, FilledObject)
   .props({

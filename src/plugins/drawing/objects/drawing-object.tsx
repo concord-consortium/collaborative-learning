@@ -96,20 +96,29 @@ export const DrawingObject = types.model("DrawingObject", {
   get supportsResize() {
     return true;
   },
+  /**
+   * Returns the translation and scaling transform that should be applied
+   * to the Transformable group element to account for the objects's flip state.
+   */
   get transform(): Transform {
     const {boundingBox, hFlip, vFlip, position} = self;
-    // Center of the object relative to its bounding box
+    const transform = { tx: 0, ty: 0, sx: 1, sy: 1 };
+    // The x,y "position" of an object is the zero point that we flip over.
+    // But depending on the object type, this position can be anywhere in its bounding box.
+    // So for the bounding box to stay the same, we need to move the object to account
+    // for the position-to-center distance.
+
+    // Center of the object relative to its "position" point.
     const center: Point = {
       x: (boundingBox.nw.x + boundingBox.se.x) / 2 - position.x,
       y: (boundingBox.nw.y + boundingBox.se.y) / 2 - position.y
     };
-    const transform = { tx: 0, ty: 0, sx: 1, sy: 1 };
     if (hFlip) {
-      transform.tx = center.x*2; // aka width
+      transform.tx = center.x*2;
       transform.sx = -1;
     }
     if (vFlip) {
-      transform.ty = center.y*2; // aka height
+      transform.ty = center.y*2;
       transform.sy = -1;
     }
     return transform;

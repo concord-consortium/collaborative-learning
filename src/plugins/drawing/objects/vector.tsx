@@ -97,7 +97,7 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
   handleDrag} : IDrawingComponentProps) {
   if (!isVectorObject(model)) return null;
   const vector = model as VectorObjectType;
-  const { id, headShape, tailShape, stroke, strokeWidth, strokeDashArray } = vector;
+  const { headShape, tailShape, stroke, strokeWidth, strokeDashArray } = vector;
   const dx = vector.dragDx ?? vector.dx;
   const dy = vector.dragDy ?? vector.dy;
   const line = <line

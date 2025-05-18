@@ -4,9 +4,10 @@ import { observer } from "mobx-react";
 import { gImageMap } from "../../../models/image-map";
 import { DrawingObjectSnapshot, DrawingTool,
   IDrawingComponentProps, IDrawingLayer, ObjectTypeIconViewBox, SizedObject, typeField } from "./drawing-object";
+import { Transformable } from "../components/transformable";
+
 import placeholderImage from "../../../assets/image_placeholder.png";
 import ImageToolIcon from "../../../clue/assets/icons/image-tool.svg";
-import { Transformable } from "../components/transformable";
 
 export const ImageObject = SizedObject.named("ImageObject")
   .props({

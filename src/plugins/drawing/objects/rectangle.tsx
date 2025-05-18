@@ -4,8 +4,9 @@ import React from "react";
 import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps,
   IDrawingLayer, ObjectTypeIconViewBox, SizedObject, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
-import RectToolIcon from "../assets/rectangle-icon.svg";
 import { Transformable } from "../components/transformable";
+
+import RectToolIcon from "../assets/rectangle-icon.svg";
 
 // Note: SizedObject must be listed last because it overrides the default implementation
 // of the boundingBox property.

@@ -4,10 +4,11 @@ import React from "react";
 import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps,
   IDrawingLayer, ObjectTypeIconViewBox, SizedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
-import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 import { uniqueId } from "../../../../src/utilities/js-utils";
 import { WrappedSvgText } from "../components/wrapped-svg-text";
 import { Transformable } from "../components/transformable";
+
+import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 
 // Note - TextObject has a stroke color, but is not implementing StrokedObject
 // because it doesn't support stroke width or dashArray.

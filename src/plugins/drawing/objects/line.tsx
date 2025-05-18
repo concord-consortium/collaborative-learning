@@ -5,8 +5,9 @@ import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray, DeltaPoint, DrawingTool, FilledObject, IDrawingComponentProps,
    IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
-import FreehandToolIcon from "../assets/freehand-icon.svg";
 import { Transformable } from "../components/transformable";
+
+import FreehandToolIcon from "../assets/freehand-icon.svg";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
   const { x, y } = line.position;
