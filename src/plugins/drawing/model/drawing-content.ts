@@ -377,6 +377,7 @@ export const DrawingContentModel = NavigatableTileModel
             }
           });
           self.setSelectedIds(newIds);
+          return newIds;
         },
 
         /**
@@ -413,14 +414,14 @@ export const DrawingContentModel = NavigatableTileModel
   .actions(self => ({
     flipHorizontalMaybeCopy: flow(function* (ids: string[], copy: boolean = false) {
       if (copy) {
-        self.duplicateObjects(ids, { x: 0, y: 0 });
+        ids = self.duplicateObjects(ids, { x: 0, y: 0 });
         yield Promise.resolve(); // Let React render the duplicated objects
       }
       self.flipHorizontal(ids);
     }),
     flipVerticalMaybeCopy: flow(function* (ids: string[], copy: boolean = false) {
       if (copy) {
-        self.duplicateObjects(ids, { x: 0, y: 0 });
+        ids = self.duplicateObjects(ids, { x: 0, y: 0 });
         yield Promise.resolve(); // Let React render the duplicated objects
       }
       self.flipVertical(ids);

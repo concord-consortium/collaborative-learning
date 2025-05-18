@@ -703,6 +703,105 @@ context('Draw Tool Tile', function () {
     //   drawToolTile.getImageDrawing().last().should("exist").invoke("attr", "href").should("contain", "sas/images/survey.png");
     // });
   });
+
+  it("Can flip objects", { scrollBehavior: false }, () => {
+    beforeTest();
+    clueCanvas.addTile("drawing");
+
+    cy.log("Flip a rectangle");
+    drawToolTile.drawRectangle(50, 50, 100, 50);
+    drawToolTile.getRectangleDrawing().invoke('attr', 'transform').then(transform => {
+      const parsedTransform = parseTransform(transform);
+      expect(parsedTransform.sx).to.equal(1);
+      expect(parsedTransform.sy).to.equal(1);
+    });
+    clueCanvas.clickToolbarButton('drawing', 'flip-horizontal');
+    cy.wait(500); // wait for animation to complete
+    drawToolTile.getRectangleDrawing().invoke('attr', 'transform').then(transform => {
+      const parsedTransform = parseTransform(transform);
+      expect(parsedTransform.sx).to.equal(-1);
+      expect(parsedTransform.sy).to.equal(1);
+    });
+    clueCanvas.clickToolbarButton('drawing', 'flip-vertical');
+    cy.wait(500);
+    drawToolTile.getRectangleDrawing().invoke('attr', 'transform').then(transform => {
+      const parsedTransform = parseTransform(transform);
+      expect(parsedTransform.sx).to.equal(-1);
+      expect(parsedTransform.sy).to.equal(-1);
+    });
+    clueCanvas.clickToolbarButton('drawing', 'delete');
+
+    cy.log("Flip an ellipse, with copy");
+    drawToolTile.drawEllipse(100, 50, 75, 25);
+    clueCanvas.clickToolbarButton('drawing', 'flip-horizontal', { altKey: true });
+    cy.wait(500);
+    drawToolTile.getEllipseDrawing().should("have.length", 2);
+    drawToolTile.getEllipseDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      const parsedTransform = parseTransform(transform);
+      expect(parsedTransform.sx).to.equal(1);
+      expect(parsedTransform.sy).to.equal(1);
+    });
+    drawToolTile.getEllipseDrawing().eq(1).invoke('attr', 'transform').then(transform => {
+      const parsedTransform = parseTransform(transform);
+      expect(parsedTransform.sx).to.equal(-1);
+      expect(parsedTransform.sy).to.equal(1);
+    });
+    clueCanvas.clickToolbarButton('drawing', 'flip-vertical', { altKey: true });
+    cy.wait(500);
+    drawToolTile.getEllipseDrawing().should("have.length", 3);
+    drawToolTile.getEllipseDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      const parsedTransform = parseTransform(transform);
+      expect(parsedTransform.sx).to.equal(1);
+      expect(parsedTransform.sy).to.equal(1);
+    });
+    drawToolTile.getEllipseDrawing().eq(1).invoke('attr', 'transform').then(transform => {
+      const parsedTransform = parseTransform(transform);
+      expect(parsedTransform.sx).to.equal(-1);
+      expect(parsedTransform.sy).to.equal(1);
+    });
+    drawToolTile.getEllipseDrawing().eq(2).invoke('attr', 'transform').then(transform => {
+      const parsedTransform = parseTransform(transform);
+      expect(parsedTransform.sx).to.equal(-1);
+      expect(parsedTransform.sy).to.equal(-1);
+    });
+    clueCanvas.clickToolbarButton('drawing', 'delete');
+    drawToolTile.getEllipseDrawing().eq(1).click();
+    drawToolTile.getDrawToolDelete().click();
+    drawToolTile.getEllipseDrawing().eq(0).click();
+    drawToolTile.getDrawToolDelete().click();
+    drawToolTile.getEllipseDrawing().should("not.exist");
+
+    cy.log("Flip a group");
+    drawToolTile.drawVector(150, 50, 30, 0);
+    drawToolTile.drawFreehand([{x: 200, y: 40}, {x: 220, y: 50}, {x: 200, y: 60}]);
+    drawToolTile.dragSelectionRectangle(140, 40, 260, 60);
+    clueCanvas.clickToolbarButton('drawing', 'group');
+    // The freehand triangle is to the right of the vector
+    drawToolTile.getFreehandDrawing().then($el => {
+      const triangleOffset = $el.offset().left;
+      drawToolTile.getVectorDrawing().then($vec => {
+        const vectorOffset = $vec.offset().left;
+        expect(triangleOffset).to.be.greaterThan(vectorOffset);
+      });
+    });
+    // Flip the group
+    clueCanvas.clickToolbarButton('drawing', 'flip-horizontal');
+    cy.wait(500);
+    drawToolTile.getGroupDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      const parsedTransform = parseTransform(transform);
+      expect(parsedTransform.sx).to.equal(-1);
+      expect(parsedTransform.sy).to.equal(1);
+    // Now triangle should be to the left of the vector
+    drawToolTile.getFreehandDrawing().then($el => {
+      const triangleOffset = $el.offset().left;
+      drawToolTile.getVectorDrawing().then($vec => {
+        const vectorOffset = $vec.offset().left;
+        expect(triangleOffset).to.be.lessThan(vectorOffset);
+      });
+    });
+  });
+});
+
   it("rejects non-primary pointer events", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
