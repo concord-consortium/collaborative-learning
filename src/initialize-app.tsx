@@ -14,7 +14,7 @@ import { AppConfigModel } from "./models/stores/app-config-model";
 import { IStores } from "./models/stores/stores";
 import { IStandaloneAuth, UserModel } from "./models/stores/user";
 import { urlParams } from "./utilities/url-params";
-import { getBearerToken } from "./utilities/auth-utils";
+import { getBearerToken, getStandaloneBasePortalUrl, STANDALONE_AUTH_DOMAIN_SENTINEL } from "./utilities/auth-utils";
 import { getAppMode } from "./lib/auth";
 import { DEBUG_STORES } from "./lib/debug";
 import { gImageMap } from "./models/image-map";
@@ -65,6 +65,11 @@ export const initializeApp = ({authoring, standalone, authDomain}: IInitializeAp
       // so fall back to that if the authDomain is not set in the hash parameters
       // checked in auth-utils.ts#initializeAuthorization and passed to this function
       authDomain = authDomain ?? urlParams.domain;
+      if (authDomain === STANDALONE_AUTH_DOMAIN_SENTINEL) {
+        // to save space in the saved registration redirect URL, we don't send the full authDomain
+        // parameter to the portal when the user is registering and instead send a sentinel value.
+        authDomain = getStandaloneBasePortalUrl();
+      }
 
       if (bearerToken && authDomain) {
         standaloneAuth = {state: "haveBearerToken", bearerToken, authDomain};
