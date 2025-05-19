@@ -1,9 +1,9 @@
 class Header{
     getClassName(){
-        return cy.get('.class[data-test=user-class]');
+        return cy.get('.class[data-test=user-title]');
     }
     getUserName(){
-        return cy.get('[data-test=user-name]');
+        return cy.get('[data-test=user-title-prefix]');
     }
     getGroupNumber(){
         return cy.get('[data-test=group-name]');

@@ -102,8 +102,8 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
         ? <VisuallyHidden>{titlePrefix} {titleText}</VisuallyHidden>
         : titlePrefix
           ? <div className="title-container">
-              <div className="title-prefix">{titlePrefix}</div>
-              <div className="title">{titleText}</div>
+              <div className="title-prefix" data-test={this.getDataTest("title-prefix")}>{titlePrefix}</div>
+              <div className="title" data-test={this.getDataTest("title")}>{titleText}</div>
             </div>
           : <div className="item line-clamp">{titleText}</div>;
 

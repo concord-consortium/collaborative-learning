@@ -18,16 +18,16 @@ class TeacherDashboard {
         return cy.get('[data-test="investigation-title"]');
     }
     getProblemDropdown() {
-        return cy.get('.problem-dropdown[data-test="user-class"] .header .line-clamp');
+        return cy.get('.problem-dropdown[data-test="user-title"] .header .line-clamp');
     }
     getClassDropdown() {
-        return cy.get('.class[data-test="user-class"] .header');
+        return cy.get('.class[data-test="user-title"] .header');
     }
     getProblemList() {
         return cy.get('.problem-dropdown .list');
     }
     getClassList() {
-        return cy.get('.class[data-test="user-class"] .list');
+        return cy.get('.class[data-test="user-title"] .list');
     }
     getViewToggle(view) { //view=["Dashboard", "Workspace"]
         return cy.get('.toggle-button').contains(view);
