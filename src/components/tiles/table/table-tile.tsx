@@ -174,7 +174,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // Expands the columns with additional data and callbacks
   useColumnExtensions({
-    gridContext, metadata, readOnly, columns, columnEditingName, changeHandlers,
+    gridContext, metadata, readOnly, columns, rows, columnEditingName, changeHandlers,
     setColumnEditingName: handleSetColumnEditingName, onShowExpressionsDialog: handleShowExpressionsDialog
   });
 
