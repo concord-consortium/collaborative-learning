@@ -37,17 +37,17 @@ class StandaloneHelper {
 
   startStandaloneSession() {
     // Click "Get Started" to begin authentication
-    cy.get("[data-testid=standalone-welcome]", { timeout: 30000 }).should("exist");
-    cy.get("[data-testid=standalone-get-started-button]").click();
+    cy.get('[data-testid=standalone-welcome]', { timeout: 30000 }).should("exist");
+    cy.get('[data-testid=standalone-get-started-button]').click();
   }
 
   logout() {
     // Click the user menu button
-    cy.get("[data-test=user-header]").should("exist").click();
+    cy.get('[data-test=user-header]').should('exist').click();
 
     // Click the logout button in the menu
-    cy.get("[data-test=user-list]").should("exist");
-    cy.get("[data-test=list-item-log-out]").should("exist").click();
+    cy.get('[data-test=user-list]').should('exist');
+    cy.get('[data-test=list-item-log-out]').should('exist').click();
 
     // Handle the portal confirmation dialog
     cy.origin('https://learn.portal.staging.concord.org', () => {
@@ -61,7 +61,7 @@ class StandaloneHelper {
     cy.url().should('include', '/standalone/');
 
     // Confirm the presence of the Get Started button
-    cy.get("[data-testid=standalone-get-started-button]").should("exist");
+    cy.get('[data-testid=standalone-get-started-button]').should('exist');
   }
 
   // Navigation helpers can be added here when CLUE-143 is completed
