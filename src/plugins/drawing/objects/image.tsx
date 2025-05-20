@@ -68,7 +68,7 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
   const height = image.dragHeight ?? image.height;
 
   return (
-    <Transformable type="image" key={id} position={image.position} transform={image.transform}>
+    <Transformable type="image" key={id} transform={image.transform}>
       <image
         href={displayUrl}
         x={0}

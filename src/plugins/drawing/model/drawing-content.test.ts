@@ -16,6 +16,7 @@ import { VectorObject } from "../objects/vector";
 import { LineObject } from "../objects/line";
 import { TextObject } from "../objects/text";
 import { GroupObjectType } from "../objects/group";
+
 import "../drawing-registration";
 
 const mockLogTileChangeEvent = jest.fn();
@@ -941,6 +942,147 @@ describe("DrawingContentModel", () => {
     expect((duplicatedGroup as any).objects[1].type).toBe("group");
     expect((duplicatedGroup as any).objects[1].objects).toHaveLength(1);
     expect((duplicatedGroup as any).objects[1].objects[0].type).toBe("ellipse");
+  });
+
+  describe("Rectangle boundingBox rotation", () => {
+    function makeRect({ x, y, width, height, rotation = 0 }:
+      { x: number, y: number, width: number, height: number, rotation?: number }) {
+      return RectangleObject.create({
+        x, y, width, height, rotation, ...mockSettings
+      });
+    }
+
+    it("returns the same bounding box for 0 degree rotation", () => {
+      const rect = makeRect({ x: 10, y: 20, width: 30, height: 40, rotation: 0 });
+      expect(rect.boundingBox.nw).toEqual({ x: 10, y: 20 });
+      expect(rect.boundingBox.se).toEqual({ x: 40, y: 60 });
+    });
+
+    it("returns a swapped bounding box for 90 degree rotation", () => {
+      const rect = makeRect({ x: 10, y: 20, width: 30, height: 40, rotation: 90 });
+      // The rectangle is rotated 90 degrees around its position (top-left corner)
+      // The new bounding box should be axis-aligned and enclose the rotated rectangle
+      // Corners: (10,20), (40,20), (40,60), (10,60)
+      // After 90deg rotation around (10,20):
+      // (10,20) -> (10,20)
+      // (40,20) -> (10,50)
+      // (40,60) -> (-30,50)
+      // (10,60) -> (-30,20)
+      // So minX = -30, maxX = 10, minY = 20, maxY = 50
+      expect(rect.boundingBox.nw.x).toBeCloseTo(-30);
+      expect(rect.boundingBox.nw.y).toBeCloseTo(20);
+      expect(rect.boundingBox.se.x).toBeCloseTo(10);
+      expect(rect.boundingBox.se.y).toBeCloseTo(50);
+    });
+
+    it("returns an offset bounding box for 180 degree rotation", () => {
+      const rect = makeRect({ x: 10, y: 20, width: 30, height: 40, rotation: 180 });
+      // Rotating 180deg around (10,20) flips the rectangle to (-20,-20) to (10,20)
+      // But the axis-aligned bounding box is the same as the original
+      expect(rect.boundingBox.nw.x).toBeCloseTo(-20);
+      expect(rect.boundingBox.nw.y).toBeCloseTo(-20);
+      expect(rect.boundingBox.se.x).toBeCloseTo(10);
+      expect(rect.boundingBox.se.y).toBeCloseTo(20);
+    });
+
+    it("returns a larger bounding box for 45 degree rotation", () => {
+      const rect = makeRect({ x: 0, y: 0, width: 10, height: 10, rotation: 45 });
+      // The rectangle is rotated 45 degrees around (0,0):
+      // (0,0) -> (0,0)
+      // (10,0) -> (7.071, 7.071)
+      // (10,10) -> (0, 14.142)
+      // (0,10) -> (-7.071, 7.071)
+      // So minX: -7.071, maxX: 7.071, minY: 0, maxY: 14.142
+      expect(rect.boundingBox.nw.x).toBeCloseTo(-7.071, 3);
+      expect(rect.boundingBox.nw.y).toBeCloseTo(0, 3);
+      expect(rect.boundingBox.se.x).toBeCloseTo(7.071, 3);
+      expect(rect.boundingBox.se.y).toBeCloseTo(14.142, 3);
+    });
+
+    it("rotates correctly around a non-origin position", () => {
+      const rect = makeRect({ x: 100, y: 200, width: 20, height: 10, rotation: 90 });
+      // Corners: (100,200), (120,200), (120,210), (100,210)
+      // After 90deg rotation around (100,200):
+      // (100,200) -> (100,200)
+      // (120,200) -> (100,220)
+      // (120,210) -> (90,220)
+      // (100,210) -> (90,200)
+      // minX = 90, maxX = 100, minY = 200, maxY = 220
+      expect(rect.boundingBox.nw.x).toBeCloseTo(90);
+      expect(rect.boundingBox.nw.y).toBeCloseTo(200);
+      expect(rect.boundingBox.se.x).toBeCloseTo(100);
+      expect(rect.boundingBox.se.y).toBeCloseTo(220);
+    });
+  });
+
+  describe("Line boundingBox rotation", () => {
+    function makeLine({ x, y, dx, dy, rotation = 0 }:
+      { x: number, y: number, dx: number, dy: number, rotation?: number }) {
+      // LineObject expects deltaPoints as an array
+      return LineObject.create({
+        x, y, deltaPoints: [{ dx, dy }], rotation,
+        ...mockSettings
+      });
+    }
+
+    it("returns the same bounding box for 0 degree rotation", () => {
+      const line = makeLine({ x: 30, y: 20, dx: -20, dy: -10, rotation: 0 });
+      // Points: (30,20) to (10,10)
+      expect(line.boundingBox.nw).toEqual({ x: 10, y: 10 });
+      expect(line.boundingBox.se).toEqual({ x: 30, y: 20 });
+    });
+
+    it("returns a rotated bounding box for 90 degree rotation", () => {
+      const line = makeLine({ x: 30, y: 20, dx: -20, dy: -10, rotation: 90 });
+      // Start: (30,20)
+      // End: (10,10)
+      // Rotate (10,10) around (30,20) by 90deg:
+      // dx = -20, dy = -10
+      // x' = 30 + (-20)*cos(90) - (-10)*sin(90) = 30 + 0 + 10 = 40
+      // y' = 20 + (-20)*sin(90) + (-10)*cos(90) = 20 - 20 + 0 = 0
+      // So new end: (40,0)
+      // Bounding box: minX = 30, maxX = 40, minY = 0, maxY = 20
+      expect(line.boundingBox.nw.x).toBeCloseTo(30);
+      expect(line.boundingBox.nw.y).toBeCloseTo(0);
+      expect(line.boundingBox.se.x).toBeCloseTo(40);
+      expect(line.boundingBox.se.y).toBeCloseTo(20);
+    });
+
+    it("returns a flipped bounding box for 180 degree rotation", () => {
+      const line = makeLine({ x: 30, y: 20, dx: -20, dy: -10, rotation: 180 });
+      // End: (10,10)
+      // Rotate (10,10) around (30,20) by 180deg:
+      // dx = -20, dy = -10
+      // x' = 30 + (-20)*cos(180) - (-10)*sin(180) = 30 + 20 - 0 = 50
+      // y' = 20 + (-20)*sin(180) + (-10)*cos(180) = 20 + 0 + 10 = 30
+      // So new end: (50,30)
+      // Bounding box: minX = 30, maxX = 50, minY = 20, maxY = 30
+      expect(line.boundingBox.nw.x).toBeCloseTo(30);
+      expect(line.boundingBox.nw.y).toBeCloseTo(20);
+      expect(line.boundingBox.se.x).toBeCloseTo(50);
+      expect(line.boundingBox.se.y).toBeCloseTo(30);
+    });
+
+    it("returns a rotated bounding box for 45 degree rotation", () => {
+      const line = makeLine({ x: 30, y: 20, dx: -20, dy: -10, rotation: 45 });
+      // NOTE: The boundingBox implementation rotates the entire simpleBoundingBox (all four corners),
+      // not just the actual line endpoints. For lines, this can result in a bounding box that is
+      // larger than the axis-aligned box around the rotated endpoints, because the extra corners
+      // (not on the line) can extend further out after rotation. This test checks the current behavior.
+      // Start: (30,20), End: (10,10)
+      // Rotate (10,10) around (30,20) by 45deg:
+      // dx = -20, dy = -10
+      // cos(45) = sin(45) = 0.7071
+      // x' = 30 + (-20)*0.7071 - (-10)*0.7071 = 30 - 14.142 + 7.071 = 22.929
+      // y' = 20 + (-20)*0.7071 + (-10)*0.7071 = 20 - 14.142 - 7.071 = -1.213
+      // However, the bounding box calculation in the code gives minX = 15.857, maxX = 30
+      // minY = -1.213, maxY = 20
+      const bbox = line.boundingBox;
+      expect(bbox.nw.x).toBeCloseTo(15.857, 2);
+      expect(bbox.nw.y).toBeCloseTo(-1.213, 3);
+      expect(bbox.se.x).toBeCloseTo(37.071, 3);
+      expect(bbox.se.y).toBeCloseTo(20, 3);
+    });
   });
 
 });

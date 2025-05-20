@@ -152,7 +152,7 @@ export const GroupComponent = observer(function GroupComponent(
   const {id, currentDims} = group;
 
   return (
-    <Transformable type="group" key={id} position={group.position} transform={group.transform}>
+    <Transformable type="group" key={id} transform={group.transform}>
       <g className="group"
          transform={`scale(${currentDims.width}, ${currentDims.height})`}>
         {renderChildDrawingObjects(group, readOnly)}

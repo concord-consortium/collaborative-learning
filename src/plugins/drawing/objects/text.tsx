@@ -159,7 +159,7 @@ export const TextComponent = observer(
   };
 
   return (
-    <Transformable type="text" position={position} transform={transform}>
+    <Transformable type="text" transform={transform}>
       <g
         key={id}
         className="text"

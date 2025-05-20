@@ -342,6 +342,15 @@ export const DrawingContentModel = NavigatableTileModel
             }
           });
         },
+        rotateBy(ids: string[], degrees: number) {
+          forEachObjectId(ids, object => {
+            // It is tempting to add "modulo 360" here, to keep the value of rotation constrained.
+            // However, then the animation from 270->0 will run the wrong way, unless we add some
+            // additional signalling to tell it not to. There doesn't seem to be much downside to
+            // letting the rotation value get arbitrarily large, so we don't constrain it.
+            object.rotation = object.rotation + degrees;
+          });
+        },
         flipHorizontal(ids: string[]) {
           forEachObjectId(ids, object => {
             object.hFlip = !object.hFlip;

@@ -24,7 +24,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
     dragDy: undefined as number | undefined
   }))
   .views(self => ({
-    get boundingBox() {
+    get simpleBoundingBox() {
       const { x, y } = self.position;
       const dx = self.dragDx ?? self.dx;
       const dy = self.dragDy ?? self.dy;
@@ -113,7 +113,7 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
     const tail = tailShape ? placeEndShape(tailShape, 0, 0, angle+180) : null; // tail points backwards
     // Set fill to stroke since arrowheads should be drawn in stroke color
   return (
-    <Transformable type="vector" position={model.position} transform={model.transform}>
+    <Transformable type="vector" transform={model.transform}>
       <g
         className="vector"
         stroke={stroke}

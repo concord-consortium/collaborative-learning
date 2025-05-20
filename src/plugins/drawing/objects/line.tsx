@@ -55,7 +55,7 @@ export const LineObject = types.compose("LineObject", StrokedObject, FilledObjec
       return false;
     },
 
-    get boundingBox() {
+    get simpleBoundingBox() {
       // The position of the line is its start point.
       // Other points are stored as deltas from the start point.
       const {x, y} = self.position;
@@ -155,7 +155,7 @@ export const LineComponent = observer(function LineComponent({model, handleHover
   const commands = `M 0 0 ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
 
   return (
-    <Transformable type="line" key={id} position={line.position} transform={line.transform}>
+    <Transformable type="line" key={id} transform={line.transform}>
       <path
         data-object-id={id}
         className="drawing-object"

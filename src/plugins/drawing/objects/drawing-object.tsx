@@ -5,11 +5,19 @@ import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, BoundingBoxSides, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
+import { rotatePoint } from "../model/drawing-utils";
+
 import ErrorIcon from "../../../assets/icons/error.svg";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "text" | "stamp" | "variable";
 
-export type Transform = { tx: number, ty: number, sx: number, sy: number };
+export type Transform = {
+  corner: Point,
+  position: Point,
+  center: Point,
+  scale: Point,
+  rotation: number
+};
 
 export const ObjectTypeIconViewBox = "0 0 36 34";
 
@@ -52,6 +60,7 @@ export const DrawingObject = types.model("DrawingObject", {
   y: types.number,
   hFlip: types.optional(types.boolean, false),
   vFlip: types.optional(types.boolean, false),
+  rotation: types.optional(types.number, 0),
   visible: true
 })
 .volatile(self => ({
@@ -66,7 +75,8 @@ export const DrawingObject = types.model("DrawingObject", {
       y: self.dragY ?? self.y
     };
   },
-  get boundingBox(): BoundingBox {
+  /** The bounding box of the object without considering rotation. */
+  get simpleBoundingBox(): BoundingBox {
     // SC: I tried an approach of tracking the SVG elements that were rendered,
     // and using a generic SVG getBBox() here, but it had performance issues.
     // The bounding box is used to draw a highlight around the element when the
@@ -76,7 +86,7 @@ export const DrawingObject = types.model("DrawingObject", {
     // the box. Additionally if the implementation doesn't access the x or y of
     // self then MobX observation is not triggered so moving the element doesn't
     // cause the selection highlight to update.
-    throw "Subclass needs to implement boundingBox";
+    throw "Subclass needs to implement simpleBoundingBox";
   },
   get label(): string {
     // Object types should implement this to return a user-friendly short label,
@@ -89,9 +99,29 @@ export const DrawingObject = types.model("DrawingObject", {
   }
 }))
 .views(self => ({
-  inSelection(selectionBox: SelectionBox) {
-    const {nw, se} = self.boundingBox;
-    return selectionBox.overlaps(nw, se);
+  get boundingBox(): BoundingBox {
+    const { simpleBoundingBox, rotation } = self;
+    // Get the four corners of the bounding box
+    const nw = simpleBoundingBox.nw;
+    const se = simpleBoundingBox.se;
+    const ne = { x: se.x, y: nw.y };
+    const sw = { x: nw.x, y: se.y };
+    // Rotate each corner around the se (our center of rotation)
+    const rotatedNW = rotatePoint(nw, se, rotation);
+    const rotatedNE = rotatePoint(ne, se, rotation);
+    const rotatedSE = se; //rotatePoint(se, se, rotation);
+    const rotatedSW = rotatePoint(sw, se, rotation);
+    // Find min/max x and y
+    const xs = [rotatedNW.x, rotatedNE.x, rotatedSE.x, rotatedSW.x];
+    const ys = [rotatedNW.y, rotatedNE.y, rotatedSE.y, rotatedSW.y];
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    return {
+      nw: { x: minX, y: minY },
+      se: { x: maxX, y: maxY }
+    };
   },
   get supportsResize() {
     return true;
@@ -101,8 +131,13 @@ export const DrawingObject = types.model("DrawingObject", {
    * to the Transformable group element to account for the objects's flip state.
    */
   get transform(): Transform {
-    const {boundingBox, hFlip, vFlip, position} = self;
-    const transform = { tx: 0, ty: 0, sx: 1, sy: 1 };
+    const {simpleBoundingBox, hFlip, vFlip, position, rotation} = self;
+    const transform = {
+      corner: {x: simpleBoundingBox.se.x, y: simpleBoundingBox.se.y},
+      position: {x: position.x, y: position.y},
+      center: {x: 0, y: 0},
+      scale: {x: hFlip ? -1 : 1, y: vFlip ? -1 : 1},
+      rotation };
     // The x,y "position" of an object is the zero point that we flip over.
     // But depending on the object type, this position can be anywhere in its bounding box.
     // So for the bounding box to stay the same, we need to move the object to account
@@ -110,19 +145,23 @@ export const DrawingObject = types.model("DrawingObject", {
 
     // Center of the object relative to its "position" point.
     const center: Point = {
-      x: (boundingBox.nw.x + boundingBox.se.x) / 2 - position.x,
-      y: (boundingBox.nw.y + boundingBox.se.y) / 2 - position.y
+      x: (simpleBoundingBox.nw.x + simpleBoundingBox.se.x) / 2 - position.x,
+      y: (simpleBoundingBox.nw.y + simpleBoundingBox.se.y) / 2 - position.y
     };
     if (hFlip) {
-      transform.tx = center.x*2;
-      transform.sx = -1;
+      transform.center.x = center.x*2;
     }
     if (vFlip) {
-      transform.ty = center.y*2;
-      transform.sy = -1;
+      transform.center.y = center.y*2;
     }
     return transform;
   }
+}))
+.views(self => ({
+  inSelection(selectionBox: SelectionBox) {
+    const {nw, se} = self.boundingBox;
+    return selectionBox.overlaps(nw, se);
+  },
 }))
 .actions(self => ({
   setVisible(visible: boolean) {
@@ -141,6 +180,12 @@ export const DrawingObject = types.model("DrawingObject", {
     self.y = self.dragY ?? self.y;
     self.dragX = self.dragY = undefined;
   },
+  /**
+   * Temporarily adjust the edges of the object's bounding box by the given deltas.
+   * This will change the size and origin position of the object, with changes stored as volatile fields.
+   *
+   * @param deltas
+   */
   setDragBounds(deltas: BoundingBoxSides) {
     // Temporarily adjust the edges of the object's bounding box by the given deltas.
     // This will change the size and origin position of the object, with changes stored as volatile fields.
@@ -190,7 +235,7 @@ export const SizedObject = DrawingObject.named("SizedObject")
   }
 }))
 .views(self => ({
-  get boundingBox() {
+  get simpleBoundingBox() {
     const { x, y } = self.position;
     const { width, height } = self.currentDims;
     const nw: Point = {x, y};

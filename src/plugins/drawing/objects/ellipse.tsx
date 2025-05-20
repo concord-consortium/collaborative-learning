@@ -20,7 +20,7 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
     dragRy: undefined as number | undefined
   }))
   .views(self => ({
-    get boundingBox() {
+    get simpleBoundingBox() {
       // The position of the ellipse is its center.
       const {x, y} = self.position;
       const rx = self.dragRx ?? self.rx;
@@ -79,7 +79,7 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
   const rx = model.dragRx ?? model.rx;
   const ry = model.dragRy ?? model.ry;
   return (
-    <Transformable type="ellipse" key={id} position={model.position} transform={model.transform}>
+    <Transformable type="ellipse" key={id} transform={model.transform}>
       <ellipse
         className="drawing-object"
         cx={0}
