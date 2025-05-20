@@ -4,14 +4,8 @@
   position: relative;
   width: 100%;
   height: 100%;
-
-  &.show-expression {
-    .flex-container {
-      .editable-header-cell {
-        height: calc(var(--header-row-height) / 2);
-      }
-    }
-  }
+  display: flex;
+  flex-direction: column;
 
   .header-cell-container {
     display: flex;
@@ -19,75 +13,56 @@
     align-items: center;
     justify-content: center ;
 
-    .flex-container {
+    &.show-expression {
+      height: calc(var(--header-row-height) / 2);
+    }
+
+    .editable-header-cell {
+      width: 100%;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      white-space: normal;
+      word-break: break-word;
+      text-align: center;
+      line-height: 18px;
 
-      .editable-header-cell {
-        width: 100%;
-        height: var(--header-row-height);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        white-space: normal;
-        word-break: break-word;
-        text-align: center;
-        line-height: 18px;
-
-        .header-name {
-          margin: 0 16px;
-        }
-
-        &.table-title-editing {
-          padding: 0 !important;
-
-          .rdg-text-editor:focus {
-            border-color: $highlight-blue;
-            outline: 0
-          }
-
-          input {
-            text-align: center;
-          }
-        }
+      .header-name {
+        margin: 0 16px;
       }
 
-      .expression-cell {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-style: italic;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        line-height: 18px;
-        &.has-expression {
-          border-top: 1px solid white;
+      &.table-title-editing {
+        padding: 0 !important;
+
+        .rdg-text-editor:focus {
+          border-color: $highlight-blue;
+          outline: 0
+        }
+
+        input {
+          text-align: center;
         }
       }
     }
 
-    .remove-column-button {
+    .column-button {
       position: absolute;
-      left: -4px;
-      top: 0;
       width: 36px;
       height: 34px;
-      display: none;  // overridden when tile is selected
       justify-content: center;
       align-items: center;
+    }
+
+    .remove-column-button {
+      left: -4px;
+      display: none;  // overridden when tile is selected
+      margin-right: 5px;
     }
 
     .sort-column-button {
       display: flex;
-      position: absolute;
       right: -4px;
-      top: 0;
-      width: 36px;
-      height: 34px;
-      justify-content: center;
-      align-items: center;
+      margin-left: 5px;
 
       svg {
         .background {
@@ -178,6 +153,21 @@
           }
         }
       }
+    }
+  }
+
+  .expression-cell {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 18px;
+    &.has-expression {
+      border-top: 1px solid white;
     }
   }
 }

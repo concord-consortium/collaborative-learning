@@ -61,22 +61,24 @@ export const useColumnHeaderCell = (height: number) => {
       return (
         <div className={classes} onMouseOver={handleColumnHeaderCellMouseOver}
               onMouseLeave={handleColumnHeaderCellMouseLeave} onClick={handleHeaderClick}>
-          <div className="header-cell-container">
-            {!isEditing && isRemovable &&
-              <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}
-                isColumnSelected={gridContext?.isColumnSelected(column.key) ?? false}/>
-            }
-            <div className="flex-container">
+          <div className="flex-container">
+            <div className={clsx("header-cell-container", {"show-expression": showExpressions})}>
+              {!isEditing && isRemovable &&
+                <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}
+                  isColumnSelected={gridContext?.isColumnSelected(column.key) ?? false}/>
+              }
               <EditableHeaderCell height={height} {...props} />
-              {showExpressions && <ExpressionCell readOnly={readOnly} column={column} />}
+              {/* {showExpressions && <ExpressionCell readOnly={readOnly} column={column} />} */}
+              {hasData &&
+                <div className={clsx("column-button sort-column-button", { "ascending": sortDirection === "ascending",
+                                      "descending": sortDirection === "descending" })} onClick={handleSort}>
+                  <SortIcon className={clsx("column-icon sort-column-icon")} />
+                </div>
+              }
             </div>
-            {hasData &&
-              <div className={clsx("column-button sort-column-button", { "ascending": sortDirection === "ascending",
-                                    "descending": sortDirection === "descending" })} onClick={handleSort}>
-                <SortIcon className={clsx("column-icon sort-column-icon")} />
-              </div>
-            }
+            {showExpressions && <ExpressionCell readOnly={readOnly} column={column} />}
           </div>
+
         </div>
       );
     };
