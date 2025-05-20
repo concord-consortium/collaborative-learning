@@ -153,7 +153,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {showProblemMenu &&
           <>
             <div className="separator"/>
-            <div className="problem-dropdown" data-test="user-class">
+            <div className="problem-dropdown" data-test="problem-dropdown">
               <ProblemMenuContainer />
             </div>
           </>
