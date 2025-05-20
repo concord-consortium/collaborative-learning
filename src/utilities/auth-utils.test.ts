@@ -1,4 +1,4 @@
-import { convertURLToOAuth2, getPortalStandaloneSignInOrRegisterUrl } from "./auth-utils";
+import { convertURLToOAuth2, getConfirmLogoutUrl, getPortalStandaloneSignInOrRegisterUrl } from "./auth-utils";
 import { reprocessUrlParams } from "./url-params";
 
 describe("auth-utils", () => {
@@ -82,6 +82,21 @@ describe("auth-utils", () => {
       setLocation("https://collaborative-learning.concord.org/standalone/?classWord=m2studio");
       const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FclassWord%3Dm2studio%26authDomain%3Dstandalone&class_word=m2studio";
       const actualURL = getPortalStandaloneSignInOrRegisterUrl();
+      expect(actualURL).toBe(expectedURL);
+    });
+  });
+
+  describe("getConfirmLogoutUrl", () => {
+
+    it("ignores the after parameter if missing", () => {
+      const expectedURL = "https://learn.portal.staging.concord.org/confirm_logout";
+      const actualURL = getConfirmLogoutUrl();
+      expect(actualURL).toBe(expectedURL);
+    });
+
+    it("uses the after parameter if present", () => {
+      const expectedURL = "https://learn.portal.staging.concord.org/confirm_logout?after=https%3A%2F%2Fexample.com";
+      const actualURL = getConfirmLogoutUrl("https://example.com");
       expect(actualURL).toBe(expectedURL);
     });
   });
