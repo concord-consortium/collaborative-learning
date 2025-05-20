@@ -34,7 +34,9 @@ describe("playbackChanges", () => {
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: vectorData }
@@ -84,7 +86,9 @@ describe("playbackChanges", () => {
       fill: "none",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: lineData }
@@ -129,7 +133,9 @@ describe("playbackChanges", () => {
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: rectData }
@@ -178,7 +184,9 @@ describe("playbackChanges", () => {
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: ellipseData }
@@ -230,7 +238,9 @@ describe("playbackChanges", () => {
       // So it seems safe to ignore it here.
       x: 10, y: 10,
       width: 10, height: 10,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: imageData }

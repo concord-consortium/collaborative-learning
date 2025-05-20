@@ -1,10 +1,11 @@
 import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach, destroy} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
+import { flow } from "mobx";
 
 import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType }
   from "./drawing-basic-types";
-import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
+import { kDrawingStateVersion, kDrawingTileType, kDuplicateOffset, kFlipOffset } from "./drawing-types";
 import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType,
@@ -341,7 +342,18 @@ export const DrawingContentModel = NavigatableTileModel
             }
           });
         },
-
+        flipHorizontal(ids: string[]) {
+          forEachObjectId(ids, object => {
+            object.hFlip = !object.hFlip;
+            object.x = object.x + object.boundingBox.se.x - object.boundingBox.nw.x + kFlipOffset;
+          });
+        },
+        flipVertical(ids: string[]) {
+          forEachObjectId(ids, object => {
+            object.vFlip = !object.vFlip;
+            object.y = object.y + object.boundingBox.se.y - object.boundingBox.nw.y + kFlipOffset;
+          });
+        },
         deleteObjects(ids: string[]) {
           forEachObjectId(ids, (object, id) => {
             if (object) {
@@ -351,20 +363,21 @@ export const DrawingContentModel = NavigatableTileModel
           });
         },
 
-        duplicateObjects(ids: string[]) {
+        duplicateObjects(ids: string[], offset: Point = {x: kDuplicateOffset, y: kDuplicateOffset}) {
           const newIds: string[] = [];
           forEachObjectId(ids, (object) => {
             if (object) {
               const snap = getSnapshot(object);
               // Remove all IDs from the snapshot and any nested objects before duplicating
               const snapWithoutIds = removeIdsFromSnapshot(snap);
-              snapWithoutIds.x = snap.x + 10;     // offset by 10 pixels so it is not hidden
-              snapWithoutIds.y = snap.y + 10;
+              snapWithoutIds.x = snap.x + offset.x;
+              snapWithoutIds.y = snap.y + offset.y;
               const newObject = self.addObject(snapWithoutIds);
               newIds.push(newObject.id);
             }
           });
           self.setSelectedIds(newIds);
+          return newIds;
         },
 
         /**
@@ -399,6 +412,20 @@ export const DrawingContentModel = NavigatableTileModel
     };
   })
   .actions(self => ({
+    flipHorizontalMaybeCopy: flow(function* (ids: string[], copy: boolean = false) {
+      if (copy) {
+        ids = self.duplicateObjects(ids, { x: 0, y: 0 });
+        yield Promise.resolve(); // Let React render the duplicated objects
+      }
+      self.flipHorizontal(ids);
+    }),
+    flipVerticalMaybeCopy: flow(function* (ids: string[], copy: boolean = false) {
+      if (copy) {
+        ids = self.duplicateObjects(ids, { x: 0, y: 0 });
+        yield Promise.resolve(); // Let React render the duplicated objects
+      }
+      self.flipVertical(ids);
+    }),
     // sets the model to how we want it to appear when a user first opens a document
     reset() {
       self.setSelectedButton("select");

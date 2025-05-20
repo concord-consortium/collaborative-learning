@@ -40,7 +40,9 @@ describe("exportDrawingTileSpec", () => {
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
 
     const v1Data: VectorObjectSnapshot = { ...vectorData, id: "v1" };
@@ -75,7 +77,9 @@ describe("exportDrawingTileSpec", () => {
       fill: "none",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
 
     const l1Data: LineObjectSnapshot = { ...lineData, id: "l1" };
@@ -110,7 +114,9 @@ describe("exportDrawingTileSpec", () => {
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
 
     const r1Data: RectangleObjectSnapshot = { ...rectData, id: "r1" };
@@ -150,7 +156,9 @@ describe("exportDrawingTileSpec", () => {
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const e1Data: EllipseObjectSnapshot = { ...ellipseData, id: "e1" };
     const e2Data: EllipseObjectSnapshot = { ...ellipseData, id: "e2" };
@@ -187,7 +195,9 @@ describe("exportDrawingTileSpec", () => {
       url: "my/image/url",
       x: 10, y: 10,
       width: 10, height: 10,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const i1Data: ImageObjectSnapshot = { ...imageData, id: "i1" };
     const i2Data: ImageObjectSnapshot = { ...imageData, id: "i2" };
@@ -231,7 +241,9 @@ describe("exportDrawingTileSpec", () => {
       filename: "image.png",
       x: 10, y: 10,
       width: 10, height: 10,
-      visible: true
+      visible: true,
+      hFlip: false,
+      vFlip: false
     };
     const { filename, ...others } = imageData;
     const exportImageData = { ...others, url: "curriculum/images/image.png" };

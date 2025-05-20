@@ -13,7 +13,7 @@ import {
 import { VectorButton } from "./toolbar-buttons/vector-button";
 import { StampButton } from "./toolbar-buttons/stamp-button";
 import { FillColorButton, StrokeColorButton } from "./toolbar-buttons/select-buttons";
-import { DeleteButton, DuplicateButton, GroupButton, UngroupButton } from "./action-buttons";
+import { DeleteButton, DuplicateButton, FlipHorizontalButton, FlipVerticalButton, GroupButton, UngroupButton } from "./action-buttons";
 import { ImageUploadButton } from "./toolbar-buttons/image-upload-button";
 import { ZoomInButton, ZoomOutButton, FitAllButton } from "./toolbar-buttons/zoom-buttons";
 import { NavigatorButton } from "../../components/toolbar/navigator-button";
@@ -77,6 +77,8 @@ registerTileToolbarButtons("drawing", [
   { name: "group", component: GroupButton },
   { name: "ungroup", component: UngroupButton },
   { name: "duplicate", component: DuplicateButton },
+  { name: "flip-horizontal", component: FlipHorizontalButton },
+  { name: "flip-vertical", component: FlipVerticalButton },
   { name: "zoom-in", component: ZoomInButton },
   { name: "zoom-out", component: ZoomOutButton },
   { name: "fit-all", component: FitAllButton },

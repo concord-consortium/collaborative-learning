@@ -8,6 +8,7 @@ import {
 import { BoundingBoxSides, Point, VectorEndShape,
   endShapesForVectorType, getVectorTypeIcon, vectorTypeForEndShapes }
   from "../model/drawing-basic-types";
+import { Transformable } from "../components/transformable";
 
 // Line or arrow
 export const VectorObject = StrokedObject.named("VectorObject")
@@ -96,37 +97,37 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
   handleDrag} : IDrawingComponentProps) {
   if (!isVectorObject(model)) return null;
   const vector = model as VectorObjectType;
-  const { id, headShape, tailShape, stroke, strokeWidth, strokeDashArray } = vector;
-  const { x, y } = vector.position;
+  const { headShape, tailShape, stroke, strokeWidth, strokeDashArray } = vector;
   const dx = vector.dragDx ?? vector.dx;
   const dy = vector.dragDy ?? vector.dy;
   const line = <line
     className="drawing-object"
-    x1={x}
-    y1={y}
-    x2={x + dx}
-    y2={y + dy}
+    x1={0}
+    y1={0}
+    x2={dx}
+    y2={dy}
     />;
     // Angle of this line as SVG likes to measure it (degrees clockwise from vertical)
     const angle = 90-Math.atan2(-dy, dx)*180/Math.PI;
-    const head = headShape ? placeEndShape(headShape, x+dx, y+dy, angle) : null;
-    const tail = tailShape ? placeEndShape(tailShape, x, y, angle+180) : null; // tail points backwards
+    const head = headShape ? placeEndShape(headShape, dx, dy, angle) : null;
+    const tail = tailShape ? placeEndShape(tailShape, 0, 0, angle+180) : null; // tail points backwards
     // Set fill to stroke since arrowheads should be drawn in stroke color
   return (
-    <g
-      className="vector"
-      key={id}
-      stroke={stroke}
-      fill={stroke}
-      strokeWidth={strokeWidth}
-      strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-      onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-      onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-      onPointerDown={(e) => handleDrag?.(e, model)}
-      pointerEvents={handleHover ? "visible" : "none"}
-    >
-      {line}{head}{tail}
-    </g>
+    <Transformable type="vector" position={model.position} transform={model.transform}>
+      <g
+        className="vector"
+        stroke={stroke}
+        fill={stroke}
+        strokeWidth={strokeWidth}
+        strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+        onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+        onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+        onPointerDown={(e) => handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      >
+        {line}{head}{tail}
+      </g>
+    </Transformable>
   );
 });
 
