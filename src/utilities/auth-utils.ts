@@ -234,3 +234,12 @@ export const removeAuthParams = (url: string, options?: RemoveAutParamsOptions) 
   return newUrl.toString();
 };
 
+export const getConfirmLogoutUrl = (after?: string) => {
+  const confirmLogoutUrl = new URL(getStandaloneBasePortalUrl());
+  confirmLogoutUrl.pathname = "/confirm_logout";
+  if (after) {
+    confirmLogoutUrl.searchParams.set("after", after);
+  }
+  return confirmLogoutUrl.toString();
+};
+

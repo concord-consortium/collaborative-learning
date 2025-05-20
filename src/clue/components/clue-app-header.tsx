@@ -10,6 +10,7 @@ import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { useStores } from "../../hooks/use-stores";
 import AppModeIndicator from "./app-mode-indicator";
 import { CustomSelect } from "./custom-select";
+import { StudentMenuContainer } from "../../components/student-menu-container";
 
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./toggle-buttons.scss";
@@ -152,7 +153,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {showProblemMenu &&
           <>
             <div className="separator"/>
-            <div className="problem-dropdown" data-test="user-class">
+            <div className="problem-dropdown" data-test="problem-dropdown">
               <ProblemMenuContainer />
             </div>
           </>
@@ -243,8 +244,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {showUserInfo &&
           <div className="user" title={getUserTitle()}>
             <div className="user-contents">
-              <div className="name" data-test="user-name">{user.name}</div>
-              <div className="class" data-test="user-class">{user.className}</div>
+              <StudentMenuContainer />
             </div>
             <div className="profile-icon">
               <div className="profile-icon-inner"/>

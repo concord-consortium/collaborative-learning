@@ -7,7 +7,7 @@ import { CustomSelect, ICustomDropdownItem } from "../clue/components/custom-sel
 import { Logger } from "../lib/logger";
 import { LogEventMethod, LogEventName } from "../lib/logger-types";
 import { IUserPortalOffering } from "../models/stores/user";
-import { getStandaloneBasePortalUrl } from "../utilities/auth-utils";
+import { getConfirmLogoutUrl } from "../utilities/auth-utils";
 
 interface IProps extends IBaseProps {}
 
@@ -25,10 +25,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
         hideItemCheck: true,
         bottomBorder: true,
         onClick: () => {
-          const confirmLogoutUrl = new URL(getStandaloneBasePortalUrl());
-          confirmLogoutUrl.pathname = "/confirm_logout";
-          confirmLogoutUrl.searchParams.set("after", window.location.href);
-          window.location.assign(confirmLogoutUrl.toString());
+          window.location.assign(getConfirmLogoutUrl(window.location.href));
         }
       });
 
