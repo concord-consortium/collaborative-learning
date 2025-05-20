@@ -69,6 +69,16 @@ export const VectorObject = StrokedObject.named("VectorObject")
         self.dragDy = self.dy - deltas.bottom + deltas.top;
       }
     },
+    setDragBoundsAbsolute(bounds: BoundingBoxSides) {
+      const bbox = self.boundingBox;
+      const deltas = {
+        left: bounds.left - bbox.nw.x,
+        top: bounds.top - bbox.nw.y,
+        right: bounds.right - bbox.se.x,
+        bottom: bounds.bottom - bbox.se.y
+      };
+      this.setDragBounds(deltas);
+    },
     resizeObject() {
       self.repositionObject();
       self.dx = self.dragDx ?? self.dx;
@@ -91,6 +101,7 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
   const dx = vector.dragDx ?? vector.dx;
   const dy = vector.dragDy ?? vector.dy;
   const line = <line
+    className="drawing-object"
     x1={x}
     y1={y}
     x2={x + dx}

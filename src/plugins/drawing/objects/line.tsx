@@ -54,6 +54,8 @@ export const LineObject = types.compose("LineObject", StrokedObject, FilledObjec
     },
 
     get boundingBox() {
+      // The position of the line is its start point.
+      // Other points are stored as deltas from the start point.
       const {x, y} = self.position;
       const nw: Point = {x, y};
       const se: Point = {x, y};
@@ -93,7 +95,7 @@ export const LineObject = types.compose("LineObject", StrokedObject, FilledObjec
       const widthFactor = width ? newWidth/width : 1;
       const heightFactor = height ? newHeight/height : 1;
 
-      // x,y get moved to a scaled position within the new bounds
+      // x,y (position of start point) get moved to a scaled position within the new bounds
       const newLeft = left+deltas.left;
       self.dragX = newLeft + (self.x-left)*widthFactor;
       const newTop = top+deltas.top;
@@ -101,6 +103,16 @@ export const LineObject = types.compose("LineObject", StrokedObject, FilledObjec
 
       self.dragScaleX = widthFactor;
       self.dragScaleY = heightFactor;
+    },
+    setDragBoundsAbsolute(bounds: BoundingBoxSides) {
+      const bbox = self.boundingBox;
+      const deltas = {
+        left: bounds.left - bbox.nw.x,
+        top: bounds.top - bbox.nw.y,
+        right: bounds.right - bbox.se.x,
+        bottom: bounds.bottom - bbox.se.y
+      };
+      this.setDragBounds(deltas);
     },
     resizeObject() {
       self.repositionObject();
@@ -142,6 +154,7 @@ export const LineComponent = observer(function LineComponent({model, handleHover
   const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
   return <path
     key={id}
+    className="drawing-object"
     d={commands}
     stroke={stroke}
     fill={fill}
