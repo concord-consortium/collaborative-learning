@@ -55,8 +55,6 @@ export const useColumnHeaderCell = (height: number) => {
           }
         }
       };
-      console.log("sortDirection", sortDirection);
-      console.log("gridContext.isColumnSelected", gridContext?.isColumnSelected(column.key));
 
       return (
         <div className={classes} onMouseOver={handleColumnHeaderCellMouseOver}
@@ -68,7 +66,6 @@ export const useColumnHeaderCell = (height: number) => {
                   isColumnSelected={gridContext?.isColumnSelected(column.key) ?? false}/>
               }
               <EditableHeaderCell height={height} {...props} />
-              {/* {showExpressions && <ExpressionCell readOnly={readOnly} column={column} />} */}
               {hasData &&
                 <div className={clsx("column-button sort-column-button", { "ascending": sortDirection === "ascending",
                                       "descending": sortDirection === "descending" })} onClick={handleSort}>
