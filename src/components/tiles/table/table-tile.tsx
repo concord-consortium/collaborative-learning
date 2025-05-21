@@ -2,7 +2,8 @@ import { observer } from "mobx-react";
 import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
-// If SortColumn is not exported, define it here based on react-data-grid's documentation:
+import { compareValues } from "../../../models/data/data-set-utils";
+
 export interface SortColumn {
   columnKey: string;
   direction: 'ASC' | 'DESC';
@@ -144,13 +145,15 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     const sorted =  [...rowsToSort].sort((a, b) => {
       for (const sort of sortColumns) {
         const { columnKey, direction } = sort;
-        const aValue = a[columnKey];
-        const bValue = b[columnKey];
+        const result = compareValues(
+          a[columnKey],
+          b[columnKey],
+          (aStr, bStr) => aStr.localeCompare(bStr, undefined, { sensitivity: 'base' })
+        );
 
-        if (aValue === bValue) continue;
-
-        const sortOrder = direction === 'ASC' ? 1 : -1;
-        return aValue > bValue ? sortOrder : -sortOrder;
+        if (result !== 0) {
+          return direction === "ASC" ? result : -result;
+        }
       }
       return 0;
     });
