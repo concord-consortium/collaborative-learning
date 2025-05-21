@@ -130,11 +130,11 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     ...rowLabelProps, measureColumnWidth, lookupImage,
     sortColumns,
     onSort: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => {
-      setSortColumns(prev => {
-        const filtered = prev.filter(c => c.columnKey !== columnKey);
-        if (direction === "NONE") return filtered;
-        return [...filtered, { columnKey, direction }];
-      });
+      if (direction === "NONE") {
+        setSortColumns([]);
+      } else {
+        setSortColumns([{ columnKey, direction }]);
+      }
   }});
 
   const sortedRows = useMemo(() => {
