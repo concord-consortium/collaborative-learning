@@ -1,5 +1,6 @@
 import { parse } from "query-string";
 import { getAssetUrl } from "./asset-utils";
+import { reprocessUrlParams } from "./url-params";
 
 // Adapted from https://stackoverflow.com/a/43467144
 export function isValidHttpUrl(possibleUrl: string | undefined) {
@@ -60,4 +61,18 @@ export function hashValue(prop: string): string | undefined {
     throw `May only have one hash parameter for ${prop}. Found: ${val}`;
   }
   return val;
+}
+
+
+export function addUrlParams(params: Record<string, string | number | boolean>) {
+  const url = new URL(window.location.href);
+  const searchParams = new URLSearchParams(url.search);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined) {
+      searchParams.set(key, String(value));
+    }
+  });
+  url.search = searchParams.toString();
+  window.history.replaceState(null, "CLUE", url.toString());
+  reprocessUrlParams();
 }

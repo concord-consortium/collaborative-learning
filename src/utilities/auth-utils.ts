@@ -14,6 +14,8 @@ const OAUTH_CLIENT_NAME = "clue";
 const PORTAL_AUTH_PATH = "/auth/oauth_authorize";
 const PORTAL_SIGNIN_OR_REGISTER_PATH = "/users/sign_in_or_register";
 
+export const STANDALONE_AUTH_DOMAIN_SENTINEL = "standalone";
+
 let accessToken: string | undefined;
 
 // Only return string or undefined
@@ -108,6 +110,11 @@ export const initializeAuthorization = ({standAlone}: {standAlone?: boolean} = {
   }
   else {
     authDomain = queryValue("authDomain");
+    if (standAlone && authDomain === STANDALONE_AUTH_DOMAIN_SENTINEL) {
+      // to save space in the saved registration redirect URL, we don't send the full authDomain
+      // parameter to the portal when the user is registering and instead send a sentinel value.
+      authDomain = getStandaloneBasePortalUrl();
+    }
 
     if (authDomain) {
       const key = Math.random().toString(36).substring(2,15);
@@ -154,7 +161,7 @@ export const convertURLToOAuth2 = (urlString: string, basePortalUrl: string, off
   }
 };
 
-export const getPortalStandaloneSignInOrRegisterUrl = () => {
+export const getStandaloneBasePortalUrl = () => {
   // the default portal URL is the staging portal
   let basePortalUrl = "https://learn.portal.staging.concord.org";
 
@@ -171,33 +178,35 @@ export const getPortalStandaloneSignInOrRegisterUrl = () => {
     }
   }
 
-  // pass all the current parameters to the login URL, minus any current auth params
-  const cleanedUrl = new URL(removeAuthParams(window.location.href));
-  const loginUrlParams = cleanedUrl.searchParams;
+  return basePortalUrl;
+};
 
-  // update the authDomain to be the portal URL
-  loginUrlParams.set("authDomain", basePortalUrl);
+export const getPortalStandaloneSignInOrRegisterUrl = () => {
+  const basePortalUrl = getStandaloneBasePortalUrl();
+
+  // pass all the current parameters to the login URL, minus any current auth params
+  const loginUrl = new URL(removeAuthParams(window.location.href));
+
+  // update the authDomain to be a sentinel value as the full URL can be long and exceed
+  // the saved redirect URL length stored in the database in the portal during registration
+  loginUrl.searchParams.set("authDomain", STANDALONE_AUTH_DOMAIN_SENTINEL);
 
   if (urlParams.portalDomain) {
     // the portalDomain is passed so that is kept in the return url during development
     // so the developer doesn't have to keep adding it back after the login to retest
-    loginUrlParams.set("portalDomain", urlParams.portalDomain);
+    loginUrl.searchParams.set("portalDomain", urlParams.portalDomain);
   }
-  const loginUrlQueryString = loginUrlParams.toString();
-  const loginUrl = `${window.location.origin}${window.location.pathname}${
-    loginUrlQueryString.length > 0 ? `?${loginUrlQueryString}` : ""}`;
 
-  const authParams: URLSearchParams = new URLSearchParams({
-    app_name: "CLUE",
-    login_url: loginUrl
-  });
-  if (urlParams.class) {
-    // if a class word is passed in (as class), add it to the params so
+  const authUrl = new URL(`${basePortalUrl}${PORTAL_SIGNIN_OR_REGISTER_PATH}`);
+  authUrl.searchParams.set("app_name", "CLUE");
+  authUrl.searchParams.set("login_url", loginUrl.toString());
+  if (urlParams.classWord) {
+    // if a class word is passed in, add it to the params so
     // that it can be pre-filled in the student registration
-    authParams.append("class_word", urlParams.class);
+    authUrl.searchParams.set("class_word", urlParams.classWord);
   }
 
-  return `${basePortalUrl}${PORTAL_SIGNIN_OR_REGISTER_PATH}?${authParams.toString()}`;
+  return authUrl.toString();
 };
 
 type RemoveAutParamsOptions = {
@@ -223,5 +232,14 @@ export const removeAuthParams = (url: string, options?: RemoveAutParamsOptions) 
   }
   newUrl.search = searchParams.toString();
   return newUrl.toString();
+};
+
+export const getConfirmLogoutUrl = (after?: string) => {
+  const confirmLogoutUrl = new URL(getStandaloneBasePortalUrl());
+  confirmLogoutUrl.pathname = "/confirm_logout";
+  if (after) {
+    confirmLogoutUrl.searchParams.set("after", after);
+  }
+  return confirmLogoutUrl.toString();
 };
 

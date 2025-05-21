@@ -7,6 +7,7 @@ import { CustomSelect, ICustomDropdownItem } from "../clue/components/custom-sel
 import { Logger } from "../lib/logger";
 import { LogEventMethod, LogEventName } from "../lib/logger-types";
 import { IUserPortalOffering } from "../models/stores/user";
+import { getConfirmLogoutUrl } from "../utilities/auth-utils";
 
 interface IProps extends IBaseProps {}
 
@@ -17,14 +18,23 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
     const links = this.getPortalClasses() as ICustomDropdownItem[];
     const { user, ui } = this.stores;
 
-    // if the user authenticated in standalone mode, we add a link to copy the shareable link
-    // of the current URL as it contains all the information needed to join the class
     if (user.standaloneAuthUser) {
+      links.unshift({
+        text: "Log Out",
+        selected: false,
+        hideItemCheck: true,
+        bottomBorder: true,
+        onClick: () => {
+          window.location.assign(getConfirmLogoutUrl(window.location.href));
+        }
+      });
+
+      // if the user authenticated in standalone mode, we add a link to copy the shareable link
+      // of the current URL as it contains all the information needed to join the class
       links.unshift({
         text: "Copy Shareable Link",
         selected: false,
         hideItemCheck: true,
-        italicize: true,
         onClick: () => {
           // in standalone mode the shareable link is the current URL
           navigator.clipboard.writeText(window.location.href).then(() => {

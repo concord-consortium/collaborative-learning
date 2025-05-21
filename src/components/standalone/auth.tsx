@@ -41,7 +41,7 @@ export type AuthenticatedState =
     classWord: string,
     classId: number,
     offeringId: number,
-  } & PortalInfoItem |
+  } & PortalInfoItem & ProblemItem |
   { state: "creatingOffering",
     classWord: string,
     classId: number,
@@ -85,16 +85,19 @@ export const findMatchingClassAndOfferingIds =
   return {matchingClassId: matchingClass?.id, matchingClassWord, matchingOfferingId};
 };
 
-type StartCLUEOptions = { classWord: string, classId: number, offeringId: number, portalInfo: PortalInfo};
+type StartCLUEOptions = {
+  classWord: string, classId: number, offeringId: number, portalInfo: PortalInfo, problem: string
+};
 export const startCLUE = (options: StartCLUEOptions): AuthenticatedState =>
 {
-  const { classWord, classId, offeringId, portalInfo } = options;
+  const { classWord, classId, offeringId, portalInfo, problem } = options;
   return {
     state: "startingCLUE",
     classWord,
     classId,
     offeringId,
-    portalInfo
+    portalInfo,
+    problem
   };
 };
 
@@ -121,7 +124,24 @@ export const createPortalOfferingForUnit = async (
     }
   });
 
-  return createPortalOffering(domain, rawPortalJWT, classId, url, name );
+  const offeringId = await createPortalOffering(domain, rawPortalJWT, classId, url, name );
+
+  // add the other problems to the offering
+  const otherProblemOrdinals = unit.getAllProblemOrdinals().filter((ord) => ord !== problemOrdinal);
+  for (const otherProblemOrdinal of otherProblemOrdinals) {
+    const { problem: otherProblem } = unit.getProblem(otherProblemOrdinal);
+    if (!otherProblem) {
+      throw new Error(`Problem ${otherProblemOrdinal} not found in unit ${unitJson.title}`);
+    }
+    const otherName = `CLUE ${otherProblem.title}`;
+
+    const otherUrl = new URL(url);
+    otherUrl.searchParams.set("problem", otherProblemOrdinal);
+
+    await createPortalOffering(domain, rawPortalJWT, classId, otherUrl.toString(), otherName);
+  }
+
+  return offeringId;
 };
 
 export const processFinalAuthenticatedState = async (
@@ -167,7 +187,7 @@ export const getFinalAuthenticatedState = (authenticatedState: AuthenticatedStat
   const { teacher } = portalInfo;
 
   if (classId && offeringId && classWord) {
-    return {state: "startingCLUE", classWord, classId, offeringId, portalInfo};
+    return {state: "startingCLUE", classWord, classId, offeringId, portalInfo, problem};
   }
 
   if (classId && teacher && classWord) {
@@ -186,22 +206,28 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
   const { curriculumConfig,
           ui: { setStandalone },
           user: { standaloneAuth, setStandaloneAuth, setStandaloneAuthUser },
-          appConfig
+          appConfig,
+          isProblemLoaded
         } = stores;
   const [authenticatedState, setAuthenticatedState] = React.useState<AuthenticatedState>({state: "start"});
   const hasStartedCLUERef = useRef(false);
   const autoStartingCLUE = useMemo(() => {
-    // when the user selects a new offering in the problem dropdown a autoLogin=true hash
+    // There are two cases where we want to automatically login:
+    //
+    // When the user selects a new offering in the problem dropdown a autoLogin=true hash
     // parameter value is added to the URL to tell us to automatically login
-    // so that the user doesn't have to click the button again to login
+    // so that the user doesn't have to click the button again to login.
+    //
+    // When the user cancels the logout flow on the portal a logout_canceled=true hash
+    // parameter value is added to the URL and in that case we should also automatically login.
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    return hashParams.get("autoLogin") === "true";
+    return hashParams.get("autoLogin") === "true" || hashParams.get("logout_canceled") === "true";
   }, []);
 
   useEffect(() => {
     if (autoStartingCLUE) {
       // If the autoLogin hash param is set immediately redirect to the standalone sign in or register page.
-      // This will also have the side effect of removing the hash param from the URL.
+      // This will also have the side effect of removing the hash params (autologin or logout_canceled) from the URL.
       window.location.assign(getPortalStandaloneSignInOrRegisterUrl());
     }
   }, [autoStartingCLUE]);
@@ -213,7 +239,7 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
           const { classWord, unit } = urlParams;
           const { domain, teacher, student } = standaloneAuth.portalJWT;
           const portalInfo: PortalInfo = {domain, rawPortalJWT: standaloneAuth.rawPortalJWT, teacher, student};
-          const problem = appConfig.defaultProblemOrdinal;
+          const problem = urlParams.problem ?? appConfig.defaultProblemOrdinal;
 
           setAuthenticatedState({state: "loadingClasses", portalInfo});
 
@@ -277,11 +303,16 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
             : await getLearnerJWT(domain, rawPortalJWT, offeringId);
           const jwt = jwt_decode(rawJWT) as PortalJWT;
 
-          // ensure the classWord is in the url
+          // because the user may have switched problems in the dropdown use the problem from the URL
+          // instead of the one in the authenticated state determined at startup
+          const problem = urlParams.problem ?? appConfig.defaultProblemOrdinal;
+
+          // ensure the classWord and problem is in the url
           const urlWithClassWord = removeAuthParams(window.location.href, {
             removeClass: true,
             addParams: {
               classWord,
+              problem
             }
           });
           window.history.replaceState(null, window.document.title, urlWithClassWord);
@@ -299,7 +330,14 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
       }
     };
     loadApp();
-  }, [authenticatedState, setStandalone, setStandaloneAuth, setStandaloneAuthUser, stores]);
+  }, [appConfig.defaultProblemOrdinal, authenticatedState, setStandalone,
+      setStandaloneAuth, setStandaloneAuthUser, stores]);
+
+  const handleLoginClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // since the problem may switch out after startup get the final login URL when clicked
+    const url = getPortalStandaloneSignInOrRegisterUrl();
+    window.location.assign(url);
+  };
 
   const renderAuthenticatedState = () => {
     if (authenticatedState.state === "loadingClasses") {
@@ -345,7 +383,7 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
     if (authenticatedState.state === "creatingClassAndOffering") {
       return (
         <div data-testid="standalone-create-class-and-offering">
-          Creating class and offering for unit and starting CLUE...
+          Creating class and offerings for unit and starting CLUE...
         </div>
       );
     }
@@ -371,6 +409,10 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
       return renderAuthenticatedState();
     }
 
+    if (!isProblemLoaded) {
+      return <div data-testid="standalone-loading">Loading...</div>;
+    }
+
     return (
       <div data-testid="standalone-welcome">
         <div className="welcome">
@@ -379,7 +421,7 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
         <div className="instructions">
           Click below to get started with an account.
         </div>
-        <a className="button" href={getPortalStandaloneSignInOrRegisterUrl()}>
+        <a className="button" data-testid="standalone-get-started-button" onClick={handleLoginClick}>
           Get Started
         </a>
       </div>

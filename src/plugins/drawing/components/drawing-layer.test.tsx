@@ -44,6 +44,7 @@ describe("Drawing Layer Components", () => {
         x: 10, y: 10,
         deltaPoints: [{ dx: 1, dy: 1 }, { dx: 2, dy: 2 }],
         stroke: "#888888",
+        fill: "none",
         strokeDashArray: "3,3",
         strokeWidth: 1
       });
@@ -60,6 +61,14 @@ describe("Drawing Layer Components", () => {
     });
     it("deletes a freehand line", () => {
       content.deleteObjects([line.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("flips a freehand line horizontally", () => {
+      content.flipHorizontal([line.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("flips a freehand line vertically", () => {
+      content.flipVertical([line.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });
@@ -87,6 +96,14 @@ describe("Drawing Layer Components", () => {
     });
     it("deletes a vector line", () => {
       content.deleteObjects([vector.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("flips a Vector line horizontally", () => {
+      content.flipHorizontal([vector.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("flips a Vector line vertically", () => {
+      content.flipVertical([vector.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });
@@ -126,6 +143,14 @@ describe("Drawing Layer Components", () => {
       content.deleteObjects([vector.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
+    it("flips a Vector arrow horizontally", () => {
+      content.flipHorizontal([vector.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("flips a Vector arrow vertically", () => {
+      content.flipVertical([vector.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
   });
 
   describe("Rectangle", () => {
@@ -154,6 +179,14 @@ describe("Drawing Layer Components", () => {
       content.deleteObjects([rect.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
+    it("flips a Rectangle horizontally", () => {
+      content.flipHorizontal([rect.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("flips a Rectangle vertically", () => {
+      content.flipVertical([rect.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
   });
 
   describe("Ellipse", () => {
@@ -180,6 +213,14 @@ describe("Drawing Layer Components", () => {
     });
     it("deletes a ellipse", () => {
       content.deleteObjects([ellipse.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("flips an ellipse horizontally", () => {
+      content.flipHorizontal([ellipse.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("flips an ellipse vertically", () => {
+      content.flipVertical([ellipse.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });
@@ -245,6 +286,16 @@ describe("Drawing Layer Components", () => {
       expect(content.objects.length).toBe(0);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
+    it("flips a group horizontally", () => {
+      content.createGroup(["r", "e"]);
+      content.flipHorizontal([content.objects[0].id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("flips a group vertically", () => {
+      content.createGroup(["r", "e"]);
+      content.flipVertical([content.objects[0].id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
   });
 
   describe("Image", () => {
@@ -268,6 +319,14 @@ describe("Drawing Layer Components", () => {
     });
     it("deletes a image", () => {
       content.deleteObjects([image.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("flips an image horizontally", () => {
+      content.flipHorizontal([image.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("flips an image vertically", () => {
+      content.flipVertical([image.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });

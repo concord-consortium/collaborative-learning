@@ -9,6 +9,8 @@ import ErrorIcon from "../../../assets/icons/error.svg";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "text" | "stamp" | "variable";
 
+export type Transform = { tx: number, ty: number, sx: number, sy: number };
+
 export const ObjectTypeIconViewBox = "0 0 36 34";
 
 // This interface is a subset of what the DrawingContentModel provides.
@@ -48,11 +50,13 @@ export const DrawingObject = types.model("DrawingObject", {
   id: types.optional(types.identifier, () => uniqueId()),
   x: types.number,
   y: types.number,
+  hFlip: types.optional(types.boolean, false),
+  vFlip: types.optional(types.boolean, false),
   visible: true
 })
 .volatile(self => ({
   dragX: undefined as number | undefined,
-  dragY: undefined as number | undefined
+  dragY: undefined as number | undefined,
 }))
 .views(self => ({
   get position() {
@@ -72,7 +76,7 @@ export const DrawingObject = types.model("DrawingObject", {
     // the box. Additionally if the implementation doesn't access the x or y of
     // self then MobX observation is not triggered so moving the element doesn't
     // cause the selection highlight to update.
-    throw "Subclass needs to implement this";
+    throw "Subclass needs to implement boundingBox";
   },
   get label(): string {
     // Object types should implement this to return a user-friendly short label,
@@ -91,6 +95,33 @@ export const DrawingObject = types.model("DrawingObject", {
   },
   get supportsResize() {
     return true;
+  },
+  /**
+   * Returns the translation and scaling transform that should be applied
+   * to the Transformable group element to account for the objects's flip state.
+   */
+  get transform(): Transform {
+    const {boundingBox, hFlip, vFlip, position} = self;
+    const transform = { tx: 0, ty: 0, sx: 1, sy: 1 };
+    // The x,y "position" of an object is the zero point that we flip over.
+    // But depending on the object type, this position can be anywhere in its bounding box.
+    // So for the bounding box to stay the same, we need to move the object to account
+    // for the position-to-center distance.
+
+    // Center of the object relative to its "position" point.
+    const center: Point = {
+      x: (boundingBox.nw.x + boundingBox.se.x) / 2 - position.x,
+      y: (boundingBox.nw.y + boundingBox.se.y) / 2 - position.y
+    };
+    if (hFlip) {
+      transform.tx = center.x*2;
+      transform.sx = -1;
+    }
+    if (vFlip) {
+      transform.ty = center.y*2;
+      transform.sy = -1;
+    }
+    return transform;
   }
 }))
 .actions(self => ({
@@ -117,6 +148,13 @@ export const DrawingObject = types.model("DrawingObject", {
     // Implementated in subclasses since this will affect object types differently.
     console.error("setDragBounds is unimplemented for this type");
   },
+  setDragBoundsAbsolute(bounds: BoundingBoxSides) {
+    // Temporarily set the edges of the object's bounding box to the given bounds.
+    // This will change the size and origin position of the object, with changes stored as volatile fields.
+
+    // Implementated in subclasses since this will affect object types differently.
+    console.error("setDragBoundsAbsolute is unimplemented for this type");
+  },
   resizeObject() {
     // Move any volatile resizing into the persisted object model.
     console.error("resizeObject is unimplemented for this type");
@@ -132,6 +170,62 @@ export interface ObjectMap {
   [key: string]: DrawingObjectType|null;
 }
 
+/** Sized objects have a width and height. */
+export const SizedObject = DrawingObject.named("SizedObject")
+.props({
+  width: types.number,
+  height: types.number
+})
+.volatile(self => ({
+  dragWidth: undefined as number | undefined,
+  dragHeight: undefined as number | undefined
+}))
+.views(self => ({
+  get currentDims() {
+    const { width, height, dragWidth, dragHeight } = self;
+    return {
+      width: dragWidth ?? width,
+      height: dragHeight ?? height
+    };
+  }
+}))
+.views(self => ({
+  get boundingBox() {
+    const { x, y } = self.position;
+    const { width, height } = self.currentDims;
+    const nw: Point = {x, y};
+    const se: Point = {x: x + width, y: y + height};
+    return {nw, se};
+  }
+}))
+.actions(self => ({
+  setDragBounds(deltas: BoundingBoxSides) {
+    self.dragX = self.x + deltas.left;
+    self.dragY = self.y + deltas.top;
+    self.dragWidth  = Math.max(self.width  + deltas.right - deltas.left, 1);
+    self.dragHeight = Math.max(self.height + deltas.bottom - deltas.top, 1);
+  },
+  setDragBoundsAbsolute(bounds: BoundingBoxSides) {
+    self.dragX = bounds.left;
+    self.dragY = bounds.top;
+    self.dragWidth = bounds.right - bounds.left;
+    self.dragHeight = bounds.bottom - bounds.top;
+  },
+  resizeObject() {
+    self.repositionObject();
+    self.width = self.dragWidth ?? self.width;
+    self.height = self.dragHeight ?? self.height;
+    self.dragWidth = self.dragHeight = undefined;
+  }
+}));
+
+export interface SizedObjectType extends Instance<typeof SizedObject> {}
+
+export function isSizedObject(object: DrawingObjectType): object is SizedObjectType {
+  return "width" in object && "height" in object;
+}
+
+/** Stroked objects have a stroke color, stroke width, and stroke dash array. */
 export const StrokedObject = DrawingObject.named("StrokedObject")
 .props({
   stroke: types.string,
@@ -158,6 +252,7 @@ export function isStrokedObject(object: DrawingObjectType): object is StrokedObj
   return getMembers(object).actions.includes("setStroke");
 }
 
+/** Filled objects have a fill color. */
 export const FilledObject = DrawingObject.named("FilledObject")
 .props({
   fill: types.string
@@ -171,8 +266,9 @@ export function isFilledObject(object: DrawingObjectType): object is FilledObjec
   return getMembers(object).actions.includes("setFill");
 }
 
-// "Editable" objects go into an "editing" state if you click them while they are already selected.
-// For example, text labels go into a state where you can edit the text.
+/** "Editable" objects go into an "editing" state if you click them while they are already selected.
+ * For example, text labels go into a state where you can edit the text.
+ */
 export const EditableObject = DrawingObject.named("EditableObject")
 .volatile(self => ({
   isEditing: false

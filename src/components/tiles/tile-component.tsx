@@ -420,7 +420,12 @@ export class TileComponent extends BaseComponent<IProps, IState> {
       console.warn("The docId passed to TileComponent is different than the " +
         "documentContent.contentId of the model passed to TileComponent");
     }
-    const dragTiles = documentContent.getDragTiles(ui.selectedTileIds);
+
+    const nonFixedTiles = ui.selectedTileIds.filter(id => {
+      const tileModel = documentContent.getTile(id);
+      return tileModel && !tileModel.fixedPosition;
+    });
+    const dragTiles = documentContent.getDragTiles(nonFixedTiles);
 
     e.dataTransfer.setData(kDragTiles, JSON.stringify(dragTiles));
 
