@@ -212,7 +212,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     const showPlaybackControls = this.props.document?.showPlaybackControls;
     const documentToShow = this.getDocumentToShow();
     const documentContent = content || documentToShow?.content; // we only pass in content if it is a problem panel
-    const typeClass = document?.type === "planning" ? "planning-doc" : "";
+    const typeClass = content ? "problem-panel" : document?.type === "planning" ? "planning-doc" : "";
 
     // Note: If there is an error in the main document, we are currently ignoring documentToShow.
     // It might be useful in the future to support showing the history so a user could try to
