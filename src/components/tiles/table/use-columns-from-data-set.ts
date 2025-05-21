@@ -23,10 +23,12 @@ interface IUseColumnsFromDataSet {
   RowLabelFormatter: React.FC<any>;
   measureColumnWidth: (attr: IAttribute) => number;
   lookupImage: (value: string) => string|undefined;
+  sortColumns?: { columnKey: string, direction: "ASC" | "DESC" }[];
+  onSort?: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void;
 }
 export const useColumnsFromDataSet = ({
   gridContext, dataSet, isLinked, metadata, readOnly, columnChanges, headerHeight, rowHeight,
-  RowLabelHeader, RowLabelFormatter, measureColumnWidth, lookupImage
+  RowLabelHeader, RowLabelFormatter, measureColumnWidth, lookupImage, sortColumns, onSort
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
 
@@ -65,7 +67,14 @@ export const useColumnsFromDataSet = ({
     };
   }, [readOnly]);
 
-  const ColumnHeaderCell = useColumnHeaderCell(headerHeight());
+const ColumnHeaderCell = (props: any) => useColumnHeaderCell({
+  column: props.column,
+  height: headerHeight(),
+  getSortDirection: (columnKey: string) => sortColumns?.find(col => col.columnKey === columnKey)?.direction ?? "NONE",
+  onSort: onSort ?? (() => {}),
+  allRowsSelected: false,
+  onAllRowsSelectionChange: () => {}
+})(props);
 
   const columns = useMemo(() => {
     const cols: TColumn[] = attributes.map(attr => {
@@ -76,6 +85,7 @@ export const useColumnsFromDataSet = ({
         key: attr.id,
         width,
         resizable: !readOnly,
+        sortable: true,
         headerRenderer: ColumnHeaderCell,
         formatter: getCellFormatter({ dataSet, isLinked, lookupImage, rowHeight, width }),
         editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,

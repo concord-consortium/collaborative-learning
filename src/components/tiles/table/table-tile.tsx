@@ -2,6 +2,11 @@ import { observer } from "mobx-react";
 import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
+// If SortColumn is not exported, define it here based on react-data-grid's documentation:
+export interface SortColumn {
+  columnKey: string;
+  direction: 'ASC' | 'DESC';
+}
 
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { ITileProps } from "../tile-component";
@@ -48,6 +53,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
   const isLinked = linkedTiles && linkedTiles.length > 1;
   const tableContextValue: ITableContext = { linked: !!isLinked };
+  const [sortColumns, setSortColumns] = useState<SortColumn[]>([]);
 
   // Basic operations based on the model
   const {
@@ -113,14 +119,45 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // rows are required by ReactDataGrid and are used by other hooks as well
   // rowProps are expanded and passed to ReactDataGrid
-  const { rows, ...rowProps } = useRowsFromDataSet({
+  const { rows: initialRows, ...rowProps } = useRowsFromDataSet({
     dataSet, isLinked, readOnly: !!readOnly, inputRowId: inputRowId.current,
     rowChanges, context: gridContext, selectedCaseIds });
 
   // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({
     gridContext, dataSet, isLinked, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
-    ...rowLabelProps, measureColumnWidth, lookupImage});
+    ...rowLabelProps, measureColumnWidth, lookupImage,
+    sortColumns,
+    onSort: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => {
+      setSortColumns(prev => {
+        const filtered = prev.filter(c => c.columnKey !== columnKey);
+        if (direction === "NONE") return filtered;
+        return [...filtered, { columnKey, direction }];
+      });
+  }});
+
+  const sortedRows = useMemo(() => {
+    if (sortColumns.length === 0) return initialRows;
+    const rowsToSort = initialRows.slice(0, -1);
+    const lastRow = initialRows[initialRows.length - 1];
+
+    const sorted =  [...rowsToSort].sort((a, b) => {
+      for (const sort of sortColumns) {
+        const { columnKey, direction } = sort;
+        const aValue = a[columnKey];
+        const bValue = b[columnKey];
+
+        if (aValue === bValue) continue;
+
+        const sortOrder = direction === 'ASC' ? 1 : -1;
+        return aValue > bValue ? sortOrder : -sortOrder;
+      }
+      return 0;
+    });
+    return [...sorted, lastRow];
+  }, [initialRows, sortColumns]);
+
+  const rows = sortedRows;
 
   // The size of the title bar
   const { titleCellWidth, getTitleHeight } =
@@ -251,7 +288,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
             titleCellHeight={getTitleHeight()}
             onBeginEdit={onBeginTitleEdit}
             onEndEdit={onEndTitleEdit} />
-          <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
+          <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={sortedRows} rowHeight={rowHeight}
             headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
             {...dataGridProps} {...rowProps} />
         </div>

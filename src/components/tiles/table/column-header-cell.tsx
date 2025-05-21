@@ -10,19 +10,24 @@ import SortIcon from "../../../assets/sort-column-icon.svg";
 import "./column-header-cell.scss";
 
 interface IProps extends THeaderRendererProps {
+  height: number,
+  getSortDirection: (columnKey: string) => "ASC" | "DESC" | "NONE",
+  onSort: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void
+
 }
-export const useColumnHeaderCell = (height: number) => {
+export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IProps) => {
   return useMemo(() => {
     const ColumnHeaderCell: React.FC<IProps> = (props: IProps) => {
       const column = props.column as unknown as TColumn;
       const { gridContext, readOnly, isEditing, isRemovable, showExpressions, hasData,
               onRemoveColumn } = column.appData || {};
+      const direction = getSortDirection(column.key);
+
       const classes = classNames("column-header-cell",
                         { "show-expression": showExpressions,
                           "selected-column": gridContext?.isColumnSelected(column.key),}
                       );
       // FIXME: temporary local state
-      const [sortDirection, setSortDirection] = React.useState<"ascending" | "descending" | undefined>(undefined);
 
       const handleColumnHeaderCellMouseOver = (e: React.MouseEvent) => {
         if (!gridContext?.isColumnSelected(column.key)) {
@@ -45,14 +50,12 @@ export const useColumnHeaderCell = (height: number) => {
 
       const handleSort = (e: React.MouseEvent) => {
         if (gridContext?.isColumnSelected(column.key)) {
-          e.stopPropagation();
-          if (sortDirection === "ascending") {
-            setSortDirection("descending");
-          } else if (sortDirection === "descending") {
-            setSortDirection(undefined);
-          } else {
-            setSortDirection("ascending");
-          }
+          let newDirection: "ASC" | "DESC" | "NONE";
+          if (direction === "ASC") newDirection = "DESC";
+          else if (direction === "DESC") newDirection = "NONE";
+          else newDirection = "ASC";
+
+          onSort && onSort(column.key, newDirection);
         }
       };
 
@@ -65,10 +68,15 @@ export const useColumnHeaderCell = (height: number) => {
                 <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}
                   isColumnSelected={gridContext?.isColumnSelected(column.key) ?? false}/>
               }
-              <EditableHeaderCell height={height} {...props} />
+              <EditableHeaderCell
+                height={height}
+                column={column as any}
+                allRowsSelected={props.allRowsSelected}
+                onAllRowsSelectionChange={props.onAllRowsSelectionChange}
+              />
               {hasData &&
-                <div className={clsx("column-button sort-column-button", { "ascending": sortDirection === "ascending",
-                                      "descending": sortDirection === "descending" })} onClick={handleSort}>
+                <div className={clsx("column-button sort-column-button", { "ascending": direction === "ASC",
+                                      "descending": direction === "DESC" })} onClick={handleSort}>
                   <SortIcon className={clsx("column-icon sort-column-icon")} />
                 </div>
               }
@@ -80,7 +88,7 @@ export const useColumnHeaderCell = (height: number) => {
       );
     };
     return ColumnHeaderCell;
-  }, [height]);
+  }, [getSortDirection, height, onSort]);
 };
 
 interface IRemoveColumnButtonProps {
