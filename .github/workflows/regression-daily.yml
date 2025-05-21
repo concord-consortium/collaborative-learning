@@ -66,6 +66,8 @@ jobs:
           CYPRESS_coverage: true
           # Increase memory allocation
           NODE_OPTIONS: "--max_old_space_size=4096"
+          CYPRESS_PORTAL_USERNAME: ${{ secrets.PORTAL_USERNAME }}
+          CYPRESS_PORTAL_PASSWORD: ${{ secrets.PORTAL_PASSWORD }}
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
