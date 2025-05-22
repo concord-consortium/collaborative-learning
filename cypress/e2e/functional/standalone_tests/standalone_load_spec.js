@@ -126,10 +126,21 @@ context('Standalone', () => {
       clueCanvas.addTile('text');
       textToolTile.enterText('Test content for navigation', { delay: 500 });
 
+      // Wait for Firebase to save (throttled at 1000ms)
+      cy.wait(2000);
+
+      // Verify content is present before reload
+      textToolTile.getTextEditor().last()
+        .should('contain', 'Test content for navigation');
+
       // Refresh the page
       cy.reload();
+
       // After reload, press the "Get Started" button to re-enter the session
       cy.get('[data-testid=standalone-get-started-button]').click();
+
+      // Wait for Firebase to load the content
+      cy.wait(2000);
 
       // Verify the text tile content persists
       textToolTile.getTextEditor().last()
