@@ -66,6 +66,8 @@ jobs:
           CYPRESS_coverage: true
           # Increase memory allocation
           NODE_OPTIONS: "--max_old_space_size=4096"
+          CYPRESS_PORTAL_TEACHER_USERNAME: ${{ secrets.PORTAL_TEACHER_USERNAME }}
+          CYPRESS_PORTAL_TEACHER_PASSWORD: ${{ secrets.PORTAL_TEACHER_PASSWORD }}
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
@@ -119,6 +121,8 @@ jobs:
           CYPRESS_coverage: true
           # Increase memory allocation
           NODE_OPTIONS: "--max_old_space_size=4096"
+          CYPRESS_PORTAL_TEACHER_USERNAME: ${{ secrets.PORTAL_TEACHER_USERNAME }}
+          CYPRESS_PORTAL_TEACHER_PASSWORD: ${{ secrets.PORTAL_TEACHER_PASSWORD }}
   notify-slack:
     if: ${{ failure() }}
     needs: [all-tests]
