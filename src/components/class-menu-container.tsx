@@ -36,7 +36,6 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
         selected: false,
         hideItemCheck: true,
         onClick: () => {
-          // in standalone mode the shareable link is the current URL
           navigator.clipboard.writeText(window.location.href).then(() => {
             ui.alert("The shareable link has been copied to the clipboard.", "Copy Shareable Link");
           }).catch(err => {
