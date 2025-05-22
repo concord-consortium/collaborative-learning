@@ -187,16 +187,20 @@ Uses common toolbar framework. Default buttons:
 - `rectangle`
 - `ellipse`
 - `stamp`
+- `upload`
+- `text`
 - `stroke-color`
 - `fill-color`
-- `text`
-- `upload`
+- `duplicate`
+- `rotate-right`
+- `flip-horizontal`
+- `flip-vertical`
 - `group`
 - `ungroup`
-- `duplicate`
 - `zoom-in`
 - `zoom-out`
 - `fit-all`
+- `navigator`
 - `delete`
 
 In addition, if shared variables are configured in unit, it supports additional buttons:

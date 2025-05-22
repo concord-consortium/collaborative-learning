@@ -37,6 +37,7 @@ describe("exportDrawingTileSpec", () => {
       type: "vector",
       x: 10, y: 10,
       dx: 10, dy: 10,
+      rotation: 0,
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
@@ -72,6 +73,7 @@ describe("exportDrawingTileSpec", () => {
     const lineData: LineObjectSnapshot = {
       type: "line",
       x: 10, y: 10,
+      rotation: 0,
       deltaPoints: [{ dx: 1, dy: 1 }, { dx: 2, dy: 2 }],
       stroke: "#888888",
       fill: "none",
@@ -110,6 +112,7 @@ describe("exportDrawingTileSpec", () => {
       type: "rectangle",
       x: 10, y: 10,
       width: 10, height: 10,
+      rotation: 0,
       fill: "#cccccc",
       stroke: "#888888",
       strokeDashArray: "3,3",
@@ -152,6 +155,7 @@ describe("exportDrawingTileSpec", () => {
       type: "ellipse",
       x: 10, y: 10,
       rx: 10, ry: 10,
+      rotation: 0,
       fill: "#cccccc",
       stroke: "#888888",
       strokeDashArray: "3,3",
@@ -195,6 +199,7 @@ describe("exportDrawingTileSpec", () => {
       url: "my/image/url",
       x: 10, y: 10,
       width: 10, height: 10,
+      rotation: 0,
       visible: true,
       hFlip: false,
       vFlip: false
@@ -241,6 +246,7 @@ describe("exportDrawingTileSpec", () => {
       filename: "image.png",
       x: 10, y: 10,
       width: 10, height: 10,
+      rotation: 0,
       visible: true,
       hFlip: false,
       vFlip: false

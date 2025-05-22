@@ -11,7 +11,7 @@ exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
   >
     <g
       class="transformable transformable-ellipse"
-      transform="translate(10,10) scale(1,1)"
+      transform="translate(20,20) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <ellipse
         class="drawing-object"
@@ -53,7 +53,7 @@ exports[`Drawing Layer Components Ellipse flips an ellipse horizontally 1`] = `
   >
     <g
       class="transformable transformable-ellipse"
-      transform="translate(40,10) scale(-1,1)"
+      transform="translate(50,20) rotate(0) translate(-10,-10) scale(-1,1)"
     >
       <ellipse
         class="drawing-object"
@@ -83,7 +83,7 @@ exports[`Drawing Layer Components Ellipse flips an ellipse vertically 1`] = `
   >
     <g
       class="transformable transformable-ellipse"
-      transform="translate(10,40) scale(1,-1)"
+      transform="translate(20,50) rotate(0) translate(-10,-10) scale(1,-1)"
     >
       <ellipse
         class="drawing-object"
@@ -113,7 +113,7 @@ exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
   >
     <g
       class="transformable transformable-ellipse"
-      transform="translate(5,5) scale(1,1)"
+      transform="translate(15,15) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <ellipse
         class="drawing-object"
@@ -143,7 +143,7 @@ exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
   >
     <g
       class="transformable transformable-line"
-      transform="translate(10,10) scale(1,1)"
+      transform="translate(13,13) rotate(0) translate(-3,-3) scale(1,1)"
     >
       <path
         class="drawing-object"
@@ -184,7 +184,7 @@ exports[`Drawing Layer Components Freehand Line flips a freehand line horizontal
   >
     <g
       class="transformable transformable-line"
-      transform="translate(26,10) scale(-1,1)"
+      transform="translate(26,13) rotate(0) translate(0,-3) scale(-1,1)"
     >
       <path
         class="drawing-object"
@@ -213,7 +213,7 @@ exports[`Drawing Layer Components Freehand Line flips a freehand line vertically
   >
     <g
       class="transformable transformable-line"
-      transform="translate(10,26) scale(1,-1)"
+      transform="translate(13,26) rotate(0) translate(-3,0) scale(1,-1)"
     >
       <path
         class="drawing-object"
@@ -242,7 +242,7 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
   >
     <g
       class="transformable transformable-line"
-      transform="translate(5,5) scale(1,1)"
+      transform="translate(8,8) rotate(0) translate(-3,-3) scale(1,1)"
     >
       <path
         class="drawing-object"
@@ -271,7 +271,7 @@ exports[`Drawing Layer Components Group creates a group 1`] = `
   >
     <g
       class="transformable transformable-group"
-      transform="translate(0,0) scale(1,1)"
+      transform="translate(20,20) rotate(0) translate(-20,-20) scale(1,1)"
     >
       <g
         class="group"
@@ -279,7 +279,7 @@ exports[`Drawing Layer Components Group creates a group 1`] = `
       >
         <g
           class="transformable transformable-rectangle"
-          transform="translate(0.5,0.5) scale(1,1)"
+          transform="translate(1,1) rotate(0) translate(-0.5,-0.5) scale(1,1)"
         >
           <rect
             class="drawing-object rectangle"
@@ -296,7 +296,7 @@ exports[`Drawing Layer Components Group creates a group 1`] = `
         </g>
         <g
           class="transformable transformable-ellipse"
-          transform="translate(0.5,0.5) scale(1,1)"
+          transform="translate(1,1) rotate(0) translate(-0.5,-0.5) scale(1,1)"
         >
           <ellipse
             class="drawing-object"
@@ -416,7 +416,7 @@ exports[`Drawing Layer Components Group flips a group horizontally 1`] = `
   >
     <g
       class="transformable transformable-group"
-      transform="translate(50,0) scale(-1,1)"
+      transform="translate(50,20) rotate(0) translate(0,-20) scale(-1,1)"
     >
       <g
         class="group"
@@ -424,7 +424,7 @@ exports[`Drawing Layer Components Group flips a group horizontally 1`] = `
       >
         <g
           class="transformable transformable-rectangle"
-          transform="translate(0.5,0.5) scale(1,1)"
+          transform="translate(1,1) rotate(0) translate(-0.5,-0.5) scale(1,1)"
         >
           <rect
             class="drawing-object rectangle"
@@ -441,7 +441,7 @@ exports[`Drawing Layer Components Group flips a group horizontally 1`] = `
         </g>
         <g
           class="transformable transformable-ellipse"
-          transform="translate(0.5,0.5) scale(1,1)"
+          transform="translate(1,1) rotate(0) translate(-0.5,-0.5) scale(1,1)"
         >
           <ellipse
             class="drawing-object"
@@ -549,7 +549,7 @@ exports[`Drawing Layer Components Group flips a group vertically 1`] = `
   >
     <g
       class="transformable transformable-group"
-      transform="translate(0,50) scale(1,-1)"
+      transform="translate(20,50) rotate(0) translate(-20,0) scale(1,-1)"
     >
       <g
         class="group"
@@ -557,7 +557,7 @@ exports[`Drawing Layer Components Group flips a group vertically 1`] = `
       >
         <g
           class="transformable transformable-rectangle"
-          transform="translate(0.5,0.5) scale(1,1)"
+          transform="translate(1,1) rotate(0) translate(-0.5,-0.5) scale(1,1)"
         >
           <rect
             class="drawing-object rectangle"
@@ -574,7 +574,7 @@ exports[`Drawing Layer Components Group flips a group vertically 1`] = `
         </g>
         <g
           class="transformable transformable-ellipse"
-          transform="translate(0.5,0.5) scale(1,1)"
+          transform="translate(1,1) rotate(0) translate(-0.5,-0.5) scale(1,1)"
         >
           <ellipse
             class="drawing-object"
@@ -682,7 +682,7 @@ exports[`Drawing Layer Components Group moves a group 1`] = `
   >
     <g
       class="transformable transformable-group"
-      transform="translate(5,5) scale(1,1)"
+      transform="translate(25,25) rotate(0) translate(-20,-20) scale(1,1)"
     >
       <g
         class="group"
@@ -690,7 +690,7 @@ exports[`Drawing Layer Components Group moves a group 1`] = `
       >
         <g
           class="transformable transformable-rectangle"
-          transform="translate(0.5,0.5) scale(1,1)"
+          transform="translate(1,1) rotate(0) translate(-0.5,-0.5) scale(1,1)"
         >
           <rect
             class="drawing-object rectangle"
@@ -707,7 +707,7 @@ exports[`Drawing Layer Components Group moves a group 1`] = `
         </g>
         <g
           class="transformable transformable-ellipse"
-          transform="translate(0.5,0.5) scale(1,1)"
+          transform="translate(1,1) rotate(0) translate(-0.5,-0.5) scale(1,1)"
         >
           <ellipse
             class="drawing-object"
@@ -815,7 +815,7 @@ exports[`Drawing Layer Components Image adds an image 1`] = `
   >
     <g
       class="transformable transformable-image"
-      transform="translate(10,10) scale(1,1)"
+      transform="translate(20,20) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <image
         height="10"
@@ -854,7 +854,7 @@ exports[`Drawing Layer Components Image flips an image horizontally 1`] = `
   >
     <g
       class="transformable transformable-image"
-      transform="translate(40,10) scale(-1,1)"
+      transform="translate(40,20) rotate(0) translate(0,-10) scale(-1,1)"
     >
       <image
         height="10"
@@ -881,7 +881,7 @@ exports[`Drawing Layer Components Image flips an image vertically 1`] = `
   >
     <g
       class="transformable transformable-image"
-      transform="translate(10,40) scale(1,-1)"
+      transform="translate(20,40) rotate(0) translate(-10,0) scale(1,-1)"
     >
       <image
         height="10"
@@ -908,7 +908,7 @@ exports[`Drawing Layer Components Image moves a image 1`] = `
   >
     <g
       class="transformable transformable-image"
-      transform="translate(5,5) scale(1,1)"
+      transform="translate(15,15) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <image
         height="10"
@@ -935,7 +935,7 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
   >
     <g
       class="transformable transformable-rectangle"
-      transform="translate(10,10) scale(1,1)"
+      transform="translate(20,20) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <rect
         class="drawing-object rectangle"
@@ -977,7 +977,7 @@ exports[`Drawing Layer Components Rectangle flips a Rectangle horizontally 1`] =
   >
     <g
       class="transformable transformable-rectangle"
-      transform="translate(40,10) scale(-1,1)"
+      transform="translate(40,20) rotate(0) translate(0,-10) scale(-1,1)"
     >
       <rect
         class="drawing-object rectangle"
@@ -1007,7 +1007,7 @@ exports[`Drawing Layer Components Rectangle flips a Rectangle vertically 1`] = `
   >
     <g
       class="transformable transformable-rectangle"
-      transform="translate(10,40) scale(1,-1)"
+      transform="translate(20,40) rotate(0) translate(-10,0) scale(1,-1)"
     >
       <rect
         class="drawing-object rectangle"
@@ -1037,7 +1037,7 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
   >
     <g
       class="transformable transformable-rectangle"
-      transform="translate(5,5) scale(1,1)"
+      transform="translate(15,15) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <rect
         class="drawing-object rectangle"
@@ -1067,7 +1067,7 @@ exports[`Drawing Layer Components Vector arrow adds a Vector arrow 1`] = `
   >
     <g
       class="transformable transformable-vector"
-      transform="translate(20,20) scale(1,1)"
+      transform="translate(40,40) rotate(0) translate(-20,-20) scale(1,1)"
     >
       <g
         class="vector"
@@ -1115,7 +1115,7 @@ exports[`Drawing Layer Components Vector arrow changes vector to double arrow 1`
   >
     <g
       class="transformable transformable-vector"
-      transform="translate(20,20) scale(1,1)"
+      transform="translate(40,40) rotate(0) translate(-20,-20) scale(1,1)"
     >
       <g
         class="vector"
@@ -1163,7 +1163,7 @@ exports[`Drawing Layer Components Vector arrow changes vector to single arrow 1`
   >
     <g
       class="transformable transformable-vector"
-      transform="translate(20,20) scale(1,1)"
+      transform="translate(40,40) rotate(0) translate(-20,-20) scale(1,1)"
     >
       <g
         class="vector"
@@ -1216,7 +1216,7 @@ exports[`Drawing Layer Components Vector arrow flips a Vector arrow horizontally
   >
     <g
       class="transformable transformable-vector"
-      transform="translate(70,20) scale(-1,1)"
+      transform="translate(70,40) rotate(0) translate(0,-20) scale(-1,1)"
     >
       <g
         class="vector"
@@ -1264,7 +1264,7 @@ exports[`Drawing Layer Components Vector arrow flips a Vector arrow vertically 1
   >
     <g
       class="transformable transformable-vector"
-      transform="translate(20,70) scale(1,-1)"
+      transform="translate(40,70) rotate(0) translate(-20,0) scale(1,-1)"
     >
       <g
         class="vector"
@@ -1312,7 +1312,7 @@ exports[`Drawing Layer Components Vector arrow moves a vector arrow 1`] = `
   >
     <g
       class="transformable transformable-vector"
-      transform="translate(5,5) scale(1,1)"
+      transform="translate(25,25) rotate(0) translate(-20,-20) scale(1,1)"
     >
       <g
         class="vector"
@@ -1360,7 +1360,7 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
   >
     <g
       class="transformable transformable-vector"
-      transform="translate(10,10) scale(1,1)"
+      transform="translate(20,20) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <g
         class="vector"
@@ -1406,7 +1406,7 @@ exports[`Drawing Layer Components Vector line flips a Vector line horizontally 1
   >
     <g
       class="transformable transformable-vector"
-      transform="translate(40,10) scale(-1,1)"
+      transform="translate(40,20) rotate(0) translate(0,-10) scale(-1,1)"
     >
       <g
         class="vector"
@@ -1440,7 +1440,7 @@ exports[`Drawing Layer Components Vector line flips a Vector line vertically 1`]
   >
     <g
       class="transformable transformable-vector"
-      transform="translate(10,40) scale(1,-1)"
+      transform="translate(20,40) rotate(0) translate(-10,0) scale(1,-1)"
     >
       <g
         class="vector"
@@ -1474,7 +1474,7 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
   >
     <g
       class="transformable transformable-vector"
-      transform="translate(5,5) scale(1,1)"
+      transform="translate(15,15) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <g
         class="vector"

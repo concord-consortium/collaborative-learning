@@ -31,6 +31,7 @@ describe("playbackChanges", () => {
       type: "vector",
       x: 10, y: 10,
       dx: 10, dy: 10,
+      rotation: 0,
       stroke: "#888888",
       strokeDashArray: "3,3",
       strokeWidth: 1,
@@ -81,6 +82,7 @@ describe("playbackChanges", () => {
     const lineData: LineObjectSnapshot = {
       type: "line",
       x: 10, y: 10,
+      rotation: 0,
       deltaPoints: [{ dx: 1, dy: 1 }, { dx: 2, dy: 2 }],
       stroke: "#888888",
       fill: "none",
@@ -129,6 +131,7 @@ describe("playbackChanges", () => {
       type: "rectangle",
       x: 10, y: 10,
       width: 10, height: 10,
+      rotation: 0,
       fill: "#cccccc",
       stroke: "#888888",
       strokeDashArray: "3,3",
@@ -180,6 +183,7 @@ describe("playbackChanges", () => {
       type: "ellipse",
       x: 10, y: 10,
       rx: 10, ry: 10,
+      rotation: 0,
       fill: "#cccccc",
       stroke: "#888888",
       strokeDashArray: "3,3",
@@ -238,6 +242,7 @@ describe("playbackChanges", () => {
       // So it seems safe to ignore it here.
       x: 10, y: 10,
       width: 10, height: 10,
+      rotation: 0,
       visible: true,
       hFlip: false,
       vFlip: false
