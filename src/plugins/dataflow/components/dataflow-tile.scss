@@ -1,7 +1,6 @@
 @import "./dataflow-vars";
 
 .dataflow-tool-tile {
-
   .title-area-wrapper {
     display: flex;
     justify-content: center;
@@ -18,7 +17,6 @@
 
   .dataflow-tool {
     display: flex;
-    border: 1px solid #BBB;
     height: 100%;
   }
 }
