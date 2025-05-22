@@ -150,7 +150,7 @@ context('Standalone', () => {
       cy.get("[data-test=user-header]").should("exist");
 
       // Verify the learner cannot see the teacher menu
-      cy.get("[data-testid=list-item-copy-shareable-link]").should("not.be.visible");
+      cy.get('[data-testid=list-item-copy-shareable-link]').should("not.be.visible");
 
       // Log out
       standaloneHelper.logout();
