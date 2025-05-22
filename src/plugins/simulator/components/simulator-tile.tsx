@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
+import classNames from "classnames";
 import React, { useEffect, useRef, useState } from "react";
-
+import { useUIStore } from "../../../hooks/use-stores";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { isCurriculumDocument } from "../../../models/document/document-types";
@@ -12,7 +13,7 @@ import { getPinBoundingBox, setPinOffsets } from "../simulations/potentiometer-s
 import "./simulator-tile.scss";
 
 export const SimulatorTileComponent = observer(function SimulatorTileComponent({
-  documentId, model, readOnly, onRegisterTileApi, tileElt
+  documentId, hovered, model, readOnly, onRegisterTileApi, tileElt
 }: ITileProps) {
   // Note: capturing the content here and using it in handleChange() below may run the risk
   // of encountering a stale closure issue depending on the order in which content changes,
@@ -20,6 +21,7 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   // (https://github.com/concord-consortium/collaborative-learning/pull/1222/files#r824873678
   // and following comments) for details. We should be on the lookout for such issues.
   const content = model.content as SimulatorContentModelType;
+  const ui = useUIStore();
   const canRunIndependently = !readOnly || isCurriculumDocument(documentId);
   const simRef = useRef<HTMLDivElement>(null);
 
@@ -62,8 +64,13 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
 
   const component = content.simulationData.component;
 
+  const classes = classNames("tile-content", "simulator-content-container", {
+    hovered,
+    selected: ui.isSelectedTile(model)
+  });
+
   return (
-    <div ref={simRef} className="simulator-content-container">
+    <div ref={simRef} className={classes}>
       <BasicEditableTileTitle />
       <div className="simulator-content">
         <div className="simulator-variables">
