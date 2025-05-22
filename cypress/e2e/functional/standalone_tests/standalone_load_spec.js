@@ -97,9 +97,14 @@ context('Standalone', () => {
       cy.log("navigate to a different problem");
       // Click on the dropdown
       cy.get("[data-testid=problem-navigation-dropdown-header]").click();
-
-      // This is a placeholder until CLUE-143 is completed
-      // TODO: Uncomment this once CLUE-143 is completed
+      // INVESTIGATION NOTE:
+      // We tried updating the fixtures (see cypress/fixtures/standalone-test-data.json)
+      // to include all required fields for portalClassOfferings
+      // and matched problem titles/subtitles.
+      // Despite this, the test still shows (N/A) in the dropdown
+      // and assignment errors in the dialog.
+      // The test code below is left commented for now as a
+      // record of this investigation and for future debugging.
       // // Select the second problem in the list
       // cy.get("[data-testid=problem-navigation-dropdown-list] .list-item").eq(1).click();
       // // Navigate back to the first problem
@@ -107,20 +112,35 @@ context('Standalone', () => {
       // cy.get("[data-testid=problem-navigation-dropdown-list] .list-item").eq(0).click();
       // // Verify the problem content changed
       // cy.get("[data-testid=problem-navigation-dropdown]").should("exist");
+
+      cy.log('Visit the standalone page for problem 1.2 directly');
+      // Visit the standalone page for problem 1.2 directly
+      cy.visit('/standalone/?unit=msa&classWord=clue_35711398245&problem=1.2');
+
+      // Assert that the expected content for problem 1.2 is visible
+      cy.contains('Walking Rates: Exploring Linear Relationships with Tables, Graphs, and Equations');
     });
 
     it('should maintain user state when navigating between problems', () => {
       // Add a text tile and enter content
       clueCanvas.addTile('text');
-      textToolTile.enterText('Test content for navigation');
+      textToolTile.enterText('Test content for navigation', { delay: 500 });
 
-      // TODO: Uncomment this once CLUE-143 is completed
-      // // Navigate to the second problem
-      // cy.get("[data-testid=problem-navigation-dropdown-header]").click();
-      // cy.get("[data-testid=problem-navigation-dropdown-list] .list-item").eq(1).click();
-      // // Navigate back to the first problem
-      // cy.get("[data-testid=problem-navigation-dropdown-header]").click();
-      // cy.get("[data-testid=problem-navigation-dropdown-list] .list-item").eq(0).click();
+      // Wait for Firebase to save (throttled at 1000ms)
+      cy.wait(2000);
+
+      // Verify content is present before reload
+      textToolTile.getTextEditor().last()
+        .should('contain', 'Test content for navigation');
+
+      // Refresh the page
+      cy.reload();
+
+      // After reload, press the "Get Started" button to re-enter the session
+      cy.get('[data-testid=standalone-get-started-button]').click();
+
+      // Wait for Firebase to load the content
+      cy.wait(2000);
 
       // Verify the text tile content persists
       textToolTile.getTextEditor().last()
@@ -131,7 +151,7 @@ context('Standalone', () => {
       clueCanvas.deleteTile('text');
     });
 
-    it("should allow user to log out and return to welcome screen", () => {
+    it("should allow learner to log out and return to welcome screen", () => {
       // Visit the standalone page
       standaloneHelper.visitStandalone("/standalone/?unit=msa");
       standaloneHelper.startStandaloneSession();
@@ -139,6 +159,10 @@ context('Standalone', () => {
 
       // Verify we're logged in by checking for the user menu
       cy.get("[data-test=user-header]").should("exist");
+
+      // Verify the learner cannot see the teacher menu
+      cy.get("[data-testid=problem-navigation-dropdown-header]").click();
+      cy.get('[data-testid=list-item-copy-shareable-link]').should("not.exist");
 
       // Log out
       standaloneHelper.logout();

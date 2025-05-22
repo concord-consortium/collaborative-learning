@@ -1,0 +1,55 @@
+{
+  "jwt": {
+    "token": "mock-jwt-token",
+    "domain": "learn.portal.staging.concord.org"
+  },
+  "user": {
+    "id": "321",
+    "first_name": "Test",
+    "last_name": "Teacher",
+    "user_type": "teacher",
+    "email": "teacher@example.com",
+    "className": "Test Class",
+    "portalClassOfferings": [
+      {
+        "classId": "789",
+        "classHash": "clue_35711398245",
+        "className": "Test Class",
+        "classUrl": "https://learn.portal.staging.concord.org/api/v1/classes/789",
+        "teacher": "Test Teacher",
+        "activityTitle": "Using Walking Rates to Explore Linear Relationships",
+        "activityUrl": "https://collaborative-learning.concord.org/branch/master/standalone/?unit=msa&problem=1.1&classWord=clue_35711398245",
+        "problemOrdinal": "1.1",
+        "unitCode": "msa",
+        "offeringId": "456",
+        "location": "/standalone/?unit=msa&classWord=clue_35711398245&problem=1.1"
+      },
+      {
+        "classId": "789",
+        "classHash": "clue_35711398245",
+        "className": "Test Class",
+        "classUrl": "https://learn.portal.staging.concord.org/api/v1/classes/789",
+        "teacher": "Test Teacher",
+        "activityTitle": "Walking Rates: Exploring Linear Relationships with Tables, Graphs, and Equations",
+        "activityUrl": "https://collaborative-learning.concord.org/branch/master/standalone/?unit=msa&problem=1.2&classWord=clue_35711398245",
+        "problemOrdinal": "1.2",
+        "unitCode": "msa",
+        "offeringId": "457",
+        "location": "/standalone/?unit=msa&classWord=clue_35711398245&problem=1.2"
+      }
+    ]
+  },
+  "offerings": [{
+    "id": "456",
+    "name": "Test Offering",
+    "activity_url": "/standalone/?unit=msa",
+    "class_info": {
+      "id": "789",
+      "name": "Test Class"
+    },
+    "problems": [
+      { "title": "Using Walking Rates to Explore Linear Relationships", "ordinal": "1.1" },
+      { "title": "Walking Rates: Exploring Linear Relationships with Tables, Graphs, and Equations", "ordinal": "1.2", "subtitle": "Walking Rates" }
+    ]
+  }]
+}

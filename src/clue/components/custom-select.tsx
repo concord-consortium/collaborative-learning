@@ -14,7 +14,7 @@ export interface ICustomDropdownItem extends IDropdownItem {
 }
 
 function getItemId(item: ICustomDropdownItem) {
-  return item.id || item.text.toLowerCase().replace(" ", "-");
+  return item.id || item.text.toLowerCase().replace(/\s+/g, "-");
 }
 
 interface IProps {

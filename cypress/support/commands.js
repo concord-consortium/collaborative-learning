@@ -248,16 +248,24 @@ Cypress.Commands.add("deleteDocumentThumbnail", (tab, section,title) => {
   cy.get('.'+tab+' .documents-list.'+section+' [data-test='+section+'-list-items] .footer .icon-delete-document').eq(1).click({force:true});
 });
 
-Cypress.Commands.add('portalLogin', () => {
+Cypress.Commands.add('portalLogin', (options = {}) => {
+  // Default to student if not specified
+  const userType = options.userType || 'student';
+
+  // Get credentials for the specified user type
+  let username, password;
+  if (userType === 'teacher') {
+    username = Cypress.env('PORTAL_TEACHER_USERNAME');
+    password = Cypress.env('PORTAL_TEACHER_PASSWORD');
+  } else {
+    username = Cypress.env('PORTAL_USERNAME');
+    password = Cypress.env('PORTAL_PASSWORD');
+  }
+
   // Handle cross-origin errors during login
   cy.on('uncaught:exception', () => {
     return false; // We want to handle all uncaught exceptions during login
   });
-
-  // Get credentials from environment variables
-  // This will work with both cypress.env.json and CI environment variables
-  const username = Cypress.env('PORTAL_USERNAME') || Cypress.env('auth')?.username;
-  const password = Cypress.env('PORTAL_PASSWORD') || Cypress.env('auth')?.password;
 
   // Debug logs in parent scope
   cy.log('DEBUG parent Cypress.env: ' + JSON.stringify(Cypress.env()));
