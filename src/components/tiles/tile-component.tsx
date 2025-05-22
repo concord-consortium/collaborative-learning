@@ -231,21 +231,26 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                                 hovered={hoverTile}
                                 selected={isTileSelected}
                                 onDragStart={e => this.props.onResizeRow(e)} />;
-    const questionBadge = isQuestionModel(model.content) &&
-                            <>
-                            <div className="question-badge">
-                              <QuestionBadge />
-                            </div>
-                            <div className="question-border-bumpout">
-                            </div>
-                            </>;
 
     const style: React.CSSProperties = {};
+    const questionBadgestyle: React.CSSProperties = {};
     if (widthPct) {
-      style.width = `${Math.round(100 * widthPct / 100)}%`;
+      const widthToPct = Math.round(100 * widthPct / 100);
+      style.width = `${widthToPct}%`;
+      questionBadgestyle.left = `${100 - widthToPct}%`;
     }
+    const tileHeight = this.getDomElementHeight();
+    const questionIndicator = isQuestionModel(model.content) &&
+                              <>
+                                <div style={{ height: tileHeight }} className="question-border" />
+                                <div style={questionBadgestyle} className="question-badge">
+                                  <QuestionBadge />
+                                </div>
+                              </>;
+
     return (
       <TileModelContext.Provider value={model}>
+        {questionIndicator}
         <div
           className={classes} data-testid="tool-tile"
           ref={elt => this.domElement = elt}
@@ -259,7 +264,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
           {this.renderLinkIndicators()}
           {dragTileButton}
           {resizeTileButton}
-          {questionBadge}
           {this.renderTile(Component)}
           {this.renderTileComments()}
         </div>
@@ -472,5 +476,13 @@ export class TileComponent extends BaseComponent<IProps, IState> {
       // calling the resize handler triggers a re-render
       handler(entry);
     }
+  };
+
+  private getDomElementHeight = () => {
+    if (this.domElement) {
+      const bounds = this.domElement.getBoundingClientRect();
+      return bounds.height;
+    }
+    return 0;
   };
 }
