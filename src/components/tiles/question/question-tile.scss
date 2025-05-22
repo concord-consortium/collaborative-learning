@@ -1,13 +1,18 @@
 @import "../../vars";
 
+.question-border {
+  width: 2px;
+  background-color: $workspace-teal;
+}
+
+.question-tile {
+  margin-left: -2px;
+}
+
 .question-badge {
   position: absolute;
   top: 0px;
-  left: 0px;
   z-index: 1;
-  width: 2px;
-  height: 100%;
-  background-color: $workspace-teal;
 }
 
 .question-tile-content {

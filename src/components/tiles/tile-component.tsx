@@ -66,6 +66,7 @@ interface ITileBaseProps {
   scale?: number;
   widthPct?: number;
   height?: number;
+  index?: number;
   model: ITileModel;
   readOnly?: boolean;
   typeClass?: string;
@@ -136,6 +137,7 @@ const ResizeTileButton =
 
 interface IState {
   hoverTile: boolean;
+  tileHeight?: number;
 }
 
 const defaultDragImage = document.createElement("img");
@@ -155,7 +157,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   private resizeElement: HTMLDivElement | null;
 
   state = {
-    hoverTile: false
+    hoverTile: false,
+    tileHeight: 0
   };
 
   constructor(props: IProps) {
@@ -231,21 +234,14 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                                 hovered={hoverTile}
                                 selected={isTileSelected}
                                 onDragStart={e => this.props.onResizeRow(e)} />;
-    const questionBadge = isQuestionModel(model.content) &&
-                            <>
-                            <div className="question-badge">
-                              <QuestionBadge />
-                            </div>
-                            <div className="question-border-bumpout">
-                            </div>
-                            </>;
 
     const style: React.CSSProperties = {};
     if (widthPct) {
-      style.width = `${Math.round(100 * widthPct / 100)}%`;
+      style.width = `${widthPct}%`;
     }
     return (
       <TileModelContext.Provider value={model}>
+        {this.renderQuestionIndicator()}
         <div
           className={classes} data-testid="tool-tile"
           ref={elt => this.domElement = elt}
@@ -259,7 +255,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
           {this.renderLinkIndicators()}
           {dragTileButton}
           {resizeTileButton}
-          {questionBadge}
           {this.renderTile(Component)}
           {this.renderTileComments()}
         </div>
@@ -307,6 +302,26 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private renderQuestionIndicator() {
+    const { model, widthPct, index } = this.props;
+    if (!isQuestionModel(model.content)) return null;
+
+    const style: React.CSSProperties = {};
+    if (widthPct && (index !== undefined)) {
+      style.left =`${widthPct * index}%`;
+    }
+    const kBorderOffset = 2; // offset for the outer border that is 1px thick
+    const tileHeight = this.state.tileHeight + kBorderOffset;
+    return (
+      <>
+        <div style={{ height: tileHeight }} className="question-border" />
+        <div style={style} className="question-badge">
+          <QuestionBadge />
+        </div>
+      </>
+    );
+  }
+
   private getTileResizeHandler = () => {
     const { model } = this.props;
     // Because this is debounced and can also fire from a browser event, it
@@ -334,6 +349,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   private handleResizeDebounced = debounce((entry: ResizeObserverEntry) => {
     this.getTileResizeHandler()?.(entry);
+    this.setState({ tileHeight: entry.contentRect.height });
   }, 100);
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {

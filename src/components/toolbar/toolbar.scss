@@ -7,6 +7,7 @@
   background-color: $workspace-teal-light-9;
   display: flex;
   text-align: center;
+  z-index: 1;
 
   &.disabled {
     display: none;
