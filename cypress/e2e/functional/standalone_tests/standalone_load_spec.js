@@ -130,5 +130,18 @@ context('Standalone', () => {
       cy.wait(500); // Wait for any animations/resize operations to complete
       clueCanvas.deleteTile('text');
     });
+
+    it("should allow user to log out and return to welcome screen", () => {
+      // Visit the standalone page
+      standaloneHelper.visitStandalone("/standalone/?unit=msa");
+      standaloneHelper.startStandaloneSession();
+      standaloneHelper.selectOrCreateGroup(1);
+
+      // Verify we're logged in by checking for the user menu
+      cy.get("[data-test=user-header]").should("exist");
+
+      // Log out
+      standaloneHelper.logout();
+    });
   });
 });
