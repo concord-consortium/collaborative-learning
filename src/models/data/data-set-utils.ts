@@ -47,7 +47,7 @@ export const
   kTypeUnknown = 9;
 
 export function typeCode(value: any) {
-  if (value == null) return kTypeNull;
+  if (value == null || value === "") return kTypeNull;
   if (value instanceof Error) return kTypeError;
   // if (isDate(value) || isDateString(value)) return kTypeDate
   // if (value instanceof DG.SimpleMap) return kTypeSimpleMap;
