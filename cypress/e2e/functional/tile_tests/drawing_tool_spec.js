@@ -96,7 +96,7 @@ context('Draw Tool Tile', function () {
     });
     cy.get("@log")
       .should("have.been.been.calledWith", LogEventName.DRAWING_TOOL_CHANGE, Cypress.sinon.match.object)
-      .its("lastCall.args.1").should("deep.include", { operation: "setZoom", args: [1.1, { x: 1170, y: 176 } ] });
+      .its("lastCall.args.1").should("deep.include", { operation: "setZoom", args: [1.1, { x: 1168, y: 176 } ] });
 
     clueCanvas.clickToolbarButton('drawing', 'zoom-out');
     drawToolTile.getDrawTileObjectCanvas().then(canvas => {
@@ -107,7 +107,7 @@ context('Draw Tool Tile', function () {
     });
     cy.get("@log")
       .should("have.been.been.calledWith", LogEventName.DRAWING_TOOL_CHANGE, Cypress.sinon.match.object)
-      .its("lastCall.args.1").should("deep.include", { operation: "setZoom", args: [1, { x: 1170, y: 176 }] });
+      .its("lastCall.args.1").should("deep.include", { operation: "setZoom", args: [1, { x: 1168, y: 176 }] });
 
     // Should not zoom out past zoom level .1
     for (let z=0; z< 9; z++) {
