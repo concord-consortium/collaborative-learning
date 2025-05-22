@@ -53,10 +53,6 @@ export function extractDragTileType(dataTransfer: DataTransfer) {
   }
 }
 
-const widthToPct = (width: number) => {
-  return Math.round(100 * width / 100);
-};
-
 /**
  * These props are used both by the TileComponent and the components provided by the
  * individual tools.
@@ -241,7 +237,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
     const style: React.CSSProperties = {};
     if (widthPct) {
-      style.width = `${widthToPct(widthPct)}%`;
+      style.width = `${widthPct}%`;
     }
     return (
       <TileModelContext.Provider value={model}>
@@ -312,7 +308,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
     const style: React.CSSProperties = {};
     if (widthPct && (index !== undefined)) {
-      style.left = `${(100 - widthToPct(widthPct)) * index}%`;
+      style.left =`${widthPct * index}%`;
     }
     const kBorderOffset = 2; // offset for the outer border that is 1px thick
     const tileHeight = this.state.tileHeight + kBorderOffset;
@@ -353,7 +349,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   private handleResizeDebounced = debounce((entry: ResizeObserverEntry) => {
     this.getTileResizeHandler()?.(entry);
-    this.setState({ ...this.state, tileHeight: entry.contentRect.height });
+    this.setState({ tileHeight: entry.contentRect.height });
   }, 100);
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
