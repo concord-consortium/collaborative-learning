@@ -2,7 +2,8 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps,
-  IDrawingLayer, ObjectTypeIconViewBox, SizedObject, typeField } from "./drawing-object";
+  IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
+import { SizedObject } from "./sized-object";
 import { Point } from "../model/drawing-basic-types";
 import { uniqueId } from "../../../../src/utilities/js-utils";
 import { WrappedSvgText } from "../components/wrapped-svg-text";
@@ -149,7 +150,7 @@ export const TextComponent = observer(
     function TextComponent({model, readOnly, handleHover, handleDrag} : IDrawingComponentProps) {
   if (!isTextObject(model)) return null;
   const textobj = model as TextObjectType;
-  const { id, stroke, text, position, transform } = textobj;
+  const { id, stroke, text, transform } = textobj;
   const { width, height } = textobj.currentDims;
   const clipId = uniqueId();
   const margin = 5;
@@ -159,7 +160,7 @@ export const TextComponent = observer(
   };
 
   return (
-    <Transformable type="text" transform={transform}>
+    <Transformable type="text" transform={transform} setAnimating={textobj.setAnimating}>
       <g
         key={id}
         className="text"

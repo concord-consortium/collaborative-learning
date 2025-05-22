@@ -27,6 +27,22 @@ function* pointIterator(line: LineObjectType): Generator<Point, string, unknown>
   return "done";
 }
 
+function* undraggedPointIterator(line: LineObjectType): Generator<Point, string, unknown> {
+  const { x, y } = line;
+  const points = line.deltaPoints;
+  let currentX = x;
+  let currentY = y;
+  yield { x: currentX, y: currentY };
+  for (const {dx, dy} of points) {
+    currentX += dx;
+    currentY += dy;
+    yield {x: currentX, y: currentY};
+  }
+  // Due to some conflict between TS and ESLint it is necessary to return
+  // a value here. As far as I can tell this value is not used.
+  return "done";
+}
+
 // polyline
 export const LineObject = types.compose("LineObject", StrokedObject, FilledObject)
   .props({
@@ -55,7 +71,20 @@ export const LineObject = types.compose("LineObject", StrokedObject, FilledObjec
       return false;
     },
 
-    get simpleBoundingBox() {
+    get undraggedUnrotatedBoundingBox() {
+      const {x, y} = self;
+      const nw: Point = {x, y};
+      const se: Point = {x, y};
+      for (const point of undraggedPointIterator(self as LineObjectType)) {
+        nw.x = Math.min(nw.x, point.x);
+        nw.y = Math.min(nw.y, point.y);
+        se.x = Math.max(se.x, point.x);
+        se.y = Math.max(se.y, point.y);
+      }
+      return {nw, se};
+    },
+
+    get unrotatedBoundingBox() {
       // The position of the line is its start point.
       // Other points are stored as deltas from the start point.
       const {x, y} = self.position;
@@ -85,36 +114,24 @@ export const LineObject = types.compose("LineObject", StrokedObject, FilledObjec
       self.deltaPoints.push(point);
     },
 
-    setDragBounds(deltas: BoundingBoxSides) {
+    setUnrotatedDragBounds(bounds: BoundingBoxSides) {
       self.dragX = self.dragY = self.dragScaleX = self.dragScaleY = undefined;
-      const bbox = self.boundingBox;
+      const bbox = self.unrotatedBoundingBox;
       const left = bbox.nw.x;
       const top = bbox.nw.y;
       const width = bbox.se.x - bbox.nw.x;
       const height = bbox.se.y - bbox.nw.y;
-      const newWidth  = width -  deltas.left + deltas.right;
-      const newHeight = height - deltas.top + deltas.bottom;
+      const newWidth  = bounds.right - bounds.left;
+      const newHeight = bounds.bottom - bounds.top;
       const widthFactor = width ? newWidth/width : 1;
       const heightFactor = height ? newHeight/height : 1;
 
       // x,y (position of start point) get moved to a scaled position within the new bounds
-      const newLeft = left+deltas.left;
-      self.dragX = newLeft + (self.x-left)*widthFactor;
-      const newTop = top+deltas.top;
-      self.dragY = newTop  + (self.y-top)*heightFactor;
+      self.dragX = bounds.left + (self.x-left)*widthFactor;
+      self.dragY = bounds.top  + (self.y-top)*heightFactor;
 
       self.dragScaleX = widthFactor;
       self.dragScaleY = heightFactor;
-    },
-    setDragBoundsAbsolute(bounds: BoundingBoxSides) {
-      const bbox = self.boundingBox;
-      const deltas = {
-        left: bounds.left - bbox.nw.x,
-        top: bounds.top - bbox.nw.y,
-        right: bounds.right - bbox.se.x,
-        bottom: bounds.bottom - bbox.se.y
-      };
-      this.setDragBounds(deltas);
     },
     resizeObject() {
       self.repositionObject();
@@ -155,7 +172,7 @@ export const LineComponent = observer(function LineComponent({model, handleHover
   const commands = `M 0 0 ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
 
   return (
-    <Transformable type="line" key={id} transform={line.transform}>
+    <Transformable type="line" key={id} transform={line.transform} setAnimating={line.setAnimating}>
       <path
         data-object-id={id}
         className="drawing-object"

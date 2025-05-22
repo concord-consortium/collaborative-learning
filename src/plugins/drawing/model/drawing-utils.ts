@@ -1,3 +1,5 @@
+import { BoundingBox, BoundingBoxSides, Point } from "./drawing-basic-types";
+
 /**
  * Recursively removes 'id' attributes from a drawing object snapshot and all nested objects in 'objects' arrays.
  * @param obj The snapshot object to process
@@ -38,3 +40,52 @@ export function rotatePoint(point: {x: number, y: number}, center: {x: number, y
     y: center.y + dx * sin + dy * cos
   };
 }
+
+export function boundingBoxForPoints(points: {x: number, y: number}[]): BoundingBoxSides {
+  const minX = Math.min(...points.map(p => p.x));
+  const maxX = Math.max(...points.map(p => p.x));
+  const minY = Math.min(...points.map(p => p.y));
+  const maxY = Math.max(...points.map(p => p.y));
+  return {left: minX, top: minY, right: maxX, bottom: maxY};
+}
+
+export function rotationPoint(boundingBox: BoundingBox, rotation: number): Point {
+  // Normalize and round rotation to nearest multiple of 90
+  const normalized = ((Math.round(rotation / 90) * 90) % 360 + 360) % 360;
+  switch (normalized) {
+    case 0:
+      // Rotation is defined to be around the se corner of unrotated object.
+      return boundingBox.se;
+    case 90:
+      // SW
+      return { x: boundingBox.nw.x, y: boundingBox.se.y };
+    case 180:
+      // NW
+      return boundingBox.nw;
+    case 270:
+      // NE
+      return { x: boundingBox.se.x, y: boundingBox.nw.y };
+    default:
+      throw new Error(`Invalid rotation: ${rotation}`);
+  }
+}
+
+export function rotateBoundingBox(boundingBox: BoundingBox, rotation: number): BoundingBox {
+  // Get the four corners of the bounding box
+  const nw = boundingBox.nw;
+  const se = boundingBox.se;
+  const ne = { x: se.x, y: nw.y };
+  const sw = { x: nw.x, y: se.y };
+  // Rotate each corner around the se (our center of rotation)
+  const rotatedNW = rotatePoint(nw, se, rotation);
+  const rotatedNE = rotatePoint(ne, se, rotation);
+  const rotatedSE = se; //rotatePoint(se, se, rotation);
+  const rotatedSW = rotatePoint(sw, se, rotation);
+  // Find min/max x and y
+  const boundingSides = boundingBoxForPoints([rotatedNW, rotatedNE, rotatedSE, rotatedSW]);
+  return {
+    nw: { x: boundingSides.left, y: boundingSides.top },
+    se: { x: boundingSides.right, y: boundingSides.bottom }
+  };
+}
+

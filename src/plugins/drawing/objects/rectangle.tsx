@@ -2,7 +2,8 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps,
-  IDrawingLayer, ObjectTypeIconViewBox, SizedObject, StrokedObject, typeField } from "./drawing-object";
+  IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
+import { SizedObject } from "./sized-object";
 import { Point } from "../model/drawing-basic-types";
 import { Transformable } from "../components/transformable";
 
@@ -64,7 +65,7 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
   const { id, stroke, strokeWidth, strokeDashArray, fill } = rect;
   const { width, height } = rect.currentDims;
   return (
-    <Transformable type="rectangle" key={id} transform={rect.transform}>
+    <Transformable type="rectangle" key={id} transform={rect.transform} setAnimating={rect.setAnimating}>
       <rect
         className="drawing-object rectangle"
         x={0}

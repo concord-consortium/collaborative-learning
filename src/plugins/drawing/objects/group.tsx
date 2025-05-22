@@ -6,13 +6,13 @@ import { DrawingObjectType, IDrawingComponentProps,
   isFilledObject,
   isStrokedObject,
   typeField,
-  ObjectTypeIconViewBox,
-  SizedObject} from "./drawing-object";
+  ObjectTypeIconViewBox } from "./drawing-object";
 import { VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion, renderDrawingObject } from "../components/drawing-object-manager";
 import { isVectorObject } from "./vector";
 import { useReadOnlyContext } from "../../../components/document/read-only-context";
 import { Transformable } from "../components/transformable";
+import { SizedObject } from "./sized-object";
 
 import GroupObjectsIcon from "../assets/group-objects-icon.svg";
 
@@ -152,7 +152,7 @@ export const GroupComponent = observer(function GroupComponent(
   const {id, currentDims} = group;
 
   return (
-    <Transformable type="group" key={id} transform={group.transform}>
+    <Transformable type="group" key={id} transform={group.transform} setAnimating={group.setAnimating}>
       <g className="group"
          transform={`scale(${currentDims.width}, ${currentDims.height})`}>
         {renderChildDrawingObjects(group, readOnly)}

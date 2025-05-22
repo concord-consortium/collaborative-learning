@@ -5,7 +5,7 @@ import {
   computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps,
   IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField
 } from "./drawing-object";
-import { BoundingBoxSides, Point, VectorEndShape,
+import { BoundingBoxSides, VectorEndShape,
   endShapesForVectorType, getVectorTypeIcon, vectorTypeForEndShapes }
   from "../model/drawing-basic-types";
 import { Transformable } from "../components/transformable";
@@ -24,13 +24,19 @@ export const VectorObject = StrokedObject.named("VectorObject")
     dragDy: undefined as number | undefined
   }))
   .views(self => ({
-    get simpleBoundingBox() {
+    get undraggedUnrotatedBoundingBox() {
+      const { x, y, dx, dy } = self;
+      return {
+        nw: { x: Math.min(x, x+dx), y: Math.min(y, y+dy) },
+        se: { x: Math.max(x, x+dx), y: Math.max(y, y+dy) } };
+    },
+    get unrotatedBoundingBox() {
       const { x, y } = self.position;
       const dx = self.dragDx ?? self.dx;
       const dy = self.dragDy ?? self.dy;
-      const nw: Point = {x: Math.min(x, x + dx), y: Math.min(y, y + dy)};
-      const se: Point = {x: Math.max(x, x + dx), y: Math.max(y, y + dy)};
-      return {nw, se};
+      return {
+        nw: { x: Math.min(x, x+dx), y: Math.min(y, y+dy) },
+        se: { x: Math.max(x, x+dx), y: Math.max(y, y+dy) } };
     },
     get label() {
       return  (self.headShape || self.tailShape) ? "Arrow" : "Line";
@@ -49,36 +55,26 @@ export const VectorObject = StrokedObject.named("VectorObject")
       self.headShape = headShape;
       self.tailShape = tailShape;
     },
-    setDragBounds(deltas: BoundingBoxSides) {
+    setUnrotatedDragBounds(bounds: BoundingBoxSides) {
       if (self.dx > 0) {
         // x,y point is towards the left
-        self.dragX = self.x + deltas.left;
-        self.dragDx = self.dx + deltas.right - deltas.left;
+        self.dragX = bounds.left;
+        self.dragDx = bounds.right - bounds.left;
       } else {
         // x,y point is towards the right
-        self.dragX = self.x + deltas.right;
-        self.dragDx = self.dx - deltas.right + deltas.left;
+        self.dragX = bounds.right;
+        self.dragDx = bounds.left - bounds.right;
       }
 
       if (self.dy > 0) {
         // x,y point is towards the top
-        self.dragY = self.y + deltas.top;
-        self.dragDy = self.dy + deltas.bottom - deltas.top;
+        self.dragY = bounds.top;
+        self.dragDy = bounds.bottom - bounds.top;
       } else {
         // x,y point is towards the bottom
-        self.dragY = self.y + deltas.bottom;
-        self.dragDy = self.dy - deltas.bottom + deltas.top;
+        self.dragY = bounds.bottom;
+        self.dragDy = bounds.top - bounds.bottom;
       }
-    },
-    setDragBoundsAbsolute(bounds: BoundingBoxSides) {
-      const bbox = self.boundingBox;
-      const deltas = {
-        left: bounds.left - bbox.nw.x,
-        top: bounds.top - bbox.nw.y,
-        right: bounds.right - bbox.se.x,
-        bottom: bounds.bottom - bbox.se.y
-      };
-      this.setDragBounds(deltas);
     },
     resizeObject() {
       self.repositionObject();
@@ -113,7 +109,7 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
     const tail = tailShape ? placeEndShape(tailShape, 0, 0, angle+180) : null; // tail points backwards
     // Set fill to stroke since arrowheads should be drawn in stroke color
   return (
-    <Transformable type="vector" transform={model.transform}>
+    <Transformable type="vector" transform={model.transform} setAnimating={model.setAnimating}>
       <g
         className="vector"
         stroke={stroke}

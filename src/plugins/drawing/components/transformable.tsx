@@ -10,6 +10,7 @@ function lerp(a: number, b: number, t: number) {
 export interface TransformableProps {
   type: string;
   transform: Transform;
+  setAnimating: (animating: boolean) => void;
   children: React.ReactNode;
 }
 
@@ -20,7 +21,7 @@ export interface TransformableProps {
  * @param transform - The transform to apply to the group.
  * @param children - The children to render inside the group.
  */
-export const Transformable: React.FC<TransformableProps> = ({ type, transform, children }) => {
+export const Transformable: React.FC<TransformableProps> = ({ type, transform, setAnimating, children }) => {
   const prevTransform = React.useRef(transform);
   const [animated, setAnimated] = React.useState(transform);
 
@@ -58,6 +59,7 @@ export const Transformable: React.FC<TransformableProps> = ({ type, transform, c
       if (t < 1) {
         rafId = requestAnimationFrame(animate);
       } else {
+        setAnimating(false);
         setAnimated(targetTrans);
         prevTransform.current = targetTrans;
       }
@@ -67,13 +69,18 @@ export const Transformable: React.FC<TransformableProps> = ({ type, transform, c
     if (prevTrans.scale.x !== targetTrans.scale.x
         || prevTrans.scale.y !== targetTrans.scale.y
         || prevTrans.rotation !== targetTrans.rotation) {
+      setAnimating(true);
       rafId = requestAnimationFrame(animate);
     } else {
+      setAnimating(false);
       setAnimated(targetTrans);
       prevTransform.current = targetTrans;
     }
-    return () => cancelAnimationFrame(rafId);
-  }, [transform]);
+    return () => {
+      cancelAnimationFrame(rafId);
+      setAnimating(false);
+    };
+  }, [transform, setAnimating]);
 
   // Series of transforms:
   // 1. Translate to the bottom-right corner of the bounding box (rotation center)

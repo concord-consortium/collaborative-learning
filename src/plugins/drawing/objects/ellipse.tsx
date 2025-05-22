@@ -20,14 +20,20 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
     dragRy: undefined as number | undefined
   }))
   .views(self => ({
-    get simpleBoundingBox() {
-      // The position of the ellipse is its center.
+    // The position of the ellipse is its center, so add and subtract the radii.
+    get undraggedUnrotatedBoundingBox() {
+      const { x, y, rx, ry } = self;
+      return {
+        nw: { x: x - rx, y: y - ry },
+        se: { x: x + rx, y: y + ry } };
+    },
+    get unrotatedBoundingBox() {
       const {x, y} = self.position;
       const rx = self.dragRx ?? self.rx;
       const ry = self.dragRy ?? self.ry;
-      const nw: Point = {x: x - rx, y: y - ry};
-      const se: Point = {x: x + rx, y: y + ry};
-      return {nw, se};
+      return {
+        nw: { x: x - rx, y: y - ry },
+        se: { x: x + rx, y: y + ry } };
     },
     get label() {
       return (self.rx === self.ry) ? "Circle" : "Ellipse";
@@ -46,17 +52,11 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
         self.rx = self.ry = Math.max(self.rx, self.ry);
       }
     },
-    setDragBounds(deltas: BoundingBoxSides) {
-      self.dragX = self.x + deltas.left/2 + deltas.right/2;
-      self.dragY = self.y + deltas.top/2 + deltas.bottom/2;
-      self.dragRx  = self.rx  + deltas.right/2 - deltas.left/2;
-      self.dragRy = self.ry + deltas.bottom/2 - deltas.top/2;
-    },
-    setDragBoundsAbsolute(bounds: BoundingBoxSides) {
-      self.dragRx = (bounds.right - bounds.left) / 2;
-      self.dragRy = (bounds.bottom - bounds.top) / 2;
-      self.dragX = bounds.left + self.dragRx;
-      self.dragY = bounds.top + self.dragRy;
+    setUnrotatedDragBounds(bounds: BoundingBoxSides) {
+      self.dragX = (bounds.left + bounds.right)/2;
+      self.dragY = (bounds.top + bounds.bottom)/2;
+      self.dragRx  = (bounds.right - bounds.left)/2;
+      self.dragRy = (bounds.bottom - bounds.top)/2;
     },
     resizeObject() {
       self.repositionObject();
@@ -79,7 +79,7 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
   const rx = model.dragRx ?? model.rx;
   const ry = model.dragRy ?? model.ry;
   return (
-    <Transformable type="ellipse" key={id} transform={model.transform}>
+    <Transformable type="ellipse" key={id} transform={model.transform} setAnimating={model.setAnimating}>
       <ellipse
         className="drawing-object"
         cx={0}

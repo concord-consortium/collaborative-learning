@@ -3,7 +3,8 @@ import React from "react";
 import { observer } from "mobx-react";
 import { gImageMap } from "../../../models/image-map";
 import { DrawingObjectSnapshot, DrawingTool,
-  IDrawingComponentProps, IDrawingLayer, ObjectTypeIconViewBox, SizedObject, typeField } from "./drawing-object";
+  IDrawingComponentProps, IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
+import { SizedObject } from "./sized-object";
 import { Transformable } from "../components/transformable";
 
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -68,7 +69,7 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
   const height = image.dragHeight ?? image.height;
 
   return (
-    <Transformable type="image" key={id} transform={image.transform}>
+    <Transformable type="image" key={id} transform={image.transform} setAnimating={image.setAnimating}>
       <image
         href={displayUrl}
         x={0}
