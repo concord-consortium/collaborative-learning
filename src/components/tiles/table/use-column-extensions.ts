@@ -1,6 +1,6 @@
 import { getEditableExpression } from "../../../models/data/expression-utils";
 import { TableMetadataModelType } from "../../../models/tiles/table/table-content";
-import { IGridContext, isDataColumn, TColumn } from "./table-types";
+import { IGridContext, isDataColumn, TColumn, TRow } from "./table-types";
 import { IContentChangeHandlers } from "./use-content-change-handlers";
 
 interface IProps {
@@ -9,12 +9,13 @@ interface IProps {
   readOnly?: boolean;
   columns: TColumn[];
   columnEditingName?: string;
+  rows: TRow[];
   setColumnEditingName: (column?: TColumn) => void;
   onShowExpressionsDialog?: (attrId?: string) => void;
   changeHandlers: IContentChangeHandlers;
 }
 export const useColumnExtensions = ({
-  gridContext, metadata, readOnly, columns, columnEditingName,
+  gridContext, metadata, readOnly, columns, columnEditingName, rows,
   setColumnEditingName, onShowExpressionsDialog, changeHandlers
 }: IProps) => {
   const { onSetColumnName, onRemoveColumn } = changeHandlers;
@@ -56,7 +57,13 @@ export const useColumnExtensions = ({
         setColumnEditingName();
       },
       onRemoveColumn,
-      onShowExpressionsDialog
+      onShowExpressionsDialog,
+      hasData: (() => {
+        return rows.some((c: any) => {
+          const value = c[column.key];
+          return value !== undefined && value !== null && value !== "";
+        });
+      })()
     };
   });
 };

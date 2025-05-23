@@ -141,6 +141,12 @@ $controls-hover-background: #c0dfe7;
       }
       .rdg-cell {
         border-top: $border-style;
+        &.highlighted-column {
+          background-color: $highlight-blue-20;
+          &.linked {
+            background-color: $highlight-linked-header;
+          }
+        }
         &.selected-column {
           background-color: $highlight-unlinked-header;
 
@@ -299,6 +305,19 @@ $controls-hover-background: #c0dfe7;
 
       &.has-expression {
         background-color: $charcoal-light-5;
+      }
+      &.hovered-column {
+        background-color: $highlight-blue-20;
+
+        &.linked {
+          background-color: $highlight-linked-cell;
+        }
+      }
+      &.controls-column {
+        background-color: white;
+        border: none;
+        box-shadow: none;
+        padding: 0;
       }
       &.selected-column {
         background-color: $highlight-unlinked-cell;
