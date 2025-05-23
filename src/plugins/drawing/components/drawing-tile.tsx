@@ -1,11 +1,13 @@
 import classNames from "classnames";
 import React, { useEffect, useState, useRef } from "react";
 import { observer } from "mobx-react";
+import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 import { isEqual } from "lodash";
 
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { DrawingLayerView } from "./drawing-layer";
 import { DrawingContentModelType } from "../model/drawing-content";
+import { DrawingObjectType } from "../objects/drawing-object";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { DrawingContentModelContext } from "./drawing-content-context";
@@ -14,7 +16,7 @@ import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable
 import { HotKeys } from "../../../utilities/hot-keys";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import { ObjectListView } from "./object-list-view";
-import { useUIStore } from "../../../hooks/use-stores";
+import { useStores } from "../../../hooks/use-stores";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 import { TileNavigator } from "../../../components/tiles/tile-navigator";
@@ -23,7 +25,6 @@ import { BoundingBox } from "../model/drawing-basic-types";
 import { TileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 
 import "./drawing-tile.scss";
-
 export interface IDrawingTileProps extends ITileProps {
   overflowVisible?: boolean;
 }
@@ -32,13 +33,14 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   const { tileElt, model, readOnly, onRegisterTileApi, navigatorAllowed = true, overflowVisible } = props;
   const contentModel = model.content as DrawingContentModelType;
   const contentRef = useCurrent(contentModel);
-  const showNavigator = navigatorAllowed && contentRef.current.isNavigatorVisible;
-  const [imageUrlToAdd, setImageUrlToAdd] = useState("");
-  const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
-  const hotKeys = useRef(new HotKeys());
   const drawingToolElement = useRef<HTMLDivElement>(null);
-
+  const hotKeys = useRef(new HotKeys());
+  const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const [tileVisibleBoundingBox, setTileVisibleBoundingBox] = useState<BoundingBox|undefined>(undefined);
+  const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
+  const stores = useStores();
+  const { clipboard, ui } = stores;
+  const showNavigator = navigatorAllowed && contentRef.current.isNavigatorVisible;
 
   const updateTileVisibleBoundingBox = (bb: BoundingBox) => {
     if (!isEqual(bb, tileVisibleBoundingBox)) {
@@ -46,7 +48,6 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     }
   };
 
-  const ui = useUIStore();
 
   useEffect(() => {
     if (!readOnly) {
@@ -73,6 +74,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     });
     if (!readOnly) {
       hotKeys.current.register({
+        "cmd-c": handleCopy, //allows user to copy image with cmd+c
         "cmd-v": handlePaste, //allows user to paste image with cmd+v
         "delete": handleDelete, // I'm not sure if this will handle "Del" IE 9 and Edge
         "backspace": handleDelete,
@@ -105,12 +107,31 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     }
   }, [model.id, tileElt, ui]);
 
+  // copy to clipboard
+  const handleCopy = () => {
+    const content = contentRef.current;
+    const objects = content.getSelectedObjects();
+    if (objects && content.metadata) {
+      const clipObjects = objects.map(obj => getSnapshot(obj));
+      clipboard.clear();
+      clipboard.addTileContent(content.metadata.id, content.type, clipObjects, stores);
+    }
+  };
+
+  // paste from clipboard
   const handlePaste = async () => {
     const osClipboardContents = await getClipboardContent();
     if (osClipboardContents) {
       pasteClipboardImage(osClipboardContents, ({ image }) => {
         setImageUrlToAdd(image.contentUrl || '');
       });
+    }
+
+    const content = contentRef.current;
+    const objectIds = clipboard.getTileContent(content.type).map((obj: DrawingObjectType) => obj.id);
+    if (content.metadata && !readOnly && objectIds?.length) {
+      const kPixelOffset = 30;
+      content.duplicateObjects(objectIds, {x: kPixelOffset, y: kPixelOffset});
     }
   };
 
