@@ -36,12 +36,12 @@ export const numericSortComparator = function ({a, b, order}: ICompareProps): nu
 };
 
 export const
-  kTypeError = 1,
-  kTypeNaN = 2,
-  kTypeNull = 3,
-  kTypeNumber = 4,
-  kTypeString = 5,
-  kTypeBoolean = 6,
+  kTypeNumber = 1,
+  kTypeString = 2,
+  kTypeBoolean = 3,
+  kTypeError = 4,
+  kTypeNaN = 5,
+  kTypeNull = 6,
   // kTypeDate = 7,
   // kTypeSimpleMap = 8, // e.g. boundaries
   kTypeUnknown = 9;
