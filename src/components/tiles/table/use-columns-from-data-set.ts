@@ -67,14 +67,14 @@ export const useColumnsFromDataSet = ({
     };
   }, [readOnly]);
 
-const ColumnHeaderCell = (props: any) => useColumnHeaderCell({
-  column: props.column,
-  height: headerHeight(),
-  getSortDirection: (columnKey: string) => sortColumns?.find(col => col.columnKey === columnKey)?.direction ?? "NONE",
-  onSort: onSort ?? (() => {}),
-  allRowsSelected: false,
-  onAllRowsSelectionChange: () => {}
-})(props);
+  const ColumnHeaderCell = (props: any) => useColumnHeaderCell({
+    column: props.column,
+    height: headerHeight(),
+    getSortDirection: (columnKey: string) => sortColumns?.find(col => col.columnKey === columnKey)?.direction ?? "NONE",
+    onSort: onSort ?? (() => {}),
+    allRowsSelected: false,
+    onAllRowsSelectionChange: () => {}
+  })(props);
 
   const columns = useMemo(() => {
     const cols: TColumn[] = attributes.map(attr => {

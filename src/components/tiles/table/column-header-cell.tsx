@@ -27,7 +27,6 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IProps) 
                         { "show-expression": showExpressions,
                           "selected-column": gridContext?.isColumnSelected(column.key),}
                       );
-      // FIXME: temporary local state
 
       const handleColumnHeaderCellMouseOver = (e: React.MouseEvent) => {
         if (!gridContext?.isColumnSelected(column.key)) {

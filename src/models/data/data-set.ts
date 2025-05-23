@@ -5,6 +5,7 @@ import { applyAction, getEnv, Instance, ISerializedActionCall,
 import { Attribute, IAttribute, IAttributeSnapshot } from "./attribute";
 import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
 import { CaseGroup } from "./data-set-types";
+import { compareValues } from "./data-set-utils";
 import { getCellFromId, getCellId, ICell, IValueType, uniqueCaseIds } from "./data-types";
 import { getAppConfig } from "../tiles/tile-environment";
 
@@ -135,6 +136,15 @@ export const DataSet = types.model("DataSet", {
     const caseString = `cases: ${self.selectedCaseIdString}`;
     const cellString = `cells: ${self.selectedCellIdString}`;
     return `${attributeString}, ${caseString}, ${cellString}`;
+  },
+  getValue(caseID: string, attributeID: string) {
+    const attr = self.attrIDMap[attributeID],
+          index = self.caseIDMap[caseID];
+    return attr && (index != null) ? attr.value(index) : undefined;
+  },
+  getValueAtIndex(index: number, attributeID: string) {
+    const attr = self.attrIDMap[attributeID];
+    return attr && (index != null) ? attr.value(index) : undefined;
   }
 }))
 .extend(self => {
@@ -339,15 +349,6 @@ export const DataSet = types.model("DataSet", {
               nextCase = (index != null) && (index < self.cases.length - 1)
                           ? self.cases[index + 1] : undefined;
         return nextCase ? nextCase.__id__ : undefined;
-      },
-      getValue(caseID: string, attributeID: string) {
-        const attr = self.attrIDMap[attributeID],
-              index = self.caseIDMap[caseID];
-        return attr && (index != null) ? attr.value(index) : undefined;
-      },
-      getValueAtIndex(index: number, attributeID: string) {
-        const attr = self.attrIDMap[attributeID];
-        return attr && (index != null) ? attr.value(index) : undefined;
       },
       getStrValue(caseID: string, attributeID: string) {
         // The values of a pseudo-case are considered to be the values of the first real case.
@@ -723,6 +724,31 @@ export const DataSet = types.model("DataSet", {
             });
           }
         });
+      },
+      sortByAttribute(attributeId: string, direction: "ASC" |"DESC" = "ASC") {
+        const compareFn = (aItemId: string, bItemId: string) => {
+          const aValue = self.getValue(aItemId, attributeId);
+          const bValue = self.getValue(bItemId, attributeId);
+          const compareResult = compareValues(aValue, bValue,
+                                  (aStr, bStr) => aStr.localeCompare(bStr, undefined, { sensitivity: 'base' }));
+          return direction === "DESC" ? -compareResult : compareResult;
+        };
+        const finalCaseIds = self.cases.map(c => c.__id__);
+        const caseIdToIndexMap: Record<string, { beforeIndex: number, afterIndex: number }> = {};
+        finalCaseIds.forEach((caseId, beforeIndex) => caseIdToIndexMap[caseId] = { beforeIndex, afterIndex: -1 });
+        finalCaseIds.sort(compareFn);
+        finalCaseIds.forEach((caseId, index) => caseIdToIndexMap[caseId].afterIndex = index);
+        if (finalCaseIds.every((caseId, index) => caseId === self.cases[index].__id__)) {
+          return;
+        }
+        // apply the index mapping to each attribute's value arrays
+        const origIndices = finalCaseIds.map(caseId => caseIdToIndexMap[caseId].beforeIndex);
+        self.attributes.forEach(attr => attr.orderValues(origIndices));
+
+        // update the cases array
+        self.cases.replace(finalCaseIds.map(__id__ => ({__id__})));
+
+        return caseIdToIndexMap;
       },
 
       clearAllSelections,

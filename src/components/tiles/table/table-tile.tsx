@@ -2,7 +2,6 @@ import { observer } from "mobx-react";
 import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
-import { compareValues } from "../../../models/data/data-set-utils";
 
 export interface SortColumn {
   columnKey: string;
@@ -120,7 +119,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // rows are required by ReactDataGrid and are used by other hooks as well
   // rowProps are expanded and passed to ReactDataGrid
-  const { rows: initialRows, ...rowProps } = useRowsFromDataSet({
+  const { rows, ...rowProps } = useRowsFromDataSet({
     dataSet, isLinked, readOnly: !!readOnly, inputRowId: inputRowId.current,
     rowChanges, context: gridContext, selectedCaseIds });
 
@@ -134,33 +133,9 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
         setSortColumns([]);
       } else {
         setSortColumns([{ columnKey, direction }]);
+        dataSet.sortByAttribute(columnKey, direction);
       }
   }});
-
-  const sortedRows = useMemo(() => {
-    if (sortColumns.length === 0) return initialRows;
-    const rowsToSort = initialRows.slice(0, -1);
-    const lastRow = initialRows[initialRows.length - 1];
-
-    const sorted =  [...rowsToSort].sort((a, b) => {
-      for (const sort of sortColumns) {
-        const { columnKey, direction } = sort;
-        const result = compareValues(
-          a[columnKey],
-          b[columnKey],
-          (aStr, bStr) => aStr.localeCompare(bStr, undefined, { sensitivity: 'base' })
-        );
-
-        if (result !== 0) {
-          return direction === "ASC" ? result : -result;
-        }
-      }
-      return 0;
-    });
-    return [...sorted, lastRow];
-  }, [initialRows, sortColumns]);
-
-  const rows = sortedRows;
 
   // The size of the title bar
   const { titleCellWidth, getTitleHeight } =
@@ -291,7 +266,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
             titleCellHeight={getTitleHeight()}
             onBeginEdit={onBeginTitleEdit}
             onEndEdit={onEndTitleEdit} />
-          <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={sortedRows} rowHeight={rowHeight}
+          <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
             headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
             {...dataGridProps} {...rowProps} />
         </div>
