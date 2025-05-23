@@ -80,23 +80,27 @@ class DrawToolTile{
     }
 
     getFreehandDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg path');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-line');
     }
     getVectorDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg g.vector');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-vector');
     }
     getRectangleDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg rect.rectangle');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-rectangle');
     }
     getEllipseDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg ellipse');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-ellipse');
     }
     getImageDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg image');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-image');
     }
     getTextDrawing(){
-      return this.getDrawTileComponent().find('.drawing-layer svg g.text');
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-text');
     }
+    getGroupDrawing(){
+      return this.getDrawTileComponent().find('.drawing-layer svg .transformable-group');
+    }
+
     getSelectionBox(){
       return this.getDrawTileComponent().find('.drawing-layer svg [data-testid=selection-box]');
     }
@@ -131,6 +135,26 @@ class DrawToolTile{
 
     drawVector(x, y, width=25, height=25) {
       this.getDrawToolVector().click();
+      this.getDrawTile().last()
+        .trigger("pointerdown", x, y, { isPrimary: true })
+        .trigger("pointermove", x+width, y+height, { isPrimary: true })
+        .trigger("pointerup", x+width, y+height, { isPrimary: true });
+    }
+
+    drawFreehand(points) {
+      this.getDrawToolFreehand().click();
+      this.getDrawTile().last()
+        .trigger("pointerdown", points[0].x, points[0].y, { isPrimary: true });
+      for (let i = 1; i < points.length; i++) {
+        this.getDrawTile().last()
+          .trigger("pointermove", points[i].x, points[i].y, { isPrimary: true });
+      }
+      this.getDrawTile().last()
+        .trigger("pointerup", points[points.length-1].x, points[points.length-1].y, { isPrimary: true });
+    }
+
+    dragSelectionRectangle(x, y, width, height) {
+      this.getDrawToolSelect().click();
       this.getDrawTile().last()
         .trigger("pointerdown", x, y, { isPrimary: true })
         .trigger("pointermove", x+width, y+height, { isPrimary: true })

@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useContext, useRef, useState, forwardRef, useCallback, useImperativeHandle } from "react";
+import React, { useContext, useRef, useState, forwardRef, useCallback, useImperativeHandle, useEffect } from "react";
 import { getParentOfType } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { TileLayoutModelType, TileRowModelType } from "../../models/document/tile-row";
@@ -10,6 +10,8 @@ import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { TileComponent, dragTileSrcDocId } from "../tiles/tile-component";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentContentModel } from "../../models/document/document-content";
+
+import resizeDragIcon from "../../assets/resize-drag-icon.png";
 
 import "./tile-row.sass";
 
@@ -91,6 +93,14 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
   const documentContentModel = getParentOfType(model, DocumentContentModel);
   const tileMap = documentContentModel?.tileMap;
 
+  // Image to use as the image dragged when user operates the resize handle.
+  // Note we used to use a transparent pixel, but in the Chromebook browser
+  // this resulted in an immediate dragEnd when the image was set.
+  const dragImage = useRef<HTMLImageElement>(document.createElement("img"));
+  useEffect(() => {
+    dragImage.current.src = resizeDragIcon;
+  }, []);
+
   if (!tileMap) {
     throw new Error("Tile map not found");
   }
@@ -105,16 +115,6 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
       return tileId ? model.hasTile(tileId) : false;
     }
   }), [model]);
-
-  // Create transparent pixel for drag image
-  // When dragging to resize, we don't want to show any drag image.
-  // The API gives us no simple way to say 'no drag image', so we use a transparent pixel.
-  // See https://stackoverflow.com/questions/7680285/how-do-you-turn-off-setdragimage
-  const transparentPixel = React.useMemo(() => {
-    const img = document.createElement("img");
-    img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-    return img;
-  }, []);
 
   const getTile = useCallback((tileId: string) => {
     return tileMap.get(tileId) as ITileModel | undefined;
@@ -159,7 +159,8 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
   const handleStartResizeRow = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     const { docId } = props;
     const { id } = model;
-    e.dataTransfer.setDragImage(transparentPixel, 0, 0);
+
+    e.dataTransfer.setDragImage(dragImage.current, 0, 0);
     e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
     e.dataTransfer.setData(kDragResizeRowId, id);
     e.dataTransfer.setData(dragResizeRowId(id), id);
@@ -171,34 +172,35 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
       const boundingBox = tileRowDiv.current.getBoundingClientRect();
       e.dataTransfer.setData(dragResizeRowDomHeight(boundingBox.height), String(boundingBox.height));
     }
-  }, [props, model, transparentPixel]);
+  }, [props, model, dragImage]);
 
   const renderTiles = useCallback((tileRefs: TileLayoutModelType[], tileHeight?: number) => {
-      const { docId, documentContent, scale, documentId } = props;
+    const { docId, documentContent, scale, documentId } = props;
     return tileRefs.map((tileRef, index) => {
       const tileModel = getTile(tileRef.tileId);
       const tileWidthPct = getTileWidth(tileRef.tileId, tileRefs);
       return tileModel
-              ? <TileComponent
-                  key={tileModel.id}
-                  model={tileModel}
-                  widthPct={tileWidthPct}
-                  height={tileHeight}
-                  isUserResizable={!readOnly && model.isUserResizable}
-                  onResizeRow={handleStartResizeRow}
-                  onSetCanAcceptDrop={handleSetCanAcceptDrop}
-                  onRequestRowHeight={handleRequestRowHeight}
-                  documentId={documentId}
-                  docId={docId}
-                  documentContent={documentContent}
-                  scale={scale}
-                  readOnly={readOnly}
-                  context={props.context}
-                />
-              : null;
+        ? <TileComponent
+          key={tileModel.id}
+          model={tileModel}
+          widthPct={tileWidthPct}
+          typeClass={typeClass}
+          height={tileHeight}
+          isUserResizable={!readOnly && model.isUserResizable}
+          onResizeRow={handleStartResizeRow}
+          onSetCanAcceptDrop={handleSetCanAcceptDrop}
+          onRequestRowHeight={handleRequestRowHeight}
+          documentId={documentId}
+          docId={docId}
+          documentContent={documentContent}
+          scale={scale}
+          readOnly={readOnly}
+          context={props.context}
+        />
+        : null;
     });
-  }, [props, getTile, getTileWidth, model.isUserResizable, handleStartResizeRow, handleSetCanAcceptDrop,
-    handleRequestRowHeight, readOnly]);
+  }, [props, getTile, getTileWidth, typeClass, readOnly, model.isUserResizable,
+    handleStartResizeRow, handleSetCanAcceptDrop, handleRequestRowHeight]);
 
   const renderDragDropHandles = useCallback(() => {
     const { isUserResizable } = model;

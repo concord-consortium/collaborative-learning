@@ -5,8 +5,10 @@ export const kDrawingTileType = "Drawing";
 
 // This version string is stored in the state of the tile.
 // Without this version, the model will try to convert the state.
-export const kDrawingStateVersion = "1.0.0";
+export const kDrawingStateVersion = "1.1.0";
 export const kDrawingDefaultHeight = 180;
+export const kDuplicateOffset = 10; // Pixels between original and duplicated object
+export const kFlipOffset = 10; // Pixels between original and flipped object
 
 // These types are used by legacy import code in drawing-change-playback.ts
 export type DrawingToolMove = Array<{id: string, destination: Point}>;

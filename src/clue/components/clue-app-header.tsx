@@ -9,6 +9,8 @@ import { ToggleGroup } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { useStores } from "../../hooks/use-stores";
 import AppModeIndicator from "./app-mode-indicator";
+import { CustomSelect } from "./custom-select";
+import { StudentMenuContainer } from "../../components/student-menu-container";
 
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./toggle-buttons.scss";
@@ -24,7 +26,7 @@ interface IProps extends IBaseProps {
 
 export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAppHeaderComponent(props) {
   const { showGroup } = props;
-  const { appConfig, appMode, appVersion, db, user, groups, investigation, ui, unit } = useStores();
+  const { appConfig, appMode, appVersion, db, user, groups, investigation, ui, unit, problem } = useStores();
   const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
   const getUserTitle = () => {
     switch(appMode){
@@ -151,7 +153,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {showProblemMenu &&
           <>
             <div className="separator"/>
-            <div className="problem-dropdown" data-test="user-class">
+            <div className="problem-dropdown" data-test="problem-dropdown">
               <ProblemMenuContainer />
             </div>
           </>
@@ -172,6 +174,29 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           </div>
         </div>
       </div>
+    );
+  };
+
+  const renderProblemInfo = () => {
+    // Only show the problem menu if the user is in standalone mode as we currently
+    // only support switching in standalone for students.  Teachers should already
+    // see the class switcher via the renderNonStudentHeader function unless the
+    // showClassSwitcher flag is set to false in which case they will get here
+    // as the default case (in which case we still don't show the problem menu since
+    // the flag is still false).
+    if ((ui.standalone || user.standaloneAuthUser) && appConfig.showClassSwitcher) {
+      return (
+        <div className="problem-dropdown" data-test="user-problem">
+          <ProblemMenuContainer />
+        </div>
+      );
+    }
+
+    return (
+      <CustomSelect
+        items={[{text: `${problem.title}${problem.subtitle ? `: ${problem.subtitle}`: ""}`}]}
+        isDisabled={true}
+      />
     );
   };
 
@@ -204,9 +229,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
             <div className="separator"/>
           </>
           }
-          <div className="problem-dropdown" data-test="user-problem">
-            <ProblemMenuContainer />
-          </div>
+          {renderProblemInfo()}
         </div>
         <div className="middle student">
           {renderPanelButtons()}
@@ -221,8 +244,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {showUserInfo &&
           <div className="user" title={getUserTitle()}>
             <div className="user-contents">
-              <div className="name" data-test="user-name">{user.name}</div>
-              <div className="class" data-test="user-class">{user.className}</div>
+              <StudentMenuContainer />
             </div>
             <div className="profile-icon">
               <div className="profile-icon-inner"/>

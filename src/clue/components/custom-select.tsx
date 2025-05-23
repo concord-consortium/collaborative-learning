@@ -10,7 +10,7 @@ export interface ICustomDropdownItem extends IDropdownItem {
   id?: string;
   itemIcon?: ReactNode;
   hideItemCheck?: boolean;
-  italicize?: boolean;
+  bottomBorder?: boolean;
 }
 
 function getItemId(item: ICustomDropdownItem) {
@@ -20,6 +20,7 @@ function getItemId(item: ICustomDropdownItem) {
 interface IProps {
   className?: string;
   dataTest?: string;
+  dataTestId?: string;
   items: ICustomDropdownItem[];
   isDisabled?: boolean;
   showItemChecks?: boolean; // default true for existing clients
@@ -71,7 +72,9 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
     const { className, isDisabled, items } = this.props;
     return (
       <div className={`custom-select ${className || ""}`}
-          data-test={this.getDataTest()} ref={this.divRef}>
+          data-test={this.getDataTest()}
+          data-testid={this.getDataTestId()}
+          ref={this.divRef}>
         { this.renderHeader() }
         { (!isDisabled && items.length > 0) && this.renderList() }
       </div>
@@ -81,6 +84,11 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
   private getDataTest(suffix?: string) {
     const { dataTest } = this.props;
     return `${dataTest || "custom-select"}${suffix ? "-" + suffix : ""}`;
+  }
+
+  private getDataTestId(suffix?: string) {
+    const { dataTestId, dataTest } = this.props;
+    return `${dataTestId || dataTest || "custom-select"}${suffix ? "-" + suffix : ""}`;
   }
 
   private renderHeader = () => {
@@ -94,14 +102,16 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
         ? <VisuallyHidden>{titlePrefix} {titleText}</VisuallyHidden>
         : titlePrefix
           ? <div className="title-container">
-              <div className="title-prefix">{titlePrefix}</div>
-              <div className="title">{titleText}</div>
+              <div className="title-prefix" data-test={this.getDataTest("title-prefix")}>{titlePrefix}</div>
+              <div className="title" data-test={this.getDataTest("title")}>{titleText}</div>
             </div>
           : <div className="item line-clamp">{titleText}</div>;
 
     return (
       <div className={`header ${showListClass} ${disabled}`}
-        data-test={this.getDataTest("header")} onClick={this.handleHeaderClick}>
+        data-test={this.getDataTest("header")}
+        data-testid={this.getDataTestId("header")}
+        onClick={this.handleHeaderClick}>
         {titleIcon && <div className="title-icon">{titleIcon}</div>}
         {titleMarkup}
         <ArrowIcon className={`arrow ${showListClass} ${disabled}`} />
@@ -124,7 +134,8 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
     const { items, showItemChecks } = this.props;
     return (
       <div className={`list ${(this.state.showList ? "show" : "")}`}
-          data-test={this.getDataTest("list")} >
+          data-test={this.getDataTest("list")}
+          data-testid={this.getDataTestId("list")} >
         { items?.map((item, i) => {
           const disabledClass = item.disabled ? "disabled" : "enabled";
           const selectedClass = this.state.selected === item.text ? "selected" : "";
@@ -132,16 +143,17 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
           return (
             <div
               key={`item-${i}-${itemId}`}
-              className={`list-item ${disabledClass} ${selectedClass}`}
+              className={classNames(`list-item ${disabledClass} ${selectedClass}`, {bottomBorder: item.bottomBorder })}
               onClick={this.handleListClick(item)}
               data-test={`list-item-${itemId}`}
+              data-testid={`list-item-${itemId}`}
             >
               {(showItemChecks !== false) &&
                 <div className={classNames("check", selectedClass, {
                   "hidden-item-check": item.hideItemCheck})}
                 />}
               {this.renderItemIcon(item)}
-              <div className={classNames("item", {italicize: item.italicize })}>{item.text}</div>
+              <div className="item">{item.text}</div>
             </div>
           );
         }) }

@@ -4,7 +4,7 @@ $member-size: 18px
 
 .app-header
   position: relative
-  z-index: 2
+  z-index: 20
   height: $header-height
   background-color: $workspace-teal-light-5
   color: $charcoal-dark-2
@@ -209,20 +209,16 @@ $member-size: 18px
         font-size: 13px
         min-width: 108px
         max-width: 155px
-        .name
-          width: 100%
-          padding: 0 10px 0 10px
-          text-align: left
-          white-space: nowrap
-          overflow: hidden
-          text-overflow: ellipsis
-        .class
-          width: 100%
-          padding: 0 10px 0 10px
-          text-align: left
-          white-space: nowrap
-          overflow: hidden
-          text-overflow: ellipsis
+        .custom-select
+          .header
+            min-width: 155px
+            max-width: 155px
+            .title-container, .title-prefix, .title
+              white-space: nowrap
+              overflow: hidden
+              text-overflow: ellipsis
+              width: 100%
+              text-align: left
 
       .student-profile-icon
         background-color: white

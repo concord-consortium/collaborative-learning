@@ -18,20 +18,22 @@ const PlaceholderTileComponent: React.FC<ITileProps> = (props) => {
 
   const renderPlaceholderText = () => {
     const content = props.model.content as PlaceholderContentModelType;
-    const { sectionId, containerType } = content;
+    const { sectionId } = content;
+    const { readOnly } = props;
+    const containerType = content.containerType || "DocumentContent";
     let placeholderText = undefined;
     // First see if there is a section-specific placeholder
-    if (containerType === "DocumentContent") {
+    if (!readOnly && containerType === "DocumentContent") {
       placeholderText = getSectionPlaceholder(sectionId);
     }
     // If there is no section-specific placeholder, use the app-config placeholder
-    if (!placeholderText) {
+    if (!readOnly && !placeholderText) {
       placeholderText = appConfig.getPlaceholder(containerType) || kDefaultPlaceholder;
     }
-    const placeholderLines = placeholderText.split("\n");
+    const placeholderLines = placeholderText?.split("\n");
     return (
       <div>
-        {placeholderLines.map((line, index) => (
+        {placeholderLines && placeholderLines.map((line, index) => (
           <div key={index}>{line}</div>
         ))}
       </div>

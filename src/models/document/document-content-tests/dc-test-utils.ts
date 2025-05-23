@@ -7,17 +7,16 @@ import { isPlaceholderContent } from "../../../models/tiles/placeholder/placehol
 
 import placeholderImage from "../../assets/image_placeholder.png";
 
-// This is needed so MST can deserialize snapshots referring to tools
-import { registerTileTypes } from "../../../register-tile-types";
-registerTileTypes(["Drawing", "Geometry", "Image", "Table", "Text"]);
-
-// This is needed so MST can deserialize snapshots referring to slate-based text tiles
-import { registerPlugins } from "@concord-consortium/slate-editor";
-registerPlugins();
 
 // mock uniqueId so we can recognize auto-generated IDs
-let idCount = 0;
-export const mockUniqueId = jest.fn(() => `testid-${++idCount}`);
+declare global {
+  // eslint-disable-next-line no-var
+  var __mockUniqueIdCount: number;
+}
+globalThis.__mockUniqueIdCount = 0;
+function mockUniqueId() {
+  return `testid-${++globalThis.__mockUniqueIdCount}`;
+}
 jest.mock("../../../utilities/js-utils", () => {
   const { uniqueId, ...others } = jest.requireActual("../../../utilities/js-utils");
   return {
@@ -26,9 +25,17 @@ jest.mock("../../../utilities/js-utils", () => {
   };
 });
 
-export function resetMockUniqueId() {
-  idCount = 0;
+export function resetMockUniqueId(count = 0) {
+  globalThis.__mockUniqueIdCount = count;
 }
+export { mockUniqueId };
+
+
+// This is needed so MST can deserialize snapshots referring to tools
+import { registerTileTypes } from "../../../register-tile-types";
+registerTileTypes(["Drawing", "Geometry", "Image", "Table", "Text"]);
+import { registerPlugins } from "@concord-consortium/slate-editor";
+registerPlugins();
 
 export function prepareTileForMatch(tile: any) {
   if (tile?.content?.type === "Geometry") {

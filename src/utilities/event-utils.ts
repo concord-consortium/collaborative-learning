@@ -23,3 +23,8 @@ export function hasDiscontiguousModifier(
     e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent | React.TouchEvent) {
   return e.ctrlKey || e.metaKey;
 }
+
+export function hasCopyModifier(
+    e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent | React.TouchEvent) {
+  return e.altKey;
+}

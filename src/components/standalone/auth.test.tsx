@@ -88,8 +88,8 @@ describe("Standalone Auth helpers", () => {
 
   describe("startCLUE", () => {
     it("should return the correct authenticated state for starting CLUE", () => {
-      const result = startCLUE({ classWord, classId, offeringId, portalInfo});
-      expect(result).toEqual({ state: "startingCLUE", classId, classWord, offeringId, portalInfo });
+      const result = startCLUE({ classWord, classId, offeringId, portalInfo, problem});
+      expect(result).toEqual({ state: "startingCLUE", classId, classWord, offeringId, portalInfo, problem });
     });
   });
 
@@ -103,7 +103,7 @@ describe("Standalone Auth helpers", () => {
   describe("processFinalAuthenticatedState", () => {
     it("should process 'startingCLUE' state correctly", async () => {
       const state: AuthenticatedState = {
-        state: "startingCLUE", classWord, classId, offeringId, portalInfo
+        state: "startingCLUE", classWord, classId, offeringId, portalInfo, problem
       };
       const result = await processFinalAuthenticatedState(state);
       expect(result).toEqual(state);
@@ -120,7 +120,7 @@ describe("Standalone Auth helpers", () => {
       };
 
       const result = await processFinalAuthenticatedState(state);
-      expect(result).toEqual({ state: "startingCLUE", classId, classWord, offeringId, portalInfo });
+      expect(result).toEqual({ state: "startingCLUE", classId, classWord, offeringId, portalInfo, problem });
     });
   });
 
@@ -156,7 +156,7 @@ describe("Standalone Auth helpers", () => {
         problem
       };
       const result = getFinalAuthenticatedState(state);
-      expect(result).toEqual({ state: "startingCLUE", classId, classWord, offeringId, portalInfo });
+      expect(result).toEqual({ state: "startingCLUE", classId, classWord, offeringId, portalInfo, problem });
     });
 
     it("should return the original state if conditions are not met", () => {

@@ -2,9 +2,11 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/selection-box";
-import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps,
+import { computeStrokeDashArray, DeltaPoint, DrawingTool, FilledObject, IDrawingComponentProps,
    IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
+import { Transformable } from "../components/transformable";
+
 import FreehandToolIcon from "../assets/freehand-icon.svg";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
@@ -26,7 +28,7 @@ function* pointIterator(line: LineObjectType): Generator<Point, string, unknown>
 }
 
 // polyline
-export const LineObject = StrokedObject.named("LineObject")
+export const LineObject = types.compose("LineObject", StrokedObject, FilledObject)
   .props({
     type: typeField("line"),
     deltaPoints: types.array(DeltaPoint)
@@ -35,6 +37,14 @@ export const LineObject = StrokedObject.named("LineObject")
     dragScaleX: undefined as number | undefined,
     dragScaleY: undefined as number | undefined
   }))
+  .preProcessSnapshot(snap => {
+    if (typeof snap.fill !== 'string') {
+      const snapClone = { ...snap };
+      snapClone.fill = "none";
+      return snapClone;
+    }
+    return snap;
+  })
   .views(self => ({
     inSelection(selectionBox: SelectionBox) {
       for (const point of pointIterator(self as LineObjectType)){
@@ -46,6 +56,8 @@ export const LineObject = StrokedObject.named("LineObject")
     },
 
     get boundingBox() {
+      // The position of the line is its start point.
+      // Other points are stored as deltas from the start point.
       const {x, y} = self.position;
       const nw: Point = {x, y};
       const se: Point = {x, y};
@@ -85,7 +97,7 @@ export const LineObject = StrokedObject.named("LineObject")
       const widthFactor = width ? newWidth/width : 1;
       const heightFactor = height ? newHeight/height : 1;
 
-      // x,y get moved to a scaled position within the new bounds
+      // x,y (position of start point) get moved to a scaled position within the new bounds
       const newLeft = left+deltas.left;
       self.dragX = newLeft + (self.x-left)*widthFactor;
       const newTop = top+deltas.top;
@@ -93,6 +105,16 @@ export const LineObject = StrokedObject.named("LineObject")
 
       self.dragScaleX = widthFactor;
       self.dragScaleY = heightFactor;
+    },
+    setDragBoundsAbsolute(bounds: BoundingBoxSides) {
+      const bbox = self.boundingBox;
+      const deltas = {
+        left: bounds.left - bbox.nw.x,
+        top: bounds.top - bbox.nw.y,
+        right: bounds.right - bbox.se.x,
+        bottom: bounds.bottom - bbox.se.y
+      };
+      this.setDragBounds(deltas);
     },
     resizeObject() {
       self.repositionObject();
@@ -127,23 +149,29 @@ export const LineComponent = observer(function LineComponent({model, handleHover
   : IDrawingComponentProps) {
   if (model.type !== "line") return null;
   const line = model as LineObjectType;
-  const { id, deltaPoints, stroke, strokeWidth, strokeDashArray } = line;
-  const { x, y } = line.position;
+  const { id, deltaPoints, stroke, fill, strokeWidth, strokeDashArray } = line;
   const scaleX = line.dragScaleX ?? 1;
   const scaleY = line.dragScaleY ?? 1;
-  const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
-  return <path
-    key={id}
-    d={commands}
-    stroke={stroke}
-    fill="none"
-    strokeWidth={strokeWidth}
-    strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-    onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onPointerDown={(e)=> handleDrag?.(e, model)}
-    pointerEvents={handleHover ? "visible" : "none"}
-  />;
+  const commands = `M 0 0 ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
+
+  return (
+    <Transformable type="line" key={id} position={line.position} transform={line.transform}>
+      <path
+        data-object-id={id}
+        className="drawing-object"
+        d={commands}
+        stroke={stroke}
+        fill={fill}
+        fillRule="nonzero"
+        strokeWidth={strokeWidth}
+        strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+        onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+        onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+        onPointerDown={(e)=> handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      />
+    </Transformable>
+  );
 });
 
 export class LineDrawingTool extends DrawingTool {
@@ -163,9 +191,9 @@ export class LineDrawingTool extends DrawingTool {
 
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
+    const {stroke, strokeWidth, strokeDashArray, fill} = this.drawingLayer.toolbarSettings();
     const line = LineObject.create({x: start.x, y: start.y,
-      deltaPoints: [], stroke, strokeWidth, strokeDashArray});
+      deltaPoints: [], stroke, strokeWidth, strokeDashArray, fill});
 
     let lastPoint = start;
     const addPoint = (e2: PointerEvent|React.PointerEvent<HTMLDivElement>) => {

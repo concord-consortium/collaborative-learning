@@ -2,37 +2,19 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps,
-  IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
-import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
+  IDrawingLayer, ObjectTypeIconViewBox, SizedObject, StrokedObject, typeField } from "./drawing-object";
+import { Point } from "../model/drawing-basic-types";
+import { Transformable } from "../components/transformable";
+
 import RectToolIcon from "../assets/rectangle-icon.svg";
 
-export const RectangleObject = types.compose("RectangleObject", StrokedObject, FilledObject)
+// Note: SizedObject must be listed last because it overrides the default implementation
+// of the boundingBox property.
+export const RectangleObject = types.compose("RectangleObject", StrokedObject, FilledObject, SizedObject)
   .props({
-    type: typeField("rectangle"),
-    width: types.number,
-    height: types.number,
+    type: typeField("rectangle")
   })
-  .volatile(self => ({
-    dragWidth: undefined as number | undefined,
-    dragHeight: undefined as number | undefined
-  }))
   .views(self => ({
-    get currentDims() {
-      const { width, height, dragWidth, dragHeight } = self;
-      return {
-        width: dragWidth ?? width,
-        height: dragHeight ?? height
-      };
-    }
-  }))
-  .views(self => ({
-    get boundingBox() {
-      const { x, y } = self.position;
-      const { width, height } = self.currentDims;
-      const nw: Point = {x, y};
-      const se: Point = {x: x + width, y: y + height};
-      return {nw, se};
-    },
     get label() {
       return self.width===self.height ? "Square" : "Rectangle";
     },
@@ -69,18 +51,6 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
         self.y = y;
         self.width = self.height = squareSize;
       }
-    },
-    setDragBounds(deltas: BoundingBoxSides) {
-      self.dragX = self.x + deltas.left;
-      self.dragY = self.y + deltas.top;
-      self.dragWidth  = Math.max(self.width  + deltas.right - deltas.left, 1);
-      self.dragHeight = Math.max(self.height + deltas.bottom - deltas.top, 1);
-    },
-    resizeObject() {
-      self.repositionObject();
-      self.width = self.dragWidth ?? self.width;
-      self.height = self.dragHeight ?? self.height;
-      self.dragWidth = self.dragHeight = undefined;
     }
   }));
 export interface RectangleObjectType extends Instance<typeof RectangleObject> {}
@@ -92,24 +62,26 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
   if (model.type !== "rectangle") return null;
   const rect = model as RectangleObjectType;
   const { id, stroke, strokeWidth, strokeDashArray, fill } = rect;
-  const { x, y } = rect.position;
   const { width, height } = rect.currentDims;
-  return <rect
-    key={id}
-    className="rectangle"
-    x={x}
-    y={y}
-    width={width}
-    height={height}
-    stroke={stroke}
-    fill={fill}
-    strokeWidth={strokeWidth}
-    strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-    onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onPointerDown={(e)=> handleDrag?.(e, model)}
-    pointerEvents={handleHover ? "visible" : "none"}
-  />;
+  return (
+    <Transformable type="rectangle" key={id} position={rect.position} transform={rect.transform}>
+      <rect
+        className="drawing-object rectangle"
+        x={0}
+        y={0}
+        width={width}
+        height={height}
+        stroke={stroke}
+        fill={fill}
+        strokeWidth={strokeWidth}
+        strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+        onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+        onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+        onPointerDown={(e)=> handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      />
+    </Transformable>
+  );
 
 });
 

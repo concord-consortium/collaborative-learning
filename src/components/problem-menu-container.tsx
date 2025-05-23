@@ -115,5 +115,5 @@ export const ProblemMenuContainer: React.FC<IProps> = observer(function ProblemM
     return null;
   }
 
-  return <CustomSelect items={problemMenuItems} />;
+  return <CustomSelect dataTestId="problem-navigation-dropdown" items={problemMenuItems} />;
 });

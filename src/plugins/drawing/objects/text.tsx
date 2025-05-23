@@ -1,42 +1,24 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps,
-  IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
-import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
-import TextToolIcon from "../../../assets/icons/comment/comment.svg";
+  IDrawingLayer, ObjectTypeIconViewBox, SizedObject, typeField } from "./drawing-object";
+import { Point } from "../model/drawing-basic-types";
 import { uniqueId } from "../../../../src/utilities/js-utils";
 import { WrappedSvgText } from "../components/wrapped-svg-text";
+import { Transformable } from "../components/transformable";
 
-export const TextObject = EditableObject.named("TextObject")
+import TextToolIcon from "../../../assets/icons/comment/comment.svg";
+
+// Note - TextObject has a stroke color, but is not implementing StrokedObject
+// because it doesn't support stroke width or dashArray.
+export const TextObject = types.compose("TextObject", EditableObject, SizedObject)
   .props({
     type: typeField("text"),
-    width: types.number,
-    height: types.number,
     stroke: types.string,
     text: types.string
   })
-  .volatile(self => ({
-    dragWidth: undefined as number | undefined,
-    dragHeight: undefined as number | undefined
-  }))
   .views(self => ({
-    get currentDims() {
-      const { width, height, dragWidth, dragHeight } = self;
-      return {
-        width: dragWidth ?? width,
-        height: dragHeight ?? height
-      };
-    }
-  }))
-  .views(self => ({
-    get boundingBox() {
-      const { x, y } = self.position;
-      const { width, height } = self.currentDims;
-      const nw: Point = {x, y};
-      const se: Point = {x: x + width, y: y + height};
-      return {nw, se};
-    },
     get label() {
       return "Text";
     },
@@ -57,21 +39,6 @@ export const TextObject = EditableObject.named("TextObject")
       self.width = Math.max(start.x, end.x) - self.x;
       self.height = Math.max(start.y, end.y) - self.y;
     },
-    setDragBounds(deltas: BoundingBoxSides) {
-      self.dragX = self.x + deltas.left;
-      self.dragY = self.y + deltas.top;
-      self.dragWidth  = self.width  + deltas.right - deltas.left;
-      self.dragHeight = self.height + deltas.bottom - deltas.top;
-    },
-    resizeObject() {
-      self.repositionObject();
-      self.width = self.dragWidth ?? self.width;
-      self.height = self.dragHeight ?? self.height;
-      self.dragWidth = self.dragHeight = undefined;
-    },
-    setEditing(editing: boolean) {
-      self.isEditing = editing;
-    }
   }));
 
 export interface TextObjectType extends Instance<typeof TextObject> {}
@@ -81,53 +48,60 @@ export function isTextObject(model: DrawingObjectType): model is TextObjectType 
   return model.type === "text";
 }
 
-export const TextComponent = observer(
-    function TextComponent({model, readOnly, handleHover, handleDrag} : IDrawingComponentProps) {
-  const textEditor = useRef<HTMLTextAreaElement>(null);
-  if (!isTextObject(model)) return null;
-  const textobj = model as TextObjectType;
-  const { id, stroke, text } = textobj;
-  const { x, y } = model.position;
-  const { width, height } = textobj.currentDims;
-  const clipId = uniqueId();
-  const margin = 5;
+// Content component for editing and displaying text objects
+interface IContentProps {
+  editing: boolean;
+  clip: string;
+  text: string;
+  model: TextObjectType;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  margin: number;
+  handleTextAreaPointerDown: (e: React.PointerEvent<HTMLTextAreaElement>) => void;
+  textColor: string;
+}
 
-  interface IContentProps {
-    editing: boolean,
-    clip: string
-  }
-  const Content = function({editing, clip}: IContentProps) {
+const TextContent: React.FC<IContentProps> = observer(({
+  editing, clip, text, model,
+  x, y, width, height, margin,
+  handleTextAreaPointerDown, textColor
+}) => {
+  // Local ref for textarea
+  const textEditor = React.useRef<HTMLTextAreaElement>(null);
 
-    useEffect(() => {
-      // Focus text area when it opens, to avoid need for user to click it again.
-      if (editing) {
-        setTimeout(() => textEditor.current?.focus());
-      }
-    }, [editing]);
+  // Local state for controlled textarea
+  const [originalText, setOriginalText] = React.useState(text);
+  const [currentText, setCurrentText] = React.useState(text);
 
+  // When editing starts, initialize both original and current text
+  React.useEffect(() => {
     if (editing) {
-      return (
-        <foreignObject x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}>
-          <textarea ref={textEditor}
-            defaultValue={text}
-            onBlur={(e) => handleClose(true)}
-            onKeyDown={handleTextAreaKeyDown}
-            onPointerDown={handleTextAreaPointerDown}>
-          </textarea>
-        </foreignObject>);
-    } else {
-      // Note that SVG text is generally 'filled', not 'stroked'.
-      // But we use the stroke color for text since we think that's more intuitive. Thus the odd-looking 'style' below.
-      return(<g clipPath={'url(#'+clip+')'}>
-              <WrappedSvgText text={text}
-                  x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}
-                  style={{fill: stroke}} />
-             </g>);
+      setOriginalText(text);
+      setCurrentText(text);
     }
+  }, [editing, text]);
+
+  // Focus text area when it opens, to avoid need for user to click it again.
+  React.useEffect(() => {
+    if (editing) {
+      setTimeout(() => textEditor.current?.focus());
+    }
+  }, [editing]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCurrentText(e.target.value);
   };
 
-  const handleTextAreaPointerDown = (e: React.PointerEvent<HTMLTextAreaElement>) => {
-    e.stopPropagation();
+  const handleAccept = () => {
+    model.setText(currentText);
+    model.setEditing(false);
+  };
+
+  const handleCancel = () => {
+    setCurrentText(originalText); // Not strictly necessary, but keeps state in sync
+    model.setEditing(false);
   };
 
   const handleTextAreaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -135,42 +109,88 @@ export const TextComponent = observer(
     const { key } = e;
     switch (key) {
       case "Escape":
-        handleClose(false);
+        handleCancel();
         break;
       case "Enter":
       case "Tab":
-        handleClose(true);
+        handleAccept();
         break;
     }
   };
 
-  const handleClose = (accept: boolean) => {
-    if (accept) {
-      const textarea = textEditor.current;
-      if (textarea) {
-        model.setText(textarea.value);
-      }
-    }
-    model.setEditing(false);
+  const handleBlur = () => {
+    handleAccept();
   };
 
-  return <g
-          key={id}
-          className="text"
-          onMouseEnter={(e) => handleHover?.(e, model, true)}
-          onMouseLeave={(e) => handleHover?.(e, model, false)}
-          onPointerDown={(e)=> handleDrag?.(e, model)}
-          pointerEvents={handleHover ? "visible" : "none"}
-         >
-          <rect x={x} y={y}
-              width={width} height={height}
-              stroke={stroke} fill="#FFFFFF" opacity="80%"
-              rx="5" ry="5" />
-          <clipPath id={clipId}>
-            <rect x={x} y={y} width={width} height={height} />
-          </clipPath>
-          <Content clip={clipId} editing={model.isEditing && !readOnly} />
-         </g>;
+  if (editing) {
+    return (
+      <foreignObject x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}>
+        <textarea ref={textEditor}
+          value={currentText}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          onKeyDown={handleTextAreaKeyDown}
+          onPointerDown={handleTextAreaPointerDown}>
+        </textarea>
+      </foreignObject>
+    );
+  } else {
+    return(
+      <g clipPath={'url(#'+clip+')'}>
+        <WrappedSvgText text={text}
+            x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}
+            style={{fill: textColor}} />
+      </g>
+    );
+  }
+});
+
+export const TextComponent = observer(
+    function TextComponent({model, readOnly, handleHover, handleDrag} : IDrawingComponentProps) {
+  if (!isTextObject(model)) return null;
+  const textobj = model as TextObjectType;
+  const { id, stroke, text, position, transform } = textobj;
+  const { width, height } = textobj.currentDims;
+  const clipId = uniqueId();
+  const margin = 5;
+
+  const handleTextAreaPointerDown = (e: React.PointerEvent<HTMLTextAreaElement>) => {
+    e.stopPropagation();
+  };
+
+  return (
+    <Transformable type="text" position={position} transform={transform}>
+      <g
+        key={id}
+        className="text"
+        onMouseEnter={(e) => handleHover?.(e, model, true)}
+        onMouseLeave={(e) => handleHover?.(e, model, false)}
+        onPointerDown={(e) => handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      >
+        <rect x={0} y={0}
+          width={width} height={height}
+          stroke={stroke} fill="#FFFFFF" opacity="80%"
+          rx="5" ry="5" />
+        <clipPath id={clipId}>
+          <rect x={0} y={0} width={width} height={height} />
+        </clipPath>
+        <TextContent
+          editing={model.isEditing && !readOnly}
+          clip={clipId}
+          text={text}
+          model={textobj}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          margin={margin}
+          handleTextAreaPointerDown={handleTextAreaPointerDown}
+          textColor={stroke}
+        />
+      </g>
+    </Transformable>
+  );
 
 });
 

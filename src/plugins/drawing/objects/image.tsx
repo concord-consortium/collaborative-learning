@@ -2,13 +2,14 @@ import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { observer } from "mobx-react";
 import { gImageMap } from "../../../models/image-map";
-import { DrawingObject, DrawingObjectSnapshot, DrawingTool,
-  IDrawingComponentProps, IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
-import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
+import { DrawingObjectSnapshot, DrawingTool,
+  IDrawingComponentProps, IDrawingLayer, ObjectTypeIconViewBox, SizedObject, typeField } from "./drawing-object";
+import { Transformable } from "../components/transformable";
+
 import placeholderImage from "../../../assets/image_placeholder.png";
 import ImageToolIcon from "../../../clue/assets/icons/image-tool.svg";
 
-export const ImageObject = DrawingObject.named("ImageObject")
+export const ImageObject = SizedObject.named("ImageObject")
   .props({
     type: typeField("image"),
 
@@ -21,22 +22,8 @@ export const ImageObject = DrawingObject.named("ImageObject")
     // into a image tile and then that image dragged to the drawing tile. In this case we want
     // to preserve the filename of the source image.
     filename: types.maybe(types.string),
-    width: types.number,
-    height: types.number
   })
-  .volatile(self => ({
-    dragWidth: undefined as number | undefined,
-    dragHeight: undefined as number | undefined
-  }))
   .views(self => ({
-    get boundingBox() {
-      const {x, y} = self.position;
-      const width = self.dragWidth ?? self.width;
-      const height = self.dragHeight ?? self.height;
-      const nw: Point = {x, y};
-      const se: Point = {x: x + width, y: y + height};
-      return {nw, se};
-    },
     get label() {
       return "Image";
     },
@@ -63,18 +50,6 @@ export const ImageObject = DrawingObject.named("ImageObject")
       self.filename = filename;
     },
 
-    setDragBounds(deltas: BoundingBoxSides) {
-      self.dragX = self.x + deltas.left;
-      self.dragY = self.y + deltas.top;
-      self.dragWidth  = self.width  + deltas.right - deltas.left;
-      self.dragHeight = self.height + deltas.bottom - deltas.top;
-    },
-    resizeObject() {
-      self.repositionObject();
-      self.width = self.dragWidth ?? self.width;
-      self.height = self.dragHeight ?? self.height;
-      self.dragWidth = self.dragHeight = undefined;
-    }
   }));
 export interface ImageObjectType extends Instance<typeof ImageObject> {}
 export interface ImageObjectSnapshot extends SnapshotIn<typeof ImageObject> {}
@@ -89,23 +64,25 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
   if (model.type !== "image") return null;
   const image = model as ImageObjectType;
   const { id, displayUrl } = image;
-  const { x, y } = image.position;
   const width = image.dragWidth ?? image.width;
   const height = image.dragHeight ?? image.height;
 
-  return <image
-    key={id}
-    href={displayUrl}
-    x={x}
-    y={y}
-    width={width}
-    height={height}
-    preserveAspectRatio="none"
-    onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onPointerDown={(e)=> handleDrag?.(e, model)}
-    pointerEvents={handleHover ? "visible" : "none"}
-  />;
+  return (
+    <Transformable type="image" key={id} position={image.position} transform={image.transform}>
+      <image
+        href={displayUrl}
+        x={0}
+        y={0}
+        width={width}
+        height={height}
+        preserveAspectRatio="none"
+        onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+        onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+        onPointerDown={(e)=> handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
+      />
+    </Transformable>
+  );
 
 });
 
