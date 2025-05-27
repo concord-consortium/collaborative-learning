@@ -1,7 +1,7 @@
 import React from "react";
 import { Transform } from "../objects/drawing-object";
 
-const duration = 1000; // ms
+const duration = 250; // ms
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
