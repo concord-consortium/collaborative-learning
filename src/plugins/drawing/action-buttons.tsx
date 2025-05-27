@@ -138,7 +138,7 @@ export const FlipHorizontalButton = observer(({ name }: IToolbarButtonComponentP
   return (
     <TileToolbarButton
       name={name}
-      title={"Flip Horizontal"}
+      title={"Flip horizontally"}
       onClick={flipHorizontal}
       disabled={!enabled}
     >
@@ -158,7 +158,7 @@ export const FlipVerticalButton = observer(({ name }: IToolbarButtonComponentPro
   return (
     <TileToolbarButton
       name={name}
-      title={"Flip Vertical"}
+      title={"Flip vertically"}
       onClick={flipVertical}
       disabled={!enabled}
     >

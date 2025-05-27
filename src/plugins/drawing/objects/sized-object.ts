@@ -2,7 +2,7 @@ import { Instance, types } from "mobx-state-tree";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import { DrawingObject, DrawingObjectType } from "./drawing-object";
 
-/** Sized objects have a width and height. */
+/** Sized objects have an explicit width and height stored in the model. */
 export const SizedObject = DrawingObject.named("SizedObject")
   .props({
     width: types.number,

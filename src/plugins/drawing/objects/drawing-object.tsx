@@ -12,6 +12,8 @@ import ErrorIcon from "../../../assets/icons/error.svg";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "text" | "stamp" | "variable";
 
+// This is a packet of information that we provide to the Transformable component.
+// It contains the information needed to draw the object in the correct position and orientation.
 export type Transform = {
   corner: Point,
   position: Point,
@@ -79,18 +81,9 @@ export const DrawingObject = types.model("DrawingObject", {
   },
   /** The bounding box of the object without considering rotation. */
   get unrotatedBoundingBox(): BoundingBox {
-    // SC: I tried an approach of tracking the SVG elements that were rendered,
-    // and using a generic SVG getBBox() here, but it had performance issues.
-    // The bounding box is used to draw a highlight around the element when the
-    // element is moving its x and y are changing and then the x and y of the
-    // getBBox get updated after it moves and then the highlight updates after
-    // this move using getBBox causes a weird lag in how the highlight tracks
-    // the box. Additionally if the implementation doesn't access the x or y of
-    // self then MobX observation is not triggered so moving the element doesn't
-    // cause the selection highlight to update.
     throw "Subclass needs to implement unrotatedBoundingBox";
   },
-  /** The bounding box of the object without considering rotation or drag. */
+  /** The bounding box of the object without considering rotation or current drag. */
   get undraggedUnrotatedBoundingBox(): BoundingBox {
     throw "Subclass needs to implement undraggedUnrotatedBoundingBox";
   },
@@ -108,17 +101,21 @@ export const DrawingObject = types.model("DrawingObject", {
   }
 }))
 .actions(self => ({
+  /** Update object's temporary size/position with new values, that have already been adjusted for rotation. */
   setUnrotatedDragBounds(bounds: BoundingBoxSides) {
     console.error("setUnrotatedDragBounds is unimplemented for type", self.type);
   },
+  /** Set the object's "real" location & size to its drag location & size. */
   resizeObject() {
     console.error("resizeObject is unimplemented for type", self.type);
   }
 }))
 .views(self => ({
+  /** The curent bounding box of the object, including rotation, drags, and flips. */
   get boundingBox(): BoundingBox {
     return rotateBoundingBox(self.unrotatedBoundingBox, self.rotation);
   },
+  /** The stored bounding box of the object, including rotation, but not any current drag.  */
   get undraggedBoundingBox(): BoundingBox {
     return rotateBoundingBox(self.undraggedUnrotatedBoundingBox, self.rotation);
   },
@@ -126,8 +123,8 @@ export const DrawingObject = types.model("DrawingObject", {
     return true;
   },
   /**
-   * Returns the translation and scaling transform that should be applied
-   * to the Transformable group element to account for the objects's flip state.
+   * Returns the translation and scaling information that should be applied
+   * to the Transformable group element to account for the objects's position, rotation, and flip state.
    */
   get transform(): Transform {
     const {unrotatedBoundingBox, hFlip, vFlip, position, rotation} = self;
@@ -182,6 +179,7 @@ export const DrawingObject = types.model("DrawingObject", {
     self.y = self.dragY ?? self.y;
     self.dragX = self.dragY = undefined;
   },
+  /** Make the object fit in the given bounding box. */
   setDragBoundsAbsolute(sides: BoundingBoxSides) {
     const nw = { x: sides.left,  y: sides.top };
     const ne = { x: sides.right, y: sides.top };
@@ -206,15 +204,15 @@ export const DrawingObject = types.model("DrawingObject", {
    *
    * @param deltas
    */
-    setDragBounds(deltas: BoundingBoxSides) {
-      const currentBoundingBox = self.undraggedBoundingBox;
-      const newSides = {
-        top: currentBoundingBox.nw.y + deltas.top,
-        bottom: currentBoundingBox.se.y + deltas.bottom,
-        left: currentBoundingBox.nw.x + deltas.left,
-        right: currentBoundingBox.se.x + deltas.right
-      };
-      self.setDragBoundsAbsolute(newSides);
+  setDragBounds(deltas: BoundingBoxSides) {
+    const currentBoundingBox = self.undraggedBoundingBox;
+    const newSides = {
+      top: currentBoundingBox.nw.y + deltas.top,
+      bottom: currentBoundingBox.se.y + deltas.bottom,
+      left: currentBoundingBox.nw.x + deltas.left,
+      right: currentBoundingBox.se.x + deltas.right
+    };
+    self.setDragBoundsAbsolute(newSides);
   }
 }));
 export interface DrawingObjectType extends Instance<typeof DrawingObject> {}

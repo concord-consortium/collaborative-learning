@@ -19,6 +19,7 @@ export interface TransformableProps {
  *
  * @param type - Type of object being rendered; used to generate a class attribute.
  * @param transform - The transform to apply to the group.
+ * @param setAnimating - A function to set the animating state.
  * @param children - The children to render inside the group.
  */
 export const Transformable: React.FC<TransformableProps> = ({ type, transform, setAnimating, children }) => {
@@ -30,9 +31,6 @@ export const Transformable: React.FC<TransformableProps> = ({ type, transform, s
     const targetTrans = transform;
     const start = performance.now();
     let rafId: number;
-
-    // console.log("prev transform", prevTrans);
-    // console.log("new transform", targetTrans);
 
     function animate(now: number) {
       // Linear interpolation between the previous and target transforms.
@@ -49,10 +47,12 @@ export const Transformable: React.FC<TransformableProps> = ({ type, transform, s
         },
         center: {
           x: lerp(prevTrans.center.x, targetTrans.center.x, t),
-          y: lerp(prevTrans.center.y, targetTrans.center.y, t)},
+          y: lerp(prevTrans.center.y, targetTrans.center.y, t)
+        },
         scale: {
           x: lerp(prevTrans.scale.x, targetTrans.scale.x, t),
-          y: lerp(prevTrans.scale.y, targetTrans.scale.y, t)},
+          y: lerp(prevTrans.scale.y, targetTrans.scale.y, t)
+        },
         rotation:
           lerp(prevTrans.rotation, targetTrans.rotation, t)
       });
@@ -85,7 +85,7 @@ export const Transformable: React.FC<TransformableProps> = ({ type, transform, s
   // 1. Translate to the bottom-right corner of the bounding box (rotation center)
   // 2. Apply rotation
   // 3. Translate to the "center" point of the object
-  // 4. Apply reflections with scale
+  // 4. Apply reflections with "scale" transformation
 
   const toPosition = {
     x: animated.position.x-animated.corner.x+animated.center.x,
