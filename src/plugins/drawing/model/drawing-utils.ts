@@ -49,9 +49,16 @@ export function boundingBoxForPoints(points: {x: number, y: number}[]): Bounding
   return {left: minX, top: minY, right: maxX, bottom: maxY};
 }
 
+/** Find the nearest multiple of 90 degrees to the given rotation.
+ * Currently we only support 0, 90, 180, and 270 degree rotation of drawing objects,
+ * but the value stored in the model is not constrained to these values.
+*/
+export function normalizeRotation(rotation: number): number {
+  return ((Math.round(rotation / 90) * 90) % 360 + 360) % 360;
+}
+
 export function rotationPoint(boundingBox: BoundingBox, rotation: number): Point {
-  // Normalize and round rotation to nearest multiple of 90
-  const normalized = ((Math.round(rotation / 90) * 90) % 360 + 360) % 360;
+  const normalized = normalizeRotation(rotation);
   switch (normalized) {
     case 0:
       // Rotation is defined to be around the se corner of unrotated object.

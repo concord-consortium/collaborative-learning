@@ -112,7 +112,7 @@ export const RotateRightButton = observer(({ name }: IToolbarButtonComponentProp
   const enabled = drawingModel.selection.length > 0;
 
   function rotateRight(event: React.MouseEvent<Element>) {
-    drawingModel.rotateBy(drawingModel.selection, 90);
+    drawingModel.rotateMaybeCopy(drawingModel.selection, 90, hasCopyModifier(event));
   }
 
   return (

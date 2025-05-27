@@ -5,7 +5,8 @@ import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, BoundingBoxSides, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
-import { boundingBoxForPoints, rotateBoundingBox, rotatePoint, rotationPoint } from "../model/drawing-utils";
+import { boundingBoxForPoints, normalizeRotation, rotateBoundingBox,
+  rotatePoint, rotationPoint } from "../model/drawing-utils";
 
 import ErrorIcon from "../../../assets/icons/error.svg";
 
@@ -101,6 +102,9 @@ export const DrawingObject = types.model("DrawingObject", {
   get icon(): JSX.Element {
     // Should be overridden by all subclasses
     return (<ErrorIcon viewBox={ObjectTypeIconViewBox}/>);
+  },
+  get isRotatedToHorizontal() {
+    return [90, 270].includes(normalizeRotation(self.rotation));
   }
 }))
 .actions(self => ({

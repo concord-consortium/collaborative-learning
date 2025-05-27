@@ -78,7 +78,6 @@ export const Transformable: React.FC<TransformableProps> = ({ type, transform, s
     }
     return () => {
       cancelAnimationFrame(rafId);
-      setAnimating(false);
     };
   }, [transform, setAnimating]);
 
