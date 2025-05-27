@@ -148,7 +148,7 @@ context('single student functional test', () => {
     cy.getCanvasItemTitle('workspaces').first().should('contain', 'v2');
 
     cy.log('verify student name appears under thumbnail');
-    cy.get('[data-test=user-name]').then(($el) => {
+    cy.get('[data-test=user-title-prefix]').then(($el) => {
       const user = $el.text();
       cy.getCanvasItemTitle('workspaces').first().find('.info div').should('contain', user);
     });
@@ -156,7 +156,7 @@ context('single student functional test', () => {
     cy.log('verify restore of published canvas');
     cy.openTopTab("class-work");
     cy.openSection("class-work", "workspaces");
-    cy.get('[data-test=user-name]').then(($el) => {
+    cy.get('[data-test=user-title-prefix]').then(($el) => {
       const user = $el.text();
       cy.getCanvasItemTitle('workspaces', user).first().click();
     });

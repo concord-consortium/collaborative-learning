@@ -212,17 +212,22 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
   const [authenticatedState, setAuthenticatedState] = React.useState<AuthenticatedState>({state: "start"});
   const hasStartedCLUERef = useRef(false);
   const autoStartingCLUE = useMemo(() => {
-    // when the user selects a new offering in the problem dropdown a autoLogin=true hash
+    // There are two cases where we want to automatically login:
+    //
+    // When the user selects a new offering in the problem dropdown a autoLogin=true hash
     // parameter value is added to the URL to tell us to automatically login
-    // so that the user doesn't have to click the button again to login
+    // so that the user doesn't have to click the button again to login.
+    //
+    // When the user cancels the logout flow on the portal a logout_canceled=true hash
+    // parameter value is added to the URL and in that case we should also automatically login.
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    return hashParams.get("autoLogin") === "true";
+    return hashParams.get("autoLogin") === "true" || hashParams.get("logout_canceled") === "true";
   }, []);
 
   useEffect(() => {
     if (autoStartingCLUE) {
       // If the autoLogin hash param is set immediately redirect to the standalone sign in or register page.
-      // This will also have the side effect of removing the hash param from the URL.
+      // This will also have the side effect of removing the hash params (autologin or logout_canceled) from the URL.
       window.location.assign(getPortalStandaloneSignInOrRegisterUrl());
     }
   }, [autoStartingCLUE]);
@@ -416,7 +421,7 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
         <div className="instructions">
           Click below to get started with an account.
         </div>
-        <a className="button" onClick={handleLoginClick}>
+        <a className="button" data-testid="standalone-get-started-button" onClick={handleLoginClick}>
           Get Started
         </a>
       </div>

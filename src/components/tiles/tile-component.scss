@@ -7,23 +7,91 @@
   overflow: hidden;
   height: 100%;
   flex: 1 1 auto;
-  border: $half-border-width solid white;
+  border: 1px solid #ccc;
 
-  &.teacher {
-    background-color: $learninglog-green-light-8;
-    margin: 5px 0 10px 20px;
-    padding-right: 10px;
-    border-left: $half-border-width solid $learninglog-green;
+  .tile-content {
+    border: 1px solid white;
+  }
 
-    &:not(.text-tool-tile) {
-      padding: 10px;
+  &.problem-panel {
+    &.readonly {
+      border: 1px solid white;
+
+      .tile-content {
+        border: 1px solid white;
+      }
+
+      &.hovered {
+        border: 1px solid rgba(191, 191, 191, 0.5);
+        .tile-content.hovered {
+          border: 1px solid rgba(191, 191, 191, 0.5);
+        }
+      }
+
+      &.selected {
+        border: 1px solid $charcoal-light-2;
+        .tile-content.selected {
+          border: 1px solid $charcoal-light-2;
+        }
+      }
     }
+
+    &.teacher, &.teacher.readonly {
+      background-color: $learninglog-green-light-8;
+      margin: 5px 0 10px 20px;
+      padding: 10px;
+      border-left: $half-border-width solid $learninglog-green;
+      border-right: 0;
+      border-top: 0;
+      border-bottom: 0;
+
+      .tile-content {
+        border: 0;
+        background-color: $learninglog-green-light-8;
+      }
+    }
+  }
+
+  &.readonly, &.readonly.hovered {
+    border: 1px solid $tool-tile-readonly-border-color;
+    .tile-content {
+      border: 1px solid $tool-tile-readonly-border-color;
+    }
+  }
+
+   &:focus {
+    outline: none;
+  }
+
+  &.hovered {
+    border: 1px solid $tool-tile-hover-border-color;
+    .tile-content.hovered {
+      border: 1px solid $tool-tile-hover-border-color;
+    }
+  }
+
+  &.selected {
+    border: 1px solid $workspace-teal;
+    .tile-content.selected {
+      border: 1px solid $workspace-teal;
+    }
+  }
+
+  &.annotatable {
+    border: 1px solid $annotation-blue;
+    .tile-content {
+      border: 1px solid $annotation-blue;
+    }
+  }
+
+  &.selected-for-comment.readonly {
+    background-color: $comment-select-background;
   }
 
   .tool-tile-drag-handle {
     position: absolute;
-    right: -2px;
-    top: -2px;
+    right: -1px;
+    top: -1px;
     box-sizing: border-box;
     width: 34px;
     height: 34px;
@@ -51,8 +119,8 @@
 
   .tool-tile-resize-handle {
     position: absolute;
-    right: -2px;
-    bottom: -2px;
+    right: -1px;
+    bottom: -1px;
     box-sizing: border-box;
     width: 34px;
     height: 34px;
@@ -76,35 +144,5 @@
     &:focus {
       outline: none;
     }
-  }
-
-  &:focus {
-    outline: none;
-  }
-
-  &.hovered {
-    border: $half-border-width solid #82C8D7;
-    padding: 0;
-
-    &.readonly {
-      border: $half-border-width solid $charcoal-light-4;
-    }
-  }
-
-  &.selected {
-    border: $half-border-width solid #0592AF;
-    padding: 0;
-
-    &.readonly {
-      border: $half-border-width solid $charcoal-light-2;
-    }
-  }
-
-  &.annotatable {
-    border: $half-border-width solid $annotation-blue;
-  }
-
-  &.selected-for-comment.readonly {
-    background-color: $comment-select-background;
   }
 }

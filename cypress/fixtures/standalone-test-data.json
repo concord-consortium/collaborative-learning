@@ -1,0 +1,27 @@
+{
+  "jwt": {
+    "token": "mock-jwt-token",
+    "domain": "learn.portal.staging.concord.org"
+  },
+  "user": {
+    "id": "123",
+    "first_name": "Test",
+    "last_name": "Student",
+    "user_type": "learner",
+    "email": "test@example.com"
+  },
+  "offerings": [{
+    "id": "456",
+    "name": "Test Offering",
+    "activity_url": "/standalone/?unit=msa",
+    "class_info": {
+      "id": "789",
+      "name": "Test Class"
+    },
+    "problems": [
+      { "title": "Problem 1", "ordinal": "1.1" },
+      { "title": "Problem 2", "ordinal": "1.2" },
+      { "title": "Problem 3", "ordinal": "1.3" }
+    ]
+  }]
+}
