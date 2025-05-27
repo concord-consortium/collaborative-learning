@@ -23,8 +23,8 @@ In CODAP there are now extra fields:
 ### Attribute
 Many of the properties of the Attribute are still the same. Here are the differences:
 - values: in CLUE this is an array of ValueType, in CODAP it is frozen `string[]`
-- title: this is only in CLUE, there is a `_title` property in CODAP. It isn't clear if this CODAP title property is used. It isn't referenced directly by the Attribute model.
-- hidden: this is only in CLUE. I think in CODAP info about whether an attribute is hidden would be stored in some metadata object.
+- title: this is only in CLUE, there is a `_title` property in CODAP. It isn't clear if this CODAP title property is used. It isn't referenced directly by the Attribute model. In the CODAP V2Model, the title accessor returns self._title ?? self.name.
+- hidden: this is only in CLUE. In CODAP info about whether an attribute is hidden is stored in the `DataSetMetadata` object.
 - precision: this exists in both, but in CODAP it supports both a number and string value of the DatePrecision enumeration.
 - userType: this is only in CODAP, it allows the user to specify a type for the attribute instead of the dataset automatically identifying the type from the values of the attribute.
 
