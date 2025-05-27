@@ -1,5 +1,6 @@
 import { SizedObject } from "./sized-object";
 import type { BoundingBox } from "../model/drawing-basic-types";
+import { DrawingObject } from "./drawing-object";
 
 function expectBoundingBoxCloseTo(actual: BoundingBox, expected: BoundingBox) {
   expect(actual.nw.x).toBeCloseTo(expected.nw.x, 6);
@@ -7,6 +8,23 @@ function expectBoundingBoxCloseTo(actual: BoundingBox, expected: BoundingBox) {
   expect(actual.se.x).toBeCloseTo(expected.se.x, 6);
   expect(actual.se.y).toBeCloseTo(expected.se.y, 6);
 }
+
+describe("DrawingObject", () => {
+
+  it("Throws if subclass-specific methods are not implemented", () => {
+    const obj = DrawingObject.create({ type: "test", x: 0, y: 0 });
+    expect(() => obj.unrotatedBoundingBox)
+      .toThrow("Subclass needs to implement unrotatedBoundingBox");
+    expect(() => obj.undraggedUnrotatedBoundingBox)
+      .toThrow("Subclass needs to implement undraggedUnrotatedBoundingBox");
+    expect(() => obj.setUnrotatedDragBounds({ top: 0, bottom: 0, left: 0, right: 0 }))
+      .toThrow("Subclass needs to implement setUnrotatedDragBounds");
+    expect(() => obj.resizeObject())
+      .toThrow("Subclass needs to implement resizeObject");
+  });
+
+});
+
 
 describe("SizedObject setDragBounds works with rotation", () => {
   const origX = 100, origY = 100, origWidth = 50, origHeight = 40;

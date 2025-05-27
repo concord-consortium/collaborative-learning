@@ -103,11 +103,11 @@ export const DrawingObject = types.model("DrawingObject", {
 .actions(self => ({
   /** Update object's temporary size/position with new values, that have already been adjusted for rotation. */
   setUnrotatedDragBounds(bounds: BoundingBoxSides) {
-    console.error("setUnrotatedDragBounds is unimplemented for type", self.type);
+    throw "Subclass needs to implement setUnrotatedDragBounds";
   },
   /** Set the object's "real" location & size to its drag location & size. */
   resizeObject() {
-    console.error("resizeObject is unimplemented for type", self.type);
+    throw "Subclass needs to implement resizeObject";
   }
 }))
 .views(self => ({

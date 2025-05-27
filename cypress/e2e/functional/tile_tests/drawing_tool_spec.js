@@ -717,9 +717,75 @@ context('Draw Tool Tile', function () {
     // });
   });
 
-  it("Can flip objects", { scrollBehavior: false }, () => {
+  it("Can rotate and flip objects", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
+
+    cy.log("Rotate a text object");
+    drawToolTile.addText(50, 10, "Spin me!");
+    drawToolTile.getTextDrawing().should("have.length", 1);
+    drawToolTile.getTextDrawing().eq(0).click();
+    drawToolTile.getSelectionBox().should("exist");
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([0]);
+    });
+    clueCanvas.clickToolbarButton('drawing', 'rotate-right');
+    drawToolTile.getTextDrawing().should("have.length", 1);
+    cy.wait(300); // wait for animation to complete
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([90]);
+    });
+    clueCanvas.clickToolbarButton('drawing', 'rotate-right');
+    cy.wait(300);
+    drawToolTile.getTextDrawing().should("have.length", 1);
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([180]);
+    });
+    clueCanvas.getUndoTool().click();
+    cy.wait(300);
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([90]);
+    });
+
+    clueCanvas.clickToolbarButton('drawing', 'flip-horizontal');
+    cy.wait(300);
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'scale')).to.deep.equal([1,-1]); // horizontal flip of rotated object -> Y axis flip
+    });
+    clueCanvas.getUndoTool().click();
+    cy.wait(300);
+
+    clueCanvas.getUndoTool().click();
+    cy.wait(300);
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([0]);
+    });
+
+    clueCanvas.clickToolbarButton('drawing', 'rotate-right', { altKey: true });
+    cy.wait(300);
+    clueCanvas.clickToolbarButton('drawing', 'rotate-right', { altKey: true });
+    cy.wait(300);
+    clueCanvas.clickToolbarButton('drawing', 'rotate-right', { altKey: true });
+    cy.wait(300);
+    drawToolTile.getTextDrawing().should("have.length", 4);
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([0]);
+    });
+    drawToolTile.getTextDrawing().eq(1).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([90]);
+    });
+    drawToolTile.getTextDrawing().eq(2).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([180]);
+    });
+    drawToolTile.getTextDrawing().eq(3).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([270]);
+    });
+    drawToolTile.getTextDrawing().eq(0).click();
+    drawToolTile.getTextDrawing().eq(1).click({shiftKey: true});
+    drawToolTile.getTextDrawing().eq(2).click({shiftKey: true});
+    drawToolTile.getTextDrawing().eq(3).click({shiftKey: true});
+    drawToolTile.getSelectionBox().should("have.length", 4);
+    drawToolTile.getDrawToolDelete().click();
 
     cy.log("Flip a rectangle");
     drawToolTile.drawRectangle(50, 50, 100, 50);
@@ -791,6 +857,7 @@ context('Draw Tool Tile', function () {
     cy.wait(500);
     drawToolTile.getGroupDrawing().eq(0).invoke('attr', 'transform').then(transform => {
       expect(parseTransform(transform, 'scale')).to.deep.equal([-1,1]);
+    });
 
     // Now triangle should be to the left of the vector
     drawToolTile.getFreehandDrawing().then($el => {
@@ -801,7 +868,6 @@ context('Draw Tool Tile', function () {
       });
     });
   });
-});
 
   it("rejects non-primary pointer events", { scrollBehavior: false }, () => {
     beforeTest();

@@ -307,7 +307,28 @@ describe("DrawingContentModel", () => {
     expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(1);
     expect(rect1.x).toBe(20);
     expect(rect1.y).toBe(20);
-});
+  });
+
+  it("can rotate objects", async () => {
+    const model = createDrawingContentWithMetadata();
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
+    const rect1 = model.addObject(rectSnapshot1);
+    await model.rotateMaybeCopy(["a"], 90, false);
+    expect(rect1.rotation).toBe(90);
+    await model.rotateMaybeCopy(["a"], 90, false);
+    expect(rect1.rotation).toBe(180);
+
+    await model.rotateMaybeCopy(["a"], 90, true);
+    expect(model.objects.length).toBe(2);
+    expect(model.objects[0]).toBe(rect1);
+    expect(model.objects[0].rotation).toBe(180);
+    expect(model.objects[1].rotation).toBe(270);
+    expect(model.objects[0].id).not.toEqual(model.objects[1].id);
+    expect(model.objects[1].x).toBe(0); // rotate in place
+    expect(model.objects[1].y).toBe(0);
+    expect(model.selection.length).toBe(1); // new object is selected
+    expect(model.selection[0]).toBe(model.objects[1].id);
+  });
 
   it("can resize rectangle", () => {
     mockLogTileChangeEvent.mockClear();
