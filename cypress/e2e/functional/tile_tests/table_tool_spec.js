@@ -79,16 +79,11 @@ context('Table Tool Tile', function () {
     cy.log('will remove a column');
     cy.get('.primary-workspace').within(function () {
       tableToolTile.getColumnHeader().contains(headerY).click();
-      // Wait for the modal title to appear in the last modal portal
-      cy.get('.ReactModalPortal').should('have.length.at.least', 1);
-      cy.get('.ReactModalPortal').last().within(() => {
-        cy.get('.modal-title').should('be.visible').and('contain', 'Remove Column');
-        cy.get('[data-testid=confirm-button]').should('be.visible').click();
-      });
-      cy.wait(200);
+      tableToolTile.getRemoveColumnButton().eq(0).should('be.visible').click();
     });
     cy.get('.modal-title').should('be.visible').and('contain', 'Remove Column');
-    cy.get('[data-testid=confirm-button]').should('be.visible').click();
+    cy.get('.modal-content').should('contain', 'Remove column').and('contain', headerY);
+    cy.get('.modal-button').contains('Remove Column').click();
     cy.get('.primary-workspace').within(function () {
       tableToolTile.getColumnHeader().should('have.length', 2);
       tableToolTile.getColumnHeaderText().then((text) => {
@@ -96,7 +91,10 @@ context('Table Tool Tile', function () {
         expect(text[1]).to.be.eq(headerY2);
       });
     });
+  // });
 
+  // it('edit table entries and formulas', function () {
+  //   beforeTest();
     let formula = `3*${headerX}+2`;
 
     cy.log('will add content to table');
