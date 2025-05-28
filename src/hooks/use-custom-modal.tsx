@@ -114,7 +114,13 @@ export const useCustomModal = <IContentProps,>({
               const key = `${i}-${b.className}`;
               const handleClick = () => invokeButton(b, handleClose);
               return (
-                <button type="button" className={classes} key={key} onClick={handleClick} {...(b.dataTestId ? { 'data-testid': b.dataTestId } : {})}>
+                <button
+                  type="button"
+                  className={classes}
+                  key={key}
+                  onClick={handleClick}
+                  {...(b.dataTestId ? { 'data-testid': b.dataTestId } : {})}
+                >
                   {b.label}
                 </button>
               );
