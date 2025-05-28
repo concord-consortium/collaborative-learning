@@ -4,10 +4,10 @@ import React from "react";
 import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps,
   IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
 import { SizedObject } from "./sized-object";
-import { Point } from "../model/drawing-basic-types";
 import { uniqueId } from "../../../../src/utilities/js-utils";
 import { WrappedSvgText } from "../components/wrapped-svg-text";
 import { Transformable } from "../components/transformable";
+import { useDrawingScale } from "../components/drawing-scale-context";
 
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 
@@ -33,13 +33,7 @@ export const TextObject = types.compose("TextObject", EditableObject, SizedObjec
     },
     setText(text: string) {
       self.text = text;
-    },
-    resize(start: Point, end: Point) {
-      self.x = Math.min(start.x, end.x);
-      self.y = Math.min(start.y, end.y);
-      self.width = Math.max(start.x, end.x) - self.x;
-      self.height = Math.max(start.y, end.y) - self.y;
-    },
+    }
   }));
 
 export interface TextObjectType extends Instance<typeof TextObject> {}
@@ -148,10 +142,15 @@ const TextContent: React.FC<IContentProps> = observer(({
 
 export const TextComponent = observer(
     function TextComponent({model, readOnly, handleHover, handleDrag} : IDrawingComponentProps) {
+  // Unlike other drawing elements, the text itself never changes size.
+  // Get the current drawing scale, so that we can counter-transform to undo the scaling.
+  const scale = useDrawingScale();
+
   if (!isTextObject(model)) return null;
   const textobj = model as TextObjectType;
   const { id, stroke, text, transform } = textobj;
   const { width, height } = textobj.currentDims;
+  const inverseScale = { scaleX: 1/scale.scaleX, scaleY: 1/scale.scaleY };
   const clipId = uniqueId();
   const margin = 5;
 
@@ -161,7 +160,7 @@ export const TextComponent = observer(
 
   return (
     <Transformable type="text" transform={transform} setAnimating={textobj.setAnimating}>
-      <g
+      <g transform={`scale(${inverseScale.scaleX}, ${inverseScale.scaleY})`}
         key={id}
         className="text"
         onMouseEnter={(e) => handleHover?.(e, model, true)}
@@ -170,11 +169,13 @@ export const TextComponent = observer(
         pointerEvents={handleHover ? "visible" : "none"}
       >
         <rect x={0} y={0}
-          width={width} height={height}
-          stroke={stroke} fill="#FFFFFF" opacity="80%"
-          rx="5" ry="5" />
+          width={width * scale.scaleX} height={height * scale.scaleY}
+          stroke={stroke} strokeWidth="1"
+          fill="#FFFFFF" opacity="80%"
+          rx="5" ry="5"
+        />
         <clipPath id={clipId}>
-          <rect x={0} y={0} width={width} height={height} />
+          <rect x={0} y={0} width={width * scale.scaleX} height={height * scale.scaleY} />
         </clipPath>
         <TextContent
           editing={model.isEditing && !readOnly}
