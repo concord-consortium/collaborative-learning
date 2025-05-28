@@ -73,9 +73,14 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
                 onAllRowsSelectionChange={props.onAllRowsSelectionChange}
               />
               {hasData &&
-                <div className={classNames("column-button sort-column-button", { "ascending": direction === "ASC",
-                                      "descending": direction === "DESC" })} onClick={handleSort}>
-                  <SortIcon className={classNames("column-icon sort-column-icon")} />
+                <div className={clsx("column-button sort-column-button", { "ascending": direction === "ASC",
+                                      "descending": direction === "DESC" })}
+                     onClick={handleSort}
+                     data-testid={`sort-control-${column.key}`}>
+                  <SortIcon className={clsx("column-icon sort-column-icon")}
+                           data-testid={`sort-indicator-${column.key}`}
+                           aria-label={direction === "ASC" ? "Sorted ascending" :
+                                     direction === "DESC" ? "Sorted descending" : "Not sorted"} />
                 </div>
               }
             </div>

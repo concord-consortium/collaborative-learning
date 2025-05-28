@@ -1,0 +1,32 @@
+{
+  "mixedData": [
+    ["Alice", "25", "95.5", "Excellent"],
+    ["Bob", "30", "88", "42"],
+    ["Charlie", "22", "92.5", "Very good"],
+    ["David", "28", "0", "Average"],
+    ["Eve", "35", "98.5", ""],
+    ["Frank", "27", "91", "Good"],
+    ["Grace", "31", "87.5", "Average"],
+    ["Henry", "29", "94", "Very good"],
+    ["Ivy", "33", "89.5", "Good"],
+    ["Jack", "26", "88", "7"]
+  ],
+  "expectedSorts": {
+    "name": {
+      "asc": ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace", "Henry", "Ivy", "Jack"],
+      "desc": ["Jack", "Ivy", "Henry", "Grace", "Frank", "Eve", "David", "Charlie", "Bob", "Alice"]
+    },
+    "age": {
+      "asc": ["22", "25", "26", "27", "28", "29", "30", "31", "33", "35"],
+      "desc": ["35", "33", "31", "30", "29", "28", "27", "26", "25", "22"]
+    },
+    "score": {
+      "asc": ["0", "87.5", "88", "88", "89.5", "91", "92.5", "94", "95.5", "98.5"],
+      "desc": ["98.5", "95.5", "94", "92.5", "91", "89.5", "88", "88", "87.5", "0"]
+    },
+    "notes": {
+      "asc": ["7", "42", "Average", "Average", "Excellent", "Good", "Good", "Very good", "Very good", ""],
+      "desc": ["", "Very good", "Very good", "Good", "Good", "Excellent", "Average", "Average", "42", "7"]
+    }
+  }
+}

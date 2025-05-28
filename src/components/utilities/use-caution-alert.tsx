@@ -37,8 +37,8 @@ export const useCautionAlert = (props: IProps) => {
     Content,
     contentProps,
     buttons: [
-      { label: cancelLabel || "Cancel" },
-      { label: confirmLabel || "OK", isDefault: true, onClick: onConfirm }
+      { label: cancelLabel || "Cancel", dataTestId: "cancel-button" },
+      { label: confirmLabel || "OK", isDefault: true, onClick: onConfirm, dataTestId: "confirm-button" }
     ],
     onClose
   }, [onClose, onConfirm]);
