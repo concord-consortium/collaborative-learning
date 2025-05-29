@@ -8,15 +8,15 @@ import SortIcon from "../../../assets/sort-column-icon.svg";
 
 import "./column-header-cell.scss";
 
-interface IProps extends THeaderRendererProps {
-  height: number,
-  getSortDirection: (columnKey: string) => "ASC" | "DESC" | "NONE",
-  onSort: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void
+interface IUseColumnHeaderCellArgs {
+  height: number;
+  getSortDirection: (columnKey: string) => "ASC" | "DESC" | "NONE";
+  onSort?: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void;
 }
 
-export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IProps) => {
+export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColumnHeaderCellArgs) => {
   return useMemo(() => {
-    const ColumnHeaderCell: React.FC<IProps> = (props: IProps) => {
+    const ColumnHeaderCell: React.FC<THeaderRendererProps> = (props) => {
       const column = props.column as unknown as TColumn;
       const { gridContext, readOnly, isEditing, isRemovable, showExpressions, hasData,
               onRemoveColumn } = column.appData || {};

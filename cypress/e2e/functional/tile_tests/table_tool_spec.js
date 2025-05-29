@@ -195,7 +195,7 @@ context('Table Tool Tile', function () {
 
     cy.log('verify formula appears under correct column header');
     cy.get('.editable-header-cell')
-      .contains('.header-name', 'y')
+      .filter(':has(.header-name:contains("y"))')
       .parent()
       .siblings('.expression-cell.has-expression')
       .should('contain', formula);
@@ -259,7 +259,7 @@ context('Table Tool Tile', function () {
 
     cy.get(".primary-workspace").within((workspace) => {
       cy.get('.editable-header-cell')
-        .contains('.header-name', 'mars')
+        .filter(':has(.header-name:contains("mars"))')
         .parent()
         .siblings('.expression-cell.has-expression')
         .should('contain', formula);
