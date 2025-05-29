@@ -1,22 +1,22 @@
 import classNames from "classnames";
 import React, { useMemo } from "react";
 import { EditableHeaderCell } from "./editable-header-cell";
-import { kHeaderRowHeight, THeaderRendererProps, TColumn } from "./table-types";
+import { kHeaderRowHeight, TColumn, THeaderRendererProps } from "./table-types";
 import { useCautionAlert } from "../../utilities/use-caution-alert";
 import RemoveColumnSvg from "../../../assets/icons/remove/remove.nosvgo.svg";
 import SortIcon from "../../../assets/sort-column-icon.svg";
 
 import "./column-header-cell.scss";
 
-interface IProps extends THeaderRendererProps {
-  height: number,
-  getSortDirection: (columnKey: string) => "ASC" | "DESC" | "NONE",
-  onSort: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void
+interface IUseColumnHeaderCellArgs extends THeaderRendererProps {
+  height: number;
+  getSortDirection: (columnKey: string) => "ASC" | "DESC" | "NONE";
+  onSort?: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void;
 }
 
-export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IProps) => {
+export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColumnHeaderCellArgs) => {
   return useMemo(() => {
-    const ColumnHeaderCell: React.FC<THeaderRendererProps> = (props) => {
+    const ColumnHeaderCell: React.FC<IUseColumnHeaderCellArgs> = (props: IUseColumnHeaderCellArgs) => {
       const column = props.column as unknown as TColumn;
       const { gridContext, readOnly, isEditing, isRemovable, showExpressions, hasData,
               onRemoveColumn } = column.appData || {};
