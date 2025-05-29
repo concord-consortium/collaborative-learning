@@ -108,6 +108,9 @@ export const DrawingObject = types.model("DrawingObject", {
   /** Set the object's "real" location & size to its drag location & size. */
   resizeObject() {
     throw "Subclass needs to implement resizeObject";
+  },
+  setRotation(rotation: number) {
+    self.rotation = rotation;
   }
 }))
 .views(self => ({

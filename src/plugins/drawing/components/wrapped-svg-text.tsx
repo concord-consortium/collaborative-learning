@@ -10,13 +10,14 @@ interface ISvgTextProps {
     y: number,
     width: number,
     height: number,
-    style?: CSSProperties
+    style?: CSSProperties,
+    sideways?: boolean // If true, the text is rotated so that "line height" is measured horizontally.
   }
 
 // Creates an SVG <text> element of the given dimentions,
 // with the requested text broken up into lines that fit within the given width
 // Very long words will not be broken, and may extend past the width bound.
-export const WrappedSvgText = function({text, x, y, width, height, style}: ISvgTextProps) {
+export const WrappedSvgText = function({text, x, y, width, height, style, sideways}: ISvgTextProps) {
     const [completedLines, setCompletedLines] = useState<string[]>([]);
     const [lineHeight, setLineHeight] = useState<number>(0);
     const textRef = useRef<SVGTextElement>(null);
@@ -45,7 +46,7 @@ export const WrappedSvgText = function({text, x, y, width, height, style}: ISvgT
             let remainingText: string[] = [];
             const done: string[] = [];
             tr.textContent = experimentalLine.join(' ');
-            const observedHeight = tr.getBoundingClientRect().height;
+            const observedHeight = sideways ? tr.getBoundingClientRect().width : tr.getBoundingClientRect().height;
             if (observedHeight > lineHeight) {
                 setLineHeight(observedHeight);
             }

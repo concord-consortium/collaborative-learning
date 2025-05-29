@@ -134,7 +134,7 @@ const TextContent: React.FC<IContentProps> = observer(({
       <g clipPath={'url(#'+clip+')'}>
         <WrappedSvgText text={text}
             x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}
-            style={{fill: textColor}} />
+            style={{fill: textColor}} sideways={model.isRotatedToHorizontal} />
       </g>
     );
   }

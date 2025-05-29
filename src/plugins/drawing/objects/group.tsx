@@ -14,6 +14,7 @@ import { useReadOnlyContext } from "../../../components/document/read-only-conte
 import { Transformable } from "../components/transformable";
 import { SizedObject } from "./sized-object";
 import { DrawingScaleProvider } from "../components/drawing-scale-context";
+import { boundingBoxForPoints, rotatePoint } from "../model/drawing-utils";
 
 import GroupObjectsIcon from "../assets/group-objects-icon.svg";
 
@@ -81,7 +82,7 @@ export const GroupObject = SizedObject.named("GroupObject")
           if (objBB.se.y > cur.se.y) cur.se.y = objBB.se.y;
         }
         return cur;
-      }, { nw: { x: Number.MAX_VALUE, y: Number.MAX_VALUE }, se: { x: 0, y: 0 } });
+      }, { nw: { x: Number.MAX_VALUE, y: Number.MAX_VALUE }, se: { x: -Number.MAX_VALUE, y: -Number.MAX_VALUE } });
 
       self.x = bb.nw.x;
       self.y = bb.nw.y;
@@ -102,21 +103,34 @@ export const GroupObject = SizedObject.named("GroupObject")
     },
     /** Reverse the "assimilate" operation.
      * Sets the position and size of each member to its actual current position and size
-     * without the scaling of the group.
+     * without the scaling/rotation of the group.
      * This is used just before the objects are moved out of the group and the group is destroyed.
      */
     unassimilateObjects() {
-      const groupBB = self.boundingBox;
+      const groupBB = self.unrotatedBoundingBox;
       const groupWidth = groupBB.se.x - groupBB.nw.x;
       const groupHeight = groupBB.se.y - groupBB.nw.y;
+      const groupRotation = self.rotation;
+
       self.objects.forEach((obj) => {
         const objBB = obj.boundingBox;
-        obj.setDragBoundsAbsolute({
-          left:   groupBB.nw.x + objBB.nw.x * groupWidth,
-          right:  groupBB.nw.x + objBB.se.x * groupWidth,
-          top:    groupBB.nw.y + objBB.nw.y * groupHeight,
-          bottom: groupBB.nw.y + objBB.se.y * groupHeight
-        });
+        // This is where the object would be in absolute coordinates if the group were not rotated.
+        const objNW = {
+          x: groupBB.nw.x + objBB.nw.x * groupWidth,
+          y: groupBB.nw.y + objBB.nw.y * groupHeight
+        };
+        const objSE = {
+          x: groupBB.nw.x + objBB.se.x * groupWidth,
+          y: groupBB.nw.y + objBB.se.y * groupHeight
+        };
+
+        // Rotate the object's points to account for the group's rotation.
+        const rotatedNW = rotatePoint(objNW, groupBB.se, groupRotation);
+        const rotatedSE = rotatePoint(objSE, groupBB.se, groupRotation);
+        // ...and then make the object resize to fit these bounds.
+        const boundingBox = boundingBoxForPoints([rotatedNW, rotatedSE]);
+        obj.setRotation(obj.rotation + groupRotation);
+        obj.setDragBoundsAbsolute(boundingBox);
         obj.resizeObject();
       });
     }
