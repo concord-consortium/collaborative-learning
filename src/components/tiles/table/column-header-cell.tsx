@@ -77,7 +77,17 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IProps) 
               {hasData &&
                 <div className={classNames("column-button sort-column-button", { "ascending": direction === "ASC",
                                       "descending": direction === "DESC" })} onClick={handleSort}>
-                  <SortIcon className={classNames("column-icon sort-column-icon")} />
+                  <SortIcon
+                    className={classNames("column-icon sort-column-icon")}
+                    data-testid={`sort-indicator-${column.key}`}
+                    aria-label={
+                      direction === "ASC"
+                        ? "Sorted ascending"
+                        : direction === "DESC"
+                          ? "Sorted descending"
+                          : "Not sorted"
+                    }
+                  />
                 </div>
               }
             </div>
