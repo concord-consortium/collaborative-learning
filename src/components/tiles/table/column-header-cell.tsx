@@ -1,5 +1,4 @@
 import classNames from "classnames";
-import clsx from "clsx";
 import React, { useMemo } from "react";
 import { EditableHeaderCell } from "./editable-header-cell";
 import { kHeaderRowHeight, THeaderRendererProps, TColumn } from "./table-types";
@@ -13,8 +12,8 @@ interface IProps extends THeaderRendererProps {
   height: number,
   getSortDirection: (columnKey: string) => "ASC" | "DESC" | "NONE",
   onSort: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void
-
 }
+
 export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IProps) => {
   return useMemo(() => {
     const ColumnHeaderCell: React.FC<IProps> = (props: IProps) => {
@@ -54,7 +53,7 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IProps) 
           else if (direction === "DESC") newDirection = "NONE";
           else newDirection = "ASC";
 
-          onSort && onSort(column.key, newDirection);
+          onSort?.(column.key, newDirection);
         }
       };
 
@@ -62,7 +61,7 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IProps) 
         <div className={classes} onMouseOver={handleColumnHeaderCellMouseOver}
               onMouseLeave={handleColumnHeaderCellMouseLeave} onClick={handleHeaderClick}>
           <div className="flex-container">
-            <div className={clsx("header-cell-container", {"show-expression": showExpressions})}>
+            <div className={classNames("header-cell-container", {"show-expression": showExpressions})}>
               {!isEditing && isRemovable &&
                 <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}
                   isColumnSelected={gridContext?.isColumnSelected(column.key) ?? false}/>
@@ -74,9 +73,9 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IProps) 
                 onAllRowsSelectionChange={props.onAllRowsSelectionChange}
               />
               {hasData &&
-                <div className={clsx("column-button sort-column-button", { "ascending": direction === "ASC",
+                <div className={classNames("column-button sort-column-button", { "ascending": direction === "ASC",
                                       "descending": direction === "DESC" })} onClick={handleSort}>
-                  <SortIcon className={clsx("column-icon sort-column-icon")} />
+                  <SortIcon className={classNames("column-icon sort-column-icon")} />
                 </div>
               }
             </div>

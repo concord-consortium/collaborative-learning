@@ -61,7 +61,7 @@ export const useColumnExtensions = ({
       hasData: (() => {
         return rows.some((c: any) => {
           const value = c[column.key];
-          return value !== undefined && value !== null && value !== "";
+          return value != null && value !== "";
         });
       })()
     };

@@ -40,7 +40,7 @@ export interface TColumnAppData {
   showExpressions: boolean;
   expression?: string;
   hasData?: boolean;
-  // sortDirection: "ascending" | "descending" | undefined;
+
   onBeginHeaderCellEdit: () => boolean | undefined;
   onHeaderCellEditKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
   onEndHeaderCellEdit: (value?: string) => void;

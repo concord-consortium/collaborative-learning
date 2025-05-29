@@ -126,19 +126,22 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     dataSet, isLinked, readOnly: !!readOnly, inputRowId: inputRowId.current,
     rowChanges, context: gridContext, selectedCaseIds });
 
+  const onSort = useCallback((columnKey: string, direction: "ASC" | "DESC" | "NONE") => {
+    if (direction === "NONE") {
+      setSortColumns([]);
+    } else {
+      setSortColumns([{ columnKey, direction }]);
+      dataSet.sortByAttribute(columnKey, direction);
+    }
+  }, [dataSet]);
+
   // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({
     gridContext, dataSet, isLinked, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
     ...rowLabelProps, measureColumnWidth, lookupImage,
     sortColumns,
-    onSort: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => {
-      if (direction === "NONE") {
-        setSortColumns([]);
-      } else {
-        setSortColumns([{ columnKey, direction }]);
-        dataSet.sortByAttribute(columnKey, direction);
-      }
-  }});
+    onSort,
+  });
 
   // The size of the title bar
   const { titleCellWidth, getTitleHeight } =
