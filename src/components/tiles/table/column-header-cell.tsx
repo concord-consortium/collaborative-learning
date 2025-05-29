@@ -8,13 +8,13 @@ import SortIcon from "../../../assets/sort-column-icon.svg";
 
 import "./column-header-cell.scss";
 
-interface IUseColumnHeaderCellArgs {
-  height: number;
-  getSortDirection: (columnKey: string) => "ASC" | "DESC" | "NONE";
-  onSort?: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void;
+interface IProps extends THeaderRendererProps {
+  height: number,
+  getSortDirection: (columnKey: string) => "ASC" | "DESC" | "NONE",
+  onSort: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void
 }
 
-export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColumnHeaderCellArgs) => {
+export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IProps) => {
   return useMemo(() => {
     const ColumnHeaderCell: React.FC<THeaderRendererProps> = (props) => {
       const column = props.column as unknown as TColumn;
@@ -54,6 +54,7 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
           else newDirection = "ASC";
 
           onSort?.(column.key, newDirection);
+          onSort?.(column.key, newDirection);
         }
       };
 
@@ -61,6 +62,7 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
         <div className={classes} onMouseOver={handleColumnHeaderCellMouseOver}
               onMouseLeave={handleColumnHeaderCellMouseLeave} onClick={handleHeaderClick}>
           <div className="flex-container">
+            <div className={classNames("header-cell-container", {"show-expression": showExpressions})}>
             <div className={classNames("header-cell-container", {"show-expression": showExpressions})}>
               {!isEditing && isRemovable &&
                 <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}
@@ -73,14 +75,9 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
                 onAllRowsSelectionChange={props.onAllRowsSelectionChange}
               />
               {hasData &&
-                <div className={clsx("column-button sort-column-button", { "ascending": direction === "ASC",
-                                      "descending": direction === "DESC" })}
-                     onClick={handleSort}
-                     data-testid={`sort-control-${column.key}`}>
-                  <SortIcon className={clsx("column-icon sort-column-icon")}
-                           data-testid={`sort-indicator-${column.key}`}
-                           aria-label={direction === "ASC" ? "Sorted ascending" :
-                                     direction === "DESC" ? "Sorted descending" : "Not sorted"} />
+                <div className={classNames("column-button sort-column-button", { "ascending": direction === "ASC",
+                                      "descending": direction === "DESC" })} onClick={handleSort}>
+                  <SortIcon className={classNames("column-icon sort-column-icon")} />
                 </div>
               }
             </div>
