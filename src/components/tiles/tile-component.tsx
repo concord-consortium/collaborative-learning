@@ -137,7 +137,6 @@ const ResizeTileButton =
 
 interface IState {
   hoverTile: boolean;
-  tileHeight?: number;
 }
 
 const defaultDragImage = document.createElement("img");
@@ -158,7 +157,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   state = {
     hoverTile: false,
-    tileHeight: 0
   };
 
   constructor(props: IProps) {
@@ -310,11 +308,9 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     if (widthPct && (index !== undefined)) {
       style.left =`${widthPct * index}%`;
     }
-    const kBorderOffset = 2; // offset for the outer border that is 1px thick
-    const tileHeight = this.state.tileHeight + kBorderOffset;
     return (
       <>
-        <div style={{ height: tileHeight }} className="question-border" />
+        <div className="question-border" />
         <div style={style} className="question-badge">
           <QuestionBadge />
         </div>
@@ -349,7 +345,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   private handleResizeDebounced = debounce((entry: ResizeObserverEntry) => {
     this.getTileResizeHandler()?.(entry);
-    this.setState({ tileHeight: entry.contentRect.height });
   }, 100);
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
