@@ -414,6 +414,18 @@ context('Table Tool Tile', function () {
         tableToolTile.getTableCellWithRowColIndex(index, 4).should('contain', expectedValue);
       });
 
+      // Undo descending sort
+      // TODO: Uncomment this when CLUE-172 is fixed
+      // clueCanvas.getUndoTool().click();
+      // cy.get('.sort-column-button').eq(2).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Not sorted');
+
+      // // Redo descending sort
+      // clueCanvas.getRedoTool().click();
+      // cy.get('.sort-column-button').eq(2).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Sorted descending');
+      // testData.expectedSorts.score.desc.forEach((expectedValue, index) => {
+      //   tableToolTile.getTableCellWithRowColIndex(index, 4).should('contain', expectedValue);
+      // });
+
       // Test sorting on Notes column (text)
       cy.log('Testing Notes column sorting');
       tableToolTile.getColumnHeader().eq(3).click();
