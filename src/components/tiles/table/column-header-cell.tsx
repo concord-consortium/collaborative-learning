@@ -8,7 +8,7 @@ import SortIcon from "../../../assets/sort-column-icon.svg";
 
 import "./column-header-cell.scss";
 
-interface IUseColumnHeaderCellArgs extends THeaderRendererProps {
+interface IUseColumnHeaderCellArgs {
   height: number;
   getSortDirection: (columnKey: string) => "ASC" | "DESC" | "NONE";
   onSort?: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void;
@@ -16,7 +16,7 @@ interface IUseColumnHeaderCellArgs extends THeaderRendererProps {
 
 export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColumnHeaderCellArgs) => {
   return useMemo(() => {
-    const ColumnHeaderCell: React.FC<IUseColumnHeaderCellArgs> = (props: IUseColumnHeaderCellArgs) => {
+    const ColumnHeaderCell: React.FC<THeaderRendererProps> = (props) => {
       const column = props.column as unknown as TColumn;
       const { gridContext, readOnly, isEditing, isRemovable, showExpressions, hasData,
               onRemoveColumn } = column.appData || {};
