@@ -62,7 +62,7 @@ export const WrappedSvgText = function({text, x, y, width, height, style, sidewa
             }
             setCompletedLines(done);
         }
-    }, [text, width, lineHeight, resizeHeight, resizeWidth]);
+    }, [text, width, lineHeight, resizeHeight, resizeWidth, sideways]);
 
     const lines: JSX.Element[] = [];
     const dy=lineHeight*LINE_SPACING;
