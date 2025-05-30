@@ -15,7 +15,6 @@ export interface IModalButton {
   isDefault?: boolean;
   isDisabled?: boolean;
   onClick?: (() => void) | (() => boolean); // close dialog on falsy return value
-  dataTestId?: string;
 }
 
 const invokeButton = (button: IModalButton, onClose: () => void) => {
@@ -114,13 +113,7 @@ export const useCustomModal = <IContentProps,>({
               const key = `${i}-${b.className}`;
               const handleClick = () => invokeButton(b, handleClose);
               return (
-                <button
-                  type="button"
-                  className={classes}
-                  key={key}
-                  onClick={handleClick}
-                  {...(b.dataTestId ? { 'data-testid': b.dataTestId } : {})}
-                >
+                <button type="button" className={classes} key={key} onClick={handleClick}>
                   {b.label}
                 </button>
               );

@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React, { useMemo } from "react";
 import { EditableHeaderCell } from "./editable-header-cell";
-import { kHeaderRowHeight, TColumn, THeaderRendererProps } from "./table-types";
+import { kHeaderRowHeight, THeaderRendererProps, TColumn } from "./table-types";
 import { useCautionAlert } from "../../utilities/use-caution-alert";
 import RemoveColumnSvg from "../../../assets/icons/remove/remove.nosvgo.svg";
 import SortIcon from "../../../assets/sort-column-icon.svg";
@@ -54,7 +54,6 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
           else newDirection = "ASC";
 
           onSort?.(column.key, newDirection);
-          onSort?.(column.key, newDirection);
         }
       };
 
@@ -62,7 +61,6 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
         <div className={classes} onMouseOver={handleColumnHeaderCellMouseOver}
               onMouseLeave={handleColumnHeaderCellMouseLeave} onClick={handleHeaderClick}>
           <div className="flex-container">
-            <div className={classNames("header-cell-container", {"show-expression": showExpressions})}>
             <div className={classNames("header-cell-container", {"show-expression": showExpressions})}>
               {!isEditing && isRemovable &&
                 <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}
@@ -77,7 +75,7 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
               {hasData &&
                 <div className={classNames("column-button sort-column-button", { "ascending": direction === "ASC",
                                       "descending": direction === "DESC" })} onClick={handleSort}>
-                  <SortIcon className={classNames("column-icon sort-column-icon")} data-testid={`sort-indicator-${column.key}`} />
+                  <SortIcon className={classNames("column-icon sort-column-icon")} />
                 </div>
               }
             </div>

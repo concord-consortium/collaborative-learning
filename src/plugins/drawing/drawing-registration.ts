@@ -8,11 +8,7 @@ import { registerDrawingObjectInfo, registerDrawingToolInfo } from "./components
 import { GroupComponent, GroupObject } from "./objects/group";
 import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
 import {
-  EllipseButton,
-  LineButton,
-  RectangleButton,
-  SelectButton,
-  TextButton
+  EllipseButton, LineButton, RectangleButton, SelectButton, TextButton
 } from "./toolbar-buttons/mode-buttons";
 import { VectorButton } from "./toolbar-buttons/vector-button";
 import { StampButton } from "./toolbar-buttons/stamp-button";
