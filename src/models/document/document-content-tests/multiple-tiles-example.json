@@ -82,6 +82,7 @@
       },
       "textTool1": {
         "id": "textTool1",
+        "title": "Text 1",
         "content": {"type": "Text", "text": "Some text"}
       },
       "tableTool": {
