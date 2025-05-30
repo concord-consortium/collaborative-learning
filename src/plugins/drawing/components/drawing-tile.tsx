@@ -7,6 +7,7 @@ import { isEqual } from "lodash";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { DrawingLayerView } from "./drawing-layer";
 import { DrawingContentModelType } from "../model/drawing-content";
+import { DrawingObjectMSTUnion } from "./drawing-object-manager";
 import { DrawingObjectType } from "../objects/drawing-object";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -128,10 +129,19 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     }
 
     const content = contentRef.current;
-    const objectIds = clipboard.getTileContent(content.type).map((obj: DrawingObjectType) => obj.id);
-    if (content.metadata && !readOnly && objectIds?.length) {
+    const objects: DrawingObjectType[] = clipboard.getTileContent(content.type);
+    if (content.metadata && !readOnly && objects?.length) {
       const kPixelOffset = 30;
-      content.duplicateObjects(objectIds, {x: kPixelOffset, y: kPixelOffset});
+      // check if there are objects copied from other drawing tiles
+      const newObjects = objects.filter(object => !content.objectMap[object.id]);
+      newObjects.forEach(obj => {
+        const { id, ...objWithoutId } = obj;
+        const newObj = DrawingObjectMSTUnion.create(objWithoutId);
+        content.addObject(getSnapshot(newObj));
+      });
+      // duplicate objects that are already in the content
+      const duplicateObjectIds = objects.filter(object => content.objectMap[object.id]).map(obj => obj.id);
+      content.duplicateObjects(duplicateObjectIds, {x: kPixelOffset, y: kPixelOffset});
     }
   };
 
