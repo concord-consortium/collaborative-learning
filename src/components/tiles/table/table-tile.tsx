@@ -4,6 +4,11 @@ import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 
+export interface SortColumn {
+  columnKey: string;
+  direction: 'ASC' | 'DESC';
+}
+
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { ITileProps } from "../tile-component";
 import { EditableTableTitle } from "./editable-table-title";
@@ -51,6 +56,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
   const isLinked = linkedTiles && linkedTiles.length > 1;
   const tableContextValue: ITableContext = { linked: !!isLinked };
+  const [sortColumns, setSortColumns] = useState<SortColumn[]>([]);
 
   // Basic operations based on the model
   const {
@@ -120,10 +126,22 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     dataSet, isLinked, readOnly: !!readOnly, inputRowId: inputRowId.current,
     rowChanges, context: gridContext, selectedCaseIds });
 
+  const onSort = useCallback((columnKey: string, direction: "ASC" | "DESC" | "NONE") => {
+    if (direction === "NONE") {
+      setSortColumns([]);
+    } else {
+      setSortColumns([{ columnKey, direction }]);
+      dataSet.sortByAttribute(columnKey, direction);
+    }
+  }, [dataSet]);
+
   // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({
     gridContext, dataSet, isLinked, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
-    ...rowLabelProps, measureColumnWidth, lookupImage});
+    ...rowLabelProps, measureColumnWidth, lookupImage,
+    sortColumns,
+    onSort,
+  });
 
   // The size of the title bar
   const { titleCellWidth, getTitleHeight } =
@@ -177,7 +195,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // Expands the columns with additional data and callbacks
   useColumnExtensions({
-    gridContext, metadata, readOnly, columns, columnEditingName, changeHandlers,
+    gridContext, metadata, readOnly, columns, rows, columnEditingName, changeHandlers,
     setColumnEditingName: handleSetColumnEditingName, onShowExpressionsDialog: handleShowExpressionsDialog
   });
 

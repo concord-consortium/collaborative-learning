@@ -94,6 +94,8 @@ jobs:
           # Portal credentials
           CYPRESS_PORTAL_USERNAME: ${{ secrets.PORTAL_USERNAME }}
           CYPRESS_PORTAL_PASSWORD: ${{ secrets.PORTAL_PASSWORD }}
+          CYPRESS_PORTAL_TEACHER_USERNAME: ${{ secrets.PORTAL_TEACHER_USERNAME }}
+          CYPRESS_PORTAL_TEACHER_PASSWORD: ${{ secrets.PORTAL_TEACHER_PASSWORD }}
           # turn on code coverage when running npm start
           # so far we've been using a webpack coverage-istanbul-loader for this
           # but there has been work on using the code coverage support in the browser directly,

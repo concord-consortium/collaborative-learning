@@ -55,9 +55,13 @@ export class NavTabPanel extends BaseComponent<IProps> {
                 { tabs?.map((tabSpec, index) => {
                     const tabClass = `top-tab tab-${tabSpec.tab}
                                       ${selectedTabIndex === index ? "selected" : ""}`;
+                    let dataTestId = undefined;
+                    if (tabSpec.tab === 'teacher-guide') dataTestId = 'nav-tab-teacher-guide';
+                    if (tabSpec.tab === 'student-work') dataTestId = 'nav-tab-student-work';
+                    if (tabSpec.tab === 'class-work') dataTestId = 'nav-tab-class-work';
                     return (
                       <React.Fragment key={tabSpec.tab}>
-                        <Tab className={tabClass}>{tabSpec.label}</Tab>
+                        <Tab className={tabClass} data-testid={dataTestId}>{tabSpec.label}</Tab>
                       </React.Fragment>
                     );
                   })
