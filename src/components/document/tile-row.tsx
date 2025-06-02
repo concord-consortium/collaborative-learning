@@ -182,7 +182,7 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
       return tileModel
         ? <TileComponent
             key={tileModel.id}
-            index={index}
+            indexInRow={index}
             model={tileModel}
             widthPct={tileWidthPct}
             typeClass={typeClass}

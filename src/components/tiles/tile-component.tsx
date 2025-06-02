@@ -66,7 +66,7 @@ interface ITileBaseProps {
   scale?: number;
   widthPct?: number;
   height?: number;
-  index?: number;
+  indexInRow?: number;
   model: ITileModel;
   readOnly?: boolean;
   typeClass?: string;
@@ -301,12 +301,12 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderQuestionIndicator() {
-    const { model, widthPct, index } = this.props;
+    const { model, widthPct, indexInRow } = this.props;
     if (!isQuestionModel(model.content)) return null;
 
     const style: React.CSSProperties = {};
-    if (widthPct && (index !== undefined)) {
-      style.left =`${widthPct * index}%`;
+    if (widthPct && (indexInRow !== undefined)) {
+      style.left =`${widthPct * indexInRow}%`;
     }
     return (
       <>
