@@ -66,6 +66,7 @@ interface ITileBaseProps {
   scale?: number;
   widthPct?: number;
   height?: number;
+  indexInRow?: number;
   model: ITileModel;
   readOnly?: boolean;
   typeClass?: string;
@@ -155,7 +156,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   private resizeElement: HTMLDivElement | null;
 
   state = {
-    hoverTile: false
+    hoverTile: false,
   };
 
   constructor(props: IProps) {
@@ -231,21 +232,14 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                                 hovered={hoverTile}
                                 selected={isTileSelected}
                                 onDragStart={e => this.props.onResizeRow(e)} />;
-    const questionBadge = isQuestionModel(model.content) &&
-                            <>
-                            <div className="question-badge">
-                              <QuestionBadge />
-                            </div>
-                            <div className="question-border-bumpout">
-                            </div>
-                            </>;
 
     const style: React.CSSProperties = {};
     if (widthPct) {
-      style.width = `${Math.round(100 * widthPct / 100)}%`;
+      style.width = `${widthPct}%`;
     }
     return (
       <TileModelContext.Provider value={model}>
+        {this.renderQuestionIndicator()}
         <div
           className={classes} data-testid="tool-tile"
           ref={elt => this.domElement = elt}
@@ -259,7 +253,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
           {this.renderLinkIndicators()}
           {dragTileButton}
           {resizeTileButton}
-          {questionBadge}
           {this.renderTile(Component)}
           {this.renderTileComments()}
         </div>
@@ -305,6 +298,24 @@ export class TileComponent extends BaseComponent<IProps, IState> {
         return <TileCommentsComponent model={commentsModel} docKey={documentContent.key} />;
       }
     }
+  }
+
+  private renderQuestionIndicator() {
+    const { model, widthPct, indexInRow } = this.props;
+    if (!isQuestionModel(model.content)) return null;
+
+    const style: React.CSSProperties = {};
+    if (widthPct && (indexInRow !== undefined)) {
+      style.left =`${widthPct * indexInRow}%`;
+    }
+    return (
+      <>
+        <div className="question-border" />
+        <div style={style} className="question-badge">
+          <QuestionBadge />
+        </div>
+      </>
+    );
   }
 
   private getTileResizeHandler = () => {
