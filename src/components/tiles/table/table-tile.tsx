@@ -138,7 +138,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({
     gridContext, dataSet, isLinked, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
-    ...rowLabelProps, measureColumnWidth, lookupImage,
+    ...rowLabelProps, showRowLabels, measureColumnWidth, lookupImage,
     sortColumns,
     onSort,
   });
