@@ -3,12 +3,7 @@ import classNames from "classnames";
 import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
-
-export interface SortColumn {
-  columnKey: string;
-  direction: 'ASC' | 'DESC';
-}
-
+import { DndContext } from "@dnd-kit/core";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { ITileProps } from "../tile-component";
 import { EditableTableTitle } from "./editable-table-title";
@@ -38,6 +33,11 @@ import { useUIStore } from "../../../hooks/use-stores";
 
 import "./table-tile.scss";
 import "./table-toolbar-registration";
+
+export interface SortColumn {
+  columnKey: string;
+  direction: 'ASC' | 'DESC';
+}
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
@@ -116,8 +116,9 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   }, [imagePromises, imageUrls]);
 
   // React components used for the index (left most) column
+  const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
   const rowLabelProps = useRowLabelColumn({
-    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels
+    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels, hoveredRowId, setHoveredRowId,
   });
 
   // rows are required by ReactDataGrid and are used by other hooks as well
@@ -212,6 +213,19 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     (e.target === containerRef.current) && gridContext.onClearSelection();
   };
 
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      const fromIndex = dataSet.caseIndexFromID(active.id);
+      const toIndex = dataSet.caseIndexFromID(over?.id);
+      if (fromIndex === -1 || toIndex === -1) {
+        console.warn("Invalid drag and drop indices:", fromIndex, toIndex);
+        return;
+      }
+      dataSet.moveCase(active.id, toIndex);
+    }
+  };
+
   // Define and submit functions for general tool tile API
   const padding = 10 + (modelRef.current.display === "teacher" ? 20 : 0);
   useToolApi({
@@ -271,15 +285,17 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
         <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
           <EditableTableTitle
             model={model}
-            className="table-title"
+            className={`table-title ${showRowLabels ? "show-row-labels" : ""}`}
             readOnly={readOnly}
             titleCellWidth={titleCellWidth}
             titleCellHeight={getTitleHeight()}
             onBeginEdit={onBeginTitleEdit}
             onEndEdit={onEndTitleEdit} />
-          <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
-            headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
-            {...dataGridProps} {...rowProps} />
+          <DndContext onDragEnd={handleDragEnd}>
+            <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
+              headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
+              {...dataGridProps} {...rowProps} />
+          </DndContext>
         </div>
       </TableContext.Provider>
     </div>

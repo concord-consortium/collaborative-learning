@@ -4,6 +4,7 @@
 $table-padding: 10px;
 $row-height: 34px;
 $index-column-width: 34px;
+$index-column-with-label-width: $index-column-width + 7px;
 $controls-column-width: 36px;
 $platform-scrollbar-width: 16px;
 $header-color: $workspace-teal-light-5;
@@ -35,6 +36,9 @@ $controls-hover-background: #c0dfe7;
       font-weight: bold;
       padding: 8px;
       position: relative;
+      &.show-row-labels {
+        margin-left: $index-column-with-label-width - 1px;
+      }
 
       &.table-title-default {
         font-style: italic;
@@ -286,15 +290,31 @@ $controls-hover-background: #c0dfe7;
       }
     }
     .index-column {
-      width: $index-column-width;
+      // width: $index-column-width;
       min-width: $index-column-width;
       padding: 0;
       background-color: var(--header-background-color);
       font-weight: bold;
       font-style: italic;
-      .index-cell-contents {
+      .index-cell-wrapper {
         width: 100%;
         height: 100%;
+        .index-cell-contents {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          .row-drag-icon {
+            position: absolute;
+            top: 1.5px;
+            left: 0px;
+          }
+          .row-index-label {
+            position: absolute;
+            right: 5px;
+          }
+        }
       }
     }
     .rdg-cell {
