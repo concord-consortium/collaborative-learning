@@ -935,4 +935,23 @@ context('Draw Tool Tile', function () {
     clueCanvas.deleteTile('draw');
     drawToolTile.getDrawTile().should("not.exist");
   });
+
+  // TODO: Figure out how to get paste to work in Cypress with Chrome.
+  // See the comment in the Image test above for more details.
+  // it.skip('Allows a user to copy and paste objects using hot keys', function () {
+  //   beforeTest();
+
+  //   clueCanvas.addTile("drawing");
+  //   cy.log("draw a rectangle");
+  //   drawToolTile.drawRectangle(100, 50, 150, 100);
+
+  //   cy.log("copy and paste the rectangle");
+  //   const isMac = navigator.platform.indexOf("Mac") === 0;
+  //   const cmdKey = isMac ? "meta" : "ctrl";
+  //   drawToolTile.getRectangleDrawing().last().click({ force: true })
+  //     .type(`{${cmdKey}+c}`, { force: true })
+  //     .type(`{${cmdKey}+v}`, { force: true });
+
+  //   drawToolTile.getRectangleDrawing().should("have.length", 2);
+  // });
 });
