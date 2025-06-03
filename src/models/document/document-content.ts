@@ -218,7 +218,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
           rowInsertIndex: 0, // this is ignored
           rowDropId: targetRow.id,
           rowDropLocation: "right"
-        });
+        }, false);
       }
     });
   },
@@ -274,6 +274,9 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     rowInfo?: IDropRowInfo,
     copySpec?: ICopySpec
   ) {
+    // Titles should be made unique unless we are copying from another document.
+    const makeTitlesUnique = !copySpec && !isCrossingDocuments;
+
     // Update shared models with new names and ids
     const updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds> = {};
     const newSharedModelEntries: SharedModelEntrySnapshotType[] = [];
@@ -389,7 +392,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     if (copySpec) {
       self.copyTilesWithSpec(updatedTiles, copySpec);
     } else if (rowInfo) {
-      self.userCopyTiles(updatedTiles, rowInfo);
+      self.userCopyTiles(updatedTiles, rowInfo, makeTitlesUnique);
     }
 
     // Update tile ids for shared models and add those references to document.
@@ -407,9 +410,9 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         // Make dataset name unique.
         // We can't do this earlier since getUniqueDataSetName only considers datasets that are linked to tiles.
         const name = updatedSharedModel.sharedModel.dataSet?.name;
-        const uniqueName = name && self.getUniqueSharedModelName(name);
-        if (updatedSharedModel.sharedModel.dataSet?.name && uniqueName) {
-          updatedSharedModel.sharedModel.dataSet.name = uniqueName;
+        const newName = makeTitlesUnique ? self.getUniqueSharedModelName(name) : name;
+        if (updatedSharedModel.sharedModel.dataSet?.name && newName) {
+          updatedSharedModel.sharedModel.dataSet.name = newName;
         }
 
         const id = sharedModelEntry.sharedModel.id;

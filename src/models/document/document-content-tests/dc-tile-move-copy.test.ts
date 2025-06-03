@@ -86,7 +86,10 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
   it("can export more complicated content", () => {
     expect(parsedExport(documentContent)).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p>Some text</p>"] } },
+        {
+          content: { type: "Text", format: "html", text: ["<p>Some text</p>"] },
+          title: "Text 1"
+        },
         // explicit row height exported since it differs from drawing tool default
         { content: { type: "Drawing", objects: [] }, layout: { height: 320 } },
         [
@@ -121,7 +124,10 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
   it("can parse content into sections", () => {
     expect(parsedSections(documentContent)).toEqual({
       "introduction": { tiles: [
-        { content: { type: "Text", format: "html", text: ["<p>Some text</p>"] } },
+        {
+          content: { type: "Text", format: "html", text: ["<p>Some text</p>"] },
+          title: "Text 1"
+        },
         // explicit row height exported since it differs from drawing tool default
         { content: { type: "Drawing", objects: [] }, layout: { height: 320 } }
       ]},
@@ -154,6 +160,56 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
       ]},
       "whatIf": { tiles: [] },
       "nowWhatDoYouKnow": { tiles: [] }
+    });
+  });
+
+  describe("Title handling when copying", () => {
+    it("copyTilesIntoNewRows generates a unique title when requested", () => {
+      const newId = mockUniqueId();
+      const dragTiles = getDocumentDragTileItems(["textTool1"]).map(tile => ({...tile, newTileId: newId}));
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "introductionRow2"
+      };
+      documentContent.copyTilesIntoNewRows(dragTiles, dropRowInfo, true);
+      expect(documentContent.getTile("textTool1")?.title).toBe("Text 1");
+      expect(documentContent.getTile(newId)?.title).toBe("Text 2");
+    });
+
+    it("copyTilesIntoExistingRow generates a unique title when requested", () => {
+      const newId = mockUniqueId();
+      const dragTiles = getDocumentDragTileItems(["textTool1"]).map(tile => ({...tile, newTileId: newId}));
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "introductionRow2"
+      };
+      documentContent.copyTilesIntoExistingRow(dragTiles, dropRowInfo, true);
+      expect(documentContent.getTile("textTool1")?.title).toBe("Text 1");
+      expect(documentContent.getTile(newId)?.title).toBe("Text 2");
+    });
+
+    it("copyTilesIntoNewRows keeps existing titles when not requested", () => {
+      const newId = mockUniqueId();
+      const dragTiles = getDocumentDragTileItems(["textTool1"]).map(tile => ({...tile, newTileId: newId}));
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "introductionRow2"
+      };
+      documentContent.copyTilesIntoNewRows(dragTiles, dropRowInfo, false);
+      expect(documentContent.getTile("textTool1")?.title).toBe("Text 1");
+      expect(documentContent.getTile(newId)?.title).toBe("Text 1");
+    });
+
+    it("copyTilesIntoExistingRow keeps existing titles when not requested", () => {
+      const newId = mockUniqueId();
+      const dragTiles = getDocumentDragTileItems(["textTool1"]).map(tile => ({...tile, newTileId: newId}));
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "introductionRow2"
+      };
+      documentContent.copyTilesIntoExistingRow(dragTiles, dropRowInfo, false);
+      expect(documentContent.getTile("textTool1")?.title).toBe("Text 1");
+      expect(documentContent.getTile(newId)?.title).toBe("Text 1");
     });
   });
 
@@ -255,7 +311,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         rowInsertIndex: whatIfRowIndex,
         rowDropId: "whatIfRow1"
       };
-      documentContent.copyTilesIntoExistingRow(dragTiles, dropRowInfo);
+      documentContent.copyTilesIntoExistingRow(dragTiles, dropRowInfo, true);
       expect(getRowLayout()).toEqual({
         introductionRowHeader: [],
         introductionRow2: [ "drawingTool1" ],
@@ -463,7 +519,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
       // copy drawingTile1 to new row before introductionRow1
       const dragTiles = getDocumentDragTileItems(["drawingTool1"]).map(tile => ({...tile, newTileId: mockUniqueId()}));
       const rowInsertIndex = documentContent.getRowIndex("introductionRow1");
-      documentContent.copyTilesIntoNewRows(dragTiles, { rowInsertIndex });
+      documentContent.copyTilesIntoNewRows(dragTiles, { rowInsertIndex }, true);
       expect(getRowLayout()).toEqual({
         introductionRowHeader: [],
         NEW_ROW: [ "NEW_DRAWING_TILE_1" ],
@@ -483,7 +539,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
       // copy drawingTile1 to new row after introductionRow1
       const dragTiles = getDocumentDragTileItems(["drawingTool1"]).map(tile => ({...tile, newTileId: mockUniqueId()}));
       const rowInsertIndex = documentContent.getRowIndex("introductionRow1") + 1;
-      documentContent.copyTilesIntoNewRows(dragTiles, { rowInsertIndex });
+      documentContent.copyTilesIntoNewRows(dragTiles, { rowInsertIndex }, true);
       expect(getRowLayout()).toEqual({
         introductionRowHeader: [],
         introductionRow1: [ "textTool1" ],
@@ -507,7 +563,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         const dragTiles = getDocumentDragTileItems(["graphTool", "textTool2"])
                             .map(tile => ({ ...tile, newTileId: mockUniqueId() }));
         const rowInsertIndex = documentContent.getRowIndex("introductionRow1");
-        documentContent.copyTilesIntoNewRows(dragTiles, { rowInsertIndex });
+        documentContent.copyTilesIntoNewRows(dragTiles, { rowInsertIndex }, true);
         expect(getRowLayout()).toEqual({
           introductionRowHeader: [],
           NEW_ROW: [ "NEW_GEOMETRY_TILE_1", "NEW_TEXT_TILE_2" ],
@@ -528,7 +584,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         const dragTiles = getDocumentDragTileItems(["graphTool", "textTool2"])
                             .map(tile => ({ ...tile, newTileId: mockUniqueId() }));
         const rowInsertIndex = documentContent.getRowIndex("introductionRow1") + 1;
-        documentContent.copyTilesIntoNewRows(dragTiles, { rowInsertIndex });
+        documentContent.copyTilesIntoNewRows(dragTiles, { rowInsertIndex }, true);
         expect(getRowLayout()).toEqual({
           introductionRowHeader: [],
           introductionRow1: [ "textTool1" ],
@@ -551,7 +607,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         const dragTiles = getDocumentDragTileItems(["tableTool", "imageTool"])
                             .map(tile => ({ ...tile, newTileId: mockUniqueId() }));
         const rowInsertIndex = documentContent.getRowIndex("introductionRow1");
-        documentContent.copyTilesIntoNewRows(dragTiles, { rowInsertIndex });
+        documentContent.copyTilesIntoNewRows(dragTiles, { rowInsertIndex }, true);
         expect(getRowLayout()).toEqual({
           introductionRowHeader: [],
           NEW_ROW: [ "NEW_TABLE_TILE_1", "NEW_IMAGE_TILE_2" ],
@@ -572,7 +628,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         const dragTiles = getDocumentDragTileItems(["tableTool", "imageTool"])
                             .map(tile => ({ ...tile, newTileId: mockUniqueId() }));
         const rowInsertIndex = documentContent.getRowIndex("introductionRow1") + 1;
-        documentContent.copyTilesIntoNewRows(dragTiles, { rowInsertIndex });
+        documentContent.copyTilesIntoNewRows(dragTiles, { rowInsertIndex }, true);
         expect(getRowLayout()).toEqual({
           introductionRowHeader: [],
           introductionRow1: [ "textTool1" ],
