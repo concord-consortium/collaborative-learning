@@ -346,6 +346,15 @@ context('Draw Tool Tile', function () {
 
     cy.log("verify moving pre-selected object");
     drawToolTile.getDrawToolSelect().click();
+    drawToolTile.getRectangleDrawing().first()
+    .invoke('attr', 'transform')
+    .then(transform => {
+      expect(parseTransform(transform, 'translate')[0]).to.be.within(210, 230);
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([0]);
+      expect(parseTransform(transform, 'translate', 1)).to.deep.equal([-150, -100]);
+      expect(parseTransform(transform, 'scale')).to.deep.equal([1, 1]);
+    });
+    // Drag right 100 px
     drawToolTile.getDrawTile()
       .trigger("pointerdown", 100, 100, { isPrimary: true })
       .trigger("pointermove", 200, 100, { isPrimary: true })
@@ -354,8 +363,12 @@ context('Draw Tool Tile', function () {
     drawToolTile.getRectangleDrawing().first().should("have.attr", "transform");
     drawToolTile.getRectangleDrawing().first()
       .invoke('attr', 'transform')
-      .then(parseTransform)
-      .then(transform => expect(transform.tx).to.be.within(160, 220));
+      .then(transform => {
+        expect(parseTransform(transform, 'translate')[0]).to.be.within(310, 330);
+        expect(parseTransform(transform, 'rotate')).to.deep.equal([0]);
+        expect(parseTransform(transform, 'translate', 1)).to.deep.equal([-150, -100]);
+        expect(parseTransform(transform, 'scale')).to.deep.equal([1, 1]);
+    });
 
     cy.log("verify hovering objects");
     drawToolTile.getDrawTile()
@@ -401,8 +414,8 @@ context('Draw Tool Tile', function () {
 
     drawToolTile.getRectangleDrawing().first()
       .invoke('attr', 'transform')
-      .then(parseTransform)
-      .then(transform => expect(transform.tx).to.be.within(150, 250));
+      .then(transform =>
+        expect(parseTransform(transform, 'translate')[0]).to.be.within(310, 330));
 
     // The best way I found to remove the hover was to delete the rectangle
     drawToolTile.getDrawToolDelete().click();
@@ -704,30 +717,92 @@ context('Draw Tool Tile', function () {
     // });
   });
 
-  it("Can flip objects", { scrollBehavior: false }, () => {
+  it("Can rotate and flip objects", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
+
+    cy.log("Rotate a text object");
+    drawToolTile.addText(50, 10, "Spin me!");
+    drawToolTile.getTextDrawing().should("have.length", 1);
+    drawToolTile.getTextDrawing().eq(0).click();
+    drawToolTile.getSelectionBox().should("exist");
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([0]);
+    });
+    clueCanvas.clickToolbarButton('drawing', 'rotate-right');
+    drawToolTile.getTextDrawing().should("have.length", 1);
+    cy.wait(300); // wait for animation to complete
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([90]);
+    });
+    clueCanvas.clickToolbarButton('drawing', 'rotate-right');
+    cy.wait(300);
+    drawToolTile.getTextDrawing().should("have.length", 1);
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([180]);
+    });
+    clueCanvas.getUndoTool().click();
+    cy.wait(300);
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([90]);
+    });
+
+    clueCanvas.clickToolbarButton('drawing', 'flip-horizontal');
+    cy.wait(300);
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'scale')).to.deep.equal([1,-1]); // horizontal flip of rotated object -> Y axis flip
+    });
+    clueCanvas.getUndoTool().click();
+    cy.wait(300);
+
+    clueCanvas.getUndoTool().click();
+    cy.wait(300);
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([0]);
+    });
+
+    clueCanvas.clickToolbarButton('drawing', 'rotate-right', { altKey: true });
+    cy.wait(300);
+    clueCanvas.clickToolbarButton('drawing', 'rotate-right', { altKey: true });
+    cy.wait(300);
+    clueCanvas.clickToolbarButton('drawing', 'rotate-right', { altKey: true });
+    cy.wait(300);
+    drawToolTile.getTextDrawing().should("have.length", 4);
+    drawToolTile.getTextDrawing().eq(0).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([0]);
+    });
+    drawToolTile.getTextDrawing().eq(1).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([90]);
+    });
+    drawToolTile.getTextDrawing().eq(2).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([180]);
+    });
+    drawToolTile.getTextDrawing().eq(3).invoke('attr', 'transform').then(transform => {
+      expect(parseTransform(transform, 'rotate')).to.deep.equal([270]);
+    });
+    drawToolTile.getTextDrawing().eq(0).click();
+    drawToolTile.getTextDrawing().eq(1).click({shiftKey: true});
+    drawToolTile.getTextDrawing().eq(2).click({shiftKey: true});
+    drawToolTile.getTextDrawing().eq(3).click({shiftKey: true});
+    drawToolTile.getSelectionBox().should("have.length", 4);
+    drawToolTile.getDrawToolDelete().click();
 
     cy.log("Flip a rectangle");
     drawToolTile.drawRectangle(50, 50, 100, 50);
     drawToolTile.getRectangleDrawing().invoke('attr', 'transform').then(transform => {
-      const parsedTransform = parseTransform(transform);
-      expect(parsedTransform.sx).to.equal(1);
-      expect(parsedTransform.sy).to.equal(1);
+      expect(parseTransform(transform, 'scale')).to.deep.equal([1,1]);
     });
     clueCanvas.clickToolbarButton('drawing', 'flip-horizontal');
     cy.wait(500); // wait for animation to complete
     drawToolTile.getRectangleDrawing().invoke('attr', 'transform').then(transform => {
-      const parsedTransform = parseTransform(transform);
-      expect(parsedTransform.sx).to.equal(-1);
-      expect(parsedTransform.sy).to.equal(1);
+      expect(parseTransform(transform, 'scale')).to.deep.equal([-1,1]);
+
     });
     clueCanvas.clickToolbarButton('drawing', 'flip-vertical');
     cy.wait(500);
     drawToolTile.getRectangleDrawing().invoke('attr', 'transform').then(transform => {
-      const parsedTransform = parseTransform(transform);
-      expect(parsedTransform.sx).to.equal(-1);
-      expect(parsedTransform.sy).to.equal(-1);
+      expect(parseTransform(transform, 'scale')).to.deep.equal([-1,-1]);
+
     });
     clueCanvas.clickToolbarButton('drawing', 'delete');
 
@@ -737,32 +812,25 @@ context('Draw Tool Tile', function () {
     cy.wait(500);
     drawToolTile.getEllipseDrawing().should("have.length", 2);
     drawToolTile.getEllipseDrawing().eq(0).invoke('attr', 'transform').then(transform => {
-      const parsedTransform = parseTransform(transform);
-      expect(parsedTransform.sx).to.equal(1);
-      expect(parsedTransform.sy).to.equal(1);
+      expect(parseTransform(transform, 'scale')).to.deep.equal([1,1]);
     });
     drawToolTile.getEllipseDrawing().eq(1).invoke('attr', 'transform').then(transform => {
-      const parsedTransform = parseTransform(transform);
-      expect(parsedTransform.sx).to.equal(-1);
-      expect(parsedTransform.sy).to.equal(1);
+      expect(parseTransform(transform, 'scale')).to.deep.equal([-1,1]);
     });
     clueCanvas.clickToolbarButton('drawing', 'flip-vertical', { altKey: true });
     cy.wait(500);
     drawToolTile.getEllipseDrawing().should("have.length", 3);
     drawToolTile.getEllipseDrawing().eq(0).invoke('attr', 'transform').then(transform => {
-      const parsedTransform = parseTransform(transform);
-      expect(parsedTransform.sx).to.equal(1);
-      expect(parsedTransform.sy).to.equal(1);
+      expect(parseTransform(transform, 'scale')).to.deep.equal([1,1]);
+
     });
     drawToolTile.getEllipseDrawing().eq(1).invoke('attr', 'transform').then(transform => {
-      const parsedTransform = parseTransform(transform);
-      expect(parsedTransform.sx).to.equal(-1);
-      expect(parsedTransform.sy).to.equal(1);
+      expect(parseTransform(transform, 'scale')).to.deep.equal([-1,1]);
+
     });
     drawToolTile.getEllipseDrawing().eq(2).invoke('attr', 'transform').then(transform => {
-      const parsedTransform = parseTransform(transform);
-      expect(parsedTransform.sx).to.equal(-1);
-      expect(parsedTransform.sy).to.equal(-1);
+      expect(parseTransform(transform, 'scale')).to.deep.equal([-1,-1]);
+
     });
     clueCanvas.clickToolbarButton('drawing', 'delete');
     drawToolTile.getEllipseDrawing().eq(1).click();
@@ -788,9 +856,9 @@ context('Draw Tool Tile', function () {
     clueCanvas.clickToolbarButton('drawing', 'flip-horizontal');
     cy.wait(500);
     drawToolTile.getGroupDrawing().eq(0).invoke('attr', 'transform').then(transform => {
-      const parsedTransform = parseTransform(transform);
-      expect(parsedTransform.sx).to.equal(-1);
-      expect(parsedTransform.sy).to.equal(1);
+      expect(parseTransform(transform, 'scale')).to.deep.equal([-1,1]);
+    });
+
     // Now triangle should be to the left of the vector
     drawToolTile.getFreehandDrawing().then($el => {
       const triangleOffset = $el.offset().left;
@@ -800,7 +868,6 @@ context('Draw Tool Tile', function () {
       });
     });
   });
-});
 
   it("rejects non-primary pointer events", { scrollBehavior: false }, () => {
     beforeTest();

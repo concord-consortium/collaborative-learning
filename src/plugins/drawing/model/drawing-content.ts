@@ -167,7 +167,7 @@ export const DrawingContentModel = NavigatableTileModel
       // Ignore actions that don't need to be logged
       const ignoredActions = ["afterAttach", "afterCreate", "reset",
         "setDisabledFeatures", "setDragPosition", "setDragBounds",
-        "setSelectedButton", "setSelectedIds", "setOpenPalette", "setEditing"];
+        "setAnimating", "setSelectedButton", "setSelectedIds", "setOpenPalette", "setEditing"];
       if (ignoredActions.includes(operation)) return;
 
       logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, { operation, change, tileId });
@@ -342,15 +342,32 @@ export const DrawingContentModel = NavigatableTileModel
             }
           });
         },
+        rotateBy(ids: string[], degrees: number) {
+          forEachObjectId(ids, object => {
+            // It is tempting to add "modulo 360" here, to keep the value of rotation constrained.
+            // However, then the animation from 270->0 will run the wrong way, unless we add some
+            // additional signalling to tell it not to. There doesn't seem to be much downside to
+            // letting the rotation value get arbitrarily large, so we don't constrain it.
+            object.rotation = object.rotation + degrees;
+          });
+        },
         flipHorizontal(ids: string[]) {
           forEachObjectId(ids, object => {
-            object.hFlip = !object.hFlip;
+            if (object.isRotatedToHorizontal) {
+              object.vFlip = !object.vFlip;
+            } else {
+              object.hFlip = !object.hFlip;
+            }
             object.x = object.x + object.boundingBox.se.x - object.boundingBox.nw.x + kFlipOffset;
           });
         },
         flipVertical(ids: string[]) {
           forEachObjectId(ids, object => {
-            object.vFlip = !object.vFlip;
+            if (object.isRotatedToHorizontal) {
+              object.hFlip = !object.hFlip;
+            } else {
+              object.vFlip = !object.vFlip;
+            }
             object.y = object.y + object.boundingBox.se.y - object.boundingBox.nw.y + kFlipOffset;
           });
         },
@@ -412,6 +429,13 @@ export const DrawingContentModel = NavigatableTileModel
     };
   })
   .actions(self => ({
+    rotateMaybeCopy: flow(function* (ids: string[], degrees: number, copy: boolean = false) {
+      if (copy) {
+        ids = self.duplicateObjects(ids, { x: 0, y: 0 });
+        yield Promise.resolve(); // Let React render the duplicated objects
+      }
+      self.rotateBy(ids, degrees);
+    }),
     flipHorizontalMaybeCopy: flow(function* (ids: string[], copy: boolean = false) {
       if (copy) {
         ids = self.duplicateObjects(ids, { x: 0, y: 0 });

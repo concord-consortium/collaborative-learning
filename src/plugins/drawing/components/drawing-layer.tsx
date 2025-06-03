@@ -421,6 +421,10 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
     const dashArray = [10/zoom, 5/zoom];
 
     return selectedObjects.map((object, index) => {
+      if (object.animating) {
+        // Do not display selection border during animation
+        return null;
+      }
       let {nw: {x: nwX, y: nwY}, se: {x: seX, y: seY}} = object.boundingBox;
       nwX -= padding;
       nwY -= padding;
