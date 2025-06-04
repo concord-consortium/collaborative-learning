@@ -67,7 +67,6 @@ jobs:
       - name: Notify Rollbar
         if: success()
         uses: rollbar/github-deploy-action@2.1.2
-        id: rollbar_deploy
         with:
           environment: ${{ inputs.environment }}
           version: ${{ inputs.version }}
