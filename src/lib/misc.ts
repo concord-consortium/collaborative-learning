@@ -17,6 +17,7 @@ function setPageTitle(stores: IStores) {
 
 function initRollbar(stores: IStores, problemId: string) {
   const {user, unit, appVersion} = stores;
+  const portal = user.portal ?? "unauthenticated";
   if (typeof (window as any).Rollbar !== "undefined") {
     const _Rollbar = (window as any).Rollbar;
     if (_Rollbar.configure) {
@@ -25,8 +26,11 @@ function initRollbar(stores: IStores, problemId: string) {
         stackTraceLimit: 50,
         payload: {
           class: user.classHash,
+          context: `${unit.code} ${problemId}`,
           offering: user.offeringId,
-          person: { id: user.id },
+          person: {
+            id: `${user.id}@${portal}`
+          },
           problemId: problemId || "",
           problem: stores.problem.title,
           role: user.type,
