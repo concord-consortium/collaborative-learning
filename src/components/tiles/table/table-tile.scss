@@ -288,9 +288,26 @@ $controls-hover-background: #c0dfe7;
           }
         }
       }
+      &:hover {
+        background-color: rgba(0, 129, 255, 0.12);
+        .index-cell-wrappper {
+          background-color: rgba(0, 129, 255, 0.20);
+          .row-drag-icon {
+            opacity: 0.12;
+          }
+        }
+      }
+      &:active {
+        background-color: rgba(0, 129, 255, 0.25);
+        .index-cell-wrapper {
+          background-color: rgba(0, 129, 255, 0.40);
+          .row-drag-icon {
+            opacity: 1;
+          }
+        }
+      }
     }
     .index-column {
-      // width: $index-column-width;
       min-width: $index-column-width;
       padding: 0;
       background-color: var(--header-background-color);
