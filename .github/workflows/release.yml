@@ -64,3 +64,12 @@ jobs:
           log-url: ${{ inputs.url }}
           state: 'failure'
           deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+      - name: Notify Rollbar
+        if: success()
+        uses: rollbar/github-deploy-action@2.1.2
+        id: rollbar_deploy
+        with:
+          environment: ${{ inputs.environment }}
+          version: ${{ inputs.version }}
+        env:
+          ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}

@@ -285,7 +285,7 @@
     "rete-engine": "^2.0.1",
     "rete-react-plugin": "^2.0.5",
     "rete-structures": "^2.0.1",
-    "rollbar": "^2.25.1",
+    "rollbar": "^2.26.4",
     "rtree": "^1.4.2",
     "superagent": "^8.0.0",
     "ts-polyfill": "^3.8.2",
