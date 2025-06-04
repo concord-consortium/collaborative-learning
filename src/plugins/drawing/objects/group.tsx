@@ -7,14 +7,14 @@ import { DrawingObjectType, IDrawingComponentProps,
   isStrokedObject,
   typeField,
   ObjectTypeIconViewBox } from "./drawing-object";
-import { VectorEndShape } from "../model/drawing-basic-types";
+import { BoundingBox, VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion, renderDrawingObject } from "../components/drawing-object-manager";
 import { isVectorObject } from "./vector";
 import { useReadOnlyContext } from "../../../components/document/read-only-context";
 import { Transformable } from "../components/transformable";
 import { SizedObject } from "./sized-object";
 import { DrawingScaleProvider } from "../components/drawing-scale-context";
-import { boundingBoxForPoints, rotatePoint } from "../model/drawing-utils";
+import { boundingBoxSidesForPoints, rotatePoint } from "../model/drawing-utils";
 
 import GroupObjectsIcon from "../assets/group-objects-icon.svg";
 
@@ -101,6 +101,36 @@ export const GroupObject = SizedObject.named("GroupObject")
         obj.resizeObject();
       });
     },
+    /**
+     * Externalize the bounding box of an object that is inside the group.
+     * The input is a BoundingBox inside the context of the group,
+     * (so it should normally have all sides in the range [0,1]).
+     * The output is the BoundingBox relative to the "outside" coordinate system
+     * (the one in which the group itself lives).
+     * @param internalBB The bounding box of the object inside the group.
+     * @returns The adjusted bounding box of the object.
+     */
+    adjustInternalBoundingBox(internalBB: BoundingBox): BoundingBox {
+      const groupBB = self.unrotatedBoundingBox;
+      const groupWidth = groupBB.se.x - groupBB.nw.x;
+      const groupHeight = groupBB.se.y - groupBB.nw.y;
+      const groupRotation = self.rotation;
+      const internalNW = {
+        x: groupBB.nw.x + internalBB.nw.x * groupWidth,
+        y: groupBB.nw.y + internalBB.nw.y * groupHeight
+      };
+      const internalSE = {
+        x: groupBB.nw.x + internalBB.se.x * groupWidth,
+        y: groupBB.nw.y + internalBB.se.y * groupHeight
+      };
+      const rotatedNW = rotatePoint(internalNW, groupBB.se, groupRotation);
+      const rotatedSE = rotatePoint(internalSE, groupBB.se, groupRotation);
+      const sides = boundingBoxSidesForPoints([rotatedNW, rotatedSE]);
+      return {
+        nw: { x: sides.left, y: sides.top },
+        se: { x: sides.right, y: sides.bottom }
+      };
+    },
     /** Reverse the "assimilate" operation.
      * Sets the position and size of each member to its actual current position and size
      * without the scaling/rotation of the group.
@@ -128,7 +158,7 @@ export const GroupObject = SizedObject.named("GroupObject")
         const rotatedNW = rotatePoint(objNW, groupBB.se, groupRotation);
         const rotatedSE = rotatePoint(objSE, groupBB.se, groupRotation);
         // ...and then make the object resize to fit these bounds.
-        const boundingBox = boundingBoxForPoints([rotatedNW, rotatedSE]);
+        const boundingBox = boundingBoxSidesForPoints([rotatedNW, rotatedSE]);
         obj.setRotation(obj.rotation + groupRotation);
         obj.setDragBoundsAbsolute(boundingBox);
         obj.resizeObject();

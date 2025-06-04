@@ -1,9 +1,10 @@
-import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach, destroy} from "mobx-state-tree";
+import { types, Instance, SnapshotIn, getSnapshot,
+  isStateTreeNode, detach, destroy, hasParentOfType, getParentOfType} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { flow } from "mobx";
 
-import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType }
+import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType, BoundingBox }
   from "./drawing-basic-types";
 import { kDrawingStateVersion, kDrawingTileType, kDuplicateOffset, kFlipOffset } from "./drawing-types";
 import { StampModel, StampModelType } from "./stamp";
@@ -17,7 +18,7 @@ import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tile
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
-import { GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
+import { GroupObject, GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
 import { NavigatableTileModel } from "../../../models/tiles/navigatable-tile-model";
 import { removeIdsFromSnapshot } from "./drawing-utils";
 
@@ -59,7 +60,7 @@ export const DrawingContentModel = NavigatableTileModel
     openPallette: OpenPaletteValues.None as OpenPaletteValues,
   }))
   .views(self => ({
-    get objectMap() {
+    get objectMap(): ObjectMap {
       // TODO this will rebuild the map when any of the objects change
       // We could handle this more efficiently
       const addObjectToMap = (map: ObjectMap, obj: any) => {
@@ -147,14 +148,34 @@ export const DrawingContentModel = NavigatableTileModel
   .views(self => ({
     getSelectedObjects():DrawingObjectType[] {
       return self.selection.map((id) => self.objectMap[id]).filter((x)=>!!x) as DrawingObjectType[];
-    }
+    },
+    getObjectBoundingBox(objectId: string): BoundingBox | undefined {
+      let object = self.objectMap[objectId];
+      if (!object) return undefined;
+      let bb = object.boundingBox;
+      // Apply the adjustments for any nested groups that contain this object.
+      while (hasParentOfType(object, GroupObject)) {
+        const group: GroupObjectType = getParentOfType(object, GroupObject);
+        bb = group.adjustInternalBoundingBox(bb);
+        object = group;
+      }
+      return bb;
+    },
+
   }))
   .views(self => tileContentAPIViews({
     get annotatableObjects(): IClueTileObject[] {
-      return self.objects.map(object => ({
-        objectId: object.id,
-        objectType: object.type,
-      }));
+      if (!self.objectMap) return [];
+      const objects: IClueTileObject[] = [];
+      Object.values(self.objectMap).forEach((object) => {
+        if (object && !isGroupObject(object)) {
+          objects.push({
+            objectId: object.id,
+            objectType: object.type,
+          });
+        }
+      });
+      return objects;
     },
   }))
   .actions(self => tileContentAPIActions({
