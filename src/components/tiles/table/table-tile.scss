@@ -290,21 +290,9 @@ $controls-hover-background: #c0dfe7;
       }
       &:hover {
         background-color: rgba(0, 129, 255, 0.12);
-        .index-cell-wrappper {
-          background-color: rgba(0, 129, 255, 0.20);
-          .row-drag-icon {
-            opacity: 0.12;
-          }
-        }
       }
       &:active {
         background-color: rgba(0, 129, 255, 0.25);
-        .index-cell-wrapper {
-          background-color: rgba(0, 129, 255, 0.40);
-          .row-drag-icon {
-            opacity: 1;
-          }
-        }
       }
     }
     .index-column {
@@ -330,6 +318,23 @@ $controls-hover-background: #c0dfe7;
           .row-index-label {
             position: absolute;
             right: 5px;
+          }
+        }
+        &:hover {
+          background-color: rgba(0, 129, 255, 0.20);
+          .index-cell-contents {
+            .row-drag-icon {
+              opacity: 0.12;
+            }
+          }
+        }
+        &:active {
+          background-color: rgba(0, 129, 255, 0.40);
+          cursor: grab;
+          .index-cell-contents {
+            .row-drag-icon {
+              opacity: 1;
+            }
           }
         }
       }

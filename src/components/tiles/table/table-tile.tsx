@@ -291,7 +291,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
             titleCellHeight={getTitleHeight()}
             onBeginEdit={onBeginTitleEdit}
             onEndEdit={onEndTitleEdit} />
-          <DndContext onDragEnd={handleDragEnd}>
+          <DndContext onDragEnd={handleDragEnd} onDragStart={()=>gridContext.onClearSelection()}>
             <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
               headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
               {...dataGridProps} {...rowProps} />
