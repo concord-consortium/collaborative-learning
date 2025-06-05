@@ -100,27 +100,54 @@ context('single student functional test', () => {
     cy.log('adds a question tile');
     clueCanvas.addTile('question');
     questionToolTile.getQuestionTile().should('exist');
+    // Test undo/redo for question tile
+    clueCanvas.getUndoTool().click();
+    questionToolTile.getQuestionTile().should('not.exist');
+    clueCanvas.getRedoTool().click();
+    questionToolTile.getQuestionTile().should('exist');
 
     cy.log('adds text tool');
     clueCanvas.addTile('text');
     textToolTile.getTextTile().should('exist');
+    // Add some text to make it distinct from question tile
     textToolTile.enterText('This is a smoke test');
+    textToolTile.getTextEditor().should('contain', 'This is a smoke test');
 
     cy.log('adds a geometry tool');
     clueCanvas.addTile('geometry');
     geometryToolTile.getGeometryTile().should('exist');
     geometryToolTile.clickGraphPosition(0, 0);
+    // Test undo/redo for geometry tile
+    clueCanvas.getUndoTool().click();
+    geometryToolTile.getGeometryTile().should('not.exist');
+    clueCanvas.getRedoTool().click();
+    geometryToolTile.getGeometryTile().should('exist');
 
     cy.log('adds an image tool');
     clueCanvas.addTile('image');
+    imageToolTile.getImageTile().should('exist');
+    // Test undo/redo for image tile
+    clueCanvas.getUndoTool().click();
+    imageToolTile.getImageTile().should('not.exist');
+    clueCanvas.getRedoTool().click();
     imageToolTile.getImageTile().should('exist');
 
     cy.log('adds a draw tool');
     clueCanvas.addTile('drawing');
     drawToolTile.getDrawTile().should('exist');
+    // Test undo/redo for draw tile
+    clueCanvas.getUndoTool().click();
+    drawToolTile.getDrawTile().should('not.exist');
+    clueCanvas.getRedoTool().click();
+    drawToolTile.getDrawTile().should('exist');
 
     cy.log('adds a table tool');
     clueCanvas.addTile('table');
+    tableToolTile.getTableTile().should('exist');
+    // Test undo/redo for table tile
+    clueCanvas.getUndoTool().click();
+    tableToolTile.getTableTile().should('not.exist');
+    clueCanvas.getRedoTool().click();
     tableToolTile.getTableTile().should('exist');
 
     cy.log('save and restore of canvas');
