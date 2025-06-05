@@ -5,6 +5,8 @@ import ImageToolTile from '../../support/elements/tile/ImageToolTile';
 import DrawToolTile from '../../support/elements/tile/DrawToolTile';
 import TextToolTile from '../../support/elements/tile/TextToolTile';
 import TableToolTile from '../../support/elements/tile/TableToolTile';
+import QuestionToolTile from '../../support/elements/tile/QuestionToolTile';
+import Dialog from '../../support/elements/common/Dialog';
 
 let canvas = new Canvas;
 let clueCanvas = new ClueCanvas;
@@ -13,6 +15,8 @@ let imageToolTile = new ImageToolTile;
 let drawToolTile = new DrawToolTile;
 let textToolTile = new TextToolTile;
 let tableToolTile = new TableToolTile;
+let questionToolTile = new QuestionToolTile;
+const dialog = new Dialog();
 
 const title = "QA 1.1 Solving a Mystery with Proportional Reasoning";
 
@@ -93,6 +97,10 @@ context('single student functional test', () => {
     // Tool palettes for Geometry, Image, Draw,and Table are tested in respective tool spec test
     // Selection tool is tested as a functionality of geometry tool tiles
 
+    cy.log('adds a question tile');
+    clueCanvas.addTile('question');
+    questionToolTile.getQuestionTile().should('exist');
+
     cy.log('adds text tool');
     clueCanvas.addTile('text');
     textToolTile.getTextTile().should('exist');
@@ -165,5 +173,49 @@ context('single student functional test', () => {
     cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.drawing-tool').should('exist');
     cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.image-tool').should('exist');
     cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.table-tool-tile').should('exist');
+  });
+
+  it('can copy all tiles into workspace and other documents using toolbar helpers', () => {
+    beforeTest();
+
+    const sourceDoc = "Source Document";
+    const targetDoc = "Target Document";
+
+    // Create the target document
+    canvas.createNewExtraDocumentFromFileMenu(targetDoc, "my-work");
+
+    // Create the source document and add a tile
+    canvas.createNewExtraDocumentFromFileMenu(sourceDoc, "my-work");
+    canvas.openDocumentWithTitle('workspaces', sourceDoc);
+
+    // Select all tiles using the helper
+    canvas.getSelectAllButton().click();
+    canvas.verifyAllTilesSelected();
+
+    // Use the Copy to Workspace button (helper)
+    canvas.getCopyToWorkspaceButton().click();
+
+    canvas.getSelectAllButton().click();
+    canvas.getCopyToDocumentButton().click();
+
+      // Using force: true because the select element may be temporarily covered by other UI elements
+    // during the dialog animation, causing Cypress to fail to interact with it
+    cy.get('.dialog-input select').select('Target Document', { force: true });
+    dialog.getDialogOKButton().click();
+
+    // Check for expected text in the copied tiles
+    cy.get('.primary-workspace [data-testid="ccrte-editor"]')
+    .should('contain.text', 'The Mystery Club at P.I. Middle School');
+
+
+    // Open the target document using the helper
+    canvas.openDocumentWithTitle('workspaces', targetDoc);
+
+    // Check for expected text in the copied document
+    cy.get('.primary-workspace [data-testid="ccrte-editor"]')
+      .should('contain.text', 'The Mystery Club at P.I. Middle School');
+
+    // Optionally, check the number of text tiles (adjust the expected count as needed)
+    textToolTile.getTextTile().should('have.length.at.least', 1);
   });
 });
