@@ -43,6 +43,7 @@ export const useRowLabelColumn = ({
     const DraggableRowLabel: React.FC = () => {
       const { attributes, listeners, setNodeRef: setDragRef } = useDraggable({ id: __id__ });
       const { setNodeRef: setDropRef } = useDroppable({ id: __id__ });
+      const isInputRow = __id__ === inputRowId;
 
       const handleClick = (e: React.MouseEvent) => {
         const hasModifier = e.ctrlKey || e.metaKey || e.shiftKey;
@@ -71,8 +72,9 @@ export const useRowLabelColumn = ({
           onMouseLeave={() => setHoveredRowId(null)}
           ref={setDropRef}
         >
-          <span className="index-cell-contents" ref={setDragRef} {...attributes} {...listeners}>
-            {hoveredRowId === __id__ && <DragIndicator className="row-drag-icon" />}
+          <span className="index-cell-contents" ref={setDragRef}
+                {...(!isInputRow ? { ...attributes, ...listeners } : {})}>
+            {(hoveredRowId === __id__ && !isInputRow)&& <DragIndicator className="row-drag-icon" />}
             {showRowLabels ? <span className="row-index-label">{__index__}</span> : undefined}
           </span>
         </div>
