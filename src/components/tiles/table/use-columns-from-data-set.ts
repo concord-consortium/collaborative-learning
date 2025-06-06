@@ -7,7 +7,8 @@ import { getCellFormatter } from "./cell-formatter";
 import CellTextEditor from "./cell-text-editor";
 import { useColumnHeaderCell } from "./column-header-cell";
 import {
-  IGridContext, kControlsColumnKey, kControlsColumnWidth, kIndexColumnKey, kIndexColumnWidth, TColumn
+  IGridContext, kControlsColumnKey, kControlsColumnWidth, kIndexColumnKey, kIndexColumnWidth,
+  kIndexColumnWidthWithLabel, TColumn
 } from "./table-types";
 
 interface IUseColumnsFromDataSet {
@@ -16,6 +17,7 @@ interface IUseColumnsFromDataSet {
   isLinked?: boolean;
   metadata: TableMetadataModelType;
   readOnly?: boolean;
+  showRowLabels?: boolean;
   columnChanges: number;
   headerHeight: () => number;
   rowHeight: (args: any) => number;
@@ -27,7 +29,7 @@ interface IUseColumnsFromDataSet {
   onSort?: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void;
 }
 export const useColumnsFromDataSet = ({
-  gridContext, dataSet, isLinked, metadata, readOnly, columnChanges, headerHeight, rowHeight,
+  gridContext, dataSet, isLinked, metadata, readOnly, showRowLabels, columnChanges, headerHeight, rowHeight,
   RowLabelHeader, RowLabelFormatter, measureColumnWidth, lookupImage, sortColumns, onSort
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
@@ -100,8 +102,8 @@ export const useColumnsFromDataSet = ({
       headerCellClass: "index-column-header",
       name: "Index",
       key: kIndexColumnKey,
-      width: kIndexColumnWidth,
-      maxWidth: kIndexColumnWidth,
+      width: showRowLabels ? kIndexColumnWidthWithLabel : kIndexColumnWidth,
+      maxWidth: showRowLabels ? kIndexColumnWidthWithLabel : kIndexColumnWidth,
       resizable: false,
       editable: false,
       frozen: true,
@@ -115,7 +117,7 @@ export const useColumnsFromDataSet = ({
     return cols;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attributes, attributes.length, rowHeight, RowLabelHeader, RowLabelFormatter, readOnly, columnChanges,
-      ColumnHeaderCell, controlsColumn, cellClasses, measureColumnWidth, metadata, lookupImage]);
+      ColumnHeaderCell, controlsColumn, cellClasses, measureColumnWidth, metadata, lookupImage, showRowLabels]);
   // attributes.length has been included above so the columns are recreated when columns are added or removed
   // from external means (such as undo/redo). It would be better to make this hook observe changes to the model,
   // but I'm not sure how to do that.
