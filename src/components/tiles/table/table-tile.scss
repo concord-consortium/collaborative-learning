@@ -324,6 +324,7 @@ $controls-hover-background: #c0dfe7;
         &:hover {
           background-color: rgba(0, 129, 255, 0.20);
           .index-cell-contents {
+            position: relative;
             .row-drag-icon {
               opacity: 0.25;
             }

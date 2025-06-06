@@ -117,7 +117,7 @@ export const useColumnsFromDataSet = ({
     return cols;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attributes, attributes.length, rowHeight, RowLabelHeader, RowLabelFormatter, readOnly, columnChanges,
-      ColumnHeaderCell, controlsColumn, cellClasses, measureColumnWidth, metadata, lookupImage]);
+      ColumnHeaderCell, controlsColumn, cellClasses, measureColumnWidth, metadata, lookupImage, showRowLabels]);
   // attributes.length has been included above so the columns are recreated when columns are added or removed
   // from external means (such as undo/redo). It would be better to make this hook observe changes to the model,
   // but I'm not sure how to do that.

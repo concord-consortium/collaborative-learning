@@ -1,5 +1,5 @@
 import React from "react";
-import { TColumn, TRow } from "./table-types";
+import { TColumn, TRow, kControlsColumnKey } from "./table-types";
 
 import "./table-tile.scss";
 
@@ -17,7 +17,7 @@ export const RowDragOverlay = ({ row, columns }: IRowDragOverlayProps) => {
   return (
     <div className="drag-overlay-row" style={rowStyle}>
       {columns
-        .filter(col => col.key !== "__controls__") // skip the control column
+        .filter(col => col.key !== kControlsColumnKey) // skip the control column
         .map((col) => {
           const cellStyle = {width: col.width ?? 80};
           return(
