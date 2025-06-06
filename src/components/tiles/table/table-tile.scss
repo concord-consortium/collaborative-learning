@@ -396,6 +396,38 @@ $controls-hover-background: #c0dfe7;
   }
 }
 
+.drag-overlay-row {
+  display: flex;
+  align-items: stretch;
+  background: $header-input-color; // or white, to match your grid
+  border: 1px solid $charcoal-light-1;
+  box-shadow: 0 0 5px rgba(0,0,0,0.25);
+  border-radius: 4px;
+  pointer-events: none;
+  height: 22px;
+  font-size: 14px;
+  font-weight: normal;
+  overflow: hidden;
+
+  .drag-overlay-cell {
+    display: flex;
+    align-items: center;
+    font-size: inherit;
+    font-weight: inherit;
+    border-right: 1px solid $charcoal-light-1;
+
+    &:first-child {
+      border-left: none;
+      width: $index-column-width;
+      background-color: $header-color;
+      color: $header-color // hides the text in the index column
+    }
+    &:last-child {
+      border-right: none;
+    }
+  }
+}
+
 // .link-color-0 > .ag-theme-fresh .ag-row-selected
 //   background-color: $link-color-0-light
 

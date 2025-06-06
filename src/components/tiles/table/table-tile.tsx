@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, DragOverlay } from "@dnd-kit/core";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { ITileProps } from "../tile-component";
 import { EditableTableTitle } from "./editable-table-title";
@@ -30,6 +30,8 @@ import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
 import { ITableContext, TableContext } from "../hooks/table-context";
 import { useUIStore } from "../../../hooks/use-stores";
+import { RowDragOverlay } from "./row-drag-overlay";
+import { TRow } from "./table-types";
 
 import "./table-tile.scss";
 import "./table-toolbar-registration";
@@ -213,8 +215,21 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     (e.target === containerRef.current) && gridContext.onClearSelection();
   };
 
+  const [activeRow, setActiveRow] = useState<TRow | null>(null);
+  const handleDragStart = (event: any) => {
+    const { active } = event;
+    const row = rows.find(r => r.__id__ === active.id);
+    if (!row) {
+      console.warn("Drag started on an invalid row:", active.id);
+      return;
+    }
+    setActiveRow(row || null);
+    gridContext.onClearSelection();
+  };
+
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
+    setActiveRow(null);
     if (active.id !== over?.id) {
       const fromIndex = dataSet.caseIndexFromID(active.id);
       const toIndex = dataSet.caseIndexFromID(over?.id);
@@ -291,10 +306,15 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
             titleCellHeight={getTitleHeight()}
             onBeginEdit={onBeginTitleEdit}
             onEndEdit={onEndTitleEdit} />
-          <DndContext onDragEnd={handleDragEnd} onDragStart={()=>gridContext.onClearSelection()}>
+          <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
             <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
               headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
               {...dataGridProps} {...rowProps} />
+            <DragOverlay>
+              {activeRow ? (
+                <RowDragOverlay row={activeRow} columns={columns}/>
+              ) : null}
+            </DragOverlay>
           </DndContext>
         </div>
       </TableContext.Provider>
