@@ -314,6 +314,7 @@ $controls-hover-background: #c0dfe7;
             position: absolute;
             top: 1.5px;
             left: 0px;
+            cursor: grab;
           }
           .row-index-label {
             position: absolute;
@@ -330,7 +331,6 @@ $controls-hover-background: #c0dfe7;
         }
         &:active {
           background-color: rgba(0, 129, 255, 0.40);
-          cursor: grab;
           .index-cell-contents {
             .row-drag-icon {
               opacity: 1;

@@ -219,6 +219,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const handleDragStart = (event: any) => {
     const { active } = event;
     const row = rows.find(r => r.__id__ === active.id);
+    document.body.classList.add("table-row-dragging");
     if (!row) {
       console.warn("Drag started on an invalid row:", active.id);
       return;
@@ -230,6 +231,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
     setActiveRow(null);
+    document.body.classList.remove("table-row-dragging");
     if (active.id !== over?.id) {
       const fromIndex = dataSet.caseIndexFromID(active.id);
       const toIndex = dataSet.caseIndexFromID(over?.id);
