@@ -11,6 +11,7 @@ interface IUseRowsFromDataSet {
   rowChanges: number;
   context: IGridContext;
   selectedCaseIds: Set<React.Key>;
+  dragOverRowId: string | null;
 }
 
 const canonicalize = (dataSet: IDataSet, row: TRow) => {
@@ -27,7 +28,7 @@ const canonicalize = (dataSet: IDataSet, row: TRow) => {
 };
 
 export const useRowsFromDataSet = ({
-  dataSet, isLinked, readOnly, inputRowId, rowChanges, context, selectedCaseIds
+  dataSet, isLinked, readOnly, inputRowId, rowChanges, context, selectedCaseIds, dragOverRowId
 }: IUseRowsFromDataSet) => {
   return useMemo(() => {
     const rowKeyGetter = (row: TRow) => row.__id__;
@@ -35,7 +36,7 @@ export const useRowsFromDataSet = ({
       const rowId = row.__id__;
       return classNames({
         // TODO: When we remove sharedSelection, we should use dataSet.isCaseSelected instead
-        highlighted: Array.from(selectedCaseIds).includes(rowId),
+        highlighted: Array.from(selectedCaseIds).includes(rowId) || dragOverRowId === rowId,
         // highlighted: dataSet.isCaseSelected(rowId),
         "input-row": rowId === inputRowId,
         linked: isLinked
@@ -49,5 +50,5 @@ export const useRowsFromDataSet = ({
     !readOnly && rows.push(canonicalize(dataSet, { __id__: inputRowId, __context__: context }));
     rowChanges; // eslint-disable-line no-unused-expressions
     return { rows, rowKeyGetter, rowClass };
-  }, [context, dataSet, inputRowId, isLinked, readOnly, rowChanges, selectedCaseIds]);
+  }, [context, dataSet, dragOverRowId, inputRowId, isLinked, readOnly, rowChanges, selectedCaseIds]);
 };

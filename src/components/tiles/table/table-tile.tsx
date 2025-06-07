@@ -119,15 +119,16 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // React components used for the index (left most) column
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+  const [dragOverRowId, setDragOverRowId] = useState<string | null>(null);
   const rowLabelProps = useRowLabelColumn({
-    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels, hoveredRowId, setHoveredRowId,
+    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels, hoveredRowId, setHoveredRowId, setDragOverRowId
   });
 
   // rows are required by ReactDataGrid and are used by other hooks as well
   // rowProps are expanded and passed to ReactDataGrid
   const { rows, ...rowProps } = useRowsFromDataSet({
     dataSet, isLinked, readOnly: !!readOnly, inputRowId: inputRowId.current,
-    rowChanges, context: gridContext, selectedCaseIds });
+    rowChanges, context: gridContext, selectedCaseIds, dragOverRowId });
 
   const onSort = useCallback((columnKey: string, direction: "ASC" | "DESC" | "NONE") => {
     if (direction === "NONE") {
@@ -241,6 +242,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       }
       dataSet.moveCase(active.id, toIndex);
     }
+    setDragOverRowId(null);
+    setHoveredRowId(null);
   };
 
   // Define and submit functions for general tool tile API

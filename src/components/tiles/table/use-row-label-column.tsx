@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Tooltip } from "react-tippy";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import RowLabelsHiddenSvg from "../../../clue/assets/icons/table/row-labels-hidden-icon.svg";
@@ -14,9 +14,10 @@ interface IProps {
   showRowLabels: boolean;
   setShowRowLabels: (show: boolean) => void;
   setHoveredRowId: (rowId: string | null) => void;
+  setDragOverRowId: (rowId: string | null) => void; // Optional, not used in this hook
 }
 export const useRowLabelColumn = ({
-  inputRowId, hoveredRowId, showRowLabels, setShowRowLabels, setHoveredRowId
+  inputRowId, hoveredRowId, showRowLabels, setShowRowLabels, setHoveredRowId, setDragOverRowId
 }: IProps) => {
 
   const title = showRowLabels ? "Hide labels" : "Show labels";
@@ -42,8 +43,11 @@ export const useRowLabelColumn = ({
 
     const DraggableRowLabel: React.FC = () => {
       const { attributes, listeners, setNodeRef: setDragRef } = useDraggable({ id: __id__ });
-      const { setNodeRef: setDropRef } = useDroppable({ id: __id__ });
+      const { over,  setNodeRef: setDropRef } = useDroppable({ id: __id__ });
       const isInputRow = __id__ === inputRowId;
+      useEffect(() => {
+        over !== null && setDragOverRowId(String(over.id));
+      }, [over]);
 
       const handleClick = (e: React.MouseEvent) => {
         const hasModifier = e.ctrlKey || e.metaKey || e.shiftKey;
@@ -82,7 +86,7 @@ export const useRowLabelColumn = ({
     };
 
     return <DraggableRowLabel />;
-  }, [hoveredRowId, inputRowId, setHoveredRowId, showRowLabels]);
+  }, [hoveredRowId, inputRowId, setDragOverRowId, setHoveredRowId, showRowLabels]);
 
   return { RowLabelHeader, RowLabelFormatter };
 };
