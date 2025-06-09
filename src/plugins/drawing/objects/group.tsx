@@ -29,7 +29,39 @@ export const GroupObject = SizedObject.named("GroupObject")
     },
     get icon() {
       return (<GroupObjectsIcon viewBox={ObjectTypeIconViewBox}/>);
-    }
+    },
+    /**
+     * Externalize the bounding box of an object that is inside the group.
+     * The input is a BoundingBox inside the context of the group,
+     * (so it should normally have all sides in the range [0,1]).
+     * The output is the BoundingBox relative to the "outside" coordinate system
+     * (the one in which the group itself lives).
+     * @param internalBB The bounding box of the object inside the group.
+     * @returns The adjusted bounding box of the object.
+     */
+    adjustInternalBoundingBox(internalBB: BoundingBox): BoundingBox {
+      const groupBB = self.unrotatedBoundingBox;
+      console.log("adjustInternalBoundingBox -- group", self.id, groupBB);
+      const groupWidth = groupBB.se.x - groupBB.nw.x;
+      const groupHeight = groupBB.se.y - groupBB.nw.y;
+      const groupRotation = self.rotation;
+      const internalNW = {
+        x: groupBB.nw.x + internalBB.nw.x * groupWidth,
+        y: groupBB.nw.y + internalBB.nw.y * groupHeight
+      };
+      const internalSE = {
+        x: groupBB.nw.x + internalBB.se.x * groupWidth,
+        y: groupBB.nw.y + internalBB.se.y * groupHeight
+      };
+      const rotatedNW = rotatePoint(internalNW, groupBB.se, groupRotation);
+      const rotatedSE = rotatePoint(internalSE, groupBB.se, groupRotation);
+      const sides = boundingBoxSidesForPoints([rotatedNW, rotatedSE]);
+      return {
+        nw: { x: sides.left, y: sides.top },
+        se: { x: sides.right, y: sides.bottom }
+      };
+    },
+
   }))
   .actions(self => ({
     setVisible(visible: boolean) {
@@ -100,36 +132,6 @@ export const GroupObject = SizedObject.named("GroupObject")
         });
         obj.resizeObject();
       });
-    },
-    /**
-     * Externalize the bounding box of an object that is inside the group.
-     * The input is a BoundingBox inside the context of the group,
-     * (so it should normally have all sides in the range [0,1]).
-     * The output is the BoundingBox relative to the "outside" coordinate system
-     * (the one in which the group itself lives).
-     * @param internalBB The bounding box of the object inside the group.
-     * @returns The adjusted bounding box of the object.
-     */
-    adjustInternalBoundingBox(internalBB: BoundingBox): BoundingBox {
-      const groupBB = self.unrotatedBoundingBox;
-      const groupWidth = groupBB.se.x - groupBB.nw.x;
-      const groupHeight = groupBB.se.y - groupBB.nw.y;
-      const groupRotation = self.rotation;
-      const internalNW = {
-        x: groupBB.nw.x + internalBB.nw.x * groupWidth,
-        y: groupBB.nw.y + internalBB.nw.y * groupHeight
-      };
-      const internalSE = {
-        x: groupBB.nw.x + internalBB.se.x * groupWidth,
-        y: groupBB.nw.y + internalBB.se.y * groupHeight
-      };
-      const rotatedNW = rotatePoint(internalNW, groupBB.se, groupRotation);
-      const rotatedSE = rotatePoint(internalSE, groupBB.se, groupRotation);
-      const sides = boundingBoxSidesForPoints([rotatedNW, rotatedSE]);
-      return {
-        nw: { x: sides.left, y: sides.top },
-        se: { x: sides.right, y: sides.bottom }
-      };
     },
     /** Reverse the "assimilate" operation.
      * Sets the position and size of each member to its actual current position and size

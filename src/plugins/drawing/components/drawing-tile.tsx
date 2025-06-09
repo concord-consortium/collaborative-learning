@@ -25,6 +25,7 @@ import { NavigatorDirection } from "../../../models/tiles/navigatable-tile-model
 import { BoundingBox } from "../model/drawing-basic-types";
 import { TileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
+import { kClosedObjectListPanelWidth, kOpenObjectListPanelWidth } from "../model/drawing-types";
 
 import "./drawing-tile.scss";
 
@@ -178,12 +179,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   };
 
   const getObjectListPanelWidth = () => {
-    if (drawingToolElement.current) {
-      const objectListElement = drawingToolElement.current.querySelector<HTMLDivElement>('div.object-list');
-      return objectListElement ? objectListElement.offsetWidth : 0;
-    } else {
-      return 0;
-    }
+    return contentRef.current.listViewOpen ? kOpenObjectListPanelWidth : kClosedObjectListPanelWidth;
   };
 
   const getVisibleCanvasSize = () => {

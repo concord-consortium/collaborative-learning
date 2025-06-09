@@ -58,6 +58,7 @@ export const DrawingContentModel = NavigatableTileModel
     selectedButton: "select",
     selection: [] as string[],
     openPallette: OpenPaletteValues.None as OpenPaletteValues,
+    listViewOpen: false,
   }))
   .views(self => ({
     get objectMap(): ObjectMap {
@@ -213,6 +214,10 @@ export const DrawingContentModel = NavigatableTileModel
 
     setOpenPalette(pallette: OpenPaletteValues) {
       self.openPallette = pallette;
+    },
+
+    setListViewOpen(open: boolean) {
+      self.listViewOpen = open;
     },
 
     addObject(object: DrawingObjectSnapshotForAdd, addAtBack=false) {
