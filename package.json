@@ -67,7 +67,7 @@
     "report-dir": "coverage-cypress"
   },
   "scripts": {
-    "build": "npm-run-all lint:build clean build:webpack build:cms",
+    "build": "npm-run-all lint:build clean build:version build:webpack build:cms",
     "build-and-serve": "npm-run-all build serve",
     "build:debug": "npm-run-all lint clean build:webpack",
     "build:webpack": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --mode production",
@@ -112,7 +112,8 @@
     "top-test:build:copy-index": "cp top-test/specific/release/index-top.html top-test/index.html",
     "top-test:build:copy-editor": "mkdir -p top-test/editor && cp top-test/specific/release/editor/index-top.html top-test/editor/index.html",
     "top-test:build": "npm-run-all top-test:build:*",
-    "top-test:serve": "npx http-server top-test"
+    "top-test:serve": "npx http-server top-test",
+    "build:version": "node ./scripts/write-version.js"
   },
   "repository": {
     "type": "git",
@@ -188,6 +189,7 @@
     "eslint-plugin-unused-imports": "^3.0.0",
     "eslint-webpack-plugin": "^3.2.0",
     "firebase-admin": "^11.0.1",
+    "git-repo-info": "^2.1.1",
     "googleapis": "^110.0.0",
     "html-webpack-plugin": "^5.5.0",
     "is-hotkey": "^0.2.0",

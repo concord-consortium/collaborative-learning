@@ -16,7 +16,7 @@ function setPageTitle(stores: IStores) {
 }
 
 function initRollbar(stores: IStores, problemId: string) {
-  const {user, unit, appVersion} = stores;
+  const {user, unit, gitInfo} = stores;
   const portal = user.portal ?? "unauthenticated";
   if (typeof (window as any).Rollbar !== "undefined") {
     const _Rollbar = (window as any).Rollbar;
@@ -35,7 +35,8 @@ function initRollbar(stores: IStores, problemId: string) {
           problem: stores.problem.title,
           role: user.type,
           unit: unit.title,
-          version: appVersion
+          code_version: gitInfo?.gitSha,
+          version_tag: gitInfo?.tag
         }
       };
       _Rollbar.configure(config);
