@@ -64,20 +64,11 @@ jobs:
           log-url: ${{ inputs.url }}
           state: 'failure'
           deployment-id: ${{ steps.deployment.outputs.deployment_id }}
-      - name: Format version number
-        uses: actions/github-script@v7
-        id: format-version
-        with:
-          result-encoding: string
-          script: |
-            const version = '${{ inputs.version }}';
-            const bareVersion = version.replace(/^v/, '');
-            return bareVersion;
       - name: Notify Rollbar
         if: success()
         uses: rollbar/github-deploy-action@2.1.2
         with:
           environment: ${{ inputs.environment }}
-          version: ${{ steps.format-version.outputs.result }}
+          version: ${{ github.sha }}
         env:
           ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}
