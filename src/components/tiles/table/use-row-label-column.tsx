@@ -46,6 +46,7 @@ export const useRowLabelColumn = ({
       const isInputRow = __id__ === inputRowId;
 
       const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
         const hasModifier = e.ctrlKey || e.metaKey || e.shiftKey;
         const selected = hasModifier ? !isRowSelected : true;
         if (e.button === 0) {
@@ -66,7 +67,7 @@ export const useRowLabelColumn = ({
       return (
         <div
           className="index-cell-wrapper"
-          onClick={handleClick}
+          onPointerDown={handleClick}
           onDoubleClick={handleClick}
           onMouseEnter={() => setHoveredRowId(__id__)}
           onMouseLeave={() => setHoveredRowId(null)}
