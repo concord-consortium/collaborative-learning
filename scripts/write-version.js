@@ -17,4 +17,4 @@ const version = {
 
 const outPath = path.join(path.dirname(new URL(import.meta.url).pathname), '../version.json');
 fs.writeFileSync(outPath, JSON.stringify(version, null, 2));
-console.log('Wrote version.json:', version);
+console.log('Wrote version information to', outPath);

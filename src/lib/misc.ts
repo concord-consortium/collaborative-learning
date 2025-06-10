@@ -40,6 +40,7 @@ function initRollbar(stores: IStores, problemId: string) {
         }
       };
       _Rollbar.configure(config);
+      console.log("Rollbar configured with:", config);
     }
   }
 }
