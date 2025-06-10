@@ -18,10 +18,17 @@ import { SerialDevice } from "./serial";
 import { Bookmarks } from "./bookmarks";
 import { ICurriculumConfig } from "./curriculum-config";
 
+export interface IGitInfo {
+  gitSha?: string|null;
+  branch?: string|null;
+  tag?: string|null;
+  date?: string|null;
+}
 
 export interface IBaseStores {
   appMode: AppMode;
   appVersion: string;
+  gitInfo: IGitInfo;
   appConfig: AppConfigModelType;
   curriculumConfig: ICurriculumConfig;
   unit: UnitModelType;

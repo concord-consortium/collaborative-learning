@@ -22,7 +22,7 @@ import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
-import { IBaseStores } from "./base-stores-types";
+import { IBaseStores, IGitInfo } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
 import { Bookmarks } from "./bookmarks";
 import { SortedDocuments } from "./sorted-documents";
@@ -57,6 +57,7 @@ export interface IStores extends IBaseStores {
   startedLoadingUnitAndProblem: boolean;
   exemplarController: ExemplarControllerModelType;
   portal: Portal;
+  gitInfo: IGitInfo;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -73,6 +74,7 @@ export function createStores(params?: ICreateStores): IStores {
 class Stores implements IStores{
   appMode: AppMode;
   appVersion: string;
+  gitInfo: IGitInfo;
   appConfig: AppConfigModelType;
   curriculumConfig: ICurriculumConfig;
   unit: UnitModelType;
@@ -113,6 +115,7 @@ class Stores implements IStores{
     makeAutoObservable(this);
     this.appMode = params?.appMode || "dev";
     this.appVersion = params?.appVersion || "unknown";
+    this.gitInfo = params?.gitInfo || {};
     this.curriculumConfig = params?.curriculumConfig || CurriculumConfig.create(curriculumConfigJson, {urlParams});
     this.appConfig = params?.appConfig || AppConfigModel.create();
 

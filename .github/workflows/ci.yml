@@ -26,6 +26,8 @@ jobs:
         run: npm run lint:build
       - name: Clean
         run: npm run clean
+      - name: Write Version
+        run: npm run build:version
       - name: Build Main App
         run: npm run build:webpack
         env:

@@ -19,6 +19,7 @@ import { getAppMode } from "./lib/auth";
 import { DEBUG_STORES } from "./lib/debug";
 import { gImageMap } from "./models/image-map";
 import PackageJson from "./../package.json";
+import gitInfo from "../version.json";
 
 import "./index.scss";
 
@@ -97,7 +98,7 @@ export const initializeApp = ({authoring, standalone, authDomain}: IInitializeAp
 
   const appConfig = AppConfigModel.create(appConfigSnapshot);
   const stores = createStores(
-    { appMode, appVersion, appConfig, user, showDemoCreator, demoName,
+    { appMode, appVersion, gitInfo, appConfig, user, showDemoCreator, demoName,
       documentToDisplay: urlParams.studentDocument, documentHistoryId: urlParams.studentDocumentHistoryId });
 
   if (standalone) {

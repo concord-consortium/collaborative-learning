@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
-import { DndContext, DragOverlay } from "@dnd-kit/core";
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { ITileProps } from "../tile-component";
 import { EditableTableTitle } from "./editable-table-title";
@@ -217,6 +217,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   };
 
   const [activeRow, setActiveRow] = useState<TRow | null>(null);
+  const pointerSensor = useSensor(PointerSensor, {activationConstraint: { distance: 3 }});
+  const sensors = useSensors(pointerSensor);
   const handleDragStart = (event: any) => {
     const { active } = event;
     const row = rows.find(r => r.__id__ === active.id);
@@ -311,7 +313,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
             titleCellHeight={getTitleHeight()}
             onBeginEdit={onBeginTitleEdit}
             onEndEdit={onEndTitleEdit} />
-          <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+          <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
             <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
               headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
               {...dataGridProps} {...rowProps} />
