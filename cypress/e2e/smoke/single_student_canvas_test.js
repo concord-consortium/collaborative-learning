@@ -7,6 +7,15 @@ import TextToolTile from '../../support/elements/tile/TextToolTile';
 import TableToolTile from '../../support/elements/tile/TableToolTile';
 import QuestionToolTile from '../../support/elements/tile/QuestionToolTile';
 import Dialog from '../../support/elements/common/Dialog';
+import ArrowAnnotation from '../../support/elements/tile/ArrowAnnotation';
+import DataCardToolTile from '../../support/elements/tile/DataCardToolTile';
+import DataflowToolTile from '../../support/elements/tile/DataflowToolTile';
+import DiagramToolTile from '../../support/elements/tile/DiagramToolTile';
+import SimulatorTile from '../../support/elements/tile/SimulatorTile';
+import NumberlineToolTile from '../../support/elements/tile/NumberlineToolTile';
+import ExpressionToolTile from '../../support/elements/tile/ExpressionToolTile';
+import XYPlotToolTile from '../../support/elements/tile/XYPlotToolTile';
+import BarGraphTile from '../../support/elements/tile/BarGraphTile';
 
 let canvas = new Canvas;
 let clueCanvas = new ClueCanvas;
@@ -17,6 +26,15 @@ let textToolTile = new TextToolTile;
 let tableToolTile = new TableToolTile;
 let questionToolTile = new QuestionToolTile;
 const dialog = new Dialog();
+const arrowAnnotation = new ArrowAnnotation();
+const dataCardToolTile = new DataCardToolTile();
+const dataflowToolTile = new DataflowToolTile();
+const diagramToolTile = new DiagramToolTile();
+const simulatorTile = new SimulatorTile();
+const numberlineToolTile = new NumberlineToolTile();
+const expressionToolTile = new ExpressionToolTile();
+const xyPlotToolTile = new XYPlotToolTile();
+const barGraphTile = new BarGraphTile();
 
 const title = "QA 1.1 Solving a Mystery with Proportional Reasoning";
 
@@ -244,5 +262,48 @@ context('single student functional test', () => {
 
     // Optionally, check the number of text tiles (adjust the expected count as needed)
     textToolTile.getTextTile().should('have.length.at.least', 1);
+  });
+
+  it('verifies old document compatibility by loading test document', () => {
+    // Set up console error monitoring
+    const consoleErrors = [];
+    cy.on('log:added', (log) => {
+      if (log.displayName === 'error' || log.displayName === 'console') {
+        consoleErrors.push(log.message);
+      }
+    });
+
+    cy.log('loads test document with all tile types and verifies components');
+    cy.visit("/editor/?appMode=qa&unit=./demo/units/qa/content.json&document=./demo/docs/old-format-test-document.json");
+
+    // Verify no critical errors in console
+    cy.wrap(null).then(() => {
+      const criticalErrors = consoleErrors.filter(error =>
+        error.includes('mobx') ||
+        error.includes('TypeError') ||
+        error.includes('ReferenceError') ||
+        error.includes('Uncaught')
+      );
+      expect(criticalErrors, 'No critical console errors should be present').to.be.empty;
+    });
+
+    // Verify all tile types are present using helper functions
+    textToolTile.getTextTile().should('exist');
+    tableToolTile.getTableTile().should('exist');
+    drawToolTile.getDrawTile().should('exist');
+    imageToolTile.getImageTile().should('exist');
+    geometryToolTile.getGeometryTile().should('exist');
+    questionToolTile.getQuestionTile().should('exist');
+    dataCardToolTile.getTile().should('exist');
+    dataflowToolTile.getDataflowTile().should('exist');
+    diagramToolTile.getDiagramTile().should('exist');
+    simulatorTile.getSimulatorTile().should('exist');
+    numberlineToolTile.getNumberlineTile().should('exist');
+    expressionToolTile.getExpressionTile().should('exist');
+    xyPlotToolTile.getTile().should('exist');
+    barGraphTile.getTile().should('exist');
+
+    // Verify sparrows using ArrowAnnotation helper
+    arrowAnnotation.getAnnotationSparrowGroups().should('exist');
   });
 });
