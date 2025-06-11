@@ -319,7 +319,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
               {...dataGridProps} {...rowProps} />
             <DragOverlay>
               {activeRow ? (
-                <RowDragOverlay row={activeRow} columns={columns}/>
+                <RowDragOverlay row={activeRow} columns={columns} rowHeight={rowHeight}/>
               ) : null}
             </DragOverlay>
           </DndContext>

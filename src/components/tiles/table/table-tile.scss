@@ -407,7 +407,6 @@ $controls-hover-background: #c0dfe7;
   box-shadow: 0 0 5px rgba(0,0,0,0.25);
   border-radius: 4px;
   pointer-events: none;
-  height: 22px;
   font-size: 14px;
   font-weight: normal;
   overflow: hidden;
@@ -434,6 +433,15 @@ $controls-hover-background: #c0dfe7;
       border-right: none;
     }
   }
+}
+
+.row-divider {
+  width: 100%;
+  background: transparent;
+}
+.row-divider.over {
+  background-color: $color7;
+  opacity: 0.25;
 }
 
 // .link-color-0 > .ag-theme-fresh .ag-row-selected
