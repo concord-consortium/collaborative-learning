@@ -41,7 +41,6 @@ export const GroupObject = SizedObject.named("GroupObject")
      */
     adjustInternalBoundingBox(internalBB: BoundingBox): BoundingBox {
       const groupBB = self.unrotatedBoundingBox;
-      console.log("adjustInternalBoundingBox -- group", self.id, groupBB);
       const groupWidth = groupBB.se.x - groupBB.nw.x;
       const groupHeight = groupBB.se.y - groupBB.nw.y;
       const groupRotation = self.rotation;
