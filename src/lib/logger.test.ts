@@ -364,7 +364,7 @@ describe("authed logger", () => {
         tileType: tileToCopy.content.type
       };
 
-      destinationDocument.content!.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 });
+      destinationDocument.content!.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 }, true);
     });
 
   });

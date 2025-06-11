@@ -11,6 +11,7 @@ import DeleteIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import GroupObjectsIcon from "./assets/group-objects-icon.svg";
 import UngroupObjectsIcon from "./assets/ungroup-objects-icon.svg";
 import DuplicateIcon from "./assets/duplicate-icon.svg";
+import RotateRightIcon from "./assets/rotate-right-icon.svg";
 import FlipHorizontalIcon from "./assets/flip-horizontal-icon.svg";
 import FlipVerticalIcon from "./assets/flip-vertical-icon.svg";
 
@@ -106,6 +107,26 @@ export const DeleteButton = observer(({ name }: IToolbarButtonComponentProps) =>
   );
 });
 
+export const RotateRightButton = observer(({ name }: IToolbarButtonComponentProps) => {
+  const drawingModel = useContext(DrawingContentModelContext);
+  const enabled = drawingModel.selection.length > 0;
+
+  function rotateRight(event: React.MouseEvent<Element>) {
+    drawingModel.rotateMaybeCopy(drawingModel.selection, 90, hasCopyModifier(event));
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title={"Rotate 90°"}
+      onClick={rotateRight}
+      disabled={!enabled}
+    >
+      <RotateRightIcon />
+    </TileToolbarButton>
+  );
+});
+
 export const FlipHorizontalButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
   const enabled = drawingModel.selection.length > 0;
@@ -117,7 +138,7 @@ export const FlipHorizontalButton = observer(({ name }: IToolbarButtonComponentP
   return (
     <TileToolbarButton
       name={name}
-      title={"Flip Horizontal"}
+      title={"Flip horizontally"}
       onClick={flipHorizontal}
       disabled={!enabled}
     >
@@ -137,7 +158,7 @@ export const FlipVerticalButton = observer(({ name }: IToolbarButtonComponentPro
   return (
     <TileToolbarButton
       name={name}
-      title={"Flip Vertical"}
+      title={"Flip vertically"}
       onClick={flipVertical}
       disabled={!enabled}
     >

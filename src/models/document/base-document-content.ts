@@ -467,7 +467,8 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
      * @param title
      * @returns possibly modified title
      */
-    getUniqueTitle(title: string) {
+    getUniqueTitle(title: string | undefined) {
+      if (!title) return title;
       const titleBase = extractTitleBase(title);
       const maxSoFar = self.getMaxNumberFromTileTiles(titleBase, self.getTilesInDocumentOrder());
       return (maxSoFar >= 0) ? defaultTitle(titleBase, maxSoFar+1) : title;
@@ -481,7 +482,8 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
      * @param title
      * @returns possibly modified name
      */
-    getUniqueSharedModelName(name: string) {
+    getUniqueSharedModelName(name: string | undefined) {
+      if (!name) return name;
       const existingSharedModels = self.getSharedModelsInUseByAnyTiles();
       if (existingSharedModels.find((sm) => sm.name === name)) {
         const titleBase = extractTitleBase(name);
@@ -686,7 +688,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     }
   }))
   .actions((self) => ({
-    copyTilesIntoExistingRow(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
+    copyTilesIntoExistingRow(tiles: IDropTileItem[], rowInfo: IDropRowInfo, makeTitlesUnique: boolean) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
         // If inserting to the left, reverse the order of the tiles so that
@@ -696,12 +698,12 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           let result: INewRowTile | undefined;
           const parsedContent = safeJsonParse<ITileModelSnapshotIn>(tile.tileContent);
           const title = parsedContent?.title;
-          const uniqueTitle = title && self.getUniqueTitle(title);
+          const newTitle = makeTitlesUnique ? self.getUniqueTitle(title) : title;
           const content = parsedContent?.content;
           if (content) {
             if (tile.embedded) {
               // already is part of another tile, so we don't need to add it to any rows, just the tileMap.
-              self.addToTileMap(parsedContent, tile.newTileId, uniqueTitle);
+              self.addToTileMap(parsedContent, tile.newTileId, newTitle);
               result = { rowId: "", tileId: tile.newTileId };
             } else {
               const rowOptions: INewTileOptions = {
@@ -714,7 +716,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
               const adjustedSnapshot = {
                   ...parsedContent,
                   id: tile.newTileId,
-                  title: uniqueTitle
+                  title: newTitle
                 };
               result = self.addTileSnapshotInExistingRow(adjustedSnapshot, rowOptions);
             }
@@ -724,7 +726,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       }
       return results;
     },
-    copyTilesIntoNewRows(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
+    copyTilesIntoNewRows(tiles: IDropTileItem[], rowInfo: IDropRowInfo, makeTitlesUnique: boolean) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
         let rowDelta = -1;
@@ -734,12 +736,12 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           let result: INewRowTile | undefined;
           const parsedContent = safeJsonParse<ITileModelSnapshotIn>(tile.tileContent);
           const title = parsedContent?.title;
-          const uniqueTitle = title && self.getUniqueTitle(title);
+          const newTitle = makeTitlesUnique ? self.getUniqueTitle(title) : title;
           const content = parsedContent?.content;
           if (content) {
             if (tile.embedded) {
               // already is part of another tile, so we don't need to add it to any rows, just the tileMap.
-              self.addToTileMap(parsedContent, tile.newTileId, uniqueTitle);
+              self.addToTileMap(parsedContent, tile.newTileId, newTitle);
               result = { rowId: "", tileId: tile.newTileId };
             } else {
               if (tile.rowIndex !== lastRowIndex) {
@@ -750,7 +752,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
                 rowId: lastRowId,
                 rowIndex: rowInfo.rowInsertIndex + rowDelta,
                 tileId: tile.newTileId,
-                title: uniqueTitle
+                title: newTitle
               };
               if (tile.rowHeight) {
                 tileOptions.rowHeight = tile.rowHeight;
@@ -1188,7 +1190,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         tile && logTileDocumentEvent(LogEventName.MOVE_TILE, { tile, containerId: containers.get(tileItem.tileId) });
       });
     },
-    userCopyTiles(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
+    userCopyTiles(tiles: IDropTileItem[], rowInfo: IDropRowInfo, makeTitlesUnique: boolean) {
       const rowList = (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self;
       const dropRow = rowInfo.rowDropId
         ? self.getRowRecursive(rowInfo.rowDropId)
@@ -1201,8 +1203,8 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         }
       }
       const results = dropRow?.acceptTileDrop(rowInfo, self.tileMap)
-                      ? self.copyTilesIntoExistingRow(tiles, rowInfo)
-                      : self.copyTilesIntoNewRows(tiles, rowInfo);
+                      ? self.copyTilesIntoExistingRow(tiles, rowInfo, makeTitlesUnique)
+                      : self.copyTilesIntoNewRows(tiles, rowInfo, makeTitlesUnique);
       self.logCopyTileResults(tiles, results);
       return results;
     }

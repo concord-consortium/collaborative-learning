@@ -27,8 +27,8 @@ toolbarDrag -- (drop) --> DChandleDrop -- (create new) --> DChandleInsertNewTile
 toolbarDuplicate{{Toolbar duplicate button}}
 ThandleDuplicate("handleDuplicate<br/>(toolbar.tsx)")
 DCduplicateTiles("duplicateTiles<br/>(document-content.ts)")
-DCcopyTiles("copyTiles<br/>(document-content.ts)<br/>Copies shared models<br/>Updates titles for uniqueness")
-BDCcopyTilesIntoNewRows("copyTilesIntoNewRows<br/>(base-document-content.ts)")
+DCcopyTiles("copyTiles<br/>(document-content.ts)<br/>Copies shared models")
+BDCcopyTilesIntoNewRows("copyTilesIntoNewRows<br/>(base-document-content.ts)<br/>Updates titles for uniqueness")
 
 toolbarDuplicate --> ThandleDuplicate --> DCduplicateTiles --> DCcopyTiles
 BDCcopyTilesIntoNewRows --> |first tile|BDCaddTileContentInNewRow
@@ -54,12 +54,17 @@ DChandleDrop("handleDrop<br/>(document-content.tsx)")
 DChandleCopyTilesDrop("handleCopyTilesDrop<br/>(document-content.tsx)")
 DChandleDragCopyTiles("handleDragCopyTiles<br/>(document-content.ts)")
 BDCuserCopyTiles[["userCopyTiles<br/>(base-document-content.ts)<br/>Logs COPY_TILE event"]]
-BDCcopyTilesIntoExistingRow("copyTilesIntoExistingRow<br/>(base-document-content.ts)")
+BDCcopyTilesIntoExistingRow("copyTilesIntoExistingRow<br/>(base-document-content.ts)<br/>Updates titles for uniqueness")
 BDCcopyTilesIntoExistingRow --> |embedded| BDCaddToTileMap
 BDCcopyTilesIntoExistingRow --> |top-level| BDCaddTileSnapshotInExistingRow
 
-dragTile --> DChandleDrop -- (copy existing) --> DChandleCopyTilesDrop --> DChandleDragCopyTiles --> DCcopyTiles --> BDCuserCopyTiles --> BDCcopyTilesIntoNewRows & BDCcopyTilesIntoExistingRow
+dragTile --> DChandleDrop -- (copy existing) --> DChandleCopyTilesDrop --> DChandleDragCopyTiles --> DCcopyTiles -- (no spec) --> BDCuserCopyTiles --> BDCcopyTilesIntoNewRows & BDCcopyTilesIntoExistingRow
 
+toolbarCopy{{Toolbar copy buttons}} --> handleCopyTo
+handleCopyTo[["handleCopyToWorkspace<br/>handleCopyToDocument<br/>(toolbar.tsx)<br/>Logs TOOLBAR_COPY... event"]] --> DCapplyCopySpec
+DCapplyCopySpec["applyCopySpec<br/>(document-content.ts)"] --> DCcopyTiles
+DCcopyTiles -- (spec) --> DCcopyTilesWithSpec
+DCcopyTilesWithSpec["copyTilesWithSpec<br/>(document-content.ts)"] --> BDCcopyTilesIntoExistingRow
 
 BDCaddTileContentInNewRow("addTileContentInNewRow<br/>(base-document-content.ts)")
 BDCaddTileSnapshotInExistingRow("addTileSnapshotInExistingRow<br/>(base-document-content.ts)")
@@ -81,6 +86,7 @@ style toolbarDuplicate fill:#88F
 style dragImage fill:#88F
 style dragTile fill:#88F
 style tableIt fill:#88F
+style toolbarCopy fill:#88F
 style placeholder fill:#88F
 
 ```

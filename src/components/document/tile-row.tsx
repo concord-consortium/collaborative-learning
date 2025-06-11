@@ -181,21 +181,22 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
       const tileWidthPct = getTileWidth(tileRef.tileId, tileRefs);
       return tileModel
         ? <TileComponent
-          key={tileModel.id}
-          model={tileModel}
-          widthPct={tileWidthPct}
-          typeClass={typeClass}
-          height={tileHeight}
-          isUserResizable={!readOnly && model.isUserResizable}
-          onResizeRow={handleStartResizeRow}
-          onSetCanAcceptDrop={handleSetCanAcceptDrop}
-          onRequestRowHeight={handleRequestRowHeight}
-          documentId={documentId}
-          docId={docId}
-          documentContent={documentContent}
-          scale={scale}
-          readOnly={readOnly}
-          context={props.context}
+            key={tileModel.id}
+            indexInRow={index}
+            model={tileModel}
+            widthPct={tileWidthPct}
+            typeClass={typeClass}
+            height={tileHeight}
+            isUserResizable={!readOnly && model.isUserResizable}
+            onResizeRow={handleStartResizeRow}
+            onSetCanAcceptDrop={handleSetCanAcceptDrop}
+            onRequestRowHeight={handleRequestRowHeight}
+            documentId={documentId}
+            docId={docId}
+            documentContent={documentContent}
+            scale={scale}
+            readOnly={readOnly}
+            context={props.context}
         />
         : null;
     });

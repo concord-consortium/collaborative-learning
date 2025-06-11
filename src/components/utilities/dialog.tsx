@@ -97,7 +97,7 @@ export class DialogComponent extends BaseComponent<IProps> {
 
     return (
       <div className="dialog-contents">
-        <div className="dialog-text">{dialog.text}</div>
+        <div className="dialog-text" data-testid="dialog-text">{dialog.text}</div>
         <div className="dialog-input">
           <select
             placeholder="Choose a document"
@@ -124,7 +124,7 @@ export class DialogComponent extends BaseComponent<IProps> {
   private renderAlertContents(dialog: UIDialogModelType) {
     return (
       <div className="dialog-contents">
-        <div className="dialog-text">{dialog.text}</div>
+        <div className="dialog-text" data-testid="dialog-text">{dialog.text}</div>
         <div className="dialog-buttons" data-test="dialog-buttons">
           <button id="okButton" onClick={this.handleCancelDialog}>Ok</button>
         </div>
@@ -135,7 +135,7 @@ export class DialogComponent extends BaseComponent<IProps> {
   private renderConfirmContents(dialog: UIDialogModelType) {
     return (
       <div className="dialog-contents">
-        <div className="dialog-text">{dialog.text}</div>
+        <div className="dialog-text" data-testid="dialog-text">{dialog.text}</div>
         <div className="dialog-buttons" data-test="dialog-buttons">
           <button id="cancelButton" className="cancel" onClick={this.handleConfirmDialogNo}>No</button>
           <button id="okButton" onClick={this.handleConfirmDialogYes}>Yes</button>
@@ -164,12 +164,12 @@ export class DialogComponent extends BaseComponent<IProps> {
         />;
     return (
       <div className="dialog-contents">
-        <div className="dialog-text">{dialog.text}</div>
+        <div className="dialog-text" data-testid="dialog-text">{dialog.text}</div>
         <div className="dialog-input">
           {input}
         </div>
         <div className="dialog-buttons" data-test="dialog-buttons">
-          <button id="cancelButton" className="cancel" onClick={this.handleCancelDialog}>Cancel</button>
+          <button id="cancelButton" className="cancel" onClick={this.handlePromptDialogOk}>Cancel</button>
           <button id="okButton" onClick={this.handlePromptDialogOk} disabled={this.promptValue.length === 0}>Ok</button>
         </div>
       </div>

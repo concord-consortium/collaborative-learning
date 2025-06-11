@@ -17,6 +17,8 @@ import { ImageObject } from "../objects/image";
 import { debounce } from "lodash";
 import { combineBoundingBoxes } from "../../../models/tiles/geometry/geometry-utils";
 import { useTileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
+import { hasSelectionModifier } from "../../../utilities/event-utils";
+import { kReadOnlyOffset } from "../model/drawing-types";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -185,7 +187,9 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
       this.props.reportVisibleBoundingBox?.(actualBoundingBox);
     } else {
       // In regular tile display, offset and zoom are the values stored in the model.
-      this.offsetX = this.props.offsetX;
+      // However, we tweak the displayed offset if there is no "show/sort" sidebar so that the
+      // read-only and read-write versions of the tile center content the same way.
+      this.offsetX = this.props.offsetX + (this.props.readOnly ? kReadOnlyOffset : 0);
       this.offsetY = this.props.offsetY;
       this.zoom = this.props.zoom;
 
@@ -256,6 +260,8 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
   public handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!this.props.readOnly) {
       this.getCurrentTool()?.handlePointerDown(e);
+    } else {
+      this.selectTile(hasSelectionModifier(e));
     }
   };
 
@@ -415,6 +421,10 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
     const dashArray = [10/zoom, 5/zoom];
 
     return selectedObjects.map((object, index) => {
+      if (object.animating) {
+        // Do not display selection border during animation
+        return null;
+      }
       let {nw: {x: nwX, y: nwY}, se: {x: seX, y: seY}} = object.boundingBox;
       nwX -= padding;
       nwY -= padding;

@@ -26,6 +26,7 @@
       }
 
       &.closed {
+        // See kReadOnlyOffset
         flex: 0 0 26px;
 
         button {

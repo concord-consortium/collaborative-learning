@@ -23,10 +23,12 @@ interface IUseColumnsFromDataSet {
   RowLabelFormatter: React.FC<any>;
   measureColumnWidth: (attr: IAttribute) => number;
   lookupImage: (value: string) => string|undefined;
+  sortColumns?: { columnKey: string, direction: "ASC" | "DESC" }[];
+  onSort?: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void;
 }
 export const useColumnsFromDataSet = ({
   gridContext, dataSet, isLinked, metadata, readOnly, columnChanges, headerHeight, rowHeight,
-  RowLabelHeader, RowLabelFormatter, measureColumnWidth, lookupImage
+  RowLabelHeader, RowLabelFormatter, measureColumnWidth, lookupImage, sortColumns, onSort
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
 
@@ -42,7 +44,8 @@ export const useColumnsFromDataSet = ({
     };
     dataSet.selectedAttributeIds; // eslint-disable-line no-unused-expressions
     return {
-      cellClass: classNames({ "has-expression": metadata?.hasExpression(attrId), ...selectedColumnClass }),
+      cellClass: classNames(`column-${attrId}`,
+                            { "has-expression": metadata?.hasExpression(attrId), ...selectedColumnClass }),
       headerCellClass: classNames({ "rdg-cell-editing": columnEditingName === attrId, ...selectedColumnClass })
     };
   }, [columnEditingName, dataSet.selectedAttributeIds, gridContext, isLinked, metadata]);
@@ -64,7 +67,15 @@ export const useColumnsFromDataSet = ({
     };
   }, [readOnly]);
 
-  const ColumnHeaderCell = useColumnHeaderCell(headerHeight());
+  const getSortDirection = useCallback((columnKey: string) => {
+    return sortColumns?.find(col => col.columnKey === columnKey)?.direction ?? "NONE";
+  }, [sortColumns]);
+
+  const ColumnHeaderCell = useColumnHeaderCell({
+    height: headerHeight(),
+    getSortDirection,
+    onSort: onSort ?? (() => {}),
+  });
 
   const columns = useMemo(() => {
     const cols: TColumn[] = attributes.map(attr => {
@@ -75,6 +86,7 @@ export const useColumnsFromDataSet = ({
         key: attr.id,
         width,
         resizable: !readOnly,
+        sortable: true,
         headerRenderer: ColumnHeaderCell,
         formatter: getCellFormatter({ dataSet, isLinked, lookupImage, rowHeight, width }),
         editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,

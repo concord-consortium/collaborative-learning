@@ -239,6 +239,14 @@ export const Attribute = types.model("Attribute", {
     if ((index != null) && (index < self.values.length) && (count > 0)) {
       self.values.splice(index, count);
     }
+  },
+  // order the values of the attribute according to the provided indices
+  orderValues(indices: number[]) {
+    const _values = self.values.slice();
+    // const _numValues = self.numValues.slice()
+    for (let i = 0; i < _values.length; ++i) {
+      self.values[i] = _values[indices[i]];
+    }
   }
 }));
 export interface IAttribute extends Instance<typeof Attribute> {}

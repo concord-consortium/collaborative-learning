@@ -5,11 +5,22 @@ import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, BoundingBoxSides, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
+import { boundingBoxForPoints, normalizeRotation, rotateBoundingBox,
+  rotatePoint, rotationPoint } from "../model/drawing-utils";
+
 import ErrorIcon from "../../../assets/icons/error.svg";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "text" | "stamp" | "variable";
 
-export type Transform = { tx: number, ty: number, sx: number, sy: number };
+// This is a packet of information that we provide to the Transformable component.
+// It contains the information needed to draw the object in the correct position and orientation.
+export type Transform = {
+  corner: Point,
+  position: Point,
+  center: Point,
+  scale: Point,
+  rotation: number
+};
 
 export const ObjectTypeIconViewBox = "0 0 36 34";
 
@@ -52,11 +63,13 @@ export const DrawingObject = types.model("DrawingObject", {
   y: types.number,
   hFlip: types.optional(types.boolean, false),
   vFlip: types.optional(types.boolean, false),
+  rotation: types.optional(types.number, 0),
   visible: true
 })
 .volatile(self => ({
   dragX: undefined as number | undefined,
   dragY: undefined as number | undefined,
+  animating: false
 }))
 .views(self => ({
   get position() {
@@ -66,17 +79,13 @@ export const DrawingObject = types.model("DrawingObject", {
       y: self.dragY ?? self.y
     };
   },
-  get boundingBox(): BoundingBox {
-    // SC: I tried an approach of tracking the SVG elements that were rendered,
-    // and using a generic SVG getBBox() here, but it had performance issues.
-    // The bounding box is used to draw a highlight around the element when the
-    // element is moving its x and y are changing and then the x and y of the
-    // getBBox get updated after it moves and then the highlight updates after
-    // this move using getBBox causes a weird lag in how the highlight tracks
-    // the box. Additionally if the implementation doesn't access the x or y of
-    // self then MobX observation is not triggered so moving the element doesn't
-    // cause the selection highlight to update.
-    throw "Subclass needs to implement boundingBox";
+  /** The bounding box of the object without considering rotation. */
+  get unrotatedBoundingBox(): BoundingBox {
+    throw "Subclass needs to implement unrotatedBoundingBox";
+  },
+  /** The bounding box of the object without considering rotation or current drag. */
+  get undraggedUnrotatedBoundingBox(): BoundingBox {
+    throw "Subclass needs to implement undraggedUnrotatedBoundingBox";
   },
   get label(): string {
     // Object types should implement this to return a user-friendly short label,
@@ -86,23 +95,48 @@ export const DrawingObject = types.model("DrawingObject", {
   get icon(): JSX.Element {
     // Should be overridden by all subclasses
     return (<ErrorIcon viewBox={ObjectTypeIconViewBox}/>);
+  },
+  get isRotatedToHorizontal() {
+    return [90, 270].includes(normalizeRotation(self.rotation));
+  }
+}))
+.actions(self => ({
+  /** Update object's temporary size/position with new values, that have already been adjusted for rotation. */
+  setUnrotatedDragBounds(bounds: BoundingBoxSides) {
+    throw "Subclass needs to implement setUnrotatedDragBounds";
+  },
+  /** Set the object's "real" location & size to its drag location & size. */
+  resizeObject() {
+    throw "Subclass needs to implement resizeObject";
+  },
+  setRotation(rotation: number) {
+    self.rotation = rotation;
   }
 }))
 .views(self => ({
-  inSelection(selectionBox: SelectionBox) {
-    const {nw, se} = self.boundingBox;
-    return selectionBox.overlaps(nw, se);
+  /** The curent bounding box of the object, including rotation, drags, and flips. */
+  get boundingBox(): BoundingBox {
+    return rotateBoundingBox(self.unrotatedBoundingBox, self.rotation);
+  },
+  /** The stored bounding box of the object, including rotation, but not any current drag.  */
+  get undraggedBoundingBox(): BoundingBox {
+    return rotateBoundingBox(self.undraggedUnrotatedBoundingBox, self.rotation);
   },
   get supportsResize() {
     return true;
   },
   /**
-   * Returns the translation and scaling transform that should be applied
-   * to the Transformable group element to account for the objects's flip state.
+   * Returns the translation and scaling information that should be applied
+   * to the Transformable group element to account for the objects's position, rotation, and flip state.
    */
   get transform(): Transform {
-    const {boundingBox, hFlip, vFlip, position} = self;
-    const transform = { tx: 0, ty: 0, sx: 1, sy: 1 };
+    const {unrotatedBoundingBox, hFlip, vFlip, position, rotation} = self;
+    const transform = {
+      corner: {x: unrotatedBoundingBox.se.x, y: unrotatedBoundingBox.se.y},
+      position: {x: position.x, y: position.y},
+      center: {x: 0, y: 0},
+      scale: {x: hFlip ? -1 : 1, y: vFlip ? -1 : 1},
+      rotation };
     // The x,y "position" of an object is the zero point that we flip over.
     // But depending on the object type, this position can be anywhere in its bounding box.
     // So for the bounding box to stay the same, we need to move the object to account
@@ -110,23 +144,30 @@ export const DrawingObject = types.model("DrawingObject", {
 
     // Center of the object relative to its "position" point.
     const center: Point = {
-      x: (boundingBox.nw.x + boundingBox.se.x) / 2 - position.x,
-      y: (boundingBox.nw.y + boundingBox.se.y) / 2 - position.y
+      x: (unrotatedBoundingBox.nw.x + unrotatedBoundingBox.se.x) / 2 - position.x,
+      y: (unrotatedBoundingBox.nw.y + unrotatedBoundingBox.se.y) / 2 - position.y
     };
     if (hFlip) {
-      transform.tx = center.x*2;
-      transform.sx = -1;
+      transform.center.x = center.x*2;
     }
     if (vFlip) {
-      transform.ty = center.y*2;
-      transform.sy = -1;
+      transform.center.y = center.y*2;
     }
     return transform;
   }
 }))
+.views(self => ({
+  inSelection(selectionBox: SelectionBox) {
+    const {nw, se} = self.boundingBox;
+    return selectionBox.overlaps(nw, se);
+  },
+}))
 .actions(self => ({
   setVisible(visible: boolean) {
     self.visible = visible;
+  },
+  setAnimating(animating: boolean) {
+    self.animating = animating;
   },
   setPosition(x: number, y: number) {
     self.x = x;
@@ -141,23 +182,40 @@ export const DrawingObject = types.model("DrawingObject", {
     self.y = self.dragY ?? self.y;
     self.dragX = self.dragY = undefined;
   },
+  /** Make the object fit in the given bounding box. */
+  setDragBoundsAbsolute(sides: BoundingBoxSides) {
+    const nw = { x: sides.left,  y: sides.top };
+    const ne = { x: sides.right, y: sides.top };
+    const sw = { x: sides.left,  y: sides.bottom };
+    const se = { x: sides.right, y: sides.bottom };
+    // Center of rotation is the original se corner, but where that is depends on the rotation.
+    const center = rotationPoint({ nw, se }, self.rotation);
+    // Reverse-rotate each corner around the center of rotation
+    // to get back to where it would be before rotation.
+    const rotatedNW = rotatePoint(nw, center, -self.rotation);
+    const rotatedNE = rotatePoint(ne, center, -self.rotation);
+    const rotatedSE = rotatePoint(se, center, -self.rotation);
+    const rotatedSW = rotatePoint(sw, center, -self.rotation);
+    const trueBoundingBox = boundingBoxForPoints([rotatedNW, rotatedNE, rotatedSE, rotatedSW]);
+    self.setUnrotatedDragBounds(trueBoundingBox);
+  },
+}))
+.actions(self => ({
+  /**
+   * Temporarily adjust the edges of the object's bounding box by the given deltas.
+   * This will change the size and origin position of the object, with changes stored as volatile fields.
+   *
+   * @param deltas
+   */
   setDragBounds(deltas: BoundingBoxSides) {
-    // Temporarily adjust the edges of the object's bounding box by the given deltas.
-    // This will change the size and origin position of the object, with changes stored as volatile fields.
-
-    // Implementated in subclasses since this will affect object types differently.
-    console.error("setDragBounds is unimplemented for this type");
-  },
-  setDragBoundsAbsolute(bounds: BoundingBoxSides) {
-    // Temporarily set the edges of the object's bounding box to the given bounds.
-    // This will change the size and origin position of the object, with changes stored as volatile fields.
-
-    // Implementated in subclasses since this will affect object types differently.
-    console.error("setDragBoundsAbsolute is unimplemented for this type");
-  },
-  resizeObject() {
-    // Move any volatile resizing into the persisted object model.
-    console.error("resizeObject is unimplemented for this type");
+    const currentBoundingBox = self.undraggedBoundingBox;
+    const newSides = {
+      top: currentBoundingBox.nw.y + deltas.top,
+      bottom: currentBoundingBox.se.y + deltas.bottom,
+      left: currentBoundingBox.nw.x + deltas.left,
+      right: currentBoundingBox.se.x + deltas.right
+    };
+    self.setDragBoundsAbsolute(newSides);
   }
 }));
 export interface DrawingObjectType extends Instance<typeof DrawingObject> {}
@@ -168,61 +226,6 @@ export interface DrawingObjectSnapshotForAdd extends SnapshotIn<typeof DrawingOb
 
 export interface ObjectMap {
   [key: string]: DrawingObjectType|null;
-}
-
-/** Sized objects have a width and height. */
-export const SizedObject = DrawingObject.named("SizedObject")
-.props({
-  width: types.number,
-  height: types.number
-})
-.volatile(self => ({
-  dragWidth: undefined as number | undefined,
-  dragHeight: undefined as number | undefined
-}))
-.views(self => ({
-  get currentDims() {
-    const { width, height, dragWidth, dragHeight } = self;
-    return {
-      width: dragWidth ?? width,
-      height: dragHeight ?? height
-    };
-  }
-}))
-.views(self => ({
-  get boundingBox() {
-    const { x, y } = self.position;
-    const { width, height } = self.currentDims;
-    const nw: Point = {x, y};
-    const se: Point = {x: x + width, y: y + height};
-    return {nw, se};
-  }
-}))
-.actions(self => ({
-  setDragBounds(deltas: BoundingBoxSides) {
-    self.dragX = self.x + deltas.left;
-    self.dragY = self.y + deltas.top;
-    self.dragWidth  = Math.max(self.width  + deltas.right - deltas.left, 1);
-    self.dragHeight = Math.max(self.height + deltas.bottom - deltas.top, 1);
-  },
-  setDragBoundsAbsolute(bounds: BoundingBoxSides) {
-    self.dragX = bounds.left;
-    self.dragY = bounds.top;
-    self.dragWidth = bounds.right - bounds.left;
-    self.dragHeight = bounds.bottom - bounds.top;
-  },
-  resizeObject() {
-    self.repositionObject();
-    self.width = self.dragWidth ?? self.width;
-    self.height = self.dragHeight ?? self.height;
-    self.dragWidth = self.dragHeight = undefined;
-  }
-}));
-
-export interface SizedObjectType extends Instance<typeof SizedObject> {}
-
-export function isSizedObject(object: DrawingObjectType): object is SizedObjectType {
-  return "width" in object && "height" in object;
 }
 
 /** Stroked objects have a stroke color, stroke width, and stroke dash array. */
