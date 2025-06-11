@@ -77,14 +77,10 @@ context('Standalone', () => {
 
       // Start the standalone session and select group
       standaloneHelper.startStandaloneSession();
-
-      // Clean up text tiles after we're in CLUE
-      clueCanvas.cleanupTextTiles();
-
       standaloneHelper.selectOrCreateGroup(1);
     });
 
-    it.skip('should display navigation dropdown and verify its contents', () => {
+    it('should display navigation dropdown and verify its contents', () => {
       cy.log("verify navigation dropdown exists and contains expected options");
       cy.get("[data-testid=problem-navigation-dropdown]").should("exist");
 
@@ -149,6 +145,9 @@ context('Standalone', () => {
       // Verify the text tile content persists
       textToolTile.getTextEditor().last()
         .should('contain', 'Test content for navigation');
+
+    // Clean up any existing text tiles
+    clueCanvas.cleanupTextTiles();
     });
 
     it("should allow learner to log out and return to welcome screen", () => {
