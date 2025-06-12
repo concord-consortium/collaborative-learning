@@ -36,6 +36,7 @@ import { gImageMap } from "../image-map";
 import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar-controller";
 import { SectionDocuments } from "./section-docs-store";
 import { Portal } from "./portal";
+import { kDemoSiteStorageKey } from "../../components/demo/demo-creator";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -144,7 +145,7 @@ class Stores implements IStores{
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);
     this.networkDocuments = params?.networkDocuments || DocumentsModel.create({});
-    const demoName = params?.demoName || this.appConfig.appName;
+    const demoName = params?.demoName || window.localStorage.getItem(kDemoSiteStorageKey) || this.appConfig.appName;
     this.demo = params?.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}});
     this.showDemoCreator = params?.showDemoCreator || false;
     this.supports = params?.supports || SupportsModel.create({});

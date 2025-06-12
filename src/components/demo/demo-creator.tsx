@@ -12,6 +12,8 @@ export const NUM_FAKE_STUDENTS = 99;
 export const NUM_FAKE_STUDENTS_VISIBLE = 9;
 export const NUM_FAKE_TEACHERS = 3;
 
+export const kDemoSiteStorageKey = "clue-demo-name";
+
 interface IProps extends IBaseProps {}
 
 interface IProblemOption {
@@ -148,7 +150,10 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
   };
 
   private handleSetName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = `${e.target.value}`;
-    this.stores.demo.setName(name);
+    const name = e.target.value.trim();
+    if (name) {
+      window.localStorage.setItem(kDemoSiteStorageKey, name);
+      this.stores.demo.setName(name);
+    }
   };
 }
