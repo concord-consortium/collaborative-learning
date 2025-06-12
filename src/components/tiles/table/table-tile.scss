@@ -99,6 +99,7 @@ $controls-hover-background: #c0dfe7;
     height: calc(100% - #{$row-height});
     border: none;
     overflow: auto !important;
+    position: relative;
 
     &.show-expressions {
       .index-column-header {
@@ -410,6 +411,7 @@ $controls-hover-background: #c0dfe7;
   font-size: 14px;
   font-weight: normal;
   overflow: hidden;
+  opacity: 0.75;
 
   .drag-overlay-cell {
     display: flex;
@@ -436,12 +438,13 @@ $controls-hover-background: #c0dfe7;
 }
 
 .row-divider {
-  width: 100%;
-  background: transparent;
+  background-color: $color7;
+  opacity: 0;
+  position: absolute;
+  z-index: 10;
 }
 .row-divider.over {
-  background-color: $color7;
-  opacity: 0.25;
+  opacity: 0.75;
 }
 
 // .link-color-0 > .ag-theme-fresh .ag-row-selected
