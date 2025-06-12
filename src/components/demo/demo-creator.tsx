@@ -150,9 +150,13 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
 
   private handleSetName = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value.trim();
+    this.stores.demo.setName(name);
     if (name) {
-      window.localStorage.setItem(kDemoSiteStorageKey, name);
-      this.stores.demo.setName(name);
+      try {
+        window.localStorage.setItem(kDemoSiteStorageKey, name);
+      } catch (error) {
+        console.warn("Unable to save demo name; perhaps localStorage is disabled:", error);
+      }
     }
   };
 }
