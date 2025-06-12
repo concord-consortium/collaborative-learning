@@ -7,6 +7,7 @@ import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
 import { getToolbarButtonInfo } from "./toolbar-button-manager";
 import { TileModelContext } from "../tiles/tile-api";
 import { JSONValue } from "../../models/stores/settings";
+import { useCanvasMethodsContext } from "../document/canvas-methods-context";
 
 const BUTTON_WIDTH = 36;
 const BUTTON_BORDER_WIDTH = 1;
@@ -38,6 +39,7 @@ export const TileToolbar = observer(
   function TileToolbar({ tileType, readOnly, tileElement }: ToolbarWrapperProps) {
 
     const model = useContext(TileModelContext);
+    const canvasMethods = useCanvasMethodsContext();
     const id = model?.id;
 
     // Get styles to position the toolbar
@@ -45,6 +47,8 @@ export const TileToolbar = observer(
 
     // How many buttons and dividers fit in the first row?
     const [itemsInFirstRow, setItemsInFirstRow] = useState<number | undefined>(undefined);
+
+    const canvasWidth = canvasMethods?.getWidth?.() || 0;
 
     // Determine the buttons to be shown.
     const ui = useUIStore();
@@ -64,8 +68,8 @@ export const TileToolbar = observer(
         setItemsInFirstRow(undefined);
         return;
       }
-      const availableWidth = (rootElement as HTMLElement)?.offsetWidth - SCROLLBAR_WIDTH;
-      if (availableWidth && buttonDescriptions.length > 0) {
+      if (canvasWidth && buttonDescriptions.length > 0) {
+        const availableWidth = canvasWidth - SCROLLBAR_WIDTH;
         let totalWidth = 0;
         let itemsThatFit = 0;
         for (let i = 0; i < buttonDescriptions.length; ++i) {
@@ -79,7 +83,7 @@ export const TileToolbar = observer(
       } else {
         setItemsInFirstRow(undefined);
       }
-    }, [rootElement, buttonDescriptions]);
+    }, [rootElement, buttonDescriptions, canvasWidth]);
 
     if (!buttonDescriptions || buttonDescriptions.length === 0) {
       // No buttons, no toolbar
