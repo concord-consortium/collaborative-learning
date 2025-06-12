@@ -5,11 +5,13 @@ import { ObjectBoundingBox } from "../../models/annotations/clue-object";
  * Context to give components access to some methods defined at the Canvas level.
  */
 
-// So far there is only one method provided here
 export interface ICanvasMethods {
+  /**
+   * Add a BoundingBox to the cache.
+   */
   cacheObjectBoundingBox: (tileId: string, objectId: string, boundingBox: ObjectBoundingBox|undefined) => void;
   /**
-   * Returns the current width of the canvas, if available.
+   * Return the current width of the canvas, if available.
    */
   getWidth?: () => number | undefined;
 }
