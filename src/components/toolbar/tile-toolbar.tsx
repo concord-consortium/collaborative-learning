@@ -54,12 +54,15 @@ export const TileToolbar = observer(
     const ui = useUIStore();
     const customizedButtons = useSettingFromStores("tools", tileType);
     const buttonDescriptions = useMemo(() => {
-      if (customizedButtons && Array.isArray(customizedButtons)) {
-        return customizedButtons;
-      } else {
-        console.warn('Invalid configuration for toolbar (should be an array): ', customizedButtons);
-        return [];
+      if (customizedButtons) {
+        if (Array.isArray(customizedButtons)) {
+          return customizedButtons;
+        } else {
+          console.warn('Invalid configuration for toolbar (should be an array): ', customizedButtons);
+          return undefined;
+        }
       }
+      return undefined;
     }, [customizedButtons]);
 
     // Calculate what fits in the first row.
@@ -131,6 +134,7 @@ export const TileToolbar = observer(
           ref={toolbarRefs.setFloating}
           data-testid="tile-toolbar"
           style={{ visibility: hide ? 'hidden' : 'visible', ...toolbarStyles}}
+          // "focusable" here so that useTileSelectionPointerEvents won't absorb toolbar clicks
           className={classNames("tile-toolbar", "focusable",
             `${tileType}-toolbar`,
             toolbarPlacement,
