@@ -22,7 +22,7 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 
-import "./image-tile.sass";
+import "./image-tile.scss";
 
 type IProps = ITileProps;
 

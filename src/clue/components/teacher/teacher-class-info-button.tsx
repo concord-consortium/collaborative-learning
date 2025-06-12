@@ -3,7 +3,7 @@ import { BaseComponent, IBaseProps } from "../../../components/base";
 import React from "react";
 import { each } from "lodash";
 
-import "./teacher-class-info-button.sass";
+import "./teacher-class-info-button.scss";
 
 /**
  * This component was developed to generate a CSV-formatted report for teachers of

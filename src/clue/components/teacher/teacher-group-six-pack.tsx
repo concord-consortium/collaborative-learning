@@ -5,7 +5,7 @@ import { DocumentViewMode } from "../../../components/document/document";
 import { GroupUserModelType } from "../../../models/stores/groups";
 import { TeacherGroupSixPackFourUp } from "./teacher-group-six-pack-fourup";
 
-import "./teacher-group-six-pack.sass";
+import "./teacher-group-six-pack.scss";
 
 interface IProps extends IBaseProps {
   page: number;

@@ -4,7 +4,7 @@ import { BaseComponent, IBaseProps } from "../base";
 import { GroupModelType } from "../../models/stores/groups";
 import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 
-import "./group-chooser.sass";
+import "./group-chooser.scss";
 
 const MAX_GROUPS = 99;
 

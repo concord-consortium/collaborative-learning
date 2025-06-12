@@ -20,7 +20,7 @@ import { DropRowContext } from "./drop-row-context";
 import { RowRefsContext } from "./row-refs-context";
 import { LockedContainerContext } from "./locked-container-context";
 
-import "./document-content.sass";
+import "./document-content.scss";
 
 interface IProps extends IBaseProps {
   content?: DocumentContentModelType;

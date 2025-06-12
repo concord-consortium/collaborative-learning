@@ -17,7 +17,7 @@ import { DocEditorSettings } from "./doc-editor-settings";
 import { SettingsDialog } from "./settings-dialog";
 
 import "../document/document.scss";
-import "../four-up.sass";
+import "../four-up.scss";
 import "./doc-editor-app.scss";
 
 const kDocEditorDocKey = "clue-doc-editor-doc";

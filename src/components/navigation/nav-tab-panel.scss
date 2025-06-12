@@ -1,0 +1,207 @@
+@import "../vars";
+
+.resource-and-chat-panel {
+  position: relative;
+  height: 100%;
+  background-color: white;
+  border-radius: 0 6px 0 0;
+
+  .nav-tab-panel {
+    // Split width between the tabs and the chat panel
+    display: flex;
+    width: 100%;
+    height: 100%;
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .close-button {
+      flex-shrink: 0;
+      width: 36px;
+      height: $nav-tab-height;
+      background-color: $charcoal-light-6;
+      border-radius: 0 6px 0 0;
+      border-style: solid;
+      border-color: $charcoal-light-2;
+      border-width: 2px 2px 0 2px;
+      background-image: url("../../assets/icons/arrow-back/arrow-back.svg");
+      background-repeat: no-repeat;
+      background-position: center;
+      cursor: pointer;
+
+      &:hover {
+        background-color: $charcoal-light-4;
+      }
+
+      &:active {
+        background-color: $charcoal-light-2;
+      }
+    }
+
+    .chat-panel-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      cursor: pointer;
+      height: $nav-tab-height;
+      background-color: white;
+      border-radius: 0 6px 0 0;
+      border-style: solid;
+      border-width: 2px 2px 0 2px;
+
+      &.problems {
+        border-color: $problem-orange-light-3;
+
+        &:hover {
+          background-color: $problem-orange-light-5;
+        }
+
+        &:active {
+          background-color: $problem-orange-light-4;
+        }
+      }
+
+      &.teacher-guide {
+        border-color: $learninglog-green-dark-1;
+
+        &:hover {
+          background-color: $learninglog-green-light-5;
+        }
+
+        &:active {
+          background-color: $learninglog-green-light-4;
+        }
+      }
+
+      &.student-work {
+        border-color: $charcoal;
+
+        &:hover {
+          background-color: $charcoal-light-4;
+        }
+
+        &:active {
+          background-color: $charcoal-light-3;
+        }
+      }
+
+      &.my-work {
+        border-color: $workspace-teal;
+
+        &:hover {
+          background-color: $workspace-teal-light-4;
+        }
+
+        &:active {
+          background-color: $workspace-teal-light-3;
+        }
+      }
+
+      &.class-work {
+        border-color: $classwork-purple;
+
+        &:hover {
+          background-color: $classwork-purple-light-4;
+        }
+
+        &:active {
+          background-color: $classwork-purple-light-3;
+        }
+      }
+
+      &.supports {
+        border-color: $support-blue;
+
+        &:hover {
+          background-color: $support-blue-light-4;
+        }
+
+        &:active {
+          background-color: $support-blue-light-3;
+        }
+      }
+
+      &.sort-work {
+        border-color: $classwork-purple;
+
+        &:hover {
+          background-color: $classwork-purple-light-4;
+        }
+
+        &:active {
+          background-color: $classwork-purple-light-3;
+        }
+      }
+
+      .new-comment-badge {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 17px;
+        height: 17px;
+        margin: 0 0 21px 29px;
+        border: solid 1.5px $workspace-teal-dark-1;
+        border-radius: 50%;
+        background-color: #5fff32;
+        font-size: 10px;
+        color: $charcoal-dark-2;
+        display: flex;
+        justify-content: center;
+      }
+    }
+
+    .top-level-tabs {
+      // stretch the tabs out horizontally in their container to take all space not used
+      // by the chat panel
+      flex: 1;
+
+      // Allow the element to get smaller than what its content requires
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-tab-list {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+
+      .top-tab {
+        flex-grow: 1;
+        height: $nav-tab-height;
+        font-size: 13px;
+        color: $charcoal-dark-2;
+        border-style: solid;
+        border-color: $charcoal-light-2;
+        border-width: 2px 2px 0 0;
+        border-radius: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        &:first-of-type {
+          border-width: 2px 0 0 2px;
+        }
+
+        &:last-of-type {
+          border-width: 2px 0 0 0;
+        }
+      }
+    }
+
+    .top-level-tab-panel {
+      // The panel should fill the remaining space
+      flex: 1;
+
+      // But it shouldn't take more than its parent's space
+      min-height: 0;
+    }
+  }
+}

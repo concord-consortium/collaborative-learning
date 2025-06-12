@@ -4,7 +4,7 @@ import { IDropdownItem } from "@concord-consortium/react-components";
 import classNames from "classnames";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
-import "./custom-select.sass";
+import "./custom-select.scss";
 
 export interface ICustomDropdownItem extends IDropdownItem {
   id?: string;

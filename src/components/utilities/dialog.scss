@@ -1,0 +1,140 @@
+@import "../vars";
+
+.dialog {
+  z-index: 100;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .dialog-background {
+    z-index: 101;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #000;
+    opacity: 0.5;
+  }
+
+  .dialog-container {
+    z-index: 102;
+    border: 2px solid $workspace-teal;
+    border-radius: 6px;
+    box-shadow: $half-border-width rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+    min-width: 400px;
+    font-size: 14px;
+
+    .dialog-title {
+      background-color: $charcoal-light-6;
+      border-radius: 6px 6px 0 0;
+      height: 34px;
+      padding: $padding 0;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .dialog-title-icon {
+        min-width: 36px;
+        margin-top: 2px;
+      }
+
+      .dialog-title-text {
+        flex-grow: 1;
+        text-align: center;
+      }
+
+      .dialog-title-cancel {
+        height: 34px;
+        border-top-right-radius: 5px;
+        overflow: hidden;
+
+        &:hover {
+          background-color: $charcoal-light-4;
+        }
+
+        &:active {
+          background-color: $charcoal-light-2;
+        }
+
+        button {
+          border: none;
+          background-color: inherit;
+
+          svg {
+            margin-top: 3px;
+          }
+        }
+      }
+    }
+
+    .dialog-contents {
+      padding: $double-padding;
+
+      .dialog-text {
+        margin-bottom: 20px;
+      }
+
+      .dialog-input {
+        margin: $margin 0;
+        height: auto;
+        padding: 0;
+        border: 0;
+
+        input, textarea, select {
+          width: 100%;
+          border-radius: 5px;
+          font-size: 14px;
+          padding: 5px 10px;
+        }
+
+        select {
+          padding: 5px 10px;
+        }
+
+        select:invalid {
+          font-style: italic;
+        }
+      }
+
+      .dialog-buttons {
+        margin-top: 25px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+
+        button {
+          min-width: 62px;
+          font-size: 14px;
+          padding: 6px 10px 7px;
+          background: $workspace-teal-light-5;
+          border: solid 1.5px $charcoal-light-1;
+          border-radius: 5px;
+
+          &.cancel {
+            background: white;
+          }
+
+          &:hover {
+            background: $workspace-teal-light-4;
+          }
+
+          &:active {
+            background: $workspace-teal-light-3;
+          }
+
+          &:disabled {
+            opacity: 0.3;
+          }
+        }
+      }
+    }
+  }
+}

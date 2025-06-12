@@ -17,7 +17,7 @@ import ThumbnailBookmark from "../assets/thumbnail-bookmark-icon.svg";
 import { DocumentToolbar } from "./document/document-toolbar";
 import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 
-import "./four-up.sass";
+import "./four-up.scss";
 
 interface IProps extends IBaseProps {
   group: GroupModelType;

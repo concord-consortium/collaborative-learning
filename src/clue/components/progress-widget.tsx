@@ -1,6 +1,6 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
-import "./progress-widget.sass";
+import "./progress-widget.scss";
 
 import { ProgressWidgetItem } from "./progress-widget-item";
 import { BaseComponent } from "../../components/base";

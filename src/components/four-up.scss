@@ -1,0 +1,196 @@
+@import "vars";
+
+.four-up {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+
+  .horizontal {
+    left: 0;
+    right: 0;
+    cursor: ns-resize;
+  }
+
+  .vertical {
+    top: 0;
+    bottom: 0;
+    cursor: ew-resize;
+  }
+
+  .splitter {
+    position: absolute;
+    background-color: #777;
+  }
+
+  .center {
+    position: absolute;
+    opacity: 0;
+    cursor: move;
+  }
+
+  .left-side-container {
+    position: absolute;
+    top: -2px;
+    bottom: 0;
+    left: 0;
+  }
+
+  .canvas-separator {
+    background-color: $charcoal-light-4 !important;
+  }
+
+  .inner-canvas-area {
+    position: absolute;
+    top: 0;
+    left: $workspace-toolbar-width + $canvas-separator-offset + $canvas-separator-width;
+    right: 0;
+    bottom: 0;
+
+    .playback-component {
+      bottom: -4px;
+    }
+  }
+
+  .canvas-container {
+    position: absolute;
+
+    .canvas-scaler {
+      position: absolute;
+      background-color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      top: 0;
+      left: 0;
+    }
+
+    .member {
+      position: absolute;
+      font-size: 12px;
+      color: $charcoal-dark-3;
+      padding: 8px;
+      opacity: 0.75;
+      cursor: pointer;
+    }
+
+    .member-centered {
+      font-size: 14px;
+      text-align: center;
+      border-radius: 0 !important;
+      top: 0 !important;
+      right: 20% !important;
+      bottom: initial !important;
+      left: 20% !important;
+    }
+
+    .in-student-group-view {
+      font-size: 14px;
+      text-align: center;
+      border-radius: 0 !important;
+      top: (-34px) !important;
+      height: 28px !important;
+      left: auto !important;
+      right: 80px !important;
+      padding: 5px;
+    }
+
+    .restore-fourup-button {
+      position: absolute;
+      top: -34px;
+      left: 5px;
+      width: 68px;
+      height: 26px;
+      padding: 0 5px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-direction: row;
+      border-radius: 5px;
+      border: solid 1.5px $charcoal-light-1;
+      background-color: $charcoal-light-6;
+
+      &:hover {
+        background-color: $charcoal-light-1;
+      }
+
+      &:active {
+        background-color: $charcoal-dark-1;
+        color: white;
+        border-color: white;
+      }
+    }
+
+    .member:hover {
+      opacity: 1;
+    }
+
+    .unshared {
+      width: 500px;
+      font-size: 32px;
+
+      &.ne {
+        color: orange;
+      }
+
+      &.se {
+        color: green;
+      }
+
+      &.sw {
+        color: purple;
+      }
+
+      .icon {
+        height: 75px;
+      }
+    }
+
+    &.north-west .member {
+      bottom: 0;
+      right: 0;
+      background-color: $id-blue;
+    }
+
+    &.north-east .member {
+      bottom: 0;
+      left: 0;
+      background-color: $id-orange;
+      border-top-right-radius: $border-radius;
+    }
+
+    &.south-east .member {
+      top: 0;
+      left: 0;
+      background-color: $id-green;
+      border-bottom-right-radius: $border-radius;
+    }
+
+    &.south-west .member {
+      top: 0;
+      right: 0;
+      background-color: $id-purple;
+      border-bottom-left-radius: $border-radius;
+    }
+  }
+
+  .icon-holder {
+    position: absolute;
+    right: 10px;
+    top: 35%;
+    height: 42px;
+    width: 42px;
+
+    .icon-star {
+      height: 100%;
+      width: 100%;
+      fill: #fff;
+      opacity: 0.5;
+
+      &.starred {
+        fill: #fef171;
+        opacity: 1;
+      }
+    }
+  }
+}

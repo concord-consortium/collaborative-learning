@@ -8,7 +8,7 @@ import CopyToDocumentIcon from "../../clue/assets/icons/copy-to-document-tool.sv
 import AlertIcon from "../../assets/alert-icon.svg";
 import ConfirmIcon from "../../assets/confirm-icon.svg";
 
-import "./dialog.sass";
+import "./dialog.scss";
 
 interface IProps extends IBaseProps {
   dialog?: UIDialogModelType;

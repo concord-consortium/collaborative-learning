@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import React from "react";
 
-import "./tab-set.sass";
+import "./tab-set.scss";
 
 interface IProps {
   className?: string;

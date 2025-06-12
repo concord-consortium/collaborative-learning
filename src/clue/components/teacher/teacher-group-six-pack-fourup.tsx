@@ -11,7 +11,7 @@ import { createStickyNote } from "../../../models/curriculum/support";
 import { AudienceModel, AudienceEnum } from "../../../models/stores/supports";
 import { GroupUserModelType, GroupModelType } from "../../../models/stores/groups";
 
-import "./teacher-group-six-pack-fourup.sass";
+import "./teacher-group-six-pack-fourup.scss";
 
 interface IProps extends IBaseProps {
   group: GroupModelType;

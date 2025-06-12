@@ -14,7 +14,7 @@ import ChatIcon from "../../assets/chat-icon.svg";
 import { SortWorkView } from "../document/sort-work-view";
 
 import "react-tabs/style/react-tabs.css";
-import "./nav-tab-panel.sass";
+import "./nav-tab-panel.scss";
 import "../themes.scss";
 
 interface IProps extends IBaseProps {

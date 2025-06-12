@@ -1,0 +1,72 @@
+@import "../vars";
+
+.tile-row {
+  position: relative;
+  min-height: 18px;
+  display: flex;
+  flex-direction: row;
+  align-content: flex-start;
+  margin: 2px;
+  gap: 2px;
+
+  &.has-teacher-tiles {
+    margin-bottom: 5px;
+  }
+
+  .drop-feedback {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 1;
+
+    &.show {
+      background-color: $color7;
+      opacity: 0.25;
+    }
+
+    &.top {
+      left: 0;
+      right: 0;
+      top: -8px;
+      height: 16px;
+    }
+
+    &.left {
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 16px;
+    }
+
+    &.right {
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 16px;
+    }
+
+    &.bottom {
+      left: 0;
+      right: 0;
+      bottom: -8px;
+      height: 16px;
+    }
+  }
+
+  .bottom-resize-handle {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    height: 15px;
+    z-index: 2;
+
+    &.enable {
+      cursor: row-resize;
+    }
+
+    &.disable {
+      pointer-events: none;
+    }
+  }
+}
