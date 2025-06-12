@@ -330,6 +330,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationModeButton().click();
     // Copy the original table. This has one internal sparrow and one sparrow shared with the other tile.
     tableToolTile.getTableCell().eq(0).click();
+    tableToolTile.getTableCell().eq(0).click(); // Single click work in actual table but not in Cypress
     clueCanvas.getDuplicateTool().click();
     aa.getAnnotationModeButton().click(); // To force a rerender of the annotation layer
     aa.getAnnotationModeButton().click();
