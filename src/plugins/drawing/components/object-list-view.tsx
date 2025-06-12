@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { DndContext, DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
@@ -28,7 +28,6 @@ interface IObjectListViewProps {
 
 export const ObjectListView = observer(function ObjectListView({model, setHoverObject}: IObjectListViewProps) {
 
-  const [open, setOpen] = useState(false);
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -41,11 +40,11 @@ export const ObjectListView = observer(function ObjectListView({model, setHoverO
   }
 
   function handleOpen() {
-    setOpen(true);
+    getContent().setListViewOpen(true);
   }
 
   function handleClose() {
-    setOpen(false);
+    getContent().setListViewOpen(false);
   }
 
   function handleDragEnd(event: DragEndEvent) {
@@ -56,7 +55,7 @@ export const ObjectListView = observer(function ObjectListView({model, setHoverO
     }
   }
 
-  if (open) {
+  if (getContent().listViewOpen) {
     const content = getContent();
     const selection = content.selection;
     const objectIdList = content.objects.map((obj)=>obj.id).reverse();

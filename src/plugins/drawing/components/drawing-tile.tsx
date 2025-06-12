@@ -24,8 +24,11 @@ import { TileNavigator } from "../../../components/tiles/tile-navigator";
 import { NavigatorDirection } from "../../../models/tiles/navigatable-tile-model";
 import { BoundingBox } from "../model/drawing-basic-types";
 import { TileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
+import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
+import { kClosedObjectListPanelWidth, kOpenObjectListPanelWidth } from "../model/drawing-types";
 
 import "./drawing-tile.scss";
+
 export interface IDrawingTileProps extends ITileProps {
   overflowVisible?: boolean;
 }
@@ -58,12 +61,11 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return contentRef.current.exportJson(options);
       },
-      getObjectBoundingBox(objectId, objectType) {
+      getObjectBoundingBox(objectId, objectType): ObjectBoundingBox | undefined {
         const bbPadding = 5;
-        const object = contentRef.current.objectMap[objectId];
+        const bb = contentRef.current.getObjectBoundingBox(objectId);
         const zoom = contentRef.current.zoom;
-        if (object) {
-          const bb = object.boundingBox;
+        if (bb) {
           const height = (bb.se.y - bb.nw.y + bbPadding * 2) * zoom;
           const width = (bb.se.x - bb.nw.x + bbPadding * 2) * zoom;
           const left = (bb.nw.x - bbPadding) * zoom + getObjectListPanelWidth();
@@ -177,12 +179,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   };
 
   const getObjectListPanelWidth = () => {
-    if (drawingToolElement.current) {
-      const objectListElement = drawingToolElement.current.querySelector<HTMLDivElement>('div.object-list');
-      return objectListElement ? objectListElement.offsetWidth : 0;
-    } else {
-      return 0;
-    }
+    return contentRef.current.listViewOpen ? kOpenObjectListPanelWidth : kClosedObjectListPanelWidth;
   };
 
   const getVisibleCanvasSize = () => {

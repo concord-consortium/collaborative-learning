@@ -21,12 +21,13 @@
       z-index: 1;
 
       &.open {
+        // This should match kOpenObjectListPanelWidth
         flex: 0 0 170px;
         background-color: $workspace-teal-light-9;
       }
 
       &.closed {
-        // See kReadOnlyOffset
+        // kClosedObjectListPanelWidth is this plus 3px border width
         flex: 0 0 26px;
 
         button {
