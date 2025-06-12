@@ -4,6 +4,7 @@ import { BaseComponent, IBaseProps } from "../base";
 import { InvestigationModelType } from "../../models/curriculum/investigation";
 import { ProblemModelType } from "../../models/curriculum/problem";
 import { parseUrl, stringify } from "query-string";
+import { kDemoSiteStorageKey } from "../../models/stores/store-types";
 
 import "./demo-creator.sass";
 
@@ -11,8 +12,6 @@ export const NUM_FAKE_CLASSES = 9;
 export const NUM_FAKE_STUDENTS = 99;
 export const NUM_FAKE_STUDENTS_VISIBLE = 9;
 export const NUM_FAKE_TEACHERS = 3;
-
-export const kDemoSiteStorageKey = "clue-demo-name";
 
 interface IProps extends IBaseProps {}
 

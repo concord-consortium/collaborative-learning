@@ -20,7 +20,7 @@ import { LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocumen
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
-import { AppMode } from "./store-types";
+import { AppMode, kDemoSiteStorageKey } from "./store-types";
 import { SerialDevice } from "./serial";
 import { IBaseStores, IGitInfo } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
@@ -36,7 +36,6 @@ import { gImageMap } from "../image-map";
 import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar-controller";
 import { SectionDocuments } from "./section-docs-store";
 import { Portal } from "./portal";
-import { kDemoSiteStorageKey } from "../../components/demo/demo-creator";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
