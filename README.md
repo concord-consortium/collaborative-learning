@@ -156,6 +156,8 @@ Create a `cypress.env.json` file in the project root (this file is gitignored):
 For automated testing in CI, the credentials are set as GitHub Secrets:
 - `PORTAL_USERNAME`: The portal username for test authentication
 - `PORTAL_PASSWORD`: The portal password for test authentication
+- `PORTAL_TEACHER_USERNAME`: The portal username for teacher test authentication
+- `PORTAL_TEACHER_PASSWORD`: The portal password for teacher test authentication
 
 The user names and passwords are stored in the 1Password shared `Developer` vault.
 

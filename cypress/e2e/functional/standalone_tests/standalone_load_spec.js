@@ -146,9 +146,8 @@ context('Standalone', () => {
       textToolTile.getTextEditor().last()
         .should('contain', 'Test content for navigation');
 
-      // Clean up - delete the text tile
-      cy.wait(500); // Wait for any animations/resize operations to complete
-      clueCanvas.deleteTile('text');
+    // Clean up any existing text tiles
+    clueCanvas.cleanupTextTiles();
     });
 
     it("should allow learner to log out and return to welcome screen", () => {
