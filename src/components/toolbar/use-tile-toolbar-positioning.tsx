@@ -14,7 +14,7 @@ export function useTileToolbarPositioning(tileElement: HTMLElement|null) {
     // "offset" middleware accounts for margin width.
     // "shift" and "flip" keep toolbar in the viewport.
     // "hide" tells us not to display the toolbar if the active element has scrolled out of view.
-    middleware: [offset({ mainAxis: -2}),
+    middleware: [offset({ mainAxis: -2, crossAxis: 1}),
       flip({mainAxis: true, crossAxis: true, fallbackStrategy: 'initialPlacement', boundary}),
       shift({crossAxis: true}),
       hide()

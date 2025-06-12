@@ -5,6 +5,7 @@ import _ from "lodash";
 import { IReactionDisposer, ObservableMap, reaction, runInAction } from "mobx";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import stringify from "json-stringify-pretty-compact";
+import { withResizeDetector } from "react-resize-detector";
 
 import { AnnotationLayer } from "./annotation-layer";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
@@ -38,6 +39,7 @@ interface IProps {
   selectedSectionId?: string | null;
   showPlayback?: boolean;
   viaTeacherDashboard?: boolean;
+  width: number;
 }
 
 interface IState {
@@ -50,7 +52,7 @@ interface IState {
 
 @inject("stores")
 @observer
-export class CanvasComponent extends BaseComponent<IProps, IState> {
+class _CanvasComponent extends BaseComponent<IProps, IState> {
   private tileApiInterface: ITileApiInterface;
   private hotKeys: HotKeys = new HotKeys();
 
@@ -174,18 +176,24 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     }
     const content = this.getDocumentToShow()?.content ?? this.getDocumentContent();
 
+    // Provide getWidth method for context using the width prop
+    const canvasMethods: ICanvasMethods = {
+      ...this.canvasMethods,
+      getWidth: () => this.props.width
+    };
+
     return (
       <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
         <AddTilesContext.Provider value={this.getDocumentContent() || null}>
           <ReadOnlyContext.Provider value={this.props.readOnly}>
-            <CanvasMethodsContext.Provider value={this.canvasMethods}>
+            <CanvasMethodsContext.Provider value={canvasMethods}>
               <ErrorBoundary fallbackRender={this.fallbackRender}>
                 <div
                   key="canvas"
                   className="canvas"
                   data-test="canvas"
                   onKeyDown={this.handleKeyDown}
-                  ref={(el) => this.setCanvasElement(el)}
+                  ref={el => this.setCanvasElement(el)}
                 >
                   {this.renderContent()}
                   {this.renderDebugInfo()}
@@ -402,3 +410,6 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     }
   };
 }
+
+// Wrapping so that we can monitor & provide our current width as a context.
+export const CanvasComponent = withResizeDetector(_CanvasComponent, { refreshMode: 'throttle' });
