@@ -93,17 +93,20 @@ interface IDragTileButtonProps {
   divRef: (instance: HTMLDivElement | null) => void;
   hovered: boolean;
   selected: boolean;
+  selectTileHandler: (e: React.PointerEvent<HTMLDivElement>) => void;
   handleTileDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
   triggerResizeHandler: () => void;
 }
 const DragTileButton = (
-    { divRef, hovered, selected, handleTileDragStart, triggerResizeHandler }: IDragTileButtonProps) => {
+    { divRef, hovered, selected,
+      handleTileDragStart, triggerResizeHandler, selectTileHandler }: IDragTileButtonProps) => {
   const classes = classNames("tool-tile-drag-handle", { hovered, selected });
   return (
     <div className={`tool-tile-drag-handle-wrapper`}
       ref={divRef}
       onDragStart={handleTileDragStart}
       onDragEnd={triggerResizeHandler}
+      onClick={selectTileHandler}
       draggable={true}
       data-testid="tool-tile-drag-handle"
       aria-label="Drag to move tile"
@@ -224,6 +227,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                               divRef={elt => this.dragElement = elt}
                               hovered={hoverTile}
                               selected={isTileSelected}
+                              selectTileHandler={this.selectTileHandler}
                               handleTileDragStart={this.handleTileDragStart}
                               triggerResizeHandler={this.triggerResizeHandler}
                               />;
@@ -349,6 +353,12 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     this.hotKeys.dispatch(e);
+  };
+
+  private selectTileHandler = (e: React.PointerEvent<HTMLDivElement>) => {
+    const { model } = this.props;
+    const { ui } = this.stores;
+    ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
   };
 
   private handlePointerDown = (e: MouseEvent | TouchEvent) => {
