@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import React from "react";
 
-import "./tab.sass";
+import "./tab.scss";
 
 interface IProps {
   id?: string;

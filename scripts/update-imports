@@ -1,0 +1,14 @@
+#!/bin/bash
+
+   # Find all files that import .sass files
+   grep -r --include="*.ts" --include="*.tsx" --include="*.scss" "\.sass" . | while read -r line; do
+    echo "Processing $line"
+     # Extract the file path
+     file=$(echo "$line" | cut -d':' -f1)
+
+     # Replace .sass with .scss in the file
+     sed -i '' 's/\.sass";/\.scss";/g' "$file"
+     sed -i '' 's/\.sass'\'')/\.scss'\'')/g' "$file"
+     sed -i '' 's/@import ".*\.sass"/@import "&.scss"/g' "$file"
+     sed -i '' 's/@use ".*\.sass"/@use "&.scss"/g' "$file"
+   done

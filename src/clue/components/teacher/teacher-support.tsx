@@ -6,7 +6,7 @@ import { TeacherSupportModelType, AudienceModelType, audienceInfo } from "../../
 import { getSectionTitle, kAllSectionType } from "../../../models/curriculum/section";
 import { createTextSupport } from "../../../models/curriculum/support";
 
-import "./teacher-support.sass";
+import "./teacher-support.scss";
 
 // SEE: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
 const ENTER_KEY_CODE = 13;

@@ -5,7 +5,7 @@ import { GroupUserModelType } from "../../../models/stores/groups";
 import { TeacherSupports } from "./teacher-supports";
 import { UserAudienceModel } from "../../../models/stores/supports";
 
-import "./teacher-student-tab.sass";
+import "./teacher-student-tab.scss";
 
 interface IProps extends IBaseProps {
   groupId?: string;

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+export GEM_HOME=/tmp/gems
+
+# Find all .sass files
+find . -name "*.sass" | while read file; do
+  # Create the new file path by replacing .sass with .scss
+  new_file="${file%.sass}.scss"
+
+  # Convert the file using sass-convert tool
+  /tmp/gems/bin/sass-convert --from sass --to scss "$file" "$new_file" && rm "$file"
+
+  echo "Converted $file to $new_file"
+done

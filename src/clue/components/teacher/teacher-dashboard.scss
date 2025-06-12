@@ -1,0 +1,59 @@
+@import "../../../components/vars";
+
+$tab-height: 20px;
+
+.teacher-dashboard {
+  .tabbed-area {
+    position: fixed;
+    top: $header-height;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    color: #000;
+
+    .tabs {
+      display: flex;
+      flex-direction: row;
+      position: absolute;
+      top: 0;
+      left: $half-margin;
+
+      .tab {
+        @include tab(center);
+
+        z-index: 1;
+        border: $border-width solid $border-color;
+        border-bottom: none;
+        border-radius: $border-radius $border-radius 0 0;
+        padding: $half-padding $double-padding;
+        background: $color6;
+        margin-left: $half-margin;
+        height: $tab-height;
+
+        &.active {
+          background: $color6-selected;
+          z-index: 3;
+          color: #fff;
+        }
+
+        &:hover {
+          background: $color6-hover;
+          z-index: 4;
+        }
+      }
+    }
+
+    .tab-contents {
+      z-index: 2;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border: none;
+      background: $color1-2;
+      color: #ffffff;
+      padding: 0;
+    }
+  }
+}

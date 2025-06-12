@@ -13,7 +13,7 @@ import { DocumentContentModel } from "../../models/document/document-content";
 
 import resizeDragIcon from "../../assets/resize-drag-icon.png";
 
-import "./tile-row.sass";
+import "./tile-row.scss";
 
 export const kDragResizeRowId = "org.concord.clue.row-resize.id";
 // allows source compatibility to be checked in dragOver
