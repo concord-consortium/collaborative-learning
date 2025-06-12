@@ -166,5 +166,36 @@ class TableToolTile{
       this.getTableCellWithRowColIndex(0, 2).should("have.text", "");
       this.getTableCellWithRowColIndex(0, 3).should("have.text", "");
     }
+
+    // Row reordering methods
+    getRowDragHandle(rowIndex) {
+      const rowNumber = rowIndex + 1;
+      return cy.get(`.table-row-${rowNumber} .index-cell-contents`);
+    }
+
+    verifyRowCount(expectedCount) {
+      cy.log(`Verifying row count is ${expectedCount}`);
+      // Get all data rows (excluding header row)
+      this.getTableRows().should('have.length', expectedCount);
+    }
+
+    verifyRowOrder(expectedOrder) {
+      cy.log('Verifying row order...');
+      cy.log(`Expected order: ${JSON.stringify(expectedOrder)}`);
+      // Verify each row's content in order
+      expectedOrder.forEach((expectedContent, index) => {
+        // The first data column has aria-colindex="2"
+        this.getTableCellWithRowColIndex(index, 2).should('contain', expectedContent);
+      });
+    }
+
+    // Returns all data rows in the table, excluding the header row
+    getTableRows() {
+      return cy.get('.rdg-row').filter('[aria-rowindex!="1"]').filter((i, el) => {
+        // Filter out rows that have no content in their first data cell
+        const firstDataCell = el.querySelector('.rdg-cell[aria-colindex="2"]');
+        return firstDataCell && firstDataCell.textContent.trim() !== '';
+      });
+    }
 }
 export default TableToolTile;

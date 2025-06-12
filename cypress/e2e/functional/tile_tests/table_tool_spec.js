@@ -449,4 +449,55 @@ context('Table Tool Tile', function () {
         .should('have.attr', 'aria-label', 'Sorted descending');
     });
   });
+
+  it.only('should handle table row reordering', function() {
+    beforeTest();
+
+    // Add table to canvas
+    clueCanvas.addTile('table');
+    tableToolTile.getTableTile().should('be.visible');
+
+    // Add test data
+    tableToolTile.typeInTableCell(1, 'Row 1');
+    tableToolTile.typeInTableCell(2, 'Data 1');
+    tableToolTile.typeInTableCell(5, 'Row 2');
+    tableToolTile.typeInTableCell(6, 'Data 2');
+    tableToolTile.typeInTableCell(9, 'Row 3');
+    tableToolTile.typeInTableCell(10, 'Data 3');
+    tableToolTile.typeInTableCell(10, 'Data 3', true);
+
+
+    cy.log('verify row count and order initial state');
+
+    // Verify initial state (3 data rows)
+    tableToolTile.verifyRowCount(3);
+    tableToolTile.verifyRowOrder(['Row 1', 'Row 2', 'Row 3']);
+
+    // Check for presence of drag handle in each data row
+    for (let i = 0; i < 3; i++) {
+      tableToolTile.getRowDragHandle(i).should('exist');
+    }
+
+    // Wait for the last cell to contain 'Data 3' before reloading
+    tableToolTile.getTableCellWithRowColIndex(2, 3).should('contain', 'Data 3');
+
+    cy.log('Testing persistence after page reload');
+    cy.reload();
+    cy.waitForLoad();
+    tableToolTile.verifyRowCount(3);
+    tableToolTile.verifyRowOrder(['Row 1', 'Row 2', 'Row 3']);
+
+    cy.log('Testing propagation to linked graph');
+    tableToolTile.getLinkGraphModalLinkButton().should("contain", "Graph It!").click();
+    xyplot.getTile().should("exist").contains("Table Data 1");
+
+    cy.log('Testing undo/redo of row reordering');
+    clueCanvas.getUndoTool().click();
+    tableToolTile.verifyRowCount(3);
+    tableToolTile.verifyRowOrder(['Row 1', 'Row 2', 'Row 3']);
+
+    clueCanvas.getRedoTool().click();
+    tableToolTile.verifyRowCount(3);
+    tableToolTile.verifyRowOrder(['Row 1', 'Row 2', 'Row 3']);
+  });
 });

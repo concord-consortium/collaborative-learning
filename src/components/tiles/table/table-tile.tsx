@@ -292,7 +292,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   });
 
   return (
-    <div className={classes}>
+    <div className={classes} data-testid="table-tile">
       <TableToolbarContext.Provider value={toolbarContext}>
         <TileToolbar
           tileType="table"
@@ -313,7 +313,11 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
           <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
             <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
               headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
-              {...dataGridProps} {...rowProps} />
+              {...dataGridProps} {...rowProps}
+              rowKeyGetter={(row: TRow) => row.__id__}
+              rowClass={(row: TRow) =>
+                `rdg-row table-row-${row.__index__} data-testid-table-row-${row.__index__}`
+              } />
             <DragOverlay>
               {activeRow ? (
                 <RowDragOverlay row={activeRow} columns={columns}/>

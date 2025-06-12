@@ -41,7 +41,11 @@ export const useRowLabelColumn = ({
     const { __id__, __index__, __context__ } = row;
 
     const DraggableRowLabel: React.FC = () => {
-      const { attributes, listeners, setNodeRef: setDragRef } = useDraggable({ id: __id__ });
+      const { attributes, listeners, setNodeRef: setDragRef } = useDraggable({
+        id: __id__,
+        data: { rowIndex: __index__ },
+        disabled: __id__ === inputRowId
+      });
       const { setNodeRef: setDropRef } = useDroppable({ id: __id__ });
       const isInputRow = __id__ === inputRowId;
 
@@ -74,6 +78,7 @@ export const useRowLabelColumn = ({
           ref={setDropRef}
         >
           <span className="index-cell-contents" ref={setDragRef}
+                data-testid={`row-drag-handle-${__index__}`}
                 {...(!isInputRow ? { ...attributes, ...listeners } : {})}>
             {(hoveredRowId === __id__ && !isInputRow)&& <DragIndicator className="row-drag-icon" />}
             {showRowLabels ? <span className="row-index-label">{__index__}</span> : undefined}
