@@ -73,7 +73,7 @@ export const useRowLabelColumn = ({inputRowId, hoveredRowId, showRowLabels, setS
 
       return (
         <div className="index-cell-wrapper" onPointerDown={handleClick} onDoubleClick={handleClick}
-          onMouseEnter={() => setHoveredRowId(__id__)} onMouseLeave={() => setHoveredRowId(null)}>
+          onPointerOver={() => setHoveredRowId(__id__)} onPointerLeave={() => setHoveredRowId(null)}>
           { (__index__ === 1 && gridElement) &&
             createPortal(
               <RowDivider rowId={__id__} before={true} dragOverRowId={dragOverRowId} setDragOverRowId={setDragOverRowId}
@@ -82,7 +82,7 @@ export const useRowLabelColumn = ({inputRowId, hoveredRowId, showRowLabels, setS
           }
           <div className="index-cell-contents" ref={setDragRef}
                 {...(!isInputRow ? { ...attributes, ...listeners } : {})}>
-            {(hoveredRowId === __id__ && !isInputRow)&& <DragIndicator className="row-drag-icon" />}
+            {(hoveredRowId === __id__ && !isInputRow) && <DragIndicator className="row-drag-icon" />}
             {showRowLabels ? <span className="row-index-label">{__index__}</span> : undefined}
           </div>
           {(gridElement && !isInputRow) &&
