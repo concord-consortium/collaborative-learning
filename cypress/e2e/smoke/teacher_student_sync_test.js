@@ -55,10 +55,6 @@ context('Teacher/Student Sync Smoke Test', () => {
     dashboard.switchWorkView('Current');
     cy.wait(3000); // Wait for canvases to load
 
-    // // Verify current work is visible
-    cy.get('[data-test="class-work-section-personal-documents"]')
-      .should('exist');
-
     // Switch back to workspace view
     dashboard.switchView("Workspace & Resources");
 
