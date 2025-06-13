@@ -69,7 +69,6 @@ interface ITileBaseProps {
   indexInRow?: number;
   model: ITileModel;
   readOnly?: boolean;
-  typeClass?: string;
   onResizeRow: (e: React.DragEvent<HTMLDivElement>) => void;
   onSetCanAcceptDrop: (tileId?: string) => void;
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
@@ -202,14 +201,14 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { model, readOnly, isUserResizable, widthPct, typeClass } = this.props;
+    const { model, readOnly, isUserResizable, widthPct } = this.props;
     const { hoverTile } = this.state;
     const { appConfig, ui, persistentUI } = this.stores;
     const { Component, tileEltClass } = getTileComponentInfo(model.content.type) || {};
     const isPlaceholderTile = Component === PlaceholderTileComponent;
     const isTileSelected = ui.isSelectedTile(model);
     const tileSelectedForComment = isTileSelected && persistentUI.showChatPanel;
-    const classes = classNames("tool-tile", model.display, tileEltClass, typeClass, {
+    const classes = classNames("tool-tile", model.display, tileEltClass, {
       placeholder: isPlaceholderTile,
       readonly: readOnly,
       fixed: model.isFixedPosition,

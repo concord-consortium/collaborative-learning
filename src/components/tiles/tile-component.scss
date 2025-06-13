@@ -13,45 +13,6 @@
     border: 1px solid white;
   }
 
-  &.problem-panel {
-    &.readonly {
-      border: 1px solid white;
-
-      .tile-content {
-        border: 1px solid white;
-      }
-
-      &.hovered {
-        border: 1px solid rgba(191, 191, 191, 0.5);
-        .tile-content.hovered {
-          border: 1px solid rgba(191, 191, 191, 0.5);
-        }
-      }
-
-      &.selected {
-        border: 1px solid $charcoal-light-2;
-        .tile-content.selected {
-          border: 1px solid $charcoal-light-2;
-        }
-      }
-    }
-
-    &.teacher, &.teacher.readonly {
-      background-color: $learninglog-green-light-8;
-      margin: 5px 0 10px 20px;
-      padding: 10px;
-      border-left: $half-border-width solid $learninglog-green;
-      border-right: 0;
-      border-top: 0;
-      border-bottom: 0;
-
-      .tile-content {
-        border: 0;
-        background-color: $learninglog-green-light-8;
-      }
-    }
-  }
-
   &.readonly, &.readonly.hovered {
     border: 1px solid $tool-tile-readonly-border-color;
     .tile-content {
@@ -143,6 +104,49 @@
 
     &:focus {
       outline: none;
+    }
+  }
+}
+
+// Only show the teacher styling when the tile is inside of the
+// problem panel or when it is inside of the CMS (iframe-control)
+.problem-panel, .iframe-control {
+  .tool-tile {
+    &.readonly {
+      border: 1px solid white;
+
+      .tile-content {
+        border: 1px solid white;
+      }
+
+      &.hovered {
+        border: 1px solid rgba(191, 191, 191, 0.5);
+        .tile-content.hovered {
+          border: 1px solid rgba(191, 191, 191, 0.5);
+        }
+      }
+
+      &.selected {
+        border: 1px solid $charcoal-light-2;
+        .tile-content.selected {
+          border: 1px solid $charcoal-light-2;
+        }
+      }
+    }
+
+    &.teacher {
+      background-color: $learninglog-green-light-8;
+      margin: 5px 0 10px 20px;
+      padding: 10px;
+      border-left: $half-border-width solid $learninglog-green;
+      border-right: 0;
+      border-top: 0;
+      border-bottom: 0;
+
+      .tile-content {
+        border: 0;
+        background-color: $learninglog-green-light-8;
+      }
     }
   }
 }
