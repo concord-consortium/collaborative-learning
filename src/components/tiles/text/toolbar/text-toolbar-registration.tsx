@@ -2,6 +2,7 @@ import React from "react";
 import { Editor, EFormat, useSlate } from "@concord-consortium/slate-editor";
 
 import { LinkButton } from "./link-button";
+import { HighlightButton } from "./highlight-button";
 import { isMac } from "../../../../utilities/browser";
 import { IToolbarButtonComponentProps, registerTileToolbarButtons }
   from "../../../toolbar/toolbar-button-manager";
@@ -10,7 +11,6 @@ import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 import BoldToolIcon from "../../../../assets/icons/text/bold-text-icon.svg";
 import ItalicToolIcon from "../../../../assets/icons/text/italic-text-icon.svg";
 import UnderlineToolIcon from "../../../../assets/icons/text/underline-text-icon.svg";
-import HighlightToolIcon from "../../../../assets/icons/text/highlight-text-icon.svg";
 import SuperscriptToolIcon from "../../../../assets/icons/text/superscript-text-icon.svg";
 import SubscriptToolIcon from "../../../../assets/icons/text/subscript-text-icon.svg";
 import NumberedListToolIcon from "../../../../assets/icons/text/numbered-list-text-icon.svg";
@@ -66,12 +66,6 @@ function UnderlineToolbarButton({name}: IToolbarButtonComponentProps) {
     slateType={EFormat.underlined} toggleFunc={toggleMark}/>;
 }
 
-function HighlightToolbarButton({name}: IToolbarButtonComponentProps) {
-  return <GenericTextToolbarButton
-    name={name} title="Hightlight" Icon={HighlightToolIcon}
-    slateType={EFormat.color} toggleFunc={toggleMark}/>;
-}
-
 function SubscriptToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
     name={name} title="Subscript" Icon={SubscriptToolIcon} slateType={EFormat.subscript} toggleFunc={toggleSupSub}/>;
@@ -111,7 +105,7 @@ registerTileToolbarButtons('text',
   },
   {
     name: 'highlight',
-    component: HighlightToolbarButton,
+    component: HighlightButton,
   },
   {
     name: 'subscript',
