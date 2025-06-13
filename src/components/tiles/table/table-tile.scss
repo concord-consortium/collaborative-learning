@@ -449,11 +449,12 @@ $controls-hover-background: #c0dfe7;
 
 .row-divider {
   background-color: $color7;
-  opacity: 0;
+  visibility: hidden;
   position: absolute;
   z-index: 10;
 }
 .row-divider.over {
+  visibility: visible;
   opacity: 0.75;
 }
 
