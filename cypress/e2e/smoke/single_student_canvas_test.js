@@ -17,14 +17,14 @@ import ExpressionToolTile from '../../support/elements/tile/ExpressionToolTile';
 import XYPlotToolTile from '../../support/elements/tile/XYPlotToolTile';
 import BarGraphTile from '../../support/elements/tile/BarGraphTile';
 
-let canvas = new Canvas;
-let clueCanvas = new ClueCanvas;
-let geometryToolTile = new GeometryToolTile;
-let imageToolTile = new ImageToolTile;
-let drawToolTile = new DrawToolTile;
-let textToolTile = new TextToolTile;
-let tableToolTile = new TableToolTile;
-let questionToolTile = new QuestionToolTile;
+const canvas = new Canvas;
+const clueCanvas = new ClueCanvas;
+const geometryToolTile = new GeometryToolTile;
+const imageToolTile = new ImageToolTile;
+const drawToolTile = new DrawToolTile;
+const textToolTile = new TextToolTile;
+const tableToolTile = new TableToolTile;
+const questionToolTile = new QuestionToolTile;
 const dialog = new Dialog();
 const arrowAnnotation = new ArrowAnnotation();
 const dataCardToolTile = new DataCardToolTile();
@@ -260,31 +260,43 @@ context('single student functional test', () => {
     cy.get('.primary-workspace [data-testid="ccrte-editor"]')
       .should('contain.text', 'The Mystery Club at P.I. Middle School');
 
-    // Optionally, check the number of text tiles (adjust the expected count as needed)
+    // Check the number of text tiles
     textToolTile.getTextTile().should('have.length.at.least', 1);
   });
 
   it('verifies old document compatibility by loading test document', () => {
-    // Set up console error monitoring
-    const consoleErrors = [];
-    cy.on('log:added', (log) => {
-      if (log.displayName === 'error' || log.displayName === 'console') {
-        consoleErrors.push(log.message);
+    // This test loads a document in the "old-format" (pre-v2 tile schema, before 2023-09).
+    // The file src/public/demo/docs/old-format-test-document.json is used to verify
+    // backward compatibility after the tile schema update.
+      cy.visit("/editor/?appMode=qa&unit=./demo/units/qa/content.json&document=./demo/docs/old-format-test-document.json", {
+        // Set up console error monitoring
+        onBeforeLoad(win) {
+        cy.stub(win.console, 'error').as('consoleError');
+        cy.stub(win.console, 'warn').as('consoleWarn');
       }
     });
 
-    cy.log('loads test document with all tile types and verifies components');
-    cy.visit("/editor/?appMode=qa&unit=./demo/units/qa/content.json&document=./demo/docs/old-format-test-document.json");
-
     // Verify no critical errors in console
-    cy.wrap(null).then(() => {
-      const criticalErrors = consoleErrors.filter(error =>
+    cy.get('@consoleError').then((stub) => {
+      const errors = stub.getCalls().map(call => call.args[0]);
+      const criticalErrors = errors.filter(error =>
         error.includes('mobx') ||
         error.includes('TypeError') ||
         error.includes('ReferenceError') ||
         error.includes('Uncaught')
       );
       expect(criticalErrors, 'No critical console errors should be present').to.be.empty;
+    });
+
+    cy.get('@consoleWarn').then((stub) => {
+      const warnings = stub.getCalls().map(call => call.args[0]);
+      const criticalWarnings = warnings.filter(warning =>
+        warning.includes('mobx') ||
+        warning.includes('TypeError') ||
+        warning.includes('ReferenceError') ||
+        warning.includes('Uncaught')
+      );
+      expect(criticalWarnings, 'No critical console warnings should be present').to.be.empty;
     });
 
     // Verify all tile types are present using helper functions

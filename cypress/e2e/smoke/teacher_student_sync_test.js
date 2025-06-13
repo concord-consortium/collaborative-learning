@@ -40,7 +40,7 @@ context('Teacher/Student Sync Smoke Test', () => {
     cy.log('verify dashboard views');
     dashboard.switchView("Dashboard");
     dashboard.switchWorkView('Published');
-    cy.wait(3000); // Wait for canvases to load
+    // cy.wait(3000); // Wait for canvases to load
 
     // Verify published work is visible in dashboard
     cy.contains('Student test message').should('exist');
@@ -56,8 +56,8 @@ context('Teacher/Student Sync Smoke Test', () => {
     cy.wait(3000); // Wait for canvases to load
 
     // // Verify current work is visible
-    // cy.get('[data-test="class-work-section-personal-documents"]')
-    //   .should('exist');
+    cy.get('[data-test="class-work-section-personal-documents"]')
+      .should('exist');
 
     // Switch back to workspace view
     dashboard.switchView("Workspace & Resources");

@@ -222,7 +222,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                 onFocus={this.handleFocus}
                 onBlur={this.handleBlur}
                 className={`ccrte-editor slate-editor ${slateClasses || ""}`}
-                data-testid="question-tile-placeholder-text"
               />
               <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
             </Slate>
