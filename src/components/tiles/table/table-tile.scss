@@ -99,6 +99,7 @@ $controls-hover-background: #c0dfe7;
     height: calc(100% - #{$row-height});
     border: none;
     overflow: auto !important;
+    position: relative;
 
     &.show-expressions {
       .index-column-header {
@@ -291,9 +292,6 @@ $controls-hover-background: #c0dfe7;
       &:hover {
         background-color: rgba(0, 129, 255, 0.12);
       }
-      &:active {
-        background-color: rgba(0, 129, 255, 0.25);
-      }
     }
     .index-column {
       min-width: $index-column-width;
@@ -310,15 +308,21 @@ $controls-hover-background: #c0dfe7;
           display: flex;
           flex-direction: row;
           align-items: center;
+          cursor: grab;
           .row-drag-icon {
             position: absolute;
             top: 1.5px;
             left: 0px;
-            cursor: grab;
+            opacity: 0;
           }
           .row-index-label {
             position: absolute;
             right: 5px;
+            min-width: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
           }
         }
         &:hover {
@@ -332,11 +336,7 @@ $controls-hover-background: #c0dfe7;
         }
         &:active {
           background-color: rgba(0, 129, 255, 0.40);
-          .index-cell-contents {
-            .row-drag-icon {
-              opacity: 1;
-            }
-          }
+          opacity: 1;
         }
       }
     }
@@ -405,10 +405,11 @@ $controls-hover-background: #c0dfe7;
   box-shadow: 0 0 5px rgba(0,0,0,0.25);
   border-radius: 4px;
   pointer-events: none;
-  height: 22px;
   font-size: 14px;
   font-weight: normal;
   overflow: hidden;
+  opacity: 0.75;
+  pointer-events: none;
 
   .drag-overlay-cell {
     display: flex;
@@ -416,17 +417,47 @@ $controls-hover-background: #c0dfe7;
     font-size: inherit;
     font-weight: inherit;
     border-right: 1px solid $charcoal-light-1;
+    background-color: rgba(0, 129, 255, 0.25);
+    position: relative;
 
     &:first-child {
       border-left: none;
       width: $index-column-width;
-      background-color: $header-color;
-      color: $header-color // hides the text in the index column
+      background-color: rgba(0, 129, 255, 0.40);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .row-drag-icon {
+        position: absolute;
+        opacity: 1;
+      }
+
+      .row-index-label {
+        position: absolute;
+        right: 5px;
+        min-width: 18px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
     }
     &:last-child {
       border-right: none;
     }
   }
+}
+
+.row-divider {
+  background-color: $color7;
+  visibility: hidden;
+  position: absolute;
+  z-index: 10;
+}
+.row-divider.over {
+  visibility: visible;
+  opacity: 0.75;
 }
 
 // .link-color-0 > .ag-theme-fresh .ag-row-selected

@@ -59,6 +59,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const isLinked = linkedTiles && linkedTiles.length > 1;
   const tableContextValue: ITableContext = { linked: !!isLinked };
   const [sortColumns, setSortColumns] = useState<SortColumn[]>([]);
+  const [gridElement, setGridElement] = useState<HTMLDivElement | null>(null);
 
   // Basic operations based on the model
   const {
@@ -81,9 +82,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // Functions and variables to handle selecting and navigating the grid
   const [showRowLabels, setShowRowLabels] = useState(false);
-  const {
-    ref: gridRef, gridContext, inputRowId, getSelectedRows, ...gridProps
-  } = useGridContext({ content, modelId: model.id, showRowLabels, triggerColumnChange, triggerRowChange });
+  const {ref: gridRef, gridContext, inputRowId, getSelectedRows, ...gridProps
+    } = useGridContext({ content, modelId: model.id, showRowLabels, triggerColumnChange, triggerRowChange });
   const selectedCaseIds = getSelectedRows();
 
   // Add click handler to clear all selections to mystery div in rdg.
@@ -96,6 +96,16 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       }
     }
   }, [gridContext, gridRef]);
+
+  useEffect(() => {
+    if (gridRef.current) {
+      const tableEl = gridRef.current.element;
+      const gridEl = tableEl?.getElementsByClassName("rdg")[0] as HTMLDivElement | undefined;
+      if (gridEl) {
+        setGridElement(gridEl);
+      }
+    }
+  },[]);
 
   // Maintains the cache of data values that map to image URLs.
   // For use in a synchronous context, returns undefined immediately if an image is not yet cached,
@@ -119,8 +129,10 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // React components used for the index (left most) column
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+  const [dragOverRowId, setDragOverRowId] = useState<string | null>(null);
   const rowLabelProps = useRowLabelColumn({
-    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels, hoveredRowId, setHoveredRowId,
+    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels, hoveredRowId, setHoveredRowId, dragOverRowId, setDragOverRowId,
+    rowHeight, gridElement
   });
 
   // rows are required by ReactDataGrid and are used by other hooks as well
@@ -221,7 +233,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const handleDragStart = (event: any) => {
     const { active } = event;
     const row = rows.find(r => r.__id__ === active.id);
-    document.body.classList.add("table-row-dragging");
     if (!row) {
       console.warn("Drag started on an invalid row:", active.id);
       return;
@@ -232,17 +243,41 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
+    if (!over) {
+      setActiveRow(null);
+      setDragOverRowId(null);
+      setHoveredRowId(null);
+      return;
+    }
+
+    const [overId, position] = over.id.split(":");
+    const fromIndex = dataSet.caseIndexFromID(active.id);
+    let toIndex = dataSet.caseIndexFromID(overId);
+    if (fromIndex === -1 || toIndex === -1) {
+      console.warn("Invalid drag and drop indices:", fromIndex, toIndex);
+      setActiveRow(null);
+      setDragOverRowId(null);
+      setHoveredRowId(null);
+      return;
+    }
+
+    // Adjust for dropping "after"
+    if (position === "after") {
+      toIndex += 1;
+    }
+
+    // If moving down, and dropping after, need to account for removal of the row
+    if (fromIndex < toIndex) {
+      toIndex -= 1;
+    }
     setActiveRow(null);
-    document.body.classList.remove("table-row-dragging");
-    if (active.id !== over?.id) {
-      const fromIndex = dataSet.caseIndexFromID(active.id);
-      const toIndex = dataSet.caseIndexFromID(over?.id);
-      if (fromIndex === -1 || toIndex === -1) {
-        console.warn("Invalid drag and drop indices:", fromIndex, toIndex);
-        return;
-      }
+
+    if (fromIndex !== toIndex && fromIndex !== -1 && toIndex !== -1) {
       dataSet.moveCase(active.id, toIndex);
     }
+
+    setDragOverRowId(null);
+    setHoveredRowId(null);
   };
 
   // Define and submit functions for general tool tile API
@@ -260,6 +295,12 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       dataGrid?.style.setProperty("--row-selected-background-color", "rgba(0,0,0,0)");
     }
   });
+
+  useEffect(() => {
+    if (gridRef.current?.element) {
+      setGridElement(gridRef.current.element);
+    }
+  }, [gridRef]);
 
   // Force a rerender whenever the model's attributes change (which contain the individual cells)
   useEffect(() => {
@@ -316,7 +357,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
               {...dataGridProps} {...rowProps} />
             <DragOverlay>
               {activeRow ? (
-                <RowDragOverlay row={activeRow} columns={columns}/>
+                <RowDragOverlay row={activeRow} columns={columns} rowHeight={rowHeight} showRowLabels={showRowLabels}/>
               ) : null}
             </DragOverlay>
           </DndContext>
