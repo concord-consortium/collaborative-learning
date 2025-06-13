@@ -7,7 +7,6 @@ import RowLabelsShownSvg from "../../../clue/assets/icons/table/row-labels-shown
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { TFormatterProps, kHeaderRowHeight } from "./table-types";
 import { RowDivider } from "./row-divider";
-
 import DragIndicator from "../../../clue/assets/icons/table/row-drag-indicator.svg";
 
 export const kTableRowDividerHeight = 9;

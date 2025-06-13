@@ -335,11 +335,7 @@ $controls-hover-background: #c0dfe7;
         }
         &:active {
           background-color: rgba(0, 129, 255, 0.40);
-          .index-cell-contents {
-            .row-drag-icon {
-              opacity: 1;
-            }
-          }
+
         }
       }
     }
@@ -420,15 +416,29 @@ $controls-hover-background: #c0dfe7;
     font-weight: inherit;
     border-right: 1px solid $charcoal-light-1;
     background-color: rgba(0, 129, 255, 0.25);
+    position: relative;
+
     &:first-child {
       border-left: none;
       width: $index-column-width;
-      color: rgba(0, 129, 255, 0.40);// hides the text in the index column
       background-color: rgba(0, 129, 255, 0.40);
-      .index-cell-contents {
-        .row-drag-icon {
-          opacity: 1;
-        }
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .row-drag-icon {
+        position: absolute;
+        opacity: 1;
+      }
+
+      .row-index-label {
+        position: absolute;
+        right: 5px;
+        min-width: 18px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
       }
     }
     &:last-child {
