@@ -43,7 +43,7 @@ export interface SortColumn {
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
-  tileElt, model, readOnly, height, hovered,
+  documentContent, tileElt, model, readOnly, height, hovered, scale,
   onRequestRowHeight, onRegisterTileApi, onUnregisterTileApi
 }) {
   // Gather data from the model
@@ -234,7 +234,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     const { active } = event;
     const row = rows.find(r => r.__id__ === active.id);
     if (!row) {
-      console.warn("***** Drag started on an invalid row:", active.id);
+      console.warn("Drag started on an invalid row:", active.id);
       return;
     }
     setActiveRow(row || null);

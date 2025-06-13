@@ -14,7 +14,6 @@ interface IRowDividerProps {
   before?: boolean;
   topPosition: number;
   gridElement: HTMLDivElement | null;
-  onDropRow?: (draggedRowId: string, targetRowId: string, before: boolean) => void;
   dragOverRowId?: string | null;
   setDragOverRowId: (rowId: string | null) => void;
 }
