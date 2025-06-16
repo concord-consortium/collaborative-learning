@@ -9,7 +9,7 @@
   margin: 6px;
   margin-left: 0px;
   padding-right: 5px;
-  border: #c9dab7;
+  border-color: #c9dab7;
   width: 110px;
 
   .top-controls {
@@ -49,8 +49,6 @@
     font-size: 10pt;
     outline: none;
     background-color: red;
-    border-radius: 5px;
-
     &.live {
       background-color: $sage-dark-1;
 
