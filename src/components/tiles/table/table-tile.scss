@@ -4,6 +4,7 @@
 $table-padding: 10px;
 $row-height: 34px;
 $index-column-width: 34px;
+$index-column-with-label-width: $index-column-width + 7px;
 $controls-column-width: 36px;
 $platform-scrollbar-width: 16px;
 $header-color: $workspace-teal-light-5;
@@ -35,6 +36,9 @@ $controls-hover-background: #c0dfe7;
       font-weight: bold;
       padding: 8px;
       position: relative;
+      &.show-row-labels {
+        margin-left: $index-column-with-label-width - 1px;
+      }
 
       &.table-title-default {
         font-style: italic;
@@ -284,17 +288,56 @@ $controls-hover-background: #c0dfe7;
           }
         }
       }
+      &:hover {
+        background-color: rgba(0, 129, 255, 0.12);
+      }
+      &:active {
+        background-color: rgba(0, 129, 255, 0.25);
+      }
     }
     .index-column {
-      width: $index-column-width;
       min-width: $index-column-width;
       padding: 0;
       background-color: var(--header-background-color);
       font-weight: bold;
       font-style: italic;
-      .index-cell-contents {
+      .index-cell-wrapper {
         width: 100%;
         height: 100%;
+        .index-cell-contents {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          .row-drag-icon {
+            position: absolute;
+            top: 1.5px;
+            left: 0px;
+            cursor: grab;
+          }
+          .row-index-label {
+            position: absolute;
+            right: 5px;
+          }
+        }
+        &:hover {
+          background-color: rgba(0, 129, 255, 0.20);
+          .index-cell-contents {
+            position: relative;
+            .row-drag-icon {
+              opacity: 0.35;
+            }
+          }
+        }
+        &:active {
+          background-color: rgba(0, 129, 255, 0.40);
+          .index-cell-contents {
+            .row-drag-icon {
+              opacity: 1;
+            }
+          }
+        }
       }
     }
     .rdg-cell {
@@ -351,6 +394,38 @@ $controls-hover-background: #c0dfe7;
 
   &.linked {
     box-shadow: inset 0 0 0 3px $highlight-linked-edit;
+  }
+}
+
+.drag-overlay-row {
+  display: flex;
+  align-items: stretch;
+  background: $header-input-color; // or white, to match your grid
+  border: 1px solid $charcoal-light-1;
+  box-shadow: 0 0 5px rgba(0,0,0,0.25);
+  border-radius: 4px;
+  pointer-events: none;
+  height: 22px;
+  font-size: 14px;
+  font-weight: normal;
+  overflow: hidden;
+
+  .drag-overlay-cell {
+    display: flex;
+    align-items: center;
+    font-size: inherit;
+    font-weight: inherit;
+    border-right: 1px solid $charcoal-light-1;
+
+    &:first-child {
+      border-left: none;
+      width: $index-column-width;
+      background-color: $header-color;
+      color: $header-color // hides the text in the index column
+    }
+    &:last-child {
+      border-right: none;
+    }
   }
 }
 

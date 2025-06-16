@@ -17,6 +17,9 @@ body {
   line-height:1.28581;
   text-transform:none;
   color:#182026;
+  &.table-row-dragging {
+    cursor: grabbing;
+  }
 }
 
 p {
