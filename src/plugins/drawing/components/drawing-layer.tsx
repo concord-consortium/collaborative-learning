@@ -18,7 +18,7 @@ import { debounce } from "lodash";
 import { combineBoundingBoxes } from "../../../models/tiles/geometry/geometry-utils";
 import { useTileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import { kReadOnlyOffset } from "../model/drawing-types";
+import { kClosedObjectListPanelWidth } from "../model/drawing-types";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -189,7 +189,7 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
       // In regular tile display, offset and zoom are the values stored in the model.
       // However, we tweak the displayed offset if there is no "show/sort" sidebar so that the
       // read-only and read-write versions of the tile center content the same way.
-      this.offsetX = this.props.offsetX + (this.props.readOnly ? kReadOnlyOffset : 0);
+      this.offsetX = this.props.offsetX + (this.props.readOnly ? kClosedObjectListPanelWidth : 0);
       this.offsetY = this.props.offsetY;
       this.zoom = this.props.zoom;
 

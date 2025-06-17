@@ -20,7 +20,7 @@ import { LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocumen
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
-import { AppMode } from "./store-types";
+import { AppMode, kDemoSiteStorageKey } from "./store-types";
 import { SerialDevice } from "./serial";
 import { IBaseStores, IGitInfo } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
@@ -144,7 +144,7 @@ class Stores implements IStores{
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);
     this.networkDocuments = params?.networkDocuments || DocumentsModel.create({});
-    const demoName = params?.demoName || this.appConfig.appName;
+    const demoName = params?.demoName || window.localStorage.getItem(kDemoSiteStorageKey) || this.appConfig.appName;
     this.demo = params?.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}});
     this.showDemoCreator = params?.showDemoCreator || false;
     this.supports = params?.supports || SupportsModel.create({});
