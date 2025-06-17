@@ -1,0 +1,13 @@
+@import "../../components/vars";
+
+.progress-widget {
+  flex-direction: column;
+  align-items: center;
+  justify-content: stretch;
+  text-align: center;
+
+  .label {
+    color: $sage-text;
+    font-weight: bold;
+  }
+}

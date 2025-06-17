@@ -6,7 +6,7 @@ import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { IGroupVirtualDocument, GroupVirtualDocument } from "../../models/document/group-virtual-document";
 
-import "./group-virtual-document.sass";
+import "./group-virtual-document.scss";
 
 interface IProps extends IBaseProps {
   document: IGroupVirtualDocument;

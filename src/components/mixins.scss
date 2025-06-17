@@ -1,0 +1,20 @@
+@use 'vars';
+
+// Hide scrollbars.  Useful when width of scroll gutters causes issues.
+@mixin hideScrollbars {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// tile toolbar
+@mixin tile-toolbar {
+  position: absolute;
+  border: $toolbar-border;
+  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
+  z-index: $toolbar-z-index;
+  background-color: $workspace-teal-light-9;
+}

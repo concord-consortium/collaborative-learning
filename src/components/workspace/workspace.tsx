@@ -10,7 +10,7 @@ import { ResizablePanel } from "./resizable-panel";
 import { HotKeys } from "../../utilities/hot-keys";
 import { StandAloneAuthComponent } from "../standalone/auth";
 
-import "./workspace.sass";
+import "./workspace.scss";
 
 interface IProps extends IBaseProps {
 }

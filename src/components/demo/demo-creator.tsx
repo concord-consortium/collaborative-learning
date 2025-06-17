@@ -6,7 +6,7 @@ import { ProblemModelType } from "../../models/curriculum/problem";
 import { parseUrl, stringify } from "query-string";
 import { kDemoSiteStorageKey } from "../../models/stores/store-types";
 
-import "./demo-creator.sass";
+import "./demo-creator.scss";
 
 export const NUM_FAKE_CLASSES = 9;
 export const NUM_FAKE_STUDENTS = 99;
