@@ -1,0 +1,878 @@
+{
+  "rowMap": {
+    "row1": {"id": "row1", "isSectionHeader": false, "tiles": [{"tileId": "tile1"}]},
+    "JmNjfbyRNXY_oT5Y": {
+      "id": "JmNjfbyRNXY_oT5Y",
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "BwwhBvBQXvGlRBAk"}]
+    },
+    "XkstiKtsaLsnb-IQ": {
+      "id": "XkstiKtsaLsnb-IQ",
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "OKRQWYioGbIUDfng"}]
+    },
+    "fbFsnAMhBZIVlP8-": {
+      "id": "fbFsnAMhBZIVlP8-",
+      "height": 430,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "NlbMhc_AkbOJY65j"}, {"tileId": "C0dEC5BahuatE5w9"}]
+    },
+    "xiq8Vb2wH92i-l5g": {
+      "id": "xiq8Vb2wH92i-l5g",
+      "height": 397.5,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "IUMt2fNLewlstcjE"}, {"tileId": "_j2nsG6i5VtVue61"}]
+    },
+    "lLhQKTwsRiuleSH6": {
+      "id": "lLhQKTwsRiuleSH6",
+      "height": 480,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "f4vUKKIsPFzW43-t"}]
+    },
+    "WhHHENxTdBpYHomE": {
+      "id": "WhHHENxTdBpYHomE",
+      "height": 320,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "3erpAcuSec2F9MBA"}]
+    },
+    "fV1lgSiH3o0Ou2of": {
+      "id": "fV1lgSiH3o0Ou2of",
+      "height": 170,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "5P2IW-1PoGuiEfKE"}]
+    },
+    "YLGTndIOZL4d0_ft": {
+      "id": "YLGTndIOZL4d0_ft",
+      "height": 320,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "PO0OpyLuLmdSZBo3"}]
+    },
+    "004CZCWVHnO9EPkg": {
+      "id": "004CZCWVHnO9EPkg",
+      "height": 126,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "KmZHPmg_IVFa_wNZ"}]
+    },
+    "infCZ5IS2XlMId2M": {
+      "id": "infCZ5IS2XlMId2M",
+      "height": 180,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "_Ni0M7gssc3Ek2Cd"}]
+    },
+    "HJS1b-sNuTnfdUIq": {
+      "id": "HJS1b-sNuTnfdUIq",
+      "height": 320,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "6rLKrlTcnGEuztan"}]
+    },
+    "KoHHM4T53kfZY5vV": {
+      "id": "KoHHM4T53kfZY5vV",
+      "height": 400,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "32urdZvQh1OM2hg-"}]
+    },
+    "2HZzMOhbGh6AAtjX": {
+      "id": "2HZzMOhbGh6AAtjX",
+      "height": 100,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "HtUztpw-UsGF2NEV"}]
+    }
+  },
+  "rowOrder": [
+    "row1",
+    "JmNjfbyRNXY_oT5Y",
+    "XkstiKtsaLsnb-IQ",
+    "fbFsnAMhBZIVlP8-",
+    "xiq8Vb2wH92i-l5g",
+    "WhHHENxTdBpYHomE",
+    "004CZCWVHnO9EPkg",
+    "infCZ5IS2XlMId2M",
+    "2HZzMOhbGh6AAtjX",
+    "KoHHM4T53kfZY5vV",
+    "HJS1b-sNuTnfdUIq",
+    "YLGTndIOZL4d0_ft",
+    "fV1lgSiH3o0Ou2of",
+    "lLhQKTwsRiuleSH6"
+  ],
+  "tileMap": {
+    "tile1": {
+      "id": "tile1",
+      "fixedPosition": false,
+      "content": {"type": "Text", "text": "Welcome to the standalone document editor"}
+    },
+    "qsCV0d-Cz4t0Atfx": {
+      "id": "qsCV0d-Cz4t0Atfx",
+      "title": "Question Prompt",
+      "fixedPosition": true,
+      "content": {
+        "type": "Text",
+        "text": "{\"object\":\"value\",\"document\":{\"children\":[{\"type\":\"paragraph\",\"children\":[{\"text\":\"Question tile placeholder text\"}]}]}}",
+        "format": "slate"
+      }
+    },
+    "XSYTB8CruUZAkosH": {
+      "id": "XSYTB8CruUZAkosH",
+      "fixedPosition": false,
+      "content": {"type": "Placeholder", "sectionId": "", "containerType": "QuestionContent"}
+    },
+    "BwwhBvBQXvGlRBAk": {
+      "id": "BwwhBvBQXvGlRBAk",
+      "title": "Question 1",
+      "fixedPosition": false,
+      "content": {
+        "type": "Question",
+        "rowMap": {
+          "IeBiucjgkVRWVtH_": {
+            "id": "IeBiucjgkVRWVtH_",
+            "isSectionHeader": false,
+            "tiles": [{"tileId": "qsCV0d-Cz4t0Atfx"}]
+          },
+          "PJ0o8sMRyE7r_9BN": {
+            "id": "PJ0o8sMRyE7r_9BN",
+            "isSectionHeader": false,
+            "tiles": [{"tileId": "jtTKscqjG88FQoI4"}]
+          }
+        },
+        "rowOrder": ["IeBiucjgkVRWVtH_", "PJ0o8sMRyE7r_9BN"],
+        "version": 1,
+        "locked": false,
+        "questionId": "5-Bf4U"
+      }
+    },
+    "jtTKscqjG88FQoI4": {
+      "id": "jtTKscqjG88FQoI4",
+      "title": "Text 1",
+      "fixedPosition": false,
+      "content": {
+        "type": "Text",
+        "text": "{\"object\":\"value\",\"document\":{\"children\":[{\"type\":\"paragraph\",\"children\":[{\"text\":\"Text tile sample text embedded in Question 1\"}]}]}}",
+        "format": "slate"
+      }
+    },
+    "OKRQWYioGbIUDfng": {
+      "id": "OKRQWYioGbIUDfng",
+      "title": "Text 2",
+      "fixedPosition": false,
+      "content": {
+        "type": "Text",
+        "text": "{\"object\":\"value\",\"document\":{\"children\":[{\"type\":\"paragraph\",\"children\":[{\"text\":\"Text tile not embedded in Question Tile.\"}]}]}}",
+        "format": "slate"
+      }
+    },
+    "NlbMhc_AkbOJY65j": {
+      "id": "NlbMhc_AkbOJY65j",
+      "fixedPosition": false,
+      "content": {
+        "type": "Table",
+        "isImported": false,
+        "importedDataSet": {"id": "AxvFXCOOLh0zgHFI", "attributes": [], "cases": []},
+        "columnWidths": {}
+      }
+    },
+    "IUMt2fNLewlstcjE": {
+      "id": "IUMt2fNLewlstcjE",
+      "fixedPosition": false,
+      "content": {"type": "DataCard", "caseIndex": 0}
+    },
+    "f4vUKKIsPFzW43-t": {
+      "id": "f4vUKKIsPFzW43-t",
+      "fixedPosition": false,
+      "content": {
+        "type": "Dataflow",
+        "program": {
+          "id": "dataflow@1",
+          "nodes": {
+            "iPLlRjnjjqBdd2ue": {
+              "id": "iPLlRjnjjqBdd2ue",
+              "name": "Generator",
+              "x": 40,
+              "y": 5,
+              "data": {
+                "type": "Generator",
+                "plot": false,
+                "orderedDisplayName": "Generator 1",
+                "tickEntries": {
+                  "7NYnaKpRln1pkzpr": {"nodeValue": "-1.9"},
+                  "QE8IPri3WU7H9pza": {"nodeValue": "-1.9"},
+                  "u2DI9RNJC0ll0fzU": {"nodeValue": "-1.14"},
+                  "STVnhqfS35x32WDs": {"nodeValue": "0.06"},
+                  "De9ybMVXDpD8Od8I": {"nodeValue": "1.18"},
+                  "WsNMUG2K965JGkon": {"nodeValue": "1.91"},
+                  "lqIew3FJpwt7Dr2M": {"nodeValue": "1.89"},
+                  "Fqon9E0lqPz5PIg5": {"nodeValue": "1.14"},
+                  "TMgpvVBftRS4Co3P": {"nodeValue": "-0.06"},
+                  "UG98a5vOHpRxTpgn": {"nodeValue": "-1.24"},
+                  "1Ek5fg2STz20MQbM": {"nodeValue": "-1.9"},
+                  "MibTw4pNp0N3-b_L": {"nodeValue": "-1.9"},
+                  "j1SxgWMJA3TWpeA0": {"nodeValue": "-1.17"},
+                  "Lw7Lc_nnN1qcx7np": {"nodeValue": "0.03"},
+                  "Q8SbsNC6hhBwWRQ8": {"nodeValue": "1.22"},
+                  "Zk6oghFPHrmSW-24": {"nodeValue": "1.9"},
+                  "UCF4np0RRrQWMPkI": {"open": true, "nodeValue": "1.9"}
+                },
+                "generatorType": "Sine",
+                "amplitude": 2,
+                "period": 10,
+                "periodUnits": "sec"
+              }
+            },
+            "frhl28X-4CGU_Kqk": {
+              "id": "frhl28X-4CGU_Kqk",
+              "name": "Logic",
+              "x": 334.91796875,
+              "y": 102.58984375,
+              "data": {
+                "type": "Logic",
+                "plot": false,
+                "orderedDisplayName": "Logic 1",
+                "tickEntries": {
+                  "7NYnaKpRln1pkzpr": {"nodeValue": "NaN"},
+                  "QE8IPri3WU7H9pza": {"nodeValue": "NaN"},
+                  "u2DI9RNJC0ll0fzU": {"nodeValue": "NaN"},
+                  "STVnhqfS35x32WDs": {"nodeValue": "NaN"},
+                  "De9ybMVXDpD8Od8I": {"nodeValue": "NaN"},
+                  "WsNMUG2K965JGkon": {"nodeValue": "NaN"},
+                  "lqIew3FJpwt7Dr2M": {"nodeValue": "NaN"},
+                  "Fqon9E0lqPz5PIg5": {"nodeValue": "NaN"},
+                  "TMgpvVBftRS4Co3P": {"nodeValue": "NaN"},
+                  "UG98a5vOHpRxTpgn": {"nodeValue": "NaN"},
+                  "1Ek5fg2STz20MQbM": {"nodeValue": "NaN"},
+                  "MibTw4pNp0N3-b_L": {"nodeValue": "NaN"},
+                  "j1SxgWMJA3TWpeA0": {"nodeValue": "NaN"},
+                  "Lw7Lc_nnN1qcx7np": {"nodeValue": "NaN"},
+                  "Q8SbsNC6hhBwWRQ8": {"nodeValue": "NaN"},
+                  "Zk6oghFPHrmSW-24": {"nodeValue": "NaN"},
+                  "UCF4np0RRrQWMPkI": {"open": true, "nodeValue": "NaN"}
+                },
+                "logicOperator": "Greater Than"
+              }
+            },
+            "al90ccm5Q7D_GkeW": {
+              "id": "al90ccm5Q7D_GkeW",
+              "name": "Demo Output",
+              "x": 617.515625,
+              "y": 54.0859375,
+              "data": {
+                "type": "Demo Output",
+                "plot": true,
+                "orderedDisplayName": "Demo Output 1",
+                "tickEntries": {
+                  "7NYnaKpRln1pkzpr": {"nodeValue": "0"},
+                  "QE8IPri3WU7H9pza": {"nodeValue": "0"},
+                  "u2DI9RNJC0ll0fzU": {"nodeValue": "0"},
+                  "STVnhqfS35x32WDs": {"nodeValue": "0"},
+                  "De9ybMVXDpD8Od8I": {"nodeValue": "0"},
+                  "WsNMUG2K965JGkon": {"nodeValue": "0"},
+                  "lqIew3FJpwt7Dr2M": {"nodeValue": "0"},
+                  "Fqon9E0lqPz5PIg5": {"nodeValue": "0"},
+                  "TMgpvVBftRS4Co3P": {"nodeValue": "0"},
+                  "UG98a5vOHpRxTpgn": {"nodeValue": "0"},
+                  "1Ek5fg2STz20MQbM": {"nodeValue": "0"},
+                  "MibTw4pNp0N3-b_L": {"nodeValue": "0"},
+                  "j1SxgWMJA3TWpeA0": {"nodeValue": "0"},
+                  "Lw7Lc_nnN1qcx7np": {"nodeValue": "0"},
+                  "Q8SbsNC6hhBwWRQ8": {"nodeValue": "0"},
+                  "Zk6oghFPHrmSW-24": {"nodeValue": "0"},
+                  "UCF4np0RRrQWMPkI": {"open": true, "nodeValue": "0"}
+                },
+                "outputType": "Light Bulb"
+              }
+            }
+          },
+          "connections": {
+            "b826a946858661be": {
+              "id": "b826a946858661be",
+              "source": "iPLlRjnjjqBdd2ue",
+              "sourceOutput": "value",
+              "target": "frhl28X-4CGU_Kqk",
+              "targetInput": "num1"
+            },
+            "028c2f3d56f86e91": {
+              "id": "028c2f3d56f86e91",
+              "source": "frhl28X-4CGU_Kqk",
+              "sourceOutput": "value",
+              "target": "al90ccm5Q7D_GkeW",
+              "targetInput": "nodeValue"
+            }
+          },
+          "recentTicks": [
+            "7NYnaKpRln1pkzpr",
+            "QE8IPri3WU7H9pza",
+            "u2DI9RNJC0ll0fzU",
+            "STVnhqfS35x32WDs",
+            "De9ybMVXDpD8Od8I",
+            "WsNMUG2K965JGkon",
+            "lqIew3FJpwt7Dr2M",
+            "Fqon9E0lqPz5PIg5",
+            "TMgpvVBftRS4Co3P",
+            "UG98a5vOHpRxTpgn",
+            "1Ek5fg2STz20MQbM",
+            "MibTw4pNp0N3-b_L",
+            "j1SxgWMJA3TWpeA0",
+            "Lw7Lc_nnN1qcx7np",
+            "Q8SbsNC6hhBwWRQ8",
+            "Zk6oghFPHrmSW-24",
+            "UCF4np0RRrQWMPkI"
+          ]
+        },
+        "programDataRate": 1000,
+        "programZoom": {"dx": -1.15234375, "dy": -0.69140625, "scale": 1}
+      }
+    },
+    "3erpAcuSec2F9MBA": {
+      "id": "3erpAcuSec2F9MBA",
+      "title": "Diagram 1",
+      "fixedPosition": false,
+      "content": {
+        "type": "Diagram",
+        "version": "0.0.3",
+        "root": {
+          "nodes": {
+            "ruXNZ33oDUkVSAUX": {
+              "id": "ruXNZ33oDUkVSAUX",
+              "variable": "4g-krQB7Y0xOLA2b",
+              "x": 516.5,
+              "y": 109
+            }
+          }
+        }
+      }
+    },
+    "5P2IW-1PoGuiEfKE": {
+      "id": "5P2IW-1PoGuiEfKE",
+      "title": "Number Line 1",
+      "fixedPosition": false,
+      "content": {
+        "type": "Numberline",
+        "points": {
+          "Cdmg1O0reFPCckFQ": {
+            "id": "Cdmg1O0reFPCckFQ",
+            "xValue": -1.0022675736961448,
+            "isOpen": false
+          },
+          "9XSiZFm90sRsw2vZ": {
+            "id": "9XSiZFm90sRsw2vZ",
+            "xValue": 1.0022675736961448,
+            "isOpen": false
+          }
+        },
+        "min": -5,
+        "max": 5
+      }
+    },
+    "C0dEC5BahuatE5w9": {
+      "id": "C0dEC5BahuatE5w9",
+      "title": "Graph 1",
+      "fixedPosition": false,
+      "content": {
+        "type": "Graph",
+        "adornments": [],
+        "axes": {
+          "bottom": {"type": "numeric", "place": "bottom", "scale": "linear", "min": 0, "max": 9},
+          "left": {"type": "numeric", "place": "left", "scale": "linear", "min": 0, "max": 12}
+        },
+        "lockAxes": false,
+        "plotType": "scatterPlot",
+        "layers": [
+          {
+            "id": "LAYRJkP_oATe04Uz",
+            "config": {
+              "id": "DCONL2GG-guZJ4xP",
+              "dataset": "PAMPoH37zXqPnS3R",
+              "metadata": "93VDCJh0_D3k6P55",
+              "primaryRole": "x",
+              "_attributeDescriptions": {"x": {"attributeID": "12ZrX5aYFcgp6J7V"}},
+              "_yAttributeDescriptions": [{"attributeID": "3bWqYkbLAlZp7mhb"}]
+            },
+            "editable": false
+          }
+        ],
+        "_idColors": {"3bWqYkbLAlZp7mhb": 0},
+        "_pointColors": ["#E6805B"],
+        "_pointStrokeColor": "#FFFFFF",
+        "pointStrokeSameAsFill": false,
+        "plotBackgroundColor": "#FFFFFF",
+        "pointSizeMultiplier": 1,
+        "isTransparent": false,
+        "plotBackgroundImageID": "",
+        "showParentToggles": false,
+        "showMeasuresForSelection": false,
+        "xAttributeLabel": "x",
+        "yAttributeLabel": "y"
+      }
+    },
+    "PO0OpyLuLmdSZBo3": {
+      "id": "PO0OpyLuLmdSZBo3",
+      "title": "Coordinate Grid 1",
+      "fixedPosition": false,
+      "content": {
+        "type": "Geometry",
+        "isNavigatorVisible": true,
+        "navigatorPosition": "bottom",
+        "offsetX": 0,
+        "offsetY": 0,
+        "zoom": 1,
+        "board": {
+          "xAxis": {
+            "name": "x",
+            "label": "x",
+            "min": -2,
+            "unit": 18.3,
+            "range": 26.229508196721312
+          },
+          "yAxis": {"name": "y", "label": "y", "min": -1, "unit": 18.3, "range": 17.486338797814206}
+        },
+        "objects": {
+          "24uvI51A1WtWWDV-": {
+            "type": "point",
+            "id": "24uvI51A1WtWWDV-",
+            "x": 15.382385587431692,
+            "y": 5.095457650273223,
+            "snapToGrid": true,
+            "colorScheme": 0,
+            "labelOption": "none"
+          },
+          "LXJScBGHi5_gahtN": {
+            "type": "circle",
+            "id": "LXJScBGHi5_gahtN",
+            "centerPoint": "24uvI51A1WtWWDV-",
+            "tangentPoint": "lT_91HSVo8qx2deA",
+            "colorScheme": 0
+          },
+          "lT_91HSVo8qx2deA": {
+            "type": "point",
+            "id": "lT_91HSVo8qx2deA",
+            "x": 12.584187158469945,
+            "y": 10.480105874316939,
+            "snapToGrid": true,
+            "colorScheme": 0,
+            "labelOption": "none"
+          }
+        },
+        "pointMetadata": {},
+        "linkedAttributeColors": {}
+      }
+    },
+    "KmZHPmg_IVFa_wNZ": {
+      "id": "KmZHPmg_IVFa_wNZ",
+      "title": "Image 1",
+      "fixedPosition": false,
+      "content": {
+        "type": "Image",
+        "url": "http://localhost:8080/assets/images/image_placeholder.png"
+      }
+    },
+    "_Ni0M7gssc3Ek2Cd": {
+      "id": "_Ni0M7gssc3Ek2Cd",
+      "title": "Sketch 1",
+      "fixedPosition": false,
+      "content": {
+        "type": "Drawing",
+        "isNavigatorVisible": true,
+        "navigatorPosition": "bottom",
+        "offsetX": 0,
+        "offsetY": 0,
+        "zoom": 1,
+        "version": "1.1.0",
+        "objects": [
+          {
+            "type": "line",
+            "id": "_wTGPZr_VkTxb2ie",
+            "x": 154.2265625,
+            "y": 85.56640625,
+            "hFlip": false,
+            "vFlip": false,
+            "visible": true,
+            "stroke": "#000000",
+            "strokeDashArray": "",
+            "strokeWidth": 2,
+            "fill": "none",
+            "deltaPoints": [
+              {"dx": 0, "dy": -0.23046875},
+              {"dx": -0.23046875, "dy": -0.4609375},
+              {"dx": -0.69140625, "dy": -1.3828125},
+              {"dx": -1.109375, "dy": -3.546875},
+              {"dx": 0, "dy": -3.83984375},
+              {"dx": 0.58203125, "dy": -6.22265625},
+              {"dx": 2.015625, "dy": -3.42578125},
+              {"dx": 6, "dy": -6.49609375},
+              {"dx": 12.6171875, "dy": -8.76953125},
+              {"dx": 14.046875, "dy": -6.4765625},
+              {"dx": 23.3046875, "dy": -6.3984375},
+              {"dx": 13.30859375, "dy": -1.5390625},
+              {"dx": 12.64453125, "dy": 2.84375},
+              {"dx": 7.93359375, "dy": 4.28125},
+              {"dx": 5.58984375, "dy": 4.34765625},
+              {"dx": 2.078125, "dy": 2.42578125},
+              {"dx": 4.5546875, "dy": 5.03125},
+              {"dx": 7.51171875, "dy": 9.06640625},
+              {"dx": 9.1953125, "dy": 8.671875},
+              {"dx": 11.890625, "dy": 9.69921875},
+              {"dx": 9.10546875, "dy": 5.8984375},
+              {"dx": 12.64453125, "dy": 3.83984375},
+              {"dx": 16.34375, "dy": 2.15234375},
+              {"dx": 27.86328125, "dy": 0},
+              {"dx": 19.3828125, "dy": -1.2109375},
+              {"dx": 18.72265625, "dy": -2.77734375},
+              {"dx": 6.08203125, "dy": -2.6171875},
+              {"dx": 1.4921875, "dy": -3.1328125},
+              {"dx": -0.29296875, "dy": -2.671875},
+              {"dx": -2.96875, "dy": -6.515625},
+              {"dx": -6.58203125, "dy": -10.91015625},
+              {"dx": -7.93359375, "dy": -8.4921875},
+              {"dx": -7.66796875, "dy": -4.46484375},
+              {"dx": -7.26953125, "dy": -1.65625},
+              {"dx": -4.765625, "dy": -0.953125},
+              {"dx": -21.97265625, "dy": -0.4765625},
+              {"dx": -16.36328125, "dy": 1.71875},
+              {"dx": -20.2578125, "dy": 2.7578125},
+              {"dx": -17.875, "dy": 3.40234375},
+              {"dx": -13.43359375, "dy": 4.1015625},
+              {"dx": -6.515625, "dy": 2.953125},
+              {"dx": -9.453125, "dy": 5.49609375},
+              {"dx": -6.44921875, "dy": 3.34375},
+              {"dx": -7.390625, "dy": 3.62890625},
+              {"dx": -4.59375, "dy": 1.328125},
+              {"dx": -6.22265625, "dy": 1.45703125},
+              {"dx": -6.1015625, "dy": 1.10546875},
+              {"dx": -5.76171875, "dy": 1.5078125},
+              {"dx": -8.484375, "dy": 1.3515625},
+              {"dx": -5.34765625, "dy": 0.76171875},
+              {"dx": -3.42578125, "dy": 0.6953125},
+              {"dx": -0.921875, "dy": 0.2265625},
+              {"dx": -0.69140625, "dy": 0.2265625},
+              {"dx": -0.69140625, "dy": 0},
+              {"dx": -2.2578125, "dy": 0.2265625},
+              {"dx": -2.2578125, "dy": 0.2265625},
+              {"dx": -3.83984375, "dy": 0.2890625},
+              {"dx": -3.1328125, "dy": 0.2265625},
+              {"dx": -1.61328125, "dy": 0.2265625},
+              {"dx": -1.84375, "dy": 0},
+              {"dx": -1.84375, "dy": 0.2265625},
+              {"dx": -2.90234375, "dy": 0},
+              {"dx": -3.0859375, "dy": 0},
+              {"dx": -3.9609375, "dy": 0},
+              {"dx": -3.0859375, "dy": 0},
+              {"dx": -2.671875, "dy": 0.2265625},
+              {"dx": -2.07421875, "dy": 0},
+              {"dx": -1.3828125, "dy": 0},
+              {"dx": -1.15234375, "dy": 0},
+              {"dx": -0.4609375, "dy": 0},
+              {"dx": -0.4609375, "dy": 0},
+              {"dx": -0.23046875, "dy": 0},
+              {"dx": -0.4609375, "dy": 0},
+              {"dx": -0.69140625, "dy": 0},
+              {"dx": -0.23046875, "dy": 0},
+              {"dx": -0.69140625, "dy": 0},
+              {"dx": -0.69140625, "dy": 0},
+              {"dx": -0.4609375, "dy": 0},
+              {"dx": -0.23046875, "dy": 0},
+              {"dx": -0.4609375, "dy": 0},
+              {"dx": -0.4609375, "dy": 0},
+              {"dx": -0.69140625, "dy": 0},
+              {"dx": -0.23046875, "dy": 0},
+              {"dx": -0.4609375, "dy": 0},
+              {"dx": -0.23046875, "dy": 0},
+              {"dx": -0.23046875, "dy": 0},
+              {"dx": -0.23046875, "dy": 0},
+              {"dx": 0, "dy": 0}
+            ]
+          }
+        ],
+        "stroke": "#000000",
+        "fill": "none",
+        "strokeDashArray": "",
+        "strokeWidth": 2,
+        "stamps": [
+          {"url": "curriculum/moving-straight-ahead/stamps/plus.png", "width": 25, "height": 25},
+          {"url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+          {"url": "curriculum/moving-straight-ahead/stamps/lparen.png", "width": 25, "height": 25},
+          {"url": "curriculum/moving-straight-ahead/stamps/rparen.png", "width": 25, "height": 25}
+        ]
+      }
+    },
+    "6rLKrlTcnGEuztan": {
+      "id": "6rLKrlTcnGEuztan",
+      "title": "Starter 1",
+      "fixedPosition": false,
+      "content": {"type": "Starter", "text": "Hello world"}
+    },
+    "32urdZvQh1OM2hg-": {
+      "id": "32urdZvQh1OM2hg-",
+      "title": "Simulation 1",
+      "fixedPosition": false,
+      "content": {"type": "Simulator", "simulation": "EMG_and_claw"}
+    },
+    "HtUztpw-UsGF2NEV": {
+      "id": "HtUztpw-UsGF2NEV",
+      "title": "Eq. 1",
+      "fixedPosition": false,
+      "content": {"type": "Expression", "latexStr": "\\frac13\\pi r^2h"}
+    },
+    "_j2nsG6i5VtVue61": {
+      "id": "_j2nsG6i5VtVue61",
+      "title": "Bar Graph 1",
+      "fixedPosition": false,
+      "content": {
+        "type": "BarGraph",
+        "yAxisLabel": "Counts",
+        "dataSetId": "mb4-y2PEsVHShDyU",
+        "primaryAttribute": "MwuJrxZYJzjH3TW5",
+        "attributeColorMap": {}
+      }
+    }
+  },
+  "sharedModelMap": {
+    "Y4fSYvomQWUKVwp1": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "Y4fSYvomQWUKVwp1",
+        "providerId": "NlbMhc_AkbOJY65j",
+        "dataSet": {
+          "id": "PAMPoH37zXqPnS3R",
+          "name": "Test Table",
+          "attributes": [
+            {
+              "id": "12ZrX5aYFcgp6J7V",
+              "clientKey": "",
+              "name": "x",
+              "hidden": false,
+              "units": "",
+              "formula": {},
+              "values": ["1", "3", "8"],
+              "title": ""
+            },
+            {
+              "id": "3bWqYkbLAlZp7mhb",
+              "clientKey": "",
+              "name": "y",
+              "hidden": false,
+              "units": "",
+              "formula": {},
+              "values": ["2", "5", "11"],
+              "title": ""
+            }
+          ],
+          "cases": [
+            {"__id__": "CGck6m-RLPWzm_6-"},
+            {"__id__": "F5AoYbERVTtLY-9-"},
+            {"__id__": "8rROcf5WbijpiTjB"}
+          ]
+        }
+      },
+      "tiles": ["NlbMhc_AkbOJY65j", "C0dEC5BahuatE5w9"]
+    },
+    "23JMsHM3WVwceDhi": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "23JMsHM3WVwceDhi",
+        "providerId": "IUMt2fNLewlstcjE",
+        "dataSet": {
+          "id": "mb4-y2PEsVHShDyU",
+          "name": "Card Deck Data 1",
+          "attributes": [
+            {
+              "id": "AE_vcWmtb2IURC6z",
+              "clientKey": "",
+              "name": "Label Text",
+              "hidden": false,
+              "units": "",
+              "formula": {},
+              "values": ["Dog"],
+              "title": ""
+            },
+            {
+              "id": "MwuJrxZYJzjH3TW5",
+              "clientKey": "",
+              "name": "Label Numeric",
+              "hidden": false,
+              "units": "",
+              "formula": {},
+              "values": ["10"],
+              "title": ""
+            }
+          ],
+          "cases": [{"__id__": "01JXG4EAEVR86DFQ8B4N6K2E7S"}]
+        }
+      },
+      "tiles": ["IUMt2fNLewlstcjE", "_j2nsG6i5VtVue61"]
+    },
+    "n7Dqvhg0R8Yp893s": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "n7Dqvhg0R8Yp893s",
+        "providerId": "f4vUKKIsPFzW43-t",
+        "dataSet": {
+          "id": "aloPuZ9dY-p0v2vw",
+          "name": "Program 1",
+          "attributes": [
+            {
+              "id": "ATTRqn9Blc-9WnT9",
+              "clientKey": "",
+              "name": "x",
+              "hidden": false,
+              "units": "",
+              "formula": {},
+              "values": [],
+              "title": ""
+            },
+            {
+              "id": "ATTRuGlE8Ng6wXdP",
+              "clientKey": "",
+              "name": "y",
+              "hidden": false,
+              "units": "",
+              "formula": {},
+              "values": [],
+              "title": ""
+            }
+          ],
+          "cases": []
+        }
+      },
+      "tiles": ["f4vUKKIsPFzW43-t"]
+    },
+    "BRxf0qiUrKHzYmqx": {
+      "sharedModel": {"type": "SharedProgramData", "id": "BRxf0qiUrKHzYmqx"},
+      "tiles": ["f4vUKKIsPFzW43-t", "32urdZvQh1OM2hg-"]
+    },
+    "ZiqLIrCXerw1kP4W": {
+      "sharedModel": {
+        "type": "SharedVariables",
+        "id": "ZiqLIrCXerw1kP4W",
+        "variables": [
+          {
+            "id": "4g-krQB7Y0xOLA2b",
+            "name": "variable_test",
+            "description": "",
+            "unit": "test unit",
+            "inputs": [],
+            "color": "light-gray",
+            "labels": []
+          },
+          {
+            "id": "5_oBJZ74ngOUh6D9",
+            "name": "target_emg_key",
+            "displayName": "Target EMG",
+            "value": 40,
+            "inputs": [],
+            "color": "light-gray",
+            "labels": []
+          },
+          {
+            "id": "c9561nuH0CdjytQd",
+            "name": "emg_key",
+            "displayName": "EMG",
+            "unit": "mV",
+            "value": 37,
+            "inputs": [],
+            "color": "light-gray",
+            "icon": "ccicon://emg_key",
+            "labels": ["input", "sensor:emg-reading", "decimalPlaces:0"]
+          },
+          {
+            "id": "sNtd57MUqITlIMpx",
+            "name": "pressure_key",
+            "displayName": "Surface Pressure",
+            "unit": "psi",
+            "value": 0,
+            "inputs": [],
+            "color": "light-gray",
+            "icon": "ccicon://pressure_key",
+            "labels": ["input", "sensor:fsr-reading", "className:long-name", "decimalPlaces:0"]
+          },
+          {
+            "id": "K6LVoQMPcw56cjHU",
+            "name": "gripper_key",
+            "displayName": "Gripper",
+            "unit": "% closed",
+            "value": 0,
+            "inputs": [],
+            "color": "light-gray",
+            "icon": "ccicon://gripper_key",
+            "labels": [
+              "output",
+              "live-output:Grabber",
+              "live-output:Gripper 2.0",
+              "decimalPlaces:0"
+            ]
+          },
+          {
+            "id": "SLuy5-CwNrpc8ark",
+            "name": "pan_temperature_key",
+            "displayName": "Pan Temperature",
+            "value": 100,
+            "inputs": [],
+            "color": "light-gray",
+            "labels": []
+          },
+          {
+            "id": "oZHGzgLqjLafkVnf",
+            "name": "temperature_key",
+            "displayName": "Temperature",
+            "unit": "°C",
+            "value": 15.5,
+            "inputs": [],
+            "color": "light-gray",
+            "icon": "ccicon://temperature_key",
+            "labels": ["input", "sensor:temperature"]
+          },
+          {
+            "id": "fLOyVIOwigV-Pgc8",
+            "name": "simulation_mode_key",
+            "displayName": "Simulation Mode",
+            "value": 0,
+            "inputs": [],
+            "color": "light-gray",
+            "labels": []
+          }
+        ]
+      },
+      "tiles": [
+        "3erpAcuSec2F9MBA",
+        "tile1",
+        "qsCV0d-Cz4t0Atfx",
+        "jtTKscqjG88FQoI4",
+        "OKRQWYioGbIUDfng",
+        "f4vUKKIsPFzW43-t",
+        "32urdZvQh1OM2hg-"
+      ]
+    },
+    "93VDCJh0_D3k6P55": {
+      "sharedModel": {
+        "type": "SharedCaseMetadata",
+        "id": "93VDCJh0_D3k6P55",
+        "data": "PAMPoH37zXqPnS3R",
+        "collections": {},
+        "categories": {
+          "12ZrX5aYFcgp6J7V": {"attribute": "12ZrX5aYFcgp6J7V", "colors": {}, "moves": []},
+          "3bWqYkbLAlZp7mhb": {"attribute": "3bWqYkbLAlZp7mhb", "colors": {}, "moves": []}
+        },
+        "columnWidths": {},
+        "hidden": {}
+      },
+      "tiles": ["C0dEC5BahuatE5w9"]
+    }
+  },
+  "annotations": {
+    "ife5dPbQDKM85paB": {
+      "id": "ife5dPbQDKM85paB",
+      "sourceObject": {
+        "tileId": "NlbMhc_AkbOJY65j",
+        "objectId": "cell:{CGck6m-RLPWzm_6-}:{3bWqYkbLAlZp7mhb}",
+        "objectType": "cell"
+      },
+      "sourceOffset": {"dx": 0, "dy": -8},
+      "targetObject": {
+        "tileId": "C0dEC5BahuatE5w9",
+        "objectId": "dot:{CGck6m-RLPWzm_6-}:{12ZrX5aYFcgp6J7V}:{3bWqYkbLAlZp7mhb}",
+        "objectType": "dot"
+      },
+      "targetOffset": {"dx": 0, "dy": -7},
+      "text": "y=2",
+      "textOffset": {"dx": 23.083333333333364, "dy": -151.35503472222223},
+      "shape": "curved",
+      "type": "arrowAnnotation"
+    }
+  }
+}

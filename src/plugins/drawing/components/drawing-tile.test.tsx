@@ -179,7 +179,6 @@ describe("DrawingToolComponent", () => {
 
     // Content already has a square in it from previous test.
     content.addAndSelectObject(rectangleSnapshot);
-    screen.getByLabelText("Open show/sort panel").click();
     let items = within(screen.getByTestId("object-list-view")).getAllByRole("listitem");
     expect(items).toHaveLength(2);
     expect(items[0]).toContainHTML("Rectangle");

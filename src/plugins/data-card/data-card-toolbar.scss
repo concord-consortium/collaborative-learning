@@ -1,5 +1,5 @@
-@import "../../components/vars.sass";
-@import "../../components/mixins.sass";
+@import "../../components/vars";
+@import "../../components/mixins";
 
 .data-card-toolbar {
   @include tile-toolbar;

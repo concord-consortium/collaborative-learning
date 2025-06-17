@@ -1,0 +1,433 @@
+//
+// general settings
+//
+
+$animation-speed: 500ms;
+
+$border-radius: 6px;
+$half-border-radius: 3px;
+
+$border-width: 4px;
+$half-border-width: 2px;
+$document-border-width: 2px;
+
+$padding: 10px;
+$quarter-padding: 2.5px;
+$half-padding: 5px;
+$double-padding: $padding * 2;
+$small-padding: 2px;
+
+$margin: 10px;
+$quarter-margin: 2.5px;
+$half-margin: 5px;
+$double-margin: $margin * 2;
+
+//
+// colors
+//
+
+$border-color: #FBF8E5;
+
+// sage
+$color1: #c9dab7;
+$color1-1: #f1f6ed;
+$color1-2: #e4ecdb;
+$color1-3: #d7e3c9;
+$color1-4: #b3ca9d;
+$color1-5: #9eba83;
+$color1-6: #85a667;
+$color1-7: #6a8e4a;
+
+// rust
+$color2: #e0b1b3;
+$color2-1: #f7ebec;
+$color2-2: #efd8d9;
+$color2-3: #e8c5c6;
+$color2-4: #d29698;
+$color2-5: #c57b7e;
+$color2-6: #b35f62;
+$color2-6: #9d4245;
+
+// cloud
+$color3: #bfbfbf;
+$color3-1: #f8f8f8;
+$color3-2: #efefef;
+$color3-3: #e9e9e9;
+$color3-4: #dfdfdf;
+$color3-5: #cfcfcf;
+$color3-6: #a7a7a7;
+$color3-7: #8f8f8f;
+$color3-8: #747474;
+
+// gold
+$color4: #e7e4b3;
+$color4-1: #f9f8ec;
+$color4-2: #f3f1d9;
+$color4-3: #edebc6;
+$color4-4: #dcd898;
+$color4-5: #d1cc7e;
+$color4-6: #c2bc62;
+$color4-7: #f3f1da;
+$color4-8: #d2cd7f;
+$color4-9: #ddd999;
+$color4-10: #faf5e9;
+$color4-11: #f1e3bd;
+$color4-hover: $color4-4;
+$color4-selected: $color4-5;
+
+// terra
+$color5: #ecd8a5;
+$color5-1: #faf5e8;
+$color5-2: #f5ebd2;
+$color5-3: #f1e2bc;
+$color5-4: #e3c788;
+$color5-5: #dab76b;
+$color5-6: #cea24f;
+$color5-hover: $color5-4;
+$color5-selected: $color5-5;
+
+// sky
+$color6: #a4cde9;
+$color6-1: #e8f2f9;
+$color6-2: #d1e6f4;
+$color6-3: #bbdaef;
+$color6-4: #86b9df;
+$color6-5: #69a5d5;
+$color6-6: #4d8dc8;
+$color6-hover: $color6-4;
+$color6-selected: $color6-5;
+
+// blue
+$color7: #00aae2;
+$color7-1: #f7fcfe;
+$color7-2: #bfeaf8;
+$color7-3: #7fd4f0;
+$color7-4: #009cdb;
+$color7-5: #007fcf;
+$color7-hover: $color5-4;
+$color7-selected: $color5-5;
+
+// orange
+$color8: #e98c42;
+$color8-1: #fefbf9;
+$color8-2: #f9e2d0;
+$color8-3: #f4c5a0;
+$color8-4: #e47c36;
+$color8-5: #da5d1d;
+$color8-hover: $color8-4;
+$color8-selected: $color8-5;
+
+// purple
+$color9: #bd599d;
+$color9-1: #fdfafc;
+$color9-2: #eed5e6;
+$color9-3: #deacce;
+$color9-4: #b14a8e;
+$color9-5: #982e70;
+$color9-hover: $color9-4;
+$color9-selected: $color9-5;
+
+// green
+$color10: #49b860;
+$color10-1: #a4dbaf;
+$color10-2: #d1edd7;
+$color10-3: #f9fdfa;
+$color10-4: #3cab51;
+$color10-5: #229233;
+$color10-hover: $color10-4;
+$color10-selected: $color10-5;
+
+// fonts
+$font-1-color: #2e5f02;
+$font-2-color: #595402;
+$font-3-color: #242424;
+$font-4-color: #595402;
+$font-5-color: #622E02;
+$font-6-color: #021860;
+
+//
+// New Colors (2019)
+//
+
+//
+// Environments and Tabs
+//
+
+// Sage
+$sage-light-3: #f1f6ed;
+$sage-light-2: #e4ecdb;
+$sage-light-1: #d7e3c9;
+$sage: #c9dab7;
+$sage-dark-1: #b3ca9d;
+$sage-dark-2: #9eba83;
+$sage-dark-3: #85a667;
+$sage-dark-4: #6a8e4a;
+$sage-dark-5: #547935;
+$sage-text: #2e5f02;
+
+// Sky
+$sky-light-3: #e8f2f9;
+$sky-light-2: #d1e6f4;
+$sky-light-1: #bbdaef;
+$sky: #a4cde9;
+$sky-dark-1: #86b9df;
+$sky-dark-2: #69a5d5;
+$sky-dark-3: #4d8dc8;
+$sky-dark-4: #3272b6;
+$sky-dark-5: #205ca6;
+$sky-text: #021860;
+
+// Peacock
+$peacock-light-3: #edf6f4;
+$peacock-light-2: #dbece9;
+$peacock-light-1: #c9e3de;
+$peacock: #b7dad3;
+$peacock-dark-1: #9dcac2;
+$peacock-dark-2: #83bab0;
+$peacock-dark-3: #67a69c;
+$peacock-dark-4: #4a8e83;
+$peacock-dark-5: #35796f;
+$peacock-text: #025f50;
+
+// Golden
+$golden-light-3: #f9f8ec;
+$golden-light-2: #f3f1d9;
+$golden-light-1: #edebc6;
+$golden: #e7e4b3;
+$golden-dark-1: #dcd898;
+$golden-dark-2: #d1cc7e;
+$golden-dark-3: #c2bc62;
+$golden-dark-4: #b0a845;
+$golden-dark-5: #9f9630;
+$golden-text: #595402;
+
+// Terra
+$terra-light-3: #faf5e8;
+$terra-light-2: #f5ebd2;
+$terra-light-1: #f1e2bc;
+$terra: #ecd8a5;
+$terra-dark-1: #e3c788;
+$terra-dark-2: #dab76b;
+$terra-dark-3: #cea24f;
+$terra-dark-4: #bf8933;
+$terra-dark-5: #b17421;
+$terra-text: #622e02;
+
+// Rust
+$rust-light-3: #f7ebec;
+$rust-light-2: #efd8d9;
+$rust-light-1: #e8c5c6;
+$rust: #e0b1b3;
+$rust-dark-1: #d29698;
+$rust-dark-2: #c57b7e;
+$rust-dark-3: #b35f62;
+$rust-dark-4: #9d4245;
+$rust-dark-5: #8a2e30;
+$rust-text: #640206;
+
+// CC Colors
+$star-yellow: #fff000;
+$tool-blue: #0000ff;
+$tool-green: #00ab7d;
+$tool-yellow: #fffb00;
+$sticky-note-yellow: #ffff88;
+$data-red: #ff3d3d;
+$data-aqua: #17ddd7;
+$data-yellow: #d3d114;
+$data-blue: #3974ff;
+$data-purple: #d51eff;
+$data-green: #49d381;
+$workspace-teal-dark-2: #016082;
+$workspace-teal-dark-1: #0481a0;
+$workspace-teal: #0592af;
+$workspace-teal-light-1: #2ba5c1;
+$workspace-teal-light-1-b: #55b7cd;
+$workspace-teal-light-2: #6fc6da;
+$workspace-teal-light-3: #93d5e4;
+$workspace-teal-light-4: #b7e2ec;
+$workspace-teal-light-5: #cdebf2;
+$workspace-teal-light-6: #d8eff5;
+$workspace-teal-light-7: #e2f4f8;
+$workspace-teal-light-8: #f0f9fb;
+$workspace-teal-light-9: #f5fbfc;
+$problem-orange-dark-1: #ea6d2f;
+$problem-orange: #ff8415;
+$problem-orange-light-1: #ff902c;
+$problem-orange-light-2: #ffa350;
+$problem-orange-light-3: #ffb16b;
+$problem-orange-light-4: #ffc18a;
+$problem-orange-light-5: #ffd4ad;
+$problem-orange-light-6: #ffdec0;
+$problem-orange-light-7: #ffe6d0;
+$problem-orange-light-8: #fff2e7;
+$problem-orange-light-9: #fff9f3;
+$support-blue-dark-1: #0081db;
+$support-blue: #159fff;
+$support-blue-light-1: #2ca8ff;
+$support-blue-light-2: #50b7ff;
+$support-blue-light-3: #6bc2ff;
+$support-blue-light-4: #8aceff;
+$support-blue-light-5: #addeff;
+$support-blue-light-6: #c0e5ff;
+$support-blue-light-7: #d0ecff;
+$support-blue-light-8: #e7f5ff;
+$support-blue-light-9: #f3faff;
+$decoration-yellow: #FFFF00;
+$learninglog-green-dark-1: #2a8a38;
+$learninglog-green: #4ea15a;
+$learninglog-green-light-1: #5faa6a;
+$learninglog-green-light-2: #7bb984;
+$learninglog-green-light-3: #8fc397;
+$learninglog-green-light-4: #a6d0ac;
+$learninglog-green-light-5: #c1dec6;
+$learninglog-green-light-6: #cfe5d2;
+$learninglog-green-light-7: #dcecde;
+$learninglog-green-light-8: #edf5ee;
+$learninglog-green-light-9: #f6faf7;
+
+$classwork-purple-dark-1: #aa2ff0;
+$classwork-purple: #c765ff;
+$classwork-purple-light-1: #cc74ff;
+$classwork-purple-light-2: #d68cff;
+$classwork-purple-light-3: #dc9eff;
+$classwork-purple-light-4: #e3b1ff;
+$classwork-purple-light-5: #ecc9ff;
+$classwork-purple-light-6: #f0d5ff;
+$classwork-purple-light-7: #f4e0ff;
+$classwork-purple-light-8: #f9efff;
+$classwork-purple-light-9: #fcf7ff;
+
+$charcoal-dark-3: #080808;
+$charcoal-dark-2: #3f3f3f;
+$charcoal-dark-1: #545454;
+$charcoal: #707070;
+$charcoal-light-1: #949494;
+$charcoal-light-1-b: #a9a9a9;
+$charcoal-light-1-c: #979797;
+$charcoal-light-2: #bfbfbf;
+$charcoal-light-3: #cfcfcf;
+$charcoal-light-4: #dfdfdf;
+$charcoal-light-5: #e9e9e9;
+$charcoal-light-6: #eeeeee;
+$charcoal-light-7: #f2f2f2;
+$charcoal-light-8: #f6f6f6;
+$charcoal-light-9: #f8f8f8;
+$id-blue-light: #dff7ff;
+$id-blue-medium: #aceaff;
+$id-blue: #80e0ff;
+$id-orange-light: #fff1e6;
+$id-orange-medium: #ffdbbf;
+$id-orange: #ffc89c;
+$id-purple-light: #fff0fa;
+$id-purple-medium: #ffd7f2;
+$id-purple: #ffc1eb;
+$id-green-light: #e4f9e8;
+$id-green-medium: #b8f0c3;
+$id-green: #91e7a2;
+$new-comment-notice: #5fff32;
+
+$highlight-blue: #0081ff;
+$highlight-blue-20: #0081ff33;
+$highlight-blue-40: #0081ff66;
+$highlight-blue-50: #80c0ff;
+$highlight-blue-25: #c0e0ff;
+$highlight-blue-50-35: #c3efff;
+
+$tool-tile-hover-border-color: #82C8D7;
+$tool-tile-readonly-border-color: #828282;
+
+// Colors for synchronous highlighting of shared datasets
+$highlight-linked-header: #92ecc9;
+$highlight-linked-cell: #cffae8;
+$highlight-linked-edit: #71f1a5;
+$highlight-unlinked-header: #8bbff3;
+$highlight-unlinked-cell: #c4defc;
+$highlight-unlinked-edit: #0081ff;
+
+$document-select-green: #98ffd0;
+$document-select-blue: #98ebff;
+
+$comment-select-yellow: #eaf28e;
+$comment-select-background: #f7fbc7;
+
+$problem-comment-hover: #f5ecaf;
+$teacherguide-comment-hover: #e3efb6;
+$studentgroups-comment-hover: #ecf0be;
+$mywork-comment-hover: #e1f1c2;
+$classwork-comment-hover: #efe9c7;
+
+$network-yellow: #faec8d;
+
+$annotation-blue: #1500ff;
+$annotation-blue-dark: #0800d0;
+$annotation-half-blue: #887ff7;
+$annotation-light-blue: #e2e0fd;
+$annotation-blue-barely-transparent: rgba(21, 0, 255, 0.5);
+$annotation-blue-transparent: rgba(21, 0, 255, 0.25);
+$annotation-blue-very-transparent: rgba(21, 0, 255, 0.125);
+
+//
+// shared component dimensions
+//
+
+$header-height: 55px;
+$tab-section-border-width: 2px;
+
+$nav-expanded-peek: 12px;
+$half-nav-expanded-peek: 4px;
+$double-nav-expanded-peek: $nav-expanded-peek * 2;
+
+$bottom-nav-contracted-height: 35px;
+$bottom-nav-expanded-height: 130px;
+
+$left-nav-contracted-width: 94px;
+
+$right-nav-contracted-width: 112px;
+
+$workspace-titlebar-height: 36px;
+$workspace-statusbar-height: 40px;
+$workspace-toolbar-width: 36px;
+
+$canvas-separator-offset: 4px;
+$canvas-separator-width: 2px;
+
+$document-margin: 2px;
+
+$toolbar-border: solid 2px $workspace-teal;
+$toolbar-border-radius: 5px;
+// Should match TOOLBAR_BUTTON_WIDTH in tile-toolbar.tsx
+$toolbar-button-width: 36px;
+$toolbar-button-height: 34px;
+$toolbar-height: $toolbar-button-height + 4px;
+
+// above .bottom-resize-handle
+$toolbar-z-index: 3;
+
+//
+// tabs
+//
+
+$tab-min-height: 50px;
+$nav-tab-height: 36px;
+
+@mixin tab($direction) {
+  display: flex;
+  justify-content: $direction;
+  align-items: center;
+  text-align: $direction;
+  color: #474748;
+  font-size: 14px;
+  letter-spacing: 0;
+  padding: 0 5px;
+}
+
+//
+// teacher dashboard
+//
+$date-width: 76px;
+$date-margin: 24px;
+$section-width: 185px;
+$teacher-margin: 10px;
+$footer-height: 55px;
+$right-controls-width: 55px;
+$six-pack-height: calc(100vh - (#{$header-height} + 20px));

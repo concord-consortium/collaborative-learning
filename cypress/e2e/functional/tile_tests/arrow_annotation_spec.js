@@ -143,6 +143,24 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getPreviewArrow().should("not.exist");
     aa.getAnnotationDeleteButtons().eq(2).click();
 
+    cy.log("Can annotate grouped objects");
+    aa.getAnnotationArrows().should("have.length", 2);
+    aa.getAnnotationButtons().should("have.length", 3);
+    // Group the two rectangles
+    aa.getAnnotationModeButton().click(); // sparrow mode off
+    drawToolTile.getRectangleDrawing().eq(0).click();
+    drawToolTile.getRectangleDrawing().eq(1).click({ shiftKey: true });
+    clueCanvas.clickToolbarButton('drawing', 'group');
+    aa.getAnnotationModeButton().click(); // sparrow mode on
+    aa.getAnnotationArrows().should("have.length", 2); // doesn't change number of arrows
+    aa.getAnnotationButtons().should("have.length", 3); // doesn't change number of buttons
+    // Ungroup the two rectangles
+    aa.getAnnotationModeButton().click(); // sparrow mode off
+    drawToolTile.getDrawTile().click();
+    drawToolTile.getGroupDrawing().eq(0).find("rect.group-rect").eq(0).click();
+    clueCanvas.clickToolbarButton('drawing', 'ungroup');
+    aa.getAnnotationModeButton().click(); // sparrow mode on
+
     // Long click or drag, however, does not create a new sparrow.
     aa.getAnnotationArrowDragHandles().eq(3).trigger('mousedown', { force: true });
     cy.wait(500);
@@ -240,7 +258,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationMenuExpander().click();
     aa.getStraightArrowToolbarButton().click();
     aa.getAnnotationButtons().eq(0).click(); // First end is anchored to an object
-    aa.getAnnotationSvg().click(200, 150);
+    aa.getAnnotationSvg().click(200, 190);
     aa.getAnnotationArrows().should("have.length", 1);
 
     aa.getAnnotationSvg().click(500, 100);
@@ -254,8 +272,8 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 0);
 
     // Attempting to connect both ends to objects results in second end being free
-    aa.getAnnotationButtons().eq(0).click();
-    aa.getAnnotationButtons().eq(1).click(); // Just the click location is used.
+    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationButtons().eq(0).click(); // Just the click location is used.
     aa.getAnnotationModeButton().click(); // exit sparrow mode
     aa.getAnnotationArrows().should("have.length", 1);
     drawToolTile.getEllipseDrawing().find("ellipse").click({ force: true, scrollBehavior: false });
@@ -327,6 +345,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationModeButton().click();
     // Copy the original table. This has one internal sparrow and one sparrow shared with the other tile.
     tableToolTile.getTableCell().eq(0).click();
+    tableToolTile.getTableCell().eq(0).click(); // Single click work in actual table but not in Cypress
     clueCanvas.getDuplicateTool().click();
     aa.getAnnotationModeButton().click(); // To force a rerender of the annotation layer
     aa.getAnnotationModeButton().click();

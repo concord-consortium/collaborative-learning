@@ -67,6 +67,34 @@ context('Test Canvas', function () {
     textToolTile.enterText('this is ' + studentWorkspace);
     textToolTile.getTextTile().should('be.visible').and('contain', studentWorkspace);
 
+    cy.log('verify tiles can be selected');
+    geometryToolTile.getGeometryTile().should('not.have.class', 'selected');
+    geometryToolTile.getGeometryTile().click();
+    geometryToolTile.getGeometryTile().should('have.class', 'selected');
+
+    // Selecting a different tile should deselect the previous tile
+    tableToolTile.getTableTile().should('not.have.class', 'selected');
+    tableToolTile.getTableTile().click();
+    tableToolTile.getTableTile().should('have.class', 'selected');
+    geometryToolTile.getGeometryTile().should('not.have.class', 'selected');
+
+    // Shift-click allows selection of both tiles
+    geometryToolTile.getGeometryTile().click({ shiftKey: true });
+    geometryToolTile.getGeometryTile().should('have.class', 'selected');
+    tableToolTile.getTableTile().should('have.class', 'selected');
+
+    // Shift-click can also be used to toggle selection off
+    geometryToolTile.getGeometryTile().click({ shiftKey: true });
+    geometryToolTile.getGeometryTile().should('not.have.class', 'selected');
+    tableToolTile.getTableTile().should('have.class', 'selected');
+
+    // Click to select should also work if you click on the drag handle (which is shown on hover)
+    geometryToolTile.getGeometryTile().parents('[data-testid="tool-tile"]').trigger('mouseenter');
+    geometryToolTile.getGeometryTile().parents('[data-testid="tool-tile"]').trigger('mouseover');
+    geometryToolTile.getGeometryTile().parents('[data-testid="tool-tile"]').find('.tool-tile-drag-handle').click();
+    geometryToolTile.getGeometryTile().should('have.class', 'selected');
+    tableToolTile.getTableTile().should('not.have.class', 'selected');
+
     cy.log('verify copy of personal workspace');
     canvas.copyDocument(copyTitle);
     canvas.getPersonalDocTitle().should('contain', copyTitle);
