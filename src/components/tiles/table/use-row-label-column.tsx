@@ -98,7 +98,7 @@ export const useRowLabelColumn = ({inputRowId, hoveredRowId, showRowLabels, setS
     };
 
     return <DraggableRowLabel />;
-  }, [hoveredRowId, inputRowId, setDragOverRowId, setHoveredRowId, showRowLabels]);
+  }, [hoveredRowId, inputRowId, setDragOverRowId, setHoveredRowId, showRowLabels, dragOverRowId, gridElement, rowHeight]);
 
   return { RowLabelHeader, RowLabelFormatter };
 };

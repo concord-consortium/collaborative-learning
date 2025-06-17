@@ -97,16 +97,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     }
   }, [gridContext, gridRef]);
 
-  useEffect(() => {
-    if (gridRef.current) {
-      const tableEl = gridRef.current.element;
-      const gridEl = tableEl?.getElementsByClassName("rdg")[0] as HTMLDivElement | undefined;
-      if (gridEl) {
-        setGridElement(gridEl);
-      }
-    }
-  },[]);
-
   // Maintains the cache of data values that map to image URLs.
   // For use in a synchronous context, returns undefined immediately if an image is not yet cached,
   // and then looks it up in the background, adds to cache, and updates state to force a refresh.
