@@ -41,7 +41,7 @@ export function rotatePoint(point: {x: number, y: number}, center: {x: number, y
   };
 }
 
-export function boundingBoxForPoints(points: {x: number, y: number}[]): BoundingBoxSides {
+export function boundingBoxSidesForPoints(points: {x: number, y: number}[]): BoundingBoxSides {
   const minX = Math.min(...points.map(p => p.x));
   const maxX = Math.max(...points.map(p => p.x));
   const minY = Math.min(...points.map(p => p.y));
@@ -89,7 +89,7 @@ export function rotateBoundingBox(boundingBox: BoundingBox, rotation: number): B
   const rotatedSE = se; //rotatePoint(se, se, rotation);
   const rotatedSW = rotatePoint(sw, se, rotation);
   // Find min/max x and y
-  const boundingSides = boundingBoxForPoints([rotatedNW, rotatedNE, rotatedSE, rotatedSW]);
+  const boundingSides = boundingBoxSidesForPoints([rotatedNW, rotatedNE, rotatedSE, rotatedSW]);
   return {
     nw: { x: boundingSides.left, y: boundingSides.top },
     se: { x: boundingSides.right, y: boundingSides.bottom }
