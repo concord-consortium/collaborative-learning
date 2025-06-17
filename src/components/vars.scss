@@ -395,8 +395,9 @@ $document-margin: 2px;
 
 $toolbar-border: solid 2px $workspace-teal;
 $toolbar-border-radius: 5px;
-// Should match TOOLBAR_BUTTON_WIDTH in tile-toolbar.tsx
 $toolbar-button-width: 36px;
+$toolbar-button-margin: 1px;
+$toolbar-divider-width: 1px;
 $toolbar-button-height: 34px;
 $toolbar-height: $toolbar-button-height + 4px;
 
@@ -431,3 +432,11 @@ $teacher-margin: 10px;
 $footer-height: 55px;
 $right-controls-width: 55px;
 $six-pack-height: calc(100vh - (#{$header-height} + 20px));
+
+// Exported for use in TypeScript
+
+:export {
+  toolbarButtonWidth: $toolbar-button-width;
+  toolbarButtonMargin: $toolbar-button-margin;
+  toolbarDividerWidth: $toolbar-divider-width;
+}

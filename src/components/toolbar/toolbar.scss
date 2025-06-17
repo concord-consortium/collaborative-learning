@@ -37,8 +37,8 @@
   align-self: flex-start;
 
   div.divider {
-    margin-left: 1px;
-    border-left: dotted 1px $workspace-teal;
+    margin-left: $toolbar-button-margin;
+    border-left: dotted $toolbar-divider-width $workspace-teal;
     height: 100%;
     width: 0px;
   }
@@ -55,7 +55,7 @@
     user-select: none;
     width: $toolbar-button-width;
     height: $toolbar-button-height;
-    margin-left: 1px;
+    margin-left: $toolbar-button-margin;
     padding: 0;
     background-color: $workspace-teal-light-9;
     cursor: pointer;
@@ -166,4 +166,3 @@
     }
   }
 }
-

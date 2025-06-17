@@ -8,10 +8,15 @@ import { getToolbarButtonInfo } from "./toolbar-button-manager";
 import { TileModelContext } from "../tiles/tile-api";
 import { JSONValue } from "../../models/stores/settings";
 import { useCanvasMethodsContext } from "../document/canvas-methods-context";
+import { getPixelWidthFromCSSStyle } from "../../utilities/js-utils";
+import styles from "../vars.scss";
 
-const BUTTON_WIDTH = 36;
-const BUTTON_BORDER_WIDTH = 1;
-const SCROLLBAR_WIDTH = 25;
+
+const buttonWidth = getPixelWidthFromCSSStyle(styles.toolbarButtonWidth) || 1;
+const buttonMargin = getPixelWidthFromCSSStyle(styles.toolbarButtonMargin) || 1;
+const dividerWidth = getPixelWidthFromCSSStyle(styles.toolbarDividerWidth) || 1;
+
+const SCROLLBAR_WIDTH = 25; // Not a CSS property, but an allowance to cover scrollbar and container borders
 
 interface ToolbarWrapperProps {
   tileType: string,
@@ -77,7 +82,7 @@ export const TileToolbar = observer(
         let itemsThatFit = 0;
         for (let i = 0; i < buttonDescriptions.length; ++i) {
           const desc = buttonDescriptions[i];
-          const itemWidth = (desc === '|' ? 0 : BUTTON_WIDTH) + BUTTON_BORDER_WIDTH;
+          const itemWidth = (desc === '|' ? dividerWidth : buttonWidth) + buttonMargin;
           if (totalWidth + itemWidth > availableWidth) break;
           totalWidth += itemWidth;
           itemsThatFit++;

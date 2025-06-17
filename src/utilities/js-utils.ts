@@ -174,3 +174,17 @@ export function notEmpty<TValue>(value: TValue | null | undefined): value is TVa
 export function arraysEqualIgnoringOrder(a: string[], b: string[]) {
   return a.length === b.length && a.every((value) => b.includes(value));
 }
+
+/**
+ * Simpleminded helper to get "2" from "2px".
+ * @param style string imported from CSS
+ * @returns number of pixels, if the style appears to be a pixel width.
+ */
+export function getPixelWidthFromCSSStyle(style: string): number | undefined {
+  if (style.endsWith('px')) {
+    return parseFloat(style);
+  } else {
+    console.warn('Expected pixel width, but got: ', style);
+    return undefined;
+  }
+}
