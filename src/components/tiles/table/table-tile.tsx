@@ -121,8 +121,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
   const [dragOverRowId, setDragOverRowId] = useState<string | null>(null);
   const rowLabelProps = useRowLabelColumn({
-    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels, hoveredRowId, setHoveredRowId, dragOverRowId, setDragOverRowId,
-    rowHeight, gridElement
+    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels, hoveredRowId, setHoveredRowId, dragOverRowId,
+    setDragOverRowId, rowHeight, gridElement
   });
 
   // rows are required by ReactDataGrid and are used by other hooks as well
@@ -288,12 +288,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       dataGrid?.style.setProperty("--row-selected-background-color", "rgba(0,0,0,0)");
     }
   }, [gridRef, containerRef]);
-
-  // useEffect(() => {
-  //   if (gridRef.current?.element) {
-  //     setGridElement(gridRef.current.element);
-  //   }
-  // }, [gridRef]);
 
   // Force a rerender whenever the model's attributes change (which contain the individual cells)
   useEffect(() => {
