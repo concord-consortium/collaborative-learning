@@ -481,14 +481,31 @@ class ClueCanvas {
                       .parent()
                       .filter('[data-tooltipped]');
     }
-
     /**
      * Locate a requested toolbar button's tooltip element and return its text value
      * @param {*} tileType string name of the tile
      * @param {*} buttonName string name of the button
      */
     getToolbarButtonToolTipText(tileType, buttonName) {
-      return this.getToolbarButtonToolTip(tileType, buttonName).invoke('attr', 'data-original-title');
+        return this.getToolbarButtonToolTip(tileType, buttonName).invoke('attr', 'data-original-title');
+    }
+
+    /**
+     * Cleans up all text tiles in the workspace if any exist
+     * This function will check for text tiles first, and only attempt deletion if they are found
+     */
+    cleanupTextTiles() {
+        canvas.getSingleCanvas().then(($workspace) => {
+            if ($workspace.find('.text-tool').length > 0) {
+                textToolTile.getTextTile().then(($tiles) => {
+                    // If there are any text tiles, delete them one by one
+                    for (let i = 0; i < $tiles.length; i++) {
+                        this.deleteTile('text');
+                        cy.wait(500); // Wait for any animations/resize operations to complete
+                    }
+                });
+            }
+        });
     }
 }
 
