@@ -4,6 +4,7 @@ import { BaseComponent, IBaseProps } from "../base";
 import { InvestigationModelType } from "../../models/curriculum/investigation";
 import { ProblemModelType } from "../../models/curriculum/problem";
 import { parseUrl, stringify } from "query-string";
+import { kDemoSiteStorageKey } from "../../models/stores/store-types";
 
 import "./demo-creator.sass";
 
@@ -148,7 +149,14 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
   };
 
   private handleSetName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = `${e.target.value}`;
+    const name = e.target.value.trim();
     this.stores.demo.setName(name);
+    if (name) {
+      try {
+        window.localStorage.setItem(kDemoSiteStorageKey, name);
+      } catch (error) {
+        console.warn("Unable to save demo name; perhaps localStorage is disabled:", error);
+      }
+    }
   };
 }
