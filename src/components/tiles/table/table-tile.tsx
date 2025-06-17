@@ -278,19 +278,22 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   });
 
   useEffect(() => {
+    if (gridRef.current?.element) {
+      setGridElement(gridRef.current.element);
+    }
     if (containerRef.current) {
       // override the CSS variables controlling selection color for linked tables
       const dataGrid = containerRef.current.getElementsByClassName("rdg")[0] as HTMLDivElement | undefined;
       dataGrid?.style.setProperty("--header-selected-background-color", "rgba(0,0,0,0)");
       dataGrid?.style.setProperty("--row-selected-background-color", "rgba(0,0,0,0)");
     }
-  });
+  }, [gridRef, containerRef]);
 
-  useEffect(() => {
-    if (gridRef.current?.element) {
-      setGridElement(gridRef.current.element);
-    }
-  }, [gridRef]);
+  // useEffect(() => {
+  //   if (gridRef.current?.element) {
+  //     setGridElement(gridRef.current.element);
+  //   }
+  // }, [gridRef]);
 
   // Force a rerender whenever the model's attributes change (which contain the individual cells)
   useEffect(() => {
