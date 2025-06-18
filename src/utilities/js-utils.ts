@@ -181,7 +181,7 @@ export function arraysEqualIgnoringOrder(a: string[], b: string[]) {
  * @returns number of pixels, if the style appears to be a pixel width.
  */
 export function getPixelWidthFromCSSStyle(style: string): number | undefined {
-  if (style.endsWith('px')) {
+  if (style?.endsWith('px')) {
     return parseFloat(style);
   } else {
     console.warn('Expected pixel width, but got: ', style);
