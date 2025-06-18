@@ -19,10 +19,17 @@
     background: #f7e58f;
     border: solid 0.8px #3f3f3f;
     border-radius: 3px;
-    padding: 2px 4px;
-    font-family: "PTSans";
+    padding: 1px 2px;
+    font-family: "PTSans-Narrow";
     font-size: 14px;
-    font-weight: "narrow";
-    color: #3f3f3f
+    color: #3f3f3f;
+    user-select: none;
+    margin: 0;
+    white-space: nowrap;
+
+    &.slate-selected {
+      outline: 2px solid #87cefa;
+    }
   }
+
 }

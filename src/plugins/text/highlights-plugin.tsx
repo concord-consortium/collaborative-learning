@@ -1,18 +1,15 @@
 import React, { useContext } from "react";
 import classNames from "classnames/dedupe";
-import { v4 as uuid } from "uuid";
-import { BaseElement, CustomEditor, CustomElement, Descendant, Editor, kSlateVoidClass, Range, registerElementComponent, RenderElementProps,
-   Transforms, useSelected, useSerializing } from "@concord-consortium/slate-editor";
+import { BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
+  RenderElementProps, useSelected } from "@concord-consortium/slate-editor";
 import { action, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react";
 import { TextContentModelType } from "../../models/tiles/text/text-content";
 import { ITextPlugin } from "../../models/tiles/text/text-plugin-info";
 import { TextPluginsContext } from "../../components/tiles/text/text-plugins-context";
 
-export const kHighlightChipType = "highlight-chip";
 export const kHighlightFormat = "highlight";
 export const kHighlightTextPluginName = "highlights";
-const kHighlightChipClass = "slate-highlight-chip";
 
 export class HighlightsPlugin implements ITextPlugin {
   public textContent: TextContentModelType;
@@ -31,7 +28,6 @@ export class HighlightsPlugin implements ITextPlugin {
   }
 
   addHighlight(id: string, text: string) {
-    console.log("HighlightsPlugin.addHighlight", {id, text})
     this.textContent.addHighlight(id, text );
   }
 
@@ -53,19 +49,18 @@ export const HighlightComponent = observer(function({ attributes, children, elem
   const plugins = useContext(TextPluginsContext);
   const highlightPlugin = plugins[kHighlightTextPluginName] as HighlightsPlugin|undefined;
   const isSelected = useSelected();
-  const isSerializing = useSerializing();
 
   if (!isHighlightElement(element)) return null;
   const {reference} = element;
   const highlightEntry = highlightPlugin?.highlightedText.find(ht => ht.id === reference);
   const textToHighlight = highlightEntry?.text ?? `invalid reference: ${reference}`;
 
-  const classes = classNames(kSlateVoidClass, "slate-highlight-chip",
-                              {"slate-selected": isSelected && !isSerializing});
+  const classes = classNames(kSlateVoidClass, "slate-highlight-chip");
 
   return (
     <span className={classes} {...attributes} contentEditable={false}>
-      <span className="highlight-chip">
+      <span className={classNames("highlight-chip", {"slate-selected": highlightEntry && isSelected})} >
+        {children}
         {textToHighlight}
       </span>
     </span>
@@ -84,8 +79,18 @@ export function registerHighlight() {
 registerHighlight();
 
 export function withHighlights(editor: Editor) {
-  // registerHighlight();
-  const { isInline } = editor;
-  editor.isInline = element => (element.type === kHighlightFormat) || isInline(element);
+  const { isInline, isVoid } = editor;
+  editor.isInline = element => element.type === kHighlightFormat || isInline(element);
+  editor.isVoid = element => element.type === kHighlightFormat || isVoid(element);
   return editor;
+}
+
+export function isHighlightChipSelected(editor: Editor): boolean {
+  if (!editor.selection) return false;
+
+  const [match] = Editor.nodes(editor, {
+    match: (n) => (n as CustomElement).type === kHighlightFormat
+  });
+
+  return !!match;
 }

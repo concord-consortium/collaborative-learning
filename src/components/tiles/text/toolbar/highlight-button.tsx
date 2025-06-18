@@ -1,7 +1,7 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { v4 as uuid } from "uuid";
 import { Editor, Range, Transforms, useSlate } from "@concord-consortium/slate-editor";
-import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat } from "../../../../plugins/text/highlights-plugin";
+import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat, HighlightElement } from "../../../../plugins/text/highlights-plugin";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../toolbar/toolbar-button-manager";
 import { TextPluginsContext } from "../text-plugins-context";
@@ -13,10 +13,27 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
   const plugins = useContext(TextPluginsContext);
   const highlightsPlugin = plugins[kHighlightTextPluginName] as HighlightsPlugin | undefined;
   const { selection } = editor;
+  const isHighlightedText = editor.isElementActive(kHighlightFormat);
   const isCollapsed = selection ? Range.isCollapsed(selection) : true;
   const isSelected = !!selection && !isCollapsed;
-  const disabled = isCollapsed && !isSelected;
-  const [toggleHighlight, setToggleHighlight] = useState(false);
+  const disabled = !isHighlightedText && isCollapsed && !isSelected;
+
+  const highlightText = (editor: Editor, reference: string, text: string) =>{
+    if (!editor.selection || Range.isCollapsed(editor.selection)) return;
+    const selectionLength = Editor.string(editor, editor.selection).length;
+    if (selectionLength === 0) return;
+
+    const highlightNode: HighlightElement = {
+      type: kHighlightFormat,
+      reference,
+      children: [{ text }]
+    };
+    // Replace selected text with the highlight chip
+    Transforms.delete(editor, { at: editor.selection });
+    Transforms.insertNodes(editor, highlightNode);
+    Transforms.collapse(editor, { edge: "end" });
+  }
+
 
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -26,18 +43,12 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     const reference = uuid();
     highlightsPlugin?.addHighlight(reference, selectedText);
 
-    const highlightNode = {
-      type: "highlight",
-      reference,
-      children: []
-    };
-    Transforms.wrapNodes(editor, highlightNode, { split: true });
+    highlightText(editor, reference, selectedText);
     Transforms.collapse(editor, { edge: "end" });
-
-    setToggleHighlight(!toggleHighlight);
   };
+
   return (
-    <TileToolbarButton name={name} title="Highlight" disabled={disabled} selected={toggleHighlight}
+    <TileToolbarButton name={name} title="Highlight" disabled={disabled} selected={isHighlightedText}
                         onClick={handleClick}>
       <HighlightToolIcon/>
     </TileToolbarButton>
