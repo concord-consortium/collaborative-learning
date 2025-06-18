@@ -1,6 +1,6 @@
 import React from "react";
 import { IProgressItem } from "./progress-widget";
-import "./progress-widget-item.sass";
+import "./progress-widget-item.scss";
 
 interface IProps {
   item: IProgressItem;

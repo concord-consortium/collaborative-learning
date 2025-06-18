@@ -9,7 +9,7 @@ import { TeacherDashboardComponent } from "./teacher/teacher-dashboard";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 
-import "./clue-app-content.sass";
+import "./clue-app-content.scss";
 
 interface IProps extends IBaseProps {}
 

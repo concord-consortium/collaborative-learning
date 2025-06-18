@@ -15,7 +15,7 @@ import { StudentMenuContainer } from "../../components/student-menu-container";
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./toggle-buttons.scss";
 
-import "./clue-app-header.sass";
+import "./clue-app-header.scss";
 
 interface IProps extends IBaseProps {
   panels: IPanelGroupSpec;

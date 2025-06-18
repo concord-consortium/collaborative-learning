@@ -10,7 +10,7 @@ import { LogEventName } from "../../lib/logger-types";
 import ToggleControl from "../utilities/toggle-control";
 import { ENavTab } from "../../models/view/nav-tabs";
 
-import "./problem-tab-content.sass";
+import "./problem-tab-content.scss";
 
 interface IProps {
   context?: string;   // ENavTab.kTeacherGuide for teacher guide, blank otherwise

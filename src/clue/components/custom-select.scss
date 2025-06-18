@@ -1,0 +1,162 @@
+@import "../../components/vars";
+
+.custom-select {
+  user-select: none;
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    min-width: 300px;
+    max-width: 400px;
+    height: 40px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    border: solid 1.5px $charcoal-light-1;
+    background-color: $workspace-teal-light-5;
+    font-size: 13px;
+    color: $charcoal-dark-2;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $workspace-teal-light-3;
+    }
+
+    &.disabled {
+      pointer-events: none;
+    }
+
+    &.show-list, &:active {
+      background-color: $workspace-teal-dark-1;
+      color: white;
+      border-color: white;
+      border-radius: 5px 5px 0 0;
+    }
+
+    &:active .arrow {
+      fill: white;
+    }
+
+    .title-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin: 0 10px 0 10px;
+      flex-grow: 1;
+
+      .title {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .item {
+      flex-grow: 1;
+      max-width: 345px;
+      white-space: pre-wrap;
+      max-height: 32px;
+      margin-left: 2px;
+      overflow: hidden;
+    }
+
+    .arrow {
+      flex-shrink: 0;
+      height: 24px;
+      width: 24px;
+      margin: 0 5px 0 0;
+      transition-property: transform;
+      transition-duration: 0.25s;
+
+      &.show-list {
+        transform: rotate(180deg);
+        fill: white;
+      }
+
+      &.disabled {
+        display: none;
+      }
+    }
+  }
+
+  .list {
+    position: absolute;
+    margin-top: 1px;
+    background-color: white;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    z-index: 11;
+    transition-property: opacity;
+    transition-duration: 0.25s;
+    pointer-events: none;
+
+    &.show {
+      opacity: 1;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .list-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      box-sizing: border-box;
+      height: 40px;
+      background-color: white;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &.bottomBorder {
+        border-bottom: 1px dashed $workspace-teal-light-5;
+      }
+
+      .item {
+        width: fit-content;
+        margin-right: 10px;
+      }
+
+      &:hover {
+        background-color: $workspace-teal-light-3;
+      }
+
+      &:active {
+        background-color: $workspace-teal-dark-1;
+        color: white;
+      }
+
+      &:active .check {
+        background-image: url("../../assets/icons/check/check-selected.svg");
+      }
+
+      .check {
+        height: 24px;
+        width: 24px;
+        margin: 0 2px 0 2px;
+        background-image: url("../../assets/icons/check/check.svg");
+        background-repeat: no-repeat;
+        background-position: center;
+
+        &.selected {
+          background-image: url("../../assets/icons/check/check-selected.svg");
+        }
+      }
+
+      &:active .hidden-item-check, .hidden-item-check, .hidden-item-check.selected {
+        background-image: none;
+      }
+    }
+
+    .list-item:last-child {
+      border-radius: 0 0 5px 5px;
+    }
+  }
+
+  /* cf. https://css-tricks.com/line-clampin/ */
+  .line-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+}
