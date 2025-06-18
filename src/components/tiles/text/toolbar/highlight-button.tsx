@@ -1,7 +1,8 @@
 import React, { useContext } from "react";
 import { v4 as uuid } from "uuid";
 import { Editor, Range, Transforms, useSlate } from "@concord-consortium/slate-editor";
-import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat, HighlightElement } from "../../../../plugins/text/highlights-plugin";
+import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat, HighlightElement }
+  from "../../../../plugins/text/highlights-plugin";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../toolbar/toolbar-button-manager";
 import { TextPluginsContext } from "../text-plugins-context";
@@ -18,7 +19,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
   const isSelected = !!selection && !isCollapsed;
   const disabled = !isHighlightedText && isCollapsed && !isSelected;
 
-  const highlightText = (editor: Editor, reference: string, text: string) =>{
+  const highlightText = (reference: string, text: string) =>{
     if (!editor.selection || Range.isCollapsed(editor.selection)) return;
     const selectionLength = Editor.string(editor, editor.selection).length;
     if (selectionLength === 0) return;
@@ -32,7 +33,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     Transforms.delete(editor, { at: editor.selection });
     Transforms.insertNodes(editor, highlightNode);
     Transforms.collapse(editor, { edge: "end" });
-  }
+  };
 
 
   const handleClick = (event: React.MouseEvent) => {
@@ -43,7 +44,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     const reference = uuid();
     highlightsPlugin?.addHighlight(reference, selectedText);
 
-    highlightText(editor, reference, selectedText);
+    highlightText(reference, selectedText);
   };
 
   return (
