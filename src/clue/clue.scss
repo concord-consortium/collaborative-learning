@@ -1,0 +1,194 @@
+// application-specific styling goes here
+@import "../components/vars";
+
+body {
+  overflow: hidden;
+}
+
+.tab-problems {
+  background-color: $problem-orange-light-7;
+
+  &:hover {
+    background-color: $problem-orange-light-5;
+  }
+
+  &:active, &.selected {
+    background-color: $problem-orange-light-4;
+    font-weight: bold;
+  }
+}
+
+.tab-teacher-guide {
+  background-color: $learninglog-green-light-7;
+
+  &:hover {
+    background-color: $learninglog-green-light-5;
+  }
+
+  &:active, &.selected {
+    background-color: $learninglog-green-light-4;
+    font-weight: bold;
+  }
+}
+
+.tab-student-work {
+  background-color: $charcoal-light-7;
+
+  &:hover {
+    background-color: $charcoal-light-5;
+  }
+
+  &:active, &.selected {
+    background-color: $charcoal-light-4;
+    font-weight: bold;
+  }
+}
+
+.tab-my-work {
+  background-color: $workspace-teal-light-6;
+
+  &:hover {
+    background-color: $workspace-teal-light-4;
+  }
+
+  &:active, &.selected {
+    background-color: $workspace-teal-light-3;
+    font-weight: bold;
+  }
+}
+
+.tab-class-work {
+  background-color: $classwork-purple-light-7;
+
+  &:hover {
+    background-color: $classwork-purple-light-5;
+  }
+
+  &:active, &.selected {
+    background-color: $classwork-purple-light-4;
+    font-weight: bold;
+  }
+}
+
+.tab-learning-log {
+  background-color: $learninglog-green-light-7;
+
+  &:hover {
+    background-color: $learninglog-green-light-5;
+  }
+
+  &:active, &.selected {
+    background-color: $learninglog-green-light-4;
+    font-weight: bold;
+  }
+}
+
+.tab-supports {
+  background-color: $support-blue-light-7;
+
+  &:hover {
+    background-color: $support-blue-light-5;
+  }
+
+  &:active, &.selected {
+    background-color: $support-blue-light-4;
+    font-weight: bold;
+  }
+}
+
+.tab-sort-work {
+  background: $classwork-purple-light-4;
+}
+
+.document {
+  .titlebar {
+    &.personal, &.personalPublication, &.problem, &.publication {
+      background-color: $workspace-teal-light-4;
+    }
+
+    &.learningLog, &.learningLogPublication {
+      background-color: $peacock-light-1;
+    }
+
+    &.supportPublication {
+      background-color: $sky-light-1;
+    }
+
+    #titlebar-title {
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .actions {
+      .action.icon, .action.icon-button {
+        background-color: inherit;
+
+        .button-icon.publish {
+          background-image: url("../assets/icons/publish/publish-icon-default.svg");
+
+          &:hover {
+            background-image: url("../assets/icons/publish/publish-icon-hover.svg");
+          }
+
+          &:active {
+            background-image: url("../assets/icons/publish/publish-icon-hover.svg");
+          }
+        }
+
+        .button-icon.publish-support {
+          margin-right: 10px;
+          background-image: url("../assets/icons/publish-support/publish-support.svg");
+
+          &:hover {
+            background-image: url("../assets/icons/publish-support/publish-support-hover.svg");
+          }
+
+          &:active {
+            background-image: url("../assets/icons/publish-support/publish-support-active.svg");
+          }
+        }
+
+        .button-icon.published {
+          background-image: url("../assets/icons/published/published.svg");
+
+          &:hover {
+            background-image: url("../assets/icons/published/published-hover.svg");
+          }
+
+          &:active {
+            background-image: url("../assets/icons/published/published-active.svg");
+          }
+        }
+
+        .button-icon.up1 {
+          background-image: url("../assets/icons/1-4-up/1-up-icon-default.svg");
+
+          &:hover {
+            background-image: url("../assets/icons/1-4-up/4-up-icon-default.svg");
+          }
+
+          &:active {
+            background-image: url("../assets/icons/1-4-up/4-up-icon-default.svg");
+          }
+        }
+
+        .button-icon.up4 {
+          background-image: url("../assets/icons/1-4-up/4-up-icon-default.svg");
+
+          &:hover {
+            background-image: url("../assets/icons/1-4-up/1-up-icon-default.svg");
+          }
+
+          &:active {
+            background-image: url("../assets/icons/1-4-up/1-up-icon-default.svg");
+          }
+        }
+      }
+
+      .icon-button.delete-disabled {
+        cursor: default;
+      }
+    }
+  }
+}

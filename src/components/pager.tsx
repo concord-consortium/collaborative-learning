@@ -1,6 +1,6 @@
 import React from "react";
 
-import "./pager.sass";
+import "./pager.scss";
 
 interface IPagerProps {
   numPages: number;

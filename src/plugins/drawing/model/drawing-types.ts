@@ -9,7 +9,9 @@ export const kDrawingStateVersion = "1.1.0";
 export const kDrawingDefaultHeight = 180;
 export const kDuplicateOffset = 10; // Pixels between original and duplicated object
 export const kFlipOffset = 10; // Pixels between original and flipped object
-export const kReadOnlyOffset = 29; // Pixels to shift read-only tile content (width+border of Show/Sort sidebar)
+
+export const kClosedObjectListPanelWidth = 29; // Size of the Show/Sort sidebar when closed
+export const kOpenObjectListPanelWidth = 170; // Size of the Show/Sort sidebar when open
 
 // These types are used by legacy import code in drawing-change-playback.ts
 export type DrawingToolMove = Array<{id: string, destination: Point}>;

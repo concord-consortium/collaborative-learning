@@ -5,7 +5,7 @@ import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, BoundingBoxSides, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
-import { boundingBoxForPoints, normalizeRotation, rotateBoundingBox,
+import { boundingBoxSidesForPoints, normalizeRotation, rotateBoundingBox,
   rotatePoint, rotationPoint } from "../model/drawing-utils";
 
 import ErrorIcon from "../../../assets/icons/error.svg";
@@ -196,7 +196,7 @@ export const DrawingObject = types.model("DrawingObject", {
     const rotatedNE = rotatePoint(ne, center, -self.rotation);
     const rotatedSE = rotatePoint(se, center, -self.rotation);
     const rotatedSW = rotatePoint(sw, center, -self.rotation);
-    const trueBoundingBox = boundingBoxForPoints([rotatedNW, rotatedNE, rotatedSE, rotatedSW]);
+    const trueBoundingBox = boundingBoxSidesForPoints([rotatedNW, rotatedNE, rotatedSE, rotatedSW]);
     self.setUnrotatedDragBounds(trueBoundingBox);
   },
 }))

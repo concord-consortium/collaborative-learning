@@ -5,7 +5,7 @@ import classNames from "classnames";
 import { useAppConfig } from "../../hooks/use-stores";
 import { ISubTabModel, NavTabModelType } from "../../models/view/nav-tabs";
 
-import "./sub-tabs-panel.sass";
+import "./sub-tabs-panel.scss";
 
 interface IProps {
   tabSpec: NavTabModelType;

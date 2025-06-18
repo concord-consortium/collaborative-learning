@@ -4,7 +4,7 @@ import { BaseComponent, IBaseProps } from "../../../components/base";
 import { TeacherSupportModelType, AudienceModelType, audienceInfo } from "../../../models/stores/supports";
 import { TeacherSupport } from "./teacher-support";
 
-import "./teacher-supports.sass";
+import "./teacher-supports.scss";
 
 interface IProps extends IBaseProps {
   supports: TeacherSupportModelType[];
