@@ -76,7 +76,9 @@ class TableToolTile{
     }
     typeInTableCell(i, text, confirm=true) {
       const confirmation = confirm ? '{enter}' : '';
-      this.getTableCell().eq(i).dblclick();
+      this.getTableCell().eq(i).click();
+      cy.wait(30);
+      this.getTableCell().eq(i).click();
       return cy.document().within(() => {
         this.getTableCellEdit().type(`${text}${confirmation}`);
       });
