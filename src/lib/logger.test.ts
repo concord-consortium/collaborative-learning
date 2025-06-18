@@ -295,7 +295,8 @@ describe("authed logger", () => {
         expect(request.parameters.objectType).toBe("Text");
         expect(request.parameters.serializedObject).toEqual({
           type: "Text",
-          text: ""
+          text: "",
+          highlightedText: [],
         });
         expect(request.parameters.documentKey).toBe("source-document");
         expect(request.parameters.documentType).toBe("problem");
@@ -316,7 +317,7 @@ describe("authed logger", () => {
         content: {},
         visibility: "public"
       });
-      sourceDocument.setContent(createSingleTileContent({ type: "Text", text: "test" }));
+      sourceDocument.setContent(createSingleTileContent({ type: "Text", text: "test", highlightedText: [] }));
 
       const destinationDocument = createDocumentModel({
         type: ProblemDocument,
@@ -338,7 +339,8 @@ describe("authed logger", () => {
         expect(request.parameters.objectType).toBe("Text");
         expect(request.parameters.serializedObject).toEqual({
           type: "Text",
-          text: "test"
+          text: "test",
+          highlightedText: [],
         });
         expect(request.parameters.documentKey).toBe("destination-document");
         expect(request.parameters.documentType).toBe("problem");
