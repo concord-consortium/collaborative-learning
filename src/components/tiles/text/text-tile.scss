@@ -14,4 +14,15 @@
   .tool-tile.fixed & {
     background-color: $workspace-teal-light-7;
   }
+
+  .highlight-chip {
+    background: #f7e58f;
+    border: solid 0.8px #3f3f3f;
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-family: "PTSans";
+    font-size: 14px;
+    font-weight: "narrow";
+    color: #3f3f3f
+  }
 }
