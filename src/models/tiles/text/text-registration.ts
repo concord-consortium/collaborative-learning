@@ -16,12 +16,12 @@ registerTileContentInfo({
   defaultContent: defaultTextContent
 });
 
-registerPlugins();
-
 registerTextPluginInfo({
   pluginName: kHighlightTextPluginName,
   createSlatePlugin: (textContent) => new HighlightsPlugin(textContent)
 });
+
+registerPlugins();
 
 registerTileComponentInfo({
   type: kTextTileType,

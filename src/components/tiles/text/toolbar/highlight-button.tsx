@@ -44,7 +44,6 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     highlightsPlugin?.addHighlight(reference, selectedText);
 
     highlightText(editor, reference, selectedText);
-    Transforms.collapse(editor, { edge: "end" });
   };
 
   return (
