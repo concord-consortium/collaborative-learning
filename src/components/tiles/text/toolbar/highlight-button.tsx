@@ -18,6 +18,15 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
   const isCollapsed = selection ? Range.isCollapsed(selection) : true;
   const isSelected = !!selection && !isCollapsed;
   const disabled = !isHighlightedText && isCollapsed && !isSelected;
+  const getSelectedChip = () => {
+    if (!selection) return undefined;
+    // Find the highlight chip node at selection
+    const [chipEntry] = Editor.nodes(editor, {
+      match: n => (n as any).type === kHighlightFormat,
+      at: selection
+    });
+    return chipEntry ? (chipEntry as [HighlightElement, Path]) : undefined;
+  };
 
   const highlightText = (editor: Editor, reference: string, text: string) =>{
     if (!editor.selection || Range.isCollapsed(editor.selection)) return;
@@ -35,28 +44,35 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     Transforms.collapse(editor, { edge: "end" });
   }
 
-  const unwrapHighlightChip = (editor: Editor) => {
+  const unHighlightChip = (editor: Editor) => {
     if (!editor.selection) return;
-    // Find the highlight chip node at selection
-    const [chipEntry] = Editor.nodes(editor, {
-      match: n => (n as any).type === kHighlightFormat,
-      at: editor.selection
-    });
+    const chipEntry = getSelectedChip();
 
     if (chipEntry) {
       const [chipNode, chipPath] = chipEntry as [HighlightElement, Path];
+      const previousPath = Path.previous(chipPath);
+      const insertPoint = Editor.end(editor, previousPath);
       const chipNodeChild = chipNode.children[0] as { text: string };
       const text = chipNodeChild.text || ""; // Assume the first child has the text
-
-      Transforms.insertNodes(editor, { text }, { at: chipPath });
+      const marks = Editor.marks(editor) || {};
+      Transforms.insertNodes(editor, { text, ...marks }, { at: insertPoint });
+      Object.keys(marks).forEach(key => {
+        Editor.removeMark(editor, key);
+      });
       Transforms.removeNodes(editor, { at: chipPath });
+      Object.entries(marks).forEach(([key, value]) => {
+        Editor.addMark(editor, key, value);
+      });
     }
   };
 
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     if (isHighlightedText) {
-      unwrapHighlightChip(editor);
+      const selectedChip = getSelectedChip();
+      const reference = selectedChip ? selectedChip[0].reference : "";
+      unHighlightChip(editor);
+      highlightsPlugin?.removeHighlight(reference);
       return;
     }
     if (!editor.selection || Range.isCollapsed(editor.selection)) return;
