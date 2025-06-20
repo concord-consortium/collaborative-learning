@@ -34,6 +34,14 @@ describe("CurriculumConfig", () => {
     expect(config.getUnitBasePath(exampleUnitUrl)).toBe(exampleUnitUrl);
   });
 
+  it("can return unit code variants", () => {
+    const config = getConfig({
+      unitCodeMap: { foo: "bar", bam: "bar", baz: "qux" }
+    });
+    expect(config.getUnitCodeVariants("bar")).toEqual(["bar", "foo", "bam"]);
+    expect(config.getUnitCodeVariants("qux")).toEqual(["qux", "baz"]);
+    expect(config.getUnitCodeVariants("unknown")).toEqual(["unknown"]);
+  });
 });
 
 describe("PortalOfferingParser", () => {

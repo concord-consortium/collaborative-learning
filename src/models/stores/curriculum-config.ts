@@ -75,8 +75,24 @@ export const CurriculumConfig = types
                               ? self.unitCodeMap.get(unitCode)
                               : undefined;
       return mappedUnitCode || unitCode;
+    },
+
+    /**
+     * Returns the unit code, plus all the unit code variants for renamed unit codes.
+     * So "sas" will return ["sas", "s s", "s+s", "stretching-and-shrinking"]
+     */
+    getUnitCodeVariants(unitId: string) {
+      const variantsSet = new Set<string>([unitId]);
+      self.unitCodeMap.forEach((value, key) => {
+        if (value === unitId) {
+          variantsSet.add(key);
+        }
+      });
+      return Array.from(variantsSet);
     }
   }));
+
+export type CurriculumConfigType = typeof CurriculumConfig.Type;
 
 export interface ICurriculumConfig extends Instance<typeof CurriculumConfig> {}
 export interface ICurriculumConfigSnapshot extends SnapshotIn<typeof CurriculumConfig> {}
@@ -95,4 +111,3 @@ export function getProblemOrdinal(url: string) {
     ? queryParams.query.problem as string
     : undefined;
 }
-
