@@ -74,6 +74,8 @@ With this approach you'll be editing the content in the `clue-curriculum` reposi
 
 If you want to have more local access to the curriculum you are editing, and you don't want to be updating the `clue-curriculum` repository, you can use the `localCMSBackend` parameter. See above for details on how to use this. Note the proxy needs to be on its own port. If it can't start on 8081 (because the cms is running there) then you'll need to configure it. See the "Configure the Decap CMS proxy server port number" section of [this Decap documentation page](https://decapcms.org/docs/working-with-a-local-git-repository).
 
+When the CMS loads the unit it will look for it at: `https://models-resources.concord.org/clue-curriculum/branch/[curriculumBranch]/msa/content.json`. This unit file is just used to figure out the tools that should be enabled in the document editors the CMS shows. Importantly, it is not loading it directly from Git. This means that your curriculumBranch needs to be pushed and deployed before the CMS will work. This is required even when working with a local git repository. Passing a full url for the unit does not work; it seems to cause other problems.
+
 ### Remote build
 
 In the CI (github actions), the toplevel `npm run build` is used. This will build both CLUE and the CMS. And then it will copy the files from `/cms/dist` to `/dist/cms`. Additionally, it copies the file `/cms/dist/admin.html` to `/dist/admin.html`. This admin.html file refers to its resources in the cms folder like `cms/admin.js` and `cms/admin.css`. This file is called `admin.html` because that was its original name, and now various authors have direct links to it. So we don't want to change that name.

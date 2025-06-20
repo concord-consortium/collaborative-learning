@@ -57,6 +57,11 @@ module.exports = (env, argv) => {
     context: __dirname, // to automatically find tsconfig.json
     // https://survivejs.com/webpack/building/source-maps/
     devtool: devMode ? 'eval-cheap-module-source-map' : 'source-map',
+    devServer: {
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      },
+    },
     // Performance: disabling these other entry points had no effect
     // on the devServer start up time
     entry: {
