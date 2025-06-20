@@ -416,6 +416,7 @@
           "bold",
           "italic",
           "underline",
+          "highlight",
           "subscript",
           "superscript",
           "list-ol",

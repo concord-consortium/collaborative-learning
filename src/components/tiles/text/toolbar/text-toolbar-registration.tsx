@@ -2,6 +2,7 @@ import React from "react";
 import { Editor, EFormat, useSlate } from "@concord-consortium/slate-editor";
 
 import { LinkButton } from "./link-button";
+import { HighlightButton } from "./highlight-button";
 import { isMac } from "../../../../utilities/browser";
 import { IToolbarButtonComponentProps, registerTileToolbarButtons }
   from "../../../toolbar/toolbar-button-manager";
@@ -101,6 +102,10 @@ registerTileToolbarButtons('text',
   {
     name: 'underline',
     component: UnderlineToolbarButton,
+  },
+  {
+    name: 'highlight',
+    component: HighlightButton,
   },
   {
     name: 'subscript',
