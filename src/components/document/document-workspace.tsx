@@ -15,7 +15,7 @@ import {
 } from "../../utilities/loading-utils";
 import { kImageTileType } from "../../models/tiles/image/image-content";
 
-import "./document-workspace.sass";
+import "./document-workspace.scss";
 
 interface IProps extends IBaseProps {
 }

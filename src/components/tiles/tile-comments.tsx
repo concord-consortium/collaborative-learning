@@ -4,7 +4,7 @@ import { TileApiInterfaceContext } from "./tile-api";
 import { BaseComponent } from "../base";
 import { TileCommentsModelType, TileCommentModelType } from "../../models/tiles/tile-comments";
 
-import "./tile-comments.sass";
+import "./tile-comments.scss";
 
 interface IProps {
   docKey: string;

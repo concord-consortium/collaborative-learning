@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect, useMemo } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
@@ -7,6 +7,16 @@ import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
 import { getToolbarButtonInfo } from "./toolbar-button-manager";
 import { TileModelContext } from "../tiles/tile-api";
 import { JSONValue } from "../../models/stores/settings";
+import { useCanvasMethodsContext } from "../document/canvas-methods-context";
+import { getPixelWidthFromCSSStyle } from "../../utilities/js-utils";
+import styles from "../vars.scss";
+
+
+const buttonWidth = getPixelWidthFromCSSStyle(styles.toolbarButtonWidth) || 1;
+const buttonMargin = getPixelWidthFromCSSStyle(styles.toolbarButtonMargin) || 1;
+const dividerWidth = getPixelWidthFromCSSStyle(styles.toolbarDividerWidth) || 1;
+
+const SCROLLBAR_WIDTH = 25; // Not a CSS property, but an allowance to cover scrollbar and container borders
 
 interface ToolbarWrapperProps {
   tileType: string,
@@ -34,58 +44,94 @@ export const TileToolbar = observer(
   function TileToolbar({ tileType, readOnly, tileElement }: ToolbarWrapperProps) {
 
     const model = useContext(TileModelContext);
+    const canvasMethods = useCanvasMethodsContext();
     const id = model?.id;
 
     // Get styles to position the toolbar
     const { toolbarRefs, toolbarStyles, toolbarPlacement, rootElement, hide } = useTileToolbarPositioning(tileElement);
 
+    // How many buttons and dividers fit in the first row?
+    const [itemsInFirstRow, setItemsInFirstRow] = useState<number | undefined>(undefined);
+
+    const canvasWidth = canvasMethods?.getWidth?.() || 0;
+
     // Determine the buttons to be shown.
     const ui = useUIStore();
-    let buttonDescriptions: JSONValue[];
     const customizedButtons = useSettingFromStores("tools", tileType);
-    if (customizedButtons) {
-      if (Array.isArray(customizedButtons)) {
-        buttonDescriptions = customizedButtons;
-      } else {
-        console.warn('Invalid configuration for toolbar (should be an array): ', customizedButtons);
-        return (null);
+    const buttonDescriptions = useMemo(() => {
+      if (customizedButtons) {
+        if (Array.isArray(customizedButtons)) {
+          return customizedButtons;
+        } else {
+          console.warn('Invalid configuration for toolbar (should be an array): ', customizedButtons);
+          return undefined;
+        }
       }
-    } else {
+      return undefined;
+    }, [customizedButtons]);
+
+    // Calculate what fits in the first row.
+    useEffect(() => {
+      if (!rootElement || !buttonDescriptions) {
+        setItemsInFirstRow(undefined);
+        return;
+      }
+      if (canvasWidth && buttonDescriptions.length > 0) {
+        const availableWidth = canvasWidth - SCROLLBAR_WIDTH;
+        let totalWidth = 0;
+        let itemsThatFit = 0;
+        for (let i = 0; i < buttonDescriptions.length; ++i) {
+          const desc = buttonDescriptions[i];
+          const itemWidth = (desc === '|' ? dividerWidth : buttonWidth) + buttonMargin;
+          if (totalWidth + itemWidth > availableWidth) break;
+          totalWidth += itemWidth;
+          itemsThatFit++;
+        }
+        setItemsInFirstRow(itemsThatFit);
+      } else {
+        setItemsInFirstRow(undefined);
+      }
+    }, [rootElement, buttonDescriptions, canvasWidth]);
+
+    if (!buttonDescriptions || buttonDescriptions.length === 0) {
       // No buttons, no toolbar
       return null;
     }
 
     // Determine if toolbar should be rendered or not.
     const enabled = !readOnly && id && ui.selectedTileIds.length === 1 && ui.selectedTileIds.includes(id);
-    // TODO question: is it more efficient to short-circuit here, or render with a class to hide it?
-    // Not rendering sounds faster, but if React is smart enough to just toggle the 'disabled' class attribute
-    // when you click in the tile, that would be super responsive.
     if (!enabled) return(null);
 
-    const buttons = buttonDescriptions.map((desc, i) => {
-      if (isValidButtonDescription(desc)) {
-        if (desc === '|') {
-          return (<div key={`${i}-divider`} className="divider"/>);
-        }
-        const buttonHasArg = !(typeof desc === 'string');
-        const name = buttonHasArg ? desc[0] : desc;
-        const info = getToolbarButtonInfo(tileType, name);
-        if (info) {
-          const Button = info?.component;
-          if (buttonHasArg) {
-            return (<Button key={`${i}-${name}`} name={name} args={desc}/>);
+    // Split buttonDescriptions into rows
+    const firstRowCount = itemsInFirstRow ?? buttonDescriptions.length;
+    const firstRow = buttonDescriptions.slice(0, firstRowCount);
+    const secondRow = buttonDescriptions.slice(firstRowCount);
+
+    const renderButtons = (descriptions: JSONValue[], rowKey: string) =>
+      descriptions.map((desc, i) => {
+        if (isValidButtonDescription(desc)) {
+          if (desc === '|') {
+            return (<div key={`${rowKey}-${i}-divider`} className="divider"/>);
+          }
+          const buttonHasArg = !(typeof desc === 'string');
+          const name = buttonHasArg ? desc[0] : desc;
+          const info = getToolbarButtonInfo(tileType, name);
+          if (info) {
+            const Button = info?.component;
+            if (buttonHasArg) {
+              return (<Button key={`${rowKey}-${i}-${name}`} name={name} args={desc}/>);
+            } else {
+              return (<Button key={`${rowKey}-${i}-${name}`} name={name}/>);
+            }
           } else {
-            return (<Button key={`${i}-${name}`} name={name}/>);
+            console.warn('Did not find info for button name: ', name);
+            return null;
           }
         } else {
-          console.warn('Did not find info for button name: ', name);
+          console.warn('Invalid configuration for toolbar button: ', desc);
           return null;
         }
-      } else {
-        console.warn('Invalid configuration for toolbar button: ', desc);
-        return null;
-      }
-    });
+      });
 
     return (
       <FloatingPortal root={rootElement}>
@@ -99,7 +145,14 @@ export const TileToolbar = observer(
             toolbarPlacement,
             { "disabled": !enabled })}
         >
-          {buttons}
+          <div className="toolbar-row">
+            {renderButtons(firstRow, "row1")}
+          </div>
+          {secondRow.length > 0 && (
+            <div className="toolbar-row">
+              {renderButtons(secondRow, "row2")}
+            </div>
+          )}
         </div>
       </FloatingPortal>);
   });
