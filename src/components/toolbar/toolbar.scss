@@ -1,11 +1,8 @@
 @import "../vars";
 
 .tile-toolbar {
-  height: $toolbar-height;
-  border: $toolbar-border;
-  border-radius: $toolbar-border-radius;
-  background-color: $workspace-teal-light-9;
   display: flex;
+  flex-direction: column;
   text-align: center;
   z-index: 1;
 
@@ -13,65 +10,37 @@
     display: none;
   }
 
-  &.bottom-start {
-    border-top-left-radius: 0;
-
-    div:first-child {
-      button {
-        // Border radius reduced by width of toolbar border, so it nests nicely
-        border-bottom-left-radius: calc($toolbar-border-radius - 2px);
-      }
-    }
-    div:last-child {
-      button {
-        border-radius: 0 calc($toolbar-border-radius - 2px) calc($toolbar-border-radius - 2px) 0;
-      }
-    }
-  }
-
-  &.bottom-end {
-    border-top-right-radius: 0;
-
-    div:first-child {
-      button {
-        border-bottom-left-radius: calc($toolbar-border-radius - 2px);
-      }
-    }
-    div:last-child {
-      button {
-        border-radius: 0 calc($toolbar-border-radius - 2px) calc($toolbar-border-radius - 2px) 0;
-      }
-    }
-  }
-
-  &.top-start {
-    border-bottom-left-radius: 0;
-
-    div:first-child {
-      button {
-        border-top-left-radius: calc($toolbar-border-radius - 2px);
-      }
-    }
-    div:last-child {
-      button {
-        border-radius: 0 calc($toolbar-border-radius - 2px) calc($toolbar-border-radius - 2px) 0;
-      }
-    }
-  }
-
+  // The second row goes above the toolbar when the toolbar is above the tile.
+  &.top-start,
   &.top-end {
-    border-bottom-right-radius: 0;
+    flex-direction: column-reverse;
+  }
 
-    div:first-child {
-      button {
-        border-radius: calc($toolbar-border-radius - 2px) 0 0 calc($toolbar-border-radius - 2px);
-      }
+  // When "end" aligned, match the right sides.
+  &.top-end,
+  &.bottom-end {
+    align-items: flex-end;
+
+    .toolbar-row {
+      align-self: flex-end;
     }
-    div:last-child {
-      button {
-        border-top-right-radius: calc($toolbar-border-radius - 2px);
-      }
-    }
+  }
+}
+
+.toolbar-row {
+  height: $toolbar-height;
+  border: $toolbar-border;
+  border-radius: $toolbar-border-radius;
+  background-color: $workspace-teal-light-9;
+  display: flex;
+  text-align: center;
+  align-self: flex-start;
+
+  div.divider {
+    margin-left: $toolbar-button-margin;
+    border-left: dotted $toolbar-divider-width $workspace-teal;
+    height: 100%;
+    width: 0px;
   }
 
   div:first-child {
@@ -80,20 +49,13 @@
     }
   }
 
-  div.divider {
-    margin-left: 1px;
-    border-left: dotted 1px $workspace-teal;
-    height: 100%;
-    width: 0px;
-  }
-
   button {
     display: block;
     border: none;
     user-select: none;
     width: $toolbar-button-width;
     height: $toolbar-button-height;
-    margin-left: 1px;
+    margin-left: $toolbar-button-margin;
     padding: 0;
     background-color: $workspace-teal-light-9;
     cursor: pointer;
@@ -121,5 +83,86 @@
       height: $toolbar-button-height;
     }
   }
+}
 
+// Second row is offset to the right and up
+.toolbar-row + .toolbar-row {
+  margin-left: 2px;
+  margin-top: -1px;
+}
+
+// Except in "end" position the offset is from the right
+.tile-toolbar.top-end > .toolbar-row + .toolbar-row,
+.tile-toolbar.bottom-end > .toolbar-row + .toolbar-row {
+  margin-left: 0;
+  margin-right: 2px;
+}
+
+// And in "top" positions the vertical offset is down
+.tile-toolbar.top-start > .toolbar-row + .toolbar-row,
+.tile-toolbar.top-end > .toolbar-row + .toolbar-row {
+  margin-top: 0;
+  margin-bottom: -1px;
+}
+
+// The corner where the toolbar is attached is not rounded.
+.tile-toolbar.bottom-start > .toolbar-row {
+  border-top-left-radius: 0;
+
+  div:first-child {
+    button {
+      // Border radius reduced by width of toolbar border, so it nests nicely
+      border-bottom-left-radius: calc($toolbar-border-radius - 2px);
+    }
+  }
+  div:last-child {
+    button {
+      border-radius: 0 calc($toolbar-border-radius - 2px) calc($toolbar-border-radius - 2px) 0;
+    }
+  }
+}
+
+.tile-toolbar.bottom-end > .toolbar-row {
+  border-top-right-radius: 0;
+
+  div:first-child {
+    button {
+      border-bottom-left-radius: calc($toolbar-border-radius - 2px);
+    }
+  }
+  div:last-child {
+    button {
+      border-radius: 0 calc($toolbar-border-radius - 2px) calc($toolbar-border-radius - 2px) 0;
+    }
+  }
+}
+
+.tile-toolbar.top-start > .toolbar-row {
+  border-bottom-left-radius: 0;
+
+  div:first-child {
+    button {
+      border-top-left-radius: calc($toolbar-border-radius - 2px);
+    }
+  }
+  div:last-child {
+    button {
+      border-radius: 0 calc($toolbar-border-radius - 2px) calc($toolbar-border-radius - 2px) 0;
+    }
+  }
+}
+
+.tile-toolbar.top-end > .toolbar-row {
+  border-bottom-right-radius: 0;
+
+  div:first-child {
+    button {
+      border-radius: calc($toolbar-border-radius - 2px) 0 0 calc($toolbar-border-radius - 2px);
+    }
+  }
+  div:last-child {
+    button {
+      border-top-right-radius: calc($toolbar-border-radius - 2px);
+    }
+  }
 }

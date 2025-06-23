@@ -277,13 +277,10 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationModeButton().click(); // exit sparrow mode
     aa.getAnnotationArrows().should("have.length", 1);
     drawToolTile.getEllipseDrawing().find("ellipse").click({ force: true, scrollBehavior: false });
-    // FIXME the force here is because the "delete" button is off screen -- the toolbar is too wide.
-    // We should probably address the root of this problem rather than forcing in the test,
-    // but doing this to get things in a state that builds for now.
-    clueCanvas.clickToolbarButton('drawing', 'delete', { force: true }); // delete the object under the second end; arrow should remain since it was not attached.
+    clueCanvas.clickToolbarButton('drawing', 'delete'); // delete the object under the second end; arrow should remain since it was not attached.
     aa.getAnnotationArrows().should("have.length", 1);
     drawToolTile.getRectangleDrawing().eq(0).click({ force: true, scrollBehavior: false });
-    clueCanvas.clickToolbarButton('drawing', 'delete', { force: true }); // delete the object under the first end; arrow should be deleted.
+    clueCanvas.clickToolbarButton('drawing', 'delete'); // delete the object under the first end; arrow should be deleted.
     aa.getAnnotationArrows().should("have.length", 0);
 
     // put the two deleted objects back
