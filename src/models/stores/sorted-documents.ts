@@ -25,6 +25,7 @@ import { DocumentGroup } from "./document-group";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { PrimarySortType } from "./ui-types";
 import { IArrowAnnotation } from "../annotations/arrow-annotation";
+import { CurriculumConfigType } from "./curriculum-config";
 
 export type SortedDocumentsMap = Record<string, DocumentGroup[]>;
 
@@ -42,6 +43,7 @@ export interface ISortedDocumentsStores {
   appConfig: AppConfigModelType;
   bookmarks: Bookmarks;
   user: UserModelType;
+  curriculumConfig: CurriculumConfigType;
 }
 
 /**
@@ -117,6 +119,9 @@ export class SortedDocuments {
   }
   get user() {
     return this.stores.user;
+  }
+  get curriculumConfig() {
+    return this.stores.curriculumConfig;
   }
 
   setDocumentHistoryViewRequest(docKey: string, historyId: string) {
@@ -272,7 +277,9 @@ export class SortedDocuments {
     let filteredQuery = baseQuery;
 
     if (filter !== "All") {
-      filteredQuery = filteredQuery.where("unit" , "==", unit);
+      // an "in" query is used here so that we can find any documents that use unit and
+      // any the older renamed unit codes.
+      filteredQuery = filteredQuery.where("unit" , "in", this.curriculumConfig.getUnitCodeVariants(unit));
     }
     if (filter === "Investigation" || filter === "Problem") {
       filteredQuery = filteredQuery.where("investigation", "==", String(investigation));
