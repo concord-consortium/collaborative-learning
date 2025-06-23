@@ -75,12 +75,12 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
       highlightsPlugin?.removeHighlight(reference);
       return;
     }
+
     if (!editor.selection || Range.isCollapsed(editor.selection)) return;
 
     const selectedText = Editor.string(editor, editor.selection);
     const reference = uuid();
     highlightsPlugin?.addHighlight(reference, selectedText);
-
     highlightText(editor, reference, selectedText);
   };
 
