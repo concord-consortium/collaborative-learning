@@ -190,10 +190,10 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     const targetRowMap = new Map<string, TileRowModelType>();
 
     updatedTiles.forEach(tile => {
-      const {rowId, sectionId} = copySpec.tilePositions[tile.tileId];
+      const { rowId, sectionId } = copySpec.tilePositions[tile.tileId];
       let targetRow = targetRowMap.get(rowId);
       let insertedRowIndex = self.defaultInsertRowIndex;
-      const insertingRow = !targetRow;
+      const insertingRow = !targetRow && !tile.embedded;
 
       if (sectionId) {
         const sectionRows = self.getRowsInSection(sectionId);
@@ -213,13 +213,11 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         targetRowMap.set(rowId, targetRow);
       }
 
-      if (targetRow) {
-        self.copyTilesIntoExistingRow([tile], {
-          rowInsertIndex: 0, // this is ignored
-          rowDropId: targetRow.id,
-          rowDropLocation: "right"
-        }, false);
-      }
+      self.copyTilesIntoExistingRow([tile], {
+        rowInsertIndex: 0, // this is ignored
+        rowDropId: targetRow?.id,
+        rowDropLocation: "right"
+      }, false);
     });
   },
 }))
@@ -558,8 +556,10 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       entry.tiles.push(newTileId);
     });
   },
-  getCopySpec(tileIds: string[], sectionId?: string): ICopySpec {
-    const tiles = self.getDragTileItems(tileIds);
+  getCopySpec(selectedTileIds: string[], sectionId?: string): ICopySpec {
+    const selectedTiles = self.getDragTileItems(selectedTileIds);
+    const tiles = self.addEmbeddedTilesToDragTiles(selectedTiles);
+    const tileIds = tiles.map(tile => tile.tileId);
     const tilePositions = tileIds.reduce<Record<string, ITileCopyPosition>>((acc, tileId) => {
       const rowId = self.findRowIdContainingTile(tileId)!;
       acc[tileId] = { rowId, sectionId: sectionId ?? self.getSectionIdForTile(tileId) };
