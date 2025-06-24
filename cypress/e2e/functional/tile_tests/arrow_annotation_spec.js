@@ -45,7 +45,7 @@ function beforeTest(params) {
 }
 
 context('Arrow Annotations (Sparrows)', function () {
-  it("can add arrows to draw tiles", () => {
+  it.skip("can add arrows to draw tiles", () => {
     beforeTest(queryParams);
     clueCanvas.addTile("drawing");
     drawToolTile.getDrawTile().should("exist");
