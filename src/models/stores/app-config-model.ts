@@ -164,7 +164,6 @@ export const AppConfigModel = types
       return self.placeholder?.[key];
     },
     showCommentPanelFor(userType: "student" | "teacher" | "researcher" | undefined) {
-      console.log("showCommentPanelFor", userType, self.enableCommentRoles);
       return userType && self.enableCommentRoles.includes(userType);
     }
 

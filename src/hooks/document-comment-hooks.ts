@@ -1,7 +1,7 @@
 import firebase from "firebase/app";
 import { useCallback } from "react";
 import { useMutation, UseMutationOptions, useQuery, useQueryClient } from "react-query";
-import { ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams,
+import { escapeKey, ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams,
   isCurriculumMetadata, isDocumentMetadata, isSectionPath
 } from "../../shared/shared";
 import { CommentDocument, CurriculumDocument, DocumentDocument } from "../lib/firestore-schema";
@@ -109,7 +109,7 @@ type PostDocumentCommentUseMutationOptions =
 
 export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationOptions) => {
   const queryClient = useQueryClient();
-  const postDocumentComment = useFirebaseFunction<IPostDocumentCommentParams>("postDocumentComment_v1");
+  const postDocumentComment = useFirebaseFunction<IPostDocumentCommentParams>("postDocumentComment_v2");
   const context = useUserContext();
   const postComment = useCallback((clientParams: IPostDocumentCommentClientParams) => {
     return postDocumentComment({ context, ...clientParams });
@@ -193,7 +193,11 @@ export const useDocumentComments = (documentKeyOrSectionPath?: string) => {
  * @returns Query results, managed by React Query.
  */
 export const useDocumentCommentsAtSimplifiedPath = (documentKeyOrSectionPath?: string) => {
-  const commentPath = isSectionPath(documentKeyOrSectionPath) ? "" : `documents/${documentKeyOrSectionPath}/comments`;
+  const commentPath = !documentKeyOrSectionPath
+    ? ""
+    : isSectionPath(documentKeyOrSectionPath)
+      ? `curriculum/${escapeKey(documentKeyOrSectionPath)}/comments`
+      : `documents/${documentKeyOrSectionPath}/comments`;
   return useCommentsAtPath(commentPath);
 };
 

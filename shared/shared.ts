@@ -106,6 +106,12 @@ export function getDocumentPath(userId: string, documentKey: string, network?: s
   return documentPath;
 }
 
+export function getSimpleDocumentPath(documentKey: string) {
+  return isSectionPath(documentKey)
+    ? `curriculum/${escapeKey(documentKey)}`
+    : `documents/${escapeKey(documentKey)}`;
+}
+
 export interface IDocumentMetadataBase {
   uid: string;
   type: string;
@@ -205,12 +211,12 @@ export interface IClientCommentParams {
   tags?: string[];    // tag option that user selects for AI
 }
 
-export interface ICommentableDocumentParams extends IFirebaseFunctionBaseParams {
+export interface IFirestoreMetadataDocumentParams extends IFirebaseFunctionBaseParams {
   document: IDocumentMetadata | ICurriculumMetadata;
 }
-export type ICommentableDocumentUnionParams = ICommentableDocumentParams | IFirebaseFunctionWarmUpParams;
+export type IFirestoreMetadataDocumentUnionParams = IFirestoreMetadataDocumentParams | IFirebaseFunctionWarmUpParams;
 
-export interface IPostDocumentCommentParams extends ICommentableDocumentParams {
+export interface IPostDocumentCommentParams extends IFirestoreMetadataDocumentParams {
   comment: IClientCommentParams;
 }
 export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFirebaseFunctionWarmUpParams;

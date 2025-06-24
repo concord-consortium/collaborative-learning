@@ -8,9 +8,10 @@ import {
   useCommentsCollectionPath, useDocumentComments,
   useDocumentCommentsAtSimplifiedPath, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
-import { useDeleteDocument } from "../../hooks/firestore-hooks";
+import { useDeleteDocument, useFirestore } from "../../hooks/firestore-hooks";
 import { useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
+import { getSimpleDocumentPath } from "../../../shared/shared";
 
 import "./chat-panel.scss";
 
@@ -30,8 +31,29 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: simplePathComments } = useDocumentCommentsAtSimplifiedPath(focusDocument);
+  // const allComments = [...comments||[], ...simplePathComments||[]]
+  //   .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  // The usePostDocumentComment hook optimistically posts comments before they are saved to the database so they
+  // instantly appear in the UI. When the comment is saved, the optimistically-posted comment should disappear, but
+  // the process uses a query key that doesn't work with the simplified path. That results in duplicate comments
+  // appearing in the UI until the page is refreshed. The de-duping logic below fixes that, but it would be better
+  // to fix the query key issue in usePostDocumentComment.
   const allComments = [...comments||[], ...simplePathComments||[]]
-    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    .filter((comment, index, self) => {
+      const duplicateIndex = self.findIndex(c =>
+        c.content === comment.content &&
+        c.uid === comment.uid &&
+        c !== comment
+      );
+
+      if (duplicateIndex) {
+        // Only keep the non-pending comment
+        return !comment.id.startsWith('pending-');
+      }
+
+      // No duplicate found, keep comment
+      return true;
+    }).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = allComments?.filter(comment => comment.tileId == null);
   const allTileComments = allComments?.filter(comment=> comment.tileId != null);
@@ -41,6 +63,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const postedComments = documentComments?.concat(commentsInDocumentOrder);
   const commentThreads = makeChatThreads(postedComments, content);
   const postCommentMutation = usePostDocumentComment();
+  const firestore = useFirestore();
 
   const postComment = useCallback((comment: string, tags?: string[]) => {
     if (focusDocument) {
@@ -65,7 +88,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   // the "Document" in "useDeleteDocument" refers to a Firestore document (not a CLUE document)
   const deleteCommentMutation = useDeleteDocument();
 
-  const deleteComment = useCallback((commentId: string, commentText: string) => {
+  const deleteComment = useCallback(async (commentId: string, commentText: string) => {
     if (focusDocument) {
       const eventPayload: ILogComment = {
         focusDocumentId: focusDocument,
@@ -75,10 +98,26 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       };
       logCommentEvent(eventPayload);
     }
-    return commentsPath
-      ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
-      : undefined;
-  }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
+
+    // Check if the comment exists at the legacy path
+    const primaryDocRef = firestore[0].doc(`${commentsPath}/${commentId}`);
+    const primaryDocSnap = await primaryDocRef.get();
+
+    if (primaryDocSnap.exists) {
+      return deleteCommentMutation.mutate(`${commentsPath}/${commentId}`);
+    } else {
+      // Try the alternate (simplified) path
+      const altCommentsPath = `${getSimpleDocumentPath(focusDocument || "")}/comments`;
+      const altDocRef = firestore[0].doc(`${altCommentsPath}/${commentId}`);
+      const altDocSnap = await altDocRef.get();
+
+      if (altDocSnap.exists) {
+        return deleteCommentMutation.mutate(`${altCommentsPath}/${commentId}`);
+      } else {
+        return undefined;
+      }
+    }
+  }, [commentsPath, deleteCommentMutation, firestore, focusDocument, focusTileId]);
 
   const handleDocumentClick = () => {
     setIsDocumentView((prevState) => !prevState);

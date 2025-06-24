@@ -18,14 +18,14 @@ import { expectEntryToBeComplete } from "./undo-store-test-utils";
 // way to get a writable reference to libDebug
 const libDebug = require("../../lib/debug");
 
-const mockValidateCommentableDocument_v1 = jest.fn();
-const mockPostDocumentComment_v1 = jest.fn();
+const mockCreateFirestoreMetadataDocument_v2 = jest.fn();
+const mockPostDocumentComment_v2 = jest.fn();
 const mockHttpsCallable = jest.fn((fn: string) => {
   switch(fn) {
-    case "validateCommentableDocument_v1":
-      return mockValidateCommentableDocument_v1;
-    case "postDocumentComment_v1":
-      return mockPostDocumentComment_v1;
+    case "createFirestoreMetadataDocument_v2":
+      return mockCreateFirestoreMetadataDocument_v2;
+    case "postDocumentComment_v2":
+      return mockPostDocumentComment_v2;
   }
 });
 jest.mock("firebase/app", () => ({
@@ -895,4 +895,3 @@ async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number
   const updateCalledTimes = when(() => testTile.updateCount === times, {timeout: 100});
   return expect(updateCalledTimes).resolves.toBeUndefined();
 }
-
