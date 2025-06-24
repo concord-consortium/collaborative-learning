@@ -1,12 +1,12 @@
 import {
   IDataSet as IFormulaDataSet
-} from "@concord-consortium/codap-formulas/dist/models/data/data-set";
+} from "@concord-consortium/codap-formulas/models/data/data-set";
 import {
   CaseInfo, ICase, IItem
-} from "@concord-consortium/codap-formulas/dist/models/data/data-set-types";
+} from "@concord-consortium/codap-formulas/models/data/data-set-types";
 import {
   IAttribute as IFormulaAttribute
-} from "@concord-consortium/codap-formulas/dist/models/data/attribute";
+} from "@concord-consortium/codap-formulas/models/data/attribute";
 import { observable } from "mobx";
 import { IAttribute } from "./attribute";
 import { IDataSet } from "./data-set";

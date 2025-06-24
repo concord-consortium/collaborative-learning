@@ -4,7 +4,7 @@ import React, { useState } from "react";
 // I'm afraid if I change that typescript configuration lots of things
 // will break, but I'm going to try...
 import { FormulaEditorContext, useFormulaEditorState
-} from "@concord-consortium/codap-formulas/dist/components/common/formula-editor-context";
+} from "@concord-consortium/codap-formulas/components/common/formula-editor-context";
 
 
 import { useCustomModal } from "../../../hooks/use-custom-modal";
