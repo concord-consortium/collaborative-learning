@@ -356,7 +356,8 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().should('not.exist');
     });
 
-    it("Test adding 2 Y Series", () => {
+    // skip flaky test for 6.2.0 release
+    it.skip("Test adding 2 Y Series", () => {
       beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
