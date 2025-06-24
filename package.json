@@ -222,6 +222,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^1.8.9",
+    "@concord-consortium/codap-formulas": "file:.yalc/@concord-consortium/codap-formulas",
     "@concord-consortium/compute-engine": "^0.12.3-cc.2",
     "@concord-consortium/diagram-view": "1.0.1",
     "@concord-consortium/mobx-state-tree": "^5.1.8-cc.2",

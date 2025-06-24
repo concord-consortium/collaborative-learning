@@ -19,7 +19,6 @@ import { useColumnResize } from "./use-column-resize";
 import { useContentChangeHandlers } from "./use-content-change-handlers";
 import { useControlsColumn } from "./use-controls-column";
 import { useDataSet } from "./use-data-set";
-import { useExpressionsDialog } from "./use-expressions-dialog";
 import { useGridContext } from "./use-grid-context";
 import { useMeasureColumnWidth } from "./use-measure-column-width";
 import { useModelDataSet } from "./use-model-data-set";
@@ -38,6 +37,7 @@ import { useUIStore } from "../../../hooks/use-stores";
 
 import "./table-tile.scss";
 import "./table-toolbar-registration";
+import { useFormulaModal } from "./use-formula-modal";
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
@@ -185,8 +185,11 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       onSetColumnExpressions(expressions, dataSet.attributes[0].name);
     }
   };
-  const [showExpressionsDialog, , setCurrYAttrId] = useExpressionsDialog({
-    metadata, dataSet, onSubmit: handleSubmitExpressions
+  // const [showExpressionsDialog, , setCurrYAttrId] = useExpressionsDialog({
+  //   metadata, dataSet, onSubmit: handleSubmitExpressions
+  // });
+  const [showExpressionsDialog, , setCurrYAttrId] = useFormulaModal({
+    dataSet
   });
   const handleShowExpressionsDialog = (attrId?: string) => {
     attrId && setCurrYAttrId(attrId);
