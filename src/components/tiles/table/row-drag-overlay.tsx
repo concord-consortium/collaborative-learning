@@ -30,7 +30,7 @@ export const RowDragOverlay = ({ row, columns, showRowLabels, rowHeight }: IRowD
             <span key={col.key} style={cellStyle} className="drag-overlay-cell">
               {idx === 0
               ? <>
-                  <DragIndicator className="row-drag-icon" />
+                  <DragIndicator className="row-drag-icon" data-testid="row-drag-indicator-overlay" />
                   {showRowLabels ? <span className="row-index-label">{row.__index__}</span> : undefined}
                 </>
               : row[col.key]}
