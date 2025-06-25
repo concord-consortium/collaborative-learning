@@ -111,7 +111,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
         tileElt.removeEventListener("touchstart", handleTilePointerDown);
       });
     }
-  }, [model.id, tileElt, ui, containerContext.model, model, readOnly]);
+  }, [tileElt, ui, containerContext.model, model, readOnly]);
 
   // copy to clipboard
   const handleCopy = () => {
