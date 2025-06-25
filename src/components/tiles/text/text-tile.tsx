@@ -249,7 +249,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;
     const { model, readOnly } = this.props;
-    const inLockedContainer = this.context;
+    const inLockedContainer = this.context.isLocked;
 
     // Don't select a locked prompt
     if (this.props.model.fixedPosition && inLockedContainer) {

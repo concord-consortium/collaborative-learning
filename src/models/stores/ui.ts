@@ -256,4 +256,7 @@ function _userSelectTile(ui: UIModelType, model: ITileModel,
 
 // Sometimes we get multiple selection events for a single click.
 // We only want to respond once per such burst of selection events.
-export const userSelectTile = debounce(_userSelectTile, 50);
+// We use leading: true to ensure that the first event in the burst is processed;
+// this helps make sure it the tile gets selected in tests, and may make it
+// feel more responsive for users as well.
+export const userSelectTile = debounce(_userSelectTile, 50, { leading: true });
