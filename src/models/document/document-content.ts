@@ -312,8 +312,13 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     // Clone the tile content and update it with the new shared model ids
     const tileIdMap: Record<string, string> = {};
     const updatedTiles: IDropTileItem[] = [];
-    // We have to process container tiles last, so that we can update them with the
-    // references to their new embedded tiles.
+    // This sorts the tiles to put containers last.
+    // The container (eg Question) tiles can then simply read the updated IDs
+    // of their embedded tiles and update their references to them.
+    // However, the sorting has the effect of actually putting the Question tiles
+    // after other tiles that are getting copied, which is a bug.
+    // TOOD: This loop should be split up so that the actual order of tiles is preserved,
+    // while still allowing the references to embedded tiles to be updated.
     const reorderedTiles: IDragTileItem[] = [
       ...tiles.filter(tile => !isContainerTile(tile)),
       ...tiles.filter(tile => isContainerTile(tile))
