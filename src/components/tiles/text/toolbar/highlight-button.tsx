@@ -18,7 +18,13 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     setToggleHighlight(!toggleHighlight);
   };
   return (
-    <TileToolbarButton name={name} title="Highlight" disabled={disabled} selected={toggleHighlight} onClick={handleClick}>
+    <TileToolbarButton
+      name={name}
+      title="Highlight"
+      disabled={disabled}
+      selected={toggleHighlight}
+      onClick={handleClick}
+    >
       <HighlightToolIcon/>
     </TileToolbarButton>
   );
