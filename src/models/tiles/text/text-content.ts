@@ -7,6 +7,8 @@ import { TileContentModel } from "../tile-content";
 import { SharedModelType } from "../../shared/shared-model";
 import { getAllTextPluginInfos } from "./text-plugin-info";
 import { escapeBackslashes, escapeDoubleQuotes, removeNewlines, removeTabs } from "../../../utilities/string-utils";
+import { tileContentAPIViews } from "../tile-model-hooks";
+import { IClueTileObject } from "src/models/annotations/clue-object";
 
 export const kTextTileType = "Text";
 
@@ -149,6 +151,16 @@ export const TextContentModel = TileContentModel
         pluginInfo?.updateTextContentAfterSharedModelChanges?.(self, sharedModel);
       });
     }
+  }))
+  .views(self => tileContentAPIViews({
+    get annotatableObjects(): IClueTileObject[] {
+      const objects: IClueTileObject[] = [];
+      const objectType = "highlight";
+      self.highlightedText.forEach(highlight => {
+        objects.push({objectId: highlight.id, objectType});
+      });
+      return objects;
+    },
   }));
 
 export type TextContentModelType = Instance<typeof TextContentModel>;

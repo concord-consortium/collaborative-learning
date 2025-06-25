@@ -99,3 +99,13 @@ export function isHighlightChipSelected(editor: Editor): boolean {
 
   return !!match;
 }
+
+export function getHighlightElement(editor: CustomEditor, id: string): HighlightElement | undefined {
+  if (!editor.selection) return undefined;
+
+  const [match] = Editor.nodes(editor, {
+    match: (n) => (n as CustomElement).type === kHighlightFormat && (n as HighlightElement).reference === id
+  });
+
+  return match ? (match[0] as HighlightElement) : undefined;
+}

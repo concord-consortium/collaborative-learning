@@ -10,6 +10,7 @@ import { BaseComponent } from "../../base";
 import { debouncedSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
+import { getHighlightElement } from "../../../plugins/text/highlights-plugin";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
@@ -165,9 +166,33 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         const { x, y, width, height, top, left, bottom, right } = entry.contentRect;
         this.tileContentRect = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
         this.toolbarTileApi?.handleTileResize?.(entry);
-      }
-    });
+      },
+      getObjectBoundingBox: (objectId: string, objectType?: string) => {
+        if (objectType === "highlight") {
+          if (this.editor) {
+            const highlightElement = getHighlightElement(this.editor, objectId);
+            if (highlightElement) {
+              const domElement = ReactEditor.toDOMNode(this.editor, highlightElement);
+              const parentElement = domElement?.parentElement; // Get the parent element
+              if (domElement && parentElement) {
+                const boundingBox = domElement.getBoundingClientRect();
+                const parentBoundingBox = parentElement.getBoundingClientRect(); // Get parent's bounding box
 
+                // Calculate position relative to the parent
+                const relativeLeft = boundingBox.left - parentBoundingBox.left + 4;
+                const relativeTop = boundingBox.top - parentBoundingBox.top + 4;
+                return {
+                  left: relativeLeft,
+                  top: relativeTop,
+                  width: boundingBox.width - 2,
+                  height: boundingBox.height
+                };
+              }
+            }
+          }
+        }
+      }
+    })
   }
 
   public componentWillUnmount() {
