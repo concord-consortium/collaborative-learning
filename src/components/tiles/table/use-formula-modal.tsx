@@ -4,8 +4,8 @@ import React, { useState } from "react";
 // I'm afraid if I change that typescript configuration lots of things
 // will break, but I'm going to try...
 import { FormulaEditorContext, useFormulaEditorState
-} from "@concord-consortium/codap-formulas/components/common/formula-editor-context";
-
+} from "@concord-consortium/codap-formulas-react17/components/common/formula-editor-context";
+import { FormulaEditor } from "@concord-consortium/codap-formulas-react17/components/common/formula-editor";
 
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { IDataSet } from "../../../models/data/data-set";
@@ -49,7 +49,7 @@ const Content: React.FC<IContentProps> = ({
 
   return (
     <FormulaEditorContext.Provider value={formulaEditorState}>
-      <div>Hello World</div>
+      <FormulaEditor editorHeight={200}/>
     </FormulaEditorContext.Provider>
   );
 };

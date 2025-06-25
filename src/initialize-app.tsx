@@ -6,6 +6,9 @@ import { setLivelinessChecking } from "mobx-state-tree";
 import Modal from "react-modal";
 import { ModalProvider } from "@concord-consortium/react-modal-hook";
 import { QueryClient, QueryClientProvider } from "react-query";
+import {
+  registerGlobalValueManagerLookupFunction
+} from "@concord-consortium/codap-formulas-react17/models/global/global-value-manager";
 
 import { AppMode } from "./models/stores/store-types";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
@@ -43,6 +46,10 @@ type IInitializeAppOptions = {authoring?: boolean, standalone?: boolean, authDom
 export const initializeApp = ({authoring, standalone, authDomain}: IInitializeAppOptions = {}): IStores => {
   const appVersion = PackageJson.version;
   const bearerToken = getBearerToken(urlParams);
+
+  console.log(`CLUE initializeApp: ${appVersion}`);
+  // Let the formula system know we don't support global values
+  registerGlobalValueManagerLookupFunction(undefined);
 
   const user = UserModel.create();
 

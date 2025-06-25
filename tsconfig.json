@@ -27,7 +27,7 @@
       // of packages. Typescript 5 added a "bundler" moduleResolver which
       // handles the exports section the same as webpack 5+ but also
       // doesn't require extensions on the import paths.
-      "@concord-consortium/codap-formulas/*": ["node_modules/@concord-consortium/codap-formulas/dist/*"]
+      "@concord-consortium/codap-formulas-react17/*": ["node_modules/@concord-consortium/codap-formulas-react17/dist/*"]
     },
     "types": ["w3c-web-serial", "gtag.js"]
   },
