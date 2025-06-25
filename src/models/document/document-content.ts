@@ -317,7 +317,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     // of their embedded tiles and update their references to them.
     // However, the sorting has the effect of actually putting the Question tiles
     // after other tiles that are getting copied, which is a bug.
-    // TOOD: This loop should be split up so that the actual order of tiles is preserved,
+    // TODO: This loop should be split up so that the actual order of tiles is preserved,
     // while still allowing the references to embedded tiles to be updated.
     const reorderedTiles: IDragTileItem[] = [
       ...tiles.filter(tile => !isContainerTile(tile)),
