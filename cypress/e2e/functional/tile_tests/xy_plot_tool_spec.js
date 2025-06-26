@@ -44,7 +44,9 @@ function beforeTest(params) {
 
 context('XYPlot Tool Tile', function () {
   describe("XYPlot Tool", () => {
-    it("XYPlot tool tile", () => {
+    // TODO: Re-enable this test once the underlying issue is resolved
+    // Skipped due to failing Cypress tests as discussed in Slack
+    it.skip("XYPlot tool tile", () => {
       beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();

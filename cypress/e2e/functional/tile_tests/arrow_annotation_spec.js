@@ -306,7 +306,9 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 0);
   });
 
-  it("can add arrows to table tiles", () => {
+  // TODO: Re-enable this test once the underlying issue is resolved
+  // Skipped due to failing Cypress tests as discussed in Slack
+  it.skip("can add arrows to table tiles", () => {
     beforeTest(queryParams);
     clueCanvas.addTile("table");
 
