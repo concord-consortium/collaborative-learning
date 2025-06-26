@@ -11,6 +11,7 @@ import {
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import { useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
+import WaitingMessage from "./waiting-message";
 
 import "./chat-panel.scss";
 
@@ -88,6 +89,13 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     setChatPanelTitle(isDocumentView ? "Documents" : "Comments");
   }, [isDocumentView]);
 
+  // Remove the "Waiting..." message when a new comment appears or the document changes.
+  // This could have false positives (since it acts on any change to the list of comments),
+  // but since the message should only be shown for a few seconds, it's low risk.
+  useEffect(() => {
+    content?.setAwaitingAIAnalysis(false);
+  }, [content, documentComments]);
+
   const newCommentCount = unreadComments?.length || 0;
   const isStudentWorkspace = activeNavTab === "student-work";
   const commentInstructions =
@@ -117,16 +125,19 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         />
         :
         focusDocument ?
-        <ChatThread
-          user={user}
-          activeNavTab={activeNavTab}
-          onPostComment={postComment}
-          onDeleteComment={deleteComment}
-          chatThreads={commentThreads}
-          focusDocument={focusDocument}
-          focusTileId={focusTileId}
-          isDocumentView={isDocumentView}
-        />
+        <>
+          <ChatThread
+            user={user}
+            activeNavTab={activeNavTab}
+            onPostComment={postComment}
+            onDeleteComment={deleteComment}
+            chatThreads={commentThreads}
+            focusDocument={focusDocument}
+            focusTileId={focusTileId}
+            isDocumentView={isDocumentView}
+          />
+          <WaitingMessage content={content} />
+        </>
         :
         <div className="select-doc-message" data-testid="select-doc-message">
           {commentInstructions}

@@ -314,8 +314,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderIdeasButton() {
-    const { documents } = this.stores;
-    if (documents.invisibleExemplarDocuments.length > 0) {
+    const { documents, appConfig: { aiEvaluation } } = this.stores;
+    if (aiEvaluation || documents.invisibleExemplarDocuments.length > 0) {
       return (
         <IdeasButton onClick={this.handleIdeasButtonClick} />
       );
@@ -418,6 +418,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} />
           }
           <DocumentAnnotationToolbar />
+          {this.renderIdeasButton()}
         </div>
         {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}
         {
@@ -463,11 +464,19 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  // The exemplar controller listens to log messages and then decides when to show
-  // the ideas button based on rules defined in exemplar-controller-rules. So we just
+  // The "ideas" button does either or both of two things, depending on the unit configuration:
+  // shows an exemplar, and/or triggers AI evaluation.
+  // The exemplar controller listens to log messages and then decides when to reveal an exemplar
+  // based on rules defined in exemplar-controller-rules. So we just
   // need to log the click. See: exemplar-controller.ts, and exemplar-controller-rules.ts
+  // The AI evaluation is triggered by updating the last-edited timestamp.
   private handleIdeasButtonClick = () => {
-    const document = this.props.document;
+    const { document } = this.props;
+    const { db: { firebase }, user, persistentUI } = this.stores;
+    firebase.setLastEditedNow(user, document.key, document.uid );
+    persistentUI.openResourceDocument(document, user);
+    persistentUI.toggleShowChatPanel(true);
+    document.content?.setAwaitingAIAnalysis(true);
     logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
   };
 
