@@ -21,9 +21,9 @@ import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
+import { ContainerContext } from "../../document/container-context";
 
 import "./image-tile.scss";
-import { ContainerContext } from "../../document/container-context";
 
 type IProps = ITileProps;
 
