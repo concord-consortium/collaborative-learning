@@ -67,7 +67,7 @@ export const DataflowNodeModel = types.
       SensorNodeModel,
       TimerNodeModel,
       TransformNodeModel,
-    ) as typeof BaseNodeModel
+    ) as unknown as typeof BaseNodeModel
   })
   .volatile(self => ({
     // These are stored so annotations can update as the node moves around

@@ -456,7 +456,8 @@ export const GeometryContentModel = GeometryBaseContentModel
       });
     },
     deselectAll(board: JXG.Board) {
-      self.metadata.selection.forEach((value, id) => {
+      self.metadata.selection.forEach((value, _id) => {
+        const id = String(_id);
         self.deselectElement(board, id);
       });
     },

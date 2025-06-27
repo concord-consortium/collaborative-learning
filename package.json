@@ -130,7 +130,7 @@
   },
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "overrides": {
-    "mobx-state-tree": "npm:@concord-consortium/mobx-state-tree@5.1.8-cc.1",
+    "mobx-state-tree": "npm:@concord-consortium/mobx-state-tree@6.0.0-cc.1",
     "@cortex-js/compute-engine": "npm:@concord-consortium/compute-engine@0.12.3-cc.1"
   },
   "devDependencies": {
@@ -231,7 +231,7 @@
     "@concord-consortium/codap-formulas-react17": "file:.yalc/@concord-consortium/codap-formulas-react17",
     "@concord-consortium/compute-engine": "^0.12.3-cc.2",
     "@concord-consortium/diagram-view": "1.0.1",
-    "@concord-consortium/mobx-state-tree": "^5.1.8-cc.2",
+    "@concord-consortium/mobx-state-tree": "^6.0.0-cc.1",
     "@concord-consortium/react-components": "^1.0.0",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
     "@concord-consortium/slate-editor": "^0.10.1",
