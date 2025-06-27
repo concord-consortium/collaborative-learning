@@ -7,6 +7,7 @@ import {
 } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "./text-content-context";
 import { BaseComponent } from "../../base";
+import { OffsetModel } from "../../../models/annotations/clue-object";
 import { debouncedSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
@@ -172,6 +173,18 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
           const box = this.highlightBoundingBoxes[objectId];
           if (box) return box;
         }
+      },
+      getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
+        // offset the annotation arrows to the right top corner of the bounding box until connected to a target,
+        // and then offset should be the center of the edge closes to the target
+        const offsets = OffsetModel.create({});
+        if (objectType === "highlight") {
+          const box = this.highlightBoundingBoxes[objectId];
+          const { width, height } = box;
+          offsets.setDx(width / 2);
+          offsets.setDy(- height / 2);
+        }
+        return offsets;
       }
     });
   }
