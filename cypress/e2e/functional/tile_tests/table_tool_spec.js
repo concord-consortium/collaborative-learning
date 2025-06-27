@@ -449,4 +449,64 @@ context('Table Tool Tile', function () {
         .should('have.attr', 'aria-label', 'Sorted descending');
     });
   });
+
+  it('should handle table row reordering', function() {
+    // TODO: Actual manual reordering is not tested - see CLUE-216
+    beforeTest();
+
+    cy.log('will add a table to canvas');
+    clueCanvas.addTile('table');
+    tableToolTile.getTableTile().should('be.visible');
+
+    cy.log('will add data to create multiple rows');
+    cy.get(".primary-workspace").within((workspace) => {
+      tableToolTile.typeInTableCellXY(0, 0, 'Row 1 Data');
+      tableToolTile.typeInTableCellXY(0, 1, 'Value A');
+      tableToolTile.typeInTableCellXY(1, 0, 'Row 2 Data');
+      tableToolTile.typeInTableCellXY(1, 1, 'Value B');
+      tableToolTile.typeInTableCellXY(2, 0, 'Row 3 Data');
+      tableToolTile.typeInTableCellXY(2, 1, 'Value C');
+    });
+
+    cy.log('verify row drag indicators appear on click');
+    // Click the first data row's index cell to show drag indicator (skip input row)
+    tableToolTile.getIndexCellWrapper().eq(1).click();
+    tableToolTile.verifyRowDragIndicatorVisible();
+
+    // Verify drag indicator is present in the index cell using data-testid
+    tableToolTile.getIndexCellContents().eq(1).find('[data-testid="row-drag-indicator"]').should('exist');
+
+    cy.log('verify row drag indicators disappear when not focused');
+    // Click away to unfocus
+    cy.get('body').click(0, 0);
+    tableToolTile.verifyRowDragIndicatorHidden();
+
+    cy.log('verify row dividers exist for drag positioning');
+    // Check that row dividers exist for positioning during drag operations
+    tableToolTile.getRowDividers().should('exist');
+
+    // Check that we have both "before" and "after" dividers (without specific row IDs)
+    cy.get('[data-testid*="-before"]').should('exist');
+    cy.get('[data-testid*="-after"]').should('exist');
+
+    cy.log('verify row dividers are initially hidden');
+    tableToolTile.verifyRowDividersHidden();
+
+    cy.log('verify index cells have grab cursor');
+    tableToolTile.verifyGrabCursor();
+
+    cy.log('verify initial row order');
+    tableToolTile.getTableCellWithRowColIndex(0, 2).should('contain', 'Row 1 Data');
+    tableToolTile.getTableCellWithRowColIndex(1, 2).should('contain', 'Row 2 Data');
+    tableToolTile.getTableCellWithRowColIndex(2, 2).should('contain', 'Row 3 Data');
+
+    cy.log('reload page and verify row order persists');
+    cy.reload();
+    cy.waitForLoad();
+
+    tableToolTile.getTableCellWithRowColIndex(0, 2).should('contain', 'Row 1 Data');
+    tableToolTile.getTableCellWithRowColIndex(1, 2).should('contain', 'Row 2 Data');
+    tableToolTile.getTableCellWithRowColIndex(2, 2).should('contain', 'Row 3 Data');
+
+  });
 });
