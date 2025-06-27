@@ -243,10 +243,20 @@ export const UIModel = types
 export type UIModelType = typeof UIModel.Type;
 export type UIDialogModelType = typeof UIDialogModel.Type;
 
-export function selectTile(ui: UIModelType, model: ITileModel, isExtending?: boolean) {
-  ui.setSelectedTile(model, { append: !!isExtending });
+/** Respond to user request to select a tile.
+ *  If the tile is is read-only and is in a container, the container is selected instead.
+ */
+function _userSelectTile(ui: UIModelType, model: ITileModel,
+      options: { append?: boolean, readOnly?: boolean, container?: ITileModel }) {
+  if (options.readOnly && options.container) {
+    model = options.container;
+  }
+  ui.setSelectedTile(model, { append: !!options.append });
 }
 
 // Sometimes we get multiple selection events for a single click.
 // We only want to respond once per such burst of selection events.
-export const debouncedSelectTile = debounce(selectTile, 50);
+// We use leading: true to ensure that the first event in the burst is processed;
+// this helps make sure it the tile gets selected in tests, and may make it
+// feel more responsive for users as well.
+export const userSelectTile = debounce(_userSelectTile, 50, { leading: true });

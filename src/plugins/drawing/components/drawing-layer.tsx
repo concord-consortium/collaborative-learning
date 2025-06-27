@@ -19,6 +19,8 @@ import { combineBoundingBoxes } from "../../../models/tiles/geometry/geometry-ut
 import { useTileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { kClosedObjectListPanelWidth } from "../model/drawing-types";
+import { IContainerContextType, useContainerContext } from "../../../components/document/container-context";
+import { userSelectTile } from "../../../models/stores/ui";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -50,6 +52,7 @@ interface InternalDrawingLayerViewProps extends DrawingLayerViewProps {
   offsetY: number;
   zoom: number;
   objectsBoundingBox: BoundingBox;
+  containerContext: IContainerContextType;
 }
 
 interface DrawingLayerViewState {
@@ -61,13 +64,14 @@ interface DrawingLayerViewState {
 
 /**
  * This wrapper has two purposes.
- * - It passes the TileNavigatorContext as a prop, since the InternalDrawingLayerView is a class component and so can't
- *   connect to two different Contexts.
+ * - It passes extra contexts as props, since the InternalDrawingLayerView is a class component and so can't
+ *   connect to multiple Contexts.
  * - It passes some content values as props so that they will cause the component to re-render even if they
  *   are not directly referenced in the render method.
  */
 export const DrawingLayerView = observer((props: DrawingLayerViewProps) => {
   const navigator = useTileNavigatorContext();
+  const containerContext = useContainerContext();
   const content = props.model.content as DrawingContentModelType;
   return (
     <InternalDrawingLayerView
@@ -76,6 +80,7 @@ export const DrawingLayerView = observer((props: DrawingLayerViewProps) => {
       offsetY={content.offsetY}
       zoom={content.zoom}
       objectsBoundingBox={content.objectsBoundingBox}
+      containerContext={containerContext}
       {...props}
     />);
 });
@@ -209,8 +214,8 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
   }
 
   public selectTile(append: boolean) {
-    const ui = this.context.stores.ui;
-    ui.setSelectedTileId(this.props.model.id, { append });
+    userSelectTile(this.context.stores.ui, this.props.model,
+      { readOnly: this.props.readOnly, append, container: this.props.containerContext.model });
   }
 
   /**

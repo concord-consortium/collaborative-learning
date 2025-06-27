@@ -17,6 +17,8 @@ import { GeometryTileMode } from "./geometry-types";
 import { BoundingBox, NavigatorDirection } from "../../../models/tiles/navigatable-tile-model";
 import { TileNavigatorContext } from "../hooks/use-tile-navigator-context";
 import { TileNavigator } from "../tile-navigator";
+import { userSelectTile } from "../../../models/stores/ui";
+import { useContainerContext } from "../../document/container-context";
 
 import "./geometry-toolbar-registration";
 
@@ -26,6 +28,7 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
   const { model, readOnly, navigatorAllowed = true, hovered, ...others } = props;
   const { tileElt } = others;
   const modelRef = useCurrent(model);
+  const containerContext = useContainerContext();
   const domElement = useRef<HTMLDivElement>(null);
   const content = model.content as GeometryContentModelType;
   const showNavigator = navigatorAllowed && content.isNavigatorVisible;
@@ -89,7 +92,9 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
   const [handlePointerDown, handlePointerUp] = useTileSelectionPointerEvents(
     useCallback(() => modelRef.current.id, [modelRef]),
     useCallback(() => ui.selectedTileIds, [ui]),
-    useCallback((append: boolean) => ui.setSelectedTile(modelRef.current, { append }), [modelRef, ui]),
+    useCallback((append: boolean) => userSelectTile(ui, modelRef.current,
+      { readOnly, append, container: containerContext.model }),
+      [modelRef, ui, containerContext.model, readOnly]),
     domElement
   );
 

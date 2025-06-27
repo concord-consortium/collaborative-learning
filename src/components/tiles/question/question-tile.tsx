@@ -9,7 +9,7 @@ import { RowListComponent } from "../../document/row-list";
 import { useCurrent } from "../../../hooks/use-current";
 import { useUIStore } from "../../../hooks/use-stores";
 import { useTileSelectionPointerEvents } from "../geometry/use-tile-selection-pointer-events";
-import { LockedContainerContext } from "../../document/locked-container-context";
+import { ContainerContext } from "../../document/container-context";
 
 import "./question-tile.scss";
 
@@ -33,7 +33,7 @@ export const QuestionTileComponent: React.FC<ITileProps> = observer(function Que
   });
 
   return (
-    <LockedContainerContext.Provider value={content.locked}>
+    <ContainerContext.Provider value={{ model: props.model, isLocked: content.locked }}>
       <div
         className={classes}
         data-testid="question-tile"
@@ -59,6 +59,6 @@ export const QuestionTileComponent: React.FC<ITileProps> = observer(function Que
           />
         </div>
       </div>
-    </LockedContainerContext.Provider>
+    </ContainerContext.Provider>
   );
 });
