@@ -472,11 +472,13 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   // The AI evaluation is triggered by updating the last-edited timestamp.
   private handleIdeasButtonClick = () => {
     const { document } = this.props;
-    const { db: { firebase }, user, persistentUI } = this.stores;
+    const { db: { firebase }, user, persistentUI, appConfig } = this.stores;
     firebase.setLastEditedNow(user, document.key, document.uid );
     persistentUI.openResourceDocument(document, user);
     persistentUI.toggleShowChatPanel(true);
-    document.content?.setAwaitingAIAnalysis(true);
+    if (appConfig.aiEvaluation) {
+      document.content?.setAwaitingAIAnalysis(true);
+    }
     logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
   };
 
