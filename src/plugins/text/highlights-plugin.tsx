@@ -39,7 +39,7 @@ export class HighlightsPlugin implements ITextPlugin {
   onInitEditor(editor: CustomEditor) {
     return withHighlights(editor);
   }
-};
+}
 
 export interface HighlightElement extends BaseElement {
   type: typeof kHighlightFormat;

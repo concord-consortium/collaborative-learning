@@ -43,7 +43,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     Transforms.delete(editor, { at: editor.selection });
     Transforms.insertNodes(editor, highlightNode);
     Transforms.collapse(editor, { edge: "end" });
-  }
+  };
 
   const unHighlightChip = () => {
     if (!editor.selection) return;
