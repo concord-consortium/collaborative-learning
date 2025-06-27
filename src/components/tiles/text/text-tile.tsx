@@ -10,7 +10,7 @@ import { BaseComponent } from "../../base";
 import { debouncedSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
-import { getHighlightElement } from "../../../plugins/text/highlights-plugin";
+import { HighlightRegistryContext, IHighlightBox } from "../../../plugins/text/highlight-registry-context";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
@@ -169,30 +169,11 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
         if (objectType === "highlight") {
-          if (this.editor) {
-            const highlightElement = getHighlightElement(this.editor, objectId);
-            if (highlightElement) {
-              const domElement = ReactEditor.toDOMNode(this.editor, highlightElement);
-              const parentElement = domElement?.parentElement; // Get the parent element
-              if (domElement && parentElement) {
-                const boundingBox = domElement.getBoundingClientRect();
-                const parentBoundingBox = parentElement.getBoundingClientRect(); // Get parent's bounding box
-
-                // Calculate position relative to the parent
-                const relativeLeft = boundingBox.left - parentBoundingBox.left + 4;
-                const relativeTop = boundingBox.top - parentBoundingBox.top + 4;
-                return {
-                  left: relativeLeft,
-                  top: relativeTop,
-                  width: boundingBox.width - 2,
-                  height: boundingBox.height
-                };
-              }
-            }
-          }
+          const box = this.highlightBoundingBoxes[objectId];
+          if (box) return box;
         }
       }
-    })
+    });
   }
 
   public componentWillUnmount() {
@@ -227,32 +208,34 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       // which is used for cypress tests and other purposes.
       // TODO: replace this provider with one at the tile level so we get it for free.
       // and then replace the drawing one with that as well
-      <TextContentModelContext.Provider value={this.getContent()} >
-        <TextPluginsContext.Provider value={this.plugins} >
-          <div
-            className={containerClasses}
-            data-testid="text-tool-wrapper"
-            ref={elt => this.textTileDiv = elt}
-            onMouseDown={this.handleMouseDownInWrapper}
-          >
-            <Slate
-              editor={this.editor as ReactEditor}
-              initialValue={this.state.initialValue}
-              onChange={this.handleChange}
+      <HighlightRegistryContext.Provider value={this.handleHighlightBox}>
+        <TextContentModelContext.Provider value={this.getContent()} >
+          <TextPluginsContext.Provider value={this.plugins} >
+            <div
+              className={containerClasses}
+              data-testid="text-tool-wrapper"
+              ref={elt => this.textTileDiv = elt}
+              onMouseDown={this.handleMouseDownInWrapper}
             >
-              <SlateEditor
-                placeholder={placeholderText}
-                hotkeyMap={defaultHotkeyMap}
-                readOnly={readOnly}
-                onFocus={this.handleFocus}
-                onBlur={this.handleBlur}
-                className={`ccrte-editor slate-editor ${slateClasses || ""}`}
-              />
-              <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
-            </Slate>
-          </div>
-        </TextPluginsContext.Provider>
-      </TextContentModelContext.Provider>
+              <Slate
+                editor={this.editor as ReactEditor}
+                initialValue={this.state.initialValue}
+                onChange={this.handleChange}
+              >
+                <SlateEditor
+                  placeholder={placeholderText}
+                  hotkeyMap={defaultHotkeyMap}
+                  readOnly={readOnly}
+                  onFocus={this.handleFocus}
+                  onBlur={this.handleBlur}
+                  className={`ccrte-editor slate-editor ${slateClasses || ""}`}
+                />
+                <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
+              </Slate>
+            </div>
+          </TextPluginsContext.Provider>
+        </TextContentModelContext.Provider>
+      </HighlightRegistryContext.Provider>
     );
   }
 
@@ -314,5 +297,11 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private handleFocus = () => {
     this.textOnFocus = this.getContent().textStr;
     this.setState({ revision: this.state.revision + 1 }); // Force a rerender
+  };
+
+  private highlightBoundingBoxes: Record<string, IHighlightBox> = {};
+
+  private handleHighlightBox = (id: string, box: IHighlightBox) => {
+    this.highlightBoundingBoxes[id] = box;
   };
 }

@@ -1,5 +1,6 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import classNames from "classnames/dedupe";
+import { Element as SlateElement } from "slate";
 import { BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
   RenderElementProps, useSelected } from "@concord-consortium/slate-editor";
 import { action, makeObservable, observable } from "mobx";
@@ -7,6 +8,7 @@ import { observer } from "mobx-react";
 import { TextContentModelType } from "../../models/tiles/text/text-content";
 import { ITextPlugin } from "../../models/tiles/text/text-plugin-info";
 import { TextPluginsContext } from "../../components/tiles/text/text-plugins-context";
+import { HighlightRegistryContext } from "./highlight-registry-context"; // 👈 new import
 
 export const kHighlightFormat = "highlight";
 export const kHighlightTextPluginName = "highlights";
@@ -39,7 +41,7 @@ export class HighlightsPlugin implements ITextPlugin {
   onInitEditor(editor: CustomEditor) {
     return withHighlights(editor);
   }
-};
+}
 
 export interface HighlightElement extends BaseElement {
   type: typeof kHighlightFormat;
@@ -54,17 +56,44 @@ export const HighlightComponent = observer(function({ attributes, children, elem
   const plugins = useContext(TextPluginsContext);
   const highlightPlugin = plugins[kHighlightTextPluginName] as HighlightsPlugin|undefined;
   const isSelected = useSelected();
+  const registryFn = useContext(HighlightRegistryContext);
+  const chipRef = useRef<HTMLSpanElement>(null); // 👈 ref to DOM node
+
 
   if (!isHighlightElement(element)) return null;
   const {reference} = element;
   const highlightEntry = highlightPlugin?.highlightedText.find(ht => ht.id === reference);
   const textToHighlight = highlightEntry?.text ?? `invalid reference: ${reference}`;
 
+  useEffect(() => {
+    const el = chipRef.current;
+    if (!el || !registryFn) return;
+
+    const reportBox = () => {
+      const highlightRect = el.getBoundingClientRect();
+      const textBoxRect = el.closest('.text-tool-wrapper')?.getBoundingClientRect();
+      if (textBoxRect) {
+        registryFn(reference, {
+          left: highlightRect.left - textBoxRect.left,
+          top: highlightRect.top - textBoxRect.top,
+          width: highlightRect.width - 2,
+          height: highlightRect.height - 2
+        });
+      }
+    };
+
+    requestAnimationFrame(reportBox);
+
+    const highlightObserver = new ResizeObserver(reportBox);
+    highlightObserver.observe(el);
+    return () => highlightObserver.disconnect();
+  }, [registryFn, reference]);
+
   const classes = classNames(kSlateVoidClass, "slate-highlight-chip");
 
   return (
     <span className={classes} {...attributes} contentEditable={false}>
-      <span className={classNames("highlight-chip", {"slate-selected": highlightEntry && isSelected})} >
+      <span ref={chipRef} className={classNames("highlight-chip", {"slate-selected": highlightEntry && isSelected})} >
         {children}
         {textToHighlight}
       </span>
@@ -100,12 +129,25 @@ export function isHighlightChipSelected(editor: Editor): boolean {
   return !!match;
 }
 
+
 export function getHighlightElement(editor: CustomEditor, id: string): HighlightElement | undefined {
-  if (!editor.selection) return undefined;
+  // Safely traverse the editor's children to find the highlight element.
+  const findHighlightElement = (nodes: any[]): HighlightElement | undefined => {
+    for (const node of nodes) {
+      if (SlateElement.isElement(node)) {
+        if ((node as HighlightElement).type === kHighlightFormat && (node as HighlightElement).reference === id) {
+          return node as HighlightElement;
+        }
+        if (node.children) {
+          const childResult = findHighlightElement(node.children);
+          if (childResult) {
+            return childResult;
+          }
+        }
+      }
+    }
+    return undefined;
+  };
 
-  const [match] = Editor.nodes(editor, {
-    match: (n) => (n as CustomElement).type === kHighlightFormat && (n as HighlightElement).reference === id
-  });
-
-  return match ? (match[0] as HighlightElement) : undefined;
+  return findHighlightElement(editor.children);
 }
