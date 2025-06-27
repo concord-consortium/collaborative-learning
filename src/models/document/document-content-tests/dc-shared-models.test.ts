@@ -555,6 +555,7 @@ Object {
     "textTool": Object {
       "content": Object {
         "format": undefined,
+        "highlightedText": Array [],
         "text": "",
         "type": "Text",
       },
