@@ -2,8 +2,10 @@ import React, { useContext } from "react";
 import { v4 as uuid } from "uuid";
 import { Path } from "slate";
 import { Editor, Range, Transforms, useSlate } from "@concord-consortium/slate-editor";
+import { useStores } from "../../../../hooks/use-stores";
 import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat, HighlightElement }
   from "../../../../plugins/text/highlights-plugin";
+  import { TileModelContext } from "../../../tiles/tile-api";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../toolbar/toolbar-button-manager";
 import { TextPluginsContext } from "../text-plugins-context";
@@ -13,6 +15,8 @@ import HighlightToolIcon from "../../../../assets/icons/text/highlight-text-icon
 export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
   const editor = useSlate();
   const plugins = useContext(TextPluginsContext);
+  const model = useContext(TileModelContext);
+  const stores = useStores();
   const highlightsPlugin = plugins[kHighlightTextPluginName] as HighlightsPlugin | undefined;
   const { selection } = editor;
   const isHighlightedText = editor.isElementActive(kHighlightFormat);
@@ -29,7 +33,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     return chipEntry ? (chipEntry as [HighlightElement, Path]) : undefined;
   };
 
-  const highlightText = (reference: string, text: string) =>{
+  const highlightText = (reference: string, text: string, marks?: Record<string, any>) =>{
     if (!editor.selection || Range.isCollapsed(editor.selection)) return;
     const selectionLength = Editor.string(editor, editor.selection).length;
     if (selectionLength === 0) return;
@@ -37,7 +41,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     const highlightNode: HighlightElement = {
       type: kHighlightFormat,
       reference,
-      children: [{ text }]
+      children: [{ text, ...marks }]
     };
     // Replace selected text with the highlight chip
     Transforms.delete(editor, { at: editor.selection });
@@ -67,12 +71,34 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     }
   };
 
+  const removeAnnotationsForHighlight = (highlightId: string) => {
+    if (!stores?.documents || !model?.id) return;
+    const document = stores.documents.findDocumentOfTile(model.id);
+    if (!document?.content) return;
+    const annotationsToRemove: string[] = [];
+    document.content.annotations.forEach((annotation) => {
+      // Check if the annotation's source or target object references this highlight
+      if (annotation.sourceObject?.objectId === highlightId && annotation.sourceObject?.objectType === "highlight") {
+        annotationsToRemove.push(annotation.id);
+      }
+      if (annotation.targetObject?.objectId === highlightId && annotation.targetObject?.objectType === "highlight") {
+        annotationsToRemove.push(annotation.id);
+      }
+    });
+    annotationsToRemove.forEach(annotationId => {
+      if (document.content) {
+        document.content.deleteAnnotation(annotationId);
+      }
+    });
+  };
+
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     if (isHighlightedText) {
       const selectedChip = getSelectedChip();
       const selectedReference = selectedChip ? selectedChip[0].reference : "";
-      // Remove from plugin first, then from editor to prevent "invalid reference" issues
+      // Remove any arrow annotations that reference this highlight
+      removeAnnotationsForHighlight(selectedReference);
       highlightsPlugin?.removeHighlight(selectedReference);
       unHighlightChip();
       return;
@@ -80,10 +106,11 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     if (!editor.selection || Range.isCollapsed(editor.selection)) return;
 
     const selectedText = Editor.string(editor, editor.selection);
+    const selectedTextMarks = Editor.marks(editor);
     const reference = uuid();
     highlightsPlugin?.addHighlight(reference, selectedText);
 
-    highlightText(reference, selectedText);
+    highlightText(reference, selectedText, selectedTextMarks || undefined);
   };
 
   return (
