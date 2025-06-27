@@ -79,13 +79,13 @@ export function EditableDocumentContent({
   className, contained, mode, isPrimary, document, toolbar, readOnly, showPlayback, fullHeight, sectionClass
 }: IProps) {
   const documentContext = useDocumentContext(document);
-  const { db: { firebase, firestore }, ui, persistentUI, user } = useStores();
+  const { db: { firebase, firestore }, ui, persistentUI, user, appConfig } = useStores();
   // set by the canvas and used by the toolbar
   const editableTileApiInterfaceRef: EditableTileApiInterfaceRef = useRef(null);
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
   const isShowingToolbar = toolbar?.length;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
-  const isChatEnabled = user.isTeacherOrResearcher;
+  const isChatEnabled = appConfig.showCommentPanelFor(user.type);
   const documentSelectedForComment = isChatEnabled && persistentUI.showChatPanel
                                      && ui.selectedTileIds.length === 0 && !isPrimary;
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass, sectionClass,

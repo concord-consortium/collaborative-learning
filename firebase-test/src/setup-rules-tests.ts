@@ -10,6 +10,7 @@ export const otherClass = "other-class";
 export const lastClass = "last-class";
 export const studentIdNumeric = 1;
 export const studentId = `${studentIdNumeric}`;
+export const studentName = "Sam Student";
 export const studentAuth = { uid: studentId, platform_user_id: studentIdNumeric, user_type: "student", class_hash: thisClass };
 export const student2IdNumeric = 2;
 export const student2Id = `${student2IdNumeric}`;

@@ -31,71 +31,67 @@ If any of these properties are encountered at the top-level of the unit configur
 
 These properties are configurable at the application (built into the code) or the unit level of the curriculum JSON.
 
-```typescript
-  // used in application loading message, log messages, etc.
-  appName: string;
-  // displayed in browser tab/window title
-  pageTitle: string;
-  // used for demo creator links
-  demoProblemTitle: string;
-  // default problem to load if none specified
-  defaultProblemOrdinal: string;
-  // disable grouping of students (e.g. Dataflow)
-  autoAssignStudentsToIndividualGroups: boolean;
-  // type of user document to create/show by default
-  defaultDocumentType: "problem" | "personal";
-  // default title of personal documents (problem documents don't have user-assigned titles)
-  defaultDocumentTitle: string;
-  // following two properties used for displaying titles for documents
-  docTimeStampPropertyName: string;
-  docDisplayIdPropertyName: string;
-  // default title of learning log documents
-  defaultLearningLogTitle: string;
-  // overrides `defaultLearningLogTitle`; not clear why both are required
-  initialLearningLogTitle: string;
-  // whether to create an initial/default learning log document for each user
-  defaultLearningLogDocument: boolean;
-  // whether to automatically divide problem documents into sections
-  autoSectionProblemDocuments: boolean;
-  // array of property names to use when constructing document labels
-  documentLabelProperties: string[];
-  // terminology for referencing documents
-  documentLabels: Record<string, SnapshotIn<typeof DocumentLabelModel>>;
-  // disables publishing documents of particular types or with particular properties
-  disablePublish: Array<SnapshotIn<typeof DocumentSpecModel>> | boolean;
-  // enable/disable showing the history-scrubbing controls for users in different roles
-  enableHistoryRoles: Array<"student" | "teacher" | "researcher">;
-  // configures naming of copied documents
-  copyPreferOriginTitle: boolean;
-  // enable/disable dragging of tiles
-  disableTileDrags: boolean;
-  // show the class switcher menu for teachers
-  showClassSwitcher: boolean;
-  // whether to show one-up/two-up view icons in document title bar
-  supportStackedTwoUpView: boolean;
-  // whether to show published (non-editable) documents in the editing workspace
-  showPublishedDocsInPrimaryWorkspace: boolean;
-  // comparison view placeholder content
-  comparisonPlaceholderContent: string | string[];
-  // Whether exemplars are hidden from students by default, becoming visible based on conditions
-  initiallyHideExemplars: boolean;
-  // configuration of navigation tabs (document navigation UI)
-  navTabs: SnapshotIn<typeof NavTabsConfigModel>;
+`appName`: (string) used in application loading message, log messages, etc.
 
-  // must be true for any of the comment-tag functionality to be enabled
-  showCommentTag?: boolean;
-  // prompt shown in the tagging pulldown menu when a comment is being made
-  tagPrompt?: string;
-  // list of possible values for tagging in comments
-  commentTags?: Record<string, string>;
-  // If set, enable the specified AI evaluation to run after document updates
-  // At the moment, there is only one evaluation pipeline defined.
-  aiEvaluation?: "categorize-design";
+`pageTitle`: (string) displayed in browser tab/window title
 
-  // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
-  // Currently any value other than "none" will be treated as "all".
-  annotations?: "all" | "none" | string[];
-```
+`demoProblemTitle`: (string) used for demo creator links
+
+`defaultProblemOrdinal`: (string) default problem to load if none specified
+
+`autoAssignStudentsToIndividualGroups`: (boolean) disable grouping of students (e.g. Dataflow)
+
+`defaultDocumentType`: ("problem" | "personal") type of user document to create/show by default
+
+`defaultDocumentTitle`: (string) default title of personal documents (problem documents don't have user-assigned titles)
+
+`docTimeStampPropertyName`: (string) used for displaying titles for documents
+
+`docDisplayIdPropertyName`: (string) used for displaying titles for documents
+
+`defaultLearningLogTitle`: (string) default title of learning log documents
+
+`initialLearningLogTitle`: (string) overrides `defaultLearningLogTitle`; not clear why both are required
+
+`defaultLearningLogDocument`: (boolean) whether to create an initial/default learning log document for each user
+
+`autoSectionProblemDocuments`: (boolean) whether to automatically divide problem documents into sections
+
+`documentLabelProperties`: (string[]) array of property names to use when constructing document labels
+
+`documentLabels`: (object) terminology for referencing documents
+
+`disablePublish`: (boolean or array) disables publishing documents of particular types or with particular properties
+
+`enableHistoryRoles`: (array of "student" | "teacher" | "researcher") enable/disable showing the history-scrubbing controls for users in different roles
+
+`copyPreferOriginTitle`: (boolean) configures naming of copied documents
+
+`disableTileDrags`: (boolean) enable/disable dragging of tiles
+
+`showClassSwitcher`: (boolean) show the class switcher menu for teachers
+
+`supportStackedTwoUpView`: (boolean) whether to show one-up/two-up view icons in document title bar
+
+`showPublishedDocsInPrimaryWorkspace`: (boolean) whether to show published (non-editable) documents in the editing workspace
+
+`comparisonPlaceholderContent`: (string | string[]) comparison view placeholder content
+
+`initiallyHideExemplars`: (boolean) Whether exemplars are hidden from students by default, becoming visible based on conditions
+
+`navTabs`: (object) configuration of navigation tabs (document navigation UI)
+
+`enableCommentRoles`: (array of "student" | "teacher" | "researcher") list of roles that can use the comments panel
+
+`showCommentTag`: (boolean) must be true for any of the comment-tag functionality to be enabled
+
+`tagPrompt`: (string) prompt shown in the tagging pulldown menu when a comment is being made
+
+`commentTags`: (object) list of possible values for tagging in comments
+
+`aiEvaluation`: ("categorize-design") If set, enable the specified AI evaluation to run after document updates. At the moment, there is only one evaluation pipeline defined.
+
+`annotations`: ("all" | "none" | string[]) List of the types of annotations supported (eg "curved-sparrow") or "all" or "none". Currently any value other than "none" will be treated as "all".
 
 ## Unit- or Problem-level `config` properties
 
