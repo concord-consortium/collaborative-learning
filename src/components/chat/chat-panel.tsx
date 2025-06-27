@@ -9,7 +9,7 @@ import {
   useDocumentCommentsAtSimplifiedPath, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
-import { useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
+import { useCurriculumOrDocumentContent, useDBStore, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
 import WaitingMessage from "./waiting-message";
 
@@ -28,6 +28,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
   const document = useDocumentOrCurriculumMetadata(focusDocument);
   const content = useCurriculumOrDocumentContent(focusDocument);
+  const { firebase } = useDBStore();
   const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: simplePathComments } = useDocumentCommentsAtSimplifiedPath(focusDocument);
@@ -89,12 +90,20 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     setChatPanelTitle(isDocumentView ? "Documents" : "Comments");
   }, [isDocumentView]);
 
-  // Remove the "Waiting..." message when a new comment appears or the document changes.
-  // This could have false positives (since it acts on any change to the list of comments),
-  // but since the message should only be shown for a few seconds, it's low risk.
+  // AI evaluation is triggered when the document edit time is updated, so we can
+  // remove the "Waiting..." message when we see a comment newer than the document last edited time.
   useEffect(() => {
-    content?.setAwaitingAIAnalysis(false);
-  }, [content, documentComments]);
+    if (user && focusDocument && content?.awaitingAIAnalysis && documentComments?.length > 0) {
+      const lastCommentTimestamp = documentComments[documentComments.length - 1].createdAt;
+      if (lastCommentTimestamp) {
+        firebase.getLastEditedTimestamp(user, focusDocument).then((docLastEditedTime) => {
+          if (docLastEditedTime && lastCommentTimestamp > docLastEditedTime) {
+            content?.setAwaitingAIAnalysis(false);
+          }
+        });
+      }
+    }
+  }, [content, documentComments, firebase, focusDocument, user]);
 
   const newCommentCount = unreadComments?.length || 0;
   const isStudentWorkspace = activeNavTab === "student-work";
