@@ -2,7 +2,8 @@ import React, { useContext } from "react";
 import { v4 as uuid } from "uuid";
 import { Path } from "slate";
 import { Editor, Range, Transforms, useSlate } from "@concord-consortium/slate-editor";
-import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat, HighlightElement } from "../../../../plugins/text/highlights-plugin";
+import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat, HighlightElement }
+  from "../../../../plugins/text/highlights-plugin";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../toolbar/toolbar-button-manager";
 import { TextPluginsContext } from "../text-plugins-context";
@@ -28,7 +29,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     return chipEntry ? (chipEntry as [HighlightElement, Path]) : undefined;
   };
 
-  const highlightText = (editor: Editor, reference: string, text: string) =>{
+  const highlightText = (reference: string, text: string) =>{
     if (!editor.selection || Range.isCollapsed(editor.selection)) return;
     const selectionLength = Editor.string(editor, editor.selection).length;
     if (selectionLength === 0) return;
@@ -44,7 +45,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     Transforms.collapse(editor, { edge: "end" });
   }
 
-  const unHighlightChip = (editor: Editor) => {
+  const unHighlightChip = () => {
     if (!editor.selection) return;
     const chipEntry = getSelectedChip();
 
@@ -55,11 +56,11 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
       const chipNodeChild = chipNode.children[0] as { text: string };
       const text = chipNodeChild.text || ""; // Assume the first child has the text
       const marks = Editor.marks(editor) || {};
+      Transforms.removeNodes(editor, { at: chipPath });
       Transforms.insertNodes(editor, { text, ...marks }, { at: insertPoint });
       Object.keys(marks).forEach(key => {
         Editor.removeMark(editor, key);
       });
-      Transforms.removeNodes(editor, { at: chipPath });
       Object.entries(marks).forEach(([key, value]) => {
         Editor.addMark(editor, key, value);
       });
@@ -70,9 +71,9 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     event.preventDefault();
     if (isHighlightedText) {
       const selectedChip = getSelectedChip();
-      const reference = selectedChip ? selectedChip[0].reference : "";
-      unHighlightChip(editor);
-      highlightsPlugin?.removeHighlight(reference);
+      const selectedChipRef = selectedChip ? selectedChip[0].reference : "";
+      unHighlightChip();
+      highlightsPlugin?.removeHighlight(selectedChipRef);
       return;
     }
 
@@ -81,7 +82,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     const selectedText = Editor.string(editor, editor.selection);
     const reference = uuid();
     highlightsPlugin?.addHighlight(reference, selectedText);
-    highlightText(editor, reference, selectedText);
+    highlightText(reference, selectedText);
   };
 
   return (
@@ -89,7 +90,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
       name={name}
       title="Highlight"
       disabled={disabled}
-      selected={toggleHighlight}
+      selected={isHighlightedText}
       onClick={handleClick}
     >
       <HighlightToolIcon/>
