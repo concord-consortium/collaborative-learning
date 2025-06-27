@@ -28,9 +28,11 @@
       "/cypress/",
       "/firebase-test/",
       "/functions-v1/",
-      "/functions-v2/"
+      "/functions-v2/",
+      "/.yalc/"
     ],
     "transform": {
+      "^.+\\.json5$": "@talabes/json5-jest",
       "^.+\\.tsx?$": [
         "ts-jest",
         {
@@ -51,7 +53,9 @@
       "\\.(css|less|sass|scss)$": "<rootDir>/__mocks__/styleMock.js",
       "react-modal-hook": "@concord-consortium/react-modal-hook",
       "mobx-state-tree": "@concord-consortium/mobx-state-tree",
-      "@cortex-js/compute-engine": "@concord-consortium/compute-engine"
+      "@cortex-js/compute-engine": "@concord-consortium/compute-engine",
+      "@concord-consortium/codap-formulas-react17/(.*)": "<rootDir>/node_modules/@concord-consortium/codap-formulas-react17/dist/$1",
+      "@concord-consortium/codap-utilities/(.*)": "<rootDir>/node_modules/@concord-consortium/codap-utilities/dist/$1"
     },
     "moduleFileExtensions": [
       "ts",
@@ -139,6 +143,7 @@
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
     "@svgr/webpack": "^6.3.1",
+    "@talabes/json5-jest": "^2.0.0",
     "@testing-library/cypress": "^10.0.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^12.1.5",

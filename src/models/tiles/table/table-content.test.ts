@@ -253,7 +253,7 @@ describe("TableContent", () => {
         attributes: [
           { name: "xCol", values: [1,2]},
           { name: "yCol", values: [2,4],
-            formula: {display: "xCol*2", canonical: "(__xCol__ * 2)"}
+            formula: { display: "xCol*2" }
           }
         ],
         cases: [
@@ -294,7 +294,7 @@ describe("TableContent", () => {
         attributes: [
           { name: "xCol", values: [1,2]},
           { name: "yCol", values: [2,4],
-            formula: {display: "xCol+$1", canonical: "(__xCol__ + $1)"}
+            formula: { display: "xCol+$1" }
           }
         ],
         cases: [
@@ -547,10 +547,10 @@ describe("TableContent", () => {
         attributes: [
           { name: "xCol", values: [1,2,"1/2","a"]},
           { name: "yCol", values: [0,0,    0,  0],
-            formula: {display: "xCol*2", canonical: "(__x__ * 2)"}
+            formula: { display: "xCol*2" }
           },
           { name: "zCol", values: [0,0,    0,  0],
-            formula: {display: "xCol", canonical: "__x__"}
+            formula: { display: "xCol" }
           }
         ],
         cases: [

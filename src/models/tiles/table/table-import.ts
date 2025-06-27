@@ -138,11 +138,12 @@ function applyUpdate(dataSet: IDataSet, change: ITableChange) {
                 dataSet.setAttributeName(colId, _value);
                 break;
               }
-              case "expression":
-                attr.formula.setCanonical(_value);
-                break;
+              // TODO: do we need to track canonical expressions?
+              // case "expression":
+              //   attr.formula.setCanonical(_value);
+              //   break;
               case "rawExpression":
-                attr.formula.setDisplay(_value);
+                attr.formula.setDisplayExpression(_value);
                 break;
             }
           });

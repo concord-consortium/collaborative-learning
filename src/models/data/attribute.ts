@@ -1,5 +1,5 @@
 import {Instance, SnapshotIn, types} from "mobx-state-tree";
-import { Formula } from "./formula";
+import { Formula } from "@concord-consortium/codap-formulas-react17/models/formula/formula";
 import { typedId } from "../../utilities/js-utils";
 import { IValueType, ValueType, isDate, isImageUrl, isNumeric, toNumeric } from "./data-types";
 
@@ -194,16 +194,21 @@ export const Attribute = types.model("Attribute", {
   //   self.editable = editable;
   // },
   clearFormula() {
-    self.formula.setDisplay();
-    self.formula.setCanonical();
+    // In CODAP the attribute formula is set to undefined when the formula is cleared
+    self.formula.setDisplayExpression("");
   },
   setDisplayFormula(display: string, xName: string) {
-    self.formula.setDisplay(display);
-    self.formula.canonicalize(xName);
+    self.formula.setDisplayExpression(display);
+    // TODO: since canonical is volatile, do we need to do this?
+    // `xName` is the name of the x attribute in the formula,
+    // we are no longer treating the x attribute as special
+    // so we should be able to remove that argument.
+    // self.formula.canonicalize(xName);
   },
   setFormula(display: string, canonical: string) {
-    self.formula.setDisplay(display);
-    self.formula.setCanonical(canonical);
+    self.formula.setDisplayExpression(display);
+    // TODO: since canonical is volatile, do we need to set it?
+    // self.formula.setCanonical(canonical);
   },
   addValue(value: IValueType, beforeIndex?: number) {
     if ((beforeIndex != null) && (beforeIndex < self.values.length)) {
