@@ -51,12 +51,19 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
 
     if (chipEntry) {
       const [chipNode, chipPath] = chipEntry as [HighlightElement, Path];
+      const previousPath = Path.previous(chipPath);
+      const insertPoint = Editor.end(editor, previousPath);
       const chipNodeChild = chipNode.children[0] as { text: string };
       const text = chipNodeChild.text || ""; // Assume the first child has the text
-
-      // Simply insert the text at the chip's location and remove the chip
-      Transforms.insertText(editor, text, { at: chipPath });
+      const marks = Editor.marks(editor) || {};
       Transforms.removeNodes(editor, { at: chipPath });
+      Transforms.insertNodes(editor, { text, ...marks }, { at: insertPoint });
+      Object.keys(marks).forEach(key => {
+        Editor.removeMark(editor, key);
+      });
+      Object.entries(marks).forEach(([key, value]) => {
+        Editor.addMark(editor, key, value);
+      });
     }
   };
 
@@ -65,8 +72,9 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     if (isHighlightedText) {
       const selectedChip = getSelectedChip();
       const selectedReference = selectedChip ? selectedChip[0].reference : "";
-      unHighlightChip();
+      // Remove from plugin first, then from editor to prevent "invalid reference" issues
       highlightsPlugin?.removeHighlight(selectedReference);
+      unHighlightChip();
       return;
     }
     if (!editor.selection || Range.isCollapsed(editor.selection)) return;
