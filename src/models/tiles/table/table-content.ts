@@ -225,9 +225,6 @@ export const TableContentModel = TileContentModel
     get isLinked() {
       return self.linkedTiles.length > 0;
     },
-    get hasExpressions() {
-      return self.metadata.hasExpressions;
-    },
     parseExpression(expr: string) {
       return self.metadata.parseExpression(expr);
     },
@@ -243,6 +240,10 @@ export const TableContentModel = TileContentModel
     }
   }))
   .views(self => ({
+    get hasExpressions() {
+      // Check if any of the attributes of the dataSet have truthy formulas
+      return self.dataSet.attributes.some(attr => attr.formula.display);
+    },
   }))
   .views(self => tileContentAPIViews({
     get contentTitle() {

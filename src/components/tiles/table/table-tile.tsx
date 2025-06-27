@@ -188,8 +188,18 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // const [showExpressionsDialog, , setCurrYAttrId] = useExpressionsDialog({
   //   metadata, dataSet, onSubmit: handleSubmitExpressions
   // });
+
+  const handleFormulaModalSubmit = () => {
+    // This is necessary to trigger a rerender of the table when the expression changes.
+    // Even though this is an observing component and the formula is an observable,
+    // that isn't enough. When the expression changes that just updates the appData of the
+    // existing columns, and the RDG component is just looking at the columns object reference.
+    // The trigger causes a whole new columns object to be created, which causes RDG to rerender.
+    triggerColumnChange();
+  };
+
   const [showExpressionsDialog, , setCurrYAttrId] = useFormulaModal({
-    dataSet
+    dataSet, onSubmit: handleFormulaModalSubmit
   });
   const handleShowExpressionsDialog = (attrId?: string) => {
     attrId && setCurrYAttrId(attrId);
@@ -198,7 +208,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // Expands the columns with additional data and callbacks
   useColumnExtensions({
-    gridContext, metadata, readOnly, columns, rows, columnEditingName, changeHandlers,
+    gridContext, dataSet, readOnly, columns, rows, columnEditingName, changeHandlers,
     setColumnEditingName: handleSetColumnEditingName, onShowExpressionsDialog: handleShowExpressionsDialog
   });
 

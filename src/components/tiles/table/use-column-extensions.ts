@@ -1,11 +1,11 @@
-import { getEditableExpression } from "../../../models/data/expression-utils";
-import { TableMetadataModelType } from "../../../models/tiles/table/table-content";
+import { IAttribute } from "../../../models/data/attribute";
+import { IDataSet } from "../../../models/data/data-set";
 import { IGridContext, isDataColumn, TColumn, TRow } from "./table-types";
 import { IContentChangeHandlers } from "./use-content-change-handlers";
 
 interface IProps {
   gridContext: IGridContext;
-  metadata: TableMetadataModelType;
+  dataSet: IDataSet;
   readOnly?: boolean;
   columns: TColumn[];
   columnEditingName?: string;
@@ -15,25 +15,23 @@ interface IProps {
   changeHandlers: IContentChangeHandlers;
 }
 export const useColumnExtensions = ({
-  gridContext, metadata, readOnly, columns, columnEditingName, rows,
+  gridContext, dataSet, readOnly, columns, columnEditingName, rows,
   setColumnEditingName, onShowExpressionsDialog, changeHandlers
 }: IProps) => {
   const { onSetColumnName, onRemoveColumn } = changeHandlers;
   const firstDataColumn = columns.find(col => isDataColumn(col));
-  const xName = (firstDataColumn?.name || "") as string;
 
   columns.forEach((column, i) => {
+    const attribute = dataSet.attrFromID(column.key) as Maybe<IAttribute>;
+
     column.appData = {
       readOnly,
       gridContext,
       editableName: !readOnly && isDataColumn(column),
       isEditing: column.key === columnEditingName,
       isRemovable: !readOnly && isDataColumn(column) && (column.key !== firstDataColumn?.key),
-      showExpressions: metadata.hasExpressions,
-      expression: getEditableExpression(
-                    metadata.rawExpressions.get(column.key),
-                    metadata.expressions.get(column.key) || "",
-                    xName),
+      showExpressions: !!attribute?.formula.display,
+      expression: attribute?.formula.display,
       onBeginHeaderCellEdit: () => {
         !readOnly && setColumnEditingName(column);
         return undefined;
