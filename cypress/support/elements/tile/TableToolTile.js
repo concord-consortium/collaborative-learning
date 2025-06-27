@@ -176,8 +176,87 @@ class TableToolTile{
       }
     }
     checkEmptyTableValues() {
-      this.getTableCellWithRowColIndex(0, 2).should("have.text", "");
-      this.getTableCellWithRowColIndex(0, 3).should("have.text", "");
+      this.getTableCellWithRowColIndex(0, 2).should('have.text', '');
+      this.getTableCellWithRowColIndex(0, 3).should('have.text', '');
+    }
+
+    // Row reordering helper methods
+    getRowDragIndicator() {
+      return cy.get('[data-testid="row-drag-indicator"]');
+    }
+
+    getRowDividers() {
+      return cy.get('[data-testid^="row-divider-"]');
+    }
+
+    getRowDividerBefore(rowId) {
+      return cy.get(`[data-testid="row-divider-${rowId}-before"]`);
+    }
+
+    getRowDividerAfter(rowId) {
+      return cy.get(`[data-testid="row-divider-${rowId}-after"]`);
+    }
+
+    getRowIndexLabels() {
+      return cy.get('.row-index-label');
+    }
+
+    getDragOverlayRow() {
+      return cy.get('.drag-overlay-row');
+    }
+
+    getDragOverlayCell() {
+      return cy.get('.drag-overlay-cell');
+    }
+
+    getIndexCellWrapper() {
+      return cy.get('.index-cell-wrapper');
+    }
+
+    getIndexCellContents() {
+      return cy.get('.index-cell-contents');
+    }
+
+    hoverOverRow(rowIndex) {
+      return this.getIndexCellWrapper().eq(rowIndex).trigger('mouseover');
+    }
+
+    unhoverFromRow(rowIndex) {
+      return this.getIndexCellWrapper().eq(rowIndex).trigger('mouseout');
+    }
+
+    verifyRowDragIndicatorVisible() {
+      this.getRowDragIndicator().should('exist');
+    }
+
+    verifyRowDragIndicatorHidden() {
+      this.getRowDragIndicator().should('have.css', 'opacity', '0');
+    }
+
+    verifyRowDividersExist() {
+      this.getRowDividers().should('exist');
+    }
+
+    verifyRowDividersHidden() {
+      cy.get('.row-divider').should('have.css', 'visibility', 'hidden');
+    }
+
+    verifyRowIndexLabelsExist() {
+      this.getRowIndexLabels().should('exist');
+    }
+
+    verifyRowIndexLabelsNotExist() {
+      this.getRowIndexLabels().should('not.exist');
+    }
+
+    verifyGrabCursor() {
+      this.getIndexCellContents().should('have.css', 'cursor', 'grab');
+    }
+
+    verifyTableAccessibility() {
+      cy.get('.table-tool').should('have.attr', 'role', 'grid');
+      cy.get('.rdg-row').should('have.attr', 'role', 'row');
+      cy.get('.rdg-cell').should('have.attr', 'role', 'gridcell');
     }
 }
 export default TableToolTile;

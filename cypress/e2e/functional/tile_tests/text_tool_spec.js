@@ -293,4 +293,39 @@ context('Text tool tile functionalities', function () {
     clueCanvas.getRedoTool().click();
     textToolTile.getTextEditor().last().should('have.descendants', 'sup');
   });
+
+  // Highlighting tool test as it was working as of this morning (June 27, 2025).
+  // TODO: Move this into the first test in this file and add checks that highlight actually happens in the editor.
+  it('Text Tool Highlight Functionality', function () {
+    beforeTest();
+
+    cy.log('Add text tool and enter sample text');
+    clueCanvas.addTile('text');
+    textToolTile.enterText('This is a sample text for testing highlight functionality. It contains multiple words that can be highlighted.');
+    textToolTile.getTextTile().last().should('contain', 'This is a sample text for testing highlight functionality');
+
+    cy.log('Verify highlight toolbar button exists and is disabled when no text is selected');
+    textToolTile.getHighlightButton().should('exist');
+    textToolTile.getHighlightButton().should('be.disabled');
+
+    cy.log('Select text using keyboard selection');
+    textToolTile.getTextEditor().last().click();
+    textToolTile.getTextEditor().last().type('{selectall}');
+
+    // Wait a moment for the selection to be processed
+    cy.wait(500);
+
+    cy.log('Verify highlight toolbar button becomes enabled when text is selected');
+    textToolTile.getHighlightButton().should('not.be.disabled');
+
+    cy.log('Click highlight toolbar button to create highlight');
+    textToolTile.getHighlightButton().click();
+
+    cy.log('Verify highlight button becomes selected');
+    textToolTile.getHighlightButton().should('have.class', 'selected');
+
+    cy.log('Clean up - delete text tile');
+    clueCanvas.deleteTile('text');
+    textToolTile.getTextTile().should('not.exist');
+  });
 });

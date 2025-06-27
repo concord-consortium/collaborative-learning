@@ -185,7 +185,6 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
             indexInRow={index}
             model={tileModel}
             widthPct={tileWidthPct}
-            typeClass={typeClass}
             height={tileHeight}
             isUserResizable={!readOnly && model.isUserResizable}
             onResizeRow={handleStartResizeRow}
@@ -200,7 +199,7 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
         />
         : null;
     });
-  }, [props, getTile, getTileWidth, typeClass, readOnly, model.isUserResizable,
+  }, [props, getTile, getTileWidth, readOnly, model.isUserResizable,
     handleStartResizeRow, handleSetCanAcceptDrop, handleRequestRowHeight]);
 
   const renderDragDropHandles = useCallback(() => {

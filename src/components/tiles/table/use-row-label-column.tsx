@@ -81,8 +81,10 @@ export const useRowLabelColumn = ({inputRowId, hoveredRowId, showRowLabels, setS
               , gridElement)
           }
           <div className="index-cell-contents" ref={setDragRef}
-                {...(!isInputRow ? { ...attributes, ...listeners } : {})}>
-            {(hoveredRowId === __id__ && !isInputRow) && <DragIndicator className="row-drag-icon" />}
+            {...(!isInputRow ? { ...attributes, ...listeners } : {})}>
+            {(hoveredRowId === __id__ && !isInputRow) &&
+              <DragIndicator className="row-drag-icon" data-testid="row-drag-indicator" />
+            }
             {showRowLabels ? <span className="row-index-label">{__index__}</span> : undefined}
           </div>
           {(gridElement && !isInputRow) &&

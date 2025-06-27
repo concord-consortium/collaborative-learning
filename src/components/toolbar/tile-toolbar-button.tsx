@@ -23,6 +23,7 @@ export interface TileToolbarButtonProps {
   disabled?: boolean; // makes button grey and unclickable if defined and true
   extraContent?: JSX.Element; // Additional element added after the button.
   colorClass?: string; // color to use for the button icon
+  dataTestId?: string; // data-testid attribute for testing
 }
 
 /**
@@ -38,7 +39,8 @@ export const TileToolbarButton = function ({
   disabled,
   children,
   extraContent,
-  colorClass
+  colorClass,
+  dataTestId
 }: PropsWithChildren<TileToolbarButtonProps>) {
   const tipOptions = useTooltipOptions();
   const tooltip = formatTooltip(title, keyHint);
@@ -59,6 +61,7 @@ export const TileToolbarButton = function ({
         onMouseUp={onMouseUp}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
+        data-testid={dataTestId}
       >
         {children}
       </button>
