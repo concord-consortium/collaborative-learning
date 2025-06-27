@@ -52,7 +52,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const imagePromises = useMemo(() => new Map<string, Promise<ImageMapEntry>>(), []);
   const [imageUrls, setImageUrls] = useState(new Map<string,string>());
   verifyAlive(content, "TableToolComponent");
-  const metadata = getContent().metadata;
   const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
   const isLinked = linkedTiles && linkedTiles.length > 1;
   const tableContextValue: ITableContext = { linked: !!isLinked };
@@ -137,7 +136,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({
-    gridContext, dataSet, isLinked, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
+    gridContext, dataSet, isLinked, content, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
     ...rowLabelProps, measureColumnWidth, lookupImage,
     sortColumns,
     onSort,
@@ -199,7 +198,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   };
 
   const [showExpressionsDialog, , setCurrYAttrId] = useFormulaModal({
-    dataSet, onSubmit: handleFormulaModalSubmit
+    table: content, dataSet, onSubmit: handleFormulaModalSubmit
   });
   const handleShowExpressionsDialog = (attrId?: string) => {
     attrId && setCurrYAttrId(attrId);

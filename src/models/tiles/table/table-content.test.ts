@@ -265,7 +265,7 @@ describe("TableContent", () => {
     const metadata = TableMetadataModel.create({ id: "test-metadata" });
     table.doPostCreate!(metadata);
     // The metadata has not expression info until the table has a dataset
-    expect(metadata.hasExpressions).toBe(false);
+    expect(table.hasExpressions).toBe(false);
 
     setupContainer(table, dataSetSnapshot);
 
@@ -273,7 +273,7 @@ describe("TableContent", () => {
     expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: 2 });
     expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: 4 });
 
-    expect(metadata.hasExpressions).toBe(true);
+    expect(table.hasExpressions).toBe(true);
     const yCol = table.dataSet.attrFromName("yCol");
     expect(yCol).toBeDefined();
     if (yCol) {
@@ -306,7 +306,7 @@ describe("TableContent", () => {
     const metadata = TableMetadataModel.create({ id: "test-metadata" });
     table.doPostCreate!(metadata);
     // The metadata has not expression info until the table has a dataset
-    expect(metadata.hasExpressions).toBe(false);
+    expect(table.hasExpressions).toBe(false);
 
     setupContainer(table, dataSetSnapshot);
 
@@ -314,7 +314,7 @@ describe("TableContent", () => {
     expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: 2 });
     expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: 4 });
 
-    expect(metadata.hasExpressions).toBe(true);
+    expect(table.hasExpressions).toBe(true);
     const yCol = table.dataSet.attrFromName("yCol");
     expect(yCol).toBeDefined();
     if (yCol) {
@@ -562,7 +562,7 @@ describe("TableContent", () => {
     const metadata = TableMetadataModel.create({ id: "test-metadata" });
     table.doPostCreate!(metadata);
     // The metadata has not expression info until the table has a dataset
-    expect(metadata.hasExpressions).toBe(false);
+    expect(table.hasExpressions).toBe(false);
 
     setupContainer(table, dataSetSnapshot);
 

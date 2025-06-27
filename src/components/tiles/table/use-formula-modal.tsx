@@ -10,14 +10,16 @@ import { FormulaEditor } from "@concord-consortium/codap-formulas-react17/compon
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { IDataSet } from "../../../models/data/data-set";
 import { createFormulaDataSetProxy } from "../../../models/data/formula-data-set-proxy";
+import { TableContentModelType } from "../../../models/tiles/table/table-content";
 
 interface IProps {
+  table: TableContentModelType;
   dataSet: IDataSet;
   onSubmit: () => void;
 }
 
 type IResult = [() => void, () => void, React.Dispatch<React.SetStateAction<string | undefined>>];
-export const useFormulaModal = ({ dataSet, onSubmit }: IProps) : IResult => {
+export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult => {
   const [currYAttrId, setCurrYAttrId] = useState<Maybe<string>>(() => {
     // If the dataSet has a second attribute, use that by default
     const yAttr = dataSet.attributes[1];
@@ -62,14 +64,15 @@ export const useFormulaModal = ({ dataSet, onSubmit }: IProps) : IResult => {
   };
 
   const handleSubmit = () => {
-    if (!attr) {
+    if (!attr || !currYAttrId) {
       console.warn(`No attribute found for ID: ${currYAttrId}`);
       return;
     }
 
     // Save the formula to the attribute
-    const formula = attr.formula;
-    formula.setDisplayExpression(formulaEditorState.formula);
+    // we use the table model so the change is logged
+    // TODO: we aren't differentiating between the display formula and canonical formula
+    table.setExpression(currYAttrId, formulaEditorState.formula, formulaEditorState.formula);
     onSubmit();
   };
 

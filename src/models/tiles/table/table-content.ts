@@ -57,12 +57,6 @@ export const TableMetadataModel = TileMetadataModel
     parser: new Parser()
   }))
   .views(self => ({
-    get hasExpressions() {
-      return Array.from(self.expressions.values()).some(expr => !!expr);
-    },
-    hasExpression(attrId: string) {
-      return !!self.expressions.get(attrId);
-    },
     parseExpression(expr: string) {
       let result: Expression | undefined;
       try {
@@ -72,38 +66,6 @@ export const TableMetadataModel = TileMetadataModel
         // return undefined on error
       }
       return result;
-    }
-  }))
-  .actions(self => ({
-    setExpression(colId: string, expression?: string) {
-      if (expression) {
-        self.expressions.set(colId, expression);
-      }
-      else {
-        self.expressions.delete(colId);
-      }
-    },
-    setRawExpression(colId: string, rawExpression?: string) {
-      if (rawExpression) {
-        self.rawExpressions.set(colId, rawExpression);
-      }
-      else {
-        self.rawExpressions.delete(colId);
-      }
-    },
-    clearExpression(colId: string) {
-      self.rawExpressions.delete(colId);
-      self.expressions.delete(colId);
-    },
-    clearRawExpressions(varName: string) {
-      self.expressions.forEach((expression, colId) => {
-        if (expression) {
-          const parsedExpression = self.parseExpression(expression);
-          if (parsedExpression && (parsedExpression.variables().indexOf(varName) >= 0)) {
-            self.rawExpressions.delete(colId);
-          }
-        }
-      });
     }
   }))
   .views(self => ({
@@ -146,13 +108,6 @@ export const TableMetadataModel = TileMetadataModel
       });
 
       return dataSet;
-    }
-  }))
-  .actions(self => ({
-    updateExpressions(id: string, rawExpression: string, expression: string, dataSet: IDataSet) {
-      self.setRawExpression(id, rawExpression);
-      self.setExpression(id, expression);
-      self.updateDatasetByExpressions(dataSet);
     }
   }));
 export interface TableMetadataModelType extends Instance<typeof TableMetadataModel> {}
@@ -245,6 +200,12 @@ export const TableContentModel = TileContentModel
       return self.dataSet.attributes.some(attr => attr.formula.display);
     },
   }))
+  .views(self => ({
+    hasExpression(attrId: string) {
+      const attr = self.dataSet.attrFromID(attrId);
+      return !!attr?.formula.display;
+    },
+  }))
   .views(self => tileContentAPIViews({
     get contentTitle() {
       return self.dataSet.name;
@@ -308,45 +269,6 @@ export const TableContentModel = TileContentModel
             sharedDataSet.dataSet = DataSet.create(getSnapshot(self.importedDataSet));
             self.clearImportedDataSet();
           }
-
-          // Originally this code was in doPostCreate. When shared datasets were implemented in
-          // CLUE 3.0.0 this code was disabled.
-          // - The `attr.formula.synchronize` is skipped, because it would add a new undo/redo entry.
-          //   I think this synchronizing was here to handle backwards compatibility. Since it hadn't
-          //   been running for many months it seems safe to skip it. There is a chance that some old
-          //   document with an out of sync formula might be loaded. I'm not sure what will happen in
-          //   that case.
-          // - the updateDatasetByExpressions is skipped for the same reason. It would modify the dataset
-          //   which would generate multiple undo/redo entries. Currently it seems the table is responsible
-          //   for computing the formula and updating the dataset values. Because the table formula code
-          //   was broken for a while, there will be documents where the values are out of sync with the
-          //   formula. Without the updateDatasetByExpressions these out of sync values will not be
-          //   updated.
-          // A change to make here is to move this out of metadata just use volatile on the table
-          // content model. And possibly even better would be to move the formula calculation out of the
-          // table.
-
-          // Initialize our metadata with this shared dataset
-          if (self.dataSet.attributes.length >= 2) {
-
-            // const xAttr = self.dataSet.attributes[0];
-            // const xName = xAttr.name;
-            self.dataSet.attributes.forEach((attr, i) => {
-              if (i > 0) {
-                // attr.formula.synchronize(xName);
-                if (attr.formula.display) {
-                  self.metadata.setRawExpression(attr.id, attr.formula.display);
-                }
-                if (attr.formula.canonical) {
-                  self.metadata.setExpression(attr.id, attr.formula.canonical);
-                }
-             }
-            });
-          }
-
-          // if (self.metadata.hasExpressions) {
-          //   self.metadata.updateDatasetByExpressions(self.dataSet);
-          // }
         }
         else {
           if (!sharedDataSet) {
@@ -389,10 +311,6 @@ export const TableContentModel = TileContentModel
       const attr = self.dataSet.attrFromID(id);
       if (attr) {
         attr.setName(name);
-        // if the name of the "x" column is changed, formulas must be updated
-        if (self.dataSet.attrIndexFromID(id) === 0) {
-          self.metadata.clearRawExpressions(kSerializedXKey);
-        }
       }
 
       self.logChange({ action: "update", target: "columns", ids: id, props: { name } });
@@ -405,8 +323,6 @@ export const TableContentModel = TileContentModel
     },
     setExpression(id: string, expression: string, rawExpression: string) {
       self.dataSet.attrFromID(id)?.setFormula(rawExpression, expression);
-      self.metadata.updateExpressions(id, rawExpression, expression, self.dataSet);
-
       self.logChange({ action: "update", target: "columns", ids: id, props: { expression, rawExpression } });
     },
     setExpressions(rawExpressions: Map<string, string>, xName: string) {
@@ -415,8 +331,6 @@ export const TableContentModel = TileContentModel
         if (attr) {
           const expression = canonicalizeExpression(rawExpression, xName);
           attr.setFormula(rawExpression, expression);
-
-          self.metadata.updateExpressions(id, rawExpression, expression, self.dataSet);
         }
       });
 
