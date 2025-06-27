@@ -1,12 +1,12 @@
 import React from "react";
 import { Editor, EFormat, useSlate } from "@concord-consortium/slate-editor";
-
-import { LinkButton } from "./link-button";
-import { HighlightButton } from "./highlight-button";
+import { isHighlightChipSelected } from "../../../../plugins/text/highlights-plugin";
 import { isMac } from "../../../../utilities/browser";
 import { IToolbarButtonComponentProps, registerTileToolbarButtons }
   from "../../../toolbar/toolbar-button-manager";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
+import { LinkButton } from "./link-button";
+import { HighlightButton } from "./highlight-button";
 
 import BoldToolIcon from "../../../../assets/icons/text/bold-text-icon.svg";
 import ItalicToolIcon from "../../../../assets/icons/text/italic-text-icon.svg";
@@ -36,14 +36,17 @@ interface IGenericTextToolbarButtonProps {
 
 function GenericTextToolbarButton({name, title, keyHint, Icon, slateType, toggleFunc}: IGenericTextToolbarButtonProps) {
   const editor = useSlate();
+  const chipSelected = isHighlightChipSelected(editor);
   const selected = editor.isMarkActive(slateType) || editor.isElementActive(slateType);
+  const disabled = chipSelected;
+
   function handleClick (e : React.MouseEvent) {
     e.stopPropagation();
     toggleFunc(editor, slateType);
   }
   return (
     <TileToolbarButton name={name} title={title} keyHint={keyHint}
-      selected={selected} onClick={handleClick}>
+      selected={selected} onClick={handleClick} disabled={disabled}>
       <Icon/>
     </TileToolbarButton>);
 }
