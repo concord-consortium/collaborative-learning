@@ -135,6 +135,12 @@ export const TextContentModel = TileContentModel
     },
     addHighlight(id: string, text: string) {
       self.highlightedText.push({ id, text });
+    },
+    removeHighlight(id: string) {
+      const index = self.highlightedText.findIndex(ht => ht.id === id);
+      if (index >= 0) {
+        self.highlightedText.splice(index, 1);
+      }
     }
   }))
   .actions(self => ({
