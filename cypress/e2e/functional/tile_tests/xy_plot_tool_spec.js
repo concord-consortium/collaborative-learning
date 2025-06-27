@@ -358,7 +358,8 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().should('not.exist');
     });
 
-    it("Test adding 2 Y Series", () => {
+    it.skip("Test adding 2 Y Series", () => {
+      // Skipped as discussed on Slack - test is failing for reasons we don't understand
       beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();

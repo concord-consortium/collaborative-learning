@@ -451,6 +451,7 @@ context('Table Tool Tile', function () {
   });
 
   it('should handle table row reordering', function() {
+    // TODO: Actual manual reordering is not tested - see CLUE-216
     beforeTest();
 
     cy.log('will add a table to canvas');
