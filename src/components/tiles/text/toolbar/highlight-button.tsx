@@ -24,6 +24,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
       disabled={disabled}
       selected={toggleHighlight}
       onClick={handleClick}
+      dataTestId="text-highlight-button"
     >
       <HighlightToolIcon/>
     </TileToolbarButton>
