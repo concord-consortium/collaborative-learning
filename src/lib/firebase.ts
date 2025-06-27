@@ -242,6 +242,12 @@ export class Firebase {
     return Promise.all(promises);
   }
 
+  public getLastEditedTimestamp(user: UserModelType, documentKey: string, userId?: string) {
+    return this.ref(this.getLastEditedMetadataPath(user, documentKey, userId)).once("value").then((snapshot) => {
+      return snapshot.val();
+    });
+  }
+
   // Unpublished personal document/learning log metadata
   public getOtherDocumentPath(user: UserModelType, documentType: OtherDocumentType, documentKey?: string) {
     const dir = documentType === PersonalDocument ? "personalDocs" : "learningLogs";

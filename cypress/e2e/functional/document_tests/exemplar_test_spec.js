@@ -3,12 +3,16 @@ import ClueCanvas from '../../../support/elements/common/cCanvas';
 import Canvas from '../../../support/elements/common/Canvas';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import TextToolTile from "../../../support/elements/tile/TextToolTile";
+import ResourcesPanel from "../../../support/elements/common/ResourcesPanel";
+import ChatPanel from "../../../support/elements/common/ChatPanel";
 
 let sortWork = new SortedWork,
   clueCanvas = new ClueCanvas,
   canvas = new Canvas,
   drawToolTile = new DrawToolTile,
-  textToolTile = new TextToolTile;
+  textToolTile = new TextToolTile,
+  resourcesPanel = new ResourcesPanel,
+  chatPanel = new ChatPanel;
 
 // The qaConfigSubtabs unit referenced here has `initiallyHideExemplars` set, and an exemplar defined in curriculum
 const queryParams1 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
@@ -18,6 +22,8 @@ const queryParams2 = `${Cypress.config("qaMothPlotUnitStudent5")}`;
 
 const exemplarName = "First Exemplar";
 const exemplarInfo = "Ivan Idea: First Exemplar";
+const studentDocumentName = "1.1 Unit Toolbar Configuration";
+const aiEvaluationMessage = "Ada is evaluating...";
 
 function beforeTest(params) {
   cy.visit(params);
@@ -134,9 +140,18 @@ context('Exemplar Documents', function () {
 
     canvas.getIdeasButton().should("be.visible").click();
 
-    // Now the exemplar should be revealed
+    // Now the exemplar should no longer be private
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
+    // But the left side should be changed to show the user's document and the comments pane
+    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.be.visible");
+    resourcesPanel.getPrimaryWorkspaceTab("my-work").should("have.class", "selected");
+    resourcesPanel.getFocusDocument().should("be.visible");
+    resourcesPanel.getFocusDocumentTitle().should("contain.text", studentDocumentName);
+    chatPanel.getChatPanel().should('exist').should('contain.text', 'Comments');
+    // No AI evaluation in this unit
+    chatPanel.getChatPanel().should('not.contain.text', aiEvaluationMessage);
 
+    // Sticky note should be visible
     clueCanvas.getStickyNotePopup().should("exist").should("be.visible")
       .should("contain.text", "Nice work, you can now see a new example for this lesson")
       .should("contain.text", exemplarName);
