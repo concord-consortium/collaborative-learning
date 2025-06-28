@@ -12,6 +12,9 @@ import { debouncedSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { HighlightRegistryContext, IHighlightBox } from "../../../plugins/text/highlight-registry-context";
+import { VariableRegistryContext, IVariableBox, kVariableFormat }
+  from "../../../plugins/shared-variables/slate/variables-plugin";
+import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
@@ -169,8 +172,12 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         this.toolbarTileApi?.handleTileResize?.(entry);
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        if (objectType === "highlight") {
+        if (objectType === kHighlightFormat) {
           const box = this.highlightBoundingBoxes[objectId];
+          if (box) return box;
+        }
+        if (objectType === kVariableFormat) {
+          const box = this.variableBoundingBoxes[objectId];
           if (box) return box;
         }
       },
@@ -178,8 +185,14 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         // offset the annotation arrows to the right top corner of the bounding box until connected to a target,
         // and then offset should be the center of the edge closes to the target
         const offsets = OffsetModel.create({});
-        if (objectType === "highlight") {
+        if (objectType === kHighlightFormat) {
           const box = this.highlightBoundingBoxes[objectId];
+          const { width, height } = box;
+          offsets.setDx(width / 2);
+          offsets.setDy(- height / 2);
+        }
+        if (objectType === kVariableFormat) {
+          const box = this.variableBoundingBoxes[objectId];
           const { width, height } = box;
           offsets.setDx(width / 2);
           offsets.setDy(- height / 2);
@@ -221,34 +234,36 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       // which is used for cypress tests and other purposes.
       // TODO: replace this provider with one at the tile level so we get it for free.
       // and then replace the drawing one with that as well
-      <HighlightRegistryContext.Provider value={this.handleHighlightBox}>
-        <TextContentModelContext.Provider value={this.getContent()} >
-          <TextPluginsContext.Provider value={this.plugins} >
-            <div
-              className={containerClasses}
-              data-testid="text-tool-wrapper"
-              ref={elt => this.textTileDiv = elt}
-              onMouseDown={this.handleMouseDownInWrapper}
-            >
-              <Slate
-                editor={this.editor as ReactEditor}
-                initialValue={this.state.initialValue}
-                onChange={this.handleChange}
+      <VariableRegistryContext.Provider value={this.handleVariableBox}>
+        <HighlightRegistryContext.Provider value={this.handleHighlightBox}>
+          <TextContentModelContext.Provider value={this.getContent()} >
+            <TextPluginsContext.Provider value={this.plugins} >
+              <div
+                className={containerClasses}
+                data-testid="text-tool-wrapper"
+                ref={elt => this.textTileDiv = elt}
+                onMouseDown={this.handleMouseDownInWrapper}
               >
-                <SlateEditor
-                  placeholder={placeholderText}
-                  hotkeyMap={defaultHotkeyMap}
-                  readOnly={readOnly}
-                  onFocus={this.handleFocus}
-                  onBlur={this.handleBlur}
-                  className={`ccrte-editor slate-editor ${slateClasses || ""}`}
-                />
-                <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
-              </Slate>
-            </div>
-          </TextPluginsContext.Provider>
-        </TextContentModelContext.Provider>
-      </HighlightRegistryContext.Provider>
+                <Slate
+                  editor={this.editor as ReactEditor}
+                  initialValue={this.state.initialValue}
+                  onChange={this.handleChange}
+                >
+                  <SlateEditor
+                    placeholder={placeholderText}
+                    hotkeyMap={defaultHotkeyMap}
+                    readOnly={readOnly}
+                    onFocus={this.handleFocus}
+                    onBlur={this.handleBlur}
+                    className={`ccrte-editor slate-editor ${slateClasses || ""}`}
+                  />
+                  <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
+                </Slate>
+              </div>
+            </TextPluginsContext.Provider>
+          </TextContentModelContext.Provider>
+        </HighlightRegistryContext.Provider>
+      </VariableRegistryContext.Provider>
     );
   }
 
@@ -313,8 +328,13 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   };
 
   private highlightBoundingBoxes: Record<string, IHighlightBox> = {};
+  private variableBoundingBoxes: Record<string, IVariableBox> = {};
 
   private handleHighlightBox = (id: string, box: IHighlightBox) => {
     this.highlightBoundingBoxes[id] = box;
+  };
+
+  private handleVariableBox = (id: string, box: IVariableBox) => {
+    this.variableBoundingBoxes[id] = box;
   };
 }

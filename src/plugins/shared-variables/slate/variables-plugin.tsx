@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import classNames from "classnames/dedupe";
 
 import {
@@ -19,6 +19,16 @@ import { SharedVariables, SharedVariablesType } from "../shared-variables";
 const kVariableClass = "slate-variable-chip";
 export const kVariableFormat = "m2s-variable";
 export const kVariableTextPluginName = "variables";
+
+// Variable registry context for bounding box tracking
+export interface IVariableBox {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+export const VariableRegistryContext = React.createContext<((id: string, box: IVariableBox) => void) | undefined>(undefined);
 
 export class VariablesPlugin implements ITextPlugin {
   public textContent;
@@ -142,10 +152,36 @@ export const VariableComponent = observer(function({ attributes, children, eleme
   const variablesPlugin = plugins[kVariableTextPluginName] as VariablesPlugin|undefined;
   const isHighlighted = useSelected();
   const isSerializing = useSerializing();
+  const registryFn = useContext(VariableRegistryContext);
+  const chipRef = useRef<HTMLSpanElement>(null);
 
   if (!isVariableElement(element)) return null;
 
   const {reference} = element;
+
+  useEffect(() => {
+    const el = chipRef.current;
+    if (!el || !registryFn) return;
+
+    const reportBox = () => {
+      const variableRect = el.getBoundingClientRect();
+      const textBoxRect = el.closest('.text-tool-wrapper')?.getBoundingClientRect();
+      if (textBoxRect) {
+        registryFn(reference, {
+          left: variableRect.left - textBoxRect.left,
+          top: variableRect.top - textBoxRect.top,
+          width: variableRect.width - 2,
+          height: variableRect.height - 2
+        });
+      }
+    };
+
+    requestAnimationFrame(reportBox);
+
+    const variableObserver = new ResizeObserver(reportBox);
+    variableObserver.observe(el);
+    return () => variableObserver.disconnect();
+  }, [registryFn, reference]);
 
   const classes = classNames(kSlateVoidClass, kVariableClass);
   const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;
@@ -155,7 +191,9 @@ export const VariableComponent = observer(function({ attributes, children, eleme
     <span className={classes} {...attributes} contentEditable={false}>
       {children}
       { variable ?
-        <VariableChip variable={variable} className={selectedClass} /> :
+        <span ref={chipRef}>
+          <VariableChip variable={variable} className={selectedClass} />
+        </span> :
         `invalid reference: ${reference}`
       }
     </span>

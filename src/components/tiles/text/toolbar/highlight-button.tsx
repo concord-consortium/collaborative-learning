@@ -78,10 +78,12 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     const annotationsToRemove: string[] = [];
     document.content.annotations.forEach((annotation) => {
       // Check if the annotation's source or target object references this highlight
-      if (annotation.sourceObject?.objectId === highlightId && annotation.sourceObject?.objectType === "highlight") {
+      if (annotation.sourceObject?.objectId === highlightId &&
+            annotation.sourceObject?.objectType === kHighlightFormat) {
         annotationsToRemove.push(annotation.id);
       }
-      if (annotation.targetObject?.objectId === highlightId && annotation.targetObject?.objectType === "highlight") {
+      if (annotation.targetObject?.objectId === highlightId &&
+            annotation.targetObject?.objectType === kHighlightFormat) {
         annotationsToRemove.push(annotation.id);
       }
     });

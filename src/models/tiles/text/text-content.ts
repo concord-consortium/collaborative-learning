@@ -6,9 +6,11 @@ import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-content";
 import { SharedModelType } from "../../shared/shared-model";
 import { getAllTextPluginInfos } from "./text-plugin-info";
+import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
+import { kVariableFormat } from "../../../plugins/shared-variables/slate/variables-plugin";
+import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { escapeBackslashes, escapeDoubleQuotes, removeNewlines, removeTabs } from "../../../utilities/string-utils";
 import { tileContentAPIViews } from "../tile-model-hooks";
-import { IClueTileObject } from "src/models/annotations/clue-object";
 
 export const kTextTileType = "Text";
 
@@ -155,10 +157,23 @@ export const TextContentModel = TileContentModel
   .views(self => tileContentAPIViews({
     get annotatableObjects(): IClueTileObject[] {
       const objects: IClueTileObject[] = [];
-      const objectType = "highlight";
+      // Add highlight chips
+      const highlightObjectType = kHighlightFormat;
       self.highlightedText.forEach(highlight => {
-        objects.push({objectId: highlight.id, objectType});
+        objects.push({objectId: highlight.id, objectType: highlightObjectType});
       });
+      // Add variable chips
+      const variableObjectType = kVariableFormat;
+      if (self.editor) {
+        for (const [node] of self.editor.nodes({at: [], mode: 'all'})) {
+          if ('type' in node && node.type === kVariableFormat) {
+            if ('reference' in node && typeof node.reference === 'string') {
+              objects.push({objectId: node.reference, objectType: variableObjectType});
+            }
+          }
+        }
+      }
+
       return objects;
     },
   }));
