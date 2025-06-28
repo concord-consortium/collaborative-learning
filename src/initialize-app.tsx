@@ -9,6 +9,9 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import {
   registerGlobalValueManagerLookupFunction
 } from "@concord-consortium/codap-formulas-react17/models/global/global-value-manager";
+import {
+  AttributeFormulaAdapter
+} from "@concord-consortium/codap-formulas-react17/models/formula/attribute-formula-adapter";
 
 import { AppMode } from "./models/stores/store-types";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
@@ -50,6 +53,7 @@ export const initializeApp = ({authoring, standalone, authDomain}: IInitializeAp
   console.log(`CLUE initializeApp: ${appVersion}`);
   // Let the formula system know we don't support global values
   registerGlobalValueManagerLookupFunction(undefined);
+  AttributeFormulaAdapter.register();
 
   const user = UserModel.create();
 
