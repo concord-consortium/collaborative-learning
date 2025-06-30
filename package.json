@@ -230,7 +230,7 @@
     "@chakra-ui/react": "^1.8.9",
     "@concord-consortium/codap-formulas-react17": "^1.0.0",
     "@concord-consortium/compute-engine": "^0.12.3-cc.2",
-    "@concord-consortium/diagram-view": "1.0.1",
+    "@concord-consortium/diagram-view": "1.0.2",
     "@concord-consortium/mobx-state-tree": "^6.0.0-cc.1",
     "@concord-consortium/react-components": "^1.0.0",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
