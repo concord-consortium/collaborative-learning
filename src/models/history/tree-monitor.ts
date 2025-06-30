@@ -109,7 +109,7 @@ export class TreeMonitor {
             //
             // When a new shared model is added to the document the path will be
             //   /content/sharedModelMap/${sharedModelId}
-            // We a shared model is linked or unlinked to a tile the path will be:
+            // When a shared model is linked or unlinked to a tile the path will be:
             //   /content/sharedModelMap/${sharedModelId}/tiles/[index]
             const pathMatch = _patch.path.match(/(.*\/content\/sharedModelMap\/[^/]+)/);
             if(pathMatch) {
@@ -226,6 +226,10 @@ export class TreeMonitor {
         // If a shared model has been deleted, we can't run these callbacks without errors,
         // so we bail out now.  May need improvement if tiles need to be notified about
         // deleted shared models.
+        if (!isAlive(this.tree)) {
+          // The tree might have been destroyed. This happens during tests.
+          return;
+        }
         try {
           tryResolve(this.tree, `${sharedModelPath}/sharedModel`);
         } catch {

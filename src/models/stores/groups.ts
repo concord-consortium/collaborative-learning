@@ -1,4 +1,4 @@
-import { types, getEnv, SnapshotIn, applySnapshot } from "mobx-state-tree";
+import { types, getEnv, SnapshotIn, applySnapshot, hasEnv } from "mobx-state-tree";
 import { DBOfferingGroup, DBOfferingGroupMap } from "../../lib/db-types";
 import { ClassModelType } from "./class";
 import { GroupVirtualDocument } from "../document/group-virtual-document";
@@ -26,12 +26,12 @@ export const GroupUserModel = types
   })
   .views(self => ({
     get environment() {
-      return getEnv(self) as IGroupsEnvironment;
+      return hasEnv(self) ? getEnv(self) as IGroupsEnvironment : undefined;
     }
   }))
   .views(self => ({
     get classUser() {
-      return self.environment.class?.getUserById(self.id);
+      return self.environment?.class?.getUserById(self.id);
     },
   }))
   .views(self => ({
@@ -51,7 +51,7 @@ export const GroupUserModel = types
       // to be Removed.
       // Also in the future we might support setting up the groups before the class is
       // initialized. For the time being we list users as New in that case.
-      const clazz = self.environment.class;
+      const clazz = self.environment?.class;
       if (!clazz || (self.connectedTimestamp + 1000) > clazz.timestamp) {
         return GroupUserState.New;
       }
@@ -83,10 +83,10 @@ export const GroupUserModel = types
       return !disconnectedTimestamp || (connectedTimestamp > disconnectedTimestamp);
     },
     get problemDocument() {
-      return self.environment.documents?.getProblemDocument(self.id);
+      return self.environment?.documents?.getProblemDocument(self.id);
     },
     get lastPublishedProblemDocument() {
-      const publishedProblemDocs = self.environment.documents?.byTypeForUser(ProblemPublication, self.id);
+      const publishedProblemDocs = self.environment?.documents?.byTypeForUser(ProblemPublication, self.id);
       if ( publishedProblemDocs?.length === 0) {
         return undefined;
       }
@@ -101,7 +101,7 @@ export const GroupModel = types
   })
   .views(self => ({
     get environment() {
-      return getEnv(self) as IGroupsEnvironment;
+      return hasEnv(self) ? getEnv(self) as IGroupsEnvironment : undefined;
     },
     get activeUsers() {
       return self.users.filter(user => user.state !== GroupUserState.Removed);
@@ -118,7 +118,7 @@ export const GroupModel = types
     // This will put the current user first if they are in this group
     get sortedUsers() {
       const sortedUsers = [...self.activeUsers];
-      const userId = self.environment.user?.id;
+      const userId = self.environment?.user?.id;
       return sortedUsers.sort((a, b) => {
         if (a.id === userId) return -1;
         if (b.id === userId) return 1;

@@ -630,26 +630,35 @@ describe("SharedModelDocumentManager", () => {
     const sharedModel1 = TestSharedModel.create({});
     manager.addTileSharedModel(tileContent, sharedModel1);
 
-    // The update function should be called right after it is added
-    await expectUpdateToBeCalledTimes(tileContent, 1);
+    // The update function should be called right after it is added.
+    // It is currently called twice, the paths that are changed when
+    // it is called are:
+    // - /content/addSharedModel
+    // - /content/sharedModelMap/[shared_model_id]/addTile
+    await expectUpdateToBeCalledTimes(tileContent, 2);
 
+    console.log("sharedModel1.setValue(\"something\")");
     // it should be monitoring this now
     sharedModel1.setValue("something");
-    await expectUpdateToBeCalledTimes(tileContent, 2);
+    await expectUpdateToBeCalledTimes(tileContent, 3);
 
     const sharedModel2 = TestSharedModel.create({});
     manager.addTileSharedModel(tileContent, sharedModel2);
 
     // The update function should be called right after second model is added
-    await expectUpdateToBeCalledTimes(tileContent, 3);
+    // It is currently called twice, the paths that are changed when
+    // it is called are:
+    // - /content/addSharedModel
+    // - /content/sharedModelMap/[shared_model_id]/addTile
+    await expectUpdateToBeCalledTimes(tileContent, 5);
 
     // it should still be monitoring the first model
     sharedModel1.setValue("something2");
-    await expectUpdateToBeCalledTimes(tileContent, 4);
+    await expectUpdateToBeCalledTimes(tileContent, 6);
 
     // it should also be monitoring the second model
     sharedModel2.setValue("something");
-    await expectUpdateToBeCalledTimes(tileContent, 5);
+    await expectUpdateToBeCalledTimes(tileContent, 7);
 
     destroy(docModel);
   });

@@ -1,4 +1,4 @@
-import { Instance, SnapshotIn, getEnv, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, getEnv, types, hasEnv } from "mobx-state-tree";
 import { getUrlFromRelativeOrFullString } from "../../utilities/url-utils";
 import { stripPTNumberFromBranch } from "../../utilities/branch-utils";
 import { parseUrl } from "query-string";
@@ -18,7 +18,7 @@ export const CurriculumConfig = types
   })
   .views(self => ({
     get env() {
-      return getEnv(self) as ICurriculumConfigEnv | undefined;
+      return hasEnv(self) ? getEnv(self) as ICurriculumConfigEnv : undefined;
     }
   }))
   .views(self => ({

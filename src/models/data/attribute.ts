@@ -33,6 +33,14 @@ export const Attribute = types.model("Attribute", {
   const values = snap.values?.map(value => value != null ? value : undefined);
   return { ...snap, values };
 })
+.postProcessSnapshot(snap => {
+  // Strip the id off of the formula.
+  // We don't need it, but since we are using the shared formula model we
+  // can't change it.
+  const formulaCopy = { ...snap.formula };
+  delete (formulaCopy as any).id;
+  return { ...snap, formula: formulaCopy };
+})
 .views(self => ({
   importValue(value: IValueType) {
     // may eventually want to do something more sophisticated here, like convert
