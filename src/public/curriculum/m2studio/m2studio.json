@@ -12,6 +12,7 @@
     "placeholderText": "Enter notes here",
     "defaultDocumentType": "problem",
     "defaultDocumentTitle": "Untitled",
+    "annotations": "all",
     "documentLabels": {
       "personal": {
         "labels": {
