@@ -6,6 +6,7 @@ import { NavTabsConfigModel } from "./nav-tabs";
 import { ToolbarModel } from "./problem-configuration";
 import { SettingsGroupMstType } from "./settings";
 import { DocumentLabelModel, UnitConfiguration } from "./unit-configuration";
+import { UserType } from "./user-types";
 
 interface IMyResourcesToolbarOptions {
   showEdit?: boolean;
@@ -76,6 +77,7 @@ export const AppConfigModel = types
     get documentLabels() { return self.configMgr.documentLabels; },
     get disablePublish() { return self.configMgr.disablePublish; },
     get enableHistoryRoles() { return self.configMgr.enableHistoryRoles; },
+    get enableCommentRoles() { return self.configMgr.enableCommentRoles; },
     get copyPreferOriginTitle() { return self.configMgr.copyPreferOriginTitle; },
     get disableTileDrags() { return self.configMgr.disableTileDrags; },
     get showClassSwitcher() { return self.configMgr.showClassSwitcher; },
@@ -161,6 +163,9 @@ export const AppConfigModel = types
     getPlaceholder(containerType: string) {
       const key = (containerType === undefined || containerType === "DocumentContent") ? "default" : containerType;
       return self.placeholder?.[key];
+    },
+    showCommentPanelFor(userType: UserType | undefined) {
+      return userType && self.enableCommentRoles.includes(userType);
     }
 
   }));
