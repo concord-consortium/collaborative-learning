@@ -58,12 +58,6 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
       const marks = Editor.marks(editor) || {};
       Transforms.removeNodes(editor, { at: chipPath });
       Transforms.insertNodes(editor, { text, ...marks }, { at: insertPoint });
-      Object.keys(marks).forEach(key => {
-        Editor.removeMark(editor, key);
-      });
-      Object.entries(marks).forEach(([key, value]) => {
-        Editor.addMark(editor, key, value);
-      });
     }
   };
 
@@ -71,7 +65,8 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     event.preventDefault();
     if (isHighlightedText) {
       const selectedChip = getSelectedChip();
-      const selectedChipRef = selectedChip ? selectedChip[0].reference : "";
+      if (!selectedChip) return
+      const selectedChipRef = selectedChip[0].reference;
       unHighlightChip();
       highlightsPlugin?.removeHighlight(selectedChipRef);
       return;
