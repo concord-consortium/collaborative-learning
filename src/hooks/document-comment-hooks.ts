@@ -119,7 +119,17 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
   return useMutation(postComment, {
     onMutate: async newCommentParams => {
       const { document, comment } = newCommentParams;
-      const queryKey = getCommentsQueryKeyFromMetadata(document);
+      const legacyQueryKey = getCommentsQueryKeyFromMetadata(document);
+      const documentKey = isDocumentMetadata(document) ? document.key : document.path;
+      const simplifiedPath = isSectionPath(documentKey || "")
+        ? `curriculum/${escapeKey(documentKey)}/comments`
+        : `documents/${documentKey}/comments`;
+
+      // If the legacy comments path has comments, the new comment will be written there. Otherwise, it will be
+      // written to the simplified path.
+      const legacyComments = legacyQueryKey ? queryClient.getQueryData<CommentWithId[]>(legacyQueryKey) : [];
+      const hasLegacyComments = legacyComments && legacyComments.length > 0;
+      const queryKey = hasLegacyComments ? legacyQueryKey : simplifiedPath;
 
       // snapshot the current state of the comments in case we need to roll back on error
       const rollbackComments = queryKey && queryClient.getQueryData<CommentWithId[]>(queryKey);
@@ -138,11 +148,10 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
       // call client-specified onMutate (if provided)
       clientOnMutate?.({ document, comment });
       // return a context object with the rollback value
-      return { rollbackComments };
+      return { rollbackComments, queryKey };
     },
     onError: (err, newCommentParams, rollbackContext) => {
-      const queryKey = getCommentsQueryKeyFromMetadata(newCommentParams.document);
-      const rollbackComments = (rollbackContext as any)?.rollbackComments;
+      const { queryKey, rollbackComments } = rollbackContext as any;
       // For now we ignore the possibility that there has been a remote change since we captured
       // the rollback comments. If we encountered an error on write it likely means there's a
       // problem with our connection which means that it's unlikely we've successfully received

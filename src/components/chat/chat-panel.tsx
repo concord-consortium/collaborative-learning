@@ -31,29 +31,8 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: simplePathComments } = useDocumentCommentsAtSimplifiedPath(focusDocument);
-  // const allComments = [...comments||[], ...simplePathComments||[]]
-  //   .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-  // The usePostDocumentComment hook optimistically posts comments before they are saved to the database so they
-  // instantly appear in the UI. When the comment is saved, the optimistically-posted comment should disappear, but
-  // the process uses a query key that doesn't work with the simplified path. That results in duplicate comments
-  // appearing in the UI until the page is refreshed. The de-duping logic below fixes that, but it would be better
-  // to fix the query key issue in usePostDocumentComment.
   const allComments = [...comments||[], ...simplePathComments||[]]
-    .filter((comment, index, self) => {
-      const duplicateIndex = self.findIndex(c =>
-        c.content === comment.content &&
-        c.uid === comment.uid &&
-        c !== comment
-      );
-
-      if (duplicateIndex) {
-        // Only keep the non-pending comment
-        return !comment.id.startsWith('pending-');
-      }
-
-      // No duplicate found, keep comment
-      return true;
-    }).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = allComments?.filter(comment => comment.tileId == null);
   const allTileComments = allComments?.filter(comment=> comment.tileId != null);
