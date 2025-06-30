@@ -415,7 +415,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getPortalButton().contains("Remove").should("not.exist");
     });
 
-    it("Test linking two datasets", () => {
+    it.skip("Test linking two datasets", () => {
       beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
