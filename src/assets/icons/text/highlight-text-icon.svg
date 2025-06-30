@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36px" height="35px" viewBox="0 0 36 35" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>FD67B4D9-8346-4D6E-A6D1-7D6439B25314</title>
+    <defs>
+        <rect id="path-1" x="5" y="24" width="26" height="5"></rect>
+    </defs>
+    <g id="More-ICON" stroke="none" fill="none" transform="translate(0, 0.9764)" fill-rule="evenodd" stroke-width="1">
+        <g id="Highlight">
+            <rect id="Rectangle" x="0" y="0" width="36" height="34"></rect>
+            <g id="Color-Bar" stroke-linejoin="square" stroke-width="0.75">
+                <rect stroke="#F7E58F" fill="#F7E58F" fill-rule="evenodd" x="5.375" y="24.375" width="25.25" height="4.25"></rect>
+                <rect stroke="#3F3F3F" x="5.375" y="24.375" width="25.25" height="4.25"></rect>
+            </g>
+            <path d="M16.0148,11.65 L21.35,17.3049875 L17.398,21.4745636 C17.0028,21.8915212 16.5376167,22.1 16.00245,22.1 C15.4672833,22.1 15.0021,21.8915212 14.6069,21.4745636 L13.94,22.0739401 L9,22.0739401 L12.1122,18.8164589 C11.717,18.3995012 11.5111667,17.9000208 11.4947,17.3180175 C11.4782333,16.7360141 11.6676,16.2365337 12.0628,15.8195761 L16.0148,11.65 Z M17.55,9.780875 L21.7195761,5.627 C22.1365337,5.209 22.6273275,5 23.1919576,5 C23.7565877,5 24.2473815,5.209 24.6643392,5.627 L27.3745636,8.317875 C27.7915212,8.735875 28,9.22789583 28,9.7939375 C28,10.3599792 27.7915212,10.852 27.3745636,11.27 L23.2049875,15.45 L17.55,9.780875 Z" id="Shape" fill="#545454" fill-rule="nonzero"></path>
+        </g>
+    </g>
+</svg>
