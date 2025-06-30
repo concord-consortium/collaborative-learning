@@ -89,6 +89,7 @@
       {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}
     ],
     "tools": ["Simulator"],
+    "enableCommentRoles": ["student", "teacher", "researcher"],
     "showCommentTag": true,
     "commentTags": {
       "diverging": "Diverging Designs",

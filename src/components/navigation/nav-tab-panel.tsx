@@ -33,10 +33,10 @@ export class NavTabPanel extends BaseComponent<IProps> {
 
   public render() {
     const { persistentUI: { activeNavTab, focusDocument, showChatPanel }, ui: { selectedTileIds },
-            user } = this.stores;
+            user, appConfig } = this.stores;
     const tabs = this.stores.tabsToDisplay;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
-    const isChatEnabled = user.isTeacherOrResearcher; //only enable chat for teachers or researchers
+    const isChatEnabled = appConfig.showCommentPanelFor(user.type);
     const openChatPanel = isChatEnabled && showChatPanel;
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
 
