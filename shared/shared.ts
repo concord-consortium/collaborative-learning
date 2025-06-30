@@ -205,9 +205,18 @@ export interface IClientCommentParams {
   tags?: string[];    // tag option that user selects for AI
 }
 
+export interface IFirestoreMetadataDocumentParams extends IFirebaseFunctionBaseParams {
+  document: IDocumentMetadata | ICurriculumMetadata;
+}
+export type IFirestoreMetadataDocumentUnionParams = IFirestoreMetadataDocumentParams | IFirebaseFunctionWarmUpParams;
+
+// TODO: Remove this type and use IFirestoreMetadataDocumentParams in its place once the app
+// is updated to use the new v2 createFirestoreMetadataDocument cloud function.
 export interface ICommentableDocumentParams extends IFirebaseFunctionBaseParams {
   document: IDocumentMetadata | ICurriculumMetadata;
 }
+// TODO: Remove this type and use IFirestoreMetadataDocumentUnionParams in its place once the app
+// is updated to use the new v2 createFirestoreMetadataDocument cloud function.
 export type ICommentableDocumentUnionParams = ICommentableDocumentParams | IFirebaseFunctionWarmUpParams;
 
 export interface IPostDocumentCommentParams extends ICommentableDocumentParams {
