@@ -1,9 +1,14 @@
 # Known Issues
 - when a value of a cell is a fraction like `1/2` this breaks mathjs's interpreter when it substitutes the value into the formula.
+- the aggregate functions stopped working but no are working again and it isn't clear why.
+- **fixed** when clicking on a equation below a header to edit it, it doesn't show the right value in the editor field. If you toggle the pull down to a different attribute and back again, then it does show the right equation in the editor field.
+- when the value of a cell is changed the formulas do not recompute.
+- when there is a chain of formulas at least 3 long which depend on each other it seems to break the formula system. It reports an error of: "Undefined symbol __CANONICAL_NAME_LOCAL_ATTR_...". CODAP does not have this problem.
+- CODAP's "insert function" and "insert value" buttons have not been added.
 - in the Jest tests when an equation is added to an attribute this doesn't seem to trigger an update of the cells of that attribute, how ever this does work in the main app
 - in the Jest tests randomly mathjs complains about getting the canonical form the variable in the equation. I'm not sure if that canonical form is what is always used, and the problem is that the context of the formula is not setup correctly. Or if the canonical form is being used incorrectly in this case.
-- the aggregate functions are no longer working. They were working before but have now stopped.
 - the upgrade of MST seems to have changed the behavior of the `updateAfterSharedModelChanges` callback. The test at `shared-model-document-manager.test.ts:649` is now showing that it is called extra times than what is expected. However we need to look at the behavior was like before all of this work to understand what the work actually changed. It looks like if only a single extra call happens at the beginning the test would still pass, so that might have been happening already. It is only when there are 2 extra calls that test starts to fail. Interestingly in CODAP this is test was not updated, so possibly some changes to the shared model manager were made to address this issue in CODAP. We should compare the two implementations, and look at the PRs in CODAP that updated it.
+
 
 # Notes during migration
 

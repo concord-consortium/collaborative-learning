@@ -18,9 +18,9 @@ interface IProps {
   onSubmit: () => void;
 }
 
-type IResult = [() => void, () => void, React.Dispatch<React.SetStateAction<string | undefined>>];
+type IResult = [() => void, () => void, (id: string) => void];
 export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult => {
-  const [currYAttrId, setCurrYAttrId] = useState<Maybe<string>>(() => {
+  const [currYAttrId, _setCurrYAttrId] = useState<Maybe<string>>(() => {
     // If the dataSet has a second attribute, use that by default
     const yAttr = dataSet.attributes[1];
     return yAttr ? yAttr.id : undefined;
@@ -49,16 +49,18 @@ export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult 
   // NOTE: useFormulaEditorState returns a new object on every call.
   const formulaEditorState = useFormulaEditorState(formulaDataSet, attr?.formula?.display || "");
 
-  // When FormulalEditor saves the formula by calling setFormula on formulaEditorState this is a react state
+  const setCurrYAttrId = (id: string) => {
+    formulaEditorState.setFormula(getAttribute(id)?.formula?.display || "");
+    _setCurrYAttrId(id);
+  };
+
+      // When FormulalEditor saves the formula by calling setFormula on formulaEditorState this is a react state
   // update. It triggers a re-render of the TableTile which is using this hook.
   // Changes in these content props do not directly tigger a re-render of the Content component, they have
   // to be passed as dependencies to the useCustomModal hook too.
   const contentProps: IContentProps = {
       currYAttrId,
-      setCurrYAttrId(id: string) {
-        formulaEditorState.setFormula(getAttribute(id)?.formula?.display || "");
-        setCurrYAttrId(id);
-      },
+      setCurrYAttrId,
       formulaEditorState,
       dataSet
   };
