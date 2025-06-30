@@ -103,7 +103,11 @@
           }
         }
       }
+      &:not(.selected-column) {
+        display: none;
+      }
       &:not(.selected-column):hover {
+        display: flex;
         svg {
           .sort.arrow {
             opacity: 0.35;

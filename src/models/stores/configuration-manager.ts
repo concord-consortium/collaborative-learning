@@ -107,6 +107,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["enableHistoryRoles"]>("enableHistoryRoles");
   }
 
+  get enableCommentRoles() {
+    return this.getProp<UC["enableCommentRoles"]>("enableCommentRoles");
+  }
+
   get copyPreferOriginTitle() {
     return this.getProp<UC["copyPreferOriginTitle"]>("copyPreferOriginTitle");
   }
