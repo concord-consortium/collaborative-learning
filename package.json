@@ -42,7 +42,7 @@
     },
     "transformIgnorePatterns": [
       "/comments/ESM-only (https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) modules that should not be transformed by ts-jest",
-      "/node_modules/(?!(d3|d3-(.+)|decode-uri-component|delaunator|escape-string-regexp|filter-obj|internmap|json-stringify-pretty-compact|jsxgraph|nanoid|query-string|robust-predicates|split-on-first|@concord-consortium/codap-formulas-react17)/)"
+      "/node_modules/(?!(d3|d3-(.+)|decode-uri-component|delaunator|escape-string-regexp|filter-obj|internmap|json-stringify-pretty-compact|jsxgraph|nanoid|query-string|robust-predicates|split-on-first|@concord-consortium/codap-formulas-react17|@concord-consortium/codap-utilities)/)"
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
