@@ -1,3 +1,10 @@
+# Known Issues
+- when a value of a cell is a fraction like `1/2` this breaks mathjs's interpreter when it substitutes the value into the formula.
+- in the Jest tests when an equation is added to an attribute this doesn't seem to trigger an update of the cells of that attribute, how ever this does work in the main app
+- in the Jest tests randomly mathjs complains about getting the canonical form the variable in the equation. I'm not sure if that canonical form is what is always used, and the problem is that the context of the formula is not setup correctly. Or if the canonical form is being used incorrectly in this case.
+- the aggregate functions are no longer working. They were working before but have now stopped.
+- the upgrade of MST seems to have changed the behavior of the `updateAfterSharedModelChanges` callback. The test at `shared-model-document-manager.test.ts:649` is now showing that it is called extra times than what is expected. However we need to look at the behavior was like before all of this work to understand what the work actually changed. It looks like if only a single extra call happens at the beginning the test would still pass, so that might have been happening already. It is only when there are 2 extra calls that test starts to fail. Interestingly in CODAP this is test was not updated, so possibly some changes to the shared model manager were made to address this issue in CODAP. We should compare the two implementations, and look at the PRs in CODAP that updated it.
+
 # Notes during migration
 
 - CLUE formula object has state variable `canonical` in CODAP that is a volatile so we'll have to ignore it during import. I think without strict MST type checking it should just be ignored automatically.
@@ -15,6 +22,52 @@
 - in table-tile.tsx useExpressionDialog is called with its onSubmit property as handleSubmitExpressions. It is also passed a dataSet.
 - the showExpressionDialog function from useExpressionDialog is called by handleShowExpressionsDialog which is passed the attribute Id.
 - useExpressionDialog calls useCustomModal to display the modal dialog, it is passed a Content component along with the properties to be displayed.
+
+## CLUE formulas
+In CLUE the table metadata has the expression and rawExpression values. Hopefully we can replace this and then get rid of one more CLUE metadata object.
+
+The use-column-extensions module is the only one that uses `TableMetadataModel.hasExpression`.
+Only use-column-extensions uses `TableMetadataModel.expressions` (besides TableMetadataModel itself)
+
+The table metadata is what currently updates the dataset based on the expression. This is called manually by the TableContentModel when cases are added or changed, and attributes added or removed, and when the expression is changed via the table-content.
+
+All of this should be replaceable by the formula observer system from CODAP. As long as these changes trigger the observer automatically via the formula data set proxy. Otherwise we might need to manually call these triggers.
+
+The point of use-column-extensions is to setup the appData property of the column object passed to RDG. This appData is typed as TColumnAppData.
+
+column-header-cell is the consumer of:
+- readOnly (passed into use-column-extensions)
+- gridContext (passed into use-column-extensions)
+- isEditing (based on passed in columnEditingName)
+- isRemovable (based on multiple conditions (not including the expressions))
+- showExpressions (based on metadata.hasExpressions)
+- expression (based on metadata.rawExpression, metadata.expression, and xName it recomputes the editable expression if the rawExpression was cleared this happens when the x attribute is renamed)
+- hasData (checks if dataset has data for this column)
+- onShowExpressionsDialog (passed in)
+- onRemoveColumn (passed in)
+
+editable-header-cell is the consumer of:
+- gridContext
+- editableName
+- isEditing
+- onBeginHeaderCellEdit
+- onHeaderCellEditKeyDown
+- onEndHeaderCellEdit
+
+cell-text-editor is the consumer of:
+- onBeginBodyCellEdit (this doesn't seem to be implemented)
+- onEndBodyCellEdit (this doesn't seem to be implemented)
+
+
+There is no inline editing of the formula. The dialog is opened when the expression is single clicked below the header name.
+
+Steps to update:
+- remove table metadata?
+
+
+## Getting formulas to recompute
+- we need to call formulaManager.addAdapters() in CODAP this is done in create-document-model. This sets up an MobX observer on the active formulas of each adapter and recomputes them when these active formulas changes. This will handle the computation of a newly added formula object.
+- this requires an adapterApi implementation provided by CLUE.
 
 ## Possible Plan
 - update the Content component used in useExpressionDialog to do what the CODAP Expression Modal Editor does. This content is being passed the dataset so it should be able to setup the formula context, with this dataset. Might be easiest to start a new "use..." file then we can see what happens with the types.

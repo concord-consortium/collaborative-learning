@@ -1,5 +1,4 @@
 import React from "react";
-import "regenerator-runtime/runtime";
 import { observable, runInAction } from "mobx";
 import { getSnapshot } from "mobx-state-tree";
 import { inject, observer } from "mobx-react";
