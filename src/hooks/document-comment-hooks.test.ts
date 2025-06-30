@@ -1,7 +1,8 @@
 import { renderHook } from "@testing-library/react-hooks";
 import { CommentDocument } from "../lib/firestore-schema";
 import {
-  DocumentQueryType, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
+  DocumentQueryType, useDocumentComments, useDocumentCommentsAtSimplifiedPath, usePostDocumentComment,
+  useUnreadDocumentComments
 } from "./document-comment-hooks";
 
 const mockPostDocumentComment_v2 = jest.fn();
@@ -23,6 +24,9 @@ jest.mock("firebase/app", () => ({
     httpsCallable: (fn: string) => mockHttpsCallable(fn)
   })
 }));
+
+// Mock useCommentsAtPath
+const useCommentsAtPath = jest.fn(() => "mocked result");
 
 // mock QueryClient methods
 const mockGetQueryData = jest.fn();
@@ -185,6 +189,28 @@ describe("Document comment hooks", () => {
       renderHook(() => useUnreadDocumentComments("bar"));
       expect(mockUseCollectionOrderedRealTimeQuery).toHaveBeenCalled();
       expect(mockUseCollectionOrderedRealTimeQuery.mock.calls[0][0]).toBe("documents/network_bar/comments");
+    });
+  });
+
+  describe("useDocumentCommentsAtSimplifiedPath", () => {
+    it("returns comments for a section path", () => {
+      const sectionPath = "msa/1/2/introduction";
+      const { result } = renderHook(() => useDocumentCommentsAtSimplifiedPath(sectionPath));
+      expect(useCommentsAtPath).toHaveBeenCalledWith("curriculum/msa_1_2_introduction/comments");
+      expect(result.current).toBe("mocked result");
+    });
+
+    it("returns comments for a non-section path", () => {
+      const docKey = "abc123";
+      const { result } = renderHook(() => useDocumentCommentsAtSimplifiedPath(docKey));
+      expect(useCommentsAtPath).toHaveBeenCalledWith("documents/abc123/comments");
+      expect(result.current).toBe("mocked result");
+    });
+
+    it("returns comments for empty input", () => {
+      const { result } = renderHook(() => useDocumentCommentsAtSimplifiedPath(""));
+      expect(useCommentsAtPath).toHaveBeenCalledWith("");
+      expect(result.current).toBe("mocked result");
     });
   });
 
