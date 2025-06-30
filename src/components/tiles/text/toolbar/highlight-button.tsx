@@ -65,7 +65,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     event.preventDefault();
     if (isHighlightedText) {
       const selectedChip = getSelectedChip();
-      if (!selectedChip) return
+      if (!selectedChip) return;
       const selectedChipRef = selectedChip[0].reference;
       unHighlightChip();
       highlightsPlugin?.removeHighlight(selectedChipRef);
