@@ -14,7 +14,8 @@ export const postDocumentComment = onCall(async (request: CallableRequest<IPostD
   if (isWarmUpParams(params)) return {version};
 
   const {context: userContext, document, comment} = params || {};
-  const {isValid, uid, firestoreRoot} = validateUserContext(userContext, request.auth);
+  const validatedUserContext = validateUserContext(userContext, request.auth);
+  const {isValid, uid, firestoreRoot} = validatedUserContext;
   if (!isValid || !userContext?.classHash || !uid) {
     throw new HttpsError("invalid-argument", "The provided user context is not valid.");
   }

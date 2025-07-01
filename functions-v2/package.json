@@ -12,6 +12,8 @@
     "test": "jest",
     "test:emulator": "firebase emulators:start --project demo-test --only firestore,database",
     "deploy": "firebase deploy --only functions:functions-v2",
+    "deploy:postDocumentComment": "firebase deploy --only functions:postDocumentComment_v2",
+    "deploy:validateCommentableDocument": "firebase deploy --only functions:validateCommentableDocument_v2",
     "logs": "firebase functions:log"
   },
   "engines": {
@@ -25,6 +27,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
