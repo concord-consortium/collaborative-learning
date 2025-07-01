@@ -77,8 +77,25 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
     return self.dataSet.name || "";
   },
   get itemIdsHash() {
-    // The formula system doesn't seem to use this, but perhaps it does
-    return null;
+    // This is supposed to be a hash of the item IDs, it is used by the formula system
+    // to watch when the set of items, like when items are added or removed.
+    // In CLUE we are also using it to watch the values of the attributes.
+    // In CODAP the values are "watched" by monitoring calls to setCaseValues, but
+    // because we are a proxy that action will not be called by CLUE.
+    // This is really in-efficient, but in CLUE the number of items and attributes is
+    // relatively small.
+    const stringsOfDataSet: string[] = [];
+    self.dataSet.cases?.forEach(({ __id__ }) => {
+      stringsOfDataSet.push(__id__);
+    });
+    self.dataSet.attributes.forEach(attr => {
+      attr.strValues.forEach((value, index) => {
+        // We use the attribute ID and the index to create a unique string for each value
+        stringsOfDataSet.push(`${attr.id}-${index}-${value}`);
+      });
+    });
+
+    return hashStringSet(stringsOfDataSet);
   },
   get attrNameMap() {
     const attrNameMap = observable.map<string, string>({}, { name: "attrNameMap" });
@@ -212,4 +229,34 @@ export function createFormulaDataSetProxy(dataSet: IDataSet): IFormulaDataSet {
   const formulaDataSet = FormulaDataSetProxy.create();
   formulaDataSet.setCLUEDataSet(dataSet);
   return formulaDataSet;
+}
+
+/*
+ * hashString()
+ *
+ * Returns a 32-bit hash value for a string.
+ * Provided by ChatGPT, but apparently originally developed by Daniel J. Bernstein.
+ */
+export function hashString(str: string) {
+  // Simple hash function for a single string (e.g., DJB2)
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    // eslint-disable-next-line no-bitwise
+    hash = (hash * 33) ^ str.charCodeAt(i);
+  }
+  // eslint-disable-next-line no-bitwise
+  return hash >>> 0; // Convert to unsigned 32-bit integer
+}
+
+/*
+ * hashStringSet()
+ *
+ * returns an order-invariant hash value for a set of strings (e.g. ids).
+ * developed with the help of ChatGPT.
+ */
+export function hashStringSet(strings: string[]) {
+  return strings
+    .map(hashString)
+    // eslint-disable-next-line no-bitwise
+    .reduce((acc, hash) => acc ^ hash, 0); // XOR all individual hashes
 }

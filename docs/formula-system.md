@@ -9,6 +9,11 @@
 - in the Jest tests randomly mathjs complains about getting the canonical form the variable in the equation. I'm not sure if that canonical form is what is always used, and the problem is that the context of the formula is not setup correctly. Or if the canonical form is being used incorrectly in this case.
 - the upgrade of MST seems to have changed the behavior of the `updateAfterSharedModelChanges` callback. The test at `shared-model-document-manager.test.ts:649` is now showing that it is called extra times than what is expected. However we need to look at the behavior was like before all of this work to understand what the work actually changed. It looks like if only a single extra call happens at the beginning the test would still pass, so that might have been happening already. It is only when there are 2 extra calls that test starts to fail. Interestingly in CODAP this is test was not updated, so possibly some changes to the shared model manager were made to address this issue in CODAP. We should compare the two implementations, and look at the PRs in CODAP that updated it.
 
+# Observing DataSet changes
+The formula system watches for calls to setCaseValues on the dataset. Because we are proxying the dataset this won't happen automatically.
+It also watches the `itemIdsHash` to know when a new case is added or removed. Because `itemIdsHash` is only used for this watching purpose, we abuse it and make it be a hash of all of the values of all of the attributes of the dataset. This triggers the formulas to recalculate when the values change in CLUE.
+
+There has been an intermittent problem where some attributes don't update after a value is changed. It seems when this happens `setCanonicalCaseValues` is being called with the correct computed value, but the actual dataset doesn't save the change. However I haven't been able to reproduce it after adding logging to verify that.
 
 # Notes during migration
 
