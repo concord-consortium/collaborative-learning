@@ -84,7 +84,7 @@
           }
           .sort.arrow {
             fill: $workspace-teal-dark-1;
-            opacity: 0;
+            opacity: 1;
           }
         }
       }
@@ -99,12 +99,9 @@
           }
           .sort.arrow {
             fill: $workspace-teal-dark-1;
-            opacity: 0;
+            opacity: 1;
           }
         }
-      }
-      &:not(.selected-column) {
-        display: none;
       }
       &:not(.selected-column):hover {
         display: flex;
@@ -152,6 +149,7 @@
           svg {
             .foreground.arrow {
               fill: $workspace-teal-dark-1;
+              opacity: 1;
             }
           }
         }
@@ -215,10 +213,6 @@
             opacity: 0.35;
 
             &.sort.circle {
-              fill: $workspace-teal-dark-1;
-              opacity: 1;
-            }
-            &.arrow {
               fill: $workspace-teal-dark-1;
               opacity: 1;
             }
