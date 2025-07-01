@@ -65,7 +65,6 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
       const chipReferences = selectedChips.map(([chipNode]) => chipNode.reference);
 
       chipReferences.forEach(ref => {
-        // Find the chip node with this reference in the current editor state
         const [chipEntry] = Array.from(Editor.nodes(editor, {
           match: n => (n as any).type === kHighlightFormat && (n as any).reference === ref,
           at: selection ?? undefined
@@ -75,6 +74,12 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
           unHighlightChip(chipEntry);
         }
       });
+      Transforms.deselect(editor);
+      // Clear DOM selection because the Slate editor is not updating the DOM selection
+      if (typeof window !== "undefined") {
+        const sel = window.getSelection();
+        if (sel) sel.removeAllRanges();
+      }
       return;
     }
 
