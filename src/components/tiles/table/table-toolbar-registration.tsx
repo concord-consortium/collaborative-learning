@@ -113,13 +113,16 @@ export const ImportDataButton = ({name}: IToolbarButtonComponentProps) => {
   const toolbarContext = useContext(TableToolbarContext);
 
   return (
-    <TileToolbarButton
-      name={name}
-      title="Import data"
-      onClick={() => toolbarContext?.importData()}
-    >
-      <ImportDataIcon />
-    </TileToolbarButton>
+    <>
+      <TileToolbarButton
+        name={name}
+        title="Import data"
+        onClick={() => toolbarContext?.importData()}
+      >
+        <ImportDataIcon />
+      </TileToolbarButton>
+      <span className="toolbar-separator" />
+    </>
   );
 };
 
