@@ -1,6 +1,7 @@
 import { applySnapshot, types, Instance, SnapshotIn, onAction, addDisposer, destroy, typecheck } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
+import { autorun } from "mobx";
 import { FormulaManager } from "@concord-consortium/codap-formulas-react17/models/formula/formula-manager";
 import {
   createFormulaAdapters
@@ -385,15 +386,28 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
       sharedModelManager.setDocument(document.content);
     }
 
-    // FIXME: need to keep these formula datasets in sync with document datasets
-    // That could mean tracking down every place where the datasets are updated
-    // or possibly adding a reaction or some other lower level observer of the sharedModelManager
-    // to do this.
-    sharedModelManager.getSharedModelsByType<typeof SharedDataSet>(kSharedDataSetType)
-      .forEach((model: SharedDataSetType) => {
-        const formulaDataSet = createFormulaDataSetProxy(model.dataSet);
+    // Sync the formula datasets with the actual datasets
+    // Ideally the formula manager would have a getter for the datasets that we could
+    // provide so we wouldn't have to do a sync like this
+    addDisposer(document, autorun(() => {
+      const existingFormulaDataSetIds = Array.from(formulaManager.dataSets.keys());
+      const sharedDataSets = sharedModelManager.getSharedModelsByType<typeof SharedDataSet>(kSharedDataSetType);
+
+      // Remove any formula datasets that are no longer in the shared model manager
+      existingFormulaDataSetIds.forEach((dataSetId) => {
+        if (!sharedDataSets.find(sharedDataSet => sharedDataSet.dataSet.id === dataSetId)) {
+          formulaManager.removeDataSet(dataSetId);
+        }
+      });
+      // Add any formula datasets that are in the shared model manager but not in the formula manager
+      sharedDataSets.forEach((sharedDataSet: SharedDataSetType) => {
+        if (formulaManager.dataSets.has(sharedDataSet.dataSet.id)) {
+          return; // already added
+        }
+        const formulaDataSet = createFormulaDataSetProxy(sharedDataSet.dataSet);
         formulaManager.addDataSet(formulaDataSet);
       });
+    }));
 
     return document;
   } catch (e) {

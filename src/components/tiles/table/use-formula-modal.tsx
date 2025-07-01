@@ -6,10 +6,9 @@ import React, { useState } from "react";
 import { FormulaEditorContext, useFormulaEditorState
 } from "@concord-consortium/codap-formulas-react17/components/common/formula-editor-context";
 import { FormulaEditor } from "@concord-consortium/codap-formulas-react17/components/common/formula-editor";
-
+import { getFormulaManager } from "@concord-consortium/codap-formulas-react17/models/formula/formula";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { IDataSet } from "../../../models/data/data-set";
-import { createFormulaDataSetProxy } from "../../../models/data/formula-data-set-proxy";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 
 interface IProps {
@@ -40,7 +39,11 @@ export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult 
   }
   const attr = getAttribute(currYAttrId || "");
 
-  const formulaDataSet = createFormulaDataSetProxy(dataSet);
+  // Get the existing formulaDataSetProxy for this dataSet
+  const formulaManager = getFormulaManager(dataSet);
+  // This requires a typescript hack because the formulaManager doesn't officially expose
+  // a way to lookup its datasets.
+  const formulaDataSet = (formulaManager as any)?.dataSets.get(dataSet.id);
 
   // This is messy because of mixing of react state, props, mobx, and the
   // useCustomModal hook which will memoize the props of the Content component
@@ -54,15 +57,15 @@ export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult 
     _setCurrYAttrId(id);
   };
 
-      // When FormulalEditor saves the formula by calling setFormula on formulaEditorState this is a react state
+  // When FormulaEditor saves the formula by calling setFormula on formulaEditorState this is a react state
   // update. It triggers a re-render of the TableTile which is using this hook.
-  // Changes in these content props do not directly tigger a re-render of the Content component, they have
+  // Changes in these content props do not directly trigger a re-render of the Content component, they have
   // to be passed as dependencies to the useCustomModal hook too.
   const contentProps: IContentProps = {
-      currYAttrId,
-      setCurrYAttrId,
-      formulaEditorState,
-      dataSet
+    currYAttrId,
+    setCurrYAttrId,
+    formulaEditorState,
+    dataSet
   };
 
   const handleSubmit = () => {
@@ -81,18 +84,20 @@ export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult 
   // TODO: the cancel button should reset the formulaEditorState.formula
   // to the current formula value in the attribute.
 
-  const [showModal, hideModal, burModal] = useCustomModal({
-    title: "Edit Formula",
-    Content,
-    contentProps,
-    buttons: [
-      { label: "Cancel" },
-      { label: "OK", isDefault: true, onClick: handleSubmit }
-    ]
-  },
-  // NOTE: formulaEditorState changes on every re-render so the modal will
-  // re-render every time the table-tile using this hook re-renders.
-  [currYAttrId, dataSet, formulaEditorState]);
+  const [showModal, hideModal, burModal] = useCustomModal(
+    {
+      title: "Edit Formula",
+      Content,
+      contentProps,
+      buttons: [
+        { label: "Cancel" },
+        { label: "OK", isDefault: true, onClick: handleSubmit }
+      ]
+    },
+    // NOTE: formulaEditorState changes on every re-render so the modal will
+    // re-render every time the table-tile using this hook re-renders.
+    [currYAttrId, dataSet, formulaEditorState]
+  );
   return [showModal, hideModal, setCurrYAttrId];
 };
 interface IContentProps {
