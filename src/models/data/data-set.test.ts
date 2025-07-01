@@ -758,3 +758,54 @@ test("DataSet sortCases only affects the specified attribute", () => {
   // B values: x, y, z -> descending order: z, y, x -> case IDs: 3, 2, 1
   expect(dataset.cases.map(c => c.__id__)).toEqual(["3", "2", "1"]);
 });
+
+test("DataSet resets sort state when new cases are added", () => {
+  const dataset = DataSet.create({ name: "SortReset", attributes: [], cases: [] });
+  const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
+
+  addCasesToDataSet(dataset, [
+    { __id__: "1", A: "c" },
+    { __id__: "2", A: "a" },
+    { __id__: "3", A: "b" }
+  ]);
+
+  dataset.sortCases(attrA.id, "ASC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("ASC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "3", "1"]);
+
+  addCasesToDataSet(dataset, [
+    { __id__: "4", A: "d" },
+    { __id__: "5", A: "e" }
+  ]);
+
+  // Sort state should be reset to NONE
+  expect(dataset.sortDirection).toBe("NONE");
+  expect(dataset.sortByAttribute).toBeUndefined();
+
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "3", "1", "4", "5"]);
+});
+
+test("DataSet resets sort state when cases are edited", () => {
+  const dataset = DataSet.create({ name: "EditSortReset", attributes: [], cases: [] });
+  const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
+
+  addCasesToDataSet(dataset, [
+    { __id__: "1", A: "c" },
+    { __id__: "2", A: "a" },
+    { __id__: "3", A: "b" }
+  ]);
+
+  dataset.sortCases(attrA.id, "ASC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("ASC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "3", "1"]); // sorted by A values
+
+  dataset.setCaseValues([{ __id__: "1", A: "z" }]);
+
+  expect(dataset.sortDirection).toBe("NONE");
+  expect(dataset.sortByAttribute).toBeUndefined();
+  // Cases should remain in the same order as before the edit
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "3", "1"]);
+  expect(dataset.getCase("1")).toEqual({ __id__: "1", A: "z" });
+});

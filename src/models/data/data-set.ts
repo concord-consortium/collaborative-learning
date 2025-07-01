@@ -325,6 +325,11 @@ export const DataSet = types.model("DataSet", {
     self.caseSelection.replace(ids);
   }
 
+  function resetSortState() {
+    self.sortDirection = "NONE";
+    self.sortByAttribute = undefined;
+  }
+
   return {
     views: {
       attrFromID(id: string) {
@@ -692,10 +697,8 @@ export const DataSet = types.model("DataSet", {
           });
           insertCaseIDAtIndex(aCase.__id__, beforeIndex);
         });
-        // Store original case order if not already stored
-        if (self.originalCaseOrder.length === 0) {
-          self.originalCaseOrder = self.cases.map(c => c.__id__);
-        }
+        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        resetSortState();
       },
 
       addCanonicalCasesWithIDs(cases: ICase[], beforeID?: string | string[]) {
@@ -708,23 +711,25 @@ export const DataSet = types.model("DataSet", {
           });
           newCases.push(insertCaseIDAtIndex(aCase.__id__, beforeIndex));
         });
+        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        resetSortState();
 
-        // Store original case order if not already stored
-        if (self.originalCaseOrder.length === 0) {
-          self.originalCaseOrder = self.cases.map(c => c.__id__);
-        }
       },
 
       setCaseValues(cases: ICase[], affectedAttributes?: string[]) {
         cases.forEach((caseValues) => {
           setCaseValues(caseValues);
         });
+        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        resetSortState();
       },
 
       setCanonicalCaseValues(cases: ICase[]) {
         cases.forEach((caseValues) => {
           setCanonicalCaseValues(caseValues);
         });
+        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        resetSortState();
       },
 
       removeCases(caseIDs: string[]) {
@@ -744,6 +749,8 @@ export const DataSet = types.model("DataSet", {
             !caseIDs.includes(caseId)
           );
         }
+        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        resetSortState();
       },
       moveCase(caseID: string, beforeIndex: number) {
         const srcIndex = self.caseIDMap[caseID];
@@ -769,6 +776,7 @@ export const DataSet = types.model("DataSet", {
           // update the cases array
           self.cases.replace(finalCaseIds.map(__id__ => ({__id__})));
         }
+        resetSortState();
       },
       sortCases(attributeId: string, direction: "ASC" |"DESC"|"NONE" = "ASC") {
         self.sortByAttribute = attributeId;
