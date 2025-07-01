@@ -68,30 +68,22 @@ class TableToolTile{
     getTableCellEdit(){
         return cy.get('.rdg-text-editor');
     }
-    // Opening a table cell for editing takes two click: one to select, another to edit.
-    // Calling `.dblclick()` can fail since some time is needed between the clicks.
-    openEditor(cell) {
-      cell.as('cellref').then($cell => {
-        // If the cell is not selected, click to select it.
-        if (!$cell.attr('aria-selected') || $cell.attr('aria-selected') === 'false') {
-          cy.wrap($cell).click({ scrollBehavior: 'none' });
-          cy.get('@cellref').should('have.attr', 'aria-selected', 'true');
-        }
-        cy.get('@cellref').click({ scrollBehavior: 'none' });
-        cy.get('@cellref').should('have.class', 'rdg-cell-editing');
-      });
-    }
     typeInTableCellXY(row, col, text) {
-      this.openEditor(this.getTableCellXY(row, col));
+      this.getTableCellXY(row, col).click({ scrollBehavior: false }).should('have.attr', 'aria-selected', 'true');
+      cy.wait(100);
+      this.getTableCellXY(row, col).click({ scrollBehavior: false });
+      cy.wait(100);
       return cy.document().within(() => {
-        this.getTableCellEdit().type(`${text}{enter}`);
+        this.getTableCellEdit().type(`${text}{enter}`, { scrollBehavior: false });
       });
     }
     typeInTableCell(i, text, confirm=true) {
       const confirmation = confirm ? '{enter}' : '';
-      this.openEditor(this.getTableCell().eq(i));
+      this.getTableCell().eq(i).click({ scrollBehavior: false }).should('have.attr', 'aria-selected', 'true');
+      cy.wait(100);
+      this.getTableCell().eq(i).click({ scrollBehavior: false });
       return cy.document().within(() => {
-        this.getTableCellEdit().type(`${text}${confirmation}`);
+        this.getTableCellEdit().type(`${text}${confirmation}`, { scrollBehavior: false });
       });
     }
     getTableCellWithColIndex(colIndex, colValue){
