@@ -1,5 +1,7 @@
 import { applySnapshot, types, onSnapshot, detach } from "mobx-state-tree";
 import _ from "lodash";
+import firebase from "firebase/app";
+import "firebase/functions";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { LogEventName } from "../../lib/logger-types";
 import { Logger, LogMessage } from "../../lib/logger";
@@ -9,6 +11,7 @@ import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
 import { kTextTileType } from "../tiles/text/text-content";
 import { countWords } from "../../utilities/string-utils";
 import { IStores } from "./stores";
+import { IClientCommentParams } from "../../../shared/shared";
 
 /**
  * Information that the exemplar controller stores about specific tiles.
@@ -46,10 +49,9 @@ export const BaseExemplarControllerModel = types
      */
     setExemplarVisibility(key: string, isVisible: boolean) {
       if (self.stores) {
-        const { db, user } = self.stores;
+        const { db } = self.stores;
         if (db) {
           db.firebase.ref(self.firebasePath).child(`${key}/visible`).set(isVisible);
-          db.firebase.getUserDocumentCommentsPath(user, key, undefined, undefined);
         }
       }
     }
@@ -69,11 +71,25 @@ export const BaseExemplarControllerModel = types
         self.setExemplarVisibility(chosen.key, true);
         // Make a comment on the current document, and open it in the resources panel
         if (self.stores) {
-          const { persistentUI, documents, db, user } = self.stores;
+          const { documents, persistentUI } = self.stores;
+          // TODO: make a comment on the current document, and open it in the resources panel
           const currentDocumentKey = persistentUI.problemWorkspace.primaryDocumentKey;
-          const currentDocument = currentDocumentKey && documents.getDocument(currentDocumentKey);
-          if (currentDocument) {
-            persistentUI.openResourceDocument(currentDocument);
+          const documentModel = currentDocumentKey && documents.getDocument(currentDocumentKey);
+          if (documentModel) {
+            const newComment: IClientCommentParams = {
+              content: "Nice work, you can now see a new example for this lesson: LINK", // TODO link
+            };
+            // const context = self.stores.userContextProvider.userContext;
+            const postDocumentComment = firebase.functions().httpsCallable("postDocumentComment_v1");
+            postDocumentComment({
+              document: documentModel.metadata,
+              comment: newComment,
+              // TODO: make the comment attributed to the exemplar user
+              // This will require a change to the backend to support this
+              // context: kExemplarUserParams
+              context: self.stores.userContextProvider.userContext
+            });
+            persistentUI.openResourceDocument(documentModel);
             persistentUI.toggleShowChatPanel(true);
           }
         }
