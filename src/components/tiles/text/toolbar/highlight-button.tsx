@@ -50,9 +50,8 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
       const [chipNode, chipPath] = chipEntry as [HighlightElement, Path];
       const previousPath = Path.previous(chipPath);
       const insertPoint = Editor.end(editor, previousPath);
-      const chipNodeChild = chipNode.children[0] as { text: string };
-      const text = chipNodeChild.text || ""; // Assume the first child has the text
-      const marks = Editor.marks(editor) || {};
+      const chipNodeChild = chipNode.children[0] as { text: string, marks?: Record<string, any> };
+      const { text, ...marks } = chipNodeChild;
       Transforms.removeNodes(editor, { at: chipPath });
       Transforms.insertNodes(editor, { text, ...marks }, { at: insertPoint });
     }
