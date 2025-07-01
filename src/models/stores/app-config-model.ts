@@ -6,6 +6,7 @@ import { NavTabsConfigModel } from "./nav-tabs";
 import { ToolbarModel } from "./problem-configuration";
 import { SettingsGroupMstType } from "./settings";
 import { DocumentLabelModel, UnitConfiguration } from "./unit-configuration";
+import { UserType } from "./user-types";
 
 interface IMyResourcesToolbarOptions {
   showEdit?: boolean;
@@ -163,7 +164,7 @@ export const AppConfigModel = types
       const key = (containerType === undefined || containerType === "DocumentContent") ? "default" : containerType;
       return self.placeholder?.[key];
     },
-    showCommentPanelFor(userType: "student" | "teacher" | "researcher" | undefined) {
+    showCommentPanelFor(userType: UserType | undefined) {
       return userType && self.enableCommentRoles.includes(userType);
     }
 
