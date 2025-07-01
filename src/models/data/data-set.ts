@@ -46,7 +46,7 @@ export const DataSet = types.model("DataSet", {
   attributes: types.array(Attribute),
   cases: types.array(CaseID),
   sortByAttribute: types.maybe(types.string),
-  sortDirection: types.optional(types.union(types.literal("ASC"), types.literal("DESC"), types.literal("NONE")), "ASC")
+  sortDirection: types.optional(types.union(types.literal("ASC"), types.literal("DESC"), types.literal("NONE")), "NONE")
 })
 .volatile(self => ({
   // MobX-observable set of selected attribute IDs
