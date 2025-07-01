@@ -16,7 +16,7 @@ import DeleteSelectedIcon from "../../../assets/icons/delete/delete-selection-ic
 import SetExpressionIcon from "../../../clue/assets/icons/table/set-expression-icon.svg";
 import ViewDataAsGraphIcon from "../../../assets/icons/view-data-as-graph-icon.svg";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
-
+import ImportDataIcon from "../../../clue/assets/icons/table/import-data-icon.svg";
 const DeleteSelectedButton = ({name}: IToolbarButtonComponentProps) => {
   const toolbarContext = useContext(TableToolbarContext);
 
@@ -109,6 +109,20 @@ const TableMergeInButton = ({name}: IToolbarButtonComponentProps) => {
   return <MergeInButton name={name} title="Add data from..."/>;
 };
 
+export const ImportDataButton = ({name}: IToolbarButtonComponentProps) => {
+  const toolbarContext = useContext(TableToolbarContext);
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Import data"
+      onClick={() => toolbarContext?.importData()}
+    >
+      <ImportDataIcon />
+    </TileToolbarButton>
+  );
+};
+
 registerTileToolbarButtons("table",
 [
   {
@@ -135,5 +149,9 @@ registerTileToolbarButtons("table",
     // This button takes an argument saying what kind of tile it should create.
     name: "data-set-view",
     component: DataSetViewButton
+  },
+  {
+    name: "import-data",
+    component: ImportDataButton
   }
 ]);

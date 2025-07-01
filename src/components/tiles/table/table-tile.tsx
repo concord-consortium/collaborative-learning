@@ -312,6 +312,9 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const toolbarContext = {
     showExpressionsDialog,
     deleteSelected,
+    importData: () => {
+      console.log("importData", dataSet);
+    }
   };
 
   const classes = classNames("tile-content", "table-tool", {
