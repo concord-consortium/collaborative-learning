@@ -17,7 +17,8 @@ jest.mock("../../hooks/use-stores", () => ({
   }),
   useStores: () => ({
     appConfig: AppConfigModel.create({ config: unitConfigDefaults })
-  })
+  }),
+  useCurriculumOrDocumentContent: () => undefined
 }));
 
 describe("CommentCard", () => {
