@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useRef } from "react";
 import { observer } from "mobx-react";
 
 import { IToolbarButtonComponentProps, registerTileToolbarButtons } from "../../toolbar/toolbar-button-manager";
@@ -111,16 +111,36 @@ const TableMergeInButton = ({name}: IToolbarButtonComponentProps) => {
 
 export const ImportDataButton = ({name}: IToolbarButtonComponentProps) => {
   const toolbarContext = useContext(TableToolbarContext);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      toolbarContext?.importData(file);
+    }
+    event.target.value = "";
+  };
 
   return (
     <>
       <TileToolbarButton
         name={name}
         title="Import data"
-        onClick={() => toolbarContext?.importData()}
+        onClick={handleButtonClick}
       >
         <ImportDataIcon />
       </TileToolbarButton>
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+        accept=".csv,.tsv,.json" // or whatever formats you support
+      />
       <span className="toolbar-separator" />
     </>
   );

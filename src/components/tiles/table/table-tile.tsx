@@ -217,6 +217,21 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     (e.target === containerRef.current) && gridContext.onClearSelection();
   };
 
+  const importData = (file: File) => {
+    if (file) {
+      // Handle file import here, e.g., read file and process data
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const contents = e.target?.result;
+        console.log("contents", contents);
+        // Parse and import data
+      };
+      reader.readAsText(file);
+    } else {
+      console.error("No file provided");
+    }
+  };
+
   const [activeRow, setActiveRow] = useState<TRow | null>(null);
   const pointerSensor = useSensor(PointerSensor, {activationConstraint: { distance: 3 }});
   const sensors = useSensors(pointerSensor);
@@ -312,9 +327,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const toolbarContext = {
     showExpressionsDialog,
     deleteSelected,
-    importData: () => {
-      console.log("importData", dataSet);
-    }
+    importData
   };
 
   const classes = classNames("tile-content", "table-tool", {
