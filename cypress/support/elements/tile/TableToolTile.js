@@ -69,22 +69,30 @@ class TableToolTile{
         return cy.get('.rdg-text-editor');
     }
     typeInTableCellXY(row, col, text) {
-      this.getTableCellXY(row, col).click({ scrollBehavior: false });
-      this.getTableCellXY(row, col).should('have.attr', 'aria-selected', 'true');
-      cy.wait(100);
-      this.getTableCellXY(row, col).click({ scrollBehavior: false });
-      return cy.document().within(() => {
-        this.getTableCellEdit().type(`${text}{enter}`, { scrollBehavior: false });
+      this.getTableCellXY(row, col).then($cell => {
+        if ($cell.attr('aria-selected') !== 'true') {
+          this.getTableCellXY(row, col).click({ scrollBehavior: false });
+          this.getTableCellXY(row, col).should('have.attr', 'aria-selected', 'true');
+          cy.wait(100);
+        }
+        this.getTableCellXY(row, col).click({ scrollBehavior: false });
+        cy.document().within(() => {
+          this.getTableCellEdit().type(`${text}{enter}`, { scrollBehavior: false });
+        });
       });
     }
     typeInTableCell(i, text, confirm=true) {
       const confirmation = confirm ? '{enter}' : '';
-      this.getTableCell().eq(i).click({ scrollBehavior: false });
-      this.getTableCell().eq(i).should('have.attr', 'aria-selected', 'true');
-      cy.wait(100);
-      this.getTableCell().eq(i).click({ scrollBehavior: false });
-      return cy.document().within(() => {
-        this.getTableCellEdit().type(`${text}${confirmation}`, { scrollBehavior: false });
+      this.getTableCell().eq(i).then($cell => {
+        if ($cell.attr('aria-selected') !== 'true') {
+          this.getTableCell().eq(i).click({ scrollBehavior: false });
+          this.getTableCell().eq(i).should('have.attr', 'aria-selected', 'true');
+          cy.wait(100);
+        }
+        this.getTableCell().eq(i).click({ scrollBehavior: false });
+        return cy.document().within(() => {
+          this.getTableCellEdit().type(`${text}${confirmation}`, { scrollBehavior: false });
+        });
       });
     }
     getTableCellWithColIndex(colIndex, colValue){
