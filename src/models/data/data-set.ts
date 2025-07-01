@@ -795,10 +795,15 @@ export const DataSet = types.model("DataSet", {
           const restoreCaseIdToIndexMap: Record<string, { beforeIndex: number, afterIndex: number }> = {};
           const currentCaseIds = self.cases.map(c => c.__id__);
 
-          // Create mapping from current positions to original positions
+          // Build a map from caseId to its index in restoredCaseIds
+          const restoredIndexMap: Record<string, number> = {};
+          restoredCaseIds.forEach((caseId, idx) => {
+            restoredIndexMap[caseId] = idx;
+          });
+
           currentCaseIds.forEach((caseId, beforeIndex) => {
-            const afterIndex = restoredCaseIds.indexOf(caseId);
-            if (afterIndex !== -1) {
+            const afterIndex = restoredIndexMap[caseId];
+            if (afterIndex !== undefined) {
               restoreCaseIdToIndexMap[caseId] = { beforeIndex, afterIndex };
             }
           });
