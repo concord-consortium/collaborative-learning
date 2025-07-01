@@ -205,6 +205,14 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     showExpressionsDialog();
   };
 
+  const handleToolbarShowExpressionsDialog = () => {
+    // This is called from the toolbar, so we don't have an attribute ID.
+    // We just use the first attribute in the dataSet.
+    const firstSelectedAttributeId = dataSet.firstSelectedAttributeId;
+    firstSelectedAttributeId && setCurrYAttrId(firstSelectedAttributeId);
+    showExpressionsDialog();
+  };
+
   // Expands the columns with additional data and callbacks
   useColumnExtensions({
     gridContext, dataSet, readOnly, columns, rows, columnEditingName, changeHandlers,
@@ -261,7 +269,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // the internal state of the component would be a better way to factor
   // all of the use* calls above.
   const toolbarContext = {
-    showExpressionsDialog,
+    showExpressionsDialog: handleToolbarShowExpressionsDialog,
     deleteSelected,
   };
 

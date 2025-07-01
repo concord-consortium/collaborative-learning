@@ -109,7 +109,7 @@ export const DataSet = types.model("DataSet", {
 })
 .views(self => ({
   get selectedAttributeIds() {
-    return Array.from(self.attributeSelection);
+    return Array.from(self.attributeSelection as Set<string>);
   },
   get selectedCaseIds() {
     return Array.from(self.caseSelection as Set<string>);
