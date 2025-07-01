@@ -419,15 +419,17 @@ service cloud.firestore {
         function userOwnsDocument() {
           return getDocumentOwner() == string(request.auth.token.platform_user_id);
         }
+
+        function hasDocumentAccess() {
+          return teacherCanAccessDocument() || researcherCanAccessDocument() || userCanAccessDocument();
+        }
+
         match /comments/{commentId} {
-          // portal-authenticated teachers with access to the document can create valid comments
-          allow create: if (teacherCanAccessDocument() || researcherCanAccessDocument()) && isValidCommentCreateRequest();
-          // teachers can only update their own comments and only if they're valid
-          allow update: if (teacherCanAccessDocument() || researcherCanAccessDocument()) && isValidCommentUpdateRequest();
-          // teachers can only delete their own comments
-          allow delete: if (teacherCanAccessDocument() || researcherCanAccessDocument()) && userIsResourceUser();
-          // only teachers that "own" the document can read the comments (for now)
-          allow read: if teacherCanAccessDocument() || researcherCanAccessDocument();
+          // Any user with access to the document can read or create comments and make valid update/delete requests
+          allow create: if hasDocumentAccess() && isValidCommentCreateRequest();
+          allow update: if hasDocumentAccess() && isValidCommentUpdateRequest();
+          allow delete: if hasDocumentAccess() && userIsResourceUser();
+          allow read: if hasDocumentAccess();
         }
 
         // For writing individual history entries

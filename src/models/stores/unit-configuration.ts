@@ -65,6 +65,8 @@ export interface UnitConfiguration extends ProblemConfiguration {
   disablePublish: Array<SnapshotIn<typeof DocumentSpecModel>> | boolean;
   // enable/disable showing the history-scrubbing controls for users in different roles
   enableHistoryRoles: Array<"student" | "teacher" | "researcher">;
+  // list of roles that can use the comments panel
+  enableCommentRoles: Array<"student" | "teacher" | "researcher">;
   // configures naming of copied documents
   copyPreferOriginTitle: boolean;
   // enable/disable dragging of tiles

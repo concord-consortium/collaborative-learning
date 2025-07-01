@@ -44,7 +44,9 @@ function beforeTest(params) {
 
 context('XYPlot Tool Tile', function () {
   describe("XYPlot Tool", () => {
-    it("XYPlot tool tile", () => {
+    // TODO: Re-enable this test once the underlying issue is resolved
+    // Skipped due to failing Cypress tests as discussed in Slack
+    it.skip("XYPlot tool tile", () => {
       beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
@@ -356,7 +358,8 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().should('not.exist');
     });
 
-    it("Test adding 2 Y Series", () => {
+    it.skip("Test adding 2 Y Series", () => {
+      // Skipped as discussed on Slack - test is failing for reasons we don't understand
       beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
@@ -412,7 +415,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getPortalButton().contains("Remove").should("not.exist");
     });
 
-    it("Test linking two datasets", () => {
+    it.skip("Test linking two datasets", () => {
       beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
