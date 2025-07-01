@@ -17,9 +17,23 @@ import { types } from "mobx-state-tree";
 import { IAttribute } from "./attribute";
 import { ICase, IDataSet } from "./data-set";
 
+const dashReplacement = "_D_A_S_H_";
+
+function replaceDashesInId(id: string): string {
+  // Replace dashes with a unique string that is unlikely to appear in attribute IDs
+  // This is necessary because mathjs does not allow dashes in variable names.
+  // We use a unique string so that we can reverse the process later.
+  return id.replace(/-/g, dashReplacement);
+}
+
+function restoreDashesInId(id: string): string {
+  // Reverse the dash replacement
+  return id.replace(new RegExp(dashReplacement, "g"), "-");
+}
+
 function getFormulaAttribute(attr: IAttribute): IFormulaAttribute {
   return  {
-    id: attr.id,
+    id: replaceDashesInId(attr.id),
     name: attr.name || "",
     title: attr.name || "",
     formula: attr.formula,
@@ -100,7 +114,7 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
   get attrNameMap() {
     const attrNameMap = observable.map<string, string>({}, { name: "attrNameMap" });
     self.dataSet.attributes.forEach(attr => {
-      attrNameMap.set(attr.name, attr.id);
+      attrNameMap.set(attr.name, replaceDashesInId(attr.id));
     });
     return attrNameMap;
   },
@@ -112,10 +126,10 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
     return self.dataSet.attributes.map(getFormulaAttribute);
   },
   getValue(caseID: string, attributeID: string) {
-    return self.dataSet.getValue(caseID, attributeID);
+    return self.dataSet.getValue(caseID, restoreDashesInId(attributeID));
   },
   attrFromID(attrId: string): IFormulaAttribute | undefined {
-    const attr = self.dataSet.attrFromID(attrId);
+    const attr = self.dataSet.attrFromID(restoreDashesInId(attrId));
     return attr ? getFormulaAttribute(attr) : undefined;
   },
   validateCases() {
@@ -124,7 +138,7 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
     return undefined;
   },
   getAttribute(id: string): IFormulaAttribute | undefined {
-    const attr = self.dataSet.attrFromID(id);
+    const attr = self.dataSet.attrFromID(restoreDashesInId(id));
     return attr ? getFormulaAttribute(attr) : undefined;
   },
   // CHECKME: is the -1 return correct here?
@@ -158,7 +172,7 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
   // FIXME: this probably needs to return numeric values when
   // that is what CODAP would do
   getValueAtItemIndex(index: number, attributeID: string): string | undefined {
-    const attr = self.dataSet.attrFromID(attributeID);
+    const attr = self.dataSet.attrFromID(restoreDashesInId(attributeID));
     if (attr) {
       return attr.strValues[index];
     }
@@ -188,7 +202,7 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
   },
   attrIDFromName(name: string): string | undefined {
     const attr = self.dataSet.attrFromName(name);
-    return attr ? attr.id : undefined;
+    return attr ? replaceDashesInId(attr.id) : undefined;
   }
 }))
 .views(self => ({
