@@ -19,17 +19,16 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
   const isCollapsed = selection ? Range.isCollapsed(selection) : true;
   const isSelected = !!selection && !isCollapsed;
   const disabled = !isHighlightedText && isCollapsed && !isSelected;
-  const getSelectedChip = () => {
+  const getSelectedChips = () => {
     if (!selection) return undefined;
-    // Find the highlight chip node at selection
-    const [chipEntry] = Editor.nodes(editor, {
+    // Find the highlight chip nodes at selection
+    return Array.from(Editor.nodes(editor, {
       match: n => (n as any).type === kHighlightFormat,
       at: selection
-    });
-    return chipEntry ? (chipEntry as [HighlightElement, Path]) : undefined;
+    })) as [HighlightElement, Path][];
   };
 
-  const highlightText = (reference: string, text: string) =>{
+  const highlightText = (reference: string, text: string, marks?: Record<string, any>) =>{
     if (!editor.selection || Range.isCollapsed(editor.selection)) return;
     const selectionLength = Editor.string(editor, editor.selection).length;
     if (selectionLength === 0) return;
@@ -37,7 +36,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     const highlightNode: HighlightElement = {
       type: kHighlightFormat,
       reference,
-      children: [{ text }]
+      children: [{ text, ...marks }]
     };
     // Replace selected text with the highlight chip
     Transforms.delete(editor, { at: editor.selection });
@@ -45,10 +44,8 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     Transforms.collapse(editor, { edge: "end" });
   };
 
-  const unHighlightChip = () => {
+  const unHighlightChip = (chipEntry: [HighlightElement, Path]) => {
     if (!editor.selection) return;
-    const chipEntry = getSelectedChip();
-
     if (chipEntry) {
       const [chipNode, chipPath] = chipEntry as [HighlightElement, Path];
       const previousPath = Path.previous(chipPath);
@@ -64,20 +61,31 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     if (isHighlightedText) {
-      const selectedChip = getSelectedChip();
-      if (!selectedChip) return;
-      const selectedChipRef = selectedChip[0].reference;
-      unHighlightChip();
-      highlightsPlugin?.removeHighlight(selectedChipRef);
+      const selectedChips = getSelectedChips();
+      if (!selectedChips || selectedChips.length === 0) return;
+      const chipReferences = selectedChips.map(([chipNode]) => chipNode.reference);
+
+      chipReferences.forEach(ref => {
+        // Find the chip node with this reference in the current editor state
+        const [chipEntry] = Array.from(Editor.nodes(editor, {
+          match: n => (n as any).type === kHighlightFormat && (n as any).reference === ref,
+          at: selection ?? undefined
+        })) as [HighlightElement, Path][];
+        if (chipEntry) {
+          highlightsPlugin?.removeHighlight(ref);
+          unHighlightChip(chipEntry);
+        }
+      });
       return;
     }
 
     if (!editor.selection || Range.isCollapsed(editor.selection)) return;
 
     const selectedText = Editor.string(editor, editor.selection);
+    const selectedTextMarks = Editor.marks(editor);
     const reference = uuid();
     highlightsPlugin?.addHighlight(reference, selectedText);
-    highlightText(reference, selectedText);
+    highlightText(reference, selectedText, selectedTextMarks || undefined);
   };
 
   return (
