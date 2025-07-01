@@ -11,7 +11,6 @@ import {
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import { useCurriculumOrDocumentContent, useDBStore, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
-import WaitingMessage from "./waiting-message";
 
 import "./chat-panel.scss";
 
@@ -134,19 +133,16 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         />
         :
         focusDocument ?
-        <>
-          <ChatThread
-            user={user}
-            activeNavTab={activeNavTab}
-            onPostComment={postComment}
-            onDeleteComment={deleteComment}
-            chatThreads={commentThreads}
-            focusDocument={focusDocument}
-            focusTileId={focusTileId}
-            isDocumentView={isDocumentView}
-          />
-          <WaitingMessage content={content} />
-        </>
+        <ChatThread
+          user={user}
+          activeNavTab={activeNavTab}
+          onPostComment={postComment}
+          onDeleteComment={deleteComment}
+          chatThreads={commentThreads}
+          focusDocument={focusDocument}
+          focusTileId={focusTileId}
+          isDocumentView={isDocumentView}
+        />
         :
         <div className="select-doc-message" data-testid="select-doc-message">
           {commentInstructions}
