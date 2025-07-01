@@ -472,8 +472,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   // The AI evaluation is triggered by updating the last-edited timestamp.
   private handleIdeasButtonClick = () => {
     const { document } = this.props;
-    const { db: { firebase }, user, persistentUI, appConfig } = this.stores;
+    const { db: { firebase }, user, ui, persistentUI, appConfig } = this.stores;
     firebase.setLastEditedNow(user, document.key, document.uid );
+    // Unselect all tiles, so that the whole-document comments are shown
+    ui.clearSelectedTiles();
     persistentUI.openResourceDocument(document, user);
     persistentUI.toggleShowChatPanel(true);
     if (appConfig.aiEvaluation) {
