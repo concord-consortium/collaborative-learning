@@ -296,12 +296,13 @@ context('Text tool tile functionalities', function () {
 
   // Highlighting tool test as it was working as of this morning (June 27, 2025).
   // TODO: Move this into the first test in this file and add checks that highlight actually happens in the editor.
-  it('Text Tool Highlight Functionality', function () {
+  it.only('Text Tool Highlight Functionality', function () {
     beforeTest();
 
     cy.log('Add text tool and enter sample text');
+    const text = 'This is a sample text for testing highlight functionality.';
     clueCanvas.addTile('text');
-    textToolTile.enterText('This is a sample text for testing highlight functionality. It contains multiple words that can be highlighted.');
+    textToolTile.enterText(text);
     textToolTile.getTextTile().last().should('contain', 'This is a sample text for testing highlight functionality');
 
     cy.log('Verify highlight toolbar button exists and is disabled when no text is selected');
@@ -323,6 +324,16 @@ context('Text tool tile functionalities', function () {
 
     cy.log('Verify highlight button becomes selected');
     textToolTile.getHighlightButton().should('have.class', 'selected');
+
+    cy.log('Verify highlight is added to the text');
+    textToolTile.getTextEditor().last().find('.highlight-chip').should('exist');
+    textToolTile.getTextEditor().last().find('.highlight-chip').should('contain.text', text);
+
+    cy.log('Verify selected highlight is removed when clicking highlight button again');
+    textToolTile.getHighlightButton().click();
+    textToolTile.getHighlightButton().should('not.have.class', 'selected');
+    textToolTile.getTextEditor().last().find('.highlight-chip').should('not.exist');
+    textToolTile.getTextTile().last().should('contain', 'This is a sample text for testing highlight functionality');
 
     cy.log('Clean up - delete text tile');
     clueCanvas.deleteTile('text');
