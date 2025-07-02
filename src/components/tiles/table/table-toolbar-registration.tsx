@@ -139,7 +139,7 @@ export const ImportDataButton = ({name}: IToolbarButtonComponentProps) => {
         ref={fileInputRef}
         style={{ display: "none" }}
         onChange={handleFileChange}
-        accept=".csv,.tsv,.json" // or whatever formats you support
+        accept=".csv" // or whatever formats you support
       />
       <span className="toolbar-separator" />
     </>
