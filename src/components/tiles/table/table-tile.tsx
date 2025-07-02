@@ -221,12 +221,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   };
 
   const importData = (file: File) => {
-    console.log("importData", file);
     if (file) {
       const isCSV = file.type === "text/csv" || file.name.toLowerCase().endsWith('.csv');
-      const isTSV = file.type === "text/tab-separated-values" || file.name.toLowerCase().endsWith('.tsv');
-      const isJSON = file.type === "application/json" || file.name.toLowerCase().endsWith('.json');
-      console.log("isCSV", isCSV, "isTSV", isTSV, "isJSON", isJSON);
 
       const addAttributesAndCases = (headers: string[], dataRows: string[][]) => {
         headers.forEach(header => {
@@ -262,44 +258,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
             triggerRowChange();
           } catch (err) {
             console.error("Error parsing CSV file:", err);
-          }
-        } else if (isTSV) {
-          try {
-            const tsvData = contents.split('\n').filter(row => row.trim().length > 0).map(row => row.split('\t'));
-            const headers = tsvData[0];
-            const tsvRows = tsvData.slice(1);
-            console.log("headers", headers);
-            console.log("rows", tsvRows);
-            if (dataSet.cases.length === 0) {
-              dataSet.attributes.forEach(attr => {
-                clearDataSet(dataSet);
-              });
-            }
-            addAttributesAndCases(headers, tsvRows);
-            triggerRowChange();
-          } catch (err) {
-            console.error("Error parsing TSV file:", err);
-          }
-        } else if (isJSON) {
-          try {
-            const json = JSON.parse(contents);
-            if (isTableImportSnapshot(json)) {
-              convertImportToSnapshot(json);
-              // merge the new data set with the existing data set by adding new cases
-
-              // update the column widths
-              // trigger a row change to update the table
-              triggerRowChange();
-              // Now update your table's model with dataSet and columnWidths
-              // For example:
-              // model.content.dataSet = dataSet;
-              // model.content.columnWidths = columnWidths;
-            } else {
-              // import csv file
-              console.log("import csv file");
-            }
-          } catch (err) {
-            console.error("Error parsing JSON file:", err);
           }
         }
       };
