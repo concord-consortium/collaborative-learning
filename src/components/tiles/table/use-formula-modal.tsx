@@ -11,6 +11,8 @@ import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 
+import "./expressions-dialog.scss";
+
 interface IProps {
   table: TableContentModelType;
   dataSet: IDataSet;
@@ -63,9 +65,19 @@ export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult 
   // to be passed as dependencies to the useCustomModal hook too.
   const contentProps: IContentProps = {
     currYAttrId,
+    currYAttrName: attr?.name,
     setCurrYAttrId,
     formulaEditorState,
     dataSet
+  };
+
+  const handleClear = () => {
+    if (!attr || !currYAttrId) {
+      console.warn(`No attribute found for ID: ${currYAttrId}`);
+      return;
+    }
+    table.setExpression(currYAttrId, "", "");
+    onSubmit();
   };
 
   const handleSubmit = () => {
@@ -86,10 +98,12 @@ export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult 
 
   const [showModal, hideModal, burModal] = useCustomModal(
     {
-      title: "Edit Formula",
+      className: "set-expression",
+      title: "Set Expression",
       Content,
       contentProps,
       buttons: [
+        { label: "Clear", onClick: handleClear },
         { label: "Cancel" },
         { label: "OK", isDefault: true, onClick: handleSubmit }
       ]
@@ -102,6 +116,7 @@ export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult 
 };
 interface IContentProps {
   currYAttrId: Maybe<string>;
+  currYAttrName: Maybe<string>;
   setCurrYAttrId: (id: string) => void;
   dataSet: IDataSet;
   formulaEditorState: ReturnType<typeof useFormulaEditorState>;
@@ -111,6 +126,7 @@ interface IContentProps {
 // are listed as dependencies in the useCustomModal hook.
 const Content: React.FC<IContentProps> = ({
   currYAttrId,
+  currYAttrName,
   setCurrYAttrId,
   dataSet,
   formulaEditorState
@@ -122,8 +138,8 @@ const Content: React.FC<IContentProps> = ({
   });
   return (
     <>
-      <div className="prompt">
-        <span>Enter an expression for</span>
+      <label className="prompt">
+        Enter an expression for{ " " }
         <select value={currYAttrId}
           onChange={e => {
             setCurrYAttrId(e.target.value);
@@ -131,10 +147,15 @@ const Content: React.FC<IContentProps> = ({
           {dataSet.attributes
             .map(attr => <option key={attr.id} value={attr.id}>{attr.name}</option>)}
         </select>
-      </div>
+        { " " }:
+      </label>
       <div className="expression">
+        <label>
+          <span className="attr-name y">{currYAttrName}</span>
+          <span className="equals">=</span>
+        </label>
         <FormulaEditorContext.Provider value={formulaEditorState}>
-          <FormulaEditor editorHeight={200}/>
+          <FormulaEditor editorHeight={30}/>
         </FormulaEditorContext.Provider>
       </div>
     </>

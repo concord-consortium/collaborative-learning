@@ -637,7 +637,6 @@ describe("SharedModelDocumentManager", () => {
     // - /content/sharedModelMap/[shared_model_id]/addTile
     await expectUpdateToBeCalledTimes(tileContent, 2);
 
-    console.log("sharedModel1.setValue(\"something\")");
     // it should be monitoring this now
     sharedModel1.setValue("something");
     await expectUpdateToBeCalledTimes(tileContent, 3);

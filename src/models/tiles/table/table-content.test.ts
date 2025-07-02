@@ -289,15 +289,6 @@ describe("TableContent", () => {
 
     setupContainer(table, dataSetSnapshot);
 
-    // TODO: This is a hack to try to help the tests succeed more often.
-    // Even with this, they occasionally fail with mathjs complaining
-    // about getting the canonical form the variable in the equation.
-    // The errors look like:
-    // "❌ Undefined symbol __CANONICAL_NAME__LOCAL_ATTR_ATTRy9y"
-    // That seems like the formula is being computed before the variables
-    // have been added to the scope.
-    await new Promise(resolve => setTimeout(resolve, 10));
-
     expect(table.dataSet.cases.length).toBe(2);
     expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: 2 });
     expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: 4 });
@@ -337,14 +328,9 @@ describe("TableContent", () => {
 
     setupContainer(table, dataSetSnapshot);
 
-    // TODO: This is a hack to try to help the tests succeed more often.
-    // Even with this, they occasionally fail with mathjs complaining
-    // about getting the canonical form the variable in the equation.
-    // The errors look like:
-    // "❌ Undefined symbol __CANONICAL_NAME__LOCAL_ATTR_ATTRy9y"
-    // That seems like the formula is being computed before the variables
-    // have been added to the scope.
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // Give the formula system a chance to process the formulas
+    // FIXME: need a deterministic way to wait for the formulas to be processed
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     expect(table.dataSet.cases.length).toBe(2);
     expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: "❌ Undefined symbol $1" });
@@ -500,9 +486,8 @@ describe("TableContent", () => {
   });
 
   // FIXME: in this test the formula is not applied after the
-  // expression is set. This is probably because the default data set of
-  // the table is not being monitored during this test setup.
-  // And in this test it is that data set which is being modified.
+  // expression is set. This is because the formula system is not
+  // enabled. In other tests this happens in setupContainer.
   it.skip("can apply changes with expressions to a DataSet", async () => {
     const changes = [
             {
@@ -535,15 +520,6 @@ describe("TableContent", () => {
     table.doPostCreate!(metadata);
     table.setExpression("y1Col", kSerializedXKey, "x");
     table.setExpression("y2Col", "foo", "foo");
-
-    // TODO: This is a hack to try to help the tests succeed more often.
-    // Even with this, they occasionally fail with mathjs complaining
-    // about getting the canonical form the variable in the equation.
-    // The errors look like:
-    // "❌ Undefined symbol __CANONICAL_NAME__LOCAL_ATTR_ATTRy9y"
-    // That seems like the formula is being computed before the variables
-    // have been added to the scope.
-    await new Promise(resolve => setTimeout(resolve, 10));
 
     expect(table.dataSet.attributes.length).toBe(3);
     expect(table.dataSet.cases.length).toBe(3);
