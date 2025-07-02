@@ -219,10 +219,19 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
 }))
 .actions(self => ({
   setCaseValues(cases: IFormulaCase[]) {
+    // Replace dashes in the attribute IDs
+    const transformedCases = cases.map((c) => {
+      // Create a new case object with transformed attribute IDs
+      const newCase: IFormulaCase = { __id__: c.__id__ };
+      Object.keys(c).forEach((key) => {
+        newCase[restoreDashesInId(key)] = c[key];
+      });
+      return newCase;
+    });
     // TODO: the formula system works with strings, numbers, booleans, dates, and undefined values
     // but CLUE only supports strings, numbers, and undefined values.
     // We should sanitize the cases to ensure they are valid for CLUE.
-    self.dataSet.setCanonicalCaseValues(cases as ICase[]);
+    self.dataSet.setCanonicalCaseValues(transformedCases as ICase[]);
   },
   updateFilterFormulaResults() {
     // This is a no-op in CLUE, and it shouldn't be called so
