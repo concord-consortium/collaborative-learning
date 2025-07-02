@@ -100,3 +100,10 @@ export function compareValues(value1: any, value2: any, strCompare: (a: string, 
     default: return 0; // other types are not ordered within type
   }
 }
+
+export function clearDataSet(dataSet: IDataSet) {
+  dataSet.attributes.forEach(attr => {
+    dataSet.removeAttribute(attr.id);
+  });
+  dataSet.cases.length > 0 && dataSet.cases.clear();
+}

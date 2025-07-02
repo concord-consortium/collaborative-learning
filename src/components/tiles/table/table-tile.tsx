@@ -27,6 +27,7 @@ import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { addCasesToDataSet } from "../../../models/data/data-set";
+import { clearDataSet } from "../../../models/data/data-set-utils";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
@@ -233,20 +234,21 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
         console.log("contents", contents);
         if (isCSV) {
           try {
-            const csvData = contents.split('\n').map(row => row.split(','));
+            const csvData = contents.split('\n').filter(row => row.trim().length > 0).map(row => row.split(','));
             const headers = csvData[0];
             const csvRows = csvData.slice(1);
-            console.log("headers", headers);
-            console.log("rows", csvRows);
-            //if table has no data, first row should be headers of table
+
             if (dataSet.cases.length === 0) {
-              // Create attributes for each header
+              dataSet.attributes.forEach(attr => {
+                clearDataSet(dataSet);
+              });
+
               headers.forEach(header => {
                 if (!dataSet.attrNameMap[header]) {
                   dataSet.addAttributeWithID({ name: header });
                 }
               });
-              // Add cases
+
               const cases = csvRows.map(row => {
                 const caseData: any = {};
                 headers.forEach((header, index) => {
