@@ -228,10 +228,25 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       const isJSON = file.type === "application/json" || file.name.toLowerCase().endsWith('.json');
       console.log("isCSV", isCSV, "isTSV", isTSV, "isJSON", isJSON);
 
+      const addAttributesAndCases = (headers: string[], dataRows: string[][]) => {
+        headers.forEach(header => {
+          if (!dataSet.attrNameMap[header]) {
+            dataSet.addAttributeWithID({ name: header });
+          }
+        });
+        const cases = dataRows.map(row => {
+          const caseData: any = {};
+          headers.forEach((header, index) => {
+            caseData[header] = row[index] || '';
+          });
+          return caseData;
+        });
+        addCasesToDataSet(dataSet, cases);
+      };
+
       const reader = new FileReader();
       reader.onload = (e) => {
         const contents = e.target?.result as string;
-        console.log("contents", contents);
         if (isCSV) {
           try {
             const csvData = contents.split('\n').filter(row => row.trim().length > 0).map(row => row.split(','));
@@ -242,23 +257,9 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
               dataSet.attributes.forEach(attr => {
                 clearDataSet(dataSet);
               });
-
-              headers.forEach(header => {
-                if (!dataSet.attrNameMap[header]) {
-                  dataSet.addAttributeWithID({ name: header });
-                }
-              });
-
-              const cases = csvRows.map(row => {
-                const caseData: any = {};
-                headers.forEach((header, index) => {
-                  caseData[header] = row[index] || '';
-                });
-                return caseData;
-              });
-              addCasesToDataSet(dataSet, cases);
-              triggerRowChange();
             }
+            addAttributesAndCases(headers, csvRows);
+            triggerRowChange();
           } catch (err) {
             console.error("Error parsing CSV file:", err);
           }
