@@ -179,10 +179,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   public render() {
     const { appConfig: { placeholderText } } = this.stores;
-    const inLockedContainer = this.context.isLocked;
-
-    // A fixed position text tile is a prompt, which should be read-only if it's in a locked question tile.
-    const readOnly = this.props.readOnly || (this.props.model.fixedPosition && inLockedContainer);
+    const readOnly = this.isReadOnly();
 
     const editableClass = readOnly ? "read-only" : "editable";
     const containerClasses = classNames("tile-content", "text-tool-wrapper", {
@@ -235,20 +232,24 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const { model } = this.props;
     const content = this.getContent();
     const { ui } = this.stores;
+    const readOnly = this.isReadOnly();
 
     if (this.editor && ReactEditor.isFocused(this.editor)) {
-      userSelectTile(ui, model, { readOnly: this.props.readOnly, container: this.context.model });
+      userSelectTile(ui, model, { readOnly, container: this.context.model });
     }
 
-    this.isHandlingUserChange = true;
-    // Update content model when user changes slate
-    content.setSlate(value);
-    this.isHandlingUserChange = false;
+    if (!readOnly) {
+      this.isHandlingUserChange = true;
+      // Update content model when user changes slate
+      content.setSlate(value);
+      this.isHandlingUserChange = false;
+    }
   };
 
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;
-    const { model, readOnly } = this.props;
+    const { model } = this.props;
+    const readOnly = this.isReadOnly();
     const inLockedContainer = this.context.isLocked;
 
     // Don't select a locked prompt
@@ -259,35 +260,60 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const append = hasSelectionModifier(e);
     const isWrapperClick = e.target === this.textTileDiv;
     userSelectTile(ui, model, { readOnly, append, container: this.context.model });
-    if (readOnly || isWrapperClick || append) {
-      isWrapperClick && this.editor && ReactEditor.focus(this.editor);
-      e.preventDefault();
+
+    if (isWrapperClick || append) {
+      if (readOnly) {
+        // In read-only mode, just prevent the default to avoid Slate's auto-select
+        // but don't stop propagation to allow text selection to work
+        e.preventDefault();
+      } else if (isWrapperClick) {
+        // In editable mode, focus the editor for wrapper clicks
+        this.editor && ReactEditor.focus(this.editor);
+        e.preventDefault();
+      }
     }
   };
+
+
+
+
 
   private getContent() {
     return this.props.model.content as TextContentModelType;
   }
 
+  private isReadOnly(): boolean {
+    const inLockedContainer = this.context.isLocked;
+    return this.props.readOnly || (this.props.model.fixedPosition && inLockedContainer);
+  }
+
   private handleBlur = () => {
-    // If the text has changed since the editor was focused, log the new text.
-    const text = this.getContent().text;
-    if (text !== this.textOnFocus) {
-      const plainText = this.getContent().asPlainText();
-      const wordCount = countWords(plainText);
-      const change = {args:[{ text }]};
-      logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, {
-        operation: 'update',
-        change,
-        plainText,
-        wordCount,
-        tileId: this.props.model.id });
+    const readOnly = this.isReadOnly();
+
+    if (!readOnly) {
+      // If the text has changed since the editor was focused, log the new text.
+      const text = this.getContent().text;
+      if (text !== this.textOnFocus) {
+        const plainText = this.getContent().asPlainText();
+        const wordCount = countWords(plainText);
+        const change = {args:[{ text }]};
+        logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, {
+          operation: 'update',
+          change,
+          plainText,
+          wordCount,
+          tileId: this.props.model.id });
+      }
     }
     this.setState({ revision: this.state.revision + 1 }); // Force a rerender
   };
 
   private handleFocus = () => {
-    this.textOnFocus = this.getContent().textStr;
+    const readOnly = this.isReadOnly();
+
+    if (!readOnly) {
+      this.textOnFocus = this.getContent().textStr;
+    }
     this.setState({ revision: this.state.revision + 1 }); // Force a rerender
   };
 }

@@ -9,6 +9,11 @@
     min-height: 52px;
     text-align: left;
     padding: 3px;
+
+    &.read-only {
+      user-select: text;
+      pointer-events: auto;
+    }
   }
 
   .tool-tile.fixed & {
