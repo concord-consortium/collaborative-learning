@@ -49,7 +49,7 @@ export const RowList = types
     get tileIds() {
       return self.rowOrder.flatMap(rowId => this.getRow(rowId)?.tileIds ?? []);
     },
-    rowHeightToExport(row: TileRowModelType, tileId: string, tileMap: Map<string, ITileModel>) {
+    rowHeightToExport(row: TileRowModelType, tileId: string, tileMap: Map<string|number, ITileModel>) {
       if (!row?.height) return;
       // we only export heights for specific tiles configured to do so
       const tileType = tileMap.get(tileId)?.content.type;
@@ -59,7 +59,7 @@ export const RowList = types
       const defaultHeight = tileContentInfo.defaultHeight;
       return defaultHeight && (row.height !== defaultHeight) ? row.height : undefined;
     },
-    exportTileAsJson(tileInfo: TileLayoutModelType, tileMap: Map<string, ITileModel>,
+    exportTileAsJson(tileInfo: TileLayoutModelType, tileMap: Map<string|number, ITileModel>,
         options?: IDocumentExportOptions) {
       const { includeTileIds, ...otherOptions } = options || {};
       const tileOptions = { includeId: includeTileIds, ...otherOptions};
@@ -69,14 +69,14 @@ export const RowList = types
         return json;
       }
     },
-    exportableRows(tileMap: Map<string, ITileModel>) {
+    exportableRows(tileMap: Map<string|number, ITileModel>) {
       // identify rows with exportable tiles
       return self.rowOrder.map(rowId => {
         const row = this.getRow(rowId);
         return row && !row.isSectionHeader && !row.isEmpty && !row.isPlaceholderRow(tileMap) ? row : undefined;
       }).filter(row => !!row);
     },
-    exportRowsAsJson(rows: (TileRowModelType | undefined)[], tileMap: Map<string, ITileModel>,
+    exportRowsAsJson(rows: (TileRowModelType | undefined)[], tileMap: Map<string|number, ITileModel>,
         options?: IDocumentExportOptions) {
       const builder = new StringBuilder();
       builder.pushLine(`"tiles": [`);
@@ -112,7 +112,7 @@ export const RowList = types
     },
     // Returns a string that describes the row list and its contents.
     // For testing/debugging purposes only, but may be useful to keep.
-    debugDescribeThis(tileMap: Map<string, ITileModel>, indent: string): string {
+    debugDescribeThis(tileMap: Map<string|number, ITileModel>, indent: string): string {
       return self.rowOrder.map(rowId => {
         const row = self.rowMap.get(rowId);
         const embedded: RowListType[] = [];
