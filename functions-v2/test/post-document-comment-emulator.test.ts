@@ -22,7 +22,6 @@ async function testWriteComments(documentPath : string, authContext: any, contex
     expect(documentPath).toContain(docKey);
   }
   // can add a comment to a document that doesn't yet exist in Firestore
-  // No need for getActualDocumentPath - documentPath is already correct
   const commentsPath = `${documentPath}/comments`;
   const post1Comment = isCurriculumComment ?
     specPostCurriculumComment({context}) :
