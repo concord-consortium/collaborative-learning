@@ -296,7 +296,7 @@ context('Text tool tile functionalities', function () {
 
   // Highlighting tool test as it was working as of this morning (June 27, 2025).
   // TODO: Move this into the first test in this file and add checks that highlight actually happens in the editor.
-  it.only('Text Tool Highlight Functionality', function () {
+  it('Text Tool Highlight Functionality', function () {
     beforeTest();
 
     cy.log('Add text tool and enter sample text');
