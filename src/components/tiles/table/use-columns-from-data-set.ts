@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React, { useCallback, useMemo, useState } from "react";
 import { IAttribute } from "../../../models/data/attribute";
-import { IDataSet } from "../../../models/data/data-set";
+import { IDataSet, TSortDirection } from "../../../models/data/data-set";
 import { TableMetadataModelType } from "../../../models/tiles/table/table-content";
 import { getCellFormatter } from "./cell-formatter";
 import CellTextEditor from "./cell-text-editor";
@@ -25,7 +25,7 @@ interface IUseColumnsFromDataSet {
   RowLabelFormatter: React.FC<any>;
   measureColumnWidth: (attr: IAttribute) => number;
   lookupImage: (value: string) => string|undefined;
-  onSort?: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void;
+  onSort?: (columnKey: string, direction: TSortDirection) => void;
 }
 export const useColumnsFromDataSet = ({
   gridContext, dataSet, isLinked, metadata, readOnly, showRowLabels, columnChanges, headerHeight, rowHeight,

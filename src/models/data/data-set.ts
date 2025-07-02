@@ -39,6 +39,9 @@ interface IEnvContext {
   derivationSpec: IDerivationSpec;
 }
 
+export type TSortDirection = "ASC" | "DESC" | "NONE";
+export const SortDirection = types.enumeration(["ASC", "DESC", "NONE"]);
+
 export const DataSet = types.model("DataSet", {
   id: types.optional(types.identifier, () => uniqueId()),
   sourceID: types.maybe(types.string),
@@ -46,7 +49,7 @@ export const DataSet = types.model("DataSet", {
   attributes: types.array(Attribute),
   cases: types.array(CaseID),
   sortByAttribute: types.maybe(types.string),
-  sortDirection: types.optional(types.union(types.literal("ASC"), types.literal("DESC"), types.literal("NONE")), "NONE")
+  sortDirection: types.optional(SortDirection, "NONE")
 })
 .volatile(self => ({
   // MobX-observable set of selected attribute IDs
@@ -743,12 +746,7 @@ export const DataSet = types.model("DataSet", {
           }
         });
 
-        // Update original case order to remove deleted cases
-        if (self.originalCaseOrder.length > 0) {
-          self.originalCaseOrder = self.originalCaseOrder.filter(caseId =>
-            !caseIDs.includes(caseId)
-          );
-        }
+        // Update original case order
         self.originalCaseOrder = self.cases.map(c => c.__id__);
         resetSortState();
       },
@@ -778,11 +776,11 @@ export const DataSet = types.model("DataSet", {
         }
         resetSortState();
       },
-      sortCases(attributeId: string, direction: "ASC" |"DESC"|"NONE" = "ASC") {
-        self.sortByAttribute = attributeId;
+      sortCases(attributeId: string, direction: TSortDirection = "ASC") {
+        self.sortByAttribute = direction === "NONE" ? undefined : attributeId;
         self.sortDirection = direction;
 
-                // If direction is "NONE", restore the original order
+        // If direction is "NONE", restore the original order
         if (direction === "NONE") {
           // If we don't have an original order stored, use current order as original
           if (self.originalCaseOrder.length === 0) {
