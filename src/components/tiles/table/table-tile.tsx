@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import ReactDataGrid from "react-data-grid";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
+import { convertImportToSnapshot, isTableImportSnapshot } from "../../../models/tiles/table/table-import";
 import { ITileProps } from "../tile-component";
 import { EditableTableTitle } from "./editable-table-title";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
@@ -25,6 +26,7 @@ import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { verifyAlive } from "../../../utilities/mst-utils";
+import { addCasesToDataSet } from "../../../models/data/data-set";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
@@ -218,17 +220,80 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   };
 
   const importData = (file: File) => {
+    console.log("importData", file);
     if (file) {
-      // Handle file import here, e.g., read file and process data
+      const isCSV = file.type === "text/csv" || file.name.toLowerCase().endsWith('.csv');
+      const isTSV = file.type === "text/tab-separated-values" || file.name.toLowerCase().endsWith('.tsv');
+      const isJSON = file.type === "application/json" || file.name.toLowerCase().endsWith('.json');
+      console.log("isCSV", isCSV, "isTSV", isTSV, "isJSON", isJSON);
+
       const reader = new FileReader();
       reader.onload = (e) => {
-        const contents = e.target?.result;
+        const contents = e.target?.result as string;
         console.log("contents", contents);
-        // Parse and import data
+        if (isCSV) {
+          try {
+            const csvData = contents.split('\n').map(row => row.split(','));
+            const headers = csvData[0];
+            const csvRows = csvData.slice(1);
+            console.log("headers", headers);
+            console.log("rows", csvRows);
+            //if table has no data, first row should be headers of table
+            if (dataSet.cases.length === 0) {
+              // Create attributes for each header
+              headers.forEach(header => {
+                if (!dataSet.attrNameMap[header]) {
+                  dataSet.addAttributeWithID({ name: header });
+                }
+              });
+              // Add cases
+              const cases = csvRows.map(row => {
+                const caseData: any = {};
+                headers.forEach((header, index) => {
+                  caseData[header] = row[index] || '';
+                });
+                return caseData;
+              });
+              addCasesToDataSet(dataSet, cases);
+              triggerRowChange();
+            }
+          } catch (err) {
+            console.error("Error parsing CSV file:", err);
+          }
+        } else if (isTSV) {
+          try {
+            const tsvData = contents.split('\n').map(row => row.split('\t'));
+            const headers = tsvData[0];
+            const tsvRows = tsvData.slice(1);
+            console.log("headers", headers);
+            console.log("rows", tsvRows);
+          } catch (err) {
+            console.error("Error parsing TSV file:", err);
+          }
+        } else if (isJSON) {
+          try {
+            const json = JSON.parse(contents);
+            if (isTableImportSnapshot(json)) {
+              convertImportToSnapshot(json);
+              // merge the new data set with the existing data set by adding new cases
+
+              // update the column widths
+              // trigger a row change to update the table
+              triggerRowChange();
+              // Now update your table's model with dataSet and columnWidths
+              // For example:
+              // model.content.dataSet = dataSet;
+              // model.content.columnWidths = columnWidths;
+            } else {
+              // import csv file
+              console.log("import csv file");
+            }
+          } catch (err) {
+            console.error("Error parsing JSON file:", err);
+          }
+        }
       };
       reader.readAsText(file);
-    } else {
-      console.error("No file provided");
     }
   };
 
