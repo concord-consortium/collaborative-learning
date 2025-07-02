@@ -265,11 +265,18 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
           }
         } else if (isTSV) {
           try {
-            const tsvData = contents.split('\n').map(row => row.split('\t'));
+            const tsvData = contents.split('\n').filter(row => row.trim().length > 0).map(row => row.split('\t'));
             const headers = tsvData[0];
             const tsvRows = tsvData.slice(1);
             console.log("headers", headers);
             console.log("rows", tsvRows);
+            if (dataSet.cases.length === 0) {
+              dataSet.attributes.forEach(attr => {
+                clearDataSet(dataSet);
+              });
+            }
+            addAttributesAndCases(headers, tsvRows);
+            triggerRowChange();
           } catch (err) {
             console.error("Error parsing TSV file:", err);
           }
