@@ -18,6 +18,7 @@ export class HighlightsPlugin implements ITextPlugin {
     makeObservable(this, {
       textContent: observable,
       addHighlight: action,
+      removeHighlight: action,
       onInitEditor: action
     });
     this.textContent = textContent;
@@ -29,6 +30,10 @@ export class HighlightsPlugin implements ITextPlugin {
 
   addHighlight(id: string, text: string) {
     this.textContent.addHighlight(id, text );
+  }
+
+  removeHighlight(id: string) {
+    this.textContent.removeHighlight(id);
   }
 
   onInitEditor(editor: CustomEditor) {
