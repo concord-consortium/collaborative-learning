@@ -1,8 +1,8 @@
 import { renderHook } from "@testing-library/react-hooks";
 import { CommentDocument } from "../lib/firestore-schema";
 import {
-  DocumentQueryType, useDocumentComments, useDocumentCommentsAtSimplifiedPath, usePostDocumentComment,
-  useUnreadDocumentComments
+  DocumentQueryType, useDocumentComments, useDocumentCommentsAtSimplifiedPath,
+  usePostDocumentComment, useUnreadDocumentComments
 } from "./document-comment-hooks";
 
 const mockPostDocumentComment_v2 = jest.fn();
@@ -24,9 +24,6 @@ jest.mock("firebase/app", () => ({
     httpsCallable: (fn: string) => mockHttpsCallable(fn)
   })
 }));
-
-// Mock useCommentsAtPath
-const useCommentsAtPath = jest.fn(() => "mocked result");
 
 // mock QueryClient methods
 const mockGetQueryData = jest.fn();
@@ -85,6 +82,8 @@ const mockUseCollectionOrderedRealTimeQuery = jest.fn((path: string, options?: a
     convertedComment = options.converter.fromFirestore({ data: () => fsComment });
     expect(convertedComment).toEqual(jsComment);
   }
+
+  return { mocked: true, path };
 });
 jest.mock("./firestore-hooks", () => ({
   useFirestore: () => ([
@@ -193,24 +192,22 @@ describe("Document comment hooks", () => {
   });
 
   describe("useDocumentCommentsAtSimplifiedPath", () => {
-    it("returns comments for a section path", () => {
-      const sectionPath = "msa/1/2/introduction";
-      const { result } = renderHook(() => useDocumentCommentsAtSimplifiedPath(sectionPath));
-      expect(useCommentsAtPath).toHaveBeenCalledWith("curriculum/msa_1_2_introduction/comments");
-      expect(result.current).toBe("mocked result");
+
+    it("returns expected path for a curriculum path", () => {
+      const path = "msa/1/2/introduction";
+      const { result } = renderHook(() => useDocumentCommentsAtSimplifiedPath(path));
+      expect(result.current).toEqual({ mocked: true, path: "curriculum/msa_1_2_introduction/comments" });
     });
 
-    it("returns comments for a non-section path", () => {
+    it("returns comments for a document path", () => {
       const docKey = "abc123";
       const { result } = renderHook(() => useDocumentCommentsAtSimplifiedPath(docKey));
-      expect(useCommentsAtPath).toHaveBeenCalledWith("documents/abc123/comments");
-      expect(result.current).toBe("mocked result");
+      expect(result.current).toEqual({ mocked: true, path: "documents/abc123/comments" });
     });
 
-    it("returns comments for empty input", () => {
+    it("handles empty paths", () => {
       const { result } = renderHook(() => useDocumentCommentsAtSimplifiedPath(""));
-      expect(useCommentsAtPath).toHaveBeenCalledWith("");
-      expect(result.current).toBe("mocked result");
+      expect(result.current).toEqual({ mocked: true, path: "" });
     });
   });
 
