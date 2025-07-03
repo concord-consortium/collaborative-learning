@@ -39,12 +39,17 @@ interface IEnvContext {
   derivationSpec: IDerivationSpec;
 }
 
+export type TSortDirection = "ASC" | "DESC" | "NONE";
+export const SortDirection = types.enumeration(["ASC", "DESC", "NONE"]);
+
 export const DataSet = types.model("DataSet", {
   id: types.optional(types.identifier, () => uniqueId()),
   sourceID: types.maybe(types.string),
   name: types.maybe(types.string),
   attributes: types.array(Attribute),
   cases: types.array(CaseID),
+  sortByAttribute: types.maybe(types.string),
+  sortDirection: types.optional(SortDirection, "NONE")
 })
 .volatile(self => ({
   // MobX-observable set of selected attribute IDs
@@ -55,7 +60,9 @@ export const DataSet = types.model("DataSet", {
   cellSelection: observable.set<string>(),
   // map from pseudo-case ID to the CaseGroup it represents
   pseudoCaseMap: {} as Record<string, CaseGroup>,
-  transactionCount: 0
+  transactionCount: 0,
+  // Store the original case order to restore when sort direction is "NONE"
+  originalCaseOrder: [] as string[]
 }))
 .views(self => ({
   get isEmpty() {
@@ -319,6 +326,11 @@ export const DataSet = types.model("DataSet", {
     clearAllSelections();
     const ids = getCaseIds(caseIds);
     self.caseSelection.replace(ids);
+  }
+
+  function resetSortState() {
+    self.sortDirection = "NONE";
+    self.sortByAttribute = undefined;
   }
 
   return {
@@ -688,6 +700,8 @@ export const DataSet = types.model("DataSet", {
           });
           insertCaseIDAtIndex(aCase.__id__, beforeIndex);
         });
+        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        resetSortState();
       },
 
       addCanonicalCasesWithIDs(cases: ICase[], beforeID?: string | string[]) {
@@ -700,18 +714,25 @@ export const DataSet = types.model("DataSet", {
           });
           newCases.push(insertCaseIDAtIndex(aCase.__id__, beforeIndex));
         });
+        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        resetSortState();
+
       },
 
       setCaseValues(cases: ICase[], affectedAttributes?: string[]) {
         cases.forEach((caseValues) => {
           setCaseValues(caseValues);
         });
+        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        resetSortState();
       },
 
       setCanonicalCaseValues(cases: ICase[]) {
         cases.forEach((caseValues) => {
           setCanonicalCaseValues(caseValues);
         });
+        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        resetSortState();
       },
 
       removeCases(caseIDs: string[]) {
@@ -724,6 +745,10 @@ export const DataSet = types.model("DataSet", {
             });
           }
         });
+
+        // Update original case order
+        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        resetSortState();
       },
       moveCase(caseID: string, beforeIndex: number) {
         const srcIndex = self.caseIDMap[caseID];
@@ -749,8 +774,58 @@ export const DataSet = types.model("DataSet", {
           // update the cases array
           self.cases.replace(finalCaseIds.map(__id__ => ({__id__})));
         }
+        resetSortState();
       },
-      sortByAttribute(attributeId: string, direction: "ASC" |"DESC" = "ASC") {
+      sortCases(attributeId: string, direction: TSortDirection = "ASC") {
+        self.sortByAttribute = direction === "NONE" ? undefined : attributeId;
+        self.sortDirection = direction;
+
+        // If direction is "NONE", restore the original order
+        if (direction === "NONE") {
+          // If we don't have an original order stored, use current order as original
+          if (self.originalCaseOrder.length === 0) {
+            self.originalCaseOrder = self.cases.map(c => c.__id__);
+            return;
+          }
+
+          // Restore original order
+          const restoredCaseIds = [...self.originalCaseOrder];
+          const restoreCaseIdToIndexMap: Record<string, { beforeIndex: number, afterIndex: number }> = {};
+          const currentCaseIds = self.cases.map(c => c.__id__);
+
+          // Build a map from caseId to its index in restoredCaseIds
+          const restoredIndexMap: Record<string, number> = {};
+          restoredCaseIds.forEach((caseId, idx) => {
+            restoredIndexMap[caseId] = idx;
+          });
+
+          currentCaseIds.forEach((caseId, beforeIndex) => {
+            const afterIndex = restoredIndexMap[caseId];
+            if (afterIndex !== undefined) {
+              restoreCaseIdToIndexMap[caseId] = { beforeIndex, afterIndex };
+            }
+          });
+
+          // Check if we need to reorder
+          if (restoredCaseIds.every((caseId, index) => caseId === self.cases[index].__id__)) {
+            return;
+          }
+
+          // Apply the index mapping to each attribute's value arrays
+          const restoreOrigIndices = restoredCaseIds.map(caseId => restoreCaseIdToIndexMap[caseId]?.beforeIndex ?? 0);
+          self.attributes.forEach(attr => attr.orderValues(restoreOrigIndices));
+
+          // Update the cases array
+          self.cases.replace(restoredCaseIds.map(__id__ => ({__id__})));
+
+          return restoreCaseIdToIndexMap;
+        }
+
+        // For ASC/DESC sorting, store original order if not already stored
+        if (self.originalCaseOrder.length === 0) {
+          self.originalCaseOrder = self.cases.map(c => c.__id__);
+        }
+
         const compareFn = (aItemId: string, bItemId: string) => {
           const aValue = self.getValue(aItemId, attributeId);
           const bValue = self.getValue(bItemId, attributeId);
@@ -977,5 +1052,3 @@ export function getDataSetBounds(dataSet: IDataSet) {
   });
   return result;
 }
-
-

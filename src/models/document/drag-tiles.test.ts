@@ -218,7 +218,7 @@ Array [
         "testid-5",
       ],
     },
-    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-6\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
+    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-6\\",\\"attributes\\":[],\\"cases\\":[],\\"sortDirection\\":\\"NONE\\"},\\"columnWidths\\":{}}}",
     "tileId": "tile3",
     "tileIndex": 0,
     "tileType": "Table",
@@ -320,7 +320,7 @@ Object {
   "annotations": Array [],
   "sharedModels": Array [
     Object {
-      "content": "{\\"type\\":\\"SharedDataSet\\",\\"id\\":\\"shared-data-set-1\\",\\"providerId\\":\\"tile3\\",\\"dataSet\\":{\\"id\\":\\"data-set-1\\",\\"name\\":\\"tile 3\\",\\"attributes\\":[{\\"id\\":\\"attribute-1\\",\\"clientKey\\":\\"\\",\\"name\\":\\"x\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"0\\"],\\"title\\":\\"\\"},{\\"id\\":\\"attribute-2\\",\\"clientKey\\":\\"\\",\\"name\\":\\"y\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"1\\"],\\"title\\":\\"\\"}],\\"cases\\":[{\\"__id__\\":\\"case-1\\"}]}}",
+      "content": "{\\"type\\":\\"SharedDataSet\\",\\"id\\":\\"shared-data-set-1\\",\\"providerId\\":\\"tile3\\",\\"dataSet\\":{\\"id\\":\\"data-set-1\\",\\"name\\":\\"tile 3\\",\\"attributes\\":[{\\"id\\":\\"attribute-1\\",\\"clientKey\\":\\"\\",\\"name\\":\\"x\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"0\\"],\\"title\\":\\"\\"},{\\"id\\":\\"attribute-2\\",\\"clientKey\\":\\"\\",\\"name\\":\\"y\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"1\\"],\\"title\\":\\"\\"}],\\"cases\\":[{\\"__id__\\":\\"case-1\\"}],\\"sortDirection\\":\\"NONE\\"}}",
       "modelId": "shared-data-set-1",
       "providerId": "tile3",
       "tileIds": Array [
@@ -340,7 +340,7 @@ Object {
           "testid-5",
         ],
       },
-      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-6\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
+      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-6\\",\\"attributes\\":[],\\"cases\\":[],\\"sortDirection\\":\\"NONE\\"},\\"columnWidths\\":{}}}",
       "tileId": "tile3",
       "tileIndex": 0,
       "tileType": "Table",
