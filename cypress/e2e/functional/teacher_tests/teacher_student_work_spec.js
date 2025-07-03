@@ -107,21 +107,21 @@ context('Teacher can use studentDocument URL parameter', () => {
 
     });
 
-    // cy.log('Log in as teacher with history ID');
-    // cy.get('@documentId').then((docId) => {
-    //   cy.get('@documentHistoryId').then((docHistoryId) => {
-    //     expect(docId).to.not.be.undefined;
-    //     expect(docHistoryId).to.not.be.undefined;
-    //     cy.visit(teacherQueryParams + '&studentDocument=' + docId + "&studentDocumentHistoryId=" + docHistoryId);
-    //     cy.waitForLoad();
+    cy.log('Log in as teacher with history ID');
+    cy.get('@documentId').then((docId) => {
+      cy.get('@documentHistoryId').then((docHistoryId) => {
+        expect(docId).to.not.be.undefined;
+        expect(docHistoryId).to.not.be.undefined;
+        cy.visit(teacherQueryParams + '&studentDocument=' + docId + "&studentDocumentHistoryId=" + docHistoryId);
+        cy.waitForLoad();
 
-    //     resourcesPanel.getPrimaryWorkspaceTab('student-work').should('have.class', 'selected');
-    //     resourcesPanel.getEditableDocumentContent()
-    //       .should('have.attr', 'data-document-key', docId)
-    //       .should('have.class', 'read-only')
-    //       .should('contain', initialText)
-    //       .should('not.contain', additionalText);
-    //   });
-    // });
+        resourcesPanel.getPrimaryWorkspaceTab('student-work').should('have.class', 'selected');
+        resourcesPanel.getEditableDocumentContent()
+          .should('have.attr', 'data-document-key', docId)
+          .should('have.class', 'read-only')
+          .should('contain', initialText)
+          .should('not.contain', additionalText);
+      });
+    });
   });
 });

@@ -336,7 +336,7 @@ export const TreeManager = types
 
 }))
 .actions((self) => ({
-  mirrorHistoryFromFirestore(user: UserModelType, firestore: Firestore) {
+  async mirrorHistoryFromFirestore(user: UserModelType, firestore: Firestore) {
     // FIXME-HISTORY: we should protect active documents so that if
     // mirrorHistoryFromFirestore is accidentally called on their treeManager
     // we don't replace their history. Probably the best approach is
@@ -352,7 +352,10 @@ export const TreeManager = types
     }
 
     const network = userId === user.id ? user.network : undefined;
-    const docPath = getDocumentPath(userId, documentKey, network);
+    const prefixedDocumentPath = getDocumentPath(userId, documentKey, network);
+    const simpleDocumentPath = getSimpleDocumentPath(documentKey);
+    const prefixedDocSnapshot = await firestore.doc(prefixedDocumentPath).get();
+    const docPath = prefixedDocSnapshot.exists ? prefixedDocumentPath : simpleDocumentPath;
 
     self.setNumHistoryEntriesAppliedFromFirestore(firestore, docPath);
 
