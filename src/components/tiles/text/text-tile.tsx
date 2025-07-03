@@ -316,5 +316,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   private handleHighlightBox = (id: string, box: IHighlightBox) => {
     this.highlightBoundingBoxes[id] = box;
+    this.setState({ revision: this.state.revision + 1 }); // Force a rerender
   };
 }
