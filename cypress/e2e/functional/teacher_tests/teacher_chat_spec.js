@@ -11,7 +11,7 @@ context('Chat Panel', () => {
     ChatTestHelpers.testCommentPosting();
     ChatTestHelpers.testWorkspaceTabHighlighting();
     ChatTestHelpers.testKeyboardShortcuts();
-    // ChatTestHelpers.testCommentDeletion();
+    ChatTestHelpers.testCommentDeletion();
     ChatTestHelpers.testDocumentVsTileCommenting();
     ChatTestHelpers.testDocumentSelectionOnTabSwitch();
   });

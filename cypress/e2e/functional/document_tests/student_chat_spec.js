@@ -18,7 +18,7 @@ context("Chat Panel", () => {
     ChatTestHelpers.testCommentPosting();
     ChatTestHelpers.testWorkspaceTabHighlighting();
     ChatTestHelpers.testKeyboardShortcuts();
-    // ChatTestHelpers.testCommentDeletion();
+    ChatTestHelpers.testCommentDeletion();
     ChatTestHelpers.testDocumentVsTileCommenting();
     ChatTestHelpers.testDocumentSelectionOnTabSwitch();
   });
@@ -29,7 +29,7 @@ context("Chat Panel", () => {
     ChatTestHelpers.testChatAvailabilityAcrossBasicTabs();
   });
 
-  it.skip('verify chat is available in sort work tab', () => {
+  it('verify chat is available in sort work tab', () => {
     ChatTestHelpers.beforeTest("qaConfigSubtabsUnitStudent5", "Student 5");
 
     ChatTestHelpers.testChatAvailabilityInSortWorkTab("Group 5");
