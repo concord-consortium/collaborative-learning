@@ -1,4 +1,4 @@
-import { getEnv, Instance, SnapshotOut, types } from "mobx-state-tree";
+import { getEnv, hasEnv, Instance, SnapshotOut, types } from "mobx-state-tree";
 import { getTileComponentInfo } from "./tile-component-info";
 import { getTileContentInfo } from "./tile-content-info";
 
@@ -23,7 +23,7 @@ const BaseToolbarButtonModel = types.model("BaseToolbarButton", {
 }))
 .views(self => ({
   get env() {
-    return getEnv(self);
+    return hasEnv(self) ? getEnv(self) : undefined;
   }
 }));
 
@@ -39,7 +39,7 @@ const AppToolbarButtonModel = BaseToolbarButtonModel.named("AppToolbarButtonMode
         // Get the appConfig from the environment
         // Unfortunately the environment cannot be typed very well
         //   https://github.com/mobxjs/mobx-state-tree/issues/431
-        const appIcons = self.env.appIcons;
+        const appIcons = self.env?.appIcons;
         self.setIcon(appIcons?.[self.iconId]);
       }
     }

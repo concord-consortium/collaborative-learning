@@ -9,7 +9,8 @@ export const useEditableExpressions = (metadata: TableMetadataModelType, xName: 
   useLayoutEffect(() => {
     const rawExpressions = metadataRef.current.rawExpressions;
     const canonicalExpressions = metadataRef.current.expressions;
-    canonicalExpressions.forEach((canonical, attrId) => {
+    canonicalExpressions.forEach((canonical, _attrId) => {
+      const attrId = String(_attrId);
       const editExpr = getEditableExpression(rawExpressions.get(attrId), canonical, xName);
       editExpr && editExpressions.current?.set(attrId, editExpr);
     });

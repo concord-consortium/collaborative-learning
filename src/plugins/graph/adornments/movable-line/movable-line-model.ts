@@ -146,7 +146,8 @@ export const MovableLineModel = AdornmentModel
     }
   },
   deleteSelected() {
-    self.lines.forEach((line, key) => {
+    self.lines.forEach((line, _key) => {
+      const key = String(_key);
       if (line.isSelected) {
         self.lines.delete(key);
       }

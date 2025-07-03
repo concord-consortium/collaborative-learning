@@ -109,7 +109,7 @@ export const TileModel = types
     get isFixedPosition() {
       return self.fixedPosition;
     },
-    exportJson(options?: ITileExportOptions, tileMap?: Map<string, ITileModel>): string | undefined {
+    exportJson(options?: ITileExportOptions, tileMap?: Map<string|number, ITileModel>): string | undefined {
       const { includeId, excludeTitle, ...otherOptions } = options || {};
       let contentJson = (self.content as any).exportJson?.(otherOptions, tileMap);
       if (!contentJson) return;

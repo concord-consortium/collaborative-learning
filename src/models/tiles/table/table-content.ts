@@ -96,7 +96,8 @@ export const TableMetadataModel = TileMetadataModel
       self.expressions.delete(colId);
     },
     clearRawExpressions(varName: string) {
-      self.expressions.forEach((expression, colId) => {
+      self.expressions.forEach((expression, _colId) => {
+        const colId = String(_colId);
         if (expression) {
           const parsedExpression = self.parseExpression(expression);
           if (parsedExpression && (parsedExpression.variables().indexOf(varName) >= 0)) {

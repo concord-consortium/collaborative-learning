@@ -457,7 +457,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     deselectAll(board: JXG.Board) {
       self.metadata.selection.forEach((value, id) => {
-        self.deselectElement(board, id);
+        self.deselectElement(board, String(id));
       });
     },
     setShowColorPalette(showOrHide: boolean) {

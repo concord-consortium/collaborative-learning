@@ -2,7 +2,9 @@ import { action, autorun, makeObservable, observable } from "mobx";
 import { addDisposer, applySnapshot, getType, isAlive, types, getRoot,
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
   getSnapshot, addMiddleware, getEnv,
-  createActionTrackingMiddleware2, resolvePath, flow, onSnapshot} from "mobx-state-tree";
+  createActionTrackingMiddleware2, resolvePath, flow, onSnapshot,
+  hasEnv
+} from "mobx-state-tree";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -292,7 +294,7 @@ describe("mst", () => {
     });
   });
 
-  test("getEnv is not observable by itself", () => {
+  test("hasEnv and getEnv are not observable", () => {
     let autorunCount = 0;
     const doSomething = jest.fn();
 
@@ -303,7 +305,7 @@ describe("mst", () => {
       afterCreate() {
         addDisposer(self, autorun(() => {
           autorunCount++;
-          doSomething(getEnv(self).someValue);
+          hasEnv(self) && doSomething(getEnv(self).someValue);
         }));
       }
     }));
@@ -317,18 +319,20 @@ describe("mst", () => {
       }
     }));
 
-    // We are not passing an environment here so MST creates an
-    // empty object as the environment.
+    // We create the object with no environment
+    // Previously MST would return {} in this case, now it throws an exception
+    // but hasEnv can be used to check if the environment is defined
     const todo = Todo.create({name: "hello"});
     expect(autorunCount).toBe(1);
-    expect(doSomething).toBeCalledTimes(1);
-    expect(getEnv(todo)).toEqual({});
+    expect(doSomething).toBeCalledTimes(0);
+    expect(hasEnv(todo)).toEqual(false);
 
     // Now we pass an environment with someValue
     const todoList = TodoList.create({}, {someValue: 1});
     todoList.addTodo(todo);
 
     // The environment of the todo has now changed
+    expect(hasEnv(todo)).toBe(true);
     expect(getEnv(todo)).toEqual({someValue: 1});
 
     return new Promise(resolve => {
@@ -338,7 +342,7 @@ describe("mst", () => {
       // even though the environment has changed the autorun is not triggered
       // a second time
       expect(autorunCount).toBe(1);
-      expect(doSomething).toBeCalledTimes(1);
+      expect(doSomething).toBeCalledTimes(0);
     });
   });
 

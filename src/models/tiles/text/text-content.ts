@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn } from "mobx-state-tree";
+import { types, Instance, SnapshotIn, cast } from "mobx-state-tree";
 import {
   convertDocument, CustomEditor, Editor, EditorValue, htmlToSlate, serializeValue, slateToHtml, textToSlate, slateToText
 } from "@concord-consortium/slate-editor";
@@ -119,11 +119,11 @@ export const TextContentModel = TileContentModel
     },
     setHtml(text: string | string[]) {
       self.format = "html";
-      self.text = text;
+      self.text = cast(text);
     },
     setMarkdown(text: string | string[]) {
       self.format = "markdown";
-      self.text = text;
+      self.text = cast(text);
     },
     setSlate(value: EditorValue) {
       self.format = "slate";

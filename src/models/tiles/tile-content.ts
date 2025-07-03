@@ -1,4 +1,4 @@
-import { getEnv, getSnapshot, Instance, types } from "mobx-state-tree";
+import { getEnv, getSnapshot, hasEnv, Instance, types } from "mobx-state-tree";
 import { SharedModelType } from "../shared/shared-model";
 import { ISharedModelManager } from "../shared/shared-model-manager";
 import { tileContentAPIActions, tileContentAPIViews } from "./tile-model-hooks";
@@ -38,7 +38,7 @@ export const TileContentModel = types.model("TileContentModel", {
   })
   .views(self => ({
     get tileEnv() {
-      return getEnv(self) as ITileEnvironment | undefined;
+      return hasEnv(self) ? getEnv(self) as ITileEnvironment : undefined;
     },
     // Override in specific tile content model when external data (like from SharedModels) is needed when copying
     get tileSnapshotForCopy() {
