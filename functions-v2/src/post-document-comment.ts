@@ -7,14 +7,15 @@ import {validateUserContext} from "./user-context";
 import {createFirestoreMetadataDocumentIfNecessaryWithoutValidation} from "./create-firestore-metadata-document";
 
 // update this when deploying updates to this function
-const version = "1.2.0";
+const version = "1.0.0";
 
 export const postDocumentComment = onCall(async (request: CallableRequest<IPostDocumentCommentUnionParams>) => {
   const params = request.data;
   if (isWarmUpParams(params)) return {version};
 
   const {context: userContext, document, comment} = params || {};
-  const {isValid, uid, firestoreRoot} = validateUserContext(userContext, request.auth);
+  const validatedUserContext = validateUserContext(userContext, request.auth);
+  const {isValid, uid, firestoreRoot} = validatedUserContext;
   if (!isValid || !userContext?.classHash || !uid) {
     throw new HttpsError("invalid-argument", "The provided user context is not valid.");
   }
@@ -41,11 +42,11 @@ export const postDocumentComment = onCall(async (request: CallableRequest<IPostD
   // add the comment once we're certain the document exists
   const commentsCollectionRef = admin.firestore().collection(`${docResult.ref.path}/comments`);
   const result = await commentsCollectionRef.add({
+    ...comment,
     uid,
     name: userContext.name,
     network: userContext.network,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    ...comment,
   });
   return {version, id: result.id};
 });

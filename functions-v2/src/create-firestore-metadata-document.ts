@@ -7,7 +7,7 @@ import {
 import {validateUserContext} from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.1.0";
+const version = "1.0.0";
 
 /**
  * Creates a Firestore metadata document for a document if one
@@ -43,13 +43,14 @@ interface ICreateFirestoreMetadataDocumentParams extends IFirestoreMetadataDocum
   uid: string;
 }
 
-// This can create multiple "commentable documents" also known as metadata documents for the same
-// document content. The uid is the user id of the current user, not the user id of the owner
-// of the document. This is by design so the comments by one network of teachers are not
-// available to the other network of teachers. However, this approach complicates the usage of these
-// documents for extra metadata like history and document filtering.
-// History handles this by always looking for a document with the prefix of `uid:[owner_uid]`, and
-// when history entries are written they are always written by the owner.
+// Creates a "commentable document" (metadata document) for the given content if one does not already exist.
+// For backward compatibility, if a legacy (prefixed) document exists, it will return that. Otherwise, it
+// will find or create an un-prefixed document. So going forward, only one metadata document will exist per
+// document content. This is a change from the legacy behavior where multiple prefixed documents could exist.
+// When the runtime code needs to write into the metadata document, it should first look for a prefixed metadata
+// document and if there isn't one, look for the un-prefixed metadata document. This approach will be compatible
+// with the legacy prefixed metadata documents. When the runtime code needs to read info from a metadata document
+// it searches for all metadata documents with a key matching the ID of the CLUE document.
 export async function createFirestoreMetadataDocumentIfNecessaryWithoutValidation(
   params?: ICreateFirestoreMetadataDocumentParams
 ) {

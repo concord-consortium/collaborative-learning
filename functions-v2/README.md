@@ -13,7 +13,7 @@ The functions are split into two folders `functions-v1` and `functions-v2`. This
 |_atMidnight_|Clears old Firebase roots for dev and qa instances|
 |_onDocumentTagged_|Updates metadata documents with strategies as needed whenever a comment is made|
 |_postDocumentComment_|Posts a comment to a document in firestore, adding metadata for the document to firestore if necessary.|
-|_validateCommentableDocument_|Checks whether a specific commentable document exists in firestore and creates it if necessary.|
+|_createFirestoreMetadataDocument_|Checks whether a specific commentable document exists in firestore and creates it if necessary.|
 
 
 ## Operations
