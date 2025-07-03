@@ -25,6 +25,8 @@ import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { verifyAlive } from "../../../utilities/mst-utils";
+import { addCasesToDataSet } from "../../../models/data/data-set";
+import { removeAllAttributes } from "../../../models/data/data-set-utils";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
@@ -217,6 +219,49 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     (e.target === containerRef.current) && gridContext.onClearSelection();
   };
 
+  const importData = (file: File) => {
+    if (file) {
+      const isCSV = file.type === "text/csv" || file.name.toLowerCase().endsWith('.csv');
+
+      const addAttributesAndCases = (headers: string[], dataRows: string[][]) => {
+        headers.forEach(header => {
+          if (!dataSet.attrNameMap[header]) {
+            dataSet.addAttributeWithID({ name: header });
+          }
+        });
+        const cases = dataRows.map(row => {
+          const caseData: any = {};
+          headers.forEach((header, index) => {
+            caseData[header] = row[index] || '';
+          });
+          return caseData;
+        });
+        addCasesToDataSet(dataSet, cases);
+      };
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const contents = e.target?.result as string;
+        if (isCSV) {
+          try {
+            const csvData = contents.split('\n').filter(row => row.trim().length > 0).map(row => row.split(','));
+            const headers = csvData[0];
+            const csvRows = csvData.slice(1);
+
+            if (dataSet.cases.length === 0) {
+              removeAllAttributes(dataSet);
+            }
+            addAttributesAndCases(headers, csvRows);
+            triggerRowChange();
+          } catch (err) {
+            console.error("Error parsing CSV file:", err);
+          }
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
   const [activeRow, setActiveRow] = useState<TRow | null>(null);
   const pointerSensor = useSensor(PointerSensor, {activationConstraint: { distance: 3 }});
   const sensors = useSensors(pointerSensor);
@@ -312,6 +357,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const toolbarContext = {
     showExpressionsDialog,
     deleteSelected,
+    importData
   };
 
   const classes = classNames("tile-content", "table-tool", {
