@@ -54,6 +54,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     highlightPendingDropLocation: undefined as string | undefined,
     // IDs of top-level rows that are currently visible on the screen
     visibleRows: [] as string[],
+    awaitingAIAnalysis: false,
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -552,6 +553,9 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     }
   }))
   .actions(self => ({
+    setAwaitingAIAnalysis(awaitingAIAnalysis: boolean) {
+      self.awaitingAIAnalysis = awaitingAIAnalysis;
+    },
     removeNeighboringPlaceholderRows(rowId: string) {
       const rowList = self.getRowListForRow(rowId);
       if (!rowList) {

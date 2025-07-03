@@ -65,6 +65,9 @@ jest.mock("../../hooks/use-stores", () => ({
   useDBStore: () => ({
     firestore: {
       getRootFolder: () => "firestore/root"
+    },
+    firebase: {
+      getLastEditedTimestamp: jest.fn(() => Date.now())
     }
   }),
   useDocumentOrCurriculumMetadata: (documentKey: string) => ({
