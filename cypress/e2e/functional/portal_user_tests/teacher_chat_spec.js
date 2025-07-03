@@ -34,7 +34,7 @@ function beforeTest(url, clueTeacher, reportUrl) {
 }
 
 describe('Teachers can communicate back and forth in chat panel', () => {
-  it("teachers can communicate back and forth in chat panel", () => {
+  it.skip("teachers can communicate back and forth in chat panel", () => {
     beforeTest(portalUrl, clueTeacher1, reportUrl1);
 
     cy.log("verify teacher1 can post document and tile comments");

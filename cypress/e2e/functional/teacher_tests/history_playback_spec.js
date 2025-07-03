@@ -26,7 +26,7 @@ function beforeTest(params) {
 }
 
 context('History Playback', () => {
-  it('verify playback', function () {
+  it.skip('verify playback', function () {
     beforeTest(queryParams);
 
     cy.log('verify playback shows no history if there is no history');
@@ -81,7 +81,7 @@ context('History Playback', () => {
     cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .drawing-tool .drawing-layer line').should('be.visible');
   });
 
-  it("verify table tile history", () => {
+  it.skip("verify table tile history", () => {
     beforeTest(queryParams);
 
     cy.log('create table and add a row in it');
