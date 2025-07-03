@@ -357,6 +357,7 @@ context('XYPlot Tool Tile', function () {
     });
 
     it("Test adding 2 Y Series", () => {
+      // Skipped as discussed on Slack - test is failing for reasons we don't understand
       beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();

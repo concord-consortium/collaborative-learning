@@ -1,5 +1,5 @@
 import { cloneDeep } from "lodash";
-import { getParent,getParentOfType, getSnapshot, getType,
+import { getParent, getSnapshot, getType,
   Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall } from "mobx-state-tree";
 import { findMetadata, getTileContentInfo, ITileExportOptions } from "./tile-content-info";
 import { TileContentUnion } from "./tile-content-union";
@@ -10,7 +10,6 @@ import { StringBuilder } from "../../utilities/string-builder";
 import { logTileDocumentEvent } from "./log/log-tile-document-event";
 import { LogEventName } from "../../lib/logger-types";
 import { RowListType } from "../document/row-list";
-import { QuestionContentModel } from "./question/question-content";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -109,15 +108,6 @@ export const TileModel = types
     },
     get isFixedPosition() {
       return self.fixedPosition;
-    },
-    get isInsideLockedTile(): boolean {
-      // At the moment, the only tile type that can be locked is the Question tile.
-      try {
-        const p = getParentOfType(self, QuestionContentModel);
-        return p.locked;
-      } catch (e) {
-        return false;
-      }
     },
     exportJson(options?: ITileExportOptions, tileMap?: Map<string, ITileModel>): string | undefined {
       const { includeId, excludeTitle, ...otherOptions } = options || {};

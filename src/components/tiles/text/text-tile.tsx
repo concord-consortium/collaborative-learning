@@ -8,7 +8,7 @@ import {
 import { TextContentModelContext } from "./text-content-context";
 import { BaseComponent } from "../../base";
 import { OffsetModel } from "../../../models/annotations/clue-object";
-import { debouncedSelectTile } from "../../../models/stores/ui";
+import { userSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { HighlightRegistryContext, IHighlightBox } from "../../../plugins/text/highlight-registry-context";
@@ -20,7 +20,7 @@ import { LogEventName } from "../../../lib/logger-types";
 import { TextPluginsContext } from "./text-plugins-context";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { countWords } from "../../../utilities/string-utils";
-import { LockedContainerContext } from "../../document/locked-container-context";
+import { ContainerContext } from "../../document/container-context";
 
 import "./toolbar/text-toolbar-registration";
 import "./text-tile.scss";
@@ -101,8 +101,8 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private textOnFocus: string | string [] | undefined;
   private isHandlingUserChange = false;
 
-  static contextType = LockedContainerContext;
-  declare context: React.ContextType<typeof LockedContainerContext>;
+  static contextType = ContainerContext;
+  declare context: React.ContextType<typeof ContainerContext>;
 
   // plugins are exposed to making testing easier
   plugins: Record<string, ITextPlugin|undefined>;
@@ -198,7 +198,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   public render() {
     const { appConfig: { placeholderText } } = this.stores;
-    const inLockedContainer = this.context;
+    const inLockedContainer = this.context.isLocked;
 
     // A fixed position text tile is a prompt, which should be read-only if it's in a locked question tile.
     const readOnly = this.props.readOnly || (this.props.model.fixedPosition && inLockedContainer);
@@ -258,7 +258,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const { ui } = this.stores;
 
     if (this.editor && ReactEditor.isFocused(this.editor)) {
-      debouncedSelectTile(ui, model);
+      userSelectTile(ui, model, { readOnly: this.props.readOnly, container: this.context.model });
     }
 
     this.isHandlingUserChange = true;
@@ -270,17 +270,17 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;
     const { model, readOnly } = this.props;
-    const inLockedContainer = this.context;
+    const inLockedContainer = this.context.isLocked;
 
     // Don't select a locked prompt
     if (this.props.model.fixedPosition && inLockedContainer) {
       return;
     }
 
-    const isExtendingSelection = hasSelectionModifier(e);
+    const append = hasSelectionModifier(e);
     const isWrapperClick = e.target === this.textTileDiv;
-    ui.setSelectedTile(model, { append: isExtendingSelection });
-    if (readOnly || isWrapperClick || isExtendingSelection) {
+    userSelectTile(ui, model, { readOnly, append, container: this.context.model });
+    if (readOnly || isWrapperClick || append) {
       isWrapperClick && this.editor && ReactEditor.focus(this.editor);
       e.preventDefault();
     }

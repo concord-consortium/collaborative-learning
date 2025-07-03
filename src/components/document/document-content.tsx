@@ -18,7 +18,7 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { RowListComponent } from "./row-list";
 import { DropRowContext } from "./drop-row-context";
 import { RowRefsContext } from "./row-refs-context";
-import { LockedContainerContext } from "./locked-container-context";
+import { ContainerContext } from "./container-context";
 
 import "./document-content.scss";
 
@@ -149,8 +149,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { viaTeacherDashboard } = this.props;
-    const { ui, persistentUI, user } = this.stores;
-    const isChatEnabled = user.isTeacherOrResearcher;
+    const { ui, persistentUI, user, appConfig } = this.stores;
+    const isChatEnabled = appConfig.showCommentPanelFor(user.type);
     const documentSelectedForComment = isChatEnabled && persistentUI.showChatPanel && ui.selectedTileIds.length === 0
                                           && persistentUI.focusDocument;
     const documentClass = classNames(
@@ -169,7 +169,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return (
       <DocumentDndContext>
         <DropRowContext.Provider value={dropRow}>
-          <LockedContainerContext.Provider value={false}>
+          <ContainerContext.Provider value={{ model: undefined, isLocked: false }}>
             <RowRefsContext.Provider value={{ addRowRef: this.addRowRef }}>
               <div className={documentClass}
                 data-testid="document-content"
@@ -185,7 +185,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                 {this.renderSpacer()}
               </div>
             </RowRefsContext.Provider>
-          </LockedContainerContext.Provider>
+          </ContainerContext.Provider>
         </DropRowContext.Provider>
       </DocumentDndContext>
     );

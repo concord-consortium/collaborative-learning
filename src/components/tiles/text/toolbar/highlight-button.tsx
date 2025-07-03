@@ -23,14 +23,13 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
   const isCollapsed = selection ? Range.isCollapsed(selection) : true;
   const isSelected = !!selection && !isCollapsed;
   const disabled = !isHighlightedText && isCollapsed && !isSelected;
-  const getSelectedChip = () => {
+  const getSelectedChips = () => {
     if (!selection) return undefined;
-    // Find the highlight chip node at selection
-    const [chipEntry] = Editor.nodes(editor, {
+    // Find the highlight chip nodes at selection
+    return Array.from(Editor.nodes(editor, {
       match: n => (n as any).type === kHighlightFormat,
       at: selection
-    });
-    return chipEntry ? (chipEntry as [HighlightElement, Path]) : undefined;
+    })) as [HighlightElement, Path][];
   };
 
   const highlightText = (reference: string, text: string, marks?: Record<string, any>) =>{
@@ -49,25 +48,16 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     Transforms.collapse(editor, { edge: "end" });
   };
 
-  const unHighlightChip = () => {
+  const unHighlightChip = (chipEntry: [HighlightElement, Path]) => {
     if (!editor.selection) return;
-    const chipEntry = getSelectedChip();
-
     if (chipEntry) {
       const [chipNode, chipPath] = chipEntry as [HighlightElement, Path];
       const previousPath = Path.previous(chipPath);
       const insertPoint = Editor.end(editor, previousPath);
-      const chipNodeChild = chipNode.children[0] as { text: string };
-      const text = chipNodeChild.text || ""; // Assume the first child has the text
-      const marks = Editor.marks(editor) || {};
+      const chipNodeChild = chipNode.children[0] as { text: string, marks?: Record<string, any> };
+      const { text, ...marks } = chipNodeChild;
       Transforms.removeNodes(editor, { at: chipPath });
       Transforms.insertNodes(editor, { text, ...marks }, { at: insertPoint });
-      Object.keys(marks).forEach(key => {
-        Editor.removeMark(editor, key);
-      });
-      Object.entries(marks).forEach(([key, value]) => {
-        Editor.addMark(editor, key, value);
-      });
     }
   };
 
@@ -95,27 +85,47 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     if (isHighlightedText) {
-      const selectedChip = getSelectedChip();
-      const selectedReference = selectedChip ? selectedChip[0].reference : "";
-      // Remove any arrow annotations that reference this highlight
-      removeAnnotationsForHighlight(selectedReference);
-      highlightsPlugin?.removeHighlight(selectedReference);
-      unHighlightChip();
+      const selectedChips = getSelectedChips();
+      if (!selectedChips || selectedChips.length === 0) return;
+      const chipReferences = selectedChips.map(([chipNode]) => chipNode.reference);
+
+      chipReferences.forEach(ref => {
+        const [chipEntry] = Array.from(Editor.nodes(editor, {
+          match: n => (n as any).type === kHighlightFormat && (n as any).reference === ref,
+          at: selection ?? undefined
+        })) as [HighlightElement, Path][];
+        if (chipEntry) {
+          highlightsPlugin?.removeHighlight(ref);
+          unHighlightChip(chipEntry);
+        }
+      });
+      Transforms.deselect(editor);
+      // Clear DOM selection because the Slate editor is not updating the DOM selection
+      if (typeof window !== "undefined") {
+        const sel = window.getSelection();
+        if (sel) sel.removeAllRanges();
+      }
       return;
     }
+
     if (!editor.selection || Range.isCollapsed(editor.selection)) return;
 
     const selectedText = Editor.string(editor, editor.selection);
     const selectedTextMarks = Editor.marks(editor);
     const reference = uuid();
     highlightsPlugin?.addHighlight(reference, selectedText);
-
     highlightText(reference, selectedText, selectedTextMarks || undefined);
   };
 
   return (
-    <TileToolbarButton name={name} title="Highlight" disabled={disabled} selected={isHighlightedText}
-                        onClick={handleClick}>
+    <TileToolbarButton
+      name={name}
+      title="Highlight"
+      disabled={disabled}
+      selected={isHighlightedText}
+      onClick={handleClick}
+      dataTestId="text-highlight-button"
+    >
       <HighlightToolIcon/>
     </TileToolbarButton>
   );
