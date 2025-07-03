@@ -5,7 +5,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import ReactDataGrid from "react-data-grid";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
-import { convertImportToSnapshot, isTableImportSnapshot } from "../../../models/tiles/table/table-import";
 import { ITileProps } from "../tile-component";
 import { EditableTableTitle } from "./editable-table-title";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
@@ -27,7 +26,7 @@ import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { addCasesToDataSet } from "../../../models/data/data-set";
-import { clearDataSet } from "../../../models/data/data-set-utils";
+import { removeAllAttributes } from "../../../models/data/data-set-utils";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
@@ -250,9 +249,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
             const csvRows = csvData.slice(1);
 
             if (dataSet.cases.length === 0) {
-              dataSet.attributes.forEach(attr => {
-                clearDataSet(dataSet);
-              });
+              removeAllAttributes(dataSet);
             }
             addAttributesAndCases(headers, csvRows);
             triggerRowChange();

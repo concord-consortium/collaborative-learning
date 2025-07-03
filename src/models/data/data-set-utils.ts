@@ -101,9 +101,8 @@ export function compareValues(value1: any, value2: any, strCompare: (a: string, 
   }
 }
 
-export function clearDataSet(dataSet: IDataSet) {
-  dataSet.attributes.forEach(attr => {
+export function removeAllAttributes(dataSet: IDataSet) {
+  [...dataSet.attributes].forEach(attr => {
     dataSet.removeAttribute(attr.id);
   });
-  dataSet.cases.length > 0 && dataSet.cases.clear();
 }
