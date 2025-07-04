@@ -8,7 +8,7 @@ import { SharedModelType } from "../../shared/shared-model";
 import { getAllTextPluginInfos } from "./text-plugin-info";
 import { escapeBackslashes, escapeDoubleQuotes, removeNewlines, removeTabs } from "../../../utilities/string-utils";
 import { tileContentAPIViews } from "../tile-model-hooks";
-import { IClueTileObject } from "src/models/annotations/clue-object";
+import { IClueTileObject } from "../../../models/annotations/clue-object";
 
 export const kTextTileType = "Text";
 

@@ -107,6 +107,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   // plugins are exposed to making testing easier
   plugins: Record<string, ITextPlugin|undefined>;
 
+  // Batch highlight box updates to prevent render thrashing
+  private pendingHighlightUpdates: Set<string> = new Set();
+  private updateTimeout: NodeJS.Timeout | null = null;
+
   public componentDidMount() {
     this.plugins = createTextPluginInstances(this.props.model.content as TextContentModelType);
     const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
@@ -193,6 +197,11 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.disposers.forEach(disposer => disposer());
     for (const plugin of Object.values(this.plugins)) {
       plugin?.dispose?.();
+    }
+    // Clear any pending update timeout
+    if (this.updateTimeout) {
+      clearTimeout(this.updateTimeout);
+      this.updateTimeout = null;
     }
   }
 
@@ -315,7 +324,19 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private highlightBoundingBoxes: Record<string, IHighlightBox> = {};
 
   private handleHighlightBox = (id: string, box: IHighlightBox) => {
+    // Update the bounding box immediately for responsiveness
     this.highlightBoundingBoxes[id] = box;
-    this.setState({ revision: this.state.revision + 1 }); // Force a rerender
+    // Batch highlight box updates to prevent render thrashing
+    // Add to pending updates set
+    this.pendingHighlightUpdates.add(id);
+
+    // If this is the first update, schedule a batched re-render
+    if (!this.updateTimeout) {
+      this.updateTimeout = setTimeout(() => {
+        this.updateTimeout = null;
+        this.pendingHighlightUpdates.clear();
+        this.setState({ revision: this.state.revision + 1 }); // Force a single rerender
+      }, 16); // ~60fps
+    }
   };
 }

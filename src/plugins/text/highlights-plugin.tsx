@@ -13,6 +13,8 @@ import { HighlightRegistryContext } from "./highlight-registry-context"; // 👈
 export const kHighlightFormat = "highlight";
 export const kHighlightTextPluginName = "highlights";
 
+const kHighlightOffset = 2;
+
 export class HighlightsPlugin implements ITextPlugin {
   public textContent: TextContentModelType;
 
@@ -76,8 +78,8 @@ export const HighlightComponent = observer(function({ attributes, children, elem
         registryFn(reference, {
           left: highlightRect.left - textBoxRect.left,
           top: highlightRect.top - textBoxRect.top,
-          width: highlightRect.width - 2,
-          height: highlightRect.height - 2
+          width: highlightRect.width - kHighlightOffset,
+          height: highlightRect.height - kHighlightOffset
         });
       }
     };

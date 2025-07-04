@@ -61,27 +61,6 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     }
   };
 
-  const removeAnnotationsForHighlight = (highlightId: string) => {
-    if (!stores?.documents || !model?.id) return;
-    const document = stores.documents.findDocumentOfTile(model.id);
-    if (!document?.content) return;
-    const annotationsToRemove: string[] = [];
-    document.content.annotations.forEach((annotation) => {
-      // Check if the annotation's source or target object references this highlight
-      if (annotation.sourceObject?.objectId === highlightId && annotation.sourceObject?.objectType === "highlight") {
-        annotationsToRemove.push(annotation.id);
-      }
-      if (annotation.targetObject?.objectId === highlightId && annotation.targetObject?.objectType === "highlight") {
-        annotationsToRemove.push(annotation.id);
-      }
-    });
-    annotationsToRemove.forEach(annotationId => {
-      if (document.content) {
-        document.content.deleteAnnotation(annotationId);
-      }
-    });
-  };
-
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     if (isHighlightedText) {
