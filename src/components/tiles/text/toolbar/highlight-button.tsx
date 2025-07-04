@@ -2,10 +2,8 @@ import React, { useContext } from "react";
 import { v4 as uuid } from "uuid";
 import { Path } from "slate";
 import { Editor, Range, Transforms, useSlate } from "@concord-consortium/slate-editor";
-import { useStores } from "../../../../hooks/use-stores";
 import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat, HighlightElement }
   from "../../../../plugins/text/highlights-plugin";
-  import { TileModelContext } from "../../../tiles/tile-api";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../toolbar/toolbar-button-manager";
 import { TextPluginsContext } from "../text-plugins-context";
@@ -15,8 +13,6 @@ import HighlightToolIcon from "../../../../assets/icons/text/highlight-text-icon
 export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
   const editor = useSlate();
   const plugins = useContext(TextPluginsContext);
-  const model = useContext(TileModelContext);
-  const stores = useStores();
   const highlightsPlugin = plugins[kHighlightTextPluginName] as HighlightsPlugin | undefined;
   const { selection } = editor;
   const isHighlightedText = editor.isElementActive(kHighlightFormat);
