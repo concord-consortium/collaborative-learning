@@ -121,8 +121,11 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
       const { document, comment } = newCommentParams;
       const legacyQueryKey = getCommentsQueryKeyFromMetadata(document);
       const documentKey = isDocumentMetadata(document) ? document.key : document.path;
+      const curriculumPath = context.network
+        ? `${context.network}/${documentKey}`
+        : documentKey;
       const simplifiedPath = isSectionPath(documentKey || "")
-        ? `curriculum/${escapeKey(documentKey)}/comments`
+        ? `curriculum/${escapeKey(curriculumPath)}/comments`
         : `documents/${documentKey}/comments`;
 
       // If the legacy comments path has comments, the new comment will be written there. Otherwise, it will be
