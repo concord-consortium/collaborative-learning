@@ -30,7 +30,7 @@ import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
 import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
-import { getDocumentPath, ICommentableDocumentParams, IDocumentMetadata, IGetImageDataParams,
+import { getSimpleDocumentPath, IFirestoreMetadataDocumentParams, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
@@ -420,7 +420,7 @@ export class DB {
       throw new Error("cannot create Firestore metadata document because environment is not valid");
     }
 
-    const documentPath = getDocumentPath(userContext.uid, documentKey, userContext.network);
+    const documentPath = getSimpleDocumentPath(documentKey);
     const documentRef = this.firestore.doc(documentPath);
     const docSnapshot = await documentRef.get();
 
@@ -434,18 +434,17 @@ export class DB {
 
       const firestoreMetadata: IDocumentMetadata & { contextId: string } = {
         ...cleanedMetadata,
-        // The validateCommentableDocument firebase function currently deployed to production is out of date.
-        // It requires contextId to defined, but doesn't check its value.
+        // The createFirestoreMetadataDocument firebase function currently deployed to production is out of date.
+        // It requires contextId to be defined, but doesn't check its value.
         contextId: "ignored",
         key: documentKey,
         properties: {},
         uid: userContext.uid,
         ...problemInfo
       };
-      const validateCommentableDocument =
-        getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
-      // FIXME-HISTORY: rename this function to validateFirestoreDocumentMetadata_v1
-      validateCommentableDocument({context: userContext, document: firestoreMetadata});
+      const createFirestoreMetadataDocument =
+        getFirebaseFunction<IFirestoreMetadataDocumentParams>("createFirestoreMetadataDocument_v2");
+      createFirestoreMetadataDocument({context: userContext, document: firestoreMetadata});
     }
   }
 

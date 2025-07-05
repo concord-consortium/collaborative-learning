@@ -14,9 +14,7 @@
     "deploy:getImageData": "firebase deploy --only functions:getImageData_v1",
     "deploy:getNetworkDocument": "firebase deploy --only functions:getNetworkDocument_v1",
     "deploy:getNetworkResources": "firebase deploy --only functions:getNetworkResources_v1",
-    "deploy:postDocumentComment": "firebase deploy --only functions:postDocumentComment_v1",
     "deploy:publishSupport": "firebase deploy --only functions:publishSupport_v1",
-    "deploy:validateCommentableDocument": "firebase deploy --only functions:validateCommentableDocument_v1",
     "logs": "firebase functions:log",
     "test": "cross-env FIREBASE_CONFIG={} ts-node node_modules/jest/bin/jest.js --detectOpenHandles",
     "test:coverage": "cross-env FIREBASE_CONFIG={} ts-node node_modules/jest/bin/jest.js --coverage --detectOpenHandles"

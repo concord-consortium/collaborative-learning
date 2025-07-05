@@ -1,4 +1,4 @@
-import { buildSectionPath, escapeKey, getCurriculumMetadata, isProblemPath, isSectionPath,
+import { buildSectionPath, escapeKey, getCurriculumMetadata, getSimpleDocumentPath, isProblemPath, isSectionPath,
   networkDocumentKey, parseProblemPath, parseSectionPath } from "./shared";
 
 describe("shared types and utilities", () => {
@@ -101,6 +101,15 @@ describe("shared types and utilities", () => {
     it("should return appropriate document key combining network and uid as appropriate", () => {
       expect(networkDocumentKey("user", "doc123")).toBe("uid:user_doc123");
       expect(networkDocumentKey("user", "doc123", "network")).toBe("network_doc123");
+    });
+  });
+
+  describe("getSimpleDocumentPath", () => {
+    it("returns curriculum path for section paths", () => {
+      expect(getSimpleDocumentPath("msa/1/2/introduction")).toBe("curriculum/msa_1_2_introduction");
+    });
+    it("returns documents path for non-section paths", () => {
+      expect(getSimpleDocumentPath("abc123")).toBe("documents/abc123");
     });
   });
 

@@ -58,6 +58,7 @@
         "maxTiles": 1
       }
     },
+    "enableCommentRoles": ["student", "teacher", "researcher"],
     "showCommentTag": true,
     "commentTags": {
       "diverging": "Diverging Designs",

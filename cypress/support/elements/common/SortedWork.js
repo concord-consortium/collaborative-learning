@@ -67,7 +67,13 @@ class SortedWork {
     return cy.get("[data-test=list-item-all]");
   }
   openSortWorkSection(sectionLabel) {
-    return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(".section-header-label", sectionLabel).find(".section-header-arrow").click();
+    return cy.get('.sort-work-view .sorted-sections .section-header-label')
+      .filter((index, el) => {
+        return !!el.querySelector('.section-header-left') &&
+              el.querySelector('.section-header-left').textContent.trim() === sectionLabel;
+      })
+      .find('.section-header-arrow')
+      .click();
   }
   checkDocumentInGroup(groupName, doc) {
     this.getSortWorkGroup(groupName).find(".documents-list .list-item .footer .info").should("contain", doc);

@@ -664,7 +664,7 @@ describe("Firestore security rules", () => {
       await expectWriteToFail(db, kDocumentCommentDocPath, specTeacherCommentDoc({ remove: ["name"] }));
     });
 
-    it("authenticated teachers can't write document comments without required name", async () => {
+    it("authenticated teachers can't write document comments without required content", async () => {
       await initFirestoreWithUserDocument(teacherAuth);
       await expectWriteToFail(db, kDocumentCommentDocPath, specTeacherCommentDoc({ remove: ["content"] }));
     });

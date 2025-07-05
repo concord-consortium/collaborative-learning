@@ -66,6 +66,16 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
   return {docContent, tileContent, manager, undoStore};
 }
 
+const makeFirestoreMock = (docExists = false) => {
+  return {
+    doc: jest.fn(() => ({
+      get: jest.fn(async () => ({
+        exists: docExists
+      }))
+    }))
+  } as unknown as Firestore;
+};
+
 describe("history loading", () => {
   it("initially has a status of NO_HISTORY", () => {
     const { manager } = setupDocument();
@@ -123,16 +133,18 @@ describe("history loading", () => {
   });
 
   describe("mirrorHistoryFromFirestore", () => {
-    it("results in zero history entries if loadHistory does nothing", () => {
+    it("results in zero history entries if loadHistory does nothing", async () => {
       const { manager } = setupDocument();
+      const firestoreMock = makeFirestoreMock();
       // this makes loadHistory be a no op.
       loadHistory.mockReturnValue(() => undefined);
-      manager.mirrorHistoryFromFirestore({id: "1234"} as UserModelType, {} as Firestore);
+      await manager.mirrorHistoryFromFirestore({id: "1234"} as UserModelType, firestoreMock);
       expect(manager.document.history).toHaveLength(0);
     });
 
-    it("creates a change doc with the history entries", () => {
+    it("creates a change doc with the history entries", async () => {
       const { manager } = setupDocument();
+      const firestoreMock = makeFirestoreMock();
       loadHistory.mockImplementation((firestore, path, historyLoaded) => {
         // In the real world this callback will be delayed until the history documents
         // are actually loaded from firebase
@@ -142,7 +154,7 @@ describe("history loading", () => {
         ]);
         return () => undefined;
       });
-      manager.mirrorHistoryFromFirestore({id: "1234"} as UserModelType, {} as Firestore);
+      await manager.mirrorHistoryFromFirestore({id: "1234"} as UserModelType, firestoreMock);
       expect(manager.document.history).toHaveLength(2);
     });
 
@@ -170,6 +182,7 @@ describe("history loading", () => {
       async function mirrorMockHistory(param: IMirrorMockHistoryParam) {
         const { entries, loadingError, lastHistoryEntry } = param;
         const { manager } = setupDocument();
+        const firestoreMock = makeFirestoreMock();
         // Delay the result to check that the history events applied is undefined
         // in the meantime and then changes when the delay is done
         const deferredResult = deferred<LastHistoryEntry>();
@@ -184,7 +197,7 @@ describe("history loading", () => {
           historyLoaded(entries, loadingError);
           return () => undefined;
         });
-        manager.mirrorHistoryFromFirestore({id: "1234"} as UserModelType, {} as Firestore);
+        await manager.mirrorHistoryFromFirestore({id: "1234"} as UserModelType, firestoreMock);
 
         await called.promise;
         // If we actually delayed the historyLoaded callback above we should be able to
