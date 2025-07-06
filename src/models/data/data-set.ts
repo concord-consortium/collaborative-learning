@@ -110,13 +110,13 @@ export const DataSet = types.model("DataSet", {
 })
 .views(self => ({
   get selectedAttributeIds() {
-    return Array.from(self.attributeSelection);
+    return Array.from(self.attributeSelection as Set<string>);
   },
   get selectedCaseIds() {
-    return Array.from(self.caseSelection);
+    return Array.from(self.caseSelection as Set<string>);
   },
   get selectedCells() {
-    return Array.from(self.cellSelection).map(cellId => getCellFromId(cellId))
+    return Array.from(self.cellSelection as Set<string>).map(cellId => getCellFromId(cellId))
       .filter(cell => cell !== undefined) as ICell[];
   }
 }))

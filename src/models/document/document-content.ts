@@ -556,7 +556,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       // This will create a new entry if necessary otherwise it will just return
       // the existing entry
       const entry = self.addSharedModel(sharedModel);
-      // TODO: unify the updating of the entry with BaseDocumentContent.addTileSharedModel,
+      // TODO: unify the updating of the entry with SharedModelDocumentManager.addTileSharedModel,
       // and SharedModelEntry.addTile
       entry.tiles.push(newTileId);
     });
