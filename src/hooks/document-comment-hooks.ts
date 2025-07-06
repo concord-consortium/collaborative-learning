@@ -125,7 +125,7 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
         ? `${context.network}/${documentKey}`
         : documentKey;
       const simplifiedPath = isSectionPath(documentKey || "")
-        ? `curriculum/${escapeKey(curriculumPath)}/comments`
+        ? `curriculum/${curriculumPath}/comments`
         : `documents/${documentKey}/comments`;
 
       // If the legacy comments path has comments, the new comment will be written there. Otherwise, it will be
