@@ -656,7 +656,7 @@ test("DataSet sortCases with missing attribute values", () => {
     { __id__: "3", A: "y" }
   ]);
   dataset.sortCases(attrA.id, "ASC");
-  // Case "2" (missing value) should sort before "1" and "3"
+  // Case "2" (missing value) should sort after "1" and "3"
   expect(dataset.cases.map(c => c.__id__)).toEqual(["1", "3", "2"]);
 });
 

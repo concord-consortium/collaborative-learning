@@ -700,7 +700,7 @@ export const DataSet = types.model("DataSet", {
           });
           insertCaseIDAtIndex(aCase.__id__, beforeIndex);
         });
-        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        self.originalCaseOrder = [];
         resetSortState();
       },
 
@@ -714,7 +714,7 @@ export const DataSet = types.model("DataSet", {
           });
           newCases.push(insertCaseIDAtIndex(aCase.__id__, beforeIndex));
         });
-        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        self.originalCaseOrder = [];
         resetSortState();
 
       },
@@ -723,7 +723,7 @@ export const DataSet = types.model("DataSet", {
         cases.forEach((caseValues) => {
           setCaseValues(caseValues);
         });
-        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        self.originalCaseOrder = [];
         resetSortState();
       },
 
@@ -731,7 +731,7 @@ export const DataSet = types.model("DataSet", {
         cases.forEach((caseValues) => {
           setCanonicalCaseValues(caseValues);
         });
-        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        self.originalCaseOrder = [];
         resetSortState();
       },
 
@@ -747,7 +747,7 @@ export const DataSet = types.model("DataSet", {
         });
 
         // Update original case order
-        self.originalCaseOrder = self.cases.map(c => c.__id__);
+        self.originalCaseOrder = [];
         resetSortState();
       },
       moveCase(caseID: string, beforeIndex: number) {
