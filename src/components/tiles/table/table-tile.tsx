@@ -3,12 +3,7 @@ import classNames from "classnames";
 import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
-
-export interface SortColumn {
-  columnKey: string;
-  direction: 'ASC' | 'DESC';
-}
-
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { ITileProps } from "../tile-component";
 import { EditableTableTitle } from "./editable-table-title";
@@ -34,10 +29,17 @@ import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
 import { ITableContext, TableContext } from "../hooks/table-context";
 import { useUIStore } from "../../../hooks/use-stores";
+import { RowDragOverlay } from "./row-drag-overlay";
+import { TRow } from "./table-types";
+import { useFormulaModal } from "./use-formula-modal";
 
 import "./table-tile.scss";
 import "./table-toolbar-registration";
-import { useFormulaModal } from "./use-formula-modal";
+
+export interface SortColumn {
+  columnKey: string;
+  direction: 'ASC' | 'DESC';
+}
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
@@ -56,6 +58,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const isLinked = linkedTiles && linkedTiles.length > 1;
   const tableContextValue: ITableContext = { linked: !!isLinked };
   const [sortColumns, setSortColumns] = useState<SortColumn[]>([]);
+  const [gridElement, setGridElement] = useState<HTMLDivElement | null>(null);
 
   // Basic operations based on the model
   const {
@@ -78,9 +81,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // Functions and variables to handle selecting and navigating the grid
   const [showRowLabels, setShowRowLabels] = useState(false);
-  const {
-    ref: gridRef, gridContext, inputRowId, getSelectedRows, ...gridProps
-  } = useGridContext({ content, modelId: model.id, showRowLabels, triggerColumnChange, triggerRowChange });
+  const {ref: gridRef, gridContext, inputRowId, getSelectedRows, ...gridProps
+    } = useGridContext({ content, modelId: model.id, showRowLabels, triggerColumnChange, triggerRowChange });
   const selectedCaseIds = getSelectedRows();
 
   // Add click handler to clear all selections to mystery div in rdg.
@@ -115,8 +117,11 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   }, [imagePromises, imageUrls]);
 
   // React components used for the index (left most) column
+  const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+  const [dragOverRowId, setDragOverRowId] = useState<string | null>(null);
   const rowLabelProps = useRowLabelColumn({
-    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels
+    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels, hoveredRowId, setHoveredRowId, dragOverRowId,
+    setDragOverRowId, rowHeight, gridElement
   });
 
   // rows are required by ReactDataGrid and are used by other hooks as well
@@ -137,7 +142,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({
     gridContext, dataSet, isLinked, content, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
-    ...rowLabelProps, measureColumnWidth, lookupImage,
+    ...rowLabelProps, showRowLabels, measureColumnWidth, lookupImage,
     sortColumns,
     onSort,
   });
@@ -232,6 +237,59 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     (e.target === containerRef.current) && gridContext.onClearSelection();
   };
 
+  const [activeRow, setActiveRow] = useState<TRow | null>(null);
+  const pointerSensor = useSensor(PointerSensor, {activationConstraint: { distance: 3 }});
+  const sensors = useSensors(pointerSensor);
+  const handleDragStart = (event: any) => {
+    const { active } = event;
+    const row = rows.find(r => r.__id__ === active.id);
+    if (!row) {
+      console.warn("Drag started on an invalid row:", active.id);
+      return;
+    }
+    setActiveRow(row || null);
+    gridContext.onClearSelection();
+  };
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (!over) {
+      setActiveRow(null);
+      setDragOverRowId(null);
+      setHoveredRowId(null);
+      return;
+    }
+
+    const [overId, position] = over.id.split(":");
+    const fromIndex = dataSet.caseIndexFromID(active.id);
+    let toIndex = dataSet.caseIndexFromID(overId);
+    if (fromIndex === -1 || toIndex === -1) {
+      console.warn("Invalid drag and drop indices:", fromIndex, toIndex);
+      setActiveRow(null);
+      setDragOverRowId(null);
+      setHoveredRowId(null);
+      return;
+    }
+
+    // Adjust for dropping "after"
+    if (position === "after") {
+      toIndex += 1;
+    }
+
+    // If moving down, and dropping after, need to account for removal of the row
+    if (fromIndex < toIndex) {
+      toIndex -= 1;
+    }
+    setActiveRow(null);
+
+    if (fromIndex !== toIndex && fromIndex !== -1 && toIndex !== -1) {
+      dataSet.moveCase(active.id, toIndex);
+    }
+
+    setDragOverRowId(null);
+    setHoveredRowId(null);
+  };
+
   // Define and submit functions for general tool tile API
   const padding = 10 + (modelRef.current.display === "teacher" ? 20 : 0);
   useToolApi({
@@ -240,13 +298,16 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   });
 
   useEffect(() => {
+    if (gridRef.current?.element) {
+      setGridElement(gridRef.current.element);
+    }
     if (containerRef.current) {
       // override the CSS variables controlling selection color for linked tables
       const dataGrid = containerRef.current.getElementsByClassName("rdg")[0] as HTMLDivElement | undefined;
       dataGrid?.style.setProperty("--header-selected-background-color", "rgba(0,0,0,0)");
       dataGrid?.style.setProperty("--row-selected-background-color", "rgba(0,0,0,0)");
     }
-  });
+  }, [gridRef, containerRef]);
 
   // Force a rerender whenever the model's attributes change (which contain the individual cells)
   useEffect(() => {
@@ -291,15 +352,22 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
         <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
           <EditableTableTitle
             model={model}
-            className="table-title"
+            className={`table-title ${showRowLabels ? "show-row-labels" : ""}`}
             readOnly={readOnly}
             titleCellWidth={titleCellWidth}
             titleCellHeight={getTitleHeight()}
             onBeginEdit={onBeginTitleEdit}
             onEndEdit={onEndTitleEdit} />
-          <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
-            headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
-            {...dataGridProps} {...rowProps} />
+          <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+            <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
+              headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
+              {...dataGridProps} {...rowProps} />
+            <DragOverlay>
+              {activeRow ? (
+                <RowDragOverlay row={activeRow} columns={columns} rowHeight={rowHeight} showRowLabels={showRowLabels}/>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         </div>
       </TableContext.Provider>
     </div>

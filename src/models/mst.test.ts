@@ -2,7 +2,9 @@ import { action, autorun, makeObservable, observable } from "mobx";
 import { addDisposer, applySnapshot, getType, isAlive, types, getRoot,
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
   getSnapshot, addMiddleware, getEnv,
-  createActionTrackingMiddleware2, resolvePath, flow, onSnapshot, hasEnv} from "mobx-state-tree";
+  createActionTrackingMiddleware2, resolvePath, flow, onSnapshot,
+  hasEnv
+} from "mobx-state-tree";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -322,9 +324,8 @@ describe("mst", () => {
     // but hasEnv can be used to check if the environment is defined
     const todo = Todo.create({name: "hello"});
     expect(autorunCount).toBe(1);
-    // Because there is no environment doSomething is not called
     expect(doSomething).toBeCalledTimes(0);
-    expect(hasEnv(todo)).toBe(false);
+    expect(hasEnv(todo)).toEqual(false);
 
     // Now we create a container object with an environment
     const todoList = TodoList.create({}, {someValue: 1});

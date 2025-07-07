@@ -1,5 +1,5 @@
-@import "../../components/mixins.sass";
-@import "../../components/vars.sass";
+@import "../../components/mixins";
+@import "../../components/vars";
 
 .expression-toolbar {
   @include tile-toolbar;

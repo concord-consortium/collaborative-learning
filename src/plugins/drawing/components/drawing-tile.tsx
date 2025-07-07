@@ -24,8 +24,13 @@ import { TileNavigator } from "../../../components/tiles/tile-navigator";
 import { NavigatorDirection } from "../../../models/tiles/navigatable-tile-model";
 import { BoundingBox } from "../model/drawing-basic-types";
 import { TileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
+import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
+import { kClosedObjectListPanelWidth, kOpenObjectListPanelWidth } from "../model/drawing-types";
+import { userSelectTile } from "../../../models/stores/ui";
+import { useContainerContext } from "../../../components/document/container-context";
 
 import "./drawing-tile.scss";
+
 export interface IDrawingTileProps extends ITileProps {
   overflowVisible?: boolean;
 }
@@ -34,6 +39,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   const { tileElt, model, readOnly, onRegisterTileApi, navigatorAllowed = true, overflowVisible } = props;
   const contentModel = model.content as DrawingContentModelType;
   const contentRef = useCurrent(contentModel);
+  const containerContext = useContainerContext();
   const drawingToolElement = useRef<HTMLDivElement>(null);
   const hotKeys = useRef(new HotKeys());
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
@@ -58,12 +64,11 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return contentRef.current.exportJson(options);
       },
-      getObjectBoundingBox(objectId, objectType) {
+      getObjectBoundingBox(objectId, objectType): ObjectBoundingBox | undefined {
         const bbPadding = 5;
-        const object = contentRef.current.objectMap[objectId];
+        const bb = contentRef.current.getObjectBoundingBox(objectId);
         const zoom = contentRef.current.zoom;
-        if (object) {
-          const bb = object.boundingBox;
+        if (bb) {
           const height = (bb.se.y - bb.nw.y + bbPadding * 2) * zoom;
           const width = (bb.se.x - bb.nw.x + bbPadding * 2) * zoom;
           const left = (bb.nw.x - bbPadding) * zoom + getObjectListPanelWidth();
@@ -94,7 +99,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       // I don't know if this ever happens in real life, but it does happen in Cypress.
       if (e.currentTarget === e.target) {
         const append = hasSelectionModifier(e);
-        ui.setSelectedTileId(model.id, { append });
+        userSelectTile(ui, model, { readOnly, append, container: containerContext.model });
       }
     };
 
@@ -106,7 +111,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
         tileElt.removeEventListener("touchstart", handleTilePointerDown);
       });
     }
-  }, [model.id, tileElt, ui]);
+  }, [tileElt, ui, containerContext.model, model, readOnly]);
 
   // copy to clipboard
   const handleCopy = () => {
@@ -173,16 +178,11 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     // When user clicks on specific objects, we handle those events locally
     // and don't allow the events to bubble up to this handler.
     const append = hasSelectionModifier(e);
-    ui.setSelectedTileId(model.id, { append });
+    userSelectTile(ui, model, { readOnly, append, container: containerContext.model });
   };
 
   const getObjectListPanelWidth = () => {
-    if (drawingToolElement.current) {
-      const objectListElement = drawingToolElement.current.querySelector<HTMLDivElement>('div.object-list');
-      return objectListElement ? objectListElement.offsetWidth : 0;
-    } else {
-      return 0;
-    }
+    return contentRef.current.listViewOpen ? kOpenObjectListPanelWidth : kClosedObjectListPanelWidth;
   };
 
   const getVisibleCanvasSize = () => {

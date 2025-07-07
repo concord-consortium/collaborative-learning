@@ -1472,8 +1472,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     this.setDragging(true);
     if (board && !hasSelectionModifier(evt || {})) {
-      content.metadata.selection.forEach((isSelected: boolean, _id) => {
-        const id = String(_id);
+      content.metadata.selection.forEach((isSelected, id) => {
         const obj = board.objects[id];
         const pt = isPoint(obj) ? obj : undefined;
         if (pt && isSelected && !pt.getAttribute("fixed")) {

@@ -16,6 +16,8 @@ import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { getDocumentContentFromNode } from "../../utilities/mst-utils";
+import { userSelectTile } from "../../models/stores/ui";
+import { IContainerContextType, useContainerContext } from "../document/container-context";
 import "../../utilities/dom-utils";
 
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
@@ -69,7 +71,6 @@ interface ITileBaseProps {
   indexInRow?: number;
   model: ITileModel;
   readOnly?: boolean;
-  typeClass?: string;
   onResizeRow: (e: React.DragEvent<HTMLDivElement>) => void;
   onSetCanAcceptDrop: (tileId?: string) => void;
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
@@ -87,23 +88,27 @@ export interface ITileProps extends ITileBaseProps, IRegisterTileApiProps {
 }
 
 interface IProps extends ITileBaseProps {
+  containerContext?: IContainerContextType;
 }
 
 interface IDragTileButtonProps {
   divRef: (instance: HTMLDivElement | null) => void;
   hovered: boolean;
   selected: boolean;
+  selectTileHandler: (e: React.PointerEvent<HTMLDivElement>) => void;
   handleTileDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
   triggerResizeHandler: () => void;
 }
 const DragTileButton = (
-    { divRef, hovered, selected, handleTileDragStart, triggerResizeHandler }: IDragTileButtonProps) => {
+    { divRef, hovered, selected,
+      handleTileDragStart, triggerResizeHandler, selectTileHandler }: IDragTileButtonProps) => {
   const classes = classNames("tool-tile-drag-handle", { hovered, selected });
   return (
     <div className={`tool-tile-drag-handle-wrapper`}
       ref={divRef}
       onDragStart={handleTileDragStart}
       onDragEnd={triggerResizeHandler}
+      onClick={selectTileHandler}
       draggable={true}
       data-testid="tool-tile-drag-handle"
       aria-label="Drag to move tile"
@@ -144,7 +149,7 @@ defaultDragImage.src = dragPlaceholderImage;
 
 @inject("stores")
 @observer
-export class TileComponent extends BaseComponent<IProps, IState> {
+class InternalTileComponent extends BaseComponent<IProps, IState> {
 
   static contextType = TileApiInterfaceContext;
   declare context: React.ContextType<typeof TileApiInterfaceContext>;
@@ -202,14 +207,14 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { model, readOnly, isUserResizable, widthPct, typeClass } = this.props;
+    const { model, readOnly, isUserResizable, widthPct } = this.props;
     const { hoverTile } = this.state;
     const { appConfig, ui, persistentUI } = this.stores;
     const { Component, tileEltClass } = getTileComponentInfo(model.content.type) || {};
     const isPlaceholderTile = Component === PlaceholderTileComponent;
     const isTileSelected = ui.isSelectedTile(model);
     const tileSelectedForComment = isTileSelected && persistentUI.showChatPanel;
-    const classes = classNames("tool-tile", model.display, tileEltClass, typeClass, {
+    const classes = classNames("tool-tile", model.display, tileEltClass, {
       placeholder: isPlaceholderTile,
       readonly: readOnly,
       fixed: model.isFixedPosition,
@@ -224,6 +229,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                               divRef={elt => this.dragElement = elt}
                               hovered={hoverTile}
                               selected={isTileSelected}
+                              selectTileHandler={this.selectTileHandler}
                               handleTileDragStart={this.handleTileDragStart}
                               triggerResizeHandler={this.triggerResizeHandler}
                               />;
@@ -351,9 +357,16 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     this.hotKeys.dispatch(e);
   };
 
+  private selectTileHandler = (e: React.PointerEvent<HTMLDivElement> | MouseEvent | TouchEvent) => {
+    const { model, readOnly, containerContext } = this.props;
+    const { ui } = this.stores;
+    userSelectTile(ui, model,
+      { readOnly, append: hasSelectionModifier(e),
+        container: containerContext?.model });
+  };
+
   private handlePointerDown = (e: MouseEvent | TouchEvent) => {
     const { model } = this.props;
-    const { ui } = this.stores;
 
     // ignore mousedown on drag element
     let targetElement: HTMLElement | null = e.target as HTMLElement;
@@ -366,7 +379,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
     // Select the tile if the tool doesn't handle the selection itself
     if (!getTileComponentInfo(model.content.type)?.tileHandlesOwnSelection) {
-      ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
+      this.selectTileHandler(e);
     }
   };
 
@@ -485,3 +498,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
   };
 }
+
+export const TileComponent = observer((props: IProps) => {
+  const containerContext = useContainerContext();
+  return <InternalTileComponent {...props} containerContext={containerContext} />;
+});

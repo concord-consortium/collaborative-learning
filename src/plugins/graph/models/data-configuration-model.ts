@@ -341,8 +341,6 @@ export const DataConfigurationModel = types
      */
     get caseSelection() {
       if (!self.dataset || self.filteredCases.length === 0) return [];
-      // With the change to MobX 6.13.0 Array.from() returns `unknown[]` instead of `string[]`
-      // so we need to cast it.
       const caseSelection = Array.from(self.dataset.caseSelection as Set<string>),
         allGraphCaseIds = self.graphCaseIDs;
       return caseSelection.filter((caseId: string) => allGraphCaseIds.has(caseId));

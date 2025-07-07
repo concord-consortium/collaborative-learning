@@ -69,16 +69,30 @@ class TableToolTile{
         return cy.get('.rdg-text-editor');
     }
     typeInTableCellXY(row, col, text) {
-      this.getTableCellXY(row, col).dblclick();
-      return cy.document().within(() => {
-        this.getTableCellEdit().type(`${text}{enter}`);
+      this.getTableCellXY(row, col).then($cell => {
+        if ($cell.attr('aria-selected') !== 'true') {
+          this.getTableCellXY(row, col).click({ scrollBehavior: false });
+          this.getTableCellXY(row, col).should('have.attr', 'aria-selected', 'true');
+          cy.wait(100);
+        }
+        this.getTableCellXY(row, col).click({ scrollBehavior: false });
+        cy.document().within(() => {
+          this.getTableCellEdit().type(`${text}{enter}`, { scrollBehavior: false });
+        });
       });
     }
     typeInTableCell(i, text, confirm=true) {
       const confirmation = confirm ? '{enter}' : '';
-      this.getTableCell().eq(i).dblclick();
-      return cy.document().within(() => {
-        this.getTableCellEdit().type(`${text}${confirmation}`);
+      this.getTableCell().eq(i).then($cell => {
+        if ($cell.attr('aria-selected') !== 'true') {
+          this.getTableCell().eq(i).click({ scrollBehavior: false });
+          this.getTableCell().eq(i).should('have.attr', 'aria-selected', 'true');
+          cy.wait(100);
+        }
+        this.getTableCell().eq(i).click({ scrollBehavior: false });
+        return cy.document().within(() => {
+          this.getTableCellEdit().type(`${text}${confirmation}`, { scrollBehavior: false });
+        });
       });
     }
     getTableCellWithColIndex(colIndex, colValue){
@@ -92,7 +106,7 @@ class TableToolTile{
         this.getTableCell().eq(cell).type(num+'{enter}');
     }
     getTableIndexColumnCell(){
-        return this.getTableTile().find('.rdg-cell.index-column');
+        return this.getTableTile().find('.index-cell-contents');
     }
     // Fill in a table tile with the given data (a list of lists)
     // Table tile should in the default state (2 columns, no rows)
@@ -163,8 +177,87 @@ class TableToolTile{
       }
     }
     checkEmptyTableValues() {
-      this.getTableCellWithRowColIndex(0, 2).should("have.text", "");
-      this.getTableCellWithRowColIndex(0, 3).should("have.text", "");
+      this.getTableCellWithRowColIndex(0, 2).should('have.text', '');
+      this.getTableCellWithRowColIndex(0, 3).should('have.text', '');
+    }
+
+    // Row reordering helper methods
+    getRowDragIndicator() {
+      return cy.get('[data-testid="row-drag-indicator"]');
+    }
+
+    getRowDividers() {
+      return cy.get('[data-testid^="row-divider-"]');
+    }
+
+    getRowDividerBefore(rowId) {
+      return cy.get(`[data-testid="row-divider-${rowId}-before"]`);
+    }
+
+    getRowDividerAfter(rowId) {
+      return cy.get(`[data-testid="row-divider-${rowId}-after"]`);
+    }
+
+    getRowIndexLabels() {
+      return cy.get('.row-index-label');
+    }
+
+    getDragOverlayRow() {
+      return cy.get('.drag-overlay-row');
+    }
+
+    getDragOverlayCell() {
+      return cy.get('.drag-overlay-cell');
+    }
+
+    getIndexCellWrapper() {
+      return cy.get('.index-cell-wrapper');
+    }
+
+    getIndexCellContents() {
+      return cy.get('.index-cell-contents');
+    }
+
+    hoverOverRow(rowIndex) {
+      return this.getIndexCellWrapper().eq(rowIndex).trigger('mouseover');
+    }
+
+    unhoverFromRow(rowIndex) {
+      return this.getIndexCellWrapper().eq(rowIndex).trigger('mouseout');
+    }
+
+    verifyRowDragIndicatorVisible() {
+      this.getRowDragIndicator().should('exist');
+    }
+
+    verifyRowDragIndicatorHidden() {
+      this.getRowDragIndicator().should('have.css', 'opacity', '0');
+    }
+
+    verifyRowDividersExist() {
+      this.getRowDividers().should('exist');
+    }
+
+    verifyRowDividersHidden() {
+      cy.get('.row-divider').should('have.css', 'visibility', 'hidden');
+    }
+
+    verifyRowIndexLabelsExist() {
+      this.getRowIndexLabels().should('exist');
+    }
+
+    verifyRowIndexLabelsNotExist() {
+      this.getRowIndexLabels().should('not.exist');
+    }
+
+    verifyGrabCursor() {
+      this.getIndexCellContents().should('have.css', 'cursor', 'grab');
+    }
+
+    verifyTableAccessibility() {
+      cy.get('.table-tool').should('have.attr', 'role', 'grid');
+      cy.get('.rdg-row').should('have.attr', 'role', 'row');
+      cy.get('.rdg-cell').should('have.attr', 'role', 'gridcell');
     }
 }
 export default TableToolTile;

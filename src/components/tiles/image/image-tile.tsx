@@ -11,7 +11,7 @@ import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { IDocumentContext } from "../../../models/document/document-types";
-import { debouncedSelectTile } from "../../../models/stores/ui";
+import { userSelectTile } from "../../../models/stores/ui";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { ImageContentModelType } from "../../../models/tiles/image/image-content";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -21,8 +21,9 @@ import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
+import { ContainerContext } from "../../document/container-context";
 
-import "./image-tile.sass";
+import "./image-tile.scss";
 
 type IProps = ITileProps;
 
@@ -55,6 +56,10 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   private toolbarToolApi: ITileApi | undefined;
   private resizeObserver: ResizeObserver;
   private imageElt: HTMLDivElement | null;
+
+  static contextType = ContainerContext;
+  declare context: React.ContextType<typeof ContainerContext>;
+
   private updateImage = (url: string, filename?: string) => {
 
     gImageMap.getImage(url, { filename })
@@ -269,7 +274,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    debouncedSelectTile(this.stores.ui, this.props.model, hasSelectionModifier(e));
+    userSelectTile(this.stores.ui, this.props.model,
+      { readOnly: this.props.readOnly, append: hasSelectionModifier(e), container: this.context.model });
   };
 
   private storeNewImageUrl(newUrl: string) {

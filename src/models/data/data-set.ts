@@ -1,7 +1,8 @@
 import { cloneDeep, findIndex } from "lodash";
 import { observable } from "mobx";
-import { applyAction, getEnv, hasEnv, Instance, ISerializedActionCall,
-          onAction, types, getSnapshot, SnapshotOut } from "mobx-state-tree";
+import { applyAction, getEnv, Instance, ISerializedActionCall,
+          onAction, types, getSnapshot, SnapshotOut,
+          hasEnv } from "mobx-state-tree";
 import { Attribute, IAttribute, IAttributeSnapshot } from "./attribute";
 import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
 import { CaseGroup } from "./data-set-types";
@@ -725,6 +726,31 @@ export const DataSet = types.model("DataSet", {
           }
         });
       },
+      moveCase(caseID: string, beforeIndex: number) {
+        const srcIndex = self.caseIDMap[caseID];
+        const finalCaseIds = self.cases.map(c => c.__id__);
+        const caseIdToIndexMap: Record<string, { beforeIdx: number, afterIndex: number }> = {};
+        finalCaseIds.forEach((caseId, beforeIdx) => caseIdToIndexMap[caseId] = { beforeIdx, afterIndex: -1 });
+        if (srcIndex != null) {
+          if (beforeIndex != null && beforeIndex < self.cases.length) {
+            finalCaseIds.splice(srcIndex, 1);
+            finalCaseIds.splice(beforeIndex, 0, caseID);
+          } else {
+            finalCaseIds.splice(srcIndex, 1);
+            finalCaseIds.push(caseID);
+            beforeIndex = finalCaseIds.length - 1;
+          }
+          finalCaseIds.forEach((caseId, index) => caseIdToIndexMap[caseId].afterIndex = index);
+          if (finalCaseIds.every((caseId, index) => caseId === self.cases[index].__id__)) {
+            return;
+          }
+          // apply the index mapping to each attribute's value arrays
+          const origIndices = finalCaseIds.map(caseId => caseIdToIndexMap[caseId].beforeIdx);
+          self.attributes.forEach(attr => attr.orderValues(origIndices));
+          // update the cases array
+          self.cases.replace(finalCaseIds.map(__id__ => ({__id__})));
+        }
+      },
       sortByAttribute(attributeId: string, direction: "ASC" |"DESC" = "ASC") {
         const compareFn = (aItemId: string, bItemId: string) => {
           const aValue = self.getValue(aItemId, attributeId);
@@ -952,5 +978,3 @@ export function getDataSetBounds(dataSet: IDataSet) {
   });
   return result;
 }
-
-

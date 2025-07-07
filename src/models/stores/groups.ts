@@ -220,4 +220,3 @@ export const GroupsModel = types
 export type GroupUserModelType = typeof GroupUserModel.Type;
 export type GroupModelType = typeof GroupModel.Type;
 export type GroupsModelType = typeof GroupsModel.Type;
-

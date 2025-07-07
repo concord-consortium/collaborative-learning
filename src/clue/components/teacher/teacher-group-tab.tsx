@@ -5,7 +5,7 @@ import { DocumentViewMode } from "../../../components/document/document";
 import { Pager } from "../../../components/pager";
 import { SixPackRightControls } from "./sixpack-right-controls";
 import { TeacherGroupSixPack, GROUPS_PER_PAGE } from "./teacher-group-six-pack";
-import "./teacher-group-tab.sass";
+import "./teacher-group-tab.scss";
 
 interface IProps extends IBaseProps {}
 

@@ -1,9 +1,10 @@
-@import "../../vars.sass";
+@import "../../vars";
 @import "../../../models/tiles/table-links";
 
 $table-padding: 10px;
 $row-height: 34px;
 $index-column-width: 34px;
+$index-column-with-label-width: $index-column-width + 7px;
 $controls-column-width: 36px;
 $platform-scrollbar-width: 16px;
 $header-color: $workspace-teal-light-5;
@@ -35,6 +36,9 @@ $controls-hover-background: #c0dfe7;
       font-weight: bold;
       padding: 8px;
       position: relative;
+      &.show-row-labels {
+        margin-left: $index-column-with-label-width - 1px;
+      }
 
       &.table-title-default {
         font-style: italic;
@@ -95,6 +99,7 @@ $controls-hover-background: #c0dfe7;
     height: calc(100% - #{$row-height});
     border: none;
     overflow: auto !important;
+    position: relative;
 
     &.show-expressions {
       .index-column-header {
@@ -284,17 +289,55 @@ $controls-hover-background: #c0dfe7;
           }
         }
       }
+      &:hover {
+        background-color: rgba(0, 129, 255, 0.12);
+      }
     }
     .index-column {
-      width: $index-column-width;
       min-width: $index-column-width;
       padding: 0;
       background-color: var(--header-background-color);
       font-weight: bold;
       font-style: italic;
-      .index-cell-contents {
+      .index-cell-wrapper {
         width: 100%;
         height: 100%;
+        .index-cell-contents {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          cursor: grab;
+          .row-drag-icon {
+            position: absolute;
+            top: 1.5px;
+            left: 0px;
+            opacity: 0;
+          }
+          .row-index-label {
+            position: absolute;
+            right: 5px;
+            min-width: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+          }
+        }
+        &:hover {
+          background-color: rgba(0, 129, 255, 0.20);
+          .index-cell-contents {
+            position: relative;
+            .row-drag-icon {
+              opacity: 0.35;
+            }
+          }
+        }
+        &:active {
+          background-color: rgba(0, 129, 255, 0.40);
+          opacity: 1;
+        }
       }
     }
     .rdg-cell {
@@ -352,6 +395,69 @@ $controls-hover-background: #c0dfe7;
   &.linked {
     box-shadow: inset 0 0 0 3px $highlight-linked-edit;
   }
+}
+
+.drag-overlay-row {
+  display: flex;
+  align-items: stretch;
+  background: $header-input-color; // or white, to match your grid
+  border: 1px solid $charcoal-light-1;
+  box-shadow: 0 0 5px rgba(0,0,0,0.25);
+  border-radius: 4px;
+  pointer-events: none;
+  font-size: 14px;
+  font-weight: normal;
+  overflow: hidden;
+  opacity: 0.75;
+  pointer-events: none;
+
+  .drag-overlay-cell {
+    display: flex;
+    align-items: center;
+    font-size: inherit;
+    font-weight: inherit;
+    border-right: 1px solid $charcoal-light-1;
+    background-color: rgba(0, 129, 255, 0.25);
+    position: relative;
+
+    &:first-child {
+      border-left: none;
+      width: $index-column-width;
+      background-color: rgba(0, 129, 255, 0.40);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .row-drag-icon {
+        position: absolute;
+        opacity: 1;
+      }
+
+      .row-index-label {
+        position: absolute;
+        right: 5px;
+        min-width: 18px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+    }
+    &:last-child {
+      border-right: none;
+    }
+  }
+}
+
+.row-divider {
+  background-color: $color7;
+  visibility: hidden;
+  position: absolute;
+  z-index: 10;
+}
+.row-divider.over {
+  visibility: visible;
+  opacity: 0.75;
 }
 
 // .link-color-0 > .ag-theme-fresh .ag-row-selected

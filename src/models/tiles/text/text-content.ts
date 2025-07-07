@@ -20,7 +20,8 @@ export const TextContentModel = TileContentModel
     type: types.optional(types.literal(kTextTileType), kTextTileType),
     text: types.optional(types.union(types.string, types.array(types.string)), ""),
     // e.g. "html", "markdown", "slate", "quill", empty => plain text
-    format: types.maybe(types.string)
+    format: types.maybe(types.string),
+    highlightedText: types.optional(types.array(types.model({id: types.identifier, text: types.string})), [])
   })
   .volatile(self => ({
     editor:  undefined as CustomEditor | undefined,
@@ -131,6 +132,15 @@ export const TextContentModel = TileContentModel
     },
     setEditor(editor?: Editor) {
      self.editor = editor;
+    },
+    addHighlight(id: string, text: string) {
+      self.highlightedText.push({ id, text });
+    },
+    removeHighlight(id: string) {
+      const index = self.highlightedText.findIndex(ht => ht.id === id);
+      if (index >= 0) {
+        self.highlightedText.splice(index, 1);
+      }
     }
   }))
   .actions(self => ({
