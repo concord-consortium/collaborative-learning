@@ -259,7 +259,7 @@
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "mathlive": "^0.94.6",
-    "mobx": "^6.6.1",
+    "mobx": "^6.13.6",
     "mobx-react": "^7.5.2",
     "nanoid": "^3.3.4",
     "object-hash": "^3.0.0",
