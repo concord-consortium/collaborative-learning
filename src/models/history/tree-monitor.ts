@@ -44,7 +44,7 @@ export class TreeMonitor {
         runningCalls.set(call.actionCall, call);
 
         // DEBUG:
-        // console.log("onStart", getActionName(call));
+        // console.log("onStart", getActionPath(call));
         const sharedModelModifications: SharedModelModifications = {};
 
         // Save the sharedModelMap before any changes are made this way if
@@ -150,6 +150,9 @@ export class TreeMonitor {
           !exchangeId || undoable === undefined) {
           throw new Error(`The call.env is corrupted: ${ JSON.stringify(call.env)}`);
         }
+        // DEBUG:
+        // console.log("onFinish", getActionPath(call));
+
         call.env = undefined;
         recorder.stop();
 
