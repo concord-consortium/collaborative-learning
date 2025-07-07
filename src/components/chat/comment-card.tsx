@@ -116,7 +116,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             );
           })
         }
-        <WaitingMessage content={content} />
+        { !focusTileId && <WaitingMessage content={content} /> }
         <CommentTextBox
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}
