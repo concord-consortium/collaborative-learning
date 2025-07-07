@@ -1,6 +1,6 @@
 import { addMiddleware, flow, types } from "mobx-state-tree";
-import { createActionTrackingMiddleware3, IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
 import { action, makeObservable } from "mobx";
+import { createActionTrackingMiddleware3, IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
 
 /**
  * This is based on MST's own createActionTrackingMiddleware2 test. The change
