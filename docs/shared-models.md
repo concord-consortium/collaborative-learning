@@ -38,9 +38,9 @@ The design also supports tiles that need to work with multiple shared models. In
 When the shared model changes, any tiles that are linked to it will have their `updateAfterSharedModelChanges(sharedModel?: SharedModelType)` action called.
 The tile should use this action to update any of its own state that references the shared model. For example if it has a list of items each referring to an item in the shared model, this is the point where the tile should update its own list. Perhaps it would delete any of its own items that are referring to a shared model item that doesn't exist, and add new items for new shared model items.
 
-The tile should not use a MobX autorun or reaction to monitor changes in the shared model itself. In the future when we support undo/redo and time travel it will be important for the container to disable this updating and then re-enable it again. If the tile handles its own monitoring the container won't be able to disable it.
+The tile should not use a MobX autorun or reaction to monitor changes in the shared model itself. When the undo/redo and time travel features are used it is important for the container to disable this updating of tile content state and then re-enable it again. If the tile handles its own monitoring the container won't be able to disable it.
 
-Implementation: The update monitoring is managed in `SharedModelDocumentManager` using an `autorun` which is monitoring the list of shared models on the document. If a new shared model is added this shared model will get an `onSnapshot` listener added to it. The `onSnapshot` listener for each shared model is what calls the `updateAfterSharedModelChanges` on the tiles. This approach could be made more efficient but it is likely to be replaced anyway when we add undo/redo and time-travel with a real MST middleware.
+Implementation: The update monitoring and triggering is managed by a combination of a MST middleware made by `createActionTrackingMiddleware3` and the `TreeMonitor`. When a new shared model is added the `TreeMonitor` identifies this by seeing that something at the path `/content\/sharedModelMap\/` was modified by an action.
 
 ## Document Data Model
 
@@ -51,3 +51,15 @@ The shared models are stored/contained at the document level in a `sharedModelMa
 The document level `sharedModelMap` is a map of shared model ids to `SharedModelEntry` objects. Each `SharedModelEntry` has a shared model and an array of tiles that are using this shared model. This relationship between shared models and tiles is called a shared model link in other places in the documentation.
 
 Note: one reason for the `SharedModelEntry` indirection is due to the behavior of MST. Using `types.map(types.late(...))` does not work in MST. The late type is evaluated immediately in this case. Putting an object in between was the best approach I could find to deal with this. So now it is `types.map(types.model({sharedModel: types.late(...)}))`. This is similar to how tiles are handled because they have the `TileModel` between them and the document.
+
+## Multiple Undo/Redo entries when shared model is added
+
+The recommended pattern described for setting up the shared models of tiles might sometimes cause multiple undo/redo entries when the tile is added to the document. This pattern uses a MobX reaction to setup the shared models after the tile has been attached to the document. Because these changes are run in a reaction this will cant be recorded as a separate actions (or actions) by the action tracking middleware. The action tracking middleware is configured to record "hooks" along with the action. So the changes made in `afterAttach` hook will be recorded along with the main action. If the reaction fires immediately any changes it makes in this first invocation will be recorded as part of the initial action.
+
+If the tile content model is created as part of a tile outside of the main tree, so its afterAttach will be first first but there won't be a shared model manager, then when it is added to the tree the reaction will not be run inside of an MST hook. So this is case where additional undo/redo entries can be added.
+
+This can be somewhat improved by taking the approach of the GraphModel. It puts all of the updating into a `initializeSharedModelReferences` action which is called by the MobX reaction. This way there will only be one action recorded by the action tracking middleware instead of multiple actions. However this still won't combine this `initializeSharedModelReferences` with whatever action made the change that triggered the reaction.
+
+I don't have a concrete case which causes this problem, but I'm pretty sure we've seen it happen. So if you find one, please update this section with its details.
+
+This issue should be resolvable by making an action like `initializeSharedModelReferences` an official CLUE Tile action and then updating the framework to call this action itself instead of requiring each tile to use a reaction to do so. With that mechanism in place the framework can group this action with the main action that can trigger it. This will probably not be easy though because we need to know the cases that can trigger it. And we need to figure out if we can call `initializeSharedModelReferences` just once or it needs to be re-active to support the needs of the tiles. Some code that tiles currently run in these reactions can probably be moved to `updateAfterSharedModelChanges`.

@@ -27,7 +27,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       document: observable,
       isReady: computed,
       setDocument: action,
-      assignIndexOfType: action,
       addTileSharedModel: action,
       removeTileSharedModel: action
     });
@@ -69,7 +68,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     this.document = document;
     // assign shared model indices by type when document is specified
     for(const sharedModelEntry of this.document.sharedModelMap.values()) {
-      this.assignIndexOfType(sharedModelEntry.sharedModel);
+      document._assignSharedModelIndexOfType(sharedModelEntry.sharedModel);
     }
   }
 
@@ -96,44 +95,9 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return;
     }
 
-    // assign an indexOfType if necessary
-    if (sharedModel.indexOfType < 0) {
-      const usedIndices = new Set<number>();
-      const sharedModels = this.document.getSharedModelsByType(sharedModel.type);
-      sharedModels.forEach((model: SharedModelType) => {
-        if (model.indexOfType >= 0) {
-          usedIndices.add(model.indexOfType);
-        }
-      });
-      for (let i = 1; sharedModel.indexOfType < 0; ++i) {
-        if (!usedIndices.has(i)) {
-          sharedModel.setIndexOfType(i);
-          break;
-        }
-      }
-    }
-
     // register it with the document if necessary.
     // This won't re-add it if it is already there
     return this.document.addSharedModel(sharedModel);
-  }
-
-  assignIndexOfType(sharedModel: SharedModelType) {
-    if (sharedModel.indexOfType < 0) {
-      const usedIndices = new Set<number>();
-      const sharedModels = this.document?.getSharedModelsByType(sharedModel.type);
-      sharedModels?.forEach(model => {
-        if (model.indexOfType >= 0) {
-          usedIndices.add(model.indexOfType);
-        }
-      });
-      for (let i = 0; sharedModel.indexOfType < 0; ++i) {
-        if (!usedIndices.has(i)) {
-          sharedModel.setIndexOfType(i);
-          break;
-        }
-      }
-    }
   }
 
   addTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType, isProvider = false): void {
@@ -141,30 +105,14 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       console.warn("addTileSharedModel has no document. this will have no effect");
       return;
     }
-    // add this tile to the sharedModel entry
+
     const tile = getTileModel(tileContentModel);
     if (!tile) {
       console.warn("addTileSharedModel can't find the tile");
       return;
     }
 
-    // assign an indexOfType if necessary
-    this.assignIndexOfType(sharedModel);
-
-    // register it with the document if necessary.
-    // This won't re-add it if it is already there
-    const sharedModelEntry = this.document.addSharedModel(sharedModel);
-
-    // If the sharedModel was added before we don't need to do anything
-    if (sharedModelEntry.tiles.includes(tile)) {
-      return;
-    }
-
-    sharedModelEntry.addTile(tile, isProvider);
-
-    // When a shared model entry changes updateAfterSharedModelChanges is called on
-    // the tile content model automatically by the tree monitor. This will also
-    // pick up this case of adding a tile.
+    this.document._addTileSharedModel(tile, sharedModel, isProvider);
   }
 
   // This is not an action because it is deriving state.
