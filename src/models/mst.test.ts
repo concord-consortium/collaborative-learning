@@ -321,7 +321,7 @@ describe("mst", () => {
 
     // We create the object with no environment
     // Previously MST would return {} in this case, now it throws an exception
-    // but hasEnv is be used to check if the environment is defined
+    // but hasEnv can be used to check if the environment is defined
     const todo = Todo.create({name: "hello"});
     expect(autorunCount).toBe(1);
     expect(doSomething).toBeCalledTimes(0);
