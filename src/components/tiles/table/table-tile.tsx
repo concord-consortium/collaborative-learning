@@ -25,7 +25,7 @@ import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { verifyAlive } from "../../../utilities/mst-utils";
-import { gImageMap, ImageMapEntry } from "../../../models/image-map";
+import { gImageMap } from "../../../models/image-map";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
 import { ITableContext, TableContext } from "../hooks/table-context";
@@ -51,7 +51,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const ui = useUIStore();
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const content = useMemo(() => getContent(), [getContent]);
-  const imagePromises = useMemo(() => new Map<string, Promise<ImageMapEntry>>(), []);
   const [imageUrls, setImageUrls] = useState(new Map<string,string>());
   verifyAlive(content, "TableToolComponent");
   const metadata = getContent().metadata;
@@ -102,11 +101,9 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // and then looks it up in the background, adds to cache, and updates state to force a refresh.
   const lookupImage = useCallback((value: string) => {
     if (gImageMap.isImageUrl(value)) {
-      let imagePromise = imagePromises.get(value);
-      if (!imagePromise) {
-        imagePromise = gImageMap.getImage(value);
-        imagePromises.set(value, imagePromise);
-        imagePromise.then((image) => {
+      const imageEntry = gImageMap.getCachedImage(value);
+      if (!imageEntry) {
+        gImageMap.getImage(value).then((image) => {
           if (image && image.displayUrl) {
             // This state changes triggers a re-render
             setImageUrls(urls => new Map(urls).set(value, image.displayUrl));
@@ -115,7 +112,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       }
       return imageUrls.get(value);
     }
-  }, [imagePromises, imageUrls]);
+  }, [imageUrls]);
 
   // React components used for the index (left most) column
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
