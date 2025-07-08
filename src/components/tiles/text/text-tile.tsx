@@ -10,6 +10,7 @@ import { BaseComponent } from "../../base";
 import { userSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
+import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
 import { createTextPluginInstances, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
@@ -204,6 +205,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
             className={containerClasses}
             data-testid="text-tool-wrapper"
             ref={elt => this.textTileDiv = elt}
+            onMouseDown={this.handleMouseDownInWrapper}
           >
             <Slate
               editor={this.editor as ReactEditor}
@@ -241,6 +243,34 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       // Update content model when user changes slate
       content.setSlate(value);
       this.isHandlingUserChange = false;
+    }
+  };
+
+  private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { ui } = this.stores;
+    const { model } = this.props;
+    const readOnly = this.isReadOnly();
+    const inLockedContainer = this.context.isLocked;
+
+    // Don't select a locked prompt
+    if (this.props.model.fixedPosition && inLockedContainer) {
+      return;
+    }
+
+    const append = hasSelectionModifier(e);
+    const isWrapperClick = e.target === this.textTileDiv;
+    userSelectTile(ui, model, { readOnly, append, container: this.context.model });
+
+    if (isWrapperClick || append) {
+      if (readOnly) {
+        // In read-only mode, just prevent the default to avoid Slate's auto-select
+        // but don't stop propagation to allow text selection to work
+        e.preventDefault();
+      } else if (isWrapperClick) {
+        // In editable mode, focus the editor for wrapper clicks
+        this.editor && ReactEditor.focus(this.editor);
+        e.preventDefault();
+      }
     }
   };
 

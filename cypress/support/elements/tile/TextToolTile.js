@@ -5,6 +5,11 @@ class TextToolTile {
     getTextTile(workspaceClass){
         return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .text-tool`);
     }
+    verifyTextTileIsEditable(){
+      cy.wait(500);
+      expect(this.getTextTile).to.exist;
+      this.getTextTile().last().should('not.have.class', 'read-only');
+    }
     enterText(text){
         this.getTextTile().last().focus();
         this.getTextEditor().last().click();
