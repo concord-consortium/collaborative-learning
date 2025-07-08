@@ -221,7 +221,7 @@ context('Table Tool Tile', function () {
     cy.get('.modal-button').contains('Cancel').click();
     cy.get('.editable-header-cell')
       .contains(headerY) // y2 also contains "y" so this no longer works
-      .first()
+      .parent()
       .siblings('.expression-cell.has-expression')
       .should('not.exist');
 
