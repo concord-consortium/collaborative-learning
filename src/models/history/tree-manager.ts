@@ -336,6 +336,9 @@ export const TreeManager = types
 
 }))
 .actions((self) => ({
+  // Using async actions is generally not a good idea, because the changes will not be grouped into
+  // a single action for any action-tracking middleware. However, in this case we aren't recording the
+  // actions of the TreeManager.
   async mirrorHistoryFromFirestore(user: UserModelType, firestore: Firestore) {
     // FIXME-HISTORY: we should protect active documents so that if
     // mirrorHistoryFromFirestore is accidentally called on their treeManager
