@@ -7,8 +7,8 @@ class TextToolTile {
     }
     verifyTextTileIsEditable(){
       cy.wait(500);
-      expect(this.getTextTile).to.exist;
-      this.getTextTile().last().should('not.have.class', 'read-only');
+      this.getTextTile().last().should('exist').and('not.have.class', 'read-only');
+      this.getTextEditor().last().should('exist').and('have.class', 'editable');
     }
     enterText(text){
         this.getTextTile().last().focus();
