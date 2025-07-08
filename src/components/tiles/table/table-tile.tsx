@@ -255,6 +255,10 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
                 }
                 addAttributesAndCases(headers, csvRows);
                 triggerRowChange();
+                content.logChange({
+                  action: "import-data",
+                  target: "table"
+                });
               }
             },
             error: (err) => {
