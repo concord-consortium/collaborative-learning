@@ -95,6 +95,13 @@ class TableToolTile{
         });
       });
     }
+    typeExpressionInDialog(expression) {
+      cy.get('[data-testid="formula-editor-input"] [role="textbox"]')
+        .click()
+        // realType is needed because codemirror doesn't handle the simulated key events
+        // that cypress sends with a plain type command.
+        .realType(expression);
+    }
     getTableCellWithColIndex(colIndex, colValue){
         return cy.get('.rdg-row').contains('.rdg-cell[aria-colindex="' + colIndex + '"]', colValue);
         // return cy.get('.rdg-row .rdg-cell[aria-colindex=\"' + colIndex + '\"]');

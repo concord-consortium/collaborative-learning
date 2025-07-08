@@ -186,11 +186,11 @@ context('Table Tool Tile', function () {
     cy.log('will verify formula modal');
     clueCanvas.clickToolbarButton('table', 'set-expression');
     cy.get('.modal-title').should('contain', "Set Expression");
-    cy.get('.modal-content .prompt select').should('not.exist');
+    cy.get('.modal-content .prompt select').should('exist');
     cy.get('.modal-content .prompt').should('contain', "y");
 
     cy.log('will enter a formula');
-    cy.get('#expression-input').click().type(formula + '{enter}');
+    tableToolTile.typeExpressionInDialog(`${formula}{enter}`);
     cy.get('.ReactModalPortal').should('not.exist');
 
     cy.log('verify formula appears under correct column header');
@@ -213,10 +213,11 @@ context('Table Tool Tile', function () {
 
     cy.log('verify clear button functionality');
     cy.get('.modal-button').contains('Clear').click();
-    cy.get('#expression-input').should('not.contain', formula);
+    clueCanvas.clickToolbarButton('table', 'set-expression');
+    cy.get('[data-testid="formula-editor-input"]').should('not.contain', formula);
 
     cy.log('verify cancel does not enter in a formula');
-    cy.get('#expression-input').click().type(formula);
+    tableToolTile.typeExpressionInDialog(formula);
     cy.get('.modal-button').contains('Cancel').click();
     cy.get('.editable-header-cell')
       .contains(headerY) // y2 also contains "y" so this no longer works
@@ -230,20 +231,23 @@ context('Table Tool Tile', function () {
     cy.get('.modal-content .prompt select').should('exist');
     cy.get('.modal-content .prompt select').select('y2');
     cy.get('.modal-content .prompt').should('contain', 'y2');
-    cy.get('#expression-input').click().type(`${headerX}+2{enter}`);
+    tableToolTile.typeExpressionInDialog(`${headerX}+2{enter}`);
 
+    // At this point the formula for mars should be empty so there shouldn't
+    // be values in its cells.
     cy.log('verify value calculated based on formula correctly');
     cy.get(".primary-workspace").within((workspace) => {
       tableToolTile.typeInTableCell(1, '3');
       tableToolTile.getTableCell().eq(1).should('contain', '3');
-      tableToolTile.getTableCell().eq(2).should('contain', '11');
+      tableToolTile.getTableCell().eq(2).should('have.text', '');
       tableToolTile.getTableCell().eq(3).should('contain', '5');
       tableToolTile.typeInTableCell(1, '5');
-      tableToolTile.getTableCell().eq(2).should('contain', '17');
+      tableToolTile.getTableCell().eq(2).should('have.text', '');
       tableToolTile.getTableCell().eq(3).should('contain', '7');
       tableToolTile.typeInTableCell(6, 'a');
-      tableToolTile.getTableCell().eq(7).should('contain', 'NaN');
-      tableToolTile.getTableCell().eq(8).should('contain', 'NaN');
+      tableToolTile.getTableCell().eq(2).should('have.text', '');
+      // The formula editor will concatenate strings, so the value will be 'a2'
+      tableToolTile.getTableCell().eq(8).should('contain', 'a2');
     });
 
     cy.log('verifies restore of table field content in copy document');
@@ -254,15 +258,15 @@ context('Table Tool Tile', function () {
     canvas.getPersonalDocTitle().should('contain', copyTitle);
     tableToolTile.getTableTitle().should('contain', tableTitle);
     tableToolTile.getTableCell().eq(1).should('contain', '5');
-    tableToolTile.getTableCell().eq(2).should('contain', '17');
+    tableToolTile.getTableCell().eq(2).should('have.text', '');
     tableToolTile.getTableCell().eq(3).should('contain', '7');
 
     cy.get(".primary-workspace").within((workspace) => {
       cy.get('.editable-header-cell')
-        .filter(':has(.header-name:contains("mars"))')
+        .filter(':has(.header-name:contains("y2"))')
         .parent()
         .siblings('.expression-cell.has-expression')
-        .should('contain', formula);
+        .should('contain', `${headerX}+2`);
     });
 
     canvas.deleteDocument();

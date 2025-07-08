@@ -179,6 +179,7 @@
     "cypress": "^13.5.0",
     "cypress-commands": "3.0.0",
     "cypress-file-upload": "^5.0.8",
+    "cypress-real-events": "^1.14.0",
     "cypress-terminal-report": "^4.1.2",
     "enquirer": "^2.3.6",
     "eslint": "^8.22.0",
