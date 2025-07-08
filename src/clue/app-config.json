@@ -405,6 +405,7 @@
         "numFormat": ".2~f",
         "tools": [
           "import-data",
+          "|",
           "set-expression",
           "link-tile",
           "link-graph",

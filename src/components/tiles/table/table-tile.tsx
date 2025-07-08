@@ -4,6 +4,7 @@ import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { parse } from "papaparse";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { ITileProps } from "../tile-component";
 import { EditableTableTitle } from "./editable-table-title";
@@ -241,21 +242,25 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
       const reader = new FileReader();
       reader.onload = (e) => {
-        const contents = e.target?.result as string;
         if (isCSV) {
-          try {
-            const csvData = contents.split('\n').filter(row => row.trim().length > 0).map(row => row.split(','));
-            const headers = csvData[0];
-            const csvRows = csvData.slice(1);
+          parse(file, {
+            complete: (results) => {
+              const data = results.data as string[][];
+              if (data.length > 1) {
+                const headers = data[0];
+                const csvRows = data.slice(1);
 
-            if (dataSet.cases.length === 0) {
-              removeAllAttributes(dataSet);
+                if (dataSet.cases.length === 0) {
+                  removeAllAttributes(dataSet);
+                }
+                addAttributesAndCases(headers, csvRows);
+                triggerRowChange();
+              }
+            },
+            error: (err) => {
+              console.error("Error parsing CSV file:", err);
             }
-            addAttributesAndCases(headers, csvRows);
-            triggerRowChange();
-          } catch (err) {
-            console.error("Error parsing CSV file:", err);
-          }
+          });
         }
       };
       reader.readAsText(file);

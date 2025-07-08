@@ -460,12 +460,6 @@ $controls-hover-background: #c0dfe7;
   opacity: 0.75;
 }
 
-.toolbar-separator {
-  display: inline-block;
-  height: $toolbar-button-height; /* match your button height */
-  border-right: solid 1px $workspace-teal;
-}
-
 // .link-color-0 > .ag-theme-fresh .ag-row-selected
 //   background-color: $link-color-0-light
 
