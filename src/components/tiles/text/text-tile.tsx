@@ -12,6 +12,7 @@ import { userSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { HighlightRegistryContext, IHighlightBox } from "../../../plugins/text/highlight-registry-context";
+import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
@@ -169,7 +170,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         this.toolbarTileApi?.handleTileResize?.(entry);
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        if (objectType === "highlight") {
+        if (objectType === kHighlightFormat) {
           const box = this.highlightBoundingBoxes[objectId];
           if (box) return box;
         }
@@ -178,7 +179,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         // offset the annotation arrows to the right top corner of the bounding box until connected to a target,
         // and then offset should be the center of the edge closes to the target
         const offsets = OffsetModel.create({});
-        if (objectType === "highlight") {
+        if (objectType === kHighlightFormat) {
           const box = this.highlightBoundingBoxes[objectId];
           const { width, height } = box;
           offsets.setDx(width / 2);

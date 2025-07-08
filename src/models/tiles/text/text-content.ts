@@ -9,6 +9,7 @@ import { getAllTextPluginInfos } from "./text-plugin-info";
 import { escapeBackslashes, escapeDoubleQuotes, removeNewlines, removeTabs } from "../../../utilities/string-utils";
 import { tileContentAPIViews } from "../tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
+import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
 
 export const kTextTileType = "Text";
 
@@ -155,7 +156,7 @@ export const TextContentModel = TileContentModel
   .views(self => tileContentAPIViews({
     get annotatableObjects(): IClueTileObject[] {
       const objects: IClueTileObject[] = [];
-      const objectType = "highlight";
+      const objectType = kHighlightFormat;
       self.highlightedText.forEach(highlight => {
         objects.push({objectId: highlight.id, objectType});
       });
