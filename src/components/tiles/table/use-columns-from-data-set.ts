@@ -68,17 +68,9 @@ export const useColumnsFromDataSet = ({
     };
   }, [readOnly]);
 
-  const getSortDirection = useCallback((columnKey: string) => {
-    // Only return the sort direction if this column is the one being sorted
-    if (dataSet?.sortByAttribute === columnKey) {
-      return dataSet.sortDirection ?? "NONE";
-    }
-    return "NONE";
-  }, [dataSet?.sortByAttribute, dataSet?.sortDirection]);
-
   const ColumnHeaderCell = useColumnHeaderCell({
     height: headerHeight(),
-    getSortDirection,
+    getSortDirection: dataSet.getSortDirection,
     onSort: onSort ?? (() => {}),
   });
 

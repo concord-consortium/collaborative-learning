@@ -152,6 +152,13 @@ export const DataSet = types.model("DataSet", {
   getValueAtIndex(index: number, attributeID: string) {
     const attr = self.attrIDMap[attributeID];
     return attr && (index != null) ? attr.value(index) : undefined;
+  },
+  getSortDirection(attributeID: string) {
+      // Only return the sort direction if this column is the one being sorted
+      if (self.sortByAttribute === attributeID) {
+      return self.sortDirection ?? "NONE";
+    }
+    return "NONE";
   }
 }))
 .extend(self => {
@@ -331,6 +338,7 @@ export const DataSet = types.model("DataSet", {
   function resetSortState() {
     self.sortDirection = "NONE";
     self.sortByAttribute = undefined;
+    self.originalCaseOrder = [];
   }
 
   return {
@@ -700,7 +708,6 @@ export const DataSet = types.model("DataSet", {
           });
           insertCaseIDAtIndex(aCase.__id__, beforeIndex);
         });
-        self.originalCaseOrder = [];
         resetSortState();
       },
 
@@ -714,7 +721,6 @@ export const DataSet = types.model("DataSet", {
           });
           newCases.push(insertCaseIDAtIndex(aCase.__id__, beforeIndex));
         });
-        self.originalCaseOrder = [];
         resetSortState();
 
       },
@@ -723,7 +729,6 @@ export const DataSet = types.model("DataSet", {
         cases.forEach((caseValues) => {
           setCaseValues(caseValues);
         });
-        self.originalCaseOrder = [];
         resetSortState();
       },
 
@@ -731,7 +736,6 @@ export const DataSet = types.model("DataSet", {
         cases.forEach((caseValues) => {
           setCanonicalCaseValues(caseValues);
         });
-        self.originalCaseOrder = [];
         resetSortState();
       },
 
@@ -745,9 +749,6 @@ export const DataSet = types.model("DataSet", {
             });
           }
         });
-
-        // Update original case order
-        self.originalCaseOrder = [];
         resetSortState();
       },
       moveCase(caseID: string, beforeIndex: number) {

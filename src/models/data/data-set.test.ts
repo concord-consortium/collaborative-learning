@@ -809,3 +809,25 @@ test("DataSet resets sort state when cases are edited", () => {
   expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "3", "1"]);
   expect(dataset.getCase("1")).toEqual({ __id__: "1", A: "z" });
 });
+
+test("Manual row reordering resets sort marker", () => {
+  const dataset = DataSet.create({ name: "ManualSort", attributes: [], cases: [] });
+  const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
+
+  addCasesToDataSet(dataset, [
+    { __id__: "1", A: "c" },
+    { __id__: "2", A: "a" },
+    { __id__: "3", A: "b" }
+  ]);
+
+  // Sort by attribute A
+  dataset.sortCases(attrA.id, "ASC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("ASC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "3", "1"]);
+
+  dataset.moveCase("1", 1); // Move first row to last position
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "1", "3"]);
+  expect(dataset.sortDirection).toBe("NONE");
+  expect(dataset.sortByAttribute).toBeUndefined();
+});
