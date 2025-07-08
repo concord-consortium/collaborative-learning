@@ -1,4 +1,4 @@
-import { getEnv, IAnyStateTreeNode } from "mobx-state-tree";
+import { getEnv, hasEnv, IAnyStateTreeNode } from "mobx-state-tree";
 import { ISharedModelManager } from "../shared/shared-model-manager";
 import { AppConfigModelType } from "../stores/app-config-model";
 
@@ -8,7 +8,7 @@ export interface ITileEnvironment {
 }
 
 export function getTileEnvironment(node?: IAnyStateTreeNode) {
-  return node ? getEnv<ITileEnvironment | undefined>(node) : undefined;
+  return node && hasEnv(node) ? getEnv<ITileEnvironment | undefined>(node) : undefined;
 }
 
 export function getAppConfig(node?: IAnyStateTreeNode) {

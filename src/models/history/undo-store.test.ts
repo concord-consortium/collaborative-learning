@@ -812,19 +812,20 @@ it("can track the addition of a new shared model", async () => {
   const sharedModelId = newSharedModel.id;
   sharedModelManager?.addTileSharedModel(tileContent, newSharedModel);
 
-  await expectEntryToBeComplete(manager, 2);
+  await expectEntryToBeComplete(manager, 1);
 
   const changeDocument = manager.document;
   expect(getSnapshot(changeDocument.history)).toEqual([
     {
-      action: "/content/addSharedModel",
+      action: "/content/_addTileSharedModel",
       created: expect.any(Number),
       id: expect.any(String),
       records: [
         {
-          action: "/content/addSharedModel",
+          action: "/content/_addTileSharedModel",
           inversePatches: [
-            { op: "remove", path: `/content/sharedModelMap/${sharedModelId}` }
+            { op: "remove", path: `/content/sharedModelMap/${sharedModelId}` },
+            { op: "remove", path: `/content/sharedModelMap/${sharedModelId}/tiles/0`}
           ],
           patches: [
             {
@@ -838,6 +839,10 @@ it("can track the addition of a new shared model", async () => {
                 },
                 tiles: []
               }
+            },
+            {
+              op: "add", path: `/content/sharedModelMap/${sharedModelId}/tiles/0`,
+              value: "t1"
             }
           ],
           tree: "test"
@@ -859,29 +864,6 @@ it("can track the addition of a new shared model", async () => {
               value: undefined
             }
           ]
-        }
-      ],
-      state: "complete",
-      tree: "test",
-      undoable: true
-    },
-    {
-      action: `/content/sharedModelMap/${sharedModelId}/addTile`,
-      created: expect.any(Number),
-      id: expect.any(String),
-      records: [
-        {
-          action: `/content/sharedModelMap/${sharedModelId}/addTile`,
-          inversePatches: [
-            { op: "remove", path: `/content/sharedModelMap/${sharedModelId}/tiles/0`}
-          ],
-          patches: [
-            {
-              op: "add", path: `/content/sharedModelMap/${sharedModelId}/tiles/0`,
-              value: "t1"
-            }
-          ],
-          tree: "test"
         }
       ],
       state: "complete",
