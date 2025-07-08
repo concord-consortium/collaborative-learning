@@ -36,6 +36,6 @@ export class BaseListener {
   }
 
   private refName(ref: firebase.database.Reference) {
-    return ref.toString().replace(/^https:\/\/collaborative-learning-ec215.firebaseio.com/, "");
+    return ref.toString().replace(/^https:\/\/collaborative-learning-.*\.firebaseio\.com/, "");
   }
 }
