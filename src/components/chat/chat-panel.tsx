@@ -97,7 +97,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       if (lastCommentTimestamp) {
         firebase.getLastEditedTimestamp(user, focusDocument).then((docLastEditedTime) => {
           if (docLastEditedTime && lastCommentTimestamp > docLastEditedTime) {
-            content?.setAwaitingAIAnalysis(false);
+            content.setAwaitingAIAnalysis(false);
           }
         });
       }

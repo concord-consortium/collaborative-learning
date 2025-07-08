@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { kAnalyzerUserParams } from "../../models/stores/user-types";
@@ -15,11 +15,18 @@ interface IWaitingMessageProps {
 /**
  * Displays a styled waiting message if content.awaitingAIAnalysis is true.
  */
-const WaitingMessage: React.FC<IWaitingMessageProps> = ({ content }) => {
-  if (!content?.awaitingAIAnalysis) return null;
+const _WaitingMessage: React.FC<IWaitingMessageProps> = ({ content }) => {
 
-  return (
-    <div className="comment-thread">
+  const waitingMessageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (waitingMessageRef.current && content?.awaitingAIAnalysis) {
+      waitingMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [content?.awaitingAIAnalysis]);
+
+  const body = (
+    <>
       <div className="comment-text-header">
         <AdaAvatar />
         <div className="user-name">{userName}</div>
@@ -27,8 +34,13 @@ const WaitingMessage: React.FC<IWaitingMessageProps> = ({ content }) => {
       <div className="comment-text" data-testid="comment">
         <em>{message}</em>
       </div>
+    </>);
+
+  return (
+    <div className="comment-thread" ref={waitingMessageRef}>
+      {content?.awaitingAIAnalysis && body}
     </div>
   );
 };
 
-export default observer(WaitingMessage);
+export default observer(_WaitingMessage);

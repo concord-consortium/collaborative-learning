@@ -5,10 +5,11 @@ import { WithId } from "../../hooks/firestore-hooks";
 import { CommentDocument } from "../../lib/firestore-schema";
 import { getDisplayTimeDate } from "../../utilities/time";
 import { useCautionAlert } from "../utilities/use-caution-alert";
-import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
-import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
 import { useCurriculumOrDocumentContent, useStores } from "../../hooks/use-stores";
 import WaitingMessage from "./waiting-message";
+
+import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
+import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
 
 import "./comment-card.scss";
 import "../themes.scss";
@@ -63,6 +64,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   const { appConfig } = useStores();
   const { showCommentTag, commentTags, tagPrompt } = appConfig;
 
+  const showWaitingMessage = !focusTileId || content?.awaitingAIAnalysis;
+
   return (
     <div className="comment-card selected" data-testid="comment-card">
       <div className="comment-card-content selected" data-testid="comment-card-content">
@@ -116,7 +119,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             );
           })
         }
-        { !focusTileId && <WaitingMessage content={content} /> }
+        { showWaitingMessage && <WaitingMessage content={content} /> }
         <CommentTextBox
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}
