@@ -43,6 +43,7 @@ context('Copy Document', () => {
 
     cy.log('Add text tile');
     clueCanvas.addTile('text');
+    textTile.verifyTextTileIsEditable();
     textTile.enterText('Hello World');
 
     cy.log('Add table tile');
@@ -186,4 +187,3 @@ context('Copy Document', () => {
     questionTile.getQuestionTileEmbeddedTiles().should("have.length", 2);
   });
 });
-
