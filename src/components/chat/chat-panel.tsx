@@ -76,6 +76,9 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         action: "delete"
       };
       logCommentEvent(eventPayload);
+    } else {
+      console.warn("deleteComment called with empty focusDocument");
+      return;
     }
 
     // Check if the comment exists at the legacy path
@@ -86,7 +89,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       return deleteCommentMutation.mutate(`${commentsPath}/${commentId}`);
     } else {
       // Try the alternate (simplified) path
-      const altCommentsPath = `${getSimpleDocumentPath(focusDocument || "")}/comments`;
+      const altCommentsPath = `${getSimpleDocumentPath(focusDocument)}/comments`;
       const altDocRef = firestore[0].doc(`${altCommentsPath}/${commentId}`);
       const altDocSnap = await altDocRef.get();
 
