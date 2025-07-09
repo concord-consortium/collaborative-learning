@@ -72,21 +72,17 @@ export const BaseExemplarControllerModel = types
         // Make a comment on the current document, and open it in the resources panel
         if (self.stores) {
           const { documents, persistentUI } = self.stores;
-          // TODO: make a comment on the current document, and open it in the resources panel
           const currentDocumentKey = persistentUI.problemWorkspace.primaryDocumentKey;
           const documentModel = currentDocumentKey && documents.getDocument(currentDocumentKey);
           if (documentModel) {
             const newComment: IClientCommentParams = {
-              content: "Nice work, you can now see a new example for this lesson: LINK", // TODO link
+              content: "See if this example gives you any new ideas: LINK", // TODO link
             };
             // const context = self.stores.userContextProvider.userContext;
-            const postDocumentComment = firebase.functions().httpsCallable("postDocumentComment_v1");
-            postDocumentComment({
+            const postExemplarComment = firebase.functions().httpsCallable("postExemplarComment_v2");
+            postExemplarComment({
               document: documentModel.metadata,
               comment: newComment,
-              // TODO: make the comment attributed to the exemplar user
-              // This will require a change to the backend to support this
-              // context: kExemplarUserParams
               context: self.stores.userContextProvider.userContext
             });
             persistentUI.openResourceDocument(documentModel);
