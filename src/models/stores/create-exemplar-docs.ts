@@ -7,7 +7,7 @@ import { ExemplarDocument } from "../document/document-types";
 import { AppConfigModelType } from "./app-config-model";
 import { UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType } from "../curriculum/investigation";
-import { kExemplarUserParams } from "./user-types";
+import { kExemplarUserParams } from "../../../shared/shared";
 
 interface ICreateExemplarDocsParams {
   unit: UnitModelType;

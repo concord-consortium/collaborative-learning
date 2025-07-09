@@ -13,6 +13,8 @@ import { countWords } from "../../utilities/string-utils";
 import { IStores } from "./stores";
 import { IClientCommentParams } from "../../../shared/shared";
 
+const kExemplarCommentContent = "See if this example gives you any new ideas:";
+
 /**
  * Information that the exemplar controller stores about specific tiles.
  * At the moment this includes two numbers representing the level of activity, and the
@@ -76,7 +78,8 @@ export const BaseExemplarControllerModel = types
           const documentModel = currentDocumentKey && documents.getDocument(currentDocumentKey);
           if (documentModel) {
             const newComment: IClientCommentParams = {
-              content: "See if this example gives you any new ideas: LINK", // TODO link
+              content: kExemplarCommentContent,
+              linkedDocumentKey: chosen.key
             };
             // const context = self.stores.userContextProvider.userContext;
             const postExemplarComment = firebase.functions().httpsCallable("postExemplarComment_v2");

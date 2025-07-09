@@ -2,22 +2,13 @@ import * as admin from "firebase-admin";
 import {CallableRequest, onCall, HttpsError} from "firebase-functions/v2/https";
 import {
   IPostDocumentCommentUnionParams, isCurriculumMetadata, isDocumentMetadata, isWarmUpParams,
+  kExemplarUserParams,
 } from "../../shared/shared";
 import {validateUserContext} from "./user-context";
 import {createFirestoreMetadataDocumentIfNecessaryWithoutValidation} from "./create-firestore-metadata-document";
 
 // update this when deploying updates to this function
 const version = "1.0.0";
-
-// This should match the definitions in src/models/stores/user-types.ts
-const kExemplarUserParams = {
-  type: "student",
-  id: "ivan_idea_1",
-  firstName: "Ivan",
-  lastName: "Idea",
-  fullName: "Ivan Idea",
-  initials: "II",
-};
 
 /**
  * This checks that the user is allowed to post a comment on the given document,

@@ -8,6 +8,8 @@ import { useCautionAlert } from "../utilities/use-caution-alert";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
 import { useStores } from "../../hooks/use-stores";
+import { logDocumentViewEvent } from "../../models/document/log-document-event";
+import { DocumentModelType } from "../../models/document/document";
 
 import "./comment-card.scss";
 import "../themes.scss";
@@ -27,6 +29,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                                                 focusDocument, focusTileId }) => {
   const commentIdRef = useRef<string>();
   const commentContentRef = useRef<string>("");
+  const { documents, persistentUI, sortedDocuments } = useStores();
 
   const alertContent = () => {
     return (
@@ -57,6 +60,12 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     }
   };
 
+  const handleOpenLinkedDocument = (document: DocumentModelType) => {
+    persistentUI.toggleShowChatPanel(false);
+    persistentUI.openResourceDocument(document, user, sortedDocuments);
+    logDocumentViewEvent(document);
+  };
+
   //appConfig holds showCommentTag, commentTags, tagPrompt fetched from "clue-curriculum" repository
   const { appConfig } = useStores();
   const { showCommentTag, commentTags, tagPrompt } = appConfig;
@@ -76,6 +85,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             const backgroundStyle = shouldShowUserIcon
                                       ? {backgroundColor: "white"}
                                       : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
+            const linkedDocument = comment.linkedDocumentKey &&
+              documents.getDocument(comment.linkedDocumentKey);
 
             //if tagPrompt was posted to Firestore - for ex: SAS unit (where tagPrompt = "Select Student Strategy")
             //our comment.tags should be [""]
@@ -109,6 +120,11 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                 }
                 <div key={idx} className="comment-text" data-testid="comment">
                   {comment.content}
+                  {linkedDocument &&
+                      <a href="#" onClick={() => handleOpenLinkedDocument(linkedDocument)}>
+                        {linkedDocument.title}
+                      </a>
+                  }
                 </div>
               </div>
             );
