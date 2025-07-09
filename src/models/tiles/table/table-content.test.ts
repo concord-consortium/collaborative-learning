@@ -1,5 +1,4 @@
 import { IAnyType, types, castToSnapshot } from "mobx-state-tree";
-import { Value } from "expr-eval";
 import {
   FormulaManager
 } from "@concord-consortium/codap-formulas-react17/models/formula/formula-manager";
@@ -14,7 +13,6 @@ import { createFormulaDataSetProxy } from "../../../models/data/formula-data-set
 import { SharedDataSet, SharedDataSetSnapshotType, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { IDataSet } from "../../data/data-set";
-import { kSerializedXKey } from "../../data/expression-utils";
 import { SharedModelType } from "../../shared/shared-model";
 import { defaultTableContent, kTableTileType, TableContentModel, TableContentModelType,
   TableContentSnapshotType, TableMetadataModel } from "./table-content";
@@ -518,7 +516,7 @@ describe("TableContent", () => {
     const table = TableContentModel.create(snapshot);
     const metadata = TableMetadataModel.create({ id: "table-1" });
     table.doPostCreate!(metadata);
-    table.setExpression("y1Col", kSerializedXKey, "x");
+    // table.setExpression("y1Col", kSerializedXKey, "x");
     table.setExpression("y2Col", "foo", "foo");
 
     expect(table.dataSet.attributes.length).toBe(3);
@@ -529,37 +527,6 @@ describe("TableContent", () => {
     expect(table.dataSet.getValue("row1", "y2Col")).toBeNaN();
     expect(table.dataSet.getValue("row2", "y2Col")).toBeNaN();
     expect(table.dataSet.getValue("row3", "y2Col")).toBeNaN();
-  });
-
-  it("can evaluate expressions", () => {
-    const table = TableContentModel.create();
-    const metadata = TableMetadataModel.create({ id: "table-1" });
-    table.doPostCreate!(metadata);
-    const expression = table.parseExpression("x+1");
-    expect(expression).toBeDefined();
-    const evaluate = (val: Value) => expression!.evaluate(val);
-
-    expect(evaluate({x:1})).toBe(2);
-    expect(evaluate({x:"1"})).toBe(2);
-    expect(evaluate({x:"a"})).toBe(NaN);
-    expect(evaluate({x:"1 a"})).toBe(NaN);
-    expect(evaluate({x:NaN})).toBe(NaN);
-
-    const expression3 = table.parseExpression('x + "more"');
-    expect(expression3).toBeDefined();
-    const evaluate3 = (val: Value) => expression3!.evaluate(val);
-    expect(evaluate3({x:1})).toBe(NaN);
-    expect(evaluate3({x:"1"})).toBe(NaN);
-    expect(evaluate3({x:"a"})).toBe(NaN);
-
-    const expression4 = table.parseExpression("x[0]");
-    expect(expression4).toBeDefined();
-    const evaluate4 = (val: Value) => expression4!.evaluate(val);
-    expect(evaluate4({x:1})).toBe(undefined);
-    expect(evaluate4({x:"1"})).toBe("1");
-    expect(evaluate4({x:"a"})).toBe("a");
-
-
   });
 
   // FIXME: formulas do not handle fractional values like 1/2 correctly.
@@ -593,10 +560,6 @@ describe("TableContent", () => {
     setupContainer(table, dataSetSnapshot);
 
     expect(table.dataSet.cases.length).toBe(4);
-
-    // force an update of the values based on the expression
-    // this does not currently happen automatically on load
-    metadata.updateDatasetByExpressions(table.dataSet);
 
     expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1,     yCol: 2,   zCol: 1   });
     expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2,     yCol: 4,   zCol: 2   });

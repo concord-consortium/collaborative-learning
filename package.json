@@ -257,7 +257,6 @@
     "dayjs": "^1.11.9",
     "downshift": "^8.1.0",
     "escape-string-regexp": "^5.0.0",
-    "expr-eval": "^2.0.2",
     "file-saver": "^2.0.5",
     "firebase": "^8.10.1",
     "immutable": "^4.3.0",

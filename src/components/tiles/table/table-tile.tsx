@@ -167,7 +167,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     model, dataSet, rows, rowHeight, headerHeight, getTitleHeight,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
   });
-  const { onSetTableTitle, onSetColumnExpressions, requestRowHeight,
+  const { onSetTableTitle, requestRowHeight,
           onAddColumn, onRemoveRows } = changeHandlers;
 
   // A function to call when a column needs to change width
@@ -184,15 +184,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   });
 
   // Functions for setting and displaying expressions
-  const handleSubmitExpressions = (expressions: Map<string, string>) => {
-    if (dataSet.attributes.length && expressions.size) {
-      onSetColumnExpressions(expressions, dataSet.attributes[0].name);
-    }
-  };
-  // const [showExpressionsDialog, , setCurrYAttrId] = useExpressionsDialog({
-  //   metadata, dataSet, onSubmit: handleSubmitExpressions
-  // });
-
   const handleFormulaModalSubmit = () => {
     // This is necessary to trigger a rerender of the table when the expression changes.
     // Even though this is an observing component and the formula is an observable,
@@ -211,8 +202,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   };
 
   const handleToolbarShowExpressionsDialog = () => {
-    // This is called from the toolbar, so we don't have an attribute ID.
-    // We just use the first attribute in the dataSet.
+    // This is called from the toolbar. We use the first selected attribute of the table.
     const firstSelectedAttributeId = dataSet.firstSelectedAttributeId;
     firstSelectedAttributeId && setCurrYAttrId(firstSelectedAttributeId);
     showExpressionsDialog();

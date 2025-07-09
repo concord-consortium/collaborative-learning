@@ -1,4 +1,3 @@
-import { Expression, Parser } from "expr-eval";
 import { reaction } from "mobx";
 import { addDisposer, Instance, SnapshotIn, types, getType, getSnapshot } from "mobx-state-tree";
 import { ITableChange } from "./table-change";
@@ -18,7 +17,6 @@ import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../../shar
 import { updateSharedDataSetColors } from "../../shared/shared-data-set-colors";
 import { SharedModelType } from "../../shared/shared-model";
 import { kMinColumnWidth } from "../../../components/tiles/table/table-types";
-import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -49,67 +47,7 @@ export function defaultTableContent(props?: IDefaultContentOptions) {
 
 export const TableMetadataModel = TileMetadataModel
   .named("TableMetadata")
-  .props({
-    expressions: types.map(types.string),
-    rawExpressions: types.map(types.string)
-  })
-  .volatile(self => ({
-    parser: new Parser()
-  }))
-  .views(self => ({
-    parseExpression(expr: string) {
-      let result: Expression | undefined;
-      try {
-        result = self.parser.parse(expr);
-      }
-      catch(e) {
-        // return undefined on error
-      }
-      return result;
-    }
-  }))
-  .views(self => ({
-    updateDatasetByExpressions(dataSet: IDataSet) {
-      dataSet.attributes.forEach(attr => {
-        const expression = self.expressions.get(attr.id);
-        if (expression) {
-          const xAttr = dataSet.attributes[0];
-          const parsedExpression = self.parseExpression(expression);
-          for (let i = 0; i < attr.values.length; i++) {
-            // Internally the formula engine can handle strings in some cases.
-            // CLUE only allows formulas to produce numeric values so we
-            // always get the numeric value of a cell. If the value isn't
-            // numeric numVal will return NaN.
-            const xVal = xAttr.numValue(i);
-            if (xVal == null) {
-              attr.setValue(i, undefined);
-            } else if (!parsedExpression) {
-              attr.setValue(i, NaN);
-            } else {
-              let expressionVal: number;
-              try {
-                expressionVal = parsedExpression.evaluate({[kSerializedXKey]: xVal});
-              }
-              catch(e) {
-                expressionVal = NaN;
-              }
-              attr.setValue(i, isFinite(expressionVal) ? expressionVal : NaN);
-            }
-          }
-        } else {
-          for (let i = 0; i < attr.values.length; i++) {
-            const val = attr.value(i);
-            // Clean up displayed errors when an expression is deleted
-            if (Number.isNaN(val as any)) {
-              attr.setValue(i, undefined);
-            }
-          }
-        }
-      });
-
-      return dataSet;
-    }
-  }));
+  .props({});
 export interface TableMetadataModelType extends Instance<typeof TableMetadataModel> {}
 
 export const TableContentModel = TileContentModel
@@ -179,9 +117,6 @@ export const TableContentModel = TileContentModel
     },
     get isLinked() {
       return self.linkedTiles.length > 0;
-    },
-    parseExpression(expr: string) {
-      return self.metadata.parseExpression(expr);
     },
     get tileSnapshotForCopy() {
       const snapshot = getSnapshot(self);
@@ -303,8 +238,6 @@ export const TableContentModel = TileContentModel
     },
     addAttribute(id: string, name: string) {
       self.dataSet.addAttributeWithID({ id, name });
-      self.metadata.updateDatasetByExpressions(self.dataSet);
-
       self.logChange({ action: "create", target: "columns", ids: [id], props: { columns: [{ name }] } });
     },
     setAttributeName(id: string, name: string) {
@@ -317,38 +250,14 @@ export const TableContentModel = TileContentModel
     },
     removeAttributes(ids: string[]) {
       ids.forEach(id => self.dataSet.removeAttribute(id));
-      self.metadata.updateDatasetByExpressions(self.dataSet);
-
       self.logChange({ action: "delete", target: "columns", ids });
     },
     setExpression(id: string, expression: string, rawExpression: string) {
       self.dataSet.attrFromID(id)?.setFormula(rawExpression, expression);
       self.logChange({ action: "update", target: "columns", ids: id, props: { expression, rawExpression } });
     },
-    setExpressions(rawExpressions: Map<string, string>, xName: string) {
-      rawExpressions.forEach((rawExpression, id) => {
-        const attr = self.dataSet.attrFromID(id);
-        if (attr) {
-          const expression = canonicalizeExpression(rawExpression, xName);
-          attr.setFormula(rawExpression, expression);
-        }
-      });
-
-      self.logChange({
-        action: "update",
-        target: "columns",
-        ids: Array.from(rawExpressions.keys()),
-        props: Array.from(rawExpressions.values())
-                    .map(rawExpr => ({
-                      expression: canonicalizeExpression(rawExpr, xName),
-                      rawExpression: rawExpr
-                    }))
-      });
-    },
     addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[]) {
       addCanonicalCasesToDataSet(self.dataSet, cases, beforeID);
-      self.metadata.updateDatasetByExpressions(self.dataSet);
-
       self.logChange({
             action: "create",
             target: "rows",
@@ -364,8 +273,6 @@ export const TableContentModel = TileContentModel
     },
     setCanonicalCaseValues(caseValues: ICase[]) {
       self.dataSet.setCanonicalCaseValues(caseValues);
-      self.metadata.updateDatasetByExpressions(self.dataSet);
-
       const ids: string[] = [];
       const values = caseValues.map(aCase => {
                       const { __id__, ...others } = aCase;

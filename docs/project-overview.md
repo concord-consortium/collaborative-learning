@@ -33,7 +33,6 @@ CLUE is a sophisticated web-based collaborative learning platform developed by T
 #### Data and Computation
 
 - Concord Compute Engine
-- expr-eval for expression evaluation
 - Firebase SDK for database operations
 - Custom state management solutions
 
