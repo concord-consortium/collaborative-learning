@@ -21,6 +21,8 @@ import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { kClosedObjectListPanelWidth } from "../model/drawing-types";
 import { IContainerContextType, useContainerContext } from "../../../components/document/container-context";
 import { userSelectTile } from "../../../models/stores/ui";
+import { useDrawingAreaContext } from "./drawing-area-context";
+import { calculateFitContent } from "../model/drawing-utils";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -53,6 +55,7 @@ interface InternalDrawingLayerViewProps extends DrawingLayerViewProps {
   zoom: number;
   objectsBoundingBox: BoundingBox;
   containerContext: IContainerContextType;
+  drawingAreaContext: ReturnType<typeof useDrawingAreaContext>;
 }
 
 interface DrawingLayerViewState {
@@ -73,6 +76,7 @@ export const DrawingLayerView = observer((props: DrawingLayerViewProps) => {
   const navigator = useTileNavigatorContext();
   const containerContext = useContainerContext();
   const content = props.model.content as DrawingContentModelType;
+  const drawingAreaContext = useDrawingAreaContext();
   return (
     <InternalDrawingLayerView
       reportVisibleBoundingBox={navigator.reportVisibleBoundingBox}
@@ -81,6 +85,7 @@ export const DrawingLayerView = observer((props: DrawingLayerViewProps) => {
       zoom={content.zoom}
       objectsBoundingBox={content.objectsBoundingBox}
       containerContext={containerContext}
+      drawingAreaContext={drawingAreaContext}
       {...props}
     />);
 });
@@ -191,25 +196,36 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
 
       this.props.reportVisibleBoundingBox?.(actualBoundingBox);
     } else {
-      // In regular tile display, offset and zoom are the values stored in the model.
-      // However, we tweak the displayed offset if there is no "show/sort" sidebar so that the
-      // read-only and read-write versions of the tile center content the same way.
-      this.offsetX = this.props.offsetX + (this.props.readOnly ? kClosedObjectListPanelWidth : 0);
-      this.offsetY = this.props.offsetY;
-      this.zoom = this.props.zoom;
+      if (this.props.readOnly) {
+        // In read-only mode, we display the entire drawing content at a zoom level that fits the view dimensions.
+        const canvasSize = this.props.drawingAreaContext?.getVisibleCanvasSize() ?? { x: 10, y: 10 };
+        const contentBoundingBox = this.props.objectsBoundingBox;
+        const { offsetX, offsetY, zoom } = calculateFitContent({ canvasSize, contentBoundingBox });
 
-      // Determine what extent of the coordinate plane will be shown in the tile.
-      const visibleCanvasSize = {
-        x: this.viewRef.current?.clientWidth || 10,
-        y: this.viewRef.current?.clientHeight || 10 };
-      const visibleBoundingBox = {
-        nw: { x: -this.offsetX/this.zoom, y: -this.offsetY/this.zoom },
-        se: { x: (-this.offsetX + visibleCanvasSize.x)/this.zoom,
-          y: (-this.offsetY + visibleCanvasSize.y)/this.zoom }
-      };
+        this.zoom = zoom;
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
+      } else {
+        // In regular tile display, offset and zoom are the values stored in the model.
+        // However, we tweak the displayed offset if there is no "show/sort" sidebar so that the
+        // read-only and read-write versions of the tile center content the same way.
+        this.offsetX = this.props.offsetX + (this.props.readOnly ? kClosedObjectListPanelWidth : 0);
+        this.offsetY = this.props.offsetY;
+        this.zoom = this.props.zoom;
 
-      // Report this to our parent, so that it can be shown in the navigator.
-      this.props.reportVisibleBoundingBox?.(visibleBoundingBox);
+        // Determine what extent of the coordinate plane will be shown in the tile.
+        const visibleCanvasSize = {
+          x: this.viewRef.current?.clientWidth || 10,
+          y: this.viewRef.current?.clientHeight || 10 };
+        const visibleBoundingBox = {
+          nw: { x: -this.offsetX/this.zoom, y: -this.offsetY/this.zoom },
+          se: { x: (-this.offsetX + visibleCanvasSize.x)/this.zoom,
+            y: (-this.offsetY + visibleCanvasSize.y)/this.zoom }
+        };
+
+        // Report this to our parent, so that it can be shown in the navigator.
+        this.props.reportVisibleBoundingBox?.(visibleBoundingBox);
+      }
     }
   }
 

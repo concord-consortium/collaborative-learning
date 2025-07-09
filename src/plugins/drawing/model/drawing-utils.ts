@@ -96,3 +96,39 @@ export function rotateBoundingBox(boundingBox: BoundingBox, rotation: number): B
   };
 }
 
+export const zoomStep = 0.1;
+export const minZoom = 0.1;
+export const maxZoom = 2;
+
+export interface IFitContentOptions {
+  canvasSize: { x: number; y: number };
+  contentBoundingBox: BoundingBox;
+  padding?: number;
+}
+
+export interface IFitContentResult {
+  offsetX: number;
+  offsetY: number;
+  zoom: number;
+}
+
+export const calculateFitContent = (options: IFitContentOptions): IFitContentResult => {
+  const { canvasSize, contentBoundingBox, padding=10 } = options;
+  const contentWidth = contentBoundingBox.se.x - contentBoundingBox.nw.x;
+  const contentHeight = contentBoundingBox.se.y - contentBoundingBox.nw.y;
+  const optimalZoom = Math.min(
+    (canvasSize.x - padding) / contentWidth,
+    (canvasSize.y - padding) / contentHeight
+  );
+  const legalZoom = Math.max(minZoom, Math.min(maxZoom, optimalZoom));
+
+  // Adjust the offset so the content is centered with the new zoom level.
+  const newOffsetX = (canvasSize.x / 2 - (contentBoundingBox.nw.x + contentWidth / 2) * legalZoom);
+  const newOffsetY = (canvasSize.y / 2 - (contentBoundingBox.nw.y + contentHeight / 2) * legalZoom);
+
+  return {
+    offsetX: newOffsetX,
+    offsetY: newOffsetY,
+    zoom: legalZoom
+  };
+};
