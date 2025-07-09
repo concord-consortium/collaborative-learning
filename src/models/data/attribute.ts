@@ -205,18 +205,11 @@ export const Attribute = types.model("Attribute", {
     // In CODAP the attribute formula is set to undefined when the formula is cleared
     self.formula.setDisplayExpression("");
   },
-  setDisplayFormula(display: string, xName: string) {
+  setDisplayFormula(display: string) {
     self.formula.setDisplayExpression(display);
-    // TODO: since canonical is volatile, do we need to do this?
-    // `xName` is the name of the x attribute in the formula,
-    // we are no longer treating the x attribute as special
-    // so we should be able to remove that argument.
-    // self.formula.canonicalize(xName);
   },
-  setFormula(display: string, canonical: string) {
+  setFormula(display: string) {
     self.formula.setDisplayExpression(display);
-    // TODO: since canonical is volatile, do we need to set it?
-    // self.formula.setCanonical(canonical);
   },
   addValue(value: IValueType, beforeIndex?: number) {
     if ((beforeIndex != null) && (beforeIndex < self.values.length)) {

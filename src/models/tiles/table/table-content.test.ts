@@ -517,7 +517,7 @@ describe("TableContent", () => {
     const metadata = TableMetadataModel.create({ id: "table-1" });
     table.doPostCreate!(metadata);
     // table.setExpression("y1Col", kSerializedXKey, "x");
-    table.setExpression("y2Col", "foo", "foo");
+    table.setExpression("y2Col", "foo");
 
     expect(table.dataSet.attributes.length).toBe(3);
     expect(table.dataSet.cases.length).toBe(3);

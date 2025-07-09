@@ -252,9 +252,9 @@ export const TableContentModel = TileContentModel
       ids.forEach(id => self.dataSet.removeAttribute(id));
       self.logChange({ action: "delete", target: "columns", ids });
     },
-    setExpression(id: string, expression: string, rawExpression: string) {
-      self.dataSet.attrFromID(id)?.setFormula(rawExpression, expression);
-      self.logChange({ action: "update", target: "columns", ids: id, props: { expression, rawExpression } });
+    setExpression(id: string, expression: string) {
+      self.dataSet.attrFromID(id)?.setFormula(expression);
+      self.logChange({ action: "update", target: "columns", ids: id, props: { expression } });
     },
     addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[]) {
       addCanonicalCasesToDataSet(self.dataSet, cases, beforeID);
