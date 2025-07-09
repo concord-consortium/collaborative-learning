@@ -1,4 +1,4 @@
-import { IAnyType, types, castToSnapshot } from "mobx-state-tree";
+import { IAnyType, types, castToSnapshot, getSnapshot } from "mobx-state-tree";
 import {
   FormulaManager
 } from "@concord-consortium/codap-formulas-react17/models/formula/formula-manager";
@@ -326,9 +326,7 @@ describe("TableContent", () => {
 
     setupContainer(table, dataSetSnapshot);
 
-    // Give the formula system a chance to process the formulas
-    // FIXME: need a deterministic way to wait for the formulas to be processed
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // The formula system processes the formulas immediately and finds the error
 
     expect(table.dataSet.cases.length).toBe(2);
     expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: "❌ Undefined symbol $1" });
@@ -339,12 +337,6 @@ describe("TableContent", () => {
     expect(yCol).toBeDefined();
     expect(yCol!.formula).toBeDefined();
     expect(yCol!.formula!.display).toBe("xCol+$1");
-
-    // FIXME: this part of the test started failing after the formula system was updated.
-    // metadata.updateDatasetByExpressions(table.dataSet);
-    //
-    // expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: NaN });
-    // expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: NaN });
   });
 
   it("can convert original change format", () => {
@@ -483,7 +475,7 @@ describe("TableContent", () => {
   // FIXME: in this test the formula is not applied after the
   // expression is set. This is because the formula system is not
   // enabled. In other tests this happens in setupContainer.
-  it.skip("can apply changes with expressions to a DataSet", async () => {
+  it("can apply changes with expressions to a DataSet", async () => {
     const changes = [
             {
               action: "create",
@@ -513,8 +505,19 @@ describe("TableContent", () => {
     const table = TableContentModel.create(snapshot);
     const metadata = TableMetadataModel.create({ id: "table-1" });
     table.doPostCreate!(metadata);
-    // Commented out because setExpression no longer takes two arguments
-    // table.setExpression("y1Col", kSerializedXKey, "x");
+
+    // We are kind of hacking this. Normally the imported dataset would get added
+    // to the shared model manager when the table is attached to the tree.
+    // But in these tests are mocking the shared model manager so it doesn't
+    // support adding the dataset like that.
+    const sharedDataSetSnapshot: SharedDataSetSnapshotType = {
+      type: "SharedDataSet",
+      dataSet: getSnapshot(table.importedDataSet)
+    };
+
+    setupContainer(table, sharedDataSetSnapshot);
+
+    table.setExpression("y1Col", "x");
     table.setExpression("y2Col", "foo");
 
     expect(table.dataSet.attributes.length).toBe(3);
@@ -522,13 +525,12 @@ describe("TableContent", () => {
     expect(table.dataSet.getValue("row1", "y1Col")).toBe(1);
     expect(table.dataSet.getValue("row2", "y1Col")).toBe(2);
     expect(table.dataSet.getValue("row3", "y1Col")).toBe(3);
-    expect(table.dataSet.getValue("row1", "y2Col")).toBeNaN();
-    expect(table.dataSet.getValue("row2", "y2Col")).toBeNaN();
-    expect(table.dataSet.getValue("row3", "y2Col")).toBeNaN();
+    expect(table.dataSet.getValue("row1", "y2Col")).toBe("❌ Undefined symbol foo");
+    expect(table.dataSet.getValue("row2", "y2Col")).toBe("❌ Undefined symbol foo");
+    expect(table.dataSet.getValue("row3", "y2Col")).toBe("❌ Undefined symbol foo");
   });
 
-  // FIXME: formulas do not handle fractional values like 1/2 correctly.
-  it.skip("various formulas handle various input types", () => {
+  it("various formulas handle various input types", () => {
     const tableSnapshot: TableContentSnapshotType = {
       type: "Table",
     };
@@ -552,7 +554,7 @@ describe("TableContent", () => {
     const table = TableContentModel.create(tableSnapshot);
     const metadata = TableMetadataModel.create({ id: "test-metadata" });
     table.doPostCreate!(metadata);
-    // The metadata has not expression info until the table has a dataset
+    // The table has expression info until it has a dataset
     expect(table.hasExpressions).toBe(false);
 
     setupContainer(table, dataSetSnapshot);
@@ -561,9 +563,12 @@ describe("TableContent", () => {
 
     expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1,     yCol: 2,   zCol: 1   });
     expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2,     yCol: 4,   zCol: 2   });
-    expect(getCaseNoId(table.dataSet, 2)).toEqual({ xCol: "1/2", yCol: 1,   zCol: 0.5 });
-    // Internally the formula engine can handle string inputs to formulas, however
-    // CLUE will return NaN for any non numeric input or non numeric output
-    expect(getCaseNoId(table.dataSet, 3)).toEqual({ xCol: "a",   yCol: NaN, zCol: NaN });
+    // The formula engine doesn't handle fractional values like the old one did
+    expect(getCaseNoId(table.dataSet, 2)).toEqual({ xCol: "1/2",
+      yCol: "❌ Invalid arguments for multiply operator: 1/2, 2",
+      zCol: "1/2" });
+    expect(getCaseNoId(table.dataSet, 3)).toEqual({ xCol: "a",
+      yCol: "❌ Invalid arguments for multiply operator: a, 2",
+      zCol: "a" });
   });
 });
