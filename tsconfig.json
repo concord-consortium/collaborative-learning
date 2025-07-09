@@ -24,9 +24,11 @@
       "mobx-state-tree": ["node_modules/@concord-consortium/mobx-state-tree/dist"],
       // Because we are using typescript 4.9.5 but webpack 5+
       // there is a mismatch how the two handle the exports sections
-      // of packages. Typescript 5 added a "bundler" moduleResolver which
-      // handles the exports section the same as webpack 5+ but also
-      // doesn't require extensions on the import paths.
+      // of packages. This path mapping solves the issue by adding the dist segment
+      // of the path.
+      // TODO: upgrade to Typescript version 5, and use its new "bundler" moduleResolver.
+      // This handles the exports section like webpack 5+ does, and also
+      // doesn't require extensions on the import paths just like Webpack.
       "@concord-consortium/codap-formulas-react17/*": ["node_modules/@concord-consortium/codap-formulas-react17/dist/*"]
     },
     "types": ["w3c-web-serial", "gtag.js"]

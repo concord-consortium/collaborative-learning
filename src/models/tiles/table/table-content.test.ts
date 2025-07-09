@@ -340,12 +340,9 @@ describe("TableContent", () => {
     expect(yCol!.formula).toBeDefined();
     expect(yCol!.formula!.display).toBe("xCol+$1");
 
-    // TODO: we previously had a method to force an update of the values.
-    // I don't know if the new formula system has this or not.
-    // The formula system seems to be computing the values right away because the
-    // other tests are passing.
+    // FIXME: this part of the test started failing after the formula system was updated.
     // metadata.updateDatasetByExpressions(table.dataSet);
-
+    //
     // expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: NaN });
     // expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: NaN });
   });
@@ -516,6 +513,7 @@ describe("TableContent", () => {
     const table = TableContentModel.create(snapshot);
     const metadata = TableMetadataModel.create({ id: "table-1" });
     table.doPostCreate!(metadata);
+    // Commented out because setExpression no longer takes two arguments
     // table.setExpression("y1Col", kSerializedXKey, "x");
     table.setExpression("y2Col", "foo");
 

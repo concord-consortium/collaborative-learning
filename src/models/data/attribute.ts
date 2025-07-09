@@ -34,9 +34,8 @@ export const Attribute = types.model("Attribute", {
   return { ...snap, values };
 })
 .postProcessSnapshot(snap => {
-  // Strip the id off of the formula.
-  // We don't need it, but since we are using the shared formula model we
-  // can't change it.
+  // Strip the id off of the formula. We don't need them.
+  // We can't easily change the Formula model itself since it is coming from a library.
   const formulaCopy = { ...snap.formula };
   delete (formulaCopy as any).id;
   return { ...snap, formula: formulaCopy };
@@ -203,10 +202,9 @@ export const Attribute = types.model("Attribute", {
   // },
   clearFormula() {
     // In CODAP the attribute formula is set to undefined when the formula is cleared
+    // In CLUE the formula has been left around with undefined properties. With the use of
+    // CODAP formula library it is easiest to just set the display expression to an empty string.
     self.formula.setDisplayExpression("");
-  },
-  setDisplayFormula(display: string) {
-    self.formula.setDisplayExpression(display);
   },
   setFormula(display: string) {
     self.formula.setDisplayExpression(display);

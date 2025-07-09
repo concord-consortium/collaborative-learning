@@ -50,7 +50,7 @@ export const initializeApp = ({authoring, standalone, authDomain}: IInitializeAp
   const appVersion = PackageJson.version;
   const bearerToken = getBearerToken(urlParams);
 
-  console.log(`CLUE initializeApp: ${appVersion}`);
+  // Setup the formula system
   // Let the formula system know we don't support global values
   registerGlobalValueManagerLookupFunction(undefined);
   AttributeFormulaAdapter.register();

@@ -47,6 +47,12 @@ function getFormulaAttribute(attr: IAttribute): IFormulaAttribute {
 
 const kDefaultCollectionId = "__default-collection__";
 
+
+/**
+ * FormulaDataSetProxy is a MobX State Tree (MST) model that acts as a proxy
+ * for a CLUE IDataSet, allowing it to be used with the formula system.
+ * It provides methods and views that mimic the expected interface of a formula data set.
+ */
 const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
 })
 .volatile(self => ({
@@ -92,12 +98,13 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
   },
   get itemIdsHash() {
     // This is supposed to be a hash of the item IDs, it is used by the formula system
-    // to watch when the set of items, like when items are added or removed.
+    // to watch the set of items, like when items are added or removed.
     // In CLUE we are also using it to watch the values of the attributes.
     // In CODAP the values are "watched" by monitoring calls to setCaseValues, but
-    // because we are a proxy that action will not be called by CLUE.
-    // This is really in-efficient, but in CLUE the number of items and attributes is
-    // relatively small.
+    // because this proxy is only used by the formula library, the setCaseValues action
+    // here will not be called by CLUE.
+    // This approach of updating a hash based on the values is in-efficient,
+    // but in CLUE the number of items and attributes is relatively small.
     const stringsOfDataSet: string[] = [];
     self.dataSet.cases?.forEach(({ __id__ }) => {
       stringsOfDataSet.push(__id__);
@@ -141,7 +148,6 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
     const attr = self.dataSet.attrFromID(restoreDashesInId(id));
     return attr ? getFormulaAttribute(attr) : undefined;
   },
-  // CHECKME: is the -1 return correct here?
   getCollectionIndex(collectionId?: string): number {
     if (collectionId === kDefaultCollectionId) {
       // CLUE doesn't support collections, so default collection is at index 0
@@ -152,12 +158,10 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
     console.warn(`getCollectionIndex: collectionId ${collectionId} is not valid`);
     return -1;
   },
-  // CHECKME: do we need to return something here?
   getCollectionForAttribute(attributeId: string) {
     // CLUE doesn't support collections, so return the default collection
     return self.defaultCollection;
   },
-  // CHECKME: do we need to return something here?
   getCollectionForCase(caseId: string) {
     // CLUE doesn't support collections, so return the default collection
     return self.defaultCollection;
@@ -169,7 +173,7 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
   getItemIndex(itemId: string): number {
     return self._itemIds.indexOf(itemId);
   },
-  // FIXME: this probably needs to return numeric values when
+  // CHECKME: this might need to return numeric values when
   // that is what CODAP would do
   getValueAtItemIndex(index: number, attributeID: string): string | undefined {
     const attr = self.dataSet.attrFromID(restoreDashesInId(attributeID));
@@ -193,7 +197,7 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
     return undefined;
   },
   get filterFormula() {
-    // CLUE doesn't support filter formulas, so return undefined
+    // CLUE doesn't support filter formulas, so always return undefined
     return undefined;
   },
   getAttributeByName(name: string): IFormulaAttribute | undefined {
@@ -228,7 +232,7 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
       });
       return newCase;
     });
-    // TODO: the formula system works with strings, numbers, booleans, dates, and undefined values
+    // FIXME: the formula system works with strings, numbers, booleans, dates, and undefined values
     // but CLUE only supports strings, numbers, and undefined values.
     // We should sanitize the cases to ensure they are valid for CLUE.
     self.dataSet.setCanonicalCaseValues(transformedCases as ICase[]);
@@ -245,9 +249,17 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
   },
 }));
 
-// The Formula system expects the data set to be an MST object,
-// so we create a MST object that proxies the CLUE data set and implements
-// all of the methods that the formula system expects.
+/**
+ * Create a formula data set proxy for a given CLUE IDataSet.
+ * This function wraps the CLUE IDataSet in a FormulaDataSetProxy,
+ * allowing it to be used with the formula system.
+ *
+ * It is best to reuse an existing FormulaDataSetProxy if one exists.
+ * That can be done by looking at the dataSets property of the formula manager
+ *
+ * @param dataSet
+ * @returns
+ */
 export function createFormulaDataSetProxy(dataSet: IDataSet): IFormulaDataSet {
   const formulaDataSet = FormulaDataSetProxy.create();
   formulaDataSet.setCLUEDataSet(dataSet);
