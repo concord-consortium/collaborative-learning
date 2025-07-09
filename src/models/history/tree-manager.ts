@@ -9,7 +9,7 @@ import { IUndoManager, UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation } from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
-import { getDocumentPath, IDocumentMetadata } from "../../../shared/shared";
+import { getDocumentPath, getSimpleDocumentPath, IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserModelType } from "../stores/user";
 import { UserContextProvider } from "../stores/user-context-provider";
@@ -336,7 +336,10 @@ export const TreeManager = types
 
 }))
 .actions((self) => ({
-  mirrorHistoryFromFirestore(user: UserModelType, firestore: Firestore) {
+  // Using async actions is generally not a good idea, because the changes will not be grouped into
+  // a single action for any action-tracking middleware. However, in this case we aren't recording the
+  // actions of the TreeManager.
+  async mirrorHistoryFromFirestore(user: UserModelType, firestore: Firestore) {
     // FIXME-HISTORY: we should protect active documents so that if
     // mirrorHistoryFromFirestore is accidentally called on their treeManager
     // we don't replace their history. Probably the best approach is
@@ -352,7 +355,10 @@ export const TreeManager = types
     }
 
     const network = userId === user.id ? user.network : undefined;
-    const docPath = getDocumentPath(userId, documentKey, network);
+    const prefixedDocumentPath = getDocumentPath(userId, documentKey, network);
+    const simpleDocumentPath = getSimpleDocumentPath(documentKey);
+    const prefixedDocSnapshot = await firestore.doc(prefixedDocumentPath).get();
+    const docPath = prefixedDocSnapshot.exists ? prefixedDocumentPath : simpleDocumentPath;
 
     self.setNumHistoryEntriesAppliedFromFirestore(firestore, docPath);
 
@@ -643,38 +649,50 @@ async function prepareFirestoreHistoryInfo(
     throw new Error("cannot record history entry because environment is not valid");
   }
 
-  const documentPath = getDocumentPath(userContext.uid, mainDocument.key, userContext.network);
+  const prefixedDocumentPath = getDocumentPath(userContext.uid, mainDocument.key, userContext.network);
+  let documentPath = getSimpleDocumentPath(mainDocument.key);
+  const prefixedDocumentRef = firestore.doc(prefixedDocumentPath);
   const documentRef = firestore.doc(documentPath);
+  const prefixedDocSnapshot = await prefixedDocumentRef.get();
 
-  // The metadata documents are created by DB#createDocument however it does not wait for the metadata
-  // document to be created. So we might end up here before the metadata document has been created.
-  await new Promise<void>((resolve, reject) => {
-    let timeoutId: NodeJS.Timeout | undefined = undefined;
-    const disposer = documentRef.onSnapshot(doc => {
-      if (doc.exists) {
-        resolve();
-        if (timeoutId) {
-          disposer();
-          clearTimeout(timeoutId);
+  // Prefixed documents are legacy documents and won't be created anymore. We create simple (unprefixed) documents
+  // automatically. If a prefixed document already exists, we want to use that because it contains history that
+  // we want to append to.
+  // TODO: Migrate prefixed documents to simple documents and remove prefixed document handling code.
+  if (!prefixedDocSnapshot.exists) {
+    // The metadata documents are created by DB#createDocument however it does not wait for the metadata
+    // document to be created. So we might end up here before the metadata document has been created.
+    // DB#createDocument will create simple, unprefixed documents even if a prefixed document already exists.
+    await new Promise<void>((resolve, reject) => {
+      let timeoutId: NodeJS.Timeout | undefined = undefined;
+      const disposer = documentRef.onSnapshot(doc => {
+        if (doc.exists) {
+          resolve();
+          if (timeoutId) {
+            disposer();
+            clearTimeout(timeoutId);
+          }
         }
-      }
+      });
+      timeoutId = setTimeout(() => {
+        // If there isn't a firestore metadata document in 5 seconds then give up
+        disposer();
+        console.warn("Could not find metadata document to attach history to", documentPath);
+        // If there is an error here the history will not be saved for the duration
+        // of this CLUE session.
+        // This happens because the rejection will bubble up to completeHistoryEntry.
+        // That does not handle errors from this promise. The "then" function will
+        // not be called. The error should be printed as an unhandled promise error.
+        // The next time a history entry is "completed" this rejected promise
+        // will be "then'd" again which will again not run its function.
+        // TODO: consider updating this to create the metadata document itself by
+        // calling createFirestoreMetadataDocument.
+        reject(`Could not find metadata document to attach history to ${documentPath}`);
+      }, 5000);
     });
-    timeoutId = setTimeout(() => {
-      // If there isn't a firestore metadata document in 5 seconds then give up
-      disposer();
-      console.warn("Could not find metadata document to attach history to", documentPath);
-      // If there is an error here the history will not be saved for the duration
-      // of this CLUE session.
-      // This happens because the rejection will bubble up to completeHistoryEntry.
-      // That does not handle errors from this promise. The "then" function will
-      // not be called. The error should be printed as an unhandled promise error.
-      // The next time a history entry is "completed" this rejected promise
-      // will be "then'd" again which will again not run its function.
-      // TODO: consider updating this to create the metadata document itself by
-      // calling createFirestoreMetadataDocument.
-      reject(`Could not find metadata document to attach history to ${documentPath}`);
-    }, 5000);
-  });
+  } else {
+    documentPath = prefixedDocumentPath;
+  }
 
   const lastHistoryEntry = await getLastHistoryEntry(firestore, documentPath);
 

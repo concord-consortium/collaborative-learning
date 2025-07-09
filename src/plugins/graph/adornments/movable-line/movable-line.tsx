@@ -451,7 +451,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       selection.html(null);
       select(`#${containerId}`).selectAll("div").remove();
 
-      model.lines.forEach((line, key) => {
+      model.lines.forEach((line, _key) => {
+        const key = String(_key);
         const newLineObject: ILineObject = { key };
         if (graphModel.getColorForId(key) === "#000000") {
           graphModel.setColorForId(key);

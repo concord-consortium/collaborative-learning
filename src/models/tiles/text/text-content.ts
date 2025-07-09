@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn } from "mobx-state-tree";
+import { types, Instance, SnapshotIn, cast } from "mobx-state-tree";
 import {
   convertDocument, CustomEditor, Editor, EditorValue, htmlToSlate, serializeValue, slateToHtml, textToSlate, slateToText
 } from "@concord-consortium/slate-editor";
@@ -20,7 +20,8 @@ export const TextContentModel = TileContentModel
     type: types.optional(types.literal(kTextTileType), kTextTileType),
     text: types.optional(types.union(types.string, types.array(types.string)), ""),
     // e.g. "html", "markdown", "slate", "quill", empty => plain text
-    format: types.maybe(types.string)
+    format: types.maybe(types.string),
+    highlightedText: types.optional(types.array(types.model({id: types.identifier, text: types.string})), [])
   })
   .volatile(self => ({
     editor:  undefined as CustomEditor | undefined,
@@ -118,11 +119,11 @@ export const TextContentModel = TileContentModel
     },
     setHtml(text: string | string[]) {
       self.format = "html";
-      self.text = text;
+      self.text = cast(text);
     },
     setMarkdown(text: string | string[]) {
       self.format = "markdown";
-      self.text = text;
+      self.text = cast(text);
     },
     setSlate(value: EditorValue) {
       self.format = "slate";
@@ -131,6 +132,15 @@ export const TextContentModel = TileContentModel
     },
     setEditor(editor?: Editor) {
      self.editor = editor;
+    },
+    addHighlight(id: string, text: string) {
+      self.highlightedText.push({ id, text });
+    },
+    removeHighlight(id: string) {
+      const index = self.highlightedText.findIndex(ht => ht.id === id);
+      if (index >= 0) {
+        self.highlightedText.splice(index, 1);
+      }
     }
   }))
   .actions(self => ({

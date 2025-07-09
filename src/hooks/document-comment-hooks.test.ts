@@ -1,14 +1,15 @@
 import { renderHook } from "@testing-library/react-hooks";
 import { CommentDocument } from "../lib/firestore-schema";
 import {
-  DocumentQueryType, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
+  DocumentQueryType, useDocumentComments, useDocumentCommentsAtSimplifiedPath,
+  usePostDocumentComment, useUnreadDocumentComments
 } from "./document-comment-hooks";
 
-const mockPostDocumentComment_v1 = jest.fn();
+const mockPostDocumentComment_v2 = jest.fn();
 const mockHttpsCallable = jest.fn((fn: string) => {
   switch(fn) {
-    case "postDocumentComment_v1":
-      return mockPostDocumentComment_v1;
+    case "postDocumentComment_v2":
+      return mockPostDocumentComment_v2;
   }
 });
 jest.mock("firebase/app", () => ({
@@ -81,6 +82,8 @@ const mockUseCollectionOrderedRealTimeQuery = jest.fn((path: string, options?: a
     convertedComment = options.converter.fromFirestore({ data: () => fsComment });
     expect(convertedComment).toEqual(jsComment);
   }
+
+  return { mocked: true, path };
 });
 jest.mock("./firestore-hooks", () => ({
   useFirestore: () => ([
@@ -96,7 +99,7 @@ jest.mock("./firestore-hooks", () => ({
 describe("Document comment hooks", () => {
 
   function resetMocks() {
-    mockPostDocumentComment_v1.mockClear();
+    mockPostDocumentComment_v2.mockClear();
     mockHttpsCallable.mockClear();
     mockUseMutation.mockClear();
     mockMutateSuccessOrError.mockReset();
@@ -128,8 +131,8 @@ describe("Document comment hooks", () => {
       expect(mockSetQueryData).toHaveBeenCalled();
       expect(mockSetQueryData.mock.calls[0][1]).toHaveLength(1);
       expect(mockHttpsCallable).toHaveBeenCalled();
-      expect(mockHttpsCallable.mock.calls[0][0]).toBe("postDocumentComment_v1");
-      expect(mockPostDocumentComment_v1).toHaveBeenCalled();
+      expect(mockHttpsCallable.mock.calls[0][0]).toBe("postDocumentComment_v2");
+      expect(mockPostDocumentComment_v2).toHaveBeenCalled();
     });
 
     it("should roll back optimistic update on error", async () => {
@@ -152,7 +155,7 @@ describe("Document comment hooks", () => {
       expect(mockSetQueryData.mock.calls[0][1]).toHaveLength(1);
       // second call is rollback, contains no comments
       expect(mockSetQueryData.mock.calls[1][1]).toHaveLength(0);
-      expect(mockPostDocumentComment_v1).toHaveBeenCalled();
+      expect(mockPostDocumentComment_v2).toHaveBeenCalled();
     });
   });
 
@@ -185,6 +188,26 @@ describe("Document comment hooks", () => {
       renderHook(() => useUnreadDocumentComments("bar"));
       expect(mockUseCollectionOrderedRealTimeQuery).toHaveBeenCalled();
       expect(mockUseCollectionOrderedRealTimeQuery.mock.calls[0][0]).toBe("documents/network_bar/comments");
+    });
+  });
+
+  describe("useDocumentCommentsAtSimplifiedPath", () => {
+
+    it("returns expected path for a curriculum path", () => {
+      const path = "msa/1/2/introduction";
+      const { result } = renderHook(() => useDocumentCommentsAtSimplifiedPath(path));
+      expect(result.current).toEqual({ mocked: true, path: "curriculum/msa_1_2_introduction/comments" });
+    });
+
+    it("returns comments for a document path", () => {
+      const docKey = "abc123";
+      const { result } = renderHook(() => useDocumentCommentsAtSimplifiedPath(docKey));
+      expect(result.current).toEqual({ mocked: true, path: "documents/abc123/comments" });
+    });
+
+    it("handles empty paths", () => {
+      const { result } = renderHook(() => useDocumentCommentsAtSimplifiedPath(""));
+      expect(result.current).toEqual({ mocked: true, path: "" });
     });
   });
 
