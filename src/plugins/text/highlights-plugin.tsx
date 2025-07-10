@@ -8,7 +8,7 @@ import { observer } from "mobx-react";
 import { TextContentModelType } from "../../models/tiles/text/text-content";
 import { ITextPlugin } from "../../models/tiles/text/text-plugin-info";
 import { TextPluginsContext } from "../../components/tiles/text/text-plugins-context";
-import { HighlightRegistryContext } from "./highlight-registry-context"; // 👈 new import
+import { HighlightRegistryContext, HighlightRevisionContext } from "./highlight-registry-context";
 
 export const kHighlightFormat = "highlight";
 export const kHighlightTextPluginName = "highlights";
@@ -47,49 +47,45 @@ export class HighlightsPlugin implements ITextPlugin {
 
 export interface HighlightElement extends BaseElement {
   type: typeof kHighlightFormat;
-  reference: string;
+  highlightId: string;
 }
 
 export const isHighlightElement = (element: CustomElement): element is HighlightElement => {
   return element.type === kHighlightFormat;
 };
 
-export const HighlightComponent = observer(function({ attributes, children, element }: RenderElementProps) {
+export const HighlightComponent = ({ attributes, children, element }: RenderElementProps) => {
   const plugins = useContext(TextPluginsContext);
   const highlightPlugin = plugins[kHighlightTextPluginName] as HighlightsPlugin|undefined;
   const isSelected = useSelected();
-  const registryFn = useContext(HighlightRegistryContext);
-  const chipRef = useRef<HTMLSpanElement>(null); // 👈 ref to DOM node
-
+  const highlightRegistryContextFn = useContext(HighlightRegistryContext);
+  const chipRef = useRef<HTMLSpanElement>(null);
+  const editorRevisionContext = useContext(HighlightRevisionContext);
 
   if (!isHighlightElement(element)) return null;
-  const {reference} = element;
-  const highlightEntry = highlightPlugin?.highlightedText.find(ht => ht.id === reference);
-  const textToHighlight = highlightEntry?.text ?? `invalid reference: ${reference}`;
+  const {highlightId} = element;
+  const highlightEntry = highlightPlugin?.highlightedText.find(ht => ht.id === highlightId);
+  const textToHighlight = highlightEntry?.text ?? `invalid reference: ${highlightId}`;
+
+  // Memoize getHighlightChipBoundingBox so it can be used in the dependency array
+  const getHighlightChipBoundingBox = React.useCallback(() => {
+    const el = chipRef.current;
+    if (!el) return;
+    const highlightRect = el.getBoundingClientRect();
+    const textBoxRect = el.closest('.text-tool-wrapper')?.getBoundingClientRect();
+    if (highlightRect && textBoxRect && highlightRect.width > 0 && highlightRect.height > 0 && highlightRegistryContextFn) {
+      highlightRegistryContextFn(highlightId, {
+        left: highlightRect.left - textBoxRect.left,
+        top: highlightRect.top - textBoxRect.top,
+        width: highlightRect.width - kHighlightOffset,
+        height: highlightRect.height - kHighlightOffset
+      });
+    }
+  }, [highlightId, highlightRegistryContextFn]);
 
   useEffect(() => {
-    const el = chipRef.current;
-    if (!el || !registryFn) return;
-
-    const reportBox = () => {
-      const highlightRect = el.getBoundingClientRect();
-      const textBoxRect = el.closest('.text-tool-wrapper')?.getBoundingClientRect();
-      if (textBoxRect) {
-        registryFn(reference, {
-          left: highlightRect.left - textBoxRect.left,
-          top: highlightRect.top - textBoxRect.top,
-          width: highlightRect.width - kHighlightOffset,
-          height: highlightRect.height - kHighlightOffset
-        });
-      }
-    };
-
-    requestAnimationFrame(reportBox);
-
-    const highlightObserver = new ResizeObserver(reportBox);
-    highlightObserver.observe(el);
-    return () => highlightObserver.disconnect();
-  }, [registryFn, reference]);
+    getHighlightChipBoundingBox();
+  }, [chipRef.current, editorRevisionContext, getHighlightChipBoundingBox]);
 
   const classes = classNames(kSlateVoidClass, "slate-highlight-chip");
 
@@ -101,7 +97,7 @@ export const HighlightComponent = observer(function({ attributes, children, elem
       </span>
     </span>
   );
-});
+};
 
 let isRegistered = false;
 
@@ -129,27 +125,4 @@ export function isHighlightChipSelected(editor: Editor): boolean {
   });
 
   return !!match;
-}
-
-
-export function getHighlightElement(editor: CustomEditor, id: string): HighlightElement | undefined {
-  // Safely traverse the editor's children to find the highlight element.
-  const findHighlightElement = (nodes: any[]): HighlightElement | undefined => {
-    for (const node of nodes) {
-      if (SlateElement.isElement(node)) {
-        if ((node as HighlightElement).type === kHighlightFormat && (node as HighlightElement).reference === id) {
-          return node as HighlightElement;
-        }
-        if (node.children) {
-          const childResult = findHighlightElement(node.children);
-          if (childResult) {
-            return childResult;
-          }
-        }
-      }
-    }
-    return undefined;
-  };
-
-  return findHighlightElement(editor.children);
 }

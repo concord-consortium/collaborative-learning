@@ -1,3 +1,4 @@
+import { ObservableMap } from "mobx";
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import {
   convertDocument, CustomEditor, Editor, EditorValue, htmlToSlate, serializeValue, slateToHtml, textToSlate, slateToText
@@ -10,6 +11,7 @@ import { escapeBackslashes, escapeDoubleQuotes, removeNewlines, removeTabs } fro
 import { tileContentAPIViews } from "../tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
+import { IHighlightBox } from "../../../plugins/text/highlight-registry-context";
 
 export const kTextTileType = "Text";
 
@@ -28,6 +30,7 @@ export const TextContentModel = TileContentModel
   })
   .volatile(self => ({
     editor:  undefined as CustomEditor | undefined,
+    highlightBoxesCache: new ObservableMap<string, IHighlightBox>(),
   }))
   .views(self => ({
     // guarantees string (not readonly string) types
@@ -143,6 +146,13 @@ export const TextContentModel = TileContentModel
       const index = self.highlightedText.findIndex(ht => ht.id === id);
       if (index >= 0) {
         self.highlightedText.splice(index, 1);
+      }
+    },
+    setHighlightBoxesCache(id: string, box: IHighlightBox) {
+      if (box) {
+        self.highlightBoxesCache.set(id, box);
+      } else {
+        self.highlightBoxesCache.delete(id);
       }
     }
   }))

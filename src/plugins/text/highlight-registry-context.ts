@@ -10,3 +10,5 @@ export interface IHighlightBox {
 export type HighlightRegistryFn = (id: string, box: IHighlightBox) => void;
 
 export const HighlightRegistryContext = React.createContext<HighlightRegistryFn | null>(null);
+
+export const HighlightRevisionContext = React.createContext(0);
