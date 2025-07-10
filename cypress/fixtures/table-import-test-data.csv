@@ -1,0 +1,7 @@
+Mammal,Order,LifeSpan,Height,Mass,Sleep,Speed,Habitat,Diet
+African Elephant,Proboscidae,70,4,6400,3,40,land,plants
+Asian Elephant,Proboscidae,70,3,5000,4,40,land,plants
+Big Brown Bat,Chiroptera,19,0.1,0.02,20,40,land,meat
+Bottlenose Dolphin,Cetacea,25,3.5,635,5,37,water,meat
+Cheetah,Carnivora,14,1.5,50,12,110,land,meat
+Chimpanzee,Primate,40,1.5,68,10,,land,both
