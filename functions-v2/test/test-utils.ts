@@ -1,7 +1,7 @@
 import {AuthData} from "firebase-functions/lib/common/providers/https";
 import {DeepPartial} from "utility-types";
-import {ICommentableDocumentParams, ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams, IRowMapEntry,
-  ITileMapEntry, IUserContext} from "../../shared/shared";
+import {ICurriculumMetadata, IDocumentMetadata, IFirestoreMetadataDocumentParams, IPostDocumentCommentParams,
+  IRowMapEntry, ITileMapEntry, IUserContext} from "../../shared/shared";
 
 interface IPartialValidateDocumentParams {
   context?: Partial<IUserContext>,
@@ -162,14 +162,16 @@ export function specDocumentContent(tiles: Array<ITileSpec> = []) {
   return JSON.stringify({rowMap, rowOrder, tileMap});
 }
 
-export const specValidateDocument = (overrides?: IPartialValidateDocumentParams): ICommentableDocumentParams => {
+export const specValidateDocument = (overrides?: IPartialValidateDocumentParams): IFirestoreMetadataDocumentParams => {
   return {
     context: specUserContext(overrides?.context),
     document: {uid: kUserId, type: kDocumentType, key: kDocumentKey, ...overrides?.document},
   };
 };
 
-export const specValidateCurriculum = (overrides?: IPartialPostCurriculumCommentParams): ICommentableDocumentParams => {
+export const specValidateCurriculum =(
+  overrides?: IPartialPostCurriculumCommentParams
+): IFirestoreMetadataDocumentParams => {
   return {
     context: specUserContext(overrides?.context),
     document: {

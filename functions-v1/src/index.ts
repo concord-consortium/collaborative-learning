@@ -3,9 +3,7 @@ import * as functions from "firebase-functions";
 import { getImageData } from "./get-image-data";
 import { getNetworkDocument } from "./get-network-document";
 import { getNetworkResources } from "./get-network-resources";
-import { postDocumentComment } from "./post-document-comment";
 import { publishSupport } from "./publish-support";
-import { validateCommentableDocument } from "./validate-commentable-document";
 
 admin.initializeApp({
   databaseURL: "https://collaborative-learning-ec215.firebaseio.com/"
@@ -26,22 +24,6 @@ export const getImageData_v1 = functions.https.onCall(getImageData);
  * The _v1 suffix allows us to version the API if necessary moving forward.
  */
 export const publishSupport_v1 = functions.https.onCall(publishSupport);
-
-/*
- * validateCommentableDocument
- *
- * Checks whether a specific commentable document exists in firestore and creates it if necessary.
- * The _v1 suffix allows us to version the API if necessary moving forward.
- */
-export const validateCommentableDocument_v1 = functions.https.onCall(validateCommentableDocument);
-
-/*
- * postDocumentComment
- *
- * Posts a comment to a document in firestore, adding metadata for the document to firestore if necessary.
- * The _v1 suffix allows us to version the API if necessary moving forward.
- */
-export const postDocumentComment_v1 = functions.https.onCall(postDocumentComment);
 
 /*
  * getNetworkDocument
