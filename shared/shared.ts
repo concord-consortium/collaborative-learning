@@ -106,6 +106,12 @@ export function getDocumentPath(userId: string, documentKey: string, network?: s
   return documentPath;
 }
 
+export function getSimpleDocumentPath(documentKey: string) {
+  return isSectionPath(documentKey)
+    ? `curriculum/${escapeKey(documentKey)}`
+    : `documents/${escapeKey(documentKey)}`;
+}
+
 export interface IDocumentMetadataBase {
   uid: string;
   type: string;
@@ -210,16 +216,7 @@ export interface IFirestoreMetadataDocumentParams extends IFirebaseFunctionBaseP
 }
 export type IFirestoreMetadataDocumentUnionParams = IFirestoreMetadataDocumentParams | IFirebaseFunctionWarmUpParams;
 
-// TODO: Remove this type and use IFirestoreMetadataDocumentParams in its place once the app
-// is updated to use the new v2 createFirestoreMetadataDocument cloud function.
-export interface ICommentableDocumentParams extends IFirebaseFunctionBaseParams {
-  document: IDocumentMetadata | ICurriculumMetadata;
-}
-// TODO: Remove this type and use IFirestoreMetadataDocumentUnionParams in its place once the app
-// is updated to use the new v2 createFirestoreMetadataDocument cloud function.
-export type ICommentableDocumentUnionParams = ICommentableDocumentParams | IFirebaseFunctionWarmUpParams;
-
-export interface IPostDocumentCommentParams extends ICommentableDocumentParams {
+export interface IPostDocumentCommentParams extends IFirestoreMetadataDocumentParams {
   comment: IClientCommentParams;
 }
 export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFirebaseFunctionWarmUpParams;
