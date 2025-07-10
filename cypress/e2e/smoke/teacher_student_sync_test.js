@@ -16,6 +16,7 @@ context('Teacher/Student Sync Smoke Test', () => {
 
     // Add a text tile and enter some text
     clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText('Student test message');
     textToolTile.getTextEditor().should('contain', 'Student test message');
 
