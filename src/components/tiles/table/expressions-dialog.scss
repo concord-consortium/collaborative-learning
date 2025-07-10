@@ -52,9 +52,9 @@ $modal-control-border-radius: 5px;
 
         &:focus-within {
           // This is a hack to get the focus outline to show up.
-          // Code Mirror applies its own cm-focused style which adds a
+          // CodeMirror applies its own cm-focused style which adds a
           // a dotted outline. The browser seems to not apply the
-          // :focus-active style to the Code Mirror element. It part of
+          // :focus-active style to the CodeMirror element. It part of
           // of the focus ring though because it can be tabbed to.
           outline: #1976d2 auto 1px;
         }

@@ -46,8 +46,7 @@ export function defaultTableContent(props?: IDefaultContentOptions) {
 }
 
 export const TableMetadataModel = TileMetadataModel
-  .named("TableMetadata")
-  .props({});
+  .named("TableMetadata");
 export interface TableMetadataModelType extends Instance<typeof TableMetadataModel> {}
 
 export const TableContentModel = TileContentModel
@@ -134,8 +133,6 @@ export const TableContentModel = TileContentModel
       // Check if any of the attributes of the dataSet have truthy formulas
       return self.dataSet.attributes.some(attr => attr.formula.display);
     },
-  }))
-  .views(self => ({
     hasExpression(attrId: string) {
       const attr = self.dataSet.attrFromID(attrId);
       return !!attr?.formula.display;

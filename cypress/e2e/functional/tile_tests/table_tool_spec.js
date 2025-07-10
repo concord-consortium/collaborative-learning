@@ -246,7 +246,7 @@ context('Table Tool Tile', function () {
       tableToolTile.getTableCell().eq(3).should('contain', '7');
       tableToolTile.typeInTableCell(6, 'a');
       tableToolTile.getTableCell().eq(2).should('have.text', '');
-      // The formula editor will concatenate strings, so the value will be 'a2'
+      // The formula evaluation will concatenate strings, so the value will be 'a2'
       tableToolTile.getTableCell().eq(8).should('contain', 'a2');
     });
 

@@ -126,7 +126,7 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
     return attrNameMap;
   },
   get collections() {
-    // CLUE doesn't support collections, so return an empty array
+    // CLUE doesn't support collections, so return a single-element array
     return [self.defaultCollection];
   },
   get attributes() {
@@ -140,7 +140,9 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
     return attr ? getFormulaAttribute(attr) : undefined;
   },
   validateCases() {
-    // FIXME: wha should we actually do here?
+    // The main purpose of validateCases() is to group cases in hierarchical data sets.
+    // Since CLUE doesn't support hierarchy, doing nothing may be fine.
+    // Just to be safe, we log a warning incase a formula triggers this call.
     console.warn("validateCases is not implemented in formula data set proxy");
     return undefined;
   },
@@ -168,6 +170,7 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
   },
   get caseInfoMap(): Map<string, CaseInfo> {
     // CHECKME: do we need to return something here?
+    // This is primarily used for grouping in hierarchical data sets, so this might be fine.
     return new Map<string, CaseInfo>();
   },
   getItemIndex(itemId: string): number {

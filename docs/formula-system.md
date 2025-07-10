@@ -1,11 +1,11 @@
-CLUE uses the same formula system as CODAP. It is used as library. Currently this library is published to NPM from the `CODAP-740-formula-library` branch of CODAP. This branch breaks up CODAP into multiple packages in a monorepo, so the formula system can be published independently.
+CLUE uses the same formula system as CODAP. It is used as a library. Currently this library is published to NPM from the `CODAP-740-formula-library` branch of CODAP. This branch breaks up CODAP into multiple packages in a monorepo, so the formula system can be published independently.
 
 # Known Issues
 - when a value of a cell is a fraction like `1/2` this breaks mathjs's interpreter when it substitutes the value into the formula.
 - CODAP's "insert function" and "insert value" buttons have not been added.
 
 # Observing DataSet changes
-The formula system library watches for calls to setCaseValues on the dataset. Because we are proxying the dataset this won't happen automatically. Luckily, itt also watches the `itemIdsHash` to know when a new case is added or removed. Because `itemIdsHash` is only used for this watching purpose, CLUE abuses it and makes it be a hash of all of the values of all of the attributes of the dataset. This triggers the formulas to recalculate when the values change in CLUE.
+The formula system library watches for calls to setCaseValues on the dataset. Because we are proxying the dataset this won't happen automatically. Luckily, it also watches the `itemIdsHash` to know when a new case is added or removed. Because `itemIdsHash` is only used for this watching purpose, CLUE abuses it and makes it be a hash of all of the values of all of the attributes of the dataset. This triggers the formulas to recalculate when the values change in CLUE.
 
 # Stored values
 When the formula system's attribute formula adapter computes the formula of an attribute it stores the computed values directly in the dataset. So any code using the dataset doesn't have to know about formulas it can just use the dataset values.
