@@ -77,6 +77,7 @@ export const DrawingLayerView = observer((props: DrawingLayerViewProps) => {
   const containerContext = useContainerContext();
   const content = props.model.content as DrawingContentModelType;
   const drawingAreaContext = useDrawingAreaContext();
+
   return (
     <InternalDrawingLayerView
       reportVisibleBoundingBox={navigator.reportVisibleBoundingBox}

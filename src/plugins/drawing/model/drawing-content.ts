@@ -309,7 +309,8 @@ export const DrawingContentModel = NavigatableTileModel
       self.setSelectedButton('select');
       self.setSelectedIds([obj.id]);
       return obj;
-    },
+    }
+
   }))
   .extend(self => {
 
