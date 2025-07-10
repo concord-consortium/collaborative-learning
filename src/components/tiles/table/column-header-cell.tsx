@@ -1,8 +1,9 @@
 import classNames from "classnames";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { EditableHeaderCell } from "./editable-header-cell";
 import { kHeaderRowHeight, THeaderRendererProps, TColumn } from "./table-types";
 import { useCautionAlert } from "../../utilities/use-caution-alert";
+import { TSortDirection } from "../../../models/data/data-set";
 import RemoveColumnSvg from "../../../assets/icons/remove/remove.nosvgo.svg";
 import SortIcon from "../../../assets/sort-column-icon.svg";
 
@@ -10,17 +11,24 @@ import "./column-header-cell.scss";
 
 interface IUseColumnHeaderCellArgs {
   height: number;
-  getSortDirection: (columnKey: string) => "ASC" | "DESC" | "NONE";
-  onSort?: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void;
+  getSortDirection: (columnKey: string) => TSortDirection;
+  onSort: (columnKey: string, direction: TSortDirection) => void;
 }
 
 export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColumnHeaderCellArgs) => {
+  // The column is memoized. If the sort order matches the original sort order, it does not re-render.
+  // This makes sure we re-render the column header cell when the sort order changes.
+  const [sortDir, setSortDir] = React.useState<TSortDirection>("NONE");
   return useMemo(() => {
     const ColumnHeaderCell: React.FC<THeaderRendererProps> = (props) => {
       const column = props.column as unknown as TColumn;
       const { gridContext, readOnly, isEditing, isRemovable, showExpressions, hasData,
               onRemoveColumn } = column.appData || {};
       const direction = getSortDirection(column.key);
+      useEffect(() => {
+        // Update the sort direction state when the column key changes
+        setSortDir(direction);
+      }, [column.key, direction]);
 
       const classes = classNames("column-header-cell",
                         { "show-expression": showExpressions,
@@ -48,12 +56,12 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
 
       const handleSort = (e: React.MouseEvent) => {
         if (gridContext?.isColumnSelected(column.key)) {
-          let newDirection: "ASC" | "DESC" | "NONE";
+          let newDirection: TSortDirection;
           if (direction === "ASC") newDirection = "DESC";
           else if (direction === "DESC") newDirection = "NONE";
           else newDirection = "ASC";
-
-          onSort?.(column.key, newDirection);
+          onSort(column.key, newDirection);
+          setSortDir(newDirection);
         }
       };
 

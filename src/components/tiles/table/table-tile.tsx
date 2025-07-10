@@ -25,6 +25,7 @@ import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { verifyAlive } from "../../../utilities/mst-utils";
+import { TSortDirection } from "../../../models/data/data-set";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
@@ -125,7 +126,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     dataSet, isLinked, readOnly: !!readOnly, inputRowId: inputRowId.current,
     rowChanges, context: gridContext, selectedCaseIds });
 
-  const onSort = useCallback((columnKey: string, direction: "ASC" | "DESC" | "NONE") => {
+  const onSort = useCallback((columnKey: string, direction: TSortDirection) => {
     if (dataSet) {
       dataSet.sortCases(columnKey, direction);
     }

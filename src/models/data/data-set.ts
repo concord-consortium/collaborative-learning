@@ -155,8 +155,8 @@ export const DataSet = types.model("DataSet", {
   },
   getSortDirection(attributeID: string) {
       // Only return the sort direction if this column is the one being sorted
-      if (self.sortByAttribute === attributeID) {
-      return self.sortDirection ?? "NONE";
+    if (self.sortByAttribute === attributeID) {
+      return self.sortDirection ;
     }
     return "NONE";
   }
@@ -778,7 +778,7 @@ export const DataSet = types.model("DataSet", {
         resetSortState();
       },
       sortCases(attributeId: string, direction: TSortDirection = "ASC") {
-        self.sortByAttribute = direction === "NONE" ? undefined : attributeId;
+        self.sortByAttribute = attributeId;
         self.sortDirection = direction;
 
         // If direction is "NONE", restore the original order

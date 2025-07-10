@@ -831,3 +831,36 @@ test("Manual row reordering resets sort marker", () => {
   expect(dataset.sortDirection).toBe("NONE");
   expect(dataset.sortByAttribute).toBeUndefined();
 });
+
+test("DataSet sortCases even if data is already in that order", () => {
+  const dataset = DataSet.create({ name: "MultipleAttributes", attributes: [], cases: [] });
+  const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
+  const attrB = addAttributeToDataSet(dataset, { id: "b", name: "B", values: [] });
+
+  // Add cases
+  addCasesToDataSet(dataset, [
+    { __id__: "1", A: "a", B: "" },
+    { __id__: "2", A: "b", B: "" },
+    { __id__: "3", A: "c", B: "" }
+  ]);
+
+  dataset.sortCases(attrA.id, "ASC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("ASC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["1", "2", "3"]);
+
+  dataset.sortCases(attrA.id, "DESC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("DESC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["3", "2", "1"]);
+
+  dataset.sortCases(attrA.id, "NONE");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("NONE");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["1", "2", "3"]);
+
+  dataset.sortCases(attrA.id, "ASC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("ASC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["1", "2", "3"]);
+});
