@@ -54,6 +54,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     highlightPendingDropLocation: undefined as string | undefined,
     // IDs of top-level rows that are currently visible on the screen
     visibleRows: [] as string[],
+    awaitingAIAnalysis: false,
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -552,6 +553,9 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     }
   }))
   .actions(self => ({
+    setAwaitingAIAnalysis(awaitingAIAnalysis: boolean) {
+      self.awaitingAIAnalysis = awaitingAIAnalysis;
+    },
     removeNeighboringPlaceholderRows(rowId: string) {
       const rowList = self.getRowListForRow(rowId);
       if (!rowList) {
@@ -1131,6 +1135,33 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           }
         });
       }
+    },
+    /**
+     * This should not be called by users. It is used internally and by the
+     * SharedModelDocumentManager
+     *
+     * This index is used for assigning colors to datasets. It is not a computed
+     * property because we want it to be stable. When a shared model is removed,
+     * the other shared model indexes should not change.
+     *
+     * @param sharedModel
+     */
+    _assignSharedModelIndexOfType(sharedModel: SharedModelType) {
+      if (sharedModel.indexOfType < 0) {
+        const usedIndices = new Set<number>();
+        const sharedModels = self.getSharedModelsByType(sharedModel.type);
+        sharedModels?.forEach(model => {
+          if (model.indexOfType >= 0) {
+            usedIndices.add(model.indexOfType);
+          }
+        });
+        for (let i = 0; sharedModel.indexOfType < 0; ++i) {
+          if (!usedIndices.has(i)) {
+            sharedModel.setIndexOfType(i);
+            break;
+          }
+        }
+      }
     }
   }))
   .actions(self => ({
@@ -1140,6 +1171,8 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       let sharedModelEntry = self.sharedModelMap.get(sharedModel.id);
 
       if (!sharedModelEntry) {
+        self._assignSharedModelIndexOfType(sharedModel);
+
         sharedModelEntry = SharedModelEntry.create({sharedModel});
         self.sharedModelMap.set(sharedModel.id, sharedModelEntry);
       }
@@ -1150,6 +1183,27 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       if (self.sharedModelMap){
         self.sharedModelMap.set(id, sharedModelEntry);
       }
+    }
+  }))
+  .actions(self => ({
+    /**
+     * This should not be called directly, but rather through
+     * `sharedModelManager.addTileSharedModel`
+     */
+    _addTileSharedModel(tile: ITileModel, sharedModel: SharedModelType, isProvider = false): void {
+      // register it with the document if necessary.
+      // This won't re-add it if it is already there
+      const sharedModelEntry = self.addSharedModel(sharedModel);
+
+      // If the sharedModel was added before and it is already linked to this tile,
+      // we don't need to do anything
+      if (sharedModelEntry.tiles.includes(tile)) {
+        return;
+      }
+
+      // The TreeMonitor will identify this change as a shared model change and call
+      // updateAfterSharedModelChanges on the tile content model.
+      sharedModelEntry.addTile(tile, isProvider);
     }
   }))
   .actions(self => ({

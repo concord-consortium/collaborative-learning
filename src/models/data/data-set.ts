@@ -1,7 +1,8 @@
 import { cloneDeep, findIndex } from "lodash";
 import { observable } from "mobx";
 import { applyAction, getEnv, Instance, ISerializedActionCall,
-          onAction, types, getSnapshot, SnapshotOut } from "mobx-state-tree";
+          onAction, types, getSnapshot, SnapshotOut,
+          hasEnv } from "mobx-state-tree";
 import { Attribute, IAttribute, IAttributeSnapshot } from "./attribute";
 import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
 import { CaseGroup } from "./data-set-types";
@@ -35,8 +36,8 @@ export interface IDerivationSpec {
 }
 
 interface IEnvContext {
-  srcDataSet: IDataSet;
-  derivationSpec: IDerivationSpec;
+  srcDataSet?: IDataSet;
+  derivationSpec?: IDerivationSpec;
 }
 
 export type TSortDirection = "ASC" | "DESC" | "NONE";
@@ -116,13 +117,13 @@ export const DataSet = types.model("DataSet", {
 })
 .views(self => ({
   get selectedAttributeIds() {
-    return Array.from(self.attributeSelection);
+    return Array.from(self.attributeSelection as Set<string>);
   },
   get selectedCaseIds() {
-    return Array.from(self.caseSelection);
+    return Array.from(self.caseSelection as Set<string>);
   },
   get selectedCells() {
-    return Array.from(self.cellSelection).map(cellId => getCellFromId(cellId))
+    return Array.from(self.cellSelection as Set<string>).map(cellId => getCellFromId(cellId))
       .filter(cell => cell !== undefined) as ICell[];
   }
 }))
@@ -542,7 +543,7 @@ export const DataSet = types.model("DataSet", {
     },
     actions: {
       afterCreate() {
-        const context: IEnvContext = getEnv(self),
+        const context: IEnvContext = hasEnv(self) ? getEnv(self) : {},
               { srcDataSet, derivationSpec = {} } = context,
               { attributeIDs, filter, synchronize } = derivationSpec;
 

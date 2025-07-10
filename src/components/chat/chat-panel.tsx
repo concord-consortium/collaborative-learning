@@ -8,9 +8,10 @@ import {
   useCommentsCollectionPath, useDocumentComments,
   useDocumentCommentsAtSimplifiedPath, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
-import { useDeleteDocument } from "../../hooks/firestore-hooks";
-import { useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
+import { useDeleteDocument, useFirestore } from "../../hooks/firestore-hooks";
+import { useCurriculumOrDocumentContent, useDBStore, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
+import { getSimpleDocumentPath } from "../../../shared/shared";
 
 import "./chat-panel.scss";
 
@@ -27,6 +28,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
   const document = useDocumentOrCurriculumMetadata(focusDocument);
   const content = useCurriculumOrDocumentContent(focusDocument);
+  const { firebase } = useDBStore();
   const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: simplePathComments } = useDocumentCommentsAtSimplifiedPath(focusDocument);
@@ -41,6 +43,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const postedComments = documentComments?.concat(commentsInDocumentOrder);
   const commentThreads = makeChatThreads(postedComments, content);
   const postCommentMutation = usePostDocumentComment();
+  const firestore = useFirestore();
 
   const postComment = useCallback((comment: string, tags?: string[]) => {
     if (focusDocument) {
@@ -65,7 +68,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   // the "Document" in "useDeleteDocument" refers to a Firestore document (not a CLUE document)
   const deleteCommentMutation = useDeleteDocument();
 
-  const deleteComment = useCallback((commentId: string, commentText: string) => {
+  const deleteComment = useCallback(async (commentId: string, commentText: string) => {
     if (focusDocument) {
       const eventPayload: ILogComment = {
         focusDocumentId: focusDocument,
@@ -74,11 +77,30 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         action: "delete"
       };
       logCommentEvent(eventPayload);
+    } else {
+      console.warn("deleteComment called with empty focusDocument");
+      return;
     }
-    return commentsPath
-      ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
-      : undefined;
-  }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
+
+    // Check if the comment exists at the legacy path
+    const primaryDocRef = firestore[0].doc(`${commentsPath}/${commentId}`);
+    const primaryDocSnap = await primaryDocRef.get();
+
+    if (primaryDocSnap.exists) {
+      return deleteCommentMutation.mutate(`${commentsPath}/${commentId}`);
+    } else {
+      // Try the alternate (simplified) path
+      const altCommentsPath = `${getSimpleDocumentPath(focusDocument)}/comments`;
+      const altDocRef = firestore[0].doc(`${altCommentsPath}/${commentId}`);
+      const altDocSnap = await altDocRef.get();
+
+      if (altDocSnap.exists) {
+        return deleteCommentMutation.mutate(`${altCommentsPath}/${commentId}`);
+      } else {
+        return undefined;
+      }
+    }
+  }, [commentsPath, deleteCommentMutation, firestore, focusDocument, focusTileId]);
 
   const handleDocumentClick = () => {
     setIsDocumentView((prevState) => !prevState);
@@ -87,6 +109,21 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   useEffect(()=>{ //switches title
     setChatPanelTitle(isDocumentView ? "Documents" : "Comments");
   }, [isDocumentView]);
+
+  // AI evaluation is triggered when the document edit time is updated, so we can
+  // remove the "Waiting..." message when we see a comment newer than the document last edited time.
+  useEffect(() => {
+    if (user && focusDocument && content?.awaitingAIAnalysis && documentComments?.length > 0) {
+      const lastCommentTimestamp = documentComments[documentComments.length - 1].createdAt;
+      if (lastCommentTimestamp) {
+        firebase.getLastEditedTimestamp(user, focusDocument).then((docLastEditedTime) => {
+          if (docLastEditedTime && lastCommentTimestamp > docLastEditedTime) {
+            content.setAwaitingAIAnalysis(false);
+          }
+        });
+      }
+    }
+  }, [content, documentComments, firebase, focusDocument, user]);
 
   const newCommentCount = unreadComments?.length || 0;
   const isStudentWorkspace = activeNavTab === "student-work";

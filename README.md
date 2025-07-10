@@ -189,7 +189,8 @@ There are a number of URL parameters that can aid in testing:
 |`researcher`    |`true`                   |When set to true the user authenticates as a researcher|
 |`studentDocument`|string                  |If set to the ID of a document, this will be displayed as the left-side content.|
 |`studentDocumentHistoryId`|string         |Open the history slider and move to the specified revision in the `studentDocument`.|
-|`portalDomain`  |string                   |Used for dev/qa of standalone auth, this overrides which portal is used for auth|
+|`portalDomain`|string                   |Used for dev/qa of standalone auth, this overrides which portal is used for auth|
+|`firebaseEnv`|`production`,`staging` |Target Firebase project for data and functions|
 
 The `unit` parameter can be in 3 forms:
 

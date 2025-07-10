@@ -4,6 +4,7 @@ import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { parse } from "papaparse";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { ITileProps } from "../tile-component";
 import { EditableTableTitle } from "./editable-table-title";
@@ -26,6 +27,8 @@ import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { TSortDirection } from "../../../models/data/data-set";
+import { addCasesToDataSet } from "../../../models/data/data-set";
+import { removeAllAttributes } from "../../../models/data/data-set-utils";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
@@ -207,6 +210,50 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     (e.target === containerRef.current) && gridContext.onClearSelection();
   };
 
+  const importData = (file: File) => {
+    if (file) {
+      const isCSV = file.type === "text/csv" || file.name.toLowerCase().endsWith('.csv');
+
+      const addAttributesAndCases = (cases: Record<string, string>[]) => {
+        if (!cases.length) return;
+        const headers = Object.keys(cases[0]);
+        headers.forEach(header => {
+          if (!dataSet.attrNameMap[header]) {
+            dataSet.addAttributeWithID({ name: header });
+          }
+        });
+        addCasesToDataSet(dataSet, cases);
+      };
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (isCSV) {
+          parse(file, {
+            header: true,
+            complete: (results) => {
+              const data = results.data as Record<string, string>[];
+              if (data.length > 0) {
+                if (dataSet.cases.length === 0) {
+                  removeAllAttributes(dataSet);
+                }
+                addAttributesAndCases(data);
+                triggerRowChange();
+                content.logChange({
+                  action: "import-data",
+                  target: "table"
+                });
+              }
+            },
+            error: (err) => {
+              console.error("Error parsing CSV file:", err);
+            }
+          });
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
   const [activeRow, setActiveRow] = useState<TRow | null>(null);
   const pointerSensor = useSensor(PointerSensor, {activationConstraint: { distance: 3 }});
   const sensors = useSensors(pointerSensor);
@@ -302,6 +349,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const toolbarContext = {
     showExpressionsDialog,
     deleteSelected,
+    importData
   };
 
   const classes = classNames("tile-content", "table-tool", {

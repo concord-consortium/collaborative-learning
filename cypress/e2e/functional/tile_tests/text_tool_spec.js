@@ -20,6 +20,7 @@ context('Text tool tile functionalities', function () {
 
     cy.log('adds text tool and types Hello World');
     clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText('Hello World');
     textToolTile.getTextTile().last().should('contain', 'Hello World');
 
@@ -129,6 +130,7 @@ context('Text tool tile functionalities', function () {
 
     cy.log('selecting the text and verify the tool bar buttons');
     clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText('Hello World');
     textToolTile.getTextTile().last().should('contain', 'Hello World');
     textToolTile.getTextEditor().type('{selectall}');
@@ -186,6 +188,7 @@ context('Text tool tile functionalities', function () {
     cy.log('will undo redo text tile creation/deletion');
     // Creation - Undo/Redo
     clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.getTextTile().should("exist");
     clueCanvas.getUndoTool().should("not.have.class", "disabled");
     clueCanvas.getRedoTool().should("have.class", "disabled");
@@ -208,6 +211,7 @@ context('Text tool tile functionalities', function () {
 
     cy.log('will undo redo text field content');
     clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText('Hello World');
     textToolTile.getTextTile().last().should('contain', 'Hello World');
     clueCanvas.getUndoTool().click().click();
@@ -293,4 +297,58 @@ context('Text tool tile functionalities', function () {
     clueCanvas.getRedoTool().click();
     textToolTile.getTextEditor().last().should('have.descendants', 'sup');
   });
+
+  // Highlighting tool test as it was working as of this morning (June 27, 2025).
+  // TODO: Move this into the first test in this file and add checks that highlight actually happens in the editor.
+  it('Text Tool Highlight Functionality', function () {
+    beforeTest();
+
+    cy.log('Add text tool and enter sample text');
+    const text = 'This is a sample text for testing highlight functionality.';
+    clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
+    textToolTile.enterText(text);
+    textToolTile.getTextTile().last().should('contain', 'This is a sample text for testing highlight functionality');
+
+    cy.log('Verify highlight toolbar button exists and is disabled when no text is selected');
+    textToolTile.getHighlightButton().should('exist');
+    textToolTile.getHighlightButton().should('be.disabled');
+
+    cy.log('Select text using keyboard selection');
+    textToolTile.getTextEditor().last().click();
+    textToolTile.getTextEditor().last().type('{selectall}');
+
+    // Wait a moment for the selection to be processed
+    cy.wait(500);
+
+    cy.log('Verify highlight toolbar button becomes enabled when text is selected');
+    textToolTile.getHighlightButton().should('not.be.disabled');
+
+    cy.log('Click highlight toolbar button to create highlight');
+    textToolTile.getHighlightButton().click();
+
+    cy.log('Verify highlight button becomes selected');
+    textToolTile.getHighlightButton().should('have.class', 'selected');
+
+    cy.log('Verify highlight is added to the text');
+    textToolTile.getTextEditor().last().find('.highlight-chip').should('exist');
+    textToolTile.getTextEditor().last().find('.highlight-chip').should('contain.text', text);
+
+    cy.log('Verify selected highlight is removed when clicking highlight button again');
+    textToolTile.getHighlightButton().click();
+    textToolTile.getHighlightButton().should('not.have.class', 'selected');
+    textToolTile.getTextEditor().last().find('.highlight-chip').should('not.exist');
+    textToolTile.getTextTile().last().should('contain', 'This is a sample text for testing highlight functionality');
+
+    cy.log('Clean up - delete text tile');
+    clueCanvas.deleteTile('text');
+    textToolTile.getTextTile().should('not.exist');
+  });
+
+  // TODO: Implement copy and paste functionality tests. Simulating copy and paste may be tricky,
+  // especially since the text editor is a `contenteditable` element instead of a native input
+  // element (e.g. `<input>` or `<textarea>`).
+  //
+  // it('Text Tool Tile text copy and paste', function () {
+  // });
 });

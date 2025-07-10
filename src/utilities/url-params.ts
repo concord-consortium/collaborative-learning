@@ -1,4 +1,5 @@
 import { ParsedQuery, parse } from "query-string";
+import { FirebaseEnv } from "../lib/firebase-config";
 import { AppMode, AppModes } from "../models/stores/store-types";
 
 export interface QueryParams {
@@ -89,6 +90,8 @@ export interface QueryParams {
 
   // direct firebase realtime database access to the emulator
   firebase?: string; // "emulator" or host:port url
+  // Firebase project to use for data and functions
+  firebaseEnv?: FirebaseEnv;
   // direct firestore access to the emulator
   firestore?: string; // "emulator" or host:port url
   // direct firebase function calls to the emulator
@@ -174,4 +177,3 @@ export const reprocessUrlParams = () => {
   // add new params
   Object.assign(urlParams, newParams);
 };
-

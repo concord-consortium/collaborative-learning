@@ -1,7 +1,7 @@
 import firebase from "firebase/app";
 import { useCallback } from "react";
 import { useMutation, UseMutationOptions, useQuery, useQueryClient } from "react-query";
-import { ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams,
+import { escapeKey, ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams,
   isCurriculumMetadata, isDocumentMetadata, isSectionPath
 } from "../../shared/shared";
 import { CommentDocument, CurriculumDocument, DocumentDocument } from "../lib/firestore-schema";
@@ -109,7 +109,7 @@ type PostDocumentCommentUseMutationOptions =
 
 export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationOptions) => {
   const queryClient = useQueryClient();
-  const postDocumentComment = useFirebaseFunction<IPostDocumentCommentParams>("postDocumentComment_v1");
+  const postDocumentComment = useFirebaseFunction<IPostDocumentCommentParams>("postDocumentComment_v2");
   const context = useUserContext();
   const postComment = useCallback((clientParams: IPostDocumentCommentClientParams) => {
     return postDocumentComment({ context, ...clientParams });
@@ -119,7 +119,20 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
   return useMutation(postComment, {
     onMutate: async newCommentParams => {
       const { document, comment } = newCommentParams;
-      const queryKey = getCommentsQueryKeyFromMetadata(document);
+      const legacyQueryKey = getCommentsQueryKeyFromMetadata(document);
+      const documentKey = isDocumentMetadata(document) ? document.key : document.path;
+      const curriculumPath = context.network
+        ? `${context.network}/${documentKey}`
+        : documentKey;
+      const simplifiedPath = isSectionPath(documentKey || "")
+        ? `curriculum/${curriculumPath}/comments`
+        : `documents/${documentKey}/comments`;
+
+      // If the legacy comments path has comments, the new comment will be written there. Otherwise, it will be
+      // written to the simplified path.
+      const legacyComments = legacyQueryKey ? queryClient.getQueryData<CommentWithId[]>(legacyQueryKey) : [];
+      const hasLegacyComments = legacyComments && legacyComments.length > 0;
+      const queryKey = hasLegacyComments ? legacyQueryKey : simplifiedPath;
 
       // snapshot the current state of the comments in case we need to roll back on error
       const rollbackComments = queryKey && queryClient.getQueryData<CommentWithId[]>(queryKey);
@@ -138,11 +151,10 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
       // call client-specified onMutate (if provided)
       clientOnMutate?.({ document, comment });
       // return a context object with the rollback value
-      return { rollbackComments };
+      return { rollbackComments, queryKey };
     },
     onError: (err, newCommentParams, rollbackContext) => {
-      const queryKey = getCommentsQueryKeyFromMetadata(newCommentParams.document);
-      const rollbackComments = (rollbackContext as any)?.rollbackComments;
+      const { queryKey, rollbackComments } = rollbackContext as any;
       // For now we ignore the possibility that there has been a remote change since we captured
       // the rollback comments. If we encountered an error on write it likely means there's a
       // problem with our connection which means that it's unlikely we've successfully received
@@ -193,7 +205,11 @@ export const useDocumentComments = (documentKeyOrSectionPath?: string) => {
  * @returns Query results, managed by React Query.
  */
 export const useDocumentCommentsAtSimplifiedPath = (documentKeyOrSectionPath?: string) => {
-  const commentPath = isSectionPath(documentKeyOrSectionPath) ? "" : `documents/${documentKeyOrSectionPath}/comments`;
+  const commentPath = !documentKeyOrSectionPath
+    ? ""
+    : isSectionPath(documentKeyOrSectionPath)
+      ? `curriculum/${escapeKey(documentKeyOrSectionPath)}/comments`
+      : `documents/${documentKeyOrSectionPath}/comments`;
   return useCommentsAtPath(commentPath);
 };
 
