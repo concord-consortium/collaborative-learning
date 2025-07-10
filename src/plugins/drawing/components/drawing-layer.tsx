@@ -200,7 +200,12 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
         // In read-only mode, we display the entire drawing content at a zoom level that fits the view dimensions.
         const canvasSize = this.props.drawingAreaContext?.getVisibleCanvasSize() ?? { x: 10, y: 10 };
         const contentBoundingBox = this.props.objectsBoundingBox;
-        const { offsetX, offsetY, zoom } = calculateFitContent({ canvasSize, contentBoundingBox });
+        const { offsetX, offsetY, zoom } = calculateFitContent({
+          canvasSize,
+          contentBoundingBox,
+          minZoom: .1,
+          maxZoom: 1
+        });
 
         this.zoom = zoom;
         this.offsetX = offsetX;

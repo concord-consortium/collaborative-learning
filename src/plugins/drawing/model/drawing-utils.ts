@@ -104,6 +104,8 @@ export interface IFitContentOptions {
   canvasSize: { x: number; y: number };
   contentBoundingBox: BoundingBox;
   padding?: number;
+  minZoom?: number;
+  maxZoom?: number;
 }
 
 export interface IFitContentResult {
@@ -113,14 +115,16 @@ export interface IFitContentResult {
 }
 
 export const calculateFitContent = (options: IFitContentOptions): IFitContentResult => {
-  const { canvasSize, contentBoundingBox, padding=10 } = options;
+  const { canvasSize, contentBoundingBox, padding=10, minZoom: customMinZoom, maxZoom: customMaxZoom } = options;
   const contentWidth = contentBoundingBox.se.x - contentBoundingBox.nw.x;
   const contentHeight = contentBoundingBox.se.y - contentBoundingBox.nw.y;
   const optimalZoom = Math.min(
     (canvasSize.x - padding) / contentWidth,
     (canvasSize.y - padding) / contentHeight
   );
-  const legalZoom = Math.max(minZoom, Math.min(maxZoom, optimalZoom));
+  const effectiveMinZoom = customMinZoom ?? minZoom;
+  const effectiveMaxZoom = customMaxZoom ?? maxZoom;
+  const legalZoom = Math.max(effectiveMinZoom, Math.min(effectiveMaxZoom, optimalZoom));
 
   // Adjust the offset so the content is centered with the new zoom level.
   const newOffsetX = (canvasSize.x / 2 - (contentBoundingBox.nw.x + contentWidth / 2) * legalZoom);
