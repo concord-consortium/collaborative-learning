@@ -64,6 +64,7 @@ context('Test Canvas', function () {
     clueCanvas.addTile('geometry');
     clueCanvas.addTile('table');
     clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText('this is ' + studentWorkspace);
     textToolTile.getTextTile().should('be.visible').and('contain', studentWorkspace);
 
@@ -227,7 +228,7 @@ context('Test Canvas', function () {
 
     cy.log('adds text tool');
     clueCanvas.addTile('text');
-    textToolTile.getTextTile().should('exist');
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText('This is the Investigation ' + title);
     clueCanvas.exportTileAndDocument('text-tool-tile');
 
