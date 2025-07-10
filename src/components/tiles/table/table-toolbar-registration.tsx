@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useRef } from "react";
 import { observer } from "mobx-react";
 
 import { IToolbarButtonComponentProps, registerTileToolbarButtons } from "../../toolbar/toolbar-button-manager";
@@ -16,7 +16,7 @@ import DeleteSelectedIcon from "../../../assets/icons/delete/delete-selection-ic
 import SetExpressionIcon from "../../../clue/assets/icons/table/set-expression-icon.svg";
 import ViewDataAsGraphIcon from "../../../assets/icons/view-data-as-graph-icon.svg";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
-
+import ImportDataIcon from "../../../clue/assets/icons/table/import-data-icon.svg";
 const DeleteSelectedButton = ({name}: IToolbarButtonComponentProps) => {
   const toolbarContext = useContext(TableToolbarContext);
 
@@ -109,6 +109,43 @@ const TableMergeInButton = ({name}: IToolbarButtonComponentProps) => {
   return <MergeInButton name={name} title="Add data from..."/>;
 };
 
+export const ImportDataButton = ({name}: IToolbarButtonComponentProps) => {
+  const toolbarContext = useContext(TableToolbarContext);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      toolbarContext?.importData(file);
+    }
+    event.target.value = "";
+  };
+
+  return (
+    <>
+      <TileToolbarButton
+        name={name}
+        title="Import data"
+        onClick={handleButtonClick}
+      >
+        <ImportDataIcon />
+      </TileToolbarButton>
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+        accept="text/csv"
+      />
+      <span className="toolbar-separator" />
+    </>
+  );
+};
+
 registerTileToolbarButtons("table",
 [
   {
@@ -135,5 +172,9 @@ registerTileToolbarButtons("table",
     // This button takes an argument saying what kind of tile it should create.
     name: "data-set-view",
     component: DataSetViewButton
+  },
+  {
+    name: "import-data",
+    component: ImportDataButton
   }
 ]);
