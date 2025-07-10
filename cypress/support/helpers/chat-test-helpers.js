@@ -84,16 +84,26 @@ export class ChatTestHelpers {
     chatPanel.getToolTile().should('be.visible').should('have.css', 'background-color').and('eq', selectedChatBackground);
   }
 
-  static testCommentCancellation() {
+  static testCommentCancellationCommon() {
     cy.log('verify user can cancel a comment');
-    cy.openProblemSection("Introduction");
     const documentComment = "This comment is for the document.";
-    cy.wait(2000);
     chatPanel.typeInCommentArea(documentComment);
     chatPanel.getCommentCancelButton().scrollIntoView();
     chatPanel.verifyCommentAreaContains(documentComment);
     chatPanel.getCommentCancelButton().scrollIntoView().click();
     chatPanel.verifyCommentAreaDoesNotContain(documentComment);
+  }
+
+  static testStudentCommentCancellation() {
+    chatPanel.getChatPanelToggle().click();
+    cy.wait(2000);
+    this.testCommentCancellationCommon();
+  }
+
+  static testCommentCancellation() {
+    cy.openProblemSection("Introduction");
+    cy.wait(2000);
+    this.testCommentCancellationCommon();
   }
 
   static testCommentPosting() {
