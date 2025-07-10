@@ -37,7 +37,7 @@ export type ITableChangeProperties = ICreateTableProperties | IUpdateTableProper
                                       ICreateRowsProperties | IUpdateRowsProperties;
 
 export interface ITableChange {
-  action: "create" | "update" | "delete";
+  action: "create" | "update" | "delete" | "import-data";
   target: "table" | "rows" | "columns" | "geometryLink";
   ids?: string | string[];
   props?: ITableChangeProperties;

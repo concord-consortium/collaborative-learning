@@ -126,7 +126,7 @@ context('single student functional test', () => {
 
     cy.log('adds text tool');
     clueCanvas.addTile('text');
-    textToolTile.getTextTile().should('exist');
+    textToolTile.verifyTextTileIsEditable();
     // Add some text to make it distinct from question tile
     textToolTile.enterText('This is a smoke test');
     textToolTile.getTextEditor().should('contain', 'This is a smoke test');
