@@ -6,11 +6,16 @@ class TextToolTile {
         return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .text-tool`);
     }
     verifyTextTileIsEditable(){
-      cy.wait(500);
       this.getTextTile().last().should('exist').and('not.have.class', 'read-only');
       this.getTextEditor().last().should('exist').and('have.class', 'editable');
     }
     enterText(text){
+        // When the text tile is first rendered there is a brief moment where the text editor is
+        // not accessible to Cypress. This `wait` is a workaround that ensures the text editor
+        // becomes accessible before typing into it.
+        // TODO: Figure out why the text editor is not immediately accessible and fix that.
+        cy.wait(500);
+
         this.getTextTile().last().focus();
         this.getTextEditor().last().click();
         this.getTextEditor().last().type(text);

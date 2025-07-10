@@ -344,4 +344,11 @@ context('Text tool tile functionalities', function () {
     clueCanvas.deleteTile('text');
     textToolTile.getTextTile().should('not.exist');
   });
+
+  // TODO: Implement copy and paste functionality tests. Simulating copy and paste may be tricky,
+  // especially since the text editor is a `contenteditable` element instead of a native input
+  // element (e.g. `<input>` or `<textarea>`).
+  //
+  // it('Text Tool Tile text copy and paste', function () {
+  // });
 });
