@@ -304,8 +304,9 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
           wordCount,
           tileId: this.props.model.id });
       }
+
+      this.setState({ revision: this.state.revision + 1 }); // Force a rerender
     }
-    this.setState({ revision: this.state.revision + 1 }); // Force a rerender
   };
 
   private handleFocus = () => {
