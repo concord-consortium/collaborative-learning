@@ -224,18 +224,13 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     if (file) {
       const isCSV = file.type === "text/csv" || file.name.toLowerCase().endsWith('.csv');
 
-      const addAttributesAndCases = (headers: string[], dataRows: string[][]) => {
+      const addAttributesAndCases = (cases: Record<string, string>[]) => {
+        if (!cases.length) return;
+        const headers = Object.keys(cases[0]);
         headers.forEach(header => {
           if (!dataSet.attrNameMap[header]) {
             dataSet.addAttributeWithID({ name: header });
           }
-        });
-        const cases = dataRows.map(row => {
-          const caseData: any = {};
-          headers.forEach((header, index) => {
-            caseData[header] = row[index] || '';
-          });
-          return caseData;
         });
         addCasesToDataSet(dataSet, cases);
       };
@@ -244,16 +239,14 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       reader.onload = (e) => {
         if (isCSV) {
           parse(file, {
+            header: true,
             complete: (results) => {
-              const data = results.data as string[][];
-              if (data.length > 1) {
-                const headers = data[0];
-                const csvRows = data.slice(1);
-
+              const data = results.data as Record<string, string>[];
+              if (data.length > 0) {
                 if (dataSet.cases.length === 0) {
                   removeAllAttributes(dataSet);
                 }
-                addAttributesAndCases(headers, csvRows);
+                addAttributesAndCases(data);
                 triggerRowChange();
                 content.logChange({
                   action: "import-data",
