@@ -109,7 +109,7 @@ export const specStudentContext = (overrides?: Partial<IUserContext>, exclude?: 
   return context;
 };
 
-export const specAuth = (overrides?: DeepPartial<AuthData>, exclude?: string[]): AuthData => {
+export const specAuth = (overrides?: DeepPartial<AuthData>): AuthData => {
   const portal = overrides?.token?.platform_id || kPortal;
   const userId = overrides?.token?.platform_user_id || kPlatformUserId;
   const classHash = overrides?.token?.class_hash || kClassHash;
