@@ -15,7 +15,7 @@ const mockUseDocumentOrCurriculumMetadata = jest.fn((docKeyOrSectionPath: string
 jest.mock("../../hooks/use-stores", () => ({
   useDocumentOrCurriculumMetadata:
   (docKeyOrSectionPath: string) => mockUseDocumentOrCurriculumMetadata(docKeyOrSectionPath),
-useNetworkDocumentKey: (documentKey: string) => `network_${documentKey}`,
+  useNetworkDocumentKey: (documentKey: string) => `network_${documentKey}`,
   useTypeOfTileInDocumentOrCurriculum: () => "Text",
   useUIStore: () => ({
     showChatPanel: true,
@@ -23,7 +23,8 @@ useNetworkDocumentKey: (documentKey: string) => `network_${documentKey}`,
   }),
   useStores: () => ({
     appConfig: AppConfigModel.create({ config: unitConfigDefaults })
-  })
+  }),
+  useCurriculumOrDocumentContent: () => undefined
 }));
 
 const makeFakeCommentThread = (title: string, tileId: string, uid: string) => {
