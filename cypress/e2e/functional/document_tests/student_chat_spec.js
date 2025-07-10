@@ -1,47 +1,53 @@
 import ChatPanel from "../../../support/elements/common/ChatPanel";
+import { ChatTestHelpers } from "../../../support/helpers/chat-test-helpers";
 
-let chatPanel = new ChatPanel;
-
-function beforeTest(configName) {
-  const queryParams = `${Cypress.config(configName)}`;
-  cy.visit(queryParams);
-  cy.waitForLoad();
-  cy.openTopTab("problems");
-}
+const chatPanel = new ChatPanel;
 
 context("Chat Panel", () => {
-  it("should be disabled for students in default config", () => {
-    beforeTest("qaConfigSubtabsUnitStudent5");
+  it("should be disabled for students in curricula that don't support student comments", () => {
+    ChatTestHelpers.beforeTest("qaMothPlotUnitStudent5", "Student 5");
     chatPanel.getChatPanelToggle().should('not.exist');
   });
 
-  it("should be enabled for students in QA config", () => {
-    beforeTest("qaUnitStudent5");
-
-    cy.log('verify chat panel opens and closes');
-    chatPanel.getChatPanelToggle().should('exist');
-    chatPanel.getChatPanelToggle().click();
+  it("should be disabled for students on the Problems tab", () => {
+    ChatTestHelpers.beforeTest("qaUnitStudent5", "Student 5");
+    cy.openTopTab("problems");
     chatPanel.getChatPanelToggle().should('not.exist');
-    chatPanel.getChatPanel().should('exist').should('contain.text', 'Comments');
-    chatPanel.getChatCloseButton().should('exist').click();
-    chatPanel.getChatPanel().should('not.exist');
-    chatPanel.getChatCloseButton().should('not.exist');
-    chatPanel.getChatPanelToggle().should('exist');
-
-    cy.log('verify new comment card exits, card icon exists and Post button is disabled');
-    chatPanel.getChatPanelToggle().click();
-    chatPanel.getCommentCard().should('exist');
-
-    cy.log('verify the comment card and the document are highlighted');
-    chatPanel.verifyProblemCommentClass();
-    chatPanel.getProblemDocumentContent().should('be.visible');
-
-    cy.log('verify the comment card and tile are highlighted and have tile icon');
-    cy.clickProblemResourceTile('introduction');
-    chatPanel.getSelectedCommentThreadHeader().should('exist');
-    chatPanel.getCommentTileTypeIcon().should('exist');
-
   });
 
+  it("should be enabled for students on the My Work tab in QA config", () => {
+    ChatTestHelpers.beforeTest("qaUnitStudent5", "Student 5");
+
+    cy.openTopTab("my-work");
+    cy.wait(1000);
+
+    // click on a document
+    cy.get(".scaled-list-item-container").first().click();
+
+    ChatTestHelpers.verifyChatPanelBasics();
+    // This check will fail because commenting on curriculum is not currently supported,
+    // but student commenting on curriculum may be supported in the future.
+    // ChatTestHelpers.verifyDocumentAndTileHighlighting();
+    ChatTestHelpers.testStudentCommentCancellation();
+    ChatTestHelpers.testCommentPosting();
+    ChatTestHelpers.testWorkspaceTabHighlighting();
+    ChatTestHelpers.testKeyboardShortcuts();
+    ChatTestHelpers.testCommentDeletion();
+  });
+
+
+  // These checks will fail because commenting on curriculum is not currently supported,
+  // but student commenting on curriculum may be supported in the future.
+  // it('verify chat is available in various tabs and subtabs', () => {
+  //   ChatTestHelpers.beforeTest("qaUnitStudent5", "Student 5");
+
+  //   ChatTestHelpers.testChatAvailabilityAcrossBasicTabs();
+  // });
+
+  it('verify chat is available in sort work tab', () => {
+    ChatTestHelpers.beforeTest("qaConfigSubtabsUnitStudent5", "Student 5");
+
+    ChatTestHelpers.testChatAvailabilityInSortWorkTab("Group 5");
+  });
 
 });

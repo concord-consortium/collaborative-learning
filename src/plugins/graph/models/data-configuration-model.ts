@@ -341,7 +341,7 @@ export const DataConfigurationModel = types
      */
     get caseSelection() {
       if (!self.dataset || self.filteredCases.length === 0) return [];
-      const caseSelection = Array.from(self.dataset.caseSelection),
+      const caseSelection = Array.from(self.dataset.caseSelection as Set<string>),
         allGraphCaseIds = self.graphCaseIDs;
       return caseSelection.filter((caseId: string) => allGraphCaseIds.has(caseId));
     }

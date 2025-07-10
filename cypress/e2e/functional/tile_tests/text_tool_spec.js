@@ -20,6 +20,7 @@ context('Text tool tile functionalities', function () {
 
     cy.log('adds text tool and types Hello World');
     clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText('Hello World');
     textToolTile.getTextTile().last().should('contain', 'Hello World');
 
@@ -129,6 +130,7 @@ context('Text tool tile functionalities', function () {
 
     cy.log('selecting the text and verify the tool bar buttons');
     clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText('Hello World');
     textToolTile.getTextTile().last().should('contain', 'Hello World');
     textToolTile.getTextEditor().type('{selectall}');
@@ -186,6 +188,7 @@ context('Text tool tile functionalities', function () {
     cy.log('will undo redo text tile creation/deletion');
     // Creation - Undo/Redo
     clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.getTextTile().should("exist");
     clueCanvas.getUndoTool().should("not.have.class", "disabled");
     clueCanvas.getRedoTool().should("have.class", "disabled");
@@ -208,6 +211,7 @@ context('Text tool tile functionalities', function () {
 
     cy.log('will undo redo text field content');
     clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText('Hello World');
     textToolTile.getTextTile().last().should('contain', 'Hello World');
     clueCanvas.getUndoTool().click().click();
@@ -302,6 +306,7 @@ context('Text tool tile functionalities', function () {
     cy.log('Add text tool and enter sample text');
     const text = 'This is a sample text for testing highlight functionality.';
     clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText(text);
     textToolTile.getTextTile().last().should('contain', 'This is a sample text for testing highlight functionality');
 
@@ -339,4 +344,11 @@ context('Text tool tile functionalities', function () {
     clueCanvas.deleteTile('text');
     textToolTile.getTextTile().should('not.exist');
   });
+
+  // TODO: Implement copy and paste functionality tests. Simulating copy and paste may be tricky,
+  // especially since the text editor is a `contenteditable` element instead of a native input
+  // element (e.g. `<input>` or `<textarea>`).
+  //
+  // it('Text Tool Tile text copy and paste', function () {
+  // });
 });

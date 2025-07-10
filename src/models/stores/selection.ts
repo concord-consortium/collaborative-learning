@@ -32,7 +32,8 @@ export const DataSetSelectionModel = types
   }))
   .actions(self => ({
     setSelected(ids: string[]) {
-      self.selection.forEach((isSelected, id) => {
+      self.selection.forEach((isSelected, _id) => {
+        const id = String(_id);
         if (isSelected && (ids.indexOf(id) < 0)) {
           self.select(id, false);
         }

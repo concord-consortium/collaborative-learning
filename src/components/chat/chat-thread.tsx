@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from "react";
+import { observer } from "mobx-react";
 import classNames from "classnames";
 import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { WithId } from "../../hooks/firestore-hooks";
-import { useUIStore } from "../../hooks/use-stores";
+import { useCurriculumOrDocumentContent, useUIStore } from "../../hooks/use-stores";
 import { CommentDocument} from "../../lib/firestore-schema";
 import { CommentCard } from "./comment-card";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
@@ -25,17 +26,28 @@ interface IProps {
   isDocumentView?: boolean;
 }
 
-export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
+const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   onPostComment, onDeleteComment, focusDocument, focusTileId, isDocumentView}) => {
-
-  useEffect(() => {
-    setExpandedThread(focusTileId || 'document');
-  },[focusTileId]);
 
   // make focusId null if undefined so it can be compared with tileId below.
   const focusId = focusTileId === undefined ? null : focusTileId;
-  const focusedItemHasNoComments = !chatThreads?.find(item => (item.tileId === focusId));
+  // expandedThread can be an id of a tile, "document", or "" if no thread is expanded.
   const [expandedThread, setExpandedThread] = useState(focusId || '');
+
+  useEffect(() => {
+    setExpandedThread(focusTileId || 'document');
+  }, [focusTileId]);
+
+  // If an AI evaluation is pending, we force the document thread to be expanded.
+  const content = useCurriculumOrDocumentContent(focusDocument);
+  const pendingAIAnalysis = content?.awaitingAIAnalysis;
+  useEffect(() => {
+    if (pendingAIAnalysis) {
+      setExpandedThread('document');
+    }
+  }, [pendingAIAnalysis]);
+
+  const focusedItemHasNoComments = !chatThreads?.find(item => (item.tileId === focusId));
   const ui = useUIStore();
 
   const handleThreadClick = (clickedId: string | null) => {
@@ -151,3 +163,5 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
     </div>
   );
 };
+
+export const ChatThread = observer(_ChatThread);
