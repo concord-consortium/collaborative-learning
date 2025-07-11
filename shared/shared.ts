@@ -72,6 +72,24 @@ export const getCurriculumMetadata = (sectionPath?: string): ICurriculumMetadata
           : undefined;
 };
 
+export const kExemplarUserParams = {
+  type: "student",
+  id: "ivan_idea_1",
+  firstName: "Ivan",
+  lastName: "Idea",
+  fullName: "Ivan Idea",
+  initials: "II",
+};
+
+export const kAnalyzerUserParams = {
+  type: "student",
+  id: "ada_insight_1",
+  firstName: "Ada",
+  lastName: "Insight",
+  fullName: "Ada Insight",
+  initials: "AI",
+};
+
 /*
  * Types that are shared between cloud functions and client code.
  */
@@ -208,7 +226,8 @@ export type IPublishSupportUnionParams = IPublishSupportParams | IFirebaseFuncti
 export interface IClientCommentParams {
   tileId?: string;    // empty for document comments
   content: string;    // plain text for now; potentially html if we need rich text
-  tags?: string[];    // tag option that user selects for AI
+  tags?: string[];    // list of tags to apply to the comment
+  linkedDocumentKey?: string; // Key of the document that this comment should link to
 }
 
 export interface IFirestoreMetadataDocumentParams extends IFirebaseFunctionBaseParams {

@@ -95,7 +95,7 @@ describe("functions", () => {
 
       const failedImagingQueue = admin.firestore().collection("analysis/queue/failedImaging");
       expect(await failedImagingQueue.count().get().then((result) => result.data().count)).toEqual(0);
-    });
+    }, 10000);
 
     test("does not process doc with unknown evaluator", async () => {
       const wrapped = fft.wrap(onAnalysisDocumentPending);

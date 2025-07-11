@@ -13,7 +13,7 @@ const clueURL = "https://collaborative-learning.concord.org/branch/shutterbug-su
 const clueUnit = "mods";
 const shutterbugURL = "https://api.concord.org/shutterbug-production";
 
-function generateHtml(clueDocument: any) {
+function generateHtml(clueDocument: unknown) {
   return `
     <script>const initialValue=${JSON.stringify(clueDocument)}</script>
     <!-- height will be updated when iframe sends updateHeight message -->

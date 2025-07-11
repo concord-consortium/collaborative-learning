@@ -34,4 +34,12 @@ module.exports = {
     "max-len": ["warn", {code: 120, ignoreUrls: true}],
     "require-jsdoc": 0,
   },
+  overrides: [
+    {
+      files: ["test/**/*.ts"],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "off",
+      },
+    },
+  ],
 };

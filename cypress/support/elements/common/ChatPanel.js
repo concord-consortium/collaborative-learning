@@ -42,11 +42,17 @@ class ChatPanel{
     getCommentCardContent() {
       return cy.get('[data-testid=comment-card-content]');
     }
+    getCommentCardLink() {
+      return cy.get('[data-testid=comment-card-content] a');
+    }
     getCommentCancelButton(){
       return cy.get('[data-testid=comment-cancel-button]');
     }
     getSelectedCommentThreadHeader(){
       return cy.get('.chat-thread-focused').find('[data-testid=chat-thread-header]');
+    }
+    getChatThread() {
+      return cy.get('[data-testid=chat-thread]');
     }
     getFocusedThread() {
       return cy.get('.chat-thread-focused');

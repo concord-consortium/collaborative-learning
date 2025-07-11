@@ -4,15 +4,12 @@ import * as admin from "firebase-admin";
 import {getAnalysisQueueFirestorePath} from "./utils";
 import {categorizeUrl} from "../lib/src/ai-categorize-document";
 import {defineSecret} from "firebase-functions/params";
+import {kAnalyzerUserParams} from "../../shared/shared";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write a queue of docs to process
 // 2. Create screenshots of those documents
 // 3. (This function) Send those screenshots to the AI service for processing, and create comments with the results
-
-// NOTE: these should match the user specified in src/models/stores/user-types.ts
-const commenterName = "Ada Insight";
-const commenterUid = "ada_insight_1";
 
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
 
@@ -72,8 +69,8 @@ export const onAnalysisDocumentImaged =
         tags,
         content: message,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        name: commenterName,
-        uid: commenterUid,
+        name: kAnalyzerUserParams.fullName,
+        uid: kAnalyzerUserParams.id,
       });
 
       // Add to "done" queue

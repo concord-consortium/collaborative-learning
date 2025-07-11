@@ -2,8 +2,6 @@ import firebase from "firebase/app";
 import { DB } from "../db";
 import { BaseListener } from "./base-listener";
 import { ENavTab } from "../../models/view/nav-tabs";
-import { AudienceEnum, AudienceModel } from "../../models/stores/supports";
-import { createStickyNote } from "../../models/curriculum/support";
 
 /**
  * Watches the location `/classes/[ID]/users[ID]/exemplars`
@@ -68,16 +66,6 @@ export class DBExemplarsListener extends BaseListener {
     }
     const visible = typeof value === "object" && value !== null && "visible" in value && value.visible;
     this.db.stores.documents.setExemplarVisible(exemplarId, visible);
-    if (visible) {
-      // Create sticky note notification if there isn't one already
-      const note = this.db.stores.supports.getStickyNoteForUserWithLink(this.db.stores.user.id, exemplarId);
-      if (!note) {
-        const audience = AudienceModel.create({type: AudienceEnum.user, identifier: this.db.stores.user.id});
-        const message = "Nice work, you can now see a new example for this lesson:";
-        this.db.createSupport(createStickyNote(message, exemplarId), "", audience);
-      }
-    }
   };
 
 }
-

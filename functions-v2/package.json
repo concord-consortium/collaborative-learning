@@ -13,6 +13,7 @@
     "test:emulator": "firebase emulators:start --project demo-test --only firestore,database",
     "deploy": "firebase deploy --only functions:functions-v2",
     "deploy:postDocumentComment": "firebase deploy --only functions:functions-v2:postDocumentComment_v2",
+    "deploy:postExemplarComment": "firebase deploy --only functions:functions-v2:postExemplarComment_v2",
     "deploy:createFirestoreMetadataDocument": "firebase deploy --only functions:functions-v2:createFirestoreMetadataDocument_v2",
     "logs": "firebase functions:log"
   },
