@@ -28,7 +28,7 @@ interface IUseColumnsFromDataSet {
   onSort?: (columnKey: string, direction: TSortDirection) => void;
 }
 export const useColumnsFromDataSet = ({
-  gridContext, dataSet, isLinked, metadata, readOnly, showRowLabels, columnChanges, headerHeight, rowHeight,
+  gridContext, dataSet, isLinked, content, readOnly, showRowLabels, columnChanges, headerHeight, rowHeight,
   RowLabelHeader, RowLabelFormatter, measureColumnWidth, lookupImage, onSort
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
