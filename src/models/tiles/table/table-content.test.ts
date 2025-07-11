@@ -1,14 +1,22 @@
-import { IAnyType, types, castToSnapshot } from "mobx-state-tree";
-import { Value } from "expr-eval";
+import { IAnyType, types, castToSnapshot, getSnapshot } from "mobx-state-tree";
+import {
+  FormulaManager
+} from "@concord-consortium/codap-formulas-react17/models/formula/formula-manager";
+import {
+  createFormulaAdapters
+} from "@concord-consortium/codap-formulas-react17/models/formula/formula-adapter-registry";
+import {
+  AttributeFormulaAdapter
+} from "@concord-consortium/codap-formulas-react17/models/formula/attribute-formula-adapter";
+import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types";
+import { createFormulaDataSetProxy } from "../../../models/data/formula-data-set-proxy";
+import { SharedDataSet, SharedDataSetSnapshotType, SharedDataSetType } from "../../../models/shared/shared-data-set";
+import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
+import { IDataSet } from "../../data/data-set";
+import { SharedModelType } from "../../shared/shared-model";
 import { defaultTableContent, kTableTileType, TableContentModel, TableContentModelType,
   TableContentSnapshotType, TableMetadataModel } from "./table-content";
 import { TableContentTableImport } from "./table-import";
-import { IDataSet } from "../../data/data-set";
-import { kSerializedXKey } from "../../data/expression-utils";
-import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types";
-import { SharedDataSet, SharedDataSetSnapshotType, SharedDataSetType } from "../../../models/shared/shared-data-set";
-import { ISharedModelManager } from "../../..//models/shared/shared-model-manager";
-import { SharedModelType } from "../../shared/shared-model";
 
 // mock Logger calls
 const mockLogTileChangeEvent = jest.fn();
@@ -86,10 +94,20 @@ const setupContainer = (content: TableContentModelType, dataSetSnapshot?: Shared
   }
 
   const sharedModelManager = makeSharedModelManager(dataSet);
+  const formulaManager = new FormulaManager();
+  const adapterApi = formulaManager.getAdapterApi();
+
   TestTileContentModelContainer.create(
     {child: castToSnapshot(content), dataSet},
-    {sharedModelManager}
+    {sharedModelManager, formulaManager}
   );
+
+  AttributeFormulaAdapter.register();
+  formulaManager.addAdapters(createFormulaAdapters(adapterApi));
+  if (dataSet) {
+    const formulaDataSet = createFormulaDataSetProxy(dataSet!.dataSet);
+    formulaManager.addDataSet(formulaDataSet);
+  }
 };
 
 describe("TableContent", () => {
@@ -243,7 +261,7 @@ describe("TableContent", () => {
     expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: 4 });
   });
 
-  it("can load a table with a formulas", () => {
+  it("can load a table with formulas", async () => {
     const tableSnapshot: TableContentSnapshotType = {
       type: "Table",
     };
@@ -253,7 +271,7 @@ describe("TableContent", () => {
         attributes: [
           { name: "xCol", values: [1,2]},
           { name: "yCol", values: [2,4],
-            formula: {display: "xCol*2", canonical: "(__xCol__ * 2)"}
+            formula: { display: "xCol*2" }
           }
         ],
         cases: [
@@ -264,8 +282,8 @@ describe("TableContent", () => {
     const table = TableContentModel.create(tableSnapshot);
     const metadata = TableMetadataModel.create({ id: "test-metadata" });
     table.doPostCreate!(metadata);
-    // The metadata has not expression info until the table has a dataset
-    expect(metadata.hasExpressions).toBe(false);
+    // The table won't know about the expressions until it has a dataset
+    expect(table.hasExpressions).toBe(false);
 
     setupContainer(table, dataSetSnapshot);
 
@@ -273,18 +291,16 @@ describe("TableContent", () => {
     expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: 2 });
     expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: 4 });
 
-    expect(metadata.hasExpressions).toBe(true);
+    expect(table.hasExpressions).toBe(true);
     const yCol = table.dataSet.attrFromName("yCol");
     expect(yCol).toBeDefined();
-    if (yCol) {
-      expect(metadata.rawExpressions.get(yCol?.id)).toBe("xCol*2");
-      expect(metadata.expressions.get(yCol?.id)).toBe("(__xCol__ * 2)");
-    }
+    expect(yCol!.formula).toBeDefined();
+    expect(yCol!.formula!.display).toBe("xCol*2");
   });
 
   // This should not happen via the UI, but the data could get corrupted
   // or it could be manually edited
-  it("can load a table with invalid formulas", () => {
+  it("can load a table with invalid formulas", async () => {
     const tableSnapshot: TableContentSnapshotType = {
       type: "Table",
     };
@@ -294,7 +310,7 @@ describe("TableContent", () => {
         attributes: [
           { name: "xCol", values: [1,2]},
           { name: "yCol", values: [2,4],
-            formula: {display: "xCol+$1", canonical: "(__xCol__ + $1)"}
+            formula: { display: "xCol+$1" }
           }
         ],
         cases: [
@@ -306,28 +322,21 @@ describe("TableContent", () => {
     const metadata = TableMetadataModel.create({ id: "test-metadata" });
     table.doPostCreate!(metadata);
     // The metadata has not expression info until the table has a dataset
-    expect(metadata.hasExpressions).toBe(false);
+    expect(table.hasExpressions).toBe(false);
 
     setupContainer(table, dataSetSnapshot);
 
-    expect(table.dataSet.cases.length).toBe(2);
-    expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: 2 });
-    expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: 4 });
+    // The formula system processes the formulas immediately and finds the error
 
-    expect(metadata.hasExpressions).toBe(true);
+    expect(table.dataSet.cases.length).toBe(2);
+    expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: "❌ Undefined symbol $1" });
+    expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: "❌ Undefined symbol $1" });
+
+    expect(table.hasExpressions).toBe(true);
     const yCol = table.dataSet.attrFromName("yCol");
     expect(yCol).toBeDefined();
-    if (yCol) {
-      expect(metadata.rawExpressions.get(yCol?.id)).toBe("xCol+$1");
-      expect(metadata.expressions.get(yCol?.id)).toBe("(__xCol__ + $1)");
-    }
-
-    // force an update of the values based on the expression
-    // this does not currently happen automatically on load
-    metadata.updateDatasetByExpressions(table.dataSet);
-
-    expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: NaN });
-    expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: NaN });
+    expect(yCol!.formula).toBeDefined();
+    expect(yCol!.formula!.display).toBe("xCol+$1");
   });
 
   it("can convert original change format", () => {
@@ -463,7 +472,10 @@ describe("TableContent", () => {
     expect(getCaseNoId(table.dataSet, 2)).toEqual({ x: "x4", y: "y4"});
   });
 
-  it("can apply changes with expressions to a DataSet", () => {
+  // FIXME: in this test the formula is not applied after the
+  // expression is set. This is because the formula system is not
+  // enabled. In other tests this happens in setupContainer.
+  it("can apply changes with expressions to a DataSet", async () => {
     const changes = [
             {
               action: "create",
@@ -493,48 +505,29 @@ describe("TableContent", () => {
     const table = TableContentModel.create(snapshot);
     const metadata = TableMetadataModel.create({ id: "table-1" });
     table.doPostCreate!(metadata);
-    table.setExpression("y1Col", kSerializedXKey, "x");
-    table.setExpression("y2Col", "foo", "foo");
+
+    // We are kind of hacking this. Normally the imported dataset would get added
+    // to the shared model manager when the table is attached to the tree.
+    // But these tests are mocking the shared model manager so it doesn't
+    // support adding the dataset like that.
+    const sharedDataSetSnapshot: SharedDataSetSnapshotType = {
+      type: "SharedDataSet",
+      dataSet: getSnapshot(table.importedDataSet)
+    };
+
+    setupContainer(table, sharedDataSetSnapshot);
+
+    table.setExpression("y1Col", "x");
+    table.setExpression("y2Col", "foo");
 
     expect(table.dataSet.attributes.length).toBe(3);
     expect(table.dataSet.cases.length).toBe(3);
     expect(table.dataSet.getValue("row1", "y1Col")).toBe(1);
     expect(table.dataSet.getValue("row2", "y1Col")).toBe(2);
     expect(table.dataSet.getValue("row3", "y1Col")).toBe(3);
-    expect(table.dataSet.getValue("row1", "y2Col")).toBeNaN();
-    expect(table.dataSet.getValue("row2", "y2Col")).toBeNaN();
-    expect(table.dataSet.getValue("row3", "y2Col")).toBeNaN();
-  });
-
-  it("can evaluate expressions", () => {
-    const table = TableContentModel.create();
-    const metadata = TableMetadataModel.create({ id: "table-1" });
-    table.doPostCreate!(metadata);
-    const expression = table.parseExpression("x+1");
-    expect(expression).toBeDefined();
-    const evaluate = (val: Value) => expression!.evaluate(val);
-
-    expect(evaluate({x:1})).toBe(2);
-    expect(evaluate({x:"1"})).toBe(2);
-    expect(evaluate({x:"a"})).toBe(NaN);
-    expect(evaluate({x:"1 a"})).toBe(NaN);
-    expect(evaluate({x:NaN})).toBe(NaN);
-
-    const expression3 = table.parseExpression('x + "more"');
-    expect(expression3).toBeDefined();
-    const evaluate3 = (val: Value) => expression3!.evaluate(val);
-    expect(evaluate3({x:1})).toBe(NaN);
-    expect(evaluate3({x:"1"})).toBe(NaN);
-    expect(evaluate3({x:"a"})).toBe(NaN);
-
-    const expression4 = table.parseExpression("x[0]");
-    expect(expression4).toBeDefined();
-    const evaluate4 = (val: Value) => expression4!.evaluate(val);
-    expect(evaluate4({x:1})).toBe(undefined);
-    expect(evaluate4({x:"1"})).toBe("1");
-    expect(evaluate4({x:"a"})).toBe("a");
-
-
+    expect(table.dataSet.getValue("row1", "y2Col")).toBe("❌ Undefined symbol foo");
+    expect(table.dataSet.getValue("row2", "y2Col")).toBe("❌ Undefined symbol foo");
+    expect(table.dataSet.getValue("row3", "y2Col")).toBe("❌ Undefined symbol foo");
   });
 
   it("various formulas handle various input types", () => {
@@ -547,10 +540,10 @@ describe("TableContent", () => {
         attributes: [
           { name: "xCol", values: [1,2,"1/2","a"]},
           { name: "yCol", values: [0,0,    0,  0],
-            formula: {display: "xCol*2", canonical: "(__x__ * 2)"}
+            formula: { display: "xCol*2" }
           },
           { name: "zCol", values: [0,0,    0,  0],
-            formula: {display: "xCol", canonical: "__x__"}
+            formula: { display: "xCol" }
           }
         ],
         cases: [
@@ -561,22 +554,21 @@ describe("TableContent", () => {
     const table = TableContentModel.create(tableSnapshot);
     const metadata = TableMetadataModel.create({ id: "test-metadata" });
     table.doPostCreate!(metadata);
-    // The metadata has not expression info until the table has a dataset
-    expect(metadata.hasExpressions).toBe(false);
+    // The table has expression info until it has a dataset
+    expect(table.hasExpressions).toBe(false);
 
     setupContainer(table, dataSetSnapshot);
 
     expect(table.dataSet.cases.length).toBe(4);
 
-    // force an update of the values based on the expression
-    // this does not currently happen automatically on load
-    metadata.updateDatasetByExpressions(table.dataSet);
-
     expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1,     yCol: 2,   zCol: 1   });
     expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2,     yCol: 4,   zCol: 2   });
-    expect(getCaseNoId(table.dataSet, 2)).toEqual({ xCol: "1/2", yCol: 1,   zCol: 0.5 });
-    // Internally the formula engine can handle string inputs to formulas, however
-    // CLUE will return NaN for any non numeric input or non numeric output
-    expect(getCaseNoId(table.dataSet, 3)).toEqual({ xCol: "a",   yCol: NaN, zCol: NaN });
+    // The formula engine doesn't handle fractional values like the old one did
+    expect(getCaseNoId(table.dataSet, 2)).toEqual({ xCol: "1/2",
+      yCol: "❌ Invalid arguments for multiply operator: 1/2, 2",
+      zCol: "1/2" });
+    expect(getCaseNoId(table.dataSet, 3)).toEqual({ xCol: "a",
+      yCol: "❌ Invalid arguments for multiply operator: a, 2",
+      zCol: "a" });
   });
 });

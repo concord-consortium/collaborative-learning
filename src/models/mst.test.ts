@@ -327,7 +327,7 @@ describe("mst", () => {
     expect(doSomething).toBeCalledTimes(0);
     expect(hasEnv(todo)).toEqual(false);
 
-    // Now we pass an environment with someValue
+    // Now we create a container object with an environment
     const todoList = TodoList.create({}, {someValue: 1});
     todoList.addTodo(todo);
 
@@ -340,7 +340,6 @@ describe("mst", () => {
     })
     .then(() => {
       // even though the environment has changed the autorun is not triggered
-      // a second time
       expect(autorunCount).toBe(1);
       expect(doSomething).toBeCalledTimes(0);
     });

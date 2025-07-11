@@ -15,7 +15,6 @@ import { useColumnResize } from "./use-column-resize";
 import { useContentChangeHandlers } from "./use-content-change-handlers";
 import { useControlsColumn } from "./use-controls-column";
 import { useDataSet } from "./use-data-set";
-import { useExpressionsDialog } from "./use-expressions-dialog";
 import { useGridContext } from "./use-grid-context";
 import { useMeasureColumnWidth } from "./use-measure-column-width";
 import { useModelDataSet } from "./use-model-data-set";
@@ -35,6 +34,7 @@ import { ITableContext, TableContext } from "../hooks/table-context";
 import { useUIStore } from "../../../hooks/use-stores";
 import { RowDragOverlay } from "./row-drag-overlay";
 import { TRow } from "./table-types";
+import { useFormulaModal } from "./use-formula-modal";
 
 import "./table-tile.scss";
 import "./table-toolbar-registration";
@@ -52,7 +52,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const imagePromises = useMemo(() => new Map<string, Promise<ImageMapEntry>>(), []);
   const [imageUrls, setImageUrls] = useState(new Map<string,string>());
   verifyAlive(content, "TableToolComponent");
-  const metadata = getContent().metadata;
   const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
   const isLinked = linkedTiles && linkedTiles.length > 1;
   const tableContextValue: ITableContext = { linked: !!isLinked };
@@ -160,7 +159,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     model, dataSet, rows, rowHeight, headerHeight, getTitleHeight,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
   });
-  const { onSetTableTitle, onSetColumnExpressions, requestRowHeight,
+  const { onSetTableTitle, requestRowHeight,
           onAddColumn, onRemoveRows } = changeHandlers;
 
   // A function to call when a column needs to change width
@@ -177,22 +176,33 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   });
 
   // Functions for setting and displaying expressions
-  const handleSubmitExpressions = (expressions: Map<string, string>) => {
-    if (dataSet.attributes.length && expressions.size) {
-      onSetColumnExpressions(expressions, dataSet.attributes[0].name);
-    }
+  const handleFormulaModalSubmit = () => {
+    // This is necessary to trigger a rerender of the table when the expression changes.
+    // Even though this is an observing component and the formula is an observable,
+    // that isn't enough. When the expression changes that just updates the appData of the
+    // existing columns, and the RDG component is just looking at the columns object reference.
+    // The trigger causes a whole new columns object to be created, which causes RDG to rerender.
+    triggerColumnChange();
   };
-  const [showExpressionsDialog, , setCurrYAttrId] = useExpressionsDialog({
-    metadata, dataSet, onSubmit: handleSubmitExpressions
+
+  const [showExpressionsDialog, , setCurrYAttrId] = useFormulaModal({
+    table: content, dataSet, onSubmit: handleFormulaModalSubmit
   });
   const handleShowExpressionsDialog = (attrId?: string) => {
     attrId && setCurrYAttrId(attrId);
     showExpressionsDialog();
   };
 
+  const handleToolbarShowExpressionsDialog = () => {
+    // This is called from the toolbar. We use the first selected attribute of the table.
+    const firstSelectedAttributeId = dataSet.firstSelectedAttributeId;
+    firstSelectedAttributeId && setCurrYAttrId(firstSelectedAttributeId);
+    showExpressionsDialog();
+  };
+
   // Expands the columns with additional data and callbacks
   useColumnExtensions({
-    gridContext, metadata, readOnly, columns, rows, columnEditingName, changeHandlers,
+    gridContext, dataSet, readOnly, columns, rows, columnEditingName, changeHandlers,
     setColumnEditingName: handleSetColumnEditingName, onShowExpressionsDialog: handleShowExpressionsDialog
   });
 
@@ -346,7 +356,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // the internal state of the component would be a better way to factor
   // all of the use* calls above.
   const toolbarContext = {
-    showExpressionsDialog,
+    showExpressionsDialog: handleToolbarShowExpressionsDialog,
     deleteSelected,
     importData
   };

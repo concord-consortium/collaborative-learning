@@ -1,31 +1,39 @@
 import { applySnapshot, types, Instance, SnapshotIn, onAction, addDisposer, destroy, typecheck } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
-import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
-import { IDocumentAddTileOptions } from "./document-content-types";
-import { DocumentTypeEnum, IDocumentContext, ISetProperties, isPublishedType,
-  LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
-  PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
-} from "./document-types";
-import { AppConfigModelType } from "../stores/app-config-model";
-import { TileCommentsModel, TileCommentsModelType } from "../tiles/tile-comments";
-import { getSharedModelManager, getTileEnvironment } from "../tiles/tile-environment";
+import { autorun } from "mobx";
+import { FormulaManager } from "@concord-consortium/codap-formulas-react17/models/formula/formula-manager";
+import {
+  createFormulaAdapters
+} from "@concord-consortium/codap-formulas-react17/models/formula/formula-adapter-registry";
+
 import {
   IDocumentMetadata, IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext
 } from "../../../shared/shared";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { LogEventMethod, LogEventName } from "../../lib/logger-types";
+import { AppConfigModelType } from "../stores/app-config-model";
+import { TileCommentsModel, TileCommentsModelType } from "../tiles/tile-comments";
+import { getSharedModelManager, getTileEnvironment } from "../tiles/tile-environment";
 import { Tree } from "../history/tree";
 import { TreeMonitor } from "../history/tree-monitor";
-import { ISharedModelDocumentManager, SharedModelDocumentManager } from "./shared-model-document-manager";
 import { ITileEnvironment } from "../tiles/tile-content";
 import { TreeManager } from "../history/tree-manager";
 import { ESupportType } from "../curriculum/support";
-import { IDocumentLogEvent, logDocumentEvent } from "./log-document-event";
-import { LogEventMethod, LogEventName } from "../../lib/logger-types";
 import { UserModelType } from "../stores/user";
+import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../shared/shared-data-set";
+import { createFormulaDataSetProxy } from "../data/formula-data-set-proxy";
 import { isDocumentAccessibleToUser } from "./document-utils";
+import { IDocumentLogEvent, logDocumentEvent } from "./log-document-event";
+import { ISharedModelDocumentManager, SharedModelDocumentManager } from "./shared-model-document-manager";
+import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
+import { IDocumentAddTileOptions } from "./document-content-types";
+import { DocumentTypeEnum, IDocumentContext, ISetProperties, isPublishedType,
+  LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
+  PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
+} from "./document-types";
 
 export enum ContentStatus {
   Valid,
@@ -323,8 +331,12 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
  */
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   const sharedModelManager = new SharedModelDocumentManager();
+  const formulaManager = new FormulaManager();
+  const adapterApi = formulaManager.getAdapterApi();
+
   const fullEnvironment: ITileEnvironment = {
-    sharedModelManager
+    sharedModelManager,
+    formulaManager
   };
   try {
     let document: DocumentModelType;
@@ -357,6 +369,9 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
         error as Error);
     }
 
+    // initialize formula adapters after the document has been created
+    setTimeout(() => formulaManager.addAdapters(createFormulaAdapters(adapterApi)));
+
     addDisposer(document, onAction(document, (call) => {
       if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
         return;
@@ -370,6 +385,30 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     if (document.content) {
       sharedModelManager.setDocument(document.content);
     }
+
+    // Sync the formula datasets with the actual datasets
+    // Ideally the formula manager would have a getter for the datasets that we could
+    // provide so we wouldn't have to do a sync like this
+    addDisposer(document, autorun(() => {
+      const existingFormulaDataSetIds = Array.from(formulaManager.dataSets.keys());
+      const sharedDataSets = sharedModelManager.getSharedModelsByType<typeof SharedDataSet>(kSharedDataSetType);
+
+      // Remove any formula datasets that are no longer in the shared model manager
+      existingFormulaDataSetIds.forEach((dataSetId) => {
+        if (!sharedDataSets.find(sharedDataSet => sharedDataSet.dataSet.id === dataSetId)) {
+          formulaManager.removeDataSet(dataSetId);
+        }
+      });
+      // Add any formula datasets that are in the shared model manager but not in the formula manager
+      sharedDataSets.forEach((sharedDataSet: SharedDataSetType) => {
+        if (formulaManager.dataSets.has(sharedDataSet.dataSet.id)) {
+          return; // already added
+        }
+        const formulaDataSet = createFormulaDataSetProxy(sharedDataSet.dataSet);
+        formulaManager.addDataSet(formulaDataSet);
+      });
+    }));
+
     return document;
   } catch (e) {
     if (!snapshot) {

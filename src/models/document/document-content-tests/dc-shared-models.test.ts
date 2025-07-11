@@ -96,7 +96,7 @@ describe("DocumentContentModel -- shared Models --", () => {
               attributes: [
                 {
                   clientKey: "",
-                  formula: {},
+                  formula: { display: "" },
                   hidden: false,
                   id: "attribute1",
                   name: "x",
@@ -106,7 +106,7 @@ describe("DocumentContentModel -- shared Models --", () => {
                 },
                 {
                   clientKey: "",
-                  formula: {},
+                  formula: { display: "" },
                   hidden: false,
                   id: "attribute2",
                   name: "y",
@@ -171,8 +171,7 @@ Object {
               "clientKey": "",
               "description": undefined,
               "formula": Object {
-                "canonical": undefined,
-                "display": undefined,
+                "display": "",
               },
               "hidden": false,
               "id": "attribute1",
@@ -191,8 +190,7 @@ Object {
               "clientKey": "",
               "description": undefined,
               "formula": Object {
-                "canonical": undefined,
-                "display": undefined,
+                "display": "",
               },
               "hidden": false,
               "id": "attribute2",
@@ -343,8 +341,7 @@ Object {
               "clientKey": "",
               "description": undefined,
               "formula": Object {
-                "canonical": undefined,
-                "display": undefined,
+                "display": "",
               },
               "hidden": false,
               "id": "testid-18",
@@ -363,8 +360,7 @@ Object {
               "clientKey": "",
               "description": undefined,
               "formula": Object {
-                "canonical": undefined,
-                "display": undefined,
+                "display": "",
               },
               "hidden": false,
               "id": "testid-19",
@@ -481,8 +477,7 @@ Object {
               "clientKey": "",
               "description": undefined,
               "formula": Object {
-                "canonical": undefined,
-                "display": undefined,
+                "display": "",
               },
               "hidden": false,
               "id": "testid-32",
@@ -501,8 +496,7 @@ Object {
               "clientKey": "",
               "description": undefined,
               "formula": Object {
-                "canonical": undefined,
-                "display": undefined,
+                "display": "",
               },
               "hidden": false,
               "id": "testid-33",
@@ -628,8 +622,7 @@ Object {
               "clientKey": "",
               "description": undefined,
               "formula": Object {
-                "canonical": undefined,
-                "display": undefined,
+                "display": "",
               },
               "hidden": false,
               "id": "testid-44",
@@ -648,8 +641,7 @@ Object {
               "clientKey": "",
               "description": undefined,
               "formula": Object {
-                "canonical": undefined,
-                "display": undefined,
+                "display": "",
               },
               "hidden": false,
               "id": "testid-45",

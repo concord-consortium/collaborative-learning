@@ -641,7 +641,6 @@ describe("SharedModelDocumentManager", () => {
     manager.addTileSharedModel(tileContent, sharedModel2);
 
     // The update function should be called right after second model is added
-    // It is actually called twice, see above for details.
     await expectUpdateToBeCalledAfter(tileContent, 2, 3);
 
     // it should still be monitoring the first model
