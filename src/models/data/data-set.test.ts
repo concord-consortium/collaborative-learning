@@ -835,7 +835,6 @@ test("Manual row reordering resets sort marker", () => {
 test("DataSet sortCases even if data is already in that order", () => {
   const dataset = DataSet.create({ name: "MultipleAttributes", attributes: [], cases: [] });
   const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
-  const attrB = addAttributeToDataSet(dataset, { id: "b", name: "B", values: [] });
 
   // Add cases
   addCasesToDataSet(dataset, [

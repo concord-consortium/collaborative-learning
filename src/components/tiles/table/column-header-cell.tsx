@@ -18,7 +18,7 @@ interface IUseColumnHeaderCellArgs {
 export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColumnHeaderCellArgs) => {
   // The column is memoized. If the sort order matches the original sort order, it does not re-render.
   // This makes sure we re-render the column header cell when the sort order changes.
-  const [sortDir, setSortDir] = React.useState<TSortDirection>("NONE");
+  const [, setSortDir] = React.useState<TSortDirection>("NONE");
   return useMemo(() => {
     const ColumnHeaderCell: React.FC<THeaderRendererProps> = (props) => {
       const column = props.column as unknown as TColumn;
