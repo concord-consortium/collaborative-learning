@@ -6,12 +6,12 @@ import { CommentDocument } from "../../lib/firestore-schema";
 import { getDisplayTimeDate } from "../../utilities/time";
 import { useCautionAlert } from "../utilities/use-caution-alert";
 import { useCurriculumOrDocumentContent, useStores } from "../../hooks/use-stores";
+import { logDocumentViewEvent } from "../../models/document/log-document-event";
+import { DocumentModelType } from "../../models/document/document";
 import WaitingMessage from "./waiting-message";
 
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
-import { logDocumentViewEvent } from "../../models/document/log-document-event";
-import { DocumentModelType } from "../../models/document/document";
 
 import "./comment-card.scss";
 import "../themes.scss";
@@ -63,7 +63,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     }
   };
 
-  const handleOpenLinkedDocument = (document: DocumentModelType) => {
+  const handleOpenLinkedDocument = (e: React.MouseEvent<HTMLAnchorElement>, document: DocumentModelType) => {
+    e.preventDefault();
     persistentUI.toggleShowChatPanel(false);
     persistentUI.openResourceDocument(document, user, sortedDocuments);
     logDocumentViewEvent(document);
@@ -126,7 +127,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                 <div key={idx} className="comment-text" data-testid="comment">
                   {comment.content}
                   {linkedDocument &&
-                      <a href="#" onClick={() => handleOpenLinkedDocument(linkedDocument)}>
+                      <a href="#" onClick={(e) => handleOpenLinkedDocument(e, linkedDocument)}>
                         {linkedDocument.title}
                       </a>
                   }

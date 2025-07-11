@@ -43,7 +43,7 @@ export interface CommentDocument {
   createdAt: FSDate;          // timestamp used for sorting
   tileId?: string;            // empty for document comments
   content: string;            // plain text for now; potentially html if we need rich text
-  tags?: string[];            // Tags selected for the commment
+  tags?: string[];            // Tags selected for the comment
   linkedDocumentKey?: string; // Key of the document that this comment should link to
 }
 // collection key is Firestore-assigned id

@@ -81,12 +81,14 @@ export const BaseExemplarControllerModel = types
               content: kExemplarCommentContent,
               linkedDocumentKey: chosen.key
             };
-            // const context = self.stores.userContextProvider.userContext;
             const postExemplarComment = firebase.functions().httpsCallable("postExemplarComment_v2");
             postExemplarComment({
-              document: documentModel.metadata,
-              comment: newComment,
-              context: self.stores.userContextProvider.userContext
+                document: documentModel.metadata,
+                comment: newComment,
+                context: self.stores.userContextProvider.userContext
+              })
+              .catch((error) => {
+                console.error("Failed to post exemplar comment:", error);
             });
             persistentUI.openResourceDocument(documentModel);
             persistentUI.toggleShowChatPanel(true);

@@ -15,6 +15,7 @@ let sortWork = new SortedWork,
   chatPanel = new ChatPanel;
 
 // The qaConfigSubtabs unit referenced here has `initiallyHideExemplars` set, and an exemplar defined in curriculum
+// TODO: remove firebaseEnv=staging once we have the rules deployed to production
 const queryParams1 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}&firebaseEnv=staging`;
 
 // qaMothPlot unit has an exemplar, but it is not initially hidden.
