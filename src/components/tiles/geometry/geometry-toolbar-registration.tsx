@@ -9,7 +9,7 @@ import { useReadOnlyContext } from "../../document/read-only-context";
 import { useTileModelContext } from "../hooks/use-tile-model-context";
 import { GeometryTileMode } from "./geometry-types";
 import { ColorPalette } from "./color-palette";
-import { clueDataColorInfo } from "../../../utilities/color-utils";
+import { clueBasicDataColorInfo } from "../../../utilities/color-utils";
 import { GeometryContentModelType } from "src/models/tiles/geometry/geometry-content";
 import { NavigatorButton } from "../../toolbar/navigator-button";
 import { logGeometryEvent } from "../../../models/tiles/geometry/geometry-utils";
@@ -33,7 +33,7 @@ import FitAllSvg from "../../../clue/assets/icons/fit-view-icon.svg";
 import "./geometry-toolbar.scss";
 
 function getColorClass (content: GeometryContentModelType | undefined) {
-  return content?.selectedColor ? clueDataColorInfo[content.selectedColor].name : undefined;
+  return content?.selectedColor ? clueBasicDataColorInfo[content.selectedColor].name : undefined;
 }
 
 function ModeButton({name, title, targetMode, Icon, colorClass}:
@@ -111,7 +111,7 @@ const ColorChangeButton = observer(function ColorChangeButton({name}: IToolbarBu
 
 const CircleButton = observer(function CircleButton({name}: IToolbarButtonComponentProps) {
   const { content } = useGeometryTileContext();
-  const colorClass = clueDataColorInfo[content?.selectedColor || 0].name;
+  const colorClass = clueBasicDataColorInfo[content?.selectedColor || 0].name;
   return(<ModeButton name={name} title="Circle" targetMode="circle" Icon={CircleSvg} colorClass={colorClass}/>);
 });
 

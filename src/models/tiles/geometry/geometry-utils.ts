@@ -9,7 +9,7 @@ import { LogEventName } from "../../../lib/logger-types";
 import { GeometryBaseContentModel } from "./geometry-model";
 import { getTileIdFromContent } from "../tile-model";
 import { isFiniteNumber } from "../../../utilities/math-utils";
-import { clueDataColorInfo } from "../../../utilities/color-utils";
+import { clueBasicDataColorInfo } from "../../../utilities/color-utils";
 import { GeometryContentModel } from "./geometry-content";
 import { SharedModelEntrySnapshotType } from "../../document/shared-model-entry";
 import { replaceJsonStringsWithUpdatedIds, UpdatedSharedDataSetIds } from "../../shared/shared-data-set";
@@ -237,7 +237,7 @@ export function logGeometryEvent(model: Instance<typeof GeometryBaseContentModel
 }
 
 export function fillPropsForColorScheme(colorScheme: number) {
-  const spec = clueDataColorInfo[colorScheme % clueDataColorInfo.length];
+  const spec = clueBasicDataColorInfo[colorScheme % clueBasicDataColorInfo.length];
   return {
     fillColor: spec.color,
     highlightFillColor: spec.color
@@ -245,7 +245,7 @@ export function fillPropsForColorScheme(colorScheme: number) {
 }
 
 export function strokePropsForColorScheme(colorScheme: number) {
-  const spec = clueDataColorInfo[(colorScheme||0) % clueDataColorInfo.length];
+  const spec = clueBasicDataColorInfo[(colorScheme||0) % clueBasicDataColorInfo.length];
   return {
     strokeColor: spec.color,
     highlightStrokeColor: spec.color
