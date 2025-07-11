@@ -266,5 +266,12 @@ class TableToolTile{
       cy.get('.rdg-row').should('have.attr', 'role', 'row');
       cy.get('.rdg-cell').should('have.attr', 'role', 'gridcell');
     }
+
+    getImportDataButton() {
+      return cy.get('.toolbar-button.import-data');
+    }
+    importData(filename) {
+      return cy.get('input[type="file"]').attachFile(filename);
+    }
 }
 export default TableToolTile;

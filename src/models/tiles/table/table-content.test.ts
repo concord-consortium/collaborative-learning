@@ -508,7 +508,7 @@ describe("TableContent", () => {
 
     // We are kind of hacking this. Normally the imported dataset would get added
     // to the shared model manager when the table is attached to the tree.
-    // But in these tests are mocking the shared model manager so it doesn't
+    // But these tests are mocking the shared model manager so it doesn't
     // support adding the dataset like that.
     const sharedDataSetSnapshot: SharedDataSetSnapshotType = {
       type: "SharedDataSet",

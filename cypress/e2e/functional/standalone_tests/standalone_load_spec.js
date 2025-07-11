@@ -124,6 +124,7 @@ context('Standalone', () => {
     it('should maintain user state when navigating between problems', () => {
       // Add a text tile and enter content
       clueCanvas.addTile('text');
+      textToolTile.verifyTextTileIsEditable();
       textToolTile.enterText('Test content for navigation', { delay: 500 });
 
       // Wait for Firebase to save (throttled at 1000ms)

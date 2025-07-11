@@ -246,7 +246,7 @@ context('Table Tool Tile', function () {
       tableToolTile.getTableCell().eq(3).should('contain', '7');
       tableToolTile.typeInTableCell(6, 'a');
       tableToolTile.getTableCell().eq(2).should('have.text', '');
-      // The formula editor will concatenate strings, so the value will be 'a2'
+      // The formula evaluation will concatenate strings, so the value will be 'a2'
       tableToolTile.getTableCell().eq(8).should('contain', 'a2');
     });
 
@@ -512,5 +512,69 @@ context('Table Tool Tile', function () {
     tableToolTile.getTableCellWithRowColIndex(1, 2).should('contain', 'Row 2 Data');
     tableToolTile.getTableCellWithRowColIndex(2, 2).should('contain', 'Row 3 Data');
 
+  });
+
+  it('should handle table import', function() {
+    beforeTest();
+
+    cy.log('will import data from csv file to empty table');
+    clueCanvas.addTile('table');
+    tableToolTile.getTableTile().should('be.visible');
+    tableToolTile.getImportDataButton().click();
+    tableToolTile.importData('table-import-test-data.csv');
+    tableToolTile.getColumnHeader().first().should('contain', 'Mammal');
+    tableToolTile.getColumnHeader().last().should('contain', 'Diet');
+    tableToolTile.getTableCellWithRowColIndex(0, 2).should('contain', 'African Elephant');
+    tableToolTile.getTableCellWithRowColIndex(0, 3).should('contain', 'Proboscidae');
+    tableToolTile.getTableCellWithRowColIndex(2, 4).should('contain', '19');
+    tableToolTile.getTableTile().click();
+    clueCanvas.deleteTile('table');
+
+    cy.log('will import data from csv file to table with data');
+    clueCanvas.addTile('table');
+    tableToolTile.getTableTile().should('be.visible');
+    cy.get(".primary-workspace").within((workspace) => {
+      tableToolTile.typeInTableCellXY(0, 0, 'Row 1 Data');
+      tableToolTile.typeInTableCellXY(0, 1, 'Value A');
+      tableToolTile.typeInTableCellXY(1, 0, 'Row 2 Data');
+      tableToolTile.typeInTableCellXY(1, 1, 'Value B');
+      tableToolTile.typeInTableCellXY(2, 0, 'Row 3 Data');
+      tableToolTile.typeInTableCellXY(2, 1, 'Value C');
+    });
+
+    tableToolTile.getImportDataButton().click();
+    tableToolTile.importData('table-import-test-data.csv');
+    tableToolTile.getColumnHeader().should('have.length', 11);
+    tableToolTile.getColumnHeader().first().should('contain', 'x');
+    tableToolTile.getColumnHeader().last().should('contain', 'Diet');
+    tableToolTile.getTableCellWithRowColIndex(0, 2).should('contain', 'Row 1 Data');
+    tableToolTile.getTableCellWithRowColIndex(2, 3).should('contain', 'Value C');
+    tableToolTile.getTableCellWithRowColIndex(3, 4).should('contain', 'African Elephant');
+    tableToolTile.getTableCellWithRowColIndex(8, 12).should('contain', 'both');
+    tableToolTile.getTableTile().click();
+    clueCanvas.deleteTile('table');
+
+    cy.log('will import data from csv file to table with data with similar headers');
+    clueCanvas.addTile('table');
+    tableToolTile.getTableTile().should('be.visible');
+    cy.get(".primary-workspace").within((workspace) => {
+      tableToolTile.renameColumn('x', 'Mammal');
+      cy.get('.rdg-cell[aria-colindex=2]').last().type('Dog{enter}');
+      cy.get('.rdg-cell[aria-colindex=2]').last().type('Cat{enter}');
+      cy.get('.rdg-cell[aria-colindex=2]').last().type('Fish{enter}');
+    });
+
+    tableToolTile.getImportDataButton().click();
+    tableToolTile.importData('table-import-test-data.csv');
+    tableToolTile.getColumnHeader().should('have.length', 10);
+    tableToolTile.getColumnHeader().first().should('contain', 'Mammal');
+    tableToolTile.getColumnHeader().last().should('contain', 'Diet');
+    tableToolTile.getTableCellWithRowColIndex(0, 2).should('contain', 'Dog');
+    tableToolTile.getTableCellWithRowColIndex(1, 2).should('contain', '');
+    tableToolTile.getTableCellWithRowColIndex(2, 2).should('contain', 'Fish');
+    tableToolTile.getTableCellWithRowColIndex(3, 2).should('contain', 'African Elephant');
+    tableToolTile.getTableCellWithRowColIndex(8, 11).should('contain', 'both');
+    tableToolTile.getTableTile().click();
+    clueCanvas.deleteTile('table');
   });
 });

@@ -36,9 +36,8 @@ export const Attribute = types.model("Attribute", {
 .postProcessSnapshot(snap => {
   // Strip the id off of the formula. We don't need them.
   // We can't easily change the Formula model itself since it is coming from a library.
-  const formulaCopy = { ...snap.formula };
-  delete (formulaCopy as any).id;
-  return { ...snap, formula: formulaCopy };
+  const { id, ...formulaWithoutId } = snap.formula;
+  return { ...snap, formula: formulaWithoutId };
 })
 .views(self => ({
   importValue(value: IValueType) {

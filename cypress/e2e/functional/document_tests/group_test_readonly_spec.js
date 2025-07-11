@@ -15,6 +15,7 @@ function setupTest(studentIndex) {
   clueCanvas.shareCanvas();//all students will share their canvas
   cy.wait(10000);
   clueCanvas.addTile('text');
+  textToolTile.verifyTextTileIsEditable();
   textToolTile.enterText('This is to test the 4-up view of S' + students[studentIndex]);
   textToolTile.getTextTile().last().should('contain', '4-up').and('contain', 'S' + students[studentIndex]);
 }

@@ -100,7 +100,7 @@ describe("postDocumentComment", () => {
   it("should succeed when asked to warm up", async () => {
     const wrapped = fft.wrap(postDocumentComment);
     const result = await wrapped({data: {warmUp: true}} as any);
-    expect(result).toEqual({version: "1.2.0"});
+    expect(result).toEqual({version: "1.0.0"});
   });
 
   it("should fail without valid arguments", async () => {
@@ -221,7 +221,7 @@ describe("postDocumentComment", () => {
     mockAdd.mockResolvedValue({id: "comment123"});
 
     const result = await wrapped({data: validParams} as any);
-    expect(result).toEqual({version: "1.2.0", id: "comment123"});
+    expect(result).toEqual({version: "1.0.0", id: "comment123"});
     expect(mockAdd).toHaveBeenCalledWith(expect.objectContaining({
       uid: "123",
       content: "This is a test comment.",

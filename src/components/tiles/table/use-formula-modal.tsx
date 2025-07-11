@@ -126,11 +126,6 @@ const Content: React.FC<IContentProps> = ({
   dataSet,
   formulaEditorState
 }) => {
-  console.log("FormulaModal Content render", {
-    currYAttrId,
-    formula: formulaEditorState.formula,
-    formulaStateRenderIndex: (formulaEditorState as any).renderIndex
-  });
   return (
     <>
       <label className="prompt">

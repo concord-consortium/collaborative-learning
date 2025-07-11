@@ -39,6 +39,7 @@ context('Teacher can use studentDocument URL parameter', () => {
         .should("include", { objectType: "Text" })
         .should("have.a.property", "documentHistoryId", "first");
 
+    textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText(initialText);
     textToolTile.getTextTile().last().should('contain', initialText);
     // Click outside the text area to save the text
