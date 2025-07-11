@@ -223,7 +223,7 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.addTile('table');
       tableToolTile.getTableTile().should('be.visible');
       clueCanvas.clickToolbarButton('table', 'set-expression');
-      cy.get('#expression-input').click().type('x*x{enter}');
+      tableToolTile.typeExpressionInDialog('x*x{enter}');
       tableToolTile.typeInTableCellXY(0, 0, '5');
       tableToolTile.getTableCellXY(0, 0).should('contain', '5');
       tableToolTile.getTableCellXY(0, 1).should('contain', '25');

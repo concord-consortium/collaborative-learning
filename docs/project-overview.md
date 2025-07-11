@@ -33,9 +33,10 @@ CLUE is a sophisticated web-based collaborative learning platform developed by T
 #### Data and Computation
 
 - Concord Compute Engine
-- expr-eval for expression evaluation
+- CODAP's formula system is used for formula in tables. This included via the `@concord-consortium/codap-formulas-react17` dependency. Under the hood it uses MathJs.
 - Firebase SDK for database operations
 - Custom state management solutions
+- MathJs is also used by the diagram tile for equation evaluation.
 
 ## Project Structure
 

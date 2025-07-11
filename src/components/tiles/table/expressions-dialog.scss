@@ -1,5 +1,8 @@
 @import "../../../components/vars";
 
+$modal-control-border: solid 1.5px $charcoal-light-1;
+$modal-control-border-radius: 5px;
+
 .custom-modal.set-expression {
   width: 512px;
   outline: none;
@@ -41,9 +44,20 @@
           margin: 0 6px 0 3px;
         }
       }
-      input {
-        height: 100%;
+      .formula-editor-input {
         flex: 1 1 auto;
+        border: $modal-control-border;
+        border-radius: $modal-control-border-radius;
+        padding: 1px;
+
+        &:focus-within {
+          // This is a hack to get the focus outline to show up.
+          // CodeMirror applies its own cm-focused style which adds a
+          // a dotted outline. The browser seems to not apply the
+          // :focus-active style to the CodeMirror element. It part of
+          // of the focus ring though because it can be tabbed to.
+          outline: #1976d2 auto 1px;
+        }
       }
     }
 

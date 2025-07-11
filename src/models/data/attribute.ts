@@ -1,5 +1,5 @@
 import {Instance, SnapshotIn, types} from "mobx-state-tree";
-import { Formula } from "./formula";
+import { Formula } from "@concord-consortium/codap-formulas-react17/models/formula/formula";
 import { typedId } from "../../utilities/js-utils";
 import { IValueType, ValueType, isDate, isImageUrl, isNumeric, toNumeric } from "./data-types";
 
@@ -32,6 +32,12 @@ export const Attribute = types.model("Attribute", {
   // convert nulls to undefined
   const values = snap.values?.map(value => value != null ? value : undefined);
   return { ...snap, values };
+})
+.postProcessSnapshot(snap => {
+  // Strip the id off of the formula. We don't need them.
+  // We can't easily change the Formula model itself since it is coming from a library.
+  const { id, ...formulaWithoutId } = snap.formula;
+  return { ...snap, formula: formulaWithoutId };
 })
 .views(self => ({
   importValue(value: IValueType) {
@@ -194,16 +200,13 @@ export const Attribute = types.model("Attribute", {
   //   self.editable = editable;
   // },
   clearFormula() {
-    self.formula.setDisplay();
-    self.formula.setCanonical();
+    // In CODAP the attribute formula is set to undefined when the formula is cleared
+    // In CLUE the formula has been left around with undefined properties. With the use of
+    // CODAP formula library it is easiest to just set the display expression to an empty string.
+    self.formula.setDisplayExpression("");
   },
-  setDisplayFormula(display: string, xName: string) {
-    self.formula.setDisplay(display);
-    self.formula.canonicalize(xName);
-  },
-  setFormula(display: string, canonical: string) {
-    self.formula.setDisplay(display);
-    self.formula.setCanonical(canonical);
+  setFormula(display: string) {
+    self.formula.setDisplayExpression(display);
   },
   addValue(value: IValueType, beforeIndex?: number) {
     if ((beforeIndex != null) && (beforeIndex < self.values.length)) {
