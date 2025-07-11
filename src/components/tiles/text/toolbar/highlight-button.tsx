@@ -37,6 +37,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     const highlightNode: HighlightElement = {
       type: kHighlightFormat,
       reference,
+      startOffset: Editor.start(editor, editor.selection).offset,
       children: [{ text, ...marks }]
     };
     // Replace selected text with the highlight chip
@@ -49,6 +50,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     if (!editor.selection) return;
     if (chipEntry) {
       const [chipNode, chipPath] = chipEntry as [HighlightElement, Path];
+      const startOffset = Number(chipNode.startOffset);
       const previousPath = Path.previous(chipPath);
       const insertPoint = Editor.end(editor, previousPath);
       const chipNodeChild = chipNode.children[0] as { text: string, marks?: Record<string, any> };
@@ -60,12 +62,10 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
       const [prevNode, prevNodePath] = Editor.node(editor, previousPath);
       if (prevNode && prevNodePath) {
         if (Text.isText(prevNode)) {
-          // find the string `text` in the prevNode and select it
-          const startOffset = prevNode.text.indexOf(text);
           if (startOffset !== -1) {
             const endOffset = startOffset + text.length;
             const range = { anchor: { path: prevNodePath, offset: startOffset },
-              focus: { path: prevNodePath, offset: endOffset } };
+                            focus: { path: prevNodePath, offset: endOffset } };
             setTimeout(() => {
               ReactEditor.focus(editor);
               Transforms.select(editor, range);
