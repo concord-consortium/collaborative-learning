@@ -1,7 +1,8 @@
 import React, { useContext } from "react";
 import { v4 as uuid } from "uuid";
 import { Path } from "slate";
-import { Editor, Range, Transforms, useSlate } from "@concord-consortium/slate-editor";
+import { ReactEditor, Editor, Range, Transforms, useSlate } from "@concord-consortium/slate-editor";
+import { Text } from "slate";
 import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat, HighlightElement }
   from "../../../../plugins/text/highlights-plugin";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
@@ -54,6 +55,24 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
       const { text, ...marks } = chipNodeChild;
       Transforms.removeNodes(editor, { at: chipPath });
       Transforms.insertNodes(editor, { text, ...marks }, { at: insertPoint });
+      // assume that when text is unhighlighted, the text is now part of the previous path
+      // get the text node at the previous path
+      const [prevNode, prevNodePath] = Editor.node(editor, previousPath);
+      if (prevNode && prevNodePath) {
+        if (Text.isText(prevNode)) {
+          // find the string `text` in the prevNode and select it
+          const startOffset = prevNode.text.indexOf(text);
+          if (startOffset !== -1) {
+            const endOffset = startOffset + text.length;
+            const range = { anchor: { path: prevNodePath, offset: startOffset },
+              focus: { path: prevNodePath, offset: endOffset } };
+            setTimeout(() => {
+              ReactEditor.focus(editor);
+              Transforms.select(editor, range);
+            }, 0);
+          }
+        }
+      }
     }
   };
 
