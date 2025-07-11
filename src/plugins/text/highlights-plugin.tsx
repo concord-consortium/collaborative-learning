@@ -44,6 +44,8 @@ export class HighlightsPlugin implements ITextPlugin {
 export interface HighlightElement extends BaseElement {
   type: typeof kHighlightFormat;
   reference: string;
+  //store the start offset of the selected text so we can restore the selection after removing the highlight
+  startOffset: number;
 }
 
 export const isHighlightElement = (element: CustomElement): element is HighlightElement => {
