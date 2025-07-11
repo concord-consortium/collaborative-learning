@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import { DocumentContentModelType } from "../../models/document/document-content";
-import { kAnalyzerUserParams } from "../../models/stores/user-types";
+import { kAnalyzerUserParams } from "../../../shared/shared";
 
 import AdaAvatar from "../../assets/ada-avatar.svg";
 
