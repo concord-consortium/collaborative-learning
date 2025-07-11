@@ -640,14 +640,14 @@ test("DataSet client synchronization", (done) => {
   src.removeAttribute(src.attributes[0].id);
 });
 
-test("DataSet sortByAttribute handles empty dataset", () => {
+test("DataSet sortCases handles empty dataset", () => {
   const dataset = DataSet.create({ name: "Empty", attributes: [], cases: [] });
   // Should not throw or change anything
-  expect(() => dataset.sortByAttribute("nonexistent")).not.toThrow();
+  expect(() => dataset.sortCases("nonexistent")).not.toThrow();
   expect(dataset.cases.length).toBe(0);
 });
 
-test("DataSet sortByAttribute with missing attribute values", () => {
+test("DataSet sortCases with missing attribute values", () => {
   const dataset = DataSet.create({ name: "Missing", attributes: [], cases: [] });
   const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
   addCasesToDataSet(dataset, [
@@ -655,12 +655,12 @@ test("DataSet sortByAttribute with missing attribute values", () => {
     { __id__: "2" }, // missing value for A
     { __id__: "3", A: "y" }
   ]);
-  dataset.sortByAttribute(attrA.id, "ASC");
-  // Case "2" (missing value) should sort before "1" and "3"
+  dataset.sortCases(attrA.id, "ASC");
+  // Case "2" (missing value) should sort after "1" and "3"
   expect(dataset.cases.map(c => c.__id__)).toEqual(["1", "3", "2"]);
 });
 
-test("DataSet sortByAttribute is stable for equal values", () => {
+test("DataSet sortCases is stable for equal values", () => {
   const dataset = DataSet.create({ name: "Stable", attributes: [], cases: [] });
   const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
   addCasesToDataSet(dataset, [
@@ -668,12 +668,12 @@ test("DataSet sortByAttribute is stable for equal values", () => {
     { __id__: "2", A: "same" },
     { __id__: "3", A: "same" }
   ]);
-  dataset.sortByAttribute(attrA.id, "ASC");
+  dataset.sortCases(attrA.id, "ASC");
   // Order should be preserved
   expect(dataset.cases.map(c => c.__id__)).toEqual(["1", "2", "3"]);
 });
 
-test("DataSet sortByAttribute returns correct index mapping", () => {
+test("DataSet sortCases returns correct index mapping", () => {
   const dataset = DataSet.create({ name: "Mapping", attributes: [], cases: [] });
   const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
   addCasesToDataSet(dataset, [
@@ -681,7 +681,7 @@ test("DataSet sortByAttribute returns correct index mapping", () => {
     { __id__: "2", A: "a" },
     { __id__: "3", A: "b" }
   ]);
-  const mapping = dataset.sortByAttribute(attrA.id, "ASC");
+  const mapping = dataset.sortCases(attrA.id, "ASC");
   expect(mapping).toEqual({
     "2": { beforeIndex: 1, afterIndex: 0 },
     "3": { beforeIndex: 2, afterIndex: 1 },
@@ -689,7 +689,7 @@ test("DataSet sortByAttribute returns correct index mapping", () => {
   });
 });
 
-test("DataSet sortByAttribute does not mutate attribute values if already sorted", () => {
+test("DataSet sortCases does not mutate attribute values if already sorted", () => {
   const dataset = DataSet.create({ name: "NoMutation", attributes: [], cases: [] });
   const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
   addCasesToDataSet(dataset, [
@@ -697,6 +697,169 @@ test("DataSet sortByAttribute does not mutate attribute values if already sorted
     { __id__: "2", A: "b" }
   ]);
   const origValues = dataset.attributes[0].values.slice();
-  dataset.sortByAttribute(attrA.id, "ASC");
+  dataset.sortCases(attrA.id, "ASC");
   expect(dataset.attributes[0].values).toEqual(origValues);
+});
+
+test("DataSet sortCases with NONE direction restores original order", () => {
+  const dataset = DataSet.create({ name: "OriginalOrder", attributes: [], cases: [] });
+  const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
+
+  // Add cases in original order: 1, 2, 3
+  addCasesToDataSet(dataset, [
+    { __id__: "1", A: "c" },
+    { __id__: "2", A: "a" },
+    { __id__: "3", A: "b" }
+  ]);
+
+  const originalOrder = dataset.cases.map(c => c.__id__);
+  expect(originalOrder).toEqual(["1", "2", "3"]);
+
+  // Sort in ascending order: 2, 3, 1
+  dataset.sortCases(attrA.id, "ASC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "3", "1"]);
+
+  // Sort with NONE direction should restore original order: 1, 2, 3
+  dataset.sortCases(attrA.id, "NONE");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["1", "2", "3"]);
+
+  // Sort in descending order: 1, 3, 2
+  dataset.sortCases(attrA.id, "DESC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["1", "3", "2"]);
+
+  // Sort with NONE direction should restore original order again: 1, 2, 3
+  dataset.sortCases(attrA.id, "NONE");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["1", "2", "3"]);
+});
+
+test("DataSet sortCases only affects the specified attribute", () => {
+  const dataset = DataSet.create({ name: "MultipleAttributes", attributes: [], cases: [] });
+  const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
+  const attrB = addAttributeToDataSet(dataset, { id: "b", name: "B", values: [] });
+
+  // Add cases
+  addCasesToDataSet(dataset, [
+    { __id__: "1", A: "c", B: "x" },
+    { __id__: "2", A: "a", B: "y" },
+    { __id__: "3", A: "b", B: "z" }
+  ]);
+
+  // Sort by attribute A
+  dataset.sortCases(attrA.id, "ASC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("ASC");
+
+  // Sort by attribute B - this should change the sortByAttribute to B
+  dataset.sortCases(attrB.id, "DESC");
+  expect(dataset.sortByAttribute).toBe(attrB.id);
+  expect(dataset.sortDirection).toBe("DESC");
+
+  // The cases should now be sorted by attribute B in descending order
+  // B values: x, y, z -> descending order: z, y, x -> case IDs: 3, 2, 1
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["3", "2", "1"]);
+});
+
+test("DataSet resets sort state when new cases are added", () => {
+  const dataset = DataSet.create({ name: "SortReset", attributes: [], cases: [] });
+  const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
+
+  addCasesToDataSet(dataset, [
+    { __id__: "1", A: "c" },
+    { __id__: "2", A: "a" },
+    { __id__: "3", A: "b" }
+  ]);
+
+  dataset.sortCases(attrA.id, "ASC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("ASC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "3", "1"]);
+
+  addCasesToDataSet(dataset, [
+    { __id__: "4", A: "d" },
+    { __id__: "5", A: "e" }
+  ]);
+
+  // Sort state should be reset to NONE
+  expect(dataset.sortDirection).toBe("NONE");
+  expect(dataset.sortByAttribute).toBeUndefined();
+
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "3", "1", "4", "5"]);
+});
+
+test("DataSet resets sort state when cases are edited", () => {
+  const dataset = DataSet.create({ name: "EditSortReset", attributes: [], cases: [] });
+  const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
+
+  addCasesToDataSet(dataset, [
+    { __id__: "1", A: "c" },
+    { __id__: "2", A: "a" },
+    { __id__: "3", A: "b" }
+  ]);
+
+  dataset.sortCases(attrA.id, "ASC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("ASC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "3", "1"]); // sorted by A values
+
+  dataset.setCaseValues([{ __id__: "1", A: "z" }]);
+
+  expect(dataset.sortDirection).toBe("NONE");
+  expect(dataset.sortByAttribute).toBeUndefined();
+  // Cases should remain in the same order as before the edit
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "3", "1"]);
+  expect(dataset.getCase("1")).toEqual({ __id__: "1", A: "z" });
+});
+
+test("Manual row reordering resets sort marker", () => {
+  const dataset = DataSet.create({ name: "ManualSort", attributes: [], cases: [] });
+  const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
+
+  addCasesToDataSet(dataset, [
+    { __id__: "1", A: "c" },
+    { __id__: "2", A: "a" },
+    { __id__: "3", A: "b" }
+  ]);
+
+  // Sort by attribute A
+  dataset.sortCases(attrA.id, "ASC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("ASC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "3", "1"]);
+
+  dataset.moveCase("1", 1); // Move first row to last position
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["2", "1", "3"]);
+  expect(dataset.sortDirection).toBe("NONE");
+  expect(dataset.sortByAttribute).toBeUndefined();
+});
+
+test("DataSet sortCases even if data is already in that order", () => {
+  const dataset = DataSet.create({ name: "MultipleAttributes", attributes: [], cases: [] });
+  const attrA = addAttributeToDataSet(dataset, { id: "a", name: "A", values: [] });
+
+  // Add cases
+  addCasesToDataSet(dataset, [
+    { __id__: "1", A: "a", B: "" },
+    { __id__: "2", A: "b", B: "" },
+    { __id__: "3", A: "c", B: "" }
+  ]);
+
+  dataset.sortCases(attrA.id, "ASC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("ASC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["1", "2", "3"]);
+
+  dataset.sortCases(attrA.id, "DESC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("DESC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["3", "2", "1"]);
+
+  dataset.sortCases(attrA.id, "NONE");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("NONE");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["1", "2", "3"]);
+
+  dataset.sortCases(attrA.id, "ASC");
+  expect(dataset.sortByAttribute).toBe(attrA.id);
+  expect(dataset.sortDirection).toBe("ASC");
+  expect(dataset.cases.map(c => c.__id__)).toEqual(["1", "2", "3"]);
 });
