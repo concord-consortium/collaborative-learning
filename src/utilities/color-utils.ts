@@ -31,6 +31,7 @@ export interface ClueColor {
   name: string;
 }
 
+// Full set of 12 data colors from clueDataColors.scss; this is used by the Graph and BarGraph tiles
 export const clueDataColorInfo: ClueColor[] = [
   { color: clueDataColors.dataBlue, name: "blue" },
   { color: clueDataColors.dataOrange, name: "orange" },
@@ -44,6 +45,18 @@ export const clueDataColorInfo: ClueColor[] = [
   { color: clueDataColors.dataGray, name: "gray" },
   { color: clueDataColors.dataBrown, name: "brown" },
   { color: clueDataColors.dataBlack, name: "black" }
+];
+
+// Smaller set of 8 data colors used by the Geometry tile
+export const clueBasicDataColorInfo: ClueColor[] = [
+  { color: clueDataColors.dataBlue, name: "blue" },
+  { color: clueDataColors.dataOrange, name: "orange" },
+  { color: clueDataColors.dataGreen, name: "green" },
+  { color: clueDataColors.dataRed, name: "red" },
+  { color: clueDataColors.dataYellow, name: "yellow" },
+  { color: clueDataColors.dataPurple, name: "purple" },
+  { color: clueDataColors.dataIndigo, name: "indigo" },
+  { color: clueDataColors.dataGray, name: "gray" }
 ];
 
 /*
