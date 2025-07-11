@@ -44,6 +44,72 @@ describe("functions", () => {
   });
 
   describe("onAnalysisDocumentImaged", () => {
+    test("uses mock evaluator when specified", async () => {
+      const wrapped = fft.wrap(onAnalysisDocumentImaged);
+      const firestore = admin.firestore();
+      const doc = {...sampleDoc, evaluator: "mock"};
+
+      await wrapped({
+        data: makeDocumentSnapshot(doc, "analysis/queue/imaged/testdoc1"),
+        params: {
+          docId: "testdoc1",
+        },
+      });
+      expect(logger.info)
+        .toHaveBeenLastCalledWith("Creating comment for",
+          "analysis/queue/imaged/testdoc1");
+      expect(logger.warn).not.toHaveBeenCalled();
+
+      // Document should have been removed from "imaged" queue and added to "done"
+
+      const pendingQueue = firestore.collection("analysis/queue/pending");
+      expect(await pendingQueue.count().get().then((result) => result.data().count)).toEqual(0);
+
+      const imagedQueue = firestore.collection("analysis/queue/imaged");
+      expect(await imagedQueue.count().get().then((result) => result.data().count)).toEqual(0);
+
+      const doneQueue = firestore.collection("analysis/queue/done");
+      expect(await doneQueue.count().get().then((result) => result.data().count)).toEqual(1);
+      await doneQueue.get().then((snapshot) => {
+        snapshot.forEach((doc) => {
+          expect(doc.data()).toEqual({
+            metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+            documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
+            commentsPath: "demo/AI/documents/testdoc1/comments",
+            documentId: "testdoc1",
+            docUpdated: "1001",
+            completedAt: expect.any(Object),
+            docImageUrl: "https://concord.org/wp-content/uploads/2024/05/capturing-moths-fig-2.png",
+            evaluator: "mock",
+            promptTokens: 0,
+            completionTokens: 0,
+            fullResponse: "",
+          });
+        });
+      });
+
+      const failedAnalyzingQueue = firestore.collection("analysis/queue/failedAnalyzing");
+      expect(await failedAnalyzingQueue.count().get().then((result) => result.data().count)).toEqual(0);
+
+      const failedImagingQueue = firestore.collection("analysis/queue/failedImaging");
+      expect(await failedImagingQueue.count().get().then((result) => result.data().count)).toEqual(0);
+
+      // Comment should have been created
+
+      const comments = firestore.collection("demo/AI/documents/testdoc1/comments");
+      await comments.get().then((snapshot) => {
+        expect(snapshot.size).toBe(1);
+        const comment = snapshot.docs[0].data();
+        expect(comment).toEqual({
+          content: "Mock reply from AI analysis",
+          tags: [],
+          createdAt: expect.any(Object),
+          name: "Ada Insight",
+          uid: "ada_insight_1",
+        });
+      });
+    });
+
     test("creates comment when queued document is imaged", async () => {
       categorizeUrl.mockResolvedValueOnce({
         choices: [{

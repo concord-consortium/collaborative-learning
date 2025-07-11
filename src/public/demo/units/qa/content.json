@@ -13,6 +13,7 @@
       {"url": "curriculum/moving-straight-ahead/stamps/rparen.png", "width": 25, "height": 25}
     ],
     "annotations": "all",
+    "aiEvaluation": "mock",
     "settings": {
       "table": { "numFormat": ".2~f" },
       "datacard": {
