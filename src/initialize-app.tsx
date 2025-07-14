@@ -12,6 +12,9 @@ import {
 import {
   AttributeFormulaAdapter
 } from "@concord-consortium/codap-formulas-react17/models/formula/attribute-formula-adapter";
+import {
+  registerMathjsFunction, typedFnRegistry
+} from "@concord-consortium/codap-formulas-react17/models/formula/functions/math";
 
 import { AppMode } from "./models/stores/store-types";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
@@ -53,7 +56,10 @@ export const initializeApp = ({authoring, standalone, authDomain}: IInitializeAp
   // Setup the formula system
   // Let the formula system know we don't support global values
   registerGlobalValueManagerLookupFunction(undefined);
+  // Have the attribute formula adapter register itself
   AttributeFormulaAdapter.register();
+  // Add an alias for the mean function
+  registerMathjsFunction("average", typedFnRegistry.mean);
 
   const user = UserModel.create();
 
