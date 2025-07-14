@@ -45,7 +45,7 @@ const TestSharedModel = SharedModel
     value: types.maybe(types.string)
   })
   .actions(self => ({
-    setValue(value: string){
+    setValue(value: string) {
       self.value = value;
     }
   }));
@@ -78,7 +78,8 @@ const TestTile = TileContentModel
     child: types.maybe(TestTileChild)
   })
   .volatile(self => ({
-    updateCount: 0
+    updateCount: 0,
+    volatileValue: 0
   }))
   .views(self => ({
     get sharedModel() {
@@ -94,27 +95,30 @@ const TestTile = TileContentModel
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       self.updateCount++;
       const sharedModelValue = self.sharedModel?.value;
-      self.text = sharedModelValue ? sharedModelValue + "-tile" : undefined;
+      self.text = sharedModelValue ? `${sharedModelValue}-tile` : undefined;
+    },
+    setVolatileValue(value: number) {
+      self.volatileValue = value;
     },
     setFlag(_flag: boolean) {
       self.flag = _flag;
     },
-    setFlagWithoutUndo(_flag: boolean){
+    setFlagWithoutUndo(_flag: boolean) {
       withoutUndo();
       self.flag = _flag;
     },
-    updateCounterAsync: flow(function *updateCounterAsync(){
+    updateCounterAsync: flow(function *updateCounterAsync() {
       self.counter += 1;
       yield wait(50); // intermittent failures with shorter waits
       self.counter += 1;
     }),
-    updateCounterWithoutUndoAsync: flow(function *updateCounterWithoutUndoAsync(){
+    updateCounterWithoutUndoAsync: flow(function *updateCounterWithoutUndoAsync() {
       withoutUndo();
       self.counter += 1;
       yield wait(50); // intermittent failures with shorter waits
       self.counter += 1;
     }),
-    setChildValue(_value: string){
+    setChildValue(_value: string) {
       self.child?.setValueWithoutUndo(_value);
     }
   }));
@@ -170,7 +174,7 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
   });
 
   // Enable the tree monitor so the events will be recorded
-  docModel.treeMonitor!.enabled = true;
+  docModel.treeMonitor!.enableMonitoring();
 
   const sharedModel = docContent.sharedModelMap.get("sm1")?.sharedModel as TestSharedModelType;
   const tileContent = docContent.tileMap.get("t1")?.content as TestTileType;
@@ -180,7 +184,15 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
   return {docModel, docContent, sharedModel, tileContent, manager, undoStore};
 }
 
+it("throws exceptions when attempting to undo/redo when not appropriate", () => {
+  const { undoStore } = setupDocument();
+
+  expect(() => undoStore.undo()).toThrow();
+  expect(() => undoStore.redo()).toThrow();
+});
+
 const setFlagTrueEntry = {
+  model: "TestTile",
   action: "/content/tileMap/t1/content/setFlag",
   created: expect.any(Number),
   id: expect.any(String),
@@ -207,14 +219,28 @@ it("records a tile change as one history event with one TreeRecordEntry", async 
   tileContent.setFlag(true);
 
   await expectEntryToBeComplete(manager, 1);
-  const changeDocument = manager.document as Instance<typeof CDocument>;
+  const changeDocument = manager.document;
 
   expect(getSnapshot(changeDocument.history)).toEqual([
     setFlagTrueEntry
   ]);
 });
 
+it("logs addition of undoable actions when DEBUG_UNDO is set", async () => {
+  const {tileContent, manager} = setupDocument();
+
+  jestSpyConsole("log", async spy => {
+    libDebug.DEBUG_UNDO = true;
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+    expect(spy).toHaveBeenCalled();
+    libDebug.DEBUG_UNDO = false;
+  });
+
+});
+
 const undoEntry = {
+  model: "UndoStore",
   action: "undo",
   created: expect.any(Number),
   id: expect.any(String),
@@ -243,12 +269,18 @@ it("can undo a tile change", async () => {
   // Make sure this entry is recorded before undoing it
   await expectEntryToBeComplete(manager, 1);
 
+  expect(undoStore.undoEntry?.modelActionKey).toBe("TestTile.setFlag");
+  expect(getSnapshot(undoStore.undoEntry!)).toEqual(setFlagTrueEntry);
+  expect(undoStore.redoEntry).toBeUndefined();
+
   undoStore.undo();
   await expectEntryToBeComplete(manager, 2);
 
   expect(tileContent.flag).toBeUndefined();
+  expect(undoStore.undoEntry).toBeUndefined();
+  expect(getSnapshot(undoStore.redoEntry!)).toEqual(setFlagTrueEntry);
 
-  const changeDocument = manager.document as Instance<typeof CDocument>;
+  const changeDocument = manager.document;
   expect(getSnapshot(changeDocument.history)).toEqual([
     setFlagTrueEntry,
     undoEntry
@@ -256,6 +288,7 @@ it("can undo a tile change", async () => {
 });
 
 const redoEntry = {
+  model: "UndoStore",
   action: "redo",
   created: expect.any(Number),
   id: expect.any(String),
@@ -294,7 +327,7 @@ it("can redo a tile change", async () => {
 
   expect(tileContent.flag).toBe(true);
 
-  const changeDocument = manager.document as Instance<typeof CDocument>;
+  const changeDocument = manager.document;
   expect(getSnapshot(changeDocument.history)).toEqual([
     setFlagTrueEntry,
     undoEntry,
@@ -310,10 +343,11 @@ it("records a async tile change as one history event with one TreeRecordEntry", 
   await tileContent.updateCounterAsync();
 
   await expectEntryToBeComplete(manager, 1);
-  const changeDocument = manager.document as Instance<typeof CDocument>;
+  const changeDocument = manager.document;
 
   expect(getSnapshot(changeDocument.history)).toEqual([
     {
+      model: "TestTile",
       action: "/content/tileMap/t1/content/updateCounterAsync",
       created: expect.any(Number),
       id: expect.any(String),
@@ -348,11 +382,12 @@ it("records an async tile change and an interleaved history event with 2 entries
   await updateCounterPromise;
 
   await expectEntryToBeComplete(manager, 2);
-  const changeDocument = manager.document as Instance<typeof CDocument>;
+  const changeDocument = manager.document;
 
   expect(getSnapshot(changeDocument.history)).toEqual([
     setFlagTrueEntry,
     {
+      model: "TestTile",
       action: "/content/tileMap/t1/content/updateCounterAsync",
       created: expect.any(Number),
       id: expect.any(String),
@@ -389,7 +424,7 @@ it("can skip adding an action to the undo list", async () => {
 
   expect(tileContent.flag).toBe(true);
 
-  const changeDocument = manager.document as Instance<typeof CDocument>;
+  const changeDocument = manager.document;
   expect(getSnapshot(changeDocument.history)).toEqual([
     // override the action name of the initialUpdateEntry
     {
@@ -408,13 +443,13 @@ it("can handle withoutUndo even when tree isn't monitored", async () => {
   const {tileContent, manager, undoStore, docModel} = setupDocument();
 
   // disable the monitor
-  docModel.treeMonitor!.enabled = false;
+  docModel.treeMonitor!.disableMonitoring();
 
   // Because the monitor is disabled this won't record an entry,
   // and the withoutUndo should basically be ignored
   jestSpyConsole("warn", spy => {
     tileContent.setFlagWithoutUndo(true);
-    expect(spy).not.toBeCalled();
+    expect(spy).not.toHaveBeenCalled();
   });
 
   // We can't undo because nothing was recorded
@@ -422,7 +457,7 @@ it("can handle withoutUndo even when tree isn't monitored", async () => {
 
   expect(tileContent.flag).toBe(true);
 
-  const changeDocument = manager.document as Instance<typeof CDocument>;
+  const changeDocument = manager.document;
   expect(getSnapshot(changeDocument.history)).toEqual([]);
 });
 
@@ -430,7 +465,7 @@ it("does not warn about withoutUndo when tree isn't monitored and DEBUG_UNDO is 
   const {tileContent, docModel} = setupDocument();
 
   // disable the monitor
-  docModel.treeMonitor!.enabled = false;
+  docModel.treeMonitor!.disableMonitoring();
 
   libDebug.DEBUG_UNDO = true;
 
@@ -438,7 +473,7 @@ it("does not warn about withoutUndo when tree isn't monitored and DEBUG_UNDO is 
   // and the withoutUndo should basically be ignored
   jestSpyConsole("warn", spy => {
     tileContent.setFlagWithoutUndo(true);
-    expect(spy).not.toBeCalled();
+    expect(spy).not.toHaveBeenCalled();
   });
 
   libDebug.DEBUG_UNDO = false;
@@ -454,7 +489,7 @@ it("does not warn about withoutUndo if tile is not in a tree and DEBUG_UNDO is o
 
   jestSpyConsole("warn", spy => {
     tileContent.setFlagWithoutUndo(true);
-    expect(spy).not.toBeCalled();
+    expect(spy).not.toHaveBeenCalled();
   });
 
   libDebug.DEBUG_UNDO = false;
@@ -492,10 +527,11 @@ it("will print a warning and still add the action to the undo list if any child 
 
   expect(tileContent.child?.value).toBe("new child value");
 
-  const changeDocument = manager.document as Instance<typeof CDocument>;
+  const changeDocument = manager.document;
 
   expect(getSnapshot(changeDocument.history)).toEqual([
     {
+      model: "TestTile",
       action: "/content/tileMap/t1/content/setChildValue",
       created: expect.any(Number),
       id: expect.any(String),
@@ -519,7 +555,30 @@ it("will print a warning and still add the action to the undo list if any child 
   ]);
 });
 
+it("changes to volatile properties are not undoable", async () => {
+  const {tileContent, manager, undoStore} = setupDocument();
+  // This should record a history entry with this change and any changes to tiles
+  // triggered by this change
+  tileContent.setVolatileValue(1);
 
+  let timedOut = false;
+  try {
+    await when(
+      () => manager.activeHistoryEntries.length === 0,
+      {timeout: 100});
+  } catch (e) {
+    timedOut = true;
+  }
+  expect(timedOut).toBe(false);
+  expect(manager.document.history.length).toBe(0);
+
+  // Make sure this entry is recorded before undoing it
+  // await expectEntryToBeComplete(manager, 1)
+
+  expect(undoStore.canUndo).toBe(false);
+
+  expect(tileContent.volatileValue).toBe(1);
+});
 
 it("records undoable actions that happen in the middle async actions which are not undoable", async () => {
   const {tileContent, manager, undoStore} = setupDocument();
@@ -540,10 +599,11 @@ it("records undoable actions that happen in the middle async actions which are n
   expect(tileContent.flag).toBe(true);
   expect(tileContent.counter).toBe(2);
 
-  const changeDocument = manager.document as Instance<typeof CDocument>;
+  const changeDocument = manager.document;
   expect(getSnapshot(changeDocument.history)).toEqual([
     setFlagTrueEntry,
     {
+      model: "TestTile",
       action: "/content/tileMap/t1/content/updateCounterWithoutUndoAsync",
       created: expect.any(Number),
       id: expect.any(String),
@@ -600,12 +660,13 @@ it("can replay the history entries", async () => {
     expect(tileContent.flag).toBe(true);
 
     // The history should not change after it is replayed
-    const changeDocument = manager.document as Instance<typeof CDocument>;
+    const changeDocument = manager.document;
     expect(getSnapshot(changeDocument.history)).toEqual(history);
 
 });
 
 const initialSharedModelUpdateEntry = {
+  model: "TestSharedModel",
   action: "/content/sharedModelMap/sm1/sharedModel/setValue",
   created: expect.any(Number),
   id: expect.any(String),
@@ -649,6 +710,7 @@ it("records a shared model change as one history event with two TreeRecordEntrie
 });
 
 const undoSharedModelEntry = {
+  model: "UndoStore",
   action: "undo",
   created: expect.any(Number),
   id: expect.any(String),
@@ -704,6 +766,7 @@ it("can undo a shared model change", async () => {
 });
 
 const redoSharedModelEntry = {
+  model: "UndoStore",
   action: "redo",
   created: expect.any(Number),
   id: expect.any(String),
@@ -792,8 +855,6 @@ it("can replay history entries that include shared model changes", async () => {
   expect(getSnapshot(changeDocument.history)).toEqual(history);
 });
 
-// This is recording 3 events for something that should probably be 1
-// However we don't have a good solution for that yet.
 it("can track the addition of a new shared model", async () => {
   // Start with just a tile and no shared model
   const {tileContent, manager} = setupDocument({
@@ -817,6 +878,7 @@ it("can track the addition of a new shared model", async () => {
   const changeDocument = manager.document;
   expect(getSnapshot(changeDocument.history)).toEqual([
     {
+      model: "DocumentContent",
       action: "/content/_addTileSharedModel",
       created: expect.any(Number),
       id: expect.any(String),

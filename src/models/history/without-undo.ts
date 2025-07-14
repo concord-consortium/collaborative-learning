@@ -2,22 +2,22 @@ import { getRoot, getRunningActionContext } from "mobx-state-tree";
 import { DEBUG_UNDO } from "../../lib/debug";
 import { runningCalls } from "./tree-types";
 
-  /**
-   * When added to the body of a MST action, this will prevent any changes
-   * made by the action from being recorded in the CLUE undo stack. The changes
-   * will still be recorded in the CLUE document history.
-   *
-   * If this action was called from another MST action it is considered a child
-   * action. Child action changes are always recorded, so by default a warning
-   * is printed when withoutUndo is called from a child action.
-   *
-   * There is is an option so you can record the child action changes, but not
-   * record the changes when the action is the initial action:
-   *
-   *   `withoutUndo({ unlessChildAction: true })`
-   *
-   */
-  export function withoutUndo(options?: { unlessChildAction?: boolean }) {
+/**
+ * When added to the body of a MST action, this will prevent any changes
+ * made by the action from being recorded in the CLUE undo stack. The changes
+ * will still be recorded in the CLUE document history.
+ *
+ * If this action was called from another MST action it is considered a child
+ * action. Child action changes are always recorded, so by default a warning
+ * is printed when withoutUndo is called from a child action.
+ *
+ * There is is an option so you can record the child action changes, but not
+ * record the changes when the action is the initial action:
+ *
+ *   `withoutUndo({ unlessChildAction: true })`
+ *
+ */
+export function withoutUndo(options?: { unlessChildAction?: boolean }) {
   const actionCall = getRunningActionContext();
   if (!actionCall) {
     throw new Error("withoutUndo called outside of an MST action");

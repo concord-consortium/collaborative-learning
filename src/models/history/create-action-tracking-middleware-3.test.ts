@@ -188,7 +188,7 @@ test("#1250", async () => {
     filter(call) {
       calls.push(
         `${call.actionCall.name} (${call.actionCall.id}) <- (${
-          call.parentCall && call.parentCall.actionCall.id
+          call.parentCall?.actionCall.id
         }) - filter`
       );
       return true;
@@ -196,14 +196,14 @@ test("#1250", async () => {
     onStart(call) {
       calls.push(
         `${call.actionCall.name} (${call.actionCall.id}) <- (${
-          call.parentCall && call.parentCall.actionCall.id
+          call.parentCall?.actionCall.id
         }) - onStart`
       );
     },
     onFinish(call, error) {
       calls.push(
         `${call.actionCall.name} (${call.actionCall.id}) <- (${
-          call.parentCall && call.parentCall.actionCall.id
+          call.parentCall?.actionCall.id
         }) - onFinish (error: ${!!error})`
       );
     }
@@ -268,7 +268,7 @@ test("MobX action calling MST actions, causes separate calls for each MST action
     filter(call) {
       calls.push(
         `${call.actionCall.name} (${call.actionCall.id}) <- (${
-          call.parentCall && call.parentCall.actionCall.id
+          call.parentCall?.actionCall.id
         }) - filter`
       );
       return true;
@@ -276,14 +276,14 @@ test("MobX action calling MST actions, causes separate calls for each MST action
     onStart(call) {
       calls.push(
         `${call.actionCall.name} (${call.actionCall.id}) <- (${
-          call.parentCall && call.parentCall.actionCall.id
+          call.parentCall?.actionCall.id
         }) - onStart`
       );
     },
     onFinish(call, error) {
       calls.push(
         `${call.actionCall.name} (${call.actionCall.id}) <- (${
-          call.parentCall && call.parentCall.actionCall.id
+          call.parentCall?.actionCall.id
         }) - onFinish (error: ${!!error})`
       );
     }

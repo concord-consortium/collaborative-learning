@@ -2,10 +2,10 @@ import { IActionContext, IMiddlewareEvent, IMiddlewareHandler } from "mobx-state
 
 
 /**
- * This is based on MST's own createActionTrackingMiddleware2. The change is that 
+ * This is based on MST's own createActionTrackingMiddleware2. The change is that
  * the actual actionContext is provided to the filter, onStart, and onFinish hooks.
  * This makes it possible to match this up with the getRunningActionContext.
- * 
+ *
  * Because we are customizing this, it might be best to just combine this with the
  * tree monitor code and remove the extra abstraction.
  */
@@ -98,8 +98,8 @@ export function createActionTrackingMiddleware3<TEnv = any>(
       const newCall: IActionTrackingMiddleware3Call<TEnv> = {
         actionCall: call,
         // make a shallow copy of the parent action env
-        env: parentRunningAction && parentRunningAction.call.env,
-        parentCall: parentRunningAction && parentRunningAction.call
+        env: parentRunningAction?.call.env,
+        parentCall: parentRunningAction?.call
       };
 
       const passesFilter = !middlewareHooks.filter || middlewareHooks.filter(newCall);

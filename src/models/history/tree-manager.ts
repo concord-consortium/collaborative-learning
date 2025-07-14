@@ -7,7 +7,8 @@ import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
-  HistoryOperation } from "./history";
+  HistoryOperation,
+  ICreateHistoryEntry} from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { getDocumentPath, getSimpleDocumentPath, IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
@@ -83,7 +84,13 @@ export const TreeManager = types
   loadingError: undefined as firebase.firestore.FirestoreError | undefined,
   mainDocument: undefined as IMainDocument | undefined,
   userContextProvider: undefined as UserContextProvider | undefined,
-  firestore: undefined as Firestore | undefined
+  firestore: undefined as Firestore | undefined,
+  /**
+   * The most recent historyEntryId of the document. If the document is restored
+   * from a system that stores the revisionId, the revisionId can be restored.
+   * However in that case, there might not be a corresponding history entry.
+   */
+  revisionId: ""
 }))
 .views((self) => ({
   get undoManager() : IUndoManager {
@@ -203,6 +210,9 @@ export const TreeManager = types
       // stack will have incomplete entries in sometimes.
       if (entry.undoable) {
         self.undoStore.addHistoryEntry(entry);
+
+        // Store the most recent undo-able history id.
+        self.revisionId = entry.id;
       }
 
       if (!firestore) {
@@ -241,6 +251,10 @@ export const TreeManager = types
     self.document = cDoc;
   },
 
+  setRevisionId(revisionId: string) {
+    self.revisionId = revisionId;
+  },
+
   setLoadingError(error: firebase.firestore.FirestoreError) {
     self.loadingError = error;
   },
@@ -250,7 +264,7 @@ export const TreeManager = types
     self.firestore = firestore;
   },
 
-  setNumHistoryEntriesApplied(value: number){
+  setNumHistoryEntriesApplied(value: number) {
     self.numHistoryEventsApplied = value;
   },
 
@@ -301,20 +315,17 @@ export const TreeManager = types
     }
   },
 
-  createHistoryEntry(historyEntryId: string, exchangeId: string, name: string,
-    treeId: string, undoable: boolean) {
+  createHistoryEntry(entryInfo: ICreateHistoryEntry) {
+    const {id: historyEntryId, exchangeId, action} = entryInfo;
     if (self.findHistoryEntry(historyEntryId) || self.findActiveHistoryEntry(historyEntryId)) {
       throw new Error(`The entry already exists ${ json({historyEntryId})}`);
     }
     const entry = HistoryEntry.create({
-      id: historyEntryId,
-      action: name,
-      tree: treeId,
-      undoable
+      ...entryInfo,
     });
     self.activeHistoryEntries.push(entry);
 
-    entry.activeExchanges.set(exchangeId, `TreeManager.createHistoryEntry ${name}`);
+    entry.activeExchanges.set(exchangeId, `TreeManager.createHistoryEntry ${action}`);
 
     return entry;
   },
@@ -388,7 +399,7 @@ export const TreeManager = types
     self.putTree(document.key, document);
   },
 
-  updateSharedModel(historyEntryId: string, exchangeId: string, sourceTreeId: string, snapshot: any) {
+  updateSharedModel(historyEntryId: string, exchangeId: string, sourceTreeId: string, snapshot: any): Promise<void> {
     // Right now this can be called in 2 cases:
     // 1. when a user changes something in a tree which then updates the
     //    tree's view of the shared model, so the tree wants all copies of
@@ -417,12 +428,11 @@ export const TreeManager = types
       return tree.applySharedModelSnapshotFromManager(historyEntryId, applyExchangeId, snapshot);
     });
     // The contract for this method is to return a Promise<void> so we cast the result here.
-    return Promise.all(applyPromises).then() as Promise<void>;
+    return Promise.all(applyPromises).then();
   },
 
-  addHistoryEntry(historyEntryId: string, exchangeId: string, treeId: string, actionName: string,
-    undoable: boolean) {
-    self.createHistoryEntry(historyEntryId, exchangeId, actionName, treeId, undoable);
+  addHistoryEntry(entryInfo: ICreateHistoryEntry) {
+    self.createHistoryEntry(entryInfo);
     return Promise.resolve();
   },
 

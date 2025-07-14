@@ -198,7 +198,7 @@ describe("document model", () => {
   });
 
   it("allows undo and redo", async () => {
-    document.treeMonitor!.enabled = true;
+    document.treeMonitor!.enableMonitoring();
     const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
 
     document.addTile("text");

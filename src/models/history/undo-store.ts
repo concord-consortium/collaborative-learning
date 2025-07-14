@@ -1,6 +1,6 @@
-import { types, Instance, flow, getParent } from "mobx-state-tree";
+import { types, Instance, flow, getParent, getType } from "mobx-state-tree";
 import { nanoid } from "nanoid";
-import { HistoryEntry, HistoryOperation } from "./history";
+import { HistoryEntry, HistoryEntryType, HistoryOperation } from "./history";
 import { TreeManager } from "./tree-manager";
 import { DEBUG_UNDO } from "../../lib/debug";
 
@@ -9,6 +9,8 @@ export interface IUndoManager {
   redoLevels : number;
   canUndo : boolean;
   canRedo : boolean;
+  undoEntry : HistoryEntryType | undefined;
+  redoEntry : HistoryEntryType | undefined;
   undo() : IUndoInformation;
   redo() : IUndoInformation;
 }
@@ -37,6 +39,12 @@ export const UndoStore = types
   get canRedo() {
     return this.redoLevels > 0;
   },
+  get undoEntry() {
+    return this.canUndo ? self.history[self.undoIdx - 1] : undefined;
+  },
+  get redoEntry() {
+    return this.canRedo ? self.history[self.undoIdx] : undefined;
+  },
   findHistoryEntry(historyEntryId: string) {
     return self.history.find(entry => entry.id === historyEntryId);
   }
@@ -52,13 +60,19 @@ export const UndoStore = types
     const historyEntryId = nanoid();
     const exchangeId = nanoid();
 
-    const manager = getParent(self) as Instance<typeof TreeManager>;
+    const manager: Instance<typeof TreeManager> = getParent(self);
 
     // Start a non-undoable action with this id
     // TODO: we are using a fake tree id of "manager" here. This is currently
     // working, but we probably want to review this approach.
-    const historyEntry =
-        manager.createHistoryEntry(historyEntryId, exchangeId, opType, "manager", false);
+    const historyEntry = manager.createHistoryEntry({
+      id: historyEntryId,
+      exchangeId,
+      tree: "manager",
+      model: getType(self).name,
+      action: opType,
+      undoable: false
+    });
 
     // Collect the trees that we are going to work with
     const treeIds = treePatchRecords.map(treePatchRecord => treePatchRecord.tree);
