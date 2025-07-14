@@ -106,7 +106,8 @@
       "categorizationDescription": "The focus area of the document",
       "categories": ["user", "environment", "form", "function"],
       "keyIndicatorsPrompt": "List of main features or elements of the document that support this categorization",
-      "discussionPrompt": "Any other relevant information."
+      "discussionPrompt": "Any other relevant information.",
+      "systemPrompt": "You are a teaching assistant in an engineering design course."
     }
   },
   "sections": {

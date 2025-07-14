@@ -45,7 +45,7 @@ describe("functions", () => {
 
       expect(logger.info)
         // eslint-disable-next-line max-len
-        .toHaveBeenCalledWith("Added document demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1 to queue for categorize-design");
+        .toHaveBeenCalledWith("Added document demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1 to queue for categorize-design with aiPrompt null");
 
       const pendingQueue = admin.firestore().collection("analysis/queue/pending");
       expect(await pendingQueue.count().get().then((result) => result.data().count)).toEqual(1);
@@ -82,7 +82,7 @@ describe("functions", () => {
 
       expect(logger.info)
         // eslint-disable-next-line max-len
-        .toHaveBeenCalledWith("Added document authed/portals/learn/classes/democlass1/users/1/documents/testdoc1 to queue for categorize-design");
+        .toHaveBeenCalledWith("Added document authed/portals/learn/classes/democlass1/users/1/documents/testdoc1 to queue for categorize-design with aiPrompt null");
 
       const pendingQueue = admin.firestore().collection("analysis/queue/pending");
       expect(await pendingQueue.count().get().then((result) => result.data().count)).toEqual(1);
@@ -133,7 +133,8 @@ describe("functions", () => {
 
       expect(logger.info)
         .toHaveBeenCalledWith(
-          "Added document demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1 to queue for custom"
+          // eslint-disable-next-line max-len
+          "Added document demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1 to queue for custom with aiPrompt {\"mainPrompt\":\"here's a prompt\",\"categorizationDescription\":\"categorize these\",\"categories\":[\"a\",\"b\"],\"keyIndicatorsPrompt\":\"KI prompt\",\"discussionPrompt\":\"discusss.\"}"
         );
 
       const pendingQueue = admin.firestore().collection("analysis/queue/pending");

@@ -9,7 +9,8 @@ import {kAnalyzerUserParams} from "../../shared/shared";
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write a queue of docs to process
 // 2. Create screenshots of those documents
-// 3. (This function) Send those screenshots to the AI service for processing, and create comments with the results
+// 3. (This function) Send those screenshots to the AI service for processing along with any custom AI prompt, and
+//    create  comments with the results
 
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
 
@@ -50,10 +51,11 @@ export const onAnalysisDocumentImaged =
 
       if (queueDoc.evaluator === "mock") {
         message = "Mock reply from AI analysis";
-      } else if (queueDoc.evaluator === "categorize-design") {
+      } else if (queueDoc.evaluator === "categorize-design" || queueDoc.evaluator === "custom") {
         const docImageUrl = event.data?.get("docImageUrl");
+        const aiPrompt = queueDoc.evaluator === "custom" ? queueDoc.aiPrompt : undefined;
 
-        const completion = await categorizeUrl(docImageUrl, openaiApiKey.value());
+        const completion = await categorizeUrl(docImageUrl, openaiApiKey.value(), aiPrompt);
         const reply = completion?.choices[0].message;
         promptTokens = completion?.usage?.prompt_tokens || 0;
         completionTokens = completion?.usage?.completion_tokens || 0;
