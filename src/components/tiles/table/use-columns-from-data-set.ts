@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React, { useCallback, useMemo, useState } from "react";
 import { IAttribute } from "../../../models/data/attribute";
-import { IDataSet } from "../../../models/data/data-set";
+import { IDataSet, TSortDirection } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { getCellFormatter } from "./cell-formatter";
 import CellTextEditor from "./cell-text-editor";
@@ -25,12 +25,11 @@ interface IUseColumnsFromDataSet {
   RowLabelFormatter: React.FC<any>;
   measureColumnWidth: (attr: IAttribute) => number;
   lookupImage: (value: string) => string|undefined;
-  sortColumns?: { columnKey: string, direction: "ASC" | "DESC" }[];
-  onSort?: (columnKey: string, direction: "ASC" | "DESC" | "NONE") => void;
+  onSort?: (columnKey: string, direction: TSortDirection) => void;
 }
 export const useColumnsFromDataSet = ({
   gridContext, dataSet, isLinked, content, readOnly, showRowLabels, columnChanges, headerHeight, rowHeight,
-  RowLabelHeader, RowLabelFormatter, measureColumnWidth, lookupImage, sortColumns, onSort
+  RowLabelHeader, RowLabelFormatter, measureColumnWidth, lookupImage, onSort
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
 
@@ -69,13 +68,9 @@ export const useColumnsFromDataSet = ({
     };
   }, [readOnly]);
 
-  const getSortDirection = useCallback((columnKey: string) => {
-    return sortColumns?.find(col => col.columnKey === columnKey)?.direction ?? "NONE";
-  }, [sortColumns]);
-
   const ColumnHeaderCell = useColumnHeaderCell({
     height: headerHeight(),
-    getSortDirection,
+    getSortDirection: dataSet.getSortDirection,
     onSort: onSort ?? (() => {}),
   });
 

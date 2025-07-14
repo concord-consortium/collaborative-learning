@@ -25,7 +25,7 @@ import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { verifyAlive } from "../../../utilities/mst-utils";
-import { addCasesToDataSet } from "../../../models/data/data-set";
+import { TSortDirection, addCasesToDataSet } from "../../../models/data/data-set";
 import { removeAllAttributes } from "../../../models/data/data-set-utils";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
@@ -38,11 +38,6 @@ import { useFormulaModal } from "./use-formula-modal";
 
 import "./table-tile.scss";
 import "./table-toolbar-registration";
-
-export interface SortColumn {
-  columnKey: string;
-  direction: 'ASC' | 'DESC';
-}
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
@@ -60,7 +55,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
   const isLinked = linkedTiles && linkedTiles.length > 1;
   const tableContextValue: ITableContext = { linked: !!isLinked };
-  const [sortColumns, setSortColumns] = useState<SortColumn[]>([]);
   const [gridElement, setGridElement] = useState<HTMLDivElement | null>(null);
 
   // Basic operations based on the model
@@ -133,21 +127,16 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     dataSet, isLinked, readOnly: !!readOnly, inputRowId: inputRowId.current,
     rowChanges, context: gridContext, selectedCaseIds });
 
-  const onSort = useCallback((columnKey: string, direction: "ASC" | "DESC" | "NONE") => {
-    if (direction === "NONE") {
-      setSortColumns([]);
-    } else {
-      setSortColumns([{ columnKey, direction }]);
-      dataSet.sortByAttribute(columnKey, direction);
+  const onSort = useCallback((columnKey: string, direction: TSortDirection) => {
+    if (dataSet) {
+      dataSet.sortCases(columnKey, direction);
     }
   }, [dataSet]);
 
   // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({
     gridContext, dataSet, isLinked, content, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
-    ...rowLabelProps, showRowLabels, measureColumnWidth, lookupImage,
-    sortColumns,
-    onSort,
+    ...rowLabelProps, showRowLabels, measureColumnWidth, lookupImage, onSort,
   });
 
   // The size of the title bar
