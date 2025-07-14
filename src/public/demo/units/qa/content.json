@@ -13,7 +13,6 @@
       {"url": "curriculum/moving-straight-ahead/stamps/rparen.png", "width": 25, "height": 25}
     ],
     "annotations": "all",
-    "aiEvaluation": "mock",
     "settings": {
       "table": { "numFormat": ".2~f" },
       "datacard": {
@@ -92,6 +91,7 @@
     "tools": ["Simulator"],
     "enableCommentRoles": ["student", "teacher", "researcher"],
     "showCommentTag": true,
+    "tagPrompt": "Select QA Strategy",
     "commentTags": {
       "diverging": "Diverging Designs",
       "converging": "Converging Designs",
@@ -100,7 +100,14 @@
       "form": "What's it look like?",
       "function": "What's it do?"
     },
-    "tagPrompt": "Select QA Strategy"
+    "aiEvaluation": "custom",
+    "aiPrompt": {
+      "mainPrompt": "This is a picture of a student document.\nThey are working on engineering task. Please tell me which of the following areas of their design they are focusing on:\n - user: who's it for?\n - environment: where's it used?\n - form: what's it look like?\n - function: what does it do?\nAnd why you chose that area.\nOr if the document doesn't include enough content to clearly identify a focus area let me know by setting \"success\" to \"false\" and \"category\" to \"unknown\".\nYour answer should be a JSON document in the given format.",
+      "categorizationDescription": "The focus area of the document",
+      "categories": ["user", "environment", "form", "function"],
+      "keyIndicatorsPrompt": "List of main features or elements of the document that support this categorization",
+      "discussionPrompt": "Any other relevant information."
+    }
   },
   "sections": {
     "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},

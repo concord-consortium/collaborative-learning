@@ -237,7 +237,20 @@ export class Firebase {
       .set(firebase.database.ServerValue.TIMESTAMP));
     const evaluation = this.getEvaluationMetadataPath(user, documentKey, userId);
     if (evaluation) {
-      promises.push(this.ref(evaluation).set(firebase.database.ServerValue.TIMESTAMP));
+      // If this unit uses "custom" evaluation, read and store the prompt strings
+      if (this.db.stores.appConfig.aiEvaluation === "custom") {
+        const aiPrompt = this.db.stores.appConfig.aiPrompt;
+        if (aiPrompt) {
+          promises.push(this.ref(evaluation).set({
+            aiPrompt,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+          }));
+        }
+      } else {
+        promises.push(this.ref(evaluation).set({
+          timestamp: firebase.database.ServerValue.TIMESTAMP
+        }));
+      }
     }
     return Promise.all(promises);
   }

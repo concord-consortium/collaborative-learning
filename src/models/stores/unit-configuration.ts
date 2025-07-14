@@ -31,6 +31,14 @@ export const DocumentLabelModel = types
     }
   }));
 
+export const AIPromptModel = types.model("AIPrompt", {
+  mainPrompt: types.string,
+  categorizationDescription: types.string,
+  categories: types.array(types.string),
+  keyIndicatorsPrompt: types.string,
+  discussionPrompt: types.string
+});
+
 export interface UnitConfiguration extends ProblemConfiguration {
   // used in application loading message, log messages, etc.
   appName: string;
@@ -90,7 +98,9 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // list of possible values for tagging in comments
   commentTags?: Record<string, string>;
   // if set, enable the specified AI evaluation to run after document updates
-  aiEvaluation?: "categorize-design";
+  aiEvaluation?: "categorize-design" | "mock" | "custom";
+  // If aiEvaluation is "custom", this defines the prompt strings to use for the AI evaluation
+  aiPrompt?: SnapshotIn<typeof AIPromptModel>;
   // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
   annotations?: "all" | "none" | string[];
 }

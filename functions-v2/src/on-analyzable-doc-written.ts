@@ -42,7 +42,10 @@ export const onAnalyzableProdDocWritten =
     });
 
 const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebaseRoot: string, firestoreRoot: string) => {
-  const timestamp = event.data.after.val();
+  const content = event.data.after.val();
+  // Check the type since it has changed from a timestamp to an object
+  const timestamp = typeof content === "object" ? content.timestamp : content;
+  const aiPrompt = typeof content === "object" ? content.aiPrompt : {};
   // onValueWritten will trigger on create, update, or delete. Ignore deletes.
   if (!timestamp) {
     logger.info("evaluation was deleted", event.subject);
@@ -63,6 +66,7 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
     commentsPath,
     docUpdated: timestamp,
     evaluator,
+    aiPrompt,
   });
-  logger.info(`Added document ${documentPath} to queue for ${evaluator}`);
+  logger.info(`Added document ${documentPath} to queue for ${evaluator} with aiPrompt ${aiPrompt}`);
 };

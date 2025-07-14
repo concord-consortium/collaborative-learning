@@ -66,7 +66,7 @@ export const onAnalysisDocumentImaged =
           await error("No response from AI", event);
           return;
         }
-        tags = reply.parsed.success && reply.parsed.category !== "unknown" ? [reply.parsed.category] : [];
+        tags = reply.parsed.category !== "unknown" ? [reply.parsed.category] : [];
         const indicators = reply.parsed.keyIndicators.length ?
           ` Key Indicators: ${reply.parsed.keyIndicators.join(", ")}` : "";
         message = reply.parsed.discussion + indicators;

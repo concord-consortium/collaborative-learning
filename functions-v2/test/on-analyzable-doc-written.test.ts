@@ -21,7 +21,7 @@ describe("functions", () => {
     await getDatabase().ref("demo").set(null);
   });
 
-  describe("on-analyzable-doc-written", () => {
+  describe("on-analyzable-doc-written with timestamp", () => {
     test("triggers on demo document evaluation field creation", async () => {
       const wrapped = fft.wrap(onAnalyzableTestDocWritten);
 
@@ -93,6 +93,65 @@ describe("functions", () => {
           commentsPath: "authed/learn/documents/testdoc1/comments",
           docUpdated: "1001",
           evaluator: "categorize-design",
+        });
+      });
+    });
+  });
+
+  describe("on-analyzable-doc-written with object value", () => {
+    test("triggers on evaluation field creation with object value", async () => {
+      const wrapped = fft.wrap(onAnalyzableTestDocWritten);
+
+      const objectValue = {
+        timestamp: 1001,
+        aiPrompt: {
+          mainPrompt: "here's a prompt",
+          categorizationDescription: "categorize these",
+          categories: ["a", "b"],
+          keyIndicatorsPrompt: "KI prompt",
+          discussionPrompt: "discusss.",
+        },
+      };
+
+      const before = makeDataSnapshot(null,
+        "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1/evaluation/custom");
+      const after = makeDataSnapshot(objectValue,
+        "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1/evaluation/custom");
+      const delta = makeChange(before, after);
+
+      await wrapped({
+        data: delta,
+        params: {
+          realm: "demo",
+          realmId: "AI",
+          portalId: "demo",
+          classId: "democlass1",
+          userId: "1",
+          docId: "testdoc1",
+          evaluator: "custom",
+        }});
+
+      expect(logger.info)
+        .toHaveBeenCalledWith(
+          "Added document demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1 to queue for custom"
+        );
+
+      const pendingQueue = admin.firestore().collection("analysis/queue/pending");
+      expect(await pendingQueue.count().get().then((result) => result.data().count)).toEqual(1);
+      await pendingQueue.doc("testdoc1").get().then((result) => {
+        expect(result.data()).toEqual({
+          metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+          documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
+          commentsPath: "demo/AI/documents/testdoc1/comments",
+          docUpdated: 1001,
+          evaluator: "custom",
+          aiPrompt: {
+            mainPrompt: "here's a prompt",
+            categorizationDescription: "categorize these",
+            categories: ["a", "b"],
+            keyIndicatorsPrompt: "KI prompt",
+            discussionPrompt: "discusss.",
+          },
         });
       });
     });
