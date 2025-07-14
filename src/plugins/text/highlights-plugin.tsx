@@ -1,10 +1,8 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import classNames from "classnames/dedupe";
-import { Element as SlateElement } from "slate";
 import { BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
   RenderElementProps, useSelected } from "@concord-consortium/slate-editor";
 import { action, makeObservable, observable } from "mobx";
-import { observer } from "mobx-react";
 import { TextContentModelType } from "../../models/tiles/text/text-content";
 import { ITextPlugin } from "../../models/tiles/text/text-plugin-info";
 import { TextPluginsContext } from "../../components/tiles/text/text-plugins-context";
@@ -62,13 +60,12 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
   const chipRef = useRef<HTMLSpanElement>(null);
   const editorRevisionContext = useContext(HighlightRevisionContext);
 
-  if (!isHighlightElement(element)) return null;
-  const {highlightId} = element;
+  const { highlightId } = element as HighlightElement;
   const highlightEntry = highlightPlugin?.highlightedText.find(ht => ht.id === highlightId);
   const textToHighlight = highlightEntry?.text ?? `invalid reference: ${highlightId}`;
 
   // Memoize getHighlightChipBoundingBox so it can be used in the dependency array
-  const getHighlightChipBoundingBox = React.useCallback(() => {
+  const getHighlightChipBoundingBox = useCallback(() => {
     const el = chipRef.current;
     if (!el) return;
     const highlightRect = el.getBoundingClientRect();
@@ -85,7 +82,9 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
 
   useEffect(() => {
     getHighlightChipBoundingBox();
-  }, [chipRef.current, editorRevisionContext, getHighlightChipBoundingBox]);
+  }, [editorRevisionContext, getHighlightChipBoundingBox]);
+
+  if (!isHighlightElement(element)) return null;
 
   const classes = classNames(kSlateVoidClass, "slate-highlight-chip");
 

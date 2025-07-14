@@ -11,7 +11,8 @@ import { OffsetModel } from "../../../models/annotations/clue-object";
 import { userSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
-import { HighlightRegistryContext, HighlightRevisionContext, IHighlightBox } from "../../../plugins/text/highlight-registry-context";
+import { HighlightRegistryContext, HighlightRevisionContext, IHighlightBox }
+    from "../../../plugins/text/highlight-registry-context";
 import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
