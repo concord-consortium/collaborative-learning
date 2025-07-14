@@ -1,24 +1,14 @@
-import SortedWork from "../../../support/elements/common/SortedWork";
-import ClueCanvas from '../../../support/elements/common/cCanvas';
 import Canvas from '../../../support/elements/common/Canvas';
-import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
-import TextToolTile from "../../../support/elements/tile/TextToolTile";
 import ResourcesPanel from "../../../support/elements/common/ResourcesPanel";
 import ChatPanel from "../../../support/elements/common/ChatPanel";
 
-let sortWork = new SortedWork,
-  clueCanvas = new ClueCanvas,
-  canvas = new Canvas,
-  drawToolTile = new DrawToolTile,
-  textToolTile = new TextToolTile,
+let canvas = new Canvas,
   resourcesPanel = new ResourcesPanel,
   chatPanel = new ChatPanel;
 
 // qa unit has mock AI analysis
+/// TODO: remove firebaseEnv=staging once we have the rules deployed to production
 const queryParams = `${Cypress.config("qaUnitStudent5")}&firebaseEnv=staging`;
-
-// qaMothPlot unit has no AI analysis configured
-const queryParams2 = `${Cypress.config("qaMothPlotUnitStudent5")}`;
 
 const studentDocumentName = "QA 1.1 Solving a Mystery with Proportional Reasoning";
 const aiEvaluationPendingMessage = "Ada is evaluating...";
@@ -49,8 +39,8 @@ context('AI Evaluation', function () {
       .and("contain.text", aiEvaluationPendingMessage);
 
     // And eventually should show the AI analysis result
-    chatPanel.getCommentCardContent().should("be.visible");
-    chatPanel.getCommentCardContent().should("contain.text", "Mock reply from AI analysis", {timeout: 60000});
+    cy.get('[data-testid=comment-card-content]', { timeout: 60000 })
+      .should("contain.text", "Mock reply from AI analysis");
   });
 
 });
