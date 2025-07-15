@@ -81,6 +81,14 @@ describe("postDocumentComment", () => {
     await testWriteComments(documentCollectionPath, authWithTeacherClaims);
   });
 
+  it("should disallow comments on documents in the wrong class", async () => {
+    expect.assertions(2);
+    const documentCollectionPath = `authed/${kCanonicalPortal}/documents/${kDocumentKey}`;
+    await expect(
+      testWriteComments(documentCollectionPath, authWithTeacherClaims, {classHash: "wrong-class"})
+    ).rejects.toThrow("The provided user context is not valid.");
+  });
+
   it("should add document comments for demo users", async () => {
     expect.assertions(kExpectedAssertions);
 
