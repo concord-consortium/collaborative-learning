@@ -67,7 +67,7 @@ export function useDocumentSyncToFirebase(
     if (!readOnly && contentStatus === ContentStatus.Valid) {
       // enable history tracking on this document
       if (document.treeMonitor) {
-        document.treeMonitor.enabled = true;
+        document.treeMonitor.enableMonitoring();
       }
       // Set up listener for online status
       if (commonSyncEnabled) {
@@ -77,7 +77,7 @@ export function useDocumentSyncToFirebase(
       return () => {
         // disable history tracking on this document
         if (document.treeMonitor) {
-          document.treeMonitor.enabled = false;
+          document.treeMonitor.disableMonitoring();
         }
         // Remove the online status listener
         if (!readOnly && commonSyncEnabled) {

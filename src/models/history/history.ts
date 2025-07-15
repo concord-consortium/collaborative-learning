@@ -19,11 +19,20 @@ export const TreePatchRecord = types.model("TreePatchRecord", {
 }));
 export interface TreePatchRecordSnapshot extends SnapshotIn<typeof TreePatchRecord> {}
 
+export interface ICreateHistoryEntry {
+  id: string;
+  exchangeId: string;
+  tree: string;
+  model: string;
+  action: string;
+  undoable: boolean;
+}
 
 export const HistoryEntry = types.model("HistoryEntry", {
   id: types.identifier,
   tree: types.maybe(types.string),
-  action: types.maybe(types.string),
+  model: types.maybe(types.string),   // name of model
+  action: types.maybe(types.string),  // name of action
   // This doesn't need to be recorded in the state, but putting it here is
   // the easiest place for now.
   undoable: types.maybe(types.boolean),
@@ -34,10 +43,18 @@ export const HistoryEntry = types.model("HistoryEntry", {
 })
 .volatile(self => ({
   // The value of the map should be the name of the exchange. This is useful
-  // for debugging an activeExchange that hasn't been ended. 
-  // The {name: "activeExchanges"} is a feature of MobX that can also 
+  // for debugging an activeExchange that hasn't been ended.
+  // The {name: "activeExchanges"} is a feature of MobX that can also
   // help with debugging.
   activeExchanges: observable.map<string, string>({}, {name: "activeExchanges"})
+}))
+.views(self => ({
+  get modelActionKey() {
+    const modelName = self.model ?? "UnknownModel";
+    const pathParts = self.action?.split("/") ?? [];
+    const actionName = pathParts.length ? pathParts[pathParts.length - 1] : "unknownAction";
+    return `${modelName}.${actionName}`;
+  }
 }));
 export interface HistoryEntrySnapshot extends SnapshotIn<typeof HistoryEntry> {}
 export interface HistoryEntryType extends Instance<typeof HistoryEntry> {}

@@ -21,7 +21,8 @@ export const Tree = types.model("Tree", {
 }))
 .actions(self => ({
   updateTreeAfterSharedModelChanges(options?: {sharedModel: SharedModelType,
-      initialSharedModelMap: SharedModelMapSnapshotOutType}) {
+      initialSharedModelMap: SharedModelMapSnapshotOutType})
+  {
     // If there is no sharedModel param, run the update function on all tiles which
     // have shared model references.
     // If there is a sharedModel param, only run the update function on tiles which
@@ -78,7 +79,7 @@ export const Tree = types.model("Tree", {
     }
 
     // Run update function on the tiles
-    for(const tile of tiles) {
+    for (const tile of tiles) {
       if (isAlive(tile)) {
         tile.content.updateAfterSharedModelChanges(sharedModel);
       }
@@ -86,40 +87,34 @@ export const Tree = types.model("Tree", {
   }
 }))
 .actions(self => {
-    const updateTreeAfterSharedModelChangesInternal = (sharedModel: SharedModelType,
-        initialSharedModelMap: SharedModelMapSnapshotOutType) => {
-      // If we are applying manager patches, then we ignore any sync actions
-      // otherwise the user might make a change such as changing the name of a
-      // node while the patches are applied. When they do this the patch for
-      // the shared model might have been applied first, and which if sync is
-      // enabled could create a new node in the diagram. Then the patch for the
-      // diagram is applied which also creates a new node in the diagram.
-      // Even if we just disable the sync when the shared model update is done
-      // from the patch, if the user makes a change, this would be a separate
-      // action would would trigger the sync. So if the user made this change
-      // at just the right time it would could result in duplicate nodes in the
-      // diagram.
-      if (self.applyingManagerPatches) {
-          return;
-      }
+  const updateTreeAfterSharedModelChangesInternal = (sharedModel: SharedModelType,
+      initialSharedModelMap: SharedModelMapSnapshotOutType) => {
+    // If we are applying manager patches, then we ignore any sync actions
+    // otherwise the user might make a change such as changing the name of a
+    // node while the patches are applied. When they do this the patch for
+    // the shared model might have been applied first, and which if sync is
+    // enabled could create a new node in the diagram. Then the patch for the
+    // diagram is applied which also creates a new node in the diagram.
+    // Even if we just disable the sync when the shared model update is done
+    // from the patch, if the user makes a change, this would be a separate
+    // action would would trigger the sync. So if the user made this change
+    // at just the right time it would could result in duplicate nodes in the
+    // diagram.
+    if (self.applyingManagerPatches) {
+      return;
+    }
 
-      // FIXME: if a shared model is unlinked from a tile we need to notify that
-      // tile. However when this happens we no longer have this tile in the list
-      // of tiles. So I think we need to update things so we pass this removed
-      // tile through. Either by constructing a list of tiles or just passing
-      // this one specific tile.
+    // The TreeMonitor middleware should pickup the historyEntryId and
+    // exchangeId parameters automatically. And then when it sends any
+    // changes captured during the update, it should include these ids
+    if (isAlive(self)) {
+      self.updateTreeAfterSharedModelChanges({sharedModel, initialSharedModelMap});
+    }
+  };
 
-      // The TreeMonitor middleware should pickup the historyEntryId and
-      // exchangeId parameters automatically. And then when it sends any
-      // changes captured during the update, it should include these ids
-      if (isAlive(self)) {
-        self.updateTreeAfterSharedModelChanges({sharedModel, initialSharedModelMap});
-      }
-    };
-
-    return {
-        updateTreeAfterSharedModelChangesInternal
-    };
+  return {
+    updateTreeAfterSharedModelChangesInternal
+  };
 })
 .actions(self => {
   return {
