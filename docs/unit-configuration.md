@@ -93,7 +93,7 @@ These properties are configurable at the application (built into the code) or th
 
 `aiEvaluation`: ("custom" | "categorize-design" | "mock") If set, enable the specified AI evaluation to run after document updates. "custom" allows the prompt to be specified with the `aiPrompt` property; "categorize-design" runs the original MODS unit categorization prompt (for backward compatibility); "mock" does not invoke any AI system but simply returns a fixed string for testing purposes.
 
-`aiPrompt`: (object) Configures the prompt to use for "custom" AI evaluation.  There are several properties wrapped up here, an example setting is below. The "categories" must be a subset of "commentTags" (see above):
+`aiPrompt`: (object) Configures the prompt to use for "custom" AI evaluation.  There are several properties wrapped up here, an example setting is below. "systemPrompt" and "mainPrompt" are required. The "categories", if supplied, must be a subset of "commentTags" (see above):
 
 ```json
 "aiPrompt": {

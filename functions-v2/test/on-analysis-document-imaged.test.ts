@@ -9,13 +9,20 @@ import * as dotenv from "dotenv";
 import * as path from "path";
 import {initialize, projectConfig} from "./initialize";
 import {onAnalysisDocumentImaged} from "../src/on-analysis-document-imaged";
+import {buildZodResponseSchema, buildMessages} from "../lib/src/ai-categorize-document";
+import {ZodArray, ZodEnum, ZodString} from "zod";
 
 jest.mock("firebase-functions/logger");
 
 const categorizeUrl = jest.fn();
-jest.mock("../lib/src/ai-categorize-document", () => ({
-  categorizeUrl: (file:string) => categorizeUrl(file),
-}));
+jest.mock("../lib/src/ai-categorize-document", () => {
+  const actual = jest.requireActual("../lib/src/ai-categorize-document");
+  return {
+    categorizeUrl: (file: string) => categorizeUrl(file),
+    buildZodResponseSchema: actual.buildZodResponseSchema,
+    buildMessages: actual.buildMessages,
+  };
+});
 
 const {fft, cleanup} = initialize();
 
@@ -61,6 +68,99 @@ describe("functions", () => {
   beforeEach(async () => {
     await clearFirestoreData(projectConfig);
     await getDatabase().ref("demo").set(null);
+  });
+
+  describe("buildZodResponseSchema", () => {
+    test("creates discussion-only schema", () => {
+      const schema = buildZodResponseSchema({
+        systemPrompt: "You are a master teacher.",
+        mainPrompt: "Evaluate this.",
+        discussionPrompt: "Discussion.",
+      });
+      expect(schema).toEqual({
+        discussion: expect.any(ZodString),
+      });
+    });
+
+    test("creates categorization-only schema", () => {
+      const schema = buildZodResponseSchema({
+        systemPrompt: "You are a master teacher.",
+        mainPrompt: "Categorize this.",
+        categorizationDescription: "Categorize the document based on its content.",
+        categories: ["category1", "category2"],
+      });
+      expect(schema).toEqual({
+        category: expect.any(ZodEnum),
+      });
+    });
+
+    test("creates categorization-and-discussion schema", () => {
+      const schema = buildZodResponseSchema({
+        systemPrompt: "You are a master teacher.",
+        mainPrompt: "Evaluate and categorize this.",
+        categorizationDescription: "Categorize the document based on its content.",
+        categories: ["category1", "category2"],
+        discussionPrompt: "Discussion.",
+      });
+      expect(schema).toEqual({
+        category: expect.any(ZodEnum),
+        discussion: expect.any(ZodString),
+      });
+    });
+
+    test("creates full schema", () => {
+      const schema = buildZodResponseSchema({
+        systemPrompt: "You are a master teacher.",
+        mainPrompt: "Evaluate and categorize this.",
+        categorizationDescription: "Categorize the document based on its content.",
+        categories: ["category1", "category2"],
+        keyIndicatorsPrompt: "Key indicators.",
+        discussionPrompt: "Discussion.",
+      });
+      expect(schema).toEqual({
+        category: expect.any(ZodEnum),
+        discussion: expect.any(ZodString),
+        keyIndicators: expect.any(ZodArray),
+      });
+    });
+  });
+
+  describe("buildMessages", () => {
+    test("creates messages", () => {
+      const messages = buildMessages(
+        {
+          systemPrompt: "You are a master teacher.",
+          mainPrompt: "Evaluate this.",
+          categorizationDescription: "Categorize the document based on its content.",
+          categories: ["category1", "category2"],
+          keyIndicatorsPrompt: "Key indicators.",
+          discussionPrompt: "Discussion.",
+        },
+        "https://example.com/image.png",
+      );
+      expect(messages).toEqual([
+        {
+          role: "system",
+          content: "You are a master teacher.",
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Evaluate this.",
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: "https://example.com/image.png",
+                detail: "auto",
+              },
+            },
+          ],
+        },
+      ]);
+    });
   });
 
   describe("onAnalysisDocumentImaged", () => {

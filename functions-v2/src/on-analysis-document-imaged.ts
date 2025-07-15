@@ -68,10 +68,10 @@ export const onAnalysisDocumentImaged =
           await error("No response from AI", event);
           return;
         }
-        tags = reply.parsed.category !== "unknown" ? [reply.parsed.category] : [];
-        const indicators = reply.parsed.keyIndicators.length ?
+        tags = reply.parsed.category && reply.parsed.category !== "unknown" ? [reply.parsed.category] : [];
+        const indicators = reply.parsed.keyIndicators && reply.parsed.keyIndicators.length ?
           ` Key Indicators: ${reply.parsed.keyIndicators.join(", ")}` : "";
-        message = reply.parsed.discussion + indicators;
+        message = (reply.parsed.discussion || "") + indicators;
         fullResponse = JSON.stringify(completion);
       } else {
         await error(`Unexpected value for evaluator: ${queueDoc?.evaluator}`, event);

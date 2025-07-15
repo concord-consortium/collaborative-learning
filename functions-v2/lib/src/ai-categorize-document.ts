@@ -1,15 +1,16 @@
 import OpenAI from "openai";
 import {zodResponseFormat} from "openai/helpers/zod";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import {z} from "zod";
 import fs from "node:fs/promises";
 
 interface IAiPrompt {
-  mainPrompt: string;
-  categorizationDescription: string;
-  categories: string[];
-  keyIndicatorsPrompt: string;
-  discussionPrompt: string;
   systemPrompt: string;
+  mainPrompt: string;
+  categorizationDescription?: string;
+  categories?: string[];
+  keyIndicatorsPrompt?: string;
+  discussionPrompt?: string;
 }
 
 const defaultAiPrompt: IAiPrompt = {
@@ -36,15 +37,44 @@ export async function categorizeDocument(file: string, apiKey: string) {
   return categorizeUrl(url, apiKey);
 }
 
-function buildZodResponseSchema(aiPrompt: IAiPrompt) {
-  return z.object({
-    category: z.enum(["unknown", ...aiPrompt.categories],
-      {description: aiPrompt.categorizationDescription}),
-    keyIndicators: z.array(z.string(),
-      {description: aiPrompt.keyIndicatorsPrompt}),
-    discussion: z.string(
-      {description: aiPrompt.discussionPrompt}),
-  });
+export function buildZodResponseSchema(aiPrompt: IAiPrompt) {
+  const schema: Record<string, z.ZodType> = {};
+  if (aiPrompt.categorizationDescription && aiPrompt.categories && aiPrompt.categories.length > 0) {
+    schema.category = z.enum(["unknown", ...aiPrompt.categories],
+      {description: aiPrompt.categorizationDescription});
+  }
+  if (aiPrompt.keyIndicatorsPrompt) {
+    schema.keyIndicators = z.array(z.string(), {description: aiPrompt.keyIndicatorsPrompt});
+  }
+  if (aiPrompt.discussionPrompt) {
+    schema.discussion = z.string({description: aiPrompt.discussionPrompt});
+  }
+  return schema;
+}
+
+export function buildMessages(aiPrompt: IAiPrompt, url: string): ChatCompletionMessageParam[] {
+  return [
+    {
+      role: "system",
+      content: aiPrompt.systemPrompt,
+    },
+    {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: aiPrompt.mainPrompt,
+        },
+        {
+          type: "image_url",
+          image_url: {
+            url,
+            detail: "auto", // auto, low, high
+          },
+        },
+      ],
+    },
+  ];
 }
 
 export async function categorizeUrl(url: string, apiKey: string, aiPrompt = defaultAiPrompt) {
@@ -53,29 +83,8 @@ export async function categorizeUrl(url: string, apiKey: string, aiPrompt = defa
     return openai.beta.chat.completions.parse({
       model: "gpt-4o-mini",
       // model: "gpt-4o-2024-08-06",
-      messages: [
-        {
-          role: "system",
-          content: aiPrompt.systemPrompt,
-        },
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: aiPrompt.mainPrompt,
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url,
-                detail: "auto", // auto, low, high
-              },
-            },
-          ],
-        },
-      ],
-      response_format: zodResponseFormat(buildZodResponseSchema(aiPrompt), "categorization-response"),
+      messages: buildMessages(aiPrompt, url),
+      response_format: zodResponseFormat(z.object(buildZodResponseSchema(aiPrompt)), "categorization-response"),
     });
   } catch (error) {
     console.log("OpenAI error", error);
