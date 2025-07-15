@@ -33,10 +33,11 @@ export const DocumentLabelModel = types
 
 export const AIPromptModel = types.model("AIPrompt", {
   mainPrompt: types.string,
-  categorizationDescription: types.string,
-  categories: types.array(types.string),
-  keyIndicatorsPrompt: types.string,
-  discussionPrompt: types.string
+  categorizationDescription: types.maybe(types.string),
+  categories: types.maybe(types.array(types.string)),
+  keyIndicatorsPrompt: types.maybe(types.string),
+  discussionPrompt: types.maybe(types.string),
+  systemPrompt: types.string
 });
 
 export interface UnitConfiguration extends ProblemConfiguration {
