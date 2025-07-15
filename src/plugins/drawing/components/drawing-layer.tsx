@@ -209,7 +209,8 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
         });
 
         this.zoom = zoom;
-        this.offsetX = offsetX;
+        // Account for the show/sort panel toggle to better match the fit-all view in the workspace.
+        this.offsetX = offsetX + kClosedObjectListPanelWidth/2;
         this.offsetY = offsetY;
       } else {
         // In regular tile display, offset and zoom are the values stored in the model.
