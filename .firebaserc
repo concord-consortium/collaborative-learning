@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "collaborative-learning-ec215"
+    "production": "collaborative-learning-ec215",
+    "staging": "collaborative-learning-staging"
   }
 }

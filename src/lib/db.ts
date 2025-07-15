@@ -181,7 +181,7 @@ export class DB {
             // We need those types to be registered so the listeners can safely create documents.
             unitLoadedPromise.then(() => {
               this.listeners.start().then(resolve).catch(reject);
-              exemplarController.initialize(user, db);
+              exemplarController.initialize(this.stores);
             });
           }
         }

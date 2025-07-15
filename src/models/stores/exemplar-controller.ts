@@ -1,16 +1,38 @@
 import { applySnapshot, types, onSnapshot, detach } from "mobx-state-tree";
 import _ from "lodash";
-import { UserModelType } from "./user";
-import { DB } from "../../lib/db";
+import firebase from "firebase/app";
+import "firebase/functions";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { LogEventName } from "../../lib/logger-types";
-import { DocumentsModelType } from "./documents";
 import { Logger, LogMessage } from "../../lib/logger";
 import { logExemplarDocumentEvent } from "../document/log-exemplar-document-event";
 import { allExemplarControllerRules } from "./exemplar-controller-rules";
 import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
 import { kTextTileType } from "../tiles/text/text-content";
 import { countWords } from "../../utilities/string-utils";
+import { IClientCommentParams } from "../../../shared/shared";
+import { Firebase } from "../../lib/firebase";
+import { UserModelType } from "./user";
+import { DocumentsModelType } from "./documents";
+import { UIModelType } from "./ui";
+import { PersistentUIModelType } from "./persistent-ui/persistent-ui";
+import { UserContextProvider } from "./user-context-provider";
+import { AppConfigModelType } from "./app-config-model";
+
+const kExemplarCommentContent = "See if this example gives you any new ideas:";
+
+export interface IExemplarControllerStores {
+  appConfig: AppConfigModelType;
+  db: {
+    firebase: Firebase;
+  };
+  user: UserModelType;
+  documents: DocumentsModelType;
+  ui: UIModelType;
+  persistentUI: PersistentUIModelType;
+  userContextProvider: UserContextProvider;
+}
+
 
 /**
  * Information that the exemplar controller stores about specific tiles.
@@ -38,8 +60,7 @@ export const BaseExemplarControllerModel = types
     inProgressTiles: types.map(InProgressTileModel)
   })
   .volatile((self) => ({
-    documentsStore: undefined as DocumentsModelType | undefined,
-    db: undefined as DB|undefined,
+    stores: undefined as IExemplarControllerStores|undefined,
     firebasePath: undefined as string|undefined,
     isIdeasButtonPressed: false
   }))
@@ -48,8 +69,11 @@ export const BaseExemplarControllerModel = types
      * Writes to the database to indicate whether the current user has access to the given exemplar.
      */
     setExemplarVisibility(key: string, isVisible: boolean) {
-      if (self.db) {
-        self.db.firebase.ref(self.firebasePath).child(`${key}/visible`).set(isVisible);
+      if (self.stores) {
+        const { db } = self.stores;
+        if (db) {
+          db.firebase.ref(self.firebasePath).child(`${key}/visible`).set(isVisible);
+        }
       }
     }
   }))
@@ -58,14 +82,38 @@ export const BaseExemplarControllerModel = types
      * Writes to the database to clear any visible exemplars.
      */
     resetAllExemplars() {
-      for (const key of self.documentsStore?.visibleExemplars || []) {
+      for (const key of self.stores?.documents?.visibleExemplars || []) {
         self.setExemplarVisibility(key, false);
       }
     },
     showRandomExemplar() {
-      const chosen = _.sample(self.documentsStore?.invisibleExemplarDocuments);
+      const chosen = _.sample(self.stores?.documents?.invisibleExemplarDocuments);
       if (chosen) {
         self.setExemplarVisibility(chosen.key, true);
+        // Make a comment on the current document, and open it in the resources panel
+        if (self.stores) {
+          const { documents, ui, persistentUI } = self.stores;
+          const currentDocumentKey = persistentUI.problemWorkspace.primaryDocumentKey;
+          const documentModel = currentDocumentKey && documents.getDocument(currentDocumentKey);
+          if (documentModel) {
+            const newComment: IClientCommentParams = {
+              content: kExemplarCommentContent,
+              linkedDocumentKey: chosen.key
+            };
+            const postExemplarComment = firebase.functions().httpsCallable("postExemplarComment_v2");
+            postExemplarComment({
+                document: documentModel.metadata,
+                comment: newComment,
+                context: self.stores.userContextProvider.userContext
+              })
+              .catch((error) => {
+                console.error("Failed to post exemplar comment:", error);
+            });
+            persistentUI.openResourceDocument(documentModel);
+            persistentUI.toggleShowChatPanel(true);
+            ui.clearSelectedTiles();
+          }
+        }
       }
       return chosen;
     },
@@ -184,17 +232,16 @@ export const ExemplarControllerModel = BaseExemplarControllerModel
     }
   }))
   .actions(self => ({
-    async initialize(user: UserModelType, db: DB) {
-      const hide = db.stores.appConfig.initiallyHideExemplars;
+    async initialize(stores: IExemplarControllerStores) {
+      const hide = stores.appConfig.initiallyHideExemplars;
       if (!hide) {
         // No need for DB listeners or log message watching
         return;
       }
-      self.db = db;
-      self.documentsStore = db.stores.documents;
-      self.firebasePath = db.firebase.getUserExemplarsPath(user);
-      const statePath = db.firebase.getExemplarStatePath(user);
-      const stateRef = db.firebase.ref(statePath);
+      self.stores = stores;
+      self.firebasePath = stores.db.firebase.getUserExemplarsPath(stores.user);
+      const statePath = stores.db.firebase.getExemplarStatePath(stores.user);
+      const stateRef = stores.db.firebase.ref(statePath);
       const stateVal = (await stateRef.once("value"))?.val();
       const state = safeJsonParse(stateVal);
       if (state) {
@@ -205,7 +252,7 @@ export const ExemplarControllerModel = BaseExemplarControllerModel
 
       onSnapshot(self, (snapshot)=>{
         const snapshotStr = JSON.stringify(snapshot);
-        const updateRef = db.firebase.ref(statePath);
+        const updateRef = stores.db.firebase.ref(statePath);
         updateRef.set(snapshotStr);
       });
     }

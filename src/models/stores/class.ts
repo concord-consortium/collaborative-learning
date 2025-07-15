@@ -1,6 +1,6 @@
 import { applySnapshot, SnapshotIn, types } from "mobx-state-tree";
 import { ClassInfo } from "./portal";
-import { kAnalyzerUserParams, kExemplarUserParams } from "./user-types";
+import { kAnalyzerUserParams, kExemplarUserParams } from "../../../shared/shared";
 
 export const ClassUserModel = types
   .model("ClassUser", {
