@@ -10,10 +10,29 @@ import { allExemplarControllerRules } from "./exemplar-controller-rules";
 import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
 import { kTextTileType } from "../tiles/text/text-content";
 import { countWords } from "../../utilities/string-utils";
-import { IStores } from "./stores";
 import { IClientCommentParams } from "../../../shared/shared";
+import { Firebase } from "../../lib/firebase";
+import { UserModelType } from "./user";
+import { DocumentsModelType } from "./documents";
+import { UIModelType } from "./ui";
+import { PersistentUIModelType } from "./persistent-ui/persistent-ui";
+import { UserContextProvider } from "./user-context-provider";
+import { AppConfigModelType } from "./app-config-model";
 
 const kExemplarCommentContent = "See if this example gives you any new ideas:";
+
+export interface IExemplarControllerStores {
+  appConfig: AppConfigModelType;
+  db: {
+    firebase: Firebase;
+  };
+  user: UserModelType;
+  documents: DocumentsModelType;
+  ui: UIModelType;
+  persistentUI: PersistentUIModelType;
+  userContextProvider: UserContextProvider;
+}
+
 
 /**
  * Information that the exemplar controller stores about specific tiles.
@@ -41,7 +60,7 @@ export const BaseExemplarControllerModel = types
     inProgressTiles: types.map(InProgressTileModel)
   })
   .volatile((self) => ({
-    stores: undefined as IStores|undefined,
+    stores: undefined as IExemplarControllerStores|undefined,
     firebasePath: undefined as string|undefined,
     isIdeasButtonPressed: false
   }))
@@ -213,7 +232,7 @@ export const ExemplarControllerModel = BaseExemplarControllerModel
     }
   }))
   .actions(self => ({
-    async initialize(stores: IStores) {
+    async initialize(stores: IExemplarControllerStores) {
       const hide = stores.appConfig.initiallyHideExemplars;
       if (!hide) {
         // No need for DB listeners or log message watching
