@@ -1,8 +1,7 @@
 import React, { useContext } from "react";
 import { v4 as uuid } from "uuid";
-import { Path } from "slate";
+import { Path, Text } from "slate";
 import { ReactEditor, Editor, Range, Transforms, useSlate } from "@concord-consortium/slate-editor";
-import { Text } from "slate";
 import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat, HighlightElement }
   from "../../../../plugins/text/highlights-plugin";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
