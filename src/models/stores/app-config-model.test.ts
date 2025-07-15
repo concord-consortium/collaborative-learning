@@ -4,7 +4,7 @@ import { unitConfigDefaults, unitConfigOverrides } from "../../test-fixtures/sam
 
 describe("ConfigurationManager", () => {
 
-  const excludeProps = ["defaultDocumentTemplate", "navTabs", "planningTemplate"];
+  const excludeProps = ["defaultDocumentTemplate", "navTabs", "planningTemplate", "myResourcesToolbar"];
   type SimpleProps = Exclude<keyof typeof unitConfigDefaults, typeof excludeProps[number]>;
   const keys = Object.keys(unitConfigDefaults).filter(prop => !excludeProps.includes(prop)) as SimpleProps[];
 
@@ -43,4 +43,25 @@ describe("ConfigurationManager", () => {
     const model = AppConfigModel.create();
     expect(model.config).toBeUndefined();
   });
+
+  it("should return aiEvaluation and aiPrompt from configuration when defined", () => {
+    const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+    appConfig.setConfigs([unitConfigOverrides]);
+    expect(appConfig.aiPrompt).toEqual({
+      mainPrompt: "This is a picture of a student document.\n Please categorize it.",
+      categorizationDescription: "The focus area of the document",
+      categories: ["user", "environment", "form", "function"],
+      keyIndicatorsPrompt: "List of main features or elements of the document that support this categorization",
+      discussionPrompt: "Any other relevant information.",
+      systemPrompt: "You are a teaching assistant in a middle school science class."
+    });
+    expect(appConfig.aiEvaluation).toEqual("custom");
+  });
+
+  it("should return undefined aiEvaluation and aiPrompt when not configured", () => {
+    const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+    expect(appConfig.aiPrompt).toBeUndefined();
+    expect(appConfig.aiEvaluation).toBeUndefined();
+  });
+
 });

@@ -19,18 +19,25 @@ export const unitConfigDefaults: UnitConfiguration = {
   documentLabelProperties: [] as any,
   documentLabels: {},
   disablePublish: [] as any,
+  enableHistoryRoles: [] as any,
+  enableCommentRoles: [] as any,
   copyPreferOriginTitle: true,
   disableTileDrags: true,
   showClassSwitcher: false,
   supportStackedTwoUpView: false,
   showPublishedDocsInPrimaryWorkspace: false,
   comparisonPlaceholderContent: "foo",
+  initiallyHideExemplars: false,
   navTabs: {} as any,
   disabledFeatures: ["foo"],
   toolbar: [] as any,
+  authorTools: [] as any,
+  myResourcesToolbar: [] as any,
   placeholderText: "Placeholder Text",
   stamps: [] as any,
-  settings: {}
+  settings: {},
+  aiEvaluation: undefined,
+  aiPrompt: undefined
 } as UnitConfiguration;
 
 export const unitConfigOverrides: UnitConfiguration = {
@@ -52,16 +59,30 @@ export const unitConfigOverrides: UnitConfiguration = {
   documentLabelProperties: [] as any,
   documentLabels: {},
   disablePublish: [] as any,
+  enableHistoryRoles: [] as any,
+  enableCommentRoles: [] as any,
   copyPreferOriginTitle: false,
   disableTileDrags: false,
   showClassSwitcher: true,
   supportStackedTwoUpView: true,
   showPublishedDocsInPrimaryWorkspace: true,
   comparisonPlaceholderContent: "bar",
+  initiallyHideExemplars: true,
   navTabs: {} as any,
   disabledFeatures: ["bar"],
   toolbar: [] as any,
+  authorTools: [] as any,
+  myResourcesToolbar: [] as any,
   placeholderText: "New Placeholder Text",
   stamps: [] as any,
-  settings: {}
+  settings: {},
+  aiEvaluation: "custom",
+  aiPrompt: {
+    mainPrompt: "This is a picture of a student document.\n Please categorize it.",
+    categorizationDescription: "The focus area of the document",
+    categories: ["user", "environment", "form", "function"],
+    keyIndicatorsPrompt: "List of main features or elements of the document that support this categorization",
+    discussionPrompt: "Any other relevant information.",
+    systemPrompt: "You are a teaching assistant in a middle school science class."
+  }
 } as UnitConfiguration;
