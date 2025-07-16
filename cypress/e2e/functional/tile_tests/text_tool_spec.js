@@ -6,7 +6,7 @@ import ArrowAnnotation from "../../../support/elements/tile/ArrowAnnotation";
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
-const aa = new ArrowAnnotation
+const aa = new ArrowAnnotation;
 let title = "QA 1.1 Solving a Mystery with Proportional Reasoning";
 let copyTitle = 'Text Tile Workspace Copy';
 
@@ -347,7 +347,7 @@ context('Text tool tile functionalities', function () {
     clueCanvas.deleteTile('text');
     textToolTile.getTextTile().should('not.exist');
   });
-  it.only('Add sparrows to text highlights', function () {
+  it('Add sparrows to text highlights', function () {
     beforeTest();
 
     const text1 = 'This is a sample text for testing highlight functionality.';
@@ -386,7 +386,7 @@ context('Text tool tile functionalities', function () {
     aa.getAnnotationModeButton().click();
     aa.getAnnotationArrows().should("have.length", 1);
 
-    cy.log('verify sparrows are removed when highlight is removed')
+    cy.log('verify sparrows are removed when highlight is removed');
     textToolTile.getTextEditor().last().find('.highlight-chip').click();
     textToolTile.getHighlightButton().click();
     aa.getAnnotationArrows().should("have.length", 0);

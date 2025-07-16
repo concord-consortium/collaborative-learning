@@ -70,7 +70,8 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
     if (!el) return;
     const highlightRect = el.getBoundingClientRect();
     const textBoxRect = el.closest('.text-tool-wrapper')?.getBoundingClientRect();
-    if (highlightRect && textBoxRect && highlightRect.width > 0 && highlightRect.height > 0 && highlightRegistryContextFn) {
+    if (highlightRect && textBoxRect && highlightRect.width > 0 && highlightRect.height > 0
+          && highlightRegistryContextFn) {
       highlightRegistryContextFn(highlightId, {
         left: highlightRect.left - textBoxRect.left,
         top: highlightRect.top - textBoxRect.top,
