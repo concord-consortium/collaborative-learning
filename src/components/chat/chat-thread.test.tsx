@@ -22,7 +22,10 @@ jest.mock("../../hooks/use-stores", () => ({
     selectedTileIds: []
   }),
   useStores: () => ({
-    appConfig: AppConfigModel.create({ config: unitConfigDefaults })
+    appConfig: AppConfigModel.create({ config: unitConfigDefaults }),
+    class: {
+      getUserById: () => ({ id: "0", type: "student", name: "Test Student" } as UserModelType)
+    }
   }),
   useCurriculumOrDocumentContent: () => undefined
 }));
