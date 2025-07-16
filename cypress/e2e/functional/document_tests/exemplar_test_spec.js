@@ -15,7 +15,8 @@ let sortWork = new SortedWork,
   chatPanel = new ChatPanel;
 
 // The qaConfigSubtabs unit referenced here has `initiallyHideExemplars` set, and an exemplar defined in curriculum
-const queryParams1 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
+// TODO: remove firebaseEnv=staging once we have the rules deployed to production
+const queryParams1 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}&firebaseEnv=staging`;
 
 // qaMothPlot unit has an exemplar, but it is not initially hidden.
 const queryParams2 = `${Cypress.config("qaMothPlotUnitStudent5")}`;
@@ -52,7 +53,8 @@ context('Exemplar Documents', function () {
     drawToolTile.drawRectangle(200, 50);
     drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
 
-    // No change, no sticky note
+    // No change, no comments, no sticky note
+    chatPanel.getChatPanel().should("not.exist");
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
     clueCanvas.getStickyNotePopup().should("not.exist");
   });
@@ -118,14 +120,21 @@ context('Exemplar Documents', function () {
 
     // Now the exemplar should be revealed
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
+    resourcesPanel.getPrimaryWorkspaceTab("my-work").should("be.visible").and("have.attr", "aria-selected", "true");
+    // resourcesPanel.getSecondaryWorkspaceTab("workspaces").should("be.visible").and("have.attr", "aria-selected", "true");
+    resourcesPanel.getPrimaryFocusDocumentTitle().should("contain.text", "1.1 Unit Toolbar Configuration");
 
-    clueCanvas.getStickyNotePopup().should("exist").should("be.visible")
-      .should("contain.text", "Nice work, you can now see a new example for this lesson")
-      .should("contain.text", exemplarName);
+    // Wait for the code to open the chat and select the whole document comments section
+    chatPanel.getChatPanel().should('be.visible').should('contain.text', 'Comments');
+    chatPanel.getChatThread().eq(0).should("have.class", "chat-thread-focused");
+    chatPanel.getUsernameFromCommentHeader().should("be.visible").and("contain.text", "Ivan Idea");
+    chatPanel.getCommentCardContent().should("be.visible")
+      .and("contain.text", "See if this example gives you any new ideas:")
+      .and("contain.text", exemplarName);
 
     cy.log("Open exemplar");
     sortWork.getFocusDocument().should('not.exist');
-    clueCanvas.getStickyNoteLink().should("be.visible").click();
+    chatPanel.getCommentCardLink().should("be.visible").click();
     sortWork.getFocusDocument().should('be.visible');
     sortWork.getFocusDocumentTitle().should("contain.text", exemplarName);
   });
@@ -147,15 +156,19 @@ context('Exemplar Documents', function () {
     resourcesPanel.getPrimaryWorkspaceTab("my-work").should("have.class", "selected");
     resourcesPanel.getFocusDocument().should("be.visible");
     resourcesPanel.getFocusDocumentTitle().should("contain.text", studentDocumentName);
-    chatPanel.getChatPanel().should('exist').should('contain.text', 'Comments');
+
+    // Wait for the code to open the chat and select the whole document comments section
+    chatPanel.getChatPanel().should('be.visible').should('contain.text', 'Comments');
+    chatPanel.getChatThread().eq(0).should("have.class", "chat-thread-focused");
+    chatPanel.getUsernameFromCommentHeader().should("be.visible").and("contain.text", "Ivan Idea");
+    chatPanel.getCommentCardContent().should("be.visible")
+      .and("contain.text", "See if this example gives you any new ideas:")
+      .and("contain.text", exemplarName);
+
     // No AI evaluation in this unit
     chatPanel.getChatPanel().should('not.contain.text', aiEvaluationMessage);
 
-    // Sticky note should be visible
-    clueCanvas.getStickyNotePopup().should("exist").should("be.visible")
-      .should("contain.text", "Nice work, you can now see a new example for this lesson")
-      .should("contain.text", exemplarName);
-
+    // There's only 1 exemplar, so the ideas button should be gone
     canvas.getIdeasButton().should("not.exist");
   });
 
@@ -177,9 +190,13 @@ context('Exemplar Documents', function () {
     drawToolTile.addText(300, 50, "one two three four five");
     // Now the exemplar should be revealed
     sortWork.getSortWorkItemByTitle(exemplarInfo).parents('.list-item').should("not.have.class", "private");
-    clueCanvas.getStickyNotePopup().should("exist").should("be.visible")
-      .should("contain.text", "Nice work, you can now see a new example for this lesson")
-      .should("contain.text", exemplarName);
+
+    chatPanel.getChatPanel().should('be.visible').should('contain.text', 'Comments');
+    chatPanel.getChatThread().eq(0).should("have.class", "chat-thread-focused");
+    chatPanel.getUsernameFromCommentHeader().should("be.visible").and("contain.text", "Ivan Idea");
+    chatPanel.getCommentCardContent().should("be.visible")
+      .and("contain.text", "See if this example gives you any new ideas:")
+      .and("contain.text", exemplarName);
   });
 
   it('Exemplar and sticky note work for personal docs', function () {
@@ -203,8 +220,13 @@ context('Exemplar Documents', function () {
     drawToolTile.addText(300, 50, "one two three four five");
     // Now the exemplar should be revealed
     sortWork.getSortWorkItemByTitle(exemplarInfo).parents('.list-item').should("not.have.class", "private");
-    clueCanvas.getStickyNotePopup().should("exist").should("be.visible")
-      .should("contain.text", "Nice work, you can now see a new example for this lesson")
-      .should("contain.text", exemplarName);
+
+    chatPanel.getChatPanel().should('be.visible').should('contain.text', 'Comments');
+    chatPanel.getChatThread().eq(0).should("have.class", "chat-thread-focused");
+    chatPanel.getUsernameFromCommentHeader().should("be.visible").and("contain.text", "Ivan Idea");
+    chatPanel.getCommentCardContent().should("be.visible")
+      .and("contain.text", "See if this example gives you any new ideas:")
+      .and("contain.text", exemplarName);
+
   });
 });

@@ -21,7 +21,15 @@
     "useDefineForClassFields": true,
     "paths": {
       "react-modal-hook": ["node_modules/@concord-consortium/react-modal-hook/dist"],
-      "mobx-state-tree": ["node_modules/@concord-consortium/mobx-state-tree/dist"]
+      "mobx-state-tree": ["node_modules/@concord-consortium/mobx-state-tree/dist"],
+      // Because we are using typescript 4.9.5 but webpack 5+
+      // there is a mismatch how the two handle the exports sections
+      // of packages. This path mapping solves the issue by adding the dist segment
+      // of the path.
+      // TODO: upgrade to Typescript version 5, and use its new "bundler" moduleResolver.
+      // This handles the exports section like webpack 5+ does, and also
+      // doesn't require extensions on the import paths just like Webpack.
+      "@concord-consortium/codap-formulas-react17/*": ["node_modules/@concord-consortium/codap-formulas-react17/dist/*"]
     },
     "types": ["w3c-web-serial", "gtag.js"]
   },

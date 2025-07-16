@@ -15,6 +15,9 @@
 
 import "@cypress/code-coverage/support";
 
+// add support for dispatching native events (https://github.com/dmtrKovalenko/cypress-real-events)
+import "cypress-real-events";
+
 // Import commands.js using ES2015 syntax:
 import './commands';
 

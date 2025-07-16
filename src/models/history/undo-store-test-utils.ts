@@ -5,7 +5,7 @@ import { TreeManager, CDocument } from "./tree-manager";
 // TODO: it would nicer to use a custom Jest matcher here so we can
 // provide a better error message when it fails
 export async function expectEntryToBeComplete(manager: Instance<typeof TreeManager>, length: number) {
-  const changeDocument = manager.document as Instance<typeof CDocument>;
+  const changeDocument: Instance<typeof CDocument> = manager.document;
   let timedOut = false;
   try {
     await when(

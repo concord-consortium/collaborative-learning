@@ -103,6 +103,10 @@ module.exports = (env, argv) => {
           loader: 'ts-loader',
           exclude: /node_modules/
         },
+        {
+          test: /\.json5$/,
+          loader: 'json5-loader'
+        },
         // This code coverage instrumentation should only be added when needed. It makes
         // the code larger and slower
         process.env.CODE_COVERAGE ? {

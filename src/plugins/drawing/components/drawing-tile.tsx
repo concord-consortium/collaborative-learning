@@ -242,18 +242,18 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
           <div data-testid="drawing-toolbar" className="drawing-toolbar-wrapper">
             <TileToolbar tileType="drawing" readOnly={!!readOnly} tileElement={tileElt} />
           </div>
+          <div className="drawing-container">
+            {!readOnly && <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />}
+            <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: updateTileVisibleBoundingBox }}>
+              <DrawingLayerView
+                {...props}
+                highlightObject={objectListHoveredObject}
+                imageUrlToAdd={imageUrlToAdd}
+                setImageUrlToAdd={setImageUrlToAdd}
+              />
+            </TileNavigatorContext.Provider>
+          </div>
         </DrawingAreaContext.Provider>
-        <div className="drawing-container">
-          {!readOnly && <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />}
-          <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: updateTileVisibleBoundingBox }}>
-            <DrawingLayerView
-              {...props}
-              highlightObject={objectListHoveredObject}
-              imageUrlToAdd={imageUrlToAdd}
-              setImageUrlToAdd={setImageUrlToAdd}
-            />
-          </TileNavigatorContext.Provider>
-        </div>
       </div>
       {!readOnly && showNavigator &&
         <TileNavigator
