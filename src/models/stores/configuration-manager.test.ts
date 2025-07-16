@@ -154,4 +154,24 @@ describe("ConfigurationManager", () => {
     expect(config.aiPrompt).toBeUndefined();
   });
 
+  it("should return commentTags when showCommentTag is true", () => {
+    const defaultsWithCommentTags = {
+      ...defaults,
+      showCommentTag: true,
+      commentTags: { "tag1": "Tag 1", "tag2": "Tag 2" }
+    };
+    const configManager = new ConfigurationManager(defaultsWithCommentTags, []);
+    expect(configManager.commentTags).toEqual({ "tag1": "Tag 1", "tag2": "Tag 2" });
+  });
+
+  it("should return empty object when showCommentTag is false", () => {
+    const defaultsWithoutCommentTags = {
+      ...defaults,
+      showCommentTag: false,
+      commentTags: { "tag1": "Tag 1" }
+    };
+    const configManager = new ConfigurationManager(defaultsWithoutCommentTags, []);
+    expect(configManager.commentTags).toEqual({});
+  });
+
 });
