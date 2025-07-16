@@ -61,7 +61,6 @@ describe("Firebase class", () => {
   });
 
   describe("setLastEditedNow", () => {
-    let firebase: Firebase;
     const mockUser = {
       id: "test-user",
       classHash: "test-class",
@@ -83,10 +82,6 @@ describe("Firebase class", () => {
     };
     const mockDocumentKey = "test-document";
     const mockUserId = "test-user-id";
-
-    beforeEach(() => {
-      firebase = new Firebase(mockDB);
-    });
 
     it("should handle custom evaluation with aiPrompt", async () => {
       const storesWithCustomEvaluation = {
