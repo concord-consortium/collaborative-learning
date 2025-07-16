@@ -1,12 +1,15 @@
 import Canvas from '../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import TextToolTile from '../../../support/elements/tile/TextToolTile';
+import ArrowAnnotation from "../../../support/elements/tile/ArrowAnnotation";
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
+const aa = new ArrowAnnotation
 let title = "QA 1.1 Solving a Mystery with Proportional Reasoning";
 let copyTitle = 'Text Tile Workspace Copy';
+
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitStudent5")}`;
@@ -344,7 +347,54 @@ context('Text tool tile functionalities', function () {
     clueCanvas.deleteTile('text');
     textToolTile.getTextTile().should('not.exist');
   });
+  it.only('Add sparrows to text highlights', function () {
+    beforeTest();
 
+    const text1 = 'This is a sample text for testing highlight functionality.';
+    const text2 = 'Add a sparrow.';
+
+    clueCanvas.addTile('text');
+    textToolTile.verifyTextTileIsEditable();
+    textToolTile.enterText(text1);
+    textToolTile.getTextTile().last().should('contain', 'This is a sample text for testing highlight functionality.');
+    textToolTile.getTextEditor().last().type('{selectall}');
+    cy.wait(500);
+    textToolTile.getHighlightButton().should('not.be.disabled');
+    textToolTile.getHighlightButton().click();
+    textToolTile.getHighlightButton().should('have.class', 'selected');
+    textToolTile.getTextEditor().last().find('.highlight-chip').should('exist');
+
+    clueCanvas.addTile('text');
+    textToolTile.getTextEditor().last().click();
+    textToolTile.verifyTextTileIsEditable();
+    textToolTile.enterText(text2);
+    textToolTile.getTextTile().last().should('contain', 'Add a sparrow.');
+    textToolTile.getTextEditor().last().type('{selectall}');
+    cy.wait(500);
+    textToolTile.getHighlightButton().should('not.be.disabled');
+    textToolTile.getHighlightButton().click();
+    textToolTile.getHighlightButton().should('have.class', 'selected');
+    textToolTile.getTextEditor().last().find('.highlight-chip').should('exist');
+
+    // Verify sparrows are added to highlights
+    aa.getAnnotationModeButton().click();
+    aa.getAnnotationLayer().should("have.class", "editing");
+    aa.getAnnotationButtons().should("have.length", 2);
+    aa.getAnnotationArrows().should("not.exist");
+    aa.getAnnotationButtons().eq(0).click();
+    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationModeButton().click();
+    aa.getAnnotationArrows().should("have.length", 1);
+
+    cy.log('verify sparrows are removed when highlight is removed')
+    textToolTile.getTextEditor().last().find('.highlight-chip').click();
+    textToolTile.getHighlightButton().click();
+    aa.getAnnotationArrows().should("have.length", 0);
+
+    cy.log('Clean up - delete text tile');
+    clueCanvas.deleteTile('text');
+    clueCanvas.deleteTile('text');
+  });
   // TODO: Implement copy and paste functionality tests. Simulating copy and paste may be tricky,
   // especially since the text editor is a `contenteditable` element instead of a native input
   // element (e.g. `<input>` or `<textarea>`).
