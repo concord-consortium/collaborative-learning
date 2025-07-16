@@ -8,9 +8,9 @@ import { useCautionAlert } from "../utilities/use-caution-alert";
 import { useCurriculumOrDocumentContent, useStores } from "../../hooks/use-stores";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentModelType } from "../../models/document/document";
+import ChatAvatar from "./chat-avatar";
 import WaitingMessage from "./waiting-message";
 
-import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
 
 import "./comment-card.scss";
@@ -81,16 +81,10 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
       <div className="comment-card-content selected" data-testid="comment-card-content">
         {
           postedComments?.map((comment, idx) => {
-            const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
-            const commenterInitial = comment.name.charAt(0);
-            const userInitialBackgroundColorIndex = parseInt(comment.uid, 10) % 6;
-            const isOwnComment = user?.id === comment.uid;
-            const shouldShowUserIcon = isOwnComment;
+            const commentUser = comment.uid;
+            const isOwnComment = user?.id === commentUser;
             // can't delete comment until we have a valid server-generated id
             const shouldShowDeleteIcon = isOwnComment && !comment.id.startsWith("pending-");
-            const backgroundStyle = shouldShowUserIcon
-                                      ? {backgroundColor: "white"}
-                                      : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
             const linkedDocument = comment.linkedDocumentKey &&
               documents.getDocument(comment.linkedDocumentKey);
 
@@ -102,9 +96,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
 
               <div key={idx} className="comment-thread" data-testid="comment-thread">
                 <div className="comment-text-header">
-                  <div className="user-icon" style={backgroundStyle}>
-                    { shouldShowUserIcon ? <UserIcon /> : commenterInitial }
-                  </div>
+                  <ChatAvatar uid={commentUser} isMe={isOwnComment} />
                   <div className="user-name">{comment.name}</div>
                   <div className="time-stamp">{getDisplayTimeDate(comment.createdAt.getTime())}</div>
                   {shouldShowDeleteIcon &&
@@ -115,7 +107,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                   }
                 </div>
                 {
-                  showCommentTag && !isTagPrompt &&
+                  showCommentTag && !isTagPrompt && comment.tags && comment.tags.length > 0 &&
                   <div className="comment-dropdown-tag">
                     {
                       comment.tags?.map((tag) => {
