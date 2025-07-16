@@ -1,15 +1,17 @@
-import React, { useContext } from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import classNames from "classnames/dedupe";
 import { BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
   RenderElementProps, useSelected } from "@concord-consortium/slate-editor";
 import { action, makeObservable, observable } from "mobx";
-import { observer } from "mobx-react";
 import { TextContentModelType } from "../../models/tiles/text/text-content";
 import { ITextPlugin } from "../../models/tiles/text/text-plugin-info";
 import { TextPluginsContext } from "../../components/tiles/text/text-plugins-context";
+import { HighlightRegistryContext, HighlightRevisionContext } from "./highlight-registry-context";
 
 export const kHighlightFormat = "highlight";
 export const kHighlightTextPluginName = "highlights";
+
+const kHighlightOffset = 2;
 
 export class HighlightsPlugin implements ITextPlugin {
   public textContent: TextContentModelType;
@@ -43,7 +45,7 @@ export class HighlightsPlugin implements ITextPlugin {
 
 export interface HighlightElement extends BaseElement {
   type: typeof kHighlightFormat;
-  reference: string;
+  highlightId: string;
   //store the start offset of the selected text so we can restore the selection after removing the highlight
   startOffset: number;
 }
@@ -52,27 +54,52 @@ export const isHighlightElement = (element: CustomElement): element is Highlight
   return element.type === kHighlightFormat;
 };
 
-export const HighlightComponent = observer(function({ attributes, children, element }: RenderElementProps) {
+export const HighlightComponent = ({ attributes, children, element }: RenderElementProps) => {
   const plugins = useContext(TextPluginsContext);
   const highlightPlugin = plugins[kHighlightTextPluginName] as HighlightsPlugin|undefined;
   const isSelected = useSelected();
+  const highlightRegistryContextFn = useContext(HighlightRegistryContext);
+  const chipRef = useRef<HTMLSpanElement>(null);
+  const editorRevisionContext = useContext(HighlightRevisionContext);
+
+  const { highlightId } = element as HighlightElement;
+  const highlightEntry = highlightPlugin?.highlightedText.find(ht => ht.id === highlightId);
+  const textToHighlight = highlightEntry?.text ?? `invalid reference: ${highlightId}`;
+
+  // Memoize getHighlightChipBoundingBox so it can be used in the dependency array
+  const getHighlightChipBoundingBox = useCallback(() => {
+    const el = chipRef.current;
+    if (!el) return;
+    const highlightRect = el.getBoundingClientRect();
+    const textBoxRect = el.closest('.text-tool-wrapper')?.getBoundingClientRect();
+    if (highlightRect && textBoxRect && highlightRect.width > 0 && highlightRect.height > 0
+          && highlightRegistryContextFn) {
+      highlightRegistryContextFn(highlightId, {
+        left: highlightRect.left - textBoxRect.left,
+        top: highlightRect.top - textBoxRect.top,
+        width: highlightRect.width - kHighlightOffset,
+        height: highlightRect.height - kHighlightOffset
+      });
+    }
+  }, [highlightId, highlightRegistryContextFn]);
+
+  useEffect(() => {
+    getHighlightChipBoundingBox();
+  }, [editorRevisionContext, getHighlightChipBoundingBox]);
 
   if (!isHighlightElement(element)) return null;
-  const {reference} = element;
-  const highlightEntry = highlightPlugin?.highlightedText.find(ht => ht.id === reference);
-  const textToHighlight = highlightEntry?.text ?? `invalid reference: ${reference}`;
 
   const classes = classNames(kSlateVoidClass, "slate-highlight-chip");
 
   return (
     <span className={classes} {...attributes} contentEditable={false}>
-      <span className={classNames("highlight-chip", {"slate-selected": highlightEntry && isSelected})} >
+      <span ref={chipRef} className={classNames("highlight-chip", {"slate-selected": highlightEntry && isSelected})} >
         {children}
         {textToHighlight}
       </span>
     </span>
   );
-});
+};
 
 let isRegistered = false;
 

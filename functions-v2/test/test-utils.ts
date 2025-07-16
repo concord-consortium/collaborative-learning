@@ -53,6 +53,7 @@ export const kOtherTeacherNetwork = "other-network";
 export const kStudentName = "Mary Student";
 export const kDocumentType = "problem";
 export const kDocumentKey = "document-key";
+export const kExemplarDocumentKey = "exemplar-key";
 export const kProblemPath = "abc/1/2";
 export const kCurriculumKey = `${kProblemPath}/intro`;
 export const kCreatedAt = Date.now();
@@ -109,7 +110,7 @@ export const specStudentContext = (overrides?: Partial<IUserContext>, exclude?: 
   return context;
 };
 
-export const specAuth = (overrides?: DeepPartial<AuthData>, exclude?: string[]): AuthData => {
+export const specAuth = (overrides?: DeepPartial<AuthData>): AuthData => {
   const portal = overrides?.token?.platform_id || kPortal;
   const userId = overrides?.token?.platform_user_id || kPlatformUserId;
   const classHash = overrides?.token?.class_hash || kClassHash;
@@ -189,6 +190,14 @@ export const specPostDocumentComment = (overrides?: IPartialPostCommentParams): 
     context: specUserContext(overrides?.context),
     document: {uid: kUserId, type: kDocumentType, key: kDocumentKey, ...overrides?.document},
     comment: {content: kComment1, ...overrides?.comment},
+  };
+};
+
+export const specPostExemplarComment = (overrides?: IPartialPostCommentParams): IPostDocumentCommentParams => {
+  return {
+    context: specUserContext(overrides?.context),
+    document: {uid: kUserId, type: kDocumentType, key: kDocumentKey, ...overrides?.document},
+    comment: {content: kComment1, linkedDocumentKey: kExemplarDocumentKey, ...overrides?.comment},
   };
 };
 

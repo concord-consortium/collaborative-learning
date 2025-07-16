@@ -63,6 +63,7 @@
         }
       }
     }
+
     .comment-dropdown-tag {
       width: 80%;
       height: 25px;
@@ -73,6 +74,12 @@
       margin-top: 3px;
       margin-bottom: 3px;
       background-color: white;
+    }
+
+    .comment-text {
+      a {
+        margin-left: .5em;
+      }
     }
   }
 

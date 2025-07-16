@@ -7,6 +7,7 @@ import { ExemplarDocument } from "../document/document-types";
 import { AppConfigModelType } from "./app-config-model";
 import { UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType } from "../curriculum/investigation";
+import { kExemplarUserParams } from "../../../shared/shared";
 
 interface ICreateExemplarDocsParams {
   unit: UnitModelType;
@@ -81,7 +82,7 @@ function createExemplarDocs(
     const visibility = appConfig.initiallyHideExemplars ? "private" : "public";
     const newDocParams: DocumentModelSnapshotType = {
       title: exemplarData.title,
-      uid: 'ivan_idea_1',
+      uid: kExemplarUserParams.id,
       type: ExemplarDocument,
       visibility,
       content: exemplarData.content,

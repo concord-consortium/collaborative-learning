@@ -19,7 +19,9 @@ import { unitConfigDefaults } from "../test-fixtures/sample-unit-configurations"
 import { UIModel } from "../models/stores/ui";
 import { PersistentUIModel } from "../models/stores/persistent-ui/persistent-ui";
 
-jest.mock("@concord-consortium/slate-editor", () => ({}));
+jest.mock("@concord-consortium/slate-editor", () => ({
+    registerElementComponent: jest.fn(),
+}));
 
 const mockUseContext = jest.fn();
 jest.mock("react", () => ({

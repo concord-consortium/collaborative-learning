@@ -4,8 +4,10 @@ import { Path, Text } from "slate";
 import { ReactEditor, Editor, Range, Transforms, useSlate } from "@concord-consortium/slate-editor";
 import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat, HighlightElement }
   from "../../../../plugins/text/highlights-plugin";
+import { useStores } from "../../../../hooks/use-stores";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../toolbar/toolbar-button-manager";
+import { TileModelContext } from "../../tile-api";
 import { TextPluginsContext } from "../text-plugins-context";
 
 import HighlightToolIcon from "../../../../assets/icons/text/highlight-text-icon.svg";
@@ -13,6 +15,8 @@ import HighlightToolIcon from "../../../../assets/icons/text/highlight-text-icon
 export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
   const editor = useSlate();
   const plugins = useContext(TextPluginsContext);
+  const model = useContext(TileModelContext);
+  const stores = useStores();
   const highlightsPlugin = plugins[kHighlightTextPluginName] as HighlightsPlugin | undefined;
   const { selection } = editor;
   const isHighlightedText = editor.isElementActive(kHighlightFormat);
@@ -35,7 +39,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
 
     const highlightNode: HighlightElement = {
       type: kHighlightFormat,
-      reference,
+      highlightId: reference,
       startOffset: Editor.start(editor, editor.selection).offset,
       children: [{ text, ...marks }]
     };
@@ -80,16 +84,41 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     if (isHighlightedText) {
       const selectedChips = getSelectedChips();
       if (!selectedChips || selectedChips.length === 0) return;
-      const chipReferences = selectedChips.map(([chipNode]) => chipNode.reference);
+      const chipReferences = selectedChips.map(([chipNode]) => chipNode.highlightId);
+
+      const removeAnnotationsForHighlight = (highlightId: string) => {
+        if (!stores?.documents || !model?.id) return;
+        const document = stores.documents.findDocumentOfTile(model.id);
+        if (!document?.content) return;
+        const annotationsToRemove: string[] = [];
+        document.content.annotations.forEach((annotation) => {
+          // Check if the annotation's source or target object references this highlight
+          if (annotation.sourceObject?.objectId === highlightId &&
+                annotation.sourceObject?.objectType === kHighlightFormat) {
+            annotationsToRemove.push(annotation.id);
+          }
+          if (annotation.targetObject?.objectId === highlightId &&
+                annotation.targetObject?.objectType === kHighlightFormat) {
+            annotationsToRemove.push(annotation.id);
+          }
+        });
+        annotationsToRemove.forEach(annotationId => {
+          if (document.content) {
+            document.content.deleteAnnotation(annotationId);
+          }
+        });
+      };
 
       chipReferences.forEach(ref => {
         const [chipEntry] = Array.from(Editor.nodes(editor, {
-          match: n => (n as any).type === kHighlightFormat && (n as any).reference === ref,
+          match: n => (n as any).type === kHighlightFormat && (n as any).highlightId === ref,
           at: selection ?? undefined
         })) as [HighlightElement, Path][];
         if (chipEntry) {
+          const chipReference = chipEntry[0].highlightId;
           highlightsPlugin?.removeHighlight(ref);
           unHighlightChip(chipEntry);
+          removeAnnotationsForHighlight(chipReference);
         }
       });
       Transforms.deselect(editor);

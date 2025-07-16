@@ -57,7 +57,7 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
     content: docContent as any
   });
 
-  docModel.treeMonitor!.enabled = true;
+  docModel.treeMonitor!.enableMonitoring();
 
   const tileContent = docContent.tileMap.get("t1")?.content as TestTileType;
   const manager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
