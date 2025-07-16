@@ -35,7 +35,7 @@ const ChatAvatar: React.FC<IChatAvatarProps> = ({ uid, isMe, pulse }) => {
   });
 
   return (
-    <span className={classes} data-testid="chat-avatar">
+    <span className={classes} data-testid="chat-thread-user-icon">
       <Image />
     </span>
   );

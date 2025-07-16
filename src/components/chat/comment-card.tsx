@@ -91,6 +91,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             //if tagPrompt was posted to Firestore - for ex: SAS unit (where tagPrompt = "Select Student Strategy")
             //our comment.tags should be [""]
             const isTagPrompt = (comment.tags && comment.tags[0] === "") || (comment.tags === undefined);
+            const displayTags = showCommentTag && !isTagPrompt && comment.tags && comment.tags.length > 0;
 
             return (
 
@@ -107,7 +108,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                   }
                 </div>
                 {
-                  showCommentTag && !isTagPrompt && comment.tags && comment.tags.length > 0 &&
+                  displayTags &&
                   <div className="comment-dropdown-tag">
                     {
                       comment.tags?.map((tag) => {
