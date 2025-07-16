@@ -40,7 +40,6 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     const highlightNode: HighlightElement = {
       type: kHighlightFormat,
       highlightId: reference,
-      startOffset: Editor.start(editor, editor.selection).offset,
       children: [{ text, ...marks }]
     };
     // Replace selected text with the highlight chip
@@ -53,26 +52,30 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
     if (!editor.selection) return;
     if (chipEntry) {
       const [chipNode, chipPath] = chipEntry as [HighlightElement, Path];
-      const startOffset = Number(chipNode.startOffset);
-      const previousPath = Path.previous(chipPath);
-      const insertPoint = Editor.end(editor, previousPath);
-      const chipNodeChild = chipNode.children[0] as { text: string, marks?: Record<string, any> };
-      const { text, ...marks } = chipNodeChild;
-      Transforms.removeNodes(editor, { at: chipPath });
-      Transforms.insertNodes(editor, { text, ...marks }, { at: insertPoint });
-      // assume that when text is unhighlighted, the text is now part of the previous path
-      // get the text node at the previous path
-      const [prevNode, prevNodePath] = Editor.node(editor, previousPath);
-      if (prevNode && prevNodePath) {
-        if (Text.isText(prevNode)) {
-          if (startOffset !== -1) {
-            const endOffset = startOffset + text.length;
-            const range = { anchor: { path: prevNodePath, offset: startOffset },
-                            focus: { path: prevNodePath, offset: endOffset } };
-            setTimeout(() => {
-              ReactEditor.focus(editor);
-              Transforms.select(editor, range);
-            }, 0);
+      const nodeBeforeHighlight = Editor.previous(editor, { at: chipPath });
+      if (nodeBeforeHighlight && Text.isText(nodeBeforeHighlight[0])) {
+        const nodeBeforeHighlightText = nodeBeforeHighlight[0].text;
+        const startOffset = nodeBeforeHighlightText.length;
+        const previousPath = Path.previous(chipPath);
+        const insertPoint = Editor.end(editor, previousPath);
+        const chipNodeChild = chipNode.children[0] as { text: string, marks?: Record<string, any> };
+        const { text, ...marks } = chipNodeChild;
+        Transforms.removeNodes(editor, { at: chipPath });
+        Transforms.insertNodes(editor, { text, ...marks }, { at: insertPoint });
+        // assume that when text is unhighlighted, the text is now part of the previous path
+        // get the text node at the previous path
+        const [prevNode, prevNodePath] = Editor.node(editor, previousPath);
+        if (prevNode && prevNodePath) {
+          if (Text.isText(prevNode)) {
+            if (startOffset !== -1) {
+              const endOffset = startOffset + text.length;
+              const range = { anchor: { path: prevNodePath, offset: startOffset },
+                              focus: { path: prevNodePath, offset: endOffset } };
+              setTimeout(() => {
+                ReactEditor.focus(editor);
+                Transforms.select(editor, range);
+              }, 0);
+            }
           }
         }
       }
