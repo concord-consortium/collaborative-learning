@@ -56,7 +56,7 @@ export const clueBasicDataColorInfo: ClueColor[] = [
   { color: clueDataColors.dataYellow, name: "yellow" },
   { color: clueDataColors.dataPurple, name: "purple" },
   { color: clueDataColors.dataIndigo, name: "indigo" },
-  { color: clueDataColors.dataGray, name: "gray" }
+  { color: clueDataColors.dataBlack, name: "black" }
 ];
 
 /*
