@@ -8,6 +8,7 @@ import { ChatPanel } from "./chat-panel";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { AppConfigModel } from "../../models/stores/app-config-model";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
+import { UserModelType } from "../../models/stores/user";
 
 
 
@@ -87,7 +88,10 @@ jest.mock("../../hooks/use-stores", () => ({
     selectedTileIds: []
   }),
   useStores: () => ({
-    appConfig: AppConfigModel.create({ config: unitConfigDefaults })
+    appConfig: AppConfigModel.create({ config: unitConfigDefaults }),
+    class: {
+      getUserById: () => ({ id: "0", type: "student", name: "Test Student" } as UserModelType)
+    }
   })
 }));
 
