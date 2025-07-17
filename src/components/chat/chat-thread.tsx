@@ -10,6 +10,8 @@ import {ChatCommentThread} from "./chat-comment-thread";
 import { TileIconComponent } from "./tile-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
 
+import DocumentIcon from "../../assets/document-id.svg";
+
 import "./chat-thread.scss";
 
 interface IProps {
@@ -78,7 +80,7 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
           const title = commentThread.title || '';
           const numComments = commentThread.comments.length;
           const shouldBeFocused = commentThread.tileId === focusId;
-          const Icon = commentThread.tileType && getTileComponentInfo(commentThread.tileType)?.Icon;
+          const Icon = commentThread.tileType ? getTileComponentInfo(commentThread.tileType)?.Icon : DocumentIcon;
           const key= commentThread.tileId || "document";
           return (
             <div key={key}

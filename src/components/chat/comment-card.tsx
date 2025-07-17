@@ -11,7 +11,7 @@ import { DocumentModelType } from "../../models/document/document";
 import ChatAvatar from "./chat-avatar";
 import WaitingMessage from "./waiting-message";
 
-import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
+import DeleteMessageIcon from "../../assets/icons/delete/delete-message-icon.svg";
 
 import "./comment-card.scss";
 import "../themes.scss";

@@ -26,7 +26,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   const textareaStyle = {height: commentTextAreaHeight};
 
   const commentEmptyNoTags =  (!commentAdded && !showCommentTag);
-  const postButtonClass = classNames("comment-footer-button", "themed-negative", activeNavTab,
+  const postButtonClass = classNames("comment-footer-button", "themed", activeNavTab,
                                       { disabled: commentEmptyNoTags,
                                       "no-action": commentEmptyNoTags });
 

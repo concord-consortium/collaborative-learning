@@ -56,19 +56,33 @@
         height: 34px;
       }
     }
+
+    svg {
+      flex-shrink: 0;
+      width: 33px;
+      height: 24px;
+    }
+
     .chat-thread-title {
         line-height: 1.29;
+        color: $charcoal-dark-2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .chat-thread-comment-info {
+      flex-shrink: 0;
       display: flex;
       flex-direction: row;
       align-items: center;
       height:100%;
     }
     .chat-thread-tile-info {
+      flex-shrink: 1;
       display: flex;
       flex-direction: row;
       align-items: center;
+      overflow: hidden;
     }
     .chat-thread-num {
       width: 24px;
