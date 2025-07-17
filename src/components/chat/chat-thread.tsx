@@ -96,7 +96,9 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
               >
                 <div className="chat-thread-tile-info">
                 {Icon && (
-                    <Icon data-testid="chat-thread-tile-type"/>
+                  <div className="chat-thread-tile-type" data-testid="chat-thread-tile-type">
+                    <TileIconComponent documentKey={focusDocument} tileId={commentThread.tileId || undefined}/>
+                  </div>
                 )}
                   <div className="chat-thread-title"> {title} </div>
                 </div>
@@ -133,7 +135,7 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
             <div className="chat-thread-tile-info">
               <div className="comment-card-header comment-select" data-testid="comment-card-header">
                 <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
-                  <div data-testid="chat-thread-tile-type">
+                  <div className="chat-thread-tile-type" data-testid="chat-thread-tile-type">
                     <TileIconComponent documentKey={focusDocument} tileId={focusTileId}/>
                   </div>
                 </div>

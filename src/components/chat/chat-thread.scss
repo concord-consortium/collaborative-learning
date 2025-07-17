@@ -6,6 +6,9 @@
   .chat-thread {
     margin: 2px;
     white-space: pre-wrap;
+    min-height: 27px;
+    flex-shrink: 0;
+
 
     &.chat-thread-focused {
       border: solid 1px $charcoal-light-2;
@@ -57,12 +60,6 @@
       }
     }
 
-    svg {
-      flex-shrink: 0;
-      width: 33px;
-      height: 24px;
-    }
-
     .chat-thread-title {
         line-height: 1.29;
         color: $charcoal-dark-2;
@@ -83,6 +80,26 @@
       flex-direction: row;
       align-items: center;
       overflow: hidden;
+
+      .chat-thread-tile-type {
+        flex-shrink: 0;
+        flex-grow: 0;
+        width: 24px;
+        height: 24px;
+        padding: 3px;
+        margin-left: 2px;
+        margin-right: 5px;
+        text-align: center;
+        overflow: hidden;
+
+        svg {
+          width: 100%;
+          height: 100%;
+          fill: $charcoal;
+        }
+
+      }
+
     }
     .chat-thread-num {
       width: 24px;
