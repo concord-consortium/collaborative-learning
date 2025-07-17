@@ -11,7 +11,7 @@ let canvas = new Canvas,
 const queryParams = `${Cypress.config("qaUnitStudent5")}&firebaseEnv=staging`;
 
 const studentDocumentName = "QA 1.1 Solving a Mystery with Proportional Reasoning";
-const aiEvaluationPendingMessage = "Ada is evaluating...";
+const aiEvaluationPendingMessage = "Ada is thinking about it...";
 
 function beforeTest(params) {
   cy.visit(params);

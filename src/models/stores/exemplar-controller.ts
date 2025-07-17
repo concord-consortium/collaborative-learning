@@ -11,27 +11,19 @@ import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
 import { kTextTileType } from "../tiles/text/text-content";
 import { countWords } from "../../utilities/string-utils";
 import { IClientCommentParams } from "../../../shared/shared";
-import { Firebase } from "../../lib/firebase";
-import { UserModelType } from "./user";
-import { DocumentsModelType } from "./documents";
-import { UIModelType } from "./ui";
-import { PersistentUIModelType } from "./persistent-ui/persistent-ui";
-import { UserContextProvider } from "./user-context-provider";
-import { AppConfigModelType } from "./app-config-model";
+import { IStores } from "./stores";
 
 const kExemplarCommentContent = "See if this example gives you any new ideas:";
 
-export interface IExemplarControllerStores {
-  appConfig: AppConfigModelType;
-  db: {
-    firebase: Firebase;
-  };
-  user: UserModelType;
-  documents: DocumentsModelType;
-  ui: UIModelType;
-  persistentUI: PersistentUIModelType;
-  userContextProvider: UserContextProvider;
-}
+export type IExemplarControllerStores = Pick<IStores,
+  "appConfig" |
+  "db" |
+  "user" |
+  "documents" |
+  "ui" |
+  "persistentUI" |
+  "userContextProvider"
+>;
 
 
 /**

@@ -3,7 +3,8 @@ export function isArrayEqual(array1: string[] | undefined, array2: string[]) {
 }
 
 export function isKnownEvaluator(evaluator: string) {
-  return evaluator === "categorize-design" || evaluator === "mock";
+  const knownEvaluators = ["categorize-design", "custom", "mock"];
+  return knownEvaluators.includes(evaluator);
 }
 
 type analysisQueueStatus = "pending" | "imaged" | "done" | "failedImaging" | "failedAnalyzing";

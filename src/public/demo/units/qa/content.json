@@ -13,7 +13,6 @@
       {"url": "curriculum/moving-straight-ahead/stamps/rparen.png", "width": 25, "height": 25}
     ],
     "annotations": "all",
-    "aiEvaluation": "mock",
     "settings": {
       "table": { "numFormat": ".2~f" },
       "datacard": {
@@ -92,6 +91,7 @@
     "tools": ["Simulator"],
     "enableCommentRoles": ["student", "teacher", "researcher"],
     "showCommentTag": true,
+    "tagPrompt": "Select QA Strategy",
     "commentTags": {
       "diverging": "Diverging Designs",
       "converging": "Converging Designs",
@@ -100,7 +100,7 @@
       "form": "What's it look like?",
       "function": "What's it do?"
     },
-    "tagPrompt": "Select QA Strategy"
+    "aiEvaluation": "mock"
   },
   "sections": {
     "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},
