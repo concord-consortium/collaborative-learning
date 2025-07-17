@@ -1,20 +1,22 @@
 import {
-  addDisposer, addMiddleware, getSnapshot, IJsonPatch, Instance, IPatchRecorder,
+  addDisposer, addMiddleware, getSnapshot, IJsonPatch, Instance,
   isActionContextThisOrChildOf, isAlive, recordPatches, tryResolve
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
+import { DocumentContentModelType } from "../document/document-content";
 import { TreeManagerAPI } from "./tree-manager-api";
 import { TreePatchRecordSnapshot } from "./history";
 import { Tree } from "./tree";
-import { CallEnv, getActionPath, isActionFromManager, runningCalls, SharedModelModifications } from "./tree-types";
+import {
+  CallEnv, getActionModelName, getActionPath, isActionFromManager, isValidCallEnv, runningCalls,
+  SharedModelModifications
+} from "./tree-types";
 import { createActionTrackingMiddleware3, IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
-import { DocumentContentModelType } from "../document/document-content";
-import { SharedModelMapSnapshotOutType } from "../document/shared-model-entry";
 
 export class TreeMonitor {
   tree: Instance<typeof Tree>;
   manager: TreeManagerAPI;
-  enabled = false;
+  private enabled = false;
 
   constructor(tree: Instance<typeof Tree>,  manager: TreeManagerAPI, includeHooks: boolean) {
     // We don't care how `this` is handled by createActionTrackingMiddleware
@@ -44,7 +46,7 @@ export class TreeMonitor {
         runningCalls.set(call.actionCall, call);
 
         // DEBUG:
-        // console.log("onStart", getActionName(call));
+        // console.log("onStart", getActionPath(call));
         const sharedModelModifications: SharedModelModifications = {};
 
         // Save the sharedModelMap before any changes are made this way if
@@ -109,10 +111,10 @@ export class TreeMonitor {
             //
             // When a new shared model is added to the document the path will be
             //   /content/sharedModelMap/${sharedModelId}
-            // We a shared model is linked or unlinked to a tile the path will be:
+            // When a shared model is linked or unlinked to a tile the path will be:
             //   /content/sharedModelMap/${sharedModelId}/tiles/[index]
             const pathMatch = _patch.path.match(/(.*\/content\/sharedModelMap\/[^/]+)/);
-            if(pathMatch) {
+            if (pathMatch) {
               const sharedModelPath = pathMatch[1];
 
               if (!sharedModelModifications[sharedModelPath]) {
@@ -144,19 +146,21 @@ export class TreeMonitor {
         };
       },
       onFinish(call, error) {
-        const { recorder, initialSharedModelMap, sharedModelModifications,
-          historyEntryId, exchangeId, undoable } = call.env || {};
-        if (!recorder || !initialSharedModelMap || !sharedModelModifications || !historyEntryId ||
-          !exchangeId || undoable === undefined) {
-          throw new Error(`The call.env is corrupted: ${ JSON.stringify(call.env)}`);
+        const env = call.env;
+        if (!isValidCallEnv(env)) {
+          throw new Error(`The call.env is corrupted: ${JSON.stringify(env)}`);
         }
+        // DEBUG:
+        // console.log("onFinish", getActionPath(call));
+
         call.env = undefined;
+
+        const { recorder } = env;
         recorder.stop();
 
         if (error === undefined) {
           // recordAction is async
-          self.recordAction(call, historyEntryId, exchangeId, recorder,
-            initialSharedModelMap, sharedModelModifications, undoable);
+          self.recordAction(call, env);
         } else {
           // TODO: This is a new feature that is being added to the tree:
           // any errors that happen during an action will cause the tree to revert back to
@@ -183,6 +187,14 @@ export class TreeMonitor {
     addDisposer(tree, middlewareDisposer);
   }
 
+  enableMonitoring() {
+    this.enabled = true;
+  }
+
+  disableMonitoring() {
+    this.enabled = false;
+  }
+
   // recordAction is async because it needs to wait for the manager to
   // respond, to the addHistoryEntry, startExchange, and
   // handleSharedModelChanges calls before it can call addTreePatchRecord. The
@@ -196,11 +208,9 @@ export class TreeMonitor {
   // shared model state sending is just to synchronize other views of the
   // shared model in other trees. The actual changes to the shared model are
   // stored in the recorder.
-  async recordAction(call: IActionTrackingMiddleware3Call<CallEnv>,
-    historyEntryId: string, exchangeId: string,
-    recorder: IPatchRecorder,
-    initialSharedModelMap: SharedModelMapSnapshotOutType, sharedModelModifications: SharedModelModifications,
-    undoable: boolean) {
+  async recordAction(call: IActionTrackingMiddleware3Call<CallEnv>, env: CallEnv) {
+    const { recorder, initialSharedModelMap, sharedModelModifications, historyEntryId,
+      exchangeId, undoable } = env;
     if (!isActionFromManager(call)) {
       // We record the start of the action even if it doesn't have any
       // patches. This is useful when an action only modifies the shared
@@ -209,8 +219,14 @@ export class TreeMonitor {
       // If the manager triggered the action then the manager already
       // added the history entry.
       //
-      await this.manager.addHistoryEntry(historyEntryId, exchangeId, this.tree.treeId,
-          getActionPath(call), undoable);
+      await this.manager.addHistoryEntry({
+        id: historyEntryId,
+        exchangeId,
+        tree: this.tree.treeId,
+        model: getActionModelName(call),
+        action: getActionPath(call),
+        undoable
+      });
     }
 
     // Call the shared model notification function if there are changes.
@@ -226,6 +242,10 @@ export class TreeMonitor {
         // If a shared model has been deleted, we can't run these callbacks without errors,
         // so we bail out now.  May need improvement if tiles need to be notified about
         // deleted shared models.
+        if (!isAlive(this.tree)) {
+          // The tree might have been destroyed. This happens during tests.
+          return;
+        }
         try {
           tryResolve(this.tree, `${sharedModelPath}/sharedModel`);
         } catch {

@@ -291,6 +291,7 @@ Common toolbar framework; default toolbar buttons:
 
 Common toolbar framework; default toolbar buttons:
 
+- `import-data`
 - `set-expression`
 - `link-tile`
 - `link-graph`

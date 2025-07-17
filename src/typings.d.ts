@@ -10,3 +10,5 @@ declare module "*.svg" {
   const _: FunctionComponent<SVGProps<SVGSVGElement>>;
   export = _;
 }
+
+type Maybe<T> = T | undefined

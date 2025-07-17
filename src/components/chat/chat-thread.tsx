@@ -4,11 +4,8 @@ import classNames from "classnames";
 import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
-import { WithId } from "../../hooks/firestore-hooks";
 import { useCurriculumOrDocumentContent, useUIStore } from "../../hooks/use-stores";
-import { CommentDocument} from "../../lib/firestore-schema";
 import { CommentCard } from "./comment-card";
-import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import {ChatCommentThread} from "./chat-comment-thread";
 import { TileIconComponent } from "./tile-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
@@ -79,8 +76,6 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       {
         chatThreads?.map((commentThread: ChatCommentThread) => {
           const title = commentThread.title || '';
-          const shouldShowUserIcon =
-            commentThread.comments.some((comment: WithId<CommentDocument>) => user?.id === comment.uid);
           const numComments = commentThread.comments.length;
           const shouldBeFocused = commentThread.tileId === focusId;
           const Icon = commentThread.tileType && getTileComponentInfo(commentThread.tileType)?.Icon;
@@ -89,7 +84,7 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
             <div key={key}
               className={classNames("chat-thread", {
                 "chat-thread-focused": shouldBeFocused,
-              }, `${focusTileId ? "chat-thread-tile" : "chat-thread-document"}`
+              }, `${commentThread.tileId ? "chat-thread-tile" : "chat-thread-document"}`
               )}
               data-testid="chat-thread">
               <div className={classNames(`chat-thread-header ${activeNavTab}`,
@@ -104,9 +99,6 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
                   <div className="chat-thread-title"> {title} </div>
                 </div>
                 <div className="chat-thread-comment-info">
-                  {shouldShowUserIcon &&
-                    <div className="user-icon" data-testid="chat-thread-user-icon"><UserIcon /></div>
-                  }
                   <div className="chat-thread-num">{numComments}</div>
                   <ChatThreadToggle
                     isThreadExpanded={expandedThread === key}

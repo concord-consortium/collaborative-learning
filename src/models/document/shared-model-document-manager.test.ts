@@ -173,7 +173,7 @@ describe("SharedModelDocumentManager", () => {
     });
 
     // Enable the tree monitor so changes to the shared model trigger the update.
-    docModel.treeMonitor!.enabled = true;
+    docModel.treeMonitor!.enableMonitoring();
 
     return {doc, docModel};
   }
@@ -641,7 +641,6 @@ describe("SharedModelDocumentManager", () => {
     manager.addTileSharedModel(tileContent, sharedModel2);
 
     // The update function should be called right after second model is added
-    // It is actually called twice, see above for details.
     await expectUpdateToBeCalledAfter(tileContent, 2, 3);
 
     // it should still be monitoring the first model

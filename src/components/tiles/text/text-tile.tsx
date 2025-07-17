@@ -7,9 +7,13 @@ import {
 } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "./text-content-context";
 import { BaseComponent } from "../../base";
+import { OffsetModel } from "../../../models/annotations/clue-object";
 import { userSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
+import { HighlightRegistryContext, HighlightRevisionContext, IHighlightBox }
+    from "../../../plugins/text/highlight-registry-context";
+import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
@@ -165,9 +169,28 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         const { x, y, width, height, top, left, bottom, right } = entry.contentRect;
         this.tileContentRect = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
         this.toolbarTileApi?.handleTileResize?.(entry);
+      },
+      getObjectBoundingBox: (objectId: string, objectType?: string) => {
+        if (objectType === kHighlightFormat) {
+          const box = this.getContent().highlightBoxesCache.get(objectId);
+          if (box) return box;
+        }
+      },
+      getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
+        // offset the annotation arrows to the right top corner of the bounding box until connected to a target,
+        // and then offset should be the center of the edge closes to the target
+        const offsets = OffsetModel.create({});
+        if (objectType === kHighlightFormat) {
+          const box = this.getContent().highlightBoxesCache.get(objectId);
+          if (box) {
+            const { width, height } = box;
+            offsets.setDx(width / 2);
+            offsets.setDy(- height / 2);
+          }
+        }
+        return offsets;
       }
     });
-
   }
 
   public componentWillUnmount() {
@@ -179,10 +202,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   public render() {
     const { appConfig: { placeholderText } } = this.stores;
-    const inLockedContainer = this.context.isLocked;
-
-    // A fixed position text tile is a prompt, which should be read-only if it's in a locked question tile.
-    const readOnly = this.props.readOnly || (this.props.model.fixedPosition && inLockedContainer);
+    const readOnly = this.isReadOnly();
 
     const editableClass = readOnly ? "read-only" : "editable";
     const containerClasses = classNames("tile-content", "text-tool-wrapper", {
@@ -204,28 +224,32 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       // and then replace the drawing one with that as well
       <TextContentModelContext.Provider value={this.getContent()} >
         <TextPluginsContext.Provider value={this.plugins} >
-          <div
-            className={containerClasses}
-            data-testid="text-tool-wrapper"
-            ref={elt => this.textTileDiv = elt}
-            onMouseDown={this.handleMouseDownInWrapper}
-          >
-            <Slate
-              editor={this.editor as ReactEditor}
-              initialValue={this.state.initialValue}
-              onChange={this.handleChange}
-            >
-              <SlateEditor
-                placeholder={placeholderText}
-                hotkeyMap={defaultHotkeyMap}
-                readOnly={readOnly}
-                onFocus={this.handleFocus}
-                onBlur={this.handleBlur}
-                className={`ccrte-editor slate-editor ${slateClasses || ""}`}
-              />
-              <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
-            </Slate>
-          </div>
+          <HighlightRevisionContext.Provider value={this.state.revision}>
+            <HighlightRegistryContext.Provider value={this.handleUpdateHighlightBoxCache}>
+              <div
+                className={containerClasses}
+                data-testid="text-tool-wrapper"
+                ref={elt => this.textTileDiv = elt}
+                onMouseDown={this.handleMouseDownInWrapper}
+              >
+                <Slate
+                  editor={this.editor as ReactEditor}
+                  initialValue={this.state.initialValue}
+                  onChange={this.handleChange}
+                >
+                  <SlateEditor
+                    placeholder={placeholderText}
+                    hotkeyMap={defaultHotkeyMap}
+                    readOnly={readOnly}
+                    onFocus={this.handleFocus}
+                    onBlur={this.handleBlur}
+                    className={`ccrte-editor slate-editor ${slateClasses || ""}`}
+                  />
+                  <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
+                </Slate>
+              </div>
+            </HighlightRegistryContext.Provider>
+          </HighlightRevisionContext.Provider>
         </TextPluginsContext.Provider>
       </TextContentModelContext.Provider>
     );
@@ -235,20 +259,25 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const { model } = this.props;
     const content = this.getContent();
     const { ui } = this.stores;
+    const readOnly = this.isReadOnly();
 
     if (this.editor && ReactEditor.isFocused(this.editor)) {
-      userSelectTile(ui, model, { readOnly: this.props.readOnly, container: this.context.model });
+      userSelectTile(ui, model, { readOnly, container: this.context.model });
     }
 
-    this.isHandlingUserChange = true;
-    // Update content model when user changes slate
-    content.setSlate(value);
-    this.isHandlingUserChange = false;
+    if (!readOnly) {
+      this.isHandlingUserChange = true;
+      // Update content model when user changes slate
+      content.setSlate(value);
+      this.setState({ revision: this.state.revision + 1 });
+      this.isHandlingUserChange = false;
+    }
   };
 
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;
-    const { model, readOnly } = this.props;
+    const { model } = this.props;
+    const readOnly = this.isReadOnly();
     const inLockedContainer = this.context.isLocked;
 
     // Don't select a locked prompt
@@ -259,9 +288,17 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const append = hasSelectionModifier(e);
     const isWrapperClick = e.target === this.textTileDiv;
     userSelectTile(ui, model, { readOnly, append, container: this.context.model });
-    if (readOnly || isWrapperClick || append) {
-      isWrapperClick && this.editor && ReactEditor.focus(this.editor);
-      e.preventDefault();
+
+    if (isWrapperClick || append) {
+      if (readOnly) {
+        // In read-only mode, just prevent the default to avoid Slate's auto-select
+        // but don't stop propagation to allow text selection to work
+        e.preventDefault();
+      } else if (isWrapperClick) {
+        // In editable mode, focus the editor for wrapper clicks
+        this.editor && ReactEditor.focus(this.editor);
+        e.preventDefault();
+      }
     }
   };
 
@@ -269,25 +306,47 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     return this.props.model.content as TextContentModelType;
   }
 
+  private isReadOnly(): boolean {
+    const inLockedContainer = this.context.isLocked;
+    const isFixedInLockedContainer = this.props.model.fixedPosition && inLockedContainer;
+    const isReadOnly = this.props.readOnly || isFixedInLockedContainer;
+
+    return isReadOnly;
+  }
+
+
   private handleBlur = () => {
-    // If the text has changed since the editor was focused, log the new text.
-    const text = this.getContent().text;
-    if (text !== this.textOnFocus) {
-      const plainText = this.getContent().asPlainText();
-      const wordCount = countWords(plainText);
-      const change = {args:[{ text }]};
-      logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, {
-        operation: 'update',
-        change,
-        plainText,
-        wordCount,
-        tileId: this.props.model.id });
+    const readOnly = this.isReadOnly();
+
+    if (!readOnly) {
+      // If the text has changed since the editor was focused, log the new text.
+      const text = this.getContent().text;
+      if (text !== this.textOnFocus) {
+        const plainText = this.getContent().asPlainText();
+        const wordCount = countWords(plainText);
+        const change = {args:[{ text }]};
+        logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, {
+          operation: 'update',
+          change,
+          plainText,
+          wordCount,
+          tileId: this.props.model.id });
+      }
+
+      this.setState({ revision: this.state.revision + 1 }); // Force a rerender
+    }
+  };
+
+  private handleFocus = () => {
+    const readOnly = this.isReadOnly();
+
+    if (!readOnly) {
+      this.textOnFocus = this.getContent().textStr;
     }
     this.setState({ revision: this.state.revision + 1 }); // Force a rerender
   };
 
-  private handleFocus = () => {
-    this.textOnFocus = this.getContent().textStr;
-    this.setState({ revision: this.state.revision + 1 }); // Force a rerender
+  private handleUpdateHighlightBoxCache = (id: string, box: IHighlightBox) => {
+    this.getContent().setHighlightBoxesCache(id, box);
   };
 }

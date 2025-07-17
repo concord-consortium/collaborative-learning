@@ -138,11 +138,10 @@ function applyUpdate(dataSet: IDataSet, change: ITableChange) {
                 dataSet.setAttributeName(colId, _value);
                 break;
               }
-              case "expression":
-                attr.formula.setCanonical(_value);
-                break;
+              // We ignore the "expression" property because the rawExpression is the actual display
+              // expression the user sees and that is all the formula system needs now.
               case "rawExpression":
-                attr.formula.setDisplay(_value);
+                attr.formula.setDisplayExpression(_value);
                 break;
             }
           });

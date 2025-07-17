@@ -12,7 +12,6 @@ import { TColumn, TRow } from "./table-types";
 export interface IContentChangeHandlers {
   onSetTableTitle: (title: string) => void;
   onSetColumnName: (column: TColumn, columnName: string) => void;
-  onSetColumnExpressions: (rawExpressions: Map<string, string>, xName: string) => void;
   onAddColumn: () => void;
   onRemoveColumn: (colId: string) => void;
   requestRowHeight: () => void;
@@ -78,13 +77,6 @@ export const useContentChangeHandlers = ({
     requestRowHeight();
   }, [readOnly, dataSet, requestRowHeight]);
 
-  const setColumnExpressions = useCallback((rawExpressions: Map<string, string>, xName: string) => {
-    if (readOnly) return;
-    getContent().setExpressions(rawExpressions, xName);
-    requestRowHeight();
-    triggerColumnChange();
-  }, [readOnly, getContent, requestRowHeight, triggerColumnChange]);
-
   const addColumn = useCallback(() => {
     if (readOnly) return;
     const attrId = uniqueId();
@@ -118,7 +110,7 @@ export const useContentChangeHandlers = ({
     getContent().removeCases(rowIds);
   }, [readOnly, getContent]);
 
-  return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
+  return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName,
           onAddColumn: addColumn, onRemoveColumn: removeColumn, requestRowHeight,
           onAddRows: addRows, onUpdateRow: updateRow, onRemoveRows: removeRows };
 };

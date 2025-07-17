@@ -6,6 +6,15 @@ import { setLivelinessChecking } from "mobx-state-tree";
 import Modal from "react-modal";
 import { ModalProvider } from "@concord-consortium/react-modal-hook";
 import { QueryClient, QueryClientProvider } from "react-query";
+import {
+  registerGlobalValueManagerLookupFunction
+} from "@concord-consortium/codap-formulas-react17/models/global/global-value-manager";
+import {
+  AttributeFormulaAdapter
+} from "@concord-consortium/codap-formulas-react17/models/formula/attribute-formula-adapter";
+import {
+  registerMathjsFunction, typedFnRegistry
+} from "@concord-consortium/codap-formulas-react17/models/formula/functions/math";
 
 import { AppMode } from "./models/stores/store-types";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
@@ -43,6 +52,14 @@ type IInitializeAppOptions = {authoring?: boolean, standalone?: boolean, authDom
 export const initializeApp = ({authoring, standalone, authDomain}: IInitializeAppOptions = {}): IStores => {
   const appVersion = PackageJson.version;
   const bearerToken = getBearerToken(urlParams);
+
+  // Setup the formula system
+  // Let the formula system know we don't support global values
+  registerGlobalValueManagerLookupFunction(undefined);
+  // Have the attribute formula adapter register itself
+  AttributeFormulaAdapter.register();
+  // Add an alias for the mean function
+  registerMathjsFunction("average", typedFnRegistry.mean);
 
   const user = UserModel.create();
 
