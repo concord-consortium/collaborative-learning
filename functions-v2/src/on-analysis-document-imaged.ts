@@ -10,7 +10,7 @@ import {kAnalyzerUserParams} from "../../shared/shared";
 // 1. Watch for changes to the lastUpdatedAt metadata field and write a queue of docs to process
 // 2. Create screenshots of those documents
 // 3. (This function) Send those screenshots to the AI service for processing along with any custom AI prompt, and
-//    create  comments with the results
+//    create comments with the results
 
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
 

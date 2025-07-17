@@ -40,7 +40,7 @@ export async function categorizeDocument(file: string, apiKey: string) {
 export function buildZodResponseSchema(aiPrompt: IAiPrompt) {
   const schema: Record<string, z.ZodType> = {};
   if (aiPrompt.categorizationDescription && aiPrompt.categories && aiPrompt.categories.length > 0) {
-    schema.category = z.enum(["unknown", ...aiPrompt.categories],
+    schema.category = z.enum(["unknown", ...aiPrompt.categories!],
       {description: aiPrompt.categorizationDescription});
   }
   if (aiPrompt.keyIndicatorsPrompt) {
@@ -80,11 +80,16 @@ export function buildMessages(aiPrompt: IAiPrompt, url: string): ChatCompletionM
 export async function categorizeUrl(url: string, apiKey: string, aiPrompt = defaultAiPrompt) {
   const openai = new OpenAI({apiKey});
   try {
+    const responseSchema = buildZodResponseSchema(aiPrompt);
+    if (Object.keys(responseSchema).length === 0) {
+      throw new Error("aiPrompt must specify at least one response field for the schema.");
+    }
+
     return openai.beta.chat.completions.parse({
       model: "gpt-4o-mini",
       // model: "gpt-4o-2024-08-06",
       messages: buildMessages(aiPrompt, url),
-      response_format: zodResponseFormat(z.object(buildZodResponseSchema(aiPrompt)), "categorization-response"),
+      response_format: zodResponseFormat(z.object(responseSchema), "categorization-response"),
     });
   } catch (error) {
     console.log("OpenAI error", error);
