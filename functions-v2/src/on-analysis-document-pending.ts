@@ -1,5 +1,5 @@
 import {FirestoreEvent, onDocumentCreated, QueryDocumentSnapshot} from "firebase-functions/v2/firestore";
-import {getAnalysisQueueFirestorePath} from "./utils";
+import {getAnalysisQueueFirestorePath, isKnownEvaluator} from "./utils";
 import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
@@ -62,7 +62,7 @@ export const onAnalysisDocumentPending =
     const firestore = admin.firestore();
     const queueDoc = event.data?.data();
 
-    if (queueDoc?.evaluator !== "categorize-design") {
+    if (!isKnownEvaluator(queueDoc?.evaluator)) {
       await error(`Unexpected value for evaluator: ${queueDoc?.evaluator}`, event);
       return;
     }
