@@ -7,6 +7,7 @@
   position: relative;
   top: 0;
   height: 34px;
+  min-height: 34px; // needed to avoid flex shrink
   padding: 0 0 0 5px;
   width: 100%;
   font-weight: bold;

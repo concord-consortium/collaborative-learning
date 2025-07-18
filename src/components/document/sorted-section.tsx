@@ -112,7 +112,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
       <div className="section-header">
         <div className="section-header-label">
         <div className="section-header-left">
-          {documentGroup.icon && <documentGroup.icon/>} {documentGroup.label}
+          {documentGroup.icon && <documentGroup.icon className="tool-icon"/>} {documentGroup.label}
         </div>
         <div className="section-header-right">
           <div>Total workspaces: {documentCount}</div>

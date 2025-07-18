@@ -10,8 +10,6 @@ import { AppConfigModel } from "../../models/stores/app-config-model";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 import { UserModelType } from "../../models/stores/user";
 
-
-
 const mockPostComment = jest.fn();
 
 jest.mock("../../hooks/document-comment-hooks", () => ({
@@ -75,7 +73,12 @@ jest.mock("../../hooks/use-stores", () => ({
     uid: "1", key: documentKey, type: "problem"
   }),
   useDocumentFromStore: () => ({
-    getDocument: () => ({ undefined })
+    getProperty: (key: string) => undefined,
+    title: "Test Document",
+    type: "problem",
+    unit: "test-unit",
+    investigation: 1,
+    problem: 1
   }),
   useCurriculumOrDocumentContent:(key: string) => {
     return DocumentContentModel.create(createSingleTileContent({
@@ -87,13 +90,23 @@ jest.mock("../../hooks/use-stores", () => ({
     showChatPanel: true,
     selectedTileIds: []
   }),
+  useAppConfig: () => AppConfigModel.create({ config: unitConfigDefaults }),
   useStores: () => ({
     appConfig: AppConfigModel.create({ config: unitConfigDefaults }),
     class: {
       getUserById: () => ({ id: "0", type: "student", name: "Test Student" } as UserModelType)
+    },
+    unit: {
+      code: "test-unit",
+      getInvestigation: () => ({
+        getProblem: () => ({
+          title: "Test Problem"
+        })
+      })
     }
   })
 }));
+
 
 describe("ChatPanel", () => {
 
