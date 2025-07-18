@@ -29,11 +29,8 @@ export function makeChatThreads (
         isTileComment = true;
         tile = content?.getTile(comment.tileId);
       }
-      if (isTileComment && !tile) {
-        console.log("id", comment.tileId, "tileMap", content?.tileMap.toJSON());
-      }
       chatThreads.push({
-        title: isTileComment ? (tile ? tile.computedTitle: undefined) : docTitle,
+        title: isTileComment ? (tile ? tile.computedTitle: null) : docTitle || null,
         tileType: isTileComment && tile ? tile.content?.type : null,
         tileId: isTileComment ? tileId : null,
         comments: [comment]
