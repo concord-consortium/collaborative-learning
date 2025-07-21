@@ -55,6 +55,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["aiEvaluation"]>("aiEvaluation");
   }
 
+  get aiPrompt(){
+    return this.getProp<UC["aiPrompt"]>("aiPrompt");
+  }
+
   get autoAssignStudentsToIndividualGroups() {
     return this.getProp<UC["autoAssignStudentsToIndividualGroups"]>("autoAssignStudentsToIndividualGroups");
   }

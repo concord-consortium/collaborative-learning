@@ -2,5 +2,12 @@
   "projects": {
     "production": "collaborative-learning-ec215",
     "staging": "collaborative-learning-staging"
-  }
+  },
+  "targets": {},
+  "etags": {
+    "collaborative-learning-staging": {
+      "extensionInstances": {}
+    }
+  },
+  "dataconnectEmulatorConfig": {}
 }

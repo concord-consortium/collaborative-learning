@@ -1,6 +1,6 @@
 import React from "react";
 import { ColorSwatch } from "./color-swatch";
-import { ClueColor, clueDataColorInfo } from "../../../utilities/color-utils";
+import { ClueColor, clueBasicDataColorInfo } from "../../../utilities/color-utils";
 
 import "./color-palette.scss";
 
@@ -13,7 +13,7 @@ export const ColorPalette: React.FC<IProps> = ({ selectedColor, onSelectColor })
   return (
     <div className="toolbar-palette color-palette">
       <div className="palette-buttons">
-        {clueDataColorInfo.map((colorInfo: ClueColor, index) =>
+        {clueBasicDataColorInfo.map((colorInfo: ClueColor, index) =>
           <ColorSwatch
             key={colorInfo.name}
             name={colorInfo.name}

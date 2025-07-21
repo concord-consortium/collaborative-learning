@@ -81,17 +81,30 @@ These properties are configurable at the application (built into the code) or th
 
 `navTabs`: (object) configuration of navigation tabs (document navigation UI)
 
+`annotations`: ("all" | "none" | string[]) List of the types of annotations supported (eg "curved-sparrow") or "all" or "none". Currently any value other than "none" will be treated as "all".
+
 `enableCommentRoles`: (array of "student" | "teacher" | "researcher") list of roles that can use the comments panel
 
 `showCommentTag`: (boolean) must be true for any of the comment-tag functionality to be enabled
 
 `tagPrompt`: (string) prompt shown in the tagging pulldown menu when a comment is being made
 
-`commentTags`: (object) list of possible values for tagging in comments
+`commentTags`: (object) list of possible values for tagging in comments, mapping IDs to human-readable names, eg: `{ "user": "Who is it for?", "environment": "Where is it used?", ... }`
 
-`aiEvaluation`: ("categorize-design") If set, enable the specified AI evaluation to run after document updates. At the moment, there is only one evaluation pipeline defined.
+`aiEvaluation`: ("custom" | "categorize-design" | "mock") If set, enable the specified AI evaluation to run after document updates. "custom" allows the prompt to be specified with the `aiPrompt` property; "categorize-design" runs the original MODS unit categorization prompt (for backward compatibility); "mock" does not invoke any AI system but simply returns a fixed string for testing purposes.
 
-`annotations`: ("all" | "none" | string[]) List of the types of annotations supported (eg "curved-sparrow") or "all" or "none". Currently any value other than "none" will be treated as "all".
+`aiPrompt`: (object) Configures the prompt to use for "custom" AI evaluation.  There are several properties wrapped up here, an example setting is below. "systemPrompt" and "mainPrompt" are required. The "categories", if supplied, must be a subset of "commentTags" (see above):
+
+```json
+"aiPrompt": {
+  "systemPrompt": "You are a master teacher.",
+  "mainPrompt": "This is a picture of a student document. Please evaluate and categorize it.",
+  "categorizationDescription": "Categorize the document based on its content.",
+  "categories": ["user", "environment", "form", "function"],
+  "keyIndicatorsPrompt": "What are the key indicators that support this categorization?",
+  "discussionPrompt": "Please provide any additional information."
+}
+```
 
 ## Unit- or Problem-level `config` properties
 
