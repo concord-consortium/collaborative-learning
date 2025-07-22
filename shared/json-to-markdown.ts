@@ -81,7 +81,9 @@ function generateDescription(flat: Record<string, string>): string {
       topPhrases.push(`the ${key} is not set`);
     } else if (value.startsWith('[') && value.endsWith(']')) {
       const items = value.slice(1, -1);
-      topPhrases.push(`the ${key} includes ${items}`);
+      if (items.length > 0) {
+        topPhrases.push(`the ${key} includes ${items}`);
+      }
     } else if (isNaN(Number(value))) {
       topPhrases.push(`the ${key} is "${value}"`);
     } else {
@@ -119,7 +121,9 @@ function generateDescription(flat: Record<string, string>): string {
         groupPhrases.push(`the ${key} is not set`);
       } else if (value.startsWith('[') && value.endsWith(']')) {
         const items = value.slice(1, -1);
-        groupPhrases.push(`the ${key} includes ${items}`);
+        if (items.length > 0) {
+          groupPhrases.push(`the ${key} includes ${items}`);
+        }
       } else if (isNaN(Number(value))) {
         groupPhrases.push(`the ${key} is "${value}"`);
       } else {
@@ -142,10 +146,17 @@ function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+const keysToIgnore = ["id", "type", ];
 // Converts JSON components into markdown format with a natural language summary
 // eslint-disable-next-line max-len
 export function jsonToMarkdownWithDescriptions(component: Record<string, any>): {description: string, markdown: string} {
-  const flat = flattenJsonCondensed(component);
+  const cleanedComponent = JSON.parse(JSON.stringify(component, (key, value) => {
+    if (keysToIgnore.includes(key)) {
+      return undefined;
+    }
+    return value;
+  }));
+  const flat = flattenJsonCondensed(cleanedComponent);
 
   const markdown = Object.entries(flat)
     .sort(([a], [b]) => a.localeCompare(b))

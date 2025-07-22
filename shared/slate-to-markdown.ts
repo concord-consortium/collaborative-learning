@@ -87,6 +87,8 @@ function serializeNode(node: any): string {
       return `\`\`\`\n${children}\n\`\`\``;
     case 'link':
       return `[${children}](${node.data?.href || '#'})`;
+    case 'highlight':
+      return `==${children}==`;
     default:
       return children;
   }

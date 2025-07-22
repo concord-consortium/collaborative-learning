@@ -228,12 +228,13 @@ export function tileSummary(tile: INormalizedTile): string {
       }
 
       // eslint-disable-next-line max-len
-      result = `This tile contains the following ${textFormat} text content delimited here by a code fence:\n\n\`\`\`\n${result || ""}\n\`\`\``;
+      result = `This tile contains the following ${textFormat} text content delimited below by a text code fence:\n\n\`\`\`text\n${result || ""}\n\`\`\``;
       break;
 
     default:
       result = jsonToMarkdownWithDescriptions(content);
-      result = `This tile contains ${type.toLowerCase()} content.\n\n${result.description}`;
+      // eslint-disable-next-line max-len
+      result = `This tile contains ${type.toLowerCase()} content.\n\n${result.description}\n\n${JSON.stringify(tile)}`;
       break;
   }
 
