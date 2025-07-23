@@ -215,7 +215,7 @@ export class Firebase {
     if (evaluation) {
       const evaluationRef = this.ref(evaluation);
       const evaluationOnDisconnect = evaluationRef.onDisconnect();
-      this.setTimestampWithAiPrompt(evaluationOnDisconnect);
+      this.updateEvaluation(evaluationOnDisconnect);
       onDisconnects.push(evaluationOnDisconnect);
     }
     return onDisconnects;
@@ -239,7 +239,8 @@ export class Firebase {
       .set(firebase.database.ServerValue.TIMESTAMP));
     const evaluation = this.getEvaluationMetadataPath(user, documentKey, userId);
     if (evaluation) {
-      promises.push(this.setTimestampWithAiPrompt(this.ref(evaluation)));
+      const updatePromise = this.updateEvaluation(this.ref(evaluation));
+      updatePromise && promises.push(updatePromise);
     }
 
     return Promise.all(promises);
@@ -473,14 +474,16 @@ export class Firebase {
     }
   };
 
-  private setTimestampWithAiPrompt = (targetRef: firebase.database.Reference | firebase.database.OnDisconnect) => {
-    const aiPrompt = this.db.stores.appConfig.aiPrompt;
-    const hasCustomAiPrompt = this.db.stores.appConfig.aiEvaluation === "custom" && aiPrompt;
-    const values = hasCustomAiPrompt
-      ? { aiPrompt, timestamp: firebase.database.ServerValue.TIMESTAMP }
-      : { timestamp: firebase.database.ServerValue.TIMESTAMP };
+private updateEvaluation = (targetRef: firebase.database.Reference | firebase.database.OnDisconnect) => {
+  const { aiEvaluation, aiPrompt } = this.db.stores.appConfig;
 
-    return targetRef.set(values);
-  };
+  if (aiEvaluation === "custom") {
+    return aiPrompt
+      ? targetRef.set({ aiPrompt, timestamp: firebase.database.ServerValue.TIMESTAMP })
+      : undefined;
+  }
+
+  return targetRef.set({ timestamp: firebase.database.ServerValue.TIMESTAMP });
+};
 
 }

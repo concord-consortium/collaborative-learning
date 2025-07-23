@@ -112,7 +112,7 @@ describe("Firebase class", () => {
       jest.spyOn(firebaseWithCustom, 'ref').mockReturnValue(mockRef as any);
 
       await firebaseWithCustom.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId);
-      expect(mockRef.set).toHaveBeenCalledTimes(2); // lastEditedAt and timestamp
+      expect(mockRef.set).toHaveBeenCalledTimes(1); // lastEditedAt only
     });
 
     it("should handle non-custom evaluation", () => {
