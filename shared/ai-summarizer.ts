@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import type {  DocumentContentSnapshotType } from "src/models/document/document-content";
 import type { ITileModelSnapshotOut } from "src/models/tiles/tile-model";
 import { slateToMarkdown } from "./slate-to-markdown";
@@ -6,6 +7,7 @@ import { generateTileDescription } from "./generate-tile-description";
 export interface INormalizedTile {
   model: ITileModelSnapshotOut;
   number: number;
+  sharedDataSet?: NormalizedDataSet
 }
 
 export interface INormalizedRow {
@@ -18,8 +20,19 @@ export interface NormalizedSection {
   sectionId?: string;
 }
 
+export interface NormalizedDataSet {
+  id: string;
+  providerId: string;
+  name: string;
+  tileIds: string[];
+  attributes: {name: string, values: string[]}[];
+  numCases: number;
+  data: string[][];
+}
+
 export interface NormalizedModel {
   sections: NormalizedSection[];
+  dataSets: NormalizedDataSet[];
 }
 
 export interface AiSummarizerOptions {
@@ -55,7 +68,8 @@ export function parseContent(content: string): DocumentContentSnapshotType {
 
 export function normalize(model: DocumentContentSnapshotType): NormalizedModel {
   const sections: NormalizedSection[] = [];
-  const {rowOrder, rowMap, tileMap} = model;
+  const dataSets: NormalizedDataSet[] = [];
+  const {rowOrder, rowMap, tileMap, sharedModelMap} = model;
 
   const addSection = (sectionId?: string): NormalizedSection => {
     const newSection: NormalizedSection = {
@@ -115,30 +129,72 @@ export function normalize(model: DocumentContentSnapshotType): NormalizedModel {
     });
   }
 
+  // add the data sets
+  console.log(sharedModelMap);
+  if (sharedModelMap) {
+    for (const [id, entry] of Object.entries(sharedModelMap)) {
+      const sharedModel: any = entry.sharedModel;
+      if (sharedModel?.type === "SharedDataSet") {
+        const {attributes, cases, name} = sharedModel.dataSet;
+        const dataSet: NormalizedDataSet = {
+          id,
+          providerId: sharedModel.providerId,
+          name,
+          tileIds: (entry.tiles || []).map((tile) => `${tile}`),
+          attributes: (attributes || []).map((attr: any) => ({name: attr.name, values: attr.values || []})),
+          numCases: cases.length,
+          data: [],
+        };
+        for (let i = 0; i < cases.length; i++) {
+          const cols: string[] = [];
+          for (const attr of dataSet.attributes) {
+            cols.push(attr.values[i] || "");
+          }
+          dataSet.data.push(cols);
+        }
+        dataSets.push(dataSet);
+
+        // add the data set to the tiles that reference it
+        for (const section of sections) {
+          section.rows.forEach((row) => {
+            row.tiles.forEach((tile) => {
+              if (dataSet.tileIds.includes(tile.model.id)) {
+                tile.sharedDataSet = dataSet;
+              }
+            });
+          });
+        }
+      }
+    }
+  }
+
   // Implement normalization logic here if needed
   return {
     sections,
+    dataSets,
   };
 }
 
 export function summarize(normalizedModel: NormalizedModel, options: AiSummarizerOptions): string {
-  const {sections} = normalizedModel;
+  const {sections, dataSets} = normalizedModel;
   if (sections.length === 0) {
     return documentSummary(
-      "This is an empty CLUE document with no content."
+      "This is an empty CLUE document with no content.",
+      dataSets
     );
   }
 
   if (sections.length === 1 && !sections[0].sectionId) {
     return documentSummary(
       "The CLUE document consists of one or more rows, with one or more tiles within each row.",
-       rowsSummary(sections[0].rows, "rowWithoutSection", options)
+      dataSets,
+      rowsSummary(sections[0].rows, "rowWithoutSection", options)
     );
   }
 
   return documentSummary(
-    // eslint-disable-next-line max-len
     "The CLUE document consists of one or more sections containing one or more rows, with one or more tiles within each row.",
+    dataSets,
     sectionsSummary(normalizedModel, options)
   );
 }
@@ -150,6 +206,8 @@ export const headingLevels = {
   tile: 4,
   rowWithoutSection: 2,
   tileWithoutSection: 3,
+  dataSets: 2,
+  dataSet: 3,
 } as const;
 export type HeadingLevel = keyof typeof headingLevels;
 
@@ -161,7 +219,7 @@ export function heading(headingLevel: HeadingLevel): string {
   return "#".repeat(level) + " ";
 }
 
-export function documentSummary(preamble: string, summary: string = ""): string {
+export function documentSummary(preamble: string, dataSets: NormalizedDataSet[], summary: string = ""): string {
   const maybeTileInfo = summary.length > 0
     ? " Tiles are either static UI elements or interactive elements " +
       "that students can use."
@@ -169,17 +227,32 @@ export function documentSummary(preamble: string, summary: string = ""): string 
   const layoutInfo = summary.length > 0
     ? "The markdown below summarizes the CLUE document's structure and content.  "
     : "";
+  const maybeDataSetInfo = summary.length > 0 && dataSets.length > 0
+    ? `  The document contains ${dataSets.length} ${pluralize(dataSets.length, "data set", "data sets")} which ${pluralize(dataSets.length, "is", "are")} listed at the end of this summary under the "Data Sets" heading.`
+    : "";
+  const dataSetSummary = summary.length > 0 && dataSets.length > 0
+    ? `\n${heading("dataSets")} Data Sets\n\n` +
+      dataSets.map((dataSet) => {
+        return `${heading("dataSet")} ${dataSet.name}\n\n` +
+          `This data set has an id of ${dataSet.id} and is used in ${dataSet.tileIds.length} ${pluralize(dataSet.tileIds.length, "tile", "tiles")} ` +
+          `and contains ${dataSet.attributes.length} ${pluralize(dataSet.attributes.length, "attribute", "attributes")} ` +
+          `(${dataSet.attributes.map(a => a.name).join(", ")}).` +
+          ` There are ${dataSet.numCases} ${pluralize(dataSet.numCases, "case", "cases")} in this data set, shown below in a Markdown table.\n\n` +
+          `${generateMarkdownTable(dataSet.attributes.map(a => a.name), dataSet.data)}\n`;
+      }).join("\n\n")
+    : "";
+
   return (
     `${heading("documentSummary")} CLUE Document Summary\n\n` +
-    `${layoutInfo}${preamble}${maybeTileInfo}\n\n` +
-    `${summary}\n`
+    `${layoutInfo}${preamble}${maybeTileInfo}${maybeDataSetInfo}\n\n` +
+    `${summary}\n` +
+    `${dataSetSummary}\n`
   );
 }
 
 export function sectionsSummary(normalizedModel: NormalizedModel, options: AiSummarizerOptions): string {
   const summaries = normalizedModel.sections.map((section, index) => {
     const maybeSectionId = section.sectionId ? ` (${section.sectionId})` : "";
-    // eslint-disable-next-line max-len
     return `${heading("section")} Section ${index + 1}${maybeSectionId}\n\n${rowsSummary(section.rows, "row", options)}`;
   });
   return summaries.join("\n\n");
@@ -197,7 +270,6 @@ export function rowsSummary(rows: INormalizedRow[], headingLevel: HeadingLevel, 
   return summaries.join("\n\n");
 }
 
-// eslint-disable-next-line max-len
 export function tilesSummary(tiles: INormalizedTile[], headingLevel: HeadingLevel, options: AiSummarizerOptions): string {
   return tiles.map((tile) => {
     const maybeTitle = tile.model.title ? ` (${tile.model.title})` : "";
@@ -237,8 +309,14 @@ export function tileSummary(tile: INormalizedTile, options: AiSummarizerOptions)
           break;
       }
 
-      // eslint-disable-next-line max-len
       result = `This tile contains the following ${textFormat} text content delimited below by a text code fence:\n\n\`\`\`text\n${result || ""}\n\`\`\``;
+      break;
+
+    case "Table":
+      result = `This tile contains a table`;
+      if (tile.sharedDataSet) {
+        result += ` which uses the "${tile.sharedDataSet.name}" (${tile.sharedDataSet.id}) data set.`;
+      }
       break;
 
     default:
@@ -248,10 +326,33 @@ export function tileSummary(tile: INormalizedTile, options: AiSummarizerOptions)
         console.error("Error generating description for tile content:", error);
         result = "An error occurred while generating the description.";
       }
-      // eslint-disable-next-line max-len
       result = `This tile contains ${type.toLowerCase()} content.\n\n${result}${options.includeModel ? `\n\n${JSON.stringify(tile)}` : ""}`;
       break;
   }
 
   return result;
+}
+
+function pluralize(length: number, singular: string, plural: string): string {
+  return length === 1 ? singular : plural;
+}
+
+function generateMarkdownTable(headers: string[], rows: string[][]): string {
+  if (headers.length === 0) {
+    return "";
+  }
+
+  const escapePipe = (text: string) => text.replace(/\|/g, "\\|");
+  const headerRow = `| ${headers.map(escapePipe).join(" | ")} |`;
+  const separatorRow = `| ${headers.map(() => "---").join(" | ")} |`;
+
+  const dataRows = rows.map(row => {
+    const paddedRow = [...row];
+    while (paddedRow.length < headers.length) {
+      paddedRow.push("");
+    }
+    return `| ${paddedRow.map(escapePipe).join(" | ")} |`;
+  });
+
+  return [headerRow, separatorRow, ...dataRows].join("\n");
 }
