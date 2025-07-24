@@ -1,21 +1,33 @@
 import classNames from "classnames";
 import React, { useEffect, useRef, useState } from "react";
 import { useUIStore } from "../../hooks/use-stores";
+import type { PostCommentFn } from "./chat-panel";
+import type { IAgreeWithAi } from "shared/shared";
+
 import SendIcon from "../../assets/send-icon.svg";
+import YesIcon from "../../assets/yes-icon.svg";
+import NoIcon from "../../assets/no-icon.svg";
+import NotSureIcon from "../../assets/not-sure-icon.svg";
+
 import "../themes.scss";
 
 interface IProps {
   activeNavTab?: string;
   numPostedComments: number;
-  onPostComment?: (comment: string, tags: string[]) => void;
+  onPostComment?: PostCommentFn;
   showCommentTag?: boolean;
   commentTags?: Record<string, string>;
   tagPrompt?: string;
+  showAgreeButtons?: boolean;
 }
 
 export const CommentTextBox: React.FC<IProps> = (props) => {
-  const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags, tagPrompt } = props;
-  const minTextAreaHeight = showCommentTag ? 100 : 35;
+  const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags, tagPrompt,
+         showAgreeButtons } = props;
+  const minTextAreaHeight =
+    showCommentTag && showAgreeButtons ? 120 :
+    showCommentTag || showAgreeButtons ? 100 :
+    35;
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [commentTextAreaHeight, setCommentTextAreaHeight] = useState(minTextAreaHeight);
   const selectElt = useRef<HTMLSelectElement>(null);
@@ -23,6 +35,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   const [commentText, setCommentText] = useState("");
    //all the AI tags pertaining to one comment - length is 1 for now
   const [allTags, setAllTags] = useState([""]);
+  const [agreeWithAi, setAgreeWithAi] = useState<IAgreeWithAi|undefined>();
   const textareaStyle = {height: commentTextAreaHeight};
 
   const commentEmptyNoTags =  (!commentAdded && !showCommentTag);
@@ -73,11 +86,12 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
     const [trimmedText, isEmpty] = trimContent(commentText);
     if (!isEmpty || (showCommentTag && allTags[0] !== "" )){
       //do not post to Firestore if select tag is tagPrompt
-      onPostComment?.(trimmedText, allTags);
+      onPostComment?.({comment: trimmedText, tags: allTags, agreeWithAi});
       setCommentTextAreaHeight(minTextAreaHeight);
       setCommentAdded(false);
       setCommentText("");
       setAllTags((oldArray) => [""]); //select will go back to top choice (tagPrompt)
+      setAgreeWithAi(undefined);
     }
   };
 
@@ -120,10 +134,25 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
     }
   };
 
+  const handleToggleAgreeWithAi = (value: IAgreeWithAi["value"]) => {
+    return () => {
+      setAgreeWithAi((prev) => {
+        if (prev?.value === value) {
+          return undefined;
+        }
+        return { version: 1, value };
+      });
+    };
+  };
+
   return (
     <div className="comment-textbox">
       <textarea
-        className={classNames({"shift-down" : showCommentTag})}
+        className={classNames({
+          "has-tags" : showCommentTag,
+          "has-agree": showAgreeButtons,
+          "has-tags-and-agree": showCommentTag && showAgreeButtons
+        })}
         ref={textareaRef}
         style={textareaStyle}
         placeholder={placeholderText}
@@ -132,10 +161,39 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
         onChange={handleCommentTextAreaChange}
         onKeyDown={handleCommentTextboxKeyDown}
       />
+      {showAgreeButtons && (
+        <div className="comment-agree">
+          <div className="comment-agree-header">Do you agree with Ada?</div>
+          <div className="comment-agree-buttons">
+            <div
+              aria-role="button"
+              title="Agree with Ada"
+              className={classNames({"selected": agreeWithAi?.value === "yes"})}
+              onClick={handleToggleAgreeWithAi("yes")}>
+              <YesIcon /> Yes
+            </div>
+            <div
+              aria-role="button"
+              title="Disagree with Ada"
+              className={classNames({"selected": agreeWithAi?.value === "no"})}
+              onClick={handleToggleAgreeWithAi("no")}>
+              <NoIcon /> No
+            </div>
+            <div
+              aria-role="button"
+              title="Not sure if you agree with Ada"
+              className={classNames({"selected": agreeWithAi?.value === "notSure"})}
+              onClick={handleToggleAgreeWithAi("notSure")}>
+              <NotSureIcon /> &hellip;?
+            </div>
+          </div>
+        </div>
+      )}
       {
         showCommentTag && commentTags &&
         <select
           ref={selectElt}
+          className={classNames({"shift-down-with-agree": showAgreeButtons})}
           data-test="comment-textbox-dropdown"
           onChange={(e) => {
             handleSelectDropDown(e.target.value);
