@@ -31,7 +31,9 @@ const {document: documentURL, readOnly, noStorage, unwrapped } = urlParams;
 const savedDocString = noStorage ? undefined : window.sessionStorage.getItem(kDocEditorDocKey);
 const initialDoc = savedDocString ? JSON.parse(savedDocString) : defaultDocumentModel;
 
-const includeModelInAiSummary = new URLSearchParams(window.location.search).get("includeModel") === "true";
+// gate the AI summary features with query parameters
+const showAiSummary = new URLSearchParams(window.location.search).get("showAiSummary") === "true";
+const includeModelInAiSummary = new URLSearchParams(window.location.search).get("includeModelInAiSummary") === "true";
 
 export const DocEditorApp = observer(function DocEditorApp() {
 
@@ -233,7 +235,7 @@ export const DocEditorApp = observer(function DocEditorApp() {
                 <button onClick={handleOpen}>open</button>
                 <button onClick={handleSave}>save</button>
                 <span className="status">{status}</span>
-                <button onClick={handleToggleAiSummary}>ai summary</button>
+                {showAiSummary && <button onClick={handleToggleAiSummary}>ai summary</button>}
                 <button onClick={handleClear}>reset doc</button>
                 <button onClick={handleSettings}>settings</button>
                 <DocumentAnnotationToolbar/>
