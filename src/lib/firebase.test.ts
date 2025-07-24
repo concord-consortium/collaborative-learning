@@ -94,7 +94,7 @@ describe("Firebase class", () => {
 
       return firebaseWithCustom.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId)
         .then(() => {
-          expect(mockRef.set).toHaveBeenCalledTimes(2); // lastEditedAt and timestamp + aiPrompt
+          expect(mockRef.set).toHaveBeenCalledTimes(2); // lastEditedAt + evaluation
           expect(mockRef.set).toHaveBeenCalledWith({
             aiPrompt: "test prompt",
             timestamp: "server-timestamp"
@@ -112,7 +112,7 @@ describe("Firebase class", () => {
       jest.spyOn(firebaseWithCustom, 'ref').mockReturnValue(mockRef as any);
 
       await firebaseWithCustom.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId);
-      expect(mockRef.set).toHaveBeenCalledTimes(1); // lastEditedAt only
+      expect(mockRef.set).toHaveBeenCalledTimes(1); // only lastEditedAt
     });
 
     it("should handle non-custom evaluation", () => {
@@ -126,7 +126,7 @@ describe("Firebase class", () => {
 
       return firebaseWithNonCustom.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId)
         .then(() => {
-          expect(mockRef.set).toHaveBeenCalledTimes(2); // lastEditedAt and timestamp
+          expect(mockRef.set).toHaveBeenCalledTimes(2); // lastEditedAt + evaluation
           expect(mockRef.set).toHaveBeenCalledWith({
             timestamp: "server-timestamp"
           });

@@ -477,6 +477,7 @@ export class Firebase {
 private updateEvaluation = (targetRef: firebase.database.Reference | firebase.database.OnDisconnect) => {
   const { aiEvaluation, aiPrompt } = this.db.stores.appConfig;
 
+  // If this unit uses "custom" evaluation, read and store the prompt strings if they're defined.
   if (aiEvaluation === "custom") {
     return aiPrompt
       ? targetRef.set({ aiPrompt, timestamp: firebase.database.ServerValue.TIMESTAMP })
