@@ -3,6 +3,10 @@ import type {  DocumentContentSnapshotType } from "src/models/document/document-
 import type { ITileModelSnapshotOut } from "src/models/tiles/tile-model";
 import { slateToMarkdown } from "./slate-to-markdown";
 import { generateTileDescription } from "./generate-tile-description";
+import ReactDOMServer from "react-dom/server";
+import React from "react";
+import { renderDrawingObject } from "../src/plugins/drawing/components/drawing-object-manager";
+import { DrawingContentModel } from "../src/plugins/drawing/model/drawing-content";
 
 export interface INormalizedTile {
   model: ITileModelSnapshotOut;
@@ -130,7 +134,6 @@ export function normalize(model: DocumentContentSnapshotType): NormalizedModel {
   }
 
   // add the data sets
-  console.log(sharedModelMap);
   if (sharedModelMap) {
     for (const [id, entry] of Object.entries(sharedModelMap)) {
       const sharedModel: any = entry.sharedModel;
@@ -319,6 +322,10 @@ export function tileSummary(tile: INormalizedTile, options: AiSummarizerOptions)
       }
       break;
 
+    case "Drawing":
+      result = `This tile contains a drawing. The drawing is rendered below in a svg code fence:\n\n\`\`\`svg\n${renderDrawing(content)}\n\`\`\``;
+      break;
+
     default:
       try {
         result = generateTileDescription(content);
@@ -355,4 +362,12 @@ function generateMarkdownTable(headers: string[], rows: string[][]): string {
   });
 
   return [headerRow, separatorRow, ...dataRows].join("\n");
+}
+
+function renderDrawing(model: any) {
+  const elements = DrawingContentModel.create(model).objects.map((o: any) => {
+    return renderDrawingObject(o);
+  });
+  const markup = ReactDOMServer.renderToStaticMarkup(React.createElement(React.Fragment, null, ...elements));
+  return `<svg xmlns:xlink="http://www.w3.org/1999/xlink">${markup}</svg>`;
 }
