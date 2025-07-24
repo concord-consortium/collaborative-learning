@@ -31,6 +31,8 @@ const {document: documentURL, readOnly, noStorage, unwrapped } = urlParams;
 const savedDocString = noStorage ? undefined : window.sessionStorage.getItem(kDocEditorDocKey);
 const initialDoc = savedDocString ? JSON.parse(savedDocString) : defaultDocumentModel;
 
+const includeModelInAiSummary = new URLSearchParams(window.location.search).get("includeModel") === "true";
+
 export const DocEditorApp = observer(function DocEditorApp() {
 
   const appConfig = useAppConfig();
@@ -177,7 +179,7 @@ export const DocEditorApp = observer(function DocEditorApp() {
     if (aiSummary) {
       setAiSummary(undefined);
     } else if (document.content) {
-      setAiSummary(aiSummarizer(getSnapshot(document.content)));
+      setAiSummary(aiSummarizer(getSnapshot(document.content), {includeModel: includeModelInAiSummary}));
     }
   }
 

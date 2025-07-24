@@ -31,7 +31,6 @@ export const AiSummary = observer(function AiSummary({ summary, toggleAiSummary 
         <div>
           <button onClick={handleCopy}>Copy</button>
           <button onClick={handleClose}>X</button>
-
         </div>
       </div>
       <div className="content">

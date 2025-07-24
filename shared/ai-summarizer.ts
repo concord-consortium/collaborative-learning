@@ -1,7 +1,7 @@
 import type {  DocumentContentSnapshotType } from "src/models/document/document-content";
 import type { ITileModelSnapshotOut } from "src/models/tiles/tile-model";
 import { slateToMarkdown } from "./slate-to-markdown";
-import { jsonToMarkdownWithDescriptions } from "./json-to-markdown";
+import { generateTileDescription } from "./generate-tile-description";
 
 export interface INormalizedTile {
   model: ITileModelSnapshotOut;
@@ -22,11 +22,15 @@ export interface NormalizedModel {
   sections: NormalizedSection[];
 }
 
-export default function aiSummarizer(content: any): string {
+export interface AiSummarizerOptions {
+  includeModel: boolean
+}
+
+export default function aiSummarizer(content: any, options: AiSummarizerOptions): string {
   const stringContent = stringifyContent(content);
   const parsedContent = parseContent(stringContent);
   const normalizedModel = normalize(parsedContent);
-  const summarizedContent = summarize(normalizedModel);
+  const summarizedContent = summarize(normalizedModel, options);
   return summarizedContent;
 }
 
@@ -117,7 +121,7 @@ export function normalize(model: DocumentContentSnapshotType): NormalizedModel {
   };
 }
 
-export function summarize(normalizedModel: NormalizedModel): string {
+export function summarize(normalizedModel: NormalizedModel, options: AiSummarizerOptions): string {
   const {sections} = normalizedModel;
   if (sections.length === 0) {
     return documentSummary(
@@ -128,14 +132,14 @@ export function summarize(normalizedModel: NormalizedModel): string {
   if (sections.length === 1 && !sections[0].sectionId) {
     return documentSummary(
       "The CLUE document consists of one or more rows, with one or more tiles within each row.",
-       rowsSummary(sections[0].rows, "rowWithoutSection")
+       rowsSummary(sections[0].rows, "rowWithoutSection", options)
     );
   }
 
   return documentSummary(
     // eslint-disable-next-line max-len
     "The CLUE document consists of one or more sections containing one or more rows, with one or more tiles within each row.",
-    sectionsSummary(normalizedModel)
+    sectionsSummary(normalizedModel, options)
   );
 }
 
@@ -172,30 +176,36 @@ export function documentSummary(preamble: string, summary: string = ""): string 
   );
 }
 
-export function sectionsSummary(normalizedModel: NormalizedModel): string {
+export function sectionsSummary(normalizedModel: NormalizedModel, options: AiSummarizerOptions): string {
   const summaries = normalizedModel.sections.map((section, index) => {
     const maybeSectionId = section.sectionId ? ` (${section.sectionId})` : "";
-    return `${heading("section")} Section ${index + 1}${maybeSectionId}\n\n${rowsSummary(section.rows, "row")}`;
+    // eslint-disable-next-line max-len
+    return `${heading("section")} Section ${index + 1}${maybeSectionId}\n\n${rowsSummary(section.rows, "row", options)}`;
   });
   return summaries.join("\n\n");
 }
 
-export function rowsSummary(rows: INormalizedRow[], headingLevel: HeadingLevel): string {
+export function rowsSummary(rows: INormalizedRow[], headingLevel: HeadingLevel, options: AiSummarizerOptions): string {
   const summaries = rows.map((row) => {
-    const tileSummaries = tilesSummary(row.tiles, headingLevel === "rowWithoutSection" ? "tileWithoutSection" : "tile");
+    const tileSummaries = tilesSummary(
+      row.tiles,
+      headingLevel === "rowWithoutSection" ? "tileWithoutSection" : "tile",
+      options
+    );
     return `${heading(headingLevel)} Row ${row.number}\n\n${tileSummaries}`;
   });
   return summaries.join("\n\n");
 }
 
-export function tilesSummary(tiles: INormalizedTile[], headingLevel: HeadingLevel): string {
+// eslint-disable-next-line max-len
+export function tilesSummary(tiles: INormalizedTile[], headingLevel: HeadingLevel, options: AiSummarizerOptions): string {
   return tiles.map((tile) => {
     const maybeTitle = tile.model.title ? ` (${tile.model.title})` : "";
-    return `${heading(headingLevel)} Tile ${tile.number}${maybeTitle}\n\n${tileSummary(tile)}`;
+    return `${heading(headingLevel)} Tile ${tile.number}${maybeTitle}\n\n${tileSummary(tile, options)}`;
   }).join("\n\n");
 }
 
-export function tileSummary(tile: INormalizedTile): string {
+export function tileSummary(tile: INormalizedTile, options: AiSummarizerOptions): string {
   const content: any = tile.model.content;
   const {type} = content;
   let result: any = "(no content available)";
@@ -232,9 +242,14 @@ export function tileSummary(tile: INormalizedTile): string {
       break;
 
     default:
-      result = jsonToMarkdownWithDescriptions(content);
+      try {
+        result = generateTileDescription(content);
+      } catch (error) {
+        console.error("Error generating description for tile content:", error);
+        result = "An error occurred while generating the description.";
+      }
       // eslint-disable-next-line max-len
-      result = `This tile contains ${type.toLowerCase()} content.\n\n${result.description}\n\n${JSON.stringify(tile)}`;
+      result = `This tile contains ${type.toLowerCase()} content.\n\n${result}${options.includeModel ? `\n\n${JSON.stringify(tile)}` : ""}`;
       break;
   }
 
