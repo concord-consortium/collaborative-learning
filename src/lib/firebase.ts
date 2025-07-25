@@ -215,7 +215,7 @@ export class Firebase {
     if (evaluation) {
       const evaluationRef = this.ref(evaluation);
       const evaluationOnDisconnect = evaluationRef.onDisconnect();
-      evaluationOnDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
+      this.updateEvaluation(evaluationOnDisconnect);
       onDisconnects.push(evaluationOnDisconnect);
     }
     return onDisconnects;
@@ -227,31 +227,22 @@ export class Firebase {
    */
   public setLastEditedNow(user: UserModelType, documentKey: string, userId: string|undefined,
       onDisconnects?: firebase.database.OnDisconnect[]) {
+
     if (onDisconnects) {
       onDisconnects.forEach((onDisconnect) => {
         onDisconnect.cancel();
       });
     }
+
     const promises: Promise<any>[] = [];
     promises.push(this.ref(this.getLastEditedMetadataPath(user, documentKey, userId))
       .set(firebase.database.ServerValue.TIMESTAMP));
     const evaluation = this.getEvaluationMetadataPath(user, documentKey, userId);
     if (evaluation) {
-      // If this unit uses "custom" evaluation, read and store the prompt strings
-      if (this.db.stores.appConfig.aiEvaluation === "custom") {
-        const aiPrompt = this.db.stores.appConfig.aiPrompt;
-        if (aiPrompt) {
-          promises.push(this.ref(evaluation).set({
-            aiPrompt,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-          }));
-        }
-      } else {
-        promises.push(this.ref(evaluation).set({
-          timestamp: firebase.database.ServerValue.TIMESTAMP
-        }));
-      }
+      const updatePromise = this.updateEvaluation(this.ref(evaluation));
+      updatePromise && promises.push(updatePromise);
     }
+
     return Promise.all(promises);
   }
 
@@ -482,5 +473,18 @@ export class Firebase {
       this.db.stores.user.setIsFirebaseConnected(connected);
     }
   };
+
+private updateEvaluation = (targetRef: firebase.database.Reference | firebase.database.OnDisconnect) => {
+  const { aiEvaluation, aiPrompt } = this.db.stores.appConfig;
+
+  // If this unit uses "custom" evaluation, read and store the prompt strings if they're defined.
+  if (aiEvaluation === "custom") {
+    return aiPrompt
+      ? targetRef.set({ aiPrompt, timestamp: firebase.database.ServerValue.TIMESTAMP })
+      : undefined;
+  }
+
+  return targetRef.set({ timestamp: firebase.database.ServerValue.TIMESTAMP });
+};
 
 }
