@@ -3,12 +3,12 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
-import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { useCurriculumOrDocumentContent, useUIStore } from "../../hooks/use-stores";
 import { CommentCard } from "./comment-card";
 import {ChatCommentThread} from "./chat-comment-thread";
 import { TileIconComponent } from "./tile-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
+
 
 import "./chat-thread.scss";
 
@@ -78,7 +78,6 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
           const title = commentThread.title || '';
           const numComments = commentThread.comments.length;
           const shouldBeFocused = commentThread.tileId === focusId;
-          const Icon = commentThread.tileType && getTileComponentInfo(commentThread.tileType)?.Icon;
           const key= commentThread.tileId || "document";
           return (
             <div key={key}
@@ -93,9 +92,9 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
                 onClick={() => handleThreadClick(key)}
               >
                 <div className="chat-thread-tile-info">
-                {Icon && (
-                    <Icon data-testid="chat-thread-tile-type"/>
-                )}
+                  <div className="chat-thread-tile-type" data-testid="chat-thread-tile-type">
+                    <TileIconComponent documentKey={focusDocument} tileId={commentThread.tileId || undefined}/>
+                  </div>
                   <div className="chat-thread-title"> {title} </div>
                 </div>
                 <div className="chat-thread-comment-info">
@@ -131,7 +130,7 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
             <div className="chat-thread-tile-info">
               <div className="comment-card-header comment-select" data-testid="comment-card-header">
                 <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
-                  <div data-testid="chat-thread-tile-type">
+                  <div className="chat-thread-tile-type" data-testid="chat-thread-tile-type">
                     <TileIconComponent documentKey={focusDocument} tileId={focusTileId}/>
                   </div>
                 </div>

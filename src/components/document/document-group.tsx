@@ -113,7 +113,7 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
     <div key={documentGroup.label} className="doc-group" data-testid="doc-group">
       {!isUnsorted &&
         <div className="doc-group-label" data-testid="doc-group-label">
-          {documentGroup.icon ? <documentGroup.icon/> : null}{documentGroup.label}
+          {documentGroup.icon ? <documentGroup.icon className="tool-icon"/> : null}{documentGroup.label}
         </div>
       }
       {visibleCount < docCount && renderScrollButton("left", leftArrowDisabled)}

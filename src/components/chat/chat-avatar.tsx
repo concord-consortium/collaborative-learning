@@ -1,10 +1,11 @@
 import React from "react";
-import StudentAvatar from "../../assets/student-avatar.svg";
-import TeacherAvatar from "../../assets/teacher-avatar.svg";
-import AdaAvatar from "../../assets/ada-avatar.svg";
 import classNames from "classnames";
 import { useStores } from "../../hooks/use-stores";
 import { kAnalyzerUserParams, kExemplarUserParams } from "../../../shared/shared";
+
+import StudentAvatar from "../../assets/student-avatar.svg";
+import TeacherAvatar from "../../assets/teacher-avatar.svg";
+import AdaAvatar from "../../assets/ada-avatar.svg";
 
 interface IChatAvatarProps {
   uid: string;
@@ -20,16 +21,16 @@ const ChatAvatar: React.FC<IChatAvatarProps> = ({ uid, isMe, pulse }) => {
   const user = classStore.getUserById(uid);
   const isAda = uid === kAnalyzerUserParams.id;
   const isIvan = uid === kExemplarUserParams.id;
-  const isTeacher = isAda || user?.type === "teacher" || user?.type === "researcher";
+  const isTeacherOrResearcher = isAda || user?.type === "teacher" || user?.type === "researcher";
   const Image = isAda ? AdaAvatar
-    : isTeacher ? TeacherAvatar : StudentAvatar;
-  const round = !isTeacher;
+    : isTeacherOrResearcher ? TeacherAvatar : StudentAvatar;
+  const round = !isTeacherOrResearcher;
 
   const classes = classNames("user-icon", {
     pulse,
     round,
-    me: isMe && !isTeacher,
-    teacher: isTeacher,
+    me: isMe && !isTeacherOrResearcher,
+    teacher: isTeacherOrResearcher,
     ada: isAda,
     ivan: isIvan
   });
