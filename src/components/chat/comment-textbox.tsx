@@ -162,28 +162,31 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
         onKeyDown={handleCommentTextboxKeyDown}
       />
       {showAgreeButtons && (
-        <div className="comment-agree">
-          <div className="comment-agree-header">Do you agree with Ada?</div>
-          <div className="comment-agree-buttons">
+        <div className="comment-agree" data-testid="comment-agree">
+          <div className="comment-agree-header" data-testid="comment-agree-header">Do you agree with Ada?</div>
+          <div className="comment-agree-buttons" data-testid="comment-agree-buttons">
             <div
               aria-role="button"
               title="Agree with Ada"
               className={classNames({"selected": agreeWithAi?.value === "yes"})}
-              onClick={handleToggleAgreeWithAi("yes")}>
+              onClick={handleToggleAgreeWithAi("yes")}
+              data-testid="comment-agree-yes-button">
               <YesIcon /> Yes
             </div>
             <div
               aria-role="button"
               title="Disagree with Ada"
               className={classNames({"selected": agreeWithAi?.value === "no"})}
-              onClick={handleToggleAgreeWithAi("no")}>
+              onClick={handleToggleAgreeWithAi("no")}
+              data-testid="comment-agree-no-button">
               <NoIcon /> No
             </div>
             <div
               aria-role="button"
               title="Not sure if you agree with Ada"
               className={classNames({"selected": agreeWithAi?.value === "notSure"})}
-              onClick={handleToggleAgreeWithAi("notSure")}>
+              onClick={handleToggleAgreeWithAi("notSure")}
+              data-testid="comment-agree-not-sure-button">
               <NotSureIcon /> &hellip;?
             </div>
           </div>

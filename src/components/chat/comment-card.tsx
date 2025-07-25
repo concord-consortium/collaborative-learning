@@ -107,19 +107,19 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   const renderAgreeWithAi = (comment: WithId<CommentDocument>) => {
     // agreeWithAi is an optional field, so we need to handle cases where it might be undefined/null
     const { value } = comment.agreeWithAi ?? { value: null };
-    const messages: Record<IAgreeWithAi["value"], {text: string, icon: JSX.Element}> = {
-      yes: {text: "Yes, I agree with Ada!", icon: <YesIcon />},
-      no: {text: "No, I disagree with Ada.", icon: <NoIcon />},
-      notSure: {text: "Not sure I agree with Ada.", icon: <NotSureIcon />},
+    const messages: Record<IAgreeWithAi["value"], {text: string, icon: JSX.Element, testId: string}> = {
+      yes: {text: "Yes, I agree with Ada!", icon: <YesIcon />, testId: "comment-agree-message-yes"},
+      no: {text: "No, I disagree with Ada.", icon: <NoIcon />, testId: "comment-agree-message-no"},
+      notSure: {text: "Not sure I agree with Ada.", icon: <NotSureIcon />, testId: "comment-agree-message-not-sure"},
     };
     const message = value && messages[value as IAgreeWithAi["value"]];
     if (!message) {
       return null; // no agree with AI message to display
     }
     return (
-      <div className="comment-agree-message">
-        <div className="comment-agree-icon">{message.icon}</div>
-        <div>{message.text}</div>
+      <div className="comment-agree-message" data-testid="comment-agree-message">
+        <div className="comment-agree-icon" data-testid="comment-agree-icon">{message.icon}</div>
+        <div data-testid={message.testId}>{message.text}</div>
       </div>
     );
   };
