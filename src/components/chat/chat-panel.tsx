@@ -192,6 +192,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
           onDeleteComment={deleteComment}
           chatThreads={commentThreads}
           focusDocument={focusDocument}
+          docTitle={docTitle}
           focusTileId={focusTileId}
           isDocumentView={isDocumentView}
         />
