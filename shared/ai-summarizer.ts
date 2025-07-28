@@ -1,4 +1,17 @@
 /* eslint-disable max-len */
+
+/*
+
+NOTE: This is spike work to:
+
+  a) see if we could generate a useful text description
+  b) to get some output to test against openai and various local models.
+
+This code is not bullet proof and only handles a few tile types but it
+is "hidden" behind a query parameter in the editor so it won't be exposed to end users.
+
+*/
+
 import type {  DocumentContentSnapshotType } from "src/models/document/document-content";
 import type { ITileModelSnapshotOut } from "src/models/tiles/tile-model";
 import { slateToMarkdown } from "./slate-to-markdown";
@@ -40,7 +53,7 @@ export interface NormalizedModel {
 }
 
 export interface AiSummarizerOptions {
-  includeModel: boolean
+  includeModel?: boolean
 }
 
 export default function aiSummarizer(content: any, options: AiSummarizerOptions): string {

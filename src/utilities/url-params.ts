@@ -113,6 +113,10 @@ export interface QueryParams {
   unwrapped?: boolean
   // Don't load or save the document from browser storage
   noStorage?: boolean
+  // Show the "ai summary" button in the document editor
+  showAiSummary?: boolean;
+  // Include the model in the AI summary
+  includeModelInAiSummary?: boolean;
 
   //
   // Standalone options

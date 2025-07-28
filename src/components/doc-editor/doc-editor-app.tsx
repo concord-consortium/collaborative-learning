@@ -27,13 +27,9 @@ const kDocEditorDocKey = "clue-doc-editor-doc";
 // These are defined at the module level so the initialDoc can be used in two useState
 // initializers. The initialDoc should only change when the page is loaded so this is
 // safe.
-const {document: documentURL, readOnly, noStorage, unwrapped } = urlParams;
+const {document: documentURL, readOnly, noStorage, unwrapped, showAiSummary, includeModelInAiSummary } = urlParams;
 const savedDocString = noStorage ? undefined : window.sessionStorage.getItem(kDocEditorDocKey);
 const initialDoc = savedDocString ? JSON.parse(savedDocString) : defaultDocumentModel;
-
-// gate the AI summary features with query parameters
-const showAiSummary = new URLSearchParams(window.location.search).get("showAiSummary") === "true";
-const includeModelInAiSummary = new URLSearchParams(window.location.search).get("includeModelInAiSummary") === "true";
 
 export const DocEditorApp = observer(function DocEditorApp() {
 
