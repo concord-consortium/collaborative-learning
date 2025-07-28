@@ -13,13 +13,26 @@ import { useAppConfig, useCurriculumOrDocumentContent, useDBStore,
   useDocumentFromStore,
   useDocumentOrCurriculumMetadata, useStores } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
-import { getSimpleDocumentPath } from "../../../shared/shared";
+import { getSimpleDocumentPath, IClientCommentParams } from "../../../shared/shared";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { AppConfigModelType } from "../../models/stores/app-config-model";
 import { UnitModelType } from "../../models/curriculum/unit";
 import { DocumentModelType } from "../../models/document/document";
 
 import "./chat-panel.scss";
+
+interface IPostCommentOptions {
+  comment: IClientCommentParams["content"];
+  tags?: IClientCommentParams["tags"];
+  agreeWithAi?: IClientCommentParams["agreeWithAi"];
+}
+export type PostCommentFn = (options: IPostCommentOptions) => void;
+
+interface IDeleteCommentOptions {
+  commentId: string;
+  commentText: string;
+}
+export type DeleteCommentFn = (options: IDeleteCommentOptions) => Promise<void>;
 
 interface IProps {
   user?: UserModelType;
@@ -61,7 +74,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const postCommentMutation = usePostDocumentComment();
   const firestore = useFirestore();
 
-  const postComment = useCallback((comment: string, tags?: string[]) => {
+  const postComment = useCallback(({ comment, tags, agreeWithAi }: IPostCommentOptions) => {
     if (focusDocument) {
       const numComments = postedComments ? postedComments.length : 0;
       const focusDocumentId = focusDocument;
@@ -71,13 +84,14 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         isFirst: (numComments < 1),
         commentText: comment,
         action: "add",
-        tags
+        tags,
+        agreeWithAi
       };
       logCommentEvent(eventPayload);
     }
     return documentMetadata
       ? postCommentMutation.mutate(
-        { document: documentMetadata, comment: { content: comment, tileId: focusTileId, tags } })
+        { document: documentMetadata, comment: { content: comment, tileId: focusTileId, tags, agreeWithAi } })
       : undefined;
   }, [documentMetadata, focusDocument, focusTileId, postCommentMutation, postedComments]);
 
@@ -85,7 +99,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   // the "Document" in "useDeleteDocument" refers to a Firestore document (not a CLUE document)
   const deleteCommentMutation = useDeleteDocument();
 
-  const deleteComment = useCallback(async (commentId: string, commentText: string) => {
+  const deleteComment = useCallback(async ({ commentId, commentText }: IDeleteCommentOptions) => {
     if (focusDocument) {
       const eventPayload: ILogComment = {
         focusDocumentId: focusDocument,

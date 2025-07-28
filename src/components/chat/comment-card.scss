@@ -134,6 +134,19 @@ $user-icon-teacher-ada-border:       #949494;
       }
     }
 
+    .comment-agree-message {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 5px;
+
+      .comment-agree-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
     .comment-dropdown-tag {
       width: 80%;
       height: 25px;
@@ -174,8 +187,14 @@ $user-icon-teacher-ada-border:       #949494;
       font-size: 14px;
       font-family: Lato;
 
-      &.shift-down {
-        padding-top: 28px; //place under dropDownMenu
+      &.has-tags {
+        padding-top: 32px;
+      }
+      &.has-agree {
+        padding-top: 52px;
+      }
+      &.has-tags-and-agree {
+        padding-top: 84px;
       }
 
       &::placeholder {
@@ -184,10 +203,46 @@ $user-icon-teacher-ada-border:       #949494;
       }
     }
 
+    .comment-agree {
+      position: absolute;
+      left: 4px;
+      top: 5px;
+      height: 48px;
+
+      .comment-agree-header {
+        font-style: italic;
+      }
+
+      .comment-agree-buttons {
+        display: flex;
+        flex-direction: row;
+
+        div {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 4px 4px 0 0;
+          width: 56px;
+          height: 26px;
+          border-radius: 5px;
+          border: solid 1.5px $charcoal-light-1;
+          &:hover, &.selected:hover {
+            background-color: $charcoal-light-4;
+          }
+          &:active, &.selected {
+            background-color: $charcoal-light-3;
+          }
+        }
+      }
+    }
+
     select { //drop down menu of tagged options
       position: absolute;
       left: 0px;
       top: 5px;
+      &.shift-down-with-agree {
+        top: 58px; //place under agreeWithAi
+      }
       height: 26px;
       margin: 1px 4px 6px;
       width: calc(100% - 30px);

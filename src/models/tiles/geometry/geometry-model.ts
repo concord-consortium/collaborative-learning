@@ -6,7 +6,7 @@ import { typeField } from "../../../utilities/mst-utils";
 import { ELabelOption, JXGPositionProperty } from "./jxg-changes";
 import { kGeometryDefaultPixelsPerUnit } from "./jxg-types";
 import { findLeastUsedNumber } from "../../../utilities/math-utils";
-import { clueDataColorInfo } from "../../../utilities/color-utils";
+import { clueBasicDataColorInfo } from "../../../utilities/color-utils";
 import { NavigatableTileModel } from "../navigatable-tile-model";
 
 export interface IDependsUponResult {
@@ -486,7 +486,7 @@ export const GeometryBaseContentModel = NavigatableTileModel
       if (self.linkedAttributeColors.get(id)) {
         return self.linkedAttributeColors.get(id);
       }
-      const color = findLeastUsedNumber(clueDataColorInfo.length, self.linkedAttributeColors.values());
+      const color = findLeastUsedNumber(clueBasicDataColorInfo.length, self.linkedAttributeColors.values());
       self.linkedAttributeColors.set(id, color);
       return color;
     },
