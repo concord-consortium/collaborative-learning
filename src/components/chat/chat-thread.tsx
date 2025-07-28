@@ -9,6 +9,7 @@ import { CommentCard } from "./comment-card";
 import {ChatCommentThread} from "./chat-comment-thread";
 import { TileIconComponent } from "./tile-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
+import type { PostCommentFn, DeleteCommentFn } from "./chat-panel";
 
 import "./chat-thread.scss";
 
@@ -16,8 +17,8 @@ interface IProps {
   user?: UserModelType;
   activeNavTab?: string;
   chatThreads?: ChatCommentThread[];
-  onPostComment?: (comment: string, tags: string[]) => void;
-  onDeleteComment?: (commentId: string, commentContent: string) => void;
+  onPostComment?: PostCommentFn;
+  onDeleteComment?: DeleteCommentFn;
   focusDocument?: string;
   focusTileId?: string;
   isDocumentView?: boolean;
