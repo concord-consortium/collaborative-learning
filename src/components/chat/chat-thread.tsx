@@ -26,7 +26,7 @@ interface IProps {
 }
 
 interface ChatThreadItemProps {
-  id: string;
+  threadId: string; // either a tileId or "document"
   user?: UserModelType;
   activeNavTab?: string;
   onPostComment?: PostCommentFn;
@@ -41,7 +41,7 @@ interface ChatThreadItemProps {
 }
 
 const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
-  id,
+  threadId,
   user,
   activeNavTab,
   onPostComment,
@@ -60,7 +60,7 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
   const tileId = commentThread?.tileId || focusTileId;
 
   return (
-    <div key={id}
+    <div key={threadId}
       className={classNames("chat-thread", {
         "chat-thread-focused": isFocused,
       }, `${tileId ? "chat-thread-tile" : "chat-thread-document"}`
@@ -69,7 +69,7 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
       <div className={classNames(`chat-thread-header ${activeNavTab}`,
         { "selected": isFocused })}
         data-testid="chat-thread-header"
-        onClick={() => onThreadClick(id)}
+        onClick={() => onThreadClick(threadId)}
       >
         <div className="chat-thread-tile-info">
           <div className="chat-thread-tile-type" data-testid="chat-thread-tile-type">
@@ -80,13 +80,13 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
         <div className="chat-thread-comment-info">
           <div className="chat-thread-num">{numComments}</div>
           <ChatThreadToggle
-            isThreadExpanded={expandedThread === id}
+            isThreadExpanded={expandedThread === threadId}
             activeNavTab={activeNavTab}
           />
         </div>
       </div>
       {
-        expandedThread === id &&
+        expandedThread === threadId &&
         <CommentCard
           user={user}
           activeNavTab={activeNavTab}
@@ -169,7 +169,7 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
           return (
             <ChatThreadItem
               key={id}
-              id={id}
+              threadId={id}
               user={user}
               activeNavTab={activeNavTab}
               onPostComment={onPostComment}
@@ -187,7 +187,7 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       {focusedItemHasNoComments && !isDocumentView &&
         <ChatThreadItem
           key={focusId ? focusId : "document"}
-          id={focusId ? focusId : "document"}
+          threadId={focusId ? focusId : "document"}
           user={user}
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}

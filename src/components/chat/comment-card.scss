@@ -226,6 +226,8 @@ $user-icon-teacher-ada-border:       #949494;
           height: 26px;
           border-radius: 5px;
           border: solid 1.5px $charcoal-light-1;
+          cursor: pointer;
+
           &:hover, &.selected:hover {
             background-color: $charcoal-light-4;
           }
@@ -270,49 +272,56 @@ $user-icon-teacher-ada-border:       #949494;
         height: 26px;
         border-radius: 5px;
         border: solid 1.5px $charcoal-light-1;
+        cursor: pointer;
+
+        &.disabled {
+          opacity: 0.35;
+          cursor: default;
+        }
+
         &.cancel {
           background-color: white;
           color: $charcoal-dark-2;
-          &:hover {
+          &:not(.disabled):hover {
             background-color: $charcoal-light-4;
           }
-          &:active {
+          &:not(.disabled):active {
             background-color: $charcoal-light-3;
           }
         }
         &.problems {
           background-color: $problem-orange-light-5;
-          &:hover {
+          &:not(.disabled):hover {
             background-color: $problem-orange-light-4;
           }
-          &:active {
+          &:not(.disabled):active {
             background-color: $problem-orange;
           }
         }
         &.sort-work, &.class-work {
           background-color: $classwork-purple-light-7;
-          &:hover {
+          &:not(.disabled):hover {
             background-color: $classwork-purple-light-4;
           }
-          &:active {
+          &:not(.disabled):active {
             background-color: $classwork-purple-dark-1;
           }
         }
         &.my-work {
           background-color: $workspace-teal-light-4;
-          &:hover {
+          &:not(.disabled):hover {
             background-color: $workspace-teal-light-3;
           }
-          &:active {
+          &:not(.disabled):active {
             background-color: $workspace-teal-dark-1;
           }
         }
         &.student-work {
           background-color: $charcoal-light-4;
-          &:hover {
+          &:not(.disabled):hover {
             background-color: $charcoal-light-3;
           }
-          &:active {
+          &:not(.disabled):active {
             background-color: $charcoal-dark-1;
           }
         }
