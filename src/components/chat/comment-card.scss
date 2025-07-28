@@ -225,8 +225,11 @@ $user-icon-teacher-ada-border:       #949494;
           height: 26px;
           border-radius: 5px;
           border: solid 1.5px $charcoal-light-1;
-          &:hover, &:active, &.selected {
+          &:hover, &.selected:hover {
             background-color: $charcoal-light-4;
+          }
+          &:active, &.selected {
+            background-color: $charcoal-light-3;
           }
         }
       }

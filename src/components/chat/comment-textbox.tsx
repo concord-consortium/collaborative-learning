@@ -166,7 +166,8 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
           <div className="comment-agree-header" data-testid="comment-agree-header">Do you agree with Ada?</div>
           <div className="comment-agree-buttons" data-testid="comment-agree-buttons">
             <div
-              aria-role="button"
+              role="button"
+              aria-label="Yes"
               title="Agree with Ada"
               className={classNames({"selected": agreeWithAi?.value === "yes"})}
               onClick={handleToggleAgreeWithAi("yes")}
@@ -174,7 +175,8 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
               <YesIcon /> Yes
             </div>
             <div
-              aria-role="button"
+              role="button"
+              aria-label="No"
               title="Disagree with Ada"
               className={classNames({"selected": agreeWithAi?.value === "no"})}
               onClick={handleToggleAgreeWithAi("no")}
@@ -182,7 +184,8 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
               <NoIcon /> No
             </div>
             <div
-              aria-role="button"
+              role="button"
+              aria-label="Not Sure"
               title="Not sure if you agree with Ada"
               className={classNames({"selected": agreeWithAi?.value === "notSure"})}
               onClick={handleToggleAgreeWithAi("notSure")}
