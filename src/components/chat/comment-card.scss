@@ -148,7 +148,7 @@ $user-icon-teacher-ada-border:       #949494;
     }
 
     .comment-dropdown-tag {
-      width: 80%;
+      width: calc(100% - 8px);
       height: 25px;
       border-radius: 75px 75px;
       display: flex;
@@ -181,20 +181,20 @@ $user-icon-teacher-ada-border:       #949494;
       border-color: Transparent;
       overflow: hidden;
       resize: none;
-      margin: 2px;
       width: calc(100% - 5px);
       box-sizing: border-box;
       font-size: 14px;
       font-family: Lato;
+      padding: 10px;
 
       &.has-tags {
-        padding-top: 32px;
+        padding-top: 36px;
       }
       &.has-agree {
-        padding-top: 52px;
+        padding-top: 56px;
       }
       &.has-tags-and-agree {
-        padding-top: 84px;
+        padding-top: 88px;
       }
 
       &::placeholder {
@@ -247,7 +247,7 @@ $user-icon-teacher-ada-border:       #949494;
       }
       height: 26px;
       margin: 1px 4px 6px;
-      width: calc(100% - 30px);
+      width: calc(100% - 8px);
       font-family: Lato;
       border: solid 1.5px $charcoal-light-1;
       border-radius: 5px;
