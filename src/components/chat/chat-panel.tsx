@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState} from "react";
+import classNames from "classnames";
 import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
@@ -168,10 +169,13 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     :
     "Open a document to begin or view comment threads";
 
+  const theme = isDocumentView ? "student-work" : activeNavTab;
+  const chatPanelClass = classNames("chat-panel", theme);
+
   return (
-    <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
+    <div className={chatPanelClass} data-testid="chat-panel">
       <ChatPanelHeader
-        activeNavTab={activeNavTab}
+        theme={theme}
         newCommentCount={newCommentCount}
         onCloseChatPanel={onCloseChatPanel}
         handleDocView={handleDocumentClick}
