@@ -31,17 +31,29 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [commentTextAreaHeight, setCommentTextAreaHeight] = useState(minTextAreaHeight);
   const selectElt = useRef<HTMLSelectElement>(null);
-  const [commentAdded, setCommentAdded] = useState(false);
   const [commentText, setCommentText] = useState("");
    //all the AI tags pertaining to one comment - length is 1 for now
   const [allTags, setAllTags] = useState([""]);
   const [agreeWithAi, setAgreeWithAi] = useState<IAgreeWithAi|undefined>();
   const textareaStyle = {height: commentTextAreaHeight};
 
-  const commentEmptyNoTags =  (!commentAdded && !showCommentTag);
-  const postButtonClass = classNames("comment-footer-button", "themed-negative", activeNavTab,
+  const trimContent = (content: string) => {
+    const trimmed = content.trim().replace(/\s+\n/g, "\n");
+    const isEmpty = !trimmed || (trimmed === "\n") || (trimmed === " ");
+    return [trimmed, isEmpty] as const;
+  };
+
+  const hasContentToPost = () => {
+    const [, isEmpty] = trimContent(commentText);
+    return !isEmpty || (showCommentTag && allTags[0] !== "");
+  };
+
+  const commentEmptyNoTags = !hasContentToPost();
+  const postButtonClass = classNames("comment-footer-button", "post","themed", activeNavTab,
                                       { disabled: commentEmptyNoTags,
                                       "no-action": commentEmptyNoTags });
+  const cancelButtonClass = classNames("comment-footer-button", "cancel",
+    { disabled: commentEmptyNoTags, "no-action": commentEmptyNoTags });
 
   const ui = useUIStore();
 
@@ -55,29 +67,20 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
     }
   });
 
-  const trimContent = (content: string) => {
-    const trimmed = content.trim().replace(/\s+\n/g, "\n");
-    const isEmpty = !trimmed || (trimmed === "\n") || (trimmed === " ");
-    return [trimmed, isEmpty] as const;
-  };
-
   const handleCommentTextAreaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const target = event.target;
     const targetText = target.value;
     if (!targetText) {
       setCommentTextAreaHeight(minTextAreaHeight);
-      setCommentAdded(false);
       setCommentText("");
     } else {
       setCommentTextAreaHeight(target.scrollHeight);
-      setCommentAdded(true);
       setCommentText(targetText);
     }
   };
 
   const resetInputs = () => {
     setCommentTextAreaHeight(minTextAreaHeight);
-    setCommentAdded(false);
     setCommentText("");
     setAllTags((oldArray) => [""]); //select will go back to top choice (tagPrompt)
     setAgreeWithAi(undefined);
@@ -89,8 +92,8 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
 
   const handlePostComment = () => {
     // do not send post if text area is empty, only has spaces or new lines
-    const [trimmedText, isEmpty] = trimContent(commentText);
-    if (!isEmpty || (showCommentTag && allTags[0] !== "" )){
+    if (hasContentToPost()){
+      const [trimmedText] = trimContent(commentText);
       //do not post to Firestore if select tag is tagPrompt
       onPostComment?.({comment: trimmedText, tags: allTags, agreeWithAi});
       resetInputs();
@@ -98,7 +101,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   };
 
   const handleCommentTextboxKeyDown = (event: React.KeyboardEvent) => {
-    const [trimmedText, isEmpty] = trimContent(commentText);
+    const [trimmedText] = trimContent(commentText);
     switch(event.key) {
       case "Escape":
         resetInputs();
@@ -107,7 +110,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
         if(event.shiftKey) {
           event.preventDefault();
           setCommentText(trimmedText+"\n");
-        } else if (isEmpty) {
+        } else if (!hasContentToPost()) {
           // do not send post if text area is empty, only has spaces or new lines
           event.preventDefault();
           break;
@@ -222,19 +225,19 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
       }
 
       <div className="comment-textbox-footer">
-        <div className="comment-footer-button cancel"
+        <button className={cancelButtonClass}
               onClick={handleCancelPost}
               data-testid="comment-cancel-button">
           Cancel
-        </div>
-        <div
+        </button>
+        <button
           className={postButtonClass}
           onClick={handlePostComment}
           data-testid="comment-post-button"
         >
           <SendIcon />
           Post
-        </div>
+        </button>
       </div>
     </div>
   );

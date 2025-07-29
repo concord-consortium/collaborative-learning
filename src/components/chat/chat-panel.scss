@@ -3,6 +3,7 @@
 .chat-panel {
   width: 36%;
   border-style: solid;
+  border-width: 2px;
   border-radius: 0 8px 0 0;
   height: 100%;
   background-color: white;
@@ -21,14 +22,14 @@
   &.my-work {
     border-color: $workspace-teal;
   }
-  &.class-work {
+  &.class-work, &.sort-work {
     border-color: $classwork-purple;
   }
   &.supports {
     border-color: $support-blue;
   }
   &.student-work {
-    border-color: $charcoal-dark-1;
+    border-color: $charcoal-light-1;
   }
 
   .select-doc-message {

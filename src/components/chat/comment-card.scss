@@ -124,11 +124,12 @@ $user-icon-teacher-ada-border:       #949494;
         border-radius: 5px;
         margin-left: auto;
         margin-right: 5px;
+        opacity: 0.5;
         &:hover {
-          background-color: $charcoal-light-4;
+          opacity: 0.75;
         }
         &:active {
-          background-color: $charcoal-light-3;
+          opacity: 1;
         }
       }
     }
@@ -147,7 +148,7 @@ $user-icon-teacher-ada-border:       #949494;
     }
 
     .comment-dropdown-tag {
-      width: 80%;
+      width: calc(100% - 8px);
       height: 25px;
       border-radius: 75px 75px;
       display: flex;
@@ -180,20 +181,20 @@ $user-icon-teacher-ada-border:       #949494;
       border-color: Transparent;
       overflow: hidden;
       resize: none;
-      margin: 2px;
       width: calc(100% - 5px);
       box-sizing: border-box;
       font-size: 14px;
       font-family: Lato;
+      padding: 10px;
 
       &.has-tags {
-        padding-top: 32px;
+        padding-top: 36px;
       }
       &.has-agree {
-        padding-top: 52px;
+        padding-top: 56px;
       }
       &.has-tags-and-agree {
-        padding-top: 84px;
+        padding-top: 88px;
       }
 
       &::placeholder {
@@ -225,6 +226,8 @@ $user-icon-teacher-ada-border:       #949494;
           height: 26px;
           border-radius: 5px;
           border: solid 1.5px $charcoal-light-1;
+          cursor: pointer;
+
           &:hover, &.selected:hover {
             background-color: $charcoal-light-4;
           }
@@ -244,7 +247,7 @@ $user-icon-teacher-ada-border:       #949494;
       }
       height: 26px;
       margin: 1px 4px 6px;
-      width: calc(100% - 30px);
+      width: calc(100% - 8px);
       font-family: Lato;
       border: solid 1.5px $charcoal-light-1;
       border-radius: 5px;
@@ -265,18 +268,76 @@ $user-icon-teacher-ada-border:       #949494;
         align-items: center;
         justify-content: center;
         margin: 4px 4px 0 0;
-        width: 56px;
         height: 26px;
+        padding: 3px;
         border-radius: 5px;
         border: solid 1.5px $charcoal-light-1;
+        cursor: pointer;
+
+        &.disabled {
+          opacity: 0.35;
+          cursor: default;
+        }
+
+        &.post {
+          width: 65px;
+          svg {
+            margin-right: 5px;
+          }
+        }
+
         &.cancel {
+          width: 56px;
           background-color: white;
           color: $charcoal-dark-2;
-          &:hover {
+          &:not(.disabled):hover {
             background-color: $charcoal-light-4;
           }
-          &:active {
+          &:not(.disabled):active {
             background-color: $charcoal-light-3;
+          }
+        }
+        &.problems {
+          background-color: $problem-orange-light-5;
+          &:not(.disabled):hover {
+            background-color: $problem-orange-light-4;
+          }
+          &:not(.disabled):active {
+            background-color: $problem-orange;
+          }
+        }
+        &.sort-work, &.class-work {
+          background-color: $classwork-purple-light-7;
+          &:not(.disabled):hover {
+            background-color: $classwork-purple-light-4;
+          }
+          &:not(.disabled):active {
+            background-color: $classwork-purple-dark-1;
+          }
+        }
+        &.my-work {
+          background-color: $workspace-teal-light-4;
+          &:not(.disabled):hover {
+            background-color: $workspace-teal-light-3;
+          }
+          &:not(.disabled):active {
+            background-color: $workspace-teal-dark-1;
+          }
+        }
+        &.student-work {
+          background-color: $charcoal-light-4;
+          &:not(.disabled):hover {
+            background-color: $charcoal-light-3;
+          }
+          &:not(.disabled):active {
+            background-color: $charcoal-dark-1;
+          }
+        }
+
+        &:active {
+          color: white;
+          svg {
+            fill: white;
           }
         }
       }

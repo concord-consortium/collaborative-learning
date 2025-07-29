@@ -13,7 +13,7 @@ import WaitingMessage from "./waiting-message";
 import { IAgreeWithAi, kAnalyzerUserParams } from "../../../shared/shared";
 import type { PostCommentFn, DeleteCommentFn } from "./chat-panel";
 
-import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
+import DeleteMessageIcon from "../../assets/icons/delete/delete-message-icon.svg";
 import YesIcon from "../../assets/yes-icon.svg";
 import NoIcon from "../../assets/no-icon.svg";
 import NotSureIcon from "../../assets/not-sure-icon.svg";

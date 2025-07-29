@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState} from "react";
+import classNames from "classnames";
 import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
@@ -9,9 +10,15 @@ import {
   useDocumentCommentsAtSimplifiedPath, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument, useFirestore } from "../../hooks/firestore-hooks";
-import { useCurriculumOrDocumentContent, useDBStore, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
+import { useAppConfig, useCurriculumOrDocumentContent, useDBStore,
+  useDocumentFromStore,
+  useDocumentOrCurriculumMetadata, useStores } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
 import { getSimpleDocumentPath, IClientCommentParams } from "../../../shared/shared";
+import { getDocumentDisplayTitle } from "../../models/document/document-utils";
+import { AppConfigModelType } from "../../models/stores/app-config-model";
+import { UnitModelType } from "../../models/curriculum/unit";
+import { DocumentModelType } from "../../models/document/document";
 
 import "./chat-panel.scss";
 
@@ -36,12 +43,21 @@ interface IProps {
   onCloseChatPanel:(show:boolean) => void;
 }
 
+function getDocTitle(document: DocumentModelType,
+    unit: UnitModelType,
+    appConfig: AppConfigModelType): string | undefined {
+  return getDocumentDisplayTitle(unit, document, appConfig) || undefined;
+}
+
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
   const [isDocumentView, setIsDocumentView] = useState(false); // switches between "Comments View" vs "Document View"
   const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
-  const document = useDocumentOrCurriculumMetadata(focusDocument);
+  const documentMetadata = useDocumentOrCurriculumMetadata(focusDocument);
   const content = useCurriculumOrDocumentContent(focusDocument);
+  const document = useDocumentFromStore(focusDocument);
   const { firebase } = useDBStore();
+  const appConfig = useAppConfig();
+  const { unit } = useStores();
   const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: simplePathComments } = useDocumentCommentsAtSimplifiedPath(focusDocument);
@@ -54,7 +70,8 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     ? allTileComments.sort((a: any, b: any) => ordering.indexOf(a.tileId) - ordering.indexOf(b.tileId))
     : [];
   const postedComments = documentComments?.concat(commentsInDocumentOrder);
-  const commentThreads = makeChatThreads(postedComments, content);
+  const docTitle = document ? getDocTitle(document, unit, appConfig) : undefined;
+  const commentThreads = makeChatThreads(postedComments, content, docTitle);
   const postCommentMutation = usePostDocumentComment();
   const firestore = useFirestore();
 
@@ -73,10 +90,11 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       };
       logCommentEvent(eventPayload);
     }
-    return document
-      ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId, tags, agreeWithAi } })
+    return documentMetadata
+      ? postCommentMutation.mutate(
+        { document: documentMetadata, comment: { content: comment, tileId: focusTileId, tags, agreeWithAi } })
       : undefined;
-  }, [document, focusDocument, focusTileId, postCommentMutation, postedComments]);
+  }, [documentMetadata, focusDocument, focusTileId, postCommentMutation, postedComments]);
 
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
   // the "Document" in "useDeleteDocument" refers to a Firestore document (not a CLUE document)
@@ -151,10 +169,13 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     :
     "Open a document to begin or view comment threads";
 
+  const theme = isDocumentView ? "student-work" : activeNavTab;
+  const chatPanelClass = classNames("chat-panel", theme);
+
   return (
-    <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
+    <div className={chatPanelClass} data-testid="chat-panel">
       <ChatPanelHeader
-        activeNavTab={activeNavTab}
+        theme={theme}
         newCommentCount={newCommentCount}
         onCloseChatPanel={onCloseChatPanel}
         handleDocView={handleDocumentClick}
@@ -175,6 +196,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
           onDeleteComment={deleteComment}
           chatThreads={commentThreads}
           focusDocument={focusDocument}
+          docTitle={docTitle}
           focusTileId={focusTileId}
           isDocumentView={isDocumentView}
         />
