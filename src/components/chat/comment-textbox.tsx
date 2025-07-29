@@ -75,10 +75,16 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
     }
   };
 
-  const handleCancelPost = () => {
+  const resetInputs = () => {
     setCommentTextAreaHeight(minTextAreaHeight);
     setCommentAdded(false);
     setCommentText("");
+    setAllTags((oldArray) => [""]); //select will go back to top choice (tagPrompt)
+    setAgreeWithAi(undefined);
+  };
+
+  const handleCancelPost = () => {
+    resetInputs();
   };
 
   const handlePostComment = () => {
@@ -87,11 +93,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
     if (!isEmpty || (showCommentTag && allTags[0] !== "" )){
       //do not post to Firestore if select tag is tagPrompt
       onPostComment?.({comment: trimmedText, tags: allTags, agreeWithAi});
-      setCommentTextAreaHeight(minTextAreaHeight);
-      setCommentAdded(false);
-      setCommentText("");
-      setAllTags((oldArray) => [""]); //select will go back to top choice (tagPrompt)
-      setAgreeWithAi(undefined);
+      resetInputs();
     }
   };
 
@@ -99,9 +101,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
     const [trimmedText, isEmpty] = trimContent(commentText);
     switch(event.key) {
       case "Escape":
-        setCommentTextAreaHeight(minTextAreaHeight);
-        setCommentAdded(false);
-        setCommentText("");
+        resetInputs();
         break;
       case "Enter":
         if(event.shiftKey) {
