@@ -154,7 +154,7 @@ class ChatPanel{
     }
 
     getCommentTextDropDown() {
-      return cy.get('[data-test=comment-textbox-dropdown]');
+      return cy.get('[data-testid=comment-textbox-dropdown]');
     }
     getCommentTagFromThread() {
       return cy.get('[data-testid=comment-thread] .comment-dropdown-tag');

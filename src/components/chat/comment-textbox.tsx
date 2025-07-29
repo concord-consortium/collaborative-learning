@@ -79,9 +79,15 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
     }
   };
 
-  const handleCancelPost = () => {
+  const resetInputs = () => {
     setCommentTextAreaHeight(minTextAreaHeight);
     setCommentText("");
+    setAllTags((oldArray) => [""]); //select will go back to top choice (tagPrompt)
+    setAgreeWithAi(undefined);
+  };
+
+  const handleCancelPost = () => {
+    resetInputs();
   };
 
   const handlePostComment = () => {
@@ -90,10 +96,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
       const [trimmedText] = trimContent(commentText);
       //do not post to Firestore if select tag is tagPrompt
       onPostComment?.({comment: trimmedText, tags: allTags, agreeWithAi});
-      setCommentTextAreaHeight(minTextAreaHeight);
-      setCommentText("");
-      setAllTags((oldArray) => [""]); //select will go back to top choice (tagPrompt)
-      setAgreeWithAi(undefined);
+      resetInputs();
     }
   };
 
@@ -101,8 +104,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
     const [trimmedText] = trimContent(commentText);
     switch(event.key) {
       case "Escape":
-        setCommentTextAreaHeight(minTextAreaHeight);
-        setCommentText("");
+        resetInputs();
         break;
       case "Enter":
         if(event.shiftKey) {
@@ -201,7 +203,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
         <select
           ref={selectElt}
           className={classNames({"shift-down-with-agree": showAgreeButtons})}
-          data-test="comment-textbox-dropdown"
+          data-testid="comment-textbox-dropdown"
           onChange={(e) => {
             handleSelectDropDown(e.target.value);
           }}

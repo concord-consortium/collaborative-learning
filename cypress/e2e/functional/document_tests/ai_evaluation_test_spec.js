@@ -54,6 +54,31 @@ context('AI Evaluation', function () {
     chatPanel.getCommentCard().find('[data-testid=comment-agree-not-sure-button]').should('be.visible')
       .and('contain.text', '…?');
 
+    // should allow toggling of the AI agree buttons
+    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]').should('be.visible').click();
+    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]')
+      .should('have.class', 'selected');
+    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]').should('be.visible').click();
+    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]')
+      .should('not.have.class', 'selected');
+
+    // should reset the inputs when the cancel button is clicked
+    cy.get("[data-testid=comment-textarea]").scrollIntoView().type('This should be cleared.', {force: true});
+    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]').should('be.visible').click();
+    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]')
+      .should('have.class', 'selected');
+    chatPanel.getCommentCard().find('[data-testid=comment-textbox-dropdown]').find('option:selected')
+      .should('contain.text', 'Select QA Strategy');
+    chatPanel.getCommentCard().find('[data-testid=comment-textbox-dropdown]').select(1);
+    chatPanel.getCommentCard().find('[data-testid=comment-textbox-dropdown]').find('option:selected')
+      .should('not.contain.text', 'Select QA Strategy');
+    chatPanel.getCommentCancelButton().should('be.visible').click();
+    cy.get("[data-testid=comment-textarea]").should('have.value', '');
+    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]')
+      .should('not.have.class', 'selected');
+    chatPanel.getCommentCard().find('[data-testid=comment-textbox-dropdown]').find('option:selected')
+      .should('contain.text', 'Select QA Strategy');
+
     // should allow posting a comment and selecting agree/disagree/not sure
     cy.get("[data-testid=comment-textarea]").scrollIntoView().type('I think Ada is correct.', {force: true});
     chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]').should('be.visible').click();
