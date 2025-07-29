@@ -50,7 +50,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   };
 
   const commentEmptyNoTags = !hasContentToPost();
-  const postButtonClass = classNames("comment-footer-button", "themed", activeNavTab,
+  const postButtonClass = classNames("comment-footer-button", "post","themed", activeNavTab,
                                       { disabled: commentEmptyNoTags,
                                       "no-action": commentEmptyNoTags });
   const cancelButtonClass = classNames("comment-footer-button", "cancel",

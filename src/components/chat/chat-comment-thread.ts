@@ -11,7 +11,7 @@ export interface ChatCommentThread {
 
 // Expects a list of comments in Document order with document level comments (with no (null) tileId) first.
 export function makeChatThreads (
-    commentsInDocumentOrder:WithId<CommentDocument>[] | undefined,
+    commentsInDocumentOrder: WithId<CommentDocument>[] | undefined,
     content: DocumentContentModelType | undefined,
     docTitle?: string) : ChatCommentThread[] {
   const chatThreads: ChatCommentThread[] = [];

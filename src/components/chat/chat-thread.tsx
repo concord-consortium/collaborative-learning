@@ -10,7 +10,6 @@ import { TileIconComponent } from "./tile-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
 import type { PostCommentFn, DeleteCommentFn } from "./chat-panel";
 
-
 import "./chat-thread.scss";
 
 interface IProps {

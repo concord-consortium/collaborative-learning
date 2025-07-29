@@ -22,7 +22,7 @@
   &.my-work {
     border-color: $workspace-teal;
   }
-  &.class-work {
+  &.class-work, &.sort-work {
     border-color: $classwork-purple;
   }
   &.supports {

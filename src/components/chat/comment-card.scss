@@ -268,8 +268,8 @@ $user-icon-teacher-ada-border:       #949494;
         align-items: center;
         justify-content: center;
         margin: 4px 4px 0 0;
-        width: 56px;
         height: 26px;
+        padding: 3px;
         border-radius: 5px;
         border: solid 1.5px $charcoal-light-1;
         cursor: pointer;
@@ -279,7 +279,15 @@ $user-icon-teacher-ada-border:       #949494;
           cursor: default;
         }
 
+        &.post {
+          width: 65px;
+          svg {
+            margin-right: 5px;
+          }
+        }
+
         &.cancel {
+          width: 56px;
           background-color: white;
           color: $charcoal-dark-2;
           &:not(.disabled):hover {
