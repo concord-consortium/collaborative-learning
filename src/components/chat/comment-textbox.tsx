@@ -200,7 +200,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
         <select
           ref={selectElt}
           className={classNames({"shift-down-with-agree": showAgreeButtons})}
-          data-test="comment-textbox-dropdown"
+          data-testid="comment-textbox-dropdown"
           onChange={(e) => {
             handleSelectDropDown(e.target.value);
           }}
