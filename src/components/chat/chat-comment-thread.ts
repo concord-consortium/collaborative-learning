@@ -30,7 +30,7 @@ export function makeChatThreads (
         tile = content?.getTile(comment.tileId);
       }
       chatThreads.push({
-        title: isTileComment ? (tile ? tile.computedTitle: null) : docTitle || null,
+        title: (isTileComment ? tile?.computedTitle : docTitle) ?? null,
         tileType: isTileComment && tile ? tile.content?.type : null,
         tileId: isTileComment ? tileId : null,
         comments: [comment]
