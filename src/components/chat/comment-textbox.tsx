@@ -31,7 +31,6 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [commentTextAreaHeight, setCommentTextAreaHeight] = useState(minTextAreaHeight);
   const selectElt = useRef<HTMLSelectElement>(null);
-  const [commentAdded, setCommentAdded] = useState(false);
   const [commentText, setCommentText] = useState("");
    //all the AI tags pertaining to one comment - length is 1 for now
   const [allTags, setAllTags] = useState([""]);
@@ -73,18 +72,15 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
     const targetText = target.value;
     if (!targetText) {
       setCommentTextAreaHeight(minTextAreaHeight);
-      setCommentAdded(false);
       setCommentText("");
     } else {
       setCommentTextAreaHeight(target.scrollHeight);
-      setCommentAdded(true);
       setCommentText(targetText);
     }
   };
 
   const handleCancelPost = () => {
     setCommentTextAreaHeight(minTextAreaHeight);
-    setCommentAdded(false);
     setCommentText("");
   };
 
@@ -95,7 +91,6 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
       //do not post to Firestore if select tag is tagPrompt
       onPostComment?.({comment: trimmedText, tags: allTags, agreeWithAi});
       setCommentTextAreaHeight(minTextAreaHeight);
-      setCommentAdded(false);
       setCommentText("");
       setAllTags((oldArray) => [""]); //select will go back to top choice (tagPrompt)
       setAgreeWithAi(undefined);
@@ -107,7 +102,6 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
     switch(event.key) {
       case "Escape":
         setCommentTextAreaHeight(minTextAreaHeight);
-        setCommentAdded(false);
         setCommentText("");
         break;
       case "Enter":
