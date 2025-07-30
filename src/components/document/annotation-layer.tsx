@@ -401,6 +401,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   };
 
   const getBoundingBox = (object: IClueObject) => {
+    console.log("AnnotationLayer render", { objectId: object.objectId, objectType: object.objectType });
     return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId, object.objectType);
   };
 
