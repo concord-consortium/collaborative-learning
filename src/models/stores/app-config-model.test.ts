@@ -4,7 +4,7 @@ import { unitConfigDefaults, unitConfigOverrides } from "../../test-fixtures/sam
 
 describe("ConfigurationManager", () => {
 
-  const excludeProps = ["defaultDocumentTemplate", "navTabs", "planningTemplate"];
+  const excludeProps = ["defaultDocumentTemplate", "navTabs", "planningTemplate", "myResourcesToolbar"];
   type SimpleProps = Exclude<keyof typeof unitConfigDefaults, typeof excludeProps[number]>;
   const keys = Object.keys(unitConfigDefaults).filter(prop => !excludeProps.includes(prop)) as SimpleProps[];
 
@@ -43,4 +43,101 @@ describe("ConfigurationManager", () => {
     const model = AppConfigModel.create();
     expect(model.config).toBeUndefined();
   });
+
+  it("should return aiEvaluation and aiPrompt from configuration when defined", () => {
+    const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+    appConfig.setConfigs([unitConfigOverrides]);
+    expect(appConfig.aiPrompt).toEqual({
+      mainPrompt: "This is a picture of a student document.\n Please categorize it.",
+      categorizationDescription: "The focus area of the document",
+      categories: ["user", "environment", "form", "function"],
+      keyIndicatorsPrompt: "List of main features or elements of the document that support this categorization",
+      discussionPrompt: "Any other relevant information.",
+      systemPrompt: "You are a teaching assistant in a middle school science class."
+    });
+    expect(appConfig.aiEvaluation).toEqual("custom");
+  });
+
+  it("should return undefined aiEvaluation and aiPrompt when not configured", () => {
+    const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+    expect(appConfig.aiPrompt).toBeUndefined();
+    expect(appConfig.aiEvaluation).toBeUndefined();
+  });
+
+  it("should return true for enabled comment roles", () => {
+    const appConfig = AppConfigModel.create({
+      config: { ...unitConfigDefaults, enableCommentRoles: ["student", "teacher"] }
+    });
+    expect(appConfig.showCommentPanelFor("student")).toBe(true);
+    expect(appConfig.showCommentPanelFor("teacher")).toBe(true);
+  });
+
+  it("should return false for disabled comment roles", () => {
+    const appConfig = AppConfigModel.create({
+      config: { ...unitConfigDefaults, enableCommentRoles: ["student"] }
+    });
+    expect(appConfig.showCommentPanelFor("teacher")).toBe(false);
+    expect(appConfig.showCommentPanelFor("researcher")).toBe(false);
+  });
+
+  it("should return false for undefined user type", () => {
+    const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+    expect(appConfig.showCommentPanelFor(undefined)).toBeUndefined();
+  });
+
+  it("should return placeholder for specific container type", () => {
+    const appConfig = AppConfigModel.create({
+      config: {
+        ...unitConfigDefaults,
+        placeholder: { "QuestionContent": "Question placeholder", "default": "Default placeholder" }
+      }
+    });
+    expect(appConfig.getPlaceholder("QuestionContent")).toBe("Question placeholder");
+  });
+
+  it("should return default placeholder for DocumentContent", () => {
+    const appConfig = AppConfigModel.create({
+      config: {
+        ...unitConfigDefaults,
+        placeholder: { "default": "Default placeholder" }
+      }
+    });
+    expect(appConfig.getPlaceholder("DocumentContent")).toBe("Default placeholder");
+  });
+
+  it("should return undefined for non-existent container type", () => {
+    const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+    expect(appConfig.getPlaceholder("NonExistent")).toBeUndefined();
+  });
+
+  it("should show annotation controls when annotations are enabled", () => {
+    const appConfig = AppConfigModel.create({
+      config: { ...unitConfigDefaults, annotations: "all" }
+    });
+    expect(appConfig.showAnnotationControls).toBe(true);
+  });
+
+  it("should hide annotation controls when annotations are 'none'", () => {
+    const appConfig = AppConfigModel.create({
+      config: { ...unitConfigDefaults, annotations: "none" }
+    });
+    expect(appConfig.showAnnotationControls).toBe(false);
+  });
+
+  it("should show annotation controls when toolbar has hide-annotations button", () => {
+    const appConfig = AppConfigModel.create({
+      config: {
+        ...unitConfigDefaults,
+        annotations: "none",
+        toolbar: [{
+          id: "hide-annotations",
+          title: "Hide Annotations",
+          iconId: "icon-hide-annotations",
+          isTileTool: false
+        }]
+      }
+    });
+    expect(appConfig.showAnnotationControls).toBe(true);
+  });
+
 });

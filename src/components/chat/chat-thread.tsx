@@ -3,15 +3,12 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
-import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
-import { WithId } from "../../hooks/firestore-hooks";
 import { useCurriculumOrDocumentContent, useUIStore } from "../../hooks/use-stores";
-import { CommentDocument} from "../../lib/firestore-schema";
 import { CommentCard } from "./comment-card";
-import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import {ChatCommentThread} from "./chat-comment-thread";
 import { TileIconComponent } from "./tile-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
+import type { PostCommentFn, DeleteCommentFn } from "./chat-panel";
 
 import "./chat-thread.scss";
 
@@ -19,21 +16,99 @@ interface IProps {
   user?: UserModelType;
   activeNavTab?: string;
   chatThreads?: ChatCommentThread[];
-  onPostComment?: (comment: string, tags: string[]) => void;
-  onDeleteComment?: (commentId: string, commentContent: string) => void;
+  onPostComment?: PostCommentFn;
+  onDeleteComment?: DeleteCommentFn;
   focusDocument?: string;
   focusTileId?: string;
   isDocumentView?: boolean;
+  docTitle?: string;
 }
 
+interface ChatThreadItemProps {
+  threadId: string; // either a tileId or "document"
+  user?: UserModelType;
+  activeNavTab?: string;
+  onPostComment?: PostCommentFn;
+  onDeleteComment?: DeleteCommentFn;
+  focusDocument?: string;
+  focusTileId?: string;
+  commentThread?: ChatCommentThread;
+  expandedThread: string;
+  onThreadClick: (clickedId: string | null) => void;
+  isFocused: boolean;
+  overrideTitle?: string;
+}
+
+const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
+  threadId,
+  user,
+  activeNavTab,
+  onPostComment,
+  onDeleteComment,
+  focusDocument,
+  focusTileId,
+  commentThread,
+  expandedThread,
+  onThreadClick,
+  isFocused,
+  overrideTitle,
+}) => {
+  const title = overrideTitle || commentThread?.title || '';
+  const numComments = commentThread?.comments.length || 0;
+  const comments = commentThread?.comments || [];
+  const tileId = commentThread?.tileId || focusTileId;
+
+  return (
+    <div key={threadId}
+      className={classNames("chat-thread", {
+        "chat-thread-focused": isFocused,
+      }, `${tileId ? "chat-thread-tile" : "chat-thread-document"}`
+      )}
+      data-testid="chat-thread">
+      <div className={classNames(`chat-thread-header ${activeNavTab}`,
+        { "selected": isFocused })}
+        data-testid="chat-thread-header"
+        onClick={() => onThreadClick(threadId)}
+      >
+        <div className="chat-thread-tile-info">
+          <div className="chat-thread-tile-type" data-testid="chat-thread-tile-type">
+            <TileIconComponent documentKey={focusDocument} tileId={tileId}/>
+          </div>
+          <div className="chat-thread-title"> {title} </div>
+        </div>
+        <div className="chat-thread-comment-info">
+          <div className="chat-thread-num">{numComments}</div>
+          <ChatThreadToggle
+            isThreadExpanded={expandedThread === threadId}
+            activeNavTab={activeNavTab}
+          />
+        </div>
+      </div>
+      {
+        expandedThread === threadId &&
+        <CommentCard
+          user={user}
+          activeNavTab={activeNavTab}
+          onPostComment={onPostComment}
+          onDeleteComment={onDeleteComment}
+          postedComments={comments}
+          focusDocument={focusDocument}
+          focusTileId={focusTileId}
+        />
+      }
+    </div>
+  );
+});
+
 const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
-  onPostComment, onDeleteComment, focusDocument, focusTileId, isDocumentView}) => {
+  onPostComment, onDeleteComment, focusDocument, focusTileId, isDocumentView, docTitle}) => {
 
   // make focusId null if undefined so it can be compared with tileId below.
   const focusId = focusTileId === undefined ? null : focusTileId;
   // expandedThread can be an id of a tile, "document", or "" if no thread is expanded.
   const [expandedThread, setExpandedThread] = useState(focusId || '');
 
+  // Switching focus expands the newly-selected thread.
   useEffect(() => {
     setExpandedThread(focusTileId || 'document');
   }, [focusTileId]);
@@ -48,6 +123,16 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   }, [pendingAIAnalysis]);
 
   const focusedItemHasNoComments = !chatThreads?.find(item => (item.tileId === focusId));
+  let overrideTitle = undefined;
+  if (focusedItemHasNoComments) {
+    // No comment thread so we need to determine the title of the focused item.
+    if (focusId) {
+      const focusedItem = content?.getTile(focusId);
+      overrideTitle = focusedItem?.computedTitle || '';
+    } else {
+      overrideTitle = docTitle || '';
+    }
+  }
   const ui = useUIStore();
 
   const handleThreadClick = (clickedId: string | null) => {
@@ -78,87 +163,42 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
     <div className="chat-list" data-testid="chat-list">
       {
         chatThreads?.map((commentThread: ChatCommentThread) => {
-          const title = commentThread.title || '';
-          const shouldShowUserIcon =
-            commentThread.comments.some((comment: WithId<CommentDocument>) => user?.id === comment.uid);
-          const numComments = commentThread.comments.length;
           const shouldBeFocused = commentThread.tileId === focusId;
-          const Icon = commentThread.tileType && getTileComponentInfo(commentThread.tileType)?.Icon;
-          const key= commentThread.tileId || "document";
+          const id = commentThread.tileId || "document";
           return (
-            <div key={key}
-              className={classNames("chat-thread", {
-                "chat-thread-focused": shouldBeFocused,
-              }, `${focusTileId ? "chat-thread-tile" : "chat-thread-document"}`
-              )}
-              data-testid="chat-thread">
-              <div className={classNames(`chat-thread-header ${activeNavTab}`,
-                { "selected": shouldBeFocused })}
-                data-testid="chat-thread-header"
-                onClick={() => handleThreadClick(key)}
-              >
-                <div className="chat-thread-tile-info">
-                {Icon && (
-                    <Icon data-testid="chat-thread-tile-type"/>
-                )}
-                  <div className="chat-thread-title"> {title} </div>
-                </div>
-                <div className="chat-thread-comment-info">
-                  {shouldShowUserIcon &&
-                    <div className="user-icon" data-testid="chat-thread-user-icon"><UserIcon /></div>
-                  }
-                  <div className="chat-thread-num">{numComments}</div>
-                  <ChatThreadToggle
-                    isThreadExpanded={expandedThread === key}
-                    activeNavTab={activeNavTab}
-                  />
-                </div>
-              </div>
-              {
-                expandedThread === key &&
-                <CommentCard
-                  user={user}
-                  activeNavTab={activeNavTab}
-                  onPostComment={onPostComment}
-                  onDeleteComment={onDeleteComment}
-                  postedComments={commentThread.comments}
-                  focusDocument={focusDocument}
-                  focusTileId={focusTileId}
-                />
-              }
-            </div>
+            <ChatThreadItem
+              key={id}
+              threadId={id}
+              user={user}
+              activeNavTab={activeNavTab}
+              onPostComment={onPostComment}
+              onDeleteComment={onDeleteComment}
+              focusDocument={focusDocument}
+              focusTileId={focusTileId}
+              commentThread={commentThread}
+              expandedThread={expandedThread}
+              onThreadClick={handleThreadClick}
+              isFocused={shouldBeFocused}
+            />
           );
         })
       }
-      {focusedItemHasNoComments  && !isDocumentView &&
-        <div key={focusTileId ? focusTileId : "document"}
-          className={`chat-thread chat-thread-focused ${focusTileId ? "chat-thread-tile" : "chat-thread-document"}`}
-          data-testid="chat-thread">
-          <div className={`chat-thread-header ${activeNavTab} selected`}
-            data-testid="chat-thread-header">
-            <div className="chat-thread-tile-info">
-              <div className="comment-card-header comment-select" data-testid="comment-card-header">
-                <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
-                  <div data-testid="chat-thread-tile-type">
-                    <TileIconComponent documentKey={focusDocument} tileId={focusTileId}/>
-                  </div>
-                </div>
-              </div>
-              <div className="chat-thread-comment-info">
-                <div className="chat-thread-num">{0}</div>
-              </div>
-            </div>
-          </div>
-          <CommentCard
-            user={user}
-            activeNavTab={activeNavTab}
-            onPostComment={onPostComment}
-            onDeleteComment={onDeleteComment}
-            postedComments={[]}
-            focusDocument={focusDocument}
-            focusTileId={focusTileId}
-          />
-        </div>
+      {focusedItemHasNoComments && !isDocumentView &&
+        <ChatThreadItem
+          key={focusId ? focusId : "document"}
+          threadId={focusId ? focusId : "document"}
+          user={user}
+          activeNavTab={activeNavTab}
+          onPostComment={onPostComment}
+          onDeleteComment={onDeleteComment}
+          focusDocument={focusDocument}
+          focusTileId={focusTileId}
+          commentThread={undefined}
+          expandedThread={expandedThread}
+          onThreadClick={handleThreadClick}
+          isFocused={true}
+          overrideTitle={overrideTitle}
+        />
       }
     </div>
   );

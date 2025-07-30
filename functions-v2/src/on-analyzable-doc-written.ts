@@ -41,8 +41,20 @@ export const onAnalyzableProdDocWritten =
       return handleUpdate(event, firebaseRoot, firestoreRoot);
     });
 
+interface AnalysisQueueDocument {
+  aiPrompt?: unknown;
+  commentsPath: string;
+  documentPath: string;
+  docUpdated: number | string;
+  evaluator: string;
+  metadataPath: string;
+}
+
 const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebaseRoot: string, firestoreRoot: string) => {
-  const timestamp = event.data.after.val();
+  const content = event.data.after.val();
+  // Check the type since it has changed from a timestamp to an object
+  const timestamp = typeof content === "object" ? content.timestamp : content;
+  const aiPrompt = (typeof content === "object" && content.aiPrompt) ? content.aiPrompt : null;
   // onValueWritten will trigger on create, update, or delete. Ignore deletes.
   if (!timestamp) {
     logger.info("evaluation was deleted", event.subject);
@@ -56,13 +68,20 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
   const commentsPath = `${firestoreRoot}/documents/${docId}/comments`;
 
   const firestore = admin.firestore();
-  // This should be safe in the event of dupliclate calls; the second will just overwrite the first.
-  await firestore.doc(getAnalysisQueueFirestorePath("pending", docId)).set({
+
+  // This should be safe in the event of duplicate calls; the second will just overwrite the first.
+  const newDocument: AnalysisQueueDocument = {
     metadataPath,
     documentPath,
     commentsPath,
     docUpdated: timestamp,
     evaluator,
-  });
-  logger.info(`Added document ${documentPath} to queue for ${evaluator}`);
+  };
+
+  if (aiPrompt) {
+    newDocument.aiPrompt = aiPrompt;
+  }
+
+  await firestore.doc(getAnalysisQueueFirestorePath("pending", docId)).set(newDocument);
+  logger.info(`Added document ${documentPath} to queue for ${evaluator} with aiPrompt ${JSON.stringify(aiPrompt)}`);
 };
