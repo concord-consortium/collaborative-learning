@@ -22,7 +22,8 @@ export const VectorTypeButton = observer(
     stroke: settings.stroke,
     strokeDashArray: settings.strokeDashArray,
     strokeWidth: settings.strokeWidth,
-    vectorType: settings.vectorType
+    vectorType: settings.vectorType,
+    alignType: settings.alignType
   };
 
   return (
@@ -36,5 +37,3 @@ export const VectorTypeButton = observer(
     </TileToolbarButton>
   );
 });
-
-

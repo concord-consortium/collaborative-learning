@@ -1,4 +1,4 @@
-import { BoundingBox, BoundingBoxSides, Point } from "./drawing-basic-types";
+import { AlignType, BoundingBox, BoundingBoxSides, Point } from "./drawing-basic-types";
 
 /**
  * Recursively removes 'id' attributes from a drawing object snapshot and all nested objects in 'objects' arrays.
@@ -47,6 +47,49 @@ export function boundingBoxSidesForPoints(points: {x: number, y: number}[]): Bou
   const minY = Math.min(...points.map(p => p.y));
   const maxY = Math.max(...points.map(p => p.y));
   return {left: minX, top: minY, right: maxX, bottom: maxY};
+}
+
+/**
+ * Computes the bounding box that encompasses all the given objects.
+ * @param objects Array of objects that have a boundingBox property
+ * @returns A BoundingBox that contains all the objects
+ */
+export function computeObjectsBoundingBox(objects: Array<{ boundingBox: BoundingBox }>): BoundingBox {
+  if (objects.length === 0) {
+    return { nw: { x: 0, y: 0 }, se: { x: 0, y: 0 } };
+  }
+
+  return objects.reduce((cur, obj) => {
+    if (obj) {
+      const objBB = obj.boundingBox;
+      if (objBB.nw.x < cur.nw.x) cur.nw.x = objBB.nw.x;
+      if (objBB.nw.y < cur.nw.y) cur.nw.y = objBB.nw.y;
+      if (objBB.se.x > cur.se.x) cur.se.x = objBB.se.x;
+      if (objBB.se.y > cur.se.y) cur.se.y = objBB.se.y;
+    }
+    return cur;
+  }, {
+    nw: { x: Number.MAX_VALUE, y: Number.MAX_VALUE },
+    se: { x: -Number.MAX_VALUE, y: -Number.MAX_VALUE }
+  });
+}
+
+export function getRelevantCoordinateForAlignType(alignType: AlignType, bbox: BoundingBox): number {
+  switch (alignType) {
+    case AlignType.h_left:
+      return bbox.nw.x;
+    case AlignType.h_center:
+      return bbox.nw.x + (bbox.se.x - bbox.nw.x) / 2;
+    case AlignType.h_right:
+      return bbox.se.x;
+    case AlignType.v_top:
+      return bbox.nw.y;
+    case AlignType.v_center:
+      return bbox.nw.y + (bbox.se.y - bbox.nw.y) / 2;
+    case AlignType.v_bottom:
+      return bbox.se.y;
+  }
+  return 0;
 }
 
 /** Find the nearest multiple of 90 degrees to the given rotation.

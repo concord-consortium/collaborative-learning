@@ -4,7 +4,7 @@ import {
   DrawingContentModelSnapshot, DrawingToolMetadataModel
 } from "./drawing-content";
 import { kDrawingTileType } from "./drawing-types";
-import { DefaultToolbarSettings, VectorEndShape } from "./drawing-basic-types";
+import { AlignType, DefaultToolbarSettings, VectorEndShape } from "./drawing-basic-types";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
 import { ImageObject, ImageObjectSnapshotForAdd } from "../objects/image";
 import { RectangleObject, RectangleObjectSnapshot, RectangleObjectSnapshotForAdd,
@@ -122,7 +122,9 @@ describe("DrawingContentModel", () => {
       stroke: DefaultToolbarSettings.stroke,
       fill: DefaultToolbarSettings.fill,
       strokeDashArray: DefaultToolbarSettings.strokeDashArray,
-      strokeWidth: DefaultToolbarSettings.strokeWidth
+      strokeWidth: DefaultToolbarSettings.strokeWidth,
+      vectorType: undefined,
+      alignType: DefaultToolbarSettings.alignType
     };
     expect(model.toolbarSettings).toEqual(defaultSettings);
     model.setStroke(stroke, model.selection);
@@ -328,6 +330,122 @@ describe("DrawingContentModel", () => {
     expect(model.objects[1].y).toBe(0);
     expect(model.selection.length).toBe(1); // new object is selected
     expect(model.selection[0]).toBe(model.objects[1].id);
+  });
+
+  it("can align objects left", () => {
+    const model = createDrawingContentWithMetadata();
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot,
+      id:"a", x:1, y:1, width: 5, height: 5};
+    const rect1 = model.addObject(rectSnapshot1);
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot,
+      id:"b", x:10, y:10, width: 6, height: 6};
+    const rect2 = model.addObject(rectSnapshot2);
+    model.alignObjects(["a", "b"], AlignType.h_left);
+    expect(rect1.x).toBe(1);
+    expect(rect2.x).toBe(1);
+    expect(rect1.y).toBe(1);
+    expect(rect2.y).toBe(10);
+  });
+
+  it("can align objects center", () => {
+    const model = createDrawingContentWithMetadata();
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot,
+      id:"a", x:1, y:1, width: 5, height: 5};
+    const rect1 = model.addObject(rectSnapshot1);
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot,
+      id:"b", x:10, y:10, width: 6, height: 6};
+    const rect2 = model.addObject(rectSnapshot2);
+    model.alignObjects(["a", "b"], AlignType.h_center);
+    expect(rect1.x).toBe(8.5-2.5);
+    expect(rect2.x).toBe(8.5-3);
+    expect(rect1.y).toBe(1);
+    expect(rect2.y).toBe(10);
+  });
+
+  it("can align objects right", () => {
+    const model = createDrawingContentWithMetadata();
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot,
+      id:"a", x:1, y:1, width: 5, height: 5};
+    const rect1 = model.addObject(rectSnapshot1);
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot,
+      id:"b", x:10, y:10, width: 6, height: 6};
+    const rect2 = model.addObject(rectSnapshot2);
+    model.alignObjects(["a", "b"], AlignType.h_right);
+    expect(rect1.x).toBe(16-5);
+    expect(rect2.x).toBe(16-6);
+    expect(rect1.y).toBe(1);
+    expect(rect2.y).toBe(10);
+  });
+
+  it("can align objects top", () => {
+    const model = createDrawingContentWithMetadata();
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot,
+      id:"a", x:1, y:1, width: 5, height: 5};
+    const rect1 = model.addObject(rectSnapshot1);
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot,
+      id:"b", x:10, y:10, width: 6, height: 6};
+    const rect2 = model.addObject(rectSnapshot2);
+    model.alignObjects(["a", "b"], AlignType.v_top);
+    expect(rect1.x).toBe(1);
+    expect(rect2.x).toBe(10);
+    expect(rect1.y).toBe(1);
+    expect(rect2.y).toBe(1);
+  });
+
+  it("can align objects middle", () => {
+    const model = createDrawingContentWithMetadata();
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot,
+      id:"a", x:1, y:1, width: 5, height: 5};
+    const rect1 = model.addObject(rectSnapshot1);
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot,
+      id:"b", x:10, y:10, width: 6, height: 6};
+    const rect2 = model.addObject(rectSnapshot2);
+    model.alignObjects(["a", "b"], AlignType.v_center);
+    expect(rect1.x).toBe(1);
+    expect(rect2.x).toBe(10);
+    expect(rect1.y).toBe(8.5-2.5);
+    expect(rect2.y).toBe(8.5-3);
+  });
+
+  it("can align objects bottom", () => {
+    const model = createDrawingContentWithMetadata();
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot,
+      id:"a", x:1, y:1, width: 5, height: 5};
+    const rect1 = model.addObject(rectSnapshot1);
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot,
+      id:"b", x:10, y:10, width: 6, height: 6};
+    const rect2 = model.addObject(rectSnapshot2);
+    model.alignObjects(["a", "b"], AlignType.v_bottom);
+    expect(rect1.x).toBe(1);
+    expect(rect2.x).toBe(10);
+    expect(rect1.y).toBe(16-5);
+    expect(rect2.y).toBe(16-6);
+  });
+
+  it("can align all types of objects", () => {
+    // Left edge of sized objects is just their x
+    const rect = RectangleObject.create({ ...baseRectangleSnapshot, x: 1, y: 1, id: "rect" });
+    const text = TextObject.create({ id: "text", x: 2, y: 2, width: 10, height: 10,
+      text: "Hello, world!", ...mockSettings });
+    const image = ImageObject.create({ id: "image", x: 3, y: 3, width: 10, height: 10,
+      url: "my/image/url", ...mockSettings });
+    // Left edge of line is the leftmost point, in this case x-11 = 4.
+    const line = LineObject.create({ id: "line", x: 15, y: 15,
+      deltaPoints: [{dx: -5, dy: -5}, {dx: -6, dy: 0}], ...mockSettings });
+    // Left edge of ellipse is x - rx (= 10-5 = 5)
+    const ellipse = EllipseObject.create({ id: "ellipse", x: 10, y: 10, rx: 5, ry: 1, ...mockSettings });
+    // Left edge of vector is the leftmost point, in this case 16-10 = 6
+    const vector = VectorObject.create({ id: "vector", x: 16, y: 16, dx: -10, dy: 10, ...mockSettings });
+
+    const model = createDrawingContentWithMetadata({ objects: [rect, ellipse, text, image, line, vector] });
+    model.alignObjects(["rect", "ellipse", "text", "image", "line", "vector"], AlignType.h_left);
+
+    expect(rect.x).toBe(1);
+    expect(text.x).toBe(1);
+    expect(image.x).toBe(1);
+    expect(line.x).toBe(12); // x-11 = 1
+    expect(ellipse.x).toBe(6); // x-dx = 1
+    expect(vector.x).toBe(11); // x-dx = 1
   });
 
   it("can resize rectangle", () => {
@@ -966,4 +1084,3 @@ describe("DrawingContentModel", () => {
   });
 
 });
-

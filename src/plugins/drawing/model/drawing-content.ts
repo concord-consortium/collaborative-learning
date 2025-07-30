@@ -4,7 +4,8 @@ import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { flow } from "mobx";
 
-import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType, BoundingBox }
+import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType,
+  BoundingBox, AlignType, isHorizontalAlignType }
   from "./drawing-basic-types";
 import { kDrawingStateVersion, kDrawingTileType, kDuplicateOffset, kFlipOffset } from "./drawing-types";
 import { StampModel, StampModelType } from "./stamp";
@@ -20,7 +21,8 @@ import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tile
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { GroupObject, GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
 import { NavigatableTileModel } from "../../../models/tiles/navigatable-tile-model";
-import { removeIdsFromSnapshot } from "./drawing-utils";
+import { computeObjectsBoundingBox, getRelevantCoordinateForAlignType, removeIdsFromSnapshot } from "./drawing-utils";
+import { notEmpty } from "../../../utilities/js-utils";
 
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
@@ -32,6 +34,7 @@ export enum OpenPaletteValues {
   StrokeColor = "stroke-color",
   FillColor = "fill-color",
   Stamp = "stamp",
+  Align = "align",
 }
 export interface DrawingObjectMove {
   id: string,
@@ -52,6 +55,7 @@ export const DrawingContentModel = NavigatableTileModel
     vectorType: types.maybe(types.enumeration<VectorType>("VectorType", Object.values(VectorType))),
     // is type.maybe to avoid need for migration
     currentStampIndex: types.maybe(types.number),
+    alignType: types.optional(types.enumeration<AlignType>("AlignType", Object.values(AlignType)), AlignType.h_left),
   })
   .volatile(self => ({
     metadata: undefined as DrawingToolMetadataModelType | undefined,
@@ -98,8 +102,8 @@ export const DrawingContentModel = NavigatableTileModel
               : null;
     },
     get toolbarSettings(): ToolbarSettings {
-      const { stroke, fill, strokeDashArray, strokeWidth, vectorType } = self;
-      return { stroke, fill, strokeDashArray, strokeWidth, vectorType };
+      const { stroke, fill, strokeDashArray, strokeWidth, vectorType, alignType } = self;
+      return { stroke, fill, strokeDashArray, strokeWidth, vectorType, alignType };
     },
     // Return the first object found that has its origin at the given point; or undefined if none.
     objectAtLocation(pos: Point) {
@@ -210,6 +214,10 @@ export const DrawingContentModel = NavigatableTileModel
 
     setSelectedStamp(stampIndex: number) {
       self.currentStampIndex = stampIndex;
+    },
+
+    setSelectedAlignType(alignType: AlignType) {
+      self.alignType = alignType;
     },
 
     setOpenPalette(pallette: OpenPaletteValues) {
@@ -395,6 +403,22 @@ export const DrawingContentModel = NavigatableTileModel
               object.vFlip = !object.vFlip;
             }
             object.y = object.y + object.boundingBox.se.y - object.boundingBox.nw.y + kFlipOffset;
+          });
+        },
+        alignObjects(ids: string[], alignType: AlignType) {
+          const objects = ids.map(id => self.objectMap[id]).filter(notEmpty);
+          const bbox = computeObjectsBoundingBox(objects);
+          const target = getRelevantCoordinateForAlignType(alignType, bbox);
+
+          forEachObjectId(ids, object => {
+            const current = getRelevantCoordinateForAlignType(alignType, object.boundingBox);
+            const delta = target - current;
+            if (isHorizontalAlignType(alignType)) {
+              object.dragX = object.x + delta;
+            } else {
+              object.dragY = object.y + delta;
+            }
+            object.repositionObject();
           });
         },
         deleteObjects(ids: string[]) {
