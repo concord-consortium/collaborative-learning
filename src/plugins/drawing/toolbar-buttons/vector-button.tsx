@@ -47,8 +47,7 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
     stroke: drawingModel.stroke,
     strokeDashArray: drawingModel.strokeDashArray,
     strokeWidth: drawingModel.strokeWidth,
-    vectorType: drawingModel.vectorType,
-    alignType: drawingModel.alignType
+    vectorType: drawingModel.vectorType
   };
 
   const vectorIcon = getVectorTypeIcon(drawingModel.toolbarSettings.vectorType);

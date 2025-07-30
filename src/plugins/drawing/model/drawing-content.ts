@@ -102,8 +102,8 @@ export const DrawingContentModel = NavigatableTileModel
               : null;
     },
     get toolbarSettings(): ToolbarSettings {
-      const { stroke, fill, strokeDashArray, strokeWidth, vectorType, alignType } = self;
-      return { stroke, fill, strokeDashArray, strokeWidth, vectorType, alignType };
+      const { stroke, fill, strokeDashArray, strokeWidth, vectorType } = self;
+      return { stroke, fill, strokeDashArray, strokeWidth, vectorType };
     },
     // Return the first object found that has its origin at the given point; or undefined if none.
     objectAtLocation(pos: Point) {

@@ -123,8 +123,7 @@ describe("DrawingContentModel", () => {
       fill: DefaultToolbarSettings.fill,
       strokeDashArray: DefaultToolbarSettings.strokeDashArray,
       strokeWidth: DefaultToolbarSettings.strokeWidth,
-      vectorType: undefined,
-      alignType: DefaultToolbarSettings.alignType
+      vectorType: undefined
     };
     expect(model.toolbarSettings).toEqual(defaultSettings);
     model.setStroke(stroke, model.selection);

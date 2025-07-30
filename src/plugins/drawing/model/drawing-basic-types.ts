@@ -125,7 +125,6 @@ export interface ToolbarSettings {
   strokeDashArray: string;
   strokeWidth: number;
   vectorType?: VectorType;
-  alignType: AlignType;
 }
 
 export const DefaultToolbarSettings: ToolbarSettings = {
@@ -133,6 +132,5 @@ export const DefaultToolbarSettings: ToolbarSettings = {
   fill: "none",
   strokeDashArray: "",
   strokeWidth: 2,
-  vectorType: VectorType.line,
-  alignType: AlignType.h_left,
+  vectorType: VectorType.line
 };

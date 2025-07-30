@@ -7,10 +7,8 @@ import { OpenPaletteValues } from "../model/drawing-content";
 import { ToolbarButtonSvg } from "./toolbar-button-svg";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
 import SmallCornerTriangle from "../../../../src/assets/icons/small-corner-triangle.svg";
-
-// Import align icon - using center align as default
 import { AlignTypePalette } from "../components/align-palette";
-import { AlignType, getAlignTypeIcon } from "../model/drawing-basic-types";
+import { AlignType, getAlignTypeIcon, getAlignTypeTooltip } from "../model/drawing-basic-types";
 
 export const AlignButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
@@ -19,13 +17,6 @@ export const AlignButton = observer(({ name }: IToolbarButtonComponentProps) => 
   const enabled = drawingModel.selection.length > 1;
 
   const { onClick } = useTouchHold(toggleOpen, alignItems);
-
-  function alignItems() {
-    drawingModel.setOpenPalette(OpenPaletteValues.None);
-    console.log("Aligning items");
-
-    drawingModel.alignObjects(drawingModel.selection, drawingModel.alignType);
-  }
 
   function handleTriangleClick(e: React.MouseEvent) {
     e.stopPropagation();
@@ -40,15 +31,22 @@ export const AlignButton = observer(({ name }: IToolbarButtonComponentProps) => 
     }
   }
 
+  function alignItems() {
+    drawingModel.setOpenPalette(OpenPaletteValues.None);
+    drawingModel.alignObjects(drawingModel.selection, drawingModel.alignType);
+  }
+
   function handleAlignTypeChange(alignType: AlignType) {
     drawingModel.setOpenPalette(OpenPaletteValues.None);
     drawingModel.setSelectedAlignType(alignType);
   }
 
-  const icon = getAlignTypeIcon(drawingModel.toolbarSettings.alignType);
+  const icon = getAlignTypeIcon(drawingModel.alignType);
+  const tooltip = getAlignTypeTooltip(drawingModel.alignType);
+
   const typesPalette = isOpen ?
     <AlignTypePalette
-      selectedAlignType={drawingModel.toolbarSettings.alignType}
+      selectedAlignType={drawingModel.alignType}
       onSelectAlignType={handleAlignTypeChange}
       settings={drawingModel}
     />
@@ -57,7 +55,7 @@ export const AlignButton = observer(({ name }: IToolbarButtonComponentProps) => 
   return (
     <TileToolbarButton
       name={name}
-      title={"Align"}
+      title={tooltip}
       selected={isSelected}
       onClick={onClick}
       onTouchHold={toggleOpen}

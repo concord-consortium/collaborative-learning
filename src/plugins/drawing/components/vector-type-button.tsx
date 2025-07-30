@@ -22,8 +22,7 @@ export const VectorTypeButton = observer(
     stroke: settings.stroke,
     strokeDashArray: settings.strokeDashArray,
     strokeWidth: settings.strokeWidth,
-    vectorType: settings.vectorType,
-    alignType: settings.alignType
+    vectorType: settings.vectorType
   };
 
   return (
