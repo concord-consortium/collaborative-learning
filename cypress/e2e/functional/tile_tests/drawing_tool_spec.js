@@ -231,6 +231,7 @@ context('Draw Tool Tile', function () {
     drawToolTile.getTileTitle().should("contain", newName);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
   });
+
   it("Vector", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
@@ -706,7 +707,26 @@ context('Draw Tool Tile', function () {
     drawToolTile.dragSelectionRectangle(50, 20, 250, 100);
     drawToolTile.getSelectionBox().should("have.length", 3);
     clueCanvas.toolbarButtonIsEnabled('drawing', 'align');
-    // By default button will align the left edges of the objects
+    // Aligns left by default
+    clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align left");
+    drawToolTile.getDrawToolAlignOptions().should("not.exist");
+    clueCanvas.longClickToolbarButton('drawing', 'align'); // Open palette via long click
+    drawToolTile.getDrawToolAlignOptions().should("exist").and("be.visible").and("have.length", 6);
+    drawToolTile.getDrawToolAlignOptions().eq(2).click();
+    drawToolTile.getDrawToolAlignOptions().should("not.exist");
+    clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align right");
+    drawToolTile.getDrawToolAlignExpand().click(); // Open palette via triangle button
+    drawToolTile.getDrawToolAlignOptions().should("exist").and("be.visible").and("have.length", 6);
+    drawToolTile.getDrawToolAlignOptions().eq(0).click();
+    drawToolTile.getDrawToolAlignOptions().should("not.exist");
+    clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align left");
+    // Palette can also be toggled open and closed without changing the alignment type
+    drawToolTile.getDrawToolAlignExpand().click(); // Open palette via triangle button
+    drawToolTile.getDrawToolAlignOptions().should("exist").and("be.visible").and("have.length", 6);
+    drawToolTile.getDrawToolAlignExpand().click(); // Close palette via triangle button
+    drawToolTile.getDrawToolAlignOptions().should("not.exist");
+    clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align left");
+
     clueCanvas.clickToolbarButton('drawing', 'align');
     // All should now have been moved to the location of the rectangle
     drawToolTile.getRectangleDrawing().eq(0).invoke('attr', 'transform')
