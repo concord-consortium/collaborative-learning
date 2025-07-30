@@ -12,7 +12,6 @@ import { AlignType, getAlignTypeIcon, getAlignTypeTooltip } from "../model/drawi
 
 export const AlignButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
-  const isSelected = drawingModel?.selectedButton === "align";
   const isOpen = drawingModel?.openPallette === OpenPaletteValues.Align;
   const enabled = drawingModel.selection.length > 1;
 
@@ -56,7 +55,6 @@ export const AlignButton = observer(({ name }: IToolbarButtonComponentProps) => 
     <TileToolbarButton
       name={name}
       title={tooltip}
-      selected={isSelected}
       onClick={onClick}
       onTouchHold={toggleOpen}
       disabled={!enabled}
