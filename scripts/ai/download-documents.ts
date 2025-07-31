@@ -17,11 +17,40 @@ import { getFirebaseBasePath, prettyDuration } from "../lib/script-utils.js";
 
 import { getClassKeys } from "../lib/firebase-classes.js";
 
+// set to true to add a timestamp to the dataset path
+const datasetPathWithTimestamp = false;
+
+// set to true to pretty print the JSON files
+const prettyPrintJson = true;
+
 // The portal to get documents from. For example, "learn.concord.org".
 const portal = "learn.concord.org";
 // The demo name to use. Make falsy to not use a demo.
-const demo = "TAGCLUE";
+// const demo = "TAGCLUE";
+const demo = false;
 // const demo = false;
+
+// add classes to pull specific classes by their hash
+const classHashes = [];
+/*
+  example:
+
+  const classHashes = [
+  "7ff18c547954b07fd73b6b6e8cff5e0cdc504de0c065ae8a",
+  "bba7afa8ce8cd2e2b6d9887016da70b3ced4b920f7662be6",
+  "9ae57f9d2fb22623404b30613e6a52dff18cb49db9e100b1",
+  "bf8f4b397e0648313b4cc3d57059c64e42cd0a8f6ea1f968",
+  "0d3e045b041e82fdea517b327d5bf8567300e8a79dc1dccd",
+  "e14f8d033a3897f5b4def8fcb81e86fdbc51a8e625941f2c",
+  "6d6b148ea3691538d7879333b4e626cd41e6ff8216e003a4",
+  "69043f6c854df4cae3d5fa5c9e56b944de4d5c298639608f",
+  "93313af148bb116f6682dcb03a12a2e83a09e8400f4aa0ac",
+];
+*/
+const classKeyRecords: Record<string, boolean> = {};
+for (const classHash of classHashes) {
+  classKeyRecords[classHash] = true;
+}
 
 // Make falsy to include all documents
 const documentLimit = false;
@@ -38,7 +67,9 @@ const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
 const firebaseBasePath = getFirebaseBasePath(portal, demo);
 
-const {classKeys, accessTime, fetchTime} = await getClassKeys(firebaseBasePath);
+const {classKeys, accessTime, fetchTime} = classHashes.length === 0
+  ? await getClassKeys(firebaseBasePath)
+  : {classKeys: classKeyRecords, accessTime: Date.now(), fetchTime: Date.now()};
 
 // Fetch the service account key JSON file contents; must be in same folder as script
 const credential = admin.credential.cert('../serviceAccountKey.json');
@@ -50,7 +81,7 @@ admin.initializeApp({
 
 const credentialTime = Date.now();
 
-const targetDir = `dataset${startTime}`;
+const targetDir = datasetPathWithTimestamp ? `dataset${startTime}` : "dataset";
 const targetPath = `${datasetPath}${targetDir}`;
 await fs.mkdir(targetPath, error => {
   if (error) {
@@ -58,6 +89,7 @@ await fs.mkdir(targetPath, error => {
   }
 });
 for (const key of Object.keys(classKeys)) {
+  console.log(`Processing class: ${key}`);
   if (documentLimit && documentsProcessed >= documentLimit) break;
   const usersSnapshot = await admin.database().ref(`${firebaseBasePath}/${key}/users`).once("value");
   const users = usersSnapshot.val();
@@ -92,8 +124,8 @@ for (const key of Object.keys(classKeys)) {
         break;
       }
       const documentId = `document${docId}`;
-      const documentFile = `${targetPath}/${documentId}.txt`;
-      fs.writeFileSync(documentFile, content);
+      const documentFile = `${targetPath}/${documentId}.json`;
+      fs.writeFileSync(documentFile, prettyPrintJson ? JSON.stringify(parsedContent, null, 2) : content);
       documentsProcessed++;
 
       if (documentsProcessed % 100 === 0) {
@@ -118,6 +150,7 @@ console.log(`Documents downloaded: ${documentsProcessed}`);
 console.log(`Undefined documents: ${undefinedDocuments}`);
 console.log(`Empty documents: ${emptyDocuments}`);
 console.log(`Failed to process: ${failedDocuments}`);
+console.log(`Non-empty documents: ${documentsProcessed - undefinedDocuments - emptyDocuments - failedDocuments}`);
 console.log(`*** Documents saved to ${targetPath} ***`);
 
 process.exit(0);

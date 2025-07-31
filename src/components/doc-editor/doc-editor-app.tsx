@@ -15,17 +15,19 @@ import { DocumentAnnotationToolbar } from "../document/document-annotation-toolb
 import { CanvasComponent } from "../document/canvas";
 import { DocEditorSettings } from "./doc-editor-settings";
 import { SettingsDialog } from "./settings-dialog";
+import aiSummarizer from "../../../shared/ai-summarizer";
 
 import "../document/document.scss";
 import "../four-up.scss";
 import "./doc-editor-app.scss";
+import { AiSummary } from "./ai-summary";
 
 const kDocEditorDocKey = "clue-doc-editor-doc";
 
 // These are defined at the module level so the initialDoc can be used in two useState
 // initializers. The initialDoc should only change when the page is loaded so this is
 // safe.
-const {document: documentURL, readOnly, noStorage, unwrapped } = urlParams;
+const {document: documentURL, readOnly, noStorage, unwrapped, showAiSummary, includeModelInAiSummary } = urlParams;
 const savedDocString = noStorage ? undefined : window.sessionStorage.getItem(kDocEditorDocKey);
 const initialDoc = savedDocString ? JSON.parse(savedDocString) : defaultDocumentModel;
 
@@ -51,6 +53,7 @@ export const DocEditorApp = observer(function DocEditorApp() {
     return _settings;
 
   });
+  const [aiSummary, setAiSummary] = useState<string>();
 
   const {showLocalReadOnly,showRemoteReadOnly,anyReadOnly} = settings;
 
@@ -170,6 +173,14 @@ export const DocEditorApp = observer(function DocEditorApp() {
     window.location.reload();
   }
 
+  function handleToggleAiSummary() {
+    if (aiSummary) {
+      setAiSummary(undefined);
+    } else if (document.content) {
+      setAiSummary(aiSummarizer(getSnapshot(document.content), {includeModel: includeModelInAiSummary}));
+    }
+  }
+
   useEffect(() => {
     if (!documentURL) {
       return;
@@ -220,6 +231,7 @@ export const DocEditorApp = observer(function DocEditorApp() {
                 <button onClick={handleOpen}>open</button>
                 <button onClick={handleSave}>save</button>
                 <span className="status">{status}</span>
+                {showAiSummary && <button onClick={handleToggleAiSummary}>ai summary</button>}
                 <button onClick={handleClear}>reset doc</button>
                 <button onClick={handleSettings}>settings</button>
                 <DocumentAnnotationToolbar/>
@@ -252,6 +264,7 @@ export const DocEditorApp = observer(function DocEditorApp() {
           }
         </div>
       }
+      { aiSummary && <AiSummary summary={aiSummary} toggleAiSummary={handleToggleAiSummary} /> }
     </div>
   );
 });

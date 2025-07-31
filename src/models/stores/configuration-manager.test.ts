@@ -64,7 +64,16 @@ describe("ConfigurationManager", () => {
     toolbar: [] as any,
     placeholderText: "New Placeholder Text",
     stamps: [] as any,
-    settings: {}
+    settings: {},
+    aiEvaluation: "custom",
+    aiPrompt: {
+      mainPrompt: "This is a picture of a student document.\n Please categorize it.",
+      categorizationDescription: "The focus area of the document",
+      categories: ["user", "environment", "form", "function"] as any,
+      keyIndicatorsPrompt: "List of main features or elements of the document that support this categorization",
+      discussionPrompt: "Any other relevant information.",
+      systemPrompt: "You are a teaching assistant in a middle school science class."
+    },
   } as UnitConfiguration;
 
   const baseSettings: Partial<UnitConfiguration> = {
@@ -124,6 +133,45 @@ describe("ConfigurationManager", () => {
   it("merges settings", () => {
     const config = new ConfigurationManager(defaults, [baseSettings, unitSettings]);
     expect(config.settings).toEqual(mergedSettings);
+  });
+
+  it("should return aiEvaluation and aiPrompt from configuration when defined", () => {
+    const config = new ConfigurationManager(defaults, [overrides]);
+    expect(config.aiPrompt).toEqual({
+      mainPrompt: "This is a picture of a student document.\n Please categorize it.",
+      categorizationDescription: "The focus area of the document",
+      categories: ["user", "environment", "form", "function"],
+      keyIndicatorsPrompt: "List of main features or elements of the document that support this categorization",
+      discussionPrompt: "Any other relevant information.",
+      systemPrompt: "You are a teaching assistant in a middle school science class."
+    });
+    expect(config.aiEvaluation).toBe("custom");
+  });
+
+  it("should return undefined aiEvaluation and aiPrompt when not configured", () => {
+    const config = new ConfigurationManager(defaults, []);
+    expect(config.aiEvaluation).toBeUndefined();
+    expect(config.aiPrompt).toBeUndefined();
+  });
+
+  it("should return commentTags when showCommentTag is true", () => {
+    const defaultsWithCommentTags = {
+      ...defaults,
+      showCommentTag: true,
+      commentTags: { "tag1": "Tag 1", "tag2": "Tag 2" }
+    };
+    const configManager = new ConfigurationManager(defaultsWithCommentTags, []);
+    expect(configManager.commentTags).toEqual({ "tag1": "Tag 1", "tag2": "Tag 2" });
+  });
+
+  it("should return empty object when showCommentTag is false", () => {
+    const defaultsWithoutCommentTags = {
+      ...defaults,
+      showCommentTag: false,
+      commentTags: { "tag1": "Tag 1" }
+    };
+    const configManager = new ConfigurationManager(defaultsWithoutCommentTags, []);
+    expect(configManager.commentTags).toEqual({});
   });
 
 });

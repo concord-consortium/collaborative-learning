@@ -2,10 +2,9 @@ import React, { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { kAnalyzerUserParams } from "../../../shared/shared";
+import ChatAvatar from "./chat-avatar";
 
-import AdaAvatar from "../../assets/ada-avatar.svg";
-
-const message = "Ada is evaluating...";
+const message = "Ada is thinking about it...";
 const userName = kAnalyzerUserParams.fullName;
 
 interface IWaitingMessageProps {
@@ -28,7 +27,7 @@ const _WaitingMessage: React.FC<IWaitingMessageProps> = ({ content }) => {
   const body = (
     <>
       <div className="comment-text-header">
-        <AdaAvatar />
+        <ChatAvatar uid={kAnalyzerUserParams.id} pulse />
         <div className="user-name">{userName}</div>
       </div>
       <div className="comment-text" data-testid="comment">

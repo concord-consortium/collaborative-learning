@@ -11,8 +11,9 @@ export interface ChatCommentThread {
 
 // Expects a list of comments in Document order with document level comments (with no (null) tileId) first.
 export function makeChatThreads (
-  commentsInDocumentOrder:WithId<CommentDocument>[] | undefined,
-  content: DocumentContentModelType | undefined) : ChatCommentThread[] {
+    commentsInDocumentOrder: WithId<CommentDocument>[] | undefined,
+    content: DocumentContentModelType | undefined,
+    docTitle?: string) : ChatCommentThread[] {
   const chatThreads: ChatCommentThread[] = [];
   // Since the comments are sorted by tile id already, each time we encounter a new tile id, we make a new thread.
   commentsInDocumentOrder?.forEach((comment, idx)=> {
@@ -29,7 +30,7 @@ export function makeChatThreads (
         tile = content?.getTile(comment.tileId);
       }
       chatThreads.push({
-        title: isTileComment && tile ? tile.computedTitle : null,
+        title: (isTileComment ? tile?.computedTitle : docTitle) ?? null,
         tileType: isTileComment && tile ? tile.content?.type : null,
         tileId: isTileComment ? tileId : null,
         comments: [comment]
