@@ -68,7 +68,6 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
   const getHighlightChipBoundingBox = useCallback(() => {
     const el = chipRef.current;
     if (!el) return;
-    console.log("getHighlightChipBoundingBox", { highlightId, el });
     const highlightRect = el.getBoundingClientRect();
     const textBoxRect = el.closest('.text-tool-wrapper')?.getBoundingClientRect();
     if (highlightRect && textBoxRect && highlightRect.width > 0 && highlightRect.height > 0
@@ -83,7 +82,6 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
   }, [highlightId, highlightRegistryContextFn]);
 
   useEffect(() => {
-    console.log("HighlightComponent useEffect", { highlightId, chipRef });
     getHighlightChipBoundingBox();
   }, [editorRevisionContext, getHighlightChipBoundingBox]);
 

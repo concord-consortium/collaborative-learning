@@ -349,7 +349,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   private handleUpdateHighlightBoxCache = (id: string, box: IHighlightBox) => {
     const readOnly = this.isReadOnly();
-    console.log("handleUpdateHighlightBoxCache", { readOnly, id, box });
     this.highlightBoxesCache.set(id, box);
   };
 }
