@@ -11,6 +11,8 @@ import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { IDocumentMetadataModel } from "../../models/stores/sorted-documents";
+import { LogEventName } from "../../lib/logger-types";
+import { Logger } from "../../lib/logger";
 
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
@@ -21,6 +23,8 @@ interface IProps {
   documentGroup: DocumentGroup;
   idx: number;
   secondarySort: SecondarySortType;
+  primarySortBy: string;
+  secondarySortBy: string;
 }
 
 export interface IOpenDocumentsGroupMetadata {
@@ -31,7 +35,7 @@ export interface IOpenDocumentsGroupMetadata {
 }
 
 export const SortedSection: React.FC<IProps> = observer(function SortedSection(props: IProps) {
-  const { docFilter, documentGroup, idx, secondarySort } = props;
+  const { docFilter, documentGroup, idx, secondarySort, primarySortBy, secondarySortBy } = props;
   const { persistentUI, sortedDocuments, ui } = useStores();
   const { expandedSortWorkSections, setExpandedSortWorkSections, setHighlightedSortWorkDocument } = ui;
   const showDocuments = expandedSortWorkSections.includes(documentGroup.label);
@@ -68,6 +72,13 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
   };
 
   const handleToggleShowDocuments = () => {
+    Logger.log(LogEventName.SORT_HEADER_TOGGLED, {
+      documentGroup: documentGroup.label,
+      show: !showDocuments,
+      numDocs: documentGroup.documents.length,
+      primarySort: primarySortBy,
+      secondarySort: secondarySortBy
+    });
     setExpandedSortWorkSections(documentGroup.label, !showDocuments);
   };
 

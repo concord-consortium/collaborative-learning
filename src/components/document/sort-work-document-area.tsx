@@ -11,6 +11,8 @@ import { ExemplarVisibilityCheckbox } from "./exemplar-visibility-checkbox";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { DocumentScroller } from "./document-scroller";
 import { DocumentGroup } from "../../models/stores/document-group";
+import { LogEventName } from "../../lib/logger-types";
+import { logDocumentEvent } from "../../models/document/log-document-event";
 
 import CloseIcon from "../../../src/assets/icons/close/close.svg";
 import ToggleDocumentScrollerIcon from "../../../src/assets/show-hide-thumbnail-view-small-icon.svg";
@@ -62,6 +64,9 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
 
   const handleCloseButtonClick = () => {
+    if (openDocument) {
+      logDocumentEvent(LogEventName.CLOSE_SORTED_DOCUMENT, { document: openDocument });
+    }
     persistentUI.closeDocumentGroupPrimaryDocument();
   };
 
