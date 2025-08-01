@@ -14,7 +14,7 @@ import { useReadOnlyContext } from "../../../components/document/read-only-conte
 import { Transformable } from "../components/transformable";
 import { SizedObject } from "./sized-object";
 import { DrawingScaleProvider } from "../components/drawing-scale-context";
-import { boundingBoxSidesForPoints, rotatePoint } from "../model/drawing-utils";
+import { boundingBoxSidesForPoints, rotatePoint, computeObjectsBoundingBox } from "../model/drawing-utils";
 
 import GroupObjectsIcon from "../assets/group-objects-icon.svg";
 
@@ -104,16 +104,7 @@ export const GroupObject = SizedObject.named("GroupObject")
      */
     assimilateObjects() {
       // Compute the overall bounding box of the group's members.
-      const bb = self.objects.reduce((cur, obj) => {
-        if (obj) {
-          const objBB = obj.boundingBox;
-          if (objBB.nw.x < cur.nw.x) cur.nw.x = objBB.nw.x;
-          if (objBB.nw.y < cur.nw.y) cur.nw.y = objBB.nw.y;
-          if (objBB.se.x > cur.se.x) cur.se.x = objBB.se.x;
-          if (objBB.se.y > cur.se.y) cur.se.y = objBB.se.y;
-        }
-        return cur;
-      }, { nw: { x: Number.MAX_VALUE, y: Number.MAX_VALUE }, se: { x: -Number.MAX_VALUE, y: -Number.MAX_VALUE } });
+      const bb = computeObjectsBoundingBox(self.objects);
 
       self.x = bb.nw.x;
       self.y = bb.nw.y;
@@ -223,4 +214,3 @@ export const GroupComponent = observer(function GroupComponent(
     </Transformable>
   );
 });
-

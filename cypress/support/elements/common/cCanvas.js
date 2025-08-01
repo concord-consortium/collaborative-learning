@@ -471,6 +471,18 @@ class ClueCanvas {
       });
     }
 
+    longClickToolbarButton(tileType, buttonName, options = {}) {
+      cy.document().within(() => {
+        cy.get(`[data-test=canvas] .tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+          .should('have.length', 1)
+          .should('not.be.disabled')
+          .trigger('mousedown', options);
+        cy.wait(600);
+        cy.get(`[data-test=canvas] .tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+          .trigger('mouseup', options);
+      });
+    }
+
     /**
      * Locate a requested toolbar button's tooltip element.
      * @param {*} tileType string name of the tile

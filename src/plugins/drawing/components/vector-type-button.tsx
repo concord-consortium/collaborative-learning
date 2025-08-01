@@ -36,5 +36,3 @@ export const VectorTypeButton = observer(
     </TileToolbarButton>
   );
 });
-
-

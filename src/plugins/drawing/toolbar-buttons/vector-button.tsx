@@ -52,6 +52,14 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
 
   const vectorIcon = getVectorTypeIcon(drawingModel.toolbarSettings.vectorType);
 
+  const typesPalette = isOpen ?
+    <VectorTypePalette
+      selectedVectorType={drawingModel.toolbarSettings.vectorType}
+      onSelectVectorType={handleVectorTypeChange}
+      settings={settings}
+    />
+    : undefined;
+
   return (
     <TileToolbarButton
       name={name}
@@ -59,15 +67,9 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
       selected={isSelected}
       onClick={onClick}
       onTouchHold={toggleOpen}
+      extraContent={typesPalette}
     >
-      <ToolbarButtonSvg SvgIcon={vectorIcon} settings={settings}/>
-      { isOpen &&
-        <VectorTypePalette
-          selectedVectorType={drawingModel.toolbarSettings.vectorType}
-          onSelectVectorType={handleVectorTypeChange}
-          settings={settings}
-        />
-      }
+      <ToolbarButtonSvg SvgIcon={vectorIcon} settings={settings} />
       <SmallCornerTriangle
         onClick={handleTriangleClick}
         className="corner-triangle expand-collapse"

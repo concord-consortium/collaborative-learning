@@ -337,6 +337,7 @@
           "rotate-right",
           "flip-horizontal",
           "flip-vertical",
+          "align",
           "group",
           "ungroup",
           "|",

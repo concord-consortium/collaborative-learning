@@ -69,6 +69,15 @@ class DrawToolTile{
     getDrawToolUploadImage(){
       return cy.get('.primary-workspace .drawing-toolbar .upload-button-input');
     }
+    getDrawToolAlign(){
+      return cy.get('.primary-workspace .drawing-toolbar .toolbar-button.align');
+    }
+    getDrawToolAlignExpand(){
+      return cy.get('.primary-workspace .drawing-toolbar .toolbar-button.align .expand-collapse');
+    }
+    getDrawToolAlignOptions(){
+      return cy.get('.primary-workspace .drawing-toolbar .toolbar-palette.aligns button');
+    }
     getDrawToolGroup(){
       return cy.get('.primary-workspace .drawing-toolbar .toolbar-button.group');
     }
