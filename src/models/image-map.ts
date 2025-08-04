@@ -7,8 +7,8 @@ import {
 } from "../utilities/image-utils";
 import { DB } from "../lib/db";
 import { DEBUG_IMAGES } from "../lib/debug";
-import placeholderImage from "../assets/image_placeholder.png";
 import { getAssetUrl } from "../utilities/asset-utils";
+import { PLACEHOLDER_IMAGE_PATH } from "../utilities/image-constants";
 
 export const kExternalUrlHandlerName = "externalUrl";
 export const kLocalAssetsHandlerName = "localAssets";
@@ -35,7 +35,7 @@ export interface ImageMapEntrySnapshot {
 export class ImageMapEntry {
   filename?: string;
   contentUrl?: string;
-  displayUrl = placeholderImage as string;
+  displayUrl = PLACEHOLDER_IMAGE_PATH;
   width?: number;
   height?: number;
   status = EntryStatus.PendingStorage;
@@ -96,7 +96,7 @@ export type ImageListenerMap = Record<string, Record<string, () => void>>;
 export class ImageMap {
   images = observable.map<string, ImageMapEntry>();
   unitCodeMap = observable.map<string, string>();
-  @observable unitUrl?: string;
+  unitUrl = observable.box<string | undefined>(undefined);
   handlers: IImageHandler[] = [];
   storingPromises: Record<string, Promise<ImageMapEntry> | undefined> = {};
 
@@ -107,8 +107,8 @@ export class ImageMap {
 
     // placeholder doesn't have contentUrl
     this._addImage(
-      placeholderImage,
-      { displayUrl: placeholderImage, success: true }
+      PLACEHOLDER_IMAGE_PATH,
+      { displayUrl: PLACEHOLDER_IMAGE_PATH, success: true }
     );
 
     this.registerHandler(firebaseRealTimeDBImagesHandler);
@@ -136,7 +136,7 @@ export class ImageMap {
     return isPlaceholderImage(url);
   }
   clonePlaceholder() {
-    return ImageMapEntry.create(this.images.get(placeholderImage)!.toJSON());
+    return ImageMapEntry.create(this.images.get(PLACEHOLDER_IMAGE_PATH)!.toJSON());
   }
   getCachedImage(url?: string) {
     return url ? this.images.get(url) : undefined;
@@ -144,7 +144,7 @@ export class ImageMap {
   @computed
   get curriculumUrl() {
     if (!this.unitUrl) return;
-    return (new URL("../", this.unitUrl)).href;
+    return (new URL("../", this.unitUrl.get())).href;
   }
   @action
   registerHandler(handler: IImageHandler) {
@@ -214,7 +214,7 @@ export class ImageMap {
   }
   @action
   setUnitUrl(url: string) {
-    this.unitUrl = url;
+    this.unitUrl.set(url);
   }
   @action
   setUnitCodeMap(map: Record<string,string>) {
@@ -402,7 +402,7 @@ export class ImageMap {
     }
 
     this._addOrUpdateEntry(url,
-      {status: EntryStatus.PendingStorage, displayUrl: placeholderImage, retries});
+      {status: EntryStatus.PendingStorage, displayUrl: PLACEHOLDER_IMAGE_PATH, retries});
 
     const storingPromise = this.storeAndAddImage(url, handler, options);
 
@@ -538,7 +538,7 @@ const kFirebaseStorageUrlPrefix = "https://firebasestorage.googleapis.com";
 // By not setting the contentUrl, it also means that the default placeholder image
 // entry will not be modified by syncContentUrl. That is a good thing.
 const kErrorStorageResult: IImageHandlerStoreResult = {
-  displayUrl: placeholderImage, success: false
+  displayUrl: PLACEHOLDER_IMAGE_PATH, success: false
 };
 
 export const firebaseStorageImagesHandler: IImageHandler = {

@@ -5,8 +5,7 @@ import { DrawingObjectType, IDrawingComponentProps,
   StrokedObjectType,
   isFilledObject,
   isStrokedObject,
-  typeField,
-  ObjectTypeIconViewBox } from "./drawing-object";
+  typeField } from "./drawing-object";
 import { BoundingBox, VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion, renderDrawingObject } from "../components/drawing-object-manager";
 import { isVectorObject } from "./vector";
@@ -16,7 +15,7 @@ import { SizedObject } from "./sized-object";
 import { DrawingScaleProvider } from "../components/drawing-scale-context";
 import { boundingBoxSidesForPoints, rotatePoint, computeObjectsBoundingBox } from "../model/drawing-utils";
 
-import GroupObjectsIcon from "../assets/group-objects-icon.svg";
+
 
 export const GroupObject = SizedObject.named("GroupObject")
   .props({
@@ -27,9 +26,7 @@ export const GroupObject = SizedObject.named("GroupObject")
     get label() {
       return "Group";
     },
-    get icon() {
-      return (<GroupObjectsIcon viewBox={ObjectTypeIconViewBox}/>);
-    },
+
     /**
      * Externalize the bounding box of an object that is inside the group.
      * The input is a BoundingBox inside the context of the group,

@@ -8,7 +8,7 @@ import { StampModelType } from "../model/stamp";
 import { boundingBoxSidesForPoints, normalizeRotation, rotateBoundingBox,
   rotatePoint, rotationPoint } from "../model/drawing-utils";
 
-import ErrorIcon from "../../../assets/icons/error.svg";
+
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "text" | "stamp" | "variable";
 
@@ -92,10 +92,7 @@ export const DrawingObject = types.model("DrawingObject", {
     // used in the show/sort panel.
     return "Unknown object";
   },
-  get icon(): JSX.Element {
-    // Should be overridden by all subclasses
-    return (<ErrorIcon viewBox={ObjectTypeIconViewBox}/>);
-  },
+
   get isRotatedToHorizontal() {
     return [90, 270].includes(normalizeRotation(self.rotation));
   }

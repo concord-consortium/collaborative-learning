@@ -1,6 +1,7 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { ToolbarSettings, VectorType, getVectorTypeIcon, getVectorTypeTooltip } from "../model/drawing-basic-types";
+import { ToolbarSettings, VectorType } from "../model/drawing-basic-types";
+import { getVectorTypeIcon, getVectorTypeTooltip } from "../model/drawing-icons";
 import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
 import { ToolbarButtonSvg } from "../toolbar-buttons/toolbar-button-svg";
 

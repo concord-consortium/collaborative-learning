@@ -2,12 +2,12 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps,
-  IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
+  IDrawingLayer, StrokedObject, typeField } from "./drawing-object";
 import { SizedObject } from "./sized-object";
 import { Point } from "../model/drawing-basic-types";
 import { Transformable } from "../components/transformable";
 
-import RectToolIcon from "../assets/rectangle-icon.svg";
+
 
 // Note: SizedObject must be listed last because it overrides the default implementation
 // of the boundingBox property.
@@ -19,11 +19,7 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
     get label() {
       return self.width===self.height ? "Square" : "Rectangle";
     },
-    get icon() {
-      return (<RectToolIcon viewBox={ObjectTypeIconViewBox}
-        fill={self.fill}
-        stroke={self.stroke} strokeWidth={self.strokeWidth} strokeDasharray={self.strokeDashArray} />);
-    }
+
   }))
   .actions(self => ({
     resize(start: Point, end: Point, makeSquare: boolean) {
@@ -139,4 +135,3 @@ export class RectangleDrawingTool extends DrawingTool {
     window.addEventListener("pointerup", handlePointerUp);
   }
 }
-

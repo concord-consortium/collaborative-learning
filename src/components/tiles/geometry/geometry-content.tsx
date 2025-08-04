@@ -55,7 +55,7 @@ import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { EditableTileTitle } from "../editable-tile-title";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
-import placeholderImage from "../../../assets/image_placeholder.png";
+import { PLACEHOLDER_IMAGE_PATH } from "../../../utilities/image-constants";
 import ErrorAlert from "../../utilities/error-alert";
 import { halfPi, isFiniteNumber, normalizeAngle, Point } from "../../../utilities/math-utils";
 import SingleStringDialog from "../../utilities/single-string-dialog";
@@ -162,7 +162,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                 if (board) {
                   const bgImage = this.getBackgroundImage(this.state.board);
                   if (bgImage) {
-                    bgImage.url = image.displayUrl || placeholderImage;
+                    bgImage.url = image.displayUrl || PLACEHOLDER_IMAGE_PATH;
                     board.update();
                   }
                 }

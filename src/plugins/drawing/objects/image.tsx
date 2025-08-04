@@ -3,12 +3,12 @@ import React from "react";
 import { observer } from "mobx-react";
 import { gImageMap } from "../../../models/image-map";
 import { DrawingObjectSnapshot, DrawingTool,
-  IDrawingComponentProps, IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
+  IDrawingComponentProps, IDrawingLayer, typeField } from "./drawing-object";
 import { SizedObject } from "./sized-object";
 import { Transformable } from "../components/transformable";
 
-import placeholderImage from "../../../assets/image_placeholder.png";
-import ImageToolIcon from "../../../clue/assets/icons/image-tool.svg";
+import { PLACEHOLDER_IMAGE_PATH } from "../../../utilities/image-constants";
+
 
 export const ImageObject = SizedObject.named("ImageObject")
   .props({
@@ -28,13 +28,11 @@ export const ImageObject = SizedObject.named("ImageObject")
     get label() {
       return "Image";
     },
-    get icon() {
-      return (<ImageToolIcon viewBox={ObjectTypeIconViewBox}/>);
-    },
+
     get displayUrl() {
       const entry = gImageMap.getImageEntry(self.url, {filename: self.filename});
       // TODO we could return a spinner image if the entry is storing or computing dimensions
-      return entry?.displayUrl || (placeholderImage as string);
+      return entry?.displayUrl || PLACEHOLDER_IMAGE_PATH;
     },
 
   }))

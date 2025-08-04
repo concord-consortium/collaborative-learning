@@ -2,14 +2,14 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps,
-  IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
+  IDrawingLayer, typeField } from "./drawing-object";
 import { SizedObject } from "./sized-object";
 import { uniqueId } from "../../../../src/utilities/js-utils";
 import { WrappedSvgText } from "../components/wrapped-svg-text";
 import { Transformable } from "../components/transformable";
 import { useDrawingScale } from "../components/drawing-scale-context";
 
-import TextToolIcon from "../../../assets/icons/comment/comment.svg";
+
 
 // Note - TextObject has a stroke color, but is not implementing StrokedObject
 // because it doesn't support stroke width or dashArray.
@@ -23,9 +23,7 @@ export const TextObject = types.compose("TextObject", EditableObject, SizedObjec
     get label() {
       return "Text";
     },
-    get icon() {
-      return (<TextToolIcon viewBox={ObjectTypeIconViewBox} fill={self.stroke} />);
-    }
+
   }))
   .actions(self => ({
     setStroke(stroke: string){

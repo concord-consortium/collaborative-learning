@@ -1,5 +1,5 @@
 import { defaultImageContent, ImageContentModel } from "./image-content";
-import placeholderImage from "../../../assets/image_placeholder.png";
+import { PLACEHOLDER_IMAGE_PATH } from "../../../utilities/image-constants";
 
 describe("ImageContent", () => {
   it("should handle empty change lists", () => {
@@ -14,7 +14,7 @@ describe("ImageContent", () => {
     const content = defaultImageContent();
     expect(content.isUserResizable).toBe(true);
     expect(content.filename).toBeUndefined();
-    expect(content.url).toBe(placeholderImage);
+    expect(content.url).toBe(PLACEHOLDER_IMAGE_PATH);
     expect(content.hasValidImage).toBe(false);
   });
 

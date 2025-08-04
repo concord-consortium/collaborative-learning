@@ -53,7 +53,7 @@ for (const classHash of classHashes) {
 }
 
 // Make falsy to include all documents
-const documentLimit = false;
+const documentLimit = 1;
 
 console.log(`*** Starting to Download Documents ***`);
 
@@ -91,10 +91,11 @@ await fs.mkdir(targetPath, error => {
 for (const key of Object.keys(classKeys)) {
   console.log(`Processing class: ${key}`);
   if (documentLimit && documentsProcessed >= documentLimit) break;
+  console.log('  - fetching', `${firebaseBasePath}/${key}/users`);
   const usersSnapshot = await admin.database().ref(`${firebaseBasePath}/${key}/users`).once("value");
   const users = usersSnapshot.val();
   // console.log(key);
-  // console.log(`  - ${Object.keys(users).length} users`);
+  console.log(`  - ${Object.keys(users).length} users`);
   for (const [_userId, user] of Object.entries<any>(users)) {
     if (documentLimit && documentsProcessed >= documentLimit) break;
     // console.log(`  ${userId}`);

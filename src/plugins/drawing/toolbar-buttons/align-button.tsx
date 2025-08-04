@@ -8,7 +8,8 @@ import { ToolbarButtonSvg } from "./toolbar-button-svg";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
 import SmallCornerTriangle from "../../../../src/assets/icons/small-corner-triangle.svg";
 import { AlignTypePalette } from "../components/align-palette";
-import { AlignType, getAlignTypeIcon, getAlignTypeTooltip } from "../model/drawing-basic-types";
+import { AlignType } from "../model/drawing-basic-types";
+import { getAlignTypeIcon, getAlignTypeTooltip } from "../model/drawing-icons";
 
 export const AlignButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);

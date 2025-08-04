@@ -6,7 +6,7 @@ import { SectionModel, SectionModelType } from "../../curriculum/section";
 import { TextContentModel } from "../../tiles/text/text-content";
 import { IDocumentExportOptions } from "../../tiles/tile-content-info";
 import { parsedExport, getColumnWidths, getAllRows } from "./dc-test-utils";
-import placeholderImage from "../../assets/image_placeholder.png";
+import { PLACEHOLDER_IMAGE_PATH } from "../../../utilities/image-constants";
 import { LogEventName } from "../../../lib/logger-types";
 
 jest.mock("../../../utilities/mst-utils", () => {
@@ -129,9 +129,9 @@ describe("DocumentContentModel", () => {
     expect(parsedContentExport()).toEqual({
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        { title: "Image 1", content: { type: "Image", url: placeholderImage } },
+        { title: "Image 1", content: { type: "Image", url: PLACEHOLDER_IMAGE_PATH } },
         { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        { title: "Image 2", content: { type: "Image", url: placeholderImage } }
+        { title: "Image 2", content: { type: "Image", url: PLACEHOLDER_IMAGE_PATH } }
       ]
     });
   });
@@ -169,7 +169,7 @@ describe("DocumentContentModel", () => {
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
-          { title: "Image 1", content: { type: "Image", url: placeholderImage } },
+          { title: "Image 1", content: { type: "Image", url: PLACEHOLDER_IMAGE_PATH } },
           { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ]
       ]

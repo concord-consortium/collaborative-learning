@@ -6,7 +6,8 @@ import { VectorTypePalette } from "../components/vector-palette";
 import { DrawingContentModelContext } from "../components/drawing-content-context";
 import { OpenPaletteValues } from "../model/drawing-content";
 import { ToolbarButtonSvg } from "./toolbar-button-svg";
-import { ToolbarSettings, VectorType, getVectorTypeIcon } from "../model/drawing-basic-types";
+import { ToolbarSettings, VectorType } from "../model/drawing-basic-types";
+import { getVectorTypeIcon } from "../model/drawing-icons";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
 import SmallCornerTriangle from "../../../../src/assets/icons/small-corner-triangle.svg";
 

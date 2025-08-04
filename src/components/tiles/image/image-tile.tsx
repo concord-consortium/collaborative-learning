@@ -18,7 +18,7 @@ import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ImageDragDrop } from "../../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
-import placeholderImage from "../../../assets/image_placeholder.png";
+import { PLACEHOLDER_IMAGE_PATH } from "../../../utilities/image-constants";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import { ContainerContext } from "../../document/container-context";
@@ -151,7 +151,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     const showEmptyImagePrompt = !this.getContent().hasValidImage;
 
     // Include states for selected and editing separately to clean up UI a little
-    const imageToUseForDisplay = imageEntry?.displayUrl || (isLoading ? "" : placeholderImage as string);
+    const imageToUseForDisplay = imageEntry?.displayUrl || (isLoading ? "" : PLACEHOLDER_IMAGE_PATH);
     // Set image display properties for the div, since this won't resize automatically when the image changes
     const imageDisplayStyle: React.CSSProperties = {
       backgroundImage: "url(" + imageToUseForDisplay + ")"

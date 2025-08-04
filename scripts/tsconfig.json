@@ -2,6 +2,12 @@
   "compilerOptions": {
     "module": "nodenext",
     "resolveJsonModule": true,
-    "types": ["node"]
-  }
+    "types": ["node"],
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "jsx": "react",
+  },
+  "include": ["**/*", "../shared/*"],
+
 }

@@ -1,25 +1,9 @@
 /* eslint-disable max-len */
 
-/*
-
-NOTE: This is spike work to:
-
-  a) see if we could generate a useful text description
-  b) to get some output to test against openai and various local models.
-
-This code is not bullet proof and only handles a few tile types but it
-is "hidden" behind a query parameter in the editor so it won't be exposed to end users.
-
-*/
-
-import type {  DocumentContentSnapshotType } from "src/models/document/document-content";
-import type { ITileModelSnapshotOut } from "src/models/tiles/tile-model";
+import type {  DocumentContentSnapshotType } from "../../src/models/document/document-content";
+import type { ITileModelSnapshotOut } from "../../src/models/tiles/tile-model";
 import { slateToMarkdown } from "./slate-to-markdown";
 import { generateTileDescription } from "./generate-tile-description";
-import ReactDOMServer from "react-dom/server";
-import React from "react";
-import { renderDrawingObject } from "../src/plugins/drawing/components/drawing-object-manager";
-import { DrawingContentModel } from "../src/plugins/drawing/model/drawing-content";
 
 export interface INormalizedTile {
   model: ITileModelSnapshotOut;
@@ -56,7 +40,7 @@ export interface AiSummarizerOptions {
   includeModel?: boolean
 }
 
-export function aiSummarizer(content: any, options: AiSummarizerOptions): string {
+export function aiSimpleSummarizer(content: any, options: AiSummarizerOptions): string {
   const stringContent = stringifyContent(content);
   const parsedContent = parseContent(stringContent);
   const normalizedModel = normalize(parsedContent);
@@ -190,6 +174,7 @@ export function normalize(model: DocumentContentSnapshotType): NormalizedModel {
     dataSets,
   };
 }
+
 
 export function summarize(normalizedModel: NormalizedModel, options: AiSummarizerOptions): string {
   const {sections, dataSets} = normalizedModel;
@@ -336,7 +321,7 @@ export function tileSummary(tile: INormalizedTile, options: AiSummarizerOptions)
       break;
 
     case "Drawing":
-      result = `This tile contains a drawing. The drawing is rendered below in a svg code fence:\n\n\`\`\`svg\n${renderDrawing(content)}\n\`\`\``;
+      result = `This tile contains a drawing.`;
       break;
 
     default:
@@ -375,14 +360,6 @@ function generateMarkdownTable(headers: string[], rows: string[][]): string {
   });
 
   return [headerRow, separatorRow, ...dataRows].join("\n");
-}
-
-function renderDrawing(model: any) {
-  const elements = DrawingContentModel.create(model).objects.map((o: any) => {
-    return renderDrawingObject(o);
-  });
-  const markup = ReactDOMServer.renderToStaticMarkup(React.createElement(React.Fragment, null, ...elements));
-  return `<svg xmlns:xlink="http://www.w3.org/1999/xlink">${markup}</svg>`;
 }
 
 /* eslint-enable max-len */

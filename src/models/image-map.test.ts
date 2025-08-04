@@ -3,7 +3,7 @@ import { autorun, flowResult, runInAction, when } from "mobx";
 import { parseFirebaseImageUrl } from "../../shared/shared-utils";
 import { DB } from "../lib/db";
 import * as ImageUtils from "../utilities/image-utils";
-import placeholderImage from "../assets/image_placeholder.png";
+import { PLACEHOLDER_IMAGE_PATH } from "../utilities/image-constants";
 import { externalUrlImagesHandler, localAssetsImagesHandler,
   firebaseRealTimeDBImagesHandler, firebaseStorageImagesHandler,
   IImageHandler, ImageMapEntry, ImageMap,
@@ -41,7 +41,7 @@ describe("ImageMap", () => {
     jest.restoreAllMocks();
     jest.spyOn(ImageUtils, "getImageDimensions")
         .mockImplementation(() =>
-          Promise.resolve({ src: placeholderImage, width: 200, height: 150 }));
+          Promise.resolve({ src: PLACEHOLDER_IMAGE_PATH, width: 200, height: 150 }));
     sImageMap = new ImageMap();
     sImageMap.setUnitUrl(kCurriculumUnitUrl);
     sImageMap.setUnitCodeMap({"stretching-and-shrinking": "sas"});
@@ -70,14 +70,14 @@ describe("ImageMap", () => {
   }
 
   it("test basic accessors", () => {
-    expect(sImageMap.isExternalUrl(placeholderImage)).toBe(false);
+    expect(sImageMap.isExternalUrl(PLACEHOLDER_IMAGE_PATH)).toBe(false);
     expect(sImageMap.isExternalUrl(kLocalImageUrl)).toBe(false);
     expect(sImageMap.isExternalUrl(kHttpImageUrl)).toBe(true);
     expect(sImageMap.isExternalUrl(kHttpsImageUrl)).toBe(true);
     expect(sImageMap.isExternalUrl(kFBStorageUrl)).toBe(false);
     expect(sImageMap.isExternalUrl(kDataUri)).toBe(true);
 
-    expect(sImageMap.isPlaceholder(placeholderImage)).toBe(true);
+    expect(sImageMap.isPlaceholder(PLACEHOLDER_IMAGE_PATH)).toBe(true);
     expect(sImageMap.isPlaceholder(kLocalImageUrl)).toBe(false);
     expect(sImageMap.isPlaceholder(kHttpImageUrl)).toBe(false);
     expect(sImageMap.isPlaceholder(kHttpsImageUrl)).toBe(false);
@@ -137,7 +137,7 @@ describe("ImageMap", () => {
       const kHttpsImage2 = kHttpsImageUrl + "2";
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
-                              Promise.resolve({ imageUrl: placeholderImage, imageData: placeholderImage}));
+                              Promise.resolve({ imageUrl: PLACEHOLDER_IMAGE_PATH, imageData: PLACEHOLDER_IMAGE_PATH}));
       p1 = externalUrlImagesHandler.store(kHttpsImage2, {db: createMockDB() })
         .then(storeResult => {
           expect(storeSpy).toHaveBeenCalled();
@@ -149,7 +149,7 @@ describe("ImageMap", () => {
       const kHttpsImage3 = kHttpsImageUrl + "3";
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
-                              Promise.resolve({ imageUrl: placeholderImage, imageData: placeholderImage}));
+                              Promise.resolve({ imageUrl: PLACEHOLDER_IMAGE_PATH, imageData: PLACEHOLDER_IMAGE_PATH}));
       p2 = externalUrlImagesHandler.store(kHttpsImage3, { db: createMockDB({ stores: { user: { id: "" }} }) })
         .then(storeResult => {
           expect(storeSpy).toHaveBeenCalled();
@@ -196,7 +196,7 @@ describe("ImageMap", () => {
       .then(storeResult => {
         // expect(storeSpy).not.toHaveBeenCalled();
         expect(storeResult.contentUrl).toBeUndefined();
-        expect(storeResult.displayUrl).toBe(placeholderImage);
+        expect(storeResult.displayUrl).toBe(PLACEHOLDER_IMAGE_PATH);
         expect(storeResult.success).toBe(false);
       });
 
@@ -206,7 +206,7 @@ describe("ImageMap", () => {
       .then(storeResult => {
         // expect(storeSpy).not.toHaveBeenCalled();
         expect(storeResult.contentUrl).toBeUndefined();
-        expect(storeResult.displayUrl).toBe(placeholderImage);
+        expect(storeResult.displayUrl).toBe(PLACEHOLDER_IMAGE_PATH);
         expect(storeResult.success).toBe(false);
       });
   });
@@ -222,7 +222,7 @@ describe("ImageMap", () => {
       .then(storeResult => {
         // expect(storeSpy).not.toHaveBeenCalled();
         expect(storeResult.contentUrl).toBeUndefined();
-        expect(storeResult.displayUrl).toBe(placeholderImage);
+        expect(storeResult.displayUrl).toBe(PLACEHOLDER_IMAGE_PATH);
       });
   });
 
@@ -233,7 +233,7 @@ describe("ImageMap", () => {
       .then(storeResult => {
         expect(storeSpy).toHaveBeenCalled();
         expect(storeResult.contentUrl).toBeUndefined();
-        expect(storeResult.displayUrl).toBe(placeholderImage);
+        expect(storeResult.displayUrl).toBe(PLACEHOLDER_IMAGE_PATH);
         expect(storeResult.success).toBe(false);
       });
   });
@@ -279,7 +279,7 @@ describe("ImageMap", () => {
       p4 = firebaseRealTimeDBImagesHandler.store("", { db: createMockDB() })
         .then(storeResult => {
           expect(storeResult.contentUrl).toBeUndefined();
-          expect(storeResult.displayUrl).toBe(placeholderImage);
+          expect(storeResult.displayUrl).toBe(PLACEHOLDER_IMAGE_PATH);
           expect(storeResult.success).toBe(false);
         });
     }
@@ -323,7 +323,7 @@ describe("ImageMap", () => {
       expect(sImageMap.getCachedImage("")).toBeUndefined();
       return sImageMap.getImage("")
               .then(image => {
-                expect(image.displayUrl).toBe(placeholderImage);
+                expect(image.displayUrl).toBe(PLACEHOLDER_IMAGE_PATH);
                 expect(image.width).toBe(200);
                 expect(image.height).toBe(150);
                 expect(consoleSpy).toBeCalledTimes(1);
@@ -331,17 +331,17 @@ describe("ImageMap", () => {
     });
 
     it("can retrieve placeholder image from cache", () => {
-      expect(sImageMap.hasImage(placeholderImage));
-      expect(sImageMap.getCachedImage(placeholderImage)).toEqual({
-        displayUrl: placeholderImage,
+      expect(sImageMap.hasImage(PLACEHOLDER_IMAGE_PATH));
+      expect(sImageMap.getCachedImage(PLACEHOLDER_IMAGE_PATH)).toEqual({
+        displayUrl: PLACEHOLDER_IMAGE_PATH,
         width: 200,
         height: 150,
         status: EntryStatus.Ready,
         retries: 0
       });
-      return sImageMap.getImage(placeholderImage)
+      return sImageMap.getImage(PLACEHOLDER_IMAGE_PATH)
               .then(image => {
-                expect(image.displayUrl).toBe(placeholderImage);
+                expect(image.displayUrl).toBe(PLACEHOLDER_IMAGE_PATH);
                 expect(image.width).toBe(200);
                 expect(image.height).toBe(150);
               });
@@ -386,7 +386,7 @@ describe("ImageMap", () => {
       expect(firstGetImagePromiseResolved).toBe(false);
       expect(secondGetImagePromiseResolved).toBe(false);
 
-      imageDimensionResolve!({ src: placeholderImage, width: 200, height: 150 });
+      imageDimensionResolve!({ src: PLACEHOLDER_IMAGE_PATH, width: 200, height: 150 });
 
       const image = await firstGetImagePromise;
       expect(image.contentUrl).toBe(kLocalImageUrl);
@@ -403,7 +403,7 @@ describe("ImageMap", () => {
       const consoleSpy = jest.spyOn(global.console, "warn").mockImplementation();
       return sImageMap.getImage(":")
               .then(image => {
-                expect(image.displayUrl).toBe(placeholderImage);
+                expect(image.displayUrl).toBe(PLACEHOLDER_IMAGE_PATH);
                 expect(consoleSpy).toBeCalled();
               });
     });
@@ -423,7 +423,7 @@ describe("ImageMap", () => {
 
       // A second call should try again and succeed
       jest.spyOn(ImageUtils, "getImageDimensions").mockImplementation(() =>
-        Promise.resolve({ src: placeholderImage, width: 200, height: 150 })
+        Promise.resolve({ src: PLACEHOLDER_IMAGE_PATH, width: 200, height: 150 })
       );
       const returnedEntry2 = await sImageMap.getImage(kLocalImageUrl);
       expect(returnedEntry2?.status).toBe(EntryStatus.Ready);
@@ -464,7 +464,7 @@ describe("ImageMap", () => {
 
       // A second call should try again and succeed
       jest.spyOn(ImageUtils, "getImageDimensions").mockImplementation(() =>
-        Promise.resolve({ src: placeholderImage, width: 200, height: 150 })
+        Promise.resolve({ src: PLACEHOLDER_IMAGE_PATH, width: 200, height: 150 })
       );
       const getImagePromise2 = sImageMap.getImage(kLocalImageUrl);
 
@@ -501,7 +501,7 @@ describe("ImageMap", () => {
       const getImagePromise = sImageMap.getImage(kLocalImageUrl);
       expect(sImageMap.getCachedImage(kLocalImageUrl)).toEqual({
         status: EntryStatus.PendingStorage,
-        displayUrl: placeholderImage,
+        displayUrl: PLACEHOLDER_IMAGE_PATH,
         retries: 1
       });
       expect(consoleSpy).toBeCalledTimes(1);
@@ -521,7 +521,7 @@ describe("ImageMap", () => {
       const mockHandler: any = {
         async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
           return {
-            displayUrl: placeholderImage,
+            displayUrl: PLACEHOLDER_IMAGE_PATH,
             success: false};
         }
       };
@@ -570,7 +570,7 @@ describe("ImageMap", () => {
         disposer();
         expect(imageEntry?.retries).toBe(2);
         expect(lastStatus).toBe(EntryStatus.Error);
-        expect(displayUrl).toBe(placeholderImage);
+        expect(displayUrl).toBe(PLACEHOLDER_IMAGE_PATH);
         // 1st getImage: retries 0
         // 2nd getImage: retries 1
         // 3rd getImage: retries 2
@@ -594,7 +594,7 @@ describe("ImageMap", () => {
       const mockHandler: any = {
         async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
           return {
-            displayUrl: placeholderImage,
+            displayUrl: PLACEHOLDER_IMAGE_PATH,
             success: false};
         }
       };
@@ -644,31 +644,31 @@ describe("ImageMap", () => {
         disposer();
         expect(imageEntry?.retries).toBe(2);
         expect(lastStatus).toBe(EntryStatus.Error);
-        expect(displayUrl).toBe(placeholderImage);
+        expect(displayUrl).toBe(PLACEHOLDER_IMAGE_PATH);
         expect(imageEntries).toEqual([
           // autorun #1 no imageEntry, then one that is pendingStorage
           null,
-          { displayUrl: placeholderImage, retries: 0, status: "pendingStorage" },
+          { displayUrl: PLACEHOLDER_IMAGE_PATH, retries: 0, status: "pendingStorage" },
 
           // autorun #2 error'd imageEntry, then one that is retrying with pendingStorage
-          { displayUrl: placeholderImage, retries: 0, status: "error" },
-          { displayUrl: placeholderImage, retries: 1, status: "pendingStorage" },
+          { displayUrl: PLACEHOLDER_IMAGE_PATH, retries: 0, status: "error" },
+          { displayUrl: PLACEHOLDER_IMAGE_PATH, retries: 1, status: "pendingStorage" },
 
           // autorun #3 triggered by async update of internal ImageMap state
-          { displayUrl: placeholderImage, retries: 1, status: "pendingStorage" },
-          { displayUrl: placeholderImage, retries: 1, status: "pendingStorage" },
+          { displayUrl: PLACEHOLDER_IMAGE_PATH, retries: 1, status: "pendingStorage" },
+          { displayUrl: PLACEHOLDER_IMAGE_PATH, retries: 1, status: "pendingStorage" },
 
           // autorun #4 error'd imageEntry, then one that is retrying with pendingStorage
-          { displayUrl: placeholderImage, retries: 1, status: "error" },
-          { displayUrl: placeholderImage, retries: 2, status: "pendingStorage" },
+          { displayUrl: PLACEHOLDER_IMAGE_PATH, retries: 1, status: "error" },
+          { displayUrl: PLACEHOLDER_IMAGE_PATH, retries: 2, status: "pendingStorage" },
 
           // autorun #5 triggered by async update of internal ImageMap state
-          { displayUrl: placeholderImage, retries: 2, status: "pendingStorage" },
-          { displayUrl: placeholderImage, retries: 2, status: "pendingStorage" },
+          { displayUrl: PLACEHOLDER_IMAGE_PATH, retries: 2, status: "pendingStorage" },
+          { displayUrl: PLACEHOLDER_IMAGE_PATH, retries: 2, status: "pendingStorage" },
 
           // autorun #6 error'd imageEntry, then one that does not retry
-          { displayUrl: placeholderImage, retries: 2, status: "error" },
-          { displayUrl: placeholderImage, retries: 2, status: "error" },
+          { displayUrl: PLACEHOLDER_IMAGE_PATH, retries: 2, status: "error" },
+          { displayUrl: PLACEHOLDER_IMAGE_PATH, retries: 2, status: "error" },
         ]);
       });
     });

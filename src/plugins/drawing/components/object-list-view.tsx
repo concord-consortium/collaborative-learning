@@ -19,6 +19,7 @@ import MoveIcon from "../assets/move-icon.svg";
 import HideObjectIcon from "../assets/hide-object-icon.svg";
 import ShowObjectIcon from "../assets/show-object-icon.svg";
 import { useUIStore } from "../../../hooks/use-stores";
+import { ObjectIcon } from "./object-icon";
 
 
 interface IObjectListViewProps {
@@ -193,7 +194,7 @@ const ObjectLine = observer(function ObjectLine(
         onClick={handleClick}
     >
       <span className="type-icon">
-        {object.icon}
+        <ObjectIcon type={object.type} object={object} />
       </span>
       <span className="label">{object.label}</span>
       {visibilityIcon}

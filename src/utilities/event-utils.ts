@@ -1,10 +1,12 @@
 // create a global keylistener so that we know what modifier keys are in use between key events
 let selectionModiferKeyDown = false;
 const updateModifierKeys = (e: KeyboardEvent | MouseEvent) => selectionModiferKeyDown = hasSelectionModifier(e);
-window.addEventListener("keydown", updateModifierKeys, true);
-window.addEventListener("keyup", updateModifierKeys, true);
-window.addEventListener("mousedown", updateModifierKeys, true);
-window.addEventListener("mouseup", updateModifierKeys, true);
+if (typeof window !== "undefined") {
+  window.addEventListener("keydown", updateModifierKeys, true);
+  window.addEventListener("keyup", updateModifierKeys, true);
+  window.addEventListener("mousedown", updateModifierKeys, true);
+  window.addEventListener("mouseup", updateModifierKeys, true);
+}
 
 export function isSelectionModifierKeyDown() {
   return selectionModiferKeyDown;

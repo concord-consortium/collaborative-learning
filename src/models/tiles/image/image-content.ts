@@ -5,13 +5,13 @@ import { ITileMetadataModel } from "../tile-metadata";
 import { tileContentAPIActions } from "../tile-model-hooks";
 import { TileContentModel } from "../tile-content";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
-import placeholderImage from "../../../assets/image_placeholder.png";
+import { PLACEHOLDER_IMAGE_PATH } from "../../../utilities/image-constants";
 
 export const kImageTileType = "Image";
 
 // This is only used directly by tests
 export function defaultImageContent(options?: IDefaultContentOptions) {
-  return ImageContentModel.create({url: options?.url || placeholderImage});
+  return ImageContentModel.create({url: options?.url || PLACEHOLDER_IMAGE_PATH});
 }
 
 export const ImageContentModel = TileContentModel

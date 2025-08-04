@@ -3,10 +3,10 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import {
   computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps,
-  IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField
+  IDrawingLayer, StrokedObject, typeField
 } from "./drawing-object";
 import { BoundingBoxSides, VectorEndShape,
-  endShapesForVectorType, getVectorTypeIcon, vectorTypeForEndShapes }
+  endShapesForVectorType }
   from "../model/drawing-basic-types";
 import { Transformable } from "../components/transformable";
 
@@ -41,10 +41,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
     get label() {
       return  (self.headShape || self.tailShape) ? "Arrow" : "Line";
     },
-    get icon() {
-      const Icon = getVectorTypeIcon(vectorTypeForEndShapes(self.headShape, self.tailShape));
-      return (<Icon viewBox={ObjectTypeIconViewBox} stroke={self.stroke} fill={self.stroke} />);
-    }
+
   }))
   .actions(self => ({
     setDeltas(dx: number, dy: number) {
@@ -204,4 +201,3 @@ export class VectorDrawingTool extends DrawingTool {
     window.addEventListener("pointerup", handlePointerUp);
   }
 }
-

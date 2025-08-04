@@ -3,11 +3,10 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray, DeltaPoint, DrawingTool, FilledObject, IDrawingComponentProps,
-   IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
+   IDrawingLayer, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import { Transformable } from "../components/transformable";
 
-import FreehandToolIcon from "../assets/freehand-icon.svg";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
   const { x, y } = line.position;
@@ -101,11 +100,6 @@ export const LineObject = types.compose("LineObject", StrokedObject, FilledObjec
 
     get label() {
       return "Freehand";
-    },
-
-    get icon() {
-      return <FreehandToolIcon viewBox={ObjectTypeIconViewBox}
-        stroke={self.stroke} strokeWidth={self.strokeWidth} strokeDasharray={self.strokeDashArray}/>;
     }
 
   }))
@@ -245,4 +239,3 @@ export class LineDrawingTool extends DrawingTool {
     window.addEventListener("pointerup", handlePointerUp);
   }
 }
-

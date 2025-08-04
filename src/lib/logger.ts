@@ -214,7 +214,9 @@ function sendToLoggingService(data: LogMessage, user: UserModelType) {
 }
 
 // Add the logger to the window in Cypress so we can stub it
-const aWindow = window as any;
-if (aWindow.Cypress) {
-  aWindow.ccLogger = Logger;
+if (typeof window !== "undefined") {
+  const aWindow = window as any;
+  if (aWindow.Cypress) {
+    aWindow.ccLogger = Logger;
+  }
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { ToolbarSettings, AlignType, getAlignTypeIcon, getAlignTypeTooltip } from "../model/drawing-basic-types";
+import { ToolbarSettings, AlignType } from "../model/drawing-basic-types";
+import { getAlignTypeIcon, getAlignTypeTooltip } from "../model/drawing-icons";
 import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
 import { ToolbarButtonSvg } from "../toolbar-buttons/toolbar-button-svg";
 

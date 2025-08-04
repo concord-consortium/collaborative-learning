@@ -18,7 +18,7 @@ import {
 } from "./jxg-types";
 import { TileModel, ITileModel } from "../tile-model";
 import { getPoint, getPolygon } from "./geometry-utils";
-import placeholderImage from "../../../assets/image_placeholder.png";
+import { PLACEHOLDER_IMAGE_PATH } from "../../../utilities/image-constants";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../../register-tile-types";
@@ -831,20 +831,20 @@ describe("GeometryContent", () => {
 
   it("can add an image", () => {
     const { content, board } = createContentAndBoard();
-    const image = content.addImage(board, placeholderImage, [0, 0], [5, 5]);
+    const image = content.addImage(board, PLACEHOLDER_IMAGE_PATH, [0, 0], [5, 5]);
     expect(content.bgImage).toEqual({
-      id: image!.id, type: "image", url: placeholderImage, x: 0, y: 0, width: 5, height: 5 });
+      id: image!.id, type: "image", url: PLACEHOLDER_IMAGE_PATH, x: 0, y: 0, width: 5, height: 5 });
     expect(image!.elType).toBe("image");
-    content.updateObjects(board, image!.id, { url: placeholderImage });
-    expect(image!.url).toBe(placeholderImage);
+    content.updateObjects(board, image!.id, { url: PLACEHOLDER_IMAGE_PATH });
+    expect(image!.url).toBe(PLACEHOLDER_IMAGE_PATH);
     content.updateObjects(board, image!.id, { size: [10, 10] });
-    content.updateObjects(board, image!.id, { url: placeholderImage, size: [10, 10] });
-    expect(image!.url).toBe(placeholderImage);
+    content.updateObjects(board, image!.id, { url: PLACEHOLDER_IMAGE_PATH, size: [10, 10] });
+    expect(image!.url).toBe(PLACEHOLDER_IMAGE_PATH);
 
     const change: JXGChange = {
       operation: "create",
       target: "image",
-      parents: [placeholderImage],
+      parents: [PLACEHOLDER_IMAGE_PATH],
       properties: { id: "image-fail" }
     };
     const failedImage = content.applyChange(board, change);
@@ -855,22 +855,22 @@ describe("GeometryContent", () => {
   it("can add an image from model object", () => {
     const { content, board } = createContentAndBoard((_content) => {
       _content.setBackgroundImage(
-        ImageModel.create({ id: "img", url: placeholderImage, x: 0, y: 0, width: 5, height: 5 }));
+        ImageModel.create({ id: "img", url: PLACEHOLDER_IMAGE_PATH, x: 0, y: 0, width: 5, height: 5 }));
     });
     // const image = content.addImage(board, placeholderImage, [0, 0], [5, 5]);
     const image = board.objects.img as JXG.Image;
     expect(isImage(image)).toBe(true);
     expect(image.elType).toBe("image");
-    content.updateObjects(board, image.id, { url: placeholderImage });
-    expect(image.url).toBe(placeholderImage);
+    content.updateObjects(board, image.id, { url: PLACEHOLDER_IMAGE_PATH });
+    expect(image.url).toBe(PLACEHOLDER_IMAGE_PATH);
     content.updateObjects(board, image.id, { size: [10, 10] });
-    content.updateObjects(board, image.id, { url: placeholderImage, size: [10, 10] });
-    expect(image.url).toBe(placeholderImage);
+    content.updateObjects(board, image.id, { url: PLACEHOLDER_IMAGE_PATH, size: [10, 10] });
+    expect(image.url).toBe(PLACEHOLDER_IMAGE_PATH);
 
     const change: JXGChange = {
       operation: "create",
       target: "image",
-      parents: [placeholderImage],
+      parents: [PLACEHOLDER_IMAGE_PATH],
       properties: { id: "image-fail" }
     };
     const failedImage = content.applyChange(board, change);
@@ -1329,7 +1329,7 @@ toMatchInlineSnapshot(`
   it("exports background image correctly", () => {
     const { content } = createContentAndBoard((_content) => {
       _content.setBackgroundImage(
-        ImageModel.create({ id: "img", url: placeholderImage, x: 0, y: 0, width: 5, height: 5 }));
+        ImageModel.create({ id: "img", url: PLACEHOLDER_IMAGE_PATH, x: 0, y: 0, width: 5, height: 5 }));
     });
 
     expect(exportAndSimplifyIds(content)).toMatchInlineSnapshot(`

@@ -1,4 +1,6 @@
-const debug = (window.localStorage ? window.localStorage.getItem("debug") : undefined) || "";
+const debug = (typeof window !== 'undefined' && window.localStorage
+  ? window.localStorage.getItem("debug")
+  : undefined) || "";
 if (debug.length > 0) {
   // eslint-disable-next-line no-console
   console.info("DEBUG:", debug);

@@ -4,8 +4,7 @@ import { DocumentContentModel, DocumentContentModelType, DocumentContentSnapshot
 import { TableContentModelType } from "../../tiles/table/table-content";
 import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types";
 import { isPlaceholderContent } from "../../../models/tiles/placeholder/placeholder-content";
-
-import placeholderImage from "../../assets/image_placeholder.png";
+import { PLACEHOLDER_IMAGE_PATH } from "../../../utilities/image-constants";
 
 
 // mock uniqueId so we can recognize auto-generated IDs
@@ -43,7 +42,7 @@ export function prepareTileForMatch(tile: any) {
     delete tile.content.board;
   }
   if (tile?.content?.type === "Image") {
-    if (tile.content.url !== placeholderImage) {
+    if (tile.content.url !== PLACEHOLDER_IMAGE_PATH) {
       tile.content.url = "image/url";
     }
   }
@@ -164,4 +163,3 @@ export function getAllRows(doc: DocumentContentModelType) {
   });
 
 }
-
