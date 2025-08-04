@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 import { useStores } from "../../hooks/use-stores";
@@ -10,6 +10,8 @@ import { DocListDebug } from "./doc-list-debug";
 import { DocFilterType, PrimarySortType, SecondarySortType } from "../../models/stores/ui-types";
 import { IOpenDocumentsGroupMetadata, SortedSection } from "./sorted-section";
 import { DocumentGroup } from "../../models/stores/document-group";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 
 import "../thumbnail/document-type-collection.scss";
 import "./sort-work-view.scss";
@@ -27,22 +29,30 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const filterOptions: DocFilterType[] = ["Problem", "Investigation", "Unit", "All"];
   const docFilter = persistentUIDocFilter;
 
-  const handleDocFilterSelection = (filter: DocFilterType) => {
+  const handleDocFilterSelection = useCallback((filter: DocFilterType) => {
+    Logger.log(LogEventName.SORT_SCOPE_CHANGE, {old: docFilter, new: filter});
     persistentUI.setDocFilter(filter);
-  };
+  }, [docFilter, persistentUI]);
 
   const normalizeSortString = (sort: string) => {
     return sort === sortTagPrompt ? "Strategy" : sort;
   };
 
-  const handlePrimarySortBySelection = (sort: string) => {
+  const handlePrimarySortBySelection = useCallback((sort: string) => {
+    Logger.log(LogEventName.FIRST_SORT_CHANGE, {old: primarySortBy, new: sort});
     persistentUI.setPrimarySortBy(sort);
     if (sort === secondarySortBy) {
+      // call directly to avoid logging SECOND_SORT_CHANGE
       persistentUI.setSecondarySortBy("None");
     }
     ui.clearHighlightedSortWorkDocument();
     ui.clearExpandedSortWorkSections();
-  };
+  }, [persistentUI, primarySortBy, secondarySortBy, ui]);
+
+  const handleSecondarySortBySelection = useCallback((sort: string) => {
+    Logger.log(LogEventName.SECOND_SORT_CHANGE, {old: secondarySortBy, new: sort});
+    persistentUI.setSecondarySortBy(sort);
+  }, [persistentUI, secondarySortBy]);
 
   const primarySortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     disabled: false,
@@ -57,13 +67,13 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     id: normalizeSortString(option).toLowerCase(),
     selected: normalizeSortString(option) === secondarySortBy,
     text: option,
-    onClick: () => persistentUI.setSecondarySortBy(normalizeSortString(option))
+    onClick: () => handleSecondarySortBySelection(normalizeSortString(option))
   }));
   secondarySortOptions.unshift({
     disabled: false,
     selected: secondarySortBy === "None",
     text: "None",
-    onClick: () => persistentUI.setSecondarySortBy("None")
+    onClick: () => handleSecondarySortBySelection("None")
   });
 
   const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => ({
@@ -137,6 +147,8 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
                       documentGroup={documentGroup}
                       idx={idx}
                       secondarySort={secondarySearchTerm}
+                      primarySortBy={primarySortBy}
+                      secondarySortBy={secondarySortBy}
                     />
                   );
                 })
