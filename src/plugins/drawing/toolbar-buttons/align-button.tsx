@@ -36,8 +36,8 @@ export const AlignButton = observer(({ name }: IToolbarButtonComponentProps) => 
   }
 
   function handleAlignTypeChange(alignType: AlignType) {
-    drawingModel.setOpenPalette(OpenPaletteValues.None);
     drawingModel.setSelectedAlignType(alignType);
+    alignItems();
   }
 
   const icon = getAlignTypeIcon(drawingModel.alignType);

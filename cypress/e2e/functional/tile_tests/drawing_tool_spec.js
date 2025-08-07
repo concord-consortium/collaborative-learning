@@ -712,22 +712,9 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawToolAlignOptions().should("not.exist");
     clueCanvas.longClickToolbarButton('drawing', 'align'); // Open palette via long click
     drawToolTile.getDrawToolAlignOptions().should("exist").and("be.visible").and("have.length", 6);
-    drawToolTile.getDrawToolAlignOptions().eq(2).click();
-    drawToolTile.getDrawToolAlignOptions().should("not.exist");
-    clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align right");
-    drawToolTile.getDrawToolAlignExpand().click(); // Open palette via triangle button
-    drawToolTile.getDrawToolAlignOptions().should("exist").and("be.visible").and("have.length", 6);
-    drawToolTile.getDrawToolAlignOptions().eq(0).click();
+    drawToolTile.getDrawToolAlignOptions().eq(0).click(); // Aligns shapes left and closes palette
     drawToolTile.getDrawToolAlignOptions().should("not.exist");
     clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align left");
-    // Palette can also be toggled open and closed without changing the alignment type
-    drawToolTile.getDrawToolAlignExpand().click(); // Open palette via triangle button
-    drawToolTile.getDrawToolAlignOptions().should("exist").and("be.visible").and("have.length", 6);
-    drawToolTile.getDrawToolAlignExpand().click(); // Close palette via triangle button
-    drawToolTile.getDrawToolAlignOptions().should("not.exist");
-    clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align left");
-
-    clueCanvas.clickToolbarButton('drawing', 'align');
     // All should now have been moved to the location of the rectangle
     drawToolTile.getRectangleDrawing().eq(0).invoke('attr', 'transform')
       .then(transform =>
@@ -738,6 +725,13 @@ context('Draw Tool Tile', function () {
     drawToolTile.getEllipseDrawing().eq(0).invoke('attr', 'transform')
       .then(transform =>
         expect(parseTransform(transform, 'translate')[0]).to.be.within(rectX+ellipseOffset-fudgeFactor, rectX+ellipseOffset+fudgeFactor));
+
+    // Palette can also be toggled open and closed without changing the alignment type
+    drawToolTile.getDrawToolAlignExpand().click(); // Open palette via triangle button
+    drawToolTile.getDrawToolAlignOptions().should("exist").and("be.visible").and("have.length", 6);
+    drawToolTile.getDrawToolAlignExpand().click(); // Close palette via triangle button
+    drawToolTile.getDrawToolAlignOptions().should("not.exist");
+    clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align left");
 
     // Undo the alignment
     clueCanvas.getUndoTool().click();
@@ -750,6 +744,12 @@ context('Draw Tool Tile', function () {
     drawToolTile.getEllipseDrawing().eq(0).invoke('attr', 'transform')
       .then(transform =>
         expect(parseTransform(transform, 'translate')[0]).to.be.within(ellipseX+ellipseOffset-fudgeFactor, ellipseX+ellipseOffset+fudgeFactor));
+
+    // Change alignment type
+    drawToolTile.getDrawToolAlignExpand().click(); // Open palette via triangle button
+    drawToolTile.getDrawToolAlignOptions().eq(2).click(); // Aligns shapes right and closes palette
+    drawToolTile.getDrawToolAlignOptions().should("not.exist");
+    clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align right");
   });
 
   it("Image", { scrollBehavior: false }, () => {
