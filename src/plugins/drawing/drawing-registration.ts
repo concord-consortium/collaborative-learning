@@ -18,6 +18,7 @@ import { DeleteButton, DuplicateButton, FlipHorizontalButton, FlipVerticalButton
 import { ImageUploadButton } from "./toolbar-buttons/image-upload-button";
 import { ZoomInButton, ZoomOutButton, FitAllButton } from "./toolbar-buttons/zoom-buttons";
 import { NavigatorButton } from "../../components/toolbar/navigator-button";
+import { AlignButton } from "./toolbar-buttons/align-button";
 
 import Icon from "./assets/draw-tool.svg";
 import HeaderIcon from "./assets/sketch-tile-id.svg";
@@ -75,6 +76,7 @@ registerTileToolbarButtons("drawing", [
   { name: "fill-color", component: FillColorButton },
   { name: "text", component: TextButton },
   { name: "upload", component: ImageUploadButton },
+  { name: "align", component: AlignButton },
   { name: "group", component: GroupButton },
   { name: "ungroup", component: UngroupButton },
   { name: "duplicate", component: DuplicateButton },

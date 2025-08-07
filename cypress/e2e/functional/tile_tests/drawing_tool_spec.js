@@ -231,6 +231,7 @@ context('Draw Tool Tile', function () {
     drawToolTile.getTileTitle().should("contain", newName);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
   });
+
   it("Vector", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
@@ -668,6 +669,87 @@ context('Draw Tool Tile', function () {
     // Ungroup again to get back to 4 separate objects
     drawToolTile.getDrawToolUngroup().click();
     drawToolTile.getSelectionBox().should("have.length", 4);
+  });
+
+  it("Align objects", { scrollBehavior: false }, () => {
+    const
+      rectX = 50, // left edge of rectangle in screen coordinates
+      rectOffset = 10, // offsets compensate for difference between screen and object coordinates
+      freehandX = 110,
+      freehandOffset = 0,
+      ellipseX = 165,
+      ellipseOffset = 60,
+      fudgeFactor = 10;
+
+    beforeTest();
+    clueCanvas.addTile("drawing");
+    clueCanvas.toolbarButtonIsDisabled('drawing', 'align');
+    drawToolTile.drawRectangle(rectX, 50, 50, 50);
+    drawToolTile.getRectangleDrawing().first()
+      .invoke('attr', 'transform')
+      .then(transform =>
+        expect(parseTransform(transform, 'translate')[0]).to.be.within(rectX+rectOffset-fudgeFactor, rectX+rectOffset+fudgeFactor));
+    drawToolTile.drawFreehand([ {x: freehandX, y: 60}, {x: freehandX+30, y: 50} ]);
+    drawToolTile.getFreehandDrawing().first()
+      .invoke('attr', 'transform')
+      .then(transform =>
+        expect(parseTransform(transform, 'translate')[0]).to.be.within(freehandX+freehandOffset-fudgeFactor, freehandX+freehandOffset+fudgeFactor));
+    drawToolTile.drawEllipse(ellipseX+35, 70, 50, 30); // drawing of ellipse starts at its center, not its left edge
+    drawToolTile.getEllipseDrawing().first()
+      .invoke('attr', 'transform')
+      .then(transform =>
+        expect(parseTransform(transform, 'translate')[0]).to.be.within(ellipseX+ellipseOffset-fudgeFactor, ellipseX+ellipseOffset+fudgeFactor));
+    clueCanvas.toolbarButtonIsDisabled('drawing', 'align');
+    drawToolTile.getRectangleDrawing().eq(0).click();
+    drawToolTile.getSelectionBox().should("have.length", 1);
+    // Toolbar button remains disabled with one object selected
+    clueCanvas.toolbarButtonIsDisabled('drawing', 'align');
+    drawToolTile.dragSelectionRectangle(50, 20, 250, 100);
+    drawToolTile.getSelectionBox().should("have.length", 3);
+    clueCanvas.toolbarButtonIsEnabled('drawing', 'align');
+    // Aligns left by default
+    clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align left");
+    drawToolTile.getDrawToolAlignOptions().should("not.exist");
+    clueCanvas.longClickToolbarButton('drawing', 'align'); // Open palette via long click
+    drawToolTile.getDrawToolAlignOptions().should("exist").and("be.visible").and("have.length", 6);
+    drawToolTile.getDrawToolAlignOptions().eq(0).click(); // Aligns shapes left and closes palette
+    drawToolTile.getDrawToolAlignOptions().should("not.exist");
+    clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align left");
+    // All should now have been moved to the location of the rectangle
+    drawToolTile.getRectangleDrawing().eq(0).invoke('attr', 'transform')
+      .then(transform =>
+        expect(parseTransform(transform, 'translate')[0]).to.be.within(rectX+rectOffset-fudgeFactor, rectX+rectOffset+fudgeFactor));
+    drawToolTile.getFreehandDrawing().eq(0).invoke('attr', 'transform')
+      .then(transform =>
+        expect(parseTransform(transform, 'translate')[0]).to.be.within(rectX+freehandOffset-fudgeFactor, rectX+freehandOffset+fudgeFactor));
+    drawToolTile.getEllipseDrawing().eq(0).invoke('attr', 'transform')
+      .then(transform =>
+        expect(parseTransform(transform, 'translate')[0]).to.be.within(rectX+ellipseOffset-fudgeFactor, rectX+ellipseOffset+fudgeFactor));
+
+    // Palette can also be toggled open and closed without changing the alignment type
+    drawToolTile.getDrawToolAlignExpand().click(); // Open palette via triangle button
+    drawToolTile.getDrawToolAlignOptions().should("exist").and("be.visible").and("have.length", 6);
+    drawToolTile.getDrawToolAlignExpand().click(); // Close palette via triangle button
+    drawToolTile.getDrawToolAlignOptions().should("not.exist");
+    clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align left");
+
+    // Undo the alignment
+    clueCanvas.getUndoTool().click();
+    drawToolTile.getRectangleDrawing().eq(0).invoke('attr', 'transform')
+      .then(transform =>
+        expect(parseTransform(transform, 'translate')[0]).to.be.within(rectX+rectOffset-fudgeFactor, rectX+rectOffset+fudgeFactor));
+    drawToolTile.getFreehandDrawing().eq(0).invoke('attr', 'transform')
+      .then(transform =>
+        expect(parseTransform(transform, 'translate')[0]).to.be.within(freehandX+freehandOffset-fudgeFactor, freehandX+freehandOffset+fudgeFactor));
+    drawToolTile.getEllipseDrawing().eq(0).invoke('attr', 'transform')
+      .then(transform =>
+        expect(parseTransform(transform, 'translate')[0]).to.be.within(ellipseX+ellipseOffset-fudgeFactor, ellipseX+ellipseOffset+fudgeFactor));
+
+    // Change alignment type
+    drawToolTile.getDrawToolAlignExpand().click(); // Open palette via triangle button
+    drawToolTile.getDrawToolAlignOptions().eq(2).click(); // Aligns shapes right and closes palette
+    drawToolTile.getDrawToolAlignOptions().should("not.exist");
+    clueCanvas.getToolbarButtonToolTipText('drawing', 'align').should("eq", "Align right");
   });
 
   it("Image", { scrollBehavior: false }, () => {
