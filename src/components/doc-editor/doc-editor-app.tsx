@@ -177,7 +177,8 @@ export const DocEditorApp = observer(function DocEditorApp() {
     if (aiSummary) {
       setAiSummary(undefined);
     } else if (document.content) {
-      setAiSummary(documentSummarizerWithDrawings(getSnapshot(document.content), {includeModel: includeModelInAiSummary, minimal: true}));
+      setAiSummary(
+        documentSummarizerWithDrawings(getSnapshot(document.content), {includeModel: includeModelInAiSummary}));
     }
   }
 
