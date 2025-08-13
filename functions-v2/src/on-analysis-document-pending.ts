@@ -106,7 +106,7 @@ export const onAnalysisDocumentPending =
     await firestore.doc(nextQueuePath).set({
       ...queueDoc,
       docImaged: admin.firestore.FieldValue.serverTimestamp(),
-      docImageUrl: responseJSON.url,
+      docImageUrl: (responseJSON as { url: string }).url,
     });
 
     // Remove from the "pending" queue

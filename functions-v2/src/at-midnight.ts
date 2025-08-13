@@ -7,6 +7,7 @@ import * as logger from "firebase-functions/logger";
 // has a different version of the firebase dependencies, which cause
 // type errors.
 import {cleanFirebaseRoots} from "../../shared/clean-firebase-roots";
+import {updateExemplarDataDocs} from "../../shared/update-exemplar-data-docs";
 
 export const atMidnight = onSchedule(
   {
@@ -35,4 +36,9 @@ export async function runAtMidnight() {
   // Inside of a firebase function according to
   // https://stackoverflow.com/a/72933644/3195497
   // it isn't necessary to call deleteApp when the function is done.
+
+  await updateExemplarDataDocs({
+    logger,
+  });
+  logger.info("atMidnight completed");
 }

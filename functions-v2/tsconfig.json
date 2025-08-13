@@ -7,7 +7,10 @@
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017",
+    "target": "es2020",
+    "lib": ["es2020"],
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     // This prevents typescript from trying to include @types from the parent folders.
     // The types in the parent folders conflict so they break the build.
     "typeRoots": ["./node_modules/@types"],
