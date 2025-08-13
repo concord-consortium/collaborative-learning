@@ -1,4 +1,5 @@
-import { documentSummarizer } from './ai-summarizer';
+import { documentSummarizer, TileHandler, defaultTileHandlers } from './ai-summarizer';
+import documentSummarizerWithDrawings from './ai-summarizer-with-drawings';
 
 describe('ai-summarizer', () => {
   describe('documentSummarizer', () => {
@@ -860,6 +861,351 @@ describe('ai-summarizer', () => {
         const result = documentSummarizer(content, {});
         expect(result).toContain('This is an empty CLUE document with no content');
       });
+    });
+  });
+});
+
+describe('documentSummarizerWithDrawings', () => {
+  describe('drawing tile handling', () => {
+    it('should handle drawing tiles with SVG rendering', () => {
+      const content = {
+        rowOrder: ['row1'],
+        rowMap: {
+          row1: {
+            tiles: [{ tileId: 'tile1' }],
+            isSectionHeader: false
+          }
+        },
+        tileMap: {
+          tile1: {
+            id: 'tile1',
+            content: {
+              type: 'Drawing',
+              objects: [
+                {
+                  type: 'rectangle',
+                  x: 10,
+                  y: 20,
+                  width: 100,
+                  height: 50,
+                  fill: 'blue',
+                  stroke: 'black',
+                  strokeWidth: 2,
+                  strokeDashArray: 'solid'
+                }
+              ]
+            }
+          }
+        }
+      };
+
+      const result = documentSummarizerWithDrawings(content, {});
+
+      // Should contain the enhanced drawing description
+      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).toContain('```svg');
+      expect(result).toContain('</svg>');
+
+      // Should contain SVG content
+      expect(result).toContain('<svg>');
+      expect(result).toContain('<rect ');
+      expect(result).toContain('</svg>');
+    });
+
+    it('should handle drawing tiles with multiple objects', () => {
+      const content = {
+        rowOrder: ['row1'],
+        rowMap: {
+          row1: {
+            tiles: [{ tileId: 'tile1' }],
+            isSectionHeader: false
+          }
+        },
+        tileMap: {
+          tile1: {
+            id: 'tile1',
+            content: {
+              type: 'Drawing',
+              objects: [
+                {
+                  type: 'ellipse',
+                  x: 50,
+                  y: 50,
+                  rx: 25,
+                  ry: 25,
+                  fill: 'red',
+                  stroke: 'black',
+                  strokeWidth: 1,
+                  strokeDashArray: 'solid'
+                },
+                {
+                  type: 'vector',
+                  x: 0,
+                  y: 0,
+                  dx: 100,
+                  dy: 100,
+                  stroke: 'black',
+                  strokeWidth: 2,
+                  strokeDashArray: 'solid'
+                }
+              ]
+            }
+          }
+        }
+      };
+
+      const result = documentSummarizerWithDrawings(content, {});
+
+      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).toContain('```svg');
+
+      // Should contain SVG content for multiple objects
+      expect(result).toContain('<svg>');
+      expect(result).toContain('<ellipse ');
+      expect(result).toContain('<line ');
+      expect(result).toContain('</svg>');
+    });
+
+    it('should handle empty drawing tiles', () => {
+      const content = {
+        rowOrder: ['row1'],
+        rowMap: {
+          row1: {
+            tiles: [{ tileId: 'tile1' }],
+            isSectionHeader: false
+          }
+        },
+        tileMap: {
+          tile1: {
+            id: 'tile1',
+            content: {
+              type: 'Drawing',
+              objects: []
+            }
+          }
+        }
+      };
+
+      const result = documentSummarizerWithDrawings(content, {});
+
+      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).toContain('```svg');
+      expect(result).toContain('<svg></svg>');
+    });
+
+    it('should preserve other tile types unchanged', () => {
+      const content = {
+        rowOrder: ['row1'],
+        rowMap: {
+          row1: {
+            tiles: [{ tileId: 'tile1' }],
+            isSectionHeader: false
+          }
+        },
+        tileMap: {
+          tile1: {
+            id: 'tile1',
+            content: {
+              type: 'Text',
+              format: 'markdown',
+              text: 'Hello World'
+            }
+          }
+        }
+      };
+
+      const result = documentSummarizerWithDrawings(content, {});
+
+      // Text tiles should work the same as in regular documentSummarizer
+      expect(result).toContain('Hello World');
+      expect(result).toContain('This tile contains the following Markdown text content');
+      expect(result).not.toContain('This tile contains a drawing');
+    });
+
+    it('should work with custom tile handlers', () => {
+      const content = {
+        rowOrder: ['row1'],
+        rowMap: {
+          row1: {
+            tiles: [{ tileId: 'tile1' }],
+            isSectionHeader: false
+          }
+        },
+        tileMap: {
+          tile1: {
+            id: 'tile1',
+            content: {
+              type: 'Drawing',
+              objects: [
+                {
+                  type: 'rectangle',
+                  x: 10,
+                  y: 20,
+                  width: 100,
+                  height: 50,
+                  fill: 'white',
+                  stroke: 'black',
+                  strokeWidth: 1,
+                  strokeDashArray: 'solid'
+                }
+              ]
+            }
+          }
+        }
+      };
+
+      // Custom tile handler that overrides the drawing handler
+      const customDrawingHandler: TileHandler = (tile, options) => {
+        if (tile.model.content.type !== 'Drawing') return undefined;
+        return 'Custom drawing description';
+      };
+
+      const result = documentSummarizerWithDrawings(content, {
+        tileHandlers: [customDrawingHandler, ...defaultTileHandlers]
+      });
+
+      // Should use custom handler instead of enhanced drawing handler
+      expect(result).toContain('Custom drawing description');
+      expect(result).not.toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+    });
+
+    it('should handle complex document structures with drawings', () => {
+      const content = {
+        rowOrder: ['header1', 'row1', 'row2'],
+        rowMap: {
+          header1: {
+            isSectionHeader: true,
+            sectionId: 'section1'
+          },
+          row1: {
+            tiles: [{ tileId: 'tile1' }],
+            isSectionHeader: false
+          },
+          row2: {
+            tiles: [{ tileId: 'tile2' }],
+            isSectionHeader: false
+          }
+        },
+        tileMap: {
+          tile1: {
+            id: 'tile1',
+            content: {
+              type: 'Drawing',
+              objects: [
+                {
+                  type: 'ellipse',
+                  x: 50,
+                  y: 50,
+                  rx: 25,
+                  ry: 25,
+                  fill: 'yellow',
+                  stroke: 'black',
+                  strokeWidth: 1,
+                  strokeDashArray: 'solid'
+                }
+              ]
+            }
+          },
+          tile2: {
+            id: 'tile2',
+            content: {
+              type: 'Text',
+              format: 'markdown',
+              text: 'Text content'
+            }
+          }
+        }
+      };
+
+      const result = documentSummarizerWithDrawings(content, {});
+
+      // Should handle both drawing and text tiles
+      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).toContain('Text content');
+      expect(result).toContain('This tile contains the following Markdown text content');
+
+      // Should maintain proper document structure
+      expect(result).toContain('# CLUE Document Summary');
+      expect(result).toContain('## Section 1');
+      expect(result).toContain('### Row 1');
+      expect(result).toContain('### Row 2');
+    });
+  });
+
+  describe('options handling', () => {
+    it('should respect minimal option with drawings', () => {
+      const content = {
+        rowOrder: ['row1'],
+        rowMap: {
+          row1: {
+            tiles: [{ tileId: 'tile1' }],
+            isSectionHeader: false
+          }
+        },
+        tileMap: {
+          tile1: {
+            id: 'tile1',
+            content: {
+              type: 'Drawing',
+              objects: [
+                {
+                  type: 'rectangle',
+                  x: 10,
+                  y: 20,
+                  width: 100,
+                  height: 50,
+                  fill: 'white',
+                  stroke: 'black',
+                  strokeWidth: 1,
+                  strokeDashArray: 'solid'
+                }
+              ]
+            }
+          }
+        }
+      };
+
+      const result = documentSummarizerWithDrawings(content, { minimal: true });
+
+      // In minimal mode, should still render SVG but with reduced boilerplate
+      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).toContain('```svg');
+      expect(result).toContain('<svg>');
+      expect(result).toContain('</svg>');
+
+      // Should not contain the full document structure explanation
+      expect(result).not.toContain('The CLUE document consists of one or more rows');
+    });
+
+    it('should respect includeModel option with drawings', () => {
+      const content = {
+        rowOrder: ['row1'],
+        rowMap: {
+          row1: {
+            tiles: [{ tileId: 'tile1' }],
+            isSectionHeader: false
+          }
+        },
+        tileMap: {
+          tile1: {
+            id: 'tile1',
+            content: {
+              type: 'Drawing',
+              objects: []
+            }
+          }
+        }
+      };
+
+      const result = documentSummarizerWithDrawings(content, { includeModel: true });
+
+      // Should include the drawing description and SVG
+      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).toContain('```svg');
+      expect(result).toContain('<svg></svg>');
+
+      // includeModel only affects unknown tile types, not handled ones
+      expect(result).not.toContain('"model":{"id":"tile1"');
     });
   });
 });
