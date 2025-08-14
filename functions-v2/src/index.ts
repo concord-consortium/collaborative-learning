@@ -5,6 +5,8 @@ export {atMidnight} from "./at-midnight";
 export {onAnalyzableTestDocWritten, onAnalyzableProdDocWritten} from "./on-analyzable-doc-written";
 export {onAnalysisDocumentPending} from "./on-analysis-document-pending";
 export {onAnalysisDocumentImaged} from "./on-analysis-document-imaged";
+export {onExemplarDataDocWritten} from "./on-exemplar-data-doc-written";
+
 import {createFirestoreMetadataDocument} from "./create-firestore-metadata-document";
 import {postDocumentComment} from "./post-document-comment";
 import {postExemplarComment} from "./post-exemplar-comment";
