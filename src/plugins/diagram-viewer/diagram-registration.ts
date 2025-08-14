@@ -9,7 +9,7 @@ import { DeleteButton, EditVariableButton, FitViewToolbarButton, HideNavigatorBu
   LockLayoutButton, NewVariableButton, VariablesLinkButton, ZoomInToolbarButton, ZoomOutToolbarButton }
     from "./diagram-toolbar-buttons";
 
-import Icon from "./src/assets/program.svg";
+import Icon from "./src/assets/diagram-tool.svg";
 import HeaderIcon from "./src/assets/diagram-tile-id.svg";
 
 registerTileContentInfo({
