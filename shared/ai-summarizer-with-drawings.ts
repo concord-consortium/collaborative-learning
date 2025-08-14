@@ -24,8 +24,8 @@ export default function documentSummarizerWithDrawings(content: any, options: Ai
 
 function handleDrawingTileWithSVG(tile: INormalizedTile, options: AiSummarizerOptions): string|undefined {
   if (tile.model.content.type !== "Drawing") { return undefined; }
-  return `This tile contains a drawing. The drawing is rendered below in a svg code fence:\n
-\`\`\`svg\n${renderDrawing(tile.model.content)}\n\`\`\``;
+  // eslint-disable-next-line max-len
+  return `This tile contains a drawing. The drawing is rendered below in an svg code fence:\n\`\`\`svg\n${renderDrawing(tile.model.content)}\n\`\`\``;
 }
 
 function renderDrawing(model: any) {

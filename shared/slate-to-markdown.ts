@@ -1,3 +1,6 @@
+// Here is the type definition of the Slate document format.
+// It is included here just for reference, not used by the code.
+//
 // type SlateNode =
 //   | {
 //       object: 'value';

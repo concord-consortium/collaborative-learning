@@ -275,7 +275,7 @@ export const minimalHeadingLevels: Record<HeadingLevel, number|undefined> = {
   rowWithoutSection: undefined,
 } as const;
 
-export function heading(headingLevel: HeadingLevel, headingText: string,options: AiSummarizerOptions): string {
+export function heading(headingLevel: HeadingLevel, headingText: string, options: AiSummarizerOptions): string {
   const level = options.minimal ? minimalHeadingLevels[headingLevel] : headingLevels[headingLevel];
   if (!level) {
     return "";
