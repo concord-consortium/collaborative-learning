@@ -9,7 +9,19 @@
           "type": "Text",
           "format": "html",
           "text": [
-            "<p>I am exemplary.</p>"
+            "<p>Try making the design larger or smaller.</p>"
+          ]
+        }
+      },
+      {
+        "id": "Customization",
+        "content": {
+          "type": "Text",
+          "dynamicContent": true,
+          "dynamicContentPrompt": "Describe the connection between making a design larger or smaller and the main themes found in the student work.",
+          "format": "plain",
+          "text": [
+            ""
           ]
         }
       }

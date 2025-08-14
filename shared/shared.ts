@@ -246,6 +246,15 @@ export interface IPostDocumentCommentParams extends IFirestoreMetadataDocumentPa
 }
 export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFirebaseFunctionWarmUpParams;
 
+export interface IGetCustomizedExemplarParams extends IFirebaseFunctionBaseParams {
+  dynamicContentPrompt: string;
+  unit: string;
+  documentId: string;
+  tileId: string;
+}
+
+export type IGetCustomizedExemplarUnionParams = IGetCustomizedExemplarParams | IFirebaseFunctionWarmUpParams;
+
 export interface INetworkResourceTeacherClassResponse {
   uid: string;
   personalDocuments?: Record<string, any>;

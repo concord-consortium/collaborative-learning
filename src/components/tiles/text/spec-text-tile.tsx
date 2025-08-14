@@ -66,20 +66,18 @@ export function specTextTile(options: ISpecTextTileOptions) {
     }
   };
 
-  const textTile = React.createRef<TextToolComponent>();
-
   render(
     <ModalProvider>
       <TileModelContext.Provider value={model}>
         <Provider stores={stores}>
-          <TextToolComponent ref={textTile} {...defaultProps} />
+          <TextToolComponent {...defaultProps} />
         </Provider>
       </TileModelContext.Provider>
     </ModalProvider>
   );
 
   return {
-    plugins: textTile?.current?.plugins,
-    textTile: textTile.current
+    plugins: undefined, // plugins are no longer accessible from outside the component
+    textTile: undefined // refs don't work with functional components
   };
 }

@@ -26,6 +26,8 @@ export const TextContentModel = TileContentModel
     text: types.optional(types.union(types.string, types.array(types.string)), ""),
     // e.g. "html", "markdown", "slate", "quill", empty => plain text
     format: types.maybe(types.string),
+    dynamicContent: types.optional(types.boolean, false),
+    dynamicContentPrompt: types.optional(types.string, ""),
     highlightedText: types.optional(types.array(types.model({id: types.identifier, text: types.string})), [])
   })
   .volatile(self => ({

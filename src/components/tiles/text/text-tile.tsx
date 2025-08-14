@@ -1,12 +1,11 @@
-import React from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import classNames from "classnames";
 import { IReactionDisposer, reaction } from "mobx";
-import { observer, inject } from "mobx-react";
+import { observer } from "mobx-react";
 import {
   createEditor, defaultHotkeyMap, Editor, EditorValue, normalizeSelection, ReactEditor, Slate, SlateEditor
 } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "./text-content-context";
-import { BaseComponent } from "../../base";
 import { OffsetModel } from "../../../models/annotations/clue-object";
 import { userSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
@@ -22,10 +21,14 @@ import { LogEventName } from "../../../lib/logger-types";
 import { TextPluginsContext } from "./text-plugins-context";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { countWords } from "../../../utilities/string-utils";
-import { ContainerContext } from "../../document/container-context";
+import { useStores } from "../../../hooks/use-stores";
+import { useContainerContext } from "../../document/container-context";
 
 import "./toolbar/text-toolbar-registration";
 import "./text-tile.scss";
+import { useFirebaseFunction } from "../../../hooks/use-firebase-function";
+import { IGetCustomizedExemplarUnionParams } from "../../../../shared/shared";
+import { useUserContext } from "../../../hooks/use-user-context";
 
 /*
   The Slate internal data model uses, among other things, "marks" and "blocks"
@@ -91,30 +94,154 @@ interface IState {
   initialValue?: EditorValue;
 }
 
-@inject("stores")
-@observer
-export default class TextToolComponent extends BaseComponent<ITileProps, IState> {
-  public state: IState = { revision: 0 };
-  private disposers: IReactionDisposer[];
-  private textTileDiv: HTMLElement | null;
-  private editor: Editor | undefined;
-  private tileContentRect: DOMRectReadOnly;
-  private toolbarTileApi: ITileApi | undefined;
-  private textOnFocus: string | string [] | undefined;
-  private isHandlingUserChange = false;
+export const TextToolComponent = observer(function TextToolComponent(props: ITileProps) {
+  const stores = useStores();
+  const containerContext = useContainerContext();
 
-  static contextType = ContainerContext;
-  declare context: React.ContextType<typeof ContainerContext>;
+  const [state, setState] = useState<IState>({ revision: 0 });
+  const [initialValue, setInitialValue] = useState<EditorValue | undefined>(undefined);
+
+  const textTileDivRef = useRef<HTMLDivElement | null>(null);
+  const editorRef = useRef<Editor | undefined>(undefined);
+  const tileContentRectRef = useRef<DOMRectReadOnly | null>(null);
+  const toolbarTileApiRef = useRef<ITileApi | undefined>(undefined);
+  const textOnFocusRef = useRef<string | string[] | undefined>(undefined);
+  const isHandlingUserChangeRef = useRef(false);
+  const disposersRef = useRef<IReactionDisposer[]>([]);
+  const pluginsRef = useRef<Record<string, ITextPlugin|undefined>>({});
+
+  const context = useUserContext();
+  const getCustomizedExemplar = useFirebaseFunction<IGetCustomizedExemplarUnionParams>("getCustomizedExemplar_v2");
 
   // plugins are exposed to making testing easier
-  plugins: Record<string, ITextPlugin|undefined>;
+  const plugins = pluginsRef.current;
 
-  public componentDidMount() {
-    this.plugins = createTextPluginInstances(this.props.model.content as TextContentModelType);
+  const getContent = useCallback(() => {
+    return props.model.content as TextContentModelType;
+  }, [props.model.content]);
+
+  const isReadOnly = useCallback((): boolean => {
+    const inLockedContainer = containerContext.isLocked;
+    const isFixedInLockedContainer = props.model.fixedPosition && inLockedContainer;
+    const readOnlyValue = props.readOnly || isFixedInLockedContainer;
+
+    return readOnlyValue;
+  }, [containerContext.isLocked, props.model.fixedPosition, props.readOnly]);
+
+  const handleUpdateHighlightBoxCache = useCallback((id: string, box: IHighlightBox) => {
+    getContent().setHighlightBoxesCache(id, box);
+  }, [getContent]);
+
+  const handleChange = useCallback((value: EditorValue) => {
+    const { model } = props;
+    const content = getContent();
+    const { ui } = stores;
+    const readOnlyValue = isReadOnly();
+
+    if (editorRef.current && ReactEditor.isFocused(editorRef.current)) {
+      userSelectTile(ui, model, { readOnly: readOnlyValue, container: containerContext.model });
+    }
+
+    if (!readOnlyValue) {
+      isHandlingUserChangeRef.current = true;
+      // Update content model when user changes slate
+      content.setSlate(value);
+      setState(prev => ({ ...prev, revision: prev.revision + 1 }));
+      isHandlingUserChangeRef.current = false;
+    }
+  }, [props, getContent, stores, isReadOnly, containerContext.model]);
+
+  const handleMouseDownInWrapper = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const { ui } = stores;
+    const { model } = props;
+    const readOnlyValue = isReadOnly();
+    const inLockedContainer = containerContext.isLocked;
+
+    // Don't select a locked prompt
+    if (props.model.fixedPosition && inLockedContainer) {
+      return;
+    }
+
+    const append = hasSelectionModifier(e);
+    const isWrapperClick = e.target === textTileDivRef.current;
+    userSelectTile(ui, model, { readOnly: readOnlyValue, append, container: containerContext.model });
+
+    if (isWrapperClick || append) {
+      if (readOnlyValue) {
+        // In read-only mode, just prevent the default to avoid Slate's auto-select
+        // but don't stop propagation to allow text selection to work
+        e.preventDefault();
+      } else if (isWrapperClick) {
+        // In editable mode, focus the editor for wrapper clicks
+        editorRef.current && ReactEditor.focus(editorRef.current);
+        e.preventDefault();
+      }
+    }
+  }, [stores, props, isReadOnly, containerContext.isLocked, containerContext.model]);
+
+  const handleBlur = useCallback(() => {
+    const readOnlyValue = isReadOnly();
+
+    if (!readOnlyValue) {
+      // If the text has changed since the editor was focused, log the new text.
+      const text = getContent().text;
+      if (text !== textOnFocusRef.current) {
+        const plainText = getContent().asPlainText();
+        const wordCount = countWords(plainText);
+        const change = {args:[{ text }]};
+        logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, {
+          operation: 'update',
+          change,
+          plainText,
+          wordCount,
+          tileId: props.model.id });
+      }
+
+      setState(prev => ({ ...prev, revision: prev.revision + 1 })); // Force a rerender
+    }
+  }, [isReadOnly, getContent, props.model.id]);
+
+  const handleFocus = useCallback(() => {
+    const readOnlyValue = isReadOnly();
+
+    if (!readOnlyValue) {
+      textOnFocusRef.current = getContent().textStr;
+    }
+    setState(prev => ({ ...prev, revision: prev.revision + 1 })); // Force a rerender
+  }, [isReadOnly, getContent]);
+
+  // Initialize editor and plugins
+  useEffect(() => {
+    const textContent = getContent();
+
+    const updateTextWithCustomizedExemplar = async () => {
+      if (!props.documentId || !props.model.id) {
+        console.log("No documentId or tileId found");
+        return;
+      }
+      console.log("Updating text with customized exemplar");
+      let response;
+      response = await getCustomizedExemplar({
+        context,
+        dynamicContentPrompt: textContent.dynamicContentPrompt,
+        unit: stores.unit.code,
+        documentId: props.documentId,
+        tileId: props.model.id
+      });
+      console.log("Response from getCustomizedExemplar", response);
+      textContent.setText(response.data.text);
+    }
+
+    if (textContent.dynamicContent) {
+      textContent.setText("Loading customized content...");
+      updateTextWithCustomizedExemplar();
+    }
+
+    pluginsRef.current = createTextPluginInstances(textContent);
     const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
     // Gather all the plugin init functions and pass that to slate.
     const onInitEditor = (e: Editor) => {
-      Object.values(this.plugins).forEach(plugin => {
+      Object.values(pluginsRef.current).forEach(plugin => {
         if (plugin?.onInitEditor) {
           e = plugin.onInitEditor(e);
         }
@@ -123,56 +250,60 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     };
     options.onInitEditor = onInitEditor;
     options.history = false;
-    this.editor = createEditor(options);
-    this.getContent().setEditor(this.editor);
-    this.setState({ initialValue: this.getContent().asSlate() });
+    const editor = createEditor(options);
+    editorRef.current = editor;
+    getContent().setEditor(editor);
+    setInitialValue(getContent().asSlate());
 
-    this.disposers = [];
     // Synchronize slate with model changes. e.g. changes to any text in another tile is refelected here.
-    this.disposers.push(reaction(
-      () => this.getContent().text,
+    const disposer1 = reaction(
+      () => getContent().text,
       () => {
         // Update slate when content model changes
-        if (!this.isHandlingUserChange) {
-          const textContent = this.getContent();
-          if (this.editor) {
-            this.editor.children = textContent.asSlate();
-            normalizeSelection(this.editor);
-            this.setState({ revision: this.state.revision + 1 }); // Force a rerender
+        if (!isHandlingUserChangeRef.current) {
+          const contentModel = getContent();
+          if (editorRef.current) {
+            editorRef.current.children = contentModel.asSlate();
+            normalizeSelection(editorRef.current);
+            setState(prev => ({ ...prev, revision: prev.revision + 1 })); // Force a rerender
           }
         }
       }
-    ));
+    );
+
     // blur editor when tile is deselected
-    this.disposers.push(reaction(
+    const disposer2 = reaction(
       () => {
-        const { model: { id } } = this.props;
-        const { ui: { selectedTileIds } } = this.stores;
+        const { model: { id } } = props;
+        const { ui: { selectedTileIds } } = stores;
         return selectedTileIds.includes(id);
       },
       isTileSelected => {
-        const isFocused = this.editor && ReactEditor.isFocused(this.editor);
+        const isFocused = editorRef.current && ReactEditor.isFocused(editorRef.current);
         if (isFocused && !isTileSelected) {
-          this.editor && ReactEditor.blur(this.editor);
+          editorRef.current && ReactEditor.blur(editorRef.current);
         }
       }
-    ));
+    );
 
-    this.props.onRegisterTileApi({
+    disposersRef.current = [disposer1, disposer2];
+
+    // Register tile API
+    props.onRegisterTileApi({
       exportContentAsTileJson: () => {
-        return this.getContent().exportJson();
+        return getContent().exportJson();
       },
       handleDocumentScroll: (x: number, y: number) => {
-        this.toolbarTileApi?.handleDocumentScroll?.(x, y);
+        toolbarTileApiRef.current?.handleDocumentScroll?.(x, y);
       },
       handleTileResize: (entry: TileResizeEntry) => {
         const { x, y, width, height, top, left, bottom, right } = entry.contentRect;
-        this.tileContentRect = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
-        this.toolbarTileApi?.handleTileResize?.(entry);
+        tileContentRectRef.current = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
+        toolbarTileApiRef.current?.handleTileResize?.(entry);
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
         if (objectType === kHighlightFormat) {
-          const box = this.getContent().highlightBoxesCache.get(objectId);
+          const box = getContent().highlightBoxesCache.get(objectId);
           if (box) return box;
         }
       },
@@ -181,7 +312,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         // and then offset should be the center of the edge closes to the target
         const offsets = OffsetModel.create({});
         if (objectType === kHighlightFormat) {
-          const box = this.getContent().highlightBoxesCache.get(objectId);
+          const box = getContent().highlightBoxesCache.get(objectId);
           if (box) {
             const { width, height } = box;
             offsets.setDx(width / 2);
@@ -191,162 +322,69 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         return offsets;
       }
     });
-  }
 
-  public componentWillUnmount() {
-    this.disposers.forEach(disposer => disposer());
-    for (const plugin of Object.values(this.plugins)) {
-      plugin?.dispose?.();
-    }
-  }
+    // Cleanup function
+    return () => {
+      disposersRef.current.forEach(disposer => disposer());
+      for (const plugin of Object.values(pluginsRef.current)) {
+        plugin?.dispose?.();
+      }
+    };
+  }, [getContent, props.onRegisterTileApi, stores, props.model.id]);
 
-  public render() {
-    const { appConfig: { placeholderText } } = this.stores;
-    const readOnly = this.isReadOnly();
+  const { appConfig: { placeholderText } } = stores;
+  const readOnly = isReadOnly();
 
-    const editableClass = readOnly ? "read-only" : "editable";
-    const containerClasses = classNames("tile-content", "text-tool-wrapper", {
-      editable: !readOnly,
-      hovered: this.props.hovered,
-      selected: this.stores.ui.isSelectedTile(this.props.model),
-    });
-    // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
-    // used here for a while now and cypress tests depend on it. Should transition
-    // to using 'text-tool-editor' for these purposes moving forward.
-    const slateClasses = `text-tool text-tool-editor ${editableClass}`;
-    if (!this.state.initialValue) return null;
+  const editableClass = readOnly ? "read-only" : "editable";
+  const containerClasses = classNames("tile-content", "text-tool-wrapper", {
+    editable: !readOnly,
+    hovered: props.hovered,
+    selected: stores.ui.isSelectedTile(props.model),
+  });
+  // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
+  // used here for a while now and cypress tests depend on it. Should transition
+  // to using 'text-tool-editor' for these purposes moving forward.
+  const slateClasses = `text-tool text-tool-editor ${editableClass}`;
 
-    return (
-      // Ideally, this would just be 'text-tool' for consistency with other tools,
-      // but 'text-tool` is used for the internal editor (cf. 'classes' above),
-      // which is used for cypress tests and other purposes.
-      // TODO: replace this provider with one at the tile level so we get it for free.
-      // and then replace the drawing one with that as well
-      <TextContentModelContext.Provider value={this.getContent()} >
-        <TextPluginsContext.Provider value={this.plugins} >
-          <HighlightRevisionContext.Provider value={this.state.revision}>
-            <HighlightRegistryContext.Provider value={this.handleUpdateHighlightBoxCache}>
-              <div
-                className={containerClasses}
-                data-testid="text-tool-wrapper"
-                ref={elt => this.textTileDiv = elt}
-                onMouseDown={this.handleMouseDownInWrapper}
+  if (!initialValue) return null;
+
+  return (
+    // Ideally, this would just be 'text-tool' for consistency with other tools,
+    // but 'text-tool` is used for the internal editor (cf. 'classes' above),
+    // which is used for cypress tests and other purposes.
+    // TODO: replace this provider with one at the tile level so we get it for free.
+    // and then replace the drawing one with that as well
+    <TextContentModelContext.Provider value={getContent()} >
+      <TextPluginsContext.Provider value={plugins} >
+        <HighlightRevisionContext.Provider value={state.revision}>
+          <HighlightRegistryContext.Provider value={handleUpdateHighlightBoxCache}>
+            <div
+              className={containerClasses}
+              data-testid="text-tool-wrapper"
+              ref={textTileDivRef}
+              onMouseDown={handleMouseDownInWrapper}
+            >
+              <Slate
+                editor={editorRef.current as ReactEditor}
+                initialValue={initialValue}
+                onChange={handleChange}
               >
-                <Slate
-                  editor={this.editor as ReactEditor}
-                  initialValue={this.state.initialValue}
-                  onChange={this.handleChange}
-                >
-                  <SlateEditor
-                    placeholder={placeholderText}
-                    hotkeyMap={defaultHotkeyMap}
-                    readOnly={readOnly}
-                    onFocus={this.handleFocus}
-                    onBlur={this.handleBlur}
-                    className={`ccrte-editor slate-editor ${slateClasses || ""}`}
-                  />
-                  <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
-                </Slate>
-              </div>
-            </HighlightRegistryContext.Provider>
-          </HighlightRevisionContext.Provider>
-        </TextPluginsContext.Provider>
-      </TextContentModelContext.Provider>
-    );
-  }
+                <SlateEditor
+                  placeholder={placeholderText}
+                  hotkeyMap={defaultHotkeyMap}
+                  readOnly={readOnly}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                  className={`ccrte-editor slate-editor ${slateClasses || ""}`}
+                />
+                <TileToolbar tileType="text" tileElement={props.tileElt} readOnly={!!readOnly} />
+              </Slate>
+            </div>
+          </HighlightRegistryContext.Provider>
+        </HighlightRevisionContext.Provider>
+      </TextPluginsContext.Provider>
+    </TextContentModelContext.Provider>
+  );
+});
 
-  private handleChange = (value: EditorValue) => {
-    const { model } = this.props;
-    const content = this.getContent();
-    const { ui } = this.stores;
-    const readOnly = this.isReadOnly();
-
-    if (this.editor && ReactEditor.isFocused(this.editor)) {
-      userSelectTile(ui, model, { readOnly, container: this.context.model });
-    }
-
-    if (!readOnly) {
-      this.isHandlingUserChange = true;
-      // Update content model when user changes slate
-      content.setSlate(value);
-      this.setState({ revision: this.state.revision + 1 });
-      this.isHandlingUserChange = false;
-    }
-  };
-
-  private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { ui } = this.stores;
-    const { model } = this.props;
-    const readOnly = this.isReadOnly();
-    const inLockedContainer = this.context.isLocked;
-
-    // Don't select a locked prompt
-    if (this.props.model.fixedPosition && inLockedContainer) {
-      return;
-    }
-
-    const append = hasSelectionModifier(e);
-    const isWrapperClick = e.target === this.textTileDiv;
-    userSelectTile(ui, model, { readOnly, append, container: this.context.model });
-
-    if (isWrapperClick || append) {
-      if (readOnly) {
-        // In read-only mode, just prevent the default to avoid Slate's auto-select
-        // but don't stop propagation to allow text selection to work
-        e.preventDefault();
-      } else if (isWrapperClick) {
-        // In editable mode, focus the editor for wrapper clicks
-        this.editor && ReactEditor.focus(this.editor);
-        e.preventDefault();
-      }
-    }
-  };
-
-  private getContent() {
-    return this.props.model.content as TextContentModelType;
-  }
-
-  private isReadOnly(): boolean {
-    const inLockedContainer = this.context.isLocked;
-    const isFixedInLockedContainer = this.props.model.fixedPosition && inLockedContainer;
-    const isReadOnly = this.props.readOnly || isFixedInLockedContainer;
-
-    return isReadOnly;
-  }
-
-
-  private handleBlur = () => {
-    const readOnly = this.isReadOnly();
-
-    if (!readOnly) {
-      // If the text has changed since the editor was focused, log the new text.
-      const text = this.getContent().text;
-      if (text !== this.textOnFocus) {
-        const plainText = this.getContent().asPlainText();
-        const wordCount = countWords(plainText);
-        const change = {args:[{ text }]};
-        logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, {
-          operation: 'update',
-          change,
-          plainText,
-          wordCount,
-          tileId: this.props.model.id });
-      }
-
-      this.setState({ revision: this.state.revision + 1 }); // Force a rerender
-    }
-  };
-
-  private handleFocus = () => {
-    const readOnly = this.isReadOnly();
-
-    if (!readOnly) {
-      this.textOnFocus = this.getContent().textStr;
-    }
-    this.setState({ revision: this.state.revision + 1 }); // Force a rerender
-  };
-
-  private handleUpdateHighlightBoxCache = (id: string, box: IHighlightBox) => {
-    this.getContent().setHighlightBoxesCache(id, box);
-  };
-}
+export default TextToolComponent;
