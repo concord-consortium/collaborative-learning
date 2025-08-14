@@ -902,7 +902,7 @@ describe('documentSummarizerWithDrawings', () => {
       const result = documentSummarizerWithDrawings(content, {});
 
       // Should contain the enhanced drawing description
-      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in an svg code fence:');
       expect(result).toContain('```svg');
       expect(result).toContain('</svg>');
 
@@ -956,7 +956,7 @@ describe('documentSummarizerWithDrawings', () => {
 
       const result = documentSummarizerWithDrawings(content, {});
 
-      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in an svg code fence:');
       expect(result).toContain('```svg');
 
       // Should contain SVG content for multiple objects
@@ -988,7 +988,7 @@ describe('documentSummarizerWithDrawings', () => {
 
       const result = documentSummarizerWithDrawings(content, {});
 
-      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in an svg code fence:');
       expect(result).toContain('```svg');
       expect(result).toContain('<svg></svg>');
     });
@@ -1066,7 +1066,7 @@ describe('documentSummarizerWithDrawings', () => {
 
       // Should use custom handler instead of enhanced drawing handler
       expect(result).toContain('Custom drawing description');
-      expect(result).not.toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).not.toContain('This tile contains a drawing. The drawing is rendered below in an svg code fence:');
     });
 
     it('should handle complex document structures with drawings', () => {
@@ -1120,7 +1120,7 @@ describe('documentSummarizerWithDrawings', () => {
       const result = documentSummarizerWithDrawings(content, {});
 
       // Should handle both drawing and text tiles
-      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in an svg code fence:');
       expect(result).toContain('Text content');
       expect(result).toContain('This tile contains the following Markdown text content');
 
@@ -1168,7 +1168,7 @@ describe('documentSummarizerWithDrawings', () => {
       const result = documentSummarizerWithDrawings(content, { minimal: true });
 
       // In minimal mode, should still render SVG but with reduced boilerplate
-      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in an svg code fence:');
       expect(result).toContain('```svg');
       expect(result).toContain('<svg>');
       expect(result).toContain('</svg>');
@@ -1200,7 +1200,7 @@ describe('documentSummarizerWithDrawings', () => {
       const result = documentSummarizerWithDrawings(content, { includeModel: true });
 
       // Should include the drawing description and SVG
-      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in a svg code fence:');
+      expect(result).toContain('This tile contains a drawing. The drawing is rendered below in an svg code fence:');
       expect(result).toContain('```svg');
       expect(result).toContain('<svg></svg>');
 
