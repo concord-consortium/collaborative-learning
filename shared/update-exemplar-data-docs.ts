@@ -35,14 +35,23 @@ interface IClassData {
   userCount: number;
   userIds: Set<string>;
   documentCount: number;
-  documents: Set<{ uid: string, key: string }>;
+  documents: Set<{ uid: string, key: string, teacher: boolean }>;
   lastEditedAt: number;
 }
 
+// Query Firestore for the list of teachers in a class.
+async function getClassTeachers(portal: string|undefined, demo: string|undefined, contextId: string, logger: Logger):
+    Promise<string[]> {
+  const classRef = getFirestore().doc(`${firestoreBasePath(portal, demo)}/classes/${contextId}`);
+  const classDoc = await classRef.get();
+  return classDoc.data()?.teachers || [];
+}
+
 // Query Firestore for all user documents in the unit, and return info by classroom.
-async function getClassData(portal: string|undefined, demo: string|undefined, unit: string, logger: Logger):
+async function getClassDocumentData(portal: string|undefined, demo: string|undefined, unit: string, logger: Logger):
     Promise<{ [contextId: string]: IClassData }> {
   const classData: { [contextId: string]: IClassData } = {};
+  const classTeachers: { [contextId: string]: string[] } = {};
 
   const documentsPath = firestoreBasePath(portal, demo) + "/documents";
 
@@ -60,10 +69,16 @@ async function getClassData(portal: string|undefined, demo: string|undefined, un
       const uid = data.uid;
       const key = data.key;
 
+      if (!(contextId in classTeachers)) {
+        classTeachers[contextId] = await getClassTeachers(portal, demo, contextId, logger);
+      }
+
+      const teacher = classTeachers[contextId].includes(uid);
+
       const lastEditedPath
         = `${firebaseBasePath(portal, demo)}/classes/${contextId}/users/${uid}/documentMetadata/${key}/lastEditedAt`;
       const documentSnapshot = await getDatabase().ref(lastEditedPath).once("value");
-      const lastEdited = documentSnapshot.exists() ? 0+documentSnapshot.val() : null;
+      const lastEdited = documentSnapshot.exists() ? Number(documentSnapshot.val()) : null;
 
       if (!classData[contextId]) {
         classData[contextId] = { userCount: 0, userIds: new Set(),
@@ -72,7 +87,7 @@ async function getClassData(portal: string|undefined, demo: string|undefined, un
       const record = classData[contextId];
       record.userIds.add(uid);
       record.documentCount++;
-      record.documents.add({ uid, key });
+      record.documents.add({ uid, key, teacher });
       if (lastEdited && lastEdited > record.lastEditedAt) {
         record.lastEditedAt = lastEdited;
       }
@@ -120,6 +135,15 @@ async function retrieveDocumentFromFirebase(portal: string|undefined, demo: stri
   }
 }
 
+async function retrieveAndSummarizeDocument(portal: string|undefined, demo: string|undefined, contextId: string,
+    uid: string, key: string, logger: Logger): Promise<string> {
+  const document = await retrieveDocumentFromFirebase(portal, demo, contextId, uid, key);
+  if (document.error) {
+    logger.info(`Error retrieving document (${contextId}/${uid}/${key}) from Firebase: ${document.error}`);
+  }
+  return documentSummarizer(document.content, { includeModel: false, minimal: true });
+}
+
 // Check if our data document under /exemplars is older than the latest document saved in the class.
 async function dataDocNeedsUpdate(portal: string|undefined, demo: string|undefined, unit: string,
     contextId: string, classData: IClassData) {
@@ -136,28 +160,31 @@ async function updateExemplarDataDoc(portal: string|undefined, demo: string|unde
     contextId: string, data: IClassData, logger: Logger) {
   logger.info(`Updating exemplar data doc for ${unit} ${contextId}`);
 
-  // Retrieve and summarize all documents in the class.
-  const summaries = await Promise.all(Array.from(data.documents).map(async ({uid, key}) =>  {
-    const document = await retrieveDocumentFromFirebase(portal, demo, contextId, uid, key);
-    if (document.error) {
-      logger.info(`Error retrieving document (${contextId}/${uid}/${key}) from Firebase: ${document.error}`);
-    }
-    return documentSummarizer(document.content, { includeModel: false, minimal: true });
+  // Retrieve and summarize the documents
+  const teacherDocs = Array.from(data.documents).filter(({teacher}) => teacher);
+  const studentDocs = Array.from(data.documents).filter(({teacher}) => !teacher);
+  const teacherSummaries = await Promise.all(teacherDocs.map(async ({uid, key}) =>  {
+    return await retrieveAndSummarizeDocument(portal, demo, contextId, uid, key, logger);
   }));
-  const fullContent = summaries.join("\n\n");
+  const studentSummaries = await Promise.all(studentDocs.map(async ({uid, key}) =>  {
+    return await retrieveAndSummarizeDocument(portal, demo, contextId, uid, key, logger);
+  }));
+  const teacherContent = teacherSummaries.join("\n\n");
+  const studentContent = studentSummaries.join("\n\n");
 
   return getExemplarDataDoc(portal, demo, unit, contextId).set({
     lastEditedAt: data.lastEditedAt,
     userCount: data.userCount,
     documentCount: data.documentCount,
-    fullContent,
+    teacherContent,
+    studentContent,
     summary: null
   });
 }
 
 async function updateExemplarDataDocsForRealm(portal: string|undefined, demo: string|undefined, logger: Logger) {
   for (const unit of units) {
-    const classData = await getClassData(portal, demo, unit, logger);
+    const classData = await getClassDocumentData(portal, demo, unit, logger);
     for (const contextId in classData) {
       const data = classData[contextId];
       if (await dataDocNeedsUpdate(portal, demo, unit, contextId, data)) {

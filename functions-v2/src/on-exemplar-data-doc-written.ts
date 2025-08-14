@@ -17,16 +17,22 @@ const exemplarDataDocPath = "{realm}/{realmId}/exemplars/{unit}/classes/{classId
 // gpt-4o-mini has a context window of 128,000 tokens; 64,000 characters should only be about 16 to 20,000 tokens.
 const chunkSize = 64000; // characters per chunk
 
-const systemPrompt = "You are a helpful assistant that analyzes and extracts themes from student work.";
+const systemPrompt = "You are a helpful assistant teacher that analyzes and extracts themes from student work.";
 
-const summarizeChunkPrompt = "Summarize the key points, themes, topics, main ideas, " +
-"and important details in this student work. Do not describe the structure of the documents, just the content.\n" +
-"Summary:";
+const summarizeStudentContentPrompt =
+  "Summarize the key points, themes, topics, main ideas, and important details in this student work. " +
+  "Do not describe the structure of the documents, just the content.\n" +
+  "Summary:";
 
 const combineSummariesPrompt = "These are summaries of important ideas found in several sets of student work.\n" +
-      "Combine these into a single list of the key points, themes, topics, main ideas, " +
-      "and important details that were found.\n\n";
+  "Combine these into a single list of the key points, themes, topics, main ideas, " +
+  "and important details that were found.\n\n";
 
+const summarizeTeacherContentPrompt =
+  "Analyze this teacher work, looking for and summarizing information about what the class is interested " +
+  "in and any important themes and topics that will help with providing relevant examples later. " +
+  "Do not describe the structure of the documents, just the content.\n" +
+  "Summary:";
 interface SummarizeResult {
   chunkIndex: number;
   summary: string;
@@ -37,13 +43,14 @@ async function summarizeChunk(
   openai: ChatOpenAI,
   chunk: string,
   chunkIndex: number,
-  totalChunks: number
+  totalChunks: number,
+  role: "student" | "teacher"
 ): Promise<SummarizeResult> {
   const messages = [
     new SystemMessage(systemPrompt),
     new HumanMessage(`Student work part ${chunkIndex + 1} of ${totalChunks}:
      ${chunk}\n
-     ${summarizeChunkPrompt}`),
+     ${role === "teacher" ? summarizeTeacherContentPrompt : summarizeStudentContentPrompt}`),
   ];
 
   logger.info("Calling LLM to summarize chunk", chunkIndex);
@@ -88,7 +95,7 @@ export const onExemplarDataDocWritten = onDocumentWritten(
   {
     document: exemplarDataDocPath,
     secrets: [openaiApiKey],
-    maxInstances: 2,
+    maxInstances: 2, // Limit how many requests we are sending to OpenAI at once
     concurrency: 3,
   },
   async (event) => {
@@ -103,31 +110,42 @@ export const onExemplarDataDocWritten = onDocumentWritten(
       return;
     }
 
-    if (content.fullContent && !content.summary) {
-      const splitter = new MarkdownTextSplitter({chunkSize, chunkOverlap: 0});
-      const chunks = await splitter.splitText(content.fullContent);
-
+    if (content.studentContent && !content.studentSummary) {
       const openai = new ChatOpenAI({
         model,
         apiKey: openaiApiKey.value(),
       });
 
-      const summaries = await Promise.all(chunks.map(
-        (chunk, index) => summarizeChunk(openai, chunk, index, chunks.length)));
+      const splitter = new MarkdownTextSplitter({chunkSize, chunkOverlap: 0});
+      const chunks = await splitter.splitText(content.studentContent);
+      const studentSummaries = await Promise.all(chunks.map(
+        (chunk, index) => summarizeChunk(openai, chunk, index, chunks.length, "student")));
 
-      let overall: SummarizeResult;
-      if (summaries.length > 1) {
-        overall = await combineSummaries(openai, summaries);
+      let studentSummary: SummarizeResult;
+      if (studentSummaries.length > 1) {
+        studentSummary = await combineSummaries(openai, studentSummaries);
       } else {
-        overall = summaries[0];
+        studentSummary = studentSummaries[0];
       }
 
-      // Make sure we write _something_ into the summary, to avoid infinte-looping this function.
-      const summary = overall.summary || "No summary found";
+      let teacherSummary: SummarizeResult;
+      if (content.teacherContent && !content.teacherSummary) {
+        teacherSummary = await summarizeChunk(openai, content.teacherContent, 0, 1, "teacher");
+      } else {
+        teacherSummary = {
+          chunkIndex: 0,
+          summary: "",
+          tokenCount: 0,
+        };
+      }
+
+      // Make sure we write _something_ into the student summary, to avoid infinite-looping this function.
+      const summary = studentSummary.summary || "No summary found";
 
       await event.data?.after.ref.update({
-        summary,
-        summaryTokenCount: overall.tokenCount,
+        studentSummary: summary,
+        teacherSummary: teacherSummary.summary,
+        summaryTokenCount: studentSummary.tokenCount + teacherSummary.tokenCount,
       });
 
       logger.info("Summarized exemplar data doc", event.subject);
