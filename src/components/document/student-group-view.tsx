@@ -7,6 +7,8 @@ import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent, getFocusedGroupUser, getQuadrant } from "../four-up";
 import { DocumentViewMode } from "./document";
+import { SummaryButton } from "./summary-button";
+import { isProductionUrl } from "../../utilities/auth-utils";
 
 import "./student-group-view.scss";
 
@@ -90,6 +92,7 @@ const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function Grou
                                   onSelectGroup={handleSelectGroup} />;
             })
         }
+      { !isProductionUrl() && <SummaryButton /> }
       </div>
     </div>
   );

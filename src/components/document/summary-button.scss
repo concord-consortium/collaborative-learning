@@ -1,0 +1,54 @@
+@import "../vars";
+
+.summary-button {
+  margin-left: auto;
+  margin-right: 4px;
+}
+
+// Scrollable modal styles
+.custom-modal.scrollable-modal {
+  max-height: 80vh;
+  max-width: 90vw;
+  width: 1200px !important;
+
+  .modal-content {
+    max-height: calc(80vh - 120px); // Account for header and footer
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+  }
+
+  .summary-content {
+    line-height: 1.6;
+    color: $charcoal-dark-1;
+
+    code {
+      background-color: $charcoal-light-8;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: $charcoal-light-8;
+      padding: 12px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 12px 0;
+
+      code {
+        background-color: transparent;
+        padding: 0;
+      }
+    }
+
+    blockquote {
+      border-left: 4px solid $workspace-teal-light-3;
+      margin: 12px 0;
+      padding: 8px 16px;
+      background-color: $workspace-teal-light-9;
+      font-style: italic;
+    }
+  }
+}
