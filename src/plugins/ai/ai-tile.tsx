@@ -28,6 +28,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       }
       if (!content.prompt) {
         console.log("No prompt found");
+        setIsUpdating(false);
         return;
       }
       console.log("Querying AI with prompt", content.prompt);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react";
+import Markdown from "markdown-to-jsx";
 import { useCustomModal } from "../../hooks/use-custom-modal";
 import { useDBStore, useStores } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
@@ -10,36 +11,10 @@ interface ISummaryButtonProps {
   className?: string;
 }
 
-// Simple markdown to HTML converter for basic markdown syntax
-// TODO: use a markdown library instead
-function markdownToHtml(markdown: string): string {
-  if (!markdown) return "";
-
-  return markdown
-    // Headers
-    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-    // Bold and italic
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Code blocks
-    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    // Line breaks
-    .replace(/\n/g, '<br>')
-    // Lists
-    .replace(/^\* (.*$)/gim, '<li>$1</li>')
-    .replace(/^- (.*$)/gim, '<li>$1</li>')
-    .replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
-    // Blockquotes
-    .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
-}
-
 /**
  * A button that shows a modal with the AI summaries of the student and teacher work.
  * At the moment this is considered internal testing functionality only, so it is only rendered
- * on non-production urls.
+ * if the `showAiSummary` URL parameter is set to true.
  */
 export const SummaryButton: React.FC<ISummaryButtonProps> = observer(function SummaryButton({ className }) {
   const { firestore } = useDBStore();
@@ -80,15 +55,13 @@ export const SummaryButton: React.FC<ISummaryButtonProps> = observer(function Su
     return (
       <div>
         <h3>Teacher work summary</h3>
-        <div
-          className="summary-content"
-          dangerouslySetInnerHTML={{ __html: markdownToHtml(teacherSummary) }}
-        />
+        <div className="summary-content">
+          <Markdown>{teacherSummary}</Markdown>
+        </div>
         <h3>Student work summary</h3>
-        <div
-          className="summary-content"
-          dangerouslySetInnerHTML={{ __html: markdownToHtml(studentSummary) }}
-        />
+        <div className="summary-content">
+          <Markdown>{studentSummary}</Markdown>
+        </div>
       </div>
     );
   };
