@@ -6,17 +6,18 @@ import {defineSecret} from "firebase-functions/params";
 import {DocumentSnapshot} from "firebase-functions/v2/firestore";
 import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
-import {
-  IGetCustomizedExemplarUnionParams, isWarmUpParams,
-} from "../../shared/shared";
+import {IAiContentUnionParams, isWarmUpParams} from "../../shared/shared";
 import {validateUserContext} from "./user-context";
 
-// This function takes a prompt provided by the client and has the LLM respond to it
-// along with the current summary of student and teacher work in the given class and unit.
+// This function generates and returns tile content from an LLM.
+// The prompt provided by the client along with the current summary of student and teacher.
+// work in the given class and unit are provided as input.
 // The response will be cached and re-used unless the prompt or work summary is updated.
 
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
 
+// Note we are currently using this fixed system prompt
+// TODO: perhaps this should be set in the unit configuration.
 const systemPrompt = "You are a helpful assistant teacher in a 6th grade classroom.";
 
 const model = "gpt-4o-mini";
@@ -44,13 +45,13 @@ function isDynamicContentUpToDate(dynamicContentPrompt: string,
   return true;
 }
 
-export const getCustomizedExemplar = onCall(
+export const getAiContent = onCall(
   {
     secrets: [openaiApiKey],
     maxInstances: 2, // Limit how many requests we are sending to OpenAI at once
     concurrency: 3,
   },
-  async (request: CallableRequest<IGetCustomizedExemplarUnionParams>) => {
+  async (request: CallableRequest<IAiContentUnionParams>) => {
     const params = request.data;
     if (isWarmUpParams(params)) return {version};
 
@@ -90,8 +91,15 @@ export const getCustomizedExemplar = onCall(
         new HumanMessage(`${dynamicContentPrompt}\n\n${teacherMessage}${studentMessage}`),
       ];
 
-      const response = await openai.invoke(messages);
-      const dynamicContent = response.content.toString();
+      let dynamicContent = "";
+      let errorMessage = "";
+      try {
+        const response = await openai.invoke(messages);
+        dynamicContent = response.content.toString();
+      } catch (error) {
+        logger.error("Error calling LLM", error);
+        errorMessage = error instanceof Error ? error.message : "Unknown error";
+      }
 
       getFirestore().doc(dynamicContentPath).set({
         dynamicContent,
@@ -101,6 +109,7 @@ export const getCustomizedExemplar = onCall(
 
       return {
         text: dynamicContent,
+        error: errorMessage,
       };
     }
   }

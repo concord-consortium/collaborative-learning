@@ -15,7 +15,7 @@
     "deploy:postDocumentComment": "firebase deploy --only functions:functions-v2:postDocumentComment_v2",
     "deploy:postExemplarComment": "firebase deploy --only functions:functions-v2:postExemplarComment_v2",
     "deploy:createFirestoreMetadataDocument": "firebase deploy --only functions:functions-v2:createFirestoreMetadataDocument_v2",
-    "deploy:getCustomizedExemplar": "firebase deploy --only functions:functions-v2:getCustomizedExemplar_v2",
+    "deploy:getAiContent": "firebase deploy --only functions:functions-v2:getAiContent_v2",
     "logs": "firebase functions:log"
   },
   "engines": {

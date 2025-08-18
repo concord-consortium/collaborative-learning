@@ -10,13 +10,13 @@ export {onExemplarDataDocWritten} from "./on-exemplar-data-doc-written";
 import {createFirestoreMetadataDocument} from "./create-firestore-metadata-document";
 import {postDocumentComment} from "./post-document-comment";
 import {postExemplarComment} from "./post-exemplar-comment";
-import {getCustomizedExemplar} from "./get-customized-exemplar";
+import {getAiContent} from "./get-ai-content";
 
 /* eslint-disable camelcase */
 export const createFirestoreMetadataDocument_v2 = createFirestoreMetadataDocument;
 export const postDocumentComment_v2 = postDocumentComment;
 export const postExemplarComment_v2 = postExemplarComment;
-export const getCustomizedExemplar_v2 = getCustomizedExemplar;
+export const getAiContent_v2 = getAiContent;
 /* eslint-enable camelcase */
 
 admin.initializeApp();

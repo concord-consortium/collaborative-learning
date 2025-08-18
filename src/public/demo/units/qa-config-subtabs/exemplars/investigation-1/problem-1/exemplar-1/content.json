@@ -12,6 +12,13 @@
             "<p>I am exemplary.</p>"
           ]
         }
+      },
+      {
+        "id": "AI",
+        "content": {
+          "type": "AI",
+          "prompt": "Provide a one-sentence summary of the student work."
+        }
       }
     ]
   }

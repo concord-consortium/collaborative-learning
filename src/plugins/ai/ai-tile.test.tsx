@@ -1,3 +1,12 @@
+// Mock the useStores hook to provide unit.code
+jest.mock("../../hooks/use-stores", () => ({
+  useStores: () => ({
+    unit: {
+      code: "test-unit"
+    }
+  })
+}));
+
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
@@ -10,6 +19,23 @@ import { AIComponent } from "./ai-tile";
 // knows it is a supported tile type
 import "./ai-registration";
 
+jest.mock("../../hooks/use-firebase-function", () => ({
+  useFirebaseFunction: jest.fn(() => jest.fn().mockResolvedValue({
+    data: { text: "Mocked customized content" }
+  }))
+}));
+
+// Mock the useUserContext hook to avoid user context errors during testing
+jest.mock("../../hooks/use-user-context", () => ({
+  useUserContext: jest.fn(() => ({
+    user: { id: "test-user-id" },
+    isAuthenticated: true,
+    isTeacher: false,
+    isStudent: true
+  }))
+}));
+
+
 describe("AIComponent", () => {
   const content = defaultAIContent();
   const model = TileModel.create({content});
@@ -17,7 +43,7 @@ describe("AIComponent", () => {
   const defaultProps = {
     tileElt: null,
     context: "",
-    docId: "",
+    docId: "test-doc-content-id",
     documentContent: null,
     isUserResizable: true,
     onResizeRow: (e: React.DragEvent<HTMLDivElement>): void => {
@@ -37,25 +63,25 @@ describe("AIComponent", () => {
     }
   };
 
-  it("renders successfully", () => {
+  it("renders successfully with prompt showing", () => {
     content.setPrompt("Hello World");
     const {getByText} =
       render(<AIComponent  {...defaultProps} {...{model}}></AIComponent>);
     expect(getByText("Hello World")).toBeInTheDocument();
   });
 
-  it("updates the text when the model changes", async () => {
+  it("updates the prompt text when the model changes", async () => {
     content.setPrompt("Hello World");
-    const {getByText, findByText} =
+    const {getByText, queryByText} =
       render(<AIComponent  {...defaultProps} {...{model}}></AIComponent>);
     expect(getByText("Hello World")).toBeInTheDocument();
 
     content.setPrompt("New Text");
-
-    expect(await findByText("New Text")).toBeInTheDocument();
+    expect(getByText("New Text")).toBeInTheDocument();
+    expect(queryByText("Hello World")).not.toBeInTheDocument();
   });
 
-  it("updates the model when the user types", () => {
+  it("updates the prompt text when the user types", () => {
     content.setPrompt("New Text");
     const {getByRole, getByText} =
       render(<AIComponent  {...defaultProps} {...{model}}></AIComponent>);

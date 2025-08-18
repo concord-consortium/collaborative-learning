@@ -11,6 +11,7 @@ interface ISummaryButtonProps {
 }
 
 // Simple markdown to HTML converter for basic markdown syntax
+// TODO: use a markdown library instead
 function markdownToHtml(markdown: string): string {
   if (!markdown) return "";
 
@@ -55,7 +56,6 @@ export const SummaryButton: React.FC<ISummaryButtonProps> = observer(function Su
       firestore.getDocument(path).then(docSnapshot => {
         const docData = docSnapshot.data();
         if (docData?.studentSummary) {
-          console.log("studentSummary", docData.studentSummary);
           setStudentSummary(docData.studentSummary);
         } else {
           setStudentSummary("No student summary available");

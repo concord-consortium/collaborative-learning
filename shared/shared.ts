@@ -246,14 +246,14 @@ export interface IPostDocumentCommentParams extends IFirestoreMetadataDocumentPa
 }
 export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFirebaseFunctionWarmUpParams;
 
-export interface IGetCustomizedExemplarParams extends IFirebaseFunctionBaseParams {
+export interface IAiContentParams extends IFirebaseFunctionBaseParams {
   dynamicContentPrompt: string;
   unit: string;
   documentId: string;
   tileId: string;
 }
 
-export type IGetCustomizedExemplarUnionParams = IGetCustomizedExemplarParams | IFirebaseFunctionWarmUpParams;
+export type IAiContentUnionParams = IAiContentParams | IFirebaseFunctionWarmUpParams;
 
 export interface INetworkResourceTeacherClassResponse {
   uid: string;
