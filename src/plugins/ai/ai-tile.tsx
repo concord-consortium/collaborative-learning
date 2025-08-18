@@ -1,5 +1,6 @@
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
+import Markdown from "markdown-to-jsx";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { AIContentModelType } from "./ai-content";
 import { useUserContext } from "../../hooks/use-user-context";
@@ -56,7 +57,11 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       <button onClick={handleUpdateButton} className="update-button" disabled={isUpdating}>Update</button>
       <h3>AI Output</h3>
       <div className="ai-output">
-        <p>{isUpdating ? "Updating..." : content.text}</p>
+        {isUpdating ? (
+          <p>Updating...</p>
+        ) : (
+          <Markdown>{content.text}</Markdown>
+        )}
       </div>
     </div>
   );
