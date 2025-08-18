@@ -7,8 +7,13 @@
   overflow: auto;
 
   textarea {
-    width: 100%;
+    width: calc(100% - 10px);
+    margin: 0 5px;
     height: 5em;
     display: block;
+  }
+
+  .ai-output {
+    margin: 0 5px;
   }
 }
