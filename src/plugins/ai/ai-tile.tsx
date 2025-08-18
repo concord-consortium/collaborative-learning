@@ -6,6 +6,7 @@ import { AIContentModelType } from "./ai-content";
 import { useUserContext } from "../../hooks/use-user-context";
 import { useStores } from "../../hooks/use-stores";
 import { useFirebaseFunction } from "../../hooks/use-firebase-function";
+import { useReadOnlyContext } from "../../components/document/read-only-context";
 
 import "./ai-tile.scss";
 
@@ -13,6 +14,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   const content = props.model.content as AIContentModelType;
   const getAiContent = useFirebaseFunction("getAiContent_v2");
   const userContext = useUserContext();
+  const readOnly = useReadOnlyContext();
   const stores = useStores();
   const [updateRequests, setUpdateRequests] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(true);
@@ -37,6 +39,9 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         tileId: props.model.id
       });
       content.setText(response.data.text);
+      if (response.data.error) {
+        console.error("Error querying AI", response.data.error);
+      }
       setIsUpdating(false);
     };
     queryAI();
@@ -50,13 +55,24 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     setUpdateRequests(updateRequests + 1);
   };
 
+  const renderPromptForm = () => {
+    if (readOnly) {
+      return null;
+    }
+    return (
+      <div className="prompt-form">
+        <h3>Prompt for AI</h3>
+        <textarea value={content.prompt} onChange={handleChange} disabled={isUpdating} />
+        <button onClick={handleUpdateButton} className="update-button" disabled={isUpdating}>Update</button>
+      </div>
+    );
+  };
+
   return (
     <div className="tile-content ai-tool">
-      <h3>Prompt for AI</h3>
-      <textarea value={content.prompt} onChange={handleChange} disabled={isUpdating} />
-      <button onClick={handleUpdateButton} className="update-button" disabled={isUpdating}>Update</button>
-      <h3>AI Output</h3>
+      {renderPromptForm()}
       <div className="ai-output">
+        <h3>AI Output</h3>
         {isUpdating ? (
           <p>Updating...</p>
         ) : (
