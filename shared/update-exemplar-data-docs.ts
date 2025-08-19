@@ -35,7 +35,7 @@ interface IClassData {
   userCount: number;
   userIds: Set<string>;
   documentCount: number;
-  documents: Set<{ uid: string, key: string, teacher: boolean }>;
+  documents: Set<{ uid: string, key: string, isTeacherDocument: boolean }>;
   lastEditedAt: number;
 }
 
@@ -73,7 +73,7 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
         classTeachers[contextId] = await getClassTeachers(portal, demo, contextId, logger);
       }
 
-      const teacher = classTeachers[contextId].includes(uid);
+      const isTeacherDocument = classTeachers[contextId].includes(uid);
 
       const lastEditedPath
         = `${firebaseBasePath(portal, demo)}/classes/${contextId}/users/${uid}/documentMetadata/${key}/lastEditedAt`;
@@ -87,7 +87,7 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
       const record = classData[contextId];
       record.userIds.add(uid);
       record.documentCount++;
-      record.documents.add({ uid, key, teacher });
+      record.documents.add({ uid, key, isTeacherDocument });
       if (lastEdited && lastEdited > record.lastEditedAt) {
         record.lastEditedAt = lastEdited;
       }
@@ -161,8 +161,8 @@ async function updateExemplarDataDoc(portal: string|undefined, demo: string|unde
   logger.info(`Updating exemplar data doc for ${unit} ${contextId}`);
 
   // Retrieve and summarize the documents
-  const teacherDocs = Array.from(data.documents).filter(({teacher}) => teacher);
-  const studentDocs = Array.from(data.documents).filter(({teacher}) => !teacher);
+  const teacherDocs = Array.from(data.documents).filter(({isTeacherDocument}) => isTeacherDocument);
+  const studentDocs = Array.from(data.documents).filter(({isTeacherDocument}) => !isTeacherDocument);
   const teacherSummaries = await Promise.all(teacherDocs.map(async ({uid, key}) =>  {
     return await retrieveAndSummarizeDocument(portal, demo, contextId, uid, key, logger);
   }));
