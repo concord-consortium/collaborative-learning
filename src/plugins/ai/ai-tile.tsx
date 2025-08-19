@@ -75,7 +75,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       <div className="ai-output">
         <h3>AI Output</h3>
         {isUpdating ? (
-          <p>Updating...</p>
+          <p>Loading...</p>
         ) : (
           <Markdown>{content.text}</Markdown>
         )}

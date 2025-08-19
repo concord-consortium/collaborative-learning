@@ -2,6 +2,8 @@ import {AuthData} from "firebase-functions/lib/common/providers/https";
 import {DeepPartial} from "utility-types";
 import {ICurriculumMetadata, IDocumentMetadata, IFirestoreMetadataDocumentParams, IPostDocumentCommentParams,
   IRowMapEntry, ITileMapEntry, IUserContext} from "../../shared/shared";
+import {getFirestore} from "firebase-admin/firestore";
+import {getDatabase} from "firebase-admin/database";
 
 interface IPartialValidateDocumentParams {
   context?: Partial<IUserContext>,
@@ -213,3 +215,55 @@ export const specPostCurriculumComment = (
 
 export const authWithNoClaims = {uid: kFirebaseUserId, token: {}};
 export const authWithTeacherClaims = specAuth({token: {user_type: "teacher"}});
+
+// Sets up test documents for update-class-data-docs tests
+// Creates both Firestore document metadata and Firebase Realtime Database document metadata
+export const setupTestDocuments = async (options: {
+  demo?: string;
+  unit?: string;
+  documentId?: string;
+  classId?: string;
+  uid?: string;
+  lastEditedAt?: Date;
+}) => {
+  const {
+    demo = "AITEST",
+    unit = "qa-config-subtabs",
+    documentId = "testdoc1",
+    classId = "test-class",
+    uid = "1",
+    lastEditedAt = Date.now(),
+  } = options;
+
+  // Set up Firestore document metadata
+  const firestoreMetadataPath = `demo/${demo}/documents/${documentId}`;
+  await getFirestore().doc(firestoreMetadataPath).set({
+    unit,
+    context_id: classId,
+    uid,
+    key: documentId,
+  });
+
+  // Set up Firebase Realtime Database document metadata
+  const firebaseMetadataPath =
+    `/demo/${demo}/portals/demo/classes/${classId}/users/${uid}/documentMetadata/${documentId}`;
+  await getDatabase().ref(firebaseMetadataPath).set({
+    lastEditedAt,
+  });
+
+  const firebaseDocPath =
+    `/demo/${demo}/portals/demo/classes/${classId}/users/${uid}/documents/${documentId}`;
+  await getDatabase().ref(firebaseDocPath).set({
+    content: JSON.stringify({foo: "bar"}),
+  });
+
+  return {
+    demo,
+    unit,
+    documentId,
+    classId,
+    uid,
+    studentDocMetadataPath: firestoreMetadataPath,
+    studentDocPath: firebaseMetadataPath,
+  };
+};
