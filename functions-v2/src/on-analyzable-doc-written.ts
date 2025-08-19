@@ -52,14 +52,14 @@ interface AnalysisQueueDocument {
 
 const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebaseRoot: string, firestoreRoot: string) => {
   const content = event.data.after.val();
+  if (!content) {
+    logger.info("evaluation was deleted", event.subject);
+    return;
+  }
   // Check the type since it has changed from a timestamp to an object
   const timestamp = typeof content === "object" ? content.timestamp : content;
   const aiPrompt = (typeof content === "object" && content.aiPrompt) ? content.aiPrompt : null;
   // onValueWritten will trigger on create, update, or delete. Ignore deletes.
-  if (!timestamp) {
-    logger.info("evaluation was deleted", event.subject);
-    return;
-  }
 
   // Determine all the database paths that we are going to need
   const {classId, userId, docId, evaluator} = event.params;

@@ -15,12 +15,12 @@ import { DocumentAnnotationToolbar } from "../document/document-annotation-toolb
 import { CanvasComponent } from "../document/canvas";
 import { DocEditorSettings } from "./doc-editor-settings";
 import { SettingsDialog } from "./settings-dialog";
-import aiSummarizer from "../../../shared/ai-summarizer";
+import documentSummarizerWithDrawings from "../../../shared/ai-summarizer-with-drawings";
+import { AiSummary } from "./ai-summary";
 
 import "../document/document.scss";
 import "../four-up.scss";
 import "./doc-editor-app.scss";
-import { AiSummary } from "./ai-summary";
 
 const kDocEditorDocKey = "clue-doc-editor-doc";
 
@@ -177,7 +177,8 @@ export const DocEditorApp = observer(function DocEditorApp() {
     if (aiSummary) {
       setAiSummary(undefined);
     } else if (document.content) {
-      setAiSummary(aiSummarizer(getSnapshot(document.content), {includeModel: includeModelInAiSummary}));
+      setAiSummary(
+        documentSummarizerWithDrawings(getSnapshot(document.content), {includeModel: includeModelInAiSummary}));
     }
   }
 

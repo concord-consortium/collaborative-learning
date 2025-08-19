@@ -1,34 +1,37 @@
-type SlateNode =
-  | {
-      object: 'value';
-      document: { object: 'document'; data: any; nodes: SlateNode[] };
-    }
-  | {
-      object: 'document';
-      data: any;
-      nodes: SlateNode[];
-    }
-  | {
-      object: 'block';
-      type: string;
-      data?: any;
-      nodes: SlateNode[];
-    }
-  | {
-      object: 'text';
-      text: string;
-      marks?: { type: string }[];
-    }
-  | {
-      type: string;
-      children: SlateNode[];
-      text?: string;
-      bold?: boolean;
-      italic?: boolean;
-      underline?: boolean;
-      code?: boolean;
-      tag?: string;
-    };
+// Here is the type definition of the Slate document format.
+// It is included here just for reference, not used by the code.
+//
+// type SlateNode =
+//   | {
+//       object: 'value';
+//       document: { object: 'document'; data: any; nodes: SlateNode[] };
+//     }
+//   | {
+//       object: 'document';
+//       data: any;
+//       nodes: SlateNode[];
+//     }
+//   | {
+//       object: 'block';
+//       type: string;
+//       data?: any;
+//       nodes: SlateNode[];
+//     }
+//   | {
+//       object: 'text';
+//       text: string;
+//       marks?: { type: string }[];
+//     }
+//   | {
+//       type: string;
+//       children: SlateNode[];
+//       text?: string;
+//       bold?: boolean;
+//       italic?: boolean;
+//       underline?: boolean;
+//       code?: boolean;
+//       tag?: string;
+//     };
 
 export function slateToMarkdown(slateText: any): string {
   let input: any;
@@ -122,15 +125,4 @@ function applyInlineFormatting(node: any): string {
   if (node.underline) text = `<u>${text}</u>`;
   if (node.code) text = `\`${text}\``;
   return text;
-}
-
-// Normalizer for "children" format
-function normalizeChildren(document: any): any {
-  if (!document.children) return document;
-
-  return {
-    object: 'document',
-    data: {},
-    nodes: document.children,
-  };
 }
