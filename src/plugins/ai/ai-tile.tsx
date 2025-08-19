@@ -18,6 +18,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   const stores = useStores();
   const [updateRequests, setUpdateRequests] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
     const queryAI = async () => {
@@ -40,6 +41,11 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         tileId: props.model.id
       });
       content.setText(response.data.text);
+      if (response.data.lastUpdated) {
+        console.log("Last updated", response.data.lastUpdated);
+        const timestamp = response.data.lastUpdated;
+        setLastUpdated(new Date(timestamp._seconds*1000));
+      }
       if (response.data.error) {
         console.error("Error querying AI", response.data.error);
       }
@@ -73,7 +79,9 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     <div className="tile-content ai-tool">
       {renderPromptForm()}
       <div className="ai-output">
-        <h3>AI Output</h3>
+        <div className="last-updated">
+          {lastUpdated ? lastUpdated.toLocaleString("en-US", {dateStyle: "long"}) : "Never"}
+        </div>
         {isUpdating ? (
           <p>Loading...</p>
         ) : (

@@ -1,5 +1,5 @@
 // import * as admin from "firebase-admin";
-import {getFirestore} from "firebase-admin/firestore";
+import {getFirestore, Timestamp} from "firebase-admin/firestore";
 import {logger} from "firebase-functions/v2";
 import {CallableRequest, onCall, HttpsError} from "firebase-functions/v2/https";
 import {defineSecret} from "firebase-functions/params";
@@ -53,6 +53,21 @@ function isCachedContentUpToDate(dynamicContentPrompt: string,
   return true;
 }
 
+function returnCachedContent(cachedContent: DocumentSnapshot) {
+  const data = cachedContent.data();
+  if (data) {
+    return {
+      text: data.dynamicContent,
+      lastUpdated: data.lastUpdated,
+      error: null,
+    };
+  } else {
+    return {
+      error: "No data",
+    };
+  }
+}
+
 async function generateContent(firestoreRoot: string, unit: string, classHash: string,
   documentId: string, tileId: string, dynamicContentPrompt: string, classInfo: DocumentSnapshot) {
   // The Firebase function is often called multiple times in quick succession
@@ -94,9 +109,7 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
   if (strategy === "WAIT" || strategy === "USE-CACHE") {
     const result = await waitForContent(firestoreRoot, unit, classHash, documentId, tileId);
     console.log("Got result after wait");
-    return {
-      text: result.data()?.dynamicContent,
-    };
+    return returnCachedContent(result);
   }
 
   // strategy is "PROCEED"; we have the lock and can proceed to generate content.
@@ -118,6 +131,7 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
 
   let dynamicContent = "";
   let errorMessage = "";
+  const lastUpdated = Timestamp.now();
   try {
     const response = await openai.invoke(messages);
     dynamicContent = response.content.toString();
@@ -130,13 +144,14 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
   await getFirestore().doc(aiContentPath).set({
     dynamicContent,
     dynamicContentPrompt,
-    lastUpdated: new Date(),
+    lastUpdated,
   });
 
   await lockRef.delete();
 
   return {
     text: dynamicContent,
+    lastUpdated,
     error: errorMessage,
   };
 }
@@ -181,9 +196,7 @@ export const getAiContent = onCall(
 
     if (isCachedContentUpToDate(dynamicContentPrompt, classInfo, cachedAIContent)) {
       logger.info("Using cached AI content");
-      return {
-        text: cachedAIContent.data()?.dynamicContent,
-      };
+      return returnCachedContent(cachedAIContent);
     } else {
       return await generateContent(firestoreRoot, unit, classHash, documentId, tileId, dynamicContentPrompt, classInfo);
     }
