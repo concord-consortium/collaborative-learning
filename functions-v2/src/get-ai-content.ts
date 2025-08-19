@@ -25,16 +25,24 @@ const model = "gpt-4o-mini";
 // update this when deploying updates to this function
 const version = "1.0.0";
 
+const lockTimeout = 60 * 1000; // 1 minute
+
 function getClassInfoPath(firestoreRoot: string, unit: string, classHash: string): string {
-  return `${firestoreRoot}/exemplars/${unit}/classes/${classHash}`;
+  return `${firestoreRoot}/aicontent/${unit}/classes/${classHash}`;
 }
 
-function getDynamicContentPath(firestoreRoot: string, unit: string, classHash: string,
+function getAIContentPath(firestoreRoot: string, unit: string, classHash: string,
   documentId: string, tileId: string): string {
   return `${getClassInfoPath(firestoreRoot, unit, classHash)}/documents/${documentId}/tiles/${tileId}`;
 }
 
-function isDynamicContentUpToDate(dynamicContentPrompt: string,
+// We use a lock file to prevent two threads from updating the same AI content at the same time.
+function getLockPath(firestoreRoot: string, unit: string, classHash: string, documentId: string,
+  tileId: string): string {
+  return getAIContentPath(firestoreRoot, unit, classHash, documentId, tileId) + "-LOCK";
+}
+
+function isCachedContentUpToDate(dynamicContentPrompt: string,
   classInfo: DocumentSnapshot, dynamicContent: DocumentSnapshot): boolean {
   if (!dynamicContent.exists) return false;
   const dynamicContentData = dynamicContent.data();
@@ -43,6 +51,107 @@ function isDynamicContentUpToDate(dynamicContentPrompt: string,
   if (dynamicContentData.lastUpdated < classInfo.data()?.lastUpdated) return false;
   if (dynamicContentData.dynamicContentPrompt !== dynamicContentPrompt) return false;
   return true;
+}
+
+async function generateContent(firestoreRoot: string, unit: string, classHash: string,
+  documentId: string, tileId: string, dynamicContentPrompt: string, classInfo: DocumentSnapshot) {
+  // The Firebase function is often called multiple times in quick succession
+  // (because multiple copies of the same tile are being rendered)
+  // but we want to avoid calling the LLM multiple times. So we use a lock
+  // that only one thread can hold at a time.
+  const lockRef = getFirestore().doc(getLockPath(firestoreRoot, unit, classHash, documentId, tileId));
+  const expiresAt = Date.now() + lockTimeout;
+
+  let strategy: string;
+  try {
+    // Attempt to acquire the lock; this is an atomic operation that will fail if the lock already exists.
+    await lockRef.create({expiresAt});
+    // Lock acquired
+    strategy = "PROCEED";
+  } catch (error) {
+    logger.info("Error in acquire lock:", (error as Error).name);
+    // Lock exists; check if it is current or has expired.
+    strategy = await getFirestore().runTransaction(async (tx) => {
+      const lock = await tx.get(lockRef);
+      if (lock.exists) {
+        const lockData = lock.data();
+        if (lockData && lockData.expiresAt && lockData.expiresAt > Date.now()) {
+          // It's a valid lock; we just have to wait for it to be released.
+          return "WAIT";
+        } else {
+          // Lock is stale - steal it.
+          tx.update(lockRef, {expiresAt});
+          return "PROCEED";
+        }
+      } else {
+        // Lock disappeared - must have just been released by another thread which generated content.
+        return "USE-CACHE";
+      }
+    });
+  }
+
+  if (strategy === "WAIT" || strategy === "USE-CACHE") {
+    const result = await waitForContent(firestoreRoot, unit, classHash, documentId, tileId);
+    console.log("Got result after wait");
+    return {
+      text: result.data()?.dynamicContent,
+    };
+  }
+
+  // strategy is "PROCEED"; we have the lock and can proceed to generate content.
+  logger.info("Generating new AI content");
+  const openai = new ChatOpenAI({
+    apiKey: openaiApiKey.value(),
+    model,
+  });
+
+  const studentSummary = classInfo.data()?.studentSummary;
+  const teacherSummary = classInfo.data()?.teacherSummary;
+  const studentMessage = `Here is a summary of the student work in this class:\n\n${studentSummary}\n\n`;
+  const teacherMessage =
+    teacherSummary ? `Here is a summary of the teacher work in this class:\n\n ${teacherSummary}\n\n` : "";
+  const messages = [
+    new SystemMessage(systemPrompt),
+    new HumanMessage(`${dynamicContentPrompt}\n\n${teacherMessage}${studentMessage}`),
+  ];
+
+  let dynamicContent = "";
+  let errorMessage = "";
+  try {
+    const response = await openai.invoke(messages);
+    dynamicContent = response.content.toString();
+  } catch (error) {
+    logger.error("Error calling LLM", error);
+    errorMessage = error instanceof Error ? error.message : "Unknown error";
+  }
+
+  const aiContentPath = getAIContentPath(firestoreRoot, unit, classHash, documentId, tileId);
+  await getFirestore().doc(aiContentPath).set({
+    dynamicContent,
+    dynamicContentPrompt,
+    lastUpdated: new Date(),
+  });
+
+  await lockRef.delete();
+
+  return {
+    text: dynamicContent,
+    error: errorMessage,
+  };
+}
+
+// If we're waiting on a lock, poll every second until it is released.
+async function waitForContent(firestoreRoot: string, unit: string, classHash: string,
+  documentId: string, tileId: string): Promise<DocumentSnapshot> {
+  const lockPath = getLockPath(firestoreRoot, unit, classHash, documentId, tileId);
+  const lock = await getFirestore().doc(lockPath).get();
+  if (!lock.exists) {
+    const aiContentPath = getAIContentPath(firestoreRoot, unit, classHash, documentId, tileId);
+    return await getFirestore().doc(aiContentPath).get();
+  }
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const result = await waitForContent(firestoreRoot, unit, classHash, documentId, tileId);
+  return result;
 }
 
 export const getAiContent = onCall(
@@ -54,8 +163,8 @@ export const getAiContent = onCall(
   async (request: CallableRequest<IAiContentUnionParams>) => {
     const params = request.data;
     if (isWarmUpParams(params)) return {version};
-
     const {context: userContext, dynamicContentPrompt, unit, documentId, tileId} = params || {};
+
     const validatedUserContext = validateUserContext(userContext, request.auth);
     const {isValid, uid, firestoreRoot} = validatedUserContext;
     if (!isValid || !userContext?.classHash || !uid) {
@@ -63,54 +172,19 @@ export const getAiContent = onCall(
     }
 
     const classHash = userContext.classHash;
-    const exemplarDataPath = getClassInfoPath(firestoreRoot, unit, classHash);
-    const exemplarData = await getFirestore().doc(exemplarDataPath).get();
+    const classInfoPath = getClassInfoPath(firestoreRoot, unit, classHash);
+    const classInfo = await getFirestore().doc(classInfoPath).get();
 
-    const dynamicContentPath = getDynamicContentPath(firestoreRoot, unit, classHash, documentId, tileId);
-    const cachedDynamicContent = await getFirestore().doc(dynamicContentPath).get();
+    const aiContentPath = getAIContentPath(firestoreRoot, unit, classHash, documentId, tileId);
+    const cachedAIContent = await getFirestore().doc(aiContentPath).get();
 
-    if (isDynamicContentUpToDate(dynamicContentPrompt, exemplarData, cachedDynamicContent)) {
-      logger.info("Using cached dynamic content");
+    if (isCachedContentUpToDate(dynamicContentPrompt, classInfo, cachedAIContent)) {
+      logger.info("Using cached AI content");
       return {
-        text: cachedDynamicContent.data()?.dynamicContent,
+        text: cachedAIContent.data()?.dynamicContent,
       };
     } else {
-      logger.info("Generating new dynamic content");
-      const openai = new ChatOpenAI({
-        apiKey: openaiApiKey.value(),
-        model,
-      });
-
-      const studentSummary = exemplarData.data()?.studentSummary;
-      const teacherSummary = exemplarData.data()?.teacherSummary;
-      const studentMessage = `Here is a summary of the student work in this class:\n\n${studentSummary}\n\n`;
-      const teacherMessage =
-        teacherSummary ? `Here is a summary of the teacher work in this class:\n\n ${teacherSummary}\n\n` : "";
-      const messages = [
-        new SystemMessage(systemPrompt),
-        new HumanMessage(`${dynamicContentPrompt}\n\n${teacherMessage}${studentMessage}`),
-      ];
-
-      let dynamicContent = "";
-      let errorMessage = "";
-      try {
-        const response = await openai.invoke(messages);
-        dynamicContent = response.content.toString();
-      } catch (error) {
-        logger.error("Error calling LLM", error);
-        errorMessage = error instanceof Error ? error.message : "Unknown error";
-      }
-
-      getFirestore().doc(dynamicContentPath).set({
-        dynamicContent,
-        dynamicContentPrompt,
-        lastUpdated: new Date(),
-      });
-
-      return {
-        text: dynamicContent,
-        error: errorMessage,
-      };
+      return await generateContent(firestoreRoot, unit, classHash, documentId, tileId, dynamicContentPrompt, classInfo);
     }
-  }
+  },
 );

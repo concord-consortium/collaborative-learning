@@ -54,7 +54,7 @@ export class Firestore {
   }
 
   public getClassInfoPath(unit: string, classHash: string) {
-    return this.getFullPath(`exemplars/${unit}/classes/${classHash}`);
+    return this.getFullPath(`aicontent/${unit}/classes/${classHash}`);
   }
 
   public getMulticlassSupportsRef() {

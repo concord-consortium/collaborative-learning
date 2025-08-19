@@ -103,7 +103,7 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
 }
 
 function getExemplarDataDoc(portal: string|undefined, demo: string|undefined, unit: string, contextId: string) {
-  return getFirestore().doc(`${firestoreBasePath(portal, demo)}/exemplars/${unit}/classes/${contextId}`);
+  return getFirestore().doc(`${firestoreBasePath(portal, demo)}/aicontent/${unit}/classes/${contextId}`);
 }
 
 // Retrieve document content from Firebase Realtime Database
