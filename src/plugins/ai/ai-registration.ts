@@ -3,10 +3,9 @@ import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { kAIDefaultHeight, kAITileType } from "./ai-types";
 import { AIComponent } from "./ai-tile";
 import { defaultAIContent, AIContentModel } from "./ai-content";
+import { switchToTextContent } from "./ai-utils";
 
 import Icon from "./ai-icon.svg";
-import HeaderIcon from "./ai-tile-id.svg";
-import { switchToTextContent } from "./ai-utils";
 
 registerTileContentInfo({
   type: kAITileType,
@@ -22,5 +21,5 @@ registerTileComponentInfo({
   Component: AIComponent,
   tileEltClass: "ai-tool-tile",
   Icon,
-  HeaderIcon
+  HeaderIcon: Icon   // TODO: if this ever becomes a "real" tile (used in student/teacher work) we'll need a HeaderIcon.
 });
