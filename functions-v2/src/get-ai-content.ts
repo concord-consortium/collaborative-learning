@@ -69,7 +69,7 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
     // Lock acquired
     strategy = "PROCEED";
   } catch (error) {
-    logger.info("Error in acquire lock:", (error as Error).name);
+    logger.info("Document is locked:", (error as Error).message);
     // Lock exists; check if it is current or has expired.
     strategy = await getFirestore().runTransaction(async (tx) => {
       const lock = await tx.get(lockRef);
@@ -80,6 +80,7 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
           return "WAIT";
         } else {
           // Lock is stale - steal it.
+          logger.info("Lock is stale; stealing it");
           tx.update(lockRef, {expiresAt});
           return "PROCEED";
         }

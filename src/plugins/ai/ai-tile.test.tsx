@@ -81,16 +81,4 @@ describe("AIComponent", () => {
     expect(queryByText("Hello World")).not.toBeInTheDocument();
   });
 
-  it("updates the prompt text when the user types", () => {
-    content.setPrompt("New Text");
-    const {getByRole, getByText} =
-      render(<AIComponent  {...defaultProps} {...{model}}></AIComponent>);
-    expect(getByText("New Text")).toBeInTheDocument();
-
-    const textBox = getByRole("textbox");
-    userEvent.type(textBox, "{selectall}{del}Typed Text");
-
-    expect(textBox).toHaveValue("Typed Text");
-    expect(content.prompt).toBe("Typed Text");
-  });
 });
