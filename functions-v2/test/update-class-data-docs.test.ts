@@ -5,7 +5,7 @@ import {getDatabase} from "firebase-admin/database";
 import * as logger from "firebase-functions/logger";
 import {initialize, projectConfig} from "./initialize";
 import {updateClassDataDocs} from "../../shared/update-class-data-docs";
-import {setupTestDocuments} from "./test-utils";
+import {kClassHash, kOtherUserId, setupTestDocuments} from "./test-utils";
 import {getFirestore} from "firebase-admin/firestore";
 
 jest.mock("firebase-functions/logger");
@@ -29,35 +29,32 @@ describe("updateClassDataDocs", () => {
     expect(logger.info).not.toHaveBeenCalled();
   });
 
-  test("creates a class data doc for new class", async () => {
+  test("creates and updates class data doc", async () => {
+    const dataDocPath = `demo/AITEST/aicontent/qa-config-subtabs/classes/${kClassHash}`;
+    const dataDoc = await getFirestore().doc(dataDocPath).get();
+    expect(dataDoc.exists).toBe(false);
+
+    const lastEditedAt = new Date().getDate();
     await setupTestDocuments({
-      demo: "AITEST",
-      unit: "qa-config-subtabs",
       documentId: "testdoc1",
-      classId: "test-class",
-      uid: "1",
+      lastEditedAt,
     });
     await setupTestDocuments({
-      demo: "AITEST",
-      unit: "qa-config-subtabs",
       documentId: "testdoc2",
-      classId: "test-class",
-      uid: "2",
-      lastEditedAt: new Date(Date.now() - 1000), // 1 second ago
+      uid: kOtherUserId,
+      lastEditedAt: lastEditedAt - 2000,
     });
 
     await updateClassDataDocs({logger});
     expect(logger.error).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.info).toHaveBeenCalledTimes(1);
-    expect(logger.info).toHaveBeenCalledWith("Updating class data doc for qa-config-subtabs test-class");
+    expect(logger.info).toHaveBeenCalledWith("Updating class data doc for qa-config-subtabs class-hash");
 
-    const classDataDoc = await getFirestore().doc(
-      "demo/AITEST/aicontent/qa-config-subtabs/classes/test-class"
-    ).get();
+    const classDataDoc = await getFirestore().doc(dataDocPath).get();
     expect(classDataDoc.exists).toBe(true);
     expect(classDataDoc.data()).toEqual({
-      lastEditedAt: expect.any(Number),
+      lastEditedAt: lastEditedAt,
       userCount: 2,
       documentCount: 2,
       teacherContent: expect.any(String),
@@ -65,5 +62,39 @@ describe("updateClassDataDocs", () => {
       summary: null,
     });
     expect(classDataDoc.data()?.studentContent).toContain("CLUE Document Summary");
+
+    // Running it again without changes should not update the class data doc
+    await updateClassDataDocs({logger});
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledTimes(2);
+    expect(logger.info).toHaveBeenCalledWith("Class data doc for qa-config-subtabs class-hash already up to date");
+
+    const classDataDoc2 = await getFirestore().doc(dataDocPath).get();
+    expect(classDataDoc2.exists).toBe(true);
+    expect(classDataDoc2.data()).toEqual(classDataDoc.data());
+
+    // Add a new document
+    await setupTestDocuments({
+      documentId: "testdoc3",
+      lastEditedAt: lastEditedAt + 2000,
+    });
+
+    await updateClassDataDocs({logger});
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledTimes(3);
+    expect(logger.info).toHaveBeenCalledWith("Updating class data doc for qa-config-subtabs class-hash");
+
+    const classDataDoc3 = await getFirestore().doc(dataDocPath).get();
+    expect(classDataDoc3.exists).toBe(true);
+    expect(classDataDoc3.data()).toEqual({
+      lastEditedAt: lastEditedAt + 2000,
+      userCount: 2,
+      documentCount: 3,
+      teacherContent: expect.any(String),
+      studentContent: expect.any(String),
+      summary: null,
+    });
   });
 });

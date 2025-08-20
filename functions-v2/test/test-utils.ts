@@ -37,7 +37,7 @@ export const kOtherPortal = "other.test.portal";
 export const kOtherClaimPortal = "https://other.test.portal";
 export const kOtherCanonicalPortal = "other_test_portal";
 export const kDemoName = "demo-name";
-export const kOtherDemoName = "demo-name";
+export const kOtherDemoName = "demo-2";
 export const kPlatformUserId = 123456;
 export const kUserId = `${kPlatformUserId}`;
 export const kFirebaseUserId = `fb-${kUserId}`;
@@ -224,15 +224,15 @@ export const setupTestDocuments = async (options: {
   documentId?: string;
   classId?: string;
   uid?: string;
-  lastEditedAt?: Date;
+  lastEditedAt?: number;
 }) => {
   const {
     demo = "AITEST",
     unit = "qa-config-subtabs",
-    documentId = "testdoc1",
-    classId = "test-class",
-    uid = "1",
-    lastEditedAt = Date.now(),
+    documentId = kDocumentKey,
+    classId = kClassHash,
+    uid = kUserId,
+    lastEditedAt = new Date().getDate(),
   } = options;
 
   // Set up Firestore document metadata
@@ -254,7 +254,7 @@ export const setupTestDocuments = async (options: {
   const firebaseDocPath =
     `/demo/${demo}/portals/demo/classes/${classId}/users/${uid}/documents/${documentId}`;
   await getDatabase().ref(firebaseDocPath).set({
-    content: JSON.stringify({foo: "bar"}),
+    content: JSON.stringify(specDocumentContent()),
   });
 
   return {
