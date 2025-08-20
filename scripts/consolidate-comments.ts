@@ -14,8 +14,8 @@ import { getFirestoreBasePath, getScriptRootFilePath, moveFirestoreDoc } from ".
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
 const portal = "";
-const demo = "BNG";
-const dryRun = false;
+const demo = "CLUE-Test";
+const dryRun = true;
 
 const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
 const credential = admin.credential.cert(serviceAccountFile);
@@ -28,7 +28,9 @@ const firestore = fbApp.firestore();
 
 const documentsRoot = getFirestoreBasePath(portal, demo);
 
-const keyPattern = "-[a-zA-Z0-9_-]{19}";
+const keyPattern = "-[a-zA-Z0-9_\\-]{19}";
+const unprefixedPattern = new RegExp("^" + keyPattern + "$");
+const prefixedPattern = new RegExp("^.+_(" + keyPattern + ")$");
 
 interface DocumentInfo {
   key: string;
@@ -40,11 +42,11 @@ function isCurriculum(documentName: string) {
 }
 
 function isPrefixed(documentName: string) {
-  return documentName.match("^.+_" + keyPattern + "$");
+  return documentName.match(prefixedPattern);
 }
 
 function isUnprefixed(documentName: string) {
-  return documentName.match("^" + keyPattern + "$");
+  return documentName.match(unprefixedPattern);
 }
 
 function typeOfDocument(documentName: string) {
@@ -61,7 +63,7 @@ function typeOfDocument(documentName: string) {
 
 function unprefixedName(documentName: string) {
   if (isPrefixed(documentName)) {
-    const result = documentName.match("^.+_(" + keyPattern + ")$");
+    const result = documentName.match(prefixedPattern);
     if (result) {
       return result[1];
     }

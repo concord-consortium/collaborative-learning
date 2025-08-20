@@ -157,7 +157,7 @@ export const copyFirestoreDoc = async (
   collectionFrom: string,
   docId: string,
   collectionTo: string,
-  docIdTo: string,
+  docIdTo?: string,
   scope: "document" | "subcollections" | "all" = "all",
   addData: any = {},
 ): Promise<boolean> => {
@@ -200,7 +200,7 @@ export const copyFirestoreDoc = async (
         const subcollectionPathTo = `${collectionTo}/${docIdTo}/${subcollectionRef.id}`;
 
         // get all the documents in the collection
-        return await subcollectionRef
+        await subcollectionRef
           .get()
           .then(async (snapshot) => {
             const docs = snapshot.docs;
@@ -242,7 +242,7 @@ export const moveFirestoreDoc = async (
   collectionFrom: string,
   docId: string,
   collectionTo: string,
-  docIdTo: string,
+  docIdTo?: string,
   scope: "document" | "subcollections" | "all" = "all",
   addData?: any,
 ): Promise<boolean | Error> => {
