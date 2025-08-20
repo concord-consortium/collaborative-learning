@@ -1,3 +1,4 @@
+import admin from "firebase-admin";
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -137,3 +138,119 @@ export function remapFirebaseClassPublications(fbPublications: Record<string, an
 export function remapFirebaseProblemDocPublications(fbPublications: Record<string, any>) {
   return remap(fbPublications, (metadata) => metadata?.documentKey);
 }
+
+/**
+ * Copy a Firestore document, and optionally all of its subcollections.
+ * There is no built-in way to do this in Firestore.
+ * @param collectionFrom The collection to copy from.
+ * @param docId The id of the document to copy.
+ * @param collectionTo The collection to copy to.
+ * @param docIdTo The id of the document to copy to. If not set, uses docId.
+ * @param scope Whether to copy the base document, its subcollections, or both.
+ * @param addData Additional data to add to the new document.
+ * @returns True if the document was copied, false otherwise.
+ *
+ * @see https://leechy.hashnode.dev/firestore-move
+ */
+export const copyFirestoreDoc = async (
+  firestore: admin.firestore.Firestore,
+  collectionFrom: string,
+  docId: string,
+  collectionTo: string,
+  docIdTo: string,
+  scope: "document" | "subcollections" | "all" = "all",
+  addData: any = {},
+): Promise<boolean> => {
+  const docRef = firestore.collection(collectionFrom).doc(docId);
+  if (!docIdTo) {
+    docIdTo = docId;
+  }
+  if (collectionFrom === collectionTo && docId === docIdTo) {
+    throw new Error("Cannot copy a document to the same location.");
+  }
+  const copyBaseDoc = scope === "all" || scope === "document";
+  const copySubcollections = scope === "all" || scope === "subcollections";
+
+  // read the document
+  const docData = await docRef
+    .get()
+    .then((doc) => doc.exists && doc.data())
+    .catch((error) => {
+      console.error('Error reading document', `${collectionFrom}/${docId}`, JSON.stringify(error));
+      throw new Error('Error reading document');
+    });
+
+  if (docData) {
+    // document exists, create the new item
+    if (copyBaseDoc) {
+      await firestore
+        .collection(collectionTo)
+        .doc(docIdTo)
+        .create({ ...docData, ...addData })
+        .catch((error) => {
+          console.error('Error creating document', `${collectionTo}/${docIdTo}`, JSON.stringify(error));
+          throw new Error('Data was not copied properly');
+        });
+    }
+
+    if (copySubcollections) {
+      const subcollections = await docRef.listCollections();
+      for await (const subcollectionRef of subcollections) {
+        const subcollectionPath = `${collectionFrom}/${docId}/${subcollectionRef.id}`;
+        const subcollectionPathTo = `${collectionTo}/${docIdTo}/${subcollectionRef.id}`;
+
+        // get all the documents in the collection
+        return await subcollectionRef
+          .get()
+          .then(async (snapshot) => {
+            const docs = snapshot.docs;
+            for await (const doc of docs) {
+              await copyFirestoreDoc(firestore, subcollectionPath, doc.id,
+                subcollectionPathTo, doc.id, "all");
+            }
+            return true;
+          })
+          .catch((error) => {
+            console.error('Error reading subcollection', subcollectionPath, JSON.stringify(error));
+            throw new Error('Data was not copied properly to the target collection.');
+          });
+      }
+    }
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Move a Firestore document, and optionally all of its subcollections.
+ * There is no built-in way to do this in Firestore.
+ * @param firestore The Firestore instance.
+ * @param collectionFrom The collection to move from.
+ * @param docId The id of the document to move.
+ * @param collectionTo The collection to move to.
+ * @param docIdTo The id of the document to move to. If not set, uses docId.
+ * @param addData Additional data to add to the new document.
+ * @param scope Whether to keep the base document, its subcollections, or both.
+ * Note that in any case the base document and all subcollections will be deleted from
+ * the original location; the scope just determines what is kept in the new location.
+ * @returns True if the document was moved, false otherwise.
+ *
+ * @see https://leechy.hashnode.dev/firestore-move
+ */
+export const moveFirestoreDoc = async (
+  firestore: admin.firestore.Firestore,
+  collectionFrom: string,
+  docId: string,
+  collectionTo: string,
+  docIdTo: string,
+  scope: "document" | "subcollections" | "all" = "all",
+  addData?: any,
+): Promise<boolean | Error> => {
+  const copied = await copyFirestoreDoc(firestore, collectionFrom, docId, collectionTo, docIdTo, scope, addData);
+  // if copy was successful, delete the original
+  if (copied) {
+    await firestore.recursiveDelete(firestore.doc(`${collectionFrom}/${docId}`));
+    return true;
+  }
+  throw new Error('Error while moving document.');
+};
