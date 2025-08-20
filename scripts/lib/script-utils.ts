@@ -159,7 +159,7 @@ export const copyFirestoreDoc = async (
   collectionTo: string,
   docIdTo?: string,
   scope: "document" | "subcollections" | "all" = "all",
-  addData: any = {},
+  addData: admin.firestore.DocumentData = {},
 ): Promise<boolean> => {
   const docRef = firestore.collection(collectionFrom).doc(docId);
   if (!docIdTo) {
@@ -244,8 +244,8 @@ export const moveFirestoreDoc = async (
   collectionTo: string,
   docIdTo?: string,
   scope: "document" | "subcollections" | "all" = "all",
-  addData?: any,
-): Promise<boolean | Error> => {
+  addData?: admin.firestore.DocumentData,
+): Promise<boolean> => {
   const copied = await copyFirestoreDoc(firestore, collectionFrom, docId, collectionTo, docIdTo, scope, addData);
   // if copy was successful, delete the original
   if (copied) {
