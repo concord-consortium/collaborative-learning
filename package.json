@@ -263,6 +263,7 @@
     "firebase": "^8.10.1",
     "immutable": "^4.3.0",
     "initials": "^3.1.2",
+    "js-sha256": "^0.11.1",
     "json-stringify-pretty-compact": "^4.0.0",
     "jsxgraph": "1.9.2",
     "jwt-decode": "^3.1.2",

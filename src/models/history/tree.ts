@@ -81,6 +81,7 @@ export const Tree = types.model("Tree", {
     // Run update function on the tiles
     for (const tile of tiles) {
       if (isAlive(tile)) {
+        tile.setUpdatedHash();
         tile.content.updateAfterSharedModelChanges(sharedModel);
       }
     }

@@ -63,6 +63,13 @@ describe("TileModel", () => {
       // can create tool tiles with correct tool from snapshot
       tile = TileModel.create(snapshot);
       expect(tile.content.type).toBe(tileType);
+
+      // the createHash and updateHash are set for all tiles except Placeholder and Unknown
+      if (!["Placeholder", "Unknown"].includes(tileType)) {
+        expect(tile.createdHash).toBeDefined();
+        expect(tile.updatedHash).toBeDefined();
+        expect(tile.createdHash).toBe(tile.updatedHash);
+      }
     });
   });
 

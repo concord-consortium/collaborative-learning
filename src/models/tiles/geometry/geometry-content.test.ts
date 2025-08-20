@@ -22,6 +22,7 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../../register-tile-types";
+import { ITileExportOptions } from "../tile-content-info";
 registerTileTypes(["Geometry"]);
 
 // Need to mock this so the placeholder that is added to the cache
@@ -111,8 +112,8 @@ function buildPolygon(board: JXG.Board, content: GeometryContentModelType,
   return { polygon, points };
 }
 
-function exportAndSimplifyIds(content: GeometryContentModelType) {
-  return content.exportJson()
+function exportAndSimplifyIds(content: GeometryContentModelType, options?: ITileExportOptions) {
+  return content.exportJson(options)
     .replaceAll(/testid-[a-zA-Z0-9_-]+/g, "testid")
     .replaceAll(/jxgBoard[a-zA-Z0-9_-]+/g, "jxgid");
 }
@@ -1348,6 +1349,34 @@ toMatchInlineSnapshot(`
 }"
 `);
   });
+
+  it("exports only the objects and background image for hashing", () => {
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.setBackgroundImage(
+        ImageModel.create({ id: "img", url: placeholderImage, x: 0, y: 0, width: 5, height: 5 }));
+    });
+    content.addMovableLine(board, [[1, 1], [5, 5]], { id: "ml" });
+    const line = board.objects.ml as JXG.Line;
+    expect(isMovableLine(line)).toBe(true);
+    content.addComment(board, "ml")!;
+
+    expect(exportAndSimplifyIds(content, {forHash: true})).toMatchInlineSnapshot(`
+"{
+  \\"objects\\": {
+    \\"ml\\": {
+      \\"type\\": \\"movableLine\\",
+      \\"id\\": \\"ml\\",
+      \\"p1\\": {\\"type\\": \\"point\\", \\"id\\": \\"ml-point1\\", \\"x\\": 1, \\"y\\": 1, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
+      \\"p2\\": {\\"type\\": \\"point\\", \\"id\\": \\"ml-point2\\", \\"x\\": 5, \\"y\\": 5, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
+      \\"colorScheme\\": 0
+    },
+    \\"testid\\": {\\"type\\": \\"comment\\", \\"id\\": \\"testid\\", \\"anchors\\": [\\"ml\\"]}
+  },
+  \\"bgImage\\": {\\"type\\": \\"image\\", \\"id\\": \\"img\\", \\"x\\": 0, \\"y\\": 0, \\"url\\": \\"test-file-stub\\", \\"width\\": 5, \\"height\\": 5}
+}"
+`);
+  });
+
 
 });
 /* eslint-enable max-len */
