@@ -1,4 +1,5 @@
-import { types, Instance } from "mobx-state-tree";
+import stringify from "json-stringify-pretty-compact";
+import { types, Instance, getSnapshot } from "mobx-state-tree";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import { kAITileType } from "./ai-types";
 
@@ -11,7 +12,7 @@ export const AIContentModel = TileContentModel
   .props({
     type: types.optional(types.literal(kAITileType), kAITileType),
     prompt: "",
-    text: ""
+    text: "This is where the dynamically generated AI response will appear."
   })
   .views(self => ({
     get isUserResizable() {
@@ -19,6 +20,10 @@ export const AIContentModel = TileContentModel
     }
   }))
   .actions(self => ({
+    exportJson() {
+      const snapshot = getSnapshot(self);
+      return stringify(snapshot);
+    },
     setPrompt(prompt: string) {
       self.prompt = prompt;
     },

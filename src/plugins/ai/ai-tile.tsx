@@ -12,41 +12,52 @@ import "./ai-tile.scss";
 
 export const AIComponent: React.FC<ITileProps> = observer((props) => {
   const content = props.model.content as AIContentModelType;
-  const getAiContent = useFirebaseFunction("getAiContent_v2");
   const userContext = useUserContext();
   const readOnly = useReadOnlyContext();
   const stores = useStores();
+  const getAiContent = userContext.classHash ? useFirebaseFunction("getAiContent_v2") : null;
   const [updateRequests, setUpdateRequests] = useState<number>(0);
-  const [isUpdating, setIsUpdating] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
-    const queryAI = async () => {
-      setIsUpdating(true);
-      if (!props.documentId || !props.model.id) {
-        console.log("No documentId or tileId found");
-        return;
+    props.onRegisterTileApi({
+      exportContentAsTileJson: () => {
+        return content.exportJson();
       }
-      if (!content.prompt) {
-        console.log("No prompt found");
+    })
+  }, []);
+
+  useEffect(() => {
+    // don't attempt to query AI if there is no class hash (i.e. we're in authoring mode)
+    if (getAiContent) {
+      const queryAI = async () => {
+        setIsUpdating(true);
+        if (!props.documentId || !props.model.id) {
+          console.log("No documentId or tileId found");
+          return;
+        }
+        if (!content.prompt) {
+          console.log("No prompt found");
+          setIsUpdating(false);
+          return;
+        }
+        console.log("Querying AI with prompt", content.prompt);
+        const response = await getAiContent({
+          context: userContext,
+          dynamicContentPrompt: content.prompt,
+          unit: stores.unit.code,
+          documentId: props.documentId,
+          tileId: props.model.id
+        });
+        content.setText(response.data.text);
+        if (response.data.error) {
+          console.error("Error querying AI", response.data.error);
+        }
         setIsUpdating(false);
-        return;
-      }
-      console.log("Querying AI with prompt", content.prompt);
-      const response = await getAiContent({
-        context: userContext,
-        dynamicContentPrompt: content.prompt,
-        unit: stores.unit.code,
-        documentId: props.documentId,
-        tileId: props.model.id
-      });
-      content.setText(response.data.text);
-      if (response.data.error) {
-        console.error("Error querying AI", response.data.error);
-      }
-      setIsUpdating(false);
-    };
-    queryAI();
-  }, [updateRequests,content, getAiContent, props.documentId, props.model.id, userContext, stores.unit.code]);
+      };
+      queryAI();
+    }
+  }, [updateRequests, content, getAiContent, props.documentId, props.model.id, userContext, stores.unit.code]);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     content.setPrompt(event.target.value);
