@@ -248,12 +248,22 @@ export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFire
 
 export interface IAiContentParams extends IFirebaseFunctionBaseParams {
   dynamicContentPrompt: string;
+  systemPrompt: string;
   unit: string;
   documentId: string;
   tileId: string;
 }
 
 export type IAiContentUnionParams = IAiContentParams | IFirebaseFunctionWarmUpParams;
+
+export interface IGenerateAiSummaryParams extends IFirebaseFunctionBaseParams {
+  portal: string;
+  demo: string;
+  unit: string;
+  classHash: string;
+}
+
+export type IGenerateAiSummaryUnionParams = IGenerateAiSummaryParams | IFirebaseFunctionWarmUpParams;
 
 export interface INetworkResourceTeacherClassResponse {
   uid: string;

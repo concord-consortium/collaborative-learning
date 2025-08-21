@@ -145,6 +145,13 @@ Under 'dataset', there is one option:
 
 - `cellsSelectCases`: boolean
 
+#### AI Tile
+
+No toolbar.
+
+- `systemPrompt`: the system prompt used in combination with the specific prompt of each AI tile.
+Default: "You are a helpful, collaborative student."
+
 #### Bar Graph
 
 Common toolbar framework.  One default button:

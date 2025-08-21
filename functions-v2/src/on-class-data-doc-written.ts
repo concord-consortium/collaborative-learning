@@ -1,5 +1,6 @@
 import {onDocumentWritten} from "firebase-functions/v2/firestore";
 import * as logger from "firebase-functions/logger";
+import * as admin from "firebase-admin";
 import {defineSecret} from "firebase-functions/params";
 import {MarkdownTextSplitter} from "@langchain/textsplitters";
 import {ChatOpenAI} from "@langchain/openai";
@@ -146,6 +147,7 @@ export const onClassDataDocWritten = onDocumentWritten(
         studentSummary: summary,
         teacherSummary: teacherSummary.summary,
         summaryTokenCount: studentSummary.tokenCount + teacherSummary.tokenCount,
+        summaryCreatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
       logger.info("Summarized the class work into the data doc", event.subject);

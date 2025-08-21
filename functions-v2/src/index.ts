@@ -11,12 +11,14 @@ import {createFirestoreMetadataDocument} from "./create-firestore-metadata-docum
 import {postDocumentComment} from "./post-document-comment";
 import {postExemplarComment} from "./post-exemplar-comment";
 import {getAiContent} from "./get-ai-content";
+import {generateClassData} from "./generate-class-data";
 
 /* eslint-disable camelcase */
 export const createFirestoreMetadataDocument_v2 = createFirestoreMetadataDocument;
 export const postDocumentComment_v2 = postDocumentComment;
 export const postExemplarComment_v2 = postExemplarComment;
 export const getAiContent_v2 = getAiContent;
+export const generateClassData_v2 = generateClassData;
 /* eslint-enable camelcase */
 
 admin.initializeApp();

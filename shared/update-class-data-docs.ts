@@ -46,7 +46,9 @@ async function getClassTeachers(portal: string|undefined, demo: string|undefined
 }
 
 // Query Firestore for all user documents in the unit, and return info by classroom.
-async function getClassDocumentData(portal: string|undefined, demo: string|undefined, unit: string, logger: Logger):
+// Optional "onlyContextId" parameter can be used to limit the query to a single class.
+async function getClassDocumentData(portal: string|undefined, demo: string|undefined, unit: string,
+    logger: Logger, onlyContextId?: string):
     Promise<{ [contextId: string]: IClassData }> {
   const classData: { [contextId: string]: IClassData } = {};
   const classTeachers: { [contextId: string]: string[] } = {};
@@ -54,10 +56,13 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
   const documentsPath = firestoreBasePath(portal, demo) + "/documents";
 
   // Query documents to see which classes need exemplar updates
-  const documentQuery = getFirestore()
+  let documentQuery = getFirestore()
     .collection(documentsPath)
     .where("unit", "==", unit)
     .select("context_id", "uid", "key");
+  if (onlyContextId) {
+    documentQuery = documentQuery.where("context_id", "==", onlyContextId);
+  }
 
   try {
     const documentSnapshots = await documentQuery.get();
@@ -178,6 +183,13 @@ async function updateClassDataDoc(portal: string|undefined, demo: string|undefin
     studentContent,
     summary: null
   });
+}
+
+export async function updateSingleClassDataDoc(portal: string|undefined, demo: string|undefined, unit: string,
+    contextId: string, logger: Logger) {
+  const classData = await getClassDocumentData(portal, demo, unit, logger, contextId);
+  const data = classData[contextId];
+  await updateClassDataDoc(portal, demo, unit, contextId, data, logger);
 }
 
 async function updateClassDataDocsForRealm(portal: string|undefined, demo: string|undefined, logger: Logger) {
