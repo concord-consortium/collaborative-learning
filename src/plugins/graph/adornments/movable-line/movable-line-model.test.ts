@@ -131,6 +131,13 @@ describe("MovableLineInstance", () => {
     const line = roundTripLine({intercept: 1, slope: null as unknown as number});
     expect(line.slope).toBe(NaN);
   });
+  it("fixes invalid intercept and slope properties", () => {
+    const lineParams = MovableLineInstance.create({intercept: null, slope: Infinity} as any);
+    expect(lineParams.intercept).toEqual(0);
+    expect(lineParams.slope).toEqual(Infinity);
+    expect(lineParams.currentIntercept).toEqual(0);
+    expect(lineParams.currentSlope).toEqual(Infinity);
+  });
 });
 
 describe("MovableLineModel", () => {
