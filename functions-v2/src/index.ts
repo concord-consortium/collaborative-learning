@@ -5,16 +5,20 @@ export {atMidnight} from "./at-midnight";
 export {onAnalyzableTestDocWritten, onAnalyzableProdDocWritten} from "./on-analyzable-doc-written";
 export {onAnalysisDocumentPending} from "./on-analysis-document-pending";
 export {onAnalysisDocumentImaged} from "./on-analysis-document-imaged";
-export {onExemplarDataDocWritten} from "./on-exemplar-data-doc-written";
+export {onClassDataDocWritten} from "./on-class-data-doc-written";
 
 import {createFirestoreMetadataDocument} from "./create-firestore-metadata-document";
 import {postDocumentComment} from "./post-document-comment";
 import {postExemplarComment} from "./post-exemplar-comment";
+import {getAiContent} from "./get-ai-content";
+import {generateClassData} from "./generate-class-data";
 
 /* eslint-disable camelcase */
 export const createFirestoreMetadataDocument_v2 = createFirestoreMetadataDocument;
 export const postDocumentComment_v2 = postDocumentComment;
 export const postExemplarComment_v2 = postExemplarComment;
+export const getAiContent_v2 = getAiContent;
+export const generateClassData_v2 = generateClassData;
 /* eslint-enable camelcase */
 
 admin.initializeApp();

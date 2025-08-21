@@ -16,6 +16,9 @@ const gTileRegistration: Record<string, () => void> = {
   "Question": loggedLoad("Question", () => [
     import(/* webpackChunkName: "Question" */"./models/tiles/question/question-registration")
   ]),
+  "AI": loggedLoad("AI", () => [
+    import(/* webpackChunkName: "AI" */"./plugins/ai/ai-registration")
+  ]),
   "BarGraph": loggedLoad("BarGraph", () => [
     import(/* webpackChunkName: "BarGraph" */"./plugins/bar-graph/bar-graph-registration"),
     import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")

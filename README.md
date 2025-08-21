@@ -173,7 +173,7 @@ There are a number of URL parameters that can aid in testing:
 |`studentDocumentHistoryId`|string         |Open the history slider and move to the specified revision in the `studentDocument`.|
 |`portalDomain`  |string                   |Used for dev/qa of standalone auth, this overrides which portal is used for auth|
 |`firebaseEnv`   |`production`,`staging`   |Target Firebase project for data and functions|
-|`showAiSummary` |`true`                   |When set to true the "ai summary" button in the document editor|
+|`showAiSummary` |`true`                   |When set to true the "ai summary" button in the document editor and Student Work view|
 |`includeModelInAiSummary`|`true`          |When set to true the JSON.stringified raw model is included in the AI summary|
 
 The `unit` parameter can be in 3 forms:
