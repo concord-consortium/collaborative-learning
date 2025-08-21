@@ -31,6 +31,14 @@ export const MovableLineInstance = types.model("MovableLineInstance", {
   dragIntercept: undefined as number|undefined,
   dragSlope: undefined as number|undefined
 }))
+.preProcessSnapshot(snap => {
+  // ensure valid intercept
+  const validIntercept = snap.intercept == null || !isFinite(snap.intercept) ? 0 : snap.intercept;
+  return {
+    ...snap,
+    intercept: validIntercept,
+  };
+})
 .views(self => ({
   get currentEquationCoords() {
     if (self.dragEquationCoords) return self.dragEquationCoords;

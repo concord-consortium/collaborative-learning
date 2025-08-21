@@ -643,7 +643,7 @@ export function computeSlopeAndIntercept(xAxis?: IAxisModel, yAxis?: IAxisModel)
   // it fits a typical set of points
   const adjustedXUpper = xLower + (xUpper - xLower) / 2,
     slope = (yUpper - yLower) / (adjustedXUpper - xLower),
-    intercept = yLower - slope * xLower;
+    intercept = isFinite(slope) ? yLower - slope * xLower : adjustedXUpper;
 
   return {slope, intercept};
 }
