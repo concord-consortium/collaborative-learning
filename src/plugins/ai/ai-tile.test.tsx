@@ -1,14 +1,21 @@
-// Mock the useStores hook to provide unit.code
+// Mock the useStores hook to provide unit.code and appConfig
 jest.mock("../../hooks/use-stores", () => ({
   useStores: () => ({
     unit: {
       code: "test-unit"
+    },
+    appConfig: {
+      getSetting: jest.fn((key: string, category: string) => {
+        if (key === "systemPrompt" && category === "ai") {
+          return "You are a helpful AI assistant.";
+        }
+        return "default-value";
+      })
     }
   })
 }));
 
 import { render } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import React from "react";
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
