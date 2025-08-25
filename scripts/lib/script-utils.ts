@@ -160,7 +160,12 @@ export const copyFirestoreDoc = async (
   docIdTo?: string,
   scope: "document" | "subcollections" | "all" = "all",
   addData: admin.firestore.DocumentData = {},
+  bulkWriter: admin.firestore.BulkWriter = null,
 ): Promise<boolean> => {
+  const shouldCommit = bulkWriter === null;
+  if (shouldCommit) {
+    bulkWriter = firestore.bulkWriter();
+  }
   const docRef = firestore.collection(collectionFrom).doc(docId);
   if (!docIdTo) {
     docIdTo = docId;
@@ -183,14 +188,8 @@ export const copyFirestoreDoc = async (
   if (docData) {
     // document exists, create the new item
     if (copyBaseDoc) {
-      await firestore
-        .collection(collectionTo)
-        .doc(docIdTo)
-        .create({ ...docData, ...addData })
-        .catch((error) => {
-          console.error('Error creating document', `${collectionTo}/${docIdTo}`, JSON.stringify(error));
-          throw new Error('Data was not copied properly');
-        });
+      const newDocRef = firestore.collection(collectionTo).doc(docIdTo);
+      bulkWriter.create(newDocRef, docData);
     }
 
     if (copySubcollections) {
@@ -204,17 +203,22 @@ export const copyFirestoreDoc = async (
           .get()
           .then(async (snapshot) => {
             const docs = snapshot.docs;
+            const promises = [];
             for await (const doc of docs) {
-              await copyFirestoreDoc(firestore, subcollectionPath, doc.id,
-                subcollectionPathTo, doc.id, "all");
+              promises.push(copyFirestoreDoc(firestore, subcollectionPath, doc.id,
+                subcollectionPathTo, doc.id, "all", bulkWriter));
             }
+            await Promise.all(promises);
             return true;
           })
           .catch((error) => {
-            console.error('Error reading subcollection', subcollectionPath, JSON.stringify(error));
+            console.error('Error reading subcollection', subcollectionPath, error);
             throw new Error('Data was not copied properly to the target collection.');
           });
       }
+    }
+    if (shouldCommit) {
+      await bulkWriter.close();
     }
     return true;
   }

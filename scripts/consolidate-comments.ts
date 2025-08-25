@@ -109,9 +109,10 @@ function displayList(title: string, list: any[]) {
 // Key fields must match; a few can differ and we combine them smartly.
 async function checkAndMerge(name: string, key: string) {
   // Make sure that the contents of the new document match the existing one.
-  const mustMatch = ["key", "uid", "context_id", "type", "title",
-    "properties", "network", "unit", "investigation", "problem", "visibility"];
-  const otherFields = ["tools", "strategies", "teachers", "originDoc", "contextId", "createdAt"];
+  const mustMatch = ["key", "uid", "context_id", "type", "title", "properties", "network", ];
+  const otherFields = ["tools", "tileTypes", "strategies", "teachers", "originDoc", "contextId", "createdAt",
+    "unit", "investigation", "problem", "visibility", "offeringId",
+  ];
 
   const newDoc = await firestore.doc(documentsRoot + "/" + name).get();
   const newData = newDoc.data();
@@ -153,7 +154,46 @@ async function checkAndMerge(name: string, key: string) {
   if (newData.createdAt && (!oldData.createdAt || newData.createdAt < oldData.createdAt)) {
     updates.createdAt = newData.createdAt;
   }
-  // tools, strategies -- choose the one with more values.
+  // unit, investigation, problem, visibility, offeringId -- if one has a value, use that.
+  if (newData.unit && !oldData.unit) {
+    updates.unit = newData.unit;
+  }
+  if (newData.unit && oldData.unit && newData.unit !== oldData.unit) {
+    console.log("Err mismatch in unit:", newData.unit, oldData.unit);
+    return false;
+  }
+  if (newData.investigation && !oldData.investigation) {
+    updates.investigation = newData.investigation;
+  }
+  if (newData.investigation && oldData.investigation && newData.investigation !== oldData.investigation) {
+    console.log("Err mismatch in investigation:", newData.investigation, oldData.investigation);
+    return false;
+  }
+  if (newData.problem && !oldData.problem) {
+    updates.problem = newData.problem;
+  }
+  if (newData.problem && oldData.problem && newData.problem !== oldData.problem) {
+    console.log("Err mismatch in problem:", newData.problem, oldData.problem);
+    return false;
+  }
+  if (newData.visibility && !oldData.visibility) {
+    updates.visibility = newData.visibility;
+  }
+  if (newData.visibility && oldData.visibility && newData.visibility !== oldData.visibility) {
+    console.log("Err mismatch in visibility:", newData.visibility, oldData.visibility);
+    return false;
+  }
+  if (newData.offeringId && !oldData.offeringId) {
+    updates.offeringId = newData.offeringId;
+  }
+  if (newData.offeringId && oldData.offeringId && newData.offeringId !== oldData.offeringId) {
+    console.log("Err mismatch in offeringId:", newData.offeringId, oldData.offeringId);
+    return false;
+  }
+  // tileTypes, tools, strategies -- choose the one with more values.
+  if (newData.tileTypes && (!oldData.tileTypes || newData.tileTypes.length > oldData.tileTypes.length)) {
+    updates.tileTypes = newData.tileTypes;
+  }
   if (newData.tools && (!oldData.tools || newData.tools.length > oldData.tools.length)) {
     updates.tools = newData.tools;
   }
