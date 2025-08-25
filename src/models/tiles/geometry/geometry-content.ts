@@ -336,6 +336,11 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
+      if (options?.forHash) {
+        // For hash generation, we only care about the objects and background image
+        const {objects, bgImage} = snapshot;
+        return stringify({objects, bgImage}, {maxLength: 200});
+      }
       return stringify(snapshot, {maxLength: 200});
     }
   }))

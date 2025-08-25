@@ -1,6 +1,8 @@
 import { cloneDeep } from "lodash";
 import { getParent, getSnapshot, getType,
-  Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall } from "mobx-state-tree";
+  Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall,
+  IDisposer,
+  onPatch} from "mobx-state-tree";
 import { findMetadata, getTileContentInfo, ITileExportOptions } from "./tile-content-info";
 import { TileContentUnion } from "./tile-content-union";
 import { ITileContentModel } from "./tile-content";
@@ -10,6 +12,7 @@ import { StringBuilder } from "../../utilities/string-builder";
 import { logTileDocumentEvent } from "./log/log-tile-document-event";
 import { LogEventName } from "../../lib/logger-types";
 import { RowListType } from "../document/row-list";
+import { sha256 } from 'js-sha256';
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -77,7 +80,11 @@ export const TileModel = types
     // if true, tile cannot be moved or have another tile placed alongside/above it.
     fixedPosition: types.optional(types.boolean, false),
     // e.g. "TextContentModel", ...
-    content: TileContentUnion
+    content: TileContentUnion,
+    // the hash of the tile contents when it was created
+    createdHash: types.maybe(types.string),
+    // the hash of the tile contents when it was updated
+    updatedHash: types.maybe(types.string),
   })
   .preProcessSnapshot(snapshot => {
     const tileType = snapshot.content.type;
@@ -139,6 +146,15 @@ export const TileModel = types
       const comma = options?.appendComma ? ',' : '';
       builder.pushLine(`}${comma}`);
       return builder.build();
+    },
+    generateHash() {
+      const options: ITileExportOptions = {forHash: true};
+      const tileMap = (self.content as any).tileMap ?? new Map();
+      const contentJson = (self.content as any).exportJson?.(options, tileMap);
+      if (!contentJson) {
+        return undefined;
+      }
+      return sha256(contentJson);
     }
   }))
   .actions(self => ({
@@ -158,50 +174,73 @@ export const TileModel = types
     },
     setFixedPosition(fixedPosition: boolean) {
       self.fixedPosition = fixedPosition;
-    }
+    },
+    setUpdatedHash() {
+      self.updatedHash = self.generateHash();
+    },
   }))
-  .actions(self => ({
-    /**
-     * Set the title in the appropriate way for this tile.
-     * For tables and data cards, this will set the name of the DataSet;
-     * for other tiles, it is set in the Tile model.
-     * @param title
-     */
-    setTitleOrContentTitle(title: string) {
-      logTileDocumentEvent(LogEventName.RENAME_TILE,{ tile: self as ITileModel });
-      if (getTileContentInfo(self.content.type)?.useContentTitle) {
-        self.content.setContentTitle(title);
-      } else {
-        self.setTitle(title);
+  .actions(self => {
+    let stopWatchingPatches: IDisposer | undefined;
+
+    return {
+      /**
+       * Set the title in the appropriate way for this tile.
+       * For tables and data cards, this will set the name of the DataSet;
+       * for other tiles, it is set in the Tile model.
+       * @param title
+       */
+      setTitleOrContentTitle(title: string) {
+        logTileDocumentEvent(LogEventName.RENAME_TILE,{ tile: self as ITileModel });
+        if (getTileContentInfo(self.content.type)?.useContentTitle) {
+          self.content.setContentTitle(title);
+        } else {
+          self.setTitle(title);
+        }
+      },
+      afterCreate() {
+        const metadata = findMetadata(self.content.type, self.id);
+        const content = self.content;
+        if (metadata && content.doPostCreate) {
+          content.doPostCreate(metadata);
+        }
+
+        if (!self.createdHash) {
+          self.createdHash = self.generateHash();
+          self.updatedHash = self.createdHash;
+        }
+
+        // Watch patches; update only if the patch path is /content or under it
+        stopWatchingPatches = onPatch(self, (patch) => {
+          const p = patch.path;
+          if (p === "/content" || p.startsWith("/content/")) {
+            self.setUpdatedHash();
+          }
+        });
+      },
+      beforeDestroy() {
+        stopWatchingPatches?.();
+      },
+      afterAttach() {
+        // The afterAttach() method of the tile content gets called when the content is attached to the tile,
+        // which often occurs before the tile has been attached to the document, which means that references
+        // can't be validated, etc.. Therefore, the tile model will call the content's afterAttachToDocument()
+        // method when the tile model itself is attached.
+        if ("afterAttachToDocument" in self.content && typeof self.content.afterAttachToDocument === "function") {
+          self.content.afterAttachToDocument();
+        }
+      },
+      onTileAction(call: ISerializedActionCall) {
+        self.content.onTileAction?.(call);
+      },
+      willRemoveFromDocument() {
+        return self.content.willRemoveFromDocument?.();
+      },
+      setDisabledFeatures(disabled: string[]) {
+        const metadata: any = findMetadata(self.content.type, self.id);
+        metadata && metadata.setDisabledFeatures && metadata.setDisabledFeatures(disabled);
       }
-    },
-    afterCreate() {
-      const metadata = findMetadata(self.content.type, self.id);
-      const content = self.content;
-      if (metadata && content.doPostCreate) {
-        content.doPostCreate(metadata);
-      }
-    },
-    afterAttach() {
-      // The afterAttach() method of the tile content gets called when the content is attached to the tile,
-      // which often occurs before the tile has been attached to the document, which means that references
-      // can't be validated, etc.. Therefore, the tile model will call the content's afterAttachToDocument()
-      // method when the tile model itself is attached.
-      if ("afterAttachToDocument" in self.content && typeof self.content.afterAttachToDocument === "function") {
-        self.content.afterAttachToDocument();
-      }
-    },
-    onTileAction(call: ISerializedActionCall) {
-      self.content.onTileAction?.(call);
-    },
-    willRemoveFromDocument() {
-      return self.content.willRemoveFromDocument?.();
-    },
-    setDisabledFeatures(disabled: string[]) {
-      const metadata: any = findMetadata(self.content.type, self.id);
-      metadata && metadata.setDisabledFeatures && metadata.setDisabledFeatures(disabled);
-    }
-  }));
+    };
+  });
 
 export interface ITileModel extends Instance<typeof TileModel> {}
 export interface ITileModelSnapshotIn extends SnapshotIn<typeof TileModel> {}

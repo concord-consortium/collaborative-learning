@@ -32,6 +32,7 @@ export const SimulatorContentModel = TileContentModel
   }))
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
+      // ignore options?.forHash option - return default export when hashing
       // crude, but enough to get us started
       return JSON.stringify(getSnapshot(self), null, 2);
     },

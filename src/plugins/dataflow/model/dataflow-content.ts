@@ -131,6 +131,11 @@ export const DataflowContentModel = TileContentModel
     },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
+      if (options?.forHash) {
+        // We only need the program for hashing
+        const {program} = snapshot;
+        return stringify({program}, {maxLength: 120});
+      }
       // We used to strip out the recent values, maybe we should again?
       return stringify(snapshot, {maxLength: 120});
     },

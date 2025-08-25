@@ -18,6 +18,7 @@ export const ExpressionContentModel = TileContentModel
       return true;
     },
     exportJson(options?: ITileExportOptions){
+      // ignore options?.forHash option - return default export when hashing
       return JSON.stringify(getSnapshot(self), null, 2);
     }
   }))

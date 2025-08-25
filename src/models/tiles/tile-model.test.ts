@@ -3,6 +3,9 @@ import { kDefaultMinWidth, TileModel } from "./tile-model";
 import { getTileTypes, getTileContentInfo } from "./tile-content-info";
 import { IUnknownContentModel } from "./unknown-content";
 import { kUnknownTileType } from "./unknown-types";
+import { ImageModel } from "./geometry/geometry-model";
+import placeholderImage from "../../../assets/image_placeholder.png";
+
 
 // Define the built in tool ids explicitly as strings.
 // Strings are used because importing the tool id constant could trigger a
@@ -10,9 +13,7 @@ import { kUnknownTileType } from "./unknown-types";
 // registerTools below.
 // The tools are listed instead of just using getToolIds (see below) in order to
 // make sure all of these built in tools get registered correctly as expected.
-const builtInTileTypes = [
-  "Unknown",
-  "Placeholder",
+const editableTileTypes = [
   "Table",
   "Geometry",
   "Image",
@@ -20,9 +21,14 @@ const builtInTileTypes = [
   "Drawing",
   "Diagram"
 ];
+const builtInTileTypes = [
+  "Unknown",
+  "Placeholder"
+].concat(editableTileTypes);
 
 // This is needed so we can check which tools are registered below
 import { registerTileTypes } from "../../register-tile-types";
+import { ImageObjectSnapshotForAdd } from "src/plugins/drawing/objects/image";
 registerTileTypes(builtInTileTypes);
 
 describe("TileModel", () => {
@@ -63,6 +69,13 @@ describe("TileModel", () => {
       // can create tool tiles with correct tool from snapshot
       tile = TileModel.create(snapshot);
       expect(tile.content.type).toBe(tileType);
+
+      // the createHash and updateHash are set for all tiles except Placeholder and Unknown
+      if (editableTileTypes.includes(tileType)) {
+        expect(tile.createdHash).toBeDefined();
+        expect(tile.updatedHash).toBeDefined();
+        expect(tile.createdHash).toBe(tile.updatedHash);
+      }
     });
   });
 
@@ -99,4 +112,62 @@ describe("TileModel", () => {
     expect(tile.maxWidth).toBeUndefined();
   });
 
+  describe("sets updatedHash when the content changes", () => {
+    it("for text tiles", () => {
+      const toolDefaultContent = getTileContentInfo("Text")?.defaultContent;
+      assertIsDefined(toolDefaultContent);
+      const tile = TileModel.create({content: getSnapshot(toolDefaultContent())});
+
+      (tile.content as any).setText("new text");
+      expect(tile.createdHash).not.toBe(tile.updatedHash);
+    });
+
+    it("for image tiles", () => {
+      const toolDefaultContent = getTileContentInfo("Image")?.defaultContent;
+      assertIsDefined(toolDefaultContent);
+      const tile = TileModel.create({content: getSnapshot(toolDefaultContent())});
+
+      (tile.content as any).setUrl("");
+      expect(tile.createdHash).not.toBe(tile.updatedHash);
+    });
+
+    it("for geometry tiles", () => {
+      const toolDefaultContent = getTileContentInfo("Geometry")?.defaultContent;
+      assertIsDefined(toolDefaultContent);
+      const tile = TileModel.create({content: getSnapshot(toolDefaultContent())});
+
+      (tile.content as any).setBackgroundImage(
+        ImageModel.create({ id: "img", url: placeholderImage, x: 0, y: 0, width: 5, height: 5 })
+      );
+      expect(tile.createdHash).not.toBe(tile.updatedHash);
+    });
+
+    it("for drawing tiles", () => {
+      const toolDefaultContent = getTileContentInfo("Drawing")?.defaultContent;
+      assertIsDefined(toolDefaultContent);
+      const tile = TileModel.create({content: getSnapshot(toolDefaultContent())});
+
+      const imageSnapshot: ImageObjectSnapshotForAdd = {
+        type: "image",
+        id: "c",
+        x: 0,
+        y: 0,
+        width: 10,
+        height: 10,
+        url: ""
+      };
+
+      (tile.content as any).addObject(imageSnapshot, true);
+      expect(tile.createdHash).not.toBe(tile.updatedHash);
+    });
+
+    it("for diagram tiles", () => {
+      const toolDefaultContent = getTileContentInfo("Diagram")?.defaultContent;
+      assertIsDefined(toolDefaultContent);
+      const tile = TileModel.create({content: getSnapshot(toolDefaultContent())});
+
+      (tile.content as any).setHideNavigator(true);
+      expect(tile.createdHash).not.toBe(tile.updatedHash);
+    });
+  });
 });

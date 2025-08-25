@@ -126,6 +126,7 @@ export interface ITileExportOptions {
   rowHeight?: number;
   transformImageUrl?: (url: string, filename?: string) => string;
   appendComma?: boolean;
+  forHash?: boolean;
 }
 
 export interface IDocumentExportOptions extends ITileExportOptions {

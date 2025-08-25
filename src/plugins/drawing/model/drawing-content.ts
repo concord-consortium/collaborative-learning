@@ -147,6 +147,7 @@ export const DrawingContentModel = NavigatableTileModel
       // json-stringify-pretty-compact is used, so the exported content is more
       // compact. It results in something close to what we used to get when the
       // export was created using a string builder.
+      // ignore options?.forHash option - return default export when hashing
       return stringify({type, objects}, {maxLength: 200});
     }
   }))
