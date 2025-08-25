@@ -21,6 +21,7 @@ import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { uniqueId } from "../../../utilities/js-utils";
 import { createDefaultDataSet } from "../../../plugins/dataflow/model/utilities/create-default-data-set";
+import stringify from "json-stringify-pretty-compact";
 
 export const kTableTileType = "Table";
 export const kCaseIdName = "__id__";
@@ -303,6 +304,11 @@ export const TableContentModel = TileContentModel
     //   return self.isValidDataSetForGeometryLink(self.dataSet);
     // },
     exportJson(options?: IDocumentExportOptions) {
+      if (options?.forHash) {
+        // the exportTableContentAsJson does not contain the dataset but just the column widths
+        // so for hashing we will just use the dataset snapshot
+        return stringify({dataSet: getSnapshot(self.dataSet), columnWidths: self.columnWidths}, {maxLength: 200});
+      }
       return exportTableContentAsJson(self.metadata, self.dataSet, self.columnWidth);
     }
   }));
