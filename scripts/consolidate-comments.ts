@@ -1,0 +1,253 @@
+#!/usr/bin/node
+
+// Find all "commentable documents" using old-style prefixed paths, and move them
+// to the unprefixed location. Multiple documents may be consolidated into a single one
+// if they share the same key.
+
+// $ cd scripts
+// $ npx tsx consolidate-comments.ts
+
+import admin from "firebase-admin";
+import _ from "lodash";
+import { getFirestoreBasePath, getScriptRootFilePath, moveFirestoreDoc } from "./lib/script-utils.js";
+
+const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
+
+const portal = "";
+const demo = "CLUE-Test";
+const dryRun = true;
+
+const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
+const credential = admin.credential.cert(serviceAccountFile);
+// Initialize the app with a service account, granting admin privileges
+const fbApp = admin.initializeApp({
+  credential,
+  databaseURL
+});
+const firestore = fbApp.firestore();
+
+const documentsRoot = getFirestoreBasePath(portal, demo);
+
+const keyPattern = "[a-zA-Z0-9_\\-]{20}";
+const unprefixedPattern = new RegExp("^" + keyPattern + "$");
+const prefixedPattern = new RegExp("^.+_(" + keyPattern + ")$");
+
+interface DocumentInfo {
+  key: string;
+  commentableDocs: { name: string, type: string }[]
+}
+
+function isCurriculum(documentName: string) {
+  return documentName.startsWith("curriculum:");
+}
+
+function isPrefixed(documentName: string) {
+  return documentName.match(prefixedPattern);
+}
+
+function isUnprefixed(documentName: string) {
+  return documentName.match(unprefixedPattern);
+}
+
+function typeOfDocument(docSnapshot: FirebaseFirestore.QueryDocumentSnapshot) {
+  const documentName = docSnapshot.id;
+  if (isCurriculum(documentName)) {
+    return "curriculum";
+  } else if (isPrefixed(documentName)) {
+    return "prefixed";
+  } else if (isUnprefixed(documentName) && documentName === docSnapshot.data().key) {
+    return "unprefixed";
+  } else {
+    return "error";
+  }
+}
+
+async function getAllDocuments(ref: FirebaseFirestore.CollectionReference) {
+  console.log("Ok Getting all documents from", ref.path);
+  const documents: FirebaseFirestore.QueryDocumentSnapshot[] = [];
+  let lastDoc: FirebaseFirestore.QueryDocumentSnapshot | null = null;
+  const batchSize = 100;
+
+  // This fetches 100 matching documents at a time to avoid query limits or memory issues.
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    let query = ref
+      .select("key")
+      .limit(batchSize);
+
+    if (lastDoc) {
+      query = query.startAfter(lastDoc);
+    }
+
+    const snapshot = await query.get();
+
+    if (snapshot.empty) {
+      break;
+    }
+
+    documents.push(...snapshot.docs);
+    console.log("Ok ...", documents.length);
+
+    if (snapshot.docs.length < batchSize) {
+      break; // No more documents to fetch
+    }
+
+    lastDoc = snapshot.docs[snapshot.docs.length - 1];
+  }
+
+  return documents;
+}
+
+function displayList(title: string, list: any[]) {
+  console.log(`Err ${title} (${list.length}):`);
+  for (const item of list) {
+    console.log("Err  ", item);
+  }
+}
+
+// Checks and combines two documents.
+// Key fields must match; a few can differ and we combine them smartly.
+async function checkAndMerge(name: string, key: string) {
+  // Make sure that the contents of the new document match the existing one.
+  const mustMatch = ["key", "uid", "context_id", "type", "title",
+    "properties", "network", "unit", "investigation", "problem", "visibility"];
+  const otherFields = ["tools", "strategies", "teachers", "originDoc", "contextId", "createdAt"];
+
+  const newDoc = await firestore.doc(documentsRoot + "/" + name).get();
+  const newData = newDoc.data();
+  const oldDoc = await firestore.doc(documentsRoot + "/" + key).get();
+  const oldData = oldDoc.data();
+  if (dryRun && oldData === undefined) {
+    // Since we're in dry run mode, this documents may not have been written.
+    return true;
+  }
+
+  for (const field of mustMatch) {
+    if (!_.isEqual(newData[field], oldData[field]) && (newData[field] || oldData[field])) {
+      console.error("Err Sanity check failed, mismatch in", field);
+      console.error("Err New data:", newData);
+      console.error("Err Old data:", oldData);
+      return false;
+    }
+  }
+  // Check that there are no fields beyond the ones in our mustMatch and otherFields lists.
+  const newFields = Object.keys(newData);
+  const oldFields = Object.keys(oldData);
+  for (const field of newFields) {
+    if (!mustMatch.includes(field) && !otherFields.includes(field)) {
+      console.error("Err Sanity check failed, unexpected field:", field);
+      return false;
+    }
+  }
+  for (const field of oldFields) {
+    if (!mustMatch.includes(field) && !otherFields.includes(field)) {
+      console.error("Err Sanity check failed, unexpected field:", field);
+      return false;
+    }
+  }
+
+  // See if there are any updates needed
+  const updates: { [key: string]: any } = {};
+
+  // createdAt -- choose the earlier one.
+  if (newData.createdAt && (!oldData.createdAt || newData.createdAt < oldData.createdAt)) {
+    updates.createdAt = newData.createdAt;
+  }
+  // tools, strategies -- choose the one with more values.
+  if (newData.tools && (!oldData.tools || newData.tools.length > oldData.tools.length)) {
+    updates.tools = newData.tools;
+  }
+  if (newData.strategies && (!oldData.strategies || newData.strategies.length > oldData.strategies.length)) {
+    updates.strategies = newData.strategies;
+  }
+  // originDoc -- if one has a value, use that.
+  if (newData.originDoc !== undefined && oldData.originDoc === undefined) {
+    updates.originDoc = newData.originDoc;
+  }
+  // teachers, contextId -- not used any more, just ignore.
+  // Write out the updates
+  if (Object.keys(updates).length > 0) {
+    console.log("Ok Updates needed:", updates);
+    if (!dryRun) {
+      await oldDoc.ref.update(updates);
+    }
+  }
+
+  return true;
+}
+
+// Moves a document and all its subcollections.
+async function moveDocument(name: string, newName: string) {
+  console.log("Ok  move", name, "->", newName);
+  if (!dryRun) {
+    await moveFirestoreDoc(firestore, documentsRoot, name, documentsRoot, newName, "all");
+  }
+}
+
+// Copies comments, history, or whatever subcollections in finds under the parent,
+// but just deletes the parent document.
+async function moveSubcollections(name: string, newName: string) {
+  console.log("Ok  move subcollections only", name, "->", newName);
+  if (!dryRun) {
+    await moveFirestoreDoc(firestore, documentsRoot, name, documentsRoot, newName, "subcollections");
+  }
+}
+
+async function reorganizeDocuments() {
+  const documentsRef = firestore.collection(documentsRoot);
+  const documents = await getAllDocuments(documentsRef);
+  const docInfo: { [key: string]: DocumentInfo } = {};
+  const errorDocs = [];
+  for (const docSnapshot of documents) {
+    const type = typeOfDocument(docSnapshot);
+    if (type === "error") {
+      errorDocs.push(docSnapshot.id);
+      continue;
+    }
+    if (type === "curriculum") {
+      continue;
+    }
+    const unprefixed = docSnapshot.data().key;
+
+    if (!(unprefixed in docInfo)) {
+      docInfo[unprefixed] = { key: unprefixed, commentableDocs: [] };
+    }
+    docInfo[unprefixed].commentableDocs.push({ name: docSnapshot.id, type });
+  }
+
+  if (errorDocs.length > 0) {
+    displayList("Unexpected documents found, ignoring:", errorDocs);
+  }
+
+  for (const key in docInfo) {
+    const documentInfo = docInfo[key];
+    let hasBaseDoc = documentInfo.commentableDocs.some(doc => doc.type === "unprefixed");
+    console.log("Ok", key, ":");
+    if (hasBaseDoc && documentInfo.commentableDocs.length === 1) {
+      continue;
+    }
+    for (const doc of documentInfo.commentableDocs) {
+      if (doc.type === "unprefixed") {
+        console.log("Ok  unprefixed doc, leave as is", doc.name);
+      } else if (doc.type === "prefixed") {
+        if (hasBaseDoc) {
+          if (await checkAndMerge(doc.name, key)) {
+            await moveSubcollections(doc.name, key);
+          } else {
+            // We exit the entire script if the sanity check fails -- it means there is an unexpected
+            // data inconsistency that should be investigated, or something the script doesn't yet handle.
+            console.error("Err Sanity check failed");
+            process.exit(1);
+          }
+        } else {
+          await moveDocument(doc.name, key);
+          hasBaseDoc = true; // this becomes the base doc after the move
+        }
+      } else {
+        throw new Error("Unexpected document type: " + doc.type);
+      }
+    }
+  }
+}
+
+await reorganizeDocuments();
