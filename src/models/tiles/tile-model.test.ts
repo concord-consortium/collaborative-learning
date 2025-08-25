@@ -6,6 +6,13 @@ import { kUnknownTileType } from "./unknown-types";
 import { ImageModel } from "./geometry/geometry-model";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
+
+// Define the built in tool ids explicitly as strings.
+// Strings are used because importing the tool id constant could trigger a
+// registration of the tool. The tools will all be registered due to the
+// registerTools below.
+// The tools are listed instead of just using getToolIds (see below) in order to
+// make sure all of these built in tools get registered correctly as expected.
 const editableTileTypes = [
   "Table",
   "Geometry",
@@ -14,13 +21,6 @@ const editableTileTypes = [
   "Drawing",
   "Diagram"
 ];
-
-// Define the built in tool ids explicitly as strings.
-// Strings are used because importing the tool id constant could trigger a
-// registration of the tool. The tools will all be registered due to the
-// registerTools below.
-// The tools are listed instead of just using getToolIds (see below) in order to
-// make sure all of these built in tools get registered correctly as expected.
 const builtInTileTypes = [
   "Unknown",
   "Placeholder"
