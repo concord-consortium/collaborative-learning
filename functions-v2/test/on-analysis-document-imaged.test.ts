@@ -9,7 +9,7 @@ import * as dotenv from "dotenv";
 import * as path from "path";
 import {initialize, projectConfig} from "./initialize";
 import {onAnalysisDocumentImaged} from "../src/on-analysis-document-imaged";
-import {buildZodResponseSchema, buildMessages} from "../lib/src/ai-categorize-document";
+import {buildZodResponseSchema, buildImageMessages} from "../lib/src/ai-categorize-document";
 import {ZodArray, ZodEnum, ZodString} from "zod";
 
 jest.mock("firebase-functions/logger");
@@ -127,7 +127,7 @@ describe("functions", () => {
 
   describe("buildMessages", () => {
     test("creates messages", () => {
-      const messages = buildMessages(
+      const messages = buildImageMessages(
         {
           systemPrompt: "You are a master teacher.",
           mainPrompt: "Evaluate this.",

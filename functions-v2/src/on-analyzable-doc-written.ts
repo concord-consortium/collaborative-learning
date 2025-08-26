@@ -41,13 +41,24 @@ export const onAnalyzableProdDocWritten =
       return handleUpdate(event, firebaseRoot, firestoreRoot);
     });
 
-interface AnalysisQueueDocument {
-  aiPrompt?: unknown;
+export interface AIPrompt {
+  mainPrompt: string,
+  categorizationDescription?: string,
+  categories?: string[],
+  keyIndicatorsPrompt?: string,
+  discussionPrompt?: string,
+  systemPrompt: string,
+  summarizer?: string
+}
+
+export interface AnalysisQueueDocument {
+  aiPrompt?: AIPrompt;
   commentsPath: string;
   documentPath: string;
   docUpdated: number | string;
   evaluator: string;
   metadataPath: string;
+  firestoreDocumentPath: string;
 }
 
 const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebaseRoot: string, firestoreRoot: string) => {
@@ -66,6 +77,7 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
   const metadataPath = `${firebaseRoot}/classes/${classId}/users/${userId}/documentMetadata/${docId}`;
   const documentPath = `${firebaseRoot}/classes/${classId}/users/${userId}/documents/${docId}`;
   const commentsPath = `${firestoreRoot}/documents/${docId}/comments`;
+  const firestoreDocumentPath = `${firestoreRoot}/documents/${docId}`;
 
   const firestore = admin.firestore();
 
@@ -76,6 +88,7 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
     commentsPath,
     docUpdated: timestamp,
     evaluator,
+    firestoreDocumentPath,
   };
 
   if (aiPrompt) {

@@ -16,6 +16,11 @@
     "deploy:postExemplarComment": "firebase deploy --only functions:functions-v2:postExemplarComment_v2",
     "deploy:createFirestoreMetadataDocument": "firebase deploy --only functions:functions-v2:createFirestoreMetadataDocument_v2",
     "deploy:getAiContent": "firebase deploy --only functions:functions-v2:getAiContent_v2",
+    "deploy:onDocumentSummarized": "firebase deploy --only functions:functions-v2:onDocumentSummarized",
+    "deploy:onAnalyzableTestDocWritten": "firebase deploy --only functions:functions-v2:onAnalyzableTestDocWritten",
+    "deploy:onAnalyzableProdDocWritten": "firebase deploy --only functions:functions-v2:onAnalyzableProdDocWritten",
+    "deploy:onAnalysisDocumentPending": "firebase deploy --only functions:functions-v2:onAnalysisDocumentPending",
+    "deploy:onAnalysisDocumentImaged": "firebase deploy --only functions:functions-v2:onAnalysisDocumentImaged",
     "logs": "firebase functions:log"
   },
   "engines": {
@@ -23,13 +28,14 @@
   },
   "main": "lib/functions-v2/src/index.js",
   "dependencies": {
+    "@google-cloud/firestore": "^7.11.3",
+    "@langchain/core": "^0.3.69",
+    "@langchain/openai": "^0.6.7",
+    "@langchain/textsplitters": "0.1.0",
     "firebase-admin": "^12.1.0",
     "firebase-functions": "^5.1.1",
     "openai": "^4.64.0",
-    "zod": "^3.23.8",
-    "@langchain/core": "^0.3.69",
-    "@langchain/openai": "^0.6.7",
-    "@langchain/textsplitters": "0.1.0"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",
