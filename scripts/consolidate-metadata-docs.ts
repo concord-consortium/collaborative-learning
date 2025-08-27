@@ -109,10 +109,11 @@ function displayList(title: string, list: any[]) {
 // Key fields must match; a few can differ and we combine them smartly.
 async function checkAndMerge(name: string, key: string) {
   // Make sure that the contents of the new document match the existing one.
-  const mustMatch = ["key", "uid", "context_id", "type", "title", "properties", "network", ];
+  const mustMatch = ["key", "uid", "context_id", "type", "title", ];
   const otherFields = ["tools", "tileTypes", "strategies", "teachers", "originDoc", "contextId", "createdAt",
-    "unit", "investigation", "problem", "visibility", "offeringId",
+    "unit", "investigation", "problem", "visibility", "offeringId", "properties", "network"
   ];
+  const propertiesFields = ["pubCount", "isDeleted"];
 
   const newDoc = await firestore.doc(documentsRoot + "/" + name).get();
   const newData = newDoc.data();
@@ -204,7 +205,30 @@ async function checkAndMerge(name: string, key: string) {
   if (newData.originDoc !== undefined && oldData.originDoc === undefined) {
     updates.originDoc = newData.originDoc;
   }
-  // teachers, contextId -- not used any more, just ignore.
+  if (!_.isEmpty(newData.properties) && _.isEmpty(oldData.properties)) {
+    updates.properties = newData.properties;
+  }
+  if (!_.isEmpty(newData.properties) && !_.isEmpty(oldData.properties)
+    && !_.isEqual(newData.properties, oldData.properties)) {
+    // Warn if the properties contains any fields other than pubCount or isDeleted
+    if (Object.keys(newData.properties).some(k => !propertiesFields.includes(k))
+      || Object.keys(oldData.properties).some(k => !propertiesFields.includes(k))) {
+        console.log("Err unknown field in properties:", newData.properties, oldData.properties);
+        return false;
+    }
+    updates.properties = oldData.properties;
+    if (newData.properties.pubCount !== undefined) {
+      // For pubCount, keep the larger one.
+      updates.properties.pubCount = Math.max(newData.properties.pubCount, oldData.properties.pubCount || 0);
+    }
+    if (newData.properties.isDeleted !== undefined && oldData.properties.isDeleted === undefined) {
+      // For isDeleted, keep whichever has a value.
+      updates.properties.isDeleted = newData.properties.isDeleted;
+    }
+  }
+
+  // teachers, contextId, network -- not used any more, just ignore.
+
   // Write out the updates
   if (Object.keys(updates).length > 0) {
     console.log("Ok Updates needed:", updates);
@@ -236,6 +260,8 @@ async function moveSubcollections(name: string, newName: string) {
 async function reorganizeDocuments() {
   const documentsRef = firestore.collection(documentsRoot);
   const documents = await getAllDocuments(documentsRef);
+  const numDocs = documents.length;
+  let docsProcessed = 0;
   const docInfo: { [key: string]: DocumentInfo } = {};
   const errorDocs = [];
   for (const docSnapshot of documents) {
@@ -262,7 +288,8 @@ async function reorganizeDocuments() {
   for (const key in docInfo) {
     const documentInfo = docInfo[key];
     let hasBaseDoc = documentInfo.commentableDocs.some(doc => doc.type === "unprefixed");
-    console.log("Ok", key, ":");
+    docsProcessed++;
+    console.log("Ok", docsProcessed, "of", numDocs, "documents", key, ":");
     if (hasBaseDoc && documentInfo.commentableDocs.length === 1) {
       continue;
     }

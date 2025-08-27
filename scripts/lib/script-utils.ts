@@ -139,6 +139,13 @@ export function remapFirebaseProblemDocPublications(fbPublications: Record<strin
   return remap(fbPublications, (metadata) => metadata?.documentKey);
 }
 
+type WriterFailure = {
+  path: string;
+  code: number;       // gRPC status code (e.g., 10=ABORTED, 14=UNAVAILABLE)
+  attempts: number;
+  message: string;
+};
+
 /**
  * Copy a Firestore document, and optionally all of its subcollections.
  * There is no built-in way to do this in Firestore.
@@ -147,7 +154,6 @@ export function remapFirebaseProblemDocPublications(fbPublications: Record<strin
  * @param collectionTo The collection to copy to.
  * @param docIdTo The id of the document to copy to. If not set, uses docId.
  * @param scope Whether to copy the base document, its subcollections, or both.
- * @param addData Additional data to add to the new document.
  * @returns True if the document was copied, false otherwise.
  *
  * @see https://leechy.hashnode.dev/firestore-move
@@ -159,13 +165,39 @@ export const copyFirestoreDoc = async (
   collectionTo: string,
   docIdTo?: string,
   scope: "document" | "subcollections" | "all" = "all",
-  addData: admin.firestore.DocumentData = {},
+): Promise<boolean> => {
+  const bulkWriter = firestore.bulkWriter();
+  const permanentFailures: WriterFailure[] = [];
+  bulkWriter.onWriteError((err) => {
+    const retriable = (err.code === 10 || err.code === 14) && err.failedAttempts < 10; // ABORTED/UNAVAILABLE
+    if (!retriable) {
+      permanentFailures.push({
+        path: err.documentRef.path,
+        code: err.code,
+        attempts: err.failedAttempts,
+        message: err.message,
+      });
+    }
+    return retriable; // true = retry, false = stop and reject that write's Promise
+  });
+  await internalCopyFirestoreDoc(firestore, collectionFrom, docId, collectionTo, docIdTo, scope, bulkWriter);
+  await bulkWriter.close();
+  if (permanentFailures.length > 0) {
+    console.error("Failed to copy document:", permanentFailures);
+    return false;
+  }
+  return true;
+};
+
+export const internalCopyFirestoreDoc = async (
+  firestore: admin.firestore.Firestore,
+  collectionFrom: string,
+  docId: string,
+  collectionTo: string,
+  docIdTo?: string,
+  scope: "document" | "subcollections" | "all" = "all",
   bulkWriter: admin.firestore.BulkWriter = null,
 ): Promise<boolean> => {
-  const shouldCommit = bulkWriter === null;
-  if (shouldCommit) {
-    bulkWriter = firestore.bulkWriter();
-  }
   const docRef = firestore.collection(collectionFrom).doc(docId);
   if (!docIdTo) {
     docIdTo = docId;
@@ -189,7 +221,8 @@ export const copyFirestoreDoc = async (
     // document exists, create the new item
     if (copyBaseDoc) {
       const newDocRef = firestore.collection(collectionTo).doc(docIdTo);
-      bulkWriter.create(newDocRef, docData);
+      bulkWriter.create(newDocRef, docData)
+      .catch((error) => { console.log("Error creating document", newDocRef.path, error.message); });
     }
 
     if (copySubcollections) {
@@ -205,8 +238,14 @@ export const copyFirestoreDoc = async (
             const docs = snapshot.docs;
             const promises = [];
             for await (const doc of docs) {
-              promises.push(copyFirestoreDoc(firestore, subcollectionPath, doc.id,
+              promises.push(internalCopyFirestoreDoc(firestore, subcollectionPath, doc.id,
                 subcollectionPathTo, doc.id, "all", bulkWriter));
+              // without this, was getting timeouts when
+              if (promises.length % 1000 === 0) {
+                console.log("Ok   flush writes", promises.length);
+                await Promise.all(promises);
+                await bulkWriter.flush();
+              }
             }
             await Promise.all(promises);
             return true;
@@ -216,9 +255,6 @@ export const copyFirestoreDoc = async (
             throw new Error('Data was not copied properly to the target collection.');
           });
       }
-    }
-    if (shouldCommit) {
-      await bulkWriter.close();
     }
     return true;
   }
@@ -233,7 +269,6 @@ export const copyFirestoreDoc = async (
  * @param docId The id of the document to move.
  * @param collectionTo The collection to move to.
  * @param docIdTo The id of the document to move to. If not set, uses docId.
- * @param addData Additional data to add to the new document.
  * @param scope Whether to keep the base document, its subcollections, or both.
  * Note that in any case the base document and all subcollections will be deleted from
  * the original location; the scope just determines what is kept in the new location.
@@ -248,9 +283,8 @@ export const moveFirestoreDoc = async (
   collectionTo: string,
   docIdTo?: string,
   scope: "document" | "subcollections" | "all" = "all",
-  addData?: admin.firestore.DocumentData,
 ): Promise<boolean> => {
-  const copied = await copyFirestoreDoc(firestore, collectionFrom, docId, collectionTo, docIdTo, scope, addData);
+  const copied = await copyFirestoreDoc(firestore, collectionFrom, docId, collectionTo, docIdTo, scope);
   // if copy was successful, delete the original
   if (copied) {
     await firestore.recursiveDelete(firestore.doc(`${collectionFrom}/${docId}`));
