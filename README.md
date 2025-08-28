@@ -1,5 +1,7 @@
 # Collaborative Learning
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/concord-consortium/collaborative-learning)
+
 Collaborative Learning was built by [The Concord Consortium](http://concord.org/) for the
 MSU Inscriptions project.
 
