@@ -4,7 +4,7 @@ import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-
 import { Presets, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, AreaPlugin } from "rete-area-plugin";
 import { onPatch, onSnapshot } from "mobx-state-tree";
-import { reaction } from "mobx";
+import { reaction, runInAction } from "mobx";
 
 import { IStores } from "../../../models/stores/stores";
 import { DataflowContentModelType } from "../model/dataflow-content";
@@ -41,7 +41,6 @@ import { InputValueControl, InputValueControlComponent } from "./controls/input-
 import { DataflowEngine } from "./engine/dataflow-engine";
 import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "./controls/value-with-units-control";
 import { DataflowProgramChange } from "../dataflow-logger";
-import { runInAction } from "mobx";
 import { getSharedNodes } from "./utilities/shared-program-data-utilities";
 import { simulatedChannel } from "../model/utilities/simulated-channel";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
@@ -49,6 +48,13 @@ import { serialSensorChannels } from "../model/utilities/channel";
 
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
+
+interface IContentBounds {
+  maxX: number;
+  maxY: number;
+  minX: number;
+  minY: number;
+}
 
  /**
 * Get an indexed name based on exiting names.
@@ -672,7 +678,7 @@ export class ReteManager implements INodeServices {
     this.snapshotDisposer?.();
     if (this.fitTimeout) {
       clearTimeout(this.fitTimeout);
-      this.fitTimeout = undefined as any;
+      this.fitTimeout = undefined;
     }
 
     const {area, editor} = this;
@@ -794,9 +800,8 @@ export class ReteManager implements INodeServices {
     const container = this.area.container;
     if (!container) return;
 
-    // The container from this.area.container is the Rete.js area which may have zero width,
-    // so we may need to find the actual container dimensions elsewhere.
-    let actualContainer = container;
+    // The container from this.area.container is the Rete.js area which may have zero width.
+    // So we may need to find the actual container dimensions elsewhere.
     let containerRect = container.getBoundingClientRect();
     let containerWidth = containerRect.width;
     let containerHeight = containerRect.height;
@@ -805,7 +810,6 @@ export class ReteManager implements INodeServices {
       // Look for the .cover div which should have valid dimensions.
       const coverDiv = container.closest(".cover") as HTMLElement;
       if (coverDiv) {
-        actualContainer = coverDiv;
         containerRect = coverDiv.getBoundingClientRect();
         containerWidth = coverDiv.offsetWidth || coverDiv.clientWidth;
         containerHeight = coverDiv.offsetHeight || coverDiv.clientHeight;
@@ -818,7 +822,6 @@ export class ReteManager implements INodeServices {
           const parentHeight = parent.offsetHeight || parent.clientHeight;
 
           if (parentWidth > 300 && parentHeight > 200) {
-            actualContainer = parent;
             containerRect = parent.getBoundingClientRect();
             containerWidth = parentWidth;
             containerHeight = parentHeight;
@@ -831,7 +834,9 @@ export class ReteManager implements INodeServices {
     }
 
     if (containerWidth <= 0 || containerHeight <= 0) {
-      setTimeout(() => this.fitContent(), 100);
+      if (!this.disposed) {
+        this.fitTimeout = window.setTimeout(() => this.fitContent(), 100);
+      }
       return;
     }
 
@@ -924,7 +929,7 @@ export class ReteManager implements INodeServices {
     return { minX, minY, maxX, maxY };
   };
 
-  private calculateFitTransform = (bounds: any, containerWidth: number, containerHeight: number) => {
+  private calculateFitTransform = (bounds: IContentBounds, containerWidth: number, containerHeight: number) => {
     const contentWidth = bounds.maxX - bounds.minX;
     const contentHeight = bounds.maxY - bounds.minY;
 
