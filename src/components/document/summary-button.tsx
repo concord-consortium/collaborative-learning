@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { observer } from "mobx-react";
 import Markdown from "markdown-to-jsx";
 import { useCustomModal } from "../../hooks/use-custom-modal";
 import { useDBStore, useStores } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
+import { useFirebaseFunction } from "../../hooks/use-firebase-function";
 
 import "./summary-button.scss";
 
@@ -18,16 +19,30 @@ interface ISummaryButtonProps {
  */
 export const SummaryButton: React.FC<ISummaryButtonProps> = observer(function SummaryButton({ className }) {
   const { firestore } = useDBStore();
-  const { unit } = useStores();
-  const { classHash } = useUserContext();
+  const { unit, portal, demo } = useStores();
+  const userContext = useUserContext();
+  const generateClassData = useFirebaseFunction("generateClassData_v2");
+
+  const regenerateSummaries = useCallback(() => {
+    const portalHost = portal.portalHost;
+    const demoName = demo.name;
+    generateClassData({
+      context: userContext,
+      portal: portalHost,
+      demo: demoName,
+      unit: unit.code,
+    });
+  }, [portal, unit.code, userContext, demo.name, generateClassData]);
 
   const SummaryContent: React.FC = () => {
     const [studentSummary, setStudentSummary] = useState<string>("");
     const [teacherSummary, setTeacherSummary] = useState<string>("");
+    const [contentUpdatedAt, setContentUpdatedAt] = useState<Date | null>(null);
+    const [summaryCreatedAt, setSummaryCreatedAt] = useState<Date | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      const path = firestore.getClassInfoPath(unit.code, classHash);
+      const path = firestore.getClassInfoPath(unit.code, userContext.classHash);
       firestore.getDocument(path).then(docSnapshot => {
         const docData = docSnapshot.data();
         if (docData?.studentSummary) {
@@ -40,13 +55,23 @@ export const SummaryButton: React.FC<ISummaryButtonProps> = observer(function Su
         } else {
           setTeacherSummary("No teacher summary available");
         }
+        if (docData?.lastEditedAt) {
+          setContentUpdatedAt(new Date(docData.lastEditedAt));
+        } else {
+          setContentUpdatedAt(null);
+        }
+        if (docData?.summaryCreatedAt) {
+          setSummaryCreatedAt(new Date(docData.summaryCreatedAt.seconds*1000));
+        } else {
+          setSummaryCreatedAt(null);
+        }
         setLoading(false);
       }).catch(error => {
         console.error("Error fetching summary:", error);
         setStudentSummary("Error loading summary");
         setLoading(false);
       });
-    }, [firestore, unit.code, classHash]);
+    }, [firestore, unit.code, userContext]);
 
     if (loading) {
       return <div>Loading summary...</div>;
@@ -62,6 +87,10 @@ export const SummaryButton: React.FC<ISummaryButtonProps> = observer(function Su
         <div className="summary-content">
           <Markdown>{studentSummary}</Markdown>
         </div>
+        <div className="timestamp">
+          <p>Summary created at: {summaryCreatedAt?.toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"})}</p>
+          <p>Latest user content included: {contentUpdatedAt?.toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"})}</p>
+        </div>
       </div>
     );
   };
@@ -72,7 +101,7 @@ export const SummaryButton: React.FC<ISummaryButtonProps> = observer(function Su
     Content: SummaryContent,
     contentProps: {},
     buttons: [
-      { label: "Close", isDefault: true, onClick: () => hideModal() }
+      { label: "Regenerate summaries", isDefault: false, onClick: regenerateSummaries }
     ],
     canCancel: true
   });

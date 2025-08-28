@@ -1,5 +1,5 @@
 // import * as admin from "firebase-admin";
-import {getFirestore} from "firebase-admin/firestore";
+import {getFirestore, Timestamp} from "firebase-admin/firestore";
 import {logger} from "firebase-functions/v2";
 import {CallableRequest, onCall, HttpsError} from "firebase-functions/v2/https";
 import {defineSecret} from "firebase-functions/params";
@@ -15,10 +15,6 @@ import {validateUserContext} from "./user-context";
 // The response will be cached and re-used unless the prompt or work summary is updated.
 
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
-
-// Note we are currently using this fixed system prompt
-// TODO: perhaps this should be set in the unit configuration.
-const systemPrompt = "You are a helpful assistant teacher in a 6th grade classroom.";
 
 const model = "gpt-4o-mini";
 
@@ -42,19 +38,34 @@ function getLockPath(firestoreRoot: string, unit: string, classHash: string, doc
   return getAIContentPath(firestoreRoot, unit, classHash, documentId, tileId) + "-LOCK";
 }
 
-function isCachedContentUpToDate(dynamicContentPrompt: string,
-  classInfo: DocumentSnapshot, dynamicContent: DocumentSnapshot): boolean {
-  if (!dynamicContent.exists) return false;
-  const dynamicContentData = dynamicContent.data();
-  if (!dynamicContentData) return false;
-  if (!dynamicContentData.lastUpdated) return false;
-  if (dynamicContentData.lastUpdated < classInfo.data()?.lastUpdated) return false;
-  if (dynamicContentData.dynamicContentPrompt !== dynamicContentPrompt) return false;
+function isCachedContentUpToDate(prompt: string,
+  classInfo: DocumentSnapshot, contentSnapshot: DocumentSnapshot): boolean {
+  if (!contentSnapshot.exists) return false;
+  const contentData = contentSnapshot.data();
+  if (!contentData) return false;
+  if (!contentData.lastUpdated) return false;
+  if (contentData.lastUpdated < classInfo.data()?.lastUpdated) return false;
+  if (contentData.prompt !== prompt) return false;
   return true;
 }
 
+function returnCachedContent(cachedContent: DocumentSnapshot) {
+  const data = cachedContent.data();
+  if (data) {
+    return {
+      text: data.content,
+      lastUpdated: data.lastUpdated,
+      error: null,
+    };
+  } else {
+    return {
+      error: "No data",
+    };
+  }
+}
+
 async function generateContent(firestoreRoot: string, unit: string, classHash: string,
-  documentId: string, tileId: string, dynamicContentPrompt: string, classInfo: DocumentSnapshot) {
+  documentId: string, tileId: string, systemPrompt: string, tilePrompt: string, classInfo: DocumentSnapshot) {
   // The Firebase function is often called multiple times in quick succession
   // (because multiple copies of the same tile are being rendered)
   // but we want to avoid calling the LLM multiple times. So we use a lock
@@ -94,9 +105,7 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
   if (strategy === "WAIT" || strategy === "USE-CACHE") {
     const result = await waitForContent(firestoreRoot, unit, classHash, documentId, tileId);
     console.log("Got result after wait");
-    return {
-      text: result.data()?.dynamicContent,
-    };
+    return returnCachedContent(result);
   }
 
   // strategy is "PROCEED"; we have the lock and can proceed to generate content.
@@ -112,15 +121,16 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
   const teacherMessage =
     teacherSummary ? `Here is a summary of the teacher work in this class:\n\n ${teacherSummary}\n\n` : "";
   const messages = [
-    new SystemMessage(systemPrompt),
-    new HumanMessage(`${dynamicContentPrompt}\n\n${teacherMessage}${studentMessage}`),
+    new SystemMessage(systemPrompt || "You are a helpful, collaborative student."),
+    new HumanMessage(`${tilePrompt}\n\n${teacherMessage}${studentMessage}`),
   ];
 
-  let dynamicContent = "";
+  let content = "";
   let errorMessage = "";
+  const lastUpdated = Timestamp.now();
   try {
     const response = await openai.invoke(messages);
-    dynamicContent = response.content.toString();
+    content = response.content.toString();
   } catch (error) {
     logger.error("Error calling LLM", error);
     errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -128,15 +138,16 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
 
   const aiContentPath = getAIContentPath(firestoreRoot, unit, classHash, documentId, tileId);
   await getFirestore().doc(aiContentPath).set({
-    dynamicContent,
-    dynamicContentPrompt,
-    lastUpdated: new Date(),
+    content,
+    prompt: tilePrompt,
+    lastUpdated,
   });
 
   await lockRef.delete();
 
   return {
-    text: dynamicContent,
+    text: content,
+    lastUpdated,
     error: errorMessage,
   };
 }
@@ -164,7 +175,8 @@ export const getAiContent = onCall(
   async (request: CallableRequest<IAiContentUnionParams>) => {
     const params = request.data;
     if (isWarmUpParams(params)) return {version};
-    const {context: userContext, dynamicContentPrompt, unit, documentId, tileId} = params || {};
+    const {context: userContext, dynamicContentPrompt: tilePrompt, systemPrompt,
+      unit, documentId, tileId} = params || {};
 
     const validatedUserContext = validateUserContext(userContext, request.auth);
     const {isValid, uid, firestoreRoot} = validatedUserContext;
@@ -179,13 +191,12 @@ export const getAiContent = onCall(
     const aiContentPath = getAIContentPath(firestoreRoot, unit, classHash, documentId, tileId);
     const cachedAIContent = await getFirestore().doc(aiContentPath).get();
 
-    if (isCachedContentUpToDate(dynamicContentPrompt, classInfo, cachedAIContent)) {
+    if (isCachedContentUpToDate(tilePrompt, classInfo, cachedAIContent)) {
       logger.info("Using cached AI content");
-      return {
-        text: cachedAIContent.data()?.dynamicContent,
-      };
+      return returnCachedContent(cachedAIContent);
     } else {
-      return await generateContent(firestoreRoot, unit, classHash, documentId, tileId, dynamicContentPrompt, classInfo);
+      return await generateContent(firestoreRoot, unit, classHash, documentId, tileId,
+        systemPrompt, tilePrompt, classInfo);
     }
   },
 );

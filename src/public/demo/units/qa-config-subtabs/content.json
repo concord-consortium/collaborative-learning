@@ -9,6 +9,9 @@
     "defaultDocumentType": "problem",
     "initiallyHideExemplars": true,
     "settings": {
+      "ai": {
+        "systemPrompt": "You are a helpful, collaborative student, who always talks like a pirate."
+      },
       "table": {
         "numFormat": ".2~f"
       },

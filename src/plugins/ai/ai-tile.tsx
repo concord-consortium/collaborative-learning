@@ -15,9 +15,12 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   const userContext = useUserContext();
   const readOnly = useReadOnlyContext();
   const stores = useStores();
+  const systemPrompt = stores.appConfig.getSetting("systemPrompt", "ai");
   const getAiContent = userContext.classHash ? useFirebaseFunction("getAiContent_v2") : null;
   const [updateRequests, setUpdateRequests] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
 
   useEffect(() => {
     props.onRegisterTileApi({
@@ -45,12 +48,17 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         console.log("Querying AI with prompt", content.prompt);
         const response = await getAiContent({
           context: userContext,
-          dynamicContentPrompt: content.prompt,
+          dynamicContentPrompt: content.prompt, // TODO: could just be "prompt"
+          systemPrompt,
           unit: stores.unit.code,
           documentId: props.documentId,
           tileId: props.model.id
         });
         content.setText(response.data.text);
+        if (response.data.lastUpdated) {
+          const timestamp = response.data.lastUpdated;
+          setLastUpdated(new Date(timestamp._seconds*1000));
+        }
         if (response.data.error) {
           console.error("Error querying AI", response.data.error);
         }
@@ -85,9 +93,11 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     <div className="tile-content ai-tool">
       {renderPromptForm()}
       <div className="ai-output">
-        <h3>AI Output</h3>
+        <div className="last-updated">
+          {lastUpdated ? lastUpdated.toLocaleString("en-US", {dateStyle: "long"}) : "..."}
+        </div>
         {isUpdating ? (
-          <p>Updating...</p>
+          <p>Loading...</p>
         ) : (
           <Markdown>{content.text}</Markdown>
         )}

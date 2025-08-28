@@ -288,6 +288,9 @@
     "placeholderText": "",
     "stamps": [],
     "settings": {
+      "ai": {
+        "systemPrompt": "You are a helpful, collaborative student."
+      },
       "bargraph": {
         "tools": [
           "link-tile"
