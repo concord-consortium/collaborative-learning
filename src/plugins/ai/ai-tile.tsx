@@ -89,7 +89,9 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       <div className="prompt-form">
         <h3>Prompt for AI</h3>
         <textarea value={content.prompt} onChange={handleChange} disabled={isUpdating} />
-        <button onClick={handleUpdateButton} className="update-button" disabled={isUpdating}>Update</button>
+        { getAiContent &&
+          <button onClick={handleUpdateButton} className="update-button" disabled={isUpdating}>Update</button>
+        }
       </div>
     );
   };
