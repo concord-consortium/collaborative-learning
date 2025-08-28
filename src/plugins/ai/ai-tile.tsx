@@ -24,7 +24,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       exportContentAsTileJson: () => {
         return content.exportJson();
       }
-    })
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

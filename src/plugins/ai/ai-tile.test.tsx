@@ -55,12 +55,8 @@ describe("AIComponent", () => {
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
       throw new Error("Function not implemented.");
     },
-    onRegisterTileApi: (tileApi: ITileApi, facet?: string): void => {
-      throw new Error("Function not implemented.");
-    },
-    onUnregisterTileApi: (facet?: string): void => {
-      throw new Error("Function not implemented.");
-    }
+    onRegisterTileApi: (tileApi: ITileApi, facet?: string): void => {},
+    onUnregisterTileApi: (facet?: string): void => {}
   };
 
   it("renders successfully with prompt showing", () => {
