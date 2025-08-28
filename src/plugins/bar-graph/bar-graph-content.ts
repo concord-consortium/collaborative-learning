@@ -45,6 +45,7 @@ export const BarGraphContentModel = TileContentModel
   })
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
+      // ignore options?.forHash option - return the entire snapshot when hashing
       const snapshot = getSnapshot(self);
       return stringify(snapshot, {maxLength: 200});
     },

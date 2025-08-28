@@ -75,6 +75,7 @@ export const NumberlineContentModel = TileContentModel
       return self.points.get(id);
     },
     exportJson(options?: ITileExportOptions) {
+      // ignore options?.forHash option - return default export when hashing
       const snapshot = getSnapshot(self);
       return stringify(snapshot, {maxLength: 200});
     }
