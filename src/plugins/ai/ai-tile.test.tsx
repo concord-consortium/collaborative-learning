@@ -42,6 +42,21 @@ jest.mock("../../hooks/use-user-context", () => ({
   }))
 }));
 
+jest.mock("mobx-state-tree", () => ({
+  ...jest.requireActual("mobx-state-tree"),
+  getParentOfType: jest.fn((model: any, type: any) => {
+    // Return a mock DocumentContentModel with the necessary properties
+    return {
+      key: "test-document-key",
+      getProperty: jest.fn(),
+      title: "Test Document"
+    };
+  })
+}));
+
+jest.mock("../../models/document/document-utils", () => ({
+  getDocumentIdentifier: jest.fn(() => "test-doc-content-id")
+}));
 
 describe("AIComponent", () => {
   const content = defaultAIContent();
@@ -62,12 +77,8 @@ describe("AIComponent", () => {
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
       throw new Error("Function not implemented.");
     },
-    onRegisterTileApi: (tileApi: ITileApi, facet?: string): void => {
-      throw new Error("Function not implemented.");
-    },
-    onUnregisterTileApi: (facet?: string): void => {
-      throw new Error("Function not implemented.");
-    }
+    onRegisterTileApi: (tileApi: ITileApi, facet?: string): void => {},
+    onUnregisterTileApi: (facet?: string): void => {}
   };
 
   it("renders successfully with prompt showing", () => {
