@@ -104,7 +104,6 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
 
   if (strategy === "WAIT" || strategy === "USE-CACHE") {
     const result = await waitForContent(firestoreRoot, unit, classHash, documentId, tileId);
-    console.log("Got result after wait");
     return returnCachedContent(result);
   }
 
@@ -192,7 +191,6 @@ export const getAiContent = onCall(
     const cachedAIContent = await getFirestore().doc(aiContentPath).get();
 
     if (isCachedContentUpToDate(tilePrompt, classInfo, cachedAIContent)) {
-      logger.info("Using cached AI content");
       return returnCachedContent(cachedAIContent);
     } else {
       return await generateContent(firestoreRoot, unit, classHash, documentId, tileId,
