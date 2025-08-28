@@ -24,7 +24,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   const [updateRequests, setUpdateRequests] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  // note: curriculum documents don't have a documentId property, so we might need to get the curriculum path to use as an id
+  // note: curriculum documents don't have a documentId property,
+  // so we might need to get the curriculum path to use as an id
   const identifier = getDocumentIdentifier(getParentOfType(props.model, DocumentContentModel));
 
   useEffect(() => {
@@ -42,15 +43,14 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       const queryAI = async () => {
         setIsUpdating(true);
         if (!identifier || !props.model.id) {
-          console.log("No document identifier or tileId found");
+          console.error("No document identifier or tileId found");
           return;
         }
         if (!content.prompt) {
-          console.log("No prompt found");
+          console.warn("No prompt found");
           setIsUpdating(false);
           return;
         }
-        console.log("Querying AI with prompt", content.prompt);
         const response = await getAiContent({
           context: userContext,
           dynamicContentPrompt: content.prompt, // TODO: could just be "prompt"
@@ -71,7 +71,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       };
       queryAI();
     }
-  }, [updateRequests, content, getAiContent, identifier, props.model.id, userContext, stores.unit.code]);
+  }, [updateRequests, content, getAiContent, identifier, props.model.id, userContext, stores.unit.code, systemPrompt]);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     content.setPrompt(event.target.value);

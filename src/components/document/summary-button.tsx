@@ -71,7 +71,7 @@ export const SummaryButton: React.FC<ISummaryButtonProps> = observer(function Su
         setStudentSummary("Error loading summary");
         setLoading(false);
       });
-    }, [firestore, unit.code, userContext]);
+    }, []);
 
     if (loading) {
       return <div>Loading summary...</div>;
@@ -88,14 +88,20 @@ export const SummaryButton: React.FC<ISummaryButtonProps> = observer(function Su
           <Markdown>{studentSummary}</Markdown>
         </div>
         <div className="timestamp">
-          <p>Summary created at: {summaryCreatedAt?.toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"})}</p>
-          <p>Latest user content included: {contentUpdatedAt?.toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"})}</p>
+          <p>
+            Summary created at:
+            {summaryCreatedAt?.toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"})}
+          </p>
+          <p>
+            Latest user content included:
+            {contentUpdatedAt?.toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"})}
+          </p>
         </div>
       </div>
     );
   };
 
-  const [showModal, hideModal] = useCustomModal({
+  const [showModal, _hideModal] = useCustomModal({
     className: "summary-modal scrollable-modal",
     title: "AI Summaries of Class Work",
     Content: SummaryContent,

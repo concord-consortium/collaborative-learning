@@ -9,8 +9,8 @@ import { documentSummarizer } from "./ai-summarizer";
 // A list of portals and demo areas can be given to scan.
 // The list of units is also limited to the ones that have exemplars.
 
-const portals: string[] = []; // TODO: ["learn.concord.org"]; maybe also staging.
-const demos = ["BORIS", "AITEST"]; // Consider only classes in this demo area.
+const portals: string[] = ["learn.concord.org"]; // Consider all classes on production.
+const demos = ["AITEST"]; // Consider only classes in this demo area.
 const units = ["qa-config-subtabs", "mods"]; // only scan these units.
 
 function firebaseBasePath(portal: string|undefined, demo: string|undefined): string {
