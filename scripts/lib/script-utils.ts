@@ -1,3 +1,4 @@
+import admin from "firebase-admin";
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -137,3 +138,157 @@ export function remapFirebaseClassPublications(fbPublications: Record<string, an
 export function remapFirebaseProblemDocPublications(fbPublications: Record<string, any>) {
   return remap(fbPublications, (metadata) => metadata?.documentKey);
 }
+
+type WriterFailure = {
+  path: string;
+  code: number;       // gRPC status code (e.g., 10=ABORTED, 14=UNAVAILABLE)
+  attempts: number;
+  message: string;
+};
+
+/**
+ * Copy a Firestore document, and optionally all of its subcollections.
+ * There is no built-in way to do this in Firestore.
+ * @param collectionFrom The collection to copy from.
+ * @param docId The id of the document to copy.
+ * @param collectionTo The collection to copy to.
+ * @param docIdTo The id of the document to copy to. If not set, uses docId.
+ * @param scope Whether to copy the base document, its subcollections, or both.
+ * @returns True if the document was copied, false otherwise.
+ *
+ * @see https://leechy.hashnode.dev/firestore-move
+ */
+export const copyFirestoreDoc = async (
+  firestore: admin.firestore.Firestore,
+  collectionFrom: string,
+  docId: string,
+  collectionTo: string,
+  docIdTo?: string,
+  scope: "document" | "subcollections" | "all" = "all",
+): Promise<boolean> => {
+  const bulkWriter = firestore.bulkWriter();
+  const permanentFailures: WriterFailure[] = [];
+  bulkWriter.onWriteError((err) => {
+    const retriable = (err.code === 10 || err.code === 14) && err.failedAttempts < 10; // ABORTED/UNAVAILABLE
+    if (!retriable) {
+      permanentFailures.push({
+        path: err.documentRef.path,
+        code: err.code,
+        attempts: err.failedAttempts,
+        message: err.message,
+      });
+    }
+    return retriable; // true = retry, false = stop and reject that write's Promise
+  });
+  await internalCopyFirestoreDoc(firestore, collectionFrom, docId, collectionTo, docIdTo, scope, bulkWriter);
+  await bulkWriter.close();
+  if (permanentFailures.length > 0) {
+    console.error("Failed to copy document:", permanentFailures);
+    return false;
+  }
+  return true;
+};
+
+export const internalCopyFirestoreDoc = async (
+  firestore: admin.firestore.Firestore,
+  collectionFrom: string,
+  docId: string,
+  collectionTo: string,
+  docIdTo?: string,
+  scope: "document" | "subcollections" | "all" = "all",
+  bulkWriter: admin.firestore.BulkWriter = null,
+): Promise<boolean> => {
+  const docRef = firestore.collection(collectionFrom).doc(docId);
+  if (!docIdTo) {
+    docIdTo = docId;
+  }
+  if (collectionFrom === collectionTo && docId === docIdTo) {
+    throw new Error("Cannot copy a document to the same location.");
+  }
+  const copyBaseDoc = scope === "all" || scope === "document";
+  const copySubcollections = scope === "all" || scope === "subcollections";
+
+  // read the document
+  const docData = await docRef
+    .get()
+    .then((doc) => doc.exists && doc.data())
+    .catch((error) => {
+      console.error('Error reading document', `${collectionFrom}/${docId}`, JSON.stringify(error));
+      throw new Error('Error reading document');
+    });
+
+  if (docData) {
+    // document exists, create the new item
+    if (copyBaseDoc) {
+      const newDocRef = firestore.collection(collectionTo).doc(docIdTo);
+      bulkWriter.create(newDocRef, docData)
+      .catch((error) => { console.log("Error creating document", newDocRef.path, error.message); });
+    }
+
+    if (copySubcollections) {
+      const subcollections = await docRef.listCollections();
+      for await (const subcollectionRef of subcollections) {
+        const subcollectionPath = `${collectionFrom}/${docId}/${subcollectionRef.id}`;
+        const subcollectionPathTo = `${collectionTo}/${docIdTo}/${subcollectionRef.id}`;
+
+        // get all the documents in the collection
+        await subcollectionRef
+          .get()
+          .then(async (snapshot) => {
+            const docs = snapshot.docs;
+            const promises = [];
+            for await (const doc of docs) {
+              promises.push(internalCopyFirestoreDoc(firestore, subcollectionPath, doc.id,
+                subcollectionPathTo, doc.id, "all", bulkWriter));
+              // without this, was getting timeouts when
+              if (promises.length % 1000 === 0) {
+                console.log("Ok   flush writes", promises.length);
+                await Promise.all(promises);
+                await bulkWriter.flush();
+              }
+            }
+            await Promise.all(promises);
+            return true;
+          })
+          .catch((error) => {
+            console.error('Error reading subcollection', subcollectionPath, error);
+            throw new Error('Data was not copied properly to the target collection.');
+          });
+      }
+    }
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Move a Firestore document, and optionally all of its subcollections.
+ * There is no built-in way to do this in Firestore.
+ * @param firestore The Firestore instance.
+ * @param collectionFrom The collection to move from.
+ * @param docId The id of the document to move.
+ * @param collectionTo The collection to move to.
+ * @param docIdTo The id of the document to move to. If not set, uses docId.
+ * @param scope Whether to keep the base document, its subcollections, or both.
+ * Note that in any case the base document and all subcollections will be deleted from
+ * the original location; the scope just determines what is kept in the new location.
+ * @returns True if the document was moved, false otherwise.
+ *
+ * @see https://leechy.hashnode.dev/firestore-move
+ */
+export const moveFirestoreDoc = async (
+  firestore: admin.firestore.Firestore,
+  collectionFrom: string,
+  docId: string,
+  collectionTo: string,
+  docIdTo?: string,
+  scope: "document" | "subcollections" | "all" = "all",
+): Promise<boolean> => {
+  const copied = await copyFirestoreDoc(firestore, collectionFrom, docId, collectionTo, docIdTo, scope);
+  // if copy was successful, delete the original
+  if (copied) {
+    await firestore.recursiveDelete(firestore.doc(`${collectionFrom}/${docId}`));
+    return true;
+  }
+  throw new Error('Error while moving document.');
+};
