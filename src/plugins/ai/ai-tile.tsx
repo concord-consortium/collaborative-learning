@@ -1,4 +1,5 @@
 import { observer } from "mobx-react";
+import { getParentOfType } from "mobx-state-tree";
 import React, { useEffect, useState } from "react";
 import Markdown from "markdown-to-jsx";
 import { ITileProps } from "../../components/tiles/tile-component";
@@ -7,6 +8,9 @@ import { useUserContext } from "../../hooks/use-user-context";
 import { useStores } from "../../hooks/use-stores";
 import { useFirebaseFunction } from "../../hooks/use-firebase-function";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
+import { getDocumentIdentifier } from "../../models/document/document-utils";
+import { DocumentContentModel } from "../../models/document/document-content";
+import { changeSlashesToUnderscores } from "./ai-utils";
 
 import "./ai-tile.scss";
 
@@ -20,7 +24,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   const [updateRequests, setUpdateRequests] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-
+  // note: curriculum documents don't have a documentId property, so we might need to get the curriculum path to use as an id
+  const identifier = getDocumentIdentifier(getParentOfType(props.model, DocumentContentModel));
 
   useEffect(() => {
     props.onRegisterTileApi({
@@ -36,8 +41,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     if (getAiContent) {
       const queryAI = async () => {
         setIsUpdating(true);
-        if (!props.documentId || !props.model.id) {
-          console.log("No documentId or tileId found");
+        if (!identifier || !props.model.id) {
+          console.log("No document identifier or tileId found");
           return;
         }
         if (!content.prompt) {
@@ -51,7 +56,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           dynamicContentPrompt: content.prompt, // TODO: could just be "prompt"
           systemPrompt,
           unit: stores.unit.code,
-          documentId: props.documentId,
+          documentId: changeSlashesToUnderscores(identifier),
           tileId: props.model.id
         });
         content.setText(response.data.text);
@@ -66,7 +71,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       };
       queryAI();
     }
-  }, [updateRequests, content, getAiContent, props.documentId, props.model.id, userContext, stores.unit.code]);
+  }, [updateRequests, content, getAiContent, identifier, props.model.id, userContext, stores.unit.code]);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     content.setPrompt(event.target.value);

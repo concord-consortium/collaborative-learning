@@ -23,3 +23,7 @@ export function switchToTextContent(content: any) {
   };
   return textTileContent;
 }
+
+export const changeSlashesToUnderscores = (input: string) => {
+  return input.replace(/\//g, "_");
+};
