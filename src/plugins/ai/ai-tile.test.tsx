@@ -42,6 +42,21 @@ jest.mock("../../hooks/use-user-context", () => ({
   }))
 }));
 
+jest.mock("mobx-state-tree", () => ({
+  ...jest.requireActual("mobx-state-tree"),
+  getParentOfType: jest.fn((model: any, type: any) => {
+    // Return a mock DocumentContentModel with the necessary properties
+    return {
+      key: "test-document-key",
+      getProperty: jest.fn(),
+      title: "Test Document"
+    };
+  })
+}));
+
+jest.mock("../../models/document/document-utils", () => ({
+  getDocumentIdentifier: jest.fn(() => "test-doc-content-id")
+}));
 
 describe("AIComponent", () => {
   const content = defaultAIContent();
