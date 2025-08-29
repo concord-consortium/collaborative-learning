@@ -119,5 +119,3 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     return this.props.model.content as DataflowContentModelType;
   }
 }
-
-

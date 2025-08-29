@@ -4,6 +4,7 @@ import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-
 import { Presets, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, AreaPlugin } from "rete-area-plugin";
 import { onPatch, onSnapshot } from "mobx-state-tree";
+import { reaction, runInAction } from "mobx";
 
 import { IStores } from "../../../models/stores/stores";
 import { DataflowContentModelType } from "../model/dataflow-content";
@@ -40,7 +41,6 @@ import { InputValueControl, InputValueControlComponent } from "./controls/input-
 import { DataflowEngine } from "./engine/dataflow-engine";
 import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "./controls/value-with-units-control";
 import { DataflowProgramChange } from "../dataflow-logger";
-import { runInAction } from "mobx";
 import { getSharedNodes } from "./utilities/shared-program-data-utilities";
 import { simulatedChannel } from "../model/utilities/simulated-channel";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
@@ -48,6 +48,13 @@ import { serialSensorChannels } from "../model/utilities/channel";
 
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
+
+interface IContentBounds {
+  maxX: number;
+  maxY: number;
+  minX: number;
+  minY: number;
+}
 
  /**
 * Get an indexed name based on exiting names.
@@ -77,6 +84,7 @@ export class ReteManager implements INodeServices {
   public disposed = false;
   public setupComplete: Promise<void>;
   private previousChannelIds = "";
+  private fitTimeout: number | undefined;
 
   constructor(
     private mstProgram: DataflowProgramModelType,
@@ -133,9 +141,10 @@ export class ReteManager implements INodeServices {
         }
       }
       if (event === "translate" || event === "translated") {
-        if (event === "translate" ) {
-          this.mstContent.setLiveProgramZoom(area.area.transform);
-        } else {
+        this.mstContent.setLiveProgramZoom(area.area.transform);
+
+        // Persist the canonical zoom only in editable instances
+        if (!this.readOnly && event === "translated") {
           this.mstContent.setProgramZoom(area.area.transform);
         }
       }
@@ -245,9 +254,13 @@ export class ReteManager implements INodeServices {
 
     AreaExtensions.simpleNodesOrder(area);
 
-    const { programZoom } = this.mstContent;
-    await this.area.area.zoom(programZoom.scale);
-    await this.area.area.translate(programZoom.dx, programZoom.dy);
+    // Don't apply programZoom to read-only instances since they will be automatically sized to
+    // fit within the view.
+    if (!this.readOnly) {
+      const { programZoom } = this.mstContent;
+      await this.area.area.zoom(programZoom.scale);
+      await this.area.area.translate(programZoom.dx, programZoom.dy);
+    }
 
     // Notify after the area, connection, and render plugins have been configured
     await this.notifyAboutExistingObjects();
@@ -304,6 +317,17 @@ export class ReteManager implements INodeServices {
     }
 
     this.setupOnSnapshot();
+
+    if (this.readOnly) {
+      setTimeout(async () => {
+        if (this.area.container && this.area.area) {
+          await this.fitContent();
+        }
+      }, 100);
+
+      // Watch for changes and re-fit content accordingly
+      this.setupProgramChangeReaction();
+    }
   }
 
   private processAfterProgramChange() {
@@ -652,6 +676,10 @@ export class ReteManager implements INodeServices {
 
   public dispose() {
     this.snapshotDisposer?.();
+    if (this.fitTimeout) {
+      clearTimeout(this.fitTimeout);
+      this.fitTimeout = undefined;
+    }
 
     const {area, editor} = this;
     // This should unmount the React components.
@@ -763,6 +791,168 @@ export class ReteManager implements INodeServices {
   public zoomOut = () => {
     const { k } = this.area.area.transform;
     this.setZoom(Math.max(MIN_ZOOM, k - .05));
+  };
+
+  public async fitContent() {
+    // Only apply content fitting to read-only tiles
+    if (!this.readOnly) return;
+
+    const container = this.area.container;
+    if (!container) return;
+
+    // The container from this.area.container is the Rete.js area which may have zero width.
+    // So we may need to find the actual container dimensions elsewhere.
+    let containerRect = container.getBoundingClientRect();
+    let containerWidth = containerRect.width;
+    let containerHeight = containerRect.height;
+
+    if (containerWidth <= 0) {
+      // Look for the .cover div which should have valid dimensions.
+      const coverDiv = container.closest(".cover") as HTMLElement;
+      if (coverDiv) {
+        containerRect = coverDiv.getBoundingClientRect();
+        containerWidth = coverDiv.offsetWidth || coverDiv.clientWidth;
+        containerHeight = coverDiv.offsetHeight || coverDiv.clientHeight;
+      } else {
+        // Fallback: look for any parent with reasonable dimensions
+        let parent = container.parentElement;
+        let level = 0;
+        while (parent && level < 10) {
+          const parentWidth = parent.offsetWidth || parent.clientWidth;
+          const parentHeight = parent.offsetHeight || parent.clientHeight;
+
+          if (parentWidth > 300 && parentHeight > 200) {
+            containerRect = parent.getBoundingClientRect();
+            containerWidth = parentWidth;
+            containerHeight = parentHeight;
+            break;
+          }
+          parent = parent.parentElement;
+          level++;
+        }
+      }
+    }
+
+    if (containerWidth <= 0 || containerHeight <= 0) {
+      if (!this.disposed) {
+        this.fitTimeout = window.setTimeout(() => this.fitContent(), 100);
+      }
+      return;
+    }
+
+    if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+      container.style.width = `${containerWidth}px`;
+      container.style.height = `${containerHeight}px`;
+    }
+
+    const bounds = this.calculateContentBounds();
+    if (!bounds) return;
+
+    const { scale, offsetX, offsetY } = this.calculateFitTransform(bounds, containerWidth, containerHeight);
+
+    await this.area.area.zoom(scale);
+    await this.area.area.translate(offsetX, offsetY);
+  }
+
+  private scheduleFit = () => {
+    if (!this.readOnly) return;
+
+    if (this.fitTimeout) {
+      clearTimeout(this.fitTimeout);
+    }
+
+    this.fitTimeout = window.setTimeout(() => {
+      this.fitContent();
+    }, 200);
+  };
+
+  private setupProgramChangeReaction = () => {
+    if (!this.readOnly) return;
+
+    // Watch for changes in the program nodes and connections
+    reaction(
+      () => ({
+        nodeCount: this.mstProgram.nodes.size,
+        connectionCount: this.mstProgram.connections.size,
+        // Watch for position changes by creating a snapshot of node positions
+        nodePositions: Array.from(this.mstProgram.nodes.values()).map(node => ({
+          id: node.id,
+          x: node.x,
+          y: node.y
+        }))
+      }),
+      (data, prevData) => {
+        // Only trigger if we have previous data and something actually changed
+        if (prevData && (
+          data.nodeCount !== prevData.nodeCount ||
+          data.connectionCount !== prevData.connectionCount ||
+          JSON.stringify(data.nodePositions) !== JSON.stringify(prevData.nodePositions)
+        )) {
+          this.scheduleFit();
+        }
+      },
+      { fireImmediately: false }
+    );
+  };
+
+  private calculateContentBounds = () => {
+    const nodes = this.mstProgram.nodes;
+    if (!nodes || nodes.size === 0) return null;
+
+    const { k } = this.area.area.transform; // current zoom
+    let minX = Infinity, minY = Infinity;
+    let maxX = -Infinity, maxY = -Infinity;
+
+    nodes.forEach(node => {
+      const x = Number.isFinite(node.liveX) ? node.liveX : node.x;
+      const y = Number.isFinite(node.liveY) ? node.liveY : node.y;
+
+      const nodeView = this.area.nodeViews.get(node.id);
+      if (nodeView?.element) {
+        const r = nodeView.element.getBoundingClientRect();
+        const nodeWidth = r.width / k;   // convert back to world units
+        const nodeHeight = r.height / k; // convert back to world units
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x + nodeWidth);
+        maxY = Math.max(maxY, y + nodeHeight);
+      } else {
+        const nodeWidth = 120;
+        const nodeHeight = 80;
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x + nodeWidth);
+        maxY = Math.max(maxY, y + nodeHeight);
+      }
+    });
+
+    return { minX, minY, maxX, maxY };
+  };
+
+  private calculateFitTransform = (bounds: IContentBounds, containerWidth: number, containerHeight: number) => {
+    const contentWidth = bounds.maxX - bounds.minX;
+    const contentHeight = bounds.maxY - bounds.minY;
+
+    if (contentWidth <= 0 || contentHeight <= 0) {
+      return { scale: 1, offsetX: 0, offsetY: 0 };
+    }
+
+    // Add some padding around the content.
+    const padding = 20;
+    const availableWidth = Math.max(0, containerWidth - 2 * padding);
+    const availableHeight = Math.max(0, containerHeight - 2 * padding);
+
+    // Calculate the scale needed to fit content within container.
+    let scale = Math.min(availableWidth / contentWidth, availableHeight / contentHeight);
+    scale = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, scale));
+
+    // Calculate the offset for centering content.
+    const scaledContentWidth = contentWidth * scale;
+    const scaledContentHeight = contentHeight * scale;
+    const offsetX = (containerWidth - scaledContentWidth) / 2 - bounds.minX * scale;
+    const offsetY = (containerHeight - scaledContentHeight) / 2 - bounds.minY * scale;
+
+    return { scale, offsetX, offsetY };
   };
 
   private async setZoom(zoom: number) {
