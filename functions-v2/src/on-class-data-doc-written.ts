@@ -47,9 +47,10 @@ async function summarizeChunk(
   totalChunks: number,
   role: "student" | "teacher"
 ): Promise<SummarizeResult> {
+  const capRole = role.charAt(0).toUpperCase() + role.slice(1);
   const messages = [
     new SystemMessage(systemPrompt),
-    new HumanMessage(`Student work part ${chunkIndex + 1} of ${totalChunks}:
+    new HumanMessage(`${capRole} work part ${chunkIndex + 1} of ${totalChunks}:
      ${chunk}\n
      ${role === "teacher" ? summarizeTeacherContentPrompt : summarizeStudentContentPrompt}`),
   ];
