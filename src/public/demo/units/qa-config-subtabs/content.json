@@ -9,6 +9,9 @@
     "defaultDocumentType": "problem",
     "initiallyHideExemplars": true,
     "settings": {
+      "ai": {
+        "systemPrompt": "You are a helpful, collaborative student, who always talks like a pirate."
+      },
       "table": {
         "numFormat": ".2~f"
       },
@@ -256,6 +259,7 @@
     "toolbar": [
       {"id": "select", "title": "Select", "iconId": "icon-select-tool", "isTileTool": false, "isDefault": true},
       {"id": "Text", "title": "Text", "isTileTool": true},
+      {"id": "AI", "title": "AI", "isTileTool": true},
       {"id": "Table", "title": "Table", "isTileTool": true},
       {"id": "DataCard", "title": "Data Card", "isTileTool": true},
       {"id": "Image", "title": "Image", "isTileTool": true},

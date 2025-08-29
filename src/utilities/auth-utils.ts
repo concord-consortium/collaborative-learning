@@ -161,6 +161,12 @@ export const convertURLToOAuth2 = (urlString: string, basePortalUrl: string, off
   }
 };
 
+export const isProductionUrl = () => {
+  const isProduction = window.location.hostname === "collaborative-learning.concord.org";
+  const isBranchUrl = window.location.pathname.includes("/branch/");
+  return isProduction && !isBranchUrl;
+};
+
 export const getStandaloneBasePortalUrl = () => {
   // the default portal URL is the staging portal
   let basePortalUrl = "https://learn.portal.staging.concord.org";
@@ -169,10 +175,7 @@ export const getStandaloneBasePortalUrl = () => {
     // allow the portal root URL to be passed in as a query param for dev/test
     basePortalUrl = urlParams.portalDomain.replace(/\/+$/, "");
   } else {
-    const isProduction = window.location.hostname === "collaborative-learning.concord.org";
-    const isBranchUrl = window.location.pathname.includes("/branch/");
-
-    if (isProduction && !isBranchUrl) {
+    if (isProductionUrl()) {
       // for production use the production portal
       basePortalUrl = "https://learn.concord.org";
     }
@@ -242,4 +245,3 @@ export const getConfirmLogoutUrl = (after?: string) => {
   }
   return confirmLogoutUrl.toString();
 };
-

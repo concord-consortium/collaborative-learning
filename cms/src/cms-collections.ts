@@ -80,14 +80,14 @@ const exemplars: CmsCollection = {
 function hasSectionsFolder(myJson: any) {
   // TODO: use ModernUnitSnapshot | LegacyUnitSnapshot
   // (some issue with importing them from the models file, so we use any for now)
-  const unitProblems = myJson.investigations.map((inv: any) => inv.problems).flat();
-  const allSections = unitProblems.map((prob: any ) => prob.sections).flat();
-  const sectionStrInPath = allSections.some((section: any) => section.includes("sections/"));
+  const unitProblems = myJson.investigations?.map((inv: any) => inv.problems).flat();
+  const allSections = unitProblems?.map((prob: any ) => prob.sections).flat();
+  const sectionStrInPath = allSections?.some((section: any) => section.includes("sections/"));
   return sectionStrInPath;
 }
 
 export function getCmsCollections(unitJson: any): CmsConfig["collections"] {
-  if (unitJson.config.commentTags) {
+  if (unitJson?.config?.commentTags) {
     const tags: Record<string, string> = unitJson.config.commentTags;
     const options = Object.entries(tags).map(([value, label]) => ({ label, value }));
     tagField.options = options;

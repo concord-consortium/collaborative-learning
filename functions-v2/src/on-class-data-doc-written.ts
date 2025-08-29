@@ -1,18 +1,19 @@
 import {onDocumentWritten} from "firebase-functions/v2/firestore";
 import * as logger from "firebase-functions/logger";
+import * as admin from "firebase-admin";
 import {defineSecret} from "firebase-functions/params";
 import {MarkdownTextSplitter} from "@langchain/textsplitters";
 import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
 
-// When the scheduled task updates a document under /exemplars with new class content,
+// When the scheduled task updates a document under /aicontent with new class content,
 // this function will use an LLM to summarize the content.
 
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
 
 const model = "gpt-4o-mini";
 
-const exemplarDataDocPath = "{realm}/{realmId}/exemplars/{unit}/classes/{classId}";
+const classDataDocPath = "{realm}/{realmId}/aicontent/{unit}/classes/{classId}";
 
 // gpt-4o-mini has a context window of 128,000 tokens; 64,000 characters should only be about 16 to 20,000 tokens.
 const chunkSize = 64000; // characters per chunk
@@ -46,9 +47,10 @@ async function summarizeChunk(
   totalChunks: number,
   role: "student" | "teacher"
 ): Promise<SummarizeResult> {
+  const capRole = role.charAt(0).toUpperCase() + role.slice(1);
   const messages = [
     new SystemMessage(systemPrompt),
-    new HumanMessage(`Student work part ${chunkIndex + 1} of ${totalChunks}:
+    new HumanMessage(`${capRole} work part ${chunkIndex + 1} of ${totalChunks}:
      ${chunk}\n
      ${role === "teacher" ? summarizeTeacherContentPrompt : summarizeStudentContentPrompt}`),
   ];
@@ -91,9 +93,9 @@ async function combineSummaries(
   };
 }
 
-export const onExemplarDataDocWritten = onDocumentWritten(
+export const onClassDataDocWritten = onDocumentWritten(
   {
-    document: exemplarDataDocPath,
+    document: classDataDocPath,
     secrets: [openaiApiKey],
     maxInstances: 2, // Limit how many requests we are sending to OpenAI at once
     concurrency: 3,
@@ -106,7 +108,7 @@ export const onExemplarDataDocWritten = onDocumentWritten(
 
     const content = event.data?.after.data();
     if (!content) {
-      logger.info("exemplar data doc was deleted", event.subject);
+      logger.info("Class data doc was deleted", event.subject);
       return;
     }
 
@@ -146,11 +148,12 @@ export const onExemplarDataDocWritten = onDocumentWritten(
         studentSummary: summary,
         teacherSummary: teacherSummary.summary,
         summaryTokenCount: studentSummary.tokenCount + teacherSummary.tokenCount,
+        summaryCreatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      logger.info("Summarized exemplar data doc", event.subject);
+      logger.info("Summarized the class work into the data doc", event.subject);
     } else {
-      logger.info("Exemplar data doc already summarized", event.subject);
+      logger.info("Class data doc already summarized", event.subject);
     }
   }
 );
