@@ -146,6 +146,18 @@ export const GroupObject = SizedObject.named("GroupObject")
           y: groupBB.nw.y + objBB.se.y * groupHeight
         };
 
+        // If the group is flipped, reflect these points over the group's center, and apply the flip to the object.
+        if (self.hFlip) {
+          objNW.x = groupBB.nw.x + (groupBB.se.x - objNW.x);
+          objSE.x = groupBB.nw.x + (groupBB.se.x - objSE.x);
+          obj.hFlip = !obj.hFlip;
+        }
+        if (self.vFlip) {
+          objNW.y = groupBB.nw.y + (groupBB.se.y - objNW.y);
+          objSE.y = groupBB.nw.y + (groupBB.se.y - objSE.y);
+          obj.vFlip = !obj.vFlip;
+        }
+
         // Rotate the object's points to account for the group's rotation.
         const rotatedNW = rotatePoint(objNW, groupBB.se, groupRotation);
         const rotatedSE = rotatePoint(objSE, groupBB.se, groupRotation);
