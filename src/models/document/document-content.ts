@@ -142,7 +142,12 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     const builder = new StringBuilder();
     builder.pushLine("{");
 
-    const includedTileIds = rows.flatMap(row => row?.tileIds ?? []);
+    const includedTileIds = rows.flatMap(row => {
+      if (!row) return [];
+      const allTileIds = self.getAllTilesInRow(row.id).map(tile => tile.id);
+      return allTileIds ?? [];
+    });
+
     const sharedModels = Object.values(self.getSharedModelsUsedByTiles(includedTileIds));
     const hasSharedModels = sharedModels.length > 0;
     const annotations = Object.values(self.getAnnotationsUsedByTiles(includedTileIds));
