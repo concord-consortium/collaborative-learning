@@ -1,7 +1,7 @@
 import { addDisposer, onAction } from "mobx-state-tree";
 import {
   createDrawingContent, defaultDrawingContent,
-  DrawingContentModelSnapshot, DrawingToolMetadataModel
+  DrawingContentModelSnapshot, DrawingToolMetadataModel, isDrawingContentModel
 } from "./drawing-content";
 import { kDrawingTileType } from "./drawing-types";
 import { AlignType, DefaultToolbarSettings, VectorEndShape } from "./drawing-basic-types";
@@ -1082,4 +1082,21 @@ describe("DrawingContentModel", () => {
     expect((duplicatedGroup as any).objects[1].objects[0].type).toBe("ellipse");
   });
 
+});
+
+describe("isDrawingContentModel", () => {
+  test("returns true for drawing content models", () => {
+    const model = {
+      type: kDrawingTileType,
+      objects: []
+    };
+    expect(isDrawingContentModel(model)).toBe(true);
+  });
+
+  test("returns false for non-drawing content models", () => {
+    const model = {
+      type: "Not a drawing"
+    };
+    expect(isDrawingContentModel(model)).toBe(false);
+  });
 });
