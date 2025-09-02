@@ -1,18 +1,16 @@
-#!/usr/bin/node
-
-// Finds classes that have updated documents for selected units,
-// and uses an LLM to create a summary of all the student work in Firestore.
-
 import { getDatabase } from "firebase-admin/database";
 import { getFirestore } from "firebase-admin/firestore";
 import { documentSummarizer } from "./ai-summarizer";
+
+// Finds classes that have updated documents for selected units,
+// and uses an LLM to create a summary of all the student work in Firestore.
 
 // For initial testing, we are limiting which parts of the database this runs on.
 // A list of portals and demo areas can be given to scan.
 // The list of units is also limited to the ones that have exemplars.
 
-const portals: string[] = []; // TODO: ["learn.concord.org"]; maybe also staging.
-const demos = ["BORIS", "AITEST"]; // Consider only classes in this demo area.
+const portals: string[] = ["learn.concord.org"]; // Consider all classes on production.
+const demos = ["AITEST"]; // Consider only classes in this demo area.
 const units = ["qa-config-subtabs", "mods"]; // only scan these units.
 
 function firebaseBasePath(portal: string|undefined, demo: string|undefined): string {
@@ -35,7 +33,7 @@ interface IClassData {
   userCount: number;
   userIds: Set<string>;
   documentCount: number;
-  documents: Set<{ uid: string, key: string, teacher: boolean }>;
+  documents: Set<{ uid: string, key: string, isTeacherDocument: boolean }>;
   lastEditedAt: number;
 }
 
@@ -48,7 +46,9 @@ async function getClassTeachers(portal: string|undefined, demo: string|undefined
 }
 
 // Query Firestore for all user documents in the unit, and return info by classroom.
-async function getClassDocumentData(portal: string|undefined, demo: string|undefined, unit: string, logger: Logger):
+// Optional "onlyContextId" parameter can be used to limit the query to a single class.
+async function getClassDocumentData(portal: string|undefined, demo: string|undefined, unit: string,
+    logger: Logger, onlyContextId?: string):
     Promise<{ [contextId: string]: IClassData }> {
   const classData: { [contextId: string]: IClassData } = {};
   const classTeachers: { [contextId: string]: string[] } = {};
@@ -56,10 +56,13 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
   const documentsPath = firestoreBasePath(portal, demo) + "/documents";
 
   // Query documents to see which classes need exemplar updates
-  const documentQuery = getFirestore()
+  let documentQuery = getFirestore()
     .collection(documentsPath)
     .where("unit", "==", unit)
     .select("context_id", "uid", "key");
+  if (onlyContextId) {
+    documentQuery = documentQuery.where("context_id", "==", onlyContextId);
+  }
 
   try {
     const documentSnapshots = await documentQuery.get();
@@ -73,7 +76,7 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
         classTeachers[contextId] = await getClassTeachers(portal, demo, contextId, logger);
       }
 
-      const teacher = classTeachers[contextId].includes(uid);
+      const isTeacherDocument = classTeachers[contextId].includes(uid);
 
       const lastEditedPath
         = `${firebaseBasePath(portal, demo)}/classes/${contextId}/users/${uid}/documentMetadata/${key}/lastEditedAt`;
@@ -87,7 +90,7 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
       const record = classData[contextId];
       record.userIds.add(uid);
       record.documentCount++;
-      record.documents.add({ uid, key, teacher });
+      record.documents.add({ uid, key, isTeacherDocument });
       if (lastEdited && lastEdited > record.lastEditedAt) {
         record.lastEditedAt = lastEdited;
       }
@@ -102,8 +105,8 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
   return classData;
 }
 
-function getExemplarDataDoc(portal: string|undefined, demo: string|undefined, unit: string, contextId: string) {
-  return getFirestore().doc(`${firestoreBasePath(portal, demo)}/exemplars/${unit}/classes/${contextId}`);
+function getClassDataDoc(portal: string|undefined, demo: string|undefined, unit: string, contextId: string) {
+  return getFirestore().doc(`${firestoreBasePath(portal, demo)}/aicontent/${unit}/classes/${contextId}`);
 }
 
 // Retrieve document content from Firebase Realtime Database
@@ -148,7 +151,7 @@ async function retrieveAndSummarizeDocument(portal: string|undefined, demo: stri
 async function dataDocNeedsUpdate(portal: string|undefined, demo: string|undefined, unit: string,
     contextId: string, classData: IClassData) {
   if (classData.userCount < 2 || !classData.lastEditedAt) return false;
-  const doc = getExemplarDataDoc(portal, demo, unit, contextId);
+  const doc = getClassDataDoc(portal, demo, unit, contextId);
   const current = await doc.get();
   if (current.exists && current.data()?.lastEditedAt >= classData.lastEditedAt) {
     return false;
@@ -156,13 +159,13 @@ async function dataDocNeedsUpdate(portal: string|undefined, demo: string|undefin
   return true;
 }
 
-async function updateExemplarDataDoc(portal: string|undefined, demo: string|undefined, unit: string,
+async function updateClassDataDoc(portal: string|undefined, demo: string|undefined, unit: string,
     contextId: string, data: IClassData, logger: Logger) {
-  logger.info(`Updating exemplar data doc for ${unit} ${contextId}`);
+  logger.info(`Updating class data doc for ${unit} ${contextId}`);
 
   // Retrieve and summarize the documents
-  const teacherDocs = Array.from(data.documents).filter(({teacher}) => teacher);
-  const studentDocs = Array.from(data.documents).filter(({teacher}) => !teacher);
+  const teacherDocs = Array.from(data.documents).filter(({isTeacherDocument}) => isTeacherDocument);
+  const studentDocs = Array.from(data.documents).filter(({isTeacherDocument}) => !isTeacherDocument);
   const teacherSummaries = await Promise.all(teacherDocs.map(async ({uid, key}) =>  {
     return await retrieveAndSummarizeDocument(portal, demo, contextId, uid, key, logger);
   }));
@@ -172,7 +175,7 @@ async function updateExemplarDataDoc(portal: string|undefined, demo: string|unde
   const teacherContent = teacherSummaries.join("\n\n");
   const studentContent = studentSummaries.join("\n\n");
 
-  return getExemplarDataDoc(portal, demo, unit, contextId).set({
+  return getClassDataDoc(portal, demo, unit, contextId).set({
     lastEditedAt: data.lastEditedAt,
     userCount: data.userCount,
     documentCount: data.documentCount,
@@ -182,23 +185,32 @@ async function updateExemplarDataDoc(portal: string|undefined, demo: string|unde
   });
 }
 
-async function updateExemplarDataDocsForRealm(portal: string|undefined, demo: string|undefined, logger: Logger) {
+export async function updateSingleClassDataDoc(portal: string|undefined, demo: string|undefined, unit: string,
+    contextId: string, logger: Logger) {
+  const classData = await getClassDocumentData(portal, demo, unit, logger, contextId);
+  const data = classData[contextId];
+  await updateClassDataDoc(portal, demo, unit, contextId, data, logger);
+}
+
+async function updateClassDataDocsForRealm(portal: string|undefined, demo: string|undefined, logger: Logger) {
   for (const unit of units) {
     const classData = await getClassDocumentData(portal, demo, unit, logger);
     for (const contextId in classData) {
       const data = classData[contextId];
       if (await dataDocNeedsUpdate(portal, demo, unit, contextId, data)) {
-        await updateExemplarDataDoc(portal, demo, unit, contextId, data, logger);
+        await updateClassDataDoc(portal, demo, unit, contextId, data, logger);
+      } else {
+        logger.info(`Class data doc for ${unit} ${contextId} already up to date`);
       }
     }
   }
 }
 
-export async function updateExemplarDataDocs({ logger }: { logger: Logger }) {
+export async function updateClassDataDocs({ logger }: { logger: Logger }) {
   for (const demo of demos) {
-    await updateExemplarDataDocsForRealm(undefined, demo, logger);
+    await updateClassDataDocsForRealm(undefined, demo, logger);
   }
   for (const portal of portals) {
-    await updateExemplarDataDocsForRealm(portal, undefined, logger);
+    await updateClassDataDocsForRealm(portal, undefined, logger);
   }
 }

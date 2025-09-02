@@ -43,6 +43,7 @@ export const AppConfigModel = types
         self.navTabs.addSortWorkTab();
       }
       self.disabledFeatures = self.configMgr.disabledFeatures;
+      self.authorTools = ToolbarModel.create(self.configMgr.authorTools);
       self.toolbar = ToolbarModel.create(self.configMgr.toolbar);
       self.settings = self.configMgr.settings;
     },

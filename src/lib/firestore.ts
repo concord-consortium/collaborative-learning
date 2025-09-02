@@ -53,6 +53,10 @@ export class Firestore {
     return this.getFullPath("mcsupports");
   }
 
+  public getClassInfoPath(unit: string, classHash: string) {
+    return this.getFullPath(`aicontent/${unit}/classes/${classHash}`);
+  }
+
   public getMulticlassSupportsRef() {
     return this.collectionRef(this.getMulticlassSupportsPath());
   }
