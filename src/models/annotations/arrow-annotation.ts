@@ -110,7 +110,8 @@ export const ArrowAnnotation = types
   getPoints(
     documentLeft: number, documentRight: number, documentTop: number, documentBottom: number,
     dragOffsets: IArrowAnnotationDragOffsets, sourceBB?: ObjectBoundingBox|null, targetBB?: ObjectBoundingBox|null,
-    viewTransform?: { offsetX: number; offsetY: number; scale: number }
+    sourceViewTransform?: { offsetX: number; offsetY: number; scale: number },
+    targetViewTransform?: { offsetX: number; offsetY: number; scale: number }
   ) {
     const defaultObj = {
       sourceX: undefined, sourceY: undefined, targetX: undefined, targetY: undefined,
@@ -166,18 +167,20 @@ export const ArrowAnnotation = types
       return defaultObj;
     }
 
-    // Apply view transformation if provided (for read-only panels where content is centered)
-    if (viewTransform) {
-      sourceX = (sourceX + viewTransform.offsetX) * viewTransform.scale;
-      sourceY = (sourceY + viewTransform.offsetY) * viewTransform.scale;
-      targetX = (targetX + viewTransform.offsetX) * viewTransform.scale;
-      targetY = (targetY + viewTransform.offsetY) * viewTransform.scale;
+    // Apply view transformations if provided for read-only panels where content is centered
+    // and re-scaled to fit the viewable tile content area.
+    if (sourceViewTransform) {
+      sourceX = (sourceX + sourceViewTransform.offsetX) * sourceViewTransform.scale;
+      sourceY = (sourceY + sourceViewTransform.offsetY) * sourceViewTransform.scale;
+      preDragSourceX = (preDragSourceX + sourceViewTransform.offsetX) * sourceViewTransform.scale;
+      preDragSourceY = (preDragSourceY + sourceViewTransform.offsetY) * sourceViewTransform.scale;
+    }
 
-      // Also transform the pre-drag coordinates for proper text positioning
-      preDragSourceX = (preDragSourceX + viewTransform.offsetX) * viewTransform.scale;
-      preDragSourceY = (preDragSourceY + viewTransform.offsetY) * viewTransform.scale;
-      preDragTargetX = (preDragTargetX + viewTransform.offsetX) * viewTransform.scale;
-      preDragTargetY = (preDragTargetY + viewTransform.offsetY) * viewTransform.scale;
+    if (targetViewTransform) {
+      targetX = (targetX + targetViewTransform.offsetX) * targetViewTransform.scale;
+      targetY = (targetY + targetViewTransform.offsetY) * targetViewTransform.scale;
+      preDragTargetX = (preDragTargetX + targetViewTransform.offsetX) * targetViewTransform.scale;
+      preDragTargetY = (preDragTargetY + targetViewTransform.offsetY) * targetViewTransform.scale;
     }
 
     // Set up text location

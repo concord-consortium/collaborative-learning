@@ -428,14 +428,14 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
         if (tileApi && tileApi.getTileDimensions && contentBoundingBox) {
           const { width: tileWidth, height: tileHeight } = tileApi.getTileDimensions();
-          const canvasSize = { x: tileWidth, y: tileHeight }
+          const canvasSize = { x: tileWidth, y: tileHeight };
           const fitContentOptions = {
             canvasSize,
             contentBoundingBox,
             minZoom: 0.1,
             maxZoom: 1,
             readOnly
-          }
+          };
           const { offsetX, offsetY, zoom } = calculateFitContent(fitContentOptions);
 
           transform = {
@@ -551,9 +551,6 @@ export const AnnotationLayer = observer(function AnnotationLayer({
           const targetViewTransform = arrow.targetObject?.tileId ?
             getTileViewTransform(arrow.targetObject.tileId) : undefined;
 
-          // Use source view transform if available, otherwise use target
-          const viewTransform = sourceViewTransform || targetViewTransform;
-
           return (
             <ArrowAnnotationComponent
               arrow={arrow}
@@ -569,7 +566,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
               getObjectNodeRadii={getObjectNodeRadii}
               key={key}
               readOnly={readOnly}
-              viewTransform={viewTransform}
+              sourceViewTransform={sourceViewTransform}
+              targetViewTransform={targetViewTransform}
             />
           );
         })}
