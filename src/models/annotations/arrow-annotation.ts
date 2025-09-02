@@ -109,7 +109,8 @@ export const ArrowAnnotation = types
 .views(self => ({
   getPoints(
     documentLeft: number, documentRight: number, documentTop: number, documentBottom: number,
-    dragOffsets: IArrowAnnotationDragOffsets, sourceBB?: ObjectBoundingBox|null, targetBB?: ObjectBoundingBox|null
+    dragOffsets: IArrowAnnotationDragOffsets, sourceBB?: ObjectBoundingBox|null, targetBB?: ObjectBoundingBox|null,
+    viewTransform?: { offsetX: number; offsetY: number; scale: number }
   ) {
     const defaultObj = {
       sourceX: undefined, sourceY: undefined, targetX: undefined, targetY: undefined,
@@ -163,6 +164,20 @@ export const ArrowAnnotation = types
         || preDragSourceX === undefined || preDragSourceY === undefined || preDragTargetX === undefined
         || preDragTargetY === undefined) {
       return defaultObj;
+    }
+
+    // Apply view transformation if provided (for read-only panels where content is centered)
+    if (viewTransform) {
+      sourceX = (sourceX + viewTransform.offsetX) * viewTransform.scale;
+      sourceY = (sourceY + viewTransform.offsetY) * viewTransform.scale;
+      targetX = (targetX + viewTransform.offsetX) * viewTransform.scale;
+      targetY = (targetY + viewTransform.offsetY) * viewTransform.scale;
+
+      // Also transform the pre-drag coordinates for proper text positioning
+      preDragSourceX = (preDragSourceX + viewTransform.offsetX) * viewTransform.scale;
+      preDragSourceY = (preDragSourceY + viewTransform.offsetY) * viewTransform.scale;
+      preDragTargetX = (preDragTargetX + viewTransform.offsetX) * viewTransform.scale;
+      preDragTargetY = (preDragTargetY + viewTransform.offsetY) * viewTransform.scale;
     }
 
     // Set up text location

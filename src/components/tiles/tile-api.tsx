@@ -29,6 +29,7 @@ export interface ITileApi {
   getObjectDefaultOffsets?: (objectId: string, objectType?: string) => IOffsetModel;
   getObjectNodeRadii?: (objectId: string, objectType?: string) =>
     { centerRadius?: number, highlightRadius?: number } | undefined;
+  getTileDimensions?: () => { width: number, height: number };
 }
 
 export interface ITileApiInterface {

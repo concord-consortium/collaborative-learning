@@ -83,13 +83,15 @@ interface IArrowAnnotationProps {
   getObjectNodeRadii: (object?: IClueObject) => { centerRadius?: number, highlightRadius?: number} | undefined;
   key?: string;
   readOnly?: boolean;
+  viewTransform?: { offsetX: number; offsetY: number; scale: number };
 }
 export const ArrowAnnotationComponent = observer(
   function ArrowAnnotationComponent({
     arrow, canEdit, deleteArrow, handleArrowClick, handleDragHandleNonDrag,
     documentBottom, documentLeft, documentRight, documentTop, getBoundingBox,
-    getObjectNodeRadii, readOnly
+    getObjectNodeRadii, readOnly, viewTransform
   }: IArrowAnnotationProps) {
+
     const [editingText, setEditingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
     const [hoveringStem, setHoveringStem] = useState(false);
@@ -128,7 +130,7 @@ export const ArrowAnnotationComponent = observer(
     const {
       sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY,
       textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
-    } = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom, dragOffsets, sourceBB, targetBB);
+    } = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom, dragOffsets, sourceBB, targetBB, viewTransform);
     const missingData = sourceX === undefined || sourceY === undefined || textCenterX === undefined
       || textCenterY === undefined || targetX === undefined || targetY === undefined;
     const curveData = useMemo(() => {
@@ -234,7 +236,7 @@ export const ArrowAnnotationComponent = observer(
             const currentDragOffsets = determineDragOffsets(_dragType, e2.clientX, e2.clientY, e.clientX, e.clientY);
             const { textCenterX: tcX, textCenterY: tcY, textOriginX: toX, textOriginY: toY }
               = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom,
-                  currentDragOffsets, sourceBB, targetBB);
+                  currentDragOffsets, sourceBB, targetBB, viewTransform);
             if (tcX !== undefined && tcY !== undefined) {
               arrow.setTextOffset(tcX - toX, tcY - toY);
             }

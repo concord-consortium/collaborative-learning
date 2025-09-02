@@ -1,4 +1,5 @@
 import { AlignType, BoundingBox, BoundingBoxSides, Point } from "./drawing-basic-types";
+import { kClosedObjectListPanelWidth } from "./drawing-types";
 
 /**
  * Recursively removes 'id' attributes from a drawing object snapshot and all nested objects in 'objects' arrays.
@@ -149,6 +150,7 @@ export interface IFitContentOptions {
   padding?: number;
   minZoom?: number;
   maxZoom?: number;
+  readOnly?: boolean;
 }
 
 export interface IFitContentResult {
@@ -158,7 +160,8 @@ export interface IFitContentResult {
 }
 
 export const calculateFitContent = (options: IFitContentOptions): IFitContentResult => {
-  const { canvasSize, contentBoundingBox, padding=10, minZoom: customMinZoom, maxZoom: customMaxZoom } = options;
+  const { canvasSize, contentBoundingBox, padding=10, minZoom: customMinZoom, maxZoom: customMaxZoom,
+          readOnly } = options;
   const contentWidth = contentBoundingBox.se.x - contentBoundingBox.nw.x;
   const contentHeight = contentBoundingBox.se.y - contentBoundingBox.nw.y;
   const optimalZoom = Math.min(
@@ -174,7 +177,7 @@ export const calculateFitContent = (options: IFitContentOptions): IFitContentRes
   const newOffsetY = (canvasSize.y / 2 - (contentBoundingBox.nw.y + contentHeight / 2) * legalZoom);
 
   return {
-    offsetX: newOffsetX,
+    offsetX: readOnly ? newOffsetX - kClosedObjectListPanelWidth : newOffsetX,
     offsetY: newOffsetY,
     zoom: legalZoom
   };
