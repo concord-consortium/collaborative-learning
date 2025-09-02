@@ -173,11 +173,14 @@ export const calculateFitContent = (options: IFitContentOptions): IFitContentRes
   const legalZoom = Math.max(effectiveMinZoom, Math.min(effectiveMaxZoom, optimalZoom));
 
   // Adjust the offset so the content is centered with the new zoom level.
-  const newOffsetX = (canvasSize.x / 2 - (contentBoundingBox.nw.x + contentWidth / 2) * legalZoom);
+  let newOffsetX = (canvasSize.x / 2 - (contentBoundingBox.nw.x + contentWidth / 2) * legalZoom);
+  newOffsetX = readOnly
+    ? newOffsetX - kClosedObjectListPanelWidth // The object list panel isn't present when read-only
+    : newOffsetX;
   const newOffsetY = (canvasSize.y / 2 - (contentBoundingBox.nw.y + contentHeight / 2) * legalZoom);
 
   return {
-    offsetX: readOnly ? newOffsetX - kClosedObjectListPanelWidth : newOffsetX,
+    offsetX: newOffsetX,
     offsetY: newOffsetY,
     zoom: legalZoom
   };
