@@ -7,6 +7,8 @@ import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent, getFocusedGroupUser, getQuadrant } from "../four-up";
 import { DocumentViewMode } from "./document";
+import { SummaryButton } from "./summary-button";
+import { urlParams } from "../../utilities/url-params";
 
 import "./student-group-view.scss";
 
@@ -51,6 +53,7 @@ interface IGroupComponentProps {
 const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function GroupViewTitlebar({group, groupUser}) {
   const {groups, persistentUI} = useStores();
   const focusedGroupUser = groupUser;
+  const showAiSummary = urlParams.showAiSummary;
 
   const handleFocusedUserChange = (selectedUser: GroupUserModelType) => {
     group?.id && selectedUser.problemDocument &&
@@ -90,6 +93,7 @@ const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function Grou
                                   onSelectGroup={handleSelectGroup} />;
             })
         }
+      { showAiSummary && <SummaryButton /> }
       </div>
     </div>
   );
