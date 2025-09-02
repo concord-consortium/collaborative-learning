@@ -131,7 +131,10 @@ export const ArrowAnnotationComponent = observer(
     const {
       sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY,
       textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
-    } = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom, dragOffsets, sourceBB, targetBB, sourceViewTransform, targetViewTransform);
+    } = arrow.getPoints(
+      documentLeft, documentRight, documentTop, documentBottom, dragOffsets,
+      sourceBB, sourceViewTransform, targetBB, targetViewTransform
+    );
     const missingData = sourceX === undefined || sourceY === undefined || textCenterX === undefined
       || textCenterY === undefined || targetX === undefined || targetY === undefined;
     const curveData = useMemo(() => {
@@ -237,7 +240,7 @@ export const ArrowAnnotationComponent = observer(
             const currentDragOffsets = determineDragOffsets(_dragType, e2.clientX, e2.clientY, e.clientX, e.clientY);
             const { textCenterX: tcX, textCenterY: tcY, textOriginX: toX, textOriginY: toY }
               = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom,
-                  currentDragOffsets, sourceBB, targetBB, sourceViewTransform, targetViewTransform);
+                  currentDragOffsets, sourceBB, sourceViewTransform, targetBB, targetViewTransform);
             if (tcX !== undefined && tcY !== undefined) {
               arrow.setTextOffset(tcX - toX, tcY - toY);
             }

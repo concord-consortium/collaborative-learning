@@ -109,9 +109,9 @@ export const ArrowAnnotation = types
 .views(self => ({
   getPoints(
     documentLeft: number, documentRight: number, documentTop: number, documentBottom: number,
-    dragOffsets: IArrowAnnotationDragOffsets, sourceBB?: ObjectBoundingBox|null, targetBB?: ObjectBoundingBox|null,
-    sourceViewTransform?: { offsetX: number; offsetY: number; scale: number },
-    targetViewTransform?: { offsetX: number; offsetY: number; scale: number }
+    dragOffsets: IArrowAnnotationDragOffsets,
+    sourceBB?: ObjectBoundingBox|null, sourceViewTransform?: { offsetX: number; offsetY: number; scale: number },
+    targetBB?: ObjectBoundingBox|null, targetViewTransform?: { offsetX: number; offsetY: number; scale: number }
   ) {
     const defaultObj = {
       sourceX: undefined, sourceY: undefined, targetX: undefined, targetY: undefined,

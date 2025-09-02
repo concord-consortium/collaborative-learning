@@ -22,7 +22,7 @@ import { isFiniteNumber, midpoint, Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { HotKeys } from "../../utilities/hot-keys";
 import { boundingBoxCenter } from "../../models/annotations/annotation-utils";
-import { DrawingContentModelType } from "../../plugins/drawing/model/drawing-content";
+import { DrawingContentModelType, isDrawingContentModel } from "../../plugins/drawing/model/drawing-content";
 import { calculateFitContent } from "../../plugins/drawing/model/drawing-utils";
 
 import "./annotation-layer.scss";
@@ -418,7 +418,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     const tile = content.tileMap?.get(tileId);
     if (!tile) return undefined;
 
-    if (tile.content && "zoom" in tile.content && "offsetX" in tile.content && "offsetY" in tile.content) {
+    if (isDrawingContentModel(tile.content)) {
       let transform;
 
       if (readOnly) {
@@ -440,8 +440,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
           transform = {
             scale: zoom,
-            offsetX: offsetX,
-            offsetY: offsetY
+            offsetX,
+            offsetY
           };
         } else {
           // Fallback to stored values if no bounding box
@@ -453,9 +453,9 @@ export const AnnotationLayer = observer(function AnnotationLayer({
         }
       } else {
         transform = {
-          scale: (tile.content as any).zoom,
-          offsetX: (tile.content as any).offsetX,
-          offsetY: (tile.content as any).offsetY
+          scale: (tile.content as DrawingContentModelType).zoom,
+          offsetX: (tile.content as DrawingContentModelType).offsetX,
+          offsetY: (tile.content as DrawingContentModelType).offsetY
         };
       }
 
@@ -542,14 +542,12 @@ export const AnnotationLayer = observer(function AnnotationLayer({
         { editing && !readOnly && rowIds.flatMap(rowId => collectButtonsForRow(rowId)) }
         { Array.from(content?.annotations.values() ?? []).map(arrow => {
           const key = `sparrow-${arrow.id}`;
-
-          // Get view transformation for the source tile if it exists
-          const sourceViewTransform = arrow.sourceObject?.tileId ?
-            getTileViewTransform(arrow.sourceObject.tileId) : undefined;
-
-          // Get view transformation for the target tile if it exists
-          const targetViewTransform = arrow.targetObject?.tileId ?
-            getTileViewTransform(arrow.targetObject.tileId) : undefined;
+          const sourceViewTransform = arrow.sourceObject?.tileId
+            ? getTileViewTransform(arrow.sourceObject.tileId)
+            : undefined;
+          const targetViewTransform = arrow.targetObject?.tileId
+            ? getTileViewTransform(arrow.targetObject.tileId)
+            : undefined;
 
           return (
             <ArrowAnnotationComponent
