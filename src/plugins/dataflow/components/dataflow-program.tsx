@@ -177,6 +177,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   public componentDidMount() {
     this.initReteManagersIfNeeded();
 
+    // Auto-fit content if in read-only mode.
+    if (this.props.readOnly && this.reteManager) {
+      this.reteManager.setupComplete.then(() => this.reteManager?.fitContent());
+    }
+
     this.props.onRegisterTileApi({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.props.tileContent.exportJson(options);
