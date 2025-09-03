@@ -77,6 +77,13 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
         }
         return undefined;
       },
+      getTileDimensions: () => {
+        if (drawingToolElement.current) {
+          const { width, height } = drawingToolElement.current.getBoundingClientRect();
+          return { width, height };
+        }
+        return { width: 0, height: 0 };
+      },
     });
     if (!readOnly) {
       hotKeys.current.register({

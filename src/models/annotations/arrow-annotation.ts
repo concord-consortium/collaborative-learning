@@ -31,6 +31,14 @@ export function updateArrowAnnotationTileIds(annotation: IArrowAnnotationSnapsho
   return annotation;
 }
 
+function applyViewTransform(x: number, y: number, transform?: { offsetX: number; offsetY: number; scale: number }) {
+  if (!transform) return { x, y };
+  return {
+    x: (x + transform.offsetX) * transform.scale,
+    y: (y + transform.offsetY) * transform.scale
+  };
+}
+
 export const kArrowAnnotationTextWidth = 150;
 export const kArrowAnnotationTextHeight = 50;
 const kArrowAnnotationTextMargin = 15;
@@ -109,7 +117,9 @@ export const ArrowAnnotation = types
 .views(self => ({
   getPoints(
     documentLeft: number, documentRight: number, documentTop: number, documentBottom: number,
-    dragOffsets: IArrowAnnotationDragOffsets, sourceBB?: ObjectBoundingBox|null, targetBB?: ObjectBoundingBox|null
+    dragOffsets: IArrowAnnotationDragOffsets,
+    sourceBB?: ObjectBoundingBox|null, sourceViewTransform?: { offsetX: number; offsetY: number; scale: number },
+    targetBB?: ObjectBoundingBox|null, targetViewTransform?: { offsetX: number; offsetY: number; scale: number }
   ) {
     const defaultObj = {
       sourceX: undefined, sourceY: undefined, targetX: undefined, targetY: undefined,
@@ -163,6 +173,20 @@ export const ArrowAnnotation = types
         || preDragSourceX === undefined || preDragSourceY === undefined || preDragTargetX === undefined
         || preDragTargetY === undefined) {
       return defaultObj;
+    }
+
+    // Apply view transformations, if provided, for read-only panels where content is centered
+    // and re-scaled to fit the viewable tile content area.
+    if (sourceViewTransform) {
+      ({ x: sourceX, y: sourceY } = applyViewTransform(sourceX, sourceY, sourceViewTransform));
+      ({ x: preDragSourceX, y: preDragSourceY } =
+        applyViewTransform(preDragSourceX, preDragSourceY, sourceViewTransform));
+    }
+
+    if (targetViewTransform) {
+      ({ x: targetX, y: targetY } = applyViewTransform(targetX, targetY, targetViewTransform));
+      ({ x: preDragTargetX, y: preDragTargetY } =
+        applyViewTransform(preDragTargetX, preDragTargetY, targetViewTransform));
     }
 
     // Set up text location

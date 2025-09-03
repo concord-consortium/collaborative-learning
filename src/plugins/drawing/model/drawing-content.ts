@@ -535,3 +535,7 @@ export function defaultDrawingContent(options?: IDefaultContentOptions) {
   }
   return createDrawingContent({ stamps });
 }
+
+export const isDrawingContentModel = (model: any): model is DrawingContentModelType => {
+  return model && model.type === kDrawingTileType;
+};

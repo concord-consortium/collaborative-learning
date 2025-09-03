@@ -22,6 +22,8 @@ import { isFiniteNumber, midpoint, Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { HotKeys } from "../../utilities/hot-keys";
 import { boundingBoxCenter } from "../../models/annotations/annotation-utils";
+import { DrawingContentModelType, isDrawingContentModel } from "../../plugins/drawing/model/drawing-content";
+import { calculateFitContent } from "../../plugins/drawing/model/drawing-utils";
 
 import "./annotation-layer.scss";
 
@@ -404,6 +406,65 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId, object.objectType);
   };
 
+  const getTileViewTransform = (tileId: string) => {
+    if (!content) return undefined;
+
+    const rowId = content.findRowIdContainingTile(tileId);
+    if (!rowId) return undefined;
+
+    const row = content.getRowRecursive(rowId);
+    if (!row) return undefined;
+
+    const tile = content.tileMap?.get(tileId);
+    if (!tile) return undefined;
+
+    if (isDrawingContentModel(tile.content)) {
+      let transform;
+
+      if (readOnly) {
+        const drawingContent = tile.content as DrawingContentModelType;
+        const contentBoundingBox = drawingContent.objectsBoundingBox;
+        const tileApi = tileApiInterface?.getTileApi(tileId);
+
+        if (tileApi && tileApi.getTileDimensions && contentBoundingBox) {
+          const { width: tileWidth, height: tileHeight } = tileApi.getTileDimensions();
+          const canvasSize = { x: tileWidth, y: tileHeight };
+          const fitContentOptions = {
+            canvasSize,
+            contentBoundingBox,
+            minZoom: 0.1,
+            maxZoom: 1,
+            readOnly
+          };
+          const { offsetX, offsetY, zoom } = calculateFitContent(fitContentOptions);
+
+          transform = {
+            scale: zoom,
+            offsetX,
+            offsetY
+          };
+        } else {
+          // Fallback to stored values if no bounding box
+          transform = {
+            scale: drawingContent.zoom,
+            offsetX: drawingContent.offsetX,
+            offsetY: drawingContent.offsetY
+          };
+        }
+      } else {
+        transform = {
+          scale: (tile.content as DrawingContentModelType).zoom,
+          offsetX: (tile.content as DrawingContentModelType).offsetX,
+          offsetY: (tile.content as DrawingContentModelType).offsetY
+        };
+      }
+
+      return transform;
+    }
+
+    return undefined;
+  };
+
   const rowIds = content?.rowOrder || [];
   const hidden = !persistentUI.showAnnotations;
   const classes = classNames("annotation-layer",
@@ -481,6 +542,13 @@ export const AnnotationLayer = observer(function AnnotationLayer({
         { editing && !readOnly && rowIds.flatMap(rowId => collectButtonsForRow(rowId)) }
         { Array.from(content?.annotations.values() ?? []).map(arrow => {
           const key = `sparrow-${arrow.id}`;
+          const sourceViewTransform = arrow.sourceObject?.tileId
+            ? getTileViewTransform(arrow.sourceObject.tileId)
+            : undefined;
+          const targetViewTransform = arrow.targetObject?.tileId
+            ? getTileViewTransform(arrow.targetObject.tileId)
+            : undefined;
+
           return (
             <ArrowAnnotationComponent
               arrow={arrow}
@@ -496,6 +564,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
               getObjectNodeRadii={getObjectNodeRadii}
               key={key}
               readOnly={readOnly}
+              sourceViewTransform={sourceViewTransform}
+              targetViewTransform={targetViewTransform}
             />
           );
         })}
