@@ -65,7 +65,7 @@ To work on the CMS locally you'll need to start both CLUE and the CMS:
 - open the CMS with `http://localhost:[cms_port]/?iframeBase=http://localhost:[clue_port]&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
     (add `&localCMSBackend` if using it). Make sure there are no extra "#" or "/" characters in the URL.
 
-Typically CLUE will be running on portal 8080 and the CMS will be running on 8082, or CLUE on 8080, Git proxy on 8081, and CMS on 8082. In this case the url above would be:
+Typically CLUE will be running on port 8080 and the CMS will be running on 8082, or CLUE on 8080, Git proxy on 8081, and CMS on 8082. In this case the url above would be:
 
 - No proxy: `http://localhost:8082/?iframeBase=http://localhost:8080&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
 - With proxy: `http://localhost:8082/?iframeBase=http://localhost:8080&localCMSBackend&unit=[clue_unit_code]`

@@ -30,13 +30,13 @@ npm install
 ```bash
 npm start
 ```
-This runs the CMS on a local development server (default port: 8081).
+This runs the CMS on a local development server (default port: 8082).
 
 ### Typical local development workflow
 1. Start CLUE (`npm start` in the top-level folder)
 2. (Optional) Start the local git proxy in the `clue-curriculum` repo: `npx netlify-cms-proxy-server`
 3. Start the CMS (`npm start` in this folder)
-4. Open the CMS in your browser with appropriate URL parameters (see docs)
+4. Open the CMS in your browser with appropriate URL parameters (see [`docs/cms.md`](../docs/cms.md))
 
 ## Build & Deployment
 - Production builds: `npm run build`
