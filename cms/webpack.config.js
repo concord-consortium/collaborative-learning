@@ -23,6 +23,9 @@ module.exports = (env, argv) => {
     context: __dirname, // to automatically find tsconfig.json
     // https://survivejs.com/webpack/building/source-maps/
     devtool: devMode ? 'eval-cheap-module-source-map' : 'source-map',
+    devServer: {
+      port: 8082
+    },
     entry: {
       admin: './src/admin.tsx',
     },
@@ -134,7 +137,7 @@ module.exports = (env, argv) => {
       extensions: [ '.ts', '.tsx', '.js', '.jsx' ]
     },
     ignoreWarnings: [/export .* was not found in/],
-    plugins: [
+  plugins: [
       new ESLintPlugin(),
       new MiniCssExtractPlugin({
         filename: devMode ? '[name].css' : '[name].[chunkhash:8].css',

@@ -65,14 +65,14 @@ To work on the CMS locally you'll need to start both CLUE and the CMS:
 - open the CMS with `http://localhost:[cms_port]/?iframeBase=http://localhost:[clue_port]&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
     (add `&localCMSBackend` if using it). Make sure there are no extra "#" or "/" characters in the URL.
 
-Typically CLUE will be running on portal 8080 and the CMS will be running on 8081, or CLUE on 8080, Git proxy on 8081, and CMS on 8082. In this case the url above would be:
+Typically CLUE will be running on portal 8080 and the CMS will be running on 8082, or CLUE on 8080, Git proxy on 8081, and CMS on 8082. In this case the url above would be:
 
-- No proxy: `http://localhost:8081/?iframeBase=http://localhost:8080&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
+- No proxy: `http://localhost:8082/?iframeBase=http://localhost:8080&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
 - With proxy: `http://localhost:8082/?iframeBase=http://localhost:8080&localCMSBackend&unit=[clue_unit_code]`
 
 With this approach you'll be editing the content in the `clue-curriculum` repository directly. By default this will use the `author` branch in the `clue-curriculum` repository. So you aren't making changes to the same branch as other people, you should make your own branch in that repository and pass it to the `curriculumBranch` parameter. You have to make this branch using your own git tools, the CMS cannot create branches itself.
 
-If you want to have more local access to the curriculum you are editing, and you don't want to be updating the `clue-curriculum` repository, you can use the `localCMSBackend` parameter. See above for details on how to use this. Note the proxy needs to be on its own port. If it can't start on 8081 (because the cms is running there) then you'll need to configure it. See the "Configure the Decap CMS proxy server port number" section of [this Decap documentation page](https://decapcms.org/docs/working-with-a-local-git-repository).
+If you want to have more local access to the curriculum you are editing, and you don't want to be updating the `clue-curriculum` repository, you can use the `localCMSBackend` parameter. See above for details on how to use this. Note the proxy needs to be on its own port. If it can't start on 8081 (because something else is running there) then you'll need to configure it. See the "Configure the Decap CMS proxy server port number" section of [this Decap documentation page](https://decapcms.org/docs/working-with-a-local-git-repository).
 
 When the CMS loads the unit it will look for it at: `https://models-resources.concord.org/clue-curriculum/branch/[curriculumBranch]/msa/content.json`. This unit file is just used to figure out the tools that should be enabled in the document editors the CMS shows. Importantly, it is not loading it directly from Git. This means that your curriculumBranch needs to be pushed and deployed before the CMS will work. This is required even when working with a local git repository. Passing a full url for the unit does not work; it seems to cause other problems.
 
