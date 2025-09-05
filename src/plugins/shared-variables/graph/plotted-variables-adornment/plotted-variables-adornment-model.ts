@@ -1,5 +1,5 @@
 import { destroy, getParentOfType, getSnapshot, IAnyStateTreeNode, Instance, types } from "mobx-state-tree";
-import { Variable, VariableType } from "@concord-consortium/diagram-view";
+import { VariableType } from "@concord-consortium/diagram-view";
 
 import { getTileModel } from "../../../../models/document/shared-model-document-manager";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
@@ -50,7 +50,7 @@ export const PlottedVariables = types.model("PlottedVariables", {})
     yVariableId: types.maybe(types.string)
   })
   .volatile(self => ({
-    variablesCopy: undefined as VariableType[] | undefined,
+    sharedVariablesCopy: undefined as SharedVariablesType | undefined,
     xVariableCopy: undefined as VariableType | undefined,
     yVariableCopy: undefined as VariableType | undefined
   }))
@@ -82,7 +82,7 @@ export const PlottedVariables = types.model("PlottedVariables", {})
   }))
   .actions(self => ({
     computeY(x: number) {
-      if (self.variablesCopy && self.xVariableCopy && self.yVariableCopy) {
+      if (self.sharedVariablesCopy && self.xVariableCopy && self.yVariableCopy) {
         self.xVariableCopy.setValue(x);
         const dependentValue = self.yVariableCopy.computedValue;
         return dependentValue ?? NaN;
@@ -92,8 +92,8 @@ export const PlottedVariables = types.model("PlottedVariables", {})
     disposeCompute() {
       self.xVariableCopy = undefined;
       self.yVariableCopy = undefined;
-      if (self.variablesCopy) destroy(self.variablesCopy);
-      self.variablesCopy = undefined;
+      if (self.sharedVariablesCopy) destroy(self.sharedVariablesCopy);
+      self.sharedVariablesCopy = undefined;
     },
     setXVariableId(variableId?: string) {
       self.xVariableId = variableId;
@@ -104,11 +104,11 @@ export const PlottedVariables = types.model("PlottedVariables", {})
   }))
   .actions(self => ({
     setupCompute() {
-      self.variablesCopy = types.array(Variable).create(
-        self.sharedVariables ? getSnapshot(self.sharedVariables.variables) : []
+      self.sharedVariablesCopy = SharedVariables.create(
+        self.sharedVariables ? getSnapshot(self.sharedVariables) : {}
       );
-      self.xVariableCopy = self.variablesCopy?.find(variable => variable.id === self.xVariableId);
-      self.yVariableCopy = self.variablesCopy?.find(variable => variable.id === self.yVariableId);
+      self.xVariableCopy = self.sharedVariablesCopy?.getVariableById(self.xVariableId || "");
+      self.yVariableCopy = self.sharedVariablesCopy?.getVariableById(self.yVariableId || "");
       return { computeY: self.computeY, dispose: self.disposeCompute };
     }
   }));
