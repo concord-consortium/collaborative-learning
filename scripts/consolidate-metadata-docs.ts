@@ -351,7 +351,11 @@ async function reorganizeDocuments() {
       } else if (doc.type === "prefixed") {
         if (hasBaseDoc) {
           if (await checkAndMerge(doc.name, key)) {
-            await moveSubcollections(doc.name, key);
+            try {
+              await moveSubcollections(doc.name, key);
+            } catch (e) {
+              console.log("Err fatal error moving", key);
+            }
           } else {
             // We exit the entire script if the sanity check fails -- it means there is an unexpected
             // data inconsistency that should be investigated, or something the script doesn't yet handle.
