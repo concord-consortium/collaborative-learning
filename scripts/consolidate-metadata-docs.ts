@@ -22,26 +22,38 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+let throttlingCallId = 0;
+
 async function withThrottlingAndBackoff<T>(fn: () => Promise<T>, attempt = 0): Promise<T> {
+  const id = ++throttlingCallId;
+  console.log(`[withThrottlingAndBackoff:${id}] entered (attempt ${attempt})`);
+  if (activeWrites >= MAX_CONCURRENT_WRITES) {
+    console.log(`[withThrottlingAndBackoff:${id}] throttling, activeWrites=${activeWrites}, waiting...`);
+  }
   // Throttle concurrent writes
   while (activeWrites >= MAX_CONCURRENT_WRITES) {
     await sleep(100);
   }
   activeWrites++;
   try {
-    return await fn();
+    console.log(`[withThrottlingAndBackoff:${id}] running function (activeWrites=${activeWrites})`);
+    const result = await fn();
+    console.log(`[withThrottlingAndBackoff:${id}] function completed successfully`);
+    return result;
   } catch (err: any) {
     // Check for Firebase bandwidth error
     const msg = err?.message || "";
     if (msg.includes("exceeded their maximum bandwidth for writes") && attempt < MAX_RETRIES) {
       const delay = BASE_DELAY_MS * Math.pow(2, attempt) + Math.random() * 200;
-      console.warn(`Warn: Write throttled by Firebase, retrying in ${Math.round(delay)}ms (attempt ${attempt + 1})`);
+      // eslint-disable-next-line max-len
+      console.warn(`[withThrottlingAndBackoff:${id}] Warn: Write throttled by Firebase, retrying in ${Math.round(delay)}ms (attempt ${attempt + 1})`);
       await sleep(delay);
       return withThrottlingAndBackoff(fn, attempt + 1);
     }
     throw err;
   } finally {
     activeWrites--;
+    console.log(`[withThrottlingAndBackoff:${id}] exiting (activeWrites=${activeWrites})`);
   }
 }
 
