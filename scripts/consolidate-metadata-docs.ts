@@ -11,6 +11,40 @@ import admin from "firebase-admin";
 import _ from "lodash";
 import { getFirestoreBasePath, getScriptRootFilePath, moveFirestoreDoc } from "./lib/script-utils.js";
 
+// --- Throttling and Backoff Utilities ---
+const MAX_CONCURRENT_WRITES = 3;
+const MAX_RETRIES = 7;
+const BASE_DELAY_MS = 500;
+let activeWrites = 0;
+
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function withThrottlingAndBackoff<T>(fn: () => Promise<T>, attempt = 0): Promise<T> {
+  // Throttle concurrent writes
+  while (activeWrites >= MAX_CONCURRENT_WRITES) {
+    await sleep(100);
+  }
+  activeWrites++;
+  try {
+    return await fn();
+  } catch (err: any) {
+    // Check for Firebase bandwidth error
+    const msg = err?.message || "";
+    if (msg.includes("exceeded their maximum bandwidth for writes") && attempt < MAX_RETRIES) {
+      const delay = BASE_DELAY_MS * Math.pow(2, attempt) + Math.random() * 200;
+      console.warn(`Warn: Write throttled by Firebase, retrying in ${Math.round(delay)}ms (attempt ${attempt + 1})`);
+      await sleep(delay);
+      return withThrottlingAndBackoff(fn, attempt + 1);
+    }
+    throw err;
+  } finally {
+    activeWrites--;
+  }
+}
+
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
 const portal = "";
@@ -233,7 +267,7 @@ async function checkAndMerge(name: string, key: string) {
   if (Object.keys(updates).length > 0) {
     console.log("Ok Updates needed:", updates);
     if (!dryRun) {
-      await oldDoc.ref.update(updates);
+      await withThrottlingAndBackoff(() => oldDoc.ref.update(updates));
     }
   }
 
@@ -244,7 +278,16 @@ async function checkAndMerge(name: string, key: string) {
 async function moveDocument(name: string, newName: string) {
   console.log("Ok  move", name, "->", newName);
   if (!dryRun) {
-    await moveFirestoreDoc(firestore, documentsRoot, name, documentsRoot, newName, "all");
+    await withThrottlingAndBackoff(() =>
+      moveFirestoreDoc(
+        firestore,
+        documentsRoot,
+        name,
+        documentsRoot,
+        newName,
+        "all"
+      )
+    );
   }
 }
 
@@ -253,7 +296,16 @@ async function moveDocument(name: string, newName: string) {
 async function moveSubcollections(name: string, newName: string) {
   console.log("Ok  move subcollections only", name, "->", newName);
   if (!dryRun) {
-    await moveFirestoreDoc(firestore, documentsRoot, name, documentsRoot, newName, "subcollections");
+    await withThrottlingAndBackoff(() =>
+      moveFirestoreDoc(
+        firestore,
+        documentsRoot,
+        name,
+        documentsRoot,
+        newName,
+        "subcollections"
+      )
+    );
   }
 }
 
