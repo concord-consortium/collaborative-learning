@@ -22,7 +22,7 @@ jest.mock("../../../../models/tiles/tile-environment", () => ({
 
 const defaultSharedVariables: SharedVariablesSnapshot = {
   variables: [
-    { id: "x", name: "x",value: 10 },
+    { id: "x", name: "x", value: 10 },
     { id: "y", inputs: [ "x" ], expression: "x * 2" }
   ]
 };
