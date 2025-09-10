@@ -84,7 +84,7 @@ export const BaseExemplarControllerModel = types
         self.setExemplarVisibility(chosen.key, true);
         // Make a comment on the current document, and open it in the resources panel
         if (self.stores) {
-          const { documents, ui, persistentUI } = self.stores;
+          const { appConfig, documents, ui, persistentUI } = self.stores;
           const currentDocumentKey = persistentUI.problemWorkspace.primaryDocumentKey;
           const documentModel = currentDocumentKey && documents.getDocument(currentDocumentKey);
           if (documentModel) {
@@ -101,7 +101,7 @@ export const BaseExemplarControllerModel = types
               .catch((error) => {
                 console.error("Failed to post exemplar comment:", error);
             });
-            persistentUI.openResourceDocument(documentModel);
+            persistentUI.openResourceDocument(documentModel, appConfig);
             persistentUI.toggleShowChatPanel(true);
             ui.clearSelectedTiles();
           }
