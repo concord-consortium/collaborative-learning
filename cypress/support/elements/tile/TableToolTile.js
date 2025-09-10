@@ -69,13 +69,20 @@ class TableToolTile{
         return cy.get('.rdg-text-editor');
     }
     typeInTableCellXY(row, col, text) {
-      this.getTableCellXY(row, col).then($cell => {
-        if ($cell.attr('aria-selected') !== 'true') {
+      // This logic has been flakey. The double click to get the editor to show
+      // up was added to try to address this issue.
+      // The behavior we've seen is that the cell is selected but then a click
+      // on it doesn't always trigger the editor to open.
+      // The invoke was added so we'd have a log of whether the cell is selected
+      // or not. The dblclick was added to try to ensure the editor opens.
+      // If this is still flakey we could try using `type('{enter}')` on the cell.
+      this.getTableCellXY(row, col).invoke('attr', 'aria-selected').then(selected => {
+        if (selected !== 'true') {
           this.getTableCellXY(row, col).click({ scrollBehavior: false });
           this.getTableCellXY(row, col).should('have.attr', 'aria-selected', 'true');
           cy.wait(100);
         }
-        this.getTableCellXY(row, col).click({ scrollBehavior: false });
+        this.getTableCellXY(row, col).dblclick({ scrollBehavior: false });
         cy.document().within(() => {
           this.getTableCellEdit().type(`${text}{enter}`, { scrollBehavior: false });
         });
