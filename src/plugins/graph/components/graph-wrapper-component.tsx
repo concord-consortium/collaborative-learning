@@ -19,7 +19,6 @@ import { GraphComponent } from "./graph-component";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
 import { Point } from "../graph-types";
 import { HotKeys } from "../../../utilities/hot-keys";
-import { LocationSetterContext } from "../hooks/use-location-setter-context";
 
 import "./graph-toolbar-registration";
 
@@ -122,6 +121,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
         // Check location cache
         } else if (content.annotationLocationCache.has(objectId)){
           const location = content.annotationLocationCache.get(objectId);
+          console.log(`--- location`, location);
           if (location) {
             const size = content.annotationSizesCache.get(objectId);
             if (size) { // This is a rectangle of defined width & height
@@ -139,6 +139,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
           coords = pos && getScaledPosition(pos);
         }
         if (coords) {
+          console.log(` -- returning bb for`, coords);
           return boundingBoxForPoint(coords);
         }
       },
@@ -203,22 +204,20 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
 
   return (
     <GraphSettingsContext.Provider value={graphSettings}>
-      <LocationSetterContext.Provider value={{ set: content.setAnnotationLocation }}>
-        <div
-          className={wrapperClasses}
-          onKeyDown={(e) => hotKeys.current.dispatch(e)}
-          tabIndex={0} // must be able to take focus so that it can receive keyDown events
-        >
-          <BasicEditableTileTitle />
-          <GraphComponent
-            layout={layout}
-            tile={model}
-            tileElt={tileElt}
-            onRequestRowHeight={onRequestRowHeight}
-            readOnly={readOnly}
-          />
-        </div>
-      </LocationSetterContext.Provider>
+      <div
+        className={wrapperClasses}
+        onKeyDown={(e) => hotKeys.current.dispatch(e)}
+        tabIndex={0} // must be able to take focus so that it can receive keyDown events
+      >
+        <BasicEditableTileTitle />
+        <GraphComponent
+          layout={layout}
+          tile={model}
+          tileElt={tileElt}
+          onRequestRowHeight={onRequestRowHeight}
+          readOnly={readOnly}
+        />
+      </div>
     </GraphSettingsContext.Provider>
   );
 });

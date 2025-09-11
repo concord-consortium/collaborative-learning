@@ -428,6 +428,7 @@ export const GraphModel = TileContentModel
       self.interactionInProgress = value;
     },
     setAnnotationLocation(id: string, location: Point|undefined, size: RectSize|undefined) {
+      console.log(`--- setAnnotationLocation`, id, location, size);
       if (location) {
         self.annotationLocationCache.set(id, location);
       } else {

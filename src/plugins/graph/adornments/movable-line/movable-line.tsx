@@ -16,7 +16,6 @@ import { useReadOnlyContext } from "../../../../components/document/read-only-co
 import { kInfinitePoint } from "../adornment-models";
 import { Point } from "../../graph-types";
 import { kAnnotationNodeDefaultRadius } from "../../../../components/annotations/annotation-utilities";
-import { useLocationSetterContext } from "../../hooks/use-location-setter-context";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 
 import "./movable-line.scss";
@@ -63,7 +62,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     layout = useAxisLayoutContext(),
     instanceId = useInstanceIdContext(),
     readOnly = useReadOnlyContext(),
-    annotationLocationSetter = useLocationSetterContext(),
+    { setAnnotationLocation } = graphModel,
     xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType,
     yScale = layout.getAxisScale("left") as ScaleNumericBaseType,
     kTolerance = 4, // pixels to snap to horizontal or vertical
@@ -116,11 +115,11 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         rect = equationNode?.getBoundingClientRect(),
         width = rect?.width || kAnnotationNodeDefaultRadius,
         height = rect?.height || kAnnotationNodeDefaultRadius;
-      annotationLocationSetter?.set(annotationId, point, { width, height });
+      setAnnotationLocation(annotationId, point, { width, height });
     } else {
-      annotationLocationSetter?.set(annotationId, undefined, undefined);
+      setAnnotationLocation(annotationId, undefined, undefined);
     }
-  }, [annotationLocationSetter, model]);
+  }, [setAnnotationLocation, model]);
 
   const updateClasses = useCallback(
     (elt: Selection<SVGLineElement, unknown, null, undefined>, lineKey: string, hover = false) => {
@@ -182,9 +181,9 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           .attr('cy', y);
         const annotationId = getAnnotationId(lineKey, "handle", index===1 ? "lower" : "upper");
         if (model.isVisible) {
-          annotationLocationSetter?.set(annotationId, { x, y }, undefined);
+          setAnnotationLocation(annotationId, { x, y }, undefined);
         } else {
-          annotationLocationSetter?.set(annotationId, undefined, undefined);
+          setAnnotationLocation(annotationId, undefined, undefined);
         }
       }
     }
@@ -252,7 +251,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       updateClasses(lineObject.line, lineObject.key);
       refreshEquation(slope, intercept, lineModel, index, lineObject.key);
     });
-  }, [annotationLocationSetter, calculateHandlePosition, instanceId, layout, model.isVisible, model.lines, plotHeight,
+  }, [setAnnotationLocation, calculateHandlePosition, instanceId, layout, model.isVisible, model.lines, plotHeight,
       plotWidth, positionEquation, updateClasses, xAttrName, xAxis, xScale, xSubAxesCount, yAttrName, yAxis, yScale,
       ySubAxesCount]);
 
