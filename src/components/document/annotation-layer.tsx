@@ -51,6 +51,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [mouseX, setMouseX] = useState<number | undefined>();
   const [mouseY, setMouseY] = useState<number | undefined>();
   const [isBackgroundClick, setIsBackgroundClick] = useState(false);
+  // Use `setLayoutTick` to force a post-layout render (e.g., after tiles/rows change).
+  const [_layoutTick, setLayoutTick] = useState(0);
   const divRef = useRef<Element|null>(null);
   const { ui, persistentUI } = useStores();
   const tileApiInterface = useContext(TileApiInterfaceContext);
@@ -112,6 +114,16 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   // Force rerenders when the layer's size changes
   useResizeObserver({ref: divRef, box: "border-box"});
+
+  // After rows or annotations added, schedule a `requestAnimationFrame` tick to recalculate all
+  // measurements when layout has stabilized.
+  const rowIds = content?.rowOrder || [];
+  const annotationCount = content ? content.annotations.size : 0;
+  const stableRowIdsString = useMemoOne(() => rowIds.join(","), [rowIds]);
+  useEffect(() => {
+    const rafId = requestAnimationFrame(() => setLayoutTick(t => t + 1));
+    return () => cancelAnimationFrame(rafId);
+  }, [stableRowIdsString, annotationCount]);
 
   function getDocumentScale(el?: HTMLElement | null) {
     if (!el) return 1;
@@ -188,6 +200,13 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     return tileApi?.getObjectNodeRadii?.(objectId, objectType);
   }
 
+  function isTileReady(tileId: string) {
+    const tileApi = tileApiInterface?.getTileApi(tileId);
+    const tileDimensions = tileApi?.getTileDimensions?.();
+    if (tileDimensions && (tileDimensions.width === 0 || tileDimensions.height === 0)) return false;
+    return true;
+  }
+
   // Returns an object bounding box with respect to the containing tile
   function getObjectBoundingBox(tileId: string, objectId: string, objectType?: string) {
     // First check the cache.
@@ -195,6 +214,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     if (cachedValue) {
       return cachedValue;
     }
+    if (!isTileReady(tileId)) return undefined;
     const tileApi = tileApiInterface?.getTileApi(tileId);
     const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);
     return objectBoundingBox;
@@ -428,6 +448,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
         if (tileApi && tileApi.getTileDimensions && contentBoundingBox) {
           const { width: tileWidth, height: tileHeight } = tileApi.getTileDimensions();
+          if (tileWidth === 0 || tileHeight === 0) return undefined;
+
           const canvasSize = { x: tileWidth, y: tileHeight };
           const fitContentOptions = {
             canvasSize,
@@ -452,6 +474,9 @@ export const AnnotationLayer = observer(function AnnotationLayer({
           };
         }
       } else {
+        const tileDimensions = tileApiInterface?.getTileApi(tileId)?.getTileDimensions?.();
+        if (tileDimensions && (tileDimensions.width === 0 || tileDimensions.height === 0)) return undefined;
+
         transform = {
           scale: (tile.content as DrawingContentModelType).zoom,
           offsetX: (tile.content as DrawingContentModelType).offsetX,
@@ -465,7 +490,6 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     return undefined;
   };
 
-  const rowIds = content?.rowOrder || [];
   const hidden = !persistentUI.showAnnotations;
   const classes = classNames("annotation-layer",
     { editing, hidden, 'show-buttons': showButtons, 'show-handles': showDragHandles });
