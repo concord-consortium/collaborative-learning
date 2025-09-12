@@ -69,19 +69,29 @@ class TableToolTile{
         return cy.get('.rdg-text-editor');
     }
     typeInTableCellXY(row, col, text) {
-      // This logic has been flakey. The double click to get the editor to show
-      // up was added to try to address this issue.
-      // The behavior we've seen is that the cell is selected but then a click
-      // on it doesn't always trigger the editor to open.
+      // Previous versions of this logic have been flakey.
+      // The cell editor sometimes would not open.
+      // A single click after the cell was selected only worked sometimes.
+      // A double click after the cell was selected worked more often, but still
+      // failed sometimes.
+      // Now it is using a `type('{enter}')`, which has always worked so far.
       // The invoke was added so we'd have a log of whether the cell is selected
-      // or not. The dblclick was added to try to ensure the editor opens.
-      // If this is still flakey we could try using `type('{enter}')` on the cell.
+      // or not at this point.
       this.getTableCellXY(row, col).invoke('attr', 'aria-selected').then(selected => {
         if (selected !== 'true') {
           this.getTableCellXY(row, col).click({ scrollBehavior: false });
           this.getTableCellXY(row, col).should('have.attr', 'aria-selected', 'true');
           cy.wait(100);
         }
+        // The .rdg-focus-sink element is how RDG handles typing. It is a single
+        // element for the whole table, and then RDG routes any keyboard events
+        // to the selected cell.
+        // NOTE: because there might be multiple tables in the app, it is often
+        // necessary to wrap the call to typeInTableCellXY in a `within`. Other
+        // cypress actions in this helper don't require this because they filter
+        // non-visible elements. But since the rdg-focus-sink is not visible we
+        // have to use `{ force: true }` so then the `type` action tries to run
+        // on all of the rdg-focus-sink elements.
         cy.get('.rdg-focus-sink').type('{enter}', { force: true });
         cy.document().within(() => {
           this.getTableCellEdit().type(`${text}{enter}`, { scrollBehavior: false });
