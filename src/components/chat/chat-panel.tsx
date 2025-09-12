@@ -19,6 +19,7 @@ import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { AppConfigModelType } from "../../models/stores/app-config-model";
 import { UnitModelType } from "../../models/curriculum/unit";
 import { DocumentModelType } from "../../models/document/document";
+import { useNavTabPanelInfo } from "../../hooks/use-nav-tab-panel-info";
 
 import "./chat-panel.scss";
 
@@ -61,7 +62,9 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: simplePathComments } = useDocumentCommentsAtSimplifiedPath(focusDocument);
+  const { playbackTime } = useNavTabPanelInfo();
   const allComments = [...comments||[], ...simplePathComments||[]]
+    .filter((comment) => playbackTime ? comment.createdAt <= playbackTime : true)
     .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = allComments?.filter(comment => comment.tileId == null);

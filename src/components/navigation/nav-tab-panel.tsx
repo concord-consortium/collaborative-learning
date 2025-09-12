@@ -12,6 +12,7 @@ import { SectionDocumentOrBrowser } from "./section-document-or-browser";
 import { ChatPanel } from "../chat/chat-panel";
 import ChatIcon from "../../assets/chat-icon.svg";
 import { SortWorkView } from "../document/sort-work-view";
+import { NavTabPanelInfoProvider } from "../../hooks/use-nav-tab-panel-info";
 
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.scss";
@@ -42,60 +43,62 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
 
     return (
-      <div className="resource-and-chat-panel">
-        <div className="nav-tab-panel"
-            ref={elt => this.navTabPanelElt = elt}>
-          <Tabs
-            className={["react-tabs", "top-level-tabs"]}
-            selectedIndex={selectedTabIndex}
-            onSelect={this.handleSelectTab}
-            forceRenderTabPanel={true}
-          >
-            <div className="top-row">
-              <TabList className="top-tab-list">
-                { tabs?.map((tabSpec, index) => {
-                    const tabClass = `top-tab tab-${tabSpec.tab}
-                                      ${selectedTabIndex === index ? "selected" : ""}`;
-                    let dataTestId = undefined;
-                    if (tabSpec.tab === 'teacher-guide') dataTestId = 'nav-tab-teacher-guide';
-                    if (tabSpec.tab === 'student-work') dataTestId = 'nav-tab-student-work';
-                    if (tabSpec.tab === 'class-work') dataTestId = 'nav-tab-class-work';
-                    return (
-                      <React.Fragment key={tabSpec.tab}>
-                        <Tab className={tabClass} data-testid={dataTestId}>{tabSpec.label}</Tab>
-                      </React.Fragment>
-                    );
-                  })
+      <NavTabPanelInfoProvider>
+        <div className="resource-and-chat-panel">
+          <div className="nav-tab-panel"
+              ref={elt => this.navTabPanelElt = elt}>
+            <Tabs
+              className={["react-tabs", "top-level-tabs"]}
+              selectedIndex={selectedTabIndex}
+              onSelect={this.handleSelectTab}
+              forceRenderTabPanel={true}
+            >
+              <div className="top-row">
+                <TabList className="top-tab-list">
+                  { tabs?.map((tabSpec, index) => {
+                      const tabClass = `top-tab tab-${tabSpec.tab}
+                                        ${selectedTabIndex === index ? "selected" : ""}`;
+                      let dataTestId = undefined;
+                      if (tabSpec.tab === 'teacher-guide') dataTestId = 'nav-tab-teacher-guide';
+                      if (tabSpec.tab === 'student-work') dataTestId = 'nav-tab-student-work';
+                      if (tabSpec.tab === 'class-work') dataTestId = 'nav-tab-class-work';
+                      return (
+                        <React.Fragment key={tabSpec.tab}>
+                          <Tab className={tabClass} data-testid={dataTestId}>{tabSpec.label}</Tab>
+                        </React.Fragment>
+                      );
+                    })
+                  }
+                </TabList>
+                { isChatEnabled
+                    ? !openChatPanel &&
+                      <div className={`chat-panel-toggle themed ${activeNavTab}`}>
+                        {/* The next line of code is commented out, but deliberately not removed,
+                            per: https://www.pivotaltracker.com/story/show/179754830 */}
+                        {/* <NewCommentsBadge documentKey={focusDocument} /> */}
+                        <ChatIcon
+                          className={`chat-button ${activeNavTab}`}
+                          onClick={this.handleShowChatColumn}
+                        />
+                      </div>
+                    : <button className="close-button" onClick={this.handleCloseResources}/>
                 }
-              </TabList>
-              { isChatEnabled
-                  ? !openChatPanel &&
-                    <div className={`chat-panel-toggle themed ${activeNavTab}`}>
-                      {/* The next line of code is commented out, but deliberately not removed,
-                          per: https://www.pivotaltracker.com/story/show/179754830 */}
-                      {/* <NewCommentsBadge documentKey={focusDocument} /> */}
-                      <ChatIcon
-                        className={`chat-button ${activeNavTab}`}
-                        onClick={this.handleShowChatColumn}
-                      />
-                    </div>
-                  : <button className="close-button" onClick={this.handleCloseResources}/>
+              </div>
+              { tabs?.map((tabSpec) => {
+                  return (
+                    <TabPanel key={tabSpec.tab} className={["react-tabs__tab-panel", "top-level-tab-panel"]}>
+                      {this.renderTabContent(tabSpec)}
+                    </TabPanel>
+                  );
+                })
               }
-            </div>
-            { tabs?.map((tabSpec) => {
-                return (
-                  <TabPanel key={tabSpec.tab} className={["react-tabs__tab-panel", "top-level-tab-panel"]}>
-                    {this.renderTabContent(tabSpec)}
-                  </TabPanel>
-                );
-              })
-            }
-          </Tabs>
-          {showChatPanel && activeNavTab &&
-            <ChatPanel user={user} activeNavTab={activeNavTab} focusDocument={focusDocument} focusTileId={focusTileId}
-                        onCloseChatPanel={this.handleShowChatColumn} />}
+            </Tabs>
+            {showChatPanel && activeNavTab &&
+              <ChatPanel user={user} activeNavTab={activeNavTab} focusDocument={focusDocument} focusTileId={focusTileId}
+                          onCloseChatPanel={this.handleShowChatColumn} />}
+          </div>
         </div>
-      </div>
+      </NavTabPanelInfoProvider>
     );
   }
 

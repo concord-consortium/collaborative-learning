@@ -91,6 +91,15 @@
         margin-right: 5px;
         text-align: center;
         overflow: hidden;
+        position: relative; // to allow absolute positioning of deleted icon
+
+        .deleted-tile-indicator {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 22px;
+          height: 22px;
+        }
 
         svg {
           width: 100%;
