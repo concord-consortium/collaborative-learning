@@ -82,7 +82,7 @@ class TableToolTile{
           this.getTableCellXY(row, col).should('have.attr', 'aria-selected', 'true');
           cy.wait(100);
         }
-        this.getTableCellXY(row, col).dblclick({ scrollBehavior: false });
+        cy.get('.rdg-focus-sink').type('{enter}', { force: true });
         cy.document().within(() => {
           this.getTableCellEdit().type(`${text}{enter}`, { scrollBehavior: false });
         });
