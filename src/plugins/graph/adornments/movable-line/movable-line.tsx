@@ -1,15 +1,16 @@
-import React, {useCallback, useEffect, useRef} from "react";
-import {autorun} from "mobx";
+import React, { useCallback, useEffect, useRef } from "react";
+import { autorun } from "mobx";
 import { observer } from "mobx-react-lite";
 import { drag, DragBehavior, select, Selection } from "d3";
 import classNames from "classnames";
 import { kebabCase } from "lodash";
 
-import {useAxisLayoutContext} from "../../imports/components/axis/models/axis-layout-context";
-import {ScaleNumericBaseType} from "../../imports/components/axis/axis-types";
-import {INumericAxisModel} from "../../imports/components/axis/models/axis-model";
-import {computeSlopeAndIntercept, equationString, IAxisIntercepts,
-        lineToAxisIntercepts} from "../../utilities/graph-utils";
+import { useAxisLayoutContext } from "../../imports/components/axis/models/axis-layout-context";
+import { ScaleNumericBaseType } from "../../imports/components/axis/axis-types";
+import { INumericAxisModel } from "../../imports/components/axis/models/axis-model";
+import {
+  computeSlopeAndIntercept, equationString, IAxisIntercepts, lineToAxisIntercepts
+} from "../../utilities/graph-utils";
 import { getAnnotationId, IMovableLineInstance, IMovableLineModel } from "./movable-line-model";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
@@ -73,8 +74,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     xScaleCopy = useRef(xScale.copy()),
     yScaleCopy = useRef(yScale.copy()),
     lineRef = useRef<SVGSVGElement>(null),
-    lineObjects = useRef<ILineObject[]>([]),
-    pointsOnAxes = useRef<IAxisIntercepts[]>([]);
+    lineObjects = useRef<ILineObject[]>([]);
+  const pointsOnAxes = useRef<IAxisIntercepts[]>([]);
 
   // Set scale copy ranges. The scale copies are used when computing the line's
   // coordinates during dragging.
@@ -165,26 +166,27 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       lineModel: IMovableLineInstance,
       lineKey: string
     ) {
+      console.log(`... fixHandles`, pixelPtsOnAxes);
       const pivot = index === 1 ? lineModel?.pivot1 : lineModel?.pivot2;
       let x,y;
       if (pivot?.x && pivot?.y) {
+        console.log(`  . pivot`, pivot.x, pivot.y);
         x = layout.getAxisMultiScale("bottom")?.getScreenCoordinate({ data: pivot.x, cell: 0 });
         y = layout.getAxisMultiScale("left")?.getScreenCoordinate({ data: pivot.y, cell: 0 });
       } else {
         const point = calculateHandlePosition(index, pixelPtsOnAxes.pt1, pixelPtsOnAxes.pt2);
+        console.log(`  . no pivot`, point);
         x = point.x;
         y = point.y;
       }
-      if (x !== undefined && x !== null && y !== undefined && y !== null) {
+      if (x != null && y != null) {
         elt
           .attr('cx', x)
           .attr('cy', y);
-        const annotationId = getAnnotationId(lineKey, "handle", index===1 ? "lower" : "upper");
-        if (model.isVisible) {
-          setAnnotationLocation(annotationId, { x, y }, undefined);
-        } else {
-          setAnnotationLocation(annotationId, undefined, undefined);
-        }
+
+        const annotationId = getAnnotationId(lineKey, "handle", index === 1 ? "lower" : "upper");
+        const annotationPoint = model.isVisible ? { x, y } : undefined;
+        setAnnotationLocation(annotationId, annotationPoint, undefined);
       }
     }
 
