@@ -4,7 +4,7 @@ import { ClueObjectModel, ObjectBoundingBox, OffsetModel } from "./clue-object";
 import { uniqueId } from "../../utilities/js-utils";
 import { LogEventName } from "../../../src/lib/logger-types";
 import { logSparrowTitleChange } from "../tiles/log/log-sparrow-event";
-import { constrainToLine } from "../../components/annotations/annotation-utilities";
+import { constrainToLine, ITileSize } from "../../components/annotations/annotation-utilities";
 
 export const kArrowAnnotationType = "arrowAnnotation";
 
@@ -61,6 +61,7 @@ export const ArrowAnnotation = types
   sourceOffset: types.maybe(OffsetModel),
   targetObject: types.maybe(ClueObjectModel),
   targetOffset: types.maybe(OffsetModel),
+  normalizedTargetOffset: types.maybe(OffsetModel),
   text: types.maybe(types.string),
   textOffset: types.maybe(OffsetModel),
   shape: types.optional(types.enumeration(Object.values(ArrowShape)), ArrowShape.curved),
@@ -88,12 +89,29 @@ export const ArrowAnnotation = types
   setTargetObject(tileId: string, objectId: string, objectType?: string) {
     self.targetObject = ClueObjectModel.create({ tileId, objectId, objectType });
   },
-  setTargetOffset(dx: number, dy: number) {
+  setTargetOffset(dx: number, dy: number, sourceTileSize?: ITileSize) {
     if (!self.targetOffset) {
       self.targetOffset = OffsetModel.create({ dx, dy });
     } else {
       self.targetOffset.setDx(dx);
       self.targetOffset.setDy(dy);
+    }
+
+    // if we have a source tile size, we also set the normalized offset which
+    // is used to resize the arrow when the source tile is resized.
+    if (sourceTileSize) {
+      const normalizedOffset = {
+        dx: dx / sourceTileSize.width,
+        dy: dy / sourceTileSize.height
+      };
+      if (!self.normalizedTargetOffset) {
+        self.normalizedTargetOffset = OffsetModel.create({ dx: normalizedOffset.dx, dy: normalizedOffset.dy });
+      } else {
+        self.normalizedTargetOffset.setDx(normalizedOffset.dx);
+        self.normalizedTargetOffset.setDy(normalizedOffset.dy);
+      }
+    } else {
+      self.normalizedTargetOffset = undefined;
     }
   },
   setText(text: string) {
@@ -119,7 +137,8 @@ export const ArrowAnnotation = types
     documentLeft: number, documentRight: number, documentTop: number, documentBottom: number,
     dragOffsets: IArrowAnnotationDragOffsets,
     sourceBB?: ObjectBoundingBox|null, sourceViewTransform?: { offsetX: number; offsetY: number; scale: number },
-    targetBB?: ObjectBoundingBox|null, targetViewTransform?: { offsetX: number; offsetY: number; scale: number }
+    targetBB?: ObjectBoundingBox|null, targetViewTransform?: { offsetX: number; offsetY: number; scale: number },
+    sourceTileSize?: ITileSize
   ) {
     const defaultObj = {
       sourceX: undefined, sourceY: undefined, targetX: undefined, targetY: undefined,
@@ -163,11 +182,20 @@ export const ArrowAnnotation = types
       preDragTargetX = tBBcenter[0] + boundDelta(tDxOffset, targetBB.width);
       preDragTargetY = tBBcenter[1] + boundDelta(tDyOffset, targetBB.height);
     } else if (sBBcenter) {
-      // No target object, so interpret target offsets relative to source object.
-      targetX = sBBcenter[0] + tDxOffset + targetDragOffsetX;
-      targetY = sBBcenter[1] + tDyOffset + targetDragOffsetY;
-      preDragTargetX = sBBcenter[0] + tDxOffset;
-      preDragTargetY = sBBcenter[1] + tDyOffset;
+      let relativeTargetDx = tDxOffset;
+      let relativeTargetDy = tDyOffset;
+
+      // If we have a source object and a normalized offset, use that to determine the target offset
+      // relative to the source tile's bounding box so that the arrow resizes with the source tile.
+      if (self.normalizedTargetOffset && sourceTileSize) {
+        relativeTargetDx = sourceTileSize.width * self.normalizedTargetOffset.dx;
+        relativeTargetDy = sourceTileSize.height * self.normalizedTargetOffset.dy;
+      }
+
+      targetX = sBBcenter[0] + relativeTargetDx + targetDragOffsetX;
+      targetY = sBBcenter[1] + relativeTargetDy + targetDragOffsetY;
+      preDragTargetX = sBBcenter[0] + relativeTargetDx;
+      preDragTargetY = sBBcenter[1] + relativeTargetDy;
     }
     if (sourceX === undefined || sourceY === undefined || targetX === undefined || targetY === undefined
         || preDragSourceX === undefined || preDragSourceY === undefined || preDragTargetX === undefined
