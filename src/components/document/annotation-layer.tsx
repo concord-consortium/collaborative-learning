@@ -6,7 +6,7 @@ import useResizeObserver from "use-resize-observer";
 import { useMemoOne } from "use-memo-one";
 import { AnnotationButton } from "../annotations/annotation-button";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
-import { getDefaultPeak, getParentOffsets, getRowOffsets, getTileOffsets,
+import { getDefaultPeak, getParentOffsets, getRowOffsets, getTileClientSize, getTileOffsets,
   IParent } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
@@ -115,15 +115,14 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   // Force rerenders when the layer's size changes
   useResizeObserver({ref: divRef, box: "border-box"});
 
-  // After rows or annotations added, schedule a `requestAnimationFrame` tick to recalculate all
-  // measurements when layout has stabilized.
-  const rowIds = content?.rowOrder || [];
+  // After the content layout or annotations change, schedule a `requestAnimationFrame` tick
+  // to recalculate all measurements when the layout has stabilized.
+  const layoutSignature = content?.layoutSignature;
   const annotationCount = content ? content.annotations.size : 0;
-  const stableRowIdsString = useMemoOne(() => rowIds.join(","), [rowIds]);
   useEffect(() => {
     const rafId = requestAnimationFrame(() => setLayoutTick(t => t + 1));
     return () => cancelAnimationFrame(rafId);
-  }, [stableRowIdsString, annotationCount]);
+  }, [layoutSignature, annotationCount]);
 
   function getDocumentScale(el?: HTMLElement | null) {
     if (!el) return 1;
@@ -302,6 +301,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
     // Determine target object/location based on input
     let targetCenter: Point, targetOffset: IOffsetModel;
+    let normalizedTargetOffset: IOffsetModel|undefined;
     if (targetObject) {
       const targetBoundingBox = getObjectBoundingBoxUnknownRow(
         targetObject.tileId, targetObject.objectId, targetObject.objectType);
@@ -316,6 +316,15 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       // an offset relative to the source location.
       targetOffset = OffsetModel.create(
         { dx: mouseX - sourceCenter[0], dy: mouseY - sourceCenter[1] });
+
+      // if there is a source object we store the normalized offset based on the tile size
+      const sourceTileSize = sourceObject ? getTileSize(sourceObject.tileId) : undefined;
+      if (sourceTileSize) {
+        normalizedTargetOffset = OffsetModel.create({
+          dx: targetOffset.dx / sourceTileSize.width,
+          dy: targetOffset.dy / sourceTileSize.height
+        });
+      }
     }
 
     // If the source object is not set, the source offset is relative to the target object.
@@ -335,8 +344,10 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     const _peakDy = Math.max(documentTop - midPoint[1], Math.min(documentBottom - midPoint[1], peakDy));
     const textOffset = OffsetModel.create({ dx: _peakDx, dy: _peakDy });
 
-    const newArrow = ArrowAnnotation.create(
-      { sourceObject, sourceOffset: _sourceOffset, targetObject, targetOffset, textOffset, shape });
+    const newArrow = ArrowAnnotation.create({
+      sourceObject, sourceOffset: _sourceOffset, targetObject, targetOffset,
+      textOffset, shape, normalizedTargetOffset
+    });
     newArrow.setIsNew(true);
     content?.addArrow(newArrow);
   };
@@ -422,8 +433,12 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     }
   };
 
-  const getBoundingBox = (object: IClueObject) => {
+  const getBoundingBox = (object: IClueObject): ObjectBoundingBox | null | undefined => {
     return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId, object.objectType);
+  };
+
+  const getTileSize = (tileId: string) => {
+    return canvasElement ? getTileClientSize(canvasElement, tileId) : undefined;
   };
 
   const getTileViewTransform = (tileId: string) => {
@@ -549,6 +564,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     });
   };
 
+  const rowIds = content?.rowOrder || [];
+
   return (
     <div
       className={classes}
@@ -586,6 +603,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
               documentTop={documentTop}
               getBoundingBox={getBoundingBox}
               getObjectNodeRadii={getObjectNodeRadii}
+              getTileSize={getTileSize}
               key={key}
               readOnly={readOnly}
               sourceViewTransform={sourceViewTransform}

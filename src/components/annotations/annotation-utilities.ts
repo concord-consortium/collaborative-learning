@@ -11,6 +11,11 @@ export type IParent = {
   tileId: string,
 }
 
+export interface ITileSize {
+  width: number;
+  height: number;
+}
+
 /**
  * Find the point on the line from source to target that is closest to the input point.
  * @param source - The start point of the line.
@@ -324,6 +329,17 @@ export const getTileOffsets = (canvasElement: HTMLDivElement, tileId: string) =>
   };
 
   return offsets;
+};
+
+export const getTileClientSize = (canvasElement: HTMLDivElement, tileId: string): ITileSize | undefined => {
+  const tileSelector = `[data-tool-id='${tileId}']`;
+  const tileElements = canvasElement.querySelectorAll<HTMLElement>(tileSelector);
+  const tileElement = tileElements && tileElements.length === 1 ? tileElements[0] : undefined;
+  if (!tileElement) return;
+
+  const {width, height} = tileElement.getBoundingClientRect();
+
+  return { width, height };
 };
 
 export const getParentOffsets = (canvasElement: HTMLDivElement, parentRowId: string, parentTileId: string) => {
