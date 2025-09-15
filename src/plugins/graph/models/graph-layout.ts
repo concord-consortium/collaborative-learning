@@ -144,7 +144,7 @@ export class GraphLayout implements IAxisLayout {
    * Todo: Eventually there will be additional room set aside at the top for formulas
    */
   @computed get computedBounds() {
-    const {graphWidth, graphHeight} = this;
+    const { graphWidth, graphHeight } = this;
     const
       legendHeight = this.getDesiredExtent('legend'),
       topAxisHeight = this.getDesiredExtent('top'),
@@ -155,7 +155,7 @@ export class GraphLayout implements IAxisLayout {
       plotWidth = graphWidth - leftAxisWidth - v2AxisWidth - rightAxisWidth,
       plotHeight = graphHeight - topAxisHeight - bottomAxisHeight - legendHeight;
 
-    if (plotWidth<1 || plotHeight<1) {
+    if (plotWidth < 1 || plotHeight < 1) {
       // Layout functions can be called before tile size is finalized,
       // leading to ugly errors if negative sizes are returned.
       const zeroSize = {left: 0, top: 0, width: 0, height: 0};
@@ -172,15 +172,15 @@ export class GraphLayout implements IAxisLayout {
     }
 
     const newBounds: Record<GraphPlace, Bounds> = {
-        left: {left: 0, top: topAxisHeight, width: leftAxisWidth, height: plotHeight},
-        top: {left: leftAxisWidth, top: 0, width: graphWidth - leftAxisWidth - rightAxisWidth, height: topAxisHeight},
-        plot: {left: leftAxisWidth, top: topAxisHeight, width: plotWidth, height: plotHeight},
-        bottom: {left: leftAxisWidth, top: topAxisHeight + plotHeight, width: plotWidth, height: bottomAxisHeight},
-        legend: {left: 6, top: graphHeight - legendHeight, width: graphWidth - 6, height: legendHeight},
-        rightNumeric: {left: leftAxisWidth + plotWidth, top: topAxisHeight, width: v2AxisWidth, height: plotHeight},
-        rightCat: {left: leftAxisWidth + plotWidth, top: topAxisHeight, width: rightAxisWidth, height: plotHeight},
-        yPlus: {left: 0, top: topAxisHeight, width: leftAxisWidth, height: plotHeight} // This value is not used
-      };
+      left: { left: 0, top: topAxisHeight, width: leftAxisWidth, height: plotHeight },
+      top: { left: leftAxisWidth, top: 0, width: graphWidth - leftAxisWidth - rightAxisWidth, height: topAxisHeight },
+      plot: { left: leftAxisWidth, top: topAxisHeight, width: plotWidth, height: plotHeight },
+      bottom: { left: leftAxisWidth, top: topAxisHeight + plotHeight, width: plotWidth, height: bottomAxisHeight },
+      legend: { left: 6, top: graphHeight - legendHeight, width: graphWidth - 6, height: legendHeight },
+      rightNumeric: { left: leftAxisWidth + plotWidth, top: topAxisHeight, width: v2AxisWidth, height: plotHeight },
+      rightCat: { left: leftAxisWidth + plotWidth, top: topAxisHeight, width: rightAxisWidth, height: plotHeight },
+      yPlus: { left: 0, top: topAxisHeight, width: leftAxisWidth, height: plotHeight } // This value is not used
+    };
     return newBounds;
   }
 

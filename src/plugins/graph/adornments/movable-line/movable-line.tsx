@@ -116,9 +116,9 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         rect = equationNode?.getBoundingClientRect(),
         width = rect?.width || kAnnotationNodeDefaultRadius,
         height = rect?.height || kAnnotationNodeDefaultRadius;
-      setAnnotationLocation(annotationId, point, { width, height });
+      setAnnotationLocation(instanceId, annotationId, point, { width, height });
     } else {
-      setAnnotationLocation(annotationId, undefined, undefined);
+      setAnnotationLocation(instanceId, annotationId, undefined, undefined);
     }
   }, [setAnnotationLocation, model]);
 
@@ -186,7 +186,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
 
         const annotationId = getAnnotationId(lineKey, "handle", index === 1 ? "lower" : "upper");
         const annotationPoint = model.isVisible ? { x, y } : undefined;
-        setAnnotationLocation(annotationId, annotationPoint, undefined);
+        setAnnotationLocation(instanceId, annotationId, annotationPoint, undefined);
       }
     }
 

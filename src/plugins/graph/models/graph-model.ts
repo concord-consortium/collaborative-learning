@@ -87,10 +87,11 @@ export const GraphModel = TileContentModel
     interactionInProgress: false,
     editingMode: "none" as GraphEditMode,
     editingLayerId: undefined as string|undefined,
-    // Map from annotation IDs to their current locations.
+    // Maps from annotation IDs to their current locations.
     // This allows adornments to flexibly give us these locations.
-    annotationLocationCache: new ObservableMap<string,Point>(),
-    annotationSizesCache: new ObservableMap<string,RectSize>()
+    // Each tile instance has its own map, and the instanceId is the first key.
+    annotationLocationCaches: new ObservableMap<string, ObservableMap<string, Point>>(),
+    annotationSizesCaches: new ObservableMap<string, ObservableMap<string, RectSize>>()
   }))
   .preProcessSnapshot((snapshot: any) => {
     // See if any changes are needed
@@ -427,18 +428,27 @@ export const GraphModel = TileContentModel
     setInteractionInProgress(value: boolean) {
       self.interactionInProgress = value;
     },
-    setAnnotationLocation(id: string, location: Point|undefined, size: RectSize|undefined) {
-      console.log(`--- setAnnotationLocation`, id, location, size);
+    setAnnotationLocation(instanceId: string, id: string, location: Point|undefined, size: RectSize|undefined) {
+      let annotationLocationCache = self.annotationLocationCaches.get(instanceId);
+      if (!annotationLocationCache) {
+        annotationLocationCache = new ObservableMap<string, Point>();
+        self.annotationLocationCaches.set(instanceId, annotationLocationCache);
+      }
       if (location) {
-        self.annotationLocationCache.set(id, location);
+        annotationLocationCache.set(id, location);
       } else {
-        self.annotationLocationCache.delete(id);
+        annotationLocationCache.delete(id);
       }
 
+      let annotationSizesCache = self.annotationSizesCaches.get(instanceId);
+      if (!annotationSizesCache) {
+        annotationSizesCache = new ObservableMap<string, RectSize>();
+        self.annotationSizesCaches.set(instanceId, annotationSizesCache);
+      }
       if (size) {
-        self.annotationSizesCache.set(id, size);
+        annotationSizesCache.set(id, size);
       } else {
-        self.annotationSizesCache.delete(id);
+        annotationSizesCache.delete(id);
       }
     }
   }))

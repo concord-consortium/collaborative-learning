@@ -6,19 +6,20 @@ import { ScaleLinear } from "d3";
 import { kSmallAnnotationNodeRadius } from "../../../components/annotations/annotation-utilities";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { ITileProps } from "../../../components/tiles/tile-component";
+import { useSettingFromStores, useUIStore } from "../../../hooks/use-stores";
 import { OffsetModel } from "../../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { HotKeys } from "../../../utilities/hot-keys";
+import { Point } from "../graph-types";
 import {
   GraphSettingsContext, IGraphSettings, IGraphSettingsFromStores, kDefaultGraphSettings
 } from "../hooks/use-graph-settings-context";
 import { useInitGraphLayout } from "../hooks/use-init-graph-layout";
-import { useSettingFromStores, useUIStore } from "../../../hooks/use-stores";
+import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
+import { InstanceIdContext, useNextInstanceId } from "../imports/hooks/use-instance-id-context";
 import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
-import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
-import { Point } from "../graph-types";
-import { HotKeys } from "../../../utilities/hot-keys";
 
 import "./graph-toolbar-registration";
 
@@ -28,6 +29,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const {
     model, readOnly, tileElt, onRegisterTileApi, onRequestRowHeight
   } = props;
+  const instanceId = useNextInstanceId("graph");
   const ui = useUIStore();
   const graphSettingsFromStores = useSettingFromStores("graph") as IGraphSettingsFromStores;
   const graphSettings: IGraphSettings = { ...kDefaultGraphSettings, ...graphSettingsFromStores };
@@ -116,13 +118,15 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
         let coords;
+        const annotationLocationCache = content.annotationLocationCaches.get(instanceId);
+        const annotationSizesCache = content.annotationSizesCaches.get(instanceId);
         if (objectType === "dot") {
           coords = getDotCenter(objectId);
         // Check location cache
-        } else if (content.annotationLocationCache.has(objectId)){
-          const location = content.annotationLocationCache.get(objectId);
+        } else if (annotationLocationCache && annotationSizesCache && annotationLocationCache.has(objectId)){
+          const location = annotationLocationCache.get(objectId);
           if (location) {
-            const size = content.annotationSizesCache.get(objectId);
+            const size = annotationSizesCache.get(objectId);
             if (size) { // This is a rectangle of defined width & height
               const bbox = {
                 left: location.x + layout.getComputedBounds("plot").left,
@@ -143,15 +147,16 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
       },
       getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
         let coords;
+        const annotationLocationCache = content.annotationLocationCaches.get(instanceId);
         if (objectType === "dot") {
           // Native graph object
           coords = getDotCenter(objectId);
-        } else if (content.annotationSizesCache.has(objectId)) {
+        } else if (content.annotationSizesCaches.get(instanceId)?.has(objectId)) {
           // Adornment object with rectangle shape; do not return SVG
           return undefined;
-        } else if (content.annotationLocationCache.has(objectId)){
+        } else if (annotationLocationCache?.has(objectId)) {
           // Adornment object with dot shape
-          coords = content.annotationLocationCache.get(objectId);
+          coords = annotationLocationCache.get(objectId);
         } else if (objectType) {
           const pos = getPositionFromAdornment(objectType, objectId);
           coords = pos && getScaledPosition(pos);
@@ -201,21 +206,23 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   });
 
   return (
-    <GraphSettingsContext.Provider value={graphSettings}>
-      <div
-        className={wrapperClasses}
-        onKeyDown={(e) => hotKeys.current.dispatch(e)}
-        tabIndex={0} // must be able to take focus so that it can receive keyDown events
-      >
-        <BasicEditableTileTitle />
-        <GraphComponent
-          layout={layout}
-          tile={model}
-          tileElt={tileElt}
-          onRequestRowHeight={onRequestRowHeight}
-          readOnly={readOnly}
-        />
-      </div>
-    </GraphSettingsContext.Provider>
+    <InstanceIdContext.Provider value={instanceId}>
+      <GraphSettingsContext.Provider value={graphSettings}>
+        <div
+          className={wrapperClasses}
+          onKeyDown={(e) => hotKeys.current.dispatch(e)}
+          tabIndex={0} // must be able to take focus so that it can receive keyDown events
+        >
+          <BasicEditableTileTitle />
+          <GraphComponent
+            layout={layout}
+            tile={model}
+            tileElt={tileElt}
+            onRequestRowHeight={onRequestRowHeight}
+            readOnly={readOnly}
+          />
+        </div>
+      </GraphSettingsContext.Provider>
+    </InstanceIdContext.Provider>
   );
 });
