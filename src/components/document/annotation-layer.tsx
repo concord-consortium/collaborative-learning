@@ -115,17 +115,14 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   // Force rerenders when the layer's size changes
   useResizeObserver({ref: divRef, box: "border-box"});
 
-  // After rows or annotations change schedule a `requestAnimationFrame` tick to recalculate all
-  // measurements when layout has stabilized.
-  const orderedTileIds = content?.orderedTileIds || {};
+  // After the content layout or annotations change, schedule a `requestAnimationFrame` tick
+  // to recalculate all measurements when the layout has stabilized.
+  const layoutSignature = content?.layoutSignature;
   const annotationCount = content ? content.annotations.size : 0;
-  const orderedTileIdsString = useMemoOne(() => {
-    return Object.entries(orderedTileIds).map(([rowId, tileIds]) => `${rowId}:${tileIds.join(",")}`).join(";");
-  }, [orderedTileIds]);
   useEffect(() => {
     const rafId = requestAnimationFrame(() => setLayoutTick(t => t + 1));
     return () => cancelAnimationFrame(rafId);
-  }, [orderedTileIdsString, annotationCount]);
+  }, [layoutSignature, annotationCount]);
 
   function getDocumentScale(el?: HTMLElement | null) {
     if (!el) return 1;
@@ -567,6 +564,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     });
   };
 
+  const rowIds = content?.rowOrder || [];
+
   return (
     <div
       className={classes}
@@ -581,7 +580,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       }}
     >
       <svg className="annotation-svg">
-        { editing && !readOnly && Object.keys(orderedTileIds).flatMap(rowId => collectButtonsForRow(rowId)) }
+        { editing && !readOnly && rowIds.flatMap(rowId => collectButtonsForRow(rowId)) }
         { Array.from(content?.annotations.values() ?? []).map(arrow => {
           const key = `sparrow-${arrow.id}`;
           const sourceViewTransform = arrow.sourceObject?.tileId

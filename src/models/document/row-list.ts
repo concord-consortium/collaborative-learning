@@ -50,13 +50,19 @@ export const RowList = types
       return self.rowOrder.flatMap(rowId => this.getRow(rowId)?.tileIds ?? []);
     },
     /**
-     * Returns the tile ids in each row as map of row ids to an array of tile ids.
+     * Returns a string "signature" used to identify when the content has changed,
+     * either row ordering, tile ordering in rows or heights of rows
      */
-    get orderedTileIds() {
-      return self.rowOrder.reduce<Record<string, string[]>>((acc, rowId) => {
-        acc[rowId] = this.getRow(rowId)?.tileIds ?? [];
+    get layoutSignature(): string {
+      const rowLayouts = self.rowOrder.reduce<Record<string, {height: number, tileIds: string[]}>>((acc, rowId) => {
+        const row = this.getRow(rowId);
+        acc[rowId] = {
+          height: row?.height ?? 0,
+          tileIds: row?.tileIds ?? []
+        };
         return acc;
       }, {});
+      return JSON.stringify(rowLayouts);
     },
     rowHeightToExport(row: TileRowModelType, tileId: string, tileMap: Map<string|number, ITileModel>) {
       if (!row?.height) return;
