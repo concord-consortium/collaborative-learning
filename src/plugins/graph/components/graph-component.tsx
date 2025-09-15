@@ -3,7 +3,6 @@ import {observer} from "mobx-react-lite";
 import React, {useEffect, useMemo, useRef} from "react";
 import {useResizeDetector} from "react-resize-detector";
 import {ITileBaseProps} from '../imports/components/tiles/tile-base-props';
-import {useGraphController} from "../hooks/use-graph-controller";
 import {InstanceIdContext, useNextInstanceId} from "../imports/hooks/use-instance-id-context";
 import {AxisLayoutContext} from "../imports/components/axis/models/axis-layout-context";
 import {GraphController, GraphControllerContext} from "../models/graph-controller";
@@ -34,7 +33,10 @@ export const GraphComponent = observer(
     [layout, instanceId]
   );
 
-  useGraphController({graphController, graphModel});
+  // Keep the graphController up to date
+  useEffect(() => {
+    graphModel && graphController.setProperties({ graphModel });
+  }, [graphController, graphModel]);
 
   useEffect(() => {
     (width != null) && (height != null) && layout.setParentExtent(width, height);

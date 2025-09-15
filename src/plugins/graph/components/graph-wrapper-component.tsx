@@ -121,7 +121,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
         // Check location cache
         } else if (content.annotationLocationCache.has(objectId)){
           const location = content.annotationLocationCache.get(objectId);
-          console.log(`--- location`, location);
           if (location) {
             const size = content.annotationSizesCache.get(objectId);
             if (size) { // This is a rectangle of defined width & height
@@ -139,7 +138,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
           coords = pos && getScaledPosition(pos);
         }
         if (coords) {
-          console.log(` -- returning bb for`, coords);
           return boundingBoxForPoint(coords);
         }
       },
