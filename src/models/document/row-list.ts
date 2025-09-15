@@ -49,6 +49,15 @@ export const RowList = types
     get tileIds() {
       return self.rowOrder.flatMap(rowId => this.getRow(rowId)?.tileIds ?? []);
     },
+    /**
+     * Returns the tile ids in each row as map of row ids to an array of tile ids.
+     */
+    get orderedTileIds() {
+      return self.rowOrder.reduce<Record<string, string[]>>((acc, rowId) => {
+        acc[rowId] = this.getRow(rowId)?.tileIds ?? [];
+        return acc;
+      }, {});
+    },
     rowHeightToExport(row: TileRowModelType, tileId: string, tileMap: Map<string|number, ITileModel>) {
       if (!row?.height) return;
       // we only export heights for specific tiles configured to do so
