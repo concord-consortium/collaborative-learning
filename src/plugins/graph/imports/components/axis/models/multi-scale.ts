@@ -98,12 +98,10 @@ export class MultiScale {
   }
 
   _setRangeFromLength() {
-    console.log(`vvv setting range`, this.orientation === 'horizontal' ? [0, this.length] : [this.length, 0]);
     this.scale.range(this.orientation === 'horizontal' ? [0, this.length] : [this.length, 0]);
   }
 
   @action setScaleType(scaleType: IScaleType) {
-    console.log(`ooo setScaleType`, scaleType);
     if (scaleType !== this.scaleType) {
       this.scaleType = scaleType;
       this.scale = scaleTypeToD3Scale(scaleType);

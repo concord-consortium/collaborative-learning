@@ -166,16 +166,13 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       lineModel: IMovableLineInstance,
       lineKey: string
     ) {
-      console.log(`... fixHandles`, pixelPtsOnAxes);
       const pivot = index === 1 ? lineModel?.pivot1 : lineModel?.pivot2;
       let x,y;
       if (pivot?.x && pivot?.y) {
-        console.log(`  . pivot`, pivot.x, pivot.y);
         x = layout.getAxisMultiScale("bottom")?.getScreenCoordinate({ data: pivot.x, cell: 0 });
         y = layout.getAxisMultiScale("left")?.getScreenCoordinate({ data: pivot.y, cell: 0 });
       } else {
         const point = calculateHandlePosition(index, pixelPtsOnAxes.pt1, pixelPtsOnAxes.pt2);
-        console.log(`  . no pivot`, point);
         x = point.x;
         y = point.y;
       }
@@ -232,8 +229,6 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       const { domain: yDomain } = yAxis;
       pointsOnAxes.current[index] = lineToAxisIntercepts(slope, intercept, xDomain, yDomain);
       // The coordinates at which the line intersects the axes
-      console.log(`xxx points`, pointsOnAxes.current[index].pt1, `y`, pointsOnAxes.current[index].pt2);
-      console.log(`  x scaled`, xScale(pointsOnAxes.current[index].pt2.x));
       const pixelPtsOnAxes = {
         pt1: {
           x: xScale(pointsOnAxes.current[index].pt1.x) / xSubAxesCount,

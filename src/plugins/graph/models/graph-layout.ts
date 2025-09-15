@@ -100,10 +100,8 @@ export class GraphLayout implements IAxisLayout {
   }
 
   @action setAxisScaleType(place: AxisPlace, scale: IScaleType) {
-    console.log(`+++ setAxisScaleType`);
     this.getAxisMultiScale(place)?.setScaleType(scale);
     const length = isVertical(place) ? this.plotHeight : this.plotWidth;
-    console.log(` ++ length`, length);
     this.getAxisMultiScale(place)?.setLength(length);
   }
 

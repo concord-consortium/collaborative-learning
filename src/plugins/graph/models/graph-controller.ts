@@ -82,7 +82,6 @@ export class GraphController {
         const axisModel = graphModel.getAxis(axisPlace),
           attrRole = axisPlaceToAttrRole[axisPlace];
         if (axisModel) {
-          console.log(`=== initializeGraph`, axisPlace, axisModel.type);
           layout.setAxisScaleType(axisPlace, axisModel.scale);
           const axisMultiScale = layout.getAxisMultiScale(axisPlace);
           if (isEmptyAxisModel(axisModel)) {  // EmptyAxisModel
@@ -164,7 +163,6 @@ export class GraphController {
             const newAxisModel = NumericAxisModel.create({place, min, max});
             graphModel.setAxis(place, newAxisModel);
             dataConfiguration.setAttributeType(attrRole, 'numeric');
-            console.log(`=== setupAxis`, place);
             layout.setAxisScaleType(place, 'linear');
           }
           if (!graphModel.lockAxes && !currentLayer?.editable) {
