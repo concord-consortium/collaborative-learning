@@ -100,27 +100,32 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     // the slider max is sliderEntries.length, which is one more than the last index
     // in sliderEntries. This value indicates going to the end of the history.
     const sliderEntry = sliderEntries[value];
+
+    // figure out which history entry to go to
+    let newHistoryEntryIndex = 0;
     if (sliderEntry) {
       // set the playback time to the time of the entry so that the comment thread is in sync
       setPlaybackTime(sliderEntry.created);
 
       if (sliderEntry.kind === "history") {
-        treeManager.goToHistoryEntry(sliderEntry.index);
+        newHistoryEntryIndex = sliderEntry.index;
       } else {
         // go to the history entry just before the comment (or any other future slider entry kinds) was made
         // to keep the canvas in sync
         for (let i = value - 1; i >= 0; i--) {
           const entry = sliderEntries[i];
           if (entry.kind === "history") {
-            treeManager.goToHistoryEntry(entry.index);
+            newHistoryEntryIndex = entry.index;
             break;
           }
         }
       }
     } else {
       // go to the final history entry when at the end of the slider
-      treeManager.goToHistoryEntry(history.length);
+      newHistoryEntryIndex = history.length;
     }
+    treeManager.goToHistoryEntry(newHistoryEntryIndex);
+
     setSliderValue(value);
   }, [treeManager, history, sliderEntries, setPlaybackTime]);
 
