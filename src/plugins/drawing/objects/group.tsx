@@ -52,6 +52,14 @@ export const GroupObject = SizedObject.named("GroupObject")
         x: groupBB.nw.x + internalBB.se.x * groupWidth,
         y: groupBB.nw.y + internalBB.se.y * groupHeight
       };
+      if (self.vFlip) {
+        internalNW.y = groupBB.nw.y + (groupBB.se.y - internalNW.y);
+        internalSE.y = groupBB.nw.y + (groupBB.se.y - internalSE.y);
+      }
+      if (self.hFlip) {
+        internalNW.x = groupBB.nw.x + (groupBB.se.x - internalNW.x);
+        internalSE.x = groupBB.nw.x + (groupBB.se.x - internalSE.x);
+      }
       const rotatedNW = rotatePoint(internalNW, groupBB.se, groupRotation);
       const rotatedSE = rotatePoint(internalSE, groupBB.se, groupRotation);
       const sides = boundingBoxSidesForPoints([rotatedNW, rotatedSE]);
