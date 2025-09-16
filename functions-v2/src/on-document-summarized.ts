@@ -74,7 +74,6 @@ export const onDocumentSummarized = onDocumentWritten({
   }
 
   // FOR NOW: only summarize the cas unit documents
-  // TODO: figure out when to summarize and when to not
   if (docData.unit !== "cas") {
     logInfo("EARLY EXIT: document is not a cas unit:", {unit: docData.unit});
     return;
@@ -83,9 +82,7 @@ export const onDocumentSummarized = onDocumentWritten({
   if (["authed", "demo"].includes(root)) {
     logInfo("EARLY EXIT: Document is in authed or demo root:", {root});
   }
-  // TODO: like onAnalysisDocumentWritten have two endpoints and then a single handler
   const prefix = root === "authed" ? `authed/portals/${space}` : `demo/${space}/portals/demo`;
-  // TODO: get the current content of the document from Firebase
   const firebaseDocumentPath = `${prefix}/classes/${docData.context_id}/users/${docData.uid}/documents/${documentId}`;
   logInfo("Firebase document path:", firebaseDocumentPath);
   let content: string|undefined = undefined;
