@@ -315,6 +315,14 @@ $border-radius-base: 6px;
     }
   }
 
+  .comment-markers-container {
+    position: absolute;
+    top: 0;
+    left: 10px;
+    right: 10px;
+    height: 100%;
+  }
+
   .rc-slider {
     position: relative;
     width: 100%;

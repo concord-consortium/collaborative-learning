@@ -1,0 +1,87 @@
+@import "../vars";
+
+.comment-marker {
+  position: absolute;
+  top: 0px;
+
+  .vertical-line {
+    position: absolute;
+    left: 50%;
+    top: 20px;
+    width: 2px;
+    height: 28px;
+    background-color: red;
+    transform: translateX(-50%);
+
+    &.my-work {
+      background-color: $workspace-teal;
+    }
+    &.class-work, &.sort-work {
+      background-color: $classwork-purple
+    }
+    &.student-work {
+      background-color: $charcoal;
+    }
+    &.learning-log {
+      background-color: $learninglog-green;
+    }
+    &.problems {
+      background-color: $problem-orange;
+    }
+  }
+
+  .user-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: solid 1.5px;
+    border-color: $user-icon-student-border;
+    background-color: $user-icon-student-background;
+    width: 20px;
+    height: 20px;
+
+    &.round {
+      border-radius: 50%;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+      fill: $user-icon-student-color;
+      margin-left: -1px;
+    }
+
+    &.me {
+      background-color: $user-icon-student-me-background;
+      border-color: $user-icon-student-me-border;
+
+      svg {
+        fill: $user-icon-student-me-color;
+      }
+    }
+
+    &.ivan {
+      background-color: $user-icon-student-ivan-background;
+      border-color: $user-icon-student-ivan-border;
+
+      svg {
+        fill: $user-icon-student-ivan-color;
+      }
+    }
+
+    &.teacher {
+      background-color: $user-icon-teacher-background;
+      border-color: $user-icon-teacher-border;
+
+      svg {
+        fill: $user-icon-teacher-color;
+      }
+    }
+
+    &.ada {
+      background-color: $user-icon-teacher-ada-background;
+      border-color: $user-icon-teacher-ada-border;
+    }
+  }
+}

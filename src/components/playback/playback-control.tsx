@@ -1,14 +1,20 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Slider from "rc-slider";
 import classNames from "classnames";
 import { Instance } from "mobx-state-tree";
 import { observer } from "mobx-react";
-import { usePersistentUIStore } from "../../hooks/use-stores";
+import { usePersistentUIStore, useStores } from "../../hooks/use-stores";
 import { logCurrentHistoryEvent } from "../../models/history/log-history-event";
 import { TreeManager } from "../../models/history/tree-manager";
 import Marker from "../../clue/assets/icons/playback/marker.svg";
 import PlayButton from "../../clue/assets/icons/playback/play-button.svg";
 import PauseButton from "../../clue/assets/icons/playback/pause-button.svg";
+import { useDocumentComments, useDocumentCommentsAtSimplifiedPath } from "../../hooks/document-comment-hooks";
+import { WithId } from "../../hooks/firestore-hooks";
+import { CommentDocument } from "../../lib/firestore-schema";
+import { useNavTabPanelInfo } from "../../hooks/use-nav-tab-panel-info";
+import { HistoryEntryType } from "../../models/history/history";
+import { CommentMarker } from "./comment-marker";
 
 import "./playback-control.scss";
 
@@ -17,21 +23,42 @@ export interface IMarkerProps {
   location: number;
 }
 
+interface IHistorySliderEntry {
+  kind: "history";
+  entry: HistoryEntryType;
+  index: number;
+  created: Date;
+}
+export interface ICommentSliderEntry {
+  kind: "comment";
+  entry: WithId<CommentDocument>;
+  created: Date;
+}
+type ISliderEntry = IHistorySliderEntry | ICommentSliderEntry;
+
 interface IProps {
   treeManager: Instance<typeof TreeManager>;
 }
 
 export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProps) => {
   const { treeManager } = props;
-  const { activeNavTab } = usePersistentUIStore();
+  const { activeNavTab, focusDocument } = usePersistentUIStore();
+  const { user } = useStores();
   const [sliderPlaying, setSliderPlaying] = useState(false);
   const sliderContainerRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
   const [markerSelected, setMarkerSelected] = useState(false);
   const [addMarkerButtonSelected, /* setAddMarkerButtonSelected */] = useState(false);
   const [markers, setMarkers] = useState<IMarkerProps[]>([]);
+  const { data: comments } = useDocumentComments(focusDocument);
+  const { data: simplePathComments } = useDocumentCommentsAtSimplifiedPath(focusDocument);
+  const allComments = [...comments||[], ...simplePathComments||[]]
+    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  const { setPlaybackTime } = useNavTabPanelInfo();
+
   // const [selectedMarkers, ] = useState<IMarkerProps[]>([]);
   const history = treeManager.document.history;
+
   // The numHistoryEntriesApplied should be set to the position of the history entry
   // that last "modified" the current document.
   //
@@ -41,11 +68,27 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   // by the history stuff, but it is being used to trigger document saves to Firebase
   // I think.  In some sense this is like a hash of the document content.
 
-  const {numHistoryEventsApplied, currentHistoryEntry} = treeManager;
+  const {numHistoryEventsApplied} = treeManager;
   // numHistoryEventsApplied can be 0 or undefined, the event is undefined in both cases
-  const sliderValue = numHistoryEventsApplied ?? 0;
-  const eventCreatedTime = currentHistoryEntry?.created;
-  const playbackDisabled = numHistoryEventsApplied === undefined || sliderValue === history.length;
+
+  const sliderEntries = useMemo(() => {
+    let entries: ISliderEntry[] = history
+      .map((entry, index) => ({kind: "history", entry, created: entry.created, index}));
+    entries = entries.concat(allComments.map((comment) => (
+      {kind: "comment", entry: comment, created: comment.createdAt}))
+    );
+    entries.sort((a, b) => a.created.getTime() - b.created.getTime());
+    return entries;
+  }, [history, allComments]);
+
+  const [sliderValue, setSliderValue] = useState(() => sliderEntries.length);
+
+  const eventCreatedTime = useMemo(() => {
+    const entry = sliderEntries[sliderValue] ?? sliderEntries[sliderEntries.length - 1];
+    return entry?.created;
+  }, [sliderValue, sliderEntries]);
+
+  const playbackDisabled = numHistoryEventsApplied === undefined || sliderValue === sliderEntries.length;
 
   const handlePlayPauseToggle = useCallback((playing?: boolean) => {
     const playStatus = playing !== undefined ? playing : !sliderPlaying;
@@ -53,19 +96,41 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     setSliderPlaying(playStatus);
   }, [sliderPlaying, treeManager]);
 
+  const goToSliderValue = useCallback((value: number) => {
+    // the slider max is sliderEntries.length, which is one more than the last index
+    // in sliderEntries. This value indicates going to the end of the history.
+    const sliderEntry = sliderEntries[value];
+    if (sliderEntry) {
+      setPlaybackTime(sliderEntry.created);
+      if (sliderEntry.kind === "history") {
+        treeManager.goToHistoryEntry(sliderEntry.index);
+      }
+    } else {
+      // go to the final history entry when at the end of the slider
+      treeManager.goToHistoryEntry(history.length);
+    }
+    setSliderValue(value);
+  }, [treeManager, history, sliderEntries, setPlaybackTime]);
+
+  const goToComment = useCallback((comment: WithId<CommentDocument>) => {
+    const index = sliderEntries.findIndex(e => e.kind === "comment" && e.entry.id === comment.id);
+    if (index !== -1) {
+      goToSliderValue(index);
+    }
+  }, [sliderEntries, goToSliderValue]);
+
   useEffect(() => {
     if (sliderPlaying) {
       const slider = setTimeout(()=>{
-        if (sliderValue < history.length) {
-          treeManager.goToHistoryEntry(sliderValue + 1);
+        if (sliderValue < sliderEntries.length) {
+          goToSliderValue(sliderValue + 1);
         } else {
           handlePlayPauseToggle(false);
         }
       }, 500);
       return () => clearTimeout(slider);
     }
-  }, [handlePlayPauseToggle, history.length, sliderPlaying, sliderValue, treeManager]);
-
+  }, [handlePlayPauseToggle, sliderEntries.length, sliderPlaying, sliderValue, goToSliderValue]);
 
   //TODO: need to add a modal that warns users about max number of markers. Currently, a generic alert is shown
   //TODO: Currently, if add marker is on and user moves the time handle, a marker is added where the user
@@ -90,7 +155,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   // };
 
   const handleSliderValueChange = (value: any) => {
-    treeManager.goToHistoryEntry(value);
+    goToSliderValue(value);
   };
 
   const handleSliderAfterChange = (value: any) => {
@@ -143,24 +208,33 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     }
   };
 
+  const getCommentLocation = (comment: WithId<CommentDocument>) => {
+    if (sliderEntries.length === 0) {
+      return 0;
+    }
+
+    const index = sliderEntries.findIndex(entry => entry.kind === "comment" && entry.entry.id === comment.id);
+    return Math.max(0, Math.min(100, 100 * (index / sliderEntries.length)));
+  };
+
+  const getMarkerLocation = (location: number) => {
+    const sliderComponentWidth = sliderContainerRef.current?.offsetWidth;
+    if (sliderComponentWidth) {
+      const markerOffset = ((location * (sliderComponentWidth - 20))/sliderComponentWidth);
+      return (markerOffset);
+    }
+  };
+
   const renderSliderContainer = () => {
     const markerContainerClass = classNames("marker-container", activeNavTab, {"selected": markerSelected});
     const markerClass = classNames("marker", activeNavTab);
-
-    const getMarkerLocation = (location: number) => {
-      const sliderComponentWidth = sliderContainerRef.current?.offsetWidth;
-      if (sliderComponentWidth) {
-        const markerOffset = ((location * (sliderComponentWidth - 20))/sliderComponentWidth);
-        return (markerOffset);
-      }
-    };
 
     return (
       <>
         <div className="slider-container" ref={sliderContainerRef} data-testid="playback-slider">
           <Slider
             min={0}
-            max={history.length}
+            max={sliderEntries.length}
             step={1}
             value={sliderValue}
             ref={railRef}
@@ -179,9 +253,27 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
               <Marker className={markerClass}/>
             </div>
           );
-        })
-      }
+        })}
       </>
+    );
+  };
+
+  const renderCommentMarkers = () => {
+    return (
+      <div className="comment-markers-container" data-testid="comment-markers">
+        {
+          allComments.map(comment => {
+            return <CommentMarker
+              key={comment.id}
+              isMe={comment.uid === user?.id}
+              comment={comment}
+              commentLocation={getCommentLocation(comment)}
+              activeNavTab={activeNavTab}
+              onClick={goToComment}
+            />;
+          })
+        }
+      </div>
     );
   };
 
@@ -195,6 +287,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
           addMarkerSelected={addMarkerButtonSelected} onAddMarkerSelected={handleAddMarkerButtonSelected}/> */}
       <div className={sliderComponentClass}>
         {renderMarkerComponent()}
+        {renderCommentMarkers()}
         {renderSliderContainer()}
       </div>
       {renderTimeInfo()}

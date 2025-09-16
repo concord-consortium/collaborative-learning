@@ -1,25 +1,5 @@
 @import "../vars";
 
-$user-icon-student-color:            #828282;
-$user-icon-student-background:       #CDEBF2;
-$user-icon-student-border:           white;
-
-$user-icon-student-me-color:         #0592AF;
-$user-icon-student-me-background:    white;
-$user-icon-student-me-border:        #949494;
-
-$user-icon-student-ivan-color:       #FDFFAB;
-$user-icon-student-ivan-background:  #0592AF;
-$user-icon-student-ivan-border:      white;
-
-$user-icon-teacher-color:            #FF8415;
-$user-icon-teacher-background:       white;
-$user-icon-teacher-border:           #949494;
-
-// $user-icon-teacher-ada-color:  none; icon is multicolored
-$user-icon-teacher-ada-background:   white;
-$user-icon-teacher-ada-border:       #949494;
-
 @keyframes pulse {
   0%, 100% {
     opacity: 0;
