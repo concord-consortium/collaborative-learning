@@ -9,12 +9,13 @@ import "./comment-marker.scss";
 
 interface IProps {
   comment: WithId<CommentDocument>;
+  isMe: boolean;
   commentLocation?: number;
   activeNavTab?: string;
   onClick: (commentEntry: WithId<CommentDocument>) => void;
 }
 
-export const CommentMarker: React.FC<IProps> = ({comment, commentLocation, activeNavTab, onClick}) => {
+export const CommentMarker: React.FC<IProps> = ({comment, isMe, commentLocation, activeNavTab, onClick}) => {
   // 10px is half the width of the marker, it is subtracted to center it
   const style = {left: `calc(${commentLocation}% - 10px)`};
 
@@ -24,7 +25,7 @@ export const CommentMarker: React.FC<IProps> = ({comment, commentLocation, activ
   return (
     <div key={`comment-${comment.id}`} className="comment-marker" style={style} onClick={handleOnClick} title={title}>
       <div className={classNames("vertical-line", activeNavTab)} />
-      <ChatAvatar uid={comment.uid} />
+      <ChatAvatar uid={comment.uid} isMe={isMe} />
     </div>
   );
 };

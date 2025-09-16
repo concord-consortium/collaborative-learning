@@ -3,7 +3,7 @@ import Slider from "rc-slider";
 import classNames from "classnames";
 import { Instance } from "mobx-state-tree";
 import { observer } from "mobx-react";
-import { usePersistentUIStore } from "../../hooks/use-stores";
+import { usePersistentUIStore, useStores } from "../../hooks/use-stores";
 import { logCurrentHistoryEvent } from "../../models/history/log-history-event";
 import { TreeManager } from "../../models/history/tree-manager";
 import Marker from "../../clue/assets/icons/playback/marker.svg";
@@ -43,6 +43,7 @@ interface IProps {
 export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProps) => {
   const { treeManager } = props;
   const { activeNavTab, focusDocument } = usePersistentUIStore();
+  const { user } = useStores();
   const [sliderPlaying, setSliderPlaying] = useState(false);
   const sliderContainerRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
@@ -264,6 +265,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
           allComments.map(comment => {
             return <CommentMarker
               key={comment.id}
+              isMe={comment.uid === user?.id}
               comment={comment}
               commentLocation={getCommentLocation(comment)}
               activeNavTab={activeNavTab}
