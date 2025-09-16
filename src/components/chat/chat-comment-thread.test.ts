@@ -31,7 +31,8 @@ describe("Chat comment thread", () => {
             title: null,
             tileId: null,
             tileType: null,
-            comments: [fakeComment]
+            comments: [fakeComment],
+            isDeletedTile: false,
         };
         expect(threads.length).toEqual(1);
         expect(threads[0]).toEqual(fakeChatThread);
@@ -85,5 +86,27 @@ describe("Chat comment thread", () => {
         expect(threads[1].comments).toEqual(tileComments);
         expect(threads[1].tileId).toEqual("tile1");
         expect(threads[1].tileType).toBeDefined();
+    });
+
+    it("Test comments on deleted tiles", () => {
+        const content = DocumentContentModel.create(createSingleTileContent({
+            type: "Text",
+            title: "test title",
+          }));
+        const c1 = makeFakeComment("c1", "tile1");
+        const c2 = makeFakeComment("c2", "tile2"); // tile2 does not exist in content, this fakes a deleted tile
+        const comments = [c1, c2];
+        const threads = makeChatThreads(comments, content);
+        expect(threads.length).toEqual(2);
+
+        expect(threads[0].comments).toEqual([c1]);
+        expect(threads[0].tileId).toEqual("tile1");
+        expect(threads[0].tileType).toBeDefined();
+        expect(threads[0].isDeletedTile).toEqual(false);
+
+        expect(threads[1].comments).toEqual([c2]);
+        expect(threads[1].tileId).toEqual("tile2");
+        expect(threads[1].tileType).toBeDefined();
+        expect(threads[1].isDeletedTile).toEqual(true);
     });
 });

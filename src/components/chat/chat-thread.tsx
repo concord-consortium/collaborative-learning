@@ -10,6 +10,8 @@ import { TileIconComponent } from "./tile-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
 import type { PostCommentFn, DeleteCommentFn } from "./chat-panel";
 
+import DeletedTileIcon from "../../assets/icons/deleted-tile-icon.svg";
+
 import "./chat-thread.scss";
 
 interface IProps {
@@ -57,6 +59,7 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
   const numComments = commentThread?.comments.length || 0;
   const comments = commentThread?.comments || [];
   const tileId = commentThread?.tileId || focusTileId;
+  const isDeletedTile = commentThread?.isDeletedTile || false;
 
   return (
     <div key={threadId}
@@ -73,6 +76,7 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
         <div className="chat-thread-tile-info">
           <div className="chat-thread-tile-type" data-testid="chat-thread-tile-type">
             <TileIconComponent documentKey={focusDocument} tileId={tileId}/>
+            {isDeletedTile && <DeletedTileIcon className="deleted-tile-indicator" />}
           </div>
           <div className="chat-thread-title"> {title} </div>
         </div>

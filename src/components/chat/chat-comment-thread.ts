@@ -7,6 +7,7 @@ export interface ChatCommentThread {
   tileId: string | null;
   tileType: string | null;
   comments: WithId<CommentDocument>[];
+  isDeletedTile: boolean;
 }
 
 // Expects a list of comments in Document order with document level comments (with no (null) tileId) first.
@@ -29,11 +30,13 @@ export function makeChatThreads (
         isTileComment = true;
         tile = content?.getTile(comment.tileId);
       }
+      const isDeletedTile = isTileComment && !tile;
       chatThreads.push({
-        title: (isTileComment ? tile?.computedTitle : docTitle) ?? null,
+        title: (isTileComment ? (isDeletedTile ? "Deleted Tile" : tile?.computedTitle) : docTitle) ?? null,
         tileType: isTileComment && tile ? tile.content?.type : null,
         tileId: isTileComment ? tileId : null,
-        comments: [comment]
+        comments: [comment],
+        isDeletedTile,
       });
     }
   });
