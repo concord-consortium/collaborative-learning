@@ -49,6 +49,21 @@ export const RowList = types
     get tileIds() {
       return self.rowOrder.flatMap(rowId => this.getRow(rowId)?.tileIds ?? []);
     },
+    /**
+     * Returns a string "signature" used to identify when the content has changed,
+     * either row ordering, tile ordering in rows or heights of rows
+     */
+    get layoutSignature(): string {
+      const rowLayouts = self.rowOrder.reduce<Record<string, {height: number, tileIds: string[]}>>((acc, rowId) => {
+        const row = this.getRow(rowId);
+        acc[rowId] = {
+          height: row?.height ?? 0,
+          tileIds: row?.tileIds ?? []
+        };
+        return acc;
+      }, {});
+      return JSON.stringify(rowLayouts);
+    },
     rowHeightToExport(row: TileRowModelType, tileId: string, tileMap: Map<string|number, ITileModel>) {
       if (!row?.height) return;
       // we only export heights for specific tiles configured to do so

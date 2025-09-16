@@ -138,10 +138,12 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("add y2 column to table and show it");
       tableToolTile.getTableTile().click();
-      tableToolTile.getAddColumnButton().click();
-      tableToolTile.typeInTableCellXY(0, 2, '30');
-      tableToolTile.typeInTableCellXY(1, 2, '31');
-      tableToolTile.typeInTableCellXY(2, 2, '32');
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.getAddColumnButton().click();
+        tableToolTile.typeInTableCellXY(0, 2, '30');
+        tableToolTile.typeInTableCellXY(1, 2, '31');
+        tableToolTile.typeInTableCellXY(2, 2, '32');
+      });
 
       xyTile.getTile().click();
       xyTile.getYAttributesLabel().should("contain.text", "y");
@@ -200,13 +202,13 @@ context('XYPlot Tool Tile', function () {
       xyTile.selectYAttribute("y2");
       xyTile.getGraphDot().eq(0).find('.inner-circle').should('have.attr', 'style').and('contain', hexToRgb(clueDataColors[1]));
 
-       //XY Plot tile restore upon page reload
-       cy.wait(2000);
-       cy.reload();
-       cy.waitForLoad();
-       xyTile.getTile().click();
-       xyTile.getXYPlotTitle().should('contain', title);
-       xyTile.getGraphDot().should('have.length', 3);
+      //XY Plot tile restore upon page reload
+      cy.wait(2000);
+      cy.reload();
+      cy.waitForLoad();
+      xyTile.getTile().click();
+      xyTile.getXYPlotTitle().should('contain', title);
+      xyTile.getGraphDot().should('have.length', 3);
 
       cy.log("Delete XY Plot Tile");
       xyTile.getTile().click();
@@ -223,13 +225,16 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.addTile('table');
       tableToolTile.getTableTile().should('be.visible');
       clueCanvas.clickToolbarButton('table', 'set-expression');
+
       tableToolTile.typeExpressionInDialog('x*x{enter}');
-      tableToolTile.typeInTableCellXY(0, 0, '5');
-      tableToolTile.getTableCellXY(0, 0).should('contain', '5');
-      tableToolTile.getTableCellXY(0, 1).should('contain', '25');
-      tableToolTile.typeInTableCellXY(1, 0, '10');
-      tableToolTile.getTableCellXY(1, 0).should('contain', '10');
-      tableToolTile.getTableCellXY(1, 1).should('contain', '100');
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.typeInTableCellXY(0, 0, '5');
+        tableToolTile.getTableCellXY(0, 0).should('contain', '5');
+        tableToolTile.getTableCellXY(0, 1).should('contain', '25');
+        tableToolTile.typeInTableCellXY(1, 0, '10');
+        tableToolTile.getTableCellXY(1, 0).should('contain', '10');
+        tableToolTile.getTableCellXY(1, 1).should('contain', '100');
+      });
 
       cy.log("Link Table");
       xyTile.getTile().click();
