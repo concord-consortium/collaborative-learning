@@ -3,6 +3,8 @@ import {getAnalysisQueueFirestorePath, isKnownEvaluator} from "./utils";
 import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
+import {type AnalysisQueueDocument} from "./on-analyzable-doc-written";
+import {documentSummarizer} from "../../shared/ai-summarizer";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write into the queue of docs to process
@@ -55,12 +57,11 @@ async function error(error: string, event: FirestoreEvent<QueryDocumentSnapshot 
   await firestore.doc(event.document).delete();
 }
 
-
 export const onAnalysisDocumentPending =
   onDocumentCreated(pendingQueuePath, async (event) => {
     const {docId} = event.params;
     const firestore = admin.firestore();
-    const queueDoc = event.data?.data();
+    const queueDoc = event.data?.data() as AnalysisQueueDocument | undefined;
 
     if (!isKnownEvaluator(queueDoc?.evaluator)) {
       await error(`Unexpected value for evaluator: ${queueDoc?.evaluator}`, event);
@@ -84,30 +85,56 @@ export const onAnalysisDocumentPending =
       return;
     }
 
-    // Generate screenshot with Shutterbug service
+    // determine the summarizer to use, defaulting to "image"
+    let summarizer = queueDoc?.aiPrompt?.summarizer;
+    if (!summarizer && queueDoc?.firestoreDocumentPath) {
+      logger.info(`No summarizer specified, checking Firestore doc ${queueDoc.firestoreDocumentPath}`);
+      // until the unit configuration is updated to include the summarizer use the Firestore
+      // doc unit to see if we want to use the text summarizer (for the cas unit)
+      const firestoreDoc = await firestore.doc(queueDoc.firestoreDocumentPath).get();
+      const firestoreData = firestoreDoc.data();
+      if (firestoreData?.unit === "cas") {
+        logger.info(`Firestore doc ${queueDoc.firestoreDocumentPath} has unit "cas", using text summarizer`);
+        summarizer = "text";
+      }
+    }
+    summarizer = summarizer ?? "image";
+    let nextQueueDoc: Record<string, unknown> = {...queueDoc, summarizer};
 
-    let responseJSON;
-    try {
-      const html = generateHtml(JSON.parse(content));
-      const response = await fetch(shutterbugURL,
-        {
-          method: "POST",
-          body: JSON.stringify({content: html, height: 1500}),
-        }
-      );
-      responseJSON = await response.json();
-    } catch (err) {
-      await error(`Shutterbug error: ${err}`, event);
+    logger.info(`Using summarizer ${summarizer}`);
+
+    if (summarizer === "text") {
+      const docSummary = documentSummarizer(content, {});
+      nextQueueDoc = {...nextQueueDoc, docSummary};
+    } else if (summarizer === "image") {
+      // Generate screenshot with Shutterbug service
+      let responseJSON;
+      try {
+        const html = generateHtml(JSON.parse(content));
+        const response = await fetch(shutterbugURL,
+          {
+            method: "POST",
+            body: JSON.stringify({content: html, height: 1500}),
+          }
+        );
+        responseJSON = await response.json();
+      } catch (err) {
+        await error(`Shutterbug error: ${err}`, event);
+        return;
+      }
+      nextQueueDoc = {
+        ...nextQueueDoc,
+        docImaged: admin.firestore.FieldValue.serverTimestamp(),
+        docImageUrl: (responseJSON as { url: string }).url,
+      };
+    } else {
+      await error(`Unexpected value for summarizer: ${summarizer}`, event);
       return;
     }
 
     // Write to the "imaged" queue
     const nextQueuePath = getAnalysisQueueFirestorePath("imaged", docId);
-    await firestore.doc(nextQueuePath).set({
-      ...queueDoc,
-      docImaged: admin.firestore.FieldValue.serverTimestamp(),
-      docImageUrl: (responseJSON as { url: string }).url,
-    });
+    await firestore.doc(nextQueuePath).set(nextQueueDoc);
 
     // Remove from the "pending" queue
     await firestore.doc(event.document).delete();

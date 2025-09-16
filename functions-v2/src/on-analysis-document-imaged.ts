@@ -2,7 +2,7 @@ import {FirestoreEvent, onDocumentCreated, QueryDocumentSnapshot} from "firebase
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import {getAnalysisQueueFirestorePath} from "./utils";
-import {categorizeUrl} from "../lib/src/ai-categorize-document";
+import {categorizeSummary, categorizeUrl} from "../lib/src/ai-categorize-document";
 import {defineSecret} from "firebase-functions/params";
 import {kAnalyzerUserParams} from "../../shared/shared";
 
@@ -34,6 +34,7 @@ export const onAnalysisDocumentImaged =
       secrets: [openaiApiKey],
     },
     async (event) => {
+      logger.info("onAnalysisDocumentImaged");
       const firestore = admin.firestore();
       const queueDoc = event.data?.data();
       if (!queueDoc) {
@@ -52,10 +53,15 @@ export const onAnalysisDocumentImaged =
       if (queueDoc.evaluator === "mock") {
         message = "Mock reply from AI analysis";
       } else if (queueDoc.evaluator === "categorize-design" || queueDoc.evaluator === "custom") {
-        const docImageUrl = event.data?.get("docImageUrl");
+        const docImageUrl = queueDoc.docImageUrl;
+        const docSummary = queueDoc.docSummary;
         const aiPrompt = queueDoc.evaluator === "custom" ? queueDoc.aiPrompt : undefined;
+        const summarizer = queueDoc.summarizer;
+        const firestoreDocumentPath = queueDoc.firestoreDocumentPath;
 
-        const completion = await categorizeUrl(docImageUrl, openaiApiKey.value(), aiPrompt);
+        const completion = summarizer === "text" ?
+          await categorizeSummary(docSummary, openaiApiKey.value(), firestoreDocumentPath, aiPrompt) :
+          await categorizeUrl(docImageUrl, openaiApiKey.value(), aiPrompt);
         const reply = completion?.choices[0].message;
         promptTokens = completion?.usage?.prompt_tokens || 0;
         completionTokens = completion?.usage?.completion_tokens || 0;

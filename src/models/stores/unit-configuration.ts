@@ -37,7 +37,8 @@ export const AIPromptModel = types.model("AIPrompt", {
   categories: types.maybe(types.array(types.string)),
   keyIndicatorsPrompt: types.maybe(types.string),
   discussionPrompt: types.maybe(types.string),
-  systemPrompt: types.string
+  systemPrompt: types.string,
+  summarizer: types.maybe(types.string)
 });
 
 export interface UnitConfiguration extends ProblemConfiguration {
