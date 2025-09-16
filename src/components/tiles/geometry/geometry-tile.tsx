@@ -31,7 +31,8 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
   const containerContext = useContainerContext();
   const domElement = useRef<HTMLDivElement>(null);
   const content = model.content as GeometryContentModelType;
-  const showNavigator = navigatorAllowed && content.isNavigatorVisible;
+  const ui = useUIStore();
+  const showNavigator = ui.isSelectedTile(model) && navigatorAllowed && content.isNavigatorVisible;
   const [board, setBoard] = useState<JXG.Board>();
   const [actionHandlers, setActionHandlers] = useState<IActionHandlers>();
   const [mode, setMode] = useState<GeometryTileMode>("select");
@@ -88,7 +89,6 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
     handlers: actionHandlers
   };
 
-  const ui = useUIStore();
   const [handlePointerDown, handlePointerUp] = useTileSelectionPointerEvents(
     useCallback(() => modelRef.current.id, [modelRef]),
     useCallback(() => ui.selectedTileIds, [ui]),

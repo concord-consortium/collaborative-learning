@@ -27,6 +27,9 @@ class GeometryToolTile {
     getGeometryTile(workspaceClass){
         return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area [data-testid=geometry-tool]`);
     }
+    getGeometryTileNavigatorPanel(){
+      return cy.get('.primary-workspace .canvas-area .geometry-tool-tile [data-testid=tile-navigator-container]');
+    }
     getGraph(workspaceClass){
         return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area [data-testid=geometry-tool] .geometry-content.show-tile`);
     }

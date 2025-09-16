@@ -21,6 +21,9 @@ class DrawToolTile{
     getDrawTileShowSortPanelCloseButton(){
       return cy.get('.primary-workspace .drawing-tool .object-list.open button.close');
     }
+    getDrawTileNavigatorPanel(){
+      return cy.get('.primary-workspace .drawing-tool-tile [data-testid=tile-navigator-container]');
+    }
     getDrawToolSelect(){
       return cy.get('.primary-workspace .drawing-toolbar .toolbar-button.select');
     }

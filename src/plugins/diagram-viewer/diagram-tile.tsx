@@ -172,7 +172,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
             <Diagram
               dqRoot={content.root}
               hideControls={true}
-              hideNavigator={!!content.hideNavigator}
+              hideNavigator={!!content.hideNavigator || !isTileSelected}
               hideNewVariableButton={true}
               interactionLocked={interactionLocked || readOnly}
               preventKeyboardDelete={preventKeyboardDelete}

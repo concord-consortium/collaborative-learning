@@ -3,6 +3,7 @@ import ClueCanvas from '../../../support/elements/common/cCanvas';
 import PrimaryWorkspace from '../../../support/elements/common/PrimaryWorkspace';
 import ResourcePanel from '../../../support/elements/common/ResourcesPanel';
 import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
+import TextToolTile from '../../../support/elements/tile/TextToolTile';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
@@ -120,6 +121,17 @@ context('Geometry Tool', function () {
     clueCanvas.clickToolbarButton('geometry', 'zoom-out');
     clueCanvas.clickToolbarButton('geometry', 'zoom-out');
     geometryToolTile.getGraphAxisTickLabels().last().should("have.text", "15");
+
+    cy.log("has a navigator panel to pan contents");
+    geometryToolTile.getGeometryTileNavigatorPanel().should("exist");
+
+    cy.log("navigator is not shown when tile is not selected");
+    const textTile = new TextToolTile;
+    clueCanvas.addTile("text");
+    textTile.getTextTile().click();
+    geometryToolTile.getGeometryTileNavigatorPanel().should("not.exist");
+    geometryToolTile.getGeometryTile().click();
+    geometryToolTile.getGeometryTileNavigatorPanel().should("exist");
   });
 
   it('works in all four modes', () => {
