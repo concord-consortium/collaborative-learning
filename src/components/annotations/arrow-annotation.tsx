@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { AnnotationNode } from "./annotation-node";
-import { getSparrowCurve, getSparrowStraight, kAnnotationNodeDefaultRadius } from "./annotation-utilities";
+import { getSparrowCurve, getSparrowStraight, ITileSize, kAnnotationNodeDefaultRadius } from "./annotation-utilities";
 import { AnnotationArrow } from "./annotation-arrow";
 import { boundDelta } from "../../models/annotations/annotation-utils";
 import {
@@ -81,6 +81,7 @@ interface IArrowAnnotationProps {
   getBoundingBox: (object: IClueObject) =>
     { height: number, left: number, top: number, width: number} | null | undefined;
   getObjectNodeRadii: (object?: IClueObject) => { centerRadius?: number, highlightRadius?: number} | undefined;
+  getTileSize: (tileId: string) => ITileSize | undefined;
   key?: string;
   readOnly?: boolean;
   sourceViewTransform?: { offsetX: number; offsetY: number; scale: number };
@@ -90,13 +91,15 @@ export const ArrowAnnotationComponent = observer(
   function ArrowAnnotationComponent({
     arrow, canEdit, deleteArrow, handleArrowClick, handleDragHandleNonDrag,
     documentBottom, documentLeft, documentRight, documentTop, getBoundingBox,
-    getObjectNodeRadii, readOnly, sourceViewTransform, targetViewTransform
+    getObjectNodeRadii, readOnly, sourceViewTransform, targetViewTransform,
+    getTileSize
   }: IArrowAnnotationProps) {
 
     const [editingText, setEditingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
     const [hoveringStem, setHoveringStem] = useState(false);
     const inputRef = useRef<HTMLInputElement|null>(null);
+
     useEffect(() => {
       // Focus on the text input when we start editing
       if (editingText && !readOnly) {
@@ -125,6 +128,7 @@ export const ArrowAnnotationComponent = observer(
     // Find bounding boxes for source and target objects
     const sourceBB = arrow.sourceObject ? getBoundingBox(arrow.sourceObject) : undefined;
     const targetBB = arrow.targetObject ? getBoundingBox(arrow.targetObject) : undefined;
+    const sourceTileSize = arrow.sourceObject ? getTileSize(arrow.sourceObject.tileId) : undefined;
 
     // Find the arrow's points curve data, given current drag and the source and target bounding boxes
     const dragOffsets = determineDragOffsets(dragType, clientX, clientY, dragX, dragY);
@@ -133,7 +137,7 @@ export const ArrowAnnotationComponent = observer(
       textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
     } = arrow.getPoints(
       documentLeft, documentRight, documentTop, documentBottom, dragOffsets,
-      sourceBB, sourceViewTransform, targetBB, targetViewTransform
+      sourceBB, sourceViewTransform, targetBB, targetViewTransform, sourceTileSize
     );
     const missingData = sourceX === undefined || sourceY === undefined || textCenterX === undefined
       || textCenterY === undefined || targetX === undefined || targetY === undefined;
@@ -222,7 +226,7 @@ export const ArrowAnnotationComponent = observer(
           // Bound the text offset to the document
           const dx = Math.max(textMinXOffset ?? 0, Math.min(textMaxXOffset ?? 0, startingDx + dDx));
           const dy = Math.max(textMinYOffset ?? 0, Math.min(textMaxYOffset ?? 0, startingDy + dDy));
-          setFunc(dx, dy);
+          setFunc(dx, dy, sourceTileSize);
         } else {
           if (mouseDownTime.current
             && performance.now() - mouseDownTime.current < 500
@@ -236,7 +240,7 @@ export const ArrowAnnotationComponent = observer(
               handleDragHandleNonDrag(e2); // free end of arrow has no object.
             }
           } else {
-            // For source and target changes, also update the text offset propoprtionally
+            // For source and target changes, also update the text offset proportionally
             const currentDragOffsets = determineDragOffsets(_dragType, e2.clientX, e2.clientY, e.clientX, e.clientY);
             const { textCenterX: tcX, textCenterY: tcY, textOriginX: toX, textOriginY: toY }
               = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom,
@@ -245,7 +249,9 @@ export const ArrowAnnotationComponent = observer(
               arrow.setTextOffset(tcX - toX, tcY - toY);
             }
             // And then update the source or target
-            setFunc(boundDelta(startingDx + dDx, widthBound), boundDelta(startingDy + dDy, heightBound));
+            const boundDx = boundDelta(startingDx + dDx, widthBound);
+            const boundDy = boundDelta(startingDy + dDy, heightBound);
+            setFunc(boundDx, boundDy, sourceTileSize);
           }
         }
         setClientX(undefined);

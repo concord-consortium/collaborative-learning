@@ -12,6 +12,8 @@ import { UserModelType } from "../../models/stores/user";
 
 const mockPostComment = jest.fn();
 
+const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
 jest.mock("../../hooks/document-comment-hooks", () => ({
   useCommentsCollectionPath: (documentKeyOrSectionPath: string) => {
     return `${documentKeyOrSectionPath}/comments`;
@@ -20,7 +22,7 @@ jest.mock("../../hooks/document-comment-hooks", () => ({
     isLoading: false,
     isError: false,
     data: [
-      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 1" },
+      { uid: "1", name: "Teacher 1", createdAt: yesterday, content: "Comment 1" },
       { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 2" },
       { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 3" },
       { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 4" },
@@ -49,6 +51,13 @@ jest.mock("../../hooks/document-comment-hooks", () => ({
   }),
   usePostDocumentComment: () => ({
     mutate: () => mockPostComment()
+  })
+}));
+
+let playbackTime: Date | undefined = undefined;
+jest.mock("../../hooks/use-nav-tab-panel-info", () => ({
+  useNavTabPanelInfo: () => ({
+    playbackTime
   })
 }));
 
@@ -143,5 +152,19 @@ describe("ChatPanel", () => {
     ));
     expect(screen.getByTestId("chat-list")).toBeInTheDocument();
     expect(screen.getAllByTestId("comment-card").length).toBe(1);
+    expect(screen.getAllByTestId("comment-thread").length).toBe(8);
+  });
+  it("should hide comments before the playback time, if set", () => {
+    // set the playback time to yesterday in the mock - should only show 1 comment
+    playbackTime = yesterday;
+    const mockCloseChatPanel = jest.fn();
+    render((
+      <ModalProvider>
+        <ChatPanel activeNavTab={ENavTab.kMyWork} focusDocument="document-key" onCloseChatPanel={mockCloseChatPanel} />
+      </ModalProvider>
+    ));
+    expect(screen.getByTestId("chat-list")).toBeInTheDocument();
+    expect(screen.getAllByTestId("comment-card").length).toBe(1);
+    expect(screen.getAllByTestId("comment-thread").length).toBe(1);
   });
 });

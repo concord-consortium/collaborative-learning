@@ -50,7 +50,8 @@ const makeFakeCommentThread = (title: string, tileId: string, uid: string) => {
     comments: [
       { uid, id: "asdf", name: "Teacher 1", createdAt: new Date(), content: title + " Comment 1" },
       { uid, id: "zyxw", name: "Teacher 2", createdAt: new Date(), content: title + " Comment 2" },
-    ]
+    ],
+    isDeletedTile: false,
   };
 };
 describe("CommentThread", () => {
