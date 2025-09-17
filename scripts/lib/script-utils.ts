@@ -327,7 +327,6 @@ export const internalCopyFirestoreDoc = async (
     // Note there are other places where the bulkWriter is used to create or update
     // documents, currently those other places are not counted towards the 1000 limit.
     if (state.operationsCount % 1000 === 0) {
-      console.log("  flushing writes", state.operationsCount);
       // As far as I can tell the flush here will wait for all of the write operations
       // to complete and honor the exponential backoff before continuing.
       await bulkWriter.flush();
@@ -343,6 +342,8 @@ export const internalCopyFirestoreDoc = async (
   for (const subcollectionRef of subcollections) {
     const subcollectionPath = `${collectionFrom}/${docId}/${subcollectionRef.id}`;
     const subcollectionPathTo = `${collectionTo}/${docIdTo}/${subcollectionRef.id}`;
+
+    process.stdout.write(`  copying ${subcollectionRef.id} `);
 
     // get all the documents in the collection
     try {
@@ -373,7 +374,11 @@ export const internalCopyFirestoreDoc = async (
           numCopiedDocs++;
           lastDoc = doc;
         }
+        process.stdout.write(".");
       } while (snapshot.docs.length === 1000);
+
+      // Close out the status line
+      process.stdout.write("\n");
 
       const logMessage = `${numCopiedDocs} documents from ${subcollectionRef.id}`;
       if (dryRun) {
