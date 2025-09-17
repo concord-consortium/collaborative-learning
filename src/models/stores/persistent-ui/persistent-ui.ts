@@ -226,18 +226,23 @@ export const PersistentUIModelV2 = types
       doc: DocumentModelType,
       appConfig: AppConfigModelType,
       user?: UserModelType,
-      sortedDocuments?: SortedDocuments
+      sortedDocuments?: SortedDocuments,
+      opts?: { fromUrlStudentDocument?: boolean }
     ) {
       const { aiEvaluation, navTabs } = appConfig || {};
       const availableTabs = navTabs?.tabSpecs.map(tab => tab.tab) ?? [];
       let navTab = "";
-      if (aiEvaluation) {
+
+      if (opts?.fromUrlStudentDocument) {
+        navTab = ENavTab.kStudentWork;
+      } else if (aiEvaluation) {
         if (availableTabs.includes(ENavTab.kSortWork)) {
           navTab = ENavTab.kSortWork;
         } else if (availableTabs.includes(ENavTab.kMyWork)) {
           navTab = ENavTab.kMyWork;
         }
       }
+
       if (!navTab) {
         navTab = getNavTabOfDocument(doc, user) || "";
       }

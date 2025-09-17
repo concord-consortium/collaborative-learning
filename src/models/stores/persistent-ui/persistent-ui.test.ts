@@ -319,6 +319,103 @@ describe("PersistentUI", () => {
     });
   });
 
+  describe("openResourceDocument", () => {
+    let persistentUI: PersistentUIModelType;
+    let mockAppConfig: any;
+    let mockUser: any;
+    let mockSortedDocuments: any;
+    let mockDoc: any;
+
+    beforeEach(() => {
+      persistentUI = PersistentUIModel.create({
+        problemWorkspace: { type: "problem", mode: "1-up" }
+      });
+
+      mockUser = { id: "student1", isTeacherOrResearcher: false };
+      mockSortedDocuments = { sortBy: jest.fn().mockReturnValue([]) };
+      mockDoc = {
+        key: "doc1",
+        type: "problem",
+        groupId: "group1",
+        uid: "student1",
+        toJSON: () => ({ key: "doc1", type: "problem", groupId: "group1" })
+      };
+    });
+
+    describe("AI evaluation tab preference", () => {
+      it("prefers Sort Work when AI is enabled and Sort Work tab exists", () => {
+        mockAppConfig = {
+          aiEvaluation: "mock",
+          navTabs: {
+            tabSpecs: [
+              { tab: "sort-work", label: "Sort Work" },
+              { tab: "my-work", label: "My Work" }
+            ]
+          }
+        };
+
+        persistentUI.openResourceDocument(mockDoc, mockAppConfig, mockUser, mockSortedDocuments);
+
+        expect(persistentUI.activeNavTab).toBe("sort-work");
+      });
+
+      it("falls back to My Work when AI is enabled but Sort Work tab not available", () => {
+        mockAppConfig = {
+          aiEvaluation: "mock",
+          navTabs: {
+            tabSpecs: [
+              { tab: "my-work", label: "My Work" }
+            ]
+          }
+        };
+
+        persistentUI.openResourceDocument(mockDoc, mockAppConfig, mockUser, mockSortedDocuments);
+
+        expect(persistentUI.activeNavTab).toBe("my-work");
+      });
+
+      it("uses document-based fallback when AI is disabled", () => {
+        mockAppConfig = {
+          aiEvaluation: undefined,
+          navTabs: {
+            tabSpecs: [
+              { tab: ENavTab.kMyWork, label: "My Work" }
+            ]
+          }
+        };
+
+        persistentUI.openResourceDocument(mockDoc, mockAppConfig, mockUser, mockSortedDocuments);
+
+        expect(persistentUI.activeNavTab).toBe(ENavTab.kMyWork);
+      });
+    });
+
+    describe("URL student document handling", () => {
+      it("opens student-work tab when `fromUrlStudentDocument` is true", () => {
+        mockAppConfig = {
+          aiEvaluation: "mock",
+          navTabs: {
+            tabSpecs: [
+              { tab: "sort-work", label: "Sort Work" },
+              { tab: "my-work", label: "My Work" },
+              { tab: "student-work", label: "Student Work" }
+            ]
+          }
+        };
+
+        persistentUI.openResourceDocument(
+          mockDoc,
+          mockAppConfig,
+          mockUser,
+          mockSortedDocuments,
+          { fromUrlStudentDocument: true }
+        );
+
+        expect(persistentUI.activeNavTab).toBe("student-work");
+      });
+    });
+  });
+
   describe("migration from V1", () => {
     it("can load a basic V1 snapshot", () => {
       const snapshot: PersistentUIModelV1Snapshot = {
