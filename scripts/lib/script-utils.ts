@@ -420,7 +420,7 @@ export const moveFirestoreDoc = async (
   scope: "document" | "subcollections" | "all" = "all",
 ): Promise<boolean> => {
   const { firestore, bulkWriter } = state;
-  const copied = await copyFirestoreDoc(state, collectionFrom, docId, collectionTo, docIdTo, scope);
+  const copied = await copyFirestoreDoc(state, collectionFrom, docId, collectionTo, docIdTo, scope, undefined);
   // If copy was successful, delete the original
   // We use a passed in bulkWriter, so the exponential backoff will be shared
   // between the copy and delete operations.

@@ -369,7 +369,7 @@ async function reorganizeDocuments() {
             // We don't exit the entire script if the sanity check fails
             // We just log the errors and don't make any changes to the database for this
             // document.
-            logErrorList(`Err Sanity check failed for prefixed doc: ${doc.name}`, mergeErrors);
+            logErrorList(`Err Sanity check failed for prefixed doc: ${doc.name}`, mergeResult.errors);
             skipBecauseOfMergeErrors = true;
           }
           prefixedCreatedTime = mergeResult.newData.createdAt;
