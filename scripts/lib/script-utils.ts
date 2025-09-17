@@ -215,7 +215,7 @@ export const copyFirestoreDoc = async (
   // Look for any errors under the docIdTo path
   const writeErrors = state.writeErrors.filter((error) => error.path.startsWith(`${collectionTo}/${docIdTo ?? docId}`));
   if (writeErrors.length > 0) {
-    logErrorList(`Failed to copy document from ${collectionTo}/${docId} to ${collectionFrom}/${docIdTo ?? docId}`,
+    logErrorList(`Failed to copy document from ${collectionFrom}/${docId} to ${collectionTo}/${docIdTo ?? docId}`,
       writeErrors);
     return false;
   }
@@ -329,27 +329,34 @@ export const internalCopyFirestoreDoc = async (
 
     // get all the documents in the collection
     try {
-      // FIXME: this is possibly a problem, if there are too many documents
-      // in the subcollection we won't be able to load them all at once. There used
-      // to be a limit of 10,000, but that seems to have changed. In dryRun testing
-      // I saw up to 44,000 documents being loaded by this get().
-      const snapshot = await subcollectionRef.get();
-      const docs = snapshot.docs;
       let numCopiedDocs = 0;
 
-      for (const doc of docs) {
-        // Recurse on the subcollection documents
-        // We await this so if it has to flush the operations we wait for that flush
-        // The waiting will also mean we will wait for the reading of the document
-        // and its collection
-        // For our current purposes there are never any collections in these collections
-        // so we only copy the document and don't look for subcollections
-        // This speeds up the process significantly.
-        await internalCopyFirestoreDoc(
-          state, subcollectionPath, doc.id, doc.data(), subcollectionPathTo, doc.id, "document"
-        );
-        numCopiedDocs++;
-      }
+      // Use paging to read in all of the subcollection docs
+      // this should keep us from running out of memory
+      let lastDoc = null;
+      let snapshot;
+      do {
+        let query = subcollectionRef.limit(1000);
+        if (lastDoc) {
+          query = query.startAfter(lastDoc);
+        }
+        snapshot = await query.get();
+        const docs = snapshot.docs;
+        for (const doc of docs) {
+          // Recurse on the subcollection documents
+          // We await this so if it has to flush the operations we wait for that flush
+          // The waiting will also mean we will wait for the reading of the document
+          // and its collection
+          // For our current purposes there are never any collections in these collections
+          // so we only copy the document and don't look for subcollections
+          // This speeds up the process significantly.
+          await internalCopyFirestoreDoc(
+            state, subcollectionPath, doc.id, doc.data(), subcollectionPathTo, doc.id, "document"
+          );
+          numCopiedDocs++;
+          lastDoc = doc;
+        }
+      } while (snapshot.docs.length === 1000);
 
       const logMessage = `${numCopiedDocs} documents from ${subcollectionRef.id}`;
       if (dryRun) {

@@ -70,7 +70,7 @@ async function getAllDocuments(ref: FirebaseFirestore.CollectionReference) {
   console.log("Ok Getting all documents from", ref.path);
   const documents: FirebaseFirestore.QueryDocumentSnapshot[] = [];
   let lastDoc: FirebaseFirestore.QueryDocumentSnapshot | null = null;
-  const batchSize = 100;
+  const batchSize = 1000;
 
   // This fetches 100 matching documents at a time to avoid query limits or memory issues.
   // eslint-disable-next-line no-constant-condition
@@ -454,6 +454,10 @@ async function reorganizeDocuments() {
         console.log("  would delete documents:", documentsToDelete);
       } else {
         for (const doc of documentsToDelete) {
+          if (doc === "" || doc == null) {
+            console.log("  skipping empty document deletion:", doc);
+            continue;
+          }
           console.log("  deleting document:", doc);
           await firestore.recursiveDelete(firestore.doc(documentsRoot + "/" + doc), writerState.bulkWriter);
         }
