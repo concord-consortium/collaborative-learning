@@ -104,13 +104,18 @@ async function getAllDocuments(ref: FirebaseFirestore.CollectionReference) {
 
 interface DocumentUpdates { [key: string]: any }
 
+interface MergeResult {
+  errors: string[];
+  newData: admin.firestore.DocumentData;
+}
+
 // Checks and combines two documents.
 // Key fields must match; a few can differ and we combine them smartly.
 async function checkAndMerge(
   name: string,
   baseData: admin.firestore.DocumentData,
   updates: DocumentUpdates
-): Promise<string[]> {
+): Promise<MergeResult> {
   // Make sure that the contents of the new document match the existing one.
   const mustMatch = ["key", "uid", "context_id", "type", "title", ];
   const otherFields = ["tools", "tileTypes", "strategies", "teachers", "originDoc", "contextId", "createdAt",
@@ -219,8 +224,13 @@ async function checkAndMerge(
 
   // teachers, contextId, network -- not used any more, just ignore.
 
-  return errors;
+  return {
+    errors,
+    newData
+  };
 }
+
+const oneWeekAgoSeconds = Date.now() - 7 * 24 * 60 * 60;
 
 async function reorganizeDocuments() {
   const documentsRef = firestore.collection(documentsRoot);
@@ -275,7 +285,6 @@ async function reorganizeDocuments() {
     if (err.code === GrpcStatus.ALREADY_EXISTS) {
       for (const allowedExistingPath of allowedExistingPaths) {
         if (err.documentRef.path.startsWith(allowedExistingPath)) {
-          console.log("  skipping existing document", err.documentRef.path);
           // We reject the promise here, but don't record it as a writeError
           return false;
         }
@@ -344,21 +353,26 @@ async function reorganizeDocuments() {
     const subDocumentsPath = baseDocRef.path + "/";
     allowedExistingPaths.add(subDocumentsPath);
     let skipBecauseOfMergeErrors = false;
+    let skipBecauseRecentDocument = false;
+    let mostRecentPrefixedCreatedTime = 0;
+    let mostRecentSubDocumentCreatedTime = 0;
 
     for (const doc of documentInfo.commentableDocs) {
       if (doc.type === "unprefixed") {
         console.log("  unprefixed doc, leave as is", doc.name);
       } else if (doc.type === "prefixed") {
+        let prefixedCreatedTime: number | undefined | null;
         if (baseDocData) {
           console.log("  merging prefixed doc into base", doc.name);
-          const mergeErrors = await checkAndMerge(doc.name, baseDocData, updates);
-          if (mergeErrors.length > 0) {
+          const mergeResult = await checkAndMerge(doc.name, baseDocData, updates);
+          if (mergeResult.errors.length > 0) {
             // We don't exit the entire script if the sanity check fails
             // We just log the errors and don't make any changes to the database for this
             // document.
             logErrorList(`Err Sanity check failed for prefixed doc: ${doc.name}`, mergeErrors);
             skipBecauseOfMergeErrors = true;
           }
+          prefixedCreatedTime = mergeResult.newData.createdAt;
         } else {
           console.log("  using first prefixed doc as base", doc.name);
           // There is no baseDoc yet so the first prefixed document we find
@@ -370,10 +384,32 @@ async function reorganizeDocuments() {
           // merged from additional prefixed documents will directly update the
           // baseDocData that we are going to write out at the end.
           updates = baseDocData;
+
+          prefixedCreatedTime = baseDocData.createdAt;
         }
 
         if (skipBecauseOfMergeErrors) {
           continue;
+        }
+
+        // This seems to be in milliseconds not seconds
+        console.log("  prefixedCreatedTime:", prefixedCreatedTime);
+
+        if (prefixedCreatedTime != null) {
+
+          // If ts is greater than November 20, 2286 in seconds, it's probably ms
+          // That date is April 26, 1970 in milliseconds, so anything less than that is probably seconds
+          if (prefixedCreatedTime > 10000000000) {
+            prefixedCreatedTime = Math.floor(prefixedCreatedTime / 1000);
+          }
+
+          mostRecentPrefixedCreatedTime = Math.max(mostRecentPrefixedCreatedTime, prefixedCreatedTime);
+
+          if (prefixedCreatedTime > oneWeekAgoSeconds) {
+            // prefixedCreatedTime is more recent than 1 week ago
+            skipBecauseRecentDocument = true;
+            continue;
+          }
         }
 
         // Copy comments, history, or whatever subcollections it finds under the parent,
@@ -384,7 +420,13 @@ async function reorganizeDocuments() {
           writerState,
           documentsRoot, doc.name,
           documentsRoot, key,
-          "subcollections"
+          "subcollections",
+          (docId, docData) => {
+            const { created } = docData;
+            if (created && created.seconds) {
+              mostRecentSubDocumentCreatedTime = Math.max(mostRecentSubDocumentCreatedTime, created.seconds);
+            }
+          }
         );
 
         const docsCopied = writerState.operationsCount - startingOperationsCount;
@@ -412,6 +454,18 @@ async function reorganizeDocuments() {
       continue;
     }
 
+    console.log("  mostRecentPrefixedCreatedTime:", mostRecentPrefixedCreatedTime);
+    if (skipBecauseRecentDocument) {
+      console.log("  skipping document because it has a recent prefixed document");
+      continue;
+    }
+
+    console.log("  mostRecentSubDocumentCreatedTime:", mostRecentSubDocumentCreatedTime);
+    if (mostRecentSubDocumentCreatedTime > oneWeekAgoSeconds) {
+      console.log("  skipping document because it has a recent sub-document");
+      continue;
+    }
+
     if (hasUnprefixedDoc) {
       // We had a unprefixed document already
       // If there are changes from prefixed documents we need to update this doc
@@ -420,10 +474,14 @@ async function reorganizeDocuments() {
           console.log("  would update base document:", updates);
         } else {
           console.log("  updating base document:", updates);
-          // We wait for the update to complete incase there is an error.
-          // The BulkWriter will send the error to the onWriteError handler
-          // it might throw it here too, that isn't clear
-          await writerState.bulkWriter.update(baseDocRef, updates);
+          // We can't wait for the update to complete here, because of how the
+          // BulkWriter works. Instead we wait for it with a flush later.
+          // The error will be reported here as well as in the onWriteError handler.
+          // We report it in both places just to be safe.
+          writerState.bulkWriter.update(baseDocRef, updates)
+            .catch((error) => {
+              console.error("Error updating base document:", baseDocRef.path, error);
+            });
         }
       } else {
         console.log("  no updates to base document");
@@ -437,13 +495,20 @@ async function reorganizeDocuments() {
         console.log("  would create base document:", baseDocData);
       } else {
         console.log("  creating base document:", baseDocData);
-        // We wait for the create to complete incase there is an error.
-        // The BulkWriter will send the error to the onWriteError handler
-        // it might throw it here too, that isn't clear
-        await writerState.bulkWriter.create(baseDocRef, baseDocData);
+
+        // The bulkWriter.create call is asynchronous, but using await
+        // with it doesn't work. The promise returned by create doesn't resolve
+        // by itself, a flush or close has to be called before it resolves.
+        // Also if we don't handle the error here, node.js will automatically
+        // exit with an unhandled error.
+        writerState.bulkWriter.create(baseDocRef, baseDocData)
+          .catch((error) => {
+            console.error("Error creating base document:", baseDocRef.path, error);
+          });
       }
     }
 
+    await writerState.bulkWriter.flush();
     if (writerState.writeErrors.length > 0) {
       logErrorList("Err Errors during writes:", writerState.writeErrors);
       process.exit(1);

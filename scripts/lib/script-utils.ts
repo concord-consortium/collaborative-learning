@@ -1,6 +1,7 @@
 import admin from "firebase-admin";
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { GrpcStatus } from "firebase-admin/firestore";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const scriptsRoot = path.resolve(__dirname, "..");
@@ -201,12 +202,13 @@ export const copyFirestoreDoc = async (
   collectionFrom: string,
   docId: string,
   collectionTo: string,
-  docIdTo?: string,
+  docIdTo: string | undefined,
   scope: "document" | "subcollections" | "all" = "all",
+  perDocCallback: undefined | ((docId: string, docData: admin.firestore.DocumentData) => void)
 ): Promise<boolean> => {
   const { bulkWriter } = state;
 
-  await internalCopyFirestoreDoc(state, collectionFrom, docId, undefined, collectionTo, docIdTo, scope);
+  await internalCopyFirestoreDoc(state, collectionFrom, docId, undefined, collectionTo, docIdTo, scope, perDocCallback);
 
   // We wait for all of the write operations to complete so we can make sure there
   // were no failures.
@@ -240,7 +242,8 @@ export const internalCopyFirestoreDoc = async (
   preloadedDocData: admin.firestore.DocumentData | undefined,
   collectionTo: string,
   docIdTo: string | undefined,
-  scope: "document" | "subcollections" | "all" = "all"
+  scope: "document" | "subcollections" | "all" = "all",
+  perDocCallback: ((docId: string, docData: admin.firestore.DocumentData) => void) | undefined
 ): Promise<void> => {
   const { firestore, bulkWriter, dryRun } = state;
   const docRef = firestore.collection(collectionFrom).doc(docId);
@@ -280,6 +283,10 @@ export const internalCopyFirestoreDoc = async (
 
   if (!docData) return;
 
+  if (perDocCallback) {
+    perDocCallback(docId, docData);
+  }
+
   // document exists, create the new item
   if (copyBaseDoc) {
     const newDocRef = firestore.collection(collectionTo).doc(docIdTo);
@@ -297,7 +304,17 @@ export const internalCopyFirestoreDoc = async (
     // The flush call is supposed to ignore any errors, so at least that won't
     // throw the error.
     if (!dryRun) {
-      bulkWriter.create(newDocRef, docData);
+      bulkWriter.create(newDocRef, docData)
+        .catch((error) => {
+          // We have to catch the errors here otherwise they cause the process to exit
+          // We are already managing them in the onWriteError handler.
+          if (error.code === GrpcStatus.ALREADY_EXISTS) {
+            // We can ignore these already exists errors
+          } else {
+            // This should be recorded in other places but we log them here just incase
+            console.error("Error creating document", newDocRef.path);
+          }
+        });
     }
     state.operationsCount++;
     // Make sure we don't build up too many write operations
@@ -351,7 +368,7 @@ export const internalCopyFirestoreDoc = async (
           // so we only copy the document and don't look for subcollections
           // This speeds up the process significantly.
           await internalCopyFirestoreDoc(
-            state, subcollectionPath, doc.id, doc.data(), subcollectionPathTo, doc.id, "document"
+            state, subcollectionPath, doc.id, doc.data(), subcollectionPathTo, doc.id, "document", perDocCallback
           );
           numCopiedDocs++;
           lastDoc = doc;
