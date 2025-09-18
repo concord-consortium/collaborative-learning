@@ -208,9 +208,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private showFileMenu() {
-    const { appConfig: { navTabs } } = this.stores;
-    // show the File menu if my work navigation is enabled
-    return !!navTabs.getNavTabSpec(ENavTab.kMyWork);
+    const { appConfig: { aiEvaluation, navTabs }, documents } = this.stores;
+    const hasIdeas = aiEvaluation || documents.invisibleExemplarDocuments.length > 0;
+    // Show the File menu if my work navigation is enabled, or if we have Ideas since in that
+    // case students may need to make more documents and publishing should be available
+    // independently of showing a MyWork tab.
+    return !!navTabs.getNavTabSpec(ENavTab.kMyWork) || hasIdeas;
   }
 
   private showPersonalShareToggle() {
@@ -323,10 +326,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private openDocument(key: string) {
-    const { documents, persistentUI, sortedDocuments, user } = this.stores;
+    const { appConfig, documents, persistentUI, sortedDocuments, user } = this.stores;
     const doc = documents.getDocument(key);
     if (doc) {
-      persistentUI.openResourceDocument(doc, user, sortedDocuments);
+      persistentUI.openResourceDocument(doc, appConfig, user, sortedDocuments);
       logDocumentViewEvent(doc);
     }
   }
@@ -476,7 +479,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     firebase.setLastEditedNow(user, document.key, document.uid );
     // Unselect all tiles, so that the whole-document comments are shown
     ui.clearSelectedTiles();
-    persistentUI.openResourceDocument(document, user);
+    persistentUI.openResourceDocument(document, appConfig, user, this.stores.sortedDocuments);
     persistentUI.toggleShowChatPanel(true);
     if (appConfig.aiEvaluation) {
       document.content?.setAwaitingAIAnalysis(true);

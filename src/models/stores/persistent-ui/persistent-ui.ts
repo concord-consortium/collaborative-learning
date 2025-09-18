@@ -222,8 +222,31 @@ export const PersistentUIModelV2 = types
      *
      * @param doc a non curriculum document
      */
-    openResourceDocument(doc: DocumentModelType, user?: UserModelType, sortedDocuments?: SortedDocuments) {
-      const navTab = getNavTabOfDocument(doc, user)  || "";
+    openResourceDocument(
+      doc: DocumentModelType,
+      appConfig: AppConfigModelType,
+      user?: UserModelType,
+      sortedDocuments?: SortedDocuments,
+      opts?: { fromUrlStudentDocument?: boolean }
+    ) {
+      const { aiEvaluation, navTabs } = appConfig || {};
+      const availableTabs = navTabs?.tabSpecs.map(tab => tab.tab) ?? [];
+      let navTab = "";
+
+      if (opts?.fromUrlStudentDocument) {
+        navTab = ENavTab.kStudentWork;
+      } else if (aiEvaluation) {
+        if (availableTabs.includes(ENavTab.kSortWork)) {
+          navTab = ENavTab.kSortWork;
+        } else if (availableTabs.includes(ENavTab.kMyWork)) {
+          navTab = ENavTab.kMyWork;
+        }
+      }
+
+      if (!navTab) {
+        navTab = getNavTabOfDocument(doc, user) || "";
+      }
+
       let docGroupId = "";
       if (navTab === ENavTab.kClassWork) {
         if (doc.type === LearningLogPublication) {
@@ -255,10 +278,15 @@ export const PersistentUIModelV2 = types
           self.setPrimarySortBy("Strategy");
           self.setSecondarySortBy("None");
         } else {
-          const primarySortBy = self.primarySortBy as PrimarySortType;
-          const sortedDocumentGroups = sortedDocuments?.sortBy(primarySortBy);
-          const openGroup = sortedDocumentGroups?.find(group => group.documents.some((d) => d.key === doc.key));
-          docGroupId = JSON.stringify({"primaryLabel": openGroup?.label, "primaryType": self.primarySortBy});
+          if (sortedDocuments) {
+            if (aiEvaluation) {
+              self.setPrimarySortBy("Name");
+            }
+            const primarySortBy = self.primarySortBy as PrimarySortType;
+            const sortedDocumentGroups = sortedDocuments?.sortBy(primarySortBy);
+            const openGroup = sortedDocumentGroups?.find(group => group.documents.some((d) => d.key === doc.key));
+            docGroupId = JSON.stringify({"primaryLabel": openGroup?.label, "primaryType": self.primarySortBy});
+          }
         }
       }
 

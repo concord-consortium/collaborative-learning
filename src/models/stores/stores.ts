@@ -182,7 +182,10 @@ class Stores implements IStores{
       const docPromise = this.sortedDocuments.fetchFullDocument(docToDisplay);
       docPromise.then((doc) => {
         if (doc) {
-          this.persistentUI.openResourceDocument(doc, this.user, this.sortedDocuments);
+          this.persistentUI.openResourceDocument(
+            doc, this.appConfig, this.user, this.sortedDocuments,
+            { fromUrlStudentDocument: true }
+          );
         } else {
           console.warn("Display document not found: ", params.documentToDisplay);
         }
