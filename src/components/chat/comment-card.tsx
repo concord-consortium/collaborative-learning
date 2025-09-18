@@ -72,7 +72,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   const handleOpenLinkedDocument = (e: React.MouseEvent<HTMLAnchorElement>, document: DocumentModelType) => {
     e.preventDefault();
     persistentUI.toggleShowChatPanel(false);
-    persistentUI.openResourceDocument(document, user, sortedDocuments);
+    persistentUI.openResourceDocument(document, appConfig, user, sortedDocuments);
     logDocumentViewEvent(document);
   };
 

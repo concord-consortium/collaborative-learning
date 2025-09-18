@@ -110,7 +110,7 @@ interface JProps {
 // This is rendering a single document item in the commented document list
 export const WorkDocumentItem: React.FC<JProps> = (props) => {
   const { doc, sectionOrNetworkDoc, isNetworkDoc, handleDocView } = props;
-  const { persistentUI, sortedDocuments, ui, user } = useStores();
+  const { appConfig, persistentUI, sortedDocuments, ui, user } = useStores();
   // We need the navTab to style the item.
   const navTab = getNavTabOfDocument(doc, user);
   const title =  useDocumentCaption(sectionOrNetworkDoc, isStudentWorkspaceDoc(sectionOrNetworkDoc, user.id));
@@ -119,7 +119,7 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
     <div
       className={`document-box my-work-document ${navTab}`}
       onClick={()=>{
-        persistentUI.openResourceDocument(sectionOrNetworkDoc, user, sortedDocuments);
+        persistentUI.openResourceDocument(sectionOrNetworkDoc, appConfig, user, sortedDocuments);
         ui.setSelectedTile();
         if (handleDocView !== undefined){
           handleDocView();
