@@ -137,7 +137,12 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
   const placementButtonClasses = classNames("tile-navigator-placement-button", {top: navigatorPosition === "top"});
 
   return (
-    <div style={{"visibility": showNavigator ? "visible" : "hidden"}} ref={containerRef} className={containerClasses} data-testid="tile-navigator-container">
+    <div
+      ref={containerRef}
+      className={containerClasses}
+      data-testid="tile-navigator-container"
+      style={{"visibility": showNavigator ? "visible" : "hidden"}}
+    >
       <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: updateNavigatorBoundingBox }}>
         <div className="tile-navigator" data-testid="tile-navigator">
           <div ref={contentAreaRef} className="tile-navigator-content-area">
