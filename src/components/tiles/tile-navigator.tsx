@@ -15,6 +15,7 @@ import "./tile-navigator.scss";
 
 interface INavigatorProps {
   renderTile: (tileProps: ITileProps) => JSX.Element;
+  showNavigator?: boolean;
   tileProps: ITileProps;
   onNavigatorPan?: (direction: NavigatorDirection) => void;
   tileVisibleBoundingBox?: BoundingBox;
@@ -28,7 +29,7 @@ const navigatorSize = { width: 90, height: 62 };
  * when it is at a zoom level that makes it larger than the tile's content area.
  */
 export const TileNavigator = observer(function TileNavigator(props: INavigatorProps) {
-  const { onNavigatorPan, renderTile, tileProps, tileVisibleBoundingBox } = props;
+  const { onNavigatorPan, renderTile, showNavigator, tileProps, tileVisibleBoundingBox } = props;
   const { model, tileElt } = tileProps;
   const contentModel = model.content as NavigatableTileModelType;
   const { navigatorPosition, zoom } = contentModel;
@@ -136,7 +137,7 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
   const placementButtonClasses = classNames("tile-navigator-placement-button", {top: navigatorPosition === "top"});
 
   return (
-    <div ref={containerRef} className={containerClasses} data-testid="tile-navigator-container">
+    <div style={{"visibility": showNavigator ? "visible" : "hidden"}} ref={containerRef} className={containerClasses} data-testid="tile-navigator-container">
       <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: updateNavigatorBoundingBox }}>
         <div className="tile-navigator" data-testid="tile-navigator">
           <div ref={contentAreaRef} className="tile-navigator-content-area">

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import { isEqual } from "lodash";
@@ -33,6 +33,7 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
   const content = model.content as GeometryContentModelType;
   const ui = useUIStore();
   const showNavigator = ui.isSelectedTile(model) && navigatorAllowed && content.isNavigatorVisible;
+
   const [board, setBoard] = useState<JXG.Board>();
   const [actionHandlers, setActionHandlers] = useState<IActionHandlers>();
   const [mode, setMode] = useState<GeometryTileMode>("select");
@@ -125,10 +126,11 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
         </TileNavigatorContext.Provider>
         <TileToolbar tileType="geometry" readOnly={!!readOnly} tileElement={tileElt} />
       </div>
-      {!readOnly && showNavigator &&
+      {!readOnly &&
         <TileNavigator
           tileVisibleBoundingBox={mainTileBoundingBox}
           onNavigatorPan={handleNavigatorPan}
+          showNavigator={showNavigator}
           tileProps={props}
           renderTile={(tileProps) =>
             <div className="geometry-tool">
