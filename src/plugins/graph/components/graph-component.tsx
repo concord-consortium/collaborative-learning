@@ -3,8 +3,7 @@ import {observer} from "mobx-react-lite";
 import React, {useEffect, useMemo, useRef} from "react";
 import {useResizeDetector} from "react-resize-detector";
 import {ITileBaseProps} from '../imports/components/tiles/tile-base-props';
-import {useGraphController} from "../hooks/use-graph-controller";
-import {InstanceIdContext, useNextInstanceId} from "../imports/hooks/use-instance-id-context";
+import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {AxisLayoutContext} from "../imports/components/axis/models/axis-layout-context";
 import {GraphController, GraphControllerContext} from "../models/graph-controller";
 import {GraphLayout, GraphLayoutContext} from "../models/graph-layout";
@@ -24,7 +23,7 @@ interface IGraphComponentProps extends ITileBaseProps {
 export const GraphComponent = observer(
     function GraphComponent({ layout, tile, tileElt, onRequestRowHeight, readOnly }: IGraphComponentProps) {
   const graphModel = isGraphModel(tile?.content) ? tile?.content : undefined;
-  const instanceId = useNextInstanceId("graph");
+  const instanceId = useInstanceIdContext();
   // Removed debouncing, but we can bring it back if we find we need it
   const graphRef = useRef<HTMLDivElement | null>(null);
   const {width, height} = useResizeDetector<HTMLDivElement>({ targetRef: graphRef });
@@ -34,7 +33,10 @@ export const GraphComponent = observer(
     [layout, instanceId]
   );
 
-  useGraphController({graphController, graphModel});
+  // Keep the graphController up to date
+  useEffect(() => {
+    graphModel && graphController.setProperties({ graphModel });
+  }, [graphController, graphModel]);
 
   useEffect(() => {
     (width != null) && (height != null) && layout.setParentExtent(width, height);
@@ -52,22 +54,20 @@ export const GraphComponent = observer(
   if (!graphModel) return null;
 
   return (
-    <InstanceIdContext.Provider value={instanceId}>
-      <GraphLayoutContext.Provider value={layout}>
-        <AxisLayoutContext.Provider value={layout}>
-          <GraphModelContext.Provider value={graphModel}>
-            <GraphControllerContext.Provider value={graphController}>
-              <Graph graphController={graphController}
-                graphRef={graphRef}
-                onRequestRowHeight={onRequestRowHeight}
-                readOnly={readOnly}
-              />
-              <AttributeDragOverlay activeDragId={overlayDragId} />
-              <TileToolbar tileType="graph" readOnly={!!readOnly} tileElement={tileElt}/>
-            </GraphControllerContext.Provider>
-          </GraphModelContext.Provider>
-        </AxisLayoutContext.Provider>
-      </GraphLayoutContext.Provider>
-    </InstanceIdContext.Provider>
+    <GraphLayoutContext.Provider value={layout}>
+      <AxisLayoutContext.Provider value={layout}>
+        <GraphModelContext.Provider value={graphModel}>
+          <GraphControllerContext.Provider value={graphController}>
+            <Graph graphController={graphController}
+              graphRef={graphRef}
+              onRequestRowHeight={onRequestRowHeight}
+              readOnly={readOnly}
+            />
+            <AttributeDragOverlay activeDragId={overlayDragId} />
+            <TileToolbar tileType="graph" readOnly={!!readOnly} tileElement={tileElt}/>
+          </GraphControllerContext.Provider>
+        </GraphModelContext.Provider>
+      </AxisLayoutContext.Provider>
+    </GraphLayoutContext.Provider>
   );
 });
