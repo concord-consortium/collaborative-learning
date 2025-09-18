@@ -210,7 +210,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private showFileMenu() {
     const { appConfig: { aiEvaluation, navTabs }, documents } = this.stores;
     const hasIdeas = aiEvaluation || documents.invisibleExemplarDocuments.length > 0;
-    // show the File menu if my work navigation is enabled or if we have ideas
+    // Show the File menu if my work navigation is enabled, or if we have Ideas since in that
+    // case students may need to make more documents and publishing should be available
+    // independently of showing a MyWork tab.
     return !!navTabs.getNavTabSpec(ENavTab.kMyWork) || hasIdeas;
   }
 
