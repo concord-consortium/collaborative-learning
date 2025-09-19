@@ -27,6 +27,7 @@ context('Diagram Tool Tile', function () {
 
     beforeTest();
     clueCanvas.addTile("diagram");
+    clueCanvas.addTile("text");
 
     // Tile, toolbar, and buttons render
     diagramTile.getDiagramTile().should("exist").click();
@@ -54,6 +55,12 @@ context('Diagram Tool Tile', function () {
     clueCanvas.clickToolbarButton("diagram", "toggle-navigator");
     navigator().should("not.exist");
     clueCanvas.clickToolbarButton("diagram", "toggle-navigator");
+    navigator().should("exist");
+
+    // Navigator is not shown when tile is not selected
+    textTile.getTextTile().click();
+    navigator().should("not.exist");
+    diagramTile.getDiagramTile().click();
     navigator().should("exist");
 
     // New variable dialog works

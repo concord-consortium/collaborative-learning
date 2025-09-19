@@ -31,7 +31,9 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
   const containerContext = useContainerContext();
   const domElement = useRef<HTMLDivElement>(null);
   const content = model.content as GeometryContentModelType;
-  const showNavigator = navigatorAllowed && content.isNavigatorVisible;
+  const ui = useUIStore();
+  const showNavigator = ui.isSelectedTile(model) && navigatorAllowed && content.isNavigatorVisible;
+
   const [board, setBoard] = useState<JXG.Board>();
   const [actionHandlers, setActionHandlers] = useState<IActionHandlers>();
   const [mode, setMode] = useState<GeometryTileMode>("select");
@@ -88,7 +90,6 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
     handlers: actionHandlers
   };
 
-  const ui = useUIStore();
   const [handlePointerDown, handlePointerUp] = useTileSelectionPointerEvents(
     useCallback(() => modelRef.current.id, [modelRef]),
     useCallback(() => ui.selectedTileIds, [ui]),
@@ -125,10 +126,18 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
         </TileNavigatorContext.Provider>
         <TileToolbar tileType="geometry" readOnly={!!readOnly} tileElement={tileElt} />
       </div>
-      {!readOnly && showNavigator &&
+      {/* FIXME: It would be best to not render the navigator at all when `showNavigator` is false. This is how
+          other tiles that support the navigator work. However, there is currently an issue with the Geometry
+          Tile and annotation arrows where if `showNavigator` becomes false, any existing annotations in the
+          tile disappear, and new ones can't be added. This may have something to do with multiple JXG boards
+          when the navigator is present and includes its own rendering of the geometry content, but we have not
+          been able to confirm that yet. As a temporary workaround, the navigator is rendered but with
+          visibility:hidden when `showNavigator` is false. */}
+      {!readOnly &&
         <TileNavigator
           tileVisibleBoundingBox={mainTileBoundingBox}
           onNavigatorPan={handleNavigatorPan}
+          showNavigator={showNavigator}
           tileProps={props}
           renderTile={(tileProps) =>
             <div className="geometry-tool">

@@ -464,10 +464,11 @@ class ClueCanvas {
      */
     clickToolbarButton(tileType, buttonName, options = {}) {
       cy.document().within(() => {
-        cy.get(`[data-test=canvas] .tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+        cy.get(`[data-test=canvas] .tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`).as('theButton');
+        cy.get('@theButton')
           .should('have.length', 1)
-          .should('not.be.disabled')
-          .click(options);
+          .should('not.be.disabled');
+        cy.get('@theButton').click(options);
       });
     }
 
