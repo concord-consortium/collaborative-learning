@@ -29,7 +29,7 @@ const navigatorSize = { width: 90, height: 62 };
  * when it is at a zoom level that makes it larger than the tile's content area.
  */
 export const TileNavigator = observer(function TileNavigator(props: INavigatorProps) {
-  const { onNavigatorPan, renderTile, showNavigator, tileProps, tileVisibleBoundingBox } = props;
+  const { onNavigatorPan, renderTile, showNavigator = true, tileProps, tileVisibleBoundingBox } = props;
   const { model, tileElt } = tileProps;
   const contentModel = model.content as NavigatableTileModelType;
   const { navigatorPosition, zoom } = contentModel;
@@ -136,13 +136,13 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
   const containerClasses = classNames("tile-navigator-container", {top: navigatorPosition === "top"});
   const placementButtonClasses = classNames("tile-navigator-placement-button", {top: navigatorPosition === "top"});
 
+  // FIXME: This visibility style based on `showNavigator` is needed due to a bug in the Geometry Tile.
+  // See comment in geometry-tile.tsx about rendering the navigator when `showNavigator` is false for
+  // more context. When that bug is fixed, this style and the `showNavigator` default prop value can be removed.
+  const style: React.CSSProperties = { visibility: showNavigator ? "visible" as const : "hidden" as const };
+
   return (
-    <div
-      ref={containerRef}
-      className={containerClasses}
-      data-testid="tile-navigator-container"
-      style={{"visibility": showNavigator ? "visible" : "hidden"}}
-    >
+    <div ref={containerRef} className={containerClasses} data-testid="tile-navigator-container" style={style}>
       <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: updateNavigatorBoundingBox }}>
         <div className="tile-navigator" data-testid="tile-navigator">
           <div ref={contentAreaRef} className="tile-navigator-content-area">

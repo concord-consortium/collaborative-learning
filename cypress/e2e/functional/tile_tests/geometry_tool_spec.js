@@ -129,9 +129,9 @@ context('Geometry Tool', function () {
     const textTile = new TextToolTile;
     clueCanvas.addTile("text");
     textTile.getTextTile().click();
-    geometryToolTile.getGeometryTileNavigatorPanel().should("not.exist");
+    geometryToolTile.getGeometryTileNavigatorPanel().should("not.be.visible");
     geometryToolTile.getGeometryTile().click();
-    geometryToolTile.getGeometryTileNavigatorPanel().should("exist");
+    geometryToolTile.getGeometryTileNavigatorPanel().should("be.visible");
   });
 
   it('works in all four modes', () => {
