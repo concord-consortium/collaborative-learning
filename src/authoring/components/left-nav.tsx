@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
+import { useImmer } from "use-immer";
+
 import "./left-nav.scss";
 import { IUnit } from "../types";
 
@@ -18,14 +20,14 @@ interface IProps {
 
 const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit }) => {
   const basePath = `#/${branch}/${unit}`;
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({
+  const [expanded, setExpanded] = useImmer<Record<string, boolean>>({
     [basePath]: true
   });
-  const sectionKeys = Object.keys(unitConfig.sections || {});
-  const [hashChangeCount, setHashChangeCount] = useState(0);
+  const [hashChangeCount, setHashChangeCount] = useImmer(0);
+  const lastHashChangeCount = React.useRef(-1);
 
   const handleToggle = (path: string) => setExpanded(prev => ({ ...prev, [path]: !prev[path] }));
-  const onHashChange = () => setHashChangeCount(prev => prev + 1);
+  const onHashChange = useCallback(() => setHashChangeCount(prev => prev + 1), [setHashChangeCount]);
 
   const tree = useMemo<TreeNode>(() => {
     return {
@@ -35,66 +37,55 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit }) => {
       {
         id: "config",
         label: "Configuration",
-          children: [
-          {
-            id: "unitSettings",
-            label: "Unit Settings",
-            tbd: true
-          },
-          {
-            id: "curriculumTabs",
-            label: "Curriculum Tabs",
-            tbd: true
-          },
-          {
-            id: "teacherGuideTabs",
-            label: "Teacher Guide Tabs",
-            tbd: true
-          },
-          {
-            id: "investigations",
-            label: "Investigations",
-            tbd: true
-          },
-          {
-            id: "raw",
-            label: "Raw Settings (Dev Only)"
-          },
+        children: [
+          { id: "curriculumTabs", label: "Curriculum Tabs"},
+          { id: "teacherGuideTabs", label: "Teacher Guide Tabs"},
+          { id: "unitSettings", label: "Unit Settings", tbd: true}
         ]
       },
       {
-        id: "investigations",
-        label: "Investigations",
-          children: unitConfig.investigations?.map(inv => ({
-          id: `investigation-${inv.ordinal}`,
-          label: inv.title,
-          children: inv.problems?.map(prob => ({
+        id: "content",
+        label: "Content",
+        children: [
+          {
+            id: "investigations",
+            label: "Investigations",
+              children: unitConfig.investigations?.map(inv => ({
+              id: `investigation-${inv.ordinal}`,
+              label: inv.title,
+              children: inv.problems?.map(prob => ({
                 id: `problem-${prob.ordinal}`,
                 label: prob.title,
-                children: prob.sections?.map(sec => {
-                      const parts = sec.split("/");
-                      let section: typeof unitConfig.sections[string] | undefined;
-                      for (const part of parts) {
-                        if (sectionKeys.includes(part)) {
-                          section = unitConfig.sections?.[part];
-                          break;
-                        }
-                      }
-                      return {
-                        id: sec,
-                        label: section?.title ?? `Unknown Section (${sec})`,
-                      };
-                    }) || [],
+                children: prob.sections?.map((sec, index) => {
+                  const problemTab = unitConfig.config.navTabs.tabSpecs.find(t => t.tab === "problems");
+                  const sectionTab = problemTab?.sections?.[index];
+                  return {
+                    id: sec,
+                    label: sectionTab?.title ?? `Unknown Section Number (${index})`,
+                  };
+                }) || [],
               })) || []
-        })) || []
-      }
-    ]};
-  }, [unitConfig, sectionKeys]);
+            })) || []
+          },
+          {
+            id: "teacherGuides",
+            label: "Teacher Guides",
+            tbd: true,
+          },
+          {
+            id: "exemplars",
+            label: "Exemplars",
+            tbd: true,
+          }
+        ]
+      }]
+    };
+  }, [unitConfig]);
 
   useEffect(() => {
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
+  }, [onHashChange]);
 
   useEffect(() => {
     const expandTree = (node: TreeNode, path: string) => {
@@ -106,8 +97,12 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit }) => {
       }
     };
 
-    expandTree(tree, basePath);
-  }, [tree, hashChangeCount, basePath]);
+    // prevent infinite loop
+    if (lastHashChangeCount.current !== hashChangeCount) {
+      lastHashChangeCount.current = hashChangeCount;
+      expandTree(tree, basePath);
+    }
+  }, [tree, hashChangeCount, basePath, setExpanded]);
 
   const renderNode = (node: TreeNode, path: string) => {
     const hasChildren = node.children && node.children.length > 0;

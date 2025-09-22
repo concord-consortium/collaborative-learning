@@ -1,60 +1,83 @@
 
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
+import { useImmer, Updater } from "use-immer";
+
+import { IUnit } from "../types";
+import { IframeControl } from "./editors/iframe-control";
+import RawSettingsControl from "./editors/raw-settings-control";
+import CurriculumTabs from "./workspace/curriculum-tabs";
 
 import "./workspace.scss";
-import { IUnit } from "../types";
-import { IframeControl } from "./iframe-control";
-import RawSettingsControl from "./raw-settings-control";
 
+type WorkspaceStatus = "loading" | "loaded" | "error" | "notImplemented";
 interface IProps {
   branch: string;
   unit: string;
   unitConfig: IUnit;
+  setUnitConfig: Updater<IUnit | undefined>;
   path: string | undefined;
   loadFile: (unitFilePath: string) => Promise<any>;
 }
 
-const Workspace: React.FC<IProps> = ({ branch, unit, unitConfig, path, loadFile }) => {
-  const [content, setContent] = React.useState<any>({});
-  const [status, setStatus] = React.useState<"loading" | "loaded" | "notImplemented" | "error">("loading");
+const Workspace: React.FC<IProps> = (props) => {
+  const { unit, unitConfig, setUnitConfig, path } = props;
+  const [content, setContent] = useImmer<any>({});
+  const isConfigPath = path?.startsWith("config/");
+  const [status, setStatus] = useImmer<WorkspaceStatus>(isConfigPath ? "loaded" : "loading");
+
+  const loadFile = useCallback((contentPath: string) => {
+    return new Promise<any>((resolve, reject) => {
+      props.loadFile(`${unit}/${contentPath}`).then((data) => {
+        setContent(data);
+        setStatus("loaded");
+        resolve(data);
+      }).catch((err) => {
+        setStatus("error");
+        console.error("Error loading content:", err);
+        resolve(undefined);
+      });
+    });
+   }, [props, setContent, setStatus, unit]);
 
   useEffect(() => {
-    if (path?.includes("/sections/")) {
+    if (isConfigPath) {
+      // nothing to load for config pages - just use unitConfig
+    } else if (path?.includes("/sections/")) {
       // load the content file for the selected path - some of the sections weirdly start with "sections/"
       // so strip that out if present
       const [_, ...parts] = path.split("/sections/");
       const contentPath = parts.join("/").replace(/^sections\//, "");
 
-      setStatus("loading");
-      loadFile(`${unit}/${contentPath}`).then((data) => {
-        setContent(data);
-        setStatus("loaded");
-      }).catch((err) => {
-        setStatus("error");
-        console.error("Error loading content:", err);
-      });
-      return;
-    }
+      loadFile(contentPath);
 
-    if (path === "config/raw") {
-      setStatus("loading");
-      loadFile(`${unit}/content.json`).then((data) => {
-        setContent(data);
-        setStatus("loaded");
-      }).catch((err) => {
-        setStatus("error");
-        console.error("Error loading content:", err);
-      });
-      return;
+    } else if (path) {
+      loadFile(path);
+    } else {
+      setContent(undefined);
+      setStatus("notImplemented");
     }
+  }, [path, isConfigPath, loadFile, unit, setContent, setStatus]);
 
-    setContent("");
-    setStatus("notImplemented");
-  }, [path, loadFile, unit]);
+  const renderConfig = () => {
+    switch (path) {
+      case "config/curriculumTabs":
+        return <CurriculumTabs unitConfig={unitConfig} setUnitConfig={setUnitConfig} />;
+      default:
+        return <div className="centered muted">Not yet implemented.</div>;
+    }
+  };
 
   const renderContent = () => {
+    if (isConfigPath) {
+      return (
+        <div className="config">
+          {renderConfig()}
+        </div>
+      );
+    }
+
     if (status === "loading") {
-      return <div className="centered">Loading content...</div>;
+      return <div className="centered">Loading ...</div>;
     }
     if (status === "error") {
       return <div className="centered">Error loading content</div>;

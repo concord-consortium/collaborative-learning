@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
+import { useImmer } from "use-immer";
 
 export type AuthState = "unauthenticated" | "authenticating" | "authenticated" | "error";
 
@@ -11,19 +12,19 @@ export const branches = ["main", "demo"];
 const anyData = data as any;
 
 export const useCurriculum = () => {
-  const [authState, setAuthState] = useState<AuthState>("authenticated");
-  const [branch, _setBranch] = useState<string | undefined>(undefined);
-  const [unit, _setUnit] = useState<string | undefined>(undefined);
-  const [path, setPath] = useState<string | undefined>(undefined);
-  const [unitConfig, setUnitConfig] = useState<IUnit | undefined>(undefined);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [authState, setAuthState] = useImmer<AuthState>("authenticated");
+  const [branch, _setBranch] = useImmer<string | undefined>(undefined);
+  const [unit, _setUnit] = useImmer<string | undefined>(undefined);
+  const [path, setPath] = useImmer<string | undefined>(undefined);
+  const [unitConfig, setUnitConfig] = useImmer<IUnit | undefined>(undefined);
+  const [error, setError] = useImmer<string | undefined>(undefined);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setError(undefined);
     _setBranch(undefined);
     _setUnit(undefined);
     setUnitConfig(undefined);
-  };
+  }, [_setBranch, _setUnit, setError, setUnitConfig]);
 
   const setUnit = useCallback((newUnit?: string, updateHash?: boolean) => {
     if (newUnit) {
@@ -39,10 +40,10 @@ export const useCurriculum = () => {
     _setUnit(newUnit);
     if (updateHash) {
       window.location.hash = branch && newUnit
-        ? `#/${branch}/${newUnit}/config/unitSettings`
+        ? `#/${branch}/${newUnit}/config/curriculumTabs`
         : (branch ? `#/${branch}` : "#");
     }
-  }, [branch]);
+  }, [_setUnit, branch, setError, setUnitConfig]);
 
   const setBranch = useCallback((newBranch?: string, updateHash?: boolean) => {
     if (newBranch && !branches.includes(newBranch)) {
@@ -59,15 +60,19 @@ export const useCurriculum = () => {
     if (updateHash) {
       window.location.hash = newBranch ? `#/${newBranch}` : "#";
     }
-  }, [branch]);
+  }, [_setBranch, branch, reset, setError]);
 
   const processHash = useCallback(() => {
     const [_, _branch, _unit, ...rest] = window.location.hash.split("/");
 
-    setBranch(_branch);
-    setUnit(_unit);
+    if (_branch !== branch) {
+      setBranch(_branch);
+    }
+    if (_unit !== unit) {
+      setUnit(_unit);
+    }
     setPath(rest.length > 0 ? rest.join("/") : undefined);
-  }, [setBranch, setUnit, setPath]);
+  }, [branch, unit, setBranch, setUnit, setPath]);
 
   useEffect(() => {
     window.addEventListener("hashchange", processHash);
@@ -105,6 +110,7 @@ export const useCurriculum = () => {
     listBranches,
     listUnits,
     unitConfig,
+    setUnitConfig,
     error,
     setError,
     path,

@@ -15,4 +15,34 @@
       color: #888;
     }
   }
+
+  .config {
+    font-size: 0.9rem;
+    height: 100%;
+    overflow: auto;
+
+    padding: 10px;
+
+    label, .sectionLabel {
+      display: block;
+      font-weight: bold;
+    }
+
+    .sectionLabel {
+      margin-top: 20px;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 4px;
+      padding: 6px;
+      font-size: 1em;
+    }
+
+    .bottomButtons {
+      margin: 20px 0;
+      text-align: left;
+    }
+  }
 }

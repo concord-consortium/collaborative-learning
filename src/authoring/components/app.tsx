@@ -1,5 +1,6 @@
 
 import React, { useEffect } from "react";
+import { useImmer } from "use-immer";
 
 import { units, useCurriculum } from "../hooks/use-curriculum";
 import LeftNav from "./left-nav";
@@ -8,8 +9,11 @@ import Workspace from "./workspace";
 import "./app.scss";
 
 const App: React.FC = () => {
-  const { branch, listBranches, setBranch, unit, setUnit, unitConfig, error, path, loadFile } = useCurriculum();
-  const [branches, setBranches] = React.useState<string[]>([]);
+  const {
+    branch, listBranches, setBranch, unit, setUnit,
+    unitConfig, setUnitConfig, error, path, loadFile
+  } = useCurriculum();
+  const [branches, setBranches] = useImmer<string[]>([]);
 
   useEffect(() => {
     if (!branch) {
@@ -17,7 +21,7 @@ const App: React.FC = () => {
         setBranches(b);
       });
     }
-  }, [branch, listBranches]);
+  }, [branch, listBranches, setBranches]);
 
   const renderHeader = () => {
     const title = `CLUE Authoring${unitConfig ? `: ${unitConfig.title}` : ""}`;
@@ -81,7 +85,14 @@ const App: React.FC = () => {
     return (
       <>
         <LeftNav branch={branch} unit={unit} unitConfig={unitConfig} />
-        <Workspace branch={branch} unit={unit} unitConfig={unitConfig} path={path} loadFile={loadFile} />
+        <Workspace
+          branch={branch}
+          unit={unit}
+          unitConfig={unitConfig}
+          setUnitConfig={setUnitConfig}
+          path={path}
+          loadFile={loadFile}
+        />
       </>
     );
   };
