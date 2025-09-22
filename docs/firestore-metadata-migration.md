@@ -28,7 +28,7 @@ The script was run multiple times:
 - Sep. 3, 2025 with a fix to try to work around a firebase api error saying we were making too many requests. This fix didn't seem to work so I don't think any new documents were processed.
 - Sep. 17, 2025 with a fixes to log more information and not make too many requests.
 - Sep. 21, 2025 after the merge conflicts were manually resolved.
--
+- Sep. 22, 2025 the script was updated and run on all recent demo spaces
 
 
 ## Merged History Problem
