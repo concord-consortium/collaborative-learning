@@ -61,9 +61,14 @@ context("Tile Navigator", () => {
       cy.log(`Testing ${tileType} navigator`);
       const logEventName = tileType === "drawing" ? LogEventName.DRAWING_TOOL_CHANGE : LogEventName.GEOMETRY_TOOL_CHANGE;
 
+      // FIXME: Ideally, we would use "not.exist" for both tile types, but the geometry tile's navigator is
+      // implemented with visibility:hidden instead of being removed from the DOM. So we have to use
+      // "not.be.visible" for that case. See comment about navigator in geometry-tile.tsx for more context.
+      const presenceTestString = tileType === "geometry" ? "not.be.visible" : "not.exist";
+
       clueCanvas.clickToolbarButton(tileType, "navigator");
       clueCanvas.getToolbarButtonToolTipText(tileType, "navigator").should("eq", "Show Navigator");
-      tileNavigator.getTileNavigator().should("not.exist");
+      tileNavigator.getTileNavigator().should(presenceTestString);
       cy.get("@log")
         .should("have.been.been.calledWith", logEventName, Cypress.sinon.match.object)
         .its("lastCall.args.1").should("deep.include", { operation: "hideNavigator" });
@@ -124,6 +129,11 @@ context("Tile Navigator", () => {
 
     for(let tileType of ["drawing", "geometry"]) {
       clueCanvas.addTile(tileType);
+      if (tileType === "drawing") {
+        drawToolTile.getDrawTile().click();
+      } else {
+        geometryTile.getGeometryTile().click();
+      }
       tileNavigator.getTileNavigator().should("exist").and("not.have.class", "top");
 
       cy.log("Move tile navigator to the top of the drawing tile in a quick animation");
@@ -143,6 +153,8 @@ context("Tile Navigator", () => {
     beforeTest();
 
     clueCanvas.addTile("drawing");
+    drawToolTile.getDrawTile().click();
+
     tileNavigator.getTileNavigatorPanningButtons().should("exist");
     tileNavigator.getTileNavigatorPanningButtons().find('button').should("have.length", 4);
     drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(0, 0) scale(1)");

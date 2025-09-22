@@ -47,7 +47,9 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
   const stores = useStores();
   const { clipboard, ui } = stores;
-  const showNavigator = navigatorAllowed && contentRef.current.isNavigatorVisible;
+  const showNavigator = ui.isSelectedTile(model) &&
+                        navigatorAllowed &&
+                        contentRef.current.isNavigatorVisible;
 
   const updateTileVisibleBoundingBox = (bb: BoundingBox) => {
     if (!isEqual(bb, tileVisibleBoundingBox)) {

@@ -1,6 +1,7 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
+import TextToolTile from '../../../support/elements/tile/TextToolTile';
 import { LogEventName } from '../../../../src/lib/logger-types';
 import { parseTransform } from '../../../support/helpers/transform';
 
@@ -140,6 +141,17 @@ context('Draw Tool Tile', function () {
       const scale = parseFloat(canvas.attr('transform').replace(/.*scale\((\d+\.\d+)\)/, '$1'));
       expect(scale).to.be.within(.82, .84);
     });
+
+    cy.log("has a navigator panel to pan drawing");
+    drawToolTile.getDrawTileNavigatorPanel().should("exist");
+
+    cy.log("navigator is not shown when tile is not selected");
+    const textTile = new TextToolTile;
+    clueCanvas.addTile("text");
+    textTile.getTextTile().click();
+    drawToolTile.getDrawTileNavigatorPanel().should("not.exist");
+    drawToolTile.getDrawTile().click();
+    drawToolTile.getDrawTileNavigatorPanel().should("exist");
 
     cy.log("can delete objects and close panel");
     // Reset zoom to 100%

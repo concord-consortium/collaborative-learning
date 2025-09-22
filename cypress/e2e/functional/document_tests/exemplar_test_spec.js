@@ -199,7 +199,7 @@ context('Exemplar Documents', function () {
       .and("contain.text", exemplarName);
   });
 
-  it('Exemplar and sticky note work for personal docs', function () {
+  it('Exemplar and comment card work for personal docs', function () {
     beforeTest(queryParams1);
     cy.openTopTab('sort-work');
     sortWork.openSortWorkSection("No Group");
@@ -227,6 +227,10 @@ context('Exemplar Documents', function () {
     chatPanel.getCommentCardContent().should("be.visible")
       .and("contain.text", "See if this example gives you any new ideas:")
       .and("contain.text", exemplarName);
+
+    chatPanel.getCommentCardLink().should("be.visible").click();
+    sortWork.getFocusDocument().should('be.visible');
+    sortWork.getFocusDocumentTitle().should("contain.text", exemplarName);
 
   });
 });
