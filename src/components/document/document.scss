@@ -11,6 +11,10 @@
   border: $document-border-width solid $workspace-teal;
   border-top-left-radius: $border-radius;
 
+  &.no-border {
+    border: 0;
+  }
+
   .titlebar {
     position: absolute;
     top: 0;

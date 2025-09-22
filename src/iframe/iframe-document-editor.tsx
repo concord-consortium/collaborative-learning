@@ -1,6 +1,7 @@
 import React from "react";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { Map } from "immutable";
+import classNames from "classnames";
 
 import { defaultDocumentModelParts } from "../components/doc-editor/doc-editor-app-defaults";
 import { AppProvider, initializeApp } from "../initialize-app";
@@ -18,6 +19,8 @@ import "../../cms/src/custom-control.scss";
 interface IProps {
   initialValue?: DocumentModelType;
   handleUpdateContent: (json: Record<string, any>) => void;
+  fullHeight?: boolean;
+  noBorder?: boolean; // if true don't show border around the editor
 }
 
 interface IState {
@@ -112,7 +115,7 @@ export class IframeDocumentEditor extends React.Component<IProps, IState>  {
     }
 
     return (
-      <div className="document">
+      <div className={classNames("document", { "no-border": this.props.noBorder })}>
         { stores.appConfig.showAnnotationControls &&
           <div className="titlebar">
             <div className="actions left">
@@ -123,6 +126,7 @@ export class IframeDocumentEditor extends React.Component<IProps, IState>  {
         <EditableDocumentContent
           className="iframe-control"
           contained={!stores.appConfig.showAnnotationControls}
+          fullHeight={this.props.fullHeight}
           mode="1-up"
           isPrimary={true}
           readOnly={!!readOnly}

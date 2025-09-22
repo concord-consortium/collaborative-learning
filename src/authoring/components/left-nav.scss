@@ -1,0 +1,60 @@
+// left-nav.scss
+
+$left-nav-indent: 6px;
+
+.leftNav {
+  width: 250px;
+  min-width: 250px;
+  border-right: 1px solid #e0e0e0;
+  background: #ffe6d0;
+  padding: $left-nav-indent 0;
+  overflow: auto;
+  font-size: 0.8rem;
+}
+
+.tree-view {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.tree-node {
+  padding: 4px $left-nav-indent;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+
+  .tbd {
+    font-size: 0.7em;
+    color: #888;
+    margin-left: 6px;
+    font-style: italic;
+  }
+}
+
+.tree-node:hover {
+  background: #e9ecef;
+}
+
+.tree-node--selected {
+  background: #d1e7fd;
+  font-weight: bold;
+}
+
+.tree-children {
+  margin-left: $left-nav-indent;
+  border-left: 1px dashed #ccc;
+  padding-left: $left-nav-indent;
+
+  li {
+    list-style: none;
+  }
+}
+
+.toggle {
+  margin-right: 6px;
+  font-size: 12px;
+  color: #888;
+  cursor: pointer;
+  user-select: none;
+}
