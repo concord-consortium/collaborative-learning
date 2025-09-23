@@ -1,0 +1,10 @@
+.iframe-control {
+  height: 100%;
+  overflow: hidden;
+
+  iframe {
+    border: none;
+    height: 100%;
+    width: 100%;
+  }
+}

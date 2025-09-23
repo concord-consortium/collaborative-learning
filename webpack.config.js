@@ -68,6 +68,7 @@ module.exports = (env, argv) => {
       index: './src/index.tsx',
       iframe: './src/iframe/iframe.tsx',
       'doc-editor': './src/doc-editor.tsx',
+      authoring: './src/authoring/index.tsx',
       standalone: './src/standalone.tsx',
     },
     mode: devMode ? 'development' : 'production',
@@ -271,6 +272,12 @@ module.exports = (env, argv) => {
       ...configHtmlPlugins({
         chunks: ['doc-editor'],
         filename: 'editor/index.html',
+      }),
+      ...configHtmlPlugins({
+        chunks: ['authoring'],
+        filename: 'authoring/index.html',
+        publicPath: '.',
+        template: 'src/authoring/index.html'
       }),
       ...configHtmlPlugins({
         chunks: ['standalone'],

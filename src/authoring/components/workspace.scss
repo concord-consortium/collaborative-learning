@@ -1,0 +1,18 @@
+.workspace {
+  width: 100%;
+  overflow: hidden;
+
+  .centered {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    font-size: 1.2em;
+
+    &.muted {
+      color: #888;
+    }
+  }
+}

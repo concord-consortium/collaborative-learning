@@ -1,0 +1,80 @@
+
+html, body, #app {
+  margin: 0;
+  padding: 0;
+      font-family: "Lato", "Noto Sans Symbols 2", "Noto Sans Math", sans-serif;
+}
+
+.app {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+
+  .header {
+    background-color: #cdebf2;
+    border-bottom: 1px solid #ccc;
+    color: #3f3f3f;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    justify-content: space-between;
+    font-size: 0.9em;
+
+    .title {
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .info {
+      a {
+        font-weight: 600;
+        color: inherit;
+      }
+    }
+  }
+
+  .main {
+    flex: 1 1 0;
+    overflow: auto;
+    background: #f7f8fa;
+    min-height: 0;
+    display: flex;
+
+    .centered {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+
+      select {
+        padding: 5px;
+      }
+    }
+  }
+
+  .error-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+
+    .error {
+      background: #fff0f0;
+      border: 1px solid #ffcccc;
+      color: #cc0000;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    }
+  }
+}
