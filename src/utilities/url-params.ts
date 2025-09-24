@@ -96,6 +96,8 @@ export interface QueryParams {
   firestore?: string; // "emulator" or host:port url
   // direct firebase function calls to the emulator
   functions?: string; // "emulator" or host:port url
+  // direct firebase auth to the emulator
+  auth?: string; // "emulator" or host:port url
   // do not use persistentUI in some cy tests that rely on demo
   noPersistentUI?: boolean;
   // mouse sensor can be enabled for cypress drag and drop tests for dnd-kit
