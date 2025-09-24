@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "outDir": "lib",
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2020",
+    "lib": ["es2020"],
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    // This prevents typescript from trying to include @types from the parent folders.
+    // The types in the parent folders conflict so they break the build.
+    "typeRoots": ["./node_modules/@types"],
+    "paths": {
+      // These are necessary so code imported from ../shared/ will use the same version of
+      // firebase-admin that the local code does. Technically only "firebase-admin/firestore"
+      // seems to be currently required, but it seems safer to alias all of the admin
+      // libraries the shared code might be using.
+      "firebase-admin": ["./node_modules/firebase-admin/lib"],
+      "firebase-admin/firestore": ["./node_modules/firebase-admin/lib/firestore"],
+      "firebase-admin/app": ["./node_modules/firebase-admin/lib/app"],
+      "firebase-admin/database": ["./node_modules/firebase-admin/lib/database"],
+    },
+
+  },
+  "compileOnSave": true,
+  "include": [
+    "src",
+    "test"
+  ],
+  "exclude": ["**/node_modules", "**/.*/"]
+}

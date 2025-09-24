@@ -1,3 +1,8 @@
+export type IUnitFiles = Record<string, IUnitFile>;
+export interface IUnitFile {
+  sha: string;
+  type?: string;
+}
 export interface IUnit {
   code: string;
   abbrevTitle: string;

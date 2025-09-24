@@ -107,6 +107,7 @@ html, body, #app {
     justify-content: center;
     align-items: center;
     height: 100%;
+    pointer-events: none;
 
     .error {
       background: #fff0f0;

@@ -1,22 +1,23 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export type AuthState = "unauthenticated" | "authenticating" | "authenticated" | "error";
 
-import { data } from "../data/data";
-import { IUnit } from "../types";
+import { IUnit, IUnitFiles } from "../types";
+import { AuthoringApi } from "./use-authoring-api";
+import { Auth } from "./use-auth";
 
 export const units = ["cas", "mods", "brain", "m2s"];
 export const branches = ["main", "demo"];
 
-const anyData = data as any;
-
-export const useCurriculum = () => {
+export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
   const [authState, setAuthState] = useState<AuthState>("authenticated");
   const [branch, _setBranch] = useState<string | undefined>(undefined);
   const [unit, _setUnit] = useState<string | undefined>(undefined);
   const [path, setPath] = useState<string | undefined>(undefined);
   const [unitConfig, setUnitConfig] = useState<IUnit | undefined>(undefined);
+  const [files, setFiles] = useState<IUnitFiles | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
+  const lastUnitRef = useRef<string | undefined>(undefined);
 
   const reset = () => {
     setError(undefined);
@@ -26,15 +27,30 @@ export const useCurriculum = () => {
   };
 
   const setUnit = useCallback((newUnit?: string, updateHash?: boolean) => {
-    if (newUnit) {
-      const key = `${newUnit}/content.json`;
-      if (anyData[key]) {
-        setError(undefined);
-        setUnitConfig(anyData[key]);
-      } else {
-        setError(`Unit ${newUnit} not found`);
+    // wait until we have a branch and a new unit
+    if (branch && newUnit && newUnit === lastUnitRef.current) {
+      return;
+    }
+
+    if (branch && newUnit) {
+      lastUnitRef.current = newUnit;
+
+      // fetch files and content in parallel
+      const filesPromise = api.get("/getPulledFiles", { branch, unit: newUnit });
+      const contentPromise = api.get("/getContent", { branch, unit: newUnit, path: "content.json" });
+      Promise.all([filesPromise, contentPromise]).then(([filesResponse, contentResponse]) => {
+        if (!filesResponse.success || !contentResponse.success) {
+          setError(filesResponse.error || contentResponse.error);
+          setUnitConfig(undefined);
+          return;
+        }
+
+        setFiles(filesResponse.files);
+        setUnitConfig(contentResponse.content);
+      }).catch((err) => {
+        setError(err.message);
         setUnitConfig(undefined);
-      }
+      });
     }
     _setUnit(newUnit);
     if (updateHash) {
@@ -42,7 +58,7 @@ export const useCurriculum = () => {
         ? `#/${branch}/${newUnit}/config/unitSettings`
         : (branch ? `#/${branch}` : "#");
     }
-  }, [branch]);
+  }, [api, branch]);
 
   const setBranch = useCallback((newBranch?: string, updateHash?: boolean) => {
     if (newBranch && !branches.includes(newBranch)) {
@@ -75,8 +91,11 @@ export const useCurriculum = () => {
   }, [processHash]);
 
   useEffect(() => {
-    processHash();
-  }, [processHash]);
+    // wait until auth is ready
+    if (auth.user) {
+      processHash();
+    }
+  }, [auth, processHash]);
 
   const listBranches = async () => {
     return branches;
@@ -85,14 +104,6 @@ export const useCurriculum = () => {
   const listUnits = async (_branch: string) => {
     // Simulate an API call to fetch units for a given branch
     return units;
-  };
-
-  const loadFile = async (unitFilePath: string) => {
-    if (anyData[unitFilePath]) {
-      return anyData[unitFilePath];
-    } else {
-      throw new Error(`File ${unitFilePath} not found`);
-    }
   };
 
   return {
@@ -108,6 +119,6 @@ export const useCurriculum = () => {
     error,
     setError,
     path,
-    loadFile,
+    files
   };
 };
