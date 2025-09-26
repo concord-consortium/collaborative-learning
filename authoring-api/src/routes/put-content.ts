@@ -24,7 +24,7 @@ const putContent = async (req: Request, res: Response) => {
   const db = getDb();
   const escapedPath = escapeFirebaseKey(path);
   const contentPath = getUnitContentPath(branch, unit, escapedPath);
-  db.ref(contentPath).set(stringContent);
+  await db.ref(contentPath).set(stringContent);
 
   return sendSuccessResponse(res, {});
 };

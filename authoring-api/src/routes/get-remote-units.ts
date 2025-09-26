@@ -29,7 +29,7 @@ const getRemoteUnits = async (req: Request, res: Response) => {
     return sendSuccessResponse(res, {units});
   } catch (error) {
     console.error("Failed to fetch repository tree:", error);
-    return res.status(500).send("An error occurred while fetching the repository data.");
+    return sendErrorResponse(res, "An error occurred while fetching the repository data.");
   }
 };
 
