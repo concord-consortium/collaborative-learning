@@ -16,14 +16,14 @@ interface IProps {
   unit: string;
   unitConfig: IUnit;
   files: IUnitFiles;
+  onMediaLibraryClicked?: () => void;
 }
 
-const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files }) => {
+const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files, onMediaLibraryClicked }) => {
   const basePath = `#/${branch}/${unit}`;
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     [basePath]: true
   });
-  const sectionKeys = Object.keys(unitConfig.sections || {});
   const [hashChangeCount, setHashChangeCount] = useState(0);
 
   const handleToggle = (path: string) => setExpanded(prev => ({ ...prev, [path]: !prev[path] }));
@@ -87,7 +87,7 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files }) => {
         })) || []
       }
     ]};
-  }, [unitConfig, sectionKeys]);
+  }, [unitConfig, files]);
 
   useEffect(() => {
     window.addEventListener("hashchange", onHashChange);
@@ -154,9 +154,19 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files }) => {
 
   return (
     <nav className="leftNav">
-      <ul className="tree-view">
-        {renderNode(tree, basePath)}
-      </ul>
+      <div className="tree-view-container">
+        <ul className="tree-view">
+          {renderNode(tree, basePath)}
+        </ul>
+      </div>
+      <div className="leftNav-bottom">
+        <button
+          className="media-library-btn"
+          onClick={onMediaLibraryClicked}
+        >
+          Media Library
+        </button>
+      </div>
     </nav>
   );
 };
