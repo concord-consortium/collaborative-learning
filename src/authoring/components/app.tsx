@@ -5,13 +5,37 @@ import { units, useCurriculum } from "../hooks/use-curriculum";
 import LeftNav from "./left-nav";
 import Workspace from "./workspace";
 import useAuth from "../hooks/use-auth";
+import useAuthoringApi from "../hooks/use-authoring-api";
 
 import "./app.scss";
 
 const App: React.FC = () => {
-  const { branch, listBranches, setBranch, unit, setUnit, unitConfig, error, path, loadFile } = useCurriculum();
-  const [branches, setBranches] = React.useState<string[]>([]);
   const auth = useAuth();
+  const api = useAuthoringApi(auth);
+  const { branch, listBranches, setBranch, unit, setUnit, unitConfig, error, path, files } = useCurriculum(auth, api);
+  const [branches, setBranches] = React.useState<string[]>([]);
+
+  // until we have an admin UI, use direct api calls to set things up
+  useEffect(() => {
+    /*
+    // if needed for debugging in the future, uncomment to use the
+    // whoami endpoint that verifies authentication is working
+    api.get("/whoami").then((response) => {
+      console.log("Whoami response:", response);
+    }).catch((err) => {
+      console.error("Whoami error:", err);
+    });
+    */
+
+    /*
+    console.log("Pulling unit");
+    api.post("/pullUnit", { branch: "main", unit: "cas" }).then(() => {
+      console.log("Pulled unit");
+    }).catch((err) => {
+      console.error("Error pulling unit:", err);
+    });
+    */
+  }, [api]);
 
   useEffect(() => {
     if (!branch) {
@@ -128,18 +152,18 @@ const App: React.FC = () => {
       );
     }
 
-    if (!unitConfig) {
+    if (!unitConfig || !files) {
       return (
         <div className="centered">
-          <div>Loading unit config...</div>
+          <div>Loading unit ...</div>
         </div>
       );
     }
 
     return (
       <>
-        <LeftNav branch={branch} unit={unit} unitConfig={unitConfig} />
-        <Workspace branch={branch} unit={unit} unitConfig={unitConfig} path={path} loadFile={loadFile} />
+        <LeftNav branch={branch} unit={unit} unitConfig={unitConfig} files={files} />
+        <Workspace branch={branch} unit={unit} unitConfig={unitConfig} path={path} api={api} />
       </>
     );
   };

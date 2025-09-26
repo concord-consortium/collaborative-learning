@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./left-nav.scss";
-import { IUnit } from "../types";
+import { IUnit, IUnitFiles } from "../types";
 
 // Tree node type
 export interface TreeNode {
   id: string;
   label: string;
   tbd?: boolean;
+  path?: string;
   children?: TreeNode[];
 }
 
@@ -14,9 +15,10 @@ interface IProps {
   branch: string;
   unit: string;
   unitConfig: IUnit;
+  files: IUnitFiles;
 }
 
-const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit }) => {
+const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files }) => {
   const basePath = `#/${branch}/${unit}`;
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     [basePath]: true
@@ -26,6 +28,7 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit }) => {
 
   const handleToggle = (path: string) => setExpanded(prev => ({ ...prev, [path]: !prev[path] }));
   const onHashChange = () => setHashChangeCount(prev => prev + 1);
+  const lastHashChangeCount = React.useRef(-1);
 
   const tree = useMemo<TreeNode>(() => {
     return {
@@ -69,23 +72,18 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit }) => {
           id: `investigation-${inv.ordinal}`,
           label: inv.title,
           children: inv.problems?.map(prob => ({
-                id: `problem-${prob.ordinal}`,
-                label: prob.title,
-                children: prob.sections?.map(sec => {
-                      const parts = sec.split("/");
-                      let section: typeof unitConfig.sections[string] | undefined;
-                      for (const part of parts) {
-                        if (sectionKeys.includes(part)) {
-                          section = unitConfig.sections?.[part];
-                          break;
-                        }
-                      }
-                      return {
-                        id: sec,
-                        label: section?.title ?? `Unknown Section (${sec})`,
-                      };
-                    }) || [],
-              })) || []
+            id: `problem-${prob.ordinal}`,
+            label: prob.title,
+            children: prob.sections?.map((sectionPath, index) => {
+              const file = files[sectionPath];
+              const section = file && file.type ? unitConfig.sections?.[file.type] : undefined;
+              return {
+                id: `section-${index+1}`,
+                label: section?.title ?? `Unknown Section (${sectionPath})`,
+                path: sectionPath
+              };
+            }) || [],
+          })) || []
         })) || []
       }
     ]};
@@ -106,13 +104,18 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit }) => {
       }
     };
 
-    expandTree(tree, basePath);
+    // prevent infinite loop
+    if (lastHashChangeCount.current !== hashChangeCount) {
+      lastHashChangeCount.current = hashChangeCount;
+      expandTree(tree, basePath);
+    }
   }, [tree, hashChangeCount, basePath]);
 
   const renderNode = (node: TreeNode, path: string) => {
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = expanded[path];
-    const isSelected = window.location.hash === path;
+    const hashPath = node.path ? `${path}?content=${node.path}` : path;
+    const isSelected = window.location.hash === hashPath;
 
     return (
       <li key={node.id}>
@@ -126,7 +129,7 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit }) => {
             if (hasChildren) {
               handleToggle(path);
             } else {
-              window.location.hash = path;
+              window.location.hash = hashPath;
             }
           }}
         >

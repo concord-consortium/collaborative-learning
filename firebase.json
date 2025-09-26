@@ -56,6 +56,23 @@
         "*.log",
         "coverage"
       ]
+    },
+    {
+      "source": "authoring-api",
+      "codebase": "authoring-api",
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ],
+      "ignore": [
+        "node_modules",
+        ".*",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local",
+        "*.log",
+        "coverage"
+      ]
     }
   ]
 }

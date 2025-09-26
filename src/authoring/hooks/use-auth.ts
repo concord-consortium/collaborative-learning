@@ -4,7 +4,16 @@ import "firebase/auth";
 
 import { initializeApp } from "../../lib/firebase-config";
 
-function useAuth() {
+export interface Auth {
+  user: firebase.User | null;
+  loading: boolean;
+  error: string | null;
+  signIn: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  reset: () => void;
+}
+
+function useAuth(): Auth {
   const [user, setUser] = useState<firebase.User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

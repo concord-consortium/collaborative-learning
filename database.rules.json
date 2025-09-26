@@ -1,5 +1,9 @@
 {
   "rules": {
+    "authoring": {
+      ".read": "auth !== null",
+      ".write": "false"
+    },
     "test": {
       ".read": "auth !== null",
       ".write": "auth !== null"

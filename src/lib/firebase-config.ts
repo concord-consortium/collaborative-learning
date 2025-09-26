@@ -51,6 +51,8 @@ export function firebaseConfig() {
   return configs[firebaseEnv];
 }
 
+export const localFunctionsHost = "http://localhost:5001";
+
 export function initializeApp() {
   // check for already being initialized for tests
   if (firebase.apps.length === 0) {
@@ -78,7 +80,7 @@ export function initializeApp() {
   if (urlParams.functions) {
     // pass `functions=emulator` to test against functions running in the emulator
     const url = new URL(urlParams.functions === "emulator"
-                          ? "http://localhost:5001" : urlParams.functions);
+                          ? localFunctionsHost : urlParams.functions);
     if (url.hostname && url.port) {
       firebase.functions().useEmulator(url.hostname, parseInt(url.port, 10));
     }
