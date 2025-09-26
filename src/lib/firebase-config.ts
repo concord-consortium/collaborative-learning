@@ -1,3 +1,10 @@
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/database";
+import "firebase/firestore";
+import "firebase/functions";
+import "firebase/storage";
+
 import { urlParams } from "../utilities/url-params";
 
 const validProjects = ["staging", "production"] as const;
@@ -42,4 +49,48 @@ export function firebaseConfig() {
   }
 
   return configs[firebaseEnv];
+}
+
+export function initializeApp() {
+  // check for already being initialized for tests
+  if (firebase.apps.length === 0) {
+    firebase.initializeApp(firebaseConfig());
+  }
+
+  if (urlParams.firebase) {
+    // pass `firebase=emulator` to test against firebase emulator instance
+    const url = new URL(urlParams.firebase === "emulator"
+                          ? "http://localhost:9000" : urlParams.firebase);
+    if (url.hostname && url.port) {
+      firebase.database().useEmulator(url.hostname, parseInt(url.port, 10));
+    }
+  }
+
+  if (urlParams.firestore) {
+    // pass `firestore=emulator` to test against firestore emulator instance
+    const url = new URL(urlParams.firestore === "emulator"
+                          ? "http://localhost:8088" : urlParams.firestore);
+    if (url.hostname && url.port) {
+      firebase.firestore().useEmulator(url.hostname, parseInt(url.port, 10));
+    }
+  }
+
+  if (urlParams.functions) {
+    // pass `functions=emulator` to test against functions running in the emulator
+    const url = new URL(urlParams.functions === "emulator"
+                          ? "http://localhost:5001" : urlParams.functions);
+    if (url.hostname && url.port) {
+      firebase.functions().useEmulator(url.hostname, parseInt(url.port, 10));
+    }
+  }
+
+  if (urlParams.auth) {
+    // pass `auth=emulator` to test against auth running in the emulator
+    const url = new URL(urlParams.auth === "emulator"
+                          ? "http://localhost:9099" : urlParams.auth);
+    if (url.hostname && url.port) {
+      // note: unlike the other useEmulator() methods this takes a full url
+      firebase.auth().useEmulator(url.toString());
+    }
+  }
 }

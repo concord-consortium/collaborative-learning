@@ -36,8 +36,7 @@ import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
-import { urlParams } from "../utilities/url-params";
-import { firebaseConfig } from "./firebase-config";
+import { initializeApp } from "./firebase-config";
 import { UserModelType } from "../models/stores/user";
 import { logExemplarDocumentEvent } from "../models/document/log-exemplar-document-event";
 import { AppMode } from "../models/stores/store-types";
@@ -126,37 +125,7 @@ export class DB {
         reject("Already connected to database!");
       }
 
-      // check for already being initialized for tests
-      if (firebase.apps.length === 0) {
-        firebase.initializeApp(firebaseConfig());
-      }
-
-      if (urlParams.firebase) {
-        // pass `firebase=emulator` to test against firebase emulator instance
-        const url = new URL(urlParams.firebase === "emulator"
-                              ? "http://localhost:9000" : urlParams.firebase);
-        if (url.hostname && url.port) {
-          firebase.database().useEmulator(url.hostname, parseInt(url.port, 10));
-        }
-      }
-
-      if (urlParams.firestore) {
-        // pass `firestore=emulator` to test against firestore emulator instance
-        const url = new URL(urlParams.firestore === "emulator"
-                              ? "http://localhost:8088" : urlParams.firestore);
-        if (url.hostname && url.port) {
-          firebase.firestore().useEmulator(url.hostname, parseInt(url.port, 10));
-        }
-      }
-
-      if (urlParams.functions) {
-        // pass `functions=emulator` to test against functions running in the emulator
-        const url = new URL(urlParams.functions === "emulator"
-                              ? "http://localhost:5001" : urlParams.functions);
-        if (url.hostname && url.port) {
-          firebase.functions().useEmulator(url.hostname, parseInt(url.port, 10));
-        }
-      }
+      initializeApp();
 
       this.stores = options.stores;
 
