@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IUnitFiles } from "../types";
 
 import "./media-library.scss";
@@ -11,14 +11,14 @@ interface IProps {
 }
 
 const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit }) => {
-  const [filter, setFilter] = React.useState("");
-  const filterInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [filter, setFilter] = useState("");
+  const filterInputRef = useRef<HTMLInputElement | null>(null);
 
-  const imageFileKeys = React.useMemo(() => {
+  const imageFileKeys = useMemo(() => {
     return Object.keys(files).filter(key => key.startsWith("images"));
   }, [files]);
 
-  const filteredFileKeys = React.useMemo(() => {
+  const filteredFileKeys = useMemo(() => {
     if (!filter) return imageFileKeys;
     return imageFileKeys.filter(key => key.toLowerCase().includes(filter.toLowerCase()));
   }, [imageFileKeys, filter]);
@@ -26,17 +26,17 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit }) => {
   const baseUrl = useMemo(() => {
     return `https://raw.githubusercontent.com/concord-consortium/clue-curriculum/refs/heads/${branch}/curriculum/${unit}/`;
   }, [branch, unit]);
-  const [selectedKey, setSelectedKey] = React.useState<string | undefined>(imageFileKeys[0]);
+  const [selectedKey, setSelectedKey] = useState<string | undefined>(imageFileKeys[0]);
 
   const imageUrl = selectedKey ? `${baseUrl}${selectedKey}` : undefined;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (imageFileKeys.length > 0 && !selectedKey) {
       setSelectedKey(imageFileKeys[0]);
     }
   }, [imageFileKeys, selectedKey]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
@@ -48,9 +48,7 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit }) => {
 
   const handleClearFilter = () => {
     setFilter("");
-    setTimeout(() => {
-      filterInputRef.current?.focus();
-    }, 0);
+    filterInputRef.current?.focus();
   };
 
   return (
@@ -71,7 +69,7 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit }) => {
               value={filter}
               onChange={e => setFilter(e.target.value)}
               autoFocus
-            ref={input => { filterInputRef.current = input; }}
+              ref={filterInputRef}
             />
             {filter && (
               <button
@@ -116,7 +114,11 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit }) => {
                 className="media-library-select-btn"
                 onClick={() => {
                   if (selectedKey) {
-                    navigator.clipboard.writeText(`curriculum/${unit}/${selectedKey}`);
+                    try {
+                      navigator.clipboard.writeText(`curriculum/${unit}/${selectedKey}`);
+                    } catch (e) {
+                      alert(`Failed to copy to clipboard: ${e}`);
+                    }
                     onClose();
                   }
                 }}
