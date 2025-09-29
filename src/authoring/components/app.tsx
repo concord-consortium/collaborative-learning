@@ -12,7 +12,7 @@ import "./app.scss";
 const App: React.FC = () => {
   const auth = useAuth();
   const api = useAuthoringApi(auth);
-  const { branch, listBranches, setBranch, unit, setUnit, unitConfig, error, path, files } = useCurriculum(auth, api);
+  const { branch, listBranches, setBranch, unit, setUnit, unitConfig, error, path, files, reset } = useCurriculum(auth, api);
   const [branches, setBranches] = React.useState<string[]>([]);
 
   // until we have an admin UI, use direct api calls to set things up
@@ -45,9 +45,10 @@ const App: React.FC = () => {
     }
   }, [branch, listBranches]);
 
-  const maybeSignOut = () => {
-    if (confirm("Are you sure you want to sign out?")) {
+  const maybeSignOut = (force?: boolean) => {
+    if (force || confirm("Are you sure you want to sign out?")) {
       auth.signOut();
+      reset();
     }
   };
 
@@ -80,7 +81,7 @@ const App: React.FC = () => {
         <div className="centered">
           <div className="error">Authentication error: {auth.error}</div>
           <div>
-            <button onClick={auth.reset}>Try Again</button>
+            <button onClick={() => maybeSignOut(true)}>Try Again</button>
           </div>
         </div>
       );
@@ -89,28 +90,16 @@ const App: React.FC = () => {
       return (
         <div className="centered">
           <div>
-            <h2>Please Sign In</h2>
             <form
               className="sign-in-form"
               onSubmit={async (e) => {
                 e.preventDefault();
-                const form = e.target as HTMLFormElement;
-                const email = (form.elements.namedItem("email") as HTMLInputElement).value;
-                const password = (form.elements.namedItem("password") as HTMLInputElement).value;
-                await auth.signIn(email, password);
+                await auth.signIn();
               }}
             >
               <div>
-                <label htmlFor="email">Email:</label>
-                <input id="email" type="email" name="email" required autoFocus disabled={auth.loading} />
-              </div>
-              <div>
-                <label htmlFor="password">Password:</label>
-                <input id="password" type="password" name="password" required disabled={auth.loading} />
-              </div>
-              <div>
                 <button type="submit" disabled={auth.loading}>
-                  {auth.loading ? "Signing in..." : "Sign In"}
+                  {auth.loading ? "Signing in with your GitHub account..." : "Please sign in to GitHub"}
                 </button>
               </div>
             </form>

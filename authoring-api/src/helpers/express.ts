@@ -1,4 +1,10 @@
-import {Response} from "express";
+import {Request, Response} from "express";
+import {DecodedIdToken} from "firebase-admin/auth";
+
+export interface AuthorizedRequest extends Request{
+  decodedToken: DecodedIdToken;
+  gitHubToken: string;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sendSuccessResponse = (res: Response, data: any) => {

@@ -3,8 +3,9 @@ import {Octokit} from "@octokit/rest";
 export const owner = "concord-consortium";
 export const repo = "clue-curriculum";
 
-// TODO: change auth to required to avoid rate limiting
-export const newOctoKit = (auth?: string) => new Octokit({auth});
+export const newOctoKit = (auth: string) => {
+  return new Octokit({auth});
+};
 
 export const baseCurriculumPath = "curriculum";
 export const getBaseUnitPath = (unit: string) => `${baseCurriculumPath}/${unit}/`;

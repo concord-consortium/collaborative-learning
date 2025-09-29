@@ -92,10 +92,10 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
 
   useEffect(() => {
     // wait until auth is ready
-    if (auth.user) {
+    if (auth.firebaseToken && auth.gitHubToken) {
       processHash();
     }
-  }, [auth, processHash]);
+  }, [auth.firebaseToken, auth.gitHubToken, processHash]);
 
   const listBranches = async () => {
     return branches;
@@ -119,6 +119,7 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
     error,
     setError,
     path,
-    files
+    files,
+    reset
   };
 };
