@@ -36,7 +36,7 @@ function useAuth(): Auth {
       if (authUser?.isAnonymous) {
         firebase.auth().signOut();
         setUser(null);
-      } else {
+    } else {
         setUser(authUser);
       }
       setLoading(false);
@@ -46,7 +46,7 @@ function useAuth(): Auth {
   }, [resetCount]);
 
   useEffect(() => {
-    window.clearTimeout(reAuthTimeoutRef.current!);
+    window.clearTimeout(reAuthTimeoutRef.current ?? undefined);
 
     if (user) {
       // re-authenticate every 7.5 hours (GitHub OAuth tokens last for 8 hours)
@@ -102,11 +102,10 @@ function useAuth(): Auth {
     setGitHubToken(null);
     setError(null);
     setLoading(true);
-    setError(null);
     setResetCount((count) => count + 1);
   };
 
-  return { user, firebaseToken, gitHubToken, loading, error, signIn, signOut,reset };
+  return { user, firebaseToken, gitHubToken, loading, error, signIn, signOut, reset };
 }
 
 export default useAuth;

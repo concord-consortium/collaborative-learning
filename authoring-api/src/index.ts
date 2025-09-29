@@ -134,7 +134,8 @@ export const authenticateAndAuthorize = async (req: Request, res: Response, next
     }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    return res.status(401).send(`Unauthorized: Invalid or expired token: ${error}`);
+    console.error("Authentication error:", error);
+    return res.status(401).send("Unauthorized: Invalid or expired token.");
   }
 };
 
