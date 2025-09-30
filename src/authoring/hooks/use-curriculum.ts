@@ -19,7 +19,7 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
   const [files, setFiles] = useState<IUnitFiles | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
   const lastUnitRef = useRef<string | undefined>(undefined);
-  const filesRef = useRef<firebase.database.Reference|undefined>(undefined);
+  const filesRef = useRef<firebase.database.Reference | undefined>(undefined);
 
   const reset = () => {
     setError(undefined);
@@ -29,17 +29,13 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
   };
 
   const setUnit = useCallback((newUnit?: string, updateHash?: boolean) => {
-    // wait until we have a branch and a new unit
-    if (!branch || newUnit === unit) {
-      return;
-    }
     _setUnit(newUnit);
     if (updateHash) {
       window.location.hash = branch && newUnit
         ? `#/${branch}/${newUnit}/config/unitSettings`
         : (branch ? `#/${branch}` : "#");
     }
-  }, [branch, unit]);
+  }, [branch]);
 
   const setBranch = useCallback((newBranch?: string, updateHash?: boolean) => {
     if (newBranch && !branches.includes(newBranch)) {
@@ -95,8 +91,7 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
       lastUnitRef.current = unit;
 
       // Setup a Firebase listener for the unit file changes so that we get real-time updates.
-      // We only to direct reads - writes go through the API.
-      filesRef.current?.off();
+      // We only do direct reads - writes go through the API.
       filesRef.current = firebase.database().ref(`authoring/content/branches/${branch}/units/${unit}/files`);
       filesRef.current.on("value", onFilesChange);
 
@@ -113,6 +108,11 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
         setUnitConfig(undefined);
       });
     }
+
+    return () => {
+      filesRef.current?.off();
+      filesRef.current = undefined;
+    };
   }, [api, branch, unit]);
 
   const listBranches = async () => {
