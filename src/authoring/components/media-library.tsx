@@ -199,9 +199,12 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit, api }) =
           const input = document.createElement("input");
           input.type = "file";
           input.accept = "image/*";
-          input.onchange = (ev: any) => {
-            const file = ev.target.files?.[0];
-            if (file) handleUpload(file);
+          input.onchange = (ev: Event) => {
+            const target = ev.target as HTMLInputElement;
+            const file = target.files?.[0];
+            if (file) {
+              handleUpload(file);
+            }
           };
           input.click();
         }}

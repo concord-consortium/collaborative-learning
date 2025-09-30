@@ -15,6 +15,10 @@ const putImage = async (req: Request, res: Response) => {
   if (!image || !fileName) {
     return sendErrorResponse(res, "Missing required body parameters: image or fileName.", 400);
   }
+  // Validate fileName: only allow alphanumeric, dash, underscore, dot, no slashes or traversal
+  if (!/^[a-zA-Z0-9._-]+$/.test(fileName)) {
+    return sendErrorResponse(res, "Invalid fileName: only alphanumeric, dash, underscore, and dot are allowed.", 400);
+  }
 
   let sha = undefined;
 
