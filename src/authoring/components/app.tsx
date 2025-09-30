@@ -13,7 +13,10 @@ import "./app.scss";
 const App: React.FC = () => {
   const auth = useAuth();
   const api = useAuthoringApi(auth);
-  const { branch, listBranches, setBranch, unit, setUnit, unitConfig, error, path, files, reset } = useCurriculum(auth, api);
+  const {
+    branch, listBranches, setBranch, unit, setUnit,
+    unitConfig, error, path, files, reset
+  } = useCurriculum(auth, api);
   const [branches, setBranches] = React.useState<string[]>([]);
   const [showMediaLibrary, setShowMediaLibrary] = React.useState(false);
 
@@ -33,7 +36,7 @@ const App: React.FC = () => {
 
     /*
     console.log("Pulling unit");
-    api.post("/pullUnit", { branch: "main", unit: "cas" }).then(() => {
+    api.post("/pullUnit", { branch: "authoring-testing", unit: "cas" }).then(() => {
       console.log("Pulled unit");
     }).catch((err) => {
       console.error("Error pulling unit:", err);
@@ -160,6 +163,7 @@ const App: React.FC = () => {
           unit={unit}
           unitConfig={unitConfig}
           files={files}
+          showMediaLibrary={showMediaLibrary}
           onMediaLibraryClicked={toggleMediaLibrary}
         />
         <Workspace branch={branch} unit={unit} unitConfig={unitConfig} path={path} api={api} />
@@ -169,6 +173,7 @@ const App: React.FC = () => {
             files={files}
             branch={branch}
             unit={unit}
+            api={api}
           />
         )}
       </>

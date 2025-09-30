@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IUnitFiles } from "../types";
+import { AuthoringApi } from "../hooks/use-authoring-api";
 
 import "./media-library.scss";
 
@@ -8,11 +9,16 @@ interface IProps {
   files: IUnitFiles;
   branch: string;
   unit: string;
+  api: AuthoringApi;
 }
 
-const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit }) => {
+const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit, api }) => {
   const [filter, setFilter] = useState("");
   const filterInputRef = useRef<HTMLInputElement | null>(null);
+  const [activeTab, setActiveTab] = useState<"images" | "upload">("images");
+  const [uploadingFile, setUploadingFile] = useState<File | null>(null);
+  const [uploadingFileBlobUrl, setUploadingFileBlobUrl] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<"uploading" | "completed" | "error" | null>(null);
 
   const imageFileKeys = useMemo(() => {
     return Object.keys(files).filter(key => key.startsWith("images"));
@@ -30,11 +36,34 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit }) => {
 
   const imageUrl = selectedKey ? `${baseUrl}${selectedKey}` : undefined;
 
+  const resetUpload = () => {
+    if (uploadingFileBlobUrl) {
+      URL.revokeObjectURL(uploadingFileBlobUrl);
+    }
+    setUploadingFileBlobUrl(null);
+    setUploadingFile(null);
+    setUploadProgress(null);
+  };
+
+  // Cleanup function to reset upload state when component unmounts
+  useEffect(() => {
+    return () => resetUpload();
+  }, []);
+
   useEffect(() => {
     if (imageFileKeys.length > 0 && !selectedKey) {
       setSelectedKey(imageFileKeys[0]);
     }
   }, [imageFileKeys, selectedKey]);
+
+  useEffect(() => {
+    if (uploadProgress === "completed") {
+      const timer = setTimeout(() => {
+        resetUpload();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [uploadProgress]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -46,20 +75,43 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
-  const handleClearFilter = () => {
+  const handleClearFilter = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     setFilter("");
     filterInputRef.current?.focus();
   };
 
-  return (
-    <div className="media-library-lightbox">
-      <div className="media-library-titlebar">
-        <span>Media Library</span>
-        <button className="media-library-close" onClick={onClose}>
-          ×
-        </button>
-      </div>
-      <div className="media-library-content-split">
+  const handleUpload = (file: File) => {
+    setUploadingFile(file);
+    setUploadingFileBlobUrl(URL.createObjectURL(file));
+    setUploadProgress("uploading");
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result?.toString().split(';base64,').pop();
+      try {
+        const response = await api.post("/putImage", {branch, unit}, {
+          image: base64String,
+          fileName: file.name
+        });
+        setUploadProgress("completed");
+        console.log('Upload successful:', response);
+      } catch (error) {
+        console.error('Upload failed:', error);
+        setUploadProgress("error");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleResetUpload = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    resetUpload();
+  };
+
+  const renderImageListTabContent = () => {
+    return (
+      <div className="media-library-image-list">
         <div className="media-library-list">
           <div className="media-library-filter-row">
             <input
@@ -130,6 +182,97 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit }) => {
             <div className="media-library-no-preview">No preview available</div>
           )}
         </div>
+      </div>
+    );
+  };
+
+  const renderUploadTabContent = () => {
+    const showUploadInstructions = !uploadingFile;
+    const showTryAgainButton = uploadProgress === "error" || uploadProgress === "completed";
+
+    return (
+      <div
+        className="media-library-upload-area"
+        tabIndex={0}
+        onClick={e => {
+          // Open file picker
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = "image/*";
+          input.onchange = (ev: any) => {
+            const file = ev.target.files?.[0];
+            if (file) handleUpload(file);
+          };
+          input.click();
+        }}
+        onDragOver={e => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onDrop={e => {
+          e.preventDefault();
+          e.stopPropagation();
+          const file = e.dataTransfer.files?.[0];
+          if (file && file.type.startsWith("image/")) {
+            handleUpload(file);
+          }
+        }}
+      >
+        {uploadingFileBlobUrl && (
+          <div className="media-library-upload-preview">
+            <img src={uploadingFileBlobUrl} alt={uploadingFile?.name} className="media-library-upload-img" />
+            <div className="media-library-upload-filename">{uploadingFile?.name}</div>
+            {uploadProgress === "uploading" && (
+              <div className="media-library-upload-progress">Uploading...</div>
+            )}
+            {uploadProgress === "completed" && (
+              <div className="media-library-upload-progress">Upload completed!</div>
+            )}
+            {uploadProgress === "error" && (
+              <div className="media-library-upload-progress error">Upload failed.</div>
+            )}
+          </div>
+        )}
+        {showUploadInstructions && (
+          <div className="media-library-upload-instructions">
+            Click here or drop an image here to upload.
+          </div>
+        )}
+        {showTryAgainButton && (
+          <div className="media-library-upload-try-again">
+            <button onClick={handleResetUpload}>
+              {uploadProgress === "completed" ? "Upload Another Image" : "Try Again"}
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="media-library-lightbox">
+      <div className="media-library-titlebar">
+        <span>Media Library</span>
+        <button className="media-library-close" onClick={onClose}>
+          ×
+        </button>
+      </div>
+      <div className="media-library-content">
+        <div className="media-library-tabs">
+          <button
+            className={"media-library-tab" + (activeTab === "images" ? " active" : "")}
+            onClick={() => setActiveTab("images")}
+          >
+            Existing Images
+          </button>
+          <button
+            className={"media-library-tab" + (activeTab === "upload" ? " active" : "")}
+            onClick={() => setActiveTab("upload")}
+          >
+            Upload New Image
+          </button>
+        </div>
+        {activeTab === "images" ? renderImageListTabContent() : renderUploadTabContent()}
       </div>
     </div>
   );
