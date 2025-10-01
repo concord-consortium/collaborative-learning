@@ -1,14 +1,15 @@
 
 import React, { useEffect, useRef } from "react";
+import { Updater, useImmer } from "use-immer";
 
 import { IUnit } from "../types";
-import { Updater, useImmer } from "use-immer";
 
 import { IframeControl } from "./editors/iframe-control";
 import RawSettingsControl from "./editors/raw-settings-control";
 import { AuthoringApi } from "../hooks/use-authoring-api";
 import CurriculumTabs from "./workspace/curriculum-tabs";
 import { SaveState } from "../hooks/use-curriculum";
+import NavTabs from "./workspace/nav-tabs";
 
 import "./workspace.scss";
 
@@ -94,8 +95,12 @@ const Workspace: React.FC<IProps> = ({ branch, unit, unitConfig, setUnitConfig, 
 
   const renderConfig = () => {
     switch (path) {
+      case "config/raw":
+        return <RawSettingsControl initialValue={unitConfig} />;
       case "config/curriculumTabs":
         return <CurriculumTabs unitConfig={unitConfig} setUnitConfig={setUnitConfig} saveState={saveState} />;
+      case "config/navTabs":
+        return <NavTabs unitConfig={unitConfig} setUnitConfig={setUnitConfig} saveState={saveState} />;
       default:
         return <div className="centered muted">Not yet implemented.</div>;
     }

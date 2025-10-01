@@ -11,10 +11,10 @@ export const NavTabsConfigModel = types
   })
   .views(self => ({
     getNavTabSpec(tabId: ENavTab) {
-      return self.tabSpecs.find(tab => tabId === tab.tab);
+      return self.tabSpecs.find(tab => tabId === tab.tab && !tab.hidden);
     },
     hasSortWorkTab() {
-      return self.tabSpecs.some(tab => tab.tab === ENavTab.kSortWork);
+      return self.tabSpecs.some(tab => tab.tab === ENavTab.kSortWork && !tab.hidden);
     }
   }))
   .actions(self => ({

@@ -1,3 +1,5 @@
+import { EAuthorableNavTab } from "../models/view/nav-tabs";
+
 export type IUnitFiles = Record<string, IUnitFile>;
 export interface IUnitFile {
   sha: string;
@@ -44,11 +46,14 @@ export interface INavTabs {
   tabSpecs: INavTabSpec[];
 }
 
+export type AuthorableNavTab = `${EAuthorableNavTab}`;
+
 export interface INavTabSpec {
-  tab: string;
+  tab: AuthorableNavTab;
   label: string;
   teacherOnly?: boolean;
   sections?: INavTabSection[];
+  hidden?: boolean;
 }
 
 export interface INavTabSection {

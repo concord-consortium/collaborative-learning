@@ -13,6 +13,16 @@ export enum ENavTab {
   kSupports = "supports"
 }
 
+// these are the tabs used in the current unit configurations
+export enum EAuthorableNavTab {
+  kProblems = "problems",
+  kTeacherGuide = "teacher-guide",
+  kStudentWork = "student-work",
+  kMyWork = "my-work",
+  kClassWork = "class-work",
+  kSortWork = "sort-work",
+}
+
 export const kBookmarksTabTitle = "Bookmarks";
 
 // generic type which maps tab id to values of another type
@@ -82,7 +92,8 @@ export const NavTabModel =
     tab: types.enumeration<ENavTab>("ENavTab", Object.values(ENavTab)),
     label: types.string,
     teacherOnly: false,
-    sections: types.array(NavTabSectionModel)
+    sections: types.array(NavTabSectionModel),
+    hidden: types.optional(types.boolean, false)
   })
   .views(self => ({
     // combine sections with matching titles into a single tab with sub-sections

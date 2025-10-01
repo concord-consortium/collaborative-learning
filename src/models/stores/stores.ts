@@ -207,9 +207,12 @@ class Stores implements IStores{
 
     const removeNonCurriculumTabs = standalone && standaloneAuth;
 
-    const tabs = (isTeacherOrResearcher)
+    let tabs = (isTeacherOrResearcher)
       ? navTabSpecs.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide)
       : navTabSpecs.tabSpecs.filter(t => !t.teacherOnly);
+
+    // remove any hidden tabs - authors can hide tabs in the authoring UI
+    tabs = tabs.filter(t => !t.hidden);
 
     return removeNonCurriculumTabs
       ? tabs.filter(t => t.tab === "problems" || t.tab === "teacher-guide")
