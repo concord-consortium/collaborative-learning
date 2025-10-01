@@ -130,7 +130,7 @@ const NavTabs: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, setUnit
                 </td>
               </tr>
               {errors.tabs?.[index]?.customLabel && (
-                <tr><td colSpan={3}>{errors.tabs?.[index]?.customLabel?.message}</td></tr>
+                <tr><td colSpan={3}></td><td>{errors.tabs?.[index]?.customLabel?.message}</td></tr>
               )}
             </React.Fragment>
           ))}
