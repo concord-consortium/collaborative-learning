@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import firebase from "firebase/app";
 
 export type AuthState = "unauthenticated" | "authenticating" | "authenticated" | "error";
 
@@ -18,6 +19,7 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
   const [files, setFiles] = useState<IUnitFiles | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
   const lastUnitRef = useRef<string | undefined>(undefined);
+  const filesRef = useRef<firebase.database.Reference | undefined>(undefined);
 
   const reset = () => {
     setError(undefined);
@@ -27,38 +29,13 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
   };
 
   const setUnit = useCallback((newUnit?: string, updateHash?: boolean) => {
-    // wait until we have a branch and a new unit
-    if (branch && newUnit && newUnit === lastUnitRef.current) {
-      return;
-    }
-
-    if (branch && newUnit) {
-      lastUnitRef.current = newUnit;
-
-      // fetch files and content in parallel
-      const filesPromise = api.get("/getPulledFiles", { branch, unit: newUnit });
-      const contentPromise = api.get("/getContent", { branch, unit: newUnit, path: "content.json" });
-      Promise.all([filesPromise, contentPromise]).then(([filesResponse, contentResponse]) => {
-        if (!filesResponse.success || !contentResponse.success) {
-          setError(filesResponse.error || contentResponse.error);
-          setUnitConfig(undefined);
-          return;
-        }
-
-        setFiles(filesResponse.files);
-        setUnitConfig(contentResponse.content);
-      }).catch((err) => {
-        setError(err.message);
-        setUnitConfig(undefined);
-      });
-    }
     _setUnit(newUnit);
     if (updateHash) {
       window.location.hash = branch && newUnit
         ? `#/${branch}/${newUnit}/config/unitSettings`
         : (branch ? `#/${branch}` : "#");
     }
-  }, [api, branch]);
+  }, [branch]);
 
   const setBranch = useCallback((newBranch?: string, updateHash?: boolean) => {
     if (newBranch && !branches.includes(newBranch)) {
@@ -96,6 +73,47 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
       processHash();
     }
   }, [auth.firebaseToken, auth.gitHubToken, processHash]);
+
+  useEffect(() => {
+    const onFilesChange = (snapshot: firebase.database.DataSnapshot) => {
+      const values = snapshot.val() ?? {};
+      // Firebase does not allow certain characters in keys, so they are escaped when stored.
+      const escapedValues = Object.keys(values).reduce<IUnitFiles>((acc, key) => {
+        const escapedKey = decodeURIComponent(key);
+        acc[escapedKey] = values[key];
+        return acc;
+      }, {});
+      setFiles(escapedValues);
+    };
+
+    // prevent unnecessary fetches
+    if (branch && unit && lastUnitRef.current !== unit) {
+      lastUnitRef.current = unit;
+
+      // Setup a Firebase listener for the unit file changes so that we get real-time updates.
+      // We only do direct reads - writes go through the API.
+      filesRef.current = firebase.database().ref(`authoring/content/branches/${branch}/units/${unit}/files`);
+      filesRef.current.on("value", onFilesChange);
+
+      // fetch content
+      api.get("/getContent", { branch, unit, path: "content.json" }).then((contentResponse) => {
+        if (!contentResponse.success) {
+          setError(contentResponse.error);
+          setUnitConfig(undefined);
+          return;
+        }
+        setUnitConfig(contentResponse.content);
+      }).catch((err) => {
+        setError(err.message);
+        setUnitConfig(undefined);
+      });
+    }
+
+    return () => {
+      filesRef.current?.off();
+      filesRef.current = undefined;
+    };
+  }, [api, branch, unit]);
 
   const listBranches = async () => {
     return branches;
