@@ -1,25 +1,34 @@
 
 import React, { useEffect, useRef } from "react";
 
-import "./workspace.scss";
 import { IUnit } from "../types";
-import { IframeControl } from "./iframe-control";
-import RawSettingsControl from "./raw-settings-control";
+import { Updater, useImmer } from "use-immer";
+
+import { IframeControl } from "./editors/iframe-control";
+import RawSettingsControl from "./editors/raw-settings-control";
 import { AuthoringApi } from "../hooks/use-authoring-api";
+import CurriculumTabs from "./workspace/curriculum-tabs";
+import { SaveState } from "../hooks/use-curriculum";
+
+import "./workspace.scss";
+import { set } from "lodash";
 
 interface IProps {
   branch: string;
   unit: string;
   unitConfig: IUnit;
+  setUnitConfig: Updater<IUnit | undefined>;
   path: string | undefined;
   api: AuthoringApi
+  saveState: SaveState;
 }
 
-const Workspace: React.FC<IProps> = ({ branch, unit, path, api }) => {
-  const [content, setContent] = React.useState<any>({});
-  const [status, setStatus] = React.useState<"loading" | "loaded" | "notImplemented" | "error">("loading");
-  const [contentPath, setContentPath] = React.useState<string | undefined>(undefined);
+const Workspace: React.FC<IProps> = ({ branch, unit, unitConfig, setUnitConfig, path, api, saveState }) => {
+  const [content, setContent] = useImmer<any>({});
+  const [status, setStatus] = useImmer<"loading" | "loaded" | "notImplemented" | "error">("loading");
+  const [contentPath, setContentPath] = useImmer<string | undefined>(undefined);
   const lastContentPathRef = useRef<string | undefined>(undefined);
+  const isConfigPath = path?.startsWith("config/");
 
   useEffect(() => {
     if (path === "config/raw") {
@@ -36,13 +45,18 @@ const Workspace: React.FC<IProps> = ({ branch, unit, path, api }) => {
 
     setContentPath(undefined);
     setStatus("notImplemented");
-  }, [path, api, unit]);
+  }, [path, api, unit, setContentPath, setStatus]);
 
   useEffect(() => {
     if (!contentPath || contentPath === lastContentPathRef.current) {
       return;
     }
     lastContentPathRef.current = contentPath;
+
+    if (isConfigPath) {
+      // nothing to load for config pages - just use unitConfig
+      return;
+    }
 
     setStatus("loading");
     api.get("/getContent", {branch, unit, path: contentPath}).then((response) => {
@@ -57,7 +71,7 @@ const Workspace: React.FC<IProps> = ({ branch, unit, path, api }) => {
       setStatus("error");
       console.error("Error loading content:", err);
     });
-  }, [contentPath, api, branch, unit]);
+  }, [contentPath, api, branch, unit, isConfigPath, setContent, setStatus]);
 
   const onChangeContent = (newContent: string) => {
     if (!contentPath) {
@@ -79,9 +93,26 @@ const Workspace: React.FC<IProps> = ({ branch, unit, path, api }) => {
     }
   };
 
+  const renderConfig = () => {
+    switch (path) {
+      case "config/curriculumTabs":
+        return <CurriculumTabs unitConfig={unitConfig} setUnitConfig={setUnitConfig} saveState={saveState} />;
+      default:
+        return <div className="centered muted">Not yet implemented.</div>;
+    }
+  };
+
   const renderContent = () => {
+    if (isConfigPath) {
+      return (
+        <div className="config">
+          {renderConfig()}
+        </div>
+      );
+    }
+
     if (status === "loading") {
-      return <div className="centered">Loading content...</div>;
+      return <div className="centered">Loading ...</div>;
     }
     if (status === "error") {
       return <div className="centered">Error loading content</div>;

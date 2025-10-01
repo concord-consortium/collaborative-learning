@@ -1,7 +1,7 @@
 
 import React, { useEffect, useCallback } from "react";
 
-import { DEBUG_IFRAME } from "../../../src/lib/debug";
+import { DEBUG_IFRAME } from "../../../lib/debug";
 
 import "./iframe-control.scss";
 

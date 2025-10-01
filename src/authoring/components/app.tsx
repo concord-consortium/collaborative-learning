@@ -15,7 +15,8 @@ const App: React.FC = () => {
   const api = useAuthoringApi(auth);
   const {
     branch, listBranches, setBranch, unit, setUnit,
-    unitConfig, error, path, files, reset
+    unitConfig, setUnitConfig, error, path, files, reset,
+    saveState
   } = useCurriculum(auth, api);
   const [branches, setBranches] = React.useState<string[]>([]);
   const [showMediaLibrary, setShowMediaLibrary] = React.useState(false);
@@ -64,7 +65,10 @@ const App: React.FC = () => {
 
     return (
       <header className="header">
-        <div className="title">{title}</div>
+        <div className="left-header">
+          <div className="title">{title}</div>
+          {saveState && <div className="save-state">{saveState}</div>}
+        </div>
         <div className="info">
           {auth.user && (
             <div>{auth.user.email} | <span onClick={() => maybeSignOut()}>Logout</span></div>
@@ -166,7 +170,15 @@ const App: React.FC = () => {
           showMediaLibrary={showMediaLibrary}
           onMediaLibraryClicked={toggleMediaLibrary}
         />
-        <Workspace branch={branch} unit={unit} unitConfig={unitConfig} path={path} api={api} />
+        <Workspace
+          branch={branch}
+          unit={unit}
+          unitConfig={unitConfig}
+          setUnitConfig={setUnitConfig}
+          path={path}
+          api={api}
+          saveState={saveState}
+        />
         {showMediaLibrary && (
           <MediaLibrary
             onClose={toggleMediaLibrary}

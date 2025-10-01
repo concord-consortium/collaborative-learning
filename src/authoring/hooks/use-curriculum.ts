@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import firebase from "firebase/app";
+import { Updater, useImmer } from "use-immer";
 
 export type AuthState = "unauthenticated" | "authenticating" | "authenticated" | "error";
+export type SaveState = "saving" | "saved" | "error" | undefined;
 
 import { IUnit, IUnitFiles } from "../types";
 import { AuthoringApi } from "./use-authoring-api";
@@ -11,31 +13,41 @@ export const units = ["cas", "mods", "brain", "m2s"];
 export const branches = ["authoring-testing"];
 
 export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
-  const [authState, setAuthState] = useState<AuthState>("authenticated");
-  const [branch, _setBranch] = useState<string | undefined>(undefined);
-  const [unit, _setUnit] = useState<string | undefined>(undefined);
-  const [path, setPath] = useState<string | undefined>(undefined);
-  const [unitConfig, setUnitConfig] = useState<IUnit | undefined>(undefined);
-  const [files, setFiles] = useState<IUnitFiles | undefined>(undefined);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [authState, setAuthState] = useImmer<AuthState>("authenticated");
+  const [branch, _setBranch] = useImmer<string | undefined>(undefined);
+  const [unit, _setUnit] = useImmer<string | undefined>(undefined);
+  const [path, setPath] = useImmer<string | undefined>(undefined);
+  const [unitConfig, _setUnitConfig] = useImmer<IUnit | undefined>(undefined);
+  const [files, setFiles] = useImmer<IUnitFiles | undefined>(undefined);
+  const [error, setError] = useImmer<string | undefined>(undefined);
   const lastUnitRef = useRef<string | undefined>(undefined);
   const filesRef = useRef<firebase.database.Reference | undefined>(undefined);
+  const [saveState, setSaveState] = useImmer<SaveState | undefined>(undefined);
+  const saveUnitConfigRef = useRef(false);
+  const saveStateClearTimeoutRef = useRef<number>();
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setError(undefined);
     _setBranch(undefined);
     _setUnit(undefined);
-    setUnitConfig(undefined);
+    _setUnitConfig(undefined);
+  }, [_setBranch, _setUnit, setError, _setUnitConfig]);
+
+  // externally when setUnitConfig is called, we want to update the state
+  // and also call the api to save the changes
+  const setUnitConfig: Updater<IUnit | undefined> = (draft) => {
+    saveUnitConfigRef.current = true;
+    _setUnitConfig(draft);
   };
 
   const setUnit = useCallback((newUnit?: string, updateHash?: boolean) => {
     _setUnit(newUnit);
     if (updateHash) {
       window.location.hash = branch && newUnit
-        ? `#/${branch}/${newUnit}/config/unitSettings`
+        ? `#/${branch}/${newUnit}/config/curriculumTabs`
         : (branch ? `#/${branch}` : "#");
     }
-  }, [branch]);
+  }, [_setUnit, branch]);
 
   const setBranch = useCallback((newBranch?: string, updateHash?: boolean) => {
     if (newBranch && !branches.includes(newBranch)) {
@@ -52,7 +64,7 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
     if (updateHash) {
       window.location.hash = newBranch ? `#/${newBranch}` : "#";
     }
-  }, [branch]);
+  }, [_setBranch, branch, reset, setError]);
 
   const processHash = useCallback(() => {
     const [_, _branch, _unit, ...rest] = window.location.hash.split("/");
@@ -100,20 +112,42 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
       api.get("/getContent", { branch, unit, path: "content.json" }).then((contentResponse) => {
         if (!contentResponse.success) {
           setError(contentResponse.error);
-          setUnitConfig(undefined);
+          _setUnitConfig(undefined);
           return;
         }
-        setUnitConfig(contentResponse.content);
+        _setUnitConfig(contentResponse.content);
       }).catch((err) => {
         setError(err.message);
-        setUnitConfig(undefined);
+        _setUnitConfig(undefined);
       });
     }
 
     // Note: we don't have a cleanup function to turn off the listener
     // because we want to keep listening for changes until branch or unit changes.
     // The filesRef.current?.off() above is what turns off the previous listener.
-  }, [api, branch, unit]);
+  }, [api, branch, setError, setFiles, _setUnitConfig, unit]);
+
+  useEffect(() => {
+    // save unit config changes
+    if (unitConfig && saveUnitConfigRef.current && branch && unit) {
+      saveUnitConfigRef.current = false;
+      window.clearTimeout(saveStateClearTimeoutRef.current);
+      setSaveState("saving");
+      api.post("/putContent", { branch, unit, path: "content.json"}, {content: unitConfig }).then((response) => {
+        if (response.success) {
+          setSaveState("saved");
+          saveStateClearTimeoutRef.current = window.setTimeout(() => {
+            setSaveState(undefined);
+          }, 1000);
+        } else {
+          setSaveState("error");
+          setError(response.error);
+        }
+      }).catch((err) => {
+        setError(err.message);
+      });
+    }
+  }, [api, branch, unit, unitConfig, setError, setSaveState]);
 
   const listBranches = async () => {
     return branches;
@@ -134,10 +168,12 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
     listBranches,
     listUnits,
     unitConfig,
+    setUnitConfig,
     error,
     setError,
     path,
     files,
-    reset
+    reset,
+    saveState
   };
 };
