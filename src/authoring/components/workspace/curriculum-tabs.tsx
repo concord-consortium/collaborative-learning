@@ -12,7 +12,7 @@ interface ICurriculumTabFormInputs {
 
 const CurriculumTabs: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, setUnitConfig, saveState }) => {
   const problemTabIndex = useMemo(() => {
-    return unitConfig.config.navTabs.tabSpecs.findIndex(t => t.tab === "problems") ?? -1;
+    return unitConfig.config.navTabs.tabSpecs.findIndex(t => t.tab === "problems");
   }, [unitConfig]);
   const problemTab = useMemo(() => {
     return problemTabIndex >= 0 ? unitConfig.config.navTabs.tabSpecs[problemTabIndex] : undefined;

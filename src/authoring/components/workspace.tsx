@@ -11,7 +11,6 @@ import CurriculumTabs from "./workspace/curriculum-tabs";
 import { SaveState } from "../hooks/use-curriculum";
 
 import "./workspace.scss";
-import { set } from "lodash";
 
 interface IProps {
   branch: string;
