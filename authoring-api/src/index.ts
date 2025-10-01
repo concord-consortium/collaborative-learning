@@ -13,25 +13,92 @@ import getPulledUnits from "./routes/get-pulled-units";
 import getPulledFiles from "./routes/get-pulled-files";
 import putContent from "./routes/put-content";
 
-export interface AuthorizedRequest extends Request{
-  decodedToken: DecodedIdToken;
-}
+import {AuthorizedRequest} from "./helpers/express";
+import {newOctoKit, owner, repo} from "./helpers/github";
 
-const adminEmails = ["dmartin@concord.org", "lbondaryk@concord.org"];
 const adminOnlyPaths = ["/pullUnit"];
+
+const fakeEmulatorDecodedToken = {
+  email: "test@concord.org",
+  firebase: {
+    sign_in_provider: "github.com",
+  },
+} as DecodedIdToken;
+
+const tokenCache = new Map<string, {isCollaborator: boolean, expires: Date}>();
+
+const getCacheExpirationDate = () => {
+  const now = new Date();
+  const tokenCacheExpirationMs = 15 * 60 * 1000; // 15 minutes
+  return new Date(now.getTime() + tokenCacheExpirationMs);
+};
 
 admin.initializeApp();
 
-const isUserAuthorized = (path: string, decodedToken: DecodedIdToken): boolean => {
-  const {email, email_verified: emailVerified} = decodedToken;
+const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitHubToken: string): Promise<boolean> => {
+  const {email, firebase} = decodedToken;
 
-  // only allow admins to pull units (the email check should be changed to a role check later)
-  if (adminOnlyPaths.includes(path) && !adminEmails.includes(email ?? "")) {
+  // make sure the user signed in using GitHub and has an email associated with their account
+  if (firebase?.sign_in_provider !== "github.com" || !email) {
     return false;
   }
 
-  // for now just allow anyone with a verified concord.org email have access
-  return !!(emailVerified && /concord\.org$/.test(email ?? ""));
+  // allow CC folks (with a concord.org email) access to everything
+  const isCCEmail = email.endsWith("@concord.org");
+  if (isCCEmail) {
+    return true;
+  }
+
+  // only allow CC folks to do admin-only operations
+  if (!isCCEmail && adminOnlyPaths.includes(path)) {
+    return false;
+  }
+
+  // clear out any expired cache entries to avoid unbounded growth
+  const now = new Date();
+  for (const [token, entry] of tokenCache) {
+    if (entry.expires <= now) {
+      tokenCache.delete(token);
+    }
+  }
+
+  // if we have a cached token and it is still valid (since it wasn't cleared above),
+  // use that to determine authorization based on whether the user is a collaborator
+  const entry = tokenCache.get(gitHubToken);
+  if (entry) {
+    return entry.isCollaborator;
+  }
+
+  // check if the user is a collaborator in the CLUE curriculum repository
+  let isCollaborator = false;
+  try {
+    const octokit = newOctoKit(gitHubToken);
+
+    // get the username associated with the token
+    const {data} = await octokit.request("GET /user");
+    const username = data?.login;
+    if (!username) {
+      console.log("Could not get GitHub username associated with the token.");
+      return false;
+    }
+
+    // This API call checks if the user is a collaborator
+    // If the response status is 204 No Content, the user is a collaborator.
+    // The Octokit client handles this by returning the response object
+    // without throwing an error.
+    const response = await octokit.rest.repos.checkCollaborator({owner, repo, username});
+    isCollaborator = (response.status === 204);
+  } catch (error) {
+    console.log(`Error checking if user is a collaborator on GitHub: ${error}`);
+    isCollaborator = false;
+  }
+
+  tokenCache.set(gitHubToken, {
+    isCollaborator,
+    expires: getCacheExpirationDate(),
+  });
+
+  return isCollaborator;
 };
 
 export const authenticateAndAuthorize = async (req: Request, res: Response, next: NextFunction) => {
@@ -45,8 +112,21 @@ export const authenticateAndAuthorize = async (req: Request, res: Response, next
 
   const idToken = authHeader.split("Bearer ")[1];
   try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    if (isUserAuthorized(req.path, decodedToken)) {
+    // in order to allow using the emulator with real github tokens
+    // (since the emulator can't emulate the GitHub auth flow), allow skipping auth validation
+    // by setting DANGEROUSLY_SKIP_AUTH_TOKEN_VALIDATION=true in the .env.local file
+    // DO NOT USE THIS IN PRODUCTION
+    const decodedToken = process.env.DANGEROUSLY_SKIP_AUTH_TOKEN_VALIDATION === "true" ?
+      fakeEmulatorDecodedToken :
+      await admin.auth().verifyIdToken(idToken);
+
+    const gitHubToken = req.query.gitHubToken?.toString();
+    if (!gitHubToken) {
+      return res.status(401).send("Unauthorized: No GitHub token provided.");
+    }
+    (req as AuthorizedRequest).gitHubToken = gitHubToken;
+
+    if (await isUserAuthorized(req.path, decodedToken, gitHubToken)) {
       (req as AuthorizedRequest).decodedToken = decodedToken;
       return next();
     } else {
@@ -54,6 +134,7 @@ export const authenticateAndAuthorize = async (req: Request, res: Response, next
     }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
+    console.error("Authentication error:", error);
     return res.status(401).send("Unauthorized: Invalid or expired token.");
   }
 };

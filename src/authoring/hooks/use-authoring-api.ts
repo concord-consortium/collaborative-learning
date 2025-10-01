@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { localFunctionsHost } from "../../lib/firebase-config";
 import { urlParams } from "../../utilities/url-params";
 import { Auth } from "./use-auth";
@@ -57,12 +58,16 @@ function useAuthoringApi(auth: Auth): AuthoringApi {
   };
 
   // eslint-disable-next-line max-len
-  const apiFetch = async (method: "GET" | "POST", endpoint: EndPoint, queryParams: ApiParams = {}, options: RequestInit = {}): Promise<ApiResponse> => {
-    if (!auth.user) {
-      throw new Error("User is not authenticated");
+  const apiFetch = useCallback(async (method: "GET" | "POST", endpoint: EndPoint, queryParams: ApiParams = {}, options: RequestInit = {}): Promise<ApiResponse> => {
+    const firebaseToken = auth.firebaseToken;
+    const gitHubToken = auth.gitHubToken;
+    if (!firebaseToken) {
+      throw new Error("Failed to get Firebase authentication token");
     }
-
-    const token = await auth.user.getIdToken();
+    if (!gitHubToken) {
+      throw new Error("GitHub token is not available");
+    }
+    queryParams = { ...queryParams, gitHubToken };
 
     const url = new URL(`${getBaseUrl()}${endpoint}`);
     url.search = new URLSearchParams(queryParams).toString();
@@ -72,7 +77,7 @@ function useAuthoringApi(auth: Auth): AuthoringApi {
       method,
       headers: {
         ...options.headers,
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${firebaseToken}`,
         "Content-Type": "application/json",
       },
     });
@@ -83,7 +88,7 @@ function useAuthoringApi(auth: Auth): AuthoringApi {
     }
 
     return response.json();
-  };
+  }, [auth.firebaseToken, auth.gitHubToken]);
 
   // eslint-disable-next-line max-len
   const get = async (endpoint: GetEndPoint, queryParams: ApiParams = {}, options: RequestInit = {}): Promise<ApiResponse> =>

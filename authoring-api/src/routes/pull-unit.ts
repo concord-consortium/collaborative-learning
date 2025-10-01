@@ -7,7 +7,7 @@ import {
   unescapeFirebaseKey,
   UnitFiles,
 } from "../helpers/db";
-import {sendErrorResponse, sendSuccessResponse} from "../helpers/express";
+import {AuthorizedRequest, sendErrorResponse, sendSuccessResponse} from "../helpers/express";
 
 const pullUnit = async (req: Request, res: Response) => {
   const unit = req.query.unit?.toString();
@@ -24,7 +24,8 @@ const pullUnit = async (req: Request, res: Response) => {
   }
 
   try {
-    const octokit = newOctoKit();
+    const authorizedRequest = req as AuthorizedRequest;
+    const octokit = newOctoKit(authorizedRequest.gitHubToken);
 
     const {data: {commit: {sha: branchSha}}} = await octokit.rest.repos.getBranch({
       owner,

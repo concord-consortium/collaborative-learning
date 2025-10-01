@@ -1,9 +1,10 @@
 import {Request, Response} from "express";
 import {newOctoKit, owner, repo} from "../helpers/github";
-import {sendErrorResponse, sendSuccessResponse} from "../helpers/express";
+import {AuthorizedRequest, sendErrorResponse, sendSuccessResponse} from "../helpers/express";
 
 const getRemoteBranches = async (req: Request, res: Response) => {
-  const octokit = newOctoKit();
+  const authorizedRequest = req as AuthorizedRequest;
+  const octokit = newOctoKit(authorizedRequest.gitHubToken);
 
   let page = 1;
   const perPage = 100;
