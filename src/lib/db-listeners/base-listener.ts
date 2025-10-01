@@ -1,5 +1,6 @@
 import firebase from "firebase/app";
 import {DEBUG_LISTENERS} from "../../lib/debug";
+import { firebaseRefPath } from "../fire-utils";
 
 export class BaseListener {
   protected listener: string;
@@ -13,7 +14,7 @@ export class BaseListener {
     action: "adding" | "removing",
     handler: string,
     ref: firebase.database.Reference) {
-    this.debugLog(methodName, action, handler, "handler for", this.refName(ref));
+    this.debugLog(methodName, action, handler, "handler for", firebaseRefPath(ref));
   }
 
   protected debugLogHandlers(
@@ -21,11 +22,11 @@ export class BaseListener {
     action: "adding" | "removing",
     handlers: string[],
     ref: firebase.database.Reference) {
-    this.debugLog(methodName, action, handlers.join(" and "), "handlers for", this.refName(ref));
+    this.debugLog(methodName, action, handlers.join(" and "), "handlers for", firebaseRefPath(ref));
   }
 
   protected debugLogSnapshot(methodName: string, snapshot: firebase.database.DataSnapshot) {
-    this.debugLog(methodName, snapshot.val(), "for", this.refName(snapshot.ref));
+    this.debugLog(methodName, snapshot.val(), "for", firebaseRefPath(snapshot.ref));
   }
 
   protected debugLog(methodName: string, ...args: any[]) {
@@ -33,9 +34,5 @@ export class BaseListener {
       // eslint-disable-next-line no-console
       console.log(`${this.listener}${methodName}`, ...args);
     }
-  }
-
-  private refName(ref: firebase.database.Reference) {
-    return ref.toString().replace(/^https:\/\/collaborative-learning-.*\.firebaseio\.com/, "");
   }
 }

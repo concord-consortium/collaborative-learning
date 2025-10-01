@@ -41,6 +41,7 @@ import { UserModelType } from "../models/stores/user";
 import { logExemplarDocumentEvent } from "../models/document/log-exemplar-document-event";
 import { AppMode } from "../models/stores/store-types";
 import { DEBUG_FIRESTORE } from "./debug";
+import { firebaseRefPath } from "./fire-utils";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
@@ -605,14 +606,16 @@ export class DB {
           if (!metadata) {
             // if we have no metadata, there's nothing we can do
             const msg = `Error retrieving metadata for ` +
-                        `document '${documentKey}' of type '${type}' for user '${userId}'`;
+                        `document '${documentKey}' of type '${type}' for user '${userId}' ` +
+                        `at '${firebaseRefPath(metadataRef)}'`;
             throw new Error(msg);
           }
           if (!document) {
             // If we have metadata but no document content, we can return a valid empty document.
             // This has been seen to occur in the wild, presumably as a result of a prior bug.
             const msg = "Warning: Reconstituting empty contents for " +
-                        `document '${documentKey}' of type '${type}' for user '${userId}'`;
+                        `document '${documentKey}' of type '${type}' for user '${userId}' ` +
+                        `at '${firebaseRefPath(documentRef)}'`;
             console.warn(msg);
             return createDocumentModel({
                                   type, title, properties, groupId, visibility, uid: userId, originDoc, pubVersion,
