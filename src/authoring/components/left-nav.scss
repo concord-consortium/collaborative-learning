@@ -8,8 +8,41 @@ $left-nav-indent: 6px;
   border-right: 1px solid #e0e0e0;
   background: #ffe6d0;
   padding: $left-nav-indent 0;
-  overflow: auto;
   font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.tree-view-container {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.leftNav-bottom {
+  flex-shrink: 0;
+  padding: 12px;
+  border-top: 1px solid #e0e0e0;
+  background: #fff6ee;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.media-library-btn {
+  padding: 8px 16px;
+  background: #ff9800;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.media-library-btn:hover {
+  background: #fb8c00;
 }
 
 .tree-view {

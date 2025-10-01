@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { units, useCurriculum } from "../hooks/use-curriculum";
 import LeftNav from "./left-nav";
 import Workspace from "./workspace";
+import MediaLibrary from "./media-library";
 import useAuth from "../hooks/use-auth";
 import useAuthoringApi from "../hooks/use-authoring-api";
 
@@ -14,6 +15,9 @@ const App: React.FC = () => {
   const api = useAuthoringApi(auth);
   const { branch, listBranches, setBranch, unit, setUnit, unitConfig, error, path, files, reset } = useCurriculum(auth, api);
   const [branches, setBranches] = React.useState<string[]>([]);
+  const [showMediaLibrary, setShowMediaLibrary] = React.useState(false);
+
+  const toggleMediaLibrary = () => setShowMediaLibrary(value => !value);
 
   // until we have an admin UI, use direct api calls to set things up
   useEffect(() => {
@@ -151,8 +155,22 @@ const App: React.FC = () => {
 
     return (
       <>
-        <LeftNav branch={branch} unit={unit} unitConfig={unitConfig} files={files} />
+        <LeftNav
+          branch={branch}
+          unit={unit}
+          unitConfig={unitConfig}
+          files={files}
+          onMediaLibraryClicked={toggleMediaLibrary}
+        />
         <Workspace branch={branch} unit={unit} unitConfig={unitConfig} path={path} api={api} />
+        {showMediaLibrary && (
+          <MediaLibrary
+            onClose={toggleMediaLibrary}
+            files={files}
+            branch={branch}
+            unit={unit}
+          />
+        )}
       </>
     );
   };
