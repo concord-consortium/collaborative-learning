@@ -15,6 +15,19 @@ export interface Auth {
   reset: () => void;
 }
 
+// used during development to bypass GitHub auth - this is not a security risk
+// since the auth api checks the GitHub token on every request unless the
+// DANGEROUSLY_SKIP_AUTH_TOKEN_VALIDATION environment variable is set on the server
+// which is only in dev mode using the emulator, and never in production
+const fakeAuth = (new URLSearchParams(window.location.search)).get("fakeAuthoringAuth") === "true";
+const fakeAuthUser = {
+  uid: "fakeUid",
+  displayName: "Fake User",
+  email: "fakeuser@example.com",
+} as unknown as firebase.User;
+const fakeFirebaseToken = "fakeFirebaseToken";
+const fakeGitHubToken = "fakeGitHubToken";
+
 function useAuth(): Auth {
   const [user, setUser] = useState<firebase.User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,8 +37,31 @@ function useAuth(): Auth {
   const [gitHubToken, setGitHubToken] = useState<string | null>(null);
   const reAuthTimeoutRef = useRef<number | null>(null);
 
+  const signInFakeUser = () => {
+    return firebase.auth().signInAnonymously().then(() => {
+      setUser(fakeAuthUser);
+      setFirebaseToken(fakeFirebaseToken);
+      setGitHubToken(fakeGitHubToken);
+      setLoading(false);
+    }).catch((err) => {
+      setError(err.message ?? "An error occurred during fake sign-in.");
+      console.error("Fake sign-in error:", err);
+    });
+  };
+
   useEffect(() => {
-    initializeApp();
+    if (resetCount === 0) {
+      initializeApp();
+    }
+
+    if (fakeAuth) {
+      // automatically sign in a fake user to avoid having to click the sign-in button
+      // on each reload during development
+      if (resetCount === 0) {
+        signInFakeUser();
+      }
+      return;
+    }
 
     // do not persist auth state between sessions as we need to get the GitHub token
     // and that is only available after the sign-in completes
@@ -36,7 +72,7 @@ function useAuth(): Auth {
       if (authUser?.isAnonymous) {
         firebase.auth().signOut();
         setUser(null);
-    } else {
+      } else {
         setUser(authUser);
       }
       setLoading(false);
@@ -63,6 +99,12 @@ function useAuth(): Auth {
 
   const signIn = async () => {
     reset();
+
+    if (fakeAuth) {
+      await signInFakeUser();
+      return;
+    }
+
     try {
       const provider = new firebase.auth.GithubAuthProvider();
       provider.addScope("public_repo");
