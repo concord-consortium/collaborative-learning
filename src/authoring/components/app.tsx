@@ -23,6 +23,10 @@ const App: React.FC = () => {
 
   const toggleMediaLibrary = () => setShowMediaLibrary(value => !value);
 
+  // uncomment when using the manual admin actions below - remove when
+  // we have a proper admin UI
+  // const pulledRef = React.useRef(false);
+
   // until we have an admin UI, use direct api calls to set things up
   useEffect(() => {
     /*
@@ -36,14 +40,21 @@ const App: React.FC = () => {
     */
 
     /*
-    console.log("Pulling unit");
-    api.post("/pullUnit", { branch: "authoring-testing", unit: "cas" }).then(() => {
-      console.log("Pulled unit");
-    }).catch((err) => {
-      console.error("Error pulling unit:", err);
-    });
+    if (auth.firebaseToken && auth.gitHubToken && pulledRef.current !== true) {
+      pulledRef.current = true;
+
+      const branchToPull = "authoring-testing";
+      const unitToPull = "m2s";
+
+      console.log(`Pulling unit: ${branchToPull}/${unitToPull}`);
+      api.post("/pullUnit", { branch: branchToPull, unit: unitToPull }).then(() => {
+        console.log(`Pulled unit: ${branchToPull}/${unitToPull}`);
+      }).catch((err) => {
+        console.error(`Error pulling unit: ${branchToPull}/${unitToPull}`, err);
+      });
+    }
     */
-  }, [api]);
+  }, [api, auth.firebaseToken, auth.gitHubToken]);
 
   useEffect(() => {
     if (!branch) {
