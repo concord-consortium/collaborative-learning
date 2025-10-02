@@ -92,7 +92,7 @@ const AISettings: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, setU
           type="text"
           id="tabLabel"
           defaultValue={settings.tagPrompt}
-          {...register("tagPrompt", { required: "Tab prompt is required" })}
+          {...register("tagPrompt", { required: "Tag prompt is required" })}
         />
         {errors.tagPrompt && <span>{errors.tagPrompt.message}</span>}
       </div>
