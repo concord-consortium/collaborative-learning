@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { Updater, useImmer } from "use-immer";
+import classNames from "classnames";
 
 import { IUnit } from "../types";
 
@@ -10,6 +11,7 @@ import { AuthoringApi } from "../hooks/use-authoring-api";
 import CurriculumTabs from "./workspace/curriculum-tabs";
 import { SaveState } from "../hooks/use-curriculum";
 import NavTabs from "./workspace/nav-tabs";
+import AISettings from "./workspace/ai-settings";
 
 import "./workspace.scss";
 
@@ -101,6 +103,8 @@ const Workspace: React.FC<IProps> = ({ branch, unit, unitConfig, setUnitConfig, 
         return <CurriculumTabs unitConfig={unitConfig} setUnitConfig={setUnitConfig} saveState={saveState} />;
       case "config/navTabs":
         return <NavTabs unitConfig={unitConfig} setUnitConfig={setUnitConfig} saveState={saveState} />;
+      case "config/aiSettings":
+        return <AISettings unitConfig={unitConfig} setUnitConfig={setUnitConfig} saveState={saveState} />;
       default:
         return <div className="centered muted">Not yet implemented.</div>;
     }
@@ -133,8 +137,12 @@ const Workspace: React.FC<IProps> = ({ branch, unit, unitConfig, setUnitConfig, 
     return <div className="centered muted">No content available.</div>;
   };
 
+  const className = classNames("workspace", {
+    "overflowing": isConfigPath,
+  });
+
   return (
-    <div className="workspace">
+    <div className={className}>
       {renderContent()}
     </div>
   );

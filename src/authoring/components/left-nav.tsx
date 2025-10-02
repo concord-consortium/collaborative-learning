@@ -49,6 +49,10 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files, showMediaL
             label: "Navigation Tabs",
           },
           {
+            id: "aiSettings",
+            label: "AI Settings",
+          },
+          {
             id: "raw",
             label: "Raw Settings (Dev Only)"
           },
