@@ -1,5 +1,12 @@
 import { EAuthorableNavTab } from "../models/view/nav-tabs";
 
+
+export const aiEvaluations = ["categorize-design", "custom"] as const;
+export type AIEvaluation = typeof aiEvaluations[number];
+
+export const summarizers = ["text", "image"] as const;
+export type Summarizer = typeof summarizers[number];
+
 export type IUnitFiles = Record<string, IUnitFile>;
 export interface IUnitFile {
   sha: string;
@@ -28,7 +35,7 @@ export interface IUnitConfig {
   commentTags: Record<string, string>;
   tagPrompt: string;
   enableCommentRoles: string[];
-  aiEvaluation: string;
+  aiEvaluation: AIEvaluation;
   aiPrompt: IAiPrompt;
 }
 
@@ -97,6 +104,7 @@ export interface IAiPrompt {
   categories: string[];
   keyIndicatorsPrompt: string;
   discussionPrompt: string;
+  summarizer?: Summarizer;
 }
 
 export interface ISection {
