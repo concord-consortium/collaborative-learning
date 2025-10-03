@@ -23,10 +23,26 @@ html, body, #app {
     justify-content: space-between;
     font-size: 0.9em;
 
-    .title {
-      font-weight: 600;
-      letter-spacing: 0.02em;
+    .left-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .title {
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+
+      .save-state {
+        font-size: 0.8em;
+        background-color: #9e9e9e;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+        text-transform: capitalize;
+      }
     }
+
 
     .info {
       a, span {

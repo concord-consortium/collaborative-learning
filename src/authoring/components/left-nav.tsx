@@ -41,13 +41,12 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files, showMediaL
         label: "Configuration",
           children: [
           {
-            id: "unitSettings",
-            label: "Unit Settings",
-            tbd: true
-          },
-          {
             id: "curriculumTabs",
             label: "Curriculum Tabs",
+          },
+          {
+            id: "unitSettings",
+            label: "Unit Settings",
             tbd: true
           },
           {
