@@ -17,8 +17,6 @@ import {
 
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
-const portal = "";
-const demo = "CLUE-Test";
 const dryRun = true;
 
 const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
@@ -29,8 +27,6 @@ const fbApp = admin.initializeApp({
   databaseURL
 });
 const firestore = fbApp.firestore();
-
-const documentsRoot = getFirestoreBasePath(portal, demo);
 
 const keyPattern = "[a-zA-Z0-9_\\-]{20}";
 const unprefixedPattern = new RegExp("^" + keyPattern + "$");
@@ -114,7 +110,8 @@ interface MergeResult {
 async function checkAndMerge(
   name: string,
   baseData: admin.firestore.DocumentData,
-  updates: DocumentUpdates
+  updates: DocumentUpdates,
+  documentsRoot: string
 ): Promise<MergeResult> {
   // Make sure that the contents of the new document match the existing one.
   const mustMatch = ["key", "uid", "context_id", "type", "title", ];
@@ -232,7 +229,19 @@ async function checkAndMerge(
 
 const oneWeekAgoSeconds = Date.now() - 7 * 24 * 60 * 60;
 
-async function reorganizeDocuments() {
+type ReorganizeDocumentsOptions = {
+  portal: string;
+} | {
+  demo: string;
+}
+
+async function reorganizeDocuments(options: ReorganizeDocumentsOptions) {
+  let documentsRoot: string;
+  if ("portal" in options) {
+    documentsRoot = getFirestoreBasePath(options.portal, undefined);
+  } else {
+    documentsRoot = getFirestoreBasePath(undefined, options.demo);
+  }
   const documentsRef = firestore.collection(documentsRoot);
   const documents = await getAllDocuments(documentsRef);
   let docsToProcess = 0;
@@ -364,7 +373,7 @@ async function reorganizeDocuments() {
         let prefixedCreatedTime: number | undefined | null;
         if (baseDocData) {
           console.log("  merging prefixed doc into base", doc.name);
-          const mergeResult = await checkAndMerge(doc.name, baseDocData, updates);
+          const mergeResult = await checkAndMerge(doc.name, baseDocData, updates, documentsRoot);
           if (mergeResult.errors.length > 0) {
             // We don't exit the entire script if the sanity check fails
             // We just log the errors and don't make any changes to the database for this
@@ -531,4 +540,29 @@ async function reorganizeDocuments() {
   }
 }
 
-await reorganizeDocuments();
+// To run for a the production data:
+// await reorganizeDocuments({
+//   portal: "learn.concord.org",
+// });
+
+// To run for a demo site:
+// await reorganizeDocuments({
+//   demo: "BORIS"
+// });
+
+// Running over all demo sites that have been used recently
+// Around Sept 2024 a last launched time was added to the CLUE demo space
+// That means there is a document at the top level of the demo space.
+// And that means that we can query for these demo spaces.
+// Without that document at the top level of the demo space, the collection
+// is considered a "non-existent ancestor" and we can't query for it.
+const demoRef = firestore.collection("demo");
+const snapshot = await demoRef.get();
+for (const doc of snapshot.docs) {
+  console.log("Processing demo site:", doc.id);
+  await reorganizeDocuments({
+    demo: doc.id
+  }).catch((error) => {
+    console.error("Error reorganizing documents for demo:", doc.id, error);
+  });
+}
