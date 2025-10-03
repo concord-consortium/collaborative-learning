@@ -175,7 +175,7 @@ There are a number of URL parameters that can aid in testing:
 |`studentDocumentHistoryId`|string         |Open the history slider and move to the specified revision in the `studentDocument`.|
 |`portalDomain`  |string                   |Used for dev/qa of standalone auth, this overrides which portal is used for auth|
 |`firebaseEnv`   |`production`,`staging`   |Target Firebase project for data and functions|
-|`showAiSummary` |`true`                   |When set to true the "ai summary" button in the document editor|
+|`showAiSummary` |`true`                   |When set to true the "ai summary" button in the document editor is shown|
 |`includeModelInAiSummary`|`true`          |When set to true the JSON.stringified raw model is included in the AI summary|
 |`fakeAuthoringAuth`|`true`                |When set to true the authoring system fakes the GitHub login|
 
