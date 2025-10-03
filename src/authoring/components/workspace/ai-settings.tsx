@@ -73,13 +73,23 @@ const AISettings: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, setU
           return obj;
         }, {} as Record<string, string>);
 
-        const aiPrompt = config.aiPrompt || {};
-        aiPrompt.systemPrompt = data.aiPrompt.systemPrompt;
-        aiPrompt.mainPrompt = data.aiPrompt.mainPrompt;
-        aiPrompt.categorizationDescription = data.aiPrompt.categorizationDescription;
-        aiPrompt.keyIndicatorsPrompt = data.aiPrompt.keyIndicatorsPrompt;
-        aiPrompt.discussionPrompt = data.aiPrompt.discussionPrompt;
-        aiPrompt.summarizer = data.aiPrompt.summarizer;
+        if (!config.aiPrompt) {
+          // create new aiPrompt object with categories initialized to empty array
+          // since categories are not authorable here
+          config.aiPrompt = { ...data.aiPrompt, categories: [] };
+        } else {
+          const aiPrompt = config.aiPrompt;
+          const {
+            systemPrompt, mainPrompt, categorizationDescription,
+            keyIndicatorsPrompt, discussionPrompt, summarizer
+          } = data.aiPrompt;
+          aiPrompt.systemPrompt = systemPrompt;
+          aiPrompt.mainPrompt = mainPrompt;
+          aiPrompt.categorizationDescription = categorizationDescription;
+          aiPrompt.keyIndicatorsPrompt = keyIndicatorsPrompt;
+          aiPrompt.discussionPrompt = discussionPrompt;
+          aiPrompt.summarizer = summarizer;
+        }
       }
     });
   };
