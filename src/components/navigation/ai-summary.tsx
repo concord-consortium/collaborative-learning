@@ -29,7 +29,7 @@ interface SummaryData {
   summaryCreatedAt?: string;
 }
 
-type Status = "checking" | "generating" | "regenerating" | "error" | "loaded"
+type Status = "checking" | "generating" | "regenerating" | "error" | "loaded";
 
 const statusMessages: Record<Status, string> = {
   checking: "Checking for summary...",
@@ -37,6 +37,12 @@ const statusMessages: Record<Status, string> = {
   regenerating: "Regenerating summary...",
   error: "Error loading summary",
   loaded: "",
+};
+
+const niceDate = (timestamp: number) => {
+  return new Date(timestamp).toLocaleString("en-US", {
+    dateStyle: "long", timeStyle: "short"
+  });
 };
 
 const AISummaryContent: React.FC = () => {
@@ -86,12 +92,8 @@ const AISummaryContent: React.FC = () => {
       setSummaryData({
         studentSummary: result.studentSummary,
         teacherSummary: result.teacherSummary,
-        lastEditedAt: result.lastEditedAt
-          ? new Date(result.lastEditedAt).toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"})
-          : undefined,
-        summaryCreatedAt: result.summaryCreatedAt
-          ? new Date(result.summaryCreatedAt.seconds*1000).toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"})
-          : undefined
+        lastEditedAt: result.lastEditedAt ? niceDate(result.lastEditedAt) : undefined,
+        summaryCreatedAt: result.summaryCreatedAt ? niceDate(result.summaryCreatedAt.seconds*1000) : undefined
       });
       setStatus("loaded");
     }, (error) => {
@@ -140,7 +142,7 @@ const AISummaryContent: React.FC = () => {
   );
 };
 
-export const AiSummary:React.FC = observer(function AiSummary(){
+export const AiSummary: React.FC = observer(function AiSummary(){
   const { user } = useStores();
   const [showSummary, setShowSummary] = useState(false);
 

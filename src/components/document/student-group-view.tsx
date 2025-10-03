@@ -7,7 +7,6 @@ import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent, getFocusedGroupUser, getQuadrant } from "../four-up";
 import { DocumentViewMode } from "./document";
-import { urlParams } from "../../utilities/url-params";
 
 import "./student-group-view.scss";
 
