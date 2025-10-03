@@ -19,9 +19,37 @@
   .config {
     font-size: 0.9rem;
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
 
-    padding: 10px;
+    &>* {
+      padding: 10px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+
+      th {
+        text-align: left;
+        white-space: nowrap;
+        padding-right: 10px;
+      }
+      td {
+        padding-right: 10px;
+        text-align: center;
+        white-space: nowrap;
+
+        &:last-child {
+          padding-right: 0;
+        }
+      }
+      td.left {
+        text-align: left;
+      }
+      td.wide {
+        width: 100%;
+      }
+    }
 
     label, .sectionLabel {
       display: block;
@@ -32,7 +60,7 @@
       margin-top: 20px;
     }
 
-    input {
+    input[type="text"] {
       width: 100%;
       box-sizing: border-box;
       margin-top: 4px;

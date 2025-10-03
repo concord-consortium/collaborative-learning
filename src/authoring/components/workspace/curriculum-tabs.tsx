@@ -34,6 +34,7 @@ const CurriculumTabs: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, 
       <div>
         <label htmlFor="tabLabel">Curriculum Tab Label</label>
         <input
+          type="text"
           id="tabLabel"
           defaultValue={problemTab?.label}
           {...register("tabLabel", { required: "Tab label is required" })}
@@ -44,6 +45,7 @@ const CurriculumTabs: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, 
       {(problemTab?.sections ?? []).map((section, index) => (
         <div key={index}>
           <input
+            type="text"
             {...register(`sections.${index}.title`, { required: "Section title is required" })}
             defaultValue={section.title}
           />
@@ -51,7 +53,7 @@ const CurriculumTabs: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, 
         </div>
       ))}
       <div className="bottomButtons">
-        <button type="submit" disabled={saveState === "saving"}>Update</button>
+        <button type="submit" disabled={saveState === "saving"}>Save</button>
       </div>
     </form>
   );

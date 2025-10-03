@@ -45,19 +45,8 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files, showMediaL
             label: "Curriculum Tabs",
           },
           {
-            id: "unitSettings",
-            label: "Unit Settings",
-            tbd: true
-          },
-          {
-            id: "teacherGuideTabs",
-            label: "Teacher Guide Tabs",
-            tbd: true
-          },
-          {
-            id: "investigations",
-            label: "Investigations",
-            tbd: true
+            id: "navTabs",
+            label: "Navigation Tabs",
           },
           {
             id: "raw",
