@@ -138,7 +138,7 @@ const Workspace: React.FC<IProps> = ({ branch, unit, unitConfig, setUnitConfig, 
   };
 
   const className = classNames("workspace", {
-    "overflowing": isConfigPath,
+    "overflowing": isConfigPath && path !== "config/raw",
   });
 
   return (
