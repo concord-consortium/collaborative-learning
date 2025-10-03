@@ -2,6 +2,34 @@
   width: 100%;
   overflow: hidden;
 
+  &.overflowing {
+    overflow: auto;
+  }
+
+  .horizontalGroup {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .left {
+    text-align: left;
+  }
+  .wide {
+    width: 100%;
+  }
+  .narrow {
+    white-space: nowrap;
+    width: 1%;
+  }
+
   .centered {
     display: flex;
     flex-direction: row;
@@ -19,10 +47,14 @@
   .config {
     font-size: 0.9rem;
     height: 100%;
-    overflow: hidden;
 
     &>* {
       padding: 10px;
+      overflow: auto;
+    }
+
+    &>form>* {
+      margin-bottom: 10px;
     }
 
     table {
@@ -39,15 +71,13 @@
         text-align: center;
         white-space: nowrap;
 
+        &.left {
+          text-align: left;
+        }
+
         &:last-child {
           padding-right: 0;
         }
-      }
-      td.left {
-        text-align: left;
-      }
-      td.wide {
-        width: 100%;
       }
     }
 
@@ -60,12 +90,16 @@
       margin-top: 20px;
     }
 
-    input[type="text"] {
+    input[type="text"], select, textarea {
       width: 100%;
       box-sizing: border-box;
       margin-top: 4px;
       padding: 6px;
       font-size: 1em;
+    }
+
+    textarea {
+      height: 80px;
     }
 
     .bottomButtons {
