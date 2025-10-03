@@ -44,8 +44,10 @@ const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitH
     return false;
   }
 
-  // allow CC folks (with a concord.org email) access to everything
-  const isCCEmail = email.endsWith("@concord.org");
+  // allow CC folks (with a concord.org email) access to everything and add a special exception
+  // for Doug's old zoopdoop.com email that Firebase auth is setting as the GitHub provider email
+  // in the generated auth token even though it is not used on GitHub anymore
+  const isCCEmail = email.endsWith("@concord.org") || email === "doug@zoopdoop.com";
   if (isCCEmail) {
     return true;
   }
