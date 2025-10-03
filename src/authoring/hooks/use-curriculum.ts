@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef } from "react";
 import firebase from "firebase/app";
 import { Updater, useImmer } from "use-immer";
 
-export type AuthState = "unauthenticated" | "authenticating" | "authenticated" | "error";
 export type SaveState = "saving" | "saved" | "error" | undefined;
 
 import { IUnit, IUnitFiles } from "../types";
@@ -13,7 +12,6 @@ export const units = ["cas", "mods", "brain", "m2s"];
 export const branches = ["authoring-testing"];
 
 export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
-  const [authState, setAuthState] = useImmer<AuthState>("authenticated");
   const [branch, _setBranch] = useImmer<string | undefined>(undefined);
   const [unit, _setUnit] = useImmer<string | undefined>(undefined);
   const [path, setPath] = useImmer<string | undefined>(undefined);
@@ -31,6 +29,7 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
     _setBranch(undefined);
     _setUnit(undefined);
     _setUnitConfig(undefined);
+    lastUnitRef.current = undefined;
   }, [_setBranch, _setUnit, setError, _setUnitConfig]);
 
   // externally when setUnitConfig is called, we want to update the state
@@ -83,8 +82,10 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
     // wait until auth is ready
     if (auth.firebaseToken && auth.gitHubToken) {
       processHash();
+    } else {
+      reset();
     }
-  }, [auth.firebaseToken, auth.gitHubToken, processHash]);
+  }, [auth.firebaseToken, auth.gitHubToken, processHash, reset]);
 
   useEffect(() => {
     const onFilesChange = (snapshot: firebase.database.DataSnapshot) => {
@@ -99,7 +100,7 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
     };
 
     // prevent unnecessary fetches
-    if (branch && unit && lastUnitRef.current !== unit) {
+    if (branch && unit && (!lastUnitRef.current || lastUnitRef.current !== unit)) {
       lastUnitRef.current = unit;
 
       // Setup a Firebase listener for the unit file metadata changes so that we get real-time updates.
@@ -159,8 +160,6 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
   };
 
   return {
-    authState,
-    setAuthState,
     branch,
     setBranch,
     unit,

@@ -177,6 +177,7 @@ There are a number of URL parameters that can aid in testing:
 |`firebaseEnv`   |`production`,`staging`   |Target Firebase project for data and functions|
 |`showAiSummary` |`true`                   |When set to true the "ai summary" button in the document editor and Student Work view|
 |`includeModelInAiSummary`|`true`          |When set to true the JSON.stringified raw model is included in the AI summary|
+|`fakeAuthoringAuth`|`true`                |When set to true the authoring system fakes the GitHub login|
 
 The `unit` parameter can be in 3 forms:
 
@@ -200,6 +201,18 @@ The `document` parameter is useful if you want to work on something that require
 The `readOnly` parameter will open the document in readOnly mode. This is useful for testing or debugging issues with tiles that have different displays when in readOnly model.
 
 The `unwrapped` parameter will open the document without any surrounding UI. This is useful for taking screenshots of documents.
+
+### Authoring Development
+
+During development of features in the authoring system it is normally useful to develop using the emulator, for both the authoring-api backend functions
+and the realtime database storage of authoring metadata and changes.  Furthermore it is also useful to skip the Firebase authentication on each page load.
+
+Here are the steps to do that:
+
+1. Ensure the authoring-api serves the latest changes by changing into the `authoring-api` folder and running `npm run build:watch`.
+2. In another terminal start the emulator with storage of any changes by also changing into the `authoring-api` folder, running `use firebase staging` and running `npm run start:data`.  The `use firebase staging` is needed as the emulator adds the staging project name to the localhost function urls.
+3. In yet another terminal start CLUE up normally by running `npm start` in the root of CLUE.
+4. Load the authoring interface with the emulator and fakeAuthoringAuth parameters:  `http://localhost:8080/authoring?functions=emulator&firebase=emulator&firebaseEnv=staging&fakeAuthoringAuth=true`
 
 ### QA
 
