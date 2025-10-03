@@ -12,6 +12,7 @@ import getPulledBranches from "./routes/get-pulled-branches";
 import getPulledUnits from "./routes/get-pulled-units";
 import getPulledFiles from "./routes/get-pulled-files";
 import putContent from "./routes/put-content";
+import putImage from "./routes/put-image";
 
 import {AuthorizedRequest} from "./helpers/express";
 import {newOctoKit, owner, repo} from "./helpers/github";
@@ -143,6 +144,9 @@ const tbd = (req: Request, res: Response) => res.status(501).send("Not implement
 
 const app = express();
 
+// increase the default body size limit from 5mb to allow for large image uploads
+app.use(express.json({limit: "5mb"}));
+
 // enable CORS for all origins - we lock down access via authentication/authorization
 app.use(cors());
 app.use((req, res, next) => {
@@ -168,6 +172,8 @@ app.post("/pushUnit", tbd);
 
 app.get("/getContent", getContent);
 app.post("/putContent", putContent);
+
+app.post("/putImage", putImage);
 
 app.get("/getRemoteBranches", getRemoteBranches);
 app.get("/getRemoteUnits", getRemoteUnits);

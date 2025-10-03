@@ -15,7 +15,8 @@ export type GetEndPoint =
 export type PostEndPoint =
   "/pullUnit" |
   "/pushUnit" |
-  "/putContent";
+  "/putContent" |
+  "/putImage";
 
 export type EndPoint = GetEndPoint | PostEndPoint;
 

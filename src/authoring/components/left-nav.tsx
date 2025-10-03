@@ -16,10 +16,11 @@ interface IProps {
   unit: string;
   unitConfig: IUnit;
   files: IUnitFiles;
+  showMediaLibrary: boolean;
   onMediaLibraryClicked?: () => void;
 }
 
-const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files, onMediaLibraryClicked }) => {
+const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files, showMediaLibrary, onMediaLibraryClicked }) => {
   const basePath = `#/${branch}/${unit}`;
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     [basePath]: true
@@ -164,7 +165,7 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files, onMediaLib
           className="media-library-btn"
           onClick={onMediaLibraryClicked}
         >
-          Media Library
+          {showMediaLibrary ? "Close" : "Open"} Media Library
         </button>
       </div>
     </nav>

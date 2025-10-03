@@ -8,7 +8,7 @@ import { AuthoringApi } from "./use-authoring-api";
 import { Auth } from "./use-auth";
 
 export const units = ["cas", "mods", "brain", "m2s"];
-export const branches = ["main", "demo"];
+export const branches = ["authoring-testing"];
 
 export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
   const [authState, setAuthState] = useState<AuthState>("authenticated");
@@ -90,8 +90,9 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
     if (branch && unit && lastUnitRef.current !== unit) {
       lastUnitRef.current = unit;
 
-      // Setup a Firebase listener for the unit file changes so that we get real-time updates.
-      // We only do direct reads - writes go through the API.
+      // Setup a Firebase listener for the unit file metadata changes so that we get real-time updates.
+      // We only do direct reads - writes to unit file metadata changes go through the API.
+      filesRef.current?.off();
       filesRef.current = firebase.database().ref(`authoring/content/branches/${branch}/units/${unit}/files`);
       filesRef.current.on("value", onFilesChange);
 
@@ -109,10 +110,9 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
       });
     }
 
-    return () => {
-      filesRef.current?.off();
-      filesRef.current = undefined;
-    };
+    // Note: we don't have a cleanup function to turn off the listener
+    // because we want to keep listening for changes until branch or unit changes.
+    // The filesRef.current?.off() above is what turns off the previous listener.
   }, [api, branch, unit]);
 
   const listBranches = async () => {
