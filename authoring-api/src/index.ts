@@ -146,7 +146,7 @@ const tbd = (req: Request, res: Response) => res.status(501).send("Not implement
 
 const app = express();
 
-// increase the default body size limit from 5mb to allow for large image uploads
+// increase the default body size limit to 5mb to allow for large image uploads
 app.use(express.json({limit: "5mb"}));
 
 // enable CORS for all origins - we lock down access via authentication/authorization

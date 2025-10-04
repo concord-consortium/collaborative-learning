@@ -103,7 +103,7 @@ const NavTabs: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, setUnit
         <tbody>
           {formTabs.map((formTab, index) => (
             <React.Fragment key={formTab.tab}>
-              <tr key={index}>
+              <tr>
                 <td>
                   <input
                     type="checkbox"
