@@ -1,0 +1,97 @@
+@import "../../components/vars";
+
+.ai-summary {
+  .ai-summary-header {
+    background-color: $classwork-purple-light-5;
+    border: solid 1.5px $classwork-purple;
+    border-top: none;
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 4px 2px 8px;
+
+    .ai-summary-header-title {
+      font-weight: bold;
+    }
+
+    .ai-summary-header-toggle {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+
+      .ai-summary-header-toggle-arrow {
+        fill: $classwork-purple-dark-1;
+        margin-right: 0;
+        &.up {
+          transform: rotate(180deg);
+        }
+      }
+    }
+  }
+
+  .ai-summary-content {
+    border: solid 1.5px $classwork-purple;
+    border-top: none;
+    padding: 4px 8px;
+    line-height: 1.6;
+    color: $charcoal-dark-1;
+    max-height: 200px;
+    overflow: auto;
+
+    code {
+      background-color: $charcoal-light-8;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: $charcoal-light-8;
+      padding: 12px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 12px 0;
+
+      code {
+        background-color: transparent;
+        padding: 0;
+      }
+    }
+
+    blockquote {
+      border-left: 4px solid $workspace-teal-light-3;
+      margin: 12px 0;
+      padding: 8px 16px;
+      background-color: $workspace-teal-light-9;
+      font-style: italic;
+    }
+
+    .timestamp {
+      font-style: italic;
+      padding-bottom: 10px;
+      font-size: 0.8em;
+      color: $charcoal-dark-1;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .bottom-buttons {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 5px;
+
+      button {
+        box-sizing: border-box;
+        height: 26px;
+        padding: 1px 6px;
+        border-radius: 5px;
+        border: solid 1.5px #949494;
+        background-color: $classwork-purple-light-5;
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+
+}
