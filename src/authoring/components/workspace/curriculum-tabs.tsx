@@ -23,8 +23,19 @@ const CurriculumTabs: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, 
   const onSubmit: SubmitHandler<ICurriculumTabFormInputs> = (data) => {
     setUnitConfig(draft => {
       if (draft && problemTabIndex >= 0) {
-        draft.config.navTabs.tabSpecs[problemTabIndex].label = data.tabLabel;
-        draft.config.navTabs.tabSpecs[problemTabIndex].sections = data.sections;
+        const tabSpec = draft.config.navTabs.tabSpecs[problemTabIndex];
+        tabSpec.label = data.tabLabel;
+        data.sections.forEach(({title}, index) => {
+          if (tabSpec.sections && index < tabSpec.sections.length) {
+            tabSpec.sections[index].title = title;
+            const initials = tabSpec.sections[index].initials;
+
+            const section = Object.values(draft.sections).find(sec => sec.initials === initials);
+            if (section) {
+              section.title = title;
+            }
+          }
+        });
       }
     });
   };

@@ -178,6 +178,7 @@ There are a number of URL parameters that can aid in testing:
 |`showAiSummary` |`true`                   |When set to true the "ai summary" button in the document editor and Student Work view|
 |`includeModelInAiSummary`|`true`          |When set to true the JSON.stringified raw model is included in the AI summary|
 |`fakeAuthoringAuth`|`true`                |When set to true the authoring system fakes the GitHub login|
+|`authoringBranch`  |string                |When set to a value the runtime knows it should use the authoring api to get content using the specified branch|
 
 The `unit` parameter can be in 3 forms:
 

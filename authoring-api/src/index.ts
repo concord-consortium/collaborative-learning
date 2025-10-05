@@ -13,6 +13,7 @@ import getPulledUnits from "./routes/get-pulled-units";
 import getPulledFiles from "./routes/get-pulled-files";
 import putContent from "./routes/put-content";
 import putImage from "./routes/put-image";
+import getRawContent from "./routes/get-raw-content";
 
 import {AuthorizedRequest} from "./helpers/express";
 import {newOctoKit, owner, repo} from "./helpers/github";
@@ -105,6 +106,11 @@ const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitH
 };
 
 export const authenticateAndAuthorize = async (req: Request, res: Response, next: NextFunction) => {
+  // don't require auth for rawContent endpoint
+  if (req.path.startsWith("/rawContent/")) {
+    return next();
+  }
+
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return res.status(401).send("Unauthorized: No authorization header provided.");
@@ -183,5 +189,8 @@ app.get("/getRemoteUnits", getRemoteUnits);
 app.get("/getPulledBranches", getPulledBranches);
 app.get("/getPulledUnits", getPulledUnits);
 app.get("/getPulledFiles", getPulledFiles);
+
+// NOTE: app.use() is used here to allow for paths with slashes (i.e. /rawContent/:branch/:unit/*)
+app.use("/rawContent", getRawContent);
 
 export const api = https.onRequest(app);

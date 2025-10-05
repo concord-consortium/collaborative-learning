@@ -8,17 +8,20 @@ import "./iframe-control.scss";
 (window as any).DISABLE_FIREBASE_SYNC = true;
 
 const urlParams = new URLSearchParams(window.location.search);
-const iframeBase = urlParams.get("iframeBase") ?? ".";
+// note: .. is used below as iframe.html is in root and authoring is in authoring/
+const iframeBase = urlParams.get("iframeBase") ?? "..";
 const iframeBaseURL = new URL(iframeBase, window.location.href);
 const validOrigin = iframeBaseURL.origin;
 
 interface IProps {
   initialValue: string;
+  branch: string;
+  unit: string;
   onChange?: (value: string) => void;
 }
 
 export const IframeControl: React.FC<IProps> = (props) => {
-  const { initialValue, onChange} = props;
+  const { initialValue, branch, unit, onChange} = props;
 
   useEffect(() => {
     if (DEBUG_IFRAME) {
@@ -59,17 +62,23 @@ export const IframeControl: React.FC<IProps> = (props) => {
     };
   }, [receiveUpdateFromEditor]);
 
-  const curriculumBranch = urlParams.get("curriculumBranch") ?? "author";
-  const iframeBaseUrl = `${iframeBase}/iframe.html?fullHeight=true&noBorder=true&curriculumBranch=${curriculumBranch}`;
-  const iframeUrl = urlParams.get("unit")
-    ? `${iframeBaseUrl}&unit=${urlParams.get("unit")}`
-    : iframeBaseUrl;
+
+  // use the same params to enable overrides of the emulator, functions, etc
+  const iframeParams = new URLSearchParams(window.location.search);
+  iframeParams.set("fullHeight", "true");
+  iframeParams.set("noBorder", "true");
+  iframeParams.set("authoringBranch", branch);
+  iframeParams.set("unit", unit);
+  iframeParams.delete("fakeAuthoringAuth");
+
+  const iframeUrl = new URL(`${iframeBaseURL.toString()}iframe.html`);
+  iframeUrl.search = iframeParams.toString();
 
   return (
     <div className="iframe-control custom-widget">
       <iframe
         id="editor"
-        src={iframeUrl}
+        src={iframeUrl.toString()}
         allow="clipboard-read; clipboard-write; serial"
         onLoad={sendInitialValueToEditor}
       />

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IUnitFiles } from "../types";
 import { AuthoringApi } from "../hooks/use-authoring-api";
+import { AuthoringPreview } from "../hooks/use-authoring-preview";
 
 import "./media-library.scss";
 
@@ -10,9 +11,10 @@ interface IProps {
   branch: string;
   unit: string;
   api: AuthoringApi;
+  authoringPreview: AuthoringPreview;
 }
 
-const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit, api }) => {
+const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit, api, authoringPreview }) => {
   const [filter, setFilter] = useState("");
   const filterInputRef = useRef<HTMLInputElement | null>(null);
   const [activeTab, setActiveTab] = useState<"images" | "upload">("images");
@@ -95,6 +97,7 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit, api }) =
           fileName: file.name
         });
         setUploadProgress("completed");
+        authoringPreview.reloadAllPreviews();
         console.log('Upload successful:', response);
       } catch (error) {
         console.error('Upload failed:', error);

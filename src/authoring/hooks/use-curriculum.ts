@@ -7,11 +7,12 @@ export type SaveState = "saving" | "saved" | "error" | undefined;
 import { IUnit, IUnitFiles } from "../types";
 import { AuthoringApi } from "./use-authoring-api";
 import { Auth } from "./use-auth";
+import { AuthoringPreview } from "./use-authoring-preview";
 
 export const units = ["cas", "mods", "brain", "m2s"];
 export const branches = ["authoring-testing"];
 
-export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
+export const useCurriculum = (auth: Auth, api: AuthoringApi, authoringPreview: AuthoringPreview) => {
   const [branch, _setBranch] = useImmer<string | undefined>(undefined);
   const [unit, _setUnit] = useImmer<string | undefined>(undefined);
   const [path, setPath] = useImmer<string | undefined>(undefined);
@@ -140,6 +141,7 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
           saveStateClearTimeoutRef.current = window.setTimeout(() => {
             setSaveState(undefined);
           }, 1000);
+          authoringPreview.reloadAllPreviews();
         } else {
           setSaveState("error");
           setError(response.error);
@@ -148,7 +150,7 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi) => {
         setError(err.message);
       });
     }
-  }, [api, branch, unit, unitConfig, setError, setSaveState]);
+  }, [api, branch, unit, unitConfig, setError, setSaveState, authoringPreview]);
 
   const listBranches = async () => {
     return branches;

@@ -10,6 +10,10 @@ export const newOctoKit = (auth: string) => {
 export const baseCurriculumPath = "curriculum";
 export const getBaseUnitPath = (unit: string) => `${baseCurriculumPath}/${unit}/`;
 
+export const getRawCurriculumUrl = (branch: string) => {
+  return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${baseCurriculumPath}/`;
+};
+
 export const getRawUrl = (branch: string, unit: string, path: string) => {
   return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${getBaseUnitPath(unit)}${path}`;
 };

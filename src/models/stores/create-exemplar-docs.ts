@@ -8,6 +8,7 @@ import { AppConfigModelType } from "./app-config-model";
 import { UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { kExemplarUserParams } from "../../../shared/shared";
+import { getContent } from "../../utilities/get-content";
 
 interface ICreateExemplarDocsParams {
   unit: UnitModelType;
@@ -48,7 +49,7 @@ export async function getExemplarsData(unitUrl: string, exemplarUrls: string[]){
   return Promise.all(
     exemplarUrls.map(async (url: string) => {
       const fetchUrl = new URL(url, unitUrl).href;
-      const response = await fetch(fetchUrl);
+      const response = await getContent(fetchUrl);
       const data = await response.json();
       // TODO: validate shape of `data`?
       const result: IExemplarData = {

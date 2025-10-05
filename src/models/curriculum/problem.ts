@@ -6,6 +6,7 @@ import { SupportModel } from "./support";
 import { ProblemConfiguration } from "../stores/problem-configuration";
 import { ITileEnvironment } from "../tiles/tile-content";
 import { SharedModelDocumentManager } from "../document/shared-model-document-manager";
+import { getContent } from "../../utilities/get-content";
 
 const LegacyProblemModel = types
   .model("Problem", {
@@ -96,7 +97,7 @@ const ModernProblemModel = types
 
   function getExternalProblemSectionData(dataUrl: string){
     try {
-      return fetch(dataUrl).then(res => res.json());
+      return getContent(dataUrl).then(res => res.json());
     } catch (error) {
       throw new Error(`Failed to load problem-section ${dataUrl} cause:\n ${error}`);
     }
