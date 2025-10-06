@@ -1,59 +1,12 @@
-import { useEffect, useRef } from "react";
-import { urlParams } from "../../utilities/url-params";
+import { useRef } from "react";
 
 export interface AuthoringPreview {
   openPreview: (branch: string, unit: string) => void;
   reloadAllPreviews: () => void;
 }
 
-const isAuthoring = window.location.pathname.startsWith("/authoring");
-const sendHeartbeatIntervalMs = 1000;
-const checkHeartbeatIntervalMs = 5000;
-
 export const useAuthoringPreview = (): AuthoringPreview => {
   const windowsRef = useRef<Window[]>([]);
-  const lastAliveRef = useRef<number>(Date.now());
-
-  useEffect(() => {
-    if (isAuthoring) {
-      const sendHeartbeat = () => {
-        windowsRef.current = windowsRef.current.filter(win => {
-          if (win && !win.closed) {
-            win.postMessage("authoring:alive!", "*");
-            return true;
-          }
-          return false;
-        });
-      };
-
-      const heartbeatInterval = setInterval(sendHeartbeat, sendHeartbeatIntervalMs);
-      return () => clearInterval(heartbeatInterval);
-
-    } else if (urlParams.authoringBranch) {
-      // In runtime authoring preview, show an alert if the authoring window closes
-      const handleMessage = (event: MessageEvent) => {
-        if (event.data === "authoring:alive!") {
-          lastAliveRef.current = Date.now();
-        }
-      };
-      window.addEventListener("message", handleMessage);
-
-      const interval = setInterval(() => {
-        if (Date.now() - lastAliveRef.current > checkHeartbeatIntervalMs) {
-          alert([
-            "The authoring window has closed or been reloaded and this window will no longer automatically reload.",
-            "Please close this window and reopen the preview from the authoring tool."
-          ].join("\n\n"));
-          clearInterval(interval);
-        }
-      }, checkHeartbeatIntervalMs);
-
-      return () => {
-        window.removeEventListener("message", handleMessage);
-        clearInterval(interval);
-      };
-    }
-  }, []);
 
   const openPreview = (branch: string, unit: string) => {
     if (!branch || !unit) {
