@@ -1,4 +1,3 @@
-// CurriculumContext.tsx
 import React, { createContext, useContext } from "react";
 import { useImmer, Updater } from "use-immer";
 import firebase from "firebase/app";
@@ -29,7 +28,6 @@ export type CurriculumContextValue = {
   saveState: SaveState;
 };
 
-// ------------ Context layer ------------
 const CurriculumContext = createContext<CurriculumContextValue | null>(null);
 
 export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
@@ -49,7 +47,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
   const filesRef = useRef<firebase.database.Reference | undefined>(undefined);
   const [saveState, setSaveState] = useImmer<SaveState | undefined>(undefined);
   const saveUnitConfigRef = useRef(false);
-  const saveStateClearTimeoutRef = useRef<number | undefined>(undefined);
+  const saveStateClearTimeoutRef = useRef<number>();
 
   const reset = useCallback(() => {
     setError(undefined);
@@ -173,9 +171,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     // save unit config changes
     if (unitConfig && saveUnitConfigRef.current && branch && unit) {
       saveUnitConfigRef.current = false;
-      if (saveStateClearTimeoutRef.current) {
-        window.clearTimeout(saveStateClearTimeoutRef.current);
-      }
+      window.clearTimeout(saveStateClearTimeoutRef.current);
       setSaveState("saving");
       api
         .post(
@@ -231,7 +227,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
 export const useCurriculum = (): CurriculumContextValue => {
   const ctx = useContext(CurriculumContext);
   if (!ctx) {
-    throw new Error("useCurriculumContext must be used within a CurriculumProvider");
+    throw new Error("useCurriculum must be used within a CurriculumProvider");
   }
   return ctx;
 };
