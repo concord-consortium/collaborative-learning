@@ -1,11 +1,5 @@
-import {Octokit} from "@octokit/rest";
-
 export const owner = "concord-consortium";
 export const repo = "clue-curriculum";
-
-export const newOctoKit = (auth: string) => {
-  return new Octokit({auth});
-};
 
 export const baseCurriculumPath = "curriculum";
 export const getBaseUnitPath = (unit: string) => `${baseCurriculumPath}/${unit}/`;

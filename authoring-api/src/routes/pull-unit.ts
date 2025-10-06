@@ -1,6 +1,8 @@
 import {Request, Response} from "express";
 import admin from "firebase-admin";
-import {getBaseUnitPath, newOctoKit, owner, getRawUrl, repo} from "../helpers/github";
+import {Octokit} from "@octokit/rest";
+import {getBaseUnitPath, owner, getRawUrl, repo} from "../helpers/github";
+
 import {
   BranchesMetadata, BranchMetadata, escapeFirebaseKey, getBranchesMetadataPath, getDb,
   getUnitFilesPath, getUnitUpdatesPath,
@@ -25,7 +27,7 @@ const pullUnit = async (req: Request, res: Response) => {
 
   try {
     const authorizedRequest = req as AuthorizedRequest;
-    const octokit = newOctoKit(authorizedRequest.gitHubToken);
+    const octokit = new Octokit({auth: authorizedRequest.gitHubToken});
 
     const {data: {commit: {sha: branchSha}}} = await octokit.rest.repos.getBranch({
       owner,

@@ -3,6 +3,7 @@ import admin from "firebase-admin";
 import express, {Request, Response, NextFunction} from "express";
 import cors from "cors";
 import {DecodedIdToken} from "firebase-admin/auth";
+import {Octokit} from "@octokit/rest";
 
 import pullUnit from "./routes/pull-unit";
 import getContent from "./routes/get-content";
@@ -16,7 +17,7 @@ import putImage from "./routes/put-image";
 import getRawContent from "./routes/get-raw-content";
 
 import {AuthorizedRequest} from "./helpers/express";
-import {newOctoKit, owner, repo} from "./helpers/github";
+import {owner, repo} from "./helpers/github";
 
 const adminOnlyPaths = ["/pullUnit"];
 
@@ -76,7 +77,7 @@ const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitH
   // check if the user is a collaborator in the CLUE curriculum repository
   let isCollaborator = false;
   try {
-    const octokit = newOctoKit(gitHubToken);
+    const octokit = new Octokit({auth: gitHubToken});
 
     // get the username associated with the token
     const {data} = await octokit.request("GET /user");
