@@ -7,6 +7,8 @@ export interface AuthoringPreview {
 }
 
 const isAuthoring = window.location.pathname.startsWith("/authoring");
+const sendHeartbeatIntervalMs = 1000;
+const checkHeartbeatIntervalMs = 5000;
 
 export const useAuthoringPreview = (): AuthoringPreview => {
   const windowsRef = useRef<Window[]>([]);
@@ -24,7 +26,7 @@ export const useAuthoringPreview = (): AuthoringPreview => {
         });
       };
 
-      const heartbeatInterval = setInterval(sendHeartbeat, 1000);
+      const heartbeatInterval = setInterval(sendHeartbeat, sendHeartbeatIntervalMs);
       return () => clearInterval(heartbeatInterval);
 
     } else if (urlParams.authoringBranch) {
@@ -37,14 +39,14 @@ export const useAuthoringPreview = (): AuthoringPreview => {
       window.addEventListener("message", handleMessage);
 
       const interval = setInterval(() => {
-        if (Date.now() - lastAliveRef.current > 5000) {
+        if (Date.now() - lastAliveRef.current > checkHeartbeatIntervalMs) {
           alert([
             "The authoring window has closed or been reloaded and this window will no longer automatically reload.",
             "Please close this window and reopen the preview from the authoring tool."
           ].join("\n\n"));
           clearInterval(interval);
         }
-      }, 5000);
+      }, checkHeartbeatIntervalMs);
 
       return () => {
         window.removeEventListener("message", handleMessage);
