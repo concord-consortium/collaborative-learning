@@ -182,7 +182,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     // Note: we don't have a cleanup function to turn off the listener
     // because we want to keep listening for changes until branch or unit changes.
     // The filesRef.current?.off() above is what turns off the previous listener.
-  }, [api, branch, setError, setFiles, _setUnitConfig, unit]);
+  }, [api, branch, setError, setFiles, _setUnitConfig, setTeacherGuideConfig, unit]);
 
   useEffect(() => {
     // save unit config changes

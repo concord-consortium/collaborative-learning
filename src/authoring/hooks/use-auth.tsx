@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import firebase from "firebase/app";
 import "firebase/auth";
 
@@ -10,6 +10,7 @@ export interface Auth {
   error: string | null;
   firebaseToken: string | null;
   gitHubToken: string | null;
+  isAdminUser: boolean;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
   reset: () => void;
@@ -151,6 +152,13 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     setResetCount((count) => count + 1);
   };
 
+  const isAdminUser = useMemo(() => {
+    if (!user?.email) return false;
+    return user.email.endsWith("@concord.org")
+      || user.email === fakeAuthUser.email
+      || user.email === "doug@zoopdoop.com";
+  }, [user?.email]);
+
   const value: Auth = {
     user,
     firebaseToken,
@@ -159,7 +167,8 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     error,
     signIn,
     signOut,
-    reset
+    reset,
+    isAdminUser
   };
 
   return (

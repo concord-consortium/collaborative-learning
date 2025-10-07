@@ -231,6 +231,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^1.8.9",
+    "@codemirror/lang-json": "^6.0.2",
     "@concord-consortium/codap-formulas-react17": "^1.1.0",
     "@concord-consortium/compute-engine": "^0.12.3-cc.2",
     "@concord-consortium/diagram-view": "1.0.2",

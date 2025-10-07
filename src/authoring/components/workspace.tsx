@@ -16,7 +16,7 @@ import "./workspace.scss";
 
 const Workspace: React.FC = () => {
   const api = useAuthoringApi();
-  const { branch, unit, path } = useCurriculum();
+  const { branch, unit, path, unitConfig, setUnitConfig } = useCurriculum();
   const authoringPreview = useAuthoringPreview();
   const [content, setContent] = useImmer<any>({});
   const [status, setStatus] = useImmer<"loading" | "loaded" | "notImplemented" | "error">("loading");
@@ -89,10 +89,14 @@ const Workspace: React.FC = () => {
     }
   };
 
+  const handleSaveRawUnitConfig = (newConfig: any) => {
+    setUnitConfig(newConfig);
+  };
+
   const renderConfig = () => {
     switch (path) {
       case "config/raw":
-        return <RawSettingsControl />;
+        return <RawSettingsControl initialValue={unitConfig} onSave={handleSaveRawUnitConfig} />;
       case "config/curriculumTabs":
         return <CurriculumTabs />;
       case "config/navTabs":
@@ -130,9 +134,6 @@ const Workspace: React.FC = () => {
           onChange={onChangeContent}
         />
       );
-    }
-    if (status === "loaded") {
-      return <RawSettingsControl />;
     }
     return <div className="centered muted">No content available.</div>;
   };

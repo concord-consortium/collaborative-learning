@@ -2,6 +2,67 @@
   height: 100%;
   overflow: hidden;
 
+  &.tabbed {
+    display: flex;
+    flex-direction: column;
+
+    .iframe-control-tabs {
+      display: flex;
+      background-color: #f0f0f0;
+      border-bottom: 1px solid #ccc;
+      font-size: 0.9em;
+
+      div {
+        padding: 8px 16px;
+        cursor: pointer;
+
+        &.active {
+          background-color: #ffffff;
+          border-top: 2px solid #007acc;
+          border-left: 1px solid #ccc;
+          border-right: 1px solid #ccc;
+          border-bottom: none;
+          font-weight: bold;
+        }
+      }
+    }
+
+    .iframe-control-tab-content {
+      flex-grow: 1;
+      position: relative;
+      height: 0; /* To enable flex-grow to work */
+      overflow: hidden;
+
+      .iframe-control-tab-pane {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: none;
+        height: 100%;
+
+        .top-buttons {
+          flex-shrink: 1;
+          padding: 10px;
+          align-self: flex-start;
+          display: flex;
+          gap: 10px;
+          align-items: center;
+
+          button {
+            font-size: 0.9rem;
+          }
+        }
+
+        &.active {
+          display: flex;
+          flex-direction: column;
+        }
+      }
+    }
+  }
+
   iframe {
     border: none;
     height: 100%;
