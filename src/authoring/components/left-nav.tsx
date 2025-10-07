@@ -17,7 +17,7 @@ interface IProps {
 }
 
 const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) => {
-  const {unitConfig, branch, unit, files} = useCurriculum();
+  const { unitConfig, teacherGuideConfig, branch, unit, files } = useCurriculum();
   const basePath = `#/${branch}/${unit}`;
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     [basePath]: true
@@ -26,58 +26,85 @@ const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) 
 
   const handleToggle = (path: string) => setExpanded(prev => ({ ...prev, [path]: !prev[path] }));
   const onHashChange = () => setHashChangeCount(prev => prev + 1);
-  const lastHashChangeCount = React.useRef(-1);
 
   const tree = useMemo<TreeNode>(() => {
-    return {
+    const result = {
       id: "root",
       label: "Curriculum",
       children: [
-      {
-        id: "config",
-        label: "Configuration",
+        {
+          id: "config",
+          label: "Configuration",
           children: [
-          {
-            id: "curriculumTabs",
-            label: "Curriculum Tabs",
-          },
-          {
-            id: "navTabs",
-            label: "Navigation Tabs",
-          },
-          {
-            id: "aiSettings",
-            label: "AI Settings",
-          },
-          {
-            id: "raw",
-            label: "Raw Settings (Dev Only)"
-          },
-        ]
-      },
-      {
-        id: "investigations",
-        label: "Investigations",
+            {
+              id: "curriculumTabs",
+              label: "Curriculum Tabs",
+            },
+            {
+              id: "navTabs",
+              label: "Navigation Tabs",
+            },
+            {
+              id: "aiSettings",
+              label: "AI Settings",
+            },
+            {
+              id: "raw",
+              label: "Raw Settings (Dev Only)"
+            },
+          ]
+        },
+        {
+          id: "investigations",
+          label: "Investigations",
           children: unitConfig?.investigations?.map(inv => ({
+            id: `investigation-${inv.ordinal}`,
+            label: inv.title,
+            children: inv.problems?.map(prob => ({
+              id: `problem-${prob.ordinal}`,
+              label: prob.title,
+              children: prob.sections?.map((sectionPath, index) => {
+                const file = files?.[sectionPath];
+                const section = file && file.type ? unitConfig.sections?.[file.type] : undefined;
+                return {
+                  id: `section-${index + 1}`,
+                  label: section?.title ?? `Unknown Section (${sectionPath})`,
+                  path: sectionPath
+                };
+              }) || [],
+            })) || []
+          })) || []
+        }
+      ]
+    };
+
+    if (teacherGuideConfig) {
+      result.children.push({
+        id: "teacher-guides",
+        label: "Teacher Guides",
+        children: teacherGuideConfig?.investigations?.map(inv => ({
           id: `investigation-${inv.ordinal}`,
           label: inv.title,
           children: inv.problems?.map(prob => ({
             id: `problem-${prob.ordinal}`,
             label: prob.title,
             children: prob.sections?.map((sectionPath, index) => {
-              const file = files?.[sectionPath];
-              const section = file && file.type ? unitConfig.sections?.[file.type] : undefined;
+              const path = `teacher-guide/${sectionPath}`;
+              const file = files?.[path];
+              const section = file && file.type ? teacherGuideConfig.sections?.[file.type] : undefined;
               return {
-                id: `section-${index+1}`,
-                label: section?.title ?? `Unknown Section (${sectionPath})`,
-                path: sectionPath
+                id: `section-${index + 1}`,
+                label: section?.title ?? `Unknown Section (${path})`,
+                path
               };
             }) || [],
           })) || []
         })) || []
-      }
-    ]};
-  }, [unitConfig, files]);
+      });
+    }
+
+    return result;
+  }, [unitConfig, teacherGuideConfig, files]);
 
   useEffect(() => {
     window.addEventListener("hashchange", onHashChange);
@@ -94,11 +121,7 @@ const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) 
       }
     };
 
-    // prevent infinite loop
-    if (lastHashChangeCount.current !== hashChangeCount) {
-      lastHashChangeCount.current = hashChangeCount;
-      expandTree(tree, basePath);
-    }
+    expandTree(tree, basePath);
   }, [tree, hashChangeCount, basePath]);
 
   const renderNode = (node: TreeNode, path: string) => {

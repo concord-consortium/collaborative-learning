@@ -20,6 +20,8 @@ export type CurriculumContextValue = {
   listUnits: (_branch: string) => Promise<string[]>;
   unitConfig: IUnit | undefined;
   setUnitConfig: Updater<IUnit | undefined>;
+  teacherGuideConfig: IUnit | undefined;
+  setTeacherGuideConfig: Updater<IUnit | undefined>;
   error: string | undefined;
   setError: (err?: string) => void;
   path: string | undefined;
@@ -41,6 +43,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
   const [unit, _setUnit] = useImmer<string | undefined>(undefined);
   const [path, setPath] = useImmer<string | undefined>(undefined);
   const [unitConfig, _setUnitConfig] = useImmer<IUnit | undefined>(undefined);
+  const [teacherGuideConfig, setTeacherGuideConfig] = useImmer<IUnit | undefined>(undefined);
   const [files, setFiles] = useImmer<IUnitFiles | undefined>(undefined);
   const [error, setError] = useImmer<string | undefined>(undefined);
   const lastUnitRef = useRef<string | undefined>(undefined);
@@ -160,6 +163,20 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
           setError(err.message);
           _setUnitConfig(undefined);
         });
+
+      // maybe fetch teacher guide content (it might not exist so we don't treat failure as an error)
+      api
+        .get("/getContent", { branch, unit, path: "teacher-guide/content.json" })
+        .then((contentResponse) => {
+          if (!contentResponse.success) {
+            setTeacherGuideConfig(undefined);
+            return;
+          }
+          setTeacherGuideConfig(contentResponse.content);
+        })
+        .catch((err) => {
+          setTeacherGuideConfig(undefined);
+        });
     }
 
     // Note: we don't have a cleanup function to turn off the listener
@@ -209,6 +226,8 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     listUnits,
     unitConfig,
     setUnitConfig,
+    teacherGuideConfig,
+    setTeacherGuideConfig,
     error,
     setError,
     path,
