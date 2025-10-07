@@ -17,12 +17,12 @@ interface IProps {
 }
 
 const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) => {
-  const {unitConfig, teacherGuideConfig, branch, unit, files} = useCurriculum();
+  const { unitConfig, teacherGuideConfig, branch, unit, files } = useCurriculum();
   const basePath = `#/${branch}/${unit}`;
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     [basePath]: true
   });
-  const [_hashChangeCount, setHashChangeCount] = useState(0);
+  const [hashChangeCount, setHashChangeCount] = useState(0);
 
   const handleToggle = (path: string) => setExpanded(prev => ({ ...prev, [path]: !prev[path] }));
   const onHashChange = () => setHashChangeCount(prev => prev + 1);
@@ -35,7 +35,7 @@ const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) 
         {
           id: "config",
           label: "Configuration",
-            children: [
+          children: [
             {
               id: "curriculumTabs",
               label: "Curriculum Tabs",
@@ -57,7 +57,7 @@ const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) 
         {
           id: "investigations",
           label: "Investigations",
-            children: unitConfig?.investigations?.map(inv => ({
+          children: unitConfig?.investigations?.map(inv => ({
             id: `investigation-${inv.ordinal}`,
             label: inv.title,
             children: inv.problems?.map(prob => ({
@@ -67,7 +67,7 @@ const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) 
                 const file = files?.[sectionPath];
                 const section = file && file.type ? unitConfig.sections?.[file.type] : undefined;
                 return {
-                  id: `section-${index+1}`,
+                  id: `section-${index + 1}`,
                   label: section?.title ?? `Unknown Section (${sectionPath})`,
                   path: sectionPath
                 };
@@ -93,7 +93,7 @@ const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) 
               const file = files?.[path];
               const section = file && file.type ? teacherGuideConfig.sections?.[file.type] : undefined;
               return {
-                id: `section-${index+1}`,
+                id: `section-${index + 1}`,
                 label: section?.title ?? `Unknown Section (${path})`,
                 path
               };
@@ -122,7 +122,7 @@ const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) 
     };
 
     expandTree(tree, basePath);
-  }, [tree, basePath]);
+  }, [tree, hashChangeCount, basePath]);
 
   const renderNode = (node: TreeNode, path: string) => {
     const hasChildren = node.children && node.children.length > 0;
