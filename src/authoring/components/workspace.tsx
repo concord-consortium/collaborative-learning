@@ -12,6 +12,7 @@ import CurriculumTabs from "./workspace/curriculum-tabs";
 import { SaveState } from "../hooks/use-curriculum";
 import NavTabs from "./workspace/nav-tabs";
 import AISettings from "./workspace/ai-settings";
+import { AuthoringPreview } from "../hooks/use-authoring-preview";
 
 import "./workspace.scss";
 
@@ -23,9 +24,11 @@ interface IProps {
   path: string | undefined;
   api: AuthoringApi
   saveState: SaveState;
+  authoringPreview: AuthoringPreview;
 }
 
-const Workspace: React.FC<IProps> = ({ branch, unit, unitConfig, setUnitConfig, path, api, saveState }) => {
+const Workspace: React.FC<IProps> = (props) => {
+  const { branch, unit, unitConfig, setUnitConfig, path, api, saveState, authoringPreview } = props;
   const [content, setContent] = useImmer<any>({});
   const [status, setStatus] = useImmer<"loading" | "loaded" | "notImplemented" | "error">("loading");
   const [contentPath, setContentPath] = useImmer<string | undefined>(undefined);
@@ -84,7 +87,9 @@ const Workspace: React.FC<IProps> = ({ branch, unit, unitConfig, setUnitConfig, 
       // the content updated by the iframe is the inner content field
       const updatedContent = {...content, content: JSON.parse(newContent)};
       api.post("/putContent", { branch, unit, path: contentPath }, {content: updatedContent}).then((response) => {
-        if (!response.success) {
+        if (response.success) {
+          authoringPreview.reloadAllPreviews();
+        } else {
           console.error("Error saving content:", response.error);
         }
       }).catch((err) => {
@@ -129,7 +134,15 @@ const Workspace: React.FC<IProps> = ({ branch, unit, unitConfig, setUnitConfig, 
       return <div className="centered muted">This page not yet implemented.</div>;
     }
     if (status === "loaded" && content?.content) {
-      return <IframeControl key={contentPath} initialValue={content.content} onChange={onChangeContent} />;
+      return (
+        <IframeControl
+          key={contentPath}
+          branch={branch}
+          unit={unit}
+          initialValue={content.content}
+          onChange={onChangeContent}
+        />
+      );
     }
     if (status === "loaded") {
       return <RawSettingsControl initialValue={content} />;

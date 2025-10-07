@@ -1,5 +1,7 @@
 import {Request, Response} from "express";
-import {baseCurriculumPath, newOctoKit, owner, repo} from "../helpers/github";
+import {Octokit} from "@octokit/rest";
+import {baseCurriculumPath, owner, repo} from "../helpers/github";
+
 import {AuthorizedRequest, sendErrorResponse, sendSuccessResponse} from "../helpers/express";
 
 const getRemoteUnits = async (req: Request, res: Response) => {
@@ -10,7 +12,7 @@ const getRemoteUnits = async (req: Request, res: Response) => {
 
   try {
     const authorizedRequest = req as AuthorizedRequest;
-    const octokit = newOctoKit(authorizedRequest.gitHubToken);
+    const octokit = new Octokit({auth: authorizedRequest.gitHubToken});
 
     const {data} = await octokit.rest.repos.getContent({
       owner,

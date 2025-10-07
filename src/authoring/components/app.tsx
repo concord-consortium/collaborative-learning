@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { units, useCurriculum } from "../hooks/use-curriculum";
 import LeftNav from "./left-nav";
@@ -7,19 +7,21 @@ import Workspace from "./workspace";
 import MediaLibrary from "./media-library";
 import useAuth from "../hooks/use-auth";
 import useAuthoringApi from "../hooks/use-authoring-api";
+import { useAuthoringPreview } from "../hooks/use-authoring-preview";
 
 import "./app.scss";
 
 const App: React.FC = () => {
   const auth = useAuth();
   const api = useAuthoringApi(auth);
+  const authoringPreview = useAuthoringPreview();
   const {
     branch, listBranches, setBranch, unit, setUnit,
     unitConfig, setUnitConfig, error, path, files, reset,
     saveState
-  } = useCurriculum(auth, api);
-  const [branches, setBranches] = React.useState<string[]>([]);
-  const [showMediaLibrary, setShowMediaLibrary] = React.useState(false);
+  } = useCurriculum(auth, api, authoringPreview);
+  const [branches, setBranches] = useState<string[]>([]);
+  const [showMediaLibrary, setShowMediaLibrary] = useState(false);
 
   const toggleMediaLibrary = () => setShowMediaLibrary(value => !value);
 
@@ -71,6 +73,12 @@ const App: React.FC = () => {
     }
   };
 
+  const handlePreviewClick = () => {
+    if (branch && unit) {
+      authoringPreview.openPreview(branch, unit);
+    }
+  };
+
   const renderHeader = () => {
     const title = `CLUE Authoring${unitConfig ? `: ${unitConfig.title}` : ""}`;
 
@@ -79,6 +87,11 @@ const App: React.FC = () => {
         <div className="left-header">
           <div className="title">{title}</div>
           {saveState && <div className="save-state">{saveState}</div>}
+          { branch && unit && (
+            <button className="preview-button" onClick={handlePreviewClick}>
+              Preview
+            </button>
+          )}
         </div>
         <div className="info">
           {auth.user && (
@@ -189,6 +202,7 @@ const App: React.FC = () => {
           path={path}
           api={api}
           saveState={saveState}
+          authoringPreview={authoringPreview}
         />
         {showMediaLibrary && (
           <MediaLibrary
@@ -197,6 +211,7 @@ const App: React.FC = () => {
             branch={branch}
             unit={unit}
             api={api}
+            authoringPreview={authoringPreview}
           />
         )}
       </>

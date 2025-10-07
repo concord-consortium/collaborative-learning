@@ -3,6 +3,7 @@ import admin from "firebase-admin";
 import express, {Request, Response, NextFunction} from "express";
 import cors from "cors";
 import {DecodedIdToken} from "firebase-admin/auth";
+import {Octokit} from "@octokit/rest";
 
 import pullUnit from "./routes/pull-unit";
 import getContent from "./routes/get-content";
@@ -13,9 +14,10 @@ import getPulledUnits from "./routes/get-pulled-units";
 import getPulledFiles from "./routes/get-pulled-files";
 import putContent from "./routes/put-content";
 import putImage from "./routes/put-image";
+import getRawContent from "./routes/get-raw-content";
 
 import {AuthorizedRequest} from "./helpers/express";
-import {newOctoKit, owner, repo} from "./helpers/github";
+import {owner, repo} from "./helpers/github";
 
 const adminOnlyPaths = ["/pullUnit"];
 
@@ -75,7 +77,7 @@ const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitH
   // check if the user is a collaborator in the CLUE curriculum repository
   let isCollaborator = false;
   try {
-    const octokit = newOctoKit(gitHubToken);
+    const octokit = new Octokit({auth: gitHubToken});
 
     // get the username associated with the token
     const {data} = await octokit.request("GET /user");
@@ -105,6 +107,11 @@ const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitH
 };
 
 export const authenticateAndAuthorize = async (req: Request, res: Response, next: NextFunction) => {
+  // don't require auth for rawContent endpoint
+  if (req.path.startsWith("/rawContent/")) {
+    return next();
+  }
+
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return res.status(401).send("Unauthorized: No authorization header provided.");
@@ -183,5 +190,8 @@ app.get("/getRemoteUnits", getRemoteUnits);
 app.get("/getPulledBranches", getPulledBranches);
 app.get("/getPulledUnits", getPulledUnits);
 app.get("/getPulledFiles", getPulledFiles);
+
+// NOTE: app.use() is used here to allow for paths with slashes (i.e. /rawContent/:branch/:unit/*)
+app.use("/rawContent", getRawContent);
 
 export const api = https.onRequest(app);

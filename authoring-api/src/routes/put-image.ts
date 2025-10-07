@@ -1,6 +1,7 @@
 import {Request, Response} from "express";
+import {Octokit} from "@octokit/rest";
 import {AuthorizedRequest, sendErrorResponse, sendSuccessResponse} from "../helpers/express";
-import {newOctoKit, owner, repo} from "../helpers/github";
+import {owner, repo} from "../helpers/github";
 import {escapeFirebaseKey, getDb, getUnitFilesPath, UnitFile} from "../helpers/db";
 
 const putImage = async (req: Request, res: Response) => {
@@ -24,7 +25,7 @@ const putImage = async (req: Request, res: Response) => {
 
   try {
     const authorizedRequest = req as AuthorizedRequest;
-    const octokit = newOctoKit(authorizedRequest.gitHubToken);
+    const octokit = new Octokit({auth: authorizedRequest.gitHubToken});
 
     const path = `curriculum/${unit}/images/${fileName}`;
     const filesPath = getUnitFilesPath(branch, unit);

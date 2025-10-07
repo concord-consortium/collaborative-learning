@@ -1,3 +1,4 @@
+import { getContent } from "../../utilities/get-content";
 import { ICurriculumConfig } from "../stores/curriculum-config";
 
 export function getUnitJson(unitId: string | undefined, curriculumConfig: ICurriculumConfig) {
@@ -13,7 +14,7 @@ export function getGuideJson(unitId: string | undefined, curriculumConfig: ICurr
 }
 
 function fetchJson(url: string) {
-  return fetch(url)
+  return getContent(url)
     .then((response) => {
       if (response.ok) {
         return response.json();

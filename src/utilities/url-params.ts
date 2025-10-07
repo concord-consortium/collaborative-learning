@@ -128,6 +128,17 @@ export interface QueryParams {
   portalDomain?: string;
   // the class word for the class that the user is in
   classWord?: string;
+
+  //
+  // Authoring options
+  //
+
+  // When set to true the authoring system fakes the GitHub login.
+  // This is not used in the runtime, only in authoring.
+  fakeAuthoringAuth?: boolean;
+  // When set to a value the runtime knows it should use the authoring api to get content
+  // using the specified branch
+  authoringBranch?: string;
 }
 
 // Make a union of all of the boolean params from the QueryParams

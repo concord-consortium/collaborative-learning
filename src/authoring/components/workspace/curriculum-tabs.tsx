@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { IWorkspaceConfigComponentProps } from "./common";
-import { INavTabSection } from "../../types";
+import { INavTabSection, ISection } from "../../types";
 
 interface ICurriculumTabFormInputs {
   tabLabel: string;
@@ -23,8 +23,25 @@ const CurriculumTabs: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, 
   const onSubmit: SubmitHandler<ICurriculumTabFormInputs> = (data) => {
     setUnitConfig(draft => {
       if (draft && problemTabIndex >= 0) {
-        draft.config.navTabs.tabSpecs[problemTabIndex].label = data.tabLabel;
-        draft.config.navTabs.tabSpecs[problemTabIndex].sections = data.sections;
+        const tabSpec = draft.config.navTabs.tabSpecs[problemTabIndex];
+        tabSpec.label = data.tabLabel;
+
+        // avoid an O(n²) lookup in the forEach below
+        const sectionMap: Record<string, ISection> = {};
+        Object.values(draft.sections).forEach(section => {
+          sectionMap[section.initials] = section;
+        });
+
+        data.sections.forEach(({title}, index) => {
+          if (tabSpec.sections && index < tabSpec.sections.length) {
+            tabSpec.sections[index].title = title;
+
+            const initials = tabSpec.sections[index].initials;
+            if (initials && sectionMap[initials]) {
+              sectionMap[initials].title = title;
+            }
+          }
+        });
       }
     });
   };

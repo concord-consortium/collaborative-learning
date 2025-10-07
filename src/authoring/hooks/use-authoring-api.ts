@@ -1,7 +1,6 @@
 import { useCallback } from "react";
-import { localFunctionsHost } from "../../lib/firebase-config";
-import { urlParams } from "../../utilities/url-params";
 import { Auth } from "./use-auth";
+import { getAuthoringApiUrl } from "../utils/authoring-api";
 
 export type GetEndPoint =
   "/whoami" |
@@ -43,20 +42,6 @@ export interface AuthoringApi {
 
 function useAuthoringApi(auth: Auth): AuthoringApi {
 
-  const getBaseUrl = () => {
-    if (urlParams.functions) {
-      const hostname = urlParams.functions === "emulator" ? localFunctionsHost : urlParams.functions;
-      // NOTE: this relies on running `firebase use staging` before running the emulator as
-      // the emulator uses the project ID to determine the local functions url
-      return `${hostname}/collaborative-learning-staging/us-central1/api`;
-    }
-
-    if (urlParams.firebaseEnv === "staging") {
-      return "https://us-central1-collaborative-learning-staging.cloudfunctions.net/api";
-    }
-
-    return "https://us-central1-collaborative-learning-ec215.cloudfunctions.net/api";
-  };
 
   // eslint-disable-next-line max-len
   const apiFetch = useCallback(async (method: "GET" | "POST", endpoint: EndPoint, queryParams: ApiParams = {}, options: RequestInit = {}): Promise<ApiResponse> => {
@@ -70,7 +55,7 @@ function useAuthoringApi(auth: Auth): AuthoringApi {
     }
     queryParams = { ...queryParams, gitHubToken };
 
-    const url = new URL(`${getBaseUrl()}${endpoint}`);
+    const url = new URL(getAuthoringApiUrl(endpoint));
     url.search = new URLSearchParams(queryParams).toString();
 
     const response = await fetch(url.toString(), {

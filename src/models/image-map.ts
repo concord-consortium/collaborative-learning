@@ -9,6 +9,8 @@ import { DB } from "../lib/db";
 import { DEBUG_IMAGES } from "../lib/debug";
 import placeholderImage from "../assets/image_placeholder.png";
 import { getAssetUrl } from "../utilities/asset-utils";
+import { urlParams } from "../utilities/url-params";
+import { getRawCurriculumUrl } from "../../authoring-api/src/helpers/github";
 
 export const kExternalUrlHandlerName = "externalUrl";
 export const kLocalAssetsHandlerName = "localAssets";
@@ -99,6 +101,7 @@ export class ImageMap {
   @observable unitUrl?: string;
   handlers: IImageHandler[] = [];
   storingPromises: Record<string, Promise<ImageMapEntry> | undefined> = {};
+  private curriculumUrlOverride?: string;
 
   private _db: DB;
 
@@ -110,6 +113,12 @@ export class ImageMap {
       placeholderImage,
       { displayUrl: placeholderImage, success: true }
     );
+
+    // when in authoring preview mode load images from the raw branch url
+    // so we don't have to wait for deploys to see image changes
+    if (urlParams.authoringBranch) {
+      this.curriculumUrlOverride = getRawCurriculumUrl(urlParams.authoringBranch);
+    }
 
     this.registerHandler(firebaseRealTimeDBImagesHandler);
     this.registerHandler(firebaseStorageImagesHandler);
@@ -143,6 +152,9 @@ export class ImageMap {
   }
   @computed
   get curriculumUrl() {
+    if (this.curriculumUrlOverride) {
+      return this.curriculumUrlOverride;
+    }
     if (!this.unitUrl) return;
     return (new URL("../", this.unitUrl)).href;
   }
