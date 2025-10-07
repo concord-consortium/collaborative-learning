@@ -2,6 +2,7 @@
 import React, { useEffect, useCallback } from "react";
 
 import { DEBUG_IFRAME } from "../../../lib/debug";
+import { useCurriculum } from "../../hooks/use-curriculum";
 
 import "./iframe-control.scss";
 
@@ -15,13 +16,12 @@ const validOrigin = iframeBaseURL.origin;
 
 interface IProps {
   initialValue: string;
-  branch: string;
-  unit: string;
   onChange?: (value: string) => void;
 }
 
 export const IframeControl: React.FC<IProps> = (props) => {
-  const { initialValue, branch, unit, onChange} = props;
+  const { branch, unit } = useCurriculum();
+  const { initialValue, onChange} = props;
 
   useEffect(() => {
     if (DEBUG_IFRAME) {
@@ -67,8 +67,10 @@ export const IframeControl: React.FC<IProps> = (props) => {
   const iframeParams = new URLSearchParams(window.location.search);
   iframeParams.set("fullHeight", "true");
   iframeParams.set("noBorder", "true");
-  iframeParams.set("authoringBranch", branch);
-  iframeParams.set("unit", unit);
+  if (branch && unit) {
+    iframeParams.set("authoringBranch", branch);
+    iframeParams.set("unit", unit);
+  }
   iframeParams.delete("fakeAuthoringAuth");
 
   const iframeUrl = new URL(`${iframeBaseURL.toString()}iframe.html`);

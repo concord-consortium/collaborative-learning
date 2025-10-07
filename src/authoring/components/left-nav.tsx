@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./left-nav.scss";
-import { IUnit, IUnitFiles } from "../types";
+import { useCurriculum } from "../hooks/use-curriculum";
 
 // Tree node type
 export interface TreeNode {
@@ -12,15 +12,12 @@ export interface TreeNode {
 }
 
 interface IProps {
-  branch: string;
-  unit: string;
-  unitConfig: IUnit;
-  files: IUnitFiles;
   showMediaLibrary: boolean;
   onMediaLibraryClicked?: () => void;
 }
 
-const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files, showMediaLibrary, onMediaLibraryClicked }) => {
+const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) => {
+  const {unitConfig, branch, unit, files} = useCurriculum();
   const basePath = `#/${branch}/${unit}`;
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     [basePath]: true
@@ -61,14 +58,14 @@ const LeftNav: React.FC<IProps> = ({ unitConfig, branch, unit, files, showMediaL
       {
         id: "investigations",
         label: "Investigations",
-          children: unitConfig.investigations?.map(inv => ({
+          children: unitConfig?.investigations?.map(inv => ({
           id: `investigation-${inv.ordinal}`,
           label: inv.title,
           children: inv.problems?.map(prob => ({
             id: `problem-${prob.ordinal}`,
             label: prob.title,
             children: prob.sections?.map((sectionPath, index) => {
-              const file = files[sectionPath];
+              const file = files?.[sectionPath];
               const section = file && file.type ? unitConfig.sections?.[file.type] : undefined;
               return {
                 id: `section-${index+1}`,

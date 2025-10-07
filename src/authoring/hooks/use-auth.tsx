@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import firebase from "firebase/app";
 import "firebase/auth";
 
@@ -19,7 +19,8 @@ export interface Auth {
 // since the auth api checks the GitHub token on every request unless the
 // DANGEROUSLY_SKIP_AUTH_TOKEN_VALIDATION environment variable is set on the server
 // which is only in dev mode using the emulator, and never in production
-const fakeAuth = (new URLSearchParams(window.location.search)).get("fakeAuthoringAuth") === "true";
+const isBrowser = typeof window !== "undefined";
+const fakeAuth = isBrowser && (new URLSearchParams(window.location.search)).get("fakeAuthoringAuth") === "true";
 const fakeAuthUser = {
   uid: "fakeUid",
   displayName: "Fake User",
@@ -28,7 +29,9 @@ const fakeAuthUser = {
 const fakeFirebaseToken = "fakeFirebaseToken";
 const fakeGitHubToken = "fakeGitHubToken";
 
-function useAuth(): Auth {
+const AuthContext = createContext<Auth | undefined>(undefined);
+
+export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const [user, setUser] = useState<firebase.User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +47,7 @@ function useAuth(): Auth {
       setGitHubToken(fakeGitHubToken);
       setLoading(false);
     }).catch((err) => {
-      setError(err.message ?? "An error occurred during fake sign-in.");
+      setError(err?.message ?? "An error occurred during fake sign-in.");
       console.error("Fake sign-in error:", err);
     });
   };
@@ -82,6 +85,7 @@ function useAuth(): Auth {
   }, [resetCount]);
 
   useEffect(() => {
+    if (!isBrowser) return;
     window.clearTimeout(reAuthTimeoutRef.current ?? undefined);
 
     if (user) {
@@ -118,7 +122,7 @@ function useAuth(): Auth {
         setFirebaseToken(token);
       }
     } catch (err: any) {
-      setError(err.message ?? "An error occurred during sign-in.");
+      setError(err?.message ?? "An error occurred during sign-in.");
       console.error("Sign-in error:", err);
     } finally {
       setLoading(false);
@@ -131,7 +135,7 @@ function useAuth(): Auth {
     try {
       await firebase.auth().signOut();
     } catch (err: any) {
-      setError(err.message ?? "An error occurred during sign-out.");
+      setError(err?.message ?? "An error occurred during sign-out.");
       console.error("Sign-out error:", err);
     } finally {
       setLoading(false);
@@ -147,7 +151,28 @@ function useAuth(): Auth {
     setResetCount((count) => count + 1);
   };
 
-  return { user, firebaseToken, gitHubToken, loading, error, signIn, signOut, reset };
-}
+  const value: Auth = {
+    user,
+    firebaseToken,
+    gitHubToken,
+    loading,
+    error,
+    signIn,
+    signOut,
+    reset
+  };
 
-export default useAuth;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = (): Auth => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return ctx;
+};

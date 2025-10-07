@@ -1,14 +1,13 @@
 import React from "react";
 
+import { useCurriculum } from "../../hooks/use-curriculum";
+
 import "./raw-settings-control.scss";
 
-interface RawSettingsControlProps {
-  initialValue: object;
-}
-
-const RawSettingsControl: React.FC<RawSettingsControlProps> = ({ initialValue }) => {
+const RawSettingsControl: React.FC = () => {
+  const { unitConfig} = useCurriculum();
   return (
-    <textarea className="raw-settings-control" value={JSON.stringify(initialValue, null, 2)} />
+    <textarea className="raw-settings-control" value={JSON.stringify(unitConfig, null, 2)} />
   );
 };
 

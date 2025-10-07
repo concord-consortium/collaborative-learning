@@ -1,17 +1,18 @@
-import { useRef } from "react";
+import React, { createContext, useContext, useRef, ReactNode } from "react";
 
 export interface AuthoringPreview {
   openPreview: (branch: string, unit: string) => void;
   reloadAllPreviews: () => void;
 }
 
-export const useAuthoringPreview = (): AuthoringPreview => {
+const AuthoringPreviewContext = createContext<AuthoringPreview | undefined>(undefined);
+
+export const AuthoringPreviewProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const windowsRef = useRef<Window[]>([]);
 
   const openPreview = (branch: string, unit: string) => {
-    if (!branch || !unit) {
-      return;
-    }
+    if (!branch || !unit) return;
+
     const runtimeUrl = new URL("..", window.location.href);
     const params = new URLSearchParams(window.location.search);
     params.set("unit", unit);
@@ -35,5 +36,17 @@ export const useAuthoringPreview = (): AuthoringPreview => {
     });
   };
 
-  return { openPreview, reloadAllPreviews };
+  return (
+    <AuthoringPreviewContext.Provider value={{ openPreview, reloadAllPreviews }}>
+      {children}
+    </AuthoringPreviewContext.Provider>
+  );
+};
+
+export const useAuthoringPreview = (): AuthoringPreview => {
+  const context = useContext(AuthoringPreviewContext);
+  if (!context) {
+    throw new Error("useAuthoringPreview must be used within an AuthoringPreviewProvider");
+  }
+  return context;
 };

@@ -1,18 +1,42 @@
-import { useCallback, useEffect, useRef } from "react";
+import React, { createContext, useContext } from "react";
+import { useImmer, Updater } from "use-immer";
 import firebase from "firebase/app";
-import { Updater, useImmer } from "use-immer";
-
-export type SaveState = "saving" | "saved" | "error" | undefined;
 
 import { IUnit, IUnitFiles } from "../types";
-import { AuthoringApi } from "./use-authoring-api";
-import { Auth } from "./use-auth";
-import { AuthoringPreview } from "./use-authoring-preview";
+import { AuthoringApi, useAuthoringApi } from "./use-authoring-api";
+import { Auth, useAuth } from "./use-auth";
+import { AuthoringPreview, useAuthoringPreview } from "./use-authoring-preview";
 
+export type SaveState = "saving" | "saved" | "error" | undefined;
 export const units = ["cas", "mods", "brain", "m2s"];
 export const branches = ["authoring-testing"];
 
-export const useCurriculum = (auth: Auth, api: AuthoringApi, authoringPreview: AuthoringPreview) => {
+export type CurriculumContextValue = {
+  branch: string | undefined;
+  setBranch: (newBranch?: string, updateHash?: boolean) => void;
+  unit: string | undefined;
+  setUnit: (newUnit?: string, updateHash?: boolean) => void;
+  listBranches: () => Promise<string[]>;
+  listUnits: (_branch: string) => Promise<string[]>;
+  unitConfig: IUnit | undefined;
+  setUnitConfig: Updater<IUnit | undefined>;
+  error: string | undefined;
+  setError: (err?: string) => void;
+  path: string | undefined;
+  files: IUnitFiles | undefined;
+  reset: () => void;
+  saveState: SaveState;
+};
+
+const CurriculumContext = createContext<CurriculumContextValue | null>(null);
+
+export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+  const auth: Auth = useAuth();
+  const api: AuthoringApi = useAuthoringApi();
+  const authoringPreview: AuthoringPreview = useAuthoringPreview();
+
+  const { useCallback, useEffect, useRef } = React;
+
   const [branch, _setBranch] = useImmer<string | undefined>(undefined);
   const [unit, _setUnit] = useImmer<string | undefined>(undefined);
   const [path, setPath] = useImmer<string | undefined>(undefined);
@@ -40,31 +64,40 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi, authoringPreview: A
     _setUnitConfig(draft);
   };
 
-  const setUnit = useCallback((newUnit?: string, updateHash?: boolean) => {
-    _setUnit(newUnit);
-    if (updateHash) {
-      window.location.hash = branch && newUnit
-        ? `#/${branch}/${newUnit}/config/curriculumTabs`
-        : (branch ? `#/${branch}` : "#");
-    }
-  }, [_setUnit, branch]);
+  const setUnit = useCallback(
+    (newUnit?: string, updateHash?: boolean) => {
+      _setUnit(newUnit);
+      if (updateHash) {
+        window.location.hash =
+          branch && newUnit
+            ? `#/${branch}/${newUnit}/config/curriculumTabs`
+            : branch
+            ? `#/${branch}`
+            : "#";
+      }
+    },
+    [_setUnit, branch]
+  );
 
-  const setBranch = useCallback((newBranch?: string, updateHash?: boolean) => {
-    if (newBranch && !branches.includes(newBranch)) {
-      setError(`Branch ${newBranch} not found`);
-      reset();
-      return;
-    }
+  const setBranch = useCallback(
+    (newBranch?: string, updateHash?: boolean) => {
+      if (newBranch && !branches.includes(newBranch)) {
+        setError(`Branch ${newBranch} not found`);
+        reset();
+        return;
+      }
 
-    // reset unit and unitConfig when branch changes
-    if (newBranch !== branch) {
-      reset();
-    }
-    _setBranch(newBranch);
-    if (updateHash) {
-      window.location.hash = newBranch ? `#/${newBranch}` : "#";
-    }
-  }, [_setBranch, branch, reset, setError]);
+      // reset unit and unitConfig when branch changes
+      if (newBranch !== branch) {
+        reset();
+      }
+      _setBranch(newBranch);
+      if (updateHash) {
+        window.location.hash = newBranch ? `#/${newBranch}` : "#";
+      }
+    },
+    [_setBranch, branch, reset, setError]
+  );
 
   const processHash = useCallback(() => {
     const [_, _branch, _unit, ...rest] = window.location.hash.split("/");
@@ -107,21 +140,26 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi, authoringPreview: A
       // Setup a Firebase listener for the unit file metadata changes so that we get real-time updates.
       // We only do direct reads - writes to unit file metadata changes go through the API.
       filesRef.current?.off();
-      filesRef.current = firebase.database().ref(`authoring/content/branches/${branch}/units/${unit}/files`);
+      filesRef.current = firebase
+        .database()
+        .ref(`authoring/content/branches/${branch}/units/${unit}/files`);
       filesRef.current.on("value", onFilesChange);
 
       // fetch content
-      api.get("/getContent", { branch, unit, path: "content.json" }).then((contentResponse) => {
-        if (!contentResponse.success) {
-          setError(contentResponse.error);
+      api
+        .get("/getContent", { branch, unit, path: "content.json" })
+        .then((contentResponse) => {
+          if (!contentResponse.success) {
+            setError(contentResponse.error);
+            _setUnitConfig(undefined);
+            return;
+          }
+          _setUnitConfig(contentResponse.content);
+        })
+        .catch((err) => {
+          setError(err.message);
           _setUnitConfig(undefined);
-          return;
-        }
-        _setUnitConfig(contentResponse.content);
-      }).catch((err) => {
-        setError(err.message);
-        _setUnitConfig(undefined);
-      });
+        });
     }
 
     // Note: we don't have a cleanup function to turn off the listener
@@ -135,33 +173,34 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi, authoringPreview: A
       saveUnitConfigRef.current = false;
       window.clearTimeout(saveStateClearTimeoutRef.current);
       setSaveState("saving");
-      api.post("/putContent", { branch, unit, path: "content.json"}, {content: unitConfig }).then((response) => {
-        if (response.success) {
-          setSaveState("saved");
-          saveStateClearTimeoutRef.current = window.setTimeout(() => {
-            setSaveState(undefined);
-          }, 1000);
-          authoringPreview.reloadAllPreviews();
-        } else {
-          setSaveState("error");
-          setError(response.error);
-        }
-      }).catch((err) => {
-        setError(err.message);
-      });
+      api
+        .post(
+          "/putContent",
+          { branch, unit, path: "content.json" },
+          { content: unitConfig }
+        )
+        .then((response) => {
+          if (response.success) {
+            setSaveState("saved");
+            saveStateClearTimeoutRef.current = window.setTimeout(() => {
+              setSaveState(undefined);
+            }, 1000);
+            authoringPreview.reloadAllPreviews();
+          } else {
+            setSaveState("error");
+            setError(response.error);
+          }
+        })
+        .catch((err) => {
+          setError(err.message);
+        });
     }
   }, [api, branch, unit, unitConfig, setError, setSaveState, authoringPreview]);
 
-  const listBranches = async () => {
-    return branches;
-  };
+  const listBranches = async () => branches;
+  const listUnits = async (_branch: string) => units;
 
-  const listUnits = async (_branch: string) => {
-    // Simulate an API call to fetch units for a given branch
-    return units;
-  };
-
-  return {
+  const value: CurriculumContextValue = {
     branch,
     setBranch,
     unit,
@@ -175,6 +214,20 @@ export const useCurriculum = (auth: Auth, api: AuthoringApi, authoringPreview: A
     path,
     files,
     reset,
-    saveState
+    saveState,
   };
+
+  return (
+    <CurriculumContext.Provider value={value}>
+      {children}
+    </CurriculumContext.Provider>
+  );
+};
+
+export const useCurriculum = (): CurriculumContextValue => {
+  const ctx = useContext(CurriculumContext);
+  if (!ctx) {
+    throw new Error("useCurriculum must be used within a CurriculumProvider");
+  }
+  return ctx;
 };

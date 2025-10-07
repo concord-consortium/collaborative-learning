@@ -2,20 +2,21 @@
 import React, { useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
-import { IWorkspaceConfigComponentProps } from "./common";
 import { INavTabSection, ISection } from "../../types";
+import { useCurriculum } from "../../hooks/use-curriculum";
 
 interface ICurriculumTabFormInputs {
   tabLabel: string;
   sections: INavTabSection[];
 }
 
-const CurriculumTabs: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, setUnitConfig, saveState }) => {
+const CurriculumTabs: React.FC = () => {
+  const { unitConfig, setUnitConfig, saveState } = useCurriculum();
   const problemTabIndex = useMemo(() => {
-    return unitConfig.config.navTabs.tabSpecs.findIndex(t => t.tab === "problems");
+    return unitConfig?.config.navTabs.tabSpecs.findIndex(t => t.tab === "problems") ?? -1;
   }, [unitConfig]);
   const problemTab = useMemo(() => {
-    return problemTabIndex >= 0 ? unitConfig.config.navTabs.tabSpecs[problemTabIndex] : undefined;
+    return problemTabIndex >= 0 ? unitConfig?.config.navTabs.tabSpecs[problemTabIndex] : undefined;
   }, [unitConfig, problemTabIndex]);
 
   const { handleSubmit, register, formState: { errors } } = useForm<ICurriculumTabFormInputs>();

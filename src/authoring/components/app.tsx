@@ -1,25 +1,25 @@
 
 import React, { useEffect, useState } from "react";
 
-import { units, useCurriculum } from "../hooks/use-curriculum";
+import { CurriculumProvider, units, useCurriculum } from "../hooks/use-curriculum";
 import LeftNav from "./left-nav";
 import Workspace from "./workspace";
 import MediaLibrary from "./media-library";
-import useAuth from "../hooks/use-auth";
-import useAuthoringApi from "../hooks/use-authoring-api";
-import { useAuthoringPreview } from "../hooks/use-authoring-preview";
+import { AuthProvider, useAuth } from "../hooks/use-auth";
+import { AuthoringApiProvider, useAuthoringApi } from "../hooks/use-authoring-api";
+import { AuthoringPreviewProvider, useAuthoringPreview } from "../hooks/use-authoring-preview";
 
 import "./app.scss";
 
-const App: React.FC = () => {
+const InnerApp: React.FC = () => {
   const auth = useAuth();
-  const api = useAuthoringApi(auth);
+  const api = useAuthoringApi();
   const authoringPreview = useAuthoringPreview();
   const {
     branch, listBranches, setBranch, unit, setUnit,
-    unitConfig, setUnitConfig, error, path, files, reset,
+    unitConfig, error, files, reset,
     saveState
-  } = useCurriculum(auth, api, authoringPreview);
+  } = useCurriculum();
   const [branches, setBranches] = useState<string[]>([]);
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
 
@@ -187,23 +187,10 @@ const App: React.FC = () => {
     return (
       <>
         <LeftNav
-          branch={branch}
-          unit={unit}
-          unitConfig={unitConfig}
-          files={files}
           showMediaLibrary={showMediaLibrary}
           onMediaLibraryClicked={toggleMediaLibrary}
         />
-        <Workspace
-          branch={branch}
-          unit={unit}
-          unitConfig={unitConfig}
-          setUnitConfig={setUnitConfig}
-          path={path}
-          api={api}
-          saveState={saveState}
-          authoringPreview={authoringPreview}
-        />
+        <Workspace />
         {showMediaLibrary && (
           <MediaLibrary
             onClose={toggleMediaLibrary}
@@ -236,6 +223,20 @@ const App: React.FC = () => {
       </main>
       {maybeRenderError()}
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AuthoringApiProvider>
+        <AuthoringPreviewProvider>
+          <CurriculumProvider>
+            <InnerApp />
+          </CurriculumProvider>
+        </AuthoringPreviewProvider>
+      </AuthoringApiProvider>
+    </AuthProvider>
   );
 };
 

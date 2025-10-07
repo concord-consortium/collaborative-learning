@@ -1,34 +1,23 @@
 
 import React, { useEffect, useRef } from "react";
-import { Updater, useImmer } from "use-immer";
+import { useImmer } from "use-immer";
 import classNames from "classnames";
-
-import { IUnit } from "../types";
 
 import { IframeControl } from "./editors/iframe-control";
 import RawSettingsControl from "./editors/raw-settings-control";
-import { AuthoringApi } from "../hooks/use-authoring-api";
+import { useAuthoringApi } from "../hooks/use-authoring-api";
 import CurriculumTabs from "./workspace/curriculum-tabs";
-import { SaveState } from "../hooks/use-curriculum";
+import { useCurriculum } from "../hooks/use-curriculum";
 import NavTabs from "./workspace/nav-tabs";
 import AISettings from "./workspace/ai-settings";
-import { AuthoringPreview } from "../hooks/use-authoring-preview";
+import { useAuthoringPreview } from "../hooks/use-authoring-preview";
 
 import "./workspace.scss";
 
-interface IProps {
-  branch: string;
-  unit: string;
-  unitConfig: IUnit;
-  setUnitConfig: Updater<IUnit | undefined>;
-  path: string | undefined;
-  api: AuthoringApi
-  saveState: SaveState;
-  authoringPreview: AuthoringPreview;
-}
-
-const Workspace: React.FC<IProps> = (props) => {
-  const { branch, unit, unitConfig, setUnitConfig, path, api, saveState, authoringPreview } = props;
+const Workspace: React.FC = () => {
+  const api = useAuthoringApi();
+  const { branch, unit, path } = useCurriculum();
+  const authoringPreview = useAuthoringPreview();
   const [content, setContent] = useImmer<any>({});
   const [status, setStatus] = useImmer<"loading" | "loaded" | "notImplemented" | "error">("loading");
   const [contentPath, setContentPath] = useImmer<string | undefined>(undefined);
@@ -53,7 +42,7 @@ const Workspace: React.FC<IProps> = (props) => {
   }, [path, api, unit, setContentPath, setStatus]);
 
   useEffect(() => {
-    if (!contentPath || contentPath === lastContentPathRef.current) {
+    if (!branch || !unit || !contentPath || contentPath === lastContentPathRef.current) {
       return;
     }
     lastContentPathRef.current = contentPath;
@@ -79,7 +68,7 @@ const Workspace: React.FC<IProps> = (props) => {
   }, [contentPath, api, branch, unit, isConfigPath, setContent, setStatus]);
 
   const onChangeContent = (newContent: string) => {
-    if (!contentPath) {
+    if (!contentPath || !branch || !unit) {
       return;
     }
 
@@ -103,13 +92,13 @@ const Workspace: React.FC<IProps> = (props) => {
   const renderConfig = () => {
     switch (path) {
       case "config/raw":
-        return <RawSettingsControl initialValue={unitConfig} />;
+        return <RawSettingsControl />;
       case "config/curriculumTabs":
-        return <CurriculumTabs unitConfig={unitConfig} setUnitConfig={setUnitConfig} saveState={saveState} />;
+        return <CurriculumTabs />;
       case "config/navTabs":
-        return <NavTabs unitConfig={unitConfig} setUnitConfig={setUnitConfig} saveState={saveState} />;
+        return <NavTabs />;
       case "config/aiSettings":
-        return <AISettings unitConfig={unitConfig} setUnitConfig={setUnitConfig} saveState={saveState} />;
+        return <AISettings />;
       default:
         return <div className="centered muted">Not yet implemented.</div>;
     }
@@ -137,15 +126,13 @@ const Workspace: React.FC<IProps> = (props) => {
       return (
         <IframeControl
           key={contentPath}
-          branch={branch}
-          unit={unit}
           initialValue={content.content}
           onChange={onChangeContent}
         />
       );
     }
     if (status === "loaded") {
-      return <RawSettingsControl initialValue={content} />;
+      return <RawSettingsControl />;
     }
     return <div className="centered muted">No content available.</div>;
   };

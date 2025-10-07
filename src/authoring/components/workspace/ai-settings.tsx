@@ -2,8 +2,8 @@
 import React, { useMemo } from "react";
 import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
 
-import { IWorkspaceConfigComponentProps } from "./common";
-import { AIEvaluation, Summarizer } from "src/authoring/types";
+import { AIEvaluation, Summarizer } from "../../types";
+import { useCurriculum } from "../../hooks/use-curriculum";
 
 interface CommentTag {
   label: string;
@@ -26,7 +26,8 @@ interface AISettingsFormInputs {
   showIdeasButton: boolean;
 }
 
-const AISettings: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, setUnitConfig, saveState }) => {
+const AISettings: React.FC = () => {
+  const { unitConfig, setUnitConfig, saveState } = useCurriculum();
   const settings: AISettingsFormInputs = useMemo(() => {
     const { tagPrompt, aiEvaluation, commentTags: rawCommentTags, aiPrompt } = unitConfig?.config || {};
 

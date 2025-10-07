@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
-import { IWorkspaceConfigComponentProps } from "./common";
 import { AuthorableNavTab, INavTabSpec } from "../../types";
 import { EAuthorableNavTab } from "../../../models/view/nav-tabs";
+import { useCurriculum } from "../../hooks/use-curriculum";
 
 interface FormTab {
   tab: AuthorableNavTab;
@@ -27,17 +27,18 @@ const defaultTabLabels: Record<AuthorableNavTab, string> = {
   "sort-work": "Sort Work",
 };
 
-const NavTabs: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, setUnitConfig, saveState }) => {
+const NavTabs: React.FC = () => {
+  const { unitConfig, setUnitConfig, saveState } = useCurriculum();
   const usedTabs = useMemo(() => {
-    return unitConfig.config.navTabs.tabSpecs.map(t => t.tab);
+    return unitConfig?.config.navTabs.tabSpecs.map(t => t.tab);
   }, [unitConfig]);
 
   // returns allNavTabs sorted so that tabs used in the current configuration appear first,
   // in the order they appear in the configuration followed by any unused tabs in their default order
   const sortedAllNavTabs = useMemo(() => {
     return [...allNavTabs].sort((a, b) => {
-      const indexA = usedTabs.indexOf(a);
-      const indexB = usedTabs.indexOf(b);
+      const indexA = usedTabs?.indexOf(a) ?? -1;
+      const indexB = usedTabs?.indexOf(b) ?? -1;
       if (indexA === -1 && indexB === -1) return 0;
       if (indexA === -1) return 1;
       if (indexB === -1) return -1;
@@ -48,7 +49,7 @@ const NavTabs: React.FC<IWorkspaceConfigComponentProps> = ({ unitConfig, setUnit
   // build the data for the form, in the order determined above
   const formTabs: FormTab[] = useMemo(() => {
     return sortedAllNavTabs.map(tab => {
-      const found = unitConfig.config.navTabs.tabSpecs.find(t => t.tab === tab);
+      const found = unitConfig?.config.navTabs.tabSpecs.find(t => t.tab === tab);
       const defaultLabel = defaultTabLabels[tab];
       return {
         tab,
