@@ -12,6 +12,7 @@ import { IOpenDocumentsGroupMetadata, SortedSection } from "./sorted-section";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
+import { AiSummary } from "../navigation/ai-summary";
 
 import "../thumbnail/document-type-collection.scss";
 import "./sort-work-view.scss";
@@ -137,6 +138,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
               primarySortItems={primarySortByOptions}
               secondarySortItems={secondarySortOptions}
             />
+            <AiSummary />
             <div key={primarySortBy} className="tab-panel-documents-section">
               { sortedDocumentGroups &&
                 sortedDocumentGroups.map((documentGroup: DocumentGroup, idx: number) => {
