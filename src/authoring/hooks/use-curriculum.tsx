@@ -20,6 +20,8 @@ export type CurriculumContextValue = {
   listUnits: (_branch: string) => Promise<string[]>;
   unitConfig: IUnit | undefined;
   setUnitConfig: Updater<IUnit | undefined>;
+  teacherGuideConfig: IUnit | undefined;
+  setTeacherGuideConfig: Updater<IUnit | undefined>;
   error: string | undefined;
   setError: (err?: string) => void;
   path: string | undefined;
@@ -41,12 +43,14 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
   const [unit, _setUnit] = useImmer<string | undefined>(undefined);
   const [path, setPath] = useImmer<string | undefined>(undefined);
   const [unitConfig, _setUnitConfig] = useImmer<IUnit | undefined>(undefined);
+  const [teacherGuideConfig, _setTeacherGuideConfig] = useImmer<IUnit | undefined>(undefined);
   const [files, setFiles] = useImmer<IUnitFiles | undefined>(undefined);
   const [error, setError] = useImmer<string | undefined>(undefined);
   const lastUnitRef = useRef<string | undefined>(undefined);
   const filesRef = useRef<firebase.database.Reference | undefined>(undefined);
   const [saveState, setSaveState] = useImmer<SaveState | undefined>(undefined);
   const saveUnitConfigRef = useRef(false);
+  const saveTeacherGuideConfigRef = useRef(false);
   const saveStateClearTimeoutRef = useRef<number>();
 
   const reset = useCallback(() => {
@@ -57,11 +61,15 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     lastUnitRef.current = undefined;
   }, [_setBranch, _setUnit, setError, _setUnitConfig]);
 
-  // externally when setUnitConfig is called, we want to update the state
+  // externally when setUnitConfig or setTeacherGuideConfig is called, we want to update the state
   // and also call the api to save the changes
   const setUnitConfig: Updater<IUnit | undefined> = (draft) => {
     saveUnitConfigRef.current = true;
     _setUnitConfig(draft);
+  };
+  const setTeacherGuideConfig: Updater<IUnit | undefined> = (draft) => {
+    saveTeacherGuideConfigRef.current = true;
+    _setTeacherGuideConfig(draft);
   };
 
   const setUnit = useCallback(
@@ -160,6 +168,20 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
           setError(err.message);
           _setUnitConfig(undefined);
         });
+
+      // maybe fetch teacher guide content (it might not exist so we don't treat failure as an error)
+      api
+        .get("/getContent", { branch, unit, path: "teacher-guide/content.json" })
+        .then((contentResponse) => {
+          if (!contentResponse.success) {
+            _setTeacherGuideConfig(undefined);
+            return;
+          }
+          _setTeacherGuideConfig(contentResponse.content);
+        })
+        .catch((err) => {
+          _setTeacherGuideConfig(undefined);
+        });
     }
 
     // Note: we don't have a cleanup function to turn off the listener
@@ -209,6 +231,8 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     listUnits,
     unitConfig,
     setUnitConfig,
+    teacherGuideConfig,
+    setTeacherGuideConfig,
     error,
     setError,
     path,

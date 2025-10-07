@@ -7,26 +7,23 @@ $left-nav-indent: 6px;
   min-width: 250px;
   border-right: 1px solid #e0e0e0;
   background: #ffe6d0;
-  padding: $left-nav-indent 0;
   font-size: 0.8rem;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
 }
 
 .tree-view-container {
-  flex: 1 1 auto;
   overflow: auto;
+  padding: $left-nav-indent 0;
+  height: 100%;
 }
 
 .leftNav-bottom {
   flex-shrink: 0;
-  padding: 12px;
+  padding: 10px;
   border-top: 1px solid #e0e0e0;
   background: #fff6ee;
-  position: sticky;
-  bottom: 0;
-  z-index: 1;
   display: flex;
   justify-content: center;
 }
