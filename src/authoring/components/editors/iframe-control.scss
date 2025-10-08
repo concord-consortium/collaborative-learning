@@ -1,3 +1,5 @@
+@import "../../../components/vars.scss";
+
 .iframe-control {
   height: 100%;
   overflow: hidden;
@@ -8,21 +10,31 @@
 
     .iframe-control-tabs {
       display: flex;
-      background-color: #f0f0f0;
-      border-bottom: 1px solid #ccc;
-      font-size: 0.9em;
+      align-items: flex-end;
+      gap: 0px;
+      padding: 3px 0 0 3px;
+      border-bottom: 1px solid #e0e0e0;
+      background-color: $charcoal-light-5;
 
       div {
-        padding: 8px 16px;
+        background: none;
+        border: 1px solid #e0e0e0;
+        font-size: 0.9em;
+        padding: 6px 18px 4px 18px;
+        border-radius: 6px 6px 0 0;
+        color: $charcoal-dark-2;
         cursor: pointer;
-
+        transition: background 0.2s, color 0.2s;
+        margin-bottom: -1px;
+        border-bottom: 1px solid #e0e0e0;
+        background: white;
+        &:hover {
+          background: $workspace-teal-light-6;
+        }
         &.active {
-          background-color: #ffffff;
-          border-top: 2px solid #007acc;
-          border-left: 1px solid #ccc;
-          border-right: 1px solid #ccc;
-          border-bottom: none;
-          font-weight: bold;
+          font-weight: 600;
+          background: #fff;
+          border-bottom: 1px solid white;
         }
       }
     }
