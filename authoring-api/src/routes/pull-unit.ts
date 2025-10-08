@@ -5,9 +5,7 @@ import {getBaseUnitPath, owner, getRawUrl, repo} from "../helpers/github";
 
 import {
   BranchesMetadata, BranchMetadata, escapeFirebaseKey, getBranchesMetadataPath, getDb,
-  getUnitFilesPath, getUnitUpdatesPath,
-  unescapeFirebaseKey,
-  UnitFiles,
+  getUnitFilesPath, getUnitUpdatesPath, unescapeFirebaseKey, UnitFiles, UnitMetadata,
 } from "../helpers/db";
 import {AuthorizedRequest, sendErrorResponse, sendSuccessResponse} from "../helpers/express";
 
@@ -18,12 +16,12 @@ const pullUnit = async (req: Request, res: Response) => {
     return sendErrorResponse(res, "Missing required parameters: unit or branch.", 400);
   }
 
-  // do not allow pulls if there are uncommitted changes
-  const updatesRef = getDb().ref(getUnitUpdatesPath(branch, unit));
-  const updatesSnapshot = await updatesRef.once("value");
-  if (updatesSnapshot.exists()) {
-    return sendErrorResponse(res, "Cannot pull unit with uncommitted updates.", 409);
+  if (branch === "main") {
+    return sendErrorResponse(res, "Cannot pull a unit on the main branch.", 400);
   }
+
+  // reset is optional
+  const reset = req.query.reset === "true";
 
   try {
     const authorizedRequest = req as AuthorizedRequest;
@@ -95,16 +93,21 @@ const pullUnit = async (req: Request, res: Response) => {
     const updatesRef = db.ref(updatesPath);
     const branchesMetadataRef = db.ref(branchesMetadataPath);
 
-    // set the files and reset the updates
+    // set the files and maybe reset the updates
     await fileRef.set(files);
-    await updatesRef.remove();
+    if (reset) {
+      await updatesRef.remove();
+    }
 
     // add the branch and unit to the metadata
     await branchesMetadataRef.transaction((currentMetadata: BranchesMetadata|null) => {
       const currentBranchMetadata: BranchMetadata = currentMetadata?.[branch] ?? {units: {}};
-      currentBranchMetadata.units[unit] = {
-        pulledAt: admin.database.ServerValue.TIMESTAMP,
-      };
+      currentBranchMetadata.units[unit] = currentBranchMetadata.units[unit] ?? {} as UnitMetadata;
+      const unitMetadata = currentBranchMetadata.units[unit];
+      unitMetadata.pulledAt = admin.database.ServerValue.TIMESTAMP;
+      if (reset) {
+        delete unitMetadata.updates;
+      }
       return {...currentMetadata, [branch]: currentBranchMetadata};
     });
 

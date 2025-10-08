@@ -15,7 +15,8 @@ export type PostEndPoint =
   | "/pullUnit"
   | "/pushUnit"
   | "/putContent"
-  | "/putImage";
+  | "/putImage"
+  | "/deleteUnit";
 
 export type EndPoint = GetEndPoint | PostEndPoint;
 
@@ -80,13 +81,6 @@ export const AuthoringApiProvider: React.FC<{children: React.ReactNode}> = ({ ch
           "Content-Type": "application/json",
         },
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `API request failed: ${response.status} ${response.statusText} - ${errorText}`
-        );
-      }
 
       return response.json();
     },

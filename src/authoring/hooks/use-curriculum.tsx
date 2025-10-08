@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import { useImmer, Updater } from "use-immer";
 import firebase from "firebase/app";
 
@@ -8,16 +8,23 @@ import { Auth, useAuth } from "./use-auth";
 import { AuthoringPreview, useAuthoringPreview } from "./use-authoring-preview";
 
 export type SaveState = "saving" | "saved" | "error" | undefined;
-export const units = ["cas", "mods", "brain", "m2s"];
-export const branches = ["authoring-testing"];
+
+export type UnitMetadata = {
+  pulledAt: number;
+  updates?: Record<string, number>;
+}
+
+export type PerBranchMetadata = {
+  units: Record<string, UnitMetadata>;
+}
+
+export type BranchMetadata = Record<string, PerBranchMetadata>;
 
 export type CurriculumContextValue = {
   branch: string | undefined;
   setBranch: (newBranch?: string, updateHash?: boolean) => void;
   unit: string | undefined;
   setUnit: (newUnit?: string, updateHash?: boolean) => void;
-  listBranches: () => Promise<string[]>;
-  listUnits: (_branch: string) => Promise<string[]>;
   unitConfig: IUnit | undefined;
   setUnitConfig: Updater<IUnit | undefined>;
   teacherGuideConfig: IUnit | undefined;
@@ -28,7 +35,10 @@ export type CurriculumContextValue = {
   files: IUnitFiles | undefined;
   reset: () => void;
   saveState: SaveState;
+  branchMetadata: BranchMetadata;
 };
+
+export const defaultPath = "config/curriculumTabs";
 
 const CurriculumContext = createContext<CurriculumContextValue | null>(null);
 
@@ -49,6 +59,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
   const lastUnitRef = useRef<string | undefined>(undefined);
   const filesRef = useRef<firebase.database.Reference | undefined>(undefined);
   const [saveState, setSaveState] = useImmer<SaveState | undefined>(undefined);
+  const [branchMetadata, setBranchMetadata] = useImmer<BranchMetadata>({});
   const saveUnitConfigRef = useRef(false);
   const saveStateClearTimeoutRef = useRef<number>();
 
@@ -69,24 +80,27 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
 
   const setUnit = useCallback(
     (newUnit?: string, updateHash?: boolean) => {
+      if (newUnit && branch && !branchMetadata[branch]?.units[newUnit]) {
+        setError(`The ${newUnit} unit on the ${branch} branch is not available for authoring.`);
+        return;
+      }
       _setUnit(newUnit);
       if (updateHash) {
         window.location.hash =
           branch && newUnit
-            ? `#/${branch}/${newUnit}/config/curriculumTabs`
+            ? `#/${branch}/${newUnit}/${defaultPath}`
             : branch
             ? `#/${branch}`
             : "#";
       }
     },
-    [_setUnit, branch]
+    [_setUnit, setError, branch, branchMetadata]
   );
 
   const setBranch = useCallback(
     (newBranch?: string, updateHash?: boolean) => {
-      if (newBranch && !branches.includes(newBranch)) {
-        setError(`Branch ${newBranch} not found`);
-        reset();
+      if (newBranch && !branchMetadata[newBranch]) {
+        setError(`The ${newBranch} branch is not available for authoring.`);
         return;
       }
 
@@ -99,7 +113,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
         window.location.hash = newBranch ? `#/${newBranch}` : "#";
       }
     },
-    [_setBranch, branch, reset, setError]
+    [_setBranch, branch, reset, setError, branchMetadata]
   );
 
   const processHash = useCallback(() => {
@@ -115,14 +129,33 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     return () => window.removeEventListener("hashchange", processHash);
   }, [processHash]);
 
+  const hasBranchMetadata = useMemo(() => Object.keys(branchMetadata).length > 0, [branchMetadata]);
+
   useEffect(() => {
     // wait until auth is ready
-    if (auth.firebaseToken && auth.gitHubToken) {
+    if (auth.firebaseToken && auth.gitHubToken && hasBranchMetadata) {
       processHash();
     } else {
       reset();
     }
-  }, [auth.firebaseToken, auth.gitHubToken, processHash, reset]);
+  }, [auth.firebaseToken, auth.gitHubToken, processHash, reset, hasBranchMetadata]);
+
+  useEffect(() => {
+    // wait until authenticated to Firebase
+    if (auth.firebaseToken) {
+      const onBranchMetadataChange = (snapshot: firebase.database.DataSnapshot) => {
+        const values = snapshot.val() ?? {};
+        console.log("branch metadata updated", values);
+        setBranchMetadata(values);
+      };
+
+      const branchMetadataRef = firebase
+        .database()
+        .ref("authoring/metadata/branches");
+      branchMetadataRef.on("value", onBranchMetadataChange);
+      return () => branchMetadataRef.off();
+    }
+  }, [auth.firebaseToken, setBranchMetadata]);
 
   useEffect(() => {
     const onFilesChange = (snapshot: firebase.database.DataSnapshot) => {
@@ -214,16 +247,11 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     }
   }, [api, branch, unit, unitConfig, setError, setSaveState, authoringPreview]);
 
-  const listBranches = async () => branches;
-  const listUnits = async (_branch: string) => units;
-
   const value: CurriculumContextValue = {
     branch,
     setBranch,
     unit,
     setUnit,
-    listBranches,
-    listUnits,
     unitConfig,
     setUnitConfig,
     teacherGuideConfig,
@@ -234,6 +262,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     files,
     reset,
     saveState,
+    branchMetadata,
   };
 
   return (

@@ -20,7 +20,7 @@ const getRemoteBranches = async (req: Request, res: Response) => {
         per_page: perPage,
         page,
       });
-      branches.push(...data.map((branch) => branch.name));
+      branches.push(...data.map((branch) => branch.name).filter((name) => name !== "main"));
       keepPaging = data.length === perPage;
       page++;
     }

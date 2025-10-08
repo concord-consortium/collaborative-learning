@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IUnitFiles } from "../types";
 import { AuthoringApi } from "../hooks/use-authoring-api";
 import { AuthoringPreview } from "../hooks/use-authoring-preview";
+import Modal from "./modal";
 
 import "./media-library.scss";
 
@@ -256,13 +257,7 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit, api, aut
   };
 
   return (
-    <div className="media-library-lightbox">
-      <div className="media-library-titlebar">
-        <span>Media Library</span>
-        <button className="media-library-close" onClick={onClose}>
-          ×
-        </button>
-      </div>
+    <Modal onClose={onClose} title="Media Library">
       <div className="media-library-content">
         <div className="media-library-tabs">
           <button
@@ -280,7 +275,7 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit, api, aut
         </div>
         {activeTab === "images" ? renderImageListTabContent() : renderUploadTabContent()}
       </div>
-    </div>
+    </Modal>
   );
 };
 

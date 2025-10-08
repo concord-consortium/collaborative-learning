@@ -15,6 +15,7 @@ import getPulledFiles from "./routes/get-pulled-files";
 import putContent from "./routes/put-content";
 import putImage from "./routes/put-image";
 import getRawContent from "./routes/get-raw-content";
+import deleteUnit from "./routes/delete-unit";
 
 import {AuthorizedRequest} from "./helpers/express";
 import {owner, repo} from "./helpers/github";
@@ -176,8 +177,10 @@ app.use(authenticateAndAuthorize);
 // test endpoint to verify authentication is working
 app.get("/whoami", (req, res) => res.send((req as AuthorizedRequest).decodedToken));
 
-app.post("/pullUnit", async (req, res) => pullUnit(req, res));
+app.post("/pullUnit", pullUnit);
 app.post("/pushUnit", tbd);
+
+app.post("/deleteUnit", deleteUnit);
 
 app.get("/getContent", getContent);
 app.post("/putContent", putContent);
