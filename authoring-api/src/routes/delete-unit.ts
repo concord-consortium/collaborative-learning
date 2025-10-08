@@ -15,8 +15,8 @@ const deleteUnit = async (req: Request, res: Response) => {
 
   try {
     const db = getDb();
-    db.ref(getUnitPath(branch, unit)).remove();
-    db.ref(getUnitMetadataPath(branch, unit)).remove();
+    await db.ref(getUnitPath(branch, unit)).remove();
+    await db.ref(getUnitMetadataPath(branch, unit)).remove();
 
     return sendSuccessResponse(res, {});
   } catch (error) {

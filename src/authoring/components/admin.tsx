@@ -159,7 +159,7 @@ const Admin: React.FC<IProps> = ({ onClose }) => {
           repository outside the authoring environment.
         </div>
         <div>
-          This is a safe action. Any edits made to this unit will be <strong>not be overwritten</strong>.
+          This is a safe action. Any edits made to this unit will <strong>not be overwritten</strong>.
           However any files that have been edited in both the authoring environment and
           the remote repository will be overwritten with the edited version when the commit
           is done in the authoring environment.
