@@ -14,7 +14,6 @@ import "./app.scss";
 
 const InnerApp: React.FC = () => {
   const auth = useAuth();
-  const api = useAuthoringApi();
   const authoringPreview = useAuthoringPreview();
   const {
     branch, setBranch, unit, setUnit,
