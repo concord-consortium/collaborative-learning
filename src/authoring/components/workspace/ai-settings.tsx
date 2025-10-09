@@ -78,7 +78,7 @@ const AISettings: React.FC = () => {
   const currentAiEvaluation = useWatch({ control, name: "aiEvaluation" });
 
   // disable AI-related fields if aiEvaluation is not set in initial settings
-  const [disableAiFields, setDisableAiFields] = useState(settings.aiEvaluation !== "custom" );
+  const [disableAiFields, setDisableAiFields] = useState(settings.aiEvaluation !== "custom");
 
   // when aiEvaluation changes, revalidate the form to ensure required fields are filled in
   useEffect(() => {
