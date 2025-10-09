@@ -1,6 +1,79 @@
+@import "../../../components/vars.scss";
+
 .iframe-control {
   height: 100%;
   overflow: hidden;
+
+  &.tabbed {
+    display: flex;
+    flex-direction: column;
+
+    .iframe-control-tabs {
+      display: flex;
+      align-items: flex-end;
+      gap: 0px;
+      padding: 3px 0 0 3px;
+      border-bottom: 1px solid #e0e0e0;
+      background-color: $charcoal-light-5;
+
+      div {
+        background: none;
+        border: 1px solid #e0e0e0;
+        font-size: 0.9em;
+        padding: 6px 18px 4px 18px;
+        border-radius: 6px 6px 0 0;
+        color: $charcoal-dark-2;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+        margin-bottom: -1px;
+        border-bottom: 1px solid #e0e0e0;
+        background: white;
+        &:hover {
+          background: $workspace-teal-light-6;
+        }
+        &.active {
+          font-weight: 600;
+          background: #fff;
+          border-bottom: 1px solid white;
+        }
+      }
+    }
+
+    .iframe-control-tab-content {
+      flex-grow: 1;
+      position: relative;
+      height: 0; /* To enable flex-grow to work */
+      overflow: hidden;
+
+      .iframe-control-tab-pane {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: none;
+        height: 100%;
+
+        .top-buttons {
+          flex-shrink: 1;
+          padding: 10px;
+          align-self: flex-start;
+          display: flex;
+          gap: 10px;
+          align-items: center;
+
+          button {
+            font-size: 0.9rem;
+          }
+        }
+
+        &.active {
+          display: flex;
+          flex-direction: column;
+        }
+      }
+    }
+  }
 
   iframe {
     border: none;

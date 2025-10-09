@@ -3,6 +3,8 @@ import React, { useEffect, useCallback } from "react";
 
 import { DEBUG_IFRAME } from "../../../lib/debug";
 import { useCurriculum } from "../../hooks/use-curriculum";
+import { useAuth } from "../../hooks/use-auth";
+import RawSettingsControl from "./raw-settings-control";
 
 import "./iframe-control.scss";
 
@@ -20,8 +22,10 @@ interface IProps {
 }
 
 export const IframeControl: React.FC<IProps> = (props) => {
+  const { isAdminUser } = useAuth();
   const { branch, unit } = useCurriculum();
   const { initialValue, onChange} = props;
+  const [ currentTab, setCurrentTab ] = React.useState<"editor" | "rawJson">("editor");
 
   useEffect(() => {
     if (DEBUG_IFRAME) {
@@ -76,14 +80,59 @@ export const IframeControl: React.FC<IProps> = (props) => {
   const iframeUrl = new URL(`${iframeBaseURL.toString()}iframe.html`);
   iframeUrl.search = iframeParams.toString();
 
-  return (
-    <div className="iframe-control custom-widget">
+  const handleReload = () => {
+    window.location.reload();
+  };
+
+  const handleSaveRawJson = (newJson: any) => {
+    handleUpdateContent(JSON.stringify(newJson, null, 2));
+  };
+
+  const renderIframe = () => {
+    return (
       <iframe
         id="editor"
         src={iframeUrl.toString()}
         allow="clipboard-read; clipboard-write; serial"
         onLoad={sendInitialValueToEditor}
       />
+    );
+  };
+
+  if (isAdminUser) {
+    return (
+      <div className="iframe-control tabbed">
+        <div className="iframe-control-tabs">
+          <div
+            className={`${currentTab === "editor" ? "active" : ""}`}
+            onClick={() => setCurrentTab("editor")}>
+            Editor
+          </div>
+          <div
+            className={`${currentTab === "rawJson" ? "active" : ""}`}
+            onClick={() => setCurrentTab("rawJson")}>
+            Raw JSON (Admin Only)
+          </div>
+        </div>
+        <div className="iframe-control-tab-content">
+          <div className={`iframe-control-tab-pane ${currentTab === "editor" ? "active" : ""}`}>
+            <div className="top-buttons">
+              <button onClick={handleReload}>Reload</button>
+              <div>(reload needed if you update and save the raw json)</div>
+            </div>
+            {renderIframe()}
+          </div>
+          <div className={`iframe-control-tab-pane ${currentTab === "rawJson" ? "active" : ""}`}>
+            <RawSettingsControl initialValue={initialValue} onSave={handleSaveRawJson} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="iframe-control">
+      {renderIframe()}
     </div>
   );
 };

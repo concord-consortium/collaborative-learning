@@ -1,15 +1,41 @@
 .workspace {
   .config {
-    textarea.raw-settings-control {
-      width: 100%;
+    > div {
+      padding: 0;
+    }
+  }
+}
+
+.raw-settings-control-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+
+  .raw-settings-upper-buttons {
+    flex-shrink: 1;
+    padding: 10px;
+    align-self: flex-start;
+
+    button {
+      font-size: 0.9rem;
+    }
+
+    .invalid-json-warning {
+      color: red;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+  }
+
+  .raw-settings-control {
+    flex-grow: 1;
+    min-height: 0;
+
+    .cm-editor {
       height: 100%;
-      min-height: 0;
-      min-width: 0;
-      resize: none;
-      box-sizing: border-box;
-      border: 0;
-      outline: none;
-      background: inherit;
+      width: 100%;
+      font-size: 0.9em;
     }
   }
 }

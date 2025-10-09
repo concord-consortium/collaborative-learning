@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./left-nav.scss";
 import { useCurriculum } from "../hooks/use-curriculum";
+import { useAuth } from "../hooks/use-auth";
 
 // Tree node type
 export interface TreeNode {
@@ -17,6 +18,7 @@ interface IProps {
 }
 
 const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) => {
+  const { isAdminUser } = useAuth();
   const { unitConfig, teacherGuideConfig, branch, unit, files } = useCurriculum();
   const basePath = `#/${branch}/${unit}`;
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
@@ -47,10 +49,6 @@ const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) 
             {
               id: "aiSettings",
               label: "AI Settings",
-            },
-            {
-              id: "raw",
-              label: "Raw Settings (Dev Only)"
             },
           ]
         },
@@ -103,8 +101,15 @@ const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) 
       });
     }
 
+    if (isAdminUser) {
+      result.children[0].children!.push({
+        id: "raw",
+        label: "Raw Unit JSON (Admin Only)"
+      } as any);
+    }
+
     return result;
-  }, [unitConfig, teacherGuideConfig, files]);
+  }, [unitConfig, teacherGuideConfig, files, isAdminUser]);
 
   useEffect(() => {
     window.addEventListener("hashchange", onHashChange);

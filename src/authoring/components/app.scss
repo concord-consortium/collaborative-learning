@@ -25,6 +25,14 @@ html, body, #app {
       background-color: #9e9e9e;
       cursor: not-allowed;
     }
+
+    &:active {
+      background-color: $color7-selected;
+    }
+
+    &:hover {
+      background-color: $color7-hover;
+    }
   }
 
   .header {
