@@ -57,6 +57,11 @@
       margin-bottom: 10px;
     }
 
+    .form-error {
+      color: red;
+      margin-bottom: 10px;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
@@ -73,6 +78,11 @@
 
         &.left {
           text-align: left;
+        }
+
+        .stacked {
+          display: flex;
+          flex-direction: column;
         }
 
         &:last-child {

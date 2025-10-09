@@ -105,4 +105,7 @@ export interface UnitConfiguration extends ProblemConfiguration {
   aiPrompt?: SnapshotIn<typeof AIPromptModel>;
   // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
   annotations?: "all" | "none" | string[];
+  // if set it will be used to determine if the show ideas button is shown, otherwise
+  // the existing logic based on aiEvaluation will be used
+  showIdeasButton?: boolean;
 }

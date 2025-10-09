@@ -35,8 +35,17 @@ export interface IUnitConfig {
   commentTags: Record<string, string>;
   tagPrompt: string;
   enableCommentRoles: string[];
-  aiEvaluation: AIEvaluation;
+  aiEvaluation?: AIEvaluation;
   aiPrompt: IAiPrompt;
+  authorTools?: IAuthorTool[];
+  showIdeasButton?: boolean;
+}
+
+export interface IAuthorTool {
+  id: string;
+  title: string;
+  isTileTool: boolean;
+  iconId?: string;
 }
 
 export interface IToolbarItem {

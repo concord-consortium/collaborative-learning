@@ -106,6 +106,8 @@ These properties are configurable at the application (built into the code) or th
 }
 ```
 
+`showIdeasButton`: (boolean | undefined) If set the ideas button visibility is determined by the value, if undefined the existing logic is used.
+
 ## Unit- or Problem-level `config` properties
 
 These properties are configurable at the unit, investigation, or problem levels of the curriculum JSON.
