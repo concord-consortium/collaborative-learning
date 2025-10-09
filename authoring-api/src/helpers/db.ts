@@ -8,6 +8,7 @@ export interface UnitFile {
 
 export interface UnitMetadata {
   pulledAt: typeof admin.database.ServerValue.TIMESTAMP
+  updates?: Record<string, typeof admin.database.ServerValue.TIMESTAMP>;
 }
 
 export type BranchesMetadata = Record<string, BranchMetadata>;
@@ -26,14 +27,17 @@ export const getUnitPath = (branch: string, unit: string) =>
 export const getUnitFilesPath = (branch: string, unit: string) =>
   `${getUnitPath(branch, unit)}/files`;
 
-export const getUnitContentPath = (branch: string, unit: string, path: string) =>
-  `${getUnitPath(branch, unit)}/content/${path}`;
-
-export const getUnitUpdatesPath = (branch: string, unit: string) =>
-  `${getUnitPath(branch, unit)}/updates`;
+export const getUnitUpdatesPath = (branch: string, unit: string, path: string = "") =>
+  `${getUnitPath(branch, unit)}/updates${path ? `/${path}` : ""}`;
 
 export const getBranchesMetadataPath = (branch?: string) =>
   `${authoringPath}/metadata/branches${branch ? `/${branch}` : ""}`;
+
+export const getUnitMetadataPath = (branch: string, unit: string, path: string = "") =>
+  `${getBranchesMetadataPath(branch)}/units/${unit}${path ? `/${path}` : ""}`;
+
+export const getUnitMetadataUpdatesPath = (branch: string, unit: string, path: string = "") =>
+  `${getBranchesMetadataPath(branch)}/units/${unit}/updates${path ? `/${path}` : ""}`;
 
 export function escapeFirebaseKey(key: string): string {
   return key.replace(/[.#$[\]/]/g, (char) => {

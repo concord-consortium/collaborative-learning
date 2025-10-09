@@ -1,0 +1,113 @@
+@import "../../components/vars.scss";
+
+.admin-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  justify-content: space-between;
+
+  .error {
+    color: red;
+    font-weight: bold;
+    padding: 10px;
+  }
+
+  .admin-section {
+    margin-bottom: 20px;
+    padding: 10px;
+    overflow: auto;
+
+    button {
+      font-size: 0.9rem;
+      padding: 5px 15px;
+
+      &.danger {
+        background: #ff4d4f;
+        color: white;
+      }
+    }
+  }
+
+  .label {
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+
+    th {
+      text-align: left;
+      font-size: 0.9em;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 3px;
+    }
+
+    tbody tr:hover {
+      background: #eef2f7;
+    }
+
+    td.table-buttons {
+      display: flex;
+      gap: 5px;
+
+      button {
+        font-size: 0.8em;
+        padding: 3px 8px;
+      }
+    }
+  }
+
+  .admin-action {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .danger {
+      color: #ff4d4f;
+    }
+
+    .progress {
+      color: #1890ff;
+      font-weight: bold;
+    }
+
+    .success {
+      color: #52c41a;
+      font-weight: bold;
+    }
+
+    .admin-action-buttons {
+      display: flex;
+      gap: 5px;
+      margin-top: 20px;
+    }
+
+    select {
+      padding: 5px;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 5px;
+    }
+  }
+
+  .admin-bottom-buttons {
+    padding: 10px;
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+
+    button {
+      font-size: 0.9rem;
+      padding: 5px 15px;
+    }
+  }
+}

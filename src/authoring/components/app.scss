@@ -30,7 +30,7 @@ html, body, #app {
       background-color: $color7-selected;
     }
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: $color7-hover;
     }
   }
@@ -65,7 +65,7 @@ html, body, #app {
         text-transform: capitalize;
       }
 
-      .preview-button {
+      button {
         font-size: 0.9em;
         padding: 3px 10px;
       }
@@ -100,6 +100,12 @@ html, body, #app {
 
       select {
         padding: 5px;
+      }
+
+      label.block {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 5px;
       }
     }
 

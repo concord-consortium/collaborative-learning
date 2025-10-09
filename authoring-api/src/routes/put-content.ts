@@ -1,5 +1,7 @@
 import {Request, Response} from "express";
-import {escapeFirebaseKey, getDb, getUnitContentPath} from "../helpers/db";
+import admin from "firebase-admin";
+
+import {escapeFirebaseKey, getDb, getUnitMetadataUpdatesPath, getUnitUpdatesPath} from "../helpers/db";
 import {sendErrorResponse, sendSuccessResponse} from "../helpers/express";
 
 const putContent = async (req: Request, res: Response) => {
@@ -8,6 +10,10 @@ const putContent = async (req: Request, res: Response) => {
   const path = req.query.path?.toString();
   if (!unit || !branch || !path) {
     return sendErrorResponse(res, "Missing required parameters: unit or branch or path.", 400);
+  }
+
+  if (branch === "main") {
+    return sendErrorResponse(res, "Cannot save content on the main branch.", 400);
   }
 
   const content = req.body?.content;
@@ -23,8 +29,11 @@ const putContent = async (req: Request, res: Response) => {
 
   const db = getDb();
   const escapedPath = escapeFirebaseKey(path);
-  const contentPath = getUnitContentPath(branch, unit, escapedPath);
+  const contentPath = getUnitUpdatesPath(branch, unit, escapedPath);
   await db.ref(contentPath).set(stringContent);
+
+  const unitMetadataUpdatePath = getUnitMetadataUpdatesPath(branch, unit, escapedPath);
+  await db.ref(unitMetadataUpdatePath).set(admin.database.ServerValue.TIMESTAMP);
 
   return sendSuccessResponse(res, {});
 };

@@ -1,13 +1,14 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
-import { CurriculumProvider, units, useCurriculum } from "../hooks/use-curriculum";
+import { CurriculumProvider, useCurriculum } from "../hooks/use-curriculum";
 import LeftNav from "./left-nav";
 import Workspace from "./workspace";
 import MediaLibrary from "./media-library";
 import { AuthProvider, useAuth } from "../hooks/use-auth";
 import { AuthoringApiProvider, useAuthoringApi } from "../hooks/use-authoring-api";
 import { AuthoringPreviewProvider, useAuthoringPreview } from "../hooks/use-authoring-preview";
+import Admin from "./admin";
 
 import "./app.scss";
 
@@ -16,55 +17,15 @@ const InnerApp: React.FC = () => {
   const api = useAuthoringApi();
   const authoringPreview = useAuthoringPreview();
   const {
-    branch, listBranches, setBranch, unit, setUnit,
+    branch, setBranch, unit, setUnit,
     unitConfig, error, files, reset,
-    saveState
+    saveState, branchMetadata,
   } = useCurriculum();
-  const [branches, setBranches] = useState<string[]>([]);
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
+  const [showAdminUI, setShowAdminUI] = useState(false);
 
   const toggleMediaLibrary = () => setShowMediaLibrary(value => !value);
-
-  // uncomment when using the manual admin actions below - remove when
-  // we have a proper admin UI
-  // const pulledRef = React.useRef(false);
-
-  // until we have an admin UI, use direct api calls to set things up
-  useEffect(() => {
-    /*
-    // if needed for debugging in the future, uncomment to use the
-    // whoami endpoint that verifies authentication is working
-    api.get("/whoami").then((response) => {
-      console.log("Whoami response:", response);
-    }).catch((err) => {
-      console.error("Whoami error:", err);
-    });
-    */
-
-    /*
-    if (auth.firebaseToken && auth.gitHubToken && pulledRef.current !== true) {
-      pulledRef.current = true;
-
-      const branchToPull = "authoring-testing";
-      const unitToPull = "m2s";
-
-      console.log(`Pulling unit: ${branchToPull}/${unitToPull}`);
-      api.post("/pullUnit", { branch: branchToPull, unit: unitToPull }).then(() => {
-        console.log(`Pulled unit: ${branchToPull}/${unitToPull}`);
-      }).catch((err) => {
-        console.error(`Error pulling unit: ${branchToPull}/${unitToPull}`, err);
-      });
-    }
-    */
-  }, [api, auth.firebaseToken, auth.gitHubToken]);
-
-  useEffect(() => {
-    if (!branch) {
-      listBranches().then((b) => {
-        setBranches(b);
-      });
-    }
-  }, [branch, listBranches]);
+  const toggleAdminUI = () => setShowAdminUI(value => !value);
 
   const maybeSignOut = (force?: boolean) => {
     if (force || confirm("Are you sure you want to sign out?")) {
@@ -88,8 +49,13 @@ const InnerApp: React.FC = () => {
           <div className="title">{title}</div>
           {saveState && <div className="save-state">{saveState}</div>}
           { branch && unit && (
-            <button className="preview-button" onClick={handlePreviewClick}>
+            <button onClick={handlePreviewClick}>
               Preview
+            </button>
+          )}
+          {auth.isAdminUser && (
+            <button onClick={toggleAdminUI}>
+              Admin
             </button>
           )}
         </div>
@@ -108,6 +74,9 @@ const InnerApp: React.FC = () => {
   };
 
   const renderMainContent = () => {
+    if (error) {
+      return null;
+    }
     if (auth.loading) {
       return <div className="centered">Checking authentication...</div>;
     }
@@ -144,12 +113,14 @@ const InnerApp: React.FC = () => {
     }
 
     if (!branch) {
+      const branches = Object.keys(branchMetadata).sort();
       if (branches.length === 0) {
         return <div className="centered">Loading branches...</div>;
       }
       return (
         <div className="centered">
           <div>
+            <label className="block" htmlFor="branch-select">Select a branch:</label>
             <select key="branch-select" defaultValue="" onChange={(e) => setBranch(e.target.value, true)}>
               <option value="" disabled>Please select a branch ...</option>
               {branches.map((b) => (
@@ -162,10 +133,12 @@ const InnerApp: React.FC = () => {
     }
 
     if (!unit) {
+      const units = Object.keys(branchMetadata[branch]?.units || {}).map(u => u).sort();
       return (
         <div className="centered">
           <div>
-            <select key="unit-select" defaultValue="" onChange={(e) => setUnit(e.target.value, true)}>
+            <label className="block" htmlFor="unit-select">Select a unit</label>
+            <select id="unit-select" key="unit-select" defaultValue="" onChange={(e) => setUnit(e.target.value, true)}>
               <option value="" disabled>Please select a unit ...</option>
               {units.map((u) => (
                 <option key={u} value={u}>{u}</option>
@@ -201,6 +174,7 @@ const InnerApp: React.FC = () => {
             authoringPreview={authoringPreview}
           />
         )}
+        {showAdminUI && <Admin onClose={toggleAdminUI} />}
       </>
     );
   };

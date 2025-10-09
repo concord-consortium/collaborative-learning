@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 import {getRawUrl} from "../helpers/github";
-import {escapeFirebaseKey, getDb, getUnitContentPath} from "../helpers/db";
+import {escapeFirebaseKey, getDb, getUnitUpdatesPath} from "../helpers/db";
 import {sendErrorResponse, sendSuccessResponse} from "../helpers/express";
 
 const getContent = async (req: Request, res: Response) => {
@@ -14,7 +14,7 @@ const getContent = async (req: Request, res: Response) => {
   // look first for updates
   const db = getDb();
   const escapedPath = escapeFirebaseKey(path);
-  const contentPath = getUnitContentPath(branch, unit, escapedPath);
+  const contentPath = getUnitUpdatesPath(branch, unit, escapedPath);
   const snapshot = await db.ref(contentPath).once("value");
   const content = snapshot.val();
   if (content) {

@@ -11,6 +11,10 @@ const putImage = async (req: Request, res: Response) => {
     return sendErrorResponse(res, "Missing required parameters: unit or branch.", 400);
   }
 
+  if (branch === "main") {
+    return sendErrorResponse(res, "Cannot save images on the main branch.", 400);
+  }
+
   const image = req.body.image?.toString();
   const fileName = req.body.fileName?.toString();
   if (!image || !fileName) {
@@ -63,6 +67,9 @@ const putImage = async (req: Request, res: Response) => {
     // update the files list in the unit's content in Firebase
     // the client listens for changes to this and will update accordingly
     fileRef.update({[escapedFilesKey]: {sha}});
+
+    // NOTE: we don't update the unit metadata timestamp here because images are not part of the
+    // content commit as they are directly committed to GitHub above
 
     console.log("Image uploaded/updated successfully");
   } catch (error) {

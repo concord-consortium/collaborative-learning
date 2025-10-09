@@ -182,7 +182,7 @@ const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) 
           className="media-library-btn"
           onClick={onMediaLibraryClicked}
         >
-          {showMediaLibrary ? "Close" : "Open"} Media Library
+          Media Library
         </button>
       </div>
     </nav>

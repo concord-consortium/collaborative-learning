@@ -9,6 +9,9 @@ const getRemoteUnits = async (req: Request, res: Response) => {
   if (!branch) {
     return sendErrorResponse(res, "Missing required parameter: branch.", 400);
   }
+  if (branch === "main") {
+    return sendErrorResponse(res, "Cannot get remote units on the main branch.", 400);
+  }
 
   try {
     const authorizedRequest = req as AuthorizedRequest;
