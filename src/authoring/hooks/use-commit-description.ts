@@ -106,6 +106,7 @@ export const useCommitDescriptions = ({branch, unit}: IUseCommitDescriptionOptio
     if (Object.keys(unitUpdates).length === 0) {
       setDescriptions([]);
       setDescriptionsState("ready");
+      return;
     }
 
     const sectionMapping: Record<string, string | undefined> = {};
