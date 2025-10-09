@@ -310,10 +310,10 @@ const Admin: React.FC<IProps> = ({ onClose }) => {
                               <button onClick={(e) => handleAction(e, {kind: "pull-latest", branch, unit})}>
                                 Pull Latest
                               </button>
-                              <button onClick={(e) => handleAction(e, {kind: "reset", branch, unit})}>
+                              <button className="danger" onClick={(e) => handleAction(e, {kind: "reset", branch, unit})}>
                                 Reset
                               </button>
-                              <button onClick={(e) => handleAction(e, {kind: "delete", branch, unit})}>
+                              <button className="danger" onClick={(e) => handleAction(e, {kind: "delete", branch, unit})}>
                                 Delete
                               </button>
                             </td>

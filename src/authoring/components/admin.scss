@@ -21,6 +21,11 @@
     button {
       font-size: 0.9rem;
       padding: 5px 15px;
+
+      &.danger {
+        background: #ff4d4f;
+        color: white;
+      }
     }
   }
 
@@ -81,11 +86,6 @@
       display: flex;
       gap: 5px;
       margin-top: 20px;
-
-      .danger {
-        background: #ff4d4f;
-        color: white;
-      }
     }
 
     select {
