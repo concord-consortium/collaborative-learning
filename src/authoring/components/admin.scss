@@ -45,7 +45,11 @@
     }
 
     td {
-      padding: 3px;
+      padding: 4px;
+    }
+
+    .no-wrap {
+      white-space: nowrap;
     }
 
     tbody tr:hover {
