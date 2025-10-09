@@ -92,6 +92,7 @@ export const AppConfigModel = types
     get tools() { return self.configMgr.tools; },
     get annotations() { return self.configMgr.annotations; },
     get initiallyHideExemplars() { return self.configMgr.initiallyHideExemplars; },
+    get showIdeasButton() { return self.configMgr.showIdeasButton ; },
     get authorToolbar() {
       return ToolbarModel.create([
         ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),

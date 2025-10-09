@@ -317,8 +317,13 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderIdeasButton() {
-    const { documents, appConfig: { aiEvaluation } } = this.stores;
-    if (aiEvaluation || documents.invisibleExemplarDocuments.length > 0) {
+    const { documents, appConfig: { aiEvaluation, showIdeasButton } } = this.stores;
+    // if showIdeasButton is explicitly set in the unit config, use that, otherwise
+    // show the button if aiEvaluation is enabled or if there are exemplar documents
+    const showButton = showIdeasButton !== undefined
+      ? showIdeasButton
+      : aiEvaluation || documents.invisibleExemplarDocuments.length > 0;
+    if (showButton) {
       return (
         <IdeasButton onClick={this.handleIdeasButtonClick} />
       );
