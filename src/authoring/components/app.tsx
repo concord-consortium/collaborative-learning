@@ -164,17 +164,6 @@ const InnerApp: React.FC = () => {
           onMediaLibraryClicked={toggleMediaLibrary}
         />
         <Workspace />
-        {showMediaLibrary && (
-          <MediaLibrary
-            onClose={toggleMediaLibrary}
-            files={files}
-            branch={branch}
-            unit={unit}
-            api={api}
-            authoringPreview={authoringPreview}
-          />
-        )}
-        {showAdminUI && <Admin onClose={toggleAdminUI} />}
       </>
     );
   };
@@ -194,6 +183,10 @@ const InnerApp: React.FC = () => {
       {renderHeader()}
       <main className="main">
         {renderMainContent()}
+        {showMediaLibrary && (
+          <MediaLibrary onClose={toggleMediaLibrary} />
+        )}
+        {showAdminUI && <Admin onClose={toggleAdminUI} />}
       </main>
       {maybeRenderError()}
     </div>
