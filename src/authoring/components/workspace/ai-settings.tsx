@@ -214,7 +214,7 @@ const AISettings: React.FC = () => {
                 </div>
               </td>
               <td className="narrow">
-                <button type="button" onClick={() => {
+                <button type="button" className="danger" onClick={() => {
                   if (confirm("Are you sure you want to delete this tag?")) {
                     commentTagsFieldArray.remove(index);
                   }
@@ -246,7 +246,7 @@ const AISettings: React.FC = () => {
           <input
             type="checkbox"
             {...register("aiTileAvailable")}
-          /> Add to toolbar
+          /> Add AI tile to authoring toolbar
         </div>
       </div>
       <div>
