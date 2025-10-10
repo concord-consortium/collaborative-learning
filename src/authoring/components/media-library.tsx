@@ -1,21 +1,19 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { IUnitFiles } from "../types";
-import { AuthoringApi } from "../hooks/use-authoring-api";
-import { AuthoringPreview } from "../hooks/use-authoring-preview";
 import Modal from "./modal";
+import { useCurriculum } from "../hooks/use-curriculum";
+import { useAuthoringApi } from "../hooks/use-authoring-api";
+import { useAuthoringPreview } from "../hooks/use-authoring-preview";
 
 import "./media-library.scss";
 
 interface IProps {
   onClose: () => void;
-  files: IUnitFiles;
-  branch: string;
-  unit: string;
-  api: AuthoringApi;
-  authoringPreview: AuthoringPreview;
 }
 
-const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit, api, authoringPreview }) => {
+const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
+  const { files, branch, unit } = useCurriculum();
+  const api = useAuthoringApi();
+  const authoringPreview = useAuthoringPreview();
   const [filter, setFilter] = useState("");
   const filterInputRef = useRef<HTMLInputElement | null>(null);
   const [activeTab, setActiveTab] = useState<"images" | "upload">("images");
@@ -24,7 +22,7 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit, api, aut
   const [uploadProgress, setUploadProgress] = useState<"uploading" | "completed" | "error" | null>(null);
 
   const imageFileKeys = useMemo(() => {
-    return Object.keys(files).filter(key => key.startsWith("images"));
+    return Object.keys(files ?? {}).filter(key => key.startsWith("images"));
   }, [files]);
 
   const filteredFileKeys = useMemo(() => {
@@ -85,6 +83,10 @@ const MediaLibrary: React.FC<IProps> = ({ onClose, files, branch, unit, api, aut
   };
 
   const handleUpload = (file: File) => {
+    if (!branch || !unit) {
+      return;
+    }
+
     setUploadingFile(file);
     setUploadingFileBlobUrl(URL.createObjectURL(file));
     setUploadProgress("uploading");

@@ -106,7 +106,8 @@ These properties are configurable at the application (built into the code) or th
 }
 ```
 
-`showIdeasButton`: (boolean | undefined) If set the ideas button visibility is determined by the value, if undefined the existing logic is used.
+`showIdeasButton`: (boolean | undefined) If set the ideas button visibility is determined by the value. If undefined the existing logic is used
+which checks if the the aiEvaluation is set or if there are invisible exemplar documents.
 
 ## Unit- or Problem-level `config` properties
 
