@@ -31,17 +31,10 @@ const CommitUI: React.FC<IProps> = ({ onClose }) => {
   useEffect(() => {
     if (!branch || !unit) {
       setError("No branch or unit selected.");
-      return;
-    }
-
-    if (!auth.gitHubToken) {
+    } else if (!auth.gitHubToken) {
       setError("You must be signed in to commit changes.");
-      return;
-    }
-
-    if (Object.keys(updates).length === 0) {
+    } else if (Object.keys(updates).length === 0) {
       setError("No updates to commit.");
-      return;
     }
   }, [branch, unit, auth.gitHubToken, updates]);
 
@@ -64,11 +57,11 @@ const CommitUI: React.FC<IProps> = ({ onClose }) => {
       } else {
         setStatus("committed");
       }
-    } catch (e) {
-      setError((e as Error).message);
+    } catch (err) {
+      setError((err as Error).message);
       setStatus(undefined);
     }
-  }
+  };
 
   const renderContent = () => {
     if (descriptionsState === "loading") {
@@ -85,7 +78,7 @@ const CommitUI: React.FC<IProps> = ({ onClose }) => {
             <button onClick={onClose}>Close</button>
           </div>
         </>
-      )
+      );
     }
 
     return (

@@ -14,7 +14,7 @@ const pushUnit = async (req: Request, res: Response) => {
   }
 
   if (branch === "main") {
-    return sendErrorResponse(res, "Cannot pull a unit on the main branch.", 400);
+    return sendErrorResponse(res, "Cannot push a unit to the main branch.", 400);
   }
 
   const {decodedToken} = req as AuthorizedRequest;
