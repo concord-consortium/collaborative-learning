@@ -1,8 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 
 import Modal from "./modal";
 import { useCurriculum } from "../hooks/use-curriculum";
-import { ApiResponse, useAuthoringApi } from "../hooks/use-authoring-api";
+import { useAuthoringApi } from "../hooks/use-authoring-api";
 import { useAuth } from "../hooks/use-auth";
 import { useCommitDescriptions } from "../hooks/use-commit-description";
 
@@ -19,6 +19,7 @@ const CommitUI: React.FC<IProps> = ({ onClose }) => {
   const { branch, unit, branchMetadata } = curriculum;
   const [error, setError] = React.useState<string | null>(null);
   const { descriptionsState, descriptions } = useCommitDescriptions({branch, unit});
+  const [status, setStatus] = React.useState<"committing" | "committed" | undefined>();
 
   const updates = useMemo<Record<string, number>>(() => {
     if (!branch || !unit) {
@@ -27,95 +28,104 @@ const CommitUI: React.FC<IProps> = ({ onClose }) => {
     return branchMetadata[branch]?.units[unit]?.updates ?? {};
   }, [branch, unit, branchMetadata]);
 
-  const renderError = (message: string) => {
-    return (
-      <>
-        <div className="error">{message}</div>
-        <div className="commit-ui-bottom-buttons">
-          <button onClick={onClose}>Close</button>
-        </div>
-      </>
-    );
+  useEffect(() => {
+    if (!branch || !unit) {
+      setError("No branch or unit selected.");
+    } else if (!auth.gitHubToken) {
+      setError("You must be signed in to commit changes.");
+    } else if (Object.keys(updates).length === 0) {
+      setError("No updates to commit.");
+    }
+  }, [branch, unit, auth.gitHubToken, updates]);
+
+  const handleCommit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    if (!branch || !unit) {
+      setError("No branch or unit selected.");
+      return;
+    }
+
+    setError(null);
+    setStatus("committing");
+
+    try {
+      const response = await api.post("/pushUnit", { branch, unit });
+      if (response.error) {
+        setError(response.error);
+        setStatus(undefined);
+      } else {
+        setStatus("committed");
+      }
+    } catch (err) {
+      setError((err as Error).message);
+      setStatus(undefined);
+    }
   };
 
   const renderContent = () => {
-    if (error) {
-      return renderError(error);
-    }
-
-    if (!branch || !unit) {
-      return renderError("No branch or unit selected.");
-    }
-
-    if (!auth.gitHubToken) {
-      return renderError("You must be signed in to commit changes.");
-    }
-
-    if (Object.keys(updates).length === 0) {
-      return renderError("No updates to commit.");
-    }
-
     if (descriptionsState === "loading") {
       return <div>Loading...</div>;
     }
 
+    if (status === "committed") {
+      return (
+        <>
+          <div className="commit-ui-top-content">
+            <div className="success">Commit successful!</div>
+          </div>
+          <div className="commit-ui-bottom-buttons">
+            <button onClick={onClose}>Close</button>
+          </div>
+        </>
+      );
+    }
+
     return (
       <>
-        <div className="commit-ui-description">
-          <div>
-            The following updated files will be committed to the <strong>{unit}</strong> unit
-            in the <strong>{branch}</strong> branch:
-          </div>
+        <div className="commit-ui-top-content">
+          <div className="commit-ui-description">
+            <div>
+              The following updated files will be committed to the <strong>{unit}</strong> unit
+              in the <strong>{branch}</strong> branch:
+            </div>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Description</th>
-                <th>Last Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {descriptions.map(({path, description, date}) => (
-                <tr key={path}>
-                  <td>{description}</td>
-                  <td>{date}</td>
+            <table>
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Last Updated</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {descriptions.map(({path, description, date}) => (
+                  <tr key={path}>
+                    <td>{description}</td>
+                    <td>{date}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-          <div>
-            Once the commit is complete the updates will be cleared from the authoring environment and the
-            updates will be able to be merged into the main branch via a pull request on GitHub.
+            <div>
+              Once the commit is complete the updates will be cleared from the authoring environment and the
+              updates will be able to be merged into the main branch via a pull request on GitHub.
+            </div>
+
+            <div>
+              Click &quot;Commit Updates&quot; to proceed.
+            </div>
           </div>
 
-          <div>
-            Click &quot;Commit Updates&quot; to proceed.
-          </div>
+          {error && <div className="error">{error}</div>}
+          {status === "committing" && <div className="progress">Committing...</div>}
         </div>
+
         <div className="commit-ui-bottom-buttons">
-          <button
-            className="primary"
-            onClick={async () => {
-              setError(null);
-              try {
-                const response: ApiResponse = await api.post("/pushUnit", {
-                  branch,
-                  unit
-                });
-                if (response.error) {
-                  setError(response.error);
-                } else {
-                  onClose();
-                }
-              } catch (e) {
-                setError((e as Error).message);
-              }
-            }}
-          >
+          <button className="primary" onClick={handleCommit} disabled={status === "committing"}>
             Commit Updates
           </button>
-          <button onClick={onClose}>Cancel</button>
+          <button onClick={onClose} disabled={status === "committing"}>Cancel</button>
         </div>
       </>
     );
