@@ -9,6 +9,92 @@ import {
 } from "../helpers/db";
 import {AuthorizedRequest, sendErrorResponse, sendSuccessResponse} from "../helpers/express";
 
+export const doPullUnit = async (octokit: Octokit, branch: string, unit: string, reset: boolean) => {
+  const {data: {commit: {sha: branchSha}}} = await octokit.rest.repos.getBranch({
+    owner,
+    repo,
+    branch,
+  });
+
+  const {data: {tree}} = await octokit.rest.git.getTree({
+    owner,
+    repo,
+    tree_sha: branchSha,
+    recursive: "1",
+  });
+
+  const baseUnitPath = getBaseUnitPath(unit);
+  const files = tree.filter((item) => {
+    return item.path && item.sha && item.type === "blob" && (
+      item.path.startsWith(baseUnitPath) || item.path === baseUnitPath
+    );
+  }).reduce<UnitFiles>((acc, item) => {
+    const path = item.path!.substring(baseUnitPath.length);
+    const key = escapeFirebaseKey(path);
+    acc[key] = {sha: item.sha!};
+    return acc;
+  }, {});
+
+  for (const [key, file] of Object.entries(files)) {
+    const path = unescapeFirebaseKey(key);
+    if (!path.endsWith(".json")) {
+      // we only need to check the type for JSON files
+      continue;
+    }
+    if (path === "content.json") {
+      file.type = "unit";
+    } else if (path === "teacher-guide/content.json") {
+      file.type = "teacher-guide";
+    } else if (path.startsWith("exemplars/")) {
+      file.type = "exemplar";
+    } else {
+      file.type = "unknown";
+      const url = getRawUrl(branch, unit, path);
+      try {
+        const response = await fetch(url);
+        if (response.ok) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const json: any = await response.json();
+          if (json.type) {
+            file.type = json.type;
+          }
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        file.type = "missing";
+      }
+    }
+  }
+
+  // update the database
+  const filesPath = getUnitFilesPath(branch, unit);
+  const updatesPath = getUnitUpdatesPath(branch, unit);
+  const branchesMetadataPath = getBranchesMetadataPath();
+
+  const db = getDb();
+  const fileRef = db.ref(filesPath);
+  const updatesRef = db.ref(updatesPath);
+  const branchesMetadataRef = db.ref(branchesMetadataPath);
+
+  // set the files and maybe reset the updates
+  await fileRef.set(files);
+  if (reset) {
+    await updatesRef.remove();
+  }
+
+  // add the branch and unit to the metadata
+  await branchesMetadataRef.transaction((currentMetadata: BranchesMetadata|null) => {
+    const currentBranchMetadata: BranchMetadata = currentMetadata?.[branch] ?? {units: {}};
+    currentBranchMetadata.units[unit] = currentBranchMetadata.units[unit] ?? {} as UnitMetadata;
+    const unitMetadata = currentBranchMetadata.units[unit];
+    unitMetadata.pulledAt = admin.database.ServerValue.TIMESTAMP;
+    if (reset) {
+      delete unitMetadata.updates;
+    }
+    return {...currentMetadata, [branch]: currentBranchMetadata};
+  });
+};
+
 const pullUnit = async (req: Request, res: Response) => {
   const unit = req.query.unit?.toString();
   const branch = req.query.branch?.toString();
@@ -27,89 +113,7 @@ const pullUnit = async (req: Request, res: Response) => {
     const authorizedRequest = req as AuthorizedRequest;
     const octokit = new Octokit({auth: authorizedRequest.gitHubToken});
 
-    const {data: {commit: {sha: branchSha}}} = await octokit.rest.repos.getBranch({
-      owner,
-      repo,
-      branch,
-    });
-
-    const {data: {tree}} = await octokit.rest.git.getTree({
-      owner,
-      repo,
-      tree_sha: branchSha,
-      recursive: "1",
-    });
-
-    const baseUnitPath = getBaseUnitPath(unit);
-    const files = tree.filter((item) => {
-      return item.path && item.sha && item.type === "blob" && (
-        item.path.startsWith(baseUnitPath) || item.path === baseUnitPath
-      );
-    }).reduce<UnitFiles>((acc, item) => {
-      const path = item.path!.substring(baseUnitPath.length);
-      const key = escapeFirebaseKey(path);
-      acc[key] = {sha: item.sha!};
-      return acc;
-    }, {});
-
-    for (const [key, file] of Object.entries(files)) {
-      const path = unescapeFirebaseKey(key);
-      if (!path.endsWith(".json")) {
-        // we only need to check the type for JSON files
-        continue;
-      }
-      if (path === "content.json") {
-        file.type = "unit";
-      } else if (path === "teacher-guide/content.json") {
-        file.type = "teacher-guide";
-      } else if (path.startsWith("exemplars/")) {
-        file.type = "exemplar";
-      } else {
-        file.type = "unknown";
-        const url = getRawUrl(branch, unit, path);
-        try {
-          const response = await fetch(url);
-          if (response.ok) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const json: any = await response.json();
-            if (json.type) {
-              file.type = json.type;
-            }
-          }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-          file.type = "missing";
-        }
-      }
-    }
-
-    // update the database
-    const filesPath = getUnitFilesPath(branch, unit);
-    const updatesPath = getUnitUpdatesPath(branch, unit);
-    const branchesMetadataPath = getBranchesMetadataPath();
-
-    const db = getDb();
-    const fileRef = db.ref(filesPath);
-    const updatesRef = db.ref(updatesPath);
-    const branchesMetadataRef = db.ref(branchesMetadataPath);
-
-    // set the files and maybe reset the updates
-    await fileRef.set(files);
-    if (reset) {
-      await updatesRef.remove();
-    }
-
-    // add the branch and unit to the metadata
-    await branchesMetadataRef.transaction((currentMetadata: BranchesMetadata|null) => {
-      const currentBranchMetadata: BranchMetadata = currentMetadata?.[branch] ?? {units: {}};
-      currentBranchMetadata.units[unit] = currentBranchMetadata.units[unit] ?? {} as UnitMetadata;
-      const unitMetadata = currentBranchMetadata.units[unit];
-      unitMetadata.pulledAt = admin.database.ServerValue.TIMESTAMP;
-      if (reset) {
-        delete unitMetadata.updates;
-      }
-      return {...currentMetadata, [branch]: currentBranchMetadata};
-    });
+    await doPullUnit(octokit, branch, unit, reset);
 
     return sendSuccessResponse(res, {});
   } catch (error) {

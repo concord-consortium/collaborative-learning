@@ -13,32 +13,53 @@
     padding: 10px;
   }
 
-  .commit-ui-description {
-    padding: 10px;
-    overflow: auto;
+  .commit-ui-top-content {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    overflow: auto;
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
+    >div {
+      padding: 10px;
+    }
 
-      th, td {
-        padding: 4px;
-        text-align: left;
-      }
+    .progress {
+      color: #1890ff;
+      font-weight: bold;
+    }
 
-      td:last-child {
-        white-space: nowrap;
-      }
+    .success {
+      color: #52c41a;
+      font-weight: bold;
+    }
 
-      tr:hover {
-        background-color: #f5f5f5;
-      }
+    .commit-ui-description {
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-grow: 1;
 
-      th {
-        text-align: left;
+      table {
+        border-collapse: collapse;
+        width: 100%;
+
+        th, td {
+          padding: 4px;
+          text-align: left;
+          font-size: 0.9rem;
+        }
+
+        td:last-child {
+          white-space: nowrap;
+        }
+
+        tr:hover {
+          background-color: #f5f5f5;
+        }
+
+        th {
+          text-align: left;
+        }
       }
     }
   }

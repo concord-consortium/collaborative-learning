@@ -16,18 +16,27 @@ import putContent from "./routes/put-content";
 import putImage from "./routes/put-image";
 import getRawContent from "./routes/get-raw-content";
 import deleteUnit from "./routes/delete-unit";
+import pushUnit from "./routes/push-unit";
 
 import {AuthorizedRequest} from "./helpers/express";
 import {owner, repo} from "./helpers/github";
 
 const adminOnlyPaths = ["/pullUnit"];
 
+// the TypeScript type definition for DecodedIdToken does not include the name property,
+// even though it is present in the actual decoded token returned by Firebase Admin SDK
+type DecodedIdTokenWithName = DecodedIdToken & {
+  name: string;
+};
+
+// use a real identity here so that GitHub commits have a real name associated with them
 const fakeEmulatorDecodedToken = {
-  email: "test@concord.org",
+  name: "Doug Martin",
+  email: "dmartin@concord.org",
   firebase: {
     sign_in_provider: "github.com",
   },
-} as DecodedIdToken;
+} as DecodedIdTokenWithName;
 
 const tokenCache = new Map<string, {isCollaborator: boolean, expires: Date}>();
 
@@ -150,8 +159,6 @@ export const authenticateAndAuthorize = async (req: Request, res: Response, next
   }
 };
 
-const tbd = (req: Request, res: Response) => res.status(501).send("Not implemented yet.");
-
 const app = express();
 
 // increase the default body size limit to 5mb to allow for large image uploads
@@ -178,7 +185,7 @@ app.use(authenticateAndAuthorize);
 app.get("/whoami", (req, res) => res.send((req as AuthorizedRequest).decodedToken));
 
 app.post("/pullUnit", pullUnit);
-app.post("/pushUnit", tbd);
+app.post("/pushUnit", pushUnit);
 
 app.post("/deleteUnit", deleteUnit);
 
