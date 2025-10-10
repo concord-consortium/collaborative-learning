@@ -1,14 +1,15 @@
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import { CurriculumProvider, useCurriculum } from "../hooks/use-curriculum";
 import LeftNav from "./left-nav";
 import Workspace from "./workspace";
 import MediaLibrary from "./media-library";
 import { AuthProvider, useAuth } from "../hooks/use-auth";
-import { AuthoringApiProvider, useAuthoringApi } from "../hooks/use-authoring-api";
+import { AuthoringApiProvider } from "../hooks/use-authoring-api";
 import { AuthoringPreviewProvider, useAuthoringPreview } from "../hooks/use-authoring-preview";
 import Admin from "./admin";
+import CommitUI from "./commit-ui";
 
 import "./app.scss";
 
@@ -22,9 +23,19 @@ const InnerApp: React.FC = () => {
   } = useCurriculum();
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [showAdminUI, setShowAdminUI] = useState(false);
+  const [showCommitUI, setShowCommitUI] = useState(false);
 
   const toggleMediaLibrary = () => setShowMediaLibrary(value => !value);
   const toggleAdminUI = () => setShowAdminUI(value => !value);
+  const toggleCommitUI = () => setShowCommitUI(value => !value);
+
+  const commitButtonDisabled = useMemo(() => {
+    if (!branch || !unit || !auth.gitHubToken) {
+      return true;
+    }
+    const numUpdates = Object.keys(branchMetadata[branch]?.units[unit]?.updates ?? {}).length;
+    return numUpdates === 0;
+  }, [branch, unit, branchMetadata, auth.gitHubToken]);
 
   const maybeSignOut = (force?: boolean) => {
     if (force || confirm("Are you sure you want to sign out?")) {
@@ -50,6 +61,15 @@ const InnerApp: React.FC = () => {
           { branch && unit && (
             <button onClick={handlePreviewClick}>
               Preview
+            </button>
+          )}
+          { branch && unit && (
+            <button
+              onClick={toggleCommitUI}
+              disabled={commitButtonDisabled}
+              title={commitButtonDisabled ? "No changes to commit" : undefined}
+            >
+              Commit
             </button>
           )}
           {auth.isAdminUser && (
@@ -186,6 +206,7 @@ const InnerApp: React.FC = () => {
           <MediaLibrary onClose={toggleMediaLibrary} />
         )}
         {showAdminUI && <Admin onClose={toggleAdminUI} />}
+        {showCommitUI && <CommitUI onClose={toggleCommitUI} />}
       </main>
       {maybeRenderError()}
     </div>

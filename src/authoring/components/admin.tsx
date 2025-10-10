@@ -4,6 +4,7 @@ import Modal from "./modal";
 import { defaultPath, useCurriculum } from "../hooks/use-curriculum";
 
 import { ApiResponse, useAuthoringApi } from "../hooks/use-authoring-api";
+import { useCommitDescriptions } from "../hooks/use-commit-description";
 
 import "./admin.scss";
 
@@ -12,7 +13,7 @@ type ActionStatus = {
 }
 
 type AdminBranchAction = {
-  kind: "pull-latest" | "reset" | "delete";
+  kind: "updates" | "pull-latest" | "reset" | "delete";
   branch: string;
   unit: string;
 }
@@ -21,9 +22,57 @@ interface IProps {
   onClose: () => void;
 }
 
+interface IUpdatesProps {
+  branch: string;
+  unit: string;
+  onClose: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+// this is a separate component so that the useCommitDescriptions hook can be used
+const Updates: React.FC<IUpdatesProps> = ({branch, unit, onClose}) => {
+  const { descriptionsState, descriptions } = useCommitDescriptions({branch, unit});
+
+  return (
+    <div className="admin-action">
+      <div className="label">Updates for {branch}/{unit}</div>
+      {descriptionsState === "loading" ? (
+        <div>Loading...</div>
+      ) : descriptions.length === 0 ? (
+        <div>There are no updates on this unit.</div>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {descriptions.map(({path, description, date}) => (
+              <tr key={path}>
+                <td>{description}</td>
+                <td className="no-wrap">{date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <div className="admin-action-buttons">
+        <button
+          onClick={onClose}>
+          Close
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const Admin: React.FC<IProps> = ({ onClose }) => {
-  const { get, post } = useAuthoringApi();
-  const {branchMetadata} = useCurriculum();
+  const api = useAuthoringApi();
+  const { get, post } = api;
+  const curriculum = useCurriculum();
+  const {branchMetadata} = curriculum;
   const [branches, setBranches] = React.useState<string[]>([]);
   const [units, setUnits] = React.useState<string[]>([]);
   const [error, setError] = React.useState<string | null>(null);
@@ -274,6 +323,7 @@ const Admin: React.FC<IProps> = ({ onClose }) => {
         <div>
           {error && <div className="error">Error: {error}</div>}
           <div className="admin-section">
+            {action?.kind === "updates" && <Updates branch={action.branch} unit={action.unit} onClose={handleCancel} />}
             {action?.kind === "pull-latest" && renderPullLatest(action.branch, action.unit)}
             {action?.kind === "reset" && renderReset(action.branch, action.unit)}
             {action?.kind === "delete" && renderDelete(action.branch, action.unit)}
@@ -291,7 +341,7 @@ const Admin: React.FC<IProps> = ({ onClose }) => {
                         <th>Unit</th>
                         <th>Pulled</th>
                         <th>Updates</th>
-                        <th>Actions</th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -304,6 +354,9 @@ const Admin: React.FC<IProps> = ({ onClose }) => {
                             <td>{new Date(pulledAt).toLocaleString()}</td>
                             <td>{numUpdates}</td>
                             <td className="table-buttons">
+                              <button onClick={(e) => handleAction(e, {kind: "updates", branch, unit})}>
+                                Updates
+                              </button>
                               <button onClick={(e) => handleEdit(e, branch, unit)}>
                                 Edit
                               </button>
