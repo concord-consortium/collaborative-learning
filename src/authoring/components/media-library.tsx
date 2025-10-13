@@ -5,7 +5,6 @@ import { useAuthoringApi } from "../hooks/use-authoring-api";
 import { useAuthoringPreview } from "../hooks/use-authoring-preview";
 
 import "./media-library.scss";
-import { set } from "lodash";
 
 interface IProps {
   onClose: () => void;
@@ -43,7 +42,7 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
     setUploadingFileDataUrl(null);
     setUploadingFile(null);
     setUploadProgress(null);
-  }, [setUploadingFileDataUrl, setUploadingFile, setUploadProgress]);
+  }, []);
 
   // Cleanup function to reset upload state when component unmounts
   useEffect(() => {
