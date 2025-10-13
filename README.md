@@ -211,7 +211,7 @@ and the realtime database storage of authoring metadata and changes.  Furthermor
 Here are the steps to do that:
 
 1. Ensure the authoring-api serves the latest changes by changing into the `authoring-api` folder and running `npm run build:watch`.
-2. In another terminal start the emulator with storage of any changes by also changing into the `authoring-api` folder, running `use firebase staging` and running `npm run start:data`.  The `use firebase staging` is needed as the emulator adds the staging project name to the localhost function urls.
+2. In another terminal start the emulator with storage of any changes by also changing into the `authoring-api` folder, running `firebase use staging` and running `npm run start:data`.  The `firebase use staging` is needed as the emulator adds the staging project name to the localhost function urls.
 3. In yet another terminal start CLUE up normally by running `npm start` in the root of CLUE.
 4. Load the authoring interface with the emulator and fakeAuthoringAuth parameters:  `http://localhost:8080/authoring?functions=emulator&firebase=emulator&firebaseEnv=staging&fakeAuthoringAuth=true`
 

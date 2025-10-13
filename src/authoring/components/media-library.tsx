@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Modal from "./modal";
 import { useCurriculum } from "../hooks/use-curriculum";
 import { useAuthoringApi } from "../hooks/use-authoring-api";
 import { useAuthoringPreview } from "../hooks/use-authoring-preview";
 
 import "./media-library.scss";
+import { set } from "lodash";
 
 interface IProps {
   onClose: () => void;
@@ -18,8 +19,9 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
   const filterInputRef = useRef<HTMLInputElement | null>(null);
   const [activeTab, setActiveTab] = useState<"images" | "upload">("images");
   const [uploadingFile, setUploadingFile] = useState<File | null>(null);
-  const [uploadingFileBlobUrl, setUploadingFileBlobUrl] = useState<string | null>(null);
+  const [uploadingFileDataUrl, setUploadingFileDataUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<"uploading" | "completed" | "error" | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const imageFileKeys = useMemo(() => {
     return Object.keys(files ?? {}).filter(key => key.startsWith("images"));
@@ -37,34 +39,22 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
 
   const imageUrl = selectedKey ? `${baseUrl}${selectedKey}` : undefined;
 
-  const resetUpload = () => {
-    if (uploadingFileBlobUrl) {
-      URL.revokeObjectURL(uploadingFileBlobUrl);
-    }
-    setUploadingFileBlobUrl(null);
+  const resetUpload = useCallback(() => {
+    setUploadingFileDataUrl(null);
     setUploadingFile(null);
     setUploadProgress(null);
-  };
+  }, [setUploadingFileDataUrl, setUploadingFile, setUploadProgress]);
 
   // Cleanup function to reset upload state when component unmounts
   useEffect(() => {
     return () => resetUpload();
-  }, []);
+  }, [resetUpload]);
 
   useEffect(() => {
     if (imageFileKeys.length > 0 && !selectedKey) {
       setSelectedKey(imageFileKeys[0]);
     }
   }, [imageFileKeys, selectedKey]);
-
-  useEffect(() => {
-    if (uploadProgress === "completed") {
-      const timer = setTimeout(() => {
-        resetUpload();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [uploadProgress]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -83,17 +73,29 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
   };
 
   const handleUpload = (file: File) => {
+    resetUpload();
+
     if (!branch || !unit) {
+      setUploadProgress("error");
+      setErrorMessage("Branch or unit is not defined");
       return;
     }
 
-    setUploadingFile(file);
-    setUploadingFileBlobUrl(URL.createObjectURL(file));
-    setUploadProgress("uploading");
-
     const reader = new FileReader();
     reader.onloadend = async () => {
-      const base64String = reader.result?.toString().split(';base64,').pop();
+      if (!reader.result) {
+        setUploadProgress("error");
+        setErrorMessage(reader.error?.message ?? "Failed to read file");
+        return;
+      }
+
+      const base64Url = reader.result?.toString() ?? "";
+      const base64String = base64Url.split(';base64,').pop();
+
+      setUploadingFile(file);
+      setUploadingFileDataUrl(base64Url);
+      setUploadProgress("uploading");
+
       try {
         const response = await api.post("/putImage", {branch, unit}, {
           image: base64String,
@@ -105,6 +107,7 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
       } catch (error) {
         console.error('Upload failed:', error);
         setUploadProgress("error");
+        setErrorMessage(error instanceof Error ? error.message : "Upload failed");
       }
     };
     reader.readAsDataURL(file);
@@ -227,9 +230,9 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
           }
         }}
       >
-        {uploadingFileBlobUrl && (
+        {uploadingFileDataUrl && (
           <div className="media-library-upload-preview">
-            <img src={uploadingFileBlobUrl} alt={uploadingFile?.name} className="media-library-upload-img" />
+            <img src={uploadingFileDataUrl} alt={uploadingFile?.name} className="media-library-upload-img" />
             <div className="media-library-upload-filename">{uploadingFile?.name}</div>
             {uploadProgress === "uploading" && (
               <div className="media-library-upload-progress">Uploading...</div>
@@ -238,7 +241,7 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
               <div className="media-library-upload-progress">Upload completed!</div>
             )}
             {uploadProgress === "error" && (
-              <div className="media-library-upload-progress error">Upload failed.</div>
+              <div className="media-library-upload-progress error">{errorMessage ?? "Upload failed."}</div>
             )}
           </div>
         )}
