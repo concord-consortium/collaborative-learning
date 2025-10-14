@@ -46,7 +46,7 @@ export const doPullUnit = async (octokit: Octokit, branch: string, unit: string,
     } else if (path === "teacher-guide/content.json") {
       file.type = "teacher-guide";
     } else {
-      // we have to exemplars to get the title, otherwise we could have
+      // we have to parse exemplars to get the title, otherwise we could have
       // just checked the path
       file.type = path.startsWith("exemplars/") ? "exemplar" : "unknown";
 
