@@ -55,17 +55,18 @@ export const IframeControl: React.FC<IProps> = (props) => {
         { initialValue: JSON.stringify(initialValue) },
         validOrigin
       );
-      (window as any).addEventListener("message", receiveUpdateFromEditor);
     }
-  }, [initialValue, receiveUpdateFromEditor]);
+  }, [initialValue]);
 
   useEffect(() => {
+    // Listen for messages from the iframe editor
+    (window as any).addEventListener("message", receiveUpdateFromEditor);
+
     // Cleanup event listener on unmount
     return () => {
       (window as any).removeEventListener("message", receiveUpdateFromEditor);
     };
   }, [receiveUpdateFromEditor]);
-
 
   // use the same params to enable overrides of the emulator, functions, etc
   const iframeParams = new URLSearchParams(window.location.search);
