@@ -11,6 +11,7 @@ export type IUnitFiles = Record<string, IUnitFile>;
 export interface IUnitFile {
   sha: string;
   type?: string;
+  title?: string;
 }
 export interface IUnit {
   code: string;

@@ -179,7 +179,6 @@ const InnerApp: React.FC = () => {
     return (
       <>
         <LeftNav
-          showMediaLibrary={showMediaLibrary}
           onMediaLibraryClicked={toggleMediaLibrary}
         />
         <Workspace />

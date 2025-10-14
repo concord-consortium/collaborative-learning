@@ -4,6 +4,7 @@ export type UnitFiles = Record<string, UnitFile>;
 export interface UnitFile {
   sha: string;
   type?: string;
+  title?: string;
 }
 
 export interface UnitMetadata {

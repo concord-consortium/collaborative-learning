@@ -13,13 +13,12 @@ export interface TreeNode {
 }
 
 interface IProps {
-  showMediaLibrary: boolean;
   onMediaLibraryClicked?: () => void;
 }
 
-const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) => {
+const LeftNav: React.FC<IProps> = ({ onMediaLibraryClicked }) => {
   const { isAdminUser } = useAuth();
-  const { unitConfig, teacherGuideConfig, branch, unit, files } = useCurriculum();
+  const { unitConfig, teacherGuideConfig, branch, unit, files, exemplarFiles } = useCurriculum();
   const basePath = `#/${branch}/${unit}`;
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     [basePath]: true
@@ -101,6 +100,18 @@ const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) 
       });
     }
 
+    if (exemplarFiles.length > 0) {
+      result.children.push({
+        id: "exemplars",
+        label: "Exemplars",
+        children: exemplarFiles.map(({path, title}) => ({
+          id: path,
+          label: title,
+          path
+        }))
+      });
+    }
+
     if (isAdminUser) {
       result.children[0].children!.push({
         id: "raw",
@@ -109,7 +120,7 @@ const LeftNav: React.FC<IProps> = ({ showMediaLibrary, onMediaLibraryClicked }) 
     }
 
     return result;
-  }, [unitConfig, teacherGuideConfig, files, isAdminUser]);
+  }, [unitConfig, teacherGuideConfig, files, isAdminUser, exemplarFiles]);
 
   useEffect(() => {
     window.addEventListener("hashchange", onHashChange);

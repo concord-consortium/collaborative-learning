@@ -45,10 +45,11 @@ export const doPullUnit = async (octokit: Octokit, branch: string, unit: string,
       file.type = "unit";
     } else if (path === "teacher-guide/content.json") {
       file.type = "teacher-guide";
-    } else if (path.startsWith("exemplars/")) {
-      file.type = "exemplar";
     } else {
-      file.type = "unknown";
+      // we have to exemplars to get the title, otherwise we could have
+      // just checked the path
+      file.type = path.startsWith("exemplars/") ? "exemplar" : "unknown";
+
       const url = getRawUrl(branch, unit, path);
       try {
         const response = await fetch(url);
@@ -57,6 +58,9 @@ export const doPullUnit = async (octokit: Octokit, branch: string, unit: string,
           const json: any = await response.json();
           if (json.type) {
             file.type = json.type;
+          }
+          if (json.title) {
+            file.title = json.title;
           }
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
