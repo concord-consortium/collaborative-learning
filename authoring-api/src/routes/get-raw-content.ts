@@ -1,6 +1,8 @@
 import {Request, Response} from "express";
 import {getRawUrl} from "../helpers/github";
-import {escapeFirebaseKey, getDb, getUnitUpdatesPath} from "../helpers/db";
+import {
+  escapeFirebaseKey, getBlobCachePath, getDb, getUnitFilesPath, getUnitUpdatesPath, UnitFile,
+} from "../helpers/db";
 
 const getRawContent = async (req: Request, res: Response) => {
   const matches = req.path.match(/^\/?([^/]+)\/([^/]+)\/(.+)$/);
@@ -22,6 +24,22 @@ const getRawContent = async (req: Request, res: Response) => {
   const content = snapshot.val();
   if (content) {
     return res.send(content);
+  }
+
+  // next look in the blob cache for any committed files as the raw content
+  // url isn't instantly updated when a commit is made
+  const unitFilePath = getUnitFilesPath(branch, unit, escapedPath);
+  const fileSnapshot = await db.ref(unitFilePath).once("value");
+  if (fileSnapshot.exists()) {
+    const {sha} = fileSnapshot.val() as UnitFile;
+    if (sha) {
+      const blobPath = getBlobCachePath(sha);
+      const blobSnapshot = await db.ref(blobPath).once("value");
+      const blobContent = blobSnapshot.val();
+      if (blobContent) {
+        return res.send(blobContent);
+      }
+    }
   }
 
   // otherwise get from github

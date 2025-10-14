@@ -24,8 +24,8 @@ export const authoringPath = "authoring";
 export const getUnitPath = (branch: string, unit: string) =>
   `${authoringPath}/content/branches/${branch}/units/${unit}`;
 
-export const getUnitFilesPath = (branch: string, unit: string) =>
-  `${getUnitPath(branch, unit)}/files`;
+export const getUnitFilesPath = (branch: string, unit: string, path: string = "") =>
+  `${getUnitPath(branch, unit)}/files${path ? `/${path}` : ""}`;
 
 export const getUnitUpdatesPath = (branch: string, unit: string, path: string = "") =>
   `${getUnitPath(branch, unit)}/updates${path ? `/${path}` : ""}`;
@@ -38,6 +38,9 @@ export const getUnitMetadataPath = (branch: string, unit: string, path: string =
 
 export const getUnitMetadataUpdatesPath = (branch: string, unit: string, path: string = "") =>
   `${getBranchesMetadataPath(branch)}/units/${unit}/updates${path ? `/${path}` : ""}`;
+
+export const getBlobCachePath = (sha?: string) =>
+  `${authoringPath}/blobs${sha ? `/${sha}` : ""}`;
 
 export function escapeFirebaseKey(key: string): string {
   return key.replace(/[.#$[\]/]/g, (char) => {

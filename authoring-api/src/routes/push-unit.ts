@@ -2,7 +2,7 @@ import {Request, Response} from "express";
 import {Octokit} from "@octokit/rest";
 import {owner, repo} from "../helpers/github";
 
-import {getDb, getUnitUpdatesPath} from "../helpers/db";
+import {getBlobCachePath, getDb, getUnitUpdatesPath} from "../helpers/db";
 import {AuthorizedRequest, sendErrorResponse, sendSuccessResponse} from "../helpers/express";
 import {doPullUnit} from "./pull-unit";
 
@@ -77,6 +77,16 @@ const pushUnit = async (req: Request, res: Response) => {
         };
       })
     );
+
+    // save the commits to the blob cache checked by getRawContent as the raw url isn't instantly updated
+    // when a commit is made and we don't want quick subsequent page reloads to show old content
+    Object.values(updates).forEach(async (content, index) => {
+      const blob = blobs[index];
+      if (blob) {
+        const blobPath = getBlobCachePath(blob.sha);
+        await db.ref(blobPath).set(content);
+      }
+    });
 
     // create a new tree based on the base tree + our blob entries
     const tree = await octokit.rest.git.createTree({owner, repo, base_tree: baseTreeSha, tree: blobs});
