@@ -21,9 +21,8 @@ const getRawContent = async (req: Request, res: Response) => {
   const escapedPath = escapeFirebaseKey(path);
   const contentPath = getUnitUpdatesPath(branch, unit, escapedPath);
   const snapshot = await db.ref(contentPath).once("value");
-  const content = snapshot.val();
-  if (content) {
-    return res.send(content);
+  if (snapshot.exists()) {
+    return res.send(snapshot.val());
   }
 
   // next look in the blob cache for any committed files as the raw content
@@ -35,9 +34,8 @@ const getRawContent = async (req: Request, res: Response) => {
     if (sha) {
       const blobPath = getBlobCachePath(sha);
       const blobSnapshot = await db.ref(blobPath).once("value");
-      const blobContent = blobSnapshot.val();
-      if (blobContent) {
-        return res.send(blobContent);
+      if (blobSnapshot.exists()) {
+        return res.send(blobSnapshot.val());
       }
     }
   }
