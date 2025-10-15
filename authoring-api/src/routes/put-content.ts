@@ -1,7 +1,9 @@
 import {Request, Response} from "express";
 import admin from "firebase-admin";
 
-import {escapeFirebaseKey, getDb, getUnitMetadataUpdatesPath, getUnitUpdatesPath} from "../helpers/db";
+import {
+  escapeFirebaseKey, getDb, getUnitFilesPath, getUnitMetadataUpdatesPath, getUnitUpdatesPath,
+} from "../helpers/db";
 import {sendErrorResponse, sendSuccessResponse} from "../helpers/express";
 
 const putContent = async (req: Request, res: Response) => {
@@ -34,6 +36,27 @@ const putContent = async (req: Request, res: Response) => {
 
   const unitMetadataUpdatePath = getUnitMetadataUpdatesPath(branch, unit, escapedPath);
   await db.ref(unitMetadataUpdatePath).set(admin.database.ServerValue.TIMESTAMP);
+
+  // ensure any metadata change is reflected in the files
+  if (content.type || content.title) {
+    const filePath = getUnitFilesPath(branch, unit, escapedPath);
+    const fileRef = db.ref(filePath);
+    await fileRef.transaction((file) => {
+      // in case this is a new file, ensure we have a default object
+      file = file ?? {
+        type: "unknown",
+        title: "Untitled",
+        // sha will be added when committed
+      };
+      if (content.type) {
+        file.type = content.type;
+      }
+      if (content.title) {
+        file.title = content.title;
+      }
+      return file;
+    });
+  }
 
   return sendSuccessResponse(res, {});
 };

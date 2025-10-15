@@ -10,15 +10,13 @@ import CurriculumTabs from "./workspace/curriculum-tabs";
 import { useCurriculum } from "../hooks/use-curriculum";
 import NavTabs from "./workspace/nav-tabs";
 import AISettings from "./workspace/ai-settings";
-import { useAuthoringPreview } from "../hooks/use-authoring-preview";
 import ExemplarMetadata from "./editors/exemplar-metadata";
 
 import "./workspace.scss";
 
 const Workspace: React.FC = () => {
   const api = useAuthoringApi();
-  const { branch, unit, path, unitConfig, setUnitConfig, files } = useCurriculum();
-  const authoringPreview = useAuthoringPreview();
+  const { branch, unit, path, unitConfig, setUnitConfig, files, saveContent } = useCurriculum();
   const [content, setContent] = useImmer<any>({});
   const [status, setStatus] = useImmer<"loading" | "loaded" | "notImplemented" | "error">("loading");
   const [contentPath, setContentPath] = useImmer<string | undefined>(undefined);
@@ -85,7 +83,7 @@ const Workspace: React.FC = () => {
   }, [contentPath, files]);
 
   const onChangeMetadata = (metadata: any) => {
-    saveContent({...metadata, content: contentRef.current.content});
+    saveIFrameContent({...metadata, content: contentRef.current.content});
   };
 
   const onChangeInnerContent = (newInnerContent: string) => {
@@ -96,7 +94,7 @@ const Workspace: React.FC = () => {
         return;
       }
       const updatedContent = {...contentRef.current, content: JSON.parse(newInnerContent)};
-      saveContent(updatedContent);
+      saveIFrameContent(updatedContent);
     } catch (e) {
       console.error("Error parsing content as JSON:", e);
     }
@@ -105,32 +103,18 @@ const Workspace: React.FC = () => {
   const onChangeRawContent = (newRawContent: string) => {
     try {
       const updatedContent = JSON.parse(newRawContent);
-      saveContent(updatedContent);
+      saveIFrameContent(updatedContent);
     } catch (e) {
       console.error("Error parsing raw content as JSON:", e);
     }
   };
 
-  const saveContent = (updatedContent: any) => {
-    if (!contentPath || !branch || !unit) {
+  const saveIFrameContent = (updatedContent: any) => {
+    if (!contentPath) {
       return;
     }
-
     contentRef.current = updatedContent;
-
-    try {
-      api.post("/putContent", { branch, unit, path: contentPath }, {content: updatedContent}).then((response) => {
-        if (response.success) {
-          authoringPreview.reloadAllPreviews();
-        } else {
-          console.error("Error saving content:", response.error);
-        }
-      }).catch((err) => {
-        console.error("Error saving content:", err);
-      });
-    } catch (e) {
-      console.error("Error parsing content as JSON:", e);
-    }
+    saveContent(contentPath, updatedContent);
   };
 
   const handleSaveRawUnitConfig = (newConfig: any) => {
