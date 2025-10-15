@@ -231,27 +231,33 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
 
     window.clearTimeout(saveStateClearTimeoutRef.current);
     setSaveState("saving");
-    return api
-      .post(
-        "/putContent",
-        { branch, unit, path: contentPath },
-        { content: updatedContent }
-      )
-      .then((response) => {
-        if (response.success) {
-          setSaveState("saved");
-          setError(undefined);
-          saveStateClearTimeoutRef.current = window.setTimeout(() => {
-            setSaveState(undefined);
-          }, 1000);
-          authoringPreview.reloadAllPreviews();
-        } else {
+    return new Promise<void>((resolve, reject) => {
+      api
+        .post(
+          "/putContent",
+          { branch, unit, path: contentPath },
+          { content: updatedContent }
+        )
+        .then((response) => {
+          if (response.success) {
+            setSaveState("saved");
+            setError(undefined);
+            resolve();
+            saveStateClearTimeoutRef.current = window.setTimeout(() => {
+              setSaveState(undefined);
+            }, 1000);
+            authoringPreview.reloadAllPreviews();
+          } else {
+            setSaveState("error");
+            setError(response.error);
+            reject(new Error(response.error));
+          }
+        })
+        .catch((err) => {
+          setError(err.message);
           setSaveState("error");
-          setError(response.error);
-        }
-      })
-      .catch((err) => {
-        setError(err.message);
+          reject(err);
+        });
       });
   }, [api, branch, unit, setError, setSaveState, authoringPreview]);
 

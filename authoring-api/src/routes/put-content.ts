@@ -42,13 +42,17 @@ const putContent = async (req: Request, res: Response) => {
     const filePath = getUnitFilesPath(branch, unit, escapedPath);
     const fileRef = db.ref(filePath);
     await fileRef.transaction((file) => {
-      if (file) {
-        if (content.type) {
-          file.type = content.type;
-        }
-        if (content.title) {
-          file.title = content.title;
-        }
+      // in case this is a new file, ensure we have a default object
+      file = file ?? {
+        type: "unknown",
+        title: "Untitled",
+        // sha will be added when committed
+      };
+      if (content.type) {
+        file.type = content.type;
+      }
+      if (content.title) {
+        file.title = content.title;
       }
       return file;
     });
