@@ -2,7 +2,7 @@ import {Request, Response} from "express";
 import {Octokit} from "@octokit/rest";
 import {owner, repo} from "../helpers/github";
 
-import {getDb, getUnitUpdatesPath} from "../helpers/db";
+import {getBlobCachePath, getDb, getUnitUpdatesPath} from "../helpers/db";
 import {AuthorizedRequest, sendErrorResponse, sendSuccessResponse} from "../helpers/express";
 import {doPullUnit} from "./pull-unit";
 
@@ -75,6 +75,18 @@ const pushUnit = async (req: Request, res: Response) => {
           mode: "100644" as const,
           type: "blob" as const,
         };
+      })
+    );
+
+    // save the commits to the blob cache checked by getRawContent as the raw url isn't instantly updated
+    // when a commit is made and we don't want quick subsequent page reloads to show old content
+    await Promise.all(
+      Object.values(updates).map(async (content, index) => {
+        const blob = blobs[index];
+        if (blob) {
+          const blobPath = getBlobCachePath(blob.sha);
+          await db.ref(blobPath).set(content);
+        }
       })
     );
 
