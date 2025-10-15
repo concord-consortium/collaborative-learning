@@ -39,6 +39,7 @@ export type CurriculumContextValue = {
   path: string | undefined;
   files: IUnitFiles | undefined;
   reset: () => void;
+  saveContent: (contentPath: string, updatedContent: any) => Promise<void>;
   saveState: SaveState;
   branchMetadata: BranchMetadata;
   exemplarFiles: ExemplarFile[];
@@ -223,35 +224,44 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     // The filesRef.current?.off() above is what turns off the previous listener.
   }, [api, branch, setError, setFiles, _setUnitConfig, setTeacherGuideConfig, unit]);
 
+  const saveContent = useCallback(async (contentPath: string, updatedContent: any) => {
+    if (!branch || !unit) {
+      return;
+    }
+
+    window.clearTimeout(saveStateClearTimeoutRef.current);
+    setSaveState("saving");
+    return api
+      .post(
+        "/putContent",
+        { branch, unit, path: contentPath },
+        { content: updatedContent }
+      )
+      .then((response) => {
+        if (response.success) {
+          setSaveState("saved");
+          setError(undefined);
+          saveStateClearTimeoutRef.current = window.setTimeout(() => {
+            setSaveState(undefined);
+          }, 1000);
+          authoringPreview.reloadAllPreviews();
+        } else {
+          setSaveState("error");
+          setError(response.error);
+        }
+      })
+      .catch((err) => {
+        setError(err.message);
+      });
+  }, [api, branch, unit, setError, setSaveState, authoringPreview]);
+
   useEffect(() => {
     // save unit config changes
     if (unitConfig && saveUnitConfigRef.current && branch && unit) {
       saveUnitConfigRef.current = false;
-      window.clearTimeout(saveStateClearTimeoutRef.current);
-      setSaveState("saving");
-      api
-        .post(
-          "/putContent",
-          { branch, unit, path: "content.json" },
-          { content: unitConfig }
-        )
-        .then((response) => {
-          if (response.success) {
-            setSaveState("saved");
-            saveStateClearTimeoutRef.current = window.setTimeout(() => {
-              setSaveState(undefined);
-            }, 1000);
-            authoringPreview.reloadAllPreviews();
-          } else {
-            setSaveState("error");
-            setError(response.error);
-          }
-        })
-        .catch((err) => {
-          setError(err.message);
-        });
+      saveContent("content.json", unitConfig);
     }
-  }, [api, branch, unit, unitConfig, setError, setSaveState, authoringPreview]);
+  }, [branch, unit, unitConfig, saveContent]);
 
   useEffect(() => {
     const newExemplarFiles = Object.entries(files || {})
@@ -282,7 +292,8 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     reset,
     saveState,
     branchMetadata,
-    exemplarFiles
+    exemplarFiles,
+    saveContent
   };
 
   return (
