@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from "react";
+import React, { ReactNode, useEffect, useMemo, useRef } from "react";
 import { useImmer } from "use-immer";
 import classNames from "classnames";
 
@@ -11,18 +11,20 @@ import { useCurriculum } from "../hooks/use-curriculum";
 import NavTabs from "./workspace/nav-tabs";
 import AISettings from "./workspace/ai-settings";
 import { useAuthoringPreview } from "../hooks/use-authoring-preview";
+import ExemplarMetadata from "./editors/exemplar-metadata";
 
 import "./workspace.scss";
 
 const Workspace: React.FC = () => {
   const api = useAuthoringApi();
-  const { branch, unit, path, unitConfig, setUnitConfig } = useCurriculum();
+  const { branch, unit, path, unitConfig, setUnitConfig, files } = useCurriculum();
   const authoringPreview = useAuthoringPreview();
   const [content, setContent] = useImmer<any>({});
   const [status, setStatus] = useImmer<"loading" | "loaded" | "notImplemented" | "error">("loading");
   const [contentPath, setContentPath] = useImmer<string | undefined>(undefined);
   const lastContentPathRef = useRef<string | undefined>(undefined);
   const isConfigPath = path?.startsWith("config/");
+  const contentRef = useRef(content);
 
   useEffect(() => {
     if (path === "config/raw") {
@@ -67,14 +69,56 @@ const Workspace: React.FC = () => {
     });
   }, [contentPath, api, branch, unit, isConfigPath, setContent, setStatus]);
 
-  const onChangeContent = (newContent: string) => {
+  // keep a ref to the latest content for callbacks so that we don't have to
+  // wrap all of them in useCallback - this ref is also updated when content
+  // is saved in saveContent()
+  useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
+
+  const contentType = useMemo(() => {
+    if (!contentPath || !files) {
+      return undefined;
+    }
+    const fileEntry = files[contentPath];
+    return fileEntry?.type;
+  }, [contentPath, files]);
+
+  const onChangeMetadata = (metadata: any) => {
+    saveContent({...metadata, content: contentRef.current.content});
+  };
+
+  const onChangeInnerContent = (newInnerContent: string) => {
+    try {
+      // the content updated by the iframe is the inner content field
+      if (!contentRef.current) {
+        console.error("contentRef.current is null in onChangeInnerContent");
+        return;
+      }
+      const updatedContent = {...contentRef.current, content: JSON.parse(newInnerContent)};
+      saveContent(updatedContent);
+    } catch (e) {
+      console.error("Error parsing content as JSON:", e);
+    }
+  };
+
+  const onChangeRawContent = (newRawContent: string) => {
+    try {
+      const updatedContent = JSON.parse(newRawContent);
+      saveContent(updatedContent);
+    } catch (e) {
+      console.error("Error parsing raw content as JSON:", e);
+    }
+  };
+
+  const saveContent = (updatedContent: any) => {
     if (!contentPath || !branch || !unit) {
       return;
     }
 
+    contentRef.current = updatedContent;
+
     try {
-      // the content updated by the iframe is the inner content field
-      const updatedContent = {...content, content: JSON.parse(newContent)};
       api.post("/putContent", { branch, unit, path: contentPath }, {content: updatedContent}).then((response) => {
         if (response.success) {
           authoringPreview.reloadAllPreviews();
@@ -127,11 +171,28 @@ const Workspace: React.FC = () => {
       return <div className="centered muted">This page not yet implemented.</div>;
     }
     if (status === "loaded" && content?.content) {
+      let headerContent: ReactNode | undefined = undefined;
+      switch (contentType) {
+        case "exemplar":
+          headerContent = content &&
+            <ExemplarMetadata
+              title={content.title}
+              tag={content.tag}
+              onChange={onChangeMetadata}
+            />;
+          break;
+        default:
+          headerContent = undefined;
+      }
+
       return (
         <IframeControl
           key={contentPath}
           initialValue={content.content}
-          onChange={onChangeContent}
+          rawContent={content}
+          onChange={onChangeInnerContent}
+          onRawChange={onChangeRawContent}
+          headerContent={headerContent}
         />
       );
     }

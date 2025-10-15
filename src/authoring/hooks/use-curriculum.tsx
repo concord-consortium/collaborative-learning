@@ -152,7 +152,6 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     if (auth.firebaseToken) {
       const onBranchMetadataChange = (snapshot: firebase.database.DataSnapshot) => {
         const values = snapshot.val() ?? {};
-        console.log("branch metadata updated", values);
         setBranchMetadata(values);
       };
 

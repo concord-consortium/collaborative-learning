@@ -18,13 +18,16 @@ const validOrigin = iframeBaseURL.origin;
 
 interface IProps {
   initialValue: string;
+  rawContent: string;
   onChange?: (value: string) => void;
+  onRawChange?: (value: string) => void;
+  headerContent?: React.ReactNode;
 }
 
 export const IframeControl: React.FC<IProps> = (props) => {
   const { isAdminUser } = useAuth();
   const { branch, unit } = useCurriculum();
-  const { initialValue, onChange} = props;
+  const { initialValue, rawContent, onChange, onRawChange, headerContent} = props;
   const [ currentTab, setCurrentTab ] = React.useState<"editor" | "rawJson">("editor");
 
   useEffect(() => {
@@ -35,6 +38,7 @@ export const IframeControl: React.FC<IProps> = (props) => {
   }, [initialValue]);
 
   const handleUpdateContent = useCallback((content: string) => onChange?.(content), [onChange]);
+  const handleUpdateRawContent = useCallback((content: string) => onRawChange?.(content), [onRawChange]);
 
   const isValidMessageEvent = (event: MessageEvent) => {
     return event.data.type === "updateContent" &&
@@ -86,7 +90,7 @@ export const IframeControl: React.FC<IProps> = (props) => {
   };
 
   const handleSaveRawJson = (newJson: any) => {
-    handleUpdateContent(JSON.stringify(newJson, null, 2));
+    handleUpdateRawContent(JSON.stringify(newJson, null, 2));
   };
 
   const renderIframe = () => {
@@ -121,10 +125,11 @@ export const IframeControl: React.FC<IProps> = (props) => {
               <button onClick={handleReload}>Reload</button>
               <div>(reload needed if you update and save the raw json)</div>
             </div>
+            {headerContent}
             {renderIframe()}
           </div>
           <div className={`iframe-control-tab-pane ${currentTab === "rawJson" ? "active" : ""}`}>
-            <RawSettingsControl initialValue={initialValue} onSave={handleSaveRawJson} />
+            <RawSettingsControl initialValue={rawContent} onSave={handleSaveRawJson} />
           </div>
         </div>
       </div>
