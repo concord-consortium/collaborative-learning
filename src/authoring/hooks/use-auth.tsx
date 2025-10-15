@@ -154,9 +154,10 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
   const isAdminUser = useMemo(() => {
     if (!user?.email) return false;
+    const otherCCEmailAddresses = ["doug@zoopdoop.com", "lbond@alum.mit.edu"];
     return user.email.endsWith("@concord.org")
       || user.email === fakeAuthUser.email
-      || user.email === "doug@zoopdoop.com";
+      || otherCCEmailAddresses.includes(user.email);
   }, [user?.email]);
 
   const value: Auth = {
