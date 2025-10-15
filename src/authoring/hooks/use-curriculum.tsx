@@ -20,6 +20,11 @@ export type PerBranchMetadata = {
 
 export type BranchMetadata = Record<string, PerBranchMetadata>;
 
+export type ExemplarFile = {
+  path: string;
+  title: string;
+};
+
 export type CurriculumContextValue = {
   branch: string | undefined;
   setBranch: (newBranch?: string, updateHash?: boolean) => void;
@@ -36,6 +41,7 @@ export type CurriculumContextValue = {
   reset: () => void;
   saveState: SaveState;
   branchMetadata: BranchMetadata;
+  exemplarFiles: ExemplarFile[];
 };
 
 export const defaultPath = "config/curriculumTabs";
@@ -60,6 +66,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
   const filesRef = useRef<firebase.database.Reference | undefined>(undefined);
   const [saveState, setSaveState] = useImmer<SaveState | undefined>(undefined);
   const [branchMetadata, setBranchMetadata] = useImmer<BranchMetadata>({});
+  const [exemplarFiles, setExemplarFiles] = useImmer<ExemplarFile[]>([]);
   const saveUnitConfigRef = useRef(false);
   const saveStateClearTimeoutRef = useRef<number>();
 
@@ -247,6 +254,19 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     }
   }, [api, branch, unit, unitConfig, setError, setSaveState, authoringPreview]);
 
+  useEffect(() => {
+    const newExemplarFiles = Object.entries(files || {})
+      .filter(([_key, file]) => file.type === "exemplar")
+      .reduce<ExemplarFile[]>((acc, [exemplarPath, file]) => {
+        acc.push({
+          path: exemplarPath,
+          title: file.title ?? "Unknown Exemplar",
+        });
+        return acc;
+      }, []);
+    setExemplarFiles(newExemplarFiles);
+  }, [files, setExemplarFiles]);
+
   const value: CurriculumContextValue = {
     branch,
     setBranch,
@@ -263,6 +283,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     reset,
     saveState,
     branchMetadata,
+    exemplarFiles
   };
 
   return (
