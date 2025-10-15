@@ -31,7 +31,7 @@ const ExemplarMetadata: React.FC<Props> = (props) => {
     <div className="exemplar-metadata-container">
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="horizontalGroup">
-          <div className="vertical  wide">
+          <div className="vertical wide">
             <label htmlFor="title">Title</label>
             <input
               defaultValue={settings.title}

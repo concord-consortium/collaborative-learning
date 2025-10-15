@@ -91,6 +91,10 @@ const Workspace: React.FC = () => {
   const onChangeInnerContent = (newInnerContent: string) => {
     try {
       // the content updated by the iframe is the inner content field
+      if (!contentRef.current) {
+        console.error("contentRef.current is null in onChangeInnerContent");
+        return;
+      }
       const updatedContent = {...contentRef.current, content: JSON.parse(newInnerContent)};
       saveContent(updatedContent);
     } catch (e) {
