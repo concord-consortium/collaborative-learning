@@ -7,6 +7,7 @@ import "./exemplar-metadata.scss";
 interface Props {
   title: string;
   tag: string;
+  tags: string[];
   onChange: (metadata: any) => void;
 }
 
@@ -42,10 +43,17 @@ const ExemplarMetadata: React.FC<Props> = (props) => {
           </div>
           <div className="vertical wide">
             <label htmlFor="tag">Tag</label>
-            <input
+            <select
               defaultValue={settings.tag}
               {...register("tag", { required: "Tag is required" })}
-            />
+            >
+              {props.tags.map((tag) => (
+                <option key={tag} value={tag}>{tag}</option>
+              ))}
+              {props.tags.length === 0 && (
+                <option value="">No tags available (add them in the AI Settings page)</option>
+              )}
+            </select>
             {errors.tag && <div className="error">{errors.tag.message}</div>}
           </div>
         </div>
