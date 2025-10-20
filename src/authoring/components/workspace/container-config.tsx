@@ -57,14 +57,16 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
   const item = itemPath ? getCurriculumItem(unitConfig, teacherGuideConfig, itemPath) : undefined;
 
   const { defaultValues, itemType, childType } = useMemo(() => {
-    if (!item) return {
-      defaultValues: undefined,
-      itemType: undefined,
-      childType: undefined,
-    };
+    if (!item) {
+      return {
+        defaultValues: undefined,
+        itemType: undefined,
+        childType: undefined,
+      };
+    }
 
-    let itemType: string | undefined = undefined;
-    let childType: string | undefined = undefined;
+    let _itemType: string | undefined = undefined;
+    let _childType: string | undefined = undefined;
     let children: UnitChild[] = [];
     let firstOrdinal: number | undefined = undefined;
 
@@ -78,25 +80,25 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
         title: child.title,
         originalIndex: index,
       };
-    }
+    };
 
     if (isUnit(item)) {
-      itemType = "Unit";
-      childType = "Investigation";
+      _itemType = "Unit";
+      _childType = "Investigation";
       children = item.investigations.map(generateChildrenData);
     }
     if (isInvestigation(item)) {
-      itemType = "Investigation";
-      childType = "Problem";
+      _itemType = "Investigation";
+      _childType = "Problem";
       children = item.problems.map(generateChildrenData);
     }
     if (isProblem(item)) {
-      itemType = "Problem";
-      childType = "Section";
+      _itemType = "Problem";
+      _childType = "Section";
     }
     return {
-      itemType,
-      childType,
+      itemType: _itemType,
+      childType: _childType,
       defaultValues: {
         title: item.title,
         firstOrdinal,
@@ -105,7 +107,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
     };
   }, [item]);
 
-  const { handleSubmit, register, control, reset, formState: { errors } } = useForm<IUnitParentFormInputs>({
+  const { handleSubmit, register, control, reset } = useForm<IUnitParentFormInputs>({
     defaultValues,
     mode: "onChange",
   });
@@ -134,7 +136,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
     const itemPathParts = itemPath.split("/");
 
     const updateUnitDraft = (draft: WritableDraft<IUnit> | undefined) => {
-      if (!draft) return
+      if (!draft) return;
 
       const currentItem = getUnitItem(draft, itemPathParts);
       if (!currentItem) return;
@@ -257,7 +259,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
               ))}
               <tr>
                 <td>
-                  <button type="button" onClick={() => { childrenFieldArray.append({ title: "" })}}>
+                  <button type="button" onClick={() => { childrenFieldArray.append({ title: "" }); }}>
                     Add { childType }
                   </button>
                 </td>
