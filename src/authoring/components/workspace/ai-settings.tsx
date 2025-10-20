@@ -1,11 +1,12 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useForm, useWatch, SubmitHandler, useFieldArray } from "react-hook-form";
+import { useForm, useWatch, SubmitHandler, useFieldArray, useController } from "react-hook-form";
+import { WritableDraft } from "immer";
+import { capitalize } from "lodash";
 
-import { AIEvaluation, IAuthorTool, Summarizer } from "../../types";
+import { AIEvaluation, CommentRole, commentRoles, IAuthorTool, Summarizer } from "../../types";
 import { useCurriculum } from "../../hooks/use-curriculum";
 import { kAITileType } from "../../../plugins/ai/ai-types";
-import { WritableDraft } from "immer";
 
 interface CommentTag {
   label: string;
@@ -15,6 +16,7 @@ interface CommentTag {
 interface AISettingsFormInputs {
   tagPrompt: string;
   commentTags: CommentTag[];
+  enableCommentRoles: CommentRole[];
   aiEvaluation?: AIEvaluation | "";
   aiPrompt: {
     systemPrompt: string;
@@ -35,7 +37,13 @@ const isAIAuthorTool = (tool: IAuthorTool | WritableDraft<IAuthorTool>) => {
 const AISettings: React.FC = () => {
   const { unitConfig, setUnitConfig, saveState } = useCurriculum();
   const settings: AISettingsFormInputs = useMemo(() => {
-    const { tagPrompt, aiEvaluation, commentTags: rawCommentTags, aiPrompt } = unitConfig?.config || {};
+    const {
+      tagPrompt,
+      aiEvaluation,
+      commentTags: rawCommentTags,
+      enableCommentRoles,
+      aiPrompt
+    } = unitConfig?.config || {};
 
     const commentTags: CommentTag[] = !rawCommentTags
       ? []
@@ -54,6 +62,7 @@ const AISettings: React.FC = () => {
     return {
       tagPrompt: tagPrompt ?? "",
       commentTags: commentTags ?? [],
+      enableCommentRoles: enableCommentRoles ?? [],
       aiEvaluation,
       aiPrompt: {
         systemPrompt: aiPrompt?.systemPrompt ?? "",
@@ -73,6 +82,11 @@ const AISettings: React.FC = () => {
     mode: "onChange",
   });
   const commentTagsFieldArray = useFieldArray({ control, name: "commentTags" });
+
+  const { field: { value: selectedCommentRoles = [], onChange: setCommentRoles } } = useController({
+    name: "enableCommentRoles",
+    control
+  });
 
   // listen for changes to aiEvaluation so we can enable/disable related fields
   const currentAiEvaluation = useWatch({ control, name: "aiEvaluation" });
@@ -116,6 +130,7 @@ const AISettings: React.FC = () => {
           }
           return obj;
         }, {} as Record<string, string>);
+        config.enableCommentRoles = data.enableCommentRoles;
 
         if (!config.aiPrompt) {
           // create new aiPrompt object with categories initialized to empty array
@@ -170,6 +185,29 @@ const AISettings: React.FC = () => {
           {...register("tagPrompt", { required: "Tag prompt is required" })}
         />
         {errors.tagPrompt && <span className="form-error">{errors.tagPrompt.message}</span>}
+      </div>
+      <div>
+        <fieldset>
+          <legend>Users that can use the comments panel (Enable Comment Roles)</legend>
+          <div className="horizontalGroup">
+            {commentRoles.map(role => (
+              <label key={role} className="horizontal middle">
+                <input
+                  type="checkbox"
+                  checked={selectedCommentRoles.includes(role)}
+                  onChange={() => {
+                    setCommentRoles(
+                      selectedCommentRoles.includes(role)
+                        ? selectedCommentRoles.filter(r => r !== role)
+                        : [...selectedCommentRoles, role]
+                    );
+                  }}
+                />
+                <span>{capitalize(role)}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
       </div>
       <table>
         <thead>
