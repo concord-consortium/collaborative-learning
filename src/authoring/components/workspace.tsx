@@ -11,6 +11,7 @@ import { useCurriculum } from "../hooks/use-curriculum";
 import NavTabs from "./workspace/nav-tabs";
 import AISettings from "./workspace/ai-settings";
 import ExemplarMetadata from "./editors/exemplar-metadata";
+import { ContainerConfig } from "./workspace/container-config";
 
 import "./workspace.scss";
 
@@ -21,7 +22,7 @@ const Workspace: React.FC = () => {
   const [status, setStatus] = useImmer<"loading" | "loaded" | "notImplemented" | "error">("loading");
   const [contentPath, setContentPath] = useImmer<string | undefined>(undefined);
   const lastContentPathRef = useRef<string | undefined>(undefined);
-  const isConfigPath = path?.startsWith("config/");
+  const isConfigPath = path?.startsWith("config/") || path?.endsWith("/containerConfig");
   const contentRef = useRef(content);
 
   useEffect(() => {
@@ -38,6 +39,8 @@ const Workspace: React.FC = () => {
     }
 
     setContentPath(undefined);
+    // For the config paths we are going to be setting the status incorrectly here
+    // but the status is ignored when isConfigPath is true
     setStatus("notImplemented");
   }, [path, api, unit, setContentPath, setStatus]);
 
@@ -124,6 +127,10 @@ const Workspace: React.FC = () => {
   };
 
   const renderConfig = () => {
+    if (path?.endsWith("/containerConfig")) {
+      return <ContainerConfig key={path} path={path} />;
+    }
+
     switch (path) {
       case "config/raw":
         return <RawSettingsControl initialValue={unitConfig} onSave={handleSaveRawUnitConfig} />;

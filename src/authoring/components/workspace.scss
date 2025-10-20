@@ -94,6 +94,13 @@
           padding-right: 0;
         }
       }
+
+      &.containerChildrenTable {
+        margin-left: 20px;
+        td {
+          text-align: left;
+        }
+      }
     }
 
     label, .sectionLabel {
