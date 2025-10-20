@@ -107,7 +107,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
     };
   }, [item]);
 
-  const { handleSubmit, register, control, reset } = useForm<IUnitParentFormInputs>({
+  const { handleSubmit, register, control, reset, formState: { errors } } = useForm<IUnitParentFormInputs>({
     defaultValues,
     mode: "onChange",
   });
@@ -216,6 +216,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
           defaultValue={defaultValues?.title}
           {...register("title", { required: "Title is required" })}
         />
+        {errors.title && <span className="form-error">{errors.title.message}</span>}
       </div>
       { !isProblem(item) && (
         <>
@@ -227,6 +228,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
               defaultValue={defaultValues?.firstOrdinal}
               {...register("firstOrdinal", { required: "First Ordinal is required" })}
             />
+            {errors.firstOrdinal && <span className="form-error">{errors.firstOrdinal.message}</span>}
           </div>
           <div className="sectionLabel">{childType}s</div>
           <table className="containerChildrenTable">
@@ -240,22 +242,27 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
                 // The items in the unit don't have ids, however react-hook-form does add an
                 // id property to each item in the field array. These ids look lik UUIDs.
                 // It isn't clear what this id is tied to.
-                <tr key={index}>
-                  <td>
-                    <input
-                      type="text"
-                      defaultValue={child.title}
-                      {...register(`children.${index}.title`, { required: "Title is required" })}
-                    />
-                  </td>
-                  <td>
-                    <button type="button" onClick={() => {
-                      childrenFieldArray.remove(index);
-                    }}>
-                      Remove
-                    </button>
-                  </td>
-                </tr>
+                <React.Fragment key={child.id}>
+                  <tr key={index}>
+                    <td>
+                      <input
+                        type="text"
+                        defaultValue={child.title}
+                        {...register(`children.${index}.title`, { required: "Title is required" })}
+                      />
+                    </td>
+                    <td>
+                      <button type="button" onClick={() => {
+                        childrenFieldArray.remove(index);
+                      }}>
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                  { errors.children?.[index]?.title && (
+                    <tr><td colSpan={2} className="form-error">{errors.children?.[index]?.title?.message}</td></tr>
+                  )}
+                </React.Fragment>
               ))}
               <tr>
                 <td>
