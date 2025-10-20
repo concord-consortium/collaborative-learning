@@ -86,6 +86,8 @@ const Workspace: React.FC = () => {
     saveIFrameContent({...metadata, content: contentRef.current.content});
   };
 
+  const exemplarTags = unitConfig?.config?.aiPrompt?.categories ?? [];
+
   const onChangeInnerContent = (newInnerContent: string) => {
     try {
       // the content updated by the iframe is the inner content field
@@ -162,6 +164,7 @@ const Workspace: React.FC = () => {
             <ExemplarMetadata
               title={content.title}
               tag={content.tag}
+              tags={exemplarTags}
               onChange={onChangeMetadata}
             />;
           break;
