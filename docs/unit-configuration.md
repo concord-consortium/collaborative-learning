@@ -327,3 +327,24 @@ Additionally these buttons are supported and can be added to the toolbar if the 
 - `new-variable`
 - `insert-variable`
 - `edit-variable`
+
+## Problem Sections
+
+There are 3 parts of the unit configuration involved in the definition of problem sections:
+- `/sections`
+- `/config/navTabs/tabSpecs[tab = "problems"]/sections`
+- `/investigations[]/problems[]/sections`
+
+`/investigations[]/problems[]/sections` can either have inline problem section content or it can be a URL to the section content stored in a different file. This array of sections determines the sub tabs shown within the problem tab. When `autoSectionProblemDocuments` is enabled, the array of sections in `/investigations[]/problems[]/sections` is used to add headers and placeholders to the default document seen by the student when they first open the document.
+
+In the `/sections` map the key is the "type" of the section. This type can can be any string the author wants. In `/investigations[]/problems[]/sections` the content has a `type` field that must match one keys in the `/sections` map. The title used for the section sub tab within the problem tab is taken from the title defined in the matching `/sections` item. The title and initials of the from the entry in `/sections` is used in the header created by `autoSectionProblemDocuments`.
+
+The type values are also used to identify the problem section in the navigation system. So when CLUE records which tab the user is looking at (PersistentUI) it uses a path ending with this type value. Because of this there should not be multiple sections in a problem's `/investigations[]/problems[]/sections` that have the same type.
+
+Despite its name the `/config/navTabs/tabSpecs[tab = "problems"]/sections` are not used for the sub tabs. The items in this sections array do not seem to be used by the runtime at all. It might be used by the authoring system in the future.
+
+### Authoring
+
+For authoring we need a list of section types that can be used for problems sections. We also need to ensure these sections are not duplicated. Originally the plan was to provide unit wide list of sections that was ordered. And then in each problem the author could enable or disable these unit wide sections without being able to re-order them. This prevents authors from adding duplicate sections. However it doesn't match the runtime's support for different orders of sections within each problem.
+
+What we probably need is a way for users to add sections to a problem and set their type. And then when they save this form a validation can prevent them from saving it with a duplicate section type. As long as the only way to set the section type is at the problem level configuration, then the validation can make sure it is unique.
