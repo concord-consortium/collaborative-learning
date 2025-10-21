@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./left-nav.scss";
 import { useCurriculum } from "../hooks/use-curriculum";
 import { useAuth } from "../hooks/use-auth";
+import { getUnitChildrenTree } from "../utils/nav-path";
 
 // Tree node type
 export interface TreeNode {
@@ -54,23 +55,7 @@ const LeftNav: React.FC<IProps> = ({ onMediaLibraryClicked }) => {
         {
           id: "investigations",
           label: "Investigations",
-          children: unitConfig?.investigations?.map(inv => ({
-            id: `investigation-${inv.ordinal}`,
-            label: inv.title,
-            children: inv.problems?.map(prob => ({
-              id: `problem-${prob.ordinal}`,
-              label: prob.title,
-              children: prob.sections?.map((sectionPath, index) => {
-                const file = files?.[sectionPath];
-                const section = file && file.type ? unitConfig.sections?.[file.type] : undefined;
-                return {
-                  id: `section-${index + 1}`,
-                  label: section?.title ?? `Unknown Section (${sectionPath})`,
-                  path: sectionPath
-                };
-              }) || [],
-            })) || []
-          })) || []
+          children: getUnitChildrenTree(unitConfig, files),
         }
       ]
     };
@@ -79,24 +64,7 @@ const LeftNav: React.FC<IProps> = ({ onMediaLibraryClicked }) => {
       result.children.push({
         id: "teacher-guides",
         label: "Teacher Guides",
-        children: teacherGuideConfig?.investigations?.map(inv => ({
-          id: `investigation-${inv.ordinal}`,
-          label: inv.title,
-          children: inv.problems?.map(prob => ({
-            id: `problem-${prob.ordinal}`,
-            label: prob.title,
-            children: prob.sections?.map((sectionPath, index) => {
-              const path = `teacher-guide/${sectionPath}`;
-              const file = files?.[path];
-              const section = file && file.type ? teacherGuideConfig.sections?.[file.type] : undefined;
-              return {
-                id: `section-${index + 1}`,
-                label: section?.title ?? `Unknown Section (${path})`,
-                path
-              };
-            }) || [],
-          })) || []
-        })) || []
+        children: getUnitChildrenTree(teacherGuideConfig, files, "teacher-guide/"),
       });
     }
 
