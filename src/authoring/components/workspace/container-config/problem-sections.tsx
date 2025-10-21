@@ -1,6 +1,5 @@
-import React, { useMemo } from "react";
-import { Control, FieldErrors, useFieldArray, UseFormRegister } from "react-hook-form";
-import { useCurriculum } from "src/authoring/hooks/use-curriculum";
+import React from "react";
+import { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { IUnitParentFormInputs } from "./container-config-types";
 
 interface UnitItemChildrenProps {
@@ -40,4 +39,4 @@ export const ProblemSections: React.FC<UnitItemChildrenProps> = (
     <div className="problemSections">
     </div>
   );
-}
+};

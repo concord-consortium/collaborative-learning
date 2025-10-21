@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { IInvestigation, IProblem, IUnit } from "../../../types";
 import { useCurriculum } from "../../../hooks/use-curriculum";
 import { CurriculumItem, getCurriculumItem, getUnitItem } from "../../../utils/nav-path";
@@ -107,8 +107,6 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
   useEffect(() => {
     reset(defaultValues);
   }, [reset, defaultValues]);
-
-  const childrenFieldArray = useFieldArray({ control, name: "children" });
 
   if (!pathMatch) {
     return <div>Invalid path for ContainerConfig: {path}</div>;
