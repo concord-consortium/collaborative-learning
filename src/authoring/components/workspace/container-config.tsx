@@ -234,6 +234,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
           <table className="containerChildrenTable">
             <thead>
               <tr>
+                <th className="reorderColumn">Reorder</th>
                 <th>Title</th>
               </tr>
             </thead>
@@ -244,6 +245,28 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
                 // It isn't clear what this id is tied to.
                 <React.Fragment key={child.id}>
                   <tr key={index}>
+                    <td className="reorderColumn">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (index > 0) childrenFieldArray.swap(index, index - 1);
+                        }}
+                        disabled={index === 0}
+                        style={{ marginLeft: 4 }}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (index < childrenFieldArray.fields.length - 1) childrenFieldArray.swap(index, index + 1);
+                        }}
+                        disabled={index === childrenFieldArray.fields.length - 1}
+                        style={{ marginLeft: 2 }}
+                      >
+                        ↓
+                      </button>
+                    </td>
                     <td>
                       <input
                         type="text"
@@ -252,9 +275,12 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
                       />
                     </td>
                     <td>
-                      <button type="button" onClick={() => {
-                        childrenFieldArray.remove(index);
-                      }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          childrenFieldArray.remove(index);
+                        }}
+                      >
                         Remove
                       </button>
                     </td>
@@ -265,7 +291,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
                 </React.Fragment>
               ))}
               <tr>
-                <td>
+                <td colSpan={2}>
                   <button type="button" onClick={() => { childrenFieldArray.append({ title: "" }); }}>
                     Add { childType }
                   </button>

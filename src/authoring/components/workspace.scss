@@ -100,6 +100,10 @@
         td {
           text-align: left;
         }
+        .reorderColumn {
+          // Force the table to minimize the width of this column
+          width: 1%;
+        }
       }
     }
 
