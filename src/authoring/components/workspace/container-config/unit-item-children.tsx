@@ -41,7 +41,7 @@ export const UnitItemChildren: React.FC<UnitItemChildrenProps> = (
             // id property to each item in the field array. These ids look like UUIDs.
             // It isn't clear what this id is tied to.
             <React.Fragment key={child.id}>
-              <tr key={index}>
+              <tr>
                 <td className="reorderColumn">
                   <button
                     type="button"

@@ -335,7 +335,7 @@ There are 3 parts of the unit configuration involved in the definition of proble
 - `/config/navTabs/tabSpecs[tab = "problems"]/sections`
 - `/investigations[]/problems[]/sections`
 
-`/investigations[]/problems[]/sections` can either have inline problem section content or it can be a URL to the section content stored in a different file. This array of sections determines the sub tabs shown within the problem tab. When `autoSectionProblemDocuments` the array of sections in `/investigations[]/problems[]/sections` is used to add headers and placeholders to the default document seen by the student when they first open the document.
+`/investigations[]/problems[]/sections` can either have inline problem section content or it can be a URL to the section content stored in a different file. This array of sections determines the sub tabs shown within the problem tab. When `autoSectionProblemDocuments` is enabled, the array of sections in `/investigations[]/problems[]/sections` is used to add headers and placeholders to the default document seen by the student when they first open the document.
 
 In the `/sections` map the key is the "type" of the section. This type can can be any string the author wants. In `/investigations[]/problems[]/sections` the content has a `type` field that must match one keys in the `/sections` map. The title used for the section sub tab within the problem tab is taken from the title defined in the matching `/sections` item. The title and initials of the from the entry in `/sections` is used in the header created by `autoSectionProblemDocuments`.
 
