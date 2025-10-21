@@ -236,7 +236,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
             <thead>
               <tr>
                 <th className="reorderColumn">Reorder</th>
-                <th>Title</th>
+                <th className="titleColumn">Title</th>
               </tr>
             </thead>
             <tbody>
@@ -268,7 +268,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
                         ↓
                       </button>
                     </td>
-                    <td>
+                    <td className="titleColumn">
                       <input
                         type="text"
                         defaultValue={child.title}
@@ -291,15 +291,13 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
                   )}
                 </React.Fragment>
               ))}
-              <tr>
-                <td colSpan={2}>
-                  <button type="button" onClick={() => { childrenFieldArray.append({ title: "" }); }}>
-                    Add { childType }
-                  </button>
-                </td>
-              </tr>
             </tbody>
           </table>
+          <div>
+            <button type="button" onClick={() => { childrenFieldArray.append({ title: "" }); }}>
+              Add { childType }
+            </button>
+          </div>
         </>
       )}
       <div className="bottomButtons">
