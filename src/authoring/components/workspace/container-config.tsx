@@ -36,7 +36,7 @@ function isProblem(item: CurriculumItem): item is IProblem {
 
 /**
  * We probably should somehow link the teacher guide structure with the main unit
- * the runtime matches the them up by the ordinal. So it looks at the investigation
+ * the runtime matches them up by the ordinal. So it looks at the investigation
  * ordinal and the problem ordinal and then tries to find the same thing in the
  * teacher guide.
  *
@@ -70,7 +70,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
     let children: UnitChild[] = [];
     let firstOrdinal: number | undefined = undefined;
 
-    const generateChildrenData = (child: IInvestigation | IProblem , index: number) => {
+    const generateChildrenData = (child: IInvestigation | IProblem, index: number) => {
       if (firstOrdinal === undefined) {
         firstOrdinal = child.ordinal;
       } else if (child.ordinal < firstOrdinal) {
@@ -193,9 +193,10 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
           return problem;
         });
 
-        if (isProblem(currentItem)) {
-          // Problems don't have children to update
-        }
+      }
+
+      if (isProblem(currentItem)) {
+        // Problems don't have children to update
       }
     };
 
@@ -234,17 +235,40 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
           <table className="containerChildrenTable">
             <thead>
               <tr>
-                <th>Title</th>
+                <th className="reorderColumn">Reorder</th>
+                <th className="titleColumn">Title</th>
               </tr>
             </thead>
             <tbody>
               {childrenFieldArray.fields.map((child, index) => (
                 // The items in the unit don't have ids, however react-hook-form does add an
-                // id property to each item in the field array. These ids look lik UUIDs.
+                // id property to each item in the field array. These ids look like UUIDs.
                 // It isn't clear what this id is tied to.
                 <React.Fragment key={child.id}>
                   <tr key={index}>
-                    <td>
+                    <td className="reorderColumn">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (index > 0) childrenFieldArray.swap(index, index - 1);
+                        }}
+                        disabled={index === 0}
+                        style={{ marginLeft: 4 }}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (index < childrenFieldArray.fields.length - 1) childrenFieldArray.swap(index, index + 1);
+                        }}
+                        disabled={index === childrenFieldArray.fields.length - 1}
+                        style={{ marginLeft: 2 }}
+                      >
+                        ↓
+                      </button>
+                    </td>
+                    <td className="titleColumn">
                       <input
                         type="text"
                         defaultValue={child.title}
@@ -252,9 +276,12 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
                       />
                     </td>
                     <td>
-                      <button type="button" onClick={() => {
-                        childrenFieldArray.remove(index);
-                      }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          childrenFieldArray.remove(index);
+                        }}
+                      >
                         Remove
                       </button>
                     </td>
@@ -264,15 +291,13 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
                   )}
                 </React.Fragment>
               ))}
-              <tr>
-                <td>
-                  <button type="button" onClick={() => { childrenFieldArray.append({ title: "" }); }}>
-                    Add { childType }
-                  </button>
-                </td>
-              </tr>
             </tbody>
           </table>
+          <div>
+            <button type="button" onClick={() => { childrenFieldArray.append({ title: "" }); }}>
+              Add { childType }
+            </button>
+          </div>
         </>
       )}
       <div className="bottomButtons">

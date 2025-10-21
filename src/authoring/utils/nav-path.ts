@@ -57,7 +57,7 @@ export const getCurriculumItem = (
   return undefined;
 };
 
-const kContainerConfigurationLabel = "⚙️ configuration";
+const kContainerConfigurationLabel = "⚙️ Configuration";
 
 export const getUnitChildrenTree = (
   unit: IUnit | undefined,
