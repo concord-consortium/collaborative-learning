@@ -36,7 +36,7 @@ function isProblem(item: CurriculumItem): item is IProblem {
 
 /**
  * We probably should somehow link the teacher guide structure with the main unit
- * the runtime matches the them up by the ordinal. So it looks at the investigation
+ * the runtime matches them up by the ordinal. So it looks at the investigation
  * ordinal and the problem ordinal and then tries to find the same thing in the
  * teacher guide.
  *
@@ -70,7 +70,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
     let children: UnitChild[] = [];
     let firstOrdinal: number | undefined = undefined;
 
-    const generateChildrenData = (child: IInvestigation | IProblem , index: number) => {
+    const generateChildrenData = (child: IInvestigation | IProblem, index: number) => {
       if (firstOrdinal === undefined) {
         firstOrdinal = child.ordinal;
       } else if (child.ordinal < firstOrdinal) {
@@ -193,9 +193,10 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
           return problem;
         });
 
-        if (isProblem(currentItem)) {
-          // Problems don't have children to update
-        }
+      }
+
+      if (isProblem(currentItem)) {
+        // Problems don't have children to update
       }
     };
 
@@ -241,7 +242,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
             <tbody>
               {childrenFieldArray.fields.map((child, index) => (
                 // The items in the unit don't have ids, however react-hook-form does add an
-                // id property to each item in the field array. These ids look lik UUIDs.
+                // id property to each item in the field array. These ids look like UUIDs.
                 // It isn't clear what this id is tied to.
                 <React.Fragment key={child.id}>
                   <tr key={index}>
