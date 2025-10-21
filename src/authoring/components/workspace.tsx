@@ -11,7 +11,7 @@ import { useCurriculum } from "../hooks/use-curriculum";
 import NavTabs from "./workspace/nav-tabs";
 import AISettings from "./workspace/ai-settings";
 import ExemplarMetadata from "./editors/exemplar-metadata";
-import { ContainerConfig } from "./workspace/container-config";
+import { ContainerConfig } from "./workspace/container-config/container-config";
 
 import "./workspace.scss";
 

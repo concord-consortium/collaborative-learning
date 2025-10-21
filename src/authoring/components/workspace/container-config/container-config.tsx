@@ -1,25 +1,15 @@
 import React, { useEffect, useMemo } from "react";
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
-import { IInvestigation, IProblem, IUnit } from "../../types";
-import { useCurriculum } from "../../hooks/use-curriculum";
-import { CurriculumItem, getCurriculumItem, getUnitItem } from "../../utils/nav-path";
+import { IInvestigation, IProblem, IUnit } from "../../../types";
+import { useCurriculum } from "../../../hooks/use-curriculum";
+import { CurriculumItem, getCurriculumItem, getUnitItem } from "../../../utils/nav-path";
 import { WritableDraft } from "immer";
+import { IUnitParentFormInputs, UnitChild } from "./container-config-types";
+import { UnitItemChildren } from "./unit-item-children";
+import { ProblemSections } from "./problem-sections";
 
 interface Props {
   path: string;
-}
-
-interface UnitChild {
-  title: string;
-  originalIndex?: number;
-}
-
-interface IUnitParentFormInputs {
-  title: string;
-  description?: string;
-  // This is used at the unit and investigation level
-  firstOrdinal?: number;
-  children: UnitChild[];
 }
 
 function isUnit(item: CurriculumItem): item is IUnit {
@@ -220,85 +210,21 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
         {errors.title && <span className="form-error">{errors.title.message}</span>}
       </div>
       { !isProblem(item) && (
-        <>
-          <div>
-            <label htmlFor="firstOrdinal">First {childType} Ordinal</label>
-            <input
-              type="number"
-              id="firstOrdinal"
-              defaultValue={defaultValues?.firstOrdinal}
-              {...register("firstOrdinal", { required: "First Ordinal is required" })}
-            />
-            {errors.firstOrdinal && <span className="form-error">{errors.firstOrdinal.message}</span>}
-          </div>
-          <div className="sectionLabel">{childType}s</div>
-          <table className="containerChildrenTable">
-            <thead>
-              <tr>
-                <th className="reorderColumn">Reorder</th>
-                <th className="titleColumn">Title</th>
-              </tr>
-            </thead>
-            <tbody>
-              {childrenFieldArray.fields.map((child, index) => (
-                // The items in the unit don't have ids, however react-hook-form does add an
-                // id property to each item in the field array. These ids look like UUIDs.
-                // It isn't clear what this id is tied to.
-                <React.Fragment key={child.id}>
-                  <tr key={index}>
-                    <td className="reorderColumn">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (index > 0) childrenFieldArray.swap(index, index - 1);
-                        }}
-                        disabled={index === 0}
-                        style={{ marginLeft: 4 }}
-                      >
-                        ↑
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (index < childrenFieldArray.fields.length - 1) childrenFieldArray.swap(index, index + 1);
-                        }}
-                        disabled={index === childrenFieldArray.fields.length - 1}
-                        style={{ marginLeft: 2 }}
-                      >
-                        ↓
-                      </button>
-                    </td>
-                    <td className="titleColumn">
-                      <input
-                        type="text"
-                        defaultValue={child.title}
-                        {...register(`children.${index}.title`, { required: "Title is required" })}
-                      />
-                    </td>
-                    <td>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          childrenFieldArray.remove(index);
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </td>
-                  </tr>
-                  { errors.children?.[index]?.title && (
-                    <tr><td colSpan={2} className="form-error">{errors.children?.[index]?.title?.message}</td></tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-          <div>
-            <button type="button" onClick={() => { childrenFieldArray.append({ title: "" }); }}>
-              Add { childType }
-            </button>
-          </div>
-        </>
+        <UnitItemChildren
+          childType={childType}
+          defaultValues={defaultValues}
+          register={register}
+          errors={errors}
+          control={control}
+        />
+      )}
+      { isProblem(item) && (
+        <ProblemSections
+          defaultValues={defaultValues}
+          register={register}
+          errors={errors}
+          control={control}
+        />
       )}
       <div className="bottomButtons">
         <button type="submit" disabled={saveState === "saving"}>Save</button>
