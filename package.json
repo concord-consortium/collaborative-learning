@@ -115,6 +115,7 @@
     "top-test:build:webpack": "cross-env DEPLOY_PATH=specific/release/ webpack --mode production --output-path top-test/specific/release",
     "top-test:build:copy-index": "cp top-test/specific/release/index-top.html top-test/index.html",
     "top-test:build:copy-editor": "mkdir -p top-test/editor && cp top-test/specific/release/editor/index-top.html top-test/editor/index.html",
+    "top-test:build:copy-authoring": "mkdir -p top-test/authoring && cp top-test/specific/release/authoring/index-top.html top-test/authoring/index.html",
     "top-test:build": "npm-run-all top-test:build:*",
     "top-test:serve": "npx http-server top-test",
     "build:version": "node ./scripts/write-version.js"
