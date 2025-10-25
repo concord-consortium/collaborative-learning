@@ -2,7 +2,7 @@ import {onCall, HttpsError} from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 import {
   escapeKey, IFirestoreMetadataDocumentParams, IFirestoreMetadataDocumentUnionParams, isCurriculumMetadata,
-  isDocumentMetadata, isWarmUpParams, networkDocumentKey,
+  isDocumentMetadata, isWarmUpParams,
 } from "../../shared/shared";
 import {validateUserContext} from "./user-context";
 
@@ -44,13 +44,6 @@ interface ICreateFirestoreMetadataDocumentParams extends IFirestoreMetadataDocum
 }
 
 // Creates a "commentable document" (metadata document) for the given content if one does not already exist.
-// For backward compatibility, if a legacy (prefixed) document exists, it will return that. Otherwise, it
-// will find or create an un-prefixed document. So going forward, only one metadata document will exist per
-// document content. This is a change from the legacy behavior where multiple prefixed documents could exist.
-// When the runtime code needs to write into the metadata document, it should first look for a prefixed metadata
-// document and if there isn't one, look for the un-prefixed metadata document. This approach will be compatible
-// with the legacy prefixed metadata documents. When the runtime code needs to read info from a metadata document
-// it searches for all metadata documents with a key matching the ID of the CLUE document.
 export async function createFirestoreMetadataDocumentIfNecessaryWithoutValidation(
   params?: ICreateFirestoreMetadataDocumentParams
 ) {
@@ -59,24 +52,13 @@ export async function createFirestoreMetadataDocumentIfNecessaryWithoutValidatio
   const firestore = admin.firestore();
   const kCollection = isCurriculumMetadata(document) ? "curriculum" : "documents";
   const kBaseDocumentKey = isCurriculumMetadata(document) ? document.path : document.key;
-  const kPrefixedDocumentKey = networkDocumentKey(uid, kBaseDocumentKey, context.network);
-  const kPrefixedDocPath = `${firestoreRoot}/${kCollection}/${kPrefixedDocumentKey}`;
   const kDocumentKey = escapeKey(kBaseDocumentKey);
   const kDocumentDocPath = `${firestoreRoot}/${kCollection}/${kDocumentKey}`;
-  let documentRef = firestore.doc(kPrefixedDocPath);
-
-  // see if a legacy prefixed document is already in firestore
-  let docReadResponse = await documentRef.get();
+  const documentRef = firestore.doc(kDocumentDocPath);
+  const docReadResponse = await documentRef.get();
   let documentContent = docReadResponse.data();
 
-  // if legacy document is not found, try the new unprefixed document path
-  if (!documentContent) {
-    documentRef = firestore.doc(kDocumentDocPath);
-    docReadResponse = await documentRef.get();
-    documentContent = docReadResponse.data();
-  }
-
-  // if we still don't have a document, create one
+  // if we don't have a document, create one
   if (!documentContent) {
     // convert empty/falsy networks to null
     const network = context.network || null;
@@ -87,7 +69,6 @@ export async function createFirestoreMetadataDocumentIfNecessaryWithoutValidatio
         // but for now we trust the client to provide valid values.
         ...document,
         context_id: context.classHash,
-        teachers: context.teachers,
         network,
       } :
       {
