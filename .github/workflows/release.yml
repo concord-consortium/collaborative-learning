@@ -46,6 +46,10 @@ jobs:
           aws s3 cp
           s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ inputs.version }}/editor/${{ env.SRC_FILE }}
           s3://${{ env.BUCKET }}/${{ env.PREFIX }}/editor/${{ inputs.dest-file }}
+      - run: >
+          aws s3 cp
+          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ inputs.version }}/authoring/${{ env.SRC_FILE }}
+          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/authoring/${{ inputs.dest-file }}
       - name: Update deployment status (success)
         if: success()
         uses: chrnorm/deployment-status@v2
