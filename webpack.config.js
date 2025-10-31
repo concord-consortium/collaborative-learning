@@ -280,6 +280,12 @@ module.exports = (env, argv) => {
         template: 'src/authoring/index.html'
       }),
       ...configHtmlPlugins({
+        chunks: ['iframe'],
+        filename: 'authoring-iframe/index.html',
+        publicPath: '.',
+        template: 'src/iframe/iframe.html'
+      }),
+      ...configHtmlPlugins({
         chunks: ['standalone'],
         filename: 'standalone/index.html',
       }),
