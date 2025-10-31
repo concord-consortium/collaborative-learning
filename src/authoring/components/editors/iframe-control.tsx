@@ -11,7 +11,7 @@ import "./iframe-control.scss";
 (window as any).DISABLE_FIREBASE_SYNC = true;
 
 const urlParams = new URLSearchParams(window.location.search);
-// note: .. is used below as iframe.html is in root and authoring is in authoring/
+// note: .. is used below as we are not in the root but rather in authoring/
 const iframeBase = urlParams.get("iframeBase") ?? "..";
 const iframeBaseURL = new URL(iframeBase, window.location.href);
 const validOrigin = iframeBaseURL.origin;
@@ -82,7 +82,7 @@ export const IframeControl: React.FC<IProps> = (props) => {
   }
   iframeParams.delete("fakeAuthoringAuth");
 
-  const iframeUrl = new URL(`${iframeBaseURL.toString()}iframe.html`);
+  const iframeUrl = new URL(`${iframeBaseURL.toString()}authoring-iframe/index.html`);
   iframeUrl.search = iframeParams.toString();
 
   const handleReload = () => {

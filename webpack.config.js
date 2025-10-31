@@ -276,8 +276,12 @@ module.exports = (env, argv) => {
       ...configHtmlPlugins({
         chunks: ['authoring'],
         filename: 'authoring/index.html',
-        publicPath: '.',
         template: 'src/authoring/index.html'
+      }),
+      ...configHtmlPlugins({
+        chunks: ['iframe'],
+        filename: 'authoring-iframe/index.html',
+        template: 'src/iframe/iframe.html'
       }),
       ...configHtmlPlugins({
         chunks: ['standalone'],
