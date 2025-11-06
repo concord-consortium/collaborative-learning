@@ -21,6 +21,7 @@
     "deploy:onAnalyzableProdDocWritten": "firebase deploy --only functions:functions-v2:onAnalyzableProdDocWritten",
     "deploy:onAnalysisDocumentPending": "firebase deploy --only functions:functions-v2:onAnalysisDocumentPending",
     "deploy:onAnalysisDocumentImaged": "firebase deploy --only functions:functions-v2:onAnalysisDocumentImaged",
+    "deploy:generateClassDataV2": "firebase deploy --only functions:functions-v2:generateClassData_v2",
     "logs": "firebase functions:log"
   },
   "engines": {
