@@ -449,7 +449,7 @@ function generateMarkdownTable(headers: string[], rows: string[][]): string {
     return "";
   }
 
-  const escapePipe = (text: string) => text.replace(/\|/g, "\\|");
+  const escapePipe = (stringOrNumber: string | number) => String(stringOrNumber).replace(/\|/g, "\\|");
   const headerRow = `| ${headers.map(escapePipe).join(" | ")} |`;
   const separatorRow = `| ${headers.map(() => "---").join(" | ")} |`;
 
