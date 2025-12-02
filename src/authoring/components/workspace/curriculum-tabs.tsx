@@ -2,7 +2,6 @@
 import React, { useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
-import { INavTabSection, ISection } from "../../types";
 import { useCurriculum } from "../../hooks/use-curriculum";
 
 interface ICurriculumTabFormInputs {
