@@ -208,7 +208,7 @@ The `unwrapped` parameter will open the document without any surrounding UI. Thi
 During development of features in the authoring system it is normally useful to develop using the emulator, for both the authoring-api backend functions
 and the realtime database storage of authoring metadata and changes.  Furthermore it is also useful to skip the Firebase authentication on each page load.
 
-It seems you also need to tell the functions to not verify the token by adding a `.env.local` file with:
+You also need to tell the functions to not verify the token by adding a `.env.local` file with:
 ```
 DANGEROUSLY_SKIP_AUTH_TOKEN_VALIDATION=true
 ```
@@ -220,6 +220,12 @@ Here are the steps to do that:
 3. In yet another terminal start CLUE up normally by running `npm start` in the root of CLUE.
 4. Load the authoring interface with the emulator and fakeAuthoringAuth parameters:  `http://localhost:8080/authoring?functions=emulator&firebase=emulator&firebaseEnv=staging&fakeAuthoringAuth=true`
 
+Alternatively, you can work on just the client side of authoring without starting the emulator:
+
+- Use a URL like:  
+  `http://localhost:8080/authoring?firebaseEnv=staging`
+
+- **Downside:** Each time the page is reloaded, it requires a new authentication with GitHub. GitHub will throttle these authentications if too many happen in a certain time period. If you are making lots of changes, you may eventually run into this problem and have to wait.
 ### QA
 
 Along with `dev`, `test`, `authed` and `demo` modes the app has a `qa` mode.  QA mode uses the same parameters as demo mode with one additional parameter:
