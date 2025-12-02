@@ -186,6 +186,19 @@ describe("mst", () => {
     expect(todo.text1).toBeUndefined();
   });
 
+  test("applySnapshot ignores unknown properties", () => {
+    const Todo1 = types.model({
+      text1: types.maybe(types.string),
+      text2: types.maybe(types.string)
+    });
+
+    const todo = Todo1.create({text1: "1", text2:"2"});
+    applySnapshot(todo, {text2: "changed", foo: "bar"} as any);
+    expect(todo.text1).toBeUndefined();
+    expect(todo.text2).toBe("changed");
+    expect((todo as any).foo).toBeUndefined();
+  });
+
   test("map set applies a snapshot to the existing object", () => {
     const TodoValue = types.model({
       name: types.string
