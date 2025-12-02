@@ -330,10 +330,12 @@ Additionally these buttons are supported and can be added to the toolbar if the 
 
 ## Problem Sections
 
-There are 3 parts of the unit configuration involved in the definition of problem sections:
+There are 2 active parts of the unit configuration involved in the definition of problem sections:
 - `/sections`
-- `/config/navTabs/tabSpecs[tab = "problems"]/sections`
 - `/investigations[]/problems[]/sections`
+
+There is a third part that is no longer used:
+- `/config/navTabs/tabSpecs[tab = "problems"]/sections`
 
 `/investigations[]/problems[]/sections` can either have inline problem section content or it can be a URL to the section content stored in a different file. This array of sections determines the sub tabs shown within the problem tab. When `autoSectionProblemDocuments` is enabled, the array of sections in `/investigations[]/problems[]/sections` is used to add headers and placeholders to the default document seen by the student when they first open the document.
 
@@ -341,7 +343,7 @@ In the `/sections` map the key is the "type" of the section. This type can can b
 
 The type values are also used to identify the problem section in the navigation system. So when CLUE records which tab the user is looking at (PersistentUI) it uses a path ending with this type value. Because of this there should not be multiple sections in a problem's `/investigations[]/problems[]/sections` that have the same type.
 
-Despite its name the `/config/navTabs/tabSpecs[tab = "problems"]/sections` are not used for the sub tabs. The items in this sections array do not seem to be used by the runtime at all. It might be used by the authoring system in the future.
+`/config/navTabs/tabSpecs[tab = "problems"]/sections` has not been used at runtime for a while now. It was used by authoring system until Dec. 2025. The authoring system now removes this property from the unit when an author updates the "Curriculum Tabs" form. At some point we ought remove this vestigial property from all of the units.
 
 ### Authoring
 

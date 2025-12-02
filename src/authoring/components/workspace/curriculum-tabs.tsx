@@ -7,7 +7,7 @@ import { useCurriculum } from "../../hooks/use-curriculum";
 
 interface ICurriculumTabFormInputs {
   tabLabel: string;
-  sections: INavTabSection[];
+  sections: Record<string, { title: string }>;
 }
 
 const CurriculumTabs: React.FC = () => {
@@ -23,29 +23,28 @@ const CurriculumTabs: React.FC = () => {
 
   const onSubmit: SubmitHandler<ICurriculumTabFormInputs> = (data) => {
     setUnitConfig(draft => {
-      if (draft && problemTabIndex >= 0) {
-        const tabSpec = draft.config.navTabs.tabSpecs[problemTabIndex];
-        tabSpec.label = data.tabLabel;
+      if (draft) {
+        if (problemTabIndex >= 0) {
+          const tabSpec = draft.config.navTabs.tabSpecs[problemTabIndex];
+          tabSpec.label = data.tabLabel;
 
-        // avoid an O(n²) lookup in the forEach below
-        const sectionMap: Record<string, ISection> = {};
-        Object.values(draft.sections).forEach(section => {
-          sectionMap[section.initials] = section;
-        });
+          // Remove tabSpec.sections from tabSpec as they are no longer used in runtime
+          if (tabSpec.sections) {
+            delete tabSpec.sections;
+          }
+        }
 
-        data.sections.forEach(({title}, index) => {
-          if (tabSpec.sections && index < tabSpec.sections.length) {
-            tabSpec.sections[index].title = title;
-
-            const initials = tabSpec.sections[index].initials;
-            if (initials && sectionMap[initials]) {
-              sectionMap[initials].title = title;
-            }
+        Object.entries(data.sections).forEach(([type, {title}]) => {
+          const section = draft.sections[type];
+          if (section) {
+            section.title = title;
           }
         });
       }
     });
   };
+
+  const sectionEntries = Object.entries(unitConfig?.sections || {});
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -60,14 +59,14 @@ const CurriculumTabs: React.FC = () => {
         {errors.tabLabel && <span>{errors.tabLabel.message}</span>}
       </div>
       <div className="sectionLabel">Curriculum Tab Subtab Labels</div>
-      {(problemTab?.sections ?? []).map((section, index) => (
-        <div key={index}>
+      {sectionEntries.map(([sectionType, section]) => (
+        <div key={sectionType}>
           <input
             type="text"
-            {...register(`sections.${index}.title`, { required: "Section title is required" })}
+            {...register(`sections.${sectionType}.title`, { required: "Section title is required" })}
             defaultValue={section.title}
           />
-          {errors.sections?.[index]?.title && <span>{errors.sections?.[index]?.title?.message}</span>}
+          {errors.sections?.[sectionType]?.title && <span>{errors.sections?.[sectionType]?.title?.message}</span>}
         </div>
       ))}
       <div className="bottomButtons">
