@@ -192,7 +192,7 @@ describe("mst", () => {
       text2: types.maybe(types.string)
     });
 
-    const todo = Todo1.create({text1: "1", text2:"2"});
+    const todo = Todo1.create({text1: "1", text2: "2"});
     applySnapshot(todo, {text2: "changed", foo: "bar"} as any);
     expect(todo.text1).toBeUndefined();
     expect(todo.text2).toBe("changed");
