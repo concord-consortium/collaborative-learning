@@ -77,7 +77,7 @@ function formatBinaryOperatorNode(
   // TODO: Should escape some characters in node names so the formula is more clear
   const formula =
     `${inputs.num1?.nodeName || "unset_num1"} ${operatorSymbol} ${inputs.num2?.nodeName || "unset_num2"} ` +
-    `${resultSymbol} nodeValue`;
+    `${resultSymbol} nodeValue`; // the formula is symbolic, so the result is just "nodeValue"
 
   // For current values, we'd need the actual input values from connections
   // For now, show placeholder
@@ -122,7 +122,7 @@ const logicOperatorSymbols: Record<string, string> = {
 };
 
 /**
- * Format a Math node
+ * Format a Logic node
  */
 function formatLogicNode(context: NodeFormatterContext): Record<string, string> {
   const { node } = context;
@@ -143,7 +143,7 @@ function formatUnaryOperatorNode(
   // TODO: Should escape some characters in node names so the formula is more clear
   const formula =
     numberSentence(inputs.num1?.nodeName || "unset_num1") +
-    ` nodeValue`;
+    ` nodeValue`; // the formula is symbolic, so the result is just "nodeValue"
 
   // For current values, we'd need the actual input values from connections
   // For now, show placeholder
