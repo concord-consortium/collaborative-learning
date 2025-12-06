@@ -233,59 +233,40 @@ export function summarize(normalizedModel: NormalizedModel, options: AiSummarize
       options.minimal ? "" : "This is an empty CLUE document with no content.",
       dataSets,
       "",
-      options
+      options,
+      1
     );
   }
 
   if (sections.length === 1 && !sections[0].sectionId) {
+    // No section header, so start rows at heading level 2
     return documentSummary(
       options.minimal ? "" : "The CLUE document consists of one or more rows, with one or more tiles within each row.",
       dataSets,
-      rowsSummary(sections[0].rows, "rowWithoutSection", options),
-      options
+      rowsSummary(sections[0].rows, 2, options),
+      options,
+      1
     );
   }
 
+  // Multiple sections, start sections at heading level 2
   return documentSummary(
     options.minimal ? "" : "The CLUE document consists of one or more sections containing one or more rows, with one or more tiles within each row.",
     dataSets,
-    sectionsSummary(normalizedModel, options),
-    options
+    sectionsSummary(normalizedModel, options, 2),
+    options,
+    1
   );
 }
 
-export const headingLevels = {
-  documentSummary: 1,
-  section: 2,
-  row: 3,
-  tile: 4,
-  rowWithoutSection: 2,
-  tileWithoutSection: 3,
-  dataSets: 2,
-  dataSet: 3,
-} as const;
-export type HeadingLevel = keyof typeof headingLevels;
-
-export const minimalHeadingLevels: Record<HeadingLevel, number|undefined> = {
-  documentSummary: 1,
-  section: 2,
-  tile: 3,
-  tileWithoutSection: 2,
-  dataSet: 2,
-  dataSets: undefined,
-  row: undefined,
-  rowWithoutSection: undefined,
-} as const;
-
-export function heading(headingLevel: HeadingLevel, headingText: string, options: AiSummarizerOptions): string {
-  const level = options.minimal ? minimalHeadingLevels[headingLevel] : headingLevels[headingLevel];
+export function heading(level: number, headingText: string): string {
   if (!level) {
     return "";
   }
   return "#".repeat(level) + ` ${headingText}\n\n`;
 }
 
-export function documentSummary(preamble: string, dataSets: NormalizedDataSet[], summary: string = "", options: AiSummarizerOptions): string {
+export function documentSummary(preamble: string, dataSets: NormalizedDataSet[], summary: string = "", options: AiSummarizerOptions, headingLevel: number = 1): string {
   const maybeTileInfo = summary.length > 0
     ? " Tiles are either static UI elements or interactive elements " +
       "that students can use."
@@ -297,12 +278,12 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
     ? `  The document contains ${dataSets.length} ${pluralize(dataSets.length, "data set", "data sets")} which ${pluralize(dataSets.length, "is", "are")} listed at the end of this summary under the "Data Sets" heading.`
     : "";
   const dataSetSummary = summary.length > 0 && dataSets.length > 0
-    ? "\n" + heading("dataSets", "Data Sets", options) +
+    ? "\n" + heading(headingLevel + 1, "Data Sets") +
       dataSets.map((dataSet) => {
         if (dataSet.tileIds.length === 0) { // Don't output if unused
           return "";
         }
-        return heading("dataSet", dataSet.name, options) +
+        return heading(headingLevel + 2, dataSet.name) +
           `This data set has an id of ${dataSet.id} and is used in ${dataSet.tileIds.length} ${pluralize(dataSet.tileIds.length, "tile", "tiles")} ` +
           `and contains ${dataSet.attributes.length} ${pluralize(dataSet.attributes.length, "attribute", "attributes")} ` +
           `(${dataSet.attributes.map(a => a.name).join(", ")}).` +
@@ -312,12 +293,12 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
     : "";
 
   if (options.minimal) {
-    return heading("documentSummary", "CLUE Document Summary", options) +
+    return heading(headingLevel, "CLUE Document Summary") +
       `${summary}\n` +
       `${dataSetSummary}`;
   } else {
     return (
-      heading("documentSummary", "CLUE Document Summary", options) +
+      heading(headingLevel, "CLUE Document Summary") +
       `${layoutInfo}${preamble}${maybeTileInfo}${maybeDataSetInfo}\n\n` +
       `${summary}\n` +
       `${dataSetSummary}\n`
@@ -325,27 +306,28 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
   }
 }
 
-export function sectionsSummary(normalizedModel: NormalizedModel, options: AiSummarizerOptions): string {
+export function sectionsSummary(normalizedModel: NormalizedModel, options: AiSummarizerOptions, headingLevel: number): string {
   const summaries = normalizedModel.sections.map((section, index) => {
     const maybeSectionId = section.sectionId ? ` (${section.sectionId})` : "";
-    return heading("section", `Section ${index + 1}${maybeSectionId}`, options) +
-      rowsSummary(section.rows, "row", options);
+    return heading(headingLevel, `Section ${index + 1}${maybeSectionId}`) +
+      rowsSummary(section.rows, headingLevel + 1, options);
   });
   return summaries.join("\n\n");
 }
 
-export function rowsSummary(rows: INormalizedRow[], headingLevel: HeadingLevel, options: AiSummarizerOptions): string {
+export function rowsSummary(rows: INormalizedRow[], headingLevel: number, options: AiSummarizerOptions): string {
   const summaries = rows.map((row) => {
-    const tileSummaries = tilesSummary(
+    let rowHeading = "";
+    let tileHeadingLevel = headingLevel;
+    if (!options.minimal) {
+      tileHeadingLevel = headingLevel + 1;
+      rowHeading = heading(headingLevel, `Row ${row.number}`);
+    }
+    return rowHeading + tilesSummary(
       row.tiles,
-      headingLevel === "rowWithoutSection" ? "tileWithoutSection" : "tile",
+      tileHeadingLevel,
       options
     );
-    if (options.minimal) {
-      return tileSummaries;
-    } else {
-      return heading(headingLevel, `Row ${row.number}`, options) + tileSummaries;
-    }
   });
   return summaries.join("\n\n");
 }
@@ -354,11 +336,11 @@ function tileTitle(tile: INormalizedTile): string {
   return tile.model?.title ? ` (${tile.model.title})` : "";
 }
 
-export function tilesSummary(tiles: INormalizedTile[], headingLevel: HeadingLevel, options: AiSummarizerOptions): string {
+export function tilesSummary(tiles: INormalizedTile[], headingLevel: number, options: AiSummarizerOptions): string {
   return tiles.map((tile) => {
     const summary = tileSummary(tile, options);
     if (summary) {
-      return heading(headingLevel, `Tile ${tile.number}${tileTitle(tile)}`, options) + summary;
+      return heading(headingLevel, `Tile ${tile.number}${tileTitle(tile)}`) + summary;
     }
     return "";
   })
