@@ -60,7 +60,9 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const appConfig = useAppConfig();
   const { unit } = useStores();
   const ordering = content?.getTilesInDocumentOrder();
+  // This looks in the prefixed location. Should now be used only for curriculum documents.
   const { data: comments } = useDocumentComments(focusDocument);
+  // This looks in the unprefixed location, which is appropriate for all user documents.
   const { data: simplePathComments } = useDocumentCommentsAtSimplifiedPath(focusDocument);
   const { playbackTime } = useNavTabPanelInfo();
   const allComments = [...comments||[], ...simplePathComments||[]]
