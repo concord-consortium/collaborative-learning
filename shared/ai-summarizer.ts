@@ -8,6 +8,7 @@ TODO: Support tiles embedded in Questions.
 
 import { slateToMarkdown } from "./slate-to-markdown";
 import { generateTileDescription } from "./generate-tile-description";
+import { programToGraphviz } from "./dataflow-to-graphviz";
 
 // We can't load actual interfaces from src/models in this context.
 type DocumentContentSnapshotType = any;
@@ -53,6 +54,7 @@ export const defaultTileHandlers: TileHandler[] = [
   handleImageTile,
   handleTableTile,
   handleDrawingTile,
+  handleDataflowTile,
   handlePlaceholderTile,
 ];
 
@@ -412,6 +414,15 @@ function handleTableTile(tile: INormalizedTile, options: AiSummarizerOptions): s
 function handleDrawingTile(tile: INormalizedTile, options: AiSummarizerOptions): string|undefined {
   if (tile.model.content.type !== "Drawing") { return undefined; }
   return "This tile contains a drawing.";
+}
+
+function handleDataflowTile(tile: INormalizedTile, options: AiSummarizerOptions): string|undefined {
+  if (tile.model.content.type !== "Dataflow") { return undefined; }
+  let result = "This tile contains a dataflow diagram.";
+  if (!tile.model.content.program) return result;
+
+  result += "\n```dot\n" + programToGraphviz(tile.model.content.program) + "\n```";
+  return result;
 }
 
 function handlePlaceholderTile(tile: INormalizedTile, options: AiSummarizerOptions): string|undefined {
