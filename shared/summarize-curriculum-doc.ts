@@ -5,7 +5,7 @@
 // $ npx tsx summarize-curriculum-doc.ts
 
 // This script is in the shared directory because it isn't easy
-// for the scripts folder to import the the shared code. They have
+// for the scripts folder to import the shared code. They have
 // different package.json and tsconfig.json files. This causes
 // module resolution
 
