@@ -1,4 +1,4 @@
-import { documentSummarizer, TileHandler, defaultTileHandlers } from './ai-summarizer';
+import { documentSummarizer, TileHandler, defaultTileHandlers, TileHandlerParams } from './ai-summarizer';
 import documentSummarizerWithDrawings from './ai-summarizer-with-drawings';
 
 describe('ai-summarizer', () => {
@@ -1055,7 +1055,7 @@ describe('documentSummarizerWithDrawings', () => {
       };
 
       // Custom tile handler that overrides the drawing handler
-      const customDrawingHandler: TileHandler = (tile, options) => {
+      const customDrawingHandler: TileHandler = ({ tile }: TileHandlerParams) => {
         if (tile.model.content.type !== 'Drawing') return undefined;
         return 'Custom drawing description';
       };

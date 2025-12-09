@@ -9,7 +9,7 @@ import React from "react";
 import { renderDrawingObject } from "../src/plugins/drawing/components/drawing-object-manager";
 import { DrawingContentModel } from "../src/plugins/drawing/model/drawing-content";
 import { documentSummarizer, AiSummarizerOptions, defaultTileHandlers,
-  TileHandler, INormalizedTile } from "./ai-summarizer";
+  TileHandler, TileHandlerParams } from "./ai-summarizer";
 
 const enhancedTileHandlers: TileHandler[] = [
   handleDrawingTileWithSVG,
@@ -22,7 +22,7 @@ export default function documentSummarizerWithDrawings(content: any, options: Ai
   return documentSummarizer(content, { ...options, tileHandlers });
 }
 
-function handleDrawingTileWithSVG(tile: INormalizedTile, options: AiSummarizerOptions): string|undefined {
+function handleDrawingTileWithSVG({ tile }: TileHandlerParams): string|undefined {
   if (tile.model.content.type !== "Drawing") { return undefined; }
   // eslint-disable-next-line max-len
   return `This tile contains a drawing. The drawing is rendered below in an svg code fence:\n\`\`\`svg\n${renderDrawing(tile.model.content)}\n\`\`\``;

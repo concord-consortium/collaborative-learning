@@ -55,8 +55,12 @@ export const DocEditorApp = observer(function DocEditorApp() {
   });
   const [aiSummary, setAiSummary] = useState<string>();
 
-  const {showLocalReadOnly,showRemoteReadOnly,anyReadOnly} = settings;
-
+  const {
+    showLocalReadOnly,
+    showRemoteReadOnly,
+    anyReadOnly,
+    minimalAISummary
+  } = settings;
 
   const loadDocument = useCallback((text: string) => {
     const _parsedText = JSON.parse(text);
@@ -178,7 +182,11 @@ export const DocEditorApp = observer(function DocEditorApp() {
       setAiSummary(undefined);
     } else if (document.content) {
       setAiSummary(
-        documentSummarizerWithDrawings(getSnapshot(document.content), {includeModel: includeModelInAiSummary}));
+        documentSummarizerWithDrawings(
+          getSnapshot(document.content),
+          {includeModel: includeModelInAiSummary, minimal: minimalAISummary}
+        )
+      );
     }
   }
 
