@@ -509,9 +509,6 @@ function handleQuestionTile({ tile, headingLevel, tileMap, options }: TileHandle
     return result;
   }
   const responseRows = rowOrder.slice(1).map((rowId: string) => rowMap?.[rowId]).filter(Boolean);
-  if (responseRows.length === 0) {
-    return result;
-  }
 
   result += heading(headingLevel, "Question Response");
 
