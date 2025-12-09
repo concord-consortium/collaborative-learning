@@ -1,13 +1,18 @@
 #!/usr/bin/node
 
-// to run this script on Node 20
+// To run this script:
 // $ cd shared
 // $ npx tsx summarize-curriculum-doc.ts
 
+// The script runs the summarizeCurriculum function in
+// ai-summarizer.ts on a passed in section json from the
+// clue-curriculum repository. This function does not work
+// as well as the summarization of student CLUE documents.
+
 // This script is in the shared directory because it isn't easy
 // for the scripts folder to import the shared code. They have
-// different package.json and tsconfig.json files. This causes
-// module resolution
+// different package.json and tsconfig.json files. That causes
+// module resolution issues.
 
 import fs from "fs";
 import path from "path";
