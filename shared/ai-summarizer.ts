@@ -550,10 +550,10 @@ interface TileSummaryParams {
   headingLevel: number;
   options: AiSummarizerOptions;
 }
-export function tileSummary({tile, tileMap, headingLevel, options}: TileSummaryParams): string {
+export function tileSummary(params: TileSummaryParams): string {
+  const { tile, options } = params;
   const handlers = options.tileHandlers || defaultTileHandlers;
 
-  const params: TileHandlerParams = { tile, tileMap, headingLevel, options };
   for (const handler of handlers) {
     const summary = handler(params);
     if (summary !== undefined) {
