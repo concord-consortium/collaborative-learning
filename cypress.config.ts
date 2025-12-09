@@ -18,7 +18,7 @@ export default defineConfig({
   env: {
     coverage: false,
   },
-  defaultCommandTimeout: 60000,
+  defaultCommandTimeout: 30000,
   qaUnit: '/?appMode=qa&fakeClass=5&problem=1.1&unit=./demo/units/qa/content.json',
   qaUnitGroup: '/?appMode=qa&fakeClass=5&qaGroup=5&problem=1.1&unit=./demo/units/qa/content.json',
   qaUnitStudent5: '/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&problem=1.1&unit=./demo/units/qa/content.json',
