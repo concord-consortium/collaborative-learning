@@ -20,7 +20,7 @@ jest.mock("../lib/src/ai-categorize-document", () => {
   return {
     categorizeUrl: (file: string) => categorizeUrl(file),
     buildZodResponseSchema: actual.buildZodResponseSchema,
-    buildMessages: actual.buildMessages,
+    buildImageMessages: actual.buildImageMessages,
   };
 });
 
@@ -68,6 +68,7 @@ describe("functions", () => {
   beforeEach(async () => {
     await clearFirestoreData(projectConfig);
     await getDatabase().ref("demo").set(null);
+    jest.clearAllMocks();
   });
 
   describe("buildZodResponseSchema", () => {
@@ -478,8 +479,7 @@ describe("functions", () => {
       });
 
       expect(logger.info)
-        .toHaveBeenLastCalledWith("Creating comment for",
-          "analysis/queue/imaged/testdoc1");
+        .toHaveBeenLastCalledWith("onAnalysisDocumentImaged");
       expect(logger.warn)
         .toHaveBeenLastCalledWith("Error processing document",
           "analysis/queue/imaged/testdoc1", "AI refusal: AI reason");

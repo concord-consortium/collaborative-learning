@@ -5,6 +5,7 @@ const kDocEditorSettingsKey = "clue-doc-editor-settings";
 export const DocEditorSettings = types.model("DocEditorSettings", {
   showLocalReadOnly: true,
   showRemoteReadOnly: true,
+  minimalAISummary: false
 })
 .views(self => ({
   get anyReadOnly() {
@@ -28,9 +29,11 @@ export const DocEditorSettings = types.model("DocEditorSettings", {
   setShowLocalReadOnly(show: boolean) {
     self.showLocalReadOnly = show;
   },
-
   setShowRemoteReadOnly(show: boolean) {
     self.showRemoteReadOnly = show;
+  },
+  setMinimalAISummary(minimal: boolean) {
+    self.minimalAISummary = minimal;
   }
 }));
 

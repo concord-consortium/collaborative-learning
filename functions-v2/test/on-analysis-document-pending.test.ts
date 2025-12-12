@@ -84,6 +84,7 @@ describe("functions", () => {
           evaluator: "categorize-design",
           docImaged: expect.any(Object),
           docImageUrl: expect.stringContaining("shutterbug"),
+          summarizer: "image",
         });
       });
 

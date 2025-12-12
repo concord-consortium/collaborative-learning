@@ -54,6 +54,7 @@ describe("functions", () => {
           metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
           documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
           commentsPath: "demo/AI/documents/testdoc1/comments",
+          firestoreDocumentPath: "demo/AI/documents/testdoc1",
           docUpdated: "1001",
           evaluator: "categorize-design",
         });
@@ -91,6 +92,7 @@ describe("functions", () => {
           metadataPath: "authed/portals/learn/classes/democlass1/users/1/documentMetadata/testdoc1",
           documentPath: "authed/portals/learn/classes/democlass1/users/1/documents/testdoc1",
           commentsPath: "authed/learn/documents/testdoc1/comments",
+          firestoreDocumentPath: "authed/learn/documents/testdoc1",
           docUpdated: "1001",
           evaluator: "categorize-design",
         });
@@ -144,6 +146,7 @@ describe("functions", () => {
           metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
           documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
           commentsPath: "demo/AI/documents/testdoc1/comments",
+          firestoreDocumentPath: "demo/AI/documents/testdoc1",
           docUpdated: 1001,
           evaluator: "custom",
           aiPrompt: {

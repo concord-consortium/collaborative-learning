@@ -56,8 +56,9 @@ jobs:
       # https://github.com/cypress-io/github-action/issues/48
       fail-fast: false
       matrix:
-        container: [1, 2, 3, 4, 5, 6, 7]
-        # If we run out cypress test runs then we temporarily use only 1 worker because without cypress cloude
+        # 15 containers should run all the tests in 6 or 7 minutes. (plus initial compiling overhead)
+        container: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15']
+        # If we run out cypress test runs then we temporarily use only 1 worker because without cypress cloud
         # there is no parallelization
         # containers: [1]
     steps:

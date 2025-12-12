@@ -1,4 +1,4 @@
-import { documentSummarizer, TileHandler, defaultTileHandlers } from './ai-summarizer';
+import { documentSummarizer, TileHandler, defaultTileHandlers, TileHandlerParams } from './ai-summarizer';
 import documentSummarizerWithDrawings from './ai-summarizer-with-drawings';
 
 describe('ai-summarizer', () => {
@@ -307,6 +307,121 @@ describe('ai-summarizer', () => {
 
         const result = documentSummarizer(content, {});
         expect(result).toContain('This tile contains a drawing');
+      });
+
+      it('should handle data flow tiles', () => {
+        const content = {
+          rowOrder: ['row1'],
+          rowMap: {
+            row1: {
+              tiles: [{ tileId: 'tile1' }],
+              isSectionHeader: false
+            }
+          },
+          tileMap: {
+            tile1: {
+              id: 'tile1',
+              content: {
+                type: 'Dataflow'
+              }
+            }
+          }
+        };
+
+        const result = documentSummarizer(content, {});
+        expect(result).toContain('This tile contains a dataflow diagram');
+      });
+
+      describe('question tiles', () => {
+        const content = {
+          rowOrder: ['row1'],
+          rowMap: {
+            row1: {
+              tiles: [{ tileId: 'tile1' }],
+              isSectionHeader: false
+            }
+          },
+          tileMap: {
+            tile1: {
+              id: 'tile1',
+              content: {
+                type: 'Question',
+              }
+            },
+          }
+        };
+
+        it('should handle empty question tiles', () => {
+          const result = documentSummarizer(content, {});
+          expect(result).toContain('This is a question for students to answer');
+          expect(result).toContain('This question does not contain any response tiles');
+        });
+
+        it('should handle question tiles with a prompt and no response row', () => {
+          const contentWithPrompt = JSON.parse(JSON.stringify(content));
+          contentWithPrompt.tileMap.tile1.content = {
+            type: 'Question',
+            rowOrder: ['qRow1'],
+            rowMap: {
+              qRow1: {
+                tiles: [{ tileId: 'prompt' }],
+              },
+            }
+          };
+          contentWithPrompt.tileMap = {
+            ...contentWithPrompt.tileMap,
+            prompt: {
+              id: 'prompt',
+              content: {
+                type: 'Text',
+                format: 'plain',
+                text: 'Why is the sky blue?'
+              }
+            },
+          };
+          const result = documentSummarizer(contentWithPrompt, {});
+          expect(result).toContain('This is a question for students to answer');
+          expect(result).toContain('# Question Prompt');
+          expect(result).toContain('This question does not contain any response tiles');
+        });
+
+        it('should handle question tiles with prompt and response', () => {
+          const contentWithResponses = JSON.parse(JSON.stringify(content));
+          contentWithResponses.tileMap.tile1.content = {
+            type: 'Question',
+            rowOrder: ['qRow1', 'qRow2'],
+            rowMap: {
+              qRow1: {
+                tiles: [{ tileId: 'prompt' }],
+              },
+              qRow2: {
+                tiles: [{tileId: 'response'}],
+              }
+            }
+          };
+          contentWithResponses.tileMap = {
+            ...contentWithResponses.tileMap,
+            prompt: {
+              id: 'prompt',
+              content: {
+                type: 'Text',
+                format: 'plain',
+                text: 'Why is the sky blue?'
+              }
+            },
+            response: {
+              id: 'response',
+              content: {
+                type: 'Text',
+              }
+            }
+          };
+
+          const result = documentSummarizer(contentWithResponses, {});
+          expect(result).toContain('This is a question for students to answer');
+          expect(result).toContain('# Question Prompt');
+          expect(result).toContain('# Question Response');
+        });
       });
 
       it('should handle placeholder tiles', () => {
@@ -1055,7 +1170,7 @@ describe('documentSummarizerWithDrawings', () => {
       };
 
       // Custom tile handler that overrides the drawing handler
-      const customDrawingHandler: TileHandler = (tile, options) => {
+      const customDrawingHandler: TileHandler = ({ tile }: TileHandlerParams) => {
         if (tile.model.content.type !== 'Drawing') return undefined;
         return 'Custom drawing description';
       };
