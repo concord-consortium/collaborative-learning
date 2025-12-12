@@ -41,6 +41,8 @@ $ npm run test:emulator         # start the firestore and database emulators
 $ npm run test                  # run all tests in `functions` directory
 ```
 
+To run `on-analysis-document-imaged.test.ts` you also need to create a `functions-v2/.secret.local` file with `OPENAI_API_KEY=[secret_key]`. You can get the key from 1password.
+
 In this approach the functions are running inside of Jest and they connect to the emulated Firestore and Realtime database services.
 
 The tests use `firebase-functions-test`. This package does a little setup of environment variables so when the functions run they will connect to the emulator. This package also provides a way to mock some standard events and wraps the calls to the functions to emulate how they would be called in the cloud.  This is a simple and efficient way of testing the basic functionality without loading the function code into the emulator itself. The downside is that the functions are not responding to real events in Firestore or realtime database. If they are http functions they are not receiving the actual request event.
