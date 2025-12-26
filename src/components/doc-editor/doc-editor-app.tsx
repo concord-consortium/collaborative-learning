@@ -15,7 +15,7 @@ import { DocumentAnnotationToolbar } from "../document/document-annotation-toolb
 import { CanvasComponent } from "../document/canvas";
 import { DocEditorSettings } from "./doc-editor-settings";
 import { SettingsDialog } from "./settings-dialog";
-import documentSummarizerWithDrawings from "../../../shared/ai-summarizer-with-drawings";
+import documentSummarizerWithDrawings from "../../../shared/ai-summarizer/ai-summarizer-with-drawings";
 import { AiSummary } from "./ai-summary";
 
 import "../document/document.scss";

@@ -5,9 +5,9 @@ Creates markdown versions of CLUE documents, suitable for feeding to AI models.
 TODO: Support more tile types.
 */
 
-import { slateToMarkdown } from "./slate-to-markdown";
-import { generateTileDescription } from "./generate-tile-description";
-import { programToGraphviz } from "./dataflow-to-graphviz";
+import { slateToMarkdown } from "../slate-to-markdown";
+import { generateTileDescription } from "../generate-tile-description";
+import { programToGraphviz } from "../dataflow-to-graphviz";
 
 // We can't load actual interfaces from src/models in this context.
 type DocumentContentSnapshotType = any;

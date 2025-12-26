@@ -6,8 +6,8 @@ This uses the React renderer, which is not available in Firebase functions.
 
 import ReactDOMServer from "react-dom/server";
 import React from "react";
-import { renderDrawingObject } from "../src/plugins/drawing/components/drawing-object-manager";
-import { DrawingContentModel } from "../src/plugins/drawing/model/drawing-content";
+import { renderDrawingObject } from "../../src/plugins/drawing/components/drawing-object-manager";
+import { DrawingContentModel } from "../../src/plugins/drawing/model/drawing-content";
 import { documentSummarizer, AiSummarizerOptions, defaultTileHandlers,
   TileHandler, TileHandlerParams } from "./ai-summarizer";
 

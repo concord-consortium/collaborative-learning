@@ -16,7 +16,7 @@
 
 import fs from "fs";
 import path from "path";
-import { summarizeCurriculum } from "./ai-summarizer";
+import { summarizeCurriculum } from "./ai-summarizer/ai-summarizer";
 
 // Allow passing a file path as a CLI argument.
 const argPath = process.argv[2];
