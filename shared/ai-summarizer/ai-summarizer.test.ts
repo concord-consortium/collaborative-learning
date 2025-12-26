@@ -1,5 +1,7 @@
-import { documentSummarizer, TileHandler, defaultTileHandlers, TileHandlerParams } from './ai-summarizer';
+import { documentSummarizer } from './ai-summarizer';
+import { TileHandler, TileHandlerParams } from './ai-summarizer-types';
 import documentSummarizerWithDrawings from './ai-summarizer-with-drawings';
+import { defaultTileHandlers } from './ai-tile-summarizer';
 
 describe('ai-summarizer', () => {
   describe('documentSummarizer', () => {
@@ -819,8 +821,8 @@ describe('ai-summarizer', () => {
         };
 
         // Mock the generateTileDescription to throw an error
-        const originalGenerateTileDescription = require('./generate-tile-description').generateTileDescription;
-        jest.spyOn(require('./generate-tile-description'), 'generateTileDescription').mockImplementation(() => {
+        const originalGenerateTileDescription = require('../generate-tile-description').generateTileDescription;
+        jest.spyOn(require('../generate-tile-description'), 'generateTileDescription').mockImplementation(() => {
           throw new Error('Test error');
         });
 
