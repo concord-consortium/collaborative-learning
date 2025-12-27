@@ -41,6 +41,47 @@ export function handleImageTile({ tile, options }: TileHandlerParams): string|un
   return options.minimal ? "" : "This tile contains a static image. No additional information is available.";
 }
 
+export function handleGraphTile({ tile }: TileHandlerParams): string|undefined {
+  const { content } = tile.model;
+  if (content.type !== "Graph") { return undefined; }
+
+  let result = `This tile contains a graph`;
+  const { sharedDataSet } = tile;
+  if (sharedDataSet) {
+    result += ` which uses the "${sharedDataSet.name}" (${sharedDataSet.id}) data set.`;
+  }
+  const { axes, layers, plotType, xAttributeLabel, yAttributeLabel } = content;
+  result += ` The graph is rendered as a ${plotType}.`;
+
+  const config = layers[0]?.config;
+  if (config) {
+    const xAttributeID = config._attributeDescriptions?.x?.attributeID;
+    const xVariable = sharedDataSet?.attributes.find((attr: any) => attr.id === xAttributeID);
+    const xVariableName = xVariable?.name ?? "an unknown variable";
+    result += `\n\n${xVariableName} is plotted on the x axis.`;
+    const xAxis = axes.bottom ?? axes.top;
+    if (xAxis) {
+      result += ` This axis ranges from ${xAxis.min} to ${xAxis.max}.`;
+      if (xAttributeLabel) result += ` It is labeled "${xAttributeLabel}".`;
+    }
+
+    const yAttributeID = config._yAttributeDescriptions?.[0]?.attributeID;
+    if (yAttributeID) {
+      const yVariable = sharedDataSet?.attributes.find((attr: any) => attr.id === yAttributeID);
+      const yVariableName = yVariable?.name ?? "an unknown variable";
+      result += `\n\n${yVariableName} is plotted on the y axis.`;
+      const yAxis = axes.left ?? axes.rightNumeric ?? axes.rightCat;
+      if (yAxis) {
+        result += ` This axis ranges from ${yAxis.min} to ${yAxis.max}.`;
+        if (yAttributeLabel) result += ` It is labeled "${yAttributeLabel}".`;
+      }
+    }
+  }
+
+  // TODO: Add information about adornments
+  return result;
+}
+
 export function handleTableTile({ tile }: TileHandlerParams): string|undefined {
   if (tile.model.content.type !== "Table") { return undefined; }
   let result = `This tile contains a table`;
@@ -133,13 +174,14 @@ export function handlePlaceholderTile({ tile }: TileHandlerParams): string|undef
 }
 
 export const defaultTileHandlers: TileHandler[] = [
-  handleTextTile,
-  handleImageTile,
-  handleTableTile,
-  handleDrawingTile,
   handleDataflowTile,
-  handleQuestionTile,
+  handleDrawingTile,
+  handleGraphTile,
+  handleImageTile,
   handlePlaceholderTile,
+  handleQuestionTile,
+  handleTableTile,
+  handleTextTile,
 ];
 
 interface TileSummaryParams {

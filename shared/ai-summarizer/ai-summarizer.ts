@@ -90,7 +90,7 @@ export function parseContent(content: string): DocumentContentSnapshotType {
 export function normalize(model: DocumentContentSnapshotType) {
   const sections: NormalizedSection[] = [];
   const dataSets: NormalizedDataSet[] = [];
-  const {rowOrder, rowMap, tileMap, sharedModelMap} = model || {};
+  const { rowOrder, rowMap, tileMap, sharedModelMap } = model || {};
 
   const addSection = (sectionId?: string): NormalizedSection => {
     const newSection: NormalizedSection = {
@@ -155,13 +155,15 @@ export function normalize(model: DocumentContentSnapshotType) {
     for (const [id, entry] of Object.entries(sharedModelMap)) {
       const sharedModel: any = (entry as any).sharedModel;
       if (sharedModel?.type === "SharedDataSet") {
-        const {attributes, cases, name} = sharedModel.dataSet;
+        const { attributes, cases, name } = sharedModel.dataSet;
         const dataSet: NormalizedDataSet = {
           id,
           providerId: sharedModel.providerId,
           name,
           tileIds: (entry as any).tiles.map((tile: any) => `${tile}`),
-          attributes: (attributes || []).map((attr: any) => ({name: attr.name, values: attr.values || []})),
+          attributes: (attributes || []).map((attr: any) => ({
+            id: attr.id, name: attr.name, values: attr.values || []
+          })),
           numCases: cases.length,
           data: [],
         };
@@ -199,7 +201,7 @@ export function normalize(model: DocumentContentSnapshotType) {
 }
 
 export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | undefined, options: AiSummarizerOptions): string {
-  const {sections, dataSets} = normalizedModel;
+  const { sections, dataSets } = normalizedModel;
   if (sections.length === 0) {
     return documentSummary(
       options.minimal ? "" : "This is an empty CLUE document with no content.",

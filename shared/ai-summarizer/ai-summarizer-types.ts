@@ -13,7 +13,7 @@ export interface NormalizedDataSet {
   providerId: string;
   name: string;
   tileIds: string[];
-  attributes: {name: string, values: string[]}[];
+  attributes: { id: string, name: string, values: string[] }[];
   numCases: number;
   data: string[][];
 }
