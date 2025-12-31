@@ -1,6 +1,6 @@
 import { slateToMarkdown } from "../slate-to-markdown";
 import {
-  AiSummarizerOptions, INormalizedRow, INormalizedTile, TileHandler, TileHandlerParams, TileMap
+  INormalizedRow, INormalizedTile, TileHandler, TileHandlerBaseParams, TileHandlerParams, TilesHandlerParams
 } from "./ai-summarizer-types";
 import { heading, pluralize } from "./ai-summarizer-utils";
 import { programToGraphviz } from "./dataflow-to-graphviz";
@@ -41,43 +41,54 @@ export function handleImageTile({ tile, options }: TileHandlerParams): string|un
   return options.minimal ? "" : "This tile contains a static image. No additional information is available.";
 }
 
-export function handleGraphTile({ tile }: TileHandlerParams): string|undefined {
+export function handleGraphTile({ dataSets, tile }: TileHandlerParams): string|undefined {
   const { content } = tile.model;
   if (content.type !== "Graph") { return undefined; }
 
-  let result = `This tile contains a graph`;
-  const { sharedDataSet } = tile;
-  if (sharedDataSet) {
-    result += ` which displays data from the "${sharedDataSet.name}" (${sharedDataSet.id}) data set.`;
-  } else {
-    result += ".";
-  }
+  // Basic info
+  let result = `This tile contains a graph.`;
   const { adornments, axes, layers, plotType, xAttributeLabel, yAttributeLabel } = content;
   result += ` The graph is rendered as a ${plotType}.`;
 
-  const config = layers[0]?.config;
-  if (config) {
-    const xAttributeID = config._attributeDescriptions?.x?.attributeID;
-    const xVariable = sharedDataSet?.attributes.find((attr: any) => attr.id === xAttributeID);
-    const xVariableName = xVariable?.name ?? "an unknown variable";
-    result += `\n\n${xVariableName} is plotted on the x axis.`;
-    const xAxis = axes.bottom ?? axes.top;
-    if (xAxis) {
-      result += ` This axis ranges from ${xAxis.min} to ${xAxis.max}.`;
-      if (xAttributeLabel) result += ` It is labeled "${xAttributeLabel}".`;
-    }
-
-    const yAttributeID = config._yAttributeDescriptions?.[0]?.attributeID;
-    const yVariable = sharedDataSet?.attributes.find((attr: any) => attr.id === yAttributeID);
-    const yVariableName = yVariable?.name ?? "an unknown variable";
-    result += `\n\n${yVariableName} is plotted on the y axis.`;
-    const yAxis = axes.left ?? axes.rightNumeric ?? axes.rightCat;
-    if (yAxis) {
-      result += ` This axis ranges from ${yAxis.min} to ${yAxis.max}.`;
-      if (yAttributeLabel) result += ` It is labeled "${yAttributeLabel}".`;
-    }
+  // Axes
+  const xAxis = axes.bottom ?? axes.top;
+  if (xAxis) {
+    const labelPart = xAttributeLabel ? `is labeled "${xAttributeLabel}" and ` : "";
+    result += ` The x axis ${labelPart}ranges from ${xAxis.min} to ${xAxis.max}.`;
+  }
+  const yAxis = axes.left ?? axes.rightNumeric ?? axes.rightCat;
+  if (yAxis) {
+    const labelPart = yAttributeLabel ? `is labeled "${yAttributeLabel}" and ` : "";
+    result += ` The y axis ${labelPart}ranges from ${yAxis.min} to ${yAxis.max}.`;
   }
 
+  // Datasets
+  const pluralDataset = pluralize(layers.length, "dataset", "datasets");
+  result += `\n\nThe graph displays data from ${layers.length} ${pluralDataset}.`;
+  const oneDatasetWord = pluralize(layers.length, " It", "\n\nOne");
+  layers.forEach((layer: any) => {
+    const { config, editable } = layer;
+    if (config) {
+      const dataSet = dataSets.find(ds => ds.id === config.dataset);
+
+      if (dataSet) {
+        result += `${oneDatasetWord} is the "${dataSet.name}" (${dataSet.id}) data set.`;
+        if (editable) result += ` This dataset contains manually entered data points.`;
+
+        const xAttributeID = config._attributeDescriptions?.x?.attributeID;
+        const xVariable = dataSet.attributes.find((attr: any) => attr.id === xAttributeID);
+        const xVariableName = xVariable?.name ?? "An unknown variable";
+        result += ` ${xVariableName} is plotted on the x axis and`;
+
+        const yAttributeID = config._yAttributeDescriptions?.[0]?.attributeID;
+        const yVariable = dataSet.attributes.find((attr: any) => attr.id === yAttributeID);
+        const yVariableName = yVariable?.name ?? "An unknown variable";
+        result += ` ${yVariableName} is plotted on the y axis for this dataset.`;
+      }
+    }
+  });
+
+  // Movable lines
   const movableLines = adornments?.find((adornment: any) => adornment.type === "Movable Line");
   if (movableLines) {
     const lines = Object.values(movableLines.lines);
@@ -121,7 +132,9 @@ export function handleDataflowTile({ tile }: TileHandlerParams): string|undefine
   return result;
 }
 
-export function handleQuestionTile({ tile, headingLevel, tileMap, options }: TileHandlerParams): string|undefined {
+export function handleQuestionTile({
+  dataSets, tile, headingLevel, tileMap, options
+}: TileHandlerParams): string|undefined {
   if (tile.model.content.type !== "Question") { return undefined; }
 
   const { rowOrder, rowMap } = tile.model.content;
@@ -143,6 +156,7 @@ export function handleQuestionTile({ tile, headingLevel, tileMap, options }: Til
   if (promptTile && promptTile.content) {
     result += heading(headingLevel, "Question Prompt");
     result += tileSummary({
+      dataSets,
       tile: { model: promptTile, number: 0 },
       tileMap,
       headingLevel,
@@ -172,6 +186,7 @@ export function handleQuestionTile({ tile, headingLevel, tileMap, options }: Til
     number: rowNumber++,
   }));
   result += rowsSummary({
+    dataSets,
     rows: normalizedResponseRows,
     rowHeadingPrefix: "Response ",
     tileMap,
@@ -198,13 +213,7 @@ export const defaultTileHandlers: TileHandler[] = [
   handleTextTile,
 ];
 
-interface TileSummaryParams {
-  tile: INormalizedTile;
-  tileMap?: TileMap;
-  headingLevel: number;
-  options: AiSummarizerOptions;
-}
-export function tileSummary(params: TileSummaryParams): string {
+export function tileSummary(params: TileHandlerParams): string {
   const { tile, options } = params;
   const handlers = options.tileHandlers || defaultTileHandlers;
 
@@ -231,15 +240,10 @@ function tileTitle(tile: INormalizedTile): string {
   return tile.model?.title ? ` (${tile.model.title})` : "";
 }
 
-interface TilesSummaryParams {
-  tiles: INormalizedTile[];
-  tileMap?: TileMap;
-  headingLevel: number;
-  options: AiSummarizerOptions;
-}
-export function tilesSummary({tiles, tileMap, headingLevel, options}: TilesSummaryParams): string {
+export function tilesSummary({dataSets, tiles, tileMap, headingLevel, options}: TilesHandlerParams): string {
   return tiles.map((tile) => {
     const summary = tileSummary({
+      dataSets,
       tile,
       tileMap,
       headingLevel: headingLevel + 1,
@@ -254,14 +258,13 @@ export function tilesSummary({tiles, tileMap, headingLevel, options}: TilesSumma
   .join("\n\n");
 }
 
-interface RowsSummaryParams {
+interface RowsSummaryParams extends TileHandlerBaseParams {
   rows: INormalizedRow[];
   rowHeadingPrefix?: string;
-  tileMap?: TileMap;
-  headingLevel: number;
-  options: AiSummarizerOptions;
 }
-export function rowsSummary({rows, rowHeadingPrefix, tileMap, headingLevel, options}: RowsSummaryParams): string {
+export function rowsSummary({
+  dataSets, rows, rowHeadingPrefix, tileMap, headingLevel, options
+}: RowsSummaryParams): string {
   const summaries = rows.map((row) => {
     let rowHeading = "";
     let tileHeadingLevel = headingLevel;
@@ -270,6 +273,7 @@ export function rowsSummary({rows, rowHeadingPrefix, tileMap, headingLevel, opti
       rowHeading = heading(headingLevel, `${rowHeadingPrefix || ""}Row ${row.number}`);
     }
     return rowHeading + tilesSummary({
+      dataSets,
       tiles: row.tiles,
       tileMap,
       headingLevel: tileHeadingLevel,

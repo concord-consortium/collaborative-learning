@@ -16,6 +16,7 @@ export interface NormalizedDataSet {
   attributes: { id: string, name: string, values: string[] }[];
   numCases: number;
   data: string[][];
+  sharedDataSetId?: string;
 }
 
 export interface INormalizedTile {
@@ -36,11 +37,17 @@ export interface NormalizedModel {
 
 export type TileMap = Record<string, ITileModelSnapshotOut>;
 
-export interface TileHandlerParams {
-  tile: INormalizedTile;
-  tileMap?: TileMap;
+export interface TileHandlerBaseParams {
+  dataSets: NormalizedDataSet[];
   headingLevel: number;
   options: AiSummarizerOptions;
+  tileMap?: TileMap;
+}
+export interface TileHandlerParams extends TileHandlerBaseParams {
+  tile: INormalizedTile;
+}
+export interface TilesHandlerParams extends TileHandlerBaseParams {
+  tiles: INormalizedTile[];
 }
 export interface TileHandler {
   (params: TileHandlerParams): string|undefined;

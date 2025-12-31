@@ -44,19 +44,24 @@ export function documentSummarizer(content: any, options: AiSummarizerOptions): 
  * - The text tile export used by authoring is different from the normal text tile export. For
  * example the highlighted text is not included in the authoring export.
  */
-export function summarizeCurriculum(content: any, headingLevel = 1, tileMap?: TileMap): string {
+export function summarizeCurriculum(
+  content: any, dataSets: NormalizedDataSet[] = [], headingLevel = 1, tileMap?: TileMap
+): string {
   if ("tiles" in content) {
-    return summarizeCurriculum(content.tiles, headingLevel, tileMap);
+    return summarizeCurriculum(content.tiles, dataSets, headingLevel, tileMap);
   }
+
   if (Array.isArray(content)) {
-    return content.map(contentItem => summarizeCurriculum(contentItem, headingLevel, tileMap)).join("\n\n");
+    return content.map(contentItem => summarizeCurriculum(contentItem, dataSets, headingLevel, tileMap)).join("\n\n");
   }
+
   if ("content" in content) {
     const normalizedTile: INormalizedTile = {
       model: content,
       number: 0,
     };
     return tileSummary({
+      dataSets,
       tile: normalizedTile,
       tileMap,
       headingLevel,
@@ -157,7 +162,7 @@ export function normalize(model: DocumentContentSnapshotType) {
       if (sharedModel?.type === "SharedDataSet") {
         const { attributes, cases, name } = sharedModel.dataSet;
         const dataSet: NormalizedDataSet = {
-          id,
+          id: sharedModel.dataSet.id,
           providerId: sharedModel.providerId,
           name,
           tileIds: (entry as any).tiles.map((tile: any) => `${tile}`),
@@ -166,6 +171,7 @@ export function normalize(model: DocumentContentSnapshotType) {
           })),
           numCases: cases.length,
           data: [],
+          sharedDataSetId: id
         };
         for (let i = 0; i < cases.length; i++) {
           const cols: string[] = [];
@@ -219,6 +225,7 @@ export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | u
       options.minimal ? "" : "The CLUE document consists of one or more rows, with one or more tiles within each row.",
       dataSets,
       rowsSummary({
+        dataSets,
         rows: sections[0].rows,
         tileMap,
         headingLevel: 2,
@@ -286,10 +293,12 @@ interface SectionsSummaryParams {
   headingLevel: number;
 }
 export function sectionsSummary({normalizedModel, tileMap, options, headingLevel}: SectionsSummaryParams): string {
+  const { dataSets } = normalizedModel;
   const summaries = normalizedModel.sections.map((section, index) => {
     const maybeSectionId = section.sectionId ? ` (${section.sectionId})` : "";
     return heading(headingLevel, `Section ${index + 1}${maybeSectionId}`) +
       rowsSummary({
+        dataSets,
         rows: section.rows,
         tileMap,
         headingLevel: headingLevel + 1,
