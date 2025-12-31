@@ -4,7 +4,7 @@ import { slateToMarkdown } from "../slate-to-markdown";
 import {
   AiSummarizerOptions, INormalizedRow, INormalizedTile, TileHandler, TileHandlerParams, TileMap
 } from "./ai-summarizer-types";
-import { heading } from "./ai-summarizer-utils";
+import { heading, pluralize } from "./ai-summarizer-utils";
 
 export function handleTextTile({ tile, options }: TileHandlerParams): string|undefined {
   const content: any = tile.model.content;
@@ -48,9 +48,11 @@ export function handleGraphTile({ tile }: TileHandlerParams): string|undefined {
   let result = `This tile contains a graph`;
   const { sharedDataSet } = tile;
   if (sharedDataSet) {
-    result += ` which uses the "${sharedDataSet.name}" (${sharedDataSet.id}) data set.`;
+    result += ` which displays data from the "${sharedDataSet.name}" (${sharedDataSet.id}) data set.`;
+  } else {
+    result += ".";
   }
-  const { axes, layers, plotType, xAttributeLabel, yAttributeLabel } = content;
+  const { adornments, axes, layers, plotType, xAttributeLabel, yAttributeLabel } = content;
   result += ` The graph is rendered as a ${plotType}.`;
 
   const config = layers[0]?.config;
@@ -66,19 +68,31 @@ export function handleGraphTile({ tile }: TileHandlerParams): string|undefined {
     }
 
     const yAttributeID = config._yAttributeDescriptions?.[0]?.attributeID;
-    if (yAttributeID) {
-      const yVariable = sharedDataSet?.attributes.find((attr: any) => attr.id === yAttributeID);
-      const yVariableName = yVariable?.name ?? "an unknown variable";
-      result += `\n\n${yVariableName} is plotted on the y axis.`;
-      const yAxis = axes.left ?? axes.rightNumeric ?? axes.rightCat;
-      if (yAxis) {
-        result += ` This axis ranges from ${yAxis.min} to ${yAxis.max}.`;
-        if (yAttributeLabel) result += ` It is labeled "${yAttributeLabel}".`;
-      }
+    const yVariable = sharedDataSet?.attributes.find((attr: any) => attr.id === yAttributeID);
+    const yVariableName = yVariable?.name ?? "an unknown variable";
+    result += `\n\n${yVariableName} is plotted on the y axis.`;
+    const yAxis = axes.left ?? axes.rightNumeric ?? axes.rightCat;
+    if (yAxis) {
+      result += ` This axis ranges from ${yAxis.min} to ${yAxis.max}.`;
+      if (yAttributeLabel) result += ` It is labeled "${yAttributeLabel}".`;
     }
   }
 
-  // TODO: Add information about adornments
+  const movableLines = adornments?.find((adornment: any) => adornment.type === "Movable Line");
+  if (movableLines) {
+    const lines = Object.values(movableLines.lines);
+    if (lines.length > 0) {
+      const existenceWord = pluralize(lines.length, "is", "are");
+      const lineWord = pluralize(lines.length, "line", "lines");
+      result += `\n\nThere ${existenceWord} ${lines.length} movable ${lineWord} on this graph.`;
+      const oneLineWord = pluralize(lines.length, "It", "One line");
+      lines.forEach((line: any) => {
+        result += ` ${oneLineWord} has a slope of ${line.slope} and a y-intercept of ${line.intercept}.`;
+      });
+    }
+  }
+
+  // TODO: Add information about more adornments
   return result;
 }
 

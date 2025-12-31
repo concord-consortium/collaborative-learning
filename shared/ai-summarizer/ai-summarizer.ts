@@ -9,7 +9,7 @@ import {
   AiSummarizerOptions, DocumentContentSnapshotType, INormalizedTile, NormalizedDataSet,
   NormalizedModel, NormalizedSection, TileMap
 } from "./ai-summarizer-types";
-import { heading } from "./ai-summarizer-utils";
+import { heading, pluralize } from "./ai-summarizer-utils";
 import { rowsSummary, tileSummary } from "./ai-tile-summarizer";
 
 /** Return the markdown summary of the given Document content.
@@ -297,10 +297,6 @@ export function sectionsSummary({normalizedModel, tileMap, options, headingLevel
       });
   });
   return summaries.join("\n\n");
-}
-
-function pluralize(length: number, singular: string, plural: string): string {
-  return length === 1 ? singular : plural;
 }
 
 function generateMarkdownTable(headers: string[], rows: string[][]): string {
