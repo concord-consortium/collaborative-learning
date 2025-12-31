@@ -1,10 +1,10 @@
 import { programToGraphviz } from "../dataflow-to-graphviz";
-import { generateTileDescription } from "../generate-tile-description";
 import { slateToMarkdown } from "../slate-to-markdown";
 import {
   AiSummarizerOptions, INormalizedRow, INormalizedTile, TileHandler, TileHandlerParams, TileMap
 } from "./ai-summarizer-types";
 import { heading, pluralize } from "./ai-summarizer-utils";
+import { generateTileDescription } from "./generate-tile-description";
 
 export function handleTextTile({ tile, options }: TileHandlerParams): string|undefined {
   const content: any = tile.model.content;
