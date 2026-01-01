@@ -821,8 +821,8 @@ describe('ai-summarizer', () => {
         };
 
         // Mock the generateTileDescription to throw an error
-        const originalGenerateTileDescription = require('../generate-tile-description').generateTileDescription;
-        jest.spyOn(require('../generate-tile-description'), 'generateTileDescription').mockImplementation(() => {
+        const originalGenerateTileDescription = require('./generate-tile-description').generateTileDescription;
+        jest.spyOn(require('./generate-tile-description'), 'generateTileDescription').mockImplementation(() => {
           throw new Error('Test error');
         });
 
