@@ -24,7 +24,7 @@
 .switch-sort-group-button {
   background: none;
   border: none;
-  color: $classwork-purple;
+  color: $classwork-purple-dark-1;
   cursor: pointer;
   display: flex;
   padding: 0;
@@ -34,7 +34,7 @@
   }
 
   &:hover {
-    color: $classwork-purple-dark-1;
+    background-color: $classwork-purple-light-3;
   }
 }
 
