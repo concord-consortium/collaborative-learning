@@ -92,7 +92,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   let openDocumentsGroup: DocumentGroup|undefined;
   let previousDocumentsGroup: DocumentGroup|undefined;
   let nextDocumentsGroup: DocumentGroup|undefined;
-  let hasSecondarySort = false;
   if (maybeTabState?.currentDocumentGroupId && openDocumentKey) {
     let openGroupMetadata: IOpenDocumentsGroupMetadata|undefined;
     try {
@@ -114,7 +113,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
           sortedDocumentGroups.findIndex(group => group.label === openGroupMetadata?.primaryLabel);
         openDocumentsGroup = sortedDocumentGroups[openDocumentsGroupIndex];
         if (openGroupMetadata.secondaryType === secondarySearchTerm) {
-          hasSecondarySort = true;
           const secondaryGroups = openDocumentsGroup?.sortBy(secondarySearchTerm) || [];
           const secondaryGroupIndex =
             secondaryGroups.findIndex(group => group.label === openGroupMetadata?.secondaryLabel);
@@ -143,7 +141,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
         showSortWorkDocumentArea ?
           openDocumentsGroup && (
             <SortWorkDocumentArea
-              hasSecondarySort={hasSecondarySort}
               nextDocumentsGroup={nextDocumentsGroup}
               openDocumentsGroup={openDocumentsGroup}
               previousDocumentsGroup={previousDocumentsGroup}

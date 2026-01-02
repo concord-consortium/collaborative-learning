@@ -34,18 +34,19 @@ function SwitchSortGroupButton({ direction, onClick, render }: IArrowButtonProps
 
 interface IProps {
   documentGroup?: DocumentGroup;
-  hasSecondarySort: boolean;
   nextDocumentsGroup?: DocumentGroup;
   previousDocumentsGroup?: DocumentGroup;
 }
 
 export const DocumentScroller: React.FC<IProps> = observer(function DocumentThumbnailCarousel(props: IProps) {
-  const { documentGroup, hasSecondarySort, nextDocumentsGroup, previousDocumentsGroup } = props;
+  const { documentGroup, nextDocumentsGroup, previousDocumentsGroup } = props;
   const { documents, networkDocuments, persistentUI, sortedDocuments } = useStores();
+  const { primarySortBy, secondarySortBy } = persistentUI;
   const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
   const subTabString = maybeTabState?.currentDocumentGroupId;
   const subTab: Partial<IOpenDocumentsGroupMetadata> = subTabString ? JSON.parse(subTabString) : {};
   const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
+  const hasSecondarySort = secondarySortBy !== "None";
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const documentListRef = useRef<HTMLDivElement>(null);
   const [scrollToLocation, setScrollToLocation] = useState(0);
@@ -140,8 +141,6 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
 
   const renderHeader = () => {
     if (!openDocumentKey) return;
-    const { primarySortBy, secondarySortBy } = persistentUI;
-    const hasSecondarySort = secondarySortBy !== "None";
 
     // The document group passed down to this component will be the secondary sort group if it exists.
     // Otherwise, it will be the primary sort group.
