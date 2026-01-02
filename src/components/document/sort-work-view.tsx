@@ -89,36 +89,48 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
   const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
 
-  const getOpenDocumentsGroup = () => {
-    let openGroup;
-    if (maybeTabState?.currentDocumentGroupId && openDocumentKey) {
-      let openGroupMetadata: IOpenDocumentsGroupMetadata;
-      try {
-        // The sort work tab stores the group metadata as the document group id.
-        // This way it can record both the primary and secondary filter values
-        // associated with the group.
-        // TODO: create different tabState and/or document group types so these
-        // values can be stored as fields in the document group
-        openGroupMetadata = JSON.parse(maybeTabState.currentDocumentGroupId);
-      } catch (e) {
-        persistentUI.closeDocumentGroupPrimaryDocument(ENavTab.kSortWork);
-        return;
-      }
+  let openDocumentsGroup: DocumentGroup|undefined;
+  let previousDocumentsGroup: DocumentGroup|undefined;
+  let nextDocumentsGroup: DocumentGroup|undefined;
+  let hasSecondarySort = false;
+  if (maybeTabState?.currentDocumentGroupId && openDocumentKey) {
+    let openGroupMetadata: IOpenDocumentsGroupMetadata|undefined;
+    try {
+      // The sort work tab stores the group metadata as the document group id.
+      // This way it can record both the primary and secondary filter values
+      // associated with the group.
+      // TODO: create different tabState and/or document group types so these
+      // values can be stored as fields in the document group
+      openGroupMetadata = JSON.parse(maybeTabState.currentDocumentGroupId);
+    } catch (e) {
+      persistentUI.closeDocumentGroupPrimaryDocument(ENavTab.kSortWork);
+    }
 
+    if (openGroupMetadata) {
       if (openGroupMetadata.primaryType !== primarySearchTerm) {
         persistentUI.closeDocumentGroupPrimaryDocument(ENavTab.kSortWork);
       } else {
-        openGroup = sortedDocumentGroups.find(group => group.label === openGroupMetadata.primaryLabel);
+        const openDocumentsGroupIndex =
+          sortedDocumentGroups.findIndex(group => group.label === openGroupMetadata?.primaryLabel);
+        openDocumentsGroup = sortedDocumentGroups[openDocumentsGroupIndex];
         if (openGroupMetadata.secondaryType === secondarySearchTerm) {
-          const secondaryGroups = openGroup?.sortBy(secondarySearchTerm);
-          openGroup = secondaryGroups?.find(group => group.label === openGroupMetadata.secondaryLabel);
+          hasSecondarySort = true;
+          const secondaryGroups = openDocumentsGroup?.sortBy(secondarySearchTerm) || [];
+          const secondaryGroupIndex =
+            secondaryGroups.findIndex(group => group.label === openGroupMetadata?.secondaryLabel);
+          openDocumentsGroup = secondaryGroups[secondaryGroupIndex];
+          const previousIndex = (secondaryGroupIndex - 1 + secondaryGroups.length) % secondaryGroups.length;
+          previousDocumentsGroup = secondaryGroups[previousIndex];
+          nextDocumentsGroup = secondaryGroups[(secondaryGroupIndex + 1) % secondaryGroups.length];
+        } else {
+          const previousIndex =
+            (openDocumentsGroupIndex - 1 + sortedDocumentGroups.length) % sortedDocumentGroups.length;
+          previousDocumentsGroup = sortedDocumentGroups[previousIndex];
+          nextDocumentsGroup = sortedDocumentGroups[(openDocumentsGroupIndex + 1) % sortedDocumentGroups.length];
         }
       }
     }
-    return openGroup;
-  };
-
-  const openDocumentsGroup = getOpenDocumentsGroup();
+  }
   const showSortWorkDocumentArea = !!openDocumentKey && openDocumentsGroup;
 
   useEffect(()=>{
@@ -129,7 +141,14 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     <div key="sort-work-view" className="sort-work-view">
       {
         showSortWorkDocumentArea ?
-          <SortWorkDocumentArea openDocumentsGroup={openDocumentsGroup} /> :
+          openDocumentsGroup && (
+            <SortWorkDocumentArea
+              hasSecondarySort={hasSecondarySort}
+              nextDocumentsGroup={nextDocumentsGroup}
+              openDocumentsGroup={openDocumentsGroup}
+              previousDocumentsGroup={previousDocumentsGroup}
+            />
+          ) :
           <>
             <SortWorkHeader
               key={`sort-work-header-${primarySortBy}`}

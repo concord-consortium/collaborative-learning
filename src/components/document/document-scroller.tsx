@@ -16,10 +16,13 @@ import "./document-scroller.scss";
 
 interface IProps {
   documentGroup?: DocumentGroup;
+  hasSecondarySort: boolean;
+  nextDocumentsGroup?: DocumentGroup;
+  previousDocumentsGroup?: DocumentGroup;
 }
 
 export const DocumentScroller: React.FC<IProps> = observer(function DocumentThumbnailCarousel(props: IProps) {
-  const { documentGroup } = props;
+  const { documentGroup, hasSecondarySort, nextDocumentsGroup, previousDocumentsGroup } = props;
   const { documents, networkDocuments, persistentUI, sortedDocuments } = useStores();
   const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
   const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
@@ -96,6 +99,27 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
     return () => obs?.disconnect();
   }, []);
 
+  const handleSwitchDocumentGroup = (direction: "previous" | "next") => {
+    const newDocumentGroup = direction === "previous" ? previousDocumentsGroup : nextDocumentsGroup;
+    const newKey = newDocumentGroup?.documents[0]?.key;
+    let newSubTab = "";
+    if (hasSecondarySort) {
+      const subTabString = maybeTabState?.currentDocumentGroupId;
+      const subTab = subTabString ? JSON.parse(subTabString) : {};
+      subTab.secondaryType = newDocumentGroup?.sortType;
+      subTab.secondaryLabel = newDocumentGroup?.label;
+      newSubTab = JSON.stringify(subTab);
+    } else {
+      newSubTab = JSON.stringify({
+        primaryType: newDocumentGroup?.sortType,
+        primaryLabel: newDocumentGroup?.label
+      });
+    }
+    if (newKey) {
+      persistentUI.openDocumentGroupPrimaryDocument(ENavTab.kSortWork, newSubTab, newKey);
+    }
+  };
+
   const renderHeader = () => {
     if (!openDocumentKey) return;
     const { primarySortBy, secondarySortBy } = persistentUI;
@@ -112,7 +136,11 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
       <div className="document-scroller-header">
         <div className="header-text">
           Sorted by
-          <span> {primarySortBy}: </span>{primaryLabel}{" "}
+          <span> {primarySortBy}: </span>
+          <button onClick={() => handleSwitchDocumentGroup("previous")}>{`<`}</button>
+          {primaryLabel}
+          <button onClick={() => handleSwitchDocumentGroup("next")}>{">"}</button>
+          {" "}
           { secondaryLabel && <><span> {secondarySortBy}: </span>{secondaryLabel}</> }
         </div>
         <div className="header-text">

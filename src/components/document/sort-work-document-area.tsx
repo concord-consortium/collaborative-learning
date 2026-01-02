@@ -19,11 +19,14 @@ import ToggleDocumentScrollerIcon from "../../../src/assets/show-hide-thumbnail-
 import SwitchDocumentIcon from "../../assets/scroll-arrow-small-icon.svg";
 
 interface IProps {
+  hasSecondarySort: boolean;
+  nextDocumentsGroup?: DocumentGroup;
   openDocumentsGroup: DocumentGroup;
+  previousDocumentsGroup?: DocumentGroup;
 }
 
 export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWorkDocumentArea(props: IProps) {
-  const { openDocumentsGroup } = props;
+  const { hasSecondarySort, nextDocumentsGroup, openDocumentsGroup, previousDocumentsGroup } = props;
   const {appConfig, class: classStore, documents, networkDocuments,
     persistentUI, sortedDocuments, ui, unit, user} = useStores();
   const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
@@ -98,7 +101,14 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
 
   return (
     <>
-      {showScroller && <DocumentScroller documentGroup={openDocumentsGroup} />}
+      {showScroller && (
+        <DocumentScroller
+          hasSecondarySort={hasSecondarySort}
+          documentGroup={openDocumentsGroup}
+          nextDocumentsGroup={nextDocumentsGroup}
+          previousDocumentsGroup={previousDocumentsGroup}
+        />
+      )}
       <div className={classNames("focus-document", ENavTab.kSortWork, sideClasses)}>
         <div className={classNames("document-header", ENavTab.kSortWork, sectionClass, sideClasses)}
               onClick={() => ui.setSelectedTile()}>
