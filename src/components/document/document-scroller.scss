@@ -21,6 +21,23 @@
   }
 }
 
+.switch-sort-group-button {
+  background: none;
+  border: none;
+  color: $classwork-purple;
+  cursor: pointer;
+  display: flex;
+  padding: 0;
+
+  &.right {
+    transform: rotate(180deg);
+  }
+
+  &:hover {
+    color: $classwork-purple-dark-1;
+  }
+}
+
 .document-thumbnail-scroller {
   background: white;
   border: solid 1.5px $classwork-purple;

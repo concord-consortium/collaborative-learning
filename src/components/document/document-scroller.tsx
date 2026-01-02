@@ -11,8 +11,25 @@ import { ENavTab } from "../../models/view/nav-tabs";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 
 import ScrollArrowIcon from "../../assets/scroll-arrow-icon.svg";
+import SwitchSortGroupIcon from "../../assets/scroll-arrow-small-current-color-icon.svg";
 
 import "./document-scroller.scss";
+
+interface IArrowButtonProps {
+  direction: "left" | "right";
+  onClick: () => void;
+  render: boolean;
+}
+function SwitchSortGroupButton({ direction, onClick, render }: IArrowButtonProps) {
+  if (!render) return null;
+
+  const className = classNames("switch-sort-group-button", direction);
+  return (
+    <button className={className} onClick={onClick}>
+      <SwitchSortGroupIcon />
+    </button>
+  );
+}
 
 interface IProps {
   documentGroup?: DocumentGroup;
@@ -99,7 +116,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
     return () => obs?.disconnect();
   }, []);
 
-  const handleSwitchDocumentGroup = (direction: "previous" | "next") => {
+  const switchSortGroup = (direction: "previous" | "next") => () => {
     const newDocumentGroup = direction === "previous" ? previousDocumentsGroup : nextDocumentsGroup;
     const newKey = newDocumentGroup?.documents[0]?.key;
     let newSubTab = "";
@@ -137,11 +154,15 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
         <div className="header-text">
           Sorted by
           <span> {primarySortBy}: </span>
-          <button onClick={() => handleSwitchDocumentGroup("previous")}>{`<`}</button>
+          <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} render={!hasSecondarySort} />
           {primaryLabel}
-          <button onClick={() => handleSwitchDocumentGroup("next")}>{">"}</button>
+          <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} render={!hasSecondarySort} />
           {" "}
-          { secondaryLabel && <><span> {secondarySortBy}: </span>{secondaryLabel}</> }
+          { secondaryLabel && <><span> {secondarySortBy}: </span>
+          <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} render={hasSecondarySort} />
+          {secondaryLabel}
+          <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} render={hasSecondarySort} />
+          </> }
         </div>
         <div className="header-text">
           Shown for <span>{persistentUI.docFilter}</span>
