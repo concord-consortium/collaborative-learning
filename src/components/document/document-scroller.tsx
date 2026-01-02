@@ -3,12 +3,13 @@ import { observer } from "mobx-react-lite";
 import classNames from "classnames";
 import { clamp } from "lodash";
 
-import { DocumentGroup } from "../../models/stores/document-group";
-import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
-import { ENavTab } from "../../models/view/nav-tabs";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
+import { DocumentGroup } from "../../models/stores/document-group";
+import { ENavTab } from "../../models/view/nav-tabs";
+import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
+import { IOpenDocumentsGroupMetadata } from "./sorted-section";
 
 import ScrollArrowIcon from "../../assets/scroll-arrow-icon.svg";
 import SwitchSortGroupIcon from "../../assets/scroll-arrow-small-current-color-icon.svg";
@@ -42,6 +43,8 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
   const { documentGroup, hasSecondarySort, nextDocumentsGroup, previousDocumentsGroup } = props;
   const { documents, networkDocuments, persistentUI, sortedDocuments } = useStores();
   const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
+  const subTabString = maybeTabState?.currentDocumentGroupId;
+  const subTab: Partial<IOpenDocumentsGroupMetadata> = subTabString ? JSON.parse(subTabString) : {};
   const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const documentListRef = useRef<HTMLDivElement>(null);
@@ -121,8 +124,6 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
     const newKey = newDocumentGroup?.documents[0]?.key;
     let newSubTab = "";
     if (hasSecondarySort) {
-      const subTabString = maybeTabState?.currentDocumentGroupId;
-      const subTab = subTabString ? JSON.parse(subTabString) : {};
       subTab.secondaryType = newDocumentGroup?.sortType;
       subTab.secondaryLabel = newDocumentGroup?.label;
       newSubTab = JSON.stringify(subTab);
@@ -144,9 +145,9 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
 
     // The document group passed down to this component will be the secondary sort group if it exists.
     // Otherwise, it will be the primary sort group.
-    const primaryLabel = hasSecondarySort
+    const primaryLabel = subTab.primaryLabel ?? (hasSecondarySort
       ? sortedDocuments.getDocSortLabel(openDocumentKey, primarySortBy)
-      : documentGroup?.label;
+      : documentGroup?.label);
     const secondaryLabel = hasSecondarySort ? documentGroup?.label : "";
 
     return (
