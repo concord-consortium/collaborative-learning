@@ -123,19 +123,12 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
   const switchSortGroup = (direction: "previous" | "next") => () => {
     const newDocumentGroup = direction === "previous" ? previousDocumentsGroup : nextDocumentsGroup;
     const newKey = newDocumentGroup?.documents[0]?.key;
-    let newSubTab = "";
-    if (hasSecondarySort) {
-      subTab.secondaryType = newDocumentGroup?.sortType;
-      subTab.secondaryLabel = newDocumentGroup?.label;
-      newSubTab = JSON.stringify(subTab);
-    } else {
-      newSubTab = JSON.stringify({
-        primaryType: newDocumentGroup?.sortType,
-        primaryLabel: newDocumentGroup?.label
-      });
-    }
+    const newSubTab = hasSecondarySort
+      ? { ...subTab, secondaryType: newDocumentGroup?.sortType, secondaryLabel: newDocumentGroup?.label }
+      : { primaryType: newDocumentGroup?.sortType, primaryLabel: newDocumentGroup?.label };
+    const newSubTabString = JSON.stringify(newSubTab);
     if (newKey) {
-      persistentUI.openDocumentGroupPrimaryDocument(ENavTab.kSortWork, newSubTab, newKey);
+      persistentUI.openDocumentGroupPrimaryDocument(ENavTab.kSortWork, newSubTabString, newKey);
     }
   };
 
@@ -159,9 +152,9 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
           <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} render={!hasSecondarySort} />
           {" "}
           { secondaryLabel && <><span> {secondarySortBy}: </span>
-          <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} render={hasSecondarySort} />
-          {secondaryLabel}
-          <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} render={hasSecondarySort} />
+            <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} render={hasSecondarySort} />
+            {secondaryLabel}
+            <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} render={hasSecondarySort} />
           </> }
         </div>
         <div className="header-text">
