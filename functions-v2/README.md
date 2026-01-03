@@ -70,8 +70,12 @@ To persist state between emulator runs, `npm run emulator` loads data from `func
 firebase emulators:start --project demo-test --import=./emulator-data --export-on-exit=./emulator-data
 ```
 
-## To deploy firebase functions to production:
+## To deploy firebase functions
 
+Run `npx firebase use [project]` to select which firebase project to deploy the functions to.
+There are two project aliases configured in `.firebaserc`: `production` and `staging`.
+
+Then run:
 ```shell
 $ npm run deploy                        # deploy all functions
 ```
