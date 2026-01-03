@@ -3,26 +3,50 @@ import { observer } from "mobx-react-lite";
 import classNames from "classnames";
 import { clamp } from "lodash";
 
-import { DocumentGroup } from "../../models/stores/document-group";
-import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
-import { ENavTab } from "../../models/view/nav-tabs";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
+import { DocumentGroup } from "../../models/stores/document-group";
+import { ENavTab } from "../../models/view/nav-tabs";
+import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
+import { IOpenDocumentsGroupMetadata } from "./sorted-section";
 
 import ScrollArrowIcon from "../../assets/scroll-arrow-icon.svg";
+import SwitchSortGroupIcon from "../../assets/scroll-arrow-small-current-color-icon.svg";
 
 import "./document-scroller.scss";
 
+interface IArrowButtonProps {
+  direction: "left" | "right";
+  onClick: () => void;
+  render: boolean;
+}
+function SwitchSortGroupButton({ direction, onClick, render }: IArrowButtonProps) {
+  if (!render) return null;
+
+  const className = classNames("switch-sort-group-button", direction);
+  return (
+    <button className={className} onClick={onClick}>
+      <SwitchSortGroupIcon />
+    </button>
+  );
+}
+
 interface IProps {
   documentGroup?: DocumentGroup;
+  nextDocumentsGroup?: DocumentGroup;
+  previousDocumentsGroup?: DocumentGroup;
 }
 
 export const DocumentScroller: React.FC<IProps> = observer(function DocumentThumbnailCarousel(props: IProps) {
-  const { documentGroup } = props;
+  const { documentGroup, nextDocumentsGroup, previousDocumentsGroup } = props;
   const { documents, networkDocuments, persistentUI, sortedDocuments } = useStores();
+  const { primarySortBy, secondarySortBy } = persistentUI;
   const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
+  const subTabString = maybeTabState?.currentDocumentGroupId;
+  const subTab: Partial<IOpenDocumentsGroupMetadata> = subTabString ? JSON.parse(subTabString) : {};
   const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
+  const hasSecondarySort = secondarySortBy !== "None";
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const documentListRef = useRef<HTMLDivElement>(null);
   const [scrollToLocation, setScrollToLocation] = useState(0);
@@ -96,24 +120,45 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
     return () => obs?.disconnect();
   }, []);
 
+  const switchSortGroup = (direction: "previous" | "next") => () => {
+    const newDocumentGroup = direction === "previous" ? previousDocumentsGroup : nextDocumentsGroup;
+    const newKey = newDocumentGroup?.documents[0]?.key;
+    const newSubTab = hasSecondarySort
+      ? { ...subTab, secondaryType: newDocumentGroup?.sortType, secondaryLabel: newDocumentGroup?.label }
+      : { primaryType: newDocumentGroup?.sortType, primaryLabel: newDocumentGroup?.label };
+    const newSubTabString = JSON.stringify(newSubTab);
+    if (newKey) {
+      persistentUI.openDocumentGroupPrimaryDocument(ENavTab.kSortWork, newSubTabString, newKey);
+    }
+  };
+
   const renderHeader = () => {
     if (!openDocumentKey) return;
-    const { primarySortBy, secondarySortBy } = persistentUI;
-    const hasSecondarySort = secondarySortBy !== "None";
 
     // The document group passed down to this component will be the secondary sort group if it exists.
     // Otherwise, it will be the primary sort group.
-    const primaryLabel = hasSecondarySort
+    const primaryLabel = subTab.primaryLabel ?? (hasSecondarySort
       ? sortedDocuments.getDocSortLabel(openDocumentKey, primarySortBy)
-      : documentGroup?.label;
+      : documentGroup?.label);
     const secondaryLabel = hasSecondarySort ? documentGroup?.label : "";
 
     return (
       <div className="document-scroller-header">
         <div className="header-text">
           Sorted by
-          <span> {primarySortBy}: </span>{primaryLabel}{" "}
-          { secondaryLabel && <><span> {secondarySortBy}: </span>{secondaryLabel}</> }
+          <span> {primarySortBy}: </span>
+          <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} render={!hasSecondarySort} />
+          {primaryLabel}
+          <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} render={!hasSecondarySort} />
+          {" "}
+          { secondaryLabel && (
+            <>
+              <span> {secondarySortBy}: </span>
+              <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} render={hasSecondarySort} />
+              {secondaryLabel}
+              <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} render={hasSecondarySort} />
+            </>
+          )}
         </div>
         <div className="header-text">
           Shown for <span>{persistentUI.docFilter}</span>
