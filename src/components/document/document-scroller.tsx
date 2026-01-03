@@ -151,11 +151,14 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
           {primaryLabel}
           <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} render={!hasSecondarySort} />
           {" "}
-          { secondaryLabel && <><span> {secondarySortBy}: </span>
-            <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} render={hasSecondarySort} />
-            {secondaryLabel}
-            <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} render={hasSecondarySort} />
-          </> }
+          { secondaryLabel && (
+            <>
+              <span> {secondarySortBy}: </span>
+              <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} render={hasSecondarySort} />
+              {secondaryLabel}
+              <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} render={hasSecondarySort} />
+            </>
+          )}
         </div>
         <div className="header-text">
           Shown for <span>{persistentUI.docFilter}</span>
