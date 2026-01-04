@@ -232,7 +232,7 @@
           "title": "Lesson 0.1 Using CLUE and Dataflow Programming",
           "subtitle": "",
           "disabled": [],
-          "sections": 
+          "sections":
           [
             {
               "type": "intro",
@@ -284,7 +284,7 @@
                         "<p>To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p>",
                         "<ul><li><strong>Dragging a tile from My Resources (left side) in CLUE into My Workspace (right side)</strong></li><li><strong>Dragging a new  tile from the menu on the left of your workspace</strong></li><li><strong>Click a button on the menu to add a new tile to the bottom of your workspace</strong></li></ul>",
                         "<p>All tiles have a <strong>waffle</strong> (gray box with six dots) in the upper right corner if you hover over it. To drag the tile, click the waffle and hold it down as you drag it to your workspace. As you drag the tile into the workspace, a blue line shows where the tile will go when you let go.</p>",
-                        "<p><strong>Tip</strong>: When your working session is over, just close the browser window. Your workspace is saved automatically (there is no Save button) If you are on a shared computer, be sure to log out of the STEM Resource Finder. </p>",
+                        "<p><strong>Tip</strong>: When your working session is over, just close the browser window. Your workspace is saved automatically (there is no Save button) If you are on a shared computer, be sure to log out of learn.concord.org. </p>",
                         "<p>OK, get ready... Here we go!</p>"
                       ]
                     }
@@ -630,7 +630,7 @@
           "title": "Lesson 1.1 - What is a bionic arm?",
           "subtitle": "",
           "disabled": [],
-          "sections": 
+          "sections":
           [
             {
               "type": "intro",
@@ -738,7 +738,7 @@
                         "<p>4. What questions would you like to ask Tilly (the teen with the bionic arms from the video)?</p>"
                       ]
                     }
-                  }        
+                  }
                 ]
               }
             }
@@ -750,7 +750,7 @@
           "title": "Lesson 1.2 - What controls our movement? ",
           "subtitle": "",
           "disabled": [],
-          "sections": 
+          "sections":
           [
             {
               "type": "intro",
@@ -1043,7 +1043,7 @@
           "title": "Lesson 1.3 - How does nerve injury affect movement?",
           "subtitle": "",
           "disabled": [],
-          "sections": 
+          "sections":
           [
             {
               "type": "intro",
@@ -1121,7 +1121,7 @@
                         "<p><strong>How does nerve injury affect movement? </strong></p>",
                         "<p>In the next activity, you will investigate how injury to different parts of the nervous system might impact limb movement. Your team may choose or  be assigned to explore one of the following injuries:</p>",
                         "<ul><li><a href='https://theconversation.com/how-our-brain-controls-movement-and-makes-new-connections-when-parts-are-damaged-63520#:~:text=The%20brain%27s%20motor%20system%20is,and%20movement%20of%20specific%20muscles'>Brain Injury</a></li><li><a href='https://uihc.org/health-topics/how-does-spinal-cord-work'>Spinal Cord Injury</a></li><li><a href='https://orthoinfo.aaos.org/en/diseases--conditions/nerve-injuries/'>Peripheral Nerve Injury</a></li></ul>",
-                        "<p>In your workspace, summarize in your own words how the injury that you read about could impact limb movement.</p>", 
+                        "<p>In your workspace, summarize in your own words how the injury that you read about could impact limb movement.</p>",
                         "<p><strong>Reflection</strong></p>",
                         "<p>Please record your current thinking and learning in your Learning Journal (see Reflection tab). </p>"
                       ]
@@ -1210,7 +1210,7 @@
           "title": "Lesson 1.4 -  How do muscles work?",
           "subtitle": "",
           "disabled": [],
-          "sections": 
+          "sections":
           [
             {
               "type": "intro",
@@ -1468,7 +1468,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>5. Open the Backyard Brains Spike Recorder App on your computer. Click on the gear icon at the top left corner of the screen. Click on the 'Connect' button just below 'Select Port' (you may need to make the app window larger to view this option).</p>" 
+                        "<p>5. Open the Backyard Brains Spike Recorder App on your computer. Click on the gear icon at the top left corner of the screen. Click on the 'Connect' button just below 'Select Port' (you may need to make the app window larger to view this option).</p>"
                       ]
                     }
                   },
@@ -1568,7 +1568,7 @@
           "title": "Lesson 1.5 - How to control a robotic gripper",
           "subtitle": "",
           "disabled": [],
-          "sections": 
+          "sections":
           [
             {
               "type": "intro",
@@ -1591,7 +1591,7 @@
                     "title": "Sketch of muscle control of a robot gripper",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/neural-engineering/images/13.jpg" 
+                      "url": "curriculum/neural-engineering/images/13.jpg"
                     }
                   },
                   {
@@ -1637,7 +1637,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        
+
                         "<p><strong>Step 1: Create a program that controls the gripper</strong></p>","<p><strong>Setting up:</strong></p>",
                         "<p>1. Connect the blue cable to the Arduino board and then connect the other end of the blue cable to your computer’s USB port: </p>"
                       ]
@@ -1894,7 +1894,7 @@
           "title": "Lesson 2.1 - How does touch impact movement?",
           "subtitle": "",
           "disabled": [],
-          "sections": 
+          "sections":
           [
             {
               "type": "intro",
@@ -2082,7 +2082,7 @@
           "title": "Lesson 2.2 - How do we perceive touch?",
           "subtitle": "",
           "disabled": [],
-          "sections": 
+          "sections":
           [
             {
               "type": "intro",
@@ -2328,7 +2328,7 @@
           "title": "Lesson 2.3 - Can robots sense objects?",
           "subtitle": "",
           "disabled": [],
-          "sections": 
+          "sections":
           [
             {
               "type": "intro",
@@ -2647,7 +2647,7 @@
           "title": "Lesson 2.4 - Can you design a human-machine interface?",
           "subtitle": "",
           "disabled": [],
-          "sections": 
+          "sections":
           [
             {
               "type": "intro",
