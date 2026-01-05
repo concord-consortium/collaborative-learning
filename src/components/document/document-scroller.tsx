@@ -18,12 +18,13 @@ import "./document-scroller.scss";
 
 interface IArrowButtonProps {
   direction: "left" | "right";
+  disabled?: boolean;
   onClick: () => void;
 }
-function SwitchSortGroupButton({ direction, onClick }: IArrowButtonProps) {
+function SwitchSortGroupButton({ direction, disabled, onClick }: IArrowButtonProps) {
   const className = classNames("switch-sort-group-button", direction);
   return (
-    <button className={className} onClick={onClick}>
+    <button className={className} onClick={onClick} disabled={disabled}>
       <SwitchSortGroupIcon />
     </button>
   );
@@ -145,16 +146,40 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
         <div className="header-text">
           Sorted by
           <span className="sort-type"> {primarySortBy}: </span>
-          {!hasSecondarySort && <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} />}
+          {!hasSecondarySort && (
+            <SwitchSortGroupButton
+              direction="left"
+              disabled={!previousDocumentsGroup}
+              onClick={switchSortGroup("previous")}
+            />
+          )}
           <span className={primaryLabelClass}>{primaryLabel}</span>
-          {!hasSecondarySort && <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} />}
+          {!hasSecondarySort && (
+            <SwitchSortGroupButton
+              direction="right"
+              disabled={!nextDocumentsGroup}
+              onClick={switchSortGroup("next")}
+            />
+          )}
           {" "}
           { hasSecondarySort && (
             <>
               <span className="sort-type"> {secondarySortBy}: </span>
-              {hasSecondarySort && <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} />}
+              {hasSecondarySort && (
+                <SwitchSortGroupButton
+                  direction="left"
+                  disabled={!previousDocumentsGroup}
+                  onClick={switchSortGroup("previous")}
+                />
+              )}
               <span className="sort-label">{secondaryLabel}</span>
-              {hasSecondarySort && <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} />}
+              {hasSecondarySort && (
+                <SwitchSortGroupButton
+                  direction="right"
+                  disabled={!nextDocumentsGroup}
+                  onClick={switchSortGroup("next")}
+                />
+              )}
             </>
           )}
         </div>

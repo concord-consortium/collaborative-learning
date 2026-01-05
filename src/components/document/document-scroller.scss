@@ -49,6 +49,20 @@
     background-color: $classwork-purple-dark-1;
     color: white;
   }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.35;
+
+    &:hover {
+      background: none;
+    }
+
+    &:active {
+      background: none;
+      color: $classwork-purple-dark-1;
+    }
+  }
 }
 
 .document-thumbnail-scroller {

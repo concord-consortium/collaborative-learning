@@ -117,14 +117,17 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
           const secondaryGroupIndex =
             secondaryGroups.findIndex(group => group.label === openGroupMetadata?.secondaryLabel);
           openDocumentsGroup = secondaryGroups[secondaryGroupIndex];
-          const previousIndex = (secondaryGroupIndex - 1 + secondaryGroups.length) % secondaryGroups.length;
-          previousDocumentsGroup = secondaryGroups[previousIndex];
-          nextDocumentsGroup = secondaryGroups[(secondaryGroupIndex + 1) % secondaryGroups.length];
+          const numGroups = secondaryGroups.length;
+          if (numGroups > 1) {
+            previousDocumentsGroup = secondaryGroups[(secondaryGroupIndex - 1 + numGroups) % numGroups];
+            nextDocumentsGroup = secondaryGroups[(secondaryGroupIndex + 1) % numGroups];
+          }
         } else {
-          const previousIndex =
-            (openDocumentsGroupIndex - 1 + sortedDocumentGroups.length) % sortedDocumentGroups.length;
-          previousDocumentsGroup = sortedDocumentGroups[previousIndex];
-          nextDocumentsGroup = sortedDocumentGroups[(openDocumentsGroupIndex + 1) % sortedDocumentGroups.length];
+          const numGroups = sortedDocumentGroups.length;
+          if (numGroups > 1) {
+            previousDocumentsGroup = sortedDocumentGroups[(openDocumentsGroupIndex - 1 + numGroups) % numGroups];
+            nextDocumentsGroup = sortedDocumentGroups[(openDocumentsGroupIndex + 1) % numGroups];
+          }
         }
       }
     }
