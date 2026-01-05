@@ -19,11 +19,8 @@ import "./document-scroller.scss";
 interface IArrowButtonProps {
   direction: "left" | "right";
   onClick: () => void;
-  render: boolean;
 }
-function SwitchSortGroupButton({ direction, onClick, render }: IArrowButtonProps) {
-  if (!render) return null;
-
+function SwitchSortGroupButton({ direction, onClick }: IArrowButtonProps) {
   const className = classNames("switch-sort-group-button", direction);
   return (
     <button className={className} onClick={onClick}>
@@ -147,16 +144,16 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
         <div className="header-text">
           Sorted by
           <span> {primarySortBy}: </span>
-          <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} render={!hasSecondarySort} />
+          {!hasSecondarySort && <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} />}
           {primaryLabel}
-          <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} render={!hasSecondarySort} />
+          {!hasSecondarySort && <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} />}
           {" "}
           { secondaryLabel && (
             <>
               <span> {secondarySortBy}: </span>
-              <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} render={hasSecondarySort} />
+              {hasSecondarySort && <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} />}
               {secondaryLabel}
-              <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} render={hasSecondarySort} />
+              {hasSecondarySort && <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} />}
             </>
           )}
         </div>
