@@ -148,7 +148,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
           {primaryLabel}
           {!hasSecondarySort && <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} />}
           {" "}
-          { secondaryLabel && (
+          { hasSecondarySort && (
             <>
               <span> {secondarySortBy}: </span>
               {hasSecondarySort && <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} />}
