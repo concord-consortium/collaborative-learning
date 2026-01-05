@@ -5,72 +5,12 @@ Creates markdown versions of CLUE documents, suitable for feeding to AI models.
 TODO: Support more tile types.
 */
 
-import { slateToMarkdown } from "./slate-to-markdown";
-import { generateTileDescription } from "./generate-tile-description";
-import { programToGraphviz } from "./dataflow-to-graphviz";
-
-// We can't load actual interfaces from src/models in this context.
-type DocumentContentSnapshotType = any;
-type ITileModelSnapshotOut = any;
-
-export interface INormalizedTile {
-  model: ITileModelSnapshotOut;
-  number: number;
-  sharedDataSet?: NormalizedDataSet
-}
-
-export interface INormalizedRow {
-  tiles: INormalizedTile[];
-  number: number;
-}
-
-export interface NormalizedSection {
-  rows: INormalizedRow[];
-  sectionId?: string;
-}
-
-export interface NormalizedDataSet {
-  id: string;
-  providerId: string;
-  name: string;
-  tileIds: string[];
-  attributes: {name: string, values: string[]}[];
-  numCases: number;
-  data: string[][];
-}
-
-export interface NormalizedModel {
-  sections: NormalizedSection[];
-  dataSets: NormalizedDataSet[];
-}
-
-export type TileMap = Record<string, ITileModelSnapshotOut>;
-
-export interface TileHandlerParams {
-  tile: INormalizedTile;
-  tileMap?: TileMap;
-  headingLevel: number;
-  options: AiSummarizerOptions;
-}
-export interface TileHandler {
-  (params: TileHandlerParams): string|undefined;
-}
-
-export const defaultTileHandlers: TileHandler[] = [
-  handleTextTile,
-  handleImageTile,
-  handleTableTile,
-  handleDrawingTile,
-  handleDataflowTile,
-  handleQuestionTile,
-  handlePlaceholderTile,
-];
-
-export interface AiSummarizerOptions {
-  includeModel?: boolean; // If true, include the full JSON model in the output
-  minimal?: boolean;      // If true, skip all boilerplate and headers and just return the text content
-  tileHandlers?: TileHandler[];
-}
+import {
+  AiSummarizerOptions, DocumentContentSnapshotType, INormalizedTile, NormalizedDataSet,
+  NormalizedModel, NormalizedSection, TileMap
+} from "./ai-summarizer-types";
+import { heading, pluralize } from "./ai-summarizer-utils";
+import { rowsSummary, tileSummary } from "./ai-tile-summarizer";
 
 /** Return the markdown summary of the given Document content.
  * The options object determines the style of the output:
@@ -104,19 +44,24 @@ export function documentSummarizer(content: any, options: AiSummarizerOptions): 
  * - The text tile export used by authoring is different from the normal text tile export. For
  * example the highlighted text is not included in the authoring export.
  */
-export function summarizeCurriculum(content: any, headingLevel = 1, tileMap?: TileMap): string {
+export function summarizeCurriculum(
+  content: any, dataSets: NormalizedDataSet[] = [], headingLevel = 1, tileMap?: TileMap
+): string {
   if ("tiles" in content) {
-    return summarizeCurriculum(content.tiles, headingLevel, tileMap);
+    return summarizeCurriculum(content.tiles, dataSets, headingLevel, tileMap);
   }
+
   if (Array.isArray(content)) {
-    return content.map(contentItem => summarizeCurriculum(contentItem, headingLevel, tileMap)).join("\n\n");
+    return content.map(contentItem => summarizeCurriculum(contentItem, dataSets, headingLevel, tileMap)).join("\n\n");
   }
+
   if ("content" in content) {
     const normalizedTile: INormalizedTile = {
       model: content,
       number: 0,
     };
     return tileSummary({
+      dataSets,
       tile: normalizedTile,
       tileMap,
       headingLevel,
@@ -150,7 +95,7 @@ export function parseContent(content: string): DocumentContentSnapshotType {
 export function normalize(model: DocumentContentSnapshotType) {
   const sections: NormalizedSection[] = [];
   const dataSets: NormalizedDataSet[] = [];
-  const {rowOrder, rowMap, tileMap, sharedModelMap} = model || {};
+  const { rowOrder, rowMap, tileMap, sharedModelMap } = model || {};
 
   const addSection = (sectionId?: string): NormalizedSection => {
     const newSection: NormalizedSection = {
@@ -215,15 +160,18 @@ export function normalize(model: DocumentContentSnapshotType) {
     for (const [id, entry] of Object.entries(sharedModelMap)) {
       const sharedModel: any = (entry as any).sharedModel;
       if (sharedModel?.type === "SharedDataSet") {
-        const {attributes, cases, name} = sharedModel.dataSet;
+        const { attributes, cases, name } = sharedModel.dataSet;
         const dataSet: NormalizedDataSet = {
-          id,
+          id: sharedModel.dataSet.id,
           providerId: sharedModel.providerId,
           name,
           tileIds: (entry as any).tiles.map((tile: any) => `${tile}`),
-          attributes: (attributes || []).map((attr: any) => ({name: attr.name, values: attr.values || []})),
+          attributes: (attributes || []).map((attr: any) => ({
+            id: attr.id, name: attr.name, values: attr.values || []
+          })),
           numCases: cases.length,
           data: [],
+          sharedDataSetId: id
         };
         for (let i = 0; i < cases.length; i++) {
           const cols: string[] = [];
@@ -259,7 +207,7 @@ export function normalize(model: DocumentContentSnapshotType) {
 }
 
 export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | undefined, options: AiSummarizerOptions): string {
-  const {sections, dataSets} = normalizedModel;
+  const { sections, dataSets } = normalizedModel;
   if (sections.length === 0) {
     return documentSummary(
       options.minimal ? "" : "This is an empty CLUE document with no content.",
@@ -277,6 +225,7 @@ export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | u
       options.minimal ? "" : "The CLUE document consists of one or more rows, with one or more tiles within each row.",
       dataSets,
       rowsSummary({
+        dataSets,
         rows: sections[0].rows,
         tileMap,
         headingLevel: 2,
@@ -295,13 +244,6 @@ export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | u
     options,
     1
   );
-}
-
-export function heading(level: number, headingText: string): string {
-  if (!level) {
-    return "";
-  }
-  return "#".repeat(level) + ` ${headingText}\n\n`;
 }
 
 export function documentSummary(preamble: string, dataSets: NormalizedDataSet[], summary: string = "", options: AiSummarizerOptions, headingLevel: number = 1): string {
@@ -351,10 +293,12 @@ interface SectionsSummaryParams {
   headingLevel: number;
 }
 export function sectionsSummary({normalizedModel, tileMap, options, headingLevel}: SectionsSummaryParams): string {
+  const { dataSets } = normalizedModel;
   const summaries = normalizedModel.sections.map((section, index) => {
     const maybeSectionId = section.sectionId ? ` (${section.sectionId})` : "";
     return heading(headingLevel, `Section ${index + 1}${maybeSectionId}`) +
       rowsSummary({
+        dataSets,
         rows: section.rows,
         tileMap,
         headingLevel: headingLevel + 1,
@@ -362,215 +306,6 @@ export function sectionsSummary({normalizedModel, tileMap, options, headingLevel
       });
   });
   return summaries.join("\n\n");
-}
-
-interface RowsSummaryParams {
-  rows: INormalizedRow[];
-  rowHeadingPrefix?: string;
-  tileMap?: TileMap;
-  headingLevel: number;
-  options: AiSummarizerOptions;
-}
-export function rowsSummary({rows, rowHeadingPrefix, tileMap, headingLevel, options}: RowsSummaryParams): string {
-  const summaries = rows.map((row) => {
-    let rowHeading = "";
-    let tileHeadingLevel = headingLevel;
-    if (!options.minimal) {
-      tileHeadingLevel = headingLevel + 1;
-      rowHeading = heading(headingLevel, `${rowHeadingPrefix || ""}Row ${row.number}`);
-    }
-    return rowHeading + tilesSummary({
-      tiles: row.tiles,
-      tileMap,
-      headingLevel: tileHeadingLevel,
-      options
-    });
-  });
-  return summaries.join("\n\n");
-}
-
-function tileTitle(tile: INormalizedTile): string {
-  return tile.model?.title ? ` (${tile.model.title})` : "";
-}
-
-interface TilesSummaryParams {
-  tiles: INormalizedTile[];
-  tileMap?: TileMap;
-  headingLevel: number;
-  options: AiSummarizerOptions;
-}
-export function tilesSummary({tiles, tileMap, headingLevel, options}: TilesSummaryParams): string {
-  return tiles.map((tile) => {
-    const summary = tileSummary({
-      tile,
-      tileMap,
-      headingLevel: headingLevel + 1,
-      options
-    });
-    if (summary) {
-      return heading(headingLevel, `Tile ${tile.number}${tileTitle(tile)}`) + summary;
-    }
-    return "";
-  })
-  .filter((summary) => summary.length > 0)
-  .join("\n\n");
-}
-
-function handleTextTile({ tile, options }: TileHandlerParams): string|undefined {
-  const content: any = tile.model.content;
-  if (content.type !== "Text") { return undefined; }
-  let textFormat = "Markdown";
-  let result: string;
-  switch (content.format) {
-    case "slate":
-      try {
-        result = slateToMarkdown(content.text);
-      } catch (error) {
-        console.error("Error deserializing slate content:", error);
-        result = content.text;
-      }
-      break;
-
-    case "markdown":
-      result = content.text;
-      break;
-
-    default:
-      textFormat = content.format || "plain";
-      result = content.text;
-      break;
-  }
-
-  return options.minimal ? `\`\`\`text\n${result || ""}\n\`\`\``
-   : `This tile contains the following ${textFormat} text content delimited below by a text code fence:\n\n\`\`\`text\n${result || ""}\n\`\`\``;
-}
-
-function handleImageTile({ tile, options }: TileHandlerParams): string|undefined {
-  if (tile.model.content.type !== "Image") { return undefined; }
-  return options.minimal ? "" : "This tile contains a static image. No additional information is available.";
-}
-
-function handleTableTile({ tile }: TileHandlerParams): string|undefined {
-  if (tile.model.content.type !== "Table") { return undefined; }
-  let result = `This tile contains a table`;
-  if (tile.sharedDataSet) {
-    result += ` which uses the "${tile.sharedDataSet.name}" (${tile.sharedDataSet.id}) data set.`;
-  }
-  return result;
-}
-
-// There is an alternative drawing tile handler in `ai-summarizer.ts` that outputs the SVG of the drawing,
-// which can be used in contexts where it is possible to import React libraries.
-function handleDrawingTile({ tile }: TileHandlerParams): string|undefined {
-  if (tile.model.content.type !== "Drawing") { return undefined; }
-  return "This tile contains a drawing.";
-}
-
-function handleDataflowTile({ tile }: TileHandlerParams): string|undefined {
-  if (tile.model.content.type !== "Dataflow") { return undefined; }
-  let result = "This tile contains a dataflow diagram.";
-  if (!tile.model.content.program) return result;
-
-  result += "\n```dot\n" + programToGraphviz(tile.model.content.program) + "\n```";
-  return result;
-}
-
-function handleQuestionTile({ tile, headingLevel, tileMap, options }: TileHandlerParams): string|undefined {
-  if (tile.model.content.type !== "Question") { return undefined; }
-
-  const { rowOrder, rowMap } = tile.model.content;
-
-  let result = `This is a question for students to answer. Its question id is \`${tile.model.content.questionId}\`. ` +
-    "This question id can be used to match up student responses to the same question.\n\n";
-
-  if (!rowOrder || rowOrder.length < 2) {
-    result += "This question does not contain any response tiles.\n\n";
-  }
-
-  // The prompt is not stored explicitly in the question tile.
-  // We have to look at the rowOrder and get the first row
-  // Then get that row from the rowMap and get its first tile
-  const firstRowId = rowOrder?.[0];
-  const firstRow = rowMap?.[firstRowId];
-  const promptTileId = firstRow?.tiles?.[0]?.tileId;
-  const promptTile = promptTileId ? tileMap?.[promptTileId] : null;
-  if (promptTile && promptTile.content) {
-    result += heading(headingLevel, "Question Prompt");
-    result += tileSummary({
-      tile: { model: promptTile, number: 0 },
-      tileMap,
-      headingLevel,
-      options: { minimal: true }
-    });
-    result += "\n\n";
-  }
-
-  if (!rowOrder || rowOrder.length < 2) {
-    return result;
-  }
-  const responseRows = rowOrder.slice(1).map((rowId: string) => rowMap?.[rowId]).filter(Boolean);
-
-  result += heading(headingLevel, "Question Response");
-
-  // Create normalized rows and tiles for the question responses
-  let tileNumber = 1;
-  let rowNumber = 1;
-  const normalizedResponseRows: INormalizedRow[] = responseRows.map((r: any) => ({
-    tiles: r.tiles.map((t: any) => {
-      const tileModel = tileMap ? tileMap[t.tileId] : null;
-      return {
-        model: tileModel,
-        number: tileNumber++,
-      } as INormalizedTile;
-    }),
-    number: rowNumber++,
-  }));
-  result += rowsSummary({
-    rows: normalizedResponseRows,
-    rowHeadingPrefix: "Response ",
-    tileMap,
-    headingLevel: headingLevel + 1,
-    options
-  });
-
-  return result;
-}
-
-function handlePlaceholderTile({ tile }: TileHandlerParams): string|undefined {
-  if (tile.model.content.type !== "Placeholder") { return undefined; }
-  return "";
-}
-
-interface TileSummaryParams {
-  tile: INormalizedTile;
-  tileMap?: TileMap;
-  headingLevel: number;
-  options: AiSummarizerOptions;
-}
-export function tileSummary(params: TileSummaryParams): string {
-  const { tile, options } = params;
-  const handlers = options.tileHandlers || defaultTileHandlers;
-
-  for (const handler of handlers) {
-    const summary = handler(params);
-    if (summary !== undefined) {
-      return summary;
-    }
-  }
-
-  // If none of the handlers returned a result, generate a generic description of the tile content.
-  let result: string;
-  try {
-    result = generateTileDescription(tile.model.content);
-  } catch (error) {
-    console.error("Error generating description for tile content:", error, tile);
-    result = "An error occurred while generating the description.";
-  }
-  return `This tile contains ${tile.model.content.type.toLowerCase()} content.\n\n${result}${options.includeModel ? `\n\n${JSON.stringify(tile)}` : ""}`;
-}
-
-function pluralize(length: number, singular: string, plural: string): string {
-  return length === 1 ? singular : plural;
 }
 
 function generateMarkdownTable(headers: string[], rows: string[][]): string {

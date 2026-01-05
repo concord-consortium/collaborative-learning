@@ -1,6 +1,6 @@
 import { getDatabase } from "firebase-admin/database";
 import { getFirestore } from "firebase-admin/firestore";
-import { documentSummarizer } from "./ai-summarizer";
+import { documentSummarizer } from "./ai-summarizer/ai-summarizer";
 
 // Finds classes that have updated documents for selected units,
 // and uses an LLM to create a summary of all the student work in Firestore.
