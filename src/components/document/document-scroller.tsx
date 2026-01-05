@@ -139,20 +139,21 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
       : documentGroup?.label);
     const secondaryLabel = hasSecondarySort ? documentGroup?.label : "";
 
+    const primaryLabelClass = classNames({ "sort-label": !hasSecondarySort });
     return (
       <div className="document-scroller-header">
         <div className="header-text">
           Sorted by
-          <span> {primarySortBy}: </span>
+          <span className="sort-type"> {primarySortBy}: </span>
           {!hasSecondarySort && <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} />}
-          {primaryLabel}
+          <span className={primaryLabelClass}>{primaryLabel}</span>
           {!hasSecondarySort && <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} />}
           {" "}
           { hasSecondarySort && (
             <>
-              <span> {secondarySortBy}: </span>
+              <span className="sort-type"> {secondarySortBy}: </span>
               {hasSecondarySort && <SwitchSortGroupButton direction="left" onClick={switchSortGroup("previous")} />}
-              {secondaryLabel}
+              <span className="sort-label">{secondaryLabel}</span>
               {hasSecondarySort && <SwitchSortGroupButton direction="right" onClick={switchSortGroup("next")} />}
             </>
           )}
