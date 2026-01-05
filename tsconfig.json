@@ -33,6 +33,6 @@
     },
     "types": ["w3c-web-serial", "gtag.js"]
   },
-  "include": ["src/**/*", "shared/*", "shared/**/*"],
+  "include": ["src/**/*", "shared/*"],
   "exclude": ["**/node_modules", "**/.*/"]
 }
