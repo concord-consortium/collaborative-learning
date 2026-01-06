@@ -19,6 +19,16 @@ export interface NormalizedDataSet {
   sharedDataSetId?: string;
 }
 
+export interface NormalizedVariable {
+  description?: string;
+  displayName?: string;
+  expression?: string;
+  id: string;
+  name?: string;
+  unit?: string;
+  value?: number;
+}
+
 export interface INormalizedTile {
   model: ITileModelSnapshotOut;
   number: number;
@@ -33,6 +43,7 @@ export interface INormalizedRow {
 export interface NormalizedModel {
   sections: NormalizedSection[];
   dataSets: NormalizedDataSet[];
+  variables: NormalizedVariable[];
 }
 
 export type TileMap = Record<string, ITileModelSnapshotOut>;
