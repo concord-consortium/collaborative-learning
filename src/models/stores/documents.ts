@@ -297,6 +297,10 @@ export const DocumentsModel = types
     // resolve the specified promise with null, i.e. the user has no documents of this type
     const resolveRequiredDocumentPromiseWithNull = (type: string) => {
       const promise = self.requiredDocuments[type];
+      if (!promise) {
+        // Some types do not have any required documents, so we just ignore these
+        return;
+      }
       !promise.isResolved && promise.resolve(null);
     };
 

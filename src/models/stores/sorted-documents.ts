@@ -6,7 +6,7 @@ import { isSortableType } from "../document/document-types";
 import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
-import { DB } from "../../lib/db";
+import { DB, OpenDocumentOptions } from "../../lib/db";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
 import { UserModelType } from "./user";
@@ -389,6 +389,8 @@ export class SortedDocuments {
     return docsArray;
   }
 
+  // This only seems to fetch documents that have metadata that was already pulled down
+  // by the watchFirestoreMetaDataDocs listener.
   async fetchFullDocument(docKey: string) {
     if (!this.docsReceived) {
       // Wait until the initial batch of documents has been received from Firestore.
@@ -402,11 +404,12 @@ export class SortedDocuments {
     const visibility = metadataDoc?.visibility === "public" || metadataDoc?.visibility === "private"
                          ? metadataDoc?.visibility as "public" | "private"
                          : undefined;
-    const props = {
+    const props: OpenDocumentOptions = {
       documentKey: metadataDoc.key,
       type: metadataDoc.type as any,
       properties: metadataDoc.properties.toJSON(),
       userId: metadataDoc.uid,
+      createdAt: metadataDoc.createdAt,
       groupId: undefined,
       visibility,
       originDoc: undefined,
@@ -421,6 +424,12 @@ export class SortedDocuments {
       unit: metadataDoc.unit ?? undefined,
     };
 
-    return  this.db.openDocument(props);
+    if (metadataDoc.type === "group") {
+      // TODO: in order to test this we need sorted documents to include group documents
+      // in the filter it applies to metadata documents
+      return this.db.openGroupDocument(props);
+    } else {
+      return  this.db.openDocument(props);
+    }
   }
 }

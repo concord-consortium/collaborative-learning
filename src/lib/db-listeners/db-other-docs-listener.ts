@@ -64,6 +64,10 @@ export class DBOtherDocumentsListener extends BaseListener {
     }
   }
 
+  // FIXME: this assumes there is only one "other" document that is waiting to be loaded
+  // per other document type with the same user. There can be multiple personal documents
+  // per user, so this assumption is wrong.
+  // Need to rework the document loading logic to handle multiple personal documents.
   private handleDocumentAdded = (snapshot: firebase.database.DataSnapshot) => {
     const {documents, user} = this.db.stores;
     const dbDoc: DBOtherDocument|null = snapshot.val();

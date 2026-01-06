@@ -40,7 +40,7 @@ export function useDocumentSyncToFirebase(
   readOnly = false
 ) {
   const { key, type, uid, contentStatus } = document;
-  const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
+  const { content: contentPath, metadata, typedMetadata } = firebase.getDocumentPaths(user, document);
   const disconnectHandlers = useRef<OnDisconnect[]|undefined>(undefined);
 
   const handlePresenceChange = useMemo(() => (snapshot: any) => {
@@ -101,6 +101,7 @@ export function useDocumentSyncToFirebase(
   }
 
   /**
+   * FIXME: this shouldn't be true anymore.
    * We currently have multiple firestore metadata docs for each real doc.
    * Use this function to update a property in all of them.
    *
@@ -172,7 +173,8 @@ export function useDocumentSyncToFirebase(
 
   // sync properties for problem, personal, and learning log documents
   useSyncMstNodeToFirebase({
-    firebase, model: document.properties, path: `${metadata}/properties`,
+    firebase, model: document.properties,
+    path: metadata ? `${metadata}/properties` : undefined,
     enabled: commonSyncEnabled && !readOnly && [ProblemDocument, PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, properties) => {
@@ -187,7 +189,8 @@ export function useDocumentSyncToFirebase(
 
   // sync properties for published documents
   useSyncMstNodeToFirebase({
-    firebase, model: document.properties, path: `${metadata}/properties`,
+    firebase, model: document.properties,
+    path: metadata ? `${metadata}/properties` : undefined,
     enabled: commonSyncEnabled && readOnly &&
       (user.id === uid) && document.supportContentType !== "multiclass" &&
       [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication ].includes(type),

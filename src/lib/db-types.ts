@@ -32,7 +32,8 @@ export type DBDocumentType = "section" |  // section documents are deprecated
                               "problem" | "planning" | "publication" |
                               "personal" | "personalPublication" |
                               "learningLog" | "learningLogPublication" |
-                              "supportPublication";
+                              "supportPublication" |
+                              "group";
 export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBProblemDocumentMetadata |
                                  DBPersonalDocumentMetadata |
@@ -41,7 +42,8 @@ export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBPublicationDocumentMetadata |
                                  DBPersonalPublicationMetadata |
                                  DBLearningLogPublicationMetadata |
-                                 DBSupportPublicationMetadata;
+                                 DBSupportPublicationMetadata |
+                                 DBGroupDocMetadata;
 
 // metadata written to {classHash}/users/{userId}/documentMetadata for all document types
 export interface DBBaseDocumentMetadata {
@@ -98,6 +100,11 @@ export interface DBSupportPublicationMetadata extends DBBaseProblemDocumentMetad
   type: "supportPublication";
 }
 
+export interface DBGroupDocMetadata extends DBBaseProblemDocumentMetadata {
+  type: "group";
+  self: DBBaseProblemDocumentMetadata['self'] & { groupId: string };
+}
+
 export interface DBGroupUserConnections {
   [key /*userId*/: string]: boolean;
 }
@@ -113,6 +120,12 @@ export interface DBDocument {
   content?: string;
   changeCount?: number;
   type: DBDocumentType;
+}
+
+// contents written to {classHash}/groups/{groupId}/documents
+export interface DBGroupDocument extends DBDocument {
+  type: "group";
+  self: DBDocument['self'] & { groupId: string };
 }
 
 export interface IDocumentProperties {

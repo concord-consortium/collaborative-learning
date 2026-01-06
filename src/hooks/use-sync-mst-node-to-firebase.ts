@@ -15,7 +15,7 @@ import { Firebase } from "../lib/firebase";
 interface IProps<T> {
   firebase: Firebase;
   model: T; // MST model or complex type (e.g. types.map())
-  path: string;
+  path: string | undefined;
   enabled: boolean;
   options?: Omit<UseMutationOptions<unknown, unknown, SnapshotOut<T>>, 'mutationFn'>;
   throttle?: number;
@@ -37,8 +37,10 @@ export function useSyncMstNodeToFirebase<T extends IAnyStateTreeNode>({
   }, options);
   const throttledMutate = useMemo(() => _throttle(mutation.mutate, throttle), [mutation.mutate, throttle]);
 
+  const setupReaction = !!path && enabled;
+
   useEffect(() => {
-    const cleanup = enabled
+    const cleanup = setupReaction
             ? onSnapshot<SnapshotOut<T>>(model, snapshot => {
                 // reset (e.g. stop retrying and restart) when value changes
                 mutation.isError && mutation.reset();
@@ -46,7 +48,7 @@ export function useSyncMstNodeToFirebase<T extends IAnyStateTreeNode>({
               })
             : undefined;
     return () => cleanup?.();
-  }, [enabled, model, mutation, throttledMutate]);
+  }, [setupReaction, model, mutation, throttledMutate]);
 
   return mutation;
 }

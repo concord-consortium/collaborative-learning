@@ -9,7 +9,8 @@ import { getSnapshot } from "mobx-state-tree";
 import {
   DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
   DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
-  DBUserStar, DBOfferingUserProblemDocument, DBOtherDocument, IDocumentProperties, DBOtherPublication, DBSupport
+  DBUserStar, DBOfferingUserProblemDocument, DBOtherDocument, IDocumentProperties, DBOtherPublication, DBSupport,
+  DBGroupDocument
 } from "./db-types";
 import { DocumentModelType, createDocumentModel } from "../models/document/document";
 import {
@@ -83,6 +84,7 @@ export interface OpenDocumentOptions {
   documentKey: string;
   type: DocumentType;
   userId: string;
+  createdAt?: number;
   groupId?: string;
   sectionId?: string;
   visibility?: "public" | "private";
@@ -95,6 +97,11 @@ export interface OpenDocumentOptions {
   investigation?: string;
   unit?: string;
 }
+
+// Allow createdAt to be a server timestamp value
+// This approach allows us to still discriminate the union of DBDocumentMetadata
+export type CreateFirestoreMetadata<T extends DBDocumentMetadata = DBDocumentMetadata> =
+  T extends any ? Omit<T, 'createdAt'> & { createdAt: number | firebase.firestore.FieldValue } : never;
 
 export class DB {
   @observable public groups: GroupUsersMap = {};
@@ -193,6 +200,15 @@ export class DB {
     return new Promise<void>((resolve, reject) => {
       groupRef.once("value")
         .then((snapshot) => {
+          // FIXME: we need to watch out for this. When we make a group document
+          // we are going to assume the user has already joined the group so this
+          // group document will already exist. But if for some reason this group info
+          // isn't set yet, then adding the "documents" child will prevent `snapshot.val()`
+          // from being null, so then the group info won't get set.
+          // And if this group info gets set later it will overwrite the group documents.
+          // This should probably be in a transaction anyhow, since another user might have
+          // already created and joined the group between when we read it and then update it.
+          //
           // if the group doesn't exist create it
           if (!snapshot.val()) {
             return groupRef.set({
@@ -381,7 +397,11 @@ export class DB {
     });
   }
 
-  async createFirestoreMetadataDocument(metadata: DBDocumentMetadata, documentKey: string) {
+
+  async createFirestoreMetadataDocument(
+    metadata: CreateFirestoreMetadata,
+    documentKey: string
+  ) {
     const userContext = this.stores.userContextProvider.userContext;
 
     if (!this.stores.userContextProvider || !this.firestore || !userContext?.uid) {
@@ -394,12 +414,22 @@ export class DB {
     const documentRef = this.firestore.doc(documentPath);
     const docSnapshot = await documentRef.get();
 
+
     if (!docSnapshot.exists) {
       const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
 
       let problemInfo: {unit:string|null, investigation?: string, problem?: string} = {unit: null};
       if ("offeringId" in metadata && metadata.offeringId != null) {
         problemInfo = this.currentProblemInfo;
+      }
+
+      // Group documents don't use a real uid, but instead a fake one based on the group id.
+      const uid = metadata.type === "group" ? metadata.self.uid : userContext.uid;
+
+      // Add the groupId for group documents to make then easier to query.
+      const groupInfo: { groupId?: string } = {};
+      if (metadata.type === "group") {
+        groupInfo.groupId = metadata.self.groupId;
       }
 
       const firestoreMetadata: IDocumentMetadata & { contextId: string } = {
@@ -409,12 +439,21 @@ export class DB {
         contextId: "ignored",
         key: documentKey,
         properties: {},
-        uid: userContext.uid,
-        ...problemInfo
+        uid,
+        ...problemInfo,
+        ...groupInfo
       };
       const createFirestoreMetadataDocument =
         getFirebaseFunction<IFirestoreMetadataDocumentParams>("createFirestoreMetadataDocument_v2");
       createFirestoreMetadataDocument({context: userContext, document: firestoreMetadata});
+
+      // FIXME: we are hacking this to get something working.
+      // Either we should stop using a firebase function to make the metadata document,
+      // or we should wait for the function to finish making the document before returning its
+      // contents.
+      return firestoreMetadata;
+    } else {
+      return docSnapshot.data() as IDocumentMetadata;
     }
   }
 
@@ -467,6 +506,8 @@ export class DB {
           return metadataRef.once("value");
         })
         .then((metadataValue) => {
+          // This approach of reading the value that was written in the metadata
+          // causes the createdAt timestamp to be populated with a value
           this.createFirestoreMetadataDocument(metadataValue.val(), documentKey);
         })
         .then(() => {
@@ -478,6 +519,71 @@ export class DB {
 
   public createPersonalDocument(params: ICreateOtherDocumentParams) {
     return this.createOtherDocument(PersonalDocument, params);
+  }
+
+  public async createGroupDocument() {
+    console.log("DB.createGroupDocument");
+    const { user } = this.stores;
+    const groupId = user.currentGroupId;
+    if (!groupId) {
+      return Promise.reject("Cannot create group document because user is not in a group.");
+    }
+
+    const path = this.firebase.getGroupDocumentPath(user, groupId);
+    console.log("group document path:", path);
+    const documentRef = this.firebase.ref(path).push();
+    const documentKey = documentRef.key!;
+    const version = "1.0";
+    // FIXME: This value is currently passed to a firebase function which actually creates the
+    // document if necessary. In the past the value was based on the a firebase realtime db timestamp
+    // that was generated when the metadata was written to the realtime db. In this case we are
+    // trying to skip the firebase realtime db metadata. Because this is going through a function it
+    // doesn't handle a client side created serverTimestamp value properly.
+    // I can think of a couple ways to fix this:
+    // 1) change the firebase function to not require createdAt to be passed in and then generate it
+    // if it isn't set.
+    // 2) bypass the function and just create the firestore document directly in the database. There
+    // might be some other server side code that is relying on the function though, so we have to
+    // check this first.
+    // In the meantime we are just going to make a client side timestamp.
+    // const createdAt = firebase.firestore.FieldValue.serverTimestamp();
+    const createdAt = Date.now();
+    const {classHash, offeringId} = user;
+    const self = {
+      // We use a fake uid for group documents so this field is always defined.
+      uid: `group_${user.offeringId}_${groupId}`,
+      // We also include the groupId here for easier querying
+      groupId,
+      documentKey,
+      classHash
+    };
+    const document: DBGroupDocument = {version, self, type: "group"};
+
+    await documentRef.set(document);
+    const metadata: CreateFirestoreMetadata = {
+      version,
+      self,
+      createdAt,
+      type: "group",
+      classHash,
+      offeringId
+    };
+    const firestoreMetadata = await this.createFirestoreMetadataDocument(metadata, documentKey);
+
+    const problemInfo = this.currentProblemInfo;
+
+    // Maybe openGroupDocument should just take the IDocumentMetadata object instead options?
+    const clueDocument = await this.openGroupDocument({
+      documentKey,
+      type: "group",
+      userId: firestoreMetadata.uid,
+      createdAt: firestoreMetadata.createdAt,
+      groupId,
+      visibility: (firestoreMetadata.visibility as "public" | "private" | undefined) || "private",
+      ...problemInfo // probably we should use the info from firestoreMetadata instead of recomputing it
+    });
+
+    return clueDocument;
   }
 
   public publishProblemDocument(documentModel: DocumentModelType) {
@@ -674,6 +780,69 @@ export class DB {
     return documentFetchPromise;
   }
 
+  public openGroupDocument(options: OpenDocumentOptions) {
+    const { documents } = this.stores;
+    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion,
+           problem, investigation, unit} = options;
+    const existingPromise = this.documentFetchPromiseMap.get(documentKey);
+    if (existingPromise) return existingPromise;
+
+    const documentFetchPromise = new Promise<DocumentModelType>((resolve, reject) => {
+      const {user} = this.stores;
+      const documentPath = this.firebase.getGroupDocumentPath(user, groupId!, documentKey);
+      const documentRef = this.firebase.ref(documentPath);
+
+      return documentRef.once("value").then((documentSnapshot) => {
+        const document: DBGroupDocument|null = documentSnapshot.val();
+        if (!document) {
+          const msg = `Error retrieving group document '${documentKey}' of type '${type}' ` +
+                      `for group '${groupId}' at '${firebaseRefPath(documentRef)}'`;
+          throw new Error(msg);
+        }
+        const content = this.parseDocumentContent(document);
+        try {
+          return createDocumentModel({
+            type,
+            title,
+            properties,
+            groupId,
+            visibility: visibility || "private",
+            uid: userId, // TODO: this could be computed instead of needing to be passed in, see createGroupDocument
+            originDoc,
+            key: document.self.documentKey,
+            createdAt: options.createdAt || Date.now(),
+            content: content ? content : {},
+            changeCount: document.changeCount,
+            pubVersion,
+            problem,
+            investigation,
+            unit
+          });
+        } catch (e) {
+          const msg = "Could not open " +
+                      `group document '${documentKey}' of type '${type}' for group '${groupId}'.` +
+                      "This is because DocumentModel.create failed.\n";
+          console.error(msg, e);
+          throw e;
+        }
+      })
+      .then((document) => {
+        // Not clear if we should add group documents to the main documents store.
+        // For now we do, to keep the behavior similar to other document types.
+        documents.add(document);
+        resolve(document);
+      })
+      .catch((msg) => {
+        // See comment in openDocument about unhandled rejected promises.
+        reject(msg);
+      });
+    });
+
+    this.documentFetchPromiseMap.set(documentKey, documentFetchPromise);
+    return documentFetchPromise;
+  }
+
+
   public createLearningLogDocument(title?: string) {
     return this.createOtherDocument(LearningLogDocument, { title });
   }
@@ -734,36 +903,18 @@ export class DB {
     return this.createOtherDocument(copyType, { content, ...titleProps });
   }
 
-  public openOtherDocument(documentType: OtherDocumentType, documentKey: string) {
-    const { user } = this.stores;
-
-    return new Promise<DocumentModelType>((resolve, reject) => {
-      const documentPath = this.firebase.getOtherDocumentPath(user, documentType, documentKey);
-      const documentRef = this.firebase.ref(documentPath);
-      return documentRef.once("value")
-        .then((snapshot) => {
-          const document: DBOtherDocument|null = snapshot.val();
-          if (!document) {
-            throw new Error("Unable to find specified document!");
-          }
-          return document;
-        })
-        .then((document) => {
-          return this.createDocumentModelFromOtherDocument(document, documentType);
-        })
-        .then(resolve)
-        .catch(reject);
-    });
-  }
-
   public async destroyFirebaseDocument(document: DocumentModelType) {
     const { content, metadata, typedMetadata } =
-      this.firebase.getUserDocumentPaths(this.stores.user, document.type, document.key);
-    await Promise.all([
-      this.firebase.ref(content).set(null),
-      this.firebase.ref(metadata).set(null),
-      this.firebase.ref(typedMetadata).set(null)
-    ]);
+      this.firebase.getDocumentPaths(this.stores.user, document);
+
+    const destroyPromises = [this.firebase.ref(content).set(null)];
+    if (metadata) {
+      destroyPromises.push(this.firebase.ref(metadata).set(null));
+    }
+    if (typedMetadata) {
+      destroyPromises.push(this.firebase.ref(typedMetadata).set(null));
+    }
+    await Promise.all(destroyPromises);
     this.stores.documents.resolveRequiredDocumentPromiseWithNull(document.type);
   }
 

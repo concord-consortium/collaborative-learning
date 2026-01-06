@@ -88,6 +88,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             document={comparisonDocument}
             workspace={problemWorkspace}
             onNewDocument={this.handleNewDocument}
+            onOpenGroupDocument={this.handleOpenGroupDocument}
             onCopyDocument={this.handleCopyDocument}
             onDeleteDocument={this.handleDeleteDocument}
             toolbar={toolbar}
@@ -101,6 +102,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         document={primaryDocument}
         workspace={problemWorkspace}
         onNewDocument={this.handleNewDocument}
+        onOpenGroupDocument={this.handleOpenGroupDocument}
         onCopyDocument={this.handleCopyDocument}
         onDeleteDocument={this.handleDeleteDocument}
         onAdminDestroyDocument={appMode === "dev" ? this.handleAdminDestroyDocument : undefined}
@@ -278,6 +280,26 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         this.handleNewDocumentOpen(docType, title)
         .catch(error => ui.setError(error));
       });
+  };
+
+  private handleOpenGroupDocument = async () => {
+    console.log("DocumentWorkspaceComponent.handleOpenGroupDocument");
+    const { db, persistentUI: { problemWorkspace } } = this.stores;
+    const groupDocument = await db.createGroupDocument();
+
+    if (groupDocument) {
+      problemWorkspace.setPrimaryDocument(groupDocument);
+    }
+
+    // TODO: Handle existing group documents
+    // For other documents there are requiredDocuments that is used to only load one document.
+    // This is even used for loading personal documents where there can be multiple personal documents.
+    // It doesn't seem to make sense to "require" group documents. But it is true there will
+    // be only one group document so we could use this same approach.
+    // Regardless of how it works, we should make a new listener that watches for the creation
+    // and updating of group documents in the db-listeners directory.
+    // And then wait for that listener to load the group document before setting it here.
+    // For now we just have createGroupDocument call openDocument directly.
   };
 
   private defaultOtherDocumentContent = (type: OtherDocumentType) => {

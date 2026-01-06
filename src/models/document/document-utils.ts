@@ -86,6 +86,8 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
   }
 }
 
+// FIXME: probably need to update to check if the group of the document
+// matches the current user's group
 export const isDocumentAccessibleToUser = (
   doc: IDocumentMetadataBase, user: UserModelType, documentStore: IExemplarVisibilityProvider
 ) => {

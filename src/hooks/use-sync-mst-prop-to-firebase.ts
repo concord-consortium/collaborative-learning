@@ -16,13 +16,14 @@ interface IProps<T> {
   firebase: Firebase;
   model: IAnyStateTreeNode;
   prop: string;
-  path: string;
+  path: string | undefined;
   enabled?: boolean;
   shouldMutate?: boolean | ((value: T) => boolean),
   options?: Omit<UseMutationOptions<unknown, unknown, T>, 'mutationFn'>;
   throttle?: number;
   additionalMutation?: (prop: string, value: T) => Promise<unknown>;
 }
+// TODO: update test
 export function useSyncMstPropToFirebase<T extends string | number | boolean | undefined>({
   firebase, model, prop, path, enabled = true, shouldMutate = true, options: clientOptions, throttle = 1000,
   additionalMutation
@@ -48,8 +49,10 @@ export function useSyncMstPropToFirebase<T extends string | number | boolean | u
   }, options);
   const throttledMutate = useMemo(() => _throttle(mutation.mutate, throttle), [mutation.mutate, throttle]);
 
+  const setupReaction = !!path && enabled;
+
   useEffect(() => {
-    const cleanup = enabled
+    const cleanup = setupReaction
             ? reaction(() => model[prop], value => {
                 // reset (e.g. stop retrying and restart) when value changes
                 mutation.isError && mutation.reset();
@@ -57,7 +60,7 @@ export function useSyncMstPropToFirebase<T extends string | number | boolean | u
               })
             : undefined;
     return () => cleanup?.();
-  }, [enabled, model, mutation, prop, throttledMutate]);
+  }, [setupReaction, model, mutation, prop, throttledMutate]);
 
   return mutation;
 }

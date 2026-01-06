@@ -27,6 +27,8 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   "icon-delete-workspace": DeleteWorkspaceIcon,
   "icon-new-workspace": OpenWorkspaceIcon,
   "icon-open-workspace": OpenWorkspaceIcon,
+  // FIXME: temporary icon until we have a specific one for group documents
+  "icon-open-group-doc": OpenWorkspaceIcon,
   "icon-publish-workspace": PublishWorkspaceIcon,
 
   // built in tool action icons

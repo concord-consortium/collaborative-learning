@@ -1,5 +1,6 @@
 import firebase from "firebase/app";
 import {
+  GroupDocument,
   LearningLogDocument, OtherDocumentType, PersonalDocument, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../models/document/document-types";
 import { AudienceModelType, SectionTarget } from "../models/stores/supports";
@@ -147,7 +148,7 @@ export class Firebase {
     return this.getFullPath(this.getDocumentPath(document, user));
   }
 
-  // convenience function which returns all of the relevant paths for a given document
+  // all of the relevant paths for a given user document
   public getUserDocumentPaths(user: UserModelType, documentType: string, documentKey: string, userId?: string) {
     const content = this.getUserDocumentPath(user, documentKey, userId);
     const metadata = this.getUserDocumentMetadataPath(user, documentKey, userId);
@@ -163,6 +164,22 @@ export class Firebase {
     };
     const typedMetadata = typedMetadataMap[documentType]?.() || "";
     return { content, metadata, typedMetadata };
+  }
+
+  /**
+   *  Returns all of the relevant paths for a given document
+   */
+  public getDocumentPaths(currentUser: UserModelType, document: DocumentModelType)
+    : { content: string; metadata?: string; typedMetadata?: string }
+  {
+    if (document.type === GroupDocument) {
+      if (!document.groupId) {
+        throw new Error("getDocumentPaths: group document missing groupId");
+      }
+      return { content: this.getGroupDocumentPath(currentUser, document.groupId!, document.key) };
+    } else {
+      return this.getUserDocumentPaths(currentUser, document.type, document.key, document.uid);
+    }
   }
 
   public getUserDocumentCommentsPath(user: UserModelType, documentKey?: string, tileId?: string, commentKey?: string) {
@@ -330,6 +347,11 @@ export class Firebase {
 
   public getGroupPath(user: UserModelType, groupId: string) {
     return `${this.getGroupsPath(user)}/${groupId}`;
+  }
+
+  public getGroupDocumentPath(user: UserModelType, groupId: string, documentKey?: string) {
+    const suffix = documentKey ? `/${documentKey}` : "";
+    return `${this.getGroupPath(user, groupId)}/documents${suffix}`;
   }
 
   public getGroupUserPath(user: UserModelType, groupId: string, userId?: string) {

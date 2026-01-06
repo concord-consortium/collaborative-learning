@@ -34,6 +34,7 @@ interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
   document: DocumentModelType;
   onNewDocument?: (type: string) => void;
+  onOpenGroupDocument?: () => void;
   onCopyDocument?: (document: DocumentModelType) => void;
   onDeleteDocument?: (document: DocumentModelType) => void;
   onAdminDestroyDocument?: (document: DocumentModelType) => void;
@@ -253,6 +254,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             {showFileMenu &&
               <DocumentFileMenu document={document}
                 onOpenDocument={this.handleOpenDocumentClick}
+                onOpenGroupDocument={this.handleOpenGroupDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={true}
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
@@ -420,6 +422,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           { !hideButtons && showFileMenu &&
               <DocumentFileMenu document={document}
                 onOpenDocument={this.handleOpenDocumentClick}
+                onOpenGroupDocument={this.handleOpenGroupDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={countNotDeleted < 1}
                 onDeleteDocument={this.handleDeleteDocumentClick}
@@ -526,6 +529,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private handleOpenDocumentClick = () => {
     this.setState({ showBrowser: true });
+  };
+
+  private handleOpenGroupDocumentClick = () => {
+    console.log("DocumentComponent.handleOpenGroupDocumentClick");
+    const { onOpenGroupDocument } = this.props;
+    onOpenGroupDocument?.();
   };
 
   private handleCopyDocumentClick = () => {
