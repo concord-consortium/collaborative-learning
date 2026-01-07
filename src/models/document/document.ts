@@ -112,13 +112,13 @@ export const DocumentModel = Tree.named("Document")
       return !!self.content;
     },
     get metadata(): IDocumentMetadata {
-      const { uid, type, key, createdAt, title, originDoc, properties, visibility } = self;
+      const { uid, groupId, type, key, createdAt, title, originDoc, properties, visibility } = self;
       // FIXME: the contextId was added here temporarily. This metadata is sent
       // up to the Firestore functions. The new functions do not require the
       // contextId. However the old functions do. The old functions were just
       // ignoring this contextId. So the contextId is added here so the client
       // code can work with the old functions.
-      return { contextId: "ignored", uid, type, key, createdAt, title,
+      return { contextId: "ignored", uid, groupId, type, key, createdAt, title,
         originDoc, properties: properties.toJSON(), investigation: self.investigation,
         problem: self.problem, unit: self.unit, visibility } as IDocumentMetadata;
     },

@@ -139,11 +139,11 @@ export interface IDocumentMetadataBase {
   investigation?: string|null;
   problem?: string|null;
   unit?: string|null;
+  groupId?: string;
 }
 
 export interface IDocumentMetadata extends IDocumentMetadataBase {
   createdAt?: number;
-  groupId?: string;
   originDoc?: string|null;
   properties?: Record<string, string>;
   tools?: string[];
