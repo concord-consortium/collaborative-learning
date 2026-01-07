@@ -133,13 +133,6 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
   const renderHeader = () => {
     if (!openDocumentKey) return;
 
-    // The document group passed down to this component will be the secondary sort group if it exists.
-    // Otherwise, it will be the primary sort group.
-    const primaryLabel = subTab.primaryLabel ?? (hasSecondarySort
-      ? sortedDocuments.getDocSortLabel(openDocumentKey, primarySortBy)
-      : documentGroup?.label);
-    const secondaryLabel = hasSecondarySort ? documentGroup?.label : "";
-
     const primaryLabelClass = classNames({ "sort-label": !hasSecondarySort });
     return (
       <div className="document-scroller-header">
@@ -153,7 +146,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
               onClick={switchSortGroup("previous")}
             />
           )}
-          <span className={primaryLabelClass}>{primaryLabel}</span>
+          <span className={primaryLabelClass}>{subTab.primaryLabel ?? ""}</span>
           {!hasSecondarySort && (
             <SwitchSortGroupButton
               direction="right"
@@ -172,7 +165,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
                   onClick={switchSortGroup("previous")}
                 />
               )}
-              <span className="sort-label">{secondaryLabel}</span>
+              <span className="sort-label">{documentGroup?.label ?? ""}</span>
               {hasSecondarySort && (
                 <SwitchSortGroupButton
                   direction="right"
