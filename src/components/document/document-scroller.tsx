@@ -33,16 +33,15 @@ function SwitchSortGroupButton({ direction, disabled, onClick }: IArrowButtonPro
 interface IProps {
   documentGroup?: DocumentGroup;
   nextDocumentsGroup?: DocumentGroup;
+  openDocumentKey?: string;
   openGroupMetadata?: IOpenDocumentsGroupMetadata;
   previousDocumentsGroup?: DocumentGroup;
 }
 
 export const DocumentScroller: React.FC<IProps> = observer(function DocumentThumbnailCarousel(props: IProps) {
-  const { documentGroup, nextDocumentsGroup, openGroupMetadata, previousDocumentsGroup } = props;
+  const { documentGroup, nextDocumentsGroup, openDocumentKey, openGroupMetadata, previousDocumentsGroup } = props;
   const { documents, networkDocuments, persistentUI, sortedDocuments } = useStores();
   const { primarySortBy, secondarySortBy } = persistentUI;
-  const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
-  const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
   const hasSecondarySort = secondarySortBy !== "None";
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const documentListRef = useRef<HTMLDivElement>(null);

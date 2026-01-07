@@ -146,6 +146,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
             <SortWorkDocumentArea
               nextDocumentsGroup={nextDocumentsGroup}
               openDocumentsGroup={openDocumentsGroup}
+              openDocumentKey={openDocumentKey}
               openGroupMetadata={openGroupMetadata}
               previousDocumentsGroup={previousDocumentsGroup}
             />

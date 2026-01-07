@@ -22,16 +22,15 @@ import SwitchDocumentIcon from "../../assets/scroll-arrow-small-icon.svg";
 interface IProps {
   nextDocumentsGroup?: DocumentGroup;
   openDocumentsGroup: DocumentGroup;
+  openDocumentKey?: string;
   openGroupMetadata?: IOpenDocumentsGroupMetadata;
   previousDocumentsGroup?: DocumentGroup;
 }
 
 export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWorkDocumentArea(props: IProps) {
-  const { nextDocumentsGroup, openDocumentsGroup, openGroupMetadata, previousDocumentsGroup } = props;
+  const { nextDocumentsGroup, openDocumentsGroup, openDocumentKey, openGroupMetadata, previousDocumentsGroup } = props;
   const {appConfig, class: classStore, documents, networkDocuments,
     persistentUI, sortedDocuments, ui, unit, user} = useStores();
-  const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
-  const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
   const showScroller = persistentUI.showDocumentScroller;
   const [prevBtnEnabled, setPrevBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup.documents.at(0)?.key);
   const [nextBtnEnabled, setNextBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup.documents.at(-1)?.key);
@@ -102,6 +101,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
         <DocumentScroller
           documentGroup={openDocumentsGroup}
           nextDocumentsGroup={nextDocumentsGroup}
+          openDocumentKey={openDocumentKey}
           openGroupMetadata={openGroupMetadata}
           previousDocumentsGroup={previousDocumentsGroup}
         />
