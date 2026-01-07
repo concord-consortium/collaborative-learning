@@ -2,17 +2,18 @@ import React, { useState } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
+import { LogEventName } from "../../lib/logger-types";
 import { DocumentModelType } from "../../models/document/document";
-import { EditableDocumentContent } from "./editable-document-content";
-import { getDocumentDisplayTitle } from "../../models/document/document-utils";
-import { ENavTab } from "../../models/view/nav-tabs";
 import { isExemplarType } from "../../models/document/document-types";
-import { ExemplarVisibilityCheckbox } from "./exemplar-visibility-checkbox";
+import { getDocumentDisplayTitle } from "../../models/document/document-utils";
+import { logDocumentEvent } from "../../models/document/log-document-event";
+import { DocumentGroup } from "../../models/stores/document-group";
+import { ENavTab } from "../../models/view/nav-tabs";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { DocumentScroller } from "./document-scroller";
-import { DocumentGroup } from "../../models/stores/document-group";
-import { LogEventName } from "../../lib/logger-types";
-import { logDocumentEvent } from "../../models/document/log-document-event";
+import { EditableDocumentContent } from "./editable-document-content";
+import { ExemplarVisibilityCheckbox } from "./exemplar-visibility-checkbox";
+import { IOpenDocumentsGroupMetadata } from "./sorted-section";
 
 import CloseIcon from "../../../src/assets/icons/close/close.svg";
 import ToggleDocumentScrollerIcon from "../../../src/assets/show-hide-thumbnail-view-small-icon.svg";
@@ -21,11 +22,12 @@ import SwitchDocumentIcon from "../../assets/scroll-arrow-small-icon.svg";
 interface IProps {
   nextDocumentsGroup?: DocumentGroup;
   openDocumentsGroup: DocumentGroup;
+  openGroupMetadata?: IOpenDocumentsGroupMetadata;
   previousDocumentsGroup?: DocumentGroup;
 }
 
 export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWorkDocumentArea(props: IProps) {
-  const { nextDocumentsGroup, openDocumentsGroup, previousDocumentsGroup } = props;
+  const { nextDocumentsGroup, openDocumentsGroup, openGroupMetadata, previousDocumentsGroup } = props;
   const {appConfig, class: classStore, documents, networkDocuments,
     persistentUI, sortedDocuments, ui, unit, user} = useStores();
   const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
@@ -81,16 +83,12 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
     const currentIndex = docKeys.indexOf(openDocumentKey);
     const newIndex = direction === "previous" ? currentIndex - 1 : currentIndex + 1;
     const newKey = docKeys[newIndex];
-    // When the document was opened by the SortedSection, the tab state should have been
-    // created, and currentDocumentGroupId set represent the group that the document was
-    // opened from.
-    const openSubTab = maybeTabState?.currentDocumentGroupId;
-    if (!openSubTab) {
-      console.error("No currentDocumentGroupId found in persistentUI");
+    if (!openGroupMetadata) {
+      console.error("No openGroupMetadata found in persistentUI");
       return;
     }
     if (newKey) {
-      persistentUI.openDocumentGroupPrimaryDocument(ENavTab.kSortWork, openSubTab, newKey);
+      persistentUI.openDocumentGroupPrimaryDocument(ENavTab.kSortWork, JSON.stringify(openGroupMetadata), newKey);
     }
     setPrevBtnEnabled(newIndex !== 0);
     setNextBtnEnabled(newIndex !== docKeys.length - 1);
@@ -104,6 +102,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
         <DocumentScroller
           documentGroup={openDocumentsGroup}
           nextDocumentsGroup={nextDocumentsGroup}
+          openGroupMetadata={openGroupMetadata}
           previousDocumentsGroup={previousDocumentsGroup}
         />
       )}

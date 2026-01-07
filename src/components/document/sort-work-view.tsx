@@ -89,11 +89,11 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
   const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
 
+  let openGroupMetadata: IOpenDocumentsGroupMetadata|undefined;
   let openDocumentsGroup: DocumentGroup|undefined;
   let previousDocumentsGroup: DocumentGroup|undefined;
   let nextDocumentsGroup: DocumentGroup|undefined;
   if (maybeTabState?.currentDocumentGroupId && openDocumentKey) {
-    let openGroupMetadata: IOpenDocumentsGroupMetadata|undefined;
     try {
       // The sort work tab stores the group metadata as the document group id.
       // This way it can record both the primary and secondary filter values
@@ -146,6 +146,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
             <SortWorkDocumentArea
               nextDocumentsGroup={nextDocumentsGroup}
               openDocumentsGroup={openDocumentsGroup}
+              openGroupMetadata={openGroupMetadata}
               previousDocumentsGroup={previousDocumentsGroup}
             />
           ) :

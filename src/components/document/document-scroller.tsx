@@ -33,16 +33,15 @@ function SwitchSortGroupButton({ direction, disabled, onClick }: IArrowButtonPro
 interface IProps {
   documentGroup?: DocumentGroup;
   nextDocumentsGroup?: DocumentGroup;
+  openGroupMetadata?: IOpenDocumentsGroupMetadata;
   previousDocumentsGroup?: DocumentGroup;
 }
 
 export const DocumentScroller: React.FC<IProps> = observer(function DocumentThumbnailCarousel(props: IProps) {
-  const { documentGroup, nextDocumentsGroup, previousDocumentsGroup } = props;
+  const { documentGroup, nextDocumentsGroup, openGroupMetadata, previousDocumentsGroup } = props;
   const { documents, networkDocuments, persistentUI, sortedDocuments } = useStores();
   const { primarySortBy, secondarySortBy } = persistentUI;
   const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
-  const subTabString = maybeTabState?.currentDocumentGroupId;
-  const subTab: Partial<IOpenDocumentsGroupMetadata> = subTabString ? JSON.parse(subTabString) : {};
   const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
   const hasSecondarySort = secondarySortBy !== "None";
   const documentScrollerRef = useRef<HTMLDivElement>(null);
@@ -122,7 +121,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
     const newDocumentGroup = direction === "previous" ? previousDocumentsGroup : nextDocumentsGroup;
     const newKey = newDocumentGroup?.documents[0]?.key;
     const newSubTab = hasSecondarySort
-      ? { ...subTab, secondaryType: newDocumentGroup?.sortType, secondaryLabel: newDocumentGroup?.label }
+      ? { ...openGroupMetadata, secondaryType: newDocumentGroup?.sortType, secondaryLabel: newDocumentGroup?.label }
       : { primaryType: newDocumentGroup?.sortType, primaryLabel: newDocumentGroup?.label };
     const newSubTabString = JSON.stringify(newSubTab);
     if (newKey) {
@@ -146,7 +145,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
               onClick={switchSortGroup("previous")}
             />
           )}
-          <span className={primaryLabelClass}>{subTab.primaryLabel ?? ""}</span>
+          <span className={primaryLabelClass}>{openGroupMetadata?.primaryLabel ?? ""}</span>
           {!hasSecondarySort && (
             <SwitchSortGroupButton
               direction="right"
