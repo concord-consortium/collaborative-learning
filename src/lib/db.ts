@@ -425,11 +425,11 @@ export class DB {
       }
 
       // Group documents don't use a real uid, but instead a fake one based on the group id.
-      const uid = metadata.type === "group" ? metadata.self.uid : userContext.uid;
+      const uid = metadata.type === GroupDocument ? metadata.self.uid : userContext.uid;
 
       // Add the groupId for group documents to make then easier to query.
       const groupInfo: { groupId?: string } = {};
-      if (metadata.type === "group") {
+      if (metadata.type === GroupDocument) {
         groupInfo.groupId = metadata.self.groupId;
       }
 
@@ -597,14 +597,14 @@ export class DB {
         documentKey,
         classHash
       };
-      const document: DBGroupDocument = {version, self, type: "group"};
+      const document: DBGroupDocument = {version, self, type: GroupDocument};
 
       await documentRef.set(document);
       const metadata: CreateFirestoreMetadata = {
         version,
         self,
         createdAt,
-        type: "group",
+        type: GroupDocument,
         classHash,
         offeringId
       };

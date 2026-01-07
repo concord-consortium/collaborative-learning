@@ -7,7 +7,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModel, DocumentContentModelType } from "../../models/document/document-content";
 import { createDefaultSectionedContent } from "../../models/document/sectioned-content";
 import {
-  DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
+  DocumentDragKey, GroupDocument, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import {
@@ -164,7 +164,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       // be a little inefficient but it should only happens if the user has a group document
       // open in the their last CLUE session when they open CLUE again.
       const primaryDocMetadata = await db.findFirestoreMetadata(problemWorkspace.primaryDocumentKey);
-      if (primaryDocMetadata && primaryDocMetadata.type === "group") {
+      if (primaryDocMetadata && primaryDocMetadata.type === GroupDocument) {
         db.openGroupDocument(primaryDocMetadata);
       }
     }

@@ -28,6 +28,7 @@ export interface DBDocumentMap {
   [key /* documentKey */: string]: DBDocument;
 }
 
+// TODO: unify this with document-types.ts
 export type DBDocumentType = "section" |  // section documents are deprecated
                               "problem" | "planning" | "publication" |
                               "personal" | "personalPublication" |

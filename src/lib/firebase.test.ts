@@ -1,4 +1,5 @@
-import { UserModelType } from "src/models/stores/user";
+import { GroupDocument } from "../models/document/document-types";
+import { UserModelType } from "../models/stores/user";
 import { DocumentModelType } from "../models/document/document";
 import { DB } from "./db";
 import { Firebase } from "./firebase";
@@ -217,7 +218,7 @@ describe("Firebase class", () => {
 
     it("should throw error for group document missing groupId", () => {
       const mockDocument = {
-        type: "group",
+        type: GroupDocument,
         key: "{doc-key}",
         uid: "{user-id}"
       } as unknown as DocumentModelType;
@@ -228,7 +229,7 @@ describe("Firebase class", () => {
 
     it("should handle group document", () => {
       const mockDocument = {
-        type: "group",
+        type: GroupDocument,
         key: "{doc-key}",
         uid: "{user-id}",
         groupId: "{group-id}"

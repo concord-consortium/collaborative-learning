@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction, when } from "mobx";
 import { types, Instance, SnapshotIn, applySnapshot, typecheck, unprotect } from "mobx-state-tree";
 import { union } from "lodash";
 import firebase from "firebase";
-import { isSortableType } from "../document/document-types";
+import { GroupDocument, isSortableType } from "../document/document-types";
 import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
@@ -401,7 +401,7 @@ export class SortedDocuments {
       console.warn("Could not find metadata doc with key", docKey, this.firestoreMetadataDocs);
       return;
     }
-    if (metadataDoc.type === "group") {
+    if (metadataDoc.type === GroupDocument) {
       // TODO: in order to test this we need sorted documents to include group documents
       // in the filter it applies to metadata documents
       return this.db.openGroupDocument({
