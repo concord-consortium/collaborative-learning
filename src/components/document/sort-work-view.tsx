@@ -114,19 +114,21 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
         openDocumentsGroup = sortedDocumentGroups[openDocumentsGroupIndex];
         if (openGroupMetadata.secondaryType === secondarySearchTerm) {
           const secondaryGroups = openDocumentsGroup?.sortBy(secondarySearchTerm) || [];
+          const groupsWithDocs = secondaryGroups.filter(group => group.documents.length > 0);
           const secondaryGroupIndex =
-            secondaryGroups.findIndex(group => group.label === openGroupMetadata?.secondaryLabel);
-          openDocumentsGroup = secondaryGroups[secondaryGroupIndex];
-          const numGroups = secondaryGroups.length;
+            groupsWithDocs.findIndex(group => group.label === openGroupMetadata?.secondaryLabel);
+          openDocumentsGroup = groupsWithDocs[secondaryGroupIndex];
+          const numGroups = groupsWithDocs.length;
           if (numGroups > 1) {
-            previousDocumentsGroup = secondaryGroups[(secondaryGroupIndex - 1 + numGroups) % numGroups];
-            nextDocumentsGroup = secondaryGroups[(secondaryGroupIndex + 1) % numGroups];
+            previousDocumentsGroup = groupsWithDocs[(secondaryGroupIndex - 1 + numGroups) % numGroups];
+            nextDocumentsGroup = groupsWithDocs[(secondaryGroupIndex + 1) % numGroups];
           }
         } else {
-          const numGroups = sortedDocumentGroups.length;
+          const groupsWithDocs = sortedDocumentGroups.filter(group => group.documents.length > 0);
+          const numGroups = groupsWithDocs.length;
           if (numGroups > 1) {
-            previousDocumentsGroup = sortedDocumentGroups[(openDocumentsGroupIndex - 1 + numGroups) % numGroups];
-            nextDocumentsGroup = sortedDocumentGroups[(openDocumentsGroupIndex + 1) % numGroups];
+            previousDocumentsGroup = groupsWithDocs[(openDocumentsGroupIndex - 1 + numGroups) % numGroups];
+            nextDocumentsGroup = groupsWithDocs[(openDocumentsGroupIndex + 1) % numGroups];
           }
         }
       }
