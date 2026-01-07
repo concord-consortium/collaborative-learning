@@ -143,6 +143,7 @@ export interface IDocumentMetadataBase {
 
 export interface IDocumentMetadata extends IDocumentMetadataBase {
   createdAt?: number;
+  groupId?: string;
   originDoc?: string|null;
   properties?: Record<string, string>;
   tools?: string[];

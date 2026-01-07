@@ -16,7 +16,7 @@ import { DocumentModelType, createDocumentModel } from "../models/document/docum
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
-  ProblemPublication, SupportPublication
+  ProblemPublication, SupportPublication, GroupDocument
 } from "../models/document/document-types";
 import { SectionModelType } from "../models/curriculum/section";
 import { SupportModelType } from "../models/curriculum/support";
@@ -37,6 +37,7 @@ import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
+import { typeConverter } from "../utilities/db-utils";
 import { initializeApp } from "./firebase-config";
 import { UserModelType } from "../models/stores/user";
 import { logExemplarDocumentEvent } from "../models/document/log-exemplar-document-event";
@@ -521,69 +522,101 @@ export class DB {
     return this.createOtherDocument(PersonalDocument, params);
   }
 
-  public async createGroupDocument() {
-    console.log("DB.createGroupDocument");
+  public async findFirestoreMetadata(documentKey: string) {
+    console.log("DB.findFirestoreMetadata");
+    const { user } = this.stores;
+
+    const converter = typeConverter<IDocumentMetadata>();
+    const docByKey = this.firestore.collection("documents")
+      .withConverter(converter)
+      .where("context_id", "==", user.classHash)
+      .where("key", "==", documentKey);
+
+    // TODO: I suspect I'll need an new index for this to work
+    const maybeDoc = await docByKey.get();
+
+    if (maybeDoc.empty) {
+      return undefined;
+    } else {
+      return maybeDoc.docs[0].data();
+    }
+  }
+
+  public async getOrCreateGroupDocument() {
+    console.log("DB.getOrCreateGroupDocument");
     const { user } = this.stores;
     const groupId = user.currentGroupId;
     if (!groupId) {
       return Promise.reject("Cannot create group document because user is not in a group.");
     }
 
-    const path = this.firebase.getGroupDocumentPath(user, groupId);
-    console.log("group document path:", path);
-    const documentRef = this.firebase.ref(path).push();
-    const documentKey = documentRef.key!;
-    const version = "1.0";
-    // FIXME: This value is currently passed to a firebase function which actually creates the
-    // document if necessary. In the past the value was based on the a firebase realtime db timestamp
-    // that was generated when the metadata was written to the realtime db. In this case we are
-    // trying to skip the firebase realtime db metadata. Because this is going through a function it
-    // doesn't handle a client side created serverTimestamp value properly.
-    // I can think of a couple ways to fix this:
-    // 1) change the firebase function to not require createdAt to be passed in and then generate it
-    // if it isn't set.
-    // 2) bypass the function and just create the firestore document directly in the database. There
-    // might be some other server side code that is relying on the function though, so we have to
-    // check this first.
-    // In the meantime we are just going to make a client side timestamp.
-    // const createdAt = firebase.firestore.FieldValue.serverTimestamp();
-    const createdAt = Date.now();
-    const {classHash, offeringId} = user;
-    const self = {
-      // We use a fake uid for group documents so this field is always defined.
-      uid: `group_${user.offeringId}_${groupId}`,
-      // We also include the groupId here for easier querying
-      groupId,
-      documentKey,
-      classHash
-    };
-    const document: DBGroupDocument = {version, self, type: "group"};
+    const converter = typeConverter<IDocumentMetadata>();
+    const findCurrentGroupDoc = this.firestore.collection("documents")
+      .withConverter(converter)
+      .where("context_id", "==", user.classHash)
+      .where("offeringId", "==", user.offeringId)
+      .where("groupId", "==", groupId);
 
-    await documentRef.set(document);
-    const metadata: CreateFirestoreMetadata = {
-      version,
-      self,
-      createdAt,
-      type: "group",
-      classHash,
-      offeringId
-    };
-    const firestoreMetadata = await this.createFirestoreMetadataDocument(metadata, documentKey);
+    const maybeGroupDoc = await findCurrentGroupDoc.get();
 
-    const problemInfo = this.currentProblemInfo;
+    let firestoreMetadata: IDocumentMetadata | undefined;
 
-    // Maybe openGroupDocument should just take the IDocumentMetadata object instead options?
-    const clueDocument = await this.openGroupDocument({
-      documentKey,
-      type: "group",
-      userId: firestoreMetadata.uid,
-      createdAt: firestoreMetadata.createdAt,
-      groupId,
-      visibility: (firestoreMetadata.visibility as "public" | "private" | undefined) || "private",
-      ...problemInfo // probably we should use the info from firestoreMetadata instead of recomputing it
-    });
+    // FIXME: this should be done in a transaction so if someone else
+    // creates a group document before we won't get two group docs
+    // I'm pretty sure doing this requires the creation of the firestore
+    // metadata document to be done using client side firestore instead
+    // of having a firebase function create it.
+    if (maybeGroupDoc.empty) {
 
-    return clueDocument;
+      // This is generating a new document key with the push method.
+      const path = this.firebase.getGroupDocumentPath(user, groupId);
+      console.log("group document path:", path);
+      const documentRef = this.firebase.ref(path).push();
+      const documentKey = documentRef.key!;
+      const version = "1.0";
+      // FIXME: This value is currently passed to a firebase function which actually creates the
+      // document if necessary. In the past the value was based on the a firebase realtime db timestamp
+      // that was generated when the metadata was written to the realtime db. In this case we are
+      // trying to skip the firebase realtime db metadata. Because this is going through a function it
+      // doesn't handle a client side created serverTimestamp value properly.
+      // I can think of a couple ways to fix this:
+      // 1) change the firebase function to not require createdAt to be passed in and then generate it
+      // if it isn't set.
+      // 2) bypass the function and just create the firestore document directly in the database. There
+      // might be some other server side code that is relying on the function though, so we have to
+      // check this first.
+      // In the meantime we are just going to make a client side timestamp.
+      // const createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      const createdAt = Date.now();
+      const {classHash, offeringId} = user;
+      const self = {
+        // We use a fake uid for group documents so this field is always defined.
+        uid: `group_${user.offeringId}_${groupId}`,
+        // We also include the groupId here for easier querying
+        groupId,
+        documentKey,
+        classHash
+      };
+      const document: DBGroupDocument = {version, self, type: "group"};
+
+      await documentRef.set(document);
+      const metadata: CreateFirestoreMetadata = {
+        version,
+        self,
+        createdAt,
+        type: "group",
+        classHash,
+        offeringId
+      };
+      firestoreMetadata = await this.createFirestoreMetadataDocument(metadata, documentKey);
+    } else {
+      firestoreMetadata = maybeGroupDoc.docs[0].data();
+      if (!firestoreMetadata) {
+        throw new Error("Could not retrieve firestore metadata for existing group document.");
+      }
+    }
+
+    return await this.openGroupDocument(firestoreMetadata);
   }
 
   public publishProblemDocument(documentModel: DocumentModelType) {
@@ -780,12 +813,18 @@ export class DB {
     return documentFetchPromise;
   }
 
-  public openGroupDocument(options: OpenDocumentOptions) {
+  public openGroupDocument(firestoreMetadata: IDocumentMetadata) {
     const { documents } = this.stores;
-    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion,
-           problem, investigation, unit} = options;
+    const { key: documentKey, type, title, properties, uid: userId, groupId, visibility,
+           originDoc,
+           problem, investigation, unit,
+           createdAt } = firestoreMetadata;
     const existingPromise = this.documentFetchPromiseMap.get(documentKey);
     if (existingPromise) return existingPromise;
+
+    if (type !== GroupDocument) {
+      throw new Error(`Cannot open group document with type '${type}'`);
+    }
 
     const documentFetchPromise = new Promise<DocumentModelType>((resolve, reject) => {
       const {user} = this.stores;
@@ -803,20 +842,23 @@ export class DB {
         try {
           return createDocumentModel({
             type,
-            title,
             properties,
             groupId,
             visibility: visibility || "private",
             uid: userId, // TODO: this could be computed instead of needing to be passed in, see createGroupDocument
-            originDoc,
             key: document.self.documentKey,
-            createdAt: options.createdAt || Date.now(),
+            createdAt,
             content: content ? content : {},
             changeCount: document.changeCount,
-            pubVersion,
-            problem,
-            investigation,
-            unit
+
+            // The following props are sometimes null in Firestore on the metadata docs.
+            // For consistency we make them undefined which is what openDocument
+            // expects.
+            title: title ?? undefined,
+            originDoc: originDoc ?? undefined,
+            problem: problem ?? undefined,
+            investigation: investigation ?? undefined,
+            unit: unit ?? undefined
           });
         } catch (e) {
           const msg = "Could not open " +

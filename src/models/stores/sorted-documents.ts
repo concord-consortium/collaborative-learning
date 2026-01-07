@@ -401,34 +401,39 @@ export class SortedDocuments {
       console.warn("Could not find metadata doc with key", docKey, this.firestoreMetadataDocs);
       return;
     }
-    const visibility = metadataDoc?.visibility === "public" || metadataDoc?.visibility === "private"
-                         ? metadataDoc?.visibility as "public" | "private"
-                         : undefined;
-    const props: OpenDocumentOptions = {
-      documentKey: metadataDoc.key,
-      type: metadataDoc.type as any,
-      properties: metadataDoc.properties.toJSON(),
-      userId: metadataDoc.uid,
-      createdAt: metadataDoc.createdAt,
-      groupId: undefined,
-      visibility,
-      originDoc: undefined,
-      pubVersion: undefined,
-
-      // The following props are sometimes null in Firestore on the metadata docs.
-      // For consistency we make them undefined which is what openDocument
-      // expects.
-      title: metadataDoc.title ?? undefined,
-      problem: metadataDoc.problem ?? undefined,
-      investigation: metadataDoc.investigation ?? undefined,
-      unit: metadataDoc.unit ?? undefined,
-    };
-
     if (metadataDoc.type === "group") {
       // TODO: in order to test this we need sorted documents to include group documents
       // in the filter it applies to metadata documents
-      return this.db.openGroupDocument(props);
+      return this.db.openGroupDocument({
+        ...metadataDoc,
+        // The type of properties is different in IDocumentMetadata and IDocumentMetadataModel
+        // See the comment on DocumentMetadataModel for more details.
+        properties: metadataDoc.properties.toJSON(),
+      });
     } else {
+      const visibility = metadataDoc?.visibility === "public" || metadataDoc?.visibility === "private"
+                          ? metadataDoc?.visibility as "public" | "private"
+                          : undefined;
+      const props: OpenDocumentOptions = {
+        documentKey: metadataDoc.key,
+        type: metadataDoc.type as any,
+        properties: metadataDoc.properties.toJSON(),
+        userId: metadataDoc.uid,
+        createdAt: metadataDoc.createdAt,
+        groupId: undefined,
+        visibility,
+        originDoc: undefined,
+        pubVersion: undefined,
+
+        // The following props are sometimes null in Firestore on the metadata docs.
+        // For consistency we make them undefined which is what openDocument
+        // expects.
+        title: metadataDoc.title ?? undefined,
+        problem: metadataDoc.problem ?? undefined,
+        investigation: metadataDoc.investigation ?? undefined,
+        unit: metadataDoc.unit ?? undefined,
+      };
+
       return  this.db.openDocument(props);
     }
   }
