@@ -570,7 +570,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleOpenGroupDocumentClick = () => {
-    console.log("DocumentComponent.handleOpenGroupDocumentClick");
     const { onOpenGroupDocument } = this.props;
     onOpenGroupDocument?.();
   };

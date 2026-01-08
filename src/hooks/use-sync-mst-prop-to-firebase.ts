@@ -16,14 +16,13 @@ interface IProps<T> {
   firebase: Firebase;
   model: IAnyStateTreeNode;
   prop: string;
-  path: string | undefined;
+  path: string;
   enabled?: boolean;
   shouldMutate?: boolean | ((value: T) => boolean),
   options?: Omit<UseMutationOptions<unknown, unknown, T>, 'mutationFn'>;
   throttle?: number;
   additionalMutation?: (prop: string, value: T) => Promise<unknown>;
 }
-// TODO: update test
 export function useSyncMstPropToFirebase<T extends string | number | boolean | undefined>({
   firebase, model, prop, path, enabled = true, shouldMutate = true, options: clientOptions, throttle = 1000,
   additionalMutation

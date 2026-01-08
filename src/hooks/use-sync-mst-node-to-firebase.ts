@@ -15,7 +15,7 @@ import { Firebase } from "../lib/firebase";
 interface IProps<T> {
   firebase: Firebase;
   model: T; // MST model or complex type (e.g. types.map())
-  path: string | undefined;
+  path: string;
   enabled: boolean;
   options?: Omit<UseMutationOptions<unknown, unknown, SnapshotOut<T>>, 'mutationFn'>;
   throttle?: number;

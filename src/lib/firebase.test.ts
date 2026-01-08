@@ -216,27 +216,18 @@ describe("Firebase class", () => {
       });
     });
 
-    it("should throw error for group document missing groupId", () => {
-      const mockDocument = {
-        type: GroupDocument,
-        key: "{doc-key}",
-        uid: "{user-id}"
-      } as unknown as DocumentModelType;
-      expect(() => {
-        firebase.getDocumentPaths(mockUser, mockDocument);
-      }).toThrow("getDocumentPaths: group document missing groupId");
-    });
-
     it("should handle group document", () => {
       const mockDocument = {
         type: GroupDocument,
         key: "{doc-key}",
-        uid: "{user-id}",
+        uid: "group_{offering-id}_{group-id}",
         groupId: "{group-id}"
       } as unknown as DocumentModelType;
       const paths = firebase.getDocumentPaths(mockUser, mockDocument);
       expect(paths).toEqual({
-        content: "classes/{test-class}/offerings/{test-offering}/groups/{group-id}/documents/{doc-key}"
+        content: "classes/{test-class}/users/group_{offering-id}_{group-id}/documents/{doc-key}",
+        metadata: "classes/{test-class}/users/group_{offering-id}_{group-id}/documentMetadata/{doc-key}",
+        typedMetadata: ""
       });
     });
 

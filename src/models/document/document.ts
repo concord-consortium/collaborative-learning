@@ -44,6 +44,13 @@ export type IExemplarVisibilityProvider = {
   isExemplarVisible: (id: string) => boolean;
 };
 
+const VisibilityTypeEnumValues = ["public", "private"] as const;
+export const VisibilityTypeEnum = types.enumeration("VisibilityType", VisibilityTypeEnumValues);
+export type VisibilityType = Instance<typeof VisibilityTypeEnum>;
+export function isVisibilityType(value: string): value is VisibilityType {
+  return VisibilityTypeEnumValues.indexOf(value as VisibilityType) >= 0;
+}
+
 export const DocumentModel = Tree.named("Document")
   .props({
     uid: types.string,
@@ -56,7 +63,7 @@ export const DocumentModel = Tree.named("Document")
     content: types.maybe(DocumentContentModel),
     comments: types.map(TileCommentsModel),
     groupId: types.maybe(types.string),
-    visibility: types.maybe(types.enumeration("VisibilityType", ["public", "private"])),
+    visibility: types.maybe(VisibilityTypeEnum),
     groupUserConnections: types.map(types.boolean),
     originDoc: types.maybe(types.string),
     changeCount: types.optional(types.number, 0),
@@ -118,6 +125,10 @@ export const DocumentModel = Tree.named("Document")
       // contextId. However the old functions do. The old functions were just
       // ignoring this contextId. So the contextId is added here so the client
       // code can work with the old functions.
+      // NOTE: we always return a groupId here even for non group documents. If this metadata is
+      // written to Firestore of Firebase this will probably fail because this groupId will be undefined.
+      // Currently it seems the metadata is not written to either place, it is just used for finding
+      // Firestore documents.
       return { contextId: "ignored", uid, groupId, type, key, createdAt, title,
         originDoc, properties: properties.toJSON(), investigation: self.investigation,
         problem: self.problem, unit: self.unit, visibility } as IDocumentMetadata;

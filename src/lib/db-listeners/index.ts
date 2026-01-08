@@ -22,12 +22,6 @@ export class DBListeners extends BaseListener {
   @observable public isListening = false;
   private db: DB;
 
-  // TODO: Probably need to add a group document listener
-  // If we create these docs on demand, then the other members of the group might need to
-  // get the newly created document by the other member.
-  // However, it might be fine to just look for an existing group document when someone
-  // uses the UI to open it. This would add a little delay while opening it, but it would
-  // reduce the amount of copies of state we need to keep in sync.
   private latestGroupIdListener: DBLatestGroupIdListener;
   private groupsListener: DBGroupsListener;
   private problemDocumentsListener: DBProblemDocumentsListener;

@@ -148,7 +148,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const { appConfig: { defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
             db, persistentUI: { problemWorkspace }, sectionsLoadedPromise,
             unit: { planningDocument }, user: { type: role } } = this.stores;
-
     if (!problemWorkspace.primaryDocumentKey) {
       const { type, content } = this.getDefaultDocumentContentSpec();
       await sectionsLoadedPromise;
@@ -160,12 +159,13 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     } else {
       // If the primary document is a group document, make sure it is opened properly.
       // This is because group documents are not loaded automatically like other documents.
-      // This will be loading the metadata even if this isn't a group document, that might
-      // be a little inefficient but it should only happens if the user has a group document
-      // open in the their last CLUE session when they open CLUE again.
+      // This code is loading the metadata even if this isn't a group document, in order to
+      // figure out if it is a group document. This guaranteeInitialDocuments function is
+      // not waited for, so this new metadata loading shouldn't slow down the initial
+      // loading of CLUE.
       const primaryDocMetadata = await db.findFirestoreMetadata(problemWorkspace.primaryDocumentKey);
       if (primaryDocMetadata && primaryDocMetadata.type === GroupDocument) {
-        db.openGroupDocument(primaryDocMetadata);
+        db.openDocumentFromFirestoreMetadata(primaryDocMetadata);
       }
     }
     // Guarantee the user starts with one learning log
@@ -294,23 +294,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleOpenGroupDocument = async () => {
-    console.log("DocumentWorkspaceComponent.handleOpenGroupDocument");
     const { db, persistentUI: { problemWorkspace } } = this.stores;
     const groupDocument = await db.getOrCreateGroupDocument();
 
     if (groupDocument) {
       problemWorkspace.setPrimaryDocument(groupDocument);
     }
-
-    // TODO: Handle existing group documents
-    // For other documents there are requiredDocuments that is used to only load one document.
-    // This is even used for loading personal documents where there can be multiple personal documents.
-    // It doesn't seem to make sense to "require" group documents. But it is true there will
-    // be only one group document so we could use this same approach.
-    // Regardless of how it works, we should make a new listener that watches for the creation
-    // and updating of group documents in the db-listeners directory.
-    // And then wait for that listener to load the group document before setting it here.
-    // For now we just have createGroupDocument call openDocument directly.
   };
 
   private defaultOtherDocumentContent = (type: OtherDocumentType) => {

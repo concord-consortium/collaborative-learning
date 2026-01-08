@@ -9,14 +9,13 @@ import { getSnapshot } from "mobx-state-tree";
 import {
   DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
   DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
-  DBUserStar, DBOfferingUserProblemDocument, DBOtherDocument, IDocumentProperties, DBOtherPublication, DBSupport,
-  DBGroupDocument
+  DBUserStar, DBOfferingUserProblemDocument, DBOtherDocument, IDocumentProperties, DBOtherPublication, DBSupport
 } from "./db-types";
-import { DocumentModelType, createDocumentModel } from "../models/document/document";
+import { DocumentModelType, createDocumentModel, isVisibilityType } from "../models/document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
-  ProblemPublication, SupportPublication, GroupDocument
+  ProblemPublication, SupportPublication, GroupDocument, isDocumentType
 } from "../models/document/document-types";
 import { SectionModelType } from "../models/curriculum/section";
 import { SupportModelType } from "../models/curriculum/support";
@@ -98,11 +97,6 @@ export interface OpenDocumentOptions {
   investigation?: string;
   unit?: string;
 }
-
-// Allow createdAt to be a server timestamp value
-// This approach allows us to still discriminate the union of DBDocumentMetadata
-export type CreateFirestoreMetadata<T extends DBDocumentMetadata = DBDocumentMetadata> =
-  T extends any ? Omit<T, 'createdAt'> & { createdAt: number | firebase.firestore.FieldValue } : never;
 
 export class DB {
   @observable public groups: GroupUsersMap = {};
@@ -201,15 +195,6 @@ export class DB {
     return new Promise<void>((resolve, reject) => {
       groupRef.once("value")
         .then((snapshot) => {
-          // FIXME: we need to watch out for this. When we make a group document
-          // we are going to assume the user has already joined the group so this
-          // group document will already exist. But if for some reason this group info
-          // isn't set yet, then adding the "documents" child will prevent `snapshot.val()`
-          // from being null, so then the group info won't get set.
-          // And if this group info gets set later it will overwrite the group documents.
-          // This should probably be in a transaction anyhow, since another user might have
-          // already created and joined the group between when we read it and then update it.
-          //
           // if the group doesn't exist create it
           if (!snapshot.val()) {
             return groupRef.set({
@@ -398,11 +383,7 @@ export class DB {
     });
   }
 
-
-  async createFirestoreMetadataDocument(
-    metadata: CreateFirestoreMetadata,
-    documentKey: string
-  ) {
+  async createFirestoreMetadataDocument(metadata: DBDocumentMetadata, documentKey: string, groupId?: string) {
     const userContext = this.stores.userContextProvider.userContext;
 
     if (!this.stores.userContextProvider || !this.firestore || !userContext?.uid) {
@@ -414,7 +395,6 @@ export class DB {
     const documentPath = getSimpleDocumentPath(documentKey);
     const documentRef = this.firestore.doc(documentPath);
     const docSnapshot = await documentRef.get();
-
 
     if (!docSnapshot.exists) {
       const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
@@ -429,8 +409,8 @@ export class DB {
 
       // Add the groupId for group documents to make then easier to query.
       const groupInfo: { groupId?: string } = {};
-      if (metadata.type === GroupDocument) {
-        groupInfo.groupId = metadata.self.groupId;
+      if (groupId) {
+        groupInfo.groupId = groupId;
       }
 
       const firestoreMetadata: IDocumentMetadata & { contextId: string } = {
@@ -471,18 +451,40 @@ export class DB {
     const { type, content, title } = params;
     const { user } = this.stores;
 
-    return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
-      const documentRef = this.firebase.ref(this.firebase.getUserDocumentPath(user)).push();
+    return new Promise<{
+      document: DBDocument,
+      metadata: DBDocumentMetadata,
+      firestoreMetadata: IDocumentMetadata
+    }>((resolve, reject) => {
+      let groupUserId: string | undefined;
+      let groupId: string | undefined;
+      if (type === GroupDocument) {
+        if (!user.currentGroupId) {
+          return reject("Cannot create group document because user is not in a group.");
+        }
+        // We only set the groupId in the metadata if this is a group document
+        // Other documents are specific to the user and the user might change groups so this groupId
+        // could become invalid.
+        groupId = user.currentGroupId;
+        // Group documents have a special user id based on the offering and group id
+        groupUserId = `group_${user.offeringId}_${user.currentGroupId}`;
+      }
+
+      // If this is group document use a group user id instead of the current user id
+      const documentPath = this.firebase.getUserDocumentPath(user, undefined, groupUserId);
+      const documentRef = this.firebase.ref(documentPath).push();
       const documentKey = documentRef.key!;
-      const metadataRef = this.firebase.ref(this.firebase.getUserDocumentMetadataPath(user, documentKey));
+      const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, groupUserId);
+      const metadataRef = this.firebase.ref(metadataPath);
       const version = "1.0";
       const createdAt = firebase.database.ServerValue.TIMESTAMP as number;
       const {classHash, offeringId} = user;
-      const self = {uid: user.id, documentKey, classHash};
-      const document: DBDocument = {version, self, type};
-      if (content) {
-        document.content = content;
-      }
+
+      const self = {
+        uid: groupUserId ?? user.id,
+        documentKey,
+        classHash
+      };
 
       let metadata: DBDocumentMetadata;
 
@@ -497,8 +499,14 @@ export class DB {
         case ProblemDocument:
         case ProblemPublication:
         case SupportPublication:
+        case GroupDocument:
           metadata = {version, self, createdAt, type, classHash, offeringId};
           break;
+      }
+
+      const document: DBDocument = {version, self, type};
+      if (content) {
+        document.content = content;
       }
 
       return documentRef.set(document)
@@ -509,10 +517,10 @@ export class DB {
         .then((metadataValue) => {
           // This approach of reading the value that was written in the metadata
           // causes the createdAt timestamp to be populated with a value
-          this.createFirestoreMetadataDocument(metadataValue.val(), documentKey);
+          return this.createFirestoreMetadataDocument(metadataValue.val(), documentKey, groupId);
         })
-        .then(() => {
-          resolve({document, metadata});
+        .then((firestoreMetadata) => {
+          resolve({document, metadata, firestoreMetadata});
         })
         .catch(reject);
     });
@@ -542,6 +550,13 @@ export class DB {
     }
   }
 
+  public async createGroupDocument() {
+    // The document here is a DBDocument not a CLUE DocumentModelType
+    const result = await this.createDocument({ type: GroupDocument });
+    Logger.log(LogEventName.CREATE_GROUP_DOCUMENT);
+    return result;
+  }
+
   public async getOrCreateGroupDocument() {
     console.log("DB.getOrCreateGroupDocument");
     const { user } = this.stores;
@@ -566,49 +581,11 @@ export class DB {
     // I'm pretty sure doing this requires the creation of the firestore
     // metadata document to be done using client side firestore instead
     // of having a firebase function create it.
+    // And this also means we have to unpack the createDocument method
+    // all of the async calls will mess up the transaction.
     if (maybeGroupDoc.empty) {
-
-      // This is generating a new document key with the push method.
-      const path = this.firebase.getGroupDocumentPath(user, groupId);
-      console.log("group document path:", path);
-      const documentRef = this.firebase.ref(path).push();
-      const documentKey = documentRef.key!;
-      const version = "1.0";
-      // FIXME: This value is currently passed to a firebase function which actually creates the
-      // document if necessary. In the past the value was based on the a firebase realtime db timestamp
-      // that was generated when the metadata was written to the realtime db. In this case we are
-      // trying to skip the firebase realtime db metadata. Because this is going through a function it
-      // doesn't handle a client side created serverTimestamp value properly.
-      // I can think of a couple ways to fix this:
-      // 1) change the firebase function to not require createdAt to be passed in and then generate it
-      // if it isn't set.
-      // 2) bypass the function and just create the firestore document directly in the database. There
-      // might be some other server side code that is relying on the function though, so we have to
-      // check this first.
-      // In the meantime we are just going to make a client side timestamp.
-      // const createdAt = firebase.firestore.FieldValue.serverTimestamp();
-      const createdAt = Date.now();
-      const {classHash, offeringId} = user;
-      const self = {
-        // We use a fake uid for group documents so this field is always defined.
-        uid: `group_${user.offeringId}_${groupId}`,
-        // We also include the groupId here for easier querying
-        groupId,
-        documentKey,
-        classHash
-      };
-      const document: DBGroupDocument = {version, self, type: GroupDocument};
-
-      await documentRef.set(document);
-      const metadata: CreateFirestoreMetadata = {
-        version,
-        self,
-        createdAt,
-        type: GroupDocument,
-        classHash,
-        offeringId
-      };
-      firestoreMetadata = await this.createFirestoreMetadataDocument(metadata, documentKey);
+      const result = await this.createGroupDocument();
+      firestoreMetadata = result.firestoreMetadata;
     } else {
       firestoreMetadata = maybeGroupDoc.docs[0].data();
       if (!firestoreMetadata) {
@@ -616,7 +593,7 @@ export class DB {
       }
     }
 
-    return await this.openGroupDocument(firestoreMetadata);
+    return await this.openDocumentFromFirestoreMetadata(firestoreMetadata);
   }
 
   public publishProblemDocument(documentModel: DocumentModelType) {
@@ -813,77 +790,34 @@ export class DB {
     return documentFetchPromise;
   }
 
-  public openGroupDocument(firestoreMetadata: IDocumentMetadata) {
-    const { documents } = this.stores;
-    const { key: documentKey, type, title, properties, uid: userId, groupId, visibility,
-           originDoc,
-           problem, investigation, unit,
-           createdAt } = firestoreMetadata;
-    const existingPromise = this.documentFetchPromiseMap.get(documentKey);
-    if (existingPromise) return existingPromise;
-
-    if (type !== GroupDocument) {
-      throw new Error(`Cannot open group document with type '${type}'`);
+  public openDocumentFromFirestoreMetadata(firestoreMetadata: IDocumentMetadata) {
+    if (!isDocumentType(firestoreMetadata.type)) {
+      throw new Error(`Cannot open document with type '${firestoreMetadata.type}'`);
     }
 
-    const documentFetchPromise = new Promise<DocumentModelType>((resolve, reject) => {
-      const {user} = this.stores;
-      const documentPath = this.firebase.getGroupDocumentPath(user, groupId!, documentKey);
-      const documentRef = this.firebase.ref(documentPath);
+    const visibility = firestoreMetadata.visibility;
+    if (visibility !== undefined && !isVisibilityType(visibility)) {
+      throw new Error(`Cannot open document with visibility '${firestoreMetadata.visibility}'`);
+    }
 
-      return documentRef.once("value").then((documentSnapshot) => {
-        const document: DBGroupDocument|null = documentSnapshot.val();
-        if (!document) {
-          const msg = `Error retrieving group document '${documentKey}' of type '${type}' ` +
-                      `for group '${groupId}' at '${firebaseRefPath(documentRef)}'`;
-          throw new Error(msg);
-        }
-        const content = this.parseDocumentContent(document);
-        try {
-          return createDocumentModel({
-            type,
-            properties,
-            groupId,
-            visibility: visibility || "private",
-            uid: userId, // TODO: this could be computed instead of needing to be passed in, see createGroupDocument
-            key: document.self.documentKey,
-            createdAt,
-            content: content ? content : {},
-            changeCount: document.changeCount,
+    const { title, originDoc, problem, investigation, unit } = firestoreMetadata;
 
-            // The following props are sometimes null in Firestore on the metadata docs.
-            // For consistency we make them undefined which is what openDocument
-            // expects.
-            title: title ?? undefined,
-            originDoc: originDoc ?? undefined,
-            problem: problem ?? undefined,
-            investigation: investigation ?? undefined,
-            unit: unit ?? undefined
-          });
-        } catch (e) {
-          const msg = "Could not open " +
-                      `group document '${documentKey}' of type '${type}' for group '${groupId}'.` +
-                      "This is because DocumentModel.create failed.\n";
-          console.error(msg, e);
-          throw e;
-        }
-      })
-      .then((document) => {
-        // Not clear if we should add group documents to the main documents store.
-        // For now we do, to keep the behavior similar to other document types.
-        documents.add(document);
-        resolve(document);
-      })
-      .catch((msg) => {
-        // See comment in openDocument about unhandled rejected promises.
-        reject(msg);
-      });
+    return this.openDocument({
+      ...firestoreMetadata,
+      documentKey: firestoreMetadata.key,
+      userId: firestoreMetadata.uid,
+      visibility,
+
+      // The following props are sometimes null in Firestore on the metadata docs.
+      // For consistency we make them undefined which is what openDocument
+      // expects.
+      title: title ?? undefined,
+      originDoc: originDoc ?? undefined,
+      problem: problem ?? undefined,
+      investigation: investigation ?? undefined,
+      unit: unit ?? undefined
     });
-
-    this.documentFetchPromiseMap.set(documentKey, documentFetchPromise);
-    return documentFetchPromise;
   }
-
 
   public createLearningLogDocument(title?: string) {
     return this.createOtherDocument(LearningLogDocument, { title });

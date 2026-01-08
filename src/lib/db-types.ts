@@ -103,7 +103,6 @@ export interface DBSupportPublicationMetadata extends DBBaseProblemDocumentMetad
 
 export interface DBGroupDocMetadata extends DBBaseProblemDocumentMetadata {
   type: "group";
-  self: DBBaseProblemDocumentMetadata['self'] & { groupId: string };
 }
 
 export interface DBGroupUserConnections {
@@ -123,10 +122,12 @@ export interface DBDocument {
   type: DBDocumentType;
 }
 
-// contents written to {classHash}/groups/{groupId}/documents
+// Note: group documents do not have any type specific metadata. They have generic metadata,
+// and they mainly use the Firestore metadata instead of the Realtime Database metadata.
+// The Realtime Database is maintained for consistency with other document types, and for
+// firebase functions which look for this metadata.
 export interface DBGroupDocument extends DBDocument {
   type: "group";
-  self: DBDocument['self'] & { groupId: string };
 }
 
 export interface IDocumentProperties {

@@ -173,8 +173,7 @@ export function useDocumentSyncToFirebase(
 
   // sync properties for problem, personal, and learning log documents
   useSyncMstNodeToFirebase({
-    firebase, model: document.properties,
-    path: metadata ? `${metadata}/properties` : undefined,
+    firebase, model: document.properties, path: `${metadata}/properties`,
     enabled: commonSyncEnabled && !readOnly && [ProblemDocument, PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, properties) => {
@@ -189,8 +188,7 @@ export function useDocumentSyncToFirebase(
 
   // sync properties for published documents
   useSyncMstNodeToFirebase({
-    firebase, model: document.properties,
-    path: metadata ? `${metadata}/properties` : undefined,
+    firebase, model: document.properties, path: `${metadata}/properties`,
     enabled: commonSyncEnabled && readOnly &&
       (user.id === uid) && document.supportContentType !== "multiclass" &&
       [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication ].includes(type),
