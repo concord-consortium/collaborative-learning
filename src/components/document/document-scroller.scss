@@ -15,8 +15,52 @@
     gap: 5px;
     height: 36px;
     align-items: center;
-    span {
+
+    .sort-type {
       font-weight: bold;
+    }
+
+    .sort-label {
+      display: flex;
+      justify-content: center;
+      min-width: 60px;
+    }
+  }
+}
+
+.switch-sort-group-button {
+  background: none;
+  border: none;
+  border-radius: 5px;
+  color: $classwork-purple-dark-1;
+  cursor: pointer;
+  display: flex;
+  padding: 0;
+
+  &.right {
+    transform: rotate(180deg);
+  }
+
+  &:hover {
+    background-color: $classwork-purple-light-3;
+  }
+
+  &:active {
+    background-color: $classwork-purple-dark-1;
+    color: white;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.35;
+
+    &:hover {
+      background: none;
+    }
+
+    &:active {
+      background: none;
+      color: $classwork-purple-dark-1;
     }
   }
 }
