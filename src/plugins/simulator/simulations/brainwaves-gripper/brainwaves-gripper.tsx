@@ -1,10 +1,12 @@
 import { VariableSlider } from "@concord-consortium/diagram-view";
 import React from "react";
 
-import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
 import {
-  iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey
-} from "../../../shared-assets/icons/icon-utilities";
+  brainwavesGripperData, kEMGKey, kGripperKey, kPressureKey
+} from "../../../../../shared/simulations/brainwaves-gripper/brainwaves-gripper";
+import { kTemperatureKey } from "../../../../../shared/simulations/shared/const";
+import { demoStreams } from "../../../../../shared/assets/data/dataflow/demo-data";
+import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
 import { SelectionButton } from "../../components/ui/selection-button";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
@@ -18,22 +20,22 @@ import "./brainwaves-gripper.scss";
 
 export const kBrainwavesKey = "EMG_and_claw";
 
-const maxPressure = 300; // The pressure value when the gripper is fully closed
-const maxGripperValue = 100;
+const maxPressure = brainwavesGripperData.values.maxPressure.value;
+const maxGripperValue = brainwavesGripperData.values.maxGripperValue.value;
 
-const minGripperCupValue = 60; // The value of the gripper when it starts to feel the cup
+const minGripperCupValue = brainwavesGripperData.values.minGripperCupValue.value;
 const gripperCupRange = maxGripperValue - minGripperCupValue;
 
-const kPanTemperatureKey = "pan_temperature_key";
-const kSimulationModeKey = "simulation_mode_key";
-const kTargetEMGKey = "target_emg_key";
-const emgDropFactor = .1; //percentage drops for simulated emg signal
+const kPanTemperatureKey = brainwavesGripperData.values.kPanTemperatureKey.value;
+const kSimulationModeKey = brainwavesGripperData.values.kSimulationModeKey.value;
+const kTargetEMGKey = brainwavesGripperData.values.kTargetEMGKey.value;
+const emgDropFactor = brainwavesGripperData.values.emgDropFactor.value;
 
-const kSimulationModePressure = 0;
-const kSimulationModeTemperature = 1;
-const baseTemperature = 15.5; // 60 degrees F
-const maxTemperature = Math.max(...demoStreams.fastBoil);
-const minGripperPanValue = 81; // The value of the gripper when it starts to feel the pan
+const kSimulationModePressure = brainwavesGripperData.values.kSimulationModePressure.value;
+const kSimulationModeTemperature = brainwavesGripperData.values.kSimulationModeTemperature.value;
+const baseTemperature = brainwavesGripperData.values.baseTemperature.value;
+const maxTemperature = brainwavesGripperData.values.maxTemperature.value;
+const minGripperPanValue = brainwavesGripperData.values.minGripperPanValue.value;
 const gripperPanRange = maxGripperValue - minGripperPanValue;
 
 interface IAnimationProps extends ISimulationProps {

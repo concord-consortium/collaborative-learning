@@ -11,10 +11,10 @@ export function handleSimulatorTile({ tile }: TileHandlerParams) {
   result += `${simData.description}\n\n`;
 
   result += `The following table includes useful information about the simulation:\n\n`;
-  result += generateMarkdownTable(["Description", "Value"], Object.entries(simData.values).map(([key, value]) => [
-    simData.valueDescriptions[key],
-    `${value}`
-  ]));
+  result += generateMarkdownTable(
+    ["Description", "Value"],
+    Object.values(simData.values).map(({ description, value }) => [description || "", `${value}`])
+  );
 
   return result;
 }

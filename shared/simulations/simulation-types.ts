@@ -1,5 +1,9 @@
+export interface ISimulationValue {
+  description?: string;
+  value: any;
+}
+
 export interface ISimulationData {
   description?: string;
-  valueDescriptions: Record<string, string>;
-  values: Record<string, any>;
+  values: Record<string, ISimulationValue>;
 }

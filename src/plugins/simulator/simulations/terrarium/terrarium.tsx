@@ -1,9 +1,10 @@
 import React, { useRef } from "react";
 
+import { kTemperatureKey } from "../../../../../shared/simulations/shared/const";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
 import {
-  iconUrl, kFanKey, kHeatLampKey, kHumidifierKey, kHumidityKey, kTemperatureKey
+  iconUrl, kFanKey, kHeatLampKey, kHumidifierKey, kHumidityKey
 } from "../../../shared-assets/icons/icon-utilities";
 
 import display from "./assets/display/display.png";
