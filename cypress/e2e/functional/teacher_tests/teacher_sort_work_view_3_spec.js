@@ -73,6 +73,18 @@ describe('SortWorkView Tests', () => {
       });
     });
 
+    cy.log('verify can switch groups sorted by two means using arrows');
+    sortWork.getSimpleDocumentItem().eq(1).click();
+    cy.get('.header-text').should('not.contain.text', '1, Teacher');
+    cy.get('.header-text').should('contain.text', '10, Student');
+    cy.get('.switch-sort-group-button.left').click();
+    cy.get('.header-text').should('not.contain.text', '10, Student');
+    cy.get('.header-text').should('contain.text', '1, Teacher');
+    cy.get('.switch-sort-group-button.right').click();
+    cy.get('.header-text').should('not.contain.text', '1, Teacher');
+    cy.get('.header-text').should('contain.text', '10, Student');
+    cy.get('.tab-sort-work').click();
+
     // Change the primary sort option to match the currently-selected secondary sort option, and
     // make sure the latter automatically resets to "None", and the previously-selected option in
     // the primary menu is now selectable in the secondary sort menu.
