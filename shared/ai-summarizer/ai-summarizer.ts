@@ -273,15 +273,19 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
     : "";
 
   if (options.minimal) {
-    return heading(headingLevel, "CLUE Document Summary") +
+    return (
+      heading(headingLevel, "CLUE Document Summary") +
       `${summary}\n` +
-      `${dataSetSummary}`;
+      `${dataSetSummary}` +
+      heading(headingLevel, "End of CLUE Document Summary")
+    );
   } else {
     return (
       heading(headingLevel, "CLUE Document Summary") +
       `${layoutInfo}${preamble}${maybeTileInfo}${maybeDataSetInfo}\n\n` +
       `${summary}\n` +
-      `${dataSetSummary}\n`
+      `${dataSetSummary}\n` +
+      heading(headingLevel, "End of CLUE Document Summary")
     );
   }
 }

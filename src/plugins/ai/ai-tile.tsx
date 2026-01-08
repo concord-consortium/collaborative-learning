@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import { getParentOfType } from "mobx-state-tree";
 import React, { useEffect, useState } from "react";
 import Markdown from "markdown-to-jsx";
+import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { AIContentModelType } from "./ai-content";
 import { useUserContext } from "../../hooks/use-user-context";
@@ -51,9 +52,19 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           setIsUpdating(false);
           return;
         }
+
+        // Add a summary of the current document to the prompt if possible
+        let prompt = content.prompt;
+        const document = props.documentId ? stores.documents.getDocument(props.documentId) : undefined;
+        const summary = document ? documentSummarizer(document.content, {}) : "";
+        if (summary) {
+          prompt = `This is a summary of the current document:\n\n${summary}\n\n\n`;
+          prompt += `Using this information, respond to the following prompt:\n\n${content.prompt}`;
+        }
+
         const response = await getAiContent({
           context: userContext,
-          dynamicContentPrompt: content.prompt, // TODO: could just be "prompt"
+          dynamicContentPrompt: prompt, // TODO: could just be "prompt"
           systemPrompt,
           unit: stores.unit.code,
           documentId: changeSlashesToUnderscores(identifier),
