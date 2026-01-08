@@ -39,7 +39,7 @@ export function generateVariablesMarkdownTable(variables: NormalizedVariable[]) 
     variable.displayName || "",
     variable.description || "",
     variable.expression || "",
-    variable.value ? `${variable.value}` : "",
+    variable.value !== undefined ? `${variable.value}` : "",
     variable.unit || ""
   ]));
 }

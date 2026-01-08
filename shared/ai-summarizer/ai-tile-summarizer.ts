@@ -5,6 +5,7 @@ import {
 import { heading, pluralize } from "./ai-summarizer-utils";
 import { programToGraphviz } from "./dataflow-to-graphviz";
 import { generateTileDescription } from "./generate-tile-description";
+import { handleSimulatorTile } from "./tile-summarizers/handle-simulator-tile";
 
 export function handleTextTile({ tile, options }: TileHandlerParams): string|undefined {
   const content: any = tile.model.content;
@@ -209,6 +210,7 @@ export const defaultTileHandlers: TileHandler[] = [
   handleImageTile,
   handlePlaceholderTile,
   handleQuestionTile,
+  handleSimulatorTile,
   handleTableTile,
   handleTextTile,
 ];
