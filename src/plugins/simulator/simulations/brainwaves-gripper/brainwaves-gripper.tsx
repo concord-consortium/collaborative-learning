@@ -1,11 +1,11 @@
 import { VariableSlider } from "@concord-consortium/diagram-view";
 import React from "react";
 
+import { demoStreams } from "../../../../../shared/assets/data/dataflow/demo-data";
 import {
   brainwavesGripperData, kEMGKey, kGripperKey, kPressureKey
 } from "../../../../../shared/simulations/brainwaves-gripper/brainwaves-gripper";
 import { kTemperatureKey } from "../../../../../shared/simulations/shared/const";
-import { demoStreams } from "../../../../../shared/assets/data/dataflow/demo-data";
 import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
 import { SelectionButton } from "../../components/ui/selection-button";
 import { ISimulation, ISimulationProps } from "../simulation-types";
