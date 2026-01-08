@@ -150,8 +150,7 @@ export class Firebase {
   /**
    *  Returns all of the relevant paths for a given document
    */
-  public getDocumentPaths(currentUser: UserModelType, document: DocumentModelType) {
-    const user = currentUser;
+  public getDocumentPaths(user: UserModelType, document: DocumentModelType) {
     const documentType = document.type;
     const documentKey = document.key;
     const userId = document.uid;

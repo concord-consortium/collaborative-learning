@@ -427,10 +427,8 @@ export class DB {
         getFirebaseFunction<IFirestoreMetadataDocumentParams>("createFirestoreMetadataDocument_v2");
       createFirestoreMetadataDocument({context: userContext, document: firestoreMetadata});
 
-      // FIXME: we are hacking this to get something working.
-      // Either we should stop using a firebase function to make the metadata document,
-      // or we should wait for the function to finish making the document before returning its
-      // contents.
+      // NOTE: This is returning the firestore metadata that we setup locally,
+      // this is not guaranteed to be the same as what ends up in Firestore.
       return firestoreMetadata;
     } else {
       return docSnapshot.data() as IDocumentMetadata;
