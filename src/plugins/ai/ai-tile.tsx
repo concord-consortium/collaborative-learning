@@ -54,17 +54,18 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         }
 
         // Add a summary of the current document to the prompt if possible
-        let prompt = content.prompt;
+        let dynamicContentPrompt = content.prompt;
         const document = props.documentId ? stores.documents.getDocument(props.documentId) : undefined;
         const summary = document ? documentSummarizer(document.content, {}) : "";
         if (summary) {
-          prompt = `This is a summary of the current document:\n\n${summary}\n\n\n`;
-          prompt += `Using this information, respond to the following prompt:\n\n${content.prompt}`;
+          dynamicContentPrompt = `This is a summary of the current document:\n\n${summary}\n\n\n`;
+          dynamicContentPrompt += `Using this information, respond to the following prompt:\n\n${content.prompt}`;
         }
+        console.log(`--- prompt`, dynamicContentPrompt);
 
         const response = await getAiContent({
           context: userContext,
-          dynamicContentPrompt: prompt, // TODO: could just be "prompt"
+          dynamicContentPrompt, // TODO: could just be "prompt"
           systemPrompt,
           unit: stores.unit.code,
           documentId: changeSlashesToUnderscores(identifier),
