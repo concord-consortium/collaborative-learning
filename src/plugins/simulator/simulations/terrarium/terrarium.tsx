@@ -1,11 +1,12 @@
 import React, { useRef } from "react";
 
 import { kTemperatureKey } from "../../../../../shared/simulations/shared/const";
+import {
+  kFanKey, kHeatLampKey, kHumidifierKey, kHumidityKey, kRawTemperatureKey, stepDuration, terrariumValues
+} from "../../../../../shared/simulations/terrarium/terrarium";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
-import {
-  iconUrl, kFanKey, kHeatLampKey, kHumidifierKey, kHumidityKey
-} from "../../../shared-assets/icons/icon-utilities";
+import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
 
 import display from "./assets/display/display.png";
 import jarForeground from "./assets/jar_foreground/jar_foreground.png";
@@ -15,22 +16,18 @@ import { condensationFrames, fanFrames, geckoFrames, humidifierFrames, jarBackgr
 
 import "./terrarium.scss";
 
-export const kTerrariumKey = "terrarium";
-
-const kRawTemperatureKey = "raw_temperature_key";
 const tickDuration = 100; // This sim "ticks" more often than it "steps" to make the animation more smooth
-const stepDuration = 1000;
 const ticksPerStep = stepDuration / tickDuration;
-const minHumidity = 0;
-const startHumidity = 20;
-const maxHumidity = 90;
-const minTemperature = 21;
-const maxTemperature = 27;
-const baseHumidityImpactPerStep = -10 / 600000 * stepDuration; // -10%/10 minutes
-const fanHumidityImpactPerStep = -5 / 60000 * stepDuration; // -5%/minute
-const fanTemperatureImpactPerStep = -1 / 60000 * stepDuration; // -1 degree/minute
-const heatLampTemperatureImpactPerStep = 1 / 60000 * stepDuration; // +1 degree/minute
-const humidifierHumidityImpactPerStep = 15 / 60000 * stepDuration; // +15%/minute
+const minHumidity = terrariumValues.minHumidity.value;
+const startHumidity = terrariumValues.startHumidity.value;
+const maxHumidity = terrariumValues.maxHumidity.value;
+const minTemperature = terrariumValues.minTemperature.value;
+const maxTemperature = terrariumValues.maxTemperature.value;
+const baseHumidityImpactPerStep = terrariumValues.baseHumidityImpactPerStep.value;
+const fanHumidityImpactPerStep = terrariumValues.fanHumidityImpactPerStep.value;
+const fanTemperatureImpactPerStep = terrariumValues.fanTemperatureImpactPerStep.value;
+const heatLampTemperatureImpactPerStep = terrariumValues.heatLampTemperatureImpactPerStep.value;
+const humidifierHumidityImpactPerStep = terrariumValues.humidifierHumidityImpactPerStep.value;
 
 function TerrariumComponent({ frame, variables }: ISimulationProps) {
   const humidifierFrameRef = useRef(0);
@@ -56,10 +53,15 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
   const maxBlur = 1.25;
   const condensationStyle = { filter: `blur(${humidityPercent * maxBlur}px)`};
 
-  // Update gecko if humidity percent is 20% or more and temperature is 25°C or less
-  if (humidityValue >= 20 && temperatureValue <= 25) {
+  // Update gecko if the humidity and temperature are within range
+  if (
+    humidityValue >= terrariumValues.minGeckoHumidity.value &&
+    temperatureValue <= terrariumValues.maxGeckoTemperature.value
+  ) {
     geckoFrameRef.current = geckoFrameRef.current + geckoDirectionRef.current;
   }
+
+  // Turn the gecko around if it's at the end of the frames
   if (geckoFrameRef.current >= geckoFrames.length) {
     geckoFrameRef.current = geckoFrames.length - 1;
     geckoDirectionRef.current = -1;

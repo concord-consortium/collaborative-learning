@@ -18,8 +18,6 @@ import {
 import "rc-slider/assets/index.css";
 import "./brainwaves-gripper.scss";
 
-export const kBrainwavesKey = "EMG_and_claw";
-
 const maxPressure = brainwavesGripperData.values.maxPressure.value;
 const maxGripperValue = brainwavesGripperData.values.maxGripperValue.value;
 

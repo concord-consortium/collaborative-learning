@@ -1,5 +1,7 @@
-import { brainwavesGripperSimulation, kBrainwavesKey } from "./brainwaves-gripper/brainwaves-gripper";
-import { kTerrariumKey, terrariumSimulation } from "./terrarium/terrarium";
+import { kBrainwavesKey } from "../../../../shared/simulations/brainwaves-gripper/brainwaves-gripper";
+import { kTerrariumKey } from "../../../../shared/simulations/terrarium/terrarium";
+import { brainwavesGripperSimulation } from "./brainwaves-gripper/brainwaves-gripper";
+import { terrariumSimulation } from "./terrarium/terrarium";
 import { ISimulation } from "./simulation-types";
 import { kPotentiometerServoKey, potentiometerAndServoSimulation } from "./potentiometer-servo/potentiometer-servo";
 

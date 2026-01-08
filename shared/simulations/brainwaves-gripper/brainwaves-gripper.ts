@@ -2,6 +2,8 @@ import { demoStreams } from "../../assets/data/dataflow/demo-data";
 import { kTemperatureKey } from "../shared/const";
 import { ISimulationData } from "../simulation-types";
 
+export const kBrainwavesKey = "EMG_and_claw";
+
 export const kGripperKey = "gripper_key";
 export const kPressureKey = "pressure_key";
 export const kEMGKey = "emg_key";
