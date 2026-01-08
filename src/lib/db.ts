@@ -84,7 +84,6 @@ export interface OpenDocumentOptions {
   documentKey: string;
   type: DocumentType;
   userId: string;
-  createdAt?: number;
   groupId?: string;
   sectionId?: string;
   visibility?: "public" | "private";
@@ -802,6 +801,8 @@ export class DB {
 
     const { title, originDoc, problem, investigation, unit } = firestoreMetadata;
 
+    // Note: the createdAt field is not passed here because it hasn't been included in the
+    // past. If it is needed in the future, it is probably safe to add it here.
     return this.openDocument({
       ...firestoreMetadata,
       documentKey: firestoreMetadata.key,
@@ -815,7 +816,8 @@ export class DB {
       originDoc: originDoc ?? undefined,
       problem: problem ?? undefined,
       investigation: investigation ?? undefined,
-      unit: unit ?? undefined
+      unit: unit ?? undefined,
+      groupId: firestoreMetadata.groupId || undefined,
     });
   }
 

@@ -37,6 +37,7 @@ export function useSyncMstNodeToFirebase<T extends IAnyStateTreeNode>({
   }, options);
   const throttledMutate = useMemo(() => _throttle(mutation.mutate, throttle), [mutation.mutate, throttle]);
 
+  // If the path is empty, it could result in overwriting a large part of the DB so it is disabled.
   const setupReaction = !!path && enabled;
 
   useEffect(() => {
