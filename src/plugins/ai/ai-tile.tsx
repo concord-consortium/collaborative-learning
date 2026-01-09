@@ -94,7 +94,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   };
 
   const renderPromptForm = () => {
-    if (readOnly) {
+    if (readOnly || !content.displayPrompt) {
       return null;
     }
     return (
