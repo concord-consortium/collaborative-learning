@@ -30,6 +30,7 @@ import {
 } from "./shared-model-entry";
 import { RowList, isRowListContainer, RowListType } from "./row-list";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
+import { IClientCommentParams, IDocumentMetadata, IUserContext } from "../../../shared/shared";
 
 /**
  * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
@@ -55,6 +56,12 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     // IDs of top-level rows that are currently visible on the screen
     visibleRows: [] as string[],
     awaitingAIAnalysis: false,
+    pendingExemplarComments: [] as Array<{
+      comment: IClientCommentParams,
+      context: IUserContext,
+      document: IDocumentMetadata,
+      postFunction: (params: object) => Promise<any>
+    }>,
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -555,6 +562,28 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
   .actions(self => ({
     setAwaitingAIAnalysis(awaitingAIAnalysis: boolean) {
       self.awaitingAIAnalysis = awaitingAIAnalysis;
+    },
+    queueExemplarComment(commentData: {
+      comment: IClientCommentParams,
+      context: IUserContext,
+      document: IDocumentMetadata,
+      postFunction: (params: object) => Promise<any>
+    }) {
+      self.pendingExemplarComments.push(commentData);
+    },
+    async postQueuedExemplarComments() {
+      for (const commentData of self.pendingExemplarComments) {
+        try {
+          await commentData.postFunction({
+            comment: commentData.comment,
+            context: commentData.context,
+            document: commentData.document
+          });
+        } catch (error) {
+          console.error("Failed to post queued exemplar comment:", error);
+        }
+      }
+      self.pendingExemplarComments.splice(0); // clear the queue
     },
     removeNeighboringPlaceholderRows(rowId: string) {
       const rowList = self.getRowListForRow(rowId);

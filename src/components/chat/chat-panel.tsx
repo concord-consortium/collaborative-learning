@@ -14,7 +14,7 @@ import { useAppConfig, useCurriculumOrDocumentContent, useDBStore,
   useDocumentFromStore,
   useDocumentOrCurriculumMetadata, useStores } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
-import { getSimpleDocumentPath, IClientCommentParams } from "../../../shared/shared";
+import { getSimpleDocumentPath, IClientCommentParams, kAnalyzerUserParams } from "../../../shared/shared";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { AppConfigModelType } from "../../models/stores/app-config-model";
 import { UnitModelType } from "../../models/curriculum/unit";
@@ -148,16 +148,28 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   }, [isDocumentView]);
 
   // AI evaluation is triggered when the document edit time is updated, so we can
-  // remove the "Waiting..." message when we see a comment newer than the document last edited time.
+  // remove the "Waiting..." message when we see a comment from AI analysis newer than
+  // the document last edited time, and then post any queued exemplar comments.
   useEffect(() => {
     if (user && focusDocument && content?.awaitingAIAnalysis && documentComments?.length > 0) {
-      const lastCommentTimestamp = documentComments[documentComments.length - 1].createdAt;
-      if (lastCommentTimestamp) {
-        firebase.getLastEditedTimestamp(user, focusDocument).then((docLastEditedTime) => {
-          if (docLastEditedTime && lastCommentTimestamp > docLastEditedTime) {
+      const lastAIAnalysisComment = [...documentComments]
+        .reverse()
+        .find(comment => comment.uid === kAnalyzerUserParams.id);
+
+      if (lastAIAnalysisComment?.createdAt) {
+        firebase.getLastEditedTimestamp(user, focusDocument).then(
+          async (docLastEditedTime) => {
+            if (docLastEditedTime && lastAIAnalysisComment.createdAt > docLastEditedTime) {
+              if (content.postQueuedExemplarComments) {
+                await content.postQueuedExemplarComments();
+              }
+            }
             content.setAwaitingAIAnalysis(false);
           }
-        });
+        ).catch(() => {
+          // Ensure awaiting AI analysis state is cleared even if timestamp fetch fails.
+          content.setAwaitingAIAnalysis(false);
+       });
       }
     }
   }, [content, documentComments, firebase, focusDocument, user]);
