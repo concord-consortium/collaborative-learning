@@ -4,7 +4,7 @@ import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import {type AnalysisQueueDocument} from "./on-analyzable-doc-written";
-import {documentSummarizer} from "../../shared/ai-summarizer";
+import {documentSummarizer} from "../../shared/ai-summarizer/ai-summarizer";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write into the queue of docs to process
