@@ -1,0 +1,29 @@
+import { ISimulationData } from "../simulation-types";
+
+export const kPotentiometerServoKey = "potentiometer_chip_servo";
+
+export const potentiometerAndServoValues = {
+  kPotAngleKey: {
+    value: "pot_angle_key",
+    description: "The name of the potentiometer variable, which represents the angle of the potentiometer."
+  },
+  kResistReadingKey: {
+    value: "resist_reading_key",
+    description: "The name of the resistance reading variable, which is based on the potentiometer angle."
+  },
+  kServoAngleKey: {
+    value: "servo_angle_key",
+    description: "The name of the servo angle variable, which represents the angle of the servo arm."
+  },
+  minPotAngle: { value: 0, description: "The minimum angle of the potentiometer in degrees" },
+  maxPotAngle: { value: 270, description: "The maximum angle of the potentiometer in degrees. 10-bit ADC" },
+  minResistReading: { value: 0, description: "The minimum resistance reading from the potentiometer" },
+  maxResistReading: { value: 1023, description: "The maximum resistance reading from the potentiometer" },
+  minServoAngle: { value: 0, description: "The minimum angle of the servo in degrees" }
+};
+
+export const potentiometerAndServoData: ISimulationData = {
+  // eslint-disable-next-line max-len
+  description: `This simulation shows an Arduino microprocessor with inputs for battery power (Voltage) or a digital sensor such as a potentiometer dial, and outputs such as a connection to a servo which can have its angle set. As the simulated Arduino is programmed in a separate Dataflow tile, the instructions in the program are shown overlapping the Arduino to associate the electric microcircuits with the functions they perform.`,
+  values: potentiometerAndServoValues
+};

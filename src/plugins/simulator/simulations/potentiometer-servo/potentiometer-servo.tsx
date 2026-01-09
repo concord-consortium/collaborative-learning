@@ -3,6 +3,7 @@ import classNames from "classnames";
 import { useResizeDetector } from "react-resize-detector";
 import { VariableSlider } from "@concord-consortium/diagram-view";
 
+import { potentiometerAndServoValues } from "../../../../../shared/simulations/potentiometer-servo/potentiometer-servo";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { iconUrl, kPotentiometerKey, kServoKey, kSignalKey
 } from "../../../shared-assets/icons/icon-utilities";
@@ -26,19 +27,17 @@ interface INodeColumnProps {
   columnLabel: string;
 }
 
-export const kPotentiometerServoKey = "potentiometer_chip_servo";
-
 const potVisibleOffset = 135;
 const servoVisibleOffset = 90;
-const minPotAngle = 0;
-const maxPotAngle = 270;
-const minServoAngle = 0;
-const minResistReading = 0;
-const maxResistReading = 1023; // 10-bit ADC
+const minPotAngle = potentiometerAndServoValues.minPotAngle.value;
+const maxPotAngle = potentiometerAndServoValues.maxPotAngle.value;
+const minServoAngle = potentiometerAndServoValues.minServoAngle.value;
+const minResistReading = potentiometerAndServoValues.minResistReading.value;
+const maxResistReading = potentiometerAndServoValues.maxResistReading.value;
 
-const kPotAngleKey = "pot_angle_key";
-const kResistReadingKey = "resist_reading_key";
-const kServoAngleKey = "servo_angle_key";
+const kPotAngleKey = potentiometerAndServoValues.kPotAngleKey.value;
+const kResistReadingKey = potentiometerAndServoValues.kResistReadingKey.value;
+const kServoAngleKey = potentiometerAndServoValues.kServoAngleKey.value;
 
 const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
   return classNames(

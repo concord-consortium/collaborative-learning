@@ -1,4 +1,7 @@
 import { brainwavesGripperData, kBrainwavesKey } from "../../simulations/brainwaves-gripper/brainwaves-gripper";
+import {
+  kPotentiometerServoKey, potentiometerAndServoData
+} from "../../simulations/potentiometer-servo/potentiometer-servo";
 import { kTerrariumKey, terrariumData } from "../../simulations/terrarium/terrarium";
 import { TileHandlerParams } from "../ai-summarizer-types";
 import { generateMarkdownTable } from "../ai-summarizer-utils";
@@ -11,6 +14,7 @@ export function handleSimulatorTile({ tile }: TileHandlerParams) {
   const { simulation } = tile.model.content;
   const simData = simulation === kBrainwavesKey ? brainwavesGripperData
     : simulation === kTerrariumKey ? terrariumData
+    : simulation === kPotentiometerServoKey ? potentiometerAndServoData
     : undefined;
 
   if (!simData) {

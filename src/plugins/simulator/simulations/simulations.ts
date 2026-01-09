@@ -1,9 +1,10 @@
 import { kBrainwavesKey } from "../../../../shared/simulations/brainwaves-gripper/brainwaves-gripper";
+import { kPotentiometerServoKey } from "../../../../shared/simulations/potentiometer-servo/potentiometer-servo";
 import { kTerrariumKey } from "../../../../shared/simulations/terrarium/terrarium";
 import { brainwavesGripperSimulation } from "./brainwaves-gripper/brainwaves-gripper";
 import { terrariumSimulation } from "./terrarium/terrarium";
 import { ISimulation } from "./simulation-types";
-import { kPotentiometerServoKey, potentiometerAndServoSimulation } from "./potentiometer-servo/potentiometer-servo";
+import { potentiometerAndServoSimulation } from "./potentiometer-servo/potentiometer-servo";
 
 // The simulation to use when none is specified.
 export const defaultSimulationKey = kBrainwavesKey;
