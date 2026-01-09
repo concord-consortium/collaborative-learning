@@ -34,6 +34,7 @@ interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
   document: DocumentModelType;
   onNewDocument?: (type: string) => void;
+  onOpenGroupDocument?: () => void;
   onCopyDocument?: (document: DocumentModelType) => void;
   onDeleteDocument?: (document: DocumentModelType) => void;
   onAdminDestroyDocument?: (document: DocumentModelType) => void;
@@ -227,6 +228,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     if (document.isProblem || document.isPlanning) {
       return this.renderProblemTitleBar(type, hideButtons);
     }
+    if (document.isGroup) {
+      return this.renderGroupDocumentTitleBar(hideButtons);
+    }
     if (document.isPersonal || document.isLearningLog) {
       return this.renderOtherDocumentTitleBar(type, hideButtons);
     }
@@ -253,6 +257,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             {showFileMenu &&
               <DocumentFileMenu document={document}
                 onOpenDocument={this.handleOpenDocumentClick}
+                onOpenGroupDocument={this.handleOpenGroupDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={true}
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
@@ -269,6 +274,41 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             {show4up && this.renderMode()}
             {showShareButton &&
               <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />}
+          </div>
+        }
+      </div>
+    );
+  }
+
+  private renderGroupDocumentTitleBar(hideButtons?: boolean) {
+    const {appMode, clipboard, user: { isTeacherOrResearcher, currentGroupId }} = this.stores;
+    const title = `Group ${currentGroupId} Document`;
+    const { document, workspace } = this.props;
+    const showFileMenu = this.showFileMenu();
+    const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
+                            ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
+                            : undefined;
+    return (
+      <div className={`titlebar group`}>
+        {!hideButtons &&
+          <div className="actions left">
+            {showFileMenu &&
+              <DocumentFileMenu document={document}
+                onOpenDocument={this.handleOpenDocumentClick}
+                onOpenGroupDocument={this.handleOpenGroupDocumentClick}
+                onCopyDocument={this.handleCopyDocumentClick}
+                isDeleteDisabled={true}
+                onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
+            <DocumentAnnotationToolbar />
+            {this.renderIdeasButton()}
+          </div>
+        }
+        <div className="title" data-test="document-title">
+          {title} {this.renderStickyNotes()}
+        </div>
+        {!hideButtons &&
+          <div className="actions right" data-test="document-titlebar-actions">
+            {downloadButton}
           </div>
         }
       </div>
@@ -420,6 +460,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           { !hideButtons && showFileMenu &&
               <DocumentFileMenu document={document}
                 onOpenDocument={this.handleOpenDocumentClick}
+                onOpenGroupDocument={this.handleOpenGroupDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={countNotDeleted < 1}
                 onDeleteDocument={this.handleDeleteDocumentClick}
@@ -526,6 +567,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private handleOpenDocumentClick = () => {
     this.setState({ showBrowser: true });
+  };
+
+  private handleOpenGroupDocumentClick = () => {
+    const { onOpenGroupDocument } = this.props;
+    onOpenGroupDocument?.();
   };
 
   private handleCopyDocumentClick = () => {

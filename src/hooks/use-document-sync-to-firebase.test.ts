@@ -94,7 +94,7 @@ const specUser = (overrides?: Partial<SnapshotIn<typeof UserModel>>) => {
 
 const specFirebase = (type: string, key: string) => {
   return {
-    getUserDocumentPaths: (user: UserModelType) => {
+    getDocumentPaths: (user: UserModelType) => {
       return {
         content: `${user.id}/content/${key}`,
         metadata: `${user.id}/metadata/${key}`,

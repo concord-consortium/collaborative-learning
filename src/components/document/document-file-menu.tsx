@@ -12,6 +12,7 @@ interface IProps {
   document: DocumentModelType;
   isOpenDisabled?: boolean;
   onOpenDocument?: (document: DocumentModelType) => void;
+  onOpenGroupDocument?: (document: DocumentModelType) => void;
   isCopyDisabled?: boolean;
   onCopyDocument?: (document: DocumentModelType) => void;
   isDeleteDisabled?: boolean;
@@ -42,6 +43,7 @@ function showPublishOption(document: DocumentModelType, stores: IStores) {
 export const DocumentFileMenu: React.FC<IProps> = props => {
   const { document,
           isOpenDisabled, onOpenDocument,
+          onOpenGroupDocument,
           isCopyDisabled, onCopyDocument,
           isDeleteDisabled, onDeleteDocument,
           onAdminDestroyDocument } = props;
@@ -79,6 +81,12 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
       text: "Open...",
       disabled: !!isOpenDisabled,
       onClick: () => onOpenDocument?.(document)
+    },
+    {
+      ...idAndIcon("icon-open-group-doc", appIcons),
+      text: "Group Doc",
+      disabled: false,
+      onClick: () => onOpenGroupDocument?.(document)
     },
     ...publishOption,
     {
