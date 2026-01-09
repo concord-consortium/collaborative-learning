@@ -6,7 +6,7 @@ import * as logger from "firebase-functions/logger";
 import {getDatabase} from "firebase-admin/database";
 import {defineSecret} from "firebase-functions/params";
 import {getEmbeddings} from "../lib/src/ai-categorize-document";
-import {documentSummarizer} from "../../shared/ai-summarizer";
+import {documentSummarizer} from "../../shared/ai-summarizer/ai-summarizer";
 
 interface Summary {
   key: string;
