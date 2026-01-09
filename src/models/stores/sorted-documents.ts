@@ -63,7 +63,7 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
    * of the user of the document might change and we don't want to store stale group ids,
    * or try to keep them all updated.
    */
-  groupId: types.maybe(types.string),
+  groupId: types.maybeNull(types.string),
   title: types.maybeNull(types.string),
   originDoc: types.maybeNull(types.string),
   properties: types.map(types.string),
@@ -72,7 +72,7 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
   investigation: types.maybeNull(types.string),
   problem: types.maybeNull(types.string),
   unit: types.maybeNull(types.string),
-  visibility: types.maybe(types.string)
+  visibility: types.maybeNull(types.string)
 })
 .views((self) => ({
   getProperty(key: string) {
@@ -252,8 +252,6 @@ export class SortedDocuments {
     snapshot.docs.forEach(doc => {
       const data = doc.data();
       mstSnapshot[data.key] = data;
-      // For some reason some docs arrive with visibility set to illegal "null" value.
-      if (data.visibility === null) data.visibility = undefined;
       typecheck(DocumentMetadataModel, data);
       const exemplarMetadata = this.exemplarMetadataDocs.get(data.key);
       if (exemplarMetadata) {

@@ -793,11 +793,11 @@ export class DB {
     }
 
     const visibility = firestoreMetadata.visibility;
-    if (visibility !== undefined && !isVisibilityType(visibility)) {
+    if (visibility != null && !isVisibilityType(visibility)) {
       throw new Error(`Cannot open document with visibility '${firestoreMetadata.visibility}'`);
     }
 
-    const { title, originDoc, problem, investigation, unit } = firestoreMetadata;
+    const { title, originDoc, problem, investigation, unit, groupId } = firestoreMetadata;
 
     // Note: the createdAt field is not passed here because it hasn't been included in the
     // past. If it is needed in the future, it is probably safe to add it here.
@@ -805,7 +805,6 @@ export class DB {
       ...firestoreMetadata,
       documentKey: firestoreMetadata.key,
       userId: firestoreMetadata.uid,
-      visibility,
 
       // The following props are sometimes null in Firestore on the metadata docs.
       // For consistency we make them undefined which is what openDocument
@@ -815,7 +814,8 @@ export class DB {
       problem: problem ?? undefined,
       investigation: investigation ?? undefined,
       unit: unit ?? undefined,
-      groupId: firestoreMetadata.groupId || undefined,
+      groupId: groupId ?? undefined,
+      visibility: visibility ?? undefined,
     });
   }
 
