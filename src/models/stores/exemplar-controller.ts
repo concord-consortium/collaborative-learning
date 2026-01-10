@@ -92,15 +92,26 @@ export const BaseExemplarControllerModel = types
               content: kExemplarCommentContent,
               linkedDocumentKey: chosen.key
             };
+
             const postExemplarComment = firebase.functions().httpsCallable("postExemplarComment_v2");
-            postExemplarComment({
-                document: documentModel.metadata,
+
+            if (appConfig.aiEvaluation && documentModel.content?.awaitingAIAnalysis) {
+              documentModel.content.queueExemplarComment({
                 comment: newComment,
-                context: self.stores.userContextProvider.userContext
-              })
-              .catch((error) => {
-                console.error("Failed to post exemplar comment:", error);
-            });
+                document: documentModel.metadata,
+                context: self.stores?.userContextProvider.userContext,
+                postFunction: postExemplarComment
+              });
+            } else {
+              postExemplarComment({
+                  document: documentModel.metadata,
+                  comment: newComment,
+                  context: self.stores?.userContextProvider.userContext
+                })
+                .catch((error) => {
+                  console.error("Failed to post exemplar comment:", error);
+              });
+            }
             persistentUI.openResourceDocument(documentModel, appConfig);
             persistentUI.toggleShowChatPanel(true);
             ui.clearSelectedTiles();
