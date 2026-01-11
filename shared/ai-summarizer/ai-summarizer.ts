@@ -272,22 +272,14 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
       }).join("\n\n")
     : "";
 
-  if (options.minimal) {
-    return (
-      heading(headingLevel, "CLUE Document Summary") +
-      `${summary}\n` +
-      `${dataSetSummary}` +
-      heading(headingLevel, "End of CLUE Document Summary")
-    );
-  } else {
-    return (
-      heading(headingLevel, "CLUE Document Summary") +
-      `${layoutInfo}${preamble}${maybeTileInfo}${maybeDataSetInfo}\n\n` +
-      `${summary}\n` +
-      `${dataSetSummary}\n` +
-      heading(headingLevel, "End of CLUE Document Summary")
-    );
-  }
+  const extra = options.minimal ? "" : `${layoutInfo}${preamble}${maybeTileInfo}${maybeDataSetInfo}\n\n`;
+  return (
+    heading(headingLevel, "CLUE Document Summary") +
+    extra +
+    summary + "\n" +
+    dataSetSummary +
+    heading(headingLevel, "End of CLUE Document Summary")
+  );
 }
 
 interface SectionsSummaryParams {

@@ -38,6 +38,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // TODO: This triggers multiple undoable actions, but shouldn't really trigger any
   useEffect(() => {
     // don't attempt to query AI if there is no class hash (i.e. we're in authoring mode)
     if (getAiContent) {
@@ -56,6 +57,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         // Add a summary of the current document to the prompt if possible
         let dynamicContentPrompt = content.prompt;
         const document = props.documentId ? stores.documents.getDocument(props.documentId) : undefined;
+        // Clear the text so previous responses do not appear in the document summary
         content.setText("");
         const summary = document ? documentSummarizer(document.content, {}) : "";
         if (summary) {
