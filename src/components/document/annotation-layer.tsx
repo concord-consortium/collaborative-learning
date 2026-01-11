@@ -442,7 +442,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   };
 
   const getTileViewTransform = (tileId: string) => {
-    if (!content) return undefined;
+    if (!content || !readOnly) return undefined;
 
     const rowId = content.findRowIdContainingTile(tileId);
     if (!rowId) return undefined;
@@ -454,52 +454,37 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     if (!tile) return undefined;
 
     if (isDrawingContentModel(tile.content)) {
-      let transform;
+      const drawingContent = tile.content as DrawingContentModelType;
+      const contentBoundingBox = drawingContent.objectsBoundingBox;
+      const tileApi = tileApiInterface?.getTileApi(tileId);
 
-      if (readOnly) {
-        const drawingContent = tile.content as DrawingContentModelType;
-        const contentBoundingBox = drawingContent.objectsBoundingBox;
-        const tileApi = tileApiInterface?.getTileApi(tileId);
+      if (tileApi && tileApi.getTileDimensions && contentBoundingBox) {
+        const { width: tileWidth, height: tileHeight } = tileApi.getTileDimensions();
+        if (tileWidth === 0 || tileHeight === 0) return undefined;
 
-        if (tileApi && tileApi.getTileDimensions && contentBoundingBox) {
-          const { width: tileWidth, height: tileHeight } = tileApi.getTileDimensions();
-          if (tileWidth === 0 || tileHeight === 0) return undefined;
+        const canvasSize = { x: tileWidth, y: tileHeight };
+        const fitContentOptions = {
+          canvasSize,
+          contentBoundingBox,
+          minZoom: 0.1,
+          maxZoom: 1,
+          readOnly
+        };
+        const { offsetX, offsetY, zoom } = calculateFitContent(fitContentOptions);
 
-          const canvasSize = { x: tileWidth, y: tileHeight };
-          const fitContentOptions = {
-            canvasSize,
-            contentBoundingBox,
-            minZoom: 0.1,
-            maxZoom: 1,
-            readOnly
-          };
-          const { offsetX, offsetY, zoom } = calculateFitContent(fitContentOptions);
-
-          transform = {
-            scale: zoom,
-            offsetX,
-            offsetY
-          };
-        } else {
-          // Fallback to stored values if no bounding box
-          transform = {
-            scale: drawingContent.zoom,
-            offsetX: drawingContent.offsetX,
-            offsetY: drawingContent.offsetY
-          };
-        }
+        return {
+          scale: zoom,
+          offsetX,
+          offsetY
+        };
       } else {
-        const tileDimensions = tileApiInterface?.getTileApi(tileId)?.getTileDimensions?.();
-        if (tileDimensions && (tileDimensions.width === 0 || tileDimensions.height === 0)) return undefined;
-
-        transform = {
-          scale: (tile.content as DrawingContentModelType).zoom,
-          offsetX: (tile.content as DrawingContentModelType).offsetX,
-          offsetY: (tile.content as DrawingContentModelType).offsetY
+        // Fallback to stored values if no bounding box
+        return {
+          scale: drawingContent.zoom,
+          offsetX: drawingContent.offsetX,
+          offsetY: drawingContent.offsetY
         };
       }
-
-      return transform;
     }
 
     return undefined;

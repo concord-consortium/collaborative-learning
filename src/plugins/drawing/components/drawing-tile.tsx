@@ -70,11 +70,13 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
         const bbPadding = 5;
         const bb = contentRef.current.getObjectBoundingBox(objectId);
         const zoom = contentRef.current.zoom;
+        const offsetX = contentRef.current.offsetX;
+        const offsetY = contentRef.current.offsetY;
         if (bb) {
           const height = (bb.se.y - bb.nw.y + bbPadding * 2) * zoom;
           const width = (bb.se.x - bb.nw.x + bbPadding * 2) * zoom;
-          const left = (bb.nw.x - bbPadding) * zoom + getObjectListPanelWidth();
-          const top = (bb.nw.y - bbPadding) * zoom;
+          const left = (bb.nw.x - bbPadding) * zoom + offsetX + getObjectListPanelWidth();
+          const top = (bb.nw.y - bbPadding) * zoom + offsetY;
           return { height, left, top, width };
         }
         return undefined;
