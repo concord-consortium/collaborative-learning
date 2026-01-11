@@ -11,7 +11,7 @@ export const AIContentModel = TileContentModel
   .named("AIContent")
   .props({
     type: types.optional(types.literal(kAITileType), kAITileType),
-    displayPrompt: types.optional(types.boolean, true),
+    hidePrompt: types.optional(types.boolean, false),
     prompt: "",
     text: "This is where the dynamically generated AI response will appear."
   })
@@ -25,8 +25,8 @@ export const AIContentModel = TileContentModel
       const snapshot = getSnapshot(self);
       return stringify(snapshot);
     },
-    setDisplayPrompt(display: boolean) {
-      self.displayPrompt = display;
+    setHidePrompt(hide: boolean) {
+      self.hidePrompt = hide;
     },
     setPrompt(prompt: string) {
       self.prompt = prompt;

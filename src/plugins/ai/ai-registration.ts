@@ -12,7 +12,7 @@ registerTileContentInfo({
   modelClass: AIContentModel,
   defaultContent: defaultAIContent,
   defaultHeight: kAIDefaultHeight,
-  updateContentForCopy: (oldContent: any) => ({ ...oldContent, displayPrompt: false })
+  updateContentForCopy: (oldContent: any) => ({ ...oldContent, hidePrompt: true })
 });
 
 registerTileComponentInfo({
