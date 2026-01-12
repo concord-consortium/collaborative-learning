@@ -47,6 +47,22 @@ describe('SortWorkView Tests', () => {
     sortWork.getSortWorkItem().eq(1).click(); // Open the first document in the list
     resourcesPanel.getEditableDocumentContent().should('be.visible');
 
+    cy.log('verify can switch sort groups using arrows');
+    cy.get('.header-text').should('not.contain.text', 'Group 1');
+    cy.get('.header-text').should('contain.text', 'No Group');
+    cy.get('.switch-sort-group-button.left').click();
+    cy.get('.header-text').should('not.contain.text', 'No Group');
+    cy.get('.header-text').should('contain.text', 'Group 1');
+    cy.get('.switch-sort-group-button.left').click();
+    cy.get('.header-text').should('not.contain.text', 'Group 1');
+    cy.get('.header-text').should('contain.text', 'No Group');
+    cy.get('.switch-sort-group-button.right').click();
+    cy.get('.header-text').should('not.contain.text', 'No Group');
+    cy.get('.header-text').should('contain.text', 'Group 1');
+    cy.get('.switch-sort-group-button.right').click();
+    cy.get('.header-text').should('not.contain.text', 'Group 1');
+    cy.get('.header-text').should('contain.text', 'No Group');
+
     cy.log('verify document scroller is visible, populated, and functions');
     let prevFocusDocKey = "";
     let selectedDocIndex = 0;

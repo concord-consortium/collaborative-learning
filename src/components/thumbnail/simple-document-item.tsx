@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import React from "react";
 import classNames from "classnames";
-import { IDocumentMetadataModel } from "../../models/stores/sorted-documents";
+import { IDocumentMetadataModel } from "../../models/document/document-metadata-model";
 import { useStores } from "../../hooks/use-stores";
 import { getDocumentDisplayTitle, isDocumentAccessibleToUser } from "../../models/document/document-utils";
 

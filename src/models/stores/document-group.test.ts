@@ -190,7 +190,7 @@ describe('DocumentGroup Model', () => {
         ]
       });
 
-      const documentsByGroup = sortedDocuments.byGroup;
+      const documentsByGroup = sortedDocuments.sortBy("Group");
       const documentCollection = documentsByGroup[0].byBookmarked;
       expect(documentCollection.length).toBe(2);
       expect(documentCollection[0].label).toBe("Bookmarked");
@@ -222,8 +222,9 @@ describe('DocumentGroup Model', () => {
         { label: "Group 3", index: 2 },
         { label: "Group 3", index: 3 }
       ];
+      const byNameGroups = sortedDocuments.sortBy("Name");
       expectedGroups.forEach(({ label, index }) => {
-        const documentGroup = sortedDocuments.byName[index];
+        const documentGroup = byNameGroups[index];
         const documentCollection = documentGroup.byGroup;
         expect(documentCollection.length).toBe(1);
         expect(documentCollection[0].label).toBe(label);
@@ -235,7 +236,8 @@ describe('DocumentGroup Model', () => {
 
   describe("byName Function", () => {
     it ('should return a document collection alphabetized by last name with the correct documents per user', () => {
-      const documentGroup = sortedDocuments.byGroup[0];
+      const byGroupDocs = sortedDocuments.sortBy("Group");
+      const documentGroup = byGroupDocs[0];
       const documentCollection = documentGroup.byName;
       expect(documentCollection.length).toBe(2);
       expect(documentCollection[0].label).toBe("Cytacki, Scott");
@@ -243,13 +245,13 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection[1].label).toBe("Swenson, Kirk");
       expect(documentCollection[1].documents.length).toBe(1);
 
-      const documentGroup2 = sortedDocuments.byGroup[1];
+      const documentGroup2 = byGroupDocs[1];
       const documentCollection2 = documentGroup2.byName;
       expect(documentCollection2.length).toBe(1);
       expect(documentCollection2[0].label).toBe("Bacal, Joe");
       expect(documentCollection2[0].documents.length).toBe(1);
 
-      const documentGroup3 = sortedDocuments.byGroup[2];
+      const documentGroup3 = byGroupDocs[2];
       const documentCollection3 = documentGroup3.byName;
       expect(documentCollection3.length).toBe(1);
       expect(documentCollection3[0].label).toBe("Cao, Dennis");
@@ -259,7 +261,8 @@ describe('DocumentGroup Model', () => {
 
   describe("byStrategy Function", () => {
     it('should return a document collection sorted by strategy with the correct documents per strategy', () => {
-      const documentGroup = sortedDocuments.byName[0];
+      const byNameGroups = sortedDocuments.sortBy("Name");
+      const documentGroup = byNameGroups[0];
       const documentCollection = documentGroup.byStrategy;
       expect(documentCollection.length).toBe(3); // 'Not Tagged' is added by default to the list of strategies
       expect(documentCollection[0].label).toBe("foo");
@@ -269,7 +272,7 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection[2].label).toBe("Not Tagged");
       expect(documentCollection[2].documents.length).toBe(0);
 
-      const documentGroup2 = sortedDocuments.byName[1];
+      const documentGroup2 = byNameGroups[1];
       const documentCollection2 = documentGroup2.byStrategy;
       expect(documentCollection2.length).toBe(3);
       expect(documentCollection2[0].label).toBe("foo");
@@ -279,7 +282,7 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection2[2].label).toBe("Not Tagged");
       expect(documentCollection2[2].documents.length).toBe(1);
 
-      const documentGroup3 = sortedDocuments.byName[2];
+      const documentGroup3 = byNameGroups[2];
       const documentCollection3 = documentGroup3.byStrategy;
       expect(documentCollection3.length).toBe(3);
       expect(documentCollection3[0].label).toBe("foo");
@@ -289,7 +292,7 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection3[2].label).toBe("Not Tagged");
       expect(documentCollection3[2].documents.length).toBe(1);
 
-      const documentGroup4 = sortedDocuments.byName[3];
+      const documentGroup4 = byNameGroups[3];
       const documentCollection4 = documentGroup4.byStrategy;
       expect(documentCollection4.length).toBe(3);
       expect(documentCollection4[0].label).toBe("foo");
@@ -303,7 +306,8 @@ describe('DocumentGroup Model', () => {
 
   describe("byTools Function", () => {
     it ('should return a document collection sorted by tool with the correct documents per tool', () => {
-      const documentGroup = sortedDocuments.byGroup[0];
+      const byGroupDocs = sortedDocuments.sortBy("Group");
+      const documentGroup = byGroupDocs[0];
       const documentCollection = documentGroup.byTools;
       expect(documentCollection.length).toBe(2);
       expect(documentCollection[0].label).toBe("Text");
@@ -311,13 +315,13 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection[1].label).toBe("No Tools");
       expect(documentCollection[1].documents.length).toBe(1);
 
-      const documentGroup2 = sortedDocuments.byGroup[1];
+      const documentGroup2 = byGroupDocs[1];
       const documentCollection2 = documentGroup2.byTools;
       expect(documentCollection2.length).toBe(1);
       expect(documentCollection2[0].label).toBe("No Tools");
       expect(documentCollection2[0].documents.length).toBe(1);
 
-      const documentGroup3 = sortedDocuments.byGroup[2];
+      const documentGroup3 = byGroupDocs[2];
       const documentCollection3 = documentGroup3.byTools;
       expect(documentCollection3.length).toBe(1);
       expect(documentCollection3[0].label).toBe("Drawing");
