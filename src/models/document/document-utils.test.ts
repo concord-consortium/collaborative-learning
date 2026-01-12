@@ -1,6 +1,6 @@
 import { UnitModel } from "../curriculum/unit";
 import { AppConfigModel } from "../stores/app-config-model";
-import { DocumentMetadataModel } from "../stores/sorted-documents";
+import { DocumentMetadataModel } from "../document/document-metadata-model";
 import { PersonalDocument, ProblemDocument, SupportPublication } from "./document-types";
 import { getDocumentDisplayTitle } from "./document-utils";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
