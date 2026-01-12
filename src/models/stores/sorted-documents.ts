@@ -107,23 +107,6 @@ export class SortedDocuments {
     return this.rootDocumentGroup.sortBy(sortType);
   }
 
-  // ** views ** //
-  get byGroup(): DocumentGroup[] {
-    return this.rootDocumentGroup.byGroup;
-  }
-  get byName(): DocumentGroup[] {
-    return this.rootDocumentGroup.byName;
-  }
-  get byStrategy(): DocumentGroup[] {
-    return this.rootDocumentGroup.byStrategy;
-  }
-  get byTools(): DocumentGroup[] {
-    return this.rootDocumentGroup.byTools;
-  }
-  get byBookmarked(): DocumentGroup[] {
-    return this.rootDocumentGroup.byBookmarked;
-  }
-
   getMSTSnapshotFromFBSnapshot(snapshot: firebase.firestore.QuerySnapshot<IDocumentMetadata>) {
     const mstSnapshot: SnapshotIn<typeof MetadataDocMapModel> = {};
     snapshot.docs.forEach(doc => {
