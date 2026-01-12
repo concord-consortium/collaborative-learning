@@ -18,6 +18,8 @@ import ToggleControl from "../utilities/toggle-control";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentAnnotationToolbar } from "./document-annotation-toolbar";
+import { kAnalyzerUserParams } from "../../../shared/shared";
+import { CommentWithId } from "../../models/document/document-comments-manager";
 
 import IdeaIcon from "../../assets/idea-icon.svg";
 
@@ -478,17 +480,44 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   // based on rules defined in exemplar-controller-rules. So we just
   // need to log the click. See: exemplar-controller.ts, and exemplar-controller-rules.ts
   // The AI evaluation is triggered by updating the last-edited timestamp.
-  private handleIdeasButtonClick = () => {
+  private handleIdeasButtonClick = async () => {
     const { document } = this.props;
     const { db: { firebase }, user, ui, persistentUI, appConfig } = this.stores;
-    firebase.setLastEditedNow(user, document.key, document.uid );
+
+    await firebase.setLastEditedNow(user, document.key, document.uid);
+
     // Unselect all tiles, so that the whole-document comments are shown
     ui.clearSelectedTiles();
     persistentUI.openResourceDocument(document, appConfig, user, this.stores.sortedDocuments);
     persistentUI.toggleShowChatPanel(true);
+
     if (appConfig.aiEvaluation) {
-      document.content?.setAwaitingAIAnalysis(true);
+      if (document.commentsManager) {
+        // Use the comments manager to queue a pending AI comment.
+        // The manager will automatically check when new comments arrive
+        // and remove this pending item when AI analysis completes.
+        const docLastEditedTime = await firebase.getLastEditedTimestamp(user, document.key);
+        const effectiveLastEdited = docLastEditedTime || Date.now();
+
+        document.commentsManager.queuePendingAIComment(
+          effectiveLastEdited,
+          (comments: CommentWithId[]) => {
+            // Check if AI analysis is complete by finding an AI comment
+            // that was created after the document was last edited.
+            const lastAIComment = [...comments]
+              .reverse()
+              .find(comment => comment.uid === kAnalyzerUserParams.id);
+
+            return !!(lastAIComment &&
+                     lastAIComment.createdAt.getTime() > effectiveLastEdited);
+          }
+        );
+      } else {
+        // Fallback for backward compatibility.
+        document.content?.setAwaitingAIAnalysis(true);
+      }
     }
+
     logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
   };
 

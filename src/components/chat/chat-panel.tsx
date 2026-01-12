@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState} from "react";
+import React, { useCallback, useEffect, useMemo, useState} from "react";
 import classNames from "classnames";
 import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
@@ -56,7 +56,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const documentMetadata = useDocumentOrCurriculumMetadata(focusDocument);
   const content = useCurriculumOrDocumentContent(focusDocument);
   const document = useDocumentFromStore(focusDocument);
-  const { firebase } = useDBStore();
   const appConfig = useAppConfig();
   const { unit } = useStores();
   const ordering = content?.getTilesInDocumentOrder();
@@ -65,9 +64,11 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   // This looks in the unprefixed location, which is appropriate for all user documents.
   const { data: simplePathComments } = useDocumentCommentsAtSimplifiedPath(focusDocument);
   const { playbackTime } = useNavTabPanelInfo();
-  const allComments = [...comments||[], ...simplePathComments||[]]
-    .filter((comment) => playbackTime ? comment.createdAt <= playbackTime : true)
-    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  const allComments = useMemo(() => {
+    return [...comments||[], ...simplePathComments||[]]
+      .filter((comment) => playbackTime ? comment.createdAt <= playbackTime : true)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  }, [comments, simplePathComments, playbackTime]);
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = allComments?.filter(comment => comment.tileId == null);
   const allTileComments = allComments?.filter(comment=> comment.tileId != null);
@@ -147,20 +148,14 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     setChatPanelTitle(isDocumentView ? "Documents" : "Comments");
   }, [isDocumentView]);
 
-  // AI evaluation is triggered when the document edit time is updated, so we can
-  // remove the "Waiting..." message when we see a comment newer than the document last edited time.
+  // Update the comments manager when new comments arrive via hooks and check for
+  // pending comments (AI analysis, exemplars).
   useEffect(() => {
-    if (user && focusDocument && content?.awaitingAIAnalysis && documentComments?.length > 0) {
-      const lastCommentTimestamp = documentComments[documentComments.length - 1].createdAt;
-      if (lastCommentTimestamp) {
-        firebase.getLastEditedTimestamp(user, focusDocument).then((docLastEditedTime) => {
-          if (docLastEditedTime && lastCommentTimestamp > docLastEditedTime) {
-            content.setAwaitingAIAnalysis(false);
-          }
-        });
-      }
+    if (document?.commentsManager) {
+      document.commentsManager.comments = allComments;
+      document.commentsManager.checkPendingComments();
     }
-  }, [content, documentComments, firebase, focusDocument, user]);
+  }, [document, allComments]);
 
   const newCommentCount = unreadComments?.length || 0;
   const isStudentWorkspace = activeNavTab === "student-work";

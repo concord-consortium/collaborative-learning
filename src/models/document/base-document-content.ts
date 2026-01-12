@@ -552,9 +552,22 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         });
     }
   }))
+  .views(self => ({
+    // Check if AI analysis is pending by checking the commentsManager.
+    // Falls back to local flag for backward compatibility.
+    get isAwaitingAIAnalysis() {
+      const doc = getParentWithTypeName(self, "Document");
+      if (doc?.commentsManager) {
+        return doc.commentsManager.isAwaitingAIAnalysis;
+      }
+      return self.awaitingAIAnalysis;
+    }
+  }))
   .actions(self => ({
     setAwaitingAIAnalysis(awaitingAIAnalysis: boolean) {
       self.awaitingAIAnalysis = awaitingAIAnalysis;
+      // Note: In hybrid approach, the commentsManager is the source of truth.
+      // This flag is kept for backward compatibility during migration.
     },
     removeNeighboringPlaceholderRows(rowId: string) {
       const rowList = self.getRowListForRow(rowId);

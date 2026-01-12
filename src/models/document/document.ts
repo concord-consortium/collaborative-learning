@@ -34,6 +34,7 @@ import { DocumentTypeEnum, IDocumentContext, ISetProperties, isPublishedType,
   LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
+import { DocumentCommentsManager } from "./document-comments-manager";
 
 export enum ContentStatus {
   Valid,
@@ -73,6 +74,7 @@ export const DocumentModel = Tree.named("Document")
     invalidContent: undefined as object | undefined,
     contentErrorMessage: undefined as string | undefined,
     showPlaybackControls: false,
+    commentsManager: undefined as DocumentCommentsManager | undefined,
   }))
   .views(self => ({
     // This is needed for the tree monitor and manager
@@ -284,6 +286,9 @@ export const DocumentModel = Tree.named("Document")
       // The manager needs to be destroyed so it can unsubscribe from firestore.
       // Destroying it will probably also free up memory
       addDisposer(self, () => destroy(manager));
+      // Initialize the comments manager.
+      self.commentsManager = new DocumentCommentsManager();
+      addDisposer(self, () => self.commentsManager?.dispose());
     },
     undoLastAction() {
       const undoManager = self.treeManagerAPI?.undoManager;

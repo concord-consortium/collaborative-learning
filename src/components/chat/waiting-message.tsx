@@ -12,17 +12,17 @@ interface IWaitingMessageProps {
 }
 
 /**
- * Displays a styled waiting message if content.awaitingAIAnalysis is true.
+ * Displays a styled waiting message if AI analysis is pending.
  */
 const _WaitingMessage: React.FC<IWaitingMessageProps> = ({ content }) => {
 
   const waitingMessageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (waitingMessageRef.current && content?.awaitingAIAnalysis) {
+    if (waitingMessageRef.current && content?.isAwaitingAIAnalysis) {
       waitingMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [content?.awaitingAIAnalysis]);
+  }, [content?.isAwaitingAIAnalysis]);
 
   const body = (
     <>
@@ -37,7 +37,7 @@ const _WaitingMessage: React.FC<IWaitingMessageProps> = ({ content }) => {
 
   return (
     <div className="comment-thread" ref={waitingMessageRef}>
-      {content?.awaitingAIAnalysis && body}
+      {content?.isAwaitingAIAnalysis && body}
     </div>
   );
 };

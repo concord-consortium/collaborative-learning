@@ -119,7 +119,8 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
 
   // If an AI evaluation is pending, we force the document thread to be expanded.
   const content = useCurriculumOrDocumentContent(focusDocument);
-  const pendingAIAnalysis = content?.awaitingAIAnalysis;
+  const pendingAIAnalysis = content?.isAwaitingAIAnalysis;
+
   useEffect(() => {
     if (pendingAIAnalysis) {
       setExpandedThread('document');
