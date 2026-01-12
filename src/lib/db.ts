@@ -407,6 +407,10 @@ export class DB {
       const uid = metadata.type === GroupDocument ? metadata.self.uid : userContext.uid;
 
       // Add the groupId for group documents to make then easier to query.
+      // groupInfo is used so that the resulting firestoreMetadata can't have a `groupId: undefined` property.
+      // `groupId: undefined` means the property actually exists but its value is `undefined`.
+      // A property like that causes Firestore to fail. By starting off the groupInfo with `{}` and only
+      // setting the groupId if it is truthy, prevents this kind of unsupported property.
       const groupInfo: { groupId?: string } = {};
       if (groupId) {
         groupInfo.groupId = groupId;
@@ -464,7 +468,7 @@ export class DB {
         // could become invalid.
         groupId = user.currentGroupId;
         // Group documents have a special user id based on the offering and group id
-        groupUserId = `group_${user.offeringId}_${user.currentGroupId}`;
+        groupUserId = user.userIdForGroupDocuments;
       }
 
       // If this is group document use a group user id instead of the current user id
