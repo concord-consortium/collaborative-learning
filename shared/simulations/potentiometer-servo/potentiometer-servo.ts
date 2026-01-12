@@ -10,12 +10,13 @@ export const potentiometerAndServoValues = {
   },
   resistReadingKey: {
     value: "resist_reading_key",
-    description: "The name of the resistance reading variable, which is based on the potentiometer angle. "
-      + "This is the value accessible in the Dataflow program."
+    description: "The name of the resistance reading variable, which is proportional to the potentiometer angle. "
+      + "This variable can be accessed with an input node reading from the simululated pin in a Dataflow program."
   },
   servoAngleKey: {
     value: "servo_angle_key",
-    description: "The name of the servo angle variable, which represents the angle of the servo arm."
+    description: "The name of the servo angle variable, which represents the angle of the servo arm. "
+      + "This variable can be set by an output node writing to the simulated servo in a Dataflow program."
   },
 
   // Constants

@@ -8,25 +8,31 @@ const maxTemperature = Math.max(...demoStreams.fastBoil);
 export const brainwavesGripperValues = {
   // Variable names
   gripperKey: {
-    value: "gripper_key", description: "The name of the gripper variable, which is how closed the gripper is"
+    value: "gripper_key", description: "The name of the gripper variable, which is how closed the gripper is. "
+      + "This variable can be set by an output node writing to the simulated gripper in a Dataflow program."
   },
   pressureKey: {
     value: "pressure_key",
-    description: "The name of the pressure variable, which is the pressure sensed at the gripper tips"
+    description: "The name of the pressure variable, which is the pressure sensed at the gripper tips. "
+      + "This variable can be accessed with an input node reading from simulated pressure sensor in a Dataflow"
+      + " program."
   },
-  panTemperatureKey: { value: "pan_temperature_key", description: "The name of the actual pan temperature variable" },
+  panTemperatureKey: { value: "pan_temperature_key", description: "The name of the actual pan temperature variable." },
   temperatureKey: {
     value: "temperature_key",
-    description: "The name of the temperature variable, which is the temperature sensed at the gripper tips"
+    description: "The name of the temperature variable, which is the temperature sensed at the gripper tips. "
+      + "This variable can be accessed with an input node reading from simulated temperature sensor in a Dataflow"
+      + " program."
   },
   targetEMGKey: {
     value: "target_emg_key",
-    description: "The name of the target EMG variable, which is set by a slider the user can adjust"
+    description: "The name of the target EMG variable, which is set by a slider the user can adjust."
   },
   emgKey: {
     value: "emg_key",
-    description: "The name of the EMG variable, which is the target EMG minus a random amount on every frame to" +
-      " simulate imperfect EMG data"
+    description: "The name of the EMG variable, which is the target EMG minus a random amount on every frame to"
+      + " simulate imperfect EMG data. "
+      + "This variable can be accessed with an input node reading from simulated EMG in a Dataflow program."
   },
   simulationModeKey: { value: "simulation_mode_key", description: "The name of the simulation mode variable" },
 
