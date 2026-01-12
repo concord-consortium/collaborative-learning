@@ -15,12 +15,7 @@ import {
 import "rc-slider/assets/index.css";
 import "./brainwaves-gripper.scss";
 
-const maxPressure = brainwavesGripperValues.maxPressure.value;
-const maxGripperValue = brainwavesGripperValues.maxGripperValue.value;
-
-const minGripperCupValue = brainwavesGripperValues.minGripperCupValue.value;
-const gripperCupRange = maxGripperValue - minGripperCupValue;
-
+// Variable names
 const gripperKey = brainwavesGripperValues.gripperKey.value;
 const pressureKey = brainwavesGripperValues.pressureKey.value;
 const temperatureKey = brainwavesGripperValues.temperatureKey.value;
@@ -28,12 +23,22 @@ const panTemperatureKey = brainwavesGripperValues.panTemperatureKey.value;
 const simulationModeKey = brainwavesGripperValues.simulationModeKey.value;
 const emgKey = brainwavesGripperValues.emgKey.value;
 const targetEMGKey = brainwavesGripperValues.targetEMGKey.value;
-const emgDropFactor = brainwavesGripperValues.emgDropFactor.value;
 
+// Simulation modes
 const simulationModePressure = brainwavesGripperValues.simulationModePressure.value;
 const simulationModeTemperature = brainwavesGripperValues.simulationModeTemperature.value;
+
+// General constants
+const maxPressure = brainwavesGripperValues.maxPressure.value;
+const maxGripperValue = brainwavesGripperValues.maxGripperValue.value;
+const emgDropFactor = brainwavesGripperValues.emgDropFactor.value;
+
+// Cup constants
+const minGripperCupValue = brainwavesGripperValues.minGripperCupValue.value;
+const gripperCupRange = maxGripperValue - minGripperCupValue;
+
+// Pan constants
 const baseTemperature = brainwavesGripperValues.baseTemperature.value;
-const maxTemperature = brainwavesGripperValues.maxTemperature.value;
 const minGripperPanValue = brainwavesGripperValues.minGripperPanValue.value;
 const gripperPanRange = maxGripperValue - minGripperPanValue;
 
@@ -52,7 +57,7 @@ function BrainwavesGripperAnimation({ frame, mode, variables }: IAnimationProps)
   const rawTemperatureVariable = findVariable(panTemperatureKey, variables);
   const rawTemperature = rawTemperatureVariable?.currentValue;
   const normalizedRawTemperatureValue = ((rawTemperature ?? baseTemperature) - baseTemperature)
-    / (maxTemperature - baseTemperature);
+    / (brainwavesGripperValues.maxTemperature.value - baseTemperature);
   const panFrame = getFrame(normalizedRawTemperatureValue, panFrames.length);
 
   const firstSteamFrame = demoStreams.fastBoil.length - 5 * steamFrames.length;

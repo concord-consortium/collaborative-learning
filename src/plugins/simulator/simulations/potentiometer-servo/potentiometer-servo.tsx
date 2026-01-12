@@ -26,17 +26,16 @@ interface INodeColumnProps {
   columnLabel: string;
 }
 
+// Variable names
+const potAngleKey = potentiometerAndServoValues.potAngleKey.value;
+const resistReadingKey = potentiometerAndServoValues.resistReadingKey.value;
+const servoAngleKey = potentiometerAndServoValues.servoAngleKey.value;
+
+// Constants
 const potVisibleOffset = 135;
 const servoVisibleOffset = 90;
 const minPotAngle = potentiometerAndServoValues.minPotAngle.value;
 const maxPotAngle = potentiometerAndServoValues.maxPotAngle.value;
-const minServoAngle = potentiometerAndServoValues.minServoAngle.value;
-const minResistReading = potentiometerAndServoValues.minResistReading.value;
-const maxResistReading = potentiometerAndServoValues.maxResistReading.value;
-
-const potAngleKey = potentiometerAndServoValues.potAngleKey.value;
-const resistReadingKey = potentiometerAndServoValues.resistReadingKey.value;
-const servoAngleKey = potentiometerAndServoValues.servoAngleKey.value;
 
 const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
   return classNames(
@@ -220,7 +219,7 @@ function step({ frame, variables }: ISimulationProps) {
   // calculate resistance based on potentiometer angle
   const potAngleVar = findVariable(potAngleKey, variables);
   const potAngle = potAngleVar?.currentValue || 0;
-  const resistance = Math.round((potAngle / maxPotAngle) * maxResistReading);
+  const resistance = Math.round((potAngle / maxPotAngle) * potentiometerAndServoValues.maxResistReading.value);
   const resistanceVar = findVariable(resistReadingKey, variables);
   resistanceVar?.setValue(resistance);
 }
@@ -243,14 +242,14 @@ export const potentiometerAndServoSimulation: ISimulation = {
       labels: ["input", "reading", "sensor:pin-reading", "decimalPlaces:0"],
       icon: iconUrl(resistReadingKey),
       name: resistReadingKey,
-      value: minResistReading
+      value: potentiometerAndServoValues.minResistReading.value
     },
     {
       displayName: "Servo",
       labels: ["output", "position", "live-output:Servo", "decimalPlaces:0"],
       icon: iconUrl(servoAngleKey),
       name: servoAngleKey,
-      value: minServoAngle,
+      value: potentiometerAndServoValues.minServoAngle.value,
       unit: "deg"
     }
   ],

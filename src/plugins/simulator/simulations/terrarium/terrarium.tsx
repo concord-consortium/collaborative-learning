@@ -13,6 +13,7 @@ import { condensationFrames, fanFrames, geckoFrames, humidifierFrames, jarBackgr
 
 import "./terrarium.scss";
 
+// Variable names
 const temperatureKey = terrariumValues.temperatureKey.value;
 const rawTemperatureKey = terrariumValues.rawTemperatureKey.value;
 const fanKey = terrariumValues.fanKey.value;
@@ -20,6 +21,7 @@ const heatLampKey = terrariumValues.heatLampKey.value;
 const humidifierKey = terrariumValues.humidifierKey.value;
 const humidityKey = terrariumValues.humidityKey.value;
 
+// Constants
 const tickDuration = 100; // This sim "ticks" more often than it "steps" to make the animation more smooth
 const ticksPerStep = stepDuration / tickDuration;
 const minHumidity = terrariumValues.minHumidity.value;
@@ -28,10 +30,6 @@ const maxHumidity = terrariumValues.maxHumidity.value;
 const minTemperature = terrariumValues.minTemperature.value;
 const maxTemperature = terrariumValues.maxTemperature.value;
 const baseHumidityImpactPerStep = terrariumValues.baseHumidityImpactPerStep.value;
-const fanHumidityImpactPerStep = terrariumValues.fanHumidityImpactPerStep.value;
-const fanTemperatureImpactPerStep = terrariumValues.fanTemperatureImpactPerStep.value;
-const heatLampTemperatureImpactPerStep = terrariumValues.heatLampTemperatureImpactPerStep.value;
-const humidifierHumidityImpactPerStep = terrariumValues.humidifierHumidityImpactPerStep.value;
 
 function TerrariumComponent({ frame, variables }: ISimulationProps) {
   const humidifierFrameRef = useRef(0);
@@ -129,14 +127,14 @@ function step({ frame, variables }: ISimulationProps) {
   const temperatureVariable = findVariable(temperatureKey, variables);
 
   const fanOn = !!fanVariable?.value;
-  const fanHumidityImpact = fanOn ? fanHumidityImpactPerStep : 0;
-  const fanTemperatureImpact = fanOn ? fanTemperatureImpactPerStep : 0;
+  const fanHumidityImpact = fanOn ? terrariumValues.fanHumidityImpactPerStep.value : 0;
+  const fanTemperatureImpact = fanOn ? terrariumValues.fanTemperatureImpactPerStep.value : 0;
 
   const heatLampOn = !!heatLampVariable?.value;
-  const heatLampTemperatureImpact = heatLampOn ? heatLampTemperatureImpactPerStep : 0;
+  const heatLampTemperatureImpact = heatLampOn ? terrariumValues.heatLampTemperatureImpactPerStep.value : 0;
 
   const humidifierOn = !!humidifierVariable?.value;
-  const humidifierHumidityImpact = humidifierOn ? humidifierHumidityImpactPerStep : 0;
+  const humidifierHumidityImpact = humidifierOn ? terrariumValues.humidifierHumidityImpactPerStep.value : 0;
 
   if (humidityVariable?.value !== undefined) {
     const humidity = Math.min(maxHumidity, Math.max(minHumidity,
