@@ -135,10 +135,11 @@ export interface IDocumentMetadataBase {
   type: string;
   key: string;
   title?: string|null;
-  visibility?: string;
+  visibility?: string|null;
   investigation?: string|null;
   problem?: string|null;
   unit?: string|null;
+  groupId?: string|null;
 }
 
 export interface IDocumentMetadata extends IDocumentMetadataBase {

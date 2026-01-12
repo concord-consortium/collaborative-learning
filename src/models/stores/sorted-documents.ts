@@ -57,6 +57,13 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
   type: types.string,
   key: types.identifier,
   createdAt: types.maybe(types.number),
+  /**
+   * If the document is a group document this is the id the group that owns the document.
+   * If the document is not a group document this should be undefined because the group
+   * of the user of the document might change and we don't want to store stale group ids,
+   * or try to keep them all updated.
+   */
+  groupId: types.maybeNull(types.string),
   title: types.maybeNull(types.string),
   originDoc: types.maybeNull(types.string),
   properties: types.map(types.string),
@@ -65,7 +72,7 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
   investigation: types.maybeNull(types.string),
   problem: types.maybeNull(types.string),
   unit: types.maybeNull(types.string),
-  visibility: types.maybe(types.string)
+  visibility: types.maybeNull(types.string)
 })
 .views((self) => ({
   getProperty(key: string) {
@@ -245,8 +252,6 @@ export class SortedDocuments {
     snapshot.docs.forEach(doc => {
       const data = doc.data();
       mstSnapshot[data.key] = data;
-      // For some reason some docs arrive with visibility set to illegal "null" value.
-      if (data.visibility === null) data.visibility = undefined;
       typecheck(DocumentMetadataModel, data);
       const exemplarMetadata = this.exemplarMetadataDocs.get(data.key);
       if (exemplarMetadata) {
@@ -389,6 +394,8 @@ export class SortedDocuments {
     return docsArray;
   }
 
+  // This only fetches documents that have metadata that was already pulled down
+  // by the watchFirestoreMetaDataDocs listener.
   async fetchFullDocument(docKey: string) {
     if (!this.docsReceived) {
       // Wait until the initial batch of documents has been received from Firestore.
@@ -399,28 +406,9 @@ export class SortedDocuments {
       console.warn("Could not find metadata doc with key", docKey, this.firestoreMetadataDocs);
       return;
     }
-    const visibility = metadataDoc?.visibility === "public" || metadataDoc?.visibility === "private"
-                         ? metadataDoc?.visibility as "public" | "private"
-                         : undefined;
-    const props = {
-      documentKey: metadataDoc.key,
-      type: metadataDoc.type as any,
-      properties: metadataDoc.properties.toJSON(),
-      userId: metadataDoc.uid,
-      groupId: undefined,
-      visibility,
-      originDoc: undefined,
-      pubVersion: undefined,
-
-      // The following props are sometimes null in Firestore on the metadata docs.
-      // For consistency we make them undefined which is what openDocument
-      // expects.
-      title: metadataDoc.title ?? undefined,
-      problem: metadataDoc.problem ?? undefined,
-      investigation: metadataDoc.investigation ?? undefined,
-      unit: metadataDoc.unit ?? undefined,
-    };
-
-    return  this.db.openDocument(props);
+    return this.db.openDocumentFromFirestoreMetadata({
+      ...metadataDoc,
+      properties: metadataDoc.properties.toJSON()
+    });
   }
 }

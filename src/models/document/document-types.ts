@@ -12,6 +12,7 @@ export const ProblemPublication = "publication";
 export const PersonalPublication = "personalPublication";
 export const LearningLogPublication = "learningLogPublication";
 export const SupportPublication = "supportPublication";
+export const GroupDocument = "group";
 
 export function isProblemType(type: string) {
   return [ProblemDocument, ProblemPublication].indexOf(type) >= 0;
@@ -55,11 +56,15 @@ export function isCurriculumDocument(documentId?: string) {
   return documentId === undefined;
 }
 
-export const DocumentTypeEnum = types.enumeration("type",
-              [SectionDocumentDEPRECATED,
+const DocumentTypeEnumValues = [SectionDocumentDEPRECATED,
                 ProblemDocument, PersonalDocument, PlanningDocument, LearningLogDocument, ExemplarDocument,
-                ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication]);
+                ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication,
+                GroupDocument];
+export const DocumentTypeEnum = types.enumeration("type", DocumentTypeEnumValues);
 export type DocumentType = Instance<typeof DocumentTypeEnum>;
+export function isDocumentType(value: string): value is DocumentType {
+  return DocumentTypeEnumValues.indexOf(value as DocumentType) >= 0;
+}
 export type ProblemOrPlanningDocumentType = typeof ProblemDocument | typeof PlanningDocument;
 export type OtherDocumentType = typeof PersonalDocument | typeof LearningLogDocument;
 export type PublishableType = typeof ProblemDocument | OtherDocumentType;

@@ -64,6 +64,16 @@ export class DBOtherDocumentsListener extends BaseListener {
     }
   }
 
+  // FIXME: there is one of these "other document" listeners for each type of other document.
+  // The code below waits for a "other document" to be created and then calls
+  // resolveRequiredDocumentPromise with this document. That resolve method only looks at
+  // the type of the document then the resolves a single promise for this type of document.
+  // In the case of personal documents there can be multiple personal documents per user.
+  // So it is possible that multiple personal documents are created at the same time but
+  // only one of them will be used with the resolved promise. This is a problem because
+  // the `DB.createOtherDocument` is waiting for this promise and assuming it resolves
+  // with the document it just created.
+  // Need to rework the document loading logic to safely handle multiple personal documents.
   private handleDocumentAdded = (snapshot: firebase.database.DataSnapshot) => {
     const {documents, user} = this.db.stores;
     const dbDoc: DBOtherDocument|null = snapshot.val();

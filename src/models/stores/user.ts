@@ -180,6 +180,16 @@ export const UserModel = types
     get activityUrl() {
       const offering = self.portalClassOfferings.find(o => o.offeringId === self.offeringId);
       return offering?.activityUrl;
+    },
+
+    /**
+     * Group documents have a special user id based on the offering and group id.
+     * In this way every member of the group will have the same userId for group documents
+     *
+     * @returns
+     */
+    get userIdForGroupDocuments() {
+      return `group_${self.offeringId}_${self.currentGroupId}`;
     }
   }))
   .views((self) => ({
@@ -200,7 +210,7 @@ export const UserModel = types
         }
       }
       return [...classSet];
-    }
+    },
   }));
 
 export type UserModelType = typeof UserModel.Type;
