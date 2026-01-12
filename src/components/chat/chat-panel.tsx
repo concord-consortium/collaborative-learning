@@ -10,9 +10,10 @@ import {
   useDocumentCommentsAtSimplifiedPath, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument, useFirestore } from "../../hooks/firestore-hooks";
-import { useAppConfig, useCurriculumOrDocumentContent, useDBStore,
-  useDocumentFromStore,
-  useDocumentOrCurriculumMetadata, useStores } from "../../hooks/use-stores";
+import {
+  useAppConfig, useCurriculumOrDocumentContent, useDocumentFromStore,
+  useDocumentOrCurriculumMetadata, useStores
+} from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
 import { getSimpleDocumentPath, IClientCommentParams } from "../../../shared/shared";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
@@ -153,7 +154,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   useEffect(() => {
     if (document?.commentsManager) {
       document.commentsManager.comments = allComments;
-      document.commentsManager.checkPendingComments();
+      void document.commentsManager.checkPendingComments();
     }
   }, [document, allComments]);
 

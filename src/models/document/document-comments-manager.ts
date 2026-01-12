@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import firebase from "firebase/app";
+import { v4 as uuid } from "uuid";
 import { CommentDocument } from "../../lib/firestore-schema";
 import { WithId } from "../../hooks/firestore-hooks";
 import { IClientCommentParams, IDocumentMetadata, IUserContext } from "../../../shared/shared";
@@ -220,7 +221,7 @@ export class DocumentCommentsManager {
    */
   queuePendingAIComment(triggeredAt: number, checkCompleted: (comments: CommentWithId[]) => boolean) {
     const pending: IPendingAIComment = {
-      id: `ai-${Date.now()}-${Math.random()}`,
+      id: `ai-${uuid()}`,
       triggeredAt,
       type: "ai-analysis",
       checkCompleted
@@ -242,7 +243,7 @@ export class DocumentCommentsManager {
       comment,
       context,
       document,
-      id: `exemplar-${Date.now()}-${Math.random()}`,
+      id: `exemplar-${uuid()}`,
       type: "exemplar",
       postFunction
     };
@@ -259,7 +260,7 @@ export class DocumentCommentsManager {
     postParams?: object
   ) {
     const pending: IPendingCustomComment = {
-      id: `custom-${Date.now()}-${Math.random()}`,
+      id: `custom-${uuid()}`,
       type: "custom",
       checkCompleted,
       postFunction,
