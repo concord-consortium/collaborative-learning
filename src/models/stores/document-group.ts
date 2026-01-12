@@ -75,7 +75,29 @@ export class DocumentGroup {
   label: string;
   sortType: SortType;
   icon?: FC<SVGProps<SVGSVGElement>>;
+  /**
+   * Concrete list of documents owned by this group instance.
+   *
+   * This is set when the `documents` argument passed to the constructor is an
+   * array of `IDocumentMetadataModel`. In that case, `documentsFunc` remains
+   * undefined and this array is returned by the `documents` getter.
+   *
+   * At most one of `ownDocuments` or `documentsFunc` is expected to be defined
+   * for a given `DocumentGroup` instance.
+   */
   private ownDocuments?: IDocumentMetadataModel[];
+  /**
+   * Lazy document provider for this group instance.
+   *
+   * This is set when the `documents` argument passed to the constructor is a
+   * function returning `IDocumentMetadataModel[]`. In that case,
+   * `ownDocuments` remains undefined and the `documents` getter calls this
+   * function each time documents are requested so another object can manage
+   * and recompute the documents as needed.
+   *
+   * At most one of `ownDocuments` or `documentsFunc` is expected to be defined
+   * for a given `DocumentGroup` instance.
+   */
   private documentsFunc?: () => IDocumentMetadataModel[];
 
   constructor(props: IDocumentGroup) {

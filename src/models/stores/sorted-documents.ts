@@ -43,6 +43,7 @@ export class SortedDocuments {
   // Maps from document ID to the history entry ID that the user requested to view.
   documentHistoryViewRequests: Record<string,string> = {};
 
+  // Root document group that serves as the root node for delegating all sorting operations.
   rootDocumentGroup: DocumentGroup;
 
   constructor(stores: ISortedDocumentsStores) {
