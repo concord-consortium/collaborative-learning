@@ -528,7 +528,6 @@ export class DB {
   }
 
   public async findFirestoreMetadata(documentKey: string) {
-    console.log("DB.findFirestoreMetadata");
     const { user } = this.stores;
 
     const converter = typeConverter<IDocumentMetadata>();
@@ -555,7 +554,6 @@ export class DB {
   }
 
   public async getOrCreateGroupDocument() {
-    console.log("DB.getOrCreateGroupDocument");
     const { user } = this.stores;
     const groupId = user.currentGroupId;
     if (!groupId) {

@@ -200,6 +200,7 @@ describe("mst", () => {
   });
 
   /**
+   * The maybe type makes unspecified properties undefined.
    * This behavior causes problems for Firestore because Firestore does not support undefined
    * values in documents. So for any MST model that is saved directly in Firestore, it is
    * better to use maybeNull. Another solution would be to configure Firestore with the

@@ -239,57 +239,31 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private renderProblemTitleBar(type: string, hideButtons?: boolean) {
-    const {problem, appMode, clipboard, user: { isTeacherOrResearcher }} = this.stores;
-    const problemTitle = problem.title;
-    const { document, workspace } = this.props;
-    const isShared = document.visibility === "public";
-    const showShareButton = type !== "planning";
-    const showFileMenu = this.showFileMenu();
-    const show4up = !workspace.comparisonVisible && !isTeacherOrResearcher;
-    const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
-                            ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
-                            : undefined;
-    return (
-      <div className={`titlebar ${type}`}>
-        {!hideButtons &&
-          <div className="actions left">
-            {showFileMenu &&
-              <DocumentFileMenu document={document}
-                onOpenDocument={this.handleOpenDocumentClick}
-                onOpenGroupDocument={this.handleOpenGroupDocumentClick}
-                onCopyDocument={this.handleCopyDocumentClick}
-                isDeleteDisabled={true}
-                onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
-            <DocumentAnnotationToolbar />
-            {this.renderIdeasButton()}
-          </div>
-        }
-        <div className="title" data-test="document-title">
-          {`${problemTitle}${type === "planning" ? ": Planning" : ""}`} {this.renderStickyNotes()}
-        </div>
-        {!hideButtons &&
-          <div className="actions right" data-test="document-titlebar-actions">
-            {downloadButton}
-            {show4up && this.renderMode()}
-            {showShareButton &&
-              <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />}
-          </div>
-        }
-      </div>
-    );
-  }
 
-  private renderGroupDocumentTitleBar(hideButtons?: boolean) {
-    const {appMode, clipboard, user: { isTeacherOrResearcher, currentGroupId }} = this.stores;
-    const title = `Group ${currentGroupId} Document`;
-    const { document, workspace } = this.props;
+  private renderGenericTitleBar(
+    {
+      title,
+      hideButtons,
+      showShareButton,
+      docType,
+      show4up
+    } : {
+      title: string,
+      hideButtons?: boolean,
+      showShareButton?: boolean
+      docType: string
+      show4up?: boolean
+    }
+  ) {
+    const { appMode, clipboard } = this.stores;
+    const { document } = this.props;
+    const isShared = document.visibility === "public";
     const showFileMenu = this.showFileMenu();
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
     return (
-      <div className={`titlebar group`}>
+      <div className={`titlebar ${docType}`}>
         {!hideButtons &&
           <div className="actions left">
             {showFileMenu &&
@@ -309,10 +283,35 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {!hideButtons &&
           <div className="actions right" data-test="document-titlebar-actions">
             {downloadButton}
+            {show4up && this.renderMode()}
+            {showShareButton &&
+              <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />}
           </div>
         }
       </div>
     );
+  }
+  private renderProblemTitleBar(type: string, hideButtons?: boolean) {
+    const { problem, user } = this.stores;
+    const { workspace } = this.props;
+    const problemTitle = `${problem.title}${type === "planning" ? ": Planning" : ""}`;
+    return this.renderGenericTitleBar({
+      title: problemTitle,
+      hideButtons,
+      showShareButton: type !== "planning",
+      docType: type,
+      show4up: !workspace.comparisonVisible && !user.isTeacherOrResearcher
+    });
+  }
+
+  private renderGroupDocumentTitleBar(hideButtons?: boolean) {
+    const {appMode, clipboard, user: { isTeacherOrResearcher, currentGroupId }} = this.stores;
+    const title = `Group ${currentGroupId} Document`;
+    return this.renderGenericTitleBar({
+      title,
+      hideButtons,
+      docType: "group",
+    });
   }
 
   private getStickyNoteData() {
