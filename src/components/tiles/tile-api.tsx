@@ -30,6 +30,7 @@ export interface ITileApi {
   getObjectNodeRadii?: (objectId: string, objectType?: string) =>
     { centerRadius?: number, highlightRadius?: number } | undefined;
   getTileDimensions?: () => { width: number, height: number };
+  getViewTransform?: () => { offsetX: number, offsetY: number, zoom: number } | undefined;
 }
 
 export interface ITileApiInterface {

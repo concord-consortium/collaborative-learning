@@ -22,8 +22,7 @@ import { isFiniteNumber, midpoint, Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { HotKeys } from "../../utilities/hot-keys";
 import { boundingBoxCenter } from "../../models/annotations/annotation-utils";
-import { DrawingContentModelType, isDrawingContentModel } from "../../plugins/drawing/model/drawing-content";
-import { calculateFitContent } from "../../plugins/drawing/model/drawing-utils";
+import { isDrawingContentModel } from "../../plugins/drawing/model/drawing-content";
 
 import "./annotation-layer.scss";
 
@@ -114,6 +113,16 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   // Force rerenders when the layer's size changes
   useResizeObserver({ref: divRef, box: "border-box"});
+
+  // Force recalculation when window resizes
+  const [_resizeTick, setResizeTick] = useState(0);
+  useEffect(() => {
+    const handleResize = () => {
+      requestAnimationFrame(() => setResizeTick(t => t + 1));
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // After the content layout or annotations change, schedule a `requestAnimationFrame` tick
   // to recalculate all measurements when the layout has stabilized.
@@ -442,6 +451,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   };
 
   const getTileViewTransform = (tileId: string) => {
+    // Only return transforms for read-only tiles that are always set to fit-to-view.
     if (!content || !readOnly) return undefined;
 
     const rowId = content.findRowIdContainingTile(tileId);
@@ -454,36 +464,18 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     if (!tile) return undefined;
 
     if (isDrawingContentModel(tile.content)) {
-      const drawingContent = tile.content as DrawingContentModelType;
-      const contentBoundingBox = drawingContent.objectsBoundingBox;
       const tileApi = tileApiInterface?.getTileApi(tileId);
 
-      if (tileApi && tileApi.getTileDimensions && contentBoundingBox) {
-        const { width: tileWidth, height: tileHeight } = tileApi.getTileDimensions();
-        if (tileWidth === 0 || tileHeight === 0) return undefined;
-
-        const canvasSize = { x: tileWidth, y: tileHeight };
-        const fitContentOptions = {
-          canvasSize,
-          contentBoundingBox,
-          minZoom: 0.1,
-          maxZoom: 1,
-          readOnly
-        };
-        const { offsetX, offsetY, zoom } = calculateFitContent(fitContentOptions);
-
-        return {
-          scale: zoom,
-          offsetX,
-          offsetY
-        };
-      } else {
-        // Fallback to stored values if no bounding box
-        return {
-          scale: drawingContent.zoom,
-          offsetX: drawingContent.offsetX,
-          offsetY: drawingContent.offsetY
-        };
+      // Get transform from the tile API.
+      if (tileApi?.getViewTransform) {
+        const transform = tileApi.getViewTransform();
+        if (transform) {
+          return {
+            scale: transform.zoom,
+            offsetX: transform.offsetX,
+            offsetY: transform.offsetY
+          };
+        }
       }
     }
 

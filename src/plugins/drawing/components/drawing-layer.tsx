@@ -78,12 +78,34 @@ export const DrawingLayerView = observer((props: DrawingLayerViewProps) => {
   const content = props.model.content as DrawingContentModelType;
   const drawingAreaContext = useDrawingAreaContext();
 
+  let offsetX = content.offsetX;
+  let offsetY = content.offsetY;
+  let zoom = content.zoom;
+
+  // For read-only tiles, calculate independent fit-to-view transforms instead of using the
+  // shared model's zoom and offset values.
+  if (props.readOnly) {
+    const canvasSize = drawingAreaContext?.getVisibleCanvasSize() ?? { x: 100, y: 100 };
+    const contentBoundingBox = content.objectsBoundingBox;
+    if (contentBoundingBox) {
+      const fitResult = calculateFitContent({
+        canvasSize,
+        contentBoundingBox,
+        minZoom: 0.1,
+        maxZoom: 1
+      });
+      offsetX = fitResult.offsetX;
+      offsetY = fitResult.offsetY;
+      zoom = fitResult.zoom;
+    }
+  }
+
   return (
     <InternalDrawingLayerView
       reportVisibleBoundingBox={navigator.reportVisibleBoundingBox}
-      offsetX={content.offsetX}
-      offsetY={content.offsetY}
-      zoom={content.zoom}
+      offsetX={offsetX}
+      offsetY={offsetY}
+      zoom={zoom}
       objectsBoundingBox={content.objectsBoundingBox}
       containerContext={containerContext}
       drawingAreaContext={drawingAreaContext}
@@ -209,8 +231,7 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
         });
 
         this.zoom = zoom;
-        // Account for the show/sort panel toggle to better match the fit-all view in the workspace.
-        this.offsetX = offsetX + kClosedObjectListPanelWidth/2;
+        this.offsetX = offsetX;
         this.offsetY = offsetY;
       } else {
         // In regular tile display, offset and zoom are the values stored in the model.
