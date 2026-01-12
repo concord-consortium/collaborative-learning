@@ -1,46 +1,43 @@
-import { kTemperatureKey } from "../shared/const";
 import { ISimulationData } from "../simulation-types";
 
 export const kTerrariumKey = "terrarium";
 
-export const kRawTemperatureKey = "raw_temperature_key";
-export const kFanKey = "fan_key";
-export const kHeatLampKey = "heat_lamp_key";
-export const kHumidifierKey = "humidifier_key";
-export const kHumidityKey = "humidity_key";
 export const stepDuration = 1000;
 
 export const terrariumValues = {
-  kRawTemperatureKey: {
-    value: kRawTemperatureKey,
+  // Variable names
+  rawTemperatureKey: {
+    value: "raw_temperature_key",
     description: "The name of the raw temperature variable, which is used to determine the actual temperature."
   },
-  kTemperatureKey: {
-    value: kTemperatureKey,
+  temperatureKey: {
+    value: "temperature_key",
     description: "The name of the temperature variable, which is the actual temperature in the terrarium." +
      " It is a random number between -.05 and +.05 added to the raw temperature."
   },
-  kHumidityKey: {
-    value: kHumidityKey,
+  humidityKey: {
+    value: "humidity_key",
     description: "The name of the humidity variable, which is the current humidity in the terrarium."
   },
-  kFanKey: {
-    value: kFanKey,
+  fanKey: {
+    value: "fan_key",
     description: "The name of the fan variable. 0 means the fan is off; anything else means it's on."
   },
-  kHeatLampKey: {
-    value: kHeatLampKey,
+  heatLampKey: {
+    value: "heat_lamp_key",
     description: "The name of the heat lamp variable. 0 means the heat lamp is off; anything else means it's on."
   },
-  kHumidifierKey: {
-    value: kHumidifierKey,
+  humidifierKey: {
+    value: "humidifier_key",
     description: "The name of the humidifier variable. 0 means the humidifier is off; anything else means it's on."
   },
+
+  // Constants
+  minTemperature: { value: 21, description: "The minimum temperature value for the terrarium in °C" },
+  maxTemperature: { value: 27, description: "The maximum temperature value for the terrarium in °C" },
   minHumidity: { value: 0, description: "The minimum humidity value for the terrarium in %" },
   startHumidity: { value: 20, description: "The starting humidity value for the terrarium in %" },
   maxHumidity: { value: 90, description: "The maximum humidity value for the terrarium in %" },
-  minTemperature: { value: 21, description: "The minimum temperature value for the terrarium in °C" },
-  maxTemperature: { value: 27, description: "The maximum temperature value for the terrarium in °C" },
   baseHumidityImpactPerStep: {
     value: -10 / 600000 * stepDuration,
     description: "The base change in humidity, -10% every 10 minutes"

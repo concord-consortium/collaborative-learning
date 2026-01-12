@@ -1,9 +1,8 @@
 import React, { FunctionComponent, SVGProps } from "react";
 
-import {
-  kEMGKey, kGripperKey, kPressureKey
-} from "../../../../shared/simulations/brainwaves-gripper/brainwaves-gripper";
-import { kTemperatureKey } from "../../../../shared/simulations/shared/const";
+import { brainwavesGripperValues } from "../../../../shared/simulations/brainwaves-gripper/brainwaves-gripper";
+import { potentiometerAndServoValues } from "../../../../shared/simulations/potentiometer-servo/potentiometer-servo";
+import { terrariumValues } from "../../../../shared/simulations/terrarium/terrarium";
 
 import EMGIcon from "./dataflow/sensor/sensor-emg-icon.svg";
 import FanIcon from "./dataflow/output/fan.svg";
@@ -19,29 +18,18 @@ import SignalIcon from "./dataflow/control/signal.svg";
 
 const kIconPrefix = "ccicon";
 
-// Terrarium simulation
-export const kFanKey = "fan_key";
-export const kHeatLampKey = "heat_lamp_key";
-export const kHumidifierKey = "humidifier_key";
-export const kHumidityKey = "humidity_key";
-
-// Potentiometer & Servo simulation
-export const kPotentiometerKey = "potentiometer_key";
-export const kServoKey = "servo_key";
-export const kSignalKey = "signal_key";
-
 const icons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>> = {
-  [kEMGKey]: EMGIcon,
-  [kFanKey]: FanIcon,
-  [kGripperKey]: GripperIcon,
-  [kHeatLampKey]: HeatLampIcon,
-  [kHumidifierKey]: HumidifierIcon,
-  [kHumidityKey]: HumidityIcon,
-  [kPressureKey]: PressureIcon,
-  [kTemperatureKey]: TemperatureIcon,
-  [kPotentiometerKey]: PotentiometerIcon,
-  [kServoKey]: ServoIcon,
-  [kSignalKey]: SignalIcon
+  [brainwavesGripperValues.emgKey.value]: EMGIcon,
+  [terrariumValues.fanKey.value]: FanIcon,
+  [brainwavesGripperValues.gripperKey.value]: GripperIcon,
+  [terrariumValues.heatLampKey.value]: HeatLampIcon,
+  [terrariumValues.humidifierKey.value]: HumidifierIcon,
+  [terrariumValues.humidityKey.value]: HumidityIcon,
+  [brainwavesGripperValues.pressureKey.value]: PressureIcon,
+  [terrariumValues.temperatureKey.value]: TemperatureIcon,
+  [potentiometerAndServoValues.potAngleKey.value]: PotentiometerIcon,
+  [potentiometerAndServoValues.servoAngleKey.value]: ServoIcon,
+  [potentiometerAndServoValues.resistReadingKey.value]: SignalIcon
 };
 
 export function iconUrl(id: string) {

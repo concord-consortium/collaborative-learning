@@ -3,19 +3,22 @@ import { ISimulationData } from "../simulation-types";
 export const kPotentiometerServoKey = "potentiometer_chip_servo";
 
 export const potentiometerAndServoValues = {
-  kPotAngleKey: {
+  // Variable names
+  potAngleKey: {
     value: "pot_angle_key",
     description: "The name of the potentiometer variable, which represents the angle of the potentiometer."
   },
-  kResistReadingKey: {
+  resistReadingKey: {
     value: "resist_reading_key",
     description: "The name of the resistance reading variable, which is based on the potentiometer angle. "
       + "This is the value accessible in the Dataflow program."
   },
-  kServoAngleKey: {
+  servoAngleKey: {
     value: "servo_angle_key",
     description: "The name of the servo angle variable, which represents the angle of the servo arm."
   },
+
+  // Constants
   minPotAngle: { value: 0, description: "The minimum angle of the potentiometer in degrees" },
   maxPotAngle: { value: 270, description: "The maximum angle of the potentiometer in degrees. 10-bit ADC" },
   minResistReading: { value: 0, description: "The minimum resistance reading from the potentiometer" },
