@@ -1,5 +1,4 @@
 import { FC, SVGProps } from "react";
-import { IDocumentMetadataModel, ISortedDocumentsStores, TagWithDocs } from "./sorted-documents";
 import { makeAutoObservable } from "mobx";
 import {
   createDocMapByBookmarks,
@@ -10,18 +9,42 @@ import {
   sortGroupSectionLabels,
   sortNameSectionLabels
 } from "../../utilities/sort-document-utils";
+import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
-import { SecondarySortType } from "./ui-types";
+import { SecondarySortType, SortType } from "./ui-types";
+import { GroupsModelType } from "./groups";
+import { ClassModelType } from "./class";
+import { AppConfigModelType } from "./app-config-model";
+import { Bookmarks } from "./bookmarks";
 
 import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
+
+interface IDocumentGroupStores {
+  groups: GroupsModelType;
+  class: ClassModelType;
+  appConfig: AppConfigModelType;
+  bookmarks: Bookmarks;
+}
+
+export type TagWithDocs = {
+  tagKey: string;
+  tagValue: string;
+  docKeysFoundWithTag: string[];
+};
 
 interface IDocumentGroup {
   icon?:FC<SVGProps<SVGSVGElement>>;
   label: string;
-  sortType: SecondarySortType;
-  documents: IDocumentMetadataModel[];
-  stores: ISortedDocumentsStores;
+  sortType: SortType;
+
+  /**
+   * This is either an array of documents or a function that returns an array of documents.
+   * The function can be used so an other object can manage the documents and recompute
+   * them as needed.
+   */
+  documents: IDocumentMetadataModel[] | (() => IDocumentMetadataModel[]);
+  stores: IDocumentGroupStores;
 }
 
 interface IBuildDocumentCollectionProps {
@@ -48,11 +71,12 @@ interface IBuildDocumentCollectionProps {
  *
  */
 export class DocumentGroup {
-  stores: ISortedDocumentsStores;
+  stores: IDocumentGroupStores;
   label: string;
-  sortType: SecondarySortType;
-  documents: IDocumentMetadataModel[];
+  sortType: SortType;
   icon?: FC<SVGProps<SVGSVGElement>>;
+  private ownDocuments?: IDocumentMetadataModel[];
+  private documentsFunc?: () => IDocumentMetadataModel[];
 
   constructor(props: IDocumentGroup) {
     makeAutoObservable(this);
@@ -60,8 +84,16 @@ export class DocumentGroup {
     this.stores = stores;
     this.label = label;
     this.sortType = sortType;
-    this.documents = documents;
+    if (typeof documents === "function") {
+      this.documentsFunc = documents;
+    } else {
+      this.ownDocuments = documents;
+    }
     this.icon = icon;
+  }
+
+  get documents(): IDocumentMetadataModel[] {
+    return this.documentsFunc ? this.documentsFunc() : this.ownDocuments ?? [];
   }
 
   buildDocumentCollection(props: IBuildDocumentCollectionProps): DocumentGroup[] {

@@ -1,39 +1,26 @@
 import { makeAutoObservable, runInAction, when } from "mobx";
-import { types, Instance, SnapshotIn, applySnapshot, typecheck, unprotect } from "mobx-state-tree";
+import { types, SnapshotIn, applySnapshot, typecheck, unprotect } from "mobx-state-tree";
 import { union } from "lodash";
 import firebase from "firebase";
+import { IDocumentMetadata } from "../../../shared/shared";
+import { typeConverter } from "../../utilities/db-utils";
+import { DB } from "../../lib/db";
+
+
 import { isSortableType } from "../document/document-types";
+import { DocumentMetadataModel, IDocumentMetadataModel } from "../document/document-metadata-model";
+import { IArrowAnnotation } from "../annotations/arrow-annotation";
 import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
-import { DB } from "../../lib/db";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
 import { UserModelType } from "./user";
-import { IDocumentMetadata } from "../../../shared/shared";
-import { typeConverter } from "../../utilities/db-utils";
-import {
-  createDocMapByBookmarks,
-  createDocMapByGroups,
-  createDocMapByNames,
-  createTileTypeToDocumentsMap,
-  getTagsWithDocs,
-  sortGroupSectionLabels,
-  sortNameSectionLabels
-} from "../../utilities/sort-document-utils";
-import { DocumentGroup } from "./document-group";
-import { getTileContentInfo } from "../tiles/tile-content-info";
 import { PrimarySortType } from "./ui-types";
-import { IArrowAnnotation } from "../annotations/arrow-annotation";
 import { CurriculumConfigType } from "./curriculum-config";
+import { DocumentGroup } from "./document-group";
 
 export type SortedDocumentsMap = Record<string, DocumentGroup[]>;
-
-export type TagWithDocs = {
-  tagKey: string;
-  tagValue: string;
-  docKeysFoundWithTag: string[];
-};
 
 export interface ISortedDocumentsStores {
   documents: DocumentsModelType;
@@ -46,35 +33,6 @@ export interface ISortedDocumentsStores {
   curriculumConfig: CurriculumConfigType;
 }
 
-/**
- * This is the serializable version of IDocumentMetadata. It is almost the same. The one
- * important difference is the `properties` property.
- * In this MST model that property is an `observable.map<string, string>`.
- * In the IDocumentMetadata it is a Record<string,string>.
- */
-export const DocumentMetadataModel = types.model("DocumentMetadata", {
-  uid: types.string,
-  type: types.string,
-  key: types.identifier,
-  createdAt: types.maybe(types.number),
-  title: types.maybeNull(types.string),
-  originDoc: types.maybeNull(types.string),
-  properties: types.map(types.string),
-  tools: types.array(types.string),
-  strategies: types.array(types.string),
-  investigation: types.maybeNull(types.string),
-  problem: types.maybeNull(types.string),
-  unit: types.maybeNull(types.string),
-  visibility: types.maybe(types.string)
-})
-.views((self) => ({
-  getProperty(key: string) {
-    return self.properties.get(key);
-  },
-}));
-
-export interface IDocumentMetadataModel extends Instance<typeof DocumentMetadataModel> {}
-
 export const MetadataDocMapModel = types.map(DocumentMetadataModel);
 
 export class SortedDocuments {
@@ -85,13 +43,21 @@ export class SortedDocuments {
   // Maps from document ID to the history entry ID that the user requested to view.
   documentHistoryViewRequests: Record<string,string> = {};
 
+  rootDocumentGroup: DocumentGroup;
+
   constructor(stores: ISortedDocumentsStores) {
     makeAutoObservable(this);
     this.stores = stores;
     // We don't need the benefits of MST's actions
-    // We only want the serialization support
+    // We only want the serialization support, and MobX observability
     unprotect(this.metadataDocsFiltered);
     unprotect(this.metadataDocsWithoutUnit);
+    this.rootDocumentGroup = new DocumentGroup({
+      stores,
+      sortType: "All",
+      label: "All Documents",
+      documents: () => this.filteredDocsByType
+    });
   }
 
   get bookmarksStore() {
@@ -138,97 +104,24 @@ export class SortedDocuments {
   }
 
   sortBy(sortType: PrimarySortType): DocumentGroup[] {
-    switch (sortType) {
-      case "Group":
-        return this.byGroup;
-      case "Name":
-        return this.byName;
-      case "Strategy":
-        return this.byStrategy;
-      case "Tools":
-        return this.byTools;
-      case "Bookmarked":
-        return this.byBookmarked;
-      default:
-        return [];
-    }
+    return this.rootDocumentGroup.sortBy(sortType);
   }
 
   // ** views ** //
   get byGroup(): DocumentGroup[] {
-    const documentMap = createDocMapByGroups(this.filteredDocsByType, this.groupsStore.groupForUser);
-    const sortedSectionLabels = sortGroupSectionLabels(Array.from(documentMap.keys()));
-    return sortedSectionLabels.map(label => {
-      return new DocumentGroup({
-        stores: this.stores,
-        sortType: "Group",
-        label,
-        documents: documentMap.get(label) ?? []
-      });
-    });
+    return this.rootDocumentGroup.byGroup;
   }
   get byName(): DocumentGroup[] {
-    const documentMap = createDocMapByNames(this.filteredDocsByType, this.class.getUserById);
-    const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
-    return sortedSectionLabels.map(label => {
-      return new DocumentGroup({
-        stores: this.stores,
-        sortType: "Name",
-        label,
-        documents: documentMap.get(label) ?? []
-      });
-    });
+    return this.rootDocumentGroup.byName;
   }
-
   get byStrategy(): DocumentGroup[] {
-    const commentTags = this.commentTags;
-    const tagsWithDocs = getTagsWithDocs(this.firestoreMetadataDocs, commentTags);
-
-    const sortedDocsArr: DocumentGroup[] = [];
-    Object.entries(tagsWithDocs).forEach((tagKeyAndValObj) => {
-      const tagWithDocs = tagKeyAndValObj[1] as TagWithDocs;
-      const label = tagWithDocs.tagValue;
-      const docKeys = tagWithDocs.docKeysFoundWithTag;
-      const documents = this.firestoreMetadataDocs.filter(doc => docKeys.includes(doc.key));
-      sortedDocsArr.push(new DocumentGroup({ stores: this.stores, sortType: "Strategy", label, documents }));
-    });
-    return sortedDocsArr;
+    return this.rootDocumentGroup.byStrategy;
   }
-
   get byTools(): DocumentGroup[] {
-    const tileTypeToDocumentsMap = createTileTypeToDocumentsMap(this.firestoreMetadataDocs);
-
-    const sectionedDocuments = Array.from(tileTypeToDocumentsMap.keys()).map(tileType => {
-
-      const contentInfo = getTileContentInfo(tileType);
-      const label = contentInfo?.displayName || tileType;
-      const documents = tileTypeToDocumentsMap.get(tileType)?.documents ?? [];
-      const icon = tileTypeToDocumentsMap.get(tileType)?.icon;
-      const section = new DocumentGroup({ stores: this.stores, sortType: "Tools", label, documents, icon });
-      return section;
-    });
-
-    // Sort the tile types. 'No Tools' should be at the end.
-    const sortedByLabel = sectionedDocuments.sort((a, b) => {
-      if (a.label === "No Tools") return 1;   // Move 'No Tools' to the end
-      if (b.label === "No Tools") return -1;  // Alphabetically sort all others
-      return a.label.localeCompare(b.label);
-    });
-
-    return sortedByLabel;
+    return this.rootDocumentGroup.byTools;
   }
-
   get byBookmarked(): DocumentGroup[] {
-    const documentMap = createDocMapByBookmarks(this.firestoreMetadataDocs, this.bookmarksStore);
-
-    const sortedSectionLabels = ["Bookmarked", "Not Bookmarked"];
-    return sortedSectionLabels.filter(label => documentMap.has(label))
-                              .map(label => new DocumentGroup({
-                                stores: this.stores,
-                                sortType: "Bookmarked",
-                                label,
-                                documents: documentMap.get(label) ?? []
-                              }));
+    return this.rootDocumentGroup.byBookmarked;
   }
 
   getMSTSnapshotFromFBSnapshot(snapshot: firebase.firestore.QuerySnapshot<IDocumentMetadata>) {
