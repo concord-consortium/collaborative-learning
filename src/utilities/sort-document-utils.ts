@@ -2,9 +2,9 @@ import { IDocumentMetadata } from "../../shared/shared";
 import { FC, SVGProps } from "react";
 import { Bookmarks } from "src/models/stores/bookmarks";
 import { getTileComponentInfo } from "../models/tiles/tile-component-info";
+import { IDocumentMetadataModel } from "../models/document/document-metadata-model";
 
 import SparrowHeaderIcon from "../assets/icons/sort-by-tools/sparrow-id.svg";
-import { IDocumentMetadataModel } from "src/models/stores/sorted-documents";
 
 export type DocumentCollection = {
   label: string;

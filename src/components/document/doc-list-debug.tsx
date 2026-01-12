@@ -1,5 +1,5 @@
 import React from "react";
-import { IDocumentMetadataModel } from "../../models/stores/sorted-documents";
+import { IDocumentMetadataModel } from "../../models/document/document-metadata-model";
 
 import "./doc-list-debug.scss";
 
