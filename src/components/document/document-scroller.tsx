@@ -9,26 +9,12 @@ import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
+import { DocumentScrollerHeader } from "./document-scroller-header";
 import { IOpenDocumentsGroupMetadata } from "./sorted-section";
 
 import ScrollArrowIcon from "../../assets/scroll-arrow-icon.svg";
-import SwitchSortGroupIcon from "../../assets/scroll-arrow-small-current-color-icon.svg";
 
 import "./document-scroller.scss";
-
-interface IArrowButtonProps {
-  direction: "left" | "right";
-  disabled?: boolean;
-  onClick: () => void;
-}
-function SwitchSortGroupButton({ direction, disabled, onClick }: IArrowButtonProps) {
-  const className = classNames("switch-sort-group-button", direction);
-  return (
-    <button className={className} onClick={onClick} disabled={disabled}>
-      <SwitchSortGroupIcon />
-    </button>
-  );
-}
 
 interface IProps {
   documentGroup?: DocumentGroup;
@@ -41,8 +27,6 @@ interface IProps {
 export const DocumentScroller: React.FC<IProps> = observer(function DocumentThumbnailCarousel(props: IProps) {
   const { documentGroup, nextDocumentsGroup, openDocumentKey, openGroupMetadata, previousDocumentsGroup } = props;
   const { documents, networkDocuments, persistentUI, sortedDocuments } = useStores();
-  const { primarySortBy, secondarySortBy } = persistentUI;
-  const hasSecondarySort = secondarySortBy !== "None";
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const documentListRef = useRef<HTMLDivElement>(null);
   const [scrollToLocation, setScrollToLocation] = useState(0);
@@ -116,74 +100,15 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
     return () => obs?.disconnect();
   }, []);
 
-  const switchSortGroup = (direction: "previous" | "next") => () => {
-    const newDocumentGroup = direction === "previous" ? previousDocumentsGroup : nextDocumentsGroup;
-    const newKey = newDocumentGroup?.documents[0]?.key;
-    const newSubTab = hasSecondarySort
-      ? { ...openGroupMetadata, secondaryType: newDocumentGroup?.sortType, secondaryLabel: newDocumentGroup?.label }
-      : { primaryType: newDocumentGroup?.sortType, primaryLabel: newDocumentGroup?.label };
-    const newSubTabString = JSON.stringify(newSubTab);
-    if (newKey) {
-      persistentUI.openDocumentGroupPrimaryDocument(ENavTab.kSortWork, newSubTabString, newKey);
-    }
-  };
-
-  const renderHeader = () => {
-    if (!openDocumentKey) return;
-
-    const primaryLabelClass = classNames({ "sort-label": !hasSecondarySort });
-    return (
-      <div className="document-scroller-header">
-        <div className="header-text">
-          Sorted by
-          <span className="sort-type"> {primarySortBy}: </span>
-          {!hasSecondarySort && (
-            <SwitchSortGroupButton
-              direction="left"
-              disabled={!previousDocumentsGroup}
-              onClick={switchSortGroup("previous")}
-            />
-          )}
-          <span className={primaryLabelClass}>{openGroupMetadata?.primaryLabel ?? ""}</span>
-          {!hasSecondarySort && (
-            <SwitchSortGroupButton
-              direction="right"
-              disabled={!nextDocumentsGroup}
-              onClick={switchSortGroup("next")}
-            />
-          )}
-          {" "}
-          { hasSecondarySort && (
-            <>
-              <span className="sort-type"> {secondarySortBy}: </span>
-              {hasSecondarySort && (
-                <SwitchSortGroupButton
-                  direction="left"
-                  disabled={!previousDocumentsGroup}
-                  onClick={switchSortGroup("previous")}
-                />
-              )}
-              <span className="sort-label">{documentGroup?.label ?? ""}</span>
-              {hasSecondarySort && (
-                <SwitchSortGroupButton
-                  direction="right"
-                  disabled={!nextDocumentsGroup}
-                  onClick={switchSortGroup("next")}
-                />
-              )}
-            </>
-          )}
-        </div>
-        <div className="header-text">
-          Shown for <span>{persistentUI.docFilter}</span>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <>
-      {renderHeader()}
+      <DocumentScrollerHeader
+        documentGroup={documentGroup}
+        nextDocumentsGroup={nextDocumentsGroup}
+        openDocumentKey={openDocumentKey}
+        openGroupMetadata={openGroupMetadata}
+        previousDocumentsGroup={previousDocumentsGroup}
+      />
       <div ref={documentScrollerRef} className="document-thumbnail-scroller" data-testid="document-thumbnail-scroller">
         {scrollToLocation > 0 &&
           <button className="scroll-arrow left" data-testid="scroll-arrow-left" onClick={handleScrollTo("left")}>
