@@ -115,7 +115,24 @@ export class SortedDocuments {
       mstSnapshot[data.key] = data;
       // For some reason some docs arrive with visibility set to illegal "null" value.
       if (data.visibility === null) data.visibility = undefined;
-      typecheck(DocumentMetadataModel, data);
+      try {
+        typecheck(DocumentMetadataModel, data);
+      } catch (e: any) {
+        // We print the full document and error message to help with debugging.
+        // The browser console will truncate large error messages so we explicitly
+        // print it.
+        console.error("DocumentMetadataModel typecheck failed for doc:", {
+          error: e.message,
+          metadata: data,
+        });
+        // Skip this invalid document so the rest of the documents can still be processed
+        // TODO: It'd be better to return a document with error information rather than skipping it
+        // entirely. This way the UI can still show this document with an error message. By doing
+        // that users will be more like to identified something is wrong, and we can track down
+        // problems sooner.
+        delete mstSnapshot[data.key];
+        return;
+      }
       const exemplarMetadata = this.exemplarMetadataDocs.get(data.key);
       if (exemplarMetadata) {
         // If this metadata doc in Firestore is an exemplar in the same unit then the exemplar
@@ -273,7 +290,7 @@ export class SortedDocuments {
     const props = {
       documentKey: metadataDoc.key,
       type: metadataDoc.type as any,
-      properties: metadataDoc.properties.toJSON(),
+      properties: metadataDoc.propertiesAsStringRecord,
       userId: metadataDoc.uid,
       groupId: undefined,
       visibility,
