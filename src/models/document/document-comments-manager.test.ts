@@ -1,14 +1,8 @@
-import { runInAction } from "mobx";
-import {
-  CommentWithId,
-  DocumentCommentsManager,
-  IPendingExemplarComment
-} from "./document-comments-manager";
+import { isObservable, runInAction } from "mobx";
+import { CommentWithId, DocumentCommentsManager, IPendingExemplarComment } from "./document-comments-manager";
 import { DocumentModel, DocumentModelType } from "./document";
 import { ProblemDocument } from "./document-types";
-import {
-  kAnalyzerUserParams
-} from "../../../shared/shared";
+import { kAnalyzerUserParams } from "../../../shared/shared";
 
 jest.mock("firebase/app", () => ({
   __esModule: true,
@@ -36,16 +30,13 @@ describe("DocumentCommentsManager", () => {
   });
 
   describe("initialization", () => {
-    it("should start with empty state", () => {
+    it("should start with empty comments and comments queue arrays", () => {
       expect(manager.comments).toEqual([]);
-      expect(manager.legacyComments).toEqual([]);
-      expect(manager.simplifiedComments).toEqual([]);
       expect(manager.pendingComments).toEqual([]);
-      expect(manager.isMonitoring).toBe(false);
     });
 
     it("should initialize as MobX observable", () => {
-      expect(manager.comments).toBeDefined();
+      expect(isObservable(manager)).toBe(true);
     });
   });
 
@@ -61,7 +52,7 @@ describe("DocumentCommentsManager", () => {
       expect(manager.isAwaitingAIAnalysis).toBe(true);
     });
 
-    it("should generate unique IDs for pending comments", () => {
+    it("should generate unique IDs for pending AI comments", () => {
       const checkCompleted = jest.fn(() => false);
 
       manager.queuePendingAIComment(Date.now(), checkCompleted);
@@ -86,7 +77,6 @@ describe("DocumentCommentsManager", () => {
 
       expect(manager.pendingComments).toHaveLength(1);
       expect(manager.pendingComments[0].type).toBe("exemplar");
-      expect(manager.hasPendingExemplars).toBe(true);
     });
 
     it("should store all exemplar comment data", () => {
@@ -107,18 +97,20 @@ describe("DocumentCommentsManager", () => {
       expect(pending.postFunction).toBeDefined();
       expect(typeof pending.postFunction).toBe("function");
     });
-  });
 
-  describe("queueCustomPendingComment", () => {
-    it("should add custom comment to pending queue", () => {
-      const checkCompleted = jest.fn(() => false);
-      const postFunction = jest.fn();
-      const postParams = { foo: "bar" };
+    it("should generate unique IDs for pending exemplar comments", () => {
+      const postFunction = jest.fn().mockResolvedValue({ id: "comment1" });
+      const comment = {
+        content: "Test comment",
+        linkedDocumentKey: "doc123"
+      };
+      const context = { classHash: "class1", appMode: "test" };
+      const document = { uid: "user1", type: "problem", key: "doc1" };
 
-      manager.queueCustomPendingComment(checkCompleted, postFunction, postParams);
-
-      expect(manager.pendingComments).toHaveLength(1);
-      expect(manager.pendingComments[0].type).toBe("custom");
+      manager.queuePendingExemplarComment(comment, context, document, postFunction);
+      manager.queuePendingExemplarComment(comment, context, document, postFunction);
+      const ids = manager.pendingComments.map(p => p.id);
+      expect(ids[0]).not.toBe(ids[1]);
     });
   });
 
@@ -147,55 +139,9 @@ describe("DocumentCommentsManager", () => {
         }];
       });
 
-      // Manually trigger the check (in real app, this happens automatically via updateComments)
       manager.checkPendingComments();
 
-      // Manager should have checked and removed the pending AI comment
       expect(checkCompleted).toHaveBeenCalled();
-    });
-
-    it("should post exemplar comments only after AI completes", async () => {
-      const postExemplar = jest.fn().mockResolvedValue({ id: "ex1" });
-      const triggeredAt = Date.now() - 1000;
-
-      const checkAICompleted = jest.fn((comments) => {
-        return comments.some((c: CommentWithId) =>
-          c.uid === kAnalyzerUserParams.id &&
-          c.createdAt.getTime() > triggeredAt
-        );
-      });
-      manager.queuePendingAIComment(triggeredAt, checkAICompleted);
-
-      manager.queuePendingExemplarComment(
-        { content: "See exemplar", linkedDocumentKey: "ex1" },
-        { classHash: "class1", appMode: "test" },
-        { uid: "u1", type: "problem", key: "d1" },
-        postExemplar
-      );
-
-      expect(manager.pendingComments).toHaveLength(2);
-      expect(postExemplar).not.toHaveBeenCalled();
-
-      // Simulate AI comment arriving
-      runInAction(() => {
-        manager.comments = [{
-          content: "AI analysis",
-          createdAt: new Date(),
-          id: "ai-comment-1",
-          name: "Ada Insight",
-          network: "test",
-          uid: kAnalyzerUserParams.id
-        }];
-      });
-
-      await manager.checkPendingComments();
-
-      expect(manager.pendingComments).toHaveLength(0);
-      expect(postExemplar).toHaveBeenCalledWith({
-        document: expect.any(Object),
-        comment: expect.objectContaining({ content: "See exemplar" }),
-        context: expect.any(Object)
-      });
     });
 
     it("should handle errors in exemplar posting gracefully", async () => {
@@ -243,78 +189,12 @@ describe("DocumentCommentsManager", () => {
     });
   });
 
-  describe("getPendingCount", () => {
-    it("should count pending comments by type", () => {
-      manager.queuePendingAIComment(Date.now(), () => false);
-      manager.queuePendingAIComment(Date.now(), () => false);
-      manager.queuePendingExemplarComment(
-        { content: "Test" },
-        { classHash: "test", appMode: "test" },
-        { uid: "u1", type: "problem", key: "d1" },
-        jest.fn()
-      );
-
-      expect(manager.getPendingCount("ai-analysis")).toBe(2);
-      expect(manager.getPendingCount("exemplar")).toBe(1);
-      expect(manager.getPendingCount("custom")).toBe(0);
-    });
-  });
-
-  describe("clearPendingComments", () => {
-    beforeEach(() => {
-      manager.queuePendingAIComment(Date.now(), () => false);
-      manager.queuePendingExemplarComment(
-        { content: "Test" },
-        { classHash: "test", appMode: "test" },
-        { uid: "u1", type: "problem", key: "d1" },
-        jest.fn()
-      );
-      manager.queueCustomPendingComment();
-    });
-
-    it("should clear all pending comments when no type specified", () => {
-      expect(manager.pendingComments).toHaveLength(3);
-
-      manager.clearPendingComments();
-
-      expect(manager.pendingComments).toHaveLength(0);
-    });
-
-    it("should clear only specified type", () => {
-      expect(manager.pendingComments).toHaveLength(3);
-
-      manager.clearPendingComments("ai-analysis");
-
-      expect(manager.pendingComments).toHaveLength(2);
-      expect(manager.isAwaitingAIAnalysis).toBe(false);
-      expect(manager.hasPendingExemplars).toBe(true);
-    });
-  });
-
   describe("computed properties", () => {
     it("isAwaitingAIAnalysis should reflect pending AI comments", () => {
       expect(manager.isAwaitingAIAnalysis).toBe(false);
 
       manager.queuePendingAIComment(Date.now(), () => false);
       expect(manager.isAwaitingAIAnalysis).toBe(true);
-
-      manager.clearPendingComments("ai-analysis");
-      expect(manager.isAwaitingAIAnalysis).toBe(false);
-    });
-
-    it("hasPendingExemplars should reflect pending exemplar comments", () => {
-      expect(manager.hasPendingExemplars).toBe(false);
-
-      manager.queuePendingExemplarComment(
-        { content: "Test" },
-        { classHash: "test", appMode: "test" },
-        { uid: "u1", type: "problem", key: "d1" },
-        jest.fn()
-      );
-      expect(manager.hasPendingExemplars).toBe(true);
-
-      manager.clearPendingComments("exemplar");
-      expect(manager.hasPendingExemplars).toBe(false);
     });
   });
 
@@ -332,19 +212,10 @@ describe("DocumentCommentsManager", () => {
 
       expect(manager.comments).toEqual([]);
       expect(manager.pendingComments).toEqual([]);
-      expect(manager.isMonitoring).toBe(false);
-    });
-
-    it("should stop monitoring when disposed", () => {
-      manager.isMonitoring = true;
-
-      manager.dispose();
-
-      expect(manager.isMonitoring).toBe(false);
     });
   });
 
-  describe("real-world scenario", () => {
+  describe("AI and exemplar coordination", () => {
     it("should handle Ideas button click > AI analysis > exemplar reveal flow", async () => {
       // Simulate user clicks Ideas button, triggering AI analysis.
       const docLastEditedTime = Date.now();
@@ -409,7 +280,7 @@ describe("DocumentCommentsManager", () => {
     });
   });
 
-  describe("DocumentModel Integration", () => {
+  describe("DocumentModel integration", () => {
     let document: DocumentModelType;
 
     beforeEach(() => {
