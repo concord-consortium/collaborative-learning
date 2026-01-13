@@ -1,14 +1,31 @@
 import classNames from "classnames";
-import React from "react";
+import React, { FunctionComponent, SVGProps } from "react";
 
 import { useStores } from "../../hooks/use-stores";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { IOpenDocumentsGroupMetadata } from "./sorted-section";
 
+import LargeThumbnailsIcon from "../../assets/large-thumbnails-view-icon.svg";
+import SmallThumbnailsIcon from "../../assets/small-thumbnails-view-icon.svg";
 import SwitchSortGroupIcon from "../../assets/scroll-arrow-small-current-color-icon.svg";
 
 import "./document-scroller-header.scss";
+
+interface IThumbnailDisplayButtonProps {
+  className?: string;
+  Icon: FunctionComponent<SVGProps<SVGSVGElement>>;
+  onClick: () => void;
+  selected?: boolean;
+}
+function ThumbnailDisplayButton({ className, Icon, onClick, selected }: IThumbnailDisplayButtonProps) {
+  const buttonClassName = classNames("thumbnail-display-button", className, { selected });
+  return (
+    <button className={buttonClassName} onClick={onClick}>
+      <Icon />
+    </button>
+  );
+}
 
 interface IArrowButtonProps {
   direction: "left" | "right";
@@ -55,45 +72,62 @@ export function DocumentScrollerHeader({
   const primaryLabelClass = classNames({ "sort-label": !hasSecondarySort });
   return (
     <div className="document-scroller-header">
-      <div className="header-text">
-        Sorted by
-        <span className="sort-type"> {primarySortBy}: </span>
-        {!hasSecondarySort && (
-          <SwitchSortGroupButton
-            direction="left"
-            disabled={!previousDocumentsGroup}
-            onClick={switchSortGroup("previous")}
+      <div className="left-group">
+        <div className="thumbnail-display-buttons">
+          <ThumbnailDisplayButton
+            className="left"
+            Icon={SmallThumbnailsIcon}
+            onClick={() => null}
+            selected={false}
           />
-        )}
-        <span className={primaryLabelClass}>{openGroupMetadata?.primaryLabel ?? ""}</span>
-        {!hasSecondarySort && (
-          <SwitchSortGroupButton
-            direction="right"
-            disabled={!nextDocumentsGroup}
-            onClick={switchSortGroup("next")}
+          <ThumbnailDisplayButton
+            className="right"
+            Icon={LargeThumbnailsIcon}
+            onClick={() => null}
+            selected={true}
           />
-        )}
-        {" "}
-        { hasSecondarySort && (
-          <>
-            <span className="sort-type"> {secondarySortBy}: </span>
-            {hasSecondarySort && (
-              <SwitchSortGroupButton
-                direction="left"
-                disabled={!previousDocumentsGroup}
-                onClick={switchSortGroup("previous")}
-              />
-            )}
-            <span className="sort-label">{documentGroup?.label ?? ""}</span>
-            {hasSecondarySort && (
-              <SwitchSortGroupButton
-                direction="right"
-                disabled={!nextDocumentsGroup}
-                onClick={switchSortGroup("next")}
-              />
-            )}
-          </>
-        )}
+        </div>
+        <div className="divider" />
+        <div className="header-text">
+          Sorted by
+          <span className="sort-type"> {primarySortBy}: </span>
+          {!hasSecondarySort && (
+            <SwitchSortGroupButton
+              direction="left"
+              disabled={!previousDocumentsGroup}
+              onClick={switchSortGroup("previous")}
+            />
+          )}
+          <span className={primaryLabelClass}>{openGroupMetadata?.primaryLabel ?? ""}</span>
+          {!hasSecondarySort && (
+            <SwitchSortGroupButton
+              direction="right"
+              disabled={!nextDocumentsGroup}
+              onClick={switchSortGroup("next")}
+            />
+          )}
+          {" "}
+          { hasSecondarySort && (
+            <>
+              <span className="sort-type"> {secondarySortBy}: </span>
+              {hasSecondarySort && (
+                <SwitchSortGroupButton
+                  direction="left"
+                  disabled={!previousDocumentsGroup}
+                  onClick={switchSortGroup("previous")}
+                />
+              )}
+              <span className="sort-label">{documentGroup?.label ?? ""}</span>
+              {hasSecondarySort && (
+                <SwitchSortGroupButton
+                  direction="right"
+                  disabled={!nextDocumentsGroup}
+                  onClick={switchSortGroup("next")}
+                />
+              )}
+            </>
+          )}
+        </div>
       </div>
       <div className="header-text">
         Shown for <span>{persistentUI.docFilter}</span>

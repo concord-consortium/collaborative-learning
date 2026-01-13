@@ -10,6 +10,18 @@
   padding: 0px 8px;
   justify-content: space-between;
 
+  .left-group {
+    display: flex;
+    align-items: center;
+  }
+
+  .divider {
+    background-color: $classwork-purple;
+    height: 26px;
+    margin: 0 7px;
+    width: 1.5px;
+  }
+
   .header-text {
     display: flex;
     gap: 5px;
@@ -24,6 +36,54 @@
       display: flex;
       justify-content: center;
       min-width: 60px;
+    }
+  }
+}
+
+.thumbnail-display-buttons {
+  display: flex;
+
+  .thumbnail-display-button {
+    align-items: center;
+    background-color: $classwork-purple-light-5;
+    border: 1.5px solid #949494;
+    color: $classwork-purple-dark-1;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    padding: 0 2px;
+    position: relative;
+    margin: 0;
+    z-index: 1;
+
+    &.left {
+      border-top-left-radius: 5px;
+      border-bottom-left-radius: 5px;
+    }
+
+    &.right {
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+      margin-left: -1.5px;
+    }
+
+    &:hover {
+      background-color: $classwork-purple-light-3;
+      z-index: 3;
+    }
+
+    &:active {
+      background-color: $classwork-purple-dark-1;
+      border-color: white;
+      color: white;
+      z-index: 3;
+    }
+
+    &.selected {
+      background-color: $classwork-purple-dark-1;
+      border-color: white;
+      color: white;
+      z-index: 2;
     }
   }
 }
