@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, SVGProps } from "react";
 
 import { useStores } from "../../hooks/use-stores";
@@ -48,11 +49,11 @@ interface IDocumentScrollerHeaderProps {
   openGroupMetadata?: IOpenDocumentsGroupMetadata;
   previousDocumentsGroup?: DocumentGroup;
 }
-export function DocumentScrollerHeader({
+export const DocumentScrollerHeader = observer(function DocumentScrollerHeader({
   documentGroup, nextDocumentsGroup, openDocumentKey, openGroupMetadata, previousDocumentsGroup
 }: IDocumentScrollerHeaderProps) {
   const { persistentUI } = useStores();
-  const { primarySortBy, secondarySortBy } = persistentUI;
+  const { primarySortBy, secondarySortBy, thumbnailDisplay } = persistentUI;
   const hasSecondarySort = secondarySortBy !== "None";
 
   const switchSortGroup = (direction: "previous" | "next") => () => {
@@ -77,14 +78,14 @@ export function DocumentScrollerHeader({
           <ThumbnailDisplayButton
             className="left"
             Icon={SmallThumbnailsIcon}
-            onClick={() => null}
-            selected={false}
+            onClick={() => persistentUI.setThumbnailDisplay("Small")}
+            selected={thumbnailDisplay === "Small"}
           />
           <ThumbnailDisplayButton
             className="right"
             Icon={LargeThumbnailsIcon}
-            onClick={() => null}
-            selected={true}
+            onClick={() => persistentUI.setThumbnailDisplay("Large")}
+            selected={thumbnailDisplay === "Large"}
           />
         </div>
         <div className="divider" />
@@ -134,4 +135,4 @@ export function DocumentScrollerHeader({
       </div>
     </div>
   );
-}
+});
