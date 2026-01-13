@@ -1,15 +1,17 @@
+import Markdown from "markdown-to-jsx";
 import { observer } from "mobx-react";
 import { getParentOfType } from "mobx-state-tree";
 import React, { useEffect, useState } from "react";
-import Markdown from "markdown-to-jsx";
-import { ITileProps } from "../../components/tiles/tile-component";
-import { AIContentModelType } from "./ai-content";
-import { useUserContext } from "../../hooks/use-user-context";
-import { useStores } from "../../hooks/use-stores";
-import { useFirebaseFunction } from "../../hooks/use-firebase-function";
+import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
-import { getDocumentIdentifier } from "../../models/document/document-utils";
+import { ITileProps } from "../../components/tiles/tile-component";
+import { useFirebaseFunction } from "../../hooks/use-firebase-function";
+import { useStores } from "../../hooks/use-stores";
+import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentContentModel } from "../../models/document/document-content";
+import { isCurriculumDocument } from "../../models/document/document-types";
+import { getDocumentIdentifier } from "../../models/document/document-utils";
+import { AIContentModelType } from "./ai-content";
 import { changeSlashesToUnderscores } from "./ai-utils";
 
 import "./ai-tile.scss";
@@ -28,6 +30,12 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   // so we might need to get the curriculum path to use as an id
   const identifier = getDocumentIdentifier(getParentOfType(props.model, DocumentContentModel));
 
+  // We currently don't query AI or display its response when the tile is in a curriculum document
+  const isInCurriculum = isCurriculumDocument(props.documentId);
+  const text = isInCurriculum
+    ? "When you drag this tile to your document Ada will give you feedback on your document."
+    : content.text;
+
   useEffect(() => {
     props.onRegisterTileApi({
       exportContentAsTileJson: () => {
@@ -37,7 +45,11 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Update the AI response
+  // TODO: This triggers multiple undoable actions, but shouldn't really trigger any
   useEffect(() => {
+    if (isInCurriculum) return;
+
     // don't attempt to query AI if there is no class hash (i.e. we're in authoring mode)
     if (getAiContent) {
       const queryAI = async () => {
@@ -51,9 +63,23 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           setIsUpdating(false);
           return;
         }
+
+        // Add a summary of the current document to the prompt if possible
+        let dynamicContentPrompt = content.prompt;
+        const document = props.documentId
+          ? stores.documents.getDocument(props.documentId) ?? stores.networkDocuments.getDocument(props.documentId)
+          : undefined;
+        // Clear the text so previous responses do not appear in the document summary
+        content.setText("");
+        const summary = document ? documentSummarizer(document.content, {}) : "";
+        if (summary) {
+          dynamicContentPrompt = `This is a summary of the current document:\n\n${summary}\n\n\n`;
+          dynamicContentPrompt += `Using this information, respond to the following prompt:\n\n${content.prompt}`;
+        }
+
         const response = await getAiContent({
           context: userContext,
-          dynamicContentPrompt: content.prompt, // TODO: could just be "prompt"
+          dynamicContentPrompt, // TODO: could just be "prompt"
           systemPrompt,
           unit: stores.unit.code,
           documentId: changeSlashesToUnderscores(identifier),
@@ -82,7 +108,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   };
 
   const renderPromptForm = () => {
-    if (readOnly) {
+    if (readOnly || content.hidePrompt) {
       return null;
     }
     return (
@@ -101,12 +127,12 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       {renderPromptForm()}
       <div className="ai-output">
         <div className="last-updated">
-          {lastUpdated ? lastUpdated.toLocaleString("en-US", {dateStyle: "long"}) : "..."}
+          {!isInCurriculum && (lastUpdated ? lastUpdated.toLocaleString("en-US", {dateStyle: "long"}) : "...")}
         </div>
         {isUpdating ? (
           <p>Loading...</p>
         ) : (
-          <Markdown>{content.text}</Markdown>
+          <Markdown>{text}</Markdown>
         )}
       </div>
     </div>
