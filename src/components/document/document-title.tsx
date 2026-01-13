@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { useState } from "react";
+import React from "react";
 import { DocumentModelType } from "../../models/document/document";
 import { useStores } from "../../hooks/use-stores";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
@@ -25,12 +25,12 @@ export const DocumentTitle: React.FC<IProps> = observer(function DocumentTitle(p
       return "";
     }
     if (document.type === GroupDocument) {
-      // getDocumentDisplayTitle adds uses the group id as the title so we don't need to
+      // getDocumentDisplayTitle uses the group id as the title so we don't need to
       // duplicate that here.
       return "";
     } else {
       // TODO: getDocumentDisplayTitle already adds a prefix with the user name, so it seems
-      // this this is going to show the owner name twice. We clean that up.
+      // this is going to show the owner name twice. We clean that up.
       const owner = classStore.users.get(document.uid);
       return owner ? owner.fullName : "";
     }
