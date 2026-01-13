@@ -95,22 +95,29 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
         const bb = contentRef.current.getObjectBoundingBox(objectId);
 
         if (bb) {
-          // For read-only tiles, return untransformed coordinates.
+          const baseHeight = bb.se.y - bb.nw.y + bbPadding * 2;
+          const baseWidth = bb.se.x - bb.nw.x + bbPadding * 2;
+          const baseLeft = bb.nw.x - bbPadding;
+          const baseTop = bb.nw.y - bbPadding;
+
+          let height, width, left, top;
+
           if (readOnly) {
-            const height = (bb.se.y - bb.nw.y + bbPadding * 2);
-            const width = (bb.se.x - bb.nw.x + bbPadding * 2);
-            const left = (bb.nw.x - bbPadding);
-            const top = (bb.nw.y - bbPadding);
-            return { height, left, top, width };
+            // Since read-only tiles are always fit-to-view, return untransformed coordinates.
+            height = baseHeight;
+            width = baseWidth;
+            left = baseLeft;
+            top = baseTop;
+          } else {
+            const zoom = contentRef.current.zoom;
+            const offsetX = contentRef.current.offsetX;
+            const offsetY = contentRef.current.offsetY;
+            height = baseHeight * zoom;
+            width = baseWidth * zoom;
+            left = baseLeft * zoom + offsetX + getObjectListPanelWidth();
+            top = baseTop * zoom + offsetY;
           }
 
-          const zoom = contentRef.current.zoom;
-          const offsetX = contentRef.current.offsetX;
-          const offsetY = contentRef.current.offsetY;
-          const height = (bb.se.y - bb.nw.y + bbPadding * 2) * zoom;
-          const width = (bb.se.x - bb.nw.x + bbPadding * 2) * zoom;
-          const left = (bb.nw.x - bbPadding) * zoom + offsetX + getObjectListPanelWidth();
-          const top = (bb.nw.y - bbPadding) * zoom + offsetY;
           return { height, left, top, width };
         }
         return undefined;

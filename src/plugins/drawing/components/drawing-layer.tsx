@@ -18,7 +18,6 @@ import { debounce } from "lodash";
 import { combineBoundingBoxes } from "../../../models/tiles/geometry/geometry-utils";
 import { useTileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import { kClosedObjectListPanelWidth } from "../model/drawing-types";
 import { IContainerContextType, useContainerContext } from "../../../components/document/container-context";
 import { userSelectTile } from "../../../models/stores/ui";
 import { useDrawingAreaContext } from "./drawing-area-context";
