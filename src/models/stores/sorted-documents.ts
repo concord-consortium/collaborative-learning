@@ -128,7 +128,7 @@ export class SortedDocuments {
         // Skip this invalid document so the rest of the documents can still be processed
         // TODO: It'd be better to return a document with error information rather than skipping it
         // entirely. This way the UI can still show this document with an error message. By doing
-        // that users will be more like to identified something is wrong, and we can track down
+        // that users will be more likely to identify something is wrong, and we can track down
         // problems sooner.
         delete mstSnapshot[data.key];
         return;

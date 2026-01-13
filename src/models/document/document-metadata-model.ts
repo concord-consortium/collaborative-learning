@@ -33,7 +33,6 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
    * In the database there can be properties with numeric values.
    * For consistency with the other document types we always return these as Strings.
    * @param key
-   * @returns
    */
   getProperty(key: string) {
     const value = self.properties.get(key);
