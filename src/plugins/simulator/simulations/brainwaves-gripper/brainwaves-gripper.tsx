@@ -1,10 +1,9 @@
 import { VariableSlider } from "@concord-consortium/diagram-view";
 import React from "react";
 
-import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
-import {
-  iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey
-} from "../../../shared-assets/icons/icon-utilities";
+import { demoStreams } from "../../../../../shared/assets/data/dataflow/demo-data";
+import { brainwavesGripperValues } from "../../../../../shared/simulations/brainwaves-gripper/brainwaves-gripper";
+import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
 import { SelectionButton } from "../../components/ui/selection-button";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
@@ -16,42 +15,49 @@ import {
 import "rc-slider/assets/index.css";
 import "./brainwaves-gripper.scss";
 
-export const kBrainwavesKey = "EMG_and_claw";
+// Variable names
+const gripperKey = brainwavesGripperValues.gripperKey.value;
+const pressureKey = brainwavesGripperValues.pressureKey.value;
+const temperatureKey = brainwavesGripperValues.temperatureKey.value;
+const panTemperatureKey = brainwavesGripperValues.panTemperatureKey.value;
+const simulationModeKey = brainwavesGripperValues.simulationModeKey.value;
+const emgKey = brainwavesGripperValues.emgKey.value;
+const targetEMGKey = brainwavesGripperValues.targetEMGKey.value;
 
-const maxPressure = 300; // The pressure value when the gripper is fully closed
-const maxGripperValue = 100;
+// Simulation modes
+const simulationModePressure = brainwavesGripperValues.simulationModePressure.value;
+const simulationModeTemperature = brainwavesGripperValues.simulationModeTemperature.value;
 
-const minGripperCupValue = 60; // The value of the gripper when it starts to feel the cup
+// General constants
+const maxPressure = brainwavesGripperValues.maxPressure.value;
+const maxGripperValue = brainwavesGripperValues.maxGripperValue.value;
+const emgDropFactor = brainwavesGripperValues.emgDropFactor.value;
+
+// Cup constants
+const minGripperCupValue = brainwavesGripperValues.minGripperCupValue.value;
 const gripperCupRange = maxGripperValue - minGripperCupValue;
 
-const kPanTemperatureKey = "pan_temperature_key";
-const kSimulationModeKey = "simulation_mode_key";
-const kTargetEMGKey = "target_emg_key";
-const emgDropFactor = .1; //percentage drops for simulated emg signal
-
-const kSimulationModePressure = 0;
-const kSimulationModeTemperature = 1;
-const baseTemperature = 15.5; // 60 degrees F
-const maxTemperature = Math.max(...demoStreams.fastBoil);
-const minGripperPanValue = 81; // The value of the gripper when it starts to feel the pan
+// Pan constants
+const baseTemperature = brainwavesGripperValues.baseTemperature.value;
+const minGripperPanValue = brainwavesGripperValues.minGripperPanValue.value;
 const gripperPanRange = maxGripperValue - minGripperPanValue;
 
 interface IAnimationProps extends ISimulationProps {
   mode: number;
 }
 function BrainwavesGripperAnimation({ frame, mode, variables }: IAnimationProps) {
-  const targetEMGVariable = findVariable(kTargetEMGKey, variables);
+  const targetEMGVariable = findVariable(targetEMGKey, variables);
   const normalizedEmgValue = Math.min((targetEMGVariable?.currentValue ?? 0) / 450, 1);
   const armFrame = getFrame(normalizedEmgValue, armFrames.length);
 
-  const gripperVariable = findVariable(kGripperKey, variables);
+  const gripperVariable = findVariable(gripperKey, variables);
   const normalizedGripperValue = (gripperVariable?.currentValue ?? 0) / 100;
   const gripperFrame = getFrame(normalizedGripperValue, gripperFrames.length);
 
-  const rawTemperatureVariable = findVariable(kPanTemperatureKey, variables);
+  const rawTemperatureVariable = findVariable(panTemperatureKey, variables);
   const rawTemperature = rawTemperatureVariable?.currentValue;
   const normalizedRawTemperatureValue = ((rawTemperature ?? baseTemperature) - baseTemperature)
-    / (maxTemperature - baseTemperature);
+    / (brainwavesGripperValues.maxTemperature.value - baseTemperature);
   const panFrame = getFrame(normalizedRawTemperatureValue, panFrames.length);
 
   const firstSteamFrame = demoStreams.fastBoil.length - 5 * steamFrames.length;
@@ -68,7 +74,7 @@ function BrainwavesGripperAnimation({ frame, mode, variables }: IAnimationProps)
         src={ arduinoFrames[0] }
         className="animation-image arduino-image"
       />
-      { mode === kSimulationModePressure
+      { mode === simulationModePressure
         ? (
           <img
             src={ gripperFrames[gripperFrame] }
@@ -98,8 +104,8 @@ function BrainwavesGripperAnimation({ frame, mode, variables }: IAnimationProps)
 }
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
-  const modeVariable = findVariable(kSimulationModeKey, variables);
-  const targetEMGVariable = findVariable(kTargetEMGKey, variables);
+  const modeVariable = findVariable(simulationModeKey, variables);
+  const targetEMGVariable = findVariable(targetEMGKey, variables);
 
   return (
     <div className="bwg-component">
@@ -124,16 +130,16 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
         </div>
         <div className="mode-selection-container">
           <SelectionButton
-            onClick={() => modeVariable?.setValue(kSimulationModePressure)}
+            onClick={() => modeVariable?.setValue(simulationModePressure)}
             position="left"
-            selected={modeVariable?.currentValue === kSimulationModePressure}
+            selected={modeVariable?.currentValue === simulationModePressure}
           >
             Pressure
           </SelectionButton>
           <SelectionButton
-            onClick={() => modeVariable?.setValue(kSimulationModeTemperature)}
+            onClick={() => modeVariable?.setValue(simulationModeTemperature)}
             position="right"
-            selected={modeVariable?.currentValue === kSimulationModeTemperature}
+            selected={modeVariable?.currentValue === simulationModeTemperature}
           >
             Temperature
           </SelectionButton>
@@ -145,8 +151,8 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
 
 function step({ frame, variables }: ISimulationProps) {
   // Set the adjustedEMGValue based on the targetEMGValue minus a random offset
-  const targetEMGVariable = findVariable(kTargetEMGKey, variables);
-  const EMGVariable = findVariable(kEMGKey, variables);
+  const targetEMGVariable = findVariable(targetEMGKey, variables);
+  const EMGVariable = findVariable(emgKey, variables);
   if (targetEMGVariable && EMGVariable) {
     const targetEMGValue = targetEMGVariable.currentValue;
     if (targetEMGValue !== undefined){
@@ -155,15 +161,15 @@ function step({ frame, variables }: ISimulationProps) {
     }
   }
 
-  const modeVariable = findVariable(kSimulationModeKey, variables);
-  const gripperVariable = findVariable(kGripperKey, variables);
-  const pressureVariable = findVariable(kPressureKey, variables);
+  const modeVariable = findVariable(simulationModeKey, variables);
+  const gripperVariable = findVariable(gripperKey, variables);
+  const pressureVariable = findVariable(pressureKey, variables);
   if (gripperVariable && pressureVariable) {
     // Update the pressure
     const gripperValue = gripperVariable.value;
     const getPressureValue = () => {
       if (!gripperValue) return 0;
-      if (modeVariable?.currentValue === kSimulationModeTemperature) {
+      if (modeVariable?.currentValue === simulationModeTemperature) {
         // Use the pan to determine pressure for the temperature simulation
         return gripperValue > minGripperPanValue
           // If the gripper is closed enough to feel the pan, set its pressure to between 0 and maxPressure
@@ -182,10 +188,10 @@ function step({ frame, variables }: ISimulationProps) {
     pressureVariable.setValue(getPressureValue());
 
     // Update the temperature
-    const panTemperatureVariable = findVariable(kPanTemperatureKey, variables);
-    const temperatureVariable = findVariable(kTemperatureKey, variables); // sensor temperature
+    const panTemperatureVariable = findVariable(panTemperatureKey, variables);
+    const temperatureVariable = findVariable(temperatureKey, variables); // sensor temperature
     const gripperFeeling = gripperValue && gripperValue > minGripperPanValue;
-    if (modeVariable?.currentValue === kSimulationModeTemperature && gripperFeeling
+    if (modeVariable?.currentValue === simulationModeTemperature && gripperFeeling
       && panTemperatureVariable && temperatureVariable) {
       // The gripper can feel the pan's temperature if it's the temperature simulation and the gripper is closed enough
       temperatureVariable.setValue(panTemperatureVariable.currentValue);
@@ -204,56 +210,56 @@ export const brainwavesGripperSimulation: ISimulation = {
     {
       // This is the EMG set by the slider
       displayName: "Target EMG",
-      name: kTargetEMGKey,
+      name: targetEMGKey,
       value: 40
     },
     {
       // This is the target EMG minus a random amount on every frame to simulate imperfect EMG data
       displayName: "EMG",
       labels: ["input", "sensor:emg-reading", "decimalPlaces:0"],
-      icon: iconUrl(kEMGKey),
-      name: kEMGKey,
+      icon: iconUrl(emgKey),
+      name: emgKey,
       value: 40,
       unit: "mV"
     },
     {
       displayName: "Surface Pressure",
       labels: ["input", "sensor:fsr-reading", "className:long-name", "decimalPlaces:0"],
-      icon: iconUrl(kPressureKey),
-      name: kPressureKey,
+      icon: iconUrl(pressureKey),
+      name: pressureKey,
       value: 0,
       unit: "psi"
     },
     {
       displayName: "Gripper",
       labels: ["output", "live-output:Grabber", "live-output:Gripper 2.0", "decimalPlaces:0"],
-      icon: iconUrl(kGripperKey),
-      name: kGripperKey,
+      icon: iconUrl(gripperKey),
+      name: gripperKey,
       value: 0,
       unit: "% closed"
     },
     {
       // This is the true temperature of the pan
       displayName: "Pan Temperature",
-      name: kPanTemperatureKey,
+      name: panTemperatureKey,
       value: baseTemperature
     },
     {
       // This is the temperature sensed by the gripper's sensors
       displayName: "Temperature",
       labels: ["input", "sensor:temperature"],
-      icon: iconUrl(kTemperatureKey),
-      name: kTemperatureKey,
+      icon: iconUrl(temperatureKey),
+      name: temperatureKey,
       value: baseTemperature,
       unit: "°C"
     },
     {
       displayName: "Simulation Mode",
-      name: kSimulationModeKey,
-      value: kSimulationModePressure
+      name: simulationModeKey,
+      value: simulationModePressure
     }
   ],
   values: {
-    [kPanTemperatureKey]: demoStreams.fastBoil
+    [panTemperatureKey]: demoStreams.fastBoil
   }
 };

@@ -3,9 +3,9 @@ import classNames from "classnames";
 import { useResizeDetector } from "react-resize-detector";
 import { VariableSlider } from "@concord-consortium/diagram-view";
 
+import { potentiometerAndServoValues } from "../../../../../shared/simulations/potentiometer-servo/potentiometer-servo";
 import { ISimulation, ISimulationProps } from "../simulation-types";
-import { iconUrl, kPotentiometerKey, kServoKey, kSignalKey
-} from "../../../shared-assets/icons/icon-utilities";
+import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
 import { findVariable } from "../simulation-utilities";
 import {
   IMiniNodeData, getMiniNodeIcon, getMiniNodesDisplayData, getTweenedServoAngle, wireToA1, getNodeBoundingBox
@@ -26,19 +26,16 @@ interface INodeColumnProps {
   columnLabel: string;
 }
 
-export const kPotentiometerServoKey = "potentiometer_chip_servo";
+// Variable names
+const potAngleKey = potentiometerAndServoValues.potAngleKey.value;
+const resistReadingKey = potentiometerAndServoValues.resistReadingKey.value;
+const servoAngleKey = potentiometerAndServoValues.servoAngleKey.value;
 
+// Constants
 const potVisibleOffset = 135;
 const servoVisibleOffset = 90;
-const minPotAngle = 0;
-const maxPotAngle = 270;
-const minServoAngle = 0;
-const minResistReading = 0;
-const maxResistReading = 1023; // 10-bit ADC
-
-const kPotAngleKey = "pot_angle_key";
-const kResistReadingKey = "resist_reading_key";
-const kServoAngleKey = "servo_angle_key";
+const minPotAngle = potentiometerAndServoValues.minPotAngle.value;
+const maxPotAngle = potentiometerAndServoValues.maxPotAngle.value;
 
 const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
   return classNames(
@@ -104,12 +101,12 @@ function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, pro
   const tweenedServoAngle = useRef(0);
   const lastTweenedAngle = tweenedServoAngle.current;
 
-  const potAngleVar = findVariable(kPotAngleKey, variables);
+  const potAngleVar = findVariable(potAngleKey, variables);
   const potAngleBaseValue = potAngleVar?.currentValue ?? 0;
   const visiblePotAngle = potAngleBaseValue - potVisibleOffset;
   const potRotationString = `rotate(${visiblePotAngle ?? 0}deg)`;
 
-  const servoAngleVar = findVariable(kServoAngleKey, variables);
+  const servoAngleVar = findVariable(servoAngleKey, variables);
   const servoAngleBaseValue = servoAngleVar?.currentValue ?? 0;
   tweenedServoAngle.current = getTweenedServoAngle(servoAngleBaseValue, lastTweenedAngle);
   const valueForRotation = 180 - (tweenedServoAngle.current - servoVisibleOffset);
@@ -220,10 +217,10 @@ function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, pro
 
 function step({ frame, variables }: ISimulationProps) {
   // calculate resistance based on potentiometer angle
-  const potAngleVar = findVariable(kPotAngleKey, variables);
+  const potAngleVar = findVariable(potAngleKey, variables);
   const potAngle = potAngleVar?.currentValue || 0;
-  const resistance = Math.round((potAngle / maxPotAngle) * maxResistReading);
-  const resistanceVar = findVariable(kResistReadingKey, variables);
+  const resistance = Math.round((potAngle / maxPotAngle) * potentiometerAndServoValues.maxResistReading.value);
+  const resistanceVar = findVariable(resistReadingKey, variables);
   resistanceVar?.setValue(resistance);
 }
 
@@ -235,24 +232,24 @@ export const potentiometerAndServoSimulation: ISimulation = {
     {
       displayName: "Potentiometer",
       labels: ["input", "position", "decimalPlaces:0"],
-      icon: iconUrl(kPotentiometerKey),
-      name: kPotAngleKey,
+      icon: iconUrl(potAngleKey),
+      name: potAngleKey,
       value: minPotAngle,
       unit: "deg"
     },
     {
       displayName: "Pin",
       labels: ["input", "reading", "sensor:pin-reading", "decimalPlaces:0"],
-      icon: iconUrl(kSignalKey),
-      name: kResistReadingKey,
-      value: minResistReading
+      icon: iconUrl(resistReadingKey),
+      name: resistReadingKey,
+      value: potentiometerAndServoValues.minResistReading.value
     },
     {
       displayName: "Servo",
       labels: ["output", "position", "live-output:Servo", "decimalPlaces:0"],
-      icon: iconUrl(kServoKey),
-      name: kServoAngleKey,
-      value: minServoAngle,
+      icon: iconUrl(servoAngleKey),
+      name: servoAngleKey,
+      value: potentiometerAndServoValues.minServoAngle.value,
       unit: "deg"
     }
   ],
