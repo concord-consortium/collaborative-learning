@@ -10,10 +10,10 @@ import { DocumentType } from "../../models/document/document-types";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentModelType } from "../../models/document/document";
 import { EditableDocumentContent } from "../document/editable-document-content";
-import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { SectionDocuments } from "../../models/stores/section-docs-store";
 import { DocumentBrowserScroller, ScrollButton } from "./document-browser-scroller";
 import CloseIcon from "../../assets/icons/close/close.svg";
+import { DocumentTitle } from "../document/document-title";
 
 interface IProps {
   tabSpec: NavTabModelType;
@@ -217,16 +217,10 @@ interface IDocumentAreaProps {
 const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocument,
     hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps
 ) => {
-  const {appConfig, class: classStore, persistentUI, ui, unit, user} = useStores();
+  const {appConfig, persistentUI, ui, user} = useStores();
   const showPlayback = user.type && !openDocument?.isPublished
                           ? appConfig.enableHistoryRoles.includes(user.type) : false;
   const showEdit = !openDocument.isRemote && ((tab === "my-work") || (tab === "learningLog"));
-  const getDisplayTitle = (document: DocumentModelType) => {
-    const documentOwner = classStore.users.get(document.uid);
-    const documentTitle = getDocumentDisplayTitle(unit, document, appConfig);
-    return {owner: documentOwner ? documentOwner.fullName : "", title: documentTitle};
-  };
-  const displayTitle = getDisplayTitle(openDocument);
 
   function handleCloseButtonClick() {
     persistentUI.closeDocumentGroupPrimaryDocument();
@@ -238,13 +232,11 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
     <div className={classNames("focus-document", tab, sideClasses)}>
       <div className={classNames("document-header", tab, sectionClass, sideClasses)}
             onClick={() => ui.setSelectedTile()}>
-        <div className="document-title">
-          {(displayTitle.owner && tab === "class-work")
-              && <span className="document-owner">{displayTitle.owner}: </span>}
-          <span className={classNames("document-title", {"class-work": tab === "class-work"})}>
-            {displayTitle.title}
-          </span>
-        </div>
+        <DocumentTitle
+          document={openDocument}
+          hideOwner={tab !== "class-work"}
+          extraTitleClassNames={{"class-work": tab === "class-work"}}
+        />
         <div className="document-buttons">
           <button className={`close-doc-button ${tab} ${sectionClass}`} onClick={handleCloseButtonClick}>
             <CloseIcon className="close-icon" />

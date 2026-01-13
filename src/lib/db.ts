@@ -747,7 +747,7 @@ export class DB {
               visibility: visibility || metadata.visibility,
               uid: userId,
               originDoc,
-              key: document.self.documentKey,
+              key: documentKey,
               createdAt: metadata.createdAt,
               content: content ? content : {},
               changeCount: document.changeCount,

@@ -63,6 +63,8 @@ export function getDocumentDisplayTitle(
     return document.getProperty("caption") || "Support";
   } else if (isProblemType(type) || isPlanningType(type)) {
     return getDocumentTitleFromProblem(unit, document);
+  } else if (type === GroupDocument) {
+    return `Group ${document.groupId} Document`;
   } else {
     return getDocumentTitleWithTimestamp(document, appConfig);
   }

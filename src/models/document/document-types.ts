@@ -46,7 +46,13 @@ export function isPublishedType(type: string) {
           .indexOf(type) >= 0;
 }
 export function isSortableType(type: string){
-  return [ProblemDocument, PersonalDocument, LearningLogDocument, ExemplarDocument].indexOf(type) >= 0;
+  return [
+    ProblemDocument,
+    PersonalDocument,
+    LearningLogDocument,
+    ExemplarDocument,
+    GroupDocument
+  ].indexOf(type) >= 0;
 }
 // This function uses a bit of a hack to determine if a document is curriculum or not:
 // curriculum documents have no ids.

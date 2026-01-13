@@ -3,9 +3,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import { LogEventName } from "../../lib/logger-types";
-import { DocumentModelType } from "../../models/document/document";
 import { isExemplarType } from "../../models/document/document-types";
-import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { ENavTab } from "../../models/view/nav-tabs";
@@ -14,6 +12,7 @@ import { DocumentScroller } from "./document-scroller";
 import { EditableDocumentContent } from "./editable-document-content";
 import { ExemplarVisibilityCheckbox } from "./exemplar-visibility-checkbox";
 import { IOpenDocumentsGroupMetadata } from "./sorted-section";
+import { DocumentTitle } from "./document-title";
 
 import CloseIcon from "../../../src/assets/icons/close/close.svg";
 import ToggleDocumentScrollerIcon from "../../../src/assets/show-hide-thumbnail-view-small-icon.svg";
@@ -29,8 +28,8 @@ interface IProps {
 
 export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWorkDocumentArea(props: IProps) {
   const { nextDocumentsGroup, openDocumentsGroup, openDocumentKey, openGroupMetadata, previousDocumentsGroup } = props;
-  const {appConfig, class: classStore, documents, networkDocuments,
-    persistentUI, sortedDocuments, ui, unit, user} = useStores();
+  const {appConfig, documents, networkDocuments,
+    persistentUI, sortedDocuments, ui, user} = useStores();
   const showScroller = persistentUI.showDocumentScroller;
   const [prevBtnEnabled, setPrevBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup.documents.at(0)?.key);
   const [nextBtnEnabled, setNextBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup.documents.at(-1)?.key);
@@ -57,12 +56,6 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   const showPlayback = user.isResearcher || (user.type && appConfig.enableHistoryRoles.includes(user.type));
   const showEdit = openDocument?.uid === user.id; //only show if doc is owned by the user who opened it
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
-  const getDisplayTitle = (document: DocumentModelType) => {
-    const documentOwner = classStore.users.get(document.uid);
-    const documentTitle = getDocumentDisplayTitle(unit, document, appConfig);
-    return {owner: documentOwner ? documentOwner.fullName : "", title: documentTitle};
-  };
-  const displayTitle = openDocument && getDisplayTitle(openDocument);
 
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
 
@@ -126,13 +119,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
             </button>
           }
           {showExemplarShare && <ExemplarVisibilityCheckbox document={openDocument} />}
-          <div className="document-title">
-            {(displayTitle && displayTitle.owner)
-                && <span className="document-owner">{displayTitle.owner}: </span>}
-            <span className={classNames("document-title")}>
-              {displayTitle && displayTitle.title}
-            </span>
-          </div>
+          <DocumentTitle document={openDocument} />
           {!showScroller &&
             <button
               className={classNames("switch-document-button next", {disabled: !nextBtnEnabled})}

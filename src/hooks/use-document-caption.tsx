@@ -4,6 +4,11 @@ import { ExemplarDocument, isPublishedType, isUnpublishedType } from "../models/
 import { getDocumentDisplayTitle } from "../models/document/document-utils";
 import { useStores } from "./use-stores";
 
+/**
+ * Return a string caption for below the thumbnail view of the document.
+ * This is also used as the name of the document in commented documents list.
+ * Note: this overlaps with the DocumentTitle component.
+ */
 export function useDocumentCaption(document: DocumentModelType, isStudentWorkspaceDoc?: boolean) {
   const {appConfig, class: classStore, unit, user} = useStores();
   const { type, uid } = document;

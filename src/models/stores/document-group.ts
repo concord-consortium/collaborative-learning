@@ -2,14 +2,13 @@ import { FC, SVGProps } from "react";
 import { makeAutoObservable } from "mobx";
 import {
   createDocMapByBookmarks,
-  createDocMapByGroups,
-  createDocMapByNames,
   createTileTypeToDocumentsMap,
   getTagsWithDocs,
   sortGroupSectionLabels,
   sortNameSectionLabels
 } from "../../utilities/sort-document-utils";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
+import { GroupDocument } from "../document/document-types";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { SecondarySortType, SortType } from "./ui-types";
@@ -148,15 +147,39 @@ export class DocumentGroup {
   }
 
   get byGroup(): DocumentGroup[] {
-    const docMap = createDocMapByGroups(this.documents, this.stores.groups.groupForUser);
-    const sortedSectionLabels = sortGroupSectionLabels(Array.from(docMap.keys()));
-    return this.buildDocumentCollection({sortedSectionLabels, sortType: "Group", docMap});
+    const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
+    this.documents.forEach((doc) => {
+      const sectionLabel = (() => {
+        if (doc.type === GroupDocument) {
+          return `Group ${doc.groupId}`;
+        }
+        const userId = doc.uid;
+        const group = this.stores.groups.groupForUser(userId);
+        return group ? `Group ${group.id}` : "No Group";
+      })();
+
+      if (!documentMap.has(sectionLabel)) {
+        documentMap.set(sectionLabel, []);
+      }
+      documentMap.get(sectionLabel)?.push(doc);
+    });
+    const sortedSectionLabels = sortGroupSectionLabels(Array.from(documentMap.keys()));
+    return this.buildDocumentCollection({sortedSectionLabels, sortType: "Group", docMap: documentMap});
   }
 
   get byName(): DocumentGroup[] {
-    const docMap = createDocMapByNames(this.documents, this.stores.class.getUserById);
-    const sortedSectionLabels = sortNameSectionLabels(Array.from(docMap.keys()));
-    return this.buildDocumentCollection({sortedSectionLabels, sortType: "Name", docMap});
+    const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
+    this.documents.forEach((doc) => {
+      const user = this.stores.class.getUserById(doc.uid);
+      const sectionLabel = user ? `${user.lastName}, ${user.firstName}` : "Unknown";
+      if (!documentMap.has(sectionLabel)) {
+        documentMap.set(sectionLabel, []);
+      }
+      documentMap.get(sectionLabel)?.push(doc);
+    });
+
+    const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
+    return this.buildDocumentCollection({sortedSectionLabels, sortType: "Name", docMap: documentMap});
   }
 
   get byStrategy(): DocumentGroup[] {
