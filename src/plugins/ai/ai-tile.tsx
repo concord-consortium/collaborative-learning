@@ -16,21 +16,23 @@ import { changeSlashesToUnderscores } from "./ai-utils";
 import "./ai-tile.scss";
 
 export const AIComponent: React.FC<ITileProps> = observer((props) => {
-  const content = props.model.content as AIContentModelType;
+  const { documentId, model, onRegisterTileApi } = props;
+  const content = model.content as AIContentModelType;
   const userContext = useUserContext();
   const readOnly = useReadOnlyContext();
   const stores = useStores();
-  const systemPrompt = stores.appConfig.getSetting("systemPrompt", "ai");
+  const { appConfig, documents, networkDocuments, unit } = stores;
+  const systemPrompt = appConfig.getSetting("systemPrompt", "ai");
   const getAiContent = userContext.classHash ? useFirebaseFunction("getAiContent_v2") : null;
   const [updateRequests, setUpdateRequests] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   // note: curriculum documents don't have a documentId property,
   // so we might need to get the curriculum path to use as an id
-  const identifier = getDocumentIdentifier(getParentOfType(props.model, DocumentContentModel));
+  const identifier = getDocumentIdentifier(getParentOfType(model, DocumentContentModel));
 
   useEffect(() => {
-    props.onRegisterTileApi({
+    onRegisterTileApi({
       exportContentAsTileJson: () => {
         return content.exportJson();
       }
@@ -45,7 +47,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     if (getAiContent) {
       const queryAI = async () => {
         setIsUpdating(true);
-        if (!identifier || !props.model.id) {
+        if (!identifier || !model.id) {
           console.error("No document identifier or tileId found");
           return;
         }
@@ -56,8 +58,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         }
 
         // Add a summary of the current document to the prompt if possible
-        const document = props.documentId
-          ? stores.documents.getDocument(props.documentId) ?? stores.networkDocuments.getDocument(props.documentId)
+        const document = documentId
+          ? documents.getDocument(documentId) ?? networkDocuments.getDocument(documentId)
           : undefined;
         // Clear the text so previous responses do not appear in the document summary
         content.setText("");
@@ -71,9 +73,9 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           context: userContext,
           dynamicContentPrompt, // TODO: could just be "prompt"
           systemPrompt,
-          unit: stores.unit.code,
+          unit: unit.code,
           documentId: changeSlashesToUnderscores(identifier),
-          tileId: props.model.id
+          tileId: model.id
         });
         content.setText(response.data.text);
         if (response.data.lastUpdated) {
@@ -87,7 +89,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       };
       queryAI();
     }
-  }, [updateRequests, content, getAiContent, identifier, props.model.id, userContext, stores.unit.code, systemPrompt]);
+  }, [
+    updateRequests, content, documentId, documents, getAiContent, identifier, model.id, networkDocuments, userContext,
+    unit.code, systemPrompt
+  ]);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     content.setPrompt(event.target.value);
