@@ -9,7 +9,6 @@ import { useFirebaseFunction } from "../../hooks/use-firebase-function";
 import { useStores } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { isCurriculumDocument } from "../../models/document/document-types";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
 import { AIContentModelType } from "./ai-content";
 import { changeSlashesToUnderscores } from "./ai-utils";
@@ -30,12 +29,6 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   // so we might need to get the curriculum path to use as an id
   const identifier = getDocumentIdentifier(getParentOfType(props.model, DocumentContentModel));
 
-  // We currently don't query AI or display its response when the tile is in a curriculum document
-  const isInCurriculum = isCurriculumDocument(props.documentId);
-  const text = isInCurriculum
-    ? "When you drag this tile to your document Ada will give you feedback on your document."
-    : content.text;
-
   useEffect(() => {
     props.onRegisterTileApi({
       exportContentAsTileJson: () => {
@@ -48,8 +41,6 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   // Update the AI response
   // TODO: This triggers multiple undoable actions, but shouldn't really trigger any
   useEffect(() => {
-    if (isInCurriculum) return;
-
     // don't attempt to query AI if there is no class hash (i.e. we're in authoring mode)
     if (getAiContent) {
       const queryAI = async () => {
@@ -65,17 +56,16 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         }
 
         // Add a summary of the current document to the prompt if possible
-        let dynamicContentPrompt = content.prompt;
         const document = props.documentId
           ? stores.documents.getDocument(props.documentId) ?? stores.networkDocuments.getDocument(props.documentId)
           : undefined;
         // Clear the text so previous responses do not appear in the document summary
         content.setText("");
         const summary = document ? documentSummarizer(document.content, {}) : "";
-        if (summary) {
-          dynamicContentPrompt = `This is a summary of the current document:\n\n${summary}\n\n\n`;
-          dynamicContentPrompt += `Using this information, respond to the following prompt:\n\n${content.prompt}`;
-        }
+        let dynamicContentPrompt = summary
+          ? `This is a summary of the current document:\n\n${summary}\n\n\n`
+          : `No information about the current document could be found.\n\n\n`;
+        dynamicContentPrompt += `Using this information, respond to the following prompt:\n\n${content.prompt}`;
 
         const response = await getAiContent({
           context: userContext,
@@ -127,12 +117,12 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       {renderPromptForm()}
       <div className="ai-output">
         <div className="last-updated">
-          {!isInCurriculum && (lastUpdated ? lastUpdated.toLocaleString("en-US", {dateStyle: "long"}) : "...")}
+          {lastUpdated ? lastUpdated.toLocaleString("en-US", {dateStyle: "long"}) : "..."}
         </div>
         {isUpdating ? (
           <p>Loading...</p>
         ) : (
-          <Markdown>{text}</Markdown>
+          <Markdown>{content.text}</Markdown>
         )}
       </div>
     </div>
