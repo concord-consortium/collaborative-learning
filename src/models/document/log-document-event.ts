@@ -2,10 +2,10 @@ import { IDocumentMetadata } from "../../../shared/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
 import { TreeManagerType } from "../history/tree-manager";
-import { IDocumentMetadataModel } from "../stores/sorted-documents";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType } from "./document";
 import { ExemplarDocument } from "./document-types";
+import { IDocumentMetadataModel } from "./document-metadata-model";
 
 interface ITeacherNetworkInfo {
   networkClassHash?: string;
