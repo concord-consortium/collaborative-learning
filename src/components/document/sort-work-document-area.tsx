@@ -3,9 +3,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import { LogEventName } from "../../lib/logger-types";
-import { DocumentModelType } from "../../models/document/document";
 import { isExemplarType } from "../../models/document/document-types";
-import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { ENavTab } from "../../models/view/nav-tabs";
@@ -30,8 +28,8 @@ interface IProps {
 
 export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWorkDocumentArea(props: IProps) {
   const { nextDocumentsGroup, openDocumentsGroup, openDocumentKey, openGroupMetadata, previousDocumentsGroup } = props;
-  const {appConfig, class: classStore, documents, networkDocuments,
-    persistentUI, sortedDocuments, ui, unit, user} = useStores();
+  const {appConfig, documents, networkDocuments,
+    persistentUI, sortedDocuments, ui, user} = useStores();
   const showScroller = persistentUI.showDocumentScroller;
   const [prevBtnEnabled, setPrevBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup.documents.at(0)?.key);
   const [nextBtnEnabled, setNextBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup.documents.at(-1)?.key);

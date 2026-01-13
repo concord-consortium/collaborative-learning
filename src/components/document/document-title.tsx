@@ -30,7 +30,7 @@ export const DocumentTitle: React.FC<IProps> = observer(function DocumentTitle(p
       return "";
     } else {
       // TODO: getDocumentDisplayTitle already adds a prefix with the user name, so it seems
-      // this is going to show the owner name twice. We clean that up.
+      // this is going to show the owner name twice. We should clean that up.
       const owner = classStore.users.get(document.uid);
       return owner ? owner.fullName : "";
     }

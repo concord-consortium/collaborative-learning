@@ -10,7 +10,6 @@ import { DocumentType } from "../../models/document/document-types";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentModelType } from "../../models/document/document";
 import { EditableDocumentContent } from "../document/editable-document-content";
-import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { SectionDocuments } from "../../models/stores/section-docs-store";
 import { DocumentBrowserScroller, ScrollButton } from "./document-browser-scroller";
 import CloseIcon from "../../assets/icons/close/close.svg";
@@ -218,7 +217,7 @@ interface IDocumentAreaProps {
 const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocument,
     hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps
 ) => {
-  const {appConfig, class: classStore, persistentUI, ui, unit, user} = useStores();
+  const {appConfig, persistentUI, ui, user} = useStores();
   const showPlayback = user.type && !openDocument?.isPublished
                           ? appConfig.enableHistoryRoles.includes(user.type) : false;
   const showEdit = !openDocument.isRemote && ((tab === "my-work") || (tab === "learningLog"));
