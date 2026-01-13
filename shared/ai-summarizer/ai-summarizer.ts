@@ -292,19 +292,15 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
       `${generateVariablesMarkdownTable(variables)}\n\n`
     : "";
 
-  if (options.minimal) {
-    return heading(headingLevel, "CLUE Document Summary") +
-      `${summary}\n` +
-      `${dataSetSummary}`;
-  } else {
-    return (
-      heading(headingLevel, "CLUE Document Summary") +
-      `${layoutInfo}${preamble}${maybeTileInfo}${maybeDataSetInfo}\n\n` +
-      `${summary}\n` +
-      `${dataSetSummary}\n` +
-      `${variablsSummary}\n`
-    );
-  }
+  const extra = options.minimal ? "" : `${layoutInfo}${preamble}${maybeTileInfo}${maybeDataSetInfo}\n\n`;
+  return (
+    heading(headingLevel, "CLUE Document Summary") +
+    extra +
+    summary + "\n" +
+    dataSetSummary + "\n" +
+    variablsSummary + "\n" +
+    heading(headingLevel, "End of CLUE Document Summary")
+  );
 }
 
 interface SectionsSummaryParams {
