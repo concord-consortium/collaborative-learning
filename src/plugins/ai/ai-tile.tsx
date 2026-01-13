@@ -32,7 +32,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
 
   // We currently don't query AI or display its response when the tile is in a curriculum document
   const isInCurriculum = isCurriculumDocument(props.documentId);
-  const response = isInCurriculum
+  const text = isInCurriculum
     ? "When you drag this tile to your document Ada will give you feedback on your document."
     : content.text;
 
@@ -132,7 +132,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         {isUpdating ? (
           <p>Loading...</p>
         ) : (
-          <Markdown>{response}</Markdown>
+          <Markdown>{text}</Markdown>
         )}
       </div>
     </div>
