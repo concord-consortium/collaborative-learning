@@ -14,6 +14,7 @@ import { DocumentScroller } from "./document-scroller";
 import { EditableDocumentContent } from "./editable-document-content";
 import { ExemplarVisibilityCheckbox } from "./exemplar-visibility-checkbox";
 import { IOpenDocumentsGroupMetadata } from "./sorted-section";
+import { DocumentTitle } from "./document-title";
 
 import CloseIcon from "../../../src/assets/icons/close/close.svg";
 import ToggleDocumentScrollerIcon from "../../../src/assets/show-hide-thumbnail-view-small-icon.svg";
@@ -57,12 +58,6 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   const showPlayback = user.isResearcher || (user.type && appConfig.enableHistoryRoles.includes(user.type));
   const showEdit = openDocument?.uid === user.id; //only show if doc is owned by the user who opened it
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
-  const getDisplayTitle = (document: DocumentModelType) => {
-    const documentOwner = classStore.users.get(document.uid);
-    const documentTitle = getDocumentDisplayTitle(unit, document, appConfig);
-    return {owner: documentOwner ? documentOwner.fullName : "", title: documentTitle};
-  };
-  const displayTitle = openDocument && getDisplayTitle(openDocument);
 
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
 
@@ -126,13 +121,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
             </button>
           }
           {showExemplarShare && <ExemplarVisibilityCheckbox document={openDocument} />}
-          <div className="document-title">
-            {(displayTitle && displayTitle.owner)
-                && <span className="document-owner">{displayTitle.owner}: </span>}
-            <span className={classNames("document-title")}>
-              {displayTitle && displayTitle.title}
-            </span>
-          </div>
+          <DocumentTitle document={openDocument} />
           {!showScroller &&
             <button
               className={classNames("switch-document-button next", {disabled: !nextBtnEnabled})}
