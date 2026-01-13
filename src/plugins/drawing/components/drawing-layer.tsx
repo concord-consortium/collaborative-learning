@@ -78,34 +78,12 @@ export const DrawingLayerView = observer((props: DrawingLayerViewProps) => {
   const content = props.model.content as DrawingContentModelType;
   const drawingAreaContext = useDrawingAreaContext();
 
-  let offsetX = content.offsetX;
-  let offsetY = content.offsetY;
-  let zoom = content.zoom;
-
-  // For read-only tiles, calculate independent fit-to-view transforms instead of using the
-  // shared model's zoom and offset values.
-  if (props.readOnly) {
-    const canvasSize = drawingAreaContext?.getVisibleCanvasSize() ?? { x: 100, y: 100 };
-    const contentBoundingBox = content.objectsBoundingBox;
-    if (contentBoundingBox) {
-      const fitResult = calculateFitContent({
-        canvasSize,
-        contentBoundingBox,
-        minZoom: 0.1,
-        maxZoom: 1
-      });
-      offsetX = fitResult.offsetX;
-      offsetY = fitResult.offsetY;
-      zoom = fitResult.zoom;
-    }
-  }
-
   return (
     <InternalDrawingLayerView
       reportVisibleBoundingBox={navigator.reportVisibleBoundingBox}
-      offsetX={offsetX}
-      offsetY={offsetY}
-      zoom={zoom}
+      offsetX={content.offsetX}
+      offsetY={content.offsetY}
+      zoom={content.zoom}
       objectsBoundingBox={content.objectsBoundingBox}
       containerContext={containerContext}
       drawingAreaContext={drawingAreaContext}
@@ -235,9 +213,7 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
         this.offsetY = offsetY;
       } else {
         // In regular tile display, offset and zoom are the values stored in the model.
-        // However, we tweak the displayed offset if there is no "show/sort" sidebar so that the
-        // read-only and read-write versions of the tile center content the same way.
-        this.offsetX = this.props.offsetX + (this.props.readOnly ? kClosedObjectListPanelWidth : 0);
+        this.offsetX = this.props.offsetX;
         this.offsetY = this.props.offsetY;
         this.zoom = this.props.zoom;
 
