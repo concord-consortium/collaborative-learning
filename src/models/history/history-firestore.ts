@@ -191,10 +191,6 @@ export class FirestoreHistoryManager {
     const { documentPath, lastEntryIndex, lastEntryId } = await this.firestoreHistoryInfoPromise;
     const { firestore } = this;
 
-    if (!firestore) {
-      throw new Error("cannot record history entry because Firestore is not defined");
-    }
-
     // add a new document for this history entry
     const historyEntryPath = firestore.getFullPath(`${documentPath}/history`);
 
@@ -205,7 +201,7 @@ export class FirestoreHistoryManager {
     const docRef = firestore.documentRef(historyEntryPath, entry.id);
     const snapshot = getSnapshot(entry);
 
-    // If there was no last entry in Firestore, getFirestoreHistoryInfo sets
+    // If there was no last entry in Firestore, prepareFirestoreHistoryInfo sets
     // lastEntryIndex to -1
     const index = lastEntryIndex + 1 + newLocalIndex;
     docRef.set({
