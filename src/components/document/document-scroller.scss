@@ -79,9 +79,11 @@ $footer-height: 12px;
 
     .list-item {
       height: 126px;
-      width: 96px;
+      min-height: auto;
+      min-width: auto;
       overflow: visible;
       padding: 0;
+      width: 96px;
 
       .scaled-list-item-container {
         flex-shrink: 0;
