@@ -499,9 +499,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         const docLastEditedTime = await firebase.getLastEditedTimestamp(user, document.key);
         const effectiveLastEdited = docLastEditedTime || Date.now();
 
-        document.commentsManager.queuePendingAIComment(
-          effectiveLastEdited,
-          (comments: CommentWithId[]) => {
+        document.commentsManager.queueRemoteComment({
+          triggeredAt: effectiveLastEdited,
+          source: "ai",
+          checkCompleted: (comments: CommentWithId[]) => {
             // Check if AI analysis is complete by finding an AI comment
             // that was created after the document was last edited.
             const lastAIComment = [...comments]
@@ -511,10 +512,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             return !!(lastAIComment &&
                      lastAIComment.createdAt.getTime() > effectiveLastEdited);
           }
-        );
-      } else {
-        // Fallback for backward compatibility.
-        document.content?.setAwaitingAIAnalysis(true);
+        });
       }
     }
 

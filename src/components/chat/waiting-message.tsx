@@ -19,10 +19,10 @@ const _WaitingMessage: React.FC<IWaitingMessageProps> = ({ content }) => {
   const waitingMessageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (waitingMessageRef.current && content?.isAwaitingAIAnalysis) {
+    if (waitingMessageRef.current && content?.isAwaitingRemoteComment) {
       waitingMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [content?.isAwaitingAIAnalysis]);
+  }, [content?.isAwaitingRemoteComment]);
 
   const body = (
     <>
@@ -37,7 +37,7 @@ const _WaitingMessage: React.FC<IWaitingMessageProps> = ({ content }) => {
 
   return (
     <div className="comment-thread" ref={waitingMessageRef}>
-      {content?.isAwaitingAIAnalysis && body}
+      {content?.isAwaitingRemoteComment && body}
     </div>
   );
 };

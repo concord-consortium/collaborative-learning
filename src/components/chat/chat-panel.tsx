@@ -149,13 +149,9 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     setChatPanelTitle(isDocumentView ? "Documents" : "Comments");
   }, [isDocumentView]);
 
-  // Update the comments manager when new comments arrive via hooks and check for
-  // pending comments (AI analysis, exemplars).
+  // Update the comments manager when new comments arrive via hooks.
   useEffect(() => {
-    if (document?.commentsManager) {
-      document.commentsManager.comments = allComments;
-      void document.commentsManager.checkPendingComments();
-    }
+    document?.commentsManager?.setComments(allComments);
   }, [document, allComments]);
 
   const newCommentCount = unreadComments?.length || 0;

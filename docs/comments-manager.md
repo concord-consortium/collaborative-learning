@@ -18,7 +18,6 @@ After analyzing several options (specific solution, full manager, hybrid), the h
 - Provides immediate value for AI/exemplar coordination
 - Minimizes disruption to existing React hooks and React Query caching
 - Creates a foundation for future migration to full manager control
-- Maintains backward compatibility
 - Reduces implementation risk
 
 **See [Migration Guide](./comments-manager-migration-guide.md) for the path to complete migration to full manager control.**
@@ -39,20 +38,20 @@ After analyzing several options (specific solution, full manager, hybrid), the h
                          ↓
 ┌─────────────────────────────────────────────────────────────┐
 │ ChatPanel useEffect                                         │
-│ → Syncs hook comments to manager.comments array             │
-│ → Triggers manager.checkPendingComments()                   │
+│ → Syncs hook comments to manager.comments array and         │
+│   triggers manager.checkPendingComments()                   │
 └─────────────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────────────┐
 │ Manager checks queue                                        │
 │ → Runs completion checks for pending items                  │
 │ → Removes completed items from queue                        │
-│ → Posts exemplars when AI analysis is complete              │
+│ → Posts local comments after remote comment is posted       │
 └─────────────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────────────┐
 │ UI Updates (via MobX observability)                         │
-│ → "Ada is thinking..." appears/disappears                   │
+│ → Waiting message appears/disappears                        │
 │ → Comments appear in correct order                          │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -61,22 +60,20 @@ After analyzing several options (specific solution, full manager, hybrid), the h
 
 **1. DocumentCommentsManager** (`src/models/document/document-comments-manager.ts`)
 - MobX class attached to each `DocumentModel`
-- Manages queue of pending comments (AI analysis, exemplars, custom)
-- Provides observable state: `isAwaitingAIAnalysis`, `hasPendingExemplars`
+- Manages queue of pending comments
 - Coordinates automatic posting when conditions are met
 
 **2. Integration Points**
 - **DocumentModel**: Creates manager instance in `afterCreate()`
-- **BaseDocumentContent**: Computed property `isAwaitingAIAnalysis` delegates to manager
-- **ExemplarController**: Queues exemplars when AI is pending
+- **BaseDocumentContent**: Computed property `isAwaitingRemoteComment`
+- **ExemplarController**: Queues exemplars
 - **Document Component**: Queues AI analysis when Ideas button clicked
 - **ChatPanel**: Bridges React hooks to manager via `useEffect`
 
 **3. Comment Queue**
-Supports three types of pending comments:
-- **AI Analysis**: Waits for AI comment from server (has completion check function)
-- **Exemplar**: Waits to post exemplar comment (has post function)
-- **Custom**: Flexible for future use cases (has both check and post functions)
+Supports two types of pending comments:
+- **Remote**: Waits for comment from remote server (has completion check function)
+- **Local**: Waits to post comment after other comments already in the queue (has post function)
 
 ## How It Works Today
 
@@ -93,7 +90,7 @@ async handleIdeasButtonClick() {
     const docLastEditedTime = await firebase.getLastEditedTimestamp(user, document.key);
     const effectiveLastEdited = docLastEditedTime || Date.now();
 
-    document.commentsManager.queuePendingAIComment(
+    document.commentsManager.queuePendingRemoteComment(
       effectiveLastEdited,
       (comments) => {
         // Check if AI has responded
@@ -109,29 +106,24 @@ async handleIdeasButtonClick() {
 }
 ```
 
-**Result**: `document.commentsManager.isAwaitingAIAnalysis` becomes `true`
+**Result**: `document.isAwaitingRemoteComment` becomes `true`
 
 ### 2. Exemplar Rule Triggers
 
 ```typescript
 // src/models/stores/exemplar-controller.ts
 showRandomExemplar() {
-  if (appConfig.aiEvaluation && documentModel.commentsManager?.isAwaitingAIAnalysis) {
-    // Queue the exemplar - it will post after AI completes
-    documentModel.commentsManager.queuePendingExemplarComment(
-      newComment,
-      userContext,
-      documentModel.metadata,
-      postExemplarComment
-    );
-  } else {
-    // Post immediately
-    postExemplarComment({ document, comment, context });
-  }
+  // Queue the exemplar - it will post after AI completes
+  documentModel.commentsManager?.queueComment(
+    newComment,
+    userContext,
+    documentModel.metadata,
+    postExemplarComment
+  );
 }
 ```
 
-**Result**: Exemplar is added to queue but not posted yet
+**Result**: Exemplar is added to queue but not posted until other comments in the queue ahead of it are posted
 
 ### 3. Comments Arrive from Firestore
 
@@ -146,8 +138,7 @@ const allComments = useMemo(() => {
 // Bridge: Sync hook comments to manager
 useEffect(() => {
   if (document?.commentsManager) {
-    document.commentsManager.comments = allComments;
-    document.commentsManager.checkPendingComments();
+    document?.commentsManager?.setComments(allComments);
   }
 }, [document, allComments]);
 ```
@@ -164,21 +155,25 @@ async checkPendingComments() {
 
   // First pass: identify what to remove and what to post
   for (const pending of this.pendingComments) {
-    if (pending.type === "ai-analysis") {
+    if (pending.type === REMOTE_COMMENT) {
       if (pending.checkCompleted(this.comments)) {
         toRemove.push(pending.id); // AI analysis complete!
       }
-    } else if (pending.type === "exemplar") {
-      // Can post if all preceding items are resolved
-      const allBeforeResolved = /* check logic */;
-      if (allBeforeResolved) {
+    } else {
+      // Other comments should be posted after all preceding pending items are resolved.
+      const indexOfThis = this.pendingComments.indexOf(pending);
+      const allBeforeAreResolved = this.pendingComments
+        .slice(0, indexOfThis)
+        .every(p => toRemove.includes(p.id));
+
+      if (allBeforeAreResolved) {
         toPost.push(pending);
         toRemove.push(pending.id);
       }
     }
   }
 
-  // Remove resolved items FIRST (makes isAwaitingAIAnalysis false instantly)
+  // Remove resolved items first
   if (toRemove.length > 0) {
     runInAction(() => {
       this.pendingComments = this.pendingComments.filter(
@@ -187,29 +182,28 @@ async checkPendingComments() {
     });
   }
 
-  // Then post exemplars
-  for (const exemplar of toPost) {
-    await exemplar.postFunction({ document, comment, context });
+  // Then post local comments
+  for (const commentToPost of toPost) {
+    await commentToPost.postFunction({ document, comment, context });
   }
 }
 ```
 
-**Result**: AI pending item removed, `isAwaitingAIAnalysis` becomes `false`, exemplar posts
+**Result**: AI pending item removed, exemplar posts
 
 ### 5. UI Updates
 
 ```typescript
 // src/components/chat/waiting-message.tsx
-// Reads computed property that delegates to manager
-const isWaiting = content?.isAwaitingAIAnalysis;
+// Reads computed property
+const isWaiting = content?.isAwaitingRemoteComment;
 
 // src/models/document/base-document-content.ts
-get isAwaitingAIAnalysis() {
+get isAwaitingRemoteComment() {
   const doc = getParentWithTypeName(self, "Document");
   if (doc?.commentsManager) {
-    return doc.commentsManager.isAwaitingAIAnalysis; // Source of truth
+    return doc.commentsManager.pendingComments.some((p: PendingComment) => p.postingType === REMOTE_COMMENT);
   }
-  return self.awaitingAIAnalysis; // Fallback for backward compatibility
 }
 ```
 
@@ -217,36 +211,24 @@ get isAwaitingAIAnalysis() {
 
 ## Key Design Patterns
 
-### 1. Computed Property Delegation
-Components continue to use `content.isAwaitingAIAnalysis`, but it delegates to the manager:
-- Provides seamless migration
-- Manager is source of truth
-- Backward compatible (falls back to local flag if manager unavailable)
-
-### 2. Hybrid Monitoring
+### 1. Hybrid Monitoring
 - React hooks continue to fetch comments (no disruption)
 - Manager receives comments array via assignment
 - ChatPanel `useEffect` bridges the two systems
 - Simple and works with existing architecture
 
-### 3. Queue Ordering
-- AI analysis items block exemplars
-- Exemplars wait for all preceding non-exemplar items
+### 2. Queue Ordering
+- Remote comment items block local comments
+- Local comments wait for all preceding items
 - Items removed from queue before posting (prevents UI flash)
 - Order guaranteed by queue processing logic
-
-### 4. Graceful Degradation
-- All code checks for manager existence (`?.commentsManager`)
-- Falls back to old behavior if manager not present
-- Can be disabled for rollback
-- Backward compatible
 
 ## Files Modified
 
 **Production Code:**
 - `src/models/document/document-comments-manager.ts` (~300 LOC) - New manager class
 - `src/models/document/document.ts` - Initializes manager
-- `src/models/document/base-document-content.ts` - Computed property delegation
+- `src/models/document/base-document-content.ts` - Computed property
 - `src/models/stores/exemplar-controller.ts` - Uses manager queue
 - `src/components/document/document.tsx` - Queues AI analysis
 - `src/components/chat/chat-panel.tsx` - Bridges hooks to manager
@@ -259,27 +241,6 @@ Components continue to use `content.isAwaitingAIAnalysis`, but it delegates to t
 **Documentation:**
 - [`docs/comments-manager.md`](./comments-manager.md) - Current implementation
 - [`docs/comments-manager-migration-guide.md`](./comments-manager-migration-guide.md) - Path to full manager control
-
-## Adding New Comment Types
-
-The queue is extensible. To add a new automated comment type:
-
-```typescript
-// 1. Queue the pending item
-document.commentsManager.queueCustomPendingComment(
-  (comments) => {
-    // Return true when your comment appears
-    return comments.some(c => c.uid === YOUR_SYSTEM_ID);
-  },
-  async (params) => {
-    // Post your comment if needed
-    await postYourComment(params);
-  },
-  { /* any params your post function needs */ }
-);
-
-// 2. That's it! The manager handles ordering automatically
-```
 
 ## Current Limitations
 
@@ -302,11 +263,11 @@ These are acceptable trade-offs for the hybrid approach. **See [Migration Guide]
 
 ## Benefits Achieved
 
-✅ **Better Architecture** - Centralized comment coordination
-✅ **Simpler Components** - ChatPanel no longer has complex AI completion logic
-✅ **Extensible** - Easy to add new comment types
-✅ **Low Risk** - Backward compatible, can be disabled
-✅ **Foundation** - Ready for future full migration
+- **Better Architecture** - Centralized comment coordination
+- **Simpler Components** - ChatPanel no longer has complex AI completion logic
+- **Extensible** - Easy to add new comment types
+- **Low Risk** - Backward compatible, can be disabled
+- **Foundation** - Ready for future full migration
 
 ## Next Steps
 

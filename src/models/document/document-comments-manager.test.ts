@@ -1,8 +1,8 @@
 import { isObservable, runInAction } from "mobx";
-import { CommentWithId, DocumentCommentsManager, IPendingExemplarComment } from "./document-comments-manager";
-import { DocumentModel, DocumentModelType } from "./document";
-import { ProblemDocument } from "./document-types";
 import { kAnalyzerUserParams } from "../../../shared/shared";
+import { DocumentModel, DocumentModelType } from "./document";
+import { CommentWithId, DocumentCommentsManager, IPendingLocalComment } from "./document-comments-manager";
+import { ProblemDocument } from "./document-types";
 
 jest.mock("firebase/app", () => ({
   __esModule: true,
@@ -40,46 +40,47 @@ describe("DocumentCommentsManager", () => {
     });
   });
 
-  describe("queuePendingAIComment", () => {
-    it("should add AI comment to pending queue", () => {
+  describe("queueRemoteComment", () => {
+    it("should add remote comment to pending queue", () => {
       const checkCompleted = jest.fn(() => false);
       const triggeredAt = Date.now();
 
-      manager.queuePendingAIComment(triggeredAt, checkCompleted);
+      manager.queueRemoteComment({ triggeredAt, source: "ai", checkCompleted });
 
       expect(manager.pendingComments).toHaveLength(1);
-      expect(manager.pendingComments[0].type).toBe("ai-analysis");
-      expect(manager.isAwaitingAIAnalysis).toBe(true);
+      expect(manager.pendingComments[0].postingType).toBe("remote");
     });
 
-    it("should generate unique IDs for pending AI comments", () => {
+    it("should generate unique IDs for pending remote comments", () => {
       const checkCompleted = jest.fn(() => false);
 
-      manager.queuePendingAIComment(Date.now(), checkCompleted);
-      manager.queuePendingAIComment(Date.now(), checkCompleted);
-
+      manager.queueRemoteComment({ triggeredAt: Date.now(), source: "ai", checkCompleted });
+      manager.queueRemoteComment({ triggeredAt: Date.now(), source: "ai", checkCompleted });
       const ids = manager.pendingComments.map(p => p.id);
       expect(ids[0]).not.toBe(ids[1]);
     });
   });
 
-  describe("queuePendingExemplarComment", () => {
-    it("should add exemplar comment to pending queue", () => {
+  describe("queueComment", () => {
+    it("should add comment to pending queue", () => {
       const postFunction = jest.fn().mockResolvedValue({ id: "comment1" });
-      const comment = {
-        content: "See if this example gives you any new ideas:",
-        linkedDocumentKey: "exemplar-doc-123"
-      };
-      const context = { classHash: "class1", appMode: "test" };
-      const document = { uid: "user1", type: "problem", key: "doc1" };
 
-      manager.queuePendingExemplarComment(comment, context, document, postFunction);
+      manager.queueComment({
+        comment: {
+          content: "See if this example gives you any new ideas:",
+          linkedDocumentKey: "exemplar-doc-123"
+        },
+        context: { classHash: "class1", appMode: "test" },
+        document: { uid: "user1", type: "problem", key: "doc1" },
+        source: "exemplar",
+        postFunction
+      });
 
       expect(manager.pendingComments).toHaveLength(1);
-      expect(manager.pendingComments[0].type).toBe("exemplar");
+      expect(manager.pendingComments[0].postingType).toBe("local");
     });
 
-    it("should store all exemplar comment data", () => {
+    it("should store all comment data", () => {
       const postFunction = jest.fn().mockResolvedValue({ id: "comment1" });
       const comment = {
         content: "Test comment",
@@ -88,9 +89,15 @@ describe("DocumentCommentsManager", () => {
       const context = { classHash: "class1", appMode: "test" };
       const document = { uid: "user1", type: "problem", key: "doc1" };
 
-      manager.queuePendingExemplarComment(comment, context, document, postFunction);
+      manager.queueComment({
+        comment,
+        context,
+        document,
+        source: "exemplar",
+        postFunction
+      });
 
-      const pending = manager.pendingComments[0] as IPendingExemplarComment;
+      const pending = manager.pendingComments[0] as IPendingLocalComment;
       expect(pending.comment).toEqual(comment);
       expect(pending.context).toEqual(context);
       expect(pending.document).toEqual(document);
@@ -98,7 +105,7 @@ describe("DocumentCommentsManager", () => {
       expect(typeof pending.postFunction).toBe("function");
     });
 
-    it("should generate unique IDs for pending exemplar comments", () => {
+    it("should generate unique IDs for pending local comments", () => {
       const postFunction = jest.fn().mockResolvedValue({ id: "comment1" });
       const comment = {
         content: "Test comment",
@@ -107,15 +114,27 @@ describe("DocumentCommentsManager", () => {
       const context = { classHash: "class1", appMode: "test" };
       const document = { uid: "user1", type: "problem", key: "doc1" };
 
-      manager.queuePendingExemplarComment(comment, context, document, postFunction);
-      manager.queuePendingExemplarComment(comment, context, document, postFunction);
+      manager.queueComment({
+        comment,
+        context,
+        document,
+        source: "exemplar",
+        postFunction
+      });
+      manager.queueComment({
+        comment,
+        context,
+        document,
+        source: "exemplar",
+        postFunction: jest.fn().mockResolvedValue({ id: "comment2" })
+      });
       const ids = manager.pendingComments.map(p => p.id);
       expect(ids[0]).not.toBe(ids[1]);
     });
   });
 
   describe("comment coordination", () => {
-    it("should automatically check and resolve AI comments when comments arrive", () => {
+    it("should automatically check and resolve remote comments when comments arrive", () => {
       const triggeredAt = Date.now() - 1000;
       const checkCompleted = jest.fn((comments) => {
         return comments.some((c: CommentWithId) =>
@@ -124,10 +143,9 @@ describe("DocumentCommentsManager", () => {
         );
       });
 
-      manager.queuePendingAIComment(triggeredAt, checkCompleted);
-      expect(manager.isAwaitingAIAnalysis).toBe(true);
+      manager.queueRemoteComment({ triggeredAt, source: "ai", checkCompleted });
 
-      // Simulate new AI comment arriving
+      // Simulate new remote comment arriving
       runInAction(() => {
         manager.comments = [{
           content: "AI analysis result",
@@ -144,16 +162,17 @@ describe("DocumentCommentsManager", () => {
       expect(checkCompleted).toHaveBeenCalled();
     });
 
-    it("should handle errors in exemplar posting gracefully", async () => {
+    it("should handle errors in comment posting gracefully", async () => {
       const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
       const postExemplar = jest.fn().mockRejectedValue(new Error("Post failed"));
 
-      manager.queuePendingExemplarComment(
-        { content: "Test", linkedDocumentKey: "ex1" },
-        { classHash: "class1", appMode: "test" },
-        { uid: "u1", type: "problem", key: "d1" },
-        postExemplar
-      );
+      manager.queueComment({
+        comment: { content: "Test", linkedDocumentKey: "ex1" },
+        context: { classHash: "class1", appMode: "test" },
+        document: { uid: "u1", type: "problem", key: "d1" },
+        source: "exemplar",
+        postFunction: postExemplar
+      });
 
       await manager.checkPendingComments();
 
@@ -163,50 +182,45 @@ describe("DocumentCommentsManager", () => {
       consoleErrorSpy.mockRestore();
     });
 
-    it("should allow multiple exemplars to be queued and posted in order", async () => {
+    it("should allow multiple comments to be queued and posted in order", async () => {
       const postEx1 = jest.fn().mockResolvedValue({ id: "ex1" });
       const postEx2 = jest.fn().mockResolvedValue({ id: "ex2" });
 
-      manager.queuePendingExemplarComment(
-        { content: "Exemplar 1", linkedDocumentKey: "ex1" },
-        { classHash: "class1", appMode: "test" },
-        { uid: "u1", type: "problem", key: "d1" },
-        postEx1
-      );
+      manager.queueComment({
+        comment: { content: "Exemplar 1", linkedDocumentKey: "ex1" },
+        context: { classHash: "class1", appMode: "test" },
+        document: { uid: "u1", type: "problem", key: "d1" },
+        source: "exemplar",
+        postFunction: postEx1
+      });
 
-      manager.queuePendingExemplarComment(
-        { content: "Exemplar 2", linkedDocumentKey: "ex2" },
-        { classHash: "class1", appMode: "test" },
-        { uid: "u1", type: "problem", key: "d1" },
-        postEx2
-      );
+      manager.queueComment({
+        comment: { content: "Exemplar 2", linkedDocumentKey: "ex2" },
+        context: { classHash: "class1", appMode: "test" },
+        document: { uid: "u1", type: "problem", key: "d1" },
+        source: "exemplar",
+        postFunction: postEx2
+      });
 
       await manager.checkPendingComments();
 
-      expect(postEx1).toHaveBeenCalled();
-      expect(postEx2).toHaveBeenCalled();
+      expect(postEx1.mock.invocationCallOrder[0]).toBeLessThan(postEx2.mock.invocationCallOrder[0]);
       expect(manager.pendingComments).toHaveLength(0);
-    });
-  });
-
-  describe("computed properties", () => {
-    it("isAwaitingAIAnalysis should reflect pending AI comments", () => {
-      expect(manager.isAwaitingAIAnalysis).toBe(false);
-
-      manager.queuePendingAIComment(Date.now(), () => false);
-      expect(manager.isAwaitingAIAnalysis).toBe(true);
     });
   });
 
   describe("dispose", () => {
     it("should clean up all state", () => {
-      manager.queuePendingAIComment(Date.now(), () => false);
-      manager.queuePendingExemplarComment(
-        { content: "Test" },
-        { classHash: "test", appMode: "test" },
-        { uid: "u1", type: "problem", key: "d1" },
-        jest.fn()
-      );
+      manager.queueRemoteComment({
+        triggeredAt: Date.now(), source: "ai", checkCompleted: () => false
+      });
+      manager.queueComment({
+        comment: { content: "Test" },
+        context: { classHash: "test", appMode: "test" },
+        document: { uid: "u1", type: "problem", key: "d1" },
+        source: "exemplar",
+        postFunction: jest.fn()
+      });
 
       manager.dispose();
 
@@ -215,32 +229,34 @@ describe("DocumentCommentsManager", () => {
     });
   });
 
-  describe("AI and exemplar coordination", () => {
+  describe("Remote and local comments coordination", () => {
     it("should handle Ideas button click > AI analysis > exemplar reveal flow", async () => {
       // Simulate user clicks Ideas button, triggering AI analysis.
       const docLastEditedTime = Date.now();
-      const checkAIComplete = jest.fn((comments) => {
-        const lastAIComment = [...comments]
+      const checkRemoteComplete = jest.fn((comments) => {
+        const lastRemoteComment = [...comments]
           .reverse()
           .find(c => c.uid === kAnalyzerUserParams.id);
-        return !!(lastAIComment && lastAIComment.createdAt.getTime() > docLastEditedTime);
+        return !!(lastRemoteComment && lastRemoteComment.createdAt.getTime() > docLastEditedTime);
       });
 
-      manager.queuePendingAIComment(docLastEditedTime, checkAIComplete);
-      expect(manager.isAwaitingAIAnalysis).toBe(true);
+      manager.queueRemoteComment({
+        triggeredAt: docLastEditedTime, source: "ai", checkCompleted: checkRemoteComplete
+      });
 
-      const postExemplar = jest.fn().mockResolvedValue({ id: "ex1" });
-      manager.queuePendingExemplarComment(
-        { content: "See if this example gives you any new ideas:", linkedDocumentKey: "ex1" },
-        { classHash: "class1", appMode: "test" },
-        { uid: "user1", type: "problem", key: "doc1" },
-        postExemplar
-      );
+      const postLocalComment = jest.fn().mockResolvedValue({ id: "ex1" });
+      manager.queueComment({
+        comment: { content: "See if this example gives you any new ideas:", linkedDocumentKey: "ex1" },
+        context: { classHash: "class1", appMode: "test" },
+        document: { uid: "user1", type: "problem", key: "doc1" },
+        source: "exemplar",
+        postFunction: postLocalComment
+      });
 
-      expect(postExemplar).not.toHaveBeenCalled();
+      expect(postLocalComment).not.toHaveBeenCalled();
       expect(manager.pendingComments).toHaveLength(2);
 
-      // Simulate AI comment arriving
+      // Simulate remote comment arriving
       runInAction(() => {
         manager.comments = [{
           id: "ai-1",
@@ -254,28 +270,26 @@ describe("DocumentCommentsManager", () => {
 
       await manager.checkPendingComments();
 
-      expect(checkAIComplete).toHaveBeenCalled();
-      expect(manager.isAwaitingAIAnalysis).toBe(false);
-      expect(postExemplar).toHaveBeenCalled();
+      expect(checkRemoteComplete).toHaveBeenCalled();
+      expect(postLocalComment).toHaveBeenCalled();
       expect(manager.pendingComments).toHaveLength(0);
 
     });
 
-    it("should handle exemplar triggered when AI is not pending", async () => {
-      const postExemplar = jest.fn().mockResolvedValue({ id: "ex1" });
+    it("should handle comment when remote is not pending", async () => {
+      const postLocalComment = jest.fn().mockResolvedValue({ id: "ex1" });
 
-      expect(manager.isAwaitingAIAnalysis).toBe(false);
-
-      manager.queuePendingExemplarComment(
-        { content: "See if this example gives you any new ideas:", linkedDocumentKey: "ex1" },
-        { classHash: "class1", appMode: "test" },
-        { uid: "user1", type: "problem", key: "doc1" },
-        postExemplar
-      );
+      manager.queueComment({
+        comment: { content: "See if this example gives you any new ideas:", linkedDocumentKey: "ex1" },
+        context: { classHash: "class1", appMode: "test" },
+        document: { uid: "user1", type: "problem", key: "doc1" },
+        source: "exemplar",
+        postFunction: postLocalComment
+      });
 
       await manager.checkPendingComments();
 
-      expect(postExemplar).toHaveBeenCalled();
+      expect(postLocalComment).toHaveBeenCalled();
       expect(manager.pendingComments).toHaveLength(0);
     });
   });

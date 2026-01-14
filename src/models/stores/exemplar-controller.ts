@@ -93,27 +93,13 @@ export const BaseExemplarControllerModel = types
               linkedDocumentKey: chosen.key
             };
             const postExemplarComment = firebase.functions().httpsCallable("postExemplarComment_v2");
-
-            // Use the comments manager to queue exemplar if AI evaluation is enabled and pending
-            if (appConfig.aiEvaluation && documentModel.commentsManager?.isAwaitingAIAnalysis) {
-              // Queue the exemplar comment to post after AI analysis completes
-              documentModel.commentsManager.queuePendingExemplarComment(
-                newComment,
-                self.stores.userContextProvider.userContext,
-                documentModel.metadata,
-                postExemplarComment
-              );
-            } else {
-              // Post immediately if AI evaluation is not enabled or not pending
-              postExemplarComment({
-                  document: documentModel.metadata,
-                  comment: newComment,
-                  context: self.stores.userContextProvider.userContext
-                })
-                .catch((error) => {
-                  console.error("Failed to post exemplar comment:", error);
-              });
-            }
+            documentModel.commentsManager?.queueComment({
+              comment: newComment,
+              context: self.stores.userContextProvider.userContext,
+              document: documentModel.metadata,
+              source: "exemplar",
+              postFunction: postExemplarComment
+            });
             persistentUI.openResourceDocument(documentModel, appConfig);
             persistentUI.toggleShowChatPanel(true);
             ui.clearSelectedTiles();

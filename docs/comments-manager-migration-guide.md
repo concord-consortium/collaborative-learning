@@ -8,7 +8,7 @@ This guide outlines the path to complete the transition from the current hybrid 
 ## Current Implementation
 
 The manager is currently **intentionally minimal**, focused solely on queue coordination:
-- Manages pending comment queue (AI analysis, exemplars)
+- Manages pending comment queue
 - Coordinates comment ordering
 - Does NOT monitor Firestore directly
 - Does NOT include MST maps
@@ -18,7 +18,7 @@ This is by design for the current hybrid approach. Future phases would add the m
 
 ## Migration Phases
 
-### Phase 1: Hybrid ✅ (Current - Complete)
+### Phase 1: Hybrid (Current - Complete)
 - Manager coordinates pending comment queue
 - React hooks fetch comments from Firestore
 - ChatPanel bridges hooks to manager via `useEffect`
@@ -66,7 +66,7 @@ Phase 2 requires adding Firestore monitoring infrastructure:
 import firebase from "firebase/app";
 
 export class DocumentCommentsManager {
-  // Add back Firestore monitoring infrastructure
+  // Add Firestore monitoring infrastructure
   private firestore: firebase.firestore.Firestore | null = null;
   private unsubscribeLegacy: (() => void) | null = null;
   private unsubscribeSimplified: (() => void) | null = null;
@@ -145,7 +145,7 @@ startMonitoring(
     });
   }
 
-  // Monitor simplified path (for AI and system-posted comments)
+  // Monitor simplified path (for remote and local comments)
   if (simplifiedPath) {
     const simplifiedRef = firestore
       .collection(`${firestoreRoot}/${simplifiedPath}`)
@@ -229,8 +229,7 @@ Once manager monitors Firestore, remove the `useEffect` bridge:
 // DELETE THIS:
 // useEffect(() => {
 //   if (document?.commentsManager) {
-//     document.commentsManager.comments = allComments;
-//     void document.commentsManager.checkPendingComments();
+//     document?.commentsManager?.setComments(allComments);
 //   }
 // }, [document, allComments]);
 ```
@@ -402,7 +401,7 @@ export const ChatPanel: React.FC<IProps> = observer(({
 
   // Read directly from manager (MobX makes this reactive)
   const allComments = manager?.comments || [];
-  const isWaitingForAI = document?.content?.isAwaitingAIAnalysis;
+  const isWaitingForRemote = document?.content?.isAwaitingRemoteComment;
 
   // No hooks needed!
   // No useEffect needed!
@@ -410,7 +409,7 @@ export const ChatPanel: React.FC<IProps> = observer(({
 
   return (
     <div className="chat-panel">
-      {isWaitingForAI && <WaitingMessage />}
+      {isWaitingForRemote && <WaitingMessage />}
       {allComments.map(comment => (
         <CommentComponent key={comment.id} comment={comment} />
       ))}
