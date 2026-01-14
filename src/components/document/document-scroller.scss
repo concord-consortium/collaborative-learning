@@ -35,7 +35,7 @@ $footer-height: 12px;
 
           .scaled-list-item {
             height: 200%;
-            overflow: scroll;
+            pointer-events: auto; // Enables scrolling
             transform: scale(.5);
             width: 200%;
           }
