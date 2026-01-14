@@ -151,7 +151,17 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
       this.addImage(this.props.imageUrlToAdd);
       this.props.setImageUrlToAdd?.("");
     }
+
+    const prevOffsetX = this.offsetX;
+    const prevOffsetY = this.offsetY;
+    const prevZoom = this.zoom;
     this.calculateBounds();
+
+    // Force re-render if bounds calculation changed the transform values.
+    if (this.props.readOnly &&
+        (prevOffsetX !== this.offsetX || prevOffsetY !== this.offsetY || prevZoom !== this.zoom)) {
+      this.forceUpdate();
+    }
   }
 
   public componentWillUnmount() {

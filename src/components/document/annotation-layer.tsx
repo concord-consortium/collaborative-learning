@@ -4,6 +4,7 @@ import { observer } from "mobx-react";
 import React, { MouseEvent, MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 import useResizeObserver from "use-resize-observer";
 import { useMemoOne } from "use-memo-one";
+import { isEqual } from "lodash";
 import { AnnotationButton } from "../annotations/annotation-button";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { getDefaultPeak, getParentOffsets, getRowOffsets, getTileClientSize, getTileOffsets,
@@ -11,6 +12,7 @@ import { getDefaultPeak, getParentOffsets, getRowOffsets, getTileClientSize, get
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
+import { CanvasMethodsContext } from "./canvas-methods-context";
 import { useStores } from "../../hooks/use-stores";
 import { ArrowAnnotation, ArrowShape, isArrowShape } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, IOffsetModel, ObjectBoundingBox, OffsetModel
@@ -55,6 +57,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const divRef = useRef<Element|null>(null);
   const { ui, persistentUI } = useStores();
   const tileApiInterface = useContext(TileApiInterfaceContext);
+  const canvasMethods = useContext(CanvasMethodsContext);
   const hotKeys = useMemoOne(() => new HotKeys(), []);
   const shape: ArrowShape = isArrowShape(ui.annotationMode) ? ui.annotationMode : ArrowShape.curved;
 
@@ -217,15 +220,20 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   // Returns an object bounding box with respect to the containing tile
   function getObjectBoundingBox(tileId: string, objectId: string, objectType?: string) {
-    // First check the cache.
-    const cachedValue = boundingBoxCache.get(tileId)?.get(objectId);
-    if (cachedValue) {
-      return cachedValue;
-    }
     if (!isTileReady(tileId)) return undefined;
+
+    // Always get fresh value from tile API, which is reactive through MobX
     const tileApi = tileApiInterface?.getTileApi(tileId);
     const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);
-    return objectBoundingBox;
+
+    // Update cache with the fresh value
+    const cachedValue = boundingBoxCache.get(tileId)?.get(objectId);
+    if (!isEqual(cachedValue, objectBoundingBox)) {
+      canvasMethods?.cacheObjectBoundingBox(tileId, objectId, objectBoundingBox);
+    }
+
+    // Return from cache to maintain MobX reactivity
+    return boundingBoxCache.get(tileId)?.get(objectId);
   }
 
   // Returns an object bounding box with respect to the containing document
@@ -464,6 +472,11 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     if (!tile) return undefined;
 
     if (isDrawingContentModel(tile.content)) {
+      // Access objectsBoundingBox directly to establish MobX reactive dependency.
+      // This ensures the annotation layer re-renders when objects move.
+      const boundingBox = tile.content.objectsBoundingBox;
+      if (!boundingBox) return undefined;
+
       const tileApi = tileApiInterface?.getTileApi(tileId);
 
       // Get transform from the tile API.
