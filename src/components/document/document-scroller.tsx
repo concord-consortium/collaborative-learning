@@ -27,6 +27,8 @@ interface IProps {
 export const DocumentScroller: React.FC<IProps> = observer(function DocumentThumbnailCarousel(props: IProps) {
   const { documentGroup, nextDocumentsGroup, openDocumentKey, openGroupMetadata, previousDocumentsGroup } = props;
   const { documents, networkDocuments, persistentUI, sortedDocuments } = useStores();
+  const { getOrCreateTabState, thumbnailDisplay } = persistentUI;
+  const largeThumbnails = thumbnailDisplay === "Large";
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const documentListRef = useRef<HTMLDivElement>(null);
   const [scrollToLocation, setScrollToLocation] = useState(0);
@@ -35,7 +37,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
   const maxScrollTo = scrollWidth - panelWidth;
 
   const handleSelectDocument = async (document: DocumentModelType) => {
-    const tabState = persistentUI.getOrCreateTabState(ENavTab.kSortWork);
+    const tabState = getOrCreateTabState(ENavTab.kSortWork);
     if (!tabState.currentDocumentGroupId) {
       console.error("No currentDocumentGroupId found in persistentUI");
       return;
@@ -100,6 +102,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
     return () => obs?.disconnect();
   }, []);
 
+  const scrollerClasses = classNames("document-thumbnail-scroller", { "large-thumbnails": largeThumbnails });
   return (
     <>
       <DocumentScrollerHeader
@@ -109,8 +112,8 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
         openGroupMetadata={openGroupMetadata}
         previousDocumentsGroup={previousDocumentsGroup}
       />
-      <div ref={documentScrollerRef} className="document-thumbnail-scroller" data-testid="document-thumbnail-scroller">
-        {scrollToLocation > 0 &&
+      <div ref={documentScrollerRef} className={scrollerClasses} data-testid="document-thumbnail-scroller">
+        {!largeThumbnails && scrollToLocation > 0 &&
           <button className="scroll-arrow left" data-testid="scroll-arrow-left" onClick={handleScrollTo("left")}>
             <ScrollArrowIcon />
           </button>
@@ -120,7 +123,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
             renderThumbnail(doc.key)
           ))}
         </div>
-        {scrollToLocation < maxScrollTo &&
+        {!largeThumbnails && scrollToLocation < maxScrollTo &&
           <button className="scroll-arrow right" data-testid="scroll-arrow-right" onClick={handleScrollTo("right")}>
             <ScrollArrowIcon />
           </button>

@@ -8,6 +8,46 @@
   position: relative;
   width: 100%;
 
+  &.large-thumbnails {
+    border: solid 1.5px $classwork-purple;
+    height: calc(100% - $document-scroller-header-height);
+
+    .document-thumbnail-list {
+      flex-wrap: wrap;
+      height: 100%;
+      overflow: scroll;
+      width: 100%;
+
+      .document-thumbnail {
+        height: 199px;
+        width: 231px;
+      }
+
+      .list-item {
+        height: 100%;
+        width: 100%;
+
+        .scaled-list-item-container {
+          height: 163px;
+          width: 211px;
+
+          .scaled-list-item {
+            height: 326px;
+            overflow: scroll;
+            transform: scale(.5);
+            width: 422px;
+          }
+        }
+
+        .footer {
+          .info {
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
+
   .document-thumbnail-list {
     align-items: center;
     display: flex;
@@ -36,10 +76,8 @@
     }
 
     .list-item {
-      max-height: 126px;
-      min-height: 126px;
-      max-width: 96px;
-      min-width: 96px;
+      height: 126px;
+      width: 96px;
       overflow: visible;
       padding: 0;
 

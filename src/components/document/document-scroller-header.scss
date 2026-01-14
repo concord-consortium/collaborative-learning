@@ -1,11 +1,11 @@
 @import "../vars";
 
 .document-scroller-header {
+  align-items: center;
   background-color: $classwork-purple-light-5;
   border: solid 1.5px $classwork-purple;
-  border-top: none;
   border-bottom: none;
-  align-items: center;
+  border-top: none;
   display: flex;
   padding: 0px 8px;
   justify-content: space-between;
@@ -25,7 +25,7 @@
   .header-text {
     display: flex;
     gap: 5px;
-    height: 36px;
+    height: $document-scroller-header-height;
     align-items: center;
 
     .sort-type {
