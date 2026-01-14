@@ -8,13 +8,17 @@ import { DocumentModelType } from "../../models/document/document";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { ENavTab } from "../../models/view/nav-tabs";
+import { getPixelWidthFromCSSStyle } from "../../utilities/js-utils";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentScrollerHeader } from "./document-scroller-header";
 import { IOpenDocumentsGroupMetadata } from "./sorted-section";
 
 import ScrollArrowIcon from "../../assets/scroll-arrow-icon.svg";
 
+import styles from "../vars.scss";
 import "./document-scroller.scss";
+
+const documentThumbnailListPadding = getPixelWidthFromCSSStyle(styles.documentThumbnailListPadding) || 1;
 
 interface IProps {
   documentGroup?: DocumentGroup;
@@ -64,12 +68,20 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
     sortedDocuments.fetchFullDocument(docKey);
   };
 
+  // Subract an extra pixel to ensure both large thumbnails can fit in the width area
+  const largeThumbnailWidth = (panelWidth - (2 * documentThumbnailListPadding) - 1) / 2;
+  const thumbnailAspectRatio = 0.87; // height / width
+  const largeThumbnailHeight = largeThumbnailWidth * thumbnailAspectRatio;
+  const thumbnailStyle = largeThumbnails ? {
+    height: `${largeThumbnailHeight}px`,
+    width: `${largeThumbnailWidth}px`
+  } : undefined;
   const renderThumbnail = (docKey: string) => {
     const fullDocument = getDocument(docKey);
     const thumbnailClass = classNames("document-thumbnail", { selected: docKey === openDocumentKey });
     return (
       fullDocument &&
-        <div key={docKey} className={thumbnailClass} data-testid="document-thumbnail">
+        <div key={docKey} className={thumbnailClass} data-testid="document-thumbnail" style={thumbnailStyle}>
           <DecoratedDocumentThumbnailItem
             key={docKey}
             scale={0.1}

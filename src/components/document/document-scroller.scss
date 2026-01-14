@@ -1,5 +1,7 @@
 @import "../vars";
 
+$footer-height: 12px;
+
 .document-thumbnail-scroller {
   background: white;
   border: solid 1.5px $classwork-purple;
@@ -19,8 +21,8 @@
       width: 100%;
 
       .document-thumbnail {
-        height: 199px;
-        width: 231px;
+        height: 100%;
+        width: 100%;
       }
 
       .list-item {
@@ -28,14 +30,14 @@
         width: 100%;
 
         .scaled-list-item-container {
-          height: 163px;
-          width: 211px;
+          height: calc(100% - $footer-height);
+          width: 100%;
 
           .scaled-list-item {
-            height: 326px;
+            height: 200%;
             overflow: scroll;
             transform: scale(.5);
-            width: 422px;
+            width: 200%;
           }
         }
 
@@ -55,7 +57,7 @@
     left: 0;
     margin: 0;
     overflow: hidden;
-    padding: 3px;
+    padding: $document-thumbnail-list-padding;
     position: relative;
     top: 0;
 
@@ -106,6 +108,7 @@
 
       .footer {
         .info {
+          height: $footer-height;
           line-height: 1.2;
           margin-top: 4px;
           width: 96px;

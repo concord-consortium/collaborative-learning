@@ -4,6 +4,7 @@ export interface IVarsExports {
   toolbarButtonWidth: string;
   toolbarButtonMargin: string;
   toolbarDividerWidth: string;
+  documentThumbnailListPadding: string;
 }
 
 export const styles: IVarsExports;
