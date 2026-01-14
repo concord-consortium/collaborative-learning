@@ -76,13 +76,13 @@ export const DocumentScrollerHeader = observer(function DocumentScrollerHeader({
       <div className="left-group">
         <div className="thumbnail-display-buttons">
           <ThumbnailDisplayButton
-            className="left"
+            className="left small-thumbnails"
             Icon={SmallThumbnailsIcon}
             onClick={() => persistentUI.setThumbnailDisplay("Small")}
             selected={thumbnailDisplay === "Small"}
           />
           <ThumbnailDisplayButton
-            className="right"
+            className="right large-thumbnails"
             Icon={LargeThumbnailsIcon}
             onClick={() => persistentUI.setThumbnailDisplay("Large")}
             selected={thumbnailDisplay === "Large"}

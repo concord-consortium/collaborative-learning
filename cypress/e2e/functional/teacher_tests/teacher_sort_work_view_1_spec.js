@@ -63,6 +63,20 @@ describe('SortWorkView Tests', () => {
     cy.get('.header-text').should('not.contain.text', 'Group 1');
     cy.get('.header-text').should('contain.text', 'No Group');
 
+    cy.log('verify thumbnail view options work');
+    cy.get('.thumbnail-display-button.small-thumbnails.selected').should('exist');
+    cy.get('.thumbnail-display-button.large-thumbnails.selected').should('not.exist');
+    cy.get('.nav-tab-panel .full-screen-editable-document-content').should('exist');
+    cy.get('.document-thumbnail-scroller.large-thumbnails').should('not.exist');
+    cy.contains('Student 7: My First Learning Log').should('be.visible');
+    cy.get('.thumbnail-display-button.large-thumbnails').click();
+    cy.get('.thumbnail-display-button.small-thumbnails.selected').should('not.exist');
+    cy.get('.thumbnail-display-button.large-thumbnails.selected').should('exist');
+    cy.get('.nav-tab-panel .full-screen-editable-document-content').should('not.exist');
+    cy.get('.document-thumbnail-scroller.large-thumbnails').should('exist');
+    cy.contains('Student 7: My First Learning Log').should('not.be.visible');
+    cy.get('.thumbnail-display-button.small-thumbnails').click();
+
     cy.log('verify document scroller is visible, populated, and functions');
     let prevFocusDocKey = "";
     let selectedDocIndex = 0;
