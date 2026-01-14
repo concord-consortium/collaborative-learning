@@ -7,9 +7,9 @@ TODO: Support more tile types.
 
 import {
   AiSummarizerOptions, DocumentContentSnapshotType, INormalizedTile, NormalizedDataSet,
-  NormalizedModel, NormalizedSection, TileMap
+  NormalizedModel, NormalizedSection, NormalizedVariable, TileMap
 } from "./ai-summarizer-types";
-import { heading, pluralize } from "./ai-summarizer-utils";
+import { generateMarkdownTable, generateVariablesMarkdownTable, heading, pluralize } from "./ai-summarizer-utils";
 import { rowsSummary, tileSummary } from "./ai-tile-summarizer";
 
 /** Return the markdown summary of the given Document content.
@@ -95,6 +95,7 @@ export function parseContent(content: string): DocumentContentSnapshotType {
 export function normalize(model: DocumentContentSnapshotType) {
   const sections: NormalizedSection[] = [];
   const dataSets: NormalizedDataSet[] = [];
+  const variables: NormalizedVariable[] = [];
   const { rowOrder, rowMap, tileMap, sharedModelMap } = model || {};
 
   const addSection = (sectionId?: string): NormalizedSection => {
@@ -192,6 +193,16 @@ export function normalize(model: DocumentContentSnapshotType) {
             });
           });
         }
+      } else if (sharedModel?.type === "SharedVariables") {
+        sharedModel.variables.forEach((v: any) => (variables.push({
+          description: v.description,
+          displayName: v.displayName,
+          expression: v.expression,
+          id: v.id,
+          name: v.name,
+          unit: v.unit,
+          value: v.value
+        })));
       }
     }
   }
@@ -201,17 +212,19 @@ export function normalize(model: DocumentContentSnapshotType) {
     normalizedModel: {
       sections,
       dataSets,
+      variables,
     },
     tileMap: tileMap as TileMap | undefined,
   };
 }
 
 export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | undefined, options: AiSummarizerOptions): string {
-  const { sections, dataSets } = normalizedModel;
+  const { sections, dataSets, variables } = normalizedModel;
   if (sections.length === 0) {
     return documentSummary(
       options.minimal ? "" : "This is an empty CLUE document with no content.",
       dataSets,
+      variables,
       "",
       options,
       1
@@ -224,6 +237,7 @@ export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | u
     return documentSummary(
       options.minimal ? "" : "The CLUE document consists of one or more rows, with one or more tiles within each row.",
       dataSets,
+      variables,
       rowsSummary({
         dataSets,
         rows: sections[0].rows,
@@ -240,13 +254,14 @@ export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | u
   return documentSummary(
     options.minimal ? "" : "The CLUE document consists of one or more sections containing one or more rows, with one or more tiles within each row.",
     dataSets,
+    variables,
     sectionsSummary({normalizedModel, tileMap, options, headingLevel: 2}),
     options,
     1
   );
 }
 
-export function documentSummary(preamble: string, dataSets: NormalizedDataSet[], summary: string = "", options: AiSummarizerOptions, headingLevel: number = 1): string {
+export function documentSummary(preamble: string, dataSets: NormalizedDataSet[], variables: NormalizedVariable[], summary: string = "", options: AiSummarizerOptions, headingLevel: number = 1): string {
   const maybeTileInfo = summary.length > 0
     ? " Tiles are either static UI elements or interactive elements " +
       "that students can use."
@@ -271,19 +286,21 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
           `${generateMarkdownTable(dataSet.attributes.map(a => a.name), dataSet.data)}\n`;
       }).join("\n\n")
     : "";
+  const variablsSummary = summary.length > 0 && variables.length > 0
+    ? `\n${heading(headingLevel + 1, "Shared Variables")}` +
+      `The document contains ${variables.length} ${pluralize(variables.length, "variable", "variables")}:\n\n` +
+      `${generateVariablesMarkdownTable(variables)}\n\n`
+    : "";
 
-  if (options.minimal) {
-    return heading(headingLevel, "CLUE Document Summary") +
-      `${summary}\n` +
-      `${dataSetSummary}`;
-  } else {
-    return (
-      heading(headingLevel, "CLUE Document Summary") +
-      `${layoutInfo}${preamble}${maybeTileInfo}${maybeDataSetInfo}\n\n` +
-      `${summary}\n` +
-      `${dataSetSummary}\n`
-    );
-  }
+  const extra = options.minimal ? "" : `${layoutInfo}${preamble}${maybeTileInfo}${maybeDataSetInfo}\n\n`;
+  return (
+    heading(headingLevel, "CLUE Document Summary") +
+    extra +
+    summary + "\n" +
+    dataSetSummary + "\n" +
+    variablsSummary + "\n" +
+    heading(headingLevel, "End of CLUE Document Summary")
+  );
 }
 
 interface SectionsSummaryParams {
@@ -306,26 +323,6 @@ export function sectionsSummary({normalizedModel, tileMap, options, headingLevel
       });
   });
   return summaries.join("\n\n");
-}
-
-function generateMarkdownTable(headers: string[], rows: string[][]): string {
-  if (headers.length === 0) {
-    return "";
-  }
-
-  const escapePipe = (stringOrNumber: string | number) => String(stringOrNumber).replace(/\|/g, "\\|");
-  const headerRow = `| ${headers.map(escapePipe).join(" | ")} |`;
-  const separatorRow = `| ${headers.map(() => "---").join(" | ")} |`;
-
-  const dataRows = rows.map(row => {
-    const paddedRow = [...row];
-    while (paddedRow.length < headers.length) {
-      paddedRow.push("");
-    }
-    return `| ${paddedRow.map(escapePipe).join(" | ")} |`;
-  });
-
-  return [headerRow, separatorRow, ...dataRows].join("\n");
 }
 
 /* eslint-enable max-len */

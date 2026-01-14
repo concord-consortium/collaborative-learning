@@ -2,6 +2,7 @@ import { reaction } from "mobx";
 import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-tree";
 import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 
+import { kPotentiometerServoKey } from "../../../../shared/simulations/potentiometer-servo/potentiometer-servo";
 import { withoutUndo } from "../../../models/history/without-undo";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
@@ -14,7 +15,6 @@ import { defaultSimulationKey, simulations } from "../simulations/simulations";
 import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
-import { kPotentiometerServoKey } from "../simulations/potentiometer-servo/potentiometer-servo";
 import { getMiniNodesDisplayData } from "../simulations/potentiometer-servo/chip-sim-utils";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
