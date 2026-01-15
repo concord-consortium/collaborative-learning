@@ -220,20 +220,16 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   // Returns an object bounding box with respect to the containing tile
   function getObjectBoundingBox(tileId: string, objectId: string, objectType?: string) {
+    // First check the cache.
+    const cachedValue = boundingBoxCache.get(tileId)?.get(objectId);
+    if (cachedValue) {
+      return cachedValue;
+    }
     if (!isTileReady(tileId)) return undefined;
 
-    // Always get fresh value from tile API, which is reactive through MobX
     const tileApi = tileApiInterface?.getTileApi(tileId);
     const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);
-
-    // Update cache with the fresh value
-    const cachedValue = boundingBoxCache.get(tileId)?.get(objectId);
-    if (!isEqual(cachedValue, objectBoundingBox)) {
-      canvasMethods?.cacheObjectBoundingBox(tileId, objectId, objectBoundingBox);
-    }
-
-    // Return from cache to maintain MobX reactivity
-    return boundingBoxCache.get(tileId)?.get(objectId);
+    return objectBoundingBox;
   }
 
   // Returns an object bounding box with respect to the containing document
