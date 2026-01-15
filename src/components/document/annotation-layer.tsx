@@ -11,7 +11,6 @@ import { getDefaultPeak, getParentOffsets, getRowOffsets, getTileClientSize, get
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
-import { CanvasMethodsContext } from "./canvas-methods-context";
 import { useStores } from "../../hooks/use-stores";
 import { ArrowAnnotation, ArrowShape, isArrowShape } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, IOffsetModel, ObjectBoundingBox, OffsetModel
