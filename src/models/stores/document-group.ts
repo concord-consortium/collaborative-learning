@@ -2,10 +2,12 @@ import { FC, SVGProps } from "react";
 import { makeAutoObservable } from "mobx";
 import {
   createDocMapByBookmarks,
+  createDocMapByDates,
   createDocMapByGroups,
   createDocMapByNames,
   createTileTypeToDocumentsMap,
   getTagsWithDocs,
+  sortDateSectionLabels,
   sortGroupSectionLabels,
   sortNameSectionLabels
 } from "../../utilities/sort-document-utils";
@@ -132,6 +134,8 @@ export class DocumentGroup {
 
   sortBy(sortType: SecondarySortType): DocumentGroup[] {
     switch (sortType) {
+      case "Date":
+        return this.byDate;
       case "Group":
         return this.byGroup;
       case "Name":
@@ -145,6 +149,16 @@ export class DocumentGroup {
       default:
         return [];
     }
+  }
+
+  get byDate(): DocumentGroup[] {
+    const docMapWithDates = createDocMapByDates(this.documents);
+    const sortedSectionLabels = sortDateSectionLabels(Array.from(docMapWithDates.keys()), docMapWithDates);
+    const docMap = new Map<string, IDocumentMetadataModel[]>();
+    docMapWithDates.forEach((value, key) => {
+      docMap.set(key, value.documents);
+    });
+    return this.buildDocumentCollection({sortedSectionLabels, sortType: "Date", docMap});
   }
 
   get byGroup(): DocumentGroup[] {
