@@ -1,7 +1,7 @@
 import { isObservable, runInAction } from "mobx";
 import { kAnalyzerUserParams } from "../../../shared/shared";
 import { DocumentModel, DocumentModelType } from "./document";
-import { CommentWithId, DocumentCommentsManager, IPendingLocalComment } from "./document-comments-manager";
+import { CommentWithId, DocumentCommentsManager } from "./document-comments-manager";
 import { ProblemDocument } from "./document-types";
 
 jest.mock("firebase/app", () => ({
@@ -62,7 +62,7 @@ describe("DocumentCommentsManager", () => {
   });
 
   describe("queueComment", () => {
-    it("should add comment to pending queue", () => {
+    it("should add comment to pending queue and process immediately", async () => {
       const postFunction = jest.fn().mockResolvedValue({ id: "comment1" });
 
       manager.queueComment({
@@ -76,18 +76,21 @@ describe("DocumentCommentsManager", () => {
         postFunction
       });
 
-      expect(manager.pendingComments).toHaveLength(1);
-      expect(manager.pendingComments[0].postingType).toBe("local");
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(postFunction).toHaveBeenCalled();
+      expect(manager.pendingComments).toHaveLength(0);
     });
 
-    it("should store all comment data", () => {
-      const postFunction = jest.fn().mockResolvedValue({ id: "comment1" });
+    it("should store all comment data and pass to postFunction", async () => {
       const comment = {
         content: "Test comment",
         linkedDocumentKey: "doc123"
       };
       const context = { classHash: "class1", appMode: "test" };
       const document = { uid: "user1", type: "problem", key: "doc1" };
+      const postFunction = jest.fn().mockResolvedValue({ id: "comment1" });
 
       manager.queueComment({
         comment,
@@ -97,12 +100,15 @@ describe("DocumentCommentsManager", () => {
         postFunction
       });
 
-      const pending = manager.pendingComments[0] as IPendingLocalComment;
-      expect(pending.comment).toEqual(comment);
-      expect(pending.context).toEqual(context);
-      expect(pending.document).toEqual(document);
-      expect(pending.postFunction).toBeDefined();
-      expect(typeof pending.postFunction).toBe("function");
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(postFunction).toHaveBeenCalledWith({
+        comment,
+        context,
+        document
+      });
+      expect(manager.pendingComments).toHaveLength(0);
     });
 
     it("should generate unique IDs for pending local comments", () => {
@@ -194,6 +200,8 @@ describe("DocumentCommentsManager", () => {
         postFunction: postEx1
       });
 
+      await new Promise(resolve => setTimeout(resolve, 10));
+
       manager.queueComment({
         comment: { content: "Exemplar 2", linkedDocumentKey: "ex2" },
         context: { classHash: "class1", appMode: "test" },
@@ -202,8 +210,11 @@ describe("DocumentCommentsManager", () => {
         postFunction: postEx2
       });
 
-      await manager.checkPendingComments();
+      await new Promise(resolve => setTimeout(resolve, 10));
 
+      // Verify both functions were called and in the correct order
+      expect(postEx1).toHaveBeenCalled();
+      expect(postEx2).toHaveBeenCalled();
       expect(postEx1.mock.invocationCallOrder[0]).toBeLessThan(postEx2.mock.invocationCallOrder[0]);
       expect(manager.pendingComments).toHaveLength(0);
     });

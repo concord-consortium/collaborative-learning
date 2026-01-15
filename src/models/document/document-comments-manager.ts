@@ -148,6 +148,7 @@ export class DocumentCommentsManager {
     };
 
     this.pendingComments.push(pending);
+    this.checkPendingComments();
   }
 
   dispose() {
