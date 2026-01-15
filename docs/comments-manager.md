@@ -155,7 +155,7 @@ async checkPendingComments() {
 
   // First pass: identify what to remove and what to post
   for (const pending of this.pendingComments) {
-    if (pending.type === REMOTE_COMMENT) {
+    if (pending.postingType === REMOTE_COMMENT) {
       if (pending.checkCompleted(this.comments)) {
         toRemove.push(pending.id); // AI analysis complete!
       }
