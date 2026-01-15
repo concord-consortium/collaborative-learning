@@ -28,6 +28,7 @@ import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
 import { kClosedObjectListPanelWidth, kOpenObjectListPanelWidth } from "../model/drawing-types";
 import { userSelectTile } from "../../../models/stores/ui";
 import { useContainerContext } from "../../../components/document/container-context";
+import { calculateFitContent } from "../model/drawing-utils";
 
 import "./drawing-tile.scss";
 
@@ -62,19 +63,61 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     if (!readOnly) {
       contentRef.current.reset();
     }
+
     onRegisterTileApi({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return contentRef.current.exportJson(options);
       },
+      getViewTransform: () => {
+        // For read-only instances, calculate the fit-to-view transform.
+        if (readOnly) {
+          const canvasSize = getVisibleCanvasSize();
+          const contentBoundingBox = contentRef.current.objectsBoundingBox;
+          if (canvasSize && contentBoundingBox) {
+            const fitResult = calculateFitContent({
+              canvasSize,
+              contentBoundingBox,
+              minZoom: 0.1,
+              maxZoom: 1
+            });
+            return {
+              offsetX: fitResult.offsetX,
+              offsetY: fitResult.offsetY,
+              zoom: fitResult.zoom
+            };
+          }
+        }
+
+        return undefined;
+      },
       getObjectBoundingBox(objectId, objectType): ObjectBoundingBox | undefined {
         const bbPadding = 5;
         const bb = contentRef.current.getObjectBoundingBox(objectId);
-        const zoom = contentRef.current.zoom;
+
         if (bb) {
-          const height = (bb.se.y - bb.nw.y + bbPadding * 2) * zoom;
-          const width = (bb.se.x - bb.nw.x + bbPadding * 2) * zoom;
-          const left = (bb.nw.x - bbPadding) * zoom + getObjectListPanelWidth();
-          const top = (bb.nw.y - bbPadding) * zoom;
+          const baseHeight = bb.se.y - bb.nw.y + bbPadding * 2;
+          const baseWidth = bb.se.x - bb.nw.x + bbPadding * 2;
+          const baseLeft = bb.nw.x - bbPadding;
+          const baseTop = bb.nw.y - bbPadding;
+
+          let height, width, left, top;
+
+          if (readOnly) {
+            // Since read-only tiles are always fit-to-view, return untransformed coordinates.
+            height = baseHeight;
+            width = baseWidth;
+            left = baseLeft;
+            top = baseTop;
+          } else {
+            const zoom = contentRef.current.zoom;
+            const offsetX = contentRef.current.offsetX;
+            const offsetY = contentRef.current.offsetY;
+            height = baseHeight * zoom;
+            width = baseWidth * zoom;
+            left = baseLeft * zoom + offsetX + getObjectListPanelWidth();
+            top = baseTop * zoom + offsetY;
+          }
+
           return { height, left, top, width };
         }
         return undefined;
@@ -191,6 +234,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   };
 
   const getObjectListPanelWidth = () => {
+    if (readOnly) return 0;
     return contentRef.current.listViewOpen ? kOpenObjectListPanelWidth : kClosedObjectListPanelWidth;
   };
 
