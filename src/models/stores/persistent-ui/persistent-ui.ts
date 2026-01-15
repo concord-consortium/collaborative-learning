@@ -35,6 +35,7 @@ export const PersistentUIModelV2 = types
     docFilter: types.optional(DocFilterTypeEnum, "Problem"),
     primarySortBy: types.optional(types.string, "Group"),
     secondarySortBy: types.optional(types.string, "None"),
+    thumbnailDisplay: types.optional(types.string, "Small"),
     showAnnotations: true,
     showTeacherContent: true,
     showChatPanel: false,
@@ -214,6 +215,9 @@ export const PersistentUIModelV2 = types
     setSecondarySortBy(sort: string) {
       self.secondarySortBy = sort;
     },
+    setThumbnailDisplay(display: string) {
+      self.thumbnailDisplay = display;
+    }
   }))
   .actions(self => ({
     /**
