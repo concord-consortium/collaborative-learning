@@ -1,10 +1,9 @@
 import React, { useRef } from "react";
 
+import { stepDuration, terrariumValues } from "../../../../../shared/simulations/terrarium/terrarium";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
-import {
-  iconUrl, kFanKey, kHeatLampKey, kHumidifierKey, kHumidityKey, kTemperatureKey
-} from "../../../shared-assets/icons/icon-utilities";
+import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
 
 import display from "./assets/display/display.png";
 import jarForeground from "./assets/jar_foreground/jar_foreground.png";
@@ -14,22 +13,23 @@ import { condensationFrames, fanFrames, geckoFrames, humidifierFrames, jarBackgr
 
 import "./terrarium.scss";
 
-export const kTerrariumKey = "terrarium";
+// Variable names
+const temperatureKey = terrariumValues.temperatureKey.value;
+const rawTemperatureKey = terrariumValues.rawTemperatureKey.value;
+const fanKey = terrariumValues.fanKey.value;
+const heatLampKey = terrariumValues.heatLampKey.value;
+const humidifierKey = terrariumValues.humidifierKey.value;
+const humidityKey = terrariumValues.humidityKey.value;
 
-const kRawTemperatureKey = "raw_temperature_key";
+// Constants
 const tickDuration = 100; // This sim "ticks" more often than it "steps" to make the animation more smooth
-const stepDuration = 1000;
 const ticksPerStep = stepDuration / tickDuration;
-const minHumidity = 0;
-const startHumidity = 20;
-const maxHumidity = 90;
-const minTemperature = 21;
-const maxTemperature = 27;
-const baseHumidityImpactPerStep = -10 / 600000 * stepDuration; // -10%/10 minutes
-const fanHumidityImpactPerStep = -5 / 60000 * stepDuration; // -5%/minute
-const fanTemperatureImpactPerStep = -1 / 60000 * stepDuration; // -1 degree/minute
-const heatLampTemperatureImpactPerStep = 1 / 60000 * stepDuration; // +1 degree/minute
-const humidifierHumidityImpactPerStep = 15 / 60000 * stepDuration; // +15%/minute
+const minHumidity = terrariumValues.minHumidity.value;
+const startHumidity = terrariumValues.startHumidity.value;
+const maxHumidity = terrariumValues.maxHumidity.value;
+const minTemperature = terrariumValues.minTemperature.value;
+const maxTemperature = terrariumValues.maxTemperature.value;
+const baseHumidityImpactPerStep = terrariumValues.baseHumidityImpactPerStep.value;
 
 function TerrariumComponent({ frame, variables }: ISimulationProps) {
   const humidifierFrameRef = useRef(0);
@@ -37,12 +37,12 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
   const geckoDirectionRef = useRef(1);
 
   // Determine temperature reading
-  const temperatureVariable = findVariable(kTemperatureKey, variables);
+  const temperatureVariable = findVariable(temperatureKey, variables);
   const temperatureValue = temperatureVariable?.currentValue ?? 0;
   const temperatureDisplay = `${Math.round(temperatureValue)}°C`;
 
   // Determine humidity reading
-  const humidityVariable = findVariable(kHumidityKey, variables);
+  const humidityVariable = findVariable(humidityKey, variables);
   const humidityValue = humidityVariable?.currentValue ?? startHumidity;
   const humidityDisplay = `${Math.round(humidityValue)}%`;
 
@@ -55,10 +55,15 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
   const maxBlur = 1.25;
   const condensationStyle = { filter: `blur(${humidityPercent * maxBlur}px)`};
 
-  // Update gecko if humidity percent is 20% or more and temperature is 25°C or less
-  if (humidityValue >= 20 && temperatureValue <= 25) {
+  // Update gecko if the humidity and temperature are within range
+  if (
+    humidityValue >= terrariumValues.minGeckoHumidity.value &&
+    temperatureValue <= terrariumValues.maxGeckoTemperature.value
+  ) {
     geckoFrameRef.current = geckoFrameRef.current + geckoDirectionRef.current;
   }
+
+  // Turn the gecko around if it's at the end of the frames
   if (geckoFrameRef.current >= geckoFrames.length) {
     geckoFrameRef.current = geckoFrames.length - 1;
     geckoDirectionRef.current = -1;
@@ -68,7 +73,7 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
   }
 
   // Update humidifier
-  const humidifierVariable = findVariable(kHumidifierKey, variables);
+  const humidifierVariable = findVariable(humidifierKey, variables);
   const humidifierOn = !!humidifierVariable?.currentValue;
   // Continue the animation if we've already started
   if (humidifierFrameRef.current > 0) {
@@ -78,10 +83,10 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
     humidifierFrameRef.current++;
   }
 
-  const fanVariable = findVariable(kFanKey, variables);
+  const fanVariable = findVariable(fanKey, variables);
   const fanOn = !!fanVariable?.currentValue;
 
-  const heatLampVariable = findVariable(kHeatLampKey, variables);
+  const heatLampVariable = findVariable(heatLampKey, variables);
   const heatLampOn = !!heatLampVariable?.currentValue;
   return (
     <div className="terrarium-component">
@@ -114,22 +119,22 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
 function step({ frame, variables }: ISimulationProps) {
   if (frame % ticksPerStep !== 0) return; // Don't actually step every tick.
 
-  const rawTemperatureVariable = findVariable(kRawTemperatureKey, variables);
-  const humidifierVariable = findVariable(kHumidifierKey, variables);
-  const fanVariable = findVariable(kFanKey, variables);
-  const heatLampVariable = findVariable(kHeatLampKey, variables);
-  const humidityVariable = findVariable(kHumidityKey, variables);
-  const temperatureVariable = findVariable(kTemperatureKey, variables);
+  const rawTemperatureVariable = findVariable(rawTemperatureKey, variables);
+  const humidifierVariable = findVariable(humidifierKey, variables);
+  const fanVariable = findVariable(fanKey, variables);
+  const heatLampVariable = findVariable(heatLampKey, variables);
+  const humidityVariable = findVariable(humidityKey, variables);
+  const temperatureVariable = findVariable(temperatureKey, variables);
 
   const fanOn = !!fanVariable?.value;
-  const fanHumidityImpact = fanOn ? fanHumidityImpactPerStep : 0;
-  const fanTemperatureImpact = fanOn ? fanTemperatureImpactPerStep : 0;
+  const fanHumidityImpact = fanOn ? terrariumValues.fanHumidityImpactPerStep.value : 0;
+  const fanTemperatureImpact = fanOn ? terrariumValues.fanTemperatureImpactPerStep.value : 0;
 
   const heatLampOn = !!heatLampVariable?.value;
-  const heatLampTemperatureImpact = heatLampOn ? heatLampTemperatureImpactPerStep : 0;
+  const heatLampTemperatureImpact = heatLampOn ? terrariumValues.heatLampTemperatureImpactPerStep.value : 0;
 
   const humidifierOn = !!humidifierVariable?.value;
-  const humidifierHumidityImpact = humidifierOn ? humidifierHumidityImpactPerStep : 0;
+  const humidifierHumidityImpact = humidifierOn ? terrariumValues.humidifierHumidityImpactPerStep.value : 0;
 
   if (humidityVariable?.value !== undefined) {
     const humidity = Math.min(maxHumidity, Math.max(minHumidity,
@@ -155,43 +160,43 @@ export const terrariumSimulation: ISimulation = {
     {
       displayName: "Temperature",
       labels: ["input", "sensor:temperature"],
-      icon: iconUrl(kTemperatureKey),
-      name: kTemperatureKey,
+      icon: iconUrl(temperatureKey),
+      name: temperatureKey,
       value: minTemperature,
       unit: "°C"
     },
     {
       displayName: "Humidity",
       labels: ["input", "sensor:humidity"],
-      icon: iconUrl(kHumidityKey),
-      name: kHumidityKey,
+      icon: iconUrl(humidityKey),
+      name: humidityKey,
       value: startHumidity,
       unit: "%"
     },
     {
       displayName: "Raw Temperature",
-      name: kRawTemperatureKey,
+      name: rawTemperatureKey,
       value: minTemperature
     },
     {
       displayName: "Fan",
       labels: ["output", "live-output:Fan", "decimalPlaces:0"],
-      icon: iconUrl(kFanKey),
-      name: kFanKey,
+      icon: iconUrl(fanKey),
+      name: fanKey,
       value: 0
     },
     {
       displayName: "Heat Lamp",
       labels: ["output", "live-output:Heat Lamp", "decimalPlaces:0"],
-      icon: iconUrl(kHeatLampKey),
-      name: kHeatLampKey,
+      icon: iconUrl(heatLampKey),
+      name: heatLampKey,
       value: 0
     },
     {
       displayName: "Humidifier",
       labels: ["output", "live-output:Humidifier", "decimalPlaces:0"],
-      icon: iconUrl(kHumidifierKey),
-      name: kHumidifierKey,
+      icon: iconUrl(humidifierKey),
+      name: humidifierKey,
       value: 0
     },
   ],

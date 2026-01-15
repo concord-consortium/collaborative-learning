@@ -10,7 +10,7 @@ import { DocumentGroupComponent } from "./document-group";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { ENavTab } from "../../models/view/nav-tabs";
-import { IDocumentMetadataModel } from "../../models/stores/sorted-documents";
+import { IDocumentMetadataModel } from "../../models/document/document-metadata-model";
 import { LogEventName } from "../../lib/logger-types";
 import { Logger } from "../../lib/logger";
 

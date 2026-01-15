@@ -2,7 +2,7 @@ import { IDocumentMetadata } from "../../../shared/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
 import { SectionModelType } from "../curriculum/section";
-import { IDocumentMetadataModel } from "../stores/sorted-documents";
+import { IDocumentMetadataModel } from "./document-metadata-model";
 import { DocumentModelType } from "./document";
 import { setTargetDocumentProperties } from "./log-document-event";
 

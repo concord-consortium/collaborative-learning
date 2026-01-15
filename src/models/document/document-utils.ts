@@ -8,7 +8,7 @@ import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
 import { isExemplarType, isPlanningType, isProblemType, isPublishedType, isSupportType } from "./document-types";
-import { IDocumentMetadataModel } from "../stores/sorted-documents";
+import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { getLocalTimeStamp } from "../../utilities/time";
 
 function getProblemFromDoc(unit: UnitModelType, document: DocumentModelType | IDocumentMetadataModel) {

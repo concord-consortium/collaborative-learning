@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { SimpleDocumentItem } from "../thumbnail/simple-document-item";
 import { DocumentGroup } from "../../models/stores/document-group";
-import { IDocumentMetadataModel } from "../../models/stores/sorted-documents";
+import { IDocumentMetadataModel } from "../../models/document/document-metadata-model";
 
 import ScrollArrowIcon from "../../assets/workspace-instance-scroll.svg";
 

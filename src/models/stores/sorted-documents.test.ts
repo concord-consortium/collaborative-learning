@@ -160,7 +160,7 @@ describe('Sorted Documents Model', () => {
 
   describe('byGroup Function', () => {
     it('should correctly sort documents by group', () => {
-      const sortedDocsByGroup = sortedDocuments.byGroup;
+      const sortedDocsByGroup = sortedDocuments.sortBy("Group");
       expect(sortedDocsByGroup.length).toBe(3);
       const group3 = sortedDocsByGroup.find(group => group.label === 'Group 3');
       expect(group3?.documents.length).toBe(2); // Group 3 - Kirk + Scott
@@ -172,7 +172,7 @@ describe('Sorted Documents Model', () => {
 
     it('should sort the groups numerically from least to greatest', () => {
       //Verify "Group 3" comes before "Group 5" and before "Group 9"
-      const sortedSectionLabels = sortedDocuments.byGroup.map(group => group.label);
+      const sortedSectionLabels = sortedDocuments.sortBy("Group").map(group => group.label);
       expect(sortedSectionLabels).toEqual(['Group 3', 'Group 5', 'Group 9']);
     });
   });
@@ -185,7 +185,7 @@ describe('Sorted Documents Model', () => {
         "Cytacki, Scott",
         "Swenson, Kirk"
       ];
-      const sortedDocsByName = sortedDocuments.byName;
+      const sortedDocsByName = sortedDocuments.sortBy("Name");
       const actualOrder = sortedDocsByName.map(group => group.label);
       expect(actualOrder).toEqual(expectedOrder);
     });
@@ -193,7 +193,7 @@ describe('Sorted Documents Model', () => {
 
   describe('byTools Function', () => {
     it('should correctly sort documents by tool', () => {
-      const sortedDocsByTools = sortedDocuments.byTools;
+      const sortedDocsByTools = sortedDocuments.sortBy("Tools");
       const summaryOfResult = sortedDocsByTools.map(section => ({
         sectionLabel: section.label,
         docKeys: section.documents.map(doc => doc.key)
