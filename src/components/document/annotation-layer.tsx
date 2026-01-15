@@ -4,7 +4,6 @@ import { observer } from "mobx-react";
 import React, { MouseEvent, MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 import useResizeObserver from "use-resize-observer";
 import { useMemoOne } from "use-memo-one";
-import { isEqual } from "lodash";
 import { AnnotationButton } from "../annotations/annotation-button";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { getDefaultPeak, getParentOffsets, getRowOffsets, getTileClientSize, getTileOffsets,
@@ -57,7 +56,6 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const divRef = useRef<Element|null>(null);
   const { ui, persistentUI } = useStores();
   const tileApiInterface = useContext(TileApiInterfaceContext);
-  const canvasMethods = useContext(CanvasMethodsContext);
   const hotKeys = useMemoOne(() => new HotKeys(), []);
   const shape: ArrowShape = isArrowShape(ui.annotationMode) ? ui.annotationMode : ArrowShape.curved;
 
