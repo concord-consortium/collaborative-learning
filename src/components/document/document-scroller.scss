@@ -33,6 +33,8 @@ $footer-height: 12px;
           height: calc(100% - $footer-height);
           width: 100%;
 
+          // Scaled items are rendered at a large size, then shrunk to fit the actual area, which makes them the
+          // correct size and scale.
           .scaled-list-item {
             height: 200%;
             pointer-events: auto; // Enables scrolling
