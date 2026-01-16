@@ -88,7 +88,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const selectAdjacentPoint = useCallback((direction: 'next' | 'prev') => {
     const points = content.pointsArr.slice().sort((a, b) => a.xValue - b.xValue);
     if (points.length === 0) return;
-    
+
     const selectedPointId = Object.keys(content.selectedPoints)[0];
     if (!selectedPointId) {
       // No point selected, select first or last based on direction
@@ -97,7 +97,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       setSelectedPointId(pointToSelect.id);
     } else {
       const currentIndex = points.findIndex(p => p.id === selectedPointId);
-      const newIndex = direction === 'next' 
+      const newIndex = direction === 'next'
         ? Math.min(currentIndex + 1, points.length - 1)
         : Math.max(currentIndex - 1, 0);
       const pointToSelect = points[newIndex];
@@ -335,7 +335,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       const tickValue = content.min + (position * range);
       tickValues.push(tickValue);
     }
-    
+
     // Always include 0 if it's within range and not already in the tick values
     const zeroIsInRange = content.min < 0 && content.max > 0;
     const zeroAlreadyIncluded = tickValues.some(v => Math.abs(v) < 0.0001);
@@ -343,7 +343,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       tickValues.push(0);
       tickValues.sort((a, b) => a - b);
     }
-    
+
     return tickValues;
   };
 
@@ -536,7 +536,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       // Only one point can be selected at a time
       const selectedPointId = Object.keys(content.selectedPoints)[0];
       const selectedPoint = selectedPointId ? content.getPoint(selectedPointId) : undefined;
-      
+
       // Remove existing label and line
       svg.selectAll('.point-value-label-group').remove();
       svg.selectAll('.point-value-label-line').remove();
@@ -573,7 +573,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         // Add vertical line from point to label (added last to be on top)
         const lineY1 = yMidPoint - innerPointRadius; // Top edge of inner point circle
         const lineY2 = y + kValueLabelHeight; // Bottom edge of label
-        
+
         svg.append("line")
           .attr("class", "point-value-label-line")
           .attr("x1", x)

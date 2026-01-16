@@ -52,7 +52,7 @@ context('Numberline Tile', function () {
     cy.get(".numberline-tool-container .zero-tick").should("exist");
     // Zero should not have a label since it's not part of regular tick spacing
     numberlineToolTile.getAllNumberlineTicks().should('not.contain', '0');
-    
+
     cy.log('will show zero label when zero is part of regular tick spacing');
     // Set symmetric range where 0 falls on regular spacing
     numberlineToolTile.setMinValue(-5);
