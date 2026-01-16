@@ -135,14 +135,21 @@ export class SerialDevice {
   public handleArduinoStreamObj(value: string, channels: Array<NodeChannelInfo>){
     this.localBuffer += value;
 
-    const pattern = /(emg|fsr|a1|tmp):([0-9.]+)[\r][\n]/g;
-    let match: RegExpExecArray | null;
+    // Match any alphanumeric channel name, not just known ones,
+    // so unknown channels are still consumed from the buffer.
+    // No 'g' flag since we always search from the start of the modified buffer.
+    // Note this pattern doesn't handle NaN or negative numbers.
+    // We are seeing at least some NAN values from the Arduino. This currently
+    // get ignored correctly, by the corrupted data fallback.
+    const pattern = /([a-z0-9]+):([0-9.]+)[\r][\n]/;
 
-    do {
-      match = pattern.exec(this.localBuffer);
-      if (!match) break;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const match = pattern.exec(this.localBuffer);
 
+      if (match) {
       const [fullMatch, channel, numStr] = match;
+        // console.log("serial match", fullMatch);
       this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
 
       const targetChannel = channels.find((c: NodeChannelInfo) => {
@@ -152,7 +159,20 @@ export class SerialDevice {
       if (targetChannel){
         targetChannel.value = Math.round(Number(numStr));
       }
-    } while (match);
+      } else {
+        // No valid pattern found - check for corrupted data we can discard
+        const lineEndIndex = this.localBuffer.indexOf("\r\n");
+        if (lineEndIndex !== -1) {
+          // console.log("serial miss", this.localBuffer.substring(0, lineEndIndex));
+
+          // Discard everything up to and including the \r\n to recover
+          this.localBuffer = this.localBuffer.substring(lineEndIndex + 2);
+        } else {
+          // No complete line to discard, wait for more data
+          break;
+        }
+      }
+    }
   }
 
   public writeToOutForMicroBitRelayHub(data: number, hubId: string, relayType: string){
@@ -179,4 +199,3 @@ export class SerialDevice {
     }
   }
 }
-
