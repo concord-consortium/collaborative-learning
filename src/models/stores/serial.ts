@@ -118,6 +118,7 @@ export class SerialDevice {
     try {
       await this.port.open({ baudRate: 9600 });
       // Re-setup writer after reopening
+      // If port.writable is null, this will throw and be caught below
       this.writer = this.port.writable!.getWriter();
       return true;
     } catch (e) {
@@ -131,7 +132,13 @@ export class SerialDevice {
     await this.port.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
 
     // set up writer directly on the port's writable stream
-    this.writer = this.port.writable!.getWriter();
+    if (!this.port.writable) {
+      console.error("Port is not writable");
+      // This has never happened in practice, but we try to handle it gracefully
+      await this.closePort();
+      return;
+    }
+    this.writer = this.port.writable.getWriter();
 
     // listen for serial data coming in to computer
     while (this.port) {
@@ -230,16 +237,16 @@ export class SerialDevice {
       const match = pattern.exec(this.localBuffer);
 
       if (match) {
-      const [fullMatch, channel, numStr] = match;
-      this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
+        const [fullMatch, channel, numStr] = match;
+        this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
 
-      const targetChannel = channels.find((c: NodeChannelInfo) => {
-        return c.channelId === channel;
-      });
+        const targetChannel = channels.find((c: NodeChannelInfo) => {
+          return c.channelId === channel;
+        });
 
-      if (targetChannel){
-        targetChannel.value = Math.round(Number(numStr));
-      }
+        if (targetChannel){
+          targetChannel.value = Math.round(Number(numStr));
+        }
       } else {
         // No valid pattern found - check for corrupted data we can discard
         const lineEndIndex = this.localBuffer.indexOf("\r\n");
