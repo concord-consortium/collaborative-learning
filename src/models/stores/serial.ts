@@ -1,6 +1,9 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
 
+const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
+
 export class SerialDevice {
   localBuffer: string;
   private port: SerialPort | null;
@@ -57,31 +60,105 @@ export class SerialDevice {
     }
   }
 
+  private readonly READ_TIMEOUT_MS = 2000;
+
+  private async readWithTimeout(
+    streamReader: ReadableStreamDefaultReader<Uint8Array>
+  ): Promise<{ value: string | undefined; done: boolean; timedOut: boolean }> {
+    const timeoutPromise = new Promise<{ value: undefined; done: false; timedOut: true }>((resolve) => {
+      setTimeout(() => resolve({ value: undefined, done: false, timedOut: true }), this.READ_TIMEOUT_MS);
+    });
+
+    const readPromise = streamReader.read().then(({ value, done }) => ({
+      value: value ? textDecoder.decode(value) : undefined,
+      done,
+      timedOut: false
+    }));
+
+    return Promise.race([readPromise, timeoutPromise]);
+  }
+
+  private async closePort(streamReader?: ReadableStreamDefaultReader<Uint8Array>) {
+    if (!this.port) return;
+    try {
+      // Cancel and release the reader first
+      if (streamReader) {
+        try {
+          await streamReader.cancel();
+        } catch (e) {
+          // Reader may already be released
+        }
+        try {
+          streamReader.releaseLock();
+        } catch (e) {
+          // Lock may already be released
+        }
+      }
+      // Close the writer
+      if (this.writer) {
+        try {
+          await this.writer.close();
+        } catch (e) {
+          // Writer may already be closed
+        }
+      }
+      await this.port.close();
+    } catch (e) {
+      console.error("Error closing port:", e);
+    }
+  }
+
+  private async reopenPort() {
+    if (!this.port) return false;
+    try {
+      await this.port.open({ baudRate: 9600 });
+      // Re-setup writer after reopening
+      this.writer = this.port.writable!.getWriter();
+      return true;
+    } catch (e) {
+      console.error("Error reopening port:", e);
+      return false;
+    }
+  }
+
   public async handleStream(channels: Array<NodeChannelInfo>){
     if (!this.port) return;
     await this.port.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
 
-    // set up writer
-    const textEncoder = new TextEncoderStream();
-    textEncoder.readable.pipeTo(this.port.writable as any);
-    this.writer = textEncoder.writable.getWriter();
+    // set up writer directly on the port's writable stream
+    this.writer = this.port.writable!.getWriter();
 
     // listen for serial data coming in to computer
-    while (this.port.readable) {
-      const textDecoder = new TextDecoderStream();
-      this.port.readable.pipeTo(textDecoder.writable);
-      const streamReader = textDecoder.readable.getReader();
+    while (this.port) {
+      if (!this.port.readable) {
+        // Port is closed, try to reopen
+        console.log("Port not readable, attempting to reopen...");
+        const reopened = await this.reopenPort();
+        if (!reopened || !this.port.readable) {
+          console.error("Failed to reopen port, stopping stream handler");
+          break;
+        }
+      }
+
+      const streamReader = this.port.readable!.getReader();
       try {
         while (this.port.readable) {
-          const { value, done } = await streamReader.read();
+          const { value, done, timedOut } = await this.readWithTimeout(streamReader);
+
+          if (timedOut) {
+            console.log("Read timed out, closing and reopening port...");
+            await this.closePort(streamReader);
+            break; // Break inner loop to trigger reopen in outer loop
+          }
+
           if (done){
             break;
           }
           if (this.deviceFamily === "arduino"){
-            this.handleArduinoStreamObj(value, channels);
+            this.handleArduinoStreamObj(value!, channels);
           }
           if (this.deviceFamily === "microbit"){
-            this.handleMicroBitStreamObj(value, channels);
+            this.handleMicroBitStreamObj(value!, channels);
           }
         }
       }
@@ -149,7 +226,6 @@ export class SerialDevice {
 
       if (match) {
       const [fullMatch, channel, numStr] = match;
-        // console.log("serial match", fullMatch);
       this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
 
       const targetChannel = channels.find((c: NodeChannelInfo) => {
@@ -163,7 +239,6 @@ export class SerialDevice {
         // No valid pattern found - check for corrupted data we can discard
         const lineEndIndex = this.localBuffer.indexOf("\r\n");
         if (lineEndIndex !== -1) {
-          // console.log("serial miss", this.localBuffer.substring(0, lineEndIndex));
 
           // Discard everything up to and including the \r\n to recover
           this.localBuffer = this.localBuffer.substring(lineEndIndex + 2);
@@ -175,10 +250,18 @@ export class SerialDevice {
     }
   }
 
+  writeLine(line: string){
+    if (this.hasPort()){
+      this.writer.write(textEncoder.encode(`${line}\n`));
+    } else {
+      console.log("Port closed, skipping write");
+    }
+  }
+
   public writeToOutForMicroBitRelayHub(data: number, hubId: string, relayType: string){
     const ri = NodeLiveOutputTypes.filter((ot:any) => ot.name === relayType)[0].relayIndex;
     const controlMessage = `c${hubId}${ri}${data}`;
-    this.writer.write(`${controlMessage}\n`);
+    this.writeLine(controlMessage);
   }
 
   public writeToOutForBBGripper(n:number, liveOutputType: string){
@@ -186,7 +269,7 @@ export class SerialDevice {
     if (this.hasPort() && outputConfig?.angleBase !== undefined){
       const percent = n / 100;
       const openTo = Math.round(outputConfig.angleBase - (percent * outputConfig.sweep));
-      this.writer.write(`${openTo.toString()}\n`);
+      this.writeLine(openTo.toString());
     }
   }
 
@@ -195,7 +278,7 @@ export class SerialDevice {
     if (this.hasPort() && outputConfig?.angleOffset !== undefined){
       const scaledAngle = (outputConfig.angleScale * n) + outputConfig.angleOffset;
       const roundedScaled = Math.round(scaledAngle);
-      this.writer.write(`${roundedScaled.toString()}\n`);
+      this.writeLine(roundedScaled.toString());
     }
   }
 }
