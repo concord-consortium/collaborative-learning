@@ -25,6 +25,10 @@ You *do not* need to build to deploy the code, that is automatic.  See more info
    To ensure that you are open a TypeScript file in VSC and then click on the version number next to
    `TypeScript React` in the status bar and select 'Use Workspace Version' in the popup menu.
 
+### Adding a new tile
+
+For information on how to add a new tile type to the CLUE codebase, see the [Adding a new tile to the codebase](tiles.md#adding-a-new-tile-to-the-codebase) section in the tiles documentation.
+
 ## Deployment
 
 Deployments are based on the contents of the /dist folder and are built automatically by GitHub Actions for each branch and tag pushed to GitHub.
@@ -222,7 +226,7 @@ Here are the steps to do that:
 
 Alternatively, you can work on just the client side of authoring without starting the emulator:
 
-- Use a URL like:  
+- Use a URL like:
   `http://localhost:8080/authoring?firebaseEnv=staging`
 
 - **Downside:** Each time the page is reloaded, it requires a new authentication with GitHub. GitHub will throttle these authentications if too many happen in a certain time period. If you are making lots of changes, you may eventually run into this problem and have to wait.
