@@ -69,7 +69,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
   };
 
   // Subract an extra pixel to ensure both large thumbnails can fit in the width area
-  const largeThumbnailWidth = (panelWidth - (2 * documentThumbnailListPadding) - 1) / 2;
+  const largeThumbnailWidth = Math.floor(panelWidth / 2 - documentThumbnailListPadding - 1);
   const thumbnailAspectRatio = 0.87; // height / width
   const largeThumbnailHeight = largeThumbnailWidth * thumbnailAspectRatio;
   const thumbnailStyle = largeThumbnails ? {
