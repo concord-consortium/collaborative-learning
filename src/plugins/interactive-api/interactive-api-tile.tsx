@@ -76,7 +76,6 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
   const { model, readOnly, onRequestRowHeight, onRegisterTileApi } = props;
   const content = isInteractiveApiModel(model.content) ? model.content : null;
 
-  const [_iframeHeight, setIframeHeight] = useState(480);
   const [isLoading, setIsLoading] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -170,7 +169,6 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
     }
 
     lastHeightRef.current = clampedHeight;
-    setIframeHeight(clampedHeight);
     // Request the tile row to resize to match the iframe content height
     // Note: This is only called if the interactive sends 'height' messages.
     // If it doesn't, the tile will use the SCSS min-height (200px) or kInteractiveApiDefaultHeight (480px)
@@ -194,10 +192,9 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
     setShowSpinner(false);
 
     // Show spinner after 2 seconds if still loading
+    // Note: The spinner will be cleared by handleIframeLoad when the iframe finishes loading
     loadingTimeoutRef.current = setTimeout(() => {
-      if (isLoading) {
-        setShowSpinner(true);
-      }
+      setShowSpinner(true);
     }, 2000);
 
     // Cleanup timeout on unmount
@@ -275,13 +272,15 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
       // Legacy bug fix: In the 1.0.0 release of the AP the special 'nochange'
       // message wasn't handled correctly and it was saved as the interactive state
       // If we see that here we just use undefined instead.
-      let initialState = content.interactiveState;
+      // Use contentRef to avoid adding interactiveState to dependencies (would cause reconnection loop)
+      let initialState = contentRef.current?.interactiveState;
       if (initialState === "nochange") {
         initialState = undefined;
       }
 
-      const baseProps = {
-        version: 1,
+      // Common properties for both runtime and report modes
+      const commonProps = {
+        version: 1 as const,
         hostFeatures: {
           modal: {
             version: "1.0.0",
@@ -290,9 +289,8 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
             alert: true        // CLUE supports simple alerts
           }
         },
-        authoredState: content.authoredState,
+        authoredState: contentRef.current?.authoredState,
         interactiveState: initialState,
-        linkedInteractives: [] as any[],
         themeInfo: {
           colors: {
             colorA: "",
@@ -303,14 +301,16 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
 
       const initMessage = readOnly
         ? {
-            ...baseProps,
-            mode: "report" as const
+            ...commonProps,
+            mode: "report" as const,
+            linkedInteractives: [] as any[]
           }
         : {
-            ...baseProps,
-            error: null,
+            ...commonProps,
             mode: "runtime" as const,
-            globalInteractiveState: null
+            error: null,
+            globalInteractiveState: null,
+            linkedInteractives: [] as any[]
           };
 
       // Send loadInteractive message first (LARA compatibility)
@@ -344,8 +344,8 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
       debouncedSetState.cancel();
       debouncedRequestHeight.cancel();
     };
-  }, [content?.url, content?.authoredState, content?.interactiveState, model.id,
-      readOnly, handleInteractiveState, handleHeight]);
+  }, [content?.url, model.id, readOnly, handleInteractiveState, handleHeight,
+      debouncedSetState, debouncedRequestHeight]);
 
   // Poll interactive for state updates every 2 seconds
   // This ensures CLUE captures state changes even if the interactive doesn't
@@ -396,7 +396,10 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
         onClick={handleSkipToContent}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            handleSkipToContent(e as any);
+            e.preventDefault();
+            if (iframeRef.current) {
+              iframeRef.current.focus();
+            }
           }
         }}
       >
