@@ -2,7 +2,6 @@ import { FC, SVGProps } from "react";
 import { makeAutoObservable } from "mobx";
 import {
   createDocMapByBookmarks,
-  createDocMapByDates,
   createDocMapByGroups,
   createDocMapByNames,
   createTileTypeToDocumentsMap,
@@ -152,7 +151,27 @@ export class DocumentGroup {
   }
 
   get byDate(): DocumentGroup[] {
-    const docMapWithDates = createDocMapByDates(this.documents);
+    const docMapWithDates: Map<string, { documents: IDocumentMetadataModel[], date: Date | null }> = new Map();
+    this.documents.forEach((doc) => {
+      let sectionLabel = "No Date";
+      let sectionDate: Date | null = null;
+
+      if (doc.createdAt) {
+        const date = new Date(doc.createdAt);
+        const dayNum = date.toLocaleString("en-US", { day: "2-digit" });
+        const dayName = date.toLocaleString("en-US", { weekday: "long" });
+        const monthName = date.toLocaleString("en-US", { month: "short" });
+        const year = date.getFullYear();
+        sectionLabel = `${dayName}, ${monthName} ${dayNum}, ${year}`;
+        sectionDate = date;
+      }
+
+      if (!docMapWithDates.has(sectionLabel)) {
+        docMapWithDates.set(sectionLabel, { documents: [], date: sectionDate });
+      }
+      docMapWithDates.get(sectionLabel)?.documents.push(doc);
+    });
+
     const sortedSectionLabels = sortDateSectionLabels(Array.from(docMapWithDates.keys()), docMapWithDates);
     const docMap = new Map<string, IDocumentMetadataModel[]>();
     docMapWithDates.forEach((value, key) => {

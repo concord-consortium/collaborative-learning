@@ -19,31 +19,6 @@ type TagWithDocs = {
   docKeysFoundWithTag: string[];
 };
 
-export const createDocMapByDates = (documents: IDocumentMetadataModel[]) => {
-  const documentMap: Map<string, { documents: IDocumentMetadataModel[], date: Date | null }> = new Map();
-
-  documents.forEach((doc) => {
-    let sectionLabel = "No Date";
-    let sectionDate: Date | null = null;
-
-    if (doc.createdAt) {
-      const date = new Date(doc.createdAt);
-      const dayNum = date.toLocaleString("en-US", { day: "2-digit" });
-      const dayName = date.toLocaleString("en-US", { weekday: "long" });
-      const monthName = date.toLocaleString("en-US", { month: "short" });
-      const year = date.getFullYear();
-      sectionLabel = `${dayName}, ${monthName} ${dayNum}, ${year}`;
-      sectionDate = date;
-    }
-
-    if (!documentMap.has(sectionLabel)) {
-      documentMap.set(sectionLabel, { documents: [], date: sectionDate });
-    }
-    documentMap.get(sectionLabel)?.documents.push(doc);
-  });
-  return documentMap;
-};
-
 export const sortDateSectionLabels = (
   docMapKeys: string[], documentMap: Map<string, { documents: IDocumentMetadataModel[], date: Date | null }>
 ) => {
