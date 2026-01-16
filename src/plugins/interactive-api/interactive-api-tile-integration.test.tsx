@@ -2,41 +2,42 @@ import { render, waitFor } from "@testing-library/react";
 import React from "react";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultInteractiveApiContent } from "./interactive-api-tile-content";
+
+// Mock iframe-phone BEFORE importing the component
+const mockIframePhone = {
+  disconnect: jest.fn(),
+  addListener: jest.fn(),
+  post: jest.fn()
+};
+
+// Store listeners for testing
+const listeners: Record<string, (data: any) => void> = {};
+
+jest.mock("iframe-phone", () => ({
+  ParentEndpoint: jest.fn().mockImplementation((iframe, callback) => {
+    // Call initInteractive callback after setup
+    setTimeout(callback, 0);
+    return mockIframePhone;
+  })
+}));
+
+// NOW import the component after the mock is set up
 import { InteractiveApiComponent } from "./interactive-api-tile";
 
 // Import registration to ensure tile type is registered
 import "./interactive-api-tile-registration";
 
 describe("InteractiveApiComponent Integration Tests", () => {
-  const mockIframePhone = {
-    disconnect: jest.fn(),
-    addListener: jest.fn(),
-    post: jest.fn()
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // Clear listeners from previous tests
+    Object.keys(listeners).forEach(key => delete listeners[key]);
+
     // Mock iframe-phone with access to listeners
-    const listeners: Record<string, (data: any) => void> = {};
     mockIframePhone.addListener.mockImplementation((type: string, handler: (data: any) => void) => {
       listeners[type] = handler;
     });
-
-    // Provide access to trigger listeners in tests
-    (mockIframePhone as any).triggerListener = (type: string, data: any) => {
-      if (listeners[type]) {
-        listeners[type](data);
-      }
-    };
-
-    jest.doMock("iframe-phone", () => ({
-      ParentEndpoint: jest.fn().mockImplementation((iframe, callback) => {
-        // Call initInteractive callback after setup
-        setTimeout(callback, 0);
-        return mockIframePhone;
-      })
-    }));
   });
 
   const createDefaultProps = () => {
@@ -97,9 +98,13 @@ describe("InteractiveApiComponent Integration Tests", () => {
 
     const newState = { answer: "42", submitted: true };
 
+    // Wait for the listener to be registered
     await waitFor(() => {
-      (mockIframePhone as any).triggerListener("interactiveState", newState);
+      expect(listeners["interactiveState"]).toBeDefined();
     });
+
+    // Trigger the listener
+    listeners["interactiveState"](newState);
 
     // Wait for debounce (500ms)
     await waitFor(() => {
@@ -113,16 +118,25 @@ describe("InteractiveApiComponent Integration Tests", () => {
     const props = createDefaultProps();
     render(<InteractiveApiComponent {...props} />);
 
-    // Clear initial calls
+    // Wait for initial setup to complete
+    await waitFor(() => {
+      expect(mockIframePhone.post).toHaveBeenCalledWith(
+        "initInteractive",
+        expect.any(Object)
+      );
+    });
+
+    // Clear initial calls (loadInteractive and initInteractive)
     mockIframePhone.post.mockClear();
 
     // Advance 2 seconds
     jest.advanceTimersByTime(2000);
-    expect(mockIframePhone.post).toHaveBeenCalledWith("getInteractiveState");
+    expect(mockIframePhone.post).toHaveBeenCalledWith("getInteractiveState", null);
 
     // Advance another 2 seconds
     jest.advanceTimersByTime(2000);
     expect(mockIframePhone.post).toHaveBeenCalledTimes(2);
+    expect(mockIframePhone.post).toHaveBeenNthCalledWith(2, "getInteractiveState", null);
 
     jest.useRealTimers();
   });
