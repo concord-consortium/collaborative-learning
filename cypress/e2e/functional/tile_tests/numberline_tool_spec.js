@@ -55,6 +55,30 @@ context('Numberline Tile', function () {
     numberlineToolTile.setToolbarReset();
     numberlineToolTile.hasNoPoints();
 
+    cy.log("will show value label for selected point");
+    numberlineToolTile.setToolbarPoint();
+    numberlineToolTile.addPointOnNumberlineTick(2.0);
+    numberlineToolTile.getPointsOnGraph().should('have.length', 1);
+    numberlineToolTile.getValueLabel().should("exist");
+    numberlineToolTile.getValueLabelText().should("contain", "2.00");
+    numberlineToolTile.getValueLabelLine().should("exist");
+
+    cy.log("will hide value label when point is deselected");
+    // Click outside the numberline to deselect
+    cy.get(".numberline-tool-container svg").click(10, 10, {force: true});
+    numberlineToolTile.getValueLabel().should("not.exist");
+    numberlineToolTile.getValueLabelLine().should("not.exist");
+
+    cy.log("will show value label when point is reselected");
+    numberlineToolTile.setToolbarSelect();
+    numberlineToolTile.addPointOnNumberlineTick(2.0);
+    numberlineToolTile.getValueLabel().should("exist");
+    numberlineToolTile.getValueLabelText().should("contain", "2.00");
+
+    cy.log("will clear points before reload test");
+    numberlineToolTile.setToolbarReset();
+    numberlineToolTile.hasNoPoints();
+
     //Numberline tile restore upon page reload
     cy.wait(2000);
     cy.reload();
