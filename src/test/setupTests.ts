@@ -1,5 +1,7 @@
 import "@testing-library/jest-dom";
 import { enableFetchMocks } from "jest-fetch-mock";
+import { TextEncoder, TextDecoder } from "util";
+
 // make fetch mocking available in all tests
 enableFetchMocks();
 
@@ -109,3 +111,7 @@ declare global {
 
 // required for ResizeObserver called in mathlive
 global.ResizeObserver = require('resize-observer-polyfill');
+
+// Polyfill TextEncoder/TextDecoder for jsdom environment
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder as typeof global.TextDecoder;
