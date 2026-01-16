@@ -117,14 +117,15 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
     setExpandedThread(focusTileId || 'document');
   }, [focusTileId]);
 
-  // If an AI evaluation is pending, we force the document thread to be expanded.
+  // If a remote comment is pending, we force the document thread to be expanded.
   const content = useCurriculumOrDocumentContent(focusDocument);
-  const pendingAIAnalysis = content?.awaitingAIAnalysis;
+  const pendingRemoteComment = content?.isAwaitingRemoteComment;
+
   useEffect(() => {
-    if (pendingAIAnalysis) {
+    if (pendingRemoteComment) {
       setExpandedThread('document');
     }
-  }, [pendingAIAnalysis]);
+  }, [pendingRemoteComment]);
 
   const focusedItemHasNoComments = !chatThreads?.find(item => (item.tileId === focusId));
   let overrideTitle = undefined;
