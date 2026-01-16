@@ -186,7 +186,7 @@
       Serial.println(tmpStringOut);
       Serial.println(a1StringOut);
 
-      // This is diabled because some versions of the CLUE code can't handle unexpected messages.
+      // This is disabled because some versions of the CLUE code can't handle unexpected messages.
       // Output current free memory for leak detection
       // memStringOut = memId + kvSeparator + freeMemory();
       // Serial.println(memStringOut);

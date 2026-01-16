@@ -4,6 +4,11 @@ import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
+function log(message: string) {
+  // eslint-disable-next-line no-console
+  console.log(`[SerialDevice] ${message}`);
+}
+
 export class SerialDevice {
   localBuffer: string;
   private port: SerialPort | null;
@@ -132,7 +137,7 @@ export class SerialDevice {
     while (this.port) {
       if (!this.port.readable) {
         // Port is closed, try to reopen
-        console.log("Port not readable, attempting to reopen...");
+        log("Port not readable, attempting to reopen...");
         const reopened = await this.reopenPort();
         if (!reopened || !this.port.readable) {
           console.error("Failed to reopen port, stopping stream handler");
@@ -146,7 +151,7 @@ export class SerialDevice {
           const { value, done, timedOut } = await this.readWithTimeout(streamReader);
 
           if (timedOut) {
-            console.log("Read timed out, closing and reopening port...");
+            log("Read timed out, closing and reopening port...");
             await this.closePort(streamReader);
             break; // Break inner loop to trigger reopen in outer loop
           }
@@ -217,7 +222,7 @@ export class SerialDevice {
     // No 'g' flag since we always search from the start of the modified buffer.
     // Note this pattern doesn't handle NaN or negative numbers.
     // We are seeing at least some NAN values from the Arduino. This currently
-    // get ignored correctly, by the corrupted data fallback.
+    // gets ignored correctly, by the corrupted data fallback.
     const pattern = /([a-z0-9]+):([0-9.]+)[\r][\n]/;
 
     // eslint-disable-next-line no-constant-condition
@@ -250,11 +255,11 @@ export class SerialDevice {
     }
   }
 
-  writeLine(line: string){
+  public writeLine(line: string){
     if (this.hasPort()){
       this.writer.write(textEncoder.encode(`${line}\n`));
     } else {
-      console.log("Port closed, skipping write");
+      log("Port closed, skipping write");
     }
   }
 
