@@ -66,6 +66,9 @@ class NumberlineToolTile {
   getValueLabelLine(){
     return cy.get(".numberline-tool-container .point-value-label-line");
   }
+  getZeroTick(){
+    return cy.get(".numberline-tool-container .zero-tick");
+  }
 
 
 

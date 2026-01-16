@@ -284,6 +284,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const numOfTicks = 11;
 
   //Returns an equally divided array between min and max with numOfTick # of elements
+  // Always includes 0 if it falls within the range
   const generateTickValues = (min: number, max: number) => {
     const tickValues = [];
     const range = content.max - content.min;
@@ -292,7 +293,27 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       const tickValue = content.min + (position * range);
       tickValues.push(tickValue);
     }
+    
+    // Always include 0 if it's within range and not already in the tick values
+    const zeroIsInRange = content.min < 0 && content.max > 0;
+    const zeroAlreadyIncluded = tickValues.some(v => Math.abs(v) < 0.0001);
+    if (zeroIsInRange && !zeroAlreadyIncluded) {
+      tickValues.push(0);
+      tickValues.sort((a, b) => a - b);
+    }
+    
     return tickValues;
+  };
+
+  // Track whether zero is part of the regular tick spacing
+  const isZeroInRegularTicks = () => {
+    const range = content.max - content.min;
+    for (let i = 0; i < numOfTicks; i++) {
+      const position = i / (numOfTicks - 1);
+      const tickValue = content.min + (position * range);
+      if (Math.abs(tickValue) < 0.0001) return true;
+    }
+    return false;
   };
 
   const tickFormatter = (value: number | { valueOf(): number }, index: number) => {
@@ -301,6 +322,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
     if (value === content.min || value === content.max) {
       return '';
+    }
+    // Only show "0" label if zero is part of regular tick spacing
+    if (value === 0) {
+      return isZeroInRegularTicks() ? '0' : '';
     }
     return value.toFixed(1);
   };

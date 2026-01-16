@@ -44,6 +44,23 @@ context('Numberline Tile', function () {
     numberlineToolTile.setMinValue(-10);
     numberlineToolTile.getAllNumberlineTicks().should('contain', 6.0);
 
+    cy.log('will always show zero tick when range spans zero');
+    // Set asymmetric range where 0 is not evenly spaced
+    numberlineToolTile.setMinValue(-3);
+    numberlineToolTile.setMaxValue(10);
+    // Zero tick should exist even if not in regular spacing
+    cy.get(".numberline-tool-container .zero-tick").should("exist");
+    // Zero should not have a label since it's not part of regular tick spacing
+    numberlineToolTile.getAllNumberlineTicks().should('not.contain', '0');
+    
+    cy.log('will show zero label when zero is part of regular tick spacing');
+    // Set symmetric range where 0 falls on regular spacing
+    numberlineToolTile.setMinValue(-5);
+    numberlineToolTile.setMaxValue(5);
+    cy.get(".numberline-tool-container .zero-tick").should("exist");
+    // Now zero should have a label
+    numberlineToolTile.getAllNumberlineTicks().should('contain', '0');
+
     cy.log("will delete a single point");
     numberlineToolTile.setToolbarSelect();
     // Just to select it
