@@ -69,7 +69,15 @@ class NumberlineToolTile {
   getZeroTick(){
     return cy.get(".numberline-tool-container .zero-tick");
   }
-
+  getMinBoxInput(){
+    return cy.get(".numberline-tool-container .border-box").eq(0).find("input");
+  }
+  getMaxBoxInput(){
+    return cy.get(".numberline-tool-container .border-box").eq(1).find("input");
+  }
+  getFocusedPoint(){
+    return cy.get(".numberline-tool-container .point-inner-circle:focus");
+  }
 
 
 }

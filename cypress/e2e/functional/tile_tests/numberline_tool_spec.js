@@ -96,6 +96,86 @@ context('Numberline Tile', function () {
     numberlineToolTile.setToolbarReset();
     numberlineToolTile.hasNoPoints();
 
+    cy.log("will select points with Tab key");
+    numberlineToolTile.setToolbarPoint();
+    numberlineToolTile.addPointOnNumberlineTick(-2.0);
+    numberlineToolTile.addPointOnNumberlineTick(2.0);
+    numberlineToolTile.addPointOnNumberlineTick(0.0);
+    numberlineToolTile.getPointsOnGraph().should('have.length', 3);
+    // Click on tile to focus it, then Tab to select first point (leftmost)
+    cy.get(".numberline-wrapper").click().type('{tab}');
+    numberlineToolTile.getValueLabel().should("exist");
+    // Tab again to select next point
+    cy.get(".numberline-wrapper").type('{tab}');
+    numberlineToolTile.getValueLabelText().should("contain", "0.00");
+    // Tab again to select rightmost point
+    cy.get(".numberline-wrapper").type('{tab}');
+    numberlineToolTile.getValueLabelText().should("contain", "2.00");
+
+    cy.log("will move selected point with arrow keys");
+    // Move the selected point (at 2.0) to the right by 0.1
+    cy.get(".numberline-wrapper").type('{rightarrow}');
+    numberlineToolTile.getValueLabelText().invoke('text').then((text) => {
+      const value = parseFloat(text);
+      expect(value).to.be.closeTo(2.1, 0.01);
+    });
+    // Move left by 0.1
+    cy.get(".numberline-wrapper").type('{leftarrow}');
+    numberlineToolTile.getValueLabelText().should("contain", "2.00");
+
+    cy.log("will move point with larger step using Shift+arrow");
+    cy.get(".numberline-wrapper").type('{shift}{rightarrow}');
+    numberlineToolTile.getValueLabelText().should("contain", "3.00");
+
+    cy.log("will delete selected point with keyboard");
+    cy.get(".numberline-wrapper").type('{del}');
+    numberlineToolTile.getPointsOnGraph().should('have.length', 2);
+
+    cy.log("will clean up keyboard test points");
+    numberlineToolTile.setToolbarReset();
+    numberlineToolTile.hasNoPoints();
+
+    cy.log("will tab through min and max fields before points");
+    // Reset min/max to known values
+    numberlineToolTile.setMinValue(-5);
+    numberlineToolTile.setMaxValue(5);
+    // Add a point so we can test tab order
+    numberlineToolTile.setToolbarPoint();
+    numberlineToolTile.addPointOnNumberlineTick(0.0);
+    numberlineToolTile.setToolbarSelect();
+    // Click outside to deselect
+    cy.get(".numberline-tool-container svg").click(10, 10, {force: true});
+    // Click on the min box to focus it
+    numberlineToolTile.getMinBox().click();
+    numberlineToolTile.getMinBox().find('input').should('exist');
+    // Tab to max field using realPress (this blurs min and focuses max)
+    cy.realPress('Tab');
+    numberlineToolTile.getMaxBox().find('input').should('exist');
+    // Tab to first point
+    cy.realPress('Tab');
+    numberlineToolTile.getFocusedPoint().should('exist');
+
+    cy.log("will edit min value with keyboard");
+    // Click to show input
+    numberlineToolTile.getMinBox().click();
+    numberlineToolTile.getMinBoxInput().should('exist');
+    numberlineToolTile.getMinBoxInput().clear().type('-8{enter}');
+    numberlineToolTile.getMinBox().should('contain', '-8');
+
+    cy.log("will edit max value with keyboard");
+    // Click to show input
+    numberlineToolTile.getMaxBox().click();
+    numberlineToolTile.getMaxBoxInput().should('exist');
+    numberlineToolTile.getMaxBoxInput().clear().type('8{enter}');
+    numberlineToolTile.getMaxBox().should('contain', '8');
+
+    cy.log("will clean up after min/max keyboard tests");
+    numberlineToolTile.setToolbarReset();
+    numberlineToolTile.hasNoPoints();
+    // Restore values to -10/10 for reload test
+    numberlineToolTile.setMinValue(-10);
+    numberlineToolTile.setMaxValue(10);
+
     //Numberline tile restore upon page reload
     cy.wait(2000);
     cy.reload();

@@ -56,6 +56,8 @@ export const TileToolbarButton = function ({
         className={classNames("toolbar-button", name, colorClass, { selected, disabled })}
         // TODO: confer with Scott about aria-disabled vs. disabled
         disabled={disabled}
+        aria-label={tooltip}
+        aria-pressed={selected}
         onClick={handleOnClick}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}

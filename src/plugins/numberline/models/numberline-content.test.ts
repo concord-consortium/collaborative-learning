@@ -74,5 +74,33 @@ describe("NumberlineContent", () => {
       expect(content.getPoint(point1.id)).toBeDefined();
       expect(content.getPoint(point2.id)).toBeUndefined();
     });
+
+    it("moves point position via drag value", () => {
+      const content = NumberlineContentModel.create({ min: -5, max: 5 });
+      const point = content.createAndSelectPoint(0, false);
+      
+      // Simulate keyboard movement
+      point.setDragXValue(0.1);
+      point.setXValueToDragValue();
+      expect(point.xValue).toBeCloseTo(0.1);
+      
+      // Move again
+      point.setDragXValue(point.xValue + 1.0);
+      point.setXValueToDragValue();
+      expect(point.xValue).toBeCloseTo(1.1);
+    });
+
+    it("can select points in order by position", () => {
+      const content = NumberlineContentModel.create();
+      const pointA = content.createNewPoint(3.0, false);
+      const pointB = content.createNewPoint(-2.0, false);
+      const pointC = content.createNewPoint(1.0, false);
+      
+      // Points sorted by xValue: B(-2), C(1), A(3)
+      const sortedPoints = content.pointsArr.slice().sort((a, b) => a.xValue - b.xValue);
+      expect(sortedPoints[0].id).toBe(pointB.id);
+      expect(sortedPoints[1].id).toBe(pointC.id);
+      expect(sortedPoints[2].id).toBe(pointA.id);
+    });
   });
 });

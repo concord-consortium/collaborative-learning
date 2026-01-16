@@ -15,7 +15,8 @@ import {
   tickHeightDefault, tickStyleDefault, tickWidthDefault, tickWidthZero,
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
   kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax,
-  kValueLabelHeight, kValueLabelPadding, kValueLabelOffsetY
+  kValueLabelHeight, kValueLabelPadding, kValueLabelOffsetY,
+  kKeyboardMoveStep, kKeyboardMoveStepLarge
 } from '../numberline-tile-constants';
 import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
 import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
@@ -37,6 +38,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   const content = model.content as NumberlineContentModelType;
   const [hoverPointId, setHoverPointId] = useState("");
+  const [focusedPointId, setFocusedPointId] = useState("");
   const [_selectedPointId, setSelectedPointId] = useState(""); // Just used to rerender when a point is selected
   const ui = useUIStore();
   const isTileSelected = ui.isSelectedTile(model);
@@ -69,16 +71,56 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     content.deleteSelectedPoints();
   }, [content]);
 
-  // Set up key handling
+  // Move selected point by a delta amount
+  const moveSelectedPoint = useCallback((delta: number) => {
+    const selectedPointId = Object.keys(content.selectedPoints)[0];
+    if (selectedPointId) {
+      const point = content.getPoint(selectedPointId);
+      if (point) {
+        const newValue = Math.max(content.min, Math.min(content.max, point.xValue + delta));
+        point.setDragXValue(newValue);
+        point.setXValueToDragValue();
+      }
+    }
+  }, [content]);
+
+  // Select next or previous point
+  const selectAdjacentPoint = useCallback((direction: 'next' | 'prev') => {
+    const points = content.pointsArr.slice().sort((a, b) => a.xValue - b.xValue);
+    if (points.length === 0) return;
+    
+    const selectedPointId = Object.keys(content.selectedPoints)[0];
+    if (!selectedPointId) {
+      // No point selected, select first or last based on direction
+      const pointToSelect = direction === 'next' ? points[0] : points[points.length - 1];
+      content.setSelectedPoint(pointToSelect);
+      setSelectedPointId(pointToSelect.id);
+    } else {
+      const currentIndex = points.findIndex(p => p.id === selectedPointId);
+      const newIndex = direction === 'next' 
+        ? Math.min(currentIndex + 1, points.length - 1)
+        : Math.max(currentIndex - 1, 0);
+      const pointToSelect = points[newIndex];
+      content.setSelectedPoint(pointToSelect);
+      setSelectedPointId(pointToSelect.id);
+    }
+  }, [content]);
+
+  // Set up key handling for when tile container has focus
   const hotKeys = useRef(new HotKeys());
   useEffect(()=>{
     if (!readOnly) {
       hotKeys.current.register({
-        "delete": deleteSelectedPoints,
-        "backspace": deleteSelectedPoints,
+        "delete": () => { deleteSelectedPoints(); return true; },
+        "backspace": () => { deleteSelectedPoints(); return true; },
+        "left": () => { moveSelectedPoint(-kKeyboardMoveStep); return true; },
+        "right": () => { moveSelectedPoint(kKeyboardMoveStep); return true; },
+        "shift-left": () => { moveSelectedPoint(-kKeyboardMoveStepLarge); return true; },
+        "shift-right": () => { moveSelectedPoint(kKeyboardMoveStepLarge); return true; },
       });
     }
-  }, [deleteSelectedPoints, readOnly]);
+  }, [deleteSelectedPoints, moveSelectedPoint, readOnly]);
+
 
   /* ============================ [ Calculate Width of Tile / Scale ]  ========================= */
   const documentScrollerRef = useRef<HTMLDivElement>(null);
@@ -374,11 +416,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       });
 
     const updateCircles = () => {
+      // Sort points by x value for consistent tab order (smallest to largest)
+      const sortedPoints = content.pointsArr.slice().sort((a, b) => a.xValue - b.xValue);
+
       /* =========================== [ Outer Hover Circles ] ======================= */
 
       //---- Initialize outer hover circles
       const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
-        .data(content.pointsArr);
+        .data(sortedPoints, (p) => p.id);
 
       outerPoints.enter()
         .append("circle").attr("class", "outer-point")
@@ -393,6 +438,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       outerPoints
         .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
         .classed("hovered", (p, idx) => (hoverPointId === p.id))
+        .classed("focused", (p) => (focusedPointId === p.id))
+        .classed("selected", (p) => (p.id in content.selectedPoints))
         .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
       outerPoints.exit().remove(); //cleanup
@@ -402,7 +449,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
       /* =========================== [ Inner Circles ] ============================= */
       const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
-        .data(content.pointsArr);
+        .data(sortedPoints, (p) => p.id);
 
       // Initialize Attributes
       innerPoints.enter()
@@ -412,12 +459,49 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         .attr('cy', yMidPoint)
         .attr('r', innerPointRadius)
         .attr('id', p => p.id)
+        .attr('tabindex', readOnly ? -1 : 0)
+        .attr('role', 'slider')
+        .attr('aria-valuemin', content.min)
+        .attr('aria-valuemax', content.max)
+        .attr('aria-valuenow', (p) => p.currentXValue)
+        .attr('aria-label', (p) => `Point at ${p.currentXValue}. Use arrow keys to move${readOnly ? '' : ', Delete to remove'}.`)
         .classed("point-inner-circle", true) //may change
+        .on('focus', function(e, p) {
+          if (!readOnly) {
+            content.setSelectedPoint(p);
+            setSelectedPointId(p.id);
+            setFocusedPointId(p.id);
+          }
+        })
+        .on('blur', function(e, p) {
+          setFocusedPointId("");
+        })
+        .on('keydown', function(e: KeyboardEvent, p) {
+          if (readOnly) return;
+          switch (e.key) {
+            case 'ArrowLeft':
+              e.preventDefault();
+              moveSelectedPoint(e.shiftKey ? -kKeyboardMoveStepLarge : -kKeyboardMoveStep);
+              break;
+            case 'ArrowRight':
+              e.preventDefault();
+              moveSelectedPoint(e.shiftKey ? kKeyboardMoveStepLarge : kKeyboardMoveStep);
+              break;
+            case 'Delete':
+            case 'Backspace':
+              e.preventDefault();
+              deleteSelectedPoints();
+              break;
+          }
+        })
         .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
       // --- Update functions inner circles
       innerPoints
       .attr('cx', (p, idx) => xScale(p.currentXValue))
+      .attr('tabindex', readOnly ? -1 : 0)
+      .attr('aria-valuenow', (p) => p.currentXValue)
+      .attr('aria-label', (p) => `Point at ${p.currentXValue}. Use arrow keys to move${readOnly ? '' : ', Delete to remove'}.`)
       .classed("selected", (p)=> p.id in content.selectedPoints)
       .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
@@ -428,9 +512,9 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       // Filter the points that should have an inner white circle
 
 
-      const openPoints = content.pointsArr.filter(p => p.isOpen);
+      const openPoints = sortedPoints.filter(p => p.isOpen);
       const innerWhitePoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-white-point')
-      .data(openPoints);
+      .data(openPoints, (p) => p.id);
 
       innerWhitePoints.enter()
         .append("circle")
@@ -522,8 +606,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   return (
     <div
       className={containerClasses}
-      onKeyDown={(e) => hotKeys.current.dispatch(e)}
       tabIndex={0}
+      onKeyDown={(e) => {
+        // Only handle keys if the event target is the tile container itself
+        // This allows inputs and focusable children to handle their own keys
+        if (e.target === e.currentTarget) {
+          hotKeys.current.dispatch(e);
+        }
+      }}
     >
       <div className={"numberline-title"}>
         <BasicEditableTileTitle />
