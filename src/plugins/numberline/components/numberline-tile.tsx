@@ -14,7 +14,8 @@ import {
   kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
   tickHeightDefault, tickStyleDefault, tickWidthDefault, tickWidthZero,
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
-  kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax
+  kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax,
+  kValueLabelHeight, kValueLabelPadding, kValueLabelOffsetY
 } from '../numberline-tile-constants';
 import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
 import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
@@ -212,6 +213,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
             const isPointOpen = optionClicked === CreatePointType.Open;
             createPoint(xScale.invert(mouseX), isPointOpen);
           }
+        } else {
+          // Clear selection when clicking outside the numberline area
+          content.clearSelectedPoints();
+          setSelectedPointId("");
         }
       }
     }
@@ -417,6 +422,59 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       .attr("cy", yMidPoint);
 
       innerWhitePoints.exit().remove();
+
+      /* =========================== [ Value Label for Selected Point ] ===================== */
+      // Only one point can be selected at a time
+      const selectedPointId = Object.keys(content.selectedPoints)[0];
+      const selectedPoint = selectedPointId ? content.getPoint(selectedPointId) : undefined;
+      
+      // Remove existing label and line
+      svg.selectAll('.point-value-label-group').remove();
+      svg.selectAll('.point-value-label-line').remove();
+
+      // Create label only if a point is selected
+      if (selectedPoint) {
+        const x = xScale(selectedPoint.currentXValue);
+        const y = yMidPoint + kValueLabelOffsetY;
+
+        const labelGroup = svg.append("g")
+          .attr("class", "point-value-label-group")
+          .attr("transform", `translate(${x}, ${y})`);
+
+        // Add text first to measure its width
+        const labelText = labelGroup.append("text")
+          .attr("class", "point-value-label-text")
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "middle")
+          .attr("y", kValueLabelHeight / 2)
+          .text(selectedPoint.currentXValue.toFixed(2));
+
+        // Get text width and add rectangle background
+        const textWidth = (labelText.node() as SVGTextElement)?.getBBox().width || 0;
+        const rectWidth = textWidth + (kValueLabelPadding * 2);
+
+        labelGroup.insert("rect", "text")
+          .attr("class", "point-value-label-bg")
+          .attr("height", kValueLabelHeight)
+          .attr("width", rectWidth)
+          .attr("x", -rectWidth / 2)
+          .attr("rx", 10)
+          .attr("ry", 10);
+
+        // Add vertical line from point to label (added last to be on top)
+        const lineY1 = yMidPoint - innerPointRadius; // Top edge of inner point circle
+        const lineY2 = y + kValueLabelHeight; // Bottom edge of label
+        
+        svg.append("line")
+          .attr("class", "point-value-label-line")
+          .attr("x1", x)
+          .attr("y1", lineY1)
+          .attr("x2", x)
+          .attr("y2", lineY2)
+          .attr("stroke", "#949494")
+          .attr("stroke-width", 1.5)
+          .style("pointer-events", "none");
+      }
     }; //end of updateCircles()
 
     updateCircles();

@@ -32,3 +32,8 @@ export const kArrowheadTop = 53;
 export const innerPointRadius = 5;
 export const outerPointRadius = 9;
 export const kPointButtonRadius = 11;
+
+//--------- Point Value Label constants ---------------------------------------------------------------
+export const kValueLabelHeight = 20;
+export const kValueLabelPadding = 5;
+export const kValueLabelOffsetY = -43; // Distance above the point (33px + half label height)

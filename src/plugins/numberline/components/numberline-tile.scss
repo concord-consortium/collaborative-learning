@@ -75,6 +75,23 @@
 
       }
 
+      .point-value-label-group {
+        pointer-events: none;
+
+        .point-value-label-bg {
+          fill: $workspace-teal-light-8;
+          stroke: #949494;
+          stroke-width: 1.5px;
+        }
+
+        .point-value-label-text {
+          fill: #3f3f3f;
+          font-size: 12px;
+          font-weight: normal;
+          font-family: Lato, sans-serif;
+        }
+      }
+
     } //end svg container
 
     .arrow {
