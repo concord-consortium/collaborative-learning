@@ -100,11 +100,11 @@ describe("InteractiveApiComponent Integration Tests", () => {
 
     // Wait for the listener to be registered
     await waitFor(() => {
-      expect(listeners["interactiveState"]).toBeDefined();
+      expect(listeners.interactiveState).toBeDefined();
     });
 
     // Trigger the listener
-    listeners["interactiveState"](newState);
+    listeners.interactiveState(newState);
 
     // Wait for debounce (500ms)
     await waitFor(() => {
