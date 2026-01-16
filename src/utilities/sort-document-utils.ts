@@ -28,9 +28,9 @@ export const createDocMapByDates = (documents: IDocumentMetadataModel[]) => {
 
     if (doc.createdAt) {
       const date = new Date(doc.createdAt);
-      const dayNum = date.toLocaleString("default", { day: "2-digit" });
-      const dayName = date.toLocaleString("default", { weekday: "long" });
-      const monthName = date.toLocaleString("default", { month: "short" });
+      const dayNum = date.toLocaleString("en-US", { day: "2-digit" });
+      const dayName = date.toLocaleString("en-US", { weekday: "long" });
+      const monthName = date.toLocaleString("en-US", { month: "short" });
       const year = date.getFullYear();
       sectionLabel = `${dayName}, ${monthName} ${dayNum}, ${year}`;
       sectionDate = date;
@@ -58,8 +58,9 @@ export const sortDateSectionLabels = (
       return dateB.getTime() - dateA.getTime();
     }
 
-    // Fallback to string comparison if dates are missing
-    return b.localeCompare(a);
+    // This should not be reached because all non-"No Date" labels have valid dates.
+    // If it is reached due to unexpected data, keep the existing order.
+    return 0;
   });
 };
 
