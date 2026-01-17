@@ -1,5 +1,5 @@
 import {
-  types, Instance, flow, IJsonPatch, detach, destroy, getSnapshot, toGenerator, addDisposer
+  types, Instance, flow, IJsonPatch, detach, destroy, toGenerator, addDisposer
 } from "mobx-state-tree";
 import { when } from "mobx";
 import firebase from "firebase/app";
@@ -38,17 +38,6 @@ export const CDocument = types
 });
 export interface CDocumentType extends Instance<typeof CDocument> {}
 
-interface IFirestoreSavingProps {
-  userContextProvider: UserContextProvider;
-  firestore: Firestore;
-}
-
-interface IFirestoreHistoryInfo {
-  documentPath: string;
-  lastEntryIndex: number;
-  lastEntryId: string | null;
-}
-
 interface IMainDocument extends TreeAPI {
   key: string;
   uid: string;
@@ -62,6 +51,12 @@ export enum HistoryStatus {
   HISTORY_LOADED,
   HISTORY_LOADING,
 }
+
+export type HistoryEntryCompletedListener = (
+  historyContainer: CDocumentType,
+  entry: Instance<typeof HistoryEntry>,
+  newLocalIndex: number,
+) => void;
 
 export const TreeManager = types
 .model("TreeManager", {
@@ -84,13 +79,16 @@ export const TreeManager = types
   loadingError: undefined as firebase.firestore.FirestoreError | undefined,
   mainDocument: undefined as IMainDocument | undefined,
   userContextProvider: undefined as UserContextProvider | undefined,
-  firestore: undefined as Firestore | undefined,
   /**
    * The most recent historyEntryId of the document. If the document is restored
    * from a system that stores the revisionId, the revisionId can be restored.
    * However in that case, there might not be a corresponding history entry.
    */
-  revisionId: ""
+  revisionId: "",
+  /**
+   * Listeners to be notified when new history entries are completed.
+   */
+  historyEntryCompletedListeners: [] as Array<HistoryEntryCompletedListener>
 }))
 .views((self) => ({
   get undoManager() : IUndoManager {
@@ -162,19 +160,8 @@ export const TreeManager = types
   }
 }))
 .actions(self => {
-  let firestoreHistoryInfoPromise: Promise<IFirestoreHistoryInfo> | undefined;
-
-  function getFirestoreHistoryInfo(): Promise<IFirestoreHistoryInfo> {
-    if (!firestoreHistoryInfoPromise) {
-      firestoreHistoryInfoPromise = prepareFirestoreHistoryInfo(self);
-    }
-
-    return firestoreHistoryInfoPromise;
-  }
-
   return {
     completeHistoryEntry(entry: Instance<typeof HistoryEntry>) {
-      const {firestore} = self;
       entry.state = "complete";
 
       // Remove the entry from the activeHistoryEntries
@@ -215,33 +202,8 @@ export const TreeManager = types
         self.revisionId = entry.id;
       }
 
-      if (!firestore) {
-        // We might want to throw an error here to figure out when this happens.
-        // Currently, when running the spec tests firestore is not setup, so it is
-        // easier to just return and not try to save the history to Firestore.
-        return;
-      }
-
-      // Create the document in firestore if necessary
-      getFirestoreHistoryInfo().then(({documentPath, lastEntryIndex, lastEntryId}) => {
-        // add a new document for this history entry
-        const historyEntryPath = firestore.getFullPath(`${documentPath}/history`);
-
-        const previousEntryLocalIndex = newLocalIndex - 1;
-        const previousEntry = previousEntryLocalIndex >= 0 && self.document.history.at(previousEntryLocalIndex);
-        const previousEntryId = previousEntry ? previousEntry.id : lastEntryId;
-
-        const docRef = firestore.documentRef(historyEntryPath, entry.id);
-        const snapshot = getSnapshot(entry);
-        // If there was no last entry in Firestore getFirestoreHistoryInfo sets
-        // lastEntryIndex to -1
-        const index = lastEntryIndex + 1 + newLocalIndex;
-        docRef.set({
-          index,
-          created: firestore.timestamp(),
-          previousEntryId,
-          entry: JSON.stringify(snapshot)
-        });
+      self.historyEntryCompletedListeners.forEach(listener => {
+        listener(self.document, entry, newLocalIndex);
       });
     }
   };
@@ -259,9 +221,8 @@ export const TreeManager = types
     self.loadingError = error;
   },
 
-  setPropsForFirestoreSaving({userContextProvider, firestore}: IFirestoreSavingProps) {
-    self.userContextProvider = userContextProvider;
-    self.firestore = firestore;
+  addHistoryEntryCompletedListener(listener: HistoryEntryCompletedListener) {
+    self.historyEntryCompletedListeners.push(listener);
   },
 
   setNumHistoryEntriesApplied(value: number) {
@@ -632,70 +593,3 @@ export const TreeManager = types
 }));
 
 export interface TreeManagerType extends Instance<typeof TreeManager> {}
-
-interface IPrepareFirestoreHistoryInfoArgs {
-  userContextProvider?: UserContextProvider;
-  mainDocument?: IMainDocument;
-  firestore?: Firestore;
-}
-
-async function prepareFirestoreHistoryInfo(
-    {userContextProvider, mainDocument, firestore}: IPrepareFirestoreHistoryInfoArgs): Promise<IFirestoreHistoryInfo> {
-  // TODO: Wait for userContext to be valid.
-  // The userContext initially starts out with a user id of 0 and doesn't have a portal and other
-  // properties defined. After the user is authenticated the userContext will have valid fields.
-  // The invalid userContext will cause an error below. So we should use something like a MobX
-  // `await when(() => userContext?.uid)`. So far we haven't seen a case where
-  // prepareFirestoreHistoryInfo is called before the userContext is ready.
-  const userContext = userContextProvider?.userContext;
-
-  if (!userContextProvider || !mainDocument || !firestore || !userContext?.uid) {
-    console.error("cannot record history entry because environment is not valid",
-      { userContext, mainDocument, firestore });
-    throw new Error("cannot record history entry because environment is not valid");
-  }
-
-  const documentPath = getSimpleDocumentPath(mainDocument.key);
-  const documentRef = firestore.doc(documentPath);
-
-  // The metadata documents are created by DB#createDocument however it does not wait for the metadata
-  // document to be created. So we might end up here before the metadata document has been created.
-  await new Promise<void>((resolve, reject) => {
-    let timeoutId: NodeJS.Timeout | undefined = undefined;
-    const disposer = documentRef.onSnapshot(doc => {
-      if (doc.exists) {
-        resolve();
-        if (timeoutId) {
-          disposer();
-          clearTimeout(timeoutId);
-        }
-      }
-    });
-    timeoutId = setTimeout(() => {
-      // If there isn't a firestore metadata document in 5 seconds then give up
-      disposer();
-      console.warn("Could not find metadata document to attach history to", documentPath);
-      // If there is an error here the history will not be saved for the duration
-      // of this CLUE session.
-      // This happens because the rejection will bubble up to completeHistoryEntry.
-      // That does not handle errors from this promise. The "then" function will
-      // not be called. The error should be printed as an unhandled promise error.
-      // The next time a history entry is "completed" this rejected promise
-      // will be "then'd" again which will again not run its function.
-      // TODO: consider updating this to create the metadata document itself by
-      // calling createFirestoreMetadataDocument.
-      reject(`Could not find metadata document to attach history to ${documentPath}`);
-    }, 5000);
-  });
-
-  const lastHistoryEntry = await getLastHistoryEntry(firestore, documentPath);
-
-  return {
-    documentPath,
-    // We start with -1 so if there is no last entry the next entry will get an index of 0
-    // 0 is a valid index so ?? must be used instead of ||
-    lastEntryIndex: lastHistoryEntry?.index ?? -1,
-    // We use null here so this is a valid Firestore property value
-    lastEntryId: lastHistoryEntry?.id || null
-  };
-}
