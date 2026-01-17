@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import { SimpleDocumentItem } from "../thumbnail/simple-document-item";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { IDocumentMetadataModel } from "../../models/document/document-metadata-model";
+import { sortDocumentsInGroup } from "../../utilities/sort-document-utils";
 
 import ScrollArrowIcon from "../../assets/workspace-instance-scroll.svg";
 
@@ -26,6 +27,7 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
   const [visibleCount, setVisibleCount] = useState(0);
   const [leftArrowDisabled, setLeftArrowDisabled] = useState(true);
   const [rightArrowDisabled, setRightArrowDisabled] = useState(false);
+  const sortedGroupDocuments = sortDocumentsInGroup(documentGroup);
 
   // Each document in the group is represented by a square box. The group of document boxes is displayed in
   // a single row. If there are more boxes than can fit within the row's width, scroll buttons are added
@@ -118,7 +120,7 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
       }
       {visibleCount < docCount && renderScrollButton("left", leftArrowDisabled)}
       <div ref={docListContainerRef} className="doc-group-list simple" data-testid="doc-group-list">
-        {documentGroup.documents?.map((doc) => {
+        {sortedGroupDocuments?.map((doc) => {
           return (
             <SimpleDocumentItem
               key={doc.key}

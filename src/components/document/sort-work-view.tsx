@@ -26,7 +26,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { tagPrompt } = appConfig;
   const { docFilter: persistentUIDocFilter, primarySortBy, secondarySortBy } = persistentUI;
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
-  const sortOptions = ["Group", "Name", sortTagPrompt, "Bookmarked", "Tools"];
+  const sortOptions = ["Date", "Group", "Name", sortTagPrompt, "Bookmarked", "Tools"];
   const filterOptions: DocFilterType[] = ["Problem", "Investigation", "Unit", "All"];
   const docFilter = persistentUIDocFilter;
 
