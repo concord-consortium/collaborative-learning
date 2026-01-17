@@ -58,6 +58,7 @@ describe('SortWorkView Tests', () => {
     sortWork.getSecondarySortByTagOption().should("exist");
     sortWork.getSecondarySortByBookmarkedOption().should("exist");
     sortWork.getSecondarySortByToolsOption().should("exist");
+    sortWork.getSecondarySortByDateOption().should("exist");
     sortWork.getSecondarySortByNameOption().should("exist").click();
     sortWork.getSecondarySortByNoneOption().should("not.have.class", "selected");
     sortWork.getSecondarySortByNameOption().should("have.class", "selected");
