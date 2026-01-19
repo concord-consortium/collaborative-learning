@@ -113,7 +113,24 @@ export class SortedDocuments {
     snapshot.docs.forEach(doc => {
       const data = doc.data();
       mstSnapshot[data.key] = data;
-      typecheck(DocumentMetadataModel, data);
+      try {
+        typecheck(DocumentMetadataModel, data);
+      } catch (e: any) {
+        // We print the full document and error message to help with debugging.
+        // The browser console will truncate large error messages so we explicitly
+        // print it.
+        console.error("DocumentMetadataModel typecheck failed for doc:", {
+          error: e.message,
+          metadata: data,
+        });
+        // Skip this invalid document so the rest of the documents can still be processed
+        // TODO: It'd be better to return a document with error information rather than skipping it
+        // entirely. This way the UI can still show this document with an error message. By doing
+        // that users will be more likely to identify something is wrong, and we can track down
+        // problems sooner.
+        delete mstSnapshot[data.key];
+        return;
+      }
       const exemplarMetadata = this.exemplarMetadataDocs.get(data.key);
       if (exemplarMetadata) {
         // If this metadata doc in Firestore is an exemplar in the same unit then the exemplar
@@ -269,7 +286,7 @@ export class SortedDocuments {
     }
     return this.db.openDocumentFromFirestoreMetadata({
       ...metadataDoc,
-      properties: metadataDoc.properties.toJSON()
+      properties: metadataDoc.propertiesAsStringRecord
     });
   }
 }

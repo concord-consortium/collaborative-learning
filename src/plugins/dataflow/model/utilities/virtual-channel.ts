@@ -1,5 +1,5 @@
+import { demoStreams } from "../../../../../shared/assets/data/dataflow/demo-data";
 import { NodeChannelInfo } from "./channel";
-import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
 
 const virtualTempChannel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Temperature", channelId: "00001-VIR",

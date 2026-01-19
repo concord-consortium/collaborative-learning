@@ -3,7 +3,6 @@ import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { kAIDefaultHeight, kAITileType } from "./ai-types";
 import { AIComponent } from "./ai-tile";
 import { defaultAIContent, AIContentModel } from "./ai-content";
-import { switchToTextContent } from "./ai-utils";
 
 import Icon from "./ai-icon.svg";
 
@@ -13,7 +12,7 @@ registerTileContentInfo({
   modelClass: AIContentModel,
   defaultContent: defaultAIContent,
   defaultHeight: kAIDefaultHeight,
-  updateContentForCopy: switchToTextContent
+  updateContentForCopy: (oldContent: any) => ({ ...oldContent, hidePrompt: true })
 });
 
 registerTileComponentInfo({

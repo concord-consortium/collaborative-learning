@@ -20,7 +20,7 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
   groupId: types.maybeNull(types.string),
   title: types.maybeNull(types.string),
   originDoc: types.maybeNull(types.string),
-  properties: types.map(types.string),
+  properties: types.map(types.union(types.string, types.number)),
   tools: types.array(types.string),
   strategies: types.array(types.string),
   investigation: types.maybeNull(types.string),
@@ -29,8 +29,24 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
   visibility: types.maybeNull(types.string)
 })
 .views((self) => ({
+  get propertiesAsStringRecord(): Record<string, string> {
+    const record: Record<string, string> = {};
+    self.properties.forEach((value, key) => {
+      record[key] = String(value);
+    });
+    return record;
+  },
+  /**
+   * In the database there can be properties with numeric values.
+   * For consistency with the other document types we always return these as Strings.
+   * @param key
+   */
   getProperty(key: string) {
-    return self.properties.get(key);
+    const value = self.properties.get(key);
+    if (value === undefined) {
+      return undefined;
+    }
+    return String(value);
   },
 }));
 
