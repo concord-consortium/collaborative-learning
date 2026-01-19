@@ -135,6 +135,7 @@ class TableToolTile{
     // Fill in a table tile with the given data (a list of lists)
     // Table tile should in the default state (2 columns, no rows)
     fillTable($tile, data) {
+      cy.wait(10); // A brief wait can avoid a race issue with a newly created table
       // at least two cols, or as many as the longest row in the data array
       const cols = Math.max(2, ...data.map(row => row.length));
       $tile.within((tile) => {
