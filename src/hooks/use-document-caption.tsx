@@ -7,7 +7,9 @@ import { useStores } from "./use-stores";
 /**
  * Return a string caption for below the thumbnail view of the document.
  * This is also used as the name of the document in commented documents list.
- * Note: this overlaps with the DocumentTitle component.
+ * Note: this component provides very similar functionality to the
+ * DocumentTitle component. See if that better serves your needs, or see if we can
+ * consolidate them.
  */
 export function useDocumentCaption(document: DocumentModelType, isStudentWorkspaceDoc?: boolean) {
   const {appConfig, class: classStore, unit, user} = useStores();

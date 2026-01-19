@@ -13,8 +13,9 @@ interface IProps {
 }
 
 /**
- * Display the document title. Note this component overlaps with the userDocumentCaption
- * hook.
+ * Display the document title. Note this component provides very similar functionality to
+ * useDocumentCaption hook. See if that better serves your needs, or see if we can
+ * consolidate them.
  */
 export const DocumentTitle: React.FC<IProps> = observer(function DocumentTitle(props: IProps) {
   const {appConfig, class: classStore, unit } = useStores();
@@ -39,7 +40,7 @@ export const DocumentTitle: React.FC<IProps> = observer(function DocumentTitle(p
   // TODO: We might want to change this Unknown to "Title Loading..." since that should be the
   // the case when document is undefined.
   // Also it is possible for getDocumentDisplayTitle to return undefined,
-  // perhaps it could return "Untitled" instead, but we need to check that change won't
+  // perhaps it could return "Untitled" instead, but we need to check that won't break
   // something else before changing it.
   const docTitle =
     !document ? "Unknown" : getDocumentDisplayTitle(unit, document, appConfig);
