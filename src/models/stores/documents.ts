@@ -13,7 +13,7 @@ import { UserModelType } from "./user";
 import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { Firestore } from "../../lib/firestore";
 import { TreeManagerType } from "../history/tree-manager";
-import { FirestoreHistoryManager } from "../history/history-firestore";
+import { FirestoreHistoryManager } from "../history/firestore-history-manager";
 import { UserContextProvider } from "./user-context-provider";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
