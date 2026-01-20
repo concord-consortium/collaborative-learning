@@ -1,4 +1,5 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, SnapshotIn } from "mobx-state-tree";
+import { IDocumentMetadata } from "../../../shared/shared";
 
 /**
  * This is the serializable version of IDocumentMetadata. It is almost the same. The one
@@ -26,7 +27,11 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
   investigation: types.maybeNull(types.string),
   problem: types.maybeNull(types.string),
   unit: types.maybeNull(types.string),
-  visibility: types.maybeNull(types.string)
+  visibility: types.maybeNull(types.string),
+  lastHistoryEntry: types.maybeNull(types.model({
+    id: types.string,
+    index: types.number,
+  })),
 })
 .views((self) => ({
   get propertiesAsStringRecord(): Record<string, string> {
@@ -51,3 +56,50 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
 }));
 
 export interface IDocumentMetadataModel extends Instance<typeof DocumentMetadataModel> {}
+
+// Compile-time checks that IDocumentMetadataModel is compatible with IDocumentMetadata.
+// The `properties` field is omitted because the model uses an observable map while
+// the interface uses Record<string, string>.
+
+/**
+ * Check the basic compatibility between IDocumentMetadataModel and IDocumentMetadata.
+ * Since many of the properties are optional, this check mainly catches type mismatches.
+ */
+// eslint-disable-next-line unused-imports/no-unused-vars
+function _checkDocumentMetadataModelMatchesInterface(
+  _model: Omit<IDocumentMetadataModel, "properties">
+): IDocumentMetadata {
+  return _model;
+}
+
+/**
+ * Check that all of the properties match between IDocumentMetadataModel and IDocumentMetadata.
+ * It does this by making all properties required.
+ * The createdAt property is excluded because in the MST model it is maybe, which results in
+ * a typescript type of `number | undefined`, which doesn't get stripped out by the Required<T>
+ * utility type.
+ */
+// eslint-disable-next-line unused-imports/no-unused-vars
+function _checkDocumentMetadataModelMatchesFullInterface(
+  _model: Required<Omit<IDocumentMetadataModel, "properties" | "createdAt">>
+): Required<Omit<IDocumentMetadata, "properties" | "createdAt">> {
+  return _model;
+}
+
+
+/**
+ * Check that the snapshot type of DocumentMetadataModel matches IDocumentMetadata.
+ * The DocumentMetadataModel is created from the data in Firestore which is supposed
+ * to match the IDocumentMetadata interface. So this checks to make sure at least
+ * the types support that creation. The types are modified to have all required
+ * properties so it will pick up missing properties.
+ *
+ * @param _model
+ * @returns
+ */
+// eslint-disable-next-line unused-imports/no-unused-vars
+function _checkInterfaceMatchesDocumentMetadataModelSnapshotIn(
+  _model: Required< IDocumentMetadata >
+): Required< SnapshotIn<typeof DocumentMetadataModel> > {
+  return _model;
+}

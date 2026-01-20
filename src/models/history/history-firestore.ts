@@ -5,6 +5,7 @@ import { HistoryEntrySnapshot } from "./history";
 
 export type LastHistoryEntry = undefined | { index: number, id: string};
 
+
 export async function getLastHistoryEntry(firestore: Firestore, documentPath: string): Promise<LastHistoryEntry> {
   const lastEntryQuery = await firestore.collection(`${documentPath}/history`)
     .limit(1)
