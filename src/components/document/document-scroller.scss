@@ -22,8 +22,9 @@ $footer-height: 12px;
       width: 100%;
 
       .document-thumbnail {
-        height: 100%;
-        width: 100%;
+        aspect-ratio: 8/7;
+        height: auto;
+        width: calc(50% - $document-thumbnail-list-padding);
       }
 
       .list-item {
