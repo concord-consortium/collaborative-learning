@@ -188,6 +188,35 @@ export const createDocMapByBookmarks = (documents: IDocumentMetadataModel[], boo
   return documentMap;
 };
 
+export const sortProblemSectionLabels = (docMapKeys: string[]) => {
+  return docMapKeys.sort((a, b) => {
+    // "No Problem" goes to the end
+    if (a === "No Problem") return 1;
+    if (b === "No Problem") return -1;
+
+    // Parse "Problem X.Y" or "Problem Y" format
+    const parseLabel = (label: string) => {
+      const match = label.match(/Problem (?:(\d+)\.)?(\d+)/);
+      if (match) {
+        return {
+          investigation: match[1] ? parseInt(match[1], 10) : 0,
+          problem: parseInt(match[2], 10)
+        };
+      }
+      return { investigation: 0, problem: 0 };
+    };
+
+    const aVals = parseLabel(a);
+    const bVals = parseLabel(b);
+
+    // Sort by investigation first, then by problem
+    if (aVals.investigation !== bVals.investigation) {
+      return aVals.investigation - bVals.investigation;
+    }
+    return aVals.problem - bVals.problem;
+  });
+};
+
 export const sortDocumentsInGroup = (documentGroup: DocumentGroup) => {
   const documents = [...documentGroup.documents];
 

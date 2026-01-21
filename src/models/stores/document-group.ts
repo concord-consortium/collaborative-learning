@@ -8,7 +8,8 @@ import {
   getTagsWithDocs,
   sortDateSectionLabels,
   sortGroupSectionLabels,
-  sortNameSectionLabels
+  sortNameSectionLabels,
+  sortProblemSectionLabels
 } from "../../utilities/sort-document-utils";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { getTileContentInfo } from "../tiles/tile-content-info";
@@ -66,6 +67,7 @@ interface IBuildDocumentCollectionProps {
  * - Strategies
  * - Tools
  * - Bookmarks
+ * - Problems
  *
  * Its main purpose is to provide sub sorting options for documents that are already
  * sorted by a primary sort filter.
@@ -145,6 +147,8 @@ export class DocumentGroup {
         return this.byTools;
       case "Bookmarked":
         return this.byBookmarked;
+      case "Problem":
+        return this.byProblem;
       default:
         return [];
     }
@@ -243,5 +247,28 @@ export class DocumentGroup {
     const docMap = createDocMapByBookmarks(this.documents, this.stores.bookmarks);
     const sortedSectionLabels = ["Bookmarked", "Not Bookmarked"];
     return this.buildDocumentCollection({sortedSectionLabels, sortType: "Bookmarked", docMap});
+  }
+
+  get byProblem(): DocumentGroup[] {
+    const docMap: Map<string, IDocumentMetadataModel[]> = new Map();
+    this.documents.forEach((doc) => {
+      const investigationOrdinal = doc.investigation;
+      const problemOrdinal = doc.problem;
+      let sectionLabel = "No Problem";
+
+      if (investigationOrdinal != null && problemOrdinal != null) {
+        sectionLabel = `Problem ${investigationOrdinal}.${problemOrdinal}`;
+      } else if (problemOrdinal != null) {
+        sectionLabel = `Problem ${problemOrdinal}`;
+      }
+
+      if (!docMap.has(sectionLabel)) {
+        docMap.set(sectionLabel, []);
+      }
+      docMap.get(sectionLabel)?.push(doc);
+    });
+
+    const sortedSectionLabels = sortProblemSectionLabels(Array.from(docMap.keys()));
+    return this.buildDocumentCollection({sortedSectionLabels, sortType: "Problem", docMap});
   }
 }

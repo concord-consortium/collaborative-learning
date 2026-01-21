@@ -73,6 +73,17 @@
       "unit-rate": "Unit Rate"
     },
     "tagPrompt": "Identify Design Approach",
+    "sortWorkConfig": {
+      "sortOptions": [
+        { "type": "Group" },
+        { "type": "Name" },
+        { "type": "Strategy" },
+        { "type": "Bookmarked" },
+        { "type": "Tools" },
+        { "type": "Date" },
+        { "type": "Problem" }
+      ]
+    },
     "tools": ["Simulator"],
     "navTabs": {
       "lazyLoadTabContents": true,

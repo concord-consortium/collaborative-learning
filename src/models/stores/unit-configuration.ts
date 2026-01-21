@@ -1,6 +1,7 @@
 import { SnapshotIn, types } from "mobx-state-tree";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { ProblemConfiguration } from "./problem-configuration";
+import { ISortWorkConfig } from "./sort-work-config";
 
 const DocumentSpecModel = types
   .model("DocumentSpec", {
@@ -110,4 +111,6 @@ export interface UnitConfiguration extends ProblemConfiguration {
   showIdeasButton?: boolean;
   // if set, the button to switch to 4-up view is hidden
   hide4up?: boolean;
+  // configuration for Sort Work tab sort options
+  sortWorkConfig?: ISortWorkConfig;
 }

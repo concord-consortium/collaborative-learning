@@ -43,22 +43,30 @@ const mockMetadataDocuments: SnapshotIn<typeof MetadataDocMapModel> = {
     createdAt: 1,
     tools: [],
     strategies: ["foo", "bar"],
+    investigation: "1",
+    problem: "1"
   },
   "Student 2 Problem Doc Group 3": {
     uid: "2", //Scott
     type: ProblemDocument, key:"Student 2 Problem Doc Group 3", createdAt: 2,
-    tools: ["Text"]
+    tools: ["Text"],
+    investigation: "1",
+    problem: "2"
   },
   "Student 3 Problem Doc Group 9": {
     uid: "3", //Dennis
     type: ProblemDocument, key:"Student 3 Problem Doc Group 9", createdAt: 3,
-    tools: ["Drawing"]
+    tools: ["Drawing"],
+    investigation: "2",
+    problem: "1"
   },
   "Student 4 Problem Doc Group 3": {
     uid: "4", //Kirk
     type: ProblemDocument, key:"Student 4 Problem Doc Group 3", createdAt: 4,
     tools: [],
-    strategies: ["bar"]
+    strategies: ["bar"],
+    investigation: "1",
+    problem: "2"
   }
 };
 
@@ -326,6 +334,47 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection3.length).toBe(1);
       expect(documentCollection3[0].label).toBe("Drawing");
       expect(documentCollection3[0].documents.length).toBe(1);
+    });
+  });
+
+  describe("byProblem Function", () => {
+    it('should return a document collection sorted by problem with correct documents per problem', () => {
+      // Primary sort by Group, then secondary sort by Problem
+      const byGroupDocs = sortedDocuments.sortBy("Group");
+
+      // Group 3 has Scott (1.2) and Kirk (1.2) - both in Problem 1.2
+      const documentGroup = byGroupDocs[0]; // Group 3
+      const documentCollection = documentGroup.byProblem;
+      expect(documentCollection.length).toBe(1);
+      expect(documentCollection[0].label).toBe("Problem 1.2");
+      expect(documentCollection[0].documents.length).toBe(2);
+
+      // Group 5 has Joe (1.1) - in Problem 1.1
+      const documentGroup2 = byGroupDocs[1]; // Group 5
+      const documentCollection2 = documentGroup2.byProblem;
+      expect(documentCollection2.length).toBe(1);
+      expect(documentCollection2[0].label).toBe("Problem 1.1");
+      expect(documentCollection2[0].documents.length).toBe(1);
+
+      // Group 9 has Dennis (2.1) - in Problem 2.1
+      const documentGroup3 = byGroupDocs[2]; // Group 9
+      const documentCollection3 = documentGroup3.byProblem;
+      expect(documentCollection3.length).toBe(1);
+      expect(documentCollection3[0].label).toBe("Problem 2.1");
+      expect(documentCollection3[0].documents.length).toBe(1);
+    });
+
+    it('should sort problems in correct order (by investigation then problem)', () => {
+      // Primary sort by Problem to test the problem sorting directly
+      const byProblemDocs = sortedDocuments.sortBy("Problem");
+      expect(byProblemDocs.length).toBe(3);
+      // Should be sorted: 1.1, 1.2, 2.1
+      expect(byProblemDocs[0].label).toBe("Problem 1.1");
+      expect(byProblemDocs[0].documents.length).toBe(1);
+      expect(byProblemDocs[1].label).toBe("Problem 1.2");
+      expect(byProblemDocs[1].documents.length).toBe(2);
+      expect(byProblemDocs[2].label).toBe("Problem 2.1");
+      expect(byProblemDocs[2].documents.length).toBe(1);
     });
   });
 

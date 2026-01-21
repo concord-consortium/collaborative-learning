@@ -50,6 +50,10 @@ const LeftNav: React.FC<IProps> = ({ onMediaLibraryClicked }) => {
               id: "aiSettings",
               label: "AI Settings",
             },
+            {
+              id: "sortWorkSettings",
+              label: "Sort Work Settings",
+            },
           ]
         },
         {
