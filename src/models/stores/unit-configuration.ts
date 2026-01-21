@@ -71,6 +71,8 @@ export interface UnitConfiguration extends ProblemConfiguration {
   documentLabelProperties: string[];
   // terminology for referencing documents
   documentLabels: Record<string, SnapshotIn<typeof DocumentLabelModel>>;
+  // terminology for referencing units, investigations, and problems
+  problemHierarchyLabels?: Record<string, SnapshotIn<typeof DocumentLabelModel>>;
   // disables publishing documents of particular types or with particular properties
   disablePublish: Array<SnapshotIn<typeof DocumentSpecModel>> | boolean;
   // enable/disable showing the history-scrubbing controls for users in different roles

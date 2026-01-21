@@ -17,18 +17,29 @@ import { AiSummary } from "../navigation/ai-summary";
 import "../thumbnail/document-type-collection.scss";
 import "./sort-work-view.scss";
 
+interface FilterOption {
+  label: string;
+  value: DocFilterType;
+}
+
 /**
  * Resources pane view of class work and exemplars.
  * Various options for sorting the display are available - by user, by group, by tools used, etc.
  */
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, investigation, persistentUI, problem, sortedDocuments, ui, unit } = useStores();
-  const { tagPrompt } = appConfig;
+  const { getProblemHierarchyLabel, tagPrompt } = appConfig;
   const { docFilter: persistentUIDocFilter, primarySortBy, secondarySortBy } = persistentUI;
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
   const sortOptions = ["Date", "Group", "Name", sortTagPrompt, "Bookmarked", "Tools"];
-  const filterOptions: DocFilterType[] = ["Problem", "Investigation", "Unit", "All"];
+  const filterOptions: FilterOption[] = [
+    { label: getProblemHierarchyLabel("Problem", 1), value: "Problem" },
+    { label: getProblemHierarchyLabel("Investigation", 1), value: "Investigation" },
+    { label: getProblemHierarchyLabel("Unit", 1), value: "Unit" },
+    { label: "All", value: "All" }
+  ];
   const docFilter = persistentUIDocFilter;
+  const docFilterLabel = getProblemHierarchyLabel(docFilter, 1);
 
   const handleDocFilterSelection = useCallback((filter: DocFilterType) => {
     Logger.log(LogEventName.SORT_SCOPE_CHANGE, {old: docFilter, new: filter});
@@ -77,10 +88,10 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     onClick: () => handleSecondarySortBySelection("None")
   });
 
-  const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => ({
-    selected: option === docFilter,
-    text: option,
-    onClick: () => handleDocFilterSelection(option)
+  const docFilterOptions: ICustomDropdownItem[] = filterOptions.map(({ label, value }) => ({
+    selected: value === docFilter,
+    text: label,
+    onClick: () => handleDocFilterSelection(value)
   }));
 
   const primarySearchTerm = normalizeSortString(primarySortBy) as PrimarySortType;
@@ -156,7 +167,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
           <>
             <SortWorkHeader
               key={`sort-work-header-${primarySortBy}`}
-              docFilter={docFilter}
+              docFilterLabel={docFilterLabel}
               docFilterItems={docFilterOptions}
               primarySortItems={primarySortByOptions}
               secondarySortItems={secondarySortOptions}

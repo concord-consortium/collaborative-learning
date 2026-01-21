@@ -103,6 +103,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["documentLabels"]>("documentLabels");
   }
 
+  get problemHierarchyLabels() {
+    return this.getProp<UC["problemHierarchyLabels"]>("problemHierarchyLabels");
+  }
+
   get disablePublish() {
     return this.getProp<UC["disablePublish"]>("disablePublish");
   }

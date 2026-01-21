@@ -77,6 +77,7 @@ export const AppConfigModel = types
     get aiPrompt() { return self.configMgr.aiPrompt; },
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },
     get documentLabels() { return self.configMgr.documentLabels; },
+    get problemHierarchyLabels() { return self.configMgr.problemHierarchyLabels; },
     get disablePublish() { return self.configMgr.disablePublish; },
     get enableHistoryRoles() { return self.configMgr.enableHistoryRoles; },
     get enableCommentRoles() { return self.configMgr.enableCommentRoles; },
@@ -152,6 +153,10 @@ export const AppConfigModel = types
     getDocumentLabel(docType: string, num?: number, lowerCase?: boolean) {
       const docLabel = self.documentLabels[docType];
       return docLabel ? DocumentLabelModel.create(docLabel).getLabel(num, lowerCase) : "";
+    },
+    getProblemHierarchyLabel(hierarchyLevel: string, num?: number, lowerCase?: boolean) {
+      const labels = self.problemHierarchyLabels?.[hierarchyLevel];
+      return labels ? DocumentLabelModel.create(labels).getLabel(num, lowerCase) : hierarchyLevel;
     },
     get showAnnotationControls() {
       return (

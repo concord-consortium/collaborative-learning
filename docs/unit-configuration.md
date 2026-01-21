@@ -61,6 +61,8 @@ These properties are configurable at the application (built into the code) or th
 
 `documentLabels`: (object) terminology for referencing documents
 
+`problemHierarchyLabels`: (object | undefined) terminology for referencing units, investigations, and problems
+
 `disablePublish`: (boolean or array) disables publishing documents of particular types or with particular properties
 
 `enableHistoryRoles`: (array of "student" | "teacher" | "researcher") enable/disable showing the history-scrubbing controls for users in different roles
