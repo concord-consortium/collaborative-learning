@@ -1,3 +1,53 @@
+/*
+ * NOT IMPLEMENTED
+ *
+ * See: docs/specs/add-interactive-api-tile.md
+ *
+ * This section lists features from the spec that were not implemented in the initial release.
+ * These are items from the "Optional Enhancements" section and other features that remain
+ * for future development.
+ *
+ * 1. URL Configuration UI (Authoring Toolbar)
+ *    Spec Section: Optional Enhancements > 1. URL Configuration UI
+ *    What's Missing: A toolbar component that allows users to configure the interactive URL
+ *    directly in the CLUE interface.
+ *    Current Workaround: URLs must be configured via document JSON or authored content files.
+ *
+ * 2. Authored State Configuration UI
+ *    Spec Section: Optional Enhancements > 2. Authored State Configuration
+ *    What's Missing: A UI for curriculum authors to configure the `authoredState` property
+ *    (the configuration passed to the interactive).
+ *    Current Workaround: `authoredState` must be configured via document JSON or authored content files.
+ *
+ * 3. Linked Interactives Support
+ *    Spec Section: Optional Enhancements > 3. Support for Linked Interactives
+ *    What's Missing: The ability for interactives to link to and receive data from other
+ *    CLUE tiles (e.g., SharedDataSet).
+ *    Current Behavior: `linkedInteractives` is always sent as an empty array `[]`.
+ *
+ * 4. Full Modal/Dialog Support
+ *    Spec Section: Optional Enhancements > 4. Advanced Features
+ *    What's Missing: Support for lightbox and dialog modal types from interactives.
+ *    Current Behavior: Only `window.alert()` is supported for `type: "alert"` modals.
+ *    The `hostFeatures.modal` declaration correctly reports `lightbox: false` and `dialog: false`.
+ *
+ * 5. Hint Display Integration
+ *    Spec Section: Technical Notes > Hint System Support
+ *    What's Missing: Displaying hints from interactives in the CLUE UI.
+ *    Current Behavior: Hints are logged to console but not displayed to users. The hint
+ *    listener exists and works, but only outputs to `console.log`.
+ *
+ * 6. Custom Message Support
+ *    Spec Section: Optional Enhancements > 4. Advanced Features
+ *    What's Missing: Support for arbitrary custom messages between CLUE and interactives.
+ *    Current Behavior: Only standard LARA Interactive API messages are supported.
+ *
+ * 7. Global Interactive State
+ *    Spec Section: Step 6 code (initMessage structure)
+ *    What's Missing: Support for sharing state across multiple instances of the same interactive.
+ *    Current Behavior: `globalInteractiveState` is always `null`.
+ */
+
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { observer } from "mobx-react";
 import iframePhone from "iframe-phone";
@@ -83,6 +133,7 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
   const lastHeightRef = useRef<number>(480); // Track last height to prevent recursive loops
   const containerRef = useRef<HTMLDivElement>(null);
+  const aspectRatioRef = useRef<number | null>(null); // Store aspect ratio from interactive
 
   // Use refs to avoid stale closures in iframe-phone callbacks
   const contentRef = useRef<InteractiveApiContentModelType | null>(content);
@@ -177,6 +228,21 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
     debouncedRequestHeight(model.id, clampedHeight);
   }, [model.id, debouncedRequestHeight, content?.maxHeight]);
 
+  // Calculate and apply height based on aspect ratio and current container width
+  const applyAspectRatio = useCallback((aspectRatio: number) => {
+    if (!containerRef.current || aspectRatio <= 0) return;
+
+    // Get the current width of the container
+    const containerWidth = containerRef.current.clientWidth;
+    if (containerWidth <= 0) return;
+
+    // Calculate height from aspect ratio (aspectRatio = width/height, so height = width/aspectRatio)
+    const calculatedHeight = Math.round(containerWidth / aspectRatio);
+
+    // Use handleHeight to apply the calculated height (it handles clamping and debouncing)
+    handleHeight(calculatedHeight);
+  }, [handleHeight]);
+
   const handleIframeLoad = useCallback(() => {
     setIsLoading(false);
     setShowSpinner(false);
@@ -228,9 +294,11 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
       phone.addListener("supportedFeatures", (info: any) => {
         const features: ISupportedFeatures = info.features;
         // Interactives can report aspectRatio for responsive sizing
-        if (features.aspectRatio) {
-          // Note: CLUE may not support aspect ratio directly, but we log it for future use
-          console.log(`Interactive ${model.id} reported aspect ratio:`, features.aspectRatio);
+        if (features.aspectRatio && features.aspectRatio > 0) {
+          // Store the aspect ratio for use in resize handling
+          aspectRatioRef.current = features.aspectRatio;
+          // Apply the aspect ratio to calculate initial height
+          applyAspectRatio(features.aspectRatio);
         }
       });
 

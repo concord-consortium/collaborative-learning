@@ -1267,44 +1267,33 @@ Add to the `gTileRegistration` object:
 ]),
 ```
 
-### Step 12: Update TileContentUnion
+### Step 12: TileContentUnion (No Action Required)
 
 **File**: `src/models/tiles/tile-content-union.ts`
 
-Add the import:
+**No manual updates are needed.** CLUE uses a dynamic registration system that automatically includes all registered tile content models.
+
+The `TileContentUnion` in CLUE uses MST's `late()` function combined with `getTileContentModels()` to dynamically build the union at runtime:
+
 ```typescript
-import { InteractiveApiContentModel } from "../../plugins/interactive-api/interactive-api-tile-content";
+export const TileContentUnion = types.late<typeof TileContentModel>(() => {
+  const contentModels = getTileContentModels();
+  return types.union({ dispatcher: tileContentFactory }, ...contentModels) as typeof TileContentModel;
+});
 ```
 
-Add to the union (after more specific models, but before `UnknownContentModel`):
-```typescript
-export const TileContentUnion = types.union(
-  { dispatcher: tileContentFactory },
-  PlaceholderContentModel,
-  GeometryContentModel,
-  ImageContentModel,
-  TableContentModel,
-  TextContentModel,
-  DrawingContentModel,
-  DataflowContentModel,
-  // ... other existing content models ...
-  InteractiveApiContentModel,  // Add near the end, after all specific models
-  UnknownContentModel  // IMPORTANT: Always keep UnknownContentModel last
-);
-```
+When you call `registerTileContentInfo()` in your tile's registration file (Step 8), the content model is automatically added to the registry. The `late()` function ensures that when MST first needs to use the union (e.g., during deserialization), it will include all registered models.
 
-**Critical**: The `InteractiveApiContentModel` must be placed:
-1. **After** models with more specific dispatchers (DataCard, Drawing, Geometry, etc.) to avoid greedy matching if `tileContentFactory` logic overlaps
-2. **Before** `UnknownContentModel` - The MST union dispatcher tries models in order during deserialization. If `UnknownContentModel` comes first, it will "catch" all unknown tile types, preventing your plugin from initializing correctly.
+**Why this works:**
+1. `registerTileContentInfo()` adds your model to `gTileContentInfoMap`
+2. `getTileContentModels()` returns all registered model classes
+3. `types.late()` defers union creation until first use, after all tiles are registered
+4. `tileContentFactory` dispatches based on the `type` property in snapshots
 
-**Placement Strategy**: Place `InteractiveApiContentModel` near the end, just before `UnknownContentModel`, after all tiles with specific dispatching logic.
-
-**Verification Steps:**
-1. Check the current order in `tile-content-union.ts` before adding
-2. Verify that `InteractiveApiContentModel` uses `type: types.literal("InteractiveApi")` (not greedy)
-3. Confirm `UnknownContentModel` is the absolute last item in the union
-4. Test deserialization by loading a document with an InteractiveApi tile
-5. If tile fails to load, check browser console for MST union dispatcher errors
+**Verification:**
+- Ensure your registration file is imported (via `register-tile-types.ts`)
+- Test by loading a document containing an InteractiveApi tile
+- If the tile fails to load, check that the registration is being called before document load
 
 ## Testing Plan
 
@@ -2490,6 +2479,66 @@ Replace the contents of `src/plugins/interactive-api/README.md` with the compreh
 The documentation is structured to serve both:
 - **Curriculum authors** who need to configure the tile
 - **Developers** who need to create compatible interactives or maintain the tile code
+
+## Not Implemented
+
+This section lists features from the spec that were **not implemented** in the initial release. These are items from the "Optional Enhancements" section and other features that remain for future development.
+
+### 1. URL Configuration UI (Authoring Toolbar)
+
+**Spec Section**: Optional Enhancements > 1. URL Configuration UI
+
+**What's Missing**: A toolbar component that allows users to configure the interactive URL directly in the CLUE interface.
+
+**Current Workaround**: URLs must be configured via document JSON or authored content files.
+
+### 2. Authored State Configuration UI
+
+**Spec Section**: Optional Enhancements > 2. Authored State Configuration
+
+**What's Missing**: A UI for curriculum authors to configure the `authoredState` property (the configuration passed to the interactive).
+
+**Current Workaround**: `authoredState` must be configured via document JSON or authored content files.
+
+### 3. Linked Interactives Support
+
+**Spec Section**: Optional Enhancements > 3. Support for Linked Interactives
+
+**What's Missing**: The ability for interactives to link to and receive data from other CLUE tiles (e.g., SharedDataSet).
+
+**Current Behavior**: `linkedInteractives` is always sent as an empty array `[]`.
+
+### 4. Full Modal/Dialog Support
+
+**Spec Section**: Optional Enhancements > 4. Advanced Features
+
+**What's Missing**: Support for lightbox and dialog modal types from interactives.
+
+**Current Behavior**: Only `window.alert()` is supported for `type: "alert"` modals. The `hostFeatures.modal` declaration correctly reports `lightbox: false` and `dialog: false`.
+
+### 6. Hint Display Integration
+
+**Spec Section**: Technical Notes > Hint System Support
+
+**What's Missing**: Displaying hints from interactives in the CLUE UI.
+
+**Current Behavior**: Hints are logged to console but not displayed to users. The hint listener exists and works, but only outputs to `console.log`.
+
+### 7. Custom Message Support
+
+**Spec Section**: Optional Enhancements > 4. Advanced Features
+
+**What's Missing**: Support for arbitrary custom messages between CLUE and interactives.
+
+**Current Behavior**: Only standard LARA Interactive API messages are supported.
+
+### 8. Global Interactive State
+
+**Spec Section**: Step 6 code (initMessage structure)
+
+**What's Missing**: Support for sharing state across multiple instances of the same interactive.
+
+**Current Behavior**: `globalInteractiveState` is always `null`.
 
 ## References
 
