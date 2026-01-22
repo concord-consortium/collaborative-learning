@@ -158,6 +158,11 @@ export const AppConfigModel = types
       const labels = self.problemHierarchyLabels?.[hierarchyLevel];
       return labels ? DocumentLabelModel.create(labels).getLabel(num, lowerCase) : hierarchyLevel;
     },
+    shouldIncludeProblemHierarchyLabel(hierarchyLevel: string) {
+      const labels = self.problemHierarchyLabels?.[hierarchyLevel];
+      // Only exclude a level if the "hide" label is explicitly set for it
+      return labels ? !DocumentLabelModel.create(labels).getAnyLabel("hide") : true;
+    },
     get showAnnotationControls() {
       return (
 

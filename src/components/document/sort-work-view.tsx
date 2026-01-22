@@ -28,18 +28,23 @@ interface FilterOption {
  */
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, investigation, persistentUI, problem, sortedDocuments, ui, unit } = useStores();
-  const { getProblemHierarchyLabel, tagPrompt } = appConfig;
+  const { getProblemHierarchyLabel, shouldIncludeProblemHierarchyLabel, tagPrompt } = appConfig;
   const { docFilter: persistentUIDocFilter, primarySortBy, secondarySortBy } = persistentUI;
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
   const sortOptions = ["Date", "Group", "Name", sortTagPrompt, "Bookmarked", "Tools"];
-  const filterOptions: FilterOption[] = [
-    { label: getProblemHierarchyLabel("Problem", 1), value: "Problem" },
-    { label: getProblemHierarchyLabel("Investigation", 1), value: "Investigation" },
-    { label: getProblemHierarchyLabel("Unit", 1), value: "Unit" },
-    { label: "All", value: "All" }
-  ];
   const docFilter = persistentUIDocFilter;
   const docFilterLabel = getProblemHierarchyLabel(docFilter, 1);
+
+  const filterOptions: FilterOption[] = [];
+  const addFilterOption = (level: DocFilterType, label?: string) => {
+    if (shouldIncludeProblemHierarchyLabel(level)) {
+      filterOptions.push({ label: label ?? getProblemHierarchyLabel(level, 1), value: level });
+    }
+  }
+  addFilterOption("Problem");
+  addFilterOption("Investigation");
+  addFilterOption("Unit");
+  addFilterOption("All", "All");
 
   const handleDocFilterSelection = useCallback((filter: DocFilterType) => {
     Logger.log(LogEventName.SORT_SCOPE_CHANGE, {old: docFilter, new: filter});

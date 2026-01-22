@@ -13,6 +13,9 @@ export const DocumentLabelModel = types
     labels: types.map(types.string)
   })
   .views(self => ({
+    getAnyLabel(label: string) {
+      return self.labels.get(label);
+    },
     getUpperLabel(num?: number) {
       const numLabel = num != null ? self.labels.get(String(num)) : "";
       return numLabel || self.labels.get("n") || "";
