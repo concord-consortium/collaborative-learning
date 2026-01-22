@@ -55,10 +55,12 @@ $section-padding: 6px;
 }
 
 .documents-list {
+  align-content: flex-start;
   display: flex;
   flex-wrap: wrap;
-  align-content: flex-start;
+  margin: 0 10px;
   overflow-y: auto;
+
   &.top-panel {
     overflow-y: hidden;
   }

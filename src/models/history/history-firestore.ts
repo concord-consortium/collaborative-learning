@@ -70,14 +70,3 @@ export function loadHistory(firestore: Firestore, historyPath: string,
   );
 
 }
-
-// TODO: it would probably be useful to split out more of the history
-// mirroring code from the TreeManager. However even if we do that it is useful
-// to keep these two functions in their own module. That way the tests
-// can mock these functions and test the history mirroring logic without
-// needing a Firestore simulator.
-//
-// We are going to have to add more stateful monitoring of the entry loading
-// in order to support corrupted history that is missing some entries.
-// So that might be a good time to split the history mirroring out of
-// the TreeMonitor

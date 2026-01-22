@@ -13,6 +13,7 @@ import { UserModelType } from "./user";
 import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { Firestore } from "../../lib/firestore";
 import { TreeManagerType } from "../history/tree-manager";
+import { FirestoreHistoryManager } from "../history/firestore-history-manager";
 import { UserContextProvider } from "./user-context-provider";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
@@ -244,11 +245,12 @@ export const DocumentsModel = types
         }
 
         const treeManager = document.treeManagerAPI as TreeManagerType;
-        treeManager.setPropsForFirestoreSaving({
-          firestore,
-          userContextProvider
-        });
 
+        // Set up the Firestore history manager to save history entries
+        const firestoreHistoryManager = new FirestoreHistoryManager(firestore, userContextProvider, document);
+        treeManager.addHistoryEntryCompletedListener(
+          firestoreHistoryManager.onHistoryEntryCompleted
+        );
       } else {
         console.warn("Document with the same key already exists");
       }

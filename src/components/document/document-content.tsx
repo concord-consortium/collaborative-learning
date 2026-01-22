@@ -491,6 +491,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       }
 
       this.clearDropRowInfo();
+      e.stopPropagation(); // Prevent other drop actions, like opening the document the tiles came from
       return;
     }
 
