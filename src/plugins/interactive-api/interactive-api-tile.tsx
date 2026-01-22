@@ -152,7 +152,7 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSkipToContent = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleSkipToContent = useCallback((e: React.SyntheticEvent) => {
     e.preventDefault();
     if (iframeRef.current) {
       iframeRef.current.focus();
@@ -251,25 +251,31 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
     }
   }, []);
 
-  // Initialize iframe communication
+  // Reset loading state when URL changes
   useEffect(() => {
-    // Start loading state and set timeout for spinner
     setIsLoading(true);
     setShowSpinner(false);
+  }, [content?.url]);
 
-    // Show spinner after 2 seconds if still loading
-    // Note: The spinner will be cleared by handleIframeLoad when the iframe finishes loading
+  // Show spinner after 2 seconds if still loading
+  // This effect depends on isLoading to avoid stale closure issues
+  useEffect(() => {
+    if (!isLoading) {
+      setShowSpinner(false);
+      return;
+    }
+
+    // Start timeout to show spinner after delay
     loadingTimeoutRef.current = setTimeout(() => {
       setShowSpinner(true);
     }, 2000);
 
-    // Cleanup timeout on unmount
     return () => {
       if (loadingTimeoutRef.current) {
         clearTimeout(loadingTimeoutRef.current);
       }
     };
-  }, [content?.url]);
+  }, [isLoading]);
 
   useEffect(() => {
     if (!iframeRef.current || !content?.url) {
@@ -340,8 +346,8 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
       // Legacy bug fix: In the 1.0.0 release of the AP the special 'nochange'
       // message wasn't handled correctly and it was saved as the interactive state
       // If we see that here we just use undefined instead.
-      // Use contentRef to avoid adding interactiveState to dependencies (would cause reconnection loop)
-      let initialState = contentRef.current?.interactiveState;
+      // Note: content is guaranteed to exist here due to the guard at the start of this effect
+      let initialState = content.interactiveState;
       if (initialState === "nochange") {
         initialState = undefined;
       }
@@ -357,7 +363,7 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
             alert: true        // CLUE supports simple alerts
           }
         },
-        authoredState: contentRef.current?.authoredState,
+        authoredState: content.authoredState,
         interactiveState: initialState,
         themeInfo: {
           colors: {
@@ -412,8 +418,12 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
       debouncedSetState.cancel();
       debouncedRequestHeight.cancel();
     };
-  }, [content?.url, model.id, readOnly, handleInteractiveState, handleHeight,
-      debouncedSetState, debouncedRequestHeight]);
+  // Note: debouncedSetState and debouncedRequestHeight are stable (empty/stable deps in useMemo)
+  // and are already captured by handleInteractiveState and handleHeight, so they're not needed here.
+  // applyAspectRatio depends on handleHeight, so it's also not needed separately.
+  // content.interactiveState and content.authoredState are intentionally read once at connection time.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content?.url, model.id, readOnly, handleInteractiveState, handleHeight]);
 
   // Poll interactive for state updates every 2 seconds
   // This ensures CLUE captures state changes even if the interactive doesn't
@@ -431,6 +441,25 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
       clearInterval(intervalId);
     };
   }, [readOnly]);
+
+  // Watch for container resize to reapply aspect ratio
+  // This ensures the tile maintains the correct aspect ratio when the user resizes it
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      // Only reapply aspect ratio if one was set by the interactive
+      if (aspectRatioRef.current && aspectRatioRef.current > 0) {
+        applyAspectRatio(aspectRatioRef.current);
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [applyAspectRatio]);
 
   if (!content) return null;
 
@@ -464,10 +493,7 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
         onClick={handleSkipToContent}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            e.preventDefault();
-            if (iframeRef.current) {
-              iframeRef.current.focus();
-            }
+            handleSkipToContent(e);
           }
         }}
       >
