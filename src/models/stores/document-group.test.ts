@@ -178,7 +178,10 @@ describe('DocumentGroup Model', () => {
       documents: { all: mockDocuments, exemplarDocuments: [] },
       groups: mockGroups,
       class: mockClass,
-      appConfig: { commentTags: {"foo": "foo", "bar": "bar"} },
+      appConfig: {
+        commentTags: {"foo": "foo", "bar": "bar"},
+        getCustomLabel: (label: string) => label
+      },
       bookmarks
     };
 

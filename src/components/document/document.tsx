@@ -272,7 +272,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             {show4up && this.renderMode()}
             {showShareButton &&
               <ShareButton isShared={isShared} onClick={this.handleToggleVisibility}
-                           groupLabel={this.stores.appConfig.groupLabel} />}
+                           groupLabel={this.stores.appConfig.getCustomLabel("Group")} />}
           </div>
         }
       </div>
@@ -375,7 +375,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {stickyNotes.map((teacherSupport, index) => {
             const { support, audience, authoredTime } = teacherSupport;
             const sentTo = audience.type === AudienceEnum.group
-              ? `${appConfig.groupLabel} ${audience.identifier}`
+              ? `${appConfig.getCustomLabel("Group")} ${audience.identifier}`
               : user.name;
             const authoredTimeAsDate = new Date(authoredTime);
             const sentOn = `${authoredTimeAsDate.toLocaleDateString()}, ${authoredTimeAsDate.toLocaleTimeString()}`;
@@ -402,7 +402,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const {workspace} = this.props;
     const { appConfig } = this.stores;
     const mode = workspace.mode === "1-up" ? "up1" : "up4";
-    const modeTitle = workspace.mode === "1-up" ? `Join ${appConfig.groupLabel} View` : "Return to Student View";
+    const modeTitle = workspace.mode === "1-up" ? `Join ${appConfig.getCustomLabel("Group")} View` : "Return to Student View";
     return (
       <ViewModeButton onClick={this.handleToggleWorkspaceMode} icon={mode} title={modeTitle} />
     );
@@ -455,7 +455,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             <div className="actions">
               {showPersonalShareToggle &&
                 <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility}
-                             groupLabel={this.stores.appConfig.groupLabel} />}
+                             groupLabel={this.stores.appConfig.getCustomLabel("Group")} />}
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
               {supportStackedTwoUpView && isPrimary &&

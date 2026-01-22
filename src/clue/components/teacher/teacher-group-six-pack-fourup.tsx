@@ -105,7 +105,7 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
       });
     }
     else {
-      ui.prompt(`Enter your message for ${appConfig.groupLabel} ${group.id}`, "", `Message ${appConfig.groupLabel}`, 5)
+      ui.prompt(`Enter your message for ${appConfig.getCustomLabel("Group")} ${group.id}`, "", `Message ${appConfig.getCustomLabel("Group")}`, 5)
       .then((message) => {
         const audience = AudienceModel.create({type: AudienceEnum.group, identifier: group.id});
         db.createSupport(createStickyNote(message), "", audience);
@@ -121,10 +121,10 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
 
   return(
     <div className="group-header">
-      <div className="group-label">{appConfig.groupLabel} {String(group.id)}</div>
+      <div className="group-label">{appConfig.getCustomLabel("Group")} {String(group.id)}</div>
       <div className="actions">
         {!isResearcher && <IconButton
-          title={`Message ${focusedGroupUser ? focusedGroupUser.name : appConfig.groupLabel}`}
+          title={`Message ${focusedGroupUser ? focusedGroupUser.name : appConfig.getCustomLabel("Group")}`}
           className="icon"
           icon="sticky-note"
           key={`sticky-note-${focusedGroupUser ? `user-${focusedGroupUser.id}` : "group"}`}

@@ -89,10 +89,15 @@ describe("useSortOptions", () => {
       setupMockStores({
         sortWorkConfig: {
           sortOptions: [
-            { type: "Group", label: "Team" },
-            { type: "Name", label: "Participant" },
-            { type: "Bookmarked", label: "Starred" }
+            { type: "Group" },
+            { type: "Name" },
+            { type: "Bookmarked" }
           ]
+        },
+        customLabels: {
+          Group: "Team",
+          Name: "Participant",
+          Bookmarked: "Starred"
         }
       });
       const { sortOptions } = useSortOptions();
@@ -215,8 +220,11 @@ describe("useSortOptions", () => {
       setupMockStores({
         sortWorkConfig: {
           sortOptions: [
-            { type: "Name", label: "Participant" }
+            { type: "Name" }
           ]
+        },
+        customLabels: {
+          Name: "Participant"
         }
       });
       const { getLabelForType } = useSortOptions();

@@ -140,55 +140,50 @@ describe("ConfigurationManager", () => {
     expect(appConfig.showAnnotationControls).toBe(true);
   });
 
-  describe("groupLabel", () => {
-    it("should return 'Group' by default when no sortWorkConfig is provided", () => {
+  describe("getCustomLabel", () => {
+    it("should return the label itself when no customLabels is provided", () => {
       const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
-      expect(appConfig.groupLabel).toBe("Group");
+      expect(appConfig.getCustomLabel("Group")).toBe("Group");
+      expect(appConfig.getCustomLabel("Name")).toBe("Name");
+      expect(appConfig.getCustomLabel("AnyLabel")).toBe("AnyLabel");
     });
 
-    it("should return 'Group' when sortWorkConfig has no custom label for Group", () => {
+    it("should return the label itself when customLabels does not have a mapping", () => {
       const appConfig = AppConfigModel.create({
         config: {
           ...unitConfigDefaults,
-          sortWorkConfig: {
-            sortOptions: [
-              { type: "Group" },
-              { type: "Name" }
-            ]
+          customLabels: {
+            "Other": "Something"
           }
         }
       });
-      expect(appConfig.groupLabel).toBe("Group");
+      expect(appConfig.getCustomLabel("Group")).toBe("Group");
     });
 
-    it("should return custom label when sortWorkConfig specifies one for Group", () => {
+    it("should return custom label when customLabels has a mapping", () => {
       const appConfig = AppConfigModel.create({
         config: {
           ...unitConfigDefaults,
-          sortWorkConfig: {
-            sortOptions: [
-              { type: "Group", label: "Team" },
-              { type: "Name" }
-            ]
+          customLabels: {
+            "Group": "Team",
+            "Name": "Participant"
           }
         }
       });
-      expect(appConfig.groupLabel).toBe("Team");
+      expect(appConfig.getCustomLabel("Group")).toBe("Team");
+      expect(appConfig.getCustomLabel("Name")).toBe("Participant");
     });
 
-    it("should return 'Group' when Group is not in sortOptions", () => {
+    it("should return customLabels property", () => {
       const appConfig = AppConfigModel.create({
         config: {
           ...unitConfigDefaults,
-          sortWorkConfig: {
-            sortOptions: [
-              { type: "Name" },
-              { type: "Date" }
-            ]
+          customLabels: {
+            "Group": "Team"
           }
         }
       });
-      expect(appConfig.groupLabel).toBe("Group");
+      expect(appConfig.customLabels).toEqual({ "Group": "Team" });
     });
   });
 

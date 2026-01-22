@@ -44,6 +44,7 @@ const SortWorkSettings: React.FC = () => {
 
   const formDefaults: SortWorkSettingsFormInputs = useMemo(() => {
     const currentConfig = unitConfig?.config?.sortWorkConfig;
+    const customLabels = unitConfig?.config?.customLabels;
     const enabledTypes = currentConfig?.sortOptions?.map(o => o.type) ?? [];
     const defaultEnabledTypes: SortTypeId[] = ["Group", "Name", "Strategy", "Bookmarked", "Tools", "Date"];
 
@@ -53,11 +54,9 @@ const SortWorkSettings: React.FC = () => {
       : [...sortTypeIds];
 
     const sortOptions: FormSortOption[] = orderedTypes.map(type => {
-      const configOption = currentConfig?.sortOptions?.find(o => o.type === type);
-
       return {
         type,
-        label: configOption?.label ?? "",
+        label: customLabels?.[type] ?? "",
         enabled: enabledTypes.length === 0 ? defaultEnabledTypes.includes(type) : enabledTypes.includes(type)
       };
     });
@@ -91,14 +90,7 @@ const SortWorkSettings: React.FC = () => {
       // Build sortOptions array from enabled options only
       const sortOptions: ISortOptionConfig[] = data.sortOptions
         .filter(o => o.enabled)
-        .map(o => {
-          const option: ISortOptionConfig = { type: o.type };
-          // Only include label if it differs from default
-          if (o.label.trim() && o.label.trim() !== getDisplayLabel(o.type)) {
-            option.label = o.label.trim();
-          }
-          return option;
-        });
+        .map(o => ({ type: o.type }));
 
       const sortWorkConfig: ISortWorkConfig = {};
 
@@ -119,6 +111,22 @@ const SortWorkSettings: React.FC = () => {
         draft.config.sortWorkConfig = sortWorkConfig;
       } else {
         delete (draft.config as any).sortWorkConfig;
+      }
+
+      // Save custom labels separately
+      const customLabels: Record<string, string> = {};
+      data.sortOptions.forEach(o => {
+        const trimmedLabel = o.label.trim();
+        // Only include label if it differs from default
+        if (trimmedLabel && trimmedLabel !== getDisplayLabel(o.type)) {
+          customLabels[o.type] = trimmedLabel;
+        }
+      });
+
+      if (Object.keys(customLabels).length > 0) {
+        draft.config.customLabels = customLabels;
+      } else {
+        delete (draft.config as any).customLabels;
       }
     });
   };

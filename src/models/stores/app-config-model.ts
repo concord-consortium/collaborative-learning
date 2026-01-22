@@ -95,8 +95,9 @@ export const AppConfigModel = types
     get showIdeasButton() { return self.configMgr.showIdeasButton; },
     get hide4up() { return self.configMgr.hide4up; },
     get sortWorkConfig() { return self.configMgr.sortWorkConfig; },
-    get groupLabel() {
-      return self.configMgr.sortWorkConfig?.sortOptions?.find(opt => opt.type === "Group")?.label ?? "Group";
+    get customLabels() { return self.configMgr.customLabels; },
+    getCustomLabel(label: string) {
+      return self.configMgr.customLabels?.[label] ?? label;
     },
     get authorToolbar() {
       return ToolbarModel.create([

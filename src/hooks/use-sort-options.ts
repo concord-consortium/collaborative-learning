@@ -51,12 +51,13 @@ export function useSortOptions() {
       .map(option => {
         const optionType = option.type;
         const defaultLabel = option.type === "Strategy" ? (tagPrompt || "") : DEFAULT_LABELS[optionType];
+        const customLabel = appConfig.customLabels?.[optionType];
         return {
           type: optionType,
-          label: option.label ?? defaultLabel
+          label: customLabel ?? defaultLabel
         };
       });
-  }, [sortWorkConfig, tagPrompt, autoAssignStudentsToIndividualGroups]);
+  }, [sortWorkConfig?.sortOptions, autoAssignStudentsToIndividualGroups, tagPrompt, appConfig]);
 
   const showContextFilter = sortWorkConfig?.showContextFilter ?? true;
 

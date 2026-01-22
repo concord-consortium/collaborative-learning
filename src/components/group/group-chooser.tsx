@@ -29,7 +29,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
 
   public componentDidMount() {
     this._isMounted = true;
-    const groupLabelLower = this.stores.appConfig.groupLabel.toLowerCase();
+    const groupLabelLower = this.stores.appConfig.getCustomLabel("Group").toLowerCase();
     this.loadingMessageKey = `Joining ${groupLabelLower}`;
     showLoadingMessage(this.loadingMessageKey);
   }
@@ -43,7 +43,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
     const {user, groups, appConfig} = this.stores;
     return (
       <div className="join" data-testid="group-select">
-        <div className="join-title">Join {appConfig.groupLabel}</div>
+        <div className="join-title">Join {appConfig.getCustomLabel("Group")}</div>
         <div className="join-content">
           {user ? <div className="welcome">Welcome {user.name}</div> : null}
           {groups.allGroups.length > 0 && this.renderChooseExistingGroup()}
@@ -56,7 +56,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
 
   private renderChooseNewGroup() {
     const {allGroups} = this.stores.groups;
-    const groupLabel = this.stores.appConfig.groupLabel;
+    const groupLabel = this.stores.appConfig.getCustomLabel("Group");
     const groupLabelLower = groupLabel.toLowerCase();
     const groupIds = allGroups.map((group) => group.id);
     const items: JSX.Element[] = [];
@@ -79,7 +79,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
 
   private renderChooseExistingGroup() {
     const {groups, appConfig} = this.stores;
-    const groupLabel = appConfig.groupLabel;
+    const groupLabel = appConfig.getCustomLabel("Group");
     const groupLabelLower = groupLabel.toLowerCase();
     const groupElements = groups.allGroups.map((group) => {
       const users = group.activeUsers.map((user) => {
@@ -131,7 +131,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
     return (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       if (group.activeUsers.length >= 4) {
-        const groupLabelLower = this.stores.appConfig.groupLabel.toLowerCase();
+        const groupLabelLower = this.stores.appConfig.getCustomLabel("Group").toLowerCase();
         this.setState({error: `Sorry, that ${groupLabelLower} is full with four students`});
       }
       else {

@@ -58,6 +58,7 @@ export interface IUnitConfig {
   showIdeasButton?: boolean;
   hide4up?: boolean;
   sortWorkConfig?: ISortWorkConfig;
+  customLabels?: Record<string, string>;
 }
 
 export interface IAuthorTool {

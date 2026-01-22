@@ -117,10 +117,11 @@ const GroupTitlebar: React.FC<IGroupComponentProps> = observer(function GroupTit
   const problem = useProblemStore();
   const document= groupUser?.problemDocument;
   const userDocTitle = document?.title || "Document";
-  const groupLabelLower = appConfig.groupLabel.toLowerCase();
+  const groupLabel = appConfig.getCustomLabel("Group");
+  const groupLabelLower = groupLabel.toLowerCase();
   const titleText = groupUser
                       ? `${groupUser.name}: ${document?.type === "problem" ? problem.title : userDocTitle}`
-                      : group?.displayId ? `Student ${appConfig.groupLabel} ${group?.displayId}` : `No ${groupLabelLower}s`;
+                      : group?.displayId ? `Student ${groupLabel} ${group?.displayId}` : `No ${groupLabelLower}s`;
   return (
     <div className="group-title" data-test="group-title">
       <div className="group-title-center">
