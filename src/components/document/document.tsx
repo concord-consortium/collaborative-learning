@@ -84,14 +84,15 @@ const TwoUpStackedButton = ({ onClick, selected }: { onClick: () => void, select
   );
 };
 
-const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boolean }) => {
+const ShareButton = ({ onClick, isShared, groupLabel }: { onClick: () => void, isShared: boolean, groupLabel: string }) => {
   const visibility = isShared ? "public" : "private";
+  const groupLabelLower = groupLabel.toLowerCase();
   return (
     <>
       {<div className="share-separator" />}
       <ToggleControl className={`share-button ${visibility}`} dataTest="share-button"
                       value={isShared} onChange={onClick}
-                      title={`${isShared ? "Shared: click to unshare from" : "Unshared: click to share to"} group`} />
+                      title={`${isShared ? "Shared: click to unshare from" : "Unshared: click to share to"} ${groupLabelLower}`} />
       <div className="share-label">Share</div>
     </>
   );
@@ -270,7 +271,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             {downloadButton}
             {show4up && this.renderMode()}
             {showShareButton &&
-              <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />}
+              <ShareButton isShared={isShared} onClick={this.handleToggleVisibility}
+                           groupLabel={this.stores.appConfig.groupLabel} />}
           </div>
         }
       </div>
@@ -352,7 +354,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderStickyNotesPopup() {
-    const { user } = this.stores;
+    const { appConfig, user } = this.stores;
     const { stickyNotes, showNotes} = this.getStickyNoteData();
     if (!showNotes || !this.stickyNoteIcon || !this.documentContainer) {
       return;
@@ -373,7 +375,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {stickyNotes.map((teacherSupport, index) => {
             const { support, audience, authoredTime } = teacherSupport;
             const sentTo = audience.type === AudienceEnum.group
-              ? `Group ${audience.identifier}`
+              ? `${appConfig.groupLabel} ${audience.identifier}`
               : user.name;
             const authoredTimeAsDate = new Date(authoredTime);
             const sentOn = `${authoredTimeAsDate.toLocaleDateString()}, ${authoredTimeAsDate.toLocaleTimeString()}`;
@@ -398,8 +400,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderMode() {
     const {workspace} = this.props;
+    const { appConfig } = this.stores;
     const mode = workspace.mode === "1-up" ? "up1" : "up4";
-    const modeTitle = workspace.mode === "1-up" ? "Join Group View" : "Return to Student View";
+    const modeTitle = workspace.mode === "1-up" ? `Join ${appConfig.groupLabel} View` : "Return to Student View";
     return (
       <ViewModeButton onClick={this.handleToggleWorkspaceMode} icon={mode} title={modeTitle} />
     );
@@ -451,7 +454,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
               {showPersonalShareToggle &&
-                <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility} />}
+                <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility}
+                             groupLabel={this.stores.appConfig.groupLabel} />}
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
               {supportStackedTwoUpView && isPrimary &&

@@ -113,12 +113,14 @@ const GroupButton: React.FC<IGroupButtonProps> = (props) => {
 };
 
 const GroupTitlebar: React.FC<IGroupComponentProps> = observer(function GroupTitlebar({group, groupUser}) {
+  const { appConfig } = useStores();
   const problem = useProblemStore();
   const document= groupUser?.problemDocument;
   const userDocTitle = document?.title || "Document";
+  const groupLabelLower = appConfig.groupLabel.toLowerCase();
   const titleText = groupUser
                       ? `${groupUser.name}: ${document?.type === "problem" ? problem.title : userDocTitle}`
-                      : group?.displayId ? `Student Group ${group?.displayId}` : "No groups";
+                      : group?.displayId ? `Student ${appConfig.groupLabel} ${group?.displayId}` : `No ${groupLabelLower}s`;
   return (
     <div className="group-title" data-test="group-title">
       <div className="group-title-center">

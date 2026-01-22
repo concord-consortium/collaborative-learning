@@ -92,7 +92,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     }
     return (
       <div onClick={handleResetGroup} className="group">
-        <div className="name" data-test="group-name">{`Group ${group.id}`}</div>
+        <div className="name" data-test="group-name">{`${appConfig.groupLabel} ${group.id}`}</div>
         <div className="group-center"/>
         <div className="members" data-test="group-members">
           <div className="row">
@@ -130,7 +130,8 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   };
 
   const handleResetGroup = () => {
-    ui.confirm("Do you want to leave this group?", "Leave Group")
+    const groupLabelLower = appConfig.groupLabel.toLowerCase();
+    ui.confirm(`Do you want to leave this ${groupLabelLower}?`, `Leave ${appConfig.groupLabel}`)
       .then((ok) => {
         if (ok) {
           db.leaveGroup();

@@ -95,6 +95,9 @@ export const AppConfigModel = types
     get showIdeasButton() { return self.configMgr.showIdeasButton; },
     get hide4up() { return self.configMgr.hide4up; },
     get sortWorkConfig() { return self.configMgr.sortWorkConfig; },
+    get groupLabel() {
+      return self.configMgr.sortWorkConfig?.sortOptions?.find(opt => opt.type === "Group")?.label ?? "Group";
+    },
     get authorToolbar() {
       return ToolbarModel.create([
         ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),

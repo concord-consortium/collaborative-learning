@@ -39,12 +39,16 @@ export const sortDateSectionLabels = (
   });
 };
 
-export const createDocMapByGroups = (documents: IDocumentMetadataModel[], groupForUser: (userId: string) => any) => {
+export const createDocMapByGroups = (
+  documents: IDocumentMetadataModel[],
+  groupForUser: (userId: string) => any,
+  groupLabel = "Group"
+) => {
   const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
   documents.forEach((doc) => {
     const userId = doc.uid;
     const group = groupForUser(userId);
-    const sectionLabel = group ? `Group ${group.id}` : "No Group";
+    const sectionLabel = group ? `${groupLabel} ${group.id}` : `No ${groupLabel}`;
 
     if (!documentMap.has(sectionLabel)) {
       documentMap.set(sectionLabel, []);

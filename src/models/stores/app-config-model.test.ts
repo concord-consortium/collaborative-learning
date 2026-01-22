@@ -140,4 +140,56 @@ describe("ConfigurationManager", () => {
     expect(appConfig.showAnnotationControls).toBe(true);
   });
 
+  describe("groupLabel", () => {
+    it("should return 'Group' by default when no sortWorkConfig is provided", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      expect(appConfig.groupLabel).toBe("Group");
+    });
+
+    it("should return 'Group' when sortWorkConfig has no custom label for Group", () => {
+      const appConfig = AppConfigModel.create({
+        config: {
+          ...unitConfigDefaults,
+          sortWorkConfig: {
+            sortOptions: [
+              { type: "Group" },
+              { type: "Name" }
+            ]
+          }
+        }
+      });
+      expect(appConfig.groupLabel).toBe("Group");
+    });
+
+    it("should return custom label when sortWorkConfig specifies one for Group", () => {
+      const appConfig = AppConfigModel.create({
+        config: {
+          ...unitConfigDefaults,
+          sortWorkConfig: {
+            sortOptions: [
+              { type: "Group", label: "Team" },
+              { type: "Name" }
+            ]
+          }
+        }
+      });
+      expect(appConfig.groupLabel).toBe("Team");
+    });
+
+    it("should return 'Group' when Group is not in sortOptions", () => {
+      const appConfig = AppConfigModel.create({
+        config: {
+          ...unitConfigDefaults,
+          sortWorkConfig: {
+            sortOptions: [
+              { type: "Name" },
+              { type: "Date" }
+            ]
+          }
+        }
+      });
+      expect(appConfig.groupLabel).toBe("Group");
+    });
+  });
+
 });
