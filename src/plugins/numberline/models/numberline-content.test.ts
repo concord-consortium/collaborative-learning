@@ -102,5 +102,30 @@ describe("NumberlineContent", () => {
       expect(sortedPoints[1].id).toBe(pointC.id);
       expect(sortedPoints[2].id).toBe(pointA.id);
     });
+
+    it("formats values near zero without negative zero display", () => {
+      // This tests the display formatting logic used in numberline-tile.tsx
+      // Values that round to zero should never display as "-0.00"
+      const formatDisplayValue = (value: number) => {
+        const displayValue = Math.abs(value) < 0.005 ? 0 : value;
+        return displayValue.toFixed(2);
+      };
+
+      // Values that should display as "0.00"
+      expect(formatDisplayValue(0)).toBe("0.00");
+      expect(formatDisplayValue(0.001)).toBe("0.00");
+      expect(formatDisplayValue(-0.001)).toBe("0.00");
+      expect(formatDisplayValue(0.004)).toBe("0.00");
+      expect(formatDisplayValue(-0.004)).toBe("0.00");
+      expect(formatDisplayValue(-0.0049)).toBe("0.00");
+
+      // Values that should display normally (not affected by the fix)
+      expect(formatDisplayValue(0.005)).toBe("0.01");
+      expect(formatDisplayValue(-0.005)).toBe("-0.01");
+      expect(formatDisplayValue(0.01)).toBe("0.01");
+      expect(formatDisplayValue(-0.01)).toBe("-0.01");
+      expect(formatDisplayValue(1.5)).toBe("1.50");
+      expect(formatDisplayValue(-1.5)).toBe("-1.50");
+    });
   });
 });

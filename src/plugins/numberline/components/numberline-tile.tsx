@@ -514,12 +514,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           .attr("transform", `translate(${x}, ${y})`);
 
         // Add text first to measure its width
+        // Avoid displaying "-0.00" by treating values that round to zero as zero
+        const displayValue = Math.abs(selectedPoint.currentXValue) < 0.005 ? 0 : selectedPoint.currentXValue;
         const labelText = labelGroup.append("text")
           .attr("class", "point-value-label-text")
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
           .attr("y", kValueLabelHeight / 2)
-          .text(selectedPoint.currentXValue.toFixed(2));
+          .text(displayValue.toFixed(2));
 
         // Get text width and add rectangle background
         const textWidth = (labelText.node() as SVGTextElement)?.getBBox().width || 0;
