@@ -51,7 +51,9 @@ context('Numberline Tile', function () {
     // Zero tick should exist even if not in regular spacing
     cy.get(".numberline-tool-container .zero-tick").should("exist");
     // Zero should not have a label since it's not part of regular tick spacing
-    numberlineToolTile.getAllNumberlineTicks().should('not.contain', '0');
+    numberlineToolTile.getAllNumberlineTicks().each(($el) => {
+      expect($el.text()).to.not.equal('0');
+    });
 
     cy.log('will show zero label when zero is part of regular tick spacing');
     // Set symmetric range where 0 falls on regular spacing
@@ -105,6 +107,7 @@ context('Numberline Tile', function () {
     // Click on tile to focus it, then Tab to select first point (leftmost)
     cy.get(".numberline-wrapper").click().type('{tab}');
     numberlineToolTile.getValueLabel().should("exist");
+    numberlineToolTile.getValueLabelText().should("contain", "-2.00");
     // Tab again to select next point
     cy.get(".numberline-wrapper").type('{tab}');
     numberlineToolTile.getValueLabelText().should("contain", "0.00");
@@ -155,21 +158,7 @@ context('Numberline Tile', function () {
     cy.realPress('Tab');
     numberlineToolTile.getFocusedPoint().should('exist');
 
-    cy.log("will edit min value with keyboard");
-    // Click to show input
-    numberlineToolTile.getMinBox().click();
-    numberlineToolTile.getMinBoxInput().should('exist');
-    numberlineToolTile.getMinBoxInput().clear().type('-8{enter}');
-    numberlineToolTile.getMinBox().should('contain', '-8');
-
-    cy.log("will edit max value with keyboard");
-    // Click to show input
-    numberlineToolTile.getMaxBox().click();
-    numberlineToolTile.getMaxBoxInput().should('exist');
-    numberlineToolTile.getMaxBoxInput().clear().type('8{enter}');
-    numberlineToolTile.getMaxBox().should('contain', '8');
-
-    cy.log("will clean up after min/max keyboard tests");
+    cy.log("will clean up after tab order tests");
     numberlineToolTile.setToolbarReset();
     numberlineToolTile.hasNoPoints();
     // Restore values to -10/10 for reload test

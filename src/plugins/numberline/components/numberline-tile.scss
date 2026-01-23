@@ -53,9 +53,9 @@
 
       .point-outer-circle {
         display: none;
-        fill: #0081ff;
+        fill: $highlight-blue;
         fill-opacity: 0.3;
-        stroke: #0081ff;
+        stroke: $highlight-blue;
         stroke-width: 1.5px;
 
         &.hovered, &.focused {
@@ -64,10 +64,7 @@
 
         &.selected {
           display: block;
-          fill: #0081ff;
           fill-opacity: 0.15;
-          stroke: #0081ff;
-          stroke-width: 1.5px;
         }
       }
 
@@ -97,16 +94,22 @@
 
         .point-value-label-bg {
           fill: $workspace-teal-light-8;
-          stroke: #949494;
+          stroke: $charcoal-light-1;
           stroke-width: 1.5px;
         }
 
         .point-value-label-text {
-          fill: #3f3f3f;
+          fill: $charcoal-dark-2;
           font-size: 12px;
           font-weight: normal;
           font-family: Lato, sans-serif;
         }
+      }
+
+      .point-value-label-line {
+        stroke: $charcoal-light-1;
+        stroke-width: 1.5px;
+        pointer-events: none;
       }
 
     } //end svg container
@@ -125,7 +128,7 @@
       align-items: center;
       justify-content: center;
       margin-top: 8px;
-      border: 1.5px solid #949494;
+      border: 1.5px solid $charcoal-light-1;
       background-color: #f0f9fb;
       padding-left: 5px;
       padding-right: 5px;

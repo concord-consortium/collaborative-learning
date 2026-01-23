@@ -86,6 +86,7 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
   const borderBoxOffset = `${arrowOffset + numCharToOffset}px`;
   const borderBoxStyle = (minOrMax === "min") ? { left: borderBoxOffset } : { right: borderBoxOffset };
   const borderClasses = classNames("border-box", {hide: !isTileSelected});
+  const minOrMaxWord = minOrMax === "min" ? "Minimum" : "Maximum";
 
   return (
     <div
@@ -96,7 +97,7 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
       onFocus={handleFocus}
       tabIndex={readOnly ? -1 : 0}
       role="button"
-      aria-label={`${minOrMax === "min" ? "Minimum" : "Maximum"} value: ${value}. ${readOnly ? "" : "Press Enter to edit."}`}
+      aria-label={`${minOrMaxWord} value: ${value}. ${readOnly ? "" : "Press Enter to edit."}`}
     >
       {isEditing ? (
         <input
@@ -107,7 +108,7 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
           onKeyDown={handleKeyDown}
           value={inputValue}
           onBlur={commitValue}
-          aria-label={`${minOrMax === "min" ? "Minimum" : "Maximum"} value`}
+          aria-label={`${minOrMaxWord} value`}
           onChange={(e) => {
             setInputValue(e.target.value);
             // Set the width of the input based on the length of the input value

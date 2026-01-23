@@ -8,14 +8,13 @@ import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { OffsetModel } from '../../../models/annotations/clue-object';
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { HotKeys } from "../../../utilities/hot-keys";
 import { NumberlineContentModelType, PointObjectModelType,  } from "../models/numberline-content";
 import {
   kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
   tickHeightDefault, tickStyleDefault, tickWidthDefault, tickWidthZero,
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
   kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax,
-  kValueLabelHeight, kValueLabelPadding, kValueLabelOffsetY,
+  kValueLabelHeight, kValueLabelPadding, kValueLabelOffsetY, kValueLabelBorderRadius,
   kKeyboardMoveStep, kKeyboardMoveStepLarge
 } from '../numberline-tile-constants';
 import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
@@ -71,55 +70,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     content.deleteSelectedPoints();
   }, [content]);
 
-  // Move selected point by a delta amount
+  // Move all selected points by a delta amount
   const moveSelectedPoint = useCallback((delta: number) => {
-    const selectedPointId = Object.keys(content.selectedPoints)[0];
-    if (selectedPointId) {
-      const point = content.getPoint(selectedPointId);
-      if (point) {
-        const newValue = Math.max(content.min, Math.min(content.max, point.xValue + delta));
-        point.setDragXValue(newValue);
-        point.setXValueToDragValue();
-      }
-    }
+    const selectedPoints = content.selectedPointsArr;
+    selectedPoints.forEach(point => {
+      const newValue = point.xValue + delta;
+      point.setXValue(newValue);
+    });
   }, [content]);
-
-  // Select next or previous point
-  const selectAdjacentPoint = useCallback((direction: 'next' | 'prev') => {
-    const points = content.pointsArr.slice().sort((a, b) => a.xValue - b.xValue);
-    if (points.length === 0) return;
-
-    const selectedPointId = Object.keys(content.selectedPoints)[0];
-    if (!selectedPointId) {
-      // No point selected, select first or last based on direction
-      const pointToSelect = direction === 'next' ? points[0] : points[points.length - 1];
-      content.setSelectedPoint(pointToSelect);
-      setSelectedPointId(pointToSelect.id);
-    } else {
-      const currentIndex = points.findIndex(p => p.id === selectedPointId);
-      const newIndex = direction === 'next'
-        ? Math.min(currentIndex + 1, points.length - 1)
-        : Math.max(currentIndex - 1, 0);
-      const pointToSelect = points[newIndex];
-      content.setSelectedPoint(pointToSelect);
-      setSelectedPointId(pointToSelect.id);
-    }
-  }, [content]);
-
-  // Set up key handling for when tile container has focus
-  const hotKeys = useRef(new HotKeys());
-  useEffect(()=>{
-    if (!readOnly) {
-      hotKeys.current.register({
-        "delete": () => { deleteSelectedPoints(); return true; },
-        "backspace": () => { deleteSelectedPoints(); return true; },
-        "left": () => { moveSelectedPoint(-kKeyboardMoveStep); return true; },
-        "right": () => { moveSelectedPoint(kKeyboardMoveStep); return true; },
-        "shift-left": () => { moveSelectedPoint(-kKeyboardMoveStepLarge); return true; },
-        "shift-right": () => { moveSelectedPoint(kKeyboardMoveStepLarge); return true; },
-      });
-    }
-  }, [deleteSelectedPoints, moveSelectedPoint, readOnly]);
 
 
   /* ============================ [ Calculate Width of Tile / Scale ]  ========================= */
@@ -327,55 +285,59 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   //Returns an equally divided array between min and max with numOfTick # of elements
   // Always includes 0 if it falls within the range
-  const generateTickValues = (min: number, max: number) => {
+  // Also tracks whether zero is part of regular tick spacing
+  const generateTickInfo = (min: number, max: number) => {
     const tickValues = [];
     const range = content.max - content.min;
+    let zeroInRegularTicks = false;
+    let zeroIndex = -1;
+
     for (let i = 0; i < numOfTicks; i++) {
       const position = i / (numOfTicks - 1);
       const tickValue = content.min + (position * range);
+
+      // Check if this tick is zero (within tolerance)
+      if (Math.abs(tickValue) < 0.0001) {
+        zeroInRegularTicks = true;
+      }
+
+      // Track where zero would be inserted if needed
+      if (zeroIndex === -1 && tickValue > 0) {
+        zeroIndex = i;
+      }
+
       tickValues.push(tickValue);
     }
 
-    // Always include 0 if it's within range and not already in the tick values
+    // Add zero if it's in range but not part of regular ticks
     const zeroIsInRange = content.min < 0 && content.max > 0;
-    const zeroAlreadyIncluded = tickValues.some(v => Math.abs(v) < 0.0001);
-    if (zeroIsInRange && !zeroAlreadyIncluded) {
-      tickValues.push(0);
-      tickValues.sort((a, b) => a - b);
+    if (zeroIsInRange && !zeroInRegularTicks) {
+      // Insert zero at the correct position
+      if (zeroIndex === -1) zeroIndex = numOfTicks;
+      tickValues.splice(zeroIndex, 0, 0);
     }
 
-    return tickValues;
-  };
-
-  // Track whether zero is part of the regular tick spacing
-  const isZeroInRegularTicks = () => {
-    const range = content.max - content.min;
-    for (let i = 0; i < numOfTicks; i++) {
-      const position = i / (numOfTicks - 1);
-      const tickValue = content.min + (position * range);
-      if (Math.abs(tickValue) < 0.0001) return true;
-    }
-    return false;
-  };
-
-  const tickFormatter = (value: number | { valueOf(): number }, index: number) => {
-    if (typeof value !== 'number') {
-      return value.toString();
-    }
-    if (value === content.min || value === content.max) {
-      return '';
-    }
-    // Only show "0" label if zero is part of regular tick spacing
-    if (value === 0) {
-      return isZeroInRegularTicks() ? '0' : '';
-    }
-    return value.toFixed(1);
+    return { tickValues, zeroInRegularTicks };
   };
 
   if (axisWidth !== 0) {
     const readOnlyState = readOnly ? "readOnly" : "readWrite";
     const axisClass = `axis-${model.id}-${readOnlyState}`;
-    const tickValues = generateTickValues(content.min, content.max);
+    const { tickValues, zeroInRegularTicks } = generateTickInfo(content.min, content.max);
+
+    const tickFormatter = (value: number | { valueOf(): number }, index: number) => {
+      if (typeof value !== 'number') {
+        return value.toString();
+      }
+      if (value === content.min || value === content.max) {
+        return '';
+      }
+      // Only show "0" label if zero is part of regular tick spacing
+      if (value === 0) {
+        return zeroInRegularTicks ? '0' : '';
+      }
+      return value.toFixed(1);
+    };
 
     axis
       .attr("class", `${axisClass} num-line`)
@@ -417,7 +379,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
     const updateCircles = () => {
       // Sort points by x value for consistent tab order (smallest to largest)
-      const sortedPoints = content.pointsArr.slice().sort((a, b) => a.xValue - b.xValue);
+      const sortedPoints = content.sortedPointsArr;
+      const deleteInstruction = readOnly ? '' : ', Delete to remove';
 
       /* =========================== [ Outer Hover Circles ] ======================= */
 
@@ -464,7 +427,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         .attr('aria-valuemin', content.min)
         .attr('aria-valuemax', content.max)
         .attr('aria-valuenow', (p) => p.currentXValue)
-        .attr('aria-label', (p) => `Point at ${p.currentXValue}. Use arrow keys to move${readOnly ? '' : ', Delete to remove'}.`)
+        .attr('aria-label', (p) => `Point at ${p.currentXValue}. Use arrow keys to move${deleteInstruction}.`)
         .classed("point-inner-circle", true) //may change
         .on('focus', function(e, p) {
           if (!readOnly) {
@@ -501,7 +464,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       .attr('cx', (p, idx) => xScale(p.currentXValue))
       .attr('tabindex', readOnly ? -1 : 0)
       .attr('aria-valuenow', (p) => p.currentXValue)
-      .attr('aria-label', (p) => `Point at ${p.currentXValue}. Use arrow keys to move${readOnly ? '' : ', Delete to remove'}.`)
+      .attr('aria-label', (p) => `Point at ${p.currentXValue}. Use arrow keys to move${deleteInstruction}.`)
       .classed("selected", (p)=> p.id in content.selectedPoints)
       .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
@@ -567,8 +530,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           .attr("height", kValueLabelHeight)
           .attr("width", rectWidth)
           .attr("x", -rectWidth / 2)
-          .attr("rx", 10)
-          .attr("ry", 10);
+          .attr("rx", kValueLabelBorderRadius)
+          .attr("ry", kValueLabelBorderRadius);
 
         // Add vertical line from point to label (added last to be on top)
         const lineY1 = yMidPoint - innerPointRadius; // Top edge of inner point circle
@@ -579,10 +542,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           .attr("x1", x)
           .attr("y1", lineY1)
           .attr("x2", x)
-          .attr("y2", lineY2)
-          .attr("stroke", "#949494")
-          .attr("stroke-width", 1.5)
-          .style("pointer-events", "none");
+          .attr("y2", lineY2);
       }
     }; //end of updateCircles()
 
@@ -607,13 +567,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     <div
       className={containerClasses}
       tabIndex={0}
-      onKeyDown={(e) => {
-        // Only handle keys if the event target is the tile container itself
-        // This allows inputs and focusable children to handle their own keys
-        if (e.target === e.currentTarget) {
-          hotKeys.current.dispatch(e);
-        }
-      }}
     >
       <div className={"numberline-title"}>
         <BasicEditableTileTitle />
