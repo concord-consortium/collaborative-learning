@@ -4,7 +4,8 @@ import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
 import { DocumentModelType } from "../document/document";
 import {
-  DocumentType, ExemplarDocument, GroupDocument, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
+  DocumentType, ExemplarDocument, GroupDocument, LearningLogDocument, LearningLogPublication,
+  OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../document/document-types";
 import { getTileEnvironment } from "../tiles/tile-environment";
@@ -13,7 +14,8 @@ import { UserModelType } from "./user";
 import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { Firestore } from "../../lib/firestore";
 import { TreeManagerType } from "../history/tree-manager";
-import { FirestoreHistoryManager, FirestoreHistoryManagerConcurrent } from "../history/firestore-history-manager";
+import { FirestoreHistoryManager, FirestoreHistoryManagerConcurrent,
+  IFirestoreHistoryManagerArgs } from "../history/firestore-history-manager";
 import { UserContextProvider } from "./user-context-provider";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
@@ -255,15 +257,28 @@ export const DocumentsModel = types
         // loading history and possibly keeping the document state in sync with the
         // history.
         // In the case of loading history this will be needed for any document.
-        let firestoreHistoryManager: FirestoreHistoryManager;
+        // let firestoreHistoryManager: FirestoreHistoryManager;
+        const historyManagerArgs: IFirestoreHistoryManagerArgs = {
+          firestore,
+          userContextProvider,
+          treeManager,
+          uploadLocalHistory: true,
+          syncRemoteHistory: false
+        };
         if (document.type === GroupDocument) {
-          firestoreHistoryManager = new FirestoreHistoryManagerConcurrent(firestore, userContextProvider, document);
+          new FirestoreHistoryManagerConcurrent(historyManagerArgs);
         } else {
-          firestoreHistoryManager = new FirestoreHistoryManager(firestore, userContextProvider, document);
+          new FirestoreHistoryManager(historyManagerArgs);
         }
-        treeManager.addHistoryEntryCompletedListener(
-          firestoreHistoryManager.onHistoryEntryCompleted
-        );
+
+        // It seems like we should track these history managers somewhere, but in this case
+        // they are just adding a listener to the treeManager. When the treeManager is longer
+        // referenced anywhere the history manager will get garbage collected.
+        // A FirestoreHistoryHistory is also used when the history is being played back
+        // by the Canvas component. In that case it is a new document copy that is completely
+        // that isn't added from the DocumentsModel. So there it can't reuse the same history
+        // manager. It is wasteful to have two history managers and two copies of the
+        // the history data in memory, but that is the easiest way to deal with it for now.
       } else {
         console.warn("Document with the same key already exists");
       }

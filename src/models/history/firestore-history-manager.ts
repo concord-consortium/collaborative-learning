@@ -1,12 +1,14 @@
-import { getSnapshot, Instance } from "mobx-state-tree";
+import { addDisposer, getSnapshot, Instance } from "mobx-state-tree";
+import firebase from "firebase/app";
 import { getSimpleDocumentPath, IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { typeConverter } from "../../utilities/db-utils";
 import { UserContextProvider } from "../stores/user-context-provider";
-import { getLastHistoryEntry } from "./history-firestore";
-import { CDocumentType } from "./tree-manager";
+import { getLastHistoryEntry, loadHistory } from "./history-firestore";
+import { CDocument, CDocumentType, TreeManagerType } from "./tree-manager";
 import { HistoryEntry } from "./history";
 import { TreeAPI } from "./tree-api";
+import { makeAutoObservable, when } from "mobx";
 
 interface IFirestoreHistoryInfo {
   documentPath: string;
@@ -20,6 +22,22 @@ interface IMainDocument extends TreeAPI {
   metadata: IDocumentMetadata;
 }
 
+export enum HistoryStatus {
+  HISTORY_ERROR,
+  FINDING_HISTORY_LENGTH,
+  NO_HISTORY,
+  HISTORY_LOADED,
+  HISTORY_LOADING,
+}
+
+export interface IFirestoreHistoryManagerArgs {
+  firestore: Firestore;
+  userContextProvider: UserContextProvider;
+  treeManager: TreeManagerType;
+  uploadLocalHistory: boolean;
+  syncRemoteHistory: boolean;
+}
+
 /**
  * Manages saving history entries to Firestore for a document. In the future this class may
  * also manage loading history entries from Firestore.
@@ -30,15 +48,35 @@ interface IMainDocument extends TreeAPI {
 export class FirestoreHistoryManager {
   firestore: Firestore;
   userContextProvider: UserContextProvider;
-  mainDocument: IMainDocument;
+  treeManager: TreeManagerType;
+  loadingError = undefined as firebase.firestore.FirestoreError | undefined;
 
-  constructor(firestore: Firestore, userContextProvider: UserContextProvider,
-    mainDocument: IMainDocument) {
+  constructor({
+    firestore,
+    userContextProvider,
+    treeManager,
+    uploadLocalHistory,
+    syncRemoteHistory
+  }: IFirestoreHistoryManagerArgs) {
     this.firestore = firestore;
     this.userContextProvider = userContextProvider;
-    this.mainDocument = mainDocument;
+    this.treeManager = treeManager;
 
-    this.onHistoryEntryCompleted = this.onHistoryEntryCompleted.bind(this);
+    if (uploadLocalHistory) {
+      this.onHistoryEntryCompleted = this.onHistoryEntryCompleted.bind(this);
+      treeManager.addHistoryEntryCompletedListener(this.onHistoryEntryCompleted);
+    }
+
+    if (syncRemoteHistory) {
+      this.mirrorHistoryFromFirestore();
+    }
+
+    // We want computed properties like historyStatus to be observable
+    makeAutoObservable(this);
+  }
+
+  setLoadingError(error: firebase.firestore.FirestoreError) {
+    this.loadingError = error;
   }
 
   /**
@@ -85,7 +123,7 @@ export class FirestoreHistoryManager {
   }
 
   async prepareFirestoreHistoryInfo(): Promise<IFirestoreHistoryInfo> {
-    const { userContextProvider, mainDocument, firestore } = this;
+    const { userContextProvider, treeManager: { mainDocument }, firestore } = this;
     // TODO: Wait for userContext to be valid.
     // The userContext initially starts out with a user id of 0 and doesn't have a portal and other
     // properties defined. After the user is authenticated the userContext will have valid fields.
@@ -118,6 +156,13 @@ export class FirestoreHistoryManager {
 
   firestoreHistoryInfoPromise: Promise<IFirestoreHistoryInfo> | undefined;
 
+  async getFirestoreHistoryInfo() : Promise<IFirestoreHistoryInfo> {
+    if (!this.firestoreHistoryInfoPromise) {
+      this.firestoreHistoryInfoPromise = this.prepareFirestoreHistoryInfo();
+    }
+    return this.firestoreHistoryInfoPromise;
+  }
+
   async onHistoryEntryCompleted(
     historyContainer: CDocumentType,
     entry: Instance<typeof HistoryEntry>,
@@ -125,10 +170,7 @@ export class FirestoreHistoryManager {
   ) {
     // The parent Firestore metadata document might not be ready yet so we need to wait for that.
     // We also need to wait for the last history entry to be known so we know what index to assign
-    if (!this.firestoreHistoryInfoPromise) {
-      this.firestoreHistoryInfoPromise = this.prepareFirestoreHistoryInfo();
-    }
-    const { documentPath, lastEntryIndex, lastEntryId } = await this.firestoreHistoryInfoPromise;
+    const { documentPath, lastEntryIndex, lastEntryId } = await this.getFirestoreHistoryInfo();
     const { firestore } = this;
 
     // add a new document for this history entry
@@ -151,12 +193,114 @@ export class FirestoreHistoryManager {
       entry: JSON.stringify(snapshot)
     });
   }
+
+  get historyStatus() : HistoryStatus {
+    if (this.loadingError) {
+      return HistoryStatus.HISTORY_ERROR;
+    }
+
+    const historyLength = this.treeManager.document.history.length;
+    const {numHistoryEventsApplied} = this.treeManager;
+    if (numHistoryEventsApplied === undefined) {
+      // We are waiting for the query to figure out the last history entry.
+      return HistoryStatus.FINDING_HISTORY_LENGTH;
+    } else {
+      if (historyLength === 0 && numHistoryEventsApplied === 0) {
+        return HistoryStatus.NO_HISTORY;
+      } else {
+        if (historyLength >= numHistoryEventsApplied) {
+          return HistoryStatus.HISTORY_LOADED;
+        } else {
+          // In this case, the numHistoryEventsApplied tells us that we have more history
+          // entries, but they haven't been loaded yet for some reason.
+          // This might be an error, but more likely the history is still loading.
+          return HistoryStatus.HISTORY_LOADING;
+        }
+      }
+    }
+  }
+
+  get historyStatusString() : string {
+    switch (this.historyStatus) {
+      case HistoryStatus.HISTORY_ERROR:
+        return "Error loading history";
+      case HistoryStatus.FINDING_HISTORY_LENGTH:
+        return "Finding the length of the history.";
+      case HistoryStatus.NO_HISTORY:
+        return "This document has no history.";
+      case HistoryStatus.HISTORY_LOADED:
+        return "History is loaded";
+      case HistoryStatus.HISTORY_LOADING: {
+        const historyLength = this.treeManager.document.history.length;
+        const {numHistoryEventsApplied} = this.treeManager;
+        return `Loading history (${historyLength}/${numHistoryEventsApplied})`;
+      }
+      default:
+        return "Unknown history status";
+    }
+  }
+
+  async moveToHistoryEntryAfterLoad(historyId: string) {
+    await when(() => this.historyStatus === HistoryStatus.HISTORY_LOADED);
+    const entry = this.treeManager.findHistoryEntryIndex(historyId);
+    if (entry >= 0) {
+      this.treeManager.goToHistoryEntry(entry);
+    } else {
+      console.warn("Did not find history entry with id: ", historyId);
+    }
+  }
+
+  async mirrorHistoryFromFirestore() {
+    const { treeManager, firestore } = this;
+    const { mainDocument } = treeManager;
+
+    const documentKey = mainDocument?.key;
+    const userId = mainDocument?.uid;
+    if (!documentKey || !userId) {
+      console.warn("mirrorHistoryFromFirestore, requires a mainDocument");
+      return;
+    }
+
+    // Wait for the parent document to exist
+    let documentPath: string;
+    try {
+      const firestoreHistoryInfo = await this.prepareFirestoreHistoryInfo();
+      documentPath = firestoreHistoryInfo.documentPath;
+    } catch (error) {
+      // The metadata document doesn't exist or there was another error.
+      // Set the loading error so historyStatus returns HISTORY_ERROR.
+      this.setLoadingError({
+        message: error instanceof Error ? error.message : String(error)
+      } as firebase.firestore.FirestoreError);
+      return;
+    }
+
+    // TODO: we should move this function into the history manager
+    treeManager.setNumHistoryEntriesAppliedFromFirestore(firestore, documentPath);
+
+    const snapshotUnsubscribe = loadHistory(firestore, `${documentPath}/history`,
+      (history, error) => {
+        if (error) {
+          this.setLoadingError(error);
+        } else {
+          // TODO: When run on every change for a collaborative document this will
+          // be pretty inefficient since it is recreating the whole CDocument
+          // each time. We can improve this by using Firestore's snapshot.docChanges()
+          // method. This way can just add the new history entries.
+          const cDocument = CDocument.create({history});
+          treeManager.setChangeDocument(cDocument);
+        }
+      }
+    );
+    // Add this disposer so our Firestore listener is removed when the treeManager is destroyed
+    addDisposer(treeManager, snapshotUnsubscribe);
+  }
 }
 
 export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
 
   async prepareFirestoreHistoryInfo(): Promise<IFirestoreHistoryInfo> {
-    const { userContextProvider, mainDocument, firestore } = this;
+    const { userContextProvider, treeManager: { mainDocument }, firestore } = this;
     // TODO: Wait for userContext to be valid.
     // The userContext initially starts out with a user id of 0 and doesn't have a portal and other
     // properties defined. After the user is authenticated the userContext will have valid fields.

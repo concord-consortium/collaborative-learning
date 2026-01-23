@@ -6,13 +6,14 @@ import { createDocumentModel } from "../document/document";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { ProblemDocument } from "../document/document-types";
 import { TileContentModel } from "../tiles/tile-content";
-import { HistoryStatus, TreeManager } from "./tree-manager";
+import { TreeManager } from "./tree-manager";
 import { getLastHistoryEntry as _getLastHistoryEntry,
   LastHistoryEntry,
   loadHistory as _loadHistory } from "./history-firestore";
-import { UserModelType } from "../stores/user";
 import { when } from "mobx";
 import { HistoryEntrySnapshot } from "./history";
+import { FirestoreHistoryManager, HistoryStatus } from "./firestore-history-manager";
+import { UserContextProvider } from "../stores/user-context-provider";
 
 jest.mock("./history-firestore");
 // This adds the mock api types to these two functions
@@ -60,56 +61,91 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
   docModel.treeMonitor!.enableMonitoring();
 
   const tileContent = docContent.tileMap.get("t1")?.content as TestTileType;
-  const manager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
-  const undoStore = manager.undoStore;
+  const treeManager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
+  const undoStore = treeManager.undoStore;
 
-  return {docContent, tileContent, manager, undoStore};
+  return {docContent, tileContent, treeManager, undoStore};
 }
 
-const makeFirestoreMock = (docExists = false) => {
+const makeFirestoreMock = (docExists = true) => {
   return {
     doc: jest.fn(() => ({
       get: jest.fn(async () => ({
         exists: docExists
-      }))
-    }))
+      })),
+      // Mock onSnapshot to immediately call the callback with a doc that exists
+      onSnapshot: jest.fn((callback: (doc: { exists: boolean }) => void) => {
+        // Simulate the document existing (or not) based on the docExists parameter
+        callback({ exists: docExists });
+        // Return an unsubscribe function
+        return jest.fn();
+      })
+    })),
+    getFullPath: jest.fn((path: string) => path)
   } as unknown as Firestore;
 };
 
+const makeUserContextProviderMock = () => {
+  return {
+    userContext: {
+      uid: "1234"
+    }
+  } as unknown as UserContextProvider;
+};
+
+function setupFirestoreHistoryManager(
+  treeManager: Instance<typeof TreeManager>,
+  firestoreMock?: Firestore
+) {
+  const firestore = firestoreMock ?? makeFirestoreMock();
+  const userContextProviderMock = makeUserContextProviderMock();
+  const historyManager = new FirestoreHistoryManager({
+    firestore,
+    userContextProvider: userContextProviderMock,
+    treeManager,
+    uploadLocalHistory: false,
+    // Don't automatically call mirrorHistoryFromFirestore in constructor
+    // so tests can set up mocks first
+    syncRemoteHistory: false
+  });
+  return { historyManager, firestoreMock: firestore };
+}
+
 describe("history loading", () => {
   it("initially has a status of NO_HISTORY", () => {
-    const { manager } = setupDocument();
+    const { treeManager } = setupDocument();
+    const { historyManager } = setupFirestoreHistoryManager(treeManager);
     // TODO: This should be changed. At this point we don't know if the
     // document has history or not. It is "NO_HISTORY" because the
     // "numHistoryEventsApplied" is 0 until the value is requested from
     // firestore. The improvement requires more state to track the
     // loading of the history instead of just using comparing the total
     // events to the number of events
-    expect(manager.historyStatus).toBe(HistoryStatus.NO_HISTORY);
+    expect(historyManager.historyStatus).toBe(HistoryStatus.NO_HISTORY);
   });
 
   describe("setNumHistoryEntriesAppliedFromFirestore", () => {
     it("updates numHistoryEntriesAppliedFromFirestore based on returned entry", async () => {
-      const { manager } = setupDocument();
+      const { treeManager } = setupDocument();
       getLastHistoryEntry.mockResolvedValue({index: 0, id: "1234"});
-      await manager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
-      expect(manager.numHistoryEventsApplied).toBe(1);
+      await treeManager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
+      expect(treeManager.numHistoryEventsApplied).toBe(1);
 
       getLastHistoryEntry.mockResolvedValue({index: 10, id: "12345"});
-      await manager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
-      expect(manager.numHistoryEventsApplied).toBe(11);
+      await treeManager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
+      expect(treeManager.numHistoryEventsApplied).toBe(11);
     });
 
     it("updates numHistoryEntriesAppliedFromFirestore to 0 with undefined entry", async () => {
-      const { manager } = setupDocument();
+      const { treeManager } = setupDocument();
       getLastHistoryEntry.mockResolvedValue(undefined);
-      await manager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
-      expect(manager.numHistoryEventsApplied).toBe(0);
+      await treeManager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
+      expect(treeManager.numHistoryEventsApplied).toBe(0);
 
     });
 
     it("updates numHistoryEntriesAppliedFromFirestore until result from firestore", async () => {
-      const { manager } = setupDocument();
+      const { treeManager } = setupDocument();
       // Delay the result of getLastHistoryEntry, so we can check that the
       // state in the manager before the result is available.
       const deferredResult = deferred<undefined>();
@@ -118,33 +154,33 @@ describe("history loading", () => {
         called.resolve();
         return deferredResult.promise;
       });
-      const actionPromise = manager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
+      const actionPromise = treeManager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
       // Make sure getLastHistoryEntry is called. Currently it is called
       // synchronously but in the future that might not be the case.
       await called.promise;
       // Test the state before it is resolved
-      expect(manager.numHistoryEventsApplied).toBe(undefined);
+      expect(treeManager.numHistoryEventsApplied).toBe(undefined);
       // Now actually provide the result
       deferredResult.resolve(undefined);
       await actionPromise;
       // Test the state after the action is finished
-      expect(manager.numHistoryEventsApplied).toBe(0);
+      expect(treeManager.numHistoryEventsApplied).toBe(0);
     });
   });
 
   describe("mirrorHistoryFromFirestore", () => {
     it("results in zero history entries if loadHistory does nothing", async () => {
-      const { manager } = setupDocument();
-      const firestoreMock = makeFirestoreMock();
+      const { treeManager } = setupDocument();
+      const { historyManager } = setupFirestoreHistoryManager(treeManager);
       // this makes loadHistory be a no op.
       loadHistory.mockReturnValue(() => undefined);
-      await manager.mirrorHistoryFromFirestore({id: "1234"} as UserModelType, firestoreMock);
-      expect(manager.document.history).toHaveLength(0);
+      await historyManager.mirrorHistoryFromFirestore();
+      expect(treeManager.document.history).toHaveLength(0);
     });
 
     it("creates a change doc with the history entries", async () => {
-      const { manager } = setupDocument();
-      const firestoreMock = makeFirestoreMock();
+      const { treeManager } = setupDocument();
+      const { historyManager } = setupFirestoreHistoryManager(treeManager);
       loadHistory.mockImplementation((firestore, path, historyLoaded) => {
         // In the real world this callback will be delayed until the history documents
         // are actually loaded from firebase
@@ -154,8 +190,33 @@ describe("history loading", () => {
         ]);
         return () => undefined;
       });
-      await manager.mirrorHistoryFromFirestore({id: "1234"} as UserModelType, firestoreMock);
-      expect(manager.document.history).toHaveLength(2);
+      await historyManager.mirrorHistoryFromFirestore();
+      expect(treeManager.document.history).toHaveLength(2);
+    });
+
+    it("sets HISTORY_ERROR when metadata document does not exist", async () => {
+      jest.useFakeTimers();
+      const { treeManager } = setupDocument();
+      // Create a firestore mock where the document doesn't exist
+      const firestoreMockNoDoc = makeFirestoreMock(false);
+      const { historyManager } = setupFirestoreHistoryManager(treeManager, firestoreMockNoDoc);
+
+      // Start mirrorHistoryFromFirestore - it will wait for metadata document
+      const mirrorPromise = historyManager.mirrorHistoryFromFirestore();
+
+      // While waiting for the history it currently reports "No History"
+      // TODO: This should be improved to show loading at this point.
+      expect(historyManager.historyStatus).toBe(HistoryStatus.NO_HISTORY);
+
+      // Fast-forward past the 5 second timeout
+      jest.advanceTimersByTime(5001);
+
+      await mirrorPromise;
+
+      // Should have set the error status since the metadata document was not found
+      expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_ERROR);
+
+      jest.useRealTimers();
     });
 
     describe("updates the historyStatus", () => {
@@ -169,11 +230,9 @@ describe("history loading", () => {
       /**
        * This does several things. It:
        * - mocks getLastHistoryEntry and loadHistory
-       * - verifies the historyStatus after getLastHistoryEntry is called, but
-       *   before it is resolved.
        * - waits until setNumHistoryEntriesAppliedFromFirestore has resolved.
        *
-       * This allows us check the logic of manager.historyStatus based on
+       * This allows us check the logic of historyManager.historyStatus based on
        * mock history entries, a loading error and a mock lastHistoryEntry
        *
        * @param param
@@ -181,57 +240,47 @@ describe("history loading", () => {
        */
       async function mirrorMockHistory(param: IMirrorMockHistoryParam) {
         const { entries, loadingError, lastHistoryEntry } = param;
-        const { manager } = setupDocument();
-        const firestoreMock = makeFirestoreMock();
-        // Delay the result to check that the history events applied is undefined
-        // in the meantime and then changes when the delay is done
-        const deferredResult = deferred<LastHistoryEntry>();
-        const called = deferred<void>();
-        getLastHistoryEntry.mockImplementation(() => {
-          called.resolve();
-          return deferredResult.promise;
-        });
+        const { treeManager } = setupDocument();
+        const { historyManager } = setupFirestoreHistoryManager(treeManager);
+
+        // Mock getLastHistoryEntry to return the lastHistoryEntry
+        // This is called in prepareFirestoreHistoryInfo
+        getLastHistoryEntry.mockResolvedValue(lastHistoryEntry);
+
         loadHistory.mockImplementation((firestore, path, historyLoaded) => {
           // In the real world this callback will be delayed until the history documents
           // are actually loaded from firebase
           historyLoaded(entries, loadingError);
           return () => undefined;
         });
-        await manager.mirrorHistoryFromFirestore({id: "1234"} as UserModelType, firestoreMock);
 
-        await called.promise;
-        // If we actually delayed the historyLoaded callback above we should be able to
-        // see FINDING_HISTORY_LENGTH before the HISTORY_ERROR
-        const initialStatus = loadingError ? HistoryStatus.HISTORY_ERROR : HistoryStatus.FINDING_HISTORY_LENGTH;
-        expect(manager.historyStatus).toBe(initialStatus);
-        expect(manager.numHistoryEventsApplied === undefined);
-        deferredResult.resolve(lastHistoryEntry);
+        await historyManager.mirrorHistoryFromFirestore();
 
-        // this seems to be the best way to wait for setNumHistoryEntriesAppliedFromFirestore to finish
-        await when(() => manager.numHistoryEventsApplied !== undefined);
+        // Wait for setNumHistoryEntriesAppliedFromFirestore to finish
+        await when(() => treeManager.numHistoryEventsApplied !== undefined);
 
-        return { manager };
+        return { treeManager, historyManager };
       }
 
       it("is LOADED when there are more events than firestore length", async () => {
-        const { manager } = await mirrorMockHistory({
+        const { historyManager } = await mirrorMockHistory({
           entries: [
             { id: "a1" },
             { id: "a2" }
           ]});
 
         // The history length is greater than the numHistoryEventsApplied
-        expect(manager.historyStatus).toBe(HistoryStatus.HISTORY_LOADED);
+        expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADED);
       });
 
       it("is NO_HISTORY when there are no events and the firestore length is 0", async () => {
-        const { manager } = await mirrorMockHistory({entries: []});
+        const { historyManager } = await mirrorMockHistory({entries: []});
 
-        expect(manager.historyStatus).toBe(HistoryStatus.NO_HISTORY);
+        expect(historyManager.historyStatus).toBe(HistoryStatus.NO_HISTORY);
       });
 
       it("is LOADED when the number of events match the firestore length", async () => {
-        const { manager } = await mirrorMockHistory({
+        const { historyManager } = await mirrorMockHistory({
           entries:[
             { id: "a1" },
             { id: "a2" }
@@ -241,17 +290,17 @@ describe("history loading", () => {
 
         // The history length is 1 plus the index of last history entry
         // so it should be 2 which matches the number of entries
-        expect(manager.historyStatus).toBe(HistoryStatus.HISTORY_LOADED);
+        expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADED);
       });
 
       it("is ERROR when loadHistory returns an error", async () => {
-        const { manager } = await mirrorMockHistory({
+        const { historyManager } = await mirrorMockHistory({
           entries:[],
           loadingError: { message: "fake error"} as firebase.firestore.FirestoreError,
           lastHistoryEntry: {index: 1, id: "1234"}
         });
 
-        expect(manager.historyStatus).toBe(HistoryStatus.HISTORY_ERROR);
+        expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_ERROR);
       });
 
       // FIXME: this is actually an error. If the history is corrupted and some
@@ -260,7 +309,7 @@ describe("history loading", () => {
       // can tell when the entries are actually loaded instead of comparing these values.
       // This case should be identified as a problem instead of just LOADING.
       it("is LOADING when number of events is less than firestore length", async () => {
-        const { manager } = await mirrorMockHistory({
+        const { historyManager } = await mirrorMockHistory({
           entries:[
             { id: "a1" },
             { id: "a2" }
@@ -270,7 +319,7 @@ describe("history loading", () => {
 
         // The history length is 1 plus the index of last history entry
         // so it should be 3 which is more than number of entries
-        expect(manager.historyStatus).toBe(HistoryStatus.HISTORY_LOADING);
+        expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADING);
       });
 
     });
