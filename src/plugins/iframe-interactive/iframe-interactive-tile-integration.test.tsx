@@ -1,7 +1,7 @@
 import { render, waitFor } from "@testing-library/react";
 import React from "react";
 import { TileModel } from "../../models/tiles/tile-model";
-import { defaultInteractiveApiContent } from "./interactive-api-tile-content";
+import { defaultIframeInteractiveContent } from "./iframe-interactive-tile-content";
 
 // Mock iframe-phone BEFORE importing the component
 const mockIframePhone = {
@@ -21,13 +21,18 @@ jest.mock("iframe-phone", () => ({
   })
 }));
 
+// Mock useSettingFromStores to avoid needing full stores context
+jest.mock("../../hooks/use-stores", () => ({
+  useSettingFromStores: jest.fn(() => "geolocation; microphone; camera; bluetooth")
+}));
+
 // NOW import the component after the mock is set up
-import { InteractiveApiComponent } from "./interactive-api-tile";
+import { IframeInteractiveComponent } from "./iframe-interactive-tile";
 
 // Import registration to ensure tile type is registered
-import "./interactive-api-tile-registration";
+import "./iframe-interactive-tile-registration";
 
-describe("InteractiveApiComponent Integration Tests", () => {
+describe("IframeInteractiveComponent Integration Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -41,7 +46,7 @@ describe("InteractiveApiComponent Integration Tests", () => {
   });
 
   const createDefaultProps = () => {
-    const content = defaultInteractiveApiContent();
+    const content = defaultIframeInteractiveContent();
     content.setUrl("https://example.com/interactive");
     const model = TileModel.create({ content });
 
@@ -64,7 +69,7 @@ describe("InteractiveApiComponent Integration Tests", () => {
 
   it("sends initInteractive message on mount", async () => {
     const props = createDefaultProps();
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     await waitFor(() => {
       expect(mockIframePhone.post).toHaveBeenCalledWith(
@@ -80,7 +85,7 @@ describe("InteractiveApiComponent Integration Tests", () => {
   it("sends report mode in read-only", async () => {
     const props = createDefaultProps();
     props.readOnly = true;
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     await waitFor(() => {
       expect(mockIframePhone.post).toHaveBeenCalledWith(
@@ -94,7 +99,7 @@ describe("InteractiveApiComponent Integration Tests", () => {
 
   it("updates interactive state when received from iframe", async () => {
     const props = createDefaultProps();
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     const newState = { answer: "42", submitted: true };
 
@@ -116,7 +121,7 @@ describe("InteractiveApiComponent Integration Tests", () => {
   it("polls for interactive state every 2 seconds", async () => {
     jest.useFakeTimers();
     const props = createDefaultProps();
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     // Wait for initial setup to complete
     await waitFor(() => {

@@ -198,11 +198,6 @@
         "isTileTool": true
       },
       {
-        "id": "InteractiveApi",
-        "title": "Interactive",
-        "isTileTool": true
-      },
-      {
         "id": "Geometry",
         "title": "Geometry",
         "isTileTool": true
@@ -295,6 +290,9 @@
     "settings": {
       "ai": {
         "systemPrompt": "You are a helpful, collaborative student."
+      },
+      "iframeInteractive": {
+        "allowedPermissions": "geolocation; microphone; camera; bluetooth"
       },
       "bargraph": {
         "tools": [

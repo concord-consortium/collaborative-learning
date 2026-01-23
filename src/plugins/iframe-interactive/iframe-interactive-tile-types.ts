@@ -1,3 +1,3 @@
-export const kInteractiveApiTileType = "InteractiveApi";
+export const kIframeInteractiveTileType = "IframeInteractive";
 
-export const kInteractiveApiDefaultHeight = 480;
+export const kIframeInteractiveDefaultHeight = 480;

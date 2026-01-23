@@ -7,6 +7,8 @@
 Story: https://concord-consortium.atlassian.net/browse/CLUE-333
 Status: *Implemented*
 
+**Note on naming**: During code review, the tile was renamed from "InteractiveApi" to "IframeInteractive" to better reflect its implementation (iframe-based) rather than the protocol it uses. The folder is `src/plugins/iframe-interactive/`, the tile type is `IframeInteractive`, and the content model is `IframeInteractiveContentModel`. This spec document retains the original "Interactive API" naming for historical reference.
+
 ## Overview
 
 This document outlines the steps to create a new "Interactive API" tile in CLUE that embeds external interactive content via an iframe using the [@concord-consortium/interactive-api-host](https://www.npmjs.com/package/@concord-consortium/interactive-api-host) package. This tile will allow curriculum authors to specify a URL to an external interactive.

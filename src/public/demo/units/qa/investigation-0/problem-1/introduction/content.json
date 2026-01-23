@@ -130,36 +130,34 @@
         }
       },
       {
-        "id": "interactive-api-test-tile-with-url",
+        "id": "iframe-interactive-test-tile-with-url",
         "title": "Test Interactive with URL",
         "content": {
-          "type": "InteractiveApi",
+          "type": "IframeInteractive",
           "url": "https://example.com",
           "interactiveState": {},
           "authoredState": {},
-          "allowedPermissions": "geolocation; microphone; camera; bluetooth",
           "maxHeight": 0,
           "enableScroll": false
         }
       },
       {
-        "id": "interactive-api-test-tile-no-url",
+        "id": "iframe-interactive-test-tile-no-url",
         "title": "Test Interactive without URL",
         "content": {
-          "type": "InteractiveApi",
+          "type": "IframeInteractive",
           "url": "",
           "interactiveState": {},
           "authoredState": {},
-          "allowedPermissions": "geolocation; microphone; camera; bluetooth",
           "maxHeight": 0,
           "enableScroll": false
         }
       },
       {
-        "id": "interactive-api-test-tile-open-response",
+        "id": "iframe-interactive-test-tile-open-response",
         "title": "Test Open Response Question",
         "content": {
-          "type": "InteractiveApi",
+          "type": "IframeInteractive",
           "url": "https://models-resources.concord.org/question-interactives/branch/master/open-response/",
           "interactiveState": {},
           "authoredState": {
@@ -171,7 +169,6 @@
             "predictionFeedback": null,
             "audioEnabled": false
           },
-          "allowedPermissions": "geolocation; microphone; camera; bluetooth",
           "maxHeight": 0,
           "enableScroll": false
         }

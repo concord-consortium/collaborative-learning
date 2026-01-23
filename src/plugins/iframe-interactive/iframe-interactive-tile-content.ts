@@ -1,28 +1,26 @@
 import { types, Instance } from "mobx-state-tree";
 import { TileContentModel } from "../../models/tiles/tile-content";
-import { kInteractiveApiTileType } from "./interactive-api-tile-types";
+import { kIframeInteractiveTileType } from "./iframe-interactive-tile-types";
 import stringify from "json-stringify-pretty-compact";
 
-export function defaultInteractiveApiContent(): InteractiveApiContentModelType {
-  return InteractiveApiContentModel.create({
+export function defaultIframeInteractiveContent(): IframeInteractiveContentModelType {
+  return IframeInteractiveContentModel.create({
     url: "",
     interactiveState: {},
     authoredState: {}
   });
 }
 
-export const InteractiveApiContentModel = TileContentModel
-  .named("InteractiveApiContent")
+export const IframeInteractiveContentModel = TileContentModel
+  .named("IframeInteractiveContent")
   .props({
-    type: types.optional(types.literal(kInteractiveApiTileType), kInteractiveApiTileType),
+    type: types.optional(types.literal(kIframeInteractiveTileType), kIframeInteractiveTileType),
     url: types.optional(types.string, ""),
     // frozen() types are immutable - to update, replace the entire object
     // interactiveState: Runtime-only, populated by interactive as students interact. Always starts empty.
     interactiveState: types.optional(types.frozen(), {}),
     // authoredState: Configured by curriculum authors, same for all students
     authoredState: types.optional(types.frozen(), {}),
-    // Optional: Allow configuration of iframe permissions
-    allowedPermissions: types.optional(types.string, "geolocation; microphone; camera; bluetooth"),
     // Optional: Maximum height for the tile (useful for very tall interactives)
     // If not set or 0, uses calculated height from interactive with 2000px max
     maxHeight: types.optional(types.number, 0),
@@ -39,7 +37,6 @@ export const InteractiveApiContentModel = TileContentModel
         url: self.url,
         interactiveState: self.interactiveState,
         authoredState: self.authoredState,
-        allowedPermissions: self.allowedPermissions,
         maxHeight: self.maxHeight,
         enableScroll: self.enableScroll
       };
@@ -57,9 +54,6 @@ export const InteractiveApiContentModel = TileContentModel
     setAuthoredState(state: any) {
       self.authoredState = state;
     },
-    setAllowedPermissions(permissions: string) {
-      self.allowedPermissions = permissions;
-    },
     setMaxHeight(height: number) {
       self.maxHeight = height;
     },
@@ -68,8 +62,8 @@ export const InteractiveApiContentModel = TileContentModel
     }
   }));
 
-export interface InteractiveApiContentModelType extends Instance<typeof InteractiveApiContentModel> {}
+export interface IframeInteractiveContentModelType extends Instance<typeof IframeInteractiveContentModel> {}
 
-export function isInteractiveApiModel(model?: any): model is InteractiveApiContentModelType {
-  return model?.type === kInteractiveApiTileType;
+export function isIframeInteractiveModel(model?: any): model is IframeInteractiveContentModelType {
+  return model?.type === kIframeInteractiveTileType;
 }

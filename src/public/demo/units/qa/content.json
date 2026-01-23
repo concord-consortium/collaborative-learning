@@ -79,7 +79,7 @@
       {"id": "Geometry", "isTileTool": true},
       {"id": "Image", "title": "Image", "isTileTool": true},
       {"id": "Drawing", "title": "Drawing", "isTileTool": true},
-      {"id": "InteractiveApi", "title": "Interactive", "isTileTool": true},
+      {"id": "IframeInteractive", "title": "Interactive", "isTileTool": true},
       {"id": "Starter", "title": "Starter", "isTileTool": true},
       {"id": "Simulator", "title": "EMG Simulator", "isTileTool": true},
       {"id": "Expression", "title": "Expression", "isTileTool": true},

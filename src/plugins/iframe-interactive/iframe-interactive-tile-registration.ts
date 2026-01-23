@@ -1,24 +1,24 @@
 import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
-import { kInteractiveApiTileType, kInteractiveApiDefaultHeight } from "./interactive-api-tile-types";
-import { InteractiveApiComponent } from "./interactive-api-tile";
-import { defaultInteractiveApiContent, InteractiveApiContentModel } from "./interactive-api-tile-content";
+import { kIframeInteractiveTileType, kIframeInteractiveDefaultHeight } from "./iframe-interactive-tile-types";
+import { IframeInteractiveComponent } from "./iframe-interactive-tile";
+import { defaultIframeInteractiveContent, IframeInteractiveContentModel } from "./iframe-interactive-tile-content";
 
-import Icon from "./interactive-api-tile-icon.svg";
-import HeaderIcon from "./interactive-api-tile-id.svg";
+import Icon from "./iframe-interactive-tile-icon.svg";
+import HeaderIcon from "./iframe-interactive-tile-id.svg";
 
 registerTileContentInfo({
-  type: kInteractiveApiTileType,
+  type: kIframeInteractiveTileType,
   displayName: "Interactive",
-  modelClass: InteractiveApiContentModel,
-  defaultContent: defaultInteractiveApiContent,
-  defaultHeight: kInteractiveApiDefaultHeight
+  modelClass: IframeInteractiveContentModel,
+  defaultContent: defaultIframeInteractiveContent,
+  defaultHeight: kIframeInteractiveDefaultHeight
 });
 
 registerTileComponentInfo({
-  type: kInteractiveApiTileType,
-  Component: InteractiveApiComponent,
-  tileEltClass: "interactive-api-tile",
+  type: kIframeInteractiveTileType,
+  Component: IframeInteractiveComponent,
+  tileEltClass: "iframe-interactive-tile",
   Icon,
   HeaderIcon
 });

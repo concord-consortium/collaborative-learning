@@ -1,6 +1,6 @@
-# Interactive API Tile
+# Iframe Interactive Tile
 
-The Interactive API tile enables embedding external interactive content into CLUE documents using the [LARA Interactive API](https://github.com/concord-consortium/lara-interactive-api) protocol. This tile provides a secure iframe-based container with bidirectional communication for educational interactives.
+The Iframe Interactive tile enables embedding external interactive content into CLUE documents using the [LARA Interactive API](https://github.com/concord-consortium/lara-interactive-api) protocol. This tile provides a secure iframe-based container with bidirectional communication for educational interactives.
 
 ## Features
 
@@ -26,29 +26,30 @@ The tile uses MST with **frozen types** for immutable state management:
 
 ```typescript
 {
-  type: "InteractiveApi",           // Tile type identifier
+  type: "IframeInteractive",           // Tile type identifier
   url: string,                      // Interactive URL (required)
   interactiveState: frozen({}),     // Student work state (immutable)
   authoredState: frozen({}),        // Teacher configuration (immutable)
-  allowedPermissions: string,       // iframe "allow" attribute
   maxHeight: number,                // Maximum height (0 = unlimited)
   enableScroll: boolean             // Enable iframe scrolling
 }
 ```
 
+**Note**: iframe permissions (`allow` attribute) are configured at the unit level via `settings.iframeInteractive.allowedPermissions` for security reasons, not per-tile.
+
 **Important**: `interactiveState` and `authoredState` use MST frozen types, meaning they must be replaced entirely rather than mutated:
 
 ```typescript
-// ✅ Correct - replaces entire state
+// Correct - replaces entire state
 content.setInteractiveState({ answer: "42", submitted: true });
 
-// ❌ Wrong - mutation not allowed
+// Wrong - mutation not allowed
 content.interactiveState.answer = "42";
 ```
 
 ### Component Architecture
 
-The React component (`InteractiveApiComponent`) handles:
+The React component (`IframeInteractiveComponent`) handles:
 - iframe lifecycle and iframe-phone connection management
 - LARA protocol message handling (initInteractive, loadInteractive, etc.)
 - State synchronization with 500ms debouncing
@@ -61,11 +62,11 @@ The React component (`InteractiveApiComponent`) handles:
 
 ### For Curriculum Authors
 
-Add an Interactive API tile to a CLUE document by including this JSON in your curriculum:
+Add an Iframe Interactive tile to a CLUE document by including this JSON in your curriculum:
 
 ```json
 {
-  "type": "InteractiveApi",
+  "type": "IframeInteractive",
   "url": "https://example.com/interactive.html",
   "authoredState": {
     "questionType": "multiple_choice",
@@ -84,7 +85,7 @@ Add an Interactive API tile to a CLUE document by including this JSON in your cu
 
 ### For Developers
 
-To create content that works with the Interactive API tile:
+To create content that works with the Iframe Interactive tile:
 
 1. **Implement the LARA Interactive API** in your interactive
 2. **Use iframe-phone** for postMessage communication
@@ -145,9 +146,9 @@ function updateHeight() {
 6. (Optional) CLUE sends `loadInteractive` if resuming work
 
 **Runtime Operation**:
-- Student interacts → Interactive sends `interactiveState` → CLUE saves (debounced 500ms)
-- Content resizes → Interactive sends `height` → CLUE adjusts (debounced 100ms)
-- Every 2s → CLUE sends `getInteractiveState` → Interactive responds with current state
+- Student interacts -> Interactive sends `interactiveState` -> CLUE saves (debounced 500ms)
+- Content resizes -> Interactive sends `height` -> CLUE adjusts (debounced 100ms)
+- Every 2s -> CLUE sends `getInteractiveState` -> Interactive responds with current state
 
 **Read-Only Mode**:
 - CLUE sends `mode: "report"` in `initInteractive`
@@ -160,7 +161,7 @@ function updateHeight() {
 
 Run the test suite:
 ```bash
-npm test -- src/plugins/interactive-api/
+npm test -- src/plugins/iframe-interactive/
 ```
 
 **Test Coverage**:
@@ -177,9 +178,26 @@ npm test -- src/plugins/interactive-api/
 | `url` | string | `""` | Interactive URL (required for display) |
 | `interactiveState` | frozen object | `{}` | Student work state (immutable) |
 | `authoredState` | frozen object | `{}` | Teacher configuration (immutable) |
-| `allowedPermissions` | string | `"geolocation; microphone; camera; bluetooth"` | iframe "allow" attribute |
 | `maxHeight` | number | `0` | Maximum height in pixels (0 = unlimited) |
 | `enableScroll` | boolean | `false` | Enable iframe scrolling |
+
+### Unit Configuration
+
+iframe permissions are configured at the unit level for security (prevents runtime modification by users):
+
+```json
+{
+  "config": {
+    "settings": {
+      "iframeInteractive": {
+        "allowedPermissions": "geolocation; microphone; camera"
+      }
+    }
+  }
+}
+```
+
+Default: `"geolocation; microphone; camera; bluetooth"`
 
 ### Content Actions
 
@@ -188,7 +206,6 @@ npm test -- src/plugins/interactive-api/
 | `setUrl` | `url: string` | Set interactive URL |
 | `setInteractiveState` | `state: any` | Replace entire interactive state |
 | `setAuthoredState` | `state: any` | Replace entire authored state |
-| `setAllowedPermissions` | `permissions: string` | Set iframe permissions |
 | `setMaxHeight` | `height: number` | Set maximum height |
 | `setEnableScroll` | `enabled: boolean` | Enable/disable scrolling |
 
@@ -230,7 +247,7 @@ The tile uses these sandbox flags for security:
 
 **Solutions**:
 1. Verify interactive sends `interactiveState` via iframe-phone
-2. Check browser DevTools → Network → WS (WebSocket) for Firebase writes
+2. Check browser DevTools -> Network -> WS (WebSocket) for Firebase writes
 3. Ensure state is plain object (no functions, circular refs)
 4. Test with polling: verify `getInteractiveState` responses
 
@@ -241,7 +258,7 @@ The tile uses these sandbox flags for security:
 **Possible causes**:
 - Interactive not sending `height` messages
 - Height messages sent too frequently (debounce causing lag)
-- Recursive height loop (CLUE ↔ Interactive)
+- Recursive height loop (CLUE <-> Interactive)
 
 **Solutions**:
 1. Verify interactive sends `height` via iframe-phone
@@ -272,7 +289,7 @@ The tile uses these sandbox flags for security:
 **Solutions**:
 1. Verify interactive includes iframe-phone library
 2. Check phone initialization happens after DOM ready
-3. Use browser DevTools → Console to check for phone errors
+3. Use browser DevTools -> Console to check for phone errors
 4. Test with minimal example interactive first
 
 ## Known Limitations
@@ -282,6 +299,7 @@ The tile uses these sandbox flags for security:
 3. **No Linked Interactives**: `linkedInteractives` always empty (multi-page sequences not supported)
 4. **No Global State**: `globalInteractiveState` always null (cross-page state not supported)
 5. **Firebase Write Limits**: Rapid state changes may hit Firebase rate limits (500ms debounce mitigates)
+6. **Undo/Redo Limitations**: While CLUE's undo/redo system works with this tile, the interactive will receive the restored state but may not be able to intelligently update its view. The interactive may need to re-initialize, which could lose unsaved state or focus.
 
 ## Performance Considerations
 

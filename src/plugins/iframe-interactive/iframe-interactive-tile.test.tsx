@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { TileModel } from "../../models/tiles/tile-model";
-import { defaultInteractiveApiContent } from "./interactive-api-tile-content";
-import { InteractiveApiComponent } from "./interactive-api-tile";
+import { defaultIframeInteractiveContent } from "./iframe-interactive-tile-content";
+import { IframeInteractiveComponent } from "./iframe-interactive-tile";
 
 // Mock iframe-phone to avoid actual iframe communication in tests
 jest.mock("iframe-phone", () => ({
@@ -13,17 +13,22 @@ jest.mock("iframe-phone", () => ({
   }))
 }));
 
-// The interactive-api tile needs to be registered so the TileModel.create
-// knows it is a supported tile type
-import "./interactive-api-tile-registration";
+// Mock useSettingFromStores to avoid needing full stores context
+jest.mock("../../hooks/use-stores", () => ({
+  useSettingFromStores: jest.fn(() => "geolocation; microphone; camera; bluetooth")
+}));
 
-describe("InteractiveApiComponent", () => {
+// The iframe-interactive tile needs to be registered so the TileModel.create
+// knows it is a supported tile type
+import "./iframe-interactive-tile-registration";
+
+describe("IframeInteractiveComponent", () => {
   const mockRequestRowHeight = jest.fn();
   const mockRegisterTileApi = jest.fn();
 
   // Create fresh content and model for each test to avoid state leakage
   const createTestProps = () => {
-    const content = defaultInteractiveApiContent();
+    const content = defaultIframeInteractiveContent();
     const model = TileModel.create({ content });
 
     return {
@@ -49,20 +54,20 @@ describe("InteractiveApiComponent", () => {
 
   it("renders successfully", () => {
     const props = createTestProps();
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
     expect(screen.getByText("No URL configured in authoring")).toBeInTheDocument();
   });
 
   it("shows placeholder when no URL is set", () => {
     const props = createTestProps();
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
     expect(screen.getByText("No URL configured in authoring")).toBeInTheDocument();
   });
 
   it("renders iframe when URL is set", () => {
     const props = createTestProps();
     props.content.setUrl("https://example.com/interactive");
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     const iframe = screen.getByTitle("Interactive Content");
     expect(iframe).toBeInTheDocument();
@@ -71,7 +76,7 @@ describe("InteractiveApiComponent", () => {
 
   it("registers tile API for export", () => {
     const props = createTestProps();
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     expect(mockRegisterTileApi).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -83,29 +88,19 @@ describe("InteractiveApiComponent", () => {
   it("exports content as JSON via tile API", () => {
     const props = createTestProps();
     props.content.setUrl("https://example.com/test");
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     const tileApi = mockRegisterTileApi.mock.calls[0][0];
     const json = tileApi.exportContentAsTileJson();
 
-    expect(json).toContain('"type": "InteractiveApi"');
+    expect(json).toContain('"type": "IframeInteractive"');
     expect(json).toContain('"url": "https://example.com/test"');
-  });
-
-  it("applies configurable iframe permissions", () => {
-    const props = createTestProps();
-    props.content.setUrl("https://example.com/interactive");
-    props.content.setAllowedPermissions("geolocation; microphone");
-    render(<InteractiveApiComponent {...props} />);
-
-    const iframe = screen.getByTitle("Interactive Content");
-    expect(iframe).toHaveAttribute("allow", "geolocation; microphone");
   });
 
   it("applies sandbox attributes for security", () => {
     const props = createTestProps();
     props.content.setUrl("https://example.com/interactive");
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     const iframe = screen.getByTitle("Interactive Content");
     expect(iframe).toHaveAttribute("sandbox",
@@ -116,7 +111,7 @@ describe("InteractiveApiComponent", () => {
     const props = createTestProps();
     props.content.setUrl("https://example.com/interactive");
     props.content.setEnableScroll(true);
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     const iframe = screen.getByTitle("Interactive Content");
     expect(iframe).toHaveAttribute("scrolling", "yes");
@@ -126,7 +121,7 @@ describe("InteractiveApiComponent", () => {
     const props = createTestProps();
     props.content.setUrl("https://example.com/interactive");
     props.content.setEnableScroll(false);
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     const iframe = screen.getByTitle("Interactive Content");
     expect(iframe).toHaveAttribute("scrolling", "no");
@@ -135,7 +130,7 @@ describe("InteractiveApiComponent", () => {
   it("includes skip to content link for accessibility", () => {
     const props = createTestProps();
     props.content.setUrl("https://example.com/interactive");
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     const skipLink = screen.getByText("Skip to interactive content");
     expect(skipLink).toBeInTheDocument();
@@ -145,7 +140,7 @@ describe("InteractiveApiComponent", () => {
   it("has proper ARIA attributes", () => {
     const props = createTestProps();
     props.content.setUrl("https://example.com/interactive");
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     const region = screen.getByRole("region");
     expect(region).toHaveAttribute("aria-label", "Interactive content");
@@ -154,7 +149,7 @@ describe("InteractiveApiComponent", () => {
   it("shows loading spinner after 2 seconds if still loading", async () => {
     const props = createTestProps();
     props.content.setUrl("https://example.com/interactive");
-    render(<InteractiveApiComponent {...props} />);
+    render(<IframeInteractiveComponent {...props} />);
 
     // Initially no spinner
     expect(screen.queryByText("Loading interactive...")).not.toBeInTheDocument();
@@ -167,11 +162,11 @@ describe("InteractiveApiComponent", () => {
 
   it("updates when model URL changes", () => {
     const props = createTestProps();
-    const { rerender } = render(<InteractiveApiComponent {...props} />);
+    const { rerender } = render(<IframeInteractiveComponent {...props} />);
     expect(screen.getByText("No URL configured in authoring")).toBeInTheDocument();
 
     props.content.setUrl("https://example.com/new-interactive");
-    rerender(<InteractiveApiComponent {...props} />);
+    rerender(<IframeInteractiveComponent {...props} />);
 
     const iframe = screen.getByTitle("Interactive Content");
     expect(iframe).toHaveAttribute("src", "https://example.com/new-interactive");

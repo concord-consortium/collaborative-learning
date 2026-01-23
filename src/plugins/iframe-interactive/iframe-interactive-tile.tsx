@@ -52,8 +52,9 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from "react"
 import { observer } from "mobx-react";
 import iframePhone from "iframe-phone";
 import { ITileProps } from "../../components/tiles/tile-component";
-import { InteractiveApiContentModelType, isInteractiveApiModel } from "./interactive-api-tile-content";
+import { IframeInteractiveContentModelType, isIframeInteractiveModel } from "./iframe-interactive-tile-content";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
+import { useSettingFromStores } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import {
@@ -62,7 +63,7 @@ import {
   ISupportedFeatures
 } from "@concord-consortium/lara-interactive-api";
 
-import "./interactive-api-tile.scss";
+import "./iframe-interactive-tile.scss";
 
 // Type from iframe-phone package
 // Note: @types/iframe-phone is not available, so we define a minimal interface
@@ -91,12 +92,12 @@ function debounce<T extends (...args: any[]) => any>(func: T, wait: number): T &
   return debounced;
 }
 
-interface IInteractiveApiComponentProps extends ITileProps {
+interface IIframeInteractiveComponentProps extends ITileProps {
   // Note: onLog and onHintChange removed - will use Logger directly
 }
 
 // Error Boundary for tile isolation
-class InteractiveApiErrorBoundary extends React.Component<
+class IframeInteractiveErrorBoundary extends React.Component<
   {children: React.ReactNode},
   {hasError: boolean}
 > {
@@ -107,7 +108,7 @@ class InteractiveApiErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("InteractiveApiTile Error:", error, errorInfo);
+    console.error("IframeInteractiveTile Error:", error, errorInfo);
   }
 
   render() {
@@ -122,9 +123,15 @@ class InteractiveApiErrorBoundary extends React.Component<
   }
 }
 
-const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> = observer((props) => {
+const kDefaultAllowedPermissions = "geolocation; microphone; camera; bluetooth";
+
+const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentProps> = observer((props) => {
   const { model, readOnly, onRequestRowHeight, onRegisterTileApi } = props;
-  const content = isInteractiveApiModel(model.content) ? model.content : null;
+  const content = isIframeInteractiveModel(model.content) ? model.content : null;
+
+  // Get allowed permissions from unit configuration (more secure than per-tile storage)
+  const allowedPermissions = useSettingFromStores("allowedPermissions", "iframeInteractive") as string
+    || kDefaultAllowedPermissions;
 
   const [isLoading, setIsLoading] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
@@ -136,7 +143,7 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
   const aspectRatioRef = useRef<number | null>(null); // Store aspect ratio from interactive
 
   // Use refs to avoid stale closures in iframe-phone callbacks
-  const contentRef = useRef<InteractiveApiContentModelType | null>(content);
+  const contentRef = useRef<IframeInteractiveContentModelType | null>(content);
   contentRef.current = content;
 
   // Track current interactive state for comparison
@@ -222,7 +229,7 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
     lastHeightRef.current = clampedHeight;
     // Request the tile row to resize to match the iframe content height
     // Note: This is only called if the interactive sends 'height' messages.
-    // If it doesn't, the tile will use the SCSS min-height (200px) or kInteractiveApiDefaultHeight (480px)
+    // If it doesn't, the tile will use the SCSS min-height (200px) or kIframeInteractiveDefaultHeight (480px)
     // In dashboard views, CLUE's layout may override this request
     // Debounced to prevent UI jitter from continuous resize events
     debouncedRequestHeight(model.id, clampedHeight);
@@ -320,12 +327,10 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
       // Listen for log messages from the interactive
       phone.addListener("log", (logData: any) => {
         // Use CLUE's Logger system
-        // Note: Ensure TILE_INTERACTIVE_LOG is added to LogEventName enum first
-        // If not yet added, this will use a fallback string for development
-        const logEventName = (LogEventName as any).TILE_INTERACTIVE_LOG || "INTERACTIVE_API_LOG";
+        const logEventName = LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE;
         Logger.log(logEventName, {
           tileId: model.id,
-          tileType: "InteractiveApi",
+          tileType: "IframeInteractive",
           ...logData
         });
       });
@@ -466,9 +471,9 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
   // Show a placeholder if no URL is configured
   if (!content.url) {
     return (
-      <div className="tile-content interactive-api-wrapper">
+      <div className="tile-content iframe-interactive-wrapper">
         <BasicEditableTileTitle />
-        <div className="interactive-api-placeholder">
+        <div className="iframe-interactive-placeholder">
           <p>No URL configured in authoring</p>
         </div>
       </div>
@@ -484,7 +489,7 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
   };
 
   return (
-    <div className="tile-content interactive-api-wrapper" ref={containerRef}>
+    <div className="tile-content iframe-interactive-wrapper" ref={containerRef}>
       <BasicEditableTileTitle />
       {/* Skip to content link for keyboard navigation */}
       <a
@@ -500,13 +505,13 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
         Skip to interactive content
       </a>
       <div
-        className="interactive-api-content"
+        className="iframe-interactive-content"
         role="region"
         aria-label="Interactive content"
         aria-busy={isLoading}
       >
         {showSpinner && (
-          <div className="interactive-api-loading" role="status" aria-live="polite">
+          <div className="iframe-interactive-loading" role="status" aria-live="polite">
             <div className="spinner" aria-hidden="true" />
             <p>Loading interactive...</p>
           </div>
@@ -517,9 +522,8 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
           src={content.url}
           style={iframeStyle}
           scrolling={content.enableScroll ? "yes" : "no"}
-          // Use configurable permissions from model (defaults to full set)
-          // Can be restricted per-tile or via Content Security Policy in strict environments
-          allow={content.allowedPermissions}
+          // Permissions come from unit configuration for security (not per-tile state)
+          allow={allowedPermissions}
           // Sandbox for enhanced security - prevents top-level navigation and other malicious actions
           sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-downloads"
           title="Interactive Content"
@@ -530,15 +534,15 @@ const InteractiveApiComponentInternal: React.FC<IInteractiveApiComponentProps> =
   );
 });
 
-InteractiveApiComponentInternal.displayName = "InteractiveApiComponentInternal";
+IframeInteractiveComponentInternal.displayName = "IframeInteractiveComponentInternal";
 
 // Export wrapped in error boundary
-export const InteractiveApiComponent: React.FC<ITileProps> = (props) => {
+export const IframeInteractiveComponent: React.FC<ITileProps> = (props) => {
   return (
-    <InteractiveApiErrorBoundary>
-      <InteractiveApiComponentInternal {...props} />
-    </InteractiveApiErrorBoundary>
+    <IframeInteractiveErrorBoundary>
+      <IframeInteractiveComponentInternal {...props} />
+    </IframeInteractiveErrorBoundary>
   );
 };
 
-InteractiveApiComponent.displayName = "InteractiveApiComponent";
+IframeInteractiveComponent.displayName = "IframeInteractiveComponent";

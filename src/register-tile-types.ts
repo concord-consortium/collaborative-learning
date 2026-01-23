@@ -58,8 +58,8 @@ const gTileRegistration: Record<string, () => void> = {
   "Image": loggedLoad("Image", () => [
     import(/* webpackChunkName: "Image" */"./models/tiles/image/image-registration")
   ]),
-  "InteractiveApi": loggedLoad("InteractiveApi", () => [
-    import(/* webpackChunkName: "InteractiveApi" */"./plugins/interactive-api/interactive-api-tile-registration")
+  "IframeInteractive": loggedLoad("IframeInteractive", () => [
+    import("./plugins/iframe-interactive/iframe-interactive-tile-registration")
   ]),
   "Numberline": loggedLoad("Numberline", () => [
     import(/* webpackChunkName: "Numberline" */"./plugins/numberline/numberline-registration"),

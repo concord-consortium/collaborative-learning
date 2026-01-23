@@ -327,7 +327,14 @@ The fastest way to create a new tile is to copy the [starter tile](src/plugins/s
    ]),
    ```
 
-5. Add your tile's content model to `src/models/tiles/tile-content-union.ts`
+5. Add your tile to unit configuration(s) where it should appear in the toolbar:
+   - **Best practice**: Add new tiles to specific units, not the global `src/clue/app-config.json`
+   - For development/testing, add to the QA unit at `src/public/demo/units/qa/content.json`
+   - Add to the `toolbar` array:
+     ```json
+     {"id": "YourTile", "title": "Your Tile", "isTileTool": true}
+     ```
+   - Only add to curriculum units that actually need this tile
 
 The starter tile includes a simple textarea example that demonstrates the basic structure, content model with MST, and proper component setup. See the [starter tile README](src/plugins/starter/README.md) for more details.
 
@@ -502,22 +509,6 @@ If your tile uses shared models (like SharedDataSet), include those imports too:
 ]),
 ```
 
-#### 6. Update the TileContentUnion (`src/models/tiles/tile-content-union.ts`)
-
-Add your content model to the union type that includes all tile content models:
-
-```typescript
-import { YourTileContentModel } from "../../plugins/your-tile/your-tile-content";
-
-export const TileContentUnion = types.union(
-  { dispatcher: tileContentFactory },
-  PlaceholderContentModel,
-  // ... other content models ...
-  YourTileContentModel,
-  UnknownContentModel
-);
-```
-
 ### Optional Features
 
 #### Floating Toolbar
@@ -588,9 +579,11 @@ const selection = selectionStore?.getDataSetSelection(dataSetId);
    - Integrates with shared models (if applicable)
    - Resizes correctly (if resizable)
 
-### Making Your Tile Available in the Editor
+### Making Your Tile Available in the Toolbar
 
-The [standalone document editor](/editor/) requires tiles to be explicitly configured in a unit configuration file. To make your new tile available in the editor:
+Both the full CLUE application and the [standalone document editor](/editor/) require tiles to be explicitly configured in a unit configuration file to appear in the toolbar. If a unit doesn't specify its own toolbar, it falls back to the global `app-config.json`, but **adding tiles to the global app-config is discouraged** as it affects all units that don't override the toolbar.
+
+To make your new tile available:
 
 1. **For testing during development**, use the QA unit which includes most tiles:
    ```
@@ -634,8 +627,8 @@ The [standalone document editor](/editor/) requires tiles to be explicitly confi
 
 ### Examples to Reference
 
-- **Simple tile**: [bar-graph](src/plugins/bar-graph/) - Good starting point
-- **Data consumer**: [graph](src/plugins/graph/) - Consumes SharedDataSet
+- **Simple tile**: [starter](src/plugins/starter/) - Minimal example, good starting point
+- **Data consumer**: [bar-graph](src/plugins/bar-graph/) or [graph](src/plugins/graph/) - Consumes SharedDataSet
 - **Complex interactions**: [geometry](src/models/tiles/geometry/) - Linked selection with tables
 - **Drawing tools**: [drawing](src/plugins/drawing/) - Canvas-based tile
 
