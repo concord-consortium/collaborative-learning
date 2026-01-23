@@ -105,33 +105,33 @@ context('Numberline Tile', function () {
     numberlineToolTile.addPointOnNumberlineTick(0.0);
     numberlineToolTile.getPointsOnGraph().should('have.length', 3);
     // Click on tile to focus it, then Tab to select first point (leftmost)
-    cy.get(".numberline-wrapper").click().type('{tab}');
+    cy.get(".primary-workspace .numberline-wrapper").click().type('{tab}');
     numberlineToolTile.getValueLabel().should("exist");
     numberlineToolTile.getValueLabelText().should("contain", "-2.00");
     // Tab again to select next point
-    cy.get(".numberline-wrapper").type('{tab}');
+    cy.get(".primary-workspace .numberline-wrapper").type('{tab}');
     numberlineToolTile.getValueLabelText().should("contain", "0.00");
     // Tab again to select rightmost point
-    cy.get(".numberline-wrapper").type('{tab}');
+    cy.get(".primary-workspace .numberline-wrapper").type('{tab}');
     numberlineToolTile.getValueLabelText().should("contain", "2.00");
 
     cy.log("will move selected point with arrow keys");
     // Move the selected point (at 2.0) to the right by 0.1
-    cy.get(".numberline-wrapper").type('{rightarrow}');
+    cy.get(".primary-workspace .numberline-wrapper").type('{rightarrow}');
     numberlineToolTile.getValueLabelText().invoke('text').then((text) => {
       const value = parseFloat(text);
       expect(value).to.be.closeTo(2.1, 0.01);
     });
     // Move left by 0.1
-    cy.get(".numberline-wrapper").type('{leftarrow}');
+    cy.get(".primary-workspace .numberline-wrapper").type('{leftarrow}');
     numberlineToolTile.getValueLabelText().should("contain", "2.00");
 
     cy.log("will move point with larger step using Shift+arrow");
-    cy.get(".numberline-wrapper").type('{shift}{rightarrow}');
+    cy.get(".primary-workspace .numberline-wrapper").type('{shift}{rightarrow}');
     numberlineToolTile.getValueLabelText().should("contain", "3.00");
 
     cy.log("will delete selected point with keyboard");
-    cy.get(".numberline-wrapper").type('{del}');
+    cy.get(".primary-workspace .numberline-wrapper").type('{del}');
     numberlineToolTile.getPointsOnGraph().should('have.length', 2);
 
     cy.log("will clean up keyboard test points");
