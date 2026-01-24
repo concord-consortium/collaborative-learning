@@ -3,7 +3,7 @@ import React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
 import { IToolbarModel } from "../models/stores/problem-configuration";
-import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
+import { IToolbarButtonModel, ToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-content-info";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content-types";
 import { DeleteButton } from "./delete-button";
@@ -11,10 +11,12 @@ import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
 import { SectionModelType } from "../models/curriculum/section";
+import { IDropTileItem } from "../models/tiles/tile-model";
 import { logHistoryEvent } from "../models/history/log-history-event";
 import { LogEventName } from "../lib/logger-types";
 import { IToolbarEventProps, logToolbarEvent } from "../models/tiles/log/log-toolbar-event";
-import { IDropTileItem } from "src/models/tiles/tile-model";
+import { DEBUG_HISTORY_VIEW } from "../lib/debug";
+import { appIcons } from "../clue/app-icons";
 
 import "./toolbar.scss";
 
@@ -102,6 +104,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "copyToDocument":
           this.handleCopyToDocument();
           break;
+        case "historyView":
+          this.handleToggleHistoryView();
+          break;
         default:
           this.handleAddTile(tool);
           break;
@@ -144,6 +149,17 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     };
     const upperButtons = this.props.toolbarModel.filter(button => !button.isBottom) as IToolbarModel;
     const lowerButtons = this.props.toolbarModel.filter(button => button.isBottom) as IToolbarModel;
+    if (DEBUG_HISTORY_VIEW) {
+      console.log("ToolbarComponent.render: adding historyView button");
+      lowerButtons.push(ToolbarButtonModel.create({
+        id: "historyView",
+        title: "View History",
+        iconId: "icon-history-view-tool",
+        isTileTool: false,
+        isBottom: true
+      }, { appIcons }))
+    }
+
     return (
       <div className="toolbar" data-testid="toolbar">
         <div className="toolbar-upper">
@@ -406,6 +422,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
       this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_SELECT_ALL_TOOL, {selectAllTiles});
     }
+  };
+
+  private handleToggleHistoryView = () => {
+    this.stores.persistentUI.toggleHistoryView();
   };
 
   private handleTogglePlayback = () => {

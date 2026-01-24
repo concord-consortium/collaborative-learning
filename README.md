@@ -105,6 +105,7 @@ To enable per component debugging set the "debug" localstorage key with one or m
 - `drop` console log the dataTransfer object from drop events on the document.
 - `firestore` turn on Firestore's internal debugging, this logs all queries to Firestore.
 - `history` this will: print some info to the console as the history system records changes, print the full history as JSON each time it is loaded from Firestore, and provide a `window.historyDocument` so you can inspect the document while navigating the history.
+- `historyView` show a history button in the document toolbar, this brings up a history view panel.
 - `images` this will set `window.imageMap` so you can look at the status and URLs of images that have been loaded.
 - `listeners` console log the adding, removing, and firing of firebase listeners
 - `loading` console log timing information for various phases of the startup process
