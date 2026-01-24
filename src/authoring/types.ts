@@ -1,12 +1,8 @@
 import { EAuthorableNavTab } from "../models/view/nav-tabs";
+import { ISortOptionConfig } from "../models/stores/sort-work-config";
 
 export const sortTypeIds = ["Group", "Name", "Strategy", "Bookmarked", "Tools", "Date", "Problem"] as const;
 export type SortTypeId = typeof sortTypeIds[number];
-
-export interface ISortOptionConfig {
-  label?: string;
-  type: SortTypeId;
-}
 
 export interface ISortWorkConfig {
   defaultPrimarySort?: SortTypeId;

@@ -119,6 +119,8 @@ const GroupTitlebar: React.FC<IGroupComponentProps> = observer(function GroupTit
   const userDocTitle = document?.title || "Document";
   const groupLabel = appConfig.getCustomLabel("Group");
   const groupLabelLower = groupLabel.toLowerCase();
+  // TODO: pluralization is naive (adds "s"). This will not work for irregular English plurals
+  // and will break entirely for localization.
   const titleText = groupUser
                       ? `${groupUser.name}: ${document?.type === "problem" ? problem.title : userDocTitle}`
                       : group?.displayId ? `Student ${groupLabel} ${group?.displayId}` : `No ${groupLabelLower}s`;

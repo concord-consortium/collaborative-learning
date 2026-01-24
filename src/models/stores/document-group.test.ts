@@ -12,7 +12,6 @@ import { ISortedDocumentsStores, MetadataDocMapModel, SortedDocuments } from "./
 import { DB } from "../../lib/db";
 import { Bookmark, Bookmarks } from "./bookmarks";
 
-
 //****************************************** Documents Mock ***************************************
 
 const mockDocumentsData: DocumentModelSnapshotType[] = [
@@ -377,6 +376,28 @@ describe('DocumentGroup Model', () => {
       expect(byProblemDocs[1].label).toBe("Problem 1.2");
       expect(byProblemDocs[1].documents.length).toBe(2);
       expect(byProblemDocs[2].label).toBe("Problem 2.1");
+      expect(byProblemDocs[2].documents.length).toBe(1);
+    });
+
+    it('should sort "No Problem" to the end', () => {
+      // Modify one document to not have problem info
+      const metadataWithNoProblem: SnapshotIn<typeof MetadataDocMapModel> = {
+        ...mockMetadataDocuments,
+        "Student 1 Problem Doc Group 5": {
+          ...mockMetadataDocuments["Student 1 Problem Doc Group 5"],
+          investigation: undefined,
+          problem: undefined
+        }
+      };
+      sortedDocuments.metadataDocsFiltered = MetadataDocMapModel.create(metadataWithNoProblem);
+
+      const byProblemDocs = sortedDocuments.sortBy("Problem");
+      expect(byProblemDocs.length).toBe(3);
+      expect(byProblemDocs[0].label).toBe("Problem 1.2");
+      expect(byProblemDocs[0].documents.length).toBe(2);
+      expect(byProblemDocs[1].label).toBe("Problem 2.1");
+      expect(byProblemDocs[1].documents.length).toBe(1);
+      expect(byProblemDocs[2].label).toBe("No Problem");
       expect(byProblemDocs[2].documents.length).toBe(1);
     });
   });

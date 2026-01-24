@@ -1,37 +1,22 @@
 import { useMemo } from "react";
 import { useStores } from "./use-stores";
 import { ISortOptionConfig } from "../models/stores/sort-work-config";
-import { PrimarySortType } from "../models/stores/ui-types";
+import { PrimarySortType, DEFAULT_SORT_TYPES } from "../models/stores/ui-types";
+import { getSortTypeLabel } from "../utilities/sort-utils";
 
-export interface SortOptionDisplay {
+// Display version of ISortOptionConfig with required label
+export interface SortOptionDisplay extends Omit<ISortOptionConfig, "label"> {
   label: string;
   type: PrimarySortType;
 }
 
-const DEFAULT_LABELS: Record<PrimarySortType, string> = {
-  Bookmarked: "Bookmarked",
-  Date: "Date",
-  Group: "Group",
-  Name: "Student",
-  Problem: "Problem",
-  Strategy: "", // Will be overridden by tagPrompt
-  Tools: "Tools"
-};
-
 // Default sort options when no configuration is provided
-// Note: "Strategy" is only included if tagPrompt is configured
-const DEFAULT_SORT_OPTIONS: ISortOptionConfig[] = [
-  { type: "Date" },
-  { type: "Group" },
-  { type: "Name" },
-  { type: "Strategy" },
-  { type: "Bookmarked" },
-  { type: "Tools" }
-];
+const DEFAULT_SORT_OPTIONS: ISortOptionConfig[] = DEFAULT_SORT_TYPES.map(type => ({ type }));
 
 export function useSortOptions() {
   const { appConfig } = useStores();
   const { sortWorkConfig, tagPrompt, autoAssignStudentsToIndividualGroups } = appConfig;
+  const { customLabels } = appConfig;
 
   const sortOptions = useMemo(() => {
     const configOptions = sortWorkConfig?.sortOptions ?? DEFAULT_SORT_OPTIONS;
@@ -48,41 +33,54 @@ export function useSortOptions() {
         }
         return true;
       })
-      .map(option => {
-        const optionType = option.type;
-        const defaultLabel = option.type === "Strategy" ? (tagPrompt || "") : DEFAULT_LABELS[optionType];
-        const customLabel = appConfig.customLabels?.[optionType];
-        return {
-          type: optionType,
-          label: customLabel ?? defaultLabel
-        };
-      });
-  }, [sortWorkConfig?.sortOptions, autoAssignStudentsToIndividualGroups, tagPrompt, appConfig]);
+      .map(option => ({
+        type: option.type,
+        label: getSortTypeLabel(option.type, { customLabels, tagPrompt })
+      }));
+  }, [sortWorkConfig?.sortOptions, autoAssignStudentsToIndividualGroups, tagPrompt, customLabels]);
+
+  const sortOptionsByType = useMemo(() => {
+    const typeSet = new Set<PrimarySortType>();
+    const typeMap = new Map<PrimarySortType, SortOptionDisplay>();
+
+    sortOptions.forEach(option => {
+      typeSet.add(option.type);
+      typeMap.set(option.type, option);
+    });
+
+    return { typeSet, typeMap };
+  }, [sortOptions]);
 
   const showContextFilter = sortWorkConfig?.showContextFilter ?? true;
 
   const defaultPrimarySort = useMemo((): PrimarySortType => {
     // Only use configured default if it's actually available in the filtered options
     const configuredDefault = sortWorkConfig?.defaultPrimarySort;
-    if (configuredDefault && sortOptions.some(opt => opt.type === configuredDefault)) {
+    if (configuredDefault && sortOptionsByType.typeSet.has(configuredDefault)) {
       return configuredDefault;
     }
-    // Fallback: Group if available, otherwise Name
-    const hasGroup = sortOptions.some(opt => opt.type === "Group");
-    if (hasGroup) return "Group";
-    return "Name";
-  }, [sortWorkConfig, sortOptions]);
+    // Fallback hierarchy: Group → Name → first available option
+    if (sortOptionsByType.typeSet.has("Group")) return "Group";
+    if (sortOptionsByType.typeSet.has("Name")) return "Name";
+
+    if (sortOptions.length > 0) {
+      return sortOptions[0].type;
+    }
+
+    // Ultimate fallback. This should not happen with proper configuration
+    // but we need to return a valid PrimarySortType
+    return "Date";
+  }, [sortWorkConfig, sortOptions, sortOptionsByType]);
 
   const getLabelForType = (type: PrimarySortType): string => {
-    const option = sortOptions.find(opt => opt.type === type);
+    const option = sortOptionsByType.typeMap.get(type);
     if (option) return option.label;
     // Fallback for types not in current options (e.g., for secondary sort "None")
-    if (type === "Strategy") return tagPrompt || DEFAULT_LABELS.Strategy;
-    return DEFAULT_LABELS[type] || type;
+    return getSortTypeLabel(type, { customLabels, tagPrompt });
   };
 
   const isValidSortType = (type: string): type is PrimarySortType => {
-    return sortOptions.some(opt => opt.type === type);
+    return sortOptionsByType.typeSet.has(type as PrimarySortType);
   };
 
   return {
