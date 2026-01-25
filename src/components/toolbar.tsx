@@ -150,7 +150,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const upperButtons = this.props.toolbarModel.filter(button => !button.isBottom) as IToolbarModel;
     const lowerButtons = this.props.toolbarModel.filter(button => button.isBottom) as IToolbarModel;
     if (DEBUG_HISTORY_VIEW) {
-      console.log("ToolbarComponent.render: adding historyView button");
       lowerButtons.push(ToolbarButtonModel.create({
         id: "historyView",
         title: "View History",
