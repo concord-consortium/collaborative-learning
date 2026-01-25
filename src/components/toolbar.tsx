@@ -157,7 +157,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         iconId: "icon-history-view-tool",
         isTileTool: false,
         isBottom: true
-      }, { appIcons }))
+      }, { appIcons }));
     }
 
     return (
