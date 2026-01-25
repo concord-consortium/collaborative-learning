@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import classNames from "classnames";
 import { getSnapshot } from "mobx-state-tree";
+import { clone } from "lodash";
 import { appIcons } from "../../app-config";
 import { useDocumentContext } from "../../hooks/use-document-context";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
@@ -17,7 +18,6 @@ import { DocumentContextReact } from "./document-context";
 import { DocumentToolbar } from "./document-toolbar";
 
 import "./editable-document-content.scss";
-import { clone } from "lodash";
 
 interface IOneUpCanvasProps {
   document: DocumentModelType;
