@@ -140,50 +140,22 @@ describe("ConfigurationManager", () => {
     expect(appConfig.showAnnotationControls).toBe(true);
   });
 
-  describe("getCustomLabel", () => {
-    it("should return the label itself when no customLabels is provided", () => {
-      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
-      expect(appConfig.getCustomLabel("Group")).toBe("Group");
-      expect(appConfig.getCustomLabel("Name")).toBe("Name");
-      expect(appConfig.getCustomLabel("AnyLabel")).toBe("AnyLabel");
-    });
-
-    it("should return the label itself when customLabels does not have a mapping", () => {
+  describe("termOverrides", () => {
+    it("should return termOverrides property", () => {
       const appConfig = AppConfigModel.create({
         config: {
           ...unitConfigDefaults,
-          customLabels: {
-            "Other": "Something"
-          }
-        }
-      });
-      expect(appConfig.getCustomLabel("Group")).toBe("Group");
-    });
-
-    it("should return custom label when customLabels has a mapping", () => {
-      const appConfig = AppConfigModel.create({
-        config: {
-          ...unitConfigDefaults,
-          customLabels: {
-            "Group": "Team",
-            "Name": "Participant"
-          }
-        }
-      });
-      expect(appConfig.getCustomLabel("Group")).toBe("Team");
-      expect(appConfig.getCustomLabel("Name")).toBe("Participant");
-    });
-
-    it("should return customLabels property", () => {
-      const appConfig = AppConfigModel.create({
-        config: {
-          ...unitConfigDefaults,
-          customLabels: {
+          termOverrides: {
             "Group": "Team"
           }
         }
       });
-      expect(appConfig.customLabels).toEqual({ "Group": "Team" });
+      expect(appConfig.termOverrides).toEqual({ "Group": "Team" });
+    });
+
+    it("should return undefined when termOverrides is not configured", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      expect(appConfig.termOverrides).toBeUndefined();
     });
   });
 

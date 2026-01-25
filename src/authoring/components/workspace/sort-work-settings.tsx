@@ -1,35 +1,30 @@
 import React, { useEffect, useMemo } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 
-import { ISortWorkConfig, SortTypeId, sortTypeIds } from "../../types";
+import { ISortWorkConfig, SortTypeId, SortTypeIds } from "../../types";
 import { useCurriculum } from "../../hooks/use-curriculum";
 import { ISortOptionConfig } from "../../../models/stores/sort-work-config";
-import { DEFAULT_SORT_LABELS } from "../../../models/stores/ui-types";
+import { DEFAULT_SORT_LABELS, DEFAULT_SORT_TYPES } from "../../../models/stores/ui-types";
 import { getSortTypeLabel } from "../../../utilities/sort-utils";
 
 import "./sort-work-settings.scss";
 
-// Authoring-specific labels
 const authoringLabels: Record<SortTypeId, string> = {
   ...DEFAULT_SORT_LABELS,
-  Name: "Name", // Override "Student" with "Name" for authoring
   Strategy: "Strategy" // Override empty string with "Strategy" for authoring
 };
 
-const defaultEnabledTypes: SortTypeId[] = ["Group", "Name", "Strategy", "Bookmarked", "Tools", "Date"];
-
-const sortTypeDescriptions: Record<SortTypeId, string> = {
-  Bookmarked: "Sorts documents by bookmarked status",
-  Date: "Sorts documents by creation date",
-  Group: "Sorts documents by student group",
-  Name: "Sorts documents by student name",
-  Problem: "Sorts documents by problem",
-  Strategy: "Sorts documents by comment tag/strategy",
-  Tools: "Sorts documents by tile types used"
+const sortOptionDescriptions: Record<SortTypeId, string> = {
+  Group: "Sort documents by student group",
+  Name: "Sort documents by individual student",
+  Strategy: "Sort documents by comment tags",
+  Bookmarked: "Sort documents by bookmark status",
+  Tools: "Sort documents by tile types used",
+  Date: "Sort documents by last modified date",
+  Problem: "Sort documents by problem number"
 };
 
 interface FormSortOption {
-  customLabel: string;
   enabled: boolean;
   type: SortTypeId;
 }
@@ -43,22 +38,21 @@ interface SortWorkSettingsFormInputs {
 const SortWorkSettings: React.FC = () => {
   const { unitConfig, setUnitConfig, saveState } = useCurriculum();
   const tagPrompt = unitConfig?.config?.tagPrompt;
+  const termOverrides = unitConfig?.config?.termOverrides;
 
   const formDefaults: SortWorkSettingsFormInputs = useMemo(() => {
     const currentConfig = unitConfig?.config?.sortWorkConfig;
-    const customLabels = unitConfig?.config?.customLabels;
     const enabledTypes = new Set(currentConfig?.sortOptions?.map(o => o.type) ?? []);
 
     // Build sort options - maintain order from config if it exists
     const orderedTypes: SortTypeId[] = currentConfig?.sortOptions
-      ? [...currentConfig.sortOptions.map(o => o.type), ...sortTypeIds.filter(t => !enabledTypes.has(t))]
-      : [...sortTypeIds];
+      ? [...currentConfig.sortOptions.map(o => o.type), ...SortTypeIds.filter(t => !enabledTypes.has(t))]
+      : [...SortTypeIds];
 
     const sortOptions: FormSortOption[] = orderedTypes.map(type => {
       return {
-        type,
-        customLabel: customLabels?.[type] ?? "", // Empty string means the default label is used.
-        enabled: enabledTypes.size === 0 ? defaultEnabledTypes.includes(type) : enabledTypes.has(type)
+        enabled: enabledTypes.size === 0 ? DEFAULT_SORT_TYPES.includes(type) : enabledTypes.has(type),
+        type
       };
     });
 
@@ -87,12 +81,7 @@ const SortWorkSettings: React.FC = () => {
   const enabledOptions = watchSortOptions?.filter(o => o.enabled) ?? [];
 
   const onSubmit: SubmitHandler<SortWorkSettingsFormInputs> = (data) => {
-    // Validate at least one sort option is enabled
     const enabledSortOptions = data.sortOptions.filter(o => o.enabled);
-    if (enabledSortOptions.length === 0) {
-      alert("At least one sort option must be enabled for the Sort Work tab to function.");
-      return;
-    }
 
     setUnitConfig(draft => {
       if (!draft) return;
@@ -119,23 +108,7 @@ const SortWorkSettings: React.FC = () => {
       if (Object.keys(sortWorkConfig).length > 0) {
         draft.config.sortWorkConfig = sortWorkConfig;
       } else {
-        delete (draft.config as any).sortWorkConfig;
-      }
-
-      // Save custom labels separately
-      const customLabels: Record<string, string> = {};
-      data.sortOptions.forEach(o => {
-        const trimmedLabel = o.customLabel.trim();
-        // Only include label if it differs from default
-        if (trimmedLabel && trimmedLabel !== getDisplayLabel(o.type)) {
-          customLabels[o.type] = trimmedLabel;
-        }
-      });
-
-      if (Object.keys(customLabels).length > 0) {
-        draft.config.customLabels = customLabels;
-      } else {
-        delete (draft.config as any).customLabels;
+        delete draft.config.sortWorkConfig;
       }
     });
   };
@@ -148,6 +121,10 @@ const SortWorkSettings: React.FC = () => {
   };
 
   const getDisplayLabel = (type: SortTypeId) => {
+    if (termOverrides?.[type]) {
+      return termOverrides[type];
+    }
+
     return getSortTypeLabel(type, { tagPrompt, baseLabels: authoringLabels });
   };
 
@@ -155,7 +132,7 @@ const SortWorkSettings: React.FC = () => {
     <form onSubmit={handleSubmit(onSubmit)} className="sort-work-settings">
       <h3 id="sort-work-heading">Sort Work Tab Configuration</h3>
       <p className="muted" id="sort-work-description">
-        Configure which sort options are available on the Sort Work tab and customize their labels.
+        Configure which sort options are available on the Sort Work tab.
       </p>
 
       <fieldset>
@@ -176,17 +153,17 @@ const SortWorkSettings: React.FC = () => {
       <fieldset>
         <legend>Sort Options</legend>
         <p className="muted small" id="sort-options-description">
-          Check the options to enable them. Use arrows to reorder.
-          Custom labels override the default display text.
+          Check the options to enable them. Use arrow buttons to reorder.
+          Labels can be customized on the <a href="#termOverrides">Term Overrides page</a>.
+          Labels marked with an <span className="custom-label-indicator">*</span> have been customized.
         </p>
         <table aria-describedby="sort-options-description" role="grid">
           <thead>
             <tr>
-              <th scope="col">Enabled</th>
-              <th scope="col">Order</th>
-              <th scope="col">Sort Type</th>
-              <th scope="col">Custom Label</th>
-              <th scope="col">Description</th>
+              <th className="enabled" scope="col">Enabled</th>
+              <th className="order" scope="col">Order</th>
+              <th className="sort-type" scope="col">Sort Type</th>
+              <th className="description" scope="col">Description</th>
             </tr>
           </thead>
           <tbody>
@@ -196,19 +173,20 @@ const SortWorkSettings: React.FC = () => {
               const rowId = `sort-option-${sortType}`;
               const watchedOption = watchSortOptions[index];
               const isOnlyEnabledOption = enabledOptions.length === 1 && watchedOption?.enabled;
+              const hasCustomLabel = !!termOverrides?.[sortType];
 
               return (
                 <tr key={field.id} id={rowId}>
-                  <td>
+                  <td className="enabled">
                     <input
-                      type="checkbox"
                       aria-label={`Enable ${displayLabel} sort option`}
                       disabled={isOnlyEnabledOption}
                       title={isOnlyEnabledOption ? "At least one sort option must remain enabled" : undefined}
+                      type="checkbox"
                       {...register(`sortOptions.${index}.enabled`)}
                     />
                   </td>
-                  <td className="narrow order-buttons">
+                  <td className="narrow order order-buttons">
                     <button
                       aria-label={`Move ${displayLabel} up`}
                       disabled={index === 0}
@@ -226,20 +204,13 @@ const SortWorkSettings: React.FC = () => {
                       ↓
                     </button>
                   </td>
-                  <td className="left">
+                  <td className="sort-type">
                     {displayLabel}
+                    {hasCustomLabel && <span className="custom-label-indicator" title="Custom label applied">*</span>}
                     <input type="hidden" {...register(`sortOptions.${index}.type`)} />
                   </td>
-                  <td className="wide">
-                    <input
-                      aria-label={`Custom label for ${displayLabel}`}
-                      placeholder={displayLabel}
-                      type="text"
-                      {...register(`sortOptions.${index}.customLabel`)}
-                    />
-                  </td>
-                  <td className="left muted small">
-                    {sortTypeDescriptions[sortType]}
+                  <td className="description">
+                    {sortOptionDescriptions[sortType]}
                   </td>
                 </tr>
               );
@@ -256,7 +227,7 @@ const SortWorkSettings: React.FC = () => {
         >
           <option value="">Auto (Group → Name → first available option)</option>
           {enabledOptions.map(option => {
-            const label = option.customLabel.trim() || getDisplayLabel(option.type);
+            const label = getDisplayLabel(option.type);
             return (
               <option key={option.type} value={option.type}>
                 {label}
@@ -270,7 +241,11 @@ const SortWorkSettings: React.FC = () => {
       </fieldset>
 
       <div className="bottomButtons">
-        <button type="submit" disabled={saveState === "saving"} aria-busy={saveState === "saving"}>
+        <button
+          aria-busy={saveState === "saving"}
+          disabled={saveState === "saving"}
+          type="submit"
+        >
           {saveState === "saving" ? "Saving..." : "Save"}
         </button>
       </div>

@@ -1,8 +1,7 @@
 import { EAuthorableNavTab } from "../models/view/nav-tabs";
 import { ISortOptionConfig } from "../models/stores/sort-work-config";
-
-export const sortTypeIds = ["Group", "Name", "Strategy", "Bookmarked", "Tools", "Date", "Problem"] as const;
-export type SortTypeId = typeof sortTypeIds[number];
+import { SortTypeIds, type SortTypeId } from "../models/stores/ui-types";
+export { SortTypeIds, SortTypeId };
 
 export interface ISortWorkConfig {
   defaultPrimarySort?: SortTypeId;
@@ -54,7 +53,7 @@ export interface IUnitConfig {
   showIdeasButton?: boolean;
   hide4up?: boolean;
   sortWorkConfig?: ISortWorkConfig;
-  customLabels?: Record<string, string>;
+  termOverrides?: Record<string, string>;
 }
 
 export interface IAuthorTool {

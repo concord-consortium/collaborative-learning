@@ -179,7 +179,8 @@ describe('DocumentGroup Model', () => {
       class: mockClass,
       appConfig: {
         commentTags: {"foo": "foo", "bar": "bar"},
-        getCustomLabel: (label: string) => label
+        termOverrides: undefined,
+        tagPrompt: undefined
       },
       bookmarks
     };

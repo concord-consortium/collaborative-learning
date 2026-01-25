@@ -94,7 +94,7 @@ describe("useSortOptions", () => {
             { type: "Bookmarked" }
           ]
         },
-        customLabels: {
+        termOverrides: {
           Group: "Team",
           Name: "Participant",
           Bookmarked: "Starred"
@@ -223,7 +223,7 @@ describe("useSortOptions", () => {
             { type: "Name" }
           ]
         },
-        customLabels: {
+        termOverrides: {
           Name: "Participant"
         }
       });

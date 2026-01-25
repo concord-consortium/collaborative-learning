@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useStores } from "./use-stores";
+import { useTranslation } from "./use-translation";
 import { ISortOptionConfig } from "../models/stores/sort-work-config";
 import { PrimarySortType, DEFAULT_SORT_TYPES } from "../models/stores/ui-types";
-import { getSortTypeLabel } from "../utilities/sort-utils";
 
 // Display version of ISortOptionConfig with required label
 export interface SortOptionDisplay extends Omit<ISortOptionConfig, "label"> {
@@ -16,7 +16,7 @@ const DEFAULT_SORT_OPTIONS: ISortOptionConfig[] = DEFAULT_SORT_TYPES.map(type =>
 export function useSortOptions() {
   const { appConfig } = useStores();
   const { sortWorkConfig, tagPrompt, autoAssignStudentsToIndividualGroups } = appConfig;
-  const { customLabels } = appConfig;
+  const { t } = useTranslation();
 
   const sortOptions = useMemo(() => {
     const configOptions = sortWorkConfig?.sortOptions ?? DEFAULT_SORT_OPTIONS;
@@ -35,9 +35,9 @@ export function useSortOptions() {
       })
       .map(option => ({
         type: option.type,
-        label: getSortTypeLabel(option.type, { customLabels, tagPrompt })
+        label: t(option.type)
       }));
-  }, [sortWorkConfig?.sortOptions, autoAssignStudentsToIndividualGroups, tagPrompt, customLabels]);
+  }, [sortWorkConfig?.sortOptions, autoAssignStudentsToIndividualGroups, tagPrompt, t]);
 
   const sortOptionsByType = useMemo(() => {
     const typeSet = new Set<PrimarySortType>();
@@ -76,7 +76,7 @@ export function useSortOptions() {
     const option = sortOptionsByType.typeMap.get(type);
     if (option) return option.label;
     // Fallback for types not in current options (e.g., for secondary sort "None")
-    return getSortTypeLabel(type, { customLabels, tagPrompt });
+    return t(type);
   };
 
   const isValidSortType = (type: string): type is PrimarySortType => {

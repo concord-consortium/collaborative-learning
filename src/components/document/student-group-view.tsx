@@ -3,6 +3,8 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { useProblemStore, useStores } from "../../hooks/use-stores";
+import { useTranslation } from "../../hooks/use-translation";
+import { TranslationKey } from "../../utilities/translation";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent, getFocusedGroupUser, getQuadrant } from "../four-up";
@@ -113,11 +115,11 @@ const GroupButton: React.FC<IGroupButtonProps> = (props) => {
 };
 
 const GroupTitlebar: React.FC<IGroupComponentProps> = observer(function GroupTitlebar({group, groupUser}) {
-  const { appConfig } = useStores();
+  const { t } = useTranslation();
   const problem = useProblemStore();
   const document= groupUser?.problemDocument;
   const userDocTitle = document?.title || "Document";
-  const groupLabel = appConfig.getCustomLabel("Group");
+  const groupLabel = t(TranslationKey.Group);
   const groupLabelLower = groupLabel.toLowerCase();
   // TODO: pluralization is naive (adds "s"). This will not work for irregular English plurals
   // and will break entirely for localization.

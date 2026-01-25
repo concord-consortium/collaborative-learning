@@ -1,6 +1,7 @@
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
 import { SectionModelType } from "../curriculum/section";
 import { ToolbarButtonModel } from "../tiles/toolbar-button";
+import { setTermOverrides, onTermOverridesChange } from "../../utilities/translation";
 import { ConfigurationManager, mergeDisabledFeatures } from "./configuration-manager";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { ToolbarModel } from "./problem-configuration";
@@ -33,9 +34,26 @@ export const AppConfigModel = types
     authorTools: ToolbarModel.create(self.config?.authorTools || []),
     myResourcesToolBar: ToolbarModel.create(self.config?.myResourcesToolbar || []),
     settings: self.config?.settings,
-    requireSortWorkTab: false
+    requireSortWorkTab: false,
+    // Observable counter that increments when term overrides change.
+    // Components that use useTranslation() observe this to trigger re-renders.
+    termOverridesVersion: 0
   }))
   .actions(self => ({
+    incrementTermOverridesVersion() {
+      self.termOverridesVersion++;
+    }
+  }))
+  .actions(self => ({
+    afterCreate() {
+      // Register callback so term override changes trigger re-renders
+      onTermOverridesChange(() => self.incrementTermOverridesVersion());
+
+      // Initialize module-level overrides from base config (if config exists)
+      if (self.config) {
+        setTermOverrides(self.configMgr.termOverrides, self.configMgr.tagPrompt);
+      }
+    },
     setConfigs(configs: Partial<UnitConfiguration>[]) {
       self.configMgr = new ConfigurationManager(self.config, configs);
       self.navTabs = NavTabsConfigModel.create(self.configMgr.navTabs);
@@ -46,6 +64,7 @@ export const AppConfigModel = types
       self.authorTools = ToolbarModel.create(self.configMgr.authorTools);
       self.toolbar = ToolbarModel.create(self.configMgr.toolbar);
       self.settings = self.configMgr.settings;
+      setTermOverrides(self.configMgr.termOverrides, self.configMgr.tagPrompt);
     },
     setRequireSortWorkTab(requireSortWorkTab: boolean) {
       self.requireSortWorkTab = requireSortWorkTab;
@@ -95,10 +114,7 @@ export const AppConfigModel = types
     get showIdeasButton() { return self.configMgr.showIdeasButton; },
     get hide4up() { return self.configMgr.hide4up; },
     get sortWorkConfig() { return self.configMgr.sortWorkConfig; },
-    get customLabels() { return self.configMgr.customLabels; },
-    getCustomLabel(label: string) {
-      return self.configMgr.customLabels?.[label] ?? label;
-    },
+    get termOverrides() { return self.configMgr.termOverrides; },
     get authorToolbar() {
       return ToolbarModel.create([
         ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),

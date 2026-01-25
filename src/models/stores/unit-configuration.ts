@@ -113,6 +113,6 @@ export interface UnitConfiguration extends ProblemConfiguration {
   hide4up?: boolean;
   // configuration for Sort Work tab sort options
   sortWorkConfig?: ISortWorkConfig;
-  // custom labels for UI text (e.g., "Group" -> "Team")
-  customLabels?: Record<string, string>;
+  // term overrides for UI text (e.g., "Group" -> "Team")
+  termOverrides?: Record<string, string>;
 }

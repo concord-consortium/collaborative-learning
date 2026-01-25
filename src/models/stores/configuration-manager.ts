@@ -215,8 +215,8 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["sortWorkConfig"]>("sortWorkConfig");
   }
 
-  get customLabels() {
-    return this.getProp<UC["customLabels"]>("customLabels");
+  get termOverrides() {
+    return this.getProp<UC["termOverrides"]>("termOverrides");
   }
 
   get settings(): UC["settings"]  {

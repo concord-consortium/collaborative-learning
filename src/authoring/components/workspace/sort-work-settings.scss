@@ -35,7 +35,45 @@
     }
 
     table {
+      border-collapse: collapse;
       margin-top: 8px;
+      width: 100%;
+
+      th, td {
+        padding: 8px 12px;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      th {
+        border-bottom: 1px solid #ddd;
+        font-weight: 600;
+      }
+
+      // Enabled column - narrow, centered
+      th.enabled,
+      td.enabled {
+        text-align: center;
+        width: 70px;
+      }
+
+      // Order column - fixed width for buttons
+      th.order,
+      td.order {
+        width: 90px;
+      }
+
+      // Sort Type column - moderate width
+      th.sort-type,
+      td.sort-type {
+        width: 150px;
+      }
+
+      // Description column - takes remaining space
+      td.description {
+        color: #666;
+        font-size: 0.9em;
+      }
 
       .order-buttons {
         white-space: nowrap;
@@ -45,14 +83,23 @@
           display: inline-flex;
           justify-content: center;
           line-height: 1;
-          padding: 4px 12px 6px;
+          height: 28px;
+          padding: 0 0 2px;
+          width: 28px;
 
           &:first-child {
             margin-right: 4px;
           }
         }
       }
+
     }
+  }
+
+  .custom-label-indicator {
+    color: #0066cc;
+    font-weight: bold;
+    margin-left: 4px;
   }
 
   .bottomButtons {
