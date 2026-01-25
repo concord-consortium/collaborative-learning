@@ -15,8 +15,6 @@ import { IDropTileItem } from "../models/tiles/tile-model";
 import { logHistoryEvent } from "../models/history/log-history-event";
 import { LogEventName } from "../lib/logger-types";
 import { IToolbarEventProps, logToolbarEvent } from "../models/tiles/log/log-toolbar-event";
-import { DEBUG_HISTORY_VIEW } from "../lib/debug";
-import { appIcons } from "../clue/app-icons";
 
 import "./toolbar.scss";
 
@@ -149,15 +147,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     };
     const upperButtons = this.props.toolbarModel.filter(button => !button.isBottom) as IToolbarModel;
     const lowerButtons = this.props.toolbarModel.filter(button => button.isBottom) as IToolbarModel;
-    if (DEBUG_HISTORY_VIEW) {
-      lowerButtons.push(ToolbarButtonModel.create({
-        id: "historyView",
-        title: "View History",
-        iconId: "icon-history-view-tool",
-        isTileTool: false,
-        isBottom: true
-      }, { appIcons }));
-    }
 
     return (
       <div className="toolbar" data-testid="toolbar">
