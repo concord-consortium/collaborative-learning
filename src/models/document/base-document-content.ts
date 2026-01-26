@@ -30,6 +30,7 @@ import {
 } from "./shared-model-entry";
 import { RowList, isRowListContainer, RowListType } from "./row-list";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
+import { REMOTE_COMMENT, PendingComment } from "./document-comments-manager";
 
 /**
  * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
@@ -53,8 +54,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     // ID of the row to highlight as the drop location for newly-created or duplicated tiles.
     highlightPendingDropLocation: undefined as string | undefined,
     // IDs of top-level rows that are currently visible on the screen
-    visibleRows: [] as string[],
-    awaitingAIAnalysis: false,
+    visibleRows: [] as string[]
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -552,10 +552,18 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         });
     }
   }))
+  .views(self => ({
+    // Check if remote comment (e.g., AI analysis) is pending.
+    get isAwaitingRemoteComment() {
+      const doc = getParentWithTypeName(self, "Document");
+      if (doc?.commentsManager) {
+        return doc.commentsManager.pendingComments.some((p: PendingComment) => p.postingType === REMOTE_COMMENT);
+      }
+
+      return false;
+    }
+  }))
   .actions(self => ({
-    setAwaitingAIAnalysis(awaitingAIAnalysis: boolean) {
-      self.awaitingAIAnalysis = awaitingAIAnalysis;
-    },
     removeNeighboringPlaceholderRows(rowId: string) {
       const rowList = self.getRowListForRow(rowId);
       if (!rowList) {

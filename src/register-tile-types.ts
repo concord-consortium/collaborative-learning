@@ -58,6 +58,9 @@ const gTileRegistration: Record<string, () => void> = {
   "Image": loggedLoad("Image", () => [
     import(/* webpackChunkName: "Image" */"./models/tiles/image/image-registration")
   ]),
+  "IframeInteractive": loggedLoad("IframeInteractive", () => [
+    import("./plugins/iframe-interactive/iframe-interactive-tile-registration")
+  ]),
   "Numberline": loggedLoad("Numberline", () => [
     import(/* webpackChunkName: "Numberline" */"./plugins/numberline/numberline-registration"),
     import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")

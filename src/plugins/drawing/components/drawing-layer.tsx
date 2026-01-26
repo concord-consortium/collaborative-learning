@@ -18,7 +18,6 @@ import { debounce } from "lodash";
 import { combineBoundingBoxes } from "../../../models/tiles/geometry/geometry-utils";
 import { useTileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import { kClosedObjectListPanelWidth } from "../model/drawing-types";
 import { IContainerContextType, useContainerContext } from "../../../components/document/container-context";
 import { userSelectTile } from "../../../models/stores/ui";
 import { useDrawingAreaContext } from "./drawing-area-context";
@@ -152,7 +151,17 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
       this.addImage(this.props.imageUrlToAdd);
       this.props.setImageUrlToAdd?.("");
     }
+
+    const prevOffsetX = this.offsetX;
+    const prevOffsetY = this.offsetY;
+    const prevZoom = this.zoom;
     this.calculateBounds();
+
+    // Force re-render if bounds calculation changed the transform values.
+    if (this.props.readOnly &&
+        (prevOffsetX !== this.offsetX || prevOffsetY !== this.offsetY || prevZoom !== this.zoom)) {
+      this.forceUpdate();
+    }
   }
 
   public componentWillUnmount() {
@@ -209,14 +218,11 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
         });
 
         this.zoom = zoom;
-        // Account for the show/sort panel toggle to better match the fit-all view in the workspace.
-        this.offsetX = offsetX + kClosedObjectListPanelWidth/2;
+        this.offsetX = offsetX;
         this.offsetY = offsetY;
       } else {
         // In regular tile display, offset and zoom are the values stored in the model.
-        // However, we tweak the displayed offset if there is no "show/sort" sidebar so that the
-        // read-only and read-write versions of the tile center content the same way.
-        this.offsetX = this.props.offsetX + (this.props.readOnly ? kClosedObjectListPanelWidth : 0);
+        this.offsetX = this.props.offsetX;
         this.offsetY = this.props.offsetY;
         this.zoom = this.props.zoom;
 

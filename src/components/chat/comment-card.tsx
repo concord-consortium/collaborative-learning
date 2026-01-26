@@ -80,7 +80,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   const { appConfig } = useStores();
   const { showCommentTag, commentTags, tagPrompt } = appConfig;
 
-  const showWaitingMessage = !focusTileId || content?.awaitingAIAnalysis;
+  const showWaitingMessage = !focusTileId || content?.isAwaitingRemoteComment;
 
   const showAgreeButtons = useMemo(() => {
     if (!postedComments || !user) {
