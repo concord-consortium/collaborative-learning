@@ -112,8 +112,7 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
       onClick: () => onDeleteDocument?.(document)
     },
     ...adminItems
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  ]), [document]);
+  ]), [document, adminItems, groupDocOption, publishOption]);
 
   return (
     <CustomSelect className="document-file-menu" dataTest="document-file-menu"
