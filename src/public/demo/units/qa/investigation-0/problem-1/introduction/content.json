@@ -128,6 +128,50 @@
             "<p>When your working session is over, just close the browser window. Your workspace is saved automatically. (There is no Save button.) If you are on a shared computer, be sure to log out of learn.concord.org. Now, click the Initial Challenge tab to continue.</p>"
           ]
         }
+      },
+      {
+        "id": "iframe-interactive-test-tile-with-url",
+        "title": "Test Interactive with URL",
+        "content": {
+          "type": "IframeInteractive",
+          "url": "https://example.com",
+          "interactiveState": {},
+          "authoredState": {},
+          "maxHeight": 0,
+          "enableScroll": false
+        }
+      },
+      {
+        "id": "iframe-interactive-test-tile-no-url",
+        "title": "Test Interactive without URL",
+        "content": {
+          "type": "IframeInteractive",
+          "url": "",
+          "interactiveState": {},
+          "authoredState": {},
+          "maxHeight": 0,
+          "enableScroll": false
+        }
+      },
+      {
+        "id": "iframe-interactive-test-tile-open-response",
+        "title": "Test Open Response Question",
+        "content": {
+          "type": "IframeInteractive",
+          "url": "https://models-resources.concord.org/question-interactives/branch/master/open-response/",
+          "interactiveState": {},
+          "authoredState": {
+            "version": 1,
+            "questionType": "open_response",
+            "prompt": "What did you observe in this activity?",
+            "hint": "Describe your observations in detail",
+            "required": false,
+            "predictionFeedback": null,
+            "audioEnabled": false
+          },
+          "maxHeight": 0,
+          "enableScroll": false
+        }
       }
     ]
   },

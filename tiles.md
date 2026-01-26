@@ -296,3 +296,344 @@ content.addTile("text")
 ```
 
 The implementation of `addTile` looks up the tile content info registered by the tile. Then uses the `defaultContent` function of the tile content info to create a content model for the tile. And finally wraps the content model in a `TileModel` and adds that to the document.
+
+## Adding a new tile to the codebase
+
+To create a new tile type in CLUE, you need to implement several components that work together. Most tiles are organized as plugins in the `src/plugins/` directory.
+
+### Quick Start: Using the Starter Tile
+
+The fastest way to create a new tile is to copy the [starter tile](src/plugins/starter/) which provides a complete working example with all the necessary files and boilerplate code.
+
+**Steps to use the starter tile:**
+
+1. Copy the entire `src/plugins/starter/` folder to a new folder with your tile's name:
+   ```bash
+   cp -r src/plugins/starter src/plugins/your-tile
+   ```
+
+2. Rename all occurrences of `starter` and `Starter` in:
+   - File contents (class names, function names, imports, etc.)
+   - Filenames (e.g., `starter-tile.tsx` → `your-tile-tile.tsx`)
+
+3. Update the icon files:
+   - Open `your-tile-icon.svg` and change the "St" text to your tile's abbreviation
+   - Open `your-tile-tile-id.svg` and change the "St" text similarly
+
+4. Register your new tile in `src/register-tile-types.ts`:
+   ```typescript
+   "YourTile": loggedLoad("YourTile", () => [
+     import(/* webpackChunkName: "YourTile" */"./plugins/your-tile/your-tile-registration")
+   ]),
+   ```
+
+5. Add your tile to unit configuration(s) where it should appear in the toolbar:
+   - **Best practice**: Add new tiles to specific units, not the global `src/clue/app-config.json`
+   - For development/testing, add to the QA unit at `src/public/demo/units/qa/content.json`
+   - Add to the `toolbar` array:
+     ```json
+     {"id": "YourTile", "title": "Your Tile", "isTileTool": true}
+     ```
+   - Only add to curriculum units that actually need this tile
+
+The starter tile includes a simple textarea example that demonstrates the basic structure, content model with MST, and proper component setup. See the [starter tile README](src/plugins/starter/README.md) for more details.
+
+### Manual Implementation
+
+If you prefer to build from scratch or need to understand the components in detail, follow these steps:
+
+#### Required Components
+
+1. **Type definition file** (`your-tile-types.ts`)
+2. **Content model** (`your-tile-content.ts`) - MST model for state management
+3. **React component** (`your-tile-tile.tsx`) - The UI component
+4. **Registration file** (`your-tile-registration.ts`) - Registers the tile with CLUE
+5. **Assets** - Icon SVG files for toolbar and header
+6. **Styling** (`your-tile.scss`) - Component styles
+7. **Optional toolbar** (`your-tile-toolbar.tsx`) - Floating toolbar with tile-specific controls
+
+### Folder Structure
+
+Create a new folder in `src/plugins/` with this structure:
+```
+src/plugins/your-tile/
+├── assets/
+│   ├── your-tile-icon.svg        # Toolbar icon
+│   └── your-tile-tile-id.svg     # Header icon (optional)
+├── your-tile-types.ts
+├── your-tile-content.ts
+├── your-tile-tile.tsx
+├── your-tile-registration.ts
+├── your-tile-toolbar.tsx         # Optional
+└── your-tile.scss
+```
+
+### Step-by-Step Implementation
+
+#### 1. Define tile types (`your-tile-types.ts`)
+
+Define constants for your tile type identifier, content type name, and default dimensions:
+
+```typescript
+export const kYourTileTileType = "YourTile";
+export const kYourTileContentType = "YourTileContentModel";
+export const kYourTileDefaultHeight = 320;
+```
+
+#### 2. Create the content model (`your-tile-content.ts`)
+
+The content model extends `TileContentModel` and uses MobX State Tree (MST):
+
+```typescript
+import { types, Instance } from "mobx-state-tree";
+import { TileContentModel } from "../../models/tiles/tile-content";
+import { kYourTileTileType, kYourTileContentType } from "./your-tile-types";
+
+export const YourTileContentModel = TileContentModel
+  .named(kYourTileContentType)
+  .props({
+    type: types.optional(types.literal(kYourTileTileType), kYourTileTileType),
+    // Add your tile-specific properties here
+    // Example: myProperty: types.optional(types.string, "")
+  })
+  .views(self => ({
+    // Views are computed properties
+    get isUserResizable() {
+      return true;  // Set to false if tile should not be resizable
+    }
+  }))
+  .actions(self => ({
+    // Actions modify the model state
+    // Example: setMyProperty(value: string) { self.myProperty = value; }
+  }));
+
+export type YourTileContentModelType = Instance<typeof YourTileContentModel>;
+
+export function defaultYourTileContent(): YourTileContentModelType {
+  return YourTileContentModel.create({});
+}
+
+// Type guard helper
+export function isYourTileModel(model?: any): model is YourTileContentModelType {
+  return model?.type === kYourTileTileType;
+}
+```
+
+#### 3. Create the React component (`your-tile-tile.tsx`)
+
+The component can be either functional (recommended) or class-based:
+
+```typescript
+import React from "react";
+import { observer } from "mobx-react";
+import { ITileProps } from "../../components/tiles/tile-component";
+import { isYourTileModel } from "./your-tile-content";
+import { TileToolbar } from "../../components/toolbar/tile-toolbar";
+import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
+
+import "./your-tile.scss";
+import "./your-tile-toolbar";  // If you have a toolbar
+
+export const YourTileComponent: React.FC<ITileProps> = observer((props: ITileProps) => {
+  const { model, readOnly, onRequestRowHeight } = props;
+  const content = isYourTileModel(model.content) ? model.content : null;
+
+  if (!content) return null;
+
+  return (
+    <div className="tile-content your-tile-wrapper">
+      <BasicEditableTileTitle />
+      <TileToolbar tileType="your-tile" readOnly={!!readOnly} tileElement={props.tileElt} />
+      <div className="your-tile-content">
+        {/* Your tile UI implementation here */}
+      </div>
+    </div>
+  );
+});
+```
+
+#### 4. Create the registration file (`your-tile-registration.ts`)
+
+This file registers both the content model and the React component:
+
+```typescript
+import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
+import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
+import { kYourTileTileType, kYourTileDefaultHeight } from "./your-tile-types";
+import { YourTileComponent } from "./your-tile-tile";
+import { defaultYourTileContent, YourTileContentModel } from "./your-tile-content";
+
+import Icon from "./assets/your-tile-icon.svg";
+import HeaderIcon from "./assets/your-tile-tile-id.svg";
+
+registerTileContentInfo({
+  type: kYourTileTileType,
+  displayName: "Your Tile",  // Display name shown in UI
+  modelClass: YourTileContentModel,
+  defaultContent: defaultYourTileContent,
+  defaultHeight: kYourTileDefaultHeight,
+  // Optional properties:
+  // isDataConsumer: true,  // If tile consumes data from SharedDataSet
+  // consumesMultipleDataSets: (appConfig) => true,  // If multiple datasets supported
+  // updateContentWithNewSharedModelIds: updateFunction,  // For handling shared model updates
+});
+
+registerTileComponentInfo({
+  type: kYourTileTileType,
+  Component: YourTileComponent,
+  tileEltClass: "your-tile-tile",  // CSS class for the tile element
+  Icon,
+  HeaderIcon
+});
+```
+
+#### 5. Register in the tile type registry (`src/register-tile-types.ts`)
+
+Add your tile to the `gTileRegistration` object so it can be dynamically loaded:
+
+```typescript
+const gTileRegistration: Record<string, () => void> = {
+  // ... existing tiles ...
+  "YourTile": loggedLoad("YourTile", () => [
+    import(/* webpackChunkName: "YourTile" */"./plugins/your-tile/your-tile-registration")
+  ]),
+  // ... more tiles ...
+};
+```
+
+If your tile uses shared models (like SharedDataSet), include those imports too:
+```typescript
+"YourTile": loggedLoad("YourTile", () => [
+  import(/* webpackChunkName: "YourTile" */"./plugins/your-tile/your-tile-registration"),
+  import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
+]),
+```
+
+### Optional Features
+
+#### Floating Toolbar
+
+For functional components, use the `useToolbarTileApi` hook to set up toolbar integration:
+
+```typescript
+import { useToolbarTileApi } from "../../components/toolbar/use-toolbar-tile-api";
+
+export const YourTileComponent: React.FC<ITileProps> = observer((props) => {
+  // ... other code ...
+
+  const { getContentHeight } = useToolbarTileApi({
+    id: model.id,
+    enabled: true,
+    // Implement ITileApi functions:
+    // getContentHeight: () => number,
+    // exportContentAsTileJson: (options) => string,
+    // handleDocumentScroll: (x, y) => void,
+    // handleTileResize: (entry) => void
+  });
+
+  // ... rest of component ...
+});
+```
+
+#### Shared Models and Data Linking
+
+If your tile needs to link with other tiles (like Table and Geometry do), use shared models:
+
+```typescript
+// In your content model:
+.views(self => ({
+  get sharedModel() {
+    const sharedModelManager = self.tileEnv?.sharedModelManager;
+    const firstSharedModel = sharedModelManager?.getTileSharedModelsByType(
+      self,
+      SharedDataSet
+    )?.[0];
+    return firstSharedModel as SharedDataSetType | undefined;
+  }
+}))
+```
+
+See the [shared-models.md](docs/shared-models.md) documentation for more details on linking tiles.
+
+#### Shared Selection
+
+Tiles that share data can synchronize their selection state using the selection store:
+
+```typescript
+import { useSharedSelectionStore } from "../../hooks/use-stores";
+
+// In your component:
+const selectionStore = useSharedSelectionStore();
+const selection = selectionStore?.getDataSetSelection(dataSetId);
+```
+
+### Testing Your New Tile
+
+1. Run `npm start` to start the development server
+2. Open CLUE in your browser
+3. Look for your tile in the toolbar (it should appear with your icon)
+4. Add the tile to a document and verify it:
+   - Renders correctly
+   - Saves and loads properly
+   - Responds to user interactions
+   - Integrates with shared models (if applicable)
+   - Resizes correctly (if resizable)
+
+### Making Your Tile Available in the Toolbar
+
+Both the full CLUE application and the [standalone document editor](/editor/) require tiles to be explicitly configured in a unit configuration file to appear in the toolbar. If a unit doesn't specify its own toolbar, it falls back to the global `app-config.json`, but **adding tiles to the global app-config is discouraged** as it affects all units that don't override the toolbar.
+
+To make your new tile available:
+
+1. **For testing during development**, use the QA unit which includes most tiles:
+   ```
+   http://localhost:8080/editor/?unit=./demo/units/qa/content.json
+   ```
+
+2. **To add your tile to a unit configuration**, edit the unit's `content.json` file and add your tile to the `toolbar` array:
+   ```json
+   {
+     "toolbar": [
+       {"id": "YourTile", "title": "Your Tile", "isTileTool": true},
+       // ... other tiles
+     ]
+   }
+   ```
+
+3. **Toolbar button properties**:
+   - `id`: The tile type identifier (must match `kYourTileTileType`)
+   - `title`: Display name shown in the toolbar (optional, defaults to `displayName` from registration)
+   - `isTileTool`: Set to `true` for tile tools, `false` for actions like undo/redo
+   - `iconId`: Custom icon class (optional, defaults to the SVG icon from registration)
+
+4. **For the main QA unit**, add your tile to [`src/public/demo/units/qa/content.json`](src/public/demo/units/qa/content.json):
+   ```json
+   "toolbar": [
+     {"id": "Question", "title": "Question", "isTileTool": true},
+     {"id": "Text", "title": "Text", "isTileTool": true},
+     {"id": "YourTile", "title": "Your Tile", "isTileTool": true},
+     // ... other tiles
+   ]
+   ```
+
+5. **Advanced: Conditional tile availability** - You can also specify which tiles are available using the `tools` property:
+   ```json
+   {
+     "tools": ["YourTile", "Text", "Table"],
+     "toolbar": [...]
+   }
+   ```
+   If `tools` is specified, only those tiles will be loaded. If omitted, tiles are loaded based on toolbar configuration.
+
+### Examples to Reference
+
+- **Simple tile**: [starter](src/plugins/starter/) - Minimal example, good starting point
+- **Data consumer**: [bar-graph](src/plugins/bar-graph/) or [graph](src/plugins/graph/) - Consumes SharedDataSet
+- **Complex interactions**: [geometry](src/models/tiles/geometry/) - Linked selection with tables
+- **Drawing tools**: [drawing](src/plugins/drawing/) - Canvas-based tile
+
+### Additional Documentation
+
+- [tile-creation.md](docs/tile-creation.md) - Flowcharts showing tile creation flows
+- [shared-models.md](docs/shared-models.md) - Linking tiles together
+- [text-tile-plugins.md](docs/text-tile-plugins.md) - Creating text tile plugins
