@@ -108,4 +108,7 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // if set it will be used to determine if the show ideas button is shown, otherwise
   // the existing logic based on aiEvaluation will be used
   showIdeasButton?: boolean;
+  // Whether group documents are enabled for the unit.
+  // If groups are not permitted (autoAssignStudentsToIndividualGroups is true), this setting has no effect.
+  groupDocumentsEnabled?: boolean;
 }

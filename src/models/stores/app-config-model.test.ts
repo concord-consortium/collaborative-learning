@@ -140,4 +140,23 @@ describe("ConfigurationManager", () => {
     expect(appConfig.showAnnotationControls).toBe(true);
   });
 
+  it("should return undefined for groupDocumentsEnabled when not configured", () => {
+    const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+    expect(appConfig.groupDocumentsEnabled).toBeUndefined();
+  });
+
+  it("should return true for groupDocumentsEnabled when set in config", () => {
+    const appConfig = AppConfigModel.create({
+      config: { ...unitConfigDefaults, groupDocumentsEnabled: true }
+    });
+    expect(appConfig.groupDocumentsEnabled).toBe(true);
+  });
+
+  it("should return false for groupDocumentsEnabled when explicitly set to false", () => {
+    const appConfig = AppConfigModel.create({
+      config: { ...unitConfigDefaults, groupDocumentsEnabled: false }
+    });
+    expect(appConfig.groupDocumentsEnabled).toBe(false);
+  });
+
 });

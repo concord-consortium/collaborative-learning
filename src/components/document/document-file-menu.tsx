@@ -62,6 +62,9 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
     onClick: () => onAdminDestroyDocument?.(document)
   };
   const adminItems = onAdminDestroyDocument && (appMode === "dev") ? [adminDestroyDocumentItem] : [];
+  const { appConfig, user } = stores;
+  const groupsPermitted = !appConfig.autoAssignStudentsToIndividualGroups;
+  const showGroupDocOption = appConfig.groupDocumentsEnabled && groupsPermitted && !!user.currentGroupId;
 
   let publishOption: ICustomDropdownItem[] = [];
   if (showPublishOption(document, stores)) {
@@ -75,6 +78,18 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
     ];
   }
 
+  let groupDocOption: ICustomDropdownItem[] = [];
+  if (showGroupDocOption) {
+    groupDocOption = [
+      {
+        ...idAndIcon("icon-open-group-doc", appIcons),
+        text: "Group Doc",
+        disabled: false,
+        onClick: () => onOpenGroupDocument?.(document)
+      }
+    ];
+  }
+
   const menuItems: ICustomDropdownItem[] = useMemo(() => ([
     {
       ...idAndIcon("icon-open-workspace", appIcons),
@@ -82,12 +97,7 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
       disabled: !!isOpenDisabled,
       onClick: () => onOpenDocument?.(document)
     },
-    {
-      ...idAndIcon("icon-open-group-doc", appIcons),
-      text: "Group Doc",
-      disabled: false,
-      onClick: () => onOpenGroupDocument?.(document)
-    },
+    ...groupDocOption,
     ...publishOption,
     {
       ...idAndIcon("icon-copy-workspace", appIcons),
