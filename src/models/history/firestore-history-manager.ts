@@ -213,18 +213,18 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // Additionally firestore transactions work by just retrying the transaction code if any
     // documents being read are updated by some other client before the write operations are
     // finished. Because of this there cannot be side effects in the transaction code,
-    // just reads and ans writes.
+    // just reads and writes.
     //
     // TODO: If multiple entries are piled up because the firestore document isn't available yet,
     // this code here might not run in correct order. These multiple calls would all be waiting
     // on the firestoreInfoPromise above. Once that resolves the first one will start running
-    // however it will then stop running again while waiting fro the read in the transaction.
+    // however it will then stop running again while waiting for the read in the transaction.
     // That will then let the second onHistoryEntryCompleted call to start running again.
     // I don't think there is a guarantee which of the blocked read calls will resolve first.
     // So the second onHistoryEntryCompleted might go first, which will then give it a wrong
     // index and previous entry id.
-    // To fix this we probably need to a queue so they always get processed in order. We could
-    // batch them up in a single transaction so that we don't need to read the me doc for each
+    // To fix this we probably need to add a queue so they always get processed in order. We could
+    // batch them up in a single transaction so that we don't need to read the metadata doc for each
     // doc in the queue. But there is a limit to how many writes can be done in a single
     // transaction.
     await firestore.runTransaction(async (transaction) => {

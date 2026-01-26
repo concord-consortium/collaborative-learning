@@ -99,7 +99,7 @@ function _checkDocumentMetadataModelMatchesFullInterface(
  */
 // eslint-disable-next-line unused-imports/no-unused-vars
 function _checkInterfaceMatchesDocumentMetadataModelSnapshotIn(
-  _model: Required< IDocumentMetadata >
-): Required< SnapshotIn<typeof DocumentMetadataModel> > {
+  _model: Required<IDocumentMetadata>
+): Required<SnapshotIn<typeof DocumentMetadataModel>> {
   return _model;
 }
