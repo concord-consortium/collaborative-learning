@@ -17,7 +17,7 @@ export function useTranslation() {
 
   // Observe termOverridesVersion to trigger re-renders when overrides change.
   // This is a MobX observable that increments whenever setTermOverrides() is called.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const _version = appConfig.termOverridesVersion;
 
   return {

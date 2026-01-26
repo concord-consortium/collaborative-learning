@@ -50,26 +50,22 @@
         font-weight: 600;
       }
 
-      // Enabled column - narrow, centered
       th.enabled,
       td.enabled {
         text-align: center;
         width: 70px;
       }
 
-      // Order column - fixed width for buttons
       th.order,
       td.order {
         width: 90px;
       }
 
-      // Sort Type column - moderate width
       th.sort-type,
       td.sort-type {
         width: 150px;
       }
 
-      // Description column - takes remaining space
       td.description {
         color: #666;
         font-size: 0.9em;

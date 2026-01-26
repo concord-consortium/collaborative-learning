@@ -5,10 +5,8 @@ import React from "react";
 import TermOverridesSettings from "./term-overrides-settings";
 import { TERM_METADATA } from "../../../utilities/translation";
 
-// Mock the useCurriculum hook with stable references
 const mockSetUnitConfig = jest.fn();
 
-// Create stable mock config objects
 const mockConfig = {
   termOverrides: {} as Record<string, string>,
   tagPrompt: "Test Tag Prompt"
@@ -31,7 +29,6 @@ jest.mock("../../hooks/use-curriculum", () => ({
 describe("TermOverridesSettings", () => {
   beforeEach(() => {
     mockSetUnitConfig.mockClear();
-    // Reset termOverrides to empty
     mockConfig.termOverrides = {};
     mockCurriculumValue.saveState = undefined;
   });
@@ -42,7 +39,6 @@ describe("TermOverridesSettings", () => {
     expect(screen.getByText("Term Overrides")).toBeInTheDocument();
     expect(screen.getByText(/Configure customized terminology/)).toBeInTheDocument();
 
-    // Check that all terms are rendered
     TERM_METADATA.forEach(term => {
       expect(screen.getByLabelText(term.key)).toBeInTheDocument();
       expect(screen.getByText(term.description)).toBeInTheDocument();
@@ -103,16 +99,14 @@ describe("TermOverridesSettings", () => {
     };
     updaterFn(mockDraft);
 
-    // Check that the custom label was set
     expect(mockDraft.config.termOverrides).toEqual({ Group: "Team" });
   });
 
   it("does not save labels that match the default value", async () => {
     render(<TermOverridesSettings />);
 
-    // Type the same value as the default
     const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
-    await userEvent.type(groupInput, "Group");
+    userEvent.type(groupInput, "Group");
 
     const saveButton = screen.getByRole("button", { name: /Save/i });
     fireEvent.click(saveButton);
@@ -134,7 +128,6 @@ describe("TermOverridesSettings", () => {
   });
 
   it("loads existing custom labels into form", () => {
-    // Set existing overrides
     mockConfig.termOverrides = { Group: "Team", Name: "Participant" };
 
     render(<TermOverridesSettings />);

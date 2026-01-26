@@ -130,7 +130,8 @@ const TermOverridesSettings: React.FC = () => {
     <form onSubmit={handleSubmit(onSubmit)} className="term-overrides-settings">
       <h3 id="term-overrides-heading">Term Overrides</h3>
       <p className="muted" id="term-overrides-description">
-        Configure customized terminology. These overrides will replace the default terms in the CLUE app everywhere the terms appear.
+        Configure customized terminology. These overrides will replace the default terms in the CLUE app everywhere
+        the terms appear.
       </p>
 
       {warnings.length > 0 && (

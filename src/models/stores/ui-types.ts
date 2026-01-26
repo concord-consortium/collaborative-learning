@@ -12,7 +12,6 @@ export type PrimarySortType = SortTypeId;
 export type SecondarySortType = PrimarySortType | "None";
 export type SortType = PrimarySortType | SecondarySortType | "All";
 
-// Default labels for sort types
 export const DEFAULT_SORT_LABELS: Record<PrimarySortType, string> = {
   Bookmarked: "Bookmarked",
   Date: "Date",
