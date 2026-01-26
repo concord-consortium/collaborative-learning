@@ -42,13 +42,13 @@ export const sortDateSectionLabels = (
 export const createDocMapByGroups = (
   documents: IDocumentMetadataModel[],
   groupForUser: (userId: string) => any,
-  groupLabel = "Group"
+  groupTerm = "Group"
 ) => {
   const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
   documents.forEach((doc) => {
     const userId = doc.uid;
     const group = groupForUser(userId);
-    const sectionLabel = group ? `${groupLabel} ${group.id}` : `No ${groupLabel}`;
+    const sectionLabel = group ? `${groupTerm} ${group.id}` : `No ${groupTerm}`;
 
     if (!documentMap.has(sectionLabel)) {
       documentMap.set(sectionLabel, []);

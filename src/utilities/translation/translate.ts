@@ -2,11 +2,11 @@
  * Translation/Term Override System
  *
  * This system currently provides term customization within English, NOT full
- * internationalization (i18n). It allows units to override specific labels
+ * internationalization (i18n). It allows units to override specific terms
  * (e.g., "Group" → "Team", "Student" → "Participant") while keeping the
  * surrounding English text unchanged.
  *
- * We intentionally use simple string interpolation like `Create ${groupLabel}`
+ * We intentionally use simple string interpolation like `Create ${groupTerm}`
  * rather than making entire phrases translation keys. Full i18n would require
  * phrase-level keys with placeholders to handle different grammatical structures
  * across languages, but that's out of scope for the current English-only term

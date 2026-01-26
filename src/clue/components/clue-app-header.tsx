@@ -133,9 +133,9 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   };
 
   const handleResetGroup = () => {
-    const groupLabel = t(TranslationKey.Group);
-    const groupLabelLower = groupLabel.toLowerCase();
-    ui.confirm(`Do you want to leave this ${groupLabelLower}?`, `Leave ${groupLabel}`)
+    const groupTerm = t(TranslationKey.Group);
+    const groupTermLower = groupTerm.toLowerCase();
+    ui.confirm(`Do you want to leave this ${groupTermLower}?`, `Leave ${groupTerm}`)
       .then((ok) => {
         if (ok) {
           db.leaveGroup();

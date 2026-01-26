@@ -10,7 +10,7 @@ import { translate, TranslationKeyType } from "../utilities/translation";
  *
  * @example
  * const { t } = useTranslation();
- * const groupLabel = t(TranslationKey.Group); // "Group" or custom override
+ * const groupTerm = t(TranslationKey.Group); // "Group" or custom override
  */
 export function useTranslation() {
   const { appConfig } = useStores();

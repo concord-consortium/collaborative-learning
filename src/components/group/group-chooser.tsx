@@ -30,8 +30,8 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
 
   public componentDidMount() {
     this._isMounted = true;
-    const groupLabelLower = this.t(TranslationKey.Group).toLowerCase();
-    this.loadingMessageKey = `Joining ${groupLabelLower}`;
+    const groupTermLower = this.t(TranslationKey.Group).toLowerCase();
+    this.loadingMessageKey = `Joining ${groupTermLower}`;
     showLoadingMessage(this.loadingMessageKey);
   }
 
@@ -57,22 +57,22 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
 
   private renderChooseNewGroup() {
     const {allGroups} = this.stores.groups;
-    const groupLabel = this.t(TranslationKey.Group);
-    const groupLabelLower = groupLabel.toLowerCase();
+    const groupTerm = this.t(TranslationKey.Group);
+    const groupTermLower = groupTerm.toLowerCase();
     const groupIds = allGroups.map((group) => group.id);
     const items: JSX.Element[] = [];
     const haveExistingGroups = groupIds.length > 0;
     for (let i = 1; i <= MAX_GROUPS; i++) {
       if (groupIds.indexOf(`${i}`) === -1) {
-        items.push(<option value={i} key={i}>{groupLabel} {i}</option>);
+        items.push(<option value={i} key={i}>{groupTerm} {i}</option>);
       }
     }
     return (
       <form className="create-group" onSubmit={this.handleChooseGroup} data-testid="create-group-form">
-        <div>{haveExistingGroups ? `Or create a new ${groupLabelLower}` : `Please create your ${groupLabelLower}`}</div>
+        <div>{haveExistingGroups ? `Or create a new ${groupTermLower}` : `Please create your ${groupTermLower}`}</div>
         <div>
           <select ref={(el) => this.groupSelect = el} data-testid="new-group-select">{items}</select>
-          <input type="submit" className="button" value={`Create ${groupLabel}`} data-testid="create-group-button" />
+          <input type="submit" className="button" value={`Create ${groupTerm}`} data-testid="create-group-button" />
         </div>
       </form>
     );
@@ -80,8 +80,8 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
 
   private renderChooseExistingGroup() {
     const {groups} = this.stores;
-    const groupLabel = this.t(TranslationKey.Group);
-    const groupLabelLower = groupLabel.toLowerCase();
+    const groupTerm = this.t(TranslationKey.Group);
+    const groupTermLower = groupTerm.toLowerCase();
     const groupElements = groups.allGroups.map((group) => {
       const users = group.activeUsers.map((user) => {
         const className = `user ${user.connected ? "connected" : "disconnected"}`;
@@ -95,7 +95,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
           onClick={this.handleChooseExistingGroup(group)}
           data-testid={`existing-group-${group.id}`}
         >
-          <div className="group-title">{`${groupLabel} ${group.id}`}</div>
+          <div className="group-title">{`${groupTerm} ${group.id}`}</div>
           <div className="group-users">
             {users}
           </div>
@@ -105,7 +105,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
 
     return (
       <div className="groups" data-testid="existing-groups">
-        <div>Click to select an existing {groupLabelLower}</div>
+        <div>Click to select an existing {groupTermLower}</div>
         <div className="group-list">
           {groupElements}
         </div>
@@ -132,8 +132,8 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
     return (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       if (group.activeUsers.length >= 4) {
-        const groupLabelLower = this.t(TranslationKey.Group).toLowerCase();
-        this.setState({error: `Sorry, that ${groupLabelLower} is full with four students`});
+        const groupTermLower = this.t(TranslationKey.Group).toLowerCase();
+        this.setState({error: `Sorry, that ${groupTermLower} is full with four students`});
       }
       else {
         this.selectGroup(group.id);

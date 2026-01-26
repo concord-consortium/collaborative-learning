@@ -186,8 +186,8 @@ export class DocumentGroup {
   }
 
   get byGroup(): DocumentGroup[] {
-    const groupLabel = translate(TranslationKey.Group);
-    const docMap = createDocMapByGroups(this.documents, this.stores.groups.groupForUser, groupLabel);
+    const groupTerm = translate(TranslationKey.Group);
+    const docMap = createDocMapByGroups(this.documents, this.stores.groups.groupForUser, groupTerm);
     const sortedSectionLabels = sortGroupSectionLabels(Array.from(docMap.keys()));
     return this.buildDocumentCollection({sortedSectionLabels, sortType: "Group", docMap});
   }

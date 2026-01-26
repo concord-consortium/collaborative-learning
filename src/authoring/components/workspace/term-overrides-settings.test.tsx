@@ -75,7 +75,7 @@ describe("TermOverridesSettings", () => {
     expect(groupInput.value).toBe("Team");
   });
 
-  it("calls setUnitConfig with custom labels on save", async () => {
+  it("calls setUnitConfig with custom terms on save", async () => {
     render(<TermOverridesSettings />);
 
     const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
@@ -102,7 +102,7 @@ describe("TermOverridesSettings", () => {
     expect(mockDraft.config.termOverrides).toEqual({ Group: "Team" });
   });
 
-  it("does not save labels that match the default value", async () => {
+  it("does not save terms that match the default value", async () => {
     render(<TermOverridesSettings />);
 
     const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
@@ -127,7 +127,7 @@ describe("TermOverridesSettings", () => {
     expect(mockDraft.config.termOverrides).toBeUndefined();
   });
 
-  it("loads existing custom labels into form", () => {
+  it("loads existing custom terms into form", () => {
     mockConfig.termOverrides = { Group: "Team", Name: "Participant" };
 
     render(<TermOverridesSettings />);

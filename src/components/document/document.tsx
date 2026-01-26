@@ -85,15 +85,15 @@ const TwoUpStackedButton = ({ onClick, selected }: { onClick: () => void, select
   );
 };
 
-const ShareButton = ({ onClick, isShared, groupLabel }: {
-  onClick: () => void,
-  isShared: boolean,
-  groupLabel: string
+const ShareButton = ({ onClick, isShared, groupTerm }: {
+  onClick: () => void
+  isShared: boolean
+  groupTerm: string
 }) => {
   const visibility = isShared ? "public" : "private";
-  const groupLabelLower = groupLabel.toLowerCase();
+  const groupTermLower = groupTerm.toLowerCase();
   const titlePrefix = isShared ? "Shared: click to unshare from" : "Unshared: click to share to";
-  const title = `${titlePrefix} ${groupLabelLower}`;
+  const title = `${titlePrefix} ${groupTermLower}`;
   return (
     <>
       {<div className="share-separator" />}
@@ -279,7 +279,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             {show4up && this.renderMode()}
             {showShareButton &&
               <ShareButton isShared={isShared} onClick={this.handleToggleVisibility}
-                           groupLabel={this.t(TranslationKey.Group)} />}
+                           groupTerm={this.t(TranslationKey.Group)} />}
           </div>
         }
       </div>
@@ -463,7 +463,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             <div className="actions">
               {showPersonalShareToggle &&
                 <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility}
-                             groupLabel={this.t(TranslationKey.Group)} />}
+                             groupTerm={this.t(TranslationKey.Group)} />}
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
               {supportStackedTwoUpView && isPrimary &&

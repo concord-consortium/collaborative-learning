@@ -108,8 +108,8 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
       });
     }
     else {
-      const groupLabel = t(TranslationKey.Group);
-      ui.prompt(`Enter your message for ${groupLabel} ${group.id}`, "", `Message ${groupLabel}`, 5)
+      const groupTerm = t(TranslationKey.Group);
+      ui.prompt(`Enter your message for ${groupTerm} ${group.id}`, "", `Message ${groupTerm}`, 5)
       .then((message) => {
         const audience = AudienceModel.create({type: AudienceEnum.group, identifier: group.id});
         db.createSupport(createStickyNote(message), "", audience);
