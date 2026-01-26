@@ -3,7 +3,7 @@ import React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
 import { IToolbarModel } from "../models/stores/problem-configuration";
-import { IToolbarButtonModel, ToolbarButtonModel } from "../models/tiles/toolbar-button";
+import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-content-info";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content-types";
 import { DeleteButton } from "./delete-button";
@@ -147,7 +147,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     };
     const upperButtons = this.props.toolbarModel.filter(button => !button.isBottom) as IToolbarModel;
     const lowerButtons = this.props.toolbarModel.filter(button => button.isBottom) as IToolbarModel;
-
     return (
       <div className="toolbar" data-testid="toolbar">
         <div className="toolbar-upper">
