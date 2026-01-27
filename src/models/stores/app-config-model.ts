@@ -94,6 +94,7 @@ export const AppConfigModel = types
     get initiallyHideExemplars() { return self.configMgr.initiallyHideExemplars; },
     get showIdeasButton() { return self.configMgr.showIdeasButton; },
     get groupDocumentsEnabled() { return self.configMgr.groupDocumentsEnabled; },
+    get hide4up() { return self.configMgr.hide4up; },
     get authorToolbar() {
       return ToolbarModel.create([
         ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),

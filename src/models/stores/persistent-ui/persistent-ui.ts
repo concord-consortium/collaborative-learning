@@ -35,10 +35,13 @@ export const PersistentUIModelV2 = types
     docFilter: types.optional(DocFilterTypeEnum, "Problem"),
     primarySortBy: types.optional(types.string, "Group"),
     secondarySortBy: types.optional(types.string, "None"),
+    thumbnailDisplay: types.optional(types.string, "Small"),
     showAnnotations: true,
     showTeacherContent: true,
     showChatPanel: false,
     showDocumentScroller: true,
+    showHistoryView: false,
+    showRemoteHistoryView: false,
     tabs: types.map(UITabModel),
     problemWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string),
@@ -97,6 +100,18 @@ export const PersistentUIModelV2 = types
     },
     toggleShowDocumentScroller(show: boolean) {
       self.showDocumentScroller = show;
+    },
+    toggleHistoryView() {
+      self.showHistoryView = !self.showHistoryView;
+    },
+    setShowHistoryView(show: boolean) {
+      self.showHistoryView = show;
+    },
+    toggleRemoteHistoryView() {
+      self.showRemoteHistoryView = !self.showRemoteHistoryView;
+    },
+    setShowRemoteHistoryView(show: boolean) {
+      self.showRemoteHistoryView = show;
     },
     setActiveNavTab(tab: string) {
       self.activeNavTab = tab;
@@ -214,6 +229,9 @@ export const PersistentUIModelV2 = types
     setSecondarySortBy(sort: string) {
       self.secondarySortBy = sort;
     },
+    setThumbnailDisplay(display: string) {
+      self.thumbnailDisplay = display;
+    }
   }))
   .actions(self => ({
     /**

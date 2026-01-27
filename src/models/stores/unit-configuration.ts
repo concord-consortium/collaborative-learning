@@ -111,4 +111,6 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // Whether group documents are enabled for the unit.
   // If groups are not permitted (autoAssignStudentsToIndividualGroups is true), this setting has no effect.
   groupDocumentsEnabled?: boolean;
+  // if set, the button to switch to 4-up view is hidden
+  hide4up?: boolean;
 }

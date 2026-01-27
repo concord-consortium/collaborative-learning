@@ -5,6 +5,9 @@ class SortedWork {
   getPrimarySortByNameOption() {
     return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-name"]');
   }
+  getPrimarySortByDateOption() {
+    return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-date"]');
+  }
   getPrimarySortByGroupOption() {
     return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-group"]');
   }
@@ -38,6 +41,9 @@ class SortedWork {
   }
   getSecondarySortByNameOption() {
     return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-name"]');
+  }
+  getSecondarySortByDateOption() {
+    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-date"]');
   }
   getSecondarySortByGroupOption() {
     return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-group"]');

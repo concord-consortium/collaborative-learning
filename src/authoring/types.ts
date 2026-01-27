@@ -43,6 +43,7 @@ export interface IUnitConfig {
   aiPrompt: IAiPrompt;
   authorTools?: IAuthorTool[];
   showIdeasButton?: boolean;
+  hide4up?: boolean;
 }
 
 export interface IAuthorTool {

@@ -2,6 +2,7 @@ import firebase from "firebase/app";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { Firestore } from "../../lib/firestore";
 import { HistoryEntrySnapshot } from "./history";
+import { getSimpleDocumentPath } from "../../../shared/shared";
 
 export type LastHistoryEntry = undefined | { index: number, id: string};
 
@@ -69,4 +70,16 @@ export function loadHistory(firestore: Firestore, historyPath: string,
     }
   );
 
+}
+
+/**
+ * Get the Firestore path for a document's history collection.
+ *
+ * @param documentKey the key of the document
+ * @returns the Firestore path to the history collection, or undefined if no key provided
+ */
+export function getHistoryPath(documentKey: string | undefined): string | undefined {
+  if (!documentKey) return undefined;
+  const docPath = getSimpleDocumentPath(documentKey);
+  return `${docPath}/history`;
 }

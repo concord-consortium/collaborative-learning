@@ -11,10 +11,10 @@ import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
 import { SectionModelType } from "../models/curriculum/section";
+import { IDropTileItem } from "../models/tiles/tile-model";
 import { logHistoryEvent } from "../models/history/log-history-event";
 import { LogEventName } from "../lib/logger-types";
 import { IToolbarEventProps, logToolbarEvent } from "../models/tiles/log/log-toolbar-event";
-import { IDropTileItem } from "src/models/tiles/tile-model";
 
 import "./toolbar.scss";
 
@@ -101,6 +101,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           break;
         case "copyToDocument":
           this.handleCopyToDocument();
+          break;
+        case "historyView":
+          this.handleToggleHistoryView();
           break;
         default:
           this.handleAddTile(tool);
@@ -406,6 +409,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
       this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_SELECT_ALL_TOOL, {selectAllTiles});
     }
+  };
+
+  private handleToggleHistoryView = () => {
+    this.stores.persistentUI.toggleHistoryView();
   };
 
   private handleTogglePlayback = () => {
