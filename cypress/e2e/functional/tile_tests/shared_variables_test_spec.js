@@ -104,8 +104,7 @@ context('Shared Variables', function () {
         textToolTile.getTextTile().last().find(`.variable-chip:contains("${textTileVName2}=${textTileVValue2}")`).should('have.length', 2);
 
         cy.log('verifies restore of variable chip content');
-        canvas.createNewExtraDocumentFromFileMenuWithoutTabs('text tool test', 'my-work');
-        cy.wait(2000);
+        canvas.createNewExtraDocumentFromFileMenu('text tool test', 'my-work');
         textToolTile.getTextTile().should('not.exist');
         //re-open investigation
         canvas.openDocumentWithTitleWithoutTabs(title);

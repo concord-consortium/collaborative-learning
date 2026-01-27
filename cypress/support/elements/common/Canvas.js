@@ -54,7 +54,8 @@ class Canvas {
     return cy.get('[data-test=personal-doc-title] [data-test=edit-icon]');
   }
 
-  createNewExtraDocumentFromFileMenu(title, type) {
+  createNewExtraDocumentFromFileMenu(title, type,) {
+    cy.log('Creating new extra document: ' + title + ' in type: ' + type);
     this.openFileMenu();
     cy.get('[data-test=list-item-icon-open-workspace]').click();
     cy.get('.primary-workspace .doc-tab.my-work.workspaces').click();
@@ -70,15 +71,19 @@ class Canvas {
       .type(title);
 
     dialog.getDialogOKButton().click();
-  }
 
-  createNewExtraDocumentFromFileMenuWithoutTabs(title, type) {
-    this.openFileMenu();
-    cy.get('[data-test=list-item-icon-open-workspace]').click();
-    cy.get('[data-test=' + type + '-section-workspaces-documents] [data-test=my-work-new-document]').click();
-    dialog.getDialogTitle().should('exist');
-    dialog.getDialogTextInput().click().clear().type(title);
-    dialog.getDialogOKButton().click();
+    // The only calls to this method use `my-work` as the type. I'm not sure
+    // what the other types could be. I assume a different type might create a
+    // a different kind of document, so the check below might fail. In order
+    // to catch this kind of issue early, I'm adding this check.
+    if (type !== 'my-work') {
+      throw new Error('createNewExtraDocumentFromFileMenu only supports my-work type currently');
+    }
+    // Creating the document will open it. There can be a delay though.
+    // If we don't wait for the document to be opened the test will continue
+    // and when the document finally opens it can change the UI in a way the
+    // tests don't expect.
+    this.getPersonalDocTitle().should('contain', title);
   }
 
   openDocumentWithTitle(subTab, title) {
