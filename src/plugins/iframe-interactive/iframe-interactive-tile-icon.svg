@@ -1,3 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="34" viewBox="0 0 36 34">
-    <text text-anchor="middle" x="50%" y="25">IA</text>
+    <g fill="none" fill-rule="evenodd">
+        <!-- <path fill-rule="nonzero" d="M0 0H36V34H0z"/> -->
+        <path fill="#707070" d="M27 6c1.65 0 3 1.35 3 3v16c0 1.65-1.35 3-3 3H9c-1.65 0-3-1.35-3-3V9c0-1.65 1.35-3 3-3h18zm0 2H9c-.542 0-1 .458-1 1v16c0 .542.458 1 1 1h18c.542 0 1-.458 1-1V9c0-.542-.458-1-1-1zM10 10h16v14H10V10zm2 4v8h12V14H12z"/>
+    </g>
 </svg>
