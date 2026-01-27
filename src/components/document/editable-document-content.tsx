@@ -1,16 +1,20 @@
 import React, { useRef } from "react";
 import classNames from "classnames";
-import { CanvasComponent } from "./canvas";
-import { DocumentContextReact } from "./document-context";
-import { FourUpComponent } from "../four-up";
+import { getSnapshot } from "mobx-state-tree";
+import { clone } from "lodash";
+import { appIcons } from "../../app-config";
 import { useDocumentContext } from "../../hooks/use-document-context";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 import { useGroupsStore, useStores } from "../../hooks/use-stores";
-import { EditableTileApiInterfaceRef, EditableTileApiInterfaceRefContext } from "../tiles/tile-api";
+import { DEBUG_HISTORY_VIEW } from "../../lib/debug";
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
-import { IToolbarModel } from "../../models/stores/problem-configuration";
+import { IToolbarModel, ToolbarModel } from "../../models/stores/problem-configuration";
 import { WorkspaceMode } from "../../models/stores/workspace";
+import { FourUpComponent } from "../four-up";
+import { EditableTileApiInterfaceRef, EditableTileApiInterfaceRefContext } from "../tiles/tile-api";
+import { CanvasComponent } from "./canvas";
+import { DocumentContextReact } from "./document-context";
 import { DocumentToolbar } from "./document-toolbar";
 
 import "./editable-document-content.scss";
@@ -83,7 +87,23 @@ export function EditableDocumentContent({
   // set by the canvas and used by the toolbar
   const editableTileApiInterfaceRef: EditableTileApiInterfaceRef = useRef(null);
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
-  const isShowingToolbar = toolbar?.length;
+  let modifiedToolbar = toolbar;
+  if (toolbar && isPrimary && DEBUG_HISTORY_VIEW) {
+    // The snapshot is read-only so we need to clone it before modifying
+    const toolbarSnapshot = clone(getSnapshot(toolbar));
+    toolbarSnapshot.push({
+      id: "historyView",
+      title: "View History",
+      iconId: "icon-history-view-tool",
+      isPrimary: true,
+      isTileTool: false,
+      isBottom: true,
+      isDefault: false,
+      height: undefined
+    });
+    modifiedToolbar = ToolbarModel.create(toolbarSnapshot, { appIcons });
+  }
+  const isShowingToolbar = modifiedToolbar?.length;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
   const isChatEnabled = appConfig.showCommentPanelFor(user.type);
   const documentSelectedForComment = isChatEnabled && persistentUI.showChatPanel
@@ -98,7 +118,7 @@ export function EditableDocumentContent({
       <EditableTileApiInterfaceRefContext.Provider value={editableTileApiInterfaceRef}>
         <div key="editable-document" className={editableDocContentClass}
               data-focus-document={document.key} >
-          {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} />}
+          {isShowingToolbar && modifiedToolbar && <DocumentToolbar document={document} toolbar={modifiedToolbar} />}
           {isShowingToolbar && <div className="canvas-separator"/>}
           <DocumentCanvas
             readOnly={isReadOnly}

@@ -109,6 +109,8 @@ These properties are configurable at the application (built into the code) or th
 `showIdeasButton`: (boolean | undefined) If set the ideas button visibility is determined by the value. If undefined the existing logic is used
 which checks if the the aiEvaluation is set or if there are invisible exemplar documents.
 
+`hide4up`: (boolean | undefined) If true, the button that switches to 4up view is always hidden.
+
 ## Unit- or Problem-level `config` properties
 
 These properties are configurable at the unit, investigation, or problem levels of the curriculum JSON.

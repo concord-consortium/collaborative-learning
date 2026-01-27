@@ -2,9 +2,7 @@ import { inject, observer } from "mobx-react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
-import { DocumentFileMenu } from "./document-file-menu";
-import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
-import { BaseComponent, IBaseProps } from "../base";
+import { kAnalyzerUserParams } from "../../../shared/shared";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
@@ -13,11 +11,17 @@ import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
 import { ENavTab } from "../../models/view/nav-tabs";
-import { IconButton } from "../utilities/icon-button";
-import ToggleControl from "../utilities/toggle-control";
+import { CommentWithId } from "../../models/document/document-comments-manager";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
+import { DEBUG_HISTORY_VIEW } from "../../lib/debug";
+import { BaseComponent, IBaseProps } from "../base";
+import { IconButton } from "../utilities/icon-button";
+import ToggleControl from "../utilities/toggle-control";
 import { DocumentAnnotationToolbar } from "./document-annotation-toolbar";
+import { HistoryViewPanel } from "./history-view-panel";
+import { DocumentFileMenu } from "./document-file-menu";
+import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
 
 import IdeaIcon from "../../assets/idea-icon.svg";
 
@@ -186,6 +190,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           readOnly={readOnly}
           sectionClass={sectionClass}
         />
+        {DEBUG_HISTORY_VIEW && this.stores.persistentUI.showHistoryView && (
+          <HistoryViewPanel document={document} />
+        )}
         {this.renderStickyNotesPopup()}
       </div>
     );
@@ -292,15 +299,16 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
   private renderProblemTitleBar(type: string, hideButtons?: boolean) {
-    const { problem, user } = this.stores;
+    const { appConfig, problem, user } = this.stores;
     const { workspace } = this.props;
     const problemTitle = `${problem.title}${type === "planning" ? ": Planning" : ""}`;
+    const show4up = !appConfig.hide4up && !workspace.comparisonVisible && !user.isTeacherOrResearcher;
     return this.renderGenericTitleBar({
       title: problemTitle,
       hideButtons,
       showShareButton: type !== "planning",
       docType: type,
-      show4up: !workspace.comparisonVisible && !user.isTeacherOrResearcher
+      show4up
     });
   }
 
@@ -518,17 +526,42 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   // based on rules defined in exemplar-controller-rules. So we just
   // need to log the click. See: exemplar-controller.ts, and exemplar-controller-rules.ts
   // The AI evaluation is triggered by updating the last-edited timestamp.
-  private handleIdeasButtonClick = () => {
+  private handleIdeasButtonClick = async () => {
     const { document } = this.props;
     const { db: { firebase }, user, ui, persistentUI, appConfig } = this.stores;
-    firebase.setLastEditedNow(user, document.key, document.uid );
+
+    await firebase.setLastEditedNow(user, document.key, document.uid);
+
     // Unselect all tiles, so that the whole-document comments are shown
     ui.clearSelectedTiles();
     persistentUI.openResourceDocument(document, appConfig, user, this.stores.sortedDocuments);
     persistentUI.toggleShowChatPanel(true);
+
     if (appConfig.aiEvaluation) {
-      document.content?.setAwaitingAIAnalysis(true);
+      if (document.commentsManager) {
+        // Use the comments manager to queue a pending AI comment.
+        // The manager will automatically check when new comments arrive
+        // and remove this pending item when AI analysis completes.
+        const docLastEditedTime = await firebase.getLastEditedTimestamp(user, document.key);
+        const effectiveLastEdited = docLastEditedTime || Date.now();
+
+        document.commentsManager.queueRemoteComment({
+          triggeredAt: effectiveLastEdited,
+          source: "ai",
+          checkCompleted: (comments: CommentWithId[]) => {
+            // Check if AI analysis is complete by finding an AI comment
+            // that was created after the document was last edited.
+            const lastAIComment = [...comments]
+              .reverse()
+              .find(comment => comment.uid === kAnalyzerUserParams.id);
+
+            return !!(lastAIComment &&
+                     lastAIComment.createdAt.getTime() > effectiveLastEdited);
+          }
+        });
+      }
     }
+
     logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
   };
 

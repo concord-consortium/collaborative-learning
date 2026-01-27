@@ -157,6 +157,60 @@ export async function categorizeUrl(url: string, apiKey: string, aiPrompt = defa
   }
 }
 
+async function findRelatedSummaries(summary: string, apiKey: string, firestoreDocumentPath: string) {
+  // get the document to build the filters
+  const db = new Firestore();
+  const document = await db.doc(firestoreDocumentPath).get();
+  if (!document.exists) {
+    throw new Error(`Document ${firestoreDocumentPath} does not exist`);
+  }
+  const { key, context_id, unit, problem, investigation } = document.data()!;
+  logger.info("Document data", { key, context_id, unit, problem, investigation });
+
+  if (!context_id || !unit || !problem || !investigation) {
+    logger.info("Skipping related summary lookup. " +
+      "Document doesn't have a complete context for finding related summaries. " +
+      "Personal documents don't have this context. ");
+    return [];
+  }
+
+  // get the embeddings for the summary
+  const embeddings = await getEmbeddings(summary, apiKey);
+
+  // lookup related documents based on summary embedding that have ai agreements
+  const query: VectorQuery = db.collection('summaries')
+    .where("key", "!=", key)
+    .where("numAiAgreements", ">", 0)
+    .where("context_id", "==", context_id)
+    .where("unit", "==", unit)
+    .where("problem", "==", problem)
+    .where("investigation", "==", investigation)
+    .findNearest({
+      vectorField: "summaryEmbedding",
+      queryVector: FieldValue.vector(embeddings),
+      limit: 5,
+      distanceMeasure: "EUCLIDEAN",
+    });
+  const snapshot = await query.get();
+  const relatedSummaries: RelatedSummary[] = [];
+  snapshot.forEach((doc) => {
+    const aiAgreements: Record<AgreementValue, AiAgreement> = doc.data().aiAgreements || undefined;
+    if (aiAgreements) {
+      const agreements = Object.values(aiAgreements).reduce<Agreements>((acc, cur) => {
+        const value = cur.value as AgreementValue;
+        acc[value] = acc[value] || [];
+        acc[value].push({content: cur.content, tags: cur.tags});
+        return acc;
+      }, {} as Agreements);
+      relatedSummaries.push({
+        summary,
+        agreements,
+      });
+    }
+  });
+  return relatedSummaries;
+}
+
 export async function categorizeSummary(summary: string, apiKey: string, firestoreDocumentPath: string, aiPrompt = defaultAiPrompt) {
   logger.info(`Categorizing summary for: ${firestoreDocumentPath}`);
   const openai = new OpenAI({apiKey});
@@ -166,49 +220,7 @@ export async function categorizeSummary(summary: string, apiKey: string, firesto
       throw new Error("aiPrompt must specify at least one response field for the schema.");
     }
 
-    // get the embeddings for the summary
-    const embeddings = await getEmbeddings(summary, apiKey);
-
-    // get the document to build the filters
-    const db = new Firestore();
-    const document = await db.doc(firestoreDocumentPath).get();
-    if (!document.exists) {
-      throw new Error(`Document ${firestoreDocumentPath} does not exist`);
-    }
-    const { key, context_id, unit, problem, investigation } = document.data()!;
-    logger.info("Document data", { key, context_id, unit, problem, investigation });
-
-    // lookup related documents based on summary embedding that have ai agreements
-    const query: VectorQuery = db.collection('summaries')
-      .where("key", "!=", key)
-      .where("numAiAgreements", ">", 0)
-      .where("context_id", "==", context_id)
-      .where("unit", "==", unit)
-      .where("problem", "==", problem)
-      .where("investigation", "==", investigation)
-      .findNearest({
-        vectorField: "summaryEmbedding",
-        queryVector: FieldValue.vector(embeddings),
-        limit: 5,
-        distanceMeasure: "EUCLIDEAN",
-      });
-    const snapshot = await query.get();
-    const relatedSummaries: RelatedSummary[] = [];
-    snapshot.forEach((doc) => {
-      const aiAgreements: Record<AgreementValue, AiAgreement> = doc.data().aiAgreements || undefined;
-      if (aiAgreements) {
-        const agreements = Object.values(aiAgreements).reduce<Agreements>((acc, cur) => {
-          const value = cur.value as AgreementValue;
-          acc[value] = acc[value] || [];
-          acc[value].push({content: cur.content, tags: cur.tags});
-          return acc;
-        }, {} as Agreements);
-        relatedSummaries.push({
-          summary,
-          agreements,
-        });
-      }
-    });
+    const relatedSummaries = await findRelatedSummaries(summary, apiKey, firestoreDocumentPath);
     logger.info("relatedSummaries", relatedSummaries);
 
     return openai.beta.chat.completions.parse({
