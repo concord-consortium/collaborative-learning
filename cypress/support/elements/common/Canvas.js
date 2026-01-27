@@ -54,7 +54,10 @@ class Canvas {
     return cy.get('[data-test=personal-doc-title] [data-test=edit-icon]');
   }
 
-  createNewExtraDocumentFromFileMenu(title, type, skipTabClick=false) {
+  createNewExtraDocumentFromFileMenu(title, type, {
+    skipTabClick = false,
+    dialogTitle = 'Create Extra Workspace'
+  } = {}) {
     cy.log('Creating new extra document: ' + title + ' in type: ' + type);
     this.openFileMenu();
     cy.get('[data-test=list-item-icon-open-workspace]').click();
@@ -64,7 +67,7 @@ class Canvas {
       cy.get('.primary-workspace .doc-tab.my-work.workspaces').click();
     }
     cy.get('[data-test=' + type + '-section-workspaces-documents] [data-test=my-work-new-document]').click();
-    dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
+    dialog.getDialogTitle().should('exist').contains(dialogTitle);
 
     // Wait for dialog to be ready and visible
     dialog.getDialogTextInput()
