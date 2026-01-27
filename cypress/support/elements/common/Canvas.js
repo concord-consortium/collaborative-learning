@@ -54,11 +54,15 @@ class Canvas {
     return cy.get('[data-test=personal-doc-title] [data-test=edit-icon]');
   }
 
-  createNewExtraDocumentFromFileMenu(title, type) {
+  createNewExtraDocumentFromFileMenu(title, type, skipTabClick=false) {
     cy.log('Creating new extra document: ' + title + ' in type: ' + type);
     this.openFileMenu();
     cy.get('[data-test=list-item-icon-open-workspace]').click();
-    cy.get('.primary-workspace .doc-tab.my-work.workspaces').click();
+    // There is at least one test case where CLUE doesn't show tabs in the view
+    // that shows up when the open item is clicked.
+    if (!skipTabClick) {
+      cy.get('.primary-workspace .doc-tab.my-work.workspaces').click();
+    }
     cy.get('[data-test=' + type + '-section-workspaces-documents] [data-test=my-work-new-document]').click();
     dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
 
