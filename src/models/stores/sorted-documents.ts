@@ -113,8 +113,6 @@ export class SortedDocuments {
     snapshot.docs.forEach(doc => {
       const data = doc.data();
       mstSnapshot[data.key] = data;
-      // For some reason some docs arrive with visibility set to illegal "null" value.
-      if (data.visibility === null) data.visibility = undefined;
       try {
         typecheck(DocumentMetadataModel, data);
       } catch (e: any) {
@@ -274,6 +272,8 @@ export class SortedDocuments {
     return docsArray;
   }
 
+  // This only fetches documents that have metadata that was already pulled down
+  // by the watchFirestoreMetaDataDocs listener.
   async fetchFullDocument(docKey: string) {
     if (!this.docsReceived) {
       // Wait until the initial batch of documents has been received from Firestore.
@@ -284,28 +284,9 @@ export class SortedDocuments {
       console.warn("Could not find metadata doc with key", docKey, this.firestoreMetadataDocs);
       return;
     }
-    const visibility = metadataDoc?.visibility === "public" || metadataDoc?.visibility === "private"
-                         ? metadataDoc?.visibility as "public" | "private"
-                         : undefined;
-    const props = {
-      documentKey: metadataDoc.key,
-      type: metadataDoc.type as any,
-      properties: metadataDoc.propertiesAsStringRecord,
-      userId: metadataDoc.uid,
-      groupId: undefined,
-      visibility,
-      originDoc: undefined,
-      pubVersion: undefined,
-
-      // The following props are sometimes null in Firestore on the metadata docs.
-      // For consistency we make them undefined which is what openDocument
-      // expects.
-      title: metadataDoc.title ?? undefined,
-      problem: metadataDoc.problem ?? undefined,
-      investigation: metadataDoc.investigation ?? undefined,
-      unit: metadataDoc.unit ?? undefined,
-    };
-
-    return  this.db.openDocument(props);
+    return this.db.openDocumentFromFirestoreMetadata({
+      ...metadataDoc,
+      properties: metadataDoc.propertiesAsStringRecord
+    });
   }
 }

@@ -7,7 +7,8 @@ import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
-import { isExemplarType, isPlanningType, isProblemType, isPublishedType, isSupportType } from "./document-types";
+import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
+  isPublishedType, isSupportType } from "./document-types";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { getLocalTimeStamp } from "../../utilities/time";
 
@@ -62,6 +63,8 @@ export function getDocumentDisplayTitle(
     return document.getProperty("caption") || "Support";
   } else if (isProblemType(type) || isPlanningType(type)) {
     return getDocumentTitleFromProblem(unit, document);
+  } else if (type === GroupDocument) {
+    return `Group ${document.groupId} Document`;
   } else {
     return getDocumentTitleWithTimestamp(document, appConfig);
   }
@@ -86,15 +89,20 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
   }
 }
 
+// TODO: handle the visibility of group documents. The request in upcoming work is for group documents
+// to be visible to everyone in the class by default. So either we just say anything that is a group
+// document is visible to everyone in the class. Or we set the visibility property on group documents
+// to "public" when they are created.
 export const isDocumentAccessibleToUser = (
   doc: IDocumentMetadataBase, user: UserModelType, documentStore: IExemplarVisibilityProvider
 ) => {
   const ownDocument = doc.uid === user.id;
+  const ownGroupDocument = doc.type === GroupDocument && doc.groupId && user.currentGroupId === doc.groupId;
   const isShared = doc.visibility === "public";
   const isPublished = isPublishedType(doc.type);
   if (user.isTeacherOrResearcher) return true;
   if (user.isStudent) {
-    return ownDocument || isShared || isPublished
+    return ownDocument || ownGroupDocument || isShared || isPublished
            || (isExemplarType(doc.type) && documentStore.isExemplarVisible(doc.key));
   }
   return false;

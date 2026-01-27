@@ -7,7 +7,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModel, DocumentContentModelType } from "../../models/document/document-content";
 import { createDefaultSectionedContent } from "../../models/document/sectioned-content";
 import {
-  DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
+  DocumentDragKey, GroupDocument, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import {
@@ -88,6 +88,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             document={comparisonDocument}
             workspace={problemWorkspace}
             onNewDocument={this.handleNewDocument}
+            onOpenGroupDocument={this.handleOpenGroupDocument}
             onCopyDocument={this.handleCopyDocument}
             onDeleteDocument={this.handleDeleteDocument}
             toolbar={toolbar}
@@ -101,6 +102,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         document={primaryDocument}
         workspace={problemWorkspace}
         onNewDocument={this.handleNewDocument}
+        onOpenGroupDocument={this.handleOpenGroupDocument}
         onCopyDocument={this.handleCopyDocument}
         onDeleteDocument={this.handleDeleteDocument}
         onAdminDestroyDocument={appMode === "dev" ? this.handleAdminDestroyDocument : undefined}
@@ -153,6 +155,17 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       const defaultDocument = await db.guaranteeOpenDefaultDocument(type, documentContent);
       if (defaultDocument) {
         problemWorkspace.setPrimaryDocument(defaultDocument);
+      }
+    } else {
+      // If the primary document is a group document, make sure it is opened properly.
+      // This is because group documents are not loaded automatically like other documents.
+      // This code is loading the metadata even if this isn't a group document, in order to
+      // figure out if it is a group document. This guaranteeInitialDocuments function is
+      // not waited for, so this new metadata loading shouldn't slow down the initial
+      // loading of CLUE.
+      const primaryDocMetadata = await db.findFirestoreMetadata(problemWorkspace.primaryDocumentKey);
+      if (primaryDocMetadata && primaryDocMetadata.type === GroupDocument) {
+        db.openDocumentFromFirestoreMetadata(primaryDocMetadata);
       }
     }
     // Guarantee the user starts with one learning log
@@ -278,6 +291,15 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         this.handleNewDocumentOpen(docType, title)
         .catch(error => ui.setError(error));
       });
+  };
+
+  private handleOpenGroupDocument = async () => {
+    const { db, persistentUI: { problemWorkspace } } = this.stores;
+    const groupDocument = await db.getOrCreateGroupDocument();
+
+    if (groupDocument) {
+      problemWorkspace.setPrimaryDocument(groupDocument);
+    }
   };
 
   private defaultOtherDocumentContent = (type: OtherDocumentType) => {

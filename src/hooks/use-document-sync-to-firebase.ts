@@ -40,7 +40,7 @@ export function useDocumentSyncToFirebase(
   readOnly = false
 ) {
   const { key, type, uid, contentStatus } = document;
-  const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
+  const { content: contentPath, metadata, typedMetadata } = firebase.getDocumentPaths(user, document);
   const disconnectHandlers = useRef<OnDisconnect[]|undefined>(undefined);
 
   const handlePresenceChange = useMemo(() => (snapshot: any) => {
@@ -101,6 +101,7 @@ export function useDocumentSyncToFirebase(
   }
 
   /**
+   * FIXME: this shouldn't be true anymore.
    * We currently have multiple firestore metadata docs for each real doc.
    * Use this function to update a property in all of them.
    *

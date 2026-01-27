@@ -199,6 +199,41 @@ describe("mst", () => {
     expect((todo as any).foo).toBeUndefined();
   });
 
+  /**
+   * The maybe type makes unspecified properties undefined.
+   * This behavior causes problems for Firestore because Firestore does not support undefined
+   * values in documents. So for any MST model that is saved directly in Firestore, it is
+   * better to use maybeNull. Another solution would be to configure Firestore with the
+   * ignoreUndefinedProperties . This way Firestore will automatically remove the undefined
+   * properties when saving the document. There is also a omitUndefined utility function that
+   * you can use to handle this.
+   */
+  test("getSnapshot includes unset maybe properties with a value of undefined", () => {
+    const Todo1 = types.model({
+      text1: types.maybe(types.string),
+      text2: types.maybe(types.string)
+    });
+
+    const todo = Todo1.create({text2: "2"});
+    const snapshot = getSnapshot(todo);
+    expect(snapshot).toHaveProperty("text1");
+    expect(snapshot.text1).toBeUndefined();
+    expect(snapshot.text2).toBe("2");
+  });
+
+  test("getSnapshot includes unset maybeNull properties with a value of null", () => {
+    const Todo1 = types.model({
+      text1: types.maybeNull(types.string),
+      text2: types.maybeNull(types.string)
+    });
+
+    const todo = Todo1.create({text2: "2"});
+    const snapshot = getSnapshot(todo);
+    expect(snapshot).toHaveProperty("text1");
+    expect(snapshot.text1).toBeNull();
+    expect(snapshot.text2).toBe("2");
+  });
+
   test("map set applies a snapshot to the existing object", () => {
     const TodoValue = types.model({
       name: types.string

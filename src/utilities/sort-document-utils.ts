@@ -39,40 +39,12 @@ export const sortDateSectionLabels = (
   });
 };
 
-export const createDocMapByGroups = (documents: IDocumentMetadataModel[], groupForUser: (userId: string) => any) => {
-  const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
-  documents.forEach((doc) => {
-    const userId = doc.uid;
-    const group = groupForUser(userId);
-    const sectionLabel = group ? `Group ${group.id}` : "No Group";
-
-    if (!documentMap.has(sectionLabel)) {
-      documentMap.set(sectionLabel, []);
-    }
-    documentMap.get(sectionLabel)?.push(doc);
-  });
-  return documentMap;
-};
-
 export const sortGroupSectionLabels = (docMapKeys: string[]) => {
   return docMapKeys.sort((a, b) => {
     const numA = parseInt(a.replace(/^\D+/g, ''), 10);
     const numB = parseInt(b.replace(/^\D+/g, ''), 10);
     return numA - numB;
   });
-};
-
-export const createDocMapByNames = (documents: IDocumentMetadataModel[], getUserById: (uid: string) => any) => {
-  const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
-  documents.forEach((doc) => {
-    const user = getUserById(doc.uid);
-    const sectionLabel = user && `${user.lastName}, ${user.firstName}`;
-    if (!documentMap.has(sectionLabel)) {
-      documentMap.set(sectionLabel, []);
-    }
-    documentMap.get(sectionLabel)?.push(doc);
-  });
-  return documentMap;
 };
 
 export const sortNameSectionLabels = (docMapKeys: string[]) => {
