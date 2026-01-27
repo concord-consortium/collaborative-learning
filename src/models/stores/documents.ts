@@ -4,7 +4,8 @@ import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
 import { DocumentModelType } from "../document/document";
 import {
-  DocumentType, ExemplarDocument, GroupDocument, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
+  DocumentType, ExemplarDocument, GroupDocument, LearningLogDocument, LearningLogPublication,
+  OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../document/document-types";
 import { getTileEnvironment } from "../tiles/tile-environment";
