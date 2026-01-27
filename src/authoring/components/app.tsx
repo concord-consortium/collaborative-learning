@@ -7,7 +7,7 @@ import Workspace from "./workspace";
 import MediaLibrary from "./media-library";
 import { AuthProvider, useAuth } from "../hooks/use-auth";
 import { AuthoringApiProvider } from "../hooks/use-authoring-api";
-import { AuthoringPreviewProvider, useAuthoringPreview } from "../hooks/use-authoring-preview";
+import { AuthoringPreviewProvider, PreviewUserType, useAuthoringPreview } from "../hooks/use-authoring-preview";
 import Admin from "./admin";
 import CommitUI from "./commit-ui";
 
@@ -44,11 +44,14 @@ const InnerApp: React.FC = () => {
     }
   };
 
-  const handlePreviewClick = () => {
+  const openPreview = (userType: PreviewUserType) => {
     if (branch && unit) {
-      authoringPreview.openPreview(branch, unit);
+      authoringPreview.openPreview(branch, unit, userType);
     }
   };
+
+  const handleStudentPreviewClick = () => openPreview("student");
+  const handleTeacherPreviewClick = () => openPreview("teacher");
 
   const renderHeader = () => {
     const title = `CLUE Authoring${unitConfig ? `: ${unitConfig.title}` : ""}`;
@@ -59,8 +62,13 @@ const InnerApp: React.FC = () => {
           <div className="title">{title}</div>
           {saveState && <div className="save-state">{saveState}</div>}
           { branch && unit && (
-            <button onClick={handlePreviewClick}>
-              Preview
+            <button onClick={handleStudentPreviewClick}>
+              Student Preview
+            </button>
+          )}
+          { branch && unit && (
+            <button onClick={handleTeacherPreviewClick}>
+              Teacher Preview
             </button>
           )}
           { branch && unit && (
