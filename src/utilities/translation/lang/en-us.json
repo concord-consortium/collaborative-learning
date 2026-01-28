@@ -1,9 +1,9 @@
 {
-  "Group": "Group",
-  "Name": "Student",
+  "studentGroup": "Group",
+  "sortLabel.sortByOwner": "Student",
   "Strategy": "",
   "Bookmarked": "Bookmarked",
   "Tools": "Tools",
-  "Date": "Date",
+  "sortLabel.sortByDate": "Date",
   "Problem": "Problem"
 }

@@ -1,7 +1,7 @@
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
 import { SectionModelType } from "../curriculum/section";
 import { ToolbarButtonModel } from "../tiles/toolbar-button";
-import { setTermOverrides, onTermOverridesChange } from "../../utilities/translation";
+import { setTermOverrides } from "../../utilities/translation/translate";
 import { ConfigurationManager, mergeDisabledFeatures } from "./configuration-manager";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { ToolbarModel } from "./problem-configuration";
@@ -34,24 +34,29 @@ export const AppConfigModel = types
     authorTools: ToolbarModel.create(self.config?.authorTools || []),
     myResourcesToolBar: ToolbarModel.create(self.config?.myResourcesToolbar || []),
     settings: self.config?.settings,
-    requireSortWorkTab: false,
-    // Observable counter that increments when term overrides change.
-    // Components that use useTranslation() observe this to trigger re-renders.
-    termOverridesVersion: 0
+    requireSortWorkTab: false
   }))
-  .actions(self => ({
-    incrementTermOverridesVersion() {
-      self.termOverridesVersion++;
+  .views(self => ({
+    /**
+     * Build the complete term overrides object, including tagPrompt as the Strategy override
+     * if no explicit Strategy override exists.
+     */
+    buildTermOverrides(): Record<string, string> | undefined {
+      const { termOverrides, tagPrompt } = self.configMgr;
+      if (!termOverrides && !tagPrompt) return undefined;
+
+      // If tagPrompt exists and there's no explicit Strategy override, use tagPrompt as Strategy
+      if (tagPrompt && !termOverrides?.Strategy) {
+        return { ...termOverrides, Strategy: tagPrompt };
+      }
+      return termOverrides;
     }
   }))
   .actions(self => ({
     afterCreate() {
-      // Register callback so term override changes trigger re-renders
-      onTermOverridesChange(() => self.incrementTermOverridesVersion());
-
       // Initialize module-level overrides from base config (if config exists)
       if (self.config) {
-        setTermOverrides(self.configMgr.termOverrides, self.configMgr.tagPrompt);
+        setTermOverrides(self.buildTermOverrides());
       }
     },
     setConfigs(configs: Partial<UnitConfiguration>[]) {
@@ -64,7 +69,7 @@ export const AppConfigModel = types
       self.authorTools = ToolbarModel.create(self.configMgr.authorTools);
       self.toolbar = ToolbarModel.create(self.configMgr.toolbar);
       self.settings = self.configMgr.settings;
-      setTermOverrides(self.configMgr.termOverrides, self.configMgr.tagPrompt);
+      setTermOverrides(self.buildTermOverrides());
     },
     setRequireSortWorkTab(requireSortWorkTab: boolean) {
       self.requireSortWorkTab = requireSortWorkTab;

@@ -8,8 +8,7 @@ import { ProblemMenuContainer } from "../../components/problem-menu-container";
 import { ToggleGroup } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { useStores } from "../../hooks/use-stores";
-import { useTranslation } from "../../hooks/use-translation";
-import { TranslationKey } from "../../utilities/translation";
+import { translate } from "../../utilities/translation/translate";
 import AppModeIndicator from "./app-mode-indicator";
 import { CustomSelect } from "./custom-select";
 import { StudentMenuContainer } from "../../components/student-menu-container";
@@ -29,7 +28,6 @@ interface IProps extends IBaseProps {
 export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAppHeaderComponent(props) {
   const { showGroup } = props;
   const { appConfig, appMode, appVersion, db, user, groups, investigation, ui, unit, problem } = useStores();
-  const { t } = useTranslation();
   const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
   const getUserTitle = () => {
     switch(appMode){
@@ -95,7 +93,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     }
     return (
       <div onClick={handleResetGroup} className="group">
-        <div className="name" data-test="group-name">{`${t(TranslationKey.Group)} ${group.id}`}</div>
+        <div className="name" data-test="group-name">{`${translate("studentGroup")} ${group.id}`}</div>
         <div className="group-center"/>
         <div className="members" data-test="group-members">
           <div className="row">
@@ -133,7 +131,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   };
 
   const handleResetGroup = () => {
-    const groupTerm = t(TranslationKey.Group);
+    const groupTerm = translate("studentGroup");
     const groupTermLower = groupTerm.toLowerCase();
     ui.confirm(`Do you want to leave this ${groupTermLower}?`, `Leave ${groupTerm}`)
       .then((ok) => {

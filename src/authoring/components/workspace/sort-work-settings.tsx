@@ -4,15 +4,15 @@ import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 import { ISortWorkConfig, SortTypeId, SortTypeIds } from "../../types";
 import { useCurriculum } from "../../hooks/use-curriculum";
 import { ISortOptionConfig } from "../../../models/stores/sort-work-config";
-import { DEFAULT_SORT_LABELS, DEFAULT_SORT_TYPES } from "../../../models/stores/ui-types";
 import { getSortTypeLabel } from "../../../utilities/sort-utils";
+import { getSortTypeTranslationKey } from "../../../utilities/translation/translation-types";
+import appConfig from "../../../clue/app-config.json";
 
 import "./sort-work-settings.scss";
 
-const authoringLabels: Record<SortTypeId, string> = {
-  ...DEFAULT_SORT_LABELS,
-  Strategy: "Strategy" // Override empty string with "Strategy" for authoring
-};
+const defaultSortTypes = new Set(
+  appConfig.config.sortWorkConfig?.sortOptions?.map((o: { type: string }) => o.type) ?? []
+);
 
 const sortOptionDescriptions: Record<SortTypeId, string> = {
   Group: "Sort documents by student group",
@@ -51,7 +51,7 @@ const SortWorkSettings: React.FC = () => {
 
     const sortOptions: FormSortOption[] = orderedTypes.map(type => {
       return {
-        enabled: enabledTypes.size === 0 ? DEFAULT_SORT_TYPES.includes(type) : enabledTypes.has(type),
+        enabled: enabledTypes.size === 0 ? defaultSortTypes.has(type) : enabledTypes.has(type),
         type
       };
     });
@@ -121,11 +121,7 @@ const SortWorkSettings: React.FC = () => {
   };
 
   const getDisplayLabel = (type: SortTypeId) => {
-    if (termOverrides?.[type]) {
-      return termOverrides[type];
-    }
-
-    return getSortTypeLabel(type, { tagPrompt, baseLabels: authoringLabels });
+    return getSortTypeLabel(type, { tagPrompt, termOverrides });
   };
 
   return (
@@ -173,7 +169,7 @@ const SortWorkSettings: React.FC = () => {
               const rowId = `sort-option-${sortType}`;
               const watchedOption = watchSortOptions[index];
               const isOnlyEnabledOption = enabledOptions.length === 1 && watchedOption?.enabled;
-              const hasCustomLabel = !!termOverrides?.[sortType];
+              const hasCustomLabel = !!termOverrides?.[getSortTypeTranslationKey(sortType)];
 
               return (
                 <tr key={field.id} id={rowId}>

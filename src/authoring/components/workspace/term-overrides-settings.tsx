@@ -1,40 +1,27 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { useCurriculum } from "../../hooks/use-curriculum";
-import { TERM_METADATA, TranslationKeyType } from "../../../utilities/translation";
+import { escapeKeyForForm, TERM_METADATA, TranslationKeyType } from "../../../utilities/translation/translation-types";
+import { getDefaultValue } from "../../../utilities/translation/translate";
 
 import "./term-overrides-settings.scss";
 
-const reservedValues = new Set<string>();
-TERM_METADATA.forEach(term => {
-  reservedValues.add(term.key);
-  if (term.defaultValue) {
-    reservedValues.add(term.defaultValue);
-  }
-});
-
 interface TermOverrideFormInputs {
-  overrides: Record<TranslationKeyType, string>;
+  overrides: Record<string, string>;
 }
 
-interface ConflictWarning {
-  conflictsWith: string;
-  termKey: TranslationKeyType;
-  value: string;
-}
-
-const TermOverridesSettings: React.FC = () => {
+export const TermOverridesSettings: React.FC = () => {
   const { unitConfig, setUnitConfig, saveState } = useCurriculum();
   const tagPrompt = unitConfig?.config?.tagPrompt;
-  const [warnings, setWarnings] = useState<ConflictWarning[]>([]);
 
   const formDefaults: TermOverrideFormInputs = useMemo(() => {
     const termOverrides = unitConfig?.config?.termOverrides ?? {};
     const overrides: Record<string, string> = {};
 
     TERM_METADATA.forEach(term => {
-      overrides[term.key] = termOverrides[term.key] ?? "";
+      // Use escaped keys for React Hook Form compatibility
+      overrides[escapeKeyForForm(term.key)] = termOverrides[term.key] ?? "";
     });
 
     return { overrides };
@@ -49,55 +36,19 @@ const TermOverridesSettings: React.FC = () => {
     reset(formDefaults);
   }, [formDefaults, reset]);
 
-  const checkConflicts = (overrides: Record<string, string>): ConflictWarning[] => {
-    const conflicts: ConflictWarning[] = [];
-
-    TERM_METADATA.forEach(term => {
-      const value = overrides[term.key]?.trim();
-      if (!value) return;
-
-      // Check if value conflicts with another term's key or default
-      // (excluding this term's own key and default)
-      TERM_METADATA.forEach(otherTerm => {
-        if (otherTerm.key === term.key) return;
-
-        if (value === otherTerm.key) {
-          conflicts.push({
-            conflictsWith: `the "${otherTerm.key}" term key`,
-            termKey: term.key,
-            value
-          });
-        } else if (value === otherTerm.defaultValue && otherTerm.defaultValue) {
-          conflicts.push({
-            conflictsWith: `the default value for "${otherTerm.key}"`,
-            termKey: term.key,
-            value
-          });
-        }
-      });
-    });
-
-    return conflicts;
-  };
-
   const onSubmit: SubmitHandler<TermOverrideFormInputs> = (data) => {
-    // Check for conflicts. Prevent saving if conflicts exist.
-    const conflicts = checkConflicts(data.overrides);
-    setWarnings(conflicts);
-
-    if (conflicts.length > 0) {
-      return;
-    }
-
     setUnitConfig(draft => {
       if (!draft) return;
 
       const termOverrides: Record<string, string> = {};
 
       TERM_METADATA.forEach(term => {
-        const value = data.overrides[term.key]?.trim();
+        // Form data uses escaped keys, but we save with real keys
+        const escapedKey = escapeKeyForForm(term.key);
+        const value = data.overrides[escapedKey]?.trim();
+        const defaultVal = getDefaultValue(term.key);
         // Only save if value is non-empty and differs from the default
-        if (value && value !== term.defaultValue) {
+        if (value && value !== defaultVal) {
           termOverrides[term.key] = value;
         }
       });
@@ -111,19 +62,14 @@ const TermOverridesSettings: React.FC = () => {
   };
 
   const getEffectiveDefault = (termKey: TranslationKeyType): string => {
-    const term = TERM_METADATA.find(t => t.key === termKey);
-    if (!term) return "";
+    const defaultVal = getDefaultValue(termKey);
 
     // Strategy has special fallback to tagPrompt
-    if (termKey === "Strategy" && !term.defaultValue) {
+    if (termKey === "Strategy" && !defaultVal) {
       return tagPrompt || "(no default)";
     }
 
-    return term.defaultValue || "(no default)";
-  };
-
-  const hasWarningForTerm = (termKey: TranslationKeyType): ConflictWarning | undefined => {
-    return warnings.find(w => w.termKey === termKey);
+    return defaultVal || "(no default)";
   };
 
   return (
@@ -134,29 +80,15 @@ const TermOverridesSettings: React.FC = () => {
         the terms appear.
       </p>
 
-      {warnings.length > 0 && (
-        <div className="warnings" role="alert">
-          <strong>Warning:</strong> Some overrides conflict with default terms and could cause problems:
-          <ul>
-            {warnings.map((warning, index) => (
-              <li key={index}>
-                &quot;{warning.value}&quot; for {warning.termKey} conflicts with {warning.conflictsWith}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       <div className="term-list">
         {[...TERM_METADATA].sort((a, b) => a.key.localeCompare(b.key)).map(term => {
-          const termWarning = hasWarningForTerm(term.key);
           const effectiveDefault = getEffectiveDefault(term.key);
 
           return (
-            <div key={term.key} className={`term-item ${termWarning ? "has-warning" : ""}`}>
+            <div key={term.key} className="term-item">
               <div className="term-header">
                 <label htmlFor={`override-${term.key}`} className="term-label">
-                  {term.key}
+                  {term.label}
                 </label>
                 <span className="term-description muted">
                   {term.description}
@@ -167,18 +99,13 @@ const TermOverridesSettings: React.FC = () => {
                   id={`override-${term.key}`}
                   placeholder={effectiveDefault}
                   type="text"
-                  {...register(`overrides.${term.key}` as const)}
+                  {...register(`overrides.${escapeKeyForForm(term.key)}` as const)}
                 />
               </div>
               {term.key === "Strategy" && (
                 <p className="help-text muted small">
                   If left blank, defaults to the tag prompt from curriculum configuration
                   {tagPrompt ? ` ("${tagPrompt}")` : " (not set)"}.
-                </p>
-              )}
-              {termWarning && (
-                <p className="warning-text">
-                  This value conflicts with {termWarning.conflictsWith}
                 </p>
               )}
             </div>
@@ -198,5 +125,3 @@ const TermOverridesSettings: React.FC = () => {
     </form>
   );
 };
-
-export default TermOverridesSettings;

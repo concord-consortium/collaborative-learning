@@ -6,7 +6,7 @@ import { DocumentFileMenu } from "./document-file-menu";
 import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType } from "../../models/document/document";
-import { TranslationKey } from "../../utilities/translation";
+import { translate } from "../../utilities/translation/translate";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
@@ -85,15 +85,11 @@ const TwoUpStackedButton = ({ onClick, selected }: { onClick: () => void, select
   );
 };
 
-const ShareButton = ({ onClick, isShared, groupTerm }: {
-  onClick: () => void
-  isShared: boolean
-  groupTerm: string
-}) => {
+const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boolean }) => {
   const visibility = isShared ? "public" : "private";
-  const groupTermLower = groupTerm.toLowerCase();
+  const groupTerm = translate("studentGroup");
   const titlePrefix = isShared ? "Shared: click to unshare from" : "Unshared: click to share to";
-  const title = `${titlePrefix} ${groupTermLower}`;
+  const title = `${titlePrefix} ${groupTerm.toLowerCase()}`;
   return (
     <>
       {<div className="share-separator" />}
@@ -278,8 +274,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             {downloadButton}
             {show4up && this.renderMode()}
             {showShareButton &&
-              <ShareButton isShared={isShared} onClick={this.handleToggleVisibility}
-                           groupTerm={this.t(TranslationKey.Group)} />}
+              <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />}
           </div>
         }
       </div>
@@ -382,7 +377,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {stickyNotes.map((teacherSupport, index) => {
             const { support, audience, authoredTime } = teacherSupport;
             const sentTo = audience.type === AudienceEnum.group
-              ? `${this.t(TranslationKey.Group)} ${audience.identifier}`
+              ? `${translate("studentGroup")} ${audience.identifier}`
               : user.name;
             const authoredTimeAsDate = new Date(authoredTime);
             const sentOn = `${authoredTimeAsDate.toLocaleDateString()}, ${authoredTimeAsDate.toLocaleTimeString()}`;
@@ -409,7 +404,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const {workspace} = this.props;
     const mode = workspace.mode === "1-up" ? "up1" : "up4";
     const modeTitle = workspace.mode === "1-up"
-      ? `Join ${this.t(TranslationKey.Group)} View`
+      ? `Join ${translate("studentGroup")} View`
       : "Return to Student View";
     return (
       <ViewModeButton onClick={this.handleToggleWorkspaceMode} icon={mode} title={modeTitle} />
@@ -462,8 +457,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
               {showPersonalShareToggle &&
-                <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility}
-                             groupTerm={this.t(TranslationKey.Group)} />}
+                <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility} />}
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
               {supportStackedTwoUpView && isPrimary &&

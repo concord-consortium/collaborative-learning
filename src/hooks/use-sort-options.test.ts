@@ -95,8 +95,8 @@ describe("useSortOptions", () => {
           ]
         },
         termOverrides: {
-          Group: "Team",
-          Name: "Participant",
+          studentGroup: "Team",
+          "sortLabel.sortByOwner": "Participant",
           Bookmarked: "Starred"
         }
       });
@@ -224,7 +224,7 @@ describe("useSortOptions", () => {
           ]
         },
         termOverrides: {
-          Name: "Participant"
+          "sortLabel.sortByOwner": "Participant"
         }
       });
       const { getLabelForType } = useSortOptions();

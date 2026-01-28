@@ -11,7 +11,7 @@ import {
   sortNameSectionLabels,
   sortProblemSectionLabels
 } from "../../utilities/sort-document-utils";
-import { translate, TranslationKey } from "../../utilities/translation";
+import { translate } from "../../utilities/translation/translate";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
@@ -186,7 +186,7 @@ export class DocumentGroup {
   }
 
   get byGroup(): DocumentGroup[] {
-    const groupTerm = translate(TranslationKey.Group);
+    const groupTerm = translate("studentGroup");
     const docMap = createDocMapByGroups(this.documents, this.stores.groups.groupForUser, groupTerm);
     const sortedSectionLabels = sortGroupSectionLabels(Array.from(docMap.keys()));
     return this.buildDocumentCollection({sortedSectionLabels, sortType: "Group", docMap});

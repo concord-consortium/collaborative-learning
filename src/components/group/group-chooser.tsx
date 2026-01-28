@@ -3,7 +3,7 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "../base";
 import { GroupModelType } from "../../models/stores/groups";
 import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
-import { TranslationKey } from "../../utilities/translation";
+import { translate } from "../../utilities/translation/translate";
 
 import "./group-chooser.scss";
 
@@ -30,7 +30,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
 
   public componentDidMount() {
     this._isMounted = true;
-    const groupTermLower = this.t(TranslationKey.Group).toLowerCase();
+    const groupTermLower = translate("studentGroup").toLowerCase();
     this.loadingMessageKey = `Joining ${groupTermLower}`;
     showLoadingMessage(this.loadingMessageKey);
   }
@@ -44,7 +44,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
     const {user, groups} = this.stores;
     return (
       <div className="join" data-testid="group-select">
-        <div className="join-title">Join {this.t(TranslationKey.Group)}</div>
+        <div className="join-title">Join {translate("studentGroup")}</div>
         <div className="join-content">
           {user ? <div className="welcome">Welcome {user.name}</div> : null}
           {groups.allGroups.length > 0 && this.renderChooseExistingGroup()}
@@ -57,7 +57,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
 
   private renderChooseNewGroup() {
     const {allGroups} = this.stores.groups;
-    const groupTerm = this.t(TranslationKey.Group);
+    const groupTerm = translate("studentGroup");
     const groupTermLower = groupTerm.toLowerCase();
     const groupIds = allGroups.map((group) => group.id);
     const items: JSX.Element[] = [];
@@ -80,7 +80,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
 
   private renderChooseExistingGroup() {
     const {groups} = this.stores;
-    const groupTerm = this.t(TranslationKey.Group);
+    const groupTerm = translate("studentGroup");
     const groupTermLower = groupTerm.toLowerCase();
     const groupElements = groups.allGroups.map((group) => {
       const users = group.activeUsers.map((user) => {
@@ -132,7 +132,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
     return (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       if (group.activeUsers.length >= 4) {
-        const groupTermLower = this.t(TranslationKey.Group).toLowerCase();
+        const groupTermLower = translate("studentGroup").toLowerCase();
         this.setState({error: `Sorry, that ${groupTermLower} is full with four students`});
       }
       else {

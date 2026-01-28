@@ -1,8 +1,8 @@
 import { PrimarySortType } from "../models/stores/ui-types";
-import { translate, TranslationKeyType } from "./translation";
+import { getDefaultValue, translate } from "./translation/translate";
+import { getSortTypeTranslationKey } from "./translation/translation-types";
 
 interface GetSortTypeLabelOptions {
-  baseLabels?: Record<PrimarySortType, string>;
   termOverrides?: Record<string, string>;
   tagPrompt?: string;
 }
@@ -10,39 +10,35 @@ interface GetSortTypeLabelOptions {
 /**
  * Get the display label for a sort type.
  *
- * Resolution order:
- * 1. termOverrides[type] if provided and present
- * 2. tagPrompt for Strategy type (if tagPrompt is truthy)
- * 3. baseLabels[type] if provided, otherwise uses translate() defaults
- * 4. The type itself as fallback
+ * When termOverrides is provided (authoring context):
+ * - Uses termOverrides[translationKey] if present
+ * - Uses tagPrompt for Strategy type if no override
+ * - Falls back to default from en-us.json (or type name if empty)
  *
- * Note: When baseLabels is provided (e.g., in authoring context), it bypasses
- * the translate() system to allow showing raw type names instead of user-facing labels.
+ * When termOverrides is NOT provided:
+ * - Uses translate() which reads from module-level overrides
  */
 export function getSortTypeLabel(
   type: PrimarySortType,
   options: GetSortTypeLabelOptions = {}
 ): string {
-  const { termOverrides, tagPrompt, baseLabels } = options;
+  const { termOverrides, tagPrompt } = options;
 
-  // When baseLabels is explicitly provided, use the legacy resolution logic.
-  // This supports the authoring tool which needs to show raw type names.
-  if (baseLabels) {
-    if (termOverrides?.[type]) {
-      return termOverrides[type];
+  // When termOverrides is provided, use authoring-specific resolution.
+  // This supports the authoring tool which needs to preview custom
+  // overrides before they're saved to the module-level state.
+  if (termOverrides) {
+    const translationKey = getSortTypeTranslationKey(type);
+    if (termOverrides[translationKey]) {
+      return termOverrides[translationKey];
     }
     if (type === "Strategy" && tagPrompt) {
       return tagPrompt;
     }
-    return baseLabels[type] || type;
+    // Fall back to en-us.json default, or type name if empty
+    return getDefaultValue(translationKey) || type;
   }
 
-  // Default case: use the translation system.
-  // If termOverrides or tagPrompt are explicitly provided, pass them.
-  // Otherwise, translate() will use module-level overrides.
-  const hasExplicitOptions = termOverrides !== undefined || tagPrompt !== undefined;
-  return translate(
-    type as TranslationKeyType,
-    hasExplicitOptions ? { overrides: termOverrides, tagPrompt } : undefined
-  );
+  // Default case: use the translation system with module-level overrides.
+  return translate(getSortTypeTranslationKey(type));
 }

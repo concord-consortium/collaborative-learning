@@ -12,21 +12,6 @@ export type PrimarySortType = SortTypeId;
 export type SecondarySortType = PrimarySortType | "None";
 export type SortType = PrimarySortType | SecondarySortType | "All";
 
-export const DEFAULT_SORT_LABELS: Record<PrimarySortType, string> = {
-  Bookmarked: "Bookmarked",
-  Date: "Date",
-  Group: "Group",
-  Name: "Student", // "Student" is preferred for UI display
-  Problem: "Problem",
-  Strategy: "", // Will be overridden by tagPrompt at runtime
-  Tools: "Tools"
-};
-
-// Default sort options in preferred order
-export const DEFAULT_SORT_TYPES: readonly PrimarySortType[] = [
-  "Date", "Group", "Name", "Strategy", "Bookmarked", "Tools"
-] as const;
-
 export const kDividerMin = 0;   // left side (resources/navigation) is collapsed
 export const kDividerHalf = 50; // resources/navigation and workspace are split 50/50
 export const kDividerMax = 100; // right side (workspace) is collapsed

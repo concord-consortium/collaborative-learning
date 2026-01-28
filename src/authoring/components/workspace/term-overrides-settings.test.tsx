@@ -2,8 +2,8 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
-import TermOverridesSettings from "./term-overrides-settings";
-import { TERM_METADATA } from "../../../utilities/translation";
+import { TermOverridesSettings } from "./term-overrides-settings";
+import { TERM_METADATA } from "../../../utilities/translation/translation-types";
 
 const mockSetUnitConfig = jest.fn();
 
@@ -40,7 +40,7 @@ describe("TermOverridesSettings", () => {
     expect(screen.getByText(/Configure customized terminology/)).toBeInTheDocument();
 
     TERM_METADATA.forEach(term => {
-      expect(screen.getByLabelText(term.key)).toBeInTheDocument();
+      expect(screen.getByLabelText(term.label)).toBeInTheDocument();
       expect(screen.getByText(term.description)).toBeInTheDocument();
     });
   });
@@ -99,7 +99,7 @@ describe("TermOverridesSettings", () => {
     };
     updaterFn(mockDraft);
 
-    expect(mockDraft.config.termOverrides).toEqual({ Group: "Team" });
+    expect(mockDraft.config.termOverrides).toEqual({ studentGroup: "Team" });
   });
 
   it("does not save terms that match the default value", async () => {
@@ -118,7 +118,7 @@ describe("TermOverridesSettings", () => {
     const updaterFn = mockSetUnitConfig.mock.calls[0][0];
     const mockDraft = {
       config: {
-        termOverrides: { Group: "OldValue" }
+        termOverrides: { studentGroup: "OldValue" }
       }
     };
     updaterFn(mockDraft);
@@ -128,7 +128,7 @@ describe("TermOverridesSettings", () => {
   });
 
   it("loads existing custom terms into form", () => {
-    mockConfig.termOverrides = { Group: "Team", Name: "Participant" };
+    mockConfig.termOverrides = { studentGroup: "Team", "sortLabel.sortByOwner": "Participant" };
 
     render(<TermOverridesSettings />);
 

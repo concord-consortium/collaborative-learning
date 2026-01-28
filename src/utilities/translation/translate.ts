@@ -16,100 +16,53 @@
  * translated terms would need to become full translation keys.
  */
 
+import { observable } from "mobx";
 import enUS from "./lang/en-us.json";
 import { TranslationKeyType } from "./translation-types";
 
-export interface TranslateOptions {
-  overrides?: Record<string, string>;
-  tagPrompt?: string;
-  vars?: Record<string, string | number>;
-}
-
-// Module-level state for term overrides
-let moduleTermOverrides: Record<string, string> | undefined;
-let moduleTagPrompt: string | undefined;
-
-// Callback to notify when overrides change (for MobX integration)
-let onOverridesChangeCallback: (() => void) | undefined;
+// Module-level MobX observable state for term overrides.
+const moduleTermOverrides = observable.box<Record<string, string> | undefined>(undefined);
 
 /**
- * Set module-level term overrides and tagPrompt.
+ * Set module-level term overrides.
  * Call this when the unit configuration loads.
  *
  * After calling this, translate() will use these values by default,
  * eliminating the need to pass options through each call.
  */
-export function setTermOverrides(
-  termOverrides?: Record<string, string>,
-  tagPrompt?: string
-): void {
-  moduleTermOverrides = termOverrides;
-  moduleTagPrompt = tagPrompt;
-
-  // Notify observers (triggers MobX re-renders)
-  onOverridesChangeCallback?.();
-}
-
-/**
- * Register a callback to be notified when term overrides change.
- * Used by MobX stores to trigger re-renders in React components.
- */
-export function onTermOverridesChange(callback: () => void): void {
-  onOverridesChangeCallback = callback;
+export function setTermOverrides(termOverrides?: Record<string, string>): void {
+  moduleTermOverrides.set(termOverrides);
 }
 
 /**
  * Clear module-level overrides (useful for testing).
  */
 export function clearTermOverrides(): void {
-  moduleTermOverrides = undefined;
-  moduleTagPrompt = undefined;
-
-  // Notify observers (triggers MobX re-renders)
-  onOverridesChangeCallback?.();
+  moduleTermOverrides.set(undefined);
 }
 
 /**
  * Translate a key to its display string.
  *
  * Resolution order:
- * 1. Explicit overrides from options (if provided)
- * 2. Module-level termOverrides (set via setTermOverrides())
- * 3. For "Strategy" key: tagPrompt if available
- * 4. Default value from en-us.json
- * 5. The key itself as fallback
+ * 1. Module-level termOverrides (set via setTermOverrides())
+ * 2. Default value from en-us.json
+ * 3. The key itself as fallback
  *
- * For most usage, just call translate(key) - it will use the module-level
- * overrides set at app initialization. Pass explicit options only for
- * special cases like authoring preview.
  */
-export function translate(key: TranslationKeyType, options?: TranslateOptions): string {
-  const { vars } = options ?? {};
+export function translate(key: TranslationKeyType): string {
+  const overrides = moduleTermOverrides.get();
 
-  // Use explicit overrides if provided, otherwise fall back to module-level
-  const overrides = options?.overrides ?? moduleTermOverrides;
-  const tagPrompt = options?.tagPrompt ?? moduleTagPrompt;
-
-  // 1. Check unit overrides first
   if (overrides?.[key]) {
-    return applyVars(overrides[key], vars);
+    return overrides[key];
   }
 
-  // 2. Special case: Strategy uses tagPrompt if available
-  if (key === "Strategy" && tagPrompt) {
-    return applyVars(tagPrompt, vars);
-  }
-
-  // 3. Fall back to default from JSON
-  const defaultValue = enUS[key as keyof typeof enUS] ?? key;
-  return applyVars(defaultValue, vars);
+  return enUS[key as keyof typeof enUS] ?? key;
 }
 
 /**
- * Apply variable substitution to a string.
- * Supports %{varName} syntax for future use.
+ * Get the default/base value for a key, ignoring any overrides.
  */
-function applyVars(text: string, vars?: Record<string, string | number>): string {
-  if (!vars) return text;
-  return text.replace(/%\{\s*(\w+)\s*\}/g, (_, name) => String(vars[name] ?? ""));
+export function getDefaultValue(key: TranslationKeyType): string {
+  return enUS[key as keyof typeof enUS] ?? key;
 }

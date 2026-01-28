@@ -1,8 +1,7 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { useStores } from "../../../hooks/use-stores";
-import { useTranslation } from "../../../hooks/use-translation";
-import { TranslationKey } from "../../../utilities/translation";
+import { translate } from "../../../utilities/translation/translate";
 import { BaseComponent, IBaseProps } from "../../../components/base";
 import { DocumentViewMode } from "../../../components/document/document";
 import { FourUpComponent, getFocusedGroupUser, getUIStudentWorkTab } from "../../../components/four-up";
@@ -88,7 +87,6 @@ interface IGroupHeaderProps {
 const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function TeacherGroupHeader(
     {group, navTabName, documentViewMode}){
   const { ui, persistentUI, db, groups, user: { isResearcher } }  = useStores();
-  const { t } = useTranslation();
 
   const openDocId = persistentUI.tabs.get(navTabName)?.getDocumentGroup(group.id)?.primaryDocumentKey;
   const groupModel = groups.getGroupById(group.id);
@@ -108,7 +106,7 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
       });
     }
     else {
-      const groupTerm = t(TranslationKey.Group);
+      const groupTerm = translate("studentGroup");
       ui.prompt(`Enter your message for ${groupTerm} ${group.id}`, "", `Message ${groupTerm}`, 5)
       .then((message) => {
         const audience = AudienceModel.create({type: AudienceEnum.group, identifier: group.id});
@@ -125,10 +123,10 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
 
   return(
     <div className="group-header">
-      <div className="group-label">{t(TranslationKey.Group)} {String(group.id)}</div>
+      <div className="group-label">{translate("studentGroup")} {String(group.id)}</div>
       <div className="actions">
         {!isResearcher && <IconButton
-          title={`Message ${focusedGroupUser ? focusedGroupUser.name : t(TranslationKey.Group)}`}
+          title={`Message ${focusedGroupUser ? focusedGroupUser.name : translate("studentGroup")}`}
           className="icon"
           icon="sticky-note"
           key={`sticky-note-${focusedGroupUser ? `user-${focusedGroupUser.id}` : "group"}`}

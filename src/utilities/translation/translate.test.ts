@@ -1,108 +1,79 @@
-import { translate, clearTermOverrides } from "./translate";
-import { TranslationKey } from "./translation-types";
+import { translate, setTermOverrides, clearTermOverrides, getDefaultValue } from "./translate";
+import { escapeKeyForForm, unescapeKeyFromForm } from "./translation-types";
 
 describe("translate", () => {
   beforeEach(() => {
     clearTermOverrides();
   });
 
+  afterEach(() => {
+    clearTermOverrides();
+  });
+
   describe("default values", () => {
-    it("should return default values when no overrides provided", () => {
-      expect(translate(TranslationKey.Group)).toBe("Group");
-      expect(translate(TranslationKey.Name)).toBe("Student");
-      expect(translate(TranslationKey.Bookmarked)).toBe("Bookmarked");
-      expect(translate(TranslationKey.Tools)).toBe("Tools");
-      expect(translate(TranslationKey.Date)).toBe("Date");
-      expect(translate(TranslationKey.Problem)).toBe("Problem");
+    it("should return default values from en-us.json when no overrides set", () => {
+      expect(translate("studentGroup")).toBe("Group");
+      expect(translate("sortLabel.sortByOwner")).toBe("Student");
+      expect(translate("Bookmarked")).toBe("Bookmarked");
+      expect(translate("Tools")).toBe("Tools");
+      expect(translate("sortLabel.sortByDate")).toBe("Date");
+      expect(translate("Problem")).toBe("Problem");
     });
 
-    it("should return empty string for Strategy when no tagPrompt", () => {
-      expect(translate(TranslationKey.Strategy)).toBe("");
+    it("should return empty string for Strategy by default", () => {
+      expect(translate("Strategy")).toBe("");
     });
   });
 
-  describe("overrides", () => {
-    it("should use override value when provided", () => {
-      const overrides = { Group: "Team" };
-      expect(translate(TranslationKey.Group, { overrides })).toBe("Team");
+  describe("module-level overrides via setTermOverrides", () => {
+    it("should use override value when set", () => {
+      setTermOverrides({ studentGroup: "Team" });
+      expect(translate("studentGroup")).toBe("Team");
     });
 
-    it("should use override for multiple terms", () => {
-      const overrides = {
-        Group: "Team",
-        Name: "Participant"
-      };
-      expect(translate(TranslationKey.Group, { overrides })).toBe("Team");
-      expect(translate(TranslationKey.Name, { overrides })).toBe("Participant");
+    it("should support multiple term overrides", () => {
+      setTermOverrides({
+        studentGroup: "Team",
+        "sortLabel.sortByOwner": "Participant"
+      });
+      expect(translate("studentGroup")).toBe("Team");
+      expect(translate("sortLabel.sortByOwner")).toBe("Participant");
     });
 
     it("should fall back to default when override not present for key", () => {
-      const overrides = { Group: "Team" };
-      expect(translate(TranslationKey.Name, { overrides })).toBe("Student");
+      setTermOverrides({ studentGroup: "Team" });
+      expect(translate("sortLabel.sortByOwner")).toBe("Student");
     });
 
     it("should not use empty string override (falls back to default)", () => {
-      const overrides = { Group: "" };
+      setTermOverrides({ studentGroup: "" });
       // Empty string is falsy, so it falls back to default
-      expect(translate(TranslationKey.Group, { overrides })).toBe("Group");
+      expect(translate("studentGroup")).toBe("Group");
+    });
+
+    it("should support Strategy override", () => {
+      setTermOverrides({ Strategy: "Approach" });
+      expect(translate("Strategy")).toBe("Approach");
+    });
+
+    it("should support Date override with namespaced key", () => {
+      setTermOverrides({ "sortLabel.sortByDate": "Timestamp" });
+      expect(translate("sortLabel.sortByDate")).toBe("Timestamp");
     });
   });
 
-  describe("Strategy special case", () => {
-    it("should use tagPrompt for Strategy when provided", () => {
-      expect(translate(TranslationKey.Strategy, { tagPrompt: "Identify Approach" })).toBe("Identify Approach");
-    });
+  describe("clearTermOverrides", () => {
+    it("should clear overrides and restore defaults", () => {
+      setTermOverrides({
+        studentGroup: "Team",
+        "sortLabel.sortByOwner": "Participant"
+      });
+      expect(translate("studentGroup")).toBe("Team");
+      expect(translate("sortLabel.sortByOwner")).toBe("Participant");
 
-    it("should prefer override over tagPrompt for Strategy", () => {
-      expect(translate(TranslationKey.Strategy, {
-        overrides: { Strategy: "Custom Strategy" },
-        tagPrompt: "Identify Approach"
-      })).toBe("Custom Strategy");
-    });
-
-    it("should return empty string for Strategy when no override or tagPrompt", () => {
-      expect(translate(TranslationKey.Strategy)).toBe("");
-      expect(translate(TranslationKey.Strategy, {})).toBe("");
-      expect(translate(TranslationKey.Strategy, { overrides: {} })).toBe("");
-    });
-  });
-
-  describe("variable substitution", () => {
-    it("should substitute variables in translated string", () => {
-      const overrides = { Group: "Team %{number}" };
-      expect(translate(TranslationKey.Group, {
-        overrides,
-        vars: { number: 5 }
-      })).toBe("Team 5");
-    });
-
-    it("should handle multiple variables", () => {
-      const overrides = { Group: "%{prefix} Team %{number}" };
-      expect(translate(TranslationKey.Group, {
-        overrides,
-        vars: { prefix: "My", number: 3 }
-      })).toBe("My Team 3");
-    });
-
-    it("should replace missing variables with empty string", () => {
-      const overrides = { Group: "Team %{number}" };
-      expect(translate(TranslationKey.Group, {
-        overrides,
-        vars: {}
-      })).toBe("Team ");
-    });
-
-    it("should handle variables with whitespace in braces", () => {
-      const overrides = { Group: "Team %{ number }" };
-      expect(translate(TranslationKey.Group, {
-        overrides,
-        vars: { number: 7 }
-      })).toBe("Team 7");
-    });
-
-    it("should not substitute when no vars provided", () => {
-      const overrides = { Group: "Team %{number}" };
-      expect(translate(TranslationKey.Group, { overrides })).toBe("Team %{number}");
+      clearTermOverrides();
+      expect(translate("studentGroup")).toBe("Group");
+      expect(translate("sortLabel.sortByOwner")).toBe("Student");
     });
   });
 
@@ -110,6 +81,65 @@ describe("translate", () => {
     it("should return the key itself for unknown keys", () => {
       // TypeScript would normally prevent this, but testing runtime behavior
       expect(translate("UnknownKey" as any)).toBe("UnknownKey");
+    });
+  });
+
+  describe("getDefaultValue", () => {
+    it("should return default values from en-us.json", () => {
+      expect(getDefaultValue("studentGroup")).toBe("Group");
+      expect(getDefaultValue("sortLabel.sortByOwner")).toBe("Student");
+      expect(getDefaultValue("sortLabel.sortByDate")).toBe("Date");
+    });
+
+    it("should ignore overrides and always return base value", () => {
+      setTermOverrides({ studentGroup: "Team", "sortLabel.sortByOwner": "Participant" });
+
+      // translate() returns the override
+      expect(translate("studentGroup")).toBe("Team");
+      expect(translate("sortLabel.sortByOwner")).toBe("Participant");
+
+      // getDefaultValue() ignores overrides and returns base value
+      expect(getDefaultValue("studentGroup")).toBe("Group");
+      expect(getDefaultValue("sortLabel.sortByOwner")).toBe("Student");
+    });
+
+    it("should return empty string for Strategy", () => {
+      expect(getDefaultValue("Strategy")).toBe("");
+    });
+
+    it("should return the key itself for unknown keys", () => {
+      expect(getDefaultValue("UnknownKey" as any)).toBe("UnknownKey");
+    });
+  });
+
+  describe("escapeKeyForForm", () => {
+    it("should convert dots to underscores", () => {
+      expect(escapeKeyForForm("sortLabel.sortByOwner")).toBe("sortLabel_sortByOwner");
+      expect(escapeKeyForForm("sortLabel.sortByDate")).toBe("sortLabel_sortByDate");
+    });
+
+    it("should leave keys without dots unchanged", () => {
+      expect(escapeKeyForForm("studentGroup")).toBe("studentGroup");
+      expect(escapeKeyForForm("Strategy")).toBe("Strategy");
+    });
+
+    it("should handle multiple dots", () => {
+      expect(escapeKeyForForm("a.b.c")).toBe("a_b_c");
+    });
+  });
+
+  describe("unescapeKeyFromForm", () => {
+    it("should convert underscores to dots", () => {
+      expect(unescapeKeyFromForm("sortLabel_sortByOwner")).toBe("sortLabel.sortByOwner");
+      expect(unescapeKeyFromForm("sortLabel_sortByDate")).toBe("sortLabel.sortByDate");
+    });
+
+    it("should leave keys without underscores unchanged", () => {
+      expect(unescapeKeyFromForm("Strategy")).toBe("Strategy");
+    });
+
+    it("should handle multiple underscores", () => {
+      expect(unescapeKeyFromForm("a_b_c")).toBe("a.b.c");
     });
   });
 });

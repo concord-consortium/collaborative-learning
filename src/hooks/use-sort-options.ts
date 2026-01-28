@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { useStores } from "./use-stores";
-import { useTranslation } from "./use-translation";
+import { translate } from "../utilities/translation/translate";
+import { getSortTypeTranslationKey } from "../utilities/translation/translation-types";
 import { ISortOptionConfig } from "../models/stores/sort-work-config";
-import { PrimarySortType, DEFAULT_SORT_TYPES } from "../models/stores/ui-types";
+import { PrimarySortType } from "../models/stores/ui-types";
 
 // Display version of ISortOptionConfig with required label
 export interface SortOptionDisplay extends Omit<ISortOptionConfig, "label"> {
@@ -10,16 +11,12 @@ export interface SortOptionDisplay extends Omit<ISortOptionConfig, "label"> {
   type: PrimarySortType;
 }
 
-// Default sort options when no configuration is provided
-const DEFAULT_SORT_OPTIONS: ISortOptionConfig[] = DEFAULT_SORT_TYPES.map(type => ({ type }));
-
 export function useSortOptions() {
   const { appConfig } = useStores();
   const { sortWorkConfig, tagPrompt, autoAssignStudentsToIndividualGroups } = appConfig;
-  const { t } = useTranslation();
 
   const sortOptions = useMemo(() => {
-    const configOptions = sortWorkConfig?.sortOptions ?? DEFAULT_SORT_OPTIONS;
+    const configOptions = sortWorkConfig?.sortOptions ?? [];
 
     return configOptions
       .filter(option => {
@@ -35,20 +32,14 @@ export function useSortOptions() {
       })
       .map(option => ({
         type: option.type,
-        label: t(option.type)
+        label: translate(getSortTypeTranslationKey(option.type))
       }));
-  }, [sortWorkConfig?.sortOptions, autoAssignStudentsToIndividualGroups, tagPrompt, t]);
+  }, [sortWorkConfig?.sortOptions, autoAssignStudentsToIndividualGroups, tagPrompt]);
 
   const sortOptionsByType = useMemo(() => {
-    const typeSet = new Set<PrimarySortType>();
-    const typeMap = new Map<PrimarySortType, SortOptionDisplay>();
-
-    sortOptions.forEach(option => {
-      typeSet.add(option.type);
-      typeMap.set(option.type, option);
-    });
-
-    return { typeSet, typeMap };
+    const map = new Map<PrimarySortType, SortOptionDisplay>();
+    sortOptions.forEach(option => map.set(option.type, option));
+    return map;
   }, [sortOptions]);
 
   const showContextFilter = sortWorkConfig?.showContextFilter ?? true;
@@ -56,12 +47,12 @@ export function useSortOptions() {
   const defaultPrimarySort = useMemo((): PrimarySortType => {
     // Only use configured default if it's actually available in the filtered options
     const configuredDefault = sortWorkConfig?.defaultPrimarySort;
-    if (configuredDefault && sortOptionsByType.typeSet.has(configuredDefault)) {
+    if (configuredDefault && sortOptionsByType.has(configuredDefault)) {
       return configuredDefault;
     }
     // Fallback hierarchy: Group → Name → first available option
-    if (sortOptionsByType.typeSet.has("Group")) return "Group";
-    if (sortOptionsByType.typeSet.has("Name")) return "Name";
+    if (sortOptionsByType.has("Group")) return "Group";
+    if (sortOptionsByType.has("Name")) return "Name";
 
     if (sortOptions.length > 0) {
       return sortOptions[0].type;
@@ -73,14 +64,11 @@ export function useSortOptions() {
   }, [sortWorkConfig, sortOptions, sortOptionsByType]);
 
   const getLabelForType = (type: PrimarySortType): string => {
-    const option = sortOptionsByType.typeMap.get(type);
-    if (option) return option.label;
-    // Fallback for types not in current options (e.g., for secondary sort "None")
-    return t(type);
+    return translate(getSortTypeTranslationKey(type));
   };
 
   const isValidSortType = (type: string): type is PrimarySortType => {
-    return sortOptionsByType.typeSet.has(type as PrimarySortType);
+    return sortOptionsByType.has(type as PrimarySortType);
   };
 
   return {

@@ -178,9 +178,7 @@ describe('DocumentGroup Model', () => {
       groups: mockGroups,
       class: mockClass,
       appConfig: {
-        commentTags: {"foo": "foo", "bar": "bar"},
-        termOverrides: undefined,
-        tagPrompt: undefined
+        commentTags: {"foo": "foo", "bar": "bar"}
       },
       bookmarks
     };
