@@ -142,7 +142,7 @@ export const getTagsWithDocs = (
   return tagsWithDocs;
 };
 
-export const createTileTypeToDocumentsMap = (documents: IDocumentMetadataModel[]) => {
+export const createTileTypeToDocumentsMap = (documents: IDocumentMetadataModel[], noToolsTerm = "No Tools") => {
   const toolToDocumentsMap = new Map<string, Record<string, any>>();
   const addDocByType = (docToAdd: IDocumentMetadataModel, type: string) => {
     if (!toolToDocumentsMap.get(type)) {
@@ -163,7 +163,7 @@ export const createTileTypeToDocumentsMap = (documents: IDocumentMetadataModel[]
   };
 
   //Iterate through all documents, determine if they are valid,
-  //create a map of valid ones, otherwise put them into the "No Tools" section
+  //create a map of valid ones, otherwise put them into the noToolsTerm section
   documents.forEach((doc) => {
       if (doc.tools) {
         const validTileTypes = doc.tools.filter(type => type !== "Placeholder" && type !== "Unknown");
@@ -172,7 +172,7 @@ export const createTileTypeToDocumentsMap = (documents: IDocumentMetadataModel[]
             addDocByType(doc, tool);
           });
         } else {
-          addDocByType(doc, "No Tools");
+          addDocByType(doc, noToolsTerm);
         }
       }
   });
@@ -180,10 +180,15 @@ export const createTileTypeToDocumentsMap = (documents: IDocumentMetadataModel[]
   return toolToDocumentsMap;
 };
 
-export const createDocMapByBookmarks = (documents: IDocumentMetadataModel[], bookmarks: Bookmarks) => {
+export const createDocMapByBookmarks = (
+  documents: IDocumentMetadataModel[],
+  bookmarks: Bookmarks,
+  bookmarkedTerm = "Bookmarked",
+  notBookmarkedTerm = "Not Bookmarked"
+) => {
   const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
   documents.forEach((doc) => {
-    const sectionLabel = bookmarks.isDocumentBookmarked(doc.key) ? "Bookmarked" : "Not Bookmarked";
+    const sectionLabel = bookmarks.isDocumentBookmarked(doc.key) ? bookmarkedTerm : notBookmarkedTerm;
     if (!documentMap.has(sectionLabel)) {
       documentMap.set(sectionLabel, []);
     }
