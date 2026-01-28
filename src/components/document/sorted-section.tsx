@@ -13,6 +13,7 @@ import { ENavTab } from "../../models/view/nav-tabs";
 import { IDocumentMetadataModel } from "../../models/document/document-metadata-model";
 import { LogEventName } from "../../lib/logger-types";
 import { Logger } from "../../lib/logger";
+import { sortDocumentsInGroup } from "../../utilities/sort-document-utils";
 
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
@@ -40,6 +41,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
   const { expandedSortWorkSections, setExpandedSortWorkSections, setHighlightedSortWorkDocument } = ui;
   const showDocuments = expandedSortWorkSections.includes(documentGroup.label);
   const documentCount = documentGroup.documents?.length || 0;
+  const sortedGroupDocuments = sortDocumentsInGroup(documentGroup);
 
   const getDocument = (docKey: string) => {
     const document = sortedDocuments.documents.all.find((doc: DocumentModelType) => doc.key === docKey);
@@ -99,7 +101,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
 
   const renderList = () => {
     if (docFilter === "Problem" && secondarySort === "None") {
-      return documentGroup.documents.map(renderUngroupedDocument);
+      return sortedGroupDocuments.map(renderUngroupedDocument);
     }
 
     const renderDocumentGroup = (group: DocumentGroup) => (

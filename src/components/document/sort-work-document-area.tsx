@@ -30,7 +30,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   const { nextDocumentsGroup, openDocumentsGroup, openDocumentKey, openGroupMetadata, previousDocumentsGroup } = props;
   const {appConfig, documents, networkDocuments,
     persistentUI, sortedDocuments, ui, user} = useStores();
-  const showScroller = persistentUI.showDocumentScroller;
+  const { showDocumentScroller: showScroller, thumbnailDisplay } = persistentUI;
   const [prevBtnEnabled, setPrevBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup.documents.at(0)?.key);
   const [nextBtnEnabled, setNextBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup.documents.at(-1)?.key);
 
@@ -99,62 +99,64 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
           previousDocumentsGroup={previousDocumentsGroup}
         />
       )}
-      <div className={classNames("focus-document", ENavTab.kSortWork, sideClasses)}>
-        <div className={classNames("document-header", ENavTab.kSortWork, sectionClass, sideClasses)}
-              onClick={() => ui.setSelectedTile()}>
-          <button
-            className={classNames("toggle-document-scroller", {closed: !showScroller})}
-            data-testid="toggle-document-scroller"
-            onClick={handleToggleScroller}
-          >
-            <ToggleDocumentScrollerIcon />
-          </button>
-          {!showScroller &&
+      {thumbnailDisplay === "Small" && (
+        <div className={classNames("focus-document", ENavTab.kSortWork, sideClasses)}>
+          <div className={classNames("document-header", ENavTab.kSortWork, sectionClass, sideClasses)}
+                onClick={() => ui.setSelectedTile()}>
             <button
-              className={classNames("switch-document-button previous", {disabled: !prevBtnEnabled})}
-              data-testid="switch-document-button-previous"
-              onClick={prevBtnEnabled ? handleSwitchDocument("previous") : undefined}
+              className={classNames("toggle-document-scroller", {closed: !showScroller})}
+              data-testid="toggle-document-scroller"
+              onClick={handleToggleScroller}
             >
-              <SwitchDocumentIcon />
+              <ToggleDocumentScrollerIcon />
             </button>
-          }
-          {showExemplarShare && <ExemplarVisibilityCheckbox document={openDocument} />}
-          <DocumentTitle document={openDocument} />
-          {!showScroller &&
-            <button
-              className={classNames("switch-document-button next", {disabled: !nextBtnEnabled})}
-              data-testid="switch-document-button-next"
-              onClick={nextBtnEnabled ? handleSwitchDocument("next") : undefined}
-            >
-              <SwitchDocumentIcon />
-            </button>
-          }
-          <div className="document-buttons">
-            <button className="close-doc-button" onClick={handleCloseButtonClick}>
-              <CloseIcon />
-            </button>
+            {!showScroller &&
+              <button
+                className={classNames("switch-document-button previous", {disabled: !prevBtnEnabled})}
+                data-testid="switch-document-button-previous"
+                onClick={prevBtnEnabled ? handleSwitchDocument("previous") : undefined}
+              >
+                <SwitchDocumentIcon />
+              </button>
+            }
+            {showExemplarShare && <ExemplarVisibilityCheckbox document={openDocument} />}
+            <DocumentTitle document={openDocument} />
+            {!showScroller &&
+              <button
+                className={classNames("switch-document-button next", {disabled: !nextBtnEnabled})}
+                data-testid="switch-document-button-next"
+                onClick={nextBtnEnabled ? handleSwitchDocument("next") : undefined}
+              >
+                <SwitchDocumentIcon />
+              </button>
+            }
+            <div className="document-buttons">
+              <button className="close-doc-button" onClick={handleCloseButtonClick}>
+                <CloseIcon />
+              </button>
+            </div>
           </div>
+          {
+            openDocument && isVisible &&
+              <EditableDocumentContent
+                mode={"1-up"}
+                isPrimary={false}
+                document={openDocument}
+                readOnly={true}
+                showPlayback={showPlayback}
+                fullHeight={true}
+                toolbar={appConfig.myResourcesToolbar({showPlayback, showEdit})}
+              />
+          }
+          {
+            openDocument && !isVisible &&
+              <div className="document-error">
+                <p>This document is not shared with you right now.</p>
+              </div>
+          }
+          { !openDocument && <DocumentLoadingSpinner/> }
         </div>
-      {
-        openDocument && isVisible &&
-          <EditableDocumentContent
-            mode={"1-up"}
-            isPrimary={false}
-            document={openDocument}
-            readOnly={true}
-            showPlayback={showPlayback}
-            fullHeight={true}
-            toolbar={appConfig.myResourcesToolbar({showPlayback, showEdit})}
-          />
-      }
-      {
-        openDocument && !isVisible &&
-          <div className="document-error">
-            <p>This document is not shared with you right now.</p>
-          </div>
-      }
-      { !openDocument && <DocumentLoadingSpinner/> }
-      </div>
+      )}
     </>
   );
 });

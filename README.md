@@ -25,6 +25,10 @@ You *do not* need to build to deploy the code, that is automatic.  See more info
    To ensure that you are open a TypeScript file in VSC and then click on the version number next to
    `TypeScript React` in the status bar and select 'Use Workspace Version' in the popup menu.
 
+### Adding a new tile
+
+For information on how to add a new tile type to the CLUE codebase, see the [Adding a new tile to the codebase](tiles.md#adding-a-new-tile-to-the-codebase) section in the tiles documentation.
+
 ## Deployment
 
 Deployments are based on the contents of the /dist folder and are built automatically by GitHub Actions for each branch and tag pushed to GitHub.
@@ -101,6 +105,7 @@ To enable per component debugging set the "debug" localstorage key with one or m
 - `drop` console log the dataTransfer object from drop events on the document.
 - `firestore` turn on Firestore's internal debugging, this logs all queries to Firestore.
 - `history` this will: print some info to the console as the history system records changes, print the full history as JSON each time it is loaded from Firestore, and provide a `window.historyDocument` so you can inspect the document while navigating the history.
+- `historyView` show a history button in the document toolbar, this brings up a history view panel.
 - `images` this will set `window.imageMap` so you can look at the status and URLs of images that have been loaded.
 - `listeners` console log the adding, removing, and firing of firebase listeners
 - `loading` console log timing information for various phases of the startup process
@@ -222,7 +227,7 @@ Here are the steps to do that:
 
 Alternatively, you can work on just the client side of authoring without starting the emulator:
 
-- Use a URL like:  
+- Use a URL like:
   `http://localhost:8080/authoring?firebaseEnv=staging`
 
 - **Downside:** Each time the page is reloaded, it requires a new authentication with GitHub. GitHub will throttle these authentications if too many happen in a certain time period. If you are making lots of changes, you may eventually run into this problem and have to wait.

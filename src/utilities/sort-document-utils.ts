@@ -3,6 +3,7 @@ import { FC, SVGProps } from "react";
 import { Bookmarks } from "src/models/stores/bookmarks";
 import { getTileComponentInfo } from "../models/tiles/tile-component-info";
 import { IDocumentMetadataModel } from "../models/document/document-metadata-model";
+import { DocumentGroup } from "../models/stores/document-group";
 
 import SparrowHeaderIcon from "../assets/icons/sort-by-tools/sparrow-id.svg";
 
@@ -16,6 +17,26 @@ type TagWithDocs = {
   tagKey: string;
   tagValue: string;
   docKeysFoundWithTag: string[];
+};
+
+export const sortDateSectionLabels = (
+  docMapKeys: string[], documentMap: Map<string, { documents: IDocumentMetadataModel[], date: Date | null }>
+) => {
+  return docMapKeys.sort((a, b) => {
+    if (a === "No Date") return 1;
+    if (b === "No Date") return -1;
+
+    const dateA = documentMap.get(a)?.date;
+    const dateB = documentMap.get(b)?.date;
+
+    if (dateA && dateB) {
+      return dateB.getTime() - dateA.getTime();
+    }
+
+    // This should not be reached because all non-"No Date" labels have valid dates.
+    // If it is reached due to unexpected data, keep the existing order.
+    return 0;
+  });
 };
 
 export const sortGroupSectionLabels = (docMapKeys: string[]) => {
@@ -137,4 +158,20 @@ export const createDocMapByBookmarks = (documents: IDocumentMetadataModel[], boo
     documentMap.get(sectionLabel)?.push(doc);
   });
   return documentMap;
+};
+
+export const sortDocumentsInGroup = (documentGroup: DocumentGroup) => {
+  const documents = [...documentGroup.documents];
+
+  // When grouped by date, documents within each date group should be ordered by createdAt
+  // in descending order (newest first, oldest last)
+  if (documentGroup.sortType === "Date") {
+    documents.sort((a, b) => {
+      const aTime = a.createdAt ?? 0;
+      const bTime = b.createdAt ?? 0;
+      return bTime - aTime;
+    });
+  }
+
+  return documents;
 };

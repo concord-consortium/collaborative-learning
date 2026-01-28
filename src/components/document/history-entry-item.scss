@@ -1,0 +1,105 @@
+.history-entry-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  background: white;
+
+  &.expanded {
+    border-color: #bbb;
+  }
+
+  .history-entry-summary {
+    display: flex;
+    align-items: center;
+    padding: 6px 10px;
+    cursor: pointer;
+    gap: 6px;
+    font-size: 12px;
+
+    &:hover {
+      background: #f8f8f8;
+    }
+
+    .history-entry-expand {
+      width: 14px;
+      font-size: 9px;
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    .history-entry-index {
+      color: #888;
+      font-size: 11px;
+      min-width: 28px;
+      flex-shrink: 0;
+    }
+
+    .history-entry-action {
+      flex: 1;
+      font-family: monospace;
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-entry-patches {
+      color: #666;
+      font-size: 10px;
+      background: #eee;
+      padding: 1px 4px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .history-entry-undoable {
+      color: #4a9;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .history-entry-time {
+      color: #888;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+  }
+
+  .history-entry-details {
+    padding: 10px 12px;
+    background: #fafafa;
+    border-top: 1px solid #eee;
+    font-size: 11px;
+    line-height: 1.5;
+
+    > div {
+      margin-bottom: 4px;
+    }
+
+    .history-entry-record {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed #ddd;
+
+      .record-header {
+        margin-bottom: 6px;
+      }
+
+      .record-patches,
+      .record-inverse-patches {
+        margin-top: 4px;
+      }
+
+      pre {
+        background: #f0f0f0;
+        padding: 8px;
+        overflow-x: auto;
+        font-size: 10px;
+        max-height: 150px;
+        overflow-y: auto;
+        margin: 4px 0;
+        border-radius: 3px;
+      }
+    }
+  }
+}

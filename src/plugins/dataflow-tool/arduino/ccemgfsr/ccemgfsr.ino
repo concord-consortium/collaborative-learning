@@ -20,10 +20,18 @@
   #include <Servo.h>
   #include <Adafruit_MLX90614.h>
 
+  // Function to calculate free RAM between heap and stack
+  // Returns number of free bytes
+  int freeMemory() {
+    extern int __heap_start, *__brkval;
+    int v;
+    return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+  }
+
   #define SERVO_PIN 2
   #define SENSITIVITY_BUTTON_PIN 7
   #define NUM_LED 6                           //number of LEDs in LED bar
-  #define MINIMUM_SERVO_UPDATE_TIME 100       //update servo position every 100ms
+  #define MINIMUM_SEND_TIME 100       //send outputs every 100ms
 
   Servo Gripper;
   Adafruit_MLX90614 mlx = Adafruit_MLX90614();
@@ -45,7 +53,7 @@
   int oldDegrees = 0;                         //old value of angle for servo
   int newDegree;                              //new value of angle for servo
 
-  // these will be used to assmble strings for Dataflow
+  // these will be used to assemble strings for Dataflow
   String emgId = "emg";
   String fsrId = "fsr";
   String tmpId = "tmp";
@@ -61,6 +69,17 @@
 
   const unsigned int MAX_ANGLE_BYTE_LENGTH = 4;
 
+  // Pre-allocate string capacity to avoid heap fragmentation
+  // Format: "xxx:1234" = 3 char id + 1 colon + up to 4 digits = ~10 chars
+  // tmpReading is float, so allow more space: "tmp:-123.45" = ~12 chars
+  const int STRING_RESERVE_SIZE = 16;
+
+  // Memory tracking
+  // Note: this is disabled to avoid sending unexpected messages to Dataflow
+  String memId = "mem";
+  String memStringOut = "";
+  int initialFreeMemory = 0;
+
   /* setup */
   void setup(){
     Serial.begin(9600);
@@ -71,6 +90,19 @@
       pinMode(ledPins[i], OUTPUT);
     }
     emgSaturationValue = sensitivities[lastSensitivitiesIndex];
+
+    // Reserve memory for output strings to prevent fragmentation
+    emgStringOut.reserve(STRING_RESERVE_SIZE);
+    fsrStringOut.reserve(STRING_RESERVE_SIZE);
+    tmpStringOut.reserve(STRING_RESERVE_SIZE);
+    a1StringOut.reserve(STRING_RESERVE_SIZE);
+    memStringOut.reserve(STRING_RESERVE_SIZE);
+
+    // Record initial free memory for leak detection
+    initialFreeMemory = freeMemory();
+    // Probably want to remove this, because the serial reader won't expect it.
+    // Serial.print("Initial free memory: ");
+    // Serial.println(initialFreeMemory);
   }
 
   /* main loop */
@@ -91,8 +123,7 @@
       // otherwise we have reached a newline or end of max length, so that's the whole message
       else {
         message[message_pos] = '\0';
-        String asString = String(message);
-        Gripper.write(asString.toInt());
+        Gripper.write(atoi(message));
         message_pos = 0;
       }
     }
@@ -138,20 +169,26 @@
     }
 
     // 5 if enough time has passed send readings to serial out (where Dataflow will find it)
-    if (millis() - oldTime > MINIMUM_SERVO_UPDATE_TIME){
+    if (millis() - oldTime > MINIMUM_SEND_TIME){
       oldTime = millis();
       oldDegrees = newDegree;
 
       // assemble keyed strings so Dataflow knows what is what
-      emgStringOut = String(emgId + kvSeparator + emgReading);
-      fsrStringOut = String(fsrId + kvSeparator + fsrReading);
-      tmpStringOut = String(tmpId + kvSeparator + tmpReading);
-      a1StringOut = String(a1Id + kvSeparator + a1Reading);
+      // Using assignment to reuse pre-allocated memory from reserve()
+      emgStringOut = emgId + kvSeparator + emgReading;
+      fsrStringOut = fsrId + kvSeparator + fsrReading;
+      tmpStringOut = tmpId + kvSeparator + tmpReading;
+      a1StringOut = a1Id + kvSeparator + a1Reading;
 
       // send to Dataflow via serial out
       Serial.println(emgStringOut);
       Serial.println(fsrStringOut);
       Serial.println(tmpStringOut);
       Serial.println(a1StringOut);
+
+      // This is disabled because some versions of the CLUE code can't handle unexpected messages.
+      // Output current free memory for leak detection
+      // memStringOut = memId + kvSeparator + freeMemory();
+      // Serial.println(memStringOut);
     }
 }
