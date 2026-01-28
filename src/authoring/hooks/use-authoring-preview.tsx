@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useRef, ReactNode } from "react";
 
+export type PreviewUserType = "student" | "teacher";
+
 export interface AuthoringPreview {
-  openPreview: (branch: string, unit: string) => void;
+  openPreview: (branch: string, unit: string, userType: PreviewUserType) => void;
   reloadAllPreviews: () => void;
 }
 
@@ -10,13 +12,14 @@ const AuthoringPreviewContext = createContext<AuthoringPreview | undefined>(unde
 export const AuthoringPreviewProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const windowsRef = useRef<Window[]>([]);
 
-  const openPreview = (branch: string, unit: string) => {
+  const openPreview = (branch: string, unit: string, userType: PreviewUserType) => {
     if (!branch || !unit) return;
 
     const runtimeUrl = new URL("..", window.location.href);
     const params = new URLSearchParams(window.location.search);
     params.set("unit", unit);
     params.set("authoringBranch", branch);
+    params.set("fakeUser", userType);
     params.delete("fakeAuthoringAuth");
     runtimeUrl.search = params.toString();
 

@@ -210,8 +210,7 @@ context('Geometry Table Integration', function () {
     // Open the document on the left, then create a new document on the right
     resourcesPanel.openPrimaryWorkspaceTab("my-work");
     cy.get(".tab-panel-documents-section .list-item").first().click();
-    canvas.createNewExtraDocumentFromFileMenuWithoutTabs("Test Document", "my-work");
-    cy.wait(100);
+    canvas.createNewExtraDocumentFromFileMenu("Test Document", "my-work");
 
     // Select the table and geometry tiles on the left
     const leftTile = type => cy.get(`.nav-tab-panel .documents-panel .${type}-tool-tile`);
