@@ -1,25 +1,19 @@
-import { addDisposer, getSnapshot, Instance } from "mobx-state-tree";
+import { action, autorun, computed, makeObservable, observable, when } from "mobx";
+import { addDisposer, getSnapshot, Instance, applySnapshot, IJsonPatch } from "mobx-state-tree";
 import firebase from "firebase/app";
 import { getSimpleDocumentPath, IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { typeConverter } from "../../utilities/db-utils";
+import { uniqueId } from "../../utilities/js-utils";
 import { UserContextProvider } from "../stores/user-context-provider";
 import { getLastHistoryEntry, loadHistory } from "./history-firestore";
-import { CDocument, CDocumentType, TreeManagerType } from "./tree-manager";
-import { HistoryEntry } from "./history";
-import { TreeAPI } from "./tree-api";
-import { makeAutoObservable, when } from "mobx";
+import { CDocument, CDocumentType, FAKE_EXCHANGE_ID, FAKE_HISTORY_ENTRY_ID, TreeManagerType } from "./tree-manager";
+import { HistoryEntry, HistoryOperation } from "./history";
 
 interface IFirestoreHistoryInfo {
   documentPath: string;
   lastEntryIndex: number;
   lastEntryId: string | null;
-}
-
-interface IMainDocument extends TreeAPI {
-  key: string;
-  uid: string;
-  metadata: IDocumentMetadata;
 }
 
 export enum HistoryStatus {
@@ -50,6 +44,7 @@ export class FirestoreHistoryManager {
   userContextProvider: UserContextProvider;
   treeManager: TreeManagerType;
   loadingError = undefined as firebase.firestore.FirestoreError | undefined;
+  managerInstanceId = uniqueId();
 
   constructor({
     firestore,
@@ -72,7 +67,12 @@ export class FirestoreHistoryManager {
     }
 
     // We want computed properties like historyStatus to be observable
-    makeAutoObservable(this);
+    makeObservable(this, {
+      loadingError: observable,
+      setLoadingError: action,
+      historyStatus: computed,
+      historyStatusString: computed
+    });
   }
 
   setLoadingError(error: firebase.firestore.FirestoreError) {
@@ -278,6 +278,8 @@ export class FirestoreHistoryManager {
     // TODO: we should move this function into the history manager
     treeManager.setNumHistoryEntriesAppliedFromFirestore(firestore, documentPath);
 
+    const mirrorCallId = uniqueId();
+
     const snapshotUnsubscribe = loadHistory(firestore, `${documentPath}/history`,
       (history, error) => {
         if (error) {
@@ -287,8 +289,31 @@ export class FirestoreHistoryManager {
           // be pretty inefficient since it is recreating the whole CDocument
           // each time. We can improve this by using Firestore's snapshot.docChanges()
           // method. This way can just add the new history entries.
-          const cDocument = CDocument.create({history});
-          treeManager.setChangeDocument(cDocument);
+
+          // If we apply the changes to the existing document in the treeManager
+          // They will have the applied flag set to false if they are not already local
+          // events that have been applied.
+          // So after we do this, we should call an async function to apply any
+          // unapplied history entries. Or we can use a reaction to do this automatically.
+
+          if (!treeManager.document) {
+            const cDocument = CDocument.create({history});
+            treeManager.setChangeDocument(cDocument);
+          } else {
+            // FIXME: this is being called twice for a single change in the document.
+            // Perhaps this is because both the initial local change and then a second
+            // remote change.
+            // I've confirmed it is the same mirrorCallId both times, so there are not
+            // multiple listeners being created.
+            console.log("Applying remote history update", {
+              length: history.length,
+              documentKey,
+              documentInstance: mainDocument.instanceId,
+              managerInstance: this.managerInstanceId,
+              mirrorCallId
+            });
+            applySnapshot(treeManager.document, {history});
+          }
         }
       }
     );
@@ -298,6 +323,31 @@ export class FirestoreHistoryManager {
 }
 
 export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
+
+  constructor(args: IFirestoreHistoryManagerArgs) {
+    super(args);
+
+    // Note: if we add new properties that we need to react to, then we shoudl remove
+    // the `makeAutoObservable` call from the parent class and instead
+    // call makeObservable in both places with the specific properties to observe.
+
+    // add a reaction to apply any unapplied history entries
+    const disposer = autorun(() => {
+      const history = this.treeManager.document?.history;
+      if (!history) return;
+
+      const entries = history.filter(entry => !entry.applied);
+
+      // This is an async function, so we are counting on it finishing before
+      // the next autorun runs. However part of applying these history entries requires
+      // setting their applied property, which will trigger this autorun again
+      // To work around this, we don't set these applied properties until the end of
+      // the async function.
+      this.applyHistoryEntries(entries);
+    });
+
+    addDisposer(this.treeManager, disposer);
+  }
 
   async prepareFirestoreHistoryInfo(): Promise<IFirestoreHistoryInfo> {
     const { userContextProvider, treeManager: { mainDocument }, firestore } = this;
@@ -415,5 +465,56 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
         entry: JSON.stringify(snapshot)
       });
     });
+  }
+
+  async applyHistoryEntries(entries: Instance<typeof HistoryEntry>[]) {
+    const { treeManager } = this;
+    const trees = Object.values(treeManager.trees);
+
+    // Disable shared model syncing on all of the trees. This is
+    // different than when the undo store applies patches because in
+    // this case we are going to apply lots of history entries all at
+    // once. We use FAKE ids here so any responses from tree are
+    // not recorded in the history.
+    const startPromises = trees.map(tree => {
+      return tree.startApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
+    });
+    await Promise.all(startPromises);
+
+    const treePatches: Record<string, IJsonPatch[] | undefined> = {};
+    Object.keys(treeManager.trees).forEach(treeId => treePatches[treeId] = []);
+
+    // direction tells us which direction to go
+    // startingIndex and endingIndex are so we don't add the currentHistoryEvent into patches
+    // because we are going to assume that it has already been played, and we don't want to play it
+    // again if we are going forward.
+    for (const historyEntry of entries) {
+      const records = historyEntry ? [ ...historyEntry.records] : [];
+      for (const entryRecord of records) {
+        const patches = treePatches[entryRecord.tree];
+        patches?.push(...entryRecord.getPatches(HistoryOperation.Redo));
+      }
+    }
+
+    const applyPromises = Object.entries(treePatches).map(([treeId, patches]) => {
+      if (patches && patches.length > 0) {
+        const tree = treeManager.trees[treeId];
+        return tree?.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
+      }
+    });
+    await Promise.all(applyPromises);
+
+    // finish the patch application
+    // Need to tell all of the tiles to re-enable the sync and run the sync
+    // to resync their tile models with any changes applied to the shared models
+    // For this final step, we still use promises so we can wait for everything to complete.
+    // This can be used in the future to make sure multiple applyPatchesToTrees are not
+    // running at the same time.
+    const finishPromises = trees.map(tree => {
+      return tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
+    });
+    await Promise.all(finishPromises);
+
+    treeManager.markEntriesAsApplied(entries);
   }
 }

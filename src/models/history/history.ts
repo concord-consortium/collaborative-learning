@@ -46,7 +46,21 @@ export const HistoryEntry = types.model("HistoryEntry", {
   // for debugging an activeExchange that hasn't been ended.
   // The {name: "activeExchanges"} is a feature of MobX that can also
   // help with debugging.
-  activeExchanges: observable.map<string, string>({}, {name: "activeExchanges"})
+  activeExchanges: observable.map<string, string>({}, {name: "activeExchanges"}),
+  /**
+   * Track whether this history entry has been applied to the current tree.
+   * This is useful for collaborative documents where multiple users may be
+   * making changes and we need to know whether this entry has already been
+   * applied or not.
+   * TODO: This state duplicates the functionality of TreeManager#numHistoryEventsApplied.
+   * That property is used when scanning around in the history with the slider.
+   * Using this individual flag on each history entry makes it possible for entries
+   * to be applied out of order, which supports collaborative editing better.
+   * It seems inefficient for scanning around with history slider to have to change
+   * this flag on each entry instead of just using a counter. We should look at how it
+   * it is used and see if we can simplify to just one approach.
+   */
+  applied: false
 }))
 .views(self => ({
   get modelActionKey() {

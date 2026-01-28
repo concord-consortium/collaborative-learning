@@ -12,7 +12,7 @@ import {
 } from "../../../shared/shared";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
-import { safeJsonParse } from "../../utilities/js-utils";
+import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tiles/tile-comments";
@@ -82,6 +82,7 @@ export const DocumentModel = Tree.named("Document")
     contentErrorMessage: undefined as string | undefined,
     showPlaybackControls: false,
     commentsManager: undefined as DocumentCommentsManager | undefined,
+    instanceId: uniqueId(),
   }))
   .views(self => ({
     // This is needed for the tree monitor and manager

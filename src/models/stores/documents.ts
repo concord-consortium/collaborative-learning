@@ -266,6 +266,7 @@ export const DocumentsModel = types
           syncRemoteHistory: false
         };
         if (document.type === GroupDocument) {
+          historyManagerArgs.syncRemoteHistory = true;
           new FirestoreHistoryManagerConcurrent(historyManagerArgs);
         } else {
           new FirestoreHistoryManager(historyManagerArgs);

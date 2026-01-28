@@ -23,8 +23,8 @@ import { getLastHistoryEntry } from "./history-firestore";
  */
 const json = (value: any) => JSON.stringify(value);
 
-const FAKE_HISTORY_ENTRY_ID = "FAKE_HISTORY_ENTRY_ID";
-const FAKE_EXCHANGE_ID = "FAKE_EXCHANGE_ID";
+export const FAKE_HISTORY_ENTRY_ID = "FAKE_HISTORY_ENTRY_ID";
+export const FAKE_EXCHANGE_ID = "FAKE_EXCHANGE_ID";
 
 export const CDocument = types
 .model("CDocument", {
@@ -39,6 +39,7 @@ interface IMainDocument extends TreeAPI {
   key: string;
   uid: string;
   metadata: IDocumentMetadata;
+  instanceId: string;
 }
 
 export enum HistoryStatus {
@@ -151,6 +152,10 @@ export const TreeManager = types
         self.revisionId = entry.id;
       }
 
+      // This was a locally created history entry based on a change to the local
+      // document. Mark it as applied.
+      entry.applied = true;
+
       self.historyEntryCompletedListeners.forEach(listener => {
         listener(self.document, entry, newLocalIndex);
       });
@@ -158,6 +163,12 @@ export const TreeManager = types
   };
 })
 .actions((self) => ({
+  markEntriesAsApplied(entries: Instance<typeof HistoryEntry>[]) {
+    entries.forEach(entry => {
+      entry.applied = true;
+    });
+  },
+
   setChangeDocument(cDoc: CDocumentType) {
     self.document = cDoc;
   },
@@ -469,7 +480,7 @@ export const TreeManager = types
     // One way might be using unique history_entry_ids that we mark as closed
     // after the finish call.
     self.numHistoryEventsApplied = newHistoryPosition;
-  })
+  }),
 }))
 .views(self => ({
   getHistoryEntry: (historyIndex: number) => {
