@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import { HistoryEntryItem } from "./history-entry-item";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
-import { TreeManager } from "../../models/history/tree-manager";
+import { TreeManager, TreeManagerType } from "../../models/history/tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType } from "../../models/history/history";
 import { loadHistory, getHistoryPath } from "../../models/history/history-firestore";
 
@@ -14,16 +14,16 @@ interface IHistoryViewPanelProps {
   document: DocumentModelType;
 }
 
-export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
+export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(function HistoryViewPanel({
   document
-}) => {
+}) {
   const stores = useStores();
   const { persistentUI, db } = stores;
   const [remoteHistoryEntries, setRemoteHistoryEntries] = useState<HistoryEntryType[]>([]);
   const [remoteHistoryError, setRemoteHistoryError] = useState<string | undefined>();
 
   // Get local history from document by casting to TreeManager instance
-  const treeManager = document.treeManagerAPI as Instance<typeof TreeManager> | undefined;
+  const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
   const localHistoryEntries = treeManager?.document.history || [];
 
   // Get history path for remote history

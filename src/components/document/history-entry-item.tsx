@@ -21,13 +21,11 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
     return date.toLocaleTimeString();
   };
 
-  const getPatchCount = () => {
-    return entry.records.reduce((total, record) => total + record.patches.length, 0);
-  };
+  const patchCount = entry.records.reduce((total, record) => total + record.patches.length, 0);
 
   return (
     <div className={`history-entry-item ${expanded ? "expanded" : ""}`}>
-      <div className="history-entry-summary" onClick={toggleExpanded}>
+      <button className="history-entry-summary" onClick={toggleExpanded}>
         <span className="history-entry-expand">
           {expanded ? "▼" : "▶"}
         </span>
@@ -36,13 +34,13 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
           {entry.modelActionKey}
         </span>
         <span className="history-entry-patches" title="Number of patches">
-          {getPatchCount()}p
+          {patchCount}p
         </span>
         {entry.undoable && (
           <span className="history-entry-undoable" title="Undoable">↩</span>
         )}
         <span className="history-entry-time">{formatTimestamp(entry.created)}</span>
-      </div>
+      </button>
       {expanded && (
         <div className="history-entry-details">
           <div><strong>ID:</strong> {entry.id}</div>
