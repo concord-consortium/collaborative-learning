@@ -150,7 +150,7 @@ const SortWorkSettings: React.FC = () => {
         <legend>Sort Options</legend>
         <p className="muted small" id="sort-options-description">
           Check the options to enable them. Use arrow buttons to reorder.
-          Labels can be customized on the <a href="#termOverrides">Term Overrides page</a>.
+          Labels can be customized on the Term Overrides page.
           Labels marked with an <span className="custom-label-indicator">*</span> have been customized.
         </p>
         <table aria-describedby="sort-options-description" role="grid">
