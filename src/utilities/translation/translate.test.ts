@@ -1,5 +1,5 @@
 import { translate, setTermOverrides, clearTermOverrides, getDefaultValue } from "./translate";
-import { escapeKeyForForm, unescapeKeyFromForm } from "./translation-types";
+import { escapeKeyForForm } from "./translation-types";
 
 describe("translate", () => {
   beforeEach(() => {
@@ -128,18 +128,4 @@ describe("translate", () => {
     });
   });
 
-  describe("unescapeKeyFromForm", () => {
-    it("should convert underscores to dots", () => {
-      expect(unescapeKeyFromForm("sortLabel_sortByOwner")).toBe("sortLabel.sortByOwner");
-      expect(unescapeKeyFromForm("sortLabel_sortByDate")).toBe("sortLabel.sortByDate");
-    });
-
-    it("should leave keys without underscores unchanged", () => {
-      expect(unescapeKeyFromForm("Strategy")).toBe("Strategy");
-    });
-
-    it("should handle multiple underscores", () => {
-      expect(unescapeKeyFromForm("a_b_c")).toBe("a.b.c");
-    });
-  });
 });

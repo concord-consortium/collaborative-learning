@@ -47,11 +47,3 @@ export function getSortTypeTranslationKey(sortType: string): TranslationKeyType 
 export function escapeKeyForForm(key: string): string {
   return key.replace(/\./g, "_");
 }
-
-/**
- * Unescape a form field name back to a translation key.
- * Converts underscores back to dots.
- */
-export function unescapeKeyFromForm(formKey: string): string {
-  return formKey.replace(/_/g, ".");
-}
