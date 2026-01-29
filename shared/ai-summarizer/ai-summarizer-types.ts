@@ -9,7 +9,7 @@ export interface NormalizedSection {
 }
 
 export interface NormalizedAttribute {
-  formula?: string;  // The formula display expression, if any
+  formula?: string;
   id: string;
   name: string;
   values: string[];

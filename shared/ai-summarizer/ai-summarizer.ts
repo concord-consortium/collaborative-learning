@@ -9,7 +9,9 @@ import {
   AiSummarizerOptions, DocumentContentSnapshotType, INormalizedTile, NormalizedDataSet,
   NormalizedModel, NormalizedSection, NormalizedVariable, TileMap
 } from "./ai-summarizer-types";
-import { generateAttributesMarkdownTable, generateMarkdownTable, generateVariablesMarkdownTable, heading, pluralize } from "./ai-summarizer-utils";
+import {
+  generateAttributesMarkdownTable, generateMarkdownTable, generateVariablesMarkdownTable, heading, pluralize
+} from "./ai-summarizer-utils";
 import { rowsSummary, tileSummary } from "./ai-tile-summarizer";
 
 /** Return the markdown summary of the given Document content.
