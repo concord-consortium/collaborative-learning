@@ -231,7 +231,10 @@ context('single student functional test', () => {
 
     // Create the source document and add a tile
     canvas.createNewExtraDocumentFromFileMenu(sourceDoc, "my-work");
-    canvas.openDocumentWithTitle('workspaces', sourceDoc);
+    // Creating the document will open it. But sometimes there is a
+    // a delay before the document actually opens. So we use this
+    // check to make sure that has happened.
+    canvas.getPersonalDocTitle().should('contain', sourceDoc);
 
     // Select all tiles using the helper
     canvas.getSelectAllButton().click();

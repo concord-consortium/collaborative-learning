@@ -55,6 +55,7 @@ class Canvas {
   }
 
   createNewExtraDocumentFromFileMenu(title, type) {
+    cy.log('Creating new extra document: ' + title + ' in type: ' + type);
     this.openFileMenu();
     cy.get('[data-test=list-item-icon-open-workspace]').click();
     cy.get('.primary-workspace .doc-tab.my-work.workspaces').click();

@@ -148,6 +148,10 @@ export interface IDocumentMetadata extends IDocumentMetadataBase {
   properties?: Record<string, string>;
   tools?: string[];
   strategies?: string[];
+  lastHistoryEntry?: {
+    id: string;
+    index: number;
+  }|null;
 }
 export function isDocumentMetadata(o: any): o is IDocumentMetadata {
   return !!o.uid && !!o.type && !!o.key;
