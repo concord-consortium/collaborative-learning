@@ -31,7 +31,7 @@ export function useSortOptions() {
       })
       .map(option => ({
         type: option.type,
-        label: getSortTypeLabel(option.type, { tagPrompt })
+        label: getSortTypeLabel(option.type)
       }));
   }, [sortWorkConfig?.sortOptions, autoAssignStudentsToIndividualGroups, tagPrompt]);
 
