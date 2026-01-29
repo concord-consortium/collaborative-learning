@@ -7,6 +7,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { TreeManager } from "../../models/history/tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType } from "../../models/history/history";
 import { loadHistory, getHistoryPath, loadFirestoreHistory, IFirestoreHistoryEntryDoc } from "../../models/history/history-firestore";
+import { FirestoreHistoryManagerConcurrent } from "../../models/history/firestore-history-manager";
 
 import "./history-view-panel.scss";
 
@@ -31,6 +32,12 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
   // Get local history from document by casting to TreeManager instance
   const treeManager = document.treeManagerAPI as Instance<typeof TreeManager> | undefined;
   const localHistoryEntries = treeManager?.document.history || [];
+
+  // Check if the history manager is a FirestoreHistoryManagerConcurrent (used for GroupDocuments)
+  const historyManager = treeManager?.historyManager;
+  const concurrentManager = historyManager instanceof FirestoreHistoryManagerConcurrent
+    ? historyManager
+    : undefined;
 
   // Get history path for remote history
   const historyPath = getHistoryPath(document.key);
@@ -117,6 +124,23 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
           <div className="history-view-section-header">
             <h4>Remote History (Firestore)</h4>
             <span className="history-view-count">{remoteHistoryEntries.length} entries</span>
+            {concurrentManager && (
+              <div className="history-manager-controls">
+                <button
+                  className={concurrentManager.paused ? "paused" : ""}
+                  onClick={() => concurrentManager.pauseUploads()}
+                  disabled={concurrentManager.paused}
+                >
+                  {concurrentManager.paused ? "Paused" : "Pause Uploads"}
+                </button>
+                <button
+                  onClick={() => concurrentManager.resumeUploadsAfterDelay(5000)}
+                  disabled={!concurrentManager.paused}
+                >
+                  Resume After 5s
+                </button>
+              </div>
+            )}
           </div>
           <div className="history-view-list">
             {remoteHistoryError ? (

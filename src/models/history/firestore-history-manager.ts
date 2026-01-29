@@ -1,4 +1,4 @@
-import { action, computed, makeObservable, observable, when } from "mobx";
+import { action, computed, makeObservable, observable, runInAction, when } from "mobx";
 import { addDisposer, getSnapshot, Instance, applySnapshot, IJsonPatch } from "mobx-state-tree";
 import firebase from "firebase/app";
 import { getSimpleDocumentPath, IDocumentMetadata } from "../../../shared/shared";
@@ -356,14 +356,23 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
 
   constructor(args: IFirestoreHistoryManagerArgs) {
     super(args);
+    // Make paused observable so UI can react to changes
+    makeObservable(this, {
+      paused: observable,
+      pauseUploads: action,
+      resumeUploadsAfterDelay: action,
+    });
   }
 
   pauseUploads() {
     this.paused = true;
   }
+
   resumeUploadsAfterDelay(delayMs: number) {
     setTimeout(() => {
-      this.paused = false;
+      runInAction(() => {
+        this.paused = false;
+      });
       this.uploadQueuedHistoryEntries();
     }, delayMs);
   }
