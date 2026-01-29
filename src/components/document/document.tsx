@@ -6,6 +6,7 @@ import { DocumentFileMenu } from "./document-file-menu";
 import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType } from "../../models/document/document";
+import { translate } from "../../utilities/translation/translate";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
@@ -86,12 +87,15 @@ const TwoUpStackedButton = ({ onClick, selected }: { onClick: () => void, select
 
 const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boolean }) => {
   const visibility = isShared ? "public" : "private";
+  const groupTerm = translate("studentGroup");
+  const titlePrefix = isShared ? "Shared: click to unshare from" : "Unshared: click to share to";
+  const title = `${titlePrefix} ${groupTerm.toLowerCase()}`;
   return (
     <>
       {<div className="share-separator" />}
       <ToggleControl className={`share-button ${visibility}`} dataTest="share-button"
                       value={isShared} onChange={onClick}
-                      title={`${isShared ? "Shared: click to unshare from" : "Unshared: click to share to"} group`} />
+                      title={title} />
       <div className="share-label">Share</div>
     </>
   );
@@ -373,7 +377,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {stickyNotes.map((teacherSupport, index) => {
             const { support, audience, authoredTime } = teacherSupport;
             const sentTo = audience.type === AudienceEnum.group
-              ? `Group ${audience.identifier}`
+              ? `${translate("studentGroup")} ${audience.identifier}`
               : user.name;
             const authoredTimeAsDate = new Date(authoredTime);
             const sentOn = `${authoredTimeAsDate.toLocaleDateString()}, ${authoredTimeAsDate.toLocaleTimeString()}`;
@@ -399,7 +403,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderMode() {
     const {workspace} = this.props;
     const mode = workspace.mode === "1-up" ? "up1" : "up4";
-    const modeTitle = workspace.mode === "1-up" ? "Join Group View" : "Return to Student View";
+    const modeTitle = workspace.mode === "1-up"
+      ? `Join ${translate("studentGroup")} View`
+      : "Return to Student View";
     return (
       <ViewModeButton onClick={this.handleToggleWorkspaceMode} icon={mode} title={modeTitle} />
     );
