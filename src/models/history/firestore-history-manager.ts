@@ -4,7 +4,6 @@ import firebase from "firebase/app";
 import { getSimpleDocumentPath, IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { typeConverter } from "../../utilities/db-utils";
-import { uniqueId } from "../../utilities/js-utils";
 import { UserContextProvider } from "../stores/user-context-provider";
 import { getLastHistoryEntry, loadFirestoreHistory, loadHistory } from "./history-firestore";
 import { CDocument, CDocumentType, FAKE_EXCHANGE_ID, FAKE_HISTORY_ENTRY_ID, TreeManagerType } from "./tree-manager";
@@ -45,7 +44,6 @@ export class FirestoreHistoryManager {
   treeManager: TreeManagerType;
   uploadLocalHistory: boolean;
   loadingError = undefined as firebase.firestore.FirestoreError | undefined;
-  managerInstanceId = uniqueId();
 
   constructor({
     firestore,
@@ -280,8 +278,6 @@ export class FirestoreHistoryManager {
     // TODO: we should move this function into the history manager
     treeManager.setNumHistoryEntriesAppliedFromFirestore(firestore, documentPath);
 
-    const mirrorCallId = uniqueId();
-
     const snapshotUnsubscribe = loadHistory(firestore, `${documentPath}/history`,
       (history, error) => {
         if (error) {
@@ -305,14 +301,10 @@ export class FirestoreHistoryManager {
             // FIXME: this is being called twice for a single change in the document.
             // Perhaps this is because both the initial local change and then a second
             // remote change.
-            // I've confirmed it is the same mirrorCallId both times, so there are not
-            // multiple listeners being created.
+            // I've confirmed there are not multiple listeners being created.
             console.log("Applying remote history update", {
               length: history.length,
               documentKey,
-              documentInstance: mainDocument.instanceId,
-              managerInstance: this.managerInstanceId,
-              mirrorCallId,
               newHistory: history,
               existingHistory: getSnapshot(treeManager.document.history)
             });
@@ -410,8 +402,6 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // TODO: we should move this function into the history manager
     treeManager.setNumHistoryEntriesAppliedFromFirestore(firestore, documentPath);
 
-    const mirrorCallId = uniqueId();
-
     const snapshotUnsubscribe = loadFirestoreHistory(firestore, `${documentPath}/history`,
       (historyEntryDocs, error) => {
         if (error) {
@@ -442,16 +432,12 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
           // FIXME: this is being called twice for a single change in the document.
           // Perhaps this is because both the initial local change and then a second
           // remote change.
-          // I've confirmed it is the same mirrorCallId both times, so there are not
-          // multiple listeners being created.
+          // I've confirmed there are not multiple listeners being created.
           const existingHistory = treeManager.document.history;
 
           console.log("Applying remote concurrent history update", {
             length: historyEntryDocs.length,
             documentKey,
-            documentInstance: mainDocument.instanceId,
-            managerInstance: this.managerInstanceId,
-            mirrorCallId,
             newHistoryEntryDocs: historyEntryDocs,
             existingHistory: getSnapshot(existingHistory)
           });

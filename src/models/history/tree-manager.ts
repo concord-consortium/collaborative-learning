@@ -39,7 +39,6 @@ interface IMainDocument extends TreeAPI {
   key: string;
   uid: string;
   metadata: IDocumentMetadata;
-  instanceId: string;
 }
 
 export enum HistoryStatus {
