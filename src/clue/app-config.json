@@ -287,6 +287,16 @@
     },
     "placeholderText": "",
     "stamps": [],
+    "sortWorkConfig": {
+      "sortOptions": [
+        { "type": "Date" },
+        { "type": "Group" },
+        { "type": "Name" },
+        { "type": "Strategy" },
+        { "type": "Bookmarked" },
+        { "type": "Tools" }
+      ]
+    },
     "settings": {
       "ai": {
         "systemPrompt": "You are a helpful, collaborative student."

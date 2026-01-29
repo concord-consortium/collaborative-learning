@@ -5,7 +5,10 @@ export type UIDialogType = Instance<typeof UIDialogTypeEnum>;
 export const DocFilterTypeEnum = types.enumeration("docFilter", ["Problem", "Investigation", "Unit", "All"]);
 export type DocFilterType = Instance<typeof DocFilterTypeEnum>;
 
-export type PrimarySortType = "Date" | "Bookmarked" | "Group" | "Name" | "Strategy" | "Tools";
+export const SortTypeIds = ["Date", "Group", "Name", "Strategy", "Bookmarked", "Tools", "Problem"] as const;
+export type SortTypeId = typeof SortTypeIds[number];
+
+export type PrimarySortType = SortTypeId;
 export type SecondarySortType = PrimarySortType | "None";
 export type SortType = PrimarySortType | SecondarySortType | "All";
 

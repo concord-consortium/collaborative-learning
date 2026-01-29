@@ -8,6 +8,7 @@ import { ProblemMenuContainer } from "../../components/problem-menu-container";
 import { ToggleGroup } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { useStores } from "../../hooks/use-stores";
+import { translate } from "../../utilities/translation/translate";
 import AppModeIndicator from "./app-mode-indicator";
 import { CustomSelect } from "./custom-select";
 import { StudentMenuContainer } from "../../components/student-menu-container";
@@ -92,7 +93,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     }
     return (
       <div onClick={handleResetGroup} className="group">
-        <div className="name" data-test="group-name">{`Group ${group.id}`}</div>
+        <div className="name" data-test="group-name">{`${translate("studentGroup")} ${group.id}`}</div>
         <div className="group-center"/>
         <div className="members" data-test="group-members">
           <div className="row">
@@ -130,7 +131,9 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   };
 
   const handleResetGroup = () => {
-    ui.confirm("Do you want to leave this group?", "Leave Group")
+    const groupTerm = translate("studentGroup");
+    const groupTermLower = groupTerm.toLowerCase();
+    ui.confirm(`Do you want to leave this ${groupTermLower}?`, `Leave ${groupTerm}`)
       .then((ok) => {
         if (ok) {
           db.leaveGroup();

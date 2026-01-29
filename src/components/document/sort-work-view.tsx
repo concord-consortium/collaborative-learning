@@ -2,6 +2,7 @@ import React, { useCallback, useEffect } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 import { useStores } from "../../hooks/use-stores";
+import { useSortOptions } from "../../hooks/use-sort-options";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DEBUG_DOC_LIST } from "../../lib/debug";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
@@ -22,70 +23,87 @@ import "./sort-work-view.scss";
  * Various options for sorting the display are available - by user, by group, by tools used, etc.
  */
 export const SortWorkView: React.FC = observer(function SortWorkView() {
-  const { appConfig, investigation, persistentUI, problem, sortedDocuments, ui, unit } = useStores();
-  const { tagPrompt } = appConfig;
+  const { investigation, persistentUI, problem, sortedDocuments, ui, unit } = useStores();
+  const { sortOptions, showContextFilter, defaultPrimarySort, isValidSortType } = useSortOptions();
   const { docFilter: persistentUIDocFilter, primarySortBy, secondarySortBy } = persistentUI;
-  const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
-  const sortOptions = ["Date", "Group", "Name", sortTagPrompt, "Bookmarked", "Tools"];
   const filterOptions: DocFilterType[] = ["Problem", "Investigation", "Unit", "All"];
   const docFilter = persistentUIDocFilter;
+
+  // Validate that current sort selections are still valid given configuration
+  const validatedPrimarySortBy: PrimarySortType =
+    isValidSortType(primarySortBy) ? primarySortBy : defaultPrimarySort;
+  const validatedSecondarySortBy: SecondarySortType =
+    secondarySortBy === "None" || isValidSortType(secondarySortBy) ? secondarySortBy : "None";
+
+  useEffect(() => {
+    if (validatedPrimarySortBy !== primarySortBy) {
+      persistentUI.setPrimarySortBy(validatedPrimarySortBy);
+    }
+    if (validatedSecondarySortBy !== secondarySortBy) {
+      persistentUI.setSecondarySortBy(validatedSecondarySortBy);
+    }
+  }, [validatedPrimarySortBy, validatedSecondarySortBy, primarySortBy, secondarySortBy, persistentUI]);
 
   const handleDocFilterSelection = useCallback((filter: DocFilterType) => {
     Logger.log(LogEventName.SORT_SCOPE_CHANGE, {old: docFilter, new: filter});
     persistentUI.setDocFilter(filter);
   }, [docFilter, persistentUI]);
 
-  const normalizeSortString = (sort: string) => {
-    return sort === sortTagPrompt ? "Strategy" : sort;
-  };
-
-  const handlePrimarySortBySelection = useCallback((sort: string) => {
-    Logger.log(LogEventName.FIRST_SORT_CHANGE, {old: primarySortBy, new: sort});
+  const handlePrimarySortBySelection = useCallback((sort: PrimarySortType) => {
+    Logger.log(LogEventName.FIRST_SORT_CHANGE, {old: validatedPrimarySortBy, new: sort});
     persistentUI.setPrimarySortBy(sort);
-    if (sort === secondarySortBy) {
+
+    if (sort === validatedSecondarySortBy) {
       // call directly to avoid logging SECOND_SORT_CHANGE
       persistentUI.setSecondarySortBy("None");
     }
+
+    if (sort === "Problem" && docFilter === "Problem") {
+      persistentUI.setDocFilter("Investigation");
+    }
+
     ui.clearHighlightedSortWorkDocument();
     ui.clearExpandedSortWorkSections();
-  }, [persistentUI, primarySortBy, secondarySortBy, ui]);
+  }, [persistentUI, validatedPrimarySortBy, validatedSecondarySortBy, docFilter, ui]);
 
-  const handleSecondarySortBySelection = useCallback((sort: string) => {
-    Logger.log(LogEventName.SECOND_SORT_CHANGE, {old: secondarySortBy, new: sort});
+  const handleSecondarySortBySelection = useCallback((sort: SecondarySortType) => {
+    Logger.log(LogEventName.SECOND_SORT_CHANGE, {old: validatedSecondarySortBy, new: sort});
     persistentUI.setSecondarySortBy(sort);
-  }, [persistentUI, secondarySortBy]);
+  }, [persistentUI, validatedSecondarySortBy]);
 
   const primarySortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     disabled: false,
-    id: normalizeSortString(option).toLowerCase(),
-    selected: normalizeSortString(option) === primarySortBy,
-    text: option,
-    onClick: () => handlePrimarySortBySelection(normalizeSortString(option))
+    id: option.type.toLowerCase(),
+    selected: option.type === validatedPrimarySortBy,
+    text: option.label,
+    onClick: () => handlePrimarySortBySelection(option.type)
   }));
 
-  const secondarySortOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
-    disabled: option === primarySortBy,
-    id: normalizeSortString(option).toLowerCase(),
-    selected: normalizeSortString(option) === secondarySortBy,
-    text: option,
-    onClick: () => handleSecondarySortBySelection(normalizeSortString(option))
+  const secondarySortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
+    disabled: option.type === validatedPrimarySortBy,
+    id: option.type.toLowerCase(),
+    selected: option.type === validatedSecondarySortBy,
+    text: option.label,
+    onClick: () => handleSecondarySortBySelection(option.type)
   }));
-  secondarySortOptions.unshift({
+  secondarySortByOptions.unshift({
     disabled: false,
-    selected: secondarySortBy === "None",
+    id: "none",
+    selected: validatedSecondarySortBy === "None",
     text: "None",
     onClick: () => handleSecondarySortBySelection("None")
   });
 
+  // Disable "Problem" filter option when sorting by Problem
   const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => ({
+    disabled: option === "Problem" && validatedPrimarySortBy === "Problem",
     selected: option === docFilter,
     text: option,
     onClick: () => handleDocFilterSelection(option)
   }));
 
-  const primarySearchTerm = normalizeSortString(primarySortBy) as PrimarySortType;
-  const sortedDocumentGroups = sortedDocuments.sortBy(primarySearchTerm);
-  const secondarySearchTerm = normalizeSortString(secondarySortBy) as SecondarySortType;
+  const sortedDocumentGroups = sortedDocuments.sortBy(validatedPrimarySortBy);
+  const secondarySearchTerm = validatedSecondarySortBy;
   const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
   const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
 
@@ -106,7 +124,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     }
 
     if (openGroupMetadata) {
-      if (openGroupMetadata.primaryType !== primarySearchTerm) {
+      if (openGroupMetadata.primaryType !== validatedPrimarySortBy) {
         persistentUI.closeDocumentGroupPrimaryDocument(ENavTab.kSortWork);
       } else {
         const openDocumentsGroupIndex =
@@ -155,14 +173,15 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
           ) :
           <>
             <SortWorkHeader
-              key={`sort-work-header-${primarySortBy}`}
+              key={`sort-work-header-${validatedPrimarySortBy}`}
               docFilter={docFilter}
               docFilterItems={docFilterOptions}
               primarySortItems={primarySortByOptions}
-              secondarySortItems={secondarySortOptions}
+              secondarySortItems={secondarySortByOptions}
+              showContextFilter={showContextFilter}
             />
             <AiSummary />
-            <div key={primarySortBy} className="tab-panel-documents-section">
+            <div key={validatedPrimarySortBy} className="tab-panel-documents-section">
               { sortedDocumentGroups &&
                 sortedDocumentGroups.map((documentGroup: DocumentGroup, idx: number) => {
                   return (
@@ -172,8 +191,8 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
                       documentGroup={documentGroup}
                       idx={idx}
                       secondarySort={secondarySearchTerm}
-                      primarySortBy={primarySortBy}
-                      secondarySortBy={secondarySortBy}
+                      primarySortBy={validatedPrimarySortBy}
+                      secondarySortBy={validatedSecondarySortBy}
                     />
                   );
                 })

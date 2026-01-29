@@ -4,6 +4,7 @@ import { Bookmarks } from "src/models/stores/bookmarks";
 import { getTileComponentInfo } from "../models/tiles/tile-component-info";
 import { IDocumentMetadataModel } from "../models/document/document-metadata-model";
 import { DocumentGroup } from "../models/stores/document-group";
+import { translate } from "./translation/translate";
 
 import SparrowHeaderIcon from "../assets/icons/sort-by-tools/sparrow-id.svg";
 
@@ -39,12 +40,16 @@ export const sortDateSectionLabels = (
   });
 };
 
-export const createDocMapByGroups = (documents: IDocumentMetadataModel[], groupForUser: (userId: string) => any) => {
+export const createDocMapByGroups = (
+  documents: IDocumentMetadataModel[],
+  groupForUser: (userId: string) => any,
+  groupTerm = "Group"
+) => {
   const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
   documents.forEach((doc) => {
     const userId = doc.uid;
     const group = groupForUser(userId);
-    const sectionLabel = group ? `Group ${group.id}` : "No Group";
+    const sectionLabel = group ? `${groupTerm} ${group.id}` : `No ${groupTerm}`;
 
     if (!documentMap.has(sectionLabel)) {
       documentMap.set(sectionLabel, []);
@@ -138,7 +143,7 @@ export const getTagsWithDocs = (
   return tagsWithDocs;
 };
 
-export const createTileTypeToDocumentsMap = (documents: IDocumentMetadataModel[]) => {
+export const createTileTypeToDocumentsMap = (documents: IDocumentMetadataModel[], noToolsTerm = "No Tools") => {
   const toolToDocumentsMap = new Map<string, Record<string, any>>();
   const addDocByType = (docToAdd: IDocumentMetadataModel, type: string) => {
     if (!toolToDocumentsMap.get(type)) {
@@ -159,7 +164,7 @@ export const createTileTypeToDocumentsMap = (documents: IDocumentMetadataModel[]
   };
 
   //Iterate through all documents, determine if they are valid,
-  //create a map of valid ones, otherwise put them into the "No Tools" section
+  //create a map of valid ones, otherwise put them into the noToolsTerm section
   documents.forEach((doc) => {
       if (doc.tools) {
         const validTileTypes = doc.tools.filter(type => type !== "Placeholder" && type !== "Unknown");
@@ -168,7 +173,7 @@ export const createTileTypeToDocumentsMap = (documents: IDocumentMetadataModel[]
             addDocByType(doc, tool);
           });
         } else {
-          addDocByType(doc, "No Tools");
+          addDocByType(doc, noToolsTerm);
         }
       }
   });
@@ -176,16 +181,54 @@ export const createTileTypeToDocumentsMap = (documents: IDocumentMetadataModel[]
   return toolToDocumentsMap;
 };
 
-export const createDocMapByBookmarks = (documents: IDocumentMetadataModel[], bookmarks: Bookmarks) => {
+export const createDocMapByBookmarks = (
+  documents: IDocumentMetadataModel[],
+  bookmarks: Bookmarks,
+  bookmarkedTerm = "Bookmarked",
+  notBookmarkedTerm = "Not Bookmarked"
+) => {
   const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
   documents.forEach((doc) => {
-    const sectionLabel = bookmarks.isDocumentBookmarked(doc.key) ? "Bookmarked" : "Not Bookmarked";
+    const sectionLabel = bookmarks.isDocumentBookmarked(doc.key) ? bookmarkedTerm : notBookmarkedTerm;
     if (!documentMap.has(sectionLabel)) {
       documentMap.set(sectionLabel, []);
     }
     documentMap.get(sectionLabel)?.push(doc);
   });
   return documentMap;
+};
+
+export const sortProblemSectionLabels = (docMapKeys: string[]) => {
+  const problemTerm = translate("Problem");
+  const noProblemLabel = `No ${problemTerm}`;
+
+  return docMapKeys.sort((a, b) => {
+    // "No Problem" goes to the end
+    if (a === noProblemLabel) return 1;
+    if (b === noProblemLabel) return -1;
+
+    // Parse "Problem X.Y" or "Problem Y" format
+    const parseLabel = (label: string) => {
+      const regex = new RegExp(`${problemTerm} (?:(\\d+)\\.)?(\\d+)`);
+      const match = label.match(regex);
+      if (match) {
+        return {
+          investigation: match[1] ? parseInt(match[1], 10) : 0,
+          problem: parseInt(match[2], 10)
+        };
+      }
+      return { investigation: 0, problem: 0 };
+    };
+
+    const aVals = parseLabel(a);
+    const bVals = parseLabel(b);
+
+    // Sort by investigation first, then by problem
+    if (aVals.investigation !== bVals.investigation) {
+      return aVals.investigation - bVals.investigation;
+    }
+    return aVals.problem - bVals.problem;
+  });
 };
 
 export const sortDocumentsInGroup = (documentGroup: DocumentGroup) => {
