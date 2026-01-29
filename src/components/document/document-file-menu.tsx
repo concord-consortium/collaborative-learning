@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext } from "react";
 import { AppConfigContext, IconComponent } from "../../app-config-context";
 import { useAppMode, useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
@@ -90,7 +90,7 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
     ];
   }
 
-  const menuItems: ICustomDropdownItem[] = useMemo(() => ([
+  const menuItems: ICustomDropdownItem[] = [
     {
       ...idAndIcon("icon-open-workspace", appIcons),
       text: "Open...",
@@ -112,8 +112,7 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
       onClick: () => onDeleteDocument?.(document)
     },
     ...adminItems
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  ]), [document, groupDocOption, publishOption]);
+  ];
 
   return (
     <CustomSelect className="document-file-menu" dataTest="document-file-menu"
