@@ -213,38 +213,4 @@ describe("useSortOptions", () => {
     });
   });
 
-  describe("getLabelForType", () => {
-    beforeEach(() => resetMocks());
-
-    it("should return custom label for configured types", () => {
-      setupMockStores({
-        sortWorkConfig: {
-          sortOptions: [
-            { type: "Name" }
-          ]
-        },
-        termOverrides: {
-          "sortLabel.sortByOwner": "Participant"
-        }
-      });
-      const { getLabelForType } = useSortOptions();
-
-      expect(getLabelForType("Name")).toBe("Participant");
-    });
-
-    it("should return default label for unconfigured types", () => {
-      setupMockStores();
-      const { getLabelForType } = useSortOptions();
-
-      expect(getLabelForType("Name")).toBe("Student");
-      expect(getLabelForType("Group")).toBe("Group");
-    });
-
-    it("should return tagPrompt for Strategy type", () => {
-      setupMockStores({ tagPrompt: "Design Approach", showCommentTag: true });
-      const { getLabelForType } = useSortOptions();
-
-      expect(getLabelForType("Strategy")).toBe("Design Approach");
-    });
-  });
 });

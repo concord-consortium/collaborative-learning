@@ -1,9 +1,8 @@
 import { useMemo } from "react";
 import { useStores } from "./use-stores";
-import { translate } from "../utilities/translation/translate";
-import { getSortTypeTranslationKey } from "../utilities/translation/translation-types";
 import { ISortOptionConfig } from "../models/stores/sort-work-config";
 import { PrimarySortType } from "../models/stores/ui-types";
+import { getSortTypeLabel } from "../utilities/sort-utils";
 
 // Display version of ISortOptionConfig with required label
 export interface SortOptionDisplay extends Omit<ISortOptionConfig, "label"> {
@@ -32,7 +31,7 @@ export function useSortOptions() {
       })
       .map(option => ({
         type: option.type,
-        label: translate(getSortTypeTranslationKey(option.type))
+        label: getSortTypeLabel(option.type, { tagPrompt })
       }));
   }, [sortWorkConfig?.sortOptions, autoAssignStudentsToIndividualGroups, tagPrompt]);
 
@@ -63,17 +62,12 @@ export function useSortOptions() {
     return "Date";
   }, [sortWorkConfig, sortOptions, sortOptionsByType]);
 
-  const getLabelForType = (type: PrimarySortType): string => {
-    return translate(getSortTypeTranslationKey(type));
-  };
-
   const isValidSortType = (type: string): type is PrimarySortType => {
     return sortOptionsByType.has(type as PrimarySortType);
   };
 
   return {
     defaultPrimarySort,
-    getLabelForType,
     isValidSortType,
     sortOptions,
     showContextFilter
