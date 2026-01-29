@@ -592,7 +592,7 @@ describe('ai-summarizer', () => {
         };
 
         const result = documentSummarizer(content, {});
-        expect(result).toContain('| attr1 | 2 |  |');
+        expect(result).toContain('| attr1 | w |  |');
         expect(result).toContain('| attr2 | x |  |');
         expect(result).toContain('| attr3 | y | x * 2 |');
         expect(result).toContain('| attr4 | z | x + y |');
