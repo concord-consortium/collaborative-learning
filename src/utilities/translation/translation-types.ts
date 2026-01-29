@@ -1,4 +1,5 @@
 import enUS from "./lang/en-us.json";
+import { SortTypeId, SortTypeIds } from "../../authoring/types";
 
 export type TranslationKeyType = keyof typeof enUS;
 
@@ -23,7 +24,7 @@ export const TERM_METADATA: TermMetadata[] = [
  * Most sort types use their ID as the key, but some have namespaced keys
  * to avoid collisions with other uses of the same term.
  */
-export const SORT_TYPE_TO_TRANSLATION_KEY: Record<string, TranslationKeyType> = {
+export const SORT_TYPE_TO_TRANSLATION_KEY: Record<SortTypeId, TranslationKeyType> = {
   Group: "studentGroup",
   Name: "sortLabel.sortByOwner",
   Date: "sortLabel.sortByDate",
@@ -36,8 +37,12 @@ export const SORT_TYPE_TO_TRANSLATION_KEY: Record<string, TranslationKeyType> = 
 /**
  * Get the translation key for a sort type ID.
  */
-export function getSortTypeTranslationKey(sortType: string): TranslationKeyType {
+export function getSortTypeTranslationKey(sortType: SortTypeId): TranslationKeyType {
   return SORT_TYPE_TO_TRANSLATION_KEY[sortType] ?? sortType as TranslationKeyType;
+}
+
+export function isValidSortTypeId(value: string): value is SortTypeId {
+  return SortTypeIds.includes(value as SortTypeId);
 }
 
 /**

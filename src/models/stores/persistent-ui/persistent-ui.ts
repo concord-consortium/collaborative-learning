@@ -8,6 +8,7 @@ import {
   DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax,
   kDividerMin, PrimarySortType
 } from "../ui-types";
+import { isValidSortTypeId } from "../../../utilities/translation/translation-types";
 import { isWorkspaceModelSnapshot, WorkspaceModel } from "../workspace";
 import { DocumentModelType } from "../../document/document";
 import { ENavTab, NavTabModelType } from "../../view/nav-tabs";
@@ -286,7 +287,8 @@ export const PersistentUIModelV2 = types
             if (aiEvaluation) {
               self.setPrimarySortBy("Name");
             }
-            const primarySortBy = self.primarySortBy as PrimarySortType;
+            const primarySortBy: PrimarySortType =
+              isValidSortTypeId(self.primarySortBy) ? self.primarySortBy : "Group";
             const sortedDocumentGroups = sortedDocuments?.sortBy(primarySortBy);
             const openGroup = sortedDocumentGroups?.find(group => group.documents.some((d) => d.key === doc.key));
             docGroupId = JSON.stringify({"primaryLabel": openGroup?.label, "primaryType": self.primarySortBy});
