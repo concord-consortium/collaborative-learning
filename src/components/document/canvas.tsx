@@ -384,6 +384,7 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
         uploadLocalHistory: false,
         syncRemoteHistory: true
       });
+      treeManager.setHistoryManager(this.historyManager);
 
       // We are counting on the updated document copy to trigger a re-render so this updated
       // historyManager will be passed to the PlaybackComponent.

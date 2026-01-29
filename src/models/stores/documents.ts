@@ -267,14 +267,16 @@ export const DocumentsModel = types
         };
         if (document.type === GroupDocument) {
           historyManagerArgs.syncRemoteHistory = true;
-          new FirestoreHistoryManagerConcurrent(historyManagerArgs);
+          const manager = new FirestoreHistoryManagerConcurrent(historyManagerArgs);
+          treeManager.setHistoryManager(manager);
         } else {
-          new FirestoreHistoryManager(historyManagerArgs);
+          const manager = new FirestoreHistoryManager(historyManagerArgs);
+          treeManager.setHistoryManager(manager);
         }
 
-        // It seems like we should track these history managers somewhere, but in this case
-        // they are just adding a listener to the treeManager. When the treeManager is longer
-        // referenced anywhere the history manager will get garbage collected.
+        // The history manager is now stored on the treeManager via setHistoryManager.
+        // When the treeManager is no longer referenced anywhere the history manager
+        // will get garbage collected.
         // A FirestoreHistoryHistory is also used when the history is being played back
         // by the Canvas component. In that case it is a new document copy that is completely
         // that isn't added from the DocumentsModel. So there it can't reuse the same history

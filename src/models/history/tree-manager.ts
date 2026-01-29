@@ -50,11 +50,19 @@ export enum HistoryStatus {
   HISTORY_LOADING,
 }
 
-export type HistoryEntryCompletedListener = (
-  historyContainer: CDocumentType,
-  entry: Instance<typeof HistoryEntry>,
-  newLocalIndex: number,
-) => void;
+/**
+ * Minimal interface for history managers that need to be notified when
+ * history entries are completed. This keeps TreeManager free of
+ * Firestore-specific imports while allowing it to coordinate with
+ * history managers.
+ */
+export interface IHistoryManager {
+  onHistoryEntryCompleted(
+    historyContainer: CDocumentType,
+    entry: Instance<typeof HistoryEntry>,
+    newLocalIndex: number
+  ): void;
+}
 
 export const TreeManager = types
 .model("TreeManager", {
@@ -83,9 +91,10 @@ export const TreeManager = types
    */
   revisionId: "",
   /**
-   * Listeners to be notified when new history entries are completed.
+   * History manager to be notified when new history entries are completed.
+   * Consumers can check for specific types (e.g., FirestoreHistoryManagerConcurrent).
    */
-  historyEntryCompletedListeners: [] as Array<HistoryEntryCompletedListener>
+  historyManager: undefined as IHistoryManager | undefined
 }))
 .views((self) => ({
   get undoManager() : IUndoManager {
@@ -156,9 +165,7 @@ export const TreeManager = types
       // document. Mark it as applied.
       entry.applied = true;
 
-      self.historyEntryCompletedListeners.forEach(listener => {
-        listener(self.document, entry, newLocalIndex);
-      });
+      self.historyManager?.onHistoryEntryCompleted(self.document, entry, newLocalIndex);
     }
   };
 })
@@ -184,8 +191,8 @@ export const TreeManager = types
     self.revisionId = revisionId;
   },
 
-  addHistoryEntryCompletedListener(listener: HistoryEntryCompletedListener) {
-    self.historyEntryCompletedListeners.push(listener);
+  setHistoryManager(manager: IHistoryManager) {
+    self.historyManager = manager;
   },
 
   setNumHistoryEntriesApplied(value: number) {

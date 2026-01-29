@@ -43,6 +43,7 @@ export class FirestoreHistoryManager {
   firestore: Firestore;
   userContextProvider: UserContextProvider;
   treeManager: TreeManagerType;
+  uploadLocalHistory: boolean;
   loadingError = undefined as firebase.firestore.FirestoreError | undefined;
   managerInstanceId = uniqueId();
 
@@ -56,11 +57,7 @@ export class FirestoreHistoryManager {
     this.firestore = firestore;
     this.userContextProvider = userContextProvider;
     this.treeManager = treeManager;
-
-    if (uploadLocalHistory) {
-      this.onHistoryEntryCompleted = this.onHistoryEntryCompleted.bind(this);
-      treeManager.addHistoryEntryCompletedListener(this.onHistoryEntryCompleted);
-    }
+    this.uploadLocalHistory = uploadLocalHistory;
 
     if (syncRemoteHistory) {
       this.mirrorHistoryFromFirestore();
@@ -168,6 +165,11 @@ export class FirestoreHistoryManager {
     entry: Instance<typeof HistoryEntry>,
     newLocalIndex: number
   ) {
+    // Skip uploading if uploadLocalHistory is false (e.g., playback documents)
+    if (!this.uploadLocalHistory) {
+      return;
+    }
+
     // The parent Firestore metadata document might not be ready yet so we need to wait for that.
     // We also need to wait for the last history entry to be known so we know what index to assign
     const { documentPath, lastEntryIndex, lastEntryId } = await this.getFirestoreHistoryInfo();
