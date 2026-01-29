@@ -8,12 +8,19 @@ export interface NormalizedSection {
   sectionId?: string;
 }
 
+export interface NormalizedAttribute {
+  formula?: string;  // The formula display expression, if any
+  id: string;
+  name: string;
+  values: string[];
+}
+
 export interface NormalizedDataSet {
   id: string;
   providerId: string;
   name: string;
   tileIds: string[];
-  attributes: { id: string, name: string, values: string[] }[];
+  attributes: NormalizedAttribute[];
   numCases: number;
   data: string[][];
   sharedDataSetId?: string;
