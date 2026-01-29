@@ -207,6 +207,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["showIdeasButton"]>("showIdeasButton");
   }
 
+  get groupDocumentsEnabled() {
+    return this.getProp<UC["groupDocumentsEnabled"]>("groupDocumentsEnabled");
+  }
+
   get hide4up() {
     return this.getProp<UC["hide4up"]>("hide4up");
   }

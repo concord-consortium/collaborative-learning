@@ -93,6 +93,7 @@ export const AppConfigModel = types
     get annotations() { return self.configMgr.annotations; },
     get initiallyHideExemplars() { return self.configMgr.initiallyHideExemplars; },
     get showIdeasButton() { return self.configMgr.showIdeasButton; },
+    get groupDocumentsEnabled() { return self.configMgr.groupDocumentsEnabled; },
     get hide4up() { return self.configMgr.hide4up; },
     get authorToolbar() {
       return ToolbarModel.create([

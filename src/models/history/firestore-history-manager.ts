@@ -573,7 +573,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // Additionally firestore transactions work by just retrying the transaction code if any
     // documents being read are updated by some other client before the write operations are
     // finished. Because of this there cannot be side effects in the transaction code,
-    // just reads and ans writes.
+    // just reads and writes.
     //
     // Firestore has a limit of 500 operations per transaction, and 10 MiB for all transfered data.
     // To be safe we put a limit of uploading 20 entries a time.

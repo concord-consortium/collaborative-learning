@@ -57,12 +57,16 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
 
 export interface IDocumentMetadataModel extends Instance<typeof DocumentMetadataModel> {}
 
-// Compile-time checks that IDocumentMetadataModel is compatible with IDocumentMetadata.
+//
+// Compile-time type checks
+// =========================
+// These make sure that IDocumentMetadataModel is compatible with IDocumentMetadata.
 // The `properties` field is omitted because the model uses an observable map while
 // the interface uses Record<string, string>.
 
 /**
- * Check the basic compatibility between IDocumentMetadataModel and IDocumentMetadata.
+ * This is function is not called anywhere. Its existence forces the Typescript compiler
+ * to check the basic compatibility between IDocumentMetadataModel and IDocumentMetadata.
  * Since many of the properties are optional, this check mainly catches type mismatches.
  */
 // eslint-disable-next-line unused-imports/no-unused-vars
@@ -73,7 +77,8 @@ function _checkDocumentMetadataModelMatchesInterface(
 }
 
 /**
- * Check that all of the properties match between IDocumentMetadataModel and IDocumentMetadata.
+ * This is function is not called anywhere. Its existence forces the Typescript compiler
+ * to check that all of the properties match between IDocumentMetadataModel and IDocumentMetadata.
  * It does this by making all properties required.
  * The createdAt property is excluded because in the MST model it is maybe, which results in
  * a typescript type of `number | undefined`, which doesn't get stripped out by the Required<T>
@@ -88,18 +93,20 @@ function _checkDocumentMetadataModelMatchesFullInterface(
 
 
 /**
- * Check that the snapshot type of DocumentMetadataModel matches IDocumentMetadata.
+ * This is function is not called anywhere. Its existence forces the Typescript compiler
+ * to check that the snapshot type of DocumentMetadataModel matches IDocumentMetadata.
  * The DocumentMetadataModel is created from the data in Firestore which is supposed
  * to match the IDocumentMetadata interface. So this checks to make sure at least
  * the types support that creation. The types are modified to have all required
  * properties so it will pick up missing properties.
- *
- * @param _model
- * @returns
  */
 // eslint-disable-next-line unused-imports/no-unused-vars
 function _checkInterfaceMatchesDocumentMetadataModelSnapshotIn(
-  _model: Required< IDocumentMetadata >
-): Required< SnapshotIn<typeof DocumentMetadataModel> > {
+  _model: Required<IDocumentMetadata>
+): Required<SnapshotIn<typeof DocumentMetadataModel>> {
   return _model;
 }
+
+//
+// End of compile-time type checks
+//
