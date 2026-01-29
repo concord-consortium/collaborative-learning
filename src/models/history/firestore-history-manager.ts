@@ -369,11 +369,9 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     }, delayMs);
   }
 
-  // TODO: override mirrorHistoryFromFirestore to handle concurrent edits better
-  // it should take the approach like the autorun above where it looks for entries that
-  // are not in the local history yet.
-  // It isn't clear if `applyHistoryEntries` will cause them to be added to the local history
-  // but we could update that function to do so.
+  // FIXME: when a document is opened that already has content in it, and it has history
+  // this history will get re-applied to the document. It is likely that this is reason
+  // we see duplicate tiles when loading a group document
   async mirrorHistoryFromFirestore() {
     const { treeManager, firestore } = this;
     const { mainDocument } = treeManager;
@@ -399,7 +397,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       return;
     }
 
-    // TODO: we should move this function into the history manager
+    // TODO: probably we can just delete this from the concurrent manager
     treeManager.setNumHistoryEntriesAppliedFromFirestore(firestore, documentPath);
 
     const snapshotUnsubscribe = loadFirestoreHistory(firestore, `${documentPath}/history`,
@@ -702,7 +700,5 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       return tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
     });
     await Promise.all(finishPromises);
-
-    treeManager.markEntriesAsApplied(entries);
   }
 }

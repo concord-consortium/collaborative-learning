@@ -160,10 +160,6 @@ export const TreeManager = types
         self.revisionId = entry.id;
       }
 
-      // This was a locally created history entry based on a change to the local
-      // document. Mark it as applied.
-      entry.applied = true;
-
       self.historyManager?.onHistoryEntryCompleted(self.document, entry, newLocalIndex);
     }
   };
@@ -174,12 +170,6 @@ export const TreeManager = types
    */
   addHistoryEntryAfterApplying(entry: Instance<typeof HistoryEntry>) {
     self.document.history.push(entry);
-  },
-
-  markEntriesAsApplied(entries: Instance<typeof HistoryEntry>[]) {
-    entries.forEach(entry => {
-      entry.applied = true;
-    });
   },
 
   setChangeDocument(cDoc: CDocumentType) {
