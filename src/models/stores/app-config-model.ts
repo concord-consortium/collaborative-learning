@@ -38,10 +38,10 @@ export const AppConfigModel = types
   }))
   .views(self => ({
     /**
-     * Build the complete term overrides object, including tagPrompt as the Strategy override
+     * The complete term overrides object, including tagPrompt as the Strategy override
      * if no explicit Strategy override exists.
      */
-    buildTermOverrides(): Record<string, string> | undefined {
+    get effectiveTermOverrides(): Record<string, string> | undefined {
       const { termOverrides, tagPrompt } = self.configMgr;
       if (!termOverrides && !tagPrompt) return undefined;
 
@@ -56,7 +56,7 @@ export const AppConfigModel = types
     afterCreate() {
       // Initialize module-level overrides from base config (if config exists)
       if (self.config) {
-        setTermOverrides(self.buildTermOverrides());
+        setTermOverrides(self.effectiveTermOverrides);
       }
     },
     setConfigs(configs: Partial<UnitConfiguration>[]) {
@@ -69,7 +69,7 @@ export const AppConfigModel = types
       self.authorTools = ToolbarModel.create(self.configMgr.authorTools);
       self.toolbar = ToolbarModel.create(self.configMgr.toolbar);
       self.settings = self.configMgr.settings;
-      setTermOverrides(self.buildTermOverrides());
+      setTermOverrides(self.effectiveTermOverrides);
     },
     setRequireSortWorkTab(requireSortWorkTab: boolean) {
       self.requireSortWorkTab = requireSortWorkTab;
