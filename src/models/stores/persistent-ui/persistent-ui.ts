@@ -291,7 +291,7 @@ export const PersistentUIModelV2 = types
               isValidSortTypeId(self.primarySortBy) ? self.primarySortBy : "Group";
             const sortedDocumentGroups = sortedDocuments?.sortBy(primarySortBy);
             const openGroup = sortedDocumentGroups?.find(group => group.documents.some((d) => d.key === doc.key));
-            docGroupId = JSON.stringify({"primaryLabel": openGroup?.label, "primaryType": self.primarySortBy});
+            docGroupId = JSON.stringify({"primaryLabel": openGroup?.label, "primaryType": primarySortBy});
           }
         }
       }
