@@ -163,6 +163,13 @@ export const TreeManager = types
   };
 })
 .actions((self) => ({
+  /**
+   * This is used when applying a remote history entry that was loaded
+   */
+  addHistoryEntryAfterApplying(entry: Instance<typeof HistoryEntry>) {
+    self.document.history.push(entry);
+  },
+
   markEntriesAsApplied(entries: Instance<typeof HistoryEntry>[]) {
     entries.forEach(entry => {
       entry.applied = true;

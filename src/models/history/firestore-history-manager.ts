@@ -1,4 +1,4 @@
-import { action, autorun, computed, makeObservable, observable, when } from "mobx";
+import { action, computed, makeObservable, observable, when } from "mobx";
 import { addDisposer, getSnapshot, Instance, applySnapshot, IJsonPatch } from "mobx-state-tree";
 import firebase from "firebase/app";
 import { getSimpleDocumentPath, IDocumentMetadata } from "../../../shared/shared";
@@ -6,9 +6,9 @@ import { Firestore } from "../../lib/firestore";
 import { typeConverter } from "../../utilities/db-utils";
 import { uniqueId } from "../../utilities/js-utils";
 import { UserContextProvider } from "../stores/user-context-provider";
-import { getLastHistoryEntry, loadHistory } from "./history-firestore";
+import { getLastHistoryEntry, loadFirestoreHistory, loadHistory } from "./history-firestore";
 import { CDocument, CDocumentType, FAKE_EXCHANGE_ID, FAKE_HISTORY_ENTRY_ID, TreeManagerType } from "./tree-manager";
-import { HistoryEntry, HistoryOperation } from "./history";
+import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType, HistoryOperation } from "./history";
 
 interface IFirestoreHistoryInfo {
   documentPath: string;
@@ -310,8 +310,29 @@ export class FirestoreHistoryManager {
               documentKey,
               documentInstance: mainDocument.instanceId,
               managerInstance: this.managerInstanceId,
-              mirrorCallId
+              mirrorCallId,
+              newHistory: history,
+              existingHistory: getSnapshot(treeManager.document.history)
             });
+            // here is where the existing history entries should be preserved and just new ones added
+            // FIXME: what is happening is that when a user makes several changes quickly, they get added
+            // to local history right away. But then remote history comes in after the first of those changes
+            // is uploaded to Firestore. So now this incomplete remote history overwrite the local history
+            // including the local changes that have not yet been uploaded.
+            //
+            // So to fix this maybe it'd work to not use applySnapshot but instead do a merge operation
+            // where we always preserve the local entries and just add the remote ones.
+            //
+            // Alternatively we could try to upload the local entries in a batch right away instead of doing one
+            // at a time. This would require changing the onHistoryEntryCompleted to batch up multiple entries
+            // somehow.
+            //
+            // Another option would be to keep the local and remote history in separate lists.
+            // Or maybe not even store the remote history. Just do the "applied" check for each remote history
+            // entry that comes in.
+            //
+            // This approach means that we can't just do "mirrorHistoryFromFirestore" combined with writing
+            // history to get a collaborative document.
             applySnapshot(treeManager.document, {history});
           }
         }
@@ -324,30 +345,148 @@ export class FirestoreHistoryManager {
 
 export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
 
+  completedHistoryEntryQueue: Array<HistoryEntryType> = [];
+  uploadInProgress = false;
+  /**
+   * Stop uploading history entries from Firestore temporarily.
+   */
+  paused = false;
+
   constructor(args: IFirestoreHistoryManagerArgs) {
     super(args);
-
-    // Note: if we add new properties that we need to react to, then we shoudl remove
-    // the `makeAutoObservable` call from the parent class and instead
-    // call makeObservable in both places with the specific properties to observe.
-
-    // add a reaction to apply any unapplied history entries
-    const disposer = autorun(() => {
-      const history = this.treeManager.document?.history;
-      if (!history) return;
-
-      const entries = history.filter(entry => !entry.applied);
-
-      // This is an async function, so we are counting on it finishing before
-      // the next autorun runs. However part of applying these history entries requires
-      // setting their applied property, which will trigger this autorun again
-      // To work around this, we don't set these applied properties until the end of
-      // the async function.
-      this.applyHistoryEntries(entries);
-    });
-
-    addDisposer(this.treeManager, disposer);
   }
+
+  pauseUploads() {
+    this.paused = true;
+  }
+  resumeUploadsAfterDelay(delayMs: number) {
+    setTimeout(() => {
+      this.paused = false;
+      this.uploadQueuedHistoryEntries();
+    }, delayMs);
+  }
+
+  // TODO: override mirrorHistoryFromFirestore to handle concurrent edits better
+  // it should take the approach like the autorun above where it looks for entries that
+  // are not in the local history yet.
+  // It isn't clear if `applyHistoryEntries` will cause them to be added to the local history
+  // but we could update that function to do so.
+  async mirrorHistoryFromFirestore() {
+    const { treeManager, firestore } = this;
+    const { mainDocument } = treeManager;
+
+    const documentKey = mainDocument?.key;
+    const userId = mainDocument?.uid;
+    if (!documentKey || !userId) {
+      console.warn("mirrorHistoryFromFirestore, requires a mainDocument");
+      return;
+    }
+
+    // Wait for the parent document to exist
+    let documentPath: string;
+    try {
+      const firestoreHistoryInfo = await this.prepareFirestoreHistoryInfo();
+      documentPath = firestoreHistoryInfo.documentPath;
+    } catch (error) {
+      // The metadata document doesn't exist or there was another error.
+      // Set the loading error so historyStatus returns HISTORY_ERROR.
+      this.setLoadingError({
+        message: error instanceof Error ? error.message : String(error)
+      } as firebase.firestore.FirestoreError);
+      return;
+    }
+
+    // TODO: we should move this function into the history manager
+    treeManager.setNumHistoryEntriesAppliedFromFirestore(firestore, documentPath);
+
+    const mirrorCallId = uniqueId();
+
+    const snapshotUnsubscribe = loadFirestoreHistory(firestore, `${documentPath}/history`,
+      (historyEntryDocs, error) => {
+        if (error) {
+          this.setLoadingError(error);
+        } else {
+          // TODO: When run on every change for a collaborative document this will
+          // be pretty inefficient since it is recreating the whole CDocument
+          // each time. We can improve this by using Firestore's snapshot.docChanges()
+          // method. This way can just add the new history entries.
+
+          // If we apply the changes to the existing document in the treeManager
+          // They will have the applied flag set to false if they are not already local
+          // events that have been applied.
+          // So after we do this, we should call an async function to apply any
+          // unapplied history entries. Or we can use a reaction to do this automatically.
+
+          if (!treeManager.document) {
+            // If there is no change document yet it seems like it should be an error
+            // We are only working on documents that are editable. So they should have
+            // a change document created automatically. However perhaps it doesn't get
+            // created until the first entry shows up?
+            // For now just throw an error so we can figure out if this case happens.
+            throw new Error("mirrorHistoryFromFirestore: no change document exists yet");
+            // If we need to create the change document here, we can use this code:
+            // treeManager.setChangeDocument(CDocument.create({history: []}));
+          }
+
+          // FIXME: this is being called twice for a single change in the document.
+          // Perhaps this is because both the initial local change and then a second
+          // remote change.
+          // I've confirmed it is the same mirrorCallId both times, so there are not
+          // multiple listeners being created.
+          const existingHistory = treeManager.document.history;
+
+          console.log("Applying remote concurrent history update", {
+            length: historyEntryDocs.length,
+            documentKey,
+            documentInstance: mainDocument.instanceId,
+            managerInstance: this.managerInstanceId,
+            mirrorCallId,
+            newHistoryEntryDocs: historyEntryDocs,
+            existingHistory: getSnapshot(existingHistory)
+          });
+
+          // here is where the existing history entries should be preserved and just new ones added
+          // FIXME: what is happening is that when a user makes several changes quickly, they get added
+          // to local history right away. But then remote history comes in after the first of those changes
+          // is uploaded to Firestore. So now this incomplete remote history overwrite the local history
+          // including the local changes that have not yet been uploaded.
+          //
+          // So to fix this maybe it'd work to not use applySnapshot but instead do a merge operation
+          // where we always preserve the local entries and just add the remote ones.
+          //
+          // Alternatively we could try to upload the local entries in a batch right away instead of doing one
+          // at a time. This would require changing the onHistoryEntryCompleted to batch up multiple entries
+          // somehow.
+          //
+          // Another option would be to keep the local and remote history in separate lists.
+          // Or maybe not even store the remote history. Just do the "applied" check for each remote history
+          // entry that comes in.
+          //
+          // This approach means that we can't just do "mirrorHistoryFromFirestore" combined with writing
+          // history to get a collaborative document.
+
+          // Not the most efficient but lets get the history entries from the historyEntryDocs
+          const incomingHistory: HistoryEntrySnapshot[] = historyEntryDocs.map(doc => {
+            return JSON.parse(doc.entry) as HistoryEntrySnapshot;
+          });
+
+          // Again not the most efficient to figure out which entries are new
+          const newEntries: HistoryEntrySnapshot[] = [];
+          for (const entry of incomingHistory) {
+            const exists = existingHistory.find(e => e.id === entry.id);
+            if (!exists) {
+              newEntries.push(entry);
+            }
+          }
+
+          this.applyHistoryEntries(newEntries);
+        }
+      }
+    );
+    // Add this disposer so our Firestore listener is removed when the treeManager is destroyed
+    addDisposer(treeManager, snapshotUnsubscribe);
+  }
+
 
   async prepareFirestoreHistoryInfo(): Promise<IFirestoreHistoryInfo> {
     const { userContextProvider, treeManager: { mainDocument }, firestore } = this;
@@ -384,6 +523,36 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     entry: Instance<typeof HistoryEntry>,
     newLocalIndex: number
   ) {
+    // Multiple entries can piled up, while some are being uploaded. A simple promise system
+    // doesn't guarantee that the uploads will happen in order. So a queue is used.
+    //
+    // There are a few reasons why they might pile up:
+    // - the entries could come in faster than they can be saved to Firestore.
+    // - the metadata document might not be ready yet, so they'll be waiting
+    // on the firestoreInfoPromise above. Once that resolves the first one will start running
+    // however it will then stop running again while waiting fro the read in the transaction.
+    // That will then let the second onHistoryEntryCompleted call to start running again.
+    // I don't think there is a guarantee which of the blocked read calls will resolve first.
+    // So the second onHistoryEntryCompleted might go first, which will then give it a wrong
+    // index and previous entry id.
+    this.completedHistoryEntryQueue.push(entry);
+    this.uploadQueuedHistoryEntries();
+  }
+
+  async uploadQueuedHistoryEntries() {
+    // If there is an inprogress we just return. The next uploadQueuedHistoryEntries
+    // call will happen after the current upload finishes (at the end of this function).
+    if (this.uploadInProgress) {
+      return;
+    }
+
+    // If we are paused, return without uploading anything.
+    // The next uploadQueuedHistoryEntries call will happen when resumeUploadsAfterDelay is called.
+    if (this.paused) {
+      return;
+    }
+    this.uploadInProgress = true;
+
     // The parent Firestore metadata document might not be ready yet so we need to wait for that.
     if (!this.firestoreHistoryInfoPromise) {
       this.firestoreHistoryInfoPromise = this.prepareFirestoreHistoryInfo();
@@ -409,18 +578,15 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // finished. Because of this there cannot be side effects in the transaction code,
     // just reads and ans writes.
     //
-    // TODO: If multiple entries are piled up because the firestore document isn't available yet,
-    // this code here might not run in correct order. These multiple calls would all be waiting
-    // on the firestoreInfoPromise above. Once that resolves the first one will start running
-    // however it will then stop running again while waiting fro the read in the transaction.
-    // That will then let the second onHistoryEntryCompleted call to start running again.
-    // I don't think there is a guarantee which of the blocked read calls will resolve first.
-    // So the second onHistoryEntryCompleted might go first, which will then give it a wrong
-    // index and previous entry id.
-    // To fix this we probably need to a queue so they always get processed in order. We could
-    // batch them up in a single transaction so that we don't need to read the me doc for each
-    // doc in the queue. But there is a limit to how many writes can be done in a single
-    // transaction.
+    // Firestore has a limit of 500 operations per transaction, and 10 MiB for all transfered data.
+    // To be safe we put a limit of uploading 20 entries a time.
+    const MAX_ENTRIES_PER_TRANSACTION = 20;
+    const entriesToUpload = this.completedHistoryEntryQueue.slice(0, MAX_ENTRIES_PER_TRANSACTION);
+    if (entriesToUpload.length === 0) {
+      // Nothing to do
+      this.uploadInProgress = false;
+      return;
+    }
     await firestore.runTransaction(async (transaction) => {
 
       const converter = typeConverter<IDocumentMetadata>();
@@ -436,9 +602,9 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
         throw new Error("Could not get metadata document data in history transaction");
       }
 
-      const previousEntry = metadata.lastHistoryEntry;
-      const previousEntryIndex = previousEntry?.index ?? -1;
-      const previousEntryId = previousEntry?.id ?? null;
+      const lastEntry = metadata.lastHistoryEntry;
+      let lastEntryIndex = lastEntry?.index ?? -1;
+      let lastEntryId = lastEntry?.id ?? null;
 
       // TODO: if we want to migrate existing documents to this approach then if there is no lastHistoryEntry
       // we need to look through the existing history entries. We can't do that in a transaction
@@ -447,27 +613,49 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       // The plan is to just use this for new group documents, so if there is some lost history
       // for existing group documents that is OK.
 
-      const newEntryIndex = previousEntryIndex + 1;
+
+      // TODO: if there are lot of entries in the queue we need to limit how many we upload at once
+      entriesToUpload.forEach(entry => {
+        const newEntryIndex = lastEntryIndex + 1;
+
+        const docRef = firestore.documentRef(historyEntriesPath, entry.id);
+        const snapshot = getSnapshot(entry);
+
+        transaction.set(docRef, {
+          index: newEntryIndex,
+          created: firestore.timestamp(),
+          previousEntryId: lastEntryId,
+          entry: JSON.stringify(snapshot)
+        });
+        lastEntryIndex = newEntryIndex;
+        lastEntryId = entry.id;
+      });
+
       transaction.update(firestore.documentRef(metadataPath), {
         lastHistoryEntry: {
-          index: newEntryIndex,
-          id: entry.id
+          index: lastEntryIndex,
+          id: lastEntryId
         }
       });
-
-      const docRef = firestore.documentRef(historyEntriesPath, entry.id);
-      const snapshot = getSnapshot(entry);
-
-      transaction.set(docRef, {
-        index: newEntryIndex,
-        created: firestore.timestamp(),
-        previousEntryId,
-        entry: JSON.stringify(snapshot)
-      });
     });
+
+    // Clear the queue now that all entries have been uploaded
+    // But if there were new entries added while the transaction was running
+    // they will be lost. So we need to call uploadQueuedHistoryEntries again
+    // to upload any new entries.
+    // If we made it here then the transaction succeed so we can remove the entriesToUpload
+    // from the queue.
+    this.completedHistoryEntryQueue.splice(0, entriesToUpload.length);
+    this.uploadInProgress = false;
+
+    // If there are more entries to upload, do that now
+    if (this.completedHistoryEntryQueue.length > 0) {
+      this.uploadQueuedHistoryEntries();
+    }
   }
 
-  async applyHistoryEntries(entries: Instance<typeof HistoryEntry>[]) {
+  // This is very similar to gotoHistoryEntry in TreeManager
+  async applyHistoryEntries(entrySnapshots: HistoryEntrySnapshot[]) {
     const { treeManager } = this;
     const trees = Object.values(treeManager.trees);
 
@@ -484,16 +672,19 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     const treePatches: Record<string, IJsonPatch[] | undefined> = {};
     Object.keys(treeManager.trees).forEach(treeId => treePatches[treeId] = []);
 
-    // direction tells us which direction to go
-    // startingIndex and endingIndex are so we don't add the currentHistoryEvent into patches
-    // because we are going to assume that it has already been played, and we don't want to play it
-    // again if we are going forward.
+    const entries: HistoryEntryType[] = entrySnapshots.map(snapshot => HistoryEntry.create(snapshot));
+
     for (const historyEntry of entries) {
       const records = historyEntry ? [ ...historyEntry.records] : [];
       for (const entryRecord of records) {
         const patches = treePatches[entryRecord.tree];
         patches?.push(...entryRecord.getPatches(HistoryOperation.Redo));
       }
+
+      // Add this to the treeManager history so the local history is close the remote history
+      // This should not cause the history entry to be sent back to firestore because that only
+      // happens with onHistoryEntryCompleted which should only called for local edits.
+      treeManager.addHistoryEntryAfterApplying(historyEntry);
     }
 
     const applyPromises = Object.entries(treePatches).map(([treeId, patches]) => {
