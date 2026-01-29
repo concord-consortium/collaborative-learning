@@ -4,6 +4,7 @@ import { Bookmarks } from "src/models/stores/bookmarks";
 import { getTileComponentInfo } from "../models/tiles/tile-component-info";
 import { IDocumentMetadataModel } from "../models/document/document-metadata-model";
 import { DocumentGroup } from "../models/stores/document-group";
+import { translate } from "./translation/translate";
 
 import SparrowHeaderIcon from "../assets/icons/sort-by-tools/sparrow-id.svg";
 
@@ -198,14 +199,18 @@ export const createDocMapByBookmarks = (
 };
 
 export const sortProblemSectionLabels = (docMapKeys: string[]) => {
+  const problemTerm = translate("Problem");
+  const noProblemLabel = `No ${problemTerm}`;
+
   return docMapKeys.sort((a, b) => {
     // "No Problem" goes to the end
-    if (a === "No Problem") return 1;
-    if (b === "No Problem") return -1;
+    if (a === noProblemLabel) return 1;
+    if (b === noProblemLabel) return -1;
 
     // Parse "Problem X.Y" or "Problem Y" format
     const parseLabel = (label: string) => {
-      const match = label.match(/Problem (?:(\d+)\.)?(\d+)/);
+      const regex = new RegExp(`${problemTerm} (?:(\\d+)\\.)?(\\d+)`);
+      const match = label.match(regex);
       if (match) {
         return {
           investigation: match[1] ? parseInt(match[1], 10) : 0,

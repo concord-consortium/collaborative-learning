@@ -262,12 +262,12 @@ export class DocumentGroup {
     this.documents.forEach((doc) => {
       const investigationOrdinal = doc.investigation;
       const problemOrdinal = doc.problem;
-      let sectionLabel = "No Problem";
+      let sectionLabel = `No ${translate("Problem")}`;
 
       if (investigationOrdinal != null && problemOrdinal != null) {
-        sectionLabel = `Problem ${investigationOrdinal}.${problemOrdinal}`;
+        sectionLabel = `${translate("Problem")} ${investigationOrdinal}.${problemOrdinal}`;
       } else if (problemOrdinal != null) {
-        sectionLabel = `Problem ${problemOrdinal}`;
+        sectionLabel = `${translate("Problem")} ${problemOrdinal}`;
       }
 
       if (!docMap.has(sectionLabel)) {
