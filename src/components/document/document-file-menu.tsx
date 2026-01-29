@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext } from "react";
 import { AppConfigContext, IconComponent } from "../../app-config-context";
 import { useAppMode, useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
@@ -62,6 +62,9 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
     onClick: () => onAdminDestroyDocument?.(document)
   };
   const adminItems = onAdminDestroyDocument && (appMode === "dev") ? [adminDestroyDocumentItem] : [];
+  const { appConfig, user } = stores;
+  const groupsPermitted = !appConfig.autoAssignStudentsToIndividualGroups;
+  const showGroupDocOption = appConfig.groupDocumentsEnabled && groupsPermitted && !!user.currentGroupId;
 
   let publishOption: ICustomDropdownItem[] = [];
   if (showPublishOption(document, stores)) {
@@ -75,19 +78,26 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
     ];
   }
 
-  const menuItems: ICustomDropdownItem[] = useMemo(() => ([
+  let groupDocOption: ICustomDropdownItem[] = [];
+  if (showGroupDocOption) {
+    groupDocOption = [
+      {
+        ...idAndIcon("icon-open-group-doc", appIcons),
+        text: "Group Doc",
+        disabled: false,
+        onClick: () => onOpenGroupDocument?.(document)
+      }
+    ];
+  }
+
+  const menuItems: ICustomDropdownItem[] = [
     {
       ...idAndIcon("icon-open-workspace", appIcons),
       text: "Open...",
       disabled: !!isOpenDisabled,
       onClick: () => onOpenDocument?.(document)
     },
-    {
-      ...idAndIcon("icon-open-group-doc", appIcons),
-      text: "Group Doc",
-      disabled: false,
-      onClick: () => onOpenGroupDocument?.(document)
-    },
+    ...groupDocOption,
     ...publishOption,
     {
       ...idAndIcon("icon-copy-workspace", appIcons),
@@ -102,8 +112,7 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
       onClick: () => onDeleteDocument?.(document)
     },
     ...adminItems
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  ]), [document]);
+  ];
 
   return (
     <CustomSelect className="document-file-menu" dataTest="document-file-menu"
