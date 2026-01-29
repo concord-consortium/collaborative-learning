@@ -6,7 +6,7 @@ import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { TreeManager } from "../../models/history/tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType } from "../../models/history/history";
-import { loadHistory, getHistoryPath } from "../../models/history/history-firestore";
+import { loadHistory, getHistoryPath, loadFirestoreHistory, IFirestoreHistoryEntryDoc } from "../../models/history/history-firestore";
 
 import "./history-view-panel.scss";
 
@@ -14,12 +14,18 @@ interface IHistoryViewPanelProps {
   document: DocumentModelType;
 }
 
+interface HistoryEntryWithMeta {
+  index: number;
+  previousEntryId?: string;
+  entry: HistoryEntryType;
+}
+
 export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
   document
 }) => {
   const stores = useStores();
   const { persistentUI, db } = stores;
-  const [remoteHistoryEntries, setRemoteHistoryEntries] = useState<HistoryEntryType[]>([]);
+  const [remoteHistoryEntries, setRemoteHistoryEntries] = useState<HistoryEntryWithMeta[]>([]);
   const [remoteHistoryError, setRemoteHistoryError] = useState<string | undefined>();
 
   // Get local history from document by casting to TreeManager instance
@@ -47,13 +53,22 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
       return;
     }
 
-    const unsubscribe = loadHistory(db.firestore, historyPath, (entries: HistoryEntrySnapshot[], error) => {
+    const unsubscribe = loadFirestoreHistory(db.firestore, historyPath, (docs: IFirestoreHistoryEntryDoc[], error) => {
       if (error) {
         setRemoteHistoryError(error.message);
         setRemoteHistoryEntries([]);
       } else {
         setRemoteHistoryError(undefined);
-        setRemoteHistoryEntries(entries.map(snapshot => HistoryEntry.create(snapshot)));
+        setRemoteHistoryEntries(docs.map(doc => {
+          console.log("History doc:", doc);
+          const { entry } = doc;
+          const entrySnapshot = JSON.parse(entry) as HistoryEntrySnapshot;
+          return {
+            index: doc.index,
+            previousEntryId: doc.previousEntryId,
+            entry: HistoryEntry.create(entrySnapshot)
+          };
+        }));
       }
     });
 
@@ -109,8 +124,13 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
             ) : remoteHistoryEntries.length === 0 ? (
               <div className="history-view-empty">No remote history entries</div>
             ) : (
-              remoteHistoryEntries.map((entry, index) => (
-                <HistoryEntryItem key={entry.id} entry={entry} index={index} />
+              remoteHistoryEntries.map((entryWithMeta) => (
+                <HistoryEntryItem
+                  key={entryWithMeta.entry.id}
+                  entry={entryWithMeta.entry}
+                  index={entryWithMeta.index}
+                  previousEntryId={entryWithMeta.previousEntryId}
+                />
               ))
             )}
           </div>
