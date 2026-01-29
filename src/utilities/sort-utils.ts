@@ -39,6 +39,11 @@ export function getSortTypeLabel(
     return getDefaultValue(translationKey) || type;
   }
 
+  // Strategy type uses tagPrompt if available
+  if (type === "Strategy" && tagPrompt) {
+    return tagPrompt;
+  }
+
   // Default case: use the translation system with module-level overrides.
   return translate(getSortTypeTranslationKey(type));
 }
