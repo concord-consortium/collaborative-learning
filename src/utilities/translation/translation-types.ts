@@ -2,6 +2,9 @@ import enUS from "./lang/en-us.json";
 import { SortTypeId, SortTypeIds } from "../../authoring/types";
 
 export type TranslationKeyType = keyof typeof enUS;
+export function isTranslationKey(key: string): key is TranslationKeyType {
+  return key in enUS;
+}
 
 export interface TermMetadata {
   key: TranslationKeyType;

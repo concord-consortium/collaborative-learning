@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 
-import { ISortWorkConfig, SortTypeId, SortTypeIds } from "../../types";
-import { useCurriculum } from "../../hooks/use-curriculum";
-import { ISortOptionConfig } from "../../../models/stores/sort-work-config";
-import { getSortTypeLabel } from "../../../utilities/sort-utils";
-import { getSortTypeTranslationKey } from "../../../utilities/translation/translation-types";
+import { translate } from "../../../utilities/translation/translate";
 import appConfig from "../../../clue/app-config.json";
+import { ISortOptionConfig } from "../../../models/stores/sort-work-config";
+import { DocFilterType, DocFilterTypeIds } from "../../../models/stores/ui-types";
+import { getSortTypeLabel } from "../../../utilities/sort-utils";
+import { getSortTypeTranslationKey, isTranslationKey } from "../../../utilities/translation/translation-types";
+import { useCurriculum } from "../../hooks/use-curriculum";
+import { ISortWorkConfig, SortTypeId, SortTypeIds } from "../../types";
 
 import "./sort-work-settings.scss";
 
@@ -24,6 +26,11 @@ const sortOptionDescriptions: Record<SortTypeId, string> = {
   Problem: "Sort documents by problem number"
 };
 
+interface DocFilterOption {
+  enabled: boolean;
+  type: DocFilterType;
+}
+
 interface FormSortOption {
   enabled: boolean;
   type: SortTypeId;
@@ -31,6 +38,7 @@ interface FormSortOption {
 
 interface SortWorkSettingsFormInputs {
   defaultPrimarySort: SortTypeId | "";
+  docFilterOptions: DocFilterOption[];
   showContextFilter: boolean;
   sortOptions: FormSortOption[];
 }
@@ -43,6 +51,18 @@ const SortWorkSettings: React.FC = () => {
   const formDefaults: SortWorkSettingsFormInputs = useMemo(() => {
     const currentConfig = unitConfig?.config?.sortWorkConfig;
     const enabledTypes = new Set(currentConfig?.sortOptions?.map(o => o.type) ?? []);
+
+    // Build doc filter options - maintain order from config if it exists
+    const enabledDocFilterTypes = new Set(currentConfig?.docFilterOptions ?? []);
+    const docFilterTypes: DocFilterType[] = currentConfig?.docFilterOptions
+      ? [...currentConfig.docFilterOptions, ...DocFilterTypeIds.filter(t => !enabledDocFilterTypes.has(t))]
+      : [...DocFilterTypeIds];
+    const docFilterOptions: DocFilterOption[] = docFilterTypes.map(type => {
+      return {
+        enabled: enabledDocFilterTypes.size === 0 ? true : enabledDocFilterTypes.has(type),
+        type
+      };
+    });
 
     // Build sort options - maintain order from config if it exists
     const orderedTypes: SortTypeId[] = currentConfig?.sortOptions
@@ -58,6 +78,7 @@ const SortWorkSettings: React.FC = () => {
 
     return {
       defaultPrimarySort: currentConfig?.defaultPrimarySort ?? "",
+      docFilterOptions,
       showContextFilter: currentConfig?.showContextFilter ?? true,
       sortOptions
     };
@@ -77,20 +98,32 @@ const SortWorkSettings: React.FC = () => {
     name: "sortOptions"
   });
 
+  const { fields: docFilterFields } = useFieldArray({
+    control,
+    name: "docFilterOptions"
+  });
+
   const watchSortOptions = watch("sortOptions");
-  const enabledOptions = watchSortOptions?.filter(o => o.enabled) ?? [];
+  const enabledSortOptions = watchSortOptions?.filter(o => o.enabled) ?? [];
+
+  const watchDocFilterOptions = watch("docFilterOptions");
+  const enabledDocFilterOptions = watchDocFilterOptions?.filter(o => o.enabled) ?? [];
 
   const onSubmit: SubmitHandler<SortWorkSettingsFormInputs> = (data) => {
-    const enabledSortOptions = data.sortOptions.filter(o => o.enabled);
+    const formEnabledSortOptions = data.sortOptions.filter(o => o.enabled);
+    const formEnabledDocFilterOptions = data.docFilterOptions.filter(o => o.enabled);
 
     setUnitConfig(draft => {
       if (!draft) return;
 
       // Build sortOptions array from enabled options only
-      const sortOptions: ISortOptionConfig[] = enabledSortOptions
-        .map(o => ({ type: o.type }));
+      const sortOptions: ISortOptionConfig[] = formEnabledSortOptions.map(o => ({ type: o.type }));
 
       const sortWorkConfig: ISortWorkConfig = {};
+
+      if (formEnabledDocFilterOptions.length > 0) {
+        sortWorkConfig.docFilterOptions = formEnabledDocFilterOptions.map(o => o.type);
+      }
 
       if (sortOptions.length > 0) {
         sortWorkConfig.sortOptions = sortOptions;
@@ -132,21 +165,6 @@ const SortWorkSettings: React.FC = () => {
       </p>
 
       <fieldset>
-        <legend>Context Filter</legend>
-        <label className="horizontal middle">
-          <input
-            aria-describedby="context-filter-description"
-            type="checkbox"
-            {...register("showContextFilter")}
-          />
-          <span>Enable &quot;Show for&quot; filter</span>
-        </label>
-        <p className="muted small" id="context-filter-description">
-          When enabled, shows a dropdown to filter documents by Problem, Investigation, Unit, or All.
-        </p>
-      </fieldset>
-
-      <fieldset>
         <legend>Sort Options</legend>
         <p className="muted small" id="sort-options-description">
           Check the options to enable them. Use arrow buttons to reorder.
@@ -168,7 +186,7 @@ const SortWorkSettings: React.FC = () => {
               const displayLabel = getDisplayLabel(sortType);
               const rowId = `sort-option-${sortType}`;
               const watchedOption = watchSortOptions[index];
-              const isOnlyEnabledOption = enabledOptions.length === 1 && watchedOption?.enabled;
+              const isOnlyEnabledOption = enabledSortOptions.length === 1 && watchedOption?.enabled;
               const hasCustomLabel = !!termOverrides?.[getSortTypeTranslationKey(sortType)];
 
               return (
@@ -222,7 +240,7 @@ const SortWorkSettings: React.FC = () => {
           {...register("defaultPrimarySort")}
         >
           <option value="">Auto (Group → Name → first available option)</option>
-          {enabledOptions.map(option => {
+          {enabledSortOptions.map(option => {
             const label = getDisplayLabel(option.type);
             return (
               <option key={option.type} value={option.type}>
@@ -234,6 +252,67 @@ const SortWorkSettings: React.FC = () => {
         <p className="muted small" id="default-sort-description">
           The sort option selected by default when a user first visits the Sort Work tab.
         </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Context Filter</legend>
+        <label className="horizontal middle">
+          <input
+            aria-describedby="context-filter-description"
+            type="checkbox"
+            {...register("showContextFilter")}
+          />
+          <span>Enable &quot;Show for&quot; filter</span>
+        </label>
+        <p className="muted small" id="context-filter-description">
+          When enabled, shows a dropdown to filter documents by Problem, Investigation, Unit, or All.
+        </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Filter Options</legend>
+        <p className="muted small" id="filter-options-description">
+          Check the options to enable them.
+          Labels can be customized on the Term Overrides page.
+          Labels marked with an <span className="custom-label-indicator">*</span> have been customized.
+        </p>
+        <table aria-describedby="filter-options-description" role="grid">
+          <thead>
+            <tr>
+              <th className="enabled" scope="col">Enabled</th>
+              <th className="filter-type" scope="col">Filter Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {docFilterFields.map((field, index) => {
+              const docFilterType = field.type;
+              const displayLabel = isTranslationKey(docFilterType) ? translate(docFilterType): docFilterType;
+              const rowId = `doc-filter-option-${docFilterType}`;
+              const watchedOption = watchDocFilterOptions[index];
+              const isOnlyEnabledOption = enabledDocFilterOptions.length === 1 && watchedOption?.enabled;
+              const hasCustomLabel = !!termOverrides?.[docFilterType];
+
+              return (
+                <tr key={field.id} id={rowId}>
+                  <td className="enabled">
+                    <input
+                      aria-label={`Enable ${displayLabel} filter option`}
+                      disabled={isOnlyEnabledOption}
+                      title={isOnlyEnabledOption ? "At least one filter option must remain enabled" : undefined}
+                      type="checkbox"
+                      {...register(`docFilterOptions.${index}.enabled`)}
+                    />
+                  </td>
+                  <td className="filter-type">
+                    {displayLabel}
+                    {hasCustomLabel && <span className="custom-label-indicator" title="Custom label applied">*</span>}
+                    <input type="hidden" {...register(`docFilterOptions.${index}.type`)} />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </fieldset>
 
       <div className="bottomButtons">

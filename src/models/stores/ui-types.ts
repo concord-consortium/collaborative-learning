@@ -2,7 +2,8 @@ import { Instance, types } from "mobx-state-tree";
 
 export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt", "getCopyToDocument"]);
 export type UIDialogType = Instance<typeof UIDialogTypeEnum>;
-export const DocFilterTypeEnum = types.enumeration("docFilter", ["Problem", "Investigation", "Unit", "All"]);
+export const DocFilterTypeIds = ["Problem", "Investigation", "Unit", "All"] as const;
+export const DocFilterTypeEnum = types.enumeration("docFilter", DocFilterTypeIds);
 export type DocFilterType = Instance<typeof DocFilterTypeEnum>;
 
 export const SortTypeIds = ["Date", "Group", "Name", "Strategy", "Bookmarked", "Tools", "Problem"] as const;
