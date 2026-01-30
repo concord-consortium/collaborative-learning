@@ -81,7 +81,7 @@ export const TermOverridesSettings: React.FC = () => {
       </p>
 
       <div className="term-list">
-        {[...TERM_METADATA].sort((a, b) => a.key.localeCompare(b.key)).map(term => {
+        {[...TERM_METADATA].sort((a, b) => a.label.localeCompare(b.label)).map(term => {
           const effectiveDefault = getEffectiveDefault(term.key);
 
           return (

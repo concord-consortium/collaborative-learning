@@ -19,7 +19,10 @@ export const TERM_METADATA: TermMetadata[] = [
   { key: "Bookmarked", label: "Bookmarked", description: "Term for bookmarked documents" },
   { key: "Tools", label: "Tools", description: "Term for CLUE tiles" },
   { key: "sortLabel.sortByDate", label: "Date", description: "Sort label for date" },
-  { key: "Problem", label: "Problem", description: "Term for the problems/tasks in the unit." }
+  { key: "Problem", label: "Problem", description: "Term for the problems/tasks in the unit" },
+  { key: "Unit", label: "Unit", description: "Term for the unit of study" },
+  { key: "Investigation", label: "Investigation", description: "Term for the investigation within a unit" },
+  { key: "Workspace", label: "Workspace", description: "The main editing/viewing panel" }
 ];
 
 /**
