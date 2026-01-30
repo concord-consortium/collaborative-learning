@@ -65,6 +65,15 @@
       "simulator": {
         "defaultSimulation": "EMG_and_claw",
         "maxTiles": 1
+      },
+      "iframeInteractive": {
+        "maxTiles": 1,
+        "url": "https://models-resources.concord.org/hurricane-model/branch/master/index.html?topBarVisible=false",
+        "interactiveState": {},
+        "authoredState": {},
+        "allowedPermissions": "geolocation; microphone; camera; bluetooth",
+        "maxHeight": 0,
+        "enableScroll": false
       }
     },
     "toolbar": [
