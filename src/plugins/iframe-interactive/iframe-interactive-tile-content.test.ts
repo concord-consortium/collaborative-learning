@@ -120,7 +120,7 @@ describe("IframeInteractiveContent", () => {
           settings: {
             iframeInteractive: {
               url: "https://example.com/hurricane-model",
-              interactiveState: {},
+              interactiveState: { version: 1, savedProgress: true },
               authoredState: { questionType: "open_response" },
               maxHeight: 800,
               enableScroll: true
@@ -130,7 +130,7 @@ describe("IframeInteractiveContent", () => {
       });
       const content = defaultIframeInteractiveContent({ appConfig });
       expect(content.url).toBe("https://example.com/hurricane-model");
-      expect(content.interactiveState).toEqual({});
+      expect(content.interactiveState).toEqual({ version: 1, savedProgress: true });
       expect(content.authoredState).toEqual({ questionType: "open_response" });
       expect(content.maxHeight).toBe(800);
       expect(content.enableScroll).toBe(true);
