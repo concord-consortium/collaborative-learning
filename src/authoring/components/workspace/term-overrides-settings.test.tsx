@@ -2,8 +2,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
-import { TermOverridesSettings } from "./term-overrides-settings";
-import { TERM_METADATA } from "../../../utilities/translation/translation-types";
+import { TERM_METADATA, TermOverridesSettings } from "./term-overrides-settings";
 
 const mockSetUnitConfig = jest.fn();
 

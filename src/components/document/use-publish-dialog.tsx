@@ -4,6 +4,7 @@ import { useCustomModal } from "../../hooks/use-custom-modal";
 import { useDBStore, useProblemPath, useStores, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
+import { translate } from "../../utilities/translation/translate";
 
 import "./publish-dialog.scss";
 
@@ -47,10 +48,10 @@ export const usePublishDialog = (document: DocumentModelType) => {
         .catch((reason) => ui.alert(`Your document failed to publish: ${reason}`, "Error"));
   };
 
-  const title = document.type === "problem" ? "Publish Problem Workspace"
+  const title = document.type === "problem" ? `Publish Problem ${translate("Workspace")}`
                                             : document.type === "learningLog"
-                                                ? "Publish Learning Log"
-                                                : "Publish Workspace";
+                                                ? `Publish Learning Log`
+                                                : `Publish ${translate("Workspace")}`;
 
   const TextContent = () => {
     const content = user.type === "teacher"

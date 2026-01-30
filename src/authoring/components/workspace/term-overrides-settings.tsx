@@ -2,10 +2,30 @@ import React, { useEffect, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { useCurriculum } from "../../hooks/use-curriculum";
-import { escapeKeyForForm, TERM_METADATA, TranslationKeyType } from "../../../utilities/translation/translation-types";
+import { escapeKeyForForm, TranslationKeyType } from "../../../utilities/translation/translation-types";
 import { getDefaultValue } from "../../../utilities/translation/translate";
 
 import "./term-overrides-settings.scss";
+
+export interface TermMetadata {
+  key: TranslationKeyType;
+  label: string;  // User-friendly display name for authoring UI
+  description: string;
+}
+
+export const TERM_METADATA: TermMetadata[] = [
+  { key: "studentGroup", label: "Group", description: "A group of students" },
+  { key: "sortLabel.sortByOwner", label: "Name", description: "Sort label for document owner/student" },
+  { key: "Strategy", label: "Strategy", description: "The comment tag/strategy for sorting" },
+  { key: "Bookmarked", label: "Bookmarked", description: "Term for bookmarked documents" },
+  { key: "Tools", label: "Tools", description: "Term for CLUE tiles" },
+  { key: "sortLabel.sortByDate", label: "Date", description: "Sort label for date" },
+  { key: "Problem", label: "Problem", description: "Term for the problems/tasks in the unit" },
+  { key: "Unit", label: "Unit", description: "Term for the unit of study" },
+  { key: "Investigation", label: "Investigation", description: "Term for the investigation within a unit" },
+  { key: "Workspace", label: "Workspace", description: "The main editing/viewing panel (singular)" },
+  { key: "Workspaces", label: "Workspaces", description: "The main editing/viewing panel (plural)" }
+];
 
 interface TermOverrideFormInputs {
   overrides: Record<string, string>;

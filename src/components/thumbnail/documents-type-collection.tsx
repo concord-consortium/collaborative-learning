@@ -1,16 +1,15 @@
 import React from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import { useAppConfig, useClassStore, useStores, useUserStore } from "../../hooks/use-stores";
-import { AppConfigModelType } from "../../models/stores/app-config-model";
+import NewDocumentIcon from "../../assets/icons/new/add.svg";
+import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
+import { useClassStore, useStores, useUserStore } from "../../hooks/use-stores";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
-import { PersonalDocument } from "../../models/document/document-types";
 import { ENavTab, NavTabSectionModelType  } from "../../models/view/nav-tabs";
+import { translate } from "../../utilities/translation/translate";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentContextReact } from "../document/document-context";
 import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-item";
-import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
-import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
 import "./document-type-collection.scss";
 
@@ -30,27 +29,15 @@ interface IProps {
   allowDelete: boolean;
 }
 
-function getNewDocumentLabel(section: NavTabSectionModelType , appConfigStore: AppConfigModelType) {
-  let documentLabel = "";
-  section.documentTypes.forEach(type => {
-    const label = type !== PersonalDocument ? appConfigStore.getDocumentLabel(type, 1) : "";
-    if (!documentLabel && label) {
-      documentLabel = label;
-    }
-  });
-  return "New " + (documentLabel || "Workspace");
-}
-
 export const DocumentCollectionByType: React.FC<IProps> = observer(({
                                   topTab, tab, section, index, numSections=0, scale, selectedDocument,
                                   selectedSecondaryDocument, horizontal, onSelectNewDocument, onSelectDocument,
                                   shouldHandleStarClick, allowDelete }: IProps) => {
-  const appConfigStore = useAppConfig();
   const classStore = useClassStore();
   const user = useUserStore();
   const { sectionDocuments } = useStores();
   const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
-  const newDocumentLabel = getNewDocumentLabel(section, appConfigStore);
+  const newDocumentLabel = `New ${translate("Problem")} ${translate("Workspace")}`;
   const isSinglePanel = numSections < 2;
   const tabName = tab?.toLowerCase().replace(' ', '-');
   const sectionDocs = sectionDocuments.getSectionDocs(section);

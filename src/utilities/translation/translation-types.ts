@@ -6,25 +6,6 @@ export function isTranslationKey(key: string): key is TranslationKeyType {
   return key in enUS;
 }
 
-export interface TermMetadata {
-  key: TranslationKeyType;
-  label: string;  // User-friendly display name for authoring UI
-  description: string;
-}
-
-export const TERM_METADATA: TermMetadata[] = [
-  { key: "studentGroup", label: "Group", description: "A group of students" },
-  { key: "sortLabel.sortByOwner", label: "Name", description: "Sort label for document owner/student" },
-  { key: "Strategy", label: "Strategy", description: "The comment tag/strategy for sorting" },
-  { key: "Bookmarked", label: "Bookmarked", description: "Term for bookmarked documents" },
-  { key: "Tools", label: "Tools", description: "Term for CLUE tiles" },
-  { key: "sortLabel.sortByDate", label: "Date", description: "Sort label for date" },
-  { key: "Problem", label: "Problem", description: "Term for the problems/tasks in the unit" },
-  { key: "Unit", label: "Unit", description: "Term for the unit of study" },
-  { key: "Investigation", label: "Investigation", description: "Term for the investigation within a unit" },
-  { key: "Workspace", label: "Workspace", description: "The main editing/viewing panel" }
-];
-
 /**
  * Maps sort type IDs (used in PrimarySortType) to translation keys.
  * Most sort types use their ID as the key, but some have namespaced keys

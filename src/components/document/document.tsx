@@ -2,25 +2,25 @@ import { inject, observer } from "mobx-react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
-import { DocumentFileMenu } from "./document-file-menu";
-import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
-import { BaseComponent, IBaseProps } from "../base";
+import { kAnalyzerUserParams } from "../../../shared/shared";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { DocumentModelType } from "../../models/document/document";
-import { translate } from "../../utilities/translation/translate";
+import { CommentWithId } from "../../models/document/document-comments-manager";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
+import { getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
-import { getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
 import { ENavTab } from "../../models/view/nav-tabs";
+import { translate } from "../../utilities/translation/translate";
+import { BaseComponent, IBaseProps } from "../base";
 import { IconButton } from "../utilities/icon-button";
 import ToggleControl from "../utilities/toggle-control";
-import { Logger } from "../../lib/logger";
-import { LogEventName } from "../../lib/logger-types";
 import { DocumentAnnotationToolbar } from "./document-annotation-toolbar";
-import { kAnalyzerUserParams } from "../../../shared/shared";
-import { CommentWithId } from "../../models/document/document-comments-manager";
+import { DocumentFileMenu } from "./document-file-menu";
+import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
 
 import IdeaIcon from "../../assets/idea-icon.svg";
 
@@ -63,7 +63,7 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
 const EditButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="edit" key="edit" className="action icon-edit"
-                onClickButton={onClick} title="Rename Workspace" />
+                onClickButton={onClick} title={`Rename ${translate("Workspace")}`} />
   );
 };
 

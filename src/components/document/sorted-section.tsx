@@ -2,18 +2,19 @@ import React from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 
-import { DocumentModelType } from "../../models/document/document";
 import { useStores } from "../../hooks/use-stores";
-import { DocFilterType, SecondarySortType } from "../../models/stores/ui-types";
-import { DocumentGroup } from "../../models/stores/document-group";
-import { DocumentGroupComponent } from "./document-group";
-import { logDocumentViewEvent } from "../../models/document/log-document-event";
-import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
-import { ENavTab } from "../../models/view/nav-tabs";
-import { IDocumentMetadataModel } from "../../models/document/document-metadata-model";
-import { LogEventName } from "../../lib/logger-types";
 import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
+import { DocumentModelType } from "../../models/document/document";
+import { IDocumentMetadataModel } from "../../models/document/document-metadata-model";
+import { logDocumentViewEvent } from "../../models/document/log-document-event";
+import { DocumentGroup } from "../../models/stores/document-group";
+import { DocFilterType, SecondarySortType } from "../../models/stores/ui-types";
+import { ENavTab } from "../../models/view/nav-tabs";
+import { translate } from "../../utilities/translation/translate";
 import { sortDocumentsInGroup } from "../../utilities/sort-document-utils";
+import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
+import { DocumentGroupComponent } from "./document-group";
 
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
@@ -128,7 +129,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
           {documentGroup.icon && <documentGroup.icon className="tool-icon"/>} {documentGroup.label}
         </div>
         <div className="section-header-right">
-          <div>Total workspaces: {documentCount}</div>
+          <div>Total {translate("Workspaces").toLowerCase()}: {documentCount}</div>
           <ArrowIcon
             className={classNames("section-header-arrow", {up: showDocuments})}
             onClick={handleToggleShowDocuments}
