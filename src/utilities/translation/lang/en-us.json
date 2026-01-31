@@ -1,13 +1,17 @@
 {
   "studentGroup": "Group",
+  "studentGroups": "Groups",
   "sortLabel.sortByOwner": "Student",
   "Strategy": "",
   "Bookmarked": "Bookmarked",
   "Tools": "Tools",
   "sortLabel.sortByDate": "Date",
   "Problem": "Problem",
+  "Problems": "Problems",
   "Workspace": "Workspace",
   "Workspaces": "Workspaces",
   "Unit": "Unit",
-  "Investigation": "Investigation"
+  "Units": "Units",
+  "Investigation": "Investigation",
+  "Investigations": "Investigations"
 }

@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect } from "react";
 import { observer } from "mobx-react";
+import React, { useCallback, useEffect } from "react";
+
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { useSortOptions } from "../../hooks/use-sort-options";
 import { useStores } from "../../hooks/use-stores";
@@ -10,15 +11,15 @@ import { DocumentGroup } from "../../models/stores/document-group";
 import { DocFilterType, DocFilterTypeIds, PrimarySortType, SecondarySortType } from "../../models/stores/ui-types";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { translate } from "../../utilities/translation/translate";
+import { isTranslationKey } from "../../utilities/translation/translation-types";
 import { AiSummary } from "../navigation/ai-summary";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 import { DocListDebug } from "./doc-list-debug";
-import { IOpenDocumentsGroupMetadata, SortedSection } from "./sorted-section";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
+import { IOpenDocumentsGroupMetadata, SortedSection } from "./sorted-section";
 
 import "../thumbnail/document-type-collection.scss";
 import "./sort-work-view.scss";
-import { isTranslationKey } from "../../utilities/translation/translation-types";
 
 /**
  * Resources pane view of class work and exemplars.
@@ -29,7 +30,8 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { sortOptions, showContextFilter, defaultPrimarySort, isValidSortType } = useSortOptions();
   const { docFilter: persistentUIDocFilter, primarySortBy, secondarySortBy } = persistentUI;
   const enabledDocFilterOptions = appConfig.sortWorkConfig?.docFilterOptions;
-  const filterOptions: DocFilterType[] = enabledDocFilterOptions ? [...enabledDocFilterOptions] : [...DocFilterTypeIds];
+  const filterOptions: DocFilterType[] =
+    enabledDocFilterOptions ? [...enabledDocFilterOptions] : [...DocFilterTypeIds];
   const docFilter = persistentUIDocFilter;
 
   // Validate that current sort selections are still valid given configuration
