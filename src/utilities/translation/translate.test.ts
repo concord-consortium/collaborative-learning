@@ -1,5 +1,4 @@
 import { translate, setTermOverrides, clearTermOverrides, getDefaultValue } from "./translate";
-import { escapeKeyForForm } from "./translation-types";
 
 describe("translate", () => {
   beforeEach(() => {
@@ -109,22 +108,6 @@ describe("translate", () => {
 
     it("should return the key itself for unknown keys", () => {
       expect(getDefaultValue("UnknownKey" as any)).toBe("UnknownKey");
-    });
-  });
-
-  describe("escapeKeyForForm", () => {
-    it("should convert dots to underscores", () => {
-      expect(escapeKeyForForm("sortLabel.sortByOwner")).toBe("sortLabel_sortByOwner");
-      expect(escapeKeyForForm("sortLabel.sortByDate")).toBe("sortLabel_sortByDate");
-    });
-
-    it("should leave keys without dots unchanged", () => {
-      expect(escapeKeyForForm("studentGroup")).toBe("studentGroup");
-      expect(escapeKeyForForm("Strategy")).toBe("Strategy");
-    });
-
-    it("should handle multiple dots", () => {
-      expect(escapeKeyForForm("a.b.c")).toBe("a_b_c");
     });
   });
 

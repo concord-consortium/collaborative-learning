@@ -4,8 +4,8 @@ import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 import appConfig from "../../../clue/app-config.json";
 import { ISortOptionConfig } from "../../../models/stores/sort-work-config";
 import { DocFilterType, DocFilterTypeIds } from "../../../models/stores/ui-types";
-import { getSortTypeLabel, getSortTypeTranslationKey } from "../../../utilities/sort-utils";
-import { isTranslationKey, translate } from "../../../utilities/translation/translate";
+import { getSortTypeTranslationKey } from "../../../utilities/sort-utils";
+import { getDefaultValue, isTranslationKey, setTermOverrides, translate } from "../../../utilities/translation/translate";
 import { ISortWorkConfig, SortTypeId, SortTypeIds } from "../../types";
 import { useCurriculum } from "../../hooks/use-curriculum";
 
@@ -44,7 +44,6 @@ interface SortWorkSettingsFormInputs {
 
 const SortWorkSettings: React.FC = () => {
   const { unitConfig, setUnitConfig, saveState } = useCurriculum();
-  const tagPrompt = unitConfig?.config?.tagPrompt;
   const termOverrides = unitConfig?.config?.termOverrides;
 
   const formDefaults: SortWorkSettingsFormInputs = useMemo(() => {
@@ -91,6 +90,11 @@ const SortWorkSettings: React.FC = () => {
   useEffect(() => {
     reset(formDefaults);
   }, [formDefaults, reset]);
+
+  // Ensure translations always use the latest termOverrides
+  useEffect(() => {
+    setTermOverrides(termOverrides);
+  }, [termOverrides]);
 
   const { fields, move } = useFieldArray({
     control,
@@ -152,10 +156,6 @@ const SortWorkSettings: React.FC = () => {
     }
   };
 
-  const getDisplayLabel = (type: SortTypeId) => {
-    return getSortTypeLabel(type, { tagPrompt, termOverrides });
-  };
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="sort-work-settings">
       <h3 id="sort-work-heading">Sort Work Tab Configuration</h3>
@@ -168,7 +168,6 @@ const SortWorkSettings: React.FC = () => {
         <p className="muted small" id="sort-options-description">
           Check the options to enable them. Use arrow buttons to reorder.
           Labels can be customized on the Term Overrides page.
-          Labels marked with an <span className="custom-label-indicator">*</span> have been customized.
         </p>
         <table aria-describedby="sort-options-description" role="grid">
           <thead>
@@ -176,23 +175,25 @@ const SortWorkSettings: React.FC = () => {
               <th className="enabled" scope="col">Enabled</th>
               <th className="order" scope="col">Order</th>
               <th className="sort-type" scope="col">Sort Type</th>
+              <th className="label" scope="col">Label</th>
               <th className="description" scope="col">Description</th>
             </tr>
           </thead>
           <tbody>
             {fields.map((field, index) => {
               const sortType = field.type;
-              const displayLabel = getDisplayLabel(sortType);
+              const translationKey = getSortTypeTranslationKey(sortType);
+              const defaultValue = getDefaultValue(translationKey);
+              const displayLabel = translate(translationKey);
               const rowId = `sort-option-${sortType}`;
               const watchedOption = watchSortOptions[index];
               const isOnlyEnabledOption = enabledSortOptions.length === 1 && watchedOption?.enabled;
-              const hasCustomLabel = !!termOverrides?.[getSortTypeTranslationKey(sortType)];
 
               return (
                 <tr key={field.id} id={rowId}>
                   <td className="enabled">
                     <input
-                      aria-label={`Enable ${displayLabel} sort option`}
+                      aria-label={`Enable ${defaultValue} sort option`}
                       disabled={isOnlyEnabledOption}
                       title={isOnlyEnabledOption ? "At least one sort option must remain enabled" : undefined}
                       type="checkbox"
@@ -201,7 +202,7 @@ const SortWorkSettings: React.FC = () => {
                   </td>
                   <td className="narrow order order-buttons">
                     <button
-                      aria-label={`Move ${displayLabel} up`}
+                      aria-label={`Move ${defaultValue} up`}
                       disabled={index === 0}
                       onClick={() => moveOption(index, -1)}
                       type="button"
@@ -209,7 +210,7 @@ const SortWorkSettings: React.FC = () => {
                       ↑
                     </button>
                     <button
-                      aria-label={`Move ${displayLabel} down`}
+                      aria-label={`Move ${defaultValue} down`}
                       disabled={index === fields.length - 1}
                       onClick={() => moveOption(index, 1)}
                       type="button"
@@ -218,10 +219,10 @@ const SortWorkSettings: React.FC = () => {
                     </button>
                   </td>
                   <td className="sort-type">
-                    {displayLabel}
-                    {hasCustomLabel && <span className="custom-label-indicator" title="Custom label applied">*</span>}
+                    {defaultValue}
                     <input type="hidden" {...register(`sortOptions.${index}.type`)} />
                   </td>
+                  <td className="label">{displayLabel}</td>
                   <td className="description">
                     {sortOptionDescriptions[sortType]}
                   </td>
@@ -240,10 +241,9 @@ const SortWorkSettings: React.FC = () => {
         >
           <option value="">Auto (Group → Name → first available option)</option>
           {enabledSortOptions.map(option => {
-            const label = getDisplayLabel(option.type);
             return (
               <option key={option.type} value={option.type}>
-                {label}
+                {getDefaultValue(getSortTypeTranslationKey(option.type))}
               </option>
             );
           })}
@@ -273,29 +273,29 @@ const SortWorkSettings: React.FC = () => {
         <p className="muted small" id="filter-options-description">
           Check the options to enable them.
           Labels can be customized on the Term Overrides page.
-          Labels marked with an <span className="custom-label-indicator">*</span> have been customized.
         </p>
         <table aria-describedby="filter-options-description" role="grid">
           <thead>
             <tr>
               <th className="enabled" scope="col">Enabled</th>
               <th className="filter-type" scope="col">Filter Type</th>
+              <th className="label" scope="col">Label</th>
             </tr>
           </thead>
           <tbody>
             {docFilterFields.map((field, index) => {
               const docFilterType = field.type;
+              const defaultValue = isTranslationKey(docFilterType) ? getDefaultValue(docFilterType) : docFilterType;
               const displayLabel = isTranslationKey(docFilterType) ? translate(docFilterType): docFilterType;
               const rowId = `doc-filter-option-${docFilterType}`;
               const watchedOption = watchDocFilterOptions[index];
               const isOnlyEnabledOption = enabledDocFilterOptions.length === 1 && watchedOption?.enabled;
-              const hasCustomLabel = !!termOverrides?.[docFilterType];
 
               return (
                 <tr key={field.id} id={rowId}>
                   <td className="enabled">
                     <input
-                      aria-label={`Enable ${displayLabel} filter option`}
+                      aria-label={`Enable ${defaultValue} filter option`}
                       disabled={isOnlyEnabledOption}
                       title={isOnlyEnabledOption ? "At least one filter option must remain enabled" : undefined}
                       type="checkbox"
@@ -303,10 +303,10 @@ const SortWorkSettings: React.FC = () => {
                     />
                   </td>
                   <td className="filter-type">
-                    {displayLabel}
-                    {hasCustomLabel && <span className="custom-label-indicator" title="Custom label applied">*</span>}
+                    {defaultValue}
                     <input type="hidden" {...register(`docFilterOptions.${index}.type`)} />
                   </td>
+                  <td className="label">{displayLabel}</td>
                 </tr>
               );
             })}
