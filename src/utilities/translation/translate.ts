@@ -18,7 +18,11 @@
 
 import { observable } from "mobx";
 import enUS from "./lang/en-us.json";
-import { TranslationKeyType } from "./translation-types";
+
+export type TranslationKeyType = keyof typeof enUS;
+export function isTranslationKey(key: string): key is TranslationKeyType {
+  return key in enUS;
+}
 
 // Module-level MobX observable state for term overrides.
 const moduleTermOverrides = observable.box<Record<string, string> | undefined>(undefined);

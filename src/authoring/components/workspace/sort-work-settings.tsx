@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 
-import { translate } from "../../../utilities/translation/translate";
 import appConfig from "../../../clue/app-config.json";
 import { ISortOptionConfig } from "../../../models/stores/sort-work-config";
 import { DocFilterType, DocFilterTypeIds } from "../../../models/stores/ui-types";
-import { getSortTypeLabel } from "../../../utilities/sort-utils";
-import { getSortTypeTranslationKey, isTranslationKey } from "../../../utilities/translation/translation-types";
-import { useCurriculum } from "../../hooks/use-curriculum";
+import { getSortTypeLabel, getSortTypeTranslationKey } from "../../../utilities/sort-utils";
+import { isTranslationKey, translate } from "../../../utilities/translation/translate";
 import { ISortWorkConfig, SortTypeId, SortTypeIds } from "../../types";
+import { useCurriculum } from "../../hooks/use-curriculum";
 
 import "./sort-work-settings.scss";
 

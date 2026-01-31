@@ -2,8 +2,8 @@ import React, { useEffect, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { useCurriculum } from "../../hooks/use-curriculum";
-import { escapeKeyForForm, TranslationKeyType } from "../../../utilities/translation/translation-types";
-import { getDefaultValue } from "../../../utilities/translation/translate";
+import { escapeKeyForForm } from "../../../utilities/sort-utils";
+import { getDefaultValue, TranslationKeyType } from "../../../utilities/translation/translate";
 
 import "./term-overrides-settings.scss";
 

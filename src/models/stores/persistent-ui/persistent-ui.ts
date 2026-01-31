@@ -6,7 +6,7 @@ import { buildSectionPath, getCurriculumMetadata } from "../../../../shared/shar
 import { DB } from "../../../lib/db";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { removeLoadingMessage, showLoadingMessage } from "../../../utilities/loading-utils";
-import { isValidSortTypeId } from "../../../utilities/translation/translation-types";
+import { isValidSortTypeId } from "../../../utilities/sort-utils";
 import { urlParams } from "../../../utilities/url-params";
 import { DocumentModelType } from "../../document/document";
 import {
