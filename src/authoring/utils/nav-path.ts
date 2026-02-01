@@ -59,6 +59,27 @@ export const getCurriculumItem = (
 
 const kContainerConfigurationLabel = "⚙️ Configuration";
 
+export const getProblemOrdinal = (unitConfig: IUnit | undefined, path: string | undefined): string | undefined => {
+  if (!unitConfig || !path) return undefined;
+
+  const pathParts = path.split("/");
+  if (pathParts[0] !== "investigations") return undefined;
+
+  const matchInvestigation = /^investigation-(\d+)$/.exec(pathParts[1] ?? "");
+  if (!matchInvestigation) return undefined;
+  const investigationIndex = parseInt(matchInvestigation[1], 10);
+  const investigation = unitConfig.investigations?.[investigationIndex];
+  if (!investigation) return undefined;
+
+  const matchProblem = /^problem-(\d+)$/.exec(pathParts[2] ?? "");
+  if (!matchProblem) return undefined;
+  const problemIndex = parseInt(matchProblem[1], 10);
+  const problem = investigation.problems?.[problemIndex];
+  if (!problem) return undefined;
+
+  return `${investigation.ordinal}.${problem.ordinal}`;
+};
+
 export const getUnitChildrenTree = (
   unit: IUnit | undefined,
   files: IUnitFiles | undefined,

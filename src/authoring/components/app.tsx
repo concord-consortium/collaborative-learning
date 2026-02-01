@@ -8,6 +8,7 @@ import MediaLibrary from "./media-library";
 import { AuthProvider, useAuth } from "../hooks/use-auth";
 import { AuthoringApiProvider } from "../hooks/use-authoring-api";
 import { AuthoringPreviewProvider, PreviewUserType, useAuthoringPreview } from "../hooks/use-authoring-preview";
+import { getProblemOrdinal } from "../utils/nav-path";
 import Admin from "./admin";
 import CommitUI from "./commit-ui";
 
@@ -19,7 +20,7 @@ const InnerApp: React.FC = () => {
   const {
     branch, setBranch, unit, setUnit,
     unitConfig, error, files, reset,
-    saveState, branchMetadata,
+    saveState, branchMetadata, path,
   } = useCurriculum();
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [showAdminUI, setShowAdminUI] = useState(false);
@@ -44,9 +45,11 @@ const InnerApp: React.FC = () => {
     }
   };
 
+  const problemOrdinal = useMemo(() => getProblemOrdinal(unitConfig, path), [unitConfig, path]);
+
   const openPreview = (userType: PreviewUserType) => {
     if (branch && unit) {
-      authoringPreview.openPreview(branch, unit, userType);
+      authoringPreview.openPreview(branch, unit, userType, problemOrdinal);
     }
   };
 
