@@ -68,13 +68,14 @@ export const getProblemOrdinal = (unitConfig: IUnit | undefined, path: string | 
   const matchInvestigation = /^investigation-(\d+)$/.exec(pathParts[1] ?? "");
   if (!matchInvestigation) return undefined;
   const investigationIndex = parseInt(matchInvestigation[1], 10);
-  const investigation = unitConfig.investigations?.[investigationIndex];
-  if (!investigation) return undefined;
+  if (investigationIndex < 0 || investigationIndex >= (unitConfig.investigations?.length ?? 0)) return undefined;
+  const investigation = unitConfig.investigations![investigationIndex];
 
   const matchProblem = /^problem-(\d+)$/.exec(pathParts[2] ?? "");
   if (!matchProblem) return undefined;
   const problemIndex = parseInt(matchProblem[1], 10);
-  const problem = investigation.problems?.[problemIndex];
+  if (problemIndex < 0 || problemIndex >= (investigation.problems?.length ?? 0)) return undefined;
+  const problem = investigation.problems![problemIndex];
   if (!problem) return undefined;
 
   return `${investigation.ordinal}.${problem.ordinal}`;
