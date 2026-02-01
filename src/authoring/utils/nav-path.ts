@@ -60,23 +60,21 @@ export const getCurriculumItem = (
 const kContainerConfigurationLabel = "⚙️ Configuration";
 
 export const getProblemOrdinal = (unitConfig: IUnit | undefined, path: string | undefined): string | undefined => {
-  if (!unitConfig || !path) return undefined;
+  const investigations = unitConfig?.investigations;
+  const [rootPart, investigationPart, problemPart] = path?.split("/") ?? [];
+  if (!investigations || rootPart !== "investigations") return undefined;
 
-  const pathParts = path.split("/");
-  if (pathParts[0] !== "investigations") return undefined;
+  const [, investigationIndexStr] = /^investigation-(\d+)$/.exec(investigationPart ?? "") ?? [];
+  if (!investigationIndexStr) return undefined;
+  const investigationIndex = parseInt(investigationIndexStr, 10);
+  if (investigationIndex < 0 || investigationIndex >= investigations.length) return undefined;
+  const investigation = investigations[investigationIndex];
 
-  const matchInvestigation = /^investigation-(\d+)$/.exec(pathParts[1] ?? "");
-  if (!matchInvestigation) return undefined;
-  const investigationIndex = parseInt(matchInvestigation[1], 10);
-  if (investigationIndex < 0 || investigationIndex >= (unitConfig.investigations?.length ?? 0)) return undefined;
-  const investigation = unitConfig.investigations![investigationIndex];
-
-  const matchProblem = /^problem-(\d+)$/.exec(pathParts[2] ?? "");
-  if (!matchProblem) return undefined;
-  const problemIndex = parseInt(matchProblem[1], 10);
-  if (problemIndex < 0 || problemIndex >= (investigation.problems?.length ?? 0)) return undefined;
-  const problem = investigation.problems![problemIndex];
-  if (!problem) return undefined;
+  const [, problemIndexStr] = /^problem-(\d+)$/.exec(problemPart ?? "") ?? [];
+  if (!problemIndexStr) return undefined;
+  const problemIndex = parseInt(problemIndexStr, 10);
+  if (problemIndex < 0 || problemIndex >= investigation.problems.length) return undefined;
+  const problem = investigation.problems[problemIndex];
 
   return `${investigation.ordinal}.${problem.ordinal}`;
 };
