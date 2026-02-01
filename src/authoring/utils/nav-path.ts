@@ -62,19 +62,16 @@ const kContainerConfigurationLabel = "⚙️ Configuration";
 export const getProblemOrdinal = (unitConfig: IUnit | undefined, path: string | undefined): string | undefined => {
   const investigations = unitConfig?.investigations;
   const [rootPart, investigationPart, problemPart] = path?.split("/") ?? [];
-  if (!investigations || rootPart !== "investigations") return undefined;
-
   const [, investigationIndexStr] = /^investigation-(\d+)$/.exec(investigationPart ?? "") ?? [];
-  if (!investigationIndexStr) return undefined;
-  const investigationIndex = parseInt(investigationIndexStr, 10);
-  if (investigationIndex < 0 || investigationIndex >= investigations.length) return undefined;
-  const investigation = investigations[investigationIndex];
-
   const [, problemIndexStr] = /^problem-(\d+)$/.exec(problemPart ?? "") ?? [];
-  if (!problemIndexStr) return undefined;
+  const investigationIndex = parseInt(investigationIndexStr, 10);
   const problemIndex = parseInt(problemIndexStr, 10);
-  if (problemIndex < 0 || problemIndex >= investigation.problems.length) return undefined;
-  const problem = investigation.problems[problemIndex];
+  const investigation = investigations?.[investigationIndex];
+  const problem = investigation?.problems[problemIndex];
+
+  if (rootPart !== "investigations" || !investigation || !problem) {
+    return undefined;
+  }
 
   return `${investigation.ordinal}.${problem.ordinal}`;
 };
