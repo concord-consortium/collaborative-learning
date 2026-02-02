@@ -102,14 +102,14 @@
       }
 
       &.class-work {
-        border-color: $classwork-purple;
+        border-color: $workspace-teal;
 
         &:hover {
-          background-color: $classwork-purple-light-4;
+          background-color: $workspace-teal-light-4;
         }
 
         &:active {
-          background-color: $classwork-purple-light-3;
+          background-color: $workspace-teal-light-3;
         }
       }
 

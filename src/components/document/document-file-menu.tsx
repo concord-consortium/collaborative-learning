@@ -10,6 +10,7 @@ import "./document-file-menu.scss";
 
 interface IProps {
   document: DocumentModelType;
+  onNewDocument?: () => void;
   isOpenDisabled?: boolean;
   onOpenDocument?: (document: DocumentModelType) => void;
   isCopyDisabled?: boolean;
@@ -41,6 +42,7 @@ function showPublishOption(document: DocumentModelType, stores: IStores) {
 
 export const DocumentFileMenu: React.FC<IProps> = props => {
   const { document,
+          onNewDocument,
           isOpenDisabled, onOpenDocument,
           isCopyDisabled, onCopyDocument,
           isDeleteDisabled, onDeleteDocument,
@@ -75,6 +77,12 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
 
   const menuItems: ICustomDropdownItem[] = useMemo(() => ([
     {
+      ...idAndIcon("icon-new-workspace", appIcons),
+      text: "New",
+      disabled: !onNewDocument,
+      onClick: () => onNewDocument?.()
+    },
+    {
       ...idAndIcon("icon-open-workspace", appIcons),
       text: "Open...",
       disabled: !!isOpenDisabled,
@@ -95,11 +103,11 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
     },
     ...adminItems
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ]), [document]);
+  ]), [document, onNewDocument]);
 
   return (
     <CustomSelect className="document-file-menu" dataTest="document-file-menu"
-                  titleIcon={titleIcon} title="File" titleVisuallyHidden={true}
+                  titleIcon={titleIcon} title="File" titleVisuallyHidden={false}
                   items={menuItems} showItemChecks={false} showItemIcons={true}/>
   );
 };
