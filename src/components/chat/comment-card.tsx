@@ -76,9 +76,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     logDocumentViewEvent(document);
   };
 
-  //appConfig holds showCommentTag, commentTags, tagPrompt fetched from "clue-curriculum" repository
   const { appConfig } = useStores();
-  const { showCommentTag, commentTags, tagPrompt } = appConfig;
+  const { showCommentTag, commentTags } = appConfig;
 
   const showWaitingMessage = !focusTileId || content?.isAwaitingRemoteComment;
 
@@ -137,8 +136,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
               documents.getDocument(comment.linkedDocumentKey);
 
             //if tagPrompt was posted to Firestore - for ex: SAS unit (where tagPrompt = "Select Student Strategy")
-            //our comment.tags should be [""]
-            const isTagPrompt = (comment.tags && comment.tags[0] === "") || (comment.tags === undefined);
+            //our comment.tags[0] should be [""]
+            const isTagPrompt = comment.tags === undefined || comment.tags[0] === "";
             const displayTags = showCommentTag && !isTagPrompt && comment.tags && comment.tags.length > 0;
 
             return (
@@ -185,7 +184,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           numPostedComments={postedComments?.length || 0}
           showCommentTag={showCommentTag || false}
           commentTags={commentTags}
-          tagPrompt={tagPrompt}
           showAgreeButtons={showAgreeButtons}
         />
       </div>

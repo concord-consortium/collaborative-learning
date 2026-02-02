@@ -36,27 +36,11 @@ export const AppConfigModel = types
     settings: self.config?.settings,
     requireSortWorkTab: false
   }))
-  .views(self => ({
-    /**
-     * The complete term overrides object, including tagPrompt as the Strategy override
-     * if no explicit Strategy override exists.
-     */
-    get effectiveTermOverrides(): Record<string, string> | undefined {
-      const { termOverrides, tagPrompt } = self.configMgr;
-      if (!termOverrides && !tagPrompt) return undefined;
-
-      // If tagPrompt exists and there's no explicit Strategy override, use tagPrompt as Strategy
-      if (tagPrompt && !termOverrides?.Strategy) {
-        return { ...termOverrides, Strategy: tagPrompt };
-      }
-      return termOverrides;
-    }
-  }))
   .actions(self => ({
     afterCreate() {
       // Initialize module-level overrides from base config (if config exists)
       if (self.config) {
-        setTermOverrides(self.effectiveTermOverrides);
+        setTermOverrides(self.config.termOverrides);
       }
     },
     setConfigs(configs: Partial<UnitConfiguration>[]) {
@@ -69,7 +53,7 @@ export const AppConfigModel = types
       self.authorTools = ToolbarModel.create(self.configMgr.authorTools);
       self.toolbar = ToolbarModel.create(self.configMgr.toolbar);
       self.settings = self.configMgr.settings;
-      setTermOverrides(self.effectiveTermOverrides);
+      setTermOverrides(self.config.termOverrides);
     },
     setRequireSortWorkTab(requireSortWorkTab: boolean) {
       self.requireSortWorkTab = requireSortWorkTab;
@@ -96,7 +80,6 @@ export const AppConfigModel = types
     get autoSectionProblemDocuments() { return self.configMgr.autoSectionProblemDocuments; },
     get showCommentTag() { return self.configMgr.showCommentTag; },
     get commentTags() { return self.configMgr.commentTags; },
-    get tagPrompt() { return self.configMgr.tagPrompt; },
     get aiEvaluation() { return self.configMgr.aiEvaluation; },
     get aiPrompt() { return self.configMgr.aiPrompt; },
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },

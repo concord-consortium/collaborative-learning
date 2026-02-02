@@ -46,7 +46,6 @@ export interface IUnitConfig {
   settings: ISettings;
   showCommentTag: boolean;
   commentTags: Record<string, string>;
-  tagPrompt: string;
   enableCommentRoles: CommentRole[];
   aiEvaluation?: AIEvaluation;
   aiPrompt: IAiPrompt;

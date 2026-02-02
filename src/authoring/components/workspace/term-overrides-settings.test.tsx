@@ -7,8 +7,7 @@ import { TERM_METADATA, TermOverridesSettings } from "./term-overrides-settings"
 const mockSetUnitConfig = jest.fn();
 
 const mockConfig = {
-  termOverrides: {} as Record<string, string>,
-  tagPrompt: "Test Tag Prompt"
+  termOverrides: {} as Record<string, string>
 };
 
 const mockUnitConfig = {
@@ -50,19 +49,12 @@ describe("TermOverridesSettings", () => {
     const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
     expect(groupInput.placeholder).toBe("Group");
 
-    const nameInput = screen.getByLabelText("Name") as HTMLInputElement;
+    const nameInput = screen.getByLabelText("Student") as HTMLInputElement;
     expect(nameInput.placeholder).toBe("Student");
 
-    // Strategy should use tagPrompt as fallback since its default is empty
+    // Strategy does not have a default
     const strategyInput = screen.getByLabelText("Strategy") as HTMLInputElement;
-    expect(strategyInput.placeholder).toBe("Test Tag Prompt");
-  });
-
-  it("shows special help text for Strategy term", () => {
-    render(<TermOverridesSettings />);
-
-    // The help text should contain both the explanation and the current tag prompt value
-    expect(screen.getByText(/If left blank, defaults to the tag prompt.*Test Tag Prompt/)).toBeInTheDocument();
+    expect(strategyInput.placeholder).toBe("(no default)");
   });
 
   it("allows entering custom override values", async () => {
@@ -134,7 +126,7 @@ describe("TermOverridesSettings", () => {
     const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
     expect(groupInput.value).toBe("Team");
 
-    const nameInput = screen.getByLabelText("Name") as HTMLInputElement;
+    const nameInput = screen.getByLabelText("Student") as HTMLInputElement;
     expect(nameInput.value).toBe("Participant");
   });
 
