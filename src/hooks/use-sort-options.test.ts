@@ -37,6 +37,15 @@ describe("useSortOptions", () => {
       expect(defaultPrimarySort).toBe("Group");
     });
 
+    it("should include Strategy option when the term is overridden", () => {
+      setupMockStores({ termOverrides: { Strategy: "Design Approach" }, showCommentTag: true });
+      const { sortOptions } = useSortOptions();
+
+      expect(sortOptions.map(o => o.type)).toContain("Strategy");
+      const strategyOption = sortOptions.find(o => o.type === "Strategy");
+      expect(strategyOption?.label).toBe("Design Approach");
+    });
+
     it("should filter out Group when autoAssignStudentsToIndividualGroups is true", () => {
       setupMockStores({ autoAssignStudentsToIndividualGroups: true });
       const { sortOptions, defaultPrimarySort } = useSortOptions();

@@ -19,7 +19,7 @@ function getTermMetadata(key: TranslationKeyType, description: string): TermMeta
 
 const strategyDescription =
   "The comment tag/strategy for sorting. The sort option will only appear if this term is overridden.";
-export const TERM_METADATA: TermMetadata[] = [
+export const termMetadata: TermMetadata[] = [
   getTermMetadata("studentGroup", "A group of students"),
   getTermMetadata("studentGroups", "Multiple groups of students"),
   getTermMetadata("sortLabel.sortByOwner", "Sort label for document owner/student"),
@@ -48,7 +48,7 @@ export const TermOverridesSettings: React.FC = () => {
     const termOverrides = unitConfig?.config?.termOverrides ?? {};
     const overrides: Record<string, string> = {};
 
-    TERM_METADATA.forEach(term => {
+    termMetadata.forEach(term => {
       // Use escaped keys for React Hook Form compatibility
       overrides[escapeKeyForForm(term.key)] = termOverrides[term.key] ?? "";
     });
@@ -71,7 +71,7 @@ export const TermOverridesSettings: React.FC = () => {
 
       const termOverrides: Record<string, string> = {};
 
-      TERM_METADATA.forEach(term => {
+      termMetadata.forEach(term => {
         // Form data uses escaped keys, but we save with real keys
         const escapedKey = escapeKeyForForm(term.key);
         const value = data.overrides[escapedKey]?.trim();
@@ -103,7 +103,7 @@ export const TermOverridesSettings: React.FC = () => {
       </p>
 
       <div className="term-list">
-        {[...TERM_METADATA].sort((a, b) => a.label.localeCompare(b.label)).map(term => {
+        {[...termMetadata].sort((a, b) => a.label.localeCompare(b.label)).map(term => {
           const effectiveDefault = getEffectiveDefault(term.key);
 
           return (

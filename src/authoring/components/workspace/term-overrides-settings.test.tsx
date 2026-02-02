@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
-import { TERM_METADATA, TermOverridesSettings } from "./term-overrides-settings";
+import { termMetadata, TermOverridesSettings } from "./term-overrides-settings";
 
 const mockSetUnitConfig = jest.fn();
 
@@ -37,7 +37,7 @@ describe("TermOverridesSettings", () => {
     expect(screen.getByText("Term Overrides")).toBeInTheDocument();
     expect(screen.getByText(/Configure customized terminology/)).toBeInTheDocument();
 
-    TERM_METADATA.forEach(term => {
+    termMetadata.forEach(term => {
       expect(screen.getByLabelText(term.label)).toBeInTheDocument();
       expect(screen.getByText(term.description)).toBeInTheDocument();
     });
