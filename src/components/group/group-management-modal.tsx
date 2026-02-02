@@ -119,7 +119,6 @@ export const GroupManagementModal: React.FC<IProps> = observer(
     const newGroupIds = useMemo(() => {
       const ids: string[] = [];
 
-      // Teacher mode: track groups from pending moves
       if (isTeacherMode) {
         pendingMoves.forEach((toGroupId) => {
           if (toGroupId !== null && !existingGroupIds.has(toGroupId)) {
@@ -130,7 +129,6 @@ export const GroupManagementModal: React.FC<IProps> = observer(
         });
       }
 
-      // Student mode: also track the selected group if it's a new group
       if (mode === "student" && selectedGroupId !== null && !existingGroupIds.has(selectedGroupId)) {
         if (!ids.includes(selectedGroupId)) {
           ids.push(selectedGroupId);
@@ -202,10 +200,9 @@ export const GroupManagementModal: React.FC<IProps> = observer(
             // Modal will close automatically when user.currentGroupId is updated.
           } catch (error) {
             console.error("Error joining group:", error);
-            setIsSaving(false);
           } finally {
-             setIsSaving(false);
-           }
+            setIsSaving(false);
+          }
         }
       }
     }, [isTeacherMode, selectedStudentId, mode, studentGroupMap, allowCancel, db, user.id, existingGroupIds]);
