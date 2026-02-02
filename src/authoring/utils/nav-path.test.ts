@@ -11,7 +11,6 @@ import {
   getUnitChildrenTree,
 } from "./nav-path";
 
-// Minimal test fixtures
 const makeProblem = (ordinal: number, title: string, sections: string[] = []) => ({
   description: "",
   ordinal,

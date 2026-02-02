@@ -51,8 +51,10 @@ export const ProblemSections: React.FC<ProblemSectionsProps> = ({
                     type="checkbox"
                     checked={isEnabled}
                     onChange={() => {
+                      const current = watchedSections?.[index];
+                      if (!current) return;
                       sectionsFieldArray.update(index, {
-                        ...watchedSections[index],
+                        ...current,
                         enabled: !isEnabled,
                       });
                     }}

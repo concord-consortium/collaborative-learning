@@ -1,5 +1,7 @@
 # Add Curriculum Subtabs to Problems
 
+> **Status:** Implemented in PR #2739.
+
 ## Story
 
 As a CLUE curriculum designer, I need to create and reorganize subtabs within problems.

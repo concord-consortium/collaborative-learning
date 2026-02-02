@@ -8,7 +8,9 @@ import {
 } from "../../../utils/nav-path";
 import { WritableDraft } from "immer";
 import { IProblemFormInputs, IUnitParentFormInputs, UnitChild } from "./container-config-types";
-import { isUnit, isInvestigation, isProblem, buildProblemSectionsFormData, parseItemPath } from "./container-config-helpers";
+import {
+  isUnit, isInvestigation, isProblem, buildProblemSectionsFormData, parseItemPath,
+} from "./container-config-helpers";
 import { UnitItemChildren } from "./unit-item-children";
 import { ProblemSections } from "./problem-sections";
 
