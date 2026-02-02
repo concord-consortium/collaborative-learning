@@ -290,6 +290,18 @@ Common toolbar framework; default toolbar buttons:
 - `reset` - clear all points from the numberline
 - `delete` - delete selected point(s) from the numberline
 
+#### IframeInteractive
+
+- `maxTiles`: number
+- `url`: string (URL for the embedded interactive)
+- `interactiveState`: object (default interactive state)
+- `authoredState`: object (default authored state for curriculum configuration)
+- `allowedPermissions`: string (iframe permissions policy)
+- `maxHeight`: number (max height in pixels, 0 for unlimited)
+- `enableScroll`: boolean
+
+(no toolbar)
+
 #### Simulation
 
 - `defaultSimulation`: string

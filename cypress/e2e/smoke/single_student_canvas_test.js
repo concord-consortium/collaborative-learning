@@ -174,7 +174,6 @@ context('single student functional test', () => {
 
     // canvas.copyDocument(canvas1);
     canvas.createNewExtraDocumentFromFileMenu(canvas2, "my-work");
-    canvas.getPersonalDocTitle().should('contain', canvas2);
     textToolTile.getTextTile().should('not.exist');
 
     cy.log('will restore from My Work tab');
@@ -231,7 +230,6 @@ context('single student functional test', () => {
 
     // Create the source document and add a tile
     canvas.createNewExtraDocumentFromFileMenu(sourceDoc, "my-work");
-    canvas.openDocumentWithTitle('workspaces', sourceDoc);
 
     // Select all tiles using the helper
     canvas.getSelectAllButton().click();

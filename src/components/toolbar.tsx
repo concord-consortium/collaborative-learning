@@ -228,7 +228,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       // If a limit on the number of tiles of a certain type has been specified in settings,
       // disable the related tile button when that limit is reached.
       const tilesOfTypeCount = document?.content?.getTilesOfType(toolButton.id).length || 0;
-      const tileSettings = settings[toolButton.id.toLowerCase()] as Record<string, any>;
+      // "Diagram" → "diagram", "IframeInteractive" → "iframeinteractive"
+      const lowerCaseId = toolButton.id.toLowerCase();
+      // "IframeInteractive" → "iframeInteractive" (works for multi-word types where settings use camelCase keys)
+      const camelCaseId = toolButton.id.charAt(0).toLowerCase() + toolButton.id.slice(1);
+      const tileSettings = (settings[lowerCaseId] || settings[camelCaseId]) as Record<string, any>;
       const maxTilesOfType = tileSettings ? tileSettings.maxTiles : undefined;
       if (maxTilesOfType && tilesOfTypeCount >= maxTilesOfType) return true;
     }

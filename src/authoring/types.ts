@@ -1,5 +1,13 @@
 import { EAuthorableNavTab } from "../models/view/nav-tabs";
+import { ISortOptionConfig } from "../models/stores/sort-work-config";
+import { SortTypeIds, type SortTypeId } from "../models/stores/ui-types";
+export { SortTypeIds, SortTypeId };
 
+export interface ISortWorkConfig {
+  defaultPrimarySort?: SortTypeId;
+  showContextFilter?: boolean;
+  sortOptions?: ISortOptionConfig[];
+}
 
 export const aiEvaluations = ["categorize-design", "custom"] as const;
 export type AIEvaluation = typeof aiEvaluations[number];
@@ -44,6 +52,8 @@ export interface IUnitConfig {
   authorTools?: IAuthorTool[];
   showIdeasButton?: boolean;
   hide4up?: boolean;
+  sortWorkConfig?: ISortWorkConfig;
+  termOverrides?: Record<string, string>;
 }
 
 export interface IAuthorTool {

@@ -96,7 +96,6 @@ context('Text tool tile functionalities', function () {
 
     cy.log('verifies restore of text field content');
     canvas.createNewExtraDocumentFromFileMenu('text tool test', 'my-work');
-    cy.wait(2000);
     textToolTile.getTextTile().should('not.exist');
     //re-open investigation
     canvas.openDocumentWithTitle('workspaces', title);
