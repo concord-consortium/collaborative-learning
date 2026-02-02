@@ -18,7 +18,7 @@ const defaultSortTypes = new Set(
 const sortOptionDescriptions: Record<SortTypeId, string> = {
   Group: "Sort documents by student group",
   Name: "Sort documents by individual student",
-  Strategy: "Sort documents by comment tags",
+  Strategy: "Sort documents by comment tags (only appears if a custom label has been set)",
   Bookmarked: "Sort documents by bookmark status",
   Tools: "Sort documents by tile types used",
   Date: "Sort documents by last modified date",
@@ -183,7 +183,7 @@ const SortWorkSettings: React.FC = () => {
             {fields.map((field, index) => {
               const sortType = field.type;
               const translationKey = getSortTypeTranslationKey(sortType);
-              const defaultValue = getDefaultValue(translationKey);
+              const defaultValue = getDefaultValue(translationKey) || sortType;
               const displayLabel = translate(translationKey);
               const rowId = `sort-option-${sortType}`;
               const watchedOption = watchSortOptions[index];
