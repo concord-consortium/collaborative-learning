@@ -67,5 +67,5 @@ export function getDefaultValue(key: TranslationKeyType): string {
  *
  */
 export function translate(key: TranslationKeyType): string {
-  return getTermOverride(key) ?? getDefaultValue(key);
+  return getTermOverride(key) || getDefaultValue(key);
 }
