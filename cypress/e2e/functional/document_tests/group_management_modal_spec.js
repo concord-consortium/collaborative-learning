@@ -356,7 +356,34 @@ context('Test teacher group management', function () {
     openTeacherGroupModal();
     cy.get('[data-testid="group-card-3"]').should('exist').and('not.contain', 'Student ' + student5);
     cy.get('[data-testid="group-card-4"]').should('exist').and('contain', 'Student ' + student5);
+    cy.get('[data-testid="group-management-modal-cancel-button"]').click();
 
+    cy.log('Test keyboard nav - Tab to student and select with Enter key');
+    openTeacherGroupModal();
+    cy.get('[data-testid="group-management-modal-close-button"]').focus();
+    cy.realPress('Tab'); // to first group card
+    cy.realPress('Tab'); // to first student in that group
+    cy.focused().invoke('attr', 'data-testid').should('match', /^student-card-/);
+    cy.focused().invoke('attr', 'data-testid').then(testId => {
+      cy.realPress('Enter');
+      cy.get(`[data-testid="${testId}"]`).should('have.class', 'selected');
+    });
+
+    cy.log('Test keyboard nav - Tab from selected student to next group card and select with Enter key');
+    // When a student is selected, other students are removed from tab order,
+    // so tabbing should go directly to the next group card.
+    cy.get(`[data-testid="student-card-${student2}"]`).should('have.attr', 'tabindex', '0');
+    cy.get(`[data-testid="student-card-${student1}"]`).should('have.attr', 'tabindex', '-1');
+    cy.get(`[data-testid="student-card-${student3}"]`).should('have.attr', 'tabindex', '-1');
+    cy.realPress('Tab');
+    cy.focused().invoke('attr', 'data-testid').should('match', /^group-card-/);
+    cy.focused().invoke('attr', 'data-testid').then(testId => {
+      cy.realPress('Enter');
+      if (testId !== 'group-card-1') {
+        cy.get(`[data-testid="${testId}"]`).should('contain', 'Student ' + student2);
+        cy.get('[data-testid="group-card-1"]').should('not.contain', 'Student ' + student2);
+      }
+    });
     cy.get('[data-testid="group-management-modal-cancel-button"]').click();
   });
 });
