@@ -191,7 +191,7 @@ context('Table Tool Tile', function () {
 
     cy.log('will enter a formula');
     tableToolTile.typeExpressionInDialog(`${formula}{enter}`);
-    cy.get('.ReactModalPortal').should('not.exist');
+    cy.contains('.modal-title', 'Set Expression').should('not.exist');
 
     cy.log('verify formula appears under correct column header');
     cy.get('.editable-header-cell')

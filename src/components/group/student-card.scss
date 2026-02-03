@@ -1,0 +1,81 @@
+@import "../vars";
+
+.student-card {
+  align-items: center;
+  background: white;
+  border: solid 1px white;
+  cursor: default;
+  display: flex;
+  font-size: 12px;
+  max-width: 125px;
+  padding: 1px 3px;
+
+  &.draggable, &[tabindex="0"] {
+    &:hover {
+      background-color: $workspace-teal-light-4;
+      border-color: $charcoal-light-1;
+
+      .student-card__status {
+        border: solid 1px white;
+      }
+    }
+
+    &:focus {
+      background-color: $workspace-teal-light-4;
+      border-color: $workspace-teal;
+      outline: none;
+
+      .student-card__status {
+        border: solid 1px white;
+      }
+    }
+  }
+
+  &.selected {
+    background-color: $workspace-teal-light-4;
+    border: solid 1px $charcoal-light-1;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.35);
+
+    .student-card__status {
+      border: solid 1px white;
+    }
+  }
+
+  &.draggable {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &.dragging {
+    opacity: 0.5;
+  }
+
+  &.connected {
+    .student-card__status {
+      background-color: $connected-green;
+    }
+  }
+
+  &.disconnected {
+    .student-card__status {
+      background-color: transparent;
+    }
+  }
+}
+
+.student-card__status {
+  border: solid 1px $workspace-teal-dark-1;
+  flex-shrink: 0;
+  height: 8px;
+  margin-right: $half-padding;
+  width: 8px;
+}
+
+.student-card__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

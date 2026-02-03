@@ -185,6 +185,17 @@ export class DB {
     this.authStateUnsubscribe = undefined;
   }
 
+  /**
+   * Finds all groups where a specific user is a member (usually 0 or 1, but handles edge cases)
+   * @returns Array of group IDs
+   */
+  private findGroupsForUser(groups: DBOfferingGroupMap, userId: string): string[] {
+    return Object.keys(groups).filter((groupId) => {
+      const users = groups[groupId].users || {};
+      return userId in users;
+    });
+  }
+
   public joinGroup(groupId: string) {
     const {user} = this.stores;
     const groupRef = this.firebase.ref(this.firebase.getGroupPath(user, groupId));
@@ -207,7 +218,7 @@ export class DB {
           }
         })
         .then(() => {
-          // always add the user to the group, the listeners will sort out if the group is oversubscribed
+          // always add the user to the group, the listeners will sort out if the student is in more than one group
           userRef = groupRef.child("users").child(user.id);
           return userRef.set({
             version: "1.0",
@@ -241,14 +252,10 @@ export class DB {
     return new Promise<void>((resolve, reject) => {
       groupsRef.once("value")
         .then((snapshot) => {
-          // find all groups where the user is a member, this should be only 0 or 1 but just in case...
           const groups: DBOfferingGroupMap = snapshot.val() || {};
-          const myGroupIds = Object.keys(groups).filter((groupId) => {
-            const users = groups[groupId].users || {};
-            return Object.keys(users).indexOf(user.id) !== -1;
-          });
+          const myGroupIds = this.findGroupsForUser(groups, user.id);
 
-          // set out user in each group to null
+          // set our user in each group to null
           if (myGroupIds.length > 0) {
             const updates: any = {};
             myGroupIds.forEach((groupId) => {
@@ -263,6 +270,125 @@ export class DB {
         .then(resolve)
         .catch(reject);
     });
+  }
+
+  /**
+   * Creates an empty group with the specified group ID
+   * @param groupId - The ID of the group to create
+   * @returns Promise that resolves when the group is created
+   */
+  public async createEmptyGroup(groupId: string): Promise<void> {
+    const { user } = this.stores;
+    const groupPath = this.firebase.getFullPath(this.firebase.getGroupPath(user, groupId));
+
+    const emptyGroup = {
+      version: "1.0",
+      self: {
+        classHash: user.classHash,
+        offeringId: user.offeringId,
+        groupId,
+      }
+    } as DBOfferingGroup;
+
+    const updates: Record<string, any> = {};
+    updates[groupPath] = emptyGroup;
+
+    await firebase.database().ref().update(updates);
+  }
+
+  /**
+   * Moves a student from their current group to another. This is for both teacher use in managing
+   * group assignments for any student in the class, and for students switching their own group.
+   *
+   * Unlike joinGroup/leaveGroup, this method:
+   * - Can operate on any student (not just the current user)
+   * - Sets up connection handlers only when the student being moved is the current user
+   * - Updates latestGroupId only when the student being moved is the current user
+   * - Uses atomic updates for consistency
+   *
+   * @param studentId - The ID of the student to move
+   * @param targetGroupId - The ID of the group to move the student to, or null to remove from all groups
+   * @returns Promise that resolves when the move is complete
+   */
+  public async moveStudentToGroup(studentId: string, targetGroupId: string | null): Promise<void> {
+    const { user } = this.stores;
+    const groupsRef = this.firebase.ref(this.firebase.getGroupsPath(user));
+
+    // Find all groups where this student is currently a member.
+    const snapshot = await groupsRef.once("value");
+    const groups: DBOfferingGroupMap = snapshot.val() || {};
+    const currentGroupIds = this.findGroupsForUser(groups, studentId);
+
+    const updates: Record<string, any> = {};
+
+    // Remove the student from all current groups.
+    currentGroupIds.forEach((groupId) => {
+      const userPath = this.firebase.getFullPath(
+        this.firebase.getGroupUserPath(user, groupId, studentId)
+      );
+      updates[userPath] = null;
+    });
+
+    // If we have a target group, add the student to it.
+    if (targetGroupId !== null) {
+      const targetGroupRef = this.firebase.ref(this.firebase.getGroupPath(user, targetGroupId));
+      const targetGroupSnapshot = await targetGroupRef.once("value");
+
+      const userData = {
+        version: "1.0",
+        self: {
+          classHash: user.classHash,
+          offeringId: user.offeringId,
+          groupId: targetGroupId,
+          uid: studentId
+        },
+        connectedTimestamp: firebase.database.ServerValue.TIMESTAMP
+      };
+
+      // Create the group if it doesn't exist, including the user in the group object.
+      // (Firebase doesn't allow updating both a path and a nested path in the same update)
+      if (!targetGroupSnapshot.val()) {
+        const groupPath = this.firebase.getFullPath(this.firebase.getGroupPath(user, targetGroupId));
+        updates[groupPath] = {
+          version: "1.0",
+          self: {
+            classHash: user.classHash,
+            offeringId: user.offeringId,
+            groupId: targetGroupId,
+          },
+          users: {
+            [studentId]: userData
+          },
+        } as DBOfferingGroup;
+      } else {
+        // Add the student to the existing target group
+        const targetUserPath = this.firebase.getFullPath(
+          this.firebase.getGroupUserPath(user, targetGroupId, studentId)
+        );
+        updates[targetUserPath] = userData;
+      }
+    }
+
+    // Apply all updates atomically.
+    if (Object.keys(updates).length > 0) {
+      await firebase.database().ref().update(updates);
+    }
+
+    // If moving the current user, update their latestGroupId preference and set up connection handlers.
+    if (studentId === this.stores.user.id) {
+      this.firebase.cancelGroupDisconnect();
+
+      await this.firebase.getLatestGroupIdRef().set(targetGroupId);
+
+      // Set currentGroupId immediately so the UI updates without waiting for the DB listener.
+      this.stores.user.setCurrentGroupId(targetGroupId ?? undefined);
+
+      // Set up connection handlers so the user's online status is tracked.
+      if (targetGroupId !== null) {
+        const userRef = this.firebase.ref(this.firebase.getGroupUserPath(user, targetGroupId));
+        await this.firebase.setConnectionHandlers(userRef);
+      }
+    }
   }
 
   public async guaranteeOpenDefaultDocument(documentType: typeof ProblemDocument | typeof PersonalDocument,
