@@ -23,9 +23,12 @@ interface IProps {
 function idAndIcon(id: string, appIcons?: Record<string, IconComponent>) {
   const ItemIcon = appIcons?.[id];
   // not clear why we need to reset the viewBox -- seems that icons are stored at different sizes
-  const viewBox = ["icon-new-workspace", "icon-open-workspace", "icon-publish-workspace"].includes(id)
-    ? "0 0 32 32"
-    : "0 0 24 24";
+  let viewBox = "0 0 24 24";
+  if (["icon-open-workspace", "icon-publish-workspace"].includes(id)) {
+    viewBox = "0 0 32 32";
+  } else if (id === "icon-new-workspace") {
+    viewBox = "0 0 20 20";
+  }
   return { id, itemIcon: ItemIcon && <ItemIcon viewBox={viewBox} /> };
 }
 
