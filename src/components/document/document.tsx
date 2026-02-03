@@ -8,7 +8,6 @@ import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, LearningLogPublication, PersonalDocument } from "../../models/document/document-types";
 import { translate } from "../../utilities/translation/translate";
-import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
