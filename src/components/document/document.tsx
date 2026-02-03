@@ -3,6 +3,7 @@ import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
 import { kAnalyzerUserParams } from "../../../shared/shared";
+import { DEBUG_HISTORY_VIEW } from "../../lib/debug";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentModelType } from "../../models/document/document";
@@ -20,6 +21,7 @@ import { IconButton } from "../utilities/icon-button";
 import ToggleControl from "../utilities/toggle-control";
 import { DocumentAnnotationToolbar } from "./document-annotation-toolbar";
 import { DocumentFileMenu } from "./document-file-menu";
+import { HistoryViewPanel } from "./history-view-panel";
 import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
 
 import IdeaIcon from "../../assets/idea-icon.svg";
@@ -191,6 +193,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           readOnly={readOnly}
           sectionClass={sectionClass}
         />
+        {DEBUG_HISTORY_VIEW && this.stores.persistentUI.showHistoryView && (
+          <HistoryViewPanel document={document} />
+        )}
         {this.renderStickyNotesPopup()}
       </div>
     );
