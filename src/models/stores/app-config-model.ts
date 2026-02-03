@@ -40,7 +40,7 @@ export const AppConfigModel = types
     afterCreate() {
       // Initialize module-level overrides from base config (if config exists)
       if (self.config) {
-        setTermOverrides(self.config.termOverrides);
+        setTermOverrides(self.configMgr.termOverrides);
       }
     },
     setConfigs(configs: Partial<UnitConfiguration>[]) {
@@ -53,7 +53,7 @@ export const AppConfigModel = types
       self.authorTools = ToolbarModel.create(self.configMgr.authorTools);
       self.toolbar = ToolbarModel.create(self.configMgr.toolbar);
       self.settings = self.configMgr.settings;
-      setTermOverrides(self.config.termOverrides);
+      setTermOverrides(self.configMgr.termOverrides);
     },
     setRequireSortWorkTab(requireSortWorkTab: boolean) {
       self.requireSortWorkTab = requireSortWorkTab;
