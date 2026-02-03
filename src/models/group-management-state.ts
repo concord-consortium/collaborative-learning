@@ -19,24 +19,18 @@ const formatStudentName = (fullName: string, showLastNameFirst: boolean) => {
 };
 
 export class GroupManagementState {
-  // Dependencies (injected via constructor)
   private groups: GroupsModelType;
   private classStore: ClassModelType;
   private user: UserModelType;
   private db: DB;
 
-  // Configuration
   mode: UserType;
-
-  // Observable state
   pendingMoves: Map<string, string | null> = new Map();
   selectedStudentId: string | null = null;
   selectedGroupId: string | null = null;
   createdGroupsInSession: Set<string> = new Set();
   showLastNameFirst = false;
   isSaving = false;
-
-  // Drag state
   draggingStudentId: string | null = null;
   draggingStudentName: string | null = null;
   draggingStudentConnected = false;
@@ -56,7 +50,6 @@ export class GroupManagementState {
     this.mode = mode;
   }
 
-  // Computed values
   get isTeacherMode(): boolean {
     return this.mode === "teacher" || this.mode === "researcher";
   }
@@ -118,6 +111,7 @@ export class GroupManagementState {
     return ids.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
   }
 
+  // Determines the next available group ID for "New Group".
   get nextGroupId(): string {
     const allUsedIds = new Set([...this.existingGroupIds, ...this.newGroupIds]);
     const existingNumericIds = [...allUsedIds]
@@ -131,10 +125,12 @@ export class GroupManagementState {
     return this.groups.groupForUser(this.user.id)?.id || null;
   }
 
+  // First-time join: student mode where the current user has no group yet
   get isFirstTimeJoin(): boolean {
     return this.mode === "student" && this.currentUserGroupId === null;
   }
 
+  // In student mode, the current user is always "selected" for moving
   get effectiveSelectedStudentId(): string | null {
     return this.mode === "student" ? this.user.id : this.selectedStudentId;
   }
@@ -169,7 +165,6 @@ export class GroupManagementState {
     return this.getStudentsForGroup(null);
   }
 
-  // Actions
   reset(): void {
     this.pendingMoves = new Map();
     this.selectedStudentId = null;
@@ -295,7 +290,7 @@ export class GroupManagementState {
     });
 
     try {
-      // Create empty groups that were added in this session but won't have students moved to them.
+      // Create empty groups that were added in this session but don't have students in them.
       const emptyGroupsToCreate = [...this.createdGroupsInSession].filter(groupId =>
         !this.existingGroupIds.has(groupId) &&
         (!this.isTeacherMode || !Array.from(this.pendingMoves.values()).includes(groupId)) &&
@@ -323,7 +318,6 @@ export class GroupManagementState {
     }
   }
 
-  // Helper methods
   getStudentsForGroup(groupId: string | null): StudentCardInfo[] {
     return this.allStudents
       .filter(student => this.studentGroupMap.get(student.id) === groupId)
