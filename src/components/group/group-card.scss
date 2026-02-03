@@ -1,0 +1,95 @@
+@import "../vars";
+
+$group-card-min-width: 130px;
+$group-card-empty-height: 38px;
+
+.group-card {
+  background-color: $charcoal-light-7;
+  border-radius: $border-radius;
+  display: flex;
+  flex-direction: column;
+  min-width: $group-card-min-width;
+  overflow: hidden;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: solid 1.5px $workspace-teal;
+    }
+  }
+
+  &.no-group {
+    .group-card__header {
+      background-color: $charcoal-light-5;
+    }
+  }
+
+  &.dragging-over {
+    background-color: $workspace-teal-light-6;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25);
+    outline: solid 1.5px $workspace-teal;
+
+    .group-card__header {
+      background-color: $workspace-teal-light-3;
+    }
+  }
+
+  &.drop-target {
+    background-color: $workspace-teal-light-7;
+    outline: solid 1.5px $charcoal-light-1;
+
+    .group-card__header {
+      background-color: $workspace-teal-light-4;
+    }
+
+    &.clickable:hover .group-card__header {
+      background-color: $workspace-teal-light-3;
+    }
+    &.clickable:active .group-card__header {
+      background-color: $workspace-teal-light-2;
+    }
+  }
+
+  .group-card__header {
+    background-color: $charcoal-light-4;
+    color: $charcoal-dark-1;
+    font-size: 13px;
+    padding: $half-padding $padding;
+    text-align: center;
+  }
+
+  .group-card__content {
+    min-height: $group-card-empty-height;
+    overflow-y: auto;
+    padding: $half-padding;
+  }
+
+  .group-card__students {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .group-card__new-group-icon {
+    align-items: center;
+    color: $charcoal-light-1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: $group-card-empty-height;
+
+    .group-card__plus-icon {
+      height: 24px;
+      margin-top: $quarter-padding;
+      width: 24px;
+    }
+
+    .group-card__new-group-label {
+      font-size: 12px;
+      margin-top: $half-padding;
+      margin-bottom: 7px;
+    }
+  }
+}

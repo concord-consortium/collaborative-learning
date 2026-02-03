@@ -1,8 +1,9 @@
 import { observer } from "mobx-react";
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { IBaseProps } from "../../components/base";
 import { ClassMenuContainer } from "../../components/class-menu-container";
+import { GroupManagementModal } from "../../components/group/group-management-modal";
 import { NetworkStatus } from "../../components/network-status";
 import { ProblemMenuContainer } from "../../components/problem-menu-container";
 import { ToggleGroup } from "@concord-consortium/react-components";
@@ -29,6 +30,31 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const { showGroup } = props;
   const { appConfig, appMode, appVersion, db, user, groups, investigation, ui, unit, problem } = useStores();
   const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
+  const [isGroupManagementModalOpen, setIsGroupManagementModalOpen] = useState(false);
+  const [isStudentGroupModalOpen, setIsStudentGroupModalOpen] = useState(false);
+
+  const handleOpenGroupManagementModal = useCallback(() => {
+    setIsGroupManagementModalOpen(true);
+  }, []);
+
+  const handleCloseGroupManagementModal = useCallback(() => {
+    setIsGroupManagementModalOpen(false);
+  }, []);
+
+  const handleOpenStudentGroupModal = useCallback(() => {
+    setIsStudentGroupModalOpen(true);
+  }, []);
+
+  const handleCloseStudentGroupModal = useCallback(() => {
+    setIsStudentGroupModalOpen(false);
+  }, []);
+
+  const handleSaveGroupChanges = useCallback(async (moves: Map<string, string | null>) => {
+    for (const [studentId, targetGroupId] of moves) {
+      await db.moveStudentToGroup(studentId, targetGroupId);
+    }
+  }, [db]);
+
   const getUserTitle = () => {
     switch(appMode){
       case "dev":
@@ -92,7 +118,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
       groupUsers.unshift(groupUsers.splice(userIndex, 1)[0]);
     }
     return (
-      <div onClick={handleResetGroup} className="group">
+      <div onClick={handleOpenStudentGroupModal} className="group">
         <div className="name" data-test="group-name">{`${translate("studentGroup")} ${group.id}`}</div>
         <div className="group-center"/>
         <div className="members" data-test="group-members">
@@ -130,15 +156,26 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     );
   };
 
-  const handleResetGroup = () => {
-    const groupTerm = translate("studentGroup");
-    const groupTermLower = groupTerm.toLowerCase();
-    ui.confirm(`Do you want to leave this ${groupTermLower}?`, `Leave ${groupTerm}`)
-      .then((ok) => {
-        if (ok) {
-          db.leaveGroup();
-        }
-      });
+  const renderStudentGroupsButton = () => {
+    const buttonClass = `student-groups-button${isGroupManagementModalOpen ? " selected" : ""}`;
+    return (
+      <div className={buttonClass} role="button" onClick={handleOpenGroupManagementModal}>
+        <div className="student-groups-label">
+          <span className="student-groups-text">Student</span>
+          <span className="student-groups-text">Groups</span>
+        </div>
+        <div className="student-groups-icon">
+          <div className="student-groups-row">
+            <div className="student-icon" />
+            <div className="student-icon" />
+          </div>
+          <div className="student-groups-row">
+            <div className="student-icon" />
+            <div className="student-icon" />
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const renderNonStudentHeader = ({showProblemMenu}: {showProblemMenu: boolean}) => {
@@ -167,6 +204,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
         </div>
         <div className="right">
           <div className="version">CLUE v{appVersion}</div>
+          {renderStudentGroupsButton()}
           <div className="user teacher" title={getUserTitle()}>
             <div className="class" data-test="user-class">
               <ClassMenuContainer />
@@ -175,6 +213,12 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
               <div className="profile-icon-inner"/>
             </div>
           </div>
+          <GroupManagementModal
+            isOpen={isGroupManagementModalOpen}
+            mode="teacher"
+            onClose={handleCloseGroupManagementModal}
+            onSave={handleSaveGroupChanges}
+          />
         </div>
       </div>
     );
@@ -254,6 +298,11 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
             </div>
           </div>
           }
+          <GroupManagementModal
+            isOpen={isStudentGroupModalOpen}
+            mode="student"
+            onClose={handleCloseStudentGroupModal}
+          />
         </div>
       </div>
     );
