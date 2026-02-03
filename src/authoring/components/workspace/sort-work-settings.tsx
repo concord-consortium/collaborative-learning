@@ -5,7 +5,9 @@ import appConfig from "../../../clue/app-config.json";
 import { ISortOptionConfig } from "../../../models/stores/sort-work-config";
 import { DocFilterType, DocFilterTypeIds } from "../../../models/stores/ui-types";
 import { getSortTypeTranslationKey } from "../../../utilities/sort-utils";
-import { getDefaultValue, isTranslationKey, setTermOverrides, translate } from "../../../utilities/translation/translate";
+import {
+  getDefaultValue, isTranslationKey, setTermOverrides, translate
+} from "../../../utilities/translation/translate";
 import { ISortWorkConfig, SortTypeId, SortTypeIds } from "../../types";
 import { useCurriculum } from "../../hooks/use-curriculum";
 

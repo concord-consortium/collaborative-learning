@@ -48,7 +48,7 @@ export const usePublishDialog = (document: DocumentModelType) => {
         .catch((reason) => ui.alert(`Your document failed to publish: ${reason}`, "Error"));
   };
 
-  const title = document.type === "problem" ? `Publish Problem ${translate("Workspace")}`
+  const title = document.type === "problem" ? `Publish ${translate("Problem")} ${translate("Workspace")}`
                                             : document.type === "learningLog"
                                                 ? `Publish Learning Log`
                                                 : `Publish ${translate("Workspace")}`;
