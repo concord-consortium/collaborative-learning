@@ -10,6 +10,7 @@ This spec focuses on the CLUE implementation. While the architecture is designed
 
 ## Related Documents
 
+- [Detector Authoring](detector-authoring.md) - How researchers build detectors (workflow, labeling, type progression)
 - [Rule-Based Detector](detector-rule-based.md) - Pattern matching, counts, sequences
 - [ML Model Detector](detector-ml-model.md) - Trained classifiers on historical data
 - [LLM Detector](detector-llm.md) - Prompted detection with semantic memory
@@ -253,6 +254,8 @@ Key topics to address:
 Q: Should the Detector Service run as Firebase Functions, a separate cloud service, or a hybrid?
 A: It will probably be different for different types of detectors. In some cases running the detector as a microVM in AWS will likely be better. These might allow us to easily save state (memory) without needing a database, and would not be too expensive. It is probably the "memory" feature of each detector that will determine where it should run. A ML model is likely to require a large initial "load" so running it as lambda or firebase function would be out of the question.
 
+For rule-based detectors, recommendations are **Bytewax (Python)** for fastest path with built-in state management, or **TypeScript+RxJS** if browser-based rule authoring is important. See [Rule-Based Detector: Rule Engine Options](detector-rule-based.md#rule-engine-options) for full comparison.
+
 Q: How does the detector service scale?
 A: Hybrid approach—shared event aggregation with separate detector instances.
 
@@ -274,7 +277,11 @@ Q: How should log events be streamed to the Detector Service in real-time?
 A: Options include: (1) Add Firestore write in addition to S3 during ingestion, (2) Kinesis/SQS stream from AWS ingestion, (3) Webhook from ingestion service. Need to understand current ingestion architecture to determine best approach.
 
 Q: What is the structure/schema of the log events?
-A: Need sample log data to understand what information is available for detection rules.
+A: Log events include:
+- **Extras** (context on every event): username, role, group, classHash, investigation, problem, section, UI state, session, time
+- **Parameters** (event-specific): documentKey, documentUid, objectType, targetId, operation, text, wordCount, etc.
+
+See [Rule-Based Detector: Data Sources](detector-rule-based.md#data-sources) for full details and links to CSV documentation (~85 event types).
 
 Q: How are events from different sources ordered?
 A: Events come from multiple sources (log events, history entries, comments) with different timing characteristics:
@@ -297,13 +304,11 @@ Q: Can multiple detectors run simultaneously on the same class?
 A: Yes. Multiple detectors can run in parallel. Duplicate notifications from different detectors are acceptable—each notification will include the name of the detector that generated it, so researchers can distinguish the source.
 
 Q: How should detectors handle recovery and multi-session activities?
-A: Best effort is acceptable for v1. However, detectors will likely need to process previous events on startup anyway—activities in CLUE can span multiple days, and it may not be practical to persist detector state between day 1 and day 2.
+A: Best effort is acceptable for v1. Activities can span multiple days, so detectors need either:
+1. **Replay on startup**: Replay previous events before processing new ones
+2. **Persistent memory**: Checkpoint state between sessions
 
-Two approaches:
-1. **Replay on startup**: Replay day 1 events before processing day 2. If feasible, crash recovery becomes straightforward (just replay from the beginning or last checkpoint).
-2. **Persistent memory**: If replay is too slow/expensive, rely on persisted "memory" between sessions. In this case, checkpointing the memory provides crash recovery without full replay.
-
-The feasibility of replay depends on detector implementation details. The need for efficient checkpointing may influence our choice of rule evaluation system.
+For rule-based detectors, the choice of stream processing framework affects this significantly—see [Rule-Based Detector: State Management](detector-rule-based.md#state-management) for comparison of Bytewax (automatic recovery) vs. TypeScript+RxJS (custom checkpointing).
 
 Q: How will detectors be tested and validated?
 A: Testing is important even for v1—classroom observations are infrequent, so a detector that fails to catch anything is an expensive mistake.
