@@ -213,7 +213,7 @@ Cypress.Commands.add('collapseWorkspace', () => {
 Cypress.Commands.add('linkTableToTile', (table, tile) => {
   cy.get('.primary-workspace .table-title').contains(table).click();
   cy.get(".table-toolbar .toolbar-button.link-tile").click();
-  cy.get('.ReactModalPortal').within(() => {
+  cy.get('.custom-modal').within(() => {
     cy.get('[data-test=link-tile-select]').select(tile);
     cy.get('button').contains('Link').click();
   });
@@ -221,7 +221,7 @@ Cypress.Commands.add('linkTableToTile', (table, tile) => {
 Cypress.Commands.add('unlinkTableToTile', (table, tile) => {
   cy.get('.primary-workspace .table-title').contains(table).click();
   cy.get(".table-toolbar .toolbar-button.link-tile").click();
-  cy.get('.ReactModalPortal').within(() => {
+  cy.get('.custom-modal').within(() => {
     cy.get('[data-test=link-tile-select]').select(tile);
     cy.get('button').contains('Clear It!').click();
   });
@@ -230,7 +230,7 @@ Cypress.Commands.add('linkTableToDataflow', (program, table) => {
   cy.get('.primary-workspace .title-area').contains(program).parent().parent().within(() => {
     cy.get('.link-table-button').click();
   });
-  cy.get('.ReactModalPortal').within(() => {
+  cy.get('.custom-modal').within(() => {
     cy.get('[data-test=link-tile-select]').select(table);
     cy.get('button').contains('Link').click();
   });
@@ -239,7 +239,7 @@ Cypress.Commands.add('unlinkTableToDataflow', (program, table) => {
   cy.get('.primary-workspace .title-area').contains(program).parent().parent().within(() => {
     cy.get('.link-table-button').click();
   });
-  cy.get('.ReactModalPortal').within(() => {
+  cy.get('.custom-modal').within(() => {
     cy.get('[data-test=link-tile-select]').select(table);
     cy.get('button').contains('Clear It!').click();
   });
