@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useRef } from "react";
+import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
 import { CommentTextBox } from "./comment-textbox";
 import { WithId } from "../../hooks/firestore-hooks";
@@ -29,11 +30,13 @@ interface IProps {
   onDeleteComment?: DeleteCommentFn;
   focusDocument?: string;
   focusTileId?: string;
+  isFocused?: boolean;
+  onSelect?: () => void;
 }
 
 export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedComments,
                                                 onPostComment, onDeleteComment,
-                                                focusDocument, focusTileId }) => {
+                                                focusDocument, focusTileId, isFocused, onSelect }) => {
   const commentIdRef = useRef<string>();
   const commentContentRef = useRef<string>("");
   const { documents, persistentUI, sortedDocuments } = useStores();
@@ -124,9 +127,15 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     );
   };
 
+  // Select this thread when clicking anywhere in the comment card
+  const handleCardClick = useCallback(() => {
+    onSelect?.();
+  }, [onSelect]);
+
   return (
-    <div className="comment-card selected" data-testid="comment-card">
-      <div className="comment-card-content selected" data-testid="comment-card-content">
+    <div className={classNames("comment-card", { selected: isFocused })}
+         data-testid="comment-card" onClick={handleCardClick}>
+      <div className={classNames("comment-card-content", { selected: isFocused })} data-testid="comment-card-content">
         {
           postedComments?.map((comment, idx) => {
             const commentUser = comment.uid;

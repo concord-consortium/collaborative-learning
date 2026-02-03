@@ -31,7 +31,7 @@ describe("CommentCard", () => {
   it("should render successfully", () => {
     render((
       <ModalProvider>
-        <CommentCard activeNavTab={activeNavTab} />
+        <CommentCard activeNavTab={activeNavTab} isFocused={true} />
       </ModalProvider>
     ));
     expect(screen.getByTestId("comment-card")).toBeInTheDocument();

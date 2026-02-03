@@ -122,13 +122,19 @@ describe("CommentThread", () => {
     // Click on Thread 2 to expand it
     fireEvent.click(screen.getByText("Thread 2"));
 
-    // Thread 2 is expanded with comments
+    // Thread 2 is now expanded with comments, and Thread 1 stays expanded too
     expect(screen.getByText("Thread 2 Comment 1")).toBeInTheDocument();
     expect(screen.getByText("Thread 2 Comment 2")).toBeInTheDocument();
-    // Second thread has this-user comments
-    expect(screen.getAllByTestId("chat-thread-user-icon")).toHaveLength(2);
-    expect(screen.getAllByTestId("chat-thread-user-icon")[0].classList.contains("me")).toBe(true);
-    expect(screen.getAllByTestId("chat-thread-user-icon")[1].classList.contains("me")).toBe(true);
+    expect(screen.getByText("Thread 1 Comment 1")).toBeInTheDocument();
+    expect(screen.getByText("Thread 1 Comment 2")).toBeInTheDocument();
+    // Both threads are expanded: Thread 1 has 2 other-user comments, Thread 2 has 2 this-user comments
+    expect(screen.getAllByTestId("chat-thread-user-icon")).toHaveLength(4);
+    // Thread 1 icons (other user)
+    expect(screen.getAllByTestId("chat-thread-user-icon")[0].classList.contains("me")).toBe(false);
+    expect(screen.getAllByTestId("chat-thread-user-icon")[1].classList.contains("me")).toBe(false);
+    // Thread 2 icons (this user)
+    expect(screen.getAllByTestId("chat-thread-user-icon")[2].classList.contains("me")).toBe(true);
+    expect(screen.getAllByTestId("chat-thread-user-icon")[3].classList.contains("me")).toBe(true);
   });
 
   it("Comment from same student user renders icon with 'me' class", () => {
