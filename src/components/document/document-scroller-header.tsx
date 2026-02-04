@@ -5,6 +5,10 @@ import React, { FunctionComponent, SVGProps } from "react";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { ENavTab } from "../../models/view/nav-tabs";
+import { isSortTypeId } from "../../models/stores/ui-types";
+import { getSortTypeTranslationKey } from "../../utilities/sort-utils";
+import { upperWords } from "../../utilities/string-utils";
+import { translate } from "../../utilities/translation/translate";
 import { IOpenDocumentsGroupMetadata } from "./sorted-section";
 
 import LargeThumbnailsIcon from "../../assets/large-thumbnails-view-icon.svg";
@@ -54,6 +58,12 @@ export const DocumentScrollerHeader = observer(function DocumentScrollerHeader({
 }: IDocumentScrollerHeaderProps) {
   const { persistentUI } = useStores();
   const { primarySortBy, secondarySortBy, thumbnailDisplay } = persistentUI;
+  const primarySortByLabel = isSortTypeId(primarySortBy)
+    ? upperWords(translate(getSortTypeTranslationKey(primarySortBy)))
+    : primarySortBy;
+  const secondarySortByLabel = isSortTypeId(secondarySortBy)
+    ? upperWords(translate(getSortTypeTranslationKey(secondarySortBy)))
+    : secondarySortBy;
   const hasSecondarySort = secondarySortBy !== "None";
 
   const switchSortGroup = (direction: "previous" | "next") => () => {
@@ -91,7 +101,7 @@ export const DocumentScrollerHeader = observer(function DocumentScrollerHeader({
         <div className="divider" />
         <div className="header-text">
           Sorted by
-          <span className="sort-type"> {primarySortBy}: </span>
+          <span className="sort-type"> {primarySortByLabel}: </span>
           {!hasSecondarySort && (
             <SwitchSortGroupButton
               direction="left"
@@ -110,7 +120,7 @@ export const DocumentScrollerHeader = observer(function DocumentScrollerHeader({
           {" "}
           { hasSecondarySort && (
             <>
-              <span className="sort-type"> {secondarySortBy}: </span>
+              <span className="sort-type"> {secondarySortByLabel}: </span>
               {hasSecondarySort && (
                 <SwitchSortGroupButton
                   direction="left"

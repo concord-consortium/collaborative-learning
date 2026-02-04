@@ -18,6 +18,9 @@ export type DocFilterType = Instance<typeof DocFilterTypeEnum>;
 
 export const SortTypeIds = ["Date", "Group", "Name", "Strategy", "Bookmarked", "Tools", "Problem"] as const;
 export type SortTypeId = typeof SortTypeIds[number];
+export function isSortTypeId(value: string): value is SortTypeId {
+  return SortTypeIds.includes(value as SortTypeId);
+}
 
 export type PrimarySortType = SortTypeId;
 export type SecondarySortType = PrimarySortType | "None";
