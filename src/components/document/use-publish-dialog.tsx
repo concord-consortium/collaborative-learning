@@ -49,12 +49,12 @@ export const usePublishDialog = (document: DocumentModelType) => {
         .catch((reason) => ui.alert(`Your document failed to publish: ${reason}`, "Error"));
   };
 
-  const problemWord = upperWords(translate("contentLevel.problem"));
-  const workspaceWord = upperWords(translate("workspace"));
-  const title = document.type === "problem" ? `Publish ${problemWord} ${workspaceWord}`
+  const problemTerm = upperWords(translate("contentLevel.problem"));
+  const workspaceTerm = upperWords(translate("workspace"));
+  const title = document.type === "problem" ? `Publish ${problemTerm} ${workspaceTerm}`
                                             : document.type === "learningLog"
                                                 ? `Publish Learning Log`
-                                                : `Publish ${workspaceWord}`;
+                                                : `Publish ${workspaceTerm}`;
 
   const TextContent = () => {
     const content = user.type === "teacher"

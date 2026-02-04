@@ -135,8 +135,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             const linkedDocument = comment.linkedDocumentKey &&
               documents.getDocument(comment.linkedDocumentKey);
 
-            //if tagPrompt was posted to Firestore - for ex: SAS unit (where tagPrompt = "Select Student Strategy")
-            //our comment.tags[0] should be [""]
+            // if tagPrompt was posted to Firestore our comment.tags should be [""]
             const isTagPrompt = comment.tags === undefined || comment.tags[0] === "";
             const displayTags = showCommentTag && !isTagPrompt && comment.tags && comment.tags.length > 0;
 
