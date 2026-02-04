@@ -84,6 +84,7 @@ describe("GroupManagementState", () => {
       expect(state.selectedGroupId).toBeNull();
       expect(state.createdGroupsInSession.size).toBe(0);
       expect(state.showLastNameFirst).toBe(false);
+      expect(state.allowCancel).toBe(true);
       expect(state.isSaving).toBe(false);
       expect(state.draggingStudentId).toBeNull();
       expect(state.draggingStudentName).toBeNull();
@@ -524,6 +525,74 @@ describe("GroupManagementState", () => {
 
       state.setShowLastNameFirst(false);
       expect(state.showLastNameFirst).toBe(false);
+    });
+  });
+
+  describe("action: setAllowCancel", () => {
+    it("should update allowCancel", () => {
+      state = createState();
+      state.setAllowCancel(false);
+
+      expect(state.allowCancel).toBe(false);
+
+      state.setAllowCancel(true);
+      expect(state.allowCancel).toBe(true);
+    });
+  });
+
+  describe("action: handleGroupCardSelect", () => {
+    it("should call selectGroup for regular groups", async () => {
+      state = createState("teacher");
+      state.selectedStudentId = "student-1";
+      const selectGroupSpy = jest.spyOn(state, "selectGroup");
+
+      await state.handleGroupCardSelect("2", false);
+
+      expect(selectGroupSpy).toHaveBeenCalledWith("2");
+      expect(state.pendingMoves.get("student-1")).toBe("2");
+    });
+
+    it("should call moveStudentToNoGroup when isNoGroup is true", async () => {
+      state = createState("teacher");
+      state.selectedStudentId = "student-1";
+      const moveToNoGroupSpy = jest.spyOn(state, "moveStudentToNoGroup");
+
+      await state.handleGroupCardSelect("no-group", true);
+
+      expect(moveToNoGroupSpy).toHaveBeenCalled();
+      expect(state.pendingMoves.get("student-1")).toBeNull();
+    });
+
+    it("should auto-save for first-time join when allowCancel is false", async () => {
+      mockUser.id = "student-4";
+      state = createState("student");
+      state.setAllowCancel(false);
+
+      await state.handleGroupCardSelect("1", false);
+
+      expect(state.selectedGroupId).toBe("1");
+      expect(mockDb.moveStudentToGroup).toHaveBeenCalledWith("student-4", "1");
+    });
+
+    it("should not auto-save when allowCancel is true", async () => {
+      mockUser.id = "student-4";
+      state = createState("student");
+      state.setAllowCancel(true);
+
+      await state.handleGroupCardSelect("1", false);
+
+      expect(state.selectedGroupId).toBe("1");
+      expect(mockDb.moveStudentToGroup).not.toHaveBeenCalled();
+    });
+
+    it("should not auto-save in teacher mode even when allowCancel is false", async () => {
+      state = createState("teacher");
+      state.setAllowCancel(false);
+      state.selectedStudentId = "student-1";
+
+      await state.handleGroupCardSelect("2", false);
+
+      expect(mockDb.moveStudentToGroup).not.toHaveBeenCalled();
     });
   });
 
