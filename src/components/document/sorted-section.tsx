@@ -129,7 +129,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
           {documentGroup.icon && <documentGroup.icon className="tool-icon"/>} {documentGroup.label}
         </div>
         <div className="section-header-right">
-          <div>Total {translate("Workspaces").toLowerCase()}: {documentCount}</div>
+          <div>Total {translate("workspaces")}: {documentCount}</div>
           <ArrowIcon
             className={classNames("section-header-arrow", {up: showDocuments})}
             onClick={handleToggleShowDocuments}

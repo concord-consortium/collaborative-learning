@@ -11,6 +11,7 @@ import { LogEventName } from "../../../lib/logger-types";
 import { createStickyNote } from "../../../models/curriculum/support";
 import { AudienceModel, AudienceEnum } from "../../../models/stores/supports";
 import { GroupUserModelType, GroupModelType } from "../../../models/stores/groups";
+import { upperWords } from "../../../utilities/string-utils";
 
 import "./teacher-group-six-pack-fourup.scss";
 
@@ -87,6 +88,7 @@ interface IGroupHeaderProps {
 const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function TeacherGroupHeader(
     {group, navTabName, documentViewMode}){
   const { ui, persistentUI, db, groups, user: { isResearcher } }  = useStores();
+  const groupWord = upperWords(translate("studentGroup"));
 
   const openDocId = persistentUI.tabs.get(navTabName)?.getDocumentGroup(group.id)?.primaryDocumentKey;
   const groupModel = groups.getGroupById(group.id);
@@ -106,7 +108,7 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
       });
     }
     else {
-      const groupTerm = translate("studentGroup");
+      const groupTerm = groupWord;
       ui.prompt(`Enter your message for ${groupTerm} ${group.id}`, "", `Message ${groupTerm}`, 5)
       .then((message) => {
         const audience = AudienceModel.create({type: AudienceEnum.group, identifier: group.id});
@@ -123,10 +125,10 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
 
   return(
     <div className="group-header">
-      <div className="group-label">{translate("studentGroup")} {String(group.id)}</div>
+      <div className="group-label">{groupWord} {String(group.id)}</div>
       <div className="actions">
         {!isResearcher && <IconButton
-          title={`Message ${focusedGroupUser ? focusedGroupUser.name : translate("studentGroup")}`}
+          title={`Message ${focusedGroupUser ? focusedGroupUser.name : groupWord}`}
           className="icon"
           icon="sticky-note"
           key={`sticky-note-${focusedGroupUser ? `user-${focusedGroupUser.id}` : "group"}`}

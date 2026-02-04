@@ -5,11 +5,12 @@ import appConfig from "../../../clue/app-config.json";
 import { ISortOptionConfig } from "../../../models/stores/sort-work-config";
 import { DocFilterType, DocFilterTypeIds } from "../../../models/stores/ui-types";
 import { getSortTypeTranslationKey } from "../../../utilities/sort-utils";
+import { upperWords } from "../../../utilities/string-utils";
 import {
   getDefaultValue, isTranslationKey, setTermOverrides, translate
 } from "../../../utilities/translation/translate";
-import { ISortWorkConfig, SortTypeId, SortTypeIds } from "../../types";
 import { useCurriculum } from "../../hooks/use-curriculum";
+import { ISortWorkConfig, SortTypeId, SortTypeIds } from "../../types";
 
 import "./sort-work-settings.scss";
 
@@ -185,8 +186,8 @@ const SortWorkSettings: React.FC = () => {
             {fields.map((field, index) => {
               const sortType = field.type;
               const translationKey = getSortTypeTranslationKey(sortType);
-              const defaultValue = getDefaultValue(translationKey) || sortType;
-              const displayLabel = translate(translationKey);
+              const defaultValue = upperWords(getDefaultValue(translationKey)) || sortType;
+              const displayLabel = upperWords(translate(translationKey));
               const rowId = `sort-option-${sortType}`;
               const watchedOption = watchSortOptions[index];
               const isOnlyEnabledOption = enabledSortOptions.length === 1 && watchedOption?.enabled;

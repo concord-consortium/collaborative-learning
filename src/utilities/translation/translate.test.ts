@@ -11,16 +11,16 @@ describe("translate", () => {
 
   describe("default values", () => {
     it("should return default values from en-us.json when no overrides set", () => {
-      expect(translate("studentGroup")).toBe("Group");
-      expect(translate("sortLabel.sortByOwner")).toBe("Student");
-      expect(translate("Bookmarked")).toBe("Bookmarked");
-      expect(translate("Tools")).toBe("Tools");
-      expect(translate("sortLabel.sortByDate")).toBe("Date");
-      expect(translate("Problem")).toBe("Problem");
+      expect(translate("studentGroup")).toBe("group");
+      expect(translate("sortLabel.sortByOwner")).toBe("student");
+      expect(translate("bookmarked")).toBe("bookmarked");
+      expect(translate("tools")).toBe("tools");
+      expect(translate("sortLabel.sortByDate")).toBe("date");
+      expect(translate("contentLevel.problem")).toBe("problem");
     });
 
     it("should return empty string for Strategy by default", () => {
-      expect(translate("Strategy")).toBe("");
+      expect(translate("strategy")).toBe("");
     });
   });
 
@@ -41,18 +41,18 @@ describe("translate", () => {
 
     it("should fall back to default when override not present for key", () => {
       setTermOverrides({ studentGroup: "Team" });
-      expect(translate("sortLabel.sortByOwner")).toBe("Student");
+      expect(translate("sortLabel.sortByOwner")).toBe("student");
     });
 
     it("should not use empty string override (falls back to default)", () => {
       setTermOverrides({ studentGroup: "" });
       // Empty string is falsy, so it falls back to default
-      expect(translate("studentGroup")).toBe("Group");
+      expect(translate("studentGroup")).toBe("group");
     });
 
     it("should support Strategy override", () => {
-      setTermOverrides({ Strategy: "Approach" });
-      expect(translate("Strategy")).toBe("Approach");
+      setTermOverrides({ strategy: "Approach" });
+      expect(translate("strategy")).toBe("Approach");
     });
 
     it("should support Date override with namespaced key", () => {
@@ -71,8 +71,8 @@ describe("translate", () => {
       expect(translate("sortLabel.sortByOwner")).toBe("Participant");
 
       clearTermOverrides();
-      expect(translate("studentGroup")).toBe("Group");
-      expect(translate("sortLabel.sortByOwner")).toBe("Student");
+      expect(translate("studentGroup")).toBe("group");
+      expect(translate("sortLabel.sortByOwner")).toBe("student");
     });
   });
 
@@ -85,9 +85,9 @@ describe("translate", () => {
 
   describe("getDefaultValue", () => {
     it("should return default values from en-us.json", () => {
-      expect(getDefaultValue("studentGroup")).toBe("Group");
-      expect(getDefaultValue("sortLabel.sortByOwner")).toBe("Student");
-      expect(getDefaultValue("sortLabel.sortByDate")).toBe("Date");
+      expect(getDefaultValue("studentGroup")).toBe("group");
+      expect(getDefaultValue("sortLabel.sortByOwner")).toBe("student");
+      expect(getDefaultValue("sortLabel.sortByDate")).toBe("date");
     });
 
     it("should ignore overrides and always return base value", () => {
@@ -98,12 +98,12 @@ describe("translate", () => {
       expect(translate("sortLabel.sortByOwner")).toBe("Participant");
 
       // getDefaultValue() ignores overrides and returns base value
-      expect(getDefaultValue("studentGroup")).toBe("Group");
-      expect(getDefaultValue("sortLabel.sortByOwner")).toBe("Student");
+      expect(getDefaultValue("studentGroup")).toBe("group");
+      expect(getDefaultValue("sortLabel.sortByOwner")).toBe("student");
     });
 
     it("should return empty string for Strategy", () => {
-      expect(getDefaultValue("Strategy")).toBe("");
+      expect(getDefaultValue("strategy")).toBe("");
     });
 
     it("should return the key itself for unknown keys", () => {

@@ -23,7 +23,7 @@ interface IProps {
 
 export const CommentTextBox: React.FC<IProps> = (props) => {
   const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags, showAgreeButtons } = props;
-  const tagPrompt = getTermOverride("Strategy");
+  const tagPrompt = getTermOverride("strategy");
   const minTextAreaHeight =
     showCommentTag && showAgreeButtons ? 120 :
     showCommentTag || showAgreeButtons ? 100 :

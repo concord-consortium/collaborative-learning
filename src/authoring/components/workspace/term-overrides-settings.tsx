@@ -23,18 +23,18 @@ export const termMetadata: TermMetadata[] = [
   getTermMetadata("studentGroup", "A group of students"),
   getTermMetadata("studentGroups", "Multiple groups of students"),
   getTermMetadata("sortLabel.sortByOwner", "Sort label for document owner/student"),
-  getTermMetadata("Strategy", strategyDescription),
-  getTermMetadata("Bookmarked", "Term for bookmarked documents"),
-  getTermMetadata("Tools", "Term for CLUE tiles"),
+  getTermMetadata("strategy", strategyDescription),
+  getTermMetadata("bookmarked", "Term for bookmarked documents"),
+  getTermMetadata("tools", "Term for CLUE tiles"),
   getTermMetadata("sortLabel.sortByDate", "Sort label for date"),
-  getTermMetadata("Problem", "Term for the problems/tasks in the unit"),
-  getTermMetadata("Problems", "Term for multiple problems/tasks in the unit"),
-  getTermMetadata("Unit", "Term for the unit of study"),
-  getTermMetadata("Units", "Term for multiple units of study"),
-  getTermMetadata("Investigation", "Term for the investigation within a unit"),
-  getTermMetadata("Investigations", "Term for multiple investigations within a unit"),
-  getTermMetadata("Workspace", "The main editing/viewing panel (singular)"),
-  getTermMetadata("Workspaces", "The main editing/viewing panel (plural)")
+  getTermMetadata("contentLevel.problem", "Term for the problems/tasks in the unit"),
+  getTermMetadata("contentLevel.problems", "Term for multiple problems/tasks in the unit"),
+  getTermMetadata("contentLevel.unit", "Term for the unit of study"),
+  getTermMetadata("contentLevel.units", "Term for multiple units of study"),
+  getTermMetadata("contentLevel.investigation", "Term for the investigation within a unit"),
+  getTermMetadata("contentLevel.investigations", "Term for multiple investigations within a unit"),
+  getTermMetadata("workspace", "The main editing/viewing panel (singular)"),
+  getTermMetadata("workspaces", "The main editing/viewing panel (plural)")
 ];
 
 interface TermOverrideFormInputs {

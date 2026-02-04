@@ -32,7 +32,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   constructor(props: IProps) {
     super(props);
 
-    showLoadingMessage(`Building ${translate("Workspace").toLowerCase()}`);
+    showLoadingMessage(`Building ${translate("workspace")}`);
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
@@ -56,7 +56,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         if (teacherGuide) {
           curriculumDocSections = [...curriculumDocSections, ...teacherGuide.sections];
         }
-        removeLoadingMessage(`Building ${translate("Workspace").toLowerCase()}`);
+        removeLoadingMessage(`Building ${translate("workspace")}`);
         logLoadingAndDocumentMeasurements(documents, curriculumDocSections, primaryDocument);
       }
     }

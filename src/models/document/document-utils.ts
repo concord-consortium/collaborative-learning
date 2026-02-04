@@ -33,7 +33,7 @@ function getDocumentTitleFromProblem(currentUnit: UnitModelType, document: Docum
 
   const upperType = upperFirst(document.type);
   if (!unit) {
-    return `${upperType} doc without ${translate("Unit").toLowerCase()}`;
+    return `${upperType} doc without ${translate("contentLevel.unit")}`;
   }
   return `${upperType} doc from ${unit}-${investigation}.${problem}`;
 }

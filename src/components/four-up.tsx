@@ -356,7 +356,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   private renderUnshownMessage = (groupUser: GroupUserModelType | undefined,
     location: "nw" | "ne" | "se" | "sw") => {
     const groupUserName = groupUser ? groupUser.name : "User";
-    const workspaceTerm = translate("Workspace").toLowerCase();
+    const workspaceTerm = translate("workspace");
     return (
       <div className={`unshared ${location}`}>
         <svg className={`icon icon-unshare`}>

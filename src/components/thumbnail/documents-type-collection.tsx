@@ -6,6 +6,7 @@ import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-t
 import { useClassStore, useStores, useUserStore } from "../../hooks/use-stores";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { ENavTab, NavTabSectionModelType  } from "../../models/view/nav-tabs";
+import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentContextReact } from "../document/document-context";
@@ -37,7 +38,8 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
   const user = useUserStore();
   const { sectionDocuments } = useStores();
   const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
-  const newDocumentLabel = `New ${translate("Problem")} ${translate("Workspace")}`;
+  const newDocumentLabel =
+    `New ${upperWords(translate("contentLevel.problem"))} ${upperWords(translate("workspace"))}`;
   const isSinglePanel = numSections < 2;
   const tabName = tab?.toLowerCase().replace(' ', '-');
   const sectionDocs = sectionDocuments.getSectionDocs(section);

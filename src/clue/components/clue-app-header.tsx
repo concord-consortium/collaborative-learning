@@ -1,3 +1,4 @@
+import { ToggleGroup } from "@concord-consortium/react-components";
 import { observer } from "mobx-react";
 import React, { useCallback, useState } from "react";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
@@ -6,13 +7,13 @@ import { ClassMenuContainer } from "../../components/class-menu-container";
 import { GroupManagementModal } from "../../components/group/group-management-modal";
 import { NetworkStatus } from "../../components/network-status";
 import { ProblemMenuContainer } from "../../components/problem-menu-container";
-import { ToggleGroup } from "@concord-consortium/react-components";
-import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
+import { StudentMenuContainer } from "../../components/student-menu-container";
 import { useStores } from "../../hooks/use-stores";
+import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
+import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
 import AppModeIndicator from "./app-mode-indicator";
 import { CustomSelect } from "./custom-select";
-import { StudentMenuContainer } from "../../components/student-menu-container";
 
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./toggle-buttons.scss";
@@ -119,7 +120,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     }
     return (
       <div onClick={handleOpenStudentGroupModal} className="group">
-        <div className="name" data-test="group-name">{`${translate("studentGroup")} ${group.id}`}</div>
+        <div className="name" data-test="group-name">{`${upperWords(translate("studentGroup"))} ${group.id}`}</div>
         <div className="group-center"/>
         <div className="members" data-test="group-members">
           <div className="row">

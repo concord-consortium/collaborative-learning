@@ -10,10 +10,10 @@ export const SORT_TYPE_TO_TRANSLATION_KEY: Record<SortTypeId, TranslationKeyType
   Group: "studentGroup",
   Name: "sortLabel.sortByOwner",
   Date: "sortLabel.sortByDate",
-  Strategy: "Strategy",
-  Bookmarked: "Bookmarked",
-  Tools: "Tools",
-  Problem: "Problem"
+  Strategy: "strategy",
+  Bookmarked: "bookmarked",
+  Tools: "tools",
+  Problem: "contentLevel.problem"
 };
 
 /**

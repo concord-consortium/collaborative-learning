@@ -1,16 +1,10 @@
 import { FC, SVGProps } from "react";
 import { makeAutoObservable } from "mobx";
 import {
-  createDocMapByBookmarks,
-  createDocMapByGroups,
-  createDocMapByNames,
-  createTileTypeToDocumentsMap,
-  getTagsWithDocs,
-  sortDateSectionLabels,
-  sortGroupSectionLabels,
-  sortNameSectionLabels,
-  sortProblemSectionLabels
+  createDocMapByBookmarks, createDocMapByGroups, createDocMapByNames, createTileTypeToDocumentsMap, getTagsWithDocs,
+  sortDateSectionLabels, sortGroupSectionLabels, sortNameSectionLabels, sortProblemSectionLabels
 } from "../../utilities/sort-document-utils";
+import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { getTileContentInfo } from "../tiles/tile-content-info";
@@ -214,7 +208,7 @@ export class DocumentGroup {
   }
 
   get byTools(): DocumentGroup[] {
-    const toolsTerm = translate("Tools");
+    const toolsTerm = upperWords(translate("tools"));
     const noToolsTerm = `No ${toolsTerm}`;
     const tileTypeToDocumentsMap = createTileTypeToDocumentsMap(this.documents, noToolsTerm);
 
@@ -250,7 +244,7 @@ export class DocumentGroup {
   }
 
   get byBookmarked(): DocumentGroup[] {
-    const bookmarkedTerm = translate("Bookmarked");
+    const bookmarkedTerm = upperWords(translate("bookmarked"));
     const notBookmarkedTerm = `Not ${bookmarkedTerm}`;
     const docMap = createDocMapByBookmarks(this.documents, this.stores.bookmarks, bookmarkedTerm, notBookmarkedTerm);
     const sortedSectionLabels = [bookmarkedTerm, notBookmarkedTerm];
@@ -262,12 +256,13 @@ export class DocumentGroup {
     this.documents.forEach((doc) => {
       const investigationOrdinal = doc.investigation;
       const problemOrdinal = doc.problem;
-      let sectionLabel = `No ${translate("Problem")}`;
+      const problemTerm = upperWords(translate("contentLevel.problem"));
+      let sectionLabel = `No ${problemTerm}`;
 
       if (investigationOrdinal != null && problemOrdinal != null) {
-        sectionLabel = `${translate("Problem")} ${investigationOrdinal}.${problemOrdinal}`;
+        sectionLabel = `${problemTerm} ${investigationOrdinal}.${problemOrdinal}`;
       } else if (problemOrdinal != null) {
-        sectionLabel = `${translate("Problem")} ${problemOrdinal}`;
+        sectionLabel = `${problemTerm} ${problemOrdinal}`;
       }
 
       if (!docMap.has(sectionLabel)) {
