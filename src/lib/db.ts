@@ -304,7 +304,8 @@ export class DB {
    * - Can operate on any student (not just the current user)
    * - Sets up connection handlers only when the student being moved is the current user
    * - Updates latestGroupId only when the student being moved is the current user
-   * - Uses atomic updates for consistency
+   * - Uses a Firebase transaction to prevent race conditions when multiple clients modify groups
+   *   concurrently (e.g., student opens multiple tabs, teacher and student act simultaneously)
    *
    * @param studentId - The ID of the student to move
    * @param targetGroupId - The ID of the group to move the student to, or null to remove from all groups
@@ -314,67 +315,60 @@ export class DB {
     const { user } = this.stores;
     const groupsRef = this.firebase.ref(this.firebase.getGroupsPath(user));
 
-    // Find all groups where this student is currently a member.
-    const snapshot = await groupsRef.once("value");
-    const groups: DBOfferingGroupMap = snapshot.val() || {};
-    const currentGroupIds = this.findGroupsForUser(groups, studentId);
+    await groupsRef.transaction((groups: DBOfferingGroupMap | null) => {
+      if (groups === null) {
+        groups = {};
+      }
 
-    const updates: Record<string, any> = {};
+      // Find all groups where this student is currently a member
+      const currentGroupIds = this.findGroupsForUser(groups, studentId);
 
-    // Remove the student from all current groups.
-    currentGroupIds.forEach((groupId) => {
-      const userPath = this.firebase.getFullPath(
-        this.firebase.getGroupUserPath(user, groupId, studentId)
-      );
-      updates[userPath] = null;
-    });
+      // Remove student from all current groups
+      currentGroupIds.forEach((groupId) => {
+        if (groups![groupId]?.users?.[studentId]) {
+          delete groups![groupId].users![studentId];
+        }
+      });
 
-    // If we have a target group, add the student to it.
-    if (targetGroupId !== null) {
-      const targetGroupRef = this.firebase.ref(this.firebase.getGroupPath(user, targetGroupId));
-      const targetGroupSnapshot = await targetGroupRef.once("value");
+      // If we have a target group, add the student to it
+      if (targetGroupId !== null) {
+        if (!groups[targetGroupId]) {
+          groups[targetGroupId] = {
+            version: "1.0",
+            self: {
+              classHash: user.classHash,
+              offeringId: user.offeringId,
+              groupId: targetGroupId,
+            },
+            users: {}
+          };
+        }
 
-      const userData = {
-        version: "1.0",
-        self: {
-          classHash: user.classHash,
-          offeringId: user.offeringId,
-          groupId: targetGroupId,
-          uid: studentId
-        },
-        connectedTimestamp: firebase.database.ServerValue.TIMESTAMP
-      };
+        if (!groups[targetGroupId].users) {
+          groups[targetGroupId].users = {};
+        }
 
-      // Create the group if it doesn't exist, including the user in the group object.
-      // (Firebase doesn't allow updating both a path and a nested path in the same update)
-      if (!targetGroupSnapshot.val()) {
-        const groupPath = this.firebase.getFullPath(this.firebase.getGroupPath(user, targetGroupId));
-        updates[groupPath] = {
+        // Add the student to the target group.
+        groups[targetGroupId].users![studentId] = {
           version: "1.0",
           self: {
             classHash: user.classHash,
             offeringId: user.offeringId,
             groupId: targetGroupId,
+            uid: studentId
           },
-          users: {
-            [studentId]: userData
-          },
-        } as DBOfferingGroup;
-      } else {
-        // Add the student to the existing target group
-        const targetUserPath = this.firebase.getFullPath(
-          this.firebase.getGroupUserPath(user, targetGroupId, studentId)
-        );
-        updates[targetUserPath] = userData;
+          // Instead of using ServerValue.TIMESTAMP, like we do in joinGroup, we use Date.now() here because
+          // ServerValue.TIMESTAMP isn't resolved in transactions. It would be written literally as
+          // {".sv": "timestamp"}. Client clock skew could affect this value, but it's a necessary compromise.
+          connectedTimestamp: Date.now()
+        };
       }
-    }
 
-    // Apply all updates atomically.
-    if (Object.keys(updates).length > 0) {
-      await firebase.database().ref().update(updates);
-    }
+      return groups;
+    });
 
     // If moving the current user, update their latestGroupId preference and set up connection handlers.
+    // These operations are outside the transaction above because they operate on different database paths.
     if (studentId === this.stores.user.id) {
       this.firebase.cancelGroupDisconnect();
 
