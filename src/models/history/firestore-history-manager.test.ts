@@ -174,7 +174,7 @@ describe("history loading", () => {
       const { historyManager } = setupFirestoreHistoryManager(treeManager);
       // this makes loadHistory be a no op.
       loadHistory.mockReturnValue(() => undefined);
-      await historyManager.mirrorHistoryFromFirestore();
+      await historyManager.subscribeToFirestoreHistory();
       expect(treeManager.document.history).toHaveLength(0);
     });
 
@@ -185,12 +185,12 @@ describe("history loading", () => {
         // In the real world this callback will be delayed until the history documents
         // are actually loaded from firebase
         historyLoaded([
-          { id: "a1" },
-          { id: "a2" }
+          { index: 1, entry: { id: "a1" } },
+          { index: 2, entry: { id: "a2" } }
         ]);
         return () => undefined;
       });
-      await historyManager.mirrorHistoryFromFirestore();
+      await historyManager.subscribeToFirestoreHistory();
       expect(treeManager.document.history).toHaveLength(2);
     });
 
@@ -202,16 +202,18 @@ describe("history loading", () => {
       const { historyManager } = setupFirestoreHistoryManager(treeManager, firestoreMockNoDoc);
 
       // Start mirrorHistoryFromFirestore - it will wait for metadata document
-      const mirrorPromise = historyManager.mirrorHistoryFromFirestore();
+      const mirrorPromise = historyManager.subscribeToFirestoreHistory();
 
       // While waiting for the history it currently reports "No History"
       // TODO: This should be improved to show loading at this point.
       expect(historyManager.historyStatus).toBe(HistoryStatus.NO_HISTORY);
 
       // Fast-forward past the 5 second timeout
-      jest.advanceTimersByTime(5001);
+      jest.advanceTimersByTimeAsync(10000);
 
+      console.log("Waiting for mirrorPromise");
       await mirrorPromise;
+      console.log("mirrorPromise finished");
 
       // Should have set the error status since the metadata document was not found
       expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_ERROR);
@@ -250,11 +252,15 @@ describe("history loading", () => {
         loadHistory.mockImplementation((firestore, path, historyLoaded) => {
           // In the real world this callback will be delayed until the history documents
           // are actually loaded from firebase
-          historyLoaded(entries, loadingError);
+          const historyEntryDocs = entries.map((entry, index) => ({
+            index,
+            entry
+          }));
+          historyLoaded(historyEntryDocs, loadingError);
           return () => undefined;
         });
 
-        await historyManager.mirrorHistoryFromFirestore();
+        await historyManager.subscribeToFirestoreHistory();
 
         // Wait for setNumHistoryEntriesAppliedFromFirestore to finish
         await when(() => treeManager.numHistoryEventsApplied !== undefined);

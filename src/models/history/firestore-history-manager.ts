@@ -5,7 +5,7 @@ import { getSimpleDocumentPath, IDocumentMetadata } from "../../../shared/shared
 import { Firestore } from "../../lib/firestore";
 import { typeConverter } from "../../utilities/db-utils";
 import { UserContextProvider } from "../stores/user-context-provider";
-import { getLastHistoryEntry, loadFirestoreHistory, loadHistory } from "./history-firestore";
+import { getLastHistoryEntry, IFirestoreHistoryEntryDoc, loadHistory } from "./history-firestore";
 import { CDocument, CDocumentType, FAKE_EXCHANGE_ID, FAKE_HISTORY_ENTRY_ID, TreeManagerType } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType, HistoryOperation } from "./history";
 
@@ -43,7 +43,9 @@ export class FirestoreHistoryManager {
   userContextProvider: UserContextProvider;
   treeManager: TreeManagerType;
   uploadLocalHistory: boolean;
-  loadingError = undefined as firebase.firestore.FirestoreError | undefined;
+  historyError = undefined as firebase.firestore.FirestoreError | undefined;
+  environmentAndMetadataDocReadyPromise: Promise<void> | undefined;
+  firestoreHistoryInfoPromise: Promise<IFirestoreHistoryInfo> | undefined;
 
   constructor({
     firestore,
@@ -58,20 +60,34 @@ export class FirestoreHistoryManager {
     this.uploadLocalHistory = uploadLocalHistory;
 
     if (syncRemoteHistory) {
-      this.mirrorHistoryFromFirestore();
+      this.subscribeToFirestoreHistory();
     }
+
+    this.environmentAndMetadataDocReadyPromise = this.waitUntilEnvironmentAndMetadataDocReady();
 
     // We want computed properties like historyStatus to be observable
     makeObservable(this, {
-      loadingError: observable,
-      setLoadingError: action,
+      historyError: observable,
+      setHistoryError: action,
       historyStatus: computed,
       historyStatusString: computed
     });
   }
 
-  setLoadingError(error: firebase.firestore.FirestoreError) {
-    this.loadingError = error;
+  setHistoryError(error: any) {
+    // We are reusing FirestoreError
+    // TODO: why???
+    this.historyError = {
+        message: error instanceof Error ? error.message : String(error)
+    } as firebase.firestore.FirestoreError;
+  }
+
+  get documentPath() {
+    const { mainDocument } = this.treeManager;
+    if (!mainDocument) {
+      throw new Error("FirestoreHistoryManager.documentPath: no mainDocument");
+    }
+    return getSimpleDocumentPath(mainDocument.key);
   }
 
   /**
@@ -86,7 +102,9 @@ export class FirestoreHistoryManager {
     const timeoutForMetadataMs = 5000;
     await new Promise<void>((resolve, reject) => {
       let timeoutId: NodeJS.Timeout | undefined = undefined;
+      console.log("waitForMetadataDocument: waiting for metadata document", { documentPath });
       const disposer = documentRef.onSnapshot(doc => {
+        console.log("waitForMetadataDocument: metadata document snapshot received", { documentPath, exists: doc.exists });
         if (doc.exists) {
           resolve();
           if (timeoutId) {
@@ -95,7 +113,15 @@ export class FirestoreHistoryManager {
           }
         }
       });
+      console.log("waitForMetadataDocument: started listener for metadata document", { documentPath });
+      for (const i of [1, 2, 3, 4]) {
+        setTimeout(() => {
+          console.log("waitForMetadataDocument: timeout test", i);
+        }, i * 1000);
+      }
+
       timeoutId = setTimeout(() => {
+        console.log("waitForMetadataDocument: timeout waiting for metadata document", { documentPath });
         // If there isn't a firestore metadata document in 5 seconds then give up
         disposer();
         console.warn("Could not find metadata document to attach history to", documentPath);
@@ -117,43 +143,57 @@ export class FirestoreHistoryManager {
     });
   }
 
-  async prepareFirestoreHistoryInfo(): Promise<IFirestoreHistoryInfo> {
+  async waitUntilEnvironmentAndMetadataDocReady(): Promise<void> {
     const { userContextProvider, treeManager: { mainDocument }, firestore } = this;
-    // TODO: Wait for userContext to be valid.
+
     // The userContext initially starts out with a user id of 0 and doesn't have a portal and other
     // properties defined. After the user is authenticated the userContext will have valid fields.
-    // The invalid userContext will cause an error below. So we should use something like a MobX
-    // `await when(() => userContext?.uid)`. So far we haven't seen a case where
-    // prepareFirestoreHistoryInfo is called before the userContext is ready.
+    // This won't be a problem in most cases but for the initially displayed document it's
+    // FirestoreHistoryManager might get created before the userContext is ready.
     const userContext = userContextProvider?.userContext;
-
-    if (!userContextProvider || !mainDocument || !firestore || !userContext?.uid) {
-      console.error("cannot record history entry because environment is not valid",
-        { userContext, mainDocument, firestore });
-      throw new Error("cannot record history entry because environment is not valid");
+    console.log("waitUntilEnvironmentAndMetadataDocReady: waiting for userContext");
+    try {
+      await when(() => !!userContext?.uid, { timeout: 5000 });
+    } catch (error) {
+      // We ignore the error because the userContext?.uid being falsy will be handled below.
     }
+    console.log("waitUntilEnvironmentAndMetadataDocReady: userContext ready", { userContext });
 
-    // Get the path to the Firestore metadata document that will be the parent of the history entries
-    const documentPath = getSimpleDocumentPath(mainDocument.key);
-    await this.waitForMetadataDocument(documentPath);
+    try {
+      if (!userContextProvider || !mainDocument || !firestore || !userContext?.uid) {
+        console.error("cannot record history entry because environment is not valid",
+          { userContext, mainDocument, firestore });
+        throw new Error("cannot record history entry because environment is not valid");
+      }
 
-    const lastHistoryEntry = await getLastHistoryEntry(firestore, documentPath);
-
-    return {
-      documentPath,
-      // We start with -1 so if there is no last entry the next entry will get an index of 0
-      // 0 is a valid index so ?? must be used instead of ||
-      lastEntryIndex: lastHistoryEntry?.index ?? -1,
-      // We use null here so this is a valid Firestore property value
-      lastEntryId: lastHistoryEntry?.id || null
-    };
+      // Get the path to the Firestore metadata document that will be the parent of the history entries
+      const documentPath = getSimpleDocumentPath(mainDocument.key);
+      console.log("waitUntilEnvironmentAndMetadataDocReady: waiting for metadata document", { documentPath });
+      await this.waitForMetadataDocument(documentPath);
+      console.log("waitUntilEnvironmentAndMetadataDocReady: metadata document ready", { documentPath });
+    } catch (error) {
+      // save this error so the historyStatus returns HISTORY_ERROR
+      this.setHistoryError(error);
+      throw error;
+    }
   }
-
-  firestoreHistoryInfoPromise: Promise<IFirestoreHistoryInfo> | undefined;
 
   async getFirestoreHistoryInfo() : Promise<IFirestoreHistoryInfo> {
     if (!this.firestoreHistoryInfoPromise) {
-      this.firestoreHistoryInfoPromise = this.prepareFirestoreHistoryInfo();
+      this.firestoreHistoryInfoPromise = (async () => {
+        await this.environmentAndMetadataDocReadyPromise;
+        const { firestore, documentPath } = this;
+        const lastHistoryEntry = await getLastHistoryEntry(firestore, documentPath);
+
+        return {
+          documentPath,
+          // We start with -1 so if there is no last entry the next entry will get an index of 0
+          // 0 is a valid index so ?? must be used instead of ||
+          lastEntryIndex: lastHistoryEntry?.index ?? -1,
+          // We use null here so this is a valid Firestore property value
+          lastEntryId: lastHistoryEntry?.id || null
+        };
+      })();
     }
     return this.firestoreHistoryInfoPromise;
   }
@@ -195,7 +235,7 @@ export class FirestoreHistoryManager {
   }
 
   get historyStatus() : HistoryStatus {
-    if (this.loadingError) {
+    if (this.historyError) {
       return HistoryStatus.HISTORY_ERROR;
     }
 
@@ -250,30 +290,42 @@ export class FirestoreHistoryManager {
     }
   }
 
-  async mirrorHistoryFromFirestore() {
+  /**
+   * This is called each time the remote history changes in Firestore
+   */
+  syncRemoteFirestoreHistory(historyDocs: IFirestoreHistoryEntryDoc[]) {
+    const { treeManager } = this;
+
+    const history: HistoryEntrySnapshot[] = historyDocs.map(doc => doc.entry);
+
+    if (!treeManager.document) {
+      const cDocument = CDocument.create({history});
+      treeManager.setChangeDocument(cDocument);
+    } else {
+      applySnapshot(treeManager.document, {history});
+    }
+  }
+
+  async subscribeToFirestoreHistory() {
     const { treeManager, firestore } = this;
     const { mainDocument } = treeManager;
 
     const documentKey = mainDocument?.key;
     const userId = mainDocument?.uid;
     if (!documentKey || !userId) {
-      console.warn("mirrorHistoryFromFirestore, requires a mainDocument");
+      console.warn("subscribeToFirestoreHistory, requires a mainDocument");
       return;
     }
 
     // Wait for the parent document to exist
-    let documentPath: string;
     try {
-      const firestoreHistoryInfo = await this.prepareFirestoreHistoryInfo();
-      documentPath = firestoreHistoryInfo.documentPath;
+      await this.environmentAndMetadataDocReadyPromise;
     } catch (error) {
-      // The metadata document doesn't exist or there was another error.
-      // Set the loading error so historyStatus returns HISTORY_ERROR.
-      this.setLoadingError({
-        message: error instanceof Error ? error.message : String(error)
-      } as firebase.firestore.FirestoreError);
+      // The environment isn't correct or the metadata document doesn't exist
+      // the error will set as this.historyError
       return;
     }
+    const { documentPath } = this;
 
     // TODO: we should move this function into the history manager
     treeManager.setNumHistoryEntriesAppliedFromFirestore(firestore, documentPath);
@@ -281,54 +333,12 @@ export class FirestoreHistoryManager {
     const snapshotUnsubscribe = loadHistory(firestore, `${documentPath}/history`,
       (history, error) => {
         if (error) {
-          this.setLoadingError(error);
+          this.setHistoryError(error);
         } else {
-          // TODO: When run on every change for a collaborative document this will
-          // be pretty inefficient since it is recreating the whole CDocument
-          // each time. We can improve this by using Firestore's snapshot.docChanges()
-          // method. This way can just add the new history entries.
-
-          // If we apply the changes to the existing document in the treeManager
-          // They will have the applied flag set to false if they are not already local
-          // events that have been applied.
-          // So after we do this, we should call an async function to apply any
-          // unapplied history entries. Or we can use a reaction to do this automatically.
-
-          if (!treeManager.document) {
-            const cDocument = CDocument.create({history});
-            treeManager.setChangeDocument(cDocument);
-          } else {
-            // FIXME: this is being called twice for a single change in the document.
-            // Perhaps this is because both the initial local change and then a second
-            // remote change.
-            // I've confirmed there are not multiple listeners being created.
-            console.log("Applying remote history update", {
-              length: history.length,
-              documentKey,
-              newHistory: history,
-              existingHistory: getSnapshot(treeManager.document.history)
-            });
-            // here is where the existing history entries should be preserved and just new ones added
-            // FIXME: what is happening is that when a user makes several changes quickly, they get added
-            // to local history right away. But then remote history comes in after the first of those changes
-            // is uploaded to Firestore. So now this incomplete remote history overwrite the local history
-            // including the local changes that have not yet been uploaded.
-            //
-            // So to fix this maybe it'd work to not use applySnapshot but instead do a merge operation
-            // where we always preserve the local entries and just add the remote ones.
-            //
-            // Alternatively we could try to upload the local entries in a batch right away instead of doing one
-            // at a time. This would require changing the onHistoryEntryCompleted to batch up multiple entries
-            // somehow.
-            //
-            // Another option would be to keep the local and remote history in separate lists.
-            // Or maybe not even store the remote history. Just do the "applied" check for each remote history
-            // entry that comes in.
-            //
-            // This approach means that we can't just do "mirrorHistoryFromFirestore" combined with writing
-            // history to get a collaborative document.
-            applySnapshot(treeManager.document, {history});
-          }
+          // FIXME: this is being called twice for a single change in the document.
+          // I've confirmed there are not multiple listeners being created.
+          // TODO: confirm this comment
+          this.syncRemoteFirestoreHistory(history);
         }
       }
     );
@@ -369,10 +379,72 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     }, delayMs);
   }
 
-  // FIXME: when a document is opened that already has content in it, and it has history
-  // this history will get re-applied to the document. It is likely that this is reason
-  // we see duplicate tiles when loading a group document
-  async mirrorHistoryFromFirestore() {
+  syncRemoteFirestoreHistory2(historyEntryDocs: IFirestoreHistoryEntryDoc[]): void {
+    const { treeManager } = this;
+    const { mainDocument } = treeManager;
+
+    const documentKey = mainDocument?.key;
+
+    if (!treeManager.document) {
+      // If there is no change document yet it seems like it should be an error
+      // We are only working on documents that are editable. So they should have
+      // a change document created automatically. However perhaps it doesn't get
+      // created until the first entry shows up?
+      // For now just throw an error so we can figure out if this case happens.
+      throw new Error("syncRemoteFirestoreHistory: no change document exists yet");
+      // If we need to create the change document here, we can use this code:
+      // treeManager.setChangeDocument(CDocument.create({history: []}));
+    }
+
+    const existingHistory = treeManager.document.history;
+
+    console.log("Applying remote concurrent history update", {
+      length: historyEntryDocs.length,
+      documentKey,
+      newHistoryEntryDocs: historyEntryDocs,
+      existingHistory: getSnapshot(existingHistory)
+    });
+
+    // We do not use applySnapshot here because it would replace the entire history with
+    // the remote history. Sometimes there will be local history entries that have not
+    // yet been uploaded, so we can't just overwrite those.
+    // Instead we just add the new history entries that aren't in our local history yet.
+    // This means that the history entries on this client will be in a different order
+    // than on other clients. That's because those other clients wouldn't have our local
+    // entries yet.
+    // This problem is being punted for now.
+
+    // Not the most efficient but lets get the history entries from the historyEntryDocs
+    // If we unify on loadFirestoreHistory we can have it do this parsing for us
+    const incomingHistory: HistoryEntrySnapshot[] = historyEntryDocs.map(doc => doc.entry);
+
+    // Again not the most efficient to figure out which entries are new
+    const newEntries: HistoryEntrySnapshot[] = [];
+    for (const entry of incomingHistory) {
+      const exists = existingHistory.find(e => e.id === entry.id);
+      if (!exists) {
+        newEntries.push(entry);
+      }
+    }
+
+    // FIXME: when a document is opened that already has content in it, and it has history
+    // this history will get re-applied to the document. It is likely that this is reason
+    // we see duplicate tiles when loading a group document
+    // We somehow need to know which entries have already been applied to the document
+    // and skip those. At least in CODAP we track the last history entry id of the document
+    // So we could use that to skip any entries before that id.
+    // Since the history is not necessarily identical on each client, perhaps this last history
+    // entry recorded in the document will be before the actual last history entry in Firestore.
+    // This needs to be thought through more carefully, but it seems good enough to start.
+    // Another approach is to not load the state of the document at all and just replay
+    // the history here. But that could be slow if there is a lot of history.
+    // Another approach is to track in the document exactly which history entries have been
+    // applied, not just the last one.
+    this.applyHistoryEntries(newEntries);
+  }
+
+
+  async subscribeToFirestoreHistory() {
     const { treeManager, firestore } = this;
     const { mainDocument } = treeManager;
 
@@ -384,133 +456,27 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     }
 
     // Wait for the parent document to exist
-    let documentPath: string;
     try {
-      const firestoreHistoryInfo = await this.prepareFirestoreHistoryInfo();
-      documentPath = firestoreHistoryInfo.documentPath;
+      await this.environmentAndMetadataDocReadyPromise;
     } catch (error) {
-      // The metadata document doesn't exist or there was another error.
-      // Set the loading error so historyStatus returns HISTORY_ERROR.
-      this.setLoadingError({
-        message: error instanceof Error ? error.message : String(error)
-      } as firebase.firestore.FirestoreError);
       return;
     }
+    const { documentPath } = this;
 
     // TODO: probably we can just delete this from the concurrent manager
     treeManager.setNumHistoryEntriesAppliedFromFirestore(firestore, documentPath);
 
-    const snapshotUnsubscribe = loadFirestoreHistory(firestore, `${documentPath}/history`,
+    const snapshotUnsubscribe = loadHistory(firestore, `${documentPath}/history`,
       (historyEntryDocs, error) => {
         if (error) {
-          this.setLoadingError(error);
+          this.setHistoryError(error);
         } else {
-          // TODO: When run on every change for a collaborative document this will
-          // be pretty inefficient since it is recreating the whole CDocument
-          // each time. We can improve this by using Firestore's snapshot.docChanges()
-          // method. This way can just add the new history entries.
-
-          // If we apply the changes to the existing document in the treeManager
-          // They will have the applied flag set to false if they are not already local
-          // events that have been applied.
-          // So after we do this, we should call an async function to apply any
-          // unapplied history entries. Or we can use a reaction to do this automatically.
-
-          if (!treeManager.document) {
-            // If there is no change document yet it seems like it should be an error
-            // We are only working on documents that are editable. So they should have
-            // a change document created automatically. However perhaps it doesn't get
-            // created until the first entry shows up?
-            // For now just throw an error so we can figure out if this case happens.
-            throw new Error("mirrorHistoryFromFirestore: no change document exists yet");
-            // If we need to create the change document here, we can use this code:
-            // treeManager.setChangeDocument(CDocument.create({history: []}));
-          }
-
-          // FIXME: this is being called twice for a single change in the document.
-          // Perhaps this is because both the initial local change and then a second
-          // remote change.
-          // I've confirmed there are not multiple listeners being created.
-          const existingHistory = treeManager.document.history;
-
-          console.log("Applying remote concurrent history update", {
-            length: historyEntryDocs.length,
-            documentKey,
-            newHistoryEntryDocs: historyEntryDocs,
-            existingHistory: getSnapshot(existingHistory)
-          });
-
-          // here is where the existing history entries should be preserved and just new ones added
-          // FIXME: what is happening is that when a user makes several changes quickly, they get added
-          // to local history right away. But then remote history comes in after the first of those changes
-          // is uploaded to Firestore. So now this incomplete remote history overwrite the local history
-          // including the local changes that have not yet been uploaded.
-          //
-          // So to fix this maybe it'd work to not use applySnapshot but instead do a merge operation
-          // where we always preserve the local entries and just add the remote ones.
-          //
-          // Alternatively we could try to upload the local entries in a batch right away instead of doing one
-          // at a time. This would require changing the onHistoryEntryCompleted to batch up multiple entries
-          // somehow.
-          //
-          // Another option would be to keep the local and remote history in separate lists.
-          // Or maybe not even store the remote history. Just do the "applied" check for each remote history
-          // entry that comes in.
-          //
-          // This approach means that we can't just do "mirrorHistoryFromFirestore" combined with writing
-          // history to get a collaborative document.
-
-          // Not the most efficient but lets get the history entries from the historyEntryDocs
-          const incomingHistory: HistoryEntrySnapshot[] = historyEntryDocs.map(doc => {
-            return JSON.parse(doc.entry) as HistoryEntrySnapshot;
-          });
-
-          // Again not the most efficient to figure out which entries are new
-          const newEntries: HistoryEntrySnapshot[] = [];
-          for (const entry of incomingHistory) {
-            const exists = existingHistory.find(e => e.id === entry.id);
-            if (!exists) {
-              newEntries.push(entry);
-            }
-          }
-
-          this.applyHistoryEntries(newEntries);
+          this.syncRemoteFirestoreHistory2(historyEntryDocs);
         }
       }
     );
     // Add this disposer so our Firestore listener is removed when the treeManager is destroyed
     addDisposer(treeManager, snapshotUnsubscribe);
-  }
-
-
-  async prepareFirestoreHistoryInfo(): Promise<IFirestoreHistoryInfo> {
-    const { userContextProvider, treeManager: { mainDocument }, firestore } = this;
-    // TODO: Wait for userContext to be valid.
-    // The userContext initially starts out with a user id of 0 and doesn't have a portal and other
-    // properties defined. After the user is authenticated the userContext will have valid fields.
-    // The invalid userContext will cause an error below. So we should use something like a MobX
-    // `await when(() => userContext?.uid)`. So far we haven't seen a case where
-    // prepareFirestoreHistoryInfo is called before the userContext is ready.
-    const userContext = userContextProvider?.userContext;
-
-    if (!userContextProvider || !mainDocument || !firestore || !userContext?.uid) {
-      console.error("cannot record history entry because environment is not valid",
-        { userContext, mainDocument, firestore });
-      throw new Error("cannot record history entry because environment is not valid");
-    }
-
-    // Get the path to the Firestore metadata document that will be the parent of the history entries
-    const documentPath = getSimpleDocumentPath(mainDocument.key);
-    await this.waitForMetadataDocument(documentPath);
-
-    return {
-      documentPath,
-      // We need to return these properties to be compatible with the parent class.
-      // We just return hardcoded values which are not actually used.
-      // The actual values are read from Firestore on each onHistoryEntryCompleted.
-      lastEntryIndex: -1,
-      lastEntryId: null
-    };
   }
 
   async onHistoryEntryCompleted(
@@ -519,17 +485,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     newLocalIndex: number
   ) {
     // Multiple entries can piled up, while some are being uploaded. A simple promise system
-    // doesn't guarantee that the uploads will happen in order. So a queue is used.
-    //
-    // There are a few reasons why they might pile up:
-    // - the entries could come in faster than they can be saved to Firestore.
-    // - the metadata document might not be ready yet, so they'll be waiting
-    // on the firestoreInfoPromise above. Once that resolves the first one will start running
-    // however it will then stop running again while waiting fro the read in the transaction.
-    // That will then let the second onHistoryEntryCompleted call to start running again.
-    // I don't think there is a guarantee which of the blocked read calls will resolve first.
-    // So the second onHistoryEntryCompleted might go first, which will then give it a wrong
-    // index and previous entry id.
+    // doesn't guarantee that the uploads will happen in the correct order. So a queue is used.
     this.completedHistoryEntryQueue.push(entry);
     this.uploadQueuedHistoryEntries();
   }
@@ -549,14 +505,12 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     this.uploadInProgress = true;
 
     // The parent Firestore metadata document might not be ready yet so we need to wait for that.
-    if (!this.firestoreHistoryInfoPromise) {
-      this.firestoreHistoryInfoPromise = this.prepareFirestoreHistoryInfo();
-    }
-    const { documentPath: relativeMetadataPath } = await this.firestoreHistoryInfoPromise;
+    // FIXME: we need to handle the case where this errors out
+    await this.environmentAndMetadataDocReadyPromise;
     const { firestore } = this;
 
     // add a new document for this history entry
-    const metadataPath = firestore.getFullPath(relativeMetadataPath);
+    const metadataPath = firestore.getFullPath(this.documentPath);
     const historyEntriesPath = `${metadataPath}/history`;
 
     // The following code is run in a Firestore transaction. This is so index and previousEntryId
@@ -573,8 +527,8 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // finished. Because of this there cannot be side effects in the transaction code,
     // just reads and writes.
     //
-    // Firestore has a limit of 500 operations per transaction, and 10 MiB for all transfered data.
-    // To be safe we put a limit of uploading 20 entries a time.
+    // Firestore has a limit of 500 operations per transaction, and 10 MiB for all transferred data.
+    // To be safe we limit how many entries we upload in a single transaction.
     const MAX_ENTRIES_PER_TRANSACTION = 20;
     const entriesToUpload = this.completedHistoryEntryQueue.slice(0, MAX_ENTRIES_PER_TRANSACTION);
     if (entriesToUpload.length === 0) {
@@ -634,10 +588,6 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       });
     });
 
-    // Clear the queue now that all entries have been uploaded
-    // But if there were new entries added while the transaction was running
-    // they will be lost. So we need to call uploadQueuedHistoryEntries again
-    // to upload any new entries.
     // If we made it here then the transaction succeed so we can remove the entriesToUpload
     // from the queue.
     this.completedHistoryEntryQueue.splice(0, entriesToUpload.length);

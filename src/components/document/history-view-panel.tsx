@@ -5,8 +5,10 @@ import { HistoryEntryItem } from "./history-entry-item";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { TreeManager } from "../../models/history/tree-manager";
-import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType } from "../../models/history/history";
-import { loadHistory, getHistoryPath, loadFirestoreHistory, IFirestoreHistoryEntryDoc } from "../../models/history/history-firestore";
+import { HistoryEntry, HistoryEntryType } from "../../models/history/history";
+import {
+  getHistoryPath, loadHistory, IFirestoreHistoryEntryDoc
+} from "../../models/history/history-firestore";
 import { FirestoreHistoryManagerConcurrent } from "../../models/history/firestore-history-manager";
 
 import "./history-view-panel.scss";
@@ -60,20 +62,18 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
       return;
     }
 
-    const unsubscribe = loadFirestoreHistory(db.firestore, historyPath, (docs: IFirestoreHistoryEntryDoc[], error) => {
+    const unsubscribe = loadHistory(db.firestore, historyPath, (docs: IFirestoreHistoryEntryDoc[], error) => {
       if (error) {
         setRemoteHistoryError(error.message);
         setRemoteHistoryEntries([]);
       } else {
         setRemoteHistoryError(undefined);
         setRemoteHistoryEntries(docs.map(doc => {
-          console.log("History doc:", doc);
           const { entry } = doc;
-          const entrySnapshot = JSON.parse(entry) as HistoryEntrySnapshot;
           return {
             index: doc.index,
             previousEntryId: doc.previousEntryId,
-            entry: HistoryEntry.create(entrySnapshot)
+            entry: HistoryEntry.create(entry)
           };
         }));
       }

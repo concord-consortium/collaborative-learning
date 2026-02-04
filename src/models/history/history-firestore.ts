@@ -33,16 +33,16 @@ export async function getLastHistoryEntry(firestore: Firestore, documentPath: st
 
 export interface IFirestoreHistoryEntryDoc {
   index: number;
-  entry: string; // JSON stringified HistoryEntrySnapshot
+  entry: HistoryEntrySnapshot;
   previousEntryId?: string;
 }
-type LoadedFirestoreHistoryHandler =
+type LoadedHistoryHandler =
   (entries: IFirestoreHistoryEntryDoc[], error?: firebase.firestore.FirestoreError) => void;
 
-export function loadFirestoreHistory(
+export function loadHistory(
   firestore: Firestore,
   historyPath: string,
-  handleLoadedFirestoreHistory: LoadedFirestoreHistoryHandler
+  handleLoadedHistory: LoadedHistoryHandler
 ) {
   const query = firestore.collection(historyPath)
     .orderBy("index");
@@ -59,42 +59,21 @@ export function loadFirestoreHistory(
         // eslint-disable-next-line no-console
         console.log("Loaded History:", querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
       }
-      const history = querySnapshot.docs.map(doc => doc.data() as IFirestoreHistoryEntryDoc);
-      handleLoadedFirestoreHistory(history);
+      const history = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          index: data.index,
+          previousEntryId: data.previousEntryId,
+          entry: data.entry ? JSON.parse(data.entry) as HistoryEntrySnapshot : undefined
+        } as IFirestoreHistoryEntryDoc;
+      });
+      handleLoadedHistory(history);
     },
     error => {
-      handleLoadedFirestoreHistory([], error);
+      handleLoadedHistory([], error);
     }
   );
 }
-
-type LoadedHistoryHandler = (entries: HistoryEntrySnapshot[], error?: firebase.firestore.FirestoreError) => void;
-
-/**
- * Load the history entries from Firestore, and monitor changes to this history.
- *
- * @param firestore CLUE Firestore instance
- * @param historyPath location of history entries in Firestore
- * @param handleLoadedHistory callback receiving the history or error, the
- * callback will be called whenever the history changes in Firestore.
- * @returns a disposer function to cleanup the Firestore query
- */
-export function loadHistory(firestore: Firestore, historyPath: string,
-  handleLoadedHistory: LoadedHistoryHandler) {
-
-  return loadFirestoreHistory(firestore, historyPath, (docs, error) => {
-    if (error) {
-      handleLoadedHistory([], error);
-    } else {
-      const history = docs.map(doc => {
-        const { entry } = doc;
-        return JSON.parse(entry) as HistoryEntrySnapshot;
-      });
-      handleLoadedHistory(history);
-    }
-  });
-}
-
 
 /**
  * Get the Firestore path for a document's history collection.
