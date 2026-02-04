@@ -113,3 +113,52 @@ When the group documents are reloaded we're getting duplicate tiles. This might 
 ## Table with graph
 
 I don't the exact steps yet, but I found that when a graph is connected to a table only one of the documents actually shows the points on the graph.
+
+# Splitting this branch
+
+1. Moving the more of the code into the firestore history manager. And perhaps at the same time splitting out the concurrent history manager into its own file.
+
+2. Adding the actual read-write support for concurrent documents.
+
+## Files
+- canvas.tsx: all about 1
+- history-entry-item.tsx: history view improvements
+- history-view-panel.scss: history view improvements
+- history-view-panel.tsx: using new loadFirestoreHistory, but also works with the new Concurrent manager. The concurrent stuff is for pausing the history application. So perhaps best is to split some of the changes in this file into part 1 and the concurrent play pause into part 2.
+- playback.tsx: all about 1
+- firestore-history-manager.test.ts should be all about part 1, but there might be some thing in there that is more than that.
+- firestore-history-manager.ts: the first half is about the refactor, then the second part is about the concurrent manager support. So this file's changes need to be split upt
+- history-firestore.ts: loadFirestoreHistory function so things can have access to the full firestore history entries. This can be part of 1, but it'd be good to refactor it a bit first.
+- tree-manager.ts: parts of this are the refactor for 1,
+  - using a generic IHistoryManager interface.
+  - historyStatus, historyStatusString view has been moved to the history manager (1)
+  - moved mirrorHistoryFromFirestore: part 1
+  - moved 'moveTohistoryEntryAfterLoad' part 1
+  - addHistoryEntryAfterApplying is part 2 (concurrency)
+- mst.test.ts: kind of dead now I think, it is testing that arrays which are updated with applySnapshot just update their elements when they have ids
+- documents.ts: this is tricky, it is a mix of refactor and concurrency. Probably we need to keep this file basically as is in part 1 and possibly leave some of the concurrency changes for part 2.
+
+So to summarize
+
+### Part 1
+- minimal history view changes to work with refactor
+- refactor: replace on history entry completed listener with IHistoryManager interface in tree manager
+- refactor: require explicity history manager creation by documents, and canvas
+- refactor: playback.tsx works with history manager instead of tree manager
+- refactor: move more firestore specific functions out of tree manager
+- refactor: when history manager is created pass it 'uploadLocalHistory' and 'syncRemoteHistory' flags. this replaces the explicit call to the mirror method
+- refactor: separate out FirestoreHistoryManagerConcurrent into its own file
+
+### Part 2
+- remainder of history view improvements plus the pause button
+- mst.test.ts just because this PR is going to be smaller
+
+
+TODO:
+- review each changed file one by one and figure out how it fits into these categories.
+- review Claude's list of unfinished work to see what I forgot I left un finished
+- see if we can reduce duplication in FirestoreHistoryManagerConcurrent, doing this before splitting the PRs would be good, so the second PR is really just about the concurrent stuff
+- see if we can drop the dual `loadHistory` and `loadFirestoreHistory` functions. Need to look at where `loadHistory` is used. The issue is that loadHistory automatically parses the doc.entry and casts it. However perhaps the places where loadFirestoreHistory are uses do the same thing so it could just do the parsing and casting.
+-
+
+- canvase
