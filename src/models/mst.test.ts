@@ -406,7 +406,7 @@ describe("mst", () => {
     // but hasEnv can be used to check if the environment is defined
     const todo = Todo.create({name: "hello"});
     expect(autorunCount).toBe(1);
-    expect(doSomething).toBeCalledTimes(0);
+    expect(doSomething).toHaveBeenCalledTimes(0);
     expect(hasEnv(todo)).toEqual(false);
 
     // Now we create a container object with an environment
@@ -423,7 +423,7 @@ describe("mst", () => {
     .then(() => {
       // even though the environment has changed the autorun is not triggered
       expect(autorunCount).toBe(1);
-      expect(doSomething).toBeCalledTimes(0);
+      expect(doSomething).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -466,7 +466,7 @@ describe("mst", () => {
     }, env);
     const todo = todoList.todos.at(0);
     expect(autorunCount).toBe(1);
-    expect(doSomething).toBeCalledTimes(1);
+    expect(doSomething).toHaveBeenCalledTimes(1);
     expect(getEnv(todo)).toBe(env);
 
     // ignore MobX warning for modifying an observable outside an action
@@ -481,7 +481,7 @@ describe("mst", () => {
     })
     .then(() => {
       expect(autorunCount).toBe(2);
-      expect(doSomething).toBeCalledTimes(2);
+      expect(doSomething).toHaveBeenCalledTimes(2);
     });
   });
 
