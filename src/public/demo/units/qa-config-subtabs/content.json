@@ -77,13 +77,13 @@
     },
     "sortWorkConfig": {
       "sortOptions": [
-        { "type": "Group" },
-        { "type": "Name" },
-        { "type": "Strategy" },
-        { "type": "Bookmarked" },
-        { "type": "Tools" },
-        { "type": "Date" },
-        { "type": "Problem" }
+        "Group",
+        "Name",
+        "Strategy",
+        "Bookmarked",
+        "Tools",
+        "Date",
+        "Problem"
       ]
     },
     "tools": ["Simulator"],
