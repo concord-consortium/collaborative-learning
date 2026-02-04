@@ -36,7 +36,7 @@
       "system": "Varies System Factors"
     },
     "termOverrides": {
-      "Strategy": "Identify Design Approach"
+      "strategy": "Identify Design Approach"
     },
     "navTabs": {
       "lazyLoadTabContents": true,

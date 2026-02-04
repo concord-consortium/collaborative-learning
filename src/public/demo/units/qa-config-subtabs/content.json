@@ -73,7 +73,7 @@
       "unit-rate": "Unit Rate"
     },
     "termOverrides": {
-      "Strategy": "Identify Design Approach"
+      "strategy": "Identify Design Approach"
     },
     "sortWorkConfig": {
       "sortOptions": [

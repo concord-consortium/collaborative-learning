@@ -102,7 +102,7 @@
     "enableCommentRoles": ["student", "teacher", "researcher"],
     "showCommentTag": true,
     "termOverrides": {
-      "Strategy": "Select QA Strategy"
+      "strategy": "Select QA Strategy"
     },
     "commentTags": {
       "diverging": "Diverging Designs",

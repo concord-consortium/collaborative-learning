@@ -37,7 +37,7 @@
       "none": "None"
     },
     "termOverrides": {
-      "Strategy": "Select Student Strategy"
+      "strategy": "Select Student Strategy"
     }
   },
   "sections": {
