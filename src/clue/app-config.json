@@ -288,14 +288,7 @@
     "placeholderText": "",
     "stamps": [],
     "sortWorkConfig": {
-      "sortOptions": [
-        { "type": "Date" },
-        { "type": "Group" },
-        { "type": "Name" },
-        { "type": "Strategy" },
-        { "type": "Bookmarked" },
-        { "type": "Tools" }
-      ]
+      "sortOptions": ["Date", "Group", "Name", "Strategy", "Bookmarked", "Tools"]
     },
     "settings": {
       "ai": {

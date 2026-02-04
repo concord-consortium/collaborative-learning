@@ -46,21 +46,21 @@ describe("TermOverridesSettings", () => {
   it("displays default values in placeholders", () => {
     render(<TermOverridesSettings />);
 
-    const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
-    expect(groupInput.placeholder).toBe("Group");
+    const groupInput = screen.getByLabelText("group") as HTMLInputElement;
+    expect(groupInput.placeholder).toBe("group");
 
-    const nameInput = screen.getByLabelText("Student") as HTMLInputElement;
-    expect(nameInput.placeholder).toBe("Student");
+    const nameInput = screen.getByLabelText("student") as HTMLInputElement;
+    expect(nameInput.placeholder).toBe("student");
 
     // Strategy does not have a default
-    const strategyInput = screen.getByLabelText("Strategy") as HTMLInputElement;
+    const strategyInput = screen.getByLabelText("strategy") as HTMLInputElement;
     expect(strategyInput.placeholder).toBe("(no default)");
   });
 
   it("allows entering custom override values", async () => {
     render(<TermOverridesSettings />);
 
-    const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
+    const groupInput = screen.getByLabelText("group") as HTMLInputElement;
     await userEvent.type(groupInput, "Team");
 
     expect(groupInput.value).toBe("Team");
@@ -69,7 +69,7 @@ describe("TermOverridesSettings", () => {
   it("calls setUnitConfig with custom terms on save", async () => {
     render(<TermOverridesSettings />);
 
-    const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
+    const groupInput = screen.getByLabelText("group") as HTMLInputElement;
     await userEvent.type(groupInput, "Team");
 
     const saveButton = screen.getByRole("button", { name: /Save/i });
@@ -96,8 +96,8 @@ describe("TermOverridesSettings", () => {
   it("does not save terms that match the default value", async () => {
     render(<TermOverridesSettings />);
 
-    const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
-    userEvent.type(groupInput, "Group");
+    const groupInput = screen.getByLabelText("group") as HTMLInputElement;
+    userEvent.type(groupInput, "group");
 
     const saveButton = screen.getByRole("button", { name: /Save/i });
     fireEvent.click(saveButton);
@@ -109,7 +109,7 @@ describe("TermOverridesSettings", () => {
     const updaterFn = mockSetUnitConfig.mock.calls[0][0];
     const mockDraft = {
       config: {
-        termOverrides: { studentGroup: "OldValue" }
+        termOverrides: { studentGroup: "group" }
       }
     };
     updaterFn(mockDraft);
@@ -123,10 +123,10 @@ describe("TermOverridesSettings", () => {
 
     render(<TermOverridesSettings />);
 
-    const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
+    const groupInput = screen.getByLabelText("group") as HTMLInputElement;
     expect(groupInput.value).toBe("Team");
 
-    const nameInput = screen.getByLabelText("Student") as HTMLInputElement;
+    const nameInput = screen.getByLabelText("student") as HTMLInputElement;
     expect(nameInput.value).toBe("Participant");
   });
 

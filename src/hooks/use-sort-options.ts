@@ -1,13 +1,12 @@
 import { useMemo } from "react";
 import { useStores } from "./use-stores";
-import { ISortOptionConfig } from "../models/stores/sort-work-config";
 import { PrimarySortType } from "../models/stores/ui-types";
 import { getSortTypeTranslationKey } from "../utilities/sort-utils";
 import { upperWords } from "../utilities/string-utils";
 import { getTermOverride, translate } from "../utilities/translation/translate";
 
 // Display version of ISortOptionConfig with required label
-export interface SortOptionDisplay extends Omit<ISortOptionConfig, "label"> {
+export interface SortOptionDisplay {
   label: string;
   type: PrimarySortType;
 }
@@ -22,18 +21,18 @@ export function useSortOptions() {
     return configOptions
       .filter(option => {
         // Filter out Group if groups are disabled
-        if (option.type === "Group" && autoAssignStudentsToIndividualGroups) {
+        if (option === "Group" && autoAssignStudentsToIndividualGroups) {
           return false;
         }
         // Only include Strategy if the term has been overridden
-        if (option.type === "Strategy" && !getTermOverride("strategy")) {
+        if (option === "Strategy" && !getTermOverride("strategy")) {
           return false;
         }
         return true;
       })
       .map(option => ({
-        type: option.type,
-        label: upperWords(translate(getSortTypeTranslationKey(option.type)))
+        type: option,
+        label: upperWords(translate(getSortTypeTranslationKey(option)))
       }));
   }, [sortWorkConfig?.sortOptions, autoAssignStudentsToIndividualGroups]);
 

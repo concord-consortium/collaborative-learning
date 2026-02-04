@@ -1,5 +1,6 @@
 import { FC, SVGProps } from "react";
 import { makeAutoObservable } from "mobx";
+
 import {
   createDocMapByBookmarks, createDocMapByGroups, createDocMapByNames, createTileTypeToDocumentsMap, getTagsWithDocs,
   sortDateSectionLabels, sortGroupSectionLabels, sortNameSectionLabels, sortProblemSectionLabels
@@ -7,13 +8,13 @@ import {
 import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
-import { getTileContentInfo } from "../tiles/tile-content-info";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
-import { SecondarySortType, SortType } from "./ui-types";
-import { GroupsModelType } from "./groups";
-import { ClassModelType } from "./class";
+import { getTileContentInfo } from "../tiles/tile-content-info";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
+import { ClassModelType } from "./class";
+import { GroupsModelType } from "./groups";
+import { SecondarySortType, SortType } from "./ui-types";
 
 import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
 
@@ -180,7 +181,7 @@ export class DocumentGroup {
   }
 
   get byGroup(): DocumentGroup[] {
-    const groupTerm = translate("studentGroup");
+    const groupTerm = upperWords(translate("studentGroup"));
     const docMap = createDocMapByGroups(this.documents, this.stores.groups.groupForUser, groupTerm);
     const sortedSectionLabels = sortGroupSectionLabels(Array.from(docMap.keys()));
     return this.buildDocumentCollection({sortedSectionLabels, sortType: "Group", docMap});

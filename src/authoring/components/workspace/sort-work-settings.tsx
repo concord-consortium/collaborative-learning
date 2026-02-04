@@ -2,7 +2,6 @@ import React, { useEffect, useMemo } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 
 import appConfig from "../../../clue/app-config.json";
-import { ISortOptionConfig } from "../../../models/stores/sort-work-config";
 import { DocFilterType, DocFilterTypeIds } from "../../../models/stores/ui-types";
 import { getSortTypeTranslationKey } from "../../../utilities/sort-utils";
 import { upperWords } from "../../../utilities/string-utils";
@@ -14,9 +13,7 @@ import { ISortWorkConfig, SortTypeId, SortTypeIds } from "../../types";
 
 import "./sort-work-settings.scss";
 
-const defaultSortTypes = new Set(
-  appConfig.config.sortWorkConfig?.sortOptions?.map((o: { type: string }) => o.type) ?? []
-);
+const defaultSortTypes = new Set(appConfig.config.sortWorkConfig?.sortOptions ?? []);
 
 const sortOptionDescriptions: Record<SortTypeId, string> = {
   Group: "Sort documents by student group",
@@ -45,13 +42,16 @@ interface SortWorkSettingsFormInputs {
   sortOptions: FormSortOption[];
 }
 
+// Converts legacy types (of the form { type: string }) to modern types, which are just strings
+const updateType = (type: any) => (typeof type === "string" ? type : type.type) as SortTypeId;
+
 const SortWorkSettings: React.FC = () => {
   const { unitConfig, setUnitConfig, saveState } = useCurriculum();
   const termOverrides = unitConfig?.config?.termOverrides;
 
   const formDefaults: SortWorkSettingsFormInputs = useMemo(() => {
     const currentConfig = unitConfig?.config?.sortWorkConfig;
-    const enabledTypes = new Set(currentConfig?.sortOptions?.map(o => o.type) ?? []);
+    const enabledTypes = new Set(currentConfig?.sortOptions ?? []);
 
     // Build doc filter options - maintain order from config if it exists
     const enabledDocFilterTypes = new Set(currentConfig?.docFilterOptions ?? []);
@@ -67,7 +67,7 @@ const SortWorkSettings: React.FC = () => {
 
     // Build sort options - maintain order from config if it exists
     const orderedTypes: SortTypeId[] = currentConfig?.sortOptions
-      ? [...currentConfig.sortOptions.map(o => o.type), ...SortTypeIds.filter(t => !enabledTypes.has(t))]
+      ? [...currentConfig.sortOptions, ...SortTypeIds.filter(t => !enabledTypes.has(t))]
       : [...SortTypeIds];
 
     const sortOptions: FormSortOption[] = orderedTypes.map(type => {
@@ -110,20 +110,22 @@ const SortWorkSettings: React.FC = () => {
   });
 
   const watchSortOptions = watch("sortOptions");
-  const enabledSortOptions = watchSortOptions?.filter(o => o.enabled) ?? [];
+  const enabledSortOptions = (watchSortOptions?.filter(o => o.enabled) ?? [])
+    .map(o => ({ ...o, type: updateType(o.type) }));
 
   const watchDocFilterOptions = watch("docFilterOptions");
   const enabledDocFilterOptions = watchDocFilterOptions?.filter(o => o.enabled) ?? [];
 
   const onSubmit: SubmitHandler<SortWorkSettingsFormInputs> = (data) => {
-    const formEnabledSortOptions = data.sortOptions.filter(o => o.enabled);
+    // Filter out legacy types
+    const formEnabledSortOptions = data.sortOptions.filter(o => o.enabled && typeof o.type === "string");
     const formEnabledDocFilterOptions = data.docFilterOptions.filter(o => o.enabled);
 
     setUnitConfig(draft => {
       if (!draft) return;
 
       // Build sortOptions array from enabled options only
-      const sortOptions: ISortOptionConfig[] = formEnabledSortOptions.map(o => ({ type: o.type }));
+      const sortOptions: SortTypeId[] = formEnabledSortOptions.map(o => o.type);
 
       const sortWorkConfig: ISortWorkConfig = {};
 
@@ -135,8 +137,7 @@ const SortWorkSettings: React.FC = () => {
         sortWorkConfig.sortOptions = sortOptions;
       }
 
-      const enabledTypes = sortOptions.map(o => o.type);
-      if (data.defaultPrimarySort && enabledTypes.includes(data.defaultPrimarySort)) {
+      if (data.defaultPrimarySort && sortOptions.includes(data.defaultPrimarySort)) {
         sortWorkConfig.defaultPrimarySort = data.defaultPrimarySort;
       }
 
@@ -184,7 +185,7 @@ const SortWorkSettings: React.FC = () => {
           </thead>
           <tbody>
             {fields.map((field, index) => {
-              const sortType = field.type;
+              const sortType = updateType(field.type);
               const translationKey = getSortTypeTranslationKey(sortType);
               const defaultValue = upperWords(getDefaultValue(translationKey)) || sortType;
               const displayLabel = upperWords(translate(translationKey));

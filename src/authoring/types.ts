@@ -1,5 +1,4 @@
 import { EAuthorableNavTab } from "../models/view/nav-tabs";
-import { ISortOptionConfig } from "../models/stores/sort-work-config";
 import { DocFilterType, SortTypeIds, type SortTypeId } from "../models/stores/ui-types";
 export { SortTypeIds, SortTypeId };
 
@@ -7,7 +6,7 @@ export interface ISortWorkConfig {
   defaultPrimarySort?: SortTypeId;
   docFilterOptions?: DocFilterType[];
   showContextFilter?: boolean;
-  sortOptions?: ISortOptionConfig[];
+  sortOptions?: SortTypeId[];
 }
 
 export const aiEvaluations = ["categorize-design", "custom"] as const;

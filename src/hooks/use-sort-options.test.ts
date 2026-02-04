@@ -38,7 +38,7 @@ describe("useSortOptions", () => {
     });
 
     it("should include Strategy option when the term is overridden", () => {
-      setupMockStores({ termOverrides: { Strategy: "Design Approach" }, showCommentTag: true });
+      setupMockStores({ termOverrides: { strategy: "Design Approach" }, showCommentTag: true });
       const { sortOptions } = useSortOptions();
 
       expect(sortOptions.map(o => o.type)).toContain("Strategy");
@@ -73,11 +73,7 @@ describe("useSortOptions", () => {
     it("should use custom sort options from config", () => {
       setupMockStores({
         sortWorkConfig: {
-          sortOptions: [
-            { type: "Name" },
-            { type: "Problem" },
-            { type: "Tools" }
-          ]
+          sortOptions: ["Name", "Problem", "Tools"]
         }
       });
       const { sortOptions } = useSortOptions();
@@ -88,16 +84,12 @@ describe("useSortOptions", () => {
     it("should use custom labels from config", () => {
       setupMockStores({
         sortWorkConfig: {
-          sortOptions: [
-            { type: "Group" },
-            { type: "Name" },
-            { type: "Bookmarked" }
-          ]
+          sortOptions: ["Group", "Name", "Bookmarked"]
         },
         termOverrides: {
           studentGroup: "Team",
           "sortLabel.sortByOwner": "Participant",
-          Bookmarked: "Starred"
+          bookmarked: "Starred"
         }
       });
       const { sortOptions } = useSortOptions();
@@ -110,11 +102,7 @@ describe("useSortOptions", () => {
     it("should respect defaultPrimarySort from config", () => {
       setupMockStores({
         sortWorkConfig: {
-          sortOptions: [
-            { type: "Name" },
-            { type: "Group" },
-            { type: "Tools" }
-          ],
+          sortOptions: ["Name", "Group", "Tools"],
           defaultPrimarySort: "Name"
         }
       });
@@ -128,11 +116,7 @@ describe("useSortOptions", () => {
       setupMockStores({
         autoAssignStudentsToIndividualGroups: true,
         sortWorkConfig: {
-          sortOptions: [
-            { type: "Group" },
-            { type: "Name" },
-            { type: "Tools" }
-          ],
+          sortOptions: ["Group", "Name", "Tools"],
           defaultPrimarySort: "Group"
         }
       });
@@ -157,11 +141,7 @@ describe("useSortOptions", () => {
       setupMockStores({
         autoAssignStudentsToIndividualGroups: true,
         sortWorkConfig: {
-          sortOptions: [
-            { type: "Group" },
-            { type: "Name" },
-            { type: "Tools" }
-          ]
+          sortOptions: ["Group", "Name", "Tools"]
         }
       });
       const { sortOptions } = useSortOptions();
@@ -172,11 +152,7 @@ describe("useSortOptions", () => {
     it("should still filter out Strategy when no override for Strategy is configured", () => {
       setupMockStores({
         sortWorkConfig: {
-          sortOptions: [
-            { type: "Strategy" },
-            { type: "Name" },
-            { type: "Tools" }
-          ]
+          sortOptions: ["Strategy", "Name", "Tools"]
         }
       });
       const { sortOptions } = useSortOptions();
