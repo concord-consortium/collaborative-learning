@@ -287,8 +287,10 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
         const attributeWord = pluralize(dataSet.attributes.length, "attribute", "attributes");
         const caseWord = pluralize(dataSet.numCases, "case", "cases");
         return heading(headingLevel + 2, dataSet.name) +
-          `This data set has an id of ${dataSet.id} and is used in ${dataSet.tileIds.length} ${tileWord} ` +
-          `and contains ${dataSet.attributes.length} ${attributeWord}, described in the following Markdown table.\n\n` +
+          `This data set has an id of ${dataSet.id} and is used in ${dataSet.tileIds.length} ${tileWord}.\n` +
+          `It contains ${dataSet.attributes.length} ${attributeWord}, described in the following Markdown table.\n` +
+          `Attributes without formulas have values that are directly entered into the data set.\n` +
+          `Attributes with formulas have their values computed from other attributes in the data set.\n\n` +
           `${generateAttributesMarkdownTable(dataSet.attributes)}\n\n` +
           `There are ${dataSet.numCases} ${caseWord} in this data set, shown below in a Markdown table.\n\n` +
           `${generateMarkdownTable(dataSet.attributes.map(a => a.name), dataSet.data)}\n`;
