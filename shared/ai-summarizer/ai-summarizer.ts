@@ -283,13 +283,23 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
         if (dataSet.tileIds.length === 0) { // Don't output if unused
           return "";
         }
+
+        let formulaSummary = "";
+        dataSet.attributes.forEach(attr => {
+          if (attr.formula) {
+            formulaSummary += `- Column "${attr.name}" is calculated by the formula \`${attr.formula}\`.\n`;
+          }
+        });
+        if (formulaSummary.length > 0) formulaSummary += "\n";
+
         const tileWord = pluralize(dataSet.tileIds.length, "tile", "tiles");
         const attributeWord = pluralize(dataSet.attributes.length, "attribute", "attributes");
         const caseWord = pluralize(dataSet.numCases, "case", "cases");
         return heading(headingLevel + 2, dataSet.name) +
-          `This data set has an id of ${dataSet.id} and is used in ${dataSet.tileIds.length} ${tileWord} ` +
-          `and contains ${dataSet.attributes.length} ${attributeWord}, described in the following Markdown table.\n\n` +
+          `This data set has an id of ${dataSet.id} and is used in ${dataSet.tileIds.length} ${tileWord}.\n` +
+          `It contains ${dataSet.attributes.length} ${attributeWord}, described in the following Markdown table.\n\n` +
           `${generateAttributesMarkdownTable(dataSet.attributes)}\n\n` +
+          formulaSummary +
           `There are ${dataSet.numCases} ${caseWord} in this data set, shown below in a Markdown table.\n\n` +
           `${generateMarkdownTable(dataSet.attributes.map(a => a.name), dataSet.data)}\n`;
       }).join("\n\n")
