@@ -25,6 +25,7 @@ export class GroupManagementState {
   private db: DB;
 
   mode: UserType;
+  allowCancel = true;
   pendingMoves: Map<string, string | null> = new Map();
   selectedStudentId: string | null = null;
   selectedGroupId: string | null = null;
@@ -264,6 +265,24 @@ export class GroupManagementState {
 
   setShowLastNameFirst(value: boolean): void {
     this.showLastNameFirst = value;
+  }
+
+  setAllowCancel(value: boolean): void {
+    this.allowCancel = value;
+  }
+
+  async handleGroupCardSelect(groupId: string, isNoGroup: boolean): Promise<void> {
+    if (isNoGroup) {
+      this.moveStudentToNoGroup();
+    } else {
+      this.selectGroup(groupId);
+
+      // For first-time join (no cancel option), auto-save immediately.
+      // Modal will close automatically when user.currentGroupId is updated.
+      if (!this.allowCancel && this.mode === "student") {
+        await this.saveFirstTimeJoin();
+      }
+    }
   }
 
   async saveFirstTimeJoin(): Promise<void> {

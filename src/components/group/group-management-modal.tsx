@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import Modal from "react-modal";
 import {
@@ -43,36 +43,19 @@ export const GroupManagementModal: React.FC<IProps> = observer(
     useEffect(() => {
       if (isOpen) {
         groupManagementState.reset();
+        groupManagementState.setAllowCancel(allowCancel);
       }
-    }, [isOpen, groupManagementState]);
+    }, [isOpen, groupManagementState, allowCancel]);
 
-    const handleStudentSelect = useCallback((studentId: string) => {
-      groupManagementState.selectStudent(studentId);
-    }, [groupManagementState]);
-
-    const handleGroupSelect = useCallback(async (groupId: string) => {
-      groupManagementState.selectGroup(groupId);
-
-      // For first-time join (no cancel option), auto-save immediately.
-      // Modal will close automatically when user.currentGroupId is updated.
-      if (!allowCancel && groupManagementState.mode === "student") {
-        await groupManagementState.saveFirstTimeJoin();
-      }
-    }, [groupManagementState, allowCancel]);
-
-    const handleNoGroupSelect = useCallback(() => {
-      groupManagementState.moveStudentToNoGroup();
-    }, [groupManagementState]);
-
-    const handleDragStart = useCallback((event: DragStartEvent) => {
+    const handleDragStart = (event: DragStartEvent) => {
       const { active } = event;
       if (isStudentCardDragData(active.data.current)) {
         const { studentId, studentName } = active.data.current;
         groupManagementState.startDrag(studentId, studentName);
       }
-    }, [groupManagementState]);
+    };
 
-    const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const handleDragEnd = (event: DragEndEvent) => {
       const { active, over } = event;
 
       if (!over || !isStudentCardDragData(active.data.current)) {
@@ -88,21 +71,21 @@ export const GroupManagementModal: React.FC<IProps> = observer(
       } else {
         groupManagementState.clearDragState();
       }
-    }, [groupManagementState]);
+    };
 
-    const handleSave = useCallback(async () => {
+    const handleSave = async () => {
       try {
         await groupManagementState.save(onSave);
         onClose();
       } catch (error) {
         // Error already logged in model. TODO: Add error display in UI.
       }
-    }, [groupManagementState, onSave, onClose]);
+    };
 
-    const handleCancel = useCallback(() => {
+    const handleCancel = () => {
       groupManagementState.reset();
       onClose();
-    }, [groupManagementState, onClose]);
+    };
 
     return (
       <Modal
@@ -148,17 +131,8 @@ export const GroupManagementModal: React.FC<IProps> = observer(
               {groups.allGroups.map(group => (
                 <GroupCard
                   key={group.id}
-                  canDragStudent={groupManagementState.canDragStudent.bind(groupManagementState)}
                   groupId={group.id}
-                  groupLabel={`Group ${group.id}`}
-                  isCurrentUserGroup={
-                    groupManagementState.mode === "student" && group.id === groupManagementState.currentUserGroupId
-                  }
-                  isDropTarget={groupManagementState.isDropTarget(group.id)}
-                  selectedStudentId={groupManagementState.effectiveSelectedStudentId}
-                  students={groupManagementState.getStudentsForGroup(group.id)}
-                  onGroupSelect={handleGroupSelect}
-                  onStudentSelect={groupManagementState.isTeacherMode ? handleStudentSelect : undefined}
+                  groupManagementState={groupManagementState}
                 />
               ))}
 
@@ -166,14 +140,8 @@ export const GroupManagementModal: React.FC<IProps> = observer(
               {groupManagementState.newGroupIds.map(groupId => (
                 <GroupCard
                   key={groupId}
-                  canDragStudent={groupManagementState.canDragStudent.bind(groupManagementState)}
                   groupId={groupId}
-                  groupLabel={`Group ${groupId}`}
-                  isDropTarget={groupManagementState.isDropTarget(groupId)}
-                  selectedStudentId={groupManagementState.effectiveSelectedStudentId}
-                  students={groupManagementState.getStudentsForGroup(groupId)}
-                  onGroupSelect={handleGroupSelect}
-                  onStudentSelect={groupManagementState.isTeacherMode ? handleStudentSelect : undefined}
+                  groupManagementState={groupManagementState}
                 />
               ))}
 
@@ -194,15 +162,8 @@ export const GroupManagementModal: React.FC<IProps> = observer(
                 return (
                   <GroupCard
                     groupId={groupManagementState.nextGroupId}
-                    groupLabel={`Group ${groupManagementState.nextGroupId}`}
-                    isDropTarget={
-                      groupManagementState.draggingStudentId !== null
-                      || groupManagementState.effectiveSelectedStudentId !== null
-                    }
+                    groupManagementState={groupManagementState}
                     isNewGroup={!showAsRegularGroup}
-                    selectedStudentId={groupManagementState.effectiveSelectedStudentId}
-                    students={[]}
-                    onGroupSelect={handleGroupSelect}
                   />
                 );
               })()}
@@ -210,15 +171,9 @@ export const GroupManagementModal: React.FC<IProps> = observer(
               {/* "No Group" card for unassigned students. Only appears for teachers and researchers. */}
               {(groupManagementState.isTeacherMode && groupManagementState.unassignedStudents.length > 0) && (
                 <GroupCard
-                  canDragStudent={groupManagementState.canDragStudent.bind(groupManagementState)}
                   groupId="no-group"
-                  groupLabel="No Group"
-                  isDropTarget={groupManagementState.isNoGroupDropTarget()}
+                  groupManagementState={groupManagementState}
                   isNoGroup={true}
-                  selectedStudentId={groupManagementState.effectiveSelectedStudentId}
-                  students={groupManagementState.unassignedStudents}
-                  onGroupSelect={groupManagementState.isTeacherMode ? handleNoGroupSelect : undefined}
-                  onStudentSelect={groupManagementState.isTeacherMode ? handleStudentSelect : undefined}
                 />
               )}
               </div>
