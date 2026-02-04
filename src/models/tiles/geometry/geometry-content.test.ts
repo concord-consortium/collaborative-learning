@@ -1249,20 +1249,20 @@ describe("GeometryContent", () => {
 
     expect(exportAndSimplifyIds(content)).toMatchInlineSnapshot(`
 "{
-  \\"type\\": \\"Geometry\\",
-  \\"isNavigatorVisible\\": true,
-  \\"navigatorPosition\\": \\"bottom\\",
-  \\"offsetX\\": 0,
-  \\"offsetY\\": 0,
-  \\"zoom\\": 1,
-  \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
-  \\"objects\\": {
-    \\"p1\\": {\\"type\\": \\"point\\", \\"id\\": \\"p1\\", \\"x\\": 1, \\"y\\": 1, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
-    \\"p2\\": {\\"type\\": \\"point\\", \\"id\\": \\"p2\\", \\"x\\": 3, \\"y\\": 3, \\"snapToGrid\\": false, \\"colorScheme\\": 1, \\"labelOption\\": \\"none\\"},
-    \\"p3\\": {\\"type\\": \\"point\\", \\"id\\": \\"p3\\", \\"x\\": 5, \\"y\\": 1, \\"name\\": \\"A\\", \\"colorScheme\\": 0, \\"labelOption\\": \\"label\\"}
+  "type": "Geometry",
+  "isNavigatorVisible": true,
+  "navigatorPosition": "bottom",
+  "offsetX": 0,
+  "offsetY": 0,
+  "zoom": 1,
+  "board": {"xAxis": {"name": "x", "label": "x", "min": -2, "unit": 18.3, "range": 26.229508196721312}, "yAxis": {"name": "y", "label": "y", "min": -1, "unit": 18.3, "range": 17.486338797814206}},
+  "objects": {
+    "p1": {"type": "point", "id": "p1", "x": 1, "y": 1, "colorScheme": 0, "labelOption": "none"},
+    "p2": {"type": "point", "id": "p2", "x": 3, "y": 3, "snapToGrid": false, "colorScheme": 1, "labelOption": "none"},
+    "p3": {"type": "point", "id": "p3", "x": 5, "y": 1, "name": "A", "colorScheme": 0, "labelOption": "label"}
   },
-  \\"pointMetadata\\": {},
-  \\"linkedAttributeColors\\": {}
+  "pointMetadata": {},
+  "linkedAttributeColors": {}
 }"
 `);
   });
@@ -1274,22 +1274,22 @@ describe("GeometryContent", () => {
     expect(exportAndSimplifyIds(content)).
 toMatchInlineSnapshot(`
 "{
-  \\"type\\": \\"Geometry\\",
-  \\"isNavigatorVisible\\": true,
-  \\"navigatorPosition\\": \\"bottom\\",
-  \\"offsetX\\": 0,
-  \\"offsetY\\": 0,
-  \\"zoom\\": 1,
-  \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
-  \\"objects\\": {
-    \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 0, \\"y\\": 0, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
-    \\"jxgid\\": {\\"type\\": \\"polygon\\", \\"id\\": \\"jxgid\\", \\"points\\": [\\"testid\\", \\"testid\\", \\"testid\\"], \\"labelOption\\": \\"none\\", \\"colorScheme\\": 0},
-    \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 1, \\"y\\": 0, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
-    \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 0, \\"y\\": 1, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
-    \\"testid\\": {\\"type\\": \\"vertexAngle\\", \\"id\\": \\"testid\\", \\"points\\": [\\"testid\\", \\"testid\\", \\"testid\\"]}
+  "type": "Geometry",
+  "isNavigatorVisible": true,
+  "navigatorPosition": "bottom",
+  "offsetX": 0,
+  "offsetY": 0,
+  "zoom": 1,
+  "board": {"xAxis": {"name": "x", "label": "x", "min": -2, "unit": 18.3, "range": 26.229508196721312}, "yAxis": {"name": "y", "label": "y", "min": -1, "unit": 18.3, "range": 17.486338797814206}},
+  "objects": {
+    "testid": {"type": "point", "id": "testid", "x": 0, "y": 0, "snapToGrid": true, "colorScheme": 0, "labelOption": "none"},
+    "jxgid": {"type": "polygon", "id": "jxgid", "points": ["testid", "testid", "testid"], "labelOption": "none", "colorScheme": 0},
+    "testid": {"type": "point", "id": "testid", "x": 1, "y": 0, "snapToGrid": true, "colorScheme": 0, "labelOption": "none"},
+    "testid": {"type": "point", "id": "testid", "x": 0, "y": 1, "snapToGrid": true, "colorScheme": 0, "labelOption": "none"},
+    "testid": {"type": "vertexAngle", "id": "testid", "points": ["testid", "testid", "testid"]}
   },
-  \\"pointMetadata\\": {},
-  \\"linkedAttributeColors\\": {}
+  "pointMetadata": {},
+  "linkedAttributeColors": {}
 }"
 `);
   });
@@ -1304,25 +1304,25 @@ toMatchInlineSnapshot(`
     expect(exportAndSimplifyIds(content)).
 toMatchInlineSnapshot(`
 "{
-  \\"type\\": \\"Geometry\\",
-  \\"isNavigatorVisible\\": true,
-  \\"navigatorPosition\\": \\"bottom\\",
-  \\"offsetX\\": 0,
-  \\"offsetY\\": 0,
-  \\"zoom\\": 1,
-  \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
-  \\"objects\\": {
-    \\"ml\\": {
-      \\"type\\": \\"movableLine\\",
-      \\"id\\": \\"ml\\",
-      \\"p1\\": {\\"type\\": \\"point\\", \\"id\\": \\"ml-point1\\", \\"x\\": 1, \\"y\\": 1, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
-      \\"p2\\": {\\"type\\": \\"point\\", \\"id\\": \\"ml-point2\\", \\"x\\": 5, \\"y\\": 5, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
-      \\"colorScheme\\": 0
+  "type": "Geometry",
+  "isNavigatorVisible": true,
+  "navigatorPosition": "bottom",
+  "offsetX": 0,
+  "offsetY": 0,
+  "zoom": 1,
+  "board": {"xAxis": {"name": "x", "label": "x", "min": -2, "unit": 18.3, "range": 26.229508196721312}, "yAxis": {"name": "y", "label": "y", "min": -1, "unit": 18.3, "range": 17.486338797814206}},
+  "objects": {
+    "ml": {
+      "type": "movableLine",
+      "id": "ml",
+      "p1": {"type": "point", "id": "ml-point1", "x": 1, "y": 1, "colorScheme": 0, "labelOption": "none"},
+      "p2": {"type": "point", "id": "ml-point2", "x": 5, "y": 5, "colorScheme": 0, "labelOption": "none"},
+      "colorScheme": 0
     },
-    \\"testid\\": {\\"type\\": \\"comment\\", \\"id\\": \\"testid\\", \\"anchors\\": [\\"ml\\"]}
+    "testid": {"type": "comment", "id": "testid", "anchors": ["ml"]}
   },
-  \\"pointMetadata\\": {},
-  \\"linkedAttributeColors\\": {}
+  "pointMetadata": {},
+  "linkedAttributeColors": {}
 }"
 `);
   });
@@ -1335,17 +1335,17 @@ toMatchInlineSnapshot(`
 
     expect(exportAndSimplifyIds(content)).toMatchInlineSnapshot(`
 "{
-  \\"type\\": \\"Geometry\\",
-  \\"isNavigatorVisible\\": true,
-  \\"navigatorPosition\\": \\"bottom\\",
-  \\"offsetX\\": 0,
-  \\"offsetY\\": 0,
-  \\"zoom\\": 1,
-  \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
-  \\"bgImage\\": {\\"type\\": \\"image\\", \\"id\\": \\"img\\", \\"x\\": 0, \\"y\\": 0, \\"url\\": \\"test-file-stub\\", \\"width\\": 5, \\"height\\": 5},
-  \\"objects\\": {},
-  \\"pointMetadata\\": {},
-  \\"linkedAttributeColors\\": {}
+  "type": "Geometry",
+  "isNavigatorVisible": true,
+  "navigatorPosition": "bottom",
+  "offsetX": 0,
+  "offsetY": 0,
+  "zoom": 1,
+  "board": {"xAxis": {"name": "x", "label": "x", "min": -2, "unit": 18.3, "range": 26.229508196721312}, "yAxis": {"name": "y", "label": "y", "min": -1, "unit": 18.3, "range": 17.486338797814206}},
+  "bgImage": {"type": "image", "id": "img", "x": 0, "y": 0, "url": "test-file-stub", "width": 5, "height": 5},
+  "objects": {},
+  "pointMetadata": {},
+  "linkedAttributeColors": {}
 }"
 `);
   });
@@ -1360,19 +1360,19 @@ toMatchInlineSnapshot(`
     expect(isMovableLine(line)).toBe(true);
     content.addComment(board, "ml")!;
 
-    expect(exportAndSimplifyIds(content, {forHash: true})).toMatchInlineSnapshot(`
+    expect(exportAndSimplifyIds(content, { forHash: true })).toMatchInlineSnapshot(`
 "{
-  \\"objects\\": {
-    \\"ml\\": {
-      \\"type\\": \\"movableLine\\",
-      \\"id\\": \\"ml\\",
-      \\"p1\\": {\\"type\\": \\"point\\", \\"id\\": \\"ml-point1\\", \\"x\\": 1, \\"y\\": 1, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
-      \\"p2\\": {\\"type\\": \\"point\\", \\"id\\": \\"ml-point2\\", \\"x\\": 5, \\"y\\": 5, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
-      \\"colorScheme\\": 0
+  "objects": {
+    "ml": {
+      "type": "movableLine",
+      "id": "ml",
+      "p1": {"type": "point", "id": "ml-point1", "x": 1, "y": 1, "colorScheme": 0, "labelOption": "none"},
+      "p2": {"type": "point", "id": "ml-point2", "x": 5, "y": 5, "colorScheme": 0, "labelOption": "none"},
+      "colorScheme": 0
     },
-    \\"testid\\": {\\"type\\": \\"comment\\", \\"id\\": \\"testid\\", \\"anchors\\": [\\"ml\\"]}
+    "testid": {"type": "comment", "id": "testid", "anchors": ["ml"]}
   },
-  \\"bgImage\\": {\\"type\\": \\"image\\", \\"id\\": \\"img\\", \\"x\\": 0, \\"y\\": 0, \\"url\\": \\"test-file-stub\\", \\"width\\": 5, \\"height\\": 5}
+  "bgImage": {"type": "image", "id": "img", "x": 0, "y": 0, "url": "test-file-stub", "width": 5, "height": 5}
 }"
 `);
   });
