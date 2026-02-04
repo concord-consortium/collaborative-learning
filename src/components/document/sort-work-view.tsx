@@ -10,6 +10,7 @@ import { LogEventName } from "../../lib/logger-types";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { DocFilterType, DocFilterTypeIds, PrimarySortType, SecondarySortType } from "../../models/stores/ui-types";
 import { ENavTab } from "../../models/view/nav-tabs";
+import { getFilterTypeTranslationKey } from "../../utilities/sort-utils";
 import { upperWords } from "../../utilities/string-utils";
 import { isTranslationKey, translate } from "../../utilities/translation/translate";
 import { AiSummary } from "../navigation/ai-summary";
@@ -100,12 +101,15 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   });
 
   // Disable "Problem" filter option when sorting by Problem
-  const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => ({
-    disabled: option === "Problem" && validatedPrimarySortBy === "Problem",
-    selected: option === docFilter,
-    text: isTranslationKey(option) ? upperWords(translate(option)) : option,
-    onClick: () => handleDocFilterSelection(option)
-  }));
+  const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => {
+    const key = getFilterTypeTranslationKey(option);
+    return ({
+      disabled: option === "Problem" && validatedPrimarySortBy === "Problem",
+      selected: option === docFilter,
+      text: isTranslationKey(key) ? upperWords(translate(key)) : option,
+      onClick: () => handleDocFilterSelection(option)
+    });
+  });
 
   const sortedDocumentGroups = sortedDocuments.sortBy(validatedPrimarySortBy);
   const secondarySearchTerm = validatedSecondarySortBy;

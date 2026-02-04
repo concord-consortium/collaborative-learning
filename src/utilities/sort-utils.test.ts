@@ -1,9 +1,37 @@
 import { SortTypeIds } from "../authoring/types";
+import { OverrideableDocFilterTypeIds } from "../models/stores/ui-types";
 import {
-  escapeKeyForForm, getSortTypeTranslationKey, isValidSortTypeId, SORT_TYPE_TO_TRANSLATION_KEY
+  escapeKeyForForm, FILTER_TYPE_TO_TRANSLATION_KEY, getFilterTypeTranslationKey,
+  getSortTypeTranslationKey, isValidSortTypeId, SORT_TYPE_TO_TRANSLATION_KEY
 } from "./sort-utils";
 
 describe("sort-utils", () => {
+  describe("FILTER_TYPE_TO_TRANSLATION_KEY", () => {
+    it("should have entries for all OverrideableDocFilterTypeIds", () => {
+      OverrideableDocFilterTypeIds.forEach(filterTypeId => {
+        expect(FILTER_TYPE_TO_TRANSLATION_KEY[filterTypeId]).toBeDefined();
+      });
+    });
+
+    it("should map filter types to their correct translation keys", () => {
+      expect(FILTER_TYPE_TO_TRANSLATION_KEY.Problem).toBe("contentLevel.problem");
+      expect(FILTER_TYPE_TO_TRANSLATION_KEY.Investigation).toBe("contentLevel.investigation");
+      expect(FILTER_TYPE_TO_TRANSLATION_KEY.Unit).toBe("contentLevel.unit");
+    });
+  });
+
+  describe("getFilterTypeTranslationKey", () => {
+    it("should return the correct translation key for overrideable filter types", () => {
+      expect(getFilterTypeTranslationKey("Problem")).toBe("contentLevel.problem");
+      expect(getFilterTypeTranslationKey("Investigation")).toBe("contentLevel.investigation");
+      expect(getFilterTypeTranslationKey("Unit")).toBe("contentLevel.unit");
+    });
+
+    it("should return the filter type itself for non-overrideable types", () => {
+      expect(getFilterTypeTranslationKey("All")).toBe("All");
+    });
+  });
+
   describe("SORT_TYPE_TO_TRANSLATION_KEY", () => {
     it("should have entries for all SortTypeIds", () => {
       SortTypeIds.forEach(sortTypeId => {
@@ -15,10 +43,10 @@ describe("sort-utils", () => {
       expect(SORT_TYPE_TO_TRANSLATION_KEY.Group).toBe("studentGroup");
       expect(SORT_TYPE_TO_TRANSLATION_KEY.Name).toBe("sortLabel.sortByOwner");
       expect(SORT_TYPE_TO_TRANSLATION_KEY.Date).toBe("sortLabel.sortByDate");
-      expect(SORT_TYPE_TO_TRANSLATION_KEY.Strategy).toBe("Strategy");
-      expect(SORT_TYPE_TO_TRANSLATION_KEY.Bookmarked).toBe("Bookmarked");
-      expect(SORT_TYPE_TO_TRANSLATION_KEY.Tools).toBe("Tools");
-      expect(SORT_TYPE_TO_TRANSLATION_KEY.Problem).toBe("Problem");
+      expect(SORT_TYPE_TO_TRANSLATION_KEY.Strategy).toBe("strategy");
+      expect(SORT_TYPE_TO_TRANSLATION_KEY.Bookmarked).toBe("bookmarked");
+      expect(SORT_TYPE_TO_TRANSLATION_KEY.Tools).toBe("tools");
+      expect(SORT_TYPE_TO_TRANSLATION_KEY.Problem).toBe("contentLevel.problem");
     });
   });
 
@@ -27,10 +55,10 @@ describe("sort-utils", () => {
       expect(getSortTypeTranslationKey("Group")).toBe("studentGroup");
       expect(getSortTypeTranslationKey("Name")).toBe("sortLabel.sortByOwner");
       expect(getSortTypeTranslationKey("Date")).toBe("sortLabel.sortByDate");
-      expect(getSortTypeTranslationKey("Strategy")).toBe("Strategy");
-      expect(getSortTypeTranslationKey("Bookmarked")).toBe("Bookmarked");
-      expect(getSortTypeTranslationKey("Tools")).toBe("Tools");
-      expect(getSortTypeTranslationKey("Problem")).toBe("Problem");
+      expect(getSortTypeTranslationKey("Strategy")).toBe("strategy");
+      expect(getSortTypeTranslationKey("Bookmarked")).toBe("bookmarked");
+      expect(getSortTypeTranslationKey("Tools")).toBe("tools");
+      expect(getSortTypeTranslationKey("Problem")).toBe("contentLevel.problem");
     });
   });
 

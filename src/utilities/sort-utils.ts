@@ -1,4 +1,6 @@
-import { SortTypeId, SortTypeIds } from "../models/stores/ui-types";
+import {
+  DocFilterType, isOverrideableDocFilterTypeId, OverrideableDocFilterTypeId, SortTypeId, SortTypeIds
+} from "../models/stores/ui-types";
 import { TranslationKeyType } from "./translation/translate";
 
 /**
@@ -21,6 +23,18 @@ export const SORT_TYPE_TO_TRANSLATION_KEY: Record<SortTypeId, TranslationKeyType
  */
 export function getSortTypeTranslationKey(sortType: SortTypeId): TranslationKeyType {
   return SORT_TYPE_TO_TRANSLATION_KEY[sortType] ?? sortType as TranslationKeyType;
+}
+
+export const FILTER_TYPE_TO_TRANSLATION_KEY: Record<OverrideableDocFilterTypeId, TranslationKeyType> = {
+  Problem: "contentLevel.problem",
+  Investigation: "contentLevel.investigation",
+  Unit: "contentLevel.unit"
+};
+
+export function getFilterTypeTranslationKey(filterType: DocFilterType): TranslationKeyType {
+  return isOverrideableDocFilterTypeId(filterType)
+    ? FILTER_TYPE_TO_TRANSLATION_KEY[filterType]
+    : filterType as TranslationKeyType;
 }
 
 export function isValidSortTypeId(value: string): value is SortTypeId {
