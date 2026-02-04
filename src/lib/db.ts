@@ -357,10 +357,7 @@ export class DB {
             groupId: targetGroupId,
             uid: studentId
           },
-          // Instead of using ServerValue.TIMESTAMP, like we do in joinGroup, we use Date.now() here because
-          // ServerValue.TIMESTAMP isn't resolved in transactions. It would be written literally as
-          // {".sv": "timestamp"}. Client clock skew could affect this value, but it's a necessary compromise.
-          connectedTimestamp: Date.now()
+          connectedTimestamp: firebase.database.ServerValue.TIMESTAMP as unknown as number
         };
       }
 
