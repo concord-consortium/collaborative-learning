@@ -28,6 +28,9 @@ export class DBGroupsListener extends BaseListener {
           // Groups may be invalid at this point, but the listener will resolve it once connection times are set
           this.updateGroupsFromDb(dbGroups);
 
+          // Set currentGroupId immediately so the UI knows the user's group status before the listener resolves.
+          user.setCurrentGroupId(groups.groupIdForUser(user.id));
+
           const group = groups.groupForUser(user.id);
           if (group) {
             // update our connection time so we report as connected/disconnected

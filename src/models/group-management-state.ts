@@ -5,6 +5,7 @@ import { UserModelType } from "./stores/user";
 import { DB } from "../lib/db";
 import { UserType } from "./stores/user-types";
 import { StudentCardInfo } from "../components/group/student-card";
+import { kAnalyzerUserParams, kExemplarUserParams } from "../../shared/shared";
 
 const formatStudentName = (fullName: string, showLastNameFirst: boolean) => {
   if (showLastNameFirst) {
@@ -25,13 +26,13 @@ export class GroupManagementState {
   private db: DB;
 
   mode: UserType;
-  allowCancel = true;
   pendingMoves: Map<string, string | null> = new Map();
   selectedStudentId: string | null = null;
   selectedGroupId: string | null = null;
   createdGroupsInSession: Set<string> = new Set();
   showLastNameFirst = false;
   isSaving = false;
+  savingFailed = false;
   draggingStudentId: string | null = null;
   draggingStudentName: string | null = null;
   draggingStudentConnected = false;
@@ -56,7 +57,11 @@ export class GroupManagementState {
   }
 
   get allStudents() {
-    return this.classStore.students;
+    // Exclude virtual users Ivan Idea and Ada Insight. They are added to the class roster for exemplar/AI
+    // features but shouldn't appear as groupable students.
+    return this.classStore.students.filter(
+      student => student.id !== kExemplarUserParams.id && student.id !== kAnalyzerUserParams.id
+    );
   }
 
   get existingGroupIds(): Set<string> {
@@ -171,6 +176,7 @@ export class GroupManagementState {
     this.selectedStudentId = null;
     this.selectedGroupId = null;
     this.createdGroupsInSession = new Set();
+    this.savingFailed = false;
     this.draggingStudentId = null;
     this.draggingStudentName = null;
     this.draggingStudentConnected = false;
@@ -267,45 +273,22 @@ export class GroupManagementState {
     this.showLastNameFirst = value;
   }
 
-  setAllowCancel(value: boolean): void {
-    this.allowCancel = value;
-  }
-
   async handleGroupCardSelect(groupId: string, isNoGroup: boolean): Promise<void> {
     if (isNoGroup) {
       this.moveStudentToNoGroup();
     } else {
       this.selectGroup(groupId);
-
-      // For first-time join (no cancel option), auto-save immediately.
-      // Modal will close automatically when user.currentGroupId is updated.
-      if (!this.allowCancel && this.mode === "student") {
-        await this.saveFirstTimeJoin();
-      }
     }
   }
 
-  async saveFirstTimeJoin(): Promise<void> {
-    if (!this.selectedGroupId) return;
-
-    runInAction(() => {
-      this.isSaving = true;
-    });
-
-    try {
-      await this.db.moveStudentToGroup(this.user.id, this.selectedGroupId);
-    } catch (error) {
-      console.error("Error joining group:", error);
-    } finally {
-      runInAction(() => {
-        this.isSaving = false;
-      });
+  async save(onSave?: (moves: Map<string, string | null>) => Promise<void>): Promise<boolean> {
+    if (this.isSaving) {
+      return false;
     }
-  }
 
-  async save(onSave?: (moves: Map<string, string | null>) => Promise<void>): Promise<void> {
     runInAction(() => {
       this.isSaving = true;
+      this.savingFailed = false;
     });
 
     try {
@@ -327,9 +310,14 @@ export class GroupManagementState {
       } else if (this.mode === "student" && this.selectedGroupId) {
         await this.db.moveStudentToGroup(this.user.id, this.selectedGroupId);
       }
+
+      return true;
     } catch (error) {
       console.error("Error saving group changes:", error);
-      throw error;
+      runInAction(() => {
+        this.savingFailed = true;
+      });
+      return false;
     } finally {
       runInAction(() => {
         this.isSaving = false;

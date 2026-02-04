@@ -66,14 +66,6 @@ function openTeacherGroupModal() {
   cy.get('[data-testid="group-management-modal-title"]').should('contain', 'Move Students to Different Groups');
 }
 
-function selectGroupFirstTimeJoin(groupId) {
-  // For first-time join, clicking a group auto-saves and closes the modal.
-  cy.get(`[data-testid="group-card-${groupId}"]`)
-    .should('be.visible')
-    .click({ force: true });
-  cy.get('[data-testid="group-management-modal"]').should('not.exist');
-}
-
 function selectGroupAndSave(groupId) {
   cy.get(`[data-testid="group-card-${groupId}"]`)
     .should('be.visible')
@@ -108,7 +100,7 @@ context('Test student join a group', function () {
     cy.log('will create a group by selecting the first available group');
     // The new modal shows sequential groups (1, 2, 3...) rather than arbitrary numbers
     // First student with no existing groups sees "Group 1"
-    selectGroupFirstTimeJoin("1");
+    selectGroupAndSave("1");
 
     cy.log('will verify student is in the specified group');
     clueHeader.getGroupName().should('contain', 'Group 1');
@@ -122,7 +114,7 @@ context('Test student join a group', function () {
     cy.get('[data-testid="group-card-1"]').should('exist');
 
     cy.log('will have another student joining an existing group');
-    selectGroupFirstTimeJoin("1");
+    selectGroupAndSave("1");
 
     cy.log('will verify second student is in existing group');
     clueHeader.getGroupName().should('contain', 'Group 1');
@@ -134,7 +126,7 @@ context('Test student join a group', function () {
     // Check that Group 1 shows the existing students
     cy.get('[data-testid="group-card-1"]').should('contain', 'Student ' + student1).and('contain', 'Student ' + student2);
     // Student 3 creates a new group (Group 2)
-    selectGroupFirstTimeJoin("2");
+    selectGroupAndSave("2");
     clueHeader.getGroupName().should('contain', 'Group 2');
     header.getUserName().should('contain', 'Student ' + student3);
     clueHeader.getGroupMembers().should('contain', 'S' + student3);
@@ -142,14 +134,14 @@ context('Test student join a group', function () {
 
     cy.log('will verify additional students can join group');
     setup(student4);
-    selectGroupFirstTimeJoin("1");
+    selectGroupAndSave("1");
     clueHeader.getGroupName().should('contain', 'Group 1');
     header.getUserName().should('contain', 'Student ' + student4);
     clueHeader.getGroupMembers().should('contain', 'S' + student1)
                                 .and('contain', 'S' + student2)
                                 .and('contain', 'S' + student4);
     setup(student5);
-    selectGroupFirstTimeJoin("1");
+    selectGroupAndSave("1");
     clueHeader.getGroupMembers().should('contain', 'S' + student1)
                                 .and('contain', 'S' + student2)
                                 .and('contain', 'S' + student4)
@@ -232,7 +224,7 @@ context('Test student join a group', function () {
     cy.log('will verify new student can join group when one leaves it');
     // Student 6 joins Group 1 (which student 5 left)
     setup(student6);
-    selectGroupFirstTimeJoin("1");
+    selectGroupAndSave("1");
     clueHeader.getGroupName().should('contain', 'Group 1');
     header.getUserName().should('contain', 'Student ' + student6);
     clueHeader.getGroupMembers().should('contain', 'S' + student1).and('contain', 'S' + student2).and('contain', 'S' + student4).and('contain', 'S' + student6);
@@ -252,7 +244,7 @@ context('Test student join a group', function () {
 
     // have special student join group 1
     setup(studentNotInClass);
-    selectGroupFirstTimeJoin("1");
+    selectGroupAndSave("1");
     clueHeader.getGroupName().should('contain', 'Group 1');
     header.getUserName().should('contain', 'Student ' + studentNotInClass);
     clueHeader.getGroupMembers().should('contain', 'S' + student1)
@@ -274,8 +266,9 @@ context('Test student join a group', function () {
                                 .and('not.contain', 'S' + studentNotInClass);
 
     cy.log('verify a 4th student can join a group with a removed student');
-    setup(student6);
-    selectGroupFirstTimeJoin("1");
+    setup(student6, { alreadyInGroup: true });
+    openGroupModalFromHeader();
+    selectGroupAndSave("1");
     clueHeader.getGroupName().should('contain', 'Group 1');
     header.getUserName().should('contain', 'Student ' + student6);
     clueHeader.getGroupMembers().should('contain', 'S' + student1)

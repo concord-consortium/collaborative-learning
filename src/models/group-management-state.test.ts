@@ -84,7 +84,6 @@ describe("GroupManagementState", () => {
       expect(state.selectedGroupId).toBeNull();
       expect(state.createdGroupsInSession.size).toBe(0);
       expect(state.showLastNameFirst).toBe(false);
-      expect(state.allowCancel).toBe(true);
       expect(state.isSaving).toBe(false);
       expect(state.draggingStudentId).toBeNull();
       expect(state.draggingStudentName).toBeNull();
@@ -528,18 +527,6 @@ describe("GroupManagementState", () => {
     });
   });
 
-  describe("action: setAllowCancel", () => {
-    it("should update allowCancel", () => {
-      state = createState();
-      state.setAllowCancel(false);
-
-      expect(state.allowCancel).toBe(false);
-
-      state.setAllowCancel(true);
-      expect(state.allowCancel).toBe(true);
-    });
-  });
-
   describe("action: handleGroupCardSelect", () => {
     it("should call selectGroup for regular groups", async () => {
       state = createState("teacher");
@@ -561,38 +548,6 @@ describe("GroupManagementState", () => {
 
       expect(moveToNoGroupSpy).toHaveBeenCalled();
       expect(state.pendingMoves.get("student-1")).toBeNull();
-    });
-
-    it("should auto-save for first-time join when allowCancel is false", async () => {
-      mockUser.id = "student-4";
-      state = createState("student");
-      state.setAllowCancel(false);
-
-      await state.handleGroupCardSelect("1", false);
-
-      expect(state.selectedGroupId).toBe("1");
-      expect(mockDb.moveStudentToGroup).toHaveBeenCalledWith("student-4", "1");
-    });
-
-    it("should not auto-save when allowCancel is true", async () => {
-      mockUser.id = "student-4";
-      state = createState("student");
-      state.setAllowCancel(true);
-
-      await state.handleGroupCardSelect("1", false);
-
-      expect(state.selectedGroupId).toBe("1");
-      expect(mockDb.moveStudentToGroup).not.toHaveBeenCalled();
-    });
-
-    it("should not auto-save in teacher mode even when allowCancel is false", async () => {
-      state = createState("teacher");
-      state.setAllowCancel(false);
-      state.selectedStudentId = "student-1";
-
-      await state.handleGroupCardSelect("2", false);
-
-      expect(mockDb.moveStudentToGroup).not.toHaveBeenCalled();
     });
   });
 
@@ -646,36 +601,52 @@ describe("GroupManagementState", () => {
       expect(state.isSaving).toBe(false);
     });
 
-    it("should handle errors gracefully", async () => {
+    it("should return true on successful save", async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      state = createState("teacher");
+      state.selectedStudentId = "student-1";
+      state.selectGroup("2");
+
+      const result = await state.save(onSave);
+
+      expect(result).toBe(true);
+      expect(state.savingFailed).toBe(false);
+    });
+
+    it("should return false and set savingFailed on error", async () => {
       const error = new Error("Save failed");
       const onSave = jest.fn().mockRejectedValue(error);
       state = createState("teacher");
       state.selectedStudentId = "student-1";
       state.selectGroup("2");
 
-      await expect(state.save(onSave)).rejects.toThrow("Save failed");
+      const result = await state.save(onSave);
+
+      expect(result).toBe(false);
+      expect(state.savingFailed).toBe(true);
       expect(state.isSaving).toBe(false);
     });
-  });
 
-  describe("action: saveFirstTimeJoin", () => {
-    it("should call moveStudentToGroup for current user", async () => {
-      mockUser.id = "student-4";
-      state = createState("student");
-      state.selectedGroupId = "1";
+    it("should reset savingFailed at the start of save", async () => {
+      let resolveOnSave: () => void;
+      const onSavePromise = new Promise<void>(resolve => { resolveOnSave = resolve; });
+      const onSave = jest.fn().mockReturnValue(onSavePromise);
+      state = createState("teacher");
+      state.selectedStudentId = "student-1";
+      state.selectGroup("2");
+      state.savingFailed = true;
 
-      await state.saveFirstTimeJoin();
+      // Call save without awaiting to check state immediately
+      const savePromise = state.save(onSave);
 
-      expect(mockDb.moveStudentToGroup).toHaveBeenCalledWith("student-4", "1");
-    });
+      // savingFailed should be cleared at the start of save, before onSave resolves
+      expect(state.savingFailed).toBe(false);
 
-    it("should do nothing if no group selected", async () => {
-      mockUser.id = "student-4";
-      state = createState("student");
+      // Now resolve and await completion
+      resolveOnSave!();
+      await savePromise;
 
-      await state.saveFirstTimeJoin();
-
-      expect(mockDb.moveStudentToGroup).not.toHaveBeenCalled();
+      expect(state.savingFailed).toBe(false);
     });
   });
 
