@@ -20,7 +20,7 @@
       }
     }
 
-    &:focus {
+    &:focus-visible {
       background-color: $workspace-teal-light-4;
       border-color: $workspace-teal;
       outline: none;
