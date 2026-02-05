@@ -402,6 +402,9 @@ $toolbar-divider-width: 1px;
 $toolbar-button-height: 34px;
 $toolbar-height: $toolbar-button-height + 4px;
 
+// Drag handle touch target size (meets WCAG 2.2 Level AAA 44×44px recommendation)
+$drag-handle-hit-size: 48px;
+
 // above .bottom-resize-handle
 $toolbar-z-index: 3;
 
