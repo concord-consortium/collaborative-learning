@@ -5,8 +5,8 @@ import { HistoryEntryItem } from "./history-entry-item";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { TreeManager } from "../../models/history/tree-manager";
-import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType } from "../../models/history/history";
-import { loadHistory, getHistoryPath } from "../../models/history/history-firestore";
+import { HistoryEntry, HistoryEntryType } from "../../models/history/history";
+import { getHistoryPath, loadHistory, IFirestoreHistoryEntryDoc } from "../../models/history/history-firestore";
 
 import "./history-view-panel.scss";
 
@@ -47,13 +47,13 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
       return;
     }
 
-    const unsubscribe = loadHistory(db.firestore, historyPath, (entries: HistoryEntrySnapshot[], error) => {
+    const unsubscribe = loadHistory(db.firestore, historyPath, (docs: IFirestoreHistoryEntryDoc[], error) => {
       if (error) {
         setRemoteHistoryError(error.message);
         setRemoteHistoryEntries([]);
       } else {
         setRemoteHistoryError(undefined);
-        setRemoteHistoryEntries(entries.map(snapshot => HistoryEntry.create(snapshot)));
+        setRemoteHistoryEntries(docs.map(doc => HistoryEntry.create(doc.entry)));
       }
     });
 

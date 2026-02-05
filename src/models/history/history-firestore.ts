@@ -31,20 +31,19 @@ export async function getLastHistoryEntry(firestore: Firestore, documentPath: st
   return { index, id: lastEntry.id };
 }
 
-type LoadedHistoryHandler = (entries: HistoryEntrySnapshot[], error?: firebase.firestore.FirestoreError) => void;
+export interface IFirestoreHistoryEntryDoc {
+  index: number;
+  entry: HistoryEntrySnapshot;
+  previousEntryId?: string;
+}
+type LoadedHistoryHandler =
+  (entries: IFirestoreHistoryEntryDoc[], error?: firebase.firestore.FirestoreError) => void;
 
-
-/**
- * Load the history entries from Firestore, and monitor changes to this history.
- *
- * @param firestore CLUE Firestore instance
- * @param historyPath location of history entries in Firestore
- * @param handleLoadedHistory callback receiving the history or error, the
- * callback will be called whenever the history changes in Firestore.
- * @returns a disposer function to cleanup the Firestore query
- */
-export function loadHistory(firestore: Firestore, historyPath: string,
-  handleLoadedHistory: LoadedHistoryHandler) {
+export function loadHistory(
+  firestore: Firestore,
+  historyPath: string,
+  handleLoadedHistory: LoadedHistoryHandler
+) {
   const query = firestore.collection(historyPath)
     .orderBy("index");
 
@@ -61,8 +60,12 @@ export function loadHistory(firestore: Firestore, historyPath: string,
         console.log("Loaded History:", querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
       }
       const history = querySnapshot.docs.map(doc => {
-        const { entry } = doc.data();
-        return JSON.parse(entry) as HistoryEntrySnapshot;
+        const data = doc.data();
+        return {
+          index: data.index,
+          previousEntryId: data.previousEntryId,
+          entry: data.entry ? JSON.parse(data.entry) as HistoryEntrySnapshot : undefined
+        } as IFirestoreHistoryEntryDoc;
       });
       handleLoadedHistory(history);
     },
@@ -70,7 +73,6 @@ export function loadHistory(firestore: Firestore, historyPath: string,
       handleLoadedHistory([], error);
     }
   );
-
 }
 
 /**
