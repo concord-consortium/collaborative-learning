@@ -117,25 +117,21 @@ export const DocumentScrollerHeader = observer(function DocumentScrollerHeader({
               onClick={switchSortGroup("next")}
             />
           )}
-          {" "}
           { hasSecondarySort && (
             <>
+              {" "}
               <span className="sort-type"> {secondarySortByLabel}: </span>
-              {hasSecondarySort && (
-                <SwitchSortGroupButton
-                  direction="left"
-                  disabled={!previousDocumentsGroup}
-                  onClick={switchSortGroup("previous")}
-                />
-              )}
+              <SwitchSortGroupButton
+                direction="left"
+                disabled={!previousDocumentsGroup}
+                onClick={switchSortGroup("previous")}
+              />
               <span className="sort-label">{documentGroup?.label ?? ""}</span>
-              {hasSecondarySort && (
-                <SwitchSortGroupButton
-                  direction="right"
-                  disabled={!nextDocumentsGroup}
-                  onClick={switchSortGroup("next")}
-                />
-              )}
+              <SwitchSortGroupButton
+                direction="right"
+                disabled={!nextDocumentsGroup}
+                onClick={switchSortGroup("next")}
+              />
             </>
           )}
         </div>
