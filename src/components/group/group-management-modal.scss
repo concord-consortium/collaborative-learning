@@ -159,7 +159,7 @@ $groups-grid-columns: 5;
     }
   }
 
-  .group-management-modal__filters {
+  .group-management-modal__options {
     align-items: center;
     display: flex;
     flex-shrink: 0;
@@ -167,14 +167,22 @@ $groups-grid-columns: 5;
     padding: 0 $modal-padding;
   }
 
+  .group-management-modal__legend {
+    align-items: center;
+    color: $charcoal-dark-1;
+    display: flex;
+    font-size: 14px;
+    gap: $half-padding;
+    margin-left: 10px;
+  }
+
   .group-management-modal__filter {
     align-items: center;
     color: $charcoal-dark-1;
     cursor: pointer;
     display: flex;
-    font-size: 12px;
+    font-size: 14px;
     gap: $half-padding;
-    margin-left: 10px;
 
     input[type="checkbox"] {
       appearance: none;
@@ -182,10 +190,10 @@ $groups-grid-columns: 5;
       border: 1px solid $workspace-teal-dark-1;
       border-radius: 2px;
       cursor: pointer;
-      height: 14px;
+      height: 16px;
       margin: 0;
       position: relative;
-      width: 14px;
+      width: 16px;
 
       &:hover {
         background-color: $workspace-teal-light-3;
@@ -220,19 +228,29 @@ $groups-grid-columns: 5;
     }
   }
 
-  .group-management-modal__filter-indicator {
+  .group-management-modal__legend-indicator {
     background-color: $connected-green;
+    border: solid 1px $connected-green-dark;
+    box-sizing: content-box;
     display: inline-block;
     height: 8px;
     width: 8px;
   }
 
   .group-management-modal__footer {
+    align-items: center;
     display: flex;
     flex-shrink: 0;
     gap: $margin;
     justify-content: flex-end;
     padding: $half-padding $modal-padding $modal-padding;
+  }
+
+  .group-management-modal__error {
+    color: $error-red;
+    font-size: 14px;
+    margin: 0;
+    text-align: right;
   }
 
   .group-management-modal__button {

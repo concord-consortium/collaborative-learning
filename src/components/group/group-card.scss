@@ -12,10 +12,32 @@ $group-card-empty-height: 38px;
   overflow: hidden;
 
   &.clickable {
+    background-color: $workspace-teal-light-7;
     cursor: pointer;
+    outline: solid 1.5px $charcoal-light-1;
 
     &:focus-visible {
       outline: solid 1.5px $workspace-teal;
+    }
+
+    &:hover {
+      background-color: $workspace-teal-light-6;
+
+      .group-card__header {
+        background-color: $workspace-teal-light-3;
+      }
+    }
+
+    &:active {
+      background-color: $workspace-teal-light-5;
+
+      .group-card__header {
+        background-color: $workspace-teal-light-2;
+      }
+    }
+
+    .group-card__header {
+      background-color: $workspace-teal-light-4;
     }
   }
 
@@ -27,27 +49,9 @@ $group-card-empty-height: 38px;
 
   &.dragging-over {
     background-color: $workspace-teal-light-6;
-    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25);
-    outline: solid 1.5px $workspace-teal;
 
     .group-card__header {
       background-color: $workspace-teal-light-3;
-    }
-  }
-
-  &.drop-target {
-    background-color: $workspace-teal-light-7;
-    outline: solid 1.5px $charcoal-light-1;
-
-    .group-card__header {
-      background-color: $workspace-teal-light-4;
-    }
-
-    &.clickable:hover .group-card__header {
-      background-color: $workspace-teal-light-3;
-    }
-    &.clickable:active .group-card__header {
-      background-color: $workspace-teal-light-2;
     }
   }
 
@@ -87,6 +91,7 @@ $group-card-empty-height: 38px;
     }
 
     .group-card__new-group-label {
+      color: $charcoal-dark-1;
       font-size: 12px;
       margin-top: $half-padding;
       margin-bottom: 7px;
