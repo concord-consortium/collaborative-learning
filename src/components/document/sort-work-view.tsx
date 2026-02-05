@@ -152,10 +152,11 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
           }
         } else {
           const groupsWithDocs = sortedDocumentGroups.filter(group => group.documents.length > 0);
+          const withDocsIndex = groupsWithDocs.findIndex(group => group.label === openGroupMetadata?.primaryLabel);
           const numGroups = groupsWithDocs.length;
           if (numGroups > 1) {
-            previousDocumentsGroup = groupsWithDocs[(openDocumentsGroupIndex - 1 + numGroups) % numGroups];
-            nextDocumentsGroup = groupsWithDocs[(openDocumentsGroupIndex + 1) % numGroups];
+            previousDocumentsGroup = groupsWithDocs[(withDocsIndex - 1 + numGroups) % numGroups];
+            nextDocumentsGroup = groupsWithDocs[(withDocsIndex + 1) % numGroups];
           }
         }
       }
