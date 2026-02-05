@@ -2,9 +2,27 @@
 
 CLUE has some work in progress support for group documents that can be edited by multiple users at the same time. While this works in some cases when changes do not overlap, there are several cases that can break it. Below is a list of a few.
 
-TODO: add more info here so when we come back to this we know how it works and what is left to implement.
+## How It Works
+
+Group documents use `FirestoreHistoryManagerConcurrent` (in `src/models/history/firestore-history-manager-concurrent.ts`) which extends `FirestoreHistoryManager`. The key differences are:
+
+1. **Concurrent uploads**: Uses a queue (`completedHistoryEntryQueue`) to batch history entries and uploads them using Firestore transactions to safely manage `lastHistoryEntry` metadata when multiple users write simultaneously.
+
+2. **Remote sync**: Listens for remote history entries and applies them to the local document via `syncRemoteFirestoreHistory()` and `applyHistoryEntries()`.
+
+3. **Pause/resume**: Supports pausing uploads temporarily (used for testing concurrent scenarios).
+
+The system stores `lastHistoryEntry` (index and id) in the document metadata to track the most recent history entry, allowing safe concurrent writes without querying the history collection.
 
 # Model Inconsistency Issues
+
+## History Entry Ordering
+
+Location: `firestore-history-manager-concurrent.ts:syncRemoteFirestoreHistory()`
+
+When applying remote history entries, the code adds new entries that aren't in local history. However, this means history entries on different clients may be in different orders - other clients won't have local entries that haven't been uploaded yet. The code comment notes "This problem is being punted for now."
+
+This could cause issues when replaying history or comparing document states across clients.
 
 ## Tile Deletion
 
@@ -114,46 +132,38 @@ When the group documents are reloaded we're getting duplicate tiles. This might 
 
 I don't the exact steps yet, but I found that when a graph is connected to a table only one of the documents actually shows the points on the graph.
 
-# Splitting this branch
+# Implementation TODOs
 
-1. Moving the more of the code into the firestore history manager. And perhaps at the same time splitting out the concurrent history manager into its own file.
+These are unfinished items identified in the code:
 
-2. Adding the actual read-write support for concurrent documents.
+## Race Condition in Initial History Load
 
-## Files
-- canvas.tsx: all about 1
-- history-entry-item.tsx: history view improvements
-- history-view-panel.scss: history view improvements
-- history-view-panel.tsx: using new loadFirestoreHistory, but also works with the new Concurrent manager. The concurrent stuff is for pausing the history application. So perhaps best is to split some of the changes in this file into part 1 and the concurrent play pause into part 2.
-- playback.tsx: all about 1
-- firestore-history-manager.test.ts should be all about part 1, but there might be some thing in there that is more than that.
-- firestore-history-manager-concurrent.ts: the extraction of it is could be in part 1, and the changing in part 2.
-- firestore-history-manager.ts: the first half is about the refactor, then the second part is about the concurrent manager support. So this file's changes need to be split upt
-- history-firestore.ts: loadFirestoreHistory function so things can have access to the full firestore history entries. This can be part of 1, but it'd be good to refactor it a bit first.
-- tree-manager.ts: parts of this are the refactor for 1,
-  - using a generic IHistoryManager interface.
-  - historyStatus, historyStatusString view has been moved to the history manager (1)
-  - moved mirrorHistoryFromFirestore: part 1
-  - moved 'moveTohistoryEntryAfterLoad' part 1
-  - addHistoryEntryAfterApplying is part 2 (concurrency)
-- mst.test.ts: kind of dead now I think, it is testing that arrays which are updated with applySnapshot just update their elements when they have ids
-- documents.ts: this is tricky, it is a mix of refactor and concurrency. Probably we need to keep this file basically as is in part 1 and possibly leave some of the concurrency changes for part 2.
+Location: `firestore-history-manager-concurrent.ts` constructor
 
-So to summarize
+When loading a group document, the system fetches the `lastHistoryEntry` to determine which history entries to skip (since they're already applied to the initially loaded document content). This approach is error-prone because:
+- A new history entry might be added after fetching the document content but before fetching the last history entry
+- Network delays might cause the document fetch to happen after the history entry fetch
 
-### Part 1
-- minimal history view changes to work with refactor
-- refactor: replace on history entry completed listener with IHistoryManager interface in tree manager
-- refactor: require explicity history manager creation by documents, and canvas
-- refactor: playback.tsx works with history manager instead of tree manager
-- refactor: move more firestore specific functions out of tree manager
-- refactor: when history manager is created pass it 'uploadLocalHistory' and 'syncRemoteHistory' flags. this replaces the explicit call to the mirror method
-- refactor: separate out FirestoreHistoryManagerConcurrent into its own file
+**Proposed fix**: Include all applied history entry IDs in the document content written to Firebase Realtime Database, then only apply history entries not in this list.
 
-### Part 2
-- remainder of history view improvements plus the pause button
-- mst.test.ts just because this PR is going to be smaller
+## Error Handling for Metadata Document
 
+Location: `firestore-history-manager-concurrent.ts:uploadQueuedHistoryEntries()`
 
-TODO:
-- review Claude's list of unfinished work to see what I forgot I left un finished
+The code awaits `environmentAndMetadataDocReadyPromise` but has a FIXME noting that error cases are not handled. If this promise rejects, the upload queue may stall.
+
+## Migration for Existing Documents
+
+Location: `firestore-history-manager-concurrent.ts:uploadQueuedHistoryEntries()`
+
+If there's no `lastHistoryEntry` in the metadata (for documents created before this feature), the code would need to scan existing history entries to find the last one. This can't be done in a Firestore transaction, so it would need to happen before starting the transaction. This migration wouldn't be safe if multiple clients are writing history simultaneously.
+
+Current plan: Only use this for new group documents; some lost history for existing group documents is acceptable.
+
+## Test Coverage Gaps
+
+Primarily in:
+- `firestore-history-manager.ts` 
+- `firestore-history-manager-concurrent.ts`
+- `document-metadata-model.ts` 
+
