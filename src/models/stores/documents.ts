@@ -14,8 +14,7 @@ import { UserModelType } from "./user";
 import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { Firestore } from "../../lib/firestore";
 import { TreeManagerType } from "../history/tree-manager";
-import { FirestoreHistoryManager,
-  IFirestoreHistoryManagerArgs } from "../history/firestore-history-manager";
+import { FirestoreHistoryManager, IFirestoreHistoryManagerArgs } from "../history/firestore-history-manager";
 import { FirestoreHistoryManagerConcurrent } from "../history/firestore-history-manager-concurrent";
 import { UserContextProvider } from "./user-context-provider";
 
@@ -279,9 +278,10 @@ export const DocumentsModel = types
         // will get garbage collected.
         // A FirestoreHistoryManager is also used when the history is being played back
         // by the Canvas component. In that case it is a new document copy that is completely
-        // that isn't added to the DocumentsModel. So there it can't reuse the same history
-        // manager. It is wasteful to have two history managers and two copies of the
-        // history data in memory, but that is the easiest way to deal with it for now.
+        // independent. It isn't added to the DocumentsModel. With this approach we aren't
+        // sharing the same history manager. It is wasteful to have two history managers
+        // and two copies of the history data in memory, but that is the easiest way to
+        //  deal with it for now.
       } else {
         console.warn("Document with the same key already exists");
       }

@@ -238,16 +238,16 @@ export class FirestoreHistoryManager {
     } else {
       if (historyLength === 0 && numHistoryEventsApplied === 0) {
         return HistoryStatus.NO_HISTORY;
-      } else {
-        if (historyLength >= numHistoryEventsApplied) {
-          return HistoryStatus.HISTORY_LOADED;
-        } else {
-          // In this case, the numHistoryEventsApplied tells us that we have more history
-          // entries, but they haven't been loaded yet for some reason.
-          // This might be an error, but more likely the history is still loading.
-          return HistoryStatus.HISTORY_LOADING;
-        }
       }
+
+      if (historyLength >= numHistoryEventsApplied) {
+        return HistoryStatus.HISTORY_LOADED;
+      }
+
+      // In this case, the numHistoryEventsApplied tells us that we have more history
+      // entries, but they haven't been loaded yet for some reason.
+      // This might be an error, but more likely the history is still loading.
+      return HistoryStatus.HISTORY_LOADING;
     }
   }
 
