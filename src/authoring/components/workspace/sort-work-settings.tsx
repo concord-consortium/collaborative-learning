@@ -197,7 +197,7 @@ const SortWorkSettings: React.FC = () => {
                 <tr key={field.id} id={rowId}>
                   <td className="enabled">
                     <input
-                      aria-label={`Enable ${defaultValue} sort option`}
+                      aria-label={`Enable ${sortType} sort option`}
                       disabled={isOnlyEnabledOption}
                       title={isOnlyEnabledOption ? "At least one sort option must remain enabled" : undefined}
                       type="checkbox"
@@ -206,7 +206,7 @@ const SortWorkSettings: React.FC = () => {
                   </td>
                   <td className="narrow order order-buttons">
                     <button
-                      aria-label={`Move ${defaultValue} up`}
+                      aria-label={`Move ${sortType} up`}
                       disabled={index === 0}
                       onClick={() => moveOption(index, -1)}
                       type="button"
@@ -214,7 +214,7 @@ const SortWorkSettings: React.FC = () => {
                       ↑
                     </button>
                     <button
-                      aria-label={`Move ${defaultValue} down`}
+                      aria-label={`Move ${sortType} down`}
                       disabled={index === fields.length - 1}
                       onClick={() => moveOption(index, 1)}
                       type="button"
@@ -223,7 +223,7 @@ const SortWorkSettings: React.FC = () => {
                     </button>
                   </td>
                   <td className="sort-type">
-                    {defaultValue}
+                    {sortType}
                     <input type="hidden" {...register(`sortOptions.${index}.type`)} />
                   </td>
                   <td className="label">{displayLabel}</td>
@@ -247,7 +247,7 @@ const SortWorkSettings: React.FC = () => {
           {enabledSortOptions.map(option => {
             return (
               <option key={option.type} value={option.type}>
-                {getDefaultValue(getSortTypeTranslationKey(option.type))}
+                {option.type}
               </option>
             );
           })}
@@ -289,7 +289,6 @@ const SortWorkSettings: React.FC = () => {
           <tbody>
             {docFilterFields.map((field, index) => {
               const docFilterType = field.type;
-              const defaultValue = isTranslationKey(docFilterType) ? getDefaultValue(docFilterType) : docFilterType;
               const displayLabel = isTranslationKey(docFilterType) ? translate(docFilterType): docFilterType;
               const rowId = `doc-filter-option-${docFilterType}`;
               const watchedOption = watchDocFilterOptions[index];
@@ -299,7 +298,7 @@ const SortWorkSettings: React.FC = () => {
                 <tr key={field.id} id={rowId}>
                   <td className="enabled">
                     <input
-                      aria-label={`Enable ${defaultValue} filter option`}
+                      aria-label={`Enable ${docFilterType} filter option`}
                       disabled={isOnlyEnabledOption}
                       title={isOnlyEnabledOption ? "At least one filter option must remain enabled" : undefined}
                       type="checkbox"
@@ -307,7 +306,7 @@ const SortWorkSettings: React.FC = () => {
                     />
                   </td>
                   <td className="filter-type">
-                    {defaultValue}
+                    {docFilterType}
                     <input type="hidden" {...register(`docFilterOptions.${index}.type`)} />
                   </td>
                   <td className="label">{displayLabel}</td>
