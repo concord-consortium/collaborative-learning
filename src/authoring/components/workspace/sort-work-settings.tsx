@@ -5,8 +5,7 @@ import appConfig from "../../../clue/app-config.json";
 import { DocFilterType, DocFilterTypeIds } from "../../../models/stores/ui-types";
 import { getSortTypeTranslationKey } from "../../../utilities/sort-utils";
 import { upperWords } from "../../../utilities/string-utils";
-import {
-  getDefaultValue, isTranslationKey, setTermOverrides, translate
+import { isTranslationKey, setTermOverrides, translate
 } from "../../../utilities/translation/translate";
 import { useCurriculum } from "../../hooks/use-curriculum";
 import { ISortWorkConfig, SortTypeId, SortTypeIds } from "../../types";
@@ -187,7 +186,6 @@ const SortWorkSettings: React.FC = () => {
             {fields.map((field, index) => {
               const sortType = updateType(field.type);
               const translationKey = getSortTypeTranslationKey(sortType);
-              const defaultValue = upperWords(getDefaultValue(translationKey)) || sortType;
               const displayLabel = upperWords(translate(translationKey));
               const rowId = `sort-option-${sortType}`;
               const watchedOption = watchSortOptions[index];

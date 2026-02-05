@@ -6,4 +6,12 @@ describe("upperWords", () => {
     const expected = "Hello World From Concord";
     expect(upperWords(input)).toBe(expected);
   });
+
+  it("handles non-strings", () => {
+    const num = 12345;
+    expect(upperWords(num as any)).toBe(num);
+
+    const obj = { key: "value" };
+    expect(upperWords(obj as any)).toBe(obj);
+  });
 });

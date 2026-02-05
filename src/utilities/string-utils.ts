@@ -11,5 +11,7 @@ export const countWords = (text: string) => {
 };
 
 export function upperWords(text: string): string {
+  if (typeof text !== "string") return text;
+
   return text.split(" ").map(upperFirst).join(" ");
 }
