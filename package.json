@@ -21,7 +21,7 @@
     "setupFilesAfterEnv": [
       "<rootDir>/src/test/setupTests.ts"
     ],
-    "testEnvironment": "jsdom",
+    "testEnvironment": "<rootDir>/src/test/jest-jsdom-environment.ts",
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "testPathIgnorePatterns": [
       "/node_modules/",
