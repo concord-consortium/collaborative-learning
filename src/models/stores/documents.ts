@@ -14,8 +14,9 @@ import { UserModelType } from "./user";
 import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { Firestore } from "../../lib/firestore";
 import { TreeManagerType } from "../history/tree-manager";
-import { FirestoreHistoryManager, FirestoreHistoryManagerConcurrent,
+import { FirestoreHistoryManager,
   IFirestoreHistoryManagerArgs } from "../history/firestore-history-manager";
+import { FirestoreHistoryManagerConcurrent } from "../history/firestore-history-manager-concurrent";
 import { UserContextProvider } from "./user-context-provider";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {

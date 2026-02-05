@@ -9,7 +9,7 @@ import { HistoryEntry, HistoryEntryType } from "../../models/history/history";
 import {
   getHistoryPath, loadHistory, IFirestoreHistoryEntryDoc
 } from "../../models/history/history-firestore";
-import { FirestoreHistoryManagerConcurrent } from "../../models/history/firestore-history-manager";
+import { FirestoreHistoryManagerConcurrent } from "../../models/history/firestore-history-manager-concurrent";
 
 import "./history-view-panel.scss";
 
