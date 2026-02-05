@@ -124,10 +124,6 @@ If a new column is added then User B sees the new attribute name.
 
 # Other issues
 
-## Duplicate Tiles
-
-When the group documents are reloaded we're getting duplicate tiles. This might happen because the remote history is being replayed when document first loads since the there is no local history initially. Probably most of these events are being discarded, but I'd guess the "addTile" has a patch which adds the row with the tile which doesn't get discarded.
-
 ## Table with graph
 
 I don't the exact steps yet, but I found that when a graph is connected to a table only one of the documents actually shows the points on the graph.
@@ -146,6 +142,12 @@ When loading a group document, the system fetches the `lastHistoryEntry` to dete
 
 **Proposed fix**: Include all applied history entry IDs in the document content written to Firebase Realtime Database, then only apply history entries not in this list.
 
+## Local history doesn't include previous remote entries
+
+Location: `firestore-history-manager-concurrent.ts:applyHistoryEntries()`
+
+When the document is first opened, remote history entries that have already been applied to the loaded document, are not re-applied. When this is skipped, we also skip putting these remote entries in the local history. So the local history does not contain the full history of the document. This is the same behavior as non group documents, and it seems to work fine. However it is confusing that the full history isn't available locally.
+
 ## Error Handling for Metadata Document
 
 Location: `firestore-history-manager-concurrent.ts:uploadQueuedHistoryEntries()`
@@ -163,7 +165,6 @@ Current plan: Only use this for new group documents; some lost history for exist
 ## Test Coverage Gaps
 
 Primarily in:
-- `firestore-history-manager.ts` 
+- `firestore-history-manager.ts`
 - `firestore-history-manager-concurrent.ts`
-- `document-metadata-model.ts` 
-
+- `document-metadata-model.ts`

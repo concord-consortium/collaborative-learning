@@ -243,6 +243,15 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // constructor on getInitialLastHistoryEntry
     if (lastEntry) {
       const lastEntryIndex = entrySnapshots.findIndex(snapshot => snapshot.id === lastEntry.id);
+
+      // TODO: we might want to add the already applied history entries to the local treeManager
+      // history of the document. This would be so the local history matches the remote history.
+      // However everything works without doing this. Also not applying them makes the
+      // history viewer less cluttered with previous entries. So for now we just skip doing this.
+      // Something like:
+      //   treeManager.addHistoryEntryAfterApplying(entrySnapshots.slice(0, lastEntryIndex + 1))
+
+      // Update the list that will be used below to only include entries after lastEntry
       entrySnapshots = entrySnapshots.slice(lastEntryIndex + 1);
     }
 
