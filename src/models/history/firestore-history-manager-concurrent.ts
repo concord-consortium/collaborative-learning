@@ -2,7 +2,7 @@ import { action, makeObservable, observable, runInAction } from "mobx";
 import { getSnapshot, Instance, IJsonPatch } from "mobx-state-tree";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { typeConverter } from "../../utilities/db-utils";
-import { IFirestoreHistoryEntryDoc } from "./history-firestore";
+import { getLastHistoryEntry, IFirestoreHistoryEntryDoc, LastHistoryEntry } from "./history-firestore";
 import { CDocumentType, FAKE_EXCHANGE_ID, FAKE_HISTORY_ENTRY_ID } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType, HistoryOperation } from "./history";
 import { FirestoreHistoryManager, IFirestoreHistoryManagerArgs } from "./firestore-history-manager";
@@ -16,14 +16,44 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
    */
   paused = false;
 
+  initialLastHistoryPromise: Promise<LastHistoryEntry> | undefined;
+
   constructor(args: IFirestoreHistoryManagerArgs) {
     super(args);
+
+    // Start loading the initial last history entry right away.
+    // We use this last history entry to determine which history entries need to be applied
+    // to the document when we first load the history. The initial document content is loaded
+    // separately from the history entries. After this initial document content load, the
+    // document content is not updated from the realtime database again. All updates come
+    // from the history entries.
+    // So we want to try to get the last history entry that was applied to the document
+    // that we initially load.
+    // FIXME: this approach is error prone because:
+    // - a new history entry might be added after our initial fetch the document content
+    //   before we get the last history entry here.
+    // - perhaps, a network delay might cause the initial fetch of the document to happen after this
+    //   history entry fetch. I haven't verified this is actually possible.
+    // The most robust approach is to include all applied history entry ids in the document content
+    // that is written to Firebase Realtime Database. We can look at this list and only apply
+    // history entries that are not in this list.
+    this.getInitialLastHistoryEntry();
+
     // Make paused observable so UI can react to changes
     makeObservable(this, {
       paused: observable,
       pauseUploads: action,
       resumeUploadsAfterDelay: action,
     });
+  }
+
+  async getInitialLastHistoryEntry() {
+    if (!this.initialLastHistoryPromise) {
+      await this.environmentAndMetadataDocReadyPromise;
+      const { firestore, documentPath } = this;
+      this.initialLastHistoryPromise = getLastHistoryEntry(firestore, documentPath);
+    }
+    return this.initialLastHistoryPromise;
   }
 
   pauseUploads() {
@@ -77,19 +107,6 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       }
     }
 
-    // FIXME: when a document is opened that already has content in it, and it has history
-    // this history will get re-applied to the document. It is likely that this is reason
-    // we see duplicate tiles when loading a group document
-    // We somehow need to know which entries have already been applied to the document
-    // and skip those. At least in CODAP we track the last history entry id of the document
-    // So we could use that to skip any entries before that id.
-    // Since the history is not necessarily identical on each client, perhaps this last history
-    // entry recorded in the document will be before the actual last history entry in Firestore.
-    // This needs to be thought through more carefully, but it seems good enough to start.
-    // Another approach is to not load the state of the document at all and just replay
-    // the history here. But that could be slow if there is a lot of history.
-    // Another approach is to track in the document exactly which history entries have been
-    // applied, not just the last one.
     this.applyHistoryEntries(newEntries);
   }
 
@@ -217,6 +234,17 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   async applyHistoryEntries(entrySnapshots: HistoryEntrySnapshot[]) {
     const { treeManager } = this;
     const trees = Object.values(treeManager.trees);
+
+    // This should be the last entry that was applied to the document when it was first loaded.
+    const lastEntry = await this.getInitialLastHistoryEntry();
+
+    // Skip any entries that are before or equal to lastEntry
+    // This approach not safe because lastEntry might be outdated. See the FIXME in the
+    // constructor on getInitialLastHistoryEntry
+    if (lastEntry) {
+      const lastEntryIndex = entrySnapshots.findIndex(snapshot => snapshot.id === lastEntry.id);
+      entrySnapshots = entrySnapshots.slice(lastEntryIndex + 1);
+    }
 
     // Disable shared model syncing on all of the trees. This is
     // different than when the undo store applies patches because in
