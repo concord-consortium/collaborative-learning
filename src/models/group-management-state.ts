@@ -282,10 +282,6 @@ export class GroupManagementState {
   }
 
   async save(onSave?: (moves: Map<string, string | null>) => Promise<void>): Promise<boolean> {
-    if (this.isSaving) {
-      return false;
-    }
-
     runInAction(() => {
       this.isSaving = true;
       this.savingFailed = false;
