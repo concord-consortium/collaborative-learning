@@ -144,7 +144,12 @@ export class FirestoreHistoryManager {
     try {
       await when(() => !!userContext?.uid, { timeout: 5000 });
     } catch (error) {
-      // We ignore the error because the userContext?.uid being falsy will be handled below.
+      // Log the timeout while still allowing the environment checks below to handle the invalid state.
+      console.warn(
+        "Timed out waiting for user authentication (userContext.uid). " +
+        "Proceeding to environment validation.",
+        error
+      );
     }
 
     try {

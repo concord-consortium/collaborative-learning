@@ -279,9 +279,9 @@ export const DocumentsModel = types
         // will get garbage collected.
         // A FirestoreHistoryManager is also used when the history is being played back
         // by the Canvas component. In that case it is a new document copy that is completely
-        // that isn't added from the DocumentsModel. So there it can't reuse the same history
+        // that isn't added to the DocumentsModel. So there it can't reuse the same history
         // manager. It is wasteful to have two history managers and two copies of the
-        // the history data in memory, but that is the easiest way to deal with it for now.
+        // history data in memory, but that is the easiest way to deal with it for now.
       } else {
         console.warn("Document with the same key already exists");
       }

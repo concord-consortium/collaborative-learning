@@ -201,7 +201,7 @@ describe("history loading", () => {
       const { historyManager } = setupFirestoreHistoryManager(treeManager, firestoreMockNoDoc);
 
       // Start mirrorHistoryFromFirestore - it will wait for metadata document
-      const mirrorPromise = historyManager.subscribeToFirestoreHistory();
+      const subscribePromise = historyManager.subscribeToFirestoreHistory();
 
       // While waiting for the history it currently reports "No History"
       // TODO: This should be improved to show loading at this point.
@@ -210,9 +210,7 @@ describe("history loading", () => {
       // Fast-forward past the 5 second timeout
       jest.advanceTimersByTimeAsync(10000);
 
-      console.log("Waiting for mirrorPromise");
-      await mirrorPromise;
-      console.log("mirrorPromise finished");
+      await subscribePromise;
 
       // Should have set the error status since the metadata document was not found
       expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_ERROR);
