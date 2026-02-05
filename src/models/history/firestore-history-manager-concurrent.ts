@@ -83,7 +83,9 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       // treeManager.setChangeDocument(CDocument.create({history: []}));
     }
 
-    const existingHistory = treeManager.document.history;
+    // Not the most efficient but lets get the history entries from the historyEntryDocs
+    // If we unify on loadFirestoreHistory we can have it do this parsing for us
+    const incomingHistory: HistoryEntrySnapshot[] = historyEntryDocs.map(doc => doc.entry);
 
     // We do not use applySnapshot here because it would replace the entire history with
     // the remote history. Sometimes there will be local history entries that have not
@@ -93,21 +95,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // than on other clients. That's because those other clients wouldn't have our local
     // entries yet.
     // This problem is being punted for now.
-
-    // Not the most efficient but lets get the history entries from the historyEntryDocs
-    // If we unify on loadFirestoreHistory we can have it do this parsing for us
-    const incomingHistory: HistoryEntrySnapshot[] = historyEntryDocs.map(doc => doc.entry);
-
-    // Again not the most efficient to figure out which entries are new
-    const newEntries: HistoryEntrySnapshot[] = [];
-    for (const entry of incomingHistory) {
-      const exists = existingHistory.find(e => e.id === entry.id);
-      if (!exists) {
-        newEntries.push(entry);
-      }
-    }
-
-    this.applyHistoryEntries(newEntries);
+    this.applyHistoryEntries(incomingHistory);
   }
 
   async onHistoryEntryCompleted(
@@ -230,10 +218,9 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     }
   }
 
-  // This is very similar to gotoHistoryEntry in TreeManager
-  async applyHistoryEntries(entrySnapshots: HistoryEntrySnapshot[]) {
+  // The second half of this method is very similar to gotoHistoryEntry in TreeManager
+  async applyHistoryEntries(incomingHistory: HistoryEntrySnapshot[]) {
     const { treeManager } = this;
-    const trees = Object.values(treeManager.trees);
 
     // This should be the last entry that was applied to the document when it was first loaded.
     const lastEntry = await this.getInitialLastHistoryEntry();
@@ -241,19 +228,37 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // Skip any entries that are before or equal to lastEntry
     // This approach not safe because lastEntry might be outdated. See the FIXME in the
     // constructor on getInitialLastHistoryEntry
+    let unappliedHistory = incomingHistory;
     if (lastEntry) {
-      const lastEntryIndex = entrySnapshots.findIndex(snapshot => snapshot.id === lastEntry.id);
+      const lastEntryIndex = incomingHistory.findIndex(snapshot => snapshot.id === lastEntry.id);
 
       // TODO: we might want to add the already applied history entries to the local treeManager
       // history of the document. This would be so the local history matches the remote history.
       // However everything works without doing this. Also not applying them makes the
       // history viewer less cluttered with previous entries. So for now we just skip doing this.
       // Something like:
-      //   treeManager.addHistoryEntryAfterApplying(entrySnapshots.slice(0, lastEntryIndex + 1))
+      //   treeManager.addHistoryEntryAfterApplying(incomingHistory.slice(0, lastEntryIndex + 1))
 
       // Update the list that will be used below to only include entries after lastEntry
-      entrySnapshots = entrySnapshots.slice(lastEntryIndex + 1);
+      unappliedHistory = incomingHistory.slice(lastEntryIndex + 1);
     }
+
+    const existingHistory = treeManager.document.history;
+
+    // Skip any entries that are already in our local history
+    // TODO: this could be more efficient by combining it with the incomingHistory.findIndex()
+    // above.
+    const entrySnapshots: HistoryEntrySnapshot[] = [];
+    for (const entry of unappliedHistory) {
+      // TODO: it is in inefficient to have to search through the array of existing history
+      // entries. It'd be better if we maintained a Set or Map of existing entry ids.
+      const exists = existingHistory.find(e => e.id === entry.id);
+      if (!exists) {
+        entrySnapshots.push(entry);
+      }
+    }
+
+    const trees = Object.values(treeManager.trees);
 
     // Disable shared model syncing on all of the trees. This is
     // different than when the undo store applies patches because in
