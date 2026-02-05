@@ -3,30 +3,34 @@
 .student-card {
   align-items: center;
   background: white;
-  border: solid 1px white;
   cursor: default;
   display: flex;
   font-size: 12px;
+  height: 22px;
+  line-height: 1;
   max-width: 125px;
-  padding: 1px 3px;
+  padding: 3px 5px;
 
   &.draggable, &[tabindex="0"] {
     &:hover {
       background-color: $workspace-teal-light-4;
-      border-color: $charcoal-light-1;
+      outline: solid 1px $charcoal-light-1;
 
-      .student-card__status {
-        border: solid 1px white;
+      &.connected {
+        .student-card__status {
+          outline: solid 1px white;
+        }
       }
     }
 
     &:focus-visible {
       background-color: $workspace-teal-light-4;
-      border-color: $workspace-teal;
-      outline: none;
+      outline: solid 1px $charcoal-light-1;
 
-      .student-card__status {
-        border: solid 1px white;
+      &.connected {
+        .student-card__status {
+          outline: solid 1px white;
+        }
       }
     }
   }
@@ -36,8 +40,10 @@
     border: solid 1px $charcoal-light-1;
     box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.35);
 
-    .student-card__status {
-      border: solid 1px white;
+    &.connected {
+      .student-card__status {
+        outline: solid 1px white;
+      }
     }
   }
 
@@ -56,6 +62,7 @@
   &.connected {
     .student-card__status {
       background-color: $connected-green;
+      outline: solid 1px $connected-green-dark;
     }
   }
 
@@ -67,10 +74,10 @@
 }
 
 .student-card__status {
-  border: solid 1px $workspace-teal-dark-1;
+  box-sizing: content-box;
   flex-shrink: 0;
   height: 8px;
-  margin-right: $half-padding;
+  margin-right: 6px;
   width: 8px;
 }
 

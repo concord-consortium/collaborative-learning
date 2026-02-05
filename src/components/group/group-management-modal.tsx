@@ -43,7 +43,6 @@ export const GroupManagementModal: React.FC<IProps> = observer(
     useEffect(() => {
       if (isOpen) {
         groupManagementState.reset();
-        groupManagementState.setAllowCancel(allowCancel);
       }
     }, [isOpen, groupManagementState, allowCancel]);
 
@@ -74,11 +73,9 @@ export const GroupManagementModal: React.FC<IProps> = observer(
     };
 
     const handleSave = async () => {
-      try {
-        await groupManagementState.save(onSave);
+      const success = await groupManagementState.save(onSave);
+      if (success) {
         onClose();
-      } catch (error) {
-        // Error already logged in model. TODO: Add error display in UI.
       }
     };
 
@@ -189,9 +186,9 @@ export const GroupManagementModal: React.FC<IProps> = observer(
             </DragOverlay>
           </DndContext>
         </div>
-        <div className="group-management-modal__filters">
-          <span className="group-management-modal__filter">
-            <span className="group-management-modal__filter-indicator" />
+        <div className="group-management-modal__options">
+          <span className="group-management-modal__legend">
+            <span className="group-management-modal__legend-indicator" />
             Online
           </span>
           <label className="group-management-modal__filter">
@@ -205,6 +202,13 @@ export const GroupManagementModal: React.FC<IProps> = observer(
           </label>
         </div>
         <div className="group-management-modal__footer">
+          {groupManagementState.savingFailed && (
+            <p className="group-management-modal__error" role="alert">
+              {groupManagementState.isFirstTimeJoin
+                ? "There was a problem joining the group. Please try again."
+                : "There was a problem saving your changes. Please try again."}
+            </p>
+          )}
           {allowCancel && (
             <button
               className="group-management-modal__button cancel"
@@ -222,7 +226,7 @@ export const GroupManagementModal: React.FC<IProps> = observer(
             type="button"
             onClick={handleSave}
           >
-            Save
+            {groupManagementState.isFirstTimeJoin ? "Join" : "Save"}
           </button>
         </div>
       </Modal>
