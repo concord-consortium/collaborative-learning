@@ -1,6 +1,7 @@
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
 import { SectionModelType } from "../curriculum/section";
 import { ToolbarButtonModel } from "../tiles/toolbar-button";
+import { setTermOverrides } from "../../utilities/translation/translate";
 import { ConfigurationManager, mergeDisabledFeatures } from "./configuration-manager";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { ToolbarModel } from "./problem-configuration";
@@ -35,7 +36,29 @@ export const AppConfigModel = types
     settings: self.config?.settings,
     requireSortWorkTab: false
   }))
+  .views(self => ({
+    /**
+     * The complete term overrides object, including tagPrompt as the Strategy override
+     * if no explicit Strategy override exists.
+     */
+    get effectiveTermOverrides(): Record<string, string> | undefined {
+      const { termOverrides, tagPrompt } = self.configMgr;
+      if (!termOverrides && !tagPrompt) return undefined;
+
+      // If tagPrompt exists and there's no explicit Strategy override, use tagPrompt as Strategy
+      if (tagPrompt && !termOverrides?.Strategy) {
+        return { ...termOverrides, Strategy: tagPrompt };
+      }
+      return termOverrides;
+    }
+  }))
   .actions(self => ({
+    afterCreate() {
+      // Initialize module-level overrides from base config (if config exists)
+      if (self.config) {
+        setTermOverrides(self.effectiveTermOverrides);
+      }
+    },
     setConfigs(configs: Partial<UnitConfiguration>[]) {
       self.configMgr = new ConfigurationManager(self.config, configs);
       self.navTabs = NavTabsConfigModel.create(self.configMgr.navTabs);
@@ -46,6 +69,7 @@ export const AppConfigModel = types
       self.authorTools = ToolbarModel.create(self.configMgr.authorTools);
       self.toolbar = ToolbarModel.create(self.configMgr.toolbar);
       self.settings = self.configMgr.settings;
+      setTermOverrides(self.effectiveTermOverrides);
     },
     setRequireSortWorkTab(requireSortWorkTab: boolean) {
       self.requireSortWorkTab = requireSortWorkTab;
@@ -95,6 +119,8 @@ export const AppConfigModel = types
     get showIdeasButton() { return self.configMgr.showIdeasButton; },
     get groupDocumentsEnabled() { return self.configMgr.groupDocumentsEnabled; },
     get hide4up() { return self.configMgr.hide4up; },
+    get sortWorkConfig() { return self.configMgr.sortWorkConfig; },
+    get termOverrides() { return self.configMgr.termOverrides; },
     get authorToolbar() {
       return ToolbarModel.create([
         ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),

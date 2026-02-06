@@ -1,6 +1,6 @@
 import { destroy } from "mobx-state-tree";
 import firebase from "firebase/app";
-import { getGroupSnapshot, GroupModel, GroupUserModelType, GroupUserState } from "../../models/stores/groups";
+import { getGroupSnapshot, GroupModel } from "../../models/stores/groups";
 import { DB } from "../db";
 import { DBOfferingGroupMap } from "../db-types";
 import { BaseListener } from "./base-listener";
@@ -27,6 +27,9 @@ export class DBGroupsListener extends BaseListener {
           this.debugLogSnapshot("#start", snapshot);
           // Groups may be invalid at this point, but the listener will resolve it once connection times are set
           this.updateGroupsFromDb(dbGroups);
+
+          // Set currentGroupId immediately so the UI knows the user's group status before the start() promise resolves.
+          user.setCurrentGroupId(groups.groupIdForUser(user.id));
 
           const group = groups.groupForUser(user.id);
           if (group) {
@@ -60,18 +63,10 @@ export class DBGroupsListener extends BaseListener {
     const { user, class: clazz } = this.db.stores;
     const groups: DBOfferingGroupMap = snapshot.val() || {};
     const myGroupIds: string[] = [];
-    const overSubscribedUserUpdates: Record<string, null> = {};
 
     this.debugLogSnapshot("#handleGroupsRef", snapshot);
 
-    const markGroupUserForRemoval = (groupId: string, userToRemove: GroupUserModelType) => {
-      const userPath = this.db.firebase.getFullPath(
-        this.db.firebase.getGroupUserPath(user, groupId, userToRemove.id)
-      );
-      overSubscribedUserUpdates[userPath] = null;
-    };
-
-    // ensure that the current user is not in more than 1 group and groups are not oversubscribed
+    // ensure that the current user is not in more than 1 group
     Object.keys(groups).forEach((groupId) => {
       // Create a temporary instance of the MST Group so the same parsing logic is used both here
       // and by updateGroupsFromDb
@@ -82,66 +77,18 @@ export class DBGroupsListener extends BaseListener {
         myGroupIds.push(groupId);
       }
 
-      let subscribedUsers = tempGroup.users.slice();
-      if (subscribedUsers.length > 4) {
-        // If a user is removed from the class kick them out. We only do this when the group
-        // is over subscribed. Perhaps the user was only removed temporarily. As long as another
-        // user doesn't try to steal their place in a group, if they are re-added to the class
-        // the user will still be in the same group.
-        const remainingUsers: GroupUserModelType[] = [];
-        subscribedUsers.forEach(groupUser => {
-          if (groupUser.state === GroupUserState.Removed) {
-            markGroupUserForRemoval(groupId, groupUser);
-          } else {
-            remainingUsers.push(groupUser);
-          }
-        });
-        subscribedUsers = remainingUsers;
-      }
-
-      // Are we are still over 4?
-      if (subscribedUsers.length > 4) {
-        // sort the users by connected timestamp and find the newest users to kick out
-        subscribedUsers.sort((a, b) => a.connectedTimestamp - b.connectedTimestamp);
-        for (let i = 4; i < subscribedUsers.length; i++) {
-          markGroupUserForRemoval(groupId, subscribedUsers[i]);
-        }
-      }
       destroy(tempGroup);
     });
 
-    // if there is a problem with the groups fix the problem in the next timeslice
-    const numUpdates = Object.keys(overSubscribedUserUpdates).length;
-    if ((numUpdates > 0) || (myGroupIds.length > 1)) {
+    if (myGroupIds.length > 1) {
       setTimeout(() => {
-        // FIXME: Note multiple CLUE windows might be doing this update at the same time. The
-        // connectedTimestamp values should be same in both windows. But the removed users
-        // are based on each individual CLUE window, so that might result in different
-        // lists. For example a CLUE window that started before the user was removed
-        // from the class will *not* see them as removed. And a CLUE window that started
-        // after the user was removed from the class *will* see them as removed.
-        // If the group is oversubscribed the first window will delete the most recent
-        // user. The second window will delete the removed user. So now two different users will
-        // be removed from the group.
-        if (numUpdates > 0) {
-          firebase.database().ref().update(overSubscribedUserUpdates);
-        }
-        // FIXME: How do we know that we haven't already been removed from this group by
-        // the overSubscribedUserUpdates?
-        // What if we decide to remove another user from this group and then we
-        // leave the group too. That means the first user was kicked out for no
-        // reason.
-        if (myGroupIds.length > 1) {
-          this.db.leaveGroup();
-        }
+        this.db.leaveGroup();
       }, 1);
     }
     else {
       // otherwise set the groups
       this.updateGroupsFromDb(groups);
-
       user.setCurrentGroupId(this.db.stores.groups.groupIdForUser(user.id));
-
     }
   };
 

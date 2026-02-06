@@ -140,6 +140,25 @@ describe("ConfigurationManager", () => {
     expect(appConfig.showAnnotationControls).toBe(true);
   });
 
+  describe("termOverrides", () => {
+    it("should return termOverrides property", () => {
+      const appConfig = AppConfigModel.create({
+        config: {
+          ...unitConfigDefaults,
+          termOverrides: {
+            "Group": "Team"
+          }
+        }
+      });
+      expect(appConfig.termOverrides).toEqual({ "Group": "Team" });
+    });
+
+    it("should return undefined when termOverrides is not configured", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      expect(appConfig.termOverrides).toBeUndefined();
+    });
+  });
+
   it("should return undefined for groupDocumentsEnabled when not configured", () => {
     const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
     expect(appConfig.groupDocumentsEnabled).toBeUndefined();

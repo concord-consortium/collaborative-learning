@@ -548,6 +548,55 @@ describe('ai-summarizer', () => {
         expect(result).toContain('This tile contains a table');
         expect(result).not.toContain('which uses the');
       });
+
+      it('should display attributes in a table format with id, name, and expression columns', () => {
+        const content = {
+          rowOrder: ['row1'],
+          rowMap: {
+            row1: {
+              tiles: [{ tileId: 'tile1' }],
+              isSectionHeader: false
+            }
+          },
+          tileMap: {
+            tile1: {
+              id: 'tile1',
+              content: {
+                type: 'Table'
+              }
+            }
+          },
+          sharedModelMap: {
+            dataSet1: {
+              sharedModel: {
+                type: 'SharedDataSet',
+                providerId: 'provider1',
+                dataSet: {
+                  id: 'ds1',
+                  name: 'Test Data',
+                  attributes: [
+                    { id: 'attr1', name: 'w', values: ['1', '2'], formula: {} },
+                    { id: 'attr2', name: 'x', values: ['-1', '-2'], formula: { display: '' } },
+                    { id: 'attr3', name: 'y', values: ['2', '4'], formula: { display: 'x * 2' } },
+                    { id: 'attr4', name: 'z', values: ['3', '6'], formula: { display: 'x + y' } }
+                  ],
+                  cases: [
+                    { __id__: 'case1' },
+                    { __id__: 'case2' }
+                  ]
+                }
+              },
+              tiles: ['tile1']
+            }
+          }
+        };
+
+        const result = documentSummarizer(content, {});
+        expect(result).toContain('| attr1 | w |  |');
+        expect(result).toContain('| attr2 | x |  |');
+        expect(result).toContain('| attr3 | y | x * 2 |');
+        expect(result).toContain('| attr4 | z | x + y |');
+      });
     });
 
     describe('options', () => {
