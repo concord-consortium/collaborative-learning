@@ -13,6 +13,7 @@ import { ENavTab } from "../../models/view/nav-tabs";
 import { getFilterTypeTranslationKey } from "../../utilities/sort-utils";
 import { upperWords } from "../../utilities/string-utils";
 import { isTranslationKey, translate } from "../../utilities/translation/translate";
+import { urlParams } from "../../utilities/url-params";
 import { AiSummary } from "../navigation/ai-summary";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 import { DocListDebug } from "./doc-list-debug";
@@ -40,6 +41,13 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     isValidSortType(primarySortBy) ? primarySortBy : defaultPrimarySort;
   const validatedSecondarySortBy: SecondarySortType =
     secondarySortBy === "None" || isValidSortType(secondarySortBy) ? secondarySortBy : "None";
+
+  // In authoring mode, set the primary sort to a fake value so the default will be chosen.
+  useEffect(() => {
+    if (urlParams.authoringBranch) {
+      persistentUI.setPrimarySortBy("Illegal Sort");
+    }
+  }, [persistentUI]);
 
   useEffect(() => {
     if (validatedPrimarySortBy !== primarySortBy) {

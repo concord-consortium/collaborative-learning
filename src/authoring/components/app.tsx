@@ -1,16 +1,16 @@
 
 import React, { useMemo, useState } from "react";
 
-import { CurriculumProvider, useCurriculum } from "../hooks/use-curriculum";
-import LeftNav from "./left-nav";
-import Workspace from "./workspace";
-import MediaLibrary from "./media-library";
 import { AuthProvider, useAuth } from "../hooks/use-auth";
 import { AuthoringApiProvider } from "../hooks/use-authoring-api";
 import { AuthoringPreviewProvider, PreviewUserType, useAuthoringPreview } from "../hooks/use-authoring-preview";
+import { CurriculumProvider, useCurriculum } from "../hooks/use-curriculum";
 import { getProblemOrdinal } from "../utils/nav-path";
 import Admin from "./admin";
 import CommitUI from "./commit-ui";
+import LeftNav from "./left-nav";
+import MediaLibrary from "./media-library";
+import Workspace from "./workspace";
 
 import "./app.scss";
 
