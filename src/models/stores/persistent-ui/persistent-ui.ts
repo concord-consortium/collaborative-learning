@@ -41,6 +41,8 @@ export const PersistentUIModelV2 = types
     showTeacherContent: true,
     showChatPanel: false,
     showDocumentScroller: true,
+    showHistoryView: false,
+    showRemoteHistoryView: false,
     tabs: types.map(UITabModel),
     problemWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string),
@@ -99,6 +101,18 @@ export const PersistentUIModelV2 = types
     },
     toggleShowDocumentScroller(show: boolean) {
       self.showDocumentScroller = show;
+    },
+    toggleHistoryView() {
+      self.showHistoryView = !self.showHistoryView;
+    },
+    setShowHistoryView(show: boolean) {
+      self.showHistoryView = show;
+    },
+    toggleRemoteHistoryView() {
+      self.showRemoteHistoryView = !self.showRemoteHistoryView;
+    },
+    setShowRemoteHistoryView(show: boolean) {
+      self.showRemoteHistoryView = show;
     },
     setActiveNavTab(tab: string) {
       self.activeNavTab = tab;

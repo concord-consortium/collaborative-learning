@@ -2,46 +2,56 @@ import React from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import { useDroppable } from "@dnd-kit/core";
-import { StudentCard, StudentCardInfo } from "./student-card";
+import { GroupManagementState } from "../../models/group-management-state";
+import { StudentCard } from "./student-card";
 
 import AddIconSvg from "../../assets/icons/add/add-icon.svg";
 
 import "./group-card.scss";
 
 interface IProps {
-  canDragStudent?: (studentId: string) => boolean;
   groupId: string;
-  groupLabel: string;
-  isCurrentUserGroup?: boolean;
-  isDropTarget?: boolean;
+  groupManagementState: GroupManagementState;
   isNewGroup?: boolean;
   isNoGroup?: boolean;
-  selectedStudentId?: string | null;
-  students: StudentCardInfo[];
-  onStudentSelect?: (studentId: string) => void;
-  onGroupSelect?: (groupId: string) => void;
 }
 
 export const GroupCard: React.FC<IProps> = observer(function GroupCard({
-  canDragStudent,
   groupId,
-  groupLabel,
-  isCurrentUserGroup = false,
-  isDropTarget = false,
+  groupManagementState,
   isNewGroup = false,
-  isNoGroup = false,
-  selectedStudentId,
-  students,
-  onStudentSelect,
-  onGroupSelect,
+  isNoGroup = false
 }) {
+  const groupLabel = isNoGroup ? "No Group" : `Group ${groupId}`;
+  const isCurrentUserGroup = groupManagementState.mode === "student"
+    && groupId === groupManagementState.currentUserGroupId;
+  const selectedStudentId = groupManagementState.effectiveSelectedStudentId;
+  const students = isNoGroup
+    ? groupManagementState.unassignedStudents
+    : groupManagementState.getStudentsForGroup(groupId);
+
+  const isDropTarget = isNoGroup
+    ? groupManagementState.isNoGroupDropTarget()
+    : groupManagementState.isDropTarget(groupId);
+
+  const canSelectGroup = isNoGroup
+    ? groupManagementState.isTeacherMode  // Only teachers can move students to "No Group"
+    : true;
+
+  const canSelectStudents = groupManagementState.isTeacherMode;
   const { isOver, setNodeRef } = useDroppable({
     id: `group-${groupId}`,
     data: { groupId, isNoGroup }
   });
 
   const handleGroupSelect = () => {
-    onGroupSelect?.(groupId);
+    if (canSelectGroup) {
+      groupManagementState.handleGroupCardSelect(groupId, isNoGroup);
+    }
+  };
+
+  const handleStudentSelect = (studentId: string) => {
+    groupManagementState.selectStudent(studentId);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -63,7 +73,7 @@ export const GroupCard: React.FC<IProps> = observer(function GroupCard({
     <div className="group-card__students">
       {students.map(student => {
         const isSelected = selectedStudentId === student.id;
-        const canDrag = !canDragStudent || canDragStudent(student.id);
+        const canDrag = groupManagementState.canDragStudent(student.id);
         // When a student is selected, exclude other students from tab order so user can tab directly to group cards
         // to quickly select the new group destination.
         const excludeFromTabOrder = !!selectedStudentId && !isSelected;
@@ -76,7 +86,7 @@ export const GroupCard: React.FC<IProps> = observer(function GroupCard({
             isSelected={isSelected}
             name={student.name}
             studentId={student.id}
-            onStudentSelect={canDrag ? onStudentSelect : undefined}
+            onStudentSelect={canDrag && canSelectStudents ? handleStudentSelect : undefined}
           />
         );
       })}
@@ -84,7 +94,7 @@ export const GroupCard: React.FC<IProps> = observer(function GroupCard({
   );
 
   const cardClasses = classNames("group-card", {
-    "clickable": !!onGroupSelect && !!selectedStudentId,
+    "clickable": canSelectGroup && !!selectedStudentId,
     "current": isCurrentUserGroup,
     "dragging-over": isOver,
     "drop-target": isDropTarget,
@@ -99,10 +109,10 @@ export const GroupCard: React.FC<IProps> = observer(function GroupCard({
       data-testid={`group-card-${groupId}`}
       onClick={handleGroupSelect}
       onKeyDown={handleKeyDown}
-      // Only enable tabbing when the group is selectable. The `onGroupSelect` prop may be undefined in some cases
-      // (e.g., for the "No Group" card in the student view since students shouldn't be able to move themselves there).
-      role={onGroupSelect ? "button" : undefined}
-      tabIndex={onGroupSelect ? 0 : undefined}
+      // Only enable tabbing when the group is selectable (e.g., "No Group" card is not selectable in student view
+      // since students shouldn't be able to move themselves there).
+      role={canSelectGroup ? "button" : undefined}
+      tabIndex={canSelectGroup ? 0 : undefined}
     >
       <div className="group-card__header">
         {groupLabel}

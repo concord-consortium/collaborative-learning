@@ -17,6 +17,7 @@ import SparrowToolIcon from "./assets/icons/sparrow-tool.svg";
 import UndoToolIcon from "./assets/icons/undo-tool.svg";
 import EditToolIcon from "./assets/icons/edit-right-icon.svg";
 import PlaybackToolIcon from "./assets/icons/playback-tool.svg";
+import HistoryViewToolIcon from "./assets/icons/history-view-tool.svg";
 import SelectAllToolIcon from "./assets/icons/select-all-tool.svg";
 import FourUpToolIcon from "./assets/icons/4-up-view-tool.svg";
 import CopyToWorkspaceToolIcon from "./assets/icons/copy-to-workspace-tool.svg";
@@ -46,6 +47,7 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   "icon-4up-view-tool": FourUpToolIcon,
   "icon-copy-to-workspace-tool": CopyToWorkspaceToolIcon,
   "icon-copy-to-document-tool": CopyToDocumentToolIcon,
+  "icon-history-view-tool": HistoryViewToolIcon,
   // Icons for tool tiles are not stored here.
   // Components that need them should get them from the tool content info.
 };
