@@ -15,6 +15,7 @@ import { ContentStatus, DocumentModelType, createDocumentModelWithEnv } from "..
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { TreeManagerType } from "../../models/history/tree-manager";
+import { ObjectBoundingBox } from "../../models/annotations/clue-object";
 import { FirestoreHistoryManager } from "../../models/history/firestore-history-manager";
 import { PlaybackComponent } from "../playback/playback";
 import {
@@ -26,7 +27,6 @@ import { DEBUG_CANVAS, DEBUG_DOCUMENT, DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentError } from "./document-error";
 import { ReadOnlyContext } from "./read-only-context";
 import { CanvasMethodsContext, ICanvasMethods } from "./canvas-methods-context";
-import { ObjectBoundingBox } from "../../models/annotations/clue-object";
 
 import "./canvas.scss";
 

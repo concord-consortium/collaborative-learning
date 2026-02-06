@@ -6,7 +6,10 @@ import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { TreeManager } from "../../models/history/tree-manager";
 import { HistoryEntry, HistoryEntryType } from "../../models/history/history";
-import { getHistoryPath, loadHistory, IFirestoreHistoryEntryDoc } from "../../models/history/history-firestore";
+import {
+  getHistoryPath, loadHistory, IFirestoreHistoryEntryDoc
+} from "../../models/history/history-firestore";
+import { FirestoreHistoryManagerConcurrent } from "../../models/history/firestore-history-manager-concurrent";
 
 import "./history-view-panel.scss";
 
@@ -14,17 +17,29 @@ interface IHistoryViewPanelProps {
   document: DocumentModelType;
 }
 
+interface HistoryEntryWithMeta {
+  index: number;
+  previousEntryId?: string;
+  entry: HistoryEntryType;
+}
+
 export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
   document
 }) => {
   const stores = useStores();
   const { persistentUI, db } = stores;
-  const [remoteHistoryEntries, setRemoteHistoryEntries] = useState<HistoryEntryType[]>([]);
+  const [remoteHistoryEntries, setRemoteHistoryEntries] = useState<HistoryEntryWithMeta[]>([]);
   const [remoteHistoryError, setRemoteHistoryError] = useState<string | undefined>();
 
   // Get local history from document by casting to TreeManager instance
   const treeManager = document.treeManagerAPI as Instance<typeof TreeManager> | undefined;
   const localHistoryEntries = treeManager?.document.history || [];
+
+  // Check if the history manager is a FirestoreHistoryManagerConcurrent (used for GroupDocuments)
+  const historyManager = treeManager?.historyManager;
+  const concurrentManager = historyManager instanceof FirestoreHistoryManagerConcurrent
+    ? historyManager
+    : undefined;
 
   // Get history path for remote history
   const historyPath = getHistoryPath(document.key);
@@ -53,7 +68,14 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
         setRemoteHistoryEntries([]);
       } else {
         setRemoteHistoryError(undefined);
-        setRemoteHistoryEntries(docs.map(doc => HistoryEntry.create(doc.entry)));
+        setRemoteHistoryEntries(docs.map(doc => {
+          const { entry } = doc;
+          return {
+            index: doc.index,
+            previousEntryId: doc.previousEntryId,
+            entry: HistoryEntry.create(entry)
+          };
+        }));
       }
     });
 
@@ -102,6 +124,23 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
           <div className="history-view-section-header">
             <h4>Remote History (Firestore)</h4>
             <span className="history-view-count">{remoteHistoryEntries.length} entries</span>
+            {concurrentManager && (
+              <div className="history-manager-controls">
+                <button
+                  className={concurrentManager.paused ? "paused" : ""}
+                  onClick={() => concurrentManager.pauseUploads()}
+                  disabled={concurrentManager.paused}
+                >
+                  {concurrentManager.paused ? "Paused" : "Pause Uploads"}
+                </button>
+                <button
+                  onClick={() => concurrentManager.resumeUploadsAfterDelay(5000)}
+                  disabled={!concurrentManager.paused}
+                >
+                  Resume After 5s
+                </button>
+              </div>
+            )}
           </div>
           <div className="history-view-list">
             {remoteHistoryError ? (
@@ -109,8 +148,13 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
             ) : remoteHistoryEntries.length === 0 ? (
               <div className="history-view-empty">No remote history entries</div>
             ) : (
-              remoteHistoryEntries.map((entry, index) => (
-                <HistoryEntryItem key={entry.id} entry={entry} index={index} />
+              remoteHistoryEntries.map((entryWithMeta) => (
+                <HistoryEntryItem
+                  key={entryWithMeta.entry.id}
+                  entry={entryWithMeta.entry}
+                  index={entryWithMeta.index}
+                  previousEntryId={entryWithMeta.previousEntryId}
+                />
               ))
             )}
           </div>
