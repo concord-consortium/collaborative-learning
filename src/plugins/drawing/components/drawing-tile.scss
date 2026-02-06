@@ -1,6 +1,8 @@
 @import "../../../components/vars";
+@import "../../../utilities/voice-typing-overlay";
 
 .drawing-tool {
+  position: relative;
   display: flex;
   height: 100%;
 

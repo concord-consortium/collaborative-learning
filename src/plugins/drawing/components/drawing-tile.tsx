@@ -12,6 +12,7 @@ import { DrawingObjectType } from "../objects/drawing-object";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { DrawingContentModelContext } from "./drawing-content-context";
+import { DrawingToolbarContext, IDrawingToolbarContext } from "./drawing-toolbar-context";
 import { DrawingAreaContext } from "./drawing-area-context";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { HotKeys } from "../../../utilities/hot-keys";
@@ -51,6 +52,14 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   const showNavigator = ui.isSelectedTile(model) &&
                         navigatorAllowed &&
                         contentRef.current.isNavigatorVisible;
+
+  const [interimText, setInterimText] = useState("");
+  const [drawingToolbarContext] = useState<IDrawingToolbarContext>(() => ({
+    interimText: "",
+    setInterimText: (text: string) => {
+      setInterimText(text);
+    },
+  }));
 
   const updateTileVisibleBoundingBox = (bb: BoundingBox) => {
     if (!isEqual(bb, tileVisibleBoundingBox)) {
@@ -275,6 +284,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
 
   return (
     <DrawingContentModelContext.Provider value={contentRef.current}>
+      <DrawingToolbarContext.Provider value={drawingToolbarContext}>
       <BasicEditableTileTitle />
       <div
         ref={drawingToolElement}
@@ -307,6 +317,11 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             </TileNavigatorContext.Provider>
           </div>
         </DrawingAreaContext.Provider>
+        {interimText && (
+          <div className="voice-typing-interim-overlay" aria-live="polite">
+            {interimText}
+          </div>
+        )}
       </div>
       {!readOnly && showNavigator &&
         <TileNavigator
@@ -321,6 +336,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             </div>}
         />
       }
+    </DrawingToolbarContext.Provider>
     </DrawingContentModelContext.Provider>
   );
 });

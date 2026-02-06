@@ -23,6 +23,7 @@ import { TextPluginsContext } from "./text-plugins-context";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { countWords } from "../../../utilities/string-utils";
 import { ContainerContext } from "../../document/container-context";
+import { ITextTileToolbarContext, TextTileToolbarContext } from "./text-toolbar-context";
 
 import "./toolbar/text-toolbar-registration";
 import "./text-tile.scss";
@@ -89,6 +90,8 @@ import "./text-tile.scss";
 interface IState {
   revision: number;
   initialValue?: EditorValue;
+  voiceTypingActive?: boolean;
+  interimText?: string;
 }
 
 @inject("stores")
@@ -108,6 +111,19 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   // plugins are exposed to making testing easier
   plugins: Record<string, ITextPlugin|undefined>;
+
+  private textTileToolbarContext: ITextTileToolbarContext = {
+    voiceTypingActive: false,
+    setVoiceTypingActive: (active: boolean) => {
+      this.textTileToolbarContext = { ...this.textTileToolbarContext, voiceTypingActive: active };
+      this.setState({ voiceTypingActive: active });
+    },
+    interimText: "",
+    setInterimText: (text: string) => {
+      this.textTileToolbarContext = { ...this.textTileToolbarContext, interimText: text };
+      this.setState({ interimText: text });
+    },
+  };
 
   public componentDidMount() {
     this.plugins = createTextPluginInstances(this.props.model.content as TextContentModelType);
@@ -209,6 +225,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       editable: !readOnly,
       hovered: this.props.hovered,
       selected: this.stores.ui.isSelectedTile(this.props.model),
+      "voice-typing-active": this.state.voiceTypingActive,
     });
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
     // used here for a while now and cypress tests depend on it. Should transition
@@ -222,36 +239,43 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       // which is used for cypress tests and other purposes.
       // TODO: replace this provider with one at the tile level so we get it for free.
       // and then replace the drawing one with that as well
-      <TextContentModelContext.Provider value={this.getContent()} >
-        <TextPluginsContext.Provider value={this.plugins} >
-          <HighlightRevisionContext.Provider value={this.state.revision}>
-            <HighlightRegistryContext.Provider value={this.handleUpdateHighlightBoxCache}>
-              <div
-                className={containerClasses}
-                data-testid="text-tool-wrapper"
-                ref={elt => this.textTileDiv = elt}
-                onMouseDown={this.handleMouseDownInWrapper}
-              >
-                <Slate
-                  editor={this.editor as ReactEditor}
-                  initialValue={this.state.initialValue}
-                  onChange={this.handleChange}
+      <TextTileToolbarContext.Provider value={this.textTileToolbarContext}>
+        <TextContentModelContext.Provider value={this.getContent()} >
+          <TextPluginsContext.Provider value={this.plugins} >
+            <HighlightRevisionContext.Provider value={this.state.revision}>
+              <HighlightRegistryContext.Provider value={this.handleUpdateHighlightBoxCache}>
+                <div
+                  className={containerClasses}
+                  data-testid="text-tool-wrapper"
+                  ref={elt => this.textTileDiv = elt}
+                  onMouseDown={this.handleMouseDownInWrapper}
                 >
-                  <SlateEditor
-                    placeholder={placeholderText}
-                    hotkeyMap={defaultHotkeyMap}
-                    readOnly={readOnly}
-                    onFocus={this.handleFocus}
-                    onBlur={this.handleBlur}
-                    className={`ccrte-editor slate-editor ${slateClasses || ""}`}
-                  />
-                  <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
-                </Slate>
-              </div>
-            </HighlightRegistryContext.Provider>
-          </HighlightRevisionContext.Provider>
-        </TextPluginsContext.Provider>
-      </TextContentModelContext.Provider>
+                  <Slate
+                    editor={this.editor as ReactEditor}
+                    initialValue={this.state.initialValue}
+                    onChange={this.handleChange}
+                  >
+                    <SlateEditor
+                      placeholder={placeholderText}
+                      hotkeyMap={defaultHotkeyMap}
+                      readOnly={readOnly}
+                      onFocus={this.handleFocus}
+                      onBlur={this.handleBlur}
+                      className={`ccrte-editor slate-editor ${slateClasses || ""}`}
+                    />
+                    <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
+                  </Slate>
+                  {this.state.interimText && (
+                    <div className="voice-typing-interim-overlay" aria-live="polite">
+                      {this.state.interimText}
+                    </div>
+                  )}
+                </div>
+              </HighlightRegistryContext.Provider>
+            </HighlightRevisionContext.Provider>
+          </TextPluginsContext.Provider>
+        </TextContentModelContext.Provider>
+      </TextTileToolbarContext.Provider>
     );
   }
 

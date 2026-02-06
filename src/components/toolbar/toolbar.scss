@@ -166,3 +166,18 @@
     }
   }
 }
+
+// Keyboard focus styling for text tile toolbar buttons (CLUE-383)
+.tile-toolbar.text-toolbar .toolbar-row button:focus-visible {
+  background-color: $workspace-teal-light-6;
+  box-shadow:
+    inset 0 0 0 3px white,
+    inset 0 0 0 5px rgb(9, 87, 208);
+}
+
+.tile-toolbar.text-toolbar .toolbar-row button.selected:focus-visible {
+  background-color: $workspace-teal-light-4;
+  box-shadow:
+    inset 0 0 0 3px white,
+    inset 0 0 0 5px rgb(9, 87, 208);
+}

@@ -1,0 +1,17 @@
+.voice-typing-interim-overlay {
+  position: absolute;
+  bottom: 4px;
+  left: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  font-style: italic;
+  color: #444;
+  font-size: 13px;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
