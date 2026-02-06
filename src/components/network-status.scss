@@ -19,7 +19,7 @@
     font-size: 13px;
 
     &.connected {
-      background-color: #00d700;
+      background-color: $connected-green;
       color: $charcoal-dark-2;
       font-weight: normal;
     }

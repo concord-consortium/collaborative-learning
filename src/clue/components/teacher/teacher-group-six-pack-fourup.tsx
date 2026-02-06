@@ -1,6 +1,7 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { useStores } from "../../../hooks/use-stores";
+import { translate } from "../../../utilities/translation/translate";
 import { BaseComponent, IBaseProps } from "../../../components/base";
 import { DocumentViewMode } from "../../../components/document/document";
 import { FourUpComponent, getFocusedGroupUser, getUIStudentWorkTab } from "../../../components/four-up";
@@ -105,7 +106,8 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
       });
     }
     else {
-      ui.prompt(`Enter your message for Group ${group.id}`, "", "Message Group", 5)
+      const groupTerm = translate("studentGroup");
+      ui.prompt(`Enter your message for ${groupTerm} ${group.id}`, "", `Message ${groupTerm}`, 5)
       .then((message) => {
         const audience = AudienceModel.create({type: AudienceEnum.group, identifier: group.id});
         db.createSupport(createStickyNote(message), "", audience);
@@ -121,10 +123,10 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
 
   return(
     <div className="group-header">
-      <div className="group-label">Group {String(group.id)}</div>
+      <div className="group-label">{translate("studentGroup")} {String(group.id)}</div>
       <div className="actions">
         {!isResearcher && <IconButton
-          title={`Message ${focusedGroupUser ? focusedGroupUser.name : "Group"}`}
+          title={`Message ${focusedGroupUser ? focusedGroupUser.name : translate("studentGroup")}`}
           className="icon"
           icon="sticky-note"
           key={`sticky-note-${focusedGroupUser ? `user-${focusedGroupUser.id}` : "group"}`}

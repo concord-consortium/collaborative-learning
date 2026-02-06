@@ -132,10 +132,10 @@ const AISettings: React.FC = () => {
         }, {} as Record<string, string>);
         config.enableCommentRoles = data.enableCommentRoles;
 
+        const categories = Object.keys(config.commentTags);
+
         if (!config.aiPrompt) {
-          // create new aiPrompt object with categories initialized to empty array
-          // since categories are not authorable here
-          config.aiPrompt = { ...data.aiPrompt, categories: [] };
+          config.aiPrompt = { ...data.aiPrompt, categories };
         } else {
           const aiPrompt = config.aiPrompt;
           const {
@@ -145,6 +145,7 @@ const AISettings: React.FC = () => {
           aiPrompt.systemPrompt = systemPrompt;
           aiPrompt.mainPrompt = mainPrompt;
           aiPrompt.categorizationDescription = categorizationDescription;
+          aiPrompt.categories = categories;
           aiPrompt.keyIndicatorsPrompt = keyIndicatorsPrompt;
           aiPrompt.discussionPrompt = discussionPrompt;
           aiPrompt.summarizer = config.aiEvaluation === "categorize-design" ? "image" : summarizer;

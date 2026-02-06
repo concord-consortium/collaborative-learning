@@ -11,7 +11,11 @@
   .history-entry-summary {
     display: flex;
     align-items: center;
+    width: 100%;
     padding: 6px 10px;
+    border: none;
+    background: none;
+    text-align: left;
     cursor: pointer;
     gap: 6px;
     font-size: 12px;

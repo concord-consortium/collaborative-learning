@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { useProblemStore, useStores } from "../../hooks/use-stores";
+import { translate } from "../../utilities/translation/translate";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent, getFocusedGroupUser, getQuadrant } from "../four-up";
@@ -116,9 +117,13 @@ const GroupTitlebar: React.FC<IGroupComponentProps> = observer(function GroupTit
   const problem = useProblemStore();
   const document= groupUser?.problemDocument;
   const userDocTitle = document?.title || "Document";
+  const groupTerm = translate("studentGroup");
+  const groupTermLower = groupTerm.toLowerCase();
+  // TODO: pluralization is naive (adds "s"). This will not work for irregular English plurals
+  // and will break entirely for localization.
   const titleText = groupUser
                       ? `${groupUser.name}: ${document?.type === "problem" ? problem.title : userDocTitle}`
-                      : group?.displayId ? `Student Group ${group?.displayId}` : "No groups";
+                      : group?.displayId ? `Student ${groupTerm} ${group?.displayId}` : `No ${groupTermLower}s`;
   return (
     <div className="group-title" data-test="group-title">
       <div className="group-title-center">

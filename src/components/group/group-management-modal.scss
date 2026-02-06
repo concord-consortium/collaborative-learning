@@ -1,0 +1,298 @@
+@import "../vars";
+
+$modal-max-width: 800px;
+$modal-max-height: 80vh;
+$modal-header-height: 40px;
+$modal-footer-height: 60px;
+$modal-padding: 20px;
+$groups-grid-gap: 12px;
+$groups-grid-columns: 5;
+
+.group-management-modal__overlay {
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+.group-management-modal {
+  background-color: white;
+  border: 2px solid $workspace-teal;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  max-height: $modal-max-height;
+  max-width: $modal-max-width;
+  outline: none;
+  overflow: hidden;
+  position: relative;
+  width: 90%;
+
+  .group-management-modal__header {
+    align-items: center;
+    background-color: $charcoal-light-6;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    display: flex;
+    flex-shrink: 0;
+    height: $modal-header-height;
+    justify-content: center;
+    position: relative;
+  }
+
+  .group-management-modal__icon {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    height: $modal-header-height;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    width: 40px;
+  }
+
+  .group-management-modal__icon-row {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+  }
+
+  .group-management-modal__icon-person {
+    height: 11px;
+    width: 11px;
+
+    &::after {
+      background-color: $workspace-teal;
+      content: "";
+      display: block;
+      height: 11px;
+      mask-image: url("../../assets/icons/clue-dashboard/teacher-student.svg");
+      mask-repeat: no-repeat;
+      mask-size: contain;
+      width: 11px;
+    }
+  }
+
+  .group-management-modal__title {
+    color: $charcoal-dark-2;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .group-management-modal__close {
+    align-items: center;
+    background: transparent;
+    border: none;
+    border-top-right-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    height: $modal-header-height;
+    justify-content: center;
+    position: absolute;
+    right: 0;
+    width: 40px;
+
+    &:hover {
+      background-color: $charcoal-light-4;
+    }
+
+    &:focus-visible {
+      background-color: $charcoal-light-4;
+      box-shadow:
+        -2px 0 0 0 $workspace-teal, // left
+        0 2px 0 0 $workspace-teal; // bottom
+    }
+
+    &:active {
+      background-color: $charcoal-light-3;
+    }
+
+    svg {
+      height: 24px;
+      width: 24px;
+    }
+  }
+
+  .group-management-modal__content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    padding: $modal-padding $modal-padding 13px;
+  }
+
+  .group-management-modal__instructions {
+    color: $charcoal-dark-1;
+    flex-shrink: 0;
+    font-size: 13px;
+    margin: 0 0 $margin 0;
+  }
+
+  .group-management-modal__groups-container {
+    border: 1px solid $charcoal-light-2;
+    border-radius: $border-radius;
+    flex: 1;
+    min-height: 200px;
+    overflow-y: auto;
+    padding: $padding;
+  }
+
+  .group-management-modal__groups-grid {
+    align-items: start;
+    display: grid;
+    gap: $groups-grid-gap;
+    grid-template-columns: repeat($groups-grid-columns, 1fr);
+
+    @media (max-width: 700px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 500px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .group-management-modal__options {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    gap: $double-margin;
+    padding: 0 $modal-padding;
+  }
+
+  .group-management-modal__legend {
+    align-items: center;
+    color: $charcoal-dark-1;
+    display: flex;
+    font-size: 14px;
+    gap: $half-padding;
+    margin-left: 10px;
+  }
+
+  .group-management-modal__filter {
+    align-items: center;
+    color: $charcoal-dark-1;
+    cursor: pointer;
+    display: flex;
+    font-size: 14px;
+    gap: $half-padding;
+
+    input[type="checkbox"] {
+      appearance: none;
+      background-color: white;
+      border: 1px solid $workspace-teal-dark-1;
+      border-radius: 2px;
+      cursor: pointer;
+      height: 16px;
+      margin: 0;
+      position: relative;
+      width: 16px;
+
+      &:hover {
+        background-color: $workspace-teal-light-3;
+      }
+
+      &:focus-visible {
+        border-color: $workspace-teal;
+        outline: 1px solid $workspace-teal;
+        outline-offset: 1px;
+      }
+
+      &:checked {
+        background-color: $workspace-teal-light-5;
+        border-color: $workspace-teal-dark-1;
+
+        &::after {
+          border: solid $workspace-teal-dark-1;
+          border-width: 0 2px 2px 0;
+          content: "";
+          height: 8px;
+          left: 4px;
+          position: absolute;
+          top: 1px;
+          transform: rotate(45deg);
+          width: 4px;
+        }
+      }
+
+      &:checked:hover {
+        background-color: $workspace-teal-light-4;
+      }
+    }
+  }
+
+  .group-management-modal__legend-indicator {
+    background-color: $connected-green;
+    border: solid 1px $connected-green-dark;
+    box-sizing: content-box;
+    display: inline-block;
+    height: 8px;
+    width: 8px;
+  }
+
+  .group-management-modal__footer {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    gap: $margin;
+    justify-content: flex-end;
+    padding: $half-padding $modal-padding $modal-padding;
+  }
+
+  .group-management-modal__error {
+    color: $error-red;
+    font-size: 14px;
+    margin: 0;
+    text-align: right;
+  }
+
+  .group-management-modal__button {
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    height: 32px;
+    min-width: 80px;
+    padding: 0 $padding;
+    transition: background-color 0.15s ease;
+
+    &.cancel {
+      background-color: white;
+      border: 1.5px solid $charcoal-light-1;
+      color: $charcoal-dark-2;
+
+      &:hover {
+        background-color: $workspace-teal-light-4;
+      }
+
+      &:active {
+        background-color: $workspace-teal-light-3;
+      }
+    }
+
+    &.save {
+      background-color: $workspace-teal-light-5;
+      border: 1.5px solid $charcoal-light-1;
+      color: $charcoal-dark-2;
+
+      &:hover:not(:disabled) {
+        background-color: $workspace-teal-light-4;
+      }
+
+      &:active {
+        background-color: $workspace-teal-light-3;
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+    }
+  }
+}
