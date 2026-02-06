@@ -13,6 +13,7 @@ import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
 import { ContentStatus, DocumentModelType, createDocumentModelWithEnv } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
+import { TileRowModelType } from "../../models/document/tile-row";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { TreeManagerType } from "../../models/history/tree-manager";
 import { PlaybackComponent } from "../playback/playback";
@@ -21,6 +22,10 @@ import {
 } from "../tiles/tile-api";
 import { StringBuilder } from "../../utilities/string-builder";
 import { HotKeys } from "../../utilities/hot-keys";
+import { shouldInterceptArrows } from "../../utilities/focus-utils";
+import { focusManager } from "../../utilities/focus-manager";
+import { announce } from "../../utilities/announcer";
+import { getAriaLabels } from "../../hooks/use-aria-labels";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT, DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentError } from "./document-error";
 import { ReadOnlyContext } from "./read-only-context";
@@ -279,7 +284,112 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // Try tile navigation first (arrow keys within tile canvas)
+    if (this.handleTileNavigation(e)) {
+      return;
+    }
+    // Fall through to hotKeys for other shortcuts
     this.hotKeys.dispatch(e);
+  };
+
+  /**
+   * Handle arrow key navigation between tiles.
+   * Returns true if the event was handled, false otherwise.
+   */
+  private handleTileNavigation = (e: React.KeyboardEvent<HTMLDivElement>): boolean => {
+    const { ui } = this.stores;
+    const content = this.getDocumentContent();
+    const selectedTileId = ui.selectedTileIds[0];
+
+    // Only handle navigation keys
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) {
+      return false;
+    }
+
+    // Check if we should intercept (not in editable element, etc.)
+    if (!shouldInterceptArrows(e.nativeEvent)) {
+      return false;
+    }
+
+    // Need content and a selected tile to navigate
+    if (!content || !selectedTileId) {
+      return false;
+    }
+
+    // Don't navigate if we're in a focus trap
+    if (focusManager.isInTrap()) {
+      return false;
+    }
+
+    // Build tile grid from rows
+    const rows = content.rowOrder
+      .map(rowId => content.rowMap.get(rowId))
+      .filter((row): row is TileRowModelType => !!row && !row.isSectionHeader);
+
+    const tileGrid = rows.map(row => row.tiles.map(tile => tile.tileId));
+
+    // Find current position
+    let currentRow = -1;
+    let currentCol = -1;
+    for (let row = 0; row < tileGrid.length; row++) {
+      const col = tileGrid[row].indexOf(selectedTileId);
+      if (col !== -1) {
+        currentRow = row;
+        currentCol = col;
+        break;
+      }
+    }
+
+    if (currentRow === -1) return false;
+
+    // Calculate next tile
+    let nextTileId: string | null = null;
+
+    switch (e.key) {
+      case 'ArrowLeft':
+        nextTileId = tileGrid[currentRow]?.[currentCol - 1] || null;
+        break;
+      case 'ArrowRight':
+        nextTileId = tileGrid[currentRow]?.[currentCol + 1] || null;
+        break;
+      case 'ArrowUp':
+        // Try same column, fall back to first tile in row above
+        nextTileId = tileGrid[currentRow - 1]?.[currentCol] ||
+                     tileGrid[currentRow - 1]?.[0] || null;
+        break;
+      case 'ArrowDown':
+        // Try same column, fall back to first tile in row below
+        nextTileId = tileGrid[currentRow + 1]?.[currentCol] ||
+                     tileGrid[currentRow + 1]?.[0] || null;
+        break;
+      case 'Home':
+        nextTileId = tileGrid[currentRow]?.[0] || null;
+        break;
+      case 'End': {
+        const lastCol = tileGrid[currentRow].length - 1;
+        nextTileId = tileGrid[currentRow]?.[lastCol] || null;
+        break;
+      }
+    }
+
+    if (nextTileId && nextTileId !== selectedTileId) {
+      e.preventDefault();
+      e.stopPropagation();
+      ui.setSelectedTileId(nextTileId);
+
+      // Announce tile selection for screen readers
+      const tileModel = content.tileMap.get(nextTileId);
+      if (tileModel) {
+        const tileTitle = tileModel.computedTitle || tileModel.content.type;
+        announce(getAriaLabels().announce.tileSelected(tileTitle));
+      }
+      return true;
+    }
+
+    // At boundary - prevent default and stop propagation to avoid double-processing
+    e.preventDefault();
+    e.stopPropagation();
+    return true;
   };
 
   private getDocumentContent = () => {

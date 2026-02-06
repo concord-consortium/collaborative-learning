@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import React, { useCallback, useEffect, useRef } from "react";
 import { IBaseProps } from "../base";
 import { useStores } from "../../hooks/use-stores";
+import { useAriaLabels } from "../../hooks/use-aria-labels";
 import { DocumentWorkspaceComponent } from "../document/document-workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
@@ -24,6 +25,14 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
           ui: { standalone }
         } = stores;
   const hotKeys = useRef(new HotKeys());
+  const ariaLabels = useAriaLabels();
+  const mainWorkspaceRef = useRef<HTMLElement>(null);
+
+  // Handle skip link click
+  const handleSkipToMain = useCallback((e: React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    mainWorkspaceRef.current?.focus();
+  }, []);
 
   let imageDragDrop: ImageDragDrop;
 
@@ -53,6 +62,26 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
     <div
       className="workspace"
       onKeyDown={(e) => hotKeys.current.dispatch(e)}>
+      {/* Skip navigation link - first focusable element */}
+      <a
+        href="#main-workspace"
+        className="skip-link"
+        onClick={handleSkipToMain}
+        onKeyDown={(e) => e.key === 'Enter' && handleSkipToMain(e)}
+      >
+        {ariaLabels.skipToMain}
+      </a>
+
+      {/* Screen reader announcements live region */}
+      <div
+        id="clue-announcements"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+        role="status"
+        aria-label={ariaLabels.announcements}
+      />
+
       <div
         className="drag-handler"
         onDragOver={handleDragOverWorkspace}
@@ -61,16 +90,26 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
       {showLeftPanel &&
         <>
           <ResizablePanel collapsed={!navTabContentShown} >
-            <NavTabPanel
-              onDragOver={handleDragOverWorkspace}
-            />
+            <nav role="navigation" aria-label={ariaLabels.resourcesPane}>
+              <NavTabPanel
+                onDragOver={handleDragOverWorkspace}
+              />
+            </nav>
           </ResizablePanel>
           {showRightPanel && <ResizePanelDivider />}
         </>
       }
       {showRightPanel &&
         <ResizablePanel collapsed={!workspaceShown}>
-          {standalone ? <StandAloneAuthComponent /> : <DocumentWorkspaceComponent />}
+          <main
+            role="main"
+            id="main-workspace"
+            aria-label={ariaLabels.workspacePane}
+            tabIndex={-1}
+            ref={mainWorkspaceRef}
+          >
+            {standalone ? <StandAloneAuthComponent /> : <DocumentWorkspaceComponent />}
+          </main>
         </ResizablePanel>
       }
     </div>

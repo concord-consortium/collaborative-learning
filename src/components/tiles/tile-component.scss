@@ -20,7 +20,7 @@
     }
   }
 
-   &:focus {
+   &:focus:not(:focus-visible) {
     outline: none;
   }
 
@@ -36,6 +36,11 @@
     .tile-content.selected {
       border: 1px solid $workspace-teal;
     }
+  }
+
+  // Visual indicator when tile is in focus trap (edit mode)
+  &.tile-focus-trapped {
+    box-shadow: inset 0 0 0 2px rgba($focus-ring-color, 0.2);
   }
 
   &.annotatable {
@@ -73,9 +78,6 @@
       opacity: 1;
     }
 
-    &:focus {
-      outline: none;
-    }
   }
 
   .tool-tile-resize-handle {
@@ -102,9 +104,6 @@
       opacity: 1;
     }
 
-    &:focus {
-      outline: none;
-    }
   }
 }
 

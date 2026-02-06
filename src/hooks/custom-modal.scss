@@ -54,7 +54,6 @@ $modal-footer-height: 45px;
       height: $modal-header-height;
       border: none;
       border-top-right-radius: $modal-header-border-radius;
-      outline: none;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -101,7 +100,6 @@ $modal-footer-height: 45px;
       background-color: white;
       border: $modal-control-border;
       border-radius: $modal-control-border-radius;
-      outline: none;
 
       &.disabled {
         opacity: 35%;

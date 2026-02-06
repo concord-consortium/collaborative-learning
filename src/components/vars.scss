@@ -439,12 +439,25 @@ $six-pack-height: calc(100vh - (#{$header-height} + 20px));
 //
 $document-scroller-header-height: 36px;
 
+//
+// Focus indicators (WCAG 2.2 AA compliant)
+// Double border: outer blue + inner white for visibility on all backgrounds
+//
+$focus-ring-color: #0957D0;
+$focus-ring-inner-color: #FFFFFF;
+$focus-ring-outer-width: 2px;
+$focus-ring-inner-width: 1px;
+
 // Exported for use in TypeScript
 
 :export {
   toolbarButtonWidth: $toolbar-button-width;
   toolbarButtonMargin: $toolbar-button-margin;
   toolbarDividerWidth: $toolbar-divider-width;
+  focusRingColor: $focus-ring-color;
+  focusRingInnerColor: $focus-ring-inner-color;
+  focusRingOuterWidth: $focus-ring-outer-width;
+  focusRingInnerWidth: $focus-ring-inner-width;
 }
 
 // user icons (use in comments and in history playlist)

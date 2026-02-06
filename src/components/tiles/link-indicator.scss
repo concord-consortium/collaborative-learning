@@ -28,9 +28,6 @@ $link-indicator-width: 20px;
   z-index: 2;
   opacity: 1;
   transition: 0.3s;
-  &:focus {
-    outline: none;
-  }
 }
 
 .link-icon {

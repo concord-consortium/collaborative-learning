@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { useProblemPathWithFacet, usePersistentUIStore, useUserStore, useUIStore } from "../../hooks/use-stores";
 import { getSectionTitle, SectionModelType } from "../../models/curriculum/section";
@@ -61,6 +61,57 @@ export const ProblemTabContent: React.FC<IProps>
     Logger.log(showTeacherContent ? LogEventName.HIDE_SOLUTIONS : LogEventName.SHOW_SOLUTIONS);
   };
 
+  const panelsContainerRef = useRef<HTMLDivElement>(null);
+
+  // Handle Up/Down arrow navigation from subtab
+  const handleProbTabKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent react-tabs from treating ArrowUp as "previous tab"
+      const topTab = document.querySelector('.top-tab-list [aria-selected="true"]') as HTMLElement;
+      if (topTab) {
+        topTab.focus();
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent react-tabs from treating ArrowDown as "next tab"
+      // Find the first tile gridcell in the active panel and select it
+      const activePanel = panelsContainerRef.current?.querySelector(
+        '.problem-panel-tab-panel.react-tabs__tab-panel--selected'
+      ) as HTMLElement;
+      if (activePanel) {
+        const firstTile = activePanel.querySelector('[role="gridcell"]') as HTMLElement;
+        if (firstTile) {
+          const tileId = firstTile.getAttribute('data-tile-id');
+          if (tileId) {
+            // Select the tile via UI model - componentDidUpdate will focus it
+            ui.setSelectedTileId(tileId);
+          }
+          // Also focus directly as a fallback
+          firstTile.focus();
+        }
+      }
+    }
+  };
+
+  // Handle ArrowUp from panel content back to selected subtab
+  const handlePanelKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowUp') {
+      const target = e.target as HTMLElement;
+      // Only handle if focus is on a tile (gridcell) in the panel
+      if (target.getAttribute('role') === 'gridcell') {
+        e.preventDefault();
+        e.stopPropagation();
+        const selectedSubTab = panelsContainerRef.current
+          ?.closest('.problem-tabs')
+          ?.querySelector('.tab-list [aria-selected="true"]') as HTMLElement;
+        if (selectedSubTab) {
+          selectedSubTab.focus();
+        }
+      }
+    }
+  };
+
   const openSubTab = persistentUI.tabs.get(tabId)?.currentDocumentGroupId;
   const sectionIndex = sections.findIndex((section: any) => section.type === openSubTab);
   // activeIndex might be -1 in an error condition
@@ -81,6 +132,7 @@ export const ProblemTabContent: React.FC<IProps>
               <Tab
                 className={classNames("prob-tab", context)}
                 key={`section-${section.type}`}
+                onKeyDown={handleProbTabKeyDown}
               >
                 {sectionTitle}
               </Tab>
@@ -90,7 +142,7 @@ export const ProblemTabContent: React.FC<IProps>
         {isTeacherOrResearcher && showSolutionsSwitch &&
           <SolutionsButton onClick={handleToggleSolutions} isToggled={showTeacherContent} />}
       </div>
-      <div className="problem-panels-container">
+      <div className="problem-panels-container" ref={panelsContainerRef} onKeyDown={handlePanelKeyDown}>
         {sections?.map((section) => {
           return (
             <TabPanel key={`section-${section.type}`} data-focus-section={section.type}

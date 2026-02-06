@@ -70,9 +70,6 @@
     background-position: center;
     cursor: pointer;
     margin: 4px;
-    &:active {
-      outline: none;
-    }
     &:focus:not(:focus-visible) {
       outline: none;
     }

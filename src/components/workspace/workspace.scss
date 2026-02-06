@@ -18,4 +18,40 @@
     right: 0;
     bottom: 0;
   }
+
+  // Skip navigation link - appears only when focused
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    z-index: 9999;
+    background: white;
+    color: $charcoal-dark-2;
+    text-decoration: none;
+    font-weight: 500;
+
+    // Intentionally uses :focus (not :focus-visible) so the link appears
+    // whenever focused, including programmatic focus. Skip links should
+    // always be visible when active regardless of input modality.
+    &:focus {
+      left: 10px;
+      top: 10px;
+      padding: 8px 16px;
+      border: $focus-ring-outer-width solid $focus-ring-color;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  // Wrapper elements must fill their resizable-panel parent
+  nav[role="navigation"],
+  main[role="main"] {
+    height: 100%;
+  }
+
+  // Ensure main workspace can receive focus for skip link target
+  main[role="main"] {
+    &:focus {
+      outline: none; // Skip link target doesn't need visible focus ring
+    }
+  }
 }

@@ -38,7 +38,6 @@ $button-label-text: $gray-text;
     height: 40px;
     background-color: $toolbar-background;
     border: 0;
-    outline: 0;
     cursor: pointer;
     &:hover:not([disabled]) {
       background-color: $button-hover;

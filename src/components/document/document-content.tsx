@@ -19,6 +19,7 @@ import { RowListComponent } from "./row-list";
 import { DropRowContext } from "./drop-row-context";
 import { RowRefsContext } from "./row-refs-context";
 import { ContainerContext } from "./container-context";
+import { getAriaLabels } from "../../hooks/use-aria-labels";
 
 import "./document-content.scss";
 
@@ -150,6 +151,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   public render() {
     const { viaTeacherDashboard } = this.props;
     const { ui, persistentUI, user, appConfig } = this.stores;
+    const ariaLabels = getAriaLabels();
     const isChatEnabled = appConfig.showCommentPanelFor(user.type);
     const documentSelectedForComment = isChatEnabled && persistentUI.showChatPanel && ui.selectedTileIds.length === 0
                                           && persistentUI.focusDocument;
@@ -174,6 +176,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
               <div className={documentClass}
                 data-testid="document-content"
                 data-document-key={this.props.documentId}
+                role="grid"
+                aria-label={ariaLabels.documentTiles}
                 onScroll={this.handleScroll}
                 onClick={this.handleClick}
                 onDragOver={this.handleDragOver}

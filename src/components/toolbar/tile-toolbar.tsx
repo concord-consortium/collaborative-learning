@@ -10,6 +10,7 @@ import { JSONValue } from "../../models/stores/settings";
 import { useCanvasMethodsContext } from "../document/canvas-methods-context";
 import { getPixelWidthFromCSSStyle } from "../../utilities/js-utils";
 import styles from "../vars.scss";
+import { useAriaLabels } from "../../hooks/use-aria-labels";
 
 
 const buttonWidth = getPixelWidthFromCSSStyle(styles.toolbarButtonWidth) || 1;
@@ -45,6 +46,7 @@ export const TileToolbar = observer(
 
     const model = useContext(TileModelContext);
     const canvasMethods = useCanvasMethodsContext();
+    const ariaLabels = useAriaLabels();
     const id = model?.id;
 
     // Get styles to position the toolbar
@@ -138,6 +140,9 @@ export const TileToolbar = observer(
         <div
           ref={toolbarRefs.setFloating}
           data-testid="tile-toolbar"
+          data-tile-id={id}
+          role="toolbar"
+          aria-label={ariaLabels.tileToolbar}
           style={{ visibility: hide ? 'hidden' : 'visible', ...toolbarStyles}}
           // "focusable" here so that useTileSelectionPointerEvents won't absorb toolbar clicks
           className={classNames("tile-toolbar", "focusable",

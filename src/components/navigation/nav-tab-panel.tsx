@@ -13,6 +13,8 @@ import { ChatPanel } from "../chat/chat-panel";
 import ChatIcon from "../../assets/chat-icon.svg";
 import { SortWorkView } from "../document/sort-work-view";
 import { NavTabPanelInfoProvider } from "../../hooks/use-nav-tab-panel-info";
+import { announce } from "../../utilities/announcer";
+import { getAriaLabels } from "../../hooks/use-aria-labels";
 
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.scss";
@@ -35,6 +37,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   public render() {
     const { persistentUI: { activeNavTab, focusDocument, showChatPanel }, ui: { selectedTileIds },
             user, appConfig } = this.stores;
+    const ariaLabels = getAriaLabels();
     const tabs = this.stores.tabsToDisplay;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const isChatEnabled = appConfig.showCommentPanelFor(user.type) &&
@@ -54,7 +57,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
               forceRenderTabPanel={true}
             >
               <div className="top-row">
-                <TabList className="top-tab-list">
+                <TabList className="top-tab-list" aria-label={ariaLabels.resourceTabs}>
                   { tabs?.map((tabSpec, index) => {
                       const tabClass = `top-tab tab-${tabSpec.tab}
                                         ${selectedTabIndex === index ? "selected" : ""}`;
@@ -63,9 +66,14 @@ export class NavTabPanel extends BaseComponent<IProps> {
                       if (tabSpec.tab === 'student-work') dataTestId = 'nav-tab-student-work';
                       if (tabSpec.tab === 'class-work') dataTestId = 'nav-tab-class-work';
                       return (
-                        <React.Fragment key={tabSpec.tab}>
-                          <Tab className={tabClass} data-testid={dataTestId}>{tabSpec.label}</Tab>
-                        </React.Fragment>
+                          <Tab
+                            key={tabSpec.tab}
+                            className={tabClass}
+                            data-testid={dataTestId}
+                            onKeyDown={(e: React.KeyboardEvent) => this.handleTopTabKeyDown(e)}
+                          >
+                            {tabSpec.label}
+                          </Tab>
                       );
                     })
                   }
@@ -79,9 +87,19 @@ export class NavTabPanel extends BaseComponent<IProps> {
                         <ChatIcon
                           className={`chat-button ${activeNavTab}`}
                           onClick={this.handleShowChatColumn}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={ariaLabels.openChatPanel}
+                          onKeyDown={(e: React.KeyboardEvent) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              this.handleShowChatColumn();
+                            }
+                          }}
                         />
                       </div>
-                    : <button className="close-button" onClick={this.handleCloseResources}/>
+                    : <button className="close-button" onClick={this.handleCloseResources}
+                      aria-label={ariaLabels.closeResourcesPanel}/>
                 }
               </div>
               { tabs?.map((tabSpec) => {
@@ -154,6 +172,21 @@ export class NavTabPanel extends BaseComponent<IProps> {
     );
   };
 
+  // Handle Down arrow from top-level tab to move focus to subtabs
+  private handleTopTabKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent react-tabs from treating ArrowDown as "next tab"
+      // Find the subtab list within the currently active top-level panel
+      const subTabList = this.navTabPanelElt?.querySelector(
+        '.top-level-tab-panel.react-tabs__tab-panel--selected .tab-list [aria-selected="true"]'
+      ) as HTMLElement;
+      if (subTabList) {
+        subTabList.focus();
+      }
+    }
+  };
+
   private handleSelectTab = (tabIndex: number) => {
     const tabs = this.stores.tabsToDisplay;
     const { persistentUI } = this.stores;
@@ -166,6 +199,8 @@ export class NavTabPanel extends BaseComponent<IProps> {
         };
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
+        // Announce tab change for screen readers
+        announce(getAriaLabels().announce.panelSelected(tabSpec.label));
       } else {
         if (persistentUI.currentDocumentGroupId) {
           // If there is a document open then a click on the active top level tab

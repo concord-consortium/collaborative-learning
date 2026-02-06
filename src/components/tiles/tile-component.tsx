@@ -18,6 +18,10 @@ import { hasSelectionModifier } from "../../utilities/event-utils";
 import { getDocumentContentFromNode } from "../../utilities/mst-utils";
 import { userSelectTile } from "../../models/stores/ui";
 import { IContainerContextType, useContainerContext } from "../document/container-context";
+import { focusManager } from "../../utilities/focus-manager";
+import { FOCUSABLE_SELECTOR, isEditableElement, shouldInterceptArrows } from "../../utilities/focus-utils";
+import { announce } from "../../utilities/announcer";
+import { getAriaLabels } from "../../hooks/use-aria-labels";
 import "../../utilities/dom-utils";
 
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
@@ -142,6 +146,7 @@ const ResizeTileButton =
 
 interface IState {
   hoverTile: boolean;
+  isFocusTrapped: boolean;
 }
 
 const defaultDragImage = document.createElement("img");
@@ -159,9 +164,13 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   private hotKeys: HotKeys = new HotKeys();
   private dragElement: HTMLDivElement | null;
   private resizeElement: HTMLDivElement | null;
+  // Track previous selection state for focus management (MobX observables
+  // always return current state, so componentDidUpdate can't detect transitions)
+  private wasSelectedByUI = false;
 
   state = {
     hoverTile: false,
+    isFocusTrapped: false,
   };
 
   constructor(props: IProps) {
@@ -183,6 +192,9 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     const options = { capture: true, passive: true };
     this.domElement?.addEventListener("touchstart", this.handlePointerDown, options);
     this.domElement?.addEventListener("mousedown", this.handlePointerDown, options);
+    this.domElement?.addEventListener("focusout", this.handleFocusOut);
+    // Initialize selection tracking
+    this.wasSelectedByUI = this.stores.ui.isSelectedTile(this.props.model);
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -196,14 +208,34 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       });
       this.resizeObserver.observe(this.domElement);
     }
+
+    // Focus tile when selected via keyboard navigation (roving tabindex pattern)
+    const { ui } = this.stores;
+    const { model } = this.props;
+    const isTileSelected = ui.isSelectedTile(model);
+
+    // Only focus if newly selected and came from keyboard navigation
+    if (isTileSelected && !this.wasSelectedByUI && this.domElement) {
+      if (focusManager.isKeyboardNavigation() && document.activeElement !== this.domElement) {
+        this.domElement.focus();
+      }
+    }
+
+    // Update selection tracking for next render
+    this.wasSelectedByUI = isTileSelected;
   }
 
   public componentWillUnmount() {
+    // Exit focus trap if still active
+    if (this.state.isFocusTrapped) {
+      focusManager.exitTrap();
+    }
     this.resizeObserver?.disconnect();
     this.handleResizeDebounced.cancel();
     const options = { capture: true, passive: true };
     this.domElement?.removeEventListener("mousedown", this.handlePointerDown, options);
     this.domElement?.removeEventListener("touchstart", this.handlePointerDown, options);
+    this.domElement?.removeEventListener("focusout", this.handleFocusOut);
   }
 
   public render() {
@@ -221,7 +253,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       hovered: this.state.hoverTile,
       selected: isTileSelected,
       annotatable: ui.annotationMode !== undefined && model.content.annotatableObjects.length > 0,
-      "selected-for-comment": tileSelectedForComment
+      "selected-for-comment": tileSelectedForComment,
+      "tile-focus-trapped": this.state.isFocusTrapped
     });
     const isDraggable = !isPlaceholderTile && !model.isFixedPosition && !appConfig.disableTileDrags;
     const dragTileButton = isDraggable &&
@@ -243,15 +276,27 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     if (widthPct) {
       style.width = `${widthPct}%`;
     }
+
+    // Roving tabindex: selected tile has tabIndex=0, others have tabIndex=-1
+    const tabIndex = isTileSelected ? 0 : -1;
+
+    // Get tile type for aria-label
+    const tileType = model.content.type;
+    const tileTitle = model.computedTitle || tileType;
+
     return (
       <TileModelContext.Provider value={model}>
         {this.renderQuestionIndicator()}
         <div
-          className={classes} data-testid="tool-tile"
+          className={classes}
+          data-testid="tool-tile"
           ref={elt => this.domElement = elt}
           data-tool-id={model.id}
+          data-tile-id={model.id}
           style={style}
-          tabIndex={-1}
+          tabIndex={tabIndex}
+          role="gridcell"
+          aria-label={`${tileTitle} tile`}
           onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
           onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
           onKeyDown={this.handleKeyDown}
@@ -354,7 +399,247 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   }, 100);
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+
+    // Enter key: enter focus trap if focused on tile container
+    if (e.key === 'Enter' && !this.state.isFocusTrapped && target === this.domElement) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.enterFocusTrap();
+      return;
+    }
+
+    // Tab on gridcell (not in trap): enter focus trap to explore tile content
+    // Only intercept if the tile has focusable elements; otherwise let Tab proceed naturally
+    if (e.key === 'Tab' && !this.state.isFocusTrapped && target === this.domElement) {
+      const focusables = this.getFocusableElements();
+      if (focusables.length > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.enterFocusTrap();
+        return;
+      }
+    }
+
+    // Arrow keys on gridcell (not in trap): navigate between tiles in the grid
+    if (!this.state.isFocusTrapped && target === this.domElement) {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        if (shouldInterceptArrows(e.nativeEvent)) {
+          if (this.handleGridNavigation(e)) return;
+        }
+      }
+    }
+
+    // If not in trap, fall through to other handlers
+    if (!this.state.isFocusTrapped) {
+      this.hotKeys.dispatch(e);
+      return;
+    }
+
+    // Escape: exit trap
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.exitFocusTrap();
+      return;
+    }
+
+    // Tab: cycle within trap
+    if (e.key === 'Tab') {
+      const focusables = this.getFocusableElements();
+      if (focusables.length === 0) return;
+
+      const currentIndex = focusables.indexOf(target);
+      let nextIndex: number;
+
+      if (e.shiftKey) {
+        nextIndex = currentIndex <= 0 ? focusables.length - 1 : currentIndex - 1;
+      } else {
+        nextIndex = currentIndex >= focusables.length - 1 ? 0 : currentIndex + 1;
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+      focusables[nextIndex].focus();
+      return;
+    }
+
+    // Arrow Up exits trap when not in editable element (per spec)
+    if (e.key === 'ArrowUp' && !isEditableElement(target)) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.exitFocusTrap();
+      return;
+    }
+
     this.hotKeys.dispatch(e);
+  };
+
+  /**
+   * Navigate between tiles using the ARIA grid structure in the DOM.
+   * Finds sibling gridcells in adjacent rows and moves selection/focus.
+   * Returns true if navigation was handled.
+   */
+  private handleGridNavigation = (e: React.KeyboardEvent<HTMLDivElement>): boolean => {
+    const { ui } = this.stores;
+    const grid = this.domElement?.closest('[role="grid"]');
+    if (!grid) return false;
+
+    // Build grid from DOM: rows containing gridcells
+    const rows = Array.from(grid.querySelectorAll('[role="row"]'));
+    const cellGrid: HTMLElement[][] = rows.map(row =>
+      Array.from(row.querySelectorAll<HTMLElement>(':scope > [role="gridcell"]'))
+    ).filter(cells => cells.length > 0);
+
+    // Find current position
+    let currentRow = -1, currentCol = -1;
+    for (let r = 0; r < cellGrid.length; r++) {
+      const c = cellGrid[r].indexOf(this.domElement!);
+      if (c !== -1) {
+        currentRow = r;
+        currentCol = c;
+        break;
+      }
+    }
+    if (currentRow === -1) return false;
+
+    let nextCell: HTMLElement | null = null;
+
+    switch (e.key) {
+      case 'ArrowLeft':
+        nextCell = cellGrid[currentRow]?.[currentCol - 1] || null;
+        break;
+      case 'ArrowRight':
+        nextCell = cellGrid[currentRow]?.[currentCol + 1] || null;
+        break;
+      case 'ArrowUp':
+        if (currentRow === 0) {
+          // At top of grid - navigate to the controlling subtab
+          // Must handle here because Canvas.handleTileNavigation would
+          // otherwise consume the event at the boundary
+          e.preventDefault();
+          e.stopPropagation();
+          const tabContainer = this.domElement?.closest('.problem-tabs')
+            || this.domElement?.closest('.document-tab-content');
+          const subtab = tabContainer
+            ?.querySelector('.tab-list [aria-selected="true"]') as HTMLElement;
+          if (subtab) {
+            subtab.focus();
+          }
+          return true;
+        }
+        nextCell = cellGrid[currentRow - 1]?.[
+          Math.min(currentCol, cellGrid[currentRow - 1].length - 1)
+        ] || null;
+        break;
+      case 'ArrowDown':
+        nextCell = cellGrid[currentRow + 1]?.[
+          Math.min(currentCol, cellGrid[currentRow + 1].length - 1)
+        ] || null;
+        break;
+    }
+
+    if (nextCell && nextCell !== this.domElement) {
+      const tileId = nextCell.getAttribute('data-tile-id');
+      if (tileId) {
+        e.preventDefault();
+        e.stopPropagation();
+        ui.setSelectedTileId(tileId);
+        // Focus directly as well, in case componentDidUpdate doesn't fire fast enough
+        nextCell.focus();
+        return true;
+      }
+    }
+
+    // At boundary (except top, which falls through above) - consume the event
+    e.preventDefault();
+    e.stopPropagation();
+    return true;
+  };
+
+  private getFocusableElements = (): HTMLElement[] => {
+    if (!this.domElement) return [];
+
+    const elements: HTMLElement[] = [];
+
+    // 1. Get tile title input if present
+    const titleInput = this.domElement.querySelector<HTMLElement>('.tile-title input, .tile-title [contenteditable]');
+    if (titleInput) elements.push(titleInput);
+
+    // 2. Get toolbar buttons (rendered in FloatingPortal, correlated by tile ID)
+    const { model } = this.props;
+    const toolbar = document.querySelector<HTMLElement>(`[data-testid="tile-toolbar"][data-tile-id="${model.id}"]`);
+    if (toolbar) {
+      const toolbarButtons = toolbar.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      toolbarButtons.forEach(btn => elements.push(btn));
+    }
+
+    // 3. Get tile content focusable elements
+    const tileContent = this.domElement.querySelector<HTMLElement>('.tool-tile-content, .tile-content');
+    if (tileContent) {
+      const contentElements = tileContent.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      contentElements.forEach(el => {
+        if (!elements.includes(el)) {
+          elements.push(el);
+        }
+      });
+    }
+
+    // Filter out disabled, hidden, and internal framework elements
+    return elements.filter(el => {
+      if (el.hasAttribute('disabled')) return false;
+      if (el.getAttribute('aria-hidden') === 'true') return false;
+      if (el.closest('[aria-hidden="true"]')) return false;
+      // Exclude react-data-grid internal elements that shouldn't be user-focusable
+      if (el.classList.contains('rdg-focus-sink')) return false;
+      const style = window.getComputedStyle(el);
+      if (style.display === 'none' || style.visibility === 'hidden') return false;
+      return true;
+    });
+  };
+
+  private enterFocusTrap = () => {
+    const { model } = this.props;
+    const tileType = model.content.type;
+
+    const focusables = this.getFocusableElements();
+    if (focusables.length === 0) return;
+
+    this.setState({ isFocusTrapped: true });
+    focusManager.enterTrap(model.id);
+
+    focusables[0].focus();
+    announce(getAriaLabels().announce.editingTile(tileType));
+  };
+
+  private exitFocusTrap = () => {
+    const { model } = this.props;
+    const tileType = model.content.type;
+
+    this.setState({ isFocusTrapped: false });
+    focusManager.exitTrap();
+
+    this.domElement?.focus();
+    announce(getAriaLabels().announce.exitedTile(tileType));
+  };
+
+  private handleFocusOut = (e: FocusEvent) => {
+    if (!this.state.isFocusTrapped) return;
+
+    // Check if focus is moving outside the tile (and toolbar)
+    const relatedTarget = e.relatedTarget as HTMLElement | null;
+    if (!relatedTarget) return;
+
+    const { model } = this.props;
+    const toolbar = document.querySelector<HTMLElement>(`[data-testid="tile-toolbar"][data-tile-id="${model.id}"]`);
+    const isWithinTile = this.domElement?.contains(relatedTarget);
+    const isWithinToolbar = toolbar?.contains(relatedTarget);
+
+    if (!isWithinTile && !isWithinToolbar) {
+      // Focus left the tile area, exit trap silently
+      this.setState({ isFocusTrapped: false });
+      focusManager.exitTrap();
+    }
   };
 
   private selectTileHandler = (e: React.PointerEvent<HTMLDivElement> | MouseEvent | TouchEvent) => {

@@ -1,3 +1,5 @@
+@import './vars.scss';
+
 #app {
   position: fixed;
   top: 0;
@@ -15,4 +17,34 @@
     stroke: currentColor;
     fill: currentColor;
   }
+}
+
+//
+// Global Focus Styles (WCAG 2.2 AA compliant)
+// Double border: inner white (box-shadow) + outer blue (outline)
+//
+
+:focus-visible {
+  outline: $focus-ring-outer-width solid $focus-ring-color;
+  outline-offset: $focus-ring-inner-width;
+  box-shadow: 0 0 0 $focus-ring-inner-width $focus-ring-inner-color;
+}
+
+// Inset variant for overflow:hidden containers
+.focus-inset:focus-visible {
+  outline-offset: -($focus-ring-outer-width + $focus-ring-inner-width);
+  box-shadow: inset 0 0 0 $focus-ring-inner-width $focus-ring-inner-color;
+}
+
+// Screen-reader-only utility class — visually hidden but accessible to SR
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

@@ -237,9 +237,12 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
   const classes = classNames("tile-row", { "has-teacher-tiles": hasTeacherTiles });
   if (!isSectionHeader && !renderableTiles.length) return null;
 
+  // Add role="row" for ARIA grid pattern (only for tile rows, not section headers)
+  const rowRole = !isSectionHeader ? "row" : undefined;
+
   return (
     <div className={classes} data-row-id={model.id}
-        style={style} ref={tileRowDiv}>
+        style={style} ref={tileRowDiv} role={rowRole}>
       { isSectionHeader && sectionId
         ? <SectionHeader type={sectionId} typeClass={typeClass}/>
         : renderTiles(renderableTiles, rowHeight)

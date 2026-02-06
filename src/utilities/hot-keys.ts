@@ -1,13 +1,19 @@
 import { each } from "lodash";
 
+// Re-export utilities for use by focus hooks
+// These are defined in focus-utils.ts to avoid circular dependencies
+export { FOCUSABLE_SELECTOR, isEditableElement, shouldInterceptArrows } from "./focus-utils";
+
 // cf. https://github.com/jaywcjlove/hotkeys
 
 // unprintables and punctuation
+// NOTE: Tab (9) is NOT routed through HotKeys dispatch — browser handles it natively
+// except in explicit focus trap contexts (see use-tile-focus-trap.ts)
 const _keyMap: { [key: number]: string } = {
   8: "backspace",
   9: "tab",
   12: "clear",
-  13: "return",
+  13: "return",  // Also mapped as "enter" below
   27: "escape",
   32: "space",
   33: "pageup",
@@ -31,6 +37,16 @@ const _keyMap: { [key: number]: string } = {
   220: "\\",
   221: "]",
   222: "'"
+};
+
+// Alias mapping for navigation keys (e.g., "enter" -> "return")
+const _keyAliases: { [key: string]: string } = {
+  "enter": "return",
+  "esc": "escape",
+  "arrowleft": "left",
+  "arrowright": "right",
+  "arrowup": "up",
+  "arrowdown": "down"
 };
 
 function keyCodeToString(keyCode: number) {
@@ -67,11 +83,18 @@ export class HotKeys {
 
   private canonicalizeKeys(keys: string) {
     const cmdKey = platformCmdKey();
-    return keys.toLowerCase()
+    let canonical = keys.toLowerCase()
       .replace("cmd", cmdKey)
       .replace("control", "ctrl")
       .replace("option", "alt")
       .replace("arrow", "");
+
+    // Apply key aliases (e.g., "enter" -> "return")
+    for (const [alias, target] of Object.entries(_keyAliases)) {
+      canonical = canonical.replace(alias, target);
+    }
+
+    return canonical;
   }
 
   /*
