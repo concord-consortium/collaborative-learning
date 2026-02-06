@@ -1,8 +1,6 @@
 import {
-  types, Instance, flow, IJsonPatch, detach, destroy, toGenerator, addDisposer
+  types, Instance, flow, IJsonPatch, detach, destroy, toGenerator
 } from "mobx-state-tree";
-import { when } from "mobx";
-import firebase from "firebase/app";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
@@ -10,11 +8,10 @@ import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation,
   ICreateHistoryEntry} from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
-import { getSimpleDocumentPath, IDocumentMetadata } from "../../../shared/shared";
+import { IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
-import { UserModelType } from "../stores/user";
 import { UserContextProvider } from "../stores/user-context-provider";
-import { getLastHistoryEntry, loadHistory } from "./history-firestore";
+import { getLastHistoryEntry } from "./history-firestore";
 
 /**
  * Helper method to print objects in template strings
@@ -26,8 +23,8 @@ import { getLastHistoryEntry, loadHistory } from "./history-firestore";
  */
 const json = (value: any) => JSON.stringify(value);
 
-const FAKE_HISTORY_ENTRY_ID = "FAKE_HISTORY_ENTRY_ID";
-const FAKE_EXCHANGE_ID = "FAKE_EXCHANGE_ID";
+export const FAKE_HISTORY_ENTRY_ID = "FAKE_HISTORY_ENTRY_ID";
+export const FAKE_EXCHANGE_ID = "FAKE_EXCHANGE_ID";
 
 export const CDocument = types
 .model("CDocument", {
@@ -44,19 +41,19 @@ interface IMainDocument extends TreeAPI {
   metadata: IDocumentMetadata;
 }
 
-export enum HistoryStatus {
-  HISTORY_ERROR,
-  FINDING_HISTORY_LENGTH,
-  NO_HISTORY,
-  HISTORY_LOADED,
-  HISTORY_LOADING,
+/**
+ * Minimal interface for history managers that need to be notified when
+ * history entries are completed. This keeps TreeManager free of
+ * Firestore-specific imports while allowing it to coordinate with
+ * history managers.
+ */
+export interface IHistoryManager {
+  onHistoryEntryCompleted(
+    historyContainer: CDocumentType,
+    entry: Instance<typeof HistoryEntry>,
+    newLocalIndex: number
+  ): void;
 }
-
-export type HistoryEntryCompletedListener = (
-  historyContainer: CDocumentType,
-  entry: Instance<typeof HistoryEntry>,
-  newLocalIndex: number,
-) => void;
 
 export const TreeManager = types
 .model("TreeManager", {
@@ -76,7 +73,6 @@ export const TreeManager = types
   // When replaying history this number can be less than the total number
   // history entries (self.document.history.length)
   numHistoryEventsApplied: 0 as number | undefined,
-  loadingError: undefined as firebase.firestore.FirestoreError | undefined,
   mainDocument: undefined as IMainDocument | undefined,
   userContextProvider: undefined as UserContextProvider | undefined,
   /**
@@ -86,9 +82,10 @@ export const TreeManager = types
    */
   revisionId: "",
   /**
-   * Listeners to be notified when new history entries are completed.
+   * History manager to be notified when new history entries are completed.
+   * Consumers can check for specific types (e.g., FirestoreHistoryManagerConcurrent).
    */
-  historyEntryCompletedListeners: [] as Array<HistoryEntryCompletedListener>
+  historyManager: undefined as IHistoryManager | undefined
 }))
 .views((self) => ({
   get undoManager() : IUndoManager {
@@ -111,53 +108,6 @@ export const TreeManager = types
   findActiveHistoryEntry(historyEntryId: string) {
     return self.activeHistoryEntries.find(entry => entry.id === historyEntryId);
   },
-
-  get historyStatus() : HistoryStatus {
-    if (self.loadingError) {
-      return HistoryStatus.HISTORY_ERROR;
-    }
-
-    const historyLength = self.document.history.length;
-    const {numHistoryEventsApplied} = self;
-    if (numHistoryEventsApplied === undefined) {
-      // We are waiting for the query to figure out the last history entry.
-      return HistoryStatus.FINDING_HISTORY_LENGTH;
-    } else {
-      if (historyLength === 0 && numHistoryEventsApplied === 0) {
-        return HistoryStatus.NO_HISTORY;
-      } else {
-        if (historyLength >= numHistoryEventsApplied) {
-          return HistoryStatus.HISTORY_LOADED;
-        } else {
-          // In this case, the numHistoryEventsApplied tells us that we have more history
-          // entries, but they haven't been loaded yet for some reason.
-          // This might be an error, but more likely the history is still loading.
-          return HistoryStatus.HISTORY_LOADING;
-        }
-      }
-    }
-  },
-}))
-.views(self => ({
-  get historyStatusString() : string {
-    switch (self.historyStatus) {
-      case HistoryStatus.HISTORY_ERROR:
-        return "Error loading history";
-      case HistoryStatus.FINDING_HISTORY_LENGTH:
-        return "Finding the length of the history.";
-      case HistoryStatus.NO_HISTORY:
-        return "This document has no history.";
-      case HistoryStatus.HISTORY_LOADED:
-        return "History is loaded";
-      case HistoryStatus.HISTORY_LOADING: {
-        const historyLength = self.document.history.length;
-        const {numHistoryEventsApplied} = self;
-        return `Loading history (${historyLength}/${numHistoryEventsApplied})`;
-      }
-      default:
-        return "Unknown history status";
-    }
-  }
 }))
 .actions(self => {
   return {
@@ -202,13 +152,18 @@ export const TreeManager = types
         self.revisionId = entry.id;
       }
 
-      self.historyEntryCompletedListeners.forEach(listener => {
-        listener(self.document, entry, newLocalIndex);
-      });
+      self.historyManager?.onHistoryEntryCompleted(self.document, entry, newLocalIndex);
     }
   };
 })
 .actions((self) => ({
+  /**
+   * This is used when applying a remote history entry that was loaded
+   */
+  addHistoryEntryAfterApplying(entry: Instance<typeof HistoryEntry>) {
+    self.document.history.push(entry);
+  },
+
   setChangeDocument(cDoc: CDocumentType) {
     self.document = cDoc;
   },
@@ -217,12 +172,8 @@ export const TreeManager = types
     self.revisionId = revisionId;
   },
 
-  setLoadingError(error: firebase.firestore.FirestoreError) {
-    self.loadingError = error;
-  },
-
-  addHistoryEntryCompletedListener(listener: HistoryEntryCompletedListener) {
-    self.historyEntryCompletedListeners.push(listener);
+  setHistoryManager(manager: IHistoryManager) {
+    self.historyManager = manager;
   },
 
   setNumHistoryEntriesApplied(value: number) {
@@ -308,49 +259,6 @@ export const TreeManager = types
 
 }))
 .actions((self) => ({
-  // Using async actions is generally not a good idea, because the changes will not be grouped into
-  // a single action for any action-tracking middleware. However, in this case we aren't recording the
-  // actions of the TreeManager.
-  async mirrorHistoryFromFirestore(user: UserModelType, firestore: Firestore) {
-    // FIXME-HISTORY: we should protect active documents so that if
-    // mirrorHistoryFromFirestore is accidentally called on their treeManager
-    // we don't replace their history. Probably the best approach is
-    // adding a prop to documents so we can identify documents that are being
-    // used for history replaying
-    // https://www.pivotaltracker.com/story/show/183291353
-
-    const documentKey = self.mainDocument?.key;
-    const userId = self.mainDocument?.uid;
-    if (!documentKey || !userId) {
-      console.warn("mirrorHistoryFromFirestore, requires a mainDocument");
-      return;
-    }
-
-    const docPath = getSimpleDocumentPath(documentKey);
-
-    self.setNumHistoryEntriesAppliedFromFirestore(firestore, docPath);
-
-    // TODO: We are not checking if the parent document of the history entries actually
-    // exists before getting the history collection below it.
-    // If this parent document doesn't exist the history won't exist.
-    // Also if this document doesn't exist then probably the query of the
-    // history will fail. I think this approach is OK, but we should
-    // check what happens if history is opened on a document that doesn't
-    // have a parent document.
-
-    const snapshotUnsubscribe = loadHistory(firestore, `${docPath}/history`,
-      (history, error) => {
-        if (error) {
-          self.setLoadingError(error);
-        } else {
-          const cDocument = CDocument.create({history});
-          self.setChangeDocument(cDocument);
-        }
-      }
-    );
-    addDisposer(self, snapshotUnsubscribe);
-  },
-
   setMainDocument(document: IMainDocument) {
     self.mainDocument = document;
     self.putTree(document.key, document);
@@ -567,18 +475,7 @@ export const TreeManager = types
     // One way might be using unique history_entry_ids that we mark as closed
     // after the finish call.
     self.numHistoryEventsApplied = newHistoryPosition;
-  })
-}))
-.actions((self) => ({
-  async moveToHistoryEntryAfterLoad(historyId: string) {
-    await when(() => self.historyStatus === HistoryStatus.HISTORY_LOADED);
-    const entry = self.findHistoryEntryIndex(historyId);
-    if (entry >= 0) {
-      self.goToHistoryEntry(entry);
-    } else {
-      console.warn("Did not find history entry with id: ", historyId);
-    }
-  }
+  }),
 }))
 .views(self => ({
   getHistoryEntry: (historyIndex: number) => {

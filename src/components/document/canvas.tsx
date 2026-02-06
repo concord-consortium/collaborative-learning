@@ -15,6 +15,7 @@ import { ContentStatus, DocumentModelType, createDocumentModelWithEnv } from "..
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { TreeManagerType } from "../../models/history/tree-manager";
+import { FirestoreHistoryManager } from "../../models/history/firestore-history-manager";
 import { PlaybackComponent } from "../playback/playback";
 import {
   ITileApiInterface, TileApiInterfaceContext, EditableTileApiInterfaceRefContext, AddTilesContext, TileApiInterface
@@ -64,6 +65,7 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
   private canvasMethods: ICanvasMethods;
 
   private showPlaybackControlsDisposer: IReactionDisposer;
+  private historyManager: FirestoreHistoryManager | undefined = undefined;
 
   constructor(props: IProps) {
     super(props);
@@ -245,6 +247,7 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
           {showPlayback && showPlaybackControls && (
             <PlaybackComponent
               document={documentToShow}
+              historyManager={this.historyManager}
               requestedHistoryId={this.state.requestedHistoryId}
             />
           )}
@@ -369,8 +372,22 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
       }
       const treeManager = docCopy.treeManagerAPI as TreeManagerType;
       const firestore = this.stores.db.firestore;
-      const user = this.stores.user;
-      treeManager.mirrorHistoryFromFirestore(user, firestore);
+
+      // We don't need to dispose the old history manager because the old document copy will be destroyed
+      // by updateHistoryDocument. This document disposal will trigger the tree manager disposal. The
+      // subscribeToFirestoreHistory method adds a disposer to the tree manager so that its firestore
+      // listener will be cleaned up when the tree manager is disposed.
+      this.historyManager = new FirestoreHistoryManager({
+        firestore,
+        userContextProvider: this.stores.userContextProvider,
+        treeManager,
+        uploadLocalHistory: false,
+        syncRemoteHistory: true
+      });
+      treeManager.setHistoryManager(this.historyManager);
+
+      // We are counting on the updated document copy to trigger a re-render so this updated
+      // historyManager will be passed to the PlaybackComponent.
       return docCopy;
     }
   };

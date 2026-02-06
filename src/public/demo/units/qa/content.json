@@ -101,7 +101,8 @@
       "form": "What's it look like?",
       "function": "What's it do?"
     },
-    "aiEvaluation": "mock"
+    "aiEvaluation": "mock",
+    "groupDocumentsEnabled": true
   },
   "sections": {
     "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},
