@@ -126,7 +126,7 @@ If a new column is added then User B sees the new attribute name.
 
 ## Table with graph
 
-I don't the exact steps yet, but I found that when a graph is connected to a table only one of the documents actually shows the points on the graph.
+I don't know the exact steps yet, but I found that when a graph is connected to a table only one of the documents actually shows the points on the graph.
 
 # Implementation TODOs
 
@@ -152,7 +152,11 @@ When the document is first opened, remote history entries that have already been
 
 Location: `firestore-history-manager-concurrent.ts:uploadQueuedHistoryEntries()`
 
-The code awaits `environmentAndMetadataDocReadyPromise` but has a FIXME noting that error cases are not handled. If this promise rejects, the upload queue may stall.
+The code awaits `environmentAndMetadataDocReadyPromise` inside a try/finally that resets `uploadInProgress`. This prevents the upload queue from stalling on errors, but creates a different problem: if the promise rejects, it will throw on every subsequent call (rejected promises throw each time they're awaited). This creates an endless cycle of silent failures as new history entries keep getting queued.
+
+**Needed improvements**:
+1. Track when this has permanently failed and stop retrying
+2. Show the user that sync is broken
 
 ## Migration for Existing Documents
 
@@ -161,6 +165,18 @@ Location: `firestore-history-manager-concurrent.ts:uploadQueuedHistoryEntries()`
 If there's no `lastHistoryEntry` in the metadata (for documents created before this feature), the code would need to scan existing history entries to find the last one. This can't be done in a Firestore transaction, so it would need to happen before starting the transaction. This migration wouldn't be safe if multiple clients are writing history simultaneously.
 
 Current plan: Only use this for new group documents; some lost history for existing group documents is acceptable.
+
+## Unhandled Promise in Recursive Upload Call
+
+Location: `firestore-history-manager-concurrent.ts:uploadQueuedHistoryEntries()` (line 217)
+
+The recursive call to `this.uploadQueuedHistoryEntries()` at the end of the function is not awaited or error-handled. If this async call throws, it will result in an unhandled promise rejection. Consider adding `.catch()` for error logging, though `await` would change the fire-and-forget behavior which is intentional.
+
+## Timer Not Tracked in resumeUploadsAfterDelay
+
+Location: `firestore-history-manager-concurrent.ts:resumeUploadsAfterDelay()` (lines 63-70)
+
+The `setTimeout` call doesn't store or cancel previous timers. Multiple calls could schedule multiple timeouts, potentially resuming uploads at unexpected times. This is low priority since it's primarily used for debugging/testing, but storing the timeout ID and clearing it before scheduling a new one would make it more robust.
 
 ## Test Coverage Gaps
 

@@ -123,94 +123,100 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     }
     this.uploadInProgress = true;
 
-    // The parent Firestore metadata document might not be ready yet so we need to wait for that.
-    // FIXME: we need to handle the case where this errors out
-    await this.environmentAndMetadataDocReadyPromise;
-    const { firestore } = this;
+    try {
+      // The parent Firestore metadata document might not be ready yet so we need to wait for that.
+      // TODO: If this promise rejects, it will throw on every subsequent call since rejected promises
+      // throw each time they're awaited. This creates an endless cycle of silent failures as new
+      // history entries keep getting queued. We should:
+      // 1. Track when this has failed and stop retrying
+      // 2. Show the user that sync is broken
+      await this.environmentAndMetadataDocReadyPromise;
+      const { firestore } = this;
 
-    // add a new document for this history entry
-    const metadataPath = firestore.getFullPath(this.documentPath);
-    const historyEntriesPath = `${metadataPath}/history`;
+      // add a new document for this history entry
+      const metadataPath = firestore.getFullPath(this.documentPath);
+      const historyEntriesPath = `${metadataPath}/history`;
 
-    // The following code is run in a Firestore transaction. This is so index and previousEntryId
-    // are consistent even when multiple users are updating the history at the same time.
-    // Without the transaction two users writing a new history entry at the same time would
-    // both set the same index and previousEntryId which would corrupt the history.
-    //
-    // In order to do this we need to store a last history index and last history entry id
-    // in the metadata document. Firestore transactions cannot run queries, so we cannot just
-    // get the last history entry by querying the history collection for the highest index.
-    //
-    // Additionally firestore transactions work by just retrying the transaction code if any
-    // documents being read are updated by some other client before the write operations are
-    // finished. Because of this there cannot be side effects in the transaction code,
-    // just reads and writes.
-    //
-    // Firestore has a limit of 500 operations per transaction, and 10 MiB for all transferred data.
-    // To be safe we limit how many entries we upload in a single transaction.
-    const MAX_ENTRIES_PER_TRANSACTION = 20;
-    const entriesToUpload = this.completedHistoryEntryQueue.slice(0, MAX_ENTRIES_PER_TRANSACTION);
-    if (entriesToUpload.length === 0) {
-      // Nothing to do
-      this.uploadInProgress = false;
-      return;
-    }
-    await firestore.runTransaction(async (transaction) => {
-
-      const converter = typeConverter<IDocumentMetadata>();
-      const metadataDoc = await transaction.get(firestore.documentRef(metadataPath).withConverter(converter));
-
-      if (!metadataDoc.exists) {
-        // The metadata document must exist because we waited for it above
-        throw new Error("Could not get metadata document in history transaction");
+      // The following code is run in a Firestore transaction. This is so index and previousEntryId
+      // are consistent even when multiple users are updating the history at the same time.
+      // Without the transaction two users writing a new history entry at the same time would
+      // both set the same index and previousEntryId which would corrupt the history.
+      //
+      // In order to do this we need to store a last history index and last history entry id
+      // in the metadata document. Firestore transactions cannot run queries, so we cannot just
+      // get the last history entry by querying the history collection for the highest index.
+      //
+      // Additionally firestore transactions work by just retrying the transaction code if any
+      // documents being read are updated by some other client before the write operations are
+      // finished. Because of this there cannot be side effects in the transaction code,
+      // just reads and writes.
+      //
+      // Firestore has a limit of 500 operations per transaction, and 10 MiB for all transferred data.
+      // To be safe we limit how many entries we upload in a single transaction.
+      const MAX_ENTRIES_PER_TRANSACTION = 20;
+      const entriesToUpload = this.completedHistoryEntryQueue.slice(0, MAX_ENTRIES_PER_TRANSACTION);
+      if (entriesToUpload.length === 0) {
+        // Nothing to do
+        return;
       }
+      await firestore.runTransaction(async (transaction) => {
 
-      const metadata = metadataDoc.data();
-      if (!metadata) {
-        throw new Error("Could not get metadata document data in history transaction");
-      }
+        const converter = typeConverter<IDocumentMetadata>();
+        const metadataDoc = await transaction.get(firestore.documentRef(metadataPath).withConverter(converter));
 
-      const lastEntry = metadata.lastHistoryEntry;
-      let lastEntryIndex = lastEntry?.index ?? -1;
-      let lastEntryId = lastEntry?.id ?? null;
-
-      // TODO: if we want to migrate existing documents to this approach then if there is no lastHistoryEntry
-      // we need to look through the existing history entries. We can't do that in a transaction
-      // though. So we would need to do that before starting the transaction.
-      // This migration would not be safe if there are multiple clients writing history at the same time.
-      // The plan is to just use this for new group documents, so if there is some lost history
-      // for existing group documents that is OK.
-
-
-      // TODO: if there are lot of entries in the queue we need to limit how many we upload at once
-      entriesToUpload.forEach(entry => {
-        const newEntryIndex = lastEntryIndex + 1;
-
-        const docRef = firestore.documentRef(historyEntriesPath, entry.id);
-        const snapshot = getSnapshot(entry);
-
-        transaction.set(docRef, {
-          index: newEntryIndex,
-          created: firestore.timestamp(),
-          previousEntryId: lastEntryId,
-          entry: JSON.stringify(snapshot)
-        });
-        lastEntryIndex = newEntryIndex;
-        lastEntryId = entry.id;
-      });
-
-      transaction.update(firestore.documentRef(metadataPath), {
-        lastHistoryEntry: {
-          index: lastEntryIndex,
-          id: lastEntryId
+        if (!metadataDoc.exists) {
+          // The metadata document must exist because we waited for it above
+          throw new Error("Could not get metadata document in history transaction");
         }
-      });
-    });
 
-    // If we made it here then the transaction succeed so we can remove the entriesToUpload
-    // from the queue.
-    this.completedHistoryEntryQueue.splice(0, entriesToUpload.length);
-    this.uploadInProgress = false;
+        const metadata = metadataDoc.data();
+        if (!metadata) {
+          throw new Error("Could not get metadata document data in history transaction");
+        }
+
+        const lastEntry = metadata.lastHistoryEntry;
+        let lastEntryIndex = lastEntry?.index ?? -1;
+        let lastEntryId = lastEntry?.id ?? null;
+
+        // TODO: if we want to migrate existing documents to this approach then if there is no lastHistoryEntry
+        // we need to look through the existing history entries. We can't do that in a transaction
+        // though. So we would need to do that before starting the transaction.
+        // This migration would not be safe if there are multiple clients writing history at the same time.
+        // The plan is to just use this for new group documents, so if there is some lost history
+        // for existing group documents that is OK.
+
+
+        // TODO: if there are lot of entries in the queue we need to limit how many we upload at once
+        entriesToUpload.forEach(entry => {
+          const newEntryIndex = lastEntryIndex + 1;
+
+          const docRef = firestore.documentRef(historyEntriesPath, entry.id);
+          const snapshot = getSnapshot(entry);
+
+          transaction.set(docRef, {
+            index: newEntryIndex,
+            created: firestore.timestamp(),
+            previousEntryId: lastEntryId,
+            entry: JSON.stringify(snapshot)
+          });
+          lastEntryIndex = newEntryIndex;
+          lastEntryId = entry.id;
+        });
+
+        transaction.update(firestore.documentRef(metadataPath), {
+          lastHistoryEntry: {
+            index: lastEntryIndex,
+            id: lastEntryId
+          }
+        });
+      });
+
+      // If we made it here then the transaction succeeded so we can remove the entriesToUpload
+      // from the queue.
+      this.completedHistoryEntryQueue.splice(0, entriesToUpload.length);
+    } finally {
+      this.uploadInProgress = false;
+    }
 
     // If there are more entries to upload, do that now
     if (this.completedHistoryEntryQueue.length > 0) {
@@ -248,12 +254,10 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // Skip any entries that are already in our local history
     // TODO: this could be more efficient by combining it with the incomingHistory.findIndex()
     // above.
+    const existingIds = new Set(existingHistory.map(e => e.id));
     const entrySnapshots: HistoryEntrySnapshot[] = [];
     for (const entry of unappliedHistory) {
-      // TODO: it is in inefficient to have to search through the array of existing history
-      // entries. It'd be better if we maintained a Set or Map of existing entry ids.
-      const exists = existingHistory.find(e => e.id === entry.id);
-      if (!exists) {
+      if (!existingIds.has(entry.id)) {
         entrySnapshots.push(entry);
       }
     }
