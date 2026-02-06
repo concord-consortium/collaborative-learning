@@ -16,15 +16,7 @@ jest.mock("../utilities/auth-utils", () => ({
 
 describe("StudentMenuContainer", () => {
 
-  it("renders custom select with logout link", () => {
-    // Mock getConfirmLogoutUrl to return a known URL
-    const mockLogoutUrl = "https://learn.portal.staging.concord.org/confirm_logout";
-    (authUtils.getConfirmLogoutUrl as jest.Mock).mockReturnValue(mockLogoutUrl);
-
-    // In Jest 30/jsdom, window.location is not easily mockable.
-    // We verify the logout behavior by checking that getConfirmLogoutUrl was called.
-    // The actual navigation (location.assign) is trusted to work correctly.
-
+  it("renders custom select with logout link", async () => {
     const user = UserModel.create({
       id: "1",
       name: "Test User"
@@ -44,10 +36,16 @@ describe("StudentMenuContainer", () => {
     expect(screen.getByTestId("user-list")).toBeInTheDocument();
     expect(screen.getByTestId("list-item-log-out")).toBeInTheDocument();
 
-    act(() => {
-      userEvent.click(screen.getByTestId("list-item-log-out"));
+    // In Jest 30/jsdom 25, window.location is non-configurable so we cannot
+    // mock location.assign directly. The call to location.assign triggers a
+    // jsdom "not implemented" error which we suppress here.
+    await jestSpyConsole("error", () => {
+      act(() => {
+        userEvent.click(screen.getByTestId("list-item-log-out"));
+      });
     });
-    // Verify that getConfirmLogoutUrl was called (the result is used in location.assign)
-    expect(authUtils.getConfirmLogoutUrl).toHaveBeenCalled();
+    // Verify getConfirmLogoutUrl was called with undefined (no return URL)
+    // since user.standaloneAuthUser is not set
+    expect(authUtils.getConfirmLogoutUrl).toHaveBeenCalledWith(undefined);
   });
 });
