@@ -229,6 +229,12 @@
         "title": "Delete",
         "iconId": "icon-delete-tool",
         "isTileTool": false
+      },
+      {
+        "id": "readAloud",
+        "title": "Read Aloud",
+        "iconId": "icon-read-aloud-tool",
+        "isTileTool": false
       }
     ],
     "authorTools": [
@@ -269,6 +275,12 @@
         "id": "copyToDocument",
         "title": "Copy to Document",
         "iconId": "icon-copy-to-document-tool",
+        "isTileTool": false
+      },
+      {
+        "id": "readAloud",
+        "title": "Read Aloud",
+        "iconId": "icon-read-aloud-tool",
         "isTileTool": false
       },
       {

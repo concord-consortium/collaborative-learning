@@ -37,5 +37,6 @@ registerTileComponentInfo({
   Component: TableToolComponent,
   tileEltClass: "table-tool-tile",
   Icon,
-  HeaderIcon
+  HeaderIcon,
+  hiddenTitle: true
 });
