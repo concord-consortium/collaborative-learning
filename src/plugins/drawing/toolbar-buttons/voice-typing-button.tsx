@@ -46,16 +46,32 @@ export const VoiceTypingDrawingButton = observer(
     const editingTextObjectRef = useRef(editingTextObject);
     editingTextObjectRef.current = editingTextObject;
 
+    const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     const announce = useCallback((message: string) => {
+      if (announceTimerRef.current) {
+        clearTimeout(announceTimerRef.current);
+      }
       setAnnouncement(message);
-      const timer = setTimeout(() => setAnnouncement(""), 2000);
-      return () => clearTimeout(timer);
+      announceTimerRef.current = setTimeout(() => {
+        setAnnouncement("");
+        announceTimerRef.current = null;
+      }, 2000);
+    }, []);
+
+    // Clean up announce timer on unmount
+    useEffect(() => {
+      return () => {
+        if (announceTimerRef.current) {
+          clearTimeout(announceTimerRef.current);
+        }
+      };
     }, []);
 
     const deactivate = useCallback((reason: "user" | "timeout" | "error" = "user") => {
       const vt = voiceTypingRef.current;
       if (vt?.isActive) {
-        vt.disable();
+        vt.disable(reason);
       }
       setActive(false);
       toolbarContext?.setInterimText("");
@@ -187,14 +203,14 @@ export const VoiceTypingDrawingButton = observer(
           }
         },
 
-        onStateChange: (isActive: boolean) => {
+        onStateChange: (isActive, reason) => {
           if (!isActive) {
             setActive(false);
             toolbarContext?.setInterimText("");
             if (tileId) {
               logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, {
                 operation: "voice-typing-stop",
-                change: { reason: "timeout" },
+                change: { reason: reason || "user" },
                 tileId,
               });
             }

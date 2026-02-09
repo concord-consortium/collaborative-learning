@@ -28,6 +28,7 @@ function isAllowedKeyCombo(e: KeyboardEvent): boolean {
   if (mod && e.key === "z" && !e.shiftKey) return true; // Undo
   if (mod && e.key === "z" && e.shiftKey) return true; // Redo
   if (mod && e.key === "Z") return true; // Redo (Mac)
+  if (mod && (e.key === "y" || e.key === "Y")) return true; // Redo (Windows)
   return false;
 }
 
@@ -56,11 +57,26 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
 
   // Aria-live announcement
   const [announcement, setAnnouncement] = useState("");
+  const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const announce = useCallback((message: string) => {
+    if (announceTimerRef.current) {
+      clearTimeout(announceTimerRef.current);
+    }
     setAnnouncement(message);
-    const timer = setTimeout(() => setAnnouncement(""), 2000);
-    return () => clearTimeout(timer);
+    announceTimerRef.current = setTimeout(() => {
+      setAnnouncement("");
+      announceTimerRef.current = null;
+    }, 2000);
+  }, []);
+
+  // Clean up announce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (announceTimerRef.current) {
+        clearTimeout(announceTimerRef.current);
+      }
+    };
   }, []);
 
   // Clean up Slate anchor ref
@@ -147,7 +163,7 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
     const vt = voiceTypingRef.current;
 
     if (vt?.isActive) {
-      vt.disable();
+      vt.disable(reason);
     }
 
     restoreEditorMethods();
@@ -182,6 +198,11 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        deactivateRef.current("user");
+        return;
+      }
+      if (e.key === "Tab") {
+        // Deactivate on Tab but allow default tab behavior (focus movement)
         deactivateRef.current("user");
         return;
       }
@@ -348,7 +369,7 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
         }
       },
 
-      onStateChange: (isActive: boolean) => {
+      onStateChange: (isActive, reason) => {
         if (!isActive) {
           // VoiceTyping module triggered deactivation (timeout, error, or single-instance eviction)
           restoreEditorMethods();
@@ -360,7 +381,7 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
           if (tileId) {
             logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, {
               operation: "voice-typing-stop",
-              change: { reason: "timeout" },
+              change: { reason: reason || "user" },
               tileId,
             });
           }

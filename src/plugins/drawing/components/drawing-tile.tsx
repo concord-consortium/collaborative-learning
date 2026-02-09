@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { observer } from "mobx-react";
 import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 import { isEqual } from "lodash";
@@ -54,12 +54,10 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
                         contentRef.current.isNavigatorVisible;
 
   const [interimText, setInterimText] = useState("");
-  const [drawingToolbarContext] = useState<IDrawingToolbarContext>(() => ({
-    interimText: "",
-    setInterimText: (text: string) => {
-      setInterimText(text);
-    },
-  }));
+  const drawingToolbarContext = useMemo<IDrawingToolbarContext>(() => ({
+    interimText,
+    setInterimText,
+  }), [interimText]);
 
   const updateTileVisibleBoundingBox = (bb: BoundingBox) => {
     if (!isEqual(bb, tileVisibleBoundingBox)) {

@@ -28,9 +28,11 @@ interface SpeechRecognitionInstance extends EventTarget {
 
 type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
 
+export type VoiceTypingDisableReason = "user" | "timeout" | "error" | "evicted";
+
 export interface VoiceTypingCallbacks {
   onTranscript: (text: string, isFinal: boolean) => void;
-  onStateChange: (active: boolean) => void;
+  onStateChange: (active: boolean, reason?: VoiceTypingDisableReason) => void;
   onError?: (error: string) => void;
 }
 
@@ -62,12 +64,12 @@ export class VoiceTyping {
   enable(callbacks: VoiceTypingCallbacks): void {
     // Single-active-instance: disable any previously active instance
     if (activeInstance && activeInstance !== this) {
-      activeInstance.disable();
+      activeInstance.disable("evicted");
     }
 
     // If this instance is already active, disable first
     if (this._isActive) {
-      this.disable();
+      this.disable("user");
     }
 
     const Ctor = getSpeechRecognitionConstructor();
@@ -75,9 +77,6 @@ export class VoiceTyping {
 
     this.callbacks = callbacks;
     this.disableRequested = false;
-    this._isActive = true;
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    activeInstance = this;
 
     const recognition = new Ctor();
     recognition.continuous = true;
@@ -103,27 +102,37 @@ export class VoiceTyping {
         recognition.start();
       } catch {
         // start() can throw if called in wrong state; treat as error
-        this.disable();
+        this.disable("error");
       }
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       this.callbacks?.onError?.(event.error);
-      this.disable();
+      this.disable("error");
     };
 
     this.recognition = recognition;
-    this.startInactivityTimer();
 
     try {
       recognition.start();
     } catch {
       this.callbacks?.onError?.("start-failed");
-      this.disable();
+      this.recognition.onresult = null;
+      this.recognition.onend = null;
+      this.recognition.onerror = null;
+      this.recognition = null;
+      this.callbacks = null;
+      return;
     }
+
+    // Only mark active after start() succeeds
+    this._isActive = true;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    activeInstance = this;
+    this.startInactivityTimer();
   }
 
-  disable(): void {
+  disable(reason: VoiceTypingDisableReason = "user"): void {
     if (!this._isActive) return;
 
     this.disableRequested = true;
@@ -145,9 +154,9 @@ export class VoiceTyping {
     // Clear inactivity timer
     this.clearInactivityTimer();
 
-    // Fire onStateChange(false) BEFORE clearing callbacks,
+    // Fire onStateChange(false, reason) BEFORE clearing callbacks,
     // so consumer can read and commit last interim transcript
-    this.callbacks?.onStateChange(false);
+    this.callbacks?.onStateChange(false, reason);
     this.callbacks = null;
 
     // Clear module-level active instance
@@ -159,7 +168,7 @@ export class VoiceTyping {
   private startInactivityTimer(): void {
     this.clearInactivityTimer();
     this.inactivityTimer = setTimeout(() => {
-      this.disable();
+      this.disable("timeout");
     }, INACTIVITY_TIMEOUT_MS);
   }
 

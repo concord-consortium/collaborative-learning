@@ -1,4 +1,4 @@
-import { VoiceTyping, VoiceTypingCallbacks } from "./voice-typing";
+import { VoiceTyping, VoiceTypingCallbacks, VoiceTypingDisableReason } from "./voice-typing";
 
 // Mock SpeechRecognition
 class MockSpeechRecognition {
@@ -74,18 +74,18 @@ function removeMockSpeechRecognition() {
 
 function createCallbacks(): VoiceTypingCallbacks & {
   transcripts: Array<{ text: string; isFinal: boolean }>;
-  stateChanges: boolean[];
+  stateChanges: Array<{ active: boolean; reason?: VoiceTypingDisableReason }>;
   errors: string[];
 } {
   const transcripts: Array<{ text: string; isFinal: boolean }> = [];
-  const stateChanges: boolean[] = [];
+  const stateChanges: Array<{ active: boolean; reason?: VoiceTypingDisableReason }> = [];
   const errors: string[] = [];
   return {
     transcripts,
     stateChanges,
     errors,
     onTranscript: (text, isFinal) => transcripts.push({ text, isFinal }),
-    onStateChange: (active) => stateChanges.push(active),
+    onStateChange: (active, reason) => stateChanges.push({ active, reason }),
     onError: (error) => errors.push(error)
   };
 }
@@ -134,7 +134,7 @@ describe("VoiceTyping", () => {
       vt.disable();
 
       expect(vt.isActive).toBe(false);
-      expect(callbacks.stateChanges).toEqual([false]);
+      expect(callbacks.stateChanges).toEqual([{ active: false, reason: "user" }]);
     });
 
     it("does nothing if disable() called when not active", () => {
@@ -143,13 +143,13 @@ describe("VoiceTyping", () => {
       expect(vt.isActive).toBe(false);
     });
 
-    it("fires onStateChange(false) on disable()", () => {
+    it("fires onStateChange(false) with reason on disable()", () => {
       const vt = new VoiceTyping();
       const callbacks = createCallbacks();
       vt.enable(callbacks);
       vt.disable();
 
-      expect(callbacks.stateChanges).toEqual([false]);
+      expect(callbacks.stateChanges).toEqual([{ active: false, reason: "user" }]);
     });
 
     it("does not call onStateChange(true) on enable()", () => {
@@ -160,6 +160,28 @@ describe("VoiceTyping", () => {
       expect(callbacks.stateChanges).toEqual([]);
 
       vt.disable();
+    });
+
+    it("handles recognition.start() throwing synchronously", () => {
+      // Install a mock where start() throws
+      (window as any).webkitSpeechRecognition = class extends MockSpeechRecognition {
+        constructor() {
+          super();
+          // eslint-disable-next-line @typescript-eslint/no-this-alias
+          mockInstance = this;
+        }
+        start() {
+          throw new Error("NotAllowedError");
+        }
+      };
+
+      const vt = new VoiceTyping();
+      const callbacks = createCallbacks();
+      vt.enable(callbacks);
+
+      expect(vt.isActive).toBe(false);
+      expect(callbacks.errors).toEqual(["start-failed"]);
+      expect(callbacks.stateChanges).toEqual([]);
     });
   });
 
@@ -250,7 +272,7 @@ describe("VoiceTyping", () => {
       jest.advanceTimersByTime(60_000);
 
       expect(vt.isActive).toBe(false);
-      expect(callbacks.stateChanges).toEqual([false]);
+      expect(callbacks.stateChanges).toEqual([{ active: false, reason: "timeout" }]);
     });
 
     it("resets timer on each onresult", () => {
@@ -282,7 +304,7 @@ describe("VoiceTyping", () => {
 
       // Advancing time should not cause any issues
       jest.advanceTimersByTime(60_000);
-      expect(callbacks.stateChanges).toEqual([false]); // Only the one from disable()
+      expect(callbacks.stateChanges).toEqual([{ active: false, reason: "user" }]); // Only the one from disable()
     });
   });
 
@@ -296,7 +318,7 @@ describe("VoiceTyping", () => {
 
       expect(callbacks.errors).toEqual(["not-allowed"]);
       expect(vt.isActive).toBe(false);
-      expect(callbacks.stateChanges).toEqual([false]);
+      expect(callbacks.stateChanges).toEqual([{ active: false, reason: "error" }]);
     });
   });
 
@@ -311,7 +333,7 @@ describe("VoiceTyping", () => {
       vt2.enable(callbacks2);
 
       expect(vt1.isActive).toBe(false);
-      expect(callbacks1.stateChanges).toEqual([false]);
+      expect(callbacks1.stateChanges).toEqual([{ active: false, reason: "evicted" }]);
       expect(vt2.isActive).toBe(true);
     });
 
@@ -323,7 +345,7 @@ describe("VoiceTyping", () => {
       const callbacks2 = createCallbacks();
       vt.enable(callbacks2);
 
-      expect(callbacks1.stateChanges).toEqual([false]);
+      expect(callbacks1.stateChanges).toEqual([{ active: false, reason: "user" }]);
       expect(vt.isActive).toBe(true);
     });
   });
