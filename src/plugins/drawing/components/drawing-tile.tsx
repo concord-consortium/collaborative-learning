@@ -336,7 +336,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             </div>}
         />
       }
-    </DrawingToolbarContext.Provider>
+      </DrawingToolbarContext.Provider>
     </DrawingContentModelContext.Provider>
   );
 });
