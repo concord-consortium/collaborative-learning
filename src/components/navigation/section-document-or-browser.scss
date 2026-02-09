@@ -39,7 +39,7 @@ $title-margin: 2px;
           width: 50%;
           border-left: $document-border-width solid;
           &.class-work {
-            border-color: $classwork-purple-dark-1
+            border-color: $workspace-teal-dark-1
           }
           &.my-work {
             border-color: $workspace-teal-dark-1
@@ -59,7 +59,7 @@ $title-margin: 2px;
             background-color: $workspace-teal-light-4;
           }
           &.class-work {
-            background-color: $classwork-purple-light-5;
+            background-color: $workspace-teal-light-4;
           }
           &.supports {
             background-color: $support-blue-light-5;
@@ -166,15 +166,15 @@ $title-margin: 2px;
                 opacity: 0.35;
               }
               &.class-work {
-                background-color: $classwork-purple-light-5;
+                background-color: $workspace-teal-light-4;
                 .x-shape {
-                  fill: $classwork-purple-dark-1;
+                  fill: $workspace-teal-dark-1;
                 }
                 &:hover {
-                  background-color: $classwork-purple-light-3;
+                  background-color: $workspace-teal-light-3;
                 }
                 &:active {
-                  background-color: $classwork-purple-dark-1;
+                  background-color: $workspace-teal-dark-1;
                   color: white;
                   .x-shape {
                     fill: white;
