@@ -6,12 +6,13 @@ import { IToolbarButtonComponentProps } from "../../../toolbar/toolbar-button-ma
 import { TileModelContext } from "../../tile-api";
 import { TextTileToolbarContext } from "../text-toolbar-context";
 import { VoiceTyping } from "../../../../utilities/voice-typing";
+import { useAnnounce } from "../../../../utilities/use-announce";
 import { logTileChangeEvent } from "../../../../models/tiles/log/log-tile-change-event";
 import { LogEventName } from "../../../../lib/logger-types";
 
 import VoiceTypingIcon from "../../../../assets/icons/text/voice-typing-text-icon.svg";
 
-import "./voice-typing-button.scss";
+import "../../../../utilities/voice-typing-button.scss";
 
 // Keys allowed while voice typing is active
 const ALLOWED_KEYS = new Set([
@@ -56,28 +57,7 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
   } | null>(null);
 
   // Aria-live announcement
-  const [announcement, setAnnouncement] = useState("");
-  const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const announce = useCallback((message: string) => {
-    if (announceTimerRef.current) {
-      clearTimeout(announceTimerRef.current);
-    }
-    setAnnouncement(message);
-    announceTimerRef.current = setTimeout(() => {
-      setAnnouncement("");
-      announceTimerRef.current = null;
-    }, 2000);
-  }, []);
-
-  // Clean up announce timer on unmount
-  useEffect(() => {
-    return () => {
-      if (announceTimerRef.current) {
-        clearTimeout(announceTimerRef.current);
-      }
-    };
-  }, []);
+  const { announcement, announce } = useAnnounce();
 
   // Clean up Slate anchor ref
   const cleanupSlateRefs = useCallback(() => {
@@ -96,7 +76,7 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
       editor.insertBreak = originalMethods.current.insertBreak;
       editor.insertFragment = originalMethods.current.insertFragment;
       if (originalMethods.current.insertData) {
-        (editor as any).insertData = originalMethods.current.insertData;
+        editor.insertData = originalMethods.current.insertData;
       }
       originalMethods.current = null;
     }
@@ -110,40 +90,33 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
       deleteForward: editor.deleteForward,
       insertBreak: editor.insertBreak,
       insertFragment: editor.insertFragment,
-      insertData: (editor as any).insertData,
+      insertData: editor.insertData,
     };
 
     editor.insertText = (text: string) => {
-      if (isVoiceTypingInsert.current) {
-        originalMethods.current!.insertText(text);
-      }
-      // else: blocked
+      if (!isVoiceTypingInsert.current || !originalMethods.current) return;
+      originalMethods.current.insertText(text);
     };
     editor.deleteBackward = (unit: "character" | "word" | "line" | "block") => {
-      if (isVoiceTypingInsert.current) {
-        originalMethods.current!.deleteBackward(unit);
-      }
+      if (!isVoiceTypingInsert.current || !originalMethods.current) return;
+      originalMethods.current.deleteBackward(unit);
     };
     editor.deleteForward = (unit: "character" | "word" | "line" | "block") => {
-      if (isVoiceTypingInsert.current) {
-        originalMethods.current!.deleteForward(unit);
-      }
+      if (!isVoiceTypingInsert.current || !originalMethods.current) return;
+      originalMethods.current.deleteForward(unit);
     };
     editor.insertBreak = () => {
-      if (isVoiceTypingInsert.current) {
-        originalMethods.current!.insertBreak();
-      }
+      if (!isVoiceTypingInsert.current || !originalMethods.current) return;
+      originalMethods.current.insertBreak();
     };
     editor.insertFragment = (fragment: any) => {
-      if (isVoiceTypingInsert.current) {
-        originalMethods.current!.insertFragment(fragment);
-      }
+      if (!isVoiceTypingInsert.current || !originalMethods.current) return;
+      originalMethods.current.insertFragment(fragment);
     };
-    if ((editor as any).insertData) {
-      (editor as any).insertData = (data: DataTransfer) => {
-        if (isVoiceTypingInsert.current) {
-          originalMethods.current!.insertData?.(data);
-        }
+    if (editor.insertData) {
+      editor.insertData = (data: DataTransfer) => {
+        if (!isVoiceTypingInsert.current || !originalMethods.current) return;
+        originalMethods.current.insertData?.(data);
       };
     }
   }, [editor]);
@@ -292,7 +265,7 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
         deactivateRef.current("user");
       }
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Activation function
   const activate = useCallback(() => {

@@ -6,13 +6,14 @@ import { TileModelContext } from "../../../components/tiles/tile-api";
 import { DrawingContentModelContext } from "../components/drawing-content-context";
 import { DrawingToolbarContext } from "../components/drawing-toolbar-context";
 import { VoiceTyping } from "../../../utilities/voice-typing";
+import { useAnnounce } from "../../../utilities/use-announce";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
 import { isTextObject, TextObjectType } from "../objects/text";
 
 import VoiceTypingIcon from "../../../assets/icons/text/voice-typing-text-icon.svg";
 
-import "./voice-typing-button.scss";
+import "../../../utilities/voice-typing-button.scss";
 
 /**
  * Get the focused textarea element if one exists, or null.
@@ -28,7 +29,7 @@ export const VoiceTypingDrawingButton = observer(
     const tileModel = useContext(TileModelContext);
     const toolbarContext = useContext(DrawingToolbarContext);
     const [active, setActive] = useState(false);
-    const [announcement, setAnnouncement] = useState("");
+    const { announcement, announce } = useAnnounce();
 
     const voiceTypingRef = useRef<VoiceTyping | null>(null);
     const activeRef = useRef(active);
@@ -45,28 +46,6 @@ export const VoiceTypingDrawingButton = observer(
 
     const editingTextObjectRef = useRef(editingTextObject);
     editingTextObjectRef.current = editingTextObject;
-
-    const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const announce = useCallback((message: string) => {
-      if (announceTimerRef.current) {
-        clearTimeout(announceTimerRef.current);
-      }
-      setAnnouncement(message);
-      announceTimerRef.current = setTimeout(() => {
-        setAnnouncement("");
-        announceTimerRef.current = null;
-      }, 2000);
-    }, []);
-
-    // Clean up announce timer on unmount
-    useEffect(() => {
-      return () => {
-        if (announceTimerRef.current) {
-          clearTimeout(announceTimerRef.current);
-        }
-      };
-    }, []);
 
     const deactivate = useCallback((reason: "user" | "timeout" | "error" = "user") => {
       const vt = voiceTypingRef.current;
@@ -139,7 +118,7 @@ export const VoiceTypingDrawingButton = observer(
           deactivateRef.current("user");
         }
       };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, []);
 
     const activate = useCallback(() => {
       if (!editingTextObject) return;
@@ -173,11 +152,15 @@ export const VoiceTypingDrawingButton = observer(
               && !before.endsWith(" ") && !before.endsWith("\n");
             const prefix = needSpaceBefore ? " " : "";
 
-            const newText = before + prefix + text + after;
+            const needSpaceAfter = after.length > 0
+              && !after.startsWith(" ") && !after.startsWith("\n");
+            const suffix = needSpaceAfter ? " " : "";
+
+            const newText = before + prefix + text + suffix + after;
             obj.setText(newText);
 
             // Advance committed text and insertion offset
-            const newCursorPos = offset + prefix.length + text.length;
+            const newCursorPos = offset + prefix.length + text.length + suffix.length;
             committedTextRef.current = newText;
             insertionOffsetRef.current = newCursorPos;
 
