@@ -16,7 +16,7 @@ $border-radius-base: 6px;
     background-color: $workspace-teal-light-8;
   }
   &.class-work {
-    background-color: $classwork-purple-light-8;
+    background-color: $workspace-teal-light-5;
   }
   &.sort-work, &.student-work {
     background-color: $charcoal-light-8;
@@ -38,7 +38,7 @@ $border-radius-base: 6px;
       background-color: $workspace-teal-light-4;
     }
     &.class-work {
-      background-color: $classwork-purple-light-4;
+      background-color: $workspace-teal-light-3;
     }
     &.sort-work, &.student-work {
       background-color: $charcoal-light-4;
@@ -87,26 +87,26 @@ $border-radius-base: 6px;
       }
     }
     &.class-work {
-      background-color: $classwork-purple-light-8;
-      fill:  $classwork-purple-light-8;
-      stroke: $classwork-purple-dark-1;
+      background-color: $workspace-teal-light-5;
+      fill:  $workspace-teal-light-5;
+      stroke: $workspace-teal-dark-1;
       &:hover {
-        background-color: $classwork-purple-light-4;
-        fill: $classwork-purple-light-4;
+        background-color: $workspace-teal-light-3;
+        fill: $workspace-teal-light-3;
       }
       &:active {
-        background-color: $classwork-purple-light-2;
-        fill: $classwork-purple-light-2;
+        background-color: $workspace-teal-light-2;
+        fill: $workspace-teal-light-2;
       }
       path {
-        fill: $classwork-purple-dark-1;
+        fill: $workspace-teal-dark-1;
       }
       &.playing {
-        background-color: $classwork-purple-light-2;
-        fill: $classwork-purple-light-2;
+        background-color: $workspace-teal-light-2;
+        fill: $workspace-teal-light-2;
         &:hover {
-          background-color: $classwork-purple-light-4;
-          fill: $classwork-purple-light-4;
+          background-color: $workspace-teal-light-3;
+          fill: $workspace-teal-light-3;
         }
       }
     }
@@ -202,7 +202,7 @@ $border-radius-base: 6px;
       background-color: $workspace-teal-light-5;
     }
     &.class-work {
-      background-color: $classwork-purple-light-5;
+      background-color: $workspace-teal-light-4;
     }
     &.sort-work, &.student-work {
       background-color: $charcoal-light-5;
@@ -251,17 +251,17 @@ $border-radius-base: 6px;
     }
     &.class-work {
       path:first-of-type {
-        fill: $classwork-purple-dark-1;
+        fill: $workspace-teal-dark-1;
       }
       path:last-of-type {
-        fill: $classwork-purple-light-5;
-        stroke: $classwork-purple-dark-1;
+        fill: $workspace-teal-light-4;
+        stroke: $workspace-teal-dark-1;
         stroke-width: 2px;
       }
       &.selected {
         color: white;
         path:last-of-type {
-          fill:  $classwork-purple-dark-1;
+          fill: $workspace-teal-dark-1;
         }
       }
     }
@@ -433,12 +433,12 @@ $border-radius-base: 6px;
 
   .rc-slider.class-work {
     .rc-slider-handle {
-      border-color: $classwork-purple-dark-1;
+      border-color: $workspace-teal-dark-1;
       &:hover {
-        background-color: $classwork-purple-light-5;
+        background-color: $workspace-teal-light-4;
       }
       &:active {
-        background-color: $classwork-purple-light-2
+        background-color: $workspace-teal-light-2
       }
     }
   }
