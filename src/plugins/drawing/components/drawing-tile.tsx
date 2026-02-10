@@ -53,11 +53,14 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
                         navigatorAllowed &&
                         contentRef.current.isNavigatorVisible;
 
+  const [voiceTypingActive, setVoiceTypingActive] = useState(false);
   const [interimText, setInterimText] = useState("");
   const drawingToolbarContext = useMemo<IDrawingToolbarContext>(() => ({
+    voiceTypingActive,
+    setVoiceTypingActive,
     interimText,
     setInterimText,
-  }), [interimText]);
+  }), [voiceTypingActive, interimText]);
 
   const updateTileVisibleBoundingBox = (bb: BoundingBox) => {
     if (!isEqual(bb, tileVisibleBoundingBox)) {

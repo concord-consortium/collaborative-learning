@@ -74,6 +74,7 @@ export const VoiceTypingDrawingButton = observer(
         vt.disable(reason);
       }
       setActive(false);
+      toolbarContext?.setVoiceTypingActive(false);
       toolbarContext?.setInterimText("");
 
       const tileId = tileModel?.id || "";
@@ -206,6 +207,7 @@ export const VoiceTypingDrawingButton = observer(
         onStateChange: (isActive, reason) => {
           if (!isActive) {
             setActive(false);
+            toolbarContext?.setVoiceTypingActive(false);
             toolbarContext?.setInterimText("");
             if (tileId) {
               logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, {
@@ -224,6 +226,7 @@ export const VoiceTypingDrawingButton = observer(
       });
 
       setActive(true);
+      toolbarContext?.setVoiceTypingActive(true);
 
       if (tileId) {
         logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, {
