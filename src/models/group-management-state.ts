@@ -200,7 +200,6 @@ export class GroupManagementState {
         newMoves.set(this.selectedStudentId, groupId);
         this.pendingMoves = newMoves;
       }
-      this.selectedStudentId = null;
     } else if (this.mode === "student") {
       if (!this.existingGroupIds.has(groupId)) {
         this.createdGroupsInSession = new Set([...this.createdGroupsInSession, groupId]);
@@ -214,7 +213,6 @@ export class GroupManagementState {
       const newMoves = new Map(this.pendingMoves);
       newMoves.set(this.selectedStudentId, null);
       this.pendingMoves = newMoves;
-      this.selectedStudentId = null;
     }
   }
 
@@ -252,7 +250,6 @@ export class GroupManagementState {
         newMoves.set(studentId, effectiveTargetGroupId);
         this.pendingMoves = newMoves;
       }
-      this.selectedStudentId = null;
     } else if (this.mode === "student" && studentId === this.user.id && effectiveTargetGroupId !== null) {
       if (!this.existingGroupIds.has(effectiveTargetGroupId)) {
         this.createdGroupsInSession = new Set([...this.createdGroupsInSession, effectiveTargetGroupId]);
@@ -326,7 +323,11 @@ export class GroupManagementState {
       .filter(student => this.studentGroupMap.get(student.id) === groupId)
       .map(student => {
         const studentGroup = this.groups.groupForUser(student.id);
-        const isConnected = studentGroup?.getUserById(student.id)?.connected ?? false;
+        // The current user is always connected since they're actively using the app.
+        // This handles the case where a student hasn't joined a group yet and has no
+        // group user record, which would otherwise show them as disconnected.
+        const isConnected = student.id === this.user.id
+          || (studentGroup?.getUserById(student.id)?.connected ?? false);
 
         return {
           id: student.id,

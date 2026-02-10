@@ -31,12 +31,12 @@
     }
   }
   &.class-work {
-    fill: $classwork-purple;
+    fill: $workspace-teal;
     &:hover {
-      background-color: $classwork-purple-light-4;
+      background-color: $workspace-teal-light-4;
     }
     &:active {
-      background-color: $classwork-purple-light-3;
+      background-color: $workspace-teal-light-3;
     }
   }
   &.supports {
@@ -124,13 +124,13 @@
     }
   }
   &.class-work {
-    fill: $classwork-purple-dark-1;
+    fill: $workspace-teal-dark-1;
     &:hover {
-      background-color: $classwork-purple-light-4;
+      background-color: $workspace-teal-light-4;
     }
     &:active {
       fill: white;
-      background-color: $classwork-purple-dark-1;
+      background-color: $workspace-teal-dark-1;
       color: white;
     }
   }
