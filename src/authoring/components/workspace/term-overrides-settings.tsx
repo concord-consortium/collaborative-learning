@@ -1,11 +1,41 @@
 import React, { useEffect, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
+import { escapeKeyForForm } from "../../../utilities/sort-utils";
+import { getDefaultValue, TranslationKeyType } from "../../../utilities/translation/translate";
 import { useCurriculum } from "../../hooks/use-curriculum";
-import { escapeKeyForForm, TERM_METADATA, TranslationKeyType } from "../../../utilities/translation/translation-types";
-import { getDefaultValue } from "../../../utilities/translation/translate";
 
 import "./term-overrides-settings.scss";
+
+export interface TermMetadata {
+  key: TranslationKeyType;
+  label: string;  // User-friendly display name for authoring UI
+  description: string;
+}
+
+function getTermMetadata(key: TranslationKeyType, description: string): TermMetadata {
+  return { key, label: getDefaultValue(key) || key, description };
+}
+
+const strategyDescription =
+  "The comment tag/strategy for sorting. The sort option will only appear if this term is overridden.";
+export const termMetadata: TermMetadata[] = [
+  getTermMetadata("studentGroup", "A group of students"),
+  getTermMetadata("studentGroups", "Multiple groups of students"),
+  getTermMetadata("sortLabel.sortByOwner", "Sort label for document owner/student"),
+  getTermMetadata("strategy", strategyDescription),
+  getTermMetadata("bookmarked", "Term for bookmarked documents"),
+  getTermMetadata("tools", "Term for CLUE tiles"),
+  getTermMetadata("sortLabel.sortByDate", "Sort label for date"),
+  getTermMetadata("contentLevel.problem", "Term for the problems/tasks in the unit"),
+  getTermMetadata("contentLevel.problems", "Term for multiple problems/tasks in the unit"),
+  getTermMetadata("contentLevel.unit", "Term for the unit of study"),
+  getTermMetadata("contentLevel.units", "Term for multiple units of study"),
+  getTermMetadata("contentLevel.investigation", "Term for the investigation within a unit"),
+  getTermMetadata("contentLevel.investigations", "Term for multiple investigations within a unit"),
+  getTermMetadata("workspace", "The main editing/viewing panel (singular)"),
+  getTermMetadata("workspaces", "The main editing/viewing panel (plural)")
+];
 
 interface TermOverrideFormInputs {
   overrides: Record<string, string>;
@@ -13,13 +43,12 @@ interface TermOverrideFormInputs {
 
 export const TermOverridesSettings: React.FC = () => {
   const { unitConfig, setUnitConfig, saveState } = useCurriculum();
-  const tagPrompt = unitConfig?.config?.tagPrompt;
 
   const formDefaults: TermOverrideFormInputs = useMemo(() => {
     const termOverrides = unitConfig?.config?.termOverrides ?? {};
     const overrides: Record<string, string> = {};
 
-    TERM_METADATA.forEach(term => {
+    termMetadata.forEach(term => {
       // Use escaped keys for React Hook Form compatibility
       overrides[escapeKeyForForm(term.key)] = termOverrides[term.key] ?? "";
     });
@@ -42,7 +71,7 @@ export const TermOverridesSettings: React.FC = () => {
 
       const termOverrides: Record<string, string> = {};
 
-      TERM_METADATA.forEach(term => {
+      termMetadata.forEach(term => {
         // Form data uses escaped keys, but we save with real keys
         const escapedKey = escapeKeyForForm(term.key);
         const value = data.overrides[escapedKey]?.trim();
@@ -62,14 +91,7 @@ export const TermOverridesSettings: React.FC = () => {
   };
 
   const getEffectiveDefault = (termKey: TranslationKeyType): string => {
-    const defaultVal = getDefaultValue(termKey);
-
-    // Strategy has special fallback to tagPrompt
-    if (termKey === "Strategy" && !defaultVal) {
-      return tagPrompt || "(no default)";
-    }
-
-    return defaultVal || "(no default)";
+    return getDefaultValue(termKey) || "(no default)";
   };
 
   return (
@@ -81,7 +103,7 @@ export const TermOverridesSettings: React.FC = () => {
       </p>
 
       <div className="term-list">
-        {[...TERM_METADATA].sort((a, b) => a.key.localeCompare(b.key)).map(term => {
+        {[...termMetadata].sort((a, b) => a.label.localeCompare(b.label)).map(term => {
           const effectiveDefault = getEffectiveDefault(term.key);
 
           return (
@@ -102,12 +124,6 @@ export const TermOverridesSettings: React.FC = () => {
                   {...register(`overrides.${escapeKeyForForm(term.key)}` as const)}
                 />
               </div>
-              {term.key === "Strategy" && (
-                <p className="help-text muted small">
-                  If left blank, defaults to the tag prompt from curriculum configuration
-                  {tagPrompt ? ` ("${tagPrompt}")` : " (not set)"}.
-                </p>
-              )}
             </div>
           );
         })}

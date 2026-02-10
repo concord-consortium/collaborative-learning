@@ -1,19 +1,24 @@
-import React, { useCallback, useEffect } from "react";
 import { observer } from "mobx-react";
-import { SortWorkHeader } from "../navigation/sort-work-header";
-import { useStores } from "../../hooks/use-stores";
-import { useSortOptions } from "../../hooks/use-sort-options";
+import React, { useCallback, useEffect } from "react";
+
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
+import { useSortOptions } from "../../hooks/use-sort-options";
+import { useStores } from "../../hooks/use-stores";
 import { DEBUG_DOC_LIST } from "../../lib/debug";
-import { SortWorkDocumentArea } from "./sort-work-document-area";
-import { ENavTab } from "../../models/view/nav-tabs";
-import { DocListDebug } from "./doc-list-debug";
-import { DocFilterType, PrimarySortType, SecondarySortType } from "../../models/stores/ui-types";
-import { IOpenDocumentsGroupMetadata, SortedSection } from "./sorted-section";
-import { DocumentGroup } from "../../models/stores/document-group";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
+import { DocumentGroup } from "../../models/stores/document-group";
+import { DocFilterType, DocFilterTypeIds, PrimarySortType, SecondarySortType } from "../../models/stores/ui-types";
+import { ENavTab } from "../../models/view/nav-tabs";
+import { getFilterTypeTranslationKey } from "../../utilities/sort-utils";
+import { upperWords } from "../../utilities/string-utils";
+import { isTranslationKey, translate } from "../../utilities/translation/translate";
+import { urlParams } from "../../utilities/url-params";
 import { AiSummary } from "../navigation/ai-summary";
+import { SortWorkHeader } from "../navigation/sort-work-header";
+import { DocListDebug } from "./doc-list-debug";
+import { SortWorkDocumentArea } from "./sort-work-document-area";
+import { IOpenDocumentsGroupMetadata, SortedSection } from "./sorted-section";
 
 import "../thumbnail/document-type-collection.scss";
 import "./sort-work-view.scss";
@@ -23,10 +28,12 @@ import "./sort-work-view.scss";
  * Various options for sorting the display are available - by user, by group, by tools used, etc.
  */
 export const SortWorkView: React.FC = observer(function SortWorkView() {
-  const { investigation, persistentUI, problem, sortedDocuments, ui, unit } = useStores();
+  const { appConfig, investigation, persistentUI, problem, sortedDocuments, ui, unit } = useStores();
   const { sortOptions, showContextFilter, defaultPrimarySort, isValidSortType } = useSortOptions();
   const { docFilter: persistentUIDocFilter, primarySortBy, secondarySortBy } = persistentUI;
-  const filterOptions: DocFilterType[] = ["Problem", "Investigation", "Unit", "All"];
+  const enabledDocFilterOptions = appConfig.sortWorkConfig?.docFilterOptions;
+  const filterOptions: DocFilterType[] =
+    enabledDocFilterOptions ? [...enabledDocFilterOptions] : [...DocFilterTypeIds];
   const docFilter = persistentUIDocFilter;
 
   // Validate that current sort selections are still valid given configuration
@@ -34,6 +41,13 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     isValidSortType(primarySortBy) ? primarySortBy : defaultPrimarySort;
   const validatedSecondarySortBy: SecondarySortType =
     secondarySortBy === "None" || isValidSortType(secondarySortBy) ? secondarySortBy : "None";
+
+  // In authoring mode, set the primary sort to a fake value so the default will be chosen.
+  useEffect(() => {
+    if (urlParams.authoringBranch) {
+      persistentUI.setPrimarySortBy("Illegal Sort");
+    }
+  }, [persistentUI]);
 
   useEffect(() => {
     if (validatedPrimarySortBy !== primarySortBy) {
@@ -95,12 +109,15 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   });
 
   // Disable "Problem" filter option when sorting by Problem
-  const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => ({
-    disabled: option === "Problem" && validatedPrimarySortBy === "Problem",
-    selected: option === docFilter,
-    text: option,
-    onClick: () => handleDocFilterSelection(option)
-  }));
+  const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => {
+    const key = getFilterTypeTranslationKey(option);
+    return ({
+      disabled: option === "Problem" && validatedPrimarySortBy === "Problem",
+      selected: option === docFilter,
+      text: isTranslationKey(key) ? upperWords(translate(key)) : option,
+      onClick: () => handleDocFilterSelection(option)
+    });
+  });
 
   const sortedDocumentGroups = sortedDocuments.sortBy(validatedPrimarySortBy);
   const secondarySearchTerm = validatedSecondarySortBy;
@@ -143,10 +160,11 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
           }
         } else {
           const groupsWithDocs = sortedDocumentGroups.filter(group => group.documents.length > 0);
+          const withDocsIndex = groupsWithDocs.findIndex(group => group.label === openGroupMetadata?.primaryLabel);
           const numGroups = groupsWithDocs.length;
           if (numGroups > 1) {
-            previousDocumentsGroup = groupsWithDocs[(openDocumentsGroupIndex - 1 + numGroups) % numGroups];
-            nextDocumentsGroup = groupsWithDocs[(openDocumentsGroupIndex + 1) % numGroups];
+            previousDocumentsGroup = groupsWithDocs[(withDocsIndex - 1 + numGroups) % numGroups];
+            nextDocumentsGroup = groupsWithDocs[(withDocsIndex + 1) % numGroups];
           }
         }
       }

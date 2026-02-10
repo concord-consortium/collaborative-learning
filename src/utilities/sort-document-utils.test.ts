@@ -182,7 +182,7 @@ describe("sort-document-utils", () => {
     });
 
     it("should work with custom Problem term", () => {
-      setTermOverrides({ Problem: "Question" });
+      setTermOverrides({ "contentLevel.problem": "Question" });
 
       const labels = ["Question 2", "No Question", "Question 1"];
       const sorted = sortProblemSectionLabels([...labels]);
@@ -191,7 +191,7 @@ describe("sort-document-utils", () => {
     });
 
     it("should work with custom Problem term and investigation format", () => {
-      setTermOverrides({ Problem: "Question" });
+      setTermOverrides({ "contentLevel.problem": "Question" });
 
       const labels = ["Question 1.2", "No Question", "Question 1.1", "Question 2.1"];
       const sorted = sortProblemSectionLabels([...labels]);

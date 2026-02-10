@@ -1,13 +1,14 @@
 import classNames from "classnames";
 import React, { useEffect, useRef, useState } from "react";
-import { useUIStore } from "../../hooks/use-stores";
-import type { PostCommentFn } from "./chat-panel";
 import type { IAgreeWithAi } from "shared/shared";
+import { useUIStore } from "../../hooks/use-stores";
+import { getTermOverride } from "../../utilities/translation/translate";
+import type { PostCommentFn } from "./chat-panel";
 
 import SendIcon from "../../assets/send-icon.svg";
-import YesIcon from "../../assets/yes-icon.svg";
 import NoIcon from "../../assets/no-icon.svg";
 import NotSureIcon from "../../assets/not-sure-icon.svg";
+import YesIcon from "../../assets/yes-icon.svg";
 
 import "../themes.scss";
 
@@ -17,13 +18,12 @@ interface IProps {
   onPostComment?: PostCommentFn;
   showCommentTag?: boolean;
   commentTags?: Record<string, string>;
-  tagPrompt?: string;
   showAgreeButtons?: boolean;
 }
 
 export const CommentTextBox: React.FC<IProps> = (props) => {
-  const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags, tagPrompt,
-         showAgreeButtons } = props;
+  const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags, showAgreeButtons } = props;
+  const tagPrompt = getTermOverride("strategy");
   const minTextAreaHeight =
     showCommentTag && showAgreeButtons ? 120 :
     showCommentTag || showAgreeButtons ? 100 :
@@ -82,7 +82,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   const resetInputs = () => {
     setCommentTextAreaHeight(minTextAreaHeight);
     setCommentText("");
-    setAllTags((oldArray) => [""]); //select will go back to top choice (tagPrompt)
+    setAllTags([""]); //select will go back to top choice (tagPrompt)
     setAgreeWithAi(undefined);
   };
 
@@ -129,12 +129,8 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
                               : "Reply...";
 
   const handleSelectDropDown = (val: string) => {
-    if (tagPrompt && val !== tagPrompt){ //do not save comments with default tag
-      setAllTags((oldArray) => [val]);
-    }
-    else {
-      setAllTags((oldArray) => [""]);
-    }
+    // Do not save comments with default tag
+    setAllTags(tagPrompt && val !== tagPrompt ? [val] : [""]);
   };
 
   const handleToggleAgreeWithAi = (value: IAgreeWithAi["value"]) => {

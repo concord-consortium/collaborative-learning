@@ -101,7 +101,9 @@
     "tools": ["Simulator"],
     "enableCommentRoles": ["student", "teacher", "researcher"],
     "showCommentTag": true,
-    "tagPrompt": "Select QA Strategy",
+    "termOverrides": {
+      "strategy": "Select QA Strategy"
+    },
     "commentTags": {
       "diverging": "Diverging Designs",
       "converging": "Converging Designs",
