@@ -4,7 +4,6 @@
   position: relative;
   height: 100%;
   background-color: white;
-  border-radius: 0 6px 0 0;
 
   .nav-tab-panel {
     // Split width between the tabs and the chat panel
@@ -23,7 +22,6 @@
       width: 36px;
       height: $nav-tab-height;
       background-color: $charcoal-light-6;
-      border-radius: 0 6px 0 0;
       border-style: solid;
       border-color: $charcoal-light-2;
       border-width: 2px 2px 0 2px;

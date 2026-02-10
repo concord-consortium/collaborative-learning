@@ -180,7 +180,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
 
   const renderNonStudentHeader = ({showProblemMenu}: {showProblemMenu: boolean}) => {
     return (
-      <div className="app-header">
+      <header className="app-header" aria-label="CLUE Header">
         <div className="left">
           <div className="unit" data-test="investigation-title">
             <div className="title">
@@ -220,7 +220,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
             onSave={handleSaveGroupChanges}
           />
         </div>
-      </div>
+      </header>
     );
   };
 
@@ -261,7 +261,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const showUnitInfo = unit.title !== "Null Unit";
 
   return (
-      <div className="app-header">
+      <header className="app-header" aria-label="CLUE Header">
         <div className="left">
           {showUnitInfo &&
           <>
@@ -304,6 +304,6 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
             onClose={handleCloseStudentGroupModal}
           />
         </div>
-      </div>
+      </header>
     );
 });

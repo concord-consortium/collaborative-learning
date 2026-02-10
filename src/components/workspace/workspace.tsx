@@ -20,6 +20,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   const { appConfig: { navTabs: navTabSpecs },
           persistentUI: { navTabContentShown, workspaceShown },
           exemplarController,
+          problem,
           user: { isResearcher },
           ui: { standalone }
         } = stores;
@@ -48,11 +49,13 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   // DocumentWorkspaceComponent component.
   const showLeftPanel =  stores.isProblemLoaded && (isResearcher || navTabSpecs.showNavPanel);
   const showRightPanel = !isResearcher;
+  const problemTitle = problem.title + (problem.subtitle ? `: ${problem.subtitle}` : "");
 
   return (
-    <div
+    <main
       className="workspace"
       onKeyDown={(e) => hotKeys.current.dispatch(e)}>
+      <h1 className="visually-hidden">{problemTitle}</h1>
       <div
         className="drag-handler"
         onDragOver={handleDragOverWorkspace}
@@ -60,19 +63,25 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
 
       {showLeftPanel &&
         <>
-          <ResizablePanel collapsed={!navTabContentShown} >
-            <NavTabPanel
-              onDragOver={handleDragOverWorkspace}
-            />
-          </ResizablePanel>
+          <section aria-labelledby="left-nav-heading">
+            <ResizablePanel collapsed={!navTabContentShown}>
+              <h2 id="left-nav-heading" className="section-heading">Lessons and Documents</h2>
+              <NavTabPanel
+                onDragOver={handleDragOverWorkspace}
+              />
+            </ResizablePanel>
+          </section>
           {showRightPanel && <ResizePanelDivider />}
         </>
       }
       {showRightPanel &&
-        <ResizablePanel collapsed={!workspaceShown}>
-          {standalone ? <StandAloneAuthComponent /> : <DocumentWorkspaceComponent />}
-        </ResizablePanel>
+        <section aria-labelledby="workspace-heading">
+          <ResizablePanel collapsed={!workspaceShown}>
+            <h2 id="workspace-heading" className="section-heading workspace-heading">Workspace</h2>
+            {standalone ? <StandAloneAuthComponent /> : <DocumentWorkspaceComponent />}
+          </ResizablePanel>
+        </section>
       }
-    </div>
+    </main>
   );
 });
