@@ -49,14 +49,30 @@
     background-color: $comment-select-background;
   }
 
-  .tool-tile-drag-handle {
+  .tool-tile-drag-handle-wrapper {
+    // Hit area for drag handle - expanded for better touch/click targeting
     position: absolute;
     right: -1px;
     top: -1px;
     box-sizing: border-box;
+    width: $drag-handle-hit-size;
+    height: $drag-handle-hit-size;
+    z-index: 99;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+
+    // Uncomment to show grab cursor over entire hit area (not just the icon)
+    // &:hover {
+    //   cursor: grab;
+    // }
+  }
+
+  .tool-tile-drag-handle {
+    // Visual gripper icon - stays at 34×34px
+    box-sizing: border-box;
     width: 34px;
     height: 34px;
-    z-index: 99;
     opacity: 0;
     transition: 0.3s;
 

@@ -67,10 +67,6 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
     <div className={tabPanelDocumentSectionClass}
           key={`${tab}-${section.type}`}
           data-test={`${section.dataTestHeader}-documents`}>
-      {(classStore.isTeacher(sectionDocs[0]?.uid) && topTab === ENavTab.kClassWork && !isBottomPanel)
-        && <div className="document-divider">
-              <div className="document-divider-label">Teacher Documents</div>
-           </div>}
       <div className={listClass}>
         {showNewDocumentThumbnail &&
           <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}

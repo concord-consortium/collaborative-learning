@@ -381,7 +381,8 @@ describe("GroupManagementState", () => {
         state.selectGroup("2");
 
         expect(state.pendingMoves.get("student-1")).toBe("2");
-        expect(state.selectedStudentId).toBeNull();
+        // Student stays selected so the teacher can see which student was last moved
+        expect(state.selectedStudentId).toBe("student-1");
       });
 
       it("should not add move when no student selected", () => {
@@ -434,7 +435,8 @@ describe("GroupManagementState", () => {
       state.moveStudentToNoGroup();
 
       expect(state.pendingMoves.get("student-1")).toBeNull();
-      expect(state.selectedStudentId).toBeNull();
+      // Student stays selected so the teacher can see which student was last moved
+      expect(state.selectedStudentId).toBe("student-1");
     });
 
     it("should do nothing when no student selected", () => {
