@@ -93,8 +93,10 @@ export const GroupCard: React.FC<IProps> = observer(function GroupCard({
     </div>
   );
 
+  const containsSelectedStudent = !!selectedStudentId && students.some(s => s.id === selectedStudentId);
+
   const cardClasses = classNames("group-card", {
-    "clickable": canSelectGroup && !!selectedStudentId,
+    "clickable": canSelectGroup && !!selectedStudentId && !containsSelectedStudent,
     "current": isCurrentUserGroup,
     "dragging-over": isOver,
     "drop-target": isDropTarget,
