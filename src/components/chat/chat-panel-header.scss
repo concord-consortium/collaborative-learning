@@ -99,11 +99,11 @@
       }
     }
     &.class-work {
-      background-image: url("../../assets/icons/close/close-class-work.svg");
+      background-image: url("../../assets/icons/close/close-my-work.svg");
       background-repeat: no-repeat;
-      fill: $classwork-purple;
+      fill: $workspace-teal;
       &:hover, &:active  {
-        background-image: url("../../assets/icons/arrow-back/arrow-back-class-work.svg");
+        background-image: url("../../assets/icons/arrow-back/arrow-back-my-work.svg");
       }
     }
     &.supports {

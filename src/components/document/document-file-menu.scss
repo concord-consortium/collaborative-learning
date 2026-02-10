@@ -7,9 +7,9 @@
     margin-left: 5px;
 
     .header {
-      width: 60px;
-      min-width: 60px;
-      max-width: 60px;
+      width: 90px;
+      min-width: 90px;
+      max-width: 90px;
       height: 26px;
       color: $charcoal-dark-2;
       background-color: $workspace-teal-light-4;
@@ -48,13 +48,11 @@
 
       font-size: 14px;
 
-      .title-container {
-        margin: 0 4px;
-
-        .title {
-          padding: 10px 0;
-          text-align: left;
-        }
+      .item.line-clamp {
+        display: block;
+        line-height: 26px;
+        margin-left: 0;
+        max-height: 26px;
       }
     }
 

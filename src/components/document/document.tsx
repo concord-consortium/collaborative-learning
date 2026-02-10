@@ -4,8 +4,8 @@ import React from "react";
 import FileSaver from "file-saver";
 import { kAnalyzerUserParams } from "../../../shared/shared";
 import { DocumentModelType } from "../../models/document/document";
+import { LearningLogDocument, LearningLogPublication, PersonalDocument } from "../../models/document/document-types";
 import { translate } from "../../utilities/translation/translate";
-import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
@@ -263,6 +263,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions left">
             {showFileMenu &&
               <DocumentFileMenu document={document}
+                onNewDocument={this.handleNewDocumentFromMenu}
                 onOpenDocument={this.handleOpenDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={true}
@@ -432,6 +433,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           { !hideButtons && showFileMenu &&
               <DocumentFileMenu document={document}
+                onNewDocument={this.handleNewDocumentFromMenu}
                 onOpenDocument={this.handleOpenDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={countNotDeleted < 1}
@@ -559,6 +561,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private handleSelectNewDocument = (type: string) => {
     const { onNewDocument } = this.props;
+    onNewDocument?.(type);
+  };
+
+  private handleNewDocumentFromMenu = () => {
+    const { document, onNewDocument } = this.props;
+    const type = document.isLearningLog ? LearningLogDocument : PersonalDocument;
     onNewDocument?.(type);
   };
 
