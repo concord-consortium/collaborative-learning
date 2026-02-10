@@ -174,7 +174,6 @@ export const VoiceTypingDrawingButton = observer(
             });
 
             if (tileId) {
-              // TODO: Confirm with stakeholders that logging transcribed text content is acceptable before merging
               logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, {
                 operation: "voice-typing-insert",
                 change: { args: [{ text }] },

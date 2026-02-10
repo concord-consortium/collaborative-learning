@@ -329,7 +329,6 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
 
           // Log the final transcript
           if (tileId) {
-            // TODO: Confirm with stakeholders that logging transcribed text content is acceptable before merging
             logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, {
               operation: "voice-typing-insert",
               change: { args: [{ text }] },
