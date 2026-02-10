@@ -108,7 +108,12 @@ export class VoiceTyping {
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       this.callbacks?.onError?.(event.error);
-      this.disable("error");
+      // "no-speech" and "aborted" are non-fatal — recognition will fire onend
+      // and auto-restart. Only disable on truly fatal errors.
+      const nonFatal = event.error === "no-speech" || event.error === "aborted";
+      if (!nonFatal) {
+        this.disable("error");
+      }
     };
 
     this.recognition = recognition;
@@ -138,16 +143,31 @@ export class VoiceTyping {
     this.disableRequested = true;
     this._isActive = false;
 
-    // Stop recognition
+    // Stop recognition — use stop() (not abort()) so the browser can deliver
+    // any pending final results via onresult before firing onend.
+    // Capture onTranscript in a closure so results can be delivered even after
+    // this.callbacks is cleared below.
     if (this.recognition) {
+      const rec = this.recognition;
+      const onTranscript = this.callbacks?.onTranscript;
+      rec.onerror = null;
+      rec.onresult = onTranscript ? (event: SpeechRecognitionEvent) => {
+        const result = event.results[event.resultIndex];
+        const transcript = result[0].transcript;
+        const isFinal = result.isFinal;
+        onTranscript(transcript, isFinal);
+      } : null;
+      rec.onend = () => {
+        rec.onresult = null;
+        rec.onend = null;
+      };
       try {
-        this.recognition.stop();
+        rec.stop();
       } catch {
-        // Ignore errors from stop()
+        // If stop() throws, clean up immediately
+        rec.onresult = null;
+        rec.onend = null;
       }
-      this.recognition.onresult = null;
-      this.recognition.onend = null;
-      this.recognition.onerror = null;
       this.recognition = null;
     }
 

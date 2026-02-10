@@ -45,6 +45,7 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
   const voiceTypingRef = useRef<VoiceTyping | null>(null);
   const isVoiceTypingInsert = useRef(false);
   const anchorPointRef = useRef<SlatePointRef | null>(null);
+  const interimTextRef = useRef("");
 
   // Store original editor methods for restoration
   const originalMethods = useRef<{
@@ -131,6 +132,44 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
     }
   }, []);
 
+  // Insert text into the Slate editor at the anchor point with smart spacing.
+  const insertIntoSlate = useCallback((text: string) => {
+    doVoiceInsert(() => {
+      const anchor = anchorPointRef.current?.current;
+      if (!anchor) return;
+
+      const beforePoint = Editor.before(editor, anchor, { unit: "character" });
+      const charBefore = beforePoint
+        ? Editor.string(editor, { anchor: beforePoint, focus: anchor })
+        : "";
+      const needSpaceBefore = charBefore !== "" && charBefore !== " " && charBefore !== "\n";
+
+      const textToInsert = (needSpaceBefore ? " " : "") + text;
+      Transforms.insertText(editor, textToInsert, { at: anchor });
+
+      const newAnchor = anchorPointRef.current?.current;
+      if (newAnchor) {
+        const afterPoint = Editor.after(editor, newAnchor, { unit: "character" });
+        const charAfter = afterPoint
+          ? Editor.string(editor, { anchor: newAnchor, focus: afterPoint })
+          : "";
+        if (charAfter && !(/^[.,;:!? \n]/.test(charAfter))) {
+          Transforms.insertText(editor, " ", { at: newAnchor });
+        }
+      }
+    });
+  }, [editor, doVoiceInsert]);
+
+  // Commit any pending interim text into the editor as final text.
+  // Must be called BEFORE restoreEditorMethods/cleanupSlateRefs so the
+  // editor overrides and anchor PointRef are still available.
+  const commitInterimText = useCallback(() => {
+    const text = interimTextRef.current;
+    if (!text) return;
+    interimTextRef.current = "";
+    insertIntoSlate(text);
+  }, [insertIntoSlate]);
+
   // Deactivation function
   const deactivate = useCallback((reason: "user" | "timeout" | "error" = "user") => {
     const vt = voiceTypingRef.current;
@@ -138,6 +177,9 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
     if (vt?.isActive) {
       vt.disable(reason);
     }
+
+    // Commit any pending interim text before tearing down
+    commitInterimText();
 
     restoreEditorMethods();
     cleanupSlateRefs();
@@ -155,7 +197,7 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
     }
 
     announce("Voice typing off");
-  }, [restoreEditorMethods, cleanupSlateRefs, toolbarContext, model?.id, announce]);
+  }, [commitInterimText, restoreEditorMethods, cleanupSlateRefs, toolbarContext, model?.id, announce]);
 
   // Keep deactivate ref current for use in event handlers
   const deactivateRef = useRef(deactivate);
@@ -295,37 +337,9 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
     vt.enable({
       onTranscript: (text: string, isFinal: boolean) => {
         if (isFinal) {
-          // Clear the interim overlay
+          interimTextRef.current = "";
           toolbarContext?.setInterimText("");
-
-          // Insert the final text into Slate
-          doVoiceInsert(() => {
-            const anchor = anchorPointRef.current?.current;
-            if (!anchor) return;
-
-            // Check spacing: add space before if needed
-            const beforePoint = Editor.before(editor, anchor, { unit: "character" });
-            const charBefore = beforePoint
-              ? Editor.string(editor, { anchor: beforePoint, focus: anchor })
-              : "";
-            const needSpaceBefore = charBefore !== "" && charBefore !== " " && charBefore !== "\n";
-
-            const textToInsert = (needSpaceBefore ? " " : "") + text;
-
-            Transforms.insertText(editor, textToInsert, { at: anchor });
-
-            // Check spacing: add space after if needed
-            const newAnchor = anchorPointRef.current?.current;
-            if (newAnchor) {
-              const afterPoint = Editor.after(editor, newAnchor, { unit: "character" });
-              const charAfter = afterPoint
-                ? Editor.string(editor, { anchor: newAnchor, focus: afterPoint })
-                : "";
-              if (charAfter && !(/^[.,;:!? \n]/.test(charAfter))) {
-                Transforms.insertText(editor, " ", { at: newAnchor });
-              }
-            }
-          });
+          insertIntoSlate(text);
 
           // Log the final transcript
           if (tileId) {
@@ -337,6 +351,7 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
           }
         } else {
           // Show interim text in the floating overlay (no Slate operations)
+          interimTextRef.current = text;
           toolbarContext?.setInterimText(text);
         }
       },
@@ -344,6 +359,8 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
       onStateChange: (isActive, reason) => {
         if (!isActive) {
           // VoiceTyping module triggered deactivation (timeout, error, or single-instance eviction)
+          // Commit any pending interim text before tearing down
+          commitInterimText();
           restoreEditorMethods();
           cleanupSlateRefs();
           setActive(false);
@@ -379,8 +396,8 @@ export function VoiceTypingButton({ name }: IToolbarButtonComponentProps) {
     }
 
     announce("Voice typing on");
-  }, [editor, model?.id, toolbarContext, installEditorOverrides, doVoiceInsert,
-      restoreEditorMethods, cleanupSlateRefs, announce]);
+  }, [editor, model?.id, toolbarContext, installEditorOverrides, insertIntoSlate,
+      commitInterimText, restoreEditorMethods, cleanupSlateRefs, announce]);
 
   // Don't render if not supported
   if (!VoiceTyping.supported) return null;

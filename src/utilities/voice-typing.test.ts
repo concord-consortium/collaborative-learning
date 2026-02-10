@@ -309,7 +309,7 @@ describe("VoiceTyping", () => {
   });
 
   describe("onerror", () => {
-    it("calls onError and disables on error", () => {
+    it("calls onError and disables on fatal error", () => {
       const vt = new VoiceTyping();
       const callbacks = createCallbacks();
       vt.enable(callbacks);
@@ -319,6 +319,81 @@ describe("VoiceTyping", () => {
       expect(callbacks.errors).toEqual(["not-allowed"]);
       expect(vt.isActive).toBe(false);
       expect(callbacks.stateChanges).toEqual([{ active: false, reason: "error" }]);
+    });
+
+    it("does not disable on non-fatal 'no-speech' error", () => {
+      const vt = new VoiceTyping();
+      const callbacks = createCallbacks();
+      vt.enable(callbacks);
+
+      mockInstance!.simulateError("no-speech");
+
+      expect(callbacks.errors).toEqual(["no-speech"]);
+      expect(vt.isActive).toBe(true);
+      expect(callbacks.stateChanges).toEqual([]);
+
+      vt.disable();
+    });
+
+    it("does not disable on non-fatal 'aborted' error", () => {
+      const vt = new VoiceTyping();
+      const callbacks = createCallbacks();
+      vt.enable(callbacks);
+
+      mockInstance!.simulateError("aborted");
+
+      expect(callbacks.errors).toEqual(["aborted"]);
+      expect(vt.isActive).toBe(true);
+      expect(callbacks.stateChanges).toEqual([]);
+
+      vt.disable();
+    });
+
+    it("disables on fatal 'network' error", () => {
+      const vt = new VoiceTyping();
+      const callbacks = createCallbacks();
+      vt.enable(callbacks);
+
+      mockInstance!.simulateError("network");
+
+      expect(callbacks.errors).toEqual(["network"]);
+      expect(vt.isActive).toBe(false);
+      expect(callbacks.stateChanges).toEqual([{ active: false, reason: "error" }]);
+    });
+  });
+
+  describe("disable() allows pending final results", () => {
+    it("delivers final results that arrive after stop() but before onend", () => {
+      const vt = new VoiceTyping();
+      const callbacks = createCallbacks();
+      vt.enable(callbacks);
+
+      const instance = mockInstance!;
+
+      vt.disable();
+
+      // Browser delivers a final result after stop() but before onend
+      instance.simulateResult("last words", true);
+
+      expect(callbacks.transcripts).toEqual([{ text: "last words", isFinal: true }]);
+    });
+
+    it("clears onresult handler after onend fires", () => {
+      const vt = new VoiceTyping();
+      const callbacks = createCallbacks();
+      vt.enable(callbacks);
+
+      const instance = mockInstance!;
+
+      vt.disable();
+
+      // onend fires after stop
+      instance.simulateEnd();
+
+      // Now onresult should be cleared — further results are ignored
+      instance.simulateResult("too late", true);
+
+      expect(callbacks.transcripts).toEqual([]);
     });
   });
 

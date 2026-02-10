@@ -23,6 +23,27 @@ function getFocusedTextarea(): HTMLTextAreaElement | null {
   return el instanceof HTMLTextAreaElement ? el : null;
 }
 
+/**
+ * Splice text into a base string at the given offset, adding spaces as needed.
+ */
+function spliceWithSpacing(base: string, offset: number, text: string) {
+  const before = base.slice(0, offset);
+  const after = base.slice(offset);
+
+  const needSpaceBefore = before.length > 0
+    && !before.endsWith(" ") && !before.endsWith("\n");
+  const prefix = needSpaceBefore ? " " : "";
+
+  const needSpaceAfter = after.length > 0
+    && !after.startsWith(" ") && !after.startsWith("\n");
+  const suffix = needSpaceAfter ? " " : "";
+
+  return {
+    newText: before + prefix + text + suffix + after,
+    newCursorPos: offset + prefix.length + text.length + suffix.length,
+  };
+}
+
 export const VoiceTypingDrawingButton = observer(
   function VoiceTypingDrawingButton({ name }: IToolbarButtonComponentProps) {
     const drawingModel = useContext(DrawingContentModelContext);
@@ -38,6 +59,7 @@ export const VoiceTypingDrawingButton = observer(
     // Track the "committed" text (before any interim) and the insertion offset within it
     const committedTextRef = useRef("");
     const insertionOffsetRef = useRef(0);
+    const interimTextRef = useRef("");
 
     // Find the currently editing text object
     const editingTextObject: TextObjectType | undefined = drawingModel?.objects.find(
@@ -47,11 +69,44 @@ export const VoiceTypingDrawingButton = observer(
     const editingTextObjectRef = useRef(editingTextObject);
     editingTextObjectRef.current = editingTextObject;
 
+    // Insert text into the editing text object at the current insertion offset.
+    const insertIntoTextObject = useCallback((text: string) => {
+      const obj = editingTextObjectRef.current;
+      if (!obj) return;
+
+      const { newText, newCursorPos } = spliceWithSpacing(
+        committedTextRef.current, insertionOffsetRef.current, text
+      );
+      obj.setText(newText);
+      committedTextRef.current = newText;
+      insertionOffsetRef.current = newCursorPos;
+
+      requestAnimationFrame(() => {
+        const ta = getFocusedTextarea();
+        if (ta) {
+          ta.selectionStart = newCursorPos;
+          ta.selectionEnd = newCursorPos;
+        }
+      });
+    }, []);
+
+    // Commit any pending interim text into the text object before tearing down.
+    const commitInterimText = useCallback(() => {
+      const text = interimTextRef.current;
+      if (!text) return;
+      interimTextRef.current = "";
+      insertIntoTextObject(text);
+    }, [insertIntoTextObject]);
+
     const deactivate = useCallback((reason: "user" | "timeout" | "error" = "user") => {
       const vt = voiceTypingRef.current;
       if (vt?.isActive) {
         vt.disable(reason);
       }
+
+      // Commit any pending interim text before tearing down
+      commitInterimText();
+
       setActive(false);
       toolbarContext?.setVoiceTypingActive(false);
       toolbarContext?.setInterimText("");
@@ -66,7 +121,7 @@ export const VoiceTypingDrawingButton = observer(
       }
 
       announce("Voice typing off");
-    }, [tileModel?.id, announce, toolbarContext]);
+    }, [commitInterimText, tileModel?.id, announce, toolbarContext]);
 
     const deactivateRef = useRef(deactivate);
     deactivateRef.current = deactivate;
@@ -136,42 +191,9 @@ export const VoiceTypingDrawingButton = observer(
       vt.enable({
         onTranscript: (text: string, isFinal: boolean) => {
           if (isFinal) {
-            // Clear the interim overlay
+            interimTextRef.current = "";
             toolbarContext?.setInterimText("");
-
-            const obj = editingTextObjectRef.current;
-            if (!obj) return;
-
-            // Splice final text at the insertion offset within the committed base
-            const base = committedTextRef.current;
-            const offset = insertionOffsetRef.current;
-            const before = base.slice(0, offset);
-            const after = base.slice(offset);
-
-            const needSpaceBefore = before.length > 0
-              && !before.endsWith(" ") && !before.endsWith("\n");
-            const prefix = needSpaceBefore ? " " : "";
-
-            const needSpaceAfter = after.length > 0
-              && !after.startsWith(" ") && !after.startsWith("\n");
-            const suffix = needSpaceAfter ? " " : "";
-
-            const newText = before + prefix + text + suffix + after;
-            obj.setText(newText);
-
-            // Advance committed text and insertion offset
-            const newCursorPos = offset + prefix.length + text.length + suffix.length;
-            committedTextRef.current = newText;
-            insertionOffsetRef.current = newCursorPos;
-
-            // Position cursor after the inserted text
-            requestAnimationFrame(() => {
-              const ta = getFocusedTextarea();
-              if (ta) {
-                ta.selectionStart = newCursorPos;
-                ta.selectionEnd = newCursorPos;
-              }
-            });
+            insertIntoTextObject(text);
 
             if (tileId) {
               logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, {
@@ -182,12 +204,15 @@ export const VoiceTypingDrawingButton = observer(
             }
           } else {
             // Show interim text in the floating overlay (no model changes)
+            interimTextRef.current = text;
             toolbarContext?.setInterimText(text);
           }
         },
 
         onStateChange: (isActive, reason) => {
           if (!isActive) {
+            // Commit any pending interim text before tearing down
+            commitInterimText();
             setActive(false);
             toolbarContext?.setVoiceTypingActive(false);
             toolbarContext?.setInterimText("");
@@ -219,7 +244,7 @@ export const VoiceTypingDrawingButton = observer(
       }
 
       announce("Voice typing on");
-    }, [editingTextObject, tileModel?.id, announce, toolbarContext]);
+    }, [editingTextObject, commitInterimText, insertIntoTextObject, tileModel?.id, announce, toolbarContext]);
 
     // Don't render if not supported
     if (!VoiceTyping.supported) return null;
