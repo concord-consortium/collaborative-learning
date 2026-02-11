@@ -16,6 +16,10 @@
   // Content after the h2 should fill remaining height
   > *:not(.section-heading) {
     flex: 1;
+
+    // Allow flex items to shrink below their content's minimum height
+    // This fixes issues with children that have height: 100% (like .single-workspace)
+    min-height: 0;
   }
 
   transition-duration: 0.5s;
