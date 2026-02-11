@@ -126,6 +126,24 @@ Start simple. Gradient boosting on hand-crafted features often outperforms compl
 - **Class imbalance**: "Interesting" events are rare. Use techniques like SMOTE, class weights, or threshold tuning.
 - **Retraining**: As researchers validate more examples, periodically retrain to incorporate new data.
 
+## Design Decisions
+
+### Rejected: LLM-Generated Synthetic Events
+
+**Considered approach:** Have the LLM generate synthetic (fake) log events and history entries to use as training data for ML models. The idea was that researchers could describe the pattern they want to detect, and the LLM would fabricate realistic-looking event sequences that exhibit that pattern.
+
+**Why it was rejected:** The vector search approach achieves the same goal more effectively:
+
+| Concern | Synthetic Data | Vector Search on Historical Data |
+|---------|----------------|----------------------------------|
+| **Realism** | Risk of unrealistic patterns that don't match actual student behavior | Uses real student behavior, guaranteed to be realistic |
+| **Edge cases** | LLM may miss important variants | Real data includes variants the researcher hasn't thought of |
+| **Negative examples** | Hard to generate realistic "almost but not quite" examples | Vector search naturally finds similar-but-different patterns |
+| **Validation** | Researcher can't verify if synthetic events are realistic | Researcher validates real examples they can inspect in context |
+| **Effort** | Still requires researcher review of generated examples | Same researcher effort, but reviewing real data |
+
+The vector search approach (see [Finding Similar Patterns](detector-authoring.md#finding-similar-patterns-vector-search)) solves the core problem—bootstrapping training data from minimal researcher input—while keeping all examples grounded in real student behavior.
+
 ## Questions
 
 - **Online vs. batch inference**: Does the model update its weights as it sees new examples, or is it static between retraining cycles? (Static is simpler, likely sufficient.)

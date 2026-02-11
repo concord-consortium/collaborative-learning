@@ -317,6 +317,15 @@ Two approaches needed:
 1. **Historical replay**: During development, run existing class data through the detector to verify it catches expected events. If historical data doesn't exist or is insufficient, the detector author should generate test data.
 2. **Demo class mode**: Researchers and other users can try to trigger the detector in a demo class. The same user can act as both student and researcher (e.g., two CLUE windows—one as student, one as researcher) to see notifications in real-time when the detector fires.
 
+Q: What are the cost implications of different detector types?
+A: Not yet analyzed. Key cost factors to consider:
+- **LLM detectors**: API costs per inference (tokens in/out), frequency of evaluation triggers
+- **ML detectors**: Compute costs for persistent runtime (microVM), training costs for model updates
+- **Rule-based detectors**: Likely lowest cost, but infrastructure for state management
+- **Shared infrastructure**: Event aggregation, Firestore reads/writes for notifications
+
+Need to estimate costs for a typical deployment (e.g., 5 classes × 30 students × 1 hour session) across detector types before committing to architecture decisions.
+
 ### Questions for Product Owner (Leslie)
 
 Q: What is the notification lifecycle?
