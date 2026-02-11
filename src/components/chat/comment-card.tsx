@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useRef } from "react";
+import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
 import { CommentTextBox } from "./comment-textbox";
 import { WithId } from "../../hooks/firestore-hooks";
@@ -29,11 +30,13 @@ interface IProps {
   onDeleteComment?: DeleteCommentFn;
   focusDocument?: string;
   focusTileId?: string;
+  isFocused?: boolean;
+  onSelect?: () => void;
 }
 
 export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedComments,
                                                 onPostComment, onDeleteComment,
-                                                focusDocument, focusTileId }) => {
+                                                focusDocument, focusTileId, isFocused, onSelect }) => {
   const commentIdRef = useRef<string>();
   const commentContentRef = useRef<string>("");
   const { documents, persistentUI, sortedDocuments } = useStores();
@@ -76,9 +79,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     logDocumentViewEvent(document);
   };
 
-  //appConfig holds showCommentTag, commentTags, tagPrompt fetched from "clue-curriculum" repository
   const { appConfig } = useStores();
-  const { showCommentTag, commentTags, tagPrompt } = appConfig;
+  const { showCommentTag, commentTags } = appConfig;
 
   const showWaitingMessage = !focusTileId || content?.isAwaitingRemoteComment;
 
@@ -124,9 +126,15 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     );
   };
 
+  // Select this thread when clicking anywhere in the comment card
+  const handleCardClick = useCallback(() => {
+    onSelect?.();
+  }, [onSelect]);
+
   return (
-    <div className="comment-card selected" data-testid="comment-card">
-      <div className="comment-card-content selected" data-testid="comment-card-content">
+    <div className={classNames("comment-card", { selected: isFocused })}
+         data-testid="comment-card" onClick={handleCardClick}>
+      <div className={classNames("comment-card-content", { selected: isFocused })} data-testid="comment-card-content">
         {
           postedComments?.map((comment, idx) => {
             const commentUser = comment.uid;
@@ -136,9 +144,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             const linkedDocument = comment.linkedDocumentKey &&
               documents.getDocument(comment.linkedDocumentKey);
 
-            //if tagPrompt was posted to Firestore - for ex: SAS unit (where tagPrompt = "Select Student Strategy")
-            //our comment.tags should be [""]
-            const isTagPrompt = (comment.tags && comment.tags[0] === "") || (comment.tags === undefined);
+            // if tagPrompt was posted to Firestore our comment.tags should be [""]
+            const isTagPrompt = comment.tags === undefined || comment.tags[0] === "";
             const displayTags = showCommentTag && !isTagPrompt && comment.tags && comment.tags.length > 0;
 
             return (
@@ -185,7 +192,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           numPostedComments={postedComments?.length || 0}
           showCommentTag={showCommentTag || false}
           commentTags={commentTags}
-          tagPrompt={tagPrompt}
           showAgreeButtons={showAgreeButtons}
         />
       </div>

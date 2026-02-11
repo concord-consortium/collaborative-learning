@@ -231,6 +231,16 @@ $title-margin: 0;
       top: $nav-tab-height;
       flex: 1;
 
+      // Override the yellow background from editable-document-content.scss
+      // In Sort Work view, only tiles should be highlighted, not the document background
+      &.comment-select .document-content {
+        background-color: white;
+
+        .tool-tile.readonly.selected {
+          border: 2px solid white;
+        }
+      }
+
       .toolbar {
         .tool.primary {
           background-color: $classwork-purple-light-5;
@@ -257,15 +267,6 @@ $title-margin: 0;
       .canvas-area {
         // Not sure why - 4px is necessary here, but the document would always scroll otherwise
         height: calc(100% - 4px);
-
-        .comment-select {
-          .tool-tile.readonly {
-            border: 2px solid $comment-select-background;
-            &.selected {
-              border: 2px solid white;
-            }
-          }
-        }
 
         .playback-component {
           // This is to compensate for the - 4px above

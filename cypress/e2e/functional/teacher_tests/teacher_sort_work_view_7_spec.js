@@ -75,9 +75,9 @@ describe('SortWorkView Tests', () => {
 
             sortWork.getHeaderTexts().eq(0)
               .should('contain', 'Sorted by')
-              .find('span').eq(0).should('contain', 'Strategy')
+              .find('span').eq(0).should('contain', 'Identify Design Approach')
               .parent().should('contain', primaryLabel)
-              .find('span').eq(2).should('contain', 'Name')
+              .find('span').eq(2).should('contain', 'Student')
               .parent().should('contain', secondaryLabel);
 
               sortWork.getHeaderTexts().eq(1)

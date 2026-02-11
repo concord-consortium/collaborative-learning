@@ -1,13 +1,15 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
-import { ClueAppHeaderComponent } from "./clue-app-header";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { WorkspaceComponent } from "../../components/workspace/workspace";
 import { DialogComponent } from "../../components/utilities/dialog";
-import { TeacherDashboardComponent } from "./teacher/teacher-dashboard";
+import { WorkspaceComponent } from "../../components/workspace/workspace";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
+import { upperWords } from "../../utilities/string-utils";
+import { translate } from "../../utilities/translation/translate";
+import { ClueAppHeaderComponent } from "./clue-app-header";
+import { TeacherDashboardComponent } from "./teacher/teacher-dashboard";
 
 import "./clue-app-content.scss";
 
@@ -26,7 +28,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
 
     const panels: IPanelGroupSpec = [{
                     panelId: EPanelId.workspace,
-                    label: "Workspace & Resources",
+                    label: `${upperWords(translate("workspace"))} & Resources`,
                     content: <WorkspaceComponent />
                   }];
     if (user && user.isTeacherOrResearcher) {

@@ -14,7 +14,6 @@ interface CommentTag {
 }
 
 interface AISettingsFormInputs {
-  tagPrompt: string;
   commentTags: CommentTag[];
   enableCommentRoles: CommentRole[];
   aiEvaluation?: AIEvaluation | "";
@@ -38,7 +37,6 @@ const AISettings: React.FC = () => {
   const { unitConfig, setUnitConfig, saveState } = useCurriculum();
   const settings: AISettingsFormInputs = useMemo(() => {
     const {
-      tagPrompt,
       aiEvaluation,
       commentTags: rawCommentTags,
       enableCommentRoles,
@@ -60,7 +58,6 @@ const AISettings: React.FC = () => {
     const aiTileAvailable = unitConfig?.config?.authorTools?.find(tool => isAIAuthorTool(tool)) !== undefined;
 
     return {
-      tagPrompt: tagPrompt ?? "",
       commentTags: commentTags ?? [],
       enableCommentRoles: enableCommentRoles ?? [],
       aiEvaluation,
@@ -122,7 +119,6 @@ const AISettings: React.FC = () => {
     setUnitConfig(draft => {
       const config = draft?.config;
       if (config) {
-        config.tagPrompt = data.tagPrompt;
         config.aiEvaluation = data.aiEvaluation === "" ? undefined : data.aiEvaluation;
         config.commentTags = data.commentTags.reduce((obj, tag) => {
           if (tag.label && tag.display) {
@@ -177,16 +173,6 @@ const AISettings: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
-        <label htmlFor="tabLabel">Tag Prompt</label>
-        <input
-          type="text"
-          id="tabLabel"
-          defaultValue={settings.tagPrompt}
-          {...register("tagPrompt", { required: "Tag prompt is required" })}
-        />
-        {errors.tagPrompt && <span className="form-error">{errors.tagPrompt.message}</span>}
-      </div>
       <div>
         <fieldset>
           <legend>Users that can use the comments panel (Enable Comment Roles)</legend>

@@ -1,19 +1,20 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
+import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentComponent, WorkspaceSide } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
-import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModel, DocumentContentModelType } from "../../models/document/document-content";
-import { createDefaultSectionedContent } from "../../models/document/sectioned-content";
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
-import { ImageDragDrop } from "../utilities/image-drag-drop";
+import { createDefaultSectionedContent } from "../../models/document/sectioned-content";
+import { kImageTileType } from "../../models/tiles/image/image-content";
 import {
   removeLoadingMessage, showLoadingMessage, logLoadingAndDocumentMeasurements
 } from "../../utilities/loading-utils";
-import { kImageTileType } from "../../models/tiles/image/image-content";
+import { translate } from "../../utilities/translation/translate";
+import { ImageDragDrop } from "../utilities/image-drag-drop";
 
 import "./document-workspace.scss";
 
@@ -31,7 +32,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   constructor(props: IProps) {
     super(props);
 
-    showLoadingMessage("Building workspace");
+    showLoadingMessage(`Building ${translate("workspace")}`);
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
@@ -55,7 +56,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         if (teacherGuide) {
           curriculumDocSections = [...curriculumDocSections, ...teacherGuide.sections];
         }
-        removeLoadingMessage("Building workspace");
+        removeLoadingMessage(`Building ${translate("workspace")}`);
         logLoadingAndDocumentMeasurements(documents, curriculumDocSections, primaryDocument);
       }
     }

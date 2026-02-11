@@ -30,15 +30,15 @@ describe("useSortOptions", () => {
       setupMockStores();
       const { sortOptions, showContextFilter, defaultPrimarySort } = useSortOptions();
 
-      // Default options: Date, Group, Name, Strategy (if tagPrompt), Bookmarked, Tools
-      // Since no tagPrompt is configured, Strategy should be filtered out
+      // Default options: Date, Group, Name, Bookmarked, Tools
+      // Note: Strategy is excluded because no term override is set
       expect(sortOptions.map(o => o.type)).toEqual(["Date", "Group", "Name", "Bookmarked", "Tools"]);
       expect(showContextFilter).toBe(true);
       expect(defaultPrimarySort).toBe("Group");
     });
 
-    it("should include Strategy option when tagPrompt is configured", () => {
-      setupMockStores({ tagPrompt: "Design Approach", showCommentTag: true });
+    it("should include Strategy option when the term is overridden", () => {
+      setupMockStores({ termOverrides: { strategy: "Design Approach" }, showCommentTag: true });
       const { sortOptions } = useSortOptions();
 
       expect(sortOptions.map(o => o.type)).toContain("Strategy");
@@ -73,11 +73,7 @@ describe("useSortOptions", () => {
     it("should use custom sort options from config", () => {
       setupMockStores({
         sortWorkConfig: {
-          sortOptions: [
-            { type: "Name" },
-            { type: "Problem" },
-            { type: "Tools" }
-          ]
+          sortOptions: ["Name", "Problem", "Tools"]
         }
       });
       const { sortOptions } = useSortOptions();
@@ -88,16 +84,12 @@ describe("useSortOptions", () => {
     it("should use custom labels from config", () => {
       setupMockStores({
         sortWorkConfig: {
-          sortOptions: [
-            { type: "Group" },
-            { type: "Name" },
-            { type: "Bookmarked" }
-          ]
+          sortOptions: ["Group", "Name", "Bookmarked"]
         },
         termOverrides: {
           studentGroup: "Team",
           "sortLabel.sortByOwner": "Participant",
-          Bookmarked: "Starred"
+          bookmarked: "Starred"
         }
       });
       const { sortOptions } = useSortOptions();
@@ -110,11 +102,7 @@ describe("useSortOptions", () => {
     it("should respect defaultPrimarySort from config", () => {
       setupMockStores({
         sortWorkConfig: {
-          sortOptions: [
-            { type: "Name" },
-            { type: "Group" },
-            { type: "Tools" }
-          ],
+          sortOptions: ["Name", "Group", "Tools"],
           defaultPrimarySort: "Name"
         }
       });
@@ -128,11 +116,7 @@ describe("useSortOptions", () => {
       setupMockStores({
         autoAssignStudentsToIndividualGroups: true,
         sortWorkConfig: {
-          sortOptions: [
-            { type: "Group" },
-            { type: "Name" },
-            { type: "Tools" }
-          ],
+          sortOptions: ["Group", "Name", "Tools"],
           defaultPrimarySort: "Group"
         }
       });
@@ -157,11 +141,7 @@ describe("useSortOptions", () => {
       setupMockStores({
         autoAssignStudentsToIndividualGroups: true,
         sortWorkConfig: {
-          sortOptions: [
-            { type: "Group" },
-            { type: "Name" },
-            { type: "Tools" }
-          ]
+          sortOptions: ["Group", "Name", "Tools"]
         }
       });
       const { sortOptions } = useSortOptions();
@@ -169,14 +149,10 @@ describe("useSortOptions", () => {
       expect(sortOptions.map(o => o.type)).toEqual(["Name", "Tools"]);
     });
 
-    it("should still filter out Strategy when no tagPrompt is configured", () => {
+    it("should still filter out Strategy when no override for Strategy is configured", () => {
       setupMockStores({
         sortWorkConfig: {
-          sortOptions: [
-            { type: "Strategy" },
-            { type: "Name" },
-            { type: "Tools" }
-          ]
+          sortOptions: ["Strategy", "Name", "Tools"]
         }
       });
       const { sortOptions } = useSortOptions();

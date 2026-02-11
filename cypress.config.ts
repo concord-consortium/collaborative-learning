@@ -37,7 +37,7 @@ export default defineConfig({
   clueTestqaUnitStudent5: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeUser=student:5&problem=1.1&unit=./demo/units/qa/content.json&noPersistentUI",
   clueTestNoUnitStudent5: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeUser=student:5&problem=1.1&noPersistentUI",
   clueTestqaUnitTeacher6: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeUser=teacher:6&problem=1.1&unit=./demo/units/qa/content.json&noPersistentUI",
-  clueTestqaConfigSubtabsUnitTeacher6: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeUser=teacher:6&problem=1.1&unit=qa-config-subtabs&noPersistentUI",
+  clueTestqaConfigSubtabsUnitTeacher6: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeUser=teacher:6&problem=1.1&unit=./demo/units/qa-config-subtabs/content.json&noPersistentUI",
   e2e: {
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.

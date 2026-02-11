@@ -35,7 +35,7 @@ interface ChatThreadItemProps {
   focusDocument?: string;
   focusTileId?: string;
   commentThread?: ChatCommentThread;
-  expandedThread: string;
+  expandedThreads: Set<string>;
   onThreadClick: (clickedId: string | null) => void;
   isFocused: boolean;
   overrideTitle?: string;
@@ -50,16 +50,28 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
   focusDocument,
   focusTileId,
   commentThread,
-  expandedThread,
+  expandedThreads,
   onThreadClick,
   isFocused,
   overrideTitle,
 }) => {
+  const ui = useUIStore();
   const title = overrideTitle || commentThread?.title || '';
   const numComments = commentThread?.comments.length || 0;
   const comments = commentThread?.comments || [];
   const tileId = commentThread?.tileId || focusTileId;
   const isDeletedTile = commentThread?.isDeletedTile || false;
+
+  // Select this thread's tile when clicking on the comment card body
+  const handleSelectCard = () => {
+    if (threadId === "document") {
+      // Clear tile selection so document becomes focused
+      ui.setSelectedTileId('');
+    } else {
+      ui.setSelectedTileId(threadId);
+      ui.setScrollTo(threadId, focusDocument || '');
+    }
+  };
 
   return (
     <div key={threadId}
@@ -83,13 +95,13 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
         <div className="chat-thread-comment-info">
           <div className="chat-thread-num">{numComments}</div>
           <ChatThreadToggle
-            isThreadExpanded={expandedThread === threadId}
+            isThreadExpanded={expandedThreads.has(threadId)}
             activeNavTab={activeNavTab}
           />
         </div>
       </div>
       {
-        expandedThread === threadId &&
+        expandedThreads.has(threadId) &&
         <CommentCard
           user={user}
           activeNavTab={activeNavTab}
@@ -98,6 +110,8 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
           postedComments={comments}
           focusDocument={focusDocument}
           focusTileId={focusTileId}
+          isFocused={isFocused}
+          onSelect={handleSelectCard}
         />
       }
     </div>
@@ -109,12 +123,15 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
 
   // make focusId null if undefined so it can be compared with tileId below.
   const focusId = focusTileId === undefined ? null : focusTileId;
-  // expandedThread can be an id of a tile, "document", or "" if no thread is expanded.
-  const [expandedThread, setExpandedThread] = useState(focusId || '');
+  // expandedThreads tracks which threads are currently expanded (can be multiple).
+  const [expandedThreads, setExpandedThreads] = useState<Set<string>>(
+    () => new Set(focusId ? [focusId] : [])
+  );
 
-  // Switching focus expands the newly-selected thread.
+  // Switching focus expands the newly-selected thread (without closing others).
   useEffect(() => {
-    setExpandedThread(focusTileId || 'document');
+    const threadToExpand = focusTileId || 'document';
+    setExpandedThreads(prev => new Set(prev).add(threadToExpand));
   }, [focusTileId]);
 
   // If a remote comment is pending, we force the document thread to be expanded.
@@ -123,7 +140,7 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
 
   useEffect(() => {
     if (pendingRemoteComment) {
-      setExpandedThread('document');
+      setExpandedThreads(prev => new Set(prev).add('document'));
     }
   }, [pendingRemoteComment]);
 
@@ -141,26 +158,34 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   const ui = useUIStore();
 
   const handleThreadClick = (clickedId: string | null) => {
-    // Do the logging before we change expandedThread so we can tell whether the thread was expanded or collapsed.
+    const threadId = clickedId || '';
+    const isCurrentlyExpanded = expandedThreads.has(threadId);
+
+    // Do the logging before we change state so we can tell whether the thread was expanded or collapsed.
     const eventPayload: ILogComment = {
       focusDocumentId: focusDocument || '',
       focusTileId: clickedId && clickedId !== "document" ? clickedId : undefined, // no focusTile for document clicks
       isFirst: false, // We're not adding a comment so this is irrelevant
       commentText: '', // This is about a thread not a single comment it doesn't make sense to log the text.
-      action: clickedId === expandedThread ? "collapse" : "expand"
+      action: isCurrentlyExpanded ? "collapse" : "expand"
     };
     logCommentEvent(eventPayload);
 
-    if (clickedId === expandedThread) {
-      // We're closing the thread so clear out expanded thread.
-      // The tile should stay selected though.
-      setExpandedThread('');
-    } else {
-      // If the clickedId was the document, the selectedTile should be set to empty.
-      const selectedTileId = clickedId === "document" ? '' : clickedId;
-      ui.setSelectedTileId(selectedTileId || '');
-      ui.setScrollTo(selectedTileId || '', focusDocument || '');
-      setExpandedThread(clickedId || '');
+    // Toggle the clicked thread's expanded state
+    setExpandedThreads(prev => {
+      const next = new Set(prev);
+      if (isCurrentlyExpanded) {
+        next.delete(threadId);
+      } else {
+        next.add(threadId);
+      }
+      return next;
+    });
+
+    // If expanding a thread (not collapsing), update the selected tile
+    if (!isCurrentlyExpanded && clickedId !== "document") {
+      ui.setSelectedTileId(clickedId || '');
+      ui.setScrollTo(clickedId || '', focusDocument || '');
     }
   };
 
@@ -181,7 +206,7 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
               focusDocument={focusDocument}
               focusTileId={focusTileId}
               commentThread={commentThread}
-              expandedThread={expandedThread}
+              expandedThreads={expandedThreads}
               onThreadClick={handleThreadClick}
               isFocused={shouldBeFocused}
             />
@@ -199,7 +224,7 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
           focusDocument={focusDocument}
           focusTileId={focusTileId}
           commentThread={undefined}
-          expandedThread={expandedThread}
+          expandedThreads={expandedThreads}
           onThreadClick={handleThreadClick}
           isFocused={true}
           overrideTitle={overrideTitle}

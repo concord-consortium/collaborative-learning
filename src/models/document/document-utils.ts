@@ -1,15 +1,16 @@
-import { getParent } from "mobx-state-tree";
 import { upperFirst } from "lodash";
+import { getParent } from "mobx-state-tree";
 import { IDocumentMetadataBase } from "../../../shared/shared";
+import { getLocalTimeStamp } from "../../utilities/time";
+import { translate } from "../../utilities/translation/translate";
 import { SectionModelType } from "../curriculum/section";
 import { getSectionPath, UnitModelType } from "../curriculum/unit";
+import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
 import { isExemplarType, isPlanningType, isProblemType, isPublishedType, isSupportType } from "./document-types";
-import { IDocumentMetadataModel } from "../document/document-metadata-model";
-import { getLocalTimeStamp } from "../../utilities/time";
 
 function getProblemFromDoc(unit: UnitModelType, document: DocumentModelType | IDocumentMetadataModel) {
   if (unit.code !== document.unit) {
@@ -32,7 +33,7 @@ function getDocumentTitleFromProblem(currentUnit: UnitModelType, document: Docum
 
   const upperType = upperFirst(document.type);
   if (!unit) {
-    return `${upperType} doc without unit`;
+    return `${upperType} doc without ${translate("contentLevel.unit")}`;
   }
   return `${upperType} doc from ${unit}-${investigation}.${problem}`;
 }
