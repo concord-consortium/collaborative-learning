@@ -7,6 +7,15 @@
   // When the width is 0 hide any elements that didn't shrink down to 0
   overflow-x: clip;
 
+  // Flex column layout so h2 heading and content properly share vertical space
+  display: flex;
+  flex-direction: column;
+
+  // Content after the h2 should fill remaining height
+  > *:not(.section-heading) {
+    flex: 1;
+  }
+
   transition-duration: 0.5s;
 
   // A problem with animating using the flex-grow property is that it is not

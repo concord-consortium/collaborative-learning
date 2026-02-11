@@ -63,24 +63,26 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
 
       {showLeftPanel &&
         <>
-          <section aria-labelledby="left-nav-heading">
-            <ResizablePanel collapsed={!navTabContentShown}>
-              <h2 id="left-nav-heading" className="section-heading">Lessons and Documents</h2>
-              <NavTabPanel
-                onDragOver={handleDragOverWorkspace}
-              />
-            </ResizablePanel>
-          </section>
+          <ResizablePanel
+            collapsed={!navTabContentShown}
+            headingId="resources-heading"
+            headingLabel="Lessons and Documents"
+          >
+            <NavTabPanel
+              onDragOver={handleDragOverWorkspace}
+            />
+          </ResizablePanel>
           {showRightPanel && <ResizePanelDivider />}
         </>
       }
       {showRightPanel &&
-        <section aria-labelledby="workspace-heading">
-          <ResizablePanel collapsed={!workspaceShown}>
-            <h2 id="workspace-heading" className="section-heading workspace-heading">Workspace</h2>
-            {standalone ? <StandAloneAuthComponent /> : <DocumentWorkspaceComponent />}
-          </ResizablePanel>
-        </section>
+        <ResizablePanel
+          collapsed={!workspaceShown}
+          headingId="workspace-heading"
+          headingLabel="Workspace"
+        >
+          {standalone ? <StandAloneAuthComponent /> : <DocumentWorkspaceComponent />}
+        </ResizablePanel>
       }
     </main>
   );
