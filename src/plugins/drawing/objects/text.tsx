@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
@@ -8,6 +9,7 @@ import { uniqueId } from "../../../../src/utilities/js-utils";
 import { WrappedSvgText } from "../components/wrapped-svg-text";
 import { Transformable } from "../components/transformable";
 import { useDrawingScale } from "../components/drawing-scale-context";
+import { DrawingToolbarContext } from "../components/drawing-toolbar-context";
 
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 
@@ -65,6 +67,7 @@ const TextContent: React.FC<IContentProps> = observer(({
 }) => {
   // Local ref for textarea
   const textEditor = React.useRef<HTMLTextAreaElement>(null);
+  const toolbarContext = React.useContext(DrawingToolbarContext);
 
   // Local state for controlled textarea
   const [originalText, setOriginalText] = React.useState(text);
@@ -121,6 +124,7 @@ const TextContent: React.FC<IContentProps> = observer(({
     return (
       <foreignObject x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}>
         <textarea ref={textEditor}
+          className={classNames({ "voice-typing-active": toolbarContext?.voiceTypingActive })}
           value={currentText}
           onChange={handleChange}
           onBlur={handleBlur}

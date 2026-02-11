@@ -19,6 +19,7 @@ import { ImageUploadButton } from "./toolbar-buttons/image-upload-button";
 import { ZoomInButton, ZoomOutButton, FitAllButton } from "./toolbar-buttons/zoom-buttons";
 import { NavigatorButton } from "../../components/toolbar/navigator-button";
 import { AlignButton } from "./toolbar-buttons/align-button";
+import { VoiceTypingDrawingButton } from "./toolbar-buttons/voice-typing-button";
 
 import Icon from "./assets/draw-tool.svg";
 import HeaderIcon from "./assets/sketch-tile-id.svg";
@@ -87,5 +88,6 @@ registerTileToolbarButtons("drawing", [
   { name: "zoom-out", component: ZoomOutButton },
   { name: "fit-all", component: FitAllButton },
   { name: "navigator", component: NavigatorButton },
-  { name: "delete", component: DeleteButton }
+  { name: "delete", component: DeleteButton },
+  { name: "voice-typing", component: VoiceTypingDrawingButton }
 ]);
