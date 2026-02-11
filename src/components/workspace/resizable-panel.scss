@@ -1,3 +1,5 @@
+@import "../vars";
+
 .resizable-panel {
   position: relative;
   // Split the remaining width in the flex container
@@ -30,5 +32,26 @@
   // transition-timing-function: cubic-bezier(0.5, 0.2, 0.7, 0.4)
   &.collapsed {
     flex: 0;
+  }
+
+  h2.section-heading {
+    align-items: center;
+    background: $problem-orange-light-7;
+    border-top-right-radius: 8px;
+    display: flex;
+    font-size: 13px;
+    font-weight: 900;
+    height: 34px;
+    justify-content: center;
+    line-height: 1;
+    margin: 0 0 2px;
+    padding: 0;
+    text-align: center;
+
+    &.workspace-heading {
+      background: $workspace-teal-light-4;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 0;
+    }
   }
 }
