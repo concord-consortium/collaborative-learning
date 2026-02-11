@@ -49,13 +49,15 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   // DocumentWorkspaceComponent component.
   const showLeftPanel =  stores.isProblemLoaded && (isResearcher || navTabSpecs.showNavPanel);
   const showRightPanel = !isResearcher;
-  const problemTitle = problem.title + (problem.subtitle ? `: ${problem.subtitle}` : "");
+  const problemTitle = stores.isProblemLoaded
+    ? problem.title + (problem.subtitle ? `: ${problem.subtitle}` : "")
+    : undefined;
 
   return (
     <main
       className="workspace"
       onKeyDown={(e) => hotKeys.current.dispatch(e)}>
-      <h1 className="visually-hidden">{problemTitle}</h1>
+      {problemTitle && <h1 className="visually-hidden">{problemTitle}</h1>}
       <div
         className="drag-handler"
         onDragOver={handleDragOverWorkspace}
