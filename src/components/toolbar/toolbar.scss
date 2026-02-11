@@ -106,6 +106,9 @@
 }
 
 // The corner where the toolbar is attached is not rounded.
+// Note: div:last-child targets the last wrapper div which normally contains the last button.
+// div:has(+ :last-child:not(:has(button))) handles the case where a non-button element
+// (e.g. an aria-live region) follows the last button wrapper.
 .tile-toolbar.bottom-start > .toolbar-row {
   border-top-left-radius: 0;
 
@@ -115,7 +118,8 @@
       border-bottom-left-radius: calc($toolbar-border-radius - 2px);
     }
   }
-  div:last-child {
+  div:last-child,
+  div:has(+ :last-child:not(:has(button))) {
     button {
       border-radius: 0 calc($toolbar-border-radius - 2px) calc($toolbar-border-radius - 2px) 0;
     }
@@ -130,7 +134,8 @@
       border-bottom-left-radius: calc($toolbar-border-radius - 2px);
     }
   }
-  div:last-child {
+  div:last-child,
+  div:has(+ :last-child:not(:has(button))) {
     button {
       border-radius: 0 calc($toolbar-border-radius - 2px) calc($toolbar-border-radius - 2px) 0;
     }
@@ -145,7 +150,8 @@
       border-top-left-radius: calc($toolbar-border-radius - 2px);
     }
   }
-  div:last-child {
+  div:last-child,
+  div:has(+ :last-child:not(:has(button))) {
     button {
       border-radius: 0 calc($toolbar-border-radius - 2px) calc($toolbar-border-radius - 2px) 0;
     }
@@ -160,7 +166,8 @@
       border-radius: calc($toolbar-border-radius - 2px) 0 0 calc($toolbar-border-radius - 2px);
     }
   }
-  div:last-child {
+  div:last-child,
+  div:has(+ :last-child:not(:has(button))) {
     button {
       border-top-right-radius: calc($toolbar-border-radius - 2px);
     }

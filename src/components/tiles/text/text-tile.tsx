@@ -24,6 +24,7 @@ import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { countWords } from "../../../utilities/string-utils";
 import { ContainerContext } from "../../document/container-context";
 import { ITextTileToolbarContext, TextTileToolbarContext } from "./text-toolbar-context";
+import { VoiceTypingOverlay } from "../../../utilities/voice-typing-overlay";
 
 import "./toolbar/text-toolbar-registration";
 import "./text-tile.scss";
@@ -265,11 +266,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                     />
                     <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
                   </Slate>
-                  {this.state.interimText && (
-                    <div className="voice-typing-interim-overlay" aria-live="polite">
-                      {this.state.interimText}
-                    </div>
-                  )}
+                  <VoiceTypingOverlay
+                    text={this.state.interimText || ""}
+                    tileElement={this.textTileDiv}
+                  />
                 </div>
               </HighlightRegistryContext.Provider>
             </HighlightRevisionContext.Provider>

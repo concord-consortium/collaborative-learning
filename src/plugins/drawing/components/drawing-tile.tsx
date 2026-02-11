@@ -28,6 +28,7 @@ import { TileNavigatorContext } from "../../../components/tiles/hooks/use-tile-n
 import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
 import { kClosedObjectListPanelWidth, kOpenObjectListPanelWidth } from "../model/drawing-types";
 import { userSelectTile } from "../../../models/stores/ui";
+import { VoiceTypingOverlay } from "../../../utilities/voice-typing-overlay";
 import { useContainerContext } from "../../../components/document/container-context";
 import { calculateFitContent } from "../model/drawing-utils";
 
@@ -318,11 +319,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             </TileNavigatorContext.Provider>
           </div>
         </DrawingAreaContext.Provider>
-        {interimText && (
-          <div className="voice-typing-interim-overlay" aria-live="polite">
-            {interimText}
-          </div>
-        )}
+        <VoiceTypingOverlay text={interimText} tileElement={drawingToolElement.current} />
       </div>
       {!readOnly && showNavigator &&
         <TileNavigator

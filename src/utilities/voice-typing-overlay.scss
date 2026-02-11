@@ -1,17 +1,14 @@
+@import "../components/vars.scss";
+
 .voice-typing-interim-overlay {
-  position: absolute;
-  bottom: 4px;
-  left: 8px;
-  right: 8px;
   padding: 4px 8px;
-  background: rgba(0, 0, 0, 0.06);
+  background: $workspace-teal-light-5;
+  border: 1px solid $workspace-teal-light-3;
   border-radius: 4px;
   font-style: italic;
-  color: #444;
+  color: #222;
   font-size: 13px;
   pointer-events: none;
-  z-index: 10;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  z-index: 10000;
+  box-sizing: border-box;
 }
