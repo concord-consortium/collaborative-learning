@@ -354,7 +354,8 @@
           "zoom-out",
           "fit-all",
           "navigator",
-          "delete"
+          "delete",
+          "voice-typing"
         ]
       },
       "geometry": {
@@ -434,7 +435,8 @@
           "superscript",
           "list-ol",
           "list-ul",
-          "link"
+          "link",
+          "voice-typing"
         ]
       }
     }
