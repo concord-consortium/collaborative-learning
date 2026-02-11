@@ -181,7 +181,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
 
   const renderNonStudentHeader = ({showProblemMenu}: {showProblemMenu: boolean}) => {
     return (
-      <header className="app-header" aria-label="CLUE Header">
+      <header className="app-header">
         <div className="left">
           <div className="unit" data-test="investigation-title">
             <div className="title">
@@ -262,7 +262,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const showUnitInfo = unit.title !== "Null Unit";
 
   return (
-      <header className="app-header" aria-label="CLUE Header">
+      <header className="app-header">
         <div className="left">
           {showUnitInfo &&
           <>
