@@ -1,18 +1,19 @@
 import { useMemo } from "react";
 import { useStores } from "./use-stores";
-import { ISortOptionConfig } from "../models/stores/sort-work-config";
 import { PrimarySortType } from "../models/stores/ui-types";
-import { getSortTypeLabel } from "../utilities/sort-utils";
+import { getSortTypeTranslationKey } from "../utilities/sort-utils";
+import { upperWords } from "../utilities/string-utils";
+import { getTermOverride, translate } from "../utilities/translation/translate";
 
 // Display version of ISortOptionConfig with required label
-export interface SortOptionDisplay extends Omit<ISortOptionConfig, "label"> {
+export interface SortOptionDisplay {
   label: string;
   type: PrimarySortType;
 }
 
 export function useSortOptions() {
   const { appConfig } = useStores();
-  const { sortWorkConfig, tagPrompt, autoAssignStudentsToIndividualGroups } = appConfig;
+  const { sortWorkConfig, autoAssignStudentsToIndividualGroups } = appConfig;
 
   const sortOptions = useMemo(() => {
     const configOptions = sortWorkConfig?.sortOptions ?? [];
@@ -20,20 +21,20 @@ export function useSortOptions() {
     return configOptions
       .filter(option => {
         // Filter out Group if groups are disabled
-        if (option.type === "Group" && autoAssignStudentsToIndividualGroups) {
+        if (option === "Group" && autoAssignStudentsToIndividualGroups) {
           return false;
         }
-        // Filter out Strategy if no tagPrompt is configured
-        if (option.type === "Strategy" && !tagPrompt) {
+        // Only include Strategy if the term has been overridden
+        if (option === "Strategy" && !getTermOverride("strategy")) {
           return false;
         }
         return true;
       })
       .map(option => ({
-        type: option.type,
-        label: getSortTypeLabel(option.type)
+        type: option,
+        label: upperWords(translate(getSortTypeTranslationKey(option)))
       }));
-  }, [sortWorkConfig?.sortOptions, autoAssignStudentsToIndividualGroups, tagPrompt]);
+  }, [sortWorkConfig?.sortOptions, autoAssignStudentsToIndividualGroups]);
 
   const sortOptionsByType = useMemo(() => {
     const map = new Map<PrimarySortType, SortOptionDisplay>();

@@ -4,6 +4,7 @@ import { Bookmarks } from "src/models/stores/bookmarks";
 import { getTileComponentInfo } from "../models/tiles/tile-component-info";
 import { IDocumentMetadataModel } from "../models/document/document-metadata-model";
 import { DocumentGroup } from "../models/stores/document-group";
+import { upperWords } from "./string-utils";
 import { translate } from "./translation/translate";
 
 import SparrowHeaderIcon from "../assets/icons/sort-by-tools/sparrow-id.svg";
@@ -199,7 +200,7 @@ export const createDocMapByBookmarks = (
 };
 
 export const sortProblemSectionLabels = (docMapKeys: string[]) => {
-  const problemTerm = translate("Problem");
+  const problemTerm = upperWords(translate("contentLevel.problem"));
   const noProblemLabel = `No ${problemTerm}`;
 
   return docMapKeys.sort((a, b) => {

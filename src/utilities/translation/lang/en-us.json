@@ -1,9 +1,17 @@
 {
-  "studentGroup": "Group",
-  "sortLabel.sortByOwner": "Student",
-  "Strategy": "",
-  "Bookmarked": "Bookmarked",
-  "Tools": "Tools",
-  "sortLabel.sortByDate": "Date",
-  "Problem": "Problem"
+  "studentGroup": "group",
+  "studentGroups": "groups",
+  "sortLabel.sortByOwner": "student",
+  "strategy": "",
+  "bookmarked": "bookmarked",
+  "tools": "tools",
+  "sortLabel.sortByDate": "date",
+  "contentLevel.problem": "problem",
+  "contentLevel.problems": "problems",
+  "workspace": "workspace",
+  "workspaces": "workspaces",
+  "contentLevel.unit": "unit",
+  "contentLevel.units": "units",
+  "contentLevel.investigation": "investigation",
+  "contentLevel.investigations": "investigations"
 }
