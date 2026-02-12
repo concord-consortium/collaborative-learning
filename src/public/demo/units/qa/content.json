@@ -96,7 +96,8 @@
       {"id": "undo", "title": "Undo", "iconId": "icon-undo-tool", "isTileTool": false},
       {"id": "redo", "title": "Redo", "iconId": "icon-redo-tool", "isTileTool": false},
       {"id": "duplicate", "title": "Duplicate", "iconId": "icon-duplicate-tool", "isTileTool": false},
-      {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}
+      {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false},
+      {"id": "readAloud", "title": "Read Aloud", "iconId": "icon-read-aloud-tool", "isTileTool": false}
     ],
     "tools": ["Simulator"],
     "enableCommentRoles": ["student", "teacher", "researcher"],

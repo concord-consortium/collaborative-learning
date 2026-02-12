@@ -20,5 +20,6 @@ registerTileComponentInfo({
   Component: StarterToolComponent,
   tileEltClass: "starter-tool-tile",
   Icon,
-  HeaderIcon
+  HeaderIcon,
+  hiddenTitle: true
 });

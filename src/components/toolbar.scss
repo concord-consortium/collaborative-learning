@@ -54,6 +54,14 @@
             }
           }
         }
+
+        &.readaloud {
+          &:active, &.active {
+            svg path {
+              fill: $workspace-teal-dark-1;
+            }
+          }
+        }
       }
     }
 
