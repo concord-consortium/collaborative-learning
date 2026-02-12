@@ -89,17 +89,15 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
 
     // Overwrite check — only warn when sanitization changed the name and it collides
     // (imageFileKeys are decoded in use-curriculum.tsx)
-    if (sanitized !== file.name) {
-      const existingKey = `images/${sanitized}`;
-      if (imageFileKeys.includes(existingKey)) {
-        const confirmed = window.confirm(
-          `The filename "${file.name}" was sanitized to "${sanitized}", ` +
-          `which matches an existing image. Overwrite it?`
-        );
-        if (!confirmed) {
-          resetUpload();
-          return;
-        }
+    const existingKey = `images/${sanitized}`;
+    if (sanitized !== file.name && imageFileKeys.includes(existingKey)) {
+      const confirmed = window.confirm(
+        `The filename "${file.name}" was sanitized to "${sanitized}", ` +
+        `which matches an existing image. Overwrite it?`
+      );
+      if (!confirmed) {
+        resetUpload();
+        return;
       }
     }
 
@@ -112,7 +110,8 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
       }
 
       const base64Url = reader.result?.toString() ?? "";
-      const base64String = base64Url.split(";base64,").pop();
+      const base64Match = /^data:.*;base64,(.*)$/.exec(base64Url);
+      const base64String = base64Match?.[1];
       if (!base64String) {
         setUploadProgress("error");
         setErrorMessage("Failed to encode file as base64");

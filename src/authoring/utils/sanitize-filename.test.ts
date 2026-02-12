@@ -57,7 +57,11 @@ describe("sanitizeFileName", () => {
     expect(sanitizeFileName("foo..$$$")).toBe("foo");
   });
 
-  it("allows leading-dot filenames", () => {
-    expect(sanitizeFileName(".bashrc")).toBe(".bashrc");
+  it("strips leading dots from basename", () => {
+    expect(sanitizeFileName(".bashrc")).toBe("bashrc");
+  });
+
+  it("strips leading dots from basename with extension", () => {
+    expect(sanitizeFileName(".foo.png")).toBe("foo.png");
   });
 });

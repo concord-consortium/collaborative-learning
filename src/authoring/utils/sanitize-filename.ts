@@ -16,8 +16,8 @@ export function sanitizeFileName(fileName: string): string {
   // Collapse consecutive hyphens
   basename = basename.replace(/-{2,}/g, "-");
 
-  // Trim leading/trailing hyphens
-  basename = basename.replace(/^-+|-+$/g, "");
+  // Trim leading/trailing hyphens and leading dots (no hidden files in an image library)
+  basename = basename.replace(/^[-.]+|-+$/g, "");
 
   // Fallback if basename is empty or only dots
   if (!basename || /^\.+$/.test(basename)) {
