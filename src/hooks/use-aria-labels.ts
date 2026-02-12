@@ -11,7 +11,7 @@ const ariaLabels = {
   // Landmark regions
   header: "CLUE Header",
   resourcesPane: "Lessons and Documents",
-  workspacePane: "My Workspace",
+  workspacePane: "Workspace",
   documentTiles: "Document tiles",
 
   // Navigation

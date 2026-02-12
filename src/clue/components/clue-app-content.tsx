@@ -71,7 +71,9 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
             </a>
           }
           {showDashboardSkipLink &&
-            <a href="#main-dashboard" className="skip-link">{ariaLabels.skipToDashboard}</a>
+            <a href="#main-dashboard" className="skip-link" onClick={this.handleDashboardSkipLink}>
+              {ariaLabels.skipToDashboard}
+            </a>
           }
         </nav>
         <ClueAppHeaderComponent panels={panels}
@@ -100,13 +102,15 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
     }
   };
 
-  // Skip link handler: expands target panel if it is currently collapsed.
+  // Skip link handler: expands target panel if collapsed
   private handleSkipLinkClick = (isTargetVisible: boolean, targetElementId: string) => {
     if (!isTargetVisible) {
       this.stores.persistentUI.setDividerPosition(kDividerHalf);
       requestAnimationFrame(() => {
         document.getElementById(targetElementId)?.focus();
       });
+    } else {
+      document.getElementById(targetElementId)?.focus();
     }
   };
 
@@ -116,5 +120,9 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
 
   private handleWorkspaceSkipLink = () => {
     this.handleSkipLinkClick(this.stores.persistentUI.workspaceShown, "workspace-panel");
+  };
+
+  private handleDashboardSkipLink = () => {
+    this.handleSkipLinkClick(true, "main-dashboard");
   };
 }

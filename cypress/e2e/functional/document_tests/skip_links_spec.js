@@ -41,9 +41,7 @@ context('Skip Links Navigation', function () {
         .should('have.attr', 'href', '#workspace-panel');
 
       cy.log('Verify dashboard skip link does NOT exist for students');
-      cy.get('nav.skip-links a.skip-link')
-        .contains('Skip to Dashboard')
-        .should('not.exist');
+      cy.get('nav.skip-links').should('not.contain', 'Skip to Dashboard');
     });
 
     it('skip links are visually hidden until focused', function () {
@@ -139,9 +137,7 @@ context('Skip Links Navigation', function () {
         .should('exist');
 
       cy.log('Verify dashboard skip link does NOT exist when in workspace view');
-      cy.get('nav.skip-links a.skip-link')
-        .contains('Skip to Dashboard')
-        .should('not.exist');
+      cy.get('nav.skip-links').should('not.contain', 'Skip to Dashboard');
     });
 
     it('shows dashboard skip link when in dashboard view', function () {
@@ -160,12 +156,8 @@ context('Skip Links Navigation', function () {
         .and('have.attr', 'href', '#main-dashboard');
 
       cy.log('Verify workspace/resources skip links do NOT exist in dashboard view');
-      cy.get('nav.skip-links a.skip-link')
-        .contains('Skip to Lessons and Documents')
-        .should('not.exist');
-      cy.get('nav.skip-links a.skip-link')
-        .contains('Skip to Workspace')
-        .should('not.exist');
+      cy.get('nav.skip-links').should('not.contain', 'Skip to Lessons and Documents');
+      cy.get('nav.skip-links').should('not.contain', 'Skip to Workspace');
     });
 
     it('navigates to dashboard when skip link is activated', function () {
@@ -200,9 +192,7 @@ context('Skip Links Navigation', function () {
         .should('exist');
 
       cy.log('Verify workspace skip links are gone');
-      cy.get('nav.skip-links a.skip-link')
-        .contains('Skip to Workspace')
-        .should('not.exist');
+      cy.get('nav.skip-links').should('not.contain', 'Skip to Workspace');
 
       cy.log('Switch back to workspace');
       cy.get('.toggle-button').contains('Workspace').click();
@@ -214,9 +204,7 @@ context('Skip Links Navigation', function () {
         .should('exist');
 
       cy.log('Verify dashboard skip link is gone');
-      cy.get('nav.skip-links a.skip-link')
-        .contains('Skip to Dashboard')
-        .should('not.exist');
+      cy.get('nav.skip-links').should('not.contain', 'Skip to Dashboard');
     });
   });
 

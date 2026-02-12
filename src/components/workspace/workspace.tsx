@@ -78,7 +78,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
         <ResizablePanel
           collapsed={!workspaceShown}
           id="workspace-panel"
-          headingLabel="Workspace"
+          headingLabel={ariaLabels.workspacePane}
           tabIndex={-1}
         >
           {standalone ? <StandAloneAuthComponent /> : <DocumentWorkspaceComponent />}

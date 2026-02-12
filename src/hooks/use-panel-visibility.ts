@@ -9,7 +9,7 @@ export interface PanelVisibility {
 export function getPanelVisibility(stores: IStores): PanelVisibility {
   const { isProblemLoaded, user, appConfig: { navTabs } } = stores;
 
-  // RESEARCHER-ACCESS: this is a temporary solution to show only the the nav panel for researchers
+  // RESEARCHER-ACCESS: this is a temporary solution to show only the nav panel for researchers
   // until we decide where to store researcher docs that are automatically created in the
   // DocumentWorkspaceComponent component.
   return {

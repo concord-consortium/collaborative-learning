@@ -21,7 +21,7 @@ interface IProps {
 // the full width and does not render the left side at all.
 export const ResizablePanel: React.FC<IProps> = ({collapsed, id, headingLabel, tabIndex, children }) => {
   const headingId = id ? `${id}-heading` : undefined;
-  const hasHeading = id && headingLabel;
+  const hasHeading = !!(id && headingLabel);
 
   return (
     <section
