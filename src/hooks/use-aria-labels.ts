@@ -45,7 +45,7 @@ const ariaLabels = {
     tileRemoved: (tileType: string) => `${tileType} tile removed`,
     panelSelected: (panelName: string) => `${panelName} panel selected`,
   },
-};
+} as const;
 
 // Type for consumers
 export type AriaLabels = typeof ariaLabels;
