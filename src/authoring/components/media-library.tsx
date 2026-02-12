@@ -3,6 +3,7 @@ import Modal from "./modal";
 import { useCurriculum } from "../hooks/use-curriculum";
 import { useAuthoringApi } from "../hooks/use-authoring-api";
 import { useAuthoringPreview } from "../hooks/use-authoring-preview";
+import { sanitizeFileName } from "../utils/sanitize-filename";
 
 import "./media-library.scss";
 
@@ -21,6 +22,7 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
   const [uploadingFileDataUrl, setUploadingFileDataUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<"uploading" | "completed" | "error" | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [sanitizedName, setSanitizedName] = useState<string | null>(null);
 
   const imageFileKeys = useMemo(() => {
     return Object.keys(files ?? {}).filter(key => key.startsWith("images"));
@@ -42,6 +44,8 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
     setUploadingFileDataUrl(null);
     setUploadingFile(null);
     setUploadProgress(null);
+    setErrorMessage(null);
+    setSanitizedName(null);
   }, []);
 
   // Cleanup function to reset upload state when component unmounts
@@ -80,6 +84,25 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
       return;
     }
 
+    const sanitized = sanitizeFileName(file.name);
+    setSanitizedName(sanitized);
+
+    // Overwrite check — only warn when sanitization changed the name and it collides
+    // (imageFileKeys are decoded in use-curriculum.tsx)
+    if (sanitized !== file.name) {
+      const existingKey = `images/${sanitized}`;
+      if (imageFileKeys.includes(existingKey)) {
+        const confirmed = window.confirm(
+          `The filename "${file.name}" was sanitized to "${sanitized}", ` +
+          `which matches an existing image. Overwrite it?`
+        );
+        if (!confirmed) {
+          resetUpload();
+          return;
+        }
+      }
+    }
+
     const reader = new FileReader();
     reader.onloadend = async () => {
       if (!reader.result) {
@@ -89,7 +112,12 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
       }
 
       const base64Url = reader.result?.toString() ?? "";
-      const base64String = base64Url.split(';base64,').pop();
+      const base64String = base64Url.split(";base64,").pop();
+      if (!base64String) {
+        setUploadProgress("error");
+        setErrorMessage("Failed to encode file as base64");
+        return;
+      }
 
       setUploadingFile(file);
       setUploadingFileDataUrl(base64Url);
@@ -98,13 +126,17 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
       try {
         const response = await api.post("/putImage", {branch, unit}, {
           image: base64String,
-          fileName: file.name
+          fileName: sanitized
         });
-        setUploadProgress("completed");
-        authoringPreview.reloadAllPreviews();
-        console.log('Upload successful:', response);
+        if (response.success) {
+          setUploadProgress("completed");
+          authoringPreview.reloadAllPreviews();
+        } else {
+          setUploadProgress("error");
+          setErrorMessage(response.error ?? "Upload failed");
+        }
       } catch (error) {
-        console.error('Upload failed:', error);
+        console.error("Upload failed:", error);
         setUploadProgress("error");
         setErrorMessage(error instanceof Error ? error.message : "Upload failed");
       }
@@ -232,7 +264,14 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
         {uploadingFileDataUrl && (
           <div className="media-library-upload-preview">
             <img src={uploadingFileDataUrl} alt={uploadingFile?.name} className="media-library-upload-img" />
-            <div className="media-library-upload-filename">{uploadingFile?.name}</div>
+            <div className="media-library-upload-filename">
+              {sanitizedName ?? uploadingFile?.name}
+            </div>
+            {sanitizedName && sanitizedName !== uploadingFile?.name && (
+              <div className="media-library-upload-renamed">
+                Renamed from &quot;{uploadingFile?.name}&quot;
+              </div>
+            )}
             {uploadProgress === "uploading" && (
               <div className="media-library-upload-progress">Uploading...</div>
             )}
