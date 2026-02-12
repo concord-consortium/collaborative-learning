@@ -7,6 +7,7 @@ import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-content-info";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content-types";
 import { DeleteButton } from "./delete-button";
+import { ReadAloudButton } from "./toolbar/read-aloud-button";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
@@ -105,6 +106,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "historyView":
           this.handleToggleHistoryView();
           break;
+        case "readAloud":
+          // NOTE: this is handled by ReadAloudButton which derives active state from the
+          // read aloud service, hides when unsupported, adds ARIA attributes,
+          // and allows stop-while-disabled.
+          break;
         default:
           this.handleAddTile(tool);
           break;
@@ -137,12 +143,21 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           onHideDropHighlight: this.removeDropRowHighlight
         };
         toolButton.initialize();
-        return toolButton.id !== "delete"
-                ? <ToolbarButtonComponent key={toolButton.id} {...buttonProps} />
-                : <DeleteButton key={toolButton.id}
-                                onSetShowDeleteTilesConfirmationAlert={this.setShowDeleteTilesConfirmationAlert}
-                                onDeleteSelectedTiles={this.handleDeleteSelectedTiles}
-                                {...buttonProps} />;
+        switch (toolButton.id) {
+          case "delete":
+            return <DeleteButton key={toolButton.id}
+                                 onSetShowDeleteTilesConfirmationAlert={this.setShowDeleteTilesConfirmationAlert}
+                                 onDeleteSelectedTiles={this.handleDeleteSelectedTiles}
+                                 {...buttonProps} />;
+          case "readAloud":
+            return <ReadAloudButton key={toolButton.id}
+                                    pane={this.props.section ? "left" : "right"}
+                                    document={this.props.document}
+                                    section={this.props.section}
+                                    {...buttonProps} />;
+          default:
+            return <ToolbarButtonComponent key={toolButton.id} {...buttonProps} />;
+        }
       });
     };
     const upperButtons = this.props.toolbarModel.filter(button => !button.isBottom) as IToolbarModel;
