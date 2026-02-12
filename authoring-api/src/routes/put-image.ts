@@ -66,7 +66,7 @@ const putImage = async (req: Request, res: Response) => {
 
     // update the files list in the unit's content in Firebase
     // the client listens for changes to this and will update accordingly
-    fileRef.update({[escapedFilesKey]: {sha}});
+    await fileRef.update({[escapedFilesKey]: {sha}});
 
     // NOTE: we don't update the unit metadata timestamp here because images are not part of the
     // content commit as they are directly committed to GitHub above
