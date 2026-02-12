@@ -2,8 +2,7 @@ import { action, makeObservable, observable, reaction } from "mobx";
 import { LogEventName } from "../../lib/logger-types";
 import { IToolbarEventProps, logToolbarEvent } from "../tiles/log/log-toolbar-event";
 import { DocumentContentModelType } from "../document/document-content";
-// TODO: enable when hiddenTitle check is enabled in prepareTile
-// import { getTileComponentInfo } from "../tiles/tile-component-info";
+import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { kTextTileType, TextContentModelType } from "../tiles/text/text-content";
 import { IStores } from "../stores/stores";
@@ -169,9 +168,7 @@ export class ReadAloudService {
     this.currentTileId = tileId;
 
     const tileType = tile.content.type;
-    // TODO: enable hiddenTitle check to suppress non-visible tile titles from speech
-    // const title = getTileComponentInfo(tileType)?.hiddenTitle ? "" : tile.computedTitle;
-    const title = tile.computedTitle;
+    const title = getTileComponentInfo(tileType)?.hiddenTitle ? "" : tile.computedTitle;
     const typeName = getTileTypeName(tileType);
 
     let textContent = "";

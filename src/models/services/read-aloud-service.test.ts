@@ -425,25 +425,14 @@ describe("ReadAloudService", () => {
   });
 
   describe("text composition", () => {
-    // TODO: enable when hiddenTitle check is enabled in prepareTile
-    // it("reads only content for text tiles (hidden title)", () => {
-    //   startWithTiles([
-    //     { id: "t1", type: "Text", title: "My Title", text: "My content" }
-    //   ]);
-    //
-    //   const spokenText = lastUtterance?.text;
-    //   expect(spokenText).not.toContain("My Title");
-    //   expect(spokenText).toBe("My content");
-    // });
-
-    it("reads title and content for text tiles with both", () => {
+    it("reads only content for text tiles (hidden title)", () => {
       startWithTiles([
         { id: "t1", type: "Text", title: "My Title", text: "My content" }
       ]);
 
       const spokenText = lastUtterance?.text;
-      expect(spokenText).toContain("My Title");
-      expect(spokenText).toContain("My content");
+      expect(spokenText).not.toContain("My Title");
+      expect(spokenText).toBe("My content");
     });
 
     it("announces tile type and title for non-text tiles", () => {

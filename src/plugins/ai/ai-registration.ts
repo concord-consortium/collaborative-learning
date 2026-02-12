@@ -20,6 +20,5 @@ registerTileComponentInfo({
   Component: AIComponent,
   tileEltClass: "ai-tool-tile",
   Icon,
-  HeaderIcon: Icon,  // TODO: if this ever becomes a "real" tile (used in student/teacher work) we'll need a HeaderIcon.
-  hiddenTitle: true
+  HeaderIcon: Icon  // TODO: if this ever becomes a "real" tile (used in student/teacher work) we'll need a HeaderIcon.
 });
