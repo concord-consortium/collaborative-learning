@@ -35,13 +35,13 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
     const {activeTab} = this.state;
 
     return (
-      <div className="teacher-dashboard">
+      <main id="main-dashboard" className="teacher-dashboard">
         <div className="tabbed-area">
           <div className="tab-contents" aria-labelledby={this.getTabId(activeTab)}>
             {this.renderTabContents()}
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 

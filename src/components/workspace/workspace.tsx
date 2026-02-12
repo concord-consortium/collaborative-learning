@@ -20,6 +20,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   const { appConfig: { navTabs: navTabSpecs },
           persistentUI: { navTabContentShown, workspaceShown },
           exemplarController,
+          problem,
           user: { isResearcher },
           ui: { standalone }
         } = stores;
@@ -48,11 +49,15 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   // DocumentWorkspaceComponent component.
   const showLeftPanel =  stores.isProblemLoaded && (isResearcher || navTabSpecs.showNavPanel);
   const showRightPanel = !isResearcher;
+  const problemTitle = stores.isProblemLoaded
+    ? problem.title + (problem.subtitle ? `: ${problem.subtitle}` : "")
+    : undefined;
 
   return (
-    <div
+    <main
       className="workspace"
       onKeyDown={(e) => hotKeys.current.dispatch(e)}>
+      {problemTitle && <h1 className="visually-hidden">{problemTitle}</h1>}
       <div
         className="drag-handler"
         onDragOver={handleDragOverWorkspace}
@@ -60,7 +65,11 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
 
       {showLeftPanel &&
         <>
-          <ResizablePanel collapsed={!navTabContentShown} >
+          <ResizablePanel
+            collapsed={!navTabContentShown}
+            headingId="resources-heading"
+            headingLabel="Lessons and Documents"
+          >
             <NavTabPanel
               onDragOver={handleDragOverWorkspace}
             />
@@ -69,10 +78,14 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
         </>
       }
       {showRightPanel &&
-        <ResizablePanel collapsed={!workspaceShown}>
+        <ResizablePanel
+          collapsed={!workspaceShown}
+          headingId="workspace-heading"
+          headingLabel="Workspace"
+        >
           {standalone ? <StandAloneAuthComponent /> : <DocumentWorkspaceComponent />}
         </ResizablePanel>
       }
-    </div>
+    </main>
   );
 });
