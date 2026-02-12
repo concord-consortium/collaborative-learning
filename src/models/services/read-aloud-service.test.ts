@@ -82,7 +82,7 @@ describe("ReadAloudService", () => {
   let service: ReadAloudService;
 
   beforeAll(async () => {
-    await registerTileTypes(["Text"]);
+    await registerTileTypes(["Geometry", "Text"]);
   });
 
   beforeEach(() => {
@@ -141,7 +141,18 @@ describe("ReadAloudService", () => {
       expect(service.state).toBe("reading");
       expect(service.activePane).toBe("right");
       expect(service.currentTileId).toBe("t1");
-      expect(mockSpeechSynthesis.speak).toHaveBeenCalled();
+      expect(mockSpeechSynthesis.speak).toHaveBeenCalledTimes(1);
+
+      lastUtterance?.onend?.();
+
+      expect(service.state).toBe("reading");
+      expect(service.currentTileId).toBe("t2");
+      expect(mockSpeechSynthesis.speak).toHaveBeenCalledTimes(2);
+
+      lastUtterance?.onend?.();
+
+      expect(service.state).toBe("idle");
+      expect(service.currentTileId).toBeNull();
     });
 
     it("reads only the selected tile when one is selected", () => {
@@ -152,6 +163,8 @@ describe("ReadAloudService", () => {
 
       expect(service.state).toBe("reading");
       expect(service.currentTileId).toBe("t2");
+      expect(lastUtterance?.text).toContain("World");
+      expect(lastUtterance?.text).not.toContain("Hello");
     });
 
     it("reads multiple selected tiles in document order", () => {
@@ -164,6 +177,18 @@ describe("ReadAloudService", () => {
 
       expect(service.state).toBe("reading");
       expect(service.currentTileId).toBe("t1");
+      expect(lastUtterance?.text).toContain("a");
+
+      lastUtterance?.onend?.();
+
+      expect(service.state).toBe("reading");
+      expect(service.currentTileId).toBe("t3");
+      expect(lastUtterance?.text).toContain("c");
+
+      lastUtterance?.onend?.();
+
+      expect(service.state).toBe("idle");
+      expect(service.currentTileId).toBeNull();
     });
 
     it("filters out selected tile IDs not in the document", () => {
@@ -172,6 +197,13 @@ describe("ReadAloudService", () => {
       ], ["t1", "nonexistent"]);
       expect(service.state).toBe("reading");
       expect(service.currentTileId).toBe("t1");
+      expect(lastUtterance?.text).toContain("a");
+
+      lastUtterance?.onend?.();
+
+      expect(service.state).toBe("idle");
+      expect(service.currentTileId).toBeNull();
+      expect(mockSpeechSynthesis.speak).toHaveBeenCalledTimes(1);
     });
 
     it("immediately stops when there are no tiles", () => {
@@ -419,7 +451,8 @@ describe("ReadAloudService", () => {
         { id: "t1", type: "Geometry", title: "My Shape" }
       ]);
 
-      expect(lastUtterance?.text).toMatch(/tile: My Shape$/);
+      // The Geometry tile's displayName is Coordinate Grid, not Geometry.
+      expect(lastUtterance?.text).toBe("Coordinate Grid tile: My Shape");
     });
 
     it("announces just tile type for tiles with no title or content", () => {
@@ -427,7 +460,8 @@ describe("ReadAloudService", () => {
         { id: "t1", type: "Geometry" }
       ]);
 
-      expect(lastUtterance?.text).toMatch(/tile$/);
+      // The Geometry tile's displayName is Coordinate Grid, not Geometry.
+      expect(lastUtterance?.text).toBe("Coordinate Grid tile");
     });
   });
 

@@ -26,12 +26,13 @@ export const ReadAloudButton: React.FC<IProps> = observer(function ReadAloudButt
   const isActive = service.state !== "idle" && service.activePane === pane;
   const hasTiles = (content?.getAllTileIds(false)?.length ?? 0) > 0;
   const isDisabled = (_isDisabled || !hasTiles) && !isActive;
+  const title = `${toolButton.title}: ${isActive ? "On" : "Off"}`;
   const tileEltClass = toolButton.id.toLowerCase();
   const className = classNames("tool", tileEltClass,
     { active: isActive }, isDisabled ? "disabled" : "enabled");
 
   const handleClick = () => {
-    if (isDisabled && !isActive) return;
+    if (isDisabled) return;
     if (isActive) {
       service.stop("user");
     } else if (content) {
@@ -46,11 +47,11 @@ export const ReadAloudButton: React.FC<IProps> = observer(function ReadAloudButt
     <div
       className={className}
       data-testid={`tool-${tileEltClass}`}
-      title={toolButton.title}
+      title={title}
       onClick={handleClick}
       role="button"
       aria-pressed={isActive}
-      aria-label={toolButton.title}
+      aria-label={title}
     >
       {toolButton.Icon && <toolButton.Icon />}
     </div>

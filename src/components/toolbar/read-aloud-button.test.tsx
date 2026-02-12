@@ -93,7 +93,7 @@ describe("ReadAloudButton", () => {
     );
     const button = screen.getByTestId("tool-readaloud");
     expect(button.getAttribute("aria-pressed")).toBe("false");
-    expect(button.getAttribute("aria-label")).toBe("Read Aloud");
+    expect(button.getAttribute("aria-label")).toBe("Read Aloud: Off");
     expect(button.getAttribute("role")).toBe("button");
   });
 
