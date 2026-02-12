@@ -120,6 +120,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationTextDisplays().should("not.exist");
     aa.getAnnotationTextInputs().should("not.exist");
     aa.getPreviewArrow().should("not.exist");
+    clueCanvas.getSingleWorkspaceDocumentContent().scrollTo("top", {ensureScrollable: false});
     aa.getAnnotationButtons().first().click({ force: true });
     aa.getPreviewArrow().should("exist");
     aa.getAnnotationButtons().eq(1).click({ force: true });
@@ -257,6 +258,7 @@ context('Arrow Annotations (Sparrows)', function () {
     cy.log("Can create straight arrow annotations");
     aa.getAnnotationMenuExpander().click();
     aa.getStraightArrowToolbarButton().click();
+    clueCanvas.getSingleWorkspaceDocumentContent().scrollTo("top", {ensureScrollable: false});
     aa.getAnnotationButtons().eq(0).click(); // First end is anchored to an object
     aa.getAnnotationSvg().click(200, 190);
     aa.getAnnotationArrows().should("have.length", 1);
@@ -563,6 +565,7 @@ context('Arrow Annotations (Sparrows)', function () {
     // The 3 nodes create annotation buttons in the dataflow tile and mini nodes
     // in the simulation tile
     aa.getAnnotationButtons().should("have.length", 28+2*3);
+    clueCanvas.getSingleWorkspaceDocumentContent().scrollTo("top", {ensureScrollable: false});
     aa.getAnnotationButtons().eq(0).click();
     aa.getAnnotationButtons().eq(2).click();
     aa.getAnnotationArrows().should("have.length", 2);
