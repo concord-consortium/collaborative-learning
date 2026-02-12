@@ -66,6 +66,11 @@ export const VoiceTypingDrawingButton = observer(
       const obj = editingTextObjectRef.current;
       if (!obj) return;
 
+      // Refresh from authoritative source so manual edits aren't clobbered.
+      committedTextRef.current = obj.text;
+      const el = getFocusedTextInput();
+      if (el) insertionOffsetRef.current = el.selectionStart ?? insertionOffsetRef.current;
+
       const { newText, newCursorPos } = spliceWithSpacing(
         committedTextRef.current, insertionOffsetRef.current, text
       );
@@ -74,10 +79,10 @@ export const VoiceTypingDrawingButton = observer(
       insertionOffsetRef.current = newCursorPos;
 
       requestAnimationFrame(() => {
-        const el = getFocusedTextInput();
-        if (el) {
-          el.selectionStart = newCursorPos;
-          el.selectionEnd = newCursorPos;
+        const focused = getFocusedTextInput();
+        if (focused) {
+          focused.selectionStart = newCursorPos;
+          focused.selectionEnd = newCursorPos;
         }
       });
     }, []);
@@ -87,19 +92,28 @@ export const VoiceTypingDrawingButton = observer(
     const insertIntoTitle = useCallback((text: string) => {
       const inserter = toolbarContext?.titleTextInserter;
       if (!inserter) return;
+
+      // Refresh from authoritative source so manual edits aren't clobbered.
+      const input = getFocusedTextInput();
+      if (input) {
+        committedTextRef.current = input.value;
+        insertionOffsetRef.current = input.selectionStart ?? insertionOffsetRef.current;
+        insertionEndOffsetRef.current = input.selectionEnd ?? insertionOffsetRef.current;
+      }
+
       const { newText, newCursorPos } = spliceWithSpacing(
         committedTextRef.current, insertionOffsetRef.current, text, insertionEndOffsetRef.current
       );
-      inserter(newText, newCursorPos);
+      inserter(newText);
       committedTextRef.current = newText;
       insertionOffsetRef.current = newCursorPos;
       insertionEndOffsetRef.current = newCursorPos; // collapse selection after first insert
       // Update cursor position in the focused input
       requestAnimationFrame(() => {
-        const input = document.activeElement;
-        if (input instanceof HTMLInputElement) {
-          input.selectionStart = newCursorPos;
-          input.selectionEnd = newCursorPos;
+        const focused = document.activeElement;
+        if (focused instanceof HTMLInputElement) {
+          focused.selectionStart = newCursorPos;
+          focused.selectionEnd = newCursorPos;
         }
       });
     }, [toolbarContext?.titleTextInserter]);
@@ -218,7 +232,9 @@ export const VoiceTypingDrawingButton = observer(
       }
       const vt = voiceTypingRef.current;
       const tileId = tileModel?.id || "";
-      const currentTarget = targetRef.current;
+      // Use render-time `target` (not targetRef) so activation always sees the
+      // latest value even if the deferred targetRef effect hasn't run yet.
+      const currentTarget = target;
 
       // Capture committed text and cursor/selection position at activation
       if (currentTarget === "text-object" && editingTextObject) {
@@ -283,7 +299,7 @@ export const VoiceTypingDrawingButton = observer(
       }
 
       announce("Voice typing on");
-    }, [editingTextObject, titleEditing, insertIntoTextObject,
+    }, [editingTextObject, titleEditing, target, insertIntoTextObject,
         insertIntoTitle, tileModel?.id, announce, toolbarContext]);
 
     // Don't render if not supported

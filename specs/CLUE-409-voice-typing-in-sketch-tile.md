@@ -20,7 +20,7 @@ Extend the existing Drawing (Sketch) tile voice typing to support dictating into
 - When title editing ends while voice typing is active, any pending interim text must be committed to the title before the edit is saved
 - Voice typing must deactivate when switching between title bar and text object editing (or vice versa) — only one target at a time. Sequence: commit pending interim text → save/close the old target → deactivate voice typing. The user must re-enable voice typing for the new target.
 - Smart spacing (adding spaces around inserted text as needed) must work for title bar insertion
-- Voice typing inserts text at the cursor position (`selectionStart`), not replacing any selected text — consistent with existing text object behavior
+- Voice typing replaces any selected text in the title with the dictated text; if no text is selected, it inserts at the cursor position (`selectionStart`) — consistent with standard text input behavior
 - The title input must display a visual indicator (teal background via `voice-typing-active` class) when voice typing is actively targeting it, consistent with the text object visual feedback
 - The voice typing button must prevent stealing focus from the title input when clicked (same pattern as existing textarea focus protection)
 - Voice typing deactivation (timeout, error, or user toggle) must not cause the title bar to exit editing mode — the user can continue typing manually after voice typing ends
@@ -34,9 +34,9 @@ Extend the existing Drawing (Sketch) tile voice typing to support dictating into
 - `src/plugins/drawing/toolbar-buttons/voice-typing-button.tsx` — Voice typing button for drawing; supports both text objects and title bar
 - `src/plugins/drawing/components/drawing-tile.tsx` — Main drawing tile component; renders `BasicEditableTileTitle` and provides `DrawingToolbarContext`
 - `src/plugins/drawing/components/drawing-toolbar-context.ts` — Toolbar context for voice typing state including title-editing state
-- `src/components/tiles/editable-tile-title.tsx` — Title editing component; uses `<input>` via `TileLabelInput`
+- `src/components/tiles/editable-tile-title.tsx` — Title editing component; uses `<input>` via `TileLabelInput`; exports `TitleTextInserter` type
 - `src/components/tiles/basic-editable-tile-title.tsx` — Wrapper that renders `EditableTileTitle`
-- `src/utilities/voice-typing-utils.ts` — Shared utility with `spliceWithSpacing` and `TitleTextInserter` type
+- `src/utilities/voice-typing-utils.ts` — Shared utility with `spliceWithSpacing`
 - `src/utilities/voice-typing.ts` — Core VoiceTyping class (unchanged)
 - `src/utilities/voice-typing-overlay.tsx` — Overlay for interim text (unchanged)
 
@@ -163,7 +163,7 @@ Extend the existing Drawing (Sketch) tile voice typing to support dictating into
 - A) Inserter includes spacing (cleaner for the button, but shared component imports voice typing utility)
 - B) Inserter is a plain `setText`; button handles spacing for both targets (keeps shared component simpler)
 
-**Decision**: B — The inserter is a plain `setText(text, cursorPos)` callback. The voice typing button calls `spliceWithSpacing` itself before calling the inserter, keeping `EditableTileTitle` free of voice typing concerns.
+**Decision**: B — The inserter is a plain `setText(text)` callback. The voice typing button calls `spliceWithSpacing` itself before calling the inserter, keeping `EditableTileTitle` free of voice typing concerns.
 
 ---
 

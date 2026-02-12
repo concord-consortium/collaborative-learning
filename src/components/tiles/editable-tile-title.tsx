@@ -5,8 +5,8 @@ import { useReadOnlyContext } from "../document/read-only-context";
 import { TileModelContext } from "../tiles/tile-api";
 import { TileLabelInput } from "./tile-label-input";
 
-/** Callback to programmatically set title text and cursor position. */
-export type TitleTextInserter = (text: string, cursorPos: number) => void;
+/** Callback to programmatically set title text. */
+export type TitleTextInserter = (text: string) => void;
 
 import "./editable-tile-title.scss";
 // TODO: previously these CSS rules were in `editable-tile-title.scss` even though those classes
@@ -49,7 +49,7 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
 
       // Register a text inserter so the voice typing button can update the title
       if (onRegisterTextInserter) {
-        const inserter: TitleTextInserter = (text, cursorPos) => {
+        const inserter: TitleTextInserter = (text) => {
           editingTitleRef.current = text;
           setEditingTitle(text);
         };
