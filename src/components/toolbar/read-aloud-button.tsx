@@ -41,6 +41,8 @@ export const ReadAloudButton: React.FC<IProps> = observer(function ReadAloudButt
   };
 
   return (
+    // TODO: Replace <div role="button"> with a <button> element for proper
+    // keyboard accessibility (tabIndex, Enter/Space handling) in future a11y work.
     <div
       className={className}
       data-testid={`tool-${tileEltClass}`}

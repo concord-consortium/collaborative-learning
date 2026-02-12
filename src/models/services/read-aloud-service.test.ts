@@ -541,6 +541,27 @@ describe("ReadAloudService", () => {
       expect(service.state).toBe("reading");
     });
 
+    it("prepares but does not speak when tile is selected while paused", () => {
+      startWithTiles([
+        { id: "t1", type: "Text", title: "A", text: "a" },
+        { id: "t2", type: "Text", title: "B", text: "b" }
+      ]);
+      expect(service.currentTileId).toBe("t1");
+
+      service.pause();
+      expect(service.state).toBe("paused");
+      mockSpeechSynthesis.speak.mockClear();
+
+      // Simulate user selecting a different tile while paused
+      stores.ui.setSelectedTileId("t2");
+
+      // Should update the target tile but remain paused
+      expect(service.currentTileId).toBe("t2");
+      expect(service.state).toBe("paused");
+      // Should NOT have called speak — that waits for resume()
+      expect(mockSpeechSynthesis.speak).not.toHaveBeenCalled();
+    });
+
     it("stops when tile is selected in other pane", () => {
       startWithTiles([
         { id: "t1", type: "Text", title: "A", text: "a" }

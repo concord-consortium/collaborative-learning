@@ -26,7 +26,7 @@ export class ReadAloudService {
   readonly isSupported: boolean;
 
   private stores: IStores;
-  private document: DocumentContentModelType | null = null;
+  private documentContent: DocumentContentModelType | null = null;
   private toolbarProps: IToolbarEventProps | null = null;
   private tileQueue: string[] = [];
   private currentChunks: string[] = [];
@@ -35,17 +35,22 @@ export class ReadAloudService {
   private readGeneration = 0;
   private isSelectingProgrammatically = false;
   private disposers: (() => void)[] = [];
+  private synth: SpeechSynthesis | null = null;
 
   constructor(stores: IStores) {
     makeObservable(this);
     this.stores = stores;
     this.isSupported = typeof window !== "undefined" && "speechSynthesis" in window;
     if (this.isSupported) {
+      this.synth = window.speechSynthesis;
       document.addEventListener("keydown", this.handleKeyDown);
     }
   }
 
   dispose() {
+    if (this.state !== "idle") {
+      this.stop("user");
+    }
     if (this.isSupported) {
       document.removeEventListener("keydown", this.handleKeyDown);
     }
@@ -70,7 +75,7 @@ export class ReadAloudService {
       this.stop("pane-switch");
     }
 
-    this.document = content;
+    this.documentContent = content;
     this.toolbarProps = toolbarProps;
     this.activePane = pane;
     this.state = "reading";
@@ -107,7 +112,7 @@ export class ReadAloudService {
 
     // Invalidate pending callbacks
     ++this.readGeneration;
-    speechSynthesis.cancel();
+    this.synth?.cancel();
     this.disposeReactions();
 
     // Log before clearing state
@@ -124,7 +129,7 @@ export class ReadAloudService {
     this.state = "idle";
     this.activePane = null;
     this.currentTileId = null;
-    this.document = null;
+    this.documentContent = null;
     this.toolbarProps = null;
     this.tileQueue = [];
     this.currentChunks = [];
@@ -134,7 +139,7 @@ export class ReadAloudService {
 
   @action pause() {
     if (this.state === "reading") {
-      speechSynthesis.pause();
+      this.synth?.pause();
       this.state = "paused";
     }
   }
@@ -142,19 +147,19 @@ export class ReadAloudService {
   @action resume() {
     if (this.state === "paused") {
       this.state = "reading";
-      if (!speechSynthesis.speaking) {
+      if (!this.synth?.speaking) {
         // Paused between chunks — speak the next one
         this.speakCurrentChunk();
       } else {
-        speechSynthesis.resume();
+        this.synth?.resume();
       }
     }
   }
 
   @action private prepareTile(tileId: string): boolean {
-    if (!this.document) return false;
+    if (!this.documentContent) return false;
 
-    const tile = this.document.getTile(tileId);
+    const tile = this.documentContent.getTile(tileId);
     if (!tile) {
       // Tile was deleted mid-read
       this.advanceToNextTile();
@@ -237,9 +242,11 @@ export class ReadAloudService {
       this.stop("error");
     };
 
-    speechSynthesis.speak(utterance);
+    this.synth?.speak(utterance);
   }
 
+  // Note: indexOf() is O(n) per call, but tile queues are small (< 20 tiles)
+  // so tracking a separate index isn't worth the added state complexity.
   private advanceToNextTile() {
     if (!this.currentTileId) {
       this.stop("complete");
@@ -307,7 +314,7 @@ export class ReadAloudService {
           if (this.state === "idle") return;
           if (this.isSelectingProgrammatically) return;
 
-          const selectedInThisPane = newSelectedIds.filter(id => this.document?.getTile(id));
+          const selectedInThisPane = newSelectedIds.filter(id => this.documentContent?.getTile(id));
           const selectedInOtherPane = newSelectedIds.length > 0 && selectedInThisPane.length === 0;
 
           if (selectedInOtherPane) {
@@ -317,7 +324,7 @@ export class ReadAloudService {
 
           if (selectedInThisPane.length === 1 && selectedInThisPane[0] !== this.currentTileId) {
             ++this.readGeneration;
-            speechSynthesis.cancel();
+            this.synth?.cancel();
             if (this.state === "paused") {
               this.prepareTile(selectedInThisPane[0]);
             } else {
