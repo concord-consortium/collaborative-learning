@@ -38,13 +38,31 @@
     flex: 0;
   }
 
+  // Focus ring using pseudo-element to ensure it renders above content.
+  // Only show top/left/right borders to avoid content scrolling through
+  // a fixed bottom border.
+  &:focus {
+    outline: none;
+
+    &::after {
+      border: $focus-ring-outer-width solid $focus-ring-color;
+      border-bottom: none;
+      content: "";
+      inset: 0;
+      pointer-events: none;
+      position: absolute;
+      z-index: 100;
+    }
+  }
+
   h2.section-heading {
     align-items: center;
     background: $problem-orange-light-7;
     border-top-right-radius: 8px;
+    color: $charcoal-dark-2;
     display: flex;
-    font-size: 13px;
-    font-weight: 900;
+    font-size: 14px;
+    font-weight: 700;
     height: 34px;
     justify-content: center;
     line-height: 1;
@@ -52,7 +70,7 @@
     padding: 0;
     text-align: center;
 
-    &.workspace-heading {
+    &.workspace-panel {
       background: $workspace-teal-light-4;
       border-top-left-radius: 8px;
       border-top-right-radius: 0;

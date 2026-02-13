@@ -5,8 +5,9 @@ import "./resizable-panel.scss";
 
 interface IProps {
   collapsed: boolean;
-  headingId?: string;
+  id?: string;
   headingLabel?: string;
+  tabIndex?: number;
 }
 
 // Originally this monitored the collapse animation and stopped rendering
@@ -18,16 +19,19 @@ interface IProps {
 // documents shown on the left sided just by collapsing it.
 // There is now a hotkey cmd-shit-f which makes the right side take
 // the full width and does not render the left side at all.
-export const ResizablePanel: React.FC<IProps> = ({collapsed, headingId, headingLabel, children }) => {
-  const hasHeading = headingId && headingLabel;
+export const ResizablePanel: React.FC<IProps> = ({collapsed, id, headingLabel, tabIndex, children }) => {
+  const headingId = id ? `${id}-heading` : undefined;
+  const hasHeading = !!(id && headingLabel);
 
   return (
     <section
       className={classNames("resizable-panel", {collapsed})}
       aria-labelledby={hasHeading ? headingId : undefined}
+      id={id}
+      tabIndex={tabIndex}
     >
       {hasHeading && (
-        <h2 id={headingId} className={classNames("section-heading", headingId)}>
+        <h2 id={headingId} className={classNames("section-heading", id)}>
           {headingLabel}
         </h2>
       )}
