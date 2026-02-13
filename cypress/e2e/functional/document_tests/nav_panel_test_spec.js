@@ -224,4 +224,60 @@ context('Nav Panel', function () {
       expect($tab.text()).to.contain(exampleClassWorkSubTabTitles[index]);
     });
   });
+
+  it('Keyboard navigation and accessibility', function () {
+    beforeTest(queryParams1);
+
+    cy.log('Arrow key navigation moves focus between top-level tabs');
+    cy.get('.top-tab.tab-problems').focus();
+    cy.focused().should('have.class', 'tab-problems');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.realPress('ArrowRight');
+    cy.focused().should('have.class', 'tab-my-work');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.realPress('ArrowRight');
+    cy.focused().should('have.class', 'tab-class-work');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.log('Arrow left navigates back');
+    cy.realPress('ArrowLeft');
+    cy.focused().should('have.class', 'tab-my-work');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.log('Tab from top-level tab moves focus to sub-tabs');
+    cy.openTopTab("problems");
+    cy.get('.top-tab.tab-problems').focus();
+    cy.realPress('Tab');
+    cy.focused().should('have.class', 'prob-tab');
+
+    cy.log('Arrow keys navigate between problem sub-tabs');
+    cy.get('.prob-tab').contains('Introduction').focus();
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.realPress('ArrowRight');
+    cy.focused().should('contain', 'Initial Challenge');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.realPress('ArrowRight');
+    cy.focused().should('contain', 'What If');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.realPress('ArrowLeft');
+    cy.focused().should('contain', 'Initial Challenge');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.log('Panel action button has aria-label');
+    cy.openTopTab("problems");
+    cy.get('.nav-tab-panel').then($panel => {
+      if ($panel.find('.close-button').length > 0) {
+        cy.get('.close-button')
+          .should('have.attr', 'aria-label', 'Close resources panel');
+      } else {
+        cy.get('.chat-panel-toggle')
+          .should('have.attr', 'aria-label', 'Open chat panel');
+      }
+    });
+  });
 });
