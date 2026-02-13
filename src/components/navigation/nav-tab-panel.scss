@@ -1,5 +1,7 @@
 @import "../vars";
 
+$action-button-width: 40px;
+
 .resource-and-chat-panel {
   position: relative;
   height: 100%;
@@ -18,7 +20,7 @@
       position: absolute;
       right: 0;
       top: 0;
-      width: 40px;
+      width: $action-button-width;
       height: $nav-tab-height;
       background-color: $charcoal-light-6;
       border-style: solid;
@@ -45,7 +47,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
+      width: $action-button-width;
       cursor: pointer;
       height: $nav-tab-height;
       background-color: white;
@@ -170,7 +172,7 @@
       align-items: center;
       width: 100%;
       padding: 0;
-      padding-right: 40px; // Reserve space for absolutely positioned action button
+      padding-right: $action-button-width; // Reserve space for absolutely positioned action button
       margin: 0;
 
       .top-tab {
