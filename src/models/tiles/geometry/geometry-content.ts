@@ -768,6 +768,9 @@ export const GeometryContentModel = GeometryBaseContentModel
       const poly = getPolygon(board, polygonId);
       const id = self.phantomPoint?.id;
       if (!poly || !id) return;
+      // Need at least 2 real vertices (JSXGraph includes a closing vertex that duplicates the first,
+      // so vertices.length >= 3 means at least 2 real vertices)
+      if (poly.vertices.length < 3) return;
       const vertexIds = poly.vertices.map(v => v.id);
       // The point before the one we're adding
       const lastPoint = poly.vertices[poly.vertices.length-2];
@@ -788,7 +791,8 @@ export const GeometryContentModel = GeometryBaseContentModel
       return newPolygon;
     }
 
-    function fixVertexAngle(board: JXG.Board, polygon: JXG.Polygon, point: JXG.Point) {
+    function fixVertexAngle(board: JXG.Board, polygon: JXG.Polygon, point: JXG.Point | undefined) {
+      if (!point) return;
       const vertexAngle = getVertexAngle(point);
       if (!vertexAngle) return;
       const model = self.getObject(vertexAngle.id);

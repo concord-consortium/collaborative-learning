@@ -14,7 +14,8 @@ export const canSupportVertexAngle = (vertex: JXG.Point): boolean => {
   return !!polygon && (polygon.vertices.length > 3);
 };
 
-export const getVertexAngle = (vertex: JXG.Point): JXG.Angle | undefined => {
+export const getVertexAngle = (vertex: JXG.Point | undefined): JXG.Angle | undefined => {
+  if (!vertex) return undefined;
   let vertexAngle: JXG.Angle | undefined;
   each(vertex.childElements, child => {
     if (isVertexAngle(child)) {
