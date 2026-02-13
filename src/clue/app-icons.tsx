@@ -17,6 +17,7 @@ import SparrowToolIcon from "./assets/icons/sparrow-tool.svg";
 import UndoToolIcon from "./assets/icons/undo-tool.svg";
 import EditToolIcon from "./assets/icons/edit-right-icon.svg";
 import PlaybackToolIcon from "./assets/icons/playback-tool.svg";
+import ReadAloudToolIcon from "./assets/icons/read-aloud-tool.svg";
 import HistoryViewToolIcon from "./assets/icons/history-view-tool.svg";
 import SelectAllToolIcon from "./assets/icons/select-all-tool.svg";
 import FourUpToolIcon from "./assets/icons/4-up-view-tool.svg";
@@ -43,6 +44,7 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   "icon-undo-tool": UndoToolIcon,
   "icon-edit-tool": EditToolIcon,
   "icon-playback-tool": PlaybackToolIcon, // TODO: get a toolbar icon for playback (this is the existing control icon)
+  "icon-read-aloud-tool": ReadAloudToolIcon,
   "icon-select-all-tool": SelectAllToolIcon,
   "icon-4up-view-tool": FourUpToolIcon,
   "icon-copy-to-workspace-tool": CopyToWorkspaceToolIcon,

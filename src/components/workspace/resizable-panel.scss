@@ -1,3 +1,5 @@
+@import "../vars";
+
 .resizable-panel {
   position: relative;
   // Split the remaining width in the flex container
@@ -6,6 +8,19 @@
   min-width: 0;
   // When the width is 0 hide any elements that didn't shrink down to 0
   overflow-x: clip;
+
+  // Flex column layout so h2 heading and content properly share vertical space
+  display: flex;
+  flex-direction: column;
+
+  // Content after the h2 should fill remaining height
+  > *:not(.section-heading) {
+    flex: 1;
+
+    // Allow flex items to shrink below their content's minimum height
+    // This fixes issues with children that have height: 100% (like .single-workspace)
+    min-height: 0;
+  }
 
   transition-duration: 0.5s;
 
@@ -21,5 +36,26 @@
   // transition-timing-function: cubic-bezier(0.5, 0.2, 0.7, 0.4)
   &.collapsed {
     flex: 0;
+  }
+
+  h2.section-heading {
+    align-items: center;
+    background: $problem-orange-light-7;
+    border-top-right-radius: 8px;
+    display: flex;
+    font-size: 13px;
+    font-weight: 900;
+    height: 34px;
+    justify-content: center;
+    line-height: 1;
+    margin: 0 0 2px;
+    padding: 0;
+    text-align: center;
+
+    &.workspace-heading {
+      background: $workspace-teal-light-4;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 0;
+    }
   }
 }

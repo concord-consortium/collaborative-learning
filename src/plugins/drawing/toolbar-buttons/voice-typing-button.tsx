@@ -6,6 +6,7 @@ import { TileModelContext } from "../../../components/tiles/tile-api";
 import { DrawingContentModelContext } from "../components/drawing-content-context";
 import { DrawingToolbarContext } from "../components/drawing-toolbar-context";
 import { VoiceTyping } from "../../../utilities/voice-typing";
+import { spliceWithSpacing } from "../../../utilities/voice-typing-utils";
 import { useAnnounce } from "../../../utilities/use-announce";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
@@ -16,33 +17,15 @@ import VoiceTypingIcon from "../../../assets/icons/text/voice-typing-text-icon.s
 import "../../../utilities/voice-typing-button.scss";
 
 /**
- * Get the focused textarea element if one exists, or null.
+ * Get the focused text input element (textarea or input) if one exists, or null.
  */
-function getFocusedTextarea(): HTMLTextAreaElement | null {
+function getFocusedTextInput(): HTMLTextAreaElement | HTMLInputElement | null {
   const el = document.activeElement;
-  return el instanceof HTMLTextAreaElement ? el : null;
+  if (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement) return el;
+  return null;
 }
 
-/**
- * Splice text into a base string at the given offset, adding spaces as needed.
- */
-function spliceWithSpacing(base: string, offset: number, text: string) {
-  const before = base.slice(0, offset);
-  const after = base.slice(offset);
-
-  const needSpaceBefore = before.length > 0
-    && !before.endsWith(" ") && !before.endsWith("\n");
-  const prefix = needSpaceBefore ? " " : "";
-
-  const needSpaceAfter = after.length > 0
-    && !after.startsWith(" ") && !after.startsWith("\n");
-  const suffix = needSpaceAfter ? " " : "";
-
-  return {
-    newText: before + prefix + text + suffix + after,
-    newCursorPos: offset + prefix.length + text.length + suffix.length,
-  };
-}
+type VoiceTypingTarget = "title" | "text-object" | null;
 
 export const VoiceTypingDrawingButton = observer(
   function VoiceTypingDrawingButton({ name }: IToolbarButtonComponentProps) {
@@ -59,6 +42,7 @@ export const VoiceTypingDrawingButton = observer(
     // Track the "committed" text (before any interim) and the insertion offset within it
     const committedTextRef = useRef("");
     const insertionOffsetRef = useRef(0);
+    const insertionEndOffsetRef = useRef(0);
     const interimTextRef = useRef("");
 
     // Find the currently editing text object
@@ -69,10 +53,23 @@ export const VoiceTypingDrawingButton = observer(
     const editingTextObjectRef = useRef(editingTextObject);
     editingTextObjectRef.current = editingTextObject;
 
+    // Determine the current voice typing target
+    const titleEditing = toolbarContext?.titleEditing ?? false;
+    const target: VoiceTypingTarget =
+      editingTextObject ? "text-object" : titleEditing ? "title" : null;
+    const targetRef = useRef(target);
+    // targetRef is updated in the useEffect below AFTER deactivation, so that
+    // commitInterimText still sees the PREVIOUS target during a switch.
+
     // Insert text into the editing text object at the current insertion offset.
     const insertIntoTextObject = useCallback((text: string) => {
       const obj = editingTextObjectRef.current;
       if (!obj) return;
+
+      // Refresh from authoritative source so manual edits aren't clobbered.
+      committedTextRef.current = obj.text;
+      const el = getFocusedTextInput();
+      if (el) insertionOffsetRef.current = el.selectionStart ?? insertionOffsetRef.current;
 
       const { newText, newCursorPos } = spliceWithSpacing(
         committedTextRef.current, insertionOffsetRef.current, text
@@ -82,79 +79,132 @@ export const VoiceTypingDrawingButton = observer(
       insertionOffsetRef.current = newCursorPos;
 
       requestAnimationFrame(() => {
-        const ta = getFocusedTextarea();
-        if (ta) {
-          ta.selectionStart = newCursorPos;
-          ta.selectionEnd = newCursorPos;
+        const focused = getFocusedTextInput();
+        if (focused) {
+          focused.selectionStart = newCursorPos;
+          focused.selectionEnd = newCursorPos;
         }
       });
     }, []);
 
-    // Commit any pending interim text into the text object before tearing down.
+    // Insert text into the title input via the registered inserter.
+    // Replaces the selected range (insertionOffsetRef..insertionEndOffsetRef) if any.
+    const insertIntoTitle = useCallback((text: string) => {
+      const inserter = toolbarContext?.titleTextInserter;
+      if (!inserter) return;
+
+      // Refresh from authoritative source so manual edits aren't clobbered.
+      const input = getFocusedTextInput();
+      if (input) {
+        committedTextRef.current = input.value;
+        insertionOffsetRef.current = input.selectionStart ?? insertionOffsetRef.current;
+        insertionEndOffsetRef.current = input.selectionEnd ?? insertionOffsetRef.current;
+      }
+
+      const { newText, newCursorPos } = spliceWithSpacing(
+        committedTextRef.current, insertionOffsetRef.current, text, insertionEndOffsetRef.current
+      );
+      inserter(newText);
+      committedTextRef.current = newText;
+      insertionOffsetRef.current = newCursorPos;
+      insertionEndOffsetRef.current = newCursorPos; // collapse selection after first insert
+      // Update cursor position in the focused input
+      requestAnimationFrame(() => {
+        const focused = document.activeElement;
+        if (focused instanceof HTMLInputElement) {
+          focused.selectionStart = newCursorPos;
+          focused.selectionEnd = newCursorPos;
+        }
+      });
+    }, [toolbarContext?.titleTextInserter]);
+
+    // Commit any pending interim text to the correct target.
     const commitInterimText = useCallback(() => {
       const text = interimTextRef.current;
       if (!text) return;
       interimTextRef.current = "";
-      insertIntoTextObject(text);
-    }, [insertIntoTextObject]);
+      toolbarContext?.setInterimText("");
+      if (targetRef.current === "title") {
+        insertIntoTitle(text);
+      } else {
+        insertIntoTextObject(text);
+      }
+    }, [insertIntoTextObject, insertIntoTitle, toolbarContext]);
+
+    // Keep a ref so onBeforeClose always calls the latest commitInterimText
+    const commitInterimTextFnRef = useRef(commitInterimText);
+    commitInterimTextFnRef.current = commitInterimText;
+
+    // Shared stop sequence: commit interim text, clear context, reset state, log, announce.
+    // Used by both deactivate() and onStateChange(!isActive).
+    const stop = useCallback((reason: string) => {
+      commitInterimTextFnRef.current();
+      if (toolbarContext) {
+        toolbarContext.commitInterimTextRef.current = null;
+      }
+      setActive(false);
+      toolbarContext?.setVoiceTypingActive(false);
+      toolbarContext?.setInterimText("");
+      const tileId = tileModel?.id || "";
+      if (tileId) {
+        logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, {
+          operation: "voice-typing-stop",
+          change: { reason, target: targetRef.current },
+          tileId,
+        });
+      }
+      announce("Voice typing off");
+    }, [tileModel?.id, announce, toolbarContext]);
 
     const deactivate = useCallback((reason: "user" | "timeout" | "error" = "user") => {
       const vt = voiceTypingRef.current;
       if (vt?.isActive) {
         vt.disable(reason);
       }
+      stop(reason);
+    }, [stop]);
 
-      // Commit any pending interim text before tearing down
-      commitInterimText();
-
-      setActive(false);
-      toolbarContext?.setVoiceTypingActive(false);
-      toolbarContext?.setInterimText("");
-
-      const tileId = tileModel?.id || "";
-      if (tileId) {
-        logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, {
-          operation: "voice-typing-stop",
-          change: { reason },
-          tileId,
-        });
-      }
-
-      announce("Voice typing off");
-    }, [commitInterimText, tileModel?.id, announce, toolbarContext]);
-
+    const stopRef = useRef(stop);
+    stopRef.current = stop;
     const deactivateRef = useRef(deactivate);
     deactivateRef.current = deactivate;
 
-    // Deactivate when text object stops editing
+    // Deactivate when target changes while active (e.g., switching from title to text object)
+    const prevTargetRef = useRef(target);
     useEffect(() => {
-      if (active && !editingTextObject) {
+      if (active && prevTargetRef.current !== null && prevTargetRef.current !== target) {
+        // targetRef.current still points to the PREVIOUS target here,
+        // so commitInterimText (called inside deactivate) commits to the right place.
         deactivateRef.current("user");
       }
-    }, [active, editingTextObject]);
+      // Update refs AFTER deactivation
+      targetRef.current = target;
+      prevTargetRef.current = target;
+    }, [active, target]);
 
     // Update insertion offset when user repositions cursor (click or arrow keys)
     useEffect(() => {
       if (!active) return;
 
-      const updateOffsetFromTextarea = () => {
+      const updateOffsetFromInput = () => {
         requestAnimationFrame(() => {
-          const textarea = getFocusedTextarea();
-          if (!textarea) return;
-          insertionOffsetRef.current = textarea.selectionStart ?? insertionOffsetRef.current;
+          const el = getFocusedTextInput();
+          if (!el) return;
+          insertionOffsetRef.current = el.selectionStart ?? insertionOffsetRef.current;
+          insertionEndOffsetRef.current = el.selectionEnd ?? insertionOffsetRef.current;
         });
       };
 
       const handlePointerUp = (e: PointerEvent) => {
-        const target = e.target as HTMLElement;
-        if (target instanceof HTMLTextAreaElement) {
-          updateOffsetFromTextarea();
+        const pointerTarget = e.target as HTMLElement;
+        if (pointerTarget instanceof HTMLTextAreaElement || pointerTarget instanceof HTMLInputElement) {
+          updateOffsetFromInput();
         }
       };
 
       const handleKeyUp = (e: KeyboardEvent) => {
         if (e.key.startsWith("Arrow") || e.key === "Home" || e.key === "End") {
-          updateOffsetFromTextarea();
+          updateOffsetFromInput();
         }
       };
 
@@ -176,29 +226,46 @@ export const VoiceTypingDrawingButton = observer(
     }, []);
 
     const activate = useCallback(() => {
-      if (!editingTextObject) return;
+      if (!editingTextObject && !titleEditing) return;
       if (!voiceTypingRef.current) {
         voiceTypingRef.current = new VoiceTyping();
       }
       const vt = voiceTypingRef.current;
       const tileId = tileModel?.id || "";
+      // Use render-time `target` (not targetRef) so activation always sees the
+      // latest value even if the deferred targetRef effect hasn't run yet.
+      const currentTarget = target;
 
-      // Capture committed text and cursor position at activation
-      committedTextRef.current = editingTextObject.text;
-      const textarea = getFocusedTextarea();
-      insertionOffsetRef.current = textarea?.selectionStart ?? editingTextObject.text.length;
+      // Capture committed text and cursor/selection position at activation
+      if (currentTarget === "text-object" && editingTextObject) {
+        committedTextRef.current = editingTextObject.text;
+        const textarea = getFocusedTextInput();
+        insertionOffsetRef.current = textarea?.selectionStart ?? editingTextObject.text.length;
+        insertionEndOffsetRef.current = insertionOffsetRef.current;
+      } else if (currentTarget === "title") {
+        const input = getFocusedTextInput();
+        committedTextRef.current = input?.value ?? "";
+        insertionOffsetRef.current = input?.selectionStart ?? committedTextRef.current.length;
+        insertionEndOffsetRef.current = input?.selectionEnd ?? insertionOffsetRef.current;
+      }
+
+      // Register commitInterimText in context so onBeforeClose can call it
+      if (toolbarContext) {
+        toolbarContext.commitInterimTextRef.current = () => commitInterimTextFnRef.current();
+      }
 
       vt.enable({
         onTranscript: (text: string, isFinal: boolean) => {
           if (isFinal) {
             interimTextRef.current = "";
             toolbarContext?.setInterimText("");
-            insertIntoTextObject(text);
+            const insertText = targetRef.current === "title" ? insertIntoTitle : insertIntoTextObject;
+            insertText(text);
 
             if (tileId) {
               logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, {
                 operation: "voice-typing-insert",
-                change: { args: [{ text }] },
+                change: { args: [{ text }], target: targetRef.current },
                 tileId,
               });
             }
@@ -211,19 +278,7 @@ export const VoiceTypingDrawingButton = observer(
 
         onStateChange: (isActive, reason) => {
           if (!isActive) {
-            // Commit any pending interim text before tearing down
-            commitInterimText();
-            setActive(false);
-            toolbarContext?.setVoiceTypingActive(false);
-            toolbarContext?.setInterimText("");
-            if (tileId) {
-              logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, {
-                operation: "voice-typing-stop",
-                change: { reason: reason || "user" },
-                tileId,
-              });
-            }
-            announce("Voice typing off");
+            stopRef.current(reason || "user");
           }
         },
 
@@ -238,21 +293,22 @@ export const VoiceTypingDrawingButton = observer(
       if (tileId) {
         logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, {
           operation: "voice-typing-start",
-          change: {},
+          change: { target: currentTarget },
           tileId,
         });
       }
 
       announce("Voice typing on");
-    }, [editingTextObject, commitInterimText, insertIntoTextObject, tileModel?.id, announce, toolbarContext]);
+    }, [editingTextObject, titleEditing, target, insertIntoTextObject,
+        insertIntoTitle, tileModel?.id, announce, toolbarContext]);
 
     // Don't render if not supported
     if (!VoiceTyping.supported) return null;
 
-    // Only enable when a text object is being edited
-    const disabled = !editingTextObject;
+    // Enable when a text object or the title bar is being edited
+    const disabled = !editingTextObject && !titleEditing;
 
-    // Prevent mousedown from stealing focus from the textarea (which would end editing)
+    // Prevent mousedown from stealing focus from the textarea/input (which would end editing)
     const handleMouseDown = (e: React.MouseEvent) => {
       if (!disabled) {
         e.preventDefault();
