@@ -14,6 +14,7 @@ import { ChatPanel } from "../chat/chat-panel";
 import ChatIcon from "../../assets/chat-icon.svg";
 import { SortWorkView } from "../document/sort-work-view";
 import { NavTabPanelInfoProvider } from "../../hooks/use-nav-tab-panel-info";
+import { getAriaLabels } from "../../hooks/use-aria-labels";
 
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.scss";
@@ -54,6 +55,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
       !this.shouldHideChat(selectedTabIndex, user.type);
     const openChatPanel = isChatEnabled && showChatPanel;
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
+    const ariaLabels = getAriaLabels();
 
     return (
       <NavTabPanelInfoProvider>
@@ -97,7 +99,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
             { isChatEnabled
                 ? !openChatPanel &&
                   <button
-                    aria-label="Open chat panel"
+                    aria-label={ariaLabels.openChatPanel}
                     className={`chat-panel-toggle themed ${activeNavTab}`}
                     onClick={this.handleShowChatColumn}
                     type="button"
@@ -108,7 +110,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
                     <ChatIcon className={`chat-button ${activeNavTab}`} />
                   </button>
                 : <button
-                    aria-label="Close resources"
+                    aria-label={ariaLabels.closeResourcesPanel}
                     className="close-button"
                     onClick={this.handleCloseResources}
                     type="button"

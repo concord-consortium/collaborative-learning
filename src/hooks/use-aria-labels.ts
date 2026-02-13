@@ -30,6 +30,7 @@ const ariaLabels = {
 
   // Chat and resources panel
   openChatPanel: "Open chat panel",
+  closeChatPanel: "Close chat panel",
   closeResourcesPanel: "Close resources panel",
 
   // Live region
