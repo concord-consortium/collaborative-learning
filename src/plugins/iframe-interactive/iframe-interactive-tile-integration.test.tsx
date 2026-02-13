@@ -21,9 +21,24 @@ jest.mock("iframe-phone", () => ({
   })
 }));
 
-// Mock useSettingFromStores to avoid needing full stores context
+// Mock stores hooks to avoid needing full stores context
 jest.mock("../../hooks/use-stores", () => ({
-  useSettingFromStores: jest.fn(() => "geolocation; microphone; camera; bluetooth")
+  useSettingFromStores: jest.fn(() => "geolocation; microphone; camera; bluetooth"),
+  useStores: jest.fn(() => ({
+    ui: {
+      isSelectedTile: jest.fn(() => false)
+    }
+  }))
+}));
+
+// Mock container context for selection handling
+jest.mock("../../components/document/container-context", () => ({
+  useContainerContext: jest.fn(() => ({ model: undefined }))
+}));
+
+// Mock userSelectTile to avoid needing full UI store
+jest.mock("../../models/stores/ui", () => ({
+  userSelectTile: jest.fn()
 }));
 
 // NOW import the component after the mock is set up

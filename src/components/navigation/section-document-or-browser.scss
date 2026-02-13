@@ -244,7 +244,7 @@ $title-margin: 2px;
         .tool-tile.readonly {
           border: 2px solid $comment-select-background;
           &.selected {
-            border: 2px solid white;
+            border: 2px solid $tool-tile-background;
           }
         }
       }

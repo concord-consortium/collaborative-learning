@@ -1,5 +1,15 @@
 @import "../../components/vars";
 
+// Selection and comment highlighting for iframe interactive tiles
+.iframe-interactive-tile {
+  &.selected-for-comment {
+    .iframe-interactive-wrapper {
+      background-color: $comment-select-background;
+      padding: 3px;
+    }
+  }
+}
+
 .iframe-interactive-wrapper {
   display: flex;
   flex-direction: column;

@@ -22,6 +22,7 @@
   &.comment-select {
     .document-content {
       background-color: $comment-select-background;
+      padding: 3px;
       .tool-tile {
         border: 2px solid $comment-select-background;
       }

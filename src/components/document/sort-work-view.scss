@@ -234,10 +234,10 @@ $title-margin: 0;
       // Override the yellow background from editable-document-content.scss
       // In Sort Work view, only tiles should be highlighted, not the document background
       &.comment-select .document-content {
-        background-color: white;
+        background-color: $tool-tile-background;
 
         .tool-tile.readonly.selected {
-          border: 2px solid white;
+          border: 2px solid $tool-tile-background;
         }
       }
 
