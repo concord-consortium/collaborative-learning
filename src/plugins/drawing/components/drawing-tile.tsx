@@ -14,6 +14,7 @@ import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { DrawingContentModelContext } from "./drawing-content-context";
 import { DrawingToolbarContext, IDrawingToolbarContext } from "./drawing-toolbar-context";
 import { TitleTextInserter } from "../../../components/tiles/editable-tile-title";
+import { useFunctionState } from "../../../hooks/use-function-state";
 import { DrawingAreaContext } from "./drawing-area-context";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { HotKeys } from "../../../utilities/hot-keys";
@@ -58,8 +59,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   const [voiceTypingActive, setVoiceTypingActive] = useState(false);
   const [interimText, setInterimText] = useState("");
   const [titleEditing, setTitleEditing] = useState(false);
-  const [titleTextInserter, setTitleTextInserter] = useState<TitleTextInserter | null>(null);
-  // useRef because setState(fn) treats fn as an updater, not a value to store.
+  const [titleTextInserter, setTitleTextInserter] = useFunctionState<TitleTextInserter>();
   const commitInterimTextRef = useRef<(() => void) | null>(null);
 
   const drawingToolbarContext = useMemo<IDrawingToolbarContext>(() => ({
@@ -72,7 +72,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     titleTextInserter,
     setTitleTextInserter,
     commitInterimTextRef,
-  }), [voiceTypingActive, interimText, titleEditing, titleTextInserter]);
+  }), [voiceTypingActive, interimText, titleEditing, titleTextInserter, setTitleTextInserter]);
 
   const updateTileVisibleBoundingBox = (bb: BoundingBox) => {
     if (!isEqual(bb, tileVisibleBoundingBox)) {
@@ -295,10 +295,9 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     contentModel.setOffset(newX, newY);
   };
 
-  // Wrap in () => inserter because setState(fn) treats fn as an updater, not a value.
   const handleRegisterTextInserter = useCallback((inserter: TitleTextInserter | null) => {
-    setTitleTextInserter(inserter ? () => inserter : null);
-  }, []);
+    setTitleTextInserter(inserter);
+  }, [setTitleTextInserter]);
 
   return (
     <DrawingContentModelContext.Provider value={contentRef.current}>
