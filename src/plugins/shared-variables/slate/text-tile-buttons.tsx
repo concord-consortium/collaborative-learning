@@ -16,6 +16,9 @@ import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
 import { TextPluginsContext } from "../../../components/tiles/text/text-plugins-context";
 import { IToolbarButtonComponentProps } from "../../../components/toolbar/toolbar-button-manager";
+import {
+  getEffectiveSelectedElements, isEffectiveElementActive
+} from "../../../components/tiles/text/slate-selection-utils";
 
 export const kNewVariableButtonName = "new-variable";
 export const kInsertVariableButtonName = "insert-variable";
@@ -184,9 +187,11 @@ export const EditVariableTextButton = observer(
   const variablesPlugin = castToVariablesPlugin(pluginInstance);
 
   const isSelected = false;
-  const selectedElements = editor?.selectedElements();
+  // Use effective selection helpers to get the selection that was active when
+  // the user clicked the toolbar button (before the editor blurred)
+  const selectedElements = getEffectiveSelectedElements(editor);
   const variables = variablesPlugin?.variables || [];
-  const hasVariable = editor?.isElementActive(kVariableFormat);
+  const hasVariable = isEffectiveElementActive(editor, kVariableFormat);
   const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
   const disabled = !selectedVariable;
 

@@ -3,8 +3,12 @@ import classNames from "classnames";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
-  createEditor, defaultHotkeyMap, Editor, EditorValue, normalizeSelection, ReactEditor, Slate, SlateEditor
+  createEditor, defaultHotkeyMap, Editor, EditorValue, normalizeSelection, ReactEditor, Slate, SlateEditor,
+  Transforms
 } from "@concord-consortium/slate-editor";
+import {
+  saveSelectionOnBlur, clearBlurSelection, isSelectionValid, EditorWithBlurSelection
+} from "./slate-selection-utils";
 import { TextContentModelContext } from "./text-content-context";
 import { BaseComponent } from "../../base";
 import { OffsetModel } from "../../../models/annotations/clue-object";
@@ -342,6 +346,13 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private handleBlur = () => {
     const readOnly = this.isReadOnly();
 
+    // Save the selection before Slate clears the DOM selection.
+    // This allows toolbar buttons to access the selection that was active
+    // when the user clicked on them.
+    if (this.editor) {
+      saveSelectionOnBlur(this.editor);
+    }
+
     if (!readOnly) {
       // If the text has changed since the editor was focused, log the new text.
       const text = this.getContent().text;
@@ -363,6 +374,23 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   private handleFocus = () => {
     const readOnly = this.isReadOnly();
+
+    // Restore the selection that was saved on blur.
+    // This ensures the user's selection is preserved across toolbar interactions.
+    if (this.editor) {
+      const editorWithBlur = this.editor as EditorWithBlurSelection;
+      if (editorWithBlur.blurSelection) {
+        // Use setTimeout to ensure this runs after Slate's focus handling
+        setTimeout(() => {
+          // Only restore the selection if it's still valid for the current document.
+          // The selection can become invalid if a toolbar action modified the document.
+          if (editorWithBlur.blurSelection && isSelectionValid(this.editor!, editorWithBlur.blurSelection)) {
+            Transforms.select(this.editor!, editorWithBlur.blurSelection);
+          }
+          clearBlurSelection(this.editor!);
+        }, 0);
+      }
+    }
 
     if (!readOnly) {
       this.textOnFocus = this.getContent().textStr;
