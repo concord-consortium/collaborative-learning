@@ -8,13 +8,14 @@ import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { OffsetModel } from '../../../models/annotations/clue-object';
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { HotKeys } from "../../../utilities/hot-keys";
 import { NumberlineContentModelType, PointObjectModelType,  } from "../models/numberline-content";
 import {
   kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
   tickHeightDefault, tickStyleDefault, tickWidthDefault, tickWidthZero,
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
-  kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax
+  kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax,
+  kValueLabelHeight, kValueLabelPadding, kValueLabelOffsetY, kValueLabelBorderRadius,
+  kKeyboardMoveStep, kKeyboardMoveStepLarge
 } from '../numberline-tile-constants';
 import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
 import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
@@ -36,6 +37,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   const content = model.content as NumberlineContentModelType;
   const [hoverPointId, setHoverPointId] = useState("");
+  const [focusedPointId, setFocusedPointId] = useState("");
   const [_selectedPointId, setSelectedPointId] = useState(""); // Just used to rerender when a point is selected
   const ui = useUIStore();
   const isTileSelected = ui.isSelectedTile(model);
@@ -68,16 +70,15 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     content.deleteSelectedPoints();
   }, [content]);
 
-  // Set up key handling
-  const hotKeys = useRef(new HotKeys());
-  useEffect(()=>{
-    if (!readOnly) {
-      hotKeys.current.register({
-        "delete": deleteSelectedPoints,
-        "backspace": deleteSelectedPoints,
-      });
-    }
-  }, [deleteSelectedPoints, readOnly]);
+  // Move all selected points by a delta amount
+  const moveSelectedPoint = useCallback((delta: number) => {
+    const selectedPoints = content.selectedPointsArr;
+    selectedPoints.forEach(point => {
+      const newValue = point.xValue + delta;
+      point.setXValue(newValue);
+    });
+  }, [content]);
+
 
   /* ============================ [ Calculate Width of Tile / Scale ]  ========================= */
   const documentScrollerRef = useRef<HTMLDivElement>(null);
@@ -212,6 +213,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
             const isPointOpen = optionClicked === CreatePointType.Open;
             createPoint(xScale.invert(mouseX), isPointOpen);
           }
+        } else {
+          // Clear selection when clicking outside the numberline area
+          content.clearSelectedPoints();
+          setSelectedPointId("");
         }
       }
     }
@@ -279,31 +284,60 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const numOfTicks = 11;
 
   //Returns an equally divided array between min and max with numOfTick # of elements
-  const generateTickValues = (min: number, max: number) => {
+  // Always includes 0 if it falls within the range
+  // Also tracks whether zero is part of regular tick spacing
+  const generateTickInfo = (min: number, max: number) => {
     const tickValues = [];
     const range = content.max - content.min;
+    let zeroInRegularTicks = false;
+    let zeroIndex = -1;
+
     for (let i = 0; i < numOfTicks; i++) {
       const position = i / (numOfTicks - 1);
       const tickValue = content.min + (position * range);
+
+      // Check if this tick is zero (within tolerance)
+      if (Math.abs(tickValue) < 0.0001) {
+        zeroInRegularTicks = true;
+      }
+
+      // Track where zero would be inserted if needed
+      if (zeroIndex === -1 && tickValue > 0) {
+        zeroIndex = i;
+      }
+
       tickValues.push(tickValue);
     }
-    return tickValues;
-  };
 
-  const tickFormatter = (value: number | { valueOf(): number }, index: number) => {
-    if (typeof value !== 'number') {
-      return value.toString();
+    // Add zero if it's in range but not part of regular ticks
+    const zeroIsInRange = content.min < 0 && content.max > 0;
+    if (zeroIsInRange && !zeroInRegularTicks) {
+      // Insert zero at the correct position
+      if (zeroIndex === -1) zeroIndex = numOfTicks;
+      tickValues.splice(zeroIndex, 0, 0);
     }
-    if (value === content.min || value === content.max) {
-      return '';
-    }
-    return value.toFixed(1);
+
+    return { tickValues, zeroInRegularTicks };
   };
 
   if (axisWidth !== 0) {
     const readOnlyState = readOnly ? "readOnly" : "readWrite";
     const axisClass = `axis-${model.id}-${readOnlyState}`;
-    const tickValues = generateTickValues(content.min, content.max);
+    const { tickValues, zeroInRegularTicks } = generateTickInfo(content.min, content.max);
+
+    const tickFormatter = (value: number | { valueOf(): number }, index: number) => {
+      if (typeof value !== 'number') {
+        return value.toString();
+      }
+      if (value === content.min || value === content.max) {
+        return '';
+      }
+      // Only show "0" label if zero is part of regular tick spacing
+      if (value === 0) {
+        return zeroInRegularTicks ? '0' : '';
+      }
+      return value.toFixed(1);
+    };
 
     axis
       .attr("class", `${axisClass} num-line`)
@@ -344,11 +378,15 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       });
 
     const updateCircles = () => {
+      // Sort points by x value for consistent tab order (smallest to largest)
+      const sortedPoints = content.sortedPointsArr;
+      const deleteInstruction = readOnly ? '' : ', Delete to remove';
+
       /* =========================== [ Outer Hover Circles ] ======================= */
 
       //---- Initialize outer hover circles
       const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
-        .data(content.pointsArr);
+        .data(sortedPoints, (p) => p.id);
 
       outerPoints.enter()
         .append("circle").attr("class", "outer-point")
@@ -363,6 +401,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       outerPoints
         .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
         .classed("hovered", (p, idx) => (hoverPointId === p.id))
+        .classed("focused", (p) => (focusedPointId === p.id))
+        .classed("selected", (p) => (p.id in content.selectedPoints))
         .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
       outerPoints.exit().remove(); //cleanup
@@ -372,7 +412,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
       /* =========================== [ Inner Circles ] ============================= */
       const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
-        .data(content.pointsArr);
+        .data(sortedPoints, (p) => p.id);
 
       // Initialize Attributes
       innerPoints.enter()
@@ -382,12 +422,49 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         .attr('cy', yMidPoint)
         .attr('r', innerPointRadius)
         .attr('id', p => p.id)
+        .attr('tabindex', readOnly ? -1 : 0)
+        .attr('role', 'slider')
+        .attr('aria-valuemin', content.min)
+        .attr('aria-valuemax', content.max)
+        .attr('aria-valuenow', (p) => p.currentXValue)
+        .attr('aria-label', (p) => `Point at ${p.currentXValue}. Use arrow keys to move${deleteInstruction}.`)
         .classed("point-inner-circle", true) //may change
+        .on('focus', function(e, p) {
+          if (!readOnly) {
+            content.setSelectedPoint(p);
+            setSelectedPointId(p.id);
+            setFocusedPointId(p.id);
+          }
+        })
+        .on('blur', function(e, p) {
+          setFocusedPointId("");
+        })
+        .on('keydown', function(e: KeyboardEvent, p) {
+          if (readOnly) return;
+          switch (e.key) {
+            case 'ArrowLeft':
+              e.preventDefault();
+              moveSelectedPoint(e.shiftKey ? -kKeyboardMoveStepLarge : -kKeyboardMoveStep);
+              break;
+            case 'ArrowRight':
+              e.preventDefault();
+              moveSelectedPoint(e.shiftKey ? kKeyboardMoveStepLarge : kKeyboardMoveStep);
+              break;
+            case 'Delete':
+            case 'Backspace':
+              e.preventDefault();
+              deleteSelectedPoints();
+              break;
+          }
+        })
         .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
       // --- Update functions inner circles
       innerPoints
       .attr('cx', (p, idx) => xScale(p.currentXValue))
+      .attr('tabindex', readOnly ? -1 : 0)
+      .attr('aria-valuenow', (p) => p.currentXValue)
+      .attr('aria-label', (p) => `Point at ${p.currentXValue}. Use arrow keys to move${deleteInstruction}.`)
       .classed("selected", (p)=> p.id in content.selectedPoints)
       .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
@@ -398,9 +475,9 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       // Filter the points that should have an inner white circle
 
 
-      const openPoints = content.pointsArr.filter(p => p.isOpen);
+      const openPoints = sortedPoints.filter(p => p.isOpen);
       const innerWhitePoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-white-point')
-      .data(openPoints);
+      .data(openPoints, (p) => p.id);
 
       innerWhitePoints.enter()
         .append("circle")
@@ -417,6 +494,58 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       .attr("cy", yMidPoint);
 
       innerWhitePoints.exit().remove();
+
+      /* =========================== [ Value Label for Selected Point ] ===================== */
+      // Only one point can be selected at a time
+      const selectedPointId = Object.keys(content.selectedPoints)[0];
+      const selectedPoint = selectedPointId ? content.getPoint(selectedPointId) : undefined;
+
+      // Remove existing label and line
+      svg.selectAll('.point-value-label-group').remove();
+      svg.selectAll('.point-value-label-line').remove();
+
+      // Create label only if a point is selected
+      if (selectedPoint) {
+        const x = xScale(selectedPoint.currentXValue);
+        const y = yMidPoint + kValueLabelOffsetY;
+
+        const labelGroup = svg.append("g")
+          .attr("class", "point-value-label-group")
+          .attr("transform", `translate(${x}, ${y})`);
+
+        // Add text first to measure its width
+        // Avoid displaying "-0.00" by treating values that round to zero as zero
+        const displayValue = Math.abs(selectedPoint.currentXValue) < 0.005 ? 0 : selectedPoint.currentXValue;
+        const labelText = labelGroup.append("text")
+          .attr("class", "point-value-label-text")
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "middle")
+          .attr("y", kValueLabelHeight / 2)
+          .text(displayValue.toFixed(2));
+
+        // Get text width and add rectangle background
+        const textWidth = (labelText.node() as SVGTextElement)?.getBBox().width || 0;
+        const rectWidth = textWidth + (kValueLabelPadding * 2);
+
+        labelGroup.insert("rect", "text")
+          .attr("class", "point-value-label-bg")
+          .attr("height", kValueLabelHeight)
+          .attr("width", rectWidth)
+          .attr("x", -rectWidth / 2)
+          .attr("rx", kValueLabelBorderRadius)
+          .attr("ry", kValueLabelBorderRadius);
+
+        // Add vertical line from point to label (added last to be on top)
+        const lineY1 = yMidPoint - innerPointRadius; // Top edge of inner point circle
+        const lineY2 = y + kValueLabelHeight; // Bottom edge of label
+
+        svg.append("line")
+          .attr("class", "point-value-label-line")
+          .attr("x1", x)
+          .attr("y1", lineY1)
+          .attr("x2", x)
+          .attr("y2", lineY2);
+      }
     }; //end of updateCircles()
 
     updateCircles();
@@ -439,7 +568,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   return (
     <div
       className={containerClasses}
-      onKeyDown={(e) => hotKeys.current.dispatch(e)}
       tabIndex={0}
     >
       <div className={"numberline-title"}>

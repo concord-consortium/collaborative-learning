@@ -44,6 +44,25 @@ context('Numberline Tile', function () {
     numberlineToolTile.setMinValue(-10);
     numberlineToolTile.getAllNumberlineTicks().should('contain', 6.0);
 
+    cy.log('will always show zero tick when range spans zero');
+    // Set asymmetric range where 0 is not evenly spaced
+    numberlineToolTile.setMinValue(-3);
+    numberlineToolTile.setMaxValue(10);
+    // Zero tick should exist even if not in regular spacing
+    cy.get(".numberline-tool-container .zero-tick").should("exist");
+    // Zero should not have a label since it's not part of regular tick spacing
+    numberlineToolTile.getAllNumberlineTicks().each(($el) => {
+      expect($el.text()).to.not.equal('0');
+    });
+
+    cy.log('will show zero label when zero is part of regular tick spacing');
+    // Set symmetric range where 0 falls on regular spacing
+    numberlineToolTile.setMinValue(-5);
+    numberlineToolTile.setMaxValue(5);
+    cy.get(".numberline-tool-container .zero-tick").should("exist");
+    // Now zero should have a label
+    numberlineToolTile.getAllNumberlineTicks().should('contain', '0');
+
     cy.log("will delete a single point");
     numberlineToolTile.setToolbarSelect();
     // Just to select it
@@ -54,6 +73,97 @@ context('Numberline Tile', function () {
     cy.log("will delete all points");
     numberlineToolTile.setToolbarReset();
     numberlineToolTile.hasNoPoints();
+
+    cy.log("will show value label for selected point");
+    numberlineToolTile.setToolbarPoint();
+    numberlineToolTile.addPointOnNumberlineTick(2.0);
+    numberlineToolTile.getPointsOnGraph().should('have.length', 1);
+    numberlineToolTile.getValueLabel().should("exist");
+    numberlineToolTile.getValueLabelText().should("contain", "2.00");
+    numberlineToolTile.getValueLabelLine().should("exist");
+
+    cy.log("will hide value label when point is deselected");
+    // Click outside the numberline to deselect
+    cy.get(".numberline-tool-container svg").click(10, 10, {force: true});
+    numberlineToolTile.getValueLabel().should("not.exist");
+    numberlineToolTile.getValueLabelLine().should("not.exist");
+
+    cy.log("will show value label when point is reselected");
+    numberlineToolTile.setToolbarSelect();
+    numberlineToolTile.addPointOnNumberlineTick(2.0);
+    numberlineToolTile.getValueLabel().should("exist");
+    numberlineToolTile.getValueLabelText().should("contain", "2.00");
+
+    cy.log("will clear points before reload test");
+    numberlineToolTile.setToolbarReset();
+    numberlineToolTile.hasNoPoints();
+
+    cy.log("will select points with Tab key");
+    numberlineToolTile.setToolbarPoint();
+    numberlineToolTile.addPointOnNumberlineTick(-2.0);
+    numberlineToolTile.addPointOnNumberlineTick(2.0);
+    numberlineToolTile.addPointOnNumberlineTick(0.0);
+    numberlineToolTile.getPointsOnGraph().should('have.length', 3);
+    // Click on tile to focus it, then Tab to select first point (leftmost)
+    cy.get(".primary-workspace .numberline-wrapper").click().type('{tab}');
+    numberlineToolTile.getValueLabel().should("exist");
+    numberlineToolTile.getValueLabelText().should("contain", "-2.00");
+    // Tab again to select next point
+    cy.get(".primary-workspace .numberline-wrapper").type('{tab}');
+    numberlineToolTile.getValueLabelText().should("contain", "0.00");
+    // Tab again to select rightmost point
+    cy.get(".primary-workspace .numberline-wrapper").type('{tab}');
+    numberlineToolTile.getValueLabelText().should("contain", "2.00");
+
+    cy.log("will move selected point with arrow keys");
+    // Move the selected point (at 2.0) to the right by 0.1
+    cy.get(".primary-workspace .numberline-wrapper").type('{rightarrow}');
+    numberlineToolTile.getValueLabelText().invoke('text').then((text) => {
+      const value = parseFloat(text);
+      expect(value).to.be.closeTo(2.1, 0.01);
+    });
+    // Move left by 0.1
+    cy.get(".primary-workspace .numberline-wrapper").type('{leftarrow}');
+    numberlineToolTile.getValueLabelText().should("contain", "2.00");
+
+    cy.log("will move point with larger step using Shift+arrow");
+    cy.get(".primary-workspace .numberline-wrapper").type('{shift}{rightarrow}');
+    numberlineToolTile.getValueLabelText().should("contain", "3.00");
+
+    cy.log("will delete selected point with keyboard");
+    cy.get(".primary-workspace .numberline-wrapper").type('{del}');
+    numberlineToolTile.getPointsOnGraph().should('have.length', 2);
+
+    cy.log("will clean up keyboard test points");
+    numberlineToolTile.setToolbarReset();
+    numberlineToolTile.hasNoPoints();
+
+    cy.log("will tab through min and max fields before points");
+    // Reset min/max to known values
+    numberlineToolTile.setMinValue(-5);
+    numberlineToolTile.setMaxValue(5);
+    // Add a point so we can test tab order
+    numberlineToolTile.setToolbarPoint();
+    numberlineToolTile.addPointOnNumberlineTick(0.0);
+    numberlineToolTile.setToolbarSelect();
+    // Click outside to deselect
+    cy.get(".numberline-tool-container svg").click(10, 10, {force: true});
+    // Click on the min box to focus it
+    numberlineToolTile.getMinBox().click();
+    numberlineToolTile.getMinBox().find('input').should('exist');
+    // Tab to max field using realPress (this blurs min and focuses max)
+    cy.realPress('Tab');
+    numberlineToolTile.getMaxBox().find('input').should('exist');
+    // Tab to first point
+    cy.realPress('Tab');
+    numberlineToolTile.getFocusedPoint().should('exist');
+
+    cy.log("will clean up after tab order tests");
+    numberlineToolTile.setToolbarReset();
+    numberlineToolTile.hasNoPoints();
+    // Restore values to -10/10 for reload test
+    numberlineToolTile.setMinValue(-10);
+    numberlineToolTile.setMaxValue(10);
 
     //Numberline tile restore upon page reload
     cy.wait(2000);
