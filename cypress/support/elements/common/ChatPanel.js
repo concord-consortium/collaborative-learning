@@ -11,8 +11,8 @@ class ChatPanel{
       return cy.get('.chat-panel-toggle');
     }
     openChatPanel() {
-      cy.get('.resource-and-chat-panel .top-row').then(topRow => {
-        if(topRow.find(".chat-panel-toggle").length > 0) {
+      cy.get('.resource-and-chat-panel .nav-tab-panel').then(panel => {
+        if(panel.find(".chat-panel-toggle").length > 0) {
           this.getChatPanelToggle().click();
           cy.wait(10000);
         }
@@ -79,7 +79,7 @@ class ChatPanel{
       return cy.get('.problem-panel [data-testid=document-content]');
     }
     getEditableDocumentContent() {
-      return cy.get('.documents-panel .editable-document-content');
+      return cy.get('.sub-tab-panel .editable-document-content');
     }
     getToolTile(tileIndex = 0) {
       return cy.get('[data-testid=tool-tile]').eq(tileIndex);

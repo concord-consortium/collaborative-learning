@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import React from "react";
 import ChatIcon from "../../assets/chat-icon.svg";
 import DocumentsWithCommentsIcon  from "../../assets/documents-list-icon.svg";
+import { useAriaLabels } from "../../hooks/use-aria-labels";
 
 import "./chat-panel-header.scss";
 import "../themes.scss";
@@ -16,6 +17,7 @@ interface IProps {
 
 export const ChatPanelHeader: React.FC<IProps> = observer(({theme, newCommentCount, onCloseChatPanel,
   handleDocView, chatPanelTitle}) => {
+  const ariaLabels = useAriaLabels();
   const renderNotification = () => {
     return (
       <div className="notification-toggle">
@@ -37,9 +39,13 @@ export const ChatPanelHeader: React.FC<IProps> = observer(({theme, newCommentCou
       <ChatIcon className={`chat-icon themed ${theme} no-action`}/>
       {chatPanelTitle}
       {renderNotification()}
-      <button className={`chat-close-button themed ${theme}`}
-              data-testid="chat-close-button"
-              onClick={() => onCloseChatPanel(false)}/>
+      <button
+        aria-label={ariaLabels.closeChatPanel}
+        className={`chat-close-button themed ${theme}`}
+        data-testid="chat-close-button"
+        onClick={() => onCloseChatPanel(false)}
+        type="button"
+      />
     </div>
   );
 });

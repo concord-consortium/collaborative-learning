@@ -186,20 +186,20 @@ context('Nav Panel', function () {
     cy.get(".resources-expander.my-work").should('not.exist');
     canvas.openFileMenu();
     cy.get("[data-test=list-item-icon-open-workspace]").click();
-    cy.get(".tab-header-row").should("not.be.visible");
+    cy.get(".document-tabs .tab-list").should("not.be.visible");
 
     cy.log('Single Top tab with visible resource tab panel');
     beforeTest(queryParams3);
     cy.get(".top-tab").should("have.length", 1);
-    cy.get(".document-tabs.my-work .tab-header-row").should("not.be.visible");
+    cy.get(".document-tabs.my-work .tab-list").should("not.be.visible");
     canvas.openFileMenu();
     cy.get("[data-test=list-item-icon-open-workspace]").click();
-    cy.get(".tab-header-row").should("not.be.visible");
+    cy.get(".document-tabs .tab-list").should("not.be.visible");
 
     cy.log('Problem Tabs with no sub tabs');
     beforeTest(queryParams4);
     cy.openTopTab("problems");
-    cy.get(".problem-tabs .tab-header-row").should("not.be.visible");
+    cy.get(".problem-tabs .tab-list").should("not.be.visible");
 
     cy.log('Customized tabs');
     const exampleProblemSubTabTitles = ["First Section", "Second Section", "Third Section"];
@@ -222,6 +222,62 @@ context('Nav Panel', function () {
     cy.get(".document-tabs .tab-list .doc-tab.class-work").each(($tab, index, $tabList) => {
       expect($tabList).to.have.lengthOf(exampleClassWorkSubTabTitles.length);
       expect($tab.text()).to.contain(exampleClassWorkSubTabTitles[index]);
+    });
+  });
+
+  it('Keyboard navigation and accessibility', function () {
+    beforeTest(queryParams1);
+
+    cy.log('Arrow key navigation moves focus between top-level tabs');
+    cy.get('.top-tab.tab-problems').focus();
+    cy.focused().should('have.class', 'tab-problems');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.realPress('ArrowRight');
+    cy.focused().should('have.class', 'tab-my-work');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.realPress('ArrowRight');
+    cy.focused().should('have.class', 'tab-class-work');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.log('Arrow left navigates back');
+    cy.realPress('ArrowLeft');
+    cy.focused().should('have.class', 'tab-my-work');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.log('Tab from top-level tab moves focus to sub-tabs');
+    cy.openTopTab("problems");
+    cy.get('.top-tab.tab-problems').focus();
+    cy.realPress('Tab');
+    cy.focused().should('have.class', 'prob-tab');
+
+    cy.log('Arrow keys navigate between problem sub-tabs');
+    cy.get('.prob-tab').contains('Introduction').focus();
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.realPress('ArrowRight');
+    cy.focused().should('contain', 'Initial Challenge');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.realPress('ArrowRight');
+    cy.focused().should('contain', 'What If');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.realPress('ArrowLeft');
+    cy.focused().should('contain', 'Initial Challenge');
+    cy.focused().should('have.attr', 'aria-selected', 'true');
+
+    cy.log('Panel action button has aria-label');
+    cy.openTopTab("problems");
+    cy.get('.nav-tab-panel').then($panel => {
+      if ($panel.find('.close-button').length > 0) {
+        cy.get('.close-button')
+          .should('have.attr', 'aria-label', 'Close resources panel');
+      } else {
+        cy.get('.chat-panel-toggle')
+          .should('have.attr', 'aria-label', 'Open chat panel');
+      }
     });
   });
 });

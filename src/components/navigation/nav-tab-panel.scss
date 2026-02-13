@@ -1,5 +1,7 @@
 @import "../vars";
 
+$action-button-width: 40px;
+
 .resource-and-chat-panel {
   position: relative;
   height: 100%;
@@ -8,18 +10,17 @@
   .nav-tab-panel {
     // Split width between the tabs and the chat panel
     display: flex;
+    position: relative;
     width: 100%;
     height: 100%;
 
-    .top-row {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-    }
-
+    // Panel action button is visually positioned at top-right but comes
+    // after sub-tabs in DOM/keyboard order for better accessibility
     .close-button {
-      flex-shrink: 0;
-      width: 36px;
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: $action-button-width;
       height: $nav-tab-height;
       background-color: $charcoal-light-6;
       border-style: solid;
@@ -40,10 +41,13 @@
     }
 
     .chat-panel-toggle {
+      position: absolute;
+      right: 0;
+      top: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
+      width: $action-button-width;
       cursor: pointer;
       height: $nav-tab-height;
       background-color: white;
@@ -168,6 +172,7 @@
       align-items: center;
       width: 100%;
       padding: 0;
+      padding-right: $action-button-width; // Reserve space for absolutely positioned action button
       margin: 0;
 
       .top-tab {
