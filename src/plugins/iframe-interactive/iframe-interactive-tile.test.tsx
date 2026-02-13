@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultIframeInteractiveContent } from "./iframe-interactive-tile-content";
@@ -13,9 +13,25 @@ jest.mock("iframe-phone", () => ({
   }))
 }));
 
-// Mock useSettingFromStores to avoid needing full stores context
+// Mock stores hooks to avoid needing full stores context
+const mockIsSelectedTile = jest.fn(() => false);
 jest.mock("../../hooks/use-stores", () => ({
-  useSettingFromStores: jest.fn(() => "geolocation; microphone; camera; bluetooth")
+  useSettingFromStores: jest.fn(() => "geolocation; microphone; camera; bluetooth"),
+  useStores: jest.fn(() => ({
+    ui: {
+      isSelectedTile: mockIsSelectedTile
+    }
+  }))
+}));
+
+// Mock container context for selection handling
+jest.mock("../../components/document/container-context", () => ({
+  useContainerContext: jest.fn(() => ({ model: undefined }))
+}));
+
+// Mock userSelectTile to avoid needing full UI store
+jest.mock("../../models/stores/ui", () => ({
+  userSelectTile: jest.fn()
 }));
 
 // The iframe-interactive tile needs to be registered so the TileModel.create
@@ -170,5 +186,151 @@ describe("IframeInteractiveComponent", () => {
 
     const iframe = screen.getByTitle("Interactive Content");
     expect(iframe).toHaveAttribute("src", "https://example.com/new-interactive");
+  });
+
+  it("applies selected class to tile-content when tile is selected", () => {
+    mockIsSelectedTile.mockReturnValue(true);
+    const props = createTestProps();
+    props.content.setUrl("https://example.com/interactive");
+    render(<IframeInteractiveComponent {...props} />);
+
+    const wrapper = screen.getByTitle("Interactive Content").closest(".tile-content");
+    expect(wrapper).toHaveClass("selected");
+    mockIsSelectedTile.mockReturnValue(false);
+  });
+
+  it("does not apply selected class when tile is not selected", () => {
+    mockIsSelectedTile.mockReturnValue(false);
+    const props = createTestProps();
+    props.content.setUrl("https://example.com/interactive");
+    render(<IframeInteractiveComponent {...props} />);
+
+    const wrapper = screen.getByTitle("Interactive Content").closest(".tile-content");
+    expect(wrapper).not.toHaveClass("selected");
+  });
+
+  it("calls userSelectTile when clicking on the tile-content wrapper", () => {
+    const { userSelectTile: mockUserSelectTile } = require("../../models/stores/ui");
+    const props = createTestProps();
+    props.content.setUrl("https://example.com/interactive");
+    render(<IframeInteractiveComponent {...props} />);
+
+    const wrapper = screen.getByTitle("Interactive Content").closest(".tile-content")!;
+    fireEvent.mouseDown(wrapper);
+    expect(mockUserSelectTile).toHaveBeenCalled();
+  });
+
+  it("attaches selection listeners when tileElt is provided", () => {
+    const { userSelectTile: mockUserSelectTile } = require("../../models/stores/ui");
+    const tileElt = document.createElement("div");
+    const props = createTestProps();
+    (props as any).tileElt = tileElt;
+    props.content.setUrl("https://example.com/interactive");
+    render(<IframeInteractiveComponent {...props} />);
+
+    // Dispatch a mousedown directly on the tileElt (simulating clicking the tile edge)
+    const event = new MouseEvent("mousedown", { bubbles: false });
+    // Make currentTarget === target by dispatching directly on the element
+    tileElt.dispatchEvent(event);
+    expect(mockUserSelectTile).toHaveBeenCalled();
+  });
+
+  it("cleans up tileElt listeners on unmount", () => {
+    const tileElt = document.createElement("div");
+    const removeSpy = jest.spyOn(tileElt, "removeEventListener");
+    const props = createTestProps();
+    (props as any).tileElt = tileElt;
+    props.content.setUrl("https://example.com/interactive");
+    const { unmount } = render(<IframeInteractiveComponent {...props} />);
+
+    unmount();
+    expect(removeSpy).toHaveBeenCalledWith("mousedown", expect.any(Function));
+    expect(removeSpy).toHaveBeenCalledWith("touchstart", expect.any(Function));
+    removeSpy.mockRestore();
+  });
+
+  it("selects tile when iframe gains focus via window blur", async () => {
+    const { userSelectTile: mockUserSelectTile } = require("../../models/stores/ui");
+    const props = createTestProps();
+    props.content.setUrl("https://example.com/interactive");
+    render(<IframeInteractiveComponent {...props} />);
+
+    const iframe = screen.getByTitle("Interactive Content");
+    // Simulate the iframe being the active element when window blurs
+    Object.defineProperty(document, "activeElement", {
+      get: () => iframe,
+      configurable: true
+    });
+
+    mockUserSelectTile.mockClear();
+    window.dispatchEvent(new Event("blur"));
+
+    // The handler uses setTimeout(0), so wait for it
+    await waitFor(() => {
+      expect(mockUserSelectTile).toHaveBeenCalled();
+    });
+
+    // Restore activeElement
+    Object.defineProperty(document, "activeElement", {
+      get: () => document.body,
+      configurable: true
+    });
+  });
+
+  it("does not select tile on window blur when iframe is not active", async () => {
+    const { userSelectTile: mockUserSelectTile } = require("../../models/stores/ui");
+    const props = createTestProps();
+    props.content.setUrl("https://example.com/interactive");
+    render(<IframeInteractiveComponent {...props} />);
+
+    // activeElement is not the iframe
+    Object.defineProperty(document, "activeElement", {
+      get: () => document.body,
+      configurable: true
+    });
+
+    mockUserSelectTile.mockClear();
+    window.dispatchEvent(new Event("blur"));
+
+    // Wait a tick for the setTimeout(0)
+    await new Promise(resolve => setTimeout(resolve, 10));
+    expect(mockUserSelectTile).not.toHaveBeenCalled();
+  });
+
+  it("skip-to-content link focuses the iframe on click", () => {
+    const props = createTestProps();
+    props.content.setUrl("https://example.com/interactive");
+    render(<IframeInteractiveComponent {...props} />);
+
+    const iframe = screen.getByTitle("Interactive Content") as HTMLIFrameElement;
+    const focusSpy = jest.spyOn(iframe, "focus");
+    const skipLink = screen.getByText("Skip to interactive content");
+    fireEvent.click(skipLink);
+    expect(focusSpy).toHaveBeenCalled();
+    focusSpy.mockRestore();
+  });
+
+  it("skip-to-content link responds to Enter key", () => {
+    const props = createTestProps();
+    props.content.setUrl("https://example.com/interactive");
+    render(<IframeInteractiveComponent {...props} />);
+
+    const iframe = screen.getByTitle("Interactive Content") as HTMLIFrameElement;
+    const focusSpy = jest.spyOn(iframe, "focus");
+    const skipLink = screen.getByText("Skip to interactive content");
+    fireEvent.keyDown(skipLink, { key: "Enter" });
+    expect(focusSpy).toHaveBeenCalled();
+    focusSpy.mockRestore();
+  });
+
+  it("applies selected class to placeholder when tile is selected", () => {
+    mockIsSelectedTile.mockReturnValue(true);
+    const props = createTestProps();
+    // No URL set — shows placeholder
+    render(<IframeInteractiveComponent {...props} />);
+
+    const wrapper = screen.getByText("No URL configured in authoring").closest(".tile-content");
+    expect(wrapper).toHaveClass("selected");
+    mockIsSelectedTile.mockReturnValue(false);
   });
 });

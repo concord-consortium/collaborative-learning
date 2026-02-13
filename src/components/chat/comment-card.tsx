@@ -126,14 +126,24 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     );
   };
 
-  // Select this thread when clicking anywhere in the comment card
+  // Select this thread when clicking or pressing Enter/Space on the comment card
   const handleCardClick = useCallback(() => {
     onSelect?.();
   }, [onSelect]);
 
+  const handleCardKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Only respond when the card div itself is focused, not child elements (e.g. text input)
+    if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      onSelect?.();
+    }
+  }, [onSelect]);
+
   return (
     <div className={classNames("comment-card", { selected: isFocused })}
-         data-testid="comment-card" onClick={handleCardClick}>
+         data-testid="comment-card" onClick={handleCardClick}
+         tabIndex={0} onKeyDown={handleCardKeyDown}
+         aria-label="Select associated tile">
       <div className={classNames("comment-card-content", { selected: isFocused })} data-testid="comment-card-content">
         {
           postedComments?.map((comment, idx) => {

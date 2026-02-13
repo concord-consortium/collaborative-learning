@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { ModalProvider } from "react-modal-hook";
 import { WithId } from "../../hooks/firestore-hooks";
@@ -60,5 +60,63 @@ describe("CommentCard", () => {
     ));
     expect(screen.getByTestId("comment-thread")).toBeInTheDocument();
     expect(screen.getByTestId("comment")).toHaveTextContent(testComment);
+  });
+
+  it("calls onSelect when clicking on the comment card", () => {
+    const mockOnSelect = jest.fn();
+    render((
+      <ModalProvider>
+        <CommentCard activeNavTab={activeNavTab} onSelect={mockOnSelect} isFocused={true} />
+      </ModalProvider>
+    ));
+    fireEvent.click(screen.getByTestId("comment-card"));
+    expect(mockOnSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onSelect when pressing Enter on the comment card", () => {
+    const mockOnSelect = jest.fn();
+    render((
+      <ModalProvider>
+        <CommentCard activeNavTab={activeNavTab} onSelect={mockOnSelect} isFocused={true} />
+      </ModalProvider>
+    ));
+    const card = screen.getByTestId("comment-card");
+    fireEvent.keyDown(card, { key: "Enter" });
+    expect(mockOnSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onSelect when pressing Space on the comment card", () => {
+    const mockOnSelect = jest.fn();
+    render((
+      <ModalProvider>
+        <CommentCard activeNavTab={activeNavTab} onSelect={mockOnSelect} isFocused={true} />
+      </ModalProvider>
+    ));
+    const card = screen.getByTestId("comment-card");
+    fireEvent.keyDown(card, { key: " " });
+    expect(mockOnSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not call onSelect for non-Enter/Space keys", () => {
+    const mockOnSelect = jest.fn();
+    render((
+      <ModalProvider>
+        <CommentCard activeNavTab={activeNavTab} onSelect={mockOnSelect} isFocused={true} />
+      </ModalProvider>
+    ));
+    const card = screen.getByTestId("comment-card");
+    fireEvent.keyDown(card, { key: "Tab" });
+    expect(mockOnSelect).not.toHaveBeenCalled();
+  });
+
+  it("comment card has tabIndex and aria-label for keyboard accessibility", () => {
+    render((
+      <ModalProvider>
+        <CommentCard activeNavTab={activeNavTab} isFocused={true} />
+      </ModalProvider>
+    ));
+    const card = screen.getByTestId("comment-card");
+    expect(card).toHaveAttribute("tabindex", "0");
+    expect(card).toHaveAttribute("aria-label", "Select associated tile");
   });
 });
