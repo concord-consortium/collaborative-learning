@@ -303,6 +303,10 @@ function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: J
   const oldPolygon = getPolygon(board, polygonId);
   const colorScheme = oldPolygon?.getAttribute("colorScheme");
   if (!oldPolygon) return;
+  // Suspend board updates during the remove/recreate to prevent JSXGraph from
+  // firing internal events (e.g. Polygon.hasPoint iterating over borders) while
+  // the polygon is in a transitional state between removal and recreation.
+  board.suspendUpdate();
   board.removeObject(oldPolygon);
   const vertices: JXG.Point[]
     = vertexIds.map(v => typeof(v)==='string' ? getPoint(board, v) : undefined)
@@ -340,6 +344,7 @@ function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: J
   // console.log('final:', polygon.vertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
 
   setPolygonEdgeColors(polygon);
+  board.unsuspendUpdate();
   return polygon;
 }
 

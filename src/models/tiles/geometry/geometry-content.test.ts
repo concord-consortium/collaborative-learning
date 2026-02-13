@@ -483,6 +483,62 @@ describe("GeometryContent", () => {
     destroyContentAndBoard(content, board);
   });
 
+  it("does not crash when closing a minimal polygon", () => {
+    // Regression test for CLUE-309: closing a polygon triggers updatePolygonVertices
+    // which removes and recreates the polygon on the board. The board.suspendUpdate()
+    // prevents JSXGraph from firing internal events (like Polygon.hasPoint) during
+    // the transition between removal and recreation.
+    const { content, board } = createContentAndBoard();
+    const phantom = content.addPhantomPoint(board, [0, 0]);
+    assertIsDefined(phantom);
+
+    // Create a polygon with just 2 real points + phantom
+    const { point: p1 } = content.realizePhantomPoint(board, [1, 1], "polygon");
+    assertIsDefined(p1);
+    const { point: p2 } = content.realizePhantomPoint(board, [3, 3], "polygon");
+    assertIsDefined(p2);
+
+    // Close the polygon by clicking the first point — this triggers
+    // closeActivePolygon → syncChange → updatePolygonVertices
+    const polygon = content.closeActivePolygon(board, p1);
+    assertIsDefined(polygon);
+    expect(isPolygon(polygon)).toBe(true);
+    expect(polygon.vertices.map(v => v.id)).toEqual([p1.id, p2.id, p1.id]);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("handles appendPhantomPointToPolygon safely with vertex angles", () => {
+    // Regression test for CLUE-309: appendPhantomPointToPolygon previously assumed
+    // poly.vertices.length >= 3 without checking, and fixVertexAngle/getVertexAngle
+    // did not handle undefined points. This test verifies the full flow of building
+    // a polygon with vertex angles, re-activating it, and closing it — exercising
+    // appendPhantomPointToPolygon and fixVertexAngle in the process.
+    const { content, board } = createContentAndBoard();
+    const { polygon, points } = buildPolygon(board, content, [[1, 1], [3, 3], [5, 1]]);
+    assertIsDefined(polygon);
+
+    // Add vertex angles to the polygon
+    content.addVertexAngle(board, [points[2].id, points[0].id, points[1].id]);
+    content.addVertexAngle(board, [points[0].id, points[1].id, points[2].id]);
+    content.addVertexAngle(board, [points[1].id, points[2].id, points[0].id]);
+
+    // Re-activate the polygon (calls appendPhantomPointToPolygon internally)
+    content.addPhantomPoint(board, [0, 0]);
+    const activePoly = content.makePolygonActive(board, polygon.id, points[1].id);
+    assertIsDefined(activePoly);
+
+    // The polygon should now have the phantom point inserted
+    expect(activePoly.vertices.length).toBeGreaterThan(polygon.vertices.length);
+
+    // Close the polygon (calls fixVertexAngle which calls getVertexAngle)
+    const closedPoly = content.closeActivePolygon(board, getPoint(board, points[2].id)!);
+    assertIsDefined(closedPoly);
+    expect(isPolygon(closedPoly)).toBe(true);
+
+    destroyContentAndBoard(content, board);
+  });
+
   it("can create polygon from existing points", () => {
     const { content, board } = createContentAndBoard((_content) => {
       _content.addObjectModel(PointModel.create({ id: "p1", x: 1, y: 1, colorScheme: 3 }));
@@ -921,6 +977,8 @@ describe("GeometryContent", () => {
     expect(canSupportVertexAngle(p0)).toBe(true);
     expect(canSupportVertexAngle(pSolo)).toBe(false);
     expect(getVertexAngle(p0)).toBeUndefined();
+    // getVertexAngle should handle undefined input without throwing
+    expect(getVertexAngle(undefined)).toBeUndefined();
     const va0 = content.addVertexAngle(board, [px.id, p0.id, py.id]);
     expect(content.lastObject).toEqual({ type: "vertexAngle", id: va0!.id, points: [px.id, p0.id, py.id] });
     const vax = content.addVertexAngle(board, [py.id, px.id, p0.id]);
