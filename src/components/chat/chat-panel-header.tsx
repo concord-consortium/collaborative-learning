@@ -37,9 +37,13 @@ export const ChatPanelHeader: React.FC<IProps> = observer(({theme, newCommentCou
       <ChatIcon className={`chat-icon themed ${theme} no-action`}/>
       {chatPanelTitle}
       {renderNotification()}
-      <button className={`chat-close-button themed ${theme}`}
-              data-testid="chat-close-button"
-              onClick={() => onCloseChatPanel(false)}/>
+      <button
+        aria-label="Close chat panel"
+        className={`chat-close-button themed ${theme}`}
+        data-testid="chat-close-button"
+        onClick={() => onCloseChatPanel(false)}
+        type="button"
+      />
     </div>
   );
 });

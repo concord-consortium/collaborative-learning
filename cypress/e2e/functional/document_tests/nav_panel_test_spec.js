@@ -186,20 +186,20 @@ context('Nav Panel', function () {
     cy.get(".resources-expander.my-work").should('not.exist');
     canvas.openFileMenu();
     cy.get("[data-test=list-item-icon-open-workspace]").click();
-    cy.get(".tab-header-row").should("not.be.visible");
+    cy.get(".document-tabs .tab-list").should("not.be.visible");
 
     cy.log('Single Top tab with visible resource tab panel');
     beforeTest(queryParams3);
     cy.get(".top-tab").should("have.length", 1);
-    cy.get(".document-tabs.my-work .tab-header-row").should("not.be.visible");
+    cy.get(".document-tabs.my-work .tab-list").should("not.be.visible");
     canvas.openFileMenu();
     cy.get("[data-test=list-item-icon-open-workspace]").click();
-    cy.get(".tab-header-row").should("not.be.visible");
+    cy.get(".document-tabs .tab-list").should("not.be.visible");
 
     cy.log('Problem Tabs with no sub tabs');
     beforeTest(queryParams4);
     cy.openTopTab("problems");
-    cy.get(".problem-tabs .tab-header-row").should("not.be.visible");
+    cy.get(".problem-tabs .tab-list").should("not.be.visible");
 
     cy.log('Customized tabs');
     const exampleProblemSubTabTitles = ["First Section", "Second Section", "Third Section"];

@@ -27,37 +27,33 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
   return (
     <div className="document-tab-content">
       <Tabs
-        className={classNames("document-tabs", navTabClass, tabsExtraClassNames)}
+        className={classNames("document-tabs", navTabClass, tabsExtraClassNames, {"no-sub-tabs": !hasSubTabs})}
         forceRenderTabPanel={true}
         selectedTabClassName="selected"
         onSelect={onSelect}
         selectedIndex={selectedIndex}
       >
-        <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
-          <TabList className={classNames("tab-list", navTabClass)}>
-            {subTabs.map((subTab) => {
-              const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
-              const type = subTab.sections[0].type;
-              return (
-                <Tab className={classNames("doc-tab", navTabClass, sectionTitle, type)}
-                  key={`section-${sectionTitle}`}>
-                  {subTab.label}
-                </Tab>
-              );
-            })}
-          </TabList>
-        </div>
-        <div className={classNames("documents-panel", {"no-sub-tabs": !hasSubTabs})}>
-          {subTabs.map((subTab, index) => {
-            const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
+        <TabList className={classNames("tab-list", navTabClass)}>
+          {subTabs.map((subTab) => {
+            const sectionTitle = subTab.label.toLowerCase().replaceAll(' ', '-');
+            const type = subTab.sections[0]?.type;
             return (
-              <TabPanel key={`subtab-${subTab.label}`} className={["react-tabs__tab-panel", "sub-tab-panel"]}
-                data-test={`subtab-${sectionTitle}`}>
-                { renderSubTabPanel(subTab) }
-              </TabPanel>
+              <Tab className={classNames("doc-tab", navTabClass, sectionTitle, type)}
+                key={`section-${sectionTitle}`}>
+                {subTab.label}
+              </Tab>
             );
           })}
-        </div>
+        </TabList>
+        {subTabs.map((subTab) => {
+          const sectionTitle = subTab.label.toLowerCase().replaceAll(' ', '-');
+          return (
+            <TabPanel key={`subtab-${subTab.label}`} className={classNames("react-tabs__tab-panel", "sub-tab-panel")}
+              data-test={`subtab-${sectionTitle}`}>
+              { renderSubTabPanel(subTab) }
+            </TabPanel>
+          );
+        })}
       </Tabs>
     </div>
   );
