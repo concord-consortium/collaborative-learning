@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { observer } from "mobx-react";
 import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 import { isEqual } from "lodash";
@@ -13,6 +13,8 @@ import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { DrawingContentModelContext } from "./drawing-content-context";
 import { DrawingToolbarContext, IDrawingToolbarContext } from "./drawing-toolbar-context";
+import { TitleTextInserter } from "../../../components/tiles/editable-tile-title";
+import { useFunctionState } from "../../../hooks/use-function-state";
 import { DrawingAreaContext } from "./drawing-area-context";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { HotKeys } from "../../../utilities/hot-keys";
@@ -56,12 +58,21 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
 
   const [voiceTypingActive, setVoiceTypingActive] = useState(false);
   const [interimText, setInterimText] = useState("");
+  const [titleEditing, setTitleEditing] = useState(false);
+  const [titleTextInserter, setTitleTextInserter] = useFunctionState<TitleTextInserter>();
+  const commitInterimTextRef = useRef<(() => void) | null>(null);
+
   const drawingToolbarContext = useMemo<IDrawingToolbarContext>(() => ({
     voiceTypingActive,
     setVoiceTypingActive,
     interimText,
     setInterimText,
-  }), [voiceTypingActive, interimText]);
+    titleEditing,
+    setTitleEditing,
+    titleTextInserter,
+    setTitleTextInserter,
+    commitInterimTextRef,
+  }), [voiceTypingActive, interimText, titleEditing, titleTextInserter, setTitleTextInserter]);
 
   const updateTileVisibleBoundingBox = (bb: BoundingBox) => {
     if (!isEqual(bb, tileVisibleBoundingBox)) {
@@ -284,10 +295,20 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     contentModel.setOffset(newX, newY);
   };
 
+  const handleRegisterTextInserter = useCallback((inserter: TitleTextInserter | null) => {
+    setTitleTextInserter(inserter);
+  }, [setTitleTextInserter]);
+
   return (
     <DrawingContentModelContext.Provider value={contentRef.current}>
       <DrawingToolbarContext.Provider value={drawingToolbarContext}>
-      <BasicEditableTileTitle />
+      <BasicEditableTileTitle
+        className={voiceTypingActive && titleEditing ? "voice-typing-active" : undefined}
+        onBeginEdit={() => setTitleEditing(true)}
+        onEndEdit={() => setTitleEditing(false)}
+        onBeforeClose={() => commitInterimTextRef.current?.()}
+        onRegisterTextInserter={handleRegisterTextInserter}
+      />
       <div
         ref={drawingToolElement}
         className={classNames("tile-content", "drawing-tool", {

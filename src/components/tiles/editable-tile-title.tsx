@@ -1,9 +1,12 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { useReadOnlyContext } from "../document/read-only-context";
 import { TileModelContext } from "../tiles/tile-api";
 import { TileLabelInput } from "./tile-label-input";
+
+/** Callback to programmatically set title text. */
+export type TitleTextInserter = (text: string) => void;
 
 import "./editable-tile-title.scss";
 // TODO: previously these CSS rules were in `editable-tile-title.scss` even though those classes
@@ -17,9 +20,11 @@ interface IProps {
   measureText: (text: string) => number;
   onBeginEdit?: () => void;
   onEndEdit?: (title?: string) => void;
+  onBeforeClose?: () => void;
+  onRegisterTextInserter?: (inserter: TitleTextInserter | null) => void;
 }
 export const EditableTileTitle: React.FC<IProps> = observer(({
-  className, measureText, onBeginEdit, onEndEdit
+  className, measureText, onBeginEdit, onEndEdit, onBeforeClose, onRegisterTextInserter
 }) => {
   const readOnly = useReadOnlyContext();
   // model and observer() allow this component to re-render
@@ -30,12 +35,26 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
   const width = Math.ceil(measureText(title)) + kTitlePadding;
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(title);
+  // Ref mirrors editingTitle so handleClose can read the latest value synchronously
+  // after voice typing commits interim text (React 17 batches state updates).
+  const editingTitleRef = useRef(editingTitle);
+  editingTitleRef.current = editingTitle;
 
   const handleClick = () => {
     if (!readOnly && !isEditing) {
       onBeginEdit?.();
       setEditingTitle(title);
+      editingTitleRef.current = title;
       setIsEditing(true);
+
+      // Register a text inserter so the voice typing button can update the title
+      if (onRegisterTextInserter) {
+        const inserter: TitleTextInserter = (text) => {
+          editingTitleRef.current = text;
+          setEditingTitle(text);
+        };
+        onRegisterTextInserter(inserter);
+      }
     }
   };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -51,9 +70,12 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
     }
   };
   const handleClose = (accept: boolean) => {
-    const trimTitle = editingTitle?.trim();
+    // Commit any pending interim voice typing text before saving
+    onBeforeClose?.();
+    const trimTitle = editingTitleRef.current?.trim();
     // This automatically logs the change
     trimTitle && model?.setTitleOrContentTitle(trimTitle);
+    onRegisterTextInserter?.(null);
     onEndEdit?.(accept && trimTitle ? trimTitle : undefined);
     setIsEditing(false);
   };

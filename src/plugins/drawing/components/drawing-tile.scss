@@ -1,6 +1,14 @@
 @import "../../../components/vars";
 @import "../../../utilities/voice-typing-overlay";
 
+.drawing-tool-tile {
+  .editable-tile-title.voice-typing-active {
+    .clue-editor-input {
+      background-color: $workspace-teal-light-7;
+    }
+  }
+}
+
 .drawing-tool {
   position: relative;
   display: flex;
