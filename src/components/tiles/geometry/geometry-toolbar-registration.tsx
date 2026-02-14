@@ -22,6 +22,7 @@ import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg
 import PointSvg from "../../../clue/assets/icons/geometry/point-icon.svg";
 import PolygonSvg from "../../../clue/assets/icons/geometry/polygon-icon.svg";
 import CircleSvg from "../../../clue/assets/icons/geometry/circle-icon.svg";
+import LineSvg from "../../../clue/assets/icons/geometry/line-icon.svg";
 import SelectSvg from "../../../clue/assets/icons/select-tool.svg";
 import ShapesColorIcon from "../../../clue/assets/icons/geometry/shapes-color-icon.svg";
 import ShapesDuplicateSvg from "../../../clue/assets/icons/geometry/shapes-duplicate-icon.svg";
@@ -47,6 +48,7 @@ function ModeButton({name, title, targetMode, Icon, colorClass}:
       if (board) {
         content?.clearPhantomPoint(board);
         content?.clearActivePolygon(board);
+        content?.clearActiveLine(board);
       }
     }
   }
@@ -115,6 +117,12 @@ const CircleButton = observer(function CircleButton({name}: IToolbarButtonCompon
   return(<ModeButton name={name} title="Circle" targetMode="circle" Icon={CircleSvg} colorClass={colorClass}/>);
 });
 
+const LineButton = observer(function LineButton({name}: IToolbarButtonComponentProps) {
+  const { content } = useGeometryTileContext();
+  const colorClass = clueBasicDataColorInfo[content?.selectedColor || 0].name;
+  return(<ModeButton name={name} title="Line" targetMode="line" Icon={LineSvg} colorClass={colorClass}/>);
+});
+
 const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButtonComponentProps) {
   const { content, board, handlers } = useGeometryTileContext();
   const disableDuplicate = !content || !board || !content.hasDeletableSelection(board);
@@ -136,21 +144,23 @@ const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponen
   const selectedPoint = board && content?.getOneSelectedPoint(board);
   const selectedSegment = board && content?.getOneSelectedSegment(board);
   const selectedPolygon = board && content?.getOneSelectedPolygon(board);
+  const selectedLine = board && content?.getOneSelectedLine(board);
 
   const pointHasLabel = selectedPoint && selectedPoint.hasLabel;
   const segmentHasLabel = selectedSegment && selectedSegment.hasLabel;
   const polygonHasLabel = selectedPolygon && selectedPolygon.hasLabel;
+  const lineHasLabel = selectedLine && selectedLine.hasLabel;
 
   function handleClick() {
-    handlers?.handleLabelDialog(selectedPoint, selectedSegment, selectedPolygon);
+    handlers?.handleLabelDialog(selectedPoint, selectedSegment, selectedPolygon, selectedLine);
   }
 
   return (
     <TileToolbarButton
       name={name}
       title="Label/Value"
-      disabled={!selectedPoint && !selectedSegment && !selectedPolygon}
-      selected={pointHasLabel || segmentHasLabel || polygonHasLabel}
+      disabled={!selectedPoint && !selectedSegment && !selectedPolygon && !selectedLine}
+      selected={pointHasLabel || segmentHasLabel || polygonHasLabel || lineHasLabel}
       onClick={handleClick}
     >
       <LabelSvg/>
@@ -331,6 +341,10 @@ registerTileToolbarButtons("geometry",
     {
       name: "circle",
       component: CircleButton
+    },
+    {
+      name: "line",
+      component: LineButton
     },
     {
       name: "duplicate",

@@ -380,6 +380,51 @@ export interface VertexAngleModelType extends Instance<typeof VertexAngleModel> 
 export const isVertexAngleModel = (o?: GeometryObjectModelType): o is VertexAngleModelType =>
   o?.type === "vertexAngle";
 
+/**
+ * Lines are defined by two points. The line extends infinitely through both points,
+ * displayed with arrows at the board edges. Unlike MovableLine, this uses shared points
+ * from the point system and supports colorScheme like polygons and circles.
+ */
+export const LineModel = GeometryObjectModel
+  .named("LineModel")
+  .props({
+    type: typeField("line"),
+    point1: types.string,
+    point2: types.maybe(types.string),
+    colorScheme: 0,
+    labelOption: types.optional(
+      types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
+      ELabelOption.kNone),
+    name: types.maybe(types.string)
+  })
+  .views(self => ({
+    get dependencies(): string[] {
+      if (self.point2) {
+        return [self.point1, self.point2];
+      }
+      return [self.point1];
+    }
+  }))
+  .actions(self => ({
+    setColorScheme(colorScheme: number) {
+      self.colorScheme = colorScheme;
+    },
+    setLabelOption(option: ELabelOption) {
+      if (option !== self.labelOption) {
+        self.labelOption = option;
+      }
+    },
+    setName(name: string) {
+      if (name !== self.name) {
+        self.name = name;
+      }
+    }
+  }));
+
+export interface LineModelType extends Instance<typeof LineModel> {}
+
+export const isLineModel = (o?: GeometryObjectModelType): o is LineModelType => o?.type === "line";
+
 export const MovableLineModel = GeometryObjectModel
   .named("MovableLineModel")
   .props({
@@ -413,8 +458,9 @@ export const ImageModel = PositionedObjectModel
 export interface ImageModelType extends Instance<typeof ImageModel> {}
 export const isImageModel = (o: GeometryObjectModelType): o is ImageModelType => o.type === "image";
 
-export type GeometryObjectModelUnion = CircleModelType | CommentModelType | ImageModelType | MovableLineModelType |
-                                       PointModelType | PolygonModelType | VertexAngleModelType;
+export type GeometryObjectModelUnion = CircleModelType | CommentModelType | ImageModelType | LineModelType |
+                                       MovableLineModelType | PointModelType | PolygonModelType |
+                                       VertexAngleModelType;
 
 // Define the shape of the geometry content without the views/actions, etc. to avoid circular references
 export const GeometryBaseContentModel = NavigatableTileModel
@@ -424,7 +470,7 @@ export const GeometryBaseContentModel = NavigatableTileModel
     board: types.maybe(BoardModel),
     bgImage: types.maybe(ImageModel),
     objects: types.map(types.union(
-      CircleModel, CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),
+      CircleModel, CommentModel, LineModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),
     pointMetadata: types.map(PointMetadataModel),
     // Maps attribute ID to color.
     linkedAttributeColors: types.map(types.number),
@@ -437,7 +483,9 @@ export const GeometryBaseContentModel = NavigatableTileModel
     // In polygon mode, the phantom point is considered to be part of an in-progress polygon.
     activePolygonId: undefined as string|undefined,
     // In circle mode, the phantom point is used to construct a cirlce
-    activeCircleId: undefined as string|undefined
+    activeCircleId: undefined as string|undefined,
+    // In line mode, the phantom point is used to construct an infinite line
+    activeLineId: undefined as string|undefined
   }))
   .preProcessSnapshot(snapshot => {
     // fix null table links ¯\_(ツ)_/¯
@@ -567,6 +615,13 @@ export function cloneGeometryObject(
     // all vertices must be selected/copied to copy a vertexAngle
     if (points.every(ptId => !!ptId)) {
       return VertexAngleModel.create({ ...obj, id, points });
+    }
+  }
+  if (isLineModel(obj)) {
+    const point1 = idMap[obj.point1];
+    const point2 = obj.point2 ? idMap[obj.point2] : undefined;
+    if (point1 && (!obj.point2 || point2)) {
+      return LineModel.create({ ...obj, id, point1, point2 });
     }
   }
   if (isMovableLineModel(obj)) {

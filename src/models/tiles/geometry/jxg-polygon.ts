@@ -152,6 +152,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[
   const selectedPoints: string[] = [];
   const polygonsToDelete: { [id: string]: JXG.Polygon } = {};
   const anglesToDelete: { [id: string]: JXG.GeometryElement } = {};
+  const othersToDelete: string[] = []; // lines, circles, comments, images, etc.
 
   // Identify polygons and angles scheduled for deletion and points that are vertices of polygons
   const polygonVertexMap: { [id: string]: string[] } = {}; // maps polygon ids to vertex ids
@@ -176,6 +177,10 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[
     }
     else if (elt && isVertexAngle(elt)) {
       anglesToDelete[id] = elt;
+    }
+    else if (elt) {
+      // Other object types (lines, circles, etc.) are passed through for deletion
+      othersToDelete.push(id);
     }
   });
 
@@ -235,7 +240,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[
   });
 
   // return adjusted list of ids to delete
-  return [...pointsToDelete, ...Object.keys(polygonsToDelete), ...Object.keys(anglesToDelete)];
+  return [...pointsToDelete, ...Object.keys(polygonsToDelete), ...Object.keys(anglesToDelete), ...othersToDelete];
 }
 
 function setPropertiesForPolygonLabelOption(polygon: JXG.Polygon) {
