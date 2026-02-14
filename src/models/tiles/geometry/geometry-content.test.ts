@@ -6,7 +6,7 @@ import {
   updateVisualProps
 } from "./geometry-content";
 import {
-  CommentModel, defaultBoard, ImageModel, LineModel, MovableLineModel, PointModel, PolygonModel,
+  CircleModel, CommentModel, defaultBoard, ImageModel, LineModel, MovableLineModel, PointModel, PolygonModel,
   PolygonModelType, segmentIdFromPointIds, VertexAngleModel, VertexAngleModelType
 } from "./geometry-model";
 import { kGeometryTileType } from "./geometry-types";
@@ -1184,6 +1184,37 @@ describe("GeometryContent", () => {
     content.selectObjects(board, ["ml-point1", "ml-point2"]);
     expect(content.copySelection(board))
       .toEqualWithUniqueIds([content.lastObject]);
+
+    // copies circles when both points are selected
+    content.deselectAll(board);
+    content.addPhantomPoint(board, [3, 3]);
+    const { point: cCenter } = content.realizePhantomPoint(board, [3, 3], "circle");
+    // Don't call addPhantomPoint here — realizePhantomPoint already created a new phantom
+    const { point: cTangent, circle } = content.realizePhantomPoint(board, [4, 3], "circle");
+    expect(circle).toBeDefined();
+    content.selectObjects(board, [cCenter!.id, cTangent!.id]);
+    const circleCopy = content.copySelection(board);
+    expect(circleCopy.length).toBe(3); // 2 points + circle
+    expect(circleCopy.some(o => o.type === "circle")).toBe(true);
+
+    // doesn't copy circle if only one point is selected
+    content.deselectAll(board);
+    content.selectObjects(board, cCenter!.id);
+    const partialCircleCopy = content.copySelection(board);
+    expect(partialCircleCopy.some(o => o.type === "circle")).toBe(false);
+
+    // copies infinite lines when both points are selected
+    content.deselectAll(board);
+    content.addPhantomPoint(board, [5, 5]);
+    const { point: lp1 } = content.realizePhantomPoint(board, [5, 5], "line");
+    // Don't call addPhantomPoint here — realizePhantomPoint already created a new phantom
+    const { point: lp2 } = content.realizePhantomPoint(board, [6, 6], "line");
+    const lineModel = content.lastObjectOfType("line");
+    expect(lineModel).toBeDefined();
+    content.selectObjects(board, [lp1!.id, lp2!.id]);
+    const lineCopy = content.copySelection(board);
+    expect(lineCopy.length).toBe(3); // 2 points + line
+    expect(lineCopy.some(o => o.type === "line")).toBe(true);
   });
 
   it("can duplicate selected objects", () => {

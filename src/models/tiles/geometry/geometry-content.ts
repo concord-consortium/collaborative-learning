@@ -1637,6 +1637,8 @@ export const GeometryContentModel = GeometryBaseContentModel
       switch (child && child.elType) {
         case "angle":
           return isVertexAngle(child);
+        case "circle":
+          return isCircle(child);
         case "line":
           return isMovableLine(child) || isInfiniteLine(child);
         case "polygon":

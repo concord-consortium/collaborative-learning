@@ -610,6 +610,13 @@ export function cloneGeometryObject(
       return PolygonModel.create({ ...obj, id, points, ...labels });
     }
   }
+  if (isCircleModel(obj)) {
+    const centerPoint = idMap[obj.centerPoint];
+    const tangentPoint = obj.tangentPoint ? idMap[obj.tangentPoint] : undefined;
+    if (centerPoint && tangentPoint) {
+      return CircleModel.create({ ...obj, id, centerPoint, tangentPoint });
+    }
+  }
   if (isVertexAngleModel(obj)) {
     const points = obj.points.map(ptId => idMap[ptId]);
     // all vertices must be selected/copied to copy a vertexAngle
