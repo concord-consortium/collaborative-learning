@@ -94,7 +94,7 @@ describe("ReadAloudButton", () => {
     const button = screen.getByTestId("tool-readaloud");
     expect(button.getAttribute("aria-pressed")).toBe("false");
     expect(button.getAttribute("aria-label")).toBe("Read Aloud: Off");
-    expect(button.getAttribute("role")).toBe("button");
+    expect(button.tagName).toBe("BUTTON");
   });
 
   it("has active class and aria-pressed when service is active on same pane", () => {

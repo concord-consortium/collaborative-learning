@@ -62,7 +62,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const handleClickTool = (e: React.MouseEvent<HTMLDivElement>, tool: IToolbarButtonModel) => {
+    const handleClickTool = (e: React.MouseEvent<HTMLButtonElement>, tool: IToolbarButtonModel) => {
       // this allows the parent component to handle the click event
       // if it returns true, the default action is prevented
       if (this.props.onToolClicked?.(tool)) {
@@ -120,7 +120,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       const { defaultTool } = this.state;
       this.setState({ activeTool: isActive && (tool !== defaultTool) ? tool : defaultTool });
     };
-    const handleDragTool = (e: React.DragEvent<HTMLDivElement>, tool: IToolbarButtonModel) => {
+    const handleDragTool = (e: React.DragEvent<HTMLButtonElement>, tool: IToolbarButtonModel) => {
       this.handleDragNewTile(tool, e);
     };
     const updateToolButton = (toolButton: IToolbarButtonModel) => {
@@ -380,7 +380,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }
   };
 
-  private handleDragNewTile = (tool: IToolbarButtonModel, e: React.DragEvent<HTMLDivElement>) => {
+  private handleDragNewTile = (tool: IToolbarButtonModel, e: React.DragEvent<HTMLButtonElement>) => {
     // remove hover-insert highlight when we start a tile drag
     this.removeDropRowHighlight();
 

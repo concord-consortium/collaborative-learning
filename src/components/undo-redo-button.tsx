@@ -9,9 +9,13 @@ export const UndoButton: React.FC<IButtonProps> =
 
   const { id, title, Icon } = toolButton;
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  // Prevent mouse clicks from stealing focus away from document content
+  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if(!isDisabled) {
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isDisabled) {
       onSetToolActive(toolButton, true);
       onClick(e, toolButton);
     }
@@ -20,10 +24,18 @@ export const UndoButton: React.FC<IButtonProps> =
   const classes = classNames("tool", "undo-button", id,
                             { active: isActive }, isDisabled ? "disabled" : "enabled");
   return (
-    <div className={classes} data-testid="undo-button" key={id} title={title}
-          onMouseDown={handleMouseDown}>
+    <button
+      aria-disabled={isDisabled || undefined}
+      aria-label={title}
+      className={classes}
+      data-testid="undo-button"
+      title={title}
+      type="button"
+      onMouseDown={handleMouseDown}
+      onClick={handleClick}
+    >
       {Icon && <Icon />}
-    </div>
+    </button>
   );
 };
 
@@ -32,9 +44,13 @@ export const RedoButton: React.FC<IButtonProps> =
 
   const { id, title, Icon } = toolButton;
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  // Prevent mouse clicks from stealing focus away from document content
+  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if(!isDisabled) {
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isDisabled) {
       onSetToolActive(toolButton, true);
       onClick(e, toolButton);
     }
@@ -43,9 +59,17 @@ export const RedoButton: React.FC<IButtonProps> =
   const classes = classNames("tool", "redo-button", id,
                             { active: isActive }, isDisabled ? "disabled" : "enabled");
   return (
-    <div className={classes} data-testid="redo-button" key={id} title={title}
-          onMouseDown={handleMouseDown}>
+    <button
+      aria-disabled={isDisabled || undefined}
+      aria-label={title}
+      className={classes}
+      data-testid="redo-button"
+      title={title}
+      type="button"
+      onMouseDown={handleMouseDown}
+      onClick={handleClick}
+    >
       {Icon && <Icon />}
-    </div>
+    </button>
   );
 };
