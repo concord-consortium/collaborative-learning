@@ -73,7 +73,7 @@
       }
     }
 
-    &[aria-disabled="true"] {
+    &[aria-disabled="true"], &:disabled {
       opacity: 35%;
       cursor: auto;
     }

@@ -8,6 +8,7 @@ import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-conte
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content-types";
 import { DeleteButton } from "./delete-button";
 import { ReadAloudButton } from "./toolbar/read-aloud-button";
+import { getAriaLabels } from "../hooks/use-aria-labels";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
@@ -30,6 +31,7 @@ export type OnToolClickedHandler = (tool: IToolbarButtonModel) => boolean|void;
 // Since many of the tools are shared between the two, each model is
 // passed as an optional prop instead of using two separate components.
 interface IProps extends IBaseProps {
+  ariaLabel?: string;
   document?: DocumentModelType;
   section?: SectionModelType;
   toolbarModel: IToolbarModel;
@@ -162,12 +164,20 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     };
     const upperButtons = this.props.toolbarModel.filter(button => !button.isBottom) as IToolbarModel;
     const lowerButtons = this.props.toolbarModel.filter(button => button.isBottom) as IToolbarModel;
+    const ariaLabels = getAriaLabels();
+
     return (
-      <div className="toolbar" data-testid="toolbar">
-        <div className="toolbar-upper">
+      <div
+        aria-label={this.props.ariaLabel}
+        aria-orientation="vertical"
+        className="toolbar"
+        data-testid="toolbar"
+        role="toolbar"
+      >
+        <div className="toolbar-upper" role="group" aria-label={ariaLabels.toolbarUpper}>
           {renderToolButtons(upperButtons)}
         </div>
-        <div className="toolbar-lower">
+        <div className="toolbar-lower" role="group" aria-label={ariaLabels.toolbarLower}>
           {renderToolButtons(lowerButtons)}
         </div>
       </div>

@@ -3,6 +3,7 @@ import { clone } from "mobx-state-tree";
 import { AppConfigContext } from "../../app-config-context";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { OnToolClickedHandler, ToolbarComponent } from "../toolbar";
+import { useAriaLabels } from "../../hooks/use-aria-labels";
 import { SectionModelType } from "src/models/curriculum/section";
 
 interface IToolbarProps {
@@ -16,6 +17,7 @@ interface IToolbarProps {
 // In the future, it will look at elements in the section and update the toolbar model accordingly.
 export const SectionToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
   const appConfig = useContext(AppConfigContext);
+  const ariaLabels = useAriaLabels();
 
   // The toolbar prop represents the app's configuration of the toolbar
   // It is cloned here in the document so changes to one document's toolbar
@@ -27,5 +29,7 @@ export const SectionToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) 
       // can lookup an app level Icon if needed.
       return clone(toolbar, { appIcons: appConfig.appIcons });
   });
-  return <ToolbarComponent key="toolbar" toolbarModel={toolbarModel} {...others} />;
+  return (
+    <ToolbarComponent key="toolbar" toolbarModel={toolbarModel} ariaLabel={ariaLabels.lessonToolbar} {...others} />
+  );
 };
