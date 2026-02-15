@@ -1,5 +1,6 @@
 import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
+import { useRovingTabindex } from "../hooks/use-roving-tabindex";
 import { DocumentModelType } from "../models/document/document";
 import { IToolbarModel } from "../models/stores/problem-configuration";
 import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
@@ -42,6 +43,8 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
   const { ariaLabel, document, section, toolbarModel, disabledToolIds, onToolClicked } = props;
   const stores = useStores();
   const ariaLabels = useAriaLabels();
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const { handleKeyDown: handleToolbarKeyDown } = useRovingTabindex(toolbarRef);
 
   const [defaultTool, setDefaultTool] = useState<IToolbarButtonModel | undefined>();
   const [activeTool, setActiveTool] = useState<IToolbarButtonModel | undefined>();
@@ -456,6 +459,8 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
       aria-orientation="vertical"
       className="toolbar"
       data-testid="toolbar"
+      onKeyDown={handleToolbarKeyDown}
+      ref={toolbarRef}
       role="toolbar"
     >
       <div className="toolbar-upper" role="group" aria-label={ariaLabels.toolbarUpper}>

@@ -39,6 +39,20 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
     document.addEventListener("dragend", endActiveHandler, true);
   };
 
+  // Mirror mouseDown/mouseUp active visual for keyboard activation
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (isDisabled) return;
+    if (e.key === "Enter" || e.key === " ") {
+      onSetToolActive(toolButton, true);
+    }
+  };
+
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      onSetToolActive(toolButton, false);
+    }
+  };
+
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (isDisabled) return;
     onClick(e, toolButton);
@@ -63,6 +77,8 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
       title={title}
       type="button"
       onMouseDown={handleMouseDown}
+      onKeyDown={handleKeyDown}
+      onKeyUp={handleKeyUp}
       onClick={handleClick}
       onDragStart={isTileTool && !isDisabled ? handleDrag : undefined}
       draggable={isTileTool && !isDisabled}
