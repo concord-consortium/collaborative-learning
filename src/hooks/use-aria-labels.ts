@@ -25,6 +25,12 @@ const ariaLabels = {
   tile: (tileType: string) => `${tileType} tile`,
   chat: (expanded: boolean) => expanded ? "Collapse chat" : "Expand chat",
 
+  // Main workspace toolbars
+  lessonToolbar: "Lesson toolbar",
+  workspaceToolbar: "Workspace toolbar",
+  toolbarUpper: "Tile tools",
+  toolbarLower: "Playback controls",
+
   // Tile toolbar
   tileToolbar: "Tile toolbar",
 

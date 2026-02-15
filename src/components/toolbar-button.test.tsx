@@ -44,7 +44,11 @@ describe("ToolButtonComponent", () => {
         onHideDropHighlight={onHideDropHighlight}
         />
     );
-    expect(screen.getByTestId("tool-select")).toBeInTheDocument();
+    const button = screen.getByTestId("tool-select");
+    expect(button).toBeInTheDocument();
+    expect(button.tagName).toBe("BUTTON");
+    expect(button).toHaveAttribute("aria-label", "Select");
+    expect(button).toHaveAttribute("aria-disabled", "true");
     expect(onSetToolActive).not.toHaveBeenCalled();
   });
 
@@ -97,7 +101,10 @@ describe("ToolButtonComponent", () => {
     );
     const element = screen.getByTestId("tool-text");
     expect(element).toBeInTheDocument();
+    expect(element.tagName).toBe("BUTTON");
     expect(element).toHaveAttribute("title", "Text");
+    expect(element).toHaveAttribute("aria-label", "Text");
+    expect(element).not.toHaveAttribute("aria-disabled");
     act(() => {
       userEvent.click(screen.getByTestId("tool-text"));
     });

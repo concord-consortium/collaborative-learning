@@ -15,16 +15,24 @@
     width: 36px;
     height: 34px;
     background-color: $charcoal-light-6;
+    color: inherit;
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
+    font-family: inherit;
     font-size: 20px;
     font-weight: bold;
     margin: 2px;
     margin-bottom: 0;
+    padding: 0;
     border: 0;
     cursor: pointer;
+
+    &:focus-visible {
+      outline: solid 2px $charcoal-dark-2;
+      outline-offset: -2px;
+    }
 
     // the :not() here is for tools that shouldn't have their svg updated
     &:not(.fourup):not(.copytoworkspace):not(.copytodocument) {
@@ -65,7 +73,7 @@
       }
     }
 
-    &.disabled {
+    &[aria-disabled="true"], &:disabled {
       opacity: 35%;
       cursor: auto;
     }
