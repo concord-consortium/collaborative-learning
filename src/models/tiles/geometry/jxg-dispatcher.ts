@@ -15,6 +15,7 @@ import { isBoard } from "./jxg-types";
 import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { circleChangeAgent } from "./jxg-circle";
+import { lineChangeAgent } from "./jxg-line";
 
 type OnWillApplyChange = (board: JXG.Board | string, change: JXGChange) => false | undefined;
 type OnDidApplyChange = (board: JXG.Board | undefined, change: JXGChange) => void;
@@ -28,6 +29,8 @@ const agents: JXGChangeAgents = {
   circle: circleChangeAgent,
   comment: commentChangeAgent,
   image: imageChangeAgent,
+  infiniteline: lineChangeAgent,
+  line: lineChangeAgent,
   linkedpoint: linkedPointChangeAgent,
   movableline: movableLineChangeAgent,
   object: objectChangeAgent,

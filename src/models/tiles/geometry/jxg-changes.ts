@@ -3,8 +3,9 @@ import { ILinkProperties, ITableLinkProperties } from "../table-link-types";
 export { type ILinkProperties, type ITableLinkProperties };
 
 export type JXGOperation = "create" | "update" | "delete";
-export type JXGObjectType = "board" | "circle" | "comment" | "image" | "linkedPoint" | "metadata" | "movableLine" |
-                              "object" | "point" | "polygon" | "segment" | "tableLink" | "vertex" | "vertexAngle";
+export type JXGObjectType = "board" | "circle" | "comment" | "image" | "infiniteLine" | "line" |
+                              "linkedPoint" | "metadata" | "movableLine" | "object" | "point" | "polygon" |
+                              "segment" | "tableLink" | "vertex" | "vertexAngle";
 
 export type JXGCoordPair = [number, number];
 export type JXGNormalizedCoordPair = [1, number, number];

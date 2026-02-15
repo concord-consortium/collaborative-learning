@@ -5,7 +5,7 @@ export interface IToolbarActionHandlers {
   handleDuplicate: () => void;
   handleDelete: () => void;
   handleLabelDialog: (selectedPoint: JXG.Point|undefined, selectedSegment: JXG.Line|undefined,
-    selectedPolygon: JXG.Polygon|undefined ) => void;
+    selectedPolygon: JXG.Polygon|undefined, selectedLine: JXG.Line|undefined ) => void;
   handleCreateMovableLine: () => void;
   handleCreateComment: () => void;
   handleUploadImageFile: (file: File) => void;

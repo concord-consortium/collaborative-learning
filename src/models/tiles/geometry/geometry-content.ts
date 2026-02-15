@@ -13,8 +13,9 @@ import { convertModelToChanges, getGeometryBoardChange } from "./geometry-migrat
 import { preprocessImportFormat } from "./geometry-import";
 import {
   CircleModel, cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
-  GeometryObjectModelUnion, ImageModel, ImageModelType, isCircleModel, isCommentModel, isMovableLineModel,
-  isMovableLinePointId, isPointModel, isPolygonModel, isVertexAngleModel, MovableLineModel, PointModel,
+  GeometryObjectModelUnion, ImageModel, ImageModelType, isCircleModel, isCommentModel, isLineModel,
+  isMovableLineModel, isMovableLinePointId, isPointModel, isPolygonModel, isVertexAngleModel,
+  LineModel, MovableLineModel, PointModel,
   PolygonModel, PolygonModelType, segmentIdFromPointIds, VertexAngleModel
 } from "./geometry-model";
 import {
@@ -29,7 +30,7 @@ import { getAssociatedPolygon, getEdgeVisualProps, getPolygonVisualProps, prepar
   setPolygonEdgeColors
 } from "./jxg-polygon";
 import {
-  isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
+  isAxisArray, isBoard, isComment, isImage, isInfiniteLine, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj, isGeometryElement, isCircle
 } from "./jxg-types";
@@ -45,6 +46,7 @@ import { getPointVisualProps } from "./jxg-point";
 import { getVertexAngle } from "./jxg-vertex-angle";
 import { GeometryTileMode } from "../../../components/tiles/geometry/geometry-types";
 import { getCircleVisualProps } from "./jxg-circle";
+import { getInfiniteLine, getLineVisualProps } from "./jxg-line";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -151,6 +153,9 @@ export function updateVisualProps(board: JXG.Board, id: string, selected: boolea
     } else if (isCircle(element)) {
       const circleProps = getCircleVisualProps(selected, colorScheme);
       element.setAttribute(circleProps);
+    } else if (isInfiniteLine(element)) {
+      const lineProps = getLineVisualProps(selected, colorScheme);
+      element.setAttribute(lineProps);
     }
   }
 }
@@ -253,6 +258,10 @@ export const GeometryContentModel = GeometryBaseContentModel
       const obj = self.getObject(id);
       return isCircleModel(obj) ? obj : undefined;
     },
+    getLine(id: string) {
+      const obj = self.getObject(id);
+      return isLineModel(obj) ? obj : undefined;
+    },
     // Returns any object in the model, even a subobject (like a movable line's point)
     getAnyObject(id: string) {
       if (isMovableLinePointId(id)) {
@@ -264,7 +273,8 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     getObjectColorScheme(id: string) {
       const obj = self.getObject(id);
-      if (isPointModel(obj) || isPolygonModel(obj) || isMovableLineModel(obj) || isCircleModel(obj)) {
+      if (isPointModel(obj) || isPolygonModel(obj) || isMovableLineModel(obj)
+          || isCircleModel(obj) || isLineModel(obj)) {
         return obj.colorScheme;
       }
       if (obj === undefined) {
@@ -348,6 +358,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     get annotatableObjects(): IClueTileObject[] {
       const polygons: IClueTileObject[] = [];
       const segments: IClueTileObject[] = [];
+      const lines: IClueTileObject[] = [];
       const points: IClueTileObject[] = [];
       const linkedPoints: IClueTileObject[] = [];
       self.objects.forEach(object => {
@@ -358,6 +369,8 @@ export const GeometryContentModel = GeometryBaseContentModel
           polygon.segmentIds.forEach(
             segmentId => segments.push({ objectId: segmentId, objectType: "segment" })
           );
+        } else if (object.type === "line") {
+          lines.push(objectInfo);
         } else if (object.type === "point") {
           points.push(objectInfo);
         }
@@ -371,7 +384,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         });
       }
       // The order of the objects is important so buttons to add sparrows don't cover each other
-      return [...polygons, ...segments, ...points, ...linkedPoints];
+      return [...polygons, ...segments, ...lines, ...points, ...linkedPoints];
     },
   }))
   .actions(self => ({
@@ -760,6 +773,18 @@ export const GeometryContentModel = GeometryBaseContentModel
             });
           }
         }
+        if (self.activeLineId) {
+          // Set the phantom as active line's second point
+          const activeLine = self.getLine(self.activeLineId);
+          if (activeLine) {
+            syncChange(board, {
+              operation: "create",
+              target: "line",
+              parents: [activeLine.point1, self.phantomPoint.id],
+              properties: { id: self.activeLineId, colorScheme: self.phantomPoint.colorScheme }
+            });
+          }
+        }
       }
       return point;
     }
@@ -937,9 +962,10 @@ export const GeometryContentModel = GeometryBaseContentModel
      * @returns the point, now considered "real".
      */
     function realizePhantomPoint(board: JXG.Board, position: JXGCoordPair, mode: GeometryTileMode):
-        { point: JXG.Point | undefined, polygon: JXG.Polygon | undefined, circle: JXG.Circle | undefined } {
+        { point: JXG.Point | undefined, polygon: JXG.Polygon | undefined,
+          circle: JXG.Circle | undefined, line: JXG.Line | undefined } {
       // Transition the current phantom point into a real point.
-      if (!self.phantomPoint) return { point: undefined, polygon: undefined, circle: undefined };
+      if (!self.phantomPoint) return { point: undefined, polygon: undefined, circle: undefined, line: undefined };
       self.phantomPoint.setPosition(position);
       const newRealPoint = self.phantomPoint;
       detach(newRealPoint);
@@ -949,7 +975,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       const phantomPoint = addPhantomPoint(board, position);
       if (!phantomPoint) {
         console.warn("Failed to create phantom point");
-        return { point: undefined, polygon: undefined, circle: undefined };
+        return { point: undefined, polygon: undefined, circle: undefined, line: undefined };
       }
 
       // Update the previously-existing JSXGraph point to be real, not phantom
@@ -1022,6 +1048,33 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       }
 
+      let newLine: JXG.Line|undefined = undefined;
+      if (mode === "line") {
+        const lineModel = self.activeLineId && self.getLine(self.activeLineId);
+        if (lineModel) {
+          // This point completes the line
+          lineModel.point2 = newRealPoint.id;
+          self.activeLineId = undefined;
+          newLine = getInfiniteLine(board, lineModel.id);
+        } else {
+          // This is the first point, create a line with the new phantom as the second point
+          const newLineModel = LineModel.create(
+            { id: uniqueId(), point1: newRealPoint.id, colorScheme: newRealPoint.colorScheme }
+          );
+          self.addObjectModel(newLineModel);
+          self.activeLineId = newLineModel.id;
+          const result = syncChange(board, {
+            operation: "create",
+            target: "line",
+            parents: [newRealPoint.id, phantomPoint.id],
+            properties: { id: newLineModel.id, colorScheme: newRealPoint.colorScheme }
+          });
+          if (isInfiniteLine(result)) {
+            newLine = result;
+          }
+        }
+      }
+
       // Log event
       if (mode === "polygon") {
         logGeometryEvent(self, "create", "vertex",
@@ -1030,13 +1083,17 @@ export const GeometryContentModel = GeometryBaseContentModel
         logGeometryEvent(self, "create", "circle",
           newCircle ? [newRealPoint.id, newCircle.id] : newRealPoint.id,
           { userAction: self.activeCircleId ? "place center point" : "place tangent point" });
+      } else if (mode === "line") {
+        logGeometryEvent(self, "create", "line",
+          newLine ? [newRealPoint.id, newLine.id] : newRealPoint.id,
+          { userAction: self.activeLineId ? "place first point" : "place second point" });
       } else {
         logGeometryEvent(self, "create", "point", newRealPoint.id);
       }
       // Return newly-created objects
       const obj = board.objects[newRealPoint.id];
       const point = isPoint(obj) ? obj : undefined;
-      return { point, polygon: newPolygon, circle: newCircle };
+      return { point, polygon: newPolygon, circle: newCircle, line: newLine };
     }
 
     /**
@@ -1074,6 +1131,16 @@ export const GeometryContentModel = GeometryBaseContentModel
           operation: "delete",
           target: "circle",
           targetID: self.activeCircleId
+        });
+      }
+
+      // Remove line if one is displayed
+      const activeLine = self.activeLineId && getInfiniteLine(board, self.activeLineId);
+      if (activeLine) {
+        syncChange(board, {
+          operation: "delete",
+          target: "line",
+          targetID: self.activeLineId
         });
       }
 
@@ -1247,6 +1314,66 @@ export const GeometryContentModel = GeometryBaseContentModel
       return isCircle(result) ? result : undefined;
     }
 
+    function createLineIncludingPoint(board: JXG.Board, pointId: string) {
+      if (!self.phantomPoint) return;
+      const colorScheme = self.getObjectColorScheme(pointId) || 0;
+      const lineModel = LineModel.create({ point1: pointId, colorScheme });
+      self.addObjectModel(lineModel);
+      self.activeLineId = lineModel.id;
+      const change: JXGChange = {
+        operation: "create",
+        target: "line",
+        parents: [pointId, self.phantomPoint.id],
+        properties: { id: lineModel.id, colorScheme }
+      };
+      const result = syncChange(board, change);
+
+      logGeometryEvent(self, "update", "point", [pointId, lineModel.id],
+        { userAction: "join point to line" });
+
+      if (isInfiniteLine(result)) {
+        return result;
+      }
+    }
+
+    function closeActiveLine(board: JXG.Board, point: JXG.Point): JXG.Line|undefined {
+      if (!self.activeLineId) return;
+      const lineModel = self.getLine(self.activeLineId);
+      if (!lineModel) return;
+      lineModel.point2 = point.id;
+
+      // Remove the line that attaches to the phantom point and replace with the final line
+      syncChange(board, {
+        operation: "delete",
+        target: "line",
+        targetID: lineModel.id
+      });
+      const result = syncChange(board, {
+        operation: "create",
+        target: "line",
+        parents: [lineModel.point1, lineModel.point2],
+        properties: { id: lineModel.id, colorScheme: lineModel.colorScheme }
+      });
+      logGeometryEvent(self, "update", "point", [point.id, lineModel.id],
+        { userAction: "join second point to line" });
+      self.activeLineId = undefined;
+      return isInfiniteLine(result) ? result : undefined;
+    }
+
+    function clearActiveLine(board: JXG.Board) {
+      if (!self.activeLineId) return;
+      const lineOnBoard = getInfiniteLine(board, self.activeLineId);
+      if (lineOnBoard) {
+        syncChange(board, {
+          operation: "delete",
+          target: "line",
+          targetID: self.activeLineId
+        });
+      }
+      self.objects.delete(self.activeLineId);
+      self.activeLineId = undefined;
+    }
+
     function addPoints(board: JXG.Board | undefined,
                        parents: JXGUnsafeCoordPair[],
                        _properties?: JXGProperties | JXGProperties[],
@@ -1313,7 +1440,7 @@ export const GeometryContentModel = GeometryBaseContentModel
 
       selectedIds.forEach(id => {
         const obj = self.getObject(id);
-        if (isPolygonModel(obj) || isPointModel(obj) || isCircleModel(obj)) {
+        if (isPolygonModel(obj) || isPointModel(obj) || isCircleModel(obj) || isLineModel(obj)) {
           obj.setColorScheme(color);
           targetIds.push(id);
         }
@@ -1353,6 +1480,15 @@ export const GeometryContentModel = GeometryBaseContentModel
       } else if (isMovableLineModel(obj)) {
         return [(forceNumber(obj.p1.x) + forceNumber(obj.p2.x)) / 2,
           (forceNumber(obj.p1.y) + forceNumber(obj.p2.y)) / 2];
+      } else if (isLineModel(obj)) {
+        const p1 = self.getObject(obj.point1);
+        const p2 = obj.point2 ? self.getObject(obj.point2) : undefined;
+        if (p1 && isPointModel(p1) && p2 && isPointModel(p2)) {
+          return [(forceNumber(p1.x) + forceNumber(p2.x)) / 2,
+            (forceNumber(p1.y) + forceNumber(p2.y)) / 2];
+        }
+        if (p1 && isPointModel(p1)) return [forceNumber(p1.x), forceNumber(p1.y)];
+        return [0, 0];
       } else if (isPolygonModel(obj)) {
         const totals = [0, 0];
         let count = 0;
@@ -1366,7 +1502,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         });
         return [totals[0] / count, totals[1] / count];
       }
-      // TODO Can comments be added to any other objects?
       return [0, 0];
     }
 
@@ -1476,6 +1611,24 @@ export const GeometryContentModel = GeometryBaseContentModel
       });
     }
 
+    function updateLineLabel(board: JXG.Board|undefined, line: JXG.Line,
+        labelOption: ELabelOption, name: string|undefined) {
+      const lineModel = self.getLine(line.id);
+      if (!board || !lineModel) return;
+      lineModel.setLabelOption(labelOption);
+      lineModel.setName(name || "");
+
+      logGeometryEvent(self, "update", "line", line.id,
+        { text: name, labelOption });
+
+      return syncChange(board, {
+        operation: "update",
+        target: "infiniteLine",
+        targetID: line.id,
+        properties: { labelOption, clientName: name }
+      });
+    }
+
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
       return filterBoardObjects(board, test);
     }
@@ -1484,8 +1637,10 @@ export const GeometryContentModel = GeometryBaseContentModel
       switch (child && child.elType) {
         case "angle":
           return isVertexAngle(child);
+        case "circle":
+          return isCircle(child);
         case "line":
-          return isMovableLine(child);
+          return isMovableLine(child) || isInfiniteLine(child);
         case "polygon":
           return true;
         case "text":
@@ -1563,6 +1718,14 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     }
 
+    function getOneSelectedLine(board: JXG.Board) {
+      const selectedObjects = self.selectedObjects(board);
+      const selectedLines = selectedObjects.filter(isInfiniteLine);
+      if (selectedLines.length === 1) {
+        return selectedLines[0] as JXG.Line;
+      }
+    }
+
     function getCommentAnchor(board: JXG.Board) {
       const selectedObjects = self.selectedObjects(board);
       if (selectedObjects.length === 1 && isPoint(selectedObjects[0])) {
@@ -1574,7 +1737,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         return selectedPolygons[0];
       }
 
-      const selectedLines = selectedObjects.filter(isMovableLine);
+      const selectedLines = selectedObjects.filter(o => isMovableLine(o) || isInfiniteLine(o));
       if (selectedLines.length === 1) {
         return selectedLines[0];
       }
@@ -1687,6 +1850,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         getOneSelectedPoint,
         getOneSelectedPolygon,
         getOneSelectedSegment,
+        getOneSelectedLine,
         getOneSelectedComment,
         getCommentAnchor,
       },
@@ -1711,11 +1875,15 @@ export const GeometryContentModel = GeometryBaseContentModel
         clearActivePolygon,
         closeActivePolygon,
         closeActiveCircle,
+        createLineIncludingPoint,
+        closeActiveLine,
+        clearActiveLine,
         addMovableLine,
         removeObjects,
         updateObjects,
         addVertexAngle,
         updateAxisLabels,
+        updateLineLabel,
         updatePolygonLabel,
         updatePolygonSegmentLabel,
         deleteSelection,

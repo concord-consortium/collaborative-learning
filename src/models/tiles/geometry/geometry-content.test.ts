@@ -2,10 +2,11 @@ import { resetMockUniqueId } from "../../document/document-content-tests/dc-test
 import { clone, isEqualWith } from "lodash";
 import { destroy, getSnapshot } from "mobx-state-tree";
 import {
-  GeometryContentModel, GeometryContentModelType, defaultGeometryContent, GeometryMetadataModel
+  GeometryContentModel, GeometryContentModelType, defaultGeometryContent, GeometryMetadataModel,
+  updateVisualProps
 } from "./geometry-content";
 import {
-  CommentModel, defaultBoard, ImageModel, MovableLineModel, PointModel, PolygonModel,
+  CircleModel, CommentModel, defaultBoard, ImageModel, LineModel, MovableLineModel, PointModel, PolygonModel,
   PolygonModelType, segmentIdFromPointIds, VertexAngleModel, VertexAngleModelType
 } from "./geometry-model";
 import { kGeometryTileType } from "./geometry-types";
@@ -13,11 +14,13 @@ import { ELabelOption, JXGChange, JXGCoordPair } from "./jxg-changes";
 import { isPointInPolygon, getPointsForVertexAngle, getPolygonEdge } from "./jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, updateVertexAnglesFromObjects } from "./jxg-vertex-angle";
 import {
-  isBoard, isCircle, isComment, isFreePoint, isImage, isLine, isMovableLine, isPoint, isPolygon,
-  isText, kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin
+  isBoard, isCircle, isComment, isFreePoint, isImage, isInfiniteLine, isLine, isMovableLine, isPoint,
+  isPolygon, isText, kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin
 } from "./jxg-types";
 import { TileModel, ITileModel } from "../tile-model";
-import { getPoint, getPolygon } from "./geometry-utils";
+import { getPoint, getPolygon, strokePropsForColorScheme } from "./geometry-utils";
+import { getLineVisualProps } from "./jxg-line";
+import { convertModelObjectToChanges } from "./geometry-migrate";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
 // This is needed so MST can deserialize snapshots referring to tools
@@ -806,6 +809,18 @@ describe("GeometryContent", () => {
     content.setSelectedColor(3);
     content.updateSelectedObjectsColor(board, 3);
     expect(point!.getAttribute("colorScheme")).toBe(3);
+    content.removeObjects(board, point!.id);
+
+    // reset color
+    content.setSelectedColor(0);
+    // change color of a line
+    content.addPhantomPoint(board, [0, 0]);
+    content.realizePhantomPoint(board, [0, 0], "line");
+    const { line: colorLine } = content.realizePhantomPoint(board, [3, 4], "line");
+    content.selectObjects(board, colorLine!.id);
+    content.setSelectedColor(4);
+    content.updateSelectedObjectsColor(board, 4);
+    expect(colorLine!.getAttribute("colorScheme")).toBe(4);
 
     destroyContentAndBoard(content, board);
   });
@@ -1170,6 +1185,37 @@ describe("GeometryContent", () => {
     content.selectObjects(board, ["ml-point1", "ml-point2"]);
     expect(content.copySelection(board))
       .toEqualWithUniqueIds([content.lastObject]);
+
+    // copies circles when both points are selected
+    content.deselectAll(board);
+    content.addPhantomPoint(board, [3, 3]);
+    const { point: cCenter } = content.realizePhantomPoint(board, [3, 3], "circle");
+    // Don't call addPhantomPoint here — realizePhantomPoint already created a new phantom
+    const { point: cTangent, circle } = content.realizePhantomPoint(board, [4, 3], "circle");
+    expect(circle).toBeDefined();
+    content.selectObjects(board, [cCenter!.id, cTangent!.id]);
+    const circleCopy = content.copySelection(board);
+    expect(circleCopy.length).toBe(3); // 2 points + circle
+    expect(circleCopy.some(o => o.type === "circle")).toBe(true);
+
+    // doesn't copy circle if only one point is selected
+    content.deselectAll(board);
+    content.selectObjects(board, cCenter!.id);
+    const partialCircleCopy = content.copySelection(board);
+    expect(partialCircleCopy.some(o => o.type === "circle")).toBe(false);
+
+    // copies infinite lines when both points are selected
+    content.deselectAll(board);
+    content.addPhantomPoint(board, [5, 5]);
+    const { point: lp1 } = content.realizePhantomPoint(board, [5, 5], "line");
+    // Don't call addPhantomPoint here — realizePhantomPoint already created a new phantom
+    const { point: lp2 } = content.realizePhantomPoint(board, [6, 6], "line");
+    const lineModel = content.lastObjectOfType("line");
+    expect(lineModel).toBeDefined();
+    content.selectObjects(board, [lp1!.id, lp2!.id]);
+    const lineCopy = content.copySelection(board);
+    expect(lineCopy.length).toBe(3); // 2 points + line
+    expect(lineCopy.some(o => o.type === "line")).toBe(true);
   });
 
   it("can duplicate selected objects", () => {
@@ -1377,6 +1423,565 @@ toMatchInlineSnapshot(`
 `);
   });
 
+
+  it("can add and remove an infinite line", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "line");
+    const { point: point2, line } = content.realizePhantomPoint(board, [3, 4], "line");
+    expect(isPoint(point1)).toBeTruthy();
+    expect(isPoint(point2)).toBeTruthy();
+    expect(isInfiniteLine(line)).toBeTruthy();
+    expect(board.objectsList.filter(o => isInfiniteLine(o)).length).toBe(1);
+    expect(content.getDependents([point1!.id])).toEqual([point1!.id, line!.id]);
+    expect(content.getDependents([point2!.id])).toEqual([point2!.id, line!.id]);
+    expect(content.getDependents([line!.id])).toEqual([line!.id]);
+    expect(content.lastObjectOfType("line")).toEqual({
+      id: line?.id,
+      type: "line",
+      point1: point1?.id,
+      point2: point2?.id,
+      colorScheme: 0,
+      labelOption: "none",
+      name: undefined });
+
+    // Removing point should remove line
+    content.removeObjects(board, [point1!.id]);
+    expect(board.objectsList.filter(o => isInfiniteLine(o)).length).toBe(0);
+    destroyContentAndBoard(content, board);
+  });
+
+  it("will create a line with the correct selected color", () => {
+    const { content, board } = createContentAndBoard();
+
+    content.setSelectedColor(2);
+    content.addPhantomPoint(board, [0, 0]);
+    content.realizePhantomPoint(board, [0, 0], "line");
+    const { line } = content.realizePhantomPoint(board, [1, 0], "line");
+    expect(line?.getAttribute("colorScheme")).toBe(2);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can create a line using createLineIncludingPoint and closeActiveLine", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+
+    // First point — creates line with phantom
+    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "points");
+    expect(isPoint(point1)).toBeTruthy();
+
+    const line = content.createLineIncludingPoint(board, point1!.id);
+    expect(isInfiniteLine(line)).toBeTruthy();
+    expect(content.activeLineId).toBeDefined();
+
+    // Second point — closes the line
+    content.addPhantomPoint(board, [3, 4]);
+    const { point: point2 } = content.realizePhantomPoint(board, [3, 4], "points");
+    expect(isPoint(point2)).toBeTruthy();
+
+    const closedLine = content.closeActiveLine(board, point2!);
+    expect(isInfiniteLine(closedLine)).toBeTruthy();
+    expect(content.activeLineId).toBeUndefined();
+
+    // Verify model
+    const lineModel = content.getLine(line!.id);
+    expect(lineModel).toBeDefined();
+    expect(lineModel?.point1).toBe(point1!.id);
+    expect(lineModel?.point2).toBe(point2!.id);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can clear an active line", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "points");
+
+    content.createLineIncludingPoint(board, point1!.id);
+    expect(content.activeLineId).toBeDefined();
+
+    content.clearActiveLine(board);
+    expect(content.activeLineId).toBeUndefined();
+    expect(board.objectsList.filter(o => isInfiniteLine(o)).length).toBe(0);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("includes lines in annotatableObjects", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    content.realizePhantomPoint(board, [0, 0], "line");
+    const { line } = content.realizePhantomPoint(board, [3, 4], "line");
+
+    const annotatables = content.annotatableObjects;
+    const lineAnnotatable = annotatables.find(obj => obj.objectId === line?.id);
+    expect(lineAnnotatable).toBeDefined();
+    expect(lineAnnotatable?.objectType).toBe("line");
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("getLineVisualProps returns selection feedback via strokeOpacity", () => {
+    // When not selected, strokeOpacity should be 1 (normal)
+    const unselectedProps = getLineVisualProps(false, 0);
+    expect(unselectedProps.strokeOpacity).toBe(1);
+
+    // When selected, strokeOpacity should be 0.99 (triggers CSS drop-shadow filter)
+    const selectedProps = getLineVisualProps(true, 0);
+    expect(selectedProps.strokeOpacity).toBe(0.99);
+
+    // highlightStrokeOpacity is always 0.99 (for hover feedback)
+    expect(unselectedProps.highlightStrokeOpacity).toBe(0.99);
+    expect(selectedProps.highlightStrokeOpacity).toBe(0.99);
+  });
+
+  it("getLineVisualProps applies color scheme to stroke", () => {
+    const color0Props = getLineVisualProps(false, 0);
+    const color2Props = getLineVisualProps(false, 2);
+    const expected0 = strokePropsForColorScheme(0);
+    const expected2 = strokePropsForColorScheme(2);
+
+    expect(color0Props.strokeColor).toBe(expected0.strokeColor);
+    expect(color0Props.highlightStrokeColor).toBe(expected0.highlightStrokeColor);
+    expect(color2Props.strokeColor).toBe(expected2.strokeColor);
+    expect(color2Props.highlightStrokeColor).toBe(expected2.highlightStrokeColor);
+
+    // strokePropsForColorScheme output is spread into the result
+    // (Actual color values come from SCSS and are not available in the test environment.)
+    expect(color0Props).toHaveProperty("strokeColor");
+    expect(color0Props).toHaveProperty("highlightStrokeColor");
+  });
+
+  it("updateVisualProps applies selection and color to lines", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    content.realizePhantomPoint(board, [0, 0], "line");
+    const { line } = content.realizePhantomPoint(board, [3, 4], "line");
+    expect(isInfiniteLine(line)).toBeTruthy();
+
+    // Initially unselected: strokeOpacity should be 1
+    updateVisualProps(board, line!.id, false);
+    expect(line!.getAttribute("strokeOpacity")).toBe(1);
+
+    // Select the line: strokeOpacity should change to 0.99
+    updateVisualProps(board, line!.id, true);
+    expect(line!.getAttribute("strokeOpacity")).toBe(0.99);
+
+    // Deselect: strokeOpacity should revert to 1
+    updateVisualProps(board, line!.id, false);
+    expect(line!.getAttribute("strokeOpacity")).toBe(1);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can select and recolor a line via the dispatcher", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "line");
+    const { point: point2, line } = content.realizePhantomPoint(board, [3, 4], "line");
+    expect(isInfiniteLine(line)).toBeTruthy();
+
+    // Select the line and both points (as the UI does)
+    const pointIds = [point1!.id, point2!.id];
+    content.selectObjects(board, [...pointIds, line!.id]);
+    expect(content.isSelected(line!.id)).toBe(true);
+    expect(content.isSelected(point1!.id)).toBe(true);
+    expect(content.isSelected(point2!.id)).toBe(true);
+
+    // Change color — this goes through the dispatcher with clientType "infiniteLine"
+    content.setSelectedColor(3);
+    content.updateSelectedObjectsColor(board, 3);
+
+    // Verify the JSXGraph line element's colorScheme was updated
+    expect(line!.getAttribute("colorScheme")).toBe(3);
+
+    // Verify the line model's colorScheme was updated
+    const lineModel = content.getLine(line!.id);
+    expect(lineModel?.colorScheme).toBe(3);
+
+    // Verify points also changed color
+    expect(point1!.getAttribute("colorScheme")).toBe(3);
+    expect(point2!.getAttribute("colorScheme")).toBe(3);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can select and delete a line", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "line");
+    const { point: point2, line } = content.realizePhantomPoint(board, [3, 4], "line");
+    expect(isInfiniteLine(line)).toBeTruthy();
+    expect(board.objectsList.filter(o => isInfiniteLine(o)).length).toBe(1);
+
+    // Select the line
+    content.selectObjects(board, line!.id);
+    expect(content.isSelected(line!.id)).toBe(true);
+
+    // Delete selection
+    content.deleteSelection(board);
+    expect(board.objectsList.filter(o => isInfiniteLine(o)).length).toBe(0);
+    expect(content.getLine(line!.id)).toBeUndefined();
+
+    // Points should be preserved after deleting the line
+    expect(isPoint(board.objects[point1!.id])).toBeTruthy();
+    expect(isPoint(board.objects[point2!.id])).toBeTruthy();
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("includes line points in annotatableObjects as points", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "line");
+    const { point: point2, line } = content.realizePhantomPoint(board, [3, 4], "line");
+
+    const annotatables = content.annotatableObjects;
+
+    // Line itself should be annotatable
+    const lineAnnotatable = annotatables.find(obj => obj.objectId === line?.id);
+    expect(lineAnnotatable).toBeDefined();
+    expect(lineAnnotatable?.objectType).toBe("line");
+
+    // Line's endpoints should also be annotatable as points
+    const point1Annotatable = annotatables.find(obj => obj.objectId === point1?.id);
+    expect(point1Annotatable).toBeDefined();
+    expect(point1Annotatable?.objectType).toBe("point");
+
+    const point2Annotatable = annotatables.find(obj => obj.objectId === point2?.id);
+    expect(point2Annotatable).toBeDefined();
+    expect(point2Annotatable?.objectType).toBe("point");
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can persist and restore a line from model", () => {
+    // Create content with a line in the model
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "lp1", x: 1, y: 2, colorScheme: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "lp2", x: 5, y: 6, colorScheme: 0 }));
+      _content.addObjectModel(LineModel.create({ id: "ln1", point1: "lp1", point2: "lp2", colorScheme: 1 }));
+    });
+
+    // Verify the board has the line
+    const boardLines = board.objectsList.filter(o => isInfiniteLine(o));
+    expect(boardLines.length).toBe(1);
+    const line = boardLines[0] as JXG.Line;
+    expect(line.getAttribute("colorScheme")).toBe(1);
+
+    // Verify the model
+    const lineModel = content.getLine("ln1");
+    expect(lineModel).toBeDefined();
+    expect(lineModel?.point1).toBe("lp1");
+    expect(lineModel?.point2).toBe("lp2");
+    expect(lineModel?.colorScheme).toBe(1);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can update line label via the dispatcher", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    content.realizePhantomPoint(board, [0, 0], "line");
+    const { line } = content.realizePhantomPoint(board, [3, 4], "line");
+    expect(isInfiniteLine(line)).toBeTruthy();
+
+    // Dispatch a label update change (as the label dialog would)
+    content.applyChange(board, {
+      operation: "update",
+      target: "infiniteLine",
+      targetID: line!.id,
+      properties: { labelOption: ELabelOption.kLabel, clientName: "AB" }
+    });
+
+    // Verify the JSXGraph line's custom attributes were set
+    expect(line!.getAttribute("clientLabelOption")).toBe(ELabelOption.kLabel);
+    expect(line!.getAttribute("clientName")).toBe("AB");
+
+    // Verify the line has a label enabled
+    expect(line!.getAttribute("withLabel")).toBe(true);
+
+    // Dispatch removal of the label
+    content.applyChange(board, {
+      operation: "update",
+      target: "infiniteLine",
+      targetID: line!.id,
+      properties: { labelOption: ELabelOption.kNone, clientName: undefined }
+    });
+    expect(line!.getAttribute("clientLabelOption")).toBe(ELabelOption.kNone);
+    expect(line!.getAttribute("withLabel")).toBe(false);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can update line label via updateLineLabel", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "line");
+    const { point: point2, line } = content.realizePhantomPoint(board, [3, 4], "line");
+    expect(isInfiniteLine(line)).toBeTruthy();
+
+    // Update the label via the content action
+    content.updateLineLabel(board, line!, ELabelOption.kLabel, "CD");
+
+    // Verify the model was updated
+    const lineModel = content.getLine(line!.id);
+    expect(lineModel?.labelOption).toBe(ELabelOption.kLabel);
+    expect(lineModel?.name).toBe("CD");
+
+    // Verify the JSXGraph line's label attributes were synced
+    expect(line!.getAttribute("clientLabelOption")).toBe(ELabelOption.kLabel);
+    expect(line!.getAttribute("clientName")).toBe("CD");
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can add a comment anchored to a line", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [2, 4]);
+    content.realizePhantomPoint(board, [2, 4], "line");
+    const { line } = content.realizePhantomPoint(board, [6, 8], "line");
+    expect(line).toBeDefined();
+
+    // getCommentAnchor should find the line when it's selected
+    content.selectObjects(board, line!.id);
+    const anchor = content.getCommentAnchor(board);
+    expect(anchor).toBeDefined();
+    expect(anchor?.id).toBe(line!.id);
+
+    // Adding a comment to the line should work
+    const result = content.addComment(board, line!.id, "line comment");
+    expect(result).toBeDefined();
+    const commentElts = board.objectsList.filter(o => isComment(o));
+    expect(commentElts.length).toBe(1);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can persist and restore a line with labels from model", () => {
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "lp1", x: 1, y: 2, colorScheme: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "lp2", x: 5, y: 6, colorScheme: 0 }));
+      _content.addObjectModel(LineModel.create({
+        id: "ln1", point1: "lp1", point2: "lp2", colorScheme: 1,
+        labelOption: ELabelOption.kLabel, name: "EF"
+      }));
+    });
+
+    // Verify the board line has the label applied
+    const boardLines = board.objectsList.filter(o => isInfiniteLine(o));
+    expect(boardLines.length).toBe(1);
+    const line = boardLines[0] as JXG.Line;
+    expect(line.getAttribute("clientLabelOption")).toBe(ELabelOption.kLabel);
+    expect(line.getAttribute("clientName")).toBe("EF");
+    expect(line.getAttribute("withLabel")).toBe(true);
+
+    // Verify the model
+    const lineModel = content.getLine("ln1");
+    expect(lineModel?.labelOption).toBe(ELabelOption.kLabel);
+    expect(lineModel?.name).toBe("EF");
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("LineModel setLabelOption and setName actions work correctly", () => {
+    const lineModel = LineModel.create({
+      id: "test-line", point1: "p1", point2: "p2", colorScheme: 0
+    });
+    expect(lineModel.labelOption).toBe(ELabelOption.kNone);
+    expect(lineModel.name).toBeUndefined();
+
+    lineModel.setLabelOption(ELabelOption.kLabel);
+    expect(lineModel.labelOption).toBe(ELabelOption.kLabel);
+
+    lineModel.setName("TestLine");
+    expect(lineModel.name).toBe("TestLine");
+
+    // Setting the same value should be a no-op (no error)
+    lineModel.setLabelOption(ELabelOption.kLabel);
+    expect(lineModel.labelOption).toBe(ELabelOption.kLabel);
+    lineModel.setName("TestLine");
+    expect(lineModel.name).toBe("TestLine");
+
+    destroy(lineModel);
+  });
+
+  it("getOneSelectedLine returns the selected infinite line", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    content.realizePhantomPoint(board, [0, 0], "line");
+    const { line } = content.realizePhantomPoint(board, [3, 4], "line");
+    expect(isInfiniteLine(line)).toBeTruthy();
+
+    // No selection — returns undefined
+    expect(content.getOneSelectedLine(board)).toBeUndefined();
+
+    // Select the line
+    content.selectObjects(board, line!.id);
+    const selectedLine = content.getOneSelectedLine(board);
+    expect(selectedLine).toBeDefined();
+    expect(selectedLine?.id).toBe(line!.id);
+
+    // Deselect — returns undefined again
+    content.deselectAll(board);
+    expect(content.getOneSelectedLine(board)).toBeUndefined();
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("handles invalid line creation gracefully", () => {
+    const { content, board } = createContentAndBoard();
+    const spy = jest.spyOn(console, "warn").mockImplementation();
+
+    // Missing parents
+    const result1 = content.applyChange(board, {
+      operation: "create", target: "line", properties: { id: "bad1" }
+    });
+    expect(result1).toBeUndefined();
+
+    // Only one parent
+    const result2 = content.applyChange(board, {
+      operation: "create", target: "line", parents: ["p1"],
+      properties: { id: "bad2" }
+    });
+    expect(result2).toBeUndefined();
+
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("exports lines and circles correctly", () => {
+    const { content } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "lp1", x: 1, y: 2, colorScheme: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "lp2", x: 3, y: 4, colorScheme: 0 }));
+      _content.addObjectModel(LineModel.create({
+        id: "ln1", point1: "lp1", point2: "lp2", colorScheme: 0,
+        labelOption: ELabelOption.kLabel, name: "AB"
+      }));
+      _content.addObjectModel(PointModel.create({ id: "cp1", x: 5, y: 5, colorScheme: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "cp2", x: 7, y: 5, colorScheme: 0 }));
+      _content.addObjectModel(CircleModel.create({ id: "cr1", centerPoint: "cp1", tangentPoint: "cp2" }));
+    });
+
+    const exported = exportAndSimplifyIds(content);
+    const parsed = JSON.parse(exported);
+
+    // Verify lines and circles appear in the exported objects
+    const objectTypes = Object.values(parsed.objects).map((o: any) => o.type);
+    expect(objectTypes).toContain("line");
+    expect(objectTypes).toContain("circle");
+    expect(objectTypes.filter((t: string) => t === "point").length).toBe(4);
+
+    // Verify the line object has the expected shape
+    const lineObj = Object.values(parsed.objects).find((o: any) => o.type === "line") as any;
+    expect(lineObj).toBeDefined();
+    expect(lineObj.point1).toBe("lp1");
+    expect(lineObj.point2).toBe("lp2");
+    expect(lineObj.colorScheme).toBe(0);
+    expect(lineObj.labelOption).toBe("label");
+    expect(lineObj.name).toBe("AB");
+
+    // Verify the circle object has the expected shape
+    const circleObj = Object.values(parsed.objects).find((o: any) => o.type === "circle") as any;
+    expect(circleObj).toBeDefined();
+    expect(circleObj.centerPoint).toBe("cp1");
+    expect(circleObj.tangentPoint).toBe("cp2");
+  });
+
+  it("convertModelObjectToChanges correctly maps line label properties", () => {
+    // Line without label — no renaming needed
+    const lineNoLabel = LineModel.create({
+      id: "ln1", point1: "p1", point2: "p2", colorScheme: 0
+    });
+    const changesNoLabel = convertModelObjectToChanges(lineNoLabel);
+    expect(changesNoLabel.length).toBe(1);
+    expect(changesNoLabel[0].operation).toBe("create");
+    expect(changesNoLabel[0].target).toBe("line");
+    expect(changesNoLabel[0].parents).toEqual(["p1", "p2"]);
+    const propsNoLabel = changesNoLabel[0].properties as Record<string, any>;
+    // labelOption "none" is still a truthy string, so it gets renamed to clientLabelOption
+    expect(propsNoLabel?.clientLabelOption).toBe("none");
+    expect(propsNoLabel?.labelOption).toBeUndefined();
+    expect(propsNoLabel?.clientName).toBeUndefined();
+
+    // Line with label — labelOption/name should be renamed to clientLabelOption/clientName
+    const lineWithLabel = LineModel.create({
+      id: "ln2", point1: "p1", point2: "p2", colorScheme: 1,
+      labelOption: ELabelOption.kLabel, name: "AB"
+    });
+    const changesWithLabel = convertModelObjectToChanges(lineWithLabel);
+    expect(changesWithLabel.length).toBe(1);
+    const propsWithLabel = changesWithLabel[0].properties as Record<string, any>;
+    expect(propsWithLabel?.clientLabelOption).toBe(ELabelOption.kLabel);
+    expect(propsWithLabel?.clientName).toBe("AB");
+    // Original keys should be cleared
+    expect(propsWithLabel?.labelOption).toBeUndefined();
+    expect(propsWithLabel?.name).toBeUndefined();
+
+    // Line with only one point (incomplete) — should produce no changes
+    const incompleteLineModel = LineModel.create({
+      id: "ln3", point1: "p1", colorScheme: 0
+    });
+    const changesIncomplete = convertModelObjectToChanges(incompleteLineModel);
+    expect(changesIncomplete.length).toBe(0);
+
+    destroy(lineNoLabel);
+    destroy(lineWithLabel);
+    destroy(incompleteLineModel);
+  });
+
+  it("synchronizes line changes across views via applyChange round-trip", () => {
+    const { content, board } = createContentAndBoard();
+
+    // Create two points directly
+    const p1 = content.applyChange(board, {
+      operation: "create", target: "point", parents: [1, 2],
+      properties: { id: "sync-p1", colorScheme: 0, snapToGrid: true }
+    }) as JXG.Point;
+    const p2 = content.applyChange(board, {
+      operation: "create", target: "point", parents: [3, 4],
+      properties: { id: "sync-p2", colorScheme: 0, snapToGrid: true }
+    }) as JXG.Point;
+    expect(isPoint(p1)).toBeTruthy();
+    expect(isPoint(p2)).toBeTruthy();
+
+    // Create line via dispatcher (as a remote view would receive)
+    const line = content.applyChange(board, {
+      operation: "create", target: "line",
+      parents: ["sync-p1", "sync-p2"],
+      properties: { id: "sync-ln1", colorScheme: 0 }
+    }) as JXG.Line;
+    expect(isInfiniteLine(line)).toBeTruthy();
+
+    // Update line color via dispatcher
+    content.applyChange(board, {
+      operation: "update", target: "object",
+      targetID: "sync-ln1",
+      properties: { colorScheme: 2 }
+    });
+    expect(line.getAttribute("colorScheme")).toBe(2);
+
+    // Update line label via dispatcher
+    content.applyChange(board, {
+      operation: "update", target: "infiniteLine",
+      targetID: "sync-ln1",
+      properties: { labelOption: ELabelOption.kLabel, clientName: "XY" }
+    });
+    expect(line.getAttribute("clientLabelOption")).toBe(ELabelOption.kLabel);
+    expect(line.getAttribute("withLabel")).toBe(true);
+
+    // Delete line via dispatcher
+    content.applyChange(board, {
+      operation: "delete", target: "object",
+      targetID: "sync-ln1"
+    });
+    expect(board.objectsList.filter(o => isInfiniteLine(o)).length).toBe(0);
+
+    destroyContentAndBoard(content, board);
+  });
 
 });
 /* eslint-enable max-len */

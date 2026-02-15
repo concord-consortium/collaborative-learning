@@ -16,7 +16,8 @@ import {
 } from "../../../models/tiles/geometry/geometry-content";
 import { convertModelObjectsToChanges } from "../../../models/tiles/geometry/geometry-migrate";
 import {
-  cloneGeometryObject, GeometryObjectModelType, isPointModel, pointIdsFromSegmentId, PointModelType, PolygonModelType
+  cloneGeometryObject, GeometryObjectModelType, isPointModel, LineModelType, pointIdsFromSegmentId,
+  PointModelType, PolygonModelType
 } from "../../../models/tiles/geometry/geometry-model";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor,
@@ -38,7 +39,7 @@ import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
 } from "../../../models/tiles/geometry/jxg-polygon";
 import {
-  isAxis, isCircle, isComment, isImage, isLine, isLinkedPoint, isMovableLine,
+  isAxis, isCircle, isComment, isImage, isInfiniteLine, isLine, isLinkedPoint, isMovableLine,
   isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isRealVisiblePoint, isVertexAngle,
   isVisibleEdge, isVisibleMovableLine, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tiles/geometry/jxg-types";
@@ -62,6 +63,7 @@ import SingleStringDialog from "../../utilities/single-string-dialog";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import { TileTitleArea } from "../tile-title-area";
 import { GeometryTileContext } from "./geometry-tile-context";
+import LabelLineDialog from "./label-line-dialog";
 import LabelPointDialog from "./label-point-dialog";
 import LabelPolygonDialog from "./label-polygon-dialog";
 import { ITileNavigatorContext } from "../hooks/use-tile-navigator-context";
@@ -99,6 +101,7 @@ interface IState extends Mutable<SizeMeProps> {
   showPointLabelDialog?: boolean;
   showSegmentLabelDialog?: boolean;
   showPolygonLabelDialog?: boolean;
+  showLineLabelDialog?: boolean;
   showInvalidTableDataAlert?: boolean;
   showColorPalette?: boolean;
 }
@@ -338,6 +341,26 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
               width: right - left
             };
             return boundingBox;
+          } else if (objectType === "line") {
+            const content = this.getContent();
+            const lineModel = content.getObject(objectId) as LineModelType;
+            if (!lineModel?.point1 || !lineModel?.point2) return undefined;
+            const coords1 = this.getPointScreenCoords(lineModel.point1);
+            const coords2 = this.getPointScreenCoords(lineModel.point2);
+            if (!coords1 || !coords2) return undefined;
+            const [x1, y1] = coords1;
+            const [x2, y2] = coords2;
+            const bottom = Math.max(y1, y2);
+            const left = Math.min(x1, x2);
+            const right = Math.max(x1, x2);
+            const top = Math.min(y1, y2);
+            const boundingBox = {
+              height: bottom - top,
+              left,
+              top,
+              width: right - left
+            };
+            return boundingBox;
           }
         },
         getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
@@ -376,6 +399,30 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             const secondAngle = normalizeAngle(segmentAngle - halfPi);
 
             // Determine the points and path of the rectangle containing the segment
+            const coords: Point[] = [
+              [x1 + Math.cos(firstAngle) * segmentButtonWidth, y1 - Math.sin(firstAngle) * segmentButtonWidth],
+              [x2 + Math.cos(firstAngle) * segmentButtonWidth, y2 - Math.sin(firstAngle) * segmentButtonWidth],
+              [x2 + Math.cos(secondAngle) * segmentButtonWidth, y2 - Math.sin(secondAngle) * segmentButtonWidth],
+              [x1 + Math.cos(secondAngle) * segmentButtonWidth, y1 - Math.sin(secondAngle) * segmentButtonWidth],
+            ];
+            return this.getButtonPath(coords, handleClick, classes);
+          } else if (objectType === "line") {
+            // Find the end points of the line
+            const content = this.getContent();
+            const lineModel = content.getObject(objectId) as LineModelType;
+            if (!lineModel?.point1 || !lineModel?.point2) return;
+            const coords1 = this.getPointScreenCoords(lineModel.point1);
+            const coords2 = this.getPointScreenCoords(lineModel.point2);
+            if (!coords1 || !coords2) return;
+
+            const [x1, y1] = coords1;
+            const [x2, y2] = coords2;
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const segmentAngle = normalizeAngle(Math.atan2(-dy, dx));
+            const firstAngle = normalizeAngle(segmentAngle + halfPi);
+            const secondAngle = normalizeAngle(segmentAngle - halfPi);
+
             const coords: Point[] = [
               [x1 + Math.cos(firstAngle) * segmentButtonWidth, y1 - Math.sin(firstAngle) * segmentButtonWidth],
               [x2 + Math.cos(firstAngle) * segmentButtonWidth, y2 - Math.sin(firstAngle) * segmentButtonWidth],
@@ -560,6 +607,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         {this.renderLineEditor()}
         {this.renderPolygonLabelDialog()}
         {this.renderSegmentLabelDialog()}
+        {this.renderLineLabelDialog()}
         {this.renderPointLabelDialog()}
         <div id={this.elementId} key="jsxgraph"
             className={classes}
@@ -670,6 +718,28 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         <LabelPolygonDialog
           board={board}
           polygon={polygon}
+          onAccept={handleAccept}
+          onClose={handleClose}
+        />
+      );
+    }
+  }
+
+  private renderLineLabelDialog() {
+    const content = this.getContent();
+    const { board, showLineLabelDialog } = this.state;
+    if (board && showLineLabelDialog) {
+      const line = content.getOneSelectedLine(board);
+      if (!line) return;
+      const handleClose = () => this.setState({ showLineLabelDialog: false });
+      const handleAccept = (ln: JXG.Line, labelOption: ELabelOption, name: string) => {
+        this.handleLabelLine(ln, labelOption, name);
+        handleClose();
+      };
+      return (
+        <LabelLineDialog
+          board={board}
+          line={line}
           onAccept={handleAccept}
           onClose={handleClose}
         />
@@ -939,12 +1009,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleLabelDialog = (selectedPoint: JXG.Point|undefined, selectedSegment: JXG.Line|undefined,
-    selectedPolygon: JXG.Polygon|undefined) => {
+    selectedPolygon: JXG.Polygon|undefined, selectedLine: JXG.Line|undefined) => {
     // If there are just two points in a polygon, we want to label the segment not the polygon.
     if (selectedSegment) {
       this.setState({ showSegmentLabelDialog: true });
     } else if (selectedPolygon) {
       this.setState({ showPolygonLabelDialog: true });
+    } else if (selectedLine) {
+      this.setState({ showLineLabelDialog: true });
     } else {
       this.setState({ showPointLabelDialog: true });
     }
@@ -1046,6 +1118,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handleLabelPolygon = (polygon: JXG.Polygon, labelOption: ELabelOption, name: string) => {
     this.applyChange(() => {
       this.getContent().updatePolygonLabel(this.state.board, polygon, labelOption, name);
+    });
+  };
+
+  private handleLabelLine = (line: JXG.Line, labelOption: ELabelOption, name: string) => {
+    this.applyChange(() => {
+      this.getContent().updateLineLabel(this.state.board, line, labelOption, name);
     });
   };
 
@@ -1399,6 +1477,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       else if (isCircle(elt)) {
         this.handleCreateCircle(elt);
       }
+      else if (isInfiniteLine(elt)) {
+        this.handleCreateInfiniteLine(elt);
+      }
       else if (isVertexAngle(elt)) {
         this.handleCreateVertexAngle(elt);
       }
@@ -1621,7 +1702,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
       // other clicks on board background create new points, perhaps starting a polygon or circle.
       this.applyChange(() => {
-        const { point, polygon, circle } = geometryContent.realizePhantomPoint(board, [x, y], this.context.mode);
+        const { point, polygon, circle, line } = geometryContent.realizePhantomPoint(board, [x, y], this.context.mode);
         if (point) {
           this.handleCreatePoint(point);
         }
@@ -1631,14 +1712,22 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (circle) {
           this.handleCreateCircle(circle);
         }
+        if (line) {
+          this.handleCreateInfiniteLine(line);
+        }
       });
     };
 
     // Don't create new points on top of an existing point, line, etc.
     const shouldInterceptPointCreation = (elt: JXG.GeometryElement) => {
+      const geometryContent = this.props.model.content as GeometryContentModelType;
+      // Don't intercept the active line being created — the user needs to click through it
+      // to place the second point.
+      if (isInfiniteLine(elt) && elt.id === geometryContent.activeLineId) return false;
       return isRealVisiblePoint(elt)
           || isVisibleEdge(elt)
           || isVisibleMovableLine(elt)
+          || isInfiniteLine(elt)
           || isComment(elt)
           || isMovableLineLabel(elt);
     };
@@ -1695,6 +1784,20 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             this.handleCreateCircle(circle);
           }
       });
+      }
+
+      if (mode === "line") {
+        this.applyChange(() => {
+          let line;
+          if (geometryContent.activeLineId) {
+            line = geometryContent.closeActiveLine(board, point);
+          } else {
+            line = geometryContent.createLineIncludingPoint(board, point.id);
+          }
+          if (line) {
+            this.handleCreateInfiniteLine(line);
+          }
+        });
       }
 
       // Polygon mode interactions with existing points
@@ -1970,6 +2073,90 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     circle.on("down", handlePointerDown);
     circle.on("drag", handleDrag);
     circle.on("up", handlePointerUp);
+  };
+
+  private handleCreateInfiniteLine = (line: JXG.Line) => {
+
+    const isInVertex = (evt: any) => {
+      const { scale } = this.props;
+      const { board } = this.state;
+      if (!board) return false;
+      const coords = getEventCoords(board, evt, scale);
+      let inVertex = false;
+      each(line.ancestors, point => {
+        if (isPoint(point) && point.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+          inVertex = true;
+        }
+      });
+      return inVertex;
+    };
+
+    const areAllVerticesSelected = () => {
+      const geometryContent = this.props.model.content as GeometryContentModelType;
+      let allSelected = true;
+      each(line.ancestors, point => {
+        if (isPoint(point) && !geometryContent.isSelected(point.id)) {
+          allSelected = false;
+        }
+      });
+      return allSelected;
+    };
+
+    const handlePointerDown = (evt: any) => {
+      const { readOnly, scale } = this.props;
+      const { board } = this.state;
+      if (!board || (line !== getClickableObjectUnderMouse(board, evt, !readOnly, scale))) return;
+      const geometryContent = this.props.model.content as GeometryContentModelType;
+      const inVertex = isInVertex(evt);
+      const allVerticesSelected = areAllVerticesSelected();
+      if (!inVertex && !allVerticesSelected) {
+        if (!hasSelectionModifier(evt)) {
+          geometryContent.deselectAll(board);
+        }
+        const ids = Object.values(line.ancestors).filter(obj => isPoint(obj)).map(obj => obj.id);
+        ids.push(line.id);
+        geometryContent.selectObjects(board, ids);
+      }
+
+      if (!readOnly) {
+        this.isVertexDrag = isInVertex(evt);
+        if (!this.isVertexDrag) {
+          this.beginDragSelectedPoints(evt, line);
+        }
+      }
+    };
+
+    const handleDrag = (evt: any) => {
+      if (this.props.readOnly || this.isVertexDrag) return;
+
+      const vertex = line.point1;
+      const dragEntry = this.dragPts[vertex.id];
+      if (dragEntry && dragEntry.initial) {
+        const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
+                                                    dragEntry.initial.usrCoords) as number[];
+        this.dragSelectedPoints(evt, line, usrDiff);
+      }
+      this.setState({ disableRotate: true });
+    };
+
+    const handlePointerUp = (evt: any) => {
+      this.setState({ disableRotate: false });
+
+      if (!this.props.readOnly && !this.isVertexDrag) {
+        const vertex = line.point1;
+        const dragEntry = this.dragPts[vertex.id];
+        if (dragEntry && dragEntry.initial) {
+          const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
+                                                      dragEntry.initial.usrCoords) as number[];
+          this.endDragSelectedPoints(evt, line, usrDiff, "drag line");
+        }
+      }
+      this.isVertexDrag = false;
+    };
+
+    line.on("down", handlePointerDown);
+    line.on("drag", handleDrag);
+    line.on("up", handlePointerUp);
   };
 
   private handleCreatePolygon = (polygon: JXG.Polygon) => {
