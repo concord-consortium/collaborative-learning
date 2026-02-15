@@ -20,6 +20,7 @@ import {
 import { TileModel, ITileModel } from "../tile-model";
 import { getPoint, getPolygon, strokePropsForColorScheme } from "./geometry-utils";
 import { getLineVisualProps } from "./jxg-line";
+import { convertModelObjectToChanges } from "./geometry-migrate";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
 // This is needed so MST can deserialize snapshots referring to tools
@@ -1675,6 +1676,309 @@ toMatchInlineSnapshot(`
     expect(lineModel?.point1).toBe("lp1");
     expect(lineModel?.point2).toBe("lp2");
     expect(lineModel?.colorScheme).toBe(1);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can update line label via the dispatcher", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    content.realizePhantomPoint(board, [0, 0], "line");
+    const { line } = content.realizePhantomPoint(board, [3, 4], "line");
+    expect(isInfiniteLine(line)).toBeTruthy();
+
+    // Dispatch a label update change (as the label dialog would)
+    content.applyChange(board, {
+      operation: "update",
+      target: "infiniteLine",
+      targetID: line!.id,
+      properties: { labelOption: ELabelOption.kLabel, clientName: "AB" }
+    });
+
+    // Verify the JSXGraph line's custom attributes were set
+    expect(line!.getAttribute("clientLabelOption")).toBe(ELabelOption.kLabel);
+    expect(line!.getAttribute("clientName")).toBe("AB");
+
+    // Verify the line has a label enabled
+    expect(line!.getAttribute("withLabel")).toBe(true);
+
+    // Dispatch removal of the label
+    content.applyChange(board, {
+      operation: "update",
+      target: "infiniteLine",
+      targetID: line!.id,
+      properties: { labelOption: ELabelOption.kNone, clientName: undefined }
+    });
+    expect(line!.getAttribute("clientLabelOption")).toBe(ELabelOption.kNone);
+    expect(line!.getAttribute("withLabel")).toBe(false);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can update line label via updateLineLabel", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "line");
+    const { point: point2, line } = content.realizePhantomPoint(board, [3, 4], "line");
+    expect(isInfiniteLine(line)).toBeTruthy();
+
+    // Update the label via the content action
+    content.updateLineLabel(board, line!, ELabelOption.kLabel, "CD");
+
+    // Verify the model was updated
+    const lineModel = content.getLine(line!.id);
+    expect(lineModel?.labelOption).toBe(ELabelOption.kLabel);
+    expect(lineModel?.name).toBe("CD");
+
+    // Verify the JSXGraph line's label attributes were synced
+    expect(line!.getAttribute("clientLabelOption")).toBe(ELabelOption.kLabel);
+    expect(line!.getAttribute("clientName")).toBe("CD");
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can add a comment anchored to a line", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [2, 4]);
+    content.realizePhantomPoint(board, [2, 4], "line");
+    const { line } = content.realizePhantomPoint(board, [6, 8], "line");
+    expect(line).toBeDefined();
+
+    // getCommentAnchor should find the line when it's selected
+    content.selectObjects(board, line!.id);
+    const anchor = content.getCommentAnchor(board);
+    expect(anchor).toBeDefined();
+    expect(anchor?.id).toBe(line!.id);
+
+    // Adding a comment to the line should work
+    const result = content.addComment(board, line!.id, "line comment");
+    expect(result).toBeDefined();
+    const commentElts = board.objectsList.filter(o => isComment(o));
+    expect(commentElts.length).toBe(1);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can persist and restore a line with labels from model", () => {
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "lp1", x: 1, y: 2, colorScheme: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "lp2", x: 5, y: 6, colorScheme: 0 }));
+      _content.addObjectModel(LineModel.create({
+        id: "ln1", point1: "lp1", point2: "lp2", colorScheme: 1,
+        labelOption: ELabelOption.kLabel, name: "EF"
+      }));
+    });
+
+    // Verify the board line has the label applied
+    const boardLines = board.objectsList.filter(o => isInfiniteLine(o));
+    expect(boardLines.length).toBe(1);
+    const line = boardLines[0] as JXG.Line;
+    expect(line.getAttribute("clientLabelOption")).toBe(ELabelOption.kLabel);
+    expect(line.getAttribute("clientName")).toBe("EF");
+    expect(line.getAttribute("withLabel")).toBe(true);
+
+    // Verify the model
+    const lineModel = content.getLine("ln1");
+    expect(lineModel?.labelOption).toBe(ELabelOption.kLabel);
+    expect(lineModel?.name).toBe("EF");
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("LineModel setLabelOption and setName actions work correctly", () => {
+    const lineModel = LineModel.create({
+      id: "test-line", point1: "p1", point2: "p2", colorScheme: 0
+    });
+    expect(lineModel.labelOption).toBe(ELabelOption.kNone);
+    expect(lineModel.name).toBeUndefined();
+
+    lineModel.setLabelOption(ELabelOption.kLabel);
+    expect(lineModel.labelOption).toBe(ELabelOption.kLabel);
+
+    lineModel.setName("TestLine");
+    expect(lineModel.name).toBe("TestLine");
+
+    // Setting the same value should be a no-op (no error)
+    lineModel.setLabelOption(ELabelOption.kLabel);
+    expect(lineModel.labelOption).toBe(ELabelOption.kLabel);
+    lineModel.setName("TestLine");
+    expect(lineModel.name).toBe("TestLine");
+
+    destroy(lineModel);
+  });
+
+  it("getOneSelectedLine returns the selected infinite line", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    content.realizePhantomPoint(board, [0, 0], "line");
+    const { line } = content.realizePhantomPoint(board, [3, 4], "line");
+    expect(isInfiniteLine(line)).toBeTruthy();
+
+    // No selection — returns undefined
+    expect(content.getOneSelectedLine(board)).toBeUndefined();
+
+    // Select the line
+    content.selectObjects(board, line!.id);
+    const selectedLine = content.getOneSelectedLine(board);
+    expect(selectedLine).toBeDefined();
+    expect(selectedLine?.id).toBe(line!.id);
+
+    // Deselect — returns undefined again
+    content.deselectAll(board);
+    expect(content.getOneSelectedLine(board)).toBeUndefined();
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("handles invalid line creation gracefully", () => {
+    const { content, board } = createContentAndBoard();
+    const spy = jest.spyOn(console, "warn").mockImplementation();
+
+    // Missing parents
+    const result1 = content.applyChange(board, {
+      operation: "create", target: "line", properties: { id: "bad1" }
+    });
+    expect(result1).toBeUndefined();
+
+    // Only one parent
+    const result2 = content.applyChange(board, {
+      operation: "create", target: "line", parents: ["p1"],
+      properties: { id: "bad2" }
+    });
+    expect(result2).toBeUndefined();
+
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("exports lines and circles correctly", () => {
+    const { content } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "lp1", x: 1, y: 2, colorScheme: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "lp2", x: 3, y: 4, colorScheme: 0 }));
+      _content.addObjectModel(LineModel.create({
+        id: "ln1", point1: "lp1", point2: "lp2", colorScheme: 0,
+        labelOption: ELabelOption.kLabel, name: "AB"
+      }));
+      _content.addObjectModel(PointModel.create({ id: "cp1", x: 5, y: 5, colorScheme: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "cp2", x: 7, y: 5, colorScheme: 0 }));
+      _content.addObjectModel(CircleModel.create({ id: "cr1", centerPoint: "cp1", tangentPoint: "cp2" }));
+    });
+
+    const exported = exportAndSimplifyIds(content);
+    const parsed = JSON.parse(exported);
+
+    // Verify lines and circles appear in the exported objects
+    const objectTypes = Object.values(parsed.objects).map((o: any) => o.type);
+    expect(objectTypes).toContain("line");
+    expect(objectTypes).toContain("circle");
+    expect(objectTypes.filter((t: string) => t === "point").length).toBe(4);
+
+    // Verify the line object has the expected shape
+    const lineObj = Object.values(parsed.objects).find((o: any) => o.type === "line") as any;
+    expect(lineObj).toBeDefined();
+    expect(lineObj.point1).toBe("lp1");
+    expect(lineObj.point2).toBe("lp2");
+    expect(lineObj.colorScheme).toBe(0);
+    expect(lineObj.labelOption).toBe("label");
+    expect(lineObj.name).toBe("AB");
+
+    // Verify the circle object has the expected shape
+    const circleObj = Object.values(parsed.objects).find((o: any) => o.type === "circle") as any;
+    expect(circleObj).toBeDefined();
+    expect(circleObj.centerPoint).toBe("cp1");
+    expect(circleObj.tangentPoint).toBe("cp2");
+  });
+
+  it("convertModelObjectToChanges correctly maps line label properties", () => {
+    // Line without label — no renaming needed
+    const lineNoLabel = LineModel.create({
+      id: "ln1", point1: "p1", point2: "p2", colorScheme: 0
+    });
+    const changesNoLabel = convertModelObjectToChanges(lineNoLabel);
+    expect(changesNoLabel.length).toBe(1);
+    expect(changesNoLabel[0].operation).toBe("create");
+    expect(changesNoLabel[0].target).toBe("line");
+    expect(changesNoLabel[0].parents).toEqual(["p1", "p2"]);
+    const propsNoLabel = changesNoLabel[0].properties as Record<string, any>;
+    // labelOption "none" is still a truthy string, so it gets renamed to clientLabelOption
+    expect(propsNoLabel?.clientLabelOption).toBe("none");
+    expect(propsNoLabel?.labelOption).toBeUndefined();
+    expect(propsNoLabel?.clientName).toBeUndefined();
+
+    // Line with label — labelOption/name should be renamed to clientLabelOption/clientName
+    const lineWithLabel = LineModel.create({
+      id: "ln2", point1: "p1", point2: "p2", colorScheme: 1,
+      labelOption: ELabelOption.kLabel, name: "AB"
+    });
+    const changesWithLabel = convertModelObjectToChanges(lineWithLabel);
+    expect(changesWithLabel.length).toBe(1);
+    const propsWithLabel = changesWithLabel[0].properties as Record<string, any>;
+    expect(propsWithLabel?.clientLabelOption).toBe(ELabelOption.kLabel);
+    expect(propsWithLabel?.clientName).toBe("AB");
+    // Original keys should be cleared
+    expect(propsWithLabel?.labelOption).toBeUndefined();
+    expect(propsWithLabel?.name).toBeUndefined();
+
+    // Line with only one point (incomplete) — should produce no changes
+    const incompleteLineModel = LineModel.create({
+      id: "ln3", point1: "p1", colorScheme: 0
+    });
+    const changesIncomplete = convertModelObjectToChanges(incompleteLineModel);
+    expect(changesIncomplete.length).toBe(0);
+
+    destroy(lineNoLabel);
+    destroy(lineWithLabel);
+    destroy(incompleteLineModel);
+  });
+
+  it("synchronizes line changes across views via applyChange round-trip", () => {
+    const { content, board } = createContentAndBoard();
+
+    // Create two points directly
+    const p1 = content.applyChange(board, {
+      operation: "create", target: "point", parents: [1, 2],
+      properties: { id: "sync-p1", colorScheme: 0, snapToGrid: true }
+    }) as JXG.Point;
+    const p2 = content.applyChange(board, {
+      operation: "create", target: "point", parents: [3, 4],
+      properties: { id: "sync-p2", colorScheme: 0, snapToGrid: true }
+    }) as JXG.Point;
+    expect(isPoint(p1)).toBeTruthy();
+    expect(isPoint(p2)).toBeTruthy();
+
+    // Create line via dispatcher (as a remote view would receive)
+    const line = content.applyChange(board, {
+      operation: "create", target: "line",
+      parents: ["sync-p1", "sync-p2"],
+      properties: { id: "sync-ln1", colorScheme: 0 }
+    }) as JXG.Line;
+    expect(isInfiniteLine(line)).toBeTruthy();
+
+    // Update line color via dispatcher
+    content.applyChange(board, {
+      operation: "update", target: "object",
+      targetID: "sync-ln1",
+      properties: { colorScheme: 2 }
+    });
+    expect(line.getAttribute("colorScheme")).toBe(2);
+
+    // Update line label via dispatcher
+    content.applyChange(board, {
+      operation: "update", target: "infiniteLine",
+      targetID: "sync-ln1",
+      properties: { labelOption: ELabelOption.kLabel, clientName: "XY" }
+    });
+    expect(line.getAttribute("clientLabelOption")).toBe(ELabelOption.kLabel);
+    expect(line.getAttribute("withLabel")).toBe(true);
+
+    // Delete line via dispatcher
+    content.applyChange(board, {
+      operation: "delete", target: "object",
+      targetID: "sync-ln1"
+    });
+    expect(board.objectsList.filter(o => isInfiniteLine(o)).length).toBe(0);
 
     destroyContentAndBoard(content, board);
   });
