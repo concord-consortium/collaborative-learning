@@ -541,7 +541,19 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     addToTileMap(tile: ITileModelSnapshotIn, idOverride?: string, titleOverride?: string) {
       const id = idOverride ?? tile.id;
       const title = titleOverride ?? tile.title;
-      return self.tileMap.put({...tile, id, title});
+      const tileModel = self.tileMap.put({...tile, id, title});
+      // When a RowList container (e.g. question tile) is added to the tileMap,
+      // its embedded rows' TileLayoutModel volatiles (like isUserResizable) are
+      // initialized to their defaults. Call updateLayout to set them correctly
+      // based on the actual tile content models now in the tileMap.
+      if (tileModel && isRowListContainer(tileModel.content)) {
+        const rowListContent = tileModel.content as RowListType;
+        rowListContent.rowOrder.forEach((rowId: string) => {
+          const row = rowListContent.getRow(rowId);
+          row?.updateLayout(self.tileMap);
+        });
+      }
+      return tileModel;
     },
     deleteTilesFromRow(row: TileRowModelType) {
       row.tiles
