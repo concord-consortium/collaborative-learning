@@ -72,7 +72,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
         <div key={docKey} className={thumbnailClass} data-testid="document-thumbnail">
           <DecoratedDocumentThumbnailItem
             key={docKey}
-            scale={0.1}
+            scale={largeThumbnails ? 0.5 : 0.1}
             document={fullDocument}
             tab={ENavTab.kSortWork}
             shouldHandleStarClick
