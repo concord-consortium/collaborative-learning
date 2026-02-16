@@ -42,18 +42,17 @@ export const ReadAloudButton: React.FC<IProps> = observer(function ReadAloudButt
   };
 
   return (
-    // TODO: Replace <div role="button"> with a <button> element for proper
-    // keyboard accessibility (tabIndex, Enter/Space handling) in future a11y work.
-    <div
+    <button
+      aria-disabled={isDisabled || undefined}
+      aria-label={title}
+      aria-pressed={isActive}
       className={className}
       data-testid={`tool-${tileEltClass}`}
       title={title}
+      type="button"
       onClick={handleClick}
-      role="button"
-      aria-pressed={isActive}
-      aria-label={title}
     >
       {toolButton.Icon && <toolButton.Icon />}
-    </div>
+    </button>
   );
 });

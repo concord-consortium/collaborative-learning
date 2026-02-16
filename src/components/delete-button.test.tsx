@@ -45,11 +45,15 @@ describe("DeleteButton", () => {
         </ModalProvider>
       </>
     );
-    expect(screen.getByTestId("delete-button")).toBeInTheDocument();
+    const button = screen.getByTestId("delete-button");
+    expect(button).toBeInTheDocument();
+    expect(button.tagName).toBe("BUTTON");
+    expect(button).toHaveAttribute("aria-label", "Delete");
+    expect(button).toHaveAttribute("aria-disabled", "true");
 
     act(() => {
       Modal.setAppElement(".app");
-      userEvent.click(screen.getByTestId("delete-button"));
+      userEvent.click(button);
     });
     expect(onSetToolActive).not.toHaveBeenCalled();
     expect(onClick).not.toHaveBeenCalled();
@@ -71,11 +75,13 @@ describe("DeleteButton", () => {
         </ModalProvider>
       </>
     );
-    expect(screen.getByTestId("delete-button")).toBeInTheDocument();
+    const button = screen.getByTestId("delete-button");
+    expect(button).toBeInTheDocument();
+    expect(button).not.toHaveAttribute("aria-disabled");
 
     act(() => {
       Modal.setAppElement(".app");
-      userEvent.click(screen.getByTestId("delete-button"));
+      userEvent.click(button);
     });
     expect(onSetToolActive).toHaveBeenCalledTimes(1);
     expect(onClick).toHaveBeenCalledTimes(1);

@@ -1,3 +1,6 @@
+import { translate } from "../utilities/translation/translate";
+import { upperWords } from "../utilities/string-utils";
+
 /**
  * Shared ARIA labels object.
  * Co-locates all labels for:
@@ -11,12 +14,12 @@ const ariaLabels = {
   // Landmark regions
   header: "CLUE Header",
   resourcesPane: "Lessons and Documents",
-  workspacePane: "Workspace",
+  get workspacePane() { return upperWords(translate("workspace")); },
   documentTiles: "Document tiles",
 
   // Navigation
   skipToResources: "Skip to Lessons and Documents",
-  skipToWorkspace: "Skip to Workspace",
+  get skipToWorkspace() { return `Skip to ${upperWords(translate("workspace"))}`; },
   skipToDashboard: "Skip to Dashboard",
   resourceTabs: "Resource navigation",
 
@@ -24,6 +27,12 @@ const ariaLabels = {
   tabPanel: (tabName: string) => `${tabName} content`,
   tile: (tileType: string) => `${tileType} tile`,
   chat: (expanded: boolean) => expanded ? "Collapse chat" : "Expand chat",
+
+  // Main workspace toolbars
+  lessonToolbar: "Lesson toolbar",
+  get workspaceToolbar() { return `${upperWords(translate("workspace"))} toolbar`; },
+  toolbarUpper: "Tile tools",
+  toolbarLower: "Playback controls",
 
   // Tile toolbar
   tileToolbar: "Tile toolbar",
@@ -46,7 +55,7 @@ const ariaLabels = {
     tileRemoved: (tileType: string) => `${tileType} tile removed`,
     panelSelected: (panelName: string) => `${panelName} panel selected`,
   },
-} as const;
+};
 
 // Type for consumers
 export type AriaLabels = typeof ariaLabels;

@@ -4,6 +4,7 @@ import { AppConfigContext } from "../../app-config-context";
 import { DocumentModelType } from "../../models/document/document";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { OnToolClickedHandler, ToolbarComponent } from "../toolbar";
+import { useAriaLabels } from "../../hooks/use-aria-labels";
 
 interface IToolbarProps {
   disabledToolIds?: string[];
@@ -19,6 +20,7 @@ interface IToolbarProps {
 // if the document is the primary document.
 export const DocumentToolbar: React.FC<IToolbarProps> = ({ document, toolbar, disabledToolIds, ...others }) => {
   const appConfig = useContext(AppConfigContext);
+  const ariaLabels = useAriaLabels();
 
   // The toolbar prop represents the app's configuration of the toolbar
   // It is cloned here in the document so changes to one document's toolbar
@@ -33,6 +35,7 @@ export const DocumentToolbar: React.FC<IToolbarProps> = ({ document, toolbar, di
 
   return (
     <ToolbarComponent
+      ariaLabel={ariaLabels.workspaceToolbar}
       key="toolbar"
       toolbarModel={toolbarModel}
       document={document}
