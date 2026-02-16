@@ -9,7 +9,8 @@ export const UndoButton: React.FC<IButtonProps> =
 
   const { id, title, Icon } = toolButton;
 
-  // Prevent mouse clicks from stealing focus away from document content
+  // Prevent mouse clicks from stealing focus away from document content, but still allow
+  // keyboard focus on button.
   const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
   };
@@ -44,7 +45,8 @@ export const RedoButton: React.FC<IButtonProps> =
 
   const { id, title, Icon } = toolButton;
 
-  // Prevent mouse clicks from stealing focus away from document content
+  // Prevent mouse clicks from stealing focus away from document content, but still allow
+  // keyboard focus on button.
   const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
   };
