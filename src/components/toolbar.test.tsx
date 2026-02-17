@@ -69,4 +69,27 @@ describe("ToolbarComponent", () => {
     // });
   });
 
+  it("has correct ARIA roles and attributes", () => {
+    render(
+      <ModalProvider>
+        <Provider stores={stores}>
+          <ToolbarComponent
+            toolbarModel={ToolbarModel.create(config)}
+            document={document}
+            ariaLabel="Workspace toolbar"
+          />
+        </Provider>
+      </ModalProvider>
+    );
+    const toolbar = screen.getByTestId("toolbar");
+    expect(toolbar).toHaveAttribute("role", "toolbar");
+    expect(toolbar).toHaveAttribute("aria-label", "Workspace toolbar");
+    expect(toolbar).toHaveAttribute("aria-orientation", "vertical");
+
+    const groups = toolbar.querySelectorAll("[role='group']");
+    expect(groups).toHaveLength(2);
+    expect(groups[0]).toHaveAttribute("aria-label", "Tile tools");
+    expect(groups[1]).toHaveAttribute("aria-label", "Playback controls");
+  });
+
 });

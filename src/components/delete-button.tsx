@@ -18,7 +18,7 @@ export const DeleteButton: React.FC<IProps> =
     !isDisabled && onSetToolActive(toolButton, true);
   };
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     !isDisabled && onClick(e, toolButton);
   };
 
@@ -36,12 +36,17 @@ export const DeleteButton: React.FC<IProps> =
   const classes = classNames("tool", "delete-button", id,
                             { active: isActive }, isDisabled ? "disabled" : "enabled");
   return (
-    <div className={classes} data-testid="delete-button"
-        key={id}
-        title={title}
-        onMouseDown={handleMouseDown}
-        onClick={handleClick}>
+    <button
+      aria-disabled={isDisabled || undefined}
+      aria-label={title}
+      className={classes}
+      data-testid="delete-button"
+      title={title}
+      type="button"
+      onMouseDown={handleMouseDown}
+      onClick={handleClick}
+    >
       {Icon && <Icon />}
-    </div>
+    </button>
   );
 };

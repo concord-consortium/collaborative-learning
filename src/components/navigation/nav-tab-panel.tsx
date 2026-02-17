@@ -1,6 +1,7 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import classNames from "classnames";
 import { BaseComponent, IBaseProps } from "../base";
 import { kDividerMin } from "../../models/stores/ui-types";
 import { ENavTab, NavTabModelType } from "../../models/view/nav-tabs";
@@ -13,6 +14,7 @@ import { ChatPanel } from "../chat/chat-panel";
 import ChatIcon from "../../assets/chat-icon.svg";
 import { SortWorkView } from "../document/sort-work-view";
 import { NavTabPanelInfoProvider } from "../../hooks/use-nav-tab-panel-info";
+import { getAriaLabels } from "../../hooks/use-aria-labels";
 
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.scss";
@@ -27,9 +29,21 @@ interface IProps extends IBaseProps {
 export class NavTabPanel extends BaseComponent<IProps> {
 
   private navTabPanelElt: HTMLDivElement | null = null;
+  private shouldRestoreFocus = false;
 
   constructor(props: IProps) {
     super(props);
+  }
+
+  public componentDidUpdate() {
+    // Restore focus to the selected tab after a MobX-triggered re-render.
+    if (this.shouldRestoreFocus && this.navTabPanelElt) {
+      const selectedTab: HTMLElement | null = this.navTabPanelElt.querySelector('.top-tab-list [aria-selected="true"]');
+      if (selectedTab) {
+        selectedTab.focus();
+      }
+      this.shouldRestoreFocus = false;
+    }
   }
 
   public render() {
@@ -41,6 +55,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
       !this.shouldHideChat(selectedTabIndex, user.type);
     const openChatPanel = isChatEnabled && showChatPanel;
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
+    const ariaLabels = getAriaLabels();
 
     return (
       <NavTabPanelInfoProvider>
@@ -53,46 +68,54 @@ export class NavTabPanel extends BaseComponent<IProps> {
               onSelect={this.handleSelectTab}
               forceRenderTabPanel={true}
             >
-              <div className="top-row">
-                <TabList className="top-tab-list">
-                  { tabs?.map((tabSpec, index) => {
-                      const tabClass = `top-tab tab-${tabSpec.tab}
-                                        ${selectedTabIndex === index ? "selected" : ""}`;
-                      let dataTestId = undefined;
-                      if (tabSpec.tab === 'teacher-guide') dataTestId = 'nav-tab-teacher-guide';
-                      if (tabSpec.tab === 'student-work') dataTestId = 'nav-tab-student-work';
-                      if (tabSpec.tab === 'class-work') dataTestId = 'nav-tab-class-work';
-                      return (
-                        <React.Fragment key={tabSpec.tab}>
-                          <Tab className={tabClass} data-testid={dataTestId}>{tabSpec.label}</Tab>
-                        </React.Fragment>
-                      );
-                    })
-                  }
-                </TabList>
-                { isChatEnabled
-                    ? !openChatPanel &&
-                      <div className={`chat-panel-toggle themed ${activeNavTab}`}>
-                        {/* The next line of code is commented out, but deliberately not removed,
-                            per: https://www.pivotaltracker.com/story/show/179754830 */}
-                        {/* <NewCommentsBadge documentKey={focusDocument} /> */}
-                        <ChatIcon
-                          className={`chat-button ${activeNavTab}`}
-                          onClick={this.handleShowChatColumn}
-                        />
-                      </div>
-                    : <button className="close-button" onClick={this.handleCloseResources}/>
+              <TabList className="top-tab-list">
+                { tabs?.map((tabSpec, index) => {
+                    const tabClass = `top-tab tab-${tabSpec.tab}
+                                      ${selectedTabIndex === index ? "selected" : ""}`;
+                    let dataTestId = undefined;
+                    if (tabSpec.tab === 'teacher-guide') dataTestId = 'nav-tab-teacher-guide';
+                    if (tabSpec.tab === 'student-work') dataTestId = 'nav-tab-student-work';
+                    if (tabSpec.tab === 'class-work') dataTestId = 'nav-tab-class-work';
+                    return (
+                      <Tab key={tabSpec.tab} className={tabClass} data-testid={dataTestId}>
+                        {tabSpec.label}
+                      </Tab>
+                    );
+                  })
                 }
-              </div>
+              </TabList>
               { tabs?.map((tabSpec) => {
                   return (
-                    <TabPanel key={tabSpec.tab} className={["react-tabs__tab-panel", "top-level-tab-panel"]}>
+                    <TabPanel key={tabSpec.tab} className={classNames("react-tabs__tab-panel", "top-level-tab-panel")}>
                       {this.renderTabContent(tabSpec)}
                     </TabPanel>
                   );
                 })
               }
             </Tabs>
+            {/* Panel action button is placed after Tabs in DOM order so it comes
+                after sub-tabs in keyboard navigation, but visually positioned
+                at the top-right of the panel */}
+            { isChatEnabled
+                ? !openChatPanel &&
+                  <button
+                    aria-label={ariaLabels.openChatPanel}
+                    className={`chat-panel-toggle themed ${activeNavTab}`}
+                    onClick={this.handleShowChatColumn}
+                    type="button"
+                  >
+                    {/* The next line of code is commented out, but deliberately not removed,
+                        per: https://www.pivotaltracker.com/story/show/179754830 */}
+                    {/* <NewCommentsBadge documentKey={focusDocument} /> */}
+                    <ChatIcon className={`chat-button ${activeNavTab}`} />
+                  </button>
+                : <button
+                    aria-label={ariaLabels.closeResourcesPanel}
+                    className="close-button"
+                    onClick={this.handleCloseResources}
+                    type="button"
+                  />
+            }
             {showChatPanel && activeNavTab &&
               <ChatPanel user={user} activeNavTab={activeNavTab} focusDocument={focusDocument} focusTileId={focusTileId}
                           onCloseChatPanel={this.handleShowChatColumn} />}
@@ -157,6 +180,14 @@ export class NavTabPanel extends BaseComponent<IProps> {
   private handleSelectTab = (tabIndex: number) => {
     const tabs = this.stores.tabsToDisplay;
     const { persistentUI } = this.stores;
+    const activeElement = document.activeElement;
+    const topTabList = this.navTabPanelElt?.querySelector('.top-tab-list');
+    const isTabFocused = activeElement?.getAttribute('role') === 'tab' &&
+                         topTabList?.contains(activeElement);
+    if (isTabFocused) {
+      this.shouldRestoreFocus = true;
+    }
+
     if (tabs) {
       const tabSpec = tabs[tabIndex];
       if (persistentUI.activeNavTab !== tabSpec.tab) {

@@ -8,6 +8,7 @@ import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-conte
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content-types";
 import { DeleteButton } from "./delete-button";
 import { ReadAloudButton } from "./toolbar/read-aloud-button";
+import { getAriaLabels } from "../hooks/use-aria-labels";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
@@ -30,6 +31,7 @@ export type OnToolClickedHandler = (tool: IToolbarButtonModel) => boolean|void;
 // Since many of the tools are shared between the two, each model is
 // passed as an optional prop instead of using two separate components.
 interface IProps extends IBaseProps {
+  ariaLabel?: string;
   document?: DocumentModelType;
   section?: SectionModelType;
   toolbarModel: IToolbarModel;
@@ -62,7 +64,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const handleClickTool = (e: React.MouseEvent<HTMLDivElement>, tool: IToolbarButtonModel) => {
+    const handleClickTool = (e: React.MouseEvent<HTMLButtonElement>, tool: IToolbarButtonModel) => {
       // this allows the parent component to handle the click event
       // if it returns true, the default action is prevented
       if (this.props.onToolClicked?.(tool)) {
@@ -120,7 +122,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       const { defaultTool } = this.state;
       this.setState({ activeTool: isActive && (tool !== defaultTool) ? tool : defaultTool });
     };
-    const handleDragTool = (e: React.DragEvent<HTMLDivElement>, tool: IToolbarButtonModel) => {
+    const handleDragTool = (e: React.DragEvent<HTMLButtonElement>, tool: IToolbarButtonModel) => {
       this.handleDragNewTile(tool, e);
     };
     const updateToolButton = (toolButton: IToolbarButtonModel) => {
@@ -162,12 +164,20 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     };
     const upperButtons = this.props.toolbarModel.filter(button => !button.isBottom) as IToolbarModel;
     const lowerButtons = this.props.toolbarModel.filter(button => button.isBottom) as IToolbarModel;
+    const ariaLabels = getAriaLabels();
+
     return (
-      <div className="toolbar" data-testid="toolbar">
-        <div className="toolbar-upper">
+      <div
+        aria-label={this.props.ariaLabel}
+        aria-orientation="vertical"
+        className="toolbar"
+        data-testid="toolbar"
+        role="toolbar"
+      >
+        <div className="toolbar-upper" role="group" aria-label={ariaLabels.toolbarUpper}>
           {renderToolButtons(upperButtons)}
         </div>
-        <div className="toolbar-lower">
+        <div className="toolbar-lower" role="group" aria-label={ariaLabels.toolbarLower}>
           {renderToolButtons(lowerButtons)}
         </div>
       </div>
@@ -380,7 +390,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }
   };
 
-  private handleDragNewTile = (tool: IToolbarButtonModel, e: React.DragEvent<HTMLDivElement>) => {
+  private handleDragNewTile = (tool: IToolbarButtonModel, e: React.DragEvent<HTMLButtonElement>) => {
     // remove hover-insert highlight when we start a tile drag
     this.removeDropRowHighlight();
 
