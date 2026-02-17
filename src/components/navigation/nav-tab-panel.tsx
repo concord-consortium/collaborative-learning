@@ -104,9 +104,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
                     onClick={this.handleShowChatColumn}
                     type="button"
                   >
-                    {/* The next line of code is commented out, but deliberately not removed,
-                        per: https://www.pivotaltracker.com/story/show/179754830 */}
-                    {/* <NewCommentsBadge documentKey={focusDocument} /> */}
                     <ChatIcon className={`chat-button ${activeNavTab}`} />
                   </button>
                 : <button
