@@ -1080,6 +1080,9 @@ export const GeometryContentModel = GeometryBaseContentModel
         logGeometryEvent(self, "create", "vertex",
           self.activePolygonId ? [newRealPoint.id, self.activePolygonId] : newRealPoint.id);
       } else if (mode === "circle") {
+        // The active ID checks below read inverted: activeCircleId/activeLineId are set
+        // *after* the first click and cleared *after* the second, so by the time this
+        // log runs the sense is opposite to what you'd expect.
         logGeometryEvent(self, "create", "circle",
           newCircle ? [newRealPoint.id, newCircle.id] : newRealPoint.id,
           { userAction: self.activeCircleId ? "place center point" : "place tangent point" });

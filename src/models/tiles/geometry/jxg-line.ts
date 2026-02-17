@@ -97,6 +97,9 @@ export const lineChangeAgent: JXGChangeAgent = {
         !Array.isArray(change.properties) && change.properties?.labelOption) {
       const line = getInfiniteLine(board as JXG.Board, change.targetID);
       if (line) {
+        // _set is a @private JSXGraph method, but it's the only way to store custom
+        // properties on board objects — setAttribute ignores unrecognized keys.
+        // This follows the same pattern used in jxg-polygon.ts and jxg-point.ts.
         line._set("clientLabelOption", change.properties.labelOption);
         line._set("clientName", change.properties.clientName);
         setPropertiesForLineLabelOption(line);

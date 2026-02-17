@@ -41,7 +41,7 @@ import {
 import {
   isAxis, isCircle, isComment, isImage, isInfiniteLine, isLine, isLinkedPoint, isMovableLine,
   isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isRealVisiblePoint, isVertexAngle,
-  isVisibleEdge, isVisibleMovableLine, kGeometryDefaultPixelsPerUnit
+  isVisibleEdge, isVisibleInfiniteLine, isVisibleMovableLine, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tiles/geometry/jxg-types";
 import {
   getVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
@@ -1727,7 +1727,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       return isRealVisiblePoint(elt)
           || isVisibleEdge(elt)
           || isVisibleMovableLine(elt)
-          || isInfiniteLine(elt)
+          || isVisibleInfiniteLine(elt)
           || isComment(elt)
           || isMovableLineLabel(elt);
     };
