@@ -52,7 +52,7 @@ export function useRovingTabindex(containerRef: React.RefObject<HTMLElement | nu
 
     container.addEventListener("focusin", handleFocusIn);
     return () => container.removeEventListener("focusin", handleFocusIn);
-  });
+  }, [containerRef, getButtons]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     const buttons = getButtons();

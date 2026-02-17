@@ -341,7 +341,7 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
     }
   };
 
-  const handleDragNewTile = (tool: IToolbarButtonModel, e: React.DragEvent<HTMLButtonElement>) => {
+  const handleDragTool = (e: React.DragEvent<HTMLButtonElement>, tool: IToolbarButtonModel) => {
     // remove hover-insert highlight when we start a tile drag
     removeDropRowHighlight();
 
@@ -409,11 +409,7 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
   };
 
   const handleSetActiveTool = (tool: IToolbarButtonModel, isActive: boolean) => {
-    setActiveTool(isActive && (tool !== defaultTool) ? tool : defaultTool);
-  };
-
-  const handleDragTool = (e: React.DragEvent<HTMLButtonElement>, tool: IToolbarButtonModel) => {
-    handleDragNewTile(tool, e);
+    setActiveTool(isActive ? tool : defaultTool);
   };
 
   const renderToolButtons = (buttons: IToolbarModel) => {

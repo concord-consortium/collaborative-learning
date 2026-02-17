@@ -36,126 +36,61 @@ function GroupedTestToolbar() {
 }
 
 describe("useRovingTabindex", () => {
-
-  it("sets first button to tabIndex=0 and others to tabIndex=-1", () => {
-    render(<TestToolbar buttonLabels={["A", "B", "C"]} />);
-    expect(screen.getByTestId("btn-A")).toHaveAttribute("tabindex", "0");
-    expect(screen.getByTestId("btn-B")).toHaveAttribute("tabindex", "-1");
-    expect(screen.getByTestId("btn-C")).toHaveAttribute("tabindex", "-1");
-  });
-
-  it("moves focus forward with ArrowDown", () => {
-    render(<TestToolbar buttonLabels={["A", "B", "C"]} />);
-    const btnA = screen.getByTestId("btn-A");
-    const btnB = screen.getByTestId("btn-B");
-
-    btnA.focus();
-    fireEvent.keyDown(screen.getByTestId("toolbar"), { key: "ArrowDown" });
-
-    expect(document.activeElement).toBe(btnB);
-    expect(btnA).toHaveAttribute("tabindex", "-1");
-    expect(btnB).toHaveAttribute("tabindex", "0");
-  });
-
-  it("moves focus forward with ArrowRight", () => {
-    render(<TestToolbar buttonLabels={["A", "B", "C"]} />);
-    const btnA = screen.getByTestId("btn-A");
-    const btnB = screen.getByTestId("btn-B");
-
-    btnA.focus();
-    fireEvent.keyDown(screen.getByTestId("toolbar"), { key: "ArrowRight" });
-
-    expect(document.activeElement).toBe(btnB);
-    expect(btnB).toHaveAttribute("tabindex", "0");
-  });
-
-  it("moves focus backward with ArrowUp", () => {
+  it("navigates with arrow keys, Home, and End without wrapping", () => {
     render(<TestToolbar buttonLabels={["A", "B", "C"]} />);
     const toolbar = screen.getByTestId("toolbar");
     const btnA = screen.getByTestId("btn-A");
     const btnB = screen.getByTestId("btn-B");
+    const btnC = screen.getByTestId("btn-C");
 
-    // Move to B first
+    // Initial state: first button is tabbable, others are not
+    expect(btnA).toHaveAttribute("tabindex", "0");
+    expect(btnB).toHaveAttribute("tabindex", "-1");
+    expect(btnC).toHaveAttribute("tabindex", "-1");
+
+    // ArrowDown moves forward
     btnA.focus();
     fireEvent.keyDown(toolbar, { key: "ArrowDown" });
     expect(document.activeElement).toBe(btnB);
+    expect(btnB).toHaveAttribute("tabindex", "0");
+    expect(btnA).toHaveAttribute("tabindex", "-1");
+    expect(btnC).toHaveAttribute("tabindex", "-1");
 
-    // Move back to A
+    // ArrowUp moves backward
     fireEvent.keyDown(toolbar, { key: "ArrowUp" });
     expect(document.activeElement).toBe(btnA);
     expect(btnA).toHaveAttribute("tabindex", "0");
     expect(btnB).toHaveAttribute("tabindex", "-1");
-  });
+    expect(btnC).toHaveAttribute("tabindex", "-1");
 
-  it("moves focus backward with ArrowLeft", () => {
-    render(<TestToolbar buttonLabels={["A", "B", "C"]} />);
-    const toolbar = screen.getByTestId("toolbar");
-    const btnA = screen.getByTestId("btn-A");
+    // ArrowRight also moves forward
+    fireEvent.keyDown(toolbar, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(btnB);
 
-    btnA.focus();
-    fireEvent.keyDown(toolbar, { key: "ArrowDown" });
+    // ArrowLeft also moves backward
     fireEvent.keyDown(toolbar, { key: "ArrowLeft" });
-
     expect(document.activeElement).toBe(btnA);
-  });
 
-  it("Home moves focus to first button", () => {
-    render(<TestToolbar buttonLabels={["A", "B", "C"]} />);
-    const toolbar = screen.getByTestId("toolbar");
-    const btnA = screen.getByTestId("btn-A");
+    // Does not wrap at the beginning
+    fireEvent.keyDown(toolbar, { key: "ArrowUp" });
+    expect(document.activeElement).toBe(btnA);
+    expect(btnA).toHaveAttribute("tabindex", "0");
 
-    // Move to the last button
-    btnA.focus();
+    // End jumps to last button
     fireEvent.keyDown(toolbar, { key: "End" });
+    expect(document.activeElement).toBe(btnC);
+    expect(btnC).toHaveAttribute("tabindex", "0");
+    expect(btnA).toHaveAttribute("tabindex", "-1");
 
-    // Home goes back to first
+    // Does not wrap at the end
+    fireEvent.keyDown(toolbar, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(btnC);
+    expect(btnC).toHaveAttribute("tabindex", "0");
+
+    // Home jumps back to first button
     fireEvent.keyDown(toolbar, { key: "Home" });
     expect(document.activeElement).toBe(btnA);
     expect(btnA).toHaveAttribute("tabindex", "0");
-  });
-
-  it("End moves focus to last button", () => {
-    render(<TestToolbar buttonLabels={["A", "B", "C"]} />);
-    const toolbar = screen.getByTestId("toolbar");
-    const btnA = screen.getByTestId("btn-A");
-    const btnB = screen.getByTestId("btn-B");
-    const btnC = screen.getByTestId("btn-C");
-
-    btnA.focus();
-    fireEvent.keyDown(toolbar, { key: "End" });
-
-    expect(document.activeElement).toBe(btnC);
-    expect(btnC).toHaveAttribute("tabindex", "0");
-    expect(btnA).toHaveAttribute("tabindex", "-1");
-    expect(btnB).toHaveAttribute("tabindex", "-1");
-  });
-
-  it("does not wrap around at the beginning", () => {
-    render(<TestToolbar buttonLabels={["A", "B", "C"]} />);
-    const toolbar = screen.getByTestId("toolbar");
-    const btnA = screen.getByTestId("btn-A");
-
-    btnA.focus();
-    fireEvent.keyDown(toolbar, { key: "ArrowUp" });
-
-    // Focus stays on first button
-    expect(document.activeElement).toBe(btnA);
-    expect(btnA).toHaveAttribute("tabindex", "0");
-  });
-
-  it("does not wrap around at the end", () => {
-    render(<TestToolbar buttonLabels={["A", "B", "C"]} />);
-    const toolbar = screen.getByTestId("toolbar");
-    const btnA = screen.getByTestId("btn-A");
-    const btnC = screen.getByTestId("btn-C");
-
-    btnA.focus();
-    fireEvent.keyDown(toolbar, { key: "End" });
-    fireEvent.keyDown(toolbar, { key: "ArrowDown" });
-
-    // Focus stays on last button
-    expect(document.activeElement).toBe(btnC);
-    expect(btnC).toHaveAttribute("tabindex", "0");
   });
 
   it("does not preventDefault for keys the hook does not handle", () => {
