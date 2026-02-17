@@ -116,4 +116,5 @@ describe("ToolButtonComponent", () => {
     });
     expect(onDragStart).toHaveBeenCalledTimes(1);
   });
+
 });
