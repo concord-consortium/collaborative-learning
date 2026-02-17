@@ -24,25 +24,22 @@
     border-color: $support-blue;
   }
 
-  .tab-header-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    background-color: white;
-    height: $nav-tab-height;
-    padding-top: 3px;
-    position: relative;
+  &.no-sub-tabs .tab-list {
+    display: none;
+  }
 
-    &.no-sub-tabs {
-      display: none;
-    }
+  &.no-sub-tabs .sub-tab-panel {
+    margin-top: 0;
   }
 
   .tab-list {
+    background-color: white;
+    height: $nav-tab-height;
+    position: relative;
     margin: 0;
-    padding: 0;
+    padding: 3px 0 0;
     display: flex;
-    flex: 1 1 auto;
+    flex: 0 0 auto; // Don't grow or shrink - use fixed height
 
     &:after {
       content: "";
@@ -140,13 +137,9 @@
     }
   }
 
-  .documents-panel {
+  .sub-tab-panel {
     margin-top: $document-margin;
     flex: 1;
     min-height: 0;
-
-    .sub-tab-panel {
-      height: 100%;
-    }
   }
 }

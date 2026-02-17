@@ -213,7 +213,7 @@ context('Geometry Table Integration', function () {
     canvas.createNewExtraDocumentFromFileMenu("Test Document", "my-work");
 
     // Select the table and geometry tiles on the left
-    const leftTile = type => cy.get(`.nav-tab-panel .documents-panel .${type}-tool-tile`);
+    const leftTile = type => cy.get(`.nav-tab-panel .sub-tab-panel .${type}-tool-tile`);
     leftTile('table').first().click();
     leftTile('geometry').first().click({ shiftKey: true });
 
