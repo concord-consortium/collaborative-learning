@@ -77,7 +77,7 @@ describe('SortWorkView Tests', () => {
     // Verify that tile content is rendered within the large thumbnails.
     // The scaled-list-item must use transform-origin: 0 0 so that the
     // top-left of the document is visible rather than clipped.
-    cy.get('.document-thumbnail-scroller.large-thumbnails .scaled-list-item .canvas-area')
+    cy.get('.document-thumbnail-scroller.large-thumbnails .scaled-list-item .document-content')
       .should('exist');
     cy.contains('Student 7: My First Learning Log').should('not.be.visible');
     cy.get('.thumbnail-display-button.small-thumbnails').click();
