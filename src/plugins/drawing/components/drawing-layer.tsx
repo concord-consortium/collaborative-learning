@@ -99,6 +99,7 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
   private svgRef: React.RefObject<any>|null;
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
+  private didForceUpdate: boolean = false;
 
   // These hold the values currently in use.
   // For regular tile view, they are same as the props passed in.
@@ -158,9 +159,16 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
     this.calculateBounds();
 
     // Force re-render if bounds calculation changed the transform values.
+    // Only allow one forceUpdate per cycle to prevent infinite loops — a resize
+    // can cause DOM dimensions to shift on each render, making calculateBounds()
+    // produce slightly different values every time.
     if (this.props.readOnly &&
+        !this.didForceUpdate &&
         (prevOffsetX !== this.offsetX || prevOffsetY !== this.offsetY || prevZoom !== this.zoom)) {
+      this.didForceUpdate = true;
       this.forceUpdate();
+    } else {
+      this.didForceUpdate = false;
     }
   }
 
