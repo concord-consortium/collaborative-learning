@@ -43,6 +43,7 @@ interface IProps extends SizeMeProps {
   tileContent: DataflowContentModelType;
   tileElt: HTMLElement | null;
   onRegisterTileApi: ITileProps["onRegisterTileApi"];
+  onReteManagerCreated?: (reteManager: ReteManager | undefined) => void;
 }
 
 interface IState {
@@ -245,6 +246,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.reteManager = undefined;
     this.playbackReteManager?.dispose();
     this.playbackReteManager = undefined;
+    this.props.onReteManagerCreated?.(undefined);
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -322,6 +324,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.toolDiv, this.props.tileContent, this.stores, this.props.readOnly, false);
 
     this.reteManager = reteManager;
+    this.props.onReteManagerCreated?.(reteManager);
   };
 
   private setDataRate = (rate: number) => {

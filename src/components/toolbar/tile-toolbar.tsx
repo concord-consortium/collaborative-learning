@@ -4,7 +4,7 @@ import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
 import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
 import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
-import { getToolbarButtonInfo } from "./toolbar-button-manager";
+import { getToolbarButtonInfo, getDefaultToolbarTools } from "./toolbar-button-manager";
 import { TileModelContext } from "../tiles/tile-api";
 import { JSONValue } from "../../models/stores/settings";
 import { useCanvasMethodsContext } from "../document/canvas-methods-context";
@@ -67,8 +67,9 @@ export const TileToolbar = observer(
           return undefined;
         }
       }
-      return undefined;
-    }, [customizedButtons]);
+      // Fall back to default tools registered in code when no config is provided
+      return getDefaultToolbarTools(tileType) ?? undefined;
+    }, [customizedButtons, tileType]);
 
     // Calculate what fits in the first row.
     useEffect(() => {

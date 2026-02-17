@@ -23,6 +23,9 @@ export interface IToolbarButtonInfo {
 // Button info is looked up first by tile type, then button name.
 const toolbarButtonInfos: Map<string,Map<string, IToolbarButtonInfo>> = new Map;
 
+// Default tools for each tile type, used when no curriculum/unit config specifies tools.
+const defaultToolbarTools: Map<string, string[]> = new Map;
+
 /**
  * Look up a toolbar button by name and tile type.
  * @param tileType
@@ -56,5 +59,17 @@ export function registerTileToolbarButtons(
       }
       tileButtons.set(info.name, info);
     });
+}
+
+/**
+ * Register default tools for a tile type. These are shown when no curriculum/unit
+ * config specifies tools for the tile type.
+ */
+export function registerDefaultToolbarTools(tileType: string, toolNames: string[]) {
+  defaultToolbarTools.set(tileType, toolNames);
+}
+
+export function getDefaultToolbarTools(tileType: string): string[] | undefined {
+  return defaultToolbarTools.get(tileType);
 }
 
