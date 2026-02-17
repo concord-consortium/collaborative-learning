@@ -99,6 +99,14 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
   private svgRef: React.RefObject<any>|null;
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
+  private forceUpdateCount: number = 0;
+
+  // Tolerance thresholds for bounds change detection in componentDidUpdate.
+  // Changes smaller than these are visually imperceptible and can be ignored,
+  // preventing unnecessary re-renders from sub-pixel oscillation.
+  private static OFFSET_TOLERANCE = 0.5; // pixels
+  private static ZOOM_TOLERANCE = 0.001; // zoom is a scale factor (typically 0.1–1.0)
+  private static MAX_FORCE_UPDATES = 2;
 
   // These hold the values currently in use.
   // For regular tile view, they are same as the props passed in.
@@ -158,9 +166,25 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
     this.calculateBounds();
 
     // Force re-render if bounds calculation changed the transform values.
-    if (this.props.readOnly &&
-        (prevOffsetX !== this.offsetX || prevOffsetY !== this.offsetY || prevZoom !== this.zoom)) {
+    // Tolerance prevents chasing sub-pixel differences that don't matter visually.
+    // Iteration count prevents infinite loops — a resize can cause DOM dimensions
+    // to shift on each render, making calculateBounds() produce slightly different
+    // values every time.
+    // Note: if an external prop change gets batched with our forceUpdate, the count
+    // may suppress one bounds-correction render. This is fine — calculateBounds()
+    // still runs and sets the correct values, which will be picked up on the next
+    // update cycle.
+    const boundsChanged =
+      Math.abs(prevOffsetX - this.offsetX) > InternalDrawingLayerView.OFFSET_TOLERANCE ||
+      Math.abs(prevOffsetY - this.offsetY) > InternalDrawingLayerView.OFFSET_TOLERANCE ||
+      Math.abs(prevZoom - this.zoom) > InternalDrawingLayerView.ZOOM_TOLERANCE;
+
+    if (this.props.readOnly && boundsChanged &&
+        this.forceUpdateCount < InternalDrawingLayerView.MAX_FORCE_UPDATES) {
+      this.forceUpdateCount++;
       this.forceUpdate();
+    } else {
+      this.forceUpdateCount = 0;
     }
   }
 

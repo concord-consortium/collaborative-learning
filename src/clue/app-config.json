@@ -376,6 +376,7 @@
           "point",
           "polygon",
           "circle",
+          "line",
           "upload",
           "|",
           "duplicate",

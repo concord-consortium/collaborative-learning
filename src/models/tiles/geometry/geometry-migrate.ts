@@ -5,7 +5,7 @@ import { comma, StringBuilder } from "../../../utilities/string-builder";
 import {
   BoardModel, BoardModelType, CircleModelType, CommentModel, CommentModelType, GeometryBaseContentModelType,
   GeometryExtrasContentSnapshotType, GeometryObjectModelType, ImageModel, ImageModelType,
-  isPointModel,
+  isPointModel, LineModel, LineModelType,
   MovableLineModel, MovableLineModelType, pointIdsFromSegmentId, PointModel, PointModelType,
   PolygonModel, PolygonModelType, PolygonSegmentLabelModelSnapshot, VertexAngleModel, VertexAngleModelType
 } from "./geometry-model";
@@ -103,6 +103,22 @@ export const convertModelObjectToChanges = (obj: GeometryObjectModelType): JXGCh
       const properties = omitNullish(props);
       if (centerPoint && tangentPoint) {
         changes.push({ operation: "create", target: "circle", parents: [centerPoint, tangentPoint], properties });
+      }
+      break;
+    }
+    case "line": {
+      const { point1, point2, ...props } = obj as LineModelType;
+      const properties = omitNullish(props);
+      if (properties.labelOption) {
+        properties.clientLabelOption = properties.labelOption;
+        properties.labelOption = undefined;
+      }
+      if (properties.name) {
+        properties.clientName = properties.name;
+        properties.name = undefined;
+      }
+      if (point1 && point2) {
+        changes.push({ operation: "create", target: "line", parents: [point1, point2], properties });
       }
       break;
     }
@@ -245,6 +261,10 @@ function getDependenciesFromChange(change: JXGChange, objectInfoMap: Record<stri
       });
     });
     return polygonId ? [polygonId, ...vertices] : vertices;
+  }
+  // line dependencies are the two points
+  if ((change.operation === "create") && (change.target === "line")) {
+    return (change.parents || []) as string[];
   }
   // movable line dependencies are the control points
   if ((change.operation === "create") && (change.target === "movableLine")) {
@@ -573,6 +593,31 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
     return "";
   };
 
+  const exportLine = (id: string, isLast: boolean) => {
+    const _changes = objectInfoMap[id].changes;
+    let props: any = {};
+    _changes.forEach(change => {
+      props = {...props, ...change.properties };
+    });
+    if (props.id !== id) props.id = id;
+
+    if (outputJson) {
+      const type = `"type": "line"`;
+      const parents = `"parents": [${validParentIds(id)?.join(", ")}]`;
+      const otherProps = Object.keys(props).length > 0
+                          ? `"properties": ${JSON.stringify(props)}`
+                          : "";
+      return `{ ${type}, ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+    }
+
+    addObjectModel(LineModel.create({
+      point1: validParentIds(props.id)[0],
+      point2: validParentIds(props.id)[1],
+      ...props
+    }));
+    return "";
+  };
+
   const exportMovableLinePoint = (id: string) => {
     const { parents } = getPointExportables(id);
 
@@ -613,6 +658,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
   const exportFnMap: Partial<Record<JXGObjectType, (id: string, isLast: boolean) => string>> = {
     comment: exportComment,
     image: exportImage,
+    line: exportLine,
     movableLine: exportMovableLine,
     point: exportPoint,
     polygon: exportPolygon,

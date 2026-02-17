@@ -49,6 +49,12 @@ export const isImage = (v: any): v is JXG.Image => v instanceof JXG.Image;
 
 export const isLine = (v: any): v is JXG.Line => v instanceof JXG.Line;
 
+export const kInfiniteLineType = "infiniteLine";
+export const isInfiniteLine = (v: any): v is JXG.Line => {
+  return v && (v.elType === "line") && (v.getAttribute("clientType") === kInfiniteLineType);
+};
+export const isVisibleInfiniteLine = (v: any): v is JXG.Line => isInfiniteLine(v) && !!v.visProp.visible;
+
 export const isPolygon = (v: any): v is JXG.Polygon => v instanceof JXG.Polygon;
 export const isVisibleEdge = (v: any): v is JXG.Line => {
   return v instanceof JXG.Line && (v.elType === "segment") && !!v.visProp.visible;
