@@ -129,6 +129,11 @@ export const DataflowContentModel = TileContentModel
     get isUserResizable() {
       return true;
     },
+    get tileSnapshotForCopy() {
+      const snapshot = getSnapshot(self);
+      // Reset programZoom so the copied tile will auto-fit all nodes on first display
+      return { ...snapshot, programZoom: DEFAULT_PROGRAM_ZOOM };
+    },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
       if (options?.forHash) {

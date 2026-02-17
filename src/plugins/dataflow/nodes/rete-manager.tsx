@@ -4,7 +4,7 @@ import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-
 import { Presets, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, AreaPlugin } from "rete-area-plugin";
 import { onPatch, onSnapshot } from "mobx-state-tree";
-import { reaction, runInAction } from "mobx";
+import { observable, reaction, runInAction } from "mobx";
 
 import { IStores } from "../../../models/stores/stores";
 import { DataflowContentModelType } from "../model/dataflow-content";
@@ -79,6 +79,8 @@ export class ReteManager implements INodeServices {
   public editor: NodeEditorMST;
   public engine = new DataflowEngine<Schemes>();
   public area: AreaPlugin<Schemes, AreaExtra>;
+  private nodeSelector: ReturnType<typeof AreaExtensions.selector>;
+  public selectionState = observable({ nodeIds: [] as string[] });
   private snapshotDisposer: () => void | undefined;
   public inTick = false;
   public disposed = false;
@@ -110,8 +112,19 @@ export class ReteManager implements INodeServices {
     // Disable the zoom handler which zooms on wheel and double click
     area.area.setZoomHandler(null);
 
-    AreaExtensions.selectableNodes(area, AreaExtensions.selector(), {
+    this.nodeSelector = AreaExtensions.selector();
+    AreaExtensions.selectableNodes(area, this.nodeSelector, {
       accumulating: AreaExtensions.accumulateOnCtrl()
+    });
+
+    // Sync observable selection state when nodes are picked or the background is clicked.
+    // This pipe runs after selectableNodes has updated the selector.
+    area.addPipe((context) => {
+      if (context.type === "nodepicked" || context.type === "pointerdown") {
+        // Defer so the selector has finished updating
+        queueMicrotask(() => this.syncSelection());
+      }
+      return context;
     });
 
     area.addPipe((context) => {
@@ -258,8 +271,15 @@ export class ReteManager implements INodeServices {
     // fit within the view.
     if (!this.readOnly) {
       const { programZoom } = this.mstContent;
-      await this.area.area.zoom(programZoom.scale);
-      await this.area.area.translate(programZoom.dx, programZoom.dy);
+      const isDefaultZoom = programZoom.dx === 0 && programZoom.dy === 0 && programZoom.scale === 1;
+      if (isDefaultZoom && this.mstProgram.nodes.size > 0) {
+        // Tile was copied with default zoom — fit content to show all nodes.
+        // Use setTimeout to ensure DOM has rendered node elements with dimensions.
+        setTimeout(() => this.fitContentAndSave(), 100);
+      } else {
+        await this.area.area.zoom(programZoom.scale);
+        await this.area.area.translate(programZoom.dx, programZoom.dy);
+      }
     }
 
     // Notify after the area, connection, and render plugins have been configured
@@ -435,6 +455,29 @@ export class ReteManager implements INodeServices {
   public selectNode = (nodeId: string) => {
     this.area.emit({ type: "nodepicked", data: { id: nodeId } });
   };
+
+  private syncSelection() {
+    // The selector stores entities with compound keys like "node_<id>".
+    // Extract the actual node IDs by stripping the "node_" prefix.
+    const nodeIds = Array.from(this.nodeSelector.entities.keys())
+      .filter(key => key.startsWith("node_"))
+      .map(key => key.slice("node_".length));
+    runInAction(() => {
+      this.selectionState.nodeIds = nodeIds;
+    });
+  }
+
+  public getSelectedNodeIds(): string[] {
+    return this.selectionState.nodeIds;
+  }
+
+  public async deleteSelectedNodes() {
+    const ids = this.getSelectedNodeIds();
+    for (const id of ids) {
+      await this.removeNodeAndConnections(id);
+    }
+    this.syncSelection();
+  }
 
   public update = (type: "node" | "connection" | "socket" | "control", id: string) => {
     this.area.update(type, id);
@@ -793,24 +836,24 @@ export class ReteManager implements INodeServices {
     this.setZoom(Math.max(MIN_ZOOM, k - .05));
   };
 
-  public async fitContent() {
-    // Only apply content fitting to read-only tiles
-    if (!this.readOnly) return;
-
+  /**
+   * Get the effective container dimensions for fitting content.
+   * The Rete.js area container may have zero width, so this walks up the DOM
+   * to find a parent with valid dimensions.
+   */
+  private getContainerDimensions(): { width: number; height: number } | null {
     const container = this.area.container;
-    if (!container) return;
+    if (!container) return null;
 
     // The container from this.area.container is the Rete.js area which may have zero width.
     // So we may need to find the actual container dimensions elsewhere.
-    let containerRect = container.getBoundingClientRect();
-    let containerWidth = containerRect.width;
-    let containerHeight = containerRect.height;
+    let containerWidth = container.getBoundingClientRect().width;
+    let containerHeight = container.getBoundingClientRect().height;
 
     if (containerWidth <= 0) {
       // Look for the .cover div which should have valid dimensions.
       const coverDiv = container.closest(".cover") as HTMLElement;
       if (coverDiv) {
-        containerRect = coverDiv.getBoundingClientRect();
         containerWidth = coverDiv.offsetWidth || coverDiv.clientWidth;
         containerHeight = coverDiv.offsetHeight || coverDiv.clientHeight;
       } else {
@@ -822,7 +865,6 @@ export class ReteManager implements INodeServices {
           const parentHeight = parent.offsetHeight || parent.clientHeight;
 
           if (parentWidth > 300 && parentHeight > 200) {
-            containerRect = parent.getBoundingClientRect();
             containerWidth = parentWidth;
             containerHeight = parentHeight;
             break;
@@ -833,25 +875,60 @@ export class ReteManager implements INodeServices {
       }
     }
 
-    if (containerWidth <= 0 || containerHeight <= 0) {
-      if (!this.disposed) {
-        this.fitTimeout = window.setTimeout(() => this.fitContent(), 100);
-      }
-      return;
-    }
+    if (containerWidth <= 0 || containerHeight <= 0) return null;
 
     if (container.offsetWidth === 0 || container.offsetHeight === 0) {
       container.style.width = `${containerWidth}px`;
       container.style.height = `${containerHeight}px`;
     }
 
+    return { width: containerWidth, height: containerHeight };
+  }
+
+  public async fitContent() {
+    // Only apply content fitting to read-only tiles
+    if (!this.readOnly) return;
+
+    const dims = this.getContainerDimensions();
+    if (!dims) {
+      if (!this.disposed) {
+        this.fitTimeout = window.setTimeout(() => this.fitContent(), 100);
+      }
+      return;
+    }
+
     const bounds = this.calculateContentBounds();
     if (!bounds) return;
 
-    const { scale, offsetX, offsetY } = this.calculateFitTransform(bounds, containerWidth, containerHeight);
+    const { scale, offsetX, offsetY } = this.calculateFitTransform(bounds, dims.width, dims.height);
 
     await this.area.area.zoom(scale);
     await this.area.area.translate(offsetX, offsetY);
+  }
+
+  /**
+   * Fit all nodes into view for an editable tile and persist the resulting zoom.
+   * Used when a tile is copied (programZoom is reset to default) so all nodes are visible.
+   */
+  private async fitContentAndSave() {
+    const dims = this.getContainerDimensions();
+    if (!dims) {
+      if (!this.disposed) {
+        this.fitTimeout = window.setTimeout(() => this.fitContentAndSave(), 100);
+      }
+      return;
+    }
+
+    const bounds = this.calculateContentBounds();
+    if (!bounds) return;
+
+    const { scale, offsetX, offsetY } = this.calculateFitTransform(bounds, dims.width, dims.height);
+
+    await this.area.area.zoom(scale);
+    await this.area.area.translate(offsetX, offsetY);
+
+    // Persist so future loads use this fitted zoom
+    this.mstContent.setProgramZoom(this.area.area.transform);
   }
 
   private scheduleFit = () => {
