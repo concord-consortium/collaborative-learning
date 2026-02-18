@@ -1761,6 +1761,73 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     // nothing needed, but keep this method for consistency
   };
 
+  // These methods are called via queueMicrotask from handleCreatePoint's down handler
+  // to defer board modifications until after JSXGraph's initMoveObject finishes iterating.
+  private handleCirclePointDown(board: JXG.Board, point: JXG.Point, geometryContent: GeometryContentModelType) {
+    this.applyChange(() => {
+      let circle;
+      if (geometryContent.activeCircleId) {
+        circle = geometryContent.closeActiveCircle(board, point);
+      } else {
+        circle = geometryContent.createCircleIncludingPoint(board, point.id);
+      }
+      if (circle) {
+        this.handleCreateCircle(circle);
+      }
+    });
+  }
+
+  private handleLinePointDown(board: JXG.Board, point: JXG.Point, geometryContent: GeometryContentModelType) {
+    this.applyChange(() => {
+      let line;
+      if (geometryContent.activeLineId) {
+        line = geometryContent.closeActiveLine(board, point);
+      } else {
+        line = geometryContent.createLineIncludingPoint(board, point.id);
+      }
+      if (line) {
+        this.handleCreateInfiniteLine(line);
+      }
+    });
+  }
+
+  private handlePolygonPointDown(board: JXG.Board, point: JXG.Point, geometryContent: GeometryContentModelType) {
+    this.applyChange(() => {
+      if (geometryContent.phantomPoint && geometryContent.activePolygonId) {
+        const poly = getPolygon(board, geometryContent.activePolygonId);
+        const vertex = poly && poly.vertices.find(p => p.id === point.id);
+        if (vertex) {
+          // user clicked on a vertex that is in the current polygon - close the polygon.
+          const polygon = geometryContent.closeActivePolygon(board, vertex);
+          if (polygon) {
+            this.handleCreatePolygon(polygon);
+          }
+        } else {
+          // use clicked a vertex that is not part of the current polygon - adopt it.
+          geometryContent.addPointToActivePolygon(board, point.id);
+        }
+      } else {
+        // No active polygon. Activate one for the point clicked.
+        const polys = Object.values(point.childElements).filter(child => isPolygon(child));
+        if (polys.length > 0 && isPolygon(polys[0])) {
+          // The point clicked is in one or more polygons.
+          // Activate the first polygon returned.
+          const poly = polys[0];
+          const polygon = geometryContent.makePolygonActive(board, poly.id, point.id);
+          if (polygon) {
+            this.handleCreatePolygon(polygon);
+          }
+        } else {
+          // Point clicked is not part of a polygon.  Create one.
+          const polygon = geometryContent.createPolygonIncludingPoint(board, point.id);
+          if (polygon) {
+            this.handleCreatePolygon(polygon);
+          }
+        }
+      }
+    });
+  }
+
   private handleCreatePoint = (point: JXG.Point) => {
 
     const handlePointerDown = (evt: Event) => {
@@ -1771,71 +1838,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const coords = copyCoords(point.coords);
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
 
+      // Defer board modifications via queueMicrotask to avoid corrupting JSXGraph's
+      // objectsList iteration in initMoveObject, which caches the array length before
+      // firing down handlers.
       if (mode === "circle") {
-        // Either start a circle, or close the active circle using the clicked point
-        this.applyChange(() => {
-          let circle;
-          if (geometryContent.activeCircleId) {
-            circle = geometryContent.closeActiveCircle(board, point);
-          } else {
-            circle = geometryContent.createCircleIncludingPoint(board, point.id);
-          }
-          if (circle) {
-            this.handleCreateCircle(circle);
-          }
-      });
+        queueMicrotask(() => this.handleCirclePointDown(board, point, geometryContent));
       }
 
       if (mode === "line") {
-        this.applyChange(() => {
-          let line;
-          if (geometryContent.activeLineId) {
-            line = geometryContent.closeActiveLine(board, point);
-          } else {
-            line = geometryContent.createLineIncludingPoint(board, point.id);
-          }
-          if (line) {
-            this.handleCreateInfiniteLine(line);
-          }
-        });
+        queueMicrotask(() => this.handleLinePointDown(board, point, geometryContent));
       }
 
-      // Polygon mode interactions with existing points
       if (mode === "polygon") {
-        this.applyChange(() => {
-          if (geometryContent.phantomPoint && geometryContent.activePolygonId) {
-            const poly = getPolygon(board, geometryContent.activePolygonId);
-            const vertex = poly && poly.vertices.find(p => p.id === id);
-            if (vertex) {
-              // user clicked on a vertex that is in the current polygon - close the polygon.
-              const polygon = geometryContent.closeActivePolygon(board, vertex);
-              if (polygon) {
-                this.handleCreatePolygon(polygon);
-              }
-            } else {
-              // use clicked a vertex that is not part of the current polygon - adopt it.
-              geometryContent.addPointToActivePolygon(board, point.id);
-            }
-          } else {
-            // No active polygon. Activate one for the point clicked.
-            const polys = Object.values(point.childElements).filter(child => isPolygon(child));
-            if (polys.length > 0 && isPolygon(polys[0])) {
-              // The point clicked is in one or more polygons.
-              // Activate the first polygon returned.
-              const poly = polys[0];
-              const polygon = geometryContent.makePolygonActive(board, poly.id, point.id);
-              if (polygon) {
-                this.handleCreatePolygon(polygon);
-              }
-            } else {
-              // Point clicked is not part of a polygon.  Create one.
-              const polygon = geometryContent.createPolygonIncludingPoint(board, point.id);
-              if (polygon) {
-                this.handleCreatePolygon(polygon);
-              }
-            }
-          }
-        });
+        queueMicrotask(() => this.handlePolygonPointDown(board, point, geometryContent));
         return;
       }
 
