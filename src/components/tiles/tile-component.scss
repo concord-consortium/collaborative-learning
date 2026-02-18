@@ -10,7 +10,7 @@
   border: 1px solid #ccc;
 
   .tile-content {
-    border: 1px solid white;
+    border: 1px solid $tool-tile-background;
   }
 
   &.readonly, &.readonly.hovered {
@@ -129,10 +129,10 @@
 .problem-panel, .iframe-control {
   .tool-tile {
     &.readonly {
-      border: 1px solid white;
+      border: 1px solid $tool-tile-background;
 
       .tile-content {
-        border: 1px solid white;
+        border: 1px solid $tool-tile-background;
       }
 
       &.hovered {

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment-event";
@@ -56,11 +56,19 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
   overrideTitle,
 }) => {
   const ui = useUIStore();
+  const threadRef = useRef<HTMLDivElement>(null);
   const title = overrideTitle || commentThread?.title || '';
   const numComments = commentThread?.comments.length || 0;
   const comments = commentThread?.comments || [];
   const tileId = commentThread?.tileId || focusTileId;
   const isDeletedTile = commentThread?.isDeletedTile || false;
+
+  // Scroll this thread into view when it becomes focused (e.g. tile selected in workspace)
+  useEffect(() => {
+    if (isFocused && threadRef.current) {
+      threadRef.current.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
+    }
+  }, [isFocused]);
 
   // Select this thread's tile when clicking on the comment card body
   const handleSelectCard = () => {
@@ -75,6 +83,7 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
 
   return (
     <div key={threadId}
+      ref={threadRef}
       className={classNames("chat-thread", {
         "chat-thread-focused": isFocused,
       }, `${tileId ? "chat-thread-tile" : "chat-thread-document"}`
@@ -157,22 +166,45 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   }
   const ui = useUIStore();
 
+  // Scroll the document preview to the focused tile when selection changes in the workspace.
+  // This complements the thread scroll in ChatThreadItem so both the document preview
+  // and the comment thread stay in sync with the workspace selection.
+  useEffect(() => {
+    if (focusTileId && focusDocument) {
+      ui.setScrollTo(focusTileId, focusDocument);
+    }
+  }, [focusTileId, focusDocument, ui]);
+
   const handleThreadClick = (clickedId: string | null) => {
     const threadId = clickedId || '';
-    const isCurrentlyExpanded = expandedThreads.has(threadId);
 
-    // Do the logging before we change state so we can tell whether the thread was expanded or collapsed.
-    const eventPayload: ILogComment = {
-      focusDocumentId: focusDocument || '',
-      focusTileId: clickedId && clickedId !== "document" ? clickedId : undefined, // no focusTile for document clicks
-      isFirst: false, // We're not adding a comment so this is irrelevant
-      commentText: '', // This is about a thread not a single comment it doesn't make sense to log the text.
-      action: isCurrentlyExpanded ? "collapse" : "expand"
-    };
-    logCommentEvent(eventPayload);
-
-    // Toggle the clicked thread's expanded state
+    // Use the setExpandedThreads callback to read the true current state via `prev`,
+    // avoiding stale closure bugs if another effect updated expandedThreads before re-render.
     setExpandedThreads(prev => {
+      const isCurrentlyExpanded = prev.has(threadId);
+
+      // Log before toggling so we capture the before-state
+      const eventPayload: ILogComment = {
+        focusDocumentId: focusDocument || '',
+        focusTileId: clickedId && clickedId !== "document" ? clickedId : undefined,
+        isFirst: false,
+        commentText: '',
+        action: isCurrentlyExpanded ? "collapse" : "expand"
+      };
+      logCommentEvent(eventPayload);
+
+      // If expanding a thread (not collapsing), update the selected tile
+      if (!isCurrentlyExpanded) {
+        if (clickedId === "document") {
+          ui.setSelectedTileId('');
+          ui.setScrollTo('', focusDocument || '');
+        } else {
+          ui.setSelectedTileId(clickedId || '');
+          ui.setScrollTo(clickedId || '', focusDocument || '');
+        }
+      }
+
+      // Toggle the clicked thread's expanded state
       const next = new Set(prev);
       if (isCurrentlyExpanded) {
         next.delete(threadId);
@@ -181,12 +213,6 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       }
       return next;
     });
-
-    // If expanding a thread (not collapsing), update the selected tile
-    if (!isCurrentlyExpanded && clickedId !== "document") {
-      ui.setSelectedTileId(clickedId || '');
-      ui.setScrollTo(clickedId || '', focusDocument || '');
-    }
   };
 
   return (
