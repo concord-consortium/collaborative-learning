@@ -1776,8 +1776,8 @@ toMatchInlineSnapshot(`
   it("can update line label via updateLineLabel", () => {
     const { content, board } = createContentAndBoard();
     content.addPhantomPoint(board, [0, 0]);
-    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "line");
-    const { point: point2, line } = content.realizePhantomPoint(board, [3, 4], "line");
+    content.realizePhantomPoint(board, [0, 0], "line");
+    const { line } = content.realizePhantomPoint(board, [3, 4], "line");
     expect(isInfiniteLine(line)).toBeTruthy();
 
     // Update the label via the content action
