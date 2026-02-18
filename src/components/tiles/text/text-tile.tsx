@@ -99,6 +99,7 @@ interface IState {
 @observer
 export default class TextToolComponent extends BaseComponent<ITileProps, IState> {
   public state: IState = { revision: 0 };
+  private highlightBoxesCache: Map<string, IHighlightBox> = new Map();
   private disposers: IReactionDisposer[];
   private textTileDiv: HTMLElement | null;
   private editor: Editor | undefined;
@@ -189,7 +190,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
         if (objectType === kHighlightFormat) {
-          const box = this.getContent().highlightBoxesCache.get(objectId);
+          const box = this.highlightBoxesCache.get(objectId);
           if (box) return box;
         }
       },
@@ -198,7 +199,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         // and then offset should be the center of the edge closes to the target
         const offsets = OffsetModel.create({});
         if (objectType === kHighlightFormat) {
-          const box = this.getContent().highlightBoxesCache.get(objectId);
+          const box = this.highlightBoxesCache.get(objectId);
           if (box) {
             const { width, height } = box;
             offsets.setDx(width / 2);
@@ -371,6 +372,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   };
 
   private handleUpdateHighlightBoxCache = (id: string, box: IHighlightBox) => {
-    this.getContent().setHighlightBoxesCache(id, box);
+    const readOnly = this.isReadOnly();
+    this.highlightBoxesCache.set(id, box);
   };
 }
