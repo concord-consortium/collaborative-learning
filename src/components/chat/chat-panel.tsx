@@ -60,6 +60,10 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const appConfig = useAppConfig();
   const { unit } = useStores();
   const ordering = content?.getTilesInDocumentOrder();
+  // Ignore focusTileId if it doesn't belong to the focus document.
+  // This prevents orphaned comments when a teacher clicks a tile in their own workspace
+  // while viewing a student's document with the chat panel open.
+  const validFocusTileId = focusTileId && ordering?.includes(focusTileId) ? focusTileId : undefined;
   // This looks in the prefixed location. Should now be used only for curriculum documents.
   const { data: comments } = useDocumentComments(focusDocument);
   // This looks in the unprefixed location, which is appropriate for all user documents.
@@ -88,7 +92,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       const focusDocumentId = focusDocument;
       const eventPayload: ILogComment = {
         focusDocumentId,
-        focusTileId,
+        focusTileId: validFocusTileId,
         isFirst: (numComments < 1),
         commentText: comment,
         action: "add",
@@ -99,9 +103,9 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     }
     return documentMetadata
       ? postCommentMutation.mutate(
-        { document: documentMetadata, comment: { content: comment, tileId: focusTileId, tags, agreeWithAi } })
+        { document: documentMetadata, comment: { content: comment, tileId: validFocusTileId, tags, agreeWithAi } })
       : undefined;
-  }, [documentMetadata, focusDocument, focusTileId, postCommentMutation, postedComments]);
+  }, [documentMetadata, focusDocument, validFocusTileId, postCommentMutation, postedComments]);
 
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
   // the "Document" in "useDeleteDocument" refers to a Firestore document (not a CLUE document)
@@ -111,7 +115,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     if (focusDocument) {
       const eventPayload: ILogComment = {
         focusDocumentId: focusDocument,
-        focusTileId,
+        focusTileId: validFocusTileId,
         commentText,
         action: "delete"
       };
@@ -139,7 +143,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         return undefined;
       }
     }
-  }, [commentsPath, deleteCommentMutation, firestore, focusDocument, focusTileId]);
+  }, [commentsPath, deleteCommentMutation, firestore, focusDocument, validFocusTileId]);
 
   const handleDocumentClick = () => {
     setIsDocumentView((prevState) => !prevState);
@@ -194,7 +198,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
           chatThreads={commentThreads}
           focusDocument={focusDocument}
           docTitle={docTitle}
-          focusTileId={focusTileId}
+          focusTileId={validFocusTileId}
           isDocumentView={isDocumentView}
         />
         :

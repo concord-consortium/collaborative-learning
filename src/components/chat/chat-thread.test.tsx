@@ -353,7 +353,6 @@ describe("CommentThread", () => {
     // When no focusTileId is set, the useEffect auto-expands "document".
     const chatThreads =
       [makeFakeCommentThread("Doc Thread", "", "u1")];
-    const testUser = {id: "u1", "name": "test user"} as UserModelType;
     render((
       <ModalProvider>
         <ChatThread

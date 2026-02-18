@@ -209,46 +209,6 @@ describe("IframeInteractiveComponent", () => {
     expect(wrapper).not.toHaveClass("selected");
   });
 
-  it("calls userSelectTile when clicking on the tile-content wrapper", () => {
-    const { userSelectTile: mockUserSelectTile } = require("../../models/stores/ui");
-    const props = createTestProps();
-    props.content.setUrl("https://example.com/interactive");
-    render(<IframeInteractiveComponent {...props} />);
-
-    const wrapper = screen.getByTitle("Interactive Content").closest(".tile-content")!;
-    fireEvent.mouseDown(wrapper);
-    expect(mockUserSelectTile).toHaveBeenCalled();
-  });
-
-  it("attaches selection listeners when tileElt is provided", () => {
-    const { userSelectTile: mockUserSelectTile } = require("../../models/stores/ui");
-    const tileElt = document.createElement("div");
-    const props = createTestProps();
-    (props as any).tileElt = tileElt;
-    props.content.setUrl("https://example.com/interactive");
-    render(<IframeInteractiveComponent {...props} />);
-
-    // Dispatch a mousedown directly on the tileElt (simulating clicking the tile edge)
-    const event = new MouseEvent("mousedown", { bubbles: false });
-    // Make currentTarget === target by dispatching directly on the element
-    tileElt.dispatchEvent(event);
-    expect(mockUserSelectTile).toHaveBeenCalled();
-  });
-
-  it("cleans up tileElt listeners on unmount", () => {
-    const tileElt = document.createElement("div");
-    const removeSpy = jest.spyOn(tileElt, "removeEventListener");
-    const props = createTestProps();
-    (props as any).tileElt = tileElt;
-    props.content.setUrl("https://example.com/interactive");
-    const { unmount } = render(<IframeInteractiveComponent {...props} />);
-
-    unmount();
-    expect(removeSpy).toHaveBeenCalledWith("mousedown", expect.any(Function));
-    expect(removeSpy).toHaveBeenCalledWith("touchstart", expect.any(Function));
-    removeSpy.mockRestore();
-  });
-
   it("selects tile when iframe gains focus via window blur", async () => {
     const { userSelectTile: mockUserSelectTile } = require("../../models/stores/ui");
     const props = createTestProps();

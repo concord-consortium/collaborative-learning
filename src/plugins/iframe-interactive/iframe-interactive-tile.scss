@@ -1,6 +1,8 @@
 @import "../../components/vars";
 
-// Selection and comment highlighting for iframe interactive tiles
+// Comment highlighting for iframe interactive tiles.
+// The parent .tool-tile only applies selected-for-comment background to .readonly tiles,
+// so we add it here for non-readonly contexts as well.
 .iframe-interactive-tile {
   &.selected-for-comment {
     .iframe-interactive-wrapper {

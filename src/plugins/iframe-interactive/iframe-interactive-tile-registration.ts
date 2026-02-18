@@ -20,6 +20,5 @@ registerTileComponentInfo({
   Component: IframeInteractiveComponent,
   tileEltClass: "iframe-interactive-tile",
   Icon,
-  HeaderIcon,
-  tileHandlesOwnSelection: true
+  HeaderIcon
 });

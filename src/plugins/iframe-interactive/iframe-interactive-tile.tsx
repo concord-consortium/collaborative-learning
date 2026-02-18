@@ -58,7 +58,6 @@ import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-ti
 import { useSettingFromStores, useStores } from "../../hooks/use-stores";
 import { useContainerContext } from "../../components/document/container-context";
 import { userSelectTile } from "../../models/stores/ui";
-import { hasSelectionModifier } from "../../utilities/event-utils";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import {
@@ -130,7 +129,7 @@ class IframeInteractiveErrorBoundary extends React.Component<
 const kDefaultAllowedPermissions = "geolocation; microphone; camera; bluetooth";
 
 const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentProps> = observer((props) => {
-  const { tileElt, model, readOnly, onRequestRowHeight, onRegisterTileApi } = props;
+  const { model, readOnly, onRequestRowHeight, onRegisterTileApi } = props;
   const content = isIframeInteractiveModel(model.content) ? model.content : null;
   const { ui } = useStores();
   const containerContext = useContainerContext();
@@ -165,29 +164,6 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle tile selection when clicking on the tile wrapper edge (border, title area).
-  // Follows the drawing tile pattern: tileHandlesOwnSelection is true in registration,
-  // so we attach our own listeners to the parent tileElt.
-  useEffect(() => {
-    const handleTilePointerDown = (e: MouseEvent | TouchEvent) => {
-      // Only handle clicks directly on the tileElt (edge case),
-      // not clicks that bubble up from child elements.
-      if (e.currentTarget === e.target) {
-        const append = hasSelectionModifier(e);
-        userSelectTile(ui, model, { readOnly, append, container: containerContext.model });
-      }
-    };
-
-    if (tileElt) {
-      tileElt.addEventListener("mousedown", handleTilePointerDown);
-      tileElt.addEventListener("touchstart", handleTilePointerDown);
-      return () => {
-        tileElt.removeEventListener("mousedown", handleTilePointerDown);
-        tileElt.removeEventListener("touchstart", handleTilePointerDown);
-      };
-    }
-  }, [tileElt, ui, containerContext.model, model, readOnly]);
-
   // Detect clicks inside the iframe by watching for window blur events.
   // When a user clicks inside an iframe, the iframe gains focus and the main
   // window blurs. We check if our iframe is the newly focused element.
@@ -205,12 +181,6 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
     return () => {
       window.removeEventListener("blur", handleWindowBlur);
     };
-  }, [ui, model, readOnly, containerContext.model]);
-
-  // Handle clicks on the tile-content wrapper area (title bar, padding, etc.)
-  const handlePointerDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    const append = hasSelectionModifier(e);
-    userSelectTile(ui, model, { readOnly, append, container: containerContext.model });
   }, [ui, model, readOnly, containerContext.model]);
 
   const handleSkipToContent = useCallback((e: React.SyntheticEvent) => {
@@ -528,7 +498,7 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
       <div className={classNames("tile-content", "iframe-interactive-wrapper", {
         hovered: props.hovered,
         selected: ui.isSelectedTile(model)
-      })} onMouseDown={handlePointerDown}>
+      })}>
         <BasicEditableTileTitle />
         <div className="iframe-interactive-placeholder">
           <p>No URL configured in authoring</p>
@@ -549,7 +519,7 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
     <div className={classNames("tile-content", "iframe-interactive-wrapper", {
       hovered: props.hovered,
       selected: ui.isSelectedTile(model)
-    })} ref={containerRef} onMouseDown={handlePointerDown}>
+    })} ref={containerRef}>
       <BasicEditableTileTitle />
       {/* Skip to content link for keyboard navigation */}
       <a
