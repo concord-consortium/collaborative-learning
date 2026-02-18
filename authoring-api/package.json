@@ -6,6 +6,7 @@
     "build:watch": "tsc --watch",
     "start": "firebase emulators:start",
     "start:data": "firebase emulators:start --import=./emulator-data --export-on-exit=./emulator-data",
+    "test": "jest",
     "deploy": "firebase deploy --only functions:authoring-api",
     "logs": "firebase functions:log"
   },
