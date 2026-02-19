@@ -1,3 +1,4 @@
+import {Octokit} from "@octokit/rest";
 import {resolveCommitAuthor} from "./resolve-commit-author";
 
 // Minimal mock matching the Octokit shape used by resolveCommitAuthor
@@ -8,8 +9,7 @@ function mockOctokit(userData: {name?: string | null; email?: string | null; log
         getAuthenticated: jest.fn().mockResolvedValue({data: userData}),
       },
     },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any;
+  } as unknown as Octokit;
 }
 
 function failingOctokit() {
@@ -19,8 +19,7 @@ function failingOctokit() {
         getAuthenticated: jest.fn().mockRejectedValue(new Error("API error")),
       },
     },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any;
+  } as unknown as Octokit;
 }
 
 describe("resolveCommitAuthor", () => {
