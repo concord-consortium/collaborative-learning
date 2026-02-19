@@ -1938,7 +1938,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const { board } = this.state;
       if (!board) return false;
       const coords = getEventCoords(board, evt, scale);
-      return find(getVertices(), vertex => vertex.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) != null;
+      return find(getVertices(), vertex => vertex?.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) != null;
     };
 
     const handlePointerDown = (evt: any) => {

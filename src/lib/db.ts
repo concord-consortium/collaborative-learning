@@ -721,11 +721,15 @@ export class DB {
           const document: DBDocument|null = documentSnapshot.val();
           const metadata: DBDocumentMetadata|null = metadataSnapshot.val();
           if (!metadata) {
-            // if we have no metadata, there's nothing we can do
-            const msg = `Error retrieving metadata for ` +
+            // If we have no metadata, reconstitute an empty document rather than crashing.
+            // This has been seen to occur in the wild with demo/stale data.
+            const msg = "Warning: Reconstituting document with missing metadata for " +
                         `document '${documentKey}' of type '${type}' for user '${userId}' ` +
                         `at '${firebaseRefPath(metadataRef)}'`;
-            throw new Error(msg);
+            console.warn(msg);
+            return createDocumentModel({
+                                  type, title, properties, groupId, visibility, uid: userId, originDoc, pubVersion,
+                                  key: documentKey, createdAt: 0, content: {}, changeCount: 0 });
           }
           if (!document) {
             // If we have metadata but no document content, we can return a valid empty document.
