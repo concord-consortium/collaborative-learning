@@ -49,7 +49,7 @@ describe("expression tile native event fallback", () => {
       target: { mode: "math", value: "y" },
     };
     // nativeEvent property is absent, so .nativeEvent is undefined
-    expect(nativeEvent.hasOwnProperty("nativeEvent")).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(nativeEvent, "nativeEvent")).toBe(false);
     const mathLiveEvent = getMathLiveEvent(nativeEvent);
     // Should fall back to the event itself
     expect(mathLiveEvent.inputType).toBe("insertFromPaste");
