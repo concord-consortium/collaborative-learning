@@ -315,14 +315,20 @@ service cloud.firestore {
           return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
         }
 
+        function isValidRatingUpdate() {
+          let affectedFields = request.resource.data.diff(resource.data).affectedKeys();
+          return affectedFields.hasOnly(['ratings']);
+        }
+
         function isValidCommentUpdateRequest() {
-          return userIsRequestUser() && preservesReadOnlyCommentFields();
+          return (userIsRequestUser() && preservesReadOnlyCommentFields())
+            || isValidRatingUpdate();
         }
 
         match /comments/{commentId} {
           // portal-authenticated teachers with access to the document can create valid comments
           allow create: if teacherCanAccessCurriculum() && isValidCommentCreateRequest();
-          // teachers can only update their own comments and only if they're valid
+          // teachers can update their own comments, or any user can update the ratings field
           allow update: if teacherCanAccessCurriculum() && isValidCommentUpdateRequest();
           // teachers can only delete their own comments
           allow delete: if teacherCanAccessCurriculum() && userIsResourceUser();
@@ -412,8 +418,14 @@ service cloud.firestore {
           return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
         }
 
+        function isValidRatingUpdate() {
+          let affectedFields = request.resource.data.diff(resource.data).affectedKeys();
+          return affectedFields.hasOnly(['ratings']);
+        }
+
         function isValidCommentUpdateRequest() {
-          return userIsRequestUser() && preservesReadOnlyCommentFields();
+          return (userIsRequestUser() && preservesReadOnlyCommentFields())
+            || isValidRatingUpdate();
         }
 
         function userOwnsDocument() {

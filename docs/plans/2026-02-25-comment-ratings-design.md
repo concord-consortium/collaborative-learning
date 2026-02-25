@@ -45,17 +45,21 @@ The existing `agreeWithAi` field and `on-document-summarized.ts` cloud function 
 
 ### Writing a Rating
 
-Direct client-side Firestore updates using dot notation:
+Direct client-side Firestore updates using dot notation via the `useUpdateCommentRating` hook (`src/hooks/use-update-comment-rating.ts`). The hook uses `firestore.doc(commentPath)` which internally prepends the root folder — callers must NOT manually prepend root.
 
 ```typescript
 // Set rating
-updateDoc(commentRef, { [`ratings.${userId}`]: "yes" });
+firestore.doc(commentPath).update({ [`ratings.${uid}`]: "yes" });
 
 // Remove rating (toggle off)
-updateDoc(commentRef, { [`ratings.${userId}`]: deleteField() });
+firestore.doc(commentPath).update({ [`ratings.${uid}`]: FieldValue.delete() });
 ```
 
 No cloud function needed.
+
+### Comment Path Resolution
+
+Comments may be stored at either the network-prefixed path (`documents/uid:X_docKey/comments/`) or the simplified path (`documents/docKey/comments/`). The rating update tries the prefixed path first and falls back to the simplified path if the document is not found there.
 
 ### Security Rules
 
@@ -86,10 +90,10 @@ The existing `useCollectionOrderedRealTimeQuery` hook already listens for commen
 +-------------------------------------+
 ```
 
-- Reuse existing `YesIcon`, `NoIcon`, `NotSureIcon` SVG icons
+- Rating buttons rendered **below the comment text** (associated with the comment, not the student)
+- Reuse existing `YesIcon`, `NoIcon`, `NotSureIcon` SVG icons at their native 18px size
 - Active selection gets filled/highlighted style
 - Counts in parentheses only when > 0; omitted when 0
-- Buttons rendered in `comment-card.tsx` below every comment
 - Replaces Ada-only agree button logic
 
 ### Key Difference from Ada Flow
@@ -127,7 +131,8 @@ type CommentAction = "add" | "delete" | "expand" | "collapse" | "rate";
 | `src/components/chat/comment-card.tsx` | Render rating buttons on all comments, replace Ada-only logic |
 | `src/components/chat/comment-card.scss` | Styles for counts, active state |
 | `src/components/chat/comment-textbox.tsx` | Remove Ada agree buttons from text input flow |
-| `src/hooks/document-comment-hooks.ts` | Add `useUpdateCommentRating` hook |
+| `src/hooks/use-update-comment-rating.ts` | New: `useUpdateCommentRating` hook |
+| `src/hooks/use-update-comment-rating.test.ts` | New: tests for the hook |
 | `src/models/tiles/log/log-comment-event.ts` | Add "rate" action and log event |
 | `shared/shared.ts` | `RatingValue` type, keep existing `IAgreeWithAi` |
 | `firestore.rules` | Security rule for ratings field |

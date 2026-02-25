@@ -134,18 +134,30 @@ git commit -m "feat: add rate comment log events (CLUE-397)"
 
 **Step 1: Write the test**
 
-```typescript
-import firebase from "firebase/app";
+Note: The `useFirestore` mock returns only the firestore instance (no root), because `firestore.doc()` internally prepends the root folder. Callers must NOT manually prepend root.
 
-// Mock firebase before importing the hook
+```typescript
+const DELETE_SENTINEL = { _type: "FieldValue.delete" };
+
+jest.mock("firebase/app", () => ({
+  __esModule: true,
+  default: {
+    firestore: {
+      FieldValue: {
+        delete: () => DELETE_SENTINEL
+      }
+    }
+  }
+}));
+
 const mockUpdate = jest.fn().mockResolvedValue(undefined);
 const mockDoc = jest.fn().mockReturnValue({ update: mockUpdate });
 
 jest.mock("./firestore-hooks", () => ({
-  useFirestore: () => [{ doc: mockDoc }, "root"]
+  useFirestore: () => [{ doc: mockDoc }]
 }));
 
-jest.mock("./use-stores", () => ({
+jest.mock("./use-user-context", () => ({
   useUserContext: () => ({ uid: "user1" })
 }));
 
@@ -162,7 +174,7 @@ describe("useUpdateCommentRating", () => {
     await act(async () => {
       await result.current("documents/doc1/comments/comment1", "yes");
     });
-    expect(mockDoc).toHaveBeenCalledWith("root/documents/doc1/comments/comment1");
+    expect(mockDoc).toHaveBeenCalledWith("documents/doc1/comments/comment1");
     expect(mockUpdate).toHaveBeenCalledWith({ "ratings.user1": "yes" });
   });
 
@@ -171,10 +183,18 @@ describe("useUpdateCommentRating", () => {
     await act(async () => {
       await result.current("documents/doc1/comments/comment1", undefined);
     });
-    expect(mockDoc).toHaveBeenCalledWith("root/documents/doc1/comments/comment1");
+    expect(mockDoc).toHaveBeenCalledWith("documents/doc1/comments/comment1");
     expect(mockUpdate).toHaveBeenCalledWith({
-      "ratings.user1": firebase.firestore.FieldValue.delete()
+      "ratings.user1": DELETE_SENTINEL
     });
+  });
+
+  it("replaces an existing rating with a different value", async () => {
+    const { result } = renderHook(() => useUpdateCommentRating());
+    await act(async () => {
+      await result.current("documents/doc1/comments/comment1", "no");
+    });
+    expect(mockUpdate).toHaveBeenCalledWith({ "ratings.user1": "no" });
   });
 });
 ```
@@ -193,28 +213,30 @@ Expected: FAIL — module not found
 
 **Step 1: Write the hook**
 
+**IMPORTANT:** `firestore.doc(partialPath)` already prepends the root folder internally. Do NOT manually prepend `${root}/` — that doubles the root and causes "No document to update" errors.
+
 ```typescript
 import firebase from "firebase/app";
 import { useCallback } from "react";
 import { RatingValue } from "../../shared/shared";
 import { useFirestore } from "./firestore-hooks";
-import { useUserContext } from "./use-stores";
+import { useUserContext } from "./use-user-context";
 
 export function useUpdateCommentRating() {
-  const [firestore, root] = useFirestore();
+  const [firestore] = useFirestore();
   const { uid } = useUserContext();
 
   return useCallback(
     async (commentPath: string, value: RatingValue | undefined) => {
       if (!uid) return;
-      const docRef = firestore.doc(`${root}/${commentPath}`);
+      const docRef = firestore.doc(commentPath);
       if (value) {
         await docRef.update({ [`ratings.${uid}`]: value });
       } else {
         await docRef.update({ [`ratings.${uid}`]: firebase.firestore.FieldValue.delete() });
       }
     },
-    [firestore, root, uid]
+    [firestore, uid]
   );
 }
 ```
@@ -421,17 +443,40 @@ Inside the `CommentCard` component, add:
   };
 ```
 
-**Step 3: Render rating buttons in the comment thread**
+**Step 3: Render rating buttons below the comment text**
 
-In the JSX, add `{renderRatingButtons(comment)}` after the comment text div (after line ~193 in the current code), replacing or alongside `{renderAgreeWithAi(comment)}`:
+In the JSX, add `{renderRatingButtons(comment)}` **after** the `.comment-text` div (below the comment content, not between the header and text). This associates the rating buttons with the comment, not the student name.
 
 ```tsx
+              <div className="comment-text">{comment.content}</div>
               {renderRatingButtons(comment)}
 ```
 
-Keep `{renderAgreeWithAi(comment)}` for now — it displays historical agree data on old comments. It can be removed in a follow-up if desired.
+**Step 4: Add simplified path fallback for rating updates**
 
-**Step 4: Add required imports**
+Comments may be stored at either the network-prefixed path or the simplified path. The click handler must try both:
+
+```typescript
+import { isSectionPath, escapeKey, RatingValue } from "../../../shared/shared";
+
+// In component:
+const simplifiedCommentsPath = focusDocument
+  ? (isSectionPath(focusDocument)
+    ? `curriculum/${escapeKey(focusDocument)}/comments`
+    : `documents/${focusDocument}/comments`)
+  : "";
+
+// In click handler:
+const primaryPath = `${commentsPath}/${comment.id}`;
+const fallbackPath = `${simplifiedCommentsPath}/${comment.id}`;
+updateRating(primaryPath, newValue).catch(() => {
+  if (fallbackPath !== primaryPath) {
+    updateRating(fallbackPath, newValue);
+  }
+});
+```
+
+**Step 5: Add required imports**
 
 ```typescript
 import { useCommentsCollectionPath } from "../../hooks/document-comment-hooks";
@@ -461,13 +506,14 @@ git commit -m "feat: add rating buttons to all comments (CLUE-397)"
 
 After the `.comment-agree-message` block (~line 128), add:
 
+Note: The header inherits the parent font size (no explicit `font-size`) and SVG icons use their native 18px size, matching the original Ada agree buttons.
+
 ```scss
     .comment-ratings {
       margin-top: 4px;
 
       .comment-ratings-header {
         font-style: italic;
-        font-size: 11px;
         color: $charcoal-dark-1;
       }
 
@@ -490,8 +536,8 @@ After the `.comment-agree-message` block (~line 128), add:
           font-size: 11px;
 
           svg {
-            width: 14px;
-            height: 14px;
+            width: 18px;
+            height: 18px;
           }
 
           .rating-count {

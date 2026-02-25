@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
 import { CommentTextBox } from "./comment-textbox";
@@ -11,7 +11,10 @@ import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentModelType } from "../../models/document/document";
 import ChatAvatar from "./chat-avatar";
 import WaitingMessage from "./waiting-message";
-import { IAgreeWithAi, kAnalyzerUserParams } from "../../../shared/shared";
+import { isSectionPath, escapeKey, RatingValue } from "../../../shared/shared";
+import { useCommentsCollectionPath } from "../../hooks/document-comment-hooks";
+import { useUpdateCommentRating } from "../../hooks/use-update-comment-rating";
+import { logCommentEvent } from "../../models/tiles/log/log-comment-event";
 import type { PostCommentFn, DeleteCommentFn } from "./chat-panel";
 
 import DeleteMessageIcon from "../../assets/icons/delete/delete-message-icon.svg";
@@ -21,6 +24,14 @@ import NotSureIcon from "../../assets/not-sure-icon.svg";
 
 import "./comment-card.scss";
 import "../themes.scss";
+
+function countRatings(ratings: Record<string, RatingValue> | undefined): Record<RatingValue, number> {
+  const counts: Record<RatingValue, number> = { yes: 0, no: 0, notSure: 0 };
+  if (ratings) {
+    Object.values(ratings).forEach(v => { counts[v]++; });
+  }
+  return counts;
+}
 
 interface IProps {
   user?: UserModelType;
@@ -84,44 +95,72 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
 
   const showWaitingMessage = !focusTileId || content?.isAwaitingRemoteComment;
 
-  const showAgreeButtons = useMemo(() => {
-    if (!postedComments || !user) {
-      // no comments or user, so no agree buttons
-      return false;
-    }
-    // findLastIndex isn't supported in our current compiler target (ES2015) so just reverse the array and use findIndex
-    const reversedComments = [...postedComments].reverse();
-    const lastAdaCommentIndex = reversedComments.findIndex((comment) => comment.uid === kAnalyzerUserParams.id);
-    const lastUserAgreedCommentIndex = reversedComments.findIndex(
-      (comment) => comment.uid === user?.id && comment.agreeWithAi // agreeWithAi is undefined/null when not set
-    );
-    if (lastAdaCommentIndex === -1) {
-      return false; // no comments from Ada, so no agree buttons
-    }
-    if (lastUserAgreedCommentIndex === -1) {
-      return true; // no comments from the user agreeing with Ada, so show agree buttons
-    }
-    // show agree buttons if the last Ada comment is after the last user agreed comment
-    // note: < is used here as we have reversed the array
-    return lastAdaCommentIndex < lastUserAgreedCommentIndex;
-  }, [postedComments, user]);
+  const updateRating = useUpdateCommentRating();
+  const commentsPath = useCommentsCollectionPath(focusDocument || "");
+  // Comments may be stored at either the network-prefixed path or the simplified path.
+  // We need the simplified path as a fallback for rating updates.
+  const simplifiedCommentsPath = focusDocument
+    ? (isSectionPath(focusDocument)
+      ? `curriculum/${escapeKey(focusDocument)}/comments`
+      : `documents/${focusDocument}/comments`)
+    : "";
 
-  const renderAgreeWithAi = (comment: WithId<CommentDocument>) => {
-    // agreeWithAi is an optional field, so we need to handle cases where it might be undefined/null
-    const { value } = comment.agreeWithAi ?? { value: null };
-    const messages: Record<IAgreeWithAi["value"], {text: string, icon: JSX.Element, testId: string}> = {
-      yes: {text: "Yes, I agree with Ada!", icon: <YesIcon />, testId: "comment-agree-message-yes"},
-      no: {text: "No, I disagree with Ada.", icon: <NoIcon />, testId: "comment-agree-message-no"},
-      notSure: {text: "Not sure I agree with Ada.", icon: <NotSureIcon />, testId: "comment-agree-message-not-sure"},
-    };
-    const message = value && messages[value as IAgreeWithAi["value"]];
-    if (!message) {
-      return null; // no agree with AI message to display
-    }
+  const ratingButtons: { value: RatingValue; label: string; icon: JSX.Element; testId: string }[] = [
+    { value: "yes", label: "Yes", icon: <YesIcon />, testId: "rating-yes-button" },
+    { value: "no", label: "No", icon: <NoIcon />, testId: "rating-no-button" },
+    { value: "notSure", label: "Not Sure", icon: <NotSureIcon />, testId: "rating-not-sure-button" },
+  ];
+
+  const renderRatingButtons = (comment: WithId<CommentDocument>) => {
+    const counts = countRatings(comment.ratings);
+    const myRating = user?.id ? comment.ratings?.[user.id] : undefined;
+
     return (
-      <div className="comment-agree-message" data-testid="comment-agree-message">
-        <div className="comment-agree-icon" data-testid="comment-agree-icon">{message.icon}</div>
-        <div data-testid={message.testId}>{message.text}</div>
+      <div className="comment-ratings" data-testid="comment-rating-buttons">
+        <div className="comment-ratings-header">
+          Do you agree with {comment.name}?
+        </div>
+        <div className="comment-ratings-buttons">
+          {ratingButtons.map(({ value, label, icon, testId }) => {
+            const count = counts[value];
+            return (
+              <div
+                key={value}
+                role="button"
+                aria-label={label}
+                className={classNames("rating-button", { selected: myRating === value })}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newValue = myRating === value ? undefined : value;
+                  if ((commentsPath || simplifiedCommentsPath) && user) {
+                    const primaryPath = `${commentsPath}/${comment.id}`;
+                    const fallbackPath = `${simplifiedCommentsPath}/${comment.id}`;
+                    updateRating(primaryPath, newValue).catch(() => {
+                      if (fallbackPath !== primaryPath) {
+                        updateRating(fallbackPath, newValue);
+                      }
+                    });
+                    logCommentEvent({
+                      focusDocumentId: focusDocument || "",
+                      focusTileId,
+                      commentText: "",
+                      action: "rate",
+                    });
+                  }
+                }}
+                data-testid={testId}
+              >
+                {icon} {label}
+                {count > 0 && (
+                  <span className="rating-count"
+                        data-testid={`rating-${value === "notSure" ? "not-sure" : value}-count`}>
+                    ({count})
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   };
@@ -172,7 +211,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                     </div>
                   }
                 </div>
-                {renderAgreeWithAi(comment)}
                 {
                   displayTags &&
                   <div className="comment-dropdown-tag">
@@ -191,6 +229,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                       </a>
                   }
                 </div>
+                {renderRatingButtons(comment)}
               </div>
             );
           })
@@ -202,7 +241,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           numPostedComments={postedComments?.length || 0}
           showCommentTag={showCommentTag || false}
           commentTags={commentTags}
-          showAgreeButtons={showAgreeButtons}
         />
       </div>
     </div>

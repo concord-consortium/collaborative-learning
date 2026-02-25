@@ -7,6 +7,14 @@ import { UserModelType } from "../../models/stores/user";
 import { AppConfigModel } from "../../models/stores/app-config-model";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
+jest.mock("../../hooks/use-update-comment-rating", () => ({
+  useUpdateCommentRating: () => jest.fn()
+}));
+
+jest.mock("../../models/tiles/log/log-comment-event", () => ({
+  logCommentEvent: jest.fn()
+}));
+
 const mockCurriculumDocument = { unit: "unit", problem: "1.1", section: "intro", path: "unit/1/1/intro" };
 const mockUseDocumentOrCurriculumMetadata = jest.fn((docKeyOrSectionPath: string) => {
   return mockCurriculumDocument;
