@@ -29,7 +29,10 @@
               // Suppress known missing-metadata errors from stale demo data (see docs/rollbar-metadata-errors.md)
               if (msg.indexOf('Error retrieving metadata for document') !== -1) return true;
             }
-            if (msg instanceof Error && msg.message.indexOf('Error retrieving metadata for document') !== -1) return true;
+            if (msg instanceof Error) {
+              if (msg.message.indexOf('ResizeObserver loop') !== -1) return true;
+              if (msg.message.indexOf('Error retrieving metadata for document') !== -1) return true;
+            }
             return false;
           },
           payload: {
