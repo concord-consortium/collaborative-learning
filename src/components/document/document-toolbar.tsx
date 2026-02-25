@@ -10,6 +10,7 @@ interface IToolbarProps {
   disabledToolIds?: string[];
   // the document is undefined when the toolbar is used in a 4-up view
   document?: DocumentModelType;
+  pane?: "left" | "right";
   toolbar: IToolbarModel;
   onToolClicked?: OnToolClickedHandler;
 }
@@ -18,7 +19,7 @@ interface IToolbarProps {
 // It is a wrapper around the ToolbarComponent that sets the toolbar model and document for the toolbar.
 // It also listens for changes to the primary document key and disables the edit button
 // if the document is the primary document.
-export const DocumentToolbar: React.FC<IToolbarProps> = ({ document, toolbar, disabledToolIds, ...others }) => {
+export const DocumentToolbar: React.FC<IToolbarProps> = ({ document, toolbar, disabledToolIds, pane, ...others }) => {
   const appConfig = useContext(AppConfigContext);
   const ariaLabels = useAriaLabels();
 
@@ -39,6 +40,7 @@ export const DocumentToolbar: React.FC<IToolbarProps> = ({ document, toolbar, di
       key="toolbar"
       toolbarModel={toolbarModel}
       document={document}
+      pane={pane}
       disabledToolIds={disabledToolIds}
       {...others}
     />

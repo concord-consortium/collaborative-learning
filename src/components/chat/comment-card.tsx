@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
 import { CommentTextBox } from "./comment-textbox";
@@ -32,14 +32,99 @@ interface IProps {
   focusTileId?: string;
   isFocused?: boolean;
   onSelect?: () => void;
+  readingCommentId?: string | null;
+  pendingCommentId?: string | null;
+  onCommentClick?: (commentId: string) => void;
 }
+
+interface ICommentItemProps {
+  comment: WithId<CommentDocument>;
+  isReading: boolean;
+  isPending: boolean;
+  isOwnComment: boolean;
+  shouldShowDeleteIcon: boolean;
+  displayTags: boolean | "" | undefined;
+  commentTags?: Record<string, string>;
+  linkedDocument: DocumentModelType | false | "" | undefined;
+  onDeleteComment: (commentId: string, content: string) => void;
+  onOpenLinkedDocument: (e: React.MouseEvent<HTMLAnchorElement>, doc: DocumentModelType) => void;
+  onCommentClick?: (commentId: string) => void;
+  renderAgreeWithAi: (comment: WithId<CommentDocument>) => JSX.Element | null;
+}
+
+const CommentItem: React.FC<ICommentItemProps> = ({
+  comment, isReading, isPending, isOwnComment, shouldShowDeleteIcon,
+  displayTags, commentTags, linkedDocument,
+  onDeleteComment, onOpenLinkedDocument, onCommentClick, renderAgreeWithAi
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if ((isReading || isPending) && ref.current) {
+      ref.current.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
+    }
+  }, [isReading, isPending]);
+
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    // Don't intercept clicks on delete button or links
+    const target = e.target as HTMLElement;
+    if (target.closest(".delete-message-icon-container") || target.closest("a")) return;
+    // Stop propagation so the card-level click handler (which selects the tile)
+    // doesn't fire — clicking a comment should deselect tiles, not select them.
+    e.stopPropagation();
+    onCommentClick?.(comment.id);
+  }, [comment.id, onCommentClick]);
+
+  return (
+    <div
+      ref={ref}
+      className={classNames("comment-thread", { reading: isReading, pending: isPending })}
+      data-testid="comment-thread"
+      onClick={handleClick}
+    >
+      <div className="comment-text-header">
+        <ChatAvatar uid={comment.uid} isMe={isOwnComment} />
+        <div className="user-name">{comment.name}</div>
+        <div className="time-stamp">{getDisplayTimeDate(comment.createdAt.getTime())}</div>
+        {shouldShowDeleteIcon &&
+          <div className="delete-message-icon-container" data-testid="delete-message-button"
+                onClick={() => onDeleteComment(comment.id, comment.content)}>
+            <DeleteMessageIcon />
+          </div>
+        }
+      </div>
+      {renderAgreeWithAi(comment)}
+      {
+        displayTags &&
+        <div className="comment-dropdown-tag">
+          {
+            comment.tags?.map((tag) => {
+              return commentTags && (commentTags[tag]);
+            }).join(", ")
+          }
+        </div>
+      }
+      <div className="comment-text" data-testid="comment">
+        {comment.content}
+        {linkedDocument &&
+            <a href="#" onClick={(e) => onOpenLinkedDocument(e, linkedDocument)}>
+              {linkedDocument.title}
+            </a>
+        }
+      </div>
+    </div>
+  );
+};
 
 export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedComments,
                                                 onPostComment, onDeleteComment,
-                                                focusDocument, focusTileId, isFocused, onSelect }) => {
+                                                focusDocument, focusTileId, isFocused, onSelect,
+                                                readingCommentId, pendingCommentId, onCommentClick }) => {
   const commentIdRef = useRef<string>();
   const commentContentRef = useRef<string>("");
-  const { documents, persistentUI, sortedDocuments } = useStores();
+  const stores = useStores();
+  const { appConfig, documents, persistentUI, sortedDocuments } = stores;
+  const { showCommentTag, commentTags } = appConfig;
   const content = useCurriculumOrDocumentContent(focusDocument);
 
   const alertContent = () => {
@@ -78,9 +163,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     persistentUI.openResourceDocument(document, appConfig, user, sortedDocuments);
     logDocumentViewEvent(document);
   };
-
-  const { appConfig } = useStores();
-  const { showCommentTag, commentTags } = appConfig;
 
   const showWaitingMessage = !focusTileId || content?.isAwaitingRemoteComment;
 
@@ -160,38 +242,21 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
 
             return (
 
-              <div key={idx} className="comment-thread" data-testid="comment-thread">
-                <div className="comment-text-header">
-                  <ChatAvatar uid={commentUser} isMe={isOwnComment} />
-                  <div className="user-name">{comment.name}</div>
-                  <div className="time-stamp">{getDisplayTimeDate(comment.createdAt.getTime())}</div>
-                  {shouldShowDeleteIcon &&
-                    <div className="delete-message-icon-container" data-testid="delete-message-button"
-                          onClick={() => handleDeleteComment(comment.id, comment.content)}>
-                      <DeleteMessageIcon />
-                    </div>
-                  }
-                </div>
-                {renderAgreeWithAi(comment)}
-                {
-                  displayTags &&
-                  <div className="comment-dropdown-tag">
-                    {
-                      comment.tags?.map((tag) => {
-                        return commentTags && (commentTags[tag]);
-                      }).join(", ")
-                    }
-                  </div>
-                }
-                <div key={idx} className="comment-text" data-testid="comment">
-                  {comment.content}
-                  {linkedDocument &&
-                      <a href="#" onClick={(e) => handleOpenLinkedDocument(e, linkedDocument)}>
-                        {linkedDocument.title}
-                      </a>
-                  }
-                </div>
-              </div>
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                isReading={comment.id === readingCommentId}
+                isPending={comment.id === pendingCommentId}
+                isOwnComment={isOwnComment}
+                shouldShowDeleteIcon={shouldShowDeleteIcon}
+                displayTags={displayTags}
+                commentTags={commentTags}
+                linkedDocument={linkedDocument}
+                onDeleteComment={handleDeleteComment}
+                onOpenLinkedDocument={handleOpenLinkedDocument}
+                onCommentClick={onCommentClick}
+                renderAgreeWithAi={renderAgreeWithAi}
+              />
             );
           })
         }

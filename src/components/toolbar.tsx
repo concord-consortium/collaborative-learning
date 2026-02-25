@@ -34,13 +34,15 @@ interface IProps {
   ariaLabel?: string;
   document?: DocumentModelType;
   section?: SectionModelType;
+  pane?: "left" | "right";
   toolbarModel: IToolbarModel;
   disabledToolIds?: string[];
   onToolClicked?: OnToolClickedHandler;
 }
 
 export const ToolbarComponent = observer(function ToolbarComponent(props: IProps) {
-  const { ariaLabel, document, section, toolbarModel, disabledToolIds, onToolClicked } = props;
+  const { ariaLabel, document, section, pane: _pane, toolbarModel, disabledToolIds, onToolClicked } = props;
+  const pane = _pane ?? (section ? "left" : "right");
   const stores = useStores();
   const ariaLabels = useAriaLabels();
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -436,7 +438,7 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
                                {...buttonProps} />;
         case "readAloud":
           return <ReadAloudButton key={toolButton.id}
-                                  pane={section ? "left" : "right"}
+                                  pane={pane}
                                   document={document}
                                   section={section}
                                   {...buttonProps} />;

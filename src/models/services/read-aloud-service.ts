@@ -1,11 +1,8 @@
-import { action, makeObservable, observable, reaction } from "mobx";
+import { action, computed, makeObservable, observable, reaction } from "mobx";
 import { LogEventName } from "../../lib/logger-types";
 import { IToolbarEventProps, logToolbarEvent } from "../tiles/log/log-toolbar-event";
-import { DocumentContentModelType } from "../document/document-content";
-import { getTileComponentInfo } from "../tiles/tile-component-info";
-import { getTileContentInfo } from "../tiles/tile-content-info";
-import { kTextTileType, TextContentModelType } from "../tiles/text/text-content";
 import { IStores } from "../stores/stores";
+import { ReadAloudQueueItem, isCommentItem } from "./read-aloud-queue-items";
 
 export type ReadAloudState = "idle" | "reading" | "paused";
 export type ReadAloudStopReason = "user" | "complete" | "error" | "pane-switch" | "tab-switch";
@@ -13,26 +10,29 @@ export type ReadAloudPane = "left" | "right";
 
 const kMaxChunkLength = 200;
 
-function getTileTypeName(type: string): string {
-  return getTileContentInfo(type)?.displayName || type;
-}
-
 export class ReadAloudService {
   @observable state: ReadAloudState = "idle";
   @observable activePane: ReadAloudPane | null = null;
-  @observable currentTileId: string | null = null;
+  @observable currentItem: ReadAloudQueueItem | null = null;
+  @observable queue: ReadAloudQueueItem[] = [];
+  @observable pendingCommentId: string | null = null;
 
   readonly isSupported: boolean;
 
   private stores: IStores;
-  private documentContent: DocumentContentModelType | null = null;
   private toolbarProps: IToolbarEventProps | null = null;
-  private tileQueue: string[] = [];
+  private queueIndex = 0;
+  private allPaneTileIds: Set<string> = new Set();
+  private isTargetedOverride = false;
   private currentChunks: string[] = [];
   private currentChunkIndex = 0;
   private currentUtterance: SpeechSynthesisUtterance | null = null;
   private readGeneration = 0;
   private isSelectingProgrammatically = false;
+  /** Timestamp of the last programmatic tile selection by readItem(). Used by
+   *  external reactions (chat-thread.tsx) to ignore selection changes caused by
+   *  Read Aloud rather than by user clicks. */
+  lastProgrammaticSelectionTime = 0;
   private disposers: (() => void)[] = [];
   private synth: SpeechSynthesis | null = null;
 
@@ -46,6 +46,14 @@ export class ReadAloudService {
     }
   }
 
+  @computed get currentTileId(): string | null {
+    return this.currentItem?.associatedTileId ?? null;
+  }
+
+  @action setPendingCommentId(commentId: string | null) {
+    this.pendingCommentId = commentId;
+  }
+
   dispose() {
     if (this.state !== "idle") {
       this.stop("user");
@@ -57,9 +65,10 @@ export class ReadAloudService {
 
   @action start(
     pane: ReadAloudPane,
-    content: DocumentContentModelType,
-    selectedTileIds: string[],
-    toolbarProps: IToolbarEventProps
+    items: ReadAloudQueueItem[],
+    toolbarProps: IToolbarEventProps,
+    allPaneTileIds?: Set<string>,
+    commentMode?: "sequential" | "targeted"
   ) {
     if (!this.isSupported) return;
 
@@ -74,24 +83,33 @@ export class ReadAloudService {
       this.stop("pane-switch");
     }
 
-    this.documentContent = content;
     this.toolbarProps = toolbarProps;
     this.activePane = pane;
     this.state = "reading";
 
-    const allTileIds = content.getAllTileIds(false);
-    if (selectedTileIds.length > 0) {
-      const selectedSet = new Set(selectedTileIds);
-      const selectedInContent = allTileIds.filter(id => selectedSet.has(id));
-      // Fall back to all tiles if no selected tiles belong to this pane's content
-      this.tileQueue = selectedInContent.length > 0 ? selectedInContent : allTileIds;
-    } else {
-      this.tileQueue = allTileIds;
-    }
+    this.queue = items;
+    this.queueIndex = 0;
+    this.allPaneTileIds = allPaneTileIds
+      ?? new Set(items.filter(i => i.kind === "tile").map(i => i.associatedTileId!));
 
-    if (this.tileQueue.length === 0) {
+    if (this.queue.length === 0) {
       this.stop("complete");
       return;
+    }
+
+    // If a comment was clicked before starting, jump directly to it.
+    // skipTileSelect prevents readItem from selecting the associated tile so the
+    // comment (not the tile) stays as the visual focus.
+    let startIndex = 0;
+    let skipTileSelect = false;
+    if (this.pendingCommentId) {
+      const pendingIdx = this.queue.findIndex(
+        item => isCommentItem(item) && item.commentId === this.pendingCommentId
+      );
+      if (pendingIdx >= 0) {
+        startIndex = pendingIdx;
+        skipTileSelect = true;
+      }
     }
 
     this.setupReactions();
@@ -99,11 +117,13 @@ export class ReadAloudService {
     logToolbarEvent(LogEventName.TOOLBAR_READ_ALOUD_START, this.toolbarProps, {
       pane: this.activePane,
       documentId: this.toolbarProps.document?.key,
-      tileId: this.tileQueue[0],
-      trigger: "user"
+      tileId: this.queue[startIndex]?.associatedTileId ?? null,
+      trigger: "user",
+      commentMode
     });
 
-    this.readTile(this.tileQueue[0]);
+    this.queueIndex = startIndex;
+    this.readItem(this.queue[startIndex], "auto", skipTileSelect);
   }
 
   @action stop(reason: ReadAloudStopReason = "user") {
@@ -124,13 +144,18 @@ export class ReadAloudService {
       });
     }
 
-    // Do NOT clear selectedTileIds — last tile remains selected
+    // Do NOT clear selectedTileIds — last tile remains selected.
+    // Do NOT clear pendingCommentId — it persists so the next start() can jump
+    // to the same comment. It is cleared when the user clicks a tile in the
+    // workspace (via the selectedTileIds reaction in chat-thread.tsx).
     this.state = "idle";
     this.activePane = null;
-    this.currentTileId = null;
-    this.documentContent = null;
+    this.currentItem = null;
     this.toolbarProps = null;
-    this.tileQueue = [];
+    this.queue = [];
+    this.queueIndex = 0;
+    this.allPaneTileIds = new Set();
+    this.isTargetedOverride = false;
     this.currentChunks = [];
     this.currentChunkIndex = 0;
     this.currentUtterance = null;
@@ -155,69 +180,112 @@ export class ReadAloudService {
     }
   }
 
-  @action private prepareTile(tileId: string): boolean {
-    if (!this.documentContent) return false;
+  @action replaceQueue(newItems: ReadAloudQueueItem[], allPaneTileIds?: Set<string>) {
+    if (this.state === "idle" || this.isTargetedOverride) return;
 
-    const tile = this.documentContent.getTile(tileId);
-    if (!tile) {
-      // Tile was deleted mid-read
-      this.advanceToNextTile();
-      return false;
+    // Find current item in new queue by stable key
+    const currentItem = this.currentItem;
+    let newIndex = -1;
+
+    if (currentItem) {
+      if (currentItem.kind === "tile" && currentItem.associatedTileId) {
+        newIndex = newItems.findIndex(
+          item => item.kind === "tile" && item.associatedTileId === currentItem.associatedTileId
+        );
+      } else if (isCommentItem(currentItem)) {
+        newIndex = newItems.findIndex(
+          item => isCommentItem(item) && item.commentId === currentItem.commentId
+        );
+      } else if (currentItem.kind === "section-header") {
+        newIndex = newItems.findIndex(item => item.kind === "section-header");
+      }
     }
 
-    this.currentTileId = tileId;
+    this.queue = newItems;
+    this.allPaneTileIds = allPaneTileIds ?? this.allPaneTileIds;
 
-    const tileType = tile.content.type;
-    const title = getTileComponentInfo(tileType)?.hiddenTitle ? "" : tile.computedTitle;
-    const typeName = getTileTypeName(tileType);
-
-    let textContent = "";
-    if (tileType === kTextTileType) {
-      textContent = (tile.content as TextContentModelType).asPlainText();
-    }
-
-    // Compose speech text
-    let speechText: string;
-    if (title && textContent) {
-      speechText = `${title}. ${textContent}`;
-    } else if (title && !textContent) {
-      speechText = `${typeName} tile: ${title}`;
-    } else if (!title && textContent) {
-      speechText = textContent;
+    if (newIndex >= 0) {
+      // Current item still exists — update index, don't interrupt current speech
+      // Invariant: currentItem may reference an item from a previous queue build
+      // until the next readItem() call. This is intentional — it matches the
+      // currently-speaking content. UI highlighting uses originTileId (stable key),
+      // not object identity or speechText.
+      this.queueIndex = newIndex;
     } else {
-      speechText = `${typeName} tile`;
+      // Current item was removed — set index so advanceToNextItem (which does
+      // queueIndex + 1) picks up the item that now occupies the old position.
+      if (newItems.length === 0) {
+        this.stop("complete");
+      } else {
+        this.queueIndex = Math.max(-1, Math.min(this.queueIndex, newItems.length) - 1);
+      }
     }
-
-    this.currentChunks = this.chunkText(speechText);
-    this.currentChunkIndex = 0;
-    return true;
   }
 
-  private readTile(tileId: string) {
-    if (!this.prepareTile(tileId)) return;
+  @action jumpToItem(index: number) {
+    if (index < 0 || index >= this.queue.length || this.state === "idle") return;
+    ++this.readGeneration;
+    this.synth?.cancel();
+    this.queueIndex = index;
+    // Note: always calls readItem (which speaks), even when paused. This is intentional —
+    // jumpToItem is triggered by explicit user clicks (e.g., clicking a comment thread),
+    // which signal "play this."
+    this.readItem(this.queue[index], "user-click");
+  }
 
-    // Select the tile in UI
-    this.isSelectingProgrammatically = true;
-    this.stores.ui.setSelectedTileId(tileId);
-    this.isSelectingProgrammatically = false;
+  @action private readItem(
+    item: ReadAloudQueueItem, trigger: "auto" | "user-click" = "auto", skipTileSelect = false
+  ) {
+    this.currentItem = item;
 
-    // Log tile transition
-    if (this.toolbarProps) {
+    // Select associated tile, or clear selection for items without one.
+    // skipTileSelect is true when starting from a pending comment — the user
+    // clicked a comment (not a tile), so we preserve their deselected-tile state.
+    if (!skipTileSelect) {
+      this.isSelectingProgrammatically = true;
+      this.lastProgrammaticSelectionTime = Date.now();
+      this.stores.ui.setSelectedTileId(item.associatedTileId ?? '');
+      this.isSelectingProgrammatically = false;
+    }
+
+    this.currentChunks = this.chunkText(item.speechText);
+    this.currentChunkIndex = 0;
+
+    // Log transition based on item kind
+    this.logItemTransition(item, trigger);
+
+    this.speakCurrentChunk();
+  }
+
+  private logItemTransition(item: ReadAloudQueueItem, trigger: "auto" | "user-click") {
+    if (!this.toolbarProps) return;
+
+    if (isCommentItem(item)) {
+      logToolbarEvent(LogEventName.TOOLBAR_READ_ALOUD_COMMENT_TRANSITION, this.toolbarProps, {
+        pane: this.activePane,
+        documentId: this.toolbarProps.document?.key,
+        tileId: item.originTileId || "document",
+        commentId: item.commentId,
+        threadIndex: item.threadIndex,
+        commentIndex: item.commentIndex,
+        trigger
+      });
+    } else if (item.kind === "tile") {
       logToolbarEvent(LogEventName.TOOLBAR_READ_ALOUD_TILE_TRANSITION, this.toolbarProps, {
         pane: this.activePane,
         documentId: this.toolbarProps.document?.key,
-        tileId
+        tileId: item.associatedTileId ?? null,
+        trigger
       });
     }
-
-    this.speakCurrentChunk();
+    // section-header items are not logged
   }
 
   private speakCurrentChunk() {
     const gen = ++this.readGeneration;
     const chunk = this.currentChunks[this.currentChunkIndex];
     if (!chunk) {
-      this.advanceToNextTile();
+      this.advanceToNextItem();
       return;
     }
 
@@ -231,7 +299,7 @@ export class ReadAloudService {
       if (this.currentChunkIndex < this.currentChunks.length) {
         this.speakCurrentChunk();
       } else {
-        this.advanceToNextTile();
+        this.advanceToNextItem();
       }
     };
     utterance.onerror = () => {
@@ -242,22 +310,10 @@ export class ReadAloudService {
     this.synth?.speak(utterance);
   }
 
-  // Note: indexOf() is O(n) per call, but tile queues are small (< 20 tiles)
-  // so tracking a separate index isn't worth the added state complexity.
-  private advanceToNextTile() {
-    if (!this.currentTileId) {
-      this.stop("complete");
-      return;
-    }
-
-    const index = this.tileQueue.indexOf(this.currentTileId);
-    if (index === -1) {
-      this.stop("complete");
-      return;
-    }
-
-    if (index + 1 < this.tileQueue.length) {
-      this.readTile(this.tileQueue[index + 1]);
+  private advanceToNextItem() {
+    this.queueIndex++;
+    if (this.queueIndex < this.queue.length) {
+      this.readItem(this.queue[this.queueIndex]);
     } else {
       this.stop("complete");
     }
@@ -311,7 +367,17 @@ export class ReadAloudService {
           if (this.state === "idle") return;
           if (this.isSelectingProgrammatically) return;
 
-          const selectedInThisPane = newSelectedIds.filter(id => this.documentContent?.getTile(id));
+          // Empty selection guard: if currently reading an item without associatedTileId,
+          // readItem already handled the setSelectedTileId('') — don't stop.
+          if (newSelectedIds.length === 0 || (newSelectedIds.length === 1 && newSelectedIds[0] === "")) {
+            if (this.currentItem && !this.currentItem.associatedTileId) {
+              return;
+            }
+          }
+
+          const selectedInThisPane = newSelectedIds.filter(id =>
+            this.allPaneTileIds.has(id)
+          );
           const selectedInOtherPane = newSelectedIds.length > 0 && selectedInThisPane.length === 0;
 
           if (selectedInOtherPane) {
@@ -320,12 +386,31 @@ export class ReadAloudService {
           }
 
           if (selectedInThisPane.length === 1 && selectedInThisPane[0] !== this.currentTileId) {
+            const selectedId = selectedInThisPane[0];
             ++this.readGeneration;
             this.synth?.cancel();
-            if (this.state === "paused") {
-              this.prepareTile(selectedInThisPane[0]);
+
+            if (this.currentItem && this.currentItem.kind !== "tile") {
+              // Currently reading non-tile items — workspace tile click means targeted mode
+              this.buildTargetedSubQueue(selectedId);
             } else {
-              this.readTile(selectedInThisPane[0]);
+              // Same-pane tile switch (existing behavior — jump to tile, continue)
+              const tileIndex = this.queue.findIndex(
+                item => item.associatedTileId === selectedId && item.kind === "tile"
+              );
+              if (tileIndex >= 0) {
+                this.queueIndex = tileIndex;
+                if (this.state === "paused") {
+                  this.currentItem = this.queue[tileIndex];
+                  this.currentChunks = this.chunkText(this.queue[tileIndex].speechText);
+                  this.currentChunkIndex = 0;
+                } else {
+                  this.readItem(this.queue[tileIndex], "user-click");
+                }
+              } else {
+                // Tile not in queue — stop
+                this.stop("user");
+              }
             }
           }
         }
@@ -352,6 +437,48 @@ export class ReadAloudService {
           () => { this.stop("tab-switch"); }
         )
       );
+
+      // Left pane: stop if the chat panel is closed (immediate, not debounced)
+      // Panel opened mid-read is handled by the reactive queue rebuild in ReadAloudButton.
+      this.disposers.push(
+        reaction(
+          () => persistentUI.showChatPanel,
+          (isOpen) => {
+            if (!isOpen) {
+              this.stop("user");
+            }
+          }
+        )
+      );
+    }
+  }
+
+  private buildTargetedSubQueue(tileId: string) {
+    const tileItem = this.queue.find(
+      item => item.kind === "tile" && item.associatedTileId === tileId
+    );
+    const commentItems = this.queue.filter(
+      item => isCommentItem(item) && item.originTileId === tileId
+    );
+
+    const items: ReadAloudQueueItem[] = [];
+    if (tileItem) items.push(tileItem);
+    items.push(...commentItems);
+
+    if (items.length === 0) {
+      this.stop("user");
+      return;
+    }
+
+    this.isTargetedOverride = true;
+    this.queue = items;
+    this.queueIndex = 0;
+    if (this.state === "paused") {
+      this.currentItem = items[0];
+      this.currentChunks = this.chunkText(items[0].speechText);
+      this.currentChunkIndex = 0;
+    } else {
+      this.readItem(items[0], "user-click");
     }
   }
 
