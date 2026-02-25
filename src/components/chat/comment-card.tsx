@@ -129,22 +129,30 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                 role="button"
                 aria-label={label}
                 className={classNames("rating-button", { selected: myRating === value })}
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
                   const newValue = myRating === value ? undefined : value;
                   if ((commentsPath || simplifiedCommentsPath) && user) {
                     const primaryPath = `${commentsPath}/${comment.id}`;
                     const fallbackPath = `${simplifiedCommentsPath}/${comment.id}`;
-                    updateRating(primaryPath, newValue).catch(() => {
+                    try {
+                      await updateRating(primaryPath, newValue);
+                    } catch {
                       if (fallbackPath !== primaryPath) {
-                        updateRating(fallbackPath, newValue);
+                        try {
+                          await updateRating(fallbackPath, newValue);
+                        } catch {
+                          // Optionally log the error; ensure no unhandled rejection.
+                        }
                       }
-                    });
+                    }
                     logCommentEvent({
                       focusDocumentId: focusDocument || "",
                       focusTileId,
                       commentText: "",
                       action: "rate",
+                      commentId: comment.id,
+                      ratingValue: newValue ?? "removed",
                     });
                   }
                 }}

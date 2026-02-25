@@ -63,14 +63,16 @@ Comments may be stored at either the network-prefixed path (`documents/uid:X_doc
 
 ### Security Rules
 
-Users can only modify their own key in the ratings map:
+Users can only modify their own key in the ratings map. The `isValidRatingUpdate()` function (defined in both curriculum and document comment rule blocks) enforces this:
 
 ```
-match /comments/{commentId} {
-  allow update: if request.auth != null
-    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ratings'])
-    && request.resource.data.ratings.diff(resource.data.ratings).affectedKeys()
-        .hasOnly([request.auth.uid]);
+function isValidRatingUpdate() {
+  let affectedFields = request.resource.data.diff(resource.data).affectedKeys();
+  let userId = string(request.auth.token.platform_user_id);
+  let existingRatings = resource.data.get('ratings', {});
+  let newRatings = request.resource.data.get('ratings', {});
+  return affectedFields.hasOnly(['ratings'])
+    && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId]);
 }
 ```
 

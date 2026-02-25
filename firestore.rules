@@ -317,7 +317,11 @@ service cloud.firestore {
 
         function isValidRatingUpdate() {
           let affectedFields = request.resource.data.diff(resource.data).affectedKeys();
-          return affectedFields.hasOnly(['ratings']);
+          let userId = string(request.auth.token.platform_user_id);
+          let existingRatings = resource.data.get('ratings', {});
+          let newRatings = request.resource.data.get('ratings', {});
+          return affectedFields.hasOnly(['ratings'])
+            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId]);
         }
 
         function isValidCommentUpdateRequest() {
@@ -328,7 +332,7 @@ service cloud.firestore {
         match /comments/{commentId} {
           // portal-authenticated teachers with access to the document can create valid comments
           allow create: if teacherCanAccessCurriculum() && isValidCommentCreateRequest();
-          // teachers can update their own comments, or any user can update the ratings field
+          // teachers can update their own comments, or any user can update their own rating
           allow update: if teacherCanAccessCurriculum() && isValidCommentUpdateRequest();
           // teachers can only delete their own comments
           allow delete: if teacherCanAccessCurriculum() && userIsResourceUser();
@@ -420,7 +424,11 @@ service cloud.firestore {
 
         function isValidRatingUpdate() {
           let affectedFields = request.resource.data.diff(resource.data).affectedKeys();
-          return affectedFields.hasOnly(['ratings']);
+          let userId = string(request.auth.token.platform_user_id);
+          let existingRatings = resource.data.get('ratings', {});
+          let newRatings = request.resource.data.get('ratings', {});
+          return affectedFields.hasOnly(['ratings'])
+            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId]);
         }
 
         function isValidCommentUpdateRequest() {

@@ -630,12 +630,16 @@ There are TWO `match /comments/{commentId}` blocks in `firestore.rules`:
 1. Under curriculum documents (~line 322)
 2. Under regular documents (~line 427)
 
-In BOTH locations, update `isValidCommentUpdateRequest()` to allow rating updates from any user with access:
+In BOTH locations, update `isValidRatingUpdate()` to restrict rating updates to the requester's own entry in the ratings map:
 
 ```
         function isValidRatingUpdate() {
           let affectedFields = request.resource.data.diff(resource.data).affectedKeys();
-          return affectedFields.hasOnly(['ratings']);
+          let userId = string(request.auth.token.platform_user_id);
+          let existingRatings = resource.data.get('ratings', {});
+          let newRatings = request.resource.data.get('ratings', {});
+          return affectedFields.hasOnly(['ratings'])
+            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId]);
         }
 
         function isValidCommentUpdateRequest() {
@@ -646,7 +650,7 @@ In BOTH locations, update `isValidCommentUpdateRequest()` to allow rating update
 
 This allows:
 - Comment authors to update their own comments (existing behavior)
-- Any user with document access to update ONLY the `ratings` field
+- Any user with document access to update ONLY their own key in the `ratings` map
 
 **Step 2: Verify rules syntax**
 
