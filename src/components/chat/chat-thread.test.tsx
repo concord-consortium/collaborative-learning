@@ -348,9 +348,54 @@ describe("CommentThread", () => {
     expect(mockSetScrollTo).toHaveBeenCalledWith("tile-abc", "document-key");
   });
 
+  it("shows empty thread with override title when focused tile has no comments", () => {
+    // chatThreads has a thread for tile-abc but NOT for tile-xyz
+    const chatThreads =
+      [makeFakeCommentThread("Thread 1", "tile-abc", "u1")];
+    const testUser = {id: "u1", name: "test user"} as UserModelType;
+    render((
+      <ModalProvider>
+        <ChatThread
+          focusTileId="tile-xyz"
+          user={testUser}
+          chatThreads={chatThreads}
+          activeNavTab={ENavTab.kMyWork}
+          focusDocument="document-key"
+        />
+      </ModalProvider>
+    ));
+
+    // tile-xyz has no comment thread, so a placeholder ChatThreadItem is rendered
+    // with isFocused=true and overrideTitle (empty string since content mock is undefined)
+    const threads = screen.getAllByTestId("chat-thread");
+    // One for tile-abc (from chatThreads) + one placeholder for tile-xyz
+    expect(threads).toHaveLength(2);
+  });
+
+  it("shows document override title when no tile focused and no document comments", () => {
+    // No document-level comments (all threads have tileIds)
+    const chatThreads =
+      [makeFakeCommentThread("Thread 1", "tile-abc", "u1")];
+    render((
+      <ModalProvider>
+        <ChatThread
+          chatThreads={chatThreads}
+          activeNavTab={ENavTab.kMyWork}
+          focusDocument="document-key"
+          docTitle="My Document"
+        />
+      </ModalProvider>
+    ));
+
+    // No focusTileId and no document thread in chatThreads,
+    // so a placeholder document thread is rendered with docTitle as overrideTitle
+    const threads = screen.getAllByTestId("chat-thread");
+    expect(threads).toHaveLength(2);
+    expect(screen.getByText("My Document")).toBeInTheDocument();
+  });
+
   it("clicking on document comment card clears tile selection", () => {
     // A thread with empty tileId is the "document" thread.
-    // When no focusTileId is set, the useEffect auto-expands "document".
     const chatThreads =
       [makeFakeCommentThread("Doc Thread", "", "u1")];
     render((
@@ -364,7 +409,9 @@ describe("CommentThread", () => {
       </ModalProvider>
     ));
 
-    // The document thread is auto-expanded by useEffect, so comment-card is visible
+    // Expand the document thread by clicking its header
+    fireEvent.click(screen.getByText("Doc Thread"));
+
     mockSetSelectedTileId.mockClear();
     fireEvent.click(screen.getByTestId("comment-card"));
     expect(mockSetSelectedTileId).toHaveBeenCalledWith("");

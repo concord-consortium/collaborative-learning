@@ -138,9 +138,13 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   );
 
   // Switching focus expands the newly-selected thread (without closing others).
+  // When focusTileId becomes undefined (e.g. cross-document selection or deselection),
+  // we do nothing — the document thread should only expand via explicit user action
+  // (clicking its header) or pending remote comments.
   useEffect(() => {
-    const threadToExpand = focusTileId || 'document';
-    setExpandedThreads(prev => new Set(prev).add(threadToExpand));
+    if (focusTileId) {
+      setExpandedThreads(prev => new Set(prev).add(focusTileId));
+    }
   }, [focusTileId]);
 
   // If a remote comment is pending, we force the document thread to be expanded.
@@ -165,15 +169,6 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
     }
   }
   const ui = useUIStore();
-
-  // Scroll the document preview to the focused tile when selection changes in the workspace.
-  // This complements the thread scroll in ChatThreadItem so both the document preview
-  // and the comment thread stay in sync with the workspace selection.
-  useEffect(() => {
-    if (focusTileId && focusDocument) {
-      ui.setScrollTo(focusTileId, focusDocument);
-    }
-  }, [focusTileId, focusDocument, ui]);
 
   const handleThreadClick = (clickedId: string | null) => {
     const threadId = clickedId || '';

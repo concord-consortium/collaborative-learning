@@ -1,3 +1,4 @@
+import { IReactionDisposer, reaction } from "mobx";
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
@@ -30,9 +31,32 @@ export class NavTabPanel extends BaseComponent<IProps> {
 
   private navTabPanelElt: HTMLDivElement | null = null;
   private shouldRestoreFocus = false;
+  private scrollToDisposer?: IReactionDisposer;
 
   constructor(props: IProps) {
     super(props);
+  }
+
+  public componentDidMount() {
+    // When the selected tile changes, scroll the document preview to show it.
+    // This lives here (always-mounted) rather than in ChatThread so that
+    // scroll-to-tile works regardless of whether the chat panel is open.
+    this.scrollToDisposer = reaction(
+      () => {
+        const { persistentUI: { focusDocument }, ui: { selectedTileIds } } = this.stores;
+        const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
+        return { focusTileId, focusDocument };
+      },
+      ({ focusTileId, focusDocument }) => {
+        if (focusTileId && focusDocument) {
+          this.stores.ui.setScrollTo(focusTileId, focusDocument);
+        }
+      }
+    );
+  }
+
+  public componentWillUnmount() {
+    this.scrollToDisposer?.();
   }
 
   public componentDidUpdate() {
