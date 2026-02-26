@@ -409,9 +409,7 @@ describe("CommentThread", () => {
       </ModalProvider>
     ));
 
-    // Expand the document thread by clicking its header
-    fireEvent.click(screen.getByText("Doc Thread"));
-
+    // Document thread is already expanded on mount (no tile focused).
     mockSetSelectedTileId.mockClear();
     fireEvent.click(screen.getByTestId("comment-card"));
     expect(mockSetSelectedTileId).toHaveBeenCalledWith("");

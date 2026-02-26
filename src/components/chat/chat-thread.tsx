@@ -134,7 +134,7 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   const focusId = focusTileId === undefined ? null : focusTileId;
   // expandedThreads tracks which threads are currently expanded (can be multiple).
   const [expandedThreads, setExpandedThreads] = useState<Set<string>>(
-    () => new Set(focusId ? [focusId] : [])
+    () => new Set(focusId ? [focusId] : ['document'])
   );
 
   // Switching focus expands the newly-selected thread (without closing others).
