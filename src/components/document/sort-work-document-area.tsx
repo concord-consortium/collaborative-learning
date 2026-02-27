@@ -159,6 +159,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
                 showPlayback={showPlayback}
                 fullHeight={true}
                 toolbar={appConfig.myResourcesToolbar({showPlayback, showEdit})}
+                pane="left"
               />
           }
           {

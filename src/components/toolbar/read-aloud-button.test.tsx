@@ -44,6 +44,12 @@ jest.mock("../../models/tiles/log/log-toolbar-event", () => ({
   logToolbarEvent: jest.fn()
 }));
 
+// Mock the document comment hooks (require Firestore access)
+jest.mock("../../hooks/document-comment-hooks", () => ({
+  useDocumentComments: () => ({ data: [], isLoading: false, isError: false }),
+  useDocumentCommentsAtSimplifiedPath: () => ({ data: [], isLoading: false, isError: false })
+}));
+
 describe("ReadAloudButton", () => {
   let stores: IStores;
 
