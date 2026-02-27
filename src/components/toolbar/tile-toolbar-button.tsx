@@ -1,8 +1,9 @@
-import React, { PropsWithChildren } from "react";
+import React, { PropsWithChildren, useCallback } from "react";
 import { useTouchHold } from "../../hooks/use-touch-hold";
 import classNames from "classnames";
 import { Tooltip } from "react-tippy";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
+import { useAnnounce } from "../../utilities/use-announce";
 
 /**
  * Create the complete tooltip from the given button information.
@@ -45,6 +46,13 @@ export const TileToolbarButton = function ({
   const tipOptions = useTooltipOptions();
   const tooltip = formatTooltip(title, keyHint);
 
+  // Announce a message when a disabled button is activated
+  const { announcement, announce } = useAnnounce();
+  const handleDisabledClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    announce("Select something to enable this action");
+  }, [announce]);
+
   const { onTouchStart, onTouchEnd, onMouseDown, onMouseUp, onClick: handleOnClick } = useTouchHold(
     () => onTouchHold?.(),
     onClick
@@ -54,17 +62,22 @@ export const TileToolbarButton = function ({
     <Tooltip title={tooltip} {...tipOptions}>
       <button
         className={classNames("toolbar-button", name, colorClass, { selected, disabled })}
-        // TODO: confer with Scott about aria-disabled vs. disabled
-        disabled={disabled}
-        onClick={handleOnClick}
-        onMouseDown={onMouseDown}
-        onMouseUp={onMouseUp}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
+        // Use aria-disabled instead of HTML disabled so buttons remain keyboard-focusable
+        aria-disabled={disabled || undefined}
+        aria-label={title}
+        aria-pressed={selected !== undefined ? selected : undefined}
+        onClick={disabled ? handleDisabledClick : handleOnClick}
+        onMouseDown={disabled ? undefined : onMouseDown}
+        onMouseUp={disabled ? undefined : onMouseUp}
+        onTouchStart={disabled ? undefined : onTouchStart}
+        onTouchEnd={disabled ? undefined : onTouchEnd}
         data-testid={dataTestId}
       >
         {children}
       </button>
+      {announcement && (
+        <span role="status" aria-live="assertive" className="visually-hidden">{announcement}</span>
+      )}
       {extraContent}
     </Tooltip>
   );

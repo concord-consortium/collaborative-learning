@@ -206,6 +206,14 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
           }
         }
         return offsets;
+      },
+      // Return focusable elements for focus trap navigation
+      getFocusableElements: () => {
+        const contentElement = this.textTileDiv?.querySelector("[data-slate-editor]") as HTMLElement | undefined;
+        const titleElement = this.textTileDiv?.querySelector(
+          ".editable-tile-title input, .editable-tile-title-text"
+        ) as HTMLElement | undefined;
+        return { contentElement: contentElement || undefined, titleElement: titleElement || undefined };
       }
     });
   }
