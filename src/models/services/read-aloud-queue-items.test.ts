@@ -7,9 +7,12 @@ import {
   TileReadAloudItem, CommentReadAloudItem
 } from "./read-aloud-queue-items";
 import { ChatCommentThread } from "../../components/chat/chat-comment-thread";
+import { kDrawingTileType, kDrawingStateVersion } from "../../plugins/drawing/model/drawing-types";
 
 // Helper to create document content with multiple tiles
-function createDocumentContent(tiles: Array<{ id: string; type: string; title?: string; text?: string }>) {
+function createDocumentContent(
+  tiles: Array<{ id: string; type: string; title?: string; text?: string; content?: any }>
+) {
   const rowMap: Record<string, any> = {};
   const tileMap: Record<string, any> = {};
   const rowOrder: string[] = [];
@@ -19,8 +22,8 @@ function createDocumentContent(tiles: Array<{ id: string; type: string; title?: 
     rowOrder.push(rowId);
     rowMap[rowId] = { id: rowId, tiles: [{ tileId: tile.id }] };
 
-    const content: any = { type: tile.type };
-    if (tile.type === "Text" && tile.text != null) {
+    const content: any = tile.content || { type: tile.type };
+    if (!tile.content && tile.type === "Text" && tile.text != null) {
       content.text = tile.text;
     }
 
@@ -33,6 +36,80 @@ function createDocumentContent(tiles: Array<{ id: string; type: string; title?: 
 
   const snapshot: DocumentContentSnapshotType = { rowMap, rowOrder, tileMap };
   return DocumentContentModel.create(snapshot);
+}
+
+// Drawing content helpers
+function createDrawingContent(objects: any[]) {
+  return {
+    type: kDrawingTileType,
+    version: kDrawingStateVersion,
+    stamps: [],
+    objects
+  };
+}
+
+let nextObjectId = 1;
+function makeTextObject(text: string, id?: string) {
+  return {
+    type: "text",
+    id: id || `text-${nextObjectId++}`,
+    x: 0, y: 0, width: 100, height: 100,
+    stroke: "#000000",
+    text
+  };
+}
+
+function makeGroupObject(children: any[], id?: string) {
+  return {
+    type: "group",
+    id: id || `group-${nextObjectId++}`,
+    x: 0, y: 0, width: 100, height: 100,
+    objects: children
+  };
+}
+
+function makeRectObject(id?: string) {
+  return {
+    type: "rectangle",
+    id: id || `rect-${nextObjectId++}`,
+    x: 0, y: 0, width: 100, height: 100,
+    stroke: "#000000",
+    strokeDashArray: "",
+    strokeWidth: 1,
+    fill: "none"
+  };
+}
+
+// Table document content helper
+function createTableDocumentContent(
+  tileId: string,
+  title: string | undefined,
+  columns: Array<{ name: string }>,
+  rows: Array<string[]>
+) {
+  const attributes = columns.map((col, i) => ({
+    id: `attr-${i}`,
+    name: col.name,
+    values: rows.map(row => row[i] ?? "")
+  }));
+  const cases = rows.map((_, i) => ({ __id__: `case-${i}` }));
+
+  const content: any = {
+    type: "Table",
+    isImported: true,
+    columnWidths: {},
+    importedDataSet: {
+      attributes,
+      cases
+    }
+  };
+
+  const rowMap = { "row-0": { id: "row-0", tiles: [{ tileId }] } };
+  const rowOrder = ["row-0"];
+  const tileMap: any = {
+    [tileId]: { id: tileId, title, content }
+  };
+  return DocumentContentModel.create({ rowMap, rowOrder, tileMap });
 }
 
 // Helper to create a comment with required fields
@@ -48,7 +125,7 @@ function makeComment(overrides: Partial<CommentWithId> & { id: string; name: str
 
 describe("read-aloud-queue-items", () => {
   beforeAll(async () => {
-    await registerTileTypes(["Geometry", "Text"]);
+    await registerTileTypes(["Drawing", "Geometry", "Table", "Text"]);
   });
 
   describe("buildTileSpeechText", () => {
@@ -75,6 +152,257 @@ describe("read-aloud-queue-items", () => {
       ]);
       const tile = content.getTile("t1")!;
       expect(buildTileSpeechText(tile)).toBe("Coordinate Grid tile");
+    });
+  });
+
+  describe("buildTileSpeechText - sketch tiles", () => {
+    it("reads multiple text objects in array structure order with periods between", () => { // regression anchor
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing", title: "My Drawing",
+        content: createDrawingContent([
+          makeTextObject("first annotation"),
+          makeTextObject("second annotation")
+        ])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("My Drawing. first annotation. second annotation");
+    });
+
+    it("reads text objects inside groups recursively (depth-first)", () => { // regression anchor
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing",
+        content: createDrawingContent([
+          makeGroupObject([makeTextObject("inside")]),
+          makeTextObject("outside")
+        ])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("inside. outside");
+    });
+
+    it("skips non-text drawing objects", () => {
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing",
+        content: createDrawingContent([
+          makeRectObject(),
+          makeTextObject("annotation"),
+          makeRectObject()
+        ])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("annotation");
+    });
+
+    it("falls back to tile type + title when drawing has no objects at all", () => {
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing", title: "Empty Canvas",
+        content: createDrawingContent([])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Sketch tile: Empty Canvas");
+    });
+
+    it("falls back to tile type + title when no text objects", () => {
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing", title: "My Shape",
+        content: createDrawingContent([makeRectObject()])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Sketch tile: My Shape");
+    });
+
+    it("falls back to tile type + title when all text objects are empty/whitespace", () => {
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing", title: "My Shape",
+        content: createDrawingContent([
+          makeTextObject(""),
+          makeTextObject("   ")
+        ])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Sketch tile: My Shape");
+    });
+
+    it("composes title + text objects with period separator", () => {
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing", title: "My Shape",
+        content: createDrawingContent([
+          makeTextObject("45 degrees"),
+          makeTextObject("right angle")
+        ])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("My Shape. 45 degrees. right angle");
+    });
+
+    it("does not double punctuation when text ends with period", () => {
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing",
+        content: createDrawingContent([
+          makeTextObject("First sentence."),
+          makeTextObject("Second")
+        ])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("First sentence. Second");
+    });
+
+    it("does not double punctuation when text ends with ! or ?", () => {
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing",
+        content: createDrawingContent([makeTextObject("Hello!")])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Hello!");
+    });
+
+    it("does not double punctuation when text ends with ellipsis", () => {
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing",
+        content: createDrawingContent([
+          makeTextObject("more to come…"),
+          makeTextObject("next")
+        ])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("more to come… next");
+    });
+
+    it("does not double punctuation when text ends with three dots", () => {
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing",
+        content: createDrawingContent([
+          makeTextObject("more to come..."),
+          makeTextObject("next")
+        ])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("more to come... next");
+    });
+
+    it("adds period after non-sentence punctuation (closing quote)", () => {
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing",
+        content: createDrawingContent([
+          makeTextObject('He said "hi"'),
+          makeTextObject("next")
+        ])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe('He said "hi". next');
+    });
+  });
+
+  describe("buildTileSpeechText - table tiles", () => {
+    it("reads column headers and rows", () => { // regression anchor
+      const doc = createTableDocumentContent("t1", "My Data",
+        [{ name: "Name" }, { name: "Age" }],
+        [["Alice", "12"]]
+      );
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("My Data. Columns: Name, Age. Alice, 12.");
+    });
+
+    it("reads multiple rows with period separators", () => {
+      const doc = createTableDocumentContent("t1", undefined,
+        [{ name: "Name" }, { name: "Age" }],
+        [["Alice", "12"], ["Bob", "14"]]
+      );
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Columns: Name, Age. Alice, 12. Bob, 14.");
+    });
+
+    it("uses singular Column: for one column", () => {
+      const doc = createTableDocumentContent("t1", undefined,
+        [{ name: "X" }],
+        [["1"]]
+      );
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Column: X. 1.");
+    });
+
+    it("reads blank for empty cells", () => { // regression anchor
+      const doc = createTableDocumentContent("t1", undefined,
+        [{ name: "X" }],
+        [["  "]]  // whitespace-only
+      );
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Column: X. blank.");
+    });
+
+    it("reads 0 as '0', not blank", () => {
+      const doc = createTableDocumentContent("t1", undefined,
+        [{ name: "X" }],
+        [["0"]]
+      );
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Column: X. 0.");
+    });
+
+    it("reads all-blank row", () => {
+      const doc = createTableDocumentContent("t1", undefined,
+        [{ name: "A" }, { name: "B" }],
+        [["", ""]]
+      );
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Columns: A, B. blank, blank.");
+    });
+
+    it("reads only column headers when no cases", () => {
+      const doc = createTableDocumentContent("t1", undefined,
+        [{ name: "Name" }, { name: "Age" }],
+        []
+      );
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Columns: Name, Age.");
+    });
+
+    it("falls back to tile type + title when no columns", () => {
+      const doc = createTableDocumentContent("t1", "My Data", [], []);
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Table tile: My Data");
+    });
+
+    it("falls back to just tile type when no columns and no title", () => { // regression anchor
+      const doc = createTableDocumentContent("t1", undefined, [], []);
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Table tile");
+    });
+
+    it("reads unnamed for empty column headers", () => {
+      const doc = createTableDocumentContent("t1", undefined,
+        [{ name: "" }, { name: "Age" }],
+        [["Alice", "12"]]
+      );
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Columns: unnamed, Age. Alice, 12.");
+    });
+
+    it("trims padded header names", () => {
+      const doc = createTableDocumentContent("t1", undefined,
+        [{ name: "  Age  " }],
+        [["12"]]
+      );
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Column: Age. 12.");
+    });
+
+    it("trims padded cell values", () => {
+      const doc = createTableDocumentContent("t1", undefined,
+        [{ name: "X" }],
+        [["  12  "]]
+      );
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Column: X. 12.");
+    });
+
+    it("title is composed with content when both exist", () => {
+      const doc = createTableDocumentContent("t1", "Results",
+        [{ name: "Score" }],
+        [["95"]]
+      );
+      const tile = doc.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("Results. Column: Score. 95.");
     });
   });
 
@@ -460,6 +788,52 @@ describe("read-aloud-queue-items", () => {
       // t1 should come before t2 in document order
       expect(commentItems[0].originTileId).toBe("t1");
       expect(commentItems[1].originTileId).toBe("t2");
+    });
+
+    it("builds targeted queue for sketch tile with comments", () => {
+      const content = createDocumentContent([
+        { id: "t1", type: "Drawing", title: "My Sketch",
+          content: createDrawingContent([makeTextObject("annotation")]) },
+        { id: "t2", type: "Text", text: "other tile" }
+      ]);
+      const manager = new DocumentCommentsManager();
+      manager.setComments([
+        makeComment({ id: "c1", name: "Alice", content: "Nice drawing!", tileId: "t1" })
+      ]);
+      const { items, commentMode } = buildReadAloudQueue(content, ["t1"], {
+        commentsManager: manager, showChatPanel: true, pane: "left", docTitle: "My Doc"
+      });
+      expect(commentMode).toBe("targeted");
+      // Tile content comes first, then comment thread
+      expect(items[0].kind).toBe("tile");
+      expect((items[0] as TileReadAloudItem).speechText).toBe("My Sketch. annotation");
+      const commentItem = items.find(i => i.kind === "comment") as CommentReadAloudItem;
+      expect(commentItem.speechText).toContain("Nice drawing!");
+      expect(items.indexOf(commentItem)).toBeGreaterThan(0);
+      // No section header in targeted mode
+      expect(items.find(i => i.kind === "section-header")).toBeUndefined();
+    });
+
+    it("builds sequential queue for table tile with comments", () => {
+      const doc = createTableDocumentContent("t1", "Results",
+        [{ name: "Score" }], [["95"]]
+      );
+      const manager = new DocumentCommentsManager();
+      manager.setComments([
+        makeComment({ id: "c1", name: "Bob", content: "Good scores", tileId: "t1" })
+      ]);
+      const { items, commentMode } = buildReadAloudQueue(doc, [], {
+        commentsManager: manager, showChatPanel: true, pane: "left", docTitle: "My Doc"
+      });
+      expect(commentMode).toBe("sequential");
+      // Tile content comes before comments in sequential mode too
+      const tileIndex = items.findIndex(i => i.kind === "tile");
+      const sectionHeaderIndex = items.findIndex(i => i.kind === "section-header");
+      const commentIndex = items.findIndex(i => i.kind === "comment");
+      expect(tileIndex).toBeLessThan(sectionHeaderIndex);
+      expect(sectionHeaderIndex).toBeLessThan(commentIndex);
+      expect((items[tileIndex] as TileReadAloudItem).speechText).toBe("Results. Column: Score. 95.");
+      expect((items[commentIndex] as CommentReadAloudItem).speechText).toContain("Good scores");
     });
   });
 });
