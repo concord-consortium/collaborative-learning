@@ -437,6 +437,10 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
                                onDeleteSelectedTiles={handleDeleteSelectedTiles}
                                {...buttonProps} />;
         case "readAloud":
+          // ReadAloudButton uses Firestore comment hooks that require fully initialized
+          // stores. In the doc-editor (authoring) context, Firestore is disabled, so we
+          // skip the ReadAloudButton entirely to avoid crashes.
+          if ((window as any).DISABLE_FIREBASE_SYNC) return null;
           return <ReadAloudButton key={toolButton.id}
                                   pane={pane}
                                   document={document}
