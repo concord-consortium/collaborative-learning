@@ -149,7 +149,7 @@ export const ChatPanel: React.FC<IProps> = observer(({ user, activeNavTab, focus
     persistentUI.setIsDocumentsView(newState);
 
     const service = getReadAloudService(stores);
-    if (service.state !== "idle" && service.activePane === "left") {
+    if (service.isReadingPane("left")) {
       if (newState) {
         // Switching TO Documents View — stop Read Aloud (immediate)
         service.stop("user");

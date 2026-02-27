@@ -85,7 +85,7 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
   // the selectedTileIds reaction (which can't distinguish comment clicks from workspace clicks).
   const handleSelectCard = () => {
     const service = getReadAloudService(stores);
-    if (service.state !== "idle" && service.activePane === "left") {
+    if (service.isReadingPane("left")) {
       // Jump to the first comment item for this thread
       const originTileId = threadId === "document" ? null : threadId;
       const idx = service.queue.findIndex(
@@ -212,7 +212,7 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
     // When Read Aloud is active, jump to the first comment item for this thread directly
     // instead of going through the selectedTileIds reaction (which can't distinguish comment
     // clicks from workspace clicks).
-    if (service.state !== "idle" && service.activePane === "left") {
+    if (service.isReadingPane("left")) {
       const originTileId = clickedId === "document" || !clickedId ? null : clickedId;
       const idx = service.queue.findIndex(
         item => isCommentItem(item) && item.originTileId === originTileId
@@ -312,7 +312,7 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
     // Always set pendingCommentId so the comment highlights visually.
     // If read-aloud starts later, it will jump to this comment.
     service.setPendingCommentId(commentId);
-    if (service.state !== "idle" && service.activePane === "left") {
+    if (service.isReadingPane("left")) {
       const idx = service.queue.findIndex(
         item => isCommentItem(item) && item.commentId === commentId
       );

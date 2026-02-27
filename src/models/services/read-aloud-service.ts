@@ -50,6 +50,10 @@ export class ReadAloudService {
     return this.currentItem?.associatedTileId ?? null;
   }
 
+  isReadingPane(pane: ReadAloudPane): boolean {
+    return this.state !== "idle" && this.activePane === pane;
+  }
+
   @action setPendingCommentId(commentId: string | null) {
     this.pendingCommentId = commentId;
   }
@@ -73,7 +77,7 @@ export class ReadAloudService {
     if (!this.isSupported) return;
 
     // Toggle off if already reading on the same pane
-    if (this.state !== "idle" && this.activePane === pane) {
+    if (this.isReadingPane(pane)) {
       this.stop("user");
       return;
     }

@@ -47,7 +47,7 @@ export const ReadAloudButton: React.FC<IProps> = observer(function ReadAloudButt
   // Compute variables needed by useEffect — must be before any early returns
   const content = doc?.content ?? section?.content;
   const commentsManager = doc?.commentsManager ?? focusDoc?.commentsManager;
-  const isActive = service.state !== "idle" && service.activePane === pane;
+  const isActive = service.isReadingPane(pane);
   const titleDoc = doc ?? focusDoc;
   const docTitle = titleDoc ? getDocumentDisplayTitle(stores.unit, titleDoc, appConfig) || undefined : undefined;
 

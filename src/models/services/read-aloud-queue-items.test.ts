@@ -52,21 +52,13 @@ describe("read-aloud-queue-items", () => {
   });
 
   describe("buildTileSpeechText", () => {
-    it("reads title + text content for text tiles with title", () => {
+    it("does not speak the title for text tiles (hiddenTitle)", () => {
       const content = createDocumentContent([
         { id: "t1", type: "Text", title: "My Title", text: "My content" }
       ]);
       const tile = content.getTile("t1")!;
-      // Text tiles have hiddenTitle, so title is not spoken — only text content
+      // Text tiles have hiddenTitle, so the title is excluded from spoken text
       expect(buildTileSpeechText(tile)).toBe("My content");
-    });
-
-    it("reads only text content for text tiles (hidden title)", () => {
-      const content = createDocumentContent([
-        { id: "t1", type: "Text", text: "Hello world" }
-      ]);
-      const tile = content.getTile("t1")!;
-      expect(buildTileSpeechText(tile)).toBe("Hello world");
     });
 
     it("announces tile type and title for non-text tiles", () => {

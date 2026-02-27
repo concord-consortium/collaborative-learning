@@ -119,7 +119,8 @@ export function EditableDocumentContent({
       <EditableTileApiInterfaceRefContext.Provider value={editableTileApiInterfaceRef}>
         <div key="editable-document" className={editableDocContentClass}
               data-focus-document={document.key} >
-          {isShowingToolbar && modifiedToolbar && <DocumentToolbar document={document} toolbar={modifiedToolbar} pane={pane} />}
+          {isShowingToolbar && modifiedToolbar &&
+            <DocumentToolbar document={document} toolbar={modifiedToolbar} pane={pane} />}
           {isShowingToolbar && <div className="canvas-separator"/>}
           <DocumentCanvas
             readOnly={isReadOnly}
