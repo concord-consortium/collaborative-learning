@@ -123,7 +123,7 @@ function extractSketchText(objects: any[]): string {
   // Join with periods, avoiding double punctuation at boundaries
   return texts.reduce((acc, text, i) => {
     if (i === 0) return text;
-    const prevEndsWithPunctuation = /[.!?]$/.test(acc) || acc.endsWith("…") || acc.endsWith("...");
+    const prevEndsWithPunctuation = /(?:[.!?]|\.{3}|…)["')\]]*$/.test(acc);
     return prevEndsWithPunctuation ? `${acc} ${text}` : `${acc}. ${text}`;
   }, "");
 }

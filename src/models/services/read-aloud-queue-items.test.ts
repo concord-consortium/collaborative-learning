@@ -280,7 +280,19 @@ describe("read-aloud-queue-items", () => {
       expect(buildTileSpeechText(tile)).toBe("more to come... next");
     });
 
-    it("adds period after non-sentence punctuation (closing quote)", () => {
+    it("does not double punctuation when sentence punctuation is inside closing quote", () => {
+      const content = createDocumentContent([{
+        id: "t1", type: "Drawing",
+        content: createDrawingContent([
+          makeTextObject('She said "hello!"'),
+          makeTextObject("next")
+        ])
+      }]);
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe('She said "hello!" next');
+    });
+
+    it("adds period after closing quote with no sentence punctuation inside", () => {
       const content = createDocumentContent([{
         id: "t1", type: "Drawing",
         content: createDrawingContent([
