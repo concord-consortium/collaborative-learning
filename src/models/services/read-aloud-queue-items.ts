@@ -1,6 +1,10 @@
 import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { kTextTileType, TextContentModelType } from "../tiles/text/text-content";
+import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
+import { DrawingContentModelType } from "../../plugins/drawing/model/drawing-content";
+import { kTableTileType } from "../tiles/table/table-content";
+import { IAttribute } from "../data/attribute";
 import { DocumentContentModelType } from "../document/document-content";
 import { CommentWithId, DocumentCommentsManager } from "../document/document-comments-manager";
 import {
@@ -60,6 +64,72 @@ function getTileTypeName(type: string): string {
   return getTileContentInfo(type)?.displayName || type;
 }
 
+/**
+ * Build speech text for a table tile: "Column(s): header1, header2. val1, val2. val3, val4."
+ * Accesses dataSet via the content model's view without a static TableContentModel import.
+ */
+function extractTableText(content: any): string {
+  if (!content || typeof content !== "object") return "";
+  const dataSet = content.dataSet;
+  if (!dataSet || typeof dataSet.getStrValue !== "function") return "";
+
+  const attributes = dataSet.attributes;
+  if (!attributes || attributes.length === 0) return "";
+
+  // Column headers
+  const headerNames = attributes.map((attr: IAttribute) => {
+    const name = (attr.name as string)?.trim();
+    return name || "unnamed";
+  });
+  const prefix = attributes.length === 1 ? "Column" : "Columns";
+  const parts: string[] = [`${prefix}: ${headerNames.join(", ")}.`];
+
+  // Row data
+  const cases = dataSet.cases;
+  if (cases && cases.length > 0) {
+    for (const aCase of cases) {
+      if (!aCase?.__id__) continue;
+      const values = attributes.map((attr: IAttribute) => {
+        const raw = dataSet.getStrValue(aCase.__id__, attr.id) as string;
+        const trimmed = raw?.trim();
+        return trimmed || "blank";
+      });
+      parts.push(`${values.join(", ")}.`);
+    }
+  }
+
+  return parts.join(" ");
+}
+
+/**
+ * Recursively extract text from drawing objects in array structure order (depth-first pre-order).
+ * Uses structural type checks to avoid importing .tsx files.
+ */
+function extractSketchText(objects: any[]): string {
+  const texts: string[] = [];
+  for (const obj of objects) {
+    if (!obj || typeof obj !== "object") continue;
+    if (obj.type === "text") {
+      const trimmed = (obj.text as string)?.trim();
+      if (trimmed) {
+        texts.push(trimmed);
+      }
+    } else if (obj.type === "group" && Array.isArray(obj.objects)) {
+      const groupText = extractSketchText(obj.objects);
+      if (groupText) {
+        texts.push(groupText);
+      }
+    }
+    // All other object types silently skipped (fail-closed)
+  }
+  // Join with periods, avoiding double punctuation at boundaries
+  return texts.reduce((acc, text, i) => {
+    if (i === 0) return text;
+    const prevEndsWithPunctuation = /(?:[.!?]|\.{3}|…)["')\]]*$/.test(acc);
+    return prevEndsWithPunctuation ? `${acc} ${text}` : `${acc}. ${text}`;
+  }, "");
+}
+
 export function buildTileSpeechText(tile: ITileModel): string {
   const tileType = tile.content.type;
   const title = getTileComponentInfo(tileType)?.hiddenTitle ? "" : tile.computedTitle;
@@ -68,6 +138,13 @@ export function buildTileSpeechText(tile: ITileModel): string {
   let textContent = "";
   if (tileType === kTextTileType) {
     textContent = (tile.content as TextContentModelType).asPlainText();
+  } else if (tileType === kDrawingTileType) {
+    const drawingContent = tile.content as DrawingContentModelType;
+    if (Array.isArray(drawingContent.objects)) {
+      textContent = extractSketchText(drawingContent.objects);
+    }
+  } else if (tileType === kTableTileType) {
+    textContent = extractTableText(tile.content);
   }
 
   if (title && textContent) return `${title}. ${textContent}`;
