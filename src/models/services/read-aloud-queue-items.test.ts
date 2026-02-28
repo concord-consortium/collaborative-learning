@@ -250,10 +250,14 @@ describe("read-aloud-queue-items", () => {
     it("does not double punctuation when text ends with ! or ?", () => {
       const content = createDocumentContent([{
         id: "t1", type: "Drawing",
-        content: createDrawingContent([makeTextObject("Hello!")])
+        content: createDrawingContent([
+          makeTextObject("Hello!"),
+          makeTextObject("Are you there?"),
+          makeTextObject("Goodbye")
+        ])
       }]);
       const tile = content.getTile("t1")!;
-      expect(buildTileSpeechText(tile)).toBe("Hello!");
+      expect(buildTileSpeechText(tile)).toBe("Hello! Are you there? Goodbye");
     });
 
     it("does not double punctuation when text ends with ellipsis", () => {

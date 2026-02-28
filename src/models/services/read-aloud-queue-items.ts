@@ -2,7 +2,9 @@ import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { kTextTileType, TextContentModelType } from "../tiles/text/text-content";
 import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
+import { DrawingContentModelType } from "../../plugins/drawing/model/drawing-content";
 import { kTableTileType } from "../tiles/table/table-content";
+import { IAttribute } from "../data/attribute";
 import { DocumentContentModelType } from "../document/document-content";
 import { CommentWithId, DocumentCommentsManager } from "../document/document-comments-manager";
 import {
@@ -75,7 +77,7 @@ function extractTableText(content: any): string {
   if (!attributes || attributes.length === 0) return "";
 
   // Column headers
-  const headerNames = attributes.map((attr: any) => {
+  const headerNames = attributes.map((attr: IAttribute) => {
     const name = (attr.name as string)?.trim();
     return name || "unnamed";
   });
@@ -87,7 +89,7 @@ function extractTableText(content: any): string {
   if (cases && cases.length > 0) {
     for (const aCase of cases) {
       if (!aCase?.__id__) continue;
-      const values = attributes.map((attr: any) => {
+      const values = attributes.map((attr: IAttribute) => {
         const raw = dataSet.getStrValue(aCase.__id__, attr.id) as string;
         const trimmed = raw?.trim();
         return trimmed || "blank";
@@ -137,7 +139,7 @@ export function buildTileSpeechText(tile: ITileModel): string {
   if (tileType === kTextTileType) {
     textContent = (tile.content as TextContentModelType).asPlainText();
   } else if (tileType === kDrawingTileType) {
-    const drawingContent = tile.content as any;
+    const drawingContent = tile.content as DrawingContentModelType;
     if (Array.isArray(drawingContent.objects)) {
       textContent = extractSketchText(drawingContent.objects);
     }
