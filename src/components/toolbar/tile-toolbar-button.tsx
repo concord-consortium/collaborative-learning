@@ -61,6 +61,7 @@ export const TileToolbarButton = function ({
   return (
     <Tooltip title={tooltip} {...tipOptions}>
       <button
+        type="button"
         className={classNames("toolbar-button", name, colorClass, { selected, disabled })}
         // Use aria-disabled instead of HTML disabled so buttons remain keyboard-focusable
         aria-disabled={disabled || undefined}
