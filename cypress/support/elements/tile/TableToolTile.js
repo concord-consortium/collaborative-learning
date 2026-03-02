@@ -100,14 +100,14 @@ class TableToolTile{
     }
     typeInTableCell(i, text, confirm=true) {
       const confirmation = confirm ? '{enter}' : '';
-      this.getTableCell().eq(i).then($cell => {
-        if ($cell.attr('aria-selected') !== 'true') {
+      this.getTableCell().eq(i).invoke('attr', 'aria-selected').then(selected => {
+        if (selected !== 'true') {
           this.getTableCell().eq(i).click({ scrollBehavior: false });
           this.getTableCell().eq(i).should('have.attr', 'aria-selected', 'true');
           cy.wait(100);
         }
-        this.getTableCell().eq(i).click({ scrollBehavior: false });
-        return cy.document().within(() => {
+        cy.get('.rdg-focus-sink').type('{enter}', { force: true });
+        cy.document().within(() => {
           this.getTableCellEdit().type(`${text}${confirmation}`, { scrollBehavior: false });
         });
       });
