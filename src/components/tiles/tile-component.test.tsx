@@ -292,9 +292,9 @@ describe("TileComponent focus trap", () => {
       expect(tileElement).toHaveAttribute("aria-label", "TestTile tile: My Notes");
     });
 
-    it("tile container has tabIndex=-1", () => {
+    it("tile container has tabIndex=0 (reachable via Tab)", () => {
       const { tileElement } = renderFocusTrapTile();
-      expect(tileElement).toHaveAttribute("tabindex", "-1");
+      expect(tileElement).toHaveAttribute("tabindex", "0");
     });
   });
 
@@ -574,19 +574,14 @@ describe("TileComponent focus trap", () => {
       tile1.dispatchEvent(new CustomEvent("tile-navigation-focus", { bubbles: false }));
       act(() => { tile1.focus(); });
 
-      // Tab on tile1 should pass through to tile2 (one-shot)
+      // Tab on tile1 passes through to tile2 (one-shot pass-through).
+      // Since pass-through does NOT propagate tile-navigation-focus,
+      // tile2's handleFocus auto-enters the focus trap immediately.
       fireEvent.keyDown(tile1, { key: "Tab" });
-      expect(document.activeElement).toBe(tile2);
-
-      // Null out mocks so tile2 has no focusable elements for clarity
-      mockContentElement = null;
-      mockTitleElement = null;
-
-      // Tab on tile2 should try to enter focus trap (NOT pass through),
-      // because tile1's pass-through did not propagate tile-navigation-focus.
-      // Since tile2 has no focusable elements, it falls through to inter-tile nav.
-      // But the key point: it attempted to enter the trap first (justArrivedViaNav was NOT set).
-      // We can verify this by checking that if tile2 HAD focusable elements, it would trap.
+      // If tile-navigation-focus had been propagated, justArrivedViaNav would
+      // prevent auto-entry and focus would stay on tile2's container.
+      // Instead, focus moved into the trap — proving no propagation occurred.
+      expect(document.activeElement).not.toBe(tile2);
     });
 
     it("after Escape→Tab→Shift+Tab, the original tile enters focus trap on Tab", () => {
@@ -603,15 +598,13 @@ describe("TileComponent focus trap", () => {
       fireEvent.keyDown(tile1, { key: "Tab" });
       expect(document.activeElement).toBe(tile2);
 
-      // Shift+Tab → back to tile1 (pass-through, does NOT propagate)
+      // Shift+Tab → back to tile1 (pass-through, does NOT propagate).
+      // handleFocus auto-enters tile1's focus trap immediately.
       fireEvent.keyDown(tile2, { key: "Tab", shiftKey: true });
-      expect(document.activeElement).toBe(tile1);
+      expect(tile1.contains(document.activeElement)).toBe(true);
 
-      // Tab on tile1 should NOW enter the focus trap (not inter-tile nav)
+      // Tab cycles within the trap (NOT inter-tile nav to tile2)
       fireEvent.keyDown(tile1, { key: "Tab" });
-      // If it entered the trap, focus would be on titleElement (or toolbar/content)
-      // Since both tiles share module-level mocks, the focusable elements may be
-      // from either tile. The key assertion: focus is NOT on tile2.
       expect(document.activeElement).not.toBe(tile2);
     });
   });

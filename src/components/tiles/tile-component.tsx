@@ -611,13 +611,18 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     }
   };
 
-  // When the tile container itself receives focus (e.g., via Tab from the toolbar),
-  // select the tile and auto-enter the focus trap unless navigation flags indicate otherwise.
-  // React's onFocus bubbles, so we check e.target === e.currentTarget to only handle
-  // direct focus on the tile container, not focus on child elements.
+  // When the tile container itself receives focus from outside the tile (e.g., Tab from
+  // the workspace toolbar), select the tile and auto-enter the focus trap.
+  // Uses relatedTarget to distinguish external focus (Tab from toolbar) from internal
+  // focus moves (ArrowUp exit to container, programmatic .focus() calls).
   private handleFocus = (e: React.FocusEvent<HTMLDivElement>) => {
     if (e.target !== e.currentTarget) return;
     if (this.escapedFocusTrap || this.justArrivedViaNav) return;
+    // Only auto-enter when focus arrives from outside the tile and its toolbar.
+    // Skip when: relatedTarget is null (programmatic focus), inside the tile (ArrowUp exit),
+    // or inside the toolbar (FloatingPortal fallback to prevent focus loop).
+    const prev = e.relatedTarget as HTMLElement | null;
+    if (!prev || this.domElement?.contains(prev) || this.toolbarElement?.contains(prev)) return;
     // Select the tile in the UI store so tile content (e.g., Slate editor) activates properly.
     // This mirrors what navigateToSiblingTile does for inter-tile keyboard navigation.
     const { model } = this.props;
