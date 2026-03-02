@@ -470,7 +470,12 @@ describe("TileComponent focus trap", () => {
       fireEvent.keyDown(tile1, { key: "Escape" });
       expect(document.activeElement).toBe(tile1);
 
-      // Tab should go to tile2 (not re-enter trap)
+      // Clear mocks so tile2's handleFocus auto-entry finds no focusable elements
+      // and focus stays on tile2's container (shared mocks would land in tile1's DOM).
+      mockTitleElement = null;
+      mockContentElement = null;
+
+      // Tab should navigate to tile2 (handleFocus auto-entry attempted, but no elements)
       fireEvent.keyDown(tile1, { key: "Tab" });
       expect(document.activeElement).toBe(tile2);
     });
@@ -483,7 +488,11 @@ describe("TileComponent focus trap", () => {
       act(() => { tile2.focus(); });
       tile2.dispatchEvent(new CustomEvent("toolbar-escape", { bubbles: false }));
 
-      // Shift+Tab should go to tile1
+      // Clear mocks so tile1's handleFocus auto-entry finds no focusable elements
+      mockTitleElement = null;
+      mockContentElement = null;
+
+      // Shift+Tab should navigate to tile1
       fireEvent.keyDown(tile2, { key: "Tab", shiftKey: true });
       expect(document.activeElement).toBe(tile1);
     });
@@ -556,35 +565,7 @@ describe("TileComponent focus trap", () => {
       expect(document.activeElement).not.toBe(titleElement);
     });
 
-    it("tile-navigation-focus event sets justArrivedViaNav (one-shot pass-through)", () => {
-      const { tileElement, titleElement } = renderFocusTrapTile();
-
-      tileElement.dispatchEvent(new CustomEvent("tile-navigation-focus", { bubbles: false }));
-      act(() => { tileElement.focus(); });
-
-      // First Tab should pass through (inter-tile nav), not enter the trap
-      fireEvent.keyDown(tileElement, { key: "Tab" });
-      expect(document.activeElement).not.toBe(titleElement);
-    });
-
-    it("tile-navigation-focus pass-through does not propagate to next tile", () => {
-      const { tile1, tile2 } = renderTwoTiles();
-
-      // Simulate: tile1 received focus via inter-tile navigation
-      tile1.dispatchEvent(new CustomEvent("tile-navigation-focus", { bubbles: false }));
-      act(() => { tile1.focus(); });
-
-      // Tab on tile1 passes through to tile2 (one-shot pass-through).
-      // Since pass-through does NOT propagate tile-navigation-focus,
-      // tile2's handleFocus auto-enters the focus trap immediately.
-      fireEvent.keyDown(tile1, { key: "Tab" });
-      // If tile-navigation-focus had been propagated, justArrivedViaNav would
-      // prevent auto-entry and focus would stay on tile2's container.
-      // Instead, focus moved into the trap — proving no propagation occurred.
-      expect(document.activeElement).not.toBe(tile2);
-    });
-
-    it("after Escape→Tab→Shift+Tab, the original tile enters focus trap on Tab", () => {
+    it("after Escape→Tab→Escape→Shift+Tab, returns to original tile", () => {
       const { stores, model2, tile1, tile2 } = renderTwoTiles();
       act(() => { stores.ui.setSelectedTileId(model2.id); });
 
@@ -594,18 +575,20 @@ describe("TileComponent focus trap", () => {
       fireEvent.keyDown(tile1, { key: "Escape" }); // escape
       expect(document.activeElement).toBe(tile1);
 
-      // Tab → tile2 (inter-tile nav, propagates tile-navigation-focus)
+      // Clear mocks so handleFocus auto-entry finds no elements
+      mockTitleElement = null;
+      mockContentElement = null;
+
+      // Tab → tile2
       fireEvent.keyDown(tile1, { key: "Tab" });
       expect(document.activeElement).toBe(tile2);
 
-      // Shift+Tab → back to tile1 (pass-through, does NOT propagate).
-      // handleFocus auto-enters tile1's focus trap immediately.
-      fireEvent.keyDown(tile2, { key: "Tab", shiftKey: true });
-      expect(tile1.contains(document.activeElement)).toBe(true);
+      // Simulate Escape on tile2 (set via toolbar-escape since we can't enter trap with no mocks)
+      tile2.dispatchEvent(new CustomEvent("toolbar-escape", { bubbles: false }));
 
-      // Tab cycles within the trap (NOT inter-tile nav to tile2)
-      fireEvent.keyDown(tile1, { key: "Tab" });
-      expect(document.activeElement).not.toBe(tile2);
+      // Shift+Tab → back to tile1
+      fireEvent.keyDown(tile2, { key: "Tab", shiftKey: true });
+      expect(document.activeElement).toBe(tile1);
     });
   });
 

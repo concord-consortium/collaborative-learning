@@ -164,10 +164,6 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   // When true, the next Tab on the tile container does inter-tile navigation
   // instead of entering the focus trap. Set by Escape, cleared after use.
   private escapedFocusTrap = false;
-  // When true, the user just arrived at this tile via inter-tile navigation.
-  // Allows one pass-through Tab/Shift+Tab without propagating navigation mode
-  // to the next tile. Cleared after use or on click.
-  private justArrivedViaNav = false;
   // Live region element for screen reader announcements (managed via direct DOM to avoid re-renders)
   private liveRegion: HTMLSpanElement | null = null;
   private liveRegionTimer: ReturnType<typeof setTimeout> | null = null;
@@ -201,7 +197,6 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     // to prevent the browser's default Tab focus movement from descendant elements.
     this.domElement?.addEventListener("keydown", this.handleTabKeyDown, true);
     this.domElement?.addEventListener("toolbar-escape", this.handleToolbarEscape);
-    this.domElement?.addEventListener("tile-navigation-focus", this.handleTileNavigationFocus);
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -228,7 +223,6 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     this.domElement?.removeEventListener("touchstart", this.handlePointerDown, options);
     this.domElement?.removeEventListener("keydown", this.handleTabKeyDown, true);
     this.domElement?.removeEventListener("toolbar-escape", this.handleToolbarEscape);
-    this.domElement?.removeEventListener("tile-navigation-focus", this.handleTileNavigationFocus);
   }
 
   public render() {
@@ -420,12 +414,6 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     this.srAnnounce("Exited tile. Tab to next tile, Shift+Tab to previous.");
   };
 
-  // tile-navigation-focus: this tile received focus via inter-tile navigation.
-  // Sets justArrivedViaNav for a one-shot pass-through on the next Tab/Shift+Tab.
-  private handleTileNavigationFocus = () => {
-    this.justArrivedViaNav = true;
-  };
-
   // Returns the focusable elements for this tile's focus trap.
   private getFocusTrapElements() {
     const toolbar = this.toolbarElement;
@@ -499,12 +487,10 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   }
 
   // Navigate to an adjacent sibling tile. Returns true if a sibling was found.
-  // When propagateNavMode is true, dispatches tile-navigation-focus on the destination
-  // so that its next Tab/Shift+Tab also does inter-tile navigation (one-shot).
-  // When false, the destination tile will enter its focus trap on the next Tab.
+  // The destination tile's handleFocus will auto-enter its focus trap.
   // NOTE: Uses DOM selectors (.document-content, .tool-tile[data-tool-id]) to find
   // siblings — if those CSS classes change, keyboard nav will silently break.
-  private navigateToSiblingTile(e: KeyboardEvent, reverse: boolean, propagateNavMode = true): boolean {
+  private navigateToSiblingTile(e: KeyboardEvent, reverse: boolean): boolean {
     const documentContent = this.domElement?.closest('.document-content');
     const tiles = Array.from(
       documentContent?.querySelectorAll('.tool-tile[data-tool-id]') ?? []
@@ -515,11 +501,6 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       const nextTileId = nextTile.getAttribute('data-tool-id');
       if (nextTileId) {
         this.stores.ui.setSelectedTileId(nextTileId, { append: false });
-      }
-      if (propagateNavMode) {
-        // Signal the destination tile to allow one pass-through Tab/Shift+Tab
-        // for inter-tile navigation (e.g., after Escape from the current tile).
-        nextTile.dispatchEvent(new CustomEvent('tile-navigation-focus', { bubbles: false }));
       }
       nextTile.focus();
       e.preventDefault();
@@ -538,23 +519,15 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
 
     if (isTileFocused) {
       if (this.escapedFocusTrap) {
-        // User Escaped from this tile — navigate to sibling and propagate
-        // navigation mode so the destination also allows one pass-through.
+        // User Escaped from this tile — navigate to sibling.
         this.escapedFocusTrap = false;
-        this.navigateToSiblingTile(e, e.shiftKey, true);
-        return;
-      }
-      if (this.justArrivedViaNav) {
-        // User just arrived via inter-tile nav — allow one pass-through
-        // but do NOT propagate navigation mode to the next tile.
-        this.justArrivedViaNav = false;
-        this.navigateToSiblingTile(e, e.shiftKey, false);
+        this.navigateToSiblingTile(e, e.shiftKey);
         return;
       }
       // Normal: enter focus trap. Tab enters at first element, Shift+Tab at last.
       if (this.enterFocusTrap(e, e.shiftKey)) return;
       // No focusable elements in this tile: fall through to inter-tile navigation.
-      this.navigateToSiblingTile(e, e.shiftKey, false);
+      this.navigateToSiblingTile(e, e.shiftKey);
       // If no sibling, let browser handle Tab (moves out of tile area)
       return;
     }
@@ -617,7 +590,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   // focus moves (ArrowUp exit to container, programmatic .focus() calls).
   private handleFocus = (e: React.FocusEvent<HTMLDivElement>) => {
     if (e.target !== e.currentTarget) return;
-    if (this.escapedFocusTrap || this.justArrivedViaNav) return;
+    if (this.escapedFocusTrap) return;
     // Only auto-enter when focus arrives from outside the tile and its toolbar.
     // Skip when: relatedTarget is null (programmatic focus), inside the tile (ArrowUp exit),
     // or inside the toolbar (FloatingPortal fallback to prevent focus loop).
@@ -684,9 +657,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   };
 
   private handlePointerDown = (e: MouseEvent | TouchEvent) => {
-    // Clear navigation flags so clicking back into a tile re-enables the focus trap
+    // Clear escaped flag so clicking back into a tile re-enables the focus trap
     this.escapedFocusTrap = false;
-    this.justArrivedViaNav = false;
     const { model } = this.props;
 
     // ignore mousedown on drag element
