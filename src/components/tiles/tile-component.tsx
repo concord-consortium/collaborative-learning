@@ -283,7 +283,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
             role="group"
             aria-label={tileAriaLabel}
             style={style}
-            tabIndex={-1}
+            tabIndex={0}
+            onFocus={this.handleFocus}
             onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
             onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
             onKeyDown={this.handleKeyDown}
@@ -441,6 +442,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       titleElement: focusable?.titleElement || null,
       activeToolbarButton,
       contentElement: focusable?.contentElement || null,
+      focusContent: focusable?.focusContent || null,
     };
   }
 
@@ -456,16 +458,35 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     return false;
   }
 
+  // Focuses the content element, preferring the tile's custom focusContent method if available.
+  // Some editors (e.g., Slate) require their own focus API to properly initialize cursor/selection.
+  private focusContent(contentElement: HTMLElement | null, focusContentFn: (() => boolean) | null): boolean {
+    if (focusContentFn) {
+      return focusContentFn();
+    }
+    if (contentElement) {
+      contentElement.focus();
+      return document.activeElement === contentElement;
+    }
+    return false;
+  }
+
   // Enters the focus trap, focusing the first (or last if reverse) element.
   // Returns true if focus was moved, false if no focusable elements exist.
   private enterFocusTrap(
     e: { preventDefault: () => void; stopPropagation: () => void },
     reverse = false
   ): boolean {
-    const { titleElement, activeToolbarButton, contentElement } = this.getFocusTrapElements();
-    const focused = reverse
-      ? this.focusFirstAvailable(contentElement, activeToolbarButton, titleElement)
-      : this.focusFirstAvailable(titleElement, activeToolbarButton, contentElement);
+    const { titleElement, activeToolbarButton, contentElement, focusContent } = this.getFocusTrapElements();
+
+    let focused: boolean;
+    if (reverse) {
+      focused = this.focusContent(contentElement, focusContent)
+        || this.focusFirstAvailable(activeToolbarButton, titleElement);
+    } else {
+      focused = this.focusFirstAvailable(titleElement, activeToolbarButton)
+        || this.focusContent(contentElement, focusContent);
+    }
 
     if (focused) {
       this.escapedFocusTrap = false;
@@ -541,7 +562,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     if (isInsideTile) {
       // Cycling within focus trap from elements inside the tile DOM.
       // (Toolbar handles its own Tab events since it's in FloatingPortal.)
-      const { titleElement, activeToolbarButton, contentElement } = this.getFocusTrapElements();
+      const { titleElement, activeToolbarButton, contentElement, focusContent } = this.getFocusTrapElements();
       const isOnContent = activeElement === contentElement || contentElement?.contains(activeElement);
       const isOnTitle = activeElement === titleElement;
 
@@ -555,7 +576,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
           return;
         } else if (isOnTitle) {
           // Title → wrap to content (last element)
-          this.focusFirstAvailable(contentElement);
+          this.focusContent(contentElement, focusContent);
           e.preventDefault();
           e.stopPropagation();
           return;
@@ -570,7 +591,9 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
           return;
         } else if (isOnTitle) {
           // Title → toolbar (or content, skipping non-focusable elements)
-          this.focusFirstAvailable(activeToolbarButton, contentElement);
+          if (!this.focusFirstAvailable(activeToolbarButton)) {
+            this.focusContent(contentElement, focusContent);
+          }
           e.preventDefault();
           e.stopPropagation();
           return;
@@ -586,6 +609,21 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       e.preventDefault();
       e.stopPropagation();
     }
+  };
+
+  // When the tile container itself receives focus (e.g., via Tab from the toolbar),
+  // select the tile and auto-enter the focus trap unless navigation flags indicate otherwise.
+  // React's onFocus bubbles, so we check e.target === e.currentTarget to only handle
+  // direct focus on the tile container, not focus on child elements.
+  private handleFocus = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget) return;
+    if (this.escapedFocusTrap || this.justArrivedViaNav) return;
+    // Select the tile in the UI store so tile content (e.g., Slate editor) activates properly.
+    // This mirrors what navigateToSiblingTile does for inter-tile keyboard navigation.
+    const { model } = this.props;
+    const { ui } = this.stores;
+    ui.setSelectedTileId(model.id, { append: false });
+    this.enterFocusTrap(e);
   };
 
   // React handler for Enter, Escape, ArrowUp exit, and hotkeys (Tab handled natively above)

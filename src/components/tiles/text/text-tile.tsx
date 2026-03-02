@@ -213,7 +213,26 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         const titleElement = this.textTileDiv?.querySelector(
           ".editable-tile-title input, .editable-tile-title-text"
         ) as HTMLElement | undefined;
-        return { contentElement: contentElement || undefined, titleElement: titleElement || undefined };
+        // Use Slate's ReactEditor.focus to properly activate the editor (sets selection/cursor).
+        // Native .focus() on the contenteditable div doesn't initialize Slate's internal state.
+        const focusContent = () => {
+          if (this.editor) {
+            ReactEditor.focus(this.editor);
+            // ReactEditor.focus doesn't create a selection if the editor never had one.
+            // Without a selection, keyboard input has no insertion point and is silently ignored.
+            if (!this.editor.selection) {
+              const end = Editor.end(this.editor, []);
+              this.editor.selection = { anchor: end, focus: end };
+            }
+            return document.activeElement === contentElement;
+          }
+          return false;
+        };
+        return {
+          contentElement: contentElement || undefined,
+          titleElement: titleElement || undefined,
+          focusContent
+        };
       }
     });
   }

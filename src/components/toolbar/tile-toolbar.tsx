@@ -110,16 +110,31 @@ export const TileToolbar = observer(
           const focusable = tileApi?.getFocusableElements?.();
           const contentElement = focusable?.contentElement;
           const titleElement = focusable?.titleElement;
+          const focusContentFn = focusable?.focusContent;
+
+          // Helper to focus content, preferring tile's custom focus method (e.g., Slate)
+          const tryFocusContent = () => {
+            if (focusContentFn?.()) return true;
+            if (contentElement) {
+              contentElement.focus();
+              return document.activeElement === contentElement;
+            }
+            return false;
+          };
 
           // Try candidates in order, skipping any that can't actually receive focus
           // (e.g., a plain div title element without tabindex).
-          const candidates = e.shiftKey
-            ? [titleElement, contentElement, tileElement]  // Shift+Tab: toolbar → title → content → tile
-            : [contentElement, titleElement, tileElement]; // Tab: toolbar → content → title → tile
-          for (const candidate of candidates) {
-            if (candidate) {
-              candidate.focus();
-              if (document.activeElement === candidate) break;
+          if (e.shiftKey) {
+            // Shift+Tab: toolbar → title → content → tile
+            if (titleElement) { titleElement.focus(); }
+            if (document.activeElement !== titleElement) {
+              if (!tryFocusContent()) { tileElement.focus(); }
+            }
+          } else {
+            // Tab: toolbar → content → title → tile
+            if (!tryFocusContent()) {
+              if (titleElement) { titleElement.focus(); }
+              if (document.activeElement !== titleElement) { tileElement.focus(); }
             }
           }
           e.preventDefault();

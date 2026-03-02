@@ -34,7 +34,7 @@ Low vision and low mobility students currently cannot access text tile toolbar f
 - The toolbar `aria-label` identifies the tile type (e.g., "Text tile toolbar")
 - Screen reader announcements are provided when entering the focus trap ("Editing tile. Press Escape to exit.") and when exiting via Escape ("Exited tile. Tab to next tile, Shift+Tab to previous.")
 - When Escape→Tab navigates to a sibling tile, the destination tile allows one pass-through Tab/Shift+Tab for continued inter-tile navigation. After that single pass-through, the next tile entered will capture focus in its focus trap. Clicking a tile resets all navigation flags.
-- Enter on the tile container enters the focus trap (direction-aware: enters at first element)
+- Tab on the tile container auto-enters the focus trap (via `handleFocus` on the `tabIndex={0}` container); Enter also enters the focus trap (direction-aware: enters at first element)
 - Focus trap cycling is defensive: `preventDefault` is always called when focus is inside the trap, even if the target element is null, to prevent focus from accidentally escaping via browser default Tab behavior
 - Tiles without `getFocusableElements()` have Tab/Shift+Tab caught by a generic fallback that exits to the tile container, preventing focus leakage
 
@@ -50,10 +50,12 @@ Low vision and low mobility students currently cannot access text tile toolbar f
 **Architecture**:
 - Native capture-phase DOM listeners (`addEventListener('keydown', handler, true)`) are required for Tab/Shift+Tab because React 17's delegated events fire too late to prevent browser default focus movement
 - The toolbar renders outside the tile DOM via `FloatingPortal`; `RegisterToolbarContext` (callback ref pattern) enables tile↔toolbar communication without `document.querySelector`
-- `ITileApi.getFocusableElements()` returns `{ contentElement, titleElement }` — each tile type implements this for tile-type-agnostic focus navigation
+- `ITileApi.getFocusableElements()` returns `{ contentElement, titleElement, focusContent }` — each tile type implements this for tile-type-agnostic focus navigation. The optional `focusContent` callback allows tiles with custom editors (e.g., Slate) to use their own focus API instead of native `.focus()`
 - Fallback toolbar button selector `button:not([tabindex="-1"]) || button` handles roving tabindex stale state
 - ArrowUp and Escape both exit the focus trap but have intentionally different post-exit behavior: Escape sets `escapedFocusTrap = true` (next Tab goes to sibling tile), ArrowUp does not (next Tab re-enters the trap)
 - Two separate navigation flags prevent infinite inter-tile loops: `escapedFocusTrap` (set by Escape, propagates `tile-navigation-focus` to destination) and `justArrivedViaNav` (set by `tile-navigation-focus`, allows one pass-through but does NOT propagate). This ensures that after Escape→Tab→Shift+Tab back, Tab re-enters the focus trap instead of looping
+- Tile containers use `tabIndex={0}` so they are reachable via native Tab navigation from the workspace toolbar. The `handleFocus` handler auto-enters the focus trap when the container receives direct focus (guarded by `escapedFocusTrap` and `justArrivedViaNav` flags to avoid re-entering after Escape)
+- Slate editors require `ReactEditor.focus()` instead of native `.focus()` to properly activate. Additionally, `ReactEditor.focus()` does not create a selection if the editor has never been focused before — the `focusContent` callback must set a default selection (cursor at end of document) so keyboard input has an insertion point
 
 ## Out of Scope
 

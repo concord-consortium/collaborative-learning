@@ -20,6 +20,7 @@ interface IGetObjectButtonSVGParams {
 export interface ITileFocusableElements {
   contentElement?: HTMLElement;  // main content area (editor, grid, canvas, etc.)
   titleElement?: HTMLElement;    // tile title input if visible
+  focusContent?: () => boolean;  // custom focus method for content (e.g., Slate's ReactEditor.focus)
 }
 
 export interface ITileApi {
