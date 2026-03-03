@@ -104,7 +104,6 @@ const CommentItem: React.FC<ICommentItemProps> = ({
           </div>
         }
       </div>
-      {renderRatingButtons(comment)}
       {
         displayTags &&
         <div className="comment-dropdown-tag">
@@ -123,6 +122,7 @@ const CommentItem: React.FC<ICommentItemProps> = ({
             </a>
         }
       </div>
+      {renderRatingButtons(comment)}
     </div>
   );
 };
