@@ -9,6 +9,7 @@ import { IDragTilesData } from "../document-content-types";
 import { LogEventName } from "../../../lib/logger-types";
 import { Logger } from "../../../lib/logger";
 import { DocumentModel, DocumentModelType } from "../document";
+import { isRowListContainer, RowListType } from "../row-list";
 
 registerTileTypes(["Question", "Text", "Expression", "Table", "Drawing"]);
 
@@ -450,6 +451,62 @@ Contents of embedded row list:
   testid-14: [Text: text-2]
   testid-15: [Table: table-2] [Drawing: sketch-1]"
 `);
+    });
+
+    it("sets isUserResizable on embedded tiles after copying a question tile", () => {
+      // First verify the original question tile's embedded tiles have correct isUserResizable.
+      // afterCreate calls updateLayout on allRows, which includes embedded rows.
+      const origQuestionTile = documentContent.getTile("question-1");
+      expect(origQuestionTile).toBeDefined();
+      const origContent = origQuestionTile!.content;
+      expect(isRowListContainer(origContent)).toBe(true);
+      const origRowList = origContent as unknown as RowListType;
+      // Row testid-14 has Text tile (no isUserResizable)
+      const origRow14 = origRowList.getRow("testid-14");
+      expect(origRow14).toBeDefined();
+      expect(origRow14!.isUserResizable).toBe(false);
+      // Row testid-15 has Table (isUserResizable=true) and Drawing (isUserResizable=true)
+      const origRow15 = origRowList.getRow("testid-15");
+      expect(origRow15).toBeDefined();
+      expect(origRow15!.isUserResizable).toBe(true);
+      origRow15!.tiles.forEach(tileRef => {
+        expect(tileRef.isUserResizable).toBe(true);
+      });
+
+      // Now copy the question tile
+      const dragTiles: IDragTilesData = {
+        sourceDocId: documentContent.contentId,
+        tiles: getDocumentDragTileItems(["question-1", "sketch-1", "text-2", "table-2"]),
+        sharedModels: [],
+        annotations: []
+      };
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 1,
+        rowDropId: "testid-11",
+        rowDropLocation: "bottom"
+      };
+      documentContent.handleDragCopyTiles(dragTiles, dropRowInfo);
+
+      // The copied question tile has id testid-31 (from mockUniqueId sequence)
+      // with embedded rows testid-32 (Text testid-28) and testid-33 (Table testid-29, Drawing testid-30)
+      const copiedQuestionTile = documentContent.getTile("testid-31");
+      expect(copiedQuestionTile).toBeDefined();
+      const copiedContent = copiedQuestionTile!.content;
+      expect(isRowListContainer(copiedContent)).toBe(true);
+      const copiedRowList = copiedContent as unknown as RowListType;
+
+      // Row testid-32 has Text tile (no isUserResizable) — row should NOT be resizable
+      const copiedRow32 = copiedRowList.getRow("testid-32");
+      expect(copiedRow32).toBeDefined();
+      expect(copiedRow32!.isUserResizable).toBe(false);
+
+      // Row testid-33 has Table and Drawing tiles (both isUserResizable=true) — row SHOULD be resizable
+      const copiedRow33 = copiedRowList.getRow("testid-33");
+      expect(copiedRow33).toBeDefined();
+      expect(copiedRow33!.isUserResizable).toBe(true);
+      copiedRow33!.tiles.forEach(tileRef => {
+        expect(tileRef.isUserResizable).toBe(true);
+      });
     });
 
     it("will not copy a question tile into itself", () => {

@@ -11,20 +11,19 @@ interface IProps {
 
 export const Delete = ({reteManager, nodeId}: IProps) => {
 
-  // FIXME: for some reason onClick doesn't work on these buttons but onMouseDown does
   const handleClick = useCallback(() => {
     reteManager.removeNodeAndConnections(nodeId);
   }, [reteManager, nodeId]);
 
-  const inputRef = useRef<HTMLInputElement>(null);
-  useStopEventPropagation(inputRef, "pointerdown");
+  const divRef = useRef<HTMLDivElement>(null);
+  useStopEventPropagation(divRef, "pointerdown");
   return (
     <div className="close-node-button control-color control-color-hoverable"
-      onMouseDown={handleClick} title={"Delete Block"}>
+      ref={divRef}
+      onClick={handleClick} title={"Delete Block"}>
       <svg className="icon">
         <DeleteNodeIcon />
       </svg>
     </div>
   );
 };
-
