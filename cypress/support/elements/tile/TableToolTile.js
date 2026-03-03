@@ -106,7 +106,7 @@ class TableToolTile{
           this.getTableCell().eq(i).should('have.attr', 'aria-selected', 'true');
           cy.wait(100);
         }
-        cy.get('.rdg-focus-sink').type('{enter}', { force: true });
+        this.getTableCell().eq(i).closest('.rdg').find('.rdg-focus-sink').type('{enter}', { force: true });
         cy.document().within(() => {
           this.getTableCellEdit().type(`${text}${confirmation}`, { scrollBehavior: false });
         });
