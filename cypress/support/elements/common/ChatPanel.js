@@ -238,5 +238,62 @@ class ChatPanel{
         })
       );
     }
+
+    // Rating buttons (on every comment)
+    getRatingButtons() {
+      return cy.get('[data-testid=comment-rating-buttons]');
+    }
+    getRatingButtonsForComment(commentText) {
+      return this.getCommentFromFocusedThread(commentText).parent().find('[data-testid=comment-rating-buttons]');
+    }
+    getRatingYesButton() {
+      return cy.get('[data-testid=rating-yes-button]');
+    }
+    getRatingNoButton() {
+      return cy.get('[data-testid=rating-no-button]');
+    }
+    getRatingNotSureButton() {
+      return cy.get('[data-testid=rating-not-sure-button]');
+    }
+    getRatingYesCount() {
+      return cy.get('[data-testid=rating-yes-count]');
+    }
+    getRatingNoCount() {
+      return cy.get('[data-testid=rating-no-count]');
+    }
+    getRatingNotSureCount() {
+      return cy.get('[data-testid=rating-not-sure-count]');
+    }
+    clickRatingButton(commentText, buttonTestId) {
+      this.getCommentFromFocusedThread(commentText).parent()
+        .find(`[data-testid=${buttonTestId}]`).click();
+    }
+    clickRatingYes(commentText) {
+      this.clickRatingButton(commentText, 'rating-yes-button');
+    }
+    clickRatingNo(commentText) {
+      this.clickRatingButton(commentText, 'rating-no-button');
+    }
+    clickRatingNotSure(commentText) {
+      this.clickRatingButton(commentText, 'rating-not-sure-button');
+    }
+    verifyRatingButtonSelected(commentText, buttonTestId) {
+      this.getCommentFromFocusedThread(commentText).parent()
+        .find(`[data-testid=${buttonTestId}]`).should('have.class', 'selected');
+    }
+    verifyRatingButtonNotSelected(commentText, buttonTestId) {
+      this.getCommentFromFocusedThread(commentText).parent()
+        .find(`[data-testid=${buttonTestId}]`).should('not.have.class', 'selected');
+    }
+    verifyRatingCount(commentText, buttonTestId, expectedCount) {
+      const countTestId = buttonTestId.replace('-button', '-count');
+      this.getCommentFromFocusedThread(commentText).parent()
+        .find(`[data-testid=${countTestId}]`).should('contain.text', `(${expectedCount})`);
+    }
+    verifyRatingCountNotVisible(commentText, buttonTestId) {
+      const countTestId = buttonTestId.replace('-button', '-count');
+      this.getCommentFromFocusedThread(commentText).parent()
+        .find(`[data-testid=${countTestId}]`).should('not.exist');
+    }
 }
 export default ChatPanel;

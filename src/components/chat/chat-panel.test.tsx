@@ -10,6 +10,14 @@ import { AppConfigModel } from "../../models/stores/app-config-model";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 import { UserModelType } from "../../models/stores/user";
 
+jest.mock("../../hooks/use-update-comment-rating", () => ({
+  useUpdateCommentRating: () => jest.fn()
+}));
+
+jest.mock("../../models/tiles/log/log-comment-event", () => ({
+  logCommentEvent: jest.fn()
+}));
+
 const mockPostComment = jest.fn();
 
 const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);

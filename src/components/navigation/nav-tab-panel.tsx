@@ -68,7 +68,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
               onSelect={this.handleSelectTab}
               forceRenderTabPanel={true}
             >
-              <TabList className="top-tab-list">
+              <TabList className={classNames("top-tab-list", { "chat-open": openChatPanel })}>
                 { tabs?.map((tabSpec, index) => {
                     const tabClass = `top-tab tab-${tabSpec.tab}
                                       ${selectedTabIndex === index ? "selected" : ""}`;
