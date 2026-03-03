@@ -73,12 +73,16 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
   const tileId = commentThread?.tileId || focusTileId;
   const isDeletedTile = commentThread?.isDeletedTile || false;
 
-  // Scroll this thread into view when it becomes focused (e.g. tile selected in workspace)
+  // Scroll this thread into view when it becomes focused (e.g. tile selected in workspace).
+  // Use a short delay so the DOM has rendered the expanded CommentCard before scrolling.
+  const isExpanded = expandedThreads.has(threadId);
   useEffect(() => {
     if (isFocused && threadRef.current) {
-      threadRef.current.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
+      setTimeout(() => {
+        threadRef.current?.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
+      }, 50);
     }
-  }, [isFocused]);
+  }, [isFocused, isExpanded]);
 
   // Select this thread's tile when clicking on the comment card body.
   // When Read Aloud is active, jump to this thread directly instead of going through
