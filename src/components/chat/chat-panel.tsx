@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState} from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
+import { observer } from "mobx-react";
 import classNames from "classnames";
 import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
 import { ChatThread } from "./chat-thread";
-import { makeChatThreads} from "./chat-comment-thread";
+import { makeChatThreads, sortCommentsInDocumentOrder } from "./chat-comment-thread";
 import {
   useCommentsCollectionPath, useDocumentComments,
   useDocumentCommentsAtSimplifiedPath, usePostDocumentComment, useUnreadDocumentComments
@@ -14,6 +15,7 @@ import {
   useAppConfig, useCurriculumOrDocumentContent, useDocumentFromStore,
   useDocumentOrCurriculumMetadata, useStores
 } from "../../hooks/use-stores";
+import { getReadAloudService } from "../../models/services/read-aloud-service";
 import { CommentedDocuments } from "./commented-documents";
 import { getSimpleDocumentPath, IClientCommentParams } from "../../../shared/shared";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
@@ -51,14 +53,16 @@ function getDocTitle(document: DocumentModelType,
   return getDocumentDisplayTitle(unit, document, appConfig) || undefined;
 }
 
-export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
-  const [isDocumentView, setIsDocumentView] = useState(false); // switches between "Comments View" vs "Document View"
-  const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
+export const ChatPanel: React.FC<IProps> = observer(({ user, activeNavTab, focusDocument, focusTileId,
+    onCloseChatPanel }) => {
+  const stores = useStores();
+  const { persistentUI } = stores;
+  const isDocumentView = persistentUI.isDocumentsView;
   const documentMetadata = useDocumentOrCurriculumMetadata(focusDocument);
   const content = useCurriculumOrDocumentContent(focusDocument);
   const document = useDocumentFromStore(focusDocument);
   const appConfig = useAppConfig();
-  const { unit } = useStores();
+  const { unit } = stores;
   const ordering = content?.getTilesInDocumentOrder();
   // Ignore focusTileId if it doesn't belong to the focus document.
   // This prevents orphaned comments when a teacher clicks a tile in their own workspace
@@ -75,12 +79,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   }, [comments, simplePathComments, playbackTime]);
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
-  const documentComments = allComments?.filter(comment => comment.tileId == null);
-  const allTileComments = allComments?.filter(comment=> comment.tileId != null);
-  const commentsInDocumentOrder = ordering && allTileComments
-    ? allTileComments.sort((a: any, b: any) => ordering.indexOf(a.tileId) - ordering.indexOf(b.tileId))
-    : [];
-  const postedComments = documentComments?.concat(commentsInDocumentOrder);
+  const postedComments = content ? sortCommentsInDocumentOrder(allComments, content) : allComments;
   const docTitle = document ? getDocTitle(document, unit, appConfig) : undefined;
   const commentThreads = makeChatThreads(postedComments, content, docTitle);
   const postCommentMutation = usePostDocumentComment();
@@ -146,12 +145,20 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   }, [commentsPath, deleteCommentMutation, firestore, focusDocument, validFocusTileId]);
 
   const handleDocumentClick = () => {
-    setIsDocumentView((prevState) => !prevState);
+    const newState = !persistentUI.isDocumentsView;
+    persistentUI.setIsDocumentsView(newState);
+
+    const service = getReadAloudService(stores);
+    if (service.isReadingPane("left")) {
+      if (newState) {
+        // Switching TO Documents View — stop Read Aloud (immediate)
+        service.stop("user");
+      }
+      // Switching TO Comments View — handled by reactive rebuild in ReadAloudButton
+    }
   };
 
-  useEffect(()=>{ //switches title
-    setChatPanelTitle(isDocumentView ? "Documents" : "Comments");
-  }, [isDocumentView]);
+  const chatPanelTitle = isDocumentView ? "Documents" : "Comments";
 
   // Update the comments manager when new comments arrive via hooks.
   useEffect(() => {
@@ -209,4 +216,4 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       }
     </div>
   );
-};
+});

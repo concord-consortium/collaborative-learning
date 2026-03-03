@@ -47,7 +47,8 @@ export const PersistentUIModelV2 = types
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
-    problemPath: ""
+    problemPath: "",
+    isDocumentsView: false
   }))
   .views((self) => ({
     get navTabContentShown () {
@@ -95,6 +96,9 @@ export const PersistentUIModelV2 = types
     },
     toggleShowChatPanel(show: boolean) {
       self.showChatPanel = show;
+    },
+    setIsDocumentsView(show: boolean) {
+      self.isDocumentsView = show;
     },
     toggleShowDocumentScroller(show: boolean) {
       self.showDocumentScroller = show;

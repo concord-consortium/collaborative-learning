@@ -26,6 +26,16 @@
 
   .comment-thread {
     margin: 0 0 10px 5px;
+
+    &.reading {
+      background-color: $comment-select-background;
+      border-radius: 4px;
+    }
+
+    &.pending {
+      outline: 2px solid $charcoal-light-2;
+    }
+
     .comment-text-header {
       display: flex;
       flex-direction: row;
