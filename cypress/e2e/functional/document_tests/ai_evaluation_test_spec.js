@@ -42,107 +42,64 @@ context('AI Evaluation', function () {
     cy.get('[data-testid=comment-card-content]', { timeout: 60000 })
       .should("contain.text", "Mock reply from AI analysis");
 
-    // Should show the AI agree buttons once the AI analysis is complete
-    chatPanel.getCommentCard().find('[data-testid=comment-agree]').should('be.visible');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-header]').should('be.visible')
-      .and('contain.text', 'Do you agree with Ada?');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-buttons]').should('be.visible');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]').should('be.visible')
-      .and('contain.text', 'Yes');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-no-button]').should('be.visible')
-      .and('contain.text', 'No');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-not-sure-button]').should('be.visible')
-      .and('contain.text', '…?');
+    const aiComment = "Mock reply from AI analysis";
 
-    // should allow toggling of the AI agree buttons
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]').should('be.visible').click();
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]')
-      .should('have.class', 'selected');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]').should('be.visible').click();
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]')
-      .should('not.have.class', 'selected');
+    // Should show rating buttons on the AI comment
+    chatPanel.getRatingButtonsForComment(aiComment).should('be.visible');
+    chatPanel.getRatingButtonsForComment(aiComment).should('contain.text', 'Do you agree with Ada Insight?');
+    chatPanel.getRatingButtonsForComment(aiComment).find('[data-testid=rating-yes-button]')
+      .should('be.visible').and('contain.text', 'Yes');
+    chatPanel.getRatingButtonsForComment(aiComment).find('[data-testid=rating-no-button]')
+      .should('be.visible').and('contain.text', 'No');
+    chatPanel.getRatingButtonsForComment(aiComment).find('[data-testid=rating-not-sure-button]')
+      .should('be.visible').and('contain.text', 'Not Sure');
 
-    // should reset the inputs when the cancel button is clicked
-    cy.get("[data-testid=comment-textarea]").scrollIntoView().type('This should be cleared.', {force: true});
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]').should('be.visible').click();
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]')
-      .should('have.class', 'selected');
-    chatPanel.getCommentCard().find('[data-testid=comment-textbox-dropdown]').find('option:selected')
-      .should('contain.text', 'Select QA Strategy');
-    chatPanel.getCommentCard().find('[data-testid=comment-textbox-dropdown]').select(1);
-    chatPanel.getCommentCard().find('[data-testid=comment-textbox-dropdown]').find('option:selected')
-      .should('not.contain.text', 'Select QA Strategy');
-    chatPanel.getCommentCancelButton().should('be.visible').click();
-    cy.get("[data-testid=comment-textarea]").should('have.value', '');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]')
-      .should('not.have.class', 'selected');
-    chatPanel.getCommentCard().find('[data-testid=comment-textbox-dropdown]').find('option:selected')
-      .should('contain.text', 'Select QA Strategy');
+    // Clicking Yes should select it and show count
+    chatPanel.clickRatingYes(aiComment);
+    chatPanel.verifyRatingButtonSelected(aiComment, 'rating-yes-button');
+    chatPanel.verifyRatingCount(aiComment, 'rating-yes-button', 1);
 
-    // should allow posting a comment and selecting agree/disagree/not sure
+    // Clicking Yes again should toggle it off and remove count
+    chatPanel.clickRatingYes(aiComment);
+    chatPanel.verifyRatingButtonNotSelected(aiComment, 'rating-yes-button');
+    chatPanel.verifyRatingCountNotVisible(aiComment, 'rating-yes-button');
+
+    // Clicking No should select it
+    chatPanel.clickRatingNo(aiComment);
+    chatPanel.verifyRatingButtonSelected(aiComment, 'rating-no-button');
+    chatPanel.verifyRatingCount(aiComment, 'rating-no-button', 1);
+
+    // Switching to Yes should deselect No and select Yes
+    chatPanel.clickRatingYes(aiComment);
+    chatPanel.verifyRatingButtonSelected(aiComment, 'rating-yes-button');
+    chatPanel.verifyRatingButtonNotSelected(aiComment, 'rating-no-button');
+    chatPanel.verifyRatingCount(aiComment, 'rating-yes-button', 1);
+    chatPanel.verifyRatingCountNotVisible(aiComment, 'rating-no-button');
+
+    // Clear the rating for a clean state
+    chatPanel.clickRatingYes(aiComment);
+    chatPanel.verifyRatingButtonNotSelected(aiComment, 'rating-yes-button');
+
+    // Posting a reply should not affect rating buttons on the AI comment
     cy.get("[data-testid=comment-textarea]").scrollIntoView().type('I think Ada is correct.', {force: true});
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]').should('be.visible').click();
     chatPanel.getCommentPostButton().should('be.visible').click();
+    chatPanel.getRatingButtonsForComment(aiComment).should('be.visible');
 
-    // once posted, the comment should show the agree message
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-message-yes]').should('be.visible')
-      .and('contain.text', 'Yes');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-icon]').should('be.visible');
+    // The reply comment should also have its own rating buttons
+    chatPanel.getRatingButtonsForComment('I think Ada is correct.').should('be.visible');
 
-    // the AI agree buttons should not be visible after posting
-    chatPanel.getCommentCard().find('[data-testid=comment-agree]').should('not.exist');
-
-    // should allow deleting the comment
+    // Clean up: delete the reply
     chatPanel.getDeleteMessageButton('I think Ada is correct.').should('be.visible').click();
     chatPanel.getDeleteConfirmModalButton().click();
 
-    // after deletion, the AI agree buttons should be visible again
-    chatPanel.getCommentCard().find('[data-testid=comment-agree]').should('be.visible');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-header]').should('be.visible')
-      .and('contain.text', 'Do you agree with Ada?');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-buttons]').should('be.visible');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-yes-button]').should('be.visible')
-      .and('contain.text', 'Yes');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-no-button]').should('be.visible')
-      .and('contain.text', 'No');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-not-sure-button]').should('be.visible')
-      .and('contain.text', '…?');
+    // Rating buttons should still be on the AI comment after reply deletion
+    chatPanel.getRatingButtonsForComment(aiComment).should('be.visible');
 
-    // should allow posting a comment without selecting agree/disagree/not sure
-    cy.get("[data-testid=comment-textarea]").scrollIntoView().type('I like eggs.', {force: true});
-    chatPanel.getCommentPostButton().should('be.visible').click();
-
-    // the comment should not show any agree message
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-message]').should('not.exist');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-icon]').should('not.exist');
-
-    // test not agree with AI message
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-no-button]').should('be.visible').click();
-    cy.get("[data-testid=comment-textarea]").scrollIntoView().type('Nope, WRONG!', {force: true});
-    chatPanel.getCommentPostButton().should('be.visible').click();
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-message-no]').should('be.visible')
-      .and('contain.text', 'No, I disagree with Ada.');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-icon]').should('be.visible');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree]').should('not.exist');
-
-    // should allow deleting the comment
-    chatPanel.getDeleteMessageButton('Nope, WRONG!').should('be.visible').click();
-    chatPanel.getDeleteConfirmModalButton().click();
-
-    // test not sure about AI message
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-not-sure-button]').should('be.visible').click();
-    cy.get("[data-testid=comment-textarea]").scrollIntoView().type('I am not sure about this.', {force: true});
-    chatPanel.getCommentPostButton().should('be.visible').click();
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-message-not-sure]').should('be.visible')
-      .and('contain.text', 'Not sure I agree with Ada.');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree-icon]').should('be.visible');
-    chatPanel.getCommentCard().find('[data-testid=comment-agree]').should('not.exist');
-
-    // should show the AI agree buttons again after another AI analysis
+    // Should show rating buttons on a new AI analysis too
     canvas.getIdeasButton().should("be.visible").click();
     cy.get('[data-testid=comment-card-content]', { timeout: 60000 })
       .should("contain.text", "Mock reply from AI analysis");
-    chatPanel.getCommentCard().find('[data-testid=comment-agree]').should('exist');
+    chatPanel.getRatingButtons().should('exist');
 
   });
 

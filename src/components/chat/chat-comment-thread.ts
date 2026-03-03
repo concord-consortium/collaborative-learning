@@ -1,6 +1,7 @@
-import { WithId } from "src/hooks/firestore-hooks";
-import { CommentDocument } from "src/lib/firestore-schema";
-import { DocumentContentModelType } from "src/models/document/document-content";
+import { WithId } from "../../hooks/firestore-hooks";
+import { CommentDocument } from "../../lib/firestore-schema";
+import { CommentWithId } from "../../models/document/document-comments-manager";
+import { DocumentContentModelType } from "../../models/document/document-content";
 
 export interface ChatCommentThread {
   title: string | null | undefined;
@@ -8,6 +9,25 @@ export interface ChatCommentThread {
   tileType: string | null;
   comments: WithId<CommentDocument>[];
   isDeletedTile: boolean;
+}
+
+// Sorts comments into document order: document-level comments first, then tile comments
+// in the order their tiles appear in the document. Tiles not found in the ordering
+// (e.g. deleted tiles) sort after all known tiles.
+export function sortCommentsInDocumentOrder(
+  comments: CommentWithId[],
+  content: DocumentContentModelType
+): CommentWithId[] {
+  const ordering = content.getTilesInDocumentOrder() || [];
+  const docComments = comments.filter(c => c.tileId == null);
+  const afterAll = ordering.length;
+  const tileComments = comments.filter(c => c.tileId != null)
+    .sort((a, b) => {
+      const aIdx = ordering.indexOf(a.tileId!);
+      const bIdx = ordering.indexOf(b.tileId!);
+      return (aIdx < 0 ? afterAll : aIdx) - (bIdx < 0 ? afterAll : bIdx);
+    });
+  return [...docComments, ...tileComments];
 }
 
 // Expects a list of comments in Document order with document level comments (with no (null) tileId) first.

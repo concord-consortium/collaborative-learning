@@ -21,6 +21,20 @@
           captureUncaught: true,
           captureUnhandledRejections: true,
           enabled: isProduction || isMasterBranch,
+          checkIgnore: function(isUncaught, args) {
+            var msg = args && args[0];
+            if (typeof msg === 'string') {
+              // Suppress benign ResizeObserver warning (browser defers notifications to next frame)
+              if (msg.indexOf('ResizeObserver loop') !== -1) return true;
+              // Suppress known missing-metadata errors from stale demo data (see docs/rollbar-metadata-errors.md)
+              if (msg.indexOf('Error retrieving metadata for document') !== -1) return true;
+            }
+            if (msg instanceof Error) {
+              if (msg.message.indexOf('ResizeObserver loop') !== -1) return true;
+              if (msg.message.indexOf('Error retrieving metadata for document') !== -1) return true;
+            }
+            return false;
+          },
           payload: {
             environment: isProduction ? "production" : "staging"
           }

@@ -27,3 +27,6 @@ src/public/ai/screenshotDataset*
 
 # Cypress env file with sensitive data
 cypress.env.json
+
+# playwright mcp artifacts
+.playwright-mcp

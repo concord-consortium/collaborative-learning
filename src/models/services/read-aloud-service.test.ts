@@ -6,6 +6,7 @@ import { LogEventName } from "../../lib/logger-types";
 import {
   ReadAloudService, getReadAloudService, resetReadAloudService
 } from "./read-aloud-service";
+import { buildReadAloudQueue, ReadAloudQueueItem } from "./read-aloud-queue-items";
 
 // Mock the logger
 const mockLogToolbarEvent = jest.fn();
@@ -101,14 +102,15 @@ describe("ReadAloudService", () => {
     resetReadAloudService();
   });
 
-  // Helper: create document content and start reading in one step
+  // Helper: create document content, build queue, and start reading in one step
   function startWithTiles(
     tiles: Array<{ id: string; type: string; title?: string; text?: string }>,
     selectedIds: string[] = [],
     pane: "left" | "right" = "right"
   ) {
     const content = createDocumentContent(tiles);
-    service.start(pane, content, selectedIds, { document: undefined });
+    const { items, allPaneTileIds } = buildReadAloudQueue(content, selectedIds);
+    service.start(pane, items, { document: undefined }, allPaneTileIds);
     return content;
   }
 
@@ -212,24 +214,28 @@ describe("ReadAloudService", () => {
     });
 
     it("toggles off when clicking while reading on the same pane", () => {
-      const content = startWithTiles([
+      const content = createDocumentContent([
         { id: "t1", type: "Text", title: "Test", text: "Hello" }
       ]);
+      const { items, allPaneTileIds } = buildReadAloudQueue(content, []);
+      service.start("right", items, { document: undefined }, allPaneTileIds);
       expect(service.state).toBe("reading");
 
       // Start again on same pane — should toggle off
-      service.start("right", content, [], { document: undefined });
+      service.start("right", items, { document: undefined }, allPaneTileIds);
       expect(service.state).toBe("idle");
     });
 
     it("stops other pane when starting on a different pane", () => {
-      const content = startWithTiles([
+      const content = createDocumentContent([
         { id: "t1", type: "Text", title: "Test", text: "Hello" }
-      ], [], "left");
+      ]);
+      const { items, allPaneTileIds } = buildReadAloudQueue(content, []);
+      service.start("left", items, { document: undefined }, allPaneTileIds);
       expect(service.state).toBe("reading");
       expect(service.activePane).toBe("left");
 
-      service.start("right", content, [], { document: undefined });
+      service.start("right", items, { document: undefined }, allPaneTileIds);
       expect(service.state).toBe("reading");
       expect(service.activePane).toBe("right");
     });
@@ -315,13 +321,15 @@ describe("ReadAloudService", () => {
     });
 
     it("toggles off when clicking button while paused", () => {
-      const content = startWithTiles([
+      const content = createDocumentContent([
         { id: "t1", type: "Text", title: "Test", text: "Hello" }
       ]);
+      const { items, allPaneTileIds } = buildReadAloudQueue(content, []);
+      service.start("right", items, { document: undefined }, allPaneTileIds);
       service.pause();
 
       // Clicking the button again while paused stops (toggle off on same pane)
-      service.start("right", content, [], { document: undefined });
+      service.start("right", items, { document: undefined }, allPaneTileIds);
       expect(service.state).toBe("idle");
     });
 
@@ -620,6 +628,213 @@ describe("ReadAloudService", () => {
       stores.persistentUI.setCurrentDocumentGroupId("problems", "section-2");
 
       expect(service.state).toBe("idle");
+    });
+  });
+
+  describe("replaceQueue", () => {
+    it("is a no-op when idle", () => {
+      const items: ReadAloudQueueItem[] = [
+        { kind: "tile", speechText: "test", associatedTileId: "t1" }
+      ];
+      service.replaceQueue(items);
+      expect(service.queue).toHaveLength(0);
+    });
+
+    it("is a no-op when isTargetedOverride is set", () => {
+      startWithTiles([
+        { id: "t1", type: "Text", text: "a" },
+        { id: "t2", type: "Text", text: "b" }
+      ]);
+      // Simulate targeted override by clicking a tile during comment reading
+      // (we just set the flag directly for testing)
+      (service as any).isTargetedOverride = true;
+
+      const newItems: ReadAloudQueueItem[] = [
+        { kind: "tile", speechText: "new", associatedTileId: "t3" }
+      ];
+      service.replaceQueue(newItems);
+      // Queue should NOT have changed
+      expect(service.queue[0].speechText).not.toBe("new");
+    });
+
+    it("reconciles position when current tile item is in new queue", () => {
+      startWithTiles([
+        { id: "t1", type: "Text", text: "a" },
+        { id: "t2", type: "Text", text: "b" },
+        { id: "t3", type: "Text", text: "c" }
+      ]);
+      // Advance to t2
+      lastUtterance?.onend?.();
+      expect(service.currentTileId).toBe("t2");
+
+      // Rebuild queue with t2 at a different position
+      const newItems: ReadAloudQueueItem[] = [
+        { kind: "tile", speechText: "x", associatedTileId: "t0" },
+        { kind: "tile", speechText: "a", associatedTileId: "t1" },
+        { kind: "tile", speechText: "b", associatedTileId: "t2" },
+        { kind: "tile", speechText: "c", associatedTileId: "t3" }
+      ];
+      service.replaceQueue(newItems);
+      expect(service.queue).toEqual(newItems);
+      // Current item still matches t2 — speech not interrupted
+      expect(service.currentTileId).toBe("t2");
+    });
+
+    it("stops when new queue is empty", () => {
+      startWithTiles([
+        { id: "t1", type: "Text", text: "a" }
+      ]);
+      service.replaceQueue([]);
+      expect(service.state).toBe("idle");
+    });
+
+    it("handles current item removed from new queue", () => {
+      startWithTiles([
+        { id: "t1", type: "Text", text: "a" },
+        { id: "t2", type: "Text", text: "b" },
+        { id: "t3", type: "Text", text: "c" }
+      ]);
+      // Advance to t2 (index 1)
+      lastUtterance?.onend?.();
+      expect(service.currentTileId).toBe("t2");
+
+      // New queue without t2
+      const newItems: ReadAloudQueueItem[] = [
+        { kind: "tile", speechText: "a", associatedTileId: "t1" },
+        { kind: "tile", speechText: "c", associatedTileId: "t3" }
+      ];
+      service.replaceQueue(newItems);
+      // On next advance, should read t3 (the item that took t2's old position)
+      lastUtterance?.onend?.();
+      expect(service.currentTileId).toBe("t3");
+    });
+
+    it("updates allPaneTileIds when provided", () => {
+      startWithTiles([
+        { id: "t1", type: "Text", text: "a" }
+      ]);
+      const newSet = new Set(["t1", "t2", "t3"]);
+      service.replaceQueue(service.queue, newSet);
+      expect((service as any).allPaneTileIds).toBe(newSet);
+    });
+
+    it("preserves allPaneTileIds when not provided", () => {
+      startWithTiles([
+        { id: "t1", type: "Text", text: "a" }
+      ]);
+      const originalSet = (service as any).allPaneTileIds;
+      service.replaceQueue(service.queue);
+      expect((service as any).allPaneTileIds).toBe(originalSet);
+    });
+
+    it("works while paused", () => {
+      startWithTiles([
+        { id: "t1", type: "Text", text: "a" },
+        { id: "t2", type: "Text", text: "b" }
+      ]);
+      service.pause();
+      const newItems: ReadAloudQueueItem[] = [
+        { kind: "tile", speechText: "a", associatedTileId: "t1" },
+        { kind: "tile", speechText: "b", associatedTileId: "t2" },
+        { kind: "tile", speechText: "c", associatedTileId: "t3" }
+      ];
+      service.replaceQueue(newItems);
+      expect(service.state).toBe("paused");
+      expect(service.queue).toEqual(newItems);
+    });
+  });
+
+  describe("jumpToItem", () => {
+    it("jumps to specified queue index", () => {
+      startWithTiles([
+        { id: "t1", type: "Text", text: "a" },
+        { id: "t2", type: "Text", text: "b" },
+        { id: "t3", type: "Text", text: "c" }
+      ]);
+      expect(service.currentTileId).toBe("t1");
+
+      service.jumpToItem(2);
+      expect(service.currentTileId).toBe("t3");
+      expect(service.state).toBe("reading");
+    });
+
+    it("is a no-op when idle", () => {
+      service.jumpToItem(0);
+      expect(service.state).toBe("idle");
+    });
+
+    it("is a no-op for out-of-bounds index", () => {
+      startWithTiles([
+        { id: "t1", type: "Text", text: "a" }
+      ]);
+      service.jumpToItem(5);
+      // Should still be at original position
+      expect(service.currentTileId).toBe("t1");
+    });
+
+    it("resumes reading even when paused", () => {
+      startWithTiles([
+        { id: "t1", type: "Text", text: "a" },
+        { id: "t2", type: "Text", text: "b" }
+      ]);
+      service.pause();
+      mockSpeechSynthesis.speak.mockClear();
+
+      service.jumpToItem(1);
+      expect(service.currentTileId).toBe("t2");
+      // jumpToItem always speaks (explicit user action)
+      expect(mockSpeechSynthesis.speak).toHaveBeenCalled();
+    });
+  });
+
+  describe("pendingCommentId", () => {
+    it("starts from the pending comment instead of first item", () => {
+      const items: ReadAloudQueueItem[] = [
+        { kind: "tile", speechText: "tile 1", associatedTileId: "t1" },
+        { kind: "comment", speechText: "comment A", commentId: "c1",
+          associatedTileId: "t1", originTileId: "t1", threadIndex: 0, commentIndex: 0 } as any,
+        { kind: "comment", speechText: "comment B", commentId: "c2",
+          associatedTileId: "t1", originTileId: "t1", threadIndex: 0, commentIndex: 1 } as any,
+      ];
+      service.setPendingCommentId("c2");
+      service.start("left", items, { document: undefined }, new Set(["t1"]));
+
+      // Should start from comment B (index 2), not tile 1 (index 0)
+      expect(service.currentItem?.speechText).toBe("comment B");
+      expect(service.state).toBe("reading");
+      // pendingCommentId persists so the next start() can reuse it;
+      // it is cleared externally (e.g. when the user clicks a tile in the workspace)
+      expect(service.pendingCommentId).toBe("c2");
+    });
+
+    it("falls back to first item when pending comment is not in queue", () => {
+      const items: ReadAloudQueueItem[] = [
+        { kind: "tile", speechText: "tile 1", associatedTileId: "t1" },
+      ];
+      service.setPendingCommentId("nonexistent");
+      service.start("left", items, { document: undefined }, new Set(["t1"]));
+
+      expect(service.currentItem?.speechText).toBe("tile 1");
+      // pendingCommentId persists even when not found in queue
+      expect(service.pendingCommentId).toBe("nonexistent");
+    });
+
+    it("preserves pendingCommentId on stop", () => {
+      service.setPendingCommentId("c1");
+      expect(service.pendingCommentId).toBe("c1");
+      startWithTiles([{ id: "t1", type: "Text", text: "a" }]);
+      service.stop("user");
+      // pendingCommentId persists across stop/start cycles so the next
+      // start() can jump to the same comment without the user re-clicking
+      expect(service.pendingCommentId).toBe("c1");
+    });
+
+    it("setPendingCommentId is observable", () => {
+      expect(service.pendingCommentId).toBeNull();
+      service.setPendingCommentId("c1");
+      expect(service.pendingCommentId).toBe("c1");
+      service.setPendingCommentId(null);
+      expect(service.pendingCommentId).toBeNull();
     });
   });
 });

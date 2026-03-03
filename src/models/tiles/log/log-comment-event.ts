@@ -6,7 +6,7 @@ import { LogEventName } from "../../../lib/logger-types";
 import { isDocumentLogEvent, logDocumentEvent } from "../../document/log-document-event";
 import { isCurriculumLogEvent, logCurriculumEvent } from "../../curriculum/log-curriculum-event";
 
-type CommentAction = "add" | "delete" | "expand" | "collapse";  // | "edit"
+type CommentAction = "add" | "delete" | "expand" | "collapse" | "rate";
 export interface ILogComment extends Record<string, any> {
   focusDocumentId: string;
   focusTileId?: string;
@@ -61,7 +61,10 @@ export function logCommentEvent(_params: ILogComment) {
               : LogEventName.EXPAND_COMMENT_THREAD_FOR_DOCUMENT,
     collapse: focusTileId
               ? LogEventName.COLLAPSE_COMMENT_THREAD_FOR_TILE
-              : LogEventName.COLLAPSE_COMMENT_THREAD_FOR_DOCUMENT
+              : LogEventName.COLLAPSE_COMMENT_THREAD_FOR_DOCUMENT,
+    rate: focusTileId
+            ? LogEventName.RATE_COMMENT_FOR_TILE
+            : LogEventName.RATE_COMMENT_FOR_DOCUMENT
   };
   const event = eventMap[action];
   const params = processCommentEventParams(_params, Logger.stores);

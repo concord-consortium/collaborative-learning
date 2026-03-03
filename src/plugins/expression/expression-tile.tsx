@@ -66,7 +66,9 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   }, [content, readOnly]);
 
   const handleMathfieldInput = useCallback((e: FormEvent<MathfieldElementAttributes>) => {
-    const mathLiveEvent = e.nativeEvent as any;
+    // When attached as a native DOM listener, e is the raw InputEvent (no nativeEvent).
+    // When called via React, e is a SyntheticEvent wrapping the native event.
+    const mathLiveEvent = ((e as any).nativeEvent ?? e) as any;
     const mathField = e.target as MathfieldElement;
 
     if(mathField.mode === "latex" && mathLiveEvent.inputType === "insertText" && mathLiveEvent.data === "insertText") {

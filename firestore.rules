@@ -315,14 +315,24 @@ service cloud.firestore {
           return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
         }
 
+        function isValidRatingUpdate() {
+          let affectedFields = request.resource.data.diff(resource.data).affectedKeys();
+          let userId = string(request.auth.token.platform_user_id);
+          let existingRatings = resource.data.get('ratings', {});
+          let newRatings = request.resource.data.get('ratings', {});
+          return affectedFields.hasOnly(['ratings'])
+            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId]);
+        }
+
         function isValidCommentUpdateRequest() {
-          return userIsRequestUser() && preservesReadOnlyCommentFields();
+          return (userIsRequestUser() && preservesReadOnlyCommentFields())
+            || isValidRatingUpdate();
         }
 
         match /comments/{commentId} {
           // portal-authenticated teachers with access to the document can create valid comments
           allow create: if teacherCanAccessCurriculum() && isValidCommentCreateRequest();
-          // teachers can only update their own comments and only if they're valid
+          // teachers can update their own comments, or any user can update their own rating
           allow update: if teacherCanAccessCurriculum() && isValidCommentUpdateRequest();
           // teachers can only delete their own comments
           allow delete: if teacherCanAccessCurriculum() && userIsResourceUser();
@@ -412,8 +422,18 @@ service cloud.firestore {
           return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
         }
 
+        function isValidRatingUpdate() {
+          let affectedFields = request.resource.data.diff(resource.data).affectedKeys();
+          let userId = string(request.auth.token.platform_user_id);
+          let existingRatings = resource.data.get('ratings', {});
+          let newRatings = request.resource.data.get('ratings', {});
+          return affectedFields.hasOnly(['ratings'])
+            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId]);
+        }
+
         function isValidCommentUpdateRequest() {
-          return userIsRequestUser() && preservesReadOnlyCommentFields();
+          return (userIsRequestUser() && preservesReadOnlyCommentFields())
+            || isValidRatingUpdate();
         }
 
         function userOwnsDocument() {

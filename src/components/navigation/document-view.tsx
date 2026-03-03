@@ -263,6 +263,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
         showPlayback={showPlayback}
         fullHeight={subTab.label !== kBookmarksTabTitle }
         toolbar={appConfig.myResourcesToolbar({showPlayback, showEdit})}
+        pane="left"
         sectionClass={sectionClass}
       />
       {onChangeDocument && !hideRightFlipper &&
