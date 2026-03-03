@@ -91,8 +91,7 @@ export const TileToolbar = observer(
       const handleTabEscape = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
           if (tileElement) {
-            // Signal tile-component that escape was used to exit the focus trap,
-            // so the next Tab moves to the next tile instead of re-entering the trap.
+            // Signal tile-component that escape was used to exit the focus trap.
             // Custom event is needed because FloatingPortal renders outside the tile DOM.
             tileElement.dispatchEvent(new CustomEvent('toolbar-escape', { bubbles: false }));
             tileElement.focus();

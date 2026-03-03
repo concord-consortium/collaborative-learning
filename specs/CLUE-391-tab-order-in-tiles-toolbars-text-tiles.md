@@ -195,3 +195,155 @@ Low vision and low mobility students currently cannot access text tile toolbar f
 **Context**: The requirement says focus must "return to the toolbar/editor on close" which is ambiguous.
 
 **Decision**: Focus returns to the link button that opened the dialog (standard ARIA dialog pattern). This is already handled by react-modal's built-in focus restoration.
+
+---
+
+## Amendment: Tab Focuses Tile Without Selecting or Entering Focus Trap
+
+**Date**: 2026-03-03
+
+**Trigger**: PM feedback after testing the built branch. The auto-entry behavior (Tab immediately focusing the text editor or other tile content) was not the desired interaction. Additionally, auto-focusing the text editor did not show the toolbar until the user typed, creating a confusing UX.
+
+### Superseded Requirements
+
+The following original requirements are replaced by this amendment:
+
+- **Line 35** (SR announcements): The single "Editing tile" announcement on Tab entry is replaced by two distinct announcements — one for focusing, one for editing.
+- **Line 36** ("When Escape→Tab navigates to a sibling tile, the destination tile auto-enters its focus trap"): Tab no longer auto-enters the focus trap on any tile.
+- **Line 37** ("Tab on the tile container auto-enters the focus trap via handleFocus"): Tab now focuses the tile without selecting it or entering the focus trap. Enter is the only entry mechanism.
+- **Lines 55-57** (architecture notes describing `escapedFocusTrap` mechanics and `handleFocus` auto-entry): Both are superseded by the Technical Changes section below — `escapedFocusTrap` is removed with no replacement, and `handleFocus` no longer auto-enters the trap.
+- **Implementation note**: The `tileHandlesOwnSelection` guard in `handleFocus` (line 604) previously prevented auto-selection and auto-entry. After this amendment, `handleFocus` only announces — the guard now prevents the SR announcement for tiles like placeholders. This is acceptable (they don't need "Press Enter to edit").
+
+### Updated Requirements
+
+- Tab on a tile container shows a **focus ring** (`:focus-visible`) on the tile but does **not** select it in the UI store — the toolbar does not appear, and no selected border is shown
+- Tab/Shift+Tab on a tile container navigates to the next/previous sibling tile, showing the focus ring on the destination (the destination tile is NOT selected)
+- Enter on a focused tile container **always selects** the tile unconditionally (toolbar becomes visible, selected border appears) and then attempts to enter the focus trap. Focus goes to the first available content element (title if present, or Slate editor). For tiles with no content to focus (e.g., drawing tiles), Enter selects the tile (toolbar appears) but focus stays on the container — the user can then Tab to enter the focus trap and reach the toolbar.
+- Escape from within the focus trap **always unselects** the tile (toolbar hides, selected border removed) and returns focus to the tile container with a focus ring
+- Tiles with no focusable elements: Tab still stops on them and shows a focus ring. Enter selects the tile (toolbar appears) but focus remains on the container since there is no content to focus. Tab then enters the focus trap to reach the toolbar.
+- A `:focus-visible` style must be added to `.tool-tile` since the existing `outline: none` on `:focus` removes the browser default. The style should be consistent with the existing `:focus-visible` pattern used on toolbar buttons (box-shadow inset). When a tile is both selected (teal border) and container-focused (e.g., after Enter → ArrowUp), both visual indicators show simultaneously — the selected border indicates "toolbar visible / editing context" while the focus ring indicates "keyboard focus is here"
+- Tile toolbar buttons using `aria-disabled="true"` must be visually styled as disabled. The existing `button:disabled` rule in `src/components/toolbar/toolbar.scss` (opacity 25%, cursor default) only targets the HTML `disabled` attribute and does not apply to `aria-disabled`. The selector must be updated to also match `&[aria-disabled="true"]`, using 35% opacity to match the main toolbar's pattern in `src/components/toolbar.scss`
+- Screen reader announcements:
+  - On Tab focusing a tile: "Tile focused. Press Enter to edit." (Note: the browser will also announce the tile's `aria-label`, e.g. "Text tile: Introduction, group" — the live region instruction supplements this.)
+  - On Enter entering the focus trap (content focused): "Editing tile. Press Escape to exit."
+  - On Enter when no content to focus (e.g., drawing tile): "Tile selected. Press Tab to access toolbar, Escape to exit."
+  - On Escape exiting the focus trap: "Exited tile. Tab to next tile, Shift+Tab to previous." (unchanged)
+
+### Keyboard Navigation Summary
+
+| State | Key | Result |
+|---|---|---|
+| Tile focused (not selected) | Tab | Navigate to next sibling tile |
+| Tile focused (not selected) | Shift+Tab | Navigate to previous sibling tile |
+| Tile focused (not selected) | Enter | Select tile + enter focus trap (or stay on container if no content) |
+| Tile selected, focus on container | Tab | Enter focus trap (toolbar/content reachable) |
+| Tile selected, focus on container | Shift+Tab | Enter focus trap backward (content first) |
+| Tile selected, focus on container | Enter | Re-enter focus trap |
+| Inside focus trap | Tab/Shift+Tab | Cycle within trap (title ↔ toolbar ↔ content) |
+| Inside focus trap | Escape | Unselect tile, focus container (focus ring only) |
+| Inside focus trap | ArrowUp (non-editable) | Exit to container, tile stays selected |
+
+### Decisions
+
+#### Should Escape unselect a mouse-clicked tile?
+
+**Context**: When a user clicks a tile, `handlePointerDown` selects it (toolbar appears). If the user then presses Escape from inside the content, should the tile be unselected (toolbar hides)? Mouse users expect their click-selection to persist. But keyboard-only users who Enter a tile and then Escape expect to return to the focus-ring-only browsing state.
+
+**Options considered**:
+- A) Escape always unselects — simple, consistent, but surprising for mouse users
+- B) Escape only unselects keyboard-entered tiles — requires tracking entry method, but matches user expectations for both input modes
+
+**Decision**: **A** — Escape always unselects, regardless of entry method. Option B was initially chosen but review #4 identified a **WCAG 2.1.2 keyboard trap**: after mouse click → Escape (keeps selection) → Tab (re-enters trap because tile is still selected) → Escape → Tab → infinite loop with no keyboard exit. Option A avoids this entirely with no additional flags. Mouse users who want to re-enter can simply click again. The `enteredViaKeyboard` flag is not needed.
+
+---
+
+#### Should Enter select the tile before or after entering the focus trap?
+
+**Context**: The toolbar renders via MobX observer and is gated on `ui.selectedTileIds.includes(id)`. MobX + React 17 batches observer re-renders — the toolbar does NOT render synchronously when `setSelectedTileId()` is called. If Enter calls `setSelectedTileId()` then immediately calls `enterFocusTrap()`, the toolbar DOM doesn't exist yet and `getFocusTrapElements()` returns null for the toolbar button.
+
+**Options considered**:
+- A) Select first, then enter trap — toolbar not yet in DOM, so initial focus skips toolbar and goes to content. Toolbar becomes reachable via Tab cycling on the next frame. Simple, no async complexity.
+- B) Enter trap first, only select on success — toolbar never exists to focus, and tiles without `getFocusableElements()` (drawing, diagram) can never be keyboard-entered since `enterFocusTrap` always fails.
+- C) Select first, defer `enterFocusTrap` to `requestAnimationFrame` — toolbar renders first, initial focus can land on toolbar. Adds async complexity and race conditions.
+
+**Decision**: **A** — Select unconditionally, then enter trap best-effort. Initial focus goes to content (title or Slate editor) since toolbar hasn't rendered yet. This is acceptable because: (1) the toolbar appears on the next render frame and becomes reachable via Tab, (2) tiles without content (drawing, diagram) are still keyboard-accessible — Enter selects them and Tab reaches the toolbar, (3) no async complexity.
+
+### Technical Changes
+
+- The `escapedFocusTrap` flag has been **removed entirely** with **no replacement flag**. The selection state (`ui.isSelectedTile(model)`) now provides all the routing information that `escapedFocusTrap` formerly tracked: selected tiles get Tab-into-trap behavior, unselected tiles get Tab-to-sibling behavior. Since Escape always deselects, this naturally prevents the re-entry loop that `escapedFocusTrap` was designed to prevent. This simplifies the focus management logic by removing a stateful flag and all its setters/clearers.
+- `handleFocus` does **not** call `ui.setSelectedTileId()`. It only announces "Tile focused. Press Enter to edit." when focus arrives from outside the tile. The `relatedTarget` guards remain to distinguish external focus from internal focus moves.
+- `handleKeyDown` Enter handler: calls `ui.setSelectedTileId()` unconditionally, then calls `enterFocusTrap()` best-effort. If `enterFocusTrap` finds content, focus moves there. If not (e.g., drawing tile), focus stays on the container — the tile is still selected, the toolbar becomes reachable via Tab on the next frame, and the handler announces "Tile selected. Press Tab to access toolbar, Escape to exit."
+- `handleKeyDown` Escape handler: always deselects this tile (removes it from `ui.selectedTileIds` — use the appropriate store API to avoid clearing other tiles' multi-select state) so the toolbar hides, then focuses the tile container.
+- `handleToolbarEscape`: same deselect logic — always deselects the tile, then focuses the tile container (new — current code only sets the flag and announces; focusing must be added, unless the toolbar's own Escape handler already manages it).
+- `navigateToSiblingTile`: remove the existing `ui.setSelectedTileId(nextTileId)` call — Tab should NOT select the destination tile. Also update the comment on line 490 ("The destination tile's handleFocus will auto-enter its focus trap") since that is no longer true.
+- `handleTabKeyDown` when tile container is focused: checks `ui.isSelectedTile(model)`. If the tile is **selected** (entered via Enter or mouse click), Tab/Shift+Tab attempts `enterFocusTrap()` (forward or backward respectively) — the toolbar should now be in the DOM (rendered on the previous frame) and reachable. If `enterFocusTrap` fails, falls through to `navigateToSiblingTile`. If the tile is **not selected** (just focused via Tab, no toolbar), Tab/Shift+Tab navigates to sibling tile directly.
+- `handleTabKeyDown` catch-all (inside tile, no cycling match): deselects this tile (same targeted deselect as Escape) before exiting to container, preventing a selected-but-unfocusable state.
+- A new `:focus-visible` CSS rule is added to `.tool-tile` in `tile-component.scss` for the keyboard focus ring.
+- `handlePointerDown`: remove `this.escapedFocusTrap = false` (no replacement — flag is gone).
+- `enterFocusTrap`: remove `this.escapedFocusTrap = false` (no replacement — flag is gone).
+- ArrowUp exit from non-editable elements: exits to tile container but does NOT deselect (ArrowUp is a soft exit, not Escape). Tile stays selected with toolbar visible.
+- All normal focus trap cycling paths within an entered tile (Tab between title/toolbar/content) remain unchanged. Only the catch-all fallback and entry/exit behavior change.
+
+### Test Plan
+
+#### Unit tests to rewrite (`tile-component.test.tsx`)
+
+The "focus trap entry (Tab on tile container)" describe block (7 tests) currently asserts that Tab auto-enters the focus trap. All must be rewritten to assert focus stays on the tile container:
+
+- "Tab enters at title when title exists" → "Tab does not enter focus trap (focus stays on container)"
+- "Tab enters at toolbar button when no title" → same
+- "Tab enters at content when only content exists" → same
+- "entering announces 'Editing tile...'" → "Tab announces 'Tile focused. Press Enter to edit.'"
+- "Shift+Tab enters at last element (content)" → "Shift+Tab does not enter focus trap"
+- "Shift+Tab enters at toolbar when no content" → same
+- "Tab skips non-focusable title and enters at toolbar" → remove (irrelevant when Tab doesn't enter trap)
+
+#### Unit tests to simplify
+
+The "inter-tile navigation (Escape + Tab)" tests currently require an Escape before Tab to navigate between tiles. With the new behavior Tab always navigates:
+
+- "after Escape, Tab navigates to next sibling tile" → "Tab navigates to next sibling tile" (remove Escape step)
+- "after Escape, Shift+Tab navigates to previous sibling tile" → "Shift+Tab navigates to previous sibling tile" (remove Escape step)
+- "clicking a tile resets escapedFocusTrap" → remove entirely (flag no longer exists)
+
+The "custom events" tests track `escapedFocusTrap` state:
+
+- "toolbar-escape event sets escapedFocusTrap" → rewrite to test SR exit announcement and deselect behavior (toolbar-escape always deselects)
+- "after Escape→Tab→Escape→Shift+Tab, returns to original tile" → simplify to "Tab→Shift+Tab navigates between tiles"
+
+The "Enter enters focus trap" tests:
+
+- "Enter enters focus trap even when escapedFocusTrap is true" → remove (duplicate once flag is gone)
+
+#### New unit tests to add
+
+- "Tab does not select tile (ui.selectedTileIds unchanged)"
+- "Enter selects tile unconditionally (ui.selectedTileIds includes tile)"
+- "Enter on tile with content focuses content (toolbar not yet in DOM)"
+- "Enter on tile without getFocusableElements selects tile, focus stays on container, announces 'Tile selected. Press Tab to access toolbar, Escape to exit.'"
+- "Tab on selected tile (after Enter) enters focus trap (toolbar reachable)"
+- "Tab on selected drawing tile (after Enter, no content) enters focus trap and reaches toolbar"
+- "Escape after Enter unselects tile and returns to focus ring"
+- "Escape after mouse click unselects tile and returns to focus ring"
+- "After mouse click → Escape → Tab, navigates to sibling (no keyboard trap)"
+- "Tab announces 'Tile focused. Press Enter to edit.'"
+- "Enter announces 'Editing tile. Press Escape to exit.'"
+- "navigateToSiblingTile does not select destination tile"
+- "Enter→Escape→Enter round-trip: selection toggles correctly"
+
+#### Tests to update
+
+- Escape exit from focus trap: add assertion that deselect is always called (tile is unselected after Escape)
+- ArrowUp exit from non-editable elements: add assertion that tile stays selected (ArrowUp is a soft exit, not Escape — it doesn't deselect)
+
+#### Tests to keep as-is
+
+- ARIA attributes (role, aria-label, tabIndex=0)
+- Focus trap cycling (Tab/Shift+Tab within trap between title/toolbar/content)
+- Screen reader live region infrastructure
+- All toolbar tests (`tile-toolbar.test.tsx`)
+- All roving tabindex tests (`use-roving-tabindex.test.tsx`)
+
+#### Cypress tests — no changes needed
+
+All Cypress changes on this branch are `aria-disabled` attribute checks (not `disabled` HTML attribute). These are unrelated to focus trap entry and should be kept as-is. No Cypress tests currently assert auto-focus behavior on tile Tab navigation.
