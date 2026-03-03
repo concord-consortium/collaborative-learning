@@ -547,7 +547,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       // initialized to their defaults. Call updateLayout to set them correctly
       // based on the actual tile content models now in the tileMap.
       if (tileModel && isRowListContainer(tileModel.content)) {
-        const rowListContent = tileModel.content as RowListType;
+        const rowListContent = tileModel.content;
         rowListContent.rowOrder.forEach((rowId: string) => {
           const row = rowListContent.getRow(rowId);
           row?.updateLayout(self.tileMap);

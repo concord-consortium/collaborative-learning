@@ -7,7 +7,7 @@ import { onPatch, onSnapshot } from "mobx-state-tree";
 import { observable, reaction, runInAction } from "mobx";
 
 import { IStores } from "../../../models/stores/stores";
-import { DataflowContentModelType } from "../model/dataflow-content";
+import { DataflowContentModelType, DEFAULT_PROGRAM_ZOOM } from "../model/dataflow-content";
 import {
   DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel
 } from "../model/dataflow-program-model";
@@ -271,7 +271,9 @@ export class ReteManager implements INodeServices {
     // fit within the view.
     if (!this.readOnly) {
       const { programZoom } = this.mstContent;
-      const isDefaultZoom = programZoom.dx === 0 && programZoom.dy === 0 && programZoom.scale === 1;
+      const isDefaultZoom = programZoom.dx === DEFAULT_PROGRAM_ZOOM.dx
+        && programZoom.dy === DEFAULT_PROGRAM_ZOOM.dy
+        && programZoom.scale === DEFAULT_PROGRAM_ZOOM.scale;
       if (isDefaultZoom && this.mstProgram.nodes.size > 0) {
         // Tile was copied with default zoom — fit content to show all nodes.
         // Use setTimeout to ensure DOM has rendered node elements with dimensions.

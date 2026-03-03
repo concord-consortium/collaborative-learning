@@ -131,7 +131,7 @@ export const DataflowContentModel = TileContentModel
     },
     get tileSnapshotForCopy() {
       const snapshot = getSnapshot(self);
-      // Reset programZoom so the copied tile will auto-fit all nodes on first display
+      // Reset programZoom so the rete manager knows to fit content on first display
       return { ...snapshot, programZoom: DEFAULT_PROGRAM_ZOOM };
     },
     exportJson(options?: ITileExportOptions) {

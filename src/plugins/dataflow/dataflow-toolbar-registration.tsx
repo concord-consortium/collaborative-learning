@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { observer } from "mobx-react";
 import { DataSetLinkButton } from "../../components/toolbar/data-set-link-button";
 import { DataSetViewButton } from "../../components/toolbar/data-set-view-button";
-import { registerTileToolbarButtons, registerDefaultToolbarTools, IToolbarButtonComponentProps }
+import { registerTileToolbarButtons, IToolbarButtonComponentProps }
   from "../../components/toolbar/toolbar-button-manager";
 import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button";
 import { DataflowReteManagerContext } from "./components/dataflow-rete-manager-context";
@@ -47,5 +47,3 @@ registerTileToolbarButtons('dataflow',
     component: DeleteNodeButton
   }
 ]);
-
-registerDefaultToolbarTools('dataflow', ["delete"]);
