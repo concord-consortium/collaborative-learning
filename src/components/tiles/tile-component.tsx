@@ -292,7 +292,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
               ref={el => this.liveRegion = el}
               className="visually-hidden"
               role="status"
-              aria-live="assertive"
+              aria-live="polite"
             />
           </div>
         </RegisterToolbarContext.Provider>
@@ -490,6 +490,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   // The destination tile's handleFocus will auto-enter its focus trap.
   // NOTE: Uses DOM selectors (.document-content, .tool-tile[data-tool-id]) to find
   // siblings — if those CSS classes change, keyboard nav will silently break.
+  // A model-based approach using getTilesInDocumentOrder() was tried but produced
+  // incorrect tab ordering in practice, so DOM queries remain the reliable method.
   private navigateToSiblingTile(e: KeyboardEvent, reverse: boolean): boolean {
     const documentContent = this.domElement?.closest('.document-content');
     const tiles = Array.from(

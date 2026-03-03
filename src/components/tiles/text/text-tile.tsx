@@ -209,10 +209,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       },
       // Return focusable elements for focus trap navigation
       getFocusableElements: () => {
-        const contentElement = this.textTileDiv?.querySelector("[data-slate-editor]") as HTMLElement | undefined;
-        const titleElement = this.textTileDiv?.querySelector(
-          ".editable-tile-title input, .editable-tile-title-text"
-        ) as HTMLElement | undefined;
+        const contentElement: HTMLElement | null | undefined = this.textTileDiv?.querySelector("[data-slate-editor]");
         // Use Slate's ReactEditor.focus to properly activate the editor (sets selection/cursor).
         // Native .focus() on the contenteditable div doesn't initialize Slate's internal state.
         const focusContent = () => {
@@ -230,7 +227,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         };
         return {
           contentElement: contentElement || undefined,
-          titleElement: titleElement || undefined,
           focusContent
         };
       }

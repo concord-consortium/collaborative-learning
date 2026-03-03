@@ -12,7 +12,7 @@ Low vision and low mobility students currently cannot access text tile toolbar f
 
 ## Requirements
 
-- When focus-trapped in a text tile, Tab cycles through focusable elements in this order: tile title (if visible) -> toolbar (single Tab stop, landing on the active button) -> text editor content
+- When focus-trapped in a tile, Tab cycles through focusable elements in this order: tile title (if visible) -> toolbar (single Tab stop, landing on the active button) -> tile's editable content
 - Shift-Tab reverses the cycle order
 - Tab wraps: from the last focusable element, Tab returns to the first; from the first, Shift-Tab goes to the last
 - Arrow keys (Left/Right) navigate between toolbar buttons without wrapping (roving tabindex pattern within the toolbar)
@@ -75,7 +75,7 @@ Low vision and low mobility students currently cannot access text tile toolbar f
 ## Decisions
 
 ### What is the desired tab order when the tile has a visible title?
-**Context**: Some text tiles have editable titles shown as an input above the content. Not all text tiles show titles — it depends on tile configuration.
+**Context**: Some tiles have editable titles shown as an input above the content. Not all tiles show titles — it depends on tile configuration.
 **Options considered**:
 - A) Title (if visible) -> Toolbar buttons -> Editor content
 - B) Toolbar buttons -> Title (if visible) -> Editor content

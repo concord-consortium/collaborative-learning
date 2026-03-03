@@ -260,10 +260,6 @@ describe("Tile toolbar button", () => {
 
 describe("Tile toolbar ARIA and keyboard", () => {
 
-  afterEach(() => {
-    // Clean up any appended elements
-  });
-
   // --- Toolbar ARIA ---
 
   it("toolbar has role='toolbar'", () => {

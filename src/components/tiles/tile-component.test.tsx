@@ -328,7 +328,7 @@ describe("TileComponent focus trap", () => {
       const { tileElement } = renderFocusTrapTile();
       act(() => { tileElement.focus(); });
       fireEvent.keyDown(tileElement, { key: "Tab" });
-      const liveRegion = tileElement.querySelector("[role='status'][aria-live='assertive']");
+      const liveRegion = tileElement.querySelector("[role='status'][aria-live='polite']");
       expect(liveRegion?.textContent).toBe("Editing tile. Press Escape to exit.");
     });
 
@@ -451,7 +451,7 @@ describe("TileComponent focus trap", () => {
       const { tileElement, contentElement } = renderFocusTrapTile();
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Escape" });
-      const liveRegion = tileElement.querySelector("[role='status'][aria-live='assertive']");
+      const liveRegion = tileElement.querySelector("[role='status'][aria-live='polite']");
       expect(liveRegion?.textContent).toBe("Exited tile. Tab to next tile, Shift+Tab to previous.");
     });
   });
@@ -655,7 +655,7 @@ describe("TileComponent focus trap", () => {
   describe("screen reader live region", () => {
     it("live region element exists with correct ARIA attributes", () => {
       const { tileElement } = renderFocusTrapTile();
-      const liveRegion = tileElement.querySelector("[role='status'][aria-live='assertive']");
+      const liveRegion = tileElement.querySelector("[role='status'][aria-live='polite']");
       expect(liveRegion).toBeInTheDocument();
       expect(liveRegion).toHaveClass("visually-hidden");
     });
@@ -666,7 +666,7 @@ describe("TileComponent focus trap", () => {
       act(() => { tileElement.focus(); });
       fireEvent.keyDown(tileElement, { key: "Tab" });
 
-      const liveRegion = tileElement.querySelector("[role='status'][aria-live='assertive']");
+      const liveRegion = tileElement.querySelector("[role='status'][aria-live='polite']");
       expect(liveRegion?.textContent).toBe("Editing tile. Press Escape to exit.");
 
       act(() => { jest.advanceTimersByTime(2000); });
