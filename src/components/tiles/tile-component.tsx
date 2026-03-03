@@ -598,9 +598,12 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     // or inside the toolbar (FloatingPortal fallback to prevent focus loop).
     const prev = e.relatedTarget as HTMLElement | null;
     if (!prev || this.domElement?.contains(prev) || this.toolbarElement?.contains(prev)) return;
+    // Respect tileHandlesOwnSelection: tiles that manage their own selection
+    // (e.g., placeholders) should not be auto-selected on focus.
+    const { model } = this.props;
+    if (getTileComponentInfo(model.content.type)?.tileHandlesOwnSelection) return;
     // Select the tile in the UI store so tile content (e.g., Slate editor) activates properly.
     // This mirrors what navigateToSiblingTile does for inter-tile keyboard navigation.
-    const { model } = this.props;
     const { ui } = this.stores;
     ui.setSelectedTileId(model.id, { append: false });
     this.enterFocusTrap(e);

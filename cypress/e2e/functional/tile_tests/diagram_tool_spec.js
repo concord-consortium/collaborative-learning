@@ -201,8 +201,8 @@ context('Diagram Tool Tile', function () {
     drawTile.getDrawTile().should("exist");
     drawTile.getDrawTile().first().click();
     drawTile.getDrawToolNewVariable().should("exist").should("be.enabled");
-    drawTile.getDrawToolEditVariable().should("exist").should("be.disabled");
-    drawTile.getDrawToolInsertVariable().should("exist").should("be.disabled");
+    drawTile.getDrawToolEditVariable().should("exist").should("have.attr", "aria-disabled", "true");
+    drawTile.getDrawToolInsertVariable().should("exist").should("have.attr", "aria-disabled", "true");
 
     // Text tile and editor render
     textTile.getTextTile().should("exist");
@@ -243,7 +243,7 @@ context('Diagram Tool Tile', function () {
     const newUnit = "util";
     drawTile.getDrawTile().click();
     drawTile.getVariableChip().click();
-    drawTile.getDrawToolEditVariable().should("not.be.disabled").click();
+    drawTile.getDrawToolEditVariable().should("not.have.attr", "aria-disabled").click();
     dialogField("name").clear();
     dialogField("name").type(newName);
     dialogField("value").clear();
