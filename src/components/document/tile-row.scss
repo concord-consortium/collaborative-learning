@@ -21,10 +21,12 @@
 
     &.show {
       background-color: $color7;
-      opacity: 0.25;
+      opacity: 0.4;
+      border: 2px solid $focus-ring-color;
 
       &.dimmed {
-        opacity: 0.10;
+        opacity: 0.15;
+        border: 1px dashed $color7-4;
       }
     }
 
