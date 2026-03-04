@@ -6,7 +6,7 @@ import { getTileComponentInfo } from "../models/tiles/tile-component-info";
 import dragPlaceholderImage from "../assets/image_drag.png";
 
 export const PickedUpTileGhost: React.FC = observer(function PickedUpTileGhost() {
-  const { ui, documents } = useStores();
+  const { ui } = useStores();
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -60,9 +60,7 @@ export const PickedUpTileGhost: React.FC = observer(function PickedUpTileGhost()
   if (!ui.pickedUpTileId) return null;
 
   // Look up the tile type icon from the tile component registry
-  const sourceDoc = documents.findDocumentOfTile(ui.pickedUpTileId);
-  const tileType = sourceDoc?.content?.getTileType(ui.pickedUpTileId);
-  const TileIcon = tileType ? getTileComponentInfo(tileType)?.Icon : undefined;
+  const TileIcon = ui.pickedUpTileType ? getTileComponentInfo(ui.pickedUpTileType)?.Icon : undefined;
 
   const ghost = (
     <>

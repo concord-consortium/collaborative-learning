@@ -59,6 +59,7 @@ export const UIModel = types
     dragId: types.maybe(types.string), // The id of the object being dragged. Used with dnd-kit dragging.
     pickedUpTileId: types.maybe(types.string),
     pickedUpDocId: types.maybe(types.string),
+    pickedUpTileType: types.maybe(types.string),
     focusedDropZoneIndex: types.maybe(types.number)
   })
   .volatile(self => ({
@@ -212,13 +213,15 @@ export const UIModel = types
         self.dragId = dragId;
       },
 
-      pickUpTile(tileId: string, docId: string) {
+      pickUpTile(tileId: string, docId: string, tileType?: string) {
         self.pickedUpTileId = tileId;
         self.pickedUpDocId = docId;
+        self.pickedUpTileType = tileType;
       },
       clearPickedUpTile() {
         self.pickedUpTileId = undefined;
         self.pickedUpDocId = undefined;
+        self.pickedUpTileType = undefined;
         self.focusedDropZoneIndex = undefined;
       },
 

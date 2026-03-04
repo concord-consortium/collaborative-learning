@@ -605,16 +605,29 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     }
   };
 
+  private findContentOfTile(tileId: string) {
+    const { documents, problem, teacherGuide } = this.stores;
+    // Check the documents store first (user documents)
+    const doc = documents.findDocumentOfTile(tileId);
+    if (doc?.content) return doc.content;
+    // Curriculum section content isn't in the documents store — search problem sections
+    for (const section of problem.sections) {
+      if (section.content?.tileMap.has(tileId)) return section.content;
+    }
+    for (const section of teacherGuide?.sections || []) {
+      if (section.content?.tileMap.has(tileId)) return section.content;
+    }
+  }
+
   private handlePickUpPlace = (dropRowInfo: IDropRowInfo) => {
     const { content } = this.props;
-    const { ui, documents } = this.stores;
+    const { ui } = this.stores;
     const tileId = ui.pickedUpTileId;
 
     if (!content || !tileId) return;
 
     // Find the source document content — the tile may be in a different document (e.g. resources pane)
-    const sourceDoc = documents.findDocumentOfTile(tileId);
-    const sourceContent = sourceDoc?.content;
+    const sourceContent = this.findContentOfTile(tileId);
     if (!sourceContent) {
       ui.clearPickedUpTile();
       return;

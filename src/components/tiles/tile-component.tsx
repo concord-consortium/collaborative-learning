@@ -520,7 +520,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       // Re-clicking the same handle cancels pick-up
       ui.clearPickedUpTile();
     } else {
-      ui.pickUpTile(model.id, docId);
+      ui.pickUpTile(model.id, docId, model.content.type);
     }
 
     // Prevent the click from bubbling to document-content's click handler,
