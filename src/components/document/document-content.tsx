@@ -89,16 +89,18 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       // property. So when there are lots of thumbnails then each of them will react to a
       // change of this global. It could be a volatile prop on the document model. Or the ui
       // store could have a scrollToMap with keys of the docId and values of the tileId
-      // Enable mousemove-based drop zone highlighting when a tile is picked up
+      // Enable mousemove-based drop zone highlighting and keyboard navigation when a tile is picked up
       this.pickUpReactionDisposer = reaction(
         () => this.stores.ui.pickedUpTileId,
         (pickedUpTileId) => {
           if (pickedUpTileId && !this.props.readOnly) {
             this.domElement?.addEventListener("mousemove", this.handlePickUpMouseMove);
             this.domElement?.addEventListener("mouseleave", this.handlePickUpMouseLeave);
+            document.addEventListener("keydown", this.handlePickUpKeyDown);
           } else {
             this.domElement?.removeEventListener("mousemove", this.handlePickUpMouseMove);
             this.domElement?.removeEventListener("mouseleave", this.handlePickUpMouseLeave);
+            document.removeEventListener("keydown", this.handlePickUpKeyDown);
             this.clearDropRowInfo();
           }
         }
@@ -135,6 +137,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   public componentWillUnmount() {
     this.scrollDisposer?.();
     this.pickUpReactionDisposer?.();
+    document.removeEventListener("keydown", this.handlePickUpKeyDown);
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -458,9 +461,18 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  // --- Click-to-pick: mousemove highlights drop zones, click places the tile ---
+  // --- Click-to-pick: mousemove/keyboard highlights drop zones, click/Enter places the tile ---
 
+  private handlePickUpMouseLeave = () => {
+    this.clearDropRowInfo();
+  };
+
+  // When the mouse moves during pick-up, clear keyboard focus so mouse takes over
   private handlePickUpMouseMove = (e: MouseEvent) => {
+    const { ui } = this.stores;
+    if (ui.focusedDropZoneIndex !== undefined) {
+      ui.setFocusedDropZoneIndex(undefined);
+    }
     const { dropRowInfo } = this.state;
     const lastUpdate = dropRowInfo?.updateTimestamp ?? 0;
     const now = Date.now();
@@ -470,8 +482,164 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     }
   };
 
-  private handlePickUpMouseLeave = () => {
-    this.clearDropRowInfo();
+  // --- Keyboard navigation of drop zones during pick-up ---
+
+  // Compute an ordered list of valid drop zones from the document's rows.
+  // Each zone has a location (top/left/right/bottom), the rowId, and an IDropRowInfo for placement.
+  private getDropZoneList() {
+    const { content } = this.props;
+    if (!content) return [];
+
+    type DropZoneLocation = "top" | "left" | "right" | "bottom";
+    interface IDropZone {
+      rowIndex: number;
+      rowId: string;
+      location: DropZoneLocation;
+      dropRowInfo: IDropRowInfo;
+    }
+
+    const zones: IDropZone[] = [];
+    const allRows = content.allRows;
+
+    allRows.forEach((row, i) => {
+      const isSectionHeader = row.isSectionHeader;
+      const isFixed = row.isFixedPositionRow(content.tileMap);
+
+      if (isFixed) {
+        // Fixed position rows only allow insertion below
+        zones.push({
+          rowIndex: i, rowId: row.id, location: "bottom",
+          dropRowInfo: { rowDropId: row.id, rowInsertIndex: i + 1, rowDropLocation: "bottom" }
+        });
+        return;
+      }
+
+      // Top zone: available unless it's a section header at the very first row
+      if (!isSectionHeader || i > 0) {
+        zones.push({
+          rowIndex: i, rowId: row.id, location: "top",
+          dropRowInfo: { rowDropId: row.id, rowInsertIndex: i, rowDropLocation: "top" }
+        });
+      }
+
+      // Left/Right zones: not available for section headers
+      if (!isSectionHeader) {
+        zones.push({
+          rowIndex: i, rowId: row.id, location: "left",
+          dropRowInfo: { rowDropId: row.id, rowInsertIndex: i, rowDropLocation: "left" }
+        });
+        zones.push({
+          rowIndex: i, rowId: row.id, location: "right",
+          dropRowInfo: { rowDropId: row.id, rowInsertIndex: i, rowDropLocation: "right" }
+        });
+      }
+
+      // Bottom zone: always available
+      zones.push({
+        rowIndex: i, rowId: row.id, location: "bottom",
+        dropRowInfo: { rowDropId: row.id, rowInsertIndex: i + 1, rowDropLocation: "bottom" }
+      });
+    });
+
+    return zones;
+  }
+
+  private handlePickUpKeyDown = (e: KeyboardEvent) => {
+    const { ui } = this.stores;
+    if (!ui.pickedUpTileId) return;
+
+    const zones = this.getDropZoneList();
+    if (zones.length === 0) return;
+
+    const currentIndex = ui.focusedDropZoneIndex;
+
+    switch (e.key) {
+      case "ArrowDown": {
+        e.preventDefault();
+        if (currentIndex === undefined) {
+          // Start at the first zone
+          ui.setFocusedDropZoneIndex(0);
+          this.setState({ dropRowInfo: zones[0].dropRowInfo });
+        } else {
+          // Move to the next zone in a later row
+          const currentRow = zones[currentIndex].rowIndex;
+          const nextIndex = zones.findIndex((z, i) => i > currentIndex && z.rowIndex > currentRow);
+          if (nextIndex >= 0) {
+            ui.setFocusedDropZoneIndex(nextIndex);
+            this.setState({ dropRowInfo: zones[nextIndex].dropRowInfo });
+          }
+        }
+        break;
+      }
+      case "ArrowUp": {
+        e.preventDefault();
+        if (currentIndex === undefined) {
+          // Start at the last zone
+          const lastIndex = zones.length - 1;
+          ui.setFocusedDropZoneIndex(lastIndex);
+          this.setState({ dropRowInfo: zones[lastIndex].dropRowInfo });
+        } else {
+          // Move to the last zone of the previous row
+          const currentRow = zones[currentIndex].rowIndex;
+          let prevIndex = -1;
+          for (let i = currentIndex - 1; i >= 0; i--) {
+            if (zones[i].rowIndex < currentRow) {
+              prevIndex = i;
+              break;
+            }
+          }
+          if (prevIndex >= 0) {
+            ui.setFocusedDropZoneIndex(prevIndex);
+            this.setState({ dropRowInfo: zones[prevIndex].dropRowInfo });
+          }
+        }
+        break;
+      }
+      case "ArrowRight": {
+        e.preventDefault();
+        if (currentIndex === undefined) {
+          ui.setFocusedDropZoneIndex(0);
+          this.setState({ dropRowInfo: zones[0].dropRowInfo });
+        } else {
+          // Move to the next zone within the same row, or wrap to next row
+          const nextIndex = Math.min(currentIndex + 1, zones.length - 1);
+          ui.setFocusedDropZoneIndex(nextIndex);
+          this.setState({ dropRowInfo: zones[nextIndex].dropRowInfo });
+        }
+        break;
+      }
+      case "ArrowLeft": {
+        e.preventDefault();
+        if (currentIndex === undefined) {
+          const lastIndex = zones.length - 1;
+          ui.setFocusedDropZoneIndex(lastIndex);
+          this.setState({ dropRowInfo: zones[lastIndex].dropRowInfo });
+        } else {
+          // Move to the previous zone
+          const prevIndex = Math.max(currentIndex - 1, 0);
+          ui.setFocusedDropZoneIndex(prevIndex);
+          this.setState({ dropRowInfo: zones[prevIndex].dropRowInfo });
+        }
+        break;
+      }
+      case "Enter": {
+        e.preventDefault();
+        if (currentIndex !== undefined && currentIndex < zones.length) {
+          this.handlePickUpPlace(zones[currentIndex].dropRowInfo);
+        }
+        break;
+      }
+      case "Tab": {
+        // Move focus to the delete button
+        e.preventDefault();
+        const deleteButton = document.querySelector<HTMLElement>(".delete-button");
+        if (deleteButton) {
+          deleteButton.focus();
+        }
+        break;
+      }
+      // Escape is handled by PickedUpTileGhost
+    }
   };
 
   private handlePickUpPlace = (dropRowInfo: IDropRowInfo) => {

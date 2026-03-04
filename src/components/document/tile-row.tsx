@@ -224,11 +224,24 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
     const rightClass = `drop-feedback right ${showRightHighlight ? "show" : dimRight ? "show dimmed" : ""}`;
     const bottomClass = `drop-feedback bottom ${showBottomHighlight ? "show" : dimBottom ? "show dimmed" : ""}`;
 
+    // Build ARIA props for drop zones when in pick-up mode
+    const rowLabel = isSectionHeader ? `section ${sectionId || ""}` : `row ${rowIndex + 1}`;
+    const ariaProps = (location: string, isVisible: boolean, isHighlighted: boolean) =>
+      allZonesVisible && isVisible
+        ? { role: "option" as const,
+            "aria-label": `${location} ${rowLabel}`,
+            "aria-selected": isHighlighted }
+        : {};
+
     return [
-      <div key="top-drop-feedback" className={topClass} />,
-      <div key="left-drop-feedback" className={leftClass} />,
-      <div key="right-drop-feedback" className={rightClass} />,
-      <div key="bottom-drop-feedback" className={bottomClass} />,
+      <div key="top-drop-feedback" className={topClass}
+        {...ariaProps("Above", dimTop || showTopHighlight, showTopHighlight)} />,
+      <div key="left-drop-feedback" className={leftClass}
+        {...ariaProps("Left of", dimLeft || showLeftHighlight, showLeftHighlight)} />,
+      <div key="right-drop-feedback" className={rightClass}
+        {...ariaProps("Right of", dimRight || showRightHighlight, showRightHighlight)} />,
+      <div key="bottom-drop-feedback" className={bottomClass}
+        {...ariaProps("Below", dimBottom || showBottomHighlight, showBottomHighlight)} />,
       <div key="bottom-resize-handle"
         className={`bottom-resize-handle ${isUserResizable ? "enable" : "disable"}`}
         draggable={isUserResizable}

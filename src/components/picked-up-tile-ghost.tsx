@@ -49,18 +49,24 @@ export const PickedUpTileGhost: React.FC = observer(function PickedUpTileGhost()
   if (!ui.pickedUpTileId) return null;
 
   const ghost = (
-    <img
-      src={dragPlaceholderImage}
-      alt=""
-      style={{
-        position: "fixed",
-        left: position.x - 40,
-        top: position.y - 10,
-        pointerEvents: "none",
-        opacity: 0.8,
-        zIndex: 10000,
-      }}
-    />
+    <>
+      <img
+        src={dragPlaceholderImage}
+        alt=""
+        style={{
+          position: "fixed",
+          left: position.x - 40,
+          top: position.y - 10,
+          pointerEvents: "none",
+          opacity: 0.8,
+          zIndex: 10000,
+        }}
+      />
+      <div aria-live="assertive" role="status"
+        style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}>
+        Tile picked up. Use arrow keys to choose a position, Enter to place, Escape to cancel.
+      </div>
+    </>
   );
 
   return createPortal(ghost, document.body);

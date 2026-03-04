@@ -58,7 +58,8 @@ export const UIModel = types
     learningLogWorkspace: WorkspaceModel,
     dragId: types.maybe(types.string), // The id of the object being dragged. Used with dnd-kit dragging.
     pickedUpTileId: types.maybe(types.string),
-    pickedUpDocId: types.maybe(types.string)
+    pickedUpDocId: types.maybe(types.string),
+    focusedDropZoneIndex: types.maybe(types.number)
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -218,6 +219,11 @@ export const UIModel = types
       clearPickedUpTile() {
         self.pickedUpTileId = undefined;
         self.pickedUpDocId = undefined;
+        self.focusedDropZoneIndex = undefined;
+      },
+
+      setFocusedDropZoneIndex(index?: number) {
+        self.focusedDropZoneIndex = index;
       },
 
       selectAllTiles,
