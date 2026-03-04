@@ -502,6 +502,11 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const allRows = content.allRows;
 
     allRows.forEach((row, i) => {
+      // Use getDropInfoForGlobalRowIndex to get the correct local rowInsertIndex
+      // within the containing RowList (not the global allRows index).
+      const baseInfo = this.getDropInfoForGlobalRowIndex(i);
+      if (!baseInfo.rowDropId) return;
+
       const isSectionHeader = row.isSectionHeader;
       const isFixed = row.isFixedPositionRow(content.tileMap);
 
@@ -509,7 +514,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         // Fixed position rows only allow insertion below
         zones.push({
           rowIndex: i, rowId: row.id, location: "bottom",
-          dropRowInfo: { rowDropId: row.id, rowInsertIndex: i + 1, rowDropLocation: "bottom" }
+          dropRowInfo: { ...baseInfo, rowDropLocation: "bottom", rowInsertIndex: baseInfo.rowInsertIndex + 1 }
         });
         return;
       }
@@ -518,7 +523,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       if (!isSectionHeader || i > 0) {
         zones.push({
           rowIndex: i, rowId: row.id, location: "top",
-          dropRowInfo: { rowDropId: row.id, rowInsertIndex: i, rowDropLocation: "top" }
+          dropRowInfo: { ...baseInfo, rowDropLocation: "top" }
         });
       }
 
@@ -526,18 +531,18 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       if (!isSectionHeader) {
         zones.push({
           rowIndex: i, rowId: row.id, location: "left",
-          dropRowInfo: { rowDropId: row.id, rowInsertIndex: i, rowDropLocation: "left" }
+          dropRowInfo: { ...baseInfo, rowDropLocation: "left" }
         });
         zones.push({
           rowIndex: i, rowId: row.id, location: "right",
-          dropRowInfo: { rowDropId: row.id, rowInsertIndex: i, rowDropLocation: "right" }
+          dropRowInfo: { ...baseInfo, rowDropLocation: "right" }
         });
       }
 
       // Bottom zone: always available
       zones.push({
         rowIndex: i, rowId: row.id, location: "bottom",
-        dropRowInfo: { rowDropId: row.id, rowInsertIndex: i + 1, rowDropLocation: "bottom" }
+        dropRowInfo: { ...baseInfo, rowDropLocation: "bottom", rowInsertIndex: baseInfo.rowInsertIndex + 1 }
       });
     });
 
