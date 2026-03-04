@@ -5,21 +5,22 @@ Users currently move tiles via HTML5 click-and-drag, which requires holding the 
 
 ## Phased Implementation
 
-### Phase 1: Mouse Click-to-Pick
-Click the drag handle to pick up, move cursor, click to place. Ghost image follows cursor. Works alongside existing HTML5 drag.
+### Phase 1: Mouse Click-to-Pick (COMPLETE)
+Click the drag handle to pick up, move cursor, click to place. Ghost image follows cursor. Works alongside existing HTML5 drag. Supports both same-document moves and cross-document copies (e.g. resources pane → workspace).
 
-### Phase 2: Keyboard Navigation
+### Phase 2: Keyboard Navigation (NOT STARTED)
 Make the drag handle tab-focusable. Enter/Space to pick up. Arrow keys navigate drop zones. All drop zones visible during pick-up with ARIA labels.
 
 ---
 
-## Phase 1: Mouse Click-to-Pick
+## Phase 1: Mouse Click-to-Pick (COMPLETE)
 
 ### State Model (UI Store)
 
-Add to `UIModel` in `src/models/stores/ui.ts`:
+Added to `UIModel` in `src/models/stores/ui.ts`:
 - `pickedUpTileId: types.maybe(types.string)` — tile currently picked up
 - `pickedUpDocId: types.maybe(types.string)` — source document content ID (for move vs. copy)
+- `isTilePickedUp` view — computed boolean for convenience
 - `pickUpTile(tileId, docId)` action — sets both fields
 - `clearPickedUpTile()` action — clears both fields
 
@@ -27,55 +28,62 @@ The full drag tile data (`IDragTilesData`) is computed lazily from the document 
 
 ### Pick-up Trigger (Drag Handle Click)
 
-The `DragTileButton` in `tile-component.tsx` already has `onClick={selectTileHandler}` and `onDragStart={handleTileDragStart}`. The key distinction: a click without drag means "pick up"; a click-and-drag uses the existing HTML5 DnD.
+The `DragTileButton` in `tile-component.tsx` has `onClick={onPickUpClick}` and `onDragStart={handleTileDragStart}`. The key distinction: a click without drag means "pick up"; a click-and-drag uses the existing HTML5 DnD.
 
 Changes to `TileComponent`:
-- Track a `didDrag` ref. Set `true` in `handleTileDragStart`, reset on `dragend`.
-- New click handler on the drag handle: if `didDrag` is true, skip (a real drag just finished). Otherwise, if no tile is picked up, call `ui.pickUpTile(model.id, docId)`. If this tile is already picked up, call `ui.clearPickedUpTile()` to cancel.
-- The existing `selectTileHandler` still fires (the tile gets selected when picked up).
+- `private didDrag = false` class field. Set `true` in `handleTileDragStart`, reset in `handleDragEnd`.
+- `handlePickUpClick`: selects the tile, then if `didDrag` is true skips (a real drag just finished). Otherwise toggles pick-up on/off via `ui.pickUpTile`/`ui.clearPickedUpTile`.
+- `handleDragEnd`: resets `didDrag` and calls `triggerResizeHandler`.
+- **Critical**: `handlePickUpClick` calls `e.stopPropagation()` to prevent the click from bubbling up to the document-content handler, which would immediately try to place the just-picked-up tile.
+- Starting a real HTML5 drag also clears any active pick-up state.
 
 ### Ghost Element
 
-A `PickedUpTileGhost` component (rendered via React portal at app root) observes `ui.pickedUpTileId`. When set:
-- Renders the same `image_drag.png` used by native drag, positioned at the cursor via a `mousemove` listener updating `position: fixed` coordinates.
+`PickedUpTileGhost` component (`src/components/picked-up-tile-ghost.tsx`) rendered inside `App.renderApp()`. It observes `ui.pickedUpTileId`. When set:
+- Renders `image_drag.png` via `createPortal` on `document.body`, positioned at cursor via a `mousemove` listener with `position: fixed`.
 - Styled with `pointer-events: none` so it doesn't block clicks on drop zones.
+- Adds `tile-picked-up` class to `document.body` for global grabbing cursor.
+- Listens for Escape key to cancel pick-up.
+- Listens for `mousedown` (capture phase) to cancel pick-up when clicking outside document content, drag handles, or delete button.
 
-When `pickedUpTileId` is cleared, the ghost unmounts.
-
-### Cursor Feedback
-
-When `pickedUpTileId` is set, add a CSS class (e.g. `.tile-picked-up`) to the app container that sets `cursor: grabbing` globally. Remove the class when cleared.
+When `pickedUpTileId` is cleared, the ghost unmounts and all listeners are cleaned up.
 
 ### Drop Zone Highlighting
 
-During pick-up, the document content area tracks cursor position via `mousemove` and calculates `dropRowInfo` using the same logic as `getDropRowInfo` (extracted into a shared utility from `DocumentContentComponent`). The existing `.drop-feedback.show` CSS classes highlight the target zone.
+`DocumentContentComponent` uses a MobX `reaction` on `ui.pickedUpTileId` to add/remove `mousemove` and `mouseleave` listeners on the document content DOM element. The `mousemove` handler calls `getDropRowInfoFromPoint(clientX, clientY)` (refactored from the original `getDropRowInfo` that took a `DragEvent`) to calculate drop zone info, which flows through `DropRowContext` to highlight the target zone — the same visual feedback as native drag.
 
 ### Placement (Click-to-Place)
 
-A document-level `mousedown` listener (added when `pickedUpTileId` is set) handles placement:
+The existing `handleClick` on the document-content div was extended:
 
-**On a drop zone (document content area)**: Calculate `dropRowInfo` from click coordinates. Build `IDragTilesData` from the picked-up tile. Call `documentContent.userMoveTiles()`. Clear pick-up state.
+**When `ui.pickedUpTileId` is set**:
+1. Calculate `dropRowInfo` from click coordinates
+2. If a valid drop zone is found, call `handlePickUpPlace(dropRowInfo)`
+3. `handlePickUpPlace` uses `documents.findDocumentOfTile(tileId)` to find the source document
+4. If source and target are the same document → `userMoveTiles` (move)
+5. If source and target differ (e.g. resources pane → workspace) → `getDragTiles` + `handleDragCopyTiles` (copy)
+6. Clear pick-up state and drop zone highlights
+7. If no valid drop zone was found, cancel pick-up
 
-**On the Delete button**: `DeleteButton` observes `ui.pickedUpTileId`. On click, if a tile is picked up, it stores the tile ID and shows the drag-delete confirmation modal (reusing the existing `onDeleteTile` path). Clear pick-up state.
-
-**Anywhere else (including other tile content/handles)**: Clear pick-up state. Let the click propagate normally for selection/focus. The pick-up cancels, the click takes its usual effect.
+**On the Delete button**: `DeleteButton` uses `useStores()` to access `ui.pickedUpTileId`. On click, if a tile is picked up, stores the tile ID in a ref, clears pick-up state (removing ghost), and shows the single-tile drag-delete confirmation modal. Wrapped with `observer` for reactivity.
 
 ### Cancel
 
-- **Escape key**: Global `keydown` listener (added when pick-up active) calls `clearPickedUpTile()`.
-- **Re-click drag handle**: Same handle click toggles pick-up off.
-- **Click elsewhere**: Document-level handler clears pick-up and lets click propagate.
+- **Escape key**: Global `keydown` listener in `PickedUpTileGhost` calls `clearPickedUpTile()`.
+- **Re-click drag handle**: `handlePickUpClick` toggles pick-up off.
+- **Click inside document content**: `handleClick` in `DocumentContentComponent` cancels if no valid drop zone.
+- **Click outside document/delete/handle**: Global `mousedown` listener (capture phase) in `PickedUpTileGhost` clears pick-up.
 
 ---
 
-## Phase 2: Keyboard Navigation
+## Phase 2: Keyboard Navigation (NOT STARTED)
 
 ### Drag Handle Focusability
 
 Make the `DragTileButton` wrapper keyboard-reachable:
 - Add `tabIndex={0}` and `role="button"`.
 - Add `onKeyDown`: Enter or Space triggers pick-up (same as click logic).
-- Update `aria-label` from `"Drag to move tile"` to `"Move tile"`. When the tile is picked up, change to `"Cancel move"`.
+- Update `aria-label` to `"Move tile"`. When the tile is picked up, change to `"Cancel move"`.
 
 ### Visible Drop Zones
 
@@ -99,19 +107,21 @@ Drop zones form an ordered list computed from `allRows`:
 - The keyboard-focused zone gets `aria-selected="true"`.
 - On pick-up, announce via `aria-live`: "Tile picked up. Use arrow keys to choose a position, Enter to place, Escape to cancel."
 
-## Files to Modify
+## Files Modified
 
-### Phase 1
-- `src/models/stores/ui.ts` — `pickedUpTileId`, `pickedUpDocId`, actions
-- `src/components/tiles/tile-component.tsx` — Drag handle click handler, `didDrag` flag
-- `src/components/document/document-content.tsx` — `mousemove` drop zone calculation, `mousedown` placement handler during pick-up
-- `src/components/delete-button.tsx` — Handle click-to-place on delete
-- New: `src/components/picked-up-tile-ghost.tsx` — Ghost component
-- `src/components/tiles/tile-component.scss` or `src/components/app.scss` — `.tile-picked-up` cursor class
-- Refactor: Extract `getDropRowInfo` into shared utility from `DocumentContentComponent`
+### Phase 1 (COMPLETE)
+- `src/models/stores/ui.ts` — `pickedUpTileId`, `pickedUpDocId`, `isTilePickedUp` view, actions
+- `src/models/stores/ui.test.ts` — Tests for pick-up state
+- `src/components/tiles/tile-component.tsx` — `DragTileButton` props, `didDrag` flag, `handlePickUpClick`, `handleDragEnd`, `stopPropagation`
+- `src/components/document/document-content.tsx` — `getDropRowInfoFromPoint` refactor, `pickUpReactionDisposer` reaction, `handlePickUpMouseMove`/`handlePickUpMouseLeave`, `handlePickUpPlace` with cross-document copy support, `handleClick` extension
+- `src/components/delete-button.tsx` — `observer` wrapper, `useStores`, picked-up tile delete on click
+- `src/components/delete-button.test.tsx` — `Provider` wrapper for stores
+- New: `src/components/picked-up-tile-ghost.tsx` — Ghost component with cursor tracking, Escape cancel, click-outside cancel
+- `src/components/app.tsx` — Renders `PickedUpTileGhost`
+- `src/components/app.scss` — `body.tile-picked-up` grabbing cursor
 
-### Phase 2
-- `src/components/tiles/tile-component.tsx` — `tabIndex`, `role`, `onKeyDown` on drag handle
+### Phase 2 (NOT STARTED)
+- `src/components/tiles/tile-component.tsx` — `tabIndex`, `role`, `onKeyDown`, `isPickedUp` prop on drag handle
 - `src/components/document/document-content.tsx` — Render all drop zones during pick-up, arrow key handler
 - `src/components/document/tile-row.tsx` — Always-visible drop feedback styling
 - `src/components/document/tile-row.scss` — Dimmed vs active drop zone styles
@@ -120,22 +130,23 @@ Drop zones form an ordered list computed from `allRows`:
 
 ## Verification
 
-### Phase 1
-1. Click drag handle → tile picks up, ghost follows cursor
-2. Move cursor over document → drop zones highlight
-3. Click drop zone → tile moves to that position
-4. Click drag handle again → pick-up cancels
-5. Press Escape → pick-up cancels
-6. Click tile content → pick-up cancels, tile gets focus
-7. Click Delete button while tile picked up → confirmation modal → delete
-8. Start a real drag (click-hold-move) → works as before, no pick-up triggered
-9. Existing HTML5 drag-and-drop still works unchanged
+### Phase 1 (COMPLETE)
+1. Click drag handle → tile picks up, ghost follows cursor ✓
+2. Move cursor over document → drop zones highlight ✓
+3. Click drop zone → tile moves to that position ✓
+4. Click drag handle again → pick-up cancels ✓
+5. Press Escape → pick-up cancels ✓
+6. Click tile content → pick-up cancels, tile gets focus ✓
+7. Click Delete button while tile picked up → ghost clears, confirmation modal → delete ✓
+8. Start a real drag (click-hold-move) → works as before, no pick-up triggered ✓
+9. Existing HTML5 drag-and-drop still works unchanged ✓
+10. Pick up from resources pane, click to place in workspace → tile copies ✓
 
 ### Phase 2
 1. Tab to drag handle → handle receives focus with visible focus ring
 2. Enter on focused handle → tile picks up, all drop zones visible
 3. Arrow keys → cycle through drop zones with highlight
 4. Enter → tile placed at highlighted zone
-5. Escape → cancel, tile returns to original position
+5. Escape → cancel, tile stays in original position
 6. Tab → focus moves to Delete button; Enter deletes
 7. Screen reader announces pick-up state and drop zone labels
