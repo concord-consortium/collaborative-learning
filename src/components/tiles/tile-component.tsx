@@ -95,24 +95,36 @@ interface IDragTileButtonProps {
   divRef: (instance: HTMLDivElement | null) => void;
   hovered: boolean;
   selected: boolean;
+  isPickedUp: boolean;
   selectTileHandler: (e: React.PointerEvent<HTMLDivElement>) => void;
   handleTileDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
   handleDragEnd: () => void;
   onPickUpClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 const DragTileButton = (
-    { divRef, hovered, selected,
+    { divRef, hovered, selected, isPickedUp,
       handleTileDragStart, handleDragEnd, onPickUpClick }: IDragTileButtonProps) => {
   const classes = classNames("tool-tile-drag-handle", { hovered, selected });
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onPickUpClick(e as unknown as React.MouseEvent<HTMLDivElement>);
+    }
+  };
+
   return (
     <div className={`tool-tile-drag-handle-wrapper`}
       ref={divRef}
       onDragStart={handleTileDragStart}
       onDragEnd={handleDragEnd}
       onClick={onPickUpClick}
+      onKeyDown={handleKeyDown}
       draggable={true}
+      tabIndex={0}
+      role="button"
+      aria-label={isPickedUp ? "Cancel move" : "Move tile"}
       data-testid="tool-tile-drag-handle"
-      aria-label="Drag to move tile"
     >
       <TileDragHandle className={classes} />
     </div>
@@ -226,11 +238,13 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       "selected-for-comment": tileSelectedForComment
     });
     const isDraggable = !isPlaceholderTile && !model.isFixedPosition && !appConfig.disableTileDrags;
+    const isPickedUp = ui.pickedUpTileId === model.id;
     const dragTileButton = isDraggable &&
                             <DragTileButton
                               divRef={elt => this.dragElement = elt}
                               hovered={hoverTile}
                               selected={isTileSelected}
+                              isPickedUp={isPickedUp}
                               selectTileHandler={this.selectTileHandler}
                               handleTileDragStart={this.handleTileDragStart}
                               handleDragEnd={this.handleDragEnd}
