@@ -1,13 +1,16 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Provider } from "mobx-react";
 import React from "react";
 import Modal from "react-modal";
 import { ModalProvider } from "react-modal-hook";
 import { ToolbarButtonModel } from "../models/tiles/toolbar-button";
+import { specStores } from "../models/stores/spec-stores";
 import { DeleteButton } from "./delete-button";
 
 describe("DeleteButton", () => {
 
+  const stores = specStores();
   const onSetToolActive = jest.fn();
   const onClick=jest.fn();
   const onSetShowDeleteTilesConfirmationAlert = jest.fn();
@@ -34,7 +37,7 @@ describe("DeleteButton", () => {
 
   it("renders when disabled", () => {
     render(
-      <>
+      <Provider stores={stores}>
         <div className="app"/>
         <ModalProvider>
           <DeleteButton
@@ -46,7 +49,7 @@ describe("DeleteButton", () => {
             onDeleteSelectedTiles={onDeleteSelectedTiles}
             onDeleteTile={onDeleteTile} />
         </ModalProvider>
-      </>
+      </Provider>
     );
     const button = screen.getByTestId("delete-button");
     expect(button).toBeInTheDocument();
@@ -65,7 +68,7 @@ describe("DeleteButton", () => {
 
   it("renders when enabled", () => {
     render(
-      <>
+      <Provider stores={stores}>
         <div className="app"/>
         <ModalProvider>
           <DeleteButton
@@ -77,7 +80,7 @@ describe("DeleteButton", () => {
             onDeleteSelectedTiles={onDeleteSelectedTiles}
             onDeleteTile={onDeleteTile} />
         </ModalProvider>
-      </>
+      </Provider>
     );
     const button = screen.getByTestId("delete-button");
     expect(button).toBeInTheDocument();
@@ -104,7 +107,7 @@ describe("DeleteButton", () => {
     }
 
     render(
-      <>
+      <Provider stores={stores}>
         <div className="app"/>
         <ModalProvider>
           <DeleteButton
@@ -116,7 +119,7 @@ describe("DeleteButton", () => {
             onDeleteSelectedTiles={onDeleteSelectedTiles}
             onDeleteTile={onDeleteTile} />
         </ModalProvider>
-      </>
+      </Provider>
     );
     expect(screen.getByTestId("delete-button")).toBeInTheDocument();
 

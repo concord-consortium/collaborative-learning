@@ -1,7 +1,9 @@
 import classNames from "classnames";
 import React, { useCallback, useRef, useState } from "react";
+import { observer } from "mobx-react";
 import { IButtonProps } from "./toolbar-button";
 import { useCautionAlert } from "./utilities/use-caution-alert";
+import { useStores } from "../hooks/use-stores";
 import { kDragTileId, kDragTiles } from "./tiles/tile-component";
 
 interface IProps extends IButtonProps {
@@ -10,10 +12,11 @@ interface IProps extends IButtonProps {
   onDeleteTile: (tileId: string) => void;
 }
 
-export const DeleteButton: React.FC<IProps> =
+export const DeleteButton: React.FC<IProps> = observer(
   ({ toolButton, isActive, isDisabled, onSetToolActive, onClick,
       onSetShowDeleteTilesConfirmationAlert, onDeleteSelectedTiles, onDeleteTile }) => {
 
+  const { ui } = useStores();
   const { id, title, Icon } = toolButton;
   const [isDragOver, setIsDragOver] = useState(false);
   const dragTileIdRef = useRef<string | null>(null);
@@ -23,6 +26,13 @@ export const DeleteButton: React.FC<IProps> =
   };
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // If a tile is picked up, treat click as delete-via-pick-up
+    if (ui.pickedUpTileId) {
+      dragTileIdRef.current = ui.pickedUpTileId;
+      ui.clearPickedUpTile();
+      showDragDeleteAlert();
+      return;
+    }
     !isDisabled && onClick(e, toolButton);
   };
 
@@ -118,4 +128,4 @@ export const DeleteButton: React.FC<IProps> =
       {Icon && <Icon />}
     </button>
   );
-};
+});
