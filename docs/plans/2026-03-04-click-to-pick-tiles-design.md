@@ -8,8 +8,8 @@ Users currently move tiles via HTML5 click-and-drag, which requires holding the 
 ### Phase 1: Mouse Click-to-Pick (COMPLETE)
 Click the drag handle to pick up, move cursor, click to place. Ghost image follows cursor. Works alongside existing HTML5 drag. Supports both same-document moves and cross-document copies (e.g. resources pane → workspace).
 
-### Phase 2: Keyboard Navigation (NOT STARTED)
-Make the drag handle tab-focusable. Enter/Space to pick up. Arrow keys navigate drop zones. All drop zones visible during pick-up with ARIA labels.
+### Phase 2: Keyboard Navigation (COMPLETE)
+Make the drag handle tab-focusable. Enter/Space to pick up. Arrow keys navigate drop zones. All drop zones visible during pick-up with ARIA labels. Accessible drop zone styling with high-contrast borders.
 
 ---
 
@@ -40,11 +40,13 @@ Changes to `TileComponent`:
 ### Ghost Element
 
 `PickedUpTileGhost` component (`src/components/picked-up-tile-ghost.tsx`) rendered inside `App.renderApp()`. It observes `ui.pickedUpTileId`. When set:
-- Renders `image_drag.png` via `createPortal` on `document.body`, positioned at cursor via a `mousemove` listener with `position: fixed`.
+- Renders `image_drag.png` via `createPortal` on `document.body`, with the tile type's registered Icon SVG (32x32) centered over it. The ghost is anchored with its top-right corner at the cursor position so it extends leftward over the tile and doesn't overflow the right edge of the screen.
+- On keyboard pick-up (Tab + Enter), initializes position from the focused drag handle's bounding rect so the ghost appears at the handle rather than at (0,0).
 - Styled with `pointer-events: none` so it doesn't block clicks on drop zones.
 - Adds `tile-picked-up` class to `document.body` for global grabbing cursor.
 - Listens for Escape key to cancel pick-up.
 - Listens for `mousedown` (capture phase) to cancel pick-up when clicking outside document content, drag handles, or delete button.
+- Renders an `aria-live="assertive"` region announcing keyboard instructions on pick-up.
 
 When `pickedUpTileId` is cleared, the ghost unmounts and all listeners are cleaned up.
 
@@ -76,36 +78,52 @@ The existing `handleClick` on the document-content div was extended:
 
 ---
 
-## Phase 2: Keyboard Navigation (NOT STARTED)
+## Phase 2: Keyboard Navigation (COMPLETE)
 
 ### Drag Handle Focusability
 
-Make the `DragTileButton` wrapper keyboard-reachable:
-- Add `tabIndex={0}` and `role="button"`.
-- Add `onKeyDown`: Enter or Space triggers pick-up (same as click logic).
-- Update `aria-label` to `"Move tile"`. When the tile is picked up, change to `"Cancel move"`.
+The `DragTileButton` wrapper in `tile-component.tsx` is keyboard-reachable:
+- `tabIndex={0}` and `role="button"` make it focusable and identifiable.
+- `onKeyDown`: Enter or Space triggers pick-up (same as click logic).
+- Dynamic `aria-label`: `"Move tile"` normally, `"Cancel move"` when the tile is picked up.
+- `isPickedUp` prop drives the aria-label toggle.
 
 ### Visible Drop Zones
 
-When `pickedUpTileId` is set, ALL valid drop zones render their `.drop-feedback` bars simultaneously at reduced opacity (e.g. 15%). The keyboard-focused or mouse-hovered zone gets full highlight (25% as today). This makes it clear where tiles can be placed.
+When `pickedUpTileId` is set, ALL valid drop zones render their `.drop-feedback` bars simultaneously. The active zone (mouse-hovered or keyboard-focused) gets full highlight; all others show dimmed.
+
+**Styling** (`tile-row.scss`):
+- Active zone: `background-color: $color7` at `opacity: 0.4` with `border: 2px solid $focus-ring-color` (#0957D0) — provides clear non-color visual contrast.
+- Dimmed zone: `opacity: 0.15` with `border: 1px dashed $color7-4` (#009cdb) — visible dashed outline shows all possible positions.
 
 ### Arrow Key Navigation
 
-Drop zones form an ordered list computed from `allRows`:
-- Each row contributes zones: top-of-row, left-side, between-tiles, right-side, bottom-of-row (as applicable based on row content and section headers).
-- **Up/Down arrow**: Move between rows.
-- **Left/Right arrow**: Move between positions within a row.
-- The currently focused zone gets the strong highlight.
-- **Enter**: Place the tile at the focused zone.
-- **Escape**: Cancel pick-up.
-- **Tab**: Cycle to the Delete button as a drop target, then back to document zones.
+`DocumentContentComponent` adds a global `keydown` listener when a tile is picked up (via the same MobX reaction that adds mousemove listeners). Drop zones form an ordered flat list computed by `getDropZoneList()` from `content.allRows`:
+
+- Each non-section-header row contributes: top, left, right, bottom zones.
+- Section headers contribute only bottom (and top if not the first row).
+- Fixed position rows contribute only bottom.
+- The list uses `getDropInfoForGlobalRowIndex()` to produce correct local `rowInsertIndex` values within the containing RowList (important for nested rows inside question tiles).
+
+**Navigation**:
+- **All four arrow keys** cycle sequentially through the flat zone list (Down/Right advance, Up/Left go back). This ensures every zone is reachable.
+- **Enter**: Place the tile at the currently focused zone via `handlePickUpPlace`.
+- **Tab**: Move focus to the Delete button.
+- **Escape**: Cancel pick-up (handled by `PickedUpTileGhost`).
+- Mouse movement clears keyboard focus (`focusedDropZoneIndex`) so the two modes don't conflict.
+
+State: `focusedDropZoneIndex: types.maybe(types.number)` in `UIModel`, cleared by `clearPickedUpTile()`.
 
 ### ARIA
 
-- Each drop zone gets `role="option"` within a container with `role="listbox"`.
-- `aria-label` describes the position, e.g. "Above row 2", "Right of Graph tile".
-- The keyboard-focused zone gets `aria-selected="true"`.
-- On pick-up, announce via `aria-live`: "Tile picked up. Use arrow keys to choose a position, Enter to place, Escape to cancel."
+- Each visible drop zone gets `role="option"` with `aria-label` describing the position (e.g. "Above row 2", "Left of row 3") and `aria-selected` when highlighted.
+- On pick-up, an `aria-live="assertive"` region in `PickedUpTileGhost` announces: "Tile picked up. Use arrow keys to choose a position, Enter to place, Escape to cancel."
+
+### Ghost Element Enhancements
+
+- Displays the tile type's registered Icon SVG (from `getTileComponentInfo`) centered at 32x32 over the 80x80 drag placeholder image, so users can identify which tile type is being moved.
+- On keyboard pick-up, initializes position from the active element's bounding rect (the focused drag handle).
+- Anchored with top-right corner at cursor/handle position, extending leftward over the tile to avoid right-edge screen overflow.
 
 ## Files Modified
 
@@ -120,13 +138,13 @@ Drop zones form an ordered list computed from `allRows`:
 - `src/components/app.tsx` — Renders `PickedUpTileGhost`
 - `src/components/app.scss` — `body.tile-picked-up` grabbing cursor
 
-### Phase 2 (NOT STARTED)
-- `src/components/tiles/tile-component.tsx` — `tabIndex`, `role`, `onKeyDown`, `isPickedUp` prop on drag handle
-- `src/components/document/document-content.tsx` — Render all drop zones during pick-up, arrow key handler
-- `src/components/document/tile-row.tsx` — Always-visible drop feedback styling
-- `src/components/document/tile-row.scss` — Dimmed vs active drop zone styles
-- `src/components/delete-button.tsx` — Tab-reachable during pick-up
-- ARIA attributes on drop zones
+### Phase 2 (COMPLETE)
+- `src/components/tiles/tile-component.tsx` — `tabIndex={0}`, `role="button"`, `onKeyDown` for Enter/Space, `isPickedUp` prop, dynamic `aria-label`
+- `src/components/document/document-content.tsx` — `getDropZoneList()` computes ordered zones from `allRows` using `getDropInfoForGlobalRowIndex`, `handlePickUpKeyDown` keyboard handler (arrow/Enter/Tab), mouse clears keyboard focus
+- `src/components/document/tile-row.tsx` — ARIA attributes (`role="option"`, `aria-label`, `aria-selected`) on drop zone divs during pick-up
+- `src/components/document/tile-row.scss` — Accessible drop zone styling: active zones get solid border with `$focus-ring-color`, dimmed zones get dashed border
+- `src/components/picked-up-tile-ghost.tsx` — Tile type icon overlay via `getTileComponentInfo`, keyboard position initialization from active element, `aria-live` announcement, top-right anchor positioning
+- `src/models/stores/ui.ts` — `focusedDropZoneIndex` state, `setFocusedDropZoneIndex` action, cleared in `clearPickedUpTile`
 
 ## Verification
 
@@ -142,11 +160,15 @@ Drop zones form an ordered list computed from `allRows`:
 9. Existing HTML5 drag-and-drop still works unchanged ✓
 10. Pick up from resources pane, click to place in workspace → tile copies ✓
 
-### Phase 2
-1. Tab to drag handle → handle receives focus with visible focus ring
-2. Enter on focused handle → tile picks up, all drop zones visible
-3. Arrow keys → cycle through drop zones with highlight
-4. Enter → tile placed at highlighted zone
-5. Escape → cancel, tile stays in original position
-6. Tab → focus moves to Delete button; Enter deletes
-7. Screen reader announces pick-up state and drop zone labels
+### Phase 2 (COMPLETE)
+1. Tab to drag handle → handle receives focus with visible focus ring ✓
+2. Enter on focused handle → tile picks up, ghost appears at handle, all drop zones visible ✓
+3. Ghost shows tile type icon centered over drag placeholder ✓
+4. Arrow keys → cycle through all drop zones sequentially with highlight ✓
+5. Left/right side-by-side placement works via keyboard ✓
+6. Enter → tile placed at highlighted zone ✓
+7. Escape → cancel, tile stays in original position ✓
+8. Tab → focus moves to Delete button; Enter deletes ✓
+9. Screen reader announces pick-up state and drop zone labels ✓
+10. Drop zones have visible borders (solid active, dashed dimmed) for accessibility ✓
+11. Mouse movement during keyboard navigation clears keyboard focus ✓
