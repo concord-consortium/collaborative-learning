@@ -11,6 +11,16 @@ export const PickedUpTileGhost: React.FC = observer(function PickedUpTileGhost()
   useEffect(() => {
     if (!ui.pickedUpTileId) return;
 
+    // Initialize ghost position near the drag handle that triggered the pick-up.
+    // When picked up via keyboard (Tab + Enter), the active element is the drag handle.
+    // When picked up via mouse click, the mouse position is already reasonable.
+    const activeEl = document.activeElement as HTMLElement | null;
+    const handle = activeEl?.closest(".tool-tile-drag-handle-wrapper") || activeEl;
+    if (handle) {
+      const rect = handle.getBoundingClientRect();
+      setPosition({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+    }
+
     document.body.classList.add("tile-picked-up");
 
     const handleMouseMove = (e: MouseEvent) => {
