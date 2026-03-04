@@ -1,8 +1,8 @@
 import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { kWaveRunnerDefaultHeight, kWaveRunnerTileType } from "./wave-runner-types";
-import { WaveRunnerToolComponent } from "./wave-runner-tile";
-import { defaultWaveRunnerContent, WaveRunnerContentModel } from "./wave-runner-content";
+import { WaveRunnerToolComponent } from "./components/wave-runner-tile";
+import { defaultWaveRunnerContent, WaveRunnerContentModel } from "./models/wave-runner-content";
 
 import Icon from "./assets/wave-runner-icon.svg";
 import HeaderIcon from "./assets/wave-runner-tile-id.svg";
