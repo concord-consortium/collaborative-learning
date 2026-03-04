@@ -1,4 +1,5 @@
 import React from "react";
+import "./status-and-output.scss";
 
 export const StatusAndOutput: React.FC = () => {
   return (
