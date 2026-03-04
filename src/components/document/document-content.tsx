@@ -544,6 +544,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return zones;
   }
 
+  private setFocusedZone(zones: ReturnType<typeof this.getDropZoneList>, index: number) {
+    const { ui } = this.stores;
+    ui.setFocusedDropZoneIndex(index);
+    this.setState({ dropRowInfo: zones[index].dropRowInfo });
+  }
+
   private handlePickUpKeyDown = (e: KeyboardEvent) => {
     const { ui } = this.stores;
     if (!ui.pickedUpTileId) return;
@@ -554,71 +560,23 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const currentIndex = ui.focusedDropZoneIndex;
 
     switch (e.key) {
-      case "ArrowDown": {
-        e.preventDefault();
-        if (currentIndex === undefined) {
-          // Start at the first zone
-          ui.setFocusedDropZoneIndex(0);
-          this.setState({ dropRowInfo: zones[0].dropRowInfo });
-        } else {
-          // Move to the next zone in a later row
-          const currentRow = zones[currentIndex].rowIndex;
-          const nextIndex = zones.findIndex((z, i) => i > currentIndex && z.rowIndex > currentRow);
-          if (nextIndex >= 0) {
-            ui.setFocusedDropZoneIndex(nextIndex);
-            this.setState({ dropRowInfo: zones[nextIndex].dropRowInfo });
-          }
-        }
-        break;
-      }
-      case "ArrowUp": {
-        e.preventDefault();
-        if (currentIndex === undefined) {
-          // Start at the last zone
-          const lastIndex = zones.length - 1;
-          ui.setFocusedDropZoneIndex(lastIndex);
-          this.setState({ dropRowInfo: zones[lastIndex].dropRowInfo });
-        } else {
-          // Move to the last zone of the previous row
-          const currentRow = zones[currentIndex].rowIndex;
-          let prevIndex = -1;
-          for (let i = currentIndex - 1; i >= 0; i--) {
-            if (zones[i].rowIndex < currentRow) {
-              prevIndex = i;
-              break;
-            }
-          }
-          if (prevIndex >= 0) {
-            ui.setFocusedDropZoneIndex(prevIndex);
-            this.setState({ dropRowInfo: zones[prevIndex].dropRowInfo });
-          }
-        }
-        break;
-      }
+      case "ArrowDown":
       case "ArrowRight": {
         e.preventDefault();
         if (currentIndex === undefined) {
-          ui.setFocusedDropZoneIndex(0);
-          this.setState({ dropRowInfo: zones[0].dropRowInfo });
-        } else {
-          // Move to the next zone within the same row, or wrap to next row
-          const nextIndex = Math.min(currentIndex + 1, zones.length - 1);
-          ui.setFocusedDropZoneIndex(nextIndex);
-          this.setState({ dropRowInfo: zones[nextIndex].dropRowInfo });
+          this.setFocusedZone(zones, 0);
+        } else if (currentIndex < zones.length - 1) {
+          this.setFocusedZone(zones, currentIndex + 1);
         }
         break;
       }
+      case "ArrowUp":
       case "ArrowLeft": {
         e.preventDefault();
         if (currentIndex === undefined) {
-          const lastIndex = zones.length - 1;
-          ui.setFocusedDropZoneIndex(lastIndex);
-          this.setState({ dropRowInfo: zones[lastIndex].dropRowInfo });
-        } else {
-          // Move to the previous zone
-          const prevIndex = Math.max(currentIndex - 1, 0);
-          ui.setFocusedDropZoneIndex(prevIndex);
-          this.setState({ dropRowInfo: zones[prevIndex].dropRowInfo });
+          this.setFocusedZone(zones, zones.length - 1);
+        } else if (currentIndex > 0) {
+          this.setFocusedZone(zones, currentIndex - 1);
         }
         break;
       }
