@@ -62,6 +62,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private rowRefs: Array<TileRowHandle>;
   private mutationObserver: MutationObserver;
   private scrollDisposer: IReactionDisposer;
+  private pickUpReactionDisposer: IReactionDisposer;
 
   constructor(props: IProps) {
     super(props);
@@ -88,6 +89,21 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       // property. So when there are lots of thumbnails then each of them will react to a
       // change of this global. It could be a volatile prop on the document model. Or the ui
       // store could have a scrollToMap with keys of the docId and values of the tileId
+      // Enable mousemove-based drop zone highlighting when a tile is picked up
+      this.pickUpReactionDisposer = reaction(
+        () => this.stores.ui.pickedUpTileId,
+        (pickedUpTileId) => {
+          if (pickedUpTileId && !this.props.readOnly) {
+            this.domElement?.addEventListener("mousemove", this.handlePickUpMouseMove);
+            this.domElement?.addEventListener("mouseleave", this.handlePickUpMouseLeave);
+          } else {
+            this.domElement?.removeEventListener("mousemove", this.handlePickUpMouseMove);
+            this.domElement?.removeEventListener("mouseleave", this.handlePickUpMouseLeave);
+            this.clearDropRowInfo();
+          }
+        }
+      );
+
       this.scrollDisposer = reaction(
         () => {
           const docId = this.stores.ui.scrollTo?.docId;
@@ -118,6 +134,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   public componentWillUnmount() {
     this.scrollDisposer?.();
+    this.pickUpReactionDisposer?.();
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -275,6 +292,21 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;
+
+    // Handle click-to-place when a tile is picked up
+    if (ui.pickedUpTileId && !this.props.readOnly) {
+      const dropRowInfo = this.getDropRowInfoFromPoint(e.clientX, e.clientY);
+      if (dropRowInfo?.rowDropId) {
+        this.handlePickUpPlace(dropRowInfo);
+        e.stopPropagation();
+        return;
+      }
+      // Click was in document but not on a valid drop zone — cancel
+      ui.clearPickedUpTile();
+      this.clearDropRowInfo();
+      return;
+    }
+
     // deselect tiles on click on document background
     // click must be on DocumentContent itself, not bubble up from child
     if (e.target === e.currentTarget) {
@@ -351,8 +383,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return { rowDropId: row.id, rowInsertIndex: rowIndex };
   }
 
-  // Determine whether the drag event is over a drop zone, and if so, which one
-  private getDropRowInfo = (e: React.DragEvent<HTMLDivElement>) => {
+  // Determine whether a point is over a drop zone, and if so, which one
+  private getDropRowInfoFromPoint = (clientX: number, clientY: number): IDropRowInfo | undefined => {
     const { content } = this.props;
     if (!this.domElement || !content) {
       return { rowInsertIndex: content ? content.rowOrder.length : 0 };
@@ -376,9 +408,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     for (let i = 0; i < rowElements.length; ++i) {
       const rowElt = rowElements[i];
       const rowBounds = rowElt.getBoundingClientRect();
-      if (this.isPointInRect(e.clientX, e.clientY, rowBounds) ||
+      if (this.isPointInRect(clientX, clientY, rowBounds) ||
           // below the last row - pretend we are in the last row
-          ((i === lastRowIndex) && (e.clientY > rowBounds.bottom))) {
+          ((i === lastRowIndex) && (clientY > rowBounds.bottom))) {
         dropInfo = this.getDropInfoForGlobalRowIndex(i);
         if (!dropInfo.rowDropId) return;
         const row = content?.getRowRecursive(dropInfo.rowDropId);
@@ -387,10 +419,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           dropInfo.rowDropLocation = "bottom";
           dropInfo.rowInsertIndex = i + 1;
         } else {
-          const dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
-          const dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
-          const dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
-          const dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
+          const dropOffsetLeft = Math.abs(clientX - rowBounds.left);
+          const dropOffsetTop = Math.abs(clientY - rowBounds.top);
+          const dropOffsetRight = Math.abs(rowBounds.right - clientX);
+          const dropOffsetBottom = Math.abs(rowBounds.bottom - clientY);
 
           const kSideDropThreshold = rowBounds.width * 0.25;
           if ((dropOffsetLeft < kSideDropThreshold) &&
@@ -415,11 +447,53 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return dropInfo;
   };
 
+  // Wrapper for drag events
+  private getDropRowInfo = (e: React.DragEvent<HTMLDivElement>) => {
+    return this.getDropRowInfoFromPoint(e.clientX, e.clientY);
+  };
+
   private clearDropRowInfo() {
     if (this.state.dropRowInfo) {
       this.setState({ dropRowInfo: undefined });
     }
   }
+
+  // --- Click-to-pick: mousemove highlights drop zones, click places the tile ---
+
+  private handlePickUpMouseMove = (e: MouseEvent) => {
+    const { dropRowInfo } = this.state;
+    const lastUpdate = dropRowInfo?.updateTimestamp ?? 0;
+    const now = Date.now();
+    if (now - lastUpdate > kDragUpdateInterval) {
+      const nextDropRowInfo = this.getDropRowInfoFromPoint(e.clientX, e.clientY);
+      this.setState({ dropRowInfo: nextDropRowInfo });
+    }
+  };
+
+  private handlePickUpMouseLeave = () => {
+    this.clearDropRowInfo();
+  };
+
+  private handlePickUpPlace = (dropRowInfo: IDropRowInfo) => {
+    const { content } = this.props;
+    const { ui } = this.stores;
+    const tileId = ui.pickedUpTileId;
+
+    if (!content || !tileId) return;
+
+    const tileModel = content.getTile(tileId);
+    if (!tileModel) {
+      ui.clearPickedUpTile();
+      return;
+    }
+
+    const dragTileItems = content.getDragTileItems([tileId]);
+    const tilesToMove = content.removeEmbeddedTilesFromDragTiles(dragTileItems);
+    content.userMoveTiles(tilesToMove, dropRowInfo);
+
+    ui.clearPickedUpTile();
+    this.clearDropRowInfo();
+  };
 
   private handleRowResizeDrop = (e: React.DragEvent<HTMLDivElement>) => {
     const { content } = this.props;

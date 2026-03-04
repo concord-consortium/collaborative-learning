@@ -29,6 +29,8 @@ export const PickedUpTileGhost: React.FC = observer(function PickedUpTileGhost()
       if (target.closest(".tool-tile-drag-handle-wrapper")) return;
       // Don't cancel if clicking the delete button (delete handler will handle it)
       if (target.closest(".delete-button")) return;
+      // Don't cancel if clicking inside document content (placement handler handles it)
+      if (target.closest(".document-content")) return;
       // Everything else cancels pick-up
       ui.clearPickedUpTile();
     };

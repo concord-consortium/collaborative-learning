@@ -508,6 +508,10 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     } else {
       ui.pickUpTile(model.id, docId);
     }
+
+    // Prevent the click from bubbling to document-content's click handler,
+    // which would immediately try to place the just-picked-up tile.
+    e.stopPropagation();
   };
 
   private triggerResizeHandler = () => {
