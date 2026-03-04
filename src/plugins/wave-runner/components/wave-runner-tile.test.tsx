@@ -8,6 +8,11 @@ import { WaveRunnerToolComponent } from "./wave-runner-tile";
 // knows it is a supported tile type
 import "../wave-runner-registration";
 
+let mockWidth: number | undefined;
+jest.mock("react-resize-detector", () => ({
+  useResizeDetector: () => ({ width: mockWidth, ref: React.createRef() })
+}));
+
 describe("WaveRunnerToolComponent", () => {
   const content = defaultWaveRunnerContent();
   const model = TileModel.create({content});
@@ -24,6 +29,10 @@ describe("WaveRunnerToolComponent", () => {
     onRegisterTileApi: () => { throw new Error("Function not implemented."); },
     onUnregisterTileApi: () => { throw new Error("Function not implemented."); }
   };
+
+  beforeEach(() => {
+    mockWidth = undefined;
+  });
 
   it("renders an editable tile title", () => {
     const {container} =
@@ -53,5 +62,29 @@ describe("WaveRunnerToolComponent", () => {
     const {getByText} =
       render(<WaveRunnerToolComponent {...defaultProps} {...{model}} />);
     expect(getByText("Status and Output")).toBeInTheDocument();
+  });
+
+  it("stacks sections vertically when width is undefined", () => {
+    mockWidth = undefined;
+    const {container} = render(<WaveRunnerToolComponent {...defaultProps} {...{model}} />);
+    const sections = container.querySelector(".wave-runner-sections");
+    expect(sections).toHaveClass("vertical");
+    expect(sections).not.toHaveClass("horizontal");
+  });
+
+  it("stacks sections vertically when width is less than 450", () => {
+    mockWidth = 400;
+    const {container} = render(<WaveRunnerToolComponent {...defaultProps} {...{model}} />);
+    const sections = container.querySelector(".wave-runner-sections");
+    expect(sections).toHaveClass("vertical");
+    expect(sections).not.toHaveClass("horizontal");
+  });
+
+  it("stacks sections horizontally when width is 450 or greater", () => {
+    mockWidth = 450;
+    const {container} = render(<WaveRunnerToolComponent {...defaultProps} {...{model}} />);
+    const sections = container.querySelector(".wave-runner-sections");
+    expect(sections).toHaveClass("horizontal");
+    expect(sections).not.toHaveClass("vertical");
   });
 });

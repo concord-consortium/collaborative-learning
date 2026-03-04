@@ -18,8 +18,29 @@
     background-color: $workspace-teal-light-8;
   }
 
+  .wave-runner-sections {
+    display: flex;
+
+    &.vertical {
+      flex-direction: column;
+
+      .wave-runner-section + .wave-runner-section {
+        border-top: 1px solid $workspace-teal-dark-1;
+      }
+    }
+
+    &.horizontal {
+      flex-direction: row;
+
+      .wave-runner-section + .wave-runner-section {
+        border-left: 1px solid $workspace-teal-dark-1;
+      }
+    }
+  }
+
   .wave-runner-section {
     padding: 8px 8px 10px;
+    flex: 1;
 
     &.data-setup {
       background-color: $workspace-teal-light-7;
