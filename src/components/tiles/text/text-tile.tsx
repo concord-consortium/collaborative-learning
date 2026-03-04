@@ -309,8 +309,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     // acts as a proxy for commenting on the question.
     if (this.props.model.fixedPosition && inLockedContainer) {
       if (readOnly && this.context.model) {
-        const append = hasSelectionModifier(e);
-        ui.setSelectedTile(this.context.model, { append });
+        ui.setSelectedTile(this.context.model, { append: hasSelectionModifier(e) });
       }
       return;
     }
