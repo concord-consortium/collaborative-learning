@@ -56,7 +56,9 @@ export const UIModel = types
     showDemoCreator: false,
     dialog: types.maybe(UIDialogModel),
     learningLogWorkspace: WorkspaceModel,
-    dragId: types.maybe(types.string) // The id of the object being dragged. Used with dnd-kit dragging.
+    dragId: types.maybe(types.string), // The id of the object being dragged. Used with dnd-kit dragging.
+    pickedUpTileId: types.maybe(types.string),
+    pickedUpDocId: types.maybe(types.string)
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -66,6 +68,9 @@ export const UIModel = types
   .views((self) => ({
     isSelectedTile(tile: ITileModel) {
       return self.selectedTileIds.indexOf(tile.id) !== -1;
+    },
+    get isTilePickedUp() {
+      return !!self.pickedUpTileId;
     }
   }))
   .actions((self) => {
@@ -204,6 +209,15 @@ export const UIModel = types
 
       setDraggingId(dragId?: string) {
         self.dragId = dragId;
+      },
+
+      pickUpTile(tileId: string, docId: string) {
+        self.pickedUpTileId = tileId;
+        self.pickedUpDocId = docId;
+      },
+      clearPickedUpTile() {
+        self.pickedUpTileId = undefined;
+        self.pickedUpDocId = undefined;
       },
 
       selectAllTiles,
