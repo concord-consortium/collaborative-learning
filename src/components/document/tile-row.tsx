@@ -206,26 +206,36 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
     const { isUserResizable } = model;
     const { rowIndex } = props;
     const highlight = state.tileAcceptDrop ? undefined : dropHighlight;
+    const allZonesVisible = stores.ui.isTilePickedUp;
+
     const showTopHighlight = (highlight === "top") && (!isSectionHeader || (rowIndex > 0));
     const showLeftHighlight = (highlight === "left") && !isSectionHeader;
     const showRightHighlight = (highlight === "right") && !isSectionHeader;
     const showBottomHighlight = (highlight === "bottom");
 
+    // During pick-up, show all drop zones dimmed; the active one gets full highlight
+    const dimTop = allZonesVisible && !showTopHighlight && (!isSectionHeader || (rowIndex > 0));
+    const dimLeft = allZonesVisible && !showLeftHighlight && !isSectionHeader;
+    const dimRight = allZonesVisible && !showRightHighlight && !isSectionHeader;
+    const dimBottom = allZonesVisible && !showBottomHighlight;
+
+    const topClass = `drop-feedback top ${showTopHighlight ? "show" : dimTop ? "show dimmed" : ""}`;
+    const leftClass = `drop-feedback left ${showLeftHighlight ? "show" : dimLeft ? "show dimmed" : ""}`;
+    const rightClass = `drop-feedback right ${showRightHighlight ? "show" : dimRight ? "show dimmed" : ""}`;
+    const bottomClass = `drop-feedback bottom ${showBottomHighlight ? "show" : dimBottom ? "show dimmed" : ""}`;
+
     return [
-      <div key="top-drop-feedback"
-          className={`drop-feedback top ${showTopHighlight ? "show" : ""}`} />,
-      <div key="left-drop-feedback"
-          className={`drop-feedback left ${showLeftHighlight ? "show" : ""}`} />,
-      <div key="right-drop-feedback"
-          className={`drop-feedback right ${showRightHighlight ? "show" : ""}`} />,
-      <div key="bottom-drop-feedback"
-          className={`drop-feedback bottom ${showBottomHighlight ? "show" : ""}`} />,
+      <div key="top-drop-feedback" className={topClass} />,
+      <div key="left-drop-feedback" className={leftClass} />,
+      <div key="right-drop-feedback" className={rightClass} />,
+      <div key="bottom-drop-feedback" className={bottomClass} />,
       <div key="bottom-resize-handle"
         className={`bottom-resize-handle ${isUserResizable ? "enable" : "disable"}`}
         draggable={isUserResizable}
         onDragStart={isUserResizable ? handleStartResizeRow : undefined} />
     ];
-  }, [model, props, state.tileAcceptDrop, dropHighlight, isSectionHeader, handleStartResizeRow]);
+  }, [model, props, state.tileAcceptDrop, dropHighlight, isSectionHeader, stores.ui.isTilePickedUp,
+    handleStartResizeRow]);
 
   const { sectionId, tiles: modelTiles } = model;
   const rowHeight = !isSectionHeader

@@ -22,6 +22,10 @@
     &.show {
       background-color: $color7;
       opacity: 0.25;
+
+      &.dimmed {
+        opacity: 0.10;
+      }
     }
 
     &.top {
