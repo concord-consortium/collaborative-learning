@@ -68,8 +68,8 @@ export const PickedUpTileGhost: React.FC = observer(function PickedUpTileGhost()
     <>
       <div style={{
         position: "fixed",
-        left: position.x + 4,
-        top: position.y + 4,
+        left: position.x - 80,
+        top: position.y - 4,
         width: 80,
         height: 80,
         pointerEvents: "none",
