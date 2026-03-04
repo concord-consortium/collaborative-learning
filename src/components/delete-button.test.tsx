@@ -12,6 +12,7 @@ describe("DeleteButton", () => {
   const onClick=jest.fn();
   const onSetShowDeleteTilesConfirmationAlert = jest.fn();
   const onDeleteSelectedTiles = jest.fn();
+  const onDeleteTile = jest.fn();
 
 
   beforeEach(() => {
@@ -19,6 +20,7 @@ describe("DeleteButton", () => {
     onClick.mockReset();
     onSetShowDeleteTilesConfirmationAlert.mockReset();
     onDeleteSelectedTiles.mockReset();
+    onDeleteTile.mockReset();
   });
 
   const buttonConfig = {
@@ -41,7 +43,8 @@ describe("DeleteButton", () => {
             onSetToolActive={onSetToolActive}
             onClick={onClick}
             onSetShowDeleteTilesConfirmationAlert={onSetShowDeleteTilesConfirmationAlert}
-            onDeleteSelectedTiles={onDeleteSelectedTiles} />
+            onDeleteSelectedTiles={onDeleteSelectedTiles}
+            onDeleteTile={onDeleteTile} />
         </ModalProvider>
       </>
     );
@@ -71,7 +74,8 @@ describe("DeleteButton", () => {
             onSetToolActive={onSetToolActive}
             onClick={onClick}
             onSetShowDeleteTilesConfirmationAlert={onSetShowDeleteTilesConfirmationAlert}
-            onDeleteSelectedTiles={onDeleteSelectedTiles} />
+            onDeleteSelectedTiles={onDeleteSelectedTiles}
+            onDeleteTile={onDeleteTile} />
         </ModalProvider>
       </>
     );
@@ -109,7 +113,8 @@ describe("DeleteButton", () => {
             onSetToolActive={onSetToolActive}
             onClick={handleClick}
             onSetShowDeleteTilesConfirmationAlert={setShowAlert}
-            onDeleteSelectedTiles={onDeleteSelectedTiles} />
+            onDeleteSelectedTiles={onDeleteSelectedTiles}
+            onDeleteTile={onDeleteTile} />
         </ModalProvider>
       </>
     );

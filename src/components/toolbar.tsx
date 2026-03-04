@@ -223,6 +223,12 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
     });
   };
 
+  const handleDeleteTile = (tileId: string) => {
+    const { ui } = stores;
+    ui.removeTileIdFromSelection(tileId);
+    document?.deleteTile(tileId);
+  };
+
   const handleToggleSelectedTilesSolution = () => {
     const { ui } = stores;
     const documentContent = document?.content;
@@ -435,6 +441,7 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
           return <DeleteButton key={toolButton.id}
                                onSetShowDeleteTilesConfirmationAlert={setShowDeleteTilesConfirmationAlert}
                                onDeleteSelectedTiles={handleDeleteSelectedTiles}
+                               onDeleteTile={handleDeleteTile}
                                {...buttonProps} />;
         case "readAloud":
           // ReadAloudButton uses Firestore comment hooks that require fully initialized
