@@ -29,6 +29,7 @@
       "/firebase-test/",
       "/functions-v1/",
       "/functions-v2/",
+      "/authoring-api/",
       "/.yalc/"
     ],
     "transform": {

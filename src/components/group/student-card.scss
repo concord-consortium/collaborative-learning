@@ -6,26 +6,20 @@
   cursor: default;
   display: flex;
   font-size: 12px;
-  height: 22px;
-  line-height: 1;
+  line-height: 1.2;
   max-width: 125px;
+  min-height: 22px;
   padding: 3px 5px;
 
   &.draggable, &[tabindex="0"] {
     &:hover {
       background-color: $workspace-teal-light-4;
       outline: solid 1px $charcoal-light-1;
-
-      &.connected {
-        .student-card__status {
-          outline: solid 1px white;
-        }
-      }
     }
 
     &:focus-visible {
       background-color: $workspace-teal-light-4;
-      outline: solid 1px $charcoal-light-1;
+      outline: solid 1.5px $workspace-teal;
 
       &.connected {
         .student-card__status {
@@ -39,12 +33,6 @@
     background-color: $workspace-teal-light-4;
     border: solid 1px $charcoal-light-1;
     box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.35);
-
-    &.connected {
-      .student-card__status {
-        outline: solid 1px white;
-      }
-    }
   }
 
   &.draggable {
@@ -82,7 +70,9 @@
 }
 
 .student-card__name {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }

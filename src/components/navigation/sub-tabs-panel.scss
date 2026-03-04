@@ -17,32 +17,29 @@
   }
 
   &.class-work {
-    border-color: $classwork-purple;
+    border-color: $workspace-teal;
   }
 
   &.supports {
     border-color: $support-blue;
   }
 
-  .tab-header-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    background-color: white;
-    height: $nav-tab-height;
-    padding-top: 3px;
-    position: relative;
+  &.no-sub-tabs .tab-list {
+    display: none;
+  }
 
-    &.no-sub-tabs {
-      display: none;
-    }
+  &.no-sub-tabs .sub-tab-panel {
+    margin-top: 0;
   }
 
   .tab-list {
+    background-color: white;
+    height: $nav-tab-height;
+    position: relative;
     margin: 0;
-    padding: 0;
+    padding: 3px 0 0;
     display: flex;
-    flex: 1 1 auto;
+    flex: 0 0 auto; // Don't grow or shrink - use fixed height
 
     &:after {
       content: "";
@@ -88,7 +85,7 @@
       }
 
       &.class-work {
-        background-color: $classwork-purple-light-7;
+        background-color: $workspace-teal-light-6;
       }
 
       &.supports {
@@ -107,7 +104,7 @@
         }
 
         &.class-work {
-          background-color: $classwork-purple-light-5;
+          background-color: $workspace-teal-light-4;
         }
 
         &.supports {
@@ -130,7 +127,7 @@
         }
 
         &.class-work {
-          background-color: $classwork-purple-light-4;
+          background-color: $workspace-teal-light-3;
         }
 
         &.supports {
@@ -140,13 +137,9 @@
     }
   }
 
-  .documents-panel {
+  .sub-tab-panel {
     margin-top: $document-margin;
     flex: 1;
     min-height: 0;
-
-    .sub-tab-panel {
-      height: 100%;
-    }
   }
 }

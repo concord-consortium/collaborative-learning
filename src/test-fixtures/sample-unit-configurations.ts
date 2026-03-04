@@ -37,14 +37,7 @@ export const unitConfigDefaults: UnitConfiguration = {
   stamps: [] as any,
   settings: {},
   sortWorkConfig: {
-    sortOptions: [
-      { type: "Date" },
-      { type: "Group" },
-      { type: "Name" },
-      { type: "Strategy" },
-      { type: "Bookmarked" },
-      { type: "Tools" }
-    ]
+    sortOptions: ["Date", "Group", "Name", "Strategy", "Bookmarked", "Tools"]
   },
   aiEvaluation: undefined,
   aiPrompt: undefined
@@ -87,11 +80,7 @@ export const unitConfigOverrides: UnitConfiguration = {
   stamps: [] as any,
   settings: {},
   sortWorkConfig: {
-    sortOptions: [
-      { type: "Name" },
-      { type: "Group" },
-      { type: "Tools" }
-    ]
+    sortOptions: ["Name", "Group", "Tools"]
   },
   aiEvaluation: "custom",
   aiPrompt: {

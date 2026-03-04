@@ -1,24 +1,21 @@
 import { FC, SVGProps } from "react";
 import { makeAutoObservable } from "mobx";
+
 import {
-  createDocMapByBookmarks,
-  createTileTypeToDocumentsMap,
-  getTagsWithDocs,
-  sortDateSectionLabels,
-  sortGroupSectionLabels,
-  sortNameSectionLabels,
-  sortProblemSectionLabels
+  createDocMapByBookmarks, createTileTypeToDocumentsMap, getTagsWithDocs,
+  sortDateSectionLabels, sortGroupSectionLabels, sortNameSectionLabels, sortProblemSectionLabels
 } from "../../utilities/sort-document-utils";
+import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { GroupDocument } from "../document/document-types";
-import { getTileContentInfo } from "../tiles/tile-content-info";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
-import { SecondarySortType, SortType } from "./ui-types";
-import { GroupsModelType } from "./groups";
-import { ClassModelType } from "./class";
+import { getTileContentInfo } from "../tiles/tile-content-info";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
+import { ClassModelType } from "./class";
+import { GroupsModelType } from "./groups";
+import { SecondarySortType, SortType } from "./ui-types";
 
 import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
 
@@ -185,7 +182,7 @@ export class DocumentGroup {
   }
 
   get byGroup(): DocumentGroup[] {
-    const groupTerm = translate("studentGroup");
+    const groupTerm = upperWords(translate("studentGroup"));
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
     this.documents.forEach((doc) => {
       const sectionLabel = (() => {
@@ -237,7 +234,7 @@ export class DocumentGroup {
   }
 
   get byTools(): DocumentGroup[] {
-    const toolsTerm = translate("Tools");
+    const toolsTerm = upperWords(translate("tools"));
     const noToolsTerm = `No ${toolsTerm}`;
     const tileTypeToDocumentsMap = createTileTypeToDocumentsMap(this.documents, noToolsTerm);
 
@@ -273,7 +270,7 @@ export class DocumentGroup {
   }
 
   get byBookmarked(): DocumentGroup[] {
-    const bookmarkedTerm = translate("Bookmarked");
+    const bookmarkedTerm = upperWords(translate("bookmarked"));
     const notBookmarkedTerm = `Not ${bookmarkedTerm}`;
     const docMap = createDocMapByBookmarks(this.documents, this.stores.bookmarks, bookmarkedTerm, notBookmarkedTerm);
     const sortedSectionLabels = [bookmarkedTerm, notBookmarkedTerm];
@@ -285,12 +282,13 @@ export class DocumentGroup {
     this.documents.forEach((doc) => {
       const investigationOrdinal = doc.investigation;
       const problemOrdinal = doc.problem;
-      let sectionLabel = `No ${translate("Problem")}`;
+      const problemTerm = upperWords(translate("contentLevel.problem"));
+      let sectionLabel = `No ${problemTerm}`;
 
       if (investigationOrdinal != null && problemOrdinal != null) {
-        sectionLabel = `${translate("Problem")} ${investigationOrdinal}.${problemOrdinal}`;
+        sectionLabel = `${problemTerm} ${investigationOrdinal}.${problemOrdinal}`;
       } else if (problemOrdinal != null) {
-        sectionLabel = `${translate("Problem")} ${problemOrdinal}`;
+        sectionLabel = `${problemTerm} ${problemOrdinal}`;
       }
 
       if (!docMap.has(sectionLabel)) {

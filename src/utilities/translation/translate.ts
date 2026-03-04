@@ -18,7 +18,11 @@
 
 import { observable } from "mobx";
 import enUS from "./lang/en-us.json";
-import { TranslationKeyType } from "./translation-types";
+
+export type TranslationKeyType = keyof typeof enUS;
+export function isTranslationKey(key: string): key is TranslationKeyType {
+  return key in enUS;
+}
 
 // Module-level MobX observable state for term overrides.
 const moduleTermOverrides = observable.box<Record<string, string> | undefined>(undefined);
@@ -41,6 +45,18 @@ export function clearTermOverrides(): void {
   moduleTermOverrides.set(undefined);
 }
 
+export function getTermOverride(key: TranslationKeyType): string | undefined {
+  const overrides = moduleTermOverrides.get();
+  return overrides?.[key];
+}
+
+/**
+ * Get the default/base value for a key, ignoring any overrides.
+ */
+export function getDefaultValue(key: TranslationKeyType): string {
+  return enUS[key] ?? key;
+}
+
 /**
  * Translate a key to its display string.
  *
@@ -51,18 +67,5 @@ export function clearTermOverrides(): void {
  *
  */
 export function translate(key: TranslationKeyType): string {
-  const overrides = moduleTermOverrides.get();
-
-  if (overrides?.[key]) {
-    return overrides[key];
-  }
-
-  return enUS[key as keyof typeof enUS] ?? key;
-}
-
-/**
- * Get the default/base value for a key, ignoring any overrides.
- */
-export function getDefaultValue(key: TranslationKeyType): string {
-  return enUS[key as keyof typeof enUS] ?? key;
+  return getTermOverride(key) || getDefaultValue(key);
 }

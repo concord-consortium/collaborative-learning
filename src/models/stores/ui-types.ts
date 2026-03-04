@@ -2,11 +2,25 @@ import { Instance, types } from "mobx-state-tree";
 
 export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt", "getCopyToDocument"]);
 export type UIDialogType = Instance<typeof UIDialogTypeEnum>;
-export const DocFilterTypeEnum = types.enumeration("docFilter", ["Problem", "Investigation", "Unit", "All"]);
+
+// "All" is not overrideable
+export const OverrideableDocFilterTypeIds = ["Problem", "Investigation", "Unit"] as const;
+export type OverrideableDocFilterTypeId = typeof OverrideableDocFilterTypeIds[number];
+export function isOverrideableDocFilterTypeId(value: string): value is OverrideableDocFilterTypeId {
+  return OverrideableDocFilterTypeIds.includes(value as OverrideableDocFilterTypeId);
+}
+
+// But all is a possible filter type
+export const DocFilterTypeIds = [...OverrideableDocFilterTypeIds, "All"] as const;
+export type DocFilterTypeId = typeof DocFilterTypeIds[number];
+export const DocFilterTypeEnum = types.enumeration("docFilter", DocFilterTypeIds);
 export type DocFilterType = Instance<typeof DocFilterTypeEnum>;
 
 export const SortTypeIds = ["Date", "Group", "Name", "Strategy", "Bookmarked", "Tools", "Problem"] as const;
 export type SortTypeId = typeof SortTypeIds[number];
+export function isSortTypeId(value: string): value is SortTypeId {
+  return SortTypeIds.includes(value as SortTypeId);
+}
 
 export type PrimarySortType = SortTypeId;
 export type SecondarySortType = PrimarySortType | "None";

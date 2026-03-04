@@ -2,14 +2,12 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
-import { TermOverridesSettings } from "./term-overrides-settings";
-import { TERM_METADATA } from "../../../utilities/translation/translation-types";
+import { termMetadata, TermOverridesSettings } from "./term-overrides-settings";
 
 const mockSetUnitConfig = jest.fn();
 
 const mockConfig = {
-  termOverrides: {} as Record<string, string>,
-  tagPrompt: "Test Tag Prompt"
+  termOverrides: {} as Record<string, string>
 };
 
 const mockUnitConfig = {
@@ -39,7 +37,7 @@ describe("TermOverridesSettings", () => {
     expect(screen.getByText("Term Overrides")).toBeInTheDocument();
     expect(screen.getByText(/Configure customized terminology/)).toBeInTheDocument();
 
-    TERM_METADATA.forEach(term => {
+    termMetadata.forEach(term => {
       expect(screen.getByLabelText(term.label)).toBeInTheDocument();
       expect(screen.getByText(term.description)).toBeInTheDocument();
     });
@@ -48,28 +46,21 @@ describe("TermOverridesSettings", () => {
   it("displays default values in placeholders", () => {
     render(<TermOverridesSettings />);
 
-    const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
-    expect(groupInput.placeholder).toBe("Group");
+    const groupInput = screen.getByLabelText("group") as HTMLInputElement;
+    expect(groupInput.placeholder).toBe("group");
 
-    const nameInput = screen.getByLabelText("Name") as HTMLInputElement;
-    expect(nameInput.placeholder).toBe("Student");
+    const nameInput = screen.getByLabelText("student") as HTMLInputElement;
+    expect(nameInput.placeholder).toBe("student");
 
-    // Strategy should use tagPrompt as fallback since its default is empty
-    const strategyInput = screen.getByLabelText("Strategy") as HTMLInputElement;
-    expect(strategyInput.placeholder).toBe("Test Tag Prompt");
-  });
-
-  it("shows special help text for Strategy term", () => {
-    render(<TermOverridesSettings />);
-
-    // The help text should contain both the explanation and the current tag prompt value
-    expect(screen.getByText(/If left blank, defaults to the tag prompt.*Test Tag Prompt/)).toBeInTheDocument();
+    // Strategy does not have a default
+    const strategyInput = screen.getByLabelText("strategy") as HTMLInputElement;
+    expect(strategyInput.placeholder).toBe("(no default)");
   });
 
   it("allows entering custom override values", async () => {
     render(<TermOverridesSettings />);
 
-    const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
+    const groupInput = screen.getByLabelText("group") as HTMLInputElement;
     await userEvent.type(groupInput, "Team");
 
     expect(groupInput.value).toBe("Team");
@@ -78,7 +69,7 @@ describe("TermOverridesSettings", () => {
   it("calls setUnitConfig with custom terms on save", async () => {
     render(<TermOverridesSettings />);
 
-    const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
+    const groupInput = screen.getByLabelText("group") as HTMLInputElement;
     await userEvent.type(groupInput, "Team");
 
     const saveButton = screen.getByRole("button", { name: /Save/i });
@@ -105,8 +96,8 @@ describe("TermOverridesSettings", () => {
   it("does not save terms that match the default value", async () => {
     render(<TermOverridesSettings />);
 
-    const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
-    userEvent.type(groupInput, "Group");
+    const groupInput = screen.getByLabelText("group") as HTMLInputElement;
+    userEvent.type(groupInput, "group");
 
     const saveButton = screen.getByRole("button", { name: /Save/i });
     fireEvent.click(saveButton);
@@ -118,7 +109,7 @@ describe("TermOverridesSettings", () => {
     const updaterFn = mockSetUnitConfig.mock.calls[0][0];
     const mockDraft = {
       config: {
-        termOverrides: { studentGroup: "OldValue" }
+        termOverrides: { studentGroup: "group" }
       }
     };
     updaterFn(mockDraft);
@@ -132,10 +123,10 @@ describe("TermOverridesSettings", () => {
 
     render(<TermOverridesSettings />);
 
-    const groupInput = screen.getByLabelText("Group") as HTMLInputElement;
+    const groupInput = screen.getByLabelText("group") as HTMLInputElement;
     expect(groupInput.value).toBe("Team");
 
-    const nameInput = screen.getByLabelText("Name") as HTMLInputElement;
+    const nameInput = screen.getByLabelText("student") as HTMLInputElement;
     expect(nameInput.value).toBe("Participant");
   });
 

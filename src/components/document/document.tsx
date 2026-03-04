@@ -3,25 +3,26 @@ import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
 import { kAnalyzerUserParams } from "../../../shared/shared";
+import { DEBUG_HISTORY_VIEW } from "../../lib/debug";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { DocumentModelType } from "../../models/document/document";
-import { translate } from "../../utilities/translation/translate";
-import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
+import { CommentWithId } from "../../models/document/document-comments-manager";
+import { LearningLogDocument, LearningLogPublication, PersonalDocument } from "../../models/document/document-types";
+import { getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
-import { getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
 import { ENavTab } from "../../models/view/nav-tabs";
-import { CommentWithId } from "../../models/document/document-comments-manager";
-import { Logger } from "../../lib/logger";
-import { LogEventName } from "../../lib/logger-types";
-import { DEBUG_HISTORY_VIEW } from "../../lib/debug";
+import { upperWords } from "../../utilities/string-utils";
+import { translate } from "../../utilities/translation/translate";
 import { BaseComponent, IBaseProps } from "../base";
 import { IconButton } from "../utilities/icon-button";
 import ToggleControl from "../utilities/toggle-control";
 import { DocumentAnnotationToolbar } from "./document-annotation-toolbar";
-import { HistoryViewPanel } from "./history-view-panel";
 import { DocumentFileMenu } from "./document-file-menu";
+import { HistoryViewPanel } from "./history-view-panel";
 import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
 
 import IdeaIcon from "../../assets/idea-icon.svg";
@@ -66,7 +67,7 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
 const EditButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="edit" key="edit" className="action icon-edit"
-                onClickButton={onClick} title="Rename Workspace" />
+                onClickButton={onClick} title={`Rename ${upperWords(translate("workspace"))}`} />
   );
 };
 
@@ -90,7 +91,7 @@ const TwoUpStackedButton = ({ onClick, selected }: { onClick: () => void, select
 
 const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boolean }) => {
   const visibility = isShared ? "public" : "private";
-  const groupTerm = translate("studentGroup");
+  const groupTerm = upperWords(translate("studentGroup"));
   const titlePrefix = isShared ? "Shared: click to unshare from" : "Unshared: click to share to";
   const title = `${titlePrefix} ${groupTerm.toLowerCase()}`;
   return (
@@ -279,6 +280,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions left">
             {showFileMenu &&
               <DocumentFileMenu document={document}
+                onNewDocument={this.handleNewDocumentFromMenu}
                 onOpenDocument={this.handleOpenDocumentClick}
                 onOpenGroupDocument={this.handleOpenGroupDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
@@ -422,7 +424,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           {stickyNotes.map((teacherSupport, index) => {
             const { support, audience, authoredTime } = teacherSupport;
             const sentTo = audience.type === AudienceEnum.group
-              ? `${translate("studentGroup")} ${audience.identifier}`
+              ? `${upperWords(translate("studentGroup"))} ${audience.identifier}`
               : user.name;
             const authoredTimeAsDate = new Date(authoredTime);
             const sentOn = `${authoredTimeAsDate.toLocaleDateString()}, ${authoredTimeAsDate.toLocaleTimeString()}`;
@@ -449,7 +451,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const {workspace} = this.props;
     const mode = workspace.mode === "1-up" ? "up1" : "up4";
     const modeTitle = workspace.mode === "1-up"
-      ? `Join ${translate("studentGroup")} View`
+      ? `Join ${upperWords(translate("studentGroup"))} View`
       : "Return to Student View";
     return (
       <ViewModeButton onClick={this.handleToggleWorkspaceMode} icon={mode} title={modeTitle} />
@@ -472,6 +474,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           { !hideButtons && showFileMenu &&
               <DocumentFileMenu document={document}
+                onNewDocument={this.handleNewDocumentFromMenu}
                 onOpenDocument={this.handleOpenDocumentClick}
                 onOpenGroupDocument={this.handleOpenGroupDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
@@ -600,6 +603,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private handleSelectNewDocument = (type: string) => {
     const { onNewDocument } = this.props;
+    onNewDocument?.(type);
+  };
+
+  private handleNewDocumentFromMenu = () => {
+    const { document, onNewDocument } = this.props;
+    const type = document.isLearningLog ? LearningLogDocument : PersonalDocument;
     onNewDocument?.(type);
   };
 

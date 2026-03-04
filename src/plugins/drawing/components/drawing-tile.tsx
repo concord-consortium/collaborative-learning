@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { observer } from "mobx-react";
 import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 import { isEqual } from "lodash";
@@ -12,6 +12,9 @@ import { DrawingObjectType } from "../objects/drawing-object";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { DrawingContentModelContext } from "./drawing-content-context";
+import { DrawingToolbarContext, IDrawingToolbarContext } from "./drawing-toolbar-context";
+import { TitleTextInserter } from "../../../components/tiles/editable-tile-title";
+import { useFunctionState } from "../../../hooks/use-function-state";
 import { DrawingAreaContext } from "./drawing-area-context";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { HotKeys } from "../../../utilities/hot-keys";
@@ -27,6 +30,7 @@ import { TileNavigatorContext } from "../../../components/tiles/hooks/use-tile-n
 import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
 import { kClosedObjectListPanelWidth, kOpenObjectListPanelWidth } from "../model/drawing-types";
 import { userSelectTile } from "../../../models/stores/ui";
+import { VoiceTypingOverlay } from "../../../utilities/voice-typing-overlay";
 import { useContainerContext } from "../../../components/document/container-context";
 import { calculateFitContent } from "../model/drawing-utils";
 
@@ -51,6 +55,24 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   const showNavigator = ui.isSelectedTile(model) &&
                         navigatorAllowed &&
                         contentRef.current.isNavigatorVisible;
+
+  const [voiceTypingActive, setVoiceTypingActive] = useState(false);
+  const [interimText, setInterimText] = useState("");
+  const [titleEditing, setTitleEditing] = useState(false);
+  const [titleTextInserter, setTitleTextInserter] = useFunctionState<TitleTextInserter>();
+  const commitInterimTextRef = useRef<(() => void) | null>(null);
+
+  const drawingToolbarContext = useMemo<IDrawingToolbarContext>(() => ({
+    voiceTypingActive,
+    setVoiceTypingActive,
+    interimText,
+    setInterimText,
+    titleEditing,
+    setTitleEditing,
+    titleTextInserter,
+    setTitleTextInserter,
+    commitInterimTextRef,
+  }), [voiceTypingActive, interimText, titleEditing, titleTextInserter, setTitleTextInserter]);
 
   const updateTileVisibleBoundingBox = (bb: BoundingBox) => {
     if (!isEqual(bb, tileVisibleBoundingBox)) {
@@ -273,9 +295,20 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     contentModel.setOffset(newX, newY);
   };
 
+  const handleRegisterTextInserter = useCallback((inserter: TitleTextInserter | null) => {
+    setTitleTextInserter(inserter);
+  }, [setTitleTextInserter]);
+
   return (
     <DrawingContentModelContext.Provider value={contentRef.current}>
-      <BasicEditableTileTitle />
+      <DrawingToolbarContext.Provider value={drawingToolbarContext}>
+      <BasicEditableTileTitle
+        className={voiceTypingActive && titleEditing ? "voice-typing-active" : undefined}
+        onBeginEdit={() => setTitleEditing(true)}
+        onEndEdit={() => setTitleEditing(false)}
+        onBeforeClose={() => commitInterimTextRef.current?.()}
+        onRegisterTextInserter={handleRegisterTextInserter}
+      />
       <div
         ref={drawingToolElement}
         className={classNames("tile-content", "drawing-tool", {
@@ -307,6 +340,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             </TileNavigatorContext.Provider>
           </div>
         </DrawingAreaContext.Provider>
+        <VoiceTypingOverlay text={interimText} tileElement={drawingToolElement.current} />
       </div>
       {!readOnly && showNavigator &&
         <TileNavigator
@@ -321,6 +355,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             </div>}
         />
       }
+      </DrawingToolbarContext.Provider>
     </DrawingContentModelContext.Provider>
   );
 });

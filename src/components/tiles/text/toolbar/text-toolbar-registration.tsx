@@ -7,6 +7,7 @@ import { IToolbarButtonComponentProps, registerTileToolbarButtons }
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 import { LinkButton } from "./link-button";
 import { HighlightButton } from "./highlight-button";
+import { VoiceTypingButton } from "./voice-typing-button";
 
 import BoldToolIcon from "../../../../assets/icons/text/bold-text-icon.svg";
 import ItalicToolIcon from "../../../../assets/icons/text/italic-text-icon.svg";
@@ -129,5 +130,9 @@ registerTileToolbarButtons('text',
   {
     name: 'link',
     component: LinkButton,
+  },
+  {
+    name: 'voice-typing',
+    component: VoiceTypingButton,
   }
 ]);

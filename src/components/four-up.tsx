@@ -3,19 +3,20 @@ import { debounce } from "lodash";
 import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
-import { BaseComponent, IBaseProps } from "./base";
-import { CanvasComponent } from "./document/canvas";
-import { DocumentViewMode } from "./document/document";
+import ThumbnailBookmark from "../assets/thumbnail-bookmark-icon.svg";
+import { Logger } from "../lib/logger";
+import { LogEventName } from "../lib/logger-types";
 import { DocumentModelType } from "../models/document/document";
 import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
+import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 import {
   CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridModelType
 } from "../models/view/four-up-grid";
-import { Logger } from "../lib/logger";
-import { LogEventName } from "../lib/logger-types";
-import ThumbnailBookmark from "../assets/thumbnail-bookmark-icon.svg";
+import { translate } from "../utilities/translation/translate";
+import { BaseComponent, IBaseProps } from "./base";
+import { CanvasComponent } from "./document/canvas";
+import { DocumentViewMode } from "./document/document";
 import { DocumentToolbar } from "./document/document-toolbar";
-import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 
 import "./four-up.scss";
 
@@ -355,13 +356,14 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   private renderUnshownMessage = (groupUser: GroupUserModelType | undefined,
     location: "nw" | "ne" | "se" | "sw") => {
     const groupUserName = groupUser ? groupUser.name : "User";
+    const workspaceTerm = translate("workspace");
     return (
       <div className={`unshared ${location}`}>
         <svg className={`icon icon-unshare`}>
           <use xlinkHref={`#icon-unshare`} />
         </svg>
         <div>
-          {`${groupUserName} has not shared their workspace.`}
+          {`${groupUserName} has not shared their ${workspaceTerm}.`}
         </div>
       </div>
     );

@@ -1,24 +1,23 @@
+import firebase from "firebase";
+import { union } from "lodash";
 import { makeAutoObservable, runInAction, when } from "mobx";
 import { types, SnapshotIn, applySnapshot, typecheck, unprotect } from "mobx-state-tree";
-import { union } from "lodash";
-import firebase from "firebase";
+
 import { IDocumentMetadata } from "../../../shared/shared";
-import { typeConverter } from "../../utilities/db-utils";
 import { DB } from "../../lib/db";
-
-
-import { isSortableType } from "../document/document-types";
-import { DocumentMetadataModel, IDocumentMetadataModel } from "../document/document-metadata-model";
+import { typeConverter } from "../../utilities/db-utils";
 import { IArrowAnnotation } from "../annotations/arrow-annotation";
-import { DocumentsModelType } from "./documents";
-import { GroupsModelType } from "./groups";
-import { ClassModelType } from "./class";
+import { DocumentMetadataModel, IDocumentMetadataModel } from "../document/document-metadata-model";
+import { isSortableType } from "../document/document-types";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
-import { UserModelType } from "./user";
-import { PrimarySortType } from "./ui-types";
+import { ClassModelType } from "./class";
 import { CurriculumConfigType } from "./curriculum-config";
 import { DocumentGroup } from "./document-group";
+import { DocumentsModelType } from "./documents";
+import { GroupsModelType } from "./groups";
+import { PrimarySortType } from "./ui-types";
+import { UserModelType } from "./user";
 
 export type SortedDocumentsMap = Record<string, DocumentGroup[]>;
 

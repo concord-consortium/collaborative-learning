@@ -10,10 +10,10 @@ import ClueHeader from '../../../support/elements/common/cHeader';
  * reliably persist between separate Cypress tests. By keeping related tests in one block,
  * we can build up state naturally without needing to duplicate setup in each test.
  *
- * NOTE ON force:true FOR CLICKS:
- * Many click operations use { force: true } because the group management modal uses
- * dnd-kit for drag-and-drop functionality. dnd-kit's pointer event handling interferes
- * with Cypress's simulated clicks, causing them to not register properly.
+ * NOTE ON realClick() FOR CLICKS:
+ * Many click operations use realClick() because the group management modal uses dnd-kit
+ * for drag-and-drop functionality. dnd-kit's pointer event handling interferes with
+ * Cypress's simulated clicks, causing them to not register properly.
  */
 
 const header = new Header();
@@ -67,9 +67,10 @@ function openTeacherGroupModal() {
 }
 
 function selectGroupAndSave(groupId) {
-  cy.get(`[data-testid="group-card-${groupId}"]`)
+  // Click on group card header to avoid accidentally clicking on student cards inside the group.
+  cy.get(`[data-testid="group-card-${groupId}"] .group-card__header`)
     .should('be.visible')
-    .click({ force: true });
+    .realClick();
   cy.get('[data-testid="group-management-modal-save-button"]').should('not.be.disabled').click();
   cy.get('[data-testid="group-management-modal"]').should('not.exist');
 }
@@ -80,9 +81,15 @@ function openGroupModalFromHeader() {
 }
 
 function teacherMoveStudentToGroup(studentId, groupId) {
-  cy.get(`[data-testid="student-card-${studentId}"]`).click({ force: true });
+  // Only click to select if not already selected (clicking again would toggle/deselect).
+  cy.get(`[data-testid="student-card-${studentId}"]`).should('be.visible').then($card => {
+    if (!$card.hasClass('selected')) {
+      cy.wrap($card).realClick();
+    }
+  });
   cy.get(`[data-testid="student-card-${studentId}"]`).should('have.class', 'selected');
-  cy.get(`[data-testid="group-card-${groupId}"]`).click({ force: true });
+  // Click on group card header to avoid accidentally clicking on student cards inside the group
+  cy.get(`[data-testid="group-card-${groupId}"] .group-card__header`).realClick();
   cy.get(`[data-testid="group-card-${groupId}"]`).should('contain', 'Student ' + studentId);
 }
 
@@ -174,9 +181,10 @@ context('Test student join a group', function () {
     setup(student5, { alreadyInGroup: true });
     openGroupModalFromHeader();
     // Student 5 is in Group 1, clicking Group 1 should not enable Save
-    cy.get(`[data-testid="group-card-1"]`)
+    // Click on group card header to avoid accidentally clicking on student cards inside the group.
+    cy.get(`[data-testid="group-card-1"] .group-card__header`)
       .should('be.visible')
-      .click({ force: true });
+      .realClick();
     // Save button should still be disabled since no change was made
     cy.get('[data-testid="group-management-modal-save-button"]').should('be.disabled');
     // Close modal
@@ -187,7 +195,7 @@ context('Test student join a group', function () {
     openGroupModalFromHeader();
     // Student 5 is in Group 1 with students 1, 2, 4. Try clicking on student 1's card.
     // In student mode, clicking another student should do nothing (no selection, Save stays disabled)
-    cy.get(`[data-testid="student-card-${student1}"]`).should('exist').click({ force: true });
+    cy.get(`[data-testid="student-card-${student1}"]`).should('exist').realClick();
     // Save button should still be disabled - students can only move themselves
     cy.get('[data-testid="group-management-modal-save-button"]').should('be.disabled');
     // The clicked student should not have a selected style

@@ -2,6 +2,8 @@ import React from "react";
 import { useAppConfig } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { ENavTab, ENavTabSectionType, NavTabModel } from "../../models/view/nav-tabs";
+import { upperWords } from "../../utilities/string-utils";
+import { translate } from "../../utilities/translation/translate";
 import { SubTabsPanel } from "../navigation/sub-tabs-panel";
 import { DocumentCollectionList } from "../thumbnail/document-collection-list";
 import { EditableDocumentContent, IProps as IEditableDocumentContentProps } from "./editable-document-content";
@@ -18,7 +20,7 @@ const fallbackMyWorkTabSpec = NavTabModel.create({
   tab: ENavTab.kMyWork,
   label: "My Work",
   sections: [{
-    title: "Workspaces",
+    title: `${upperWords(translate("workspaces"))}`,
     type: ENavTabSectionType.kProblemDocuments,
     documentTypes: ["problem", "planning", "personal"],
     properties: ["!isDeleted"],

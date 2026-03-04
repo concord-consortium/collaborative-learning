@@ -16,8 +16,11 @@
     &.my-work {
       background-color: $workspace-teal;
     }
-    &.class-work, &.sort-work {
-      background-color: $classwork-purple
+    &.class-work {
+      background-color: $workspace-teal;
+    }
+    &.sort-work {
+      background-color: $classwork-purple;
     }
     &.student-work {
       background-color: $charcoal;

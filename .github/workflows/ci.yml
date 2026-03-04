@@ -52,11 +52,18 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             cms/package-lock.json
+            authoring-api/package-lock.json
       - name: Install Dependencies
         run: npm ci
       - name: Install CMS Dependencies
         working-directory: ./cms
         run: npm ci
+      - name: Install Authoring API Dependencies
+        working-directory: ./authoring-api
+        run: npm ci
+      - name: Run Authoring API Tests
+        working-directory: ./authoring-api
+        run: npm test
       - name: Cache Jest cache
         uses: actions/cache@v3
         with:

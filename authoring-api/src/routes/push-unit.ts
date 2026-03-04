@@ -4,6 +4,7 @@ import {owner, repo} from "../helpers/github";
 
 import {getBlobCachePath, getDb, getUnitUpdatesPath} from "../helpers/db";
 import {AuthorizedRequest, sendErrorResponse, sendSuccessResponse} from "../helpers/express";
+import {resolveCommitAuthor} from "../helpers/resolve-commit-author";
 import {doPullUnit} from "./pull-unit";
 
 const pushUnit = async (req: Request, res: Response) => {
@@ -17,15 +18,14 @@ const pushUnit = async (req: Request, res: Response) => {
     return sendErrorResponse(res, "Cannot push a unit to the main branch.", 400);
   }
 
-  const {decodedToken} = req as AuthorizedRequest;
-  const {name, email} = decodedToken || {};
-  const author = name && email ? {name, email} : undefined;
-  if (!author) {
-    return sendErrorResponse(res, "Could not determine author information from token.", 400);
-  }
-
   const authorizedRequest = req as AuthorizedRequest;
   const octokit = new Octokit({auth: authorizedRequest.gitHubToken});
+
+  const {decodedToken} = authorizedRequest;
+  const author = await resolveCommitAuthor(decodedToken, octokit);
+  if (!author) {
+    return sendErrorResponse(res, "Could not determine author information from token or GitHub profile.", 400);
+  }
 
   let newCommitSha: string;
   try {

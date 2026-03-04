@@ -9,7 +9,7 @@
  * if a new teacher is added to a class, we would want to reflect that in our classes subcollection.
  */
 
-import type { IAgreeWithAi } from "shared/shared";
+import type { IAgreeWithAi, RatingValue } from "shared/shared";
 
 // represents a Firestore subcollection
 type FSCollection<IDocument> = Record<string, IDocument>;
@@ -49,6 +49,7 @@ export interface CommentDocument {
   tags?: string[];            // Tags selected for the comment
   linkedDocumentKey?: string; // Key of the document that this comment should link to
   agreeWithAi?: IAgreeWithAi; // Whether the comment agrees with the AI's suggestion
+  ratings?: Record<string, RatingValue>;  // keyed by userId
 }
 // collection key is Firestore-assigned id
 type CommentsCollection = FSCollection<CommentDocument>;

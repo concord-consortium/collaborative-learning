@@ -87,8 +87,6 @@ These properties are configurable at the application (built into the code) or th
 
 `showCommentTag`: (boolean) must be true for any of the comment-tag functionality to be enabled
 
-`tagPrompt`: (string) prompt shown in the tagging pulldown menu when a comment is being made
-
 `commentTags`: (object) list of possible values for tagging in comments, mapping IDs to human-readable names, eg: `{ "user": "Who is it for?", "environment": "Where is it used?", ... }`
 
 `aiEvaluation`: ("custom" | "categorize-design" | "mock") If set, enable the specified AI evaluation to run after document updates. "custom" allows the prompt to be specified with the `aiPrompt` property; "categorize-design" runs the original MODS unit categorization prompt (for backward compatibility); "mock" does not invoke any AI system but simply returns a fixed string for testing purposes.

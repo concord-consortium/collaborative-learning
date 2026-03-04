@@ -58,14 +58,14 @@ body {
 }
 
 .tab-class-work {
-  background-color: $classwork-purple-light-7;
+  background-color: $workspace-teal-light-6;
 
   &:hover {
-    background-color: $classwork-purple-light-5;
+    background-color: $workspace-teal-light-4;
   }
 
   &:active, &.selected {
-    background-color: $classwork-purple-light-4;
+    background-color: $workspace-teal-light-3;
     font-weight: bold;
   }
 }
@@ -97,7 +97,16 @@ body {
 }
 
 .tab-sort-work {
-  background: $classwork-purple-light-4;
+  background-color: $classwork-purple-light-7;
+
+  &:hover {
+    background-color: $classwork-purple-light-5;
+  }
+
+  &:active, &.selected {
+    background-color: $classwork-purple-light-4;
+    font-weight: bold;
+  }
 }
 
 .document {

@@ -131,7 +131,7 @@ $groups-grid-columns: 5;
   .group-management-modal__instructions {
     color: $charcoal-dark-1;
     flex-shrink: 0;
-    font-size: 13px;
+    font-size: 14px;
     margin: 0 0 $margin 0;
   }
 
@@ -187,7 +187,7 @@ $groups-grid-columns: 5;
     input[type="checkbox"] {
       appearance: none;
       background-color: white;
-      border: 1px solid $workspace-teal-dark-1;
+      border: 1.5px solid $workspace-teal-dark-1;
       border-radius: 2px;
       cursor: pointer;
       height: 16px;
@@ -211,14 +211,14 @@ $groups-grid-columns: 5;
 
         &::after {
           border: solid $workspace-teal-dark-1;
-          border-width: 0 2px 2px 0;
+          border-width: 0 1.5px 1.5px 0;
           content: "";
-          height: 8px;
+          height: 10px;
           left: 4px;
           position: absolute;
-          top: 1px;
+          top: 0;
           transform: rotate(45deg);
-          width: 4px;
+          width: 5px;
         }
       }
 
@@ -261,6 +261,10 @@ $groups-grid-columns: 5;
     min-width: 80px;
     padding: 0 $padding;
     transition: background-color 0.15s ease;
+
+    &:focus-visible {
+      outline: solid 1.5px $workspace-teal;
+    }
 
     &.cancel {
       background-color: white;

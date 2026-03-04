@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { AppConfigContext, IconComponent } from "../../app-config-context";
 import { useAppMode, useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
@@ -10,6 +10,7 @@ import "./document-file-menu.scss";
 
 interface IProps {
   document: DocumentModelType;
+  onNewDocument?: () => void;
   isOpenDisabled?: boolean;
   onOpenDocument?: (document: DocumentModelType) => void;
   onOpenGroupDocument?: (document: DocumentModelType) => void;
@@ -23,9 +24,12 @@ interface IProps {
 function idAndIcon(id: string, appIcons?: Record<string, IconComponent>) {
   const ItemIcon = appIcons?.[id];
   // not clear why we need to reset the viewBox -- seems that icons are stored at different sizes
-  const viewBox = ["icon-new-workspace", "icon-open-workspace", "icon-publish-workspace"].includes(id)
-    ? "0 0 32 32"
-    : "0 0 24 24";
+  let viewBox = "0 0 24 24";
+  if (["icon-open-workspace", "icon-publish-workspace"].includes(id)) {
+    viewBox = "0 0 32 32";
+  } else if (id === "icon-new-workspace") {
+    viewBox = "0 0 20 20";
+  }
   return { id, itemIcon: ItemIcon && <ItemIcon viewBox={viewBox} /> };
 }
 
@@ -42,6 +46,7 @@ function showPublishOption(document: DocumentModelType, stores: IStores) {
 
 export const DocumentFileMenu: React.FC<IProps> = props => {
   const { document,
+          onNewDocument,
           isOpenDisabled, onOpenDocument,
           onOpenGroupDocument,
           isCopyDisabled, onCopyDocument,
@@ -90,7 +95,13 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
     ];
   }
 
-  const menuItems: ICustomDropdownItem[] = [
+  const menuItems: ICustomDropdownItem[] = useMemo(() => ([
+    {
+      ...idAndIcon("icon-new-workspace", appIcons),
+      text: "New",
+      disabled: !onNewDocument,
+      onClick: () => onNewDocument?.()
+    },
     {
       ...idAndIcon("icon-open-workspace", appIcons),
       text: "Open...",
@@ -112,11 +123,12 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
       onClick: () => onDeleteDocument?.(document)
     },
     ...adminItems
-  ];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ]), [document, onNewDocument]);
 
   return (
     <CustomSelect className="document-file-menu" dataTest="document-file-menu"
-                  titleIcon={titleIcon} title="File" titleVisuallyHidden={true}
+                  titleIcon={titleIcon} title="File" titleVisuallyHidden={false}
                   items={menuItems} showItemChecks={false} showItemIcons={true}/>
   );
 };

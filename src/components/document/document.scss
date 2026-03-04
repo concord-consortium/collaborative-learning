@@ -9,7 +9,6 @@
   color: black;
   background-color: white;
   border: $document-border-width solid $workspace-teal;
-  border-top-left-radius: $border-radius;
 
   &.no-border {
     border: 0;
@@ -25,7 +24,7 @@
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: flex-start;
-    border-top-left-radius: $border-radius;
+
     &.planning {
       background-color: $workspace-teal-light-4;
     }

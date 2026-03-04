@@ -11,6 +11,10 @@ $group-card-empty-height: 38px;
   min-width: $group-card-min-width;
   overflow: hidden;
 
+  &:focus-visible {
+    outline: solid 1.5px $workspace-teal;
+  }
+
   &.clickable {
     background-color: $workspace-teal-light-7;
     cursor: pointer;
@@ -39,11 +43,27 @@ $group-card-empty-height: 38px;
     .group-card__header {
       background-color: $workspace-teal-light-4;
     }
+
+    .group-card__new-group-icon {
+      color: $workspace-teal;
+    }
   }
 
   &.no-group {
     .group-card__header {
       background-color: $charcoal-light-5;
+    }
+
+    &.clickable .group-card__header {
+      background-color: $workspace-teal-light-4;
+    }
+
+    &.clickable:hover .group-card__header {
+      background-color: $workspace-teal-light-3;
+    }
+
+    &.clickable:active .group-card__header {
+      background-color: $workspace-teal-light-2;
     }
   }
 
@@ -78,7 +98,7 @@ $group-card-empty-height: 38px;
 
   .group-card__new-group-icon {
     align-items: center;
-    color: $charcoal-light-1;
+    color: $charcoal;
     display: flex;
     flex-direction: column;
     justify-content: center;

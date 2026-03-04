@@ -18,6 +18,7 @@ on:
         type: string
         description: URL to use for environment-url and log-url
         required: true
+run-name: Release ${{ github.event.inputs.version }}
 env:
   BUCKET: models-resources
   PREFIX: collaborative-learning

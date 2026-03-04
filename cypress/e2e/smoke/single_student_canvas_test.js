@@ -212,11 +212,11 @@ context('single student functional test', () => {
       const user = $el.text();
       cy.getCanvasItemTitle('workspaces', user).first().click();
     });
-    cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.text-tool').should('exist').and('contain', 'This is a smoke test');
-    cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.geometry-content').should('exist');
-    cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.drawing-tool').should('exist');
-    cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.image-tool').should('exist');
-    cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.table-tool-tile').should('exist');
+    cy.get(".document-tabs.class-work .sub-tab-panel .canvas-area").find('.text-tool').should('exist').and('contain', 'This is a smoke test');
+    cy.get(".document-tabs.class-work .sub-tab-panel .canvas-area").find('.geometry-content').should('exist');
+    cy.get(".document-tabs.class-work .sub-tab-panel .canvas-area").find('.drawing-tool').should('exist');
+    cy.get(".document-tabs.class-work .sub-tab-panel .canvas-area").find('.image-tool').should('exist');
+    cy.get(".document-tabs.class-work .sub-tab-panel .canvas-area").find('.table-tool-tile').should('exist');
   });
 
   it('can copy all tiles into workspace and other documents using toolbar helpers', () => {

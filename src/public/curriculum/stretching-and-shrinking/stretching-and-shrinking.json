@@ -36,7 +36,9 @@
       "guess-and-check": "Guess and Check",
       "none": "None"
     },
-    "tagPrompt": "Select Student Strategy"
+    "termOverrides": {
+      "strategy": "Select Student Strategy"
+    }
   },
   "sections": {
     "introduction": {

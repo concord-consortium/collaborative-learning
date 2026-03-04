@@ -179,13 +179,13 @@ Cypress.Commands.add("clickProblemResource", () => {
   cy.get(".prob-tab.selected").eq(0).click();
 });
 Cypress.Commands.add("clickDocumentResource", () => {
-  cy.get(".documents-panel div.document-title").eq(0).click();
+  cy.get(".sub-tab-panel div.document-title").eq(0).click();
 });
 Cypress.Commands.add("clickDocumentResourceTile", (tileIndex = 0) => {
-  cy.get('.documents-panel .editable-document-content .tile-row').eq(tileIndex).click();
+  cy.get('.sub-tab-panel .editable-document-content .tile-row').eq(tileIndex).click();
 });
 Cypress.Commands.add("getDocumentToolTile", (tileIndex = 0) => {
-  cy.get('.documents-panel .editable-document-content .tile-row tool-tile').eq(tileIndex).click();
+  cy.get('.sub-tab-panel .editable-document-content .tile-row tool-tile').eq(tileIndex).click();
 });
 Cypress.Commands.add('collapseResourceTabs', () => {
   cy.get('.drag-thumbnail').trigger('mouseover').then(() => {
