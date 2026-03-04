@@ -97,18 +97,19 @@ interface IDragTileButtonProps {
   selected: boolean;
   selectTileHandler: (e: React.PointerEvent<HTMLDivElement>) => void;
   handleTileDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
-  triggerResizeHandler: () => void;
+  handleDragEnd: () => void;
+  onPickUpClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 const DragTileButton = (
     { divRef, hovered, selected,
-      handleTileDragStart, triggerResizeHandler, selectTileHandler }: IDragTileButtonProps) => {
+      handleTileDragStart, handleDragEnd, onPickUpClick }: IDragTileButtonProps) => {
   const classes = classNames("tool-tile-drag-handle", { hovered, selected });
   return (
     <div className={`tool-tile-drag-handle-wrapper`}
       ref={divRef}
       onDragStart={handleTileDragStart}
-      onDragEnd={triggerResizeHandler}
-      onClick={selectTileHandler}
+      onDragEnd={handleDragEnd}
+      onClick={onPickUpClick}
       draggable={true}
       data-testid="tool-tile-drag-handle"
       aria-label="Drag to move tile"
@@ -159,6 +160,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   private hotKeys: HotKeys = new HotKeys();
   private dragElement: HTMLDivElement | null;
   private resizeElement: HTMLDivElement | null;
+  private didDrag = false;
 
   state = {
     hoverTile: false,
@@ -231,7 +233,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
                               selected={isTileSelected}
                               selectTileHandler={this.selectTileHandler}
                               handleTileDragStart={this.handleTileDragStart}
-                              triggerResizeHandler={this.triggerResizeHandler}
+                              handleDragEnd={this.handleDragEnd}
+                              onPickUpClick={this.handlePickUpClick}
                               />;
     const resizeTileButton = isUserResizable &&
                               <ResizeTileButton divRef={elt => this.resizeElement = elt}
@@ -417,6 +420,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       return;
     }
 
+    this.didDrag = true;
+
     // set the drag data
     const { model, docId } = this.props;
 
@@ -429,6 +434,11 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     if (!e.dataTransfer) return;
 
     const { ui } = this.stores;
+
+    // A real drag started — cancel any active click-to-pick
+    if (ui.isTilePickedUp) {
+      ui.clearPickedUpTile();
+    }
 
     // dragging a tile selects it first
     ui.setSelectedTile(model, { append: hasSelectionModifier(e), dragging: true });
@@ -472,6 +482,32 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     const offsetX = kDefaultDragImageWidth;
     const offsetY = 0;
     e.dataTransfer.setDragImage(defaultDragImage, offsetX, offsetY);
+  };
+
+  private handleDragEnd = () => {
+    this.didDrag = false;
+    this.triggerResizeHandler();
+  };
+
+  private handlePickUpClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Always select the tile on handle click
+    this.selectTileHandler(e as unknown as React.PointerEvent<HTMLDivElement>);
+
+    // If a real drag just happened, don't trigger pick-up
+    if (this.didDrag) {
+      this.didDrag = false;
+      return;
+    }
+
+    const { model, docId } = this.props;
+    const { ui } = this.stores;
+
+    if (ui.pickedUpTileId === model.id) {
+      // Re-clicking the same handle cancels pick-up
+      ui.clearPickedUpTile();
+    } else {
+      ui.pickUpTile(model.id, docId);
+    }
   };
 
   private triggerResizeHandler = () => {
