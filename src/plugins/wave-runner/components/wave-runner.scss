@@ -14,7 +14,7 @@
 
   .wave-runner-title-background {
     width: 100%;
-    height: 40px;
+    height: 46px;
     background-color: $workspace-teal-light-8;
   }
 
@@ -55,5 +55,32 @@
     color: $charcoal-dark-2;
     font-weight: bold;
     text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .wave-runner-field-row {
+    display: flex;
+    gap: 20px;
+
+    & + .wave-runner-field-row {
+      margin-top: 13px;
+    }
+  }
+
+  .wave-runner-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .wave-runner-field-label {
+    color: $charcoal-dark-2;
+    margin-left: 8px;
+    margin-bottom: 5px;
+  }
+
+  .wave-runner-dropdown,
+  .wave-runner-datetime {
+    width: 100%;
   }
 }
