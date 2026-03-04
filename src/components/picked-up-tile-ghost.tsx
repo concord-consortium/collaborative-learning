@@ -23,11 +23,23 @@ export const PickedUpTileGhost: React.FC = observer(function PickedUpTileGhost()
       }
     };
 
+    const handleMouseDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Don't cancel if clicking a drag handle (toggle handler handles it)
+      if (target.closest(".tool-tile-drag-handle-wrapper")) return;
+      // Don't cancel if clicking the delete button (delete handler will handle it)
+      if (target.closest(".delete-button")) return;
+      // Everything else cancels pick-up
+      ui.clearPickedUpTile();
+    };
+
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleMouseDown, true);
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleMouseDown, true);
       document.body.classList.remove("tile-picked-up");
     };
   }, [ui, ui.pickedUpTileId]);
