@@ -476,20 +476,31 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private handlePickUpPlace = (dropRowInfo: IDropRowInfo) => {
     const { content } = this.props;
-    const { ui } = this.stores;
+    const { ui, documents } = this.stores;
     const tileId = ui.pickedUpTileId;
 
     if (!content || !tileId) return;
 
-    const tileModel = content.getTile(tileId);
-    if (!tileModel) {
+    // Find the source document content — the tile may be in a different document (e.g. resources pane)
+    const sourceDoc = documents.findDocumentOfTile(tileId);
+    const sourceContent = sourceDoc?.content;
+    if (!sourceContent) {
       ui.clearPickedUpTile();
       return;
     }
 
-    const dragTileItems = content.getDragTileItems([tileId]);
-    const tilesToMove = content.removeEmbeddedTilesFromDragTiles(dragTileItems);
-    content.userMoveTiles(tilesToMove, dropRowInfo);
+    const isSameDocument = sourceContent.contentId === content.contentId;
+
+    if (isSameDocument) {
+      // Move within the same document
+      const dragTileItems = sourceContent.getDragTileItems([tileId]);
+      const tilesToMove = sourceContent.removeEmbeddedTilesFromDragTiles(dragTileItems);
+      content.userMoveTiles(tilesToMove, dropRowInfo);
+    } else {
+      // Copy from another document (e.g. resources pane → workspace)
+      const dragTiles = sourceContent.getDragTiles([tileId]);
+      content.handleDragCopyTiles(dragTiles, dropRowInfo);
+    }
 
     ui.clearPickedUpTile();
     this.clearDropRowInfo();
