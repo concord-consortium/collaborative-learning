@@ -43,6 +43,12 @@ describe("WaveRunnerToolComponent", () => {
     expect(getByText("Wave Runner Content")).toBeInTheDocument();
   });
 
+  it("renders an editable tile title", () => {
+    const {container} =
+      render(<WaveRunnerToolComponent  {...defaultProps} {...{model}}></WaveRunnerToolComponent>);
+    expect(container.querySelector(".title-area")).toBeInTheDocument();
+  });
+
   it("updates the text when the model changes", async () => {
     const {getByText, findByText} =
       render(<WaveRunnerToolComponent  {...defaultProps} {...{model}}></WaveRunnerToolComponent>);
