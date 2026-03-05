@@ -10,14 +10,14 @@ import { StatusAndOutput } from "./status-and-output";
 import "../wave-runner-toolbar";
 import "./wave-runner-tile.scss";
 
-export const WaveRunnerComponent: React.FC<ITileProps> = observer(({ tileElt }) => {
+export const WaveRunnerComponent: React.FC<ITileProps> = observer(({ readOnly, tileElt }) => {
   const { width: containerWidth, ref: containerRef } = useResizeDetector();
   const vertical = !containerWidth || containerWidth < 700;
 
   return (
     <div className="tile-content wave-runner-tile">
       <BasicEditableTileTitle />
-      <TileToolbar tileType="wave-runner" readOnly={false} tileElement={tileElt} />
+      <TileToolbar tileType="wave-runner" readOnly={!!readOnly} tileElement={tileElt} />
       <div ref={containerRef} className="wave-runner-content">
         <div className="title-background" />
         <div className={classNames("sections", { vertical, horizontal: !vertical })}>
