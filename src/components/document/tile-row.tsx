@@ -224,24 +224,24 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
     const rightClass = `drop-feedback right ${showRightHighlight ? "show" : dimRight ? "show dimmed" : ""}`;
     const bottomClass = `drop-feedback bottom ${showBottomHighlight ? "show" : dimBottom ? "show dimmed" : ""}`;
 
-    // Build ARIA props for drop zones when in pick-up mode
+    // Build ARIA props for drop zones when in pick-up mode.
+    // Uses aria-label only (no role/aria-selected) since these elements are not focusable
+    // and are not inside a listbox container.
     const rowLabel = isSectionHeader ? `section ${sectionId || ""}` : `row ${rowIndex + 1}`;
-    const ariaProps = (location: string, isVisible: boolean, isHighlighted: boolean) =>
+    const ariaProps = (location: string, isVisible: boolean) =>
       allZonesVisible && isVisible
-        ? { role: "option" as const,
-            "aria-label": `${location} ${rowLabel}`,
-            "aria-selected": isHighlighted }
+        ? { "aria-label": `${location} ${rowLabel}` }
         : {};
 
     return [
       <div key="top-drop-feedback" className={topClass}
-        {...ariaProps("Above", dimTop || showTopHighlight, showTopHighlight)} />,
+        {...ariaProps("Above", dimTop || showTopHighlight)} />,
       <div key="left-drop-feedback" className={leftClass}
-        {...ariaProps("Left of", dimLeft || showLeftHighlight, showLeftHighlight)} />,
+        {...ariaProps("Left of", dimLeft || showLeftHighlight)} />,
       <div key="right-drop-feedback" className={rightClass}
-        {...ariaProps("Right of", dimRight || showRightHighlight, showRightHighlight)} />,
+        {...ariaProps("Right of", dimRight || showRightHighlight)} />,
       <div key="bottom-drop-feedback" className={bottomClass}
-        {...ariaProps("Below", dimBottom || showBottomHighlight, showBottomHighlight)} />,
+        {...ariaProps("Below", dimBottom || showBottomHighlight)} />,
       <div key="bottom-resize-handle"
         className={`bottom-resize-handle ${isUserResizable ? "enable" : "disable"}`}
         draggable={isUserResizable}

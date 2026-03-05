@@ -116,14 +116,36 @@ State: `focusedDropZoneIndex: types.maybe(types.number)` in `UIModel`, cleared b
 
 ### ARIA
 
-- Each visible drop zone gets `role="option"` with `aria-label` describing the position (e.g. "Above row 2", "Left of row 3") and `aria-selected` when highlighted.
+- Each visible drop zone gets `aria-label` describing the position (e.g. "Above row 2", "Left of row 3").
 - On pick-up, an `aria-live="assertive"` region in `PickedUpTileGhost` announces: "Tile picked up. Use arrow keys to choose a position, Enter to place, Escape to cancel."
+- The keydown handler skips processing when focus is on interactive elements (`.delete-button`, `button`, `input`, etc.) so Enter activates the focused control instead of placing the tile.
 
 ### Ghost Element Enhancements
 
 - Displays the tile type's registered Icon SVG (from `getTileComponentInfo`) centered at 32x32 over the 80x80 drag placeholder image, so users can identify which tile type is being moved.
 - On keyboard pick-up, initializes position from the active element's bounding rect (the focused drag handle).
 - Anchored with top-right corner at cursor/handle position, extending leftward over the tile to avoid right-edge screen overflow.
+
+---
+
+## Phase 3: Visual Polish & Bug Fixes (COMPLETE)
+
+### Tile Shrink Animation
+When a tile is picked up or HTML5-dragged, all `.tool-tile` elements shrink to `scale(0.95)` with a 0.2s ease-out transition, creating visible gaps where the drop zone indicators show *around* tiles instead of overlaid on top. Uses body-level CSS classes (`body.tile-picked-up` set by the ghost component, `body.tile-dragging` set by `handleTileDragStart`/`handleDragEnd`) so all tiles shrink simultaneously without each component needing to observe drag state. See comment in `tile-component.scss`.
+
+### Resources Pane Fixes
+Curriculum/resources tiles live in `problem.sections[].content`, not in the `documents` store, so `documents.findDocumentOfTile()` returned null for them. Fixed by:
+- **Ghost icon**: Store `pickedUpTileType` in the UI store at pick-up time; the ghost reads it directly instead of looking up the source document.
+- **Click-to-place**: Added `findContentOfTile()` helper in `DocumentContentComponent` that first checks the documents store, then falls back to searching `problem.sections` and `teacherGuide?.sections`.
+- **Delete**: `handleDeleteTile` in `toolbar.tsx` uses `documents.findDocumentOfTile()` to target the correct source document.
+
+### Empty Document Support
+When the target document has no rows (e.g. a new blank personal document), click-to-place and keyboard Enter now accept placement at `rowInsertIndex: 0`. The spacer div shows an `empty-drop-target` style (dimmed drop zone appearance) to indicate it accepts drops.
+
+### Drop Zone Corner Overlap
+Left/right drop zones are inset by 8px at top and bottom (`top: 8px; bottom: 8px`) so they don't overlap with the top/bottom zones at the corners, avoiding confusing transparent overlaps.
+
+---
 
 ## Files Modified
 

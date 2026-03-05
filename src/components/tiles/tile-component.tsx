@@ -454,6 +454,9 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       ui.clearPickedUpTile();
     }
 
+    // Shrink all tiles to reveal drop zones (see tile-component.scss)
+    document.body.classList.add("tile-dragging");
+
     // dragging a tile selects it first
     ui.setSelectedTile(model, { append: hasSelectionModifier(e), dragging: true });
 
@@ -500,6 +503,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
 
   private handleDragEnd = () => {
     this.didDrag = false;
+    document.body.classList.remove("tile-dragging");
     this.triggerResizeHandler();
   };
 

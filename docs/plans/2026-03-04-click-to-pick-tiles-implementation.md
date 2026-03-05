@@ -1,7 +1,5 @@
 # Click-to-Pick Tiles Implementation Plan
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
-
 **Goal:** Add click-to-pick as an alternative to click-and-drag for moving tiles, with Phase 1 (mouse) and Phase 2 (keyboard) as separate commits.
 
 **Architecture:** Application-level pick state in the UI MobX store. When a tile is picked up, a ghost image follows the cursor, drop zones highlight, and clicks on drop zones/delete button trigger placement/deletion. Phase 2 adds keyboard navigation through drop zones with arrow keys.

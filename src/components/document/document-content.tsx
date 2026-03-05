@@ -89,7 +89,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       // property. So when there are lots of thumbnails then each of them will react to a
       // change of this global. It could be a volatile prop on the document model. Or the ui
       // store could have a scrollToMap with keys of the docId and values of the tileId
-      // Enable mousemove-based drop zone highlighting and keyboard navigation when a tile is picked up
+      // Enable mousemove-based drop zone highlighting and keyboard navigation when a tile is picked up.
+      // The readOnly guard ensures only one instance registers the global keydown listener —
+      // at most one DocumentContentComponent is non-readOnly at a time (the primary workspace document).
       this.pickUpReactionDisposer = reaction(
         () => this.stores.ui.pickedUpTileId,
         (pickedUpTileId) => {
@@ -270,7 +272,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderSpacer = () => {
-    const spacerClass = classNames({"spacer" : !this.props.readOnly, "playback-spacer": this.props.showPlaybackSpacer});
+    const { ui } = this.stores;
+    const { content, readOnly } = this.props;
+    const isEmptyDropTarget = !readOnly && ui.isTilePickedUp && content && content.rowOrder.length === 0;
+    const spacerClass = classNames(
+      {"spacer" : !readOnly, "playback-spacer": this.props.showPlaybackSpacer},
+      {"empty-drop-target": isEmptyDropTarget}
+    );
     return <div className={spacerClass} onClick={this.handleClick} />;
   };
 
@@ -299,7 +307,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     // Handle click-to-place when a tile is picked up
     if (ui.pickedUpTileId && !this.props.readOnly) {
       const dropRowInfo = this.getDropRowInfoFromPoint(e.clientX, e.clientY);
-      if (dropRowInfo?.rowDropId) {
+      const isEmptyDocument = this.props.content && this.props.content.rowOrder.length === 0;
+      if (dropRowInfo?.rowDropId || (isEmptyDocument && dropRowInfo)) {
         this.handlePickUpPlace(dropRowInfo);
         e.stopPropagation();
         return;
@@ -559,8 +568,22 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     if (!ui.pickedUpTileId) return;
 
+    // Don't intercept keys when focus is on interactive elements (e.g. the delete button)
+    const active = document.activeElement as HTMLElement | null;
+    if (active?.closest(".delete-button, button, input, select, textarea")) return;
+
     const zones = this.getDropZoneList();
-    if (zones.length === 0) return;
+    const { content } = this.props;
+    const isEmptyDocument = content && content.rowOrder.length === 0;
+
+    // Empty document: Enter places the tile at index 0, arrow keys are no-ops
+    if (zones.length === 0) {
+      if (isEmptyDocument && e.key === "Enter") {
+        e.preventDefault();
+        this.handlePickUpPlace({ rowInsertIndex: 0 });
+      }
+      return;
+    }
 
     const currentIndex = ui.focusedDropZoneIndex;
 

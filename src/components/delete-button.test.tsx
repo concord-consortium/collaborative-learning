@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "mobx-react";
 import React from "react";
@@ -7,6 +7,7 @@ import { ModalProvider } from "react-modal-hook";
 import { ToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { specStores } from "../models/stores/spec-stores";
 import { DeleteButton } from "./delete-button";
+import { kDragTileId, kDragTiles } from "./tiles/tile-component";
 
 describe("DeleteButton", () => {
 
@@ -93,6 +94,80 @@ describe("DeleteButton", () => {
     expect(onSetToolActive).toHaveBeenCalledTimes(1);
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(onSetShowDeleteTilesConfirmationAlert).toHaveBeenCalledTimes(1);
+  });
+
+  it("deletes picked-up tile on click", () => {
+    const testStores = specStores();
+    testStores.ui.pickUpTile("tile-1", "doc-1", "Text");
+
+    render(
+      <Provider stores={testStores}>
+        <div className="app"/>
+        <ModalProvider>
+          <DeleteButton
+            toolButton={toolButton}
+            isActive={false} isDisabled={false}
+            onSetToolActive={onSetToolActive}
+            onClick={onClick}
+            onSetShowDeleteTilesConfirmationAlert={onSetShowDeleteTilesConfirmationAlert}
+            onDeleteSelectedTiles={onDeleteSelectedTiles}
+            onDeleteTile={onDeleteTile} />
+        </ModalProvider>
+      </Provider>
+    );
+
+    act(() => {
+      Modal.setAppElement(".app");
+      userEvent.click(screen.getByTestId("delete-button"));
+    });
+    // Pick-up should be cleared
+    expect(testStores.ui.pickedUpTileId).toBeUndefined();
+    // Confirmation modal should appear
+    act(() => {
+      userEvent.click(screen.getByText("Delete Tile", { selector: "button" }));
+    });
+    expect(onDeleteTile).toHaveBeenCalledWith("tile-1");
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("deletes tile on drag-and-drop", () => {
+    render(
+      <Provider stores={stores}>
+        <div className="app"/>
+        <ModalProvider>
+          <DeleteButton
+            toolButton={toolButton}
+            isActive={false} isDisabled={false}
+            onSetToolActive={onSetToolActive}
+            onClick={onClick}
+            onSetShowDeleteTilesConfirmationAlert={onSetShowDeleteTilesConfirmationAlert}
+            onDeleteSelectedTiles={onDeleteSelectedTiles}
+            onDeleteTile={onDeleteTile} />
+        </ModalProvider>
+      </Provider>
+    );
+
+    const button = screen.getByTestId("delete-button");
+    const dataTransfer = {
+      types: [kDragTiles],
+      getData: (type: string) => {
+        if (type === kDragTileId) return "tile-2";
+        if (type === kDragTiles) return JSON.stringify({ sourceDocId: "doc-1", tiles: [{ tileId: "tile-2" }] });
+        return "";
+      },
+      dropEffect: "none",
+      preventDefault: jest.fn(),
+    };
+
+    act(() => {
+      Modal.setAppElement(".app");
+      fireEvent.drop(button, { dataTransfer });
+    });
+    // Confirmation modal should appear
+    act(() => {
+      userEvent.click(screen.getByText("Delete Tile", { selector: "button" }));
+    });
+    expect(onDeleteTile).toHaveBeenCalledWith("tile-2");
   });
 
   it("shows confirmation alert when requested", () => {
