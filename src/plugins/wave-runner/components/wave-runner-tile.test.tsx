@@ -8,6 +8,11 @@ import { WaveRunnerComponent } from "./wave-runner-tile";
 // knows it is a supported tile type
 import "../wave-runner-registration";
 
+// Mock the TileToolbar since it requires store providers not available in this test
+jest.mock("../../../components/toolbar/tile-toolbar", () => ({
+  TileToolbar: () => null
+}));
+
 let mockWidth: number | undefined;
 jest.mock("react-resize-detector", () => ({
   useResizeDetector: () => ({ width: mockWidth, ref: React.createRef() })

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36px" height="34px" viewBox="0 0 36 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>8FAF4534-AA15-4695-9A04-86559DA7A1DC</title>
+    <g id="Load-Data-ICON" stroke="none" fill="none">
+        <rect id="Rectangle" fill-rule="nonzero" x="0" y="0" width="36" height="34"></rect>
+        <g id="Group" stroke-width="1" fill-rule="evenodd" transform="translate(5, 4)">
+            <rect id="Rectangle" x="0" y="0" width="26" height="26"></rect>
+        </g>
+        <polygon id="Run" fill="#545454" fill-rule="evenodd" points="12.5833333 7.52083333 12.5833333 26.4791667 27.4791667 17"></polygon>
+        <ellipse id="Oval" stroke="#333333" stroke-width="1" fill="#FFC541" fill-rule="nonzero" cx="19" cy="16.5" rx="6.5" ry="3"></ellipse>
+    </g>
+</svg>

@@ -62,6 +62,17 @@
           "toggle-lock"
         ]
       },
+      "wave-runner": {
+        "tools": [
+          "load-data",
+          "|",
+          "play",
+          "restart",
+          "reset",
+          "|",
+          "timeline"
+        ]
+      },
       "simulator": {
         "defaultSimulation": "EMG_and_claw",
         "maxTiles": 1
