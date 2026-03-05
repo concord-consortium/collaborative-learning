@@ -11,6 +11,7 @@ import { GroupManagementModal } from "./group/group-management-modal";
 import { IStores } from "../models/stores/stores";
 import ErrorAlert from "./utilities/error-alert";
 import { getCurrentLoadingMessage, removeLoadingMessage, showLoadingMessage } from "../utilities/loading-utils";
+import { PickedUpTileGhost } from "./picked-up-tile-ghost";
 
 // used for tooltips in various parts of the application
 import "react-tippy/dist/tippy.css";
@@ -245,6 +246,7 @@ export class AppComponent extends BaseComponent<IProps> {
     return (
       <div className="app">
         {children}
+        <PickedUpTileGhost />
       </div>
     );
   }

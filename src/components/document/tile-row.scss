@@ -21,7 +21,13 @@
 
     &.show {
       background-color: $color7;
-      opacity: 0.25;
+      opacity: 0.4;
+      border: 2px solid $focus-ring-color;
+
+      &.dimmed {
+        opacity: 0.15;
+        border: 1px dashed $color7-4;
+      }
     }
 
     &.top {
@@ -33,15 +39,15 @@
 
     &.left {
       left: 0;
-      top: 0;
-      bottom: 0;
+      top: 8px;
+      bottom: 8px;
       width: 16px;
     }
 
     &.right {
       right: 0;
-      top: 0;
-      bottom: 0;
+      top: 8px;
+      bottom: 8px;
       width: 16px;
     }
 

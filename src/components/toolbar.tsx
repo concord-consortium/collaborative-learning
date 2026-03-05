@@ -223,6 +223,15 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
     });
   };
 
+  const handleDeleteTile = (tileId: string) => {
+    const { ui, documents } = stores;
+    ui.removeTileIdFromSelection(tileId);
+    // The tile may be in a different document than the toolbar's (e.g. picked up from resources).
+    // Use findDocumentOfTile to target the correct source document.
+    const sourceDoc = documents.findDocumentOfTile(tileId);
+    (sourceDoc || document)?.deleteTile(tileId);
+  };
+
   const handleToggleSelectedTilesSolution = () => {
     const { ui } = stores;
     const documentContent = document?.content;
@@ -435,6 +444,7 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
           return <DeleteButton key={toolButton.id}
                                onSetShowDeleteTilesConfirmationAlert={setShowDeleteTilesConfirmationAlert}
                                onDeleteSelectedTiles={handleDeleteSelectedTiles}
+                               onDeleteTile={handleDeleteTile}
                                {...buttonProps} />;
         case "readAloud":
           // ReadAloudButton uses Firestore comment hooks that require fully initialized
