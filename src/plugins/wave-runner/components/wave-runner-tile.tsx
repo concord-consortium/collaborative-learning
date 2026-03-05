@@ -6,18 +6,18 @@ import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { DataSetup } from "./data-setup";
 import { StatusAndOutput } from "./status-and-output";
-import "./wave-runner.scss";
+import "./wave-runner-tile.scss";
 
-export const WaveRunnerToolComponent: React.FC<ITileProps> = observer(() => {
+export const WaveRunnerComponent: React.FC<ITileProps> = observer(() => {
   const { width: containerWidth, ref: containerRef } = useResizeDetector();
   const vertical = !containerWidth || containerWidth < 700;
 
   return (
-    <div className="tile-content wave-runner-tool">
+    <div className="tile-content wave-runner-tile">
       <BasicEditableTileTitle />
       <div ref={containerRef} className="wave-runner-content">
-        <div className="wave-runner-title-background" />
-        <div className={classNames("wave-runner-sections", { vertical, horizontal: !vertical })}>
+        <div className="title-background" />
+        <div className={classNames("sections", { vertical, horizontal: !vertical })}>
           <DataSetup />
           <StatusAndOutput />
         </div>
@@ -25,4 +25,4 @@ export const WaveRunnerToolComponent: React.FC<ITileProps> = observer(() => {
     </div>
   );
 });
-WaveRunnerToolComponent.displayName = "WaveRunnerToolComponent";
+WaveRunnerComponent.displayName = "WaveRunnerComponent";

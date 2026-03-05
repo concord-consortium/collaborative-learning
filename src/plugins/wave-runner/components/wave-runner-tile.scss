@@ -1,6 +1,6 @@
 @import "../../../components/vars";
 
-.wave-runner-tool {
+.wave-runner-tile {
   color: $charcoal-dark-2;
   width: 100%;
   height: 100%;
@@ -13,19 +13,19 @@
     padding: 4px;
   }
 
-  .wave-runner-title-background {
+  .title-background {
     width: 100%;
-    height: 46px;
+    height: 40px;
     background-color: $workspace-teal-light-8;
   }
 
-  .wave-runner-sections {
+  .sections {
     display: flex;
 
     &.vertical {
       flex-direction: column;
 
-      .wave-runner-section + .wave-runner-section {
+      .section + .section {
         border-top: 1px solid $workspace-teal-dark-1;
       }
     }
@@ -33,13 +33,13 @@
     &.horizontal {
       flex-direction: row;
 
-      .wave-runner-section + .wave-runner-section {
+      .section + .section {
         border-left: 1px solid $workspace-teal-dark-1;
       }
     }
   }
 
-  .wave-runner-section {
+  .section {
     padding: 8px 8px 10px;
     flex: 1;
 
@@ -52,7 +52,7 @@
     }
   }
 
-  .wave-runner-section-title {
+  .section-title {
     font-weight: bold;
     text-align: center;
     margin-bottom: 8px;

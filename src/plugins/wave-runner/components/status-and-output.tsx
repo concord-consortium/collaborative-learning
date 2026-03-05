@@ -3,13 +3,13 @@ import "./status-and-output.scss";
 
 export const StatusAndOutput: React.FC = () => {
   return (
-    <div className="wave-runner-section status-and-output">
-      <div className="wave-runner-section-title">Status and Output</div>
-      <div className="status-waveform-placeholder">
+    <div className="section status-and-output">
+      <div className="section-title">Status and Output</div>
+      <div className="waveform-container">
         Finish&nbsp;<b>Data Setup</b>&nbsp;to see the waveform. Then run the model.
       </div>
-      <div className="status-waveform-spacer" />
-      <div className="status-estimated-time">
+      <div className="download-status-container" />
+      <div className="estimated-time">
         Estimated time to complete run:
       </div>
       <div className="status-counts-row">
