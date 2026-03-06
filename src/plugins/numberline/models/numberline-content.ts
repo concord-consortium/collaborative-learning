@@ -35,6 +35,9 @@ export const PointObjectModel = types
         self.dragXValue = undefined;
       }
     },
+    setXValue(num: number) {
+      self.xValue = num;
+    },
   }));
 
 export interface PointObjectModelType extends Instance<typeof PointObjectModel> {}
@@ -70,6 +73,16 @@ export const NumberlineContentModel = TileContentModel
   .views(self =>({
     get pointsXValuesArr() {
       return self.pointsArr.map((pointObj) => pointObj.xValue);
+    },
+    get sortedPointsArr() {
+      return self.pointsArr.slice().sort((a, b) => a.xValue - b.xValue);
+    },
+    get firstSelectedPoint() {
+      const firstId = Object.keys(self.selectedPoints)[0];
+      return firstId ? self.selectedPoints[firstId] : undefined;
+    },
+    get selectedPointsArr() {
+      return Object.values(self.selectedPoints);
     },
     getPoint(id: string) {
       return self.points.get(id);

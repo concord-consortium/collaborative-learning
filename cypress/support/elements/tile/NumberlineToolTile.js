@@ -57,7 +57,27 @@ class NumberlineToolTile {
   getMinBox(){
     return cy.get(".numberline-tool-container .border-box").eq(0); //first element is min
   }
-
+  getValueLabel(){
+    return cy.get(".numberline-tool-container .point-value-label-group");
+  }
+  getValueLabelText(){
+    return cy.get(".numberline-tool-container .point-value-label-text");
+  }
+  getValueLabelLine(){
+    return cy.get(".numberline-tool-container .point-value-label-line");
+  }
+  getZeroTick(){
+    return cy.get(".numberline-tool-container .zero-tick");
+  }
+  getMinBoxInput(){
+    return cy.get(".numberline-tool-container .border-box").eq(0).find("input");
+  }
+  getMaxBoxInput(){
+    return cy.get(".numberline-tool-container .border-box").eq(1).find("input");
+  }
+  getFocusedPoint(){
+    return cy.get(".numberline-tool-container .point-inner-circle:focus");
+  }
 
 
 }

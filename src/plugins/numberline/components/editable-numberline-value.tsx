@@ -17,10 +17,20 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
   const { readOnly, isTileSelected, value, arrowOffset, minOrMax, onValueChange } = props;
 
   const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(value.toString());
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Update input value when external value changes
+  useEffect(() => {
+    if (!isEditing) {
+      setInputValue(value.toString());
+    }
+  }, [value, isEditing]);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
+      inputRef.current.focus();
       inputRef.current.select();
     }
   }, [isEditing]);
@@ -31,22 +41,36 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
     }
   };
 
-  const updateValue = (val: string) => {
-    if (checkIfNumber(val)) {
-      onValueChange(Number(val));
+  const handleFocus = () => {
+    if (!readOnly && !isEditing) {
+      setInputValue(value.toString());
+      setIsEditing(true);
+    }
+  };
+
+  const commitValue = () => {
+    if (checkIfNumber(inputValue)) {
+      onValueChange(Number(inputValue));
     }
     setIsEditing(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const { key } = e;
     switch (key) {
       case "Enter": {
-        updateValue((e.target as HTMLInputElement).value);
+        e.preventDefault();
+        e.stopPropagation();
+        commitValue();
         break;
       }
       case "Escape":
+        setInputValue(value.toString());
         setIsEditing(false);
+        break;
+      case "Tab":
+        // Commit and allow natural tab progression
+        commitValue();
         break;
     }
   };
@@ -62,19 +86,31 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
   const borderBoxOffset = `${arrowOffset + numCharToOffset}px`;
   const borderBoxStyle = (minOrMax === "min") ? { left: borderBoxOffset } : { right: borderBoxOffset };
   const borderClasses = classNames("border-box", {hide: !isTileSelected});
+  const minOrMaxWord = minOrMax === "min" ? "Minimum" : "Maximum";
 
   return (
-    <div className={borderClasses} style={borderBoxStyle} onClick={handleClick}>
+    <div
+      ref={containerRef}
+      className={borderClasses}
+      style={borderBoxStyle}
+      onClick={handleClick}
+      onFocus={handleFocus}
+      tabIndex={readOnly ? -1 : 0}
+      role="button"
+      aria-label={`${minOrMaxWord} value: ${value}. ${readOnly ? "" : "Press Enter to edit."}`}
+    >
       {isEditing ? (
         <input
           className="input-textbox"
           ref={(el) => {
             inputRef.current = el;
           }}
-          onKeyDown={(e) => handleKeyDown(e)}
-          defaultValue={value.toString()} // Set the initial value
-          onBlur={(e) => updateValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          value={inputValue}
+          onBlur={commitValue}
+          aria-label={`${minOrMaxWord} value`}
           onChange={(e) => {
+            setInputValue(e.target.value);
             // Set the width of the input based on the length of the input value
             if (inputRef.current) {
               inputRef.current.style.width = `${Math.max(5, e.target.value.length)}ch`;
