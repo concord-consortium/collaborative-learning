@@ -111,6 +111,66 @@
           padding-left: 20px;
         }
       }
+
+      &.problemSectionsTable {
+        width: 100%;
+        table-layout: auto;
+        margin-top: 10px;
+
+        th {
+          text-align: left;
+          padding: 4px 8px;
+          border-bottom: 1px solid #ccc;
+        }
+
+        td {
+          padding: 4px 8px;
+          text-align: left;
+          vertical-align: middle;
+        }
+
+        tr.disabled {
+          opacity: 0.6;
+        }
+
+        tr.enabled {
+          background-color: #f0f8ff;
+        }
+
+        .checkboxColumn {
+          width: 60px;
+          text-align: center;
+        }
+
+        .reorderColumn {
+          width: 70px;
+          white-space: nowrap;
+        }
+
+        .sectionNameColumn {
+          font-weight: 500;
+
+          .initials {
+            font-weight: normal;
+            color: #666;
+          }
+        }
+
+        .pathColumn {
+          font-family: monospace;
+          font-size: 0.85em;
+          color: #666;
+
+          .newPath {
+            font-style: italic;
+            color: #090;
+          }
+
+          .noPath {
+            color: #999;
+          }
+        }
+      }
     }
 
     label, .sectionLabel {

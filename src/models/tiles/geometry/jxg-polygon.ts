@@ -152,6 +152,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[
   const selectedPoints: string[] = [];
   const polygonsToDelete: { [id: string]: JXG.Polygon } = {};
   const anglesToDelete: { [id: string]: JXG.GeometryElement } = {};
+  const othersToDelete: string[] = []; // lines, circles, comments, images, etc.
 
   // Identify polygons and angles scheduled for deletion and points that are vertices of polygons
   const polygonVertexMap: { [id: string]: string[] } = {}; // maps polygon ids to vertex ids
@@ -176,6 +177,10 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[
     }
     else if (elt && isVertexAngle(elt)) {
       anglesToDelete[id] = elt;
+    }
+    else if (elt) {
+      // Other object types (lines, circles, etc.) are passed through for deletion
+      othersToDelete.push(id);
     }
   });
 
@@ -235,7 +240,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[
   });
 
   // return adjusted list of ids to delete
-  return [...pointsToDelete, ...Object.keys(polygonsToDelete), ...Object.keys(anglesToDelete)];
+  return [...pointsToDelete, ...Object.keys(polygonsToDelete), ...Object.keys(anglesToDelete), ...othersToDelete];
 }
 
 function setPropertiesForPolygonLabelOption(polygon: JXG.Polygon) {
@@ -303,44 +308,33 @@ function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: J
   const oldPolygon = getPolygon(board, polygonId);
   const colorScheme = oldPolygon?.getAttribute("colorScheme");
   if (!oldPolygon) return;
-  board.removeObject(oldPolygon);
-  const vertices: JXG.Point[]
-    = vertexIds.map(v => typeof(v)==='string' ? getPoint(board, v) : undefined)
-    .filter(notEmpty);
-  const props = {
-    id: polygonId, // re-use the same ID
-    colorScheme,
-    ...getPolygonVisualProps(false, colorScheme)
-  };
-  const polygon = board.create("polygon", vertices, props) as JXG.Polygon;
-
-
-  // Without deleting/rebuilding, would look something like this (but this fails due to apparent bugs in JSXGraph 1.4.x)
-  // const polygon = getPolygon(board, polygonId);
-  // if (!polygon) return;
-
-  // const existingVertices = polygon.vertices;
-  // const newVertices: JXG.Point[]
-  //   = vertexIds.map(v => typeof(v)==='string' ? getPoint(board, v) : undefined)
-  //     .filter(notEmpty);
-
-  // const addedVertices = newVertices.filter(v => !existingVertices.includes(v));
-  // const removedVertices = existingVertices.filter(v => !newVertices.includes(v));
-
-  // console.log('current:', existingVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
-  // console.log('adding:', addedVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`),
-  //   'removing:', removedVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
-
-  // for (const v of removedVertices) {
-  //   polygon.removePoints(v);
-  // }
-  // for (const v of addedVertices) {
-  //   polygon.addPoints(v);
-  // }
-  // console.log('final:', polygon.vertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
-
-  setPolygonEdgeColors(polygon);
-  return polygon;
+  // Suspend board updates during the remove/recreate to prevent JSXGraph from
+  // firing internal events (e.g. Polygon.hasPoint iterating over borders) while
+  // the polygon is in a transitional state between removal and recreation.
+  board.suspendUpdate();
+  try {
+    // Clear the borders array before removing the polygon to prevent a double-removal
+    // bug in JSXGraph. When board.removeObject() is called on a polygon, it first
+    // removes all child elements (including borders) via _removeObj's childElements loop,
+    // then calls polygon.remove() which iterates this.borders and tries to remove them
+    // again. The second removal uses stale _pos values, corrupting board.objectsList
+    // and causing "Cannot read properties of undefined (reading 'hasPoint')" errors.
+    (oldPolygon as any).borders = [];
+    board.removeObject(oldPolygon);
+    const vertices: JXG.Point[]
+      = vertexIds.map(v => typeof(v)==='string' ? getPoint(board, v) : undefined)
+      .filter(notEmpty);
+    const props = {
+      id: polygonId, // re-use the same ID
+      colorScheme,
+      ...getPolygonVisualProps(false, colorScheme)
+    };
+    const polygon = board.create("polygon", vertices, props) as JXG.Polygon;
+    setPolygonEdgeColors(polygon);
+    return polygon;
+  } finally {
+    board.unsuspendUpdate();
+  }
 }
 
 export const polygonChangeAgent: JXGChangeAgent = {

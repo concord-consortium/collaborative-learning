@@ -1,0 +1,22 @@
+@import "../components/vars.scss";
+
+@keyframes voice-typing-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+.toolbar-button.voice-typing.selected svg {
+  animation: voice-typing-pulse 0.7s infinite;
+
+  path {
+    fill: $workspace-teal-dark-1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolbar-button.voice-typing.selected svg {
+    animation: none;
+    opacity: 0.7;
+  }
+}

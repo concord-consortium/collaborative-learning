@@ -1,22 +1,21 @@
 import { FC, SVGProps } from "react";
 import { makeAutoObservable } from "mobx";
+
 import {
-  createDocMapByBookmarks,
-  createTileTypeToDocumentsMap,
-  getTagsWithDocs,
-  sortDateSectionLabels,
-  sortGroupSectionLabels,
-  sortNameSectionLabels
+  createDocMapByBookmarks, createTileTypeToDocumentsMap, getTagsWithDocs,
+  sortDateSectionLabels, sortGroupSectionLabels, sortNameSectionLabels, sortProblemSectionLabels
 } from "../../utilities/sort-document-utils";
+import { upperWords } from "../../utilities/string-utils";
+import { translate } from "../../utilities/translation/translate";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { GroupDocument } from "../document/document-types";
-import { getTileContentInfo } from "../tiles/tile-content-info";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
-import { SecondarySortType, SortType } from "./ui-types";
-import { GroupsModelType } from "./groups";
-import { ClassModelType } from "./class";
+import { getTileContentInfo } from "../tiles/tile-content-info";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
+import { ClassModelType } from "./class";
+import { GroupsModelType } from "./groups";
+import { SecondarySortType, SortType } from "./ui-types";
 
 import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
 
@@ -65,6 +64,7 @@ interface IBuildDocumentCollectionProps {
  * - Strategies
  * - Tools
  * - Bookmarks
+ * - Problems
  *
  * Its main purpose is to provide sub sorting options for documents that are already
  * sorted by a primary sort filter.
@@ -144,6 +144,8 @@ export class DocumentGroup {
         return this.byTools;
       case "Bookmarked":
         return this.byBookmarked;
+      case "Problem":
+        return this.byProblem;
       default:
         return [];
     }
@@ -180,15 +182,16 @@ export class DocumentGroup {
   }
 
   get byGroup(): DocumentGroup[] {
+    const groupTerm = upperWords(translate("studentGroup"));
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
     this.documents.forEach((doc) => {
       const sectionLabel = (() => {
         if (doc.type === GroupDocument) {
-          return `Group ${doc.groupId}`;
+          return `${groupTerm} ${doc.groupId}`;
         }
         const userId = doc.uid;
         const group = this.stores.groups.groupForUser(userId);
-        return group ? `Group ${group.id}` : "No Group";
+        return group ? `${groupTerm} ${group.id}` : `No ${groupTerm}`;
       })();
 
       if (!documentMap.has(sectionLabel)) {
@@ -231,7 +234,9 @@ export class DocumentGroup {
   }
 
   get byTools(): DocumentGroup[] {
-    const tileTypeToDocumentsMap = createTileTypeToDocumentsMap(this.documents);
+    const toolsTerm = upperWords(translate("tools"));
+    const noToolsTerm = `No ${toolsTerm}`;
+    const tileTypeToDocumentsMap = createTileTypeToDocumentsMap(this.documents, noToolsTerm);
 
     // Map the tile types to their display names
     const sectionedDocuments = Array.from(tileTypeToDocumentsMap.keys()).map(tileType => {
@@ -243,7 +248,9 @@ export class DocumentGroup {
       });
       if (tileType === "Sparrow") {
         section.icon = SparrowHeaderIcon;
-      } else {
+      } else if (tileType !== noToolsTerm) {
+        // Look up display name and icon for real tile types.
+        // For noToolsTerm, keep the translated label as-is (no icon needed).
         const contentInfo = getTileContentInfo(tileType);
         section.label = contentInfo?.displayName || tileType;
         const componentInfo = getTileComponentInfo(tileType);
@@ -254,8 +261,8 @@ export class DocumentGroup {
 
     // Sort the tile types. 'No Tools' should be at the end.
     const sortedByLabel = sectionedDocuments.sort((a, b) => {
-      if (a.label === "No Tools") return 1;   // Move 'No Tools' to the end
-      if (b.label === "No Tools") return -1;  // Alphabetically sort all others
+      if (a.label === noToolsTerm) return 1;   // Move 'No Tools' to the end
+      if (b.label === noToolsTerm) return -1;  // Alphabetically sort all others
       return a.label.localeCompare(b.label);
     });
 
@@ -263,8 +270,34 @@ export class DocumentGroup {
   }
 
   get byBookmarked(): DocumentGroup[] {
-    const docMap = createDocMapByBookmarks(this.documents, this.stores.bookmarks);
-    const sortedSectionLabels = ["Bookmarked", "Not Bookmarked"];
+    const bookmarkedTerm = upperWords(translate("bookmarked"));
+    const notBookmarkedTerm = `Not ${bookmarkedTerm}`;
+    const docMap = createDocMapByBookmarks(this.documents, this.stores.bookmarks, bookmarkedTerm, notBookmarkedTerm);
+    const sortedSectionLabels = [bookmarkedTerm, notBookmarkedTerm];
     return this.buildDocumentCollection({sortedSectionLabels, sortType: "Bookmarked", docMap});
+  }
+
+  get byProblem(): DocumentGroup[] {
+    const docMap: Map<string, IDocumentMetadataModel[]> = new Map();
+    this.documents.forEach((doc) => {
+      const investigationOrdinal = doc.investigation;
+      const problemOrdinal = doc.problem;
+      const problemTerm = upperWords(translate("contentLevel.problem"));
+      let sectionLabel = `No ${problemTerm}`;
+
+      if (investigationOrdinal != null && problemOrdinal != null) {
+        sectionLabel = `${problemTerm} ${investigationOrdinal}.${problemOrdinal}`;
+      } else if (problemOrdinal != null) {
+        sectionLabel = `${problemTerm} ${problemOrdinal}`;
+      }
+
+      if (!docMap.has(sectionLabel)) {
+        docMap.set(sectionLabel, []);
+      }
+      docMap.get(sectionLabel)?.push(doc);
+    });
+
+    const sortedSectionLabels = sortProblemSectionLabels(Array.from(docMap.keys()));
+    return this.buildDocumentCollection({sortedSectionLabels, sortType: "Problem", docMap});
   }
 }

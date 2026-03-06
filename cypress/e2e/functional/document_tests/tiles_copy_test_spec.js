@@ -179,7 +179,6 @@ context('Test copy tiles from one document to other document', function () {
 
     //Create new document
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspaceCopyTiles, "my-work");
-    cy.wait(5000);
 
     tiles1.forEach(tool => {
       cy.get(`.nav-tab-panel .my-work .${tool.name}-tool-tile`)
@@ -201,7 +200,6 @@ context('Test copy tiles from one document to other document', function () {
 
     //Create new document
     canvas.createNewExtraDocumentFromFileMenu(studentClassWorkCopyTiles, "my-work");
-    cy.wait(5000);
 
     tiles1.forEach(tool => {
       cy.get(`.nav-tab-panel .class-work .${tool.name}-tool-tile`)
@@ -263,7 +261,6 @@ context('Test copy tiles from one document to other document', function () {
 
     //Create new document
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspaceCopyTiles, "my-work");
-    cy.wait(5000);
 
     tiles2.forEach(tool => {
       cy.get(`.nav-tab-panel .my-work .${tool.name}-tool-tile`)
@@ -285,7 +282,6 @@ context('Test copy tiles from one document to other document', function () {
 
     //Create new document
     canvas.createNewExtraDocumentFromFileMenu(studentClassWorkCopyTiles, "my-work");
-    cy.wait(5000);
 
     tiles2.forEach(tool => {
       cy.get(`.nav-tab-panel .class-work .${tool.name}-tool-tile`)
@@ -352,7 +348,6 @@ context('Test copy tiles from one document to other document', function () {
     // Test Copy to Document with dialog functionality
     cy.log('Test Copy to Document with dialog functionality');
     canvas.createNewExtraDocumentFromFileMenu("Copy to Document Test", "my-work");
-    cy.wait(1000);
 
     cy.openTopTab('problems');
     cy.openProblemSection('Initial Challenge');

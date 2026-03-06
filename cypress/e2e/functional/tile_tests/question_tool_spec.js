@@ -31,7 +31,6 @@ context('Question tool tile functionalities', function () {
 
     cy.log('verifies restore of question tile');
     canvas.createNewExtraDocumentFromFileMenu('question tool test', 'my-work');
-    cy.wait(2000);
     questionToolTile.getQuestionTile().should('not.exist');
 
     //re-open investigation
@@ -123,7 +122,6 @@ context('Question tool tile functionalities', function () {
     // Create new document
     const newDocTitle = "Question Tile Copy Test";
     canvas.createNewExtraDocumentFromFileMenu(newDocTitle, "my-work");
-    cy.wait(5000);
 
     // Copy the tile using drag and drop
     cy.get('.nav-tab-panel .my-work .question-tile')

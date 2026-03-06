@@ -1,27 +1,21 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { IInvestigation, IProblem, IUnit } from "../../../types";
 import { useCurriculum } from "../../../hooks/use-curriculum";
-import { CurriculumItem, getCurriculumItem, getUnitItem } from "../../../utils/nav-path";
+import {
+  getCurriculumItem, getUnitItem,
+  getProblemBasePath, generateSectionPath,
+} from "../../../utils/nav-path";
 import { WritableDraft } from "immer";
-import { IUnitParentFormInputs, UnitChild } from "./container-config-types";
+import { IProblemFormInputs, IUnitParentFormInputs, UnitChild } from "./container-config-types";
+import {
+  isUnit, isInvestigation, isProblem, buildProblemSectionsFormData, parseItemPath,
+} from "./container-config-helpers";
 import { UnitItemChildren } from "./unit-item-children";
 import { ProblemSections } from "./problem-sections";
 
 interface Props {
   path: string;
-}
-
-function isUnit(item: CurriculumItem): item is IUnit {
-  return "investigations" in item && Array.isArray(item.investigations);
-}
-
-function isInvestigation(item: CurriculumItem): item is IInvestigation {
-  return "problems" in item && Array.isArray(item.problems);
-}
-
-function isProblem(item: CurriculumItem): item is IProblem {
-  return "sections" in item && Array.isArray(item.sections);
 }
 
 /**
@@ -39,6 +33,8 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
     setUnitConfig,
     teacherGuideConfig,
     setTeacherGuideConfig,
+    files,
+    saveContent,
     saveState
   } = useCurriculum();
 
@@ -77,12 +73,12 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
       _childType = "Investigation";
       children = item.investigations.map(generateChildrenData);
     }
-    if (isInvestigation(item)) {
+    else if (isInvestigation(item)) {
       _itemType = "Investigation";
       _childType = "Problem";
       children = item.problems.map(generateChildrenData);
     }
-    if (isProblem(item)) {
+    else if (isProblem(item)) {
       _itemType = "Problem";
       _childType = "Section";
     }
@@ -107,6 +103,68 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
   useEffect(() => {
     reset(defaultValues);
   }, [reset, defaultValues]);
+
+  // --- Problem form hooks ---
+  const isSubmitting = useRef(false);
+
+  const pathInfo = useMemo(
+    () => itemPath ? parseItemPath(itemPath) : undefined,
+    [itemPath]
+  );
+
+  const availableSections = useMemo(() => {
+    if (!pathInfo) return {};
+    if (pathInfo.isTeacherGuide) {
+      return teacherGuideConfig?.sections ?? {};
+    }
+    return unitConfig?.sections ?? {};
+  }, [pathInfo, unitConfig, teacherGuideConfig]);
+
+  const sectionPathPrefix = pathInfo?.isTeacherGuide ? "teacher-guide/" : "";
+
+  const problemFormDefaults = useMemo(() => {
+    if (!item || !isProblem(item)) return undefined;
+    return {
+      title: item.title,
+      sections: buildProblemSectionsFormData(item, availableSections, files, sectionPathPrefix),
+    };
+  }, [item, availableSections, files, sectionPathPrefix]);
+
+  const problemFormResolver = useMemo(() => {
+    return (values: IProblemFormInputs) => {
+      const resolverErrors: Record<string, any> = {};
+      const enabledTypes = values.sections.filter(s => s.enabled).map(s => s.type);
+
+      const duplicates = enabledTypes.filter(
+        (type, index) => enabledTypes.indexOf(type) !== index
+      );
+      if (duplicates.length > 0) {
+        resolverErrors.sections = { message: `Duplicate section types: ${duplicates.join(", ")}` };
+      }
+
+      const invalidTypes = enabledTypes.filter(type => !availableSections[type]);
+      if (invalidTypes.length > 0) {
+        resolverErrors.sections = { message: `Unknown section types: ${invalidTypes.join(", ")}` };
+      }
+
+      return {
+        values: Object.keys(resolverErrors).length === 0 ? values : {},
+        errors: resolverErrors,
+      };
+    };
+  }, [availableSections]);
+
+  const problemForm = useForm<IProblemFormInputs>({
+    defaultValues: problemFormDefaults,
+    mode: "onChange",
+    resolver: problemFormResolver,
+  });
+
+  useEffect(() => {
+    if (problemFormDefaults) {
+      problemForm.reset(problemFormDefaults);
+    }
+  }, [problemForm, problemFormDefaults]);
 
   if (!pathMatch) {
     return <div>Invalid path for ContainerConfig: {path}</div>;
@@ -158,8 +216,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
           return investigation;
         });
       }
-
-      if (isInvestigation(currentItem)) {
+      else if (isInvestigation(currentItem)) {
         currentItem.problems = data.children.map((child, index) => {
           let problem: IProblem | undefined;
           const { title } = child;
@@ -182,8 +239,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
         });
 
       }
-
-      if (isProblem(currentItem)) {
+      else if (isProblem(currentItem)) {
         // Problems don't have children to update
       }
     };
@@ -194,6 +250,98 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
       setUnitConfig(updateUnitDraft);
     }
   };
+
+  const onSubmitProblem: SubmitHandler<IProblemFormInputs> = async (data) => {
+    if (!itemPath || !pathInfo || !item || !isProblem(item)) return;
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+
+    const itemPathParts = itemPath.split("/");
+    const config = pathInfo.isTeacherGuide ? teacherGuideConfig : unitConfig;
+    const investigation = config?.investigations?.[pathInfo.investigationIndex];
+    if (!investigation) {
+      isSubmitting.current = false;
+      return;
+    }
+
+    const enabledSections = data.sections.filter(s => s.enabled);
+    const existingPaths = enabledSections.filter(s => s.existingPath).map(s => s.existingPath!);
+    const problemBasePath = getProblemBasePath(
+      existingPaths, config, investigation,
+      pathInfo.investigationIndex, item.ordinal
+    );
+
+    const newSectionPaths: string[] = [];
+    const filesToCreate: { path: string; sectionType: string }[] = [];
+
+    for (const section of enabledSections) {
+      if (section.existingPath) {
+        newSectionPaths.push(section.existingPath);
+      } else {
+        const newPath = generateSectionPath(problemBasePath, section.type);
+        newSectionPaths.push(newPath);
+        if (!files?.[sectionPathPrefix + newPath]) {
+          filesToCreate.push({ path: newPath, sectionType: section.type });
+        }
+      }
+    }
+
+    try {
+      for (const file of filesToCreate) {
+        await saveContent(sectionPathPrefix + file.path, { type: file.sectionType, content: { tiles: [] } });
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      console.error("Failed to create section file:", message);
+      problemForm.setError("sections", {
+        message: "Failed to create section file. Please try again."
+      });
+      isSubmitting.current = false;
+      return;
+    }
+
+    const updateUnitDraft = (draft: WritableDraft<IUnit> | undefined) => {
+      if (!draft) return;
+      const currentItem = getUnitItem(draft, itemPathParts);
+      if (!currentItem || !isProblem(currentItem)) return;
+      currentItem.title = data.title;
+      currentItem.sections = newSectionPaths;
+    };
+
+    if (pathInfo.isTeacherGuide) {
+      setTeacherGuideConfig(updateUnitDraft);
+    } else {
+      setUnitConfig(updateUnitDraft);
+    }
+    isSubmitting.current = false;
+  };
+
+  if (isProblem(item)) {
+    return (
+      <form onSubmit={problemForm.handleSubmit(onSubmitProblem)}>
+        <div>
+          <label htmlFor="title">{itemType} Title</label>
+          <input
+            type="text"
+            id="title"
+            defaultValue={problemFormDefaults?.title}
+            {...problemForm.register("title", { required: "Title is required" })}
+          />
+          {problemForm.formState.errors.title && (
+            <span className="form-error">{problemForm.formState.errors.title.message}</span>
+          )}
+        </div>
+        <ProblemSections
+          availableSections={availableSections}
+          control={problemForm.control}
+          errors={problemForm.formState.errors}
+        />
+        <div className="bottomButtons">
+          <button type="submit" disabled={saveState === "saving"}>Save</button>
+        </div>
+      </form>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -207,23 +355,13 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
         />
         {errors.title && <span className="form-error">{errors.title.message}</span>}
       </div>
-      { !isProblem(item) && (
-        <UnitItemChildren
-          childType={childType}
-          defaultValues={defaultValues}
-          register={register}
-          errors={errors}
-          control={control}
-        />
-      )}
-      { isProblem(item) && (
-        <ProblemSections
-          defaultValues={defaultValues}
-          register={register}
-          errors={errors}
-          control={control}
-        />
-      )}
+      <UnitItemChildren
+        childType={childType}
+        defaultValues={defaultValues}
+        register={register}
+        errors={errors}
+        control={control}
+      />
       <div className="bottomButtons">
         <button type="submit" disabled={saveState === "saving"}>Save</button>
       </div>

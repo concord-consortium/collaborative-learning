@@ -106,13 +106,13 @@
     }
   }
   &.class-work {
-    border-color: $classwork-purple;
-    background-color: $classwork-purple-light-4;
+    border-color: $workspace-teal;
+    background-color: $workspace-teal-light-3;
     &:hover {
-      background-color: $classwork-purple-light-3;
+      background-color: $workspace-teal-light-2;
     }
     &:active {
-      background-color: $classwork-purple-light-2;
+      background-color: $workspace-teal-light-1-b;
     }
   }
   &.supports {

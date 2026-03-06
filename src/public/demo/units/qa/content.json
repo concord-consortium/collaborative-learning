@@ -65,6 +65,15 @@
       "simulator": {
         "defaultSimulation": "EMG_and_claw",
         "maxTiles": 1
+      },
+      "iframeInteractive": {
+        "maxTiles": 1,
+        "url": "https://models-resources.concord.org/hurricane-model/branch/master/index.html?topBarVisible=false",
+        "interactiveState": {},
+        "authoredState": {},
+        "allowedPermissions": "geolocation; microphone; camera; bluetooth",
+        "maxHeight": 0,
+        "enableScroll": false
       }
     },
     "toolbar": [
@@ -87,12 +96,15 @@
       {"id": "undo", "title": "Undo", "iconId": "icon-undo-tool", "isTileTool": false},
       {"id": "redo", "title": "Redo", "iconId": "icon-redo-tool", "isTileTool": false},
       {"id": "duplicate", "title": "Duplicate", "iconId": "icon-duplicate-tool", "isTileTool": false},
-      {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}
+      {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false},
+      {"id": "readAloud", "title": "Read Aloud", "iconId": "icon-read-aloud-tool", "isTileTool": false}
     ],
     "tools": ["Simulator"],
     "enableCommentRoles": ["student", "teacher", "researcher"],
     "showCommentTag": true,
-    "tagPrompt": "Select QA Strategy",
+    "termOverrides": {
+      "strategy": "Select QA Strategy"
+    },
     "commentTags": {
       "diverging": "Diverging Designs",
       "converging": "Converging Designs",

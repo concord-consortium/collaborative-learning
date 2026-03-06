@@ -9,7 +9,9 @@ import {
   AiSummarizerOptions, DocumentContentSnapshotType, INormalizedTile, NormalizedDataSet,
   NormalizedModel, NormalizedSection, NormalizedVariable, TileMap
 } from "./ai-summarizer-types";
-import { generateMarkdownTable, generateVariablesMarkdownTable, heading, pluralize } from "./ai-summarizer-utils";
+import {
+  generateAttributesMarkdownTable, generateMarkdownTable, generateVariablesMarkdownTable, heading, pluralize
+} from "./ai-summarizer-utils";
 import { rowsSummary, tileSummary } from "./ai-tile-summarizer";
 
 /** Return the markdown summary of the given Document content.
@@ -168,7 +170,10 @@ export function normalize(model: DocumentContentSnapshotType) {
           name,
           tileIds: (entry as any).tiles.map((tile: any) => `${tile}`),
           attributes: (attributes || []).map((attr: any) => ({
-            id: attr.id, name: attr.name, values: attr.values || []
+            id: attr.id,
+            name: attr.name,
+            values: attr.values || [],
+            formula: attr.formula?.display || undefined
           })),
           numCases: cases.length,
           data: [],
@@ -278,11 +283,24 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
         if (dataSet.tileIds.length === 0) { // Don't output if unused
           return "";
         }
+
+        let formulaSummary = "";
+        dataSet.attributes.forEach(attr => {
+          if (attr.formula) {
+            formulaSummary += `- Column "${attr.name}" is calculated by the formula \`${attr.formula}\`.\n`;
+          }
+        });
+        if (formulaSummary.length > 0) formulaSummary += "\n";
+
+        const tileWord = pluralize(dataSet.tileIds.length, "tile", "tiles");
+        const attributeWord = pluralize(dataSet.attributes.length, "attribute", "attributes");
+        const caseWord = pluralize(dataSet.numCases, "case", "cases");
         return heading(headingLevel + 2, dataSet.name) +
-          `This data set has an id of ${dataSet.id} and is used in ${dataSet.tileIds.length} ${pluralize(dataSet.tileIds.length, "tile", "tiles")} ` +
-          `and contains ${dataSet.attributes.length} ${pluralize(dataSet.attributes.length, "attribute", "attributes")} ` +
-          `(${dataSet.attributes.map(a => a.name).join(", ")}).` +
-          ` There are ${dataSet.numCases} ${pluralize(dataSet.numCases, "case", "cases")} in this data set, shown below in a Markdown table.\n\n` +
+          `This data set has an id of ${dataSet.id} and is used in ${dataSet.tileIds.length} ${tileWord}.\n` +
+          `It contains ${dataSet.attributes.length} ${attributeWord}, described in the following Markdown table.\n\n` +
+          `${generateAttributesMarkdownTable(dataSet.attributes)}\n\n` +
+          formulaSummary +
+          `There are ${dataSet.numCases} ${caseWord} in this data set, shown below in a Markdown table.\n\n` +
           `${generateMarkdownTable(dataSet.attributes.map(a => a.name), dataSet.data)}\n`;
       }).join("\n\n")
     : "";

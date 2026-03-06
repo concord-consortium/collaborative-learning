@@ -9,11 +9,11 @@ export interface IButtonProps {
   isPrimary?: boolean;
   height?: number;
   onSetToolActive: (tool: IToolbarButtonModel, isActive: boolean) => void;
-  onClick: (e: React.MouseEvent<HTMLDivElement>, tool: IToolbarButtonModel) => void;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>, tool: IToolbarButtonModel) => void;
 }
 
 export interface IToolbarButtonProps extends IButtonProps {
-  onDragStart: (e: React.DragEvent<HTMLDivElement>, tool: IToolbarButtonModel) => void;
+  onDragStart: (e: React.DragEvent<HTMLButtonElement>, tool: IToolbarButtonModel) => void;
   onShowDropHighlight: () => void;
   onHideDropHighlight: () => void;
 }
@@ -39,12 +39,12 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
     document.addEventListener("dragend", endActiveHandler, true);
   };
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (isDisabled) return;
     onClick(e, toolButton);
   };
 
-  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrag = (e: React.DragEvent<HTMLButtonElement>) => {
     onDragStart(e, toolButton);
   };
 
@@ -54,18 +54,22 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
     { active: isActive, primary: isPrimary }, isDisabled ? "disabled" : "enabled");
   const style: CSSProperties =  height ? {height} : {};
   return (
-    <div className={className}
-        style={style}
-        data-testid={`tool-${tileEltClass}`}
-        key={id}
-        title={title}
-        onMouseDown={handleMouseDown}
-        onClick={handleClick}
-        onDragStart={isTileTool && !isDisabled ? handleDrag : undefined}
-        draggable={(isTileTool && !isDisabled) || false}
-        onMouseEnter={showDropHighlight ? onShowDropHighlight : undefined}
-        onMouseLeave={showDropHighlight ? onHideDropHighlight : undefined}>
+    <button
+      aria-disabled={isDisabled || undefined}
+      aria-label={title}
+      className={className}
+      style={style}
+      data-testid={`tool-${tileEltClass}`}
+      title={title}
+      type="button"
+      onMouseDown={handleMouseDown}
+      onClick={handleClick}
+      onDragStart={isTileTool && !isDisabled ? handleDrag : undefined}
+      draggable={isTileTool && !isDisabled}
+      onMouseEnter={showDropHighlight ? onShowDropHighlight : undefined}
+      onMouseLeave={showDropHighlight ? onHideDropHighlight : undefined}
+      >
       {Icon && <Icon />}
-    </div>
+    </button>
   );
 };

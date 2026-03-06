@@ -72,7 +72,20 @@
       "system": "Varies System Factors",
       "unit-rate": "Unit Rate"
     },
-    "tagPrompt": "Identify Design Approach",
+    "termOverrides": {
+      "strategy": "Identify Design Approach"
+    },
+    "sortWorkConfig": {
+      "sortOptions": [
+        "Group",
+        "Name",
+        "Strategy",
+        "Bookmarked",
+        "Tools",
+        "Date",
+        "Problem"
+      ]
+    },
     "tools": ["Simulator"],
     "navTabs": {
       "lazyLoadTabContents": true,

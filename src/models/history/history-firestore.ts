@@ -1,8 +1,8 @@
 import firebase from "firebase/app";
+import { getSimpleDocumentPath } from "../../../shared/shared";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { Firestore } from "../../lib/firestore";
 import { HistoryEntrySnapshot } from "./history";
-import { getSimpleDocumentPath } from "../../../shared/shared";
 
 export type LastHistoryEntry = undefined | { index: number, id: string};
 

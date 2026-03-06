@@ -56,4 +56,18 @@ $tab-height: 20px;
       padding: 0;
     }
   }
+
+  // Focus ring applied to .tabbed-area since .teacher-dashboard has 0 height due to
+  // .tabbed-area using position:fixed.
+  &:focus {
+    outline: none;
+  }
+  &:focus .tabbed-area::after {
+    border: $focus-ring-outer-width solid $focus-ring-color;
+    content: "";
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 100;
+  }
 }

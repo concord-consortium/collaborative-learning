@@ -35,7 +35,9 @@
       "user": "Varies Human Factors",
       "system": "Varies System Factors"
     },
-    "tagPrompt": "Identify Design Approach",
+    "termOverrides": {
+      "strategy": "Identify Design Approach"
+    },
     "navTabs": {
       "lazyLoadTabContents": true,
       "showNavPanel": true,

@@ -229,6 +229,12 @@
         "title": "Delete",
         "iconId": "icon-delete-tool",
         "isTileTool": false
+      },
+      {
+        "id": "readAloud",
+        "title": "Read Aloud",
+        "iconId": "icon-read-aloud-tool",
+        "isTileTool": false
       }
     ],
     "authorTools": [
@@ -272,6 +278,12 @@
         "isTileTool": false
       },
       {
+        "id": "readAloud",
+        "title": "Read Aloud",
+        "iconId": "icon-read-aloud-tool",
+        "isTileTool": false
+      },
+      {
         "id": "togglePlayback",
         "title": "Playback",
         "iconId": "icon-playback-tool",
@@ -287,6 +299,9 @@
     },
     "placeholderText": "",
     "stamps": [],
+    "sortWorkConfig": {
+      "sortOptions": ["Date", "Group", "Name", "Strategy", "Bookmarked", "Tools"]
+    },
     "settings": {
       "ai": {
         "systemPrompt": "You are a helpful, collaborative student."
@@ -305,7 +320,8 @@
       "dataflow": {
         "tools": [
           ["data-set-view", "Table"],
-          ["data-set-link", "Graph"]
+          ["data-set-link", "Graph"],
+          "delete"
         ]
       },
       "diagram": {
@@ -351,7 +367,8 @@
           "zoom-out",
           "fit-all",
           "navigator",
-          "delete"
+          "delete",
+          "voice-typing"
         ]
       },
       "geometry": {
@@ -360,6 +377,7 @@
           "point",
           "polygon",
           "circle",
+          "line",
           "upload",
           "|",
           "duplicate",
@@ -431,7 +449,8 @@
           "superscript",
           "list-ol",
           "list-ul",
-          "link"
+          "link",
+          "voice-typing"
         ]
       }
     }

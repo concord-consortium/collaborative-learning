@@ -17,7 +17,7 @@ $scroller-height: 145px;
     // It actually matches the `themed-negative` fill color,
     // but then the active style doesn't match the spec.
     &.class-work {
-      fill: $classwork-purple-dark-1;
+      fill: $workspace-teal-dark-1;
     }
     &.my-work {
       fill: $workspace-teal-dark-1;
@@ -41,7 +41,7 @@ $scroller-height: 145px;
   }
   .scroller-icon {
     &.class-work {
-      fill: $classwork-purple-dark-1;
+      fill: $workspace-teal-dark-1;
     }
     &.my-work {
       fill: $workspace-teal-dark-1;
@@ -56,7 +56,7 @@ $scroller-height: 145px;
   align-items: center;
   border-bottom: $document-border-width solid;
   &.class-work {
-    border-color: $classwork-purple-dark-1
+    border-color: $workspace-teal-dark-1
   }
   &.my-work {
     border-color: $workspace-teal-dark-1

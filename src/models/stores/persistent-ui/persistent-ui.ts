@@ -1,28 +1,26 @@
 import {
-  getSnapshot, applySnapshot, types, onSnapshot,
-  SnapshotIn, Instance
+  getSnapshot, applySnapshot, types, onSnapshot, SnapshotIn, Instance
 } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
-import { AppConfigModelType } from "../app-config-model";
-import {
-  DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax,
-  kDividerMin, PrimarySortType
-} from "../ui-types";
-import { isWorkspaceModelSnapshot, WorkspaceModel } from "../workspace";
-import { DocumentModelType } from "../../document/document";
-import { ENavTab, NavTabModelType } from "../../view/nav-tabs";
 import { buildSectionPath, getCurriculumMetadata } from "../../../../shared/shared";
-import {
-  ExemplarDocument, LearningLogDocument, LearningLogPublication, PersonalDocument,
-  PersonalPublication, PlanningDocument, ProblemDocument,
-  ProblemPublication, SupportPublication
-} from "../../document/document-types";
-import { UserModelType } from "../user";
 import { DB } from "../../../lib/db";
 import { safeJsonParse } from "../../../utilities/js-utils";
-import { urlParams } from "../../../utilities/url-params";
 import { removeLoadingMessage, showLoadingMessage } from "../../../utilities/loading-utils";
+import { isValidSortTypeId } from "../../../utilities/sort-utils";
+import { urlParams } from "../../../utilities/url-params";
+import { DocumentModelType } from "../../document/document";
+import {
+  ExemplarDocument, LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
+  PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
+} from "../../document/document-types";
+import { ENavTab, NavTabModelType } from "../../view/nav-tabs";
+import { AppConfigModelType } from "../app-config-model";
 import { SortedDocuments } from "../sorted-documents";
+import {
+  DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax, kDividerMin, PrimarySortType
+} from "../ui-types";
+import { UserModelType } from "../user";
+import { isWorkspaceModelSnapshot, WorkspaceModel } from "../workspace";
 import { UITabModel, UITabModel_V1 } from "./ui-tab-model";
 
 export const kPersistentUiStateVersion2 = "2.0.0";
@@ -49,7 +47,8 @@ export const PersistentUIModelV2 = types
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
-    problemPath: ""
+    problemPath: "",
+    isDocumentsView: false
   }))
   .views((self) => ({
     get navTabContentShown () {
@@ -97,6 +96,9 @@ export const PersistentUIModelV2 = types
     },
     toggleShowChatPanel(show: boolean) {
       self.showChatPanel = show;
+    },
+    setIsDocumentsView(show: boolean) {
+      self.isDocumentsView = show;
     },
     toggleShowDocumentScroller(show: boolean) {
       self.showDocumentScroller = show;
@@ -300,10 +302,11 @@ export const PersistentUIModelV2 = types
             if (aiEvaluation) {
               self.setPrimarySortBy("Name");
             }
-            const primarySortBy = self.primarySortBy as PrimarySortType;
+            const primarySortBy: PrimarySortType =
+              isValidSortTypeId(self.primarySortBy) ? self.primarySortBy : "Group";
             const sortedDocumentGroups = sortedDocuments?.sortBy(primarySortBy);
             const openGroup = sortedDocumentGroups?.find(group => group.documents.some((d) => d.key === doc.key));
-            docGroupId = JSON.stringify({"primaryLabel": openGroup?.label, "primaryType": self.primarySortBy});
+            docGroupId = JSON.stringify({"primaryLabel": openGroup?.label, "primaryType": primarySortBy});
           }
         }
       }

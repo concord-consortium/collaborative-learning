@@ -36,6 +36,9 @@ export const unitConfigDefaults: UnitConfiguration = {
   placeholderText: "Placeholder Text",
   stamps: [] as any,
   settings: {},
+  sortWorkConfig: {
+    sortOptions: ["Date", "Group", "Name", "Strategy", "Bookmarked", "Tools"]
+  },
   aiEvaluation: undefined,
   aiPrompt: undefined
 } as UnitConfiguration;
@@ -76,6 +79,9 @@ export const unitConfigOverrides: UnitConfiguration = {
   placeholderText: "New Placeholder Text",
   stamps: [] as any,
   settings: {},
+  sortWorkConfig: {
+    sortOptions: ["Name", "Group", "Tools"]
+  },
   aiEvaluation: "custom",
   aiPrompt: {
     mainPrompt: "This is a picture of a student document.\n Please categorize it.",

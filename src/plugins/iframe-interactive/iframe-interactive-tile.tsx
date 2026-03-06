@@ -48,13 +48,16 @@
  *    Current Behavior: `globalInteractiveState` is always `null`.
  */
 
+import classNames from "classnames";
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { observer } from "mobx-react";
 import iframePhone from "iframe-phone";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { IframeInteractiveContentModelType, isIframeInteractiveModel } from "./iframe-interactive-tile-content";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
-import { useSettingFromStores } from "../../hooks/use-stores";
+import { useSettingFromStores, useStores } from "../../hooks/use-stores";
+import { useContainerContext } from "../../components/document/container-context";
+import { userSelectTile } from "../../models/stores/ui";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import {
@@ -128,6 +131,8 @@ const kDefaultAllowedPermissions = "geolocation; microphone; camera; bluetooth";
 const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentProps> = observer((props) => {
   const { model, readOnly, onRequestRowHeight, onRegisterTileApi } = props;
   const content = isIframeInteractiveModel(model.content) ? model.content : null;
+  const { ui } = useStores();
+  const containerContext = useContainerContext();
 
   // Get allowed permissions from unit configuration (more secure than per-tile storage)
   const allowedPermissions = useSettingFromStores("allowedPermissions", "iframeInteractive") as string
@@ -158,6 +163,25 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Detect clicks inside the iframe by watching for window blur events.
+  // When a user clicks inside an iframe, the iframe gains focus and the main
+  // window blurs. We check if our iframe is the newly focused element.
+  useEffect(() => {
+    const handleWindowBlur = () => {
+      // setTimeout(0) ensures document.activeElement is updated before we check it
+      setTimeout(() => {
+        if (document.activeElement === iframeRef.current) {
+          userSelectTile(ui, model, { readOnly, container: containerContext.model });
+        }
+      }, 0);
+    };
+
+    window.addEventListener("blur", handleWindowBlur);
+    return () => {
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [ui, model, readOnly, containerContext.model]);
 
   const handleSkipToContent = useCallback((e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -471,7 +495,10 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
   // Show a placeholder if no URL is configured
   if (!content.url) {
     return (
-      <div className="tile-content iframe-interactive-wrapper">
+      <div className={classNames("tile-content", "iframe-interactive-wrapper", {
+        hovered: props.hovered,
+        selected: ui.isSelectedTile(model)
+      })}>
         <BasicEditableTileTitle />
         <div className="iframe-interactive-placeholder">
           <p>No URL configured in authoring</p>
@@ -489,7 +516,10 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
   };
 
   return (
-    <div className="tile-content iframe-interactive-wrapper" ref={containerRef}>
+    <div className={classNames("tile-content", "iframe-interactive-wrapper", {
+      hovered: props.hovered,
+      selected: ui.isSelectedTile(model)
+    })} ref={containerRef}>
       <BasicEditableTileTitle />
       {/* Skip to content link for keyboard navigation */}
       <a

@@ -1,14 +1,16 @@
-import { inject, observer } from "mobx-react";
-import React from "react";
-import { BaseComponent, IBaseProps } from "./base";
+import { observer } from "mobx-react";
+import React, { useEffect, useRef, useState } from "react";
+import { useRovingTabindex } from "../hooks/use-roving-tabindex";
 import { DocumentModelType } from "../models/document/document";
 import { IToolbarModel } from "../models/stores/problem-configuration";
 import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-content-info";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content-types";
 import { DeleteButton } from "./delete-button";
+import { ReadAloudButton } from "./toolbar/read-aloud-button";
+import { useAriaLabels } from "../hooks/use-aria-labels";
+import { useStores } from "../hooks/use-stores";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
-import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
 import { SectionModelType } from "../models/curriculum/section";
 import { IDropTileItem } from "../models/tiles/tile-model";
@@ -28,188 +30,118 @@ export type OnToolClickedHandler = (tool: IToolbarButtonModel) => boolean|void;
 // This toolbar works with both the document and section models.
 // Since many of the tools are shared between the two, each model is
 // passed as an optional prop instead of using two separate components.
-interface IProps extends IBaseProps {
+interface IProps {
+  ariaLabel?: string;
   document?: DocumentModelType;
   section?: SectionModelType;
+  pane?: "left" | "right";
   toolbarModel: IToolbarModel;
   disabledToolIds?: string[];
-  defaultSectionId?: string;
   onToolClicked?: OnToolClickedHandler;
 }
 
-interface IState {
-  defaultTool?: IToolbarButtonModel;
-  activeTool?: IToolbarButtonModel;
-}
+export const ToolbarComponent = observer(function ToolbarComponent(props: IProps) {
+  const { ariaLabel, document, section, pane: _pane, toolbarModel, disabledToolIds, onToolClicked } = props;
+  const pane = _pane ?? (section ? "left" : "right");
+  const stores = useStores();
+  const ariaLabels = useAriaLabels();
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const { handleKeyDown: handleToolbarKeyDown } = useRovingTabindex(toolbarRef);
 
-@inject("stores")
-@observer
-export class ToolbarComponent extends BaseComponent<IProps, IState> {
+  const [defaultTool, setDefaultTool] = useState<IToolbarButtonModel | undefined>();
+  const [activeTool, setActiveTool] = useState<IToolbarButtonModel | undefined>();
+  const showDeleteTilesConfirmationAlertRef = useRef<(() => void) | undefined>();
 
-  static contextType = EditableTileApiInterfaceRefContext;
-  declare context: React.ContextType<typeof EditableTileApiInterfaceRefContext>;
-
-  private showDeleteTilesConfirmationAlert?: () => void;
-
-  state: IState = {};
-
-  public componentDidMount() {
-    const defaultTool = this.props.toolbarModel.find(item => item.isDefault);
-    if (defaultTool) {
-      this.setState({ defaultTool, activeTool: defaultTool });
+  useEffect(() => {
+    const tool = toolbarModel.find(item => item.isDefault);
+    if (tool) {
+      setDefaultTool(tool);
+      setActiveTool(tool);
     }
-  }
+  }, [toolbarModel]);
 
-  public render() {
-    const handleClickTool = (e: React.MouseEvent<HTMLDivElement>, tool: IToolbarButtonModel) => {
-      // this allows the parent component to handle the click event
-      // if it returns true, the default action is prevented
-      if (this.props.onToolClicked?.(tool)) {
-        return;
-      }
+  const getUniqueTitle = (tileContentInfo: ITileContentInfo) => {
+    const { type } = tileContentInfo;
+    return document?.getUniqueTitleForType(type);
+  };
 
-      switch (tool.id) {
-        case "select":
-          this.handleSelect();
-          break;
-        case "undo":
-          this.handleUndo();
-          break;
-        case "redo":
-          this.handleRedo();
-          break;
-        case "delete":
-          this.handleDelete();
-          break;
-        case "duplicate":
-          this.handleDuplicate();
-          break;
-        case "solution":
-          this.handleToggleSelectedTilesSolution();
-          break;
-        case "edit":
-          this.handleEdit();
-          break;
-        case "selectAll":
-          this.handleSelectAll();
-          break;
-        case "togglePlayback":
-          this.handleTogglePlayback();
-          break;
-        case "copyToWorkspace":
-          this.handleCopyToWorkspace();
-          break;
-        case "copyToDocument":
-          this.handleCopyToDocument();
-          break;
-        case "historyView":
-          this.handleToggleHistoryView();
-          break;
-        default:
-          this.handleAddTile(tool);
-          break;
-      }
-    };
-    const handleSetActiveTool = (tool: IToolbarButtonModel, isActive: boolean) => {
-      const { defaultTool } = this.state;
-      this.setState({ activeTool: isActive && (tool !== defaultTool) ? tool : defaultTool });
-    };
-    const handleDragTool = (e: React.DragEvent<HTMLDivElement>, tool: IToolbarButtonModel) => {
-      this.handleDragNewTile(tool, e);
-    };
-    const updateToolButton = (toolButton: IToolbarButtonModel) => {
-      // Currently no-op; no buttons need updates.
-    };
-    const renderToolButtons = (buttons: IToolbarModel) => {
-      return buttons.map(toolButton => {
-        if (ignoredButtons.includes(toolButton.id)) return null;
-        updateToolButton(toolButton);
-        const buttonProps: IToolbarButtonProps = {
-          toolButton,
-          isActive: this.isButtonActive(toolButton),
-          isDisabled: this.isButtonDisabled(toolButton),
-          isPrimary: this.isButtonPrimary(toolButton),
-          height: toolButton.height,
-          onSetToolActive: handleSetActiveTool,
-          onClick: handleClickTool,
-          onDragStart: handleDragTool,
-          onShowDropHighlight: this.getShowDropRowHighlight(toolButton),
-          onHideDropHighlight: this.removeDropRowHighlight
-        };
-        toolButton.initialize();
-        return toolButton.id !== "delete"
-                ? <ToolbarButtonComponent key={toolButton.id} {...buttonProps} />
-                : <DeleteButton key={toolButton.id}
-                                onSetShowDeleteTilesConfirmationAlert={this.setShowDeleteTilesConfirmationAlert}
-                                onDeleteSelectedTiles={this.handleDeleteSelectedTiles}
-                                {...buttonProps} />;
-      });
-    };
-    const upperButtons = this.props.toolbarModel.filter(button => !button.isBottom) as IToolbarModel;
-    const lowerButtons = this.props.toolbarModel.filter(button => button.isBottom) as IToolbarModel;
-    return (
-      <div className="toolbar" data-testid="toolbar">
-        <div className="toolbar-upper">
-          {renderToolButtons(upperButtons)}
-        </div>
-        <div className="toolbar-lower">
-          {renderToolButtons(lowerButtons)}
-        </div>
-      </div>
-    );
-  }
+  const removeDropRowHighlight = () => {
+    document?.content?.showPendingInsertHighlight(false);
+  };
 
-  private getShowDropRowHighlight(toolButton: IToolbarButtonModel) {
-    return ["duplicate"].includes(toolButton.id)
-      ? this.showDropRowHighlightAfterSelectedTiles
-      : this.showDefaultDropRowHighlight;
-  }
-
-  private showDefaultDropRowHighlight = () => {
-    const { document } = this.props;
+  const showDefaultDropRowHighlight = () => {
     document?.content?.showPendingInsertHighlight(true);
   };
 
-  private showDropRowHighlightAfterSelectedTiles = () => {
-    const { document } = this.props;
+  const showDropRowHighlightAfterSelectedTiles = () => {
     if (!document?.content) return;
-    const { ui: { selectedTileIds } } = this.stores;
+    const { ui: { selectedTileIds } } = stores;
     const tilePositions = document.content.getTilePositions(Array.from(selectedTileIds)) || [];
     const rowId = document.content.getLastRowForTiles(tilePositions);
     document.content.showPendingInsertHighlight(true, rowId);
   };
 
-  private removeDropRowHighlight = () => {
-    const { document } = this.props;
-    document?.content?.showPendingInsertHighlight(false);
+  const getShowDropRowHighlight = (toolButton: IToolbarButtonModel) => {
+    return ["duplicate"].includes(toolButton.id)
+      ? showDropRowHighlightAfterSelectedTiles
+      : showDefaultDropRowHighlight;
   };
 
-  private getUniqueTitle(tileContentInfo: ITileContentInfo) {
-    const { document } = this.props;
-    const { type } = tileContentInfo;
-    return document?.getUniqueTitleForType(type);
-  }
+  const getSelectedTileIdsInDocument = () => {
+    const { ui: { selectedTileIds } } = stores;
+    const content = document?.content ?? section?.content;
+    return selectedTileIds.reduce((acc, tileId) => {
+      if (content?.getTile(tileId)) {
+        acc.push(tileId);
+      }
+      return acc;
+    }, [] as string[]);
+  };
 
-  private isButtonActive(toolButton: IToolbarButtonModel) {
-    if (toolButton.id === "solution") {
-      return this.selectedTilesIncludeTeacher();
-    } else {
-      return toolButton === this.state.activeTool;
+  const selectedTilesIncludeTeacher = () => {
+    const { ui } = stores;
+    const documentContent = document?.content;
+    if (documentContent) {
+      return ui.selectedTileIds.some(tileId => {
+        const tile = documentContent.getTile(tileId);
+        return tile?.display === "teacher";
+      });
     }
-  }
+    return false;
+  };
 
-  private isButtonPrimary(toolButton: IToolbarButtonModel) {
+  const logDocumentOrSectionEvent = (
+    event: LogEventName, otherParams: Record<string, any> = {}, targetDocument?: DocumentModelType
+  ) => {
+    const eventProps: IToolbarEventProps = { document, section, targetDocument };
+    logToolbarEvent(event, eventProps, otherParams);
+  };
+
+  const selectCopiedTiles = (copiedTiles: IDropTileItem[]) => {
+    const { ui } = stores;
+    const copiedTileIds = copiedTiles.map(tile => tile.newTileId);
+    ui.selectAllTiles(copiedTileIds);
+  };
+
+  const isButtonActive = (toolButton: IToolbarButtonModel) => {
+    if (toolButton.id === "solution") {
+      return selectedTilesIncludeTeacher();
+    } else {
+      return toolButton === activeTool;
+    }
+  };
+
+  const isButtonPrimary = (toolButton: IToolbarButtonModel) => {
     return !!toolButton.isPrimary;
-  }
+  };
 
-  private isButtonDisabled(toolButton: IToolbarButtonModel) {
-    const { document } = this.props;
+  const isButtonDisabled = (toolButton: IToolbarButtonModel) => {
     const {
       appConfig: { settings },
       persistentUI: {problemWorkspace: { primaryDocumentKey } }
-    } = this.stores;
+    } = stores;
 
-    const selectedTileIds = this.getSelectedTileIdsInDocument();
+    const selectedTileIds = getSelectedTileIdsInDocument();
 
     const undoManager = document?.treeManagerAPI?.undoManager;
     if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
@@ -231,34 +163,79 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       // If a limit on the number of tiles of a certain type has been specified in settings,
       // disable the related tile button when that limit is reached.
       const tilesOfTypeCount = document?.content?.getTilesOfType(toolButton.id).length || 0;
-      const tileSettings = settings[toolButton.id.toLowerCase()] as Record<string, any>;
+      // "Diagram" → "diagram", "IframeInteractive" → "iframeinteractive"
+      const lowerCaseId = toolButton.id.toLowerCase();
+      // "IframeInteractive" → "iframeInteractive" (works for multi-word types where settings use camelCase keys)
+      const camelCaseId = toolButton.id.charAt(0).toLowerCase() + toolButton.id.slice(1);
+      const tileSettings = (settings[lowerCaseId] || settings[camelCaseId]) as Record<string, any>;
       const maxTilesOfType = tileSettings ? tileSettings.maxTiles : undefined;
       if (maxTilesOfType && tilesOfTypeCount >= maxTilesOfType) return true;
     }
 
-    if (this.props.disabledToolIds?.includes(toolButton.id)) {
+    if (disabledToolIds?.includes(toolButton.id)) {
       return true;
     }
 
     return false;
-  }
-
-  private getSelectedTileIdsInDocument = () => {
-    const { document, section } = this.props;
-    const { ui: { selectedTileIds } } = this.stores;
-
-    const content = document?.content ?? section?.content;
-    return selectedTileIds.reduce((acc, tileId) => {
-      if (content?.getTile(tileId)) {
-        acc.push(tileId);
-      }
-      return acc;
-    }, [] as string[]);
   };
 
-  private handleAddTile(tool: IToolbarButtonModel) {
-    const { document } = this.props;
-    const { ui } = this.stores;
+  const handleSelect = () => {
+    stores.ui.setAnnotationMode();
+  };
+
+  const handleUndo = () => {
+    document?.undoLastAction();
+  };
+
+  const handleRedo = () => {
+    document?.redoLastAction();
+  };
+
+  const handleDelete = () => {
+    showDeleteTilesConfirmationAlertRef.current?.();
+    setActiveTool(defaultTool);
+  };
+
+  const handleDuplicate = () => {
+    const { ui } = stores;
+    const selectedTileIds = ui.selectedTileIds;
+    if (!document?.content) return;
+
+    // Sort the selected tile ids in top->bottom, left->right order so they duplicate in the correct formation
+    const tilePositions = document.content.getTilePositions(Array.from(selectedTileIds)) || [];
+    const selectedDragTileItems = document.content.getDragTileItems(tilePositions.map(info => info.tileId)) || [];
+    const dragTileItems = document.content.addEmbeddedTilesToDragTiles(selectedDragTileItems);
+
+    document.content.duplicateTiles(dragTileItems);
+    ui.clearSelectedTiles();
+    removeDropRowHighlight();
+  };
+
+  const setShowDeleteTilesConfirmationAlert = (showAlert: () => void) => {
+    showDeleteTilesConfirmationAlertRef.current = showAlert;
+  };
+
+  const handleDeleteSelectedTiles = () => {
+    const { ui } = stores;
+    ui.selectedTileIds.forEach(tileId => {
+      ui.removeTileIdFromSelection(tileId);
+      document?.deleteTile(tileId);
+    });
+  };
+
+  const handleToggleSelectedTilesSolution = () => {
+    const { ui } = stores;
+    const documentContent = document?.content;
+    if (documentContent) {
+      const display = selectedTilesIncludeTeacher() ? undefined : "teacher";
+      ui.selectedTileIds.forEach(tileId => {
+        documentContent.getTile(tileId)?.setDisplay(display);
+      });
+    }
+  };
+
+  const handleAddTile = (tool: IToolbarButtonModel) => {
+    const { ui } = stores;
     const tileContentInfo = getTileContentInfo(tool.id);
     if (!tileContentInfo) return;
 
@@ -278,125 +255,28 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const rowTile = document?.addTile(tool.id, newTileOptions);
     if (document && rowTile && rowTile.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
-      this.setState(state => ({ activeTool: state.defaultTool }));
+      setActiveTool(defaultTool);
       // Scroll to the new tile once it has been added to the correct location
       // We need to use a timeout because tiles are added in one spot, then moved elsewhere
       // TODO When tiles are created in the right place, the timeout here should be removed
       setTimeout(() => ui.setScrollTo(rowTile.tileId, document.key));
     }
-  }
-
-  private handleSelect() {
-    this.stores.ui.setAnnotationMode();
-  }
-
-  private handleUndo() {
-    this.props.document?.undoLastAction();
-  }
-
-  private handleRedo() {
-    this.props.document?.redoLastAction();
-  }
-
-  private handleDelete() {
-    this.showDeleteTilesConfirmationAlert?.();
-    this.setState(state => ({ activeTool: state.defaultTool }));
-  }
-
-  private handleDuplicate() {
-    const { document } = this.props;
-    const { ui } = this.stores;
-    const selectedTileIds = ui.selectedTileIds;
-    if (!document?.content) return;
-
-    // Sort the selected tile ids in top->bottom, left->right order so they duplicate in the correct formation
-    const tilePositions = document.content.getTilePositions(Array.from(selectedTileIds)) || [];
-    const selectedDragTileItems = document.content.getDragTileItems(tilePositions.map(info => info.tileId)) || [];
-    const dragTileItems = document.content.addEmbeddedTilesToDragTiles(selectedDragTileItems);
-
-    document.content.duplicateTiles(dragTileItems);
-    ui.clearSelectedTiles();
-    this.removeDropRowHighlight();
-  }
-
-  private setShowDeleteTilesConfirmationAlert = (showAlert: () => void) => {
-    this.showDeleteTilesConfirmationAlert = showAlert;
   };
 
-  private handleDeleteSelectedTiles = () => {
-    const { ui } = this.stores;
-    const { document } = this.props;
-    ui.selectedTileIds.forEach(tileId => {
-      ui.removeTileIdFromSelection(tileId);
-      document?.deleteTile(tileId);
-    });
-  };
-
-  // Returns true if any of the selected tiles have display: "teacher"
-  private selectedTilesIncludeTeacher = () => {
-    const { ui } = this.stores;
-    const { document } = this.props;
-    const documentContent = document?.content;
-    let includesTeacher = false;
-    if (documentContent) {
-      ui.selectedTileIds.forEach(tileId => {
-        const tile = documentContent.getTile(tileId);
-        if (tile?.display === "teacher") {
-          includesTeacher = true;
-        }
-      });
-    }
-    return includesTeacher;
-  };
-
-  private handleToggleSelectedTilesSolution = () => {
-    const { ui } = this.stores;
-    const { document } = this.props;
-    const documentContent = document?.content;
-    if (documentContent) {
-      const display = this.selectedTilesIncludeTeacher() ? undefined : "teacher";
-      ui.selectedTileIds.forEach(tileId => {
-        documentContent.getTile(tileId)?.setDisplay(display);
-      });
-    }
-  };
-
-  private handleDragNewTile = (tool: IToolbarButtonModel, e: React.DragEvent<HTMLDivElement>) => {
-    // remove hover-insert highlight when we start a tile drag
-    this.removeDropRowHighlight();
-
-    const tileContentInfo = getTileContentInfo(tool.id);
-    if (tileContentInfo) {
-      const dragInfo: IDragToolCreateInfo =
-        { toolId: tool.id, title: this.getUniqueTitle(tileContentInfo) };
-      e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
-    }
-  };
-
-  private logDocumentOrSectionEvent = (
-    event: LogEventName, otherParams: Record<string, any> = {}, targetDocument?: DocumentModelType
-  ) => {
-    const { document, section } = this.props;
-    const eventProps: IToolbarEventProps = { document, section, targetDocument };
-    logToolbarEvent(event, eventProps, otherParams);
-  };
-
-  private handleEdit = () => {
-    const { document } = this.props;
+  const handleEdit = () => {
     if (document) {
-      this.stores.persistentUI.problemWorkspace.setPrimaryDocument(document);
-      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_EDIT_TOOL);
+      stores.persistentUI.problemWorkspace.setPrimaryDocument(document);
+      logDocumentOrSectionEvent(LogEventName.TOOLBAR_EDIT_TOOL);
     }
   };
 
-  private handleSelectAll = () => {
-    const { ui, isShowingTeacherContent } = this.stores;
-    const { document, section } = this.props;
+  const handleSelectAll = () => {
+    const { ui, isShowingTeacherContent } = stores;
 
     const content = document?.content ?? section?.content;
     if (content) {
       const allTileIds = content.getAllTileIds(isShowingTeacherContent);
-      const selectedTileIds = this.getSelectedTileIdsInDocument();
+      const selectedTileIds = getSelectedTileIdsInDocument();
 
       // If there are no selected tiles, or the number of selected tiles is not equal to the number of all tiles,
       // then select all tiles. Otherwise, clear the selection.
@@ -407,31 +287,29 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         ui.selectAllTiles([]);
       }
 
-      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_SELECT_ALL_TOOL, {selectAllTiles});
+      logDocumentOrSectionEvent(LogEventName.TOOLBAR_SELECT_ALL_TOOL, {selectAllTiles});
     }
   };
 
-  private handleToggleHistoryView = () => {
-    this.stores.persistentUI.toggleHistoryView();
+  const handleToggleHistoryView = () => {
+    stores.persistentUI.toggleHistoryView();
   };
 
-  private handleTogglePlayback = () => {
-    const { document } = this.props;
+  const handleTogglePlayback = () => {
     if (document) {
       const prevShowPlaybackControls = document.showPlaybackControls;
       logHistoryEvent({documentId: document.key || '',
         action: prevShowPlaybackControls ? "hideControls" : "showControls"});
       document.toggleShowPlaybackControls();
 
-      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_PLAYBACK_TOOL, {
+      logDocumentOrSectionEvent(LogEventName.TOOLBAR_PLAYBACK_TOOL, {
         showPlaybackControls: document.showPlaybackControls
       });
     }
   };
 
-  private handleCopyToWorkspace = () => {
-    const { documents, ui, persistentUI: { problemWorkspace: { primaryDocumentKey } } } = this.stores;
-    const { document, section } = this.props;
+  const handleCopyToWorkspace = () => {
+    const { documents, ui, persistentUI: { problemWorkspace: { primaryDocumentKey } } } = stores;
     const content = document?.content ?? section?.content;
     const primaryDocument = documents.getDocument(primaryDocumentKey ?? "");
 
@@ -440,14 +318,13 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
       const copiedTiles = primaryDocument.content.applyCopySpec(copySpec, true);
 
-      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_WORKSPACE, {}, primaryDocument);
-      this.selectCopiedTiles(copiedTiles);
+      logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_WORKSPACE, {}, primaryDocument);
+      selectCopiedTiles(copiedTiles);
     }
   };
 
-  private handleCopyToDocument = () => {
-    const { ui, documents } = this.stores;
-    const { document, section } = this.props;
+  const handleCopyToDocument = () => {
+    const { ui, documents } = stores;
     const content = document?.content ?? section?.content;
 
     if (content) {
@@ -459,16 +336,141 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
             const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
             const copiedTiles = copyToDocument.content.applyCopySpec(copySpec, true);
 
-            this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_DOCUMENT, {}, copyToDocument);
-            this.selectCopiedTiles(copiedTiles);
+            logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_DOCUMENT, {}, copyToDocument);
+            selectCopiedTiles(copiedTiles);
           }
         });
     }
   };
 
-  private selectCopiedTiles = (copiedTiles: IDropTileItem[]) => {
-    const { ui } = this.stores;
-    const copiedTileIds = copiedTiles.map(tile => tile.newTileId);
-    ui.selectAllTiles(copiedTileIds);
+  const handleDragTool = (e: React.DragEvent<HTMLButtonElement>, tool: IToolbarButtonModel) => {
+    // remove hover-insert highlight when we start a tile drag
+    removeDropRowHighlight();
+
+    const tileContentInfo = getTileContentInfo(tool.id);
+    if (tileContentInfo) {
+      const dragInfo: IDragToolCreateInfo =
+        { toolId: tool.id, title: getUniqueTitle(tileContentInfo) };
+      e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
+    }
   };
-}
+
+  const handleClickTool = (_e: React.MouseEvent<HTMLButtonElement>, tool: IToolbarButtonModel) => {
+    // this allows the parent component to handle the click event
+    // if it returns true, the default action is prevented
+    if (onToolClicked?.(tool)) {
+      return;
+    }
+
+    switch (tool.id) {
+      case "select":
+        handleSelect();
+        break;
+      case "undo":
+        handleUndo();
+        break;
+      case "redo":
+        handleRedo();
+        break;
+      case "delete":
+        handleDelete();
+        break;
+      case "duplicate":
+        handleDuplicate();
+        break;
+      case "solution":
+        handleToggleSelectedTilesSolution();
+        break;
+      case "edit":
+        handleEdit();
+        break;
+      case "selectAll":
+        handleSelectAll();
+        break;
+      case "togglePlayback":
+        handleTogglePlayback();
+        break;
+      case "copyToWorkspace":
+        handleCopyToWorkspace();
+        break;
+      case "copyToDocument":
+        handleCopyToDocument();
+        break;
+      case "historyView":
+        handleToggleHistoryView();
+        break;
+      case "readAloud":
+        // NOTE: this is handled by ReadAloudButton which derives active state from the
+        // read aloud service, hides when unsupported, adds ARIA attributes,
+        // and allows stop-while-disabled.
+        break;
+      default:
+        handleAddTile(tool);
+        break;
+    }
+  };
+
+  const handleSetActiveTool = (tool: IToolbarButtonModel, isActive: boolean) => {
+    setActiveTool(isActive ? tool : defaultTool);
+  };
+
+  const renderToolButtons = (buttons: IToolbarModel) => {
+    return buttons.map(toolButton => {
+      if (ignoredButtons.includes(toolButton.id)) return null;
+      const buttonProps: IToolbarButtonProps = {
+        toolButton,
+        isActive: isButtonActive(toolButton),
+        isDisabled: isButtonDisabled(toolButton),
+        isPrimary: isButtonPrimary(toolButton),
+        height: toolButton.height,
+        onSetToolActive: handleSetActiveTool,
+        onClick: handleClickTool,
+        onDragStart: handleDragTool,
+        onShowDropHighlight: getShowDropRowHighlight(toolButton),
+        onHideDropHighlight: removeDropRowHighlight
+      };
+      toolButton.initialize();
+      switch (toolButton.id) {
+        case "delete":
+          return <DeleteButton key={toolButton.id}
+                               onSetShowDeleteTilesConfirmationAlert={setShowDeleteTilesConfirmationAlert}
+                               onDeleteSelectedTiles={handleDeleteSelectedTiles}
+                               {...buttonProps} />;
+        case "readAloud":
+          // ReadAloudButton uses Firestore comment hooks that require fully initialized
+          // stores. In the doc-editor (authoring) context, Firestore is disabled, so we
+          // skip the ReadAloudButton entirely to avoid crashes.
+          if ((window as any).DISABLE_FIREBASE_SYNC) return null;
+          return <ReadAloudButton key={toolButton.id}
+                                  pane={pane}
+                                  document={document}
+                                  section={section}
+                                  {...buttonProps} />;
+        default:
+          return <ToolbarButtonComponent key={toolButton.id} {...buttonProps} />;
+      }
+    });
+  };
+
+  const upperButtons = toolbarModel.filter(button => !button.isBottom) as IToolbarModel;
+  const lowerButtons = toolbarModel.filter(button => button.isBottom) as IToolbarModel;
+
+  return (
+    <div
+      aria-label={ariaLabel}
+      aria-orientation="vertical"
+      className="toolbar"
+      data-testid="toolbar"
+      onKeyDown={handleToolbarKeyDown}
+      ref={toolbarRef}
+      role="toolbar"
+    >
+      <div className="toolbar-upper" role="group" aria-label={ariaLabels.toolbarUpper}>
+        {renderToolButtons(upperButtons)}
+      </div>
+      <div className="toolbar-lower" role="group" aria-label={ariaLabels.toolbarLower}>
+        {renderToolButtons(lowerButtons)}
+      </div>
+    </div>
+  );
+});

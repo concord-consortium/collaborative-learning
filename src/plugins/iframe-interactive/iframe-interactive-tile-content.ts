@@ -1,13 +1,17 @@
 import { types, Instance } from "mobx-state-tree";
 import { TileContentModel } from "../../models/tiles/tile-content";
+import { IDefaultContentOptions } from "../../models/tiles/tile-content-info";
 import { kIframeInteractiveTileType } from "./iframe-interactive-tile-types";
 import stringify from "json-stringify-pretty-compact";
 
-export function defaultIframeInteractiveContent(): IframeInteractiveContentModelType {
+export function defaultIframeInteractiveContent(options?: IDefaultContentOptions): IframeInteractiveContentModelType {
+  const settings = options?.appConfig?.getSetting("iframeInteractive") as Record<string, any> | undefined;
   return IframeInteractiveContentModel.create({
-    url: "",
-    interactiveState: {},
-    authoredState: {}
+    url: settings?.url ?? "",
+    interactiveState: settings?.interactiveState ?? {},
+    authoredState: settings?.authoredState ?? {},
+    maxHeight: settings?.maxHeight ?? 0,
+    enableScroll: settings?.enableScroll ?? false
   });
 }
 

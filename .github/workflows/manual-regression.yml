@@ -20,7 +20,7 @@ on:
           - cleanup/remove_teacher_comment_spec.js
           - functional/author_tests/doc-editor_spec.js
           - functional/document_tests/canvas_test_spec.js
-          - functional/document_tests/group_chooser_spec.js
+          - functional/document_tests/group_management_modal_spec.js
           - functional/document_tests/group_test_readonly_spec.js
           - functional/document_tests/group_test_spec.js
           - functional/document_tests/header_test_spec.js

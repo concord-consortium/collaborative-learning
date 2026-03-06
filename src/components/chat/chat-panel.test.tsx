@@ -10,6 +10,14 @@ import { AppConfigModel } from "../../models/stores/app-config-model";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 import { UserModelType } from "../../models/stores/user";
 
+jest.mock("../../hooks/use-update-comment-rating", () => ({
+  useUpdateCommentRating: () => jest.fn()
+}));
+
+jest.mock("../../models/tiles/log/log-comment-event", () => ({
+  logCommentEvent: jest.fn()
+}));
+
 const mockPostComment = jest.fn();
 
 const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -104,6 +112,10 @@ jest.mock("../../hooks/use-stores", () => ({
     appConfig: AppConfigModel.create({ config: unitConfigDefaults }),
     class: {
       getUserById: () => ({ id: "0", type: "student", name: "Test Student" } as UserModelType)
+    },
+    persistentUI: {
+      isDocumentsView: false,
+      setIsDocumentsView: jest.fn()
     },
     unit: {
       code: "test-unit",

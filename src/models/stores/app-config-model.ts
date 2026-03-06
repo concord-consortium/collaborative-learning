@@ -1,6 +1,7 @@
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
 import { SectionModelType } from "../curriculum/section";
 import { ToolbarButtonModel } from "../tiles/toolbar-button";
+import { setTermOverrides } from "../../utilities/translation/translate";
 import { ConfigurationManager, mergeDisabledFeatures } from "./configuration-manager";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { ToolbarModel } from "./problem-configuration";
@@ -36,6 +37,12 @@ export const AppConfigModel = types
     requireSortWorkTab: false
   }))
   .actions(self => ({
+    afterCreate() {
+      // Initialize module-level overrides from base config (if config exists)
+      if (self.config) {
+        setTermOverrides(self.configMgr.termOverrides);
+      }
+    },
     setConfigs(configs: Partial<UnitConfiguration>[]) {
       self.configMgr = new ConfigurationManager(self.config, configs);
       self.navTabs = NavTabsConfigModel.create(self.configMgr.navTabs);
@@ -46,6 +53,7 @@ export const AppConfigModel = types
       self.authorTools = ToolbarModel.create(self.configMgr.authorTools);
       self.toolbar = ToolbarModel.create(self.configMgr.toolbar);
       self.settings = self.configMgr.settings;
+      setTermOverrides(self.configMgr.termOverrides);
     },
     setRequireSortWorkTab(requireSortWorkTab: boolean) {
       self.requireSortWorkTab = requireSortWorkTab;
@@ -72,7 +80,6 @@ export const AppConfigModel = types
     get autoSectionProblemDocuments() { return self.configMgr.autoSectionProblemDocuments; },
     get showCommentTag() { return self.configMgr.showCommentTag; },
     get commentTags() { return self.configMgr.commentTags; },
-    get tagPrompt() { return self.configMgr.tagPrompt; },
     get aiEvaluation() { return self.configMgr.aiEvaluation; },
     get aiPrompt() { return self.configMgr.aiPrompt; },
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },
@@ -95,6 +102,8 @@ export const AppConfigModel = types
     get showIdeasButton() { return self.configMgr.showIdeasButton; },
     get groupDocumentsEnabled() { return self.configMgr.groupDocumentsEnabled; },
     get hide4up() { return self.configMgr.hide4up; },
+    get sortWorkConfig() { return self.configMgr.sortWorkConfig; },
+    get termOverrides() { return self.configMgr.termOverrides; },
     get authorToolbar() {
       return ToolbarModel.create([
         ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),

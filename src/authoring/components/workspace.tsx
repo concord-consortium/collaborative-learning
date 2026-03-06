@@ -10,6 +10,8 @@ import CurriculumTabs from "./workspace/curriculum-tabs";
 import { useCurriculum } from "../hooks/use-curriculum";
 import NavTabs from "./workspace/nav-tabs";
 import AISettings from "./workspace/ai-settings";
+import SortWorkSettings from "./workspace/sort-work-settings";
+import { TermOverridesSettings } from "./workspace/term-overrides-settings";
 import ExemplarMetadata from "./editors/exemplar-metadata";
 import { ContainerConfig } from "./workspace/container-config/container-config";
 
@@ -140,6 +142,10 @@ const Workspace: React.FC = () => {
         return <NavTabs />;
       case "config/aiSettings":
         return <AISettings />;
+      case "config/sortWorkSettings":
+        return <SortWorkSettings />;
+      case "config/termOverrides":
+        return <TermOverridesSettings />;
       default:
         return <div className="centered muted">Not yet implemented.</div>;
     }

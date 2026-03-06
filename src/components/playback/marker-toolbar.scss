@@ -16,7 +16,7 @@
     border-color: $workspace-teal;
   }
   &.class-work {
-    border-color: $classwork-purple;
+    border-color: $workspace-teal;
   }
   &.sort-work, &.student-work {
     border-color: $charcoal;
@@ -47,22 +47,22 @@
       }
     }
     &.class-work {
-      background-color: $classwork-purple-light-9;
+      background-color: $workspace-teal-light-6;
       &:hover {
-        background-color: $classwork-purple-light-6;
+        background-color: $workspace-teal-light-5;
       }
       &:active {
-        background-color: $classwork-purple-light-4;
+        background-color: $workspace-teal-light-3;
       }
       &.selected {
-        background-color: $classwork-purple-light-4;
+        background-color: $workspace-teal-light-3;
       }
       path:first-of-type {
-        stroke: $classwork-purple-dark-1;
-        fill: $classwork-purple-light-4;
+        stroke: $workspace-teal-dark-1;
+        fill: $workspace-teal-light-3;
       }
       path:last-of-type {
-        fill: $classwork-purple-dark-1;
+        fill: $workspace-teal-dark-1;
       }
     }
     &.sort-work, &.student-work {
@@ -124,15 +124,15 @@
       }
     }
     &.class-work {
-      background-color: $classwork-purple-light-9;
+      background-color: $workspace-teal-light-6;
       &:hover {
-        background-color: $classwork-purple-light-6;
+        background-color: $workspace-teal-light-5;
       }
       &:active {
-        background-color: $classwork-purple-light-4;
+        background-color: $workspace-teal-light-3;
       }
       path {
-        fill: $classwork-purple-dark-1;
+        fill: $workspace-teal-dark-1;
       }
     }
     &.sort-work, &.student-work {

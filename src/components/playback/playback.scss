@@ -32,8 +32,11 @@
   &.my-work {
     border-color: $workspace-teal;
   }
-  &.class-work, &.sort-work {
-    border-color: $classwork-purple
+  &.class-work {
+    border-color: $workspace-teal;
+  }
+  &.sort-work {
+    border-color: $classwork-purple;
   }
   &.student-work {
     border-color: $charcoal;
@@ -49,7 +52,7 @@
     background-color: $workspace-teal-light-8;
   }
   &.class-work {
-    background-color: $classwork-purple-light-8;
+    background-color: $workspace-teal-light-5;
   }
   &.sort-work, &.student-work {
     background-color: $charcoal-light-8;
@@ -81,7 +84,17 @@
           background-color: $workspace-teal-light-2
         }
       }
-      &.class-work, &.sort-work {
+      &.class-work {
+        border-color: $workspace-teal;
+        background-color: $workspace-teal-light-4;
+        &:hover {
+          background-color: $workspace-teal-light-3;
+        }
+        &:active {
+          background-color: $workspace-teal-light-2;
+        }
+      }
+      &.sort-work {
         border-color: $classwork-purple;
         background-color: $classwork-purple-light-5;
         &:hover {
@@ -128,7 +141,16 @@
             background-color: $workspace-teal-light-2
           }
         }
-        &.class-work, &.sort-work {
+        &.class-work {
+          background-color: $workspace-teal-light-3;
+          &:hover {
+            background-color: $workspace-teal-light-4;
+          }
+          &:active {
+            background-color: $workspace-teal-light-2;
+          }
+        }
+        &.sort-work {
           background-color: $classwork-purple-light-4;
           &:hover {
             background-color: $classwork-purple-light-5;

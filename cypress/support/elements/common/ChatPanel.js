@@ -11,8 +11,8 @@ class ChatPanel{
       return cy.get('.chat-panel-toggle');
     }
     openChatPanel() {
-      cy.get('.resource-and-chat-panel .top-row').then(topRow => {
-        if(topRow.find(".chat-panel-toggle").length > 0) {
+      cy.get('.resource-and-chat-panel .nav-tab-panel').then(panel => {
+        if(panel.find(".chat-panel-toggle").length > 0) {
           this.getChatPanelToggle().click();
           cy.wait(10000);
         }
@@ -79,19 +79,19 @@ class ChatPanel{
       return cy.get('.problem-panel [data-testid=document-content]');
     }
     getEditableDocumentContent() {
-      return cy.get('.documents-panel .editable-document-content');
+      return cy.get('.sub-tab-panel .editable-document-content');
     }
     getToolTile(tileIndex = 0) {
       return cy.get('[data-testid=tool-tile]').eq(tileIndex);
     }
     typeInCommentArea(commentText) {
       // If the comment list is long, the text box is off screen so force.
-      cy.get("[data-testid=comment-textarea]").scrollIntoView().type(commentText, {force: true});
+      cy.get(".chat-thread-focused [data-testid=comment-textarea]").scrollIntoView().type(commentText, {force: true});
       cy.wait(2000);
     }
     clickPostCommentButton() {
       // If the comment list is long, the button is off screen so force.
-      cy.get("[data-testid=comment-post-button]").scrollIntoView().click({force: true});
+      cy.get(".chat-thread-focused [data-testid=comment-post-button]").scrollIntoView().click({force: true});
       cy.wait(5000);
     }
     useEnterToPostComment() {
@@ -138,7 +138,8 @@ class ChatPanel{
       this.getFocusedThread().should("contain", commentText);
     }
     verifyCommentThreadDoesNotContain(commentText) {
-      this.getChatPanel().should("not.contain", commentText);
+      // With multiple threads expanded, check only the focused thread
+      this.getFocusedThread().should("not.contain", commentText);
     }
     verifyCommentThreadDoesNotExist() {
       this.getFocusedThread().should("not.exist");
@@ -236,6 +237,63 @@ class ChatPanel{
           }
         })
       );
+    }
+
+    // Rating buttons (on every comment)
+    getRatingButtons() {
+      return cy.get('[data-testid=comment-rating-buttons]');
+    }
+    getRatingButtonsForComment(commentText) {
+      return this.getCommentFromFocusedThread(commentText).parent().find('[data-testid=comment-rating-buttons]');
+    }
+    getRatingYesButton() {
+      return cy.get('[data-testid=rating-yes-button]');
+    }
+    getRatingNoButton() {
+      return cy.get('[data-testid=rating-no-button]');
+    }
+    getRatingNotSureButton() {
+      return cy.get('[data-testid=rating-not-sure-button]');
+    }
+    getRatingYesCount() {
+      return cy.get('[data-testid=rating-yes-count]');
+    }
+    getRatingNoCount() {
+      return cy.get('[data-testid=rating-no-count]');
+    }
+    getRatingNotSureCount() {
+      return cy.get('[data-testid=rating-not-sure-count]');
+    }
+    clickRatingButton(commentText, buttonTestId) {
+      this.getCommentFromFocusedThread(commentText).parent()
+        .find(`[data-testid=${buttonTestId}]`).click();
+    }
+    clickRatingYes(commentText) {
+      this.clickRatingButton(commentText, 'rating-yes-button');
+    }
+    clickRatingNo(commentText) {
+      this.clickRatingButton(commentText, 'rating-no-button');
+    }
+    clickRatingNotSure(commentText) {
+      this.clickRatingButton(commentText, 'rating-not-sure-button');
+    }
+    verifyRatingButtonSelected(commentText, buttonTestId) {
+      this.getCommentFromFocusedThread(commentText).parent()
+        .find(`[data-testid=${buttonTestId}]`).should('have.class', 'selected');
+    }
+    verifyRatingButtonNotSelected(commentText, buttonTestId) {
+      this.getCommentFromFocusedThread(commentText).parent()
+        .find(`[data-testid=${buttonTestId}]`).should('not.have.class', 'selected');
+    }
+    verifyRatingCount(commentText, buttonTestId, expectedCount) {
+      const countTestId = buttonTestId.replace('-button', '-count');
+      this.getCommentFromFocusedThread(commentText).parent()
+        .find(`[data-testid=${countTestId}]`).should('contain.text', `(${expectedCount})`);
+    }
+    verifyRatingCountNotVisible(commentText, buttonTestId) {
+      const countTestId = buttonTestId.replace('-button', '-count');
+      this.getCommentFromFocusedThread(commentText).parent()
+        .find(`[data-testid=${countTestId}]`).should('not.exist');
     }
 }
 export default ChatPanel;

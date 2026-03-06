@@ -7,7 +7,7 @@ import { BaseComponent, IBaseProps } from "./base";
 import { urlParams } from "../utilities/url-params";
 import { DemoCreatorComponent } from "./demo/demo-creator";
 
-import { GroupChooserComponent } from "./group/group-chooser";
+import { GroupManagementModal } from "./group/group-management-modal";
 import { IStores } from "../models/stores/stores";
 import ErrorAlert from "./utilities/error-alert";
 import { getCurrentLoadingMessage, removeLoadingMessage, showLoadingMessage } from "../utilities/loading-utils";
@@ -224,7 +224,17 @@ export class AppComponent extends BaseComponent<IProps> {
           db.joinGroup(user.id);
         }
         else {
-          return this.renderApp(<GroupChooserComponent />);
+          return this.renderApp(
+            <GroupManagementModal
+              allowCancel={false}
+              isOpen={true}
+              mode="student"
+              onClose={() => {
+                // No-op: modal closes automatically after successful save.
+                // Cancel is disabled for first-time join.
+              }}
+            />
+          );
         }
       }
     }

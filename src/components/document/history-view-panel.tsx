@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Instance } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { HistoryEntryItem } from "./history-entry-item";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
-import { TreeManager } from "../../models/history/tree-manager";
+import { TreeManagerType } from "../../models/history/tree-manager";
 import { HistoryEntry, HistoryEntryType } from "../../models/history/history";
 import {
   getHistoryPath, loadHistory, IFirestoreHistoryEntryDoc
@@ -23,16 +22,22 @@ interface HistoryEntryWithMeta {
   entry: HistoryEntryType;
 }
 
-export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(({
+interface HistoryEntryWithMeta {
+  index: number;
+  previousEntryId?: string;
+  entry: HistoryEntryType;
+}
+
+export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(function HistoryViewPanel({
   document
-}) => {
+}) {
   const stores = useStores();
   const { persistentUI, db } = stores;
   const [remoteHistoryEntries, setRemoteHistoryEntries] = useState<HistoryEntryWithMeta[]>([]);
   const [remoteHistoryError, setRemoteHistoryError] = useState<string | undefined>();
 
   // Get local history from document by casting to TreeManager instance
-  const treeManager = document.treeManagerAPI as Instance<typeof TreeManager> | undefined;
+  const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
   const localHistoryEntries = treeManager?.document.history || [];
 
   // Check if the history manager is a FirestoreHistoryManagerConcurrent (used for GroupDocuments)

@@ -40,14 +40,19 @@ export const NumericAxisDragRects = observer(
         dilationAnchorCoord: number,
         dragging = false;
 
-      const onDragStart: D3Handler = function() {
+      const isContinuousScale = (scale: any): scale is ScaleContinuousNumeric<number, number> => {
+          return scale && typeof scale.invert === 'function';
+        },
+
+        onDragStart: D3Handler = function() {
           const subAxisLength = layout.getAxisLength(place) / numSubAxes,
             rangeMin = subAxisIndex * subAxisLength,
             rangeMax = (subAxisIndex + 1) * subAxisLength,
             range = isVertical(place) ? [rangeMax, rangeMin] : [rangeMin, rangeMax];
           multiScale = layout.getAxisMultiScale(place);
-          d3Scale = (multiScale?.scale as ScaleContinuousNumeric<number, number>).copy()
-            .range(range);
+          const scale = multiScale?.scale;
+          if (!isContinuousScale(scale)) return;
+          d3Scale = scale.copy().range(range);
           d3ScaleAtStart = d3Scale.copy();
           lower = d3ScaleAtStart.domain()[0];
           upper = d3ScaleAtStart.domain()[1];
@@ -60,7 +65,9 @@ export const NumericAxisDragRects = observer(
           select(this)
             .classed('dragging', true);
           multiScale = layout.getAxisMultiScale(place);
-          d3Scale = multiScale?.scale as ScaleContinuousNumeric<number, number>;
+          const scale = multiScale?.scale;
+          if (!isContinuousScale(scale)) return;
+          d3Scale = scale;
           d3ScaleAtStart = d3Scale.copy();
           lower = d3ScaleAtStart.domain()[0];
           upper = d3ScaleAtStart.domain()[1];

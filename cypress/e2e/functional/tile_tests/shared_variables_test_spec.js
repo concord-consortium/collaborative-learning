@@ -95,17 +95,31 @@ context('Shared Variables', function () {
           .should('exist');
 
         cy.log('can change the value of a variable');
-        textToolTile.getTextTile().last().find('.variable-chip').first().click();
+        textToolTile.getTextTile().last().find('.variable-name').first().click();
+        // For some reason this is failing sometimes. The variable is getting unselected at the same
+        // time that the dialog opens. Perhaps it is related to how the variable can be unselected
+        // when the user switches to another window and back again after selecting it.
+        // A second click on the variable doesn't help.
+        // Even pausing after the click and then manually clicking the toolbar button has the same
+        // behavior. So it seems like something in the Cypress click on the variable chip is causing
+        // the issue. When I run the tests in Electron the problem doesn't happen.
+        // To fix this we probably need to try to log when the chip is getting unselected, so we can
+        // try to figure out what event is causing that.
         clueCanvas.clickToolbarButton('text', 'edit-variable');
         cy.get(".custom-modal").should("exist");
+        // We make sure the variable name shows up in the edit dialog, this makes it more obvious
+        // when the problem above happens.
+        dialogField("name").should('have.value', textTileVName2);
         dialogField("value").clear().type(textTileVValue2);
         dialogOkButton().click();
         // Make sure the text tile now has 2 chips with the new variable value.
         textToolTile.getTextTile().last().find(`.variable-chip:contains("${textTileVName2}=${textTileVValue2}")`).should('have.length', 2);
 
         cy.log('verifies restore of variable chip content');
-        canvas.createNewExtraDocumentFromFileMenuWithoutTabs('text tool test', 'my-work');
-        cy.wait(2000);
+        canvas.createNewExtraDocumentFromFileMenu('text tool test', 'my-work', {
+          skipTabClick: true,
+          dialogTitle: 'Create Document'
+        });
         textToolTile.getTextTile().should('not.exist');
         //re-open investigation
         canvas.openDocumentWithTitleWithoutTabs(title);

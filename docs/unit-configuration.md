@@ -87,8 +87,6 @@ These properties are configurable at the application (built into the code) or th
 
 `showCommentTag`: (boolean) must be true for any of the comment-tag functionality to be enabled
 
-`tagPrompt`: (string) prompt shown in the tagging pulldown menu when a comment is being made
-
 `commentTags`: (object) list of possible values for tagging in comments, mapping IDs to human-readable names, eg: `{ "user": "Who is it for?", "environment": "Where is it used?", ... }`
 
 `aiEvaluation`: ("custom" | "categorize-design" | "mock") If set, enable the specified AI evaluation to run after document updates. "custom" allows the prompt to be specified with the `aiPrompt` property; "categorize-design" runs the original MODS unit categorization prompt (for backward compatibility); "mock" does not invoke any AI system but simply returns a fixed string for testing purposes.
@@ -291,6 +289,18 @@ Common toolbar framework; default toolbar buttons:
 - `point-open` - create an open point by clicking on the numberline. `select`, `point`, `point-open` are mutually exclusive
 - `reset` - clear all points from the numberline
 - `delete` - delete selected point(s) from the numberline
+
+#### IframeInteractive
+
+- `maxTiles`: number
+- `url`: string (URL for the embedded interactive)
+- `interactiveState`: object (default interactive state)
+- `authoredState`: object (default authored state for curriculum configuration)
+- `allowedPermissions`: string (iframe permissions policy)
+- `maxHeight`: number (max height in pixels, 0 for unlimited)
+- `enableScroll`: boolean
+
+(no toolbar)
 
 #### Simulation
 

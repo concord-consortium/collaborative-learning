@@ -1,5 +1,7 @@
 import { defaultIframeInteractiveContent, IframeInteractiveContentModel } from "./iframe-interactive-tile-content";
 import { kIframeInteractiveTileType } from "./iframe-interactive-tile-types";
+import { AppConfigModel } from "../../models/stores/app-config-model";
+import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
 describe("IframeInteractiveContent", () => {
   it("has default empty url and states", () => {
@@ -108,5 +110,73 @@ describe("IframeInteractiveContent", () => {
     expect(content.authoredState).toEqual({ version: 1 });
     expect(content.maxHeight).toBe(800);
     expect(content.enableScroll).toBe(false);
+  });
+
+  describe("settings-based default content", () => {
+    it("uses settings from appConfig when provided", () => {
+      const appConfig = AppConfigModel.create({
+        config: {
+          ...unitConfigDefaults,
+          settings: {
+            iframeInteractive: {
+              url: "https://example.com/hurricane-model",
+              interactiveState: { version: 1, savedProgress: true },
+              authoredState: { questionType: "open_response" },
+              maxHeight: 800,
+              enableScroll: true
+            }
+          }
+        }
+      });
+      const content = defaultIframeInteractiveContent({ appConfig });
+      expect(content.url).toBe("https://example.com/hurricane-model");
+      expect(content.interactiveState).toEqual({ version: 1, savedProgress: true });
+      expect(content.authoredState).toEqual({ questionType: "open_response" });
+      expect(content.maxHeight).toBe(800);
+      expect(content.enableScroll).toBe(true);
+    });
+
+    it("falls back to defaults when appConfig has no iframeInteractive settings", () => {
+      const appConfig = AppConfigModel.create({
+        config: {
+          ...unitConfigDefaults,
+          settings: {}
+        }
+      });
+      const content = defaultIframeInteractiveContent({ appConfig });
+      expect(content.url).toBe("");
+      expect(content.interactiveState).toEqual({});
+      expect(content.authoredState).toEqual({});
+      expect(content.maxHeight).toBe(0);
+      expect(content.enableScroll).toBe(false);
+    });
+
+    it("falls back to defaults when no options are provided", () => {
+      const content = defaultIframeInteractiveContent();
+      expect(content.url).toBe("");
+      expect(content.interactiveState).toEqual({});
+      expect(content.authoredState).toEqual({});
+      expect(content.maxHeight).toBe(0);
+      expect(content.enableScroll).toBe(false);
+    });
+
+    it("handles partial settings (only url provided)", () => {
+      const appConfig = AppConfigModel.create({
+        config: {
+          ...unitConfigDefaults,
+          settings: {
+            iframeInteractive: {
+              url: "https://example.com/interactive"
+            }
+          }
+        }
+      });
+      const content = defaultIframeInteractiveContent({ appConfig });
+      expect(content.url).toBe("https://example.com/interactive");
+      expect(content.interactiveState).toEqual({});
+      expect(content.authoredState).toEqual({});
+      expect(content.maxHeight).toBe(0);
+      expect(content.enableScroll).toBe(false);
+    });
   });
 });

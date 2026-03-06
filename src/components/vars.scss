@@ -324,7 +324,10 @@ $id-purple: #ffc1eb;
 $id-green-light: #e4f9e8;
 $id-green-medium: #b8f0c3;
 $id-green: #91e7a2;
+$connected-green: #00fa00;
+$connected-green-dark: #00ad00;
 $new-comment-notice: #5fff32;
+$error-red: #b00020;
 
 $highlight-blue: #0081ff;
 $highlight-blue-20: #0081ff33;
@@ -335,6 +338,7 @@ $highlight-blue-50-35: #c3efff;
 
 $tool-tile-hover-border-color: #82C8D7;
 $tool-tile-readonly-border-color: #828282;
+$tool-tile-background: white;
 
 // Colors for synchronous highlighting of shared datasets
 $highlight-linked-header: #92ecc9;
@@ -401,6 +405,9 @@ $toolbar-divider-width: 1px;
 $toolbar-button-height: 34px;
 $toolbar-height: $toolbar-button-height + 4px;
 
+// Drag handle touch target size (meets WCAG 2.2 Level AAA 44×44px recommendation)
+$drag-handle-hit-size: 48px;
+
 // above .bottom-resize-handle
 $toolbar-z-index: 3;
 
@@ -438,12 +445,25 @@ $six-pack-height: calc(100vh - (#{$header-height} + 20px));
 //
 $document-scroller-header-height: 36px;
 
+//
+// Focus indicators (WCAG 2.2 AA compliant)
+// Double border: outer blue + inner white for visibility on all backgrounds
+//
+$focus-ring-color: #0957D0;
+$focus-ring-inner-color: #FFFFFF;
+$focus-ring-outer-width: 2px;
+$focus-ring-inner-width: 1px;
+
 // Exported for use in TypeScript
 
 :export {
   toolbarButtonWidth: $toolbar-button-width;
   toolbarButtonMargin: $toolbar-button-margin;
   toolbarDividerWidth: $toolbar-divider-width;
+  focusRingColor: $focus-ring-color;
+  focusRingInnerColor: $focus-ring-inner-color;
+  focusRingOuterWidth: $focus-ring-outer-width;
+  focusRingInnerWidth: $focus-ring-inner-width;
 }
 
 // user icons (use in comments and in history playlist)

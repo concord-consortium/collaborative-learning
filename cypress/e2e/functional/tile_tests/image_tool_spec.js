@@ -21,7 +21,6 @@ context('Image Tile', function () {
 
     cy.log('upload image from user computer');
     canvas.createNewExtraDocumentFromFileMenu(userCanvas, "my-work");
-    cy.wait(2000);
 
     cy.log('will upload png file from user computer');
     const imageFilePath1 = 'image.png';
@@ -115,4 +114,3 @@ context('Image Tile', function () {
     imageToolTile.getImageToolTile().should("not.exist");
   });
 });
-

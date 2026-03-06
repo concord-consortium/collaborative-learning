@@ -1,4 +1,4 @@
-import { NormalizedVariable } from "./ai-summarizer-types";
+import { NormalizedAttribute, NormalizedVariable } from "./ai-summarizer-types";
 
 export function heading(level: number, headingText: string): string {
   if (!level) {
@@ -41,5 +41,14 @@ export function generateVariablesMarkdownTable(variables: NormalizedVariable[]) 
     variable.expression || "",
     variable.value !== undefined ? `${variable.value}` : "",
     variable.unit || ""
+  ]));
+}
+
+const attributeHeaders = ["id", "Name", "Formula"];
+export function generateAttributesMarkdownTable(attributes: NormalizedAttribute[]) {
+  return generateMarkdownTable(attributeHeaders, attributes.map(attr => [
+    attr.id || "",
+    attr.name || "",
+    attr.formula || ""
   ]));
 }

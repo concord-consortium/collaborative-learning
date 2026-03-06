@@ -96,13 +96,13 @@ describe('SortWorkView Tests', () => {
     // TODO: Figure out why this test is flaky; it passes locally but fails on CI.
     // sortWork.getSortWorkItemByTitle(exemplarDocs[0]).parents('.list-item').should("not.have.class", "private");
 
-    cy.log("have student 1 leave the group");
-    header.leaveGroup();
+    cy.log("have teacher move student 1 out of the group");
+    visitQaSubtabsUnit({teacher: 1});
+    header.teacherMoveStudentToGroup("1", "no-group");
 
     cy.log("check student:1 problem, exemplar, and personal docs show in No Group");
-    visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
-    cy.wait(1000);
+    cy.get('.section-header-label').should("contain", "No Group");
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentNotInGroup("Group 5", studentProblemDocs[0]);
     sortWork.checkDocumentNotInGroup("Group 5", studentPersonalDocs[0]);
@@ -180,15 +180,12 @@ describe('SortWorkView Tests', () => {
     sortWork.checkDocumentNotInGroup("Group 6", studentProblemDocs[1]);
     sortWork.checkDocumentNotInGroup("Group 6", studentPersonalDocs[1]);
 
-    cy.log("run CLUE as a student:1 and leave the group");
-    visitQaSubtabsUnit({student: 1, group: 6});
-    header.leaveGroup();
+    cy.log("have teacher move student 1 out of Group 6");
+    header.teacherMoveStudentToGroup("1", "no-group");
 
     cy.log("check Group 6 no longer exists in Sort Work");
-    visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
-    cy.wait(500);
-    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
+    cy.get('.section-header-label').should("contain", "No Group");
     sortWork.checkDocumentInGroup("No Group", studentProblemDocs[0]);
     sortWork.checkDocumentInGroup("No Group", studentPersonalDocs[0]);
     sortWork.checkGroupDoesNotExist("Group 6");

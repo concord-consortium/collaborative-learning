@@ -125,7 +125,7 @@ context('Test group functionalities', function () {
     clueCanvas.getFourToOneUpViewToggle().should('be.visible');
     clueCanvas.getSouthWestCanvas().should('contain', 'S18');
     clueCanvas.getSouthWestCanvas().should('be.visible').and('contain', 'Student 18 has not shared their workspace.');
-    header.leaveGroup();
+    header.changeGroup('11');
 
     cy.log('will open a new 4-up canvas with shared canvas from other students updated');
     cy.visit(getUrl(3));

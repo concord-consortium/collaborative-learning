@@ -20,6 +20,9 @@ class SortedWork {
   getPrimarySortByToolsOption(){
     return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-tools"]');
   }
+  getPrimarySortByProblemOption(){
+    return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-problem"]');
+  }
   getSortWorkItem() {
     return cy.get(".sort-work-view .sorted-sections .list-item .footer .info");
   }
@@ -57,20 +60,23 @@ class SortedWork {
   getSecondarySortByToolsOption(){
     return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-tools"]');
   }
+  getSecondarySortByProblemOption(){
+    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-problem"]');
+  }
   getShowForMenu() {
     return cy.get("[data-test=filter-work-menu]");
   }
   getShowForProblemOption() {
-    return cy.get("[data-test=list-item-problem]");
+    return cy.get("[data-test=filter-work-menu] [data-test=list-item-problem]");
   }
   getShowForInvestigationOption() {
-    return cy.get("[data-test=list-item-investigation]");
+    return cy.get("[data-test=filter-work-menu] [data-test=list-item-investigation]");
   }
   getShowForUnitOption() {
-    return cy.get("[data-test=list-item-unit]");
+    return cy.get("[data-test=filter-work-menu] [data-test=list-item-unit]");
   }
   getShowForAllOption() {
-    return cy.get("[data-test=list-item-all]");
+    return cy.get("[data-test=filter-work-menu] [data-test=list-item-all]");
   }
   openSortWorkSection(sectionLabel) {
     return cy.get('.sort-work-view .sorted-sections .section-header-label')

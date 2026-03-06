@@ -1,0 +1,87 @@
+.workspace .config form.term-overrides-settings {
+  h3 {
+    margin-bottom: 8px;
+  }
+
+  p.muted {
+    margin-bottom: 6px;
+  }
+
+  .warnings {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    color: #856404;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+
+    ul {
+      margin: 6px 0 0 20px;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 2px;
+    }
+  }
+
+  .term-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .term-item {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 6px 10px 10px;
+
+    &.has-warning {
+      background-color: #fffef5;
+      border-color: #ffc107;
+    }
+
+    .term-header {
+      align-items: baseline;
+      display: flex;
+      gap: 8px;
+    }
+
+    .term-label {
+      font-weight: bold;
+      font-size: 1em;
+    }
+
+    .term-description {
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    .term-input-row {
+      input[type="text"] {
+        max-width: 250px;
+        width: 100%;
+      }
+    }
+
+    .help-text {
+      color: #666;
+      font-size: 0.85em;
+      font-style: italic;
+      margin-top: 6px;
+      margin-bottom: 0;
+    }
+
+    .warning-text {
+      color: #856404;
+      font-size: 0.9em;
+      font-weight: 500;
+      margin-top: 6px;
+      margin-bottom: 0;
+    }
+  }
+
+  .bottomButtons {
+    margin-top: 16px;
+  }
+}

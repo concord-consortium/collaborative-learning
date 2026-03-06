@@ -75,12 +75,13 @@ export interface IProps {
   document: DocumentModelType;
   showPlayback?: boolean;
   toolbar?: IToolbarModel;
+  pane?: "left" | "right";
   readOnly?: boolean;
   fullHeight?: boolean
   sectionClass?: string;
 }
 export function EditableDocumentContent({
-  className, contained, mode, isPrimary, document, toolbar, readOnly, showPlayback, fullHeight, sectionClass
+  className, contained, mode, isPrimary, document, toolbar, pane, readOnly, showPlayback, fullHeight, sectionClass
 }: IProps) {
   const documentContext = useDocumentContext(document);
   const { db: { firebase, firestore }, ui, persistentUI, user, appConfig } = useStores();
@@ -118,7 +119,8 @@ export function EditableDocumentContent({
       <EditableTileApiInterfaceRefContext.Provider value={editableTileApiInterfaceRef}>
         <div key="editable-document" className={editableDocContentClass}
               data-focus-document={document.key} >
-          {isShowingToolbar && modifiedToolbar && <DocumentToolbar document={document} toolbar={modifiedToolbar} />}
+          {isShowingToolbar && modifiedToolbar &&
+            <DocumentToolbar document={document} toolbar={modifiedToolbar} pane={pane} />}
           {isShowingToolbar && <div className="canvas-separator"/>}
           <DocumentCanvas
             readOnly={isReadOnly}

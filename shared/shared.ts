@@ -234,6 +234,7 @@ export interface IAgreeWithAi {
 }
 
 export type AgreementValue = IAgreeWithAi["value"]
+export type RatingValue = "yes" | "no" | "notSure";
 export interface IClientCommentParams {
   tileId?: string;    // empty for document comments
   content: string;    // plain text for now; potentially html if we need rich text
