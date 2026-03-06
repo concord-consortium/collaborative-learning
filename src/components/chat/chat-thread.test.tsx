@@ -21,7 +21,6 @@ const mockUseDocumentOrCurriculumMetadata = jest.fn((docKeyOrSectionPath: string
 });
 
 const mockSetSelectedTileId = jest.fn();
-const mockSetScrollTo = jest.fn();
 
 jest.mock("../../hooks/use-stores", () => ({
   useDocumentOrCurriculumMetadata:
@@ -31,8 +30,7 @@ jest.mock("../../hooks/use-stores", () => ({
   useUIStore: () => ({
     showChatPanel: true,
     selectedTileIds: [],
-    setSelectedTileId: mockSetSelectedTileId,
-    setScrollTo: mockSetScrollTo
+    setSelectedTileId: mockSetSelectedTileId
   }),
   useStores: () => ({
     appConfig: AppConfigModel.create({ config: unitConfigDefaults }),
@@ -275,12 +273,10 @@ describe("CommentThread", () => {
     ));
 
     mockSetSelectedTileId.mockClear();
-    mockSetScrollTo.mockClear();
 
     // Thread 2 is collapsed, click to expand it
     fireEvent.click(screen.getByText("Thread 2"));
     expect(mockSetSelectedTileId).toHaveBeenCalledWith("tile-xyz");
-    expect(mockSetScrollTo).toHaveBeenCalledWith("tile-xyz", "document-key");
   });
 
   it("collapsing a thread does not update tile selection", () => {
@@ -324,12 +320,10 @@ describe("CommentThread", () => {
     ));
 
     mockSetSelectedTileId.mockClear();
-    mockSetScrollTo.mockClear();
 
     // Click the document thread header (tileId is "" so id becomes "document")
     fireEvent.click(screen.getByText("Doc Thread"));
     expect(mockSetSelectedTileId).toHaveBeenCalledWith("");
-    expect(mockSetScrollTo).toHaveBeenCalledWith("", "document-key");
   });
 
   it("clicking on comment card body selects the tile", () => {
@@ -350,10 +344,8 @@ describe("CommentThread", () => {
 
     // Thread is expanded, click on the comment card
     mockSetSelectedTileId.mockClear();
-    mockSetScrollTo.mockClear();
     fireEvent.click(screen.getByTestId("comment-card"));
     expect(mockSetSelectedTileId).toHaveBeenCalledWith("tile-abc");
-    expect(mockSetScrollTo).toHaveBeenCalledWith("tile-abc", "document-key");
   });
 
   it("shows empty thread with override title when focused tile has no comments", () => {

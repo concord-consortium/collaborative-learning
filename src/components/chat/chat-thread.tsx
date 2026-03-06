@@ -104,7 +104,6 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
       ui.setSelectedTileId('');
     } else {
       ui.setSelectedTileId(threadId);
-      ui.setScrollTo(threadId, focusDocument || '');
     }
   };
 
@@ -243,10 +242,8 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       if (!isCurrentlyExpanded) {
         if (clickedId === "document") {
           ui.setSelectedTileId('');
-          ui.setScrollTo('', focusDocument || '');
         } else {
           ui.setSelectedTileId(clickedId || '');
-          ui.setScrollTo(clickedId || '', focusDocument || '');
         }
       }
 

@@ -248,6 +248,9 @@ export type UIDialogModelType = typeof UIDialogModel.Type;
  */
 function _userSelectTile(ui: UIModelType, model: ITileModel,
       options: { append?: boolean, readOnly?: boolean, container?: ITileModel }) {
+  if (options.readOnly && options.container) {
+    model = options.container;
+  }
   ui.setSelectedTile(model, { append: !!options.append });
 }
 
