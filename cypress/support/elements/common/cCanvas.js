@@ -413,7 +413,7 @@ class ClueCanvas {
     toolbarButtonIsEnabled(tileType, buttonName) {
       return cy.document().within(() => {
         cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
-          .should('not.be.disabled');
+          .should('not.have.attr', 'aria-disabled');
       });
     }
 
@@ -426,7 +426,7 @@ class ClueCanvas {
     toolbarButtonIsDisabled(tileType, buttonName) {
       cy.document().within(() => {
         cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
-          .should('be.disabled');
+          .should('have.attr', 'aria-disabled', 'true');
       });
     }
 
@@ -467,20 +467,20 @@ class ClueCanvas {
         cy.get(`[data-test=canvas] .tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`).as('theButton');
         cy.get('@theButton')
           .should('have.length', 1)
-          .should('not.be.disabled');
+          .should('not.have.attr', 'aria-disabled');
         cy.get('@theButton').click(options);
       });
     }
 
     longClickToolbarButton(tileType, buttonName, options = {}) {
       cy.document().within(() => {
-        cy.get(`[data-test=canvas] .tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+        cy.get(`[data-test=canvas] .tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`).as('theButton');
+        cy.get('@theButton')
           .should('have.length', 1)
-          .should('not.be.disabled')
-          .trigger('mousedown', options);
+          .should('not.have.attr', 'aria-disabled');
+        cy.get('@theButton').trigger('mousedown', options);
         cy.wait(600);
-        cy.get(`[data-test=canvas] .tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
-          .trigger('mouseup', options);
+        cy.get('@theButton').trigger('mouseup', options);
       });
     }
 

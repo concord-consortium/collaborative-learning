@@ -314,7 +314,7 @@ context('Text tool tile functionalities', function () {
 
     cy.log('Verify highlight toolbar button exists and is disabled when no text is selected');
     textToolTile.getHighlightButton().should('exist');
-    textToolTile.getHighlightButton().should('be.disabled');
+    textToolTile.getHighlightButton().should('have.attr', 'aria-disabled', 'true');
 
     cy.log('Select text using keyboard selection');
     textToolTile.getTextEditor().last().click();
@@ -324,7 +324,7 @@ context('Text tool tile functionalities', function () {
     cy.wait(500);
 
     cy.log('Verify highlight toolbar button becomes enabled when text is selected');
-    textToolTile.getHighlightButton().should('not.be.disabled');
+    textToolTile.getHighlightButton().should('not.have.attr', 'aria-disabled');
 
     cy.log('Click highlight toolbar button to create highlight');
     textToolTile.getHighlightButton().click();
@@ -358,7 +358,7 @@ context('Text tool tile functionalities', function () {
     textToolTile.getTextTile().last().should('contain', 'This is a sample text for testing highlight functionality.');
     textToolTile.getTextEditor().last().type('{selectall}');
     cy.wait(500);
-    textToolTile.getHighlightButton().should('not.be.disabled');
+    textToolTile.getHighlightButton().should('not.have.attr', 'aria-disabled');
     textToolTile.getHighlightButton().click();
     textToolTile.getHighlightButton().should('have.class', 'selected');
     textToolTile.getTextEditor().last().find('.highlight-chip').should('exist');
@@ -370,7 +370,7 @@ context('Text tool tile functionalities', function () {
     textToolTile.getTextTile().last().should('contain', 'Add a sparrow.');
     textToolTile.getTextEditor().last().type('{selectall}');
     cy.wait(500);
-    textToolTile.getHighlightButton().should('not.be.disabled');
+    textToolTile.getHighlightButton().should('not.have.attr', 'aria-disabled');
     textToolTile.getHighlightButton().click();
     textToolTile.getHighlightButton().should('have.class', 'selected');
     textToolTile.getTextEditor().last().find('.highlight-chip').should('exist');

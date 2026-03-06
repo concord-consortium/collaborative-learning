@@ -60,12 +60,12 @@
     background-color: $workspace-teal-light-9;
     cursor: pointer;
 
-    &:hover:not(:disabled):not(.selected) {
+    &:hover:not(:disabled):not([aria-disabled="true"]):not(.selected) {
       background-color: $workspace-teal-light-6;
     }
 
-    &:disabled {
-      opacity: 25%;
+    &:disabled, &[aria-disabled="true"] {
+      opacity: 35%;
       cursor: default;
     }
 
