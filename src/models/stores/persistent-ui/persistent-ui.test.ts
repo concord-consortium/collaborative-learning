@@ -1,4 +1,4 @@
-import { applySnapshot, getSnapshot } from "@concord-consortium/mobx-state-tree";
+import { applySnapshot, getSnapshot, unprotect } from "@concord-consortium/mobx-state-tree";
 import {
   PersistentUIModel, PersistentUIModelV1Snapshot, persistentUIModelPreProcessor,
   PersistentUIModelV2Snapshot, PersistentUIModelType
@@ -6,6 +6,7 @@ import {
 import { UITabModel } from "./ui-tab-model";
 import { UIDocumentGroup } from "./ui-document-group";
 import { ENavTab, NavTabModel, NavTabModelType } from "../../../models/view/nav-tabs";
+import { kDividerMin, kDividerMax, kDividerHalf } from "../ui-types";
 
 describe("PersistentUI", () => {
   describe("UIDocumentGroup", () => {
@@ -638,6 +639,40 @@ describe("PersistentUI", () => {
 
 
       expect(ui.version).toBe("2.0.0");
+    });
+  });
+
+  describe("applyDefaultPanelLayout", () => {
+    it("sets divider to kDividerMin for workspace-only when no saved state", () => {
+      const model = PersistentUIModel.create({ problemWorkspace: { type: "problem", mode: "1-up" } });
+      model.applyDefaultPanelLayout("workspace-only");
+      expect(model.dividerPosition).toBe(kDividerMin);
+    });
+
+    it("sets divider to kDividerMax for resources-only when no saved state", () => {
+      const model = PersistentUIModel.create({ problemWorkspace: { type: "problem", mode: "1-up" } });
+      model.applyDefaultPanelLayout("resources-only");
+      expect(model.dividerPosition).toBe(kDividerMax);
+    });
+
+    it("keeps kDividerHalf for split when no saved state", () => {
+      const model = PersistentUIModel.create({ problemWorkspace: { type: "problem", mode: "1-up" } });
+      model.applyDefaultPanelLayout("split");
+      expect(model.dividerPosition).toBe(kDividerHalf);
+    });
+
+    it("keeps kDividerHalf for undefined when no saved state", () => {
+      const model = PersistentUIModel.create({ problemWorkspace: { type: "problem", mode: "1-up" } });
+      model.applyDefaultPanelLayout(undefined);
+      expect(model.dividerPosition).toBe(kDividerHalf);
+    });
+
+    it("does not change divider when saved state exists", () => {
+      const model = PersistentUIModel.create({ problemWorkspace: { type: "problem", mode: "1-up" } });
+      unprotect(model);
+      (model as any).hasSavedPersistentUI = true;
+      model.applyDefaultPanelLayout("workspace-only");
+      expect(model.dividerPosition).toBe(kDividerHalf);
     });
   });
 });
