@@ -9,6 +9,19 @@ import { AppConfigModel } from "../../models/stores/app-config-model";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
 
+const mockUpdateRating = jest.fn().mockResolvedValue(undefined);
+jest.mock("../../hooks/use-update-comment-rating", () => ({
+  useUpdateCommentRating: () => mockUpdateRating
+}));
+
+jest.mock("../../hooks/document-comment-hooks", () => ({
+  useCommentsCollectionPath: () => "documents/doc1/comments"
+}));
+
+jest.mock("../../models/tiles/log/log-comment-event", () => ({
+  logCommentEvent: jest.fn()
+}));
+
 jest.mock("../../hooks/use-stores", () => ({
   useTypeOfTileInDocumentOrCurriculum: () => "Text",
   useUIStore: () => ({
@@ -118,5 +131,78 @@ describe("CommentCard", () => {
     const card = screen.getByTestId("comment-card");
     expect(card).toHaveAttribute("tabindex", "0");
     expect(card).toHaveAttribute("aria-label", "Select associated tile");
+  });
+
+  it("renders rating buttons on every comment", () => {
+    const postedComments: WithId<CommentDocument>[] = [
+      { id: "c1", uid: "1", name: "User1", createdAt: new Date(), content: "hello" },
+      { id: "c2", uid: "2", name: "User2", createdAt: new Date(), content: "world" }
+    ];
+    render((
+      <ModalProvider>
+        <CommentCard user={testUser} postedComments={postedComments} focusDocument="doc1" />
+      </ModalProvider>
+    ));
+    expect(screen.getAllByTestId("comment-rating-buttons")).toHaveLength(2);
+  });
+
+  it("shows rating counts when > 0", () => {
+    const postedComments: WithId<CommentDocument>[] = [
+      {
+        id: "c1", uid: "1", name: "User1", createdAt: new Date(), content: "hello",
+        ratings: { "u1": "yes", "u2": "yes", "u3": "no" }
+      }
+    ];
+    render((
+      <ModalProvider>
+        <CommentCard user={testUser} postedComments={postedComments} focusDocument="doc1" />
+      </ModalProvider>
+    ));
+    expect(screen.getByTestId("rating-yes-count")).toHaveTextContent("(2)");
+    expect(screen.getByTestId("rating-no-count")).toHaveTextContent("(1)");
+    expect(screen.queryByTestId("rating-not-sure-count")).not.toBeInTheDocument();
+  });
+
+  it("shows header with poster name", () => {
+    const postedComments: WithId<CommentDocument>[] = [
+      { id: "c1", uid: "1", name: "Alice", createdAt: new Date(), content: "hello" }
+    ];
+    render((
+      <ModalProvider>
+        <CommentCard user={testUser} postedComments={postedComments} focusDocument="doc1" />
+      </ModalProvider>
+    ));
+    expect(screen.getByText("Do you agree with Alice?")).toBeInTheDocument();
+  });
+
+  it("highlights the active rating for the current user", () => {
+    const currentUser = { id: "u1", name: "Me" } as UserModelType;
+    const postedComments: WithId<CommentDocument>[] = [
+      {
+        id: "c1", uid: "other", name: "Other", createdAt: new Date(), content: "hello",
+        ratings: { "u1": "no" }
+      }
+    ];
+    render((
+      <ModalProvider>
+        <CommentCard user={currentUser} postedComments={postedComments} focusDocument="doc1" />
+      </ModalProvider>
+    ));
+    expect(screen.getByTestId("rating-no-button")).toHaveClass("selected");
+    expect(screen.getByTestId("rating-yes-button")).not.toHaveClass("selected");
+  });
+
+  it("calls updateRating when clicking a rating button", () => {
+    mockUpdateRating.mockClear();
+    const postedComments: WithId<CommentDocument>[] = [
+      { id: "c1", uid: "1", name: "User1", createdAt: new Date(), content: "hello" }
+    ];
+    render((
+      <ModalProvider>
+        <CommentCard user={testUser} postedComments={postedComments} focusDocument="doc1" />
+      </ModalProvider>
+    ));
+    fireEvent.click(screen.getByTestId("rating-yes-button"));
+    expect(mockUpdateRating).toHaveBeenCalledWith("documents/doc1/comments/c1", "yes");
   });
 });

@@ -13,6 +13,8 @@ import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { TileTitleArea } from "../../../components/tiles/tile-title-area";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
+import { ReteManager } from "../nodes/rete-manager";
+import { DataflowReteManagerContext } from "./dataflow-rete-manager-context";
 
 import "../dataflow-toolbar-registration";
 import "./dataflow-tile.scss";
@@ -29,6 +31,7 @@ interface IDataflowTileState {
   playBackIndex: number;
   recordIndex: number; //# of ticks for record
   isEditingTitle: boolean;
+  reteManager: ReteManager | undefined;
 }
 
 @inject("stores")
@@ -43,9 +46,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       isPlaying: false,
       playBackIndex: 0,
       recordIndex: 0,
-      isEditingTitle: false
+      isEditingTitle: false,
+      reteManager: undefined
     };
   }
+
+  private handleReteManagerCreated = (reteManager: ReteManager | undefined) => {
+    this.setState({ reteManager });
+  };
   public render() {
     const { readOnly, height, model, onRegisterTileApi, tileElt } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
@@ -57,7 +65,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const tileContent = this.getContent();
 
     return (
-      <>
+      <DataflowReteManagerContext.Provider value={this.state.reteManager ?? null}>
+        <>
         <TileTitleArea>
           {this.renderTitle()}
         </TileTitleArea>
@@ -76,13 +85,15 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   tileContent={tileContent}
                   tileElt={tileElt}
                   onRegisterTileApi={onRegisterTileApi}
+                  onReteManagerCreated={this.handleReteManagerCreated}
                 />
               );
             }}
           </SizeMe>
           <TileToolbar tileType="dataflow" readOnly={!!readOnly} tileElement={this.props.tileElt} />
         </div>
-      </>
+        </>
+      </DataflowReteManagerContext.Provider>
     );
   }
 

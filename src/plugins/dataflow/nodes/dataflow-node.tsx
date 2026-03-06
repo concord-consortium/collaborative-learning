@@ -71,6 +71,7 @@ export const CustomDataflowNode = observer(
   sortByIndex(controls);
 
   const dynamicClasses = classNames({
+    "selected": data.selected,
     "gate-active": node instanceof ControlNode && node.model.gateActive,
     "has-flow-in": node instanceof ControlNode && node.hasFlowIn(),
     "plot-open": showPlot,

@@ -320,7 +320,8 @@
       "dataflow": {
         "tools": [
           ["data-set-view", "Table"],
-          ["data-set-link", "Graph"]
+          ["data-set-link", "Graph"],
+          "delete"
         ]
       },
       "diagram": {

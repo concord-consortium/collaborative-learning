@@ -124,16 +124,49 @@
       }
     }
 
-    .comment-agree-message {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 5px;
+    .comment-ratings {
+      margin-top: 4px;
 
-      .comment-agree-icon {
+      .comment-ratings-header {
+        font-style: italic;
+        color: $charcoal-dark-1;
+      }
+
+      .comment-ratings-buttons {
         display: flex;
-        align-items: center;
-        justify-content: center;
+        flex-direction: row;
+        gap: 4px;
+        margin-top: 2px;
+
+        .rating-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 2px;
+          padding: 2px 6px;
+          height: 24px;
+          border-radius: 5px;
+          border: solid 1.5px $charcoal-light-1;
+          cursor: pointer;
+          font-size: 11px;
+
+          svg {
+            width: 18px;
+            height: 18px;
+          }
+
+          .rating-count {
+            margin-left: 2px;
+            font-weight: bold;
+          }
+
+          &:hover, &.selected:hover {
+            background-color: $charcoal-light-4;
+          }
+          &:active, &.selected {
+            background-color: $charcoal-light-3;
+          }
+        }
       }
     }
 
@@ -180,51 +213,9 @@
       &.has-tags {
         padding-top: 36px;
       }
-      &.has-agree {
-        padding-top: 56px;
-      }
-      &.has-tags-and-agree {
-        padding-top: 88px;
-      }
-
       &::placeholder {
         color: $charcoal;
         font-style: italic;
-      }
-    }
-
-    .comment-agree {
-      position: absolute;
-      left: 4px;
-      top: 5px;
-      height: 48px;
-
-      .comment-agree-header {
-        font-style: italic;
-      }
-
-      .comment-agree-buttons {
-        display: flex;
-        flex-direction: row;
-
-        div {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 4px 4px 0 0;
-          width: 56px;
-          height: 26px;
-          border-radius: 5px;
-          border: solid 1.5px $charcoal-light-1;
-          cursor: pointer;
-
-          &:hover, &.selected:hover {
-            background-color: $charcoal-light-4;
-          }
-          &:active, &.selected {
-            background-color: $charcoal-light-3;
-          }
-        }
       }
     }
 
@@ -232,9 +223,6 @@
       position: absolute;
       left: 0px;
       top: 5px;
-      &.shift-down-with-agree {
-        top: 58px; //place under agreeWithAi
-      }
       height: 26px;
       margin: 1px 4px 6px;
       width: calc(100% - 8px);
