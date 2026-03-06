@@ -44,7 +44,7 @@ The current problem with this case is that the recorded history is now broken. S
 - user B deletes the first object
 - resume user A's uploads
 
-The result of this is that user B will see different object colors than user B.
+The result of this is that user A will see different object colors than user B.
 
 This behavior should happen for any common drawing object properties: fill color, stroke width, position, rotation, flipping. If there is a property like "text" of a text object that doesn't exist on other objects, this seems to just be ignored. It doesn't show an error in the console.
 

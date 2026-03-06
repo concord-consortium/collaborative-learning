@@ -185,8 +185,6 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
         // The plan is to just use this for new group documents, so if there is some lost history
         // for existing group documents that is OK.
 
-
-        // TODO: if there are lot of entries in the queue we need to limit how many we upload at once
         entriesToUpload.forEach(entry => {
           const newEntryIndex = lastEntryIndex + 1;
 
