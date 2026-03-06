@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
-import { AuthorableNavTab, INavTabSpec } from "../../types";
+import { AuthorableNavTab, INavTabSpec, IUnitConfig } from "../../types";
 import { EAuthorableNavTab } from "../../../models/view/nav-tabs";
 import { useCurriculum } from "../../hooks/use-curriculum";
 
@@ -14,7 +14,7 @@ interface FormTab {
 }
 
 interface INavTabsInputs {
-  defaultPanelLayout: string;
+  defaultPanelLayout: IUnitConfig["defaultPanelLayout"];
   tabs: FormTab[];
 }
 
@@ -72,9 +72,9 @@ const NavTabs: React.FC = () => {
       if (draft) {
         // Save panel layout (omit if "split" since that's the default)
         if (data.defaultPanelLayout && data.defaultPanelLayout !== "split") {
-          (draft.config as any).defaultPanelLayout = data.defaultPanelLayout;
+          draft.config.defaultPanelLayout = data.defaultPanelLayout;
         } else {
-          delete (draft.config as any).defaultPanelLayout;
+          delete draft.config.defaultPanelLayout;
         }
         formTabs.forEach((tab, index) => {
           const formTab = data.tabs[index];

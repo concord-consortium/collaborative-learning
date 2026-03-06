@@ -156,6 +156,8 @@ export class DB {
               // After unit config is available, apply default panel layout for first-time visitors
               persistentUIReady.then(() => {
                 persistentUI.applyDefaultPanelLayout(this.stores.appConfig.defaultPanelLayout);
+              }).catch((err) => {
+                console.error("Error initializing persistent UI:", err);
               });
             });
           }
