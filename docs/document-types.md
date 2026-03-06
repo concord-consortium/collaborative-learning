@@ -102,9 +102,11 @@ Note that only personal documents and learning logs have the `title` property (o
 
 ## Group Documents
 
-We are in the process of adding a new group document type. These documents will be editable by all members of a group. They are stored under a virtual group user in standard place. This virtual group user has the form `group_{offering_id}_{group_id}`.
+Group documents are editable by all members of a group. They are stored under a virtual group user in the standard place for documents. This virtual group user has the form `group_{offeringId}_{groupId}`. Group documents do not have type-specific metadata. Their generic metadata (`DBGroupDocMetadata`) extends `DBBaseProblemDocumentMetadata` with `type: "group"`.
 
-The group documents rely on the Firestore metadata. The Realtime Database metadata is maintained for consistency and so firebase functions which are watching properties in this metadata work properly with group documents.
+Group documents rely on Firestore metadata as the primary source for loading and querying. The Realtime Database metadata is maintained for consistency and so firebase functions which are watching properties in this metadata work properly with group documents.
+
+The feature is enabled per-unit via `groupDocumentsEnabled` in the unit configuration. Concurrent editing by multiple group members is still a work in progress. See [group-documents.md](group-documents.md) for more details.
 
 ## Publications
 

@@ -168,13 +168,13 @@ Current plan: Only use this for new group documents; some lost history for exist
 
 ## Unhandled Promise in Recursive Upload Call
 
-Location: `firestore-history-manager-concurrent.ts:uploadQueuedHistoryEntries()` (line 217)
+Location: `firestore-history-manager-concurrent.ts:uploadQueuedHistoryEntries()`
 
-The recursive call to `this.uploadQueuedHistoryEntries()` at the end of the function is not awaited or error-handled. If this async call throws, it will result in an unhandled promise rejection. Consider adding `.catch()` for error logging, though `await` would change the fire-and-forget behavior which is intentional.
+The recursive call to `this.uploadQueuedHistoryEntries()` at the end of `uploadQueuedHistoryEntries()` is not awaited or error-handled. If this async call throws, it will result in an unhandled promise rejection. Consider adding `.catch()` for error logging, though `await` would change the fire-and-forget behavior which is intentional.
 
 ## Timer Not Tracked in resumeUploadsAfterDelay
 
-Location: `firestore-history-manager-concurrent.ts:resumeUploadsAfterDelay()` (lines 63-70)
+Location: `firestore-history-manager-concurrent.ts:resumeUploadsAfterDelay()`
 
 The `setTimeout` call doesn't store or cancel previous timers. Multiple calls could schedule multiple timeouts, potentially resuming uploads at unexpected times. This is low priority since it's primarily used for debugging/testing, but storing the timeout ID and clearing it before scheduling a new one would make it more robust.
 
