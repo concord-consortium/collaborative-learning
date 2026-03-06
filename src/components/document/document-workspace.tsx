@@ -146,7 +146,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private async guaranteeInitialDocuments() {
-    const { appConfig: { defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
+    const { appConfig: { defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle,
+              groupDocumentsEnabled },
             db, persistentUI: { problemWorkspace }, sectionsLoadedPromise,
             unit: { planningDocument }, user: { type: role } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
@@ -157,16 +158,16 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       if (defaultDocument) {
         problemWorkspace.setPrimaryDocument(defaultDocument);
       }
-    } else {
+    } else if (groupDocumentsEnabled) {
       // If the primary document is a group document, make sure it is opened properly.
       // This is because group documents are not loaded automatically like other documents.
-      // This code is loading the metadata even if this isn't a group document, in order to
-      // figure out if it is a group document. This guaranteeInitialDocuments function is
-      // not waited for, so this new metadata loading shouldn't slow down the initial
-      // loading of CLUE.
-      const primaryDocMetadata = await db.findFirestoreMetadata(problemWorkspace.primaryDocumentKey);
-      if (primaryDocMetadata && primaryDocMetadata.type === GroupDocument) {
-        db.openDocumentFromFirestoreMetadata(primaryDocMetadata);
+      try {
+        const primaryDocMetadata = await db.findFirestoreMetadata(problemWorkspace.primaryDocumentKey);
+        if (primaryDocMetadata && primaryDocMetadata.type === GroupDocument) {
+          db.openDocumentFromFirestoreMetadata(primaryDocMetadata);
+        }
+      } catch (e) {
+        console.warn("Failed to check if primary document is a group document", e);
       }
     }
     // Guarantee the user starts with one learning log
