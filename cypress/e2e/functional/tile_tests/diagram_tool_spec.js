@@ -243,7 +243,8 @@ context('Diagram Tool Tile', function () {
     const newUnit = "util";
     drawTile.getDrawTile().click();
     drawTile.getVariableChip().click();
-    drawTile.getDrawToolEditVariable().should("not.have.attr", "aria-disabled").click();
+    drawTile.getDrawToolEditVariable().should("not.have.attr", "aria-disabled");
+    drawTile.getDrawToolEditVariable().click();
     dialogField("name").clear();
     dialogField("name").type(newName);
     dialogField("value").clear();
