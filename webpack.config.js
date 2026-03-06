@@ -5,6 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const packageJson = require('./package.json');
 const fs = require('fs');
 const path = require('path');
@@ -101,8 +102,26 @@ module.exports = (env, argv) => {
         },
         {
           test: /\.[tj]sx?$/i,
-          loader: 'ts-loader',
-          exclude: /node_modules/
+          exclude: /node_modules/,
+          use: process.env.CODE_COVERAGE
+            ? { loader: 'ts-loader', options: { transpileOnly: true } }
+            : {
+                loader: 'swc-loader',
+                options: {
+                  jsc: {
+                    parser: {
+                      syntax: 'typescript',
+                      tsx: true,
+                      decorators: true,
+                    },
+                    transform: {
+                      react: {
+                        runtime: 'automatic'
+                      }
+                    }
+                  }
+                }
+              }
         },
         {
           test: /\.json5$/,
@@ -260,7 +279,13 @@ module.exports = (env, argv) => {
     },
     ignoreWarnings: [/export .* was not found in/],
     plugins: [
-      new ESLintPlugin(),
+      new ESLintPlugin({
+        lintDirtyModulesOnly: devMode
+      }),
+      // Run TypeScript type checking in a separate process for faster builds
+      ...(!process.env.CODE_COVERAGE ? [new ForkTsCheckerWebpackPlugin({
+        typescript: { memoryLimit: 4096 }
+      })] : []),
       new MiniCssExtractPlugin({
         filename: devMode ? '[name].css' : '[name].[chunkhash:8].css',
         ignoreOrder: true
