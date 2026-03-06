@@ -89,6 +89,9 @@ export const PersistentUIModelV2 = types
     setDividerPosition(position: number) {
       self.dividerPosition = position;
     },
+    setHasSavedPersistentUI(value: boolean) {
+      self.hasSavedPersistentUI = value;
+    },
     applyDefaultPanelLayout(layout: "split" | "workspace-only" | "resources-only" | undefined) {
       if (self.hasSavedPersistentUI) return;
       switch (layout) {
@@ -346,7 +349,7 @@ export const PersistentUIModelV2 = types
       const getRef = db.firebase.ref(path);
       const theData: string | undefined = (await getRef.once("value"))?.val();
       const asObj = safeJsonParse(theData);
-      self.hasSavedPersistentUI = !!asObj;
+      self.setHasSavedPersistentUI(!!asObj);
       if (asObj) {
         // As of CLUE 5.3, comparison mode should only be available in the bookmarks tab.
         // Due to a yet-to-be-determined bug, it can be saved in the PersistentUI in other situations in which it

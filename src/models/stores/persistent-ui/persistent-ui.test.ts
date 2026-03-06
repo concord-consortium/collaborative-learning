@@ -1,4 +1,4 @@
-import { applySnapshot, getSnapshot, unprotect } from "@concord-consortium/mobx-state-tree";
+import { applySnapshot, getSnapshot } from "@concord-consortium/mobx-state-tree";
 import {
   PersistentUIModel, PersistentUIModelV1Snapshot, persistentUIModelPreProcessor,
   PersistentUIModelV2Snapshot, PersistentUIModelType
@@ -669,8 +669,7 @@ describe("PersistentUI", () => {
 
     it("does not change divider when saved state exists", () => {
       const model = PersistentUIModel.create({ problemWorkspace: { type: "problem", mode: "1-up" } });
-      unprotect(model);
-      (model as any).hasSavedPersistentUI = true;
+      model.setHasSavedPersistentUI(true);
       model.applyDefaultPanelLayout("workspace-only");
       expect(model.dividerPosition).toBe(kDividerHalf);
     });
