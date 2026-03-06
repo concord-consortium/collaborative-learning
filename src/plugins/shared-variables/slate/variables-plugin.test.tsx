@@ -96,7 +96,7 @@ describe("VariablesPlugin", () => {
       const plugin = new VariablesPlugin(textContent);
       await jestSpyConsole("log", mockConsole => {
         plugin.addTileSharedModelWhenReady();
-        expect(mockConsole).toBeCalled();
+        expect(mockConsole).toHaveBeenCalled();
       });
 
       plugin.dispose();
@@ -109,7 +109,7 @@ describe("VariablesPlugin", () => {
       const plugin = new VariablesPlugin(textContent);
       await jestSpyConsole("log", mockConsole => {
         plugin.addTileSharedModelWhenReady();
-        expect(mockConsole).not.toBeCalled();
+        expect(mockConsole).not.toHaveBeenCalled();
       });
 
       plugin.dispose();
@@ -125,7 +125,7 @@ describe("VariablesPlugin", () => {
       const plugin = new VariablesPlugin(textContent);
       await jestSpyConsole("log", mockConsole => {
         plugin.addTileSharedModelWhenReady();
-        expect(mockConsole).toBeCalled();
+        expect(mockConsole).toHaveBeenCalled();
       });
 
       plugin.dispose();
@@ -141,7 +141,7 @@ describe("VariablesPlugin", () => {
       const plugin = new VariablesPlugin(textContent);
       await jestSpyConsole("log", mockConsole => {
         plugin.addTileSharedModelWhenReady();
-        expect(mockConsole).not.toBeCalled();
+        expect(mockConsole).not.toHaveBeenCalled();
       });
 
       plugin.dispose();

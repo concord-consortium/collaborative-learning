@@ -40,6 +40,7 @@ interface IProps extends IBaseProps {
   workspace: WorkspaceModelType;
   document: DocumentModelType;
   onNewDocument?: (type: string) => void;
+  onOpenGroupDocument?: () => void;
   onCopyDocument?: (document: DocumentModelType) => void;
   onDeleteDocument?: (document: DocumentModelType) => void;
   onAdminDestroyDocument?: (document: DocumentModelType) => void;
@@ -239,6 +240,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     if (document.isProblem || document.isPlanning) {
       return this.renderProblemTitleBar(type, hideButtons);
     }
+    if (document.isGroup) {
+      return this.renderGroupDocumentTitleBar(hideButtons);
+    }
     if (document.isPersonal || document.isLearningLog) {
       return this.renderOtherDocumentTitleBar(type, hideButtons);
     }
@@ -247,25 +251,38 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private renderProblemTitleBar(type: string, hideButtons?: boolean) {
-    const { problem, appConfig, appMode, clipboard, user: { isTeacherOrResearcher } } = this.stores;
-    const problemTitle = problem.title;
-    const { document, workspace } = this.props;
+
+  private renderGenericTitleBar(
+    {
+      title,
+      hideButtons,
+      showShareButton,
+      docType,
+      show4up
+    } : {
+      title: string,
+      hideButtons?: boolean,
+      showShareButton?: boolean
+      docType: string
+      show4up?: boolean
+    }
+  ) {
+    const { appMode, clipboard } = this.stores;
+    const { document } = this.props;
     const isShared = document.visibility === "public";
-    const showShareButton = type !== "planning";
     const showFileMenu = this.showFileMenu();
-    const show4up = !appConfig.hide4up && !workspace.comparisonVisible && !isTeacherOrResearcher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
     return (
-      <div className={`titlebar ${type}`}>
+      <div className={`titlebar ${docType}`}>
         {!hideButtons &&
           <div className="actions left">
             {showFileMenu &&
               <DocumentFileMenu document={document}
                 onNewDocument={this.handleNewDocumentFromMenu}
                 onOpenDocument={this.handleOpenDocumentClick}
+                onOpenGroupDocument={this.handleOpenGroupDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={true}
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
@@ -274,7 +291,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           </div>
         }
         <div className="title" data-test="document-title">
-          {`${problemTitle}${type === "planning" ? ": Planning" : ""}`} {this.renderStickyNotes()}
+          {title} {this.renderStickyNotes()}
         </div>
         {!hideButtons &&
           <div className="actions right" data-test="document-titlebar-actions">
@@ -286,6 +303,29 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         }
       </div>
     );
+  }
+  private renderProblemTitleBar(type: string, hideButtons?: boolean) {
+    const { appConfig, problem, user } = this.stores;
+    const { workspace } = this.props;
+    const problemTitle = `${problem.title}${type === "planning" ? ": Planning" : ""}`;
+    const show4up = !appConfig.hide4up && !workspace.comparisonVisible && !user.isTeacherOrResearcher;
+    return this.renderGenericTitleBar({
+      title: problemTitle,
+      hideButtons,
+      showShareButton: type !== "planning",
+      docType: type,
+      show4up
+    });
+  }
+
+  private renderGroupDocumentTitleBar(hideButtons?: boolean) {
+    const { user: { currentGroupId } } = this.stores;
+    const title = `Group ${currentGroupId} Document`;
+    return this.renderGenericTitleBar({
+      title,
+      hideButtons,
+      docType: "group",
+    });
   }
 
   private getStickyNoteData() {
@@ -436,6 +476,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               <DocumentFileMenu document={document}
                 onNewDocument={this.handleNewDocumentFromMenu}
                 onOpenDocument={this.handleOpenDocumentClick}
+                onOpenGroupDocument={this.handleOpenGroupDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={countNotDeleted < 1}
                 onDeleteDocument={this.handleDeleteDocumentClick}
@@ -573,6 +614,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private handleOpenDocumentClick = () => {
     this.setState({ showBrowser: true });
+  };
+
+  private handleOpenGroupDocumentClick = () => {
+    const { onOpenGroupDocument } = this.props;
+    onOpenGroupDocument?.();
   };
 
   private handleCopyDocumentClick = () => {

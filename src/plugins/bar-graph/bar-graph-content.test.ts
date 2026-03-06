@@ -55,8 +55,8 @@ describe("Bar Graph Content", () => {
     const content = defaultBarGraphContent();
     expect(content.yAxisLabel).toBe("Counts");
     expect(getSnapshot(content)).toMatchInlineSnapshot(`
-Object {
-  "attributeColorMap": Object {},
+{
+  "attributeColorMap": {},
   "dataSetId": undefined,
   "primaryAttribute": undefined,
   "secondaryAttribute": undefined,

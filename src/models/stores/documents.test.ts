@@ -90,7 +90,7 @@ describe("documents model", () => {
     expect(documents.all.length).toBe(1);
     jestSpyConsole("warn", spy => {
       documents.add(document);
-      expect(spy).toBeCalledWith("Document with the same key already exists");
+      expect(spy).toHaveBeenCalledWith("Document with the same key already exists");
     });
     expect(documents.all.length).toBe(1);
   });

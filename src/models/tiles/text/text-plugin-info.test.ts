@@ -28,8 +28,8 @@ describe("TextPluginInfo", () => {
   test("getTextPluginInstances", () => {
     const textContent: any = {foo: "bar"};
     const pluginInstances = createTextPluginInstances(textContent);
-    expect(testTextPluginInfo.createSlatePlugin).toBeCalledWith(textContent);
-    expect(testTextPluginInfoWithUpdate.createSlatePlugin).toBeCalledWith(textContent);
+    expect(testTextPluginInfo.createSlatePlugin).toHaveBeenCalledWith(textContent);
+    expect(testTextPluginInfoWithUpdate.createSlatePlugin).toHaveBeenCalledWith(textContent);
     expect(Object.entries(pluginInstances)).toHaveLength(2);
     expect(pluginInstances.test).toBe(testTextPluginInstance);
     expect(pluginInstances.testWithUpdate).toBe(testTextPluginWithUpdateInstance);

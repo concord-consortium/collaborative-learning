@@ -48,8 +48,11 @@ export function useSyncMstPropToFirebase<T extends string | number | boolean | u
   }, options);
   const throttledMutate = useMemo(() => _throttle(mutation.mutate, throttle), [mutation.mutate, throttle]);
 
+  // If the path is empty, it could result in overwriting a large part of the DB so it is disabled.
+  const setupReaction = !!path && enabled;
+
   useEffect(() => {
-    const cleanup = enabled
+    const cleanup = setupReaction
             ? reaction(() => model[prop], value => {
                 // reset (e.g. stop retrying and restart) when value changes
                 mutation.isError && mutation.reset();
@@ -57,7 +60,7 @@ export function useSyncMstPropToFirebase<T extends string | number | boolean | u
               })
             : undefined;
     return () => cleanup?.();
-  }, [enabled, model, mutation, prop, throttledMutate]);
+  }, [setupReaction, model, mutation, prop, throttledMutate]);
 
   return mutation;
 }
