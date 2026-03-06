@@ -14,6 +14,7 @@ interface FormTab {
 }
 
 interface INavTabsInputs {
+  defaultPanelLayout: string;
   tabs: FormTab[];
 }
 
@@ -61,11 +62,20 @@ const NavTabs: React.FC = () => {
     });
   }, [sortedAllNavTabs, unitConfig]);
 
+  const currentPanelLayout = useMemo(() => {
+    return unitConfig?.config?.defaultPanelLayout ?? "split";
+  }, [unitConfig]);
   const { handleSubmit, register, formState: { errors } } = useForm<INavTabsInputs>();
 
   const onSubmit: SubmitHandler<INavTabsInputs> = (data) => {
     setUnitConfig(draft => {
       if (draft) {
+        // Save panel layout (omit if "split" since that's the default)
+        if (data.defaultPanelLayout && data.defaultPanelLayout !== "split") {
+          (draft.config as any).defaultPanelLayout = data.defaultPanelLayout;
+        } else {
+          delete (draft.config as any).defaultPanelLayout;
+        }
         formTabs.forEach((tab, index) => {
           const formTab = data.tabs[index];
           const customLabel = formTab.customLabel.trim();
@@ -92,6 +102,20 @@ const NavTabs: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
+      <fieldset>
+        <legend>Panel Layout</legend>
+        <p className="muted">
+          Controls which panels are visible when a student first opens this problem.
+        </p>
+        <select
+          {...register("defaultPanelLayout")}
+          defaultValue={currentPanelLayout}
+        >
+          <option value="split">Split (resources and workspace)</option>
+          <option value="workspace-only">Workspace only</option>
+          <option value="resources-only">Resources only</option>
+        </select>
+      </fieldset>
       <table>
         <thead>
           <tr>
