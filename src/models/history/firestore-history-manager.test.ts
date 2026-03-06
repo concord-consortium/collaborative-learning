@@ -11,6 +11,7 @@ import { getLastHistoryEntry as _getLastHistoryEntry,
   LastHistoryEntry,
   loadHistory as _loadHistory } from "./history-firestore";
 import { when } from "mobx";
+import { HistoryEntrySnapshot } from "./history";
 import { FirestoreHistoryManager, HistoryStatus } from "./firestore-history-manager";
 import { UserContextProvider } from "../stores/user-context-provider";
 
@@ -221,7 +222,7 @@ describe("history loading", () => {
     describe("updates the historyStatus", () => {
 
       interface IMirrorMockHistoryParam {
-        entries: { id: string }[];
+        entries: HistoryEntrySnapshot[];
         loadingError?: firebase.firestore.FirestoreError | undefined;
         lastHistoryEntry?: LastHistoryEntry;
       }
@@ -291,28 +292,41 @@ describe("history loading", () => {
           lastHistoryEntry: {index: 1, id: "1234"}
         });
 
+        // The history length is 1 plus the index of last history entry
+        // so it should be 2 which matches the number of entries
         expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADED);
       });
 
-      it("is LOADING when there are fewer events than the firestore length", async () => {
+      it("is ERROR when loadHistory returns an error", async () => {
         const { historyManager } = await mirrorMockHistory({
-          entries: [
-            { id: "a1" }
-          ],
-          lastHistoryEntry: {index: 10, id: "1234"}
-        });
-
-        expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADING);
-      });
-
-      it("is ERROR when there is a loadingError", async () => {
-        const { historyManager } = await mirrorMockHistory({
-          entries: [],
-          loadingError: { message: "test error" } as firebase.firestore.FirestoreError
+          entries:[],
+          loadingError: { message: "fake error"} as firebase.firestore.FirestoreError,
+          lastHistoryEntry: {index: 1, id: "1234"}
         });
 
         expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_ERROR);
       });
+
+      // FIXME: this is actually an error. If the history is corrupted and some
+      // indexes are skipped, then the last entry will have an index which is bigger
+      // than the number of loaded entries. We should track the loading better so we
+      // can tell when the entries are actually loaded instead of comparing these values.
+      // This case should be identified as a problem instead of just LOADING.
+      it("is LOADING when number of events is less than firestore length", async () => {
+        const { historyManager } = await mirrorMockHistory({
+          entries:[
+            { id: "a1" },
+            { id: "a2" }
+          ],
+          lastHistoryEntry: {index: 2, id: "1234"}
+        });
+
+        // The history length is 1 plus the index of last history entry
+        // so it should be 3 which is more than number of entries
+        expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADING);
+      });
+
     });
+
   });
 });

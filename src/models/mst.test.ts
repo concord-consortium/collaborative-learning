@@ -5,6 +5,7 @@ import { addDisposer, applySnapshot, getType, isAlive, types, getRoot,
   createActionTrackingMiddleware2, resolvePath, flow, onSnapshot,
   hasEnv
 } from "mobx-state-tree";
+import { uniqueId } from "../utilities/js-utils";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -174,29 +175,62 @@ describe("mst", () => {
     expect(lateCalled).toBe(true);
   });
 
-  test("applySnapshot does not merge the properties", () => {
-    const Todo1 = types.model({
-      text1: types.maybe(types.string),
-      text2: types.maybe(types.string)
+  describe("applySnapshot", () => {
+    test("does not merge the properties", () => {
+      const Todo1 = types.model({
+        text1: types.maybe(types.string),
+        text2: types.maybe(types.string)
+      });
+
+      const todo = Todo1.create({text1: "1", text2:"2"});
+      expect(todo.text1).toBe("1");
+      applySnapshot(todo, {text2: "changed"});
+      expect(todo.text1).toBeUndefined();
     });
 
-    const todo = Todo1.create({text1: "1", text2:"2"});
-    expect(todo.text1).toBe("1");
-    applySnapshot(todo, {text2: "changed"});
-    expect(todo.text1).toBeUndefined();
-  });
+    test("ignores unknown properties", () => {
+      const Todo1 = types.model({
+        text1: types.maybe(types.string),
+        text2: types.maybe(types.string)
+      });
 
-  test("applySnapshot ignores unknown properties", () => {
-    const Todo1 = types.model({
-      text1: types.maybe(types.string),
-      text2: types.maybe(types.string)
+      const todo = Todo1.create({text1: "1", text2: "2"});
+      applySnapshot(todo, {text2: "changed", foo: "bar"} as any);
+      expect(todo.text1).toBeUndefined();
+      expect(todo.text2).toBe("changed");
+      expect((todo as any).foo).toBeUndefined();
     });
 
-    const todo = Todo1.create({text1: "1", text2: "2"});
-    applySnapshot(todo, {text2: "changed", foo: "bar"} as any);
-    expect(todo.text1).toBeUndefined();
-    expect(todo.text2).toBe("changed");
-    expect((todo as any).foo).toBeUndefined();
+    test("reuses instances in arrays where possible", () => {
+      const Todo = types.model({
+        id: types.identifier,
+        text: types.string
+      }).volatile(() => ({
+        instanceId: uniqueId()
+      }));
+
+      const TodoList = types.model({
+        todos: types.array(Todo)
+      });
+
+      const todoList = TodoList.create({
+        todos: [
+          { id: "1", text: "1" },
+          { id: "2", text: "2" }
+        ]
+      });
+      const firstTodo = todoList.todos[0];
+      applySnapshot(todoList, {
+        todos: [
+          { id: "1", text: "changed" },
+          { id: "3", text: "3" }
+        ]
+      });
+      expect(todoList.todos.length).toBe(2);
+      expect(todoList.todos[0]).toBe(firstTodo);
+      expect(todoList.todos[0].instanceId).toBe(firstTodo.instanceId);
+      expect(todoList.todos[0].text).toBe("changed");
+    });
   });
 
   /**
@@ -1070,6 +1104,4 @@ describe("mst", () => {
     const container3 = TestContainer.create({});
     expect(container3.child?.prop).toBe("value");
   });
-
-
 });

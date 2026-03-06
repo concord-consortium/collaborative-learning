@@ -7,18 +7,25 @@ import "./history-entry-item.scss";
 interface IHistoryEntryItemProps {
   entry: HistoryEntryType;
   index: number;
+  previousEntryId?: string;
 }
 
 export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
   entry,
-  index
+  index,
+  previousEntryId,
 }) => {
   const [expanded, setExpanded] = useState(false);
 
   const toggleExpanded = () => setExpanded(!expanded);
 
   const formatTimestamp = (date: Date) => {
-    return date.toLocaleTimeString();
+    return date.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+      fractionalSecondDigits: 3
+    });
   };
 
   const getPatchCount = () => {
@@ -31,7 +38,7 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
         <span className="history-entry-expand">
           {expanded ? "▼" : "▶"}
         </span>
-        <span className="history-entry-index">#{index + 1}</span>
+        <span className="history-entry-index">#{index}</span>
         <span className="history-entry-action" title={entry.action}>
           {entry.modelActionKey}
         </span>
@@ -48,6 +55,7 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
           <div><strong>ID:</strong> {entry.id}</div>
           <div><strong>Model:</strong> {entry.model}</div>
           <div><strong>Action:</strong> {entry.action}</div>
+          <div><strong>Previous Entry ID:</strong> {previousEntryId}</div>
           <div><strong>Undoable:</strong> {entry.undoable ? "Yes" : "No"}</div>
           <div><strong>State:</strong> {entry.state}</div>
           <div><strong>Records:</strong> {entry.records.length}</div>
