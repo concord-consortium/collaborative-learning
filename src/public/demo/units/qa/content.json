@@ -90,6 +90,7 @@
       {"id": "Drawing", "title": "Drawing", "isTileTool": true},
       {"id": "IframeInteractive", "title": "Interactive", "isTileTool": true},
       {"id": "Starter", "title": "Starter", "isTileTool": true},
+      {"id": "WaveRunner", "title": "Wave Runner", "isTileTool": true},
       {"id": "Simulator", "title": "EMG Simulator", "isTileTool": true},
       {"id": "Expression", "title": "Expression", "isTileTool": true},
       {"id": "BarGraph", "title": "Bar Graph", "isTileTool": true},
