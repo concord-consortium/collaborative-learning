@@ -49,6 +49,7 @@ const EditableAxisLabel: React.FC<IProps> = observer(function EditableAxisLabel(
     const { key } = e;
     switch (key) {
       case "Escape":
+        e.stopPropagation();
         handleEndEdit(false);
         break;
       case "Enter":

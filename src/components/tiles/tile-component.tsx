@@ -6,11 +6,14 @@ import { isAlive } from "mobx-state-tree";
 import ResizeObserver from "resize-observer-polyfill";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
+import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { isQuestionModel } from "../../models/tiles/question/question-content";
 import { BaseComponent } from "../base";
 import PlaceholderTileComponent from "./placeholder/placeholder-tile";
-import { ITileApi, TileResizeEntry, TileApiInterfaceContext, TileModelContext } from "./tile-api";
+import {
+  ITileApi, TileResizeEntry, TileApiInterfaceContext, TileModelContext, RegisterToolbarContext
+} from "./tile-api";
 import { HotKeys } from "../../utilities/hot-keys";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
@@ -157,6 +160,10 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   private domElement: HTMLDivElement | null;
   private resizeObserver: ResizeObserver;
   private hotKeys: HotKeys = new HotKeys();
+  private toolbarElement: HTMLElement | null = null;
+  // Live region element for screen reader announcements (managed via direct DOM to avoid re-renders)
+  private liveRegion: HTMLSpanElement | null = null;
+  private liveRegionTimer: ReturnType<typeof setTimeout> | null = null;
   private dragElement: HTMLDivElement | null;
   private resizeElement: HTMLDivElement | null;
 
@@ -183,6 +190,10 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     const options = { capture: true, passive: true };
     this.domElement?.addEventListener("touchstart", this.handlePointerDown, options);
     this.domElement?.addEventListener("mousedown", this.handlePointerDown, options);
+    // Native capture-phase listener for Tab — React 17's delegated events fire too late
+    // to prevent the browser's default Tab focus movement from descendant elements.
+    this.domElement?.addEventListener("keydown", this.handleTabKeyDown, true);
+    this.domElement?.addEventListener("toolbar-escape", this.handleToolbarEscape);
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -201,9 +212,14 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   public componentWillUnmount() {
     this.resizeObserver?.disconnect();
     this.handleResizeDebounced.cancel();
+    if (this.liveRegionTimer) {
+      clearTimeout(this.liveRegionTimer);
+    }
     const options = { capture: true, passive: true };
     this.domElement?.removeEventListener("mousedown", this.handlePointerDown, options);
     this.domElement?.removeEventListener("touchstart", this.handlePointerDown, options);
+    this.domElement?.removeEventListener("keydown", this.handleTabKeyDown, true);
+    this.domElement?.removeEventListener("toolbar-escape", this.handleToolbarEscape);
   }
 
   public render() {
@@ -223,6 +239,10 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       annotatable: ui.annotationMode !== undefined && model.content.annotatableObjects.length > 0,
       "selected-for-comment": tileSelectedForComment
     });
+    const tileTypeName = getTileContentInfo(model.content.type)?.displayName || model.content.type;
+    const tileTitle = model.computedTitle;
+    const tileAriaLabel = tileTitle ? `${tileTypeName} tile: ${tileTitle}` : `${tileTypeName} tile`;
+
     const isDraggable = !isPlaceholderTile && !model.isFixedPosition && !appConfig.disableTileDrags;
     const dragTileButton = isDraggable &&
                             <DragTileButton
@@ -245,23 +265,34 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     }
     return (
       <TileModelContext.Provider value={model}>
-        {this.renderQuestionIndicator()}
-        <div
-          className={classes} data-testid="tool-tile"
-          ref={elt => this.domElement = elt}
-          data-tool-id={model.id}
-          style={style}
-          tabIndex={-1}
-          onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
-          onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
-          onKeyDown={this.handleKeyDown}
-        >
-          {this.renderLinkIndicators()}
-          {dragTileButton}
-          {resizeTileButton}
-          {this.renderTile(Component)}
-          {this.renderTileComments()}
-        </div>
+        <RegisterToolbarContext.Provider value={this.handleRegisterToolbar}>
+          {this.renderQuestionIndicator()}
+          <div
+            className={classes} data-testid="tool-tile"
+            ref={elt => this.domElement = elt}
+            data-tool-id={model.id}
+            role="group"
+            aria-label={tileAriaLabel}
+            style={style}
+            tabIndex={0}
+            onFocus={this.handleFocus}
+            onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
+            onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
+            onKeyDown={this.handleKeyDown}
+          >
+            {this.renderLinkIndicators()}
+            {dragTileButton}
+            {resizeTileButton}
+            {this.renderTile(Component)}
+            {this.renderTileComments()}
+            <span
+              ref={el => this.liveRegion = el}
+              className="visually-hidden"
+              role="status"
+              aria-live="polite"
+            />
+          </div>
+        </RegisterToolbarContext.Provider>
       </TileModelContext.Provider>
     );
   }
@@ -353,7 +384,270 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     this.getTileResizeHandler()?.(entry);
   }, 100);
 
+  // Screen reader announcement via visually-hidden aria-live region.
+  // Uses direct DOM manipulation to avoid triggering React re-renders.
+  private srAnnounce(message: string) {
+    if (!this.liveRegion) return;
+    if (this.liveRegionTimer) {
+      clearTimeout(this.liveRegionTimer);
+    }
+    this.liveRegion.textContent = message;
+    this.liveRegionTimer = setTimeout(() => {
+      if (this.liveRegion) this.liveRegion.textContent = "";
+      this.liveRegionTimer = null;
+    }, 2000);
+  }
+
+  private handleRegisterToolbar = (el: HTMLElement | null) => {
+    this.toolbarElement = el;
+  };
+
+  // toolbar-escape: user pressed Escape from the toolbar (which is in FloatingPortal).
+  // Deselects the tile (hides toolbar) and announces exit. The toolbar's own Escape
+  // handler focuses the tile container; this handler handles the deselect + SR announcement.
+  private handleToolbarEscape = () => {
+    const { ui } = this.stores;
+    const { model } = this.props;
+    ui.removeTileIdFromSelection(model.id);
+    this.srAnnounce("Exited tile. Tab to next tile, Shift+Tab to previous.");
+  };
+
+  // Returns the focusable elements for this tile's focus trap.
+  private getFocusTrapElements() {
+    const toolbar = this.toolbarElement;
+    const activeToolbarButton = (
+      toolbar?.querySelector('button:not([tabindex="-1"])') || toolbar?.querySelector('button')
+    ) as HTMLElement | null;
+
+    const tileId = this.props.model.id;
+    const tileApiInterface = this.context;
+    const tileApi = tileApiInterface?.getTileApi(tileId);
+    const focusable = tileApi?.getFocusableElements?.();
+
+    return {
+      titleElement: focusable?.titleElement || null,
+      activeToolbarButton,
+      contentElement: focusable?.contentElement || null,
+      focusContent: focusable?.focusContent || null,
+    };
+  }
+
+  // Tries to focus elements in order, returning true on the first that actually receives focus.
+  // Handles elements that exist in the DOM but aren't focusable (e.g., a plain div without tabindex).
+  private focusFirstAvailable(...elements: (HTMLElement | null)[]): boolean {
+    for (const el of elements) {
+      if (el) {
+        el.focus();
+        if (document.activeElement === el) return true;
+      }
+    }
+    return false;
+  }
+
+  // Focuses the content element, preferring the tile's custom focusContent method if available.
+  // Some editors (e.g., Slate) require their own focus API to properly initialize cursor/selection.
+  private focusContent(contentElement: HTMLElement | null, focusContentFn: (() => boolean) | null): boolean {
+    if (focusContentFn) {
+      return focusContentFn();
+    }
+    if (contentElement) {
+      contentElement.focus();
+      return document.activeElement === contentElement;
+    }
+    return false;
+  }
+
+  // Enters the focus trap, focusing the first (or last if reverse) element.
+  // Returns true if focus was moved, false if no focusable elements exist.
+  private enterFocusTrap(
+    e: { preventDefault: () => void; stopPropagation: () => void },
+    reverse = false
+  ): boolean {
+    const { titleElement, activeToolbarButton, contentElement, focusContent } = this.getFocusTrapElements();
+
+    let focused: boolean;
+    if (reverse) {
+      focused = this.focusContent(contentElement, focusContent)
+        || this.focusFirstAvailable(activeToolbarButton, titleElement);
+    } else {
+      focused = this.focusFirstAvailable(titleElement, activeToolbarButton)
+        || this.focusContent(contentElement, focusContent);
+    }
+
+    if (focused) {
+      this.srAnnounce("Editing tile. Press Escape to exit.");
+      e.preventDefault();
+      e.stopPropagation();
+      return true;
+    }
+    return false;
+  }
+
+  // Navigate to an adjacent sibling tile. Returns true if a sibling was found.
+  // The destination tile receives focus (focus ring via :focus-visible) but is NOT selected.
+  // NOTE: Uses DOM selectors (.document-content, .tool-tile[data-tool-id]) to find
+  // siblings — if those CSS classes change, keyboard nav will silently break.
+  // A model-based approach using getTilesInDocumentOrder() was tried but produced
+  // incorrect tab ordering in practice, so DOM queries remain the reliable method.
+  private navigateToSiblingTile(e: KeyboardEvent, reverse: boolean): boolean {
+    const documentContent = this.domElement?.closest('.document-content');
+    const tiles = Array.from(
+      documentContent?.querySelectorAll('.tool-tile[data-tool-id]') ?? []
+    ) as HTMLElement[];
+    const currentIndex = tiles.indexOf(this.domElement!);
+    const nextTile = reverse ? tiles[currentIndex - 1] : tiles[currentIndex + 1];
+    if (nextTile) {
+      nextTile.focus();
+      e.preventDefault();
+      e.stopPropagation();
+      return true;
+    }
+    return false;
+  }
+
+  private handleTabKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== "Tab") return;
+
+    const activeElement = document.activeElement as HTMLElement;
+    const isTileFocused = activeElement === this.domElement;
+    const isInsideTile = this.domElement?.contains(activeElement) && !isTileFocused;
+
+    if (isTileFocused) {
+      const { ui } = this.stores;
+      if (ui.isSelectedTile(this.props.model)) {
+        // Selected tile (via Enter or mouse click): enter focus trap.
+        // Toolbar should be in the DOM from the prior render frame.
+        if (this.enterFocusTrap(e, e.shiftKey)) return;
+      }
+      // Not selected (focus-ring-only), or enterFocusTrap failed: navigate to sibling.
+      this.navigateToSiblingTile(e, e.shiftKey);
+      // If no sibling, let browser handle Tab (moves out of tile area)
+      return;
+    }
+
+    if (isInsideTile) {
+      // Cycling within focus trap from elements inside the tile DOM.
+      // (Toolbar handles its own Tab events since it's in FloatingPortal.)
+      const { titleElement, activeToolbarButton, contentElement, focusContent } = this.getFocusTrapElements();
+      const isOnContent = activeElement === contentElement || contentElement?.contains(activeElement);
+      const isOnTitle = activeElement === titleElement;
+
+      if (e.shiftKey) {
+        // Shift+Tab: go backward
+        if (isOnContent) {
+          // Content → toolbar (or title, skipping non-focusable elements)
+          this.focusFirstAvailable(activeToolbarButton, titleElement);
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        } else if (isOnTitle) {
+          // Title → wrap to content (last element)
+          this.focusContent(contentElement, focusContent);
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+      } else {
+        // Tab: go forward
+        if (isOnContent) {
+          // Content → wrap to title (or toolbar, skipping non-focusable elements)
+          this.focusFirstAvailable(titleElement, activeToolbarButton);
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        } else if (isOnTitle) {
+          // Title → toolbar (or content, skipping non-focusable elements)
+          if (!this.focusFirstAvailable(activeToolbarButton)) {
+            this.focusContent(contentElement, focusContent);
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+      }
+
+      // Catch-all: focus is inside the tile but no cycling conditions matched
+      // (e.g., tile doesn't implement getFocusableElements). Deselect and exit
+      // to the tile container to prevent a selected-but-unfocusable state.
+      const { ui } = this.stores;
+      const { model } = this.props;
+      ui.removeTileIdFromSelection(model.id);
+      this.srAnnounce("Exited tile. Tab to next tile, Shift+Tab to previous.");
+      this.domElement?.focus();
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  // When the tile container receives focus from outside the tile, announce for SR.
+  // Does NOT select the tile or enter the focus trap — Enter is the sole entry mechanism.
+  // Uses relatedTarget to distinguish external focus (Tab from toolbar/sibling) from internal
+  // focus moves (Escape/ArrowUp exit to container, programmatic .focus() calls).
+  private handleFocus = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget) return;
+    // Only announce when focus arrives from outside the tile and its toolbar.
+    // Skip when: relatedTarget is null (programmatic focus), inside the tile (Escape/ArrowUp exit),
+    // or inside the toolbar (FloatingPortal — toolbar Escape has its own announcement).
+    const prev = e.relatedTarget as HTMLElement | null;
+    if (!prev || this.domElement?.contains(prev) || this.toolbarElement?.contains(prev)) return;
+    // Respect tileHandlesOwnSelection: tiles like placeholders don't need this announcement.
+    const { model } = this.props;
+    if (getTileComponentInfo(model.content.type)?.tileHandlesOwnSelection) return;
+    this.srAnnounce("Tile focused. Press Enter to edit.");
+  };
+
+  // React handler for Enter, Escape, ArrowUp exit, and hotkeys (Tab handled natively above)
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const activeElement = document.activeElement as HTMLElement;
+    const isTileFocused = activeElement === this.domElement;
+    const isInsideTile = this.domElement?.contains(activeElement) && !isTileFocused;
+
+    // Enter on tile container: select the tile unconditionally, then enter focus trap best-effort.
+    // Toolbar renders via MobX observer gated on selectedTileIds — it won't be in the DOM yet
+    // on this frame, so initial focus goes to content. Toolbar becomes reachable via Tab cycling.
+    if (e.key === "Enter" && isTileFocused) {
+      const { ui } = this.stores;
+      const { model } = this.props;
+      ui.setSelectedTileId(model.id, { append: false });
+      if (!this.enterFocusTrap(e)) {
+        // No content to focus (e.g., drawing tile) — tile is selected, toolbar appears next frame.
+        this.srAnnounce("Tile selected. Press Tab to access toolbar, Escape to exit.");
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      return;
+    }
+
+    const isSelectedOnContainer = isTileFocused && this.stores.ui.isSelectedTile(this.props.model);
+    if (e.key === "Escape" && (isInsideTile || isSelectedOnContainer)) {
+      // Exit focus trap: deselect the tile (hides toolbar) and return focus to the container.
+      const { ui } = this.stores;
+      const { model } = this.props;
+      ui.removeTileIdFromSelection(model.id);
+      this.srAnnounce("Exited tile. Tab to next tile, Shift+Tab to previous.");
+      this.domElement?.focus();
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    // ArrowUp from a non-editable element exits the focus trap.
+    // Editable elements (input, textarea, contenteditable/Slate) keep normal ArrowUp behavior.
+    if (e.key === "ArrowUp" && isInsideTile) {
+      const isEditable = activeElement.tagName === "INPUT" ||
+                         activeElement.tagName === "TEXTAREA" ||
+                         activeElement.isContentEditable;
+      if (!isEditable) {
+        this.domElement?.focus();
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+    }
+
+    // Tab is handled by native capture-phase listener (handleTabKeyDown)
+    if (e.key === "Tab") return;
+
     this.hotKeys.dispatch(e);
   };
 

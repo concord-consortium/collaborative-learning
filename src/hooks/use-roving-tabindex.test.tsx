@@ -153,4 +153,44 @@ describe("useRovingTabindex", () => {
     expect(document.activeElement).toBe(btn);
     expect(btn).toHaveAttribute("tabindex", "0");
   });
+
+  it("sets tabindex on new buttons added after re-render", () => {
+    const { rerender } = render(<TestToolbar buttonLabels={["A", "B"]} />);
+    const toolbar = screen.getByTestId("toolbar");
+    const btnB = screen.getByTestId("btn-B");
+
+    // Move roving target to B
+    btnB.focus();
+    expect(btnB).toHaveAttribute("tabindex", "0");
+
+    // Move focus away from toolbar
+    toolbar.focus();
+
+    // Re-render with an additional button
+    rerender(<TestToolbar buttonLabels={["A", "B", "C"]} />);
+
+    // New button C should get tabindex=-1, and B should remain the roving target
+    expect(screen.getByTestId("btn-A")).toHaveAttribute("tabindex", "-1");
+    expect(screen.getByTestId("btn-B")).toHaveAttribute("tabindex", "0");
+    expect(screen.getByTestId("btn-C")).toHaveAttribute("tabindex", "-1");
+  });
+
+  it("clamps roving index when buttons are removed", () => {
+    const { rerender } = render(<TestToolbar buttonLabels={["A", "B", "C"]} />);
+    const toolbar = screen.getByTestId("toolbar");
+
+    // Move roving target to C (index 2)
+    screen.getByTestId("btn-C").focus();
+    expect(screen.getByTestId("btn-C")).toHaveAttribute("tabindex", "0");
+
+    // Move focus away
+    toolbar.focus();
+
+    // Re-render with fewer buttons — C is gone, index 2 is out of range
+    rerender(<TestToolbar buttonLabels={["A", "B"]} />);
+
+    // Index should clamp to 1 (last button), so B becomes roving target
+    expect(screen.getByTestId("btn-A")).toHaveAttribute("tabindex", "-1");
+    expect(screen.getByTestId("btn-B")).toHaveAttribute("tabindex", "0");
+  });
 });

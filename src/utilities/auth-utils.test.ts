@@ -26,15 +26,19 @@ describe("auth-utils", () => {
   });
 
   describe("getPortalStandaloneSignInOrRegisterUrl", () => {
-    // functions to mock and reset window.location and url params
-    const originalLocation = window.location;
-    const mockWindowLocation = (newLocation: Location | URL) => {
-      delete (window as any).location;
-      (window as any).location = newLocation as Location;
+    // In Jest 30/jsdom, window.location is not easily mockable.
+    // We use jsdom's reconfigure method exposed by our custom test environment.
+    const originalHref = window.location.href;
+
+    const setLocation = (url: string) => {
+      // Use jsdom's reconfigure method exposed by jest-jsdom-environment.ts
+      (global as any).jsdom.reconfigure({ url });
       reprocessUrlParams();
     };
-    const setLocation = (url: string) => mockWindowLocation(new URL(url));
-    afterEach(() => mockWindowLocation(originalLocation));
+
+    afterEach(() => {
+      setLocation(originalHref);
+    });
 
     it("uses the portalDomain param if present", () => {
       setLocation("https://collaborative-learning.concord.org/standalone/?portalDomain=https://example.com");
