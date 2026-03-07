@@ -44,7 +44,6 @@ function beforeTest(params) {
 
 context('XYPlot Tool Tile', function () {
   describe("XYPlot Tool", () => {
-    // flaky
     it("XYPlot tool tile", () => {
       beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
