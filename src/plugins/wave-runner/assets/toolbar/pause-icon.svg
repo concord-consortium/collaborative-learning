@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="108px" height="34px" viewBox="0 0 108 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="36px" height="34px" viewBox="0 0 36 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>2855B4F8-6C50-4188-9E40-07BF4B64D000</title>
-    <g id="Pause-ICON" stroke="none" fill="none" transform="translate(72, 0)">
+    <g id="Pause-ICON" stroke="none" fill="none">
         <rect id="Rectangle" fill-rule="nonzero" x="0" y="0" width="36" height="34"></rect>
         <path d="M9.875,26.4791667 L15.2916667,26.4791667 L15.2916667,7.52083333 L9.875,7.52083333 L9.875,26.4791667 Z M20.7083333,7.52083333 L20.7083333,26.4791667 L26.125,26.4791667 L26.125,7.52083333 L20.7083333,7.52083333 Z" id="Pause" fill="#545454" fill-rule="evenodd"></path>
-        <text id="IN-PROG" font-family="Arial-BoldMT, Arial" font-size="10" font-weight="bold" fill="#1500FF">
-            <tspan x="-72" y="13">IN</tspan>
-            <tspan x="-72" y="24">PROG</tspan>
-        </text>
     </g>
 </svg>
