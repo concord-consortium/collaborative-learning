@@ -327,8 +327,13 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const readOnly = this.isReadOnly();
     const inLockedContainer = this.context.isLocked;
 
-    // Don't select a locked prompt
+    // Don't select a locked prompt in editable mode (it shouldn't be editable).
+    // In read-only mode, select the container (question tile) so the prompt
+    // acts as a proxy for commenting on the question.
     if (this.props.model.fixedPosition && inLockedContainer) {
+      if (readOnly && this.context.model) {
+        ui.setSelectedTile(this.context.model, { append: hasSelectionModifier(e) });
+      }
       return;
     }
 
