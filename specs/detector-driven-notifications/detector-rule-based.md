@@ -1,0 +1,406 @@
+# Rule-Based Detector
+
+Part of [Detector-Driven Notifications](detector-driven-notifications.md) — notifies researchers in real-time (~30s target latency) when students perform "interesting" actions during class, enabling timely interviews.
+
+## Overview
+
+Rule-based detectors match configurable patterns against event streams—counts, sequences, time windows, and thresholds. They're well-suited for detecting specific, well-defined behaviors.
+
+**Example use cases:**
+- "Alert when student deletes more than 3 objects in 1 minute"
+- "Notify when a student hasn't made changes for 5 minutes after starting"
+- "Detect when student undoes the same action 3+ times"
+
+## Detectable Patterns
+
+Rule-based detectors can match patterns across several dimensions. Each pattern type can be combined with filters (by user, document, tile type, etc.) and scoped to time windows.
+
+### 1. Count-Based Patterns
+
+Detect when an event occurs N times within a time window.
+
+| Pattern | Events Used | Use Case |
+|---------|-------------|----------|
+| Delete ≥3 tiles in 1 minute | `DELETE_TILE` | Student may be frustrated or starting over |
+| Create ≥5 sparrows in 2 minutes | `SPARROW_CREATION` | Student actively making connections |
+| ≥10 geometry operations in 1 minute | `GEOMETRY_TOOL_CHANGE` | High engagement or rapid iteration |
+| 0 events in 5 minutes after first action | Any event | Student may be stuck |
+
+### 2. Sequence-Based Patterns
+
+Detect specific sequences of events, optionally within a time window.
+
+| Pattern | Events Used | Use Case |
+|---------|-------------|----------|
+| Create tile → Delete same tile within 30s | `CREATE_TILE` → `DELETE_TILE` (same `objectType`) | Uncertainty about approach |
+| View peer work → Copy tile | `VIEW_SHOW_DOCUMENT` → `COPY_TILE` | Learning from peers (or copying) |
+| Request idea → Create tile | `REQUEST_IDEA` → `CREATE_TILE` | Following up on hint |
+| Geometry create → delete → create (same target) | `GEOMETRY_TOOL_CHANGE` sequence | Iterating on a shape |
+
+### 3. Absence/Inactivity Patterns
+
+Detect when expected events *don't* occur within a time window.
+
+| Pattern | Detection Logic | Use Case |
+|---------|-----------------|----------|
+| No events for 5 min after session start | Timer starts on first event, fires if no subsequent events | Student may be stuck or disengaged |
+| No tile creation after viewing exemplar | `REQUEST_IDEA` not followed by `CREATE_TILE` within 3 min | Hint didn't help |
+| No text changes after opening text tile | `TEXT_TOOL_CHANGE` absent after tile focus | Writer's block |
+| Long gap between geometry operations | `GEOMETRY_TOOL_CHANGE` gap > 2 min | Thinking or stuck |
+
+**Note:** Absence detection requires timers/scheduled checks—the detector must actively monitor for non-events, not just react to incoming events.
+
+### 4. Threshold-Based Patterns
+
+Detect when a value crosses a threshold, either from event parameters or accumulated state.
+
+| Pattern | Data Source | Use Case |
+|---------|-------------|----------|
+| Text word count drops by >50% | `TEXT_TOOL_CHANGE.wordCount` | Major deletion, possible frustration |
+| Text word count exceeds 200 | `TEXT_TOOL_CHANGE.wordCount` | Substantial writing |
+| Document has >10 tiles | Accumulated from `CREATE_TILE` - `DELETE_TILE` | Complex document |
+| Student has viewed >5 peer documents | Count of `VIEW_SHOW_DOCUMENT` where `documentUid` ≠ self | Actively exploring peer work |
+
+### 5. Cross-Document Patterns
+
+Detect patterns across multiple documents owned by the same student.
+
+| Pattern | Detection Logic | Use Case |
+|---------|-----------------|----------|
+| Activity in learning log after problem work | `*_TOOL_CHANGE` in learning log after problem document changes | Reflection behavior |
+| Copying between own documents | `COPY_TILE` where source and target both owned by student | Reusing own work |
+| Switching documents frequently | >3 `VIEW_SHOW_DOCUMENT` (own docs) in 2 min | Comparing or unsure where to work |
+
+### 6. Cross-Student Patterns
+
+Detect patterns across students, typically within a group or class.
+
+| Pattern | Detection Logic | Use Case |
+|---------|-----------------|----------|
+| All group members idle | No events from any student in group for 3 min | Group may need help |
+| One student doing all the work | >80% of group's events from one student | Collaboration issue |
+| Student views peer's work then makes similar change | `VIEW_SHOW_DOCUMENT` (peer) → similar `*_TOOL_CHANGE` | Learning from peer or copying |
+| Divergent approaches in group | Students creating different tile types for same section | Interesting variation |
+
+**Note:** Cross-student patterns require the detector to maintain state across multiple students, which has scaling implications.
+
+## Data Sources
+
+Rule-based detectors consume two primary data streams:
+
+### History Entries
+
+JSON-Patch formatted forward and reverse patches of every document change, generated by MST middleware. Includes:
+- The patches themselves (what changed)
+- Model type and action name (semantic intent)
+- Timestamp and document revision ID
+
+Covers: tile create/delete/modify, text edits, drawing changes, geometry operations — any change to document state.
+
+### Log Events
+
+Developer-added events capturing user actions, including those that don't change document state. Each event includes:
+
+**Extras (context on every event):**
+- `username`, `role`, `group`, `classHash` — who
+- `investigation`, `problem`, `problemPath`, `section` — where in curriculum
+- `navTabsOpen`, `selectedNavTabs`, `workspaceMode` — UI state
+- `session`, `time` — session tracking
+
+**Parameters (event-specific):**
+- `documentKey`, `documentUid`, `documentTitle`, `documentType` — document context
+- `objectType`, `targetId`, `operation`, `target` — what was affected
+- `commentText`, `text`, `wordCount`, `userAction` — rich event data
+
+### Current Document State
+
+Rules can also reference the current state of a document, not just the event stream. This simplifies many patterns:
+
+| Without document state | With document state |
+|------------------------|---------------------|
+| Track all `CREATE_TILE` and `DELETE_TILE` events to compute tile count, then check if deletion happens when count is low | Check if `DELETE_TILE` occurs when document has ≤2 tiles |
+| Track all geometry operations to know object count | Check if "add object" occurs when document already has ≥3 drawing objects |
+| Replay history to determine document complexity | Query current tile count, text length, etc. directly |
+
+**Implementation options:**
+1. **Query on demand** — Fetch document state from Firestore when evaluating a rule. Simple but adds latency on each rule evaluation.
+2. **Maintain incrementally** — Apply JSON-Patch entries as they arrive to build document state. Since history entries are already in JSON-Patch format (a standard with libraries in most languages), this is straightforward. The detector already needs to handle out-of-order events and checkpointing for event patterns, so maintaining document state is incremental work, not a new category of complexity.
+
+Maintaining state incrementally is recommended — it avoids query latency and leverages the JSON-Patch format that history entries already provide.
+
+### Reference Documentation
+
+Detailed log event documentation is available in CSV format:
+- [CLUE log events.csv](CLUE%20Log%20Events%20-%20CLUE%20log%20events.csv) — ~85 event types with descriptions
+- [CLUE Parameters.csv](CLUE%20Log%20Events%20-%20CLUE%20Parameters.csv) — Event-specific parameter definitions
+- [CLUE Extras.csv](CLUE%20Log%20Events%20-%20CLUE%20Extras.csv) — Context fields included with all events
+
+## State Management
+
+Rule-based detectors maintain several types of state to evaluate patterns.
+
+### State Types Needed
+
+| State Type | Purpose | Example |
+|------------|---------|---------|
+| **Event buffers** | Time windows for count patterns | Last 1 min of DELETE_TILE events |
+| **Counters** | Accumulate counts per window | 3 deletions in current window |
+| **Timers** | Absence/inactivity detection | Fire if no event in 5 min |
+| **Sequence state** | Track partial sequence matches | Saw CREATE_TILE, waiting for DELETE_TILE |
+| **Document state** | Current document from patches | Full document JSON for state queries |
+| **Cross-student state** | Group/class aggregates | Events from all 4 group members |
+
+### Bytewax Approach
+
+[Bytewax](https://github.com/bytewax/bytewax) handles state automatically via its Rust core.
+
+**How state is maintained:**
+- Stateful operators (`stateful_map`, `fold_window`, `reduce`) maintain state per key
+- Use `key_on` operator to partition by student_id, document_id, or group_id
+- Built-in windowing: `TumblingWindower`, `SlidingWindower`, `SessionWindower`
+
+**How state is persisted:**
+- Periodic snapshots to SQLite databases ("recovery partitions")
+- Configurable `snapshot_interval` (e.g., every 10 seconds)
+- Recovery partitions stored on disk
+
+**How recovery works:**
+- On restart, run same dataflow pointing to same recovery directory
+- State automatically restored from latest snapshot
+- Supports rescaling (change worker count without losing state)
+
+**Mapping to our needs:**
+
+| State Type | Bytewax Approach |
+|------------|------------------|
+| Event buffers | `fold_window` with `TumblingWindower` or `SlidingWindower` |
+| Counters | `fold_window` with count accumulator |
+| Timers | `SessionWindower` (fires after inactivity gap) |
+| Sequence state | `stateful_map` with state machine |
+| Document state | `stateful_map` applying JSON patches |
+| Cross-student | Key by `group_id` instead of `student_id` |
+
+**Example — count deletions per student in 1-minute windows:**
+```python
+from bytewax.operators.windowing import fold_window, TumblingWindower
+
+events.pipe(
+    filter(lambda e: e["type"] == "DELETE_TILE"),
+    key_on(lambda e: e["student_id"]),
+    fold_window(
+        "delete_count",
+        clock=EventClock(lambda e: e["time"]),
+        windower=TumblingWindower(length=timedelta(minutes=1)),
+        builder=lambda: 0,
+        folder=lambda count, event: count + 1
+    ),
+    filter(lambda kv: kv[1][1] >= 3)  # threshold
+)
+```
+
+### TypeScript + RxJS Approach
+
+RxJS provides stream primitives; state management and checkpointing are custom.
+
+**How state is maintained:**
+- `scan` operator for accumulating state
+- `bufferTime`/`windowTime` for time-based grouping
+- `groupBy` for per-key state
+- State lives in memory in operator closures
+
+**How state is persisted:**
+- Custom implementation required
+- Serialize state to JSON
+- Persist to Firebase, file, or other storage
+- Restore on startup before processing new events
+
+**How recovery works:**
+- On startup: load persisted state, replay events since last checkpoint
+- Track "last processed event" timestamp/ID
+- Handle partial state (some operators may need replay)
+
+**Mapping to our needs:**
+
+| State Type | RxJS Approach |
+|------------|---------------|
+| Event buffers | `bufferTime(60000)` or `windowTime(60000)` |
+| Counters | `scan((count, e) => count + 1, 0)` |
+| Timers | `debounceTime` + `timeout` or custom `setTimeout` |
+| Sequence state | `scan` with state machine object |
+| Document state | `scan` applying JSON patches |
+| Cross-student | `groupBy(e => e.group_id)` |
+
+**Example — count deletions per student in 1-minute windows:**
+```typescript
+events$.pipe(
+  filter(e => e.type === 'DELETE_TILE'),
+  groupBy(e => e.student_id),
+  mergeMap(student$ =>
+    student$.pipe(
+      bufferTime(60000),
+      filter(buffer => buffer.length >= 3),
+      map(buffer => ({
+        student_id: buffer[0].student_id,
+        count: buffer.length,
+        pattern: 'excessive_deletions'
+      }))
+    )
+  )
+)
+```
+
+**Checkpointing (custom implementation needed):**
+```typescript
+interface DetectorState {
+  lastEventId: string;
+  lastEventTime: number;
+  documentStates: Map<string, Document>;
+  windowBuffers: Map<string, Event[]>;
+  sequenceStates: Map<string, SequenceMatch>;
+}
+
+async function checkpoint(state: DetectorState) {
+  await firebase.doc('detector-state/rule-based').set(
+    JSON.parse(JSON.stringify(state))
+  );
+}
+
+async function restore(): Promise<DetectorState> {
+  const doc = await firebase.doc('detector-state/rule-based').get();
+  return doc.exists ? deserialize(doc.data()) : initialState();
+}
+```
+
+### Comparison Summary
+
+| Aspect | Bytewax | TypeScript + RxJS |
+|--------|---------|-------------------|
+| **Windowing** | Built-in (tumbling, sliding, session) | Built-in (`bufferTime`, `windowTime`) |
+| **Keyed state** | Built-in via `key_on` | Via `groupBy` + `mergeMap` |
+| **Checkpointing** | Automatic (SQLite) | Custom (serialize to Firebase/file) |
+| **Recovery** | Automatic on restart | Custom (load state, replay events) |
+| **Rescaling** | Supported | Custom implementation needed |
+| **Language** | Python | TypeScript |
+| **Browser support** | No | Yes |
+
+## Rule Engine Options
+
+Rules will likely be authored and updated by LLMs, so syntax popularity (more training data = better generation) is a key consideration alongside technical capabilities.
+
+### Evaluation Criteria
+
+| Criterion | Why It Matters |
+|-----------|---------------|
+| **LLM Authoring** | Syntax popularity = better LLM training data = better code generation |
+| **State Management** | Need checkpointing for crash recovery and multi-day sessions |
+| **Time Windows** | Core requirement for count/sequence patterns |
+| **Browser Authoring** | Nice-to-have: run in browser for rule author testing |
+
+### Option Comparison
+
+| Option | Language | LLM Authoring | State Mgmt | Time Windows | Browser? |
+|--------|----------|---------------|------------|--------------|----------|
+| **ksqlDB** | SQL | ⭐⭐⭐ Excellent | Kafka-managed | Built-in | No |
+| **Bytewax** | Python | ⭐⭐⭐ Excellent | Built-in (auto-recovery) | Built-in | No |
+| **Faust** | Python | ⭐⭐⭐ Excellent | RocksDB | Built-in | No |
+| **Drools** | Java/DRL | ⭐⭐ Good | Built-in | Built-in (CEP) | No |
+| **TypeScript code** | TypeScript | ⭐⭐⭐ Excellent | Custom | Custom (RxJS) | Yes |
+| **json-rules-engine** | JS/JSON | ⭐ Poor (obscure DSL) | Custom | None | Yes |
+| **CEP.js** | JS | ⭐ Poor (obscure) | Via RxJS | Built-in | Yes |
+
+### Option Details
+
+**SQL-based (ksqlDB)**
+
+LLMs are excellent at SQL. Windowing syntax is intuitive:
+```sql
+SELECT student_id, count(*)
+FROM tile_events
+WHERE event_type = 'DELETE_TILE'
+WINDOW TUMBLING (SIZE 1 MINUTE)
+GROUP BY student_id
+HAVING count(*) >= 3;
+```
+
+Pros: Best LLM authoring, mature, battle-tested at scale, built-in state
+Cons: Requires Kafka infrastructure, no browser option, may be overkill for small scale
+
+**Python-based (Bytewax)**
+
+Python is the #1 language for LLM code generation. Bytewax is "functional Pandas for live data"—under 100 lines for an event detector. Built-in stateful processing with automatic recovery.
+
+Pros: LLMs excel at Python, built-in state management with recovery, windowing included
+Cons: Requires Python runtime, no browser option
+
+**Python-based (Faust)**
+
+Similar to Bytewax but more Kafka-native. Uses RocksDB for state persistence. Originally used at Robinhood; now maintained as a community fork.
+
+Pros: Same Python benefits, mature, good state management
+Cons: Original project deprecated (fork is active), Kafka-centric
+
+**Java-based (Drools)**
+
+Mature CEP engine (since 2005) with visual Workbench for non-coders.
+
+Pros: Very mature, visual rule editor, enterprise-grade
+Cons: Java ecosystem, DRL syntax less common in LLM training data than Python/SQL
+
+**TypeScript code-based (Custom)**
+
+Write rules as TypeScript functions, use RxJS for streaming primitives.
+
+Pros: LLMs good at TS, runs in browser for authoring UX, full control
+Cons: Need to build time windows, state management, checkpointing
+
+### Recommendation
+
+- **Bytewax** for fastest path to working detectors with proper state management
+- **TypeScript code-based** if browser-based rule authoring is important
+
+## Implementation Considerations
+
+- Need to handle out-of-order events gracefully
+- Time-window rules require careful timestamp handling
+- Cross-student patterns require state across multiple students (scaling implications)
+
+## Design Decisions
+
+Decisions from the main spec discussion and this document's exploration.
+
+### From Main Spec
+
+| Decision | Rationale |
+|----------|-----------|
+| **Build state incrementally** | More efficient than querying document state on each event |
+| **Detector handles event ordering** | Events arrive from multiple sources with timestamps; detector manages ordering internally |
+| **Detector handles scaling internally** | If single instance can't handle 30 students, detector implementation manages sharding |
+| **Multiple detectors can run simultaneously** | Each notification includes detector name to distinguish source |
+| **Testing via historical replay + demo mode** | Historical replay for development; demo class mode for researchers to test triggering |
+
+### Questions Explored
+
+**Q: Rule definition format — DSL, JSON/YAML, or code-based?**
+
+A: Code-based (Python or TypeScript) is recommended. LLMs will likely author rules, and they generate better code in popular languages than in obscure DSLs. JSON-based rule engines like json-rules-engine have less LLM training data. See [Rule Engine Options](#rule-engine-options) for full comparison.
+
+**Q: Choice of rule evaluation system/engine?**
+
+A: Recommended options:
+- **Bytewax (Python)** — Best for fast path to working detectors with built-in state management and recovery
+- **TypeScript code-based** — Best if browser-based rule authoring/testing is important
+
+SQL-based (ksqlDB) is also strong for LLM authoring but requires Kafka infrastructure.
+
+**Q: Checkpointing approach for crash recovery?**
+
+A: Depends on engine choice:
+- Bytewax/Faust: Built-in automatic state recovery
+- TypeScript: Would need custom implementation (serialize state to JSON, persist to Firebase or file)
+- ksqlDB: Kafka handles state
+
+For multi-day sessions, either replay previous day's events on startup, or persist detector memory between sessions.
+
+## Open Questions
+
+*Add detector-specific questions here as they arise.*
