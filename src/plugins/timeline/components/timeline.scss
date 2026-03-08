@@ -1,0 +1,11 @@
+.timeline {
+  height: 208px;
+  margin: 10px 0 10px 12px;
+  position: relative;
+
+  .waveform {
+    background-color: black;
+    height: 100px;
+    width: 100%;
+  }
+}

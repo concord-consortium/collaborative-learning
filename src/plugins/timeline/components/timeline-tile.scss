@@ -5,4 +5,25 @@
   height: 100%;
   text-align: left;
   overflow: auto;
+
+  .timeline-container {
+    display: flex;
+    flex-direction: column;
+    margin: 46px 17px 15px;
+
+    .event-row {
+      align-items: center;
+      display: flex;
+      justify-content: center;
+      position: relative;
+
+      button + button {
+        margin-left: 76px;
+      }
+
+      .event-label {
+        position: absolute;
+      }
+    }
+  }
 }
