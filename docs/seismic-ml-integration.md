@@ -16,9 +16,11 @@ Two tiles work together to provide seismic data exploration with ML-based event 
 
 ### Model performance across data sizes
 
-We don't know how long the ML model takes to run over different sizes of seismic data. Runtime will vary by model type and by the user's hardware. We need:
+We don't know how long the ML model takes to run over different sizes of seismic data. Each day of data is roughly 20MB from EarthScope, so longer time ranges (weeks, months) involve substantial data. Runtime will vary by model type and by the user's hardware. We need:
 - Rough benchmarks for representative data sizes (e.g., 1 hour, 6 hours, 24 hours of data).
 - A systematic way to collect and report performance metrics for each model we might use, so we can compare models and set user expectations (the Wave Runner tile has an "estimated time to complete" display).
+
+Running the ML model in the browser is strongly preferred to avoid server-side infrastructure costs. However, if students are looking at more than a couple of days of data, browser execution may not be feasible and we may need to run the model in the cloud. This is a key question to resolve early — it determines whether we need server infrastructure for model execution.
 
 ### Target hardware
 
@@ -97,36 +99,41 @@ Steps are grouped into two parallel tracks so Scott and Teale can work simultane
 2. **ML model browser feasibility and benchmarking** — Get the existing TensorFlow.js demo running on target hardware with representative data sizes. Establish a benchmarking setup that can be reused as Derek iterates on models.
 3. **Model integration approach** — Define the interface between the ML model code and the Wave Runner tile (input/output formats, progress reporting, model packaging).
 
-### Teale's track: seismic data pipeline
+### Teale's track: UI validation and data pipeline
 
-These items can proceed in parallel with Scott's ML work. The goal is to get real seismic data flowing into the tile UI.
+These items can proceed in parallel with Scott's ML work.
 
-4. **Data source decision** — Clarify whether we are targeting Raspberry Shake, EarthScope, or both. This determines the fetching approach and any authentication requirements. Teale should:
+4. **Graph visualization at different time scales** — Before building more infrastructure, generate screenshots of graphs using the planned graph format for 24 hours, 1 month, and 1 year of data. The goal is to determine whether it is really necessary to download all of the data for graphing purposes, or whether a summarized view is sufficient. This informs how much of the data pipeline complexity is needed for the demo.
+
+5. **Thin slice through the tiles** — Build a minimal end-to-end path through both tiles to validate the UI design. There are concerns about the designed UI, and having a working thin slice will help verify whether those concerns are justified before investing in the full implementation.
+
+6. **Data source decision** — Clarify whether we are targeting Raspberry Shake, EarthScope, or both. This determines the fetching approach and any authentication requirements. Teale should:
    - Document what APIs each provider offers and their browser compatibility (CORS, rate limits).
    - Identify which provider is most practical for the initial demo.
    - Flag any showstoppers (e.g., school network restrictions for Raspberry Shake).
 
-5. **miniSEED format and in-memory representation** — Teale has already found seisplotjs for parsing miniSEED. Remaining work:
+7. **miniSEED format and in-memory representation** — Teale has already found seisplotjs for parsing miniSEED. Remaining work:
    - Build a small proof-of-concept that fetches and parses real data from the chosen provider.
    - Measure memory usage for representative time ranges (1 hour, 6 hours, 24 hours) to inform size constraints.
    - Determine whether miniSEED is already compressed or if raw samples are at full precision.
 
-6. **Seismic data shared model design** — Scott and Teale pair on this. This is the critical integration point — the contract between the Wave Runner tile, the Timeline tile, and the data fetching layer. Scott's understanding of the ML pipeline and data lifecycle will help anticipate what the shared model needs to support. Plan for a couple pairing sessions to work out:
+8. **Seismic data shared model design** — Scott and Teale pair on this. This is the critical integration point — the contract between the Wave Runner tile, the Timeline tile, and the data fetching layer. Scott's understanding of the ML pipeline and data lifecycle will help anticipate what the shared model needs to support. Plan for a couple pairing sessions to work out:
    - The shared model API: what methods/views does it expose? (e.g., samples for a time range, envelope data, station metadata, download progress)
    - How it abstracts over the data source so provider can be swapped later.
    - What state it holds and when data is evicted from memory.
    - Once the interface is agreed upon, Teale implements against a mock so tile UI work can continue without a complete data pipeline.
 
-7. **Fetching data from the provider** — Wire up the actual data fetching. Teale should:
+9. **Fetching data from the provider** — Wire up the actual data fetching. Teale should:
    - Test browser-direct fetching from the chosen provider.
    - If CORS or other issues prevent direct access, prototype a Cloud Function proxy.
    - Integrate fetching into the shared model implementation, replacing the mock.
 
 ### Deferred (not needed for initial demo)
 
-8. **Envelope summaries for compact storage** — Design the compact view representation. For the demo, limiting to shorter time ranges may be sufficient.
-9. **Compression of full-resolution data** — Explore only if miniSEED is not already compact enough. Optimization work that can wait.
-10. **Dynamic fetching for zoom** — Depends on the envelope design. Not needed for an initial demo.
+10. **Event boundary detection and grouping** — The ML model classifies fixed-size windows of data. For the initial demo, we just report whether each window contains an event. Deferred work includes: detecting where within a window an event starts/ends, and grouping consecutive event-positive windows into a single event span.
+11. **Envelope summaries for compact storage** — Design the compact view representation. For the demo, limiting to shorter time ranges may be sufficient.
+12. **Compression of full-resolution data** — Explore only if miniSEED is not already compact enough. Optimization work that can wait.
+13. **Dynamic fetching for zoom** — Depends on the envelope design. Not needed for an initial demo.
 
 ## Rationale
 
@@ -134,8 +141,10 @@ Three constraints drive this ordering:
 
 **Derek needs early feedback on browser feasibility.** The biggest risk in this project is that running ML models in the browser is too slow on target hardware. If that turns out to be the case, we either need Derek to produce smaller/faster models or we need to reconsider the browser-only architecture. The sooner we have benchmarks on real hardware, the sooner Derek can adjust. This is why target hardware confirmation (#1) and ML benchmarking (#2) come first — they are the highest-risk items and Derek's work depends on the answers.
 
-**Teale should not wait on ML work.** Teale has the tile shell built but all the buttons are no-ops. If he waited for the ML track to complete before starting on data, he'd be blocked. Instead, he can work the data pipeline track (#4–#7) in parallel. The shared model design (#6) is especially important — once that interface is agreed upon, Teale can mock it and continue building tile functionality even before fetching is fully wired up.
+**Teale should not wait on ML work.** Teale has the tile shell built but all the buttons are no-ops. If he waited for the ML track to complete before starting on data, he'd be blocked. Instead, he starts by validating the UI design — generating graph screenshots at different time scales (#4) and building a thin slice through the tiles (#5). This surfaces design problems early before investing in infrastructure. From there he moves to the data pipeline (#6–#9) in parallel with Scott's ML work. The shared model design (#8) is especially important — once that interface is agreed upon, Teale can mock it and continue building tile functionality even before fetching is fully wired up.
 
-**Demo in ~1 month means deferring optimization.** Envelope summaries (#8), compression (#9), and dynamic zoom fetching (#10) are important for the full product but not for an initial teacher demo. For the demo, we can constrain the time range to something that fits in memory and skip the multi-resolution view. This lets us show a working end-to-end flow (select station, load data, run model, see events) without solving every data management problem first.
+**Do we even need all the data for graphing?** At ~20MB per day from EarthScope, downloading weeks or months of full-resolution data to the browser is impractical. But the graph may not need full resolution — a summarized view could suffice for longer time ranges. Teale's graph screenshots (#4) will help answer this before we build the data pipeline, potentially simplifying the architecture significantly.
+
+**Demo in ~1 month means deferring optimization.** Event boundary refinement (#10), envelope summaries (#11), compression (#12), and dynamic zoom fetching (#13) are important for the full product but not for an initial teacher demo. For the demo, we can constrain the time range to something that fits in memory and skip the multi-resolution view. This lets us show a working end-to-end flow (select station, load data, run model, see events) without solving every data management problem first.
 
 A secondary principle: **pushing computation into the browser is a core goal.** We strongly prefer browser-only execution to avoid maintaining server infrastructure. This keeps published materials cheap to run long-term. The ML feasibility question (#2) is therefore not just a technical question — it determines whether the project's cost model works.
