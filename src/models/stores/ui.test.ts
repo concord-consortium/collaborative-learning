@@ -116,6 +116,31 @@ describe("ui model", () => {
     ui.closeDialog();
   });
 
+  it("allows tile to be picked up and cleared", () => {
+    expect(ui.pickedUpTileId).toBeUndefined();
+    expect(ui.pickedUpDocId).toBeUndefined();
+    expect(ui.isTilePickedUp).toBe(false);
+
+    ui.pickUpTile("tile-1", "doc-1");
+    expect(ui.pickedUpTileId).toBe("tile-1");
+    expect(ui.pickedUpDocId).toBe("doc-1");
+    expect(ui.isTilePickedUp).toBe(true);
+
+    ui.clearPickedUpTile();
+    expect(ui.pickedUpTileId).toBeUndefined();
+    expect(ui.pickedUpDocId).toBeUndefined();
+    expect(ui.isTilePickedUp).toBe(false);
+  });
+
+  it("allows picking up a different tile replaces the previous", () => {
+    ui.pickUpTile("tile-1", "doc-1");
+    expect(ui.pickedUpTileId).toBe("tile-1");
+
+    ui.pickUpTile("tile-2", "doc-2");
+    expect(ui.pickedUpTileId).toBe("tile-2");
+    expect(ui.pickedUpDocId).toBe("doc-2");
+  });
+
   it("allows prompt dialogs", () => {
     expect(ui.dialog).toBe(undefined);
     ui.prompt("prompt test");

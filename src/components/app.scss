@@ -1,3 +1,11 @@
+body.tile-picked-up {
+  cursor: grabbing !important;
+
+  * {
+    cursor: grabbing !important;
+  }
+}
+
 #app {
   position: fixed;
   top: 0;

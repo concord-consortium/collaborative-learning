@@ -8,6 +8,7 @@
   height: 100%;
   flex: 1 1 auto;
   border: 1px solid #ccc;
+  transition: transform 0.2s ease-out;
 
   .tile-content {
     border: 1px solid $tool-tile-background;
@@ -127,6 +128,20 @@
     &:focus {
       outline: none;
     }
+  }
+}
+
+// Shrink tiles during drag/pick-up so drop zone indicators show *around* them
+// instead of overlaid on top. Uses body-level classes (rather than per-tile component
+// classes) so all tiles shrink simultaneously — including tiles in the resources pane,
+// nested question tiles, etc. — without each component needing to observe drag state.
+// body.tile-picked-up is set by PickedUpTileGhost; body.tile-dragging is set by
+// TileComponent.handleTileDragStart / handleDragEnd.
+body.tile-picked-up,
+body.tile-dragging {
+  .tool-tile {
+    transform: scale(0.95);
+    transform-origin: center center;
   }
 }
 
