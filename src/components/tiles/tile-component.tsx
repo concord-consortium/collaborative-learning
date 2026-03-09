@@ -166,6 +166,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   private liveRegionTimer: ReturnType<typeof setTimeout> | null = null;
   private dragElement: HTMLDivElement | null;
   private resizeElement: HTMLDivElement | null;
+  private wasSelected = false;
 
   state = {
     hoverTile: false,
@@ -197,6 +198,14 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidUpdate(prevProps: IProps) {
+    // Scroll the tile into view when it becomes selected.
+    const { model } = this.props;
+    const isNowSelected = this.stores.ui.isSelectedTile(model);
+    if (isNowSelected && !this.wasSelected) {
+      this.domElement?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    }
+    this.wasSelected = isNowSelected;
+
     if (this.domElement && !this.resizeObserver) {
       this.resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
         for (const entry of entries) {
