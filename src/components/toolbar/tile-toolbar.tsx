@@ -1,14 +1,16 @@
-import React, { useContext, useState, useEffect, useMemo } from "react";
+import React, { useCallback, useContext, useRef, useState, useEffect, useMemo } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
 import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
 import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
 import { getToolbarButtonInfo } from "./toolbar-button-manager";
-import { TileModelContext } from "../tiles/tile-api";
+import { TileApiInterfaceContext, TileModelContext, RegisterToolbarContext } from "../tiles/tile-api";
 import { JSONValue } from "../../models/stores/settings";
+import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { useCanvasMethodsContext } from "../document/canvas-methods-context";
 import { getPixelWidthFromCSSStyle } from "../../utilities/js-utils";
+import { useRovingTabindex } from "../../hooks/use-roving-tabindex";
 import styles from "../vars.scss";
 
 
@@ -44,11 +46,122 @@ export const TileToolbar = observer(
   function TileToolbar({ tileType, readOnly, tileElement }: ToolbarWrapperProps) {
 
     const model = useContext(TileModelContext);
+    const tileApiInterface = useContext(TileApiInterfaceContext);
+    const registerToolbar = useContext(RegisterToolbarContext);
     const canvasMethods = useCanvasMethodsContext();
     const id = model?.id;
 
+    // Keep tile API accessible in native event listeners via ref
+    const tileApiInterfaceRef = useRef(tileApiInterface);
+    tileApiInterfaceRef.current = tileApiInterface;
+
     // Get styles to position the toolbar
     const { toolbarRefs, toolbarStyles, toolbarPlacement, rootElement, hide } = useTileToolbarPositioning(tileElement);
+
+    // Roving tabindex for keyboard navigation within toolbar
+    const toolbarContainerRef = useRef<HTMLDivElement | null>(null);
+    const [toolbarContainer, setToolbarContainer] = useState<HTMLDivElement | null>(null);
+    const { handleKeyDown: handleRovingKeyDown } = useRovingTabindex(toolbarContainerRef);
+
+    // Combine floating ref with our container ref
+    const setToolbarRef = useCallback((el: HTMLDivElement | null) => {
+      toolbarRefs.setFloating(el);
+      toolbarContainerRef.current = el;
+      setToolbarContainer(el); // trigger re-render so useEffect picks up the element
+    }, [toolbarRefs]);
+
+    // Register toolbar element with tile-component via context callback
+    useEffect(() => {
+      if (toolbarContainer) {
+        registerToolbar?.(toolbarContainer);
+        return () => registerToolbar?.(null);
+      }
+    }, [toolbarContainer, registerToolbar]);
+
+    // Handle Tab/Escape from toolbar for focus trap cycling.
+    // Uses native DOM listener (capture phase) to intercept Tab before browser processes it.
+    // NOTE: This focus routing must stay in sync with tile-component.tsx's handleTabKeyDown.
+    // The toolbar is in a FloatingPortal outside the tile DOM, so it has its own Tab/Escape
+    // handling that mirrors the tile's focus trap logic. Changes to one should be reviewed
+    // against the other.
+    useEffect(() => {
+      const container = toolbarContainer;
+      if (!container || !id) return;
+
+      const handleTabEscape = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          if (tileElement) {
+            // Signal tile-component that escape was used to exit the focus trap.
+            // Custom event is needed because FloatingPortal renders outside the tile DOM.
+            tileElement.dispatchEvent(new CustomEvent('toolbar-escape', { bubbles: false }));
+            tileElement.focus();
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          return;
+        }
+
+        if (e.key === "Tab") {
+          if (!tileElement) return;
+
+          // Use tile API to get focusable elements (tile-type-agnostic)
+          const tileApi = tileApiInterfaceRef.current?.getTileApi(id);
+          const focusable = tileApi?.getFocusableElements?.();
+          const contentElement = focusable?.contentElement;
+          const titleElement = focusable?.titleElement;
+          const focusContentFn = focusable?.focusContent;
+
+          // Helper to focus content, preferring tile's custom focus method (e.g., Slate)
+          const tryFocusContent = () => {
+            if (focusContentFn?.()) return true;
+            if (contentElement) {
+              contentElement.focus();
+              return document.activeElement === contentElement;
+            }
+            return false;
+          };
+
+          // Try candidates in order, skipping any that can't actually receive focus
+          // (e.g., a plain div title element without tabindex).
+          if (e.shiftKey) {
+            // Shift+Tab: toolbar → title → content → tile
+            if (titleElement) { titleElement.focus(); }
+            if (document.activeElement !== titleElement) {
+              if (!tryFocusContent()) { tileElement.focus(); }
+            }
+          } else {
+            // Tab: toolbar → content → title → tile
+            if (!tryFocusContent()) {
+              if (titleElement) { titleElement.focus(); }
+              if (document.activeElement !== titleElement) { tileElement.focus(); }
+            }
+          }
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
+
+      container.addEventListener("keydown", handleTabEscape, true); // capture phase
+      return () => container.removeEventListener("keydown", handleTabEscape, true);
+    }, [id, tileElement, toolbarContainer]);
+
+    // Handle arrow keys via React event (roving tabindex)
+    const handleToolbarKeyDown = useCallback((e: React.KeyboardEvent) => {
+      // ArrowUp from toolbar exits focus trap to tile container.
+      // Must intercept before roving tabindex handles it as button navigation.
+      if (e.key === "ArrowUp") {
+        if (tileElement) {
+          tileElement.focus();
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        return;
+      }
+      // Only delegate arrow keys, Home/End to roving tabindex (Tab/Escape handled natively above)
+      if (e.key !== "Tab" && e.key !== "Escape") {
+        handleRovingKeyDown(e);
+      }
+    }, [handleRovingKeyDown, tileElement]);
 
     // How many buttons and dividers fit in the first row?
     const [itemsInFirstRow, setItemsInFirstRow] = useState<number | undefined>(undefined);
@@ -136,9 +249,13 @@ export const TileToolbar = observer(
     return (
       <FloatingPortal root={rootElement}>
         <div
-          ref={toolbarRefs.setFloating}
+          ref={setToolbarRef}
           data-testid="tile-toolbar"
+          data-tile-id={id}
+          role="toolbar"
+          aria-label={`${getTileContentInfo(tileType)?.displayName || tileType} tile toolbar`}
           style={{ visibility: hide ? 'hidden' : 'visible', ...toolbarStyles}}
+          onKeyDown={handleToolbarKeyDown}
           // "focusable" here so that useTileSelectionPointerEvents won't absorb toolbar clicks
           className={classNames("tile-toolbar", "focusable",
             `${tileType}-toolbar`,

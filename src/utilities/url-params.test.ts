@@ -2,15 +2,11 @@ import { parse } from "query-string";
 import { processUrlParams } from "./url-params";
 
 describe("urlParams", () => {
-  const originalLocation = window.location;
-
-  const mockWindowLocation = (newLocation: Location | URL) => {
-    delete (window as any).location;
-    window.location = newLocation as Location;
-  };
+  // In Jest 30/jsdom, use jsdom's reconfigure method to change the URL
+  const originalHref = window.location.href;
 
   const setLocation = (url: string) => {
-    mockWindowLocation(new URL(url));
+    (global as any).jsdom.reconfigure({ url });
   };
 
   const setQueryParams = (params?: string) => {
@@ -23,7 +19,7 @@ describe("urlParams", () => {
   };
 
   afterEach(() => {
-    mockWindowLocation(originalLocation);
+    setLocation(originalHref);
   });
 
   test("appMode must be valid", () => {

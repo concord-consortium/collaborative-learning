@@ -206,6 +206,29 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
           }
         }
         return offsets;
+      },
+      // Return focusable elements for focus trap navigation
+      getFocusableElements: () => {
+        const contentElement: HTMLElement | null | undefined = this.textTileDiv?.querySelector("[data-slate-editor]");
+        // Use Slate's ReactEditor.focus to properly activate the editor (sets selection/cursor).
+        // Native .focus() on the contenteditable div doesn't initialize Slate's internal state.
+        const focusContent = () => {
+          if (this.editor) {
+            ReactEditor.focus(this.editor);
+            // ReactEditor.focus doesn't create a selection if the editor never had one.
+            // Without a selection, keyboard input has no insertion point and is silently ignored.
+            if (!this.editor.selection) {
+              const end = Editor.end(this.editor, []);
+              this.editor.selection = { anchor: end, focus: end };
+            }
+            return document.activeElement === contentElement;
+          }
+          return false;
+        };
+        return {
+          contentElement: contentElement || undefined,
+          focusContent
+        };
       }
     });
   }
@@ -304,8 +327,13 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const readOnly = this.isReadOnly();
     const inLockedContainer = this.context.isLocked;
 
-    // Don't select a locked prompt
+    // Don't select a locked prompt in editable mode (it shouldn't be editable).
+    // In read-only mode, select the container (question tile) so the prompt
+    // acts as a proxy for commenting on the question.
     if (this.props.model.fixedPosition && inLockedContainer) {
+      if (readOnly && this.context.model) {
+        ui.setSelectedTile(this.context.model, { append: hasSelectionModifier(e) });
+      }
       return;
     }
 

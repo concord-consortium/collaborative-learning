@@ -1,3 +1,6 @@
+import { GroupDocument } from "../models/document/document-types";
+import { UserModelType } from "../models/stores/user";
+import { DocumentModelType } from "../models/document/document";
 import { DB } from "./db";
 import { Firebase } from "./firebase";
 
@@ -58,6 +61,176 @@ describe("Firebase class", () => {
         expect(firebase.getRootFolder()).toBe("/demo/demo/portals//");
       });
     });
+  });
+
+  describe("getDocumentPaths", () => {
+    const firebase = new Firebase(mockDB);
+    const mockUser = {
+      id: "{user-id}",
+      portal: "{test-portal}",
+      classHash: "{test-class}",
+      offeringId: "{test-offering}"
+    } as unknown as UserModelType;
+
+    it("should handle personal document", () => {
+      const mockDocument = {
+        type: "personal",
+        key: "{doc-key}",
+        uid: "{user-id}"
+      } as unknown as DocumentModelType;
+      const paths = firebase.getDocumentPaths(mockUser, mockDocument);
+      expect(paths).toEqual({
+        content: "classes/{test-class}/users/{user-id}/documents/{doc-key}",
+        metadata: "classes/{test-class}/users/{user-id}/documentMetadata/{doc-key}",
+        typedMetadata: "classes/{test-class}/users/{user-id}/personalDocs/{doc-key}"
+      });
+    });
+
+    // When the document is from another user the computed path for the typedMetadata
+    // is not correct. This is probably a bug, but it isn't clear yet.
+    it.failing("should handle personal documents from other users", () => {
+      const mockDocument = {
+        type: "personal",
+        key: "{doc-key}",
+        uid: "{other-user-id}"
+      } as unknown as DocumentModelType;
+      const paths = firebase.getDocumentPaths(mockUser, mockDocument);
+      expect(paths).toEqual({
+        content: "classes/{test-class}/users/{other-user-id}/documents/{doc-key}",
+        metadata: "classes/{test-class}/users/{other-user-id}/documentMetadata/{doc-key}",
+        typedMetadata: "classes/{test-class}/users/{other-user-id}/personalDocs/{doc-key}"
+      });
+    });
+
+    it("should handle a learning log document", () => {
+      const mockDocument = {
+        type: "learningLog",
+        key: "{doc-key}",
+        uid: "{user-id}"
+      } as unknown as DocumentModelType;
+      const paths = firebase.getDocumentPaths(mockUser, mockDocument);
+      expect(paths).toEqual({
+        content: "classes/{test-class}/users/{user-id}/documents/{doc-key}",
+        metadata: "classes/{test-class}/users/{user-id}/documentMetadata/{doc-key}",
+        typedMetadata: "classes/{test-class}/users/{user-id}/learningLogs/{doc-key}"
+      });
+    });
+
+    // When the document is from another user the computed path for the typedMetadata
+    // is not correct. This is probably a bug, but it isn't clear yet.
+    it.failing("should handle learning log documents from other users", () => {
+      const mockDocument = {
+        type: "learningLog",
+        key: "{doc-key}",
+        uid: "{other-user-id}"
+      } as unknown as DocumentModelType;
+      const paths = firebase.getDocumentPaths(mockUser, mockDocument);
+      expect(paths).toEqual({
+        content: "classes/{test-class}/users/{other-user-id}/documents/{doc-key}",
+        metadata: "classes/{test-class}/users/{other-user-id}/documentMetadata/{doc-key}",
+        typedMetadata: "classes/{test-class}/users/{other-user-id}/learningLogs/{doc-key}"
+      });
+    });
+
+    it("should handle problem document", () => {
+      const mockDocument = {
+        type: "problem",
+        key: "{doc-key}",
+        uid: "{user-id}"
+      } as unknown as DocumentModelType;
+      const paths = firebase.getDocumentPaths(mockUser, mockDocument);
+      expect(paths).toEqual({
+        content: "classes/{test-class}/users/{user-id}/documents/{doc-key}",
+        metadata: "classes/{test-class}/users/{user-id}/documentMetadata/{doc-key}",
+        typedMetadata: "classes/{test-class}/offerings/{test-offering}/users/{user-id}/documents/{doc-key}"
+      });
+    });
+
+    it("should handle problem documents from other users", () => {
+      const mockDocument = {
+        type: "problem",
+        key: "{doc-key}",
+        uid: "{other-user-id}"
+      } as unknown as DocumentModelType;
+      const paths = firebase.getDocumentPaths(mockUser, mockDocument);
+      expect(paths).toEqual({
+        content: "classes/{test-class}/users/{other-user-id}/documents/{doc-key}",
+        metadata: "classes/{test-class}/users/{other-user-id}/documentMetadata/{doc-key}",
+        typedMetadata: "classes/{test-class}/offerings/{test-offering}/users/{other-user-id}/documents/{doc-key}"
+      });
+    });
+
+    it("should handle planning document", () => {
+      const mockDocument = {
+        type: "planning",
+        key: "{doc-key}",
+        uid: "{user-id}"
+      } as unknown as DocumentModelType;
+      const paths = firebase.getDocumentPaths(mockUser, mockDocument);
+      expect(paths).toEqual({
+        content: "classes/{test-class}/users/{user-id}/documents/{doc-key}",
+        metadata: "classes/{test-class}/users/{user-id}/documentMetadata/{doc-key}",
+        typedMetadata: "classes/{test-class}/offerings/{test-offering}/users/{user-id}/planning/{doc-key}"
+      });
+    });
+
+    it("should handle planning documents from other users", () => {
+      const mockDocument = {
+        type: "planning",
+        key: "{doc-key}",
+        uid: "{other-user-id}"
+      } as unknown as DocumentModelType;
+      const paths = firebase.getDocumentPaths(mockUser, mockDocument);
+      expect(paths).toEqual({
+        content: "classes/{test-class}/users/{other-user-id}/documents/{doc-key}",
+        metadata: "classes/{test-class}/users/{other-user-id}/documentMetadata/{doc-key}",
+        typedMetadata: "classes/{test-class}/offerings/{test-offering}/users/{other-user-id}/planning/{doc-key}"
+      });
+    });
+
+    it("should handle published problem documents", () => {
+      const mockDocument = {
+        type: "publication",
+        key: "{doc-key}",
+        uid: "{user-id}"
+      } as unknown as DocumentModelType;
+      const paths = firebase.getDocumentPaths(mockUser, mockDocument);
+      expect(paths).toEqual({
+        content: "classes/{test-class}/users/{user-id}/documents/{doc-key}",
+        metadata: "classes/{test-class}/users/{user-id}/documentMetadata/{doc-key}",
+        typedMetadata: "classes/{test-class}/offerings/{test-offering}/publications/{doc-key}"
+      });
+    });
+
+    it("should handle published problem documents from other users", () => {
+      const mockDocument = {
+        type: "publication",
+        key: "{doc-key}",
+        uid: "{other-user-id}"
+      } as unknown as DocumentModelType;
+      const paths = firebase.getDocumentPaths(mockUser, mockDocument);
+      expect(paths).toEqual({
+        content: "classes/{test-class}/users/{other-user-id}/documents/{doc-key}",
+        metadata: "classes/{test-class}/users/{other-user-id}/documentMetadata/{doc-key}",
+        typedMetadata: "classes/{test-class}/offerings/{test-offering}/publications/{doc-key}"
+      });
+    });
+
+    it("should handle group document", () => {
+      const mockDocument = {
+        type: GroupDocument,
+        key: "{doc-key}",
+        uid: "group_{offering-id}_{group-id}",
+        groupId: "{group-id}"
+      } as unknown as DocumentModelType;
+      const paths = firebase.getDocumentPaths(mockUser, mockDocument);
+      expect(paths).toEqual({
+        content: "classes/{test-class}/users/group_{offering-id}_{group-id}/documents/{doc-key}",
+        metadata: "classes/{test-class}/users/group_{offering-id}_{group-id}/documentMetadata/{doc-key}",
+        typedMetadata: ""
+      });
+    });
+
   });
 
   describe("setLastEditedNow", () => {

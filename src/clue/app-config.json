@@ -314,6 +314,17 @@
           "link-tile"
         ]
       },
+      "wave-runner": {
+        "tools": [
+          "load-data",
+          "|",
+          "play",
+          "restart",
+          "reset",
+          "|",
+          "timeline"
+        ]
+      },
       "dataset": {
         "cellsSelectCases": false
       },

@@ -174,4 +174,26 @@ describe("ConfigurationManager", () => {
     expect(configManager.commentTags).toEqual({});
   });
 
+  it("should return undefined for groupDocumentsEnabled when not configured", () => {
+    const configManager = new ConfigurationManager(defaults, []);
+    expect(configManager.groupDocumentsEnabled).toBeUndefined();
+  });
+
+  it("should return true for groupDocumentsEnabled when set in config", () => {
+    const configWithGroupDocs = {
+      ...defaults,
+      groupDocumentsEnabled: true
+    };
+    const configManager = new ConfigurationManager(configWithGroupDocs, []);
+    expect(configManager.groupDocumentsEnabled).toBe(true);
+  });
+
+  it("should return groupDocumentsEnabled from override config", () => {
+    const overrideWithGroupDocs: Partial<UnitConfiguration> = {
+      groupDocumentsEnabled: true
+    };
+    const configManager = new ConfigurationManager(defaults, [overrideWithGroupDocs]);
+    expect(configManager.groupDocumentsEnabled).toBe(true);
+  });
+
 });

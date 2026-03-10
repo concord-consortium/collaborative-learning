@@ -80,11 +80,11 @@ class TextToolTile {
     }
 
     verifyHighlightToolbarButtonEnabled() {
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.highlight').should('not.be.disabled');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.highlight').should('not.have.attr', 'aria-disabled');
     }
 
     verifyHighlightToolbarButtonDisabled() {
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.highlight').should('be.disabled');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.highlight').should('have.attr', 'aria-disabled', 'true');
     }
 
     clickHighlightToolbarButton() {
@@ -93,24 +93,24 @@ class TextToolTile {
 
     verifyOtherToolbarButtonsDisabled() {
         // Verify that other toolbar buttons are disabled when highlight chip is selected
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.bold').should('be.disabled');
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.italic').should('be.disabled');
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.underline').should('be.disabled');
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.subscript').should('be.disabled');
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.superscript').should('be.disabled');
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.list-ol').should('be.disabled');
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.list-ul').should('be.disabled');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.bold').should('have.attr', 'aria-disabled', 'true');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.italic').should('have.attr', 'aria-disabled', 'true');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.underline').should('have.attr', 'aria-disabled', 'true');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.subscript').should('have.attr', 'aria-disabled', 'true');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.superscript').should('have.attr', 'aria-disabled', 'true');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.list-ol').should('have.attr', 'aria-disabled', 'true');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.list-ul').should('have.attr', 'aria-disabled', 'true');
     }
 
     verifyOtherToolbarButtonsEnabled() {
         // Verify that other toolbar buttons are enabled when no highlight chip is selected
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.bold').should('not.be.disabled');
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.italic').should('not.be.disabled');
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.underline').should('not.be.disabled');
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.subscript').should('not.be.disabled');
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.superscript').should('not.be.disabled');
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.list-ol').should('not.be.disabled');
-        cy.get('.tile-toolbar.text-toolbar .toolbar-button.list-ul').should('not.be.disabled');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.bold').should('not.have.attr', 'aria-disabled');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.italic').should('not.have.attr', 'aria-disabled');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.underline').should('not.have.attr', 'aria-disabled');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.subscript').should('not.have.attr', 'aria-disabled');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.superscript').should('not.have.attr', 'aria-disabled');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.list-ol').should('not.have.attr', 'aria-disabled');
+        cy.get('.tile-toolbar.text-toolbar .toolbar-button.list-ul').should('not.have.attr', 'aria-disabled');
     }
 
     getHighlightButton() {

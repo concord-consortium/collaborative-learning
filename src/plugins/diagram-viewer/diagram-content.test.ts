@@ -204,7 +204,7 @@ describe("DiagramContent", () => {
     const content = createDiagramContent();
     jestSpyConsole("warn", spy => {
       expect(() => content.updateAfterSharedModelChanges()).not.toThrow();
-      expect(spy).toBeCalledWith("updateAfterSharedModelChanges was called with no shared model present");
+      expect(spy).toHaveBeenCalledWith("updateAfterSharedModelChanges was called with no shared model present");
     });
   });
 });

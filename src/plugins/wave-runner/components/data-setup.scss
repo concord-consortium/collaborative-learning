@@ -1,0 +1,28 @@
+@import "../../../components/vars";
+
+.wave-runner-tile {
+  .field-row {
+    display: flex;
+    gap: 20px;
+
+    & + .field-row {
+      margin-top: 13px;
+    }
+  }
+
+  .field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .field-label {
+    margin-left: 8px;
+    margin-bottom: 5px;
+  }
+
+  .dropdown,
+  .datetime {
+    width: 100%;
+  }
+}

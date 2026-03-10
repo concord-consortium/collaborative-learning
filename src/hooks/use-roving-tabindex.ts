@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 
 /**
  * Manages roving tabindex for toolbar keyboard navigation.
@@ -20,13 +20,11 @@ export function useRovingTabindex(containerRef: React.RefObject<HTMLElement | nu
     return Array.from(containerRef.current.querySelectorAll("button"));
   }, [containerRef]);
 
-  // Set tabindex attributes after each render to handle dynamic button changes
-  // (e.g., buttons becoming enabled/disabled). Also tracks focus changes from mouse
-  // clicks to keep the roving target in sync.
+  // Set tabindex attributes after every render to handle dynamic button changes
+  // (e.g., buttons added/removed, or button DOM elements replaced by React).
+  // Runs on every render (no dependency array) — this is intentional and cheap
+  // since it only sets attributes on a small number of buttons.
   useLayoutEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
     const buttons = getButtons();
     if (buttons.length === 0) return;
 
@@ -36,9 +34,14 @@ export function useRovingTabindex(containerRef: React.RefObject<HTMLElement | nu
     buttons.forEach((button, i) => {
       button.setAttribute("tabindex", i === currentIndexRef.current ? "0" : "-1");
     });
+  });
 
-    // When a button receives focus via mouse click, update the roving target.
-    // Queries fresh buttons to avoid stale closure if DOM changed since effect ran.
+  // When a button receives focus via mouse click, update the roving target.
+  // Queries fresh buttons to avoid stale closure if DOM changed since effect ran.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
       const freshButtons = getButtons();

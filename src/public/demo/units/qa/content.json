@@ -90,6 +90,7 @@
       {"id": "Drawing", "title": "Drawing", "isTileTool": true},
       {"id": "IframeInteractive", "title": "Interactive", "isTileTool": true},
       {"id": "Starter", "title": "Starter", "isTileTool": true},
+      {"id": "WaveRunner", "title": "Wave Runner", "isTileTool": true},
       {"id": "Simulator", "title": "EMG Simulator", "isTileTool": true},
       {"id": "Expression", "title": "Expression", "isTileTool": true},
       {"id": "BarGraph", "title": "Bar Graph", "isTileTool": true},
@@ -113,7 +114,8 @@
       "form": "What's it look like?",
       "function": "What's it do?"
     },
-    "aiEvaluation": "mock"
+    "aiEvaluation": "mock",
+    "groupDocumentsEnabled": true
   },
   "sections": {
     "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},

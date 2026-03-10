@@ -78,6 +78,9 @@ const gTileRegistration: Record<string, () => void> = {
   ]),
   "Text": loggedLoad("Text", () => [
     import(/* webpackChunkName: "Text" */"./models/tiles/text/text-registration")
+  ]),
+  "WaveRunner": loggedLoad("WaveRunner", () => [
+    import(/* webpackChunkName: "WaveRunner" */"./plugins/wave-runner/wave-runner-registration")
   ])
 };
 

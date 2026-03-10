@@ -1,5 +1,6 @@
 import { observer } from "mobx-react";
 import React from "react";
+import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { StarterContentModelType } from "./starter-content";
 import "./starter-tile.scss";
@@ -18,6 +19,7 @@ export const StarterToolComponent: React.FC<ITileProps> = observer((props) => {
 
   return (
     <div className="tile-content starter-tool">
+      <BasicEditableTileTitle />
       <textarea value={content.text} onChange={handleChange} />
     </div>
   );
