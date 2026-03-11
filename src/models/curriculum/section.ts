@@ -67,6 +67,16 @@ export function getSectionPlaceholder(type: SectionType) {
   return getSectionInfo(type).placeholder;
 }
 
+export function getMaxInitialsLength(): number {
+  let max = 0;
+  for (const key of Object.keys(gSectionInfoMap)) {
+    if (key !== kAllSectionType) {
+      max = Math.max(max, gSectionInfoMap[key].initials.length);
+    }
+  }
+  return max;
+}
+
 export const SectionModel = types
   .model("Section", {
     type: types.string, // sectionId corresponding to entry in unit

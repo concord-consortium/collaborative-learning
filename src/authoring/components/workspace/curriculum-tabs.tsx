@@ -6,7 +6,7 @@ import { useCurriculum } from "../../hooks/use-curriculum";
 
 interface ICurriculumTabFormInputs {
   tabLabel: string;
-  sections: Record<string, { title: string }>;
+  sections: Record<string, { title: string; initials: string }>;
 }
 
 const CurriculumTabs: React.FC = () => {
@@ -33,10 +33,11 @@ const CurriculumTabs: React.FC = () => {
           }
         }
 
-        Object.entries(data.sections).forEach(([type, {title}]) => {
+        Object.entries(data.sections).forEach(([type, {title, initials}]) => {
           const section = draft.sections[type];
           if (section) {
             section.title = title;
+            section.initials = initials;
           }
         });
       }
@@ -59,9 +60,17 @@ const CurriculumTabs: React.FC = () => {
       </div>
       <div className="sectionLabel">Curriculum Tab Subtab Labels</div>
       {sectionEntries.map(([sectionType, section]) => (
-        <div key={sectionType}>
+        <div key={sectionType} style={{ display: "flex", gap: 8, marginBottom: 4 }}>
           <input
             type="text"
+            style={{ width: 80 }}
+            placeholder="Abbrev"
+            {...register(`sections.${sectionType}.initials`, { required: "Abbreviation is required" })}
+            defaultValue={section.initials}
+          />
+          <input
+            type="text"
+            style={{ flex: 1 }}
             {...register(`sections.${sectionType}.title`, { required: "Section title is required" })}
             defaultValue={section.title}
           />
