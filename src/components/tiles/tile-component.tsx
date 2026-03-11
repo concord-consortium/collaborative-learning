@@ -202,7 +202,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     const { model } = this.props;
     const isNowSelected = this.stores.ui.isSelectedTile(model);
     if (isNowSelected && !this.wasSelected) {
-      this.domElement?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      this.domElement?.scrollIntoView?.({ behavior: "smooth", block: "nearest", inline: "nearest" });
     }
     this.wasSelected = isNowSelected;
 
