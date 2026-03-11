@@ -44,6 +44,20 @@ The number of levels depends on the scale factor K between adjacent levels: `lev
 
 The display width (~1000 px) barely affects the level count — doubling it shifts the count by at most 1.
 
+## Tile structure
+
+Each tile stores a fixed number of envelope points. With **1024 points per tile**, the time duration covered by a single tile varies by level:
+
+| Level | Point spacing | Tile duration   | Tiles per year |
+|-------|---------------|-----------------|----------------|
+| L0    | ~315,000 s    | ~10.2 years     | ~0.1           |
+| L1    | ~3,150 s      | ~37.3 days      | ~10            |
+| L2    | ~31.5 s       | ~9.0 hours      | ~978           |
+| L3    | ~0.315 s      | ~5.4 minutes    | ~97,700        |
+| raw   | 0.005 s       | ~5.1 seconds    | on-demand      |
+
+L0 is coarse enough that a single tile covers more than a year — for a 10-year dataset, one tile suffices. L3 produces many small tiles (~97,700 per year), but each is only ~1.5–2 KB gzipped so they are cheap to fetch individually.
+
 ## Storage estimates (per station-year, gzipped columnar Int16)
 
 Raw data is not stored in the tile cache — it is fetched on demand from the data provider when the user zooms in. Only envelope levels L0–L3 are stored.
