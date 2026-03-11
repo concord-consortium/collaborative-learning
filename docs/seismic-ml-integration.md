@@ -131,7 +131,7 @@ These items can proceed in parallel with Scott's ML work.
 ### Deferred (not needed for initial demo)
 
 10. **Event boundary detection and grouping** — The ML model classifies fixed-size windows of data. For the initial demo, we just report whether each window contains an event. Deferred work includes: detecting where within a window an event starts/ends, and grouping consecutive event-positive windows into a single event span.
-11. **Envelope summaries for compact storage** — Design the compact view representation. For the demo, limiting to shorter time ranges may be sufficient.
+11. **Envelope summaries for compact storage** — Design the compact view representation. For the demo, limiting to shorter time ranges may be sufficient. See [envelope-tile-cache-design.md](envelope-tile-cache-design.md) for detailed analysis of tile levels, storage format, and cost estimates.
 12. **Compression of full-resolution data** — Explore only if miniSEED is not already compact enough. Optimization work that can wait.
 13. **Dynamic fetching for zoom** — Depends on the envelope design. Not needed for an initial demo.
 
