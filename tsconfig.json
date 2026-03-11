@@ -29,7 +29,8 @@
       // TODO: upgrade to Typescript version 5, and use its new "bundler" moduleResolver.
       // This handles the exports section like webpack 5+ does, and also
       // doesn't require extensions on the import paths just like Webpack.
-      "@concord-consortium/codap-formulas-react17/*": ["node_modules/@concord-consortium/codap-formulas-react17/dist/*"]
+      "@concord-consortium/codap-formulas-react17/*": ["node_modules/@concord-consortium/codap-formulas-react17/dist/*"],
+      "seisplotjs": ["node_modules/seisplotjs/dist/index"]
     },
     "types": ["w3c-web-serial", "gtag.js"]
   },
