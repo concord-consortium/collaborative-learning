@@ -195,7 +195,7 @@ describe("ConfigurationManager", () => {
     const appConfig = AppConfigModel.create({
       config: { ...unitConfigDefaults, groupDocumentsEnabled: false }
     });
-    expect(appConfig.groupDocumentsEnabled).toBe(false)
+    expect(appConfig.groupDocumentsEnabled).toBe(false);
   });
 
 });
