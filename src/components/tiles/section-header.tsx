@@ -25,7 +25,7 @@ export class SectionHeader extends BaseComponent<IProps> {
     return (
       <div id={`section_${initials}`} className={rowSectionHeaderClassNames} data-test="section-header"
           onMouseDown={this.handleMouseDown} >
-        <div className={`initials ${typeClass}`}
+        <div className={classNames("initials", typeClass)}
             style={{ minWidth: `${getMaxInitialsLength() + 1}ch` }}>
           {initials}
         </div>

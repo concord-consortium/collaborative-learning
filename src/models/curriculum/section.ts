@@ -67,11 +67,14 @@ export function getSectionPlaceholder(type: SectionType) {
   return getSectionInfo(type).placeholder;
 }
 
-export function getMaxInitialsLength(): number {
+export function getMaxInitialsLength(
+  sectionInfoMap?: ISectionInfoMap
+): number {
+  const map = sectionInfoMap || gSectionInfoMap;
   let max = 0;
-  for (const key of Object.keys(gSectionInfoMap)) {
+  for (const key of Object.keys(map)) {
     if (key !== kAllSectionType) {
-      max = Math.max(max, gSectionInfoMap[key].initials.length);
+      max = Math.max(max, map[key].initials.length);
     }
   }
   return max;

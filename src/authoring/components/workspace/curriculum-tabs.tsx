@@ -65,12 +65,17 @@ const CurriculumTabs: React.FC = () => {
             type="text"
             style={{ width: 80 }}
             placeholder="Abbrev"
+            aria-label={`Abbreviation for ${section.title || sectionType} section`}
             {...register(`sections.${sectionType}.initials`, { required: "Abbreviation is required" })}
             defaultValue={section.initials}
           />
+          {errors.sections?.[sectionType]?.initials && (
+            <span>{errors.sections?.[sectionType]?.initials?.message}</span>
+          )}
           <input
             type="text"
             style={{ flex: 1 }}
+            aria-label={`Title for ${sectionType} section`}
             {...register(`sections.${sectionType}.title`, { required: "Section title is required" })}
             defaultValue={section.title}
           />
