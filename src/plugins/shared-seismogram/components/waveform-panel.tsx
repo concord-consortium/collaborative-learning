@@ -1,8 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { DateTime, Interval } from "luxon";
 import { seismograph, seismographconfig, seismogram as seismogramModule } from "seisplotjs";
-import type { seismogram as SeismogramNS } from "seisplotjs";
-type Seismogram = SeismogramNS.Seismogram;
+type Seismogram = seismogramModule.Seismogram;
 import "./waveform-panel.scss";
 
 interface WaveformPanelProps {
