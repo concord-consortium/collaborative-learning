@@ -30,7 +30,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
 
   private navTabPanelElt: HTMLDivElement | null = null;
   private shouldRestoreFocus = false;
-
   constructor(props: IProps) {
     super(props);
   }

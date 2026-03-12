@@ -48,7 +48,8 @@ export const PersistentUIModelV2 = types
   .volatile(self => ({
     defaultLeftNavExpanded: false,
     problemPath: "",
-    isDocumentsView: false
+    isDocumentsView: false,
+    hasSavedPersistentUI: false
   }))
   .views((self) => ({
     get navTabContentShown () {
@@ -87,6 +88,21 @@ export const PersistentUIModelV2 = types
   .actions(self => ({
     setDividerPosition(position: number) {
       self.dividerPosition = position;
+    },
+    setHasSavedPersistentUI(value: boolean) {
+      self.hasSavedPersistentUI = value;
+    },
+    applyDefaultPanelLayout(layout: "split" | "workspace-only" | "resources-only" | undefined) {
+      if (self.hasSavedPersistentUI) return;
+      switch (layout) {
+        case "workspace-only":
+          self.dividerPosition = kDividerMin;
+          break;
+        case "resources-only":
+          self.dividerPosition = kDividerMax;
+          break;
+        // "split" or undefined: keep the default kDividerHalf
+      }
     },
     setShowAnnotations(show: boolean) {
       self.showAnnotations = show;
@@ -333,6 +349,7 @@ export const PersistentUIModelV2 = types
       const getRef = db.firebase.ref(path);
       const theData: string | undefined = (await getRef.once("value"))?.val();
       const asObj = safeJsonParse(theData);
+      self.setHasSavedPersistentUI(!!asObj);
       if (asObj) {
         // As of CLUE 5.3, comparison mode should only be available in the bookmarks tab.
         // Due to a yet-to-be-determined bug, it can be saved in the PersistentUI in other situations in which it

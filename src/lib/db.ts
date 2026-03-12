@@ -144,7 +144,7 @@ export class DB {
             this.firestore.recordLaunchTime();
 
             // Start fetching the persistent UI. We want this to happen as early as possible.
-            persistentUI.initializePersistentUISync(user, db);
+            const persistentUIReady = persistentUI.initializePersistentUISync(user, db);
 
             // Resolve after listeners have started.
             // Before they can be started  we need to wait for the unit to be loaded,
@@ -153,6 +153,13 @@ export class DB {
             unitLoadedPromise.then(() => {
               this.listeners.start().then(resolve).catch(reject);
               exemplarController.initialize(this.stores);
+
+              // After unit config is available, apply default panel layout for first-time visitors
+              persistentUIReady.then(() => {
+                persistentUI.applyDefaultPanelLayout(this.stores.appConfig.defaultPanelLayout);
+              }).catch((err) => {
+                console.error("Error initializing persistent UI:", err);
+              });
             });
           }
         }

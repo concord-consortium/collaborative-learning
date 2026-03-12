@@ -40,7 +40,8 @@ export const unitConfigDefaults: UnitConfiguration = {
     sortOptions: ["Date", "Group", "Name", "Strategy", "Bookmarked", "Tools"]
   },
   aiEvaluation: undefined,
-  aiPrompt: undefined
+  aiPrompt: undefined,
+  defaultPanelLayout: undefined,
 } as UnitConfiguration;
 
 export const unitConfigOverrides: UnitConfiguration = {
@@ -90,5 +91,6 @@ export const unitConfigOverrides: UnitConfiguration = {
     keyIndicatorsPrompt: "List of main features or elements of the document that support this categorization",
     discussionPrompt: "Any other relevant information.",
     systemPrompt: "You are a teaching assistant in a middle school science class."
-  }
+  },
+  defaultPanelLayout: "workspace-only",
 } as UnitConfiguration;
