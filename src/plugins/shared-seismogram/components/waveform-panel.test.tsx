@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import React from "react";
 import { DateTime } from "luxon";
-import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
+import { WaveformPanel } from "./waveform-panel";
 import type { seismogram as SeismogramNS } from "seisplotjs";
 type Seismogram = SeismogramNS.Seismogram;
 

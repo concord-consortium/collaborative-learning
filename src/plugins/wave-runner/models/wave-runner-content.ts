@@ -1,5 +1,5 @@
-import { getType, types, Instance } from "mobx-state-tree";
-import { TileContentModel } from "../../../models/tiles/tile-content";
+import { types, Instance } from "mobx-state-tree";
+import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
 import { kWaveRunnerTileType } from "../wave-runner-types";
@@ -21,14 +21,16 @@ export const WaveRunnerContentModel = TileContentModel
       const smm = getSharedModelManager(self);
       return smm?.findFirstSharedModelByType(SharedSeismogram);
     },
+  }))
+  .views(self => ({
     get isLoading() {
-      return this.sharedSeismogram?.isLoading ?? false;
+      return self.sharedSeismogram?.isLoading ?? false;
     },
     get loadError() {
-      return this.sharedSeismogram?.loadError ?? null;
+      return self.sharedSeismogram?.loadError ?? null;
     },
     get hasData() {
-      return this.sharedSeismogram?.hasData ?? false;
+      return self.sharedSeismogram?.hasData ?? false;
     }
   }))
   .actions(self => ({
@@ -43,12 +45,12 @@ export const WaveRunnerContentModel = TileContentModel
         sharedSeismogram = self.sharedSeismogram ?? newSharedSeismogram;
       }
 
-      await sharedSeismogram.loadData();
+      sharedSeismogram.loadData();
     }
   }));
 
 export interface WaveRunnerContentModelType extends Instance<typeof WaveRunnerContentModel> {}
 
-export function isWaveRunnerContentModel(model: unknown): model is WaveRunnerContentModelType {
-  return !!model && getType(model as object) === WaveRunnerContentModel;
+export function isWaveRunnerContentModel(model?: ITileContentModel): model is WaveRunnerContentModelType {
+  return model?.type === kWaveRunnerTileType;
 }

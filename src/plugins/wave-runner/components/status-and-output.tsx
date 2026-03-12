@@ -12,28 +12,29 @@ interface WindowConfig {
   durationSeconds: number;
 }
 
+// TODO Clean this file up.
 const SEVEN_DAY_START = DateTime.fromISO("2026-01-30T00:00:00Z", { zone: "utc" });
-const THREE_DAY_START = DateTime.fromISO("2026-02-03T00:00:00Z", { zone: "utc" });
-const FILE_START      = DateTime.fromISO("2026-02-01T00:00:00Z", { zone: "utc" });
-const NINE_AM         = DateTime.fromISO("2026-02-01T09:00:00Z", { zone: "utc" });
-const NINE_25         = DateTime.fromISO("2026-02-01T09:25:00Z", { zone: "utc" });
-const NINE_28         = DateTime.fromISO("2026-02-01T09:28:25Z", { zone: "utc" });
+// const THREE_DAY_START = DateTime.fromISO("2026-02-03T00:00:00Z", { zone: "utc" });
+// const FILE_START      = DateTime.fromISO("2026-02-01T00:00:00Z", { zone: "utc" });
+// const NINE_AM         = DateTime.fromISO("2026-02-01T09:00:00Z", { zone: "utc" });
+// const NINE_25         = DateTime.fromISO("2026-02-01T09:25:00Z", { zone: "utc" });
+// const NINE_28         = DateTime.fromISO("2026-02-01T09:28:25Z", { zone: "utc" });
 
 const WINDOW_CONFIGS: WindowConfig[] = [
   { label: "1 week",      startTime: SEVEN_DAY_START, durationSeconds: 7 * 86400 },
-  { label: "3 days",      startTime: THREE_DAY_START, durationSeconds: 3 * 86400 },
-  { label: "24 hours",    startTime: FILE_START,      durationSeconds: 86400     },
-  { label: "6 hours",     startTime: NINE_AM,         durationSeconds: 21600     },
-  { label: "1 hour",      startTime: NINE_AM,         durationSeconds: 3600      },
-  { label: "15 minutes",  startTime: NINE_25,         durationSeconds: 900       },
-  { label: "5 minutes",   startTime: NINE_25,         durationSeconds: 300       },
-  { label: "1 minute",    startTime: NINE_28,         durationSeconds: 60        },
-  { label: "30 seconds",  startTime: NINE_28,         durationSeconds: 30        },
-  { label: "15 seconds",  startTime: NINE_28,         durationSeconds: 15        },
-  { label: "5 seconds",   startTime: NINE_28,         durationSeconds: 5         },
+  // { label: "3 days",      startTime: THREE_DAY_START, durationSeconds: 3 * 86400 },
+  // { label: "24 hours",    startTime: FILE_START,      durationSeconds: 86400     },
+  // { label: "6 hours",     startTime: NINE_AM,         durationSeconds: 21600     },
+  // { label: "1 hour",      startTime: NINE_AM,         durationSeconds: 3600      },
+  // { label: "15 minutes",  startTime: NINE_25,         durationSeconds: 900       },
+  // { label: "5 minutes",   startTime: NINE_25,         durationSeconds: 300       },
+  // { label: "1 minute",    startTime: NINE_28,         durationSeconds: 60        },
+  // { label: "30 seconds",  startTime: NINE_28,         durationSeconds: 30        },
+  // { label: "15 seconds",  startTime: NINE_28,         durationSeconds: 15        },
+  // { label: "5 seconds",   startTime: NINE_28,         durationSeconds: 5         },
 ];
 
-export const StatusAndOutput: React.FC = observer(() => {
+export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
   const rawContent = useContext(TileModelContext)?.content;
   const model = isWaveRunnerContentModel(rawContent) ? rawContent : undefined;
   const seismogram = model?.sharedSeismogram?.seismogram;

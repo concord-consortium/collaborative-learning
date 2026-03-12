@@ -1,5 +1,5 @@
-import { getType, types, Instance } from "mobx-state-tree";
-import { TileContentModel } from "../../../models/tiles/tile-content";
+import { types, Instance } from "mobx-state-tree";
+import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
 import { kTimelineTileType } from "../timeline-types";
@@ -30,6 +30,6 @@ export const TimelineContentModel = TileContentModel
 
 export interface TimelineContentModelType extends Instance<typeof TimelineContentModel> {}
 
-export function isTimelineContentModel(model: unknown): model is TimelineContentModelType {
-  return !!model && getType(model as object) === TimelineContentModel;
+export function isTimelineContentModel(model?: ITileContentModel): model is TimelineContentModelType {
+  return model?.type === kTimelineTileType;
 }

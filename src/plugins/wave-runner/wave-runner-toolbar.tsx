@@ -64,8 +64,6 @@ const TimelineButton = observer(function TimelineButton({ name }: IToolbarButton
     addTilesContext.addTileAfter(kTimelineTileType, tileModel, sharedModels);
   }
 
-  if (!content) return null;
-
   return (
     <TileToolbarButton name={name} title="Timeline It!" onClick={handleClick} disabled={disabled}>
       <TimelineItIcon/>
