@@ -58,6 +58,44 @@ Each tile stores a fixed number of envelope points. With **1024 points per tile*
 
 L0 is coarse enough that a single tile covers more than a year — for a 10-year dataset, one tile suffices. L3 produces many small tiles (~97,700 per year), but each is only ~1.5–2 KB gzipped so they are cheap to fetch individually.
 
+## Tile addressing
+
+Given a datetime, the client needs to determine which tile to fetch. Two approaches:
+
+### Option A: Fixed point count (sequential index)
+
+Tiles are numbered sequentially from a shared epoch (e.g., Unix epoch). The tile duration is constant per level (`points_per_tile × point_spacing`), so the index is:
+
+```
+tile_duration = 1024 × point_spacing[level]
+tile_index = floor((t - epoch) / tile_duration)
+```
+
+Tile path: `/{station}/{level}/{tile_index}`
+
+**Pros**: Simple arithmetic, uniform tile sizes, uniform fetch sizes, similar to web map tile systems (z/x/y).
+**Cons**: Tile boundaries don't align with human-readable time units. Index numbers can be large (L3 tile indices reach ~5 million for 2024 timestamps from Unix epoch).
+
+### Option B: Calendar-aligned tiles
+
+Tiles snap to natural time boundaries, with the point count varying per tile:
+
+| Level | Tile boundary | Points per tile (approx) |
+|-------|---------------|--------------------------|
+| L0    | 10 years      | ~100                     |
+| L1    | 1 month       | ~830–880 (varies by month)|
+| L2    | 1 hour        | ~114                     |
+| L3    | 5 minutes     | ~952                     |
+
+Tile path: `/{station}/{level}/2024-03-15T14:00:00` or `/{station}/L2/2024/03/15/14`
+
+**Pros**: Human-readable paths, easy to reason about cache invalidation ("regenerate March 2024"), aligns with how data often arrives in practice.
+**Cons**: Variable tile sizes (months have different lengths), more complex indexing math, variable fetch sizes.
+
+### Recommendation
+
+Fixed point count (Option A) is simpler to implement and matches the uniform storage format. Calendar-aligned (Option B) is worth considering if human-readable paths or time-boundary-aligned cache invalidation become important.
+
 ## Storage estimates (per station-year, gzipped columnar Int16)
 
 Raw data is not stored in the tile cache — it is fetched on demand from the data provider when the user zooms in. Only envelope levels L0–L3 are stored.
