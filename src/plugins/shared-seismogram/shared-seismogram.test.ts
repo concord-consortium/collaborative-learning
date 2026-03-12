@@ -1,6 +1,14 @@
+jest.mock("seisplotjs", () => ({
+  miniseed: {
+    parseDataRecords: jest.fn().mockReturnValue([{ stub: true }]),
+    merge: jest.fn().mockReturnValue({ numPoints: 42 }),
+  },
+  seismogram: {},
+}));
+
 import { SharedSeismogram, kSharedSeismogramType, isSharedSeismogram } from "./shared-seismogram";
 
-describe.skip("SharedSeismogram", () => {
+describe("SharedSeismogram", () => {
   it("has the correct type", () => {
     const model = SharedSeismogram.create();
     expect(model.type).toBe(kSharedSeismogramType);
@@ -40,13 +48,6 @@ describe.skip("SharedSeismogram", () => {
       global.fetch = jest.fn().mockResolvedValue({
         arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
       } as any);
-
-      jest.mock("seisplotjs", () => ({
-        miniseed: {
-          parseDataRecords: jest.fn().mockReturnValue([{ stub: true }]),
-          merge: jest.fn().mockReturnValue({ numPoints: 42 }),
-        },
-      }));
     });
 
     afterEach(() => {

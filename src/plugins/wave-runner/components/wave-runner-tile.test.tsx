@@ -1,3 +1,11 @@
+jest.mock("seisplotjs", () => ({
+  miniseed: {
+    parseDataRecords: jest.fn().mockReturnValue([{ stub: true }]),
+    merge: jest.fn().mockReturnValue({ numPoints: 42 }),
+  },
+  seismogram: {},
+}));
+
 import { render, screen } from "@testing-library/react";
 import { Provider } from "mobx-react";
 import React from "react";
@@ -17,7 +25,7 @@ jest.mock("react-resize-detector", () => ({
   useResizeDetector: () => ({ width: mockWidth, ref: React.createRef() })
 }));
 
-describe.skip("WaveRunnerComponent", () => {
+describe("WaveRunnerComponent", () => {
   const content = defaultWaveRunnerContent();
   const model = TileModel.create({ content });
 
