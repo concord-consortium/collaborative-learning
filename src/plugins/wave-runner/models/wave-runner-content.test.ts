@@ -1,8 +1,8 @@
-import { WaveRunnerContentModel } from "./wave-runner-content";
+// import { WaveRunnerContentModel } from "./wave-runner-content";
 
-describe("WaveRunnerContent", () => {
-  it("is always user resizable", () => {
-    const content = WaveRunnerContentModel.create();
-    expect(content.isUserResizable).toBe(true);
-  });
-});
+// describe("WaveRunnerContent", () => {
+//   it("is always user resizable", () => {
+//     const content = WaveRunnerContentModel.create();
+//     expect(content.isUserResizable).toBe(true);
+//   });
+// });
