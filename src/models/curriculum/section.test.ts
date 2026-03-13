@@ -1,5 +1,6 @@
 import { getSectionInitials, getSectionPlaceholder, getSectionTitle,
-        kAllSectionType, SectionModel, registerSectionInfo, findSectionIndex } from "./section";
+        kAllSectionType, SectionModel, registerSectionInfo, findSectionIndex,
+        getMaxInitialsLength } from "./section";
 
 describe("SectionModel", () => {
 
@@ -42,6 +43,34 @@ describe("SectionModel", () => {
     expect(foo2Section.placeholder).toBe("Foo Placeholder");
   });
 
+});
+
+describe("getMaxInitialsLength", () => {
+  it("returns max initials length from a provided map", () => {
+    const map = {
+      intro: { initials: "IN", title: "Introduction" },
+      explore: { initials: "EXPLORE", title: "Explore" },
+      summarize: { initials: "SUM", title: "Summarize" }
+    };
+    expect(getMaxInitialsLength(map)).toBe(7);
+  });
+
+  it("excludes the 'all' section type", () => {
+    const map = {
+      [kAllSectionType]: { initials: "EVERYTHING", title: "All" },
+      intro: { initials: "IN", title: "Introduction" }
+    };
+    expect(getMaxInitialsLength(map)).toBe(2);
+  });
+
+  it("returns 0 for an empty map", () => {
+    expect(getMaxInitialsLength({})).toBe(0);
+  });
+
+  it("computes from global map when no argument provided", () => {
+    registerSectionInfo({ test: { initials: "TEST", title: "Test Section" } });
+    expect(getMaxInitialsLength()).toBeGreaterThanOrEqual(4);
+  });
 });
 
 describe("findSelectedSectionIndex", () => {
