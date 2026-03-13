@@ -5,8 +5,8 @@ import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button"
 import {
   IToolbarButtonComponentProps, registerTileToolbarButtons
 } from "../../components/toolbar/toolbar-button-manager";
-import { isWaveRunnerContentModel } from "./models/wave-runner-content";
 import { kTimelineTileType } from "../timeline/timeline-types";
+import { isWaveRunnerContentModel } from "./models/wave-runner-content";
 
 import LoadDataIcon from "./assets/toolbar/load-data-icon.svg";
 import RunIcon from "./assets/toolbar/run-icon.svg";
@@ -17,7 +17,9 @@ import TimelineItIcon from "./assets/toolbar/timeline-it-icon.svg";
 const LoadDataButton = observer(function LoadDataButton({ name }: IToolbarButtonComponentProps) {
   const tileModel = useContext(TileModelContext);
   const content = tileModel?.content;
+
   if (!isWaveRunnerContentModel(content)) return null;
+
   const disabled = content.isLoading || content.hasData;
   return (
     <TileToolbarButton name={name} title="Load Data" onClick={() => content.loadData()} disabled={disabled}>

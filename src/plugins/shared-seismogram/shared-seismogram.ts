@@ -5,6 +5,7 @@ import { SharedModel, SharedModelType } from "../../models/shared/shared-model";
 
 export const kSharedSeismogramType = "SharedSeismogram";
 
+// TODO: Remove hardcoded data. Fetch data based on station, start time, and end time props.
 const S3_BASE = "https://models-resources.s3.amazonaws.com/collaborative-learning/datasets";
 const MSEED_URLS = [
   `${S3_BASE}/2026_01_30_00_00_00-2026_01_31_00_00_00_anchorage_airport.mseed`,

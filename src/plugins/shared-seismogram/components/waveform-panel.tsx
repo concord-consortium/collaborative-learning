@@ -15,15 +15,19 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = ({
   label,
   startTime,
   durationSeconds,
-  seismogram: seismogramData,
+  seismogram,
 }) => {
   const divRef = useRef<HTMLDivElement>(null);
 
+  // Plot the seismogram
   useEffect(() => {
-    if (!divRef.current || !seismogramData) return;
+    if (!divRef.current || !seismogram) return;
+
+    const div = divRef.current;
+    let spElement: HTMLElement | null = null;
 
     const endTime = startTime.plus({ seconds: durationSeconds });
-    const sdd = seismogramModule.SeismogramDisplayData.fromSeismogram(seismogramData);
+    const sdd = seismogramModule.SeismogramDisplayData.fromSeismogram(seismogram);
     const interval = Interval.fromDateTimes(startTime, endTime);
     sdd.timeRange = interval;
 
@@ -38,20 +42,19 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = ({
     config.lineColors = ["white"];
     config.margin = { top: 0, right: 0, bottom: 0, left: 0 };
 
-    let spElement: HTMLElement | null = null;
     try {
       spElement = new seismograph.Seismograph([sdd], config) as unknown as HTMLElement;
-      divRef.current.appendChild(spElement);
+      div.appendChild(spElement);
     } catch (e) {
       // Seismograph custom element may not render in all environments
     }
 
     return () => {
-      if (spElement && divRef.current && divRef.current.contains(spElement)) {
-        divRef.current.removeChild(spElement);
+      if (spElement && div && div.contains(spElement)) {
+        div.removeChild(spElement);
       }
     };
-  }, [seismogramData, startTime, durationSeconds]);
+  }, [seismogram, startTime, durationSeconds]);
 
   return (
     <div className="waveform-panel">
