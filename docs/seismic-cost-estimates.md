@@ -143,9 +143,29 @@ Assuming moderate classroom usage: 100 active students, each viewing ~5 stations
 | Data transfer cost | $0.007 | $0.02 |
 | **Total/month** | **~$0.05** | **~$0.14** |
 
-**CloudFront free tier covers this entirely**: 1 TB/month data transfer + 10M requests/month (always free, not just first 12 months). Even 50x the above usage stays within the free tier.
+**CloudFront free tier covers tile serving entirely**: 1 TB/month data transfer + 10M requests/month (always free, not just first 12 months). Even 50x the above tile usage stays within the free tier.
 
 Note: S3-to-CloudFront data transfer is free.
+
+#### CloudFront as CORS proxy for EarthScope data
+
+EarthScope's data server does not support CORS, so browser-based access to raw seismic data requires proxying through CloudFront. This applies in two situations:
+
+**1. Client-side ML processing (one-time per station-year):** One student processes the raw data for a station-year and uploads the ML results to S3 for other students to access. Each station-year is ~7.3 GB of raw data.
+
+| Station-years processed | Data through proxy | CloudFront cost |
+|---|---|---|
+| 5 | 36.5 GB | free tier |
+| 100 | 730 GB | free tier |
+| 1,000 | 7.3 TB | **~$536** |
+
+This is a one-time cost, not monthly. CloudFront caching helps if multiple students attempt to process the same station — the data is served from edge cache rather than re-fetching from EarthScope.
+
+**2. Exploration at raw zoom level:** When students zoom past the finest cached level (L3 or L2 depending on configuration), the client fetches raw 200 Hz data for the visible time range. Raw data is ~1.4 MB per hour of seismic data, so a student viewing a few minutes at raw zoom downloads only a few hundred KB. Even heavy exploration by 100 students would likely stay well within the free tier.
+
+Rate: first 1 TB/month free, then $0.085/GB.
+
+This proxy is needed for all four scenarios (A–D) for raw-zoom exploration, but the ML processing cost only applies to client-side ML (A and C). With server-side ML (B and D), the ML model runs on AWS infrastructure that can fetch from EarthScope directly without CloudFront.
 
 ### Compute for tile cache generation (one-time + periodic)
 
@@ -231,9 +251,9 @@ Assumes the tile cache and event data are pre-generated (one-time cost amortized
 | 10 × 10yr | $0.01 | $0.05 | — | **~$0.06** |
 | 100 × 10yr | $0.07 | $0.05 | — | **~$0.12** |
 
-One-time setup: L0-L2 tile generation ($0.02–$5) + S3/CloudFront configuration.
+One-time setup: L0-L2 tile generation ($0.02–$5) + S3/CloudFront configuration. Plus one-time CORS proxy cost for ML processing (free for ≤100 station-years, ~$536 at 1,000 — see [CORS proxy](#cloudfront-as-cors-proxy-for-earthscope-data)).
 
-**Trade-off**: Students must download raw data from the provider to zoom deeply or run the ML model. A year of data is ~7.3 GB — only practical for short time ranges (days to weeks) in the browser. No smooth zoom across long time ranges.
+**Trade-off**: Students must download raw data through the CORS proxy to zoom deeply or run the ML model. A year of data is ~7.3 GB per station — only practical for short time ranges (days to weeks) in the browser. ML results are uploaded to S3 after processing so each station-year only needs to be processed once. No smooth zoom across long time ranges.
 
 ### B: No L3 cache + AWS ML
 
@@ -257,9 +277,9 @@ The tile cache still needs server-side generation (downloading 7.3 GB/station-ye
 | 10 × 10yr | $0.58 | $0.14 | $0.02 | **~$0.74** |
 | 100 × 10yr | $5.82 | $0.14 | $0.05 | **~$6.01** |
 
-One-time setup: Full tile cache generation ($0.05–$10) + Lambda pipeline for cache + S3/CloudFront.
+One-time setup: Full tile cache generation ($0.05–$10) + Lambda pipeline for cache + S3/CloudFront. Plus one-time CORS proxy cost for ML processing (free for ≤100 station-years, ~$536 at 1,000 — see [CORS proxy](#cloudfront-as-cors-proxy-for-earthscope-data)).
 
-**Trade-off**: Smooth zoom experience without downloading raw data. Students still run ML in browser (slow for long time ranges on Chromebooks — ~2 min per day of data on CPU). Server infrastructure needed for tile cache regardless.
+**Trade-off**: Smooth zoom experience without downloading raw data for browsing. Students still run ML in browser (slow for long time ranges on Chromebooks — ~2 min per day of data on CPU), downloading raw data through the CORS proxy. ML results are uploaded to S3 so each station-year only needs to be processed once. Server infrastructure needed for tile cache regardless.
 
 ### D: L3 cache + AWS ML (full server-side)
 
@@ -285,7 +305,7 @@ For the initial data population (not monthly). Uses GPU (g4dn spot) for ML:
 | 10 × 10yr | $0.49 | $0.18 | $1.12 | **~$1.79** |
 | 100 × 10yr | $4.94 | $1.83 | $10.95 | **~$17.72** |
 
-(Includes GPU spot compute + S3 PUTs. Raw data download from EarthScope is free.)
+(Includes GPU spot compute + S3 PUTs. Raw data download from EarthScope is free for server-side processing. For client-side ML, add CORS proxy cost — see [CORS proxy](#cloudfront-as-cors-proxy-for-earthscope-data).)
 
 ## Key takeaways
 
@@ -299,7 +319,7 @@ For the initial data population (not monthly). Uses GPU (g4dn spot) for ML:
 
 5. **L3 tile duration matters.** With small (~5 min) L3 tiles, PUT costs reach ~$500 for 1,000 station-years. Using larger tiles (~9 hours) reduces this to ~$5. See [L3 tile duration options](#l3-tile-duration-options).
 
-6. **CloudFront free tier covers classroom usage.** 1 TB/month and 10M requests/month (always free) is far more than even heavy classroom use would generate.
+6. **CloudFront free tier covers tile serving but not necessarily ML data.** 1 TB/month (always free) easily covers tile serving. However, CloudFront is also needed as a CORS proxy for EarthScope data. For client-side ML, raw data downloads are one-time per station-year (~7.3 GB each) — free at moderate scale but ~$536 at 1,000 station-years. Exploration at raw zoom uses minimal data.
 
 7. **Adding ML to a cache pipeline is nearly free.** If you're already running a GPU instance for tile cache generation, running the ML model in the same job adds negligible cost. This makes combination D (full server-side) only marginally more expensive than C (cache-only), with a much better student experience.
 
