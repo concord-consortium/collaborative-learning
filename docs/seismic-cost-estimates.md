@@ -161,6 +161,18 @@ EarthScope's data server does not support CORS, so browser-based access to raw s
 
 This is a one-time cost, not monthly. CloudFront caching helps if multiple students attempt to process the same station — the data is served from edge cache rather than re-fetching from EarthScope.
 
+Download time for 7.3 GB (one station-year) depends on the student's effective bandwidth:
+
+| Effective bandwidth | Time for 7.3 GB |
+|---|---|
+| 1 Mbps | ~16 hours |
+| 5 Mbps | ~3.2 hours |
+| 10 Mbps | ~1.6 hours |
+| 25 Mbps | ~39 min |
+| 50 Mbps | ~19 min |
+
+On shared school networks, per-student throughput may be well below the school's total bandwidth.
+
 **2. Exploration at raw zoom level:** When students zoom past the finest cached level (L3 or L2 depending on configuration), the client fetches raw 200 Hz data for the visible time range. Raw data is ~1.4 MB per hour of seismic data, so a student viewing a few minutes at raw zoom downloads only a few hundred KB. Even heavy exploration by 100 students would likely stay well within the free tier.
 
 Rate: first 1 TB/month free, then $0.085/GB.
