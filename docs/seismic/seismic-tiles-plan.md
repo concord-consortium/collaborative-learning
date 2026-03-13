@@ -17,7 +17,7 @@ Two tiles work together to provide seismic data exploration with ML-based event 
 
   **Open question:** When the ML model runs and produces new events, how should the shared models be updated? Options include updating them in place as the model runs, or requiring an explicit user action to push the new results to the shared models. To be resolved.
 
-**Timeline tile** (planned): Displays seismic waveform data with interactive controls for exploring the time series. Also shows events identified and labeled by the ML model. This is the primary visualization and exploration surface for students.
+**Timeline tile** (in progress — Teale): Displays seismic waveform data with interactive controls for exploring the time series. Also shows events identified and labeled by the ML model. This is the primary visualization and exploration surface for students.
 
 **Shared models** connect the two tiles:
 - **SharedDataSet** (existing): Stores the events detected by the ML model so the Timeline tile can display them.
