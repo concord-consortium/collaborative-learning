@@ -335,6 +335,6 @@ For the initial data population (not monthly). Uses GPU (g4dn spot) for ML:
 
 7. **Adding ML to a cache pipeline is nearly free.** If you're already running a GPU instance for tile cache generation, running the ML model in the same job adds negligible cost. This makes combination D (full server-side) only marginally more expensive than C (cache-only), with a much better student experience.
 
-8. **Client-side ML is limiting.** No server cost, but students need to download raw data and wait ~2 min per day of data on CPU (no WebGPU on Chromebooks). Only practical for short time ranges (days). On devices with WebGPU it's ~3 min per year — viable but hardware-dependent.
+8. **Client-side ML performance varies by hardware.** No server cost, but students need to download raw data. On CPU it's ~2 min per day of data — only practical for short time ranges. Chromebooks do support WebGPU, which dramatically improves performance (24 hours of data in ~0.5–10s depending on the device). The bottleneck for client-side ML is data download size, not model execution — see [seismic-tiles-plan.md](seismic-tiles-plan.md).
 
 9. **The real cost is engineering time.** Building the AWS Batch pipeline, Docker container with CUDA/TensorFlow, tile generation logic, S3/CloudFront setup, and EventBridge scheduling is likely weeks of engineering work regardless of the AWS bill.

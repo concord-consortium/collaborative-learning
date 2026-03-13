@@ -8,7 +8,7 @@ To run ML models on seismic data in the browser, students need to download raw w
 
 ROVER is EarthScope's recommended tool for large data downloads. It encodes years of operational experience with the FDSN web services, including:
 
-- **EarthScope's rate limits**: max 5 concurrent connections and 10 connections/second. Exceeding these triggers TCP RESETs. ROVER's default of 5 parallel download workers matches this limit exactly.
+- **EarthScope's rate limits**: max 5 concurrent connections and 10 connections/second. Exceeding these triggers TCP RESETs. ROVER's default of 5 parallel download workers matches this limit exactly. **Note:** These limits are per IP. If all requests go through a CloudFront proxy, all students share the same outbound IP(s), so the 5-connection limit applies to the entire class, not per student. See the concurrency warning in the [download queue](#key-components) section.
 - **Day-aligned chunking with resume**: ROVER splits requests into day-length pieces and saves each as a separate file. This is a deliberate design choice — EarthScope's dataselect service is optimized for day-granularity requests, and day-length miniSEED files are the standard archive unit. Critically, this also means interrupted downloads can resume where they left off. ROVER scans its local repository to find which days are already on disk and only requests the gaps. For a browser downloading 1.8 GB over a potentially unreliable connection, this resume capability is essential.
 - **Gap detection via the availability service**: Before downloading, ROVER queries `fdsnws/availability` to find what time ranges actually exist, avoiding wasted requests for periods with no data (station outages, maintenance windows, etc.).
 - **Retry strategy**: 3 retries per download with configurable timeouts, tuned to EarthScope's service behavior.
@@ -30,7 +30,7 @@ Building a download system from scratch would mean rediscovering these constrain
 7. Update progress UI
 ```
 
-All EarthScope requests go through a CloudFront CORS proxy, since EarthScope's servers do not support CORS headers. CloudFront caching at the edge also helps if multiple students request the same station — subsequent requests are served from cache rather than re-fetching from EarthScope.
+All EarthScope requests go through a CloudFront CORS proxy, since EarthScope's servers do not support CORS headers. CloudFront caching at the edge helps if multiple students request the same station — subsequent requests are served from cache rather than re-fetching from EarthScope. However, students are likely exploring different stations and time ranges, so cache hits may be rare and most requests will be forwarded to EarthScope (see concurrency warning below).
 
 ### OPFS (Origin Private File System) for persistent caching
 
@@ -65,6 +65,11 @@ OPFS also enables data reuse across ML runs — if a student wants to run a diff
 
 **Download queue**: A promise-pool limiting concurrency to 5 parallel fetches, matching EarthScope's connection limit. Each fetch targets one day of data via the FDSN dataselect endpoint through the CloudFront proxy.
 
+**⚠️ Proxy concurrency problem:** The 5-connection limit is per IP, and a CloudFront proxy means all students share the same outbound IP(s) to EarthScope. If each student's browser runs 5 concurrent fetches, a class of 25 students could attempt 125 simultaneous connections — all appearing to come from the same CloudFront edge. EarthScope would reject most of these with TCP RESETs. Since students are likely exploring different stations and time ranges, CloudFront caching won't help much. Possible mitigations:
+- Reduce per-student concurrency to 1–2 connections and implement server-side request queuing in the proxy.
+- Use a Cloud Function proxy instead of or alongside CloudFront — each function invocation gets its own IP, naturally spreading the load.
+- Pre-fetch data for the lesson's stations/time ranges before class to warm the cache.
+
 **miniSEED parsing**: Use [seisplotjs](https://crotwell.github.io/seisplotjs/) (JavaScript library for seismological data) to parse miniSEED format. This replaces ROVER's dependency on `mseedindex` (a C program that builds a SQLite index of miniSEED byte offsets). Since we process data day-by-day rather than from large concatenated archives, we don't need byte-offset indexing.
 
 **Progress and resume**: Track download state (total days, completed days, in-progress days) and display to the user. On resume, scan OPFS for existing day files and skip them. This is simpler than ROVER's SQLite-based index since each file represents exactly one day.
@@ -76,7 +81,7 @@ OPFS also enables data reuse across ML runs — if a student wants to run a diff
 | ROVER feature | Browser version | Notes |
 |---|---|---|
 | Day-aligned chunking | Keep | Matches EarthScope's optimization and archive structure |
-| 5 concurrent workers | Keep | Matches EarthScope's rate limit |
+| 5 concurrent workers | Revisit | Matches EarthScope's per-IP rate limit, but with a proxy all students share this limit — may need to reduce per-student concurrency |
 | 3 retries per download | Keep | Same resilience strategy |
 | Availability-based gap detection | Keep | Avoids wasted requests for missing data |
 | Verification pass | Consider | Could do a lightweight check, but less critical for a cache |
@@ -114,8 +119,8 @@ This optimization should be considered after the first version is working and we
 
 | Service | URL | Purpose |
 |---|---|---|
-| Availability | `https://service.iris.edu/fdsnws/availability/1/query` | Check what time ranges exist for a station/channel |
-| Dataselect | `https://service.iris.edu/fdsnws/dataselect/1/query` | Download miniSEED waveform data |
+| Availability | `https://service.earthscope.org/fdsnws/availability/1/query` | Check what time ranges exist for a station/channel |
+| Dataselect | `https://service.earthscope.org/fdsnws/dataselect/1/query` | Download miniSEED waveform data |
 
 Both need to be proxied through CloudFront for browser access (no CORS support from EarthScope).
 
