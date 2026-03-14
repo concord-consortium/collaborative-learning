@@ -81,7 +81,8 @@ If we can define this interface confidently, Teale can code against a mock imple
 FDSN data is served in miniSEED format. What we know so far:
 - **Library**: [seisplotjs](https://github.com/crotwell/seisplotjs) can parse miniSEED in the browser.
 - **Compression**: miniSEED supports multiple compression formats. The data from both Raspberry Shake and EarthScope uses Steim2, the most efficient lossless compression approach available in the format.
-- **Memory usage**: seisplotjs uses roughly double the raw file size when data is parsed into memory. For 24 hours of 200 Hz data (~20 MB on disk), this means ~40 MB in memory.
+- **Memory usage**: seisplotjs uses roughly double the raw file size when data is parsed into memory. For 24 hours of 200 Hz data (~20 MB on disk), this means ~40 MB in memory. This estimate comes from summing `seg.y.byteLength` across seismogram segments, which measures the decoded sample arrays. The actual total memory footprint may be higher due to additional object overhead (segment metadata, seisplotjs internal structures, etc.).
+
 
 Remaining unknowns:
 - Exact memory overhead at larger time ranges and whether this becomes a problem on Chromebooks.
