@@ -272,6 +272,28 @@ export const Graph = observer(
             if (isNumericAxisModel(axisModel)){
               const minVal = axisModel.min;
               const maxVal = axisModel.max;
+              // Compute cross-axis zero position so arrows track the zero-axis lines.
+              // For bottom axis arrows, we need y=0 position (from left axis domain).
+              // For left axis arrows, we need x=0 position (from bottom axis domain).
+              const otherAxis: AxisPlace = axis === "bottom" ? "left" : "bottom";
+              const otherAxisModel = graphModel?.getAxis(otherAxis);
+              const plotBounds = layout.getComputedBounds("plot");
+              let crossAxisZeroPos: number | undefined;
+              if (isNumericAxisModel(otherAxisModel) && plotBounds) {
+                const otherMin = otherAxisModel.min;
+                const otherMax = otherAxisModel.max;
+                if (otherMin <= 0 && otherMax >= 0) {
+                  if (otherAxis === "left") {
+                    // y=0: screen y increases downward, axis goes max (top) to min (bottom)
+                    const fraction = (otherMax - 0) / (otherMax - otherMin);
+                    crossAxisZeroPos = plotBounds.top + plotBounds.height * fraction;
+                  } else {
+                    // x=0: screen x increases rightward, axis goes min (left) to max (right)
+                    const fraction = (0 - otherMin) / (otherMax - otherMin);
+                    crossAxisZeroPos = plotBounds.left + plotBounds.width * fraction;
+                  }
+                }
+              }
               return (
                 <div key={`${axis}-min-max`}>
                   <AxisEndComponents
@@ -280,6 +302,8 @@ export const Graph = observer(
                     axis={axis}
                     onValueChange={(newValue) => handleMinMaxChange("min", axisModel, newValue)}
                     readOnly={readOnly}
+                    showArrow={crossAxisZeroPos != null}
+                    crossAxisZeroPos={crossAxisZeroPos}
                   />
                   <AxisEndComponents
                     value={maxVal}
@@ -287,6 +311,8 @@ export const Graph = observer(
                     axis={axis}
                     onValueChange={(newValue) => handleMinMaxChange("max", axisModel, newValue)}
                     readOnly={readOnly}
+                    showArrow={crossAxisZeroPos != null}
+                    crossAxisZeroPos={crossAxisZeroPos}
                   />
                 </div>
               );

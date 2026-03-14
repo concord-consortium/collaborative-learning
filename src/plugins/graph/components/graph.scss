@@ -63,9 +63,9 @@ $graph-background-fill: #fff;
     pointer-events: none;
   }
 
-  .zero .tick line {
-    stroke: #444444;
-    stroke-opacity: 0.8;
+  .zero line {
+    stroke: #707070;
+    stroke-width: 2px;
     shape-rendering: crispEdges;
     pointer-events: none;
   }

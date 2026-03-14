@@ -27,10 +27,12 @@ interface IAxisEndComponentsProps {
   axis: AxisPlace;
   onValueChange: (newValue: number) => void;
   readOnly?: boolean;
+  showArrow?: boolean;
+  crossAxisZeroPos?: number; // absolute pixel position of zero on the cross-axis
 }
 
 export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(function AxisEndComponents(props) {
-  const { value, minOrMax, axis, onValueChange, readOnly } = props;
+  const { value, minOrMax, axis, onValueChange, readOnly, showArrow = true, crossAxisZeroPos } = props;
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const layout = useAxisLayoutContext();
@@ -82,11 +84,13 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
   const borderBoxStyles = calculateBorderBoxStyles();
 
   // The arrow adds an arrowhead to the end of the axis.
+  // When crossAxisZeroPos is provided, arrows move to the zero-axis position.
   const calculateArrowStyle = () => {
     const style: CSSProperties = {};
 
     if (axis === "bottom") {
-      style.top = `${axisBounds.top - 7}`;
+      const topPos = crossAxisZeroPos ?? axisBounds.top;
+      style.top = `${topPos - 7}`;
       if (minOrMax === "min") {
         style.left = `${axisBounds.left - kAxisTickLength - 2}px`;
       } else {
@@ -96,7 +100,8 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
 
     if (axis === "left") {
       style.transform = "rotate(-90deg)";
-      style.left = `${axisBounds.left + axisBounds.width - 9}`;
+      const leftPos = crossAxisZeroPos ?? (axisBounds.left + axisBounds.width);
+      style.left = `${leftPos - 9}`;
       if (minOrMax === "min") {
         style.top = `${axisBounds.top + axisBounds.height + kAxisTickLength - 14}px`;
       } else {
@@ -118,14 +123,16 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
     const style: CSSProperties = {};
 
     if (axis === "bottom") {
+      const topPos = crossAxisZeroPos ?? axisBounds.top;
       style.left = `${axisBounds.left - kAxisTickLength}px`;
-      style.top = `${axisBounds.top - kAxisStrokeWidth / 2}px`;
+      style.top = `${topPos - kAxisStrokeWidth / 2}px`;
       style.height = `${kAxisStrokeWidth}px`;
       style.width = `${kAxisTickLength}px`;
     }
 
     if (axis === "left") {
-      style.left = `${axisBounds.left + axisBounds.width - kAxisStrokeWidth / 2}px`;
+      const leftPos = crossAxisZeroPos ?? (axisBounds.left + axisBounds.width);
+      style.left = `${leftPos - kAxisStrokeWidth / 2}px`;
       style.top = `${axisBounds.top + axisBounds.height}px`;
       style.height = `${kAxisTickLength}px`;
       style.width = `${kAxisStrokeWidth}px`;
@@ -150,8 +157,8 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
   const borderBoxClasses = classNames("editable-border-box", axis);
   return (
     <>
-      {axisExtensionStyle && <div className="axis-extension" style={axisExtensionStyle} />}
-      <ArrowSVG className="arrow" style={arrowStyle} />
+      {showArrow && axisExtensionStyle && <div className="axis-extension" style={axisExtensionStyle} />}
+      {showArrow && <ArrowSVG className="arrow" style={arrowStyle} />}
       <div style={borderBoxStyles} className={borderBoxClasses} onClick={handleClick}
         data-testid={`editable-border-box-${axis}-${minOrMax}`}>
         { isEditing ?
