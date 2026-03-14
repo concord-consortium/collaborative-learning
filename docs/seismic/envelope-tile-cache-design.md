@@ -8,10 +8,31 @@ To support smooth zooming across a large time range without loading all raw data
 
 **Columnar Int16** is a good balance of compactness and simplicity:
 - Store all min values contiguously, then all max values (columnar layout compresses better than interleaved min/max because adjacent values in each column are more similar).
-- Quantize amplitudes to Int16 (2 bytes) by mapping the station's amplitude range linearly to the integer range. Seismic envelope data at coarse resolutions doesn't need Float32 precision.
+- Quantize amplitudes to Int16 (2 bytes) using a fixed global amplitude range per instrument type (see [Amplitude quantization](#amplitude-quantization)). Seismic envelope data at coarse resolutions doesn't need Float32 precision.
 - Gzip the binary buffer. For example, a 1024-point tile = 1024 × 2 × 2 = 4 KB raw, ~1.5–2 KB gzipped. L3 tiles use more points per tile (see [Tile structure](#tile-structure)).
-- In the browser, the decompressed buffer can be read directly as a `Float32Array` (or `Int16Array` with a known scale factor) — no parsing needed.
+- In the browser, the decompressed buffer can be read directly as an `Int16Array` with a known scale factor — no parsing needed.
 - Reserve Int16 value `-32768` as a sentinel for "no data" (see [Missing and partial data](#missing-and-partial-data)).
+
+## Amplitude quantization
+
+Raw miniSEED data from EarthScope contains integer counts (digitizer output). Before quantizing to Int16 for envelope storage, the counts must be converted to physical units by dividing by the channel's overall sensitivity (from StationXML metadata). This puts values in consistent, physically meaningful units that students can reason about — a learning goal is for students to gain understanding of the actual units of seismic amplitudes.
+
+The amplitude range depends on the **instrument type**, identified by the second character of the SEED channel code (e.g., B**H**Z vs B**N**Z):
+
+| Instrument code | Sensor type | Physical units | Fixed range | Int16 resolution |
+|---|---|---|---|---|
+| **H** (high-gain seismometer) | Broadband velocity | m/s | ±0.05 m/s | ~1.5 µm/s per step |
+| **L** (low-gain seismometer) | Broadband velocity | m/s | ±0.05 m/s | ~1.5 µm/s per step |
+| **N** (accelerometer) | Strong-motion acceleration | m/s² | ±40 m/s² | ~1.2 mm/s² per step |
+
+**Why fixed global ranges instead of per-tile or per-station scaling:**
+- **Incremental fill**: Tiles are filled incrementally as users process data. A per-tile scale factor would require rescaling existing data when new data arrives with a larger amplitude, complicating the read-modify-write flow.
+- **Cross-station comparison**: Students will compare amplitudes across stations. A fixed range means Int16 values are directly comparable without needing per-tile metadata.
+- **Simplicity**: No per-tile header or scale factor to manage. The instrument type (from the channel code) determines the range.
+
+**Precision is sufficient**: The ±0.05 m/s velocity range maps to ±32,767 Int16 steps. Typical teleseismic signals (0.0001–0.001 m/s peak) use 65–650 steps — more than enough for display. Very quiet signals (~0.00001 m/s) still get ~7 steps. Broadband seismometers clip at ~0.013–0.026 m/s, well within the ±0.05 m/s range.
+
+**Deriving the range**: The clip level of a seismometer is determined by `max_output_voltage / sensitivity`. Common broadband sensors: STS-2 clips at ~0.013 m/s, Trillium Compact at ~0.026 m/s. The ±0.05 m/s range provides headroom beyond any common sensor's clip level. Accelerometers typically clip at ±2g to ±4g (~±20–40 m/s²); the ±40 m/s² range covers the common ±4g sensors. Note that clip levels are not available in StationXML — they must be derived from manufacturer specs or computed from the sensitivity and max output voltage.
 
 ## Switching rule
 
@@ -44,6 +65,21 @@ The number of levels depends on the scale factor K between adjacent levels: `lev
 | raw   | 0.005 s       | 200 Hz       | < ~5.3 min                 |
 
 The display width (~1000 px) barely affects the level count — doubling it shifts the count by at most 1.
+
+### Integer multiple constraint
+
+Each level's point spacing should be an exact integer multiple of the next finer level's spacing, all the way down to the raw sample interval. This matters because tiles are filled incrementally: when new raw data arrives for part of a tile, we need to update the coarser levels without re-reading all the raw data.
+
+For example, if a user processes 1 hour of raw data:
+1. L3 envelope points are computed directly from the raw samples (min/max over groups of raw samples per L3 window).
+2. The affected L2 points can then be computed from the L3 data — each L2 window covers exactly K consecutive L3 windows, so `L2_min = min(L3_mins)` and `L2_max = max(L3_maxes)`.
+3. Similarly, L1 from L2, and L0 from L1.
+
+If the spacings aren't exact integer multiples, a coarser window would straddle finer windows — its min/max couldn't be computed from the finer level alone, and you'd need to go back to raw data or accept approximate values.
+
+Note that this constraint applies between envelope levels only — not between L3 and the raw data. At the raw→L3 boundary, L3 windows are always computed directly from raw samples, so a non-integer number of samples per window just means some windows have one more sample than others (e.g., if L3 spacing is 0.316s at 200 Hz, windows alternate between 63 and 64 samples). The min/max is still well-defined either way. Raw sample rates also vary by station (commonly 50, 100, or 200 Hz), so L3 spacing can't be an exact multiple of all possible sample intervals anyway.
+
+The approximate values in the table above (~0.315s, ~31.5s, etc.) would need to be adjusted to exact values that satisfy the integer multiple constraint between envelope levels when the levels are finalized.
 
 ## Tile structure
 
@@ -86,10 +122,12 @@ tile_duration = points_per_tile[level] × point_spacing[level]
 tile_index = floor((t - epoch) / tile_duration)
 ```
 
-Tile path: `/{station}/{level}/{tile_index}`
+Tile path: `/{station}/{channel}/{level}/{tile_index}`
 
 **Pros**: Simple arithmetic, uniform tile sizes, uniform fetch sizes, similar to web map tile systems (z/x/y).
 **Cons**: Tile boundaries don't align with human-readable time units. Index numbers can be large (L3 tile indices reach ~5 million for 2024 timestamps from Unix epoch).
+
+Including the channel in the path is necessary because the amplitude quantization range depends on the instrument type (see [Amplitude quantization](#amplitude-quantization)), and a station may have multiple channels (e.g., both velocity BHZ and accelerometer BNZ).
 
 ### Option B: Calendar-aligned tiles
 
@@ -102,7 +140,7 @@ Tiles snap to natural time boundaries, with the point count varying per tile:
 | L2    | 1 hour        | ~114                     |
 | L3    | 5 minutes     | ~952                     |
 
-Tile path: `/{station}/{level}/2024-03-15T14:00:00` or `/{station}/L2/2024/03/15/14`
+Tile path: `/{station}/{channel}/{level}/2024-03-15T14:00:00` or `/{station}/{channel}/L2/2024/03/15/14`
 
 **Pros**: Human-readable paths, easy to reason about cache invalidation ("regenerate March 2024"), aligns with how data often arrives in practice.
 **Cons**: Variable tile sizes (months have different lengths), more complex indexing math, variable fetch sizes.
@@ -138,12 +176,21 @@ A tile may cover a time range where data exists for only part of the window. In 
 
 This approach keeps the format simple (fixed-size arrays, no variable-length encoding or sidecar metadata) while cleanly distinguishing "amplitude is zero" from "no measurement exists."
 
+### Open questions: envelope computation with incomplete or corrupt raw data
+
+**Partial gaps within a window**: A single envelope window may cover a time range where only some of the expected raw samples exist (e.g., a data gap starts mid-window). Options include: computing the envelope from whatever samples are present, treating the entire window as missing, or using a threshold (e.g., if less than half the samples are present, mark it missing). To be decided.
+
+**Corrupt / out-of-range raw data points**: Raw seismic data sometimes contains isolated spike values far outside the plausible range. With our fixed amplitude quantization, these would exceed the Int16 range. Options include: clamping to the Int16 max (effectively saying "this window had an extreme value"), discarding the outlier and computing the envelope from the remaining points, or flagging the window as having an error. To be decided.
+
+**Using sentinel values for richer status**: The current design uses `-32768` in both the min and max arrays to mean "no data." But since the sentinel could be set independently on min vs max, a sentinel on only one channel could encode additional states — for example, distinguishing "no data" from "data present but contained out-of-range values" or other error conditions. This would allow the client to render these cases differently (e.g., a different color or icon for corrupt windows vs genuinely missing data). The specific encoding scheme is to be decided.
+
 ## Why a custom binary format
 
 We considered several existing formats before settling on a simple custom binary layout:
 
 | Format | Tiled HTTP access | Browser JS library | Verdict |
 |--------|------------------|--------------------|---------|
+| **Gzipped JSON** | N/A (custom) | Built-in | Simplest to implement — just `JSON.parse()` an array of numbers. But ~2.5–3× larger than binary Int16 after gzip (see size comparison below). At L3 scale this adds up to hundreds of MB of extra storage per station-year. |
 | **Zarr** | Native (chunk = object) | zarrita.js | Closest fit — each chunk is an S3 object, metadata is declarative JSON, good Python tooling for generation. But value over custom format is incremental for our simple 1D arrays. |
 | **HDF5** | Cloud-Optimized possible | h5wasm (no partial reads in browser) | No JS library supports partial HTTP reads — must download entire files. |
 | **miniSEED** | N/A | seisplotjs | Stores raw waveforms only, not pre-computed envelopes. Relevant for the raw data layer but not the tile cache. |
@@ -151,9 +198,11 @@ We considered several existing formats before settling on a simple custom binary
 | **PMTiles** | Range requests | pmtiles | Validates the architecture (single-file tile archives on static storage) but tightly coupled to 2D map tiles. |
 | **Arrow IPC / Parquet** | Limited | apache-arrow / hyparquet | Too much per-tile metadata overhead for simple 1D int16 arrays. Parquet's row-group mechanism could work but adds complexity without solving new problems. |
 
+**Gzipped JSON vs binary Int16 size comparison**: A 1024-point tile has 2,048 Int16 values (min + max). As binary, this is 4 KB raw, ~1.5–2 KB gzipped. As JSON (e.g., `{"min":[-342,17,...],"max":[289,1045,...]}`), each number averages ~4–5 characters plus a comma separator, producing ~10–12 KB of text, which gzips to ~4–5 KB. For L3 tiles with ~11,400 points: binary is ~46 KB raw / ~22 KB gzipped; JSON is ~115 KB raw / ~50–60 KB gzipped. Over a full station-year, the JSON overhead adds ~200–400 MB of extra storage, roughly doubling the L3 cost. JSON also requires parsing text into numbers rather than directly interpreting a typed array buffer, though for tile-sized payloads the parse time difference is negligible.
+
 **Zarr is the strongest alternative** — it standardizes exactly what we need (chunked arrays on cloud storage with per-chunk HTTP access). If we later want interoperability with Python analysis tools or want to drop the custom format spec, migrating to Zarr would be straightforward since the underlying storage pattern is nearly identical.
 
-For now, the custom binary format is simpler: no additional JS dependency, zero metadata overhead per tile, and the format is trivial enough (gzipped array of int16 or uint8 values at a known offset) that a spec is barely needed.
+For now, the custom binary format is simpler: no additional JS dependency, zero metadata overhead per tile, and the format is trivial enough (gzipped array of int16 values at a known offset) that a spec is barely needed.
 
 ## Concurrent writes and conflict handling
 
@@ -174,22 +223,9 @@ For L3, tiles are larger (covering hours of data, ~22–200 KB each) which incre
 3. PUTs the updated object with `If-Match: <previous-ETag>` (or `If-None-Match: *` for new objects)
 4. On 412 conflict: re-read, re-merge, retry
 
-## Possible optimization: Uint8 instead of Int16
+## Why not Uint8
 
-Seismic waveforms oscillate around zero, so within any envelope window the min is typically ≤ 0 and the max is typically ≥ 0. We can exploit this by storing each as a **single unsigned byte** rather than a signed 16-bit integer:
-
-- **Max values**: Uint8 0–255 maps to `[0, +peak_amplitude]`
-- **Min values**: Uint8 0–255 maps to `[0, -peak_amplitude]`
-
-This gives 256 levels per side (512 across the full amplitude range). For a display that's 200–400 pixels tall, this provides sub-pixel precision — more than sufficient for the educational visualizations we're targeting.
-
-**Sentinel value**: Reserve `0` in both arrays to mean "no data." The actual value range becomes 1–255 (255 levels per side). A true zero amplitude maps to 1, which is close enough for display purposes.
-
-**Storage savings**: Raw tile size drops from 4 KB to 2 KB (1024 × 1 × 2), gzipped ~0.8–1 KB. L3 storage per station-year drops from ~200–280 MB to ~100–140 MB.
-
-**Edge case**: At L3 (~0.315s windows), a low-frequency wave could place an entire window on one side of zero — making a min positive or a max negative. Clamping to 0 in these cases loses minimal visual information since the adjacent windows will capture the full extent.
-
-**Resolution limit**: On a full-screen tall display (~2000px height, ~1000px per side), 256 levels means ~4 pixels per quantization step — visible stair-stepping. A custom 10-bit format (1024 levels per side) would fix this but requires bit packing/unpacking with no direct `TypedArray` view, and the storage savings over Int16 are modest after gzip (~1.2 KB vs ~1.5 KB per tile). If 8-bit resolution proves insufficient, falling back to Int16 is simpler than introducing a bit-packed format — the ~2x raw size increase is cheap given the small tile sizes.
+An earlier version of this design considered storing min/max as Uint8 (one unsigned byte each, with min and max stored as magnitudes on their respective sides of zero). This would halve storage, but it is **not viable with fixed global amplitude ranges**. With only 255 usable levels spanning ±0.05 m/s, each step is ~196 µm/s. A typical teleseismic signal at 0.0001 m/s peak would map to less than 1 step — effectively invisible. Int16 with 32,767 levels provides the precision needed to represent both quiet teleseismic signals and near-clip-level local events in the same fixed range.
 
 ## Firestore considerations
 
