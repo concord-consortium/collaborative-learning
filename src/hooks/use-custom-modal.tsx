@@ -70,10 +70,13 @@ export const useCustomModal = <IContentProps,>({
   const handleAfterOpen = ({overlayEl, contentEl}: { overlayEl: Element, contentEl: HTMLDivElement }) => {
     setContentElt(contentEl);
 
-    const element = focusElement && contentEl.querySelector(focusElement) as HTMLElement || contentEl;
+    const element = (focusElement && contentEl.querySelector(focusElement) as HTMLElement) || contentEl;
+    console.log("Modal trying to focus element on open", { focusElement, element });
     element && setTimeout(() => {
       element.focus?.();
+      console.log("Modal focused element");
       (element as HTMLInputElement).select?.();
+      console.log("Modal selected element");
     });
   };
 
