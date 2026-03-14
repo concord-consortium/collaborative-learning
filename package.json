@@ -18,6 +18,9 @@
   "jest": {
     "preset": "ts-jest/presets/js-with-ts",
     "resolver": "<rootDir>/src/test/jest-resolver.js",
+    "setupFiles": [
+      "jest-canvas-mock"
+    ],
     "setupFilesAfterEnv": [
       "<rootDir>/src/test/setupTests.ts"
     ],
@@ -39,11 +42,19 @@
         {
           "isolatedModules": true
         }
+      ],
+      "^.+\\.mjs$": [
+        "babel-jest",
+        {
+          "presets": [
+            "@babel/preset-env"
+          ]
+        }
       ]
     },
     "transformIgnorePatterns": [
       "/comments/ESM-only (https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) modules that should not be transformed by ts-jest",
-      "/node_modules/(?!(d3|d3-(.+)|decode-uri-component|delaunator|escape-string-regexp|filter-obj|internmap|json-stringify-pretty-compact|jsxgraph|nanoid|query-string|robust-predicates|split-on-first|@concord-consortium/codap-formulas-react17|@concord-consortium/codap-utilities)/)"
+      "/node_modules/(?!(d3|d3-(.+)|decode-uri-component|delaunator|escape-string-regexp|filter-obj|internmap|json-stringify-pretty-compact|jsxgraph|nanoid|query-string|robust-predicates|seisplotjs|split-on-first|@concord-consortium/codap-formulas-react17|@concord-consortium/codap-utilities)/)"
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
@@ -162,6 +173,7 @@
     "@types/is-hotkey": "^0.1.7",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.14.184",
+    "@types/luxon": "^3.7.1",
     "@types/object-hash": "^2.2.1",
     "@types/papaparse": "^5.3.16",
     "@types/react": "^17.0.48",
@@ -205,6 +217,7 @@
     "is-hotkey": "^0.2.0",
     "istanbul-lib-coverage": "^3.2.0",
     "jest": "^30.2.0",
+    "jest-canvas-mock": "^2.5.2",
     "jest-environment-jsdom": "^30.2.0",
     "jest-fetch-mock": "^3.0.3",
     "json5-loader": "^4.0.1",
@@ -220,6 +233,7 @@
     "script-loader": "^0.7.2",
     "string-replace-loader": "^3.1.0",
     "style-loader": "^3.3.1",
+    "terser": "^5.46.0",
     "ts-jest": "^29.4.6",
     "ts-jest-mocker": "^1.0.0",
     "ts-loader": "^9.3.1",
@@ -308,6 +322,7 @@
     "rete-structures": "^2.0.1",
     "rollbar": "^2.26.4",
     "rtree": "^1.4.2",
+    "seisplotjs": "^3.2.0",
     "superagent": "^8.0.0",
     "ts-polyfill": "^3.8.2",
     "tslib": "^2.4.0",
