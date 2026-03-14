@@ -209,8 +209,7 @@ describe("history loading", () => {
       expect(historyManager.historyStatus).toBe(HistoryStatus.NO_HISTORY);
 
       // Fast-forward past the 5 second timeout
-      // @ts-expect-error advanceTimersByTimeAsync exists in Jest 29.5+ but not in current type definitions
-      await jest.advanceTimersByTimeAsync(10000);
+      jest.advanceTimersByTimeAsync(10000);
 
       await subscribePromise;
 
