@@ -1,11 +1,3 @@
-jest.mock("seisplotjs", () => ({
-  miniseed: {
-    parseDataRecords: jest.fn().mockReturnValue([{ stub: true }]),
-    merge: jest.fn().mockReturnValue({ numPoints: 42 }),
-  },
-  seismogram: {},
-}));
-
 import { render } from "@testing-library/react";
 import React from "react";
 import { DateTime } from "luxon";
