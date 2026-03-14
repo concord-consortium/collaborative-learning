@@ -157,21 +157,25 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
       const rootSvg = subAxisElt?.ownerSVGElement;
       if (!rootSvg) return;
       const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
-      select(rootSvg).selectAll(`.zero-${place}`).remove();
+      const zeroClass = `zero-${place}-${subAxisIndex}`;
+      select(rootSvg).selectAll(`.${zeroClass}`).remove();
       const tickLength = layout.getAxisLength(otherPlace(place)) ?? 0;
       const [domainMin, domainMax] = numericScale.domain();
       if (domainMin <= 0 && domainMax >= 0 && tickLength > 0) {
         const zeroPos = numericScale(0);
         const zeroGroup = select(rootSvg).append('g')
-          .attr('class', `zero zero-${place}`)
+          .attr('class', `zero ${zeroClass}`)
           .attr('transform', initialTransform);
+        // For left axes, zero line extends rightward (positive x) into the plot.
+        // For right axes, it extends leftward (negative x) into the plot.
+        const crossLength = (place === 'left' || place === 'top') ? tickLength : -tickLength;
         const line = axisIsVertical
           ? zeroGroup.append('line')
-              .attr('x1', 0).attr('x2', tickLength)
+              .attr('x1', 0).attr('x2', crossLength)
               .attr('y1', zeroPos).attr('y2', zeroPos)
           : zeroGroup.append('line')
               .attr('x1', zeroPos).attr('x2', zeroPos)
-              .attr('y1', 0).attr('y2', -tickLength);
+              .attr('y1', 0).attr('y2', -crossLength);
         line.style('stroke', '#707070')
             .style('stroke-width', `${kAxisStrokeWidth}px`)
             .style('shape-rendering', 'crispEdges');
@@ -258,7 +262,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     // Clean up zero lines from root SVG when axis type changes away from numeric
     if (type !== 'numeric') {
       const rootSvg = subAxisElt?.ownerSVGElement;
-      if (rootSvg) select(rootSvg).selectAll(`.zero-${place}`).remove();
+      if (rootSvg) select(rootSvg).selectAll(`.zero-${place}-${subAxisIndex}`).remove();
     }
     switch (type) {
       case 'empty':
