@@ -26,6 +26,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = ({
     const div = divRef.current;
     let spElement: HTMLElement | null = null;
 
+    // FIXME: This blocks program execution
     const endTime = startTime.plus({ seconds: durationSeconds });
     const sdd = seismogramModule.SeismogramDisplayData.fromSeismogram(seismogram);
     const interval = Interval.fromDateTimes(startTime, endTime);
