@@ -2,13 +2,18 @@
 
 .wave-runner-tile {
   .waveform-container {
-    height: 40px;
     width: 100%;
-    background-color: $charcoal-light-4;
+    overflow-y: auto;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+  .waveform-loading,
+  .waveform-error {
     font-style: italic;
+    padding: 12px;
     text-align: center;
   }
 

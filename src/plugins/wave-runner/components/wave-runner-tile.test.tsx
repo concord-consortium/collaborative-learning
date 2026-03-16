@@ -17,7 +17,7 @@ jest.mock("react-resize-detector", () => ({
   useResizeDetector: () => ({ width: mockWidth, ref: React.createRef() })
 }));
 
-describe("WaveRunnerToolComponent", () => {
+describe("WaveRunnerComponent", () => {
   const content = defaultWaveRunnerContent();
   const model = TileModel.create({ content });
 

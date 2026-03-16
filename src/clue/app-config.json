@@ -314,6 +314,17 @@
           "link-tile"
         ]
       },
+      "timeline": {
+        "tools": [
+          "table-it",
+          "data-card-it",
+          "bar-graph-it",
+          "|",
+          "zoom-in",
+          "zoom-out",
+          "view-all"
+        ]
+      },
       "wave-runner": {
         "tools": [
           "load-data",
