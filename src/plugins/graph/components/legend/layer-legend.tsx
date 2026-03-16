@@ -96,7 +96,7 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
     const yAttributes = dataConfiguration.yAttributeDescriptions;
 
     legendItems = yAttributes.map((description, index) =>
-      <>
+      <React.Fragment key={description.attributeID}>
         <LegendDropdown
           buttonAriaLabel={`Color: ${graphModel.getColorNameForId(description.attributeID)}`}
           buttonLabel={<ColorKey color={graphModel.getColorForId(description.attributeID)} />}
@@ -115,13 +115,12 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
         <SimpleAttributeLabel
           attrId={description.attributeID}
           hideRemoveOption={yAttributes.length <= 1}
-          key={description.attributeID}
           onChangeAttribute={onChangeAttribute}
           onRemoveAttribute={onRemoveAttribute}
           onTreatAttributeAs={onTreatAttributeAs}
           place={'left'}
         />
-      </>
+      </React.Fragment>
     );
     if (!readOnly) {
       legendItems.push(<AddSeriesButton />);
