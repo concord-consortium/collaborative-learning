@@ -21,14 +21,15 @@ Three data scales:
 
 From the [envelope tile cache design](envelope-tile-cache-design.md):
 
-| Data | Size (gzipped) | Object count |
-|---|---|---|
-| L0-L2 envelope tiles | ~3 MB | ~1,000 |
-| L3 envelope tiles (~9hr tiles) | ~250 MB | ~977 |
-| ML event output | ~0.1 MB (est.) | 1 |
-| Raw seismic data (from provider) | ~7.3 GB | not stored |
+| Data | Size | Object/doc count | Storage |
+|---|---|---|---|
+| L0-L2 envelope tiles | ~3 MB (gzipped) | ~1,000 | S3 |
+| L3 envelope tiles (~9hr tiles) | ~250 MB (gzipped) | ~977 | S3 |
+| Event database (5% event rate, 60s windows) | ~5.2 MB | ~26,000 docs | Firestore |
+| Coverage bitmaps (10-min windows, 30-day chunks) | ~7 KB | 13 docs | Firestore |
+| Raw seismic data (from provider) | ~7.3 GB | not stored | — |
 
-L3 is 99% of the tile cache storage. With ~9-hour tiles, L3 object count is comparable to L0–L2.
+L3 is 99% of the tile cache storage. With ~9-hour tiles, L3 object count is comparable to L0–L2. Event and coverage data is stored in Firestore — see [event-database-design.md](event-database-design.md) for details.
 
 ## ML model processing time
 
@@ -97,6 +98,35 @@ For batch processing, one instance processes many station-years sequentially —
 | 1,000 station-years | $0.07 | **$5.82** |
 
 Rate: $0.023/GB/month.
+
+### Firestore: event database (monthly)
+
+ML-detected events and coverage bitmaps are stored in Firestore. See [event-database-design.md](event-database-design.md) for the schema.
+
+**Storage** (at $0.18/GB/month):
+
+| Scale | Event docs | Coverage docs | Event storage | Coverage storage | **Monthly total** |
+|---|---|---|---|---|---|
+| 5 station-years | ~130K | 65 | ~26 MB | ~35 KB | **~$0.005** |
+| 100 station-years | ~2.6M | 1,300 | ~520 MB | ~700 KB | **~$0.09** |
+| 1,000 station-years | ~26M | 13,000 | ~5.2 GB | ~7 MB | **~$0.94** |
+
+Assumes 5% event rate with 60-second model windows (~26K events per station-year). Coverage uses bitmap encoding (540 bytes per 30-day chunk, 13 chunks per year).
+
+**Writes** (one-time, at $0.18/100K writes):
+
+| Scale | Event writes | Coverage writes | **Write cost** |
+|---|---|---|---|
+| 5 station-years | ~130K | 65 | **~$0.23** |
+| 100 station-years | ~2.6M | 1,300 | **~$4.68** |
+| 1,000 station-years | ~26M | 13,000 | **~$46.80** |
+
+**Reads** (per query, at $0.06/100K reads):
+
+| Query | Docs read | Cost |
+|---|---|---|
+| Load events for 1 station+model+year | ~26K | $0.016 |
+| Check coverage for 1 station+model+year | 13 | negligible |
 
 ### S3 PUT requests (one-time, for tile generation)
 
@@ -257,11 +287,11 @@ Assumes the tile cache and event data are pre-generated (one-time cost amortized
 
 ### A: No L3 cache + Client-side ML (minimal infrastructure)
 
-| Scale | Storage | Serving | Updates | **Monthly total** |
-|---|---|---|---|---|
-| 5 × 1yr | $0.00 | $0.05 | — | **~$0.05** |
-| 10 × 10yr | $0.01 | $0.05 | — | **~$0.06** |
-| 100 × 10yr | $0.07 | $0.05 | — | **~$0.12** |
+| Scale | S3 storage | Firestore (events) | Serving | Updates | **Monthly total** |
+|---|---|---|---|---|---|
+| 5 × 1yr | $0.00 | $0.005 | $0.05 | — | **~$0.06** |
+| 10 × 10yr | $0.01 | $0.09 | $0.05 | — | **~$0.15** |
+| 100 × 10yr | $0.07 | $0.94 | $0.05 | — | **~$1.06** |
 
 One-time setup: L0-L2 tile generation ($0.02–$5) + S3/CloudFront configuration. Plus one-time CORS proxy cost for ML processing (free for ≤100 station-years, ~$536 at 1,000 — see [CORS proxy](#cloudfront-as-cors-proxy-for-earthscope-data)).
 
@@ -269,11 +299,11 @@ One-time setup: L0-L2 tile generation ($0.02–$5) + S3/CloudFront configuration
 
 ### B: No L3 cache + AWS ML
 
-| Scale | Storage | Serving | ML updates (GPU) | **Monthly total** |
-|---|---|---|---|---|
-| 5 × 1yr | $0.00 | $0.05 | $0.78 | **~$0.83** |
-| 10 × 10yr | $0.01 | $0.05 | $0.78 | **~$0.84** |
-| 100 × 10yr | $0.07 | $0.05 | $0.90 | **~$1.02** |
+| Scale | S3 storage | Firestore (events) | Serving | ML updates (GPU) | **Monthly total** |
+|---|---|---|---|---|---|
+| 5 × 1yr | $0.00 | $0.005 | $0.05 | $0.78 | **~$0.84** |
+| 10 × 10yr | $0.01 | $0.09 | $0.05 | $0.78 | **~$0.93** |
+| 100 × 10yr | $0.07 | $0.94 | $0.05 | $0.90 | **~$1.96** |
 
 One-time setup: L0-L2 tile generation + AWS Batch with g4dn GPU instances for ML pipeline.
 
@@ -283,11 +313,11 @@ One-time setup: L0-L2 tile generation + AWS Batch with g4dn GPU instances for ML
 
 The tile cache still needs server-side generation (downloading 7.3 GB/station-year and computing envelopes is impractical in a browser). This can run on the same GPU instance or on CPU Lambda — envelope computation is lightweight, so CPU is fine for cache-only.
 
-| Scale | Storage | Serving | Cache updates (Lambda) | **Monthly total** |
-|---|---|---|---|---|
-| 5 × 1yr | $0.03 | $0.14 | $0.02 | **~$0.19** |
-| 10 × 10yr | $0.58 | $0.14 | $0.02 | **~$0.74** |
-| 100 × 10yr | $5.82 | $0.14 | $0.05 | **~$6.01** |
+| Scale | S3 storage | Firestore (events) | Serving | Cache updates (Lambda) | **Monthly total** |
+|---|---|---|---|---|---|
+| 5 × 1yr | $0.03 | $0.005 | $0.14 | $0.02 | **~$0.20** |
+| 10 × 10yr | $0.58 | $0.09 | $0.14 | $0.02 | **~$0.83** |
+| 100 × 10yr | $5.82 | $0.94 | $0.14 | $0.05 | **~$6.95** |
 
 One-time setup: Full tile cache generation ($0.05–$10) + Lambda pipeline for cache + S3/CloudFront. Plus one-time CORS proxy cost for ML processing (free for ≤100 station-years, ~$536 at 1,000 — see [CORS proxy](#cloudfront-as-cors-proxy-for-earthscope-data)).
 
@@ -297,11 +327,11 @@ One-time setup: Full tile cache generation ($0.05–$10) + Lambda pipeline for c
 
 Since the GPU instance is already running for ML, tile cache generation runs alongside it at no additional compute cost.
 
-| Scale | Storage | Serving | GPU updates (cache + ML) | **Monthly total** |
-|---|---|---|---|---|
-| 5 × 1yr | $0.03 | $0.14 | $0.78 | **~$0.95** |
-| 10 × 10yr | $0.58 | $0.14 | $0.78 | **~$1.50** |
-| 100 × 10yr | $5.82 | $0.14 | $0.90 | **~$6.86** |
+| Scale | S3 storage | Firestore (events) | Serving | GPU updates (cache + ML) | **Monthly total** |
+|---|---|---|---|---|---|
+| 5 × 1yr | $0.03 | $0.005 | $0.14 | $0.78 | **~$0.96** |
+| 10 × 10yr | $0.58 | $0.09 | $0.14 | $0.78 | **~$1.59** |
+| 100 × 10yr | $5.82 | $0.94 | $0.14 | $0.90 | **~$7.80** |
 
 One-time setup: Full tile cache generation + ML pipeline on AWS Batch + S3/CloudFront.
 
@@ -311,17 +341,17 @@ One-time setup: Full tile cache generation + ML pipeline on AWS Batch + S3/Cloud
 
 For the initial data population (not monthly). Uses GPU (g4dn spot) for ML:
 
-| Scale | L0-L2 tile PUTs | L3 tile PUTs (~9hr tiles) | GPU compute (ML + cache) | **Total one-time** |
-|---|---|---|---|---|
-| 5 × 1yr | $0.02 | $0.01 | $0.08 | **~$0.11** |
-| 10 × 10yr | $0.49 | $0.18 | $1.12 | **~$1.79** |
-| 100 × 10yr | $4.94 | $1.83 | $10.95 | **~$17.72** |
+| Scale | L0-L2 tile PUTs | L3 tile PUTs (~9hr tiles) | Firestore writes (events + coverage) | GPU compute (ML + cache) | **Total one-time** |
+|---|---|---|---|---|---|
+| 5 × 1yr | $0.02 | $0.01 | $0.23 | $0.08 | **~$0.34** |
+| 10 × 10yr | $0.49 | $0.18 | $4.68 | $1.12 | **~$6.47** |
+| 100 × 10yr | $4.94 | $1.83 | $46.80 | $10.95 | **~$64.52** |
 
 (Includes GPU spot compute + S3 PUTs. Raw data download from EarthScope is free for server-side processing. For client-side ML, add CORS proxy cost — see [CORS proxy](#cloudfront-as-cors-proxy-for-earthscope-data).)
 
 ## Key takeaways
 
-1. **AWS costs are low.** Even the largest scenario (1,000 station-years with full L3 cache + AWS ML) costs ~$7/month ongoing. The infrastructure cost is dominated by engineering time to build and maintain the pipeline, not AWS bills.
+1. **Infrastructure costs are low.** Even the largest scenario (1,000 station-years with full L3 cache + AWS ML) costs ~$8/month ongoing. Firestore event storage adds ~$0.94/month at that scale. The one-time Firestore write cost (~$47 at 1,000 station-years) is the largest new expense. The infrastructure cost is dominated by engineering time to build and maintain the pipeline, not cloud bills.
 
 2. **GPU is dramatically cheaper than CPU for ML.** At 1,000 station-years: GPU spot = $10.95, ONNX Runtime on CPU Lambda = $58–$292, browser JS on Lambda = $1,460. GPU is 5–27x cheaper than the best CPU option and ~130x cheaper than browser JS.
 
