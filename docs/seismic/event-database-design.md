@@ -15,7 +15,7 @@ Related: [CLUE-463](https://concord-consortium.atlassian.net/browse/CLUE-463)
 One document per detected event, organized by station and model:
 
 ```
-seismic/{station}/models/{model}/events/{windowStart}
+services/seismic/stations/{station}/models/{model}/events/{windowStart}
   station: string          // e.g., "K204" — denormalized for collection group queries
   model: string            // e.g., "compact-v1" — denormalized for collection group queries
   windowStart: Timestamp
@@ -26,6 +26,8 @@ seismic/{station}/models/{model}/events/{windowStart}
   createdAt: Timestamp
 ```
 
+The `{station}` key uses the FDSN network+station format: `{network}_{station}` (e.g., `AK_K204`). This is globally unique across data providers — station codes alone are only unique within a network.
+
 Using `windowStart` as the document ID provides natural deduplication — two users detecting the same event just overwrite with the same data.
 
 The primary query pattern is single station + single model + time range. The denormalized `station` and `model` fields exist to support future collection group queries across stations if needed.
@@ -35,7 +37,7 @@ The primary query pattern is single station + single model + time range. The den
 Bitmap-based tracking of which time ranges have been processed. Each bit represents a 10-minute coverage window. Documents are chunked into 30-day periods.
 
 ```
-seismic/{station}/models/{model}/coverage/{chunkIndex}
+services/seismic/stations/{station}/models/{model}/coverage/{chunkIndex}
   bitmap: Bytes            // Uint8Array, 1 bit per 10-min window, 540 bytes per 30-day chunk
   updatedAt: Timestamp
 ```
@@ -70,7 +72,7 @@ Firestore's `arrayUnion` would avoid transactions by storing coverage as an arra
 ## Security Rules
 
 ```javascript
-match /seismic/{station}/models/{model} {
+match /services/seismic/stations/{station}/models/{model} {
 
   match /events/{eventId} {
     allow read: if request.auth != null;
@@ -136,7 +138,7 @@ async function markCovered(
 
   // Transaction per chunk: read bitmap, OR in new bits, write back
   for (const [chunkIndex, windows] of chunkUpdates) {
-    const docRef = doc(db, "seismic", station, "models", model, "coverage", String(chunkIndex));
+    const docRef = doc(db, "services", "seismic", "stations", station, "models", model, "coverage", String(chunkIndex));
     await runTransaction(db, async (txn) => {
       const snap = await txn.get(docRef);
       const bitmap = snap.exists()
@@ -164,7 +166,7 @@ async function getUncoveredRanges(
   let currentGapStart: number | null = null;
 
   for (let chunk = startChunk; chunk <= endChunk; chunk++) {
-    const docRef = doc(db, "seismic", station, "models", model, "coverage", String(chunk));
+    const docRef = doc(db, "services", "seismic", "stations", station, "models", model, "coverage", String(chunk));
     const snap = await get(docRef);
     const bitmap = snap.exists()
       ? snap.data().bitmap.toUint8Array()
@@ -207,7 +209,7 @@ async function writeEvents(
   const batch = writeBatch(db);
   for (const event of events) {
     const docRef = doc(
-      db, "seismic", station, "models", model, "events", String(event.windowStart)
+      db, "services", "seismic", "stations", station, "models", model, "events", String(event.windowStart)
     );
     batch.set(docRef, {
       station,
@@ -233,7 +235,7 @@ async function loadEvents(
   station: string, model: string, startTime: number, endTime: number,
   pageSize = 500
 ): Promise<SeismicEvent[]> {
-  const eventsRef = collection(db, "seismic", station, "models", model, "events");
+  const eventsRef = collection(db, "services", "seismic", "stations", station, "models", model, "events");
   const events: SeismicEvent[] = [];
   let lastDoc: QueryDocumentSnapshot | undefined;
 
