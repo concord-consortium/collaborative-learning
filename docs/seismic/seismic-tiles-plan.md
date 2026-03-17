@@ -117,7 +117,7 @@ These items can proceed in parallel with Scott's ML work.
 
 6. ~~**Data source decision**~~ ✅ — EarthScope chosen. Raspberry Shake ruled out due to redistribution restrictions and low rate limits. See [data-services.md](data-services.md).
 
-7. **miniSEED format and in-memory representation** — Teale did the investigation work but the results need to be located and added to these documents. What we know so far is captured in the [miniSEED section](#miniseed-format-and-in-memory-representation) above.
+7. ~~**miniSEED format and in-memory representation**~~ ✅ — Teale's investigation is captured in the [miniSEED section](#miniseed-format-and-in-memory-representation) above.
 
 8. **Seismic data shared model design** — The current shared model is intentionally simple. It will need to be expanded as Teale works on envelope summaries and dynamic fetching (#10, #11). Scott and Teale should pair on this as the requirements become clearer. Key design questions:
    - The shared model API: what methods/views does it expose? (e.g., samples for a time range, envelope data, station metadata, download progress)
