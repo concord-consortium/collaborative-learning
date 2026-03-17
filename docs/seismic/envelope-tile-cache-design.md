@@ -9,7 +9,7 @@ To support smooth zooming across a large time range without loading all raw data
 **Columnar Int16** is a good balance of compactness and simplicity:
 - Store all min values contiguously, then all max values (columnar layout compresses better than interleaved min/max because adjacent values in each column are more similar).
 - Quantize amplitudes to Int16 (2 bytes) using a fixed global amplitude range per instrument type (see [Amplitude quantization](#amplitude-quantization)). Seismic envelope data at coarse resolutions doesn't need Float32 precision.
-- Gzip the binary buffer. For example, a 1024-point tile = 1024 × 2 × 2 = 4 KB raw, ~1.5–2 KB gzipped. L3 tiles use more points per tile (see [Tile structure](#tile-structure)).
+- Gzip the binary buffer. For example, a 1024-point L0/L1 tile = 1024 × 2 × 2 = 4 KB raw, ~1.5–2 KB gzipped. L2 tiles use 20,480 points (~80 KB raw, ~30–40 KB gzipped). See [Tile structure](#tile-structure).
 - In the browser, the decompressed buffer can be read directly as an `Int16Array` with a known scale factor — no parsing needed.
 - Reserve Int16 value `-32768` as a sentinel for "no data" (see [Missing and partial data](#missing-and-partial-data)).
 
@@ -94,16 +94,16 @@ The approximate values in the table above (~1.575s, ~157.5s, etc.) would need to
 
 ## Tile structure
 
-Each tile stores envelope points for a contiguous time range. With the 6-month L0 configuration and 1024 points per tile for all levels:
+Each tile stores envelope points for a contiguous time range. The number of points per tile varies by level — L2 uses 20× more points per tile to reduce tile count (fewer S3 objects to manage). With the 6-month L0 configuration:
 
-| Level | Point spacing | Points per tile | Tile duration   | Tiles per year |
-|-------|---------------|-----------------|-----------------|----------------|
-| L0    | ~15,750 s     | 1,024           | ~186 days       | ~2             |
-| L1    | ~157.5 s      | 1,024           | ~1.9 days       | ~195           |
-| L2    | ~1.575 s      | 1,024           | ~27 min         | ~19,500        |
-| Raw   | 0.005 s       | —               | —               | on-demand      |
+| Level | Point spacing | Points per tile | Tile duration   | Tiles per year | Tile size (gzipped) |
+|-------|---------------|-----------------|-----------------|----------------|---------------------|
+| L0    | ~15,750 s     | 1,024           | ~186 days       | ~2             | ~1–2 KB             |
+| L1    | ~157.5 s      | 1,024           | ~1.9 days       | ~195           | ~1–2 KB             |
+| L2    | ~1.575 s      | 20,480          | ~9 hours        | ~975           | ~30–40 KB           |
+| Raw   | 0.005 s       | —               | —               | on-demand      | —                   |
 
-L2 has the most tiles per year. At 1024 points per tile, each L2 tile is ~4 KB raw / ~2 KB gzipped — small individual fetches. The ~19,500 tiles per station-year is manageable for S3 (PUT cost ~$0.10 per station-year at $5/million PUTs).
+L2 has the most tiles per year. At 20,480 points per tile, each L2 tile is ~80 KB raw / ~30–40 KB gzipped. The ~975 tiles per station-year is very manageable for S3.
 
 ## Tile addressing
 
