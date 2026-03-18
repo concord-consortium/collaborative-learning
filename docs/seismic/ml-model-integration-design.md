@@ -26,13 +26,13 @@ Fetched when the user selects a model from the dropdown. Contains everything nee
 ```
 
 Field descriptions:
-- **id**: Stable identifier used in the event database path (`services/seismic/stations/{station}/models/{model}/...`). Bumped when the model is retrained (e.g., `compact-v2`), so old events remain valid.
+- **id**: Stable identifier used in the event database path (`services/seismic/stations/{station}/channels/{channel}/models/{model}/...`). Bumped when the model is retrained (e.g., `compact-v2`), so old events remain valid.
 - **architecture**: Maps to a build function in CLUE (see [Architecture Registry](#architecture-registry)).
 - **num_classes**: Number of output classes.
 - **class_names**: Human-readable names for each class, in output order.
 - **sampling_rate**: Sample rate the model expects (Hz). Input data at a different rate must be resampled.
 - **window_duration**: Length of each classification window (seconds). Combined with `sampling_rate`, determines the expected input size (e.g., 100 Hz × 60s = 6000 samples).
-- **instrument_types**: Compatible SEED instrument codes (second character of the channel code). `H` = high-gain broadband seismometer, `E` = extremely short-period seismometer — both velocity instruments. The Wave Runner tile should warn if the selected station's channel is incompatible.
+- **instrument_types**: Compatible SEED instrument codes (second character of the channel code). `H` = high-gain broadband seismometer, `E` = extremely short-period seismometer — both velocity instruments. The Wave Runner tile should filter the channel dropdown to only show compatible channels, or warn if the selected channel is incompatible.
 - **weightsUrl**: Relative URL to the weights file, resolved relative to the directory containing `metadata.json`. Only fetched when the user clicks "Run Model."
 
 ### weights.json (1–3 MB)
@@ -174,10 +174,10 @@ The caller determines how much data to request per download. Recommended default
 ### Orchestration loop
 
 ```
-determine uncovered time ranges (from coverage bitmaps — see event-database-design.md)
+determine uncovered time ranges for station + channel + model (from coverage bitmaps — see event-database-design.md)
 load model weights (once)
 for each chunk of the uncovered ranges:
-    download chunk from proxy → Seismogram
+    download chunk from proxy (station + channel + time range) → Seismogram
     events = await runner.processChunk(seismogram, callbacks)
     add events to working SharedDataSet (orchestration layer sets source="local")
     // Future: compute and upload envelope tiles from this same seismogram
@@ -237,7 +237,7 @@ The `source` column distinguishes events detected in this session (`"local"`) fr
 ```
 User clicks "Load Data"
   → fetch metadata.json (if not already loaded) → get model id
-  → query Firestore for events (station + model id + time range)
+  → query Firestore for events (station + channel + model id + time range)
   → populate working dataset with rows (source="remote")
   → Wave Runner shows "Y events loaded from database."
 User clicks "Timeline It!"
@@ -249,9 +249,10 @@ User clicks "Timeline It!"
 
 ```
 User clicks "Run Model"
+  → validate selected channel against model's instrument_types
   → fetch metadata.json (if not already loaded)
   → fetch weights.json → build TF.js model
-  → check coverage bitmaps → determine uncovered time ranges
+  → check coverage bitmaps (station + channel + model) → determine uncovered time ranges
   → for each chunk:
       download data → runner.processChunk()
       → onEvents callback adds rows (source="local") to working dataset
@@ -265,7 +266,7 @@ User clicks "Timeline It!"
 
 ### Combining loaded and detected events
 
-If a user loads precomputed events ("Load Data") and then runs the model for uncovered gaps ("Run Model"), both sets end up in the working dataset. The coverage bitmaps (see [event-database-design.md](event-database-design.md)) prevent duplication — the runner only processes uncovered time ranges. The `source` column distinguishes the two populations.
+If a user loads precomputed events ("Load Data") and then runs the model for uncovered gaps ("Run Model"), both sets end up in the working dataset. The coverage bitmaps (see [event-database-design.md](event-database-design.md)) prevent duplication — the runner only processes uncovered time ranges for the selected station + channel + model. The `source` column distinguishes the two populations.
 
 ## Out of Scope
 
