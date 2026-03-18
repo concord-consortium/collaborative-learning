@@ -6,6 +6,7 @@
 - [Envelope Tile Cache Design](envelope-tile-cache-design.md) — Tile levels, storage format, and cost estimates for envelope summaries
 - [Seismic Data Services](data-services.md) — Comparison of EarthScope and Raspberry Shake APIs, file sizes, and rate limits
 - [Seismic ML Infrastructure Cost Estimates](seismic-cost-estimates.md) — Cost analysis for different infrastructure options
+- [ML Model Integration with Wave Runner](ml-model-integration-design.md) — Interface between the ML model code and the Wave Runner tile
 
 ## Tile Architecture
 
@@ -15,7 +16,7 @@ Two tiles work together to provide seismic data exploration with ML-based event 
 - **Database only**: The "Load Data" toolbar button is enabled and the "Run Model" button is disabled. Clicking "Load Data" fetches events from the database (uploaded by other users who previously ran the ML model for that station, model, and time range) and updates the shared models.
 - **ML model running**: Both the "Load Data" and "Run Model" buttons are enabled. Clicking "Load Data" fetches whatever events are already in the database. Clicking "Run Model" fills in gaps — it downloads the seismic data, runs the selected ML model in the browser, uploads the detected events, and uploads tiled envelope data so the data can be explored visually efficiently.
 
-  **Open question:** When the ML model runs and produces new events, how should the shared models be updated? Options include updating them in place as the model runs, or requiring an explicit user action to push the new results to the shared models. To be resolved.
+  **Resolved:** The Wave Runner tile maintains two SharedDataSets — a working dataset that receives events incrementally as the model runs, and a committed dataset that the Timeline tile observes. The user clicks "Timeline It!" to push results from the working dataset to the committed dataset. See [ml-model-integration-design.md](ml-model-integration-design.md) for details.
 
 **Timeline tile** (in progress — Teale): Displays seismic waveform data with interactive controls for exploring the time series. Also shows events identified and labeled by the ML model. This is the primary visualization and exploration surface for students.
 

@@ -15,12 +15,12 @@ Related: [CLUE-463](https://concord-consortium.atlassian.net/browse/CLUE-463)
 One document per detected event, organized by station and model:
 
 ```
-services/seismic/stations/{station}/models/{model}/events/{windowStart}
+services/seismic/stations/{station}/models/{model}/events/{windowStart}_{eventType}
   station: string          // e.g., "K204" — denormalized for collection group queries
   model: string            // e.g., "compact-v1" — denormalized for collection group queries
   windowStart: Timestamp
   windowEnd: Timestamp
-  eventType: string        // e.g., "earthquake", "noise"
+  eventType: string        // e.g., "earthquake", "traffic"
   confidence: number       // 0.0–1.0
   createdBy: string        // user ID
   createdAt: Timestamp
@@ -28,7 +28,7 @@ services/seismic/stations/{station}/models/{model}/events/{windowStart}
 
 The `{station}` key uses the FDSN network+station format: `{network}_{station}` (e.g., `AK_K204`). This is globally unique across data providers — station codes alone are only unique within a network.
 
-Using `windowStart` as the document ID provides natural deduplication — two users detecting the same event just overwrite with the same data.
+The document ID is `{windowStart}_{eventType}` (e.g., `1710720000000_earthquake`). The composite key supports multiple events per window (a multi-class model may detect both traffic and earthquake in the same window) while providing natural deduplication — two users detecting the same event just overwrite with the same data.
 
 The primary query pattern is single station + single model + time range. The denormalized `station` and `model` fields exist to support future collection group queries across stations if needed.
 
@@ -208,8 +208,9 @@ async function writeEvents(
 ) {
   const batch = writeBatch(db);
   for (const event of events) {
+    const docId = `${event.windowStart}_${event.eventType}`;
     const docRef = doc(
-      db, "services", "seismic", "stations", station, "models", model, "events", String(event.windowStart)
+      db, "services", "seismic", "stations", station, "models", model, "events", docId
     );
     batch.set(docRef, {
       station,
