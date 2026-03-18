@@ -1,3 +1,9 @@
+// This script processes local seismic data and uploads it to S3.
+// Seismic data should be downloaded using Rover. See https://github.com/EarthScope/rover.
+// You must be logged in to AWS for the script to upload.
+// Run like:
+// npx tsx seismic/generate-envelopes.ts --input-dir ../../seismic-data/data --network AK --station K204 --channel HNZ
+
 // scripts/seismic/generate-envelopes.ts
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join } from "path";
