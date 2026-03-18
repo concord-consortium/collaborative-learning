@@ -129,7 +129,7 @@ function loadMiniSeedFiles(dataRoot: string, network: string, station: string): 
         traces.push({
           channel: seis.channelCode,
           sampleRate: seg.sampleRate,
-          startTime: seg.startTime.toEpochSecond(),
+          startTime: seg.startTime.toSeconds(),
           samples: new Float64Array(seg.y),
         });
       }
@@ -198,8 +198,8 @@ function assembleTiles(
         tile.maxs[pointIndex] = qMax;
       } else {
         // Merge: keep the more extreme values
-        tile.mins[pointIndex] = Math.min(tile.mins[pointIndex], qMin) as number;
-        tile.maxs[pointIndex] = Math.max(tile.maxs[pointIndex], qMax) as number;
+        tile.mins[pointIndex] = Math.min(tile.mins[pointIndex], qMin);
+        tile.maxs[pointIndex] = Math.max(tile.maxs[pointIndex], qMax);
       }
     }
   }

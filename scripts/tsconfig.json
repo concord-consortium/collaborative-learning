@@ -3,7 +3,6 @@
     "module": "nodenext",
     "resolveJsonModule": true,
     "paths": {
-      "seisplotjs": ["../node_modules/seisplotjs/dist/index"],
       "seisplotjs/nodeonly": ["../node_modules/seisplotjs/dist/index_node"]
     },
     "types": ["node"]
