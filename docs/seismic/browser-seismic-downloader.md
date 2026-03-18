@@ -42,16 +42,15 @@ Downloaded miniSEED files are stored in the browser's Origin Private File System
 
 ```
 /seismic-cache/
-  AK/                          (network)
-    FIB/                       (station)
-      BHZ/                     (channel)
-        2025/
-          001.mseed            (Jan 1)
-          002.mseed            (Jan 2)
-          ...
+  AK_FIB/                       (network_station)
+    BHZ/                         (channel)
+      2025/
+        001.mseed                (Jan 1)
+        002.mseed                (Jan 2)
+        ...
 ```
 
-This keeps each station's data isolated, making it straightforward to scan what's cached per station and clean up a single station's data.
+This uses our standard `{network_station}` identifier (see [seismic-tiles-plan.md](seismic-tiles-plan.md#station-identification-across-systems)), consistent with the envelope tile cache and Firestore paths. It keeps each station's data isolated, making it straightforward to scan what's cached per station and clean up a single station's data.
 
 **Option B: ROVER's actual layout**
 

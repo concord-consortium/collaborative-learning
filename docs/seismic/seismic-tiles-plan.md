@@ -91,6 +91,39 @@ Remaining unknowns:
 
 The full time range of high-resolution data cannot be held in memory at once. The planned approach is a multi-level tile cache that stores summary statistics (min/max amplitude) at progressively coarser resolutions. This allows rendering an overview of long time ranges without loading all samples, and fetching full-resolution data only when the user zooms in. See [envelope-tile-cache-design.md](envelope-tile-cache-design.md) for the detailed design including tile levels, storage format, and cost estimates.
 
+### Station identification across systems
+
+Seismic data is identified by three components: **network** (e.g., `AK`), **station** (e.g., `K204`), and **channel** (e.g., `BHZ`). These are handled differently across the systems we're building, which creates inconsistency and a risk of bugs. This section documents the current state to inform a decision on a consistent approach.
+
+#### Current schemas
+
+| System | Path / Key Format | Network | Station | Channel |
+|--------|-------------------|---------|---------|---------|
+| **EarthScope API** | `?network=AK&station=K204&channel=BHZ` | Separate param | Separate param | Separate param |
+| **Envelope tile cache** | `/{station}/{channel}/{level}/{tile_index}` | Folded into station as `AK_K204` | Combined with network | Separate path segment |
+| **Firestore events** | `services/seismic/stations/{station}/models/{model}/events/{id}` | Folded into station as `AK_K204` | Combined with network | **Missing** |
+| **Firestore coverage** | `services/seismic/stations/{station}/models/{model}/coverage/{chunkIndex}` | Folded into station as `AK_K204` | Combined with network | **Missing** |
+| **OPFS cache (Option A)** | `/seismic-cache/{network}/{station}/{channel}/{year}/{doy}.mseed` | Separate directory | Separate directory | Separate directory |
+| **OPFS cache (Option B/ROVER)** | `/data/{network}/{year}/{doy}/{station}.{network}.{year}.{doy}` | Separate dir + in filename | In filename | **Missing** |
+
+#### Recommended conventions
+
+1. **`{network_station}`** is always `{network}_{station}` (e.g., `AK_K204`) — a single string used as document IDs and directory names. When calling EarthScope APIs, split on `_` back into separate `network` and `station` params.
+
+2. **`{channel}`** is always a separate path segment, never folded into the station ID. Channel has different semantics (affects amplitude interpretation, sample rate) and different channels may share station-level metadata.
+
+3. **Unified paths:**
+
+| System | Path |
+|--------|------|
+| **Envelope tile cache** | `/{network_station}/{channel}/{level}/{tile_index}` (already follows this) |
+| **Firestore events** | `services/seismic/stations/{network_station}/channels/{channel}/models/{model}/events/{id}` |
+| **Firestore coverage** | `services/seismic/stations/{network_station}/channels/{channel}/models/{model}/coverage/{chunkIndex}` |
+| **OPFS raw cache (Option A)** | `/seismic-cache/{network_station}/{channel}/{year}/{doy}.mseed` |
+| **OPFS raw cache (Option B/ROVER)** | ROVER's own layout — does not follow our convention, kept as-is for reference |
+
+Note: the OPFS Option B (ROVER's layout) intentionally does not follow our convention since it mirrors ROVER's existing structure. See [browser-seismic-downloader.md](browser-seismic-downloader.md) for details on both options.
+
 ### Compression of full-resolution data
 
 miniSEED already uses Steim2 lossless compression, so there is limited room for further lossless compression. If data size is still a problem, options include:
