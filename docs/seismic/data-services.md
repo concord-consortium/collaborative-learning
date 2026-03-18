@@ -46,11 +46,9 @@ They recommend limiting requests to 24 hours but don't enforce a hard limit. The
 
 ### Redistribution policy
 
-From the [IRIS data policy announcement](https://ds.iris.edu/ds/newsletter/vol18/no1/460/iris-board-approves-new-data-policies-for-iris/):
+All data from EarthScope-operated NSF facilities (GAGE and SAGE) is licensed under [CC BY 4.0](https://www.unavco.org/data/policies_forms/data-policy/data-license.html). This means data can be reused, shared, adapted, and redistributed for any purpose — including commercial applications — with the only requirement being proper attribution (credit the data source, link to data/metadata, reference the CC BY 4.0 license, note any modifications).
 
-> The IRIS DMC encourages the redistribution of IRIS data to other interested parties without restriction.
-
-The only requirement is that redistribution be documented according to their "Redistribution of IRIS Data" guidelines. However, we were unable to locate this guidelines document — it may not have been migrated from the old IRIS site to the current EarthScope site. All data collected with NSF SAGE instrumentation are made freely and openly available.
+One caveat: if a contributing data provider previously released data under a more restrictive license, that original license takes precedence. For standard seismic network data like AK (Alaska), this should not be an issue.
 
 ## Raspberry Shake
 
