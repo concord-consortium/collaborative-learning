@@ -9,7 +9,7 @@ To support smooth zooming across a large time range without loading all raw data
 **Columnar Int16** is a good balance of compactness and simplicity:
 - Store all min values contiguously, then all max values (columnar layout compresses better than interleaved min/max because adjacent values in each column are more similar).
 - Quantize amplitudes to Int16 (2 bytes) using a fixed global amplitude range per instrument type (see [Amplitude quantization](#amplitude-quantization)). Seismic envelope data at coarse resolutions doesn't need Float32 precision.
-- Gzip the binary buffer. For example, a 1024-point L0/L1 tile = 1024 × 2 × 2 = 4 KB raw, ~1.5–2 KB gzipped. L2 tiles use 20,480 points (~80 KB raw, ~30–40 KB gzipped). See [Tile structure](#tile-structure).
+- Gzip the binary buffer. For example, a 1024-point L0/L1 tile = 1024 × 2 × 2 = 4 KB raw. L2 tiles use 20,480 points (~80 KB raw). In practice, gzip compression is very effective on envelope data: measured L0/L1 tiles are ~100–600 bytes and L2 tiles are ~3–6 KB (much smaller than the theoretical maximum, due to repeated sentinel values and smooth amplitude patterns). See [Tile structure](#tile-structure).
 - In the browser, the decompressed buffer can be read directly as an `Int16Array` with a known scale factor — no parsing needed.
 - Reserve Int16 value `-32768` as a sentinel for "no data" (see [Missing and partial data](#missing-and-partial-data)).
 
@@ -59,19 +59,19 @@ The scale factor K ≈ 100 between adjacent levels keeps data loaded at transiti
 | Level | Point spacing | Active zoom range | Points/year | Gzipped storage/station-year |
 |-------|---------------|-------------------|-------------|------------------------------|
 | L0 | ~15,750 s | ~1 year → ~6 months | ~2,000 | negligible |
-| L1 | ~157.5 s | ~6 months → ~1.8 days | ~200,000 | ~200–400 KB |
-| L2 | ~1.575 s | ~1.8 days → ~2.6 min | ~20,000,000 | ~40–60 MB |
+| L1 | ~157.5 s | ~6 months → ~1.8 days | ~200,000 | ~100–200 KB |
+| L2 | ~1.575 s | ~1.8 days → ~2.6 min | ~20,000,000 | ~4–6 MB |
 | Raw | 0.005 s | < ~2.6 min | — | fetched on demand from EarthScope |
 
-Total stored envelope data: **~40–60 MB per station-year**, dominated by L2.
+Total stored envelope data: **~4–6 MB per station-year**, dominated by L2. (Measured: 19 L2 tiles covering ~7 days averaged ~4.3 KB each, extrapolating to ~4.3 MB/station-year. Gzip compression is much more effective than initially estimated because envelope data contains many repeated sentinel values and smoothly varying amplitudes.)
 
 The main tradeoff in choosing L0's target is L2 storage: a smaller L0 target (e.g., 3 months) pushes L2 finer, increasing storage but reducing the view size at which raw data must be fetched. A larger L0 target (e.g., 1 year) halves L2 storage but means raw fetches start at ~5 min views instead of ~2.6 min.
 
 | L0 target | L2 spacing | Raw data needed below... | L2 storage/station-year |
 |-----------|-----------|------------------------|------------------------|
-| 3 months | ~0.79 s | ~1.3 min | ~80–120 MB |
-| 6 months | ~1.575 s | ~2.6 min | ~40–60 MB |
-| 1 year | ~3.15 s | ~5 min | ~20–30 MB |
+| 3 months | ~0.79 s | ~1.3 min | ~8–12 MB |
+| 6 months | ~1.575 s | ~2.6 min | ~4–6 MB |
+| 1 year | ~3.15 s | ~5 min | ~2–3 MB |
 
 **The level configuration should be easy to change** — the spacings should be defined as constants so we can experiment with different L0 targets and K values without structural code changes. The tile addressing, storage format, and switching logic should all derive from these constants.
 
@@ -98,12 +98,12 @@ Each tile stores envelope points for a contiguous time range. The number of poin
 
 | Level | Point spacing | Points per tile | Tile duration   | Tiles per year | Tile size (gzipped) |
 |-------|---------------|-----------------|-----------------|----------------|---------------------|
-| L0    | ~15,750 s     | 1,024           | ~186 days       | ~2             | ~1–2 KB             |
-| L1    | ~157.5 s      | 1,024           | ~1.9 days       | ~195           | ~1–2 KB             |
-| L2    | ~1.575 s      | 20,480          | ~9 hours        | ~975           | ~30–40 KB           |
+| L0    | ~15,750 s     | 1,024           | ~186 days       | ~2             | ~100–200 bytes      |
+| L1    | ~157.5 s      | 1,024           | ~1.9 days       | ~195           | ~500–600 bytes      |
+| L2    | ~1.575 s      | 20,480          | ~9 hours        | ~975           | ~3–6 KB             |
 | Raw   | 0.005 s       | —               | —               | on-demand      | —                   |
 
-L2 has the most tiles per year. At 20,480 points per tile, each L2 tile is ~80 KB raw / ~30–40 KB gzipped. The ~975 tiles per station-year is very manageable for S3.
+L2 has the most tiles per year. At 20,480 points per tile, each L2 tile is ~80 KB raw / ~3–6 KB gzipped (measured). The ~975 tiles per station-year is very manageable for S3.
 
 ## Tile addressing
 
@@ -148,13 +148,13 @@ Fixed point count (Option A) is simpler to implement and matches the uniform sto
 
 Raw data is not stored in the tile cache — it is fetched on demand from EarthScope when the user zooms in. Only envelope levels L0–L2 are stored.
 
-| Level | Points / year | Raw size | Gzipped (est) |
-|-------|---------------|----------|---------------|
-| L0    | ~2,000        | 8 KB     | negligible    |
-| L1    | ~200,000      | 800 KB   | ~200–400 KB   |
-| L2    | ~20,000,000   | 80 MB    | ~40–60 MB     |
+| Level | Points / year | Raw size | Gzipped (measured) |
+|-------|---------------|----------|--------------------|
+| L0    | ~2,000        | 8 KB     | negligible         |
+| L1    | ~200,000      | 800 KB   | ~100–200 KB        |
+| L2    | ~20,000,000   | 80 MB    | ~4–6 MB            |
 
-L2 dominates at ~99% of total storage. For 1 station-year, total envelope storage is roughly **40–60 MB** gzipped. These estimates are for the 6-month L0 configuration — see the [comparison table in Resolution levels](#resolution-levels) for how storage changes with different L0 targets.
+L2 dominates at ~97% of total storage. For 1 station-year, total envelope storage is roughly **4–6 MB** gzipped. These figures are based on measured tile sizes from a ~7-day sample (station K204, channel HNZ): L2 tiles averaged ~4.3 KB gzipped vs 80 KB raw (~5% compression ratio). The high compressibility comes from sparse data (sentinel-filled gaps) and smooth amplitude patterns. These estimates are for the 6-month L0 configuration — see the [comparison table in Resolution levels](#resolution-levels) for how storage changes with different L0 targets.
 
 ## Missing and partial data
 
@@ -192,7 +192,7 @@ We considered several existing formats before settling on a simple custom binary
 | **PMTiles** | Range requests | pmtiles | Validates the architecture (single-file tile archives on static storage) but tightly coupled to 2D map tiles. |
 | **Arrow IPC / Parquet** | Limited | apache-arrow / hyparquet | Too much per-tile metadata overhead for simple 1D int16 arrays. Parquet's row-group mechanism could work but adds complexity without solving new problems. |
 
-**Gzipped JSON vs binary Int16 size comparison**: A 1024-point tile has 2,048 Int16 values (min + max). As binary, this is 4 KB raw, ~1.5–2 KB gzipped. As JSON (e.g., `{"min":[-342,17,...],"max":[289,1045,...]}`), each number averages ~4–5 characters plus a comma separator, producing ~10–12 KB of text, which gzips to ~4–5 KB. Over a full station-year at L2 (~20M points), the JSON overhead roughly doubles the storage cost. JSON also requires parsing text into numbers rather than directly interpreting a typed array buffer, though for tile-sized payloads the parse time difference is negligible.
+**Gzipped JSON vs binary Int16 size comparison**: A 1024-point tile has 2,048 Int16 values (min + max). As binary, this is 4 KB raw, ~100–600 bytes gzipped (measured). As JSON (e.g., `{"min":[-342,17,...],"max":[289,1045,...]}`), each number averages ~4–5 characters plus a comma separator, producing ~10–12 KB of text, which would gzip larger. Over a full station-year at L2 (~20M points), JSON would substantially increase storage cost. JSON also requires parsing text into numbers rather than directly interpreting a typed array buffer, though for tile-sized payloads the parse time difference is negligible.
 
 **Zarr is the strongest alternative** — it standardizes exactly what we need (chunked arrays on cloud storage with per-chunk HTTP access). If we later want interoperability with Python analysis tools or want to drop the custom format spec, migrating to Zarr would be straightforward since the underlying storage pattern is nearly identical.
 
@@ -221,4 +221,4 @@ An earlier version of this design considered storing min/max as Uint8 (one unsig
 
 ## Firestore considerations
 
-Firestore charges $0.18/GB/month for stored data. At ~50 MB per station-year, the storage cost is roughly **$0.009/month per station-year** — very cheap. For comparison, S3 Standard at $0.023/GB would be ~$0.001/month for the same data.
+Firestore charges $0.18/GB/month for stored data. At ~5 MB per station-year, the storage cost is roughly **$0.001/month per station-year** — very cheap. For comparison, S3 Standard at $0.023/GB would be ~$0.0001/month for the same data.
