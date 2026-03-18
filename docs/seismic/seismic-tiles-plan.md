@@ -111,7 +111,7 @@ Steps are grouped into two parallel tracks so Scott and Teale can work simultane
 
 These items can proceed in parallel with Scott's ML work.
 
-4. ~~**Graph visualization at different time scales**~~ ✅ — Teale generated screenshots of graphs at 24 hours, 1 month, and 1 year of data. Confirmed that a summarized view is needed for longer time ranges.
+4. ~~**Graph visualization at different time scales**~~ ✅ — Teale generated screenshots of graphs at several durations ranging from 5 seconds to 1 week. Confirmed that a summarized view is needed for longer time ranges.
 
 5. **Thin slice through the tiles** (almost done) — Building a minimal end-to-end path through both tiles to validate the UI design.
 

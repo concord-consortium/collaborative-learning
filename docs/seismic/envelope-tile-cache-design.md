@@ -153,6 +153,8 @@ Fixed point count (Option A) is simpler to implement and matches the uniform sto
 
 Raw data is not stored in the tile cache — it is fetched on demand from the data provider when the user zooms in. Only envelope levels L0–L3 are stored.
 
+**Note on raw data fetching:** When the Timeline tile fetches raw data for zoomed-in views, requests should be aligned to fixed time boundaries (e.g., hour- or minute-aligned chunks) rather than using the exact visible time range. This way, when multiple students zoom into the same region, their requests hit the same CloudFront cache keys instead of each generating a unique request that must be forwarded to EarthScope.
+
 | Level | Points / year | Raw size | Gzipped (est) |
 |-------|---------------|----------|---------------|
 | L0    | ~100          | 400 B    | negligible    |
