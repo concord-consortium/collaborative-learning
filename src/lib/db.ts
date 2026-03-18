@@ -485,7 +485,7 @@ export class DB {
                     offeringId: user.offeringId,
                     uid: user.id
                   },
-                  visibility: "private",
+                  visibility: this.stores.appConfig.defaultSharedDocuments ? "public" : "private",
                   documentKey: document.self.documentKey,
                 };
                 const newDocumentPath = type === PlanningDocument
@@ -970,7 +970,8 @@ export class DB {
               classHash: user.classHash
             },
             title: docTitle,
-            properties: properties || {}
+            properties: properties || {},
+            visibility: this.stores.appConfig.defaultSharedDocuments ? "public" : "private",
           };
           return this.firebase.ref(this.firebase.getOtherDocumentPath(user, documentType, documentKey))
                   .set(newDocument)

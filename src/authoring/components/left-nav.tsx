@@ -58,6 +58,10 @@ const LeftNav: React.FC<IProps> = ({ onMediaLibraryClicked }) => {
               id: "termOverrides",
               label: "Term Overrides",
             },
+            {
+              id: "documentSettings",
+              label: "Document Settings",
+            },
           ]
         },
         {

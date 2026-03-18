@@ -219,11 +219,31 @@ $title-margin: 0;
       }
     }
 
-    .document-error {
+    .document-not-shared {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--charcoal-6-charcoal-light-6);
+
+      .not-shared-icon {
+        width: 24px;
+        height: 24px;
+        fill: #0481a0;
+      }
 
       p {
-        margin-top: 3em;
+        margin-top: 1em;
+        font-family: Lato;
+        font-size: 14px;
+        font-weight: normal;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
         text-align: center;
+        color: #3f3f3f;
       }
     }
 

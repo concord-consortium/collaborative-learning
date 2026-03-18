@@ -17,6 +17,7 @@ import { DocumentTitle } from "./document-title";
 import CloseIcon from "../../../src/assets/icons/close/close.svg";
 import ToggleDocumentScrollerIcon from "../../../src/assets/show-hide-thumbnail-view-small-icon.svg";
 import SwitchDocumentIcon from "../../assets/scroll-arrow-small-icon.svg";
+import NotShareIcon from "../../assets/icons/share/not-share.svg";
 
 interface IProps {
   nextDocumentsGroup?: DocumentGroup;
@@ -151,8 +152,9 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
           }
           {
             openDocument && !isVisible &&
-              <div className="document-error">
-                <p>This document is not shared with you right now.</p>
+              <div className="document-not-shared">
+                <NotShareIcon className="not-shared-icon" />
+                <p>This document is no longer shared and can't be viewed at this time.</p>
               </div>
           }
           { !openDocument && <DocumentLoadingSpinner/> }
