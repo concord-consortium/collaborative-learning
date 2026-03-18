@@ -146,7 +146,9 @@ Fixed point count (Option A) is simpler to implement and matches the uniform sto
 
 ## Storage estimates (per station-year, gzipped columnar Int16)
 
-Raw data is not stored in the tile cache — it is fetched on demand from EarthScope when the user zooms in. Only envelope levels L0–L2 are stored.
+Raw data is not stored in the tile cache — it is fetched on demand from the data provider when the user zooms in. Only envelope levels L0–L2 are stored.
+
+**Note on raw data fetching:** When the Timeline tile fetches raw data for zoomed-in views, requests should be aligned to fixed 1-minute time boundaries rather than using the exact visible time range. This way, when multiple students zoom into the same region, their requests hit the same CloudFront cache keys instead of each generating a unique request that must be forwarded to EarthScope. At 200 Hz, 1 minute of raw data is ~48 KB, which downloads in under 0.5 seconds even on a slow school network (1 Mbps). This matters because zooming and scrolling can trigger multiple fetches in quick succession — larger chunks (e.g., 10 minutes = ~480 KB = ~3.8 seconds at 1 Mbps) would feel sluggish for interactive exploration. Note that this 1-minute boundary is intentionally different from the 10-minute coverage bitmap windows in the [event database](event-database-design.md). The coverage bitmap tracks whether the ML model has processed a time range, which is a bulk operation where coarser granularity keeps storage compact. Raw data fetching serves interactive zooming, where responsiveness matters more than minimizing the number of cache keys.
 
 | Level | Points / year | Raw size | Gzipped (est) |
 |-------|---------------|----------|---------------|
