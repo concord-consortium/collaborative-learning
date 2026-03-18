@@ -5,8 +5,8 @@
 // npx tsx seismic/generate-envelopes.ts --input-dir ../../seismic-data/data --network AK --station K204 --channel HNZ
 
 // scripts/seismic/generate-envelopes.ts
-import { readFileSync, readdirSync, statSync } from "fs";
-import { join } from "path";
+import { readFileSync, readdirSync, statSync, writeFileSync, mkdirSync } from "fs";
+import { join, dirname } from "path";
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { miniseed } from "seisplotjs/nodeonly";
 import {
@@ -33,6 +33,8 @@ interface ScriptConfig {
   station: string;
   /** SEED channel code (e.g., "BHZ"). If omitted, processes all channels found. */
   channel?: string;
+  /** Optional local output directory for saving tiles as files */
+  outputDir?: string;
   /** S3 bucket name */
   s3Bucket: string;
   /** S3 key prefix (e.g., "envelopes/") */
@@ -57,6 +59,7 @@ function parseArgs(): ScriptConfig {
       case "--network": config.network = value; break;
       case "--station": config.station = value; break;
       case "--channel": config.channel = value; break;
+      case "--output-dir": config.outputDir = value; break;
       case "--s3-bucket": config.s3Bucket = value; break;
       case "--s3-prefix": config.s3Prefix = value; break;
       case "--aws-region": config.awsRegion = value; break;
@@ -69,7 +72,8 @@ function parseArgs(): ScriptConfig {
   if (!config.inputDir || !config.network || !config.station) {
     console.error("Usage: npx tsx scripts/seismic/generate-envelopes.ts \\");
     console.error("  --input-dir <path> --network <net> --station <sta> \\");
-    console.error("  [--channel <chan>] [--s3-bucket <bucket>] [--s3-prefix <prefix>] [--aws-region <region>]");
+    console.error("  [--channel <chan>] [--output-dir <path>]");
+    console.error("  [--s3-bucket <bucket>] [--s3-prefix <prefix>] [--aws-region <region>]");
     process.exit(1);
   }
 
@@ -254,22 +258,30 @@ async function uploadTiles(
   station: string,
   channel: string,
   level: number,
-  tiles: Map<number, EnvelopeTileData>
+  tiles: Map<number, EnvelopeTileData>,
+  outputDir?: string
 ): Promise<void> {
   console.log(`Uploading ${tiles.size} L${level} tile(s)...`);
   let count = 0;
 
   for (const [tileIdx, tile] of tiles) {
-    const key = `${prefix}${getTileS3Key(station, channel, level, tileIdx)}`;
+    const tileKey = getTileS3Key(station, channel, level, tileIdx);
     const body = encodeEnvelopeTile(tile.mins, tile.maxs);
+    const bodyBytes = new Uint8Array(body);
 
     await s3.send(new PutObjectCommand({
       Bucket: bucket,
-      Key: key,
-      Body: new Uint8Array(body),
+      Key: `${prefix}${tileKey}`,
+      Body: bodyBytes,
       ContentType: "application/octet-stream",
       ContentEncoding: "gzip",
     }));
+
+    if (outputDir) {
+      const filePath = join(outputDir, tileKey);
+      mkdirSync(dirname(filePath), { recursive: true });
+      writeFileSync(filePath, bodyBytes);
+    }
 
     count++;
     if (count % 100 === 0) {
@@ -406,7 +418,9 @@ async function main() {
 
     // Upload all levels
     for (let level = 0; level < NUM_LEVELS; level++) {
-      await uploadTiles(s3, config.s3Bucket, prefix, config.station, channel, level, allTiles[level]);
+      await uploadTiles(
+        s3, config.s3Bucket, prefix, config.station, channel, level, allTiles[level], config.outputDir
+      );
     }
 
     console.log(`  Channel ${channel} complete.`);
