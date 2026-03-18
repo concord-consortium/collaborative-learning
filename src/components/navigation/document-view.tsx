@@ -212,7 +212,7 @@ interface IDocumentAreaProps {
   subTab: ISubTabModel;
   tab: string;
   sectionClass: string;
-  isVisible?: boolean;
+  isVisible: boolean;
   isSecondaryDocument?: boolean;
   hasSecondaryDocument?: boolean;
   hideLeftFlipper?: boolean;

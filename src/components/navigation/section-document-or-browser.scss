@@ -51,12 +51,12 @@ $title-margin: 2px;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          background-color: var(--charcoal-6-charcoal-light-6);
+          background-color: $charcoal-light-6;
 
           .not-shared-icon {
             width: 24px;
             height: 24px;
-            fill: #0481a0;
+            fill: $workspace-teal-dark-1;
           }
 
           p {
@@ -69,7 +69,7 @@ $title-margin: 2px;
             line-height: normal;
             letter-spacing: normal;
             text-align: center;
-            color: #3f3f3f;
+            color: $charcoal-dark-2;
           }
         }
         .document-header {
