@@ -4,6 +4,8 @@
 
 To run ML models on seismic data in the browser, students need to download raw waveform data from EarthScope (formerly IRIS). Depending on the channel, data rates range from 50 Hz (BHZ) to 200 Hz (HHZ), meaning a year of data for a single station is roughly 1.8–7.3 GB. This document describes an approach for building a robust browser-based download manager modeled on [ROVER](https://earthscope.github.io/rover/), EarthScope's official command-line tool for bulk data retrieval.
 
+**Scope:** This downloader is specifically for bulk data needs (ML model input and client-side envelope tile generation), not for timeline tile zooming. The Timeline tile uses a separate [envelope cache](envelope-tile-cache-design.md) of precomputed min/max data at multiple resolutions, which supports smooth zooming without downloading raw waveforms. When the user zooms past the finest envelope level, the Timeline tile fetches raw data for just the visible time range (typically a few hundred KB). The ROVER-style chunked download described here would be overkill for that use case and would cause unnecessary performance problems. This does mean two separate code paths for fetching data from EarthScope, but the requirements are different enough (bulk sequential download with resume vs. small on-demand range requests) that a shared approach would add complexity without much benefit.
+
 ## Why model this on ROVER rather than building from scratch
 
 ROVER is EarthScope's recommended tool for large data downloads. It encodes years of operational experience with the FDSN web services, including:
@@ -34,19 +36,39 @@ All EarthScope requests go through a CloudFront CORS proxy, since EarthScope's s
 
 ### OPFS (Origin Private File System) for persistent caching
 
-Downloaded miniSEED files are stored in the browser's Origin Private File System using ROVER's directory convention:
+Downloaded miniSEED files are stored in the browser's Origin Private File System. The directory layout needs to be finalized before implementation — there are two options:
+
+**Option A: Station-first layout (current proposal)**
 
 ```
 /seismic-cache/
-  AK/
-    FIB/
-      BHZ/
-        2025/
-          001.mseed    (Jan 1)
-          002.mseed    (Jan 2)
-          ...
-          365.mseed    (Dec 31)
+  AK_FIB/                       (network_station)
+    BHZ/                         (channel)
+      2025/
+        001.mseed                (Jan 1)
+        002.mseed                (Jan 2)
+        ...
 ```
+
+This uses our standard `{network_station}` identifier (see [seismic-tiles-plan.md](seismic-tiles-plan.md#station-identification-across-systems)), consistent with the envelope tile cache and Firestore paths. It keeps each station's data isolated, making it straightforward to scan what's cached per station and clean up a single station's data.
+
+**Option B: ROVER's actual layout**
+
+ROVER uses a date-first structure where files from multiple stations share the same day folder:
+
+```
+<datarepo>/data/
+  AK/                          (network)
+    2025/                      (year)
+      001/                     (day of year)
+        FIB.AK.2025.001        (station.network.year.day, no .mseed extension)
+        RC01.AK.2025.001
+      002/
+        FIB.AK.2025.002
+        ...
+```
+
+See [ROVER documentation](https://earthscope.github.io/rover/) for details. Note that ROVER's layout mixes data from different stations into the same day folder, which makes per-station operations (scanning cached days, cleanup) less efficient for our use case where students typically work with one station at a time.
 
 **Why OPFS over other browser storage:**
 
@@ -87,7 +109,7 @@ OPFS also enables data reuse across ML runs — if a student wants to run a diff
 | Verification pass | Consider | Could do a lightweight check, but less critical for a cache |
 | mseedindex (C program) | Skip for v1 | seisplotjs parses miniSEED directly in JS; see [sub-day resume](#future-optimization-sub-day-resume) for when indexing becomes useful |
 | SQLite index | Skip for v1 | OPFS directory structure + file existence is sufficient for day-level resume |
-| File system organization | Adapt | Same directory layout, but in OPFS instead of local filesystem |
+| File system organization | Adapt | OPFS instead of local filesystem; directory layout TBD (see [OPFS section](#opfs-origin-private-file-system-for-persistent-caching)) |
 | ASDF conversion | Skip | Not needed |
 | SeedLink streaming | Skip | We're fetching historical data, not real-time |
 
