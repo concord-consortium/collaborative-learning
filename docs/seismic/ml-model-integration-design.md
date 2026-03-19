@@ -194,18 +194,11 @@ Estimated time: the orchestration layer times the first chunk (download + proces
 
 ## SharedDataSet Update Flow
 
-### Two SharedDataSets
+### Working Dataset
 
-The Wave Runner tile manages two SharedDataSet instances:
+The Wave Runner tile maintains a single **working dataset** (SharedDataSet). This receives events as the model runs or as precomputed events are loaded from Firestore. The Wave Runner's own UI (event counts in "Status and Output") reads from this dataset, which is updated incrementally.
 
-1. **Working dataset**: Receives events as the model runs or as precomputed events are loaded from Firestore. The Wave Runner's own UI (event counts in "Status and Output") reads from this. Updated incrementally.
-
-2. **Committed dataset**: The one the Timeline tile observes. Updated only when the user clicks "Timeline It!" (or similar explicit action). This is a bulk operation: clear the old events and write the new ones from the working dataset.
-
-This separation ensures:
-- Students see events accumulating in the Wave Runner tile during a model run.
-- The Timeline tile doesn't flicker or partially update mid-run.
-- The user has an explicit action to push results to the Timeline.
+When the user clicks "Timeline It!", the Wave Runner copies the working dataset into a new SharedDataSet and creates a new Timeline tile that observes the copy. Each click produces a new Timeline tile with a snapshot of the current events. The working dataset continues to be updated independently — subsequent model runs or data loads don't affect previously created Timeline tiles.
 
 ### SharedDataSet schema
 
@@ -221,7 +214,7 @@ Each row in the dataset is a detected event:
 
 The `source` column tracks whether an event has been uploaded to Firestore. Events detected in this session start as `"local"` and are flipped to `"remote"` after upload. Events loaded from Firestore are `"remote"` from the start. This tells the upload logic which rows still need to be written — once all rows are `"remote"`, there's nothing left to upload. The distinction is transient and not intended for UI purposes.
 
-**Note:** The flows below are illustrative — the exact UI sequence (which buttons trigger what, whether "Load Data" and "Run Model" are separate steps or combined) will be refined as the overall Wave Runner UI design settles. The underlying architecture (two datasets, source column, coverage-aware runner) supports whatever flow we land on.
+**Note:** The flows below are illustrative — the exact UI sequence (which buttons trigger what, whether "Load Data" and "Run Model" are separate steps or combined) will be refined as the overall Wave Runner UI design settles. The underlying architecture (working dataset, snapshot-on-timeline, source column, coverage-aware runner) supports whatever flow we land on.
 
 ### Flow: "Load Data"
 
@@ -232,8 +225,8 @@ User clicks "Load Data"
   → populate working dataset with rows (source="remote")
   → Wave Runner shows "Y events loaded from database."
 User clicks "Timeline It!"
-  → copy working dataset rows into committed dataset
-  → Timeline tile re-renders with events
+  → copy working dataset into a new SharedDataSet
+  → create a new Timeline tile observing the copy
 ```
 
 ### Flow: "Run Model"
@@ -251,8 +244,8 @@ User clicks "Run Model"
   → run completes
   → Wave Runner shows "Run complete. X events found."
 User clicks "Timeline It!"
-  → copy working dataset rows into committed dataset
-  → Timeline tile re-renders with events
+  → copy working dataset into a new SharedDataSet
+  → create a new Timeline tile observing the copy
 ```
 
 ### Combining loaded and detected events
