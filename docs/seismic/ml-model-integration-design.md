@@ -16,7 +16,6 @@ Fetched when the user selects a model from the dropdown. Contains everything nee
 {
   "id": "compact-v1",
   "architecture": "compact",
-  "num_classes": 2,
   "class_names": ["Noise", "Earthquake"],
   "sampling_rate": 100,
   "window_duration": 60,
@@ -28,8 +27,7 @@ Fetched when the user selects a model from the dropdown. Contains everything nee
 Field descriptions:
 - **id**: Stable identifier used in the event database path (`services/seismic/stations/{station}/channels/{channel}/models/{model}/...`). Bumped when the model is retrained (e.g., `compact-v2`), so old events remain valid.
 - **architecture**: Maps to a build function in CLUE (see [Architecture Registry](#architecture-registry)).
-- **num_classes**: Number of output classes.
-- **class_names**: Human-readable names for each class, in output order.
+- **class_names**: Human-readable names for each class, in output order. The model outputs one probability per class index, and this array provides the index-to-name mapping (e.g., index 0 → `"Noise"`, index 1 → `"Earthquake"`). The entry `"Noise"` is special: it represents the absence of a detected event and is excluded when creating `SeismicEvent` records (see [Confidence threshold](#confidence-threshold)). The number of output classes is `class_names.length`.
 - **sampling_rate**: Sample rate the model expects (Hz). Input data at a different rate must be resampled.
 - **window_duration**: Length of each classification window (seconds). Combined with `sampling_rate`, determines the expected input size (e.g., 100 Hz × 60s = 6000 samples).
 - **instrument_types**: Compatible SEED instrument codes (second character of the channel code). `H` = high-gain seismometer, `L` = low-gain seismometer — both velocity instruments. The Wave Runner tile should filter the channel dropdown to only show compatible channels, or warn if the selected channel is incompatible.
@@ -83,7 +81,7 @@ A curriculum unit can override the default model list to show only the models ap
 Model architectures (the TF.js layer definitions) must live in code because each architecture is a distinct programmatic construction. CLUE maintains a simple lookup from architecture strings to build functions:
 
 ```typescript
-const ARCHITECTURES: Record<string, (numClasses: number) => tf.LayersModel> = {
+const ARCHITECTURES: Record<string, (metadata: ModelMetadata) => tf.LayersModel> = {
   compact: buildCompactModel,
   standard: buildStandardModel,
 };
@@ -156,7 +154,7 @@ What does matter is the **instrument type**: the models were trained on velocity
 
 ### Confidence threshold
 
-For each window, every non-noise class that exceeds a confidence threshold (initially 0.5) produces a separate `SeismicEvent`. For a 2-class model (Noise/Earthquake), each window yields at most one event. For a multi-class model (Noise/Traffic/Earthquake), a single window could produce both a Traffic event and an Earthquake event if both exceed the threshold. The threshold could later become a user-facing control if students need to explore how it affects detection counts.
+The model outputs a probability for each class. The runner iterates over the output indices, skipping any class whose name is `"Noise"` (matched by string). For each remaining class that exceeds a confidence threshold (initially 0.5), the runner produces a `SeismicEvent` with `eventType` set to the class name. For a 2-class model (Noise/Earthquake), each window yields at most one event. For a multi-class model (Noise/Traffic/Earthquake), a single window could produce both a Traffic event and an Earthquake event if both exceed the threshold. The threshold could later become a user-facing control if students need to explore how it affects detection counts.
 
 ## Orchestration
 
