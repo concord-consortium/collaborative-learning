@@ -70,6 +70,8 @@ Returning the `Response` gives callers flexibility in how they consume the data:
 - **Query service**: calls `response.arrayBuffer()` then parses with seisplotjs.
 - **Future browser-seismic-downloader**: can pipe `response.body` directly to an OPFS file handle via `response.body.pipeTo(writable)`, avoiding an intermediate ArrayBuffer entirely.
 
+**Download progress:** Since the `Response.body` is a `ReadableStream`, callers can read it chunk by chunk and track bytes received against the `Content-Length` header to report download progress. This is useful for large fetches (e.g., 24 hours of data at ~20 MB) that may take several seconds. No changes to the fetcher API are needed — the caller decides whether to consume the response as a stream (with progress tracking) or just call `.arrayBuffer()`.
+
 **Possible optimization:** Investigate whether seisplotjs can parse miniSEED from a `ReadableStream` rather than requiring a complete `ArrayBuffer`. miniSEED is a record-based format (fixed-size records), so streaming parsing is theoretically possible. This would allow piping fetch responses through a parsing transform without buffering the full response.
 
 ### Relationship to browser-seismic-downloader
@@ -176,6 +178,14 @@ The result contains a mix of:
 - **Gaps** — regions where data is still loading or unavailable
 
 The exact structure of ViewportQuery is **TBD based on the plot implementation** (uPlot vs custom canvas). The form of the cache — both for envelope data and raw data — should be driven by the specific needs of the plotting library to minimize conversion overhead during rendering.
+
+### Requirements
+
+The specific API and approach for the query service is likely to change as the plot implementation is developed, but the following requirements should hold:
+
+1. **Cancellable in-flight requests.** When the plot moves to a new viewport before tiles have finished loading, the service must be able to cancel stale fetches rather than letting them pile up. See [Viewport-scoped cancellation](#viewport-scoped-cancellation) for the current approach.
+
+2. **Debouncing is the caller's responsibility.** When a user is scrolling and zooming rapidly, the plot component should debounce before calling `loadViewport` to avoid starting and immediately cancelling many connections. The query service does not debounce internally — it assumes each `loadViewport` call represents a viewport the caller actually wants data for.
 
 ### Level selection
 
