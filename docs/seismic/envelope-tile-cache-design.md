@@ -105,6 +105,14 @@ Each tile stores envelope points for a contiguous time range. The number of poin
 
 L2 has the most tiles per year. At 20,480 points per tile, each L2 tile is ~80 KB raw / ~3–6 KB gzipped (measured). The ~975 tiles per station-year is very manageable for S3.
 
+### Known issue: L2 tile boundaries don't align with L1 point boundaries
+
+L2 points align perfectly with L1 points — every K=100 consecutive L2 points maps to exactly one L1 point. However, the L2 **tile** boundary (20,480 points) is not a multiple of K: 20,480 / 100 = 204.8. This means the last L1 point covered by an L2 tile straddles the boundary into the next L2 tile — 80 of its L2 points are in one tile and 20 are in the next.
+
+This doesn't matter for a batch pipeline that processes all data in one pass (it can accumulate L1 points from individual L2 points regardless of tile boundaries). But it becomes a problem for **incremental tile updates**: to recompute an L1 point that falls on an L2 tile boundary, you'd need to download two L2 tiles instead of one.
+
+**Fix:** Change `POINTS_PER_TILE[2]` to a value divisible by K_FACTOR. For example, 20,000 (200 × 100) or 20,500 (205 × 100). This would slightly change tile duration and tiles-per-year but keep them in the same ballpark. This should be done before incremental updates are implemented.
+
 ## Tile addressing
 
 Given a datetime, the client needs to determine which tile to fetch. Two approaches:
