@@ -20,7 +20,7 @@ Fetched when the user selects a model from the dropdown. Contains everything nee
   "class_names": ["Noise", "Earthquake"],
   "sampling_rate": 100,
   "window_duration": 60,
-  "instrument_types": ["H", "E"],
+  "instrument_types": ["H", "L"],
   "weightsUrl": "./weights.json"
 }
 ```
@@ -32,7 +32,7 @@ Field descriptions:
 - **class_names**: Human-readable names for each class, in output order.
 - **sampling_rate**: Sample rate the model expects (Hz). Input data at a different rate must be resampled.
 - **window_duration**: Length of each classification window (seconds). Combined with `sampling_rate`, determines the expected input size (e.g., 100 Hz × 60s = 6000 samples).
-- **instrument_types**: Compatible SEED instrument codes (second character of the channel code). `H` = high-gain broadband seismometer, `E` = extremely short-period seismometer — both velocity instruments. The Wave Runner tile should filter the channel dropdown to only show compatible channels, or warn if the selected channel is incompatible.
+- **instrument_types**: Compatible SEED instrument codes (second character of the channel code). `H` = high-gain seismometer, `L` = low-gain seismometer — both velocity instruments. The Wave Runner tile should filter the channel dropdown to only show compatible channels, or warn if the selected channel is incompatible.
 - **weightsUrl**: Relative URL to the weights file, resolved relative to the directory containing `metadata.json`. Only fetched when the user clicks "Run Model."
 
 ### weights.json (1–3 MB)
