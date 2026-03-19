@@ -229,14 +229,17 @@ interface SeismicEvent {
   confidence: number;
 }
 
+function eventDocId(event: SeismicEvent): string {
+  return `${event.windowStart}_${event.eventType}`;
+}
+
 async function writeEvents(
   station: string, channel: string, model: string, events: SeismicEvent[]
 ) {
   const batch = writeBatch(db);
   for (const event of events) {
-    const docId = `${event.windowStart}_${event.eventType}`;
     const docRef = doc(
-      db, "services", "seismic", "stations", station, "channels", channel, "models", model, "events", docId
+      db, "services", "seismic", "stations", station, "channels", channel, "models", model, "events", eventDocId(event)
     );
     batch.set(docRef, {
       station,

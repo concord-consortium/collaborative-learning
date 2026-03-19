@@ -109,16 +109,11 @@ The runner stays loaded (model weights in GPU memory) across chunks. Processing 
 ### Runner interface
 
 ```typescript
-interface DetectedEvent {
-  windowStart: number;    // epoch ms
-  windowEnd: number;      // epoch ms
-  eventType: string;      // "Earthquake", "Traffic", etc.
-  confidence: number;     // 0–1
-}
+// SeismicEvent is defined in event-database-design.md
 
 interface ModelRunnerCallbacks {
   onProgress: (windowsProcessed: number, windowsTotal: number) => void;
-  onEvents: (events: DetectedEvent[]) => void;
+  onEvents: (events: SeismicEvent[]) => void;
 }
 
 class SeismicModelRunner {
@@ -134,7 +129,7 @@ class SeismicModelRunner {
   async processChunk(
     seismogram: Seismogram,
     callbacks: ModelRunnerCallbacks
-  ): Promise<DetectedEvent[]>;
+  ): Promise<SeismicEvent[]>;
 
   /** Dispose the TF.js model and free GPU memory. */
   dispose(): void;
@@ -161,7 +156,7 @@ What does matter is the **instrument type**: the models were trained on velocity
 
 ### Confidence threshold
 
-For each window, every non-noise class that exceeds a confidence threshold (initially 0.5) produces a separate `DetectedEvent`. For a 2-class model (Noise/Earthquake), each window yields at most one event. For a multi-class model (Noise/Traffic/Earthquake), a single window could produce both a Traffic event and an Earthquake event if both exceed the threshold. The threshold could later become a user-facing control if students need to explore how it affects detection counts.
+For each window, every non-noise class that exceeds a confidence threshold (initially 0.5) produces a separate `SeismicEvent`. For a 2-class model (Noise/Earthquake), each window yields at most one event. For a multi-class model (Noise/Traffic/Earthquake), a single window could produce both a Traffic event and an Earthquake event if both exceed the threshold. The threshold could later become a user-facing control if students need to explore how it affects detection counts.
 
 ## Orchestration
 
