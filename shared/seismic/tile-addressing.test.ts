@@ -1,5 +1,7 @@
 // shared/seismic/tile-addressing.test.ts
-import { getTileIndex, getTileTimeRange, getTileIndicesForViewport, getTileS3Key, getTileDuration } from "./tile-addressing";
+import {
+  getTileIndex, getTileTimeRange, getTileIndicesForViewport, getTileS3Key, getTileDuration, getPointIndexInTile
+} from "./tile-addressing";
 import { LEVEL_SPACINGS, POINTS_PER_TILE } from "./envelope-config";
 
 describe("tile-addressing", () => {
@@ -58,6 +60,19 @@ describe("tile-addressing", () => {
       for (let level = 0; level < LEVEL_SPACINGS.length; level++) {
         expect(getTileDuration(level)).toBe(LEVEL_SPACINGS[level] * POINTS_PER_TILE[level]);
       }
+    });
+  });
+
+  describe("getPointIndexInTile", () => {
+    it("returns 0 for a timestamp at the start of a tile", () => {
+      const range = getTileTimeRange(2, 3);
+      expect(getPointIndexInTile(range.start, 2, 3)).toBe(0);
+    });
+
+    it("returns the correct offset for a timestamp within a tile", () => {
+      const range = getTileTimeRange(1, 0);
+      const time = range.start + LEVEL_SPACINGS[1] * 5;
+      expect(getPointIndexInTile(time, 1, 0)).toBe(5);
     });
   });
 

@@ -43,6 +43,14 @@ export function getTileIndicesForViewport(startTime: number, endTime: number, le
 }
 
 /**
+ * Returns the point index within a tile for a given timestamp.
+ */
+export function getPointIndexInTile(timestamp: number, level: number, tileIndex: number): number {
+  const tileRange = getTileTimeRange(level, tileIndex);
+  return Math.floor((timestamp - tileRange.start) / LEVEL_SPACINGS[level]);
+}
+
+/**
  * Constructs the S3 object key for a tile.
  * Format: {station}/{channel}/L{level}/{tileIndex}
  */

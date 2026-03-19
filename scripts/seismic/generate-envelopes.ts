@@ -12,7 +12,9 @@ import { miniseed } from "seisplotjs/nodeonly";
 import {
   LEVEL_SPACINGS, POINTS_PER_TILE, K_FACTOR, NUM_LEVELS, AMPLITUDE_RANGES, NO_DATA_SENTINEL
 } from "../../shared/seismic/envelope-config.js";
-import { getTileIndex, getTileTimeRange, getTileS3Key } from "../../shared/seismic/tile-addressing.js";
+import {
+  getTileIndex, getTileTimeRange, getTileS3Key, getPointIndexInTile
+} from "../../shared/seismic/tile-addressing.js";
 import { encodeEnvelopeTile, quantize } from "../../shared/seismic/envelope-codec.js";
 import { computeEnvelopesFromRaw, rollUpEnvelopes } from "../../shared/seismic/envelope-compute.js";
 import { fetchStationMetadata } from "../../shared/seismic/earthscope-client.js";
@@ -196,8 +198,7 @@ function assembleTiles(
     }
 
     const tile = tiles.get(tileIdx)!;
-    const tileRange = getTileTimeRange(level, tileIdx);
-    const pointIndex = Math.floor((pt.time - tileRange.start) / LEVEL_SPACINGS[level]);
+    const pointIndex = getPointIndexInTile(pt.time, level, tileIdx);
 
     if (pointIndex >= 0 && pointIndex < pointsPerTile) {
       const qMin = quantize(pt.min, rangeMax);
