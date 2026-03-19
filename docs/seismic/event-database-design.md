@@ -15,13 +15,13 @@ Related: [CLUE-463](https://concord-consortium.atlassian.net/browse/CLUE-463)
 One document per detected event, organized by station, channel, and model:
 
 ```
-services/seismic/stations/{station}/channels/{channel}/models/{model}/events/{windowStart}
+services/seismic/stations/{station}/channels/{channel}/models/{model}/events/{windowStart}_{eventType}
   station: string          // e.g., "AK_K204" — denormalized for collection group queries
   channel: string          // e.g., "BHZ" — denormalized for collection group queries
   model: string            // e.g., "compact-v1" — denormalized for collection group queries
   windowStart: Timestamp
   windowEnd: Timestamp
-  eventType: string        // e.g., "earthquake", "noise"
+  eventType: string        // e.g., "earthquake", "traffic"
   confidence: number       // 0.0–1.0
   createdBy: string        // user ID
   createdAt: Timestamp
@@ -29,7 +29,7 @@ services/seismic/stations/{station}/channels/{channel}/models/{model}/events/{wi
 
 The `{station}` key uses the FDSN network+station format: `{network}_{station}` (e.g., `AK_K204`). This is globally unique across data providers — station codes alone are only unique within a network. The `{channel}` is a separate path segment because different channels (e.g., BHZ vs BNZ) have different sample rates and physical units, and the ML model produces different results for each. See [seismic-tiles-plan.md](seismic-tiles-plan.md#station-identification-across-systems) for the full convention.
 
-Using `windowStart` as the document ID provides natural deduplication — two users detecting the same event just overwrite with the same data.
+The document ID is `{windowStart}_{eventType}` (e.g., `1710720000000_earthquake`). The composite key supports multiple events per window (a multi-class model may detect both traffic and earthquake in the same window) while providing natural deduplication — two users detecting the same event just overwrite with the same data.
 
 The primary query pattern is single station + single model + time range. The denormalized `station` and `model` fields exist to support future collection group queries across stations if needed.
 
@@ -229,13 +229,17 @@ interface SeismicEvent {
   confidence: number;
 }
 
+function eventDocId(event: SeismicEvent): string {
+  return `${event.windowStart}_${event.eventType}`;
+}
+
 async function writeEvents(
   station: string, channel: string, model: string, events: SeismicEvent[]
 ) {
   const batch = writeBatch(db);
   for (const event of events) {
     const docRef = doc(
-      db, "services", "seismic", "stations", station, "channels", channel, "models", model, "events", String(event.windowStart)
+      db, "services", "seismic", "stations", station, "channels", channel, "models", model, "events", eventDocId(event)
     );
     batch.set(docRef, {
       station,
