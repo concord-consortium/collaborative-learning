@@ -19,9 +19,9 @@ describe("envelope-config", () => {
   });
 
   it("POINTS_PER_TILE is per-level with L2 having more points", () => {
-    expect(POINTS_PER_TILE[0]).toBe(1024);
-    expect(POINTS_PER_TILE[1]).toBe(1024);
-    expect(POINTS_PER_TILE[2]).toBe(20480);
+    expect(POINTS_PER_TILE[0]).toBe(1000);
+    expect(POINTS_PER_TILE[1]).toBe(1000);
+    expect(POINTS_PER_TILE[2]).toBe(20000);
   });
 
   it("has amplitude ranges for H, L, and N instrument codes", () => {

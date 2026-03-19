@@ -139,6 +139,6 @@ Total: roughly the size of one ROVER file, regardless of how much total data is 
 - `loadMiniSeedFiles` — replaced by per-file loading within the pipeline loop
 - `uploadTiles` — replaced by `flushTile` which handles one tile at a time
 
-### Known limitation: L2 tile boundary / L1 point misalignment
+### L2 tile boundary / L1 point alignment
 
-L2 tiles have 20,480 points and L1 points span K=100 L2 points. Since 20,480 is not divisible by 100, an L1 point can straddle two L2 tiles. This is not a problem for this pipeline (it accumulates per-point, not per-tile), but it will matter for future incremental tile updates. See the note in [envelope-tile-cache-design.md](../seismic/envelope-tile-cache-design.md#known-issue-l2-tile-boundaries-dont-align-with-l1-point-boundaries).
+This was written when `POINTS_PER_TILE[2]` was 20,480 (not divisible by K=100), which caused L1 points to straddle L2 tile boundaries. This has since been fixed — `POINTS_PER_TILE` is now `[1000, 1000, 20000]`, with all values divisible by K_FACTOR. See [Tile structure](../seismic/envelope-tile-cache-design.md#tile-structure).

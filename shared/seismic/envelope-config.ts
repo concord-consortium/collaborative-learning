@@ -19,12 +19,19 @@ export const K_FACTOR = 100;
 /** Point spacing in seconds for each level, coarsest (L0) to finest (L2). */
 export const LEVEL_SPACINGS = [L0_SPACING, L0_SPACING / K_FACTOR, L0_SPACING / (K_FACTOR ** 2)];
 
+/** Number of envelope points per tile for L0 and L1. */
+export const BASE_POINTS_PER_TILE = 1000;
+
+/** L2 uses more points per tile to reduce total tile count. */
+export const L2_TILE_MULTIPLIER = 20;
+
 /**
  * Number of envelope points per tile, indexed by level.
- * L2 uses 20x more points per tile to reduce total tile count.
- * L0/L1: 1024 points, L2: 20480 points.
+ * L0/L1: 1000 points, L2: 20000 points.
  */
-export const POINTS_PER_TILE = [1024, 1024, 20480];
+export const POINTS_PER_TILE = [
+  BASE_POINTS_PER_TILE, BASE_POINTS_PER_TILE, BASE_POINTS_PER_TILE * L2_TILE_MULTIPLIER
+];
 
 /** Number of stored envelope levels. */
 export const NUM_LEVELS = LEVEL_SPACINGS.length;

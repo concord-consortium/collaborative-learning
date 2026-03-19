@@ -9,7 +9,7 @@ To support smooth zooming across a large time range without loading all raw data
 **Columnar Int16** is a good balance of compactness and simplicity:
 - Store all min values contiguously, then all max values (columnar layout compresses better than interleaved min/max because adjacent values in each column are more similar).
 - Quantize amplitudes to Int16 (2 bytes) using a fixed global amplitude range per instrument type (see [Amplitude quantization](#amplitude-quantization)). Seismic envelope data at coarse resolutions doesn't need Float32 precision.
-- Gzip the binary buffer. For example, a 1024-point L0/L1 tile = 1024 × 2 × 2 = 4 KB raw. L2 tiles use 20,480 points (~80 KB raw). In practice, gzip compression is very effective on envelope data: measured L0/L1 tiles are ~100–600 bytes and L2 tiles are ~3–6 KB (much smaller than the theoretical maximum, due to repeated sentinel values and smooth amplitude patterns). See [Tile structure](#tile-structure).
+- Gzip the binary buffer. For example, a 1000-point L0/L1 tile = 1000 × 2 × 2 = 4 KB raw. L2 tiles use 20,000 points (~80 KB raw). In practice, gzip compression is very effective on envelope data: measured L0/L1 tiles are ~100–600 bytes and L2 tiles are ~3–6 KB (much smaller than the theoretical maximum, due to repeated sentinel values and smooth amplitude patterns). See [Tile structure](#tile-structure).
 - In the browser, the decompressed buffer can be read directly as an `Int16Array` with a known scale factor — no parsing needed.
 - Reserve Int16 value `-32768` as a sentinel for "no data" (see [Missing and partial data](#missing-and-partial-data)).
 
@@ -98,20 +98,14 @@ Each tile stores envelope points for a contiguous time range. The number of poin
 
 | Level | Point spacing | Points per tile | Tile duration   | Tiles per year | Tile size (gzipped) |
 |-------|---------------|-----------------|-----------------|----------------|---------------------|
-| L0    | ~15,750 s     | 1,024           | ~186 days       | ~2             | ~100–200 bytes      |
-| L1    | ~157.5 s      | 1,024           | ~1.9 days       | ~195           | ~500–600 bytes      |
-| L2    | ~1.575 s      | 20,480          | ~9 hours        | ~975           | ~3–6 KB             |
+| L0    | ~15,750 s     | 1,000           | ~182 days       | ~2             | ~100–200 bytes      |
+| L1    | ~157.5 s      | 1,000           | ~1.8 days       | ~200           | ~500–600 bytes      |
+| L2    | ~1.575 s      | 20,000          | ~8.75 hours     | ~1,000         | ~3–6 KB             |
 | Raw   | 0.005 s       | —               | —               | on-demand      | —                   |
 
-L2 has the most tiles per year. At 20,480 points per tile, each L2 tile is ~80 KB raw / ~3–6 KB gzipped (measured). The ~975 tiles per station-year is very manageable for S3.
+L2 has the most tiles per year. At 20,000 points per tile, each L2 tile is ~80 KB raw / ~3–6 KB gzipped (measured). The ~1,000 tiles per station-year is very manageable for S3.
 
-### Known issue: L2 tile boundaries don't align with L1 point boundaries
-
-L2 points align perfectly with L1 points — every K=100 consecutive L2 points maps to exactly one L1 point. However, the L2 **tile** boundary (20,480 points) is not a multiple of K: 20,480 / 100 = 204.8. This means the last L1 point covered by an L2 tile straddles the boundary into the next L2 tile — 80 of its L2 points are in one tile and 20 are in the next.
-
-This doesn't matter for a batch pipeline that processes all data in one pass (it can accumulate L1 points from individual L2 points regardless of tile boundaries). But it becomes a problem for **incremental tile updates**: to recompute an L1 point that falls on an L2 tile boundary, you'd need to download two L2 tiles instead of one.
-
-**Fix:** Change `POINTS_PER_TILE[2]` to a value divisible by K_FACTOR. For example, 20,000 (200 × 100) or 20,500 (205 × 100). This would slightly change tile duration and tiles-per-year but keep them in the same ballpark. This should be done before incremental updates are implemented.
+Points per tile at each level is chosen to be divisible by K_FACTOR (100), so that tile boundaries at finer levels always align with point boundaries at the next coarser level. This ensures incremental updates to a coarser level never need to read across finer-level tile boundaries.
 
 ## Tile addressing
 
@@ -202,7 +196,7 @@ We considered several existing formats before settling on a simple custom binary
 | **PMTiles** | Range requests | pmtiles | Validates the architecture (single-file tile archives on static storage) but tightly coupled to 2D map tiles. |
 | **Arrow IPC / Parquet** | Limited | apache-arrow / hyparquet | Too much per-tile metadata overhead for simple 1D int16 arrays. Parquet's row-group mechanism could work but adds complexity without solving new problems. |
 
-**Gzipped JSON vs binary Int16 size comparison**: A 1024-point tile has 2,048 Int16 values (min + max). As binary, this is 4 KB raw, ~100–600 bytes gzipped (measured). As JSON (e.g., `{"min":[-342,17,...],"max":[289,1045,...]}`), each number averages ~4–5 characters plus a comma separator, producing ~10–12 KB of text, which would gzip larger. Over a full station-year at L2 (~20M points), JSON would substantially increase storage cost. JSON also requires parsing text into numbers rather than directly interpreting a typed array buffer, though for tile-sized payloads the parse time difference is negligible.
+**Gzipped JSON vs binary Int16 size comparison**: A 1000-point tile has 2,000 Int16 values (min + max). As binary, this is 4 KB raw, ~100–600 bytes gzipped (measured). As JSON (e.g., `{"min":[-342,17,...],"max":[289,1045,...]}`), each number averages ~4–5 characters plus a comma separator, producing ~10–12 KB of text, which would gzip larger. Over a full station-year at L2 (~20M points), JSON would substantially increase storage cost. JSON also requires parsing text into numbers rather than directly interpreting a typed array buffer, though for tile-sized payloads the parse time difference is negligible.
 
 **Zarr is the strongest alternative** — it standardizes exactly what we need (chunked arrays on cloud storage with per-chunk HTTP access). If we later want interoperability with Python analysis tools or want to drop the custom format spec, migrating to Zarr would be straightforward since the underlying storage pattern is nearly identical.
 
