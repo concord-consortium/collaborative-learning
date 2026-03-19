@@ -219,9 +219,7 @@ Each row in the dataset is a detected event:
 | `confidence` | number | 0–1 |
 | `source` | string | `"local"` or `"remote"` |
 
-The `source` column distinguishes events detected in this session (`"local"`) from events loaded from Firestore (`"remote"`). This serves two purposes:
-- **Firestore upload**: Only rows with `source="local"` need to be written to the event database. After upload completes, these rows are flipped to `"remote"`.
-- **UI**: The Wave Runner (or Timeline) can visually distinguish newly detected events from precomputed ones (e.g., "12 new events detected, 45 loaded from database").
+The `source` column tracks whether an event has been uploaded to Firestore. Events detected in this session start as `"local"` and are flipped to `"remote"` after upload. Events loaded from Firestore are `"remote"` from the start. This tells the upload logic which rows still need to be written — once all rows are `"remote"`, there's nothing left to upload. The distinction is transient and not intended for UI purposes.
 
 **Note:** The flows below are illustrative — the exact UI sequence (which buttons trigger what, whether "Load Data" and "Run Model" are separate steps or combined) will be refined as the overall Wave Runner UI design settles. The underlying architecture (two datasets, source column, coverage-aware runner) supports whatever flow we land on.
 
