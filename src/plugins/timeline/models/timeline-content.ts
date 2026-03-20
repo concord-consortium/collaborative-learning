@@ -2,6 +2,7 @@ import { types, Instance } from "mobx-state-tree";
 import { DateTime } from "luxon";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
+import { isValidDateTime } from "../../../utilities/luxon-utils";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
 import { kTimelineTileType } from "../timeline-types";
 
@@ -27,10 +28,14 @@ export const TimelineContentModel = TileContentModel
       return smm?.findFirstSharedModelByType(SharedSeismogram);
     },
     get viewStartTime() {
-      return self.viewStartTimeISO ? DateTime.fromISO(self.viewStartTimeISO) : undefined;
+      if (!self.viewStartTimeISO) return undefined;
+      const time = DateTime.fromISO(self.viewStartTimeISO);
+      return time.isValid ? time : undefined;
     },
     get viewEndTime() {
-      return self.viewEndTimeISO ? DateTime.fromISO(self.viewEndTimeISO) : undefined;
+      if (!self.viewEndTimeISO) return undefined;
+      const time = DateTime.fromISO(self.viewEndTimeISO);
+      return time.isValid ? time : undefined;
     }
   }))
   .views(self => ({
@@ -73,6 +78,7 @@ export const TimelineContentModel = TileContentModel
   }))
   .actions(self => ({
     setViewRange(start: DateTime, end: DateTime) {
+      if (!isValidDateTime(start) || !isValidDateTime(end) || start >= end) return;
       self.viewStartTimeISO = start.toISO() ?? undefined;
       self.viewEndTimeISO = end.toISO() ?? undefined;
     }

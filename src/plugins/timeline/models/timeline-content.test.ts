@@ -101,9 +101,9 @@ describe("zoom functionality", () => {
     expect(content.viewStartTime?.toISO()).toBe(dataEnd.minus({ seconds: 2000 }).toISO());
   });
 
-  it("zoom(0.5) respects minimum range of 5 seconds", () => {
+  it("zoom(0.5) respects minimum view range", () => {
     // Set a very small range, just above minimum
-    content.setViewRange(dataStart, dataStart.plus({ seconds: 6 }));
+    content.setViewRange(dataStart, dataStart.plus({ seconds: kMinViewRangeSeconds + 1 }));
     // Zoom in repeatedly
     for (let i = 0; i < 20; i++) {
       content.zoom(0.5);
@@ -150,5 +150,13 @@ describe("zoom functionality", () => {
     content.setViewRange(dataStart, dataEnd);
     expect(content.viewStartTimeISO).toBe(dataStart.toISO());
     expect(content.viewEndTimeISO).toBe(dataEnd.toISO());
+  });
+
+  it("setViewRange ignores call when start is later than end", () => {
+    content.setViewRange(dataStart, dataEnd);
+    content.setViewRange(dataEnd, dataStart);
+    // View range should remain unchanged
+    expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
+    expect(content.viewEndTime?.toISO()).toBe(dataEnd.toISO());
   });
 });

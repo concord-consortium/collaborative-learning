@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import React, { useContext, useEffect } from "react";
 import { TileModelContext } from "../../../components/tiles/tile-api";
+import { isValidDateTime } from "../../../utilities/luxon-utils";
 import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
 import { isTimelineContentModel } from "../models/timeline-content";
 
@@ -39,7 +40,7 @@ export const Timeline = observer(function Timeline() {
 
   return (
     <div className="timeline-area">
-      {seismogram && startTime && endTime ? (
+      {seismogram && isValidDateTime(startTime) && isValidDateTime(endTime) ? (
         <WaveformPanel
           label="Full waveform"
           startTime={startTime}
