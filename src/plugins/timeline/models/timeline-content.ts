@@ -84,13 +84,12 @@ export const TimelineContentModel = TileContentModel
       }
     },
     zoom(factor: number) {
-      if (!self.viewStartTime || !self.viewEndTime) return;
-      if (!self.dataStartTime || !self.dataEndTime) return;
-      const currentRange = self.viewRangeSeconds!;
-      const dataRange = self.dataRangeSeconds!;
-      // Clamp to [kMinViewRangeSeconds, dataRange]
-      const newRange = Math.max(Math.min(currentRange * factor, dataRange), kMinViewRangeSeconds);
-      const center = self.viewStartTime.plus({ seconds: currentRange / 2 });
+      if (!self.viewStartTime || self.viewRangeSeconds == null) return;
+      if (!self.dataStartTime || !self.dataEndTime || self.dataRangeSeconds == null) return;
+
+      // Clamp to [kMinViewRangeSeconds, self.dataRangeSeconds]
+      const newRange = Math.max(Math.min(self.viewRangeSeconds * factor, self.dataRangeSeconds), kMinViewRangeSeconds);
+      const center = self.viewStartTime.plus({ seconds: self.viewRangeSeconds / 2 });
       let newStart = center.minus({ seconds: newRange / 2 });
       let newEnd = center.plus({ seconds: newRange / 2 });
 

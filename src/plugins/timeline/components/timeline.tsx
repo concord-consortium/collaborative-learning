@@ -13,6 +13,8 @@ export const Timeline = observer(function Timeline() {
 
   const dataStartTime = model?.dataStartTime;
   const dataEndTime = model?.dataEndTime;
+  const startTime = model?.viewStartTime;
+  const endTime = model?.viewEndTime;
 
   // Initialize view range when seismogram data becomes available,
   // and clamp view to stay within bounds if data range changes.
@@ -34,9 +36,6 @@ export const Timeline = observer(function Timeline() {
       }
     }
   }, [model, dataStartTime, dataEndTime]);
-
-  const startTime = model?.viewStartTime;
-  const endTime = model?.viewEndTime;
 
   return (
     <div className="timeline-area">
