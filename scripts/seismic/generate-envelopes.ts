@@ -43,6 +43,8 @@ interface ScriptConfig {
   s3Prefix: string;
   /** AWS region */
   awsRegion: string;
+  /** When true, skip all S3 operations. --output-dir is required. */
+  localOnly: boolean;
 }
 
 function parseArgs(): ScriptConfig {
@@ -51,20 +53,25 @@ function parseArgs(): ScriptConfig {
     s3Bucket: DEFAULT_S3_BUCKET,
     s3Prefix: DEFAULT_S3_PREFIX,
     awsRegion: DEFAULT_AWS_REGION,
+    localOnly: false,
   };
 
-  for (let i = 0; i < args.length; i += 2) {
+  let i = 0;
+  while (i < args.length) {
     const key = args[i];
-    const value = args[i + 1];
     switch (key) {
-      case "--input-dir": config.inputDir = value; break;
-      case "--network": config.network = value; break;
-      case "--station": config.station = value; break;
-      case "--channel": config.channel = value; break;
-      case "--output-dir": config.outputDir = value; break;
-      case "--s3-bucket": config.s3Bucket = value; break;
-      case "--s3-prefix": config.s3Prefix = value; break;
-      case "--aws-region": config.awsRegion = value; break;
+      case "--local-only":
+        config.localOnly = true;
+        i += 1;
+        break;
+      case "--input-dir": config.inputDir = args[i + 1]; i += 2; break;
+      case "--network": config.network = args[i + 1]; i += 2; break;
+      case "--station": config.station = args[i + 1]; i += 2; break;
+      case "--channel": config.channel = args[i + 1]; i += 2; break;
+      case "--output-dir": config.outputDir = args[i + 1]; i += 2; break;
+      case "--s3-bucket": config.s3Bucket = args[i + 1]; i += 2; break;
+      case "--s3-prefix": config.s3Prefix = args[i + 1]; i += 2; break;
+      case "--aws-region": config.awsRegion = args[i + 1]; i += 2; break;
       default:
         console.error(`Unknown argument: ${key}`);
         process.exit(1);
@@ -74,8 +81,13 @@ function parseArgs(): ScriptConfig {
   if (!config.inputDir || !config.network || !config.station) {
     console.error("Usage: npx tsx scripts/seismic/generate-envelopes.ts \\");
     console.error("  --input-dir <path> --network <net> --station <sta> \\");
-    console.error("  [--channel <chan>] [--output-dir <path>]");
+    console.error("  [--channel <chan>] [--output-dir <path>] [--local-only]");
     console.error("  [--s3-bucket <bucket>] [--s3-prefix <prefix>] [--aws-region <region>]");
+    process.exit(1);
+  }
+
+  if (config.localOnly && !config.outputDir) {
+    console.error("--output-dir is required when --local-only is set");
     process.exit(1);
   }
 
