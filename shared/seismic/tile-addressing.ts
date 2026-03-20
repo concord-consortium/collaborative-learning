@@ -1,5 +1,5 @@
 // shared/seismic/tile-addressing.ts
-import { LEVEL_SPACINGS, POINTS_PER_TILE } from "./envelope-config";
+import { ENVELOPE_LAYOUT_VERSION, LEVEL_SPACINGS, POINTS_PER_TILE } from "./envelope-config";
 import type { TimeRange } from "./seismic-types";
 
 /** Duration of one tile in seconds at the given level. */
@@ -56,4 +56,11 @@ export function getPointIndexInTile(timestamp: number, level: number, tileIndex:
  */
 export function getTileS3Key(station: string, channel: string, level: number, tileIndex: number): string {
   return `${station}/${channel}/L${level}/${tileIndex}`;
+}
+
+/**
+ * Constructs the S3 root for tile keys, which includes the current layout version.
+ */
+export function getS3Root(prefix: string) {
+  return `${prefix}v${ENVELOPE_LAYOUT_VERSION}/`;
 }

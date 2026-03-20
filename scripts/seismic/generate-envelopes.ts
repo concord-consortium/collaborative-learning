@@ -15,7 +15,7 @@ import { miniseed } from "seisplotjs/nodeonly";
 import {
   LEVEL_SPACINGS, NUM_LEVELS, AMPLITUDE_RANGES
 } from "../../shared/seismic/envelope-config.js";
-import { getTileS3Key } from "../../shared/seismic/tile-addressing.js";
+import { getS3Root, getTileS3Key } from "../../shared/seismic/tile-addressing.js";
 import { encodeEnvelopeTile, quantize } from "../../shared/seismic/envelope-codec.js";
 import { computeEnvelopesFromRaw } from "../../shared/seismic/envelope-compute.js";
 import { fetchStationMetadata } from "../../shared/seismic/earthscope-client.js";
@@ -199,7 +199,7 @@ async function wipeExistingTiles(
   station: string,
   channel: string
 ): Promise<void> {
-  const keyPrefix = `${prefix}${station}/${channel}/`;
+  const keyPrefix = `${getS3Root(prefix)}${station}/${channel}/`;
   console.log(`Wiping existing tiles under ${keyPrefix}...`);
 
   let continuationToken: string | undefined;
@@ -249,7 +249,7 @@ function makeFlushTile(
       pendingUploads.push(
         s3.send(new PutObjectCommand({
           Bucket: config.s3Bucket,
-          Key: `${config.s3Prefix}${tileKey}`,
+          Key: `${getS3Root(config.s3Prefix)}${tileKey}`,
           Body: bodyBytes,
           ContentType: "application/octet-stream",
           ContentEncoding: "gzip",

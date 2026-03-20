@@ -10,6 +10,9 @@
  * See docs/seismic/envelope-tile-cache-design.md for rationale.
  */
 
+/** Layout version -- update this when other constants change */
+export const ENVELOPE_LAYOUT_VERSION = 1;
+
 /** ~6 months */
 export const L0_SPACING = 15750;
 
