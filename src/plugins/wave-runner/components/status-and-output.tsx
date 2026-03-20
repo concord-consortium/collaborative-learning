@@ -33,7 +33,7 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
       </div>
       <div className="estimated-time">
         {model?.isRunning
-          ? `Processing: ${model.windowsProcessed} / ${model.windowsTotal} windows`
+          ? `Processing day ${model.chunksProcessed + 1} of ${model.chunksTotal || "?"}...`
           : model?.eventsFound
             ? "Run complete."
             : "Estimated time to complete run:"}

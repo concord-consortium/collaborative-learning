@@ -54,11 +54,21 @@ export const WaveRunnerContentModel = TileContentModel
   }))
   .volatile(() => ({
     isRunning: false,
-    windowsProcessed: 0,
-    windowsTotal: 0,
+    chunksProcessed: 0,
+    chunksTotal: 0,
     eventsFound: 0,
     runError: null as string | null,
     detectedEvents: [] as SeismicEvent[],
+  }))
+  .actions(self => ({
+    updateChunkProgress(done: number, total: number) {
+      self.chunksProcessed = done;
+      self.chunksTotal = total;
+    },
+    addEvents(events: SeismicEvent[]) {
+      self.detectedEvents = [...self.detectedEvents, ...events];
+      self.eventsFound = self.detectedEvents.length;
+    },
   }))
   .actions(self => ({
     runModel: flow(function* () {
@@ -89,6 +99,7 @@ export const WaveRunnerContentModel = TileContentModel
         const endDate = new Date("2026-02-06T00:00:00Z");
         const msPerDay = 86400000;
         const totalDays = (endDate.getTime() - startDate.getTime()) / msPerDay;
+        self.updateChunkProgress(0, totalDays);
 
         for (let day = 0; day < totalDays; day++) {
           const chunkStart = new Date(startDate.getTime() + day * msPerDay);
@@ -109,20 +120,18 @@ export const WaveRunnerContentModel = TileContentModel
           yield runner.processChunk(
             seismogram,
             {
-              onProgress: (done: number, total: number) => {
-                self.windowsProcessed = done;
-                self.windowsTotal = total;
-              },
+              onProgress: () => {},
               onEvents: (events: SeismicEvent[]) => {
-                self.detectedEvents = [...self.detectedEvents, ...events];
-                self.eventsFound = self.detectedEvents.length;
+                self.addEvents(events);
               },
             }
           );
+          self.updateChunkProgress(day + 1, totalDays);
         }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         self.runError = `Error running model: ${message}`;
+        console.error("Wave Runner runModel error:", err);
       } finally {
         runner.dispose();
         self.isRunning = false;
