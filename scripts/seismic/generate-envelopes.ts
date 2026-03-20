@@ -7,18 +7,22 @@
 // scripts/seismic/generate-envelopes.ts
 import { readFileSync, readdirSync, statSync, writeFileSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
-import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand,
+  type PutObjectCommandOutput
+} from "@aws-sdk/client-s3";
 import { miniseed } from "seisplotjs/nodeonly";
 import {
-  LEVEL_SPACINGS, POINTS_PER_TILE, K_FACTOR, NUM_LEVELS, AMPLITUDE_RANGES, NO_DATA_SENTINEL
+  LEVEL_SPACINGS, NUM_LEVELS, AMPLITUDE_RANGES
 } from "../../shared/seismic/envelope-config.js";
-import {
-  getTileIndex, getTileTimeRange, getTileS3Key, getPointIndexInTile
-} from "../../shared/seismic/tile-addressing.js";
+import { getTileS3Key } from "../../shared/seismic/tile-addressing.js";
 import { encodeEnvelopeTile, quantize } from "../../shared/seismic/envelope-codec.js";
-import { computeEnvelopesFromRaw, rollUpEnvelopes } from "../../shared/seismic/envelope-compute.js";
+import { computeEnvelopesFromRaw } from "../../shared/seismic/envelope-compute.js";
 import { fetchStationMetadata } from "../../shared/seismic/earthscope-client.js";
-import type { ChannelMetadata, EnvelopePoint, EnvelopeTileData } from "../../shared/seismic/seismic-types.js";
+import {
+  createPipelineState, processL2Point, flushTiles, type FlushTileFn
+} from "../../shared/seismic/envelope-pipeline.js";
+import type { ChannelMetadata, EnvelopeTileData } from "../../shared/seismic/seismic-types.js";
 
 // ---- Configuration ----
 
@@ -135,34 +139,23 @@ function findRoverFiles(dataRoot: string, network: string, station: string): str
   return files;
 }
 
-function loadMiniSeedFiles(dataRoot: string, network: string, station: string): RawTrace[] {
-  const files = findRoverFiles(dataRoot, network, station);
-  if (files.length === 0) {
-    throw new Error(`No ROVER files found for ${network}.${station} in ${dataRoot}`);
-  }
-  console.log(`Found ${files.length} ROVER file(s)`);
+function loadMiniSeedFile(filePath: string): RawTrace[] {
+  const buffer = readFileSync(filePath);
+  const arrayBuf = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+  const records = miniseed.parseDataRecords(arrayBuf);
+  const seismograms = miniseed.seismogramPerChannel(records);
 
   const traces: RawTrace[] = [];
-  for (const filePath of files) {
-    const buffer = readFileSync(filePath);
-    const arrayBuf = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
-    const records = miniseed.parseDataRecords(arrayBuf);
-    const seismograms = miniseed.seismogramPerChannel(records);
-
-    for (const seis of seismograms) {
-      const segments = seis.segments;
-      for (const seg of segments) {
-        traces.push({
-          channel: seis.channelCode,
-          sampleRate: seg.sampleRate,
-          startTime: seg.startTime.toSeconds(),
-          samples: new Float64Array(seg.y),
-        });
-      }
+  for (const seis of seismograms) {
+    for (const seg of seis.segments) {
+      traces.push({
+        channel: seis.channelCode,
+        sampleRate: seg.sampleRate,
+        startTime: seg.startTime.toSeconds(),
+        samples: new Float64Array(seg.y),
+      });
     }
   }
-
-  console.log(`Loaded ${traces.length} trace segment(s)`);
   return traces;
 }
 
@@ -191,45 +184,6 @@ function findSensitivity(
   console.warn(`No metadata time match for channel ${channel} at ${timeSec}, using latest`);
   const last = matching[matching.length - 1];
   return { scale: last.scale, instrumentCode: last.instrumentCode };
-}
-
-// ---- Tile Assembly ----
-
-function assembleTiles(
-  level: number,
-  envelopePoints: EnvelopePoint[],
-  rangeMax: number
-): Map<number, EnvelopeTileData> {
-  const tiles = new Map<number, EnvelopeTileData>();
-  const pointsPerTile = POINTS_PER_TILE[level];
-
-  for (const pt of envelopePoints) {
-    const tileIdx = getTileIndex(pt.time, level);
-    if (!tiles.has(tileIdx)) {
-      const mins = new Int16Array(pointsPerTile).fill(NO_DATA_SENTINEL);
-      const maxs = new Int16Array(pointsPerTile).fill(NO_DATA_SENTINEL);
-      tiles.set(tileIdx, { mins, maxs });
-    }
-
-    const tile = tiles.get(tileIdx)!;
-    const pointIndex = getPointIndexInTile(pt.time, level, tileIdx);
-
-    if (pointIndex >= 0 && pointIndex < pointsPerTile) {
-      const qMin = quantize(pt.min, rangeMax);
-      const qMax = quantize(pt.max, rangeMax);
-
-      if (tile.mins[pointIndex] === NO_DATA_SENTINEL) {
-        tile.mins[pointIndex] = qMin;
-        tile.maxs[pointIndex] = qMax;
-      } else {
-        // Merge: keep the more extreme values
-        tile.mins[pointIndex] = Math.min(tile.mins[pointIndex], qMin);
-        tile.maxs[pointIndex] = Math.max(tile.maxs[pointIndex], qMax);
-      }
-    }
-  }
-
-  return tiles;
 }
 
 // ---- S3 Operations ----
@@ -266,176 +220,149 @@ async function wipeExistingTiles(
   } while (continuationToken);
 }
 
-async function uploadTiles(
-  s3: S3Client,
-  bucket: string,
-  prefix: string,
+// ---- Tile Output ----
+
+function makeFlushTile(
   station: string,
   channel: string,
-  level: number,
-  tiles: Map<number, EnvelopeTileData>,
-  outputDir?: string
-): Promise<void> {
-  console.log(`Uploading ${tiles.size} L${level} tile(s)...`);
-  let count = 0;
-
-  for (const [tileIdx, tile] of tiles) {
-    const tileKey = getTileS3Key(station, channel, level, tileIdx);
-    const body = encodeEnvelopeTile(tile.mins, tile.maxs);
+  config: ScriptConfig,
+  s3: S3Client | null,
+  pendingUploads: Promise<PutObjectCommandOutput>[],
+): FlushTileFn {
+  let flushedCount = 0;
+  return (level: number, tileIndex: number, tileData: EnvelopeTileData) => {
+    const tileKey = getTileS3Key(station, channel, level, tileIndex);
+    const body = encodeEnvelopeTile(tileData.mins, tileData.maxs);
     const bodyBytes = new Uint8Array(body);
 
-    await s3.send(new PutObjectCommand({
-      Bucket: bucket,
-      Key: `${prefix}${tileKey}`,
-      Body: bodyBytes,
-      ContentType: "application/octet-stream",
-      ContentEncoding: "gzip",
-    }));
-
-    if (outputDir) {
-      const filePath = join(outputDir, tileKey);
+    if (config.outputDir) {
+      const filePath = join(config.outputDir, tileKey);
       mkdirSync(dirname(filePath), { recursive: true });
       writeFileSync(filePath, bodyBytes);
     }
 
-    count++;
-    if (count % 100 === 0) {
-      console.log(`  Uploaded ${count}/${tiles.size}`);
+    if (s3) {
+      pendingUploads.push(
+        s3.send(new PutObjectCommand({
+          Bucket: config.s3Bucket,
+          Key: `${config.s3Prefix}${tileKey}`,
+          Body: bodyBytes,
+          ContentType: "application/octet-stream",
+          ContentEncoding: "gzip",
+        }))
+      );
     }
-  }
 
-  console.log(`  Done: ${count} L${level} tile(s) uploaded`);
+    flushedCount++;
+    if (flushedCount % 100 === 0) {
+      console.log(`  Flushed ${flushedCount} tile(s)...`);
+    }
+  };
 }
 
 // ---- Main ----
 
 async function main() {
   const config = parseArgs();
-  const prefix = config.s3Prefix;
 
-  // 1. Load miniSEED files
-  console.log(`Loading ROVER data from ${config.inputDir} for ${config.network}.${config.station}...`);
-  const traces = loadMiniSeedFiles(config.inputDir, config.network, config.station);
+  // 1. Find and sort ROVER files
+  console.log(`Finding ROVER files in ${config.inputDir} for ${config.network}.${config.station}...`);
+  const files = findRoverFiles(config.inputDir, config.network, config.station);
+  if (files.length === 0) {
+    throw new Error(
+      `No ROVER files found for ${config.network}.${config.station} in ${config.inputDir}`
+    );
+  }
+  console.log(`Found ${files.length} ROVER file(s)`);
 
   // 2. Fetch station metadata
   console.log(`Fetching station metadata for ${config.network}.${config.station}...`);
   const metadata = await fetchStationMetadata(config.network, config.station);
   console.log(`  Found ${metadata.length} channel(s)`);
 
-  // 3. Group traces by channel
-  const tracesByChannel = new Map<string, RawTrace[]>();
-  for (const trace of traces) {
-    if (config.channel && trace.channel !== config.channel) continue;
-    if (!tracesByChannel.has(trace.channel)) {
-      tracesByChannel.set(trace.channel, []);
+  // 3. Discover channels from first file
+  const firstFileTraces = loadMiniSeedFile(files[0]);
+  const channelsFound = new Set(firstFileTraces.map(t => t.channel));
+  const channelsToProcess = config.channel
+    ? [config.channel]
+    : Array.from(channelsFound);
+
+  // 4. Set up S3 (if not --local-only)
+  const s3 = config.localOnly ? null : new S3Client({ region: config.awsRegion });
+
+  // 5. Process each channel
+  for (const channel of channelsToProcess) {
+    console.log(`\nProcessing channel ${channel}...`);
+
+    // Determine instrument type and amplitude range
+    const firstTrace = firstFileTraces.find(t => t.channel === channel);
+    if (!firstTrace) {
+      console.warn(`No traces for channel ${channel}, skipping`);
+      continue;
     }
-    tracesByChannel.get(trace.channel)!.push(trace);
-  }
-
-  if (tracesByChannel.size === 0) {
-    console.error("No traces found for the specified channel(s)");
-    process.exit(1);
-  }
-
-  // 4. Process each channel
-  const s3 = new S3Client({ region: config.awsRegion });
-
-  for (const [channel, channelTraces] of tracesByChannel) {
-    console.log(`\nProcessing channel ${channel} (${channelTraces.length} trace segments)...`);
-
-    // Determine instrument code and rangeMax from first trace
-    const { instrumentCode } = findSensitivity(metadata, channel, channelTraces[0].startTime);
+    const { instrumentCode } = findSensitivity(metadata, channel, firstTrace.startTime);
     const rangeMax = AMPLITUDE_RANGES[instrumentCode];
     if (!rangeMax) {
-      console.warn(`Unknown instrument code "${instrumentCode}" for channel ${channel}, skipping`);
+      console.warn(
+        `Unknown instrument code "${instrumentCode}" for channel ${channel}, skipping`
+      );
       continue;
     }
     console.log(`  Instrument: ${instrumentCode}, range: ±${rangeMax}`);
 
-    // Sort traces by start time
-    channelTraces.sort((a, b) => a.startTime - b.startTime);
-
-    // Compute L2 envelopes from raw data
-    const finestLevel = NUM_LEVELS - 1;
-    console.log("  Computing L2 envelopes from raw data...");
-    const l2Points: EnvelopePoint[] = [];
-
-    for (const trace of channelTraces) {
-      // Look up scale for this trace's time range (may differ across epochs)
-      const { scale } = findSensitivity(metadata, channel, trace.startTime);
-      const physicalSamples = new Float64Array(trace.samples.length);
-      for (let i = 0; i < trace.samples.length; i++) {
-        physicalSamples[i] = trace.samples[i] / scale;
-      }
-
-      const { mins, maxs } = computeEnvelopesFromRaw(
-        physicalSamples, trace.sampleRate, LEVEL_SPACINGS[finestLevel]
-      );
-
-      for (let i = 0; i < mins.length; i++) {
-        const time = trace.startTime + i * LEVEL_SPACINGS[finestLevel];
-        l2Points.push({ time, min: mins[i], max: maxs[i] });
-      }
+    // Wipe existing tiles (S3 mode only)
+    if (s3) {
+      await wipeExistingTiles(s3, config.s3Bucket, config.s3Prefix, config.station, channel);
     }
-    console.log(`  Generated ${l2Points.length} L2 envelope points`);
 
-    // Assemble L2 tiles
-    const allTiles: Array<Map<number, EnvelopeTileData>> = new Array(NUM_LEVELS);
-    allTiles[finestLevel] = assembleTiles(finestLevel, l2Points, rangeMax);
+    // Initialize pipeline state
+    const state = createPipelineState();
+    const pendingUploads: Promise<PutObjectCommandOutput>[] = [];
+    const flushTile = makeFlushTile(config.station, channel, config, s3, pendingUploads);
+    const finestLevel = NUM_LEVELS - 1;
 
-    // Roll up L2 → L1 → L0
-    for (let level = NUM_LEVELS - 2; level >= 0; level--) {
-      console.log(`  Rolling up L${level + 1} → L${level}...`);
-      const finerTiles = allTiles[level + 1];
+    // Stream-process each file
+    for (let fileIdx = 0; fileIdx < files.length; fileIdx++) {
+      const filePath = files[fileIdx];
+      console.log(`  Processing file ${fileIdx + 1}/${files.length}: ${filePath}`);
+      const traces = loadMiniSeedFile(filePath);
 
-      // Collect all finer-level data points in order
-      const finerTileIndices = [...finerTiles.keys()];
-      const allMins: number[] = [];
-      const allMaxs: number[] = [];
-      const allTimes: number[] = [];
-      const finerPointsPerTile = POINTS_PER_TILE[level + 1];
+      // Filter to target channel and sort by start time
+      const channelTraces = traces
+        .filter(t => t.channel === channel)
+        .sort((a, b) => a.startTime - b.startTime);
 
-      for (const tileIdx of finerTileIndices) {
-        const tile = finerTiles.get(tileIdx)!;
-        const tileRange = getTileTimeRange(level + 1, tileIdx);
-        for (let i = 0; i < finerPointsPerTile; i++) {
-          allMins.push(tile.mins[i]);
-          allMaxs.push(tile.maxs[i]);
-          allTimes.push(tileRange.start + i * LEVEL_SPACINGS[level + 1]);
+      for (const trace of channelTraces) {
+        const { scale } = findSensitivity(metadata, channel, trace.startTime);
+        const physicalSamples = new Float64Array(trace.samples.length);
+        for (let i = 0; i < trace.samples.length; i++) {
+          physicalSamples[i] = trace.samples[i] / scale;
+        }
+
+        const { mins, maxs } = computeEnvelopesFromRaw(
+          physicalSamples, trace.sampleRate, LEVEL_SPACINGS[finestLevel]
+        );
+
+        for (let i = 0; i < mins.length; i++) {
+          const time = trace.startTime + i * LEVEL_SPACINGS[finestLevel];
+          const qMin = quantize(mins[i], rangeMax);
+          const qMax = quantize(maxs[i], rangeMax);
+          processL2Point(state, time, qMin, qMax);
         }
       }
 
-      const rolledUp = rollUpEnvelopes(
-        new Int16Array(allMins),
-        new Int16Array(allMaxs),
-        K_FACTOR
-      );
-
-      // Convert rolled-up Int16 values back to timed points for tile assembly
-      const coarserPoints: EnvelopePoint[] = [];
-      for (let i = 0; i < rolledUp.mins.length; i++) {
-        if (rolledUp.mins[i] === NO_DATA_SENTINEL) continue;
-        const time = allTimes[i * K_FACTOR] ?? allTimes[0] + i * LEVEL_SPACINGS[level];
-        // Dequantize from Int16 back to physical units for re-assembly
-        coarserPoints.push({
-          time,
-          min: (rolledUp.mins[i] / 32767) * rangeMax,
-          max: (rolledUp.maxs[i] / 32767) * rangeMax,
-        });
+      // Flush completed state after each file
+      flushTiles(state, flushTile);
+      if (pendingUploads.length > 0) {
+        await Promise.all(pendingUploads);
+        pendingUploads.length = 0;
       }
-
-      allTiles[level] = assembleTiles(level, coarserPoints, rangeMax);
-      console.log(`  Generated ${allTiles[level].size} L${level} tile(s)`);
     }
 
-    // Wipe existing tiles for this station/channel
-    await wipeExistingTiles(s3, config.s3Bucket, prefix, config.station, channel);
-
-    // Upload all levels
-    for (let level = 0; level < NUM_LEVELS; level++) {
-      await uploadTiles(
-        s3, config.s3Bucket, prefix, config.station, channel, level, allTiles[level], config.outputDir
-      );
+    // Final flush
+    flushTiles(state, flushTile, true);
+    if (pendingUploads.length > 0) {
+      await Promise.all(pendingUploads);
     }
 
     console.log(`  Channel ${channel} complete.`);
