@@ -113,10 +113,12 @@ function findRoverFiles(dataRoot: string, network: string, station: string): str
   const networkDir = join(dataRoot, network);
   const files: string[] = [];
 
-  for (const year of readdirSync(networkDir)) {
+  const years = readdirSync(networkDir).sort((a, b) => Number(a) - Number(b));
+  for (const year of years) {
     const yearDir = join(networkDir, year);
     if (!statSync(yearDir).isDirectory()) continue;
-    for (const day of readdirSync(yearDir)) {
+    const days = readdirSync(yearDir).sort((a, b) => Number(a) - Number(b));
+    for (const day of days) {
       const dayDir = join(yearDir, day);
       if (!statSync(dayDir).isDirectory()) continue;
       const expected = `${station}.${network}.${year}.${day}`;
