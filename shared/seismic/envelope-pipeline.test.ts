@@ -1,6 +1,6 @@
 // shared/seismic/envelope-pipeline.test.ts
-import { createPipelineState, placePointInTile } from "./envelope-pipeline";
-import { LEVEL_SPACINGS, NUM_LEVELS, NO_DATA_SENTINEL } from "./envelope-config";
+import { createPipelineState, placePointInTile, processL2Point } from "./envelope-pipeline";
+import { LEVEL_SPACINGS, K_FACTOR, NUM_LEVELS, NO_DATA_SENTINEL } from "./envelope-config";
 import { getTileIndex, getTileTimeRange, getPointIndexInTile } from "./tile-addressing";
 
 describe("envelope-pipeline", () => {
@@ -67,6 +67,46 @@ describe("envelope-pipeline", () => {
       const tile = tiles.get(0)!;
       expect(tile.mins[0]).toBe(-100);
       expect(tile.mins[1]).toBe(-200);
+    });
+  });
+
+  describe("processL2Point", () => {
+    it("places point in L2 tile and updates highestL2GlobalIndex", () => {
+      const state = createPipelineState();
+      const time = 1000;
+      processL2Point(state, time, -500, 500);
+
+      const expectedL2Global = Math.floor(time / LEVEL_SPACINGS[2]);
+      expect(state.highestL2GlobalIndex).toBe(expectedL2Global);
+
+      const tileIdx = getTileIndex(time, 2);
+      expect(state.openTiles[2].has(tileIdx)).toBe(true);
+    });
+
+    it("creates an L1 accumulator for the corresponding L1 point", () => {
+      const state = createPipelineState();
+      const time = 1000;
+      processL2Point(state, time, -500, 500);
+
+      const l2Global = Math.floor(time / LEVEL_SPACINGS[2]);
+      const l1Global = Math.floor(l2Global / K_FACTOR);
+      expect(state.l1Accumulators.has(l1Global)).toBe(true);
+      expect(state.l1Accumulators.get(l1Global)!.min).toBe(-500);
+      expect(state.l1Accumulators.get(l1Global)!.max).toBe(500);
+    });
+
+    it("accumulates min/max across multiple L2 points in the same L1 window", () => {
+      const state = createPipelineState();
+      const time1 = 0;
+      const time2 = LEVEL_SPACINGS[2];
+      processL2Point(state, time1, -200, 300);
+      processL2Point(state, time2, -500, 100);
+
+      const l2Global = Math.floor(time1 / LEVEL_SPACINGS[2]);
+      const l1Global = Math.floor(l2Global / K_FACTOR);
+      const acc = state.l1Accumulators.get(l1Global)!;
+      expect(acc.min).toBe(-500);
+      expect(acc.max).toBe(300);
     });
   });
 });

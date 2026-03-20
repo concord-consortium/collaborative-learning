@@ -1,5 +1,5 @@
 // shared/seismic/envelope-pipeline.ts
-import { NUM_LEVELS, POINTS_PER_TILE, NO_DATA_SENTINEL } from "./envelope-config";
+import { NUM_LEVELS, POINTS_PER_TILE, NO_DATA_SENTINEL, LEVEL_SPACINGS, K_FACTOR } from "./envelope-config";
 import { getTileIndex, getPointIndexInTile } from "./tile-addressing";
 import type { EnvelopeTileData } from "./seismic-types";
 
@@ -60,5 +60,34 @@ export function placePointInTile(
   if (pointIndex >= 0 && pointIndex < POINTS_PER_TILE[level]) {
     tile.mins[pointIndex] = qMin;
     tile.maxs[pointIndex] = qMax;
+  }
+}
+
+/**
+ * Process a single quantized L2 envelope point:
+ * 1. Place into the L2 open tile
+ * 2. Update highestL2GlobalIndex
+ * 3. Update the L1 accumulator for the corresponding L1 point
+ */
+export function processL2Point(
+  state: PipelineState,
+  time: number,
+  qMin: number,
+  qMax: number,
+): void {
+  placePointInTile(state.openTiles[2], 2, time, qMin, qMax);
+
+  const l2GlobalIndex = Math.floor(time / LEVEL_SPACINGS[2]);
+  if (l2GlobalIndex > state.highestL2GlobalIndex) {
+    state.highestL2GlobalIndex = l2GlobalIndex;
+  }
+
+  const l1GlobalIndex = Math.floor(l2GlobalIndex / K_FACTOR);
+  const existing = state.l1Accumulators.get(l1GlobalIndex);
+  if (existing) {
+    if (qMin < existing.min) existing.min = qMin;
+    if (qMax > existing.max) existing.max = qMax;
+  } else {
+    state.l1Accumulators.set(l1GlobalIndex, { min: qMin, max: qMax });
   }
 }
