@@ -91,3 +91,60 @@ export function processL2Point(
     state.l1Accumulators.set(l1GlobalIndex, { min: qMin, max: qMax });
   }
 }
+
+/**
+ * Flush pipeline state — accumulators into coarser tiles, then completed tiles via callback.
+ *
+ * When `force` is false (default), only flush state that is strictly behind the current
+ * processing position — the current accumulator and tile remain open.
+ *
+ * When `force` is true, finalize ALL remaining accumulators and flush ALL open tiles.
+ * Use this after all files have been processed.
+ */
+export function flushTiles(state: PipelineState, flushTile: FlushTileFn, force = false): void {
+  const currentL1Index = Math.floor(state.highestL2GlobalIndex / K_FACTOR);
+  const currentL0Index = Math.floor(currentL1Index / K_FACTOR);
+
+  // 1. Flush L1 accumulators → L1 tiles, update L0 accumulators
+  for (const [l1Index, acc] of state.l1Accumulators) {
+    if (force || l1Index < currentL1Index) {
+      const l1Time = l1Index * LEVEL_SPACINGS[1];
+      placePointInTile(state.openTiles[1], 1, l1Time, acc.min, acc.max);
+
+      const l0Index = Math.floor(l1Index / K_FACTOR);
+      const l0Acc = state.l0Accumulators.get(l0Index);
+      if (l0Acc) {
+        if (acc.min < l0Acc.min) l0Acc.min = acc.min;
+        if (acc.max > l0Acc.max) l0Acc.max = acc.max;
+      } else {
+        state.l0Accumulators.set(l0Index, { min: acc.min, max: acc.max });
+      }
+
+      state.l1Accumulators.delete(l1Index);
+    }
+  }
+
+  // 2. Flush L0 accumulators → L0 tiles
+  for (const [l0Index, acc] of state.l0Accumulators) {
+    if (force || l0Index < currentL0Index) {
+      const l0Time = l0Index * LEVEL_SPACINGS[0];
+      placePointInTile(state.openTiles[0], 0, l0Time, acc.min, acc.max);
+      state.l0Accumulators.delete(l0Index);
+    }
+  }
+
+  // 3. Flush completed (or all) tiles at each level
+  const currentTileIndex = [
+    getTileIndex(currentL0Index * LEVEL_SPACINGS[0], 0),
+    getTileIndex(currentL1Index * LEVEL_SPACINGS[1], 1),
+    getTileIndex(state.highestL2GlobalIndex * LEVEL_SPACINGS[2], 2),
+  ];
+  for (let level = 0; level < NUM_LEVELS; level++) {
+    for (const [tileIdx, tileData] of state.openTiles[level]) {
+      if (force || tileIdx < currentTileIndex[level]) {
+        flushTile(level, tileIdx, tileData);
+        state.openTiles[level].delete(tileIdx);
+      }
+    }
+  }
+}
