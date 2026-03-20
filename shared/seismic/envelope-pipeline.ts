@@ -1,5 +1,6 @@
 // shared/seismic/envelope-pipeline.ts
-import { NUM_LEVELS } from "./envelope-config";
+import { NUM_LEVELS, POINTS_PER_TILE, NO_DATA_SENTINEL } from "./envelope-config";
+import { getTileIndex, getPointIndexInTile } from "./tile-addressing";
 import type { EnvelopeTileData } from "./seismic-types";
 
 /** Running min/max accumulator for a single coarser-level point. Values are quantized Int16. */
@@ -34,4 +35,30 @@ export function createPipelineState(): PipelineState {
     l0Accumulators: new Map(),
     highestL2GlobalIndex: -1,
   };
+}
+
+/**
+ * Place a single quantized envelope point into the correct open tile.
+ * Creates the tile (filled with NO_DATA_SENTINEL) if it doesn't exist.
+ */
+export function placePointInTile(
+  tiles: Map<number, EnvelopeTileData>,
+  level: number,
+  time: number,
+  qMin: number,
+  qMax: number,
+): void {
+  const tileIdx = getTileIndex(time, level);
+  if (!tiles.has(tileIdx)) {
+    const pointsPerTile = POINTS_PER_TILE[level];
+    const mins = new Int16Array(pointsPerTile).fill(NO_DATA_SENTINEL);
+    const maxs = new Int16Array(pointsPerTile).fill(NO_DATA_SENTINEL);
+    tiles.set(tileIdx, { mins, maxs });
+  }
+  const tile = tiles.get(tileIdx)!;
+  const pointIndex = getPointIndexInTile(time, level, tileIdx);
+  if (pointIndex >= 0 && pointIndex < POINTS_PER_TILE[level]) {
+    tile.mins[pointIndex] = qMin;
+    tile.maxs[pointIndex] = qMax;
+  }
 }
