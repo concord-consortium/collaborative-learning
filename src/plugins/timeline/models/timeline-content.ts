@@ -5,7 +5,7 @@ import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
 import { kTimelineTileType } from "../timeline-types";
 
-export const kMinViewRangeSeconds = 5;
+export const kMinViewRangeSeconds = 2;
 
 export function defaultTimelineContent(): TimelineContentModelType {
   return TimelineContentModel.create();
