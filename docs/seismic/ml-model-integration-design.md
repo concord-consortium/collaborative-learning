@@ -78,7 +78,7 @@ A curriculum unit can override the default model list to show only the models ap
 
 ### Architecture registry
 
-Model architectures (the TF.js layer definitions) must live in code because each architecture is a distinct programmatic construction. CLUE maintains a simple lookup from architecture strings to build functions:
+Model architectures (the TF.js layer definitions) must live in code because each architecture is a distinct programmatic construction. The architecture registry lives in `shared/seismic/seismic-architectures.ts` alongside the runner, so it's available in both browser and Node environments:
 
 ```typescript
 const ARCHITECTURES: Record<string, (metadata: ModelMetadata) => tf.LayersModel> = {
@@ -91,9 +91,20 @@ The `buildCompactModel` and `buildStandardModel` functions are adapted from the 
 
 ## Runner Architecture
 
+### Location
+
+`shared/seismic/seismic-model-runner.ts` — alongside the raw data fetcher and other shared seismic utilities.
+
+The runner lives in `shared/seismic/` rather than in the Wave Runner plugin because it needs to run in both environments:
+
+- **Browser**: The Wave Runner tile's orchestration loop calls the runner, maps detected events into a SharedDataSet for the UI.
+- **Node.js scripts**: A server-side script calls the same runner, maps detected events into Firestore writes to prepopulate the event database.
+
+The runner itself has no knowledge of SharedDataSet, Firestore, or any output destination. It accepts a Seismogram and produces SeismicEvent objects via callbacks and return value. The caller decides what to do with the events.
+
 ### Design choice: mini-batch loop with `tf.nextFrame()` yields
 
-The runner processes windows in mini-batches (~50 windows at a time) in the main thread. `await tf.nextFrame()` between batches keeps the UI responsive. This approach was chosen over:
+The runner processes windows in mini-batches (~50 windows at a time). In the browser, `await tf.nextFrame()` between batches keeps the UI responsive. In Node.js, `tf.nextFrame()` resolves immediately (via `setImmediate`), so batching still works but without the browser-specific frame scheduling. This approach was chosen over:
 
 - **Sequential single-window processing**: 3–4× slower than batched on GPU (confirmed by benchmarks in the tiny-cnn-seismicML repo).
 - **Web Worker**: WebGPU in workers has inconsistent browser support. For the primary target (Chromebooks with WebGPU), inference is already sub-second — the UI thread is barely blocked. Adds significant complexity for minimal benefit.
@@ -158,7 +169,12 @@ The model outputs a probability for each class. The runner iterates over the out
 
 ## Orchestration
 
-The Wave Runner tile orchestrates the overall flow: downloading data, feeding chunks to the runner, and updating shared models.
+The orchestration loop lives in the caller, not the runner. The runner is a stateless processing engine — it takes a Seismogram and produces events. The caller is responsible for downloading data, feeding chunks, and deciding what to do with events:
+
+- **Wave Runner tile (browser)**: Downloads data via `fetchRawSeismicData`, feeds chunks to the runner, maps events into a SharedDataSet.
+- **Server-side script (Node.js)**: Downloads data the same way, feeds chunks to the same runner, writes events to Firestore.
+
+The rest of this section describes the Wave Runner tile's orchestration as the primary use case.
 
 ### Chunk size
 
@@ -192,13 +208,19 @@ Two levels of progress:
 
 Estimated time: the orchestration layer times the first chunk (download + processing) and extrapolates. The estimate improves as more chunks complete.
 
-## SharedDataSet Update Flow
+## Event Storage and SharedDataSet Flow
 
-### Working Dataset
+### Volatile event storage
 
-The Wave Runner tile maintains a single **working dataset** (SharedDataSet). This receives events as the model runs or as precomputed events are loaded from Firestore. The Wave Runner's own UI (event counts in "Status and Output") reads from this dataset, which is updated incrementally.
+Detected events are stored as volatile state on the Wave Runner content model (`detectedEvents: SeismicEvent[]`). This array is populated incrementally as the runner processes chunks, and is cleared when a new model run starts. The Wave Runner UI (event counts in "Status and Output") reads directly from this volatile state.
 
-When the user clicks "Timeline It!", the Wave Runner copies the working dataset into a new SharedDataSet and creates a new Timeline tile that observes the copy. Each click produces a new Timeline tile with a snapshot of the current events. The working dataset continues to be updated independently — subsequent model runs or data loads don't affect previously created Timeline tiles.
+No SharedDataSet is created during model execution — events live only in volatile memory until the user explicitly clicks "Timeline It!".
+
+### SharedDataSet creation on "Timeline It!"
+
+When the user clicks "Timeline It!", the Wave Runner creates a SharedDataSet from the current `detectedEvents`, creates a new Timeline tile, and links the SharedDataSet to it. The Wave Runner keeps a reference to the SharedDataSet it created so that pressing "Timeline It!" again (without re-running the model) reuses the same SharedDataSet rather than creating a duplicate.
+
+When the user clicks "Run Model" again, the cached SharedDataSet reference is cleared. The next "Timeline It!" click will create a fresh SharedDataSet from the new results.
 
 ### SharedDataSet schema
 
@@ -210,47 +232,32 @@ Each row in the dataset is a detected event:
 | `windowEnd` | number | Epoch ms |
 | `eventType` | string | "Earthquake", "Traffic", etc. |
 | `confidence` | number | 0–1 |
-| `source` | string | `"local"` or `"remote"` |
-
-The `source` column tracks whether an event has been uploaded to Firestore. Events detected in this session start as `"local"` and are flipped to `"remote"` after upload. Events loaded from Firestore are `"remote"` from the start. This tells the upload logic which rows still need to be written — once all rows are `"remote"`, there's nothing left to upload. The distinction is transient and not intended for UI purposes.
-
-**Note:** The flows below are illustrative — the exact UI sequence (which buttons trigger what, whether "Load Data" and "Run Model" are separate steps or combined) will be refined as the overall Wave Runner UI design settles. The underlying architecture (working dataset, snapshot-on-timeline, source column, coverage-aware runner) supports whatever flow we land on.
-
-### Flow: "Load Data"
-
-```
-User clicks "Load Data"
-  → fetch metadata.json (if not already loaded) → get model id
-  → query Firestore for events (station + channel + model id + time range)
-  → populate working dataset with rows (source="remote")
-  → Wave Runner shows "Y events loaded from database."
-User clicks "Timeline It!"
-  → copy working dataset into a new SharedDataSet
-  → create a new Timeline tile observing the copy
-```
 
 ### Flow: "Run Model"
 
 ```
 User clicks "Run Model"
-  → validate selected channel against model's instrument_types
-  → fetch metadata.json (if not already loaded)
-  → fetch weights.json → build TF.js model
-  → check coverage bitmaps (station + channel + model) → determine uncovered time ranges
+  → clear detectedEvents and cached SharedDataSet reference
   → for each chunk:
       download data → runner.processChunk()
-      → onEvents callback adds rows (source="local") to working dataset
+      → onEvents callback appends to volatile detectedEvents
       → Wave Runner UI updates event count
   → run completes
   → Wave Runner shows "Run complete. X events found."
 User clicks "Timeline It!"
-  → copy working dataset into a new SharedDataSet
-  → create a new Timeline tile observing the copy
+  → create SharedDataSet from detectedEvents (or reuse cached reference)
+  → create a new Timeline tile observing the SharedDataSet
+User clicks "Timeline It!" again (without re-running)
+  → reuse the same SharedDataSet
+  → create another Timeline tile observing it
+User clicks "Run Model" again
+  → cached SharedDataSet reference is cleared
+  → new run produces new detectedEvents
 ```
 
-### Combining loaded and detected events
+### Future: Combining loaded and precomputed events
 
-If a user loads precomputed events ("Load Data") and then runs the model for uncovered gaps ("Run Model"), both sets end up in the working dataset. The coverage bitmaps (see [event-database-design.md](event-database-design.md)) prevent duplication — the runner only processes uncovered time ranges for the selected station + channel + model. The `source` column distinguishes the two populations.
+When Firestore event loading is implemented ("Load Data"), loaded events will also be stored in `detectedEvents`. The coverage bitmaps (see [event-database-design.md](event-database-design.md)) will prevent duplication — the runner only processes uncovered time ranges. The `source` column (tracking local vs remote events for upload purposes) will be added to the schema at that point.
 
 ## Out of Scope
 
