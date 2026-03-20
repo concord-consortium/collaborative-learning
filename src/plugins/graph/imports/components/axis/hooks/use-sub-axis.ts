@@ -14,15 +14,23 @@ import {DragInfo, collisionExists, computeBestNumberOfTicks,
 import { useGraphModelContext } from "../../../../hooks/use-graph-model-context";
 import { isImageUrl } from "../../../../../../models/data/data-types";
 
+// Color for emphasized (bold) axis lines — used for domain lines and zero-axis lines.
+const kAxisDomainColor = "#707070";
+
 // This function is used to style the axes of multiple types of plots below.
-// When deemphasize is true, the domain line is drawn light (like grid lines) instead of bold.
-function styleAxis(axisSelection: Selection<any, any, any, any>, duration?: number, deemphasize = false) {
-  const strokeColor = deemphasize ? kTickAndGridColor : "#707070";
-  const strokeWidth = deemphasize ? 1 : kAxisStrokeWidth;
+// When emphasize is true, the domain line is drawn bold; otherwise light (like grid lines).
+function styleAxis(axisSelection: Selection<any, any, any, any>, duration?: number, emphasize = false) {
+  const strokeColor = emphasize ? kAxisDomainColor : kTickAndGridColor;
+  const strokeWidth = emphasize ? kAxisStrokeWidth : 1;
   axisSelection.select(".domain")
     .transition().duration(duration ?? 0)
     .style("stroke", strokeColor)
     .style("stroke-width", `${strokeWidth}px`);
+}
+
+// Generates the CSS class name used to identify zero-axis lines for a given place/subAxisIndex.
+function zeroLineClass(place: string, subAxisIndex: number) {
+  return `zero-${place}-${subAxisIndex}`;
 }
 
 export interface IUseSubAxis {
@@ -128,7 +136,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
           return hideMinAndMax  ? 'none' : null;
         });
 
-      styleAxis(select(subAxisElt), duration, true);
+      styleAxis(select(subAxisElt), duration);
     };
 
     const renderScatterPlotGridLines = () => {
@@ -144,7 +152,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
           .selectAll("line")
           .style("stroke", kTickAndGridColor);
         select(subAxisElt).select('.grid').selectAll('text').remove();
-        styleAxis(select(subAxisElt).select(".grid"), 0, true);
+        styleAxis(select(subAxisElt).select(".grid"));
       }
     };
 
@@ -156,8 +164,10 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     const renderZeroAxisLines = () => {
       const rootSvg = subAxisElt?.ownerSVGElement;
       if (!rootSvg) return;
+      // FIXME: d3Scale's type doesn't expose .domain()/.range() for numeric scales;
+      // this cast is not type-safe but follows the existing pattern in this file.
       const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
-      const zeroClass = `zero-${place}-${subAxisIndex}`;
+      const zeroClass = zeroLineClass(place, subAxisIndex);
       select(rootSvg).selectAll(`.${zeroClass}`).remove();
       const tickLength = layout.getAxisLength(otherPlace(place)) ?? 0;
       const [domainMin, domainMax] = numericScale.domain();
@@ -176,7 +186,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
           : zeroGroup.append('line')
               .attr('x1', zeroPos).attr('x2', zeroPos)
               .attr('y1', 0).attr('y2', -crossLength);
-        line.style('stroke', '#707070')
+        line.style('stroke', kAxisDomainColor)
             .style('stroke-width', `${kAxisStrokeWidth}px`)
             .style('shape-rendering', 'crispEdges');
       }
@@ -262,7 +272,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     // Clean up zero lines from root SVG when axis type changes away from numeric
     if (type !== 'numeric') {
       const rootSvg = subAxisElt?.ownerSVGElement;
-      if (rootSvg) select(rootSvg).selectAll(`.zero-${place}-${subAxisIndex}`).remove();
+      if (rootSvg) select(rootSvg).selectAll(`.${zeroLineClass(place, subAxisIndex)}`).remove();
     }
     switch (type) {
       case 'empty':
@@ -365,7 +375,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     select(subAxisElt).selectAll('*').remove();  // start over
 
     sAS.attr('class', 'axis').append('line').attr("class", "domain");
-    styleAxis(sAS);
+    styleAxis(sAS, undefined, true);
     categoriesSelectionRef.current = sAS.selectAll('g')
       .data(categoryData)
       .join(
