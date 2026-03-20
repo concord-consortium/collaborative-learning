@@ -1,4 +1,8 @@
-import { types, Instance } from "mobx-state-tree";
+import { flow, types, Instance } from "mobx-state-tree";
+import { miniseed } from "seisplotjs";
+import { fetchRawSeismicData } from "../../../../shared/seismic/earthscope-client";
+import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
+import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
@@ -47,6 +51,83 @@ export const WaveRunnerContentModel = TileContentModel
 
       sharedSeismogram.loadData();
     }
+  }))
+  .volatile(() => ({
+    isRunning: false,
+    windowsProcessed: 0,
+    windowsTotal: 0,
+    eventsFound: 0,
+    runError: null as string | null,
+    detectedEvents: [] as SeismicEvent[],
+  }))
+  .actions(self => ({
+    runModel: flow(function* () {
+      if (self.isRunning) return;
+      self.isRunning = true;
+      self.runError = null;
+      self.eventsFound = 0;
+      self.detectedEvents = [];
+
+      // Hardcoded metadata for now — will come from model registry later
+      const metadata: ModelMetadata = {
+        id: "placeholder-v1",
+        architecture: "placeholder",
+        class_names: ["Noise", "Earthquake"],
+        sampling_rate: 100,
+        window_duration: 60,
+        instrument_types: ["H"],
+        weightsUrl: "",
+      };
+
+      const runner = new SeismicModelRunner();
+      try {
+        yield runner.loadModel(metadata);
+
+        // Mock data covers 2026-01-30 to 2026-02-06 (7 days)
+        // Fetch one day at a time
+        const startDate = new Date("2026-01-30T00:00:00Z");
+        const endDate = new Date("2026-02-06T00:00:00Z");
+        const msPerDay = 86400000;
+        const totalDays = (endDate.getTime() - startDate.getTime()) / msPerDay;
+
+        for (let day = 0; day < totalDays; day++) {
+          const chunkStart = new Date(startDate.getTime() + day * msPerDay);
+          const chunkEnd = new Date(chunkStart.getTime() + msPerDay);
+
+          // Fetch raw data for this day
+          const response: Response = yield fetchRawSeismicData(
+            "AK", "K204", "HNZ",
+            chunkStart.toISOString(), chunkEnd.toISOString()
+          );
+          const buffer: ArrayBuffer = yield response.arrayBuffer();
+
+          // Parse miniSEED → Seismogram
+          const records = miniseed.parseDataRecords(buffer);
+          const seismogram = miniseed.merge(records);
+
+          // Run model on this chunk
+          yield runner.processChunk(
+            seismogram,
+            {
+              onProgress: (done: number, total: number) => {
+                self.windowsProcessed = done;
+                self.windowsTotal = total;
+              },
+              onEvents: (events: SeismicEvent[]) => {
+                self.detectedEvents = [...self.detectedEvents, ...events];
+                self.eventsFound = self.detectedEvents.length;
+              },
+            }
+          );
+        }
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        self.runError = `Error running model: ${message}`;
+      } finally {
+        runner.dispose();
+        self.isRunning = false;
+      }
+    })
   }));
 
 export interface WaveRunnerContentModelType extends Instance<typeof WaveRunnerContentModel> {}
