@@ -3,6 +3,8 @@ import { miniseed } from "seisplotjs";
 import { fetchRawSeismicData } from "../../../../shared/seismic/earthscope-client";
 import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
 import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
+import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
+import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
@@ -59,6 +61,7 @@ export const WaveRunnerContentModel = TileContentModel
     eventsFound: 0,
     runError: null as string | null,
     detectedEvents: [] as SeismicEvent[],
+    cachedEventsDataSet: undefined as SharedDataSetType | undefined,
   }))
   .actions(self => ({
     updateChunkProgress(done: number, total: number) {
@@ -69,6 +72,33 @@ export const WaveRunnerContentModel = TileContentModel
       self.detectedEvents = [...self.detectedEvents, ...events];
       self.eventsFound = self.detectedEvents.length;
     },
+    clearCachedEventsDataSet() {
+      self.cachedEventsDataSet = undefined;
+    },
+    getOrCreateEventsDataSet(): SharedDataSetType | undefined {
+      if (self.detectedEvents.length === 0) return undefined;
+      if (self.cachedEventsDataSet) return self.cachedEventsDataSet;
+
+      const smm = getSharedModelManager(self);
+      if (!smm?.isReady) return undefined;
+
+      const dataSet = DataSet.create();
+      addAttributeToDataSet(dataSet, { name: "windowStart" });
+      addAttributeToDataSet(dataSet, { name: "windowEnd" });
+      addAttributeToDataSet(dataSet, { name: "eventType" });
+      addAttributeToDataSet(dataSet, { name: "confidence" });
+      addCasesToDataSet(dataSet, self.detectedEvents.map(evt => ({
+        windowStart: evt.windowStart,
+        windowEnd: evt.windowEnd,
+        eventType: evt.eventType,
+        confidence: evt.confidence,
+      })));
+
+      const sharedDataSet = SharedDataSet.create({ dataSet });
+      smm.addTileSharedModel(self, sharedDataSet);
+      self.cachedEventsDataSet = sharedDataSet;
+      return sharedDataSet;
+    },
   }))
   .actions(self => ({
     runModel: flow(function* () {
@@ -77,6 +107,7 @@ export const WaveRunnerContentModel = TileContentModel
       self.runError = null;
       self.eventsFound = 0;
       self.detectedEvents = [];
+      self.cachedEventsDataSet = undefined;
 
       // Hardcoded metadata for now — will come from model registry later
       const metadata: ModelMetadata = {
