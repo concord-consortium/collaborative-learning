@@ -28,13 +28,19 @@ const LoadDataButton = observer(function LoadDataButton({ name }: IToolbarButton
   );
 });
 
-function PlayButton({ name }: IToolbarButtonComponentProps) {
+const PlayButton = observer(function PlayButton({ name }: IToolbarButtonComponentProps) {
+  const tileModel = useContext(TileModelContext);
+  const content = tileModel?.content;
+
+  if (!isWaveRunnerContentModel(content)) return null;
+
+  const disabled = content.isRunning || !content.hasData;
   return (
-    <TileToolbarButton name={name} title="Run Model" onClick={() => undefined} disabled={true}>
+    <TileToolbarButton name={name} title="Run Model" onClick={() => content.runModel()} disabled={disabled}>
       <RunIcon/>
     </TileToolbarButton>
   );
-}
+});
 
 function RestartButton({ name }: IToolbarButtonComponentProps) {
   return (
