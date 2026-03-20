@@ -9,13 +9,21 @@ To support smooth zooming across a large time range without loading all raw data
 **Columnar Int16** is a good balance of compactness and simplicity:
 - Store all min values contiguously, then all max values (columnar layout compresses better than interleaved min/max because adjacent values in each column are more similar).
 - Quantize amplitudes to Int16 (2 bytes) using a fixed global amplitude range per instrument type (see [Amplitude quantization](#amplitude-quantization)). Seismic envelope data at coarse resolutions doesn't need Float32 precision.
-- Gzip the binary buffer. For example, a 1024-point tile = 1024 × 2 × 2 = 4 KB raw, ~1.5–2 KB gzipped. L3 tiles use more points per tile (see [Tile structure](#tile-structure)).
+- Gzip the binary buffer. For example, a 1000-point L0/L1 tile = 1000 × 2 × 2 = 4 KB raw. L2 tiles use 20,000 points (~80 KB raw). In practice, gzip compression is very effective on envelope data: measured L0/L1 tiles are ~100–600 bytes and L2 tiles are ~3–6 KB (much smaller than the theoretical maximum, due to repeated sentinel values and smooth amplitude patterns). See [Tile structure](#tile-structure).
 - In the browser, the decompressed buffer can be read directly as an `Int16Array` with a known scale factor — no parsing needed.
 - Reserve Int16 value `-32768` as a sentinel for "no data" (see [Missing and partial data](#missing-and-partial-data)).
 
 ## Amplitude quantization
 
-Raw miniSEED data from EarthScope contains integer counts (digitizer output). Before quantizing to Int16 for envelope storage, the counts must be converted to physical units by dividing by the channel's overall sensitivity (from StationXML metadata). This puts values in consistent, physically meaningful units that students can reason about — a learning goal is for students to gain understanding of the actual units of seismic amplitudes.
+Raw miniSEED data from EarthScope contains integer counts (digitizer output). Before quantizing to Int16 for envelope storage, the counts must be converted to physical units by dividing by the channel's overall sensitivity. This puts values in consistent, physically meaningful units that students can reason about — a learning goal is for students to gain understanding of the actual units of seismic amplitudes.
+
+**Obtaining the sensitivity**: The overall sensitivity (counts per physical unit) is available as the `Scale` field from the EarthScope FDSN Station service at channel level:
+
+```
+https://service.earthscope.org/fdsnws/station/1/query?net=AK&sta=K204&level=channel&format=text
+```
+
+The response includes `Scale`, `ScaleFreq`, and `ScaleUnits` columns. For example, `Scale=213947.0` with `ScaleUnits=M/S**2` means 213,947 counts per 1 m/s². To convert: `physical_value = raw_count / Scale`. Note that a station's sensitivity can change over time when equipment is swapped — the `StartTime` and `EndTime` columns indicate which sensitivity value applies to a given time period.
 
 The amplitude range depends on the **instrument type**, identified by the second character of the SEED channel code (e.g., B**H**Z vs B**N**Z):
 
@@ -40,74 +48,64 @@ Each pixel on the x-axis should map to approximately one envelope point. When th
 
 ## Resolution levels
 
-The resolution range spans from a 10-year overview on a ~1000-pixel display down to raw 200 Hz data:
-- **Coarsest**: 10 years / 1000 px ≈ 315,000 seconds per point
-- **Finest** (raw data): 1/200 Hz = 0.005 seconds per point
-- **Ratio**: ~63 million
+Users are expected to view at most ~1 year of data at once. The coarsest envelope level should target **less than** the maximum view so it covers a useful zoom range — if L0 is tuned for exactly the maximum, it's only active at that single zoom level and becomes nearly useless.
 
-The number of levels depends on the scale factor K between adjacent levels: `levels = ceil(log_K(63,000,000))`. Larger K means fewer levels but more data loaded at level transitions (up to K × 1000 points per view).
+We store **3 envelope levels** (L0–L2) and fetch raw data directly from EarthScope for views below L2's range. A 4th envelope level (finer than L2) would have tens of millions of points per station-year — too expensive to store. At the L2→raw transition, a raw data fetch is small enough (tens to hundreds of KB) that skipping the 4th level is practical.
 
-| Factor K | Levels | Points loaded at transition | Bytes at transition (Int16 min+max) |
-|----------|--------|-----------------------------|-------------------------------------|
-| 10       | 8      | 10,000                      | 40 KB                               |
-| 32       | 6      | 32,000                      | 128 KB                              |
-| 100      | 5      | 100,000                     | 400 KB                              |
-| 1000     | 4      | 1,000,000                   | 4 MB                                |
+The scale factor K ≈ 100 between adjacent levels keeps data loaded at transitions reasonable (~100,000 points = ~400 KB).
 
-**Recommended: K ≈ 100, giving 5 levels**
+**Starting configuration: L0 targets ~6 months (K ≈ 100)**
 
-| Level | Point spacing | Sample rate  | Active zoom range          |
-|-------|---------------|--------------|----------------------------|
-| 0     | ~315,000 s    | ~1/3.6 days  | ≥ ~10 years (full overview)|
-| 1     | ~3,150 s      | ~1/52 min    | ~10 years → ~36 days       |
-| 2     | ~31.5 s       | ~1/32 s      | ~36 days → ~8.7 hours      |
-| 3     | ~0.315 s      | ~3.2 Hz      | ~8.7 hours → ~5.3 min      |
-| raw   | 0.005 s       | 200 Hz       | < ~5.3 min                 |
+| Level | Point spacing | Active zoom range | Points/year | Gzipped storage/station-year |
+|-------|---------------|-------------------|-------------|------------------------------|
+| L0 | ~15,750 s | ~1 year → ~6 months | ~2,000 | negligible |
+| L1 | ~157.5 s | ~6 months → ~1.8 days | ~200,000 | ~100–200 KB |
+| L2 | ~1.575 s | ~1.8 days → ~2.6 min | ~20,000,000 | ~4–6 MB |
+| Raw | 0.005 s | < ~2.6 min | — | fetched on demand from EarthScope |
+
+Total stored envelope data: **~4–6 MB per station-year**, dominated by L2. (Measured: 19 L2 tiles covering ~7 days averaged ~4.3 KB each, extrapolating to ~4.3 MB/station-year. Gzip compression is much more effective than initially estimated because envelope data contains many repeated sentinel values and smoothly varying amplitudes.)
+
+The main tradeoff in choosing L0's target is L2 storage: a smaller L0 target (e.g., 3 months) pushes L2 finer, increasing storage but reducing the view size at which raw data must be fetched. A larger L0 target (e.g., 1 year) halves L2 storage but means raw fetches start at ~5 min views instead of ~2.6 min.
+
+| L0 target | L2 spacing | Raw data needed below... | L2 storage/station-year |
+|-----------|-----------|------------------------|------------------------|
+| 3 months | ~0.79 s | ~1.3 min | ~8–12 MB |
+| 6 months | ~1.575 s | ~2.6 min | ~4–6 MB |
+| 1 year | ~3.15 s | ~5 min | ~2–3 MB |
+
+**The level configuration should be easy to change** — the spacings should be defined as constants so we can experiment with different L0 targets and K values without structural code changes. The tile addressing, storage format, and switching logic should all derive from these constants.
 
 The display width (~1000 px) barely affects the level count — doubling it shifts the count by at most 1.
 
 ### Integer multiple constraint
 
-Each level's point spacing should be an exact integer multiple of the next finer level's spacing, all the way down to the raw sample interval. This matters because tiles are filled incrementally: when new raw data arrives for part of a tile, we need to update the coarser levels without re-reading all the raw data.
+Each level's point spacing should be an exact integer multiple of the next finer level's spacing. This matters because tiles are filled incrementally: when new raw data arrives for part of a tile, we need to update the coarser levels without re-reading all the raw data.
 
 For example, if a user processes 1 hour of raw data:
-1. L3 envelope points are computed directly from the raw samples (min/max over groups of raw samples per L3 window).
-2. The affected L2 points can then be computed from the L3 data — each L2 window covers exactly K consecutive L3 windows, so `L2_min = min(L3_mins)` and `L2_max = max(L3_maxes)`.
-3. Similarly, L1 from L2, and L0 from L1.
+1. L2 envelope points are computed directly from the raw samples (min/max over groups of raw samples per L2 window).
+2. The affected L1 points can then be computed from the L2 data — each L1 window covers exactly K consecutive L2 windows, so `L1_min = min(L2_mins)` and `L1_max = max(L2_maxes)`.
+3. Similarly, L0 from L1.
 
 If the spacings aren't exact integer multiples, a coarser window would straddle finer windows — its min/max couldn't be computed from the finer level alone, and you'd need to go back to raw data or accept approximate values.
 
-Note that this constraint applies between envelope levels only — not between L3 and the raw data. At the raw→L3 boundary, L3 windows are always computed directly from raw samples, so a non-integer number of samples per window just means some windows have one more sample than others (e.g., if L3 spacing is 0.316s at 200 Hz, windows alternate between 63 and 64 samples). The min/max is still well-defined either way. Raw sample rates also vary by station (commonly 50, 100, or 200 Hz), so L3 spacing can't be an exact multiple of all possible sample intervals anyway.
+Note that this constraint applies between envelope levels only — not between L2 and the raw data. At the raw→L2 boundary, L2 windows are always computed directly from raw samples, so a non-integer number of samples per window just means some windows have one more sample than others (e.g., if L2 spacing is 1.575s at 200 Hz, windows alternate between 315 and 316 samples). The min/max is still well-defined either way. Raw sample rates also vary by station (commonly 50, 100, or 200 Hz), so L2 spacing can't be an exact multiple of all possible sample intervals anyway.
 
-The approximate values in the table above (~0.315s, ~31.5s, etc.) would need to be adjusted to exact values that satisfy the integer multiple constraint between envelope levels when the levels are finalized.
+The approximate values in the table above (~1.575s, ~157.5s, etc.) would need to be adjusted to exact values that satisfy the integer multiple constraint between envelope levels when the levels are finalized.
 
 ## Tile structure
 
-Each tile stores envelope points for a contiguous time range. The number of points per tile can vary by level — coarser levels use fewer points per tile since each point covers more time, while L3 uses more points per tile to keep the object count manageable for S3 PUT costs and to provide a reasonable fetch unit for slow school networks.
+Each tile stores envelope points for a contiguous time range. The number of points per tile varies by level — L2 uses 20× more points per tile to reduce tile count (fewer S3 objects to manage). With the 6-month L0 configuration:
 
-With 1024 points per tile for L0–L2, the tile durations are:
+| Level | Point spacing | Points per tile | Tile duration   | Tiles per year | Tile size (gzipped) |
+|-------|---------------|-----------------|-----------------|----------------|---------------------|
+| L0    | ~15,750 s     | 1,000           | ~182 days       | ~2             | ~100–200 bytes      |
+| L1    | ~157.5 s      | 1,000           | ~1.8 days       | ~200           | ~500–600 bytes      |
+| L2    | ~1.575 s      | 20,000          | ~8.75 hours     | ~1,000         | ~3–6 KB             |
+| Raw   | 0.005 s       | —               | —               | on-demand      | —                   |
 
-| Level | Point spacing | Points per tile | Tile duration   | Tiles per year |
-|-------|---------------|-----------------|-----------------|----------------|
-| L0    | ~315,000 s    | 1,024           | ~10.2 years     | ~0.1           |
-| L1    | ~3,150 s      | 1,024           | ~37.3 days      | ~10            |
-| L2    | ~31.5 s       | 1,024           | ~9.0 hours      | ~978           |
-| raw   | 0.005 s       | —               | —               | on-demand      |
+L2 has the most tiles per year. At 20,000 points per tile, each L2 tile is ~80 KB raw / ~3–6 KB gzipped (measured). The ~1,000 tiles per station-year is very manageable for S3.
 
-L0 is coarse enough that a single tile covers more than a year — for a 10-year dataset, one tile suffices.
-
-### L3 tile duration
-
-L3 has ~100 million points per station-year. At 1024 points per tile, that would be ~97,700 tiles per year — each only ~1.5–2 KB gzipped but expensive in S3 PUT requests at scale. Using more points per tile reduces the object count and provides a larger fetch unit, which is better for slow connections (fewer round-trips).
-
-| L3 tile duration | Points per tile | Tile size (gzipped Int16) | Tiles per station-year | PUTs at 1,000 station-years | PUT cost |
-|------------------|-----------------|---------------------------|------------------------|-----------------------------|----------|
-| ~5.4 min (1,024 pts) | 1,024 | ~2 KB | 97,700 | 97.7M | **$489** |
-| 1 hour (~11,400 pts) | ~11,400 | ~22 KB | ~8,770 | 8.77M | $44 |
-| ~9 hours (~100K pts) | ~100,000 | ~200 KB | ~977 | 977K | $4.89 |
-| 1 day (~274K pts) | ~274,000 | ~540 KB | 365 | 365K | **$1.83** |
-
-A duration in the **1–9 hour range** balances PUT costs, fetch size for slow networks, and conflict window for concurrent writers (see [Concurrent writes](#concurrent-writes-and-conflict-handling)). The client fetches 1–2 tiles for a typical L3 viewport, decompresses the tile, and indexes directly into the array — same as other levels, just with more points per tile.
+Points per tile at each level is chosen to be divisible by K_FACTOR (100), so that tile boundaries at finer levels always align with point boundaries at the next coarser level. This ensures incremental updates to a coarser level never need to read across finer-level tile boundaries.
 
 ## Tile addressing
 
@@ -125,7 +123,7 @@ tile_index = floor((t - epoch) / tile_duration)
 Tile path: `/{station}/{channel}/{level}/{tile_index}`
 
 **Pros**: Simple arithmetic, uniform tile sizes, uniform fetch sizes, similar to web map tile systems (z/x/y).
-**Cons**: Tile boundaries don't align with human-readable time units. Index numbers can be large (L3 tile indices reach ~5 million for 2024 timestamps from Unix epoch).
+**Cons**: Tile boundaries don't align with human-readable time units.
 
 Including the channel in the path is necessary because the amplitude quantization range depends on the instrument type (see [Amplitude quantization](#amplitude-quantization)), and a station may have multiple channels (e.g., both velocity BHZ and accelerometer BNZ).
 
@@ -135,10 +133,9 @@ Tiles snap to natural time boundaries, with the point count varying per tile:
 
 | Level | Tile boundary | Points per tile (approx) |
 |-------|---------------|--------------------------|
-| L0    | 10 years      | ~100                     |
-| L1    | 1 month       | ~830–880 (varies by month)|
-| L2    | 1 hour        | ~114                     |
-| L3    | 5 minutes     | ~952                     |
+| L0    | 1 year        | ~2,000                   |
+| L1    | 1 month       | ~16,500–17,500 (varies by month)|
+| L2    | 1 hour        | ~2,286                   |
 
 Tile path: `/{station}/{channel}/{level}/2024-03-15T14:00:00` or `/{station}/{channel}/L2/2024/03/15/14`
 
@@ -151,18 +148,17 @@ Fixed point count (Option A) is simpler to implement and matches the uniform sto
 
 ## Storage estimates (per station-year, gzipped columnar Int16)
 
-Raw data is not stored in the tile cache — it is fetched on demand from the data provider when the user zooms in. Only envelope levels L0–L3 are stored.
+Raw data is not stored in the tile cache — it is fetched on demand from EarthScope when the user zooms in. Only envelope levels L0–L2 are stored.
 
 **Note on raw data fetching:** When the Timeline tile fetches raw data for zoomed-in views, requests should be aligned to fixed 1-minute time boundaries rather than using the exact visible time range. This way, when multiple students zoom into the same region, their requests hit the same CloudFront cache keys instead of each generating a unique request that must be forwarded to EarthScope. At 200 Hz, 1 minute of raw data is ~48 KB, which downloads in under 0.5 seconds even on a slow school network (1 Mbps). This matters because zooming and scrolling can trigger multiple fetches in quick succession — larger chunks (e.g., 10 minutes = ~480 KB = ~3.8 seconds at 1 Mbps) would feel sluggish for interactive exploration. Note that this 1-minute boundary is intentionally different from the 10-minute coverage bitmap windows in the [event database](event-database-design.md). The coverage bitmap tracks whether the ML model has processed a time range, which is a bulk operation where coarser granularity keeps storage compact. Raw data fetching serves interactive zooming, where responsiveness matters more than minimizing the number of cache keys.
 
-| Level | Points / year | Raw size | Gzipped (est) |
-|-------|---------------|----------|---------------|
-| L0    | ~100          | 400 B    | negligible    |
-| L1    | ~10,000       | 40 KB    | ~20 KB        |
-| L2    | ~1,000,000    | 4 MB     | ~2–3 MB       |
-| L3    | ~100,000,000  | 400 MB   | ~200–280 MB   |
+| Level | Points / year | Raw size | Gzipped (measured) |
+|-------|---------------|----------|--------------------|
+| L0    | ~2,000        | 8 KB     | negligible         |
+| L1    | ~200,000      | 800 KB   | ~100–200 KB        |
+| L2    | ~20,000,000   | 80 MB    | ~4–6 MB            |
 
-L3 dominates at ~99% of total storage. For 1 station-year, total envelope storage is roughly **200–280 MB** gzipped.
+L2 dominates at ~97% of total storage. For 1 station-year, total envelope storage is roughly **4–6 MB** gzipped. These figures are based on measured tile sizes from a ~7-day sample (station K204, channel HNZ): L2 tiles averaged ~4.3 KB gzipped vs 80 KB raw (~5% compression ratio). The high compressibility comes from sparse data (sentinel-filled gaps) and smooth amplitude patterns. These estimates are for the 6-month L0 configuration — see the [comparison table in Resolution levels](#resolution-levels) for how storage changes with different L0 targets.
 
 ## Missing and partial data
 
@@ -200,7 +196,7 @@ We considered several existing formats before settling on a simple custom binary
 | **PMTiles** | Range requests | pmtiles | Validates the architecture (single-file tile archives on static storage) but tightly coupled to 2D map tiles. |
 | **Arrow IPC / Parquet** | Limited | apache-arrow / hyparquet | Too much per-tile metadata overhead for simple 1D int16 arrays. Parquet's row-group mechanism could work but adds complexity without solving new problems. |
 
-**Gzipped JSON vs binary Int16 size comparison**: A 1024-point tile has 2,048 Int16 values (min + max). As binary, this is 4 KB raw, ~1.5–2 KB gzipped. As JSON (e.g., `{"min":[-342,17,...],"max":[289,1045,...]}`), each number averages ~4–5 characters plus a comma separator, producing ~10–12 KB of text, which gzips to ~4–5 KB. For L3 tiles with ~11,400 points: binary is ~46 KB raw / ~22 KB gzipped; JSON is ~115 KB raw / ~50–60 KB gzipped. Over a full station-year, the JSON overhead adds ~200–400 MB of extra storage, roughly doubling the L3 cost. JSON also requires parsing text into numbers rather than directly interpreting a typed array buffer, though for tile-sized payloads the parse time difference is negligible.
+**Gzipped JSON vs binary Int16 size comparison**: A 1000-point tile has 2,000 Int16 values (min + max). As binary, this is 4 KB raw, ~100–600 bytes gzipped (measured). As JSON (e.g., `{"min":[-342,17,...],"max":[289,1045,...]}`), each number averages ~4–5 characters plus a comma separator, producing ~10–12 KB of text, which would gzip larger. Over a full station-year at L2 (~20M points), JSON would substantially increase storage cost. JSON also requires parsing text into numbers rather than directly interpreting a typed array buffer, though for tile-sized payloads the parse time difference is negligible.
 
 **Zarr is the strongest alternative** — it standardizes exactly what we need (chunked arrays on cloud storage with per-chunk HTTP access). If we later want interoperability with Python analysis tools or want to drop the custom format spec, migrating to Zarr would be straightforward since the underlying storage pattern is nearly identical.
 
@@ -214,9 +210,7 @@ S3 objects are immutable — there is no partial/in-place update. Each write rep
 
 ### Conflict granularity by level
 
-For L0–L2, tiles are small objects (~2–4 KB). Conflicts require two users to process overlapping time ranges at the same level simultaneously — unlikely in practice.
-
-For L3, tiles are larger (covering hours of data, ~22–200 KB each) which increases the conflict window — two users processing overlapping hours would contend on the same tile. Since concurrent processing of the same station is expected to be rare, occasional retries should be acceptable. The L3 tile duration choice (see [L3 tile duration](#l3-tile-duration)) trades off between PUT cost savings (larger tiles) and conflict window (smaller tiles).
+All tiles are small objects (~2–4 KB each). Conflicts require two users to process overlapping time ranges at the same level simultaneously — unlikely in practice. Since concurrent processing of the same station is expected to be rare, occasional retries should be acceptable.
 
 ### Write flow
 
@@ -231,4 +225,4 @@ An earlier version of this design considered storing min/max as Uint8 (one unsig
 
 ## Firestore considerations
 
-Firestore charges $0.18/GB/month for stored data. At ~280 MB per station-year, the storage cost is roughly **$0.05/month per station-year** — very cheap. For comparison, S3 Standard at $0.023/GB would be ~$0.006/month for the same data.
+Firestore charges $0.18/GB/month for stored data. At ~5 MB per station-year, the storage cost is roughly **$0.001/month per station-year** — very cheap. For comparison, S3 Standard at $0.023/GB would be ~$0.0001/month for the same data.

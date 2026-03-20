@@ -100,7 +100,7 @@
       {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false},
       {"id": "readAloud", "title": "Read Aloud", "iconId": "icon-read-aloud-tool", "isTileTool": false}
     ],
-    "tools": ["Simulator"],
+    "tools": ["Simulator", "Timeline"],
     "enableCommentRoles": ["student", "teacher", "researcher"],
     "showCommentTag": true,
     "termOverrides": {
