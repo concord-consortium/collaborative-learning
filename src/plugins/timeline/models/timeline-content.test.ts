@@ -92,6 +92,15 @@ describe("zoom functionality", () => {
     expect(content.viewEndTime?.toISO()).toBe(dataStart.plus({ seconds: 2000 }).toISO());
   });
 
+  it("zoom(2) shifts from end edge when clamped", () => {
+    const nearEnd = dataEnd.minus({ seconds: 1000 });
+    content.setViewRange(nearEnd, dataEnd);
+    content.zoom(2);
+    expect(content.viewRangeSeconds!).toBeCloseTo(2000, 0);
+    expect(content.viewEndTime?.toISO()).toBe(dataEnd.toISO());
+    expect(content.viewStartTime?.toISO()).toBe(dataEnd.minus({ seconds: 2000 }).toISO());
+  });
+
   it("zoom(0.5) respects minimum range of 5 seconds", () => {
     // Set a very small range, just above minimum
     content.setViewRange(dataStart, dataStart.plus({ seconds: 6 }));
