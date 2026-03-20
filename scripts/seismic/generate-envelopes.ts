@@ -49,6 +49,8 @@ interface ScriptConfig {
   awsRegion: string;
   /** When true, skip all S3 operations. --output-dir is required. */
   localOnly: boolean;
+  /** Maximum number of ROVER files to process (for testing). 0 = no limit. */
+  maxFiles: number;
 }
 
 function parseArgs(): ScriptConfig {
@@ -58,6 +60,7 @@ function parseArgs(): ScriptConfig {
     s3Prefix: DEFAULT_S3_PREFIX,
     awsRegion: DEFAULT_AWS_REGION,
     localOnly: false,
+    maxFiles: 0,
   };
 
   let i = 0;
@@ -76,6 +79,7 @@ function parseArgs(): ScriptConfig {
       case "--s3-bucket": config.s3Bucket = args[i + 1]; i += 2; break;
       case "--s3-prefix": config.s3Prefix = args[i + 1]; i += 2; break;
       case "--aws-region": config.awsRegion = args[i + 1]; i += 2; break;
+      case "--max-files": config.maxFiles = Number(args[i + 1]); i += 2; break;
       default:
         console.error(`Unknown argument: ${key}`);
         process.exit(1);
@@ -272,6 +276,9 @@ async function main() {
     throw new Error(
       `No ROVER files found for ${config.network}.${config.station} in ${config.inputDir}`
     );
+  }
+  if (config.maxFiles > 0) {
+    files.splice(config.maxFiles);
   }
   console.log(`Found ${files.length} ROVER file(s)`);
 
