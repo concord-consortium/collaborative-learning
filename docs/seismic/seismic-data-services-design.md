@@ -41,6 +41,7 @@ Make a single FDSN dataselect HTTP request and return the `Response`. This is th
 fetchRawSeismicData(
   network: string,
   station: string,
+  location: string,         // FDSN location code, e.g., "--" or "00"
   channel: string,
   startTime: string,        // ISO 8601
   endTime: string,          // ISO 8601
@@ -145,13 +146,14 @@ The reactive layer that orchestrates Parts 1 and 2 to serve the plot component. 
 ### API
 
 ```ts
-// MobX computed — returns current best-available data for the viewport.
+// Method — returns current best-available data for the viewport.
+// Called from inside MobX observer components so cache reads are tracked.
 // Returns a fresh object each call containing references to cached data.
 query(
   station: string,
   channel: string,
-  startTime: number,
-  endTime: number,
+  startTime: number,       // Unix seconds
+  endTime: number,         // Unix seconds
   pixelWidth: number
 ): ViewportQuery
 
@@ -161,8 +163,8 @@ loadViewport(
   callerId: string,
   station: string,
   channel: string,
-  startTime: number,
-  endTime: number,
+  startTime: number,       // Unix seconds
+  endTime: number,         // Unix seconds
   pixelWidth: number
 ): void
 ```
@@ -252,6 +254,7 @@ Thin MST shared model holding the query parameters that identify what seismic da
 type: "SharedSeismogram"
 network: string         // e.g., "AK"
 station: string         // e.g., "K204"
+location: string        // FDSN location code, e.g., "--" or "00"
 channel: string         // e.g., "HNZ"
 startTime: number       // Unix seconds
 endTime: number         // Unix seconds
