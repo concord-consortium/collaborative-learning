@@ -152,8 +152,8 @@ The reactive layer that orchestrates Parts 1 and 2 to serve the plot component. 
 query(
   station: string,
   channel: string,
-  startTime: number,       // Unix seconds
-  endTime: number,         // Unix seconds
+  startTime: DateTime,
+  endTime: DateTime,
   pixelWidth: number
 ): ViewportQuery
 
@@ -163,8 +163,8 @@ loadViewport(
   callerId: string,
   station: string,
   channel: string,
-  startTime: number,       // Unix seconds
-  endTime: number,         // Unix seconds
+  startTime: DateTime,
+  endTime: DateTime,
   pixelWidth: number
 ): void
 ```
@@ -188,6 +188,10 @@ The specific API and approach for the query service is likely to change as the p
 1. **Cancellable in-flight requests.** When the plot moves to a new viewport before tiles have finished loading, the service must be able to cancel stale fetches rather than letting them pile up. See [Viewport-scoped cancellation](#viewport-scoped-cancellation) for the current approach.
 
 2. **Debouncing is the caller's responsibility.** When a user is scrolling and zooming rapidly, the plot component should debounce before calling `loadViewport` to avoid starting and immediately cancelling many connections. The query service does not debounce internally — it assumes each `loadViewport` call represents a viewport the caller actually wants data for.
+
+### DateTime convention
+
+The query service accepts Luxon `DateTime` objects in its public API, consistent with SharedSeismogram and TimelineContentModel. Internally, it converts to the formats each fetcher expects: ISO 8601 strings for `fetchRawSeismicData`, and Unix seconds for tile-addressing math and `fetchEnvelopeTile`. These conversions are internal to the service — callers always work with `DateTime`.
 
 ### Level selection
 
@@ -271,10 +275,14 @@ network: string         // e.g., "AK"
 station: string         // e.g., "K204"
 location: string        // FDSN location code, e.g., "--" or "00"
 channel: string         // e.g., "HNZ"
-startTime: number       // Unix seconds
-endTime: number         // Unix seconds
+startTimeISO: string    // ISO 8601, persisted; exposed as DateTime view
+endTimeISO: string      // ISO 8601, persisted; exposed as DateTime view
 model: string           // ML model identifier
 ```
+
+### DateTime views
+
+SharedSeismogram exposes `startTime` and `endTime` as Luxon `DateTime` views derived from the persisted ISO strings, following the same pattern as `TimelineContentModel.viewStartTime`/`viewEndTime`. Consumers always work with `DateTime` objects; the ISO strings are an internal persistence detail.
 
 ### Changes from current implementation
 
