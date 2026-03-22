@@ -62,6 +62,16 @@ describe("TimelineComponent", () => {
     expect(container.querySelector(".title-area")).toBeInTheDocument();
   });
 
+  it("zoom buttons are disabled when no seismogram data is available", () => {
+    renderWithStores();
+    const zoomInButton = screen.getByLabelText("Zoom In");
+    const zoomOutButton = screen.getByLabelText("Zoom Out");
+    const viewAllButton = screen.getByLabelText("View All");
+    expect(zoomInButton).toHaveAttribute("aria-disabled", "true");
+    expect(zoomOutButton).toHaveAttribute("aria-disabled", "true");
+    expect(viewAllButton).toHaveAttribute("aria-disabled", "true");
+  });
+
   it("renders all toolbar buttons", () => {
     renderWithStores();
     const toolbar = screen.getByTestId("tile-toolbar");

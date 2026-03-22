@@ -30,6 +30,12 @@ export const SharedSeismogram = SharedModel
   .views(self => ({
     get hasData() {
       return self.seismogram !== undefined;
+    },
+    get startTime() {
+      return self.seismogram?.startTime;
+    },
+    get endTime() {
+      return self.seismogram?.endTime;
     }
   }))
   .actions(self => ({

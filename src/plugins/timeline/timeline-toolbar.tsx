@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
+import { observer } from "mobx-react-lite";
+import { TileModelContext } from "../../components/tiles/tile-api";
 import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button";
 import {
   IToolbarButtonComponentProps, registerTileToolbarButtons
 } from "../../components/toolbar/toolbar-button-manager";
+import { isTimelineContentModel } from "./models/timeline-content";
 
 import TableItIcon from "./assets/toolbar/table-it-icon.svg";
 import DataCardItIcon from "./assets/toolbar/data-card-it-icon.svg";
@@ -50,44 +53,50 @@ function BarGraphItButton({ name }: IToolbarButtonComponentProps) {
   );
 }
 
-function ZoomInButton({ name }: IToolbarButtonComponentProps) {
+const ZoomInButton = observer(function ZoomInButton({ name }: IToolbarButtonComponentProps) {
+  const model = useContext(TileModelContext);
+  const content = isTimelineContentModel(model?.content) ? model?.content : undefined;
   return (
     <TileToolbarButton
       name={name}
       title="Zoom In"
-      onClick={() => undefined}
-      disabled={true}
+      onClick={() => content?.zoom(0.5)}
+      disabled={!content?.canZoomIn}
     >
       <ZoomInIcon/>
     </TileToolbarButton>
   );
-}
+});
 
-function ZoomOutButton({ name }: IToolbarButtonComponentProps) {
+const ZoomOutButton = observer(function ZoomOutButton({ name }: IToolbarButtonComponentProps) {
+  const model = useContext(TileModelContext);
+  const content = isTimelineContentModel(model?.content) ? model?.content : undefined;
   return (
     <TileToolbarButton
       name={name}
       title="Zoom Out"
-      onClick={() => undefined}
-      disabled={true}
+      onClick={() => content?.zoom(2)}
+      disabled={!content?.canZoomOut}
     >
       <ZoomOutIcon/>
     </TileToolbarButton>
   );
-}
+});
 
-function ViewAllButton({ name }: IToolbarButtonComponentProps) {
+const ViewAllButton = observer(function ViewAllButton({ name }: IToolbarButtonComponentProps) {
+  const model = useContext(TileModelContext);
+  const content = isTimelineContentModel(model?.content) ? model?.content : undefined;
   return (
     <TileToolbarButton
       name={name}
       title="View All"
-      onClick={() => undefined}
-      disabled={true}
+      onClick={() => content?.fitToData()}
+      disabled={!content?.canFitToData}
     >
       <ZoomToFitIcon/>
     </TileToolbarButton>
   );
-}
+});
 
 registerTileToolbarButtons("timeline",
 [
