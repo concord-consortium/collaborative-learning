@@ -205,6 +205,21 @@ When the user zooms in (e.g., L1 → L2), the query returns the best available d
 
 As L2 tiles arrive and populate the MobX observable cache, `query()` returns updated results and the plot re-renders. The plot receives the full composite each time and re-renders all data (not just the new tiles). Given the data volumes involved (~1200 envelope points or ~24K raw samples per viewport), full re-rendering is expected to be fast enough. This can be revisited if performance is an issue.
 
+### Missing envelope regions
+
+Envelopes are precomputed and uploaded to S3 for specific stations and time ranges. When the user views a time range that extends beyond the available envelopes, the service needs to handle the gap gracefully rather than falling back to raw data.
+
+**Why not fall back to raw data at envelope zoom levels:** At L0 or L1, the viewport may span weeks or months. Fetching raw waveform data for that range would be tens or hundreds of megabytes — impractical and likely to fail or overwhelm the browser.
+
+**Approach:** The query service treats a 404 from `fetchEnvelopeTile` as a permanent "no data" marker for that tile, distinct from "loading" or "cached." Specifically:
+
+1. When `fetchEnvelopeTile` returns `null` (404), the service records that tile index as **missing** in the cache (e.g., a sentinel value rather than tile data).
+2. Future `query()` calls that overlap a missing tile return it as a **no-data gap** — a gap type that the plot can distinguish from a loading gap.
+3. The service does **not** attempt a raw data fallback for missing tiles at envelope zoom levels (L0, L1, L2). Raw fallback only applies when the selected level is already "raw" (below L2 resolution).
+4. The plot renders no-data gaps as empty regions (or with a visual indicator like a hatched background), so the user understands that data is unavailable rather than still loading.
+
+The `ViewportQuery` result's gap entries should carry a status distinguishing at least: `loading` (fetch in flight), `no-data` (tile confirmed missing), and `error` (fetch failed for a retriable reason).
+
 ### Viewport-scoped cancellation
 
 Each plot component generates a stable caller ID (e.g., on mount) and passes it to every `loadViewport` call. When a new `loadViewport` arrives with the same caller ID:
