@@ -41,6 +41,7 @@ Make a single FDSN dataselect HTTP request and return the `Response`. This is th
 fetchRawSeismicData(
   network: string,
   station: string,
+  location: string,         // FDSN location code, e.g., "--" or "00"
   channel: string,
   startTime: string,        // ISO 8601
   endTime: string,          // ISO 8601
@@ -145,13 +146,14 @@ The reactive layer that orchestrates Parts 1 and 2 to serve the plot component. 
 ### API
 
 ```ts
-// MobX computed — returns current best-available data for the viewport.
+// Method — returns current best-available data for the viewport.
+// Called from inside MobX observer components so cache reads are tracked.
 // Returns a fresh object each call containing references to cached data.
 query(
   station: string,
   channel: string,
-  startTime: number,
-  endTime: number,
+  startTime: DateTime,
+  endTime: DateTime,
   pixelWidth: number
 ): ViewportQuery
 
@@ -161,8 +163,8 @@ loadViewport(
   callerId: string,
   station: string,
   channel: string,
-  startTime: number,
-  endTime: number,
+  startTime: DateTime,
+  endTime: DateTime,
   pixelWidth: number
 ): void
 ```
@@ -187,6 +189,10 @@ The specific API and approach for the query service is likely to change as the p
 
 2. **Debouncing is the caller's responsibility.** When a user is scrolling and zooming rapidly, the plot component should debounce before calling `loadViewport` to avoid starting and immediately cancelling many connections. The query service does not debounce internally — it assumes each `loadViewport` call represents a viewport the caller actually wants data for.
 
+### DateTime convention
+
+The query service accepts Luxon `DateTime` objects in its public API, consistent with SharedSeismogram and TimelineContentModel. Internally, it converts to the formats each fetcher expects: ISO 8601 strings for `fetchRawSeismicData`, and Unix seconds for tile-addressing math and `fetchEnvelopeTile`. These conversions are internal to the service — callers always work with `DateTime`.
+
 ### Level selection
 
 Given `secondsPerPixel` (derived from viewport width and time range), the service selects the appropriate data source:
@@ -202,6 +208,21 @@ When the user zooms in (e.g., L1 → L2), the query returns the best available d
 - L1 data as fallback for regions where L2 tiles haven't loaded yet
 
 As L2 tiles arrive and populate the MobX observable cache, `query()` returns updated results and the plot re-renders. The plot receives the full composite each time and re-renders all data (not just the new tiles). Given the data volumes involved (~1200 envelope points or ~24K raw samples per viewport), full re-rendering is expected to be fast enough. This can be revisited if performance is an issue.
+
+### Missing envelope regions
+
+Envelopes are precomputed and uploaded to S3 for specific stations and time ranges. When the user views a time range that extends beyond the available envelopes, the service needs to handle the gap gracefully rather than falling back to raw data.
+
+**Why not fall back to raw data at envelope zoom levels:** At L0 or L1, the viewport may span weeks or months. Fetching raw waveform data for that range would be tens or hundreds of megabytes — impractical and likely to fail or overwhelm the browser.
+
+**Approach:** The query service treats a 404 from `fetchEnvelopeTile` as a permanent "no data" marker for that tile, distinct from "loading" or "cached." Specifically:
+
+1. When `fetchEnvelopeTile` returns `null` (404), the service records that tile index as **missing** in the cache (e.g., a sentinel value rather than tile data).
+2. Future `query()` calls that overlap a missing tile return it as a **no-data gap** — a gap type that the plot can distinguish from a loading gap.
+3. The service does **not** attempt a raw data fallback for missing tiles at envelope zoom levels (L0, L1, L2). Raw fallback only applies when the selected level is already "raw" (below L2 resolution).
+4. The plot renders no-data gaps as empty regions (or with a visual indicator like a hatched background), so the user understands that data is unavailable rather than still loading.
+
+The `ViewportQuery` result's gap entries should carry a status distinguishing at least: `loading` (fetch in flight), `no-data` (tile confirmed missing), and `error` (fetch failed for a retriable reason).
 
 ### Viewport-scoped cancellation
 
@@ -252,11 +273,16 @@ Thin MST shared model holding the query parameters that identify what seismic da
 type: "SharedSeismogram"
 network: string         // e.g., "AK"
 station: string         // e.g., "K204"
+location: string        // FDSN location code, e.g., "--" or "00"
 channel: string         // e.g., "HNZ"
-startTime: number       // Unix seconds
-endTime: number         // Unix seconds
+startTimeISO: string    // ISO 8601, persisted; exposed as DateTime view
+endTimeISO: string      // ISO 8601, persisted; exposed as DateTime view
 model: string           // ML model identifier
 ```
+
+### DateTime views
+
+SharedSeismogram exposes `startTime` and `endTime` as Luxon `DateTime` views derived from the persisted ISO strings, following the same pattern as `TimelineContentModel.viewStartTime`/`viewEndTime`. Consumers always work with `DateTime` objects; the ISO strings are an internal persistence detail.
 
 ### Changes from current implementation
 

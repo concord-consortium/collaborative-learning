@@ -67,6 +67,19 @@ describe("SharedSeismogram", () => {
     expect(model.hasData).toBe(false);
   });
 
+  it("exposes startTime and endTime from the seismogram", () => {
+    const model = SharedSeismogram.create();
+    // Before data is loaded, should be undefined
+    expect(model.startTime).toBeUndefined();
+    expect(model.endTime).toBeUndefined();
+
+    // After setting a seismogram, should reflect its times
+    const mockSeismogram = { startTime: 1000, endTime: 2000 } as any;
+    model.setSeismogram(mockSeismogram);
+    expect(model.startTime).toBe(mockSeismogram.startTime);
+    expect(model.endTime).toBe(mockSeismogram.endTime);
+  });
+
   it("isSharedSeismogram returns true for a SharedSeismogram instance", () => {
     const model = SharedSeismogram.create();
     expect(isSharedSeismogram(model)).toBe(true);
