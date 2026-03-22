@@ -3,18 +3,23 @@ import { ChannelMetadata } from "./seismic-types.js";
 /**
  * Low-level fetchers for EarthScope's FDSN web services.
  *
- * Currently mocked: returns pre-staged miniSEED files from S3 that cover the
- * requested time range, instead of hitting EarthScope's dataselect endpoint.
- * The public API is the same as the real implementation so callers won't need
- * to change when the mock is replaced.
+ * By default returns pre-staged miniSEED files from S3 (mock data).
+ * When the URL parameter `seismicProxy` is present, fetches live data from
+ * the Concord CloudFront proxy instead.
  */
 
 // ---------------------------------------------------------------------------
-// Mock data – day-aligned miniSEED files on S3 for AK.K204.HNZ
+// Configuration
 // ---------------------------------------------------------------------------
 
 const STATION_SERVICE_URL = "https://service.earthscope.org/fdsnws/station/1/query";
+const CLOUDFRONT_PROXY_URL = "https://seismic-data.concord.org";
 const S3_BASE = "https://models-resources.s3.amazonaws.com/collaborative-learning/datasets";
+
+function isProxyEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).has("seismicProxy");
+}
 
 interface MockFile {
   url: string;
@@ -75,15 +80,46 @@ export async function fetchRawSeismicData(
     signal?: AbortSignal;
   }
 ): Promise<Response> {
-  // --- Mock implementation ---------------------------------------------------
+  if (isProxyEnabled()) {
+    return fetchFromProxy(network, station, channel, startTime, endTime, options);
+  }
+  return fetchFromMock(startTime, endTime, options);
+}
+
+async function fetchFromProxy(
+  network: string,
+  station: string,
+  channel: string,
+  startTime: string,
+  endTime: string,
+  options?: { baseUrl?: string; signal?: AbortSignal }
+): Promise<Response> {
+  const base = options?.baseUrl ?? CLOUDFRONT_PROXY_URL;
+  const params = new URLSearchParams({
+    net: network, sta: station, cha: channel, loc: "--",
+    start: startTime, end: endTime,
+  });
+  const url = `${base}/earthscope/cached/dataselect/1/query?${params}`;
+  const response = await fetch(url, { signal: options?.signal });
+  if (!response.ok) {
+    throw new Error(`dataselect ${response.status}: ${response.statusText}`);
+  }
+  return response;
+}
+
+async function fetchFromMock(
+  startTime: string,
+  endTime: string,
+  options?: { signal?: AbortSignal }
+): Promise<Response> {
   const startSec = new Date(startTime).getTime() / 1000;
   const endSec = new Date(endTime).getTime() / 1000;
 
   const match = MOCK_FILES.find(f => f.startSec < endSec && f.endSec > startSec);
   if (!match) {
     throw new Error(
-      `No mock data available for ${network}.${station}.${channel} ` +
-      `${startTime}–${endTime}. Mock data covers 2026-01-30 to 2026-02-06.`
+      `No mock data available for ${startTime}–${endTime}. ` +
+      `Mock data covers 2026-01-30 to 2026-02-06.`
     );
   }
 
@@ -94,19 +130,6 @@ export async function fetchRawSeismicData(
     );
   }
   return response;
-
-  // --- Future real implementation (sketch) -----------------------------------
-  // const base = options?.baseUrl ?? CLOUDFRONT_PROXY_URL;
-  // const params = new URLSearchParams({
-  //   net: network, sta: station, cha: channel, loc: "--",
-  //   starttime: startTime, endtime: endTime,
-  // });
-  // const url = `${base}/fdsnws/dataselect/1/query?${params}`;
-  // const response = await fetch(url, { signal: options?.signal });
-  // if (!response.ok) {
-  //   throw new Error(`dataselect ${response.status}: ${response.statusText}`);
-  // }
-  // return response;
 }
 
 /**
