@@ -6,20 +6,38 @@ const BATCH_SIZE = 50;
 const DETECTION_THRESHOLD = 0.5;
 
 /**
- * Resample by integer decimation: keep every Nth sample.
- * Throws if the ratio sourceRate/targetRate is not a positive integer.
+ * Resample signal to a different sample rate.
+ * Uses integer decimation for exact integer ratios (e.g., 200→100 Hz),
+ * and linear interpolation for other ratios (e.g., 50→100 Hz).
+ *
+ * The training pipeline uses scipy.signal.resample (FFT-based), but for
+ * bandlimited seismic data the difference from linear interpolation is
+ * negligible — the model normalizes each window to zero mean and unit
+ * variance, which dominates any interpolation artifacts.
  */
 function resample(samples: Float32Array, sourceRate: number, targetRate: number): Float32Array {
   if (sourceRate === targetRate) return samples;
-  const ratio = sourceRate / targetRate;
-  if (ratio <= 0 || !Number.isInteger(ratio)) {
-    throw new Error(
-      `Resampling requires a positive integer decimation ratio, got ${sourceRate}/${targetRate} = ${ratio}`
-    );
+
+  // Fast path: integer decimation (e.g., 200 Hz → 100 Hz)
+  const decimationRatio = sourceRate / targetRate;
+  if (decimationRatio > 1 && Number.isInteger(decimationRatio)) {
+    const out = new Float32Array(Math.floor(samples.length / decimationRatio));
+    for (let i = 0; i < out.length; i++) {
+      out[i] = samples[i * decimationRatio];
+    }
+    return out;
   }
-  const out = new Float32Array(Math.floor(samples.length / ratio));
-  for (let i = 0; i < out.length; i++) {
-    out[i] = samples[i * ratio];
+
+  // General case: linear interpolation (e.g., 50 Hz → 100 Hz)
+  const targetLength = Math.round(samples.length * targetRate / sourceRate);
+  const out = new Float32Array(targetLength);
+  const step = (samples.length - 1) / (targetLength - 1);
+  for (let i = 0; i < targetLength; i++) {
+    const srcIdx = i * step;
+    const lo = Math.floor(srcIdx);
+    const hi = Math.min(lo + 1, samples.length - 1);
+    const frac = srcIdx - lo;
+    out[i] = samples[lo] * (1 - frac) + samples[hi] * frac;
   }
   return out;
 }

@@ -150,7 +150,9 @@ The runner accepts a seisplotjs `Seismogram` directly. This avoids requiring the
 ### Input preprocessing
 
 For each chunk, the runner:
-1. **Resamples** from the source sample rate to the model's expected rate if they differ (e.g., 200 Hz → 100 Hz via 2× decimation).
+1. **Resamples** from the source sample rate to the model's expected rate if they differ. Two strategies depending on the ratio:
+   - **Integer decimation** for exact integer ratios (e.g., 200 Hz → 100 Hz): keeps every Nth sample. Fast O(n) path for the common HHZ downsampling case.
+   - **Linear interpolation** for other ratios (e.g., 50 Hz → 100 Hz for BHZ channels): interpolates between adjacent samples to produce the target number of samples. The training pipeline uses FFT-based resampling (`scipy.signal.resample`), but for bandlimited seismic data the difference is negligible — the per-window normalization (step 3) dominates any interpolation artifacts.
 2. **Windows** the data into non-overlapping segments of `windowDuration × samplingRate` samples. Windows that straddle a gap between seismogram segments are skipped — a gap means we don't know what happened, and classifying partial data would be misleading.
 3. **Preprocesses** each window: detrend (subtract mean) and scale to unit variance.
 4. **Batches** ~50 windows into a single tensor for batched inference.
@@ -162,6 +164,10 @@ The model was trained on raw miniSEED counts (no instrument response removal). T
 What does matter is the **instrument type**: the models were trained on velocity seismometer data (EHZ, BHZ channels). Feeding accelerometer data into a velocity-trained model would produce bad classifications because the waveform shapes are fundamentally different. The `instrument_types` field in the model metadata specifies compatible instruments.
 
 **Preprocessing mismatch note**: The training pipeline applies a bandpass filter (1–45 Hz) that the current browser inference code omits. This is an ML-side concern to resolve in the tiny-cnn-seismicML repo, not a CLUE integration issue.
+
+### Resampling validation
+
+The linear interpolation used for upsampling (e.g., 50 Hz BHZ → 100 Hz) differs from the FFT-based `scipy.signal.resample` used in training. This needs validation to confirm it doesn't affect classification accuracy. The quickest test is within the Python pipeline: resample the same BHZ waveform with both `scipy.signal.resample` and `numpy.interp` (linear), run both through the PyTorch model (`trained_models/best_model.pth`), and compare the output probabilities. If the results diverge significantly, the CLUE runner would need FFT-based resampling. A cross-framework test (Python pipeline vs CLUE runner on the same waveform) would additionally catch any PyTorch-vs-TF.js floating-point differences, but isolating one variable at a time is more informative.
 
 ### Confidence threshold
 

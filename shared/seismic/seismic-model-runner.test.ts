@@ -122,6 +122,25 @@ describe("SeismicModelRunner", () => {
     runner.dispose();
   });
 
+  it("processChunk upsamples from 50Hz to 100Hz", async () => {
+    const runner = new SeismicModelRunner();
+    await runner.loadModel(mockMetadata, mockFetch);
+
+    // 3000 samples at 50Hz = 60s of data
+    // Upsampled to 100Hz = 6000 samples = 1 window
+    const samples = new Float32Array(3000);
+    for (let i = 0; i < samples.length; i++) samples[i] = Math.sin(i * 0.02);
+    const seis = makeMockSeismogram(samples, 50, 1000000);
+
+    const { callbacks, progressCalls } = makeCallbacks();
+    await runner.processChunk(seis, callbacks);
+
+    const lastProgress = progressCalls[progressCalls.length - 1];
+    expect(lastProgress).toEqual([1, 1]);
+
+    runner.dispose();
+  });
+
   it("processChunk throws if model not loaded", async () => {
     const runner = new SeismicModelRunner();
     const samples = new Float32Array(6000);
