@@ -26,6 +26,11 @@ const mockMetadata: ModelMetadata = {
   weightsUrl: "./weights.json",
 };
 
+// Mock fetch that returns an empty weights JSON (placeholder has no named layers to load)
+const mockFetch = (() => Promise.resolve({
+  ok: true, json: () => Promise.resolve({}),
+})) as unknown as typeof fetch;
+
 function makeCallbacks() {
   const progressCalls: [number, number][] = [];
   const eventBatches: SeismicEvent[][] = [];
@@ -46,7 +51,7 @@ describe("SeismicModelRunner", () => {
   it("loadModel builds model from registry and sets isLoaded", async () => {
     const runner = new SeismicModelRunner();
     expect(runner.isLoaded).toBe(false);
-    await runner.loadModel(mockMetadata);
+    await runner.loadModel(mockMetadata, mockFetch);
     expect(runner.isLoaded).toBe(true);
     runner.dispose();
   });
@@ -54,7 +59,7 @@ describe("SeismicModelRunner", () => {
   it("loadModel throws for unknown architecture", async () => {
     const runner = new SeismicModelRunner();
     const badMetadata = { ...mockMetadata, architecture: "nonexistent" };
-    await expect(runner.loadModel(badMetadata)).rejects.toThrow(
+    await expect(runner.loadModel(badMetadata, mockFetch)).rejects.toThrow(
       'Unknown architecture: "nonexistent"'
     );
     runner.dispose();
@@ -62,7 +67,7 @@ describe("SeismicModelRunner", () => {
 
   it("processChunk processes 2 windows and reports progress and events", async () => {
     const runner = new SeismicModelRunner();
-    await runner.loadModel(mockMetadata);
+    await runner.loadModel(mockMetadata, mockFetch);
 
     // 2 windows: 100 Hz * 60s = 6000 samples/window, so 12000 samples total
     const samples = new Float32Array(12000);
@@ -100,7 +105,7 @@ describe("SeismicModelRunner", () => {
 
   it("processChunk resamples from 200Hz to 100Hz", async () => {
     const runner = new SeismicModelRunner();
-    await runner.loadModel(mockMetadata);
+    await runner.loadModel(mockMetadata, mockFetch);
 
     // 12000 samples at 200Hz = 60s of data
     // Decimated to 100Hz = 6000 samples = 1 window

@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
-import { getArchitecture } from "./seismic-architectures";
+import { getArchitecture, loadWeightsFromJson } from "./seismic-architectures";
 import { ModelMetadata, ModelRunnerCallbacks, SeismicEvent } from "./seismic-model-types";
 
 const BATCH_SIZE = 50;
@@ -32,12 +32,22 @@ export class SeismicModelRunner {
     return this.model !== null;
   }
 
-  async loadModel(metadata: ModelMetadata): Promise<void> {
+  async loadModel(metadata: ModelMetadata, fetchFn: typeof fetch = fetch): Promise<void> {
     const buildFn = getArchitecture(metadata.architecture);
     if (!buildFn) {
       throw new Error(`Unknown architecture: "${metadata.architecture}"`);
     }
-    this.model = buildFn(metadata);
+    const model = buildFn(metadata);
+
+    // Fetch and load pretrained weights
+    const response = await fetchFn(metadata.weightsUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch weights from ${metadata.weightsUrl}: ${response.status}`);
+    }
+    const weightsJson = await response.json();
+    loadWeightsFromJson(model, weightsJson);
+
+    this.model = model;
     this.metadata = metadata;
   }
 
@@ -103,14 +113,16 @@ export class SeismicModelRunner {
         }
       }
 
-      // Build tensor and predict
+      // Build tensor, predict, and apply softmax to convert logits to probabilities
       const inputTensor = tf.tensor3d(windowData, [batchSize, samplesPerWindow, 1]);
-      const predictions = model.predict(inputTensor) as tf.Tensor;
-      const predData = await predictions.data();
+      const logits = model.predict(inputTensor) as tf.Tensor;
+      const probabilities = tf.softmax(logits);
+      const predData = await probabilities.data();
 
       // Dispose tensors immediately
       inputTensor.dispose();
-      predictions.dispose();
+      logits.dispose();
+      probabilities.dispose();
 
       // Extract events from predictions
       const batchEvents: SeismicEvent[] = [];
