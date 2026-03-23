@@ -3,6 +3,10 @@ import * as tf from "@tensorflow/tfjs";
 /**
  * Model metadata fetched from metadata.json.
  * See docs/seismic/ml-model-integration-design.md § Model Packaging.
+ *
+ * The JSON Schema for this interface is generated automatically.
+ * Do not edit src/public/schemas/seismic-model/v1.json by hand —
+ * run `npm run update:seismic-schema` to regenerate it from this type.
  */
 export interface ModelMetadata {
   $schema: string;               // e.g., "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json"

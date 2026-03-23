@@ -298,6 +298,19 @@ Deploying a model is an explicit action — pushing to main in either repo does 
 
 The `ModelMetadata` interface in CLUE (`shared/seismic/seismic-model-types.ts`) defines the metadata format. The export scripts in tiny-cnn-seismicML produce files matching this interface. Both sides should reference the `$schema` version and each other when making changes.
 
+### Schema management
+
+The JSON Schema for each metadata format version is checked into CLUE at `src/public/schemas/seismic-model/v1.json`. This file is the source of truth for what a valid `v1` metadata.json looks like.
+
+**Keeping the schema in sync with the TypeScript type:**
+
+- A build-time test generates a JSON Schema from the `ModelMetadata` interface (using a tool like `ts-json-schema-generator`) and asserts it matches the checked-in schema file. If someone changes the interface without updating the schema, the test fails.
+- An npm script (e.g., `npm run update:seismic-schema`) regenerates the schema file from the current type. Run this when intentionally changing the metadata format.
+
+**Deployment:**
+
+Each CLUE release includes the schema file in its versioned asset path (e.g., `collaborative-learning.concord.org/version/v1.2.3/schemas/seismic-model/v1.json`). The canonical URL referenced by `$schema` (`collaborative-learning.concord.org/schemas/seismic-model/v1.json`) is updated manually — copying the schema to the site root is a separate step from deploying a CLUE release. Since a schema version only changes when the metadata format changes (rare, and always accompanied by CLUE code changes), this manual step is infrequent and intentional.
+
 ## Out of Scope
 
 The following are related concerns designed elsewhere:
