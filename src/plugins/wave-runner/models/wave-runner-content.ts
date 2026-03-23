@@ -55,7 +55,7 @@ export const WaveRunnerContentModel = TileContentModel
         sharedSeismogram = self.sharedSeismogram ?? newSharedSeismogram;
       }
 
-      sharedSeismogram.loadData();
+      sharedSeismogram.loadData(self.startDate, self.endDate);
     }
   }));
 

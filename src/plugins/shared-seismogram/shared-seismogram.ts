@@ -2,20 +2,9 @@ import { flow, getType, Instance, types } from "mobx-state-tree";
 import { miniseed, seismogram as seismogramNS } from "seisplotjs";
 type Seismogram = seismogramNS.Seismogram;
 import { SharedModel, SharedModelType } from "../../models/shared/shared-model";
+import { fetchRawSeismicData } from "../../../shared/seismic/earthscope-client";
 
 export const kSharedSeismogramType = "SharedSeismogram";
-
-// TODO: Remove hardcoded data. Fetch data based on station, start time, and end time props.
-const S3_BASE = "https://models-resources.s3.amazonaws.com/collaborative-learning/datasets";
-const MSEED_URLS = [
-  `${S3_BASE}/2026_01_30_00_00_00-2026_01_31_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_01_31_00_00_00-2026_02_01_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_01_00_00_00-2026_02_02_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_02_00_00_00-2026_02_03_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_03_00_00_00-2026_02_04_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_04_00_00_00-2026_02_05_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_05_00_00_00-2026_02_06_00_00_00_anchorage_airport.mseed`,
-];
 
 export const SharedSeismogram = SharedModel
   .named("SharedSeismogram")
@@ -42,14 +31,37 @@ export const SharedSeismogram = SharedModel
     setSeismogram(s: Seismogram | undefined) {
       self.seismogram = s;
     },
-    loadData: flow(function* () {
+    loadData: flow(function* (startDate: string, endDate: string) {
       self.isLoading = true;
       self.loadError = null;
+      self.seismogram = undefined;
       try {
-        const buffers: ArrayBuffer[] = yield Promise.all(
-          MSEED_URLS.map((url: string) => fetch(url).then((res: Response) => res.arrayBuffer()))
-        );
-        const allRecords = buffers.flatMap((buf: ArrayBuffer) => miniseed.parseDataRecords(buf));
+        const start = new Date(`${startDate}T00:00:00Z`);
+        const end = new Date(`${endDate}T00:00:00Z`);
+        const msPerDay = 86400000;
+        const totalDays = Math.round((end.getTime() - start.getTime()) / msPerDay);
+
+        const allRecords: any[] = [];
+        for (let day = 0; day < totalDays; day++) {
+          const chunkStart = new Date(start.getTime() + day * msPerDay);
+          const chunkEnd = new Date(chunkStart.getTime() + msPerDay);
+          try {
+            const response: Response = yield fetchRawSeismicData(
+              "AK", "K204", "HNZ",
+              chunkStart.toISOString(), chunkEnd.toISOString()
+            );
+            const buffer: ArrayBuffer = yield response.arrayBuffer();
+            const records = miniseed.parseDataRecords(buffer);
+            allRecords.push(...records);
+          } catch {
+            // Skip days with no data available
+          }
+        }
+
+        if (allRecords.length === 0) {
+          self.loadError = "No seismic data found for the selected date range.";
+          return;
+        }
         self.seismogram = miniseed.merge(allRecords);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
