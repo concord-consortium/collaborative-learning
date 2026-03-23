@@ -309,7 +309,7 @@ The JSON Schema for each metadata format version is checked into CLUE at `src/pu
 
 **Deployment:**
 
-Each CLUE release includes the schema file in its versioned asset path (e.g., `collaborative-learning.concord.org/version/v1.2.3/schemas/seismic-model/v1.json`). The canonical URL referenced by `$schema` (`collaborative-learning.concord.org/schemas/seismic-model/v1.json`) is updated manually — copying the schema to the site root is a separate step from deploying a CLUE release. Since a schema version only changes when the metadata format changes (rare, and always accompanied by CLUE code changes), this manual step is infrequent and intentional.
+Each CLUE release includes the schema file in its versioned asset path (e.g., `collaborative-learning.concord.org/version/v1.2.3/schemas/seismic-model/v1.json`). The canonical URL referenced by `$schema` (`collaborative-learning.concord.org/schemas/seismic-model/v1.json`) is published separately using `scripts/seismic/deploy-model-schema.sh <version>`. This script validates the checked-in schema matches the TypeScript interface (by running the test), checks that the version doesn't already exist in S3 (schema versions are immutable once published), and uploads with the correct content type. Since a schema version only changes when the metadata format changes (rare, and always accompanied by CLUE code changes), this step is infrequent and intentional.
 
 ## Out of Scope
 
