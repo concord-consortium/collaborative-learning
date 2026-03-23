@@ -114,8 +114,12 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         .tickFormat(format('.9'));
       const duration = enableAnimation.current ? transitionDuration : 0;
       if (!axisIsVertical && numericScale.ticks) {
-        const horizontalTicks = numericScale.ticks(computeBestNumberOfTicks(numericScale)); //array of all ticks
-        //get first and last and put them into model min and max
+        // Cap at 6 ticks so the axis shows major values (e.g. 0, 2, 4, 6, 8, 10) rather than
+        // every integer. computeBestNumberOfTicks maximizes ticks while avoiding label collisions,
+        // which can produce too many labels when the numbers are small.
+        const kMaxHorizontalTicks = 6;
+        const bestTicks = Math.min(computeBestNumberOfTicks(numericScale), kMaxHorizontalTicks);
+        const horizontalTicks = numericScale.ticks(bestTicks);
         axisScale.tickValues(horizontalTicks);
       }
       select(subAxisElt)
