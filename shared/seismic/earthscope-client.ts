@@ -16,9 +16,17 @@ const STATION_SERVICE_URL = "https://service.earthscope.org/fdsnws/station/1/que
 const CLOUDFRONT_PROXY_URL = "https://seismic-data.concord.org";
 const S3_BASE = "https://models-resources.s3.amazonaws.com/collaborative-learning/datasets";
 
+function getUrlParam(name: string): string | null {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get(name);
+}
+
 function isProxyEnabled(): boolean {
-  if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).has("seismicProxy");
+  return getUrlParam("seismicProxy") !== null;
+}
+
+function getLocalBaseUrl(): string | null {
+  return getUrlParam("seismicLocal");
 }
 
 interface MockFile {
@@ -80,10 +88,40 @@ export async function fetchRawSeismicData(
     signal?: AbortSignal;
   }
 ): Promise<Response> {
+  const localBase = getLocalBaseUrl();
+  if (localBase) {
+    return fetchFromLocal(localBase, network, station, startTime, endTime, options);
+  }
   if (isProxyEnabled()) {
     return fetchFromProxy(network, station, channel, startTime, endTime, options);
   }
   return fetchFromMock(startTime, endTime, options);
+}
+
+/**
+ * Fetch from a local static server that mirrors the ROVER directory layout:
+ *   {baseUrl}/data/{network}/{year}/{doy}/{station}.{network}.{year}.{doy}
+ * Expects day-aligned requests (one day per call).
+ */
+async function fetchFromLocal(
+  baseUrl: string,
+  network: string,
+  station: string,
+  startTime: string,
+  _endTime: string,
+  options?: { signal?: AbortSignal }
+): Promise<Response> {
+  const startDate = new Date(startTime);
+  const year = startDate.getUTCFullYear();
+  const startOfYear = Date.UTC(year, 0, 1);
+  const doy = String(Math.floor((startDate.getTime() - startOfYear) / 86400000) + 1).padStart(3, "0");
+
+  const url = `${baseUrl}/data/${network}/${year}/${doy}/${station}.${network}.${year}.${doy}`;
+  const response = await fetch(url, { signal: options?.signal });
+  if (!response.ok) {
+    throw new Error(`Local data fetch failed: ${url} → ${response.status}`);
+  }
+  return response;
 }
 
 async function fetchFromProxy(

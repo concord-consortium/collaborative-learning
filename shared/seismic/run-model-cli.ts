@@ -42,6 +42,7 @@ async function main() {
   console.log();
 
   const metadata: ModelMetadata = {
+    $schema: "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
     id: "placeholder-v1",
     architecture: "placeholder",
     class_names: ["Noise", "Earthquake"],
@@ -51,8 +52,13 @@ async function main() {
     weightsUrl: "",
   };
 
+  // Mock fetch for placeholder model (no real weights to load)
+  const mockFetch = (() => Promise.resolve({
+    ok: true, json: () => Promise.resolve({}),
+  })) as unknown as typeof fetch;
+
   const runner = new SeismicModelRunner();
-  await runner.loadModel(metadata);
+  await runner.loadModel(metadata, mockFetch);
   console.log(`Model loaded: ${metadata.id} (${metadata.architecture})`);
   console.log();
 

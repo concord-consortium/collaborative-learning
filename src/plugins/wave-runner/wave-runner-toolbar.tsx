@@ -38,7 +38,7 @@ const PlayButton = observer(function PlayButton({ name }: IToolbarButtonComponen
 
   if (!isWaveRunnerContentModel(content)) return null;
 
-  const disabled = content.isRunning;
+  const disabled = content.isRunning || !content.selectedModelUrl;
   return (
     <TileToolbarButton name={name} title="Run Model" onClick={() => content.runModel()} disabled={disabled}>
       <RunIcon/>

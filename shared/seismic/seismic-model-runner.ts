@@ -3,7 +3,7 @@ import { getArchitecture, loadWeightsFromJson } from "./seismic-architectures";
 import { ModelMetadata, ModelRunnerCallbacks, SeismicEvent } from "./seismic-model-types";
 
 const BATCH_SIZE = 50;
-const DETECTION_THRESHOLD = 0.5;
+const DEFAULT_DETECTION_THRESHOLD = 0.7;
 
 /**
  * Resample signal to a different sample rate.
@@ -69,7 +69,11 @@ export class SeismicModelRunner {
     this.metadata = metadata;
   }
 
-  async processChunk(seismogram: any, callbacks: ModelRunnerCallbacks): Promise<SeismicEvent[]> {
+  async processChunk(
+    seismogram: any,
+    callbacks: ModelRunnerCallbacks,
+    detectionThreshold = DEFAULT_DETECTION_THRESHOLD,
+  ): Promise<SeismicEvent[]> {
     if (!this.model || !this.metadata) {
       throw new Error("Model not loaded");
     }
@@ -82,7 +86,7 @@ export class SeismicModelRunner {
     for (const seg of seismogram.segments) {
       totalLength += seg.y.length;
     }
-    let rawSamples = new Float32Array(totalLength);
+    const rawSamples = new Float32Array(totalLength);
     let offset = 0;
     for (const seg of seismogram.segments) {
       rawSamples.set(seg.y, offset);
@@ -156,7 +160,7 @@ export class SeismicModelRunner {
           if (className === "Noise") continue;
 
           const confidence = predData[w * numClasses + c];
-          if (confidence >= DETECTION_THRESHOLD) {
+          if (confidence >= detectionThreshold) {
             batchEvents.push({
               windowStart: windowStartMs,
               windowEnd: windowEndMs,
