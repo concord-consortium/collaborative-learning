@@ -12,6 +12,8 @@ export const WaveRunnerContentModel = TileContentModel
   .named("WaveRunnerTool")
   .props({
     type: types.optional(types.literal(kWaveRunnerTileType), kWaveRunnerTileType),
+    startDate: types.optional(types.string, "2026-01-30"),
+    endDate: types.optional(types.string, "2026-02-06"),
   })
   .views(self => ({
     get isUserResizable() {
@@ -32,6 +34,14 @@ export const WaveRunnerContentModel = TileContentModel
     get hasData() {
       return self.sharedSeismogram?.hasData ?? false;
     }
+  }))
+  .actions(self => ({
+    setStartDate(date: string) {
+      self.startDate = date;
+    },
+    setEndDate(date: string) {
+      self.endDate = date;
+    },
   }))
   .actions(self => ({
     async loadData() {
