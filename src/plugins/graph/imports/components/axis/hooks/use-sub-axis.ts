@@ -14,13 +14,23 @@ import {DragInfo, collisionExists, computeBestNumberOfTicks,
 import { useGraphModelContext } from "../../../../hooks/use-graph-model-context";
 import { isImageUrl } from "../../../../../../models/data/data-types";
 
-// This function is used to style to style the axes of multiple types of plots below.
-// It would be better if we had functions like this to style other features consistently (tick marks, grid lines).
-function styleAxis(axisSelection: Selection<any, any, any, any>, duration?: number) {
+// Color for emphasized (bold) axis lines — used for domain lines and zero-axis lines.
+const kAxisDomainColor = "#707070";
+
+// This function is used to style the axes of multiple types of plots below.
+// When emphasize is true, the domain line is drawn bold; otherwise light (like grid lines).
+function styleAxis(axisSelection: Selection<any, any, any, any>, duration?: number, emphasize = false) {
+  const strokeColor = emphasize ? kAxisDomainColor : kTickAndGridColor;
+  const strokeWidth = emphasize ? kAxisStrokeWidth : 1;
   axisSelection.select(".domain")
-  .transition().duration(duration ?? 0)
-    .style("stroke", "#707070")
-    .style("stroke-width", `${kAxisStrokeWidth}px`);
+    .transition().duration(duration ?? 0)
+    .style("stroke", strokeColor)
+    .style("stroke-width", `${strokeWidth}px`);
+}
+
+// Generates the CSS class name used to identify zero-axis lines for a given place/subAxisIndex.
+function zeroLineClass(place: string, subAxisIndex: number) {
+  return `zero-${place}-${subAxisIndex}`;
 }
 
 export interface IUseSubAxis {
@@ -104,8 +114,12 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         .tickFormat(format('.9'));
       const duration = enableAnimation.current ? transitionDuration : 0;
       if (!axisIsVertical && numericScale.ticks) {
-        const horizontalTicks = numericScale.ticks(computeBestNumberOfTicks(numericScale)); //array of all ticks
-        //get first and last and put them into model min and max
+        // Cap at 6 ticks so the axis shows major values (e.g. 0, 2, 4, 6, 8, 10) rather than
+        // every integer. computeBestNumberOfTicks maximizes ticks while avoiding label collisions,
+        // which can produce too many labels when the numbers are small.
+        const kMaxHorizontalTicks = 6;
+        const bestTicks = Math.min(computeBestNumberOfTicks(numericScale), kMaxHorizontalTicks);
+        const horizontalTicks = numericScale.ticks(bestTicks);
         axisScale.tickValues(horizontalTicks);
       }
       select(subAxisElt)
@@ -114,7 +128,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore types are incompatible
         .call(axisScale)
-        .selectAll("line,path")
+        .selectAll(".tick line, .domain")
         .style("stroke", kTickAndGridColor);
 
       select(subAxisElt)
@@ -132,7 +146,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     const renderScatterPlotGridLines = () => {
       if (axis) {
         const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
-        select(subAxisElt).selectAll('.zero, .grid').remove();
+        select(subAxisElt).selectAll('.grid').remove();
         const tickLength = layout.getAxisLength(otherPlace(place)) ?? 0;
         select(subAxisElt).append('g')
           .attr('class', 'grid')
@@ -143,6 +157,43 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
           .style("stroke", kTickAndGridColor);
         select(subAxisElt).select('.grid').selectAll('text').remove();
         styleAxis(select(subAxisElt).select(".grid"));
+      }
+    };
+
+    // Draw bold zero-axis lines independently of grid lines.
+    // The left axis draws a horizontal line at y=0 (the x-axis).
+    // The bottom axis draws a vertical line at x=0 (the y-axis).
+    // Zero lines are drawn in the root SVG (not inside the axis group) so they render
+    // on top of all axis-wrapper background rects that would otherwise obscure them.
+    const renderZeroAxisLines = () => {
+      const rootSvg = subAxisElt?.ownerSVGElement;
+      if (!rootSvg) return;
+      // FIXME: d3Scale's type doesn't expose .domain()/.range() for numeric scales;
+      // this cast is not type-safe but follows the existing pattern in this file.
+      const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
+      const zeroClass = zeroLineClass(place, subAxisIndex);
+      select(rootSvg).selectAll(`.${zeroClass}`).remove();
+      const tickLength = layout.getAxisLength(otherPlace(place)) ?? 0;
+      const [domainMin, domainMax] = numericScale.domain();
+      if (domainMin <= 0 && domainMax >= 0 && tickLength > 0) {
+        const zeroPos = numericScale(0);
+        const zeroGroup = select(rootSvg).append('g')
+          .attr('class', `zero ${zeroClass}`)
+          .attr('transform', initialTransform);
+        // crossLength is positive when the zero line should extend in the positive direction
+        // (rightward for left axes, downward for top axes) and negative otherwise
+        // (leftward for right axes, upward for bottom axes).
+        const crossLength = (place === 'left' || place === 'top') ? tickLength : -tickLength;
+        const line = axisIsVertical
+          ? zeroGroup.append('line')
+              .attr('x1', 0).attr('x2', crossLength)
+              .attr('y1', zeroPos).attr('y2', zeroPos)
+          : zeroGroup.append('line')
+              .attr('x1', zeroPos).attr('x2', zeroPos)
+              .attr('y1', 0).attr('y2', crossLength);
+        line.style('stroke', kAxisDomainColor)
+            .style('stroke-width', `${kAxisStrokeWidth}px`)
+            .style('shape-rendering', 'crispEdges');
       }
     };
 
@@ -223,14 +274,26 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     };
 
     d3Scale.range(axisIsVertical ? [rangeMax, rangeMin] : [rangeMin, rangeMax]);
+    // Clean up zero lines from root SVG when axis type changes away from numeric
+    if (type !== 'numeric') {
+      const rootSvg = subAxisElt?.ownerSVGElement;
+      if (rootSvg) select(rootSvg).selectAll(`.${zeroLineClass(place, subAxisIndex)}`).remove();
+    }
     switch (type) {
       case 'empty':
         renderEmptyAxis();
         break;
-      case 'numeric':
+      case 'numeric': {
+        // Skip rendering when the scale domain hasn't been initialized yet.
+        // An uninitialized render would wipe previously drawn content via selectAll('*').remove()
+        // and then fail to redraw (e.g., zero lines) because the domain is undefined.
+        const [dMin, dMax] = (d3Scale as unknown as ScaleLinear<number, number>).domain();
+        if (dMin == null || dMax == null) break;
         renderNumericAxis();
         showScatterPlotGridLines && renderScatterPlotGridLines();
+        renderZeroAxisLines();
         break;
+      }
       case 'categorical':
         renderCategoricalSubAxis();
         break;
@@ -317,7 +380,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     select(subAxisElt).selectAll('*').remove();  // start over
 
     sAS.attr('class', 'axis').append('line').attr("class", "domain");
-    styleAxis(sAS);
+    styleAxis(sAS, undefined, true);
     categoriesSelectionRef.current = sAS.selectAll('g')
       .data(categoryData)
       .join(
@@ -421,6 +484,19 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         return place ? layout.getAxisLength(place) : undefined;
       },
       bounds => bounds && renderSubAxis()
+    );
+    return () => disposer();
+  }, [axisModel, layout, renderSubAxis]);
+
+  // Re-render when the cross-axis length changes, so zero-axis lines can be drawn
+  // once the other axis has initialized its layout.
+  useEffect(() => {
+    const disposer = reaction(
+      () => {
+        const { place } = (isAlive(axisModel) && axisModel) || {};
+        return place ? layout.getAxisLength(otherPlace(place)) : undefined;
+      },
+      length => length && renderSubAxis()
     );
     return () => disposer();
   }, [axisModel, layout, renderSubAxis]);
