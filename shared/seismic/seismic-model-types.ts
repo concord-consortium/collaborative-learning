@@ -5,6 +5,7 @@ import * as tf from "@tensorflow/tfjs";
  * See docs/seismic/ml-model-integration-design.md § Model Packaging.
  */
 export interface ModelMetadata {
+  $schema: string;               // e.g., "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json"
   id: string;                    // e.g., "compact-v1"
   architecture: string;          // maps to a build function in ARCHITECTURES
   class_names: string[];         // e.g., ["Noise", "Earthquake"]

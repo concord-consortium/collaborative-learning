@@ -2,6 +2,7 @@ import { getArchitecture, buildPlaceholderModel } from "./seismic-architectures"
 import { ModelMetadata } from "./seismic-model-types";
 
 const mockMetadata: ModelMetadata = {
+  $schema: "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
   id: "test-v1",
   architecture: "placeholder",
   class_names: ["Noise", "Earthquake"],

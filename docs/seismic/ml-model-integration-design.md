@@ -14,6 +14,7 @@ Fetched when the user selects a model from the dropdown. Contains everything nee
 
 ```json
 {
+  "$schema": "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
   "id": "compact-v1",
   "architecture": "compact",
   "class_names": ["Noise", "Earthquake"],
@@ -25,6 +26,7 @@ Fetched when the user selects a model from the dropdown. Contains everything nee
 ```
 
 Field descriptions:
+- **$schema**: Schema URL that doubles as a format version identifier. The version segment (e.g., `v1`) is used in S3 paths so that metadata format changes don't break older CLUE releases (see [Deployment](#deployment)). The URL can optionally serve an actual JSON Schema for validation. CLUE checks the version segment and ignores models whose schema version it doesn't understand.
 - **id**: Stable identifier used in the event database path (`services/seismic/stations/{station}/channels/{channel}/models/{model}/...`). Bumped when the model is retrained (e.g., `compact-v2`), so old events remain valid.
 - **architecture**: Maps to a build function in CLUE (see [Architecture Registry](#architecture-registry)).
 - **class_names**: Human-readable names for each class, in output order. The model outputs one probability per class index, and this array provides the index-to-name mapping (e.g., index 0 → `"Noise"`, index 1 → `"Earthquake"`). The entry `"Noise"` is special: it represents the absence of a detected event and is excluded when creating `SeismicEvent` records (see [Confidence threshold](#confidence-threshold)). The number of output classes is `class_names.length`.
@@ -58,11 +60,13 @@ A default list of models is defined in the app configuration. Each entry provide
 ```json
 {
   "models": [
-    { "label": "Compact Model", "metadataUrl": "https://models.concord.org/seismic/compact-v1/metadata.json" },
-    { "label": "Standard Model", "metadataUrl": "https://models.concord.org/seismic/standard-v1/metadata.json" }
+    { "label": "Compact Model", "metadataUrl": "https://models-resources.concord.org/tiny-cnn-seismicML/models/v1/compact-v1/metadata.json" },
+    { "label": "Standard Model", "metadataUrl": "https://models-resources.concord.org/tiny-cnn-seismicML/models/v1/standard-v1/metadata.json" }
   ]
 }
 ```
+
+The `v1` segment in the URL corresponds to the schema version in the metadata file. When the metadata format changes (e.g., a new required field), the schema version bumps to `v2`, and new models are deployed under `/seismic/v2/`. Older CLUE releases continue to read from `/seismic/v1/` and are unaffected.
 
 ### Unit JSON override
 
@@ -71,7 +75,7 @@ A curriculum unit can override the default model list to show only the models ap
 ```json
 {
   "models": [
-    { "label": "Earthquake Detector", "metadataUrl": "https://models.concord.org/seismic/compact-v1/metadata.json" }
+    { "label": "Earthquake Detector", "metadataUrl": "https://models-resources.concord.org/tiny-cnn-seismicML/models/v1/compact-v1/metadata.json" }
   ]
 }
 ```
@@ -264,6 +268,35 @@ User clicks "Run Model" again
 ### Future: Combining loaded and precomputed events
 
 When Firestore event loading is implemented ("Load Data"), loaded events will also be stored in `detectedEvents`. The coverage bitmaps (see [event-database-design.md](event-database-design.md)) will prevent duplication — the runner only processes uncovered time ranges. The `source` column (tracking local vs remote events for upload purposes) will be added to the schema at that point.
+
+## Deployment
+
+Model files (metadata.json + weights.json) are maintained in the [tiny-cnn-seismicML](https://github.com/concord-consortium/tiny-cnn-seismicML) repo alongside the training code and export scripts. They are deployed to S3/CDN independently of CLUE releases via a deploy script in that repo.
+
+### S3 path structure
+
+```
+models-resources.concord.org/tiny-cnn-seismicML/models/{schema-version}/{model-id}/
+  metadata.json
+  weights.json
+```
+
+For example: `models-resources.concord.org/tiny-cnn-seismicML/models/v1/compact-v1/metadata.json`
+
+The schema version (`v1`) comes from the `$schema` URL in the metadata file. This two-level versioning keeps format changes (schema version) separate from model retraining (model id). A new model retrained with the same metadata format deploys as `/v1/compact-v2/`. A metadata format change bumps to `/v2/`, and older CLUE releases that only understand `v1` are unaffected.
+
+### Deploy workflow
+
+1. Train and export weights in tiny-cnn-seismicML (produces metadata.json + weights.json)
+2. Tag the commit (e.g., `compact-v1`)
+3. Run the deploy script to upload to the versioned S3 path
+4. CLUE's app config or unit JSON references the S3 URL
+
+Deploying a model is an explicit action — pushing to main in either repo does not automatically update production models.
+
+### Format contract
+
+The `ModelMetadata` interface in CLUE (`shared/seismic/seismic-model-types.ts`) defines the metadata format. The export scripts in tiny-cnn-seismicML produce files matching this interface. Both sides should reference the `$schema` version and each other when making changes.
 
 ## Out of Scope
 
