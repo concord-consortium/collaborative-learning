@@ -176,8 +176,9 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         const zeroGroup = select(rootSvg).append('g')
           .attr('class', `zero ${zeroClass}`)
           .attr('transform', initialTransform);
-        // For left axes, zero line extends rightward (positive x) into the plot.
-        // For right axes, it extends leftward (negative x) into the plot.
+        // crossLength is positive when the zero line should extend in the positive direction
+        // (rightward for left axes, downward for top axes) and negative otherwise
+        // (leftward for right axes, upward for bottom axes).
         const crossLength = (place === 'left' || place === 'top') ? tickLength : -tickLength;
         const line = axisIsVertical
           ? zeroGroup.append('line')
@@ -185,7 +186,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
               .attr('y1', zeroPos).attr('y2', zeroPos)
           : zeroGroup.append('line')
               .attr('x1', zeroPos).attr('x2', zeroPos)
-              .attr('y1', 0).attr('y2', -crossLength);
+              .attr('y1', 0).attr('y2', crossLength);
         line.style('stroke', kAxisDomainColor)
             .style('stroke-width', `${kAxisStrokeWidth}px`)
             .style('shape-rendering', 'crispEdges');
