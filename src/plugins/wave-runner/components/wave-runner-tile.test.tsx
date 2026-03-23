@@ -111,6 +111,14 @@ describe("WaveRunnerComponent", () => {
     expect(sections).not.toHaveClass("vertical");
   });
 
+  it("renders date pickers with default values", () => {
+    renderWithStores();
+    const startInput = screen.getByLabelText("Start Date") as HTMLInputElement;
+    const endInput = screen.getByLabelText("End Date") as HTMLInputElement;
+    expect(startInput.value).toBe("2026-01-30");
+    expect(endInput.value).toBe("2026-02-06");
+  });
+
   it("renders all toolbar buttons", () => {
     renderWithStores();
     const toolbar = screen.getByTestId("tile-toolbar");
