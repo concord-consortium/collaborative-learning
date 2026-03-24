@@ -334,7 +334,11 @@
           "reset",
           "|",
           "timeline"
-        ]
+        ],
+        "stations": [
+          { "network": "AK", "station": "K204", "channel": "HNZ", "label": "Anchorage Airport" }
+        ],
+        "defaultStation": 0
       },
       "dataset": {
         "cellsSelectCases": false
