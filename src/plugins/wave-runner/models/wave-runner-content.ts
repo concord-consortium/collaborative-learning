@@ -38,9 +38,11 @@ export const WaveRunnerContentModel = TileContentModel
   .actions(self => ({
     setStartDate(date: string) {
       self.startDate = date;
+      self.sharedSeismogram?.setSeismogram(undefined);
     },
     setEndDate(date: string) {
       self.endDate = date;
+      self.sharedSeismogram?.setSeismogram(undefined);
     },
   }))
   .actions(self => ({

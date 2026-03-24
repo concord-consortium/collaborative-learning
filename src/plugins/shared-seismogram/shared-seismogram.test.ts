@@ -87,11 +87,11 @@ describe("SharedSeismogram", () => {
       expect(model.loadError).toBeNull();
     });
 
-    it("sets loadError on fetch failure", async () => {
+    it("surfaces unexpected fetch errors in loadError", async () => {
       mockFetch.mockRejectedValue(new Error("Network error"));
       const model = SharedSeismogram.create();
       await model.loadData("2026-01-30", "2026-01-31");
-      expect(model.loadError).toContain("No seismic data");
+      expect(model.loadError).toContain("Network error");
       expect(model.isLoading).toBe(false);
       expect(model.hasData).toBe(false);
     });
@@ -119,13 +119,29 @@ describe("SharedSeismogram", () => {
       expect(model.loadError).toBeNull();
     });
 
-    it("sets loadError when all days fail", async () => {
+    it("sets loadError when all days fail with no-data errors", async () => {
       mockFetch.mockRejectedValue(new Error("No mock data"));
 
       const model = SharedSeismogram.create();
       await model.loadData("2020-01-01", "2020-01-03");
 
       expect(model.loadError).toContain("No seismic data");
+    });
+
+    it("sets loadError for invalid date range (end before start)", async () => {
+      const model = SharedSeismogram.create();
+      await model.loadData("2026-02-06", "2026-01-30");
+
+      expect(model.loadError).toContain("Invalid date range");
+      expect(model.isLoading).toBe(false);
+    });
+
+    it("sets loadError for same start and end date", async () => {
+      const model = SharedSeismogram.create();
+      await model.loadData("2026-01-30", "2026-01-30");
+
+      expect(model.loadError).toContain("Invalid date range");
+      expect(model.isLoading).toBe(false);
     });
   });
 });

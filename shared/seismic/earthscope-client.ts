@@ -76,7 +76,8 @@ const MOCK_FILES: MockFile[] = [
  *
  * @returns The fetch `Response`. Callers choose how to consume it —
  *   `.arrayBuffer()`, streaming via `.body`, etc.
- * @throws On network errors or non-2xx responses (other than 404 from mock).
+ * @throws On network errors, when no matching mock file is found, or when the
+ *   underlying fetch returns a non-2xx HTTP response.
  */
 export async function fetchRawSeismicData(
   network: string,

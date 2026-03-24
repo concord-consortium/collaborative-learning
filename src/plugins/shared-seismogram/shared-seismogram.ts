@@ -39,7 +39,13 @@ export const SharedSeismogram = SharedModel
         const start = new Date(`${startDate}T00:00:00Z`);
         const end = new Date(`${endDate}T00:00:00Z`);
         const msPerDay = 86400000;
-        const totalDays = Math.round((end.getTime() - start.getTime()) / msPerDay);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end.getTime() <= start.getTime()) {
+          self.loadError = "Invalid date range. End date must be after start date.";
+          return;
+        }
+
+        const totalDays = Math.ceil((end.getTime() - start.getTime()) / msPerDay);
 
         const allRecords: any[] = [];
         for (let day = 0; day < totalDays; day++) {
@@ -53,8 +59,11 @@ export const SharedSeismogram = SharedModel
             const buffer: ArrayBuffer = yield response.arrayBuffer();
             const records = miniseed.parseDataRecords(buffer);
             allRecords.push(...records);
-          } catch {
-            // Skip days with no data available
+          } catch (err: unknown) {
+            // Skip "no data" errors (thrown by fetchRawSeismicData when no mock file matches).
+            // Rethrow unexpected errors (network failures, CORS, auth) so they surface to the user.
+            if (err instanceof Error && err.message.includes("No mock data")) continue;
+            throw err;
           }
         }
 
