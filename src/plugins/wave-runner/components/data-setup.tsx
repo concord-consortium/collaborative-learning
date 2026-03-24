@@ -18,6 +18,12 @@ export const DataSetup: React.FC<IProps> = observer(({ content }) => {
             <option>Choose a station</option>
           </select>
         </div>
+        <div className="field">
+          <label className="field-label">Model</label>
+          <select className="dropdown">
+            <option>Choose a model</option>
+          </select>
+        </div>
       </div>
       <div className="field-row">
         <div className="field">
