@@ -1,0 +1,43 @@
+import { types, Instance, SnapshotIn } from "mobx-state-tree";
+
+/**
+ * Compute the SEED-style station identifier from station fields.
+ * Usable with both MST instances and plain config objects.
+ * Format: {network}_{station}_{location}_{channel}
+ * Empty location is replaced with "_", yielding three consecutive underscores in the id.
+ */
+export function stationId(
+  station: { network: string; station: string; location?: string; channel: string }
+): string {
+  const loc = station.location || "_";
+  return `${station.network}_${station.station}_${loc}_${station.channel}`;
+}
+
+export const StationModel = types
+  .model("Station", {
+    network: types.string,
+    station: types.string,
+    location: types.optional(types.string, ""),
+    channel: types.string,
+    label: types.string,
+  })
+  .views(self => ({
+    get id() {
+      return stationId(self);
+    },
+  }));
+
+export interface StationModelType extends Instance<typeof StationModel> {}
+export type StationSnapshot = SnapshotIn<typeof StationModel>;
+
+/**
+ * Shape of a station entry in unit configuration.
+ * Same fields as StationSnapshot (location is optional, defaults to "").
+ */
+export interface StationConfig {
+  network: string;
+  station: string;
+  location?: string;
+  channel: string;
+  label: string;
+}
