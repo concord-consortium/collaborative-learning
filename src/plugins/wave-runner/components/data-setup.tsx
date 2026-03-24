@@ -1,13 +1,11 @@
 import { observer } from "mobx-react";
 import React from "react";
-import { WaveRunnerContentModelType } from "../models/wave-runner-content";
+import { useWaveRunnerContent } from "../hooks/use-wave-runner-content";
 import "./data-setup.scss";
 
-interface IProps {
-  content: WaveRunnerContentModelType;
-}
+export const DataSetup: React.FC = observer(function DataSetup() {
+  const content = useWaveRunnerContent();
 
-export const DataSetup: React.FC<IProps> = observer(({ content }) => {
   return (
     <div className="section data-setup">
       <div className="section-title">Data Setup</div>
@@ -50,4 +48,3 @@ export const DataSetup: React.FC<IProps> = observer(({ content }) => {
     </div>
   );
 });
-DataSetup.displayName = "DataSetup";
