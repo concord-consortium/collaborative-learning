@@ -16,7 +16,7 @@ export const WaveRunnerComponent: React.FC<ITileProps> = observer(({ readOnly, t
   const { width: containerWidth, ref: containerRef } = useResizeDetector();
   const vertical = !containerWidth || containerWidth < 700;
   const model = useContext(TileModelContext);
-  const content = isWaveRunnerContentModel(model?.content) ? model.content : undefined;
+  const content = isWaveRunnerContentModel(model?.content) ? model?.content : undefined;
 
   return (
     <div className="tile-content wave-runner-tile">
