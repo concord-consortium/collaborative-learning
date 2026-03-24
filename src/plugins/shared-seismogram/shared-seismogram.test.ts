@@ -72,6 +72,8 @@ describe("SharedSeismogram", () => {
   });
 
   describe("loadData", () => {
+    const testStation = { network: "AK", station: "K204", location: "", channel: "HNZ", label: "Anchorage Airport" };
+
     beforeEach(() => {
       jest.clearAllMocks();
       mockFetch.mockResolvedValue(new Response(new ArrayBuffer(8)));
@@ -79,7 +81,7 @@ describe("SharedSeismogram", () => {
 
     it("sets isLoading true while fetching, then false when done", async () => {
       const model = SharedSeismogram.create();
-      const promise = model.loadData("2026-01-30", "2026-01-31");
+      const promise = model.loadData(testStation, "2026-01-30", "2026-01-31");
       expect(model.isLoading).toBe(true);
       await promise;
       expect(model.isLoading).toBe(false);
@@ -87,7 +89,7 @@ describe("SharedSeismogram", () => {
 
     it("populates seismogram after successful load", async () => {
       const model = SharedSeismogram.create();
-      await model.loadData("2026-01-30", "2026-01-31");
+      await model.loadData(testStation, "2026-01-30", "2026-01-31");
       expect(model.hasData).toBe(true);
       expect(model.loadError).toBeNull();
     });
@@ -95,7 +97,7 @@ describe("SharedSeismogram", () => {
     it("surfaces unexpected fetch errors in loadError", async () => {
       mockFetch.mockRejectedValue(new Error("Network error"));
       const model = SharedSeismogram.create();
-      await model.loadData("2026-01-30", "2026-01-31");
+      await model.loadData(testStation, "2026-01-30", "2026-01-31");
       expect(model.loadError).toContain("Network error");
       expect(model.isLoading).toBe(false);
       expect(model.hasData).toBe(false);
@@ -103,11 +105,11 @@ describe("SharedSeismogram", () => {
 
     it("calls fetchRawSeismicData once per day in the date range", async () => {
       const model = SharedSeismogram.create();
-      await model.loadData("2026-01-30", "2026-02-01"); // 2 days
+      await model.loadData(testStation, "2026-01-30", "2026-02-01"); // 2 days
 
       expect(mockFetch).toHaveBeenCalledTimes(2);
       expect(mockFetch).toHaveBeenCalledWith(
-        "AK", "K204", "HNZ",
+        "AK", "K204", "", "HNZ",
         expect.stringContaining("2026-01-30"),
         expect.stringContaining("2026-01-31")
       );
@@ -119,7 +121,7 @@ describe("SharedSeismogram", () => {
         .mockResolvedValueOnce(new Response(new ArrayBuffer(8)));
 
       const model = SharedSeismogram.create();
-      await model.loadData("2026-01-29", "2026-01-31"); // day 1 fails, day 2 succeeds
+      await model.loadData(testStation, "2026-01-29", "2026-01-31"); // day 1 fails, day 2 succeeds
 
       expect(model.loadError).toBeNull();
     });
@@ -128,14 +130,14 @@ describe("SharedSeismogram", () => {
       mockFetch.mockRejectedValue(new Error("No mock data"));
 
       const model = SharedSeismogram.create();
-      await model.loadData("2020-01-01", "2020-01-03");
+      await model.loadData(testStation, "2020-01-01", "2020-01-03");
 
       expect(model.loadError).toContain("No seismic data");
     });
 
     it("sets loadError for invalid date range (end before start)", async () => {
       const model = SharedSeismogram.create();
-      await model.loadData("2026-02-06", "2026-01-30");
+      await model.loadData(testStation, "2026-02-06", "2026-01-30");
 
       expect(model.loadError).toContain("Invalid date range");
       expect(model.isLoading).toBe(false);
@@ -143,7 +145,7 @@ describe("SharedSeismogram", () => {
 
     it("sets loadError for same start and end date", async () => {
       const model = SharedSeismogram.create();
-      await model.loadData("2026-01-30", "2026-01-30");
+      await model.loadData(testStation, "2026-01-30", "2026-01-30");
 
       expect(model.loadError).toContain("Invalid date range");
       expect(model.isLoading).toBe(false);

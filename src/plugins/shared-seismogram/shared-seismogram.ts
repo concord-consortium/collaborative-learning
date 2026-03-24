@@ -4,6 +4,7 @@ import { miniseed, seismogram as seismogramNS } from "seisplotjs";
 type Seismogram = seismogramNS.Seismogram;
 import { SharedModel, SharedModelType } from "../../models/shared/shared-model";
 import { fetchRawSeismicData } from "../../../shared/seismic/earthscope-client";
+import { StationSnapshot } from "./station-model";
 
 export const kSharedSeismogramType = "SharedSeismogram";
 
@@ -38,7 +39,7 @@ export const SharedSeismogram = SharedModel
     },
   }))
   .actions(self => ({
-    loadData: flow(function* (startDate: string, endDate: string) {
+    loadData: flow(function* (station: StationSnapshot, startDate: string, endDate: string) {
       self.isLoading = true;
       self.loadError = null;
       self.seismogram = undefined;
@@ -60,7 +61,7 @@ export const SharedSeismogram = SharedModel
           const chunkEnd = new Date(chunkStart.getTime() + msPerDay);
           try {
             const response: Response = yield fetchRawSeismicData(
-              "AK", "K204", "HNZ",
+              station.network, station.station, station.location ?? "", station.channel,
               chunkStart.toISOString(), chunkEnd.toISOString()
             );
             const buffer: ArrayBuffer = yield response.arrayBuffer();
