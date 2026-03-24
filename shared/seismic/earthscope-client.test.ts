@@ -52,7 +52,7 @@ describe("fetchRawSeismicData", () => {
     fetchMock.mockResponseOnce(new ArrayBuffer(8) as any);
 
     const response = await fetchRawSeismicData(
-      "AK", "K204", "HNZ",
+      "AK", "K204", "", "HNZ",
       "2026-01-30T00:00:00Z", "2026-01-31T00:00:00Z"
     );
 
@@ -65,7 +65,7 @@ describe("fetchRawSeismicData", () => {
 
   it("throws when mock has no data for the requested range", async () => {
     await expect(
-      fetchRawSeismicData("AK", "K204", "HNZ", "2020-01-01T00:00:00Z", "2020-01-02T00:00:00Z")
+      fetchRawSeismicData("AK", "K204", "", "HNZ", "2020-01-01T00:00:00Z", "2020-01-02T00:00:00Z")
     ).rejects.toThrow("No mock data available");
   });
 
@@ -75,7 +75,7 @@ describe("fetchRawSeismicData", () => {
     fetchMock.mockResponseOnce(new ArrayBuffer(8) as any);
 
     const response = await fetchRawSeismicData(
-      "AK", "K204", "HNZ",
+      "AK", "K204", "", "HNZ",
       "2026-01-30T00:00:00Z", "2026-01-31T00:00:00Z"
     );
 
@@ -84,5 +84,31 @@ describe("fetchRawSeismicData", () => {
       expect.stringContaining("seismic-data.concord.org"),
       expect.anything()
     );
+  });
+
+  it("passes location to proxy URL, mapping empty to '--'", async () => {
+    setUrl("http://localhost/?seismicProxy");
+    fetchMock.mockResponseOnce(new ArrayBuffer(8) as any);
+
+    await fetchRawSeismicData(
+      "AK", "K204", "", "HNZ",
+      "2026-01-30T00:00:00Z", "2026-01-31T00:00:00Z"
+    );
+
+    const calledUrl = fetchMock.mock.calls[0][0] as string;
+    expect(calledUrl).toContain("loc=--");
+  });
+
+  it("passes non-empty location to proxy URL", async () => {
+    setUrl("http://localhost/?seismicProxy");
+    fetchMock.mockResponseOnce(new ArrayBuffer(8) as any);
+
+    await fetchRawSeismicData(
+      "AK", "DDM", "01", "HNZ",
+      "2026-01-30T00:00:00Z", "2026-01-31T00:00:00Z"
+    );
+
+    const calledUrl = fetchMock.mock.calls[0][0] as string;
+    expect(calledUrl).toContain("loc=01");
   });
 });
