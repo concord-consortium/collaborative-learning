@@ -154,7 +154,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
             openDocument && !isVisible &&
               <div className="document-not-shared">
                 <NotShareIcon className="not-shared-icon" />
-                <p>This document is no longer shared and can't be viewed at this time.</p>
+                <p>This document is no longer shared and can&apos;t be viewed at this time.</p>
               </div>
           }
           { !openDocument && <DocumentLoadingSpinner/> }

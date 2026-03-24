@@ -267,7 +267,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isVisible, isSec
           />
         : <div className="document-not-shared">
             <NotShareIcon className="not-shared-icon" />
-            <p>This document is no longer shared and can't be viewed at this time.</p>
+            <p>This document is no longer shared and can&apos;t be viewed at this time.</p>
           </div>
       }
       {onChangeDocument && !hideRightFlipper &&

@@ -52,7 +52,7 @@ const DocumentSettings: React.FC = () => {
         </label>
         <p className="muted small">
           When enabled, new student documents (problem, personal, and learning log)
-          will be shared with classmates by default instead of private.
+          will be shared with classmates by default instead of being private.
         </p>
       </fieldset>
 
