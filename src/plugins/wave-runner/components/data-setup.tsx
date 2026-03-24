@@ -25,23 +25,23 @@ export const DataSetup: React.FC = observer(function DataSetup() {
       </div>
       <div className="field-row">
         <div className="field">
-          <label className="field-label" htmlFor="wave-runner-start-date">Start Date</label>
+          <label className="field-label" htmlFor="wave-runner-start-date">Start Date and Time</label>
           <input
             id="wave-runner-start-date"
             className="datetime"
-            type="date"
-            value={content.startDate}
-            onChange={e => content.setStartDate(e.target.value)}
+            type="datetime-local"
+            value={`${content.startDate}T00:00`}
+            onChange={e => content.setStartDate(e.target.value.split("T")[0])}
           />
         </div>
         <div className="field">
-          <label className="field-label" htmlFor="wave-runner-end-date">End Date</label>
+          <label className="field-label" htmlFor="wave-runner-end-date">End Date and Time</label>
           <input
             id="wave-runner-end-date"
             className="datetime"
-            type="date"
-            value={content.endDate}
-            onChange={e => content.setEndDate(e.target.value)}
+            type="datetime-local"
+            value={`${content.endDate}T00:00`}
+            onChange={e => content.setEndDate(e.target.value.split("T")[0])}
           />
         </div>
       </div>
