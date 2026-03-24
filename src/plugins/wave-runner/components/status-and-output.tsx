@@ -17,12 +17,15 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
       <div className="waveform-container">
         {model?.isLoading && <div className="waveform-loading">Loading seismic data...</div>}
         {model?.loadError && <div className="waveform-error">{model.loadError}</div>}
-        {seismogram && (
+        {seismogram && model && (
           <WaveformPanel
-            key="1 week"
-            label="1 week"
-            startTime={DateTime.fromISO("2026-01-30T00:00:00Z", { zone: "utc" })}
-            durationSeconds={7 * 86400}
+            key={`${model.startDate}-${model.endDate}`}
+            label={`${model.startDate} – ${model.endDate}`}
+            startTime={DateTime.fromISO(`${model.startDate}T00:00:00Z`, { zone: "utc" })}
+            durationSeconds={
+              (new Date(`${model.endDate}T00:00:00Z`).getTime()
+               - new Date(`${model.startDate}T00:00:00Z`).getTime()) / 1000
+            }
             seismogram={seismogram}
           />
         )}
