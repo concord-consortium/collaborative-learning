@@ -1,7 +1,8 @@
-import { types, Instance } from "mobx-state-tree";
+import { cast, types, Instance } from "mobx-state-tree";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
+import { StationModel, StationSnapshot } from "../../shared-seismogram/station-model";
 import { kWaveRunnerTileType } from "../wave-runner-types";
 
 export function defaultWaveRunnerContent(): WaveRunnerContentModelType {
@@ -14,6 +15,7 @@ export const WaveRunnerContentModel = TileContentModel
     type: types.optional(types.literal(kWaveRunnerTileType), kWaveRunnerTileType),
     startDate: types.optional(types.string, "2026-01-30"),
     endDate: types.optional(types.string, "2026-02-06"),
+    station: types.maybe(StationModel),
   })
   .views(self => ({
     get isUserResizable() {
@@ -44,9 +46,14 @@ export const WaveRunnerContentModel = TileContentModel
       self.endDate = date;
       self.sharedSeismogram?.setSeismogram(undefined);
     },
+    setStation(station: StationSnapshot) {
+      self.station = cast(station);
+      self.sharedSeismogram?.setSeismogram(undefined);
+    },
   }))
   .actions(self => ({
     async loadData() {
+      if (!self.station) return;
       const smm = getSharedModelManager(self);
       if (!smm?.isReady) return;
 
@@ -57,7 +64,11 @@ export const WaveRunnerContentModel = TileContentModel
         sharedSeismogram = self.sharedSeismogram ?? newSharedSeismogram;
       }
 
-      sharedSeismogram.loadData(self.startDate, self.endDate);
+      // Pass a plain snapshot, not a live MST node, since loadData is async
+      // and the station could theoretically be replaced between yields.
+      const { network, station, location, channel, label } = self.station;
+      sharedSeismogram.loadData({ network, station, location, channel, label },
+        self.startDate, self.endDate);
     }
   }));
 
