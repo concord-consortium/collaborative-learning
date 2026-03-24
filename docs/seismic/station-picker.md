@@ -46,8 +46,8 @@ interface StationConfig {
 }
 ```
 
-This is the config shape (with `label` for display). `StationModel` (below) is the
-persisted shape (without `label`). The component maps between them.
+This is the same shape as `StationModel` (below) plus being the config input shape.
+`StationModel` persists all fields including `label`.
 
 ---
 
@@ -61,6 +61,7 @@ export const StationModel = types.model("Station", {
   station: types.string,
   location: types.optional(types.string, ""),
   channel: types.string,
+  label: types.string,
 });
 ```
 
@@ -190,7 +191,7 @@ the config. The `id` is computed using the same logic as `StationModel`'s `id` v
 These are plain objects, not MST instances.
 
 If `content.station` exists but its `id` doesn't match any config entry, append it to
-the list using its `id` as the display label. This handles the case where a saved
+the list using its persisted `label` for display. This handles the case where a saved
 document references a station later removed from the unit config.
 
 If `stationConfigs` is undefined or empty, the dropdown is disabled.
@@ -206,4 +207,4 @@ fall back to config.
 
 - `<option value={id}>` with `config.label` as display text
 - Selected value matches `content.station?.id` (computed via the same id logic)
-- On change, find the matching config entry and call `content.setStation({ network, station, location, channel })` with a plain snapshot
+- On change, find the matching config entry and call `content.setStation({ network, station, location, channel, label })` with a plain snapshot
