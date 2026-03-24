@@ -29,6 +29,26 @@ Add `stations` array and `defaultStation` index to `settings["wave-runner"]` in 
 - `defaultStation` is the index into the `stations` array that is pre-selected for new
   tiles. Defaults to `0` if omitted.
 
+If `stations` is missing or empty, the station dropdown should be hidden or disabled
+with no selectable options.
+
+### StationConfig Interface
+
+The unit config station entries use this shape (defined in the wave-runner plugin):
+
+```typescript
+interface StationConfig {
+  network: string;
+  station: string;
+  location?: string;
+  channel: string;
+  label: string;
+}
+```
+
+This is the config shape (with `label` for display). `StationModel` (below) is the
+persisted shape (without `label`). The component maps between them.
+
 ---
 
 ## StationModel
@@ -44,7 +64,7 @@ export const StationModel = types.model("Station", {
 });
 ```
 
-With a computed `id` view returning the SEED identifier:
+With a computed `id` view returning the SEED identifier (using underscore separators):
 
 ```typescript
 get id() {
@@ -73,21 +93,25 @@ station: types.maybe(StationModel),
 **New action:**
 
 ```typescript
-setStation(station: SnapshotIn<typeof StationModel> | Instance<typeof StationModel>) {
+setStation(station: SnapshotIn<typeof StationModel>) {
   self.station = cast(station);
   self.sharedSeismogram?.setSeismogram(undefined);
 }
 ```
 
+Takes a snapshot (plain object), not a live MST instance. This avoids MST ownership
+issues — live instances get adopted into the tree on assignment and cannot be reused.
 Clears the existing seismogram when station changes, same pattern as `setStartDate`/
 `setEndDate`.
 
 **loadData change:**
 
-When `loadData` is called and `station` is undefined, populate it from the unit config's
-`defaultStation` index before proceeding.
+If `station` is undefined when `loadData` is called, bail out (do not load). The
+component's `useEffect` is responsible for setting the default station on mount — see
+DataSetup Component section below. This keeps config access in the React layer (via
+hooks) rather than reaching into `getAppConfig` from the model.
 
-Pass `self.station` through to `SharedSeismogram.loadData`.
+Pass `self.station` snapshot through to `SharedSeismogram.loadData`.
 
 ---
 
@@ -118,7 +142,9 @@ and `station.channel` instead of hardcoded `"AK", "K204", "HNZ"`.
 
 File: `shared/seismic/earthscope-client.ts`
 
-`fetchRawSeismicData` gains a `location` parameter:
+`fetchRawSeismicData` gains a `location` parameter inserted between `station` and
+`channel`. This is a breaking change to the internal API — all existing call sites must
+be updated (including any tests).
 
 ```typescript
 export async function fetchRawSeismicData(
@@ -140,6 +166,10 @@ loc: location || "--",
 
 Empty string becomes `"--"` (FDSN convention for empty location code).
 
+`fetchFromLocal` and `fetchFromMock` remain location-agnostic — they do not use the
+location parameter in their URL construction. The local ROVER path format
+(`{station}.{network}.{year}.{doy}`) does not include location.
+
 ---
 
 ## DataSetup Component Changes
@@ -149,29 +179,31 @@ File: `src/plugins/wave-runner/components/data-setup.tsx`
 **Reading config:**
 
 ```typescript
-const stations = useSettingFromStores("stations", "wave-runner") as StationConfig[];
+const stationConfigs = useSettingFromStores("stations", "wave-runner") as StationConfig[] | undefined;
 const defaultStationIndex = (useSettingFromStores("defaultStation", "wave-runner") as number) ?? 0;
 ```
 
-**Pre-creating station instances:**
+**Building the options list:**
 
-Use `useMemo` to create immutable `StationModel` instances from the config array. These
-are reused across renders — selecting a station sets `content.station` to one of these
-pre-created instances.
+Use `useMemo` to build an array of `{ config: StationConfig; id: string }` entries from
+the config. The `id` is computed using the same logic as `StationModel`'s `id` view.
+These are plain objects, not MST instances.
 
-**Orphaned station handling:**
+If `content.station` exists but its `id` doesn't match any config entry, append it to
+the list using its `id` as the display label. This handles the case where a saved
+document references a station later removed from the unit config.
 
-If `content.station` exists but its `id` doesn't match any station in the unit config,
-append it to the dropdown list using its `id` as the display label. This handles the case
-where a saved document references a station that was later removed from the unit config.
+If `stationConfigs` is undefined or empty, the dropdown is disabled.
 
 **Default station on mount:**
 
-If `content.station` is undefined when the component mounts, auto-set it from the
-`defaultStation` index via a `useEffect`.
+If `content.station` is undefined when the component mounts (or when `stationConfigs`
+becomes available), auto-set it from the `defaultStation` index via a `useEffect`. This
+is the single authoritative mechanism for applying the default — `loadData` does not
+fall back to config.
 
 **Select element:**
 
-- `<option value={station.id}>` with `label` as display text
-- Selected value matches `content.station?.id`
-- On change, find the matching pre-created instance and call `content.setStation(instance)`
+- `<option value={id}>` with `config.label` as display text
+- Selected value matches `content.station?.id` (computed via the same id logic)
+- On change, find the matching config entry and call `content.setStation({ network, station, location, channel })` with a plain snapshot
