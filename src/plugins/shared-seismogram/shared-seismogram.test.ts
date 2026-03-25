@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { SharedSeismogram, kSharedSeismogramType, isSharedSeismogram } from "./shared-seismogram";
 
 // Mock the earthscope client
@@ -6,10 +7,12 @@ jest.mock("../../../shared/seismic/earthscope-client", () => ({
 }));
 
 // Mock seisplotjs miniSEED parsing
+const mockStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+const mockEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
 jest.mock("seisplotjs", () => ({
   miniseed: {
     parseDataRecords: jest.fn(() => [{ sample: 1 }]),
-    merge: jest.fn(() => ({ startTime: new Date(), endTime: new Date() })),
+    merge: jest.fn(() => ({ startTime: mockStart, endTime: mockEnd })),
   },
   seismogram: {},
 }));
@@ -55,10 +58,12 @@ describe("SharedSeismogram", () => {
     expect(model.endTime).toBeUndefined();
 
     // After setting a seismogram, should reflect its times
-    const mockSeismogram = { startTime: 1000, endTime: 2000 } as any;
+    const start = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+    const end = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+    const mockSeismogram = { startTime: start, endTime: end } as any;
     model.setSeismogram(mockSeismogram);
-    expect(model.startTime).toBe(mockSeismogram.startTime);
-    expect(model.endTime).toBe(mockSeismogram.endTime);
+    expect(model.startTime?.toMillis()).toBe(start.toMillis());
+    expect(model.endTime?.toMillis()).toBe(end.toMillis());
   });
 
   it("isSharedSeismogram returns true for a SharedSeismogram instance", () => {
