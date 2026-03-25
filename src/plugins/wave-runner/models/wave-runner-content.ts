@@ -21,7 +21,7 @@ export const WaveRunnerContentModel = TileContentModel
     },
     get sharedSeismogram(): SharedSeismogramType | undefined {
       const smm = getSharedModelManager(self);
-      return smm?.findFirstSharedModelByType(SharedSeismogram);
+      return smm?.getTileSharedModelsByType(self, SharedSeismogram)[0] as SharedSeismogramType | undefined;
     },
   }))
   .views(self => ({

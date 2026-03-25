@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { isValidDateTime } from "../../../utilities/luxon-utils";
-import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
+import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
 import { kTimelineTileType } from "../timeline-types";
 
 export const kMinViewRangeSeconds = 2;
@@ -25,7 +25,7 @@ export const TimelineContentModel = TileContentModel
     },
     get sharedSeismogram() {
       const smm = getSharedModelManager(self);
-      return smm?.findFirstSharedModelByType(SharedSeismogram);
+      return smm?.getTileSharedModelsByType(self, SharedSeismogram)[0] as SharedSeismogramType | undefined;
     },
     get viewStartTime() {
       if (!self.viewStartTimeISO) return undefined;

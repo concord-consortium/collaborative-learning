@@ -5,6 +5,7 @@ import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button"
 import {
   IToolbarButtonComponentProps, registerTileToolbarButtons
 } from "../../components/toolbar/toolbar-button-manager";
+import { SharedSeismogram } from "../shared-seismogram/shared-seismogram";
 import { kTimelineTileType } from "../timeline/timeline-types";
 import { useWaveRunnerContent } from "./hooks/use-wave-runner-content";
 
@@ -57,8 +58,14 @@ const TimelineButton = observer(function TimelineButton({ name }: IToolbarButton
   function handleClick() {
     if (!tileModel || !addTilesContext) return;
     const sharedSeismogram = content.sharedSeismogram;
-    const sharedModels = sharedSeismogram ? [sharedSeismogram] : undefined;
-    addTilesContext.addTileAfter(kTimelineTileType, tileModel, sharedModels);
+    if (!sharedSeismogram?.seismogram) return;
+    // Create a copy so the Timeline keeps its data when Wave Runner reloads.
+    const copy = SharedSeismogram.create({
+      startTimeISO: sharedSeismogram.startTimeISO,
+      endTimeISO: sharedSeismogram.endTimeISO,
+    });
+    copy.setSeismogram(sharedSeismogram.seismogram);
+    addTilesContext.addTileAfter(kTimelineTileType, tileModel, [copy]);
   }
 
   return (

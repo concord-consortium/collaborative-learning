@@ -1,4 +1,5 @@
 import { flow, getType, Instance, types } from "mobx-state-tree";
+import { DateTime } from "luxon";
 import { miniseed, seismogram as seismogramNS } from "seisplotjs";
 type Seismogram = seismogramNS.Seismogram;
 import { SharedModel, SharedModelType } from "../../models/shared/shared-model";
@@ -10,6 +11,8 @@ export const SharedSeismogram = SharedModel
   .named("SharedSeismogram")
   .props({
     type: types.optional(types.literal(kSharedSeismogramType), kSharedSeismogramType),
+    startTimeISO: types.maybe(types.string),
+    endTimeISO: types.maybe(types.string),
   })
   .volatile(() => ({
     seismogram: undefined as Seismogram | undefined,
@@ -21,16 +24,20 @@ export const SharedSeismogram = SharedModel
       return self.seismogram !== undefined;
     },
     get startTime() {
-      return self.seismogram?.startTime;
+      return self.startTimeISO ? DateTime.fromISO(self.startTimeISO, { zone: "utc" }) : undefined;
     },
     get endTime() {
-      return self.seismogram?.endTime;
+      return self.endTimeISO ? DateTime.fromISO(self.endTimeISO, { zone: "utc" }) : undefined;
     }
   }))
   .actions(self => ({
     setSeismogram(s: Seismogram | undefined) {
       self.seismogram = s;
+      self.startTimeISO = s?.startTime?.toISO() ?? undefined;
+      self.endTimeISO = s?.endTime?.toISO() ?? undefined;
     },
+  }))
+  .actions(self => ({
     loadData: flow(function* (startDate: string, endDate: string) {
       self.isLoading = true;
       self.loadError = null;
@@ -71,7 +78,7 @@ export const SharedSeismogram = SharedModel
           self.loadError = "No seismic data found for the selected date range.";
           return;
         }
-        self.seismogram = miniseed.merge(allRecords);
+        self.setSeismogram(miniseed.merge(allRecords));
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         self.loadError = `Error loading seismic data: ${message}`;
