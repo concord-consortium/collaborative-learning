@@ -336,7 +336,9 @@
           "timeline"
         ],
         "stations": [
-          { "network": "AK", "station": "K204", "channel": "HNZ", "label": "Anchorage Airport" }
+          { "network": "AK", "station": "K204", "channel": "HNZ", "label": "Anchorage Airport" },
+          { "network": "AK", "station": "RC01", "channel": "BHZ", "label": "Rabbit Creek, AK" },
+          { "network": "AK", "station": "FIRE", "channel": "BHZ", "label": "Fire Island, AK" }
         ],
         "defaultStation": 0
       },
