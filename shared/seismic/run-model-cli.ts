@@ -72,7 +72,7 @@ async function main() {
     process.stdout.write(`Day ${day + 1}/${totalDays} (${label}): fetching...`);
 
     const response = await fetchRawSeismicData(
-      network, station, channel,
+      network, station, "", channel,
       chunkStart.toISOString(), chunkEnd.toISOString()
     );
     const buffer = await response.arrayBuffer();
