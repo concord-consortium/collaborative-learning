@@ -1,0 +1,107 @@
+/**
+ * Run the seismic ML model on raw waveform data and print detected events.
+ *
+ * Usage (from project root):
+ *   npx ts-node --compiler-options '{"module":"CommonJS"}' \
+ *       shared/seismic/run-model-cli.ts \
+ *       --network AK --station K204 --channel HNZ \
+ *       --start 2026-01-30 --end 2026-02-01
+ *
+ * All parameters are optional — defaults to the full mock data range (7 days).
+ * Currently uses the placeholder model (random weights) and mock S3 data.
+ */
+
+import { parseArgs } from "node:util";
+import { miniseed } from "seisplotjs";
+import { fetchRawSeismicData } from "./earthscope-client";
+import { SeismicModelRunner } from "./seismic-model-runner";
+import { ModelMetadata } from "./seismic-model-types";
+
+async function main() {
+  const { values } = parseArgs({
+    options: {
+      network: { type: "string", default: "AK" },
+      station: { type: "string", default: "K204" },
+      channel: { type: "string", default: "HNZ" },
+      start:   { type: "string", default: "2026-01-30" },
+      end:     { type: "string", default: "2026-02-06" },
+    },
+  });
+
+  const network = values.network!;
+  const station = values.station!;
+  const channel = values.channel!;
+  const startDate = new Date(values.start! + (values.start!.includes("T") ? "" : "T00:00:00Z"));
+  const endDate = new Date(values.end! + (values.end!.includes("T") ? "" : "T00:00:00Z"));
+
+  const msPerDay = 86400000;
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / msPerDay);
+
+  console.log(`Network: ${network}  Station: ${station}  Channel: ${channel}`);
+  console.log(`Range: ${startDate.toISOString()} -> ${endDate.toISOString()} (${totalDays} days)`);
+  console.log();
+
+  const metadata: ModelMetadata = {
+    $schema: "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
+    id: "placeholder-v1",
+    architecture: "placeholder",
+    class_names: ["Noise", "Earthquake"],
+    sampling_rate: 100,
+    window_duration: 60,
+    instrument_types: ["H"],
+    weightsUrl: "",
+  };
+
+  // Mock fetch for placeholder model (no real weights to load)
+  const mockFetch = (() => Promise.resolve({
+    ok: true, json: () => Promise.resolve({}),
+  })) as unknown as typeof fetch;
+
+  const runner = new SeismicModelRunner();
+  await runner.loadModel(metadata, mockFetch);
+  console.log(`Model loaded: ${metadata.id} (${metadata.architecture})`);
+  console.log();
+
+  let totalEvents = 0;
+
+  for (let day = 0; day < totalDays; day++) {
+    const chunkStart = new Date(startDate.getTime() + day * msPerDay);
+    const chunkEnd = new Date(chunkStart.getTime() + msPerDay);
+    const label = chunkStart.toISOString().slice(0, 10);
+
+    process.stdout.write(`Day ${day + 1}/${totalDays} (${label}): fetching...`);
+
+    const response = await fetchRawSeismicData(
+      network, station, channel,
+      chunkStart.toISOString(), chunkEnd.toISOString()
+    );
+    const buffer = await response.arrayBuffer();
+    const records = miniseed.parseDataRecords(buffer);
+    const seismogram = miniseed.merge(records);
+
+    process.stdout.write(` ${seismogram.numPoints} samples, running model...`);
+
+    const events = await runner.processChunk(seismogram, {
+      onProgress: () => {},
+      onEvents: () => {},
+    });
+
+    totalEvents += events.length;
+    console.log(` ${events.length} events`);
+
+    for (const evt of events) {
+      const start = new Date(evt.windowStart).toISOString();
+      const end = new Date(evt.windowEnd).toISOString();
+      console.log(`  ${evt.eventType} [${(evt.confidence * 100).toFixed(1)}%] ${start} -> ${end}`);
+    }
+  }
+
+  runner.dispose();
+  console.log();
+  console.log(`Done. ${totalEvents} total events detected.`);
+}
+
+main().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
