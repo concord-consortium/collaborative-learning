@@ -139,9 +139,21 @@ export const Tree = types.model("Tree", {
     },
 
     // Actually apply the patches.
-    // It might be called multiple times after startApplyingPatchesFromManager
+    // It might be called multiple times after startApplyingPatchesFromManager.
+    // Patches are applied individually so that one failing patch (e.g. referencing
+    // a node that was already removed) does not prevent subsequent patches from
+    // being applied. This makes history scrubbing more resilient.
     applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
-      applyPatch(self, patchesToApply);
+      for (const patch of patchesToApply) {
+        try {
+          applyPatch(self, [patch]);
+        } catch (e) {
+          if (DEBUG_HISTORY) {
+            // eslint-disable-next-line no-console
+            console.warn("Failed to apply history patch", patch, e);
+          }
+        }
+      }
       // We return a promise because the API is async
       // The action itself doesn't do anything asynchronous though
       // so it isn't necessary to use a flow
