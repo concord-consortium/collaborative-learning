@@ -13,6 +13,19 @@ import { kWaveRunnerTileType } from "../wave-runner-types";
 
 const SUPPORTED_SCHEMA = "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json";
 
+export const PLACEHOLDER_MODEL_URL = "placeholder:random-weights";
+
+const PLACEHOLDER_METADATA: ModelMetadata = {
+  $schema: SUPPORTED_SCHEMA,
+  id: "placeholder-v1",
+  architecture: "placeholder",
+  class_names: ["Noise", "Earthquake"],
+  sampling_rate: 100,
+  window_duration: 60,
+  instrument_types: ["H", "N", "L"],
+  weightsUrl: "",
+};
+
 export interface ModelListEntry {
   label: string;
   metadataUrl: string;
@@ -23,6 +36,10 @@ export const DEFAULT_MODELS: ModelListEntry[] = [
   {
     label: "Compact Model",
     metadataUrl: "https://models-resources.concord.org/tiny-cnn-seismicML/models/v1/compact-v1/metadata.json"
+  },
+  {
+    label: "Placeholder (random weights)",
+    metadataUrl: PLACEHOLDER_MODEL_URL,
   },
 ];
 
@@ -149,6 +166,12 @@ export const WaveRunnerContentModel = TileContentModel
       self.selectedModelUrl = metadataUrl;
       self.selectedModelMetadata = null;
       self.modelLoadError = null;
+
+      // Placeholder model — use hardcoded metadata, no fetch needed
+      if (metadataUrl === PLACEHOLDER_MODEL_URL) {
+        self.selectedModelMetadata = { ...PLACEHOLDER_METADATA };
+        return;
+      }
 
       try {
         const response: Response = yield fetch(metadataUrl);

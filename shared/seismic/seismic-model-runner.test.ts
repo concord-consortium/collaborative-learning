@@ -152,4 +152,35 @@ describe("SeismicModelRunner", () => {
       "Model not loaded"
     );
   });
+
+  it("placeholder architecture skips weights fetch and produces events", async () => {
+    const placeholderMetadata: ModelMetadata = {
+      ...mockMetadata,
+      architecture: "placeholder",
+      weightsUrl: "",
+    };
+
+    const runner = new SeismicModelRunner();
+    // Pass a fetch that would fail — placeholder should never call it
+    const failingFetch = (() => { throw new Error("should not fetch"); }) as unknown as typeof fetch;
+    await runner.loadModel(placeholderMetadata, failingFetch);
+    expect(runner.isLoaded).toBe(true);
+
+    // 2 windows of data
+    const samples = new Float32Array(12000);
+    for (let i = 0; i < samples.length; i++) samples[i] = Math.sin(i * 0.01);
+    const startMs = Date.UTC(2025, 0, 1); // 2025-01-01T00:00:00Z
+    const seis = makeMockSeismogram(samples, 100, startMs);
+
+    const { callbacks } = makeCallbacks();
+    // Threshold 0 so every window produces an event
+    const allEvents = await runner.processChunk(seis, callbacks, 0);
+
+    expect(allEvents.length).toBe(2);
+    expect(allEvents[0].windowStart).toBe(startMs);
+    expect(allEvents[0].windowEnd).toBe(startMs + 60000);
+    expect(allEvents[1].windowStart).toBe(startMs + 60000);
+
+    runner.dispose();
+  });
 });

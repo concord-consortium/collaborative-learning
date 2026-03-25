@@ -57,13 +57,15 @@ export class SeismicModelRunner {
     }
     const model = buildFn(metadata);
 
-    // Fetch and load pretrained weights
-    const response = await fetchFn(metadata.weightsUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch weights from ${metadata.weightsUrl}: ${response.status}`);
+    // Placeholder uses random weights — skip the fetch
+    if (metadata.architecture !== "placeholder") {
+      const response = await fetchFn(metadata.weightsUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch weights from ${metadata.weightsUrl}: ${response.status}`);
+      }
+      const weightsJson = await response.json();
+      loadWeightsFromJson(model, weightsJson);
     }
-    const weightsJson = await response.json();
-    loadWeightsFromJson(model, weightsJson);
 
     this.model = model;
     this.metadata = metadata;
