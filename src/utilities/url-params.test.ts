@@ -37,6 +37,13 @@ describe("urlParams", () => {
     expect(processQueryParams("demo=yes").demo).toBe(true);
     expect(processQueryParams("demo=false").demo).toBe(false);
   });
+
+  test("logMonitor boolean param", () => {
+    expect(processQueryParams().logMonitor).toBe(false);
+    expect(processQueryParams("logMonitor").logMonitor).toBe(true);
+    expect(processQueryParams("logMonitor=true").logMonitor).toBe(true);
+    expect(processQueryParams("logMonitor=false").logMonitor).toBe(false);
+  });
 });
 
 describe("query-string parse", () => {
