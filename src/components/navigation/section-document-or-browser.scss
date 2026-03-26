@@ -1,4 +1,5 @@
 @import "../vars";
+@import "../mixins";
 $title-margin: 2px;
 
 .document-tabs {
@@ -46,31 +47,7 @@ $title-margin: 2px;
           }
         }
         .document-not-shared {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          background-color: $charcoal-light-6;
-
-          .not-shared-icon {
-            width: 24px;
-            height: 24px;
-            fill: $workspace-teal-dark-1;
-          }
-
-          p {
-            margin-top: 1em;
-            font-family: Lato;
-            font-size: 14px;
-            font-weight: normal;
-            font-stretch: normal;
-            font-style: normal;
-            line-height: normal;
-            letter-spacing: normal;
-            text-align: center;
-            color: $charcoal-dark-2;
-          }
+          @include document-not-shared;
         }
         .document-header {
           display: flex;
