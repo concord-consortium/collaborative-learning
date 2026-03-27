@@ -249,8 +249,8 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
 
   // respond to case count changes from any source (including history playback patches).
   // The onAction handler above only fires for interactive actions, not for applyPatch.
-  // We track dataset.cases.length for normal case additions, and also the total filtered
-  // case count to detect filteredCases rebuilds during history playback. Without tracking
+  // We track dataset.cases.length for normal case additions, and also a structural
+  // signature of filteredCases to detect rebuilds during history playback. Without tracking
   // filteredCases, linked table data wouldn't trigger circle creation because the table's
   // dataset.cases.length doesn't change — only the graph's filteredCases are rebuilt.
   useEffect(function respondToCaseCountChanges() {
@@ -258,10 +258,12 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       () => {
         if (!isAlive(dataConfiguration)) return undefined;
         const casesLen = dataConfiguration?.dataset?.cases.length ?? 0;
-        // Also track filtered cases total to react to filteredCases rebuilds
-        const filteredTotal = dataConfiguration?.filteredCases?.reduce(
-          (sum, fc) => sum + fc.caseIds.length, 0) ?? 0;
-        return `${casesLen}-${filteredTotal}`;
+        // Track per-entry caseIds lengths so rebuilds that keep the total the same
+        // still trigger this reaction when the grouping or identity changes.
+        const filteredSignature = dataConfiguration?.filteredCases
+          ? dataConfiguration.filteredCases.map(fc => fc.caseIds.length).join(",")
+          : "none";
+        return `${casesLen}-${filteredSignature}`;
       },
       () => {
         if (!isAlive(dataConfiguration)) return;

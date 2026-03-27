@@ -140,17 +140,25 @@ export const Tree = types.model("Tree", {
 
     // Actually apply the patches.
     // It might be called multiple times after startApplyingPatchesFromManager.
-    // Patches are applied individually so that one failing patch (e.g. referencing
-    // a node that was already removed) does not prevent subsequent patches from
-    // being applied. This makes history scrubbing more resilient.
+    // Try applying all patches in a single batch for performance. If that fails,
+    // fall back to per-patch application so one bad patch does not prevent
+    // subsequent patches from being applied.
     applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
-      for (const patch of patchesToApply) {
-        try {
-          applyPatch(self, [patch]);
-        } catch (e) {
-          if (DEBUG_HISTORY) {
-            // eslint-disable-next-line no-console
-            console.warn("Failed to apply history patch", patch, e);
+      try {
+        applyPatch(self, patchesToApply as IJsonPatch[]);
+      } catch (e) {
+        if (DEBUG_HISTORY) {
+          // eslint-disable-next-line no-console
+          console.warn("Failed to apply history patches in batch, falling back to per-patch application", e);
+        }
+        for (const patch of patchesToApply) {
+          try {
+            applyPatch(self, [patch]);
+          } catch (perPatchError) {
+            if (DEBUG_HISTORY) {
+              // eslint-disable-next-line no-console
+              console.warn("Failed to apply history patch", patch, perPatchError);
+            }
           }
         }
       }
