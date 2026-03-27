@@ -15,10 +15,11 @@
   .initials {
     color: white;
     background-color: $problem-orange-light-3;
-    width: 36px;
+    padding: 0 8px;
+    white-space: nowrap;
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: center;
 
     &.planning-doc {
       background-color: $learninglog-green-light-4;

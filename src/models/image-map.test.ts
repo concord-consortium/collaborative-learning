@@ -326,7 +326,7 @@ describe("ImageMap", () => {
                 expect(image.displayUrl).toBe(placeholderImage);
                 expect(image.width).toBe(200);
                 expect(image.height).toBe(150);
-                expect(consoleSpy).toBeCalledTimes(1);
+                expect(consoleSpy).toHaveBeenCalledTimes(1);
               });
     });
 
@@ -404,7 +404,7 @@ describe("ImageMap", () => {
       return sImageMap.getImage(":")
               .then(image => {
                 expect(image.displayUrl).toBe(placeholderImage);
-                expect(consoleSpy).toBeCalled();
+                expect(consoleSpy).toHaveBeenCalled();
               });
     });
 
@@ -504,7 +504,7 @@ describe("ImageMap", () => {
         displayUrl: placeholderImage,
         retries: 1
       });
-      expect(consoleSpy).toBeCalledTimes(1);
+      expect(consoleSpy).toHaveBeenCalledTimes(1);
 
       const returnedEntry = await getImagePromise;
       expect(returnedEntry).toEqual({
@@ -588,7 +588,7 @@ describe("ImageMap", () => {
     it("returns undefined when no URL is passed to it", () => {
       const consoleSpy = jest.spyOn(global.console, "warn").mockImplementation();
       expect(sImageMap.getImageEntry("")).toBeUndefined();
-      expect(consoleSpy).toBeCalled();
+      expect(consoleSpy).toHaveBeenCalled();
     });
     it("limits the number times it retries entries that have failed", () => {
       const mockHandler: any = {
@@ -792,7 +792,7 @@ describe("ImageMap", () => {
       const entryReturned = await addImagePromise;
       // It returns the entry, without computing the dimensions
       expect(entryReturned).toEqual(expectedEntry);
-      expect(dimSpy).not.toBeCalled();
+      expect(dimSpy).not.toHaveBeenCalled();
 
       function resetEntryInMap(status: EntryStatus) {
         Object.assign(entryInMap!, {
@@ -838,7 +838,7 @@ describe("ImageMap", () => {
       }));
       expect(returnedEntry.status).toBe(EntryStatus.Error);
       expect(sImageMap.getCachedImage(kLocalImageUrl)).toBe(returnedEntry);
-      expect(dimSpy).toBeCalled();
+      expect(dimSpy).toHaveBeenCalled();
     });
   });
 });

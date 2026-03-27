@@ -84,7 +84,7 @@ export const
   hoverRadiusFactor = 1.0,
   kGraphFont = "12px sans-serif",
   kChoroplethHeight = 16,
-  kTopAndRightDefaultExtent = 3,
+  kTopAndRightDefaultExtent = 14,
   kTickAndGridColor = "#bfbfbf",
   kTickFontColor = "#3f3f3f",
   kAxisStrokeWidth = 2,

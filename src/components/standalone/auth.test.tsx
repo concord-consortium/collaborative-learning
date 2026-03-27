@@ -125,15 +125,18 @@ describe("Standalone Auth helpers", () => {
   });
 
   describe("getFinalAuthenticatedState", () => {
-    // functions to mock and reset window.location and url params
-    const originalLocation = window.location;
-    const mockWindowLocation = (newLocation: Location | URL) => {
-      delete (window as any).location;
-      (window as any).location = newLocation as Location;
+    // In Jest 30/jsdom, window.location is not easily mockable.
+    // We use jsdom's reconfigure method exposed by our custom test environment.
+    const originalHref = window.location.href;
+
+    const setLocation = (url: string) => {
+      (global as any).jsdom.reconfigure({ url });
       reprocessUrlParams();
     };
-    const setLocation = (url: string) => mockWindowLocation(new URL(url));
-    afterEach(() => mockWindowLocation(originalLocation));
+
+    afterEach(() => {
+      setLocation(originalHref);
+    });
 
     it("should return 'startingCLUE' state if classId, offeringId, and classWord are present", () => {
       // unit must be set in the URL params

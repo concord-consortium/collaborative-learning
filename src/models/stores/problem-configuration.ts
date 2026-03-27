@@ -28,4 +28,7 @@ export interface ProblemConfiguration {
   placeholderText: string;
   stamps: SnapshotIn<typeof StampModel>[];
   settings: SnapshotIn<typeof SettingsMstType>;
+  // default panel layout when user first visits a problem
+  // "split" (default) shows both panels; "workspace-only" collapses resources; "resources-only" collapses workspace
+  defaultPanelLayout?: "split" | "workspace-only" | "resources-only";
 }

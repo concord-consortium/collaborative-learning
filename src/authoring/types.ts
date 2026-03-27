@@ -53,6 +53,7 @@ export interface IUnitConfig {
   hide4up?: boolean;
   sortWorkConfig?: ISortWorkConfig;
   termOverrides?: Record<string, string>;
+  defaultPanelLayout?: "split" | "workspace-only" | "resources-only";
 }
 
 export interface IAuthorTool {

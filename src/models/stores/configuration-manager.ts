@@ -203,6 +203,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["showIdeasButton"]>("showIdeasButton");
   }
 
+  get groupDocumentsEnabled() {
+    return this.getProp<UC["groupDocumentsEnabled"]>("groupDocumentsEnabled");
+  }
+
   get hide4up() {
     return this.getProp<UC["hide4up"]>("hide4up");
   }
@@ -213,6 +217,10 @@ export class ConfigurationManager implements UnitConfiguration {
 
   get termOverrides() {
     return this.getProp<UC["termOverrides"]>("termOverrides");
+  }
+
+  get defaultPanelLayout() {
+    return this.getProp<UC["defaultPanelLayout"]>("defaultPanelLayout");
   }
 
   get settings(): UC["settings"]  {

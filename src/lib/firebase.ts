@@ -147,8 +147,14 @@ export class Firebase {
     return this.getFullPath(this.getDocumentPath(document, user));
   }
 
-  // convenience function which returns all of the relevant paths for a given document
-  public getUserDocumentPaths(user: UserModelType, documentType: string, documentKey: string, userId?: string) {
+  /**
+   *  Returns all of the relevant paths for a given document
+   */
+  public getDocumentPaths(user: UserModelType, document: DocumentModelType) {
+    const documentType = document.type;
+    const documentKey = document.key;
+    const userId = document.uid;
+
     const content = this.getUserDocumentPath(user, documentKey, userId);
     const metadata = this.getUserDocumentMetadataPath(user, documentKey, userId);
     const typedMetadataMap: Record<string, () => string> = {

@@ -13,12 +13,12 @@ import { upperWords } from "../utilities/string-utils";
 const ariaLabels = {
   // Landmark regions
   header: "CLUE Header",
-  resourcesPane: "Lessons and Documents",
+  get resourcesPane() { return translate("resourcesPanel"); },
   get workspacePane() { return upperWords(translate("workspace")); },
   documentTiles: "Document tiles",
 
   // Navigation
-  skipToResources: "Skip to Lessons and Documents",
+  get skipToResources() { return `Skip to ${translate("resourcesPanel")}`; },
   get skipToWorkspace() { return `Skip to ${upperWords(translate("workspace"))}`; },
   skipToDashboard: "Skip to Dashboard",
   resourceTabs: "Resource navigation",

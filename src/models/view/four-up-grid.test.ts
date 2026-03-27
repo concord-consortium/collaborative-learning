@@ -10,7 +10,7 @@ describe("four-up grid model", () => {
         ]
       });
     };
-    expect(invalidCells).toThrowError(Error);
+    expect(invalidCells).toThrow(Error);
   });
 
   it("sets default values", () => {

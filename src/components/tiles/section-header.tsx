@@ -2,7 +2,9 @@ import React from "react";
 import { inject } from "mobx-react";
 import classNames from "classnames";
 import { BaseComponent } from "../base";
-import { SectionType, getSectionInitials, getSectionTitle } from "../../models/curriculum/section";
+import {
+  SectionType, getSectionInitials, getSectionTitle, getMaxInitialsLength
+} from "../../models/curriculum/section";
 
 import "./section-header.scss";
 
@@ -23,7 +25,10 @@ export class SectionHeader extends BaseComponent<IProps> {
     return (
       <div id={`section_${initials}`} className={rowSectionHeaderClassNames} data-test="section-header"
           onMouseDown={this.handleMouseDown} >
-        <div className={`initials ${typeClass}`}>{initials}</div>
+        <div className={classNames("initials", typeClass)}
+            style={{ minWidth: `${getMaxInitialsLength() + 1}ch` }}>
+          {initials}
+        </div>
         <div className="title">{title}</div>
       </div>
     );

@@ -2,6 +2,9 @@
   "compilerOptions": {
     "module": "nodenext",
     "resolveJsonModule": true,
+    "paths": {
+      "seisplotjs/nodeonly": ["../node_modules/seisplotjs/dist/index_node"]
+    },
     "types": ["node"]
   }
 }

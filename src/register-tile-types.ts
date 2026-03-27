@@ -78,6 +78,14 @@ const gTileRegistration: Record<string, () => void> = {
   ]),
   "Text": loggedLoad("Text", () => [
     import(/* webpackChunkName: "Text" */"./models/tiles/text/text-registration")
+  ]),
+  "Timeline": loggedLoad("Timeline", () => [
+    import(/* webpackChunkName: "Timeline" */"./plugins/timeline/timeline-registration"),
+    import(/* webpackChunkName: "SharedSeismogram" */"./plugins/shared-seismogram/shared-seismogram-registration")
+  ]),
+  "WaveRunner": loggedLoad("WaveRunner", () => [
+    import(/* webpackChunkName: "WaveRunner" */"./plugins/wave-runner/wave-runner-registration"),
+    import(/* webpackChunkName: "SharedSeismogram" */"./plugins/shared-seismogram/shared-seismogram-registration")
   ])
 };
 

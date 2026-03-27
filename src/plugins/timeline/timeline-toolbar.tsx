@@ -1,0 +1,109 @@
+import React, { useContext } from "react";
+import { observer } from "mobx-react-lite";
+import { TileModelContext } from "../../components/tiles/tile-api";
+import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button";
+import {
+  IToolbarButtonComponentProps, registerTileToolbarButtons
+} from "../../components/toolbar/toolbar-button-manager";
+import { isTimelineContentModel } from "./models/timeline-content";
+
+import TableItIcon from "./assets/toolbar/table-it-icon.svg";
+import DataCardItIcon from "./assets/toolbar/data-card-it-icon.svg";
+import BarGraphItIcon from "./assets/toolbar/bar-graph-it-icon.svg";
+import ZoomInIcon from "./assets/toolbar/zoom-in-icon.svg";
+import ZoomOutIcon from "./assets/toolbar/zoom-out-icon.svg";
+import ZoomToFitIcon from "./assets/toolbar/zoom-to-fit-icon.svg";
+
+function TableItButton({ name }: IToolbarButtonComponentProps) {
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Table It!"
+      onClick={() => undefined}
+      disabled={true}
+    >
+      <TableItIcon/>
+    </TileToolbarButton>
+  );
+}
+
+function DataCardItButton({ name }: IToolbarButtonComponentProps) {
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Data Card It!"
+      onClick={() => undefined}
+      disabled={true}
+    >
+      <DataCardItIcon/>
+    </TileToolbarButton>
+  );
+}
+
+function BarGraphItButton({ name }: IToolbarButtonComponentProps) {
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Bar Graph It!"
+      onClick={() => undefined}
+      disabled={true}
+    >
+      <BarGraphItIcon/>
+    </TileToolbarButton>
+  );
+}
+
+const ZoomInButton = observer(function ZoomInButton({ name }: IToolbarButtonComponentProps) {
+  const model = useContext(TileModelContext);
+  const content = isTimelineContentModel(model?.content) ? model?.content : undefined;
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Zoom In"
+      onClick={() => content?.zoom(0.5)}
+      disabled={!content?.canZoomIn}
+    >
+      <ZoomInIcon/>
+    </TileToolbarButton>
+  );
+});
+
+const ZoomOutButton = observer(function ZoomOutButton({ name }: IToolbarButtonComponentProps) {
+  const model = useContext(TileModelContext);
+  const content = isTimelineContentModel(model?.content) ? model?.content : undefined;
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Zoom Out"
+      onClick={() => content?.zoom(2)}
+      disabled={!content?.canZoomOut}
+    >
+      <ZoomOutIcon/>
+    </TileToolbarButton>
+  );
+});
+
+const ViewAllButton = observer(function ViewAllButton({ name }: IToolbarButtonComponentProps) {
+  const model = useContext(TileModelContext);
+  const content = isTimelineContentModel(model?.content) ? model?.content : undefined;
+  return (
+    <TileToolbarButton
+      name={name}
+      title="View All"
+      onClick={() => content?.fitToData()}
+      disabled={!content?.canFitToData}
+    >
+      <ZoomToFitIcon/>
+    </TileToolbarButton>
+  );
+});
+
+registerTileToolbarButtons("timeline",
+[
+  { name: "table-it", component: TableItButton },
+  { name: "data-card-it", component: DataCardItButton },
+  { name: "bar-graph-it", component: BarGraphItButton },
+  { name: "zoom-in", component: ZoomInButton },
+  { name: "zoom-out", component: ZoomOutButton },
+  { name: "view-all", component: ViewAllButton }
+]);

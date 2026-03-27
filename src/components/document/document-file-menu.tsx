@@ -13,6 +13,7 @@ interface IProps {
   onNewDocument?: () => void;
   isOpenDisabled?: boolean;
   onOpenDocument?: (document: DocumentModelType) => void;
+  onOpenGroupDocument?: (document: DocumentModelType) => void;
   isCopyDisabled?: boolean;
   onCopyDocument?: (document: DocumentModelType) => void;
   isDeleteDisabled?: boolean;
@@ -47,6 +48,7 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
   const { document,
           onNewDocument,
           isOpenDisabled, onOpenDocument,
+          onOpenGroupDocument,
           isCopyDisabled, onCopyDocument,
           isDeleteDisabled, onDeleteDocument,
           onAdminDestroyDocument } = props;
@@ -65,6 +67,9 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
     onClick: () => onAdminDestroyDocument?.(document)
   };
   const adminItems = onAdminDestroyDocument && (appMode === "dev") ? [adminDestroyDocumentItem] : [];
+  const { appConfig, user } = stores;
+  const groupsPermitted = !appConfig.autoAssignStudentsToIndividualGroups;
+  const showGroupDocOption = appConfig.groupDocumentsEnabled && groupsPermitted && !!user.currentGroupId;
 
   let publishOption: ICustomDropdownItem[] = [];
   if (showPublishOption(document, stores)) {
@@ -74,6 +79,18 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
         text: "Publish...",
         disabled: false,
         onClick: () => { showPublishDialog(); }
+      }
+    ];
+  }
+
+  let groupDocOption: ICustomDropdownItem[] = [];
+  if (showGroupDocOption) {
+    groupDocOption = [
+      {
+        ...idAndIcon("icon-open-group-doc", appIcons),
+        text: "Group Doc",
+        disabled: false,
+        onClick: () => onOpenGroupDocument?.(document)
       }
     ];
   }
@@ -91,6 +108,7 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
       disabled: !!isOpenDisabled,
       onClick: () => onOpenDocument?.(document)
     },
+    ...groupDocOption,
     ...publishOption,
     {
       ...idAndIcon("icon-copy-workspace", appIcons),

@@ -80,9 +80,7 @@ const CommentItem: React.FC<ICommentItemProps> = ({
     // Don't intercept clicks on delete button or links
     const target = e.target as HTMLElement;
     if (target.closest(".delete-message-icon-container") || target.closest("a")) return;
-    // Stop propagation so the card-level click handler (which selects the tile)
-    // doesn't fire — clicking a comment should deselect tiles, not select them.
-    e.stopPropagation();
+    // Let the click propagate to the card-level handler so the tile gets selected.
     onCommentClick?.(comment.id);
   }, [comment.id, onCommentClick]);
 
@@ -104,7 +102,6 @@ const CommentItem: React.FC<ICommentItemProps> = ({
           </div>
         }
       </div>
-      {renderRatingButtons(comment)}
       {
         displayTags &&
         <div className="comment-dropdown-tag">
@@ -123,6 +120,7 @@ const CommentItem: React.FC<ICommentItemProps> = ({
             </a>
         }
       </div>
+      {renderRatingButtons(comment)}
     </div>
   );
 };

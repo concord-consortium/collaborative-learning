@@ -138,39 +138,39 @@ describe("DocumentContentModel -- shared Models --", () => {
       };
       documentContent.moveTiles(dragTiles, dropRowInfo);
       expect(getSnapshot(documentContent)).toMatchInlineSnapshot(`
-Object {
-  "annotations": Object {},
-  "rowMap": Object {
-    "testid-6": Object {
+{
+  "annotations": {},
+  "rowMap": {
+    "testid-6": {
       "height": undefined,
       "id": "testid-6",
       "isSectionHeader": false,
       "sectionId": undefined,
-      "tiles": Array [
-        Object {
+      "tiles": [
+        {
           "tileId": "graphTool",
           "widthPct": undefined,
         },
-        Object {
+        {
           "tileId": "tableTool",
           "widthPct": undefined,
         },
       ],
     },
   },
-  "rowOrder": Array [
+  "rowOrder": [
     "testid-6",
   ],
-  "sharedModelMap": Object {
-    "sharedDataSet1": Object {
+  "sharedModelMap": {
+    "sharedDataSet1": {
       "provider": "tableTool",
-      "sharedModel": Object {
-        "dataSet": Object {
-          "attributes": Array [
-            Object {
+      "sharedModel": {
+        "dataSet": {
+          "attributes": [
+            {
               "clientKey": "",
               "description": undefined,
-              "formula": Object {
+              "formula": {
                 "display": "",
               },
               "hidden": false,
@@ -180,16 +180,16 @@ Object {
               "sourceID": undefined,
               "title": "",
               "units": "",
-              "values": Array [
+              "values": [
                 "1",
                 "2",
                 "3",
               ],
             },
-            Object {
+            {
               "clientKey": "",
               "description": undefined,
-              "formula": Object {
+              "formula": {
                 "display": "",
               },
               "hidden": false,
@@ -199,21 +199,21 @@ Object {
               "sourceID": undefined,
               "title": "",
               "units": "",
-              "values": Array [
+              "values": [
                 "-1",
                 "0",
                 "1",
               ],
             },
           ],
-          "cases": Array [
-            Object {
+          "cases": [
+            {
               "__id__": "HR3at2-RqvnRaT9z",
             },
-            Object {
+            {
               "__id__": "O3SmGUb4iRPw29HU",
             },
-            Object {
+            {
               "__id__": "76WRbhQpTu2Wqy1c",
             },
           ],
@@ -227,25 +227,25 @@ Object {
         "providerId": "tableTool",
         "type": "SharedDataSet",
       },
-      "tiles": Array [
+      "tiles": [
         "tableTool",
         "graphTool",
       ],
     },
   },
-  "tileMap": Object {
-    "graphTool": Object {
-      "content": Object {
+  "tileMap": {
+    "graphTool": {
+      "content": {
         "bgImage": undefined,
-        "board": Object {
-          "xAxis": Object {
+        "board": {
+          "xAxis": {
             "label": undefined,
             "min": -2,
             "name": undefined,
             "range": undefined,
             "unit": 18.3,
           },
-          "yAxis": Object {
+          "yAxis": {
             "label": undefined,
             "min": -1,
             "name": undefined,
@@ -254,12 +254,12 @@ Object {
           },
         },
         "isNavigatorVisible": true,
-        "linkedAttributeColors": Object {},
+        "linkedAttributeColors": {},
         "navigatorPosition": "bottom",
-        "objects": Object {},
+        "objects": {},
         "offsetX": 0,
         "offsetY": 0,
-        "pointMetadata": Object {},
+        "pointMetadata": {},
         "type": "Geometry",
         "zoom": 1,
       },
@@ -270,12 +270,12 @@ Object {
       "title": undefined,
       "updatedHash": "5faefa6a838fb8d6c69e520146666176cce3219ed34cad6cf82c438ca8adf6a0",
     },
-    "tableTool": Object {
-      "content": Object {
-        "columnWidths": Object {},
-        "importedDataSet": Object {
-          "attributes": Array [],
-          "cases": Array [],
+    "tableTool": {
+      "content": {
+        "columnWidths": {},
+        "importedDataSet": {
+          "attributes": [],
+          "cases": [],
           "id": "testid-7",
           "name": undefined,
           "sortByAttribute": undefined,
@@ -316,35 +316,35 @@ Object {
       // FIXME: the ids here are not going to be consistent, so we should
       // reset them in beforeEach
       expect(getSnapshot(targetDocument)).toMatchInlineSnapshot(`
-Object {
-  "annotations": Object {},
-  "rowMap": Object {
-    "testid-21": Object {
+{
+  "annotations": {},
+  "rowMap": {
+    "testid-21": {
       "height": undefined,
       "id": "testid-21",
       "isSectionHeader": false,
       "sectionId": undefined,
-      "tiles": Array [
-        Object {
+      "tiles": [
+        {
           "tileId": "testid-20",
           "widthPct": undefined,
         },
       ],
     },
   },
-  "rowOrder": Array [
+  "rowOrder": [
     "testid-21",
   ],
-  "sharedModelMap": Object {
-    "testid-17": Object {
+  "sharedModelMap": {
+    "testid-17": {
       "provider": "testid-20",
-      "sharedModel": Object {
-        "dataSet": Object {
-          "attributes": Array [
-            Object {
+      "sharedModel": {
+        "dataSet": {
+          "attributes": [
+            {
               "clientKey": "",
               "description": undefined,
-              "formula": Object {
+              "formula": {
                 "display": "",
               },
               "hidden": false,
@@ -354,16 +354,16 @@ Object {
               "sourceID": undefined,
               "title": "",
               "units": "",
-              "values": Array [
+              "values": [
                 "1",
                 "2",
                 "3",
               ],
             },
-            Object {
+            {
               "clientKey": "",
               "description": undefined,
-              "formula": Object {
+              "formula": {
                 "display": "",
               },
               "hidden": false,
@@ -373,21 +373,21 @@ Object {
               "sourceID": undefined,
               "title": "",
               "units": "",
-              "values": Array [
+              "values": [
                 "-1",
                 "0",
                 "1",
               ],
             },
           ],
-          "cases": Array [
-            Object {
+          "cases": [
+            {
               "__id__": "caseid-0",
             },
-            Object {
+            {
               "__id__": "caseid-1",
             },
-            Object {
+            {
               "__id__": "caseid-2",
             },
           ],
@@ -401,18 +401,18 @@ Object {
         "providerId": "testid-20",
         "type": "SharedDataSet",
       },
-      "tiles": Array [
+      "tiles": [
         "testid-20",
       ],
     },
   },
-  "tileMap": Object {
-    "testid-20": Object {
-      "content": Object {
-        "columnWidths": Object {},
-        "importedDataSet": Object {
-          "attributes": Array [],
-          "cases": Array [],
+  "tileMap": {
+    "testid-20": {
+      "content": {
+        "columnWidths": {},
+        "importedDataSet": {
+          "attributes": [],
+          "cases": [],
           "id": "testid-12",
           "name": undefined,
           "sortByAttribute": undefined,
@@ -450,39 +450,39 @@ Object {
       // FIXME: the ids here are not going to be consistent, so we should
       // reset them in beforeEach
       expect(getSnapshot(targetDocument)).toMatchInlineSnapshot(`
-Object {
-  "annotations": Object {},
-  "rowMap": Object {
-    "testid-28": Object {
+{
+  "annotations": {},
+  "rowMap": {
+    "testid-28": {
       "height": undefined,
       "id": "testid-28",
       "isSectionHeader": false,
       "sectionId": undefined,
-      "tiles": Array [
-        Object {
+      "tiles": [
+        {
           "tileId": "textTool",
           "widthPct": undefined,
         },
-        Object {
+        {
           "tileId": "testid-34",
           "widthPct": undefined,
         },
       ],
     },
   },
-  "rowOrder": Array [
+  "rowOrder": [
     "testid-28",
   ],
-  "sharedModelMap": Object {
-    "testid-31": Object {
+  "sharedModelMap": {
+    "testid-31": {
       "provider": "testid-34",
-      "sharedModel": Object {
-        "dataSet": Object {
-          "attributes": Array [
-            Object {
+      "sharedModel": {
+        "dataSet": {
+          "attributes": [
+            {
               "clientKey": "",
               "description": undefined,
-              "formula": Object {
+              "formula": {
                 "display": "",
               },
               "hidden": false,
@@ -492,16 +492,16 @@ Object {
               "sourceID": undefined,
               "title": "",
               "units": "",
-              "values": Array [
+              "values": [
                 "1",
                 "2",
                 "3",
               ],
             },
-            Object {
+            {
               "clientKey": "",
               "description": undefined,
-              "formula": Object {
+              "formula": {
                 "display": "",
               },
               "hidden": false,
@@ -511,21 +511,21 @@ Object {
               "sourceID": undefined,
               "title": "",
               "units": "",
-              "values": Array [
+              "values": [
                 "-1",
                 "0",
                 "1",
               ],
             },
           ],
-          "cases": Array [
-            Object {
+          "cases": [
+            {
               "__id__": "caseid-3",
             },
-            Object {
+            {
               "__id__": "caseid-4",
             },
-            Object {
+            {
               "__id__": "caseid-5",
             },
           ],
@@ -539,18 +539,18 @@ Object {
         "providerId": "testid-34",
         "type": "SharedDataSet",
       },
-      "tiles": Array [
+      "tiles": [
         "testid-34",
       ],
     },
   },
-  "tileMap": Object {
-    "testid-34": Object {
-      "content": Object {
-        "columnWidths": Object {},
-        "importedDataSet": Object {
-          "attributes": Array [],
-          "cases": Array [],
+  "tileMap": {
+    "testid-34": {
+      "content": {
+        "columnWidths": {},
+        "importedDataSet": {
+          "attributes": [],
+          "cases": [],
           "id": "testid-24",
           "name": undefined,
           "sortByAttribute": undefined,
@@ -567,10 +567,10 @@ Object {
       "title": undefined,
       "updatedHash": "bf6efb008cb9048ef82b551651c76a15ed948932a17ca38054ab3f2e26942395",
     },
-    "textTool": Object {
-      "content": Object {
+    "textTool": {
+      "content": {
         "format": undefined,
-        "highlightedText": Array [],
+        "highlightedText": [],
         "text": "",
         "type": "Text",
       },
@@ -599,39 +599,39 @@ Object {
       // FIXME: the ids here are not going to be consistent, so we should
       // reset them in beforeEach
       expect(getSnapshot(targetDocument)).toMatchInlineSnapshot(`
-Object {
-  "annotations": Object {},
-  "rowMap": Object {
-    "testid-48": Object {
+{
+  "annotations": {},
+  "rowMap": {
+    "testid-48": {
       "height": undefined,
       "id": "testid-48",
       "isSectionHeader": false,
       "sectionId": undefined,
-      "tiles": Array [
-        Object {
+      "tiles": [
+        {
           "tileId": "testid-46",
           "widthPct": undefined,
         },
-        Object {
+        {
           "tileId": "testid-47",
           "widthPct": undefined,
         },
       ],
     },
   },
-  "rowOrder": Array [
+  "rowOrder": [
     "testid-48",
   ],
-  "sharedModelMap": Object {
-    "testid-43": Object {
+  "sharedModelMap": {
+    "testid-43": {
       "provider": "testid-46",
-      "sharedModel": Object {
-        "dataSet": Object {
-          "attributes": Array [
-            Object {
+      "sharedModel": {
+        "dataSet": {
+          "attributes": [
+            {
               "clientKey": "",
               "description": undefined,
-              "formula": Object {
+              "formula": {
                 "display": "",
               },
               "hidden": false,
@@ -641,16 +641,16 @@ Object {
               "sourceID": undefined,
               "title": "",
               "units": "",
-              "values": Array [
+              "values": [
                 "1",
                 "2",
                 "3",
               ],
             },
-            Object {
+            {
               "clientKey": "",
               "description": undefined,
-              "formula": Object {
+              "formula": {
                 "display": "",
               },
               "hidden": false,
@@ -660,21 +660,21 @@ Object {
               "sourceID": undefined,
               "title": "",
               "units": "",
-              "values": Array [
+              "values": [
                 "-1",
                 "0",
                 "1",
               ],
             },
           ],
-          "cases": Array [
-            Object {
+          "cases": [
+            {
               "__id__": "caseid-6",
             },
-            Object {
+            {
               "__id__": "caseid-7",
             },
-            Object {
+            {
               "__id__": "caseid-8",
             },
           ],
@@ -688,19 +688,19 @@ Object {
         "providerId": "testid-46",
         "type": "SharedDataSet",
       },
-      "tiles": Array [
+      "tiles": [
         "testid-46",
         "testid-47",
       ],
     },
   },
-  "tileMap": Object {
-    "testid-46": Object {
-      "content": Object {
-        "columnWidths": Object {},
-        "importedDataSet": Object {
-          "attributes": Array [],
-          "cases": Array [],
+  "tileMap": {
+    "testid-46": {
+      "content": {
+        "columnWidths": {},
+        "importedDataSet": {
+          "attributes": [],
+          "cases": [],
           "id": "testid-37",
           "name": undefined,
           "sortByAttribute": undefined,
@@ -717,18 +717,18 @@ Object {
       "title": undefined,
       "updatedHash": "ce1722ac802435259cd5159bc84abc42e4c04111d0b538d13cd5af2edeced810",
     },
-    "testid-47": Object {
-      "content": Object {
+    "testid-47": {
+      "content": {
         "bgImage": undefined,
-        "board": Object {
-          "xAxis": Object {
+        "board": {
+          "xAxis": {
             "label": undefined,
             "min": -2,
             "name": undefined,
             "range": undefined,
             "unit": 18.3,
           },
-          "yAxis": Object {
+          "yAxis": {
             "label": undefined,
             "min": -1,
             "name": undefined,
@@ -737,12 +737,12 @@ Object {
           },
         },
         "isNavigatorVisible": true,
-        "linkedAttributeColors": Object {},
+        "linkedAttributeColors": {},
         "navigatorPosition": "bottom",
-        "objects": Object {},
+        "objects": {},
         "offsetX": 0,
         "offsetY": 0,
-        "pointMetadata": Object {},
+        "pointMetadata": {},
         "type": "Geometry",
         "zoom": 1,
       },

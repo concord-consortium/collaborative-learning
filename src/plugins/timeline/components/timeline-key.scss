@@ -1,0 +1,12 @@
+.timeline-key {
+  display: flex;
+
+  .key-title {
+    font-weight: bold;
+    margin-right: 5px;
+  }
+
+  .event-types {
+    display: flex;
+  }
+}

@@ -1,0 +1,54 @@
+@import "../../../components/vars";
+
+.wave-runner-tile {
+  .waveform-container {
+    width: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+  .waveform-loading,
+  .waveform-error {
+    font-style: italic;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .download-status-container {
+    height: 12px;
+    width: 100%;
+    background-color: white;
+  }
+
+  .estimated-time {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 5px;
+  }
+
+  .status-counts-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 10px;
+
+    .status-count {
+      display: flex;
+      align-items: center;
+
+      .status-count-label {
+        margin-right: 5px;
+      }
+
+      .status-count-box {
+        width: 34px;
+        height: 26px;
+        background-color: white;
+        border-radius: 5px;
+      }
+    }
+  }
+}

@@ -133,18 +133,18 @@ describe("tile dragging", () => {
         // But having them inline seems more valuable than consistent indentation
         /*eslint-disable max-len*/
         expect(items).toMatchInlineSnapshot(`
-Array [
-  Object {
+[
+  {
     "rowHeight": undefined,
     "rowIndex": 0,
-    "rowList": Object {
-      "rowOrder": Array [
+    "rowList": {
+      "rowOrder": [
         "testid-3",
         "testid-4",
         "testid-5",
       ],
     },
-    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 1\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\",\\"highlightedText\\":[]},\\"createdHash\\":\\"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674\\",\\"updatedHash\\":\\"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674\\"}",
+    "tileContent": "{"id":"testid-1000","title":"tile 1","fixedPosition":false,"content":{"type":"Text","text":"","highlightedText":[]},"createdHash":"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674","updatedHash":"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674"}",
     "tileId": "tile1",
     "tileIndex": 0,
     "tileType": "Text",
@@ -160,33 +160,33 @@ Array [
 
         /*eslint-disable max-len*/
         expect(items).toMatchInlineSnapshot(`
-Array [
-  Object {
+[
+  {
     "rowHeight": undefined,
     "rowIndex": 0,
-    "rowList": Object {
-      "rowOrder": Array [
+    "rowList": {
+      "rowOrder": [
         "testid-3",
         "testid-4",
         "testid-5",
       ],
     },
-    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 1\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\",\\"highlightedText\\":[]},\\"createdHash\\":\\"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674\\",\\"updatedHash\\":\\"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674\\"}",
+    "tileContent": "{"id":"testid-1000","title":"tile 1","fixedPosition":false,"content":{"type":"Text","text":"","highlightedText":[]},"createdHash":"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674","updatedHash":"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674"}",
     "tileId": "tile1",
     "tileIndex": 0,
     "tileType": "Text",
   },
-  Object {
+  {
     "rowHeight": undefined,
     "rowIndex": 1,
-    "rowList": Object {
-      "rowOrder": Array [
+    "rowList": {
+      "rowOrder": [
         "testid-3",
         "testid-4",
         "testid-5",
       ],
     },
-    "tileContent": "{\\"id\\":\\"testid-1001\\",\\"title\\":\\"tile 2\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\",\\"highlightedText\\":[]},\\"createdHash\\":\\"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674\\",\\"updatedHash\\":\\"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674\\"}",
+    "tileContent": "{"id":"testid-1001","title":"tile 2","fixedPosition":false,"content":{"type":"Text","text":"","highlightedText":[]},"createdHash":"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674","updatedHash":"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674"}",
     "tileId": "tile2",
     "tileIndex": 0,
     "tileType": "Text",
@@ -207,18 +207,18 @@ Array [
 
         /*eslint-disable max-len*/
         expect(items).toMatchInlineSnapshot(`
-Array [
-  Object {
+[
+  {
     "rowHeight": undefined,
     "rowIndex": 2,
-    "rowList": Object {
-      "rowOrder": Array [
+    "rowList": {
+      "rowOrder": [
         "testid-3",
         "testid-4",
         "testid-5",
       ],
     },
-    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-6\\",\\"attributes\\":[],\\"cases\\":[],\\"sortDirection\\":\\"NONE\\"},\\"columnWidths\\":{}},\\"createdHash\\":\\"9f121eeeb2005b691080d077172f1d19674c97efc138e3097b3cf3e6873fd6df\\",\\"updatedHash\\":\\"9f121eeeb2005b691080d077172f1d19674c97efc138e3097b3cf3e6873fd6df\\"}",
+    "tileContent": "{"id":"testid-1000","fixedPosition":false,"content":{"type":"Table","isImported":false,"importedDataSet":{"id":"testid-6","attributes":[],"cases":[],"sortDirection":"NONE"},"columnWidths":{}},"createdHash":"9f121eeeb2005b691080d077172f1d19674c97efc138e3097b3cf3e6873fd6df","updatedHash":"9f121eeeb2005b691080d077172f1d19674c97efc138e3097b3cf3e6873fd6df"}",
     "tileId": "tile3",
     "tileIndex": 0,
     "tileType": "Table",
@@ -236,22 +236,22 @@ Array [
         const dragTiles = cleanDragTiles(documentContent.getDragTiles(["tile1"]));
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
-Object {
-  "annotations": Array [],
-  "sharedModels": Array [],
+{
+  "annotations": [],
+  "sharedModels": [],
   "sourceDocId": "testid-7",
-  "tiles": Array [
-    Object {
+  "tiles": [
+    {
       "rowHeight": undefined,
       "rowIndex": 0,
-      "rowList": Object {
-        "rowOrder": Array [
+      "rowList": {
+        "rowOrder": [
           "testid-3",
           "testid-4",
           "testid-5",
         ],
       },
-      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 1\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\",\\"highlightedText\\":[]},\\"createdHash\\":\\"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674\\",\\"updatedHash\\":\\"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674\\"}",
+      "tileContent": "{"id":"testid-1000","title":"tile 1","fixedPosition":false,"content":{"type":"Text","text":"","highlightedText":[]},"createdHash":"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674","updatedHash":"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674"}",
       "tileId": "tile1",
       "tileIndex": 0,
       "tileType": "Text",
@@ -268,37 +268,37 @@ Object {
         const dragTiles = cleanDragTiles(documentContent.getDragTiles(["tile2", "tile1"]));
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
-Object {
-  "annotations": Array [],
-  "sharedModels": Array [],
+{
+  "annotations": [],
+  "sharedModels": [],
   "sourceDocId": "testid-7",
-  "tiles": Array [
-    Object {
+  "tiles": [
+    {
       "rowHeight": undefined,
       "rowIndex": 0,
-      "rowList": Object {
-        "rowOrder": Array [
+      "rowList": {
+        "rowOrder": [
           "testid-3",
           "testid-4",
           "testid-5",
         ],
       },
-      "tileContent": "{\\"id\\":\\"testid-1001\\",\\"title\\":\\"tile 1\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\",\\"highlightedText\\":[]},\\"createdHash\\":\\"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674\\",\\"updatedHash\\":\\"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674\\"}",
+      "tileContent": "{"id":"testid-1001","title":"tile 1","fixedPosition":false,"content":{"type":"Text","text":"","highlightedText":[]},"createdHash":"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674","updatedHash":"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674"}",
       "tileId": "tile1",
       "tileIndex": 0,
       "tileType": "Text",
     },
-    Object {
+    {
       "rowHeight": undefined,
       "rowIndex": 1,
-      "rowList": Object {
-        "rowOrder": Array [
+      "rowList": {
+        "rowOrder": [
           "testid-3",
           "testid-4",
           "testid-5",
         ],
       },
-      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 2\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\",\\"highlightedText\\":[]},\\"createdHash\\":\\"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674\\",\\"updatedHash\\":\\"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674\\"}",
+      "tileContent": "{"id":"testid-1000","title":"tile 2","fixedPosition":false,"content":{"type":"Text","text":"","highlightedText":[]},"createdHash":"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674","updatedHash":"7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674"}",
       "tileId": "tile2",
       "tileIndex": 0,
       "tileType": "Text",
@@ -316,31 +316,31 @@ Object {
 
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
-Object {
-  "annotations": Array [],
-  "sharedModels": Array [
-    Object {
-      "content": "{\\"type\\":\\"SharedDataSet\\",\\"id\\":\\"shared-data-set-1\\",\\"providerId\\":\\"tile3\\",\\"dataSet\\":{\\"id\\":\\"data-set-1\\",\\"name\\":\\"tile 3\\",\\"attributes\\":[{\\"id\\":\\"attribute-1\\",\\"clientKey\\":\\"\\",\\"name\\":\\"x\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{\\"display\\":\\"\\"},\\"values\\":[\\"0\\"],\\"title\\":\\"\\"},{\\"id\\":\\"attribute-2\\",\\"clientKey\\":\\"\\",\\"name\\":\\"y\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{\\"display\\":\\"\\"},\\"values\\":[\\"1\\"],\\"title\\":\\"\\"}],\\"cases\\":[{\\"__id__\\":\\"case-1\\"}],\\"sortDirection\\":\\"NONE\\"}}",
+{
+  "annotations": [],
+  "sharedModels": [
+    {
+      "content": "{"type":"SharedDataSet","id":"shared-data-set-1","providerId":"tile3","dataSet":{"id":"data-set-1","name":"tile 3","attributes":[{"id":"attribute-1","clientKey":"","name":"x","hidden":false,"units":"","formula":{"display":""},"values":["0"],"title":""},{"id":"attribute-2","clientKey":"","name":"y","hidden":false,"units":"","formula":{"display":""},"values":["1"],"title":""}],"cases":[{"__id__":"case-1"}],"sortDirection":"NONE"}}",
       "modelId": "shared-data-set-1",
       "providerId": "tile3",
-      "tileIds": Array [
+      "tileIds": [
         "tile3",
       ],
     },
   ],
   "sourceDocId": "testid-7",
-  "tiles": Array [
-    Object {
+  "tiles": [
+    {
       "rowHeight": undefined,
       "rowIndex": 2,
-      "rowList": Object {
-        "rowOrder": Array [
+      "rowList": {
+        "rowOrder": [
           "testid-3",
           "testid-4",
           "testid-5",
         ],
       },
-      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-6\\",\\"attributes\\":[],\\"cases\\":[],\\"sortDirection\\":\\"NONE\\"},\\"columnWidths\\":{}},\\"createdHash\\":\\"9f121eeeb2005b691080d077172f1d19674c97efc138e3097b3cf3e6873fd6df\\",\\"updatedHash\\":\\"9f121eeeb2005b691080d077172f1d19674c97efc138e3097b3cf3e6873fd6df\\"}",
+      "tileContent": "{"id":"testid-1000","fixedPosition":false,"content":{"type":"Table","isImported":false,"importedDataSet":{"id":"testid-6","attributes":[],"cases":[],"sortDirection":"NONE"},"columnWidths":{}},"createdHash":"9f121eeeb2005b691080d077172f1d19674c97efc138e3097b3cf3e6873fd6df","updatedHash":"9f121eeeb2005b691080d077172f1d19674c97efc138e3097b3cf3e6873fd6df"}",
       "tileId": "tile3",
       "tileIndex": 0,
       "tileType": "Table",

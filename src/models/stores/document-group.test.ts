@@ -3,6 +3,7 @@ import { mock } from "ts-jest-mocker";
 import { DeepPartial } from "utility-types";
 import { SnapshotIn } from "mobx-state-tree";
 
+import { clearTermOverrides, setTermOverrides } from "../../utilities/translation/translate";
 import { createDocumentModel, DocumentModelSnapshotType, DocumentModelType } from "../document/document";
 import { DocumentContentSnapshotType } from "../document/document-content";
 import { ProblemDocument } from '../document/document-types';
@@ -224,6 +225,10 @@ describe('DocumentGroup Model', () => {
   });
 
   describe("byGroup Function", () => {
+    afterEach(() => {
+      clearTermOverrides();
+    });
+
     it('should return a document collection sorted by group names and with the correct documents per group', () => {
       const expectedGroups = [
         { label: "Group 5", index: 0 },
@@ -232,6 +237,25 @@ describe('DocumentGroup Model', () => {
         { label: "Group 3", index: 3 }
       ];
       const byNameGroups = sortedDocuments.sortBy("Name");
+      expectedGroups.forEach(({ label, index }) => {
+        const documentGroup = byNameGroups[index];
+        const documentCollection = documentGroup.byGroup;
+        expect(documentCollection.length).toBe(1);
+        expect(documentCollection[0].label).toBe(label);
+        expect(documentCollection[0].documents.length).toBe(1);
+      });
+    });
+
+    it('should use custom group term when term override is set', () => {
+      setTermOverrides({ studentGroup: "Team" });
+
+      const byNameGroups = sortedDocuments.sortBy("Name");
+      const expectedGroups = [
+        { label: "Team 5", index: 0 },
+        { label: "Team 9", index: 1 },
+        { label: "Team 3", index: 2 },
+        { label: "Team 3", index: 3 }
+      ];
       expectedGroups.forEach(({ label, index }) => {
         const documentGroup = byNameGroups[index];
         const documentCollection = documentGroup.byGroup;

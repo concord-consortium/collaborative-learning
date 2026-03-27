@@ -16,6 +16,13 @@ interface IGetObjectButtonSVGParams {
   objectType?: string;
   translateTilePointToScreenPoint?: (point: [x: number, y: number]) => [x: number, y: number] | undefined;
 }
+// Focus trap elements returned by tile-specific implementations
+export interface ITileFocusableElements {
+  contentElement?: HTMLElement;  // main content area (editor, grid, canvas, etc.)
+  titleElement?: HTMLElement;    // tile title input if visible
+  focusContent?: () => boolean;  // custom focus method for content (e.g., Slate's ReactEditor.focus)
+}
+
 export interface ITileApi {
   isLinked?: () => boolean;
   getLinkedTiles?: () => string[] | undefined;
@@ -23,6 +30,8 @@ export interface ITileApi {
   exportContentAsTileJson?: (options?: ITileExportOptions) => string;
   handleDocumentScroll?: (x: number, y: number) => void;
   handleTileResize?: (entry: TileResizeEntry) => void;
+  // Tile-specific focusable elements for focus trap navigation
+  getFocusableElements?: () => ITileFocusableElements | undefined;
   // Annotation functions
   getObjectBoundingBox?: (objectId: string, objectType?: string) => ObjectBoundingBox | undefined;
   getObjectButtonSVG?: (params: IGetObjectButtonSVGParams) => ReactElement | undefined;
@@ -76,6 +85,11 @@ export type EditableTileApiInterfaceRef = React.MutableRefObject<ITileApiInterfa
 export const EditableTileApiInterfaceRefContext = createContext<EditableTileApiInterfaceRef | null>(null);
 
 export const TileModelContext = createContext<ITileModel | null>(null);
+
+// Callback for toolbar to register its DOM element with tile-component.
+// This avoids a querySelector across the FloatingPortal boundary.
+export type RegisterToolbarCallback = (el: HTMLElement | null) => void;
+export const RegisterToolbarContext = createContext<RegisterToolbarCallback | null>(null);
 
 export interface IAddTilesContext {
   /**

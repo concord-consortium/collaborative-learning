@@ -43,6 +43,12 @@ describe("StarterToolComponent", () => {
     expect(getByText("Hello World")).toBeInTheDocument();
   });
 
+  it("renders an editable tile title", () => {
+    const {container} =
+      render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
+    expect(container.querySelector(".title-area")).toBeInTheDocument();
+  });
+
   it("updates the text when the model changes", async () => {
     const {getByText, findByText} =
       render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);

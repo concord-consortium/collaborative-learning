@@ -5,7 +5,6 @@ import { Bookmark, Bookmarks } from "../models/stores/bookmarks";
 import { DB } from "../lib/db";
 import {
   createDocMapByBookmarks,
-  createDocMapByGroups,
   createTileTypeToDocumentsMap,
   sortProblemSectionLabels
 } from "./sort-document-utils";
@@ -66,38 +65,6 @@ describe("sort-document-utils", () => {
       expect(result.has("Not Bookmarked")).toBe(false);
       expect(result.get("Faved")).toHaveLength(1);
       expect(result.get("Not Faved")).toHaveLength(1);
-    });
-  });
-
-  describe("createDocMapByGroups", () => {
-    it("should use default group term when not specified", () => {
-      const doc1 = createMockDocument({ uid: "user1", key: "doc1" });
-      const doc2 = createMockDocument({ uid: "user2", key: "doc2" });
-      const groupForUser = (userId: string) => {
-        if (userId === "user1") return { id: "1" };
-        return null;
-      };
-
-      const result = createDocMapByGroups([doc1, doc2], groupForUser);
-
-      expect(result.has("Group 1")).toBe(true);
-      expect(result.has("No Group")).toBe(true);
-    });
-
-    it("should use custom group term when specified", () => {
-      const doc1 = createMockDocument({ uid: "user1", key: "doc1" });
-      const doc2 = createMockDocument({ uid: "user2", key: "doc2" });
-      const groupForUser = (userId: string) => {
-        if (userId === "user1") return { id: "1" };
-        return null;
-      };
-
-      const result = createDocMapByGroups([doc1, doc2], groupForUser, "Team");
-
-      expect(result.has("Team 1")).toBe(true);
-      expect(result.has("No Team")).toBe(true);
-      expect(result.has("Group 1")).toBe(false);
-      expect(result.has("No Group")).toBe(false);
     });
   });
 

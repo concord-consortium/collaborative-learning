@@ -28,11 +28,13 @@ export interface DBDocumentMap {
   [key /* documentKey */: string]: DBDocument;
 }
 
+// TODO: unify this with document-types.ts
 export type DBDocumentType = "section" |  // section documents are deprecated
                               "problem" | "planning" | "publication" |
                               "personal" | "personalPublication" |
                               "learningLog" | "learningLogPublication" |
-                              "supportPublication";
+                              "supportPublication" |
+                              "group";
 export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBProblemDocumentMetadata |
                                  DBPersonalDocumentMetadata |
@@ -41,7 +43,8 @@ export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBPublicationDocumentMetadata |
                                  DBPersonalPublicationMetadata |
                                  DBLearningLogPublicationMetadata |
-                                 DBSupportPublicationMetadata;
+                                 DBSupportPublicationMetadata |
+                                 DBGroupDocMetadata;
 
 // metadata written to {classHash}/users/{userId}/documentMetadata for all document types
 export interface DBBaseDocumentMetadata {
@@ -98,6 +101,10 @@ export interface DBSupportPublicationMetadata extends DBBaseProblemDocumentMetad
   type: "supportPublication";
 }
 
+export interface DBGroupDocMetadata extends DBBaseProblemDocumentMetadata {
+  type: "group";
+}
+
 export interface DBGroupUserConnections {
   [key /*userId*/: string]: boolean;
 }
@@ -113,6 +120,14 @@ export interface DBDocument {
   content?: string;
   changeCount?: number;
   type: DBDocumentType;
+}
+
+// Note: group documents do not have any type specific metadata. They have generic metadata,
+// and they mainly use the Firestore metadata instead of the Realtime Database metadata.
+// The Realtime Database is maintained for consistency with other document types, and for
+// firebase functions which look for this metadata.
+export interface DBGroupDocument extends DBDocument {
+  type: "group";
 }
 
 export interface IDocumentProperties {

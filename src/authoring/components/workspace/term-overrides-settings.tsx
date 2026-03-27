@@ -33,6 +33,7 @@ export const termMetadata: TermMetadata[] = [
   getTermMetadata("contentLevel.units", "Term for multiple units of study"),
   getTermMetadata("contentLevel.investigation", "Term for the investigation within a unit"),
   getTermMetadata("contentLevel.investigations", "Term for multiple investigations within a unit"),
+  getTermMetadata("resourcesPanel", "Label for the resources/lessons panel"),
   getTermMetadata("workspace", "The main editing/viewing panel (singular)"),
   getTermMetadata("workspaces", "The main editing/viewing panel (plural)")
 ];

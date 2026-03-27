@@ -6,7 +6,7 @@ import { GroupVirtualDocumentComponent } from "../../components/document/group-v
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModel, DocumentContentModelType } from "../../models/document/document-content";
 import {
-  DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
+  DocumentDragKey, GroupDocument, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
 import { createDefaultSectionedContent } from "../../models/document/sectioned-content";
 import { kImageTileType } from "../../models/tiles/image/image-content";
@@ -89,6 +89,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             document={comparisonDocument}
             workspace={problemWorkspace}
             onNewDocument={this.handleNewDocument}
+            onOpenGroupDocument={this.handleOpenGroupDocument}
             onCopyDocument={this.handleCopyDocument}
             onDeleteDocument={this.handleDeleteDocument}
             toolbar={toolbar}
@@ -102,6 +103,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         document={primaryDocument}
         workspace={problemWorkspace}
         onNewDocument={this.handleNewDocument}
+        onOpenGroupDocument={this.handleOpenGroupDocument}
         onCopyDocument={this.handleCopyDocument}
         onDeleteDocument={this.handleDeleteDocument}
         onAdminDestroyDocument={appMode === "dev" ? this.handleAdminDestroyDocument : undefined}
@@ -144,7 +146,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private async guaranteeInitialDocuments() {
-    const { appConfig: { defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
+    const { appConfig: { defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle,
+              groupDocumentsEnabled },
             db, persistentUI: { problemWorkspace }, sectionsLoadedPromise,
             unit: { planningDocument }, user: { type: role } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
@@ -154,6 +157,17 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       const defaultDocument = await db.guaranteeOpenDefaultDocument(type, documentContent);
       if (defaultDocument) {
         problemWorkspace.setPrimaryDocument(defaultDocument);
+      }
+    } else if (groupDocumentsEnabled) {
+      // If the primary document is a group document, make sure it is opened properly.
+      // This is because group documents are not loaded automatically like other documents.
+      try {
+        const primaryDocMetadata = await db.findFirestoreMetadata(problemWorkspace.primaryDocumentKey);
+        if (primaryDocMetadata && primaryDocMetadata.type === GroupDocument) {
+          db.openDocumentFromFirestoreMetadata(primaryDocMetadata);
+        }
+      } catch (e) {
+        console.warn("Failed to check if primary document is a group document", e);
       }
     }
     // Guarantee the user starts with one learning log
@@ -279,6 +293,15 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         this.handleNewDocumentOpen(docType, title)
         .catch(error => ui.setError(error));
       });
+  };
+
+  private handleOpenGroupDocument = async () => {
+    const { db, persistentUI: { problemWorkspace } } = this.stores;
+    const groupDocument = await db.getOrCreateGroupDocument();
+
+    if (groupDocument) {
+      problemWorkspace.setPrimaryDocument(groupDocument);
+    }
   };
 
   private defaultOtherDocumentContent = (type: OtherDocumentType) => {

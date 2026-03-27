@@ -159,4 +159,43 @@ describe("ConfigurationManager", () => {
     });
   });
 
+  describe("defaultPanelLayout", () => {
+    it("should return undefined when not configured", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      expect(appConfig.defaultPanelLayout).toBeUndefined();
+    });
+
+    it("should return the configured value", () => {
+      const appConfig = AppConfigModel.create({
+        config: { ...unitConfigDefaults, defaultPanelLayout: "workspace-only" }
+      });
+      expect(appConfig.defaultPanelLayout).toBe("workspace-only");
+    });
+
+    it("should cascade from override configs", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      appConfig.setConfigs([{ defaultPanelLayout: "resources-only" }]);
+      expect(appConfig.defaultPanelLayout).toBe("resources-only");
+    });
+  });
+
+  it("should return undefined for groupDocumentsEnabled when not configured", () => {
+    const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+    expect(appConfig.groupDocumentsEnabled).toBeUndefined();
+  });
+
+  it("should return true for groupDocumentsEnabled when set in config", () => {
+    const appConfig = AppConfigModel.create({
+      config: { ...unitConfigDefaults, groupDocumentsEnabled: true }
+    });
+    expect(appConfig.groupDocumentsEnabled).toBe(true);
+  });
+
+  it("should return false for groupDocumentsEnabled when explicitly set to false", () => {
+    const appConfig = AppConfigModel.create({
+      config: { ...unitConfigDefaults, groupDocumentsEnabled: false }
+    });
+    expect(appConfig.groupDocumentsEnabled).toBe(false);
+  });
+
 });

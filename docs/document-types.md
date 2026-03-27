@@ -100,6 +100,14 @@ export interface DBOtherDocument {
 
 Note that only personal documents and learning logs have the `title` property (other document types are given titles automatically) and the `properties` property, which is used to store additional information like whether or not the document has been "deleted" by the user (i.e. should be hidden in the UI).
 
+## Group Documents
+
+Group documents are editable by all members of a group. They are stored under a virtual group user in the standard place for documents. This virtual group user has the form `group_{offeringId}_{groupId}`. Group documents do not have type-specific metadata. Their generic metadata (`DBGroupDocMetadata`) extends `DBBaseProblemDocumentMetadata` with `type: "group"`.
+
+Group documents rely on Firestore metadata as the primary source for loading and querying. The Realtime Database metadata is maintained for consistency and so firebase functions which are watching properties in this metadata work properly with group documents.
+
+The feature is enabled per-unit via `groupDocumentsEnabled` in the unit configuration. Concurrent editing by multiple group members is still a work in progress. See [group-documents.md](group-documents.md) for more details.
+
 ## Publications
 
 The user has the option of publishing many of the preceding document types for the whole class. Under the hood, a published document is just a read-only copy of the document with some additional metadata, e.g. the `originDoc`, which indicates the id of the document from which it was published. A user can publish a given document multiple times, resulting in multiple versions of the published document. By convention, only the most recent version of a given publication is shown in the UI, but all published versions are (currently) maintained internally.

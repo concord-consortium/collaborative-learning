@@ -4,7 +4,8 @@ import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
 import { DocumentModelType } from "../document/document";
 import {
-  DocumentType, ExemplarDocument, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
+  DocumentType, ExemplarDocument, GroupDocument, LearningLogDocument, LearningLogPublication,
+  OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../document/document-types";
 import { getTileEnvironment } from "../tiles/tile-environment";
@@ -13,7 +14,8 @@ import { UserModelType } from "./user";
 import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { Firestore } from "../../lib/firestore";
 import { TreeManagerType } from "../history/tree-manager";
-import { FirestoreHistoryManager } from "../history/firestore-history-manager";
+import { FirestoreHistoryManager, IFirestoreHistoryManagerArgs } from "../history/firestore-history-manager";
+import { FirestoreHistoryManagerConcurrent } from "../history/firestore-history-manager-concurrent";
 import { UserContextProvider } from "./user-context-provider";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
@@ -240,17 +242,46 @@ export const DocumentsModel = types
           // We can consider adding another "type" to this flag indicating the
           // document should be read-only like a network/remote document. Then
           // we can add a warning if it looks like the document should be saving
-          // history but there is firestore or useContext here
+          // history but there isn't firestore or userContext here
           return;
         }
 
         const treeManager = document.treeManagerAPI as TreeManagerType;
 
         // Set up the Firestore history manager to save history entries
-        const firestoreHistoryManager = new FirestoreHistoryManager(firestore, userContextProvider, document);
-        treeManager.addHistoryEntryCompletedListener(
-          firestoreHistoryManager.onHistoryEntryCompleted
-        );
+        // Note: because the FirestoreHistoryManager currently only manages saving history
+        // to Firestore, it'd be cleaner to set it up in the same place that
+        // treeMonitor.enableMonitoring() is called. That only happens when the document
+        // is being edited.
+        // However, in the near future we plan to extend this to also manage
+        // loading history and possibly keeping the document state in sync with the
+        // history.
+        // In the case of loading history this will be needed for any document.
+        const historyManagerArgs: IFirestoreHistoryManagerArgs = {
+          firestore,
+          userContextProvider,
+          treeManager,
+          uploadLocalHistory: true,
+          syncRemoteHistory: false
+        };
+        if (document.type === GroupDocument) {
+          historyManagerArgs.syncRemoteHistory = true;
+          const manager = new FirestoreHistoryManagerConcurrent(historyManagerArgs);
+          treeManager.setHistoryManager(manager);
+        } else {
+          const manager = new FirestoreHistoryManager(historyManagerArgs);
+          treeManager.setHistoryManager(manager);
+        }
+
+        // The history manager is now stored on the treeManager via setHistoryManager.
+        // When the treeManager is no longer referenced anywhere the history manager
+        // will get garbage collected.
+        // A FirestoreHistoryManager is also used when the history is being played back
+        // by the Canvas component. In that case it is a new document copy that is completely
+        // independent. It isn't added to the DocumentsModel. With this approach we aren't
+        // sharing the same history manager. It is wasteful to have two history managers
+        // and two copies of the history data in memory, but that is the easiest way to
+        //  deal with it for now.
       } else {
         console.warn("Document with the same key already exists");
       }
@@ -299,6 +330,10 @@ export const DocumentsModel = types
     // resolve the specified promise with null, i.e. the user has no documents of this type
     const resolveRequiredDocumentPromiseWithNull = (type: string) => {
       const promise = self.requiredDocuments[type];
+      if (!promise) {
+        // Some types do not have any required documents, so we just ignore these
+        return;
+      }
       !promise.isResolved && promise.resolve(null);
     };
 
