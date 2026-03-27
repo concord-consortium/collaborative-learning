@@ -1,4 +1,5 @@
 @import "../vars";
+@import "../mixins";
 $title-margin: 0;
 
 .sort-work-view {
@@ -219,12 +220,8 @@ $title-margin: 0;
       }
     }
 
-    .document-error {
-
-      p {
-        margin-top: 3em;
-        text-align: center;
-      }
+    .document-not-shared {
+      @include document-not-shared;
     }
 
     .editable-document-content {
