@@ -1,14 +1,14 @@
 /**
  * Run the seismic ML model on raw waveform data and print detected events.
  *
- * Usage (from project root):
- *   npx ts-node --compiler-options '{"module":"CommonJS"}' \
- *       shared/seismic/run-model-cli.ts \
+ * Usage (from the scripts/ directory):
+ *   npx tsx ../shared/seismic/run-model-cli.ts \
  *       --network AK --station K204 --channel HNZ \
  *       --start 2026-01-30 --end 2026-02-01
  *
- * All parameters are optional — defaults to the full mock data range (7 days).
- * Currently uses the placeholder model (random weights) and mock S3 data.
+ * Options:
+ *   --model compact|placeholder   Model to use (default: compact, fetched from CDN)
+ *   --network, --station, --channel, --start, --end   Data selection
  */
 
 import { parseArgs } from "node:util";
@@ -17,9 +17,24 @@ import { fetchRawSeismicData } from "./earthscope-client";
 import { SeismicModelRunner } from "./seismic-model-runner";
 import { ModelMetadata } from "./seismic-model-types";
 
+const COMPACT_METADATA_URL =
+  "https://models-resources.concord.org/tiny-cnn-seismicML/models/v1/compact-v1/metadata.json";
+
+const PLACEHOLDER_METADATA: ModelMetadata = {
+  $schema: "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
+  id: "placeholder-v1",
+  architecture: "placeholder",
+  class_names: ["Noise", "Earthquake"],
+  sampling_rate: 100,
+  window_duration: 60,
+  instrument_types: ["H", "N", "L"],
+  weightsUrl: "",
+};
+
 async function main() {
   const { values } = parseArgs({
     options: {
+      model:   { type: "string", default: "compact" },
       network: { type: "string", default: "AK" },
       station: { type: "string", default: "K204" },
       channel: { type: "string", default: "HNZ" },
@@ -28,6 +43,7 @@ async function main() {
     },
   });
 
+  const modelChoice = values.model!;
   const network = values.network!;
   const station = values.station!;
   const channel = values.channel!;
@@ -41,24 +57,27 @@ async function main() {
   console.log(`Range: ${startDate.toISOString()} -> ${endDate.toISOString()} (${totalDays} days)`);
   console.log();
 
-  const metadata: ModelMetadata = {
-    $schema: "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
-    id: "placeholder-v1",
-    architecture: "placeholder",
-    class_names: ["Noise", "Earthquake"],
-    sampling_rate: 100,
-    window_duration: 60,
-    instrument_types: ["H"],
-    weightsUrl: "",
-  };
-
-  // Mock fetch for placeholder model (no real weights to load)
-  const mockFetch = (() => Promise.resolve({
-    ok: true, json: () => Promise.resolve({}),
-  })) as unknown as typeof fetch;
+  // Resolve model metadata
+  let metadata: ModelMetadata;
+  if (modelChoice === "placeholder") {
+    metadata = PLACEHOLDER_METADATA;
+  } else if (modelChoice === "compact") {
+    console.log(`Fetching model metadata from ${COMPACT_METADATA_URL}...`);
+    const response = await fetch(COMPACT_METADATA_URL);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch model metadata: ${response.status}`);
+    }
+    metadata = await response.json() as ModelMetadata;
+    // Resolve relative weightsUrl against the metadata URL
+    if (metadata.weightsUrl && !metadata.weightsUrl.startsWith("http")) {
+      metadata.weightsUrl = new URL(metadata.weightsUrl, COMPACT_METADATA_URL).href;
+    }
+  } else {
+    throw new Error(`Unknown model: "${modelChoice}". Use "compact" or "placeholder".`);
+  }
 
   const runner = new SeismicModelRunner();
-  await runner.loadModel(metadata, mockFetch);
+  await runner.loadModel(metadata);
   console.log(`Model loaded: ${metadata.id} (${metadata.architecture})`);
   console.log();
 
