@@ -21,11 +21,11 @@ function resample(samples: Float32Array, sourceRate: number, targetRate: number)
   // Fast path: integer decimation (e.g., 200 Hz → 100 Hz)
   const decimationRatio = sourceRate / targetRate;
   if (decimationRatio > 1 && Number.isInteger(decimationRatio)) {
-    const out = new Float32Array(Math.floor(samples.length / decimationRatio));
-    for (let i = 0; i < out.length; i++) {
-      out[i] = samples[i * decimationRatio];
+    const decimated = new Float32Array(Math.floor(samples.length / decimationRatio));
+    for (let i = 0; i < decimated.length; i++) {
+      decimated[i] = samples[i * decimationRatio];
     }
-    return out;
+    return decimated;
   }
 
   // General case: linear interpolation (e.g., 50 Hz → 100 Hz)
