@@ -4,12 +4,12 @@ import { types, Instance, SnapshotIn } from "mobx-state-tree";
  * Compute the SEED-style station identifier from station fields.
  * Usable with both MST instances and plain config objects.
  * Format: {network}_{station}_{location}_{channel}
- * Empty location is replaced with "_", yielding three consecutive underscores in the id.
+ * Empty location is replaced with "", yielding a double underscore in the id.
  */
 export function stationId(
   station: { network: string; station: string; location?: string; channel: string }
 ): string {
-  const loc = station.location || "_";
+  const loc = station.location || "";
   return `${station.network}_${station.station}_${loc}_${station.channel}`;
 }
 

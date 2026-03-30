@@ -136,7 +136,7 @@ describe("WaveRunnerComponent", () => {
   it("auto-selects the default station on mount", () => {
     renderWithStores();
     const stationSelect = screen.getByLabelText("Station") as HTMLSelectElement;
-    expect(stationSelect.value).toBe("AK_K204___HNZ");
+    expect(stationSelect.value).toBe("AK_K204__HNZ");
   });
 
   it("renders all toolbar buttons", () => {
