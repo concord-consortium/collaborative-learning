@@ -17,7 +17,7 @@ import TimelineItIcon from "./assets/toolbar/timeline-it-icon.svg";
 
 const LoadDataButton = observer(function LoadDataButton({ name }: IToolbarButtonComponentProps) {
   const content = useWaveRunnerContent();
-  const disabled = content.isLoading || content.hasData;
+  const disabled = !content.station || content.isLoading || content.hasData;
   return (
     <TileToolbarButton name={name} title="Load Data" onClick={() => content.loadData()} disabled={disabled}>
       <LoadDataIcon/>

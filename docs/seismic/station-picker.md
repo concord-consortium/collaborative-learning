@@ -69,12 +69,12 @@ With a computed `id` view returning the SEED identifier (using underscore separa
 
 ```typescript
 get id() {
-  const loc = self.location || "__";
+  const loc = self.location || "";
   return `${self.network}_${self.station}_${loc}_${self.channel}`;
 }
 ```
 
-Examples: `AK_K204___HNZ` (empty location → `__`), `AK_DDM_01_HNZ`.
+Examples: `AK_K204__HNZ` (empty location → `""`), `AK_DDM_01_HNZ`.
 
 Instances are immutable — no actions defined on the model. Changing station means
 replacing the instance.

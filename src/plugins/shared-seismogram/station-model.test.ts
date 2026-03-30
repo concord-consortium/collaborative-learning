@@ -23,7 +23,7 @@ describe("StationModel", () => {
     const station = StationModel.create({
       network: "AK", station: "K204", channel: "HNZ", label: "Anchorage Airport"
     });
-    expect(station.id).toBe("AK_K204___HNZ");
+    expect(station.id).toBe("AK_K204__HNZ");
   });
 
   it("computes id with non-empty location", () => {
@@ -37,11 +37,11 @@ describe("StationModel", () => {
 describe("stationId", () => {
   it("computes id from a plain object (snapshot)", () => {
     expect(stationId({ network: "AK", station: "K204", location: "", channel: "HNZ" }))
-      .toBe("AK_K204___HNZ");
+      .toBe("AK_K204__HNZ");
   });
 
   it("computes id when location is undefined", () => {
     expect(stationId({ network: "AK", station: "K204", channel: "HNZ" }))
-      .toBe("AK_K204___HNZ");
+      .toBe("AK_K204__HNZ");
   });
 });
