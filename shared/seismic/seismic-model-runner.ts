@@ -30,6 +30,9 @@ function resample(samples: Float32Array, sourceRate: number, targetRate: number)
 
   // General case: linear interpolation (e.g., 50 Hz → 100 Hz)
   const targetLength = Math.round(samples.length * targetRate / sourceRate);
+  if (targetLength <= 1) {
+    return new Float32Array(targetLength > 0 ? [samples[0]] : []);
+  }
   const out = new Float32Array(targetLength);
   const step = (samples.length - 1) / (targetLength - 1);
   for (let i = 0; i < targetLength; i++) {

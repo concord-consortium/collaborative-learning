@@ -149,7 +149,7 @@ export function buildPlaceholderModel(metadata: ModelMetadata): tf.LayersModel {
 
   const input = tf.input({ shape: [samplesPerWindow, 1] });
   const flat = tf.layers.flatten().apply(input);
-  const output = tf.layers.dense({ units: numClasses, activation: "softmax" }).apply(flat);
+  const output = tf.layers.dense({ units: numClasses }).apply(flat);
 
   return tf.model({ inputs: input, outputs: output as tf.SymbolicTensor });
 }

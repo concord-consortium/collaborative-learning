@@ -229,10 +229,18 @@ export const WaveRunnerContentModel = TileContentModel
 
         const startDate = new Date(`${self.startDate}T00:00:00Z`);
         const endDate = new Date(`${self.endDate}T00:00:00Z`);
+        const startMs = startDate.getTime();
+        const endMs = endDate.getTime();
         const detectionThreshold = 0.7;
 
+        if (isNaN(startMs) || isNaN(endMs) || endMs <= startMs) {
+          self.runError = "Invalid date range. End date must be after start date.";
+          self.isRunning = false;
+          return;
+        }
+
         const msPerDay = 86400000;
-        const totalDays = (endDate.getTime() - startDate.getTime()) / msPerDay;
+        const totalDays = Math.ceil((endMs - startMs) / msPerDay);
         self.updateChunkProgress(0, totalDays);
 
         for (let day = 0; day < totalDays; day++) {
@@ -246,9 +254,13 @@ export const WaveRunnerContentModel = TileContentModel
               network, station, location, channel,
               chunkStart.toISOString(), chunkEnd.toISOString()
             );
-          } catch {
-            self.updateChunkProgress(day + 1, totalDays);
-            continue;
+          } catch (err: unknown) {
+            const isNoData = err instanceof Error && /no data|404/i.test(err.message);
+            if (isNoData) {
+              self.updateChunkProgress(day + 1, totalDays);
+              continue;
+            }
+            throw err;
           }
           const buffer: ArrayBuffer = yield response.arrayBuffer();
 

@@ -153,6 +153,32 @@ describe("SeismicModelRunner", () => {
     );
   });
 
+  it("resample handles single-sample input without producing NaN", async () => {
+    const runner = new SeismicModelRunner();
+    // Use compact model metadata with a tiny window so 1 resampled sample forms a "window"
+    const tinyMetadata: ModelMetadata = {
+      ...mockMetadata,
+      sampling_rate: 100,
+      window_duration: 0.01, // 1 sample per window at 100Hz
+    };
+    await runner.loadModel(tinyMetadata, mockFetch);
+
+    // 1 sample at 80Hz → targetLength = Math.round(1 * 100/80) = 1
+    // Without the fix, resample produces NaN due to 0/0 division
+    const samples = new Float32Array([5.0]);
+    const seis = makeMockSeismogram(samples, 80, 1000000);
+
+    const { callbacks } = makeCallbacks();
+    // With NaN data, the model produces NaN confidences which fail the threshold check.
+    // With the fix, the single sample value is preserved and the model runs normally.
+    const events = await runner.processChunk(seis, callbacks, 0);
+
+    // threshold=0 so we'd get an event if the data is valid, but 0 events if it's NaN
+    expect(events.length).toBe(1);
+
+    runner.dispose();
+  });
+
   it("placeholder architecture skips weights fetch and produces events", async () => {
     const placeholderMetadata: ModelMetadata = {
       ...mockMetadata,

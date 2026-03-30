@@ -92,7 +92,7 @@ const TimelineButton = observer(function TimelineButton({ name }: IToolbarButton
       endTimeISO: sharedSeismogram.endTimeISO,
     });
     copy.setSeismogram(sharedSeismogram.seismogram);
-    const sharedModels = [sharedDataSet, copy].filter(Boolean) as any[];
+    const sharedModels = sharedDataSet ? [sharedDataSet, copy] : [copy];
     addTilesContext.addTileAfter(kTimelineTileType, tileModel, sharedModels);
   }
 
