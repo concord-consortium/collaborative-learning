@@ -90,12 +90,14 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       // change of this global. It could be a volatile prop on the document model. Or the ui
       // store could have a scrollToMap with keys of the docId and values of the tileId
       // Enable mousemove-based drop zone highlighting and keyboard navigation when a tile is picked up.
-      // The readOnly guard ensures only one instance registers the global keydown listener —
-      // at most one DocumentContentComponent is non-readOnly at a time (the primary workspace document).
+      // Only the DocumentContentComponent that owns the picked-up tile registers the global keydown
+      // listener. This prevents duplicate key processing in multi-pane views (2-up, 4-up).
       this.pickUpReactionDisposer = reaction(
         () => this.stores.ui.pickedUpTileId,
         (pickedUpTileId) => {
-          if (pickedUpTileId && !this.props.readOnly) {
+          const isOwner = pickedUpTileId
+            && this.stores.ui.pickedUpDocId === this.props.content?.contentId;
+          if (isOwner) {
             this.domElement?.addEventListener("mousemove", this.handlePickUpMouseMove);
             this.domElement?.addEventListener("mouseleave", this.handlePickUpMouseLeave);
             document.addEventListener("keydown", this.handlePickUpKeyDown);
