@@ -3,7 +3,9 @@ import { createDocumentsModelWithRequiredDocuments, DocumentsModel } from "../mo
 import { DBDocument } from "./db-types";
 import { createDocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
-import { PersonalDocument, PlanningDocument, ProblemDocument } from "../models/document/document-types";
+import {
+  LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
+} from "../models/document/document-types";
 import { specStores } from "../models/stores/spec-stores";
 import { IStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
@@ -248,6 +250,115 @@ describe("db", () => {
     await jestSpyConsole("error", async spy => {
       await db.guaranteeLearningLog();
       expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("document visibility with defaultSharedDocuments", () => {
+    // Synchronous thenable that executes callbacks immediately, avoiding async
+    // timing issues in the mock chain. Unwraps nested thenables like real Promises.
+    function syncThenable(value: any): any {
+      if (value && typeof value === "object" && typeof value.then === "function") {
+        return value;
+      }
+      return {
+        then: (onFulfilled: any, onRejected?: any) => {
+          try { return syncThenable(onFulfilled(value)); }
+          catch (e) { if (onRejected) return syncThenable(onRejected(e)); throw e; }
+        },
+        catch: () => syncThenable(value)
+      };
+    }
+
+    function setupMocks(mockSet: jest.Mock) {
+      // Mock createDocument to bypass internal Firebase/Firestore operations
+      jest.spyOn(db, "createDocument").mockReturnValue(syncThenable({
+        document: { version: "1.0", self: { documentKey: "doc-1", uid: "1", classHash: "test" }, type: "mock" },
+        metadata: {},
+        firestoreMetadata: {}
+      }) as any);
+
+      // Mock Firebase ref for offering user check and document writes
+      mockDatabase.mockImplementation(() => ({
+        ref: () => ({
+          update: () => {},
+          set: (doc: any) => { mockSet(doc); return syncThenable(undefined); },
+          once: () => syncThenable({ val: () => true })
+        })
+      }));
+    }
+
+    it("sets ProblemDocument visibility to public when defaultSharedDocuments is true", async () => {
+      const mockSet = jest.fn();
+      const docModel = createDocumentModel({ uid: "1", type: ProblemDocument, key: "doc-1" });
+      setupMocks(mockSet);
+      stores.appConfig.setConfigs([{ defaultSharedDocuments: true }]);
+      await db.connect({appMode: "test", stores, dontStartListeners: true});
+
+      const promise = db.createProblemOrPlanningDocument(ProblemDocument);
+      // The synchronous mock chain has already executed and called mockSet
+      const docWritten = mockSet.mock.calls.find((c: any[]) => c[0]?.visibility);
+      expect(docWritten![0].visibility).toBe("public");
+
+      stores.documents.resolveRequiredDocumentPromise(docModel);
+      await promise;
+    });
+
+    it("sets ProblemDocument visibility to private when defaultSharedDocuments is not set", async () => {
+      const mockSet = jest.fn();
+      const docModel = createDocumentModel({ uid: "1", type: ProblemDocument, key: "doc-1" });
+      setupMocks(mockSet);
+      await db.connect({appMode: "test", stores, dontStartListeners: true});
+
+      const promise = db.createProblemOrPlanningDocument(ProblemDocument);
+      const docWritten = mockSet.mock.calls.find((c: any[]) => c[0]?.visibility);
+      expect(docWritten![0].visibility).toBe("private");
+
+      stores.documents.resolveRequiredDocumentPromise(docModel);
+      await promise;
+    });
+
+    it("sets PlanningDocument visibility to private even when defaultSharedDocuments is true", async () => {
+      const mockSet = jest.fn();
+      const docModel = createDocumentModel({ uid: "1", type: PlanningDocument, key: "doc-1" });
+      setupMocks(mockSet);
+      stores.appConfig.setConfigs([{ defaultSharedDocuments: true }]);
+      await db.connect({appMode: "test", stores, dontStartListeners: true});
+
+      const promise = db.createProblemOrPlanningDocument(PlanningDocument);
+      const docWritten = mockSet.mock.calls.find((c: any[]) => c[0]?.visibility);
+      expect(docWritten![0].visibility).toBe("private");
+
+      stores.documents.resolveRequiredDocumentPromise(docModel);
+      await promise;
+    });
+
+    it("sets PersonalDocument visibility to public when defaultSharedDocuments is true", async () => {
+      const mockSet = jest.fn();
+      const docModel = createDocumentModel({ uid: "1", type: PersonalDocument, key: "doc-1" });
+      setupMocks(mockSet);
+      stores.appConfig.setConfigs([{ defaultSharedDocuments: true }]);
+      await db.connect({appMode: "test", stores, dontStartListeners: true});
+
+      const promise = db.createOtherDocument(PersonalDocument);
+      const docWritten = mockSet.mock.calls.find((c: any[]) => c[0]?.visibility);
+      expect(docWritten![0].visibility).toBe("public");
+
+      stores.documents.resolveRequiredDocumentPromise(docModel);
+      await promise;
+    });
+
+    it("sets LearningLogDocument visibility to private when defaultSharedDocuments is not set", async () => {
+      const mockSet = jest.fn();
+      const docModel = createDocumentModel({ uid: "1", type: LearningLogDocument, key: "doc-1" });
+      setupMocks(mockSet);
+      await db.connect({appMode: "test", stores, dontStartListeners: true});
+
+      const promise = db.createOtherDocument(LearningLogDocument);
+      const docWritten = mockSet.mock.calls.find((c: any[]) => c[0]?.visibility);
+      expect(docWritten![0].visibility).toBe("private");
+
+      stores.documents.resolveRequiredDocumentPromise(docModel);
+      await promise;
     });
   });
 

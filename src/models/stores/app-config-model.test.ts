@@ -198,4 +198,31 @@ describe("ConfigurationManager", () => {
     expect(appConfig.groupDocumentsEnabled).toBe(false);
   });
 
+  describe("defaultSharedDocuments", () => {
+    it("should return undefined when not configured", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      expect(appConfig.defaultSharedDocuments).toBeUndefined();
+    });
+
+    it("should return true when set to true", () => {
+      const appConfig = AppConfigModel.create({
+        config: { ...unitConfigDefaults, defaultSharedDocuments: true }
+      });
+      expect(appConfig.defaultSharedDocuments).toBe(true);
+    });
+
+    it("should return false when explicitly set to false", () => {
+      const appConfig = AppConfigModel.create({
+        config: { ...unitConfigDefaults, defaultSharedDocuments: false }
+      });
+      expect(appConfig.defaultSharedDocuments).toBe(false);
+    });
+
+    it("should cascade from override configs", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      appConfig.setConfigs([{ defaultSharedDocuments: true }]);
+      expect(appConfig.defaultSharedDocuments).toBe(true);
+    });
+  });
+
 });

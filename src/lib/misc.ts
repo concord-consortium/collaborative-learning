@@ -1,5 +1,7 @@
+import { emitLogEvent } from "@concord-consortium/log-monitor";
 import { IStores } from "../models/stores/stores";
-import { Logger } from "./logger";
+import { urlParams } from "../utilities/url-params";
+import { Logger, LogMessage } from "./logger";
 
 function setPageTitle(stores: IStores) {
   const { appConfig, showDemoCreator, unit, problem } = stores;
@@ -55,4 +57,12 @@ export function problemLoaded(stores: IStores, problemId: string) {
   Logger.Instance?.registerLogListener((logMessage) => {
     (window as any).Rollbar?.captureEvent(logMessage, 'info');
   });
+
+  // Forward log events to the log monitor sidebar when enabled
+  if (urlParams.logMonitor) {
+    Logger.Instance?.registerLogListener((logMessage: LogMessage) => {
+      const { event, ...data } = logMessage;
+      emitLogEvent({ event, data, timestamp: Date.now() });
+    });
+  }
 }

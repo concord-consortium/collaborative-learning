@@ -139,6 +139,13 @@ export interface QueryParams {
   // When set to a value the runtime knows it should use the authoring api to get content
   // using the specified branch
   authoringBranch?: string;
+
+  //
+  // Developer/researcher tools
+  //
+
+  // Show the log monitor sidebar
+  logMonitor?: boolean;
 }
 
 // Make a union of all of the boolean params from the QueryParams
@@ -149,7 +156,7 @@ type BooleanParamNames = Exclude<
 undefined>;
 
 const booleanParams: BooleanParamNames[] =
-  [ "demo", "mouseSensor", "noPersistentUI", "readOnly", "noStorage", "unwrapped" ];
+  [ "demo", "logMonitor", "mouseSensor", "noPersistentUI", "readOnly", "noStorage", "unwrapped" ];
 
 const processBooleanValue = (value: string | (string | null)[] | null | undefined) => {
   if (value === undefined || value === "false") {

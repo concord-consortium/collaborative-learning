@@ -44,6 +44,7 @@
     "showPublishedDocsInPrimaryWorkspace": false,
     "comparisonPlaceholderContent": "",
     "initiallyHideExemplars": false,
+    "defaultSharedDocuments": false,
     "navTabs": {
       "lazyLoadTabContents": true,
       "showNavPanel": true,
