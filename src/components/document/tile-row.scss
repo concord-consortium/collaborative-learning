@@ -37,18 +37,11 @@
       height: 16px;
     }
 
-    &.left {
-      left: 0;
+    &.tile-boundary {
       top: 8px;
       bottom: 8px;
       width: 16px;
-    }
-
-    &.right {
-      right: 0;
-      top: 8px;
-      bottom: 8px;
-      width: 16px;
+      // left/right position set via inline style
     }
 
     &.bottom {

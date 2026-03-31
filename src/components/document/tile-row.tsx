@@ -70,6 +70,7 @@ interface IProps {
   height?: number;
   readOnly?: boolean;
   dropHighlight?: string;
+  dropTileInsertIndex?: number;
 }
 
 interface IState {
@@ -83,12 +84,13 @@ export interface TileRowHandle {
 }
 
 const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
-  const { model, typeClass, height: propHeight, readOnly, dropHighlight } = props;
+  const { model, typeClass, height: propHeight, readOnly, dropHighlight, dropTileInsertIndex } = props;
   const stores = useStores();
   const [state, setState] = useState<IState>({});
   const tileRowDiv = useRef<HTMLDivElement | null>(null);
   const tileApiInterface = useContext(TileApiInterfaceContext);
   const isSectionHeader = model.isSectionHeader;
+  const { sectionId } = model;
 
   const documentContentModel = getParentOfType(model, DocumentContentModel);
   const tileMap = documentContentModel?.tileMap;
@@ -209,37 +211,60 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
     const allZonesVisible = stores.ui.isTilePickedUp;
 
     const showTopHighlight = (highlight === "top") && (!isSectionHeader || (rowIndex > 0));
-    const showLeftHighlight = (highlight === "left") && !isSectionHeader;
-    const showRightHighlight = (highlight === "right") && !isSectionHeader;
     const showBottomHighlight = (highlight === "bottom");
 
     // During pick-up, show all drop zones dimmed; the active one gets full highlight
     const dimTop = allZonesVisible && !showTopHighlight && (!isSectionHeader || (rowIndex > 0));
-    const dimLeft = allZonesVisible && !showLeftHighlight && !isSectionHeader;
-    const dimRight = allZonesVisible && !showRightHighlight && !isSectionHeader;
     const dimBottom = allZonesVisible && !showBottomHighlight;
 
     const topClass = `drop-feedback top ${showTopHighlight ? "show" : dimTop ? "show dimmed" : ""}`;
-    const leftClass = `drop-feedback left ${showLeftHighlight ? "show" : dimLeft ? "show dimmed" : ""}`;
-    const rightClass = `drop-feedback right ${showRightHighlight ? "show" : dimRight ? "show dimmed" : ""}`;
     const bottomClass = `drop-feedback bottom ${showBottomHighlight ? "show" : dimBottom ? "show dimmed" : ""}`;
 
     // Build ARIA props for drop zones when in pick-up mode.
-    // Uses aria-label only (no role/aria-selected) since these elements are not focusable
-    // and are not inside a listbox container.
     const rowLabel = isSectionHeader ? `section ${sectionId || ""}` : `row ${rowIndex + 1}`;
     const ariaProps = (location: string, isVisible: boolean) =>
       allZonesVisible && isVisible
         ? { "aria-label": `${location} ${rowLabel}` }
         : {};
 
+    // Tile-boundary side drop zones: N+1 zones for N tiles, positioned at each tile boundary.
+    // These replace the old separate "left" and "right" zones.
+    const tileBoundaryZones: React.ReactElement[] = [];
+    const renderableTileCount = model.tiles.filter(t => isTileRenderable(t.tileId)).length;
+    if (renderableTileCount > 0 && !isSectionHeader) {
+      const boundaryCount = renderableTileCount + 1;
+      for (let b = 0; b < boundaryCount; b++) {
+        const isActive = (highlight === "left") && (dropTileInsertIndex === b);
+        const isDimmed = allZonesVisible && !isActive;
+        const isVisible = isActive || isDimmed;
+        const zoneClass = classNames("drop-feedback", "tile-boundary", {
+          show: isVisible,
+          dimmed: isDimmed
+        });
+
+        // Position: first zone at left edge, last at right edge, interior at tile boundaries
+        let zoneStyle: React.CSSProperties;
+        if (b === 0) {
+          zoneStyle = { left: 0 };
+        } else if (b === boundaryCount - 1) {
+          zoneStyle = { right: 0 };
+        } else {
+          const leftPct = (b / renderableTileCount) * 100;
+          zoneStyle = { left: `calc(${leftPct}% - 8px)` };
+        }
+
+        const label = b === 0 ? "Left of" : b === boundaryCount - 1 ? "Right of" : `Position ${b} in`;
+        tileBoundaryZones.push(
+          <div key={`tile-boundary-${b}`} className={zoneClass} style={zoneStyle}
+            {...ariaProps(label, isVisible)} />
+        );
+      }
+    }
+
     return [
       <div key="top-drop-feedback" className={topClass}
         {...ariaProps("Above", dimTop || showTopHighlight)} />,
-      <div key="left-drop-feedback" className={leftClass}
-        {...ariaProps("Left of", dimLeft || showLeftHighlight)} />,
-      <div key="right-drop-feedback" className={rightClass}
-        {...ariaProps("Right of", dimRight || showRightHighlight)} />,
+      ...tileBoundaryZones,
       <div key="bottom-drop-feedback" className={bottomClass}
         {...ariaProps("Below", dimBottom || showBottomHighlight)} />,
       <div key="bottom-resize-handle"
@@ -247,10 +272,10 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
         draggable={isUserResizable}
         onDragStart={isUserResizable ? handleStartResizeRow : undefined} />
     ];
-  }, [model, props, state.tileAcceptDrop, dropHighlight, isSectionHeader, stores.ui.isTilePickedUp,
-    handleStartResizeRow]);
+  }, [model, props, state.tileAcceptDrop, dropHighlight, dropTileInsertIndex, isSectionHeader,
+    sectionId, stores.ui.isTilePickedUp, isTileRenderable, handleStartResizeRow]);
 
-  const { sectionId, tiles: modelTiles } = model;
+  const { tiles: modelTiles } = model;
   const rowHeight = !isSectionHeader
                     ? propHeight || model.height || getContentHeight()
                     : undefined;

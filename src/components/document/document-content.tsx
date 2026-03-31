@@ -431,26 +431,55 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           dropInfo.rowDropLocation = "bottom";
           dropInfo.rowInsertIndex = i + 1;
         } else {
-          const dropOffsetLeft = Math.abs(clientX - rowBounds.left);
           const dropOffsetTop = Math.abs(clientY - rowBounds.top);
-          const dropOffsetRight = Math.abs(rowBounds.right - clientX);
           const dropOffsetBottom = Math.abs(rowBounds.bottom - clientY);
 
-          const kSideDropThreshold = rowBounds.width * 0.25;
-          if ((dropOffsetLeft < kSideDropThreshold) &&
-              (dropOffsetLeft < dropOffsetRight)) {
-            dropInfo.rowDropLocation = "left";
+          // Uniform tile-boundary detection for all rows with tiles.
+          // For N tiles there are N+1 boundaries: left edge, between each pair, right edge.
+          // If the cursor is near any boundary, it's a side drop with a tileInsertIndex.
+          const kSideDropThreshold = 25; // pixels from boundary to trigger side drop
+          const tileElements = rowElt.querySelectorAll(':scope > .tool-tile');
+          let sideDropDetected = false;
+
+          if (tileElements.length > 0) {
+            const boundaries: number[] = [];
+            // First boundary: left edge of the first tile
+            boundaries.push(tileElements[0].getBoundingClientRect().left);
+            // Interior boundaries: midpoint between adjacent tiles
+            for (let t = 0; t < tileElements.length - 1; t++) {
+              const leftRight = tileElements[t].getBoundingClientRect().right;
+              const rightLeft = tileElements[t + 1].getBoundingClientRect().left;
+              boundaries.push((leftRight + rightLeft) / 2);
+            }
+            // Last boundary: right edge of the last tile
+            boundaries.push(tileElements[tileElements.length - 1].getBoundingClientRect().right);
+
+            // Find the nearest boundary
+            let nearestIndex = 0;
+            let nearestDist = Infinity;
+            for (let b = 0; b < boundaries.length; b++) {
+              const dist = Math.abs(clientX - boundaries[b]);
+              if (dist < nearestDist) {
+                nearestDist = dist;
+                nearestIndex = b;
+              }
+            }
+
+            if (nearestDist < kSideDropThreshold) {
+              dropInfo.rowDropLocation = "left";
+              dropInfo.tileInsertIndex = nearestIndex;
+              sideDropDetected = true;
+            }
           }
-          else if ((dropOffsetRight < kSideDropThreshold) &&
-                  (dropOffsetRight <= dropOffsetLeft)) {
-            dropInfo.rowDropLocation = "right";
-          }
-          else if (dropOffsetTop < dropOffsetBottom) {
-            dropInfo.rowDropLocation = "top";
-          }
-          else {
-            dropInfo.rowDropLocation = "bottom";
-            dropInfo.rowInsertIndex = i + 1;
+
+          if (!sideDropDetected) {
+            if (dropOffsetTop < dropOffsetBottom) {
+              dropInfo.rowDropLocation = "top";
+            }
+            else {
+              dropInfo.rowDropLocation = "bottom";
+              dropInfo.rowInsertIndex = i + 1;
+            }
           }
         }
       }
@@ -536,16 +565,14 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         });
       }
 
-      // Left/Right zones: not available for section headers
-      if (!isSectionHeader) {
-        zones.push({
-          rowIndex: i, rowId: row.id, location: "left",
-          dropRowInfo: { ...baseInfo, rowDropLocation: "left" }
-        });
-        zones.push({
-          rowIndex: i, rowId: row.id, location: "right",
-          dropRowInfo: { ...baseInfo, rowDropLocation: "right" }
-        });
+      // Tile-boundary side zones: N+1 zones for N tiles in the row
+      if (!isSectionHeader && row.tileCount > 0) {
+        for (let t = 0; t <= row.tileCount; t++) {
+          zones.push({
+            rowIndex: i, rowId: row.id, location: "left",
+            dropRowInfo: { ...baseInfo, rowDropLocation: "left", tileInsertIndex: t }
+          });
+        }
       }
 
       // Bottom zone: always available
