@@ -1,0 +1,52 @@
+{
+  "$ref": "#/definitions/ModelMetadata",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ModelMetadata": {
+      "description": "Model metadata fetched from metadata.json. See docs/seismic/ml-model-integration-design.md § Model Packaging.\n\nThe JSON Schema for this interface is generated automatically. Do not edit src/public/schemas/seismic-model/v1.json by hand — run `npm run update:seismic-schema` to regenerate it from this type.",
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "architecture": {
+          "type": "string"
+        },
+        "class_names": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "instrument_types": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "sampling_rate": {
+          "type": "number"
+        },
+        "weightsUrl": {
+          "type": "string"
+        },
+        "window_duration": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "$schema",
+        "id",
+        "architecture",
+        "class_names",
+        "sampling_rate",
+        "window_duration",
+        "instrument_types",
+        "weightsUrl"
+      ],
+      "type": "object"
+    }
+  }
+}
