@@ -93,9 +93,13 @@ The result seems to be same as if the tile is deleted by a single user after the
 
 So far all the issues that have been explored above, could be addressed by a global change. When a change in the remote history is downloaded by a client, it can check if it has a local fork from this history. That would be a history entry that has the same previousEntryId as a different remote history entry. In this case the client should reverse its history until this fork point and then apply the remote history.
 
-This approach will mean any conflicting changes will be lost by one of the users. If the users do not edit the same tile at the same time this conflicting changes should be minimal.
+Some of the infrastructure for this is already in place. `FirestoreHistoryManagerConcurrent.uploadQueuedHistoryEntries()` uses Firestore transactions to atomically write history entries and update a `lastHistoryEntry` field (index and id) on the metadata document. Each uploaded entry includes a `previousEntryId` linking it to the prior entry. This means conflicting writes are serialized on the server side — two clients can't both claim the same `previousEntryId`. However, the client does not yet detect when its local history has forked from the remote history, and does not roll back local changes when that happens. Currently, remote entries are just appended to local history regardless of whether they conflict (see `syncRemoteFirestoreHistory()`), which can result in the inconsistencies described above.
 
-This approach should guarantee that the document state and history state are valid, and that all use documents show the same thing.
+What remains to be implemented is the fork detection and rollback: when a remote entry arrives whose `previousEntryId` doesn't match the local head, the client should reverse its local uncommitted entries (using their undo patches) back to the fork point, then apply the remote entries.
+
+This approach will mean any conflicting changes will be lost by one of the users. If the users do not edit the same tile at the same time these conflicting changes should be minimal.
+
+This approach should guarantee that the document state and history state are valid, and that all users' documents show the same thing.
 
 In the future we can add special handling for certain cases so we can accept some changes even when there is a local fork. These would be changes that we know will not conflict with each other.
 
@@ -116,9 +120,13 @@ In this case User B's edits will be lost. This happens even though they are in a
 - start with a document with a table
 - User A changes the name of an attribute
 
-In this case User B will not see the new attribute name.
+In this case User B will not see the new attribute name. This has been confirmed with the current group document implementation.
 
-This is probably due to the table component not paying attention to this kind of model change. We should test if the same problem happens when a single user tries to undo an attribute name change. And also test what happens when playing back history, whether attribute name changes show up in the playback.
+**Root cause** (investigated 2026-03-31): The table's column definitions are built in a `useMemo` in `use-columns-from-data-set.ts` that captures `attr.name` at memo time. The memo's dependencies don't include attribute names — it only re-runs when `columnChanges` (a counter) is incremented via `triggerColumnChange()`. The `onSnapshot` handler on `dataSet.attributes` in `table-tile.tsx` calls `triggerRowChange()` (not `triggerColumnChange()`), so attribute name changes trigger a row re-render but never rebuild the column definitions.
+
+In same-instance testing, the read-only view appeared to update after a rename, but this was a coincidence: clicking in the CLUE tab changes `dataSet.selectedAttributeIds` (which is shared between both views via the same DataSet model), and this invalidates the `cellClasses` callback which is a dependency of the columns memo.
+
+The fix would be to call `triggerColumnChange()` (or add it alongside `triggerRowChange()`) in the `onSnapshot` handler. This would also fix the single-user undo case, since undo applies patches which trigger `onSnapshot` the same way.
 
 If a new column is added then User B sees the new attribute name.
 
