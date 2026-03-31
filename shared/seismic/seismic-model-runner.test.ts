@@ -3,6 +3,9 @@ import { DateTime } from "luxon";
 import { SeismicModelRunner } from "./seismic-model-runner";
 import { ModelMetadata, ModelRunnerCallbacks, SeismicEvent } from "./seismic-model-types";
 
+const samples12000 = new Float32Array(12000);
+for (let i = 0; i < samples12000.length; i++) samples12000[i] = Math.sin(i * 0.01);
+
 function makeMockSeismogram(
   samples: Float32Array,
   sampleRate: number,
@@ -71,9 +74,7 @@ describe("SeismicModelRunner", () => {
     await runner.loadModel(mockMetadata, mockFetch);
 
     // 2 windows: 100 Hz * 60s = 6000 samples/window, so 12000 samples total
-    const samples = new Float32Array(12000);
-    for (let i = 0; i < samples.length; i++) samples[i] = Math.sin(i * 0.01);
-    const seis = makeMockSeismogram(samples, 100, 1000000);
+    const seis = makeMockSeismogram(samples12000, 100, 1000000);
 
     const { callbacks, progressCalls, eventBatches } = makeCallbacks();
     const allEvents = await runner.processChunk(seis, callbacks);
@@ -110,9 +111,7 @@ describe("SeismicModelRunner", () => {
 
     // 12000 samples at 200Hz = 60s of data
     // Decimated to 100Hz = 6000 samples = 1 window
-    const samples = new Float32Array(12000);
-    for (let i = 0; i < samples.length; i++) samples[i] = Math.sin(i * 0.01);
-    const seis = makeMockSeismogram(samples, 200, 1000000);
+    const seis = makeMockSeismogram(samples12000, 200, 1000000);
 
     const { callbacks, progressCalls } = makeCallbacks();
     await runner.processChunk(seis, callbacks);
@@ -193,10 +192,8 @@ describe("SeismicModelRunner", () => {
     expect(runner.isLoaded).toBe(true);
 
     // 2 windows of data
-    const samples = new Float32Array(12000);
-    for (let i = 0; i < samples.length; i++) samples[i] = Math.sin(i * 0.01);
     const startMs = Date.UTC(2025, 0, 1); // 2025-01-01T00:00:00Z
-    const seis = makeMockSeismogram(samples, 100, startMs);
+    const seis = makeMockSeismogram(samples12000, 100, startMs);
 
     const { callbacks } = makeCallbacks();
     // Threshold 0 so every window produces an event
