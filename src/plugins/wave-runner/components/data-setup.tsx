@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import React, { useEffect, useMemo } from "react";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { StationConfig, stationId } from "../../shared-seismogram/station-model";
+import { DEFAULT_MODELS } from "../models/wave-runner-content";
 import { useWaveRunnerContent } from "../hooks/use-wave-runner-content";
 import "./data-setup.scss";
 
@@ -65,6 +66,13 @@ export const DataSetup: React.FC = observer(function DataSetup() {
     }
   };
 
+  const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const url = e.target.value;
+    if (url) {
+      content.ensureModelMetadata(url);
+    }
+  };
+
   const hasStations = dropdownOptions.length > 0;
 
   return (
@@ -88,8 +96,18 @@ export const DataSetup: React.FC = observer(function DataSetup() {
         </div>
         <div className="field">
           <label className="field-label">Model</label>
-          <select className="dropdown" disabled={content.isLoading}>
-            <option>Choose a model</option>
+          <select
+            className="dropdown"
+            value={content.selectedModelUrl ?? ""}
+            onChange={handleModelChange}
+            disabled={content.isLoading}
+          >
+            <option value="">Choose a model</option>
+            {DEFAULT_MODELS.map(model => (
+              <option key={model.metadataUrl} value={model.metadataUrl}>
+                {model.label}
+              </option>
+            ))}
           </select>
         </div>
       </div>

@@ -12,6 +12,7 @@ Notes on dependencies, particularly reasons for not updating to their latest ver
 |@types/react-dom            |17.0.17        |18.0.6        |React 18                                                                     |
 |@types/react-tabs           |2.3.4          |5.0.5         |Versions 3 and 4 were never published(?); Version 5 requires React 18        |
 |@types/slate-react          |0.22.9         |0.50.1        |Requires slate-editor library update to latest slate                         |
+|ts-json-schema-generator    |2.4.0          |2.9.0         |v2.5+ requires Node >= 22; CI runs Node 20.                                  |
 
 ## Runtime Dependencies
 

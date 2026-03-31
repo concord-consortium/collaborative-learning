@@ -333,6 +333,7 @@
           "restart",
           "reset",
           "|",
+          "table-it",
           "timeline"
         ],
         "stations": [

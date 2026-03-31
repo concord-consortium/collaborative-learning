@@ -39,7 +39,7 @@ describe("WaveRunnerComponent", () => {
       config: {
         settings: {
           "wave-runner": {
-            tools: ["load-data", "|", "play", "restart", "reset", "|", "timeline"],
+            tools: ["load-data", "|", "play", "restart", "reset", "|", "table-it", "timeline"],
           stations: [
             { network: "AK", station: "K204", channel: "HNZ", label: "Anchorage Airport" },
             { network: "AK", station: "DDM", location: "01", channel: "HNZ", label: "Dexter Display Mine" }
@@ -146,6 +146,13 @@ describe("WaveRunnerComponent", () => {
     expect(toolbar).toContainHTML("Run Model");
     expect(toolbar).toContainHTML("Restart Model");
     expect(toolbar).toContainHTML("Clear &amp; Reset Model");
+    expect(toolbar).toContainHTML("Table It!");
     expect(toolbar).toContainHTML("Timeline It!");
+  });
+
+  it("renders model dropdown with available models", () => {
+    renderWithStores();
+    expect(screen.getByText("Choose a model")).toBeInTheDocument();
+    expect(screen.getByText("Compact Model")).toBeInTheDocument();
   });
 });
