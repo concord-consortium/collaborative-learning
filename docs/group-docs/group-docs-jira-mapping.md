@@ -179,20 +179,20 @@ These product/UI stories (CLUE-360, 377, 378, 380) could be done in parallel wit
 |---|---|---|---|---|
 | **FY26 Sprint 14** | [CLUE-483](https://concord-consortium.atlassian.net/browse/CLUE-483) | UI disruption testing | Immediate | |
 | | [CLUE-485](https://concord-consortium.atlassian.net/browse/CLUE-485) | Prevent document corruption from simultaneous edits | A2/B2 | |
-| | [CLUE-316](https://concord-consortium.atlassian.net/browse/CLUE-316) | Group documents Text Tiles | A5/B6 (per-tile) | Should come after A2/B2 and A3; text tile work isn't useful if conflicts still corrupt the document |
-| | [CLUE-317](https://concord-consortium.atlassian.net/browse/CLUE-317) | Group documents Locked tiles: Program Tiles | B3 (locking) | Only needed if Plan B; depends on UI disruption testing outcome (CLUE-483) |
-| | [CLUE-340](https://concord-consortium.atlassian.net/browse/CLUE-340) | Group documents Tile list/arrangement/focus | A3/B4 (merging) | Depends on A2/B2 (fork detection) being done first |
 | | [CLUE-379](https://concord-consortium.atlassian.net/browse/CLUE-379) | Run-time state for History/Group Synch | DataFlow parallel track | Independent, can be done anytime |
-| | [CLUE-360](https://concord-consortium.atlassian.net/browse/CLUE-360) | Group documents Styling in Sorts | Product/UI | Independent, can be done anytime |
-| | [CLUE-378](https://concord-consortium.atlassian.net/browse/CLUE-378) | Group documents author name | Product/UI | Independent, can be done anytime |
-| | [CLUE-380](https://concord-consortium.atlassian.net/browse/CLUE-380) | Group documents autoshared | Product/UI | Independent, can be done anytime |
 | **FY26 Sprint 15** | [CLUE-484](https://concord-consortium.atlassian.net/browse/CLUE-484) | Fix undo rendering bugs | A1/B1 | Both plans say this should come before A2/B2, so ideally Sprint 14 not 15 |
 | | [CLUE-486](https://concord-consortium.atlassian.net/browse/CLUE-486) | Shared model conflict resolution | A4/B5 | Depends on A2/B2 and A3/B4 being done first |
-| | [CLUE-315](https://concord-consortium.atlassian.net/browse/CLUE-315) | Tiles have a 'not group safe' property | B3 (locking) | Only needed if Plan B |
+| | [CLUE-340](https://concord-consortium.atlassian.net/browse/CLUE-340) | Group documents Tile list/arrangement/focus | A3/B4 (merging) | Depends on A2/B2 (fork detection) being done first |
+| | [CLUE-316](https://concord-consortium.atlassian.net/browse/CLUE-316) | Group documents Text Tiles | A5/B6 (per-tile) | Should come after conflict infrastructure (A2-A4) |
+| | [CLUE-317](https://concord-consortium.atlassian.net/browse/CLUE-317) | Group documents Locked tiles: Program Tiles | B3 (locking) | Only needed if Plan B; depends on UI disruption testing outcome (CLUE-483) |
 | | [CLUE-318](https://concord-consortium.atlassian.net/browse/CLUE-318) | Group documents Sim Tiles | A5/B6 (per-tile) | Should come after conflict infrastructure (A2-A4) |
 | | [CLUE-319](https://concord-consortium.atlassian.net/browse/CLUE-319) | Group documents Graph Tiles | A5/B6 (per-tile) | Should come after conflict infrastructure (A2-A4) |
 | | [CLUE-349](https://concord-consortium.atlassian.net/browse/CLUE-349) | Group documents Table Tiles | A5/B6 (per-tile) | Should come after conflict infrastructure (A2-A4) |
+| | [CLUE-315](https://concord-consortium.atlassian.net/browse/CLUE-315) | Tiles have a 'not group safe' property | B3 (locking) | Only needed if Plan B |
+| | [CLUE-360](https://concord-consortium.atlassian.net/browse/CLUE-360) | Group documents Styling in Sorts | Product/UI | Independent, can be done anytime |
 | | [CLUE-377](https://concord-consortium.atlassian.net/browse/CLUE-377) | Group documents Can be Default | Product/UI | Independent, can be done anytime |
+| | [CLUE-378](https://concord-consortium.atlassian.net/browse/CLUE-378) | Group documents author name | Product/UI | Independent, can be done anytime |
+| | [CLUE-380](https://concord-consortium.atlassian.net/browse/CLUE-380) | Group documents autoshared | Product/UI | Independent, can be done anytime |
 | | [CLUE-221](https://concord-consortium.atlassian.net/browse/CLUE-221) | Users can hide unneeded labels/tools | Not group-doc specific | |
 | | [CLUE-351](https://concord-consortium.atlassian.net/browse/CLUE-351) | CLUE Sort by Problem | Not group-doc specific | |
 | **No sprint** | [CLUE-487](https://concord-consortium.atlassian.net/browse/CLUE-487) | Reliability and robustness fixes | Parallel track | |
@@ -202,12 +202,10 @@ These product/UI stories (CLUE-360, 377, 378, 380) could be done in parallel wit
 
 ### Ordering concerns
 
-Several stories are scheduled earlier than their dependencies suggest:
-
 1. **CLUE-484 (Fix undo rendering bugs)** is in Sprint 15 but both plans list it as step 1 (A1/B1), before fork detection (A2/B2 = CLUE-485 in Sprint 14). Ideally this would be Sprint 14 or earlier.
 
-2. **CLUE-316 (Text Tiles), CLUE-317 (Locked Program Tiles), CLUE-340 (Tile list/arrangement)** are in Sprint 14 but depend on the conflict infrastructure (fork detection, merging) that's being built in the same sprint or later. Per-tile work and conflict merging aren't useful if the document can still be corrupted by simultaneous edits.
+2. **CLUE-315 (not group safe property)** and **CLUE-317 (Locked tiles)** are only needed if Plan B is chosen. The UI disruption testing (CLUE-483, Sprint 14) determines this — so these shouldn't be started until that testing is complete.
 
-3. **CLUE-315 (not group safe property)** and **CLUE-317 (Locked tiles)** are only needed if Plan B is chosen. The UI disruption testing (CLUE-483, Sprint 14) determines this — so these shouldn't be started until that testing is complete.
+3. **Per-tile stories (CLUE-316, 318, 319, 349)** and **conflict merging (CLUE-340)** depend on the conflict infrastructure (A2/B2 fork detection) being done first. These are later steps in both plans.
 
-4. **Per-tile stories (CLUE-318, 319, 349)** are in Sprint 15 but depend on the conflict infrastructure (A2-A4) being done first. These are the last step in both plans.
+4. **CLUE-486 (Shared model conflict resolution)** depends on A2/B2 and A3/B4 being done first.
