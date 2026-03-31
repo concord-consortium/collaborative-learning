@@ -233,6 +233,11 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentWillUnmount() {
+    // If this component initiated a drag and is being unmounted before dragend fires
+    // (e.g. tile moved to a different row), clean up the body class so tiles unshrink.
+    if (this.didDrag) {
+      this.handleDragEnd();
+    }
     this.resizeObserver?.disconnect();
     this.handleResizeDebounced.cancel();
     if (this.liveRegionTimer) {
