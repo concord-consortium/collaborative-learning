@@ -82,6 +82,7 @@ const MOCK_FILES: MockFile[] = [
 export async function fetchRawSeismicData(
   network: string,
   station: string,
+  location: string,
   channel: string,
   startTime: string,
   endTime: string,
@@ -95,7 +96,7 @@ export async function fetchRawSeismicData(
     return fetchFromLocal(localBase, network, station, startTime, endTime, options);
   }
   if (isProxyEnabled()) {
-    return fetchFromProxy(network, station, channel, startTime, endTime, options);
+    return fetchFromProxy(network, station, location, channel, startTime, endTime, options);
   }
   return fetchFromMock(startTime, endTime, options);
 }
@@ -129,6 +130,7 @@ async function fetchFromLocal(
 async function fetchFromProxy(
   network: string,
   station: string,
+  location: string,
   channel: string,
   startTime: string,
   endTime: string,
@@ -136,7 +138,7 @@ async function fetchFromProxy(
 ): Promise<Response> {
   const base = options?.baseUrl ?? CLOUDFRONT_PROXY_URL;
   const params = new URLSearchParams({
-    net: network, sta: station, cha: channel, loc: "--",
+    net: network, sta: station, cha: channel, loc: location || "--",
     start: startTime, end: endTime,
   });
   const url = `${base}/earthscope/cached/dataselect/1/query?${params}`;

@@ -28,12 +28,21 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
           />
         )}
       </div>
-      <div className="download-status-container" />
-      <div className="estimated-time">Estimated time to complete run:</div>
+      <div className="download-status-container">
+        {model.isRunning && <div>Running model...</div>}
+        {model.runError && <div className="waveform-error">{model.runError}</div>}
+      </div>
+      <div className="estimated-time">
+        {model.isRunning
+          ? `Processing day ${model.chunksProcessed + 1} of ${model.chunksTotal || "?"}...`
+          : model.eventsFound
+            ? "Run complete."
+            : "Estimated time to complete run:"}
+      </div>
       <div className="status-counts-row">
         <div className="status-count">
           <label className="status-count-label">Events Identified</label>
-          <div className="status-count-box" />
+          <div className="status-count-box">{model.eventsFound ?? ""}</div>
         </div>
         <div className="status-count">
           <label className="status-count-label">Event Categories</label>

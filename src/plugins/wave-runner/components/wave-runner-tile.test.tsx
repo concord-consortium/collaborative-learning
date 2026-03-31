@@ -39,7 +39,12 @@ describe("WaveRunnerComponent", () => {
       config: {
         settings: {
           "wave-runner": {
-            tools: ["load-data", "|", "play", "restart", "reset", "|", "timeline"]
+            tools: ["load-data", "|", "play", "restart", "reset", "|", "table-it", "timeline"],
+          stations: [
+            { network: "AK", station: "K204", channel: "HNZ", label: "Anchorage Airport" },
+            { network: "AK", station: "DDM", location: "01", channel: "HNZ", label: "Dexter Display Mine" }
+          ],
+          defaultStation: 0
           }
         }
       }
@@ -119,6 +124,21 @@ describe("WaveRunnerComponent", () => {
     expect(endInput.value).toBe("2026-02-06T00:00");
   });
 
+  it("renders station dropdown with options from config", () => {
+    renderWithStores();
+    const stationSelect = screen.getByLabelText("Station") as HTMLSelectElement;
+    const options = Array.from(stationSelect.options);
+    expect(options).toHaveLength(2);
+    expect(options[0].text).toBe("Anchorage Airport");
+    expect(options[1].text).toBe("Dexter Display Mine");
+  });
+
+  it("auto-selects the default station on mount", () => {
+    renderWithStores();
+    const stationSelect = screen.getByLabelText("Station") as HTMLSelectElement;
+    expect(stationSelect.value).toBe("AK_K204__HNZ");
+  });
+
   it("renders all toolbar buttons", () => {
     renderWithStores();
     const toolbar = screen.getByTestId("tile-toolbar");
@@ -126,6 +146,13 @@ describe("WaveRunnerComponent", () => {
     expect(toolbar).toContainHTML("Run Model");
     expect(toolbar).toContainHTML("Restart Model");
     expect(toolbar).toContainHTML("Clear &amp; Reset Model");
+    expect(toolbar).toContainHTML("Table It!");
     expect(toolbar).toContainHTML("Timeline It!");
+  });
+
+  it("renders model dropdown with available models", () => {
+    renderWithStores();
+    expect(screen.getByText("Choose a model")).toBeInTheDocument();
+    expect(screen.getByText("Compact Model")).toBeInTheDocument();
   });
 });
