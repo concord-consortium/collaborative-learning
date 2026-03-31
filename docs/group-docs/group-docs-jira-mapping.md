@@ -92,7 +92,7 @@ This document maps the Jira stories under the CLUE-312 "Group Document" epic to 
 
 | Key | Summary | Status | Notes |
 |---|---|---|---|
-| [CLUE-485](https://concord-consortium.atlassian.net/browse/CLUE-485) | Group documents: GD-5 fork detection and rollback | To Do | Created to fill this gap. Sprint 14, charged to Inscriptions 2. CLUE-376 covered the transaction infrastructure (done); this covers the remaining rollback logic. |
+| [CLUE-485](https://concord-consortium.atlassian.net/browse/CLUE-485) | Group documents: Prevent document corruption from simultaneous edits | To Do | Created to fill this gap. Sprint 14, charged to Inscriptions 2. CLUE-376 covered the transaction infrastructure (done); this covers the remaining rollback logic. |
 
 ### Plan area: Tile Locking (B3 — only if disruptions are not tolerable)
 
@@ -157,7 +157,7 @@ These stories are about product features (how group documents appear, are shared
 |---|---|---|---|---|---|
 | [CLUE-483](https://concord-consortium.atlassian.net/browse/CLUE-483) | Group documents: UI disruption testing | FY26 Sprint 14 | Scott Cytacki | 381 Inscriptions 2 | Immediate testing |
 | [CLUE-484](https://concord-consortium.atlassian.net/browse/CLUE-484) | Group documents: Fix undo rendering bugs | FY26 Sprint 15 | Unassigned | *(none)* | A1/B1 |
-| [CLUE-485](https://concord-consortium.atlassian.net/browse/CLUE-485) | Group documents: GD-5 fork detection and rollback | FY26 Sprint 14 | Scott Cytacki | 381 Inscriptions 2 | A2/B2 |
+| [CLUE-485](https://concord-consortium.atlassian.net/browse/CLUE-485) | Group documents: Prevent document corruption from simultaneous edits | FY26 Sprint 14 | Scott Cytacki | 381 Inscriptions 2 | A2/B2 |
 | [CLUE-486](https://concord-consortium.atlassian.net/browse/CLUE-486) | Group documents: Shared model conflict resolution | FY26 Sprint 15 | Unassigned | *(none)* | A4/B5 |
 | [CLUE-487](https://concord-consortium.atlassian.net/browse/CLUE-487) | Group documents: Reliability and robustness fixes | *(no sprint)* | Unassigned | *(none)* | Parallel track |
 
