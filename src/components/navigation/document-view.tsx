@@ -14,6 +14,7 @@ import { SectionDocuments } from "../../models/stores/section-docs-store";
 import { DocumentBrowserScroller, ScrollButton } from "./document-browser-scroller";
 import CloseIcon from "../../assets/icons/close/close.svg";
 import { DocumentTitle } from "../document/document-title";
+import NotShareIcon from "../../assets/icons/share/not-share.svg";
 
 interface IProps {
   tabSpec: NavTabModelType;
@@ -52,6 +53,8 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const isStarredTab = subTab.label === kBookmarksTabTitle;
   const noValidDocument = !openDocument || openDocument.getProperty("isDeleted");
   const noSecondaryDocument = !openSecondaryDocument || openSecondaryDocument.getProperty("isDeleted");
+  const isPrimaryAccessible = openDocument?.isAccessibleToUser(store.user, documents) ?? false;
+  const isSecondaryAccessible = openSecondaryDocument?.isAccessibleToUser(store.user, documents) ?? false;
 
   const documentTypes: DocumentType[] = tabSpec.tab === "class-work"
                                           ? ["publication"]
@@ -182,7 +185,8 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
         {noValidDocument
           ? null
           : <DocumentArea openDocument={openDocument} subTab={subTab} tab={tabSpec.tab}
-              sectionClass={sectionClass} hasSecondaryDocument={isStarredTab && !noSecondaryDocument}
+              sectionClass={sectionClass} isVisible={isPrimaryAccessible}
+              hasSecondaryDocument={isStarredTab && !noSecondaryDocument}
               hideLeftFlipper={!isStarredTab || hideLeftFlipper()}
               hideRightFlipper={!isStarredTab || hideRightFlipper()}
               onChangeDocument={handleChangeDocument}
@@ -191,7 +195,8 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
         {noSecondaryDocument
           ? null
           : <DocumentArea openDocument={openSecondaryDocument} subTab={subTab} tab={tabSpec.tab}
-              sectionClass={sectionClass} isSecondaryDocument={true} hasSecondaryDocument={true}
+              sectionClass={sectionClass} isVisible={isSecondaryAccessible}
+              isSecondaryDocument={true} hasSecondaryDocument={true}
               hideLeftFlipper={!isStarredTab || hideLeftFlipper("secondary")}
               hideRightFlipper={!isStarredTab || hideRightFlipper("secondary")}
               onChangeDocument={handleChangeDocument}
@@ -207,6 +212,7 @@ interface IDocumentAreaProps {
   subTab: ISubTabModel;
   tab: string;
   sectionClass: string;
+  isVisible: boolean;
   isSecondaryDocument?: boolean;
   hasSecondaryDocument?: boolean;
   hideLeftFlipper?: boolean;
@@ -214,7 +220,7 @@ interface IDocumentAreaProps {
   onChangeDocument?: (shift: number, secondary?: boolean) => void;
 }
 
-const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocument,
+const DocumentArea = ({openDocument, subTab, tab, sectionClass, isVisible, isSecondaryDocument,
     hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps
 ) => {
   const {appConfig, persistentUI, ui, user} = useStores();
@@ -247,17 +253,23 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
         <ScrollButton side="left" theme={tab} className="document-flipper"
             onClick={()=>onChangeDocument(1, isSecondaryDocument)}/>
       }
-      <EditableDocumentContent
-        mode={"1-up"}
-        isPrimary={false}
-        document={openDocument}
-        readOnly={true}
-        showPlayback={showPlayback}
-        fullHeight={subTab.label !== kBookmarksTabTitle }
-        toolbar={appConfig.myResourcesToolbar({showPlayback, showEdit})}
-        pane="left"
-        sectionClass={sectionClass}
-      />
+      {isVisible
+        ? <EditableDocumentContent
+            mode={"1-up"}
+            isPrimary={false}
+            document={openDocument}
+            readOnly={true}
+            showPlayback={showPlayback}
+            fullHeight={subTab.label !== kBookmarksTabTitle }
+            toolbar={appConfig.myResourcesToolbar({showPlayback, showEdit})}
+            pane="left"
+            sectionClass={sectionClass}
+          />
+        : <div className="document-not-shared">
+            <NotShareIcon className="not-shared-icon" />
+            <p>This document is no longer shared and can&apos;t be viewed at this time.</p>
+          </div>
+      }
       {onChangeDocument && !hideRightFlipper &&
         <ScrollButton side="right" theme={tab} className="document-flipper"
             onClick={()=>onChangeDocument(-1, isSecondaryDocument)}/>

@@ -12,6 +12,7 @@ import NavTabs from "./workspace/nav-tabs";
 import AISettings from "./workspace/ai-settings";
 import SortWorkSettings from "./workspace/sort-work-settings";
 import { TermOverridesSettings } from "./workspace/term-overrides-settings";
+import DocumentSettings from "./workspace/document-settings";
 import ExemplarMetadata from "./editors/exemplar-metadata";
 import { ContainerConfig } from "./workspace/container-config/container-config";
 
@@ -146,6 +147,8 @@ const Workspace: React.FC = () => {
         return <SortWorkSettings />;
       case "config/termOverrides":
         return <TermOverridesSettings />;
+      case "config/documentSettings":
+        return <DocumentSettings />;
       default:
         return <div className="centered muted">Not yet implemented.</div>;
     }

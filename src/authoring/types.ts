@@ -54,6 +54,7 @@ export interface IUnitConfig {
   sortWorkConfig?: ISortWorkConfig;
   termOverrides?: Record<string, string>;
   defaultPanelLayout?: "split" | "workspace-only" | "resources-only";
+  defaultSharedDocuments?: boolean;
 }
 
 export interface IAuthorTool {

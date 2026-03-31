@@ -196,4 +196,27 @@ describe("ConfigurationManager", () => {
     expect(configManager.groupDocumentsEnabled).toBe(true);
   });
 
+  it("should return undefined for defaultSharedDocuments when not configured", () => {
+    const configManager = new ConfigurationManager(defaults, []);
+    expect(configManager.defaultSharedDocuments).toBeUndefined();
+  });
+
+  it("should return true for defaultSharedDocuments when set in config", () => {
+    const configWithShared = { ...defaults, defaultSharedDocuments: true };
+    const configManager = new ConfigurationManager(configWithShared, []);
+    expect(configManager.defaultSharedDocuments).toBe(true);
+  });
+
+  it("should return false for defaultSharedDocuments when explicitly set to false", () => {
+    const configWithShared = { ...defaults, defaultSharedDocuments: false };
+    const configManager = new ConfigurationManager(configWithShared, []);
+    expect(configManager.defaultSharedDocuments).toBe(false);
+  });
+
+  it("should return defaultSharedDocuments from override config", () => {
+    const overrideWithShared: Partial<UnitConfiguration> = { defaultSharedDocuments: true };
+    const configManager = new ConfigurationManager(defaults, [overrideWithShared]);
+    expect(configManager.defaultSharedDocuments).toBe(true);
+  });
+
 });
