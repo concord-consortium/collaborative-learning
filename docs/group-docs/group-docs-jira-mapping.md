@@ -76,44 +76,31 @@ This document maps the Jira stories under the CLUE-312 "Group Document" epic to 
 
 ## Open Stories Mapped to Plan
 
-### Plan area: UI Disruption Testing (Immediate)
+### GD-7: Undo Bugs
 
 | Key | Summary | Status | Notes |
 |---|---|---|---|
-| [CLUE-483](https://concord-consortium.atlassian.net/browse/CLUE-483) | Group documents: UI disruption testing | To Do | Created to fill this gap. Sprint 14, charged to Inscriptions 2. |
+| [CLUE-484](https://concord-consortium.atlassian.net/browse/CLUE-484) | Group documents: Fix undo rendering bugs | To Do | Sprint 15. |
 
-### Plan area: Fix Undo Rendering Bugs (A1/B1)
-
-| Key | Summary | Status | Notes |
-|---|---|---|---|
-| [CLUE-484](https://concord-consortium.atlassian.net/browse/CLUE-484) | Group documents: Fix undo rendering bugs | To Do | Created to fill this gap. Sprint 15. |
-
-### Plan area: Finish GD-5 — Fork Detection and Rollback (A2/B2)
+### GD-6: Corruption Prevention
 
 | Key | Summary | Status | Notes |
 |---|---|---|---|
-| [CLUE-485](https://concord-consortium.atlassian.net/browse/CLUE-485) | Group documents: Prevent document corruption from simultaneous edits | To Do | Created to fill this gap. Sprint 14, charged to Inscriptions 2. CLUE-376 covered the transaction infrastructure (done); this covers the remaining rollback logic. |
+| [CLUE-485](https://concord-consortium.atlassian.net/browse/CLUE-485) | Group documents: Prevent document corruption from simultaneous edits | To Do | Sprint 14, charged to Inscriptions 2. CLUE-376 covered the transaction infrastructure (done); this covers the remaining rollback logic. |
 
-### Plan area: Tile Locking (B3 — only if disruptions are not tolerable)
-
-| Key | Summary | Status | Notes |
-|---|---|---|---|
-| [CLUE-315](https://concord-consortium.atlassian.net/browse/CLUE-315) | Tiles have a 'not group safe' property | To Do | Tiles can be annotated as not group-safe (code level or unit JSON). This is a prerequisite for locking — identifying which tiles need it. |
-| [CLUE-317](https://concord-consortium.atlassian.net/browse/CLUE-317) | Group documents Locked tiles: Program Tiles | To Do | Locking specifically for program (dataflow) tiles. Includes lock visual annotation, hardware pairing lock, and synchronized read-only view. Most detailed locking story. |
-
-### Plan area: Smarter Conflict Merging (A3/B4)
+### GD-9: Document-Level Merging
 
 | Key | Summary | Status | Notes |
 |---|---|---|---|
 | [CLUE-340](https://concord-consortium.atlassian.net/browse/CLUE-340) | Group documents Tile list/arrangement/focus | To Do | "All users can add tiles... Last student to add a tile will 'win' the layout, but all tiles will be saved." This is document-level merging — tile additions shouldn't conflict with each other. |
 
-### Plan area: Shared Model Conflict Resolution (A4/B5)
+### GD-10: Shared Model Merging
 
 | Key | Summary | Status | Notes |
 |---|---|---|---|
-| [CLUE-486](https://concord-consortium.atlassian.net/browse/CLUE-486) | Group documents: Shared model conflict resolution | To Do | Created to fill this gap. Sprint 15. The per-tile stories (CLUE-316, 318, 319, 349) imply concurrent shared model editing but this covers the underlying merge infrastructure. |
+| [CLUE-486](https://concord-consortium.atlassian.net/browse/CLUE-486) | Group documents: Shared model conflict resolution | To Do | Sprint 15. The per-tile stories (CLUE-316, 318, 319, 349) imply concurrent shared model editing but this covers the underlying merge infrastructure. |
 
-### Plan area: Per-Tile Resilience / Hardening (A5/B6)
+### GD-11: Tile Hardening
 
 | Key | Summary | Status | Notes |
 |---|---|---|---|
@@ -122,7 +109,20 @@ This document maps the Jira stories under the CLUE-312 "Group Document" epic to 
 | [CLUE-319](https://concord-consortium.atlassian.net/browse/CLUE-319) | Group documents Graph Tiles | To Do | "Multiple students can edit the same or multiple graphs." Minimal description. |
 | [CLUE-349](https://concord-consortium.atlassian.net/browse/CLUE-349) | Group documents Table Tiles | To Do | "Multiple students can edit the same or multiple tables." Minimal description. |
 
-### Plan area: DataFlow Simulation (Parallel Track)
+### GD-8: Tile Locking (Plan B only)
+
+| Key | Summary | Status | Notes |
+|---|---|---|---|
+| [CLUE-315](https://concord-consortium.atlassian.net/browse/CLUE-315) | Tiles have a 'not group safe' property | To Do | Prerequisite for locking — identifying which tiles need it. |
+| [CLUE-317](https://concord-consortium.atlassian.net/browse/CLUE-317) | Group documents Locked tiles: Program Tiles | To Do | Locking specifically for program (dataflow) tiles. Includes lock visual annotation, hardware pairing lock, and synchronized read-only view. |
+
+### UI Disruption Testing (Immediate)
+
+| Key | Summary | Status | Notes |
+|---|---|---|---|
+| [CLUE-483](https://concord-consortium.atlassian.net/browse/CLUE-483) | Group documents: UI disruption testing | To Do | Sprint 14, charged to Inscriptions 2. Determines Plan A vs Plan B. |
+
+### DataFlow Simulation (Parallel Track)
 
 | Key | Summary | Status | Notes |
 |---|---|---|---|
@@ -155,17 +155,17 @@ These stories are about product features (how group documents appear, are shared
 
 | Key | Summary | Sprint | Assigned | Charged To | Plan Area |
 |---|---|---|---|---|---|
-| [CLUE-483](https://concord-consortium.atlassian.net/browse/CLUE-483) | Group documents: UI disruption testing | FY26 Sprint 14 | Scott Cytacki | 381 Inscriptions 2 | Immediate testing |
-| [CLUE-484](https://concord-consortium.atlassian.net/browse/CLUE-484) | Group documents: Fix undo rendering bugs | FY26 Sprint 15 | Unassigned | *(none)* | A1/B1 |
-| [CLUE-485](https://concord-consortium.atlassian.net/browse/CLUE-485) | Group documents: Prevent document corruption from simultaneous edits | FY26 Sprint 14 | Scott Cytacki | 381 Inscriptions 2 | A2/B2 |
-| [CLUE-486](https://concord-consortium.atlassian.net/browse/CLUE-486) | Group documents: Shared model conflict resolution | FY26 Sprint 15 | Unassigned | *(none)* | A4/B5 |
+| [CLUE-483](https://concord-consortium.atlassian.net/browse/CLUE-483) | Group documents: UI disruption testing | FY26 Sprint 14 | Scott Cytacki | 381 Inscriptions 2 | UI Disruption Testing |
+| [CLUE-484](https://concord-consortium.atlassian.net/browse/CLUE-484) | Group documents: Fix undo rendering bugs | FY26 Sprint 15 | Unassigned | *(none)* | GD-7: Undo Bugs |
+| [CLUE-485](https://concord-consortium.atlassian.net/browse/CLUE-485) | Group documents: Prevent document corruption from simultaneous edits | FY26 Sprint 14 | Scott Cytacki | 381 Inscriptions 2 | GD-6: Corruption Prevention |
+| [CLUE-486](https://concord-consortium.atlassian.net/browse/CLUE-486) | Group documents: Shared model conflict resolution | FY26 Sprint 15 | Unassigned | *(none)* | GD-10: Shared Model Merging |
 | [CLUE-487](https://concord-consortium.atlassian.net/browse/CLUE-487) | Group documents: Reliability and robustness fixes | *(no sprint)* | Unassigned | *(none)* | Parallel track |
 
 ## Gaps: Jira stories not covered by plan
 
 | Key | Summary | Notes |
 |---|---|---|
-| [CLUE-315](https://concord-consortium.atlassian.net/browse/CLUE-315) | Tiles have a 'not group safe' property | Only relevant if Plan B (tile locking) is chosen. The plan doesn't currently discuss marking tiles as group-safe/unsafe since Plan A avoids locking. |
+| [CLUE-315](https://concord-consortium.atlassian.net/browse/CLUE-315) | Tiles have a 'not group safe' property | Only relevant if Plan B (GD-8: Tile Locking) is chosen. Plan A avoids locking. |
 | [CLUE-360](https://concord-consortium.atlassian.net/browse/CLUE-360) | Group documents Styling in Sorts | Product/UI work not covered by the technical plan. |
 | [CLUE-377](https://concord-consortium.atlassian.net/browse/CLUE-377) | Group documents Can be Default | Product/UI work not covered by the technical plan. |
 | [CLUE-378](https://concord-consortium.atlassian.net/browse/CLUE-378) | Group documents author name | Product/UI work not covered by the technical plan. |
@@ -175,20 +175,20 @@ These product/UI stories (CLUE-360, 377, 378, 380) could be done in parallel wit
 
 ## Open Stories by Sprint
 
-| Sprint | Key | Summary | Plan Area | Ordering Concern |
+| Sprint | Key | Summary | Work Area | Ordering Concern |
 |---|---|---|---|---|
-| **FY26 Sprint 14** | [CLUE-483](https://concord-consortium.atlassian.net/browse/CLUE-483) | UI disruption testing | Immediate | |
-| | [CLUE-485](https://concord-consortium.atlassian.net/browse/CLUE-485) | Prevent document corruption from simultaneous edits | A2/B2 | |
+| **FY26 Sprint 14** | [CLUE-483](https://concord-consortium.atlassian.net/browse/CLUE-483) | UI disruption testing | UI Disruption Testing | |
+| | [CLUE-485](https://concord-consortium.atlassian.net/browse/CLUE-485) | Prevent document corruption from simultaneous edits | GD-6: Corruption Prevention | |
 | | [CLUE-379](https://concord-consortium.atlassian.net/browse/CLUE-379) | Run-time state for History/Group Synch | DataFlow parallel track | Independent, can be done anytime |
-| **FY26 Sprint 15** | [CLUE-484](https://concord-consortium.atlassian.net/browse/CLUE-484) | Fix undo rendering bugs | A1/B1 | Both plans say this should come before A2/B2, so ideally Sprint 14 not 15 |
-| | [CLUE-486](https://concord-consortium.atlassian.net/browse/CLUE-486) | Shared model conflict resolution | A4/B5 | Depends on A2/B2 and A3/B4 being done first |
-| | [CLUE-340](https://concord-consortium.atlassian.net/browse/CLUE-340) | Group documents Tile list/arrangement/focus | A3/B4 (merging) | Depends on A2/B2 (fork detection) being done first |
-| | [CLUE-316](https://concord-consortium.atlassian.net/browse/CLUE-316) | Group documents Text Tiles | A5/B6 (per-tile) | Should come after conflict infrastructure (A2-A4) |
-| | [CLUE-317](https://concord-consortium.atlassian.net/browse/CLUE-317) | Group documents Locked tiles: Program Tiles | B3 (locking) | Only needed if Plan B; depends on UI disruption testing outcome (CLUE-483) |
-| | [CLUE-318](https://concord-consortium.atlassian.net/browse/CLUE-318) | Group documents Sim Tiles | A5/B6 (per-tile) | Should come after conflict infrastructure (A2-A4) |
-| | [CLUE-319](https://concord-consortium.atlassian.net/browse/CLUE-319) | Group documents Graph Tiles | A5/B6 (per-tile) | Should come after conflict infrastructure (A2-A4) |
-| | [CLUE-349](https://concord-consortium.atlassian.net/browse/CLUE-349) | Group documents Table Tiles | A5/B6 (per-tile) | Should come after conflict infrastructure (A2-A4) |
-| | [CLUE-315](https://concord-consortium.atlassian.net/browse/CLUE-315) | Tiles have a 'not group safe' property | B3 (locking) | Only needed if Plan B |
+| **FY26 Sprint 15** | [CLUE-484](https://concord-consortium.atlassian.net/browse/CLUE-484) | Fix undo rendering bugs | GD-7: Undo Bugs | Independent of GD-6; exploratory work to find all instances |
+| | [CLUE-486](https://concord-consortium.atlassian.net/browse/CLUE-486) | Shared model conflict resolution | GD-10: Shared Model Merging | Depends on GD-6 and GD-9 being done first |
+| | [CLUE-340](https://concord-consortium.atlassian.net/browse/CLUE-340) | Group documents Tile list/arrangement/focus | GD-9: Document-Level Merging | Depends on GD-6 being done first |
+| | [CLUE-316](https://concord-consortium.atlassian.net/browse/CLUE-316) | Group documents Text Tiles | GD-11: Tile Hardening | Should come after GD-6 through GD-10 |
+| | [CLUE-317](https://concord-consortium.atlassian.net/browse/CLUE-317) | Group documents Locked tiles: Program Tiles | GD-8: Tile Locking | Only needed if Plan B; depends on UI disruption testing outcome |
+| | [CLUE-318](https://concord-consortium.atlassian.net/browse/CLUE-318) | Group documents Sim Tiles | GD-11: Tile Hardening | Should come after GD-6 through GD-10 |
+| | [CLUE-319](https://concord-consortium.atlassian.net/browse/CLUE-319) | Group documents Graph Tiles | GD-11: Tile Hardening | Should come after GD-6 through GD-10 |
+| | [CLUE-349](https://concord-consortium.atlassian.net/browse/CLUE-349) | Group documents Table Tiles | GD-11: Tile Hardening | Should come after GD-6 through GD-10 |
+| | [CLUE-315](https://concord-consortium.atlassian.net/browse/CLUE-315) | Tiles have a 'not group safe' property | GD-8: Tile Locking | Only needed if Plan B |
 | | [CLUE-360](https://concord-consortium.atlassian.net/browse/CLUE-360) | Group documents Styling in Sorts | Product/UI | Independent, can be done anytime |
 | | [CLUE-377](https://concord-consortium.atlassian.net/browse/CLUE-377) | Group documents Can be Default | Product/UI | Independent, can be done anytime |
 | | [CLUE-378](https://concord-consortium.atlassian.net/browse/CLUE-378) | Group documents author name | Product/UI | Independent, can be done anytime |
@@ -202,10 +202,10 @@ These product/UI stories (CLUE-360, 377, 378, 380) could be done in parallel wit
 
 ### Ordering concerns
 
-1. **CLUE-484 (Fix undo rendering bugs)** is in Sprint 15 but both plans list it as step 1 (A1/B1), before fork detection (A2/B2 = CLUE-485 in Sprint 14). Ideally this would be Sprint 14 or earlier.
+1. **GD-8: Tile Locking stories (CLUE-315, CLUE-317)** are only needed if Plan B is chosen. The UI disruption testing (CLUE-483, Sprint 14) determines this — so these shouldn't be started until that testing is complete.
 
-2. **CLUE-315 (not group safe property)** and **CLUE-317 (Locked tiles)** are only needed if Plan B is chosen. The UI disruption testing (CLUE-483, Sprint 14) determines this — so these shouldn't be started until that testing is complete.
+2. **GD-11: Tile Hardening stories (CLUE-316, 318, 319, 349)** and **GD-9: Document-Level Merging (CLUE-340)** depend on GD-6: Corruption Prevention being done first. These are later steps in both plans.
 
-3. **Per-tile stories (CLUE-316, 318, 319, 349)** and **conflict merging (CLUE-340)** depend on the conflict infrastructure (A2/B2 fork detection) being done first. These are later steps in both plans.
+3. **GD-10: Shared Model Merging (CLUE-486)** depends on GD-6 and GD-9 being done first.
 
-4. **CLUE-486 (Shared model conflict resolution)** depends on A2/B2 and A3/B4 being done first.
+Note: GD-7: Undo Bugs (CLUE-484) is independent of GD-6: Corruption Prevention (CLUE-485). The corruption prevention work is well-defined and self-contained, while the undo bugs require exploration to find all instances. It's fine to do them in parallel or in either order.

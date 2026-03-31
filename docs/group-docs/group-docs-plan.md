@@ -2,6 +2,19 @@
 
 This document outlines the remaining work areas for group documents after the initial implementation (GD-1 through GD-4, plus partial GD-5). See `group-docs-current-state.md` for where things stand today.
 
+Note: The original GD-5 (from `group-docs-brainstorm.md`) included both the transaction infrastructure and the fork detection/rollback logic. The transaction infrastructure is done (CLUE-376). The remaining rollback work is now GD-6, and the conflict merging aspects originally envisioned as part of GD-5's future work are now GD-9 and GD-10.
+
+## Work Areas
+
+| Label | Name | Description |
+|---|---|---|
+| **GD-6** | Corruption Prevention | Client-side fork detection and rollback to prevent document corruption |
+| **GD-7** | Undo Bugs | Fix cases where patch-applied model changes don't update the tile UI |
+| **GD-8** | Tile Locking | Lock tiles so only one user can edit at a time (Plan B only) |
+| **GD-9** | Document-Level Merging | Merge non-conflicting changes at the document/tile level instead of rolling back |
+| **GD-10** | Shared Model Merging | Merge non-conflicting changes within shared models |
+| **GD-11** | Tile Hardening | Per-tile fixes to preserve transient UI state across remote updates |
+
 ## Immediate: UI Disruption Testing
 
 This can start now, before any other work is done. The goal is to determine whether the transient UI disruptions from concurrent editing are tolerable in practice.
@@ -18,24 +31,32 @@ See `group-docs-potential-ui-issues.md` for specific issues to test, each marked
 
 If testing shows that transient UI disruptions are acceptable for most tiles, the path is simpler — no tile locking needed.
 
-### A1. Fix Undo Rendering Bugs
+Plan A proceeds through these work areas. Items at the same level can be done in parallel or in either order. Indented items depend on the item above them.
+
+1. **GD-7: Undo Bugs** — independent, can be done anytime
+2. **GD-6: Corruption Prevention**
+   - **GD-9: Document-Level Merging** — depends on GD-6
+     - **GD-10: Shared Model Merging** — depends on GD-9
+3. **GD-11: Tile Hardening** (as needed, after the merging work areas)
+
+### GD-7: Undo Bugs
 
 Fix cases where model changes via patch application don't update the tile UI. These are bugs that affect both single-user undo and group documents. They're typically low effort to fix (e.g., the table attribute name issue is a one-line change from `triggerRowChange()` to `triggerColumnChange()`). See `group-docs-potential-ui-issues.md` for undo-testable issues.
 
-### A2. Finish GD-5: Fork Detection and Rollback
+### GD-6: Corruption Prevention
 
 The transaction infrastructure is in place (`lastHistoryEntry` metadata, `previousEntryId` chaining, Firestore transactions in `uploadQueuedHistoryEntries()`). What remains is client-side fork detection and rollback: when a remote entry arrives whose `previousEntryId` doesn't match the local head, the client should reverse its local uncommitted entries (using their undo patches) back to the fork point, then apply the remote entries.
 
 After this step, the document and history should never be corrupted by concurrent edits. However, any conflict will roll back all of one user's local changes, which may be disruptive.
 
-### A3. Smarter Conflict Merging
+### GD-9: Document-Level Merging
 
-After GD-5, any conflict rolls back all local changes. Smarter merging would reduce how much work gets "clobbered":
+After GD-6, any conflict rolls back all local changes. Smarter merging would reduce how much work gets "clobbered":
 
 - **Document level**: Changes to different tiles (that don't share a model) can be merged instead of rolling back. For example, adding a new tile shouldn't affect someone editing an existing tile.
 - **Tile + shared model level**: If two tiles are being changed and they don't share a model, merge the changes.
 
-### A4. Shared Model Conflict Resolution
+### GD-10: Shared Model Merging
 
 Support concurrent changes to shared models when they don't actually conflict. For example:
 - Two users editing different cells in a shared dataset
@@ -44,7 +65,7 @@ Support concurrent changes to shared models when they don't actually conflict. F
 
 True conflicts (e.g., one user deleting an object another user is referencing) still need to be detected and one side rolled back.
 
-### A5. Per-Tile UI Hardening (as needed)
+### GD-11: Tile Hardening (as needed)
 
 For specific tiles where testing showed the disruption is too frequent or severe, harden those tiles to preserve transient state across remote updates. This is done per-tile, only where needed. Options include saving/restoring focus, deferring updates during active interaction, or other tile-specific solutions. See `group-docs-tile-resilience-research.md` for per-tile risk analysis and `group-docs-potential-ui-issues.md` for concrete issues.
 
@@ -54,15 +75,24 @@ For specific tiles where testing showed the disruption is too frequent or severe
 
 If testing shows that transient UI disruptions make group documents unusable for key tiles, tile locking is needed as an intermediate step.
 
-### B1. Fix Undo Rendering Bugs
+Plan B proceeds through these work areas. Items at the same level can be done in parallel or in either order. Indented items depend on the item above them.
 
-Same as A1 — these are bugs regardless of which plan we follow.
+1. **GD-7: Undo Bugs** — independent, can be done anytime
+2. **GD-6: Corruption Prevention**
+   - **GD-8: Tile Locking** — depends on GD-6
+   - **GD-9: Document-Level Merging** — depends on GD-6
+     - **GD-10: Shared Model Merging** — depends on GD-9
+3. **GD-11: Tile Hardening** + remove locks incrementally (after the merging work areas)
 
-### B2. Finish GD-5: Fork Detection and Rollback
+### GD-7: Undo Bugs
 
-Same as A2.
+Same as Plan A.
 
-### B3. Tile Locking
+### GD-6: Corruption Prevention
+
+Same as Plan A.
+
+### GD-8: Tile Locking
 
 Add the ability to "lock" a tile so only one user can edit it at a time. Other users see a read-only view of the tile that updates as the editing user makes changes. This prevents concurrent edits to a tile's own state and avoids the transient UI disruptions.
 
@@ -80,15 +110,15 @@ Tile locking prevents concurrent edits to a tile's own state, but shared model c
 - **Defer shared model updates in locked tiles**: Queue updates and apply when the user finishes editing.
 - **Per-tile hardening**: Preserve transient state across shared model updates for specific tiles.
 
-### B4. Smarter Conflict Merging
+### GD-9: Document-Level Merging
 
-Same as A3, but with tile locking in place, most tile-level conflicts are prevented. The remaining merging work is primarily at the document level.
+Same as Plan A, but with tile locking in place, most tile-level conflicts are prevented. The remaining merging work is primarily at the document level.
 
-### B5. Shared Model Conflict Resolution
+### GD-10: Shared Model Merging
 
-Same as A4.
+Same as Plan A.
 
-### B6. Per-Tile UI Hardening + Remove Locks
+### GD-11: Tile Hardening + Remove Locks
 
 For tiles where we want to allow true concurrent editing without locks, harden those tiles to handle remote updates gracefully. This allows removing locks on specific tiles incrementally.
 
