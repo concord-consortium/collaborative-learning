@@ -1246,7 +1246,6 @@ describe("WaveformPanel", () => {
         sharedSeismogram={sharedSeismogram}
         startTime={START}
         endTime={END}
-        pixelWidth={800}
       />
     );
     expect(getByText("1 day")).toBeInTheDocument();
@@ -1261,7 +1260,6 @@ describe("WaveformPanel", () => {
         sharedSeismogram={sharedSeismogram}
         startTime={START}
         endTime={END}
-        pixelWidth={800}
       />
     );
     expect(mockLoadViewport).toHaveBeenCalled();
@@ -1279,7 +1277,7 @@ Expected: FAIL — props don't match
 Replace the content of `src/plugins/shared-seismogram/components/waveform-panel.tsx`:
 
 ```tsx
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { DateTime } from "luxon";
 import uPlot from "uplot";
@@ -1294,7 +1292,6 @@ interface WaveformPanelProps {
   sharedSeismogram: SharedSeismogramType;
   startTime: DateTime;
   endTime: DateTime;
-  pixelWidth: number;
 }
 
 export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function WaveformPanel({
@@ -1302,19 +1299,31 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
   sharedSeismogram,
   startTime,
   endTime,
-  pixelWidth,
 }) {
   const { seismicQueryService } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
   const uplotRef = useRef<uPlot | null>(null);
   const callerIdRef = useRef(nanoid());
+  const [pixelWidth, setPixelWidth] = useState(0);
 
   const { network, station, location, channel } = sharedSeismogram;
+
+  // Measure container width
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setPixelWidth(entry.contentRect.width);
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Debounce loadViewport
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!network || !station || !channel) return;
+    if (!network || !station || !channel || pixelWidth === 0) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       seismicQueryService.loadViewport(callerIdRef.current, {
@@ -1333,7 +1342,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
   }, [network, station, location, channel, startTime, endTime, pixelWidth, seismicQueryService]);
 
   // Query and render
-  const queryResult = (network && station && channel)
+  const queryResult = (network && station && channel && pixelWidth > 0)
     ? seismicQueryService.query({
         network,
         station,
@@ -1401,15 +1410,6 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     };
   }, [queryResult, pixelWidth]);
 
-  // Resize handling
-  useEffect(() => {
-    if (!uplotRef.current || !containerRef.current) return;
-    uplotRef.current.setSize({
-      width: pixelWidth,
-      height: containerRef.current.clientHeight || 150,
-    });
-  }, [pixelWidth]);
-
   return (
     <div className="waveform-panel">
       <div className="waveform-panel-label">{label}</div>
@@ -1467,7 +1467,7 @@ Replace the content of `src/plugins/timeline/components/timeline.tsx`:
 
 ```tsx
 import { observer } from "mobx-react-lite";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { isValidDateTime } from "../../../utilities/luxon-utils";
 import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
@@ -1478,21 +1478,6 @@ import "./timeline.scss";
 export const Timeline = observer(function Timeline() {
   const rawContent = useContext(TileModelContext)?.content;
   const model = isTimelineContentModel(rawContent) ? rawContent : undefined;
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [pixelWidth, setPixelWidth] = useState(0);
-
-  // Measure container width
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const observer = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        setPixelWidth(entry.contentRect.width);
-      }
-    });
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
 
   const sharedSeismogram = model?.sharedSeismogram;
   const dataStartTime = model?.dataStartTime;
@@ -1519,14 +1504,13 @@ export const Timeline = observer(function Timeline() {
   }, [model, dataStartTime, dataEndTime]);
 
   return (
-    <div className="timeline-area" ref={containerRef}>
-      {sharedSeismogram && isValidDateTime(startTime) && isValidDateTime(endTime) && pixelWidth > 0 ? (
+    <div className="timeline-area">
+      {sharedSeismogram && isValidDateTime(startTime) && isValidDateTime(endTime) ? (
         <WaveformPanel
           label="Full waveform"
           sharedSeismogram={sharedSeismogram}
           startTime={startTime}
           endTime={endTime}
-          pixelWidth={pixelWidth}
         />
       ) : <div className="waveform" />}
     </div>
@@ -1659,7 +1643,7 @@ async loadData() {
 Replace the content of `src/plugins/wave-runner/components/status-and-output.tsx`:
 
 ```tsx
-import React, { useRef, useState, useEffect } from "react";
+import React from "react";
 import { observer } from "mobx-react";
 import { DateTime } from "luxon";
 import { useWaveRunnerContent } from "../hooks/use-wave-runner-content";
@@ -1671,35 +1655,20 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
   const sharedSeismogram = model.sharedSeismogram;
   const hasStation = model.hasStationData;
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [pixelWidth, setPixelWidth] = useState(0);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const observer = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        setPixelWidth(entry.contentRect.width);
-      }
-    });
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
   const startTime = DateTime.fromISO(`${model.startDate}T00:00:00Z`, { zone: "utc" });
   const endTime = DateTime.fromISO(`${model.endDate}T00:00:00Z`, { zone: "utc" });
 
   return (
     <div className="section status-and-output">
       <div className="section-title">Status and Output</div>
-      <div className="waveform-container" ref={containerRef}>
-        {sharedSeismogram && hasStation && pixelWidth > 0 && (
+      <div className="waveform-container">
+        {sharedSeismogram && hasStation && (
           <WaveformPanel
             key={`${model.startDate}-${model.endDate}`}
             label={`${model.startDate} – ${model.endDate}`}
             sharedSeismogram={sharedSeismogram}
             startTime={startTime}
             endTime={endTime}
-            pixelWidth={pixelWidth}
           />
         )}
       </div>
