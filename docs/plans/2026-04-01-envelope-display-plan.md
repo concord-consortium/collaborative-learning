@@ -291,34 +291,40 @@ git commit -m "feat: implement envelope tile fetcher"
 Create `src/models/stores/seismic-query-service.test.ts`:
 
 ```ts
+import { DateTime } from "luxon";
 import { SeismicQueryService, envelopeCacheKey, rawCacheKey } from "./seismic-query-service";
 
 describe("SeismicQueryService", () => {
   describe("selectLevel", () => {
     let service: SeismicQueryService;
+    const t0 = DateTime.fromSeconds(0, { zone: "utc" });
+
+    function selectLevelFromSecondsPerPixel(spp: number) {
+      return service.selectLevel(t0, DateTime.fromSeconds(spp * 1000, { zone: "utc" }), 1000);
+    }
 
     beforeEach(() => {
       service = new SeismicQueryService();
     });
 
     it("selects L0 when secondsPerPixel >= L0 spacing (15750)", () => {
-      expect(service.selectLevel(15750)).toBe(0);
-      expect(service.selectLevel(20000)).toBe(0);
+      expect(selectLevelFromSecondsPerPixel(15750)).toBe(0);
+      expect(selectLevelFromSecondsPerPixel(20000)).toBe(0);
     });
 
     it("selects L1 when secondsPerPixel >= L1 spacing (157.5)", () => {
-      expect(service.selectLevel(157.5)).toBe(1);
-      expect(service.selectLevel(1000)).toBe(1);
+      expect(selectLevelFromSecondsPerPixel(157.5)).toBe(1);
+      expect(selectLevelFromSecondsPerPixel(1000)).toBe(1);
     });
 
     it("selects L2 when secondsPerPixel >= L2 spacing (1.575)", () => {
-      expect(service.selectLevel(1.575)).toBe(2);
-      expect(service.selectLevel(10)).toBe(2);
+      expect(selectLevelFromSecondsPerPixel(1.575)).toBe(2);
+      expect(selectLevelFromSecondsPerPixel(10)).toBe(2);
     });
 
     it("selects raw when secondsPerPixel < L2 spacing", () => {
-      expect(service.selectLevel(1)).toBe("raw");
-      expect(service.selectLevel(0.01)).toBe("raw");
+      expect(selectLevelFromSecondsPerPixel(1)).toBe("raw");
+      expect(selectLevelFromSecondsPerPixel(0.01)).toBe("raw");
     });
   });
 });
@@ -355,6 +361,7 @@ import { dequantize } from "../../../shared/seismic/envelope-codec";
 import { getTileIndicesForViewport, getTileTimeRange, getTileDuration } from "../../../shared/seismic/tile-addressing";
 import { fetchEnvelopeTile } from "../../../shared/seismic/envelope-fetcher";
 import { fetchRawSeismicData, fetchStationMetadata } from "../../../shared/seismic/earthscope-client";
+import { miniseed } from "seisplotjs";
 import {
   EnvelopeTileData, ChannelMetadata, SeismicViewportParams, ViewportQueryResult, RawSegment
 } from "../../../shared/seismic/seismic-types";
@@ -395,7 +402,8 @@ export class SeismicQueryService {
    * Select the appropriate data level for the given seconds per pixel.
    * Returns 0, 1, 2 for envelope levels, or "raw" for raw data.
    */
-  selectLevel(secondsPerPixel: number): number | "raw" {
+  selectLevel(startTime: DateTime, endTime: DateTime, pixelWidth: number): number | "raw" {
+    const secondsPerPixel = (endTime.toSeconds() - startTime.toSeconds()) / pixelWidth;
     for (let level = 0; level < LEVEL_SPACINGS.length; level++) {
       if (secondsPerPixel >= LEVEL_SPACINGS[level]) return level;
     }
@@ -408,10 +416,7 @@ export class SeismicQueryService {
    */
   query(params: SeismicViewportParams): ViewportQueryResult {
     const { network, station, channel, startTime, endTime, pixelWidth } = params;
-    const startSec = startTime.toSeconds();
-    const endSec = endTime.toSeconds();
-    const secondsPerPixel = (endSec - startSec) / pixelWidth;
-    const level = this.selectLevel(secondsPerPixel);
+    const level = this.selectLevel(startTime, endTime, pixelWidth);
     const instrumentCode = channel.charAt(1);
     const amplitudeRange = AMPLITUDE_RANGES[instrumentCode] ?? 1;
 
@@ -426,11 +431,8 @@ export class SeismicQueryService {
    * call with the same callerId.
    */
   loadViewport(callerId: string, params: SeismicViewportParams): void {
-    const { network, station, channel, startTime, endTime, pixelWidth } = params;
-    const startSec = startTime.toSeconds();
-    const endSec = endTime.toSeconds();
-    const secondsPerPixel = (endSec - startSec) / pixelWidth;
-    const level = this.selectLevel(secondsPerPixel);
+    const { startTime, endTime, pixelWidth } = params;
+    const level = this.selectLevel(startTime, endTime, pixelWidth);
 
     if (level === "raw") {
       this.loadRaw(callerId, params);
@@ -718,8 +720,11 @@ export class SeismicQueryService {
 
       const chunkStartSec = chunkIndex * RAW_CHUNK_DURATION;
       const chunkEndSec = (chunkIndex + 1) * RAW_CHUNK_DURATION;
-      const chunkStartISO = DateTime.fromSeconds(chunkStartSec, { zone: "utc" }).toISO()!;
-      const chunkEndISO = DateTime.fromSeconds(chunkEndSec, { zone: "utc" }).toISO()!;
+      const chunkStartDT = DateTime.fromSeconds(chunkStartSec, { zone: "utc" });
+      const chunkEndDT = DateTime.fromSeconds(chunkEndSec, { zone: "utc" });
+      const chunkStartISO = chunkStartDT.toISO();
+      const chunkEndISO = chunkEndDT.toISO();
+      if (!chunkStartISO || !chunkEndISO) continue;
 
       this.fetchAndParseRaw(
         network, station, location, channel,
@@ -742,13 +747,10 @@ export class SeismicQueryService {
     network: string, station: string, location: string, channel: string,
     startISO: string, endISO: string, signal: AbortSignal
   ): Promise<RawSegment[]> {
-    // Lazy import seisplotjs to avoid loading it in Node.js test environments
-    // unless actually needed.
     const response = await fetchRawSeismicData(
       network, station, location, channel, startISO, endISO, { signal }
     );
     const buffer = await response.arrayBuffer();
-    const { miniseed } = await import("seisplotjs");
     const records = miniseed.parseDataRecords(buffer);
     const seismogram = miniseed.merge(records);
 
@@ -926,6 +928,7 @@ describe("SeismicQueryService query", () => {
     }));
 
     expect(result.data[1][0]).toBeNull();
+    expect(result.data[2][0]).toBeNull();
   });
 });
 
@@ -1307,19 +1310,18 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
   const callerIdRef = useRef(nanoid());
 
   const { network, station, location, channel } = sharedSeismogram;
-  const hasStation = !!(network && station && channel);
 
   // Debounce loadViewport
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!hasStation) return;
+    if (!network || !station || !channel) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       seismicQueryService.loadViewport(callerIdRef.current, {
-        network: network!,
-        station: station!,
+        network,
+        station,
         location: location ?? "",
-        channel: channel!,
+        channel,
         startTime,
         endTime,
         pixelWidth,
@@ -1328,15 +1330,15 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [hasStation, network, station, location, channel, startTime, endTime, pixelWidth, seismicQueryService]);
+  }, [network, station, location, channel, startTime, endTime, pixelWidth, seismicQueryService]);
 
   // Query and render
-  const queryResult = hasStation
+  const queryResult = (network && station && channel)
     ? seismicQueryService.query({
-        network: network!,
-        station: station!,
+        network,
+        station,
         location: location ?? "",
-        channel: channel!,
+        channel,
         startTime,
         endTime,
         pixelWidth,
