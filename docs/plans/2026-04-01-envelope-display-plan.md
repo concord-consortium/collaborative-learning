@@ -1287,6 +1287,9 @@ import { SharedSeismogramType } from "../shared-seismogram";
 import { nanoid } from "nanoid";
 import "./waveform-panel.scss";
 
+const LOAD_VIEWPORT_DEBOUNCE_MS = 150;
+const DEFAULT_CHART_HEIGHT = 150;
+
 interface WaveformPanelProps {
   label: string;
   sharedSeismogram: SharedSeismogramType;
@@ -1335,7 +1338,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
         endTime,
         pixelWidth,
       });
-    }, 150);
+    }, LOAD_VIEWPORT_DEBOUNCE_MS);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
@@ -1368,7 +1371,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     const isEnvelope = queryResult.level !== "raw";
     const opts: uPlot.Options = {
       width: pixelWidth,
-      height: containerRef.current.clientHeight || 150,
+      height: containerRef.current.clientHeight || DEFAULT_CHART_HEIGHT,
       cursor: { show: false },
       legend: { show: false },
       scales: {
