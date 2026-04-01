@@ -1,6 +1,5 @@
 import {ScaleBand, ScaleLinear, scaleLinear, scaleOrdinal} from "d3";
 import {reaction} from "mobx";
-import {isAlive} from "mobx-state-tree";
 import {MutableRefObject, useCallback, useEffect, useRef} from "react";
 import { mstAutorun } from "../../../../../../utilities/mst-autorun";
 import {axisGap} from "../axis-types";
@@ -59,7 +58,6 @@ export const useAxis = ({
    * computations. Then the desiredExtent could be a computed property which is cached automatically.
    */
   const computeDesiredExtent = useCallback(() => {
-    if (dataConfiguration && !isAlive(dataConfiguration)) return 0;
     if (dataConfiguration?.placeCanHaveZeroExtent(axisPlace)) {
       return 0;
     }

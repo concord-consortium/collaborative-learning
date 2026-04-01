@@ -139,29 +139,9 @@ export const Tree = types.model("Tree", {
     },
 
     // Actually apply the patches.
-    // It might be called multiple times after startApplyingPatchesFromManager.
-    // Try applying all patches in a single batch for performance. If that fails,
-    // fall back to per-patch application so one bad patch does not prevent
-    // subsequent patches from being applied.
+    // It might be called multiple times after startApplyingPatchesFromManager
     applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
-      try {
-        applyPatch(self, patchesToApply as IJsonPatch[]);
-      } catch (e) {
-        if (DEBUG_HISTORY) {
-          // eslint-disable-next-line no-console
-          console.warn("Failed to apply history patches in batch, falling back to per-patch application", e);
-        }
-        for (const patch of patchesToApply) {
-          try {
-            applyPatch(self, [patch]);
-          } catch (perPatchError) {
-            if (DEBUG_HISTORY) {
-              // eslint-disable-next-line no-console
-              console.warn("Failed to apply history patch", patch, perPatchError);
-            }
-          }
-        }
-      }
+      applyPatch(self, patchesToApply);
       // We return a promise because the API is async
       // The action itself doesn't do anything asynchronous though
       // so it isn't necessary to use a flow

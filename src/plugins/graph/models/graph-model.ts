@@ -742,24 +742,6 @@ export const GraphModel = TileContentModel
         });
       }
 
-      // Ensure all layers with datasets have their volatile filteredCases initialized.
-      // After history playback (applyPatch), volatile state like filteredCases is not
-      // restored, and existing FilteredCases objects may hold stale source references
-      // to destroyed dataset nodes. When sharedModel is undefined (history playback),
-      // aggressively rebuild all filteredCases. Otherwise only rebuild empty ones.
-      self.layers.forEach(layer => {
-        if (layer.config.dataset) {
-          if (!sharedModel) {
-            // History playback: destroy stale filteredCases and rebuild from scratch
-            while (layer.config.filteredCases.length > 0) {
-              layer.config.filteredCases.pop()?.destroy();
-            }
-            layer.config.handleDataSetChange();
-          } else if (layer.config.filteredCases.length === 0) {
-            layer.config.handleDataSetChange();
-          }
-        }
-      });
     },
     afterAttach() {
       // Some shared model references may need to be updated. We can't update them until the SharedModelManager
