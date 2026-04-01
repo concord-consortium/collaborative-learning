@@ -91,11 +91,17 @@ Note: `SeismicViewportParams` uses Luxon `DateTime` so add the import at the top
 import { DateTime } from "luxon";
 ```
 
-**Step 2: Add RAW_CHUNK_DURATION to `envelope-config.ts`**
+**Step 2: Add constants to `envelope-config.ts`**
 
 Add to the end of `shared/seismic/envelope-config.ts`:
 
 ```ts
+/** S3 bucket where envelope tiles are stored. */
+export const S3_BUCKET = "models-resources";
+
+/** S3 key prefix for envelope tiles. */
+export const S3_PREFIX = "collaborative-learning/envelopes/";
+
 /** Duration of each raw data fetch chunk in seconds. */
 export const RAW_CHUNK_DURATION = 7200; // 2 hours
 ```
@@ -229,10 +235,11 @@ Create `shared/seismic/envelope-fetcher.ts`:
 
 ```ts
 import { decodeEnvelopeTile } from "./envelope-codec";
+import { S3_BUCKET, S3_PREFIX } from "./envelope-config";
 import { FetchEnvelopeTileParams, EnvelopeTileData } from "./seismic-types";
 import { getTileS3Key, getS3Root } from "./tile-addressing";
 
-const DEFAULT_S3_BASE_URL = "https://models-resources.s3.amazonaws.com/collaborative-learning/envelope-tiles/";
+const DEFAULT_S3_BASE_URL = `https://${S3_BUCKET}.s3.amazonaws.com/${S3_PREFIX}`;
 
 /**
  * Fetch a single precomputed envelope tile from S3 and decode it.
@@ -258,6 +265,8 @@ export async function fetchEnvelopeTile(params: FetchEnvelopeTileParams): Promis
 }
 ```
 
+**Note:** Also update `scripts/seismic/generate-envelopes.ts` to import `S3_BUCKET` and `S3_PREFIX` from `shared/seismic/envelope-config.ts` instead of defining its own `DEFAULT_S3_BUCKET` and `DEFAULT_S3_PREFIX` constants.
+
 **Step 2: Run tests to verify they pass**
 
 Run: `npx jest --no-watchman shared/seismic/envelope-fetcher.test.ts 2>&1 | tail -20`
@@ -282,7 +291,7 @@ git commit -m "feat: implement envelope tile fetcher"
 Create `src/models/stores/seismic-query-service.test.ts`:
 
 ```ts
-import { SeismicQueryService } from "./seismic-query-service";
+import { SeismicQueryService, envelopeCacheKey, rawCacheKey } from "./seismic-query-service";
 
 describe("SeismicQueryService", () => {
   describe("selectLevel", () => {
@@ -353,8 +362,16 @@ import {
 type EnvelopeCacheEntry = EnvelopeTileData | "loading" | "missing";
 type RawCacheEntry = RawSegment[] | "loading" | "missing";
 
+export function envelopeCacheKey(network: string, station: string, channel: string, level: number, tileIndex: number) {
+  return `${network}_${station}/${channel}/L${level}/${tileIndex}`;
+}
+
+export function rawCacheKey(network: string, station: string, channel: string, chunkIndex: number) {
+  return `${network}_${station}/${channel}/raw/${chunkIndex}`;
+}
+
 export class SeismicQueryService {
-  /** Envelope tile cache keyed by "L{level}/{tileIndex}/{network}_{station}/{channel}" */
+  /** Envelope tile cache keyed by "{network}_{station}/{channel}/L{level}/{tileIndex}" */
   envelopeCache: Map<string, EnvelopeCacheEntry> = observable.map();
 
   /** Raw data cache keyed by "{network}_{station}/{channel}/raw/{chunkIndex}" */
@@ -424,10 +441,6 @@ export class SeismicQueryService {
 
   // --- Private helpers (envelope) ---
 
-  private envelopeCacheKey(level: number, tileIndex: number, network: string, station: string, channel: string) {
-    return `L${level}/${tileIndex}/${network}_${station}/${channel}`;
-  }
-
   private queryEnvelope(params: SeismicViewportParams, level: number, amplitudeRange: number): ViewportQueryResult {
     const { network, station, channel, startTime, endTime } = params;
     const startSec = startTime.toSeconds();
@@ -441,7 +454,7 @@ export class SeismicQueryService {
     let isLoading = false;
 
     for (const tileIndex of tileIndices) {
-      const key = this.envelopeCacheKey(level, tileIndex, network, station, channel);
+      const key = envelopeCacheKey(network, station, channel, level, tileIndex);
       let entry = this.envelopeCache.get(key);
 
       // Fallback to one level coarser if this level is loading
@@ -516,7 +529,7 @@ export class SeismicQueryService {
     const maxs: (number | null)[] = [];
 
     for (const fbTileIndex of fallbackIndices) {
-      const fbKey = this.envelopeCacheKey(fallbackLevel, fbTileIndex, network, station, channel);
+      const fbKey = envelopeCacheKey(network, station, channel, fallbackLevel, fbTileIndex);
       const fbEntry = this.envelopeCache.get(fbKey);
       if (!fbEntry || fbEntry === "loading" || fbEntry === "missing") return null;
 
@@ -550,7 +563,7 @@ export class SeismicQueryService {
     const toFetch: number[] = [];
     const neededKeys = new Set<string>();
     for (const tileIndex of tileIndices) {
-      const key = this.envelopeCacheKey(level, tileIndex, network, station, channel);
+      const key = envelopeCacheKey(network, station, channel, level, tileIndex);
       neededKeys.add(key);
       if (!this.envelopeCache.has(key)) {
         toFetch.push(tileIndex);
@@ -562,7 +575,7 @@ export class SeismicQueryService {
 
     // Fetch missing tiles
     for (const tileIndex of toFetch) {
-      const key = this.envelopeCacheKey(level, tileIndex, network, station, channel);
+      const key = envelopeCacheKey(network, station, channel, level, tileIndex);
       const controller = new AbortController();
       this.registerInflight(callerId, key, controller);
 
@@ -587,10 +600,6 @@ export class SeismicQueryService {
 
   // --- Private helpers (raw) ---
 
-  private rawCacheKey(network: string, station: string, channel: string, chunkIndex: number) {
-    return `${network}_${station}/${channel}/raw/${chunkIndex}`;
-  }
-
   private rawChunkIndex(unixSeconds: number): number {
     return Math.floor(unixSeconds / RAW_CHUNK_DURATION);
   }
@@ -607,7 +616,7 @@ export class SeismicQueryService {
     let isLoading = false;
 
     for (let ci = firstChunk; ci <= lastChunk; ci++) {
-      const key = this.rawCacheKey(network, station, channel, ci);
+      const key = rawCacheKey(network, station, channel, ci);
       const entry = this.rawCache.get(key);
 
       if (entry === "loading" || entry === undefined) {
@@ -658,7 +667,7 @@ export class SeismicQueryService {
     const maxs: (number | null)[] = [];
 
     for (const tileIndex of l2Indices) {
-      const key = this.envelopeCacheKey(2, tileIndex, network, station, channel);
+      const key = envelopeCacheKey(network, station, channel, 2, tileIndex);
       const entry = this.envelopeCache.get(key);
       if (!entry || entry === "loading" || entry === "missing") return null;
 
@@ -691,7 +700,7 @@ export class SeismicQueryService {
     const neededKeys = new Set<string>();
     const toFetch: number[] = [];
     for (let ci = firstChunk; ci <= lastChunk; ci++) {
-      const key = this.rawCacheKey(network, station, channel, ci);
+      const key = rawCacheKey(network, station, channel, ci);
       neededKeys.add(key);
       if (!this.rawCache.has(key)) {
         toFetch.push(ci);
@@ -701,7 +710,7 @@ export class SeismicQueryService {
     this.cancelStale(callerId, neededKeys);
 
     for (const chunkIndex of toFetch) {
-      const key = this.rawCacheKey(network, station, channel, chunkIndex);
+      const key = rawCacheKey(network, station, channel, chunkIndex);
       const controller = new AbortController();
       this.registerInflight(callerId, key, controller);
 
@@ -868,7 +877,7 @@ describe("SeismicQueryService query", () => {
     const tileIndex = 0;
     const mins = new Int16Array([1000, 2000]);
     const maxs = new Int16Array([3000, 4000]);
-    const key = `L${level}/${tileIndex}/AK_K204/HNZ`;
+    const key = envelopeCacheKey("AK", "K204", "HNZ", level, tileIndex);
     service.envelopeCache.set(key, { mins, maxs });
 
     const range = getTileTimeRange(level, tileIndex);
@@ -887,7 +896,7 @@ describe("SeismicQueryService query", () => {
   it("inserts nulls for missing tiles", () => {
     const level = 1;
     const tileIndex = 0;
-    const key = `L${level}/${tileIndex}/AK_K204/HNZ`;
+    const key = envelopeCacheKey("AK", "K204", "HNZ", level, tileIndex);
     service.envelopeCache.set(key, "missing");
 
     const range = getTileTimeRange(level, tileIndex);
@@ -906,7 +915,7 @@ describe("SeismicQueryService query", () => {
     const tileIndex = 0;
     const mins = new Int16Array([NO_DATA_SENTINEL]);
     const maxs = new Int16Array([NO_DATA_SENTINEL]);
-    const key = `L${level}/${tileIndex}/AK_K204/HNZ`;
+    const key = envelopeCacheKey("AK", "K204", "HNZ", level, tileIndex);
     service.envelopeCache.set(key, { mins, maxs });
 
     const range = getTileTimeRange(level, tileIndex);
@@ -949,12 +958,12 @@ describe("SeismicQueryService loadViewport", () => {
     });
 
     // Should have set cache to "loading"
-    expect(service.envelopeCache.get("L1/0/AK_K204/HNZ")).toBe("loading");
+    expect(service.envelopeCache.get(envelopeCacheKey("AK", "K204", "HNZ", 1, 0))).toBe("loading");
     expect(mockFetch).toHaveBeenCalled();
   });
 
   it("does not re-fetch tiles already in cache", () => {
-    const key = "L1/0/AK_K204/HNZ";
+    const key = envelopeCacheKey("AK", "K204", "HNZ", 1, 0);
     service.envelopeCache.set(key, { mins: new Int16Array([1]), maxs: new Int16Array([2]) });
 
     const level = 1;
