@@ -44,6 +44,9 @@ git commit -m "feat: add uplot dependency for seismic waveform rendering"
 Add the following to the end of `shared/seismic/seismic-types.ts`:
 
 ```ts
+/** A series of nullable numbers, used for uPlot data arrays. */
+export type NullableNumberArray = (number | null)[];
+
 /** A raw seismic data segment parsed from miniSEED. */
 export interface RawSegment {
   startTime: number;   // Unix seconds
@@ -77,7 +80,7 @@ export interface SeismicViewportParams {
 export interface ViewportQueryResult {
   level: number | "raw";
   /** uPlot data: [timestamps, mins, maxs] for envelopes; [timestamps, values] for raw */
-  data: (number | null)[][];
+  data: NullableNumberArray[];
   /** Amplitude range for y-axis scaling */
   amplitudeRange: number;
   /** True if any data is still loading */
@@ -363,7 +366,8 @@ import { fetchEnvelopeTile } from "../../../shared/seismic/envelope-fetcher";
 import { fetchRawSeismicData, fetchStationMetadata } from "../../../shared/seismic/earthscope-client";
 import { miniseed } from "seisplotjs";
 import {
-  EnvelopeTileData, ChannelMetadata, SeismicViewportParams, ViewportQueryResult, RawSegment
+  EnvelopeTileData, ChannelMetadata, NullableNumberArray,
+  SeismicViewportParams, ViewportQueryResult, RawSegment
 } from "../../../shared/seismic/seismic-types";
 
 type EnvelopeCacheEntry = EnvelopeTileData | "loading" | "missing";
@@ -450,9 +454,9 @@ export class SeismicQueryService {
     const tileIndices = getTileIndicesForViewport(startSec, endSec, level);
     const spacing = LEVEL_SPACINGS[level];
 
-    const timestamps: (number | null)[] = [];
-    const mins: (number | null)[] = [];
-    const maxs: (number | null)[] = [];
+    const timestamps: NullableNumberArray = [];
+    const mins: NullableNumberArray = [];
+    const maxs: NullableNumberArray = [];
     let isLoading = false;
 
     for (const tileIndex of tileIndices) {
@@ -516,7 +520,7 @@ export class SeismicQueryService {
   private getFallbackData(
     level: number, tileIndex: number, network: string, station: string, channel: string,
     viewStartSec: number, viewEndSec: number
-  ): { timestamps: (number | null)[], mins: (number | null)[], maxs: (number | null)[] } | null {
+  ): { timestamps: NullableNumberArray, mins: NullableNumberArray, maxs: NullableNumberArray } | null {
     const fallbackLevel = level - 1;
     if (fallbackLevel < 0) return null;
 
@@ -526,9 +530,9 @@ export class SeismicQueryService {
     const fallbackSpacing = LEVEL_SPACINGS[fallbackLevel];
     const fallbackIndices = getTileIndicesForViewport(overlapStart, overlapEnd, fallbackLevel);
 
-    const timestamps: (number | null)[] = [];
-    const mins: (number | null)[] = [];
-    const maxs: (number | null)[] = [];
+    const timestamps: NullableNumberArray = [];
+    const mins: NullableNumberArray = [];
+    const maxs: NullableNumberArray = [];
 
     for (const fbTileIndex of fallbackIndices) {
       const fbKey = envelopeCacheKey(network, station, channel, fallbackLevel, fbTileIndex);
@@ -613,8 +617,8 @@ export class SeismicQueryService {
     const firstChunk = this.rawChunkIndex(startSec);
     const lastChunk = this.rawChunkIndex(endSec - 1e-9);
 
-    const timestamps: (number | null)[] = [];
-    const values: (number | null)[] = [];
+    const timestamps: NullableNumberArray = [];
+    const values: NullableNumberArray = [];
     let isLoading = false;
 
     for (let ci = firstChunk; ci <= lastChunk; ci++) {
@@ -661,12 +665,12 @@ export class SeismicQueryService {
   private getL2FallbackForRaw(
     network: string, station: string, channel: string,
     startSec: number, endSec: number, amplitudeRange: number
-  ): { timestamps: (number | null)[], mins: (number | null)[], maxs: (number | null)[] } | null {
+  ): { timestamps: NullableNumberArray, mins: NullableNumberArray, maxs: NullableNumberArray } | null {
     const l2Indices = getTileIndicesForViewport(startSec, endSec, 2);
     const spacing = LEVEL_SPACINGS[2];
-    const timestamps: (number | null)[] = [];
-    const mins: (number | null)[] = [];
-    const maxs: (number | null)[] = [];
+    const timestamps: NullableNumberArray = [];
+    const mins: NullableNumberArray = [];
+    const maxs: NullableNumberArray = [];
 
     for (const tileIndex of l2Indices) {
       const key = envelopeCacheKey(network, station, channel, 2, tileIndex);
