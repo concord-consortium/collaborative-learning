@@ -39,7 +39,7 @@ describe("WaveformPanel", () => {
 
   beforeEach(() => {
     sharedSeismogram = SharedSeismogram.create();
-    sharedSeismogram.setStation("AK", "K204", "", "HNZ");
+    sharedSeismogram.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ" });
     mockQuery.mockClear();
     mockLoadViewport.mockClear();
   });

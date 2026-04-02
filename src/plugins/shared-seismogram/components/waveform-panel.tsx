@@ -30,7 +30,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
   const callerIdRef = useRef(nanoid());
   const [pixelWidth, setPixelWidth] = useState(0);
 
-  const { network, station, location, channel } = sharedSeismogram;
+  const stationInfo = sharedSeismogram.station;
 
   // Measure container width
   useEffect(() => {
@@ -47,14 +47,14 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
   // Debounce loadViewport
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!network || !station || !channel || pixelWidth === 0) return;
+    if (!stationInfo || pixelWidth === 0) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       seismicQueryService.loadViewport(callerIdRef.current, {
-        network,
-        station,
-        location: location ?? "",
-        channel,
+        network: stationInfo.network,
+        station: stationInfo.station,
+        location: stationInfo.location,
+        channel: stationInfo.channel,
         startTime,
         endTime,
         pixelWidth,
@@ -63,15 +63,15 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [network, station, location, channel, startTime, endTime, pixelWidth, seismicQueryService]);
+  }, [stationInfo, startTime, endTime, pixelWidth, seismicQueryService]);
 
   // Query and render
-  const queryResult = (network && station && channel && pixelWidth > 0)
+  const queryResult = (stationInfo && pixelWidth > 0)
     ? seismicQueryService.query({
-        network,
-        station,
-        location: location ?? "",
-        channel,
+        network: stationInfo.network,
+        station: stationInfo.station,
+        location: stationInfo.location,
+        channel: stationInfo.channel,
         startTime,
         endTime,
         pixelWidth,

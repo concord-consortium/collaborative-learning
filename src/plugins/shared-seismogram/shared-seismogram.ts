@@ -1,6 +1,7 @@
 import { getType, Instance, types } from "mobx-state-tree";
 import { DateTime } from "luxon";
 import { SharedModel, SharedModelType } from "../../models/shared/shared-model";
+import { StationModel, StationSnapshot } from "./station-model";
 
 export const kSharedSeismogramType = "SharedSeismogram";
 
@@ -8,10 +9,7 @@ export const SharedSeismogram = SharedModel
   .named("SharedSeismogram")
   .props({
     type: types.optional(types.literal(kSharedSeismogramType), kSharedSeismogramType),
-    network: types.maybe(types.string),
-    station: types.maybe(types.string),
-    location: types.maybe(types.string),
-    channel: types.maybe(types.string),
+    station: types.maybe(StationModel),
     startTimeISO: types.maybe(types.string),
     endTimeISO: types.maybe(types.string),
   })
@@ -24,11 +22,8 @@ export const SharedSeismogram = SharedModel
     },
   }))
   .actions(self => ({
-    setStation(network: string, station: string, location: string, channel: string) {
-      self.network = network;
-      self.station = station;
-      self.location = location;
-      self.channel = channel;
+    setStation(station: StationSnapshot) {
+      self.station = StationModel.create(station);
     },
     setTimeRange(startTimeISO: string, endTimeISO: string) {
       self.startTimeISO = startTimeISO;

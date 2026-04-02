@@ -9,21 +9,18 @@ describe("SharedSeismogram", () => {
 
   it("starts with no station data", () => {
     const model = SharedSeismogram.create();
-    expect(model.network).toBeUndefined();
     expect(model.station).toBeUndefined();
-    expect(model.location).toBeUndefined();
-    expect(model.channel).toBeUndefined();
     expect(model.startTime).toBeUndefined();
     expect(model.endTime).toBeUndefined();
   });
 
   it("setStation updates station fields", () => {
     const model = SharedSeismogram.create();
-    model.setStation("AK", "K204", "", "HNZ");
-    expect(model.network).toBe("AK");
-    expect(model.station).toBe("K204");
-    expect(model.location).toBe("");
-    expect(model.channel).toBe("HNZ");
+    model.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ" });
+    expect(model.station?.network).toBe("AK");
+    expect(model.station?.station).toBe("K204");
+    expect(model.station?.location).toBe("");
+    expect(model.station?.channel).toBe("HNZ");
   });
 
   it("setTimeRange updates time fields", () => {

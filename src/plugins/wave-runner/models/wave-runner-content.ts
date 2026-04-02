@@ -67,8 +67,7 @@ export const WaveRunnerContentModel = TileContentModel
   }))
   .views(self => ({
     get hasStationData() {
-      const ss = self.sharedSeismogram;
-      return !!(ss?.network && ss?.station && ss?.channel);
+      return !!self.sharedSeismogram?.station;
     },
   }))
   .actions(self => ({
@@ -80,9 +79,7 @@ export const WaveRunnerContentModel = TileContentModel
     },
     setStation(station: StationSnapshot) {
       self.station = cast(station);
-      self.sharedSeismogram?.setStation(
-        station.network, station.station, station.location ?? "", station.channel
-      );
+      self.sharedSeismogram?.setStation(station);
     },
   }))
   .actions(self => ({
@@ -99,7 +96,7 @@ export const WaveRunnerContentModel = TileContentModel
       }
 
       const { network, station, location, channel } = self.station;
-      sharedSeismogram.setStation(network, station, location ?? "", channel);
+      sharedSeismogram.setStation({ network, station, location: location ?? "", channel });
       sharedSeismogram.setTimeRange(
         `${self.startDate}T00:00:00Z`,
         `${self.endDate}T00:00:00Z`

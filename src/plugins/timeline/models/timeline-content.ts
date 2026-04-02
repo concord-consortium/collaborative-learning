@@ -40,8 +40,7 @@ export const TimelineContentModel = TileContentModel
   }))
   .views(self => ({
     get hasStationData() {
-      const ss = self.sharedSeismogram;
-      return !!(ss?.network && ss?.station && ss?.channel);
+      return !!self.sharedSeismogram?.station;
     },
     get dataStartTime(): DateTime | undefined {
       return self.sharedSeismogram?.startTime;
