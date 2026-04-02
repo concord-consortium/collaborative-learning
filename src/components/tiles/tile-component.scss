@@ -8,7 +8,6 @@
   height: 100%;
   flex: 1 1 auto;
   border: 1px solid #ccc;
-  transition: transform 0.2s ease-out;
 
   .tile-content {
     border: 1px solid $tool-tile-background;
@@ -140,6 +139,7 @@
 body.tile-picked-up,
 body.tile-dragging {
   .tool-tile {
+    transition: transform 0.2s ease-out;
     transform: scale(0.95);
     transform-origin: center center;
   }

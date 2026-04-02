@@ -60,6 +60,8 @@ export const UIModel = types
     pickedUpTileId: types.maybe(types.string),
     pickedUpDocId: types.maybe(types.string),
     pickedUpTileType: types.maybe(types.string),
+    pickedUpX: types.maybe(types.number),
+    pickedUpY: types.maybe(types.number),
     focusedDropZoneIndex: types.maybe(types.number)
   })
   .volatile(self => ({
@@ -213,15 +215,19 @@ export const UIModel = types
         self.dragId = dragId;
       },
 
-      pickUpTile(tileId: string, docId: string, tileType?: string) {
+      pickUpTile(tileId: string, docId: string, tileType?: string, x?: number, y?: number) {
         self.pickedUpTileId = tileId;
         self.pickedUpDocId = docId;
         self.pickedUpTileType = tileType;
+        self.pickedUpX = x;
+        self.pickedUpY = y;
       },
       clearPickedUpTile() {
         self.pickedUpTileId = undefined;
         self.pickedUpDocId = undefined;
         self.pickedUpTileType = undefined;
+        self.pickedUpX = undefined;
+        self.pickedUpY = undefined;
         self.focusedDropZoneIndex = undefined;
       },
 

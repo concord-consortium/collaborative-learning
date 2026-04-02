@@ -82,9 +82,7 @@ export const DeleteButton: React.FC<IProps> = observer(
     }
   }, [hasTileDrag]);
 
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLButtonElement>) => {
-    setIsDragOver(false);
-  }, []);
+  const handleDragLeave = () => setIsDragOver(false);
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();

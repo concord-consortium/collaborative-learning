@@ -224,7 +224,7 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
     const rowLabel = isSectionHeader ? `section ${sectionId || ""}` : `row ${rowIndex + 1}`;
     const ariaProps = (location: string, isVisible: boolean) =>
       allZonesVisible && isVisible
-        ? { "aria-label": `${location} ${rowLabel}` }
+        ? { role: "img" as const, "aria-label": `Insert ${location.toLowerCase()} ${rowLabel}` }
         : {};
 
     // Tile-boundary side drop zones: N+1 zones for N tiles, positioned at each tile boundary.
@@ -242,18 +242,32 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
           dimmed: isDimmed
         });
 
-        // Position: first zone at left edge, last at right edge, interior at tile boundaries
+        // Position: first zone at left edge, last at right edge, interior at actual tile boundaries
         let zoneStyle: React.CSSProperties;
         if (b === 0) {
           zoneStyle = { left: 0 };
         } else if (b === boundaryCount - 1) {
           zoneStyle = { right: 0 };
         } else {
-          const leftPct = (b / renderableTileCount) * 100;
-          zoneStyle = { left: `calc(${leftPct}% - 8px)` };
+          // Read actual tile positions from the DOM to handle unequal-width tiles
+          const rowEl = tileRowDiv.current;
+          const tileElements = rowEl?.querySelectorAll(':scope > .tool-tile');
+          if (tileElements && tileElements.length > b - 1) {
+            const leftTileRight = tileElements[b - 1].getBoundingClientRect().right;
+            const rowLeft = rowEl!.getBoundingClientRect().left;
+            zoneStyle = { left: `${leftTileRight - rowLeft - 8}px` };
+          } else {
+            // Fallback to even split
+            const leftPct = (b / renderableTileCount) * 100;
+            zoneStyle = { left: `calc(${leftPct}% - 8px)` };
+          }
         }
 
-        const label = b === 0 ? "Left of" : b === boundaryCount - 1 ? "Right of" : `Position ${b} in`;
+        const label = b === 0
+          ? "before first tile in"
+          : b === boundaryCount - 1
+            ? "after last tile in"
+            : `at position ${b} in`;
         tileBoundaryZones.push(
           <div key={`tile-boundary-${b}`} className={zoneClass} style={zoneStyle}
             {...ariaProps(label, isVisible)} />
@@ -263,10 +277,10 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
 
     return [
       <div key="top-drop-feedback" className={topClass}
-        {...ariaProps("Above", dimTop || showTopHighlight)} />,
+        {...ariaProps("above", dimTop || showTopHighlight)} />,
       ...tileBoundaryZones,
       <div key="bottom-drop-feedback" className={bottomClass}
-        {...ariaProps("Below", dimBottom || showBottomHighlight)} />,
+        {...ariaProps("below", dimBottom || showBottomHighlight)} />,
       <div key="bottom-resize-handle"
         className={`bottom-resize-handle ${isUserResizable ? "enable" : "disable"}`}
         draggable={isUserResizable}

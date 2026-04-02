@@ -227,9 +227,10 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
     const { ui, documents } = stores;
     ui.removeTileIdFromSelection(tileId);
     // The tile may be in a different document than the toolbar's (e.g. picked up from resources).
-    // Use findDocumentOfTile to target the correct source document.
+    // Only delete if we can find the tile's actual document. Curriculum tiles won't be found
+    // by findDocumentOfTile and should not be deleted (they're shared/read-only resources).
     const sourceDoc = documents.findDocumentOfTile(tileId);
-    (sourceDoc || document)?.deleteTile(tileId);
+    sourceDoc?.deleteTile(tileId);
   };
 
   const handleToggleSelectedTilesSolution = () => {

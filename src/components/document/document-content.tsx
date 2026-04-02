@@ -142,6 +142,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     this.scrollDisposer?.();
     this.pickUpReactionDisposer?.();
     document.removeEventListener("keydown", this.handlePickUpKeyDown);
+    this.domElement?.removeEventListener("mousemove", this.handlePickUpMouseMove);
+    this.domElement?.removeEventListener("mouseleave", this.handlePickUpMouseLeave);
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -308,6 +310,15 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     // Handle click-to-place when a tile is picked up
     if (ui.pickedUpTileId && !this.props.readOnly) {
+      // If the click landed on a tile body, cancel pick-up rather than placing.
+      // Users clicking on tiles likely want to interact with them, not place the picked-up tile.
+      const target = e.target as HTMLElement;
+      if (target.closest(".tool-tile")) {
+        ui.clearPickedUpTile();
+        this.clearDropRowInfo();
+        return;
+      }
+
       const dropRowInfo = this.getDropRowInfoFromPoint(e.clientX, e.clientY);
       const isEmptyDocument = this.props.content && this.props.content.rowOrder.length === 0;
       if (dropRowInfo?.rowDropId || (isEmptyDocument && dropRowInfo)) {
@@ -439,11 +450,14 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           // Uniform tile-boundary detection for all rows with tiles.
           // For N tiles there are N+1 boundaries: left edge, between each pair, right edge.
           // If the cursor is near any boundary, it's a side drop with a tileInsertIndex.
-          const kSideDropThreshold = 25; // pixels from boundary to trigger side drop
           const tileElements = rowElt.querySelectorAll(':scope > .tool-tile');
           let sideDropDetected = false;
 
           if (tileElements.length > 0) {
+            // Scale threshold with tile size: 15% of average tile width, minimum 25px
+            const avgTileWidth = (tileElements[tileElements.length - 1].getBoundingClientRect().right
+              - tileElements[0].getBoundingClientRect().left) / tileElements.length;
+            const kSideDropThreshold = Math.max(25, avgTileWidth * 0.15);
             const boundaries: number[] = [];
             // First boundary: left edge of the first tile
             boundaries.push(tileElements[0].getBoundingClientRect().left);
@@ -530,7 +544,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { content } = this.props;
     if (!content) return [];
 
-    type DropZoneLocation = "top" | "left" | "right" | "bottom";
+    // "right" is used by internal callers (e.g. userAddTile) but not by the UI's
+    // getDropRowInfoFromPoint, which uses "left" with tileInsertIndex for all side drops.
+    type DropZoneLocation = "top" | "left" | "bottom";
     interface IDropZone {
       rowIndex: number;
       rowId: string;
@@ -567,9 +583,14 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         });
       }
 
-      // Tile-boundary side zones: N+1 zones for N tiles in the row
+      // Tile-boundary side zones: N+1 zones for N tiles in the row.
+      // Filter to renderable tiles to match what tile-row.tsx renders.
       if (!isSectionHeader && row.tileCount > 0) {
-        for (let t = 0; t <= row.tileCount; t++) {
+        const renderableTileCount = row.tiles.filter(t => {
+          const tile = content.tileMap.get(t.tileId);
+          return tile && (!tile.display || this.stores.isShowingTeacherContent);
+        }).length;
+        for (let t = 0; t <= renderableTileCount; t++) {
           zones.push({
             rowIndex: i, rowId: row.id, location: "left",
             dropRowInfo: { ...baseInfo, rowDropLocation: "left", tileInsertIndex: t }
@@ -653,22 +674,16 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         }
         break;
       }
-      // Escape is handled by PickedUpTileGhost
+      case "Escape": {
+        e.preventDefault();
+        ui.clearPickedUpTile();
+        break;
+      }
     }
   };
 
   private findContentOfTile(tileId: string) {
-    const { documents, problem, teacherGuide } = this.stores;
-    // Check the documents store first (user documents)
-    const doc = documents.findDocumentOfTile(tileId);
-    if (doc?.content) return doc.content;
-    // Curriculum section content isn't in the documents store — search problem sections
-    for (const section of problem.sections) {
-      if (section.content?.tileMap.has(tileId)) return section.content;
-    }
-    for (const section of teacherGuide?.sections || []) {
-      if (section.content?.tileMap.has(tileId)) return section.content;
-    }
+    return this.stores.findContentOfTile(tileId);
   }
 
   private handlePickUpPlace = (dropRowInfo: IDropRowInfo) => {

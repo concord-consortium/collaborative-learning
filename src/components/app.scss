@@ -1,8 +1,16 @@
 body.tile-picked-up {
   cursor: grabbing !important;
 
-  * {
+  *:not(.delete-button):not(.tool-tile-drag-handle-wrapper) {
     cursor: grabbing !important;
+  }
+
+  .delete-button {
+    cursor: pointer !important;
+  }
+
+  .tool-tile-drag-handle-wrapper {
+    cursor: pointer !important;
   }
 }
 

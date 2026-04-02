@@ -238,6 +238,23 @@ class Stores implements IStores{
   }
 
   /**
+   * Find the DocumentContentModel that contains the given tile.
+   * Searches user documents first, then curriculum problem sections and teacher guide sections.
+   */
+  findContentOfTile(tileId: string) {
+    const { documents, problem, teacherGuide } = this;
+    const doc = documents.findDocumentOfTile(tileId);
+    if (doc?.content) return doc.content;
+    for (const section of problem.sections) {
+      if (section.content?.tileMap.has(tileId)) return section.content;
+    }
+    for (const section of teacherGuide?.sections || []) {
+      if (section.content?.tileMap.has(tileId)) return section.content;
+    }
+    return undefined;
+  }
+
+  /**
    * The currently open group in the Student Work tab
    */
   get studentWorkTabSelectedGroupId() {
