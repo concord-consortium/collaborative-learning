@@ -1,3 +1,12 @@
+// Mock uPlot — canvas won't work in jsdom
+jest.mock("uplot", () => {
+  return jest.fn().mockImplementation(() => ({
+    setData: jest.fn(),
+    setSize: jest.fn(),
+    destroy: jest.fn(),
+  }));
+});
+
 import { render, screen } from "@testing-library/react";
 import { Provider } from "mobx-react";
 import React from "react";

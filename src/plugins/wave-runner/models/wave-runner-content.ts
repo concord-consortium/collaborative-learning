@@ -66,28 +66,23 @@ export const WaveRunnerContentModel = TileContentModel
     },
   }))
   .views(self => ({
-    get isLoading() {
-      return self.sharedSeismogram?.isLoading ?? false;
+    get hasStationData() {
+      const ss = self.sharedSeismogram;
+      return !!(ss?.network && ss?.station && ss?.channel);
     },
-    get loadError() {
-      return self.sharedSeismogram?.loadError ?? null;
-    },
-    get hasData() {
-      return self.sharedSeismogram?.hasData ?? false;
-    }
   }))
   .actions(self => ({
     setStartDate(date: string) {
       self.startDate = date;
-      self.sharedSeismogram?.setSeismogram(undefined);
     },
     setEndDate(date: string) {
       self.endDate = date;
-      self.sharedSeismogram?.setSeismogram(undefined);
     },
     setStation(station: StationSnapshot) {
       self.station = cast(station);
-      self.sharedSeismogram?.setSeismogram(undefined);
+      self.sharedSeismogram?.setStation(
+        station.network, station.station, station.location ?? "", station.channel
+      );
     },
   }))
   .actions(self => ({
@@ -103,11 +98,12 @@ export const WaveRunnerContentModel = TileContentModel
         sharedSeismogram = self.sharedSeismogram ?? newSharedSeismogram;
       }
 
-      // Pass a plain snapshot, not a live MST node, since loadData is async
-      // and the station could theoretically be replaced between yields.
-      const { network, station, location, channel, label } = self.station;
-      sharedSeismogram.loadData({ network, station, location, channel, label },
-        self.startDate, self.endDate);
+      const { network, station, location, channel } = self.station;
+      sharedSeismogram.setStation(network, station, location ?? "", channel);
+      sharedSeismogram.setTimeRange(
+        `${self.startDate}T00:00:00Z`,
+        `${self.endDate}T00:00:00Z`
+      );
     }
   }))
   .volatile(() => ({

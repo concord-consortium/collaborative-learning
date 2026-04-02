@@ -7,24 +7,23 @@ import "./status-and-output.scss";
 
 export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
   const model = useWaveRunnerContent();
-  const seismogram = model.sharedSeismogram?.seismogram;
+  const sharedSeismogram = model.sharedSeismogram;
+  const hasStation = model.hasStationData;
+
+  const startTime = DateTime.fromISO(`${model.startDate}T00:00:00Z`, { zone: "utc" });
+  const endTime = DateTime.fromISO(`${model.endDate}T00:00:00Z`, { zone: "utc" });
 
   return (
     <div className="section status-and-output">
       <div className="section-title">Status and Output</div>
       <div className="waveform-container">
-        {model.isLoading && <div className="waveform-loading">Loading seismic data...</div>}
-        {model.loadError && <div className="waveform-error">{model.loadError}</div>}
-        {seismogram && (
+        {sharedSeismogram && hasStation && (
           <WaveformPanel
             key={`${model.startDate}-${model.endDate}`}
             label={`${model.startDate} – ${model.endDate}`}
-            startTime={DateTime.fromISO(`${model.startDate}T00:00:00Z`, { zone: "utc" })}
-            durationSeconds={
-              (new Date(`${model.endDate}T00:00:00Z`).getTime()
-               - new Date(`${model.startDate}T00:00:00Z`).getTime()) / 1000
-            }
-            seismogram={seismogram}
+            sharedSeismogram={sharedSeismogram}
+            startTime={startTime}
+            endTime={endTime}
           />
         )}
       </div>
