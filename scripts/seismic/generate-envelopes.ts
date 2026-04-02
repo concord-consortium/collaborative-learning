@@ -13,7 +13,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { miniseed } from "seisplotjs/nodeonly";
 import {
-  LEVEL_SPACINGS, NUM_LEVELS, AMPLITUDE_RANGES
+  LEVEL_SPACINGS, NUM_LEVELS, AMPLITUDE_RANGES, S3_BUCKET, S3_PREFIX
 } from "../../shared/seismic/envelope-config.js";
 import { getS3Root, getTileS3Key } from "../../shared/seismic/tile-addressing.js";
 import { encodeEnvelopeTile, quantize } from "../../shared/seismic/envelope-codec.js";
@@ -26,8 +26,6 @@ import type { ChannelMetadata, EnvelopeTileData } from "../../shared/seismic/sei
 
 // ---- Configuration ----
 
-const DEFAULT_S3_BUCKET = "models-resources";
-const DEFAULT_S3_PREFIX = "collaborative-learning/envelopes/";
 const DEFAULT_AWS_REGION = "us-east-1";
 
 interface ScriptConfig {
@@ -56,8 +54,8 @@ interface ScriptConfig {
 function parseArgs(): ScriptConfig {
   const args = process.argv.slice(2);
   const config: Partial<ScriptConfig> = {
-    s3Bucket: DEFAULT_S3_BUCKET,
-    s3Prefix: DEFAULT_S3_PREFIX,
+    s3Bucket: S3_BUCKET,
+    s3Prefix: S3_PREFIX,
     awsRegion: DEFAULT_AWS_REGION,
     localOnly: false,
     maxFiles: 0,
