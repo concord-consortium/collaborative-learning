@@ -10,14 +10,14 @@ import "./timeline.scss";
 export const Timeline = observer(function Timeline() {
   const rawContent = useContext(TileModelContext)?.content;
   const model = isTimelineContentModel(rawContent) ? rawContent : undefined;
-  const seismogram = model?.seismogram;
 
+  const sharedSeismogram = model?.sharedSeismogram;
   const dataStartTime = model?.dataStartTime;
   const dataEndTime = model?.dataEndTime;
   const startTime = model?.viewStartTime;
   const endTime = model?.viewEndTime;
 
-  // Initialize view range when seismogram data becomes available,
+  // Initialize view range when data becomes available,
   // and clamp view to stay within bounds if data range changes.
   useEffect(() => {
     if (!model || !dataStartTime || !dataEndTime) return;
@@ -40,12 +40,12 @@ export const Timeline = observer(function Timeline() {
 
   return (
     <div className="timeline-area">
-      {seismogram && isValidDateTime(startTime) && isValidDateTime(endTime) ? (
+      {sharedSeismogram && isValidDateTime(startTime) && isValidDateTime(endTime) ? (
         <WaveformPanel
           label="Full waveform"
+          sharedSeismogram={sharedSeismogram}
           startTime={startTime}
-          durationSeconds={endTime.diff(startTime, "seconds").seconds}
-          seismogram={seismogram}
+          endTime={endTime}
         />
       ) : <div className="waveform" />}
     </div>
