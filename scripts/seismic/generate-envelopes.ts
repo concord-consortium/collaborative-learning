@@ -15,7 +15,7 @@ import { miniseed } from "seisplotjs/nodeonly";
 import {
   LEVEL_SPACINGS, NUM_LEVELS, AMPLITUDE_RANGES, S3_BUCKET, S3_PREFIX
 } from "../../shared/seismic/envelope-config.js";
-import { getS3Root, getTileS3Key } from "../../shared/seismic/tile-addressing.js";
+import { getS3Root, getStationChannelPrefix, getTileS3Key } from "../../shared/seismic/tile-addressing.js";
 import { encodeEnvelopeTile, quantize } from "../../shared/seismic/envelope-codec.js";
 import { computeEnvelopesFromRaw } from "../../shared/seismic/envelope-compute.js";
 import { fetchStationMetadata } from "../../shared/seismic/earthscope-client.js";
@@ -194,10 +194,11 @@ async function wipeExistingTiles(
   s3: S3Client,
   bucket: string,
   prefix: string,
+  network: string,
   station: string,
   channel: string
 ): Promise<void> {
-  const keyPrefix = `${getS3Root(prefix)}${station}/${channel}/`;
+  const keyPrefix = `${getS3Root(prefix)}${getStationChannelPrefix(network, station, channel)}`;
   console.log(`Wiping existing tiles under ${keyPrefix}...`);
 
   let continuationToken: string | undefined;
@@ -225,6 +226,7 @@ async function wipeExistingTiles(
 // ---- Tile Output ----
 
 function makeFlushTile(
+  network: string,
   station: string,
   channel: string,
   config: ScriptConfig,
@@ -233,7 +235,7 @@ function makeFlushTile(
 ): FlushTileFn {
   let flushedCount = 0;
   return (level: number, tileIndex: number, tileData: EnvelopeTileData) => {
-    const tileKey = getTileS3Key(station, channel, level, tileIndex);
+    const tileKey = getTileS3Key(network, station, channel, level, tileIndex);
     const body = encodeEnvelopeTile(tileData.mins, tileData.maxs);
     const bodyBytes = new Uint8Array(body);
 
@@ -317,13 +319,13 @@ async function main() {
 
     // Wipe existing tiles (S3 mode only)
     if (s3) {
-      await wipeExistingTiles(s3, config.s3Bucket, config.s3Prefix, config.station, channel);
+      await wipeExistingTiles(s3, config.s3Bucket, config.s3Prefix, config.network, config.station, channel);
     }
 
     // Initialize pipeline state
     const state = createPipelineState();
     const pendingUploads: Promise<PutObjectCommandOutput>[] = [];
-    const flushTile = makeFlushTile(config.station, channel, config, s3, pendingUploads);
+    const flushTile = makeFlushTile(config.network, config.station, channel, config, s3, pendingUploads);
     const finestLevel = NUM_LEVELS - 1;
 
     // Stream-process each file

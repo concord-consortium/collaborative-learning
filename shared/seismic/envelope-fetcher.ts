@@ -14,8 +14,7 @@ export async function fetchEnvelopeTile(params: FetchEnvelopeTileParams): Promis
   const { network, station, channel, level, tileIndex, signal } = params;
   const s3BaseUrl = params.s3BaseUrl ?? DEFAULT_S3_BASE_URL;
 
-  const combinedStation = `${network}_${station}`;
-  const key = getTileS3Key(combinedStation, channel, level, tileIndex);
+  const key = getTileS3Key(network, station, channel, level, tileIndex);
   const url = `${getS3Root(s3BaseUrl)}${key}`;
 
   const response = await fetch(url, { signal });

@@ -56,13 +56,9 @@ export const DataSetup: React.FC = observer(function DataSetup() {
     const selectedId = e.target.value;
     const match = dropdownOptions.find(opt => opt.id === selectedId);
     if (match) {
-      content.setStation({
-        network: match.config.network,
-        station: match.config.station,
-        location: match.config.location ?? "",
-        channel: match.config.channel,
-        label: match.config.label,
-      });
+      const { network, station, channel, label } = match.config;
+      const location = match.config.location ?? "";
+      content.setStation({ network, station, location, channel, label });
     }
   };
 

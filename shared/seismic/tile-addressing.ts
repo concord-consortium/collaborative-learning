@@ -51,11 +51,21 @@ export function getPointIndexInTile(timestamp: number, level: number, tileIndex:
 }
 
 /**
- * Constructs the S3 object key for a tile.
- * Format: {station}/{channel}/L{level}/{tileIndex}
+ * Constructs the S3 key prefix for all tiles of a given station and channel.
+ * Format: {network}_{station}/{channel}/
  */
-export function getTileS3Key(station: string, channel: string, level: number, tileIndex: number): string {
-  return `${station}/${channel}/L${level}/${tileIndex}`;
+export function getStationChannelPrefix(network: string, station: string, channel: string): string {
+  return `${network}_${station}/${channel}/`;
+}
+
+/**
+ * Constructs the S3 object key for a tile.
+ * Format: {network}_{station}/{channel}/L{level}/{tileIndex}
+ */
+export function getTileS3Key(
+  network: string, station: string, channel: string, level: number, tileIndex: number
+): string {
+  return `${getStationChannelPrefix(network, station, channel)}L${level}/${tileIndex}`;
 }
 
 /**

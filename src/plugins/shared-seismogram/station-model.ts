@@ -19,7 +19,7 @@ export const StationModel = types
     station: types.string,
     location: types.optional(types.string, ""),
     channel: types.string,
-    label: types.string,
+    label: types.optional(types.string, ""),
   })
   .views(self => ({
     get id() {
@@ -39,5 +39,5 @@ export interface StationConfig {
   station: string;
   location?: string;
   channel: string;
-  label: string;
+  label?: string;
 }
