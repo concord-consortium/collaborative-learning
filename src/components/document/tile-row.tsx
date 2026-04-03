@@ -252,10 +252,12 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
           // Read actual tile positions from the DOM to handle unequal-width tiles
           const rowEl = tileRowDiv.current;
           const tileElements = rowEl?.querySelectorAll(':scope > .tool-tile');
-          if (tileElements && tileElements.length > b - 1) {
+          if (tileElements && tileElements.length > b) {
             const leftTileRight = tileElements[b - 1].getBoundingClientRect().right;
+            const rightTileLeft = tileElements[b].getBoundingClientRect().left;
+            const midpoint = (leftTileRight + rightTileLeft) / 2;
             const rowLeft = rowEl!.getBoundingClientRect().left;
-            zoneStyle = { left: `${leftTileRight - rowLeft - 8}px` };
+            zoneStyle = { left: `${midpoint - rowLeft - 8}px` };
           } else {
             // Fallback to even split
             const leftPct = (b / renderableTileCount) * 100;

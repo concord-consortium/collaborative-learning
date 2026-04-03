@@ -310,15 +310,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     // Handle click-to-place when a tile is picked up
     if (ui.pickedUpTileId && !this.props.readOnly) {
-      // If the click landed on a tile body, cancel pick-up rather than placing.
-      // Users clicking on tiles likely want to interact with them, not place the picked-up tile.
-      const target = e.target as HTMLElement;
-      if (target.closest(".tool-tile")) {
-        ui.clearPickedUpTile();
-        this.clearDropRowInfo();
-        return;
-      }
-
       const dropRowInfo = this.getDropRowInfoFromPoint(e.clientX, e.clientY);
       const isEmptyDocument = this.props.content && this.props.content.rowOrder.length === 0;
       if (dropRowInfo?.rowDropId || (isEmptyDocument && dropRowInfo)) {
@@ -693,14 +684,17 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     if (!content || !tileId) return;
 
-    // Find the source document content — the tile may be in a different document (e.g. resources pane)
-    const sourceContent = this.findContentOfTile(tileId);
+    // Check local document first: template tile IDs (e.g. TemplateTextTileQ1_1) are reused across
+    // documents, so a global search may find the wrong document. If the tile is in the local
+    // document's tileMap, it's a same-document move.
+    const isLocalTile = content.tileMap.has(tileId);
+    const sourceContent = isLocalTile ? content : this.findContentOfTile(tileId);
     if (!sourceContent) {
       ui.clearPickedUpTile();
       return;
     }
 
-    const isSameDocument = sourceContent.contentId === content.contentId;
+    const isSameDocument = isLocalTile || sourceContent.contentId === content.contentId;
 
     if (isSameDocument) {
       // Move within the same document

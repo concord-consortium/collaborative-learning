@@ -58,6 +58,7 @@ export interface IStores extends IBaseStores {
   exemplarController: ExemplarControllerModelType;
   portal: Portal;
   gitInfo: IGitInfo;
+  findContentOfTile(tileId: string): any;
 }
 
 export interface ICreateStores extends Partial<IStores> {
