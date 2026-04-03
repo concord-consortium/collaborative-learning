@@ -19,10 +19,7 @@ interface WaveformPanelProps {
 }
 
 export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function WaveformPanel({
-  label,
-  sharedSeismogram,
-  startTime,
-  endTime,
+  label, sharedSeismogram, startTime, endTime,
 }) {
   const { seismicQueryService } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,14 +47,9 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     if (!stationInfo || pixelWidth === 0) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
+      const { network, station, location, channel } = stationInfo;
       seismicQueryService.loadViewport(callerIdRef.current, {
-        network: stationInfo.network,
-        station: stationInfo.station,
-        location: stationInfo.location,
-        channel: stationInfo.channel,
-        startTime,
-        endTime,
-        pixelWidth,
+        network, station, location, channel, startTime, endTime, pixelWidth,
       });
     }, LOAD_VIEWPORT_DEBOUNCE_MS);
     return () => {

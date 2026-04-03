@@ -1,10 +1,12 @@
 import { makeAutoObservable, observable, runInAction } from "mobx";
 import { DateTime } from "luxon";
-import { LEVEL_SPACINGS, AMPLITUDE_RANGES, NO_DATA_SENTINEL, RAW_CHUNK_DURATION } from "../../../shared/seismic/envelope-config";
+import {
+  LEVEL_SPACINGS, AMPLITUDE_RANGES, NO_DATA_SENTINEL, RAW_CHUNK_DURATION
+} from "../../../shared/seismic/envelope-config";
 import { dequantize } from "../../../shared/seismic/envelope-codec";
 import { getTileIndicesForViewport, getTileTimeRange } from "../../../shared/seismic/tile-addressing";
 import { fetchEnvelopeTile } from "../../../shared/seismic/envelope-fetcher";
-import { fetchRawSeismicData } from "../../../shared/seismic/earthscope-client";
+import { fetchRawSeismicData, fetchStationMetadata } from "../../../shared/seismic/earthscope-client";
 import { miniseed } from "seisplotjs";
 import {
   EnvelopeTileData, ChannelMetadata, NullableNumberArray,
@@ -115,9 +117,9 @@ export class SeismicQueryService {
           continue;
         }
         // No fallback — insert nulls for this tile's time range
-        const range = getTileTimeRange(level, tileIndex);
-        const tileStart = Math.max(range.start, startSec);
-        const tileEnd = Math.min(range.end, endSec);
+        const _range = getTileTimeRange(level, tileIndex);
+        const tileStart = Math.max(_range.start, startSec);
+        const tileEnd = Math.min(_range.end, endSec);
         for (let t = tileStart; t < tileEnd; t += spacing) {
           timestamps.push(t);
           mins.push(null);
@@ -127,9 +129,9 @@ export class SeismicQueryService {
       }
 
       if (entry === "missing") {
-        const range = getTileTimeRange(level, tileIndex);
-        const tileStart = Math.max(range.start, startSec);
-        const tileEnd = Math.min(range.end, endSec);
+        const _range = getTileTimeRange(level, tileIndex);
+        const tileStart = Math.max(_range.start, startSec);
+        const tileEnd = Math.min(_range.end, endSec);
         for (let t = tileStart; t < tileEnd; t += spacing) {
           timestamps.push(t);
           mins.push(null);
@@ -336,7 +338,7 @@ export class SeismicQueryService {
     return timestamps.length > 0 ? { timestamps, mins, maxs } : null;
   }
 
-  private loadRaw(callerId: string, params: SeismicViewportParams): void {
+  private async loadRaw(callerId: string, params: SeismicViewportParams): Promise<void> {
     const { network, station, location, channel, startTime, endTime } = params;
     const startSec = startTime.toSeconds();
     const endSec = endTime.toSeconds();
@@ -355,6 +357,11 @@ export class SeismicQueryService {
 
     this.cancelStale(callerId, neededKeys);
 
+    if (toFetch.length === 0) return;
+
+    // Ensure station metadata is cached so we have the sensitivity
+    const sensitivity = await this.getSensitivity(network, station, channel);
+
     for (const chunkIndex of toFetch) {
       const key = rawCacheKey(network, station, channel, chunkIndex);
       const controller = new AbortController();
@@ -372,7 +379,7 @@ export class SeismicQueryService {
 
       this.fetchAndParseRaw(
         network, station, location, channel,
-        chunkStartISO, chunkEndISO, controller.signal
+        chunkStartISO, chunkEndISO, sensitivity, controller.signal
       ).then(segments => {
         runInAction(() => {
           this.rawCache.set(key, segments.length > 0 ? segments : "missing");
@@ -387,9 +394,20 @@ export class SeismicQueryService {
     }
   }
 
+  private async getSensitivity(network: string, station: string, channel: string): Promise<number> {
+    const metaKey = `${network}_${station}`;
+    let metadata = this.metadataCache.get(metaKey);
+    if (!metadata) {
+      metadata = await fetchStationMetadata(network, station);
+      runInAction(() => { this.metadataCache.set(metaKey, metadata!); });
+    }
+    const channelMeta = metadata.find(m => m.channel === channel);
+    return channelMeta?.scale ?? 1;
+  }
+
   private async fetchAndParseRaw(
     network: string, station: string, location: string, channel: string,
-    startISO: string, endISO: string, signal: AbortSignal
+    startISO: string, endISO: string, sensitivity: number, signal: AbortSignal
   ): Promise<RawSegment[]> {
     const response = await fetchRawSeismicData(
       network, station, location, channel, startISO, endISO, { signal }
@@ -407,7 +425,7 @@ export class SeismicQueryService {
         const y = seg.y;
         const samples = new Float64Array(y.length);
         for (let i = 0; i < y.length; i++) {
-          samples[i] = y[i];
+          samples[i] = y[i] / sensitivity;
         }
         segments.push({ startTime: segStartTime, sampleRate, samples });
       }

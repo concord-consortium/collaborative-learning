@@ -323,7 +323,10 @@
           "|",
           "zoom-in",
           "zoom-out",
-          "view-all"
+          "view-all",
+          "|",
+          "pan-left",
+          "pan-right"
         ]
       },
       "wave-runner": {

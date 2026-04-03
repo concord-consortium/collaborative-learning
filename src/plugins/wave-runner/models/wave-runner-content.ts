@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { cast, flow, types, Instance } from "mobx-state-tree";
 import { miniseed } from "seisplotjs";
 import { fetchRawSeismicData } from "../../../../shared/seismic/earthscope-client";
@@ -51,58 +52,11 @@ export const WaveRunnerContentModel = TileContentModel
   .named("WaveRunnerTool")
   .props({
     type: types.optional(types.literal(kWaveRunnerTileType), kWaveRunnerTileType),
-    startDate: types.optional(types.string, "2026-01-30"),
-    endDate: types.optional(types.string, "2026-02-06"),
+    startDate: types.optional(types.string, "2025-01-01"),
+    endDate: types.optional(types.string, "2025-12-31"),
     station: types.maybe(StationModel),
     selectedModelUrl: types.maybe(types.string),
   })
-  .views(self => ({
-    get isUserResizable() {
-      return true;
-    },
-    get sharedSeismogram(): SharedSeismogramType | undefined {
-      const smm = getSharedModelManager(self);
-      return smm?.getTileSharedModelsByType(self, SharedSeismogram)[0] as SharedSeismogramType | undefined;
-    },
-  }))
-  .views(self => ({
-    get hasStationData() {
-      return !!self.sharedSeismogram?.station;
-    },
-  }))
-  .actions(self => ({
-    setStartDate(date: string) {
-      self.startDate = date;
-    },
-    setEndDate(date: string) {
-      self.endDate = date;
-    },
-    setStation(station: StationSnapshot) {
-      self.station = cast(station);
-      self.sharedSeismogram?.setStation(station);
-    },
-  }))
-  .actions(self => ({
-    async loadData() {
-      if (!self.station) return;
-      const smm = getSharedModelManager(self);
-      if (!smm?.isReady) return;
-
-      let sharedSeismogram = self.sharedSeismogram;
-      if (!sharedSeismogram) {
-        const newSharedSeismogram = SharedSeismogram.create();
-        smm.addTileSharedModel(self, newSharedSeismogram, true);
-        sharedSeismogram = self.sharedSeismogram ?? newSharedSeismogram;
-      }
-
-      const { network, station, location, channel } = self.station;
-      sharedSeismogram.setStation({ network, station, location: location ?? "", channel });
-      sharedSeismogram.setTimeRange(
-        `${self.startDate}T00:00:00Z`,
-        `${self.endDate}T00:00:00Z`
-      );
-    }
-  }))
   .volatile(() => ({
     isRunning: false,
     chunksProcessed: 0,
@@ -114,7 +68,60 @@ export const WaveRunnerContentModel = TileContentModel
     selectedModelMetadata: null as ModelMetadata | null,
     modelLoadError: null as string | null,
   }))
+  .views(self => ({
+    get isUserResizable() {
+      return true;
+    },
+    get sharedSeismogram(): SharedSeismogramType | undefined {
+      const smm = getSharedModelManager(self);
+      if (!smm?.isReady) return;
+      let sharedSeismogram =
+        smm.getTileSharedModelsByType(self, SharedSeismogram)[0] as SharedSeismogramType | undefined;
+
+      if (!sharedSeismogram) {
+        sharedSeismogram = SharedSeismogram.create();
+        smm.addTileSharedModel(self, sharedSeismogram, true);
+      }
+
+      return sharedSeismogram;
+    },
+    get startDateISO() {
+      return DateTime.fromISO(`${self.startDate}T00:00:00Z`, { zone: "utc" });
+    },
+    get endDateISO() {
+      return DateTime.fromISO(`${self.endDate}T00:00:00Z`, { zone: "utc" });
+    }
+  }))
+  .views(self => ({
+    get hasStationData() {
+      return !!self.sharedSeismogram?.station;
+    },
+  }))
   .actions(self => ({
+    async loadData() {
+      if (!self.station || !self.sharedSeismogram) return;
+
+      const { network, station, location, channel } = self.station;
+      self.sharedSeismogram.setStation({ network, station, location, channel });
+      self.sharedSeismogram.setTimeRange(
+        `${self.startDate}T00:00:00Z`,
+        `${self.endDate}T00:00:00Z`
+      );
+    }
+  }))
+  .actions(self => ({
+    setStartDate(date: string) {
+      self.startDate = date;
+      self.loadData();
+    },
+    setEndDate(date: string) {
+      self.endDate = date;
+      self.loadData();
+    },
+    setStation(station: StationSnapshot) {
+      self.station = cast(station);
+      self.loadData();
+    },
     updateChunkProgress(done: number, total: number) {
       self.chunksProcessed = done;
       self.chunksTotal = total;
@@ -150,8 +157,6 @@ export const WaveRunnerContentModel = TileContentModel
       self.cachedEventsDataSet = sharedDataSet;
       return sharedDataSet;
     },
-  }))
-  .actions(self => ({
     ensureModelMetadata: flow(function* (metadataUrl: string) {
       // Already loaded for this URL
       if (self.selectedModelUrl === metadataUrl && self.selectedModelMetadata) return;
