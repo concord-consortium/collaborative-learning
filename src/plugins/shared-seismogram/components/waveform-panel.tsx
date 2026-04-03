@@ -108,7 +108,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
             { label: "Value", stroke: "white", width: 1 },
           ],
       bands: isEnvelope
-        ? [{ series: [1, 2], fill: "rgba(255, 255, 255, 0.3)" }]
+        ? [{ series: [2, 1], fill: "rgba(255, 255, 255, 0.3)" }]
         : undefined,
     };
 
