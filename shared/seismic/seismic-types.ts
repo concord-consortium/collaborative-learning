@@ -38,7 +38,8 @@ export interface EnvelopeTileData {
 }
 
 /** A series of nullable numbers, used for uPlot data arrays. */
-export type NullableNumberArray = (number | null)[];
+export type NullableNumber = (number | null)
+export type NullableNumberArray = NullableNumber[];
 
 /** A raw seismic data segment parsed from miniSEED. */
 export interface RawSegment {

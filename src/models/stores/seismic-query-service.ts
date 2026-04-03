@@ -10,11 +10,13 @@ import { fetchRawSeismicData, fetchStationMetadata } from "../../../shared/seism
 import { miniseed } from "seisplotjs";
 import {
   EnvelopeTileData, ChannelMetadata, NullableNumberArray,
-  SeismicViewportParams, ViewportQueryResult, RawSegment
+  SeismicViewportParams, ViewportQueryResult, RawSegment, TimeRange
 } from "../../../shared/seismic/seismic-types";
 
 type EnvelopeCacheEntry = EnvelopeTileData | "loading" | "missing";
 type RawCacheEntry = RawSegment[] | "loading" | "missing";
+
+const valueScalar = 2;
 
 export function envelopeCacheKey(network: string, station: string, channel: string, level: number, tileIndex: number) {
   return `${network}_${station}/${channel}/L${level}/${tileIndex}`;
@@ -88,6 +90,25 @@ export class SeismicQueryService {
     }
   }
 
+  // --- Private helpers (general) ---
+
+  private addNull(time: number, timestamps: NullableNumberArray, v1: NullableNumberArray, v2?: NullableNumberArray) {
+    timestamps.push(time);
+    v1.push(null);
+    v2?.push(null);
+  }
+
+  private fillNull(
+    range: TimeRange, spacing: number, timestamps: NullableNumberArray, v1: NullableNumberArray,
+    v2?: NullableNumberArray, minStart?: number, maxEnd?: number
+  ) {
+    const tileStart = minStart !== undefined ? Math.max(range.start, minStart) : range.start;
+    const tileEnd = maxEnd !== undefined ? Math.min(range.end, maxEnd) : range.end;
+    for (let t = tileStart; t < tileEnd; t += spacing) {
+      this.addNull(t, timestamps, v1, v2);
+    }
+  }
+
   // --- Private helpers (envelope) ---
 
   private queryEnvelope(params: SeismicViewportParams, level: number, amplitudeRange: number): ViewportQueryResult {
@@ -117,26 +138,12 @@ export class SeismicQueryService {
           continue;
         }
         // No fallback — insert nulls for this tile's time range
-        const _range = getTileTimeRange(level, tileIndex);
-        const tileStart = Math.max(_range.start, startSec);
-        const tileEnd = Math.min(_range.end, endSec);
-        for (let t = tileStart; t < tileEnd; t += spacing) {
-          timestamps.push(t);
-          mins.push(null);
-          maxs.push(null);
-        }
+        this.fillNull(getTileTimeRange(level, tileIndex), spacing, timestamps, mins, maxs, startSec, endSec);
         continue;
       }
 
       if (entry === "missing") {
-        const _range = getTileTimeRange(level, tileIndex);
-        const tileStart = Math.max(_range.start, startSec);
-        const tileEnd = Math.min(_range.end, endSec);
-        for (let t = tileStart; t < tileEnd; t += spacing) {
-          timestamps.push(t);
-          mins.push(null);
-          maxs.push(null);
-        }
+        this.fillNull(getTileTimeRange(level, tileIndex), spacing, timestamps, mins, maxs, startSec, endSec);
         continue;
       }
 
@@ -146,13 +153,11 @@ export class SeismicQueryService {
         const t = range.start + i * spacing;
         if (t < startSec || t >= endSec) continue;
         if (entry.mins[i] === NO_DATA_SENTINEL) {
-          timestamps.push(t);
-          mins.push(null);
-          maxs.push(null);
+          this.addNull(t, timestamps, mins, maxs);
         } else {
           timestamps.push(t);
-          mins.push(dequantize(entry.mins[i], amplitudeRange));
-          maxs.push(dequantize(entry.maxs[i], amplitudeRange));
+          mins.push(dequantize(entry.mins[i], amplitudeRange) * valueScalar);
+          maxs.push(dequantize(entry.maxs[i], amplitudeRange) * valueScalar);
         }
       }
     }
@@ -187,14 +192,12 @@ export class SeismicQueryService {
         const t = fbRange.start + i * fallbackSpacing;
         if (t < overlapStart || t >= overlapEnd) continue;
         if (fbEntry.mins[i] === NO_DATA_SENTINEL) {
-          timestamps.push(t);
-          mins.push(null);
-          maxs.push(null);
+          this.addNull(t, timestamps, mins, maxs);
         } else {
           const amplitudeRange = AMPLITUDE_RANGES[channel.charAt(1)] ?? 1;
           timestamps.push(t);
-          mins.push(dequantize(fbEntry.mins[i], amplitudeRange));
-          maxs.push(dequantize(fbEntry.maxs[i], amplitudeRange));
+          mins.push(dequantize(fbEntry.mins[i], amplitudeRange) * valueScalar);
+          maxs.push(dequantize(fbEntry.maxs[i], amplitudeRange) * valueScalar);
         }
       }
     }
@@ -324,13 +327,11 @@ export class SeismicQueryService {
         const t = range.start + i * spacing;
         if (t < startSec || t >= endSec) continue;
         if (entry.mins[i] === NO_DATA_SENTINEL) {
-          timestamps.push(t);
-          mins.push(null);
-          maxs.push(null);
+          this.addNull(t, timestamps, mins, maxs);
         } else {
           timestamps.push(t);
-          mins.push(dequantize(entry.mins[i], amplitudeRange));
-          maxs.push(dequantize(entry.maxs[i], amplitudeRange));
+          mins.push(dequantize(entry.mins[i], amplitudeRange) * valueScalar);
+          maxs.push(dequantize(entry.maxs[i], amplitudeRange) * valueScalar);
         }
       }
     }
@@ -425,7 +426,7 @@ export class SeismicQueryService {
         const y = seg.y;
         const samples = new Float64Array(y.length);
         for (let i = 0; i < y.length; i++) {
-          samples[i] = y[i] / sensitivity;
+          samples[i] = y[i] / sensitivity * valueScalar;
         }
         segments.push({ startTime: segStartTime, sampleRate, samples });
       }
