@@ -48,11 +48,15 @@ export interface RawSegment {
   samples: Float64Array;
 }
 
-/** Parameters for fetching a single envelope tile. */
-export interface FetchEnvelopeTileParams {
+export interface StationData {
   network: string;
   station: string;
   channel: string;
+}
+
+/** Parameters for fetching a single envelope tile. */
+export interface FetchEnvelopeTileParams {
+  stationData: StationData;
   level: number;
   tileIndex: number;
   s3BaseUrl?: string;
@@ -61,10 +65,8 @@ export interface FetchEnvelopeTileParams {
 
 /** Viewport parameters for seismic data queries. */
 export interface SeismicViewportParams {
-  network: string;
-  station: string;
+  stationData: StationData;
   location: string;
-  channel: string;
   startTime: DateTime;
   endTime: DateTime;
   pixelWidth: number;

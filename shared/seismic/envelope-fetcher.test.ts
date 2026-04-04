@@ -7,9 +7,7 @@ const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
 const baseParams: FetchEnvelopeTileParams = {
-  network: "AK",
-  station: "K204",
-  channel: "HNZ",
+  stationData: { network: "AK", station: "K204", channel: "HNZ" },
   level: 1,
   tileIndex: 42,
   s3BaseUrl: "https://test-bucket.s3.amazonaws.com/tiles/",

@@ -11,10 +11,10 @@ const DEFAULT_S3_BASE_URL = `https://${S3_BUCKET}.s3.amazonaws.com/${S3_PREFIX}`
  * Throws on other HTTP errors.
  */
 export async function fetchEnvelopeTile(params: FetchEnvelopeTileParams): Promise<EnvelopeTileData | null> {
-  const { network, station, channel, level, tileIndex, signal } = params;
+  const { stationData, level, tileIndex, signal } = params;
   const s3BaseUrl = params.s3BaseUrl ?? DEFAULT_S3_BASE_URL;
 
-  const key = getTileS3Key(network, station, channel, level, tileIndex);
+  const key = getTileS3Key(stationData, level, tileIndex);
   const url = `${getS3Root(s3BaseUrl)}${key}`;
 
   const response = await fetch(url, { signal });

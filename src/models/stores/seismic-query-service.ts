@@ -10,7 +10,7 @@ import { fetchRawSeismicData, fetchStationMetadata } from "../../../shared/seism
 import { miniseed } from "seisplotjs";
 import {
   EnvelopeTileData, ChannelMetadata, NullableNumberArray,
-  SeismicViewportParams, ViewportQueryResult, RawSegment, TimeRange
+  SeismicViewportParams, ViewportQueryResult, RawSegment, StationData, TimeRange
 } from "../../../shared/seismic/seismic-types";
 
 type EnvelopeCacheEntry = EnvelopeTileData | "loading" | "missing";
@@ -18,11 +18,13 @@ type RawCacheEntry = RawSegment[] | "loading" | "missing";
 
 const valueScalar = 2;
 
-export function envelopeCacheKey(network: string, station: string, channel: string, level: number, tileIndex: number) {
+export function envelopeCacheKey(stationData: StationData, level: number, tileIndex: number) {
+  const { network, station, channel } = stationData;
   return `${network}_${station}/${channel}/L${level}/${tileIndex}`;
 }
 
-export function rawCacheKey(network: string, station: string, channel: string, chunkIndex: number) {
+export function rawCacheKey(stationData: StationData, chunkIndex: number) {
+  const { network, station, channel } = stationData;
   return `${network}_${station}/${channel}/raw/${chunkIndex}`;
 }
 
@@ -64,9 +66,9 @@ export class SeismicQueryService {
    * Called from MobX observer components so cache reads are tracked.
    */
   query(params: SeismicViewportParams): ViewportQueryResult {
-    const { channel, startTime, endTime, pixelWidth } = params;
+    const { stationData, startTime, endTime, pixelWidth } = params;
     const level = this.selectLevel(startTime, endTime, pixelWidth);
-    const instrumentCode = channel.charAt(1);
+    const instrumentCode = stationData.channel.charAt(1);
     const amplitudeRange = AMPLITUDE_RANGES[instrumentCode] ?? 1;
 
     if (level === "raw") {
@@ -109,10 +111,47 @@ export class SeismicQueryService {
     }
   }
 
+  private getFallbackData(
+    level: number, stationData: StationData, start: number, end: number
+  ): { timestamps: NullableNumberArray, mins: NullableNumberArray, maxs: NullableNumberArray } | null {
+    if (level < 0) return null;
+
+    const spacing = LEVEL_SPACINGS[level];
+    const tileIndices = getTileIndicesForViewport(start, end, level);
+
+    const timestamps: NullableNumberArray = [];
+    const mins: NullableNumberArray = [];
+    const maxs: NullableNumberArray = [];
+
+    for (const fbTileIndex of tileIndices) {
+      const key = envelopeCacheKey(stationData, level, fbTileIndex);
+      const entry = this.envelopeCache.get(key);
+      if (!entry || entry === "loading" || entry === "missing") {
+        return this.getFallbackData(level - 1, stationData, start, end);
+      }
+
+      const range = getTileTimeRange(level, fbTileIndex);
+      for (let i = 0; i < entry.mins.length; i++) {
+        const t = range.start + i * spacing;
+        if (t < start || t >= end) continue;
+        if (entry.mins[i] === NO_DATA_SENTINEL) {
+          this.addNull(t, timestamps, mins, maxs);
+        } else {
+          const amplitudeRange = AMPLITUDE_RANGES[stationData.channel.charAt(1)] ?? 1;
+          timestamps.push(t);
+          mins.push(dequantize(entry.mins[i], amplitudeRange) * valueScalar);
+          maxs.push(dequantize(entry.maxs[i], amplitudeRange) * valueScalar);
+        }
+      }
+    }
+
+    return timestamps.length > 0 ? { timestamps, mins, maxs } : null;
+  }
+
   // --- Private helpers (envelope) ---
 
   private queryEnvelope(params: SeismicViewportParams, level: number, amplitudeRange: number): ViewportQueryResult {
-    const { network, station, channel, startTime, endTime } = params;
+    const { stationData, startTime, endTime } = params;
     const startSec = startTime.toSeconds();
     const endSec = endTime.toSeconds();
     const tileIndices = getTileIndicesForViewport(startSec, endSec, level);
@@ -124,13 +163,16 @@ export class SeismicQueryService {
     let isLoading = false;
 
     for (const tileIndex of tileIndices) {
-      const key = envelopeCacheKey(network, station, channel, level, tileIndex);
+      const key = envelopeCacheKey(stationData, level, tileIndex);
       const entry = this.envelopeCache.get(key);
 
       // Fallback to one level coarser if this level is loading
       if (entry === "loading" || entry === undefined) {
         isLoading = true;
-        const fallbackData = this.getFallbackData(level, tileIndex, network, station, channel, startSec, endSec);
+        const _range = getTileTimeRange(level, tileIndex);
+        const overlapStart = Math.max(_range.start, startSec);
+        const overlapEnd = Math.min(_range.end, endSec);
+        const fallbackData = this.getFallbackData(level - 1, stationData, overlapStart, overlapEnd);
         if (fallbackData) {
           timestamps.push(...fallbackData.timestamps);
           mins.push(...fallbackData.mins);
@@ -165,48 +207,8 @@ export class SeismicQueryService {
     return { level, data: [timestamps, mins, maxs], amplitudeRange, isLoading };
   }
 
-  private getFallbackData(
-    level: number, tileIndex: number, network: string, station: string, channel: string,
-    viewStartSec: number, viewEndSec: number
-  ): { timestamps: NullableNumberArray, mins: NullableNumberArray, maxs: NullableNumberArray } | null {
-    const fallbackLevel = level - 1;
-    if (fallbackLevel < 0) return null;
-
-    const range = getTileTimeRange(level, tileIndex);
-    const overlapStart = Math.max(range.start, viewStartSec);
-    const overlapEnd = Math.min(range.end, viewEndSec);
-    const fallbackSpacing = LEVEL_SPACINGS[fallbackLevel];
-    const fallbackIndices = getTileIndicesForViewport(overlapStart, overlapEnd, fallbackLevel);
-
-    const timestamps: NullableNumberArray = [];
-    const mins: NullableNumberArray = [];
-    const maxs: NullableNumberArray = [];
-
-    for (const fbTileIndex of fallbackIndices) {
-      const fbKey = envelopeCacheKey(network, station, channel, fallbackLevel, fbTileIndex);
-      const fbEntry = this.envelopeCache.get(fbKey);
-      if (!fbEntry || fbEntry === "loading" || fbEntry === "missing") return null;
-
-      const fbRange = getTileTimeRange(fallbackLevel, fbTileIndex);
-      for (let i = 0; i < fbEntry.mins.length; i++) {
-        const t = fbRange.start + i * fallbackSpacing;
-        if (t < overlapStart || t >= overlapEnd) continue;
-        if (fbEntry.mins[i] === NO_DATA_SENTINEL) {
-          this.addNull(t, timestamps, mins, maxs);
-        } else {
-          const amplitudeRange = AMPLITUDE_RANGES[channel.charAt(1)] ?? 1;
-          timestamps.push(t);
-          mins.push(dequantize(fbEntry.mins[i], amplitudeRange) * valueScalar);
-          maxs.push(dequantize(fbEntry.maxs[i], amplitudeRange) * valueScalar);
-        }
-      }
-    }
-
-    return timestamps.length > 0 ? { timestamps, mins, maxs } : null;
-  }
-
   private loadEnvelope(callerId: string, params: SeismicViewportParams, level: number): void {
-    const { network, station, channel, startTime, endTime } = params;
+    const { stationData, startTime, endTime } = params;
     const startSec = startTime.toSeconds();
     const endSec = endTime.toSeconds();
     const tileIndices = getTileIndicesForViewport(startSec, endSec, level);
@@ -215,7 +217,7 @@ export class SeismicQueryService {
     const toFetch: number[] = [];
     const neededKeys = new Set<string>();
     for (const tileIndex of tileIndices) {
-      const key = envelopeCacheKey(network, station, channel, level, tileIndex);
+      const key = envelopeCacheKey(stationData, level, tileIndex);
       neededKeys.add(key);
       if (!this.envelopeCache.has(key)) {
         toFetch.push(tileIndex);
@@ -227,16 +229,13 @@ export class SeismicQueryService {
 
     // Fetch missing tiles
     for (const tileIndex of toFetch) {
-      const key = envelopeCacheKey(network, station, channel, level, tileIndex);
+      const key = envelopeCacheKey(stationData, level, tileIndex);
       const controller = new AbortController();
       this.registerInflight(callerId, key, controller);
 
       runInAction(() => { this.envelopeCache.set(key, "loading"); });
 
-      fetchEnvelopeTile({
-        network, station, channel, level, tileIndex,
-        signal: controller.signal,
-      }).then(data => {
+      fetchEnvelopeTile({ stationData, level, tileIndex, signal: controller.signal }).then(data => {
         runInAction(() => {
           this.envelopeCache.set(key, data ?? "missing");
         });
@@ -257,7 +256,7 @@ export class SeismicQueryService {
   }
 
   private queryRaw(params: SeismicViewportParams, amplitudeRange: number): ViewportQueryResult {
-    const { network, station, channel, startTime, endTime } = params;
+    const { stationData, startTime, endTime } = params;
     const startSec = startTime.toSeconds();
     const endSec = endTime.toSeconds();
     const firstChunk = this.rawChunkIndex(startSec);
@@ -268,17 +267,15 @@ export class SeismicQueryService {
     let isLoading = false;
 
     for (let ci = firstChunk; ci <= lastChunk; ci++) {
-      const key = rawCacheKey(network, station, channel, ci);
+      const key = rawCacheKey(stationData, ci);
       const entry = this.rawCache.get(key);
 
       if (entry === "loading" || entry === undefined) {
         isLoading = true;
         // Attempt fallback to L2 envelope for this chunk's time range
-        const chunkStart = ci * RAW_CHUNK_DURATION;
-        const chunkEnd = (ci + 1) * RAW_CHUNK_DURATION;
-        const fallback = this.getL2FallbackForRaw(
-          network, station, channel, Math.max(chunkStart, startSec), Math.min(chunkEnd, endSec), amplitudeRange
-        );
+        const start = Math.max(ci * RAW_CHUNK_DURATION, startSec);
+        const end = Math.min((ci + 1) * RAW_CHUNK_DURATION, endSec);
+        const fallback = this.getFallbackData(2, stationData, start, end);
         if (fallback) {
           // Envelope fallback — push as interleaved min/max approximation (use midpoint)
           for (let i = 0; i < fallback.timestamps.length; i++) {
@@ -307,40 +304,8 @@ export class SeismicQueryService {
     return { level: "raw", data: [timestamps, values], amplitudeRange, isLoading };
   }
 
-  private getL2FallbackForRaw(
-    network: string, station: string, channel: string,
-    startSec: number, endSec: number, amplitudeRange: number
-  ): { timestamps: NullableNumberArray, mins: NullableNumberArray, maxs: NullableNumberArray } | null {
-    const l2Indices = getTileIndicesForViewport(startSec, endSec, 2);
-    const spacing = LEVEL_SPACINGS[2];
-    const timestamps: NullableNumberArray = [];
-    const mins: NullableNumberArray = [];
-    const maxs: NullableNumberArray = [];
-
-    for (const tileIndex of l2Indices) {
-      const key = envelopeCacheKey(network, station, channel, 2, tileIndex);
-      const entry = this.envelopeCache.get(key);
-      if (!entry || entry === "loading" || entry === "missing") return null;
-
-      const range = getTileTimeRange(2, tileIndex);
-      for (let i = 0; i < entry.mins.length; i++) {
-        const t = range.start + i * spacing;
-        if (t < startSec || t >= endSec) continue;
-        if (entry.mins[i] === NO_DATA_SENTINEL) {
-          this.addNull(t, timestamps, mins, maxs);
-        } else {
-          timestamps.push(t);
-          mins.push(dequantize(entry.mins[i], amplitudeRange) * valueScalar);
-          maxs.push(dequantize(entry.maxs[i], amplitudeRange) * valueScalar);
-        }
-      }
-    }
-
-    return timestamps.length > 0 ? { timestamps, mins, maxs } : null;
-  }
-
   private async loadRaw(callerId: string, params: SeismicViewportParams): Promise<void> {
-    const { network, station, location, channel, startTime, endTime } = params;
+    const { stationData, location, startTime, endTime } = params;
     const startSec = startTime.toSeconds();
     const endSec = endTime.toSeconds();
     const firstChunk = this.rawChunkIndex(startSec);
@@ -349,7 +314,7 @@ export class SeismicQueryService {
     const neededKeys = new Set<string>();
     const toFetch: number[] = [];
     for (let ci = firstChunk; ci <= lastChunk; ci++) {
-      const key = rawCacheKey(network, station, channel, ci);
+      const key = rawCacheKey(stationData, ci);
       neededKeys.add(key);
       if (!this.rawCache.has(key)) {
         toFetch.push(ci);
@@ -361,10 +326,10 @@ export class SeismicQueryService {
     if (toFetch.length === 0) return;
 
     // Ensure station metadata is cached so we have the sensitivity
-    const sensitivity = await this.getSensitivity(network, station, channel);
+    const sensitivity = await this.getSensitivity(stationData);
 
     for (const chunkIndex of toFetch) {
-      const key = rawCacheKey(network, station, channel, chunkIndex);
+      const key = rawCacheKey(stationData, chunkIndex);
       const controller = new AbortController();
       this.registerInflight(callerId, key, controller);
 
@@ -379,8 +344,7 @@ export class SeismicQueryService {
       if (!chunkStartISO || !chunkEndISO) continue;
 
       this.fetchAndParseRaw(
-        network, station, location, channel,
-        chunkStartISO, chunkEndISO, sensitivity, controller.signal
+        stationData, location, chunkStartISO, chunkEndISO, sensitivity, controller.signal
       ).then(segments => {
         runInAction(() => {
           this.rawCache.set(key, segments.length > 0 ? segments : "missing");
@@ -395,7 +359,7 @@ export class SeismicQueryService {
     }
   }
 
-  private async getSensitivity(network: string, station: string, channel: string): Promise<number> {
+  private async getSensitivity({ network, station, channel }: StationData): Promise<number> {
     const metaKey = `${network}_${station}`;
     let metadata = this.metadataCache.get(metaKey);
     if (!metadata) {
@@ -407,8 +371,8 @@ export class SeismicQueryService {
   }
 
   private async fetchAndParseRaw(
-    network: string, station: string, location: string, channel: string,
-    startISO: string, endISO: string, sensitivity: number, signal: AbortSignal
+    { network, station, channel }: StationData, location: string, startISO: string, endISO: string,
+    sensitivity: number, signal: AbortSignal
   ): Promise<RawSegment[]> {
     const response = await fetchRawSeismicData(
       network, station, location, channel, startISO, endISO, { signal }

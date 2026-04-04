@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { SeismicQueryService, envelopeCacheKey, rawCacheKey } from "./seismic-query-service";
+import { SeismicQueryService, envelopeCacheKey } from "./seismic-query-service";
 import { encodeEnvelopeTile } from "../../../shared/seismic/envelope-codec";
 import { LEVEL_SPACINGS, NO_DATA_SENTINEL } from "../../../shared/seismic/envelope-config";
 import { getTileTimeRange } from "../../../shared/seismic/tile-addressing";
@@ -16,6 +16,8 @@ jest.mock("seisplotjs", () => ({
     merge: jest.fn(() => null),
   },
 }));
+
+const stationData = { network: "AK", station: "K204", channel: "HNZ" };
 
 describe("SeismicQueryService", () => {
   describe("selectLevel", () => {
@@ -56,10 +58,8 @@ describe("SeismicQueryService query", () => {
   let service: SeismicQueryService;
 
   const viewportParams = (overrides?: Partial<SeismicViewportParams>): SeismicViewportParams => ({
-    network: "AK",
-    station: "K204",
+    stationData,
     location: "",
-    channel: "HNZ",
     startTime: DateTime.fromSeconds(0, { zone: "utc" }),
     endTime: DateTime.fromSeconds(LEVEL_SPACINGS[1] * 1000, { zone: "utc" }),
     pixelWidth: 1000,
@@ -81,7 +81,7 @@ describe("SeismicQueryService query", () => {
     const tileIndex = 0;
     const mins = new Int16Array([1000, 2000]);
     const maxs = new Int16Array([3000, 4000]);
-    const key = envelopeCacheKey("AK", "K204", "HNZ", level, tileIndex);
+    const key = envelopeCacheKey(stationData, level, tileIndex);
     service.envelopeCache.set(key, { mins, maxs });
 
     const range = getTileTimeRange(level, tileIndex);
@@ -100,7 +100,7 @@ describe("SeismicQueryService query", () => {
   it("inserts nulls for missing tiles", () => {
     const level = 1;
     const tileIndex = 0;
-    const key = envelopeCacheKey("AK", "K204", "HNZ", level, tileIndex);
+    const key = envelopeCacheKey(stationData, level, tileIndex);
     service.envelopeCache.set(key, "missing");
 
     const range = getTileTimeRange(level, tileIndex);
@@ -119,7 +119,7 @@ describe("SeismicQueryService query", () => {
     const tileIndex = 0;
     const mins = new Int16Array([NO_DATA_SENTINEL]);
     const maxs = new Int16Array([NO_DATA_SENTINEL]);
-    const key = envelopeCacheKey("AK", "K204", "HNZ", level, tileIndex);
+    const key = envelopeCacheKey(stationData, level, tileIndex);
     service.envelopeCache.set(key, { mins, maxs });
 
     const range = getTileTimeRange(level, tileIndex);
@@ -153,30 +153,26 @@ describe("SeismicQueryService loadViewport", () => {
     const level = 1;
     const range = getTileTimeRange(level, 0);
     service.loadViewport("caller1", {
-      network: "AK",
-      station: "K204",
+      stationData,
       location: "",
-      channel: "HNZ",
       startTime: DateTime.fromSeconds(range.start, { zone: "utc" }),
       endTime: DateTime.fromSeconds(range.start + LEVEL_SPACINGS[level], { zone: "utc" }),
       pixelWidth: 1,
     });
 
-    expect(service.envelopeCache.get(envelopeCacheKey("AK", "K204", "HNZ", 1, 0))).toBe("loading");
+    expect(service.envelopeCache.get(envelopeCacheKey(stationData, 1, 0))).toBe("loading");
     expect(mockFetch).toHaveBeenCalled();
   });
 
   it("does not re-fetch tiles already in cache", () => {
-    const key = envelopeCacheKey("AK", "K204", "HNZ", 1, 0);
+    const key = envelopeCacheKey(stationData, 1, 0);
     service.envelopeCache.set(key, { mins: new Int16Array([1]), maxs: new Int16Array([2]) });
 
     const level = 1;
     const range = getTileTimeRange(level, 0);
     service.loadViewport("caller1", {
-      network: "AK",
-      station: "K204",
+      stationData,
       location: "",
-      channel: "HNZ",
       startTime: DateTime.fromSeconds(range.start, { zone: "utc" }),
       endTime: DateTime.fromSeconds(range.start + LEVEL_SPACINGS[level], { zone: "utc" }),
       pixelWidth: 1,
