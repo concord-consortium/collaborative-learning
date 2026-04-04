@@ -84,12 +84,7 @@ export class SeismicQueryService {
   loadViewport(callerId: string, params: SeismicViewportParams): void {
     const { startTime, endTime, pixelWidth } = params;
     const level = this.selectLevel(startTime, endTime, pixelWidth);
-
-    if (level === "raw") {
-      this.loadRaw(callerId, params);
-    } else {
-      this.loadEnvelope(callerId, params, level);
-    }
+    this.loadData(callerId, params, level);
   }
 
   // --- Private helpers (general) ---
@@ -146,6 +141,80 @@ export class SeismicQueryService {
     }
 
     return timestamps.length > 0 ? { timestamps, mins, maxs } : null;
+  }
+
+  private async loadData(callerId: string, params: SeismicViewportParams, level: number | "raw"): Promise<void> {
+    const { stationData, location, startTime, endTime } = params;
+    const startSec = startTime.toSeconds();
+    const endSec = endTime.toSeconds();
+    const raw = level === "raw";
+
+    let indices: number[];
+    if (raw) {
+      const firstChunk = this.rawChunkIndex(startSec);
+      const lastChunk = this.rawChunkIndex(endSec - 1e-9);
+      indices = [];
+      for (let ci = firstChunk; ci <= lastChunk; ci++) indices.push(ci);
+    } else {
+      indices = getTileIndicesForViewport(startSec, endSec, level);
+    }
+
+    const toFetch: number[] = [];
+    const neededKeys = new Set<string>();
+    const cache = raw ? this.rawCache : this.envelopeCache;
+    const getKey = (i: number) => raw ? rawCacheKey(stationData, i) : envelopeCacheKey(stationData, level, i);
+    for (const index of indices) {
+      const key = getKey(index);
+      neededKeys.add(key);
+      if (!cache.has(key)) {
+        toFetch.push(index);
+      }
+    }
+
+    // Cancel stale fetches for this caller
+    this.cancelStale(callerId, neededKeys);
+
+    if (toFetch.length === 0) return;
+
+    const sensitivity = raw ? await this.getSensitivity(stationData) : 1;
+
+    // Fetch missing tiles
+    for (const index of toFetch) {
+      const key = getKey(index);
+      const controller = new AbortController();
+      this.registerInflight(callerId, key, controller);
+
+      runInAction(() => { cache.set(key, "loading"); });
+
+      const catchFunction = (err: any) => {
+        if (err.name !== "AbortError") {
+          runInAction(() => { cache.set(key, "missing"); });
+        }
+      };
+      const finallyFunction = () => {
+        this.removeInflight(callerId, key);
+      };
+
+      if (raw) {
+        const chunkStartISO = DateTime.fromSeconds(index * RAW_CHUNK_DURATION, { zone: "utc" }).toISO();
+        const chunkEndISO = DateTime.fromSeconds((index + 1) * RAW_CHUNK_DURATION, { zone: "utc" }).toISO();
+        if (!chunkStartISO || !chunkEndISO) continue;
+
+        this.fetchAndParseRaw(stationData, location, chunkStartISO, chunkEndISO, sensitivity, controller.signal)
+          .then(segments => {
+            runInAction(() => {
+              this.rawCache.set(key, segments.length > 0 ? segments : "missing");
+            });
+          }).catch(catchFunction).finally(finallyFunction);
+      } else {
+        fetchEnvelopeTile({ stationData, level, tileIndex: index, signal: controller.signal })
+          .then(data => {
+            runInAction(() => {
+              this.envelopeCache.set(key, data ?? "missing");
+            });
+          }).catch(catchFunction).finally(finallyFunction);
+      }
+    }
   }
 
   // --- Private helpers (envelope) ---
@@ -207,48 +276,6 @@ export class SeismicQueryService {
     return { level, data: [timestamps, mins, maxs], amplitudeRange, isLoading };
   }
 
-  private loadEnvelope(callerId: string, params: SeismicViewportParams, level: number): void {
-    const { stationData, startTime, endTime } = params;
-    const startSec = startTime.toSeconds();
-    const endSec = endTime.toSeconds();
-    const tileIndices = getTileIndicesForViewport(startSec, endSec, level);
-
-    // Determine which tiles need fetching
-    const toFetch: number[] = [];
-    const neededKeys = new Set<string>();
-    for (const tileIndex of tileIndices) {
-      const key = envelopeCacheKey(stationData, level, tileIndex);
-      neededKeys.add(key);
-      if (!this.envelopeCache.has(key)) {
-        toFetch.push(tileIndex);
-      }
-    }
-
-    // Cancel stale fetches for this caller
-    this.cancelStale(callerId, neededKeys);
-
-    // Fetch missing tiles
-    for (const tileIndex of toFetch) {
-      const key = envelopeCacheKey(stationData, level, tileIndex);
-      const controller = new AbortController();
-      this.registerInflight(callerId, key, controller);
-
-      runInAction(() => { this.envelopeCache.set(key, "loading"); });
-
-      fetchEnvelopeTile({ stationData, level, tileIndex, signal: controller.signal }).then(data => {
-        runInAction(() => {
-          this.envelopeCache.set(key, data ?? "missing");
-        });
-      }).catch(err => {
-        if (err.name !== "AbortError") {
-          runInAction(() => { this.envelopeCache.set(key, "missing"); });
-        }
-      }).finally(() => {
-        this.removeInflight(callerId, key);
-      });
-    }
-  }
-
   // --- Private helpers (raw) ---
 
   private rawChunkIndex(unixSeconds: number): number {
@@ -302,61 +329,6 @@ export class SeismicQueryService {
     }
 
     return { level: "raw", data: [timestamps, values], amplitudeRange, isLoading };
-  }
-
-  private async loadRaw(callerId: string, params: SeismicViewportParams): Promise<void> {
-    const { stationData, location, startTime, endTime } = params;
-    const startSec = startTime.toSeconds();
-    const endSec = endTime.toSeconds();
-    const firstChunk = this.rawChunkIndex(startSec);
-    const lastChunk = this.rawChunkIndex(endSec - 1e-9);
-
-    const neededKeys = new Set<string>();
-    const toFetch: number[] = [];
-    for (let ci = firstChunk; ci <= lastChunk; ci++) {
-      const key = rawCacheKey(stationData, ci);
-      neededKeys.add(key);
-      if (!this.rawCache.has(key)) {
-        toFetch.push(ci);
-      }
-    }
-
-    this.cancelStale(callerId, neededKeys);
-
-    if (toFetch.length === 0) return;
-
-    // Ensure station metadata is cached so we have the sensitivity
-    const sensitivity = await this.getSensitivity(stationData);
-
-    for (const chunkIndex of toFetch) {
-      const key = rawCacheKey(stationData, chunkIndex);
-      const controller = new AbortController();
-      this.registerInflight(callerId, key, controller);
-
-      runInAction(() => { this.rawCache.set(key, "loading"); });
-
-      const chunkStartSec = chunkIndex * RAW_CHUNK_DURATION;
-      const chunkEndSec = (chunkIndex + 1) * RAW_CHUNK_DURATION;
-      const chunkStartDT = DateTime.fromSeconds(chunkStartSec, { zone: "utc" });
-      const chunkEndDT = DateTime.fromSeconds(chunkEndSec, { zone: "utc" });
-      const chunkStartISO = chunkStartDT.toISO();
-      const chunkEndISO = chunkEndDT.toISO();
-      if (!chunkStartISO || !chunkEndISO) continue;
-
-      this.fetchAndParseRaw(
-        stationData, location, chunkStartISO, chunkEndISO, sensitivity, controller.signal
-      ).then(segments => {
-        runInAction(() => {
-          this.rawCache.set(key, segments.length > 0 ? segments : "missing");
-        });
-      }).catch(err => {
-        if (err.name !== "AbortError") {
-          runInAction(() => { this.rawCache.set(key, "missing"); });
-        }
-      }).finally(() => {
-        this.removeInflight(callerId, key);
-      });
-    }
   }
 
   private async getSensitivity({ network, station, channel }: StationData): Promise<number> {
