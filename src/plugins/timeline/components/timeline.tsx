@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { observer } from "mobx-react-lite";
 import React, { useContext, useEffect } from "react";
 import { TileModelContext } from "../../../components/tiles/tile-api";
@@ -41,12 +42,25 @@ export const Timeline = observer(function Timeline() {
   return (
     <div className="timeline-area">
       {sharedSeismogram && isValidDateTime(startTime) && isValidDateTime(endTime) ? (
-        <WaveformPanel
-          label="Full waveform"
-          sharedSeismogram={sharedSeismogram}
-          startTime={startTime}
-          endTime={endTime}
-        />
+        <>
+          <WaveformPanel
+            label="Full waveform"
+            sharedSeismogram={sharedSeismogram}
+            startTime={startTime}
+            endTime={endTime}
+          />
+          <div className="timeline-range-row">
+            <div className="range-date range-start">
+              <div>{startTime.toLocaleString()}</div>
+              <div>{startTime.toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
+            </div>
+            <div className="range-duration">{model.viewRangeSeconds} seconds</div>
+            <div className="range-date range-end">
+              <div>{endTime.toLocaleString()}</div>
+              <div>{endTime.toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
+            </div>
+          </div>
+        </>
       ) : <div className="waveform" />}
     </div>
   );
