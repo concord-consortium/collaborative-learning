@@ -16,7 +16,7 @@ import {
 type EnvelopeCacheEntry = EnvelopeTileData | "loading" | "missing";
 type RawCacheEntry = RawSegment[] | "loading" | "missing";
 
-const valueScalar = 2;
+const valueScalar = 1;
 
 export function envelopeCacheKey(stationData: StationData, level: number, tileIndex: number) {
   const { network, station, channel } = stationData;

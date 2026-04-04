@@ -1,12 +1,16 @@
 // shared/seismic/seismic-types.ts
 import { DateTime } from "luxon";
 
-/** Channel metadata from EarthScope FDSN Station service. */
-export interface ChannelMetadata {
+/** Basic station data */
+export interface StationData {
   network: string;
   station: string;
-  location: string;
   channel: string;
+}
+
+/** Channel metadata from EarthScope FDSN Station service. */
+export interface ChannelMetadata extends StationData {
+  location: string;
   startTime: string;
   endTime: string;
   /** Overall sensitivity in counts per physical unit. */
@@ -46,12 +50,6 @@ export interface RawSegment {
   startTime: number;   // Unix seconds
   sampleRate: number;
   samples: Float64Array;
-}
-
-export interface StationData {
-  network: string;
-  station: string;
-  channel: string;
 }
 
 /** Parameters for fetching a single envelope tile. */
