@@ -111,6 +111,7 @@ export class SeismicQueryService {
   ): { timestamps: NullableNumberArray, mins: NullableNumberArray, maxs: NullableNumberArray } | null {
     if (level < 0) return null;
 
+    const amplitudeRange = AMPLITUDE_RANGES[stationData.channel.charAt(1)] ?? 1;
     const spacing = LEVEL_SPACINGS[level];
     const tileIndices = getTileIndicesForViewport(start, end, level);
 
@@ -132,7 +133,6 @@ export class SeismicQueryService {
         if (entry.mins[i] === NO_DATA_SENTINEL) {
           this.addNull(t, timestamps, mins, maxs);
         } else {
-          const amplitudeRange = AMPLITUDE_RANGES[stationData.channel.charAt(1)] ?? 1;
           timestamps.push(t);
           mins.push(dequantize(entry.mins[i], amplitudeRange) * valueScalar);
           maxs.push(dequantize(entry.maxs[i], amplitudeRange) * valueScalar);
