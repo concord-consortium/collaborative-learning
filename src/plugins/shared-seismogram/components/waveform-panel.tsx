@@ -10,7 +10,7 @@ import "./waveform-panel.scss";
 
 const LOAD_VIEWPORT_DEBOUNCE_MS = 150;
 const DEFAULT_CHART_HEIGHT = 150;
-const AMPLITUDE_RANGE_SCALAR = 1.1;
+const AMPLITUDE_RANGE_SCALAR = 1.2;
 
 interface WaveformPanelProps {
   label: string;
