@@ -146,6 +146,9 @@ export interface QueryParams {
 
   // Show the log monitor sidebar
   logMonitor?: boolean;
+
+  // Show the accessibility debugger sidebar
+  debugA11y?: boolean;
 }
 
 // Make a union of all of the boolean params from the QueryParams
@@ -156,7 +159,7 @@ type BooleanParamNames = Exclude<
 undefined>;
 
 const booleanParams: BooleanParamNames[] =
-  [ "demo", "logMonitor", "mouseSensor", "noPersistentUI", "readOnly", "noStorage", "unwrapped" ];
+  [ "debugA11y", "demo", "logMonitor", "mouseSensor", "noPersistentUI", "readOnly", "noStorage", "unwrapped" ];
 
 const processBooleanValue = (value: string | (string | null)[] | null | undefined) => {
   if (value === undefined || value === "false") {
