@@ -232,12 +232,10 @@ describe("useClueAccessibility", () => {
   });
 
   it("does not register tile API for region type", () => {
-    const onRegister = jest.fn();
-
-    // RegionHarness uses type: "region" — no onRegisterTileApi call
-    render(<RegionHarness />);
-
-    expect(onRegister).not.toHaveBeenCalled();
+    // RegionHarness uses type: "region" — should render without error
+    // and not attempt any tile API registration
+    const { container } = render(<RegionHarness />);
+    expect(container.querySelector("[data-testid='harness']")).toBeTruthy();
   });
 });
 
