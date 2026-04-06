@@ -1,5 +1,5 @@
 import {
-  applyPatch, flow, getSnapshot, IJsonPatch, isAlive, resolvePath, resolveIdentifier, types
+  applyPatch, applySnapshot, flow, getSnapshot, IJsonPatch, isAlive, resolvePath, resolveIdentifier, types
 } from "mobx-state-tree";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentContentModelType } from "../document/document-content";
@@ -7,6 +7,39 @@ import { SharedModelMapSnapshotOutType } from "../document/shared-model-entry";
 import { SharedModelType } from "../shared/shared-model";
 import { ITileModel, TileModel } from "../tiles/tile-model";
 import { TreeManagerAPI } from "./tree-manager-api";
+
+// Match the tile ID in patch paths like `/content/tileMap/{tileId}/...`
+const kTileMapPathRegex = /^\/content\/tileMap\/([^/]+)/;
+// Match the shared model ID in patch paths like `/content/sharedModelMap/{smId}/...`
+const kSharedModelMapPathRegex = /^\/content\/sharedModelMap\/([^/]+)/;
+
+/**
+ * Extract the tile ID that a set of history patches is targeting, so the UI can
+ * scroll that tile into view. Prefers a direct tileMap patch; falls back to the
+ * first tile linked to an affected sharedModel. Returns undefined when no tile
+ * can be identified (e.g. patches only affect document-level structure).
+ */
+function getAffectedTileId(patches: readonly IJsonPatch[], content: DocumentContentModelType): string | undefined {
+  let sharedModelTileId: string | undefined;
+  for (const patch of patches) {
+    const tileMatch = patch.path.match(kTileMapPathRegex);
+    if (tileMatch) {
+      // Direct tile patches take precedence.
+      return tileMatch[1];
+    }
+    if (!sharedModelTileId) {
+      const smMatch = patch.path.match(kSharedModelMapPathRegex);
+      if (smMatch) {
+        const entry = content.sharedModelMap.get(smMatch[1]);
+        const firstTile = entry?.tiles?.[0];
+        if (firstTile?.id) {
+          sharedModelTileId = firstTile.id;
+        }
+      }
+    }
+  }
+  return sharedModelTileId;
+}
 
 export const Tree = types.model("Tree", {
 })
@@ -139,9 +172,46 @@ export const Tree = types.model("Tree", {
     },
 
     // Actually apply the patches.
-    // It might be called multiple times after startApplyingPatchesFromManager
+    // It might be called multiple times after startApplyingPatchesFromManager.
+    // Try batch application first for performance (avoids intermediate re-renders).
+    // On failure, restore from snapshot and retry per-patch so one bad patch does
+    // not prevent subsequent patches from being applied.
     applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
-      applyPatch(self, patchesToApply);
+      // Capture snapshot before batch attempt so we can rollback on partial failure.
+      // Batch applyPatch is not atomic — if patch N fails, patches 1..N-1 are already
+      // applied. Without rollback, the per-patch fallback would double-apply them.
+      const preBatchSnapshot = getSnapshot(self);
+      try {
+        applyPatch(self, patchesToApply as IJsonPatch[]);
+      } catch (e) {
+        if (DEBUG_HISTORY) {
+          // eslint-disable-next-line no-console
+          console.warn("Failed to apply history patches in batch, falling back to per-patch application", e);
+        }
+        // Restore to pre-batch state before retrying per-patch.
+        applySnapshot(self, preBatchSnapshot);
+        for (const patch of patchesToApply) {
+          try {
+            applyPatch(self, [patch]);
+          } catch (perPatchError) {
+            if (DEBUG_HISTORY) {
+              // eslint-disable-next-line no-console
+              console.warn("Failed to apply history patch", patch, perPatchError);
+            }
+          }
+        }
+      }
+
+      // Determine which tile (if any) was affected by these patches, so the UI can
+      // scroll that tile into view during history playback.
+      const content = (self as any).content as DocumentContentModelType | undefined;
+      if (content) {
+        const affectedTileId = getAffectedTileId(patchesToApply, content);
+        if (affectedTileId) {
+          content.setHistoryScrollTileId(affectedTileId);
+        }
+      }
+
       // We return a promise because the API is async
       // The action itself doesn't do anything asynchronous though
       // so it isn't necessary to use a flow

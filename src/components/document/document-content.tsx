@@ -62,6 +62,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private rowRefs: Array<TileRowHandle>;
   private mutationObserver: MutationObserver;
   private scrollDisposer: IReactionDisposer;
+  private historyScrollDisposer: IReactionDisposer;
 
   constructor(props: IProps) {
     super(props);
@@ -113,11 +114,43 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           }
         }
       );
+
+      // During history playback, scroll the tile being patched into view so the user
+      // can see the effect of moving the scrubber. Find the tile via DOM selector so
+      // this works for tiles nested inside containers (e.g. Question tiles), whose
+      // rows are not in rowRefs.
+      this.historyScrollDisposer = reaction(
+        () => {
+          const content = this.props.content;
+          return content
+            ? { tileId: content.historyScrollTileId, token: content.historyScrollToken }
+            : undefined;
+        },
+        (value) => {
+          const tileId = value?.tileId;
+          const container = this.domElement;
+          if (!tileId || !container) return;
+          const tileEl = container.querySelector<HTMLElement>(`[data-tool-id="${tileId}"]`);
+          if (!tileEl) return;
+          const containerRect = container.getBoundingClientRect();
+          const tileRect = tileEl.getBoundingClientRect();
+          const tileTop = tileRect.top - containerRect.top + container.scrollTop;
+          const tileBottom = tileTop + tileRect.height;
+          const visibleTop = container.scrollTop;
+          const visibleBottom = visibleTop + container.clientHeight;
+          // Only scroll if the tile isn't already fully in view. When we do scroll,
+          // pull the tile toward the top with a small margin for visual prominence.
+          if (tileTop < visibleTop || tileBottom > visibleBottom) {
+            container.scrollTo({ top: Math.max(0, tileTop - 16), behavior: "smooth" });
+          }
+        }
+      );
     }
   }
 
   public componentWillUnmount() {
     this.scrollDisposer?.();
+    this.historyScrollDisposer?.();
   }
 
   public componentDidUpdate(prevProps: IProps) {
