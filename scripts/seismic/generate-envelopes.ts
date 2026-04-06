@@ -198,7 +198,7 @@ async function wipeExistingTiles(
   station: string,
   channel: string
 ): Promise<void> {
-  const keyPrefix = `${getS3Root(prefix)}${getStationChannelPrefix(network, station, channel)}`;
+  const keyPrefix = `${getS3Root(prefix)}${getStationChannelPrefix({ network, station, channel })}`;
   console.log(`Wiping existing tiles under ${keyPrefix}...`);
 
   let continuationToken: string | undefined;
@@ -235,7 +235,7 @@ function makeFlushTile(
 ): FlushTileFn {
   let flushedCount = 0;
   return (level: number, tileIndex: number, tileData: EnvelopeTileData) => {
-    const tileKey = getTileS3Key(network, station, channel, level, tileIndex);
+    const tileKey = getTileS3Key({ network, station, channel }, level, tileIndex);
     const body = encodeEnvelopeTile(tileData.mins, tileData.maxs);
     const bodyBytes = new Uint8Array(body);
 
@@ -346,15 +346,14 @@ async function main() {
           physicalSamples[i] = trace.samples[i] / scale;
         }
 
-        const { mins, maxs } = computeEnvelopesFromRaw(
-          physicalSamples, trace.sampleRate, LEVEL_SPACINGS[finestLevel]
+        const { mins, maxs, times } = computeEnvelopesFromRaw(
+          physicalSamples, trace.sampleRate, LEVEL_SPACINGS[finestLevel], trace.startTime
         );
 
         for (let i = 0; i < mins.length; i++) {
-          const time = trace.startTime + i * LEVEL_SPACINGS[finestLevel];
           const qMin = quantize(mins[i], rangeMax);
           const qMax = quantize(maxs[i], rangeMax);
-          processL2Point(state, time, qMin, qMax);
+          processL2Point(state, times[i], qMin, qMax);
         }
       }
 
