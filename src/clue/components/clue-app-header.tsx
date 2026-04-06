@@ -177,7 +177,6 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
       <button
         type="button"
         className={buttonClass}
-        aria-label="Student Groups"
         aria-pressed={isGroupManagementModalOpen}
         onClick={handleOpenGroupManagementModal}
       >

@@ -46,7 +46,7 @@
 @mixin focus-ring($offset: -2px) {
   &:focus-visible,
   &.keyboard-focused {
-    outline: 2px solid vars.$workspace-teal-dark-1;
+    outline: 2px solid $workspace-teal-dark-1;
     outline-offset: $offset;
   }
 }
