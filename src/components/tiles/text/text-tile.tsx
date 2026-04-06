@@ -16,6 +16,7 @@ import { HighlightRegistryContext, HighlightRevisionContext, IHighlightBox }
 import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
+import { ClueTileAccessibilityBridge } from "../../../hooks/use-clue-accessibility";
 import { ITileProps } from "../tile-component";
 import { createTextPluginInstances, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { LogEventName } from "../../../lib/logger-types";
@@ -175,62 +176,8 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       }
     ));
 
-    this.props.onRegisterTileApi({
-      exportContentAsTileJson: () => {
-        return this.getContent().exportJson();
-      },
-      handleDocumentScroll: (x: number, y: number) => {
-        this.toolbarTileApi?.handleDocumentScroll?.(x, y);
-      },
-      handleTileResize: (entry: TileResizeEntry) => {
-        const { x, y, width, height, top, left, bottom, right } = entry.contentRect;
-        this.tileContentRect = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
-        this.toolbarTileApi?.handleTileResize?.(entry);
-      },
-      getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        if (objectType === kHighlightFormat) {
-          const box = this.getContent().highlightBoxesCache.get(objectId);
-          if (box) return box;
-        }
-      },
-      getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
-        // offset the annotation arrows to the right top corner of the bounding box until connected to a target,
-        // and then offset should be the center of the edge closes to the target
-        const offsets = OffsetModel.create({});
-        if (objectType === kHighlightFormat) {
-          const box = this.getContent().highlightBoxesCache.get(objectId);
-          if (box) {
-            const { width, height } = box;
-            offsets.setDx(width / 2);
-            offsets.setDy(- height / 2);
-          }
-        }
-        return offsets;
-      },
-      // Return focusable elements for focus trap navigation
-      getFocusableElements: () => {
-        const contentElement: HTMLElement | null | undefined = this.textTileDiv?.querySelector("[data-slate-editor]");
-        // Use Slate's ReactEditor.focus to properly activate the editor (sets selection/cursor).
-        // Native .focus() on the contenteditable div doesn't initialize Slate's internal state.
-        const focusContent = () => {
-          if (this.editor) {
-            ReactEditor.focus(this.editor);
-            // ReactEditor.focus doesn't create a selection if the editor never had one.
-            // Without a selection, keyboard input has no insertion point and is silently ignored.
-            if (!this.editor.selection) {
-              const end = Editor.end(this.editor, []);
-              this.editor.selection = { anchor: end, focus: end };
-            }
-            return document.activeElement === contentElement;
-          }
-          return false;
-        };
-        return {
-          contentElement: contentElement || undefined,
-          focusContent
-        };
-      }
-    });
+    // Tile API registration (including getFocusableElements) is now handled
+    // by the ClueTileAccessibilityBridge rendered in render().
   }
 
   public componentWillUnmount() {
@@ -239,6 +186,60 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       plugin?.dispose?.();
     }
   }
+
+  // --- Accessibility bridge helpers ---
+
+  private getSlateContentElement = (): HTMLElement | undefined => {
+    const el = this.textTileDiv?.querySelector("[data-slate-editor]");
+    return el instanceof HTMLElement ? el : undefined;
+  };
+
+  private focusSlateContent = (): boolean => {
+    if (this.editor) {
+      const contentElement = this.getSlateContentElement();
+      ReactEditor.focus(this.editor);
+      // ReactEditor.focus doesn't create a selection if the editor never had one.
+      // Without a selection, keyboard input has no insertion point and is silently ignored.
+      if (!this.editor.selection) {
+        const end = Editor.end(this.editor, []);
+        this.editor.selection = { anchor: end, focus: end };
+      }
+      return document.activeElement === contentElement;
+    }
+    return false;
+  };
+
+  private additionalTileApi: Partial<ITileApi> = {
+    exportContentAsTileJson: () => {
+      return this.getContent().exportJson();
+    },
+    handleDocumentScroll: (x: number, y: number) => {
+      this.toolbarTileApi?.handleDocumentScroll?.(x, y);
+    },
+    handleTileResize: (entry: TileResizeEntry) => {
+      const { x, y, width, height, top, left, bottom, right } = entry.contentRect;
+      this.tileContentRect = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
+      this.toolbarTileApi?.handleTileResize?.(entry);
+    },
+    getObjectBoundingBox: (objectId: string, objectType?: string) => {
+      if (objectType === kHighlightFormat) {
+        const box = this.getContent().highlightBoxesCache.get(objectId);
+        if (box) return box;
+      }
+    },
+    getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
+      const offsets = OffsetModel.create({});
+      if (objectType === kHighlightFormat) {
+        const box = this.getContent().highlightBoxesCache.get(objectId);
+        if (box) {
+          const { width, height } = box;
+          offsets.setDx(width / 2);
+          offsets.setDy(-height / 2);
+        }
+      }
+      return offsets;
+    },
+  };
 
   public render() {
     const { appConfig: { placeholderText } } = this.stores;
@@ -274,6 +275,14 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                   ref={elt => this.textTileDiv = elt}
                   onMouseDown={this.handleMouseDownInWrapper}
                 >
+                  <ClueTileAccessibilityBridge
+                    onRegisterTileApi={this.props.onRegisterTileApi}
+                    onUnregisterTileApi={this.props.onUnregisterTileApi}
+                    tileType="text"
+                    getContentElement={this.getSlateContentElement}
+                    focusContent={this.focusSlateContent}
+                    additionalApi={this.additionalTileApi}
+                  />
                   <Slate
                     editor={this.editor as ReactEditor}
                     initialValue={this.state.initialValue}
