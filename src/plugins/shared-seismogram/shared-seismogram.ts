@@ -1,26 +1,19 @@
 import { flow, getType, Instance, types } from "mobx-state-tree";
+import { DateTime } from "luxon";
 import { miniseed, seismogram as seismogramNS } from "seisplotjs";
 type Seismogram = seismogramNS.Seismogram;
 import { SharedModel, SharedModelType } from "../../models/shared/shared-model";
+import { fetchRawSeismicData } from "../../../shared/seismic/earthscope-client";
+import { StationSnapshot } from "./station-model";
 
 export const kSharedSeismogramType = "SharedSeismogram";
-
-// TODO: Remove hardcoded data. Fetch data based on station, start time, and end time props.
-const S3_BASE = "https://models-resources.s3.amazonaws.com/collaborative-learning/datasets";
-const MSEED_URLS = [
-  `${S3_BASE}/2026_01_30_00_00_00-2026_01_31_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_01_31_00_00_00-2026_02_01_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_01_00_00_00-2026_02_02_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_02_00_00_00-2026_02_03_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_03_00_00_00-2026_02_04_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_04_00_00_00-2026_02_05_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_05_00_00_00-2026_02_06_00_00_00_anchorage_airport.mseed`,
-];
 
 export const SharedSeismogram = SharedModel
   .named("SharedSeismogram")
   .props({
     type: types.optional(types.literal(kSharedSeismogramType), kSharedSeismogramType),
+    startTimeISO: types.maybe(types.string),
+    endTimeISO: types.maybe(types.string),
   })
   .volatile(() => ({
     seismogram: undefined as Seismogram | undefined,
@@ -32,25 +25,61 @@ export const SharedSeismogram = SharedModel
       return self.seismogram !== undefined;
     },
     get startTime() {
-      return self.seismogram?.startTime;
+      return self.startTimeISO ? DateTime.fromISO(self.startTimeISO, { zone: "utc" }) : undefined;
     },
     get endTime() {
-      return self.seismogram?.endTime;
+      return self.endTimeISO ? DateTime.fromISO(self.endTimeISO, { zone: "utc" }) : undefined;
     }
   }))
   .actions(self => ({
     setSeismogram(s: Seismogram | undefined) {
       self.seismogram = s;
+      self.startTimeISO = s?.startTime?.toISO() ?? undefined;
+      self.endTimeISO = s?.endTime?.toISO() ?? undefined;
     },
-    loadData: flow(function* () {
+  }))
+  .actions(self => ({
+    loadData: flow(function* (station: StationSnapshot, startDate: string, endDate: string) {
       self.isLoading = true;
       self.loadError = null;
+      self.seismogram = undefined;
       try {
-        const buffers: ArrayBuffer[] = yield Promise.all(
-          MSEED_URLS.map((url: string) => fetch(url).then((res: Response) => res.arrayBuffer()))
-        );
-        const allRecords = buffers.flatMap((buf: ArrayBuffer) => miniseed.parseDataRecords(buf));
-        self.seismogram = miniseed.merge(allRecords);
+        const start = new Date(`${startDate}T00:00:00Z`);
+        const end = new Date(`${endDate}T00:00:00Z`);
+        const msPerDay = 86400000;
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end.getTime() <= start.getTime()) {
+          self.loadError = "Invalid date range. End date must be after start date.";
+          return;
+        }
+
+        const totalDays = Math.ceil((end.getTime() - start.getTime()) / msPerDay);
+
+        const allRecords: any[] = [];
+        for (let day = 0; day < totalDays; day++) {
+          const chunkStart = new Date(start.getTime() + day * msPerDay);
+          const chunkEnd = new Date(chunkStart.getTime() + msPerDay);
+          try {
+            const response: Response = yield fetchRawSeismicData(
+              station.network, station.station, station.location ?? "", station.channel,
+              chunkStart.toISOString(), chunkEnd.toISOString()
+            );
+            const buffer: ArrayBuffer = yield response.arrayBuffer();
+            const records = miniseed.parseDataRecords(buffer);
+            allRecords.push(...records);
+          } catch (err: unknown) {
+            // Skip "no data" errors (thrown by fetchRawSeismicData when no mock file matches).
+            // Rethrow unexpected errors (network failures, CORS, auth) so they surface to the user.
+            if (err instanceof Error && err.message.includes("No mock data")) continue;
+            throw err;
+          }
+        }
+
+        if (allRecords.length === 0) {
+          self.loadError = "No seismic data found for the selected date range.";
+          return;
+        }
+        self.setSeismogram(miniseed.merge(allRecords));
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         self.loadError = `Error loading seismic data: ${message}`;

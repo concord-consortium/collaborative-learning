@@ -14,6 +14,7 @@ Fetched when the user selects a model from the dropdown. Contains everything nee
 
 ```json
 {
+  "$schema": "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
   "id": "compact-v1",
   "architecture": "compact",
   "class_names": ["Noise", "Earthquake"],
@@ -25,6 +26,7 @@ Fetched when the user selects a model from the dropdown. Contains everything nee
 ```
 
 Field descriptions:
+- **$schema**: Schema URL that doubles as a format version identifier. The version segment (e.g., `v1`) is used in S3 paths so that metadata format changes don't break older CLUE releases (see [Deployment](#deployment)). The URL can optionally serve an actual JSON Schema for validation. CLUE checks the version segment and ignores models whose schema version it doesn't understand.
 - **id**: Stable identifier used in the event database path (`services/seismic/stations/{station}/channels/{channel}/models/{model}/...`). Bumped when the model is retrained (e.g., `compact-v2`), so old events remain valid.
 - **architecture**: Maps to a build function in CLUE (see [Architecture Registry](#architecture-registry)).
 - **class_names**: Human-readable names for each class, in output order. The model outputs one probability per class index, and this array provides the index-to-name mapping (e.g., index 0 → `"Noise"`, index 1 → `"Earthquake"`). The entry `"Noise"` is special: it represents the absence of a detected event and is excluded when creating `SeismicEvent` records (see [Confidence threshold](#confidence-threshold)). The number of output classes is `class_names.length`.
@@ -58,11 +60,13 @@ A default list of models is defined in the app configuration. Each entry provide
 ```json
 {
   "models": [
-    { "label": "Compact Model", "metadataUrl": "https://models.concord.org/seismic/compact-v1/metadata.json" },
-    { "label": "Standard Model", "metadataUrl": "https://models.concord.org/seismic/standard-v1/metadata.json" }
+    { "label": "Compact Model", "metadataUrl": "https://models-resources.concord.org/tiny-cnn-seismicML/models/v1/compact-v1/metadata.json" },
+    { "label": "Standard Model", "metadataUrl": "https://models-resources.concord.org/tiny-cnn-seismicML/models/v1/standard-v1/metadata.json" }
   ]
 }
 ```
+
+The `v1` segment in the URL corresponds to the schema version in the metadata file. When the metadata format changes (e.g., a new required field), the schema version bumps to `v2`, and new models are deployed under `/seismic/v2/`. Older CLUE releases continue to read from `/seismic/v1/` and are unaffected.
 
 ### Unit JSON override
 
@@ -71,14 +75,14 @@ A curriculum unit can override the default model list to show only the models ap
 ```json
 {
   "models": [
-    { "label": "Earthquake Detector", "metadataUrl": "https://models.concord.org/seismic/compact-v1/metadata.json" }
+    { "label": "Earthquake Detector", "metadataUrl": "https://models-resources.concord.org/tiny-cnn-seismicML/models/v1/compact-v1/metadata.json" }
   ]
 }
 ```
 
 ### Architecture registry
 
-Model architectures (the TF.js layer definitions) must live in code because each architecture is a distinct programmatic construction. CLUE maintains a simple lookup from architecture strings to build functions:
+Model architectures (the TF.js layer definitions) must live in code because each architecture is a distinct programmatic construction. The architecture registry lives in `shared/seismic/seismic-architectures.ts` alongside the runner, so it's available in both browser and Node environments:
 
 ```typescript
 const ARCHITECTURES: Record<string, (metadata: ModelMetadata) => tf.LayersModel> = {
@@ -91,9 +95,20 @@ The `buildCompactModel` and `buildStandardModel` functions are adapted from the 
 
 ## Runner Architecture
 
+### Location
+
+`shared/seismic/seismic-model-runner.ts` — alongside the raw data fetcher and other shared seismic utilities.
+
+The runner lives in `shared/seismic/` rather than in the Wave Runner plugin because it needs to run in both environments:
+
+- **Browser**: The Wave Runner tile's orchestration loop calls the runner, maps detected events into a SharedDataSet for the UI.
+- **Node.js scripts**: A server-side script calls the same runner, maps detected events into Firestore writes to prepopulate the event database.
+
+The runner itself has no knowledge of SharedDataSet, Firestore, or any output destination. It accepts a Seismogram and produces SeismicEvent objects via callbacks and return value. The caller decides what to do with the events.
+
 ### Design choice: mini-batch loop with `tf.nextFrame()` yields
 
-The runner processes windows in mini-batches (~50 windows at a time) in the main thread. `await tf.nextFrame()` between batches keeps the UI responsive. This approach was chosen over:
+The runner processes windows in mini-batches (~50 windows at a time). In the browser, `await tf.nextFrame()` between batches keeps the UI responsive. In Node.js, `tf.nextFrame()` resolves immediately (via `setImmediate`), so batching still works but without the browser-specific frame scheduling. This approach was chosen over:
 
 - **Sequential single-window processing**: 3–4× slower than batched on GPU (confirmed by benchmarks in the tiny-cnn-seismicML repo).
 - **Web Worker**: WebGPU in workers has inconsistent browser support. For the primary target (Chromebooks with WebGPU), inference is already sub-second — the UI thread is barely blocked. Adds significant complexity for minimal benefit.
@@ -139,7 +154,9 @@ The runner accepts a seisplotjs `Seismogram` directly. This avoids requiring the
 ### Input preprocessing
 
 For each chunk, the runner:
-1. **Resamples** from the source sample rate to the model's expected rate if they differ (e.g., 200 Hz → 100 Hz via 2× decimation).
+1. **Resamples** from the source sample rate to the model's expected rate if they differ. Two strategies depending on the ratio:
+   - **Integer decimation** for exact integer ratios (e.g., 200 Hz → 100 Hz): keeps every Nth sample. Fast O(n) path for the common HHZ downsampling case.
+   - **Linear interpolation** for other ratios (e.g., 50 Hz → 100 Hz for BHZ channels): interpolates between adjacent samples to produce the target number of samples. The training pipeline uses FFT-based resampling (`scipy.signal.resample`), but for bandlimited seismic data the difference is negligible — the per-window normalization (step 3) dominates any interpolation artifacts.
 2. **Windows** the data into non-overlapping segments of `windowDuration × samplingRate` samples. Windows that straddle a gap between seismogram segments are skipped — a gap means we don't know what happened, and classifying partial data would be misleading.
 3. **Preprocesses** each window: detrend (subtract mean) and scale to unit variance.
 4. **Batches** ~50 windows into a single tensor for batched inference.
@@ -152,13 +169,22 @@ What does matter is the **instrument type**: the models were trained on velocity
 
 **Preprocessing mismatch note**: The training pipeline applies a bandpass filter (1–45 Hz) that the current browser inference code omits. This is an ML-side concern to resolve in the tiny-cnn-seismicML repo, not a CLUE integration issue.
 
+### Resampling validation
+
+The linear interpolation used for upsampling (e.g., 50 Hz BHZ → 100 Hz) differs from the FFT-based `scipy.signal.resample` used in training. This needs validation to confirm it doesn't affect classification accuracy. The quickest test is within the Python pipeline: resample the same BHZ waveform with both `scipy.signal.resample` and `numpy.interp` (linear), run both through the PyTorch model (`trained_models/best_model.pth`), and compare the output probabilities. If the results diverge significantly, the CLUE runner would need FFT-based resampling. A cross-framework test (Python pipeline vs CLUE runner on the same waveform) would additionally catch any PyTorch-vs-TF.js floating-point differences, but isolating one variable at a time is more informative.
+
 ### Confidence threshold
 
 The model outputs a probability for each class. The runner iterates over the output indices, skipping any class whose name is `"Noise"` (matched by string). For each remaining class that exceeds a confidence threshold (initially 0.5), the runner produces a `SeismicEvent` with `eventType` set to the class name. For a 2-class model (Noise/Earthquake), each window yields at most one event. For a multi-class model (Noise/Traffic/Earthquake), a single window could produce both a Traffic event and an Earthquake event if both exceed the threshold. The threshold could later become a user-facing control if students need to explore how it affects detection counts.
 
 ## Orchestration
 
-The Wave Runner tile orchestrates the overall flow: downloading data, feeding chunks to the runner, and updating shared models.
+The orchestration loop lives in the caller, not the runner. The runner is a stateless processing engine — it takes a Seismogram and produces events. The caller is responsible for downloading data, feeding chunks, and deciding what to do with events:
+
+- **Wave Runner tile (browser)**: Downloads data via `fetchRawSeismicData`, feeds chunks to the runner, maps events into a SharedDataSet.
+- **Server-side script (Node.js)**: Downloads data the same way, feeds chunks to the same runner, writes events to Firestore.
+
+The rest of this section describes the Wave Runner tile's orchestration as the primary use case.
 
 ### Chunk size
 
@@ -192,13 +218,19 @@ Two levels of progress:
 
 Estimated time: the orchestration layer times the first chunk (download + processing) and extrapolates. The estimate improves as more chunks complete.
 
-## SharedDataSet Update Flow
+## Event Storage and SharedDataSet Flow
 
-### Working Dataset
+### Volatile event storage
 
-The Wave Runner tile maintains a single **working dataset** (SharedDataSet). This receives events as the model runs or as precomputed events are loaded from Firestore. The Wave Runner's own UI (event counts in "Status and Output") reads from this dataset, which is updated incrementally.
+Detected events are stored as volatile state on the Wave Runner content model (`detectedEvents: SeismicEvent[]`). This array is populated incrementally as the runner processes chunks, and is cleared when a new model run starts. The Wave Runner UI (event counts in "Status and Output") reads directly from this volatile state.
 
-When the user clicks "Timeline It!", the Wave Runner copies the working dataset into a new SharedDataSet and creates a new Timeline tile that observes the copy. Each click produces a new Timeline tile with a snapshot of the current events. The working dataset continues to be updated independently — subsequent model runs or data loads don't affect previously created Timeline tiles.
+No SharedDataSet is created during model execution — events live only in volatile memory until the user explicitly clicks "Timeline It!".
+
+### SharedDataSet creation on "Timeline It!"
+
+When the user clicks "Timeline It!", the Wave Runner creates a SharedDataSet from the current `detectedEvents`, creates a new Timeline tile, and links the SharedDataSet to it. The Wave Runner keeps a reference to the SharedDataSet it created so that pressing "Timeline It!" again (without re-running the model) reuses the same SharedDataSet rather than creating a duplicate.
+
+When the user clicks "Run Model" again, the cached SharedDataSet reference is cleared. The next "Timeline It!" click will create a fresh SharedDataSet from the new results.
 
 ### SharedDataSet schema
 
@@ -210,47 +242,74 @@ Each row in the dataset is a detected event:
 | `windowEnd` | number | Epoch ms |
 | `eventType` | string | "Earthquake", "Traffic", etc. |
 | `confidence` | number | 0–1 |
-| `source` | string | `"local"` or `"remote"` |
-
-The `source` column tracks whether an event has been uploaded to Firestore. Events detected in this session start as `"local"` and are flipped to `"remote"` after upload. Events loaded from Firestore are `"remote"` from the start. This tells the upload logic which rows still need to be written — once all rows are `"remote"`, there's nothing left to upload. The distinction is transient and not intended for UI purposes.
-
-**Note:** The flows below are illustrative — the exact UI sequence (which buttons trigger what, whether "Load Data" and "Run Model" are separate steps or combined) will be refined as the overall Wave Runner UI design settles. The underlying architecture (working dataset, snapshot-on-timeline, source column, coverage-aware runner) supports whatever flow we land on.
-
-### Flow: "Load Data"
-
-```
-User clicks "Load Data"
-  → fetch metadata.json (if not already loaded) → get model id
-  → query Firestore for events (station + channel + model id + time range)
-  → populate working dataset with rows (source="remote")
-  → Wave Runner shows "Y events loaded from database."
-User clicks "Timeline It!"
-  → copy working dataset into a new SharedDataSet
-  → create a new Timeline tile observing the copy
-```
 
 ### Flow: "Run Model"
 
 ```
 User clicks "Run Model"
-  → validate selected channel against model's instrument_types
-  → fetch metadata.json (if not already loaded)
-  → fetch weights.json → build TF.js model
-  → check coverage bitmaps (station + channel + model) → determine uncovered time ranges
+  → clear detectedEvents and cached SharedDataSet reference
   → for each chunk:
       download data → runner.processChunk()
-      → onEvents callback adds rows (source="local") to working dataset
+      → onEvents callback appends to volatile detectedEvents
       → Wave Runner UI updates event count
   → run completes
   → Wave Runner shows "Run complete. X events found."
 User clicks "Timeline It!"
-  → copy working dataset into a new SharedDataSet
-  → create a new Timeline tile observing the copy
+  → create SharedDataSet from detectedEvents (or reuse cached reference)
+  → create a new Timeline tile observing the SharedDataSet
+User clicks "Timeline It!" again (without re-running)
+  → reuse the same SharedDataSet
+  → create another Timeline tile observing it
+User clicks "Run Model" again
+  → cached SharedDataSet reference is cleared
+  → new run produces new detectedEvents
 ```
 
-### Combining loaded and detected events
+### Future: Combining loaded and precomputed events
 
-If a user loads precomputed events ("Load Data") and then runs the model for uncovered gaps ("Run Model"), both sets end up in the working dataset. The coverage bitmaps (see [event-database-design.md](event-database-design.md)) prevent duplication — the runner only processes uncovered time ranges for the selected station + channel + model. The `source` column distinguishes the two populations.
+When Firestore event loading is implemented ("Load Data"), loaded events will also be stored in `detectedEvents`. The coverage bitmaps (see [event-database-design.md](event-database-design.md)) will prevent duplication — the runner only processes uncovered time ranges. The `source` column (tracking local vs remote events for upload purposes) will be added to the schema at that point.
+
+## Deployment
+
+Model files (metadata.json + weights.json) are maintained in the [tiny-cnn-seismicML](https://github.com/concord-consortium/tiny-cnn-seismicML) repo alongside the training code and export scripts. They are deployed to S3/CDN independently of CLUE releases via a deploy script in that repo.
+
+### S3 path structure
+
+```
+models-resources.concord.org/tiny-cnn-seismicML/models/{schema-version}/{model-id}/
+  metadata.json
+  weights.json
+```
+
+For example: `models-resources.concord.org/tiny-cnn-seismicML/models/v1/compact-v1/metadata.json`
+
+The schema version (`v1`) comes from the `$schema` URL in the metadata file. This two-level versioning keeps format changes (schema version) separate from model retraining (model id). A new model retrained with the same metadata format deploys as `/v1/compact-v2/`. A metadata format change bumps to `/v2/`, and older CLUE releases that only understand `v1` are unaffected.
+
+### Deploy workflow
+
+1. Train and export weights in tiny-cnn-seismicML (produces metadata.json + weights.json)
+2. Tag the commit (e.g., `compact-v1`)
+3. Run the deploy script to upload to the versioned S3 path
+4. CLUE's app config or unit JSON references the S3 URL
+
+Deploying a model is an explicit action — pushing to main in either repo does not automatically update production models.
+
+### Format contract
+
+The `ModelMetadata` interface in CLUE (`shared/seismic/seismic-model-types.ts`) defines the metadata format. The export scripts in tiny-cnn-seismicML produce files matching this interface. Both sides should reference the `$schema` version and each other when making changes.
+
+### Schema management
+
+The JSON Schema for each metadata format version is checked into CLUE at `src/public/schemas/seismic-model/v1.json`. This file is the source of truth for what a valid `v1` metadata.json looks like.
+
+**Keeping the schema in sync with the TypeScript type:**
+
+- A build-time test generates a JSON Schema from the `ModelMetadata` interface (using a tool like `ts-json-schema-generator`) and asserts it matches the checked-in schema file. If someone changes the interface without updating the schema, the test fails.
+- An npm script (e.g., `npm run update:seismic-schema`) regenerates the schema file from the current type. Run this when intentionally changing the metadata format.
+
+**Deployment:**
+
+Each CLUE release includes the schema file in its versioned asset path (e.g., `collaborative-learning.concord.org/version/v1.2.3/schemas/seismic-model/v1.json`). The canonical URL referenced by `$schema` (`collaborative-learning.concord.org/schemas/seismic-model/v1.json`) is published separately using `scripts/seismic/deploy-model-schema.sh <version>`. This script validates the checked-in schema matches the TypeScript interface (by running the test), checks that the version doesn't already exist in S3 (schema versions are immutable once published), and uploads with the correct content type. Since a schema version only changes when the metadata format changes (rare, and always accompanied by CLUE code changes), this step is infrequent and intentional.
 
 ## Out of Scope
 
