@@ -71,6 +71,8 @@ export class SeismicQueryService {
     const instrumentCode = stationData.channel.charAt(1);
     const amplitudeRange = AMPLITUDE_RANGES[instrumentCode] ?? 1;
 
+    console.log(`--- requesting level`, level);
+
     if (level === "raw") {
       return this.queryRaw(params, amplitudeRange);
     }
@@ -273,19 +275,17 @@ export class SeismicQueryService {
       }
     }
 
-    // TODO Remove this debugging code
-    // Find timestamp of peak max value
-    let peakMaxVal = -Infinity;
-    let peakMaxTime = 0;
-    for (let i = 0; i < maxs.length; i++) {
-      if (maxs[i] !== null && maxs[i]! > peakMaxVal) {
-        peakMaxVal = maxs[i]!;
-        peakMaxTime = timestamps[i] as number;
-      }
+    // Compute actual data range for y-axis auto-scaling
+    let dataMax = 0;
+    for (let i = 0; i < mins.length; i++) {
+      const min = mins[i];
+      if (min !== null) dataMax = Math.max(dataMax, Math.abs(min));
+      const max = maxs[i];
+      if (max !== null) dataMax = Math.max(dataMax, Math.abs(max));
     }
-    console.log(`  ENVELOPE peak max: value=${peakMaxVal}, time=${peakMaxTime}`);
+    const autoRange = dataMax > 0 ? dataMax : amplitudeRange;
 
-    return { level, data: [timestamps, mins, maxs], amplitudeRange, isLoading };
+    return { level, data: [timestamps, mins, maxs], amplitudeRange: autoRange, isLoading };
   }
 
   // --- Private helpers (raw) ---
@@ -340,19 +340,14 @@ export class SeismicQueryService {
       }
     }
 
-    // TODO Remove this debugging code
-    // Find timestamp of peak max value
-    let peakMaxVal = -Infinity;
-    let peakMaxTime = 0;
+    // Compute actual data range for y-axis auto-scaling
+    let dataMax = 0;
     for (let i = 0; i < values.length; i++) {
-      if (values[i] !== null && values[i]! > peakMaxVal) {
-        peakMaxVal = values[i]!;
-        peakMaxTime = timestamps[i] as number;
-      }
+      if (values[i] !== null) dataMax = Math.max(dataMax, Math.abs(values[i]!));
     }
-    console.log(`  RAW peak max: value=${peakMaxVal}, time=${peakMaxTime}`);
+    const autoRange = dataMax > 0 ? dataMax : amplitudeRange;
 
-    return { level: "raw", data: [timestamps, values], amplitudeRange, isLoading };
+    return { level: "raw", data: [timestamps, values], amplitudeRange: autoRange, isLoading };
   }
 
   private async getMetadata(network: string, station: string): Promise<ChannelMetadata[]> {

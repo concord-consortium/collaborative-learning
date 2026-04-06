@@ -10,6 +10,7 @@ import "./waveform-panel.scss";
 
 const LOAD_VIEWPORT_DEBOUNCE_MS = 150;
 const DEFAULT_CHART_HEIGHT = 150;
+const AMPLITUDE_RANGE_SCALAR = 1.1;
 
 interface WaveformPanelProps {
   label: string;
@@ -75,6 +76,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     }
 
     const isEnvelope = queryResult.level !== "raw";
+    const amplitudeRange = queryResult.amplitudeRange * AMPLITUDE_RANGE_SCALAR;
     const opts: uPlot.Options = {
       width: pixelWidth,
       height: containerRef.current.clientHeight || DEFAULT_CHART_HEIGHT,
@@ -83,7 +85,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
       scales: {
         x: { time: true },
         y: {
-          range: [-queryResult.amplitudeRange, queryResult.amplitudeRange],
+          range: [-amplitudeRange, amplitudeRange],
         },
       },
       axes: [
@@ -101,7 +103,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
             { label: "Value", stroke: "white", width: 1 },
           ],
       bands: isEnvelope
-        ? [{ series: [2, 1], fill: "rgba(255, 255, 255, 0.3)" }]
+        ? [{ series: [2, 1], fill: "rgba(255, 255, 255, 0.6)" }]
         : undefined,
     };
 
