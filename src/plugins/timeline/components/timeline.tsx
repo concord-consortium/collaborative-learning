@@ -51,13 +51,13 @@ export const Timeline = observer(function Timeline() {
           />
           <div className="timeline-range-row">
             <div className="range-date range-start">
-              <div>{startTime.toLocaleString()}</div>
-              <div>{startTime.toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
+              <div>{startTime.toUTC().toLocaleString()}</div>
+              <div>{startTime.toUTC().toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
             </div>
             <div className="range-duration">{model.viewRangeSeconds} seconds</div>
             <div className="range-date range-end">
-              <div>{endTime.toLocaleString()}</div>
-              <div>{endTime.toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
+              <div>{endTime.toUTC().toLocaleString()}</div>
+              <div>{endTime.toUTC().toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
             </div>
           </div>
         </>
