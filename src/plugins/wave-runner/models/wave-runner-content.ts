@@ -75,15 +75,7 @@ export const WaveRunnerContentModel = TileContentModel
     get sharedSeismogram(): SharedSeismogramType | undefined {
       const smm = getSharedModelManager(self);
       if (!smm?.isReady) return;
-      let sharedSeismogram =
-        smm.getTileSharedModelsByType(self, SharedSeismogram)[0] as SharedSeismogramType | undefined;
-
-      if (!sharedSeismogram) {
-        sharedSeismogram = SharedSeismogram.create();
-        smm.addTileSharedModel(self, sharedSeismogram, true);
-      }
-
-      return sharedSeismogram;
+      return smm.getTileSharedModelsByType(self, SharedSeismogram)[0] as SharedSeismogramType | undefined;
     },
     get startDateISO() {
       return DateTime.fromISO(`${self.startDate}T00:00:00Z`, { zone: "utc" });
@@ -99,11 +91,20 @@ export const WaveRunnerContentModel = TileContentModel
   }))
   .actions(self => ({
     async loadData() {
-      if (!self.station || !self.sharedSeismogram) return;
+      if (!self.station) return;
+
+      let sharedSeismogram = self.sharedSeismogram;
+      if (!sharedSeismogram) {
+        const smm = getSharedModelManager(self);
+        if (!smm?.isReady) return;
+
+        sharedSeismogram = SharedSeismogram.create();
+        smm.addTileSharedModel(self, sharedSeismogram, true);
+      }
 
       const { network, station, location, channel } = self.station;
-      self.sharedSeismogram.setStation({ network, station, location, channel });
-      self.sharedSeismogram.setTimeRange(
+      sharedSeismogram.setStation({ network, station, location, channel });
+      sharedSeismogram.setTimeRange(
         `${self.startDate}T00:00:00Z`,
         `${self.endDate}T00:00:00Z`
       );

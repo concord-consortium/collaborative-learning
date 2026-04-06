@@ -71,8 +71,6 @@ export class SeismicQueryService {
     const instrumentCode = stationData.channel.charAt(1);
     const amplitudeRange = AMPLITUDE_RANGES[instrumentCode] ?? 1;
 
-    console.log(`--- requesting level`, level);
-
     if (level === "raw") {
       return this.queryRaw(params, amplitudeRange);
     }
@@ -411,6 +409,13 @@ export class SeismicQueryService {
       if (!neededKeys.has(key)) {
         controller.abort();
         callerInflight.delete(key);
+
+        if (this.envelopeCache.get(key) === "loading") {
+          this.envelopeCache.delete(key);
+        }
+        if (this.rawCache.get(key) === "loading") {
+          this.rawCache.delete(key);
+        }
       }
     }
   }
