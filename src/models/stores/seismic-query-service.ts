@@ -176,7 +176,7 @@ export class SeismicQueryService {
 
     if (toFetch.length === 0) return;
 
-    const sensitivity = raw ? await this.getSensitivity(stationData) : 1;
+    const metadata = raw ? await this.getMetadata(stationData.network, stationData.station) : [];
 
     // Fetch missing tiles
     for (const index of toFetch) {
@@ -200,7 +200,7 @@ export class SeismicQueryService {
         const chunkEndISO = DateTime.fromSeconds((index + 1) * RAW_CHUNK_DURATION, { zone: "utc" }).toISO();
         if (!chunkStartISO || !chunkEndISO) continue;
 
-        this.fetchAndParseRaw(stationData, location, chunkStartISO, chunkEndISO, sensitivity, controller.signal)
+        this.fetchAndParseRaw(stationData, location, chunkStartISO, chunkEndISO, metadata, controller.signal)
           .then(segments => {
             runInAction(() => {
               this.rawCache.set(key, segments.length > 0 ? segments : "missing");
@@ -273,6 +273,18 @@ export class SeismicQueryService {
       }
     }
 
+    // TODO Remove this debugging code
+    // Find timestamp of peak max value
+    let peakMaxVal = -Infinity;
+    let peakMaxTime = 0;
+    for (let i = 0; i < maxs.length; i++) {
+      if (maxs[i] !== null && maxs[i]! > peakMaxVal) {
+        peakMaxVal = maxs[i]!;
+        peakMaxTime = timestamps[i] as number;
+      }
+    }
+    console.log(`  ENVELOPE peak max: value=${peakMaxVal}, time=${peakMaxTime}`);
+
     return { level, data: [timestamps, mins, maxs], amplitudeRange, isLoading };
   }
 
@@ -328,23 +340,46 @@ export class SeismicQueryService {
       }
     }
 
+    // TODO Remove this debugging code
+    // Find timestamp of peak max value
+    let peakMaxVal = -Infinity;
+    let peakMaxTime = 0;
+    for (let i = 0; i < values.length; i++) {
+      if (values[i] !== null && values[i]! > peakMaxVal) {
+        peakMaxVal = values[i]!;
+        peakMaxTime = timestamps[i] as number;
+      }
+    }
+    console.log(`  RAW peak max: value=${peakMaxVal}, time=${peakMaxTime}`);
+
     return { level: "raw", data: [timestamps, values], amplitudeRange, isLoading };
   }
 
-  private async getSensitivity({ network, station, channel }: StationData): Promise<number> {
+  private async getMetadata(network: string, station: string): Promise<ChannelMetadata[]> {
     const metaKey = `${network}_${station}`;
     let metadata = this.metadataCache.get(metaKey);
     if (!metadata) {
       metadata = await fetchStationMetadata(network, station);
       runInAction(() => { this.metadataCache.set(metaKey, metadata!); });
     }
-    const channelMeta = metadata.find(m => m.channel === channel);
-    return channelMeta?.scale ?? 1;
+    return metadata;
+  }
+
+  private findSensitivity(metadata: ChannelMetadata[], channel: string, timeSec: number): number {
+    const matching = metadata.filter(m => m.channel === channel);
+    if (matching.length === 0) return 1;
+    for (const m of matching) {
+      const start = new Date(m.startTime).getTime() / 1000;
+      const end = m.endTime === "" ? Infinity : new Date(m.endTime).getTime() / 1000;
+      if (timeSec >= start && timeSec < end) return m.scale;
+    }
+    // No time match — use the latest entry
+    return matching[matching.length - 1].scale;
   }
 
   private async fetchAndParseRaw(
     { network, station, channel }: StationData, location: string, startISO: string, endISO: string,
-    sensitivity: number, signal: AbortSignal
+    metadata: ChannelMetadata[], signal: AbortSignal
   ): Promise<RawSegment[]> {
     const response = await fetchRawSeismicData(
       network, station, location, channel, startISO, endISO, { signal }
@@ -358,6 +393,7 @@ export class SeismicQueryService {
     if (seismogram && seismogram.segments) {
       for (const seg of seismogram.segments) {
         const segStartTime = seg.startTime.toSeconds();
+        const sensitivity = this.findSensitivity(metadata, channel, segStartTime);
         const sampleRate = seg.sampleRate;
         const y = seg.y;
         const samples = new Float64Array(y.length);
