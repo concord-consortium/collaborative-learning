@@ -234,7 +234,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         if (box) {
           const { width, height } = box;
           offsets.setDx(width / 2);
-          offsets.setDy(- height / 2);
+          offsets.setDy(-height / 2);
         }
       }
       return offsets;
