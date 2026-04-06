@@ -82,7 +82,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             className="dropdown"
             value={currentStationId ?? ""}
             onChange={handleStationChange}
-            disabled={!hasStations}
+            disabled={!hasStations || content.isRunning}
           >
             {!hasStations && <option value="">No stations configured</option>}
             {dropdownOptions.map(opt => (
@@ -96,6 +96,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             className="dropdown"
             value={content.selectedModelUrl ?? ""}
             onChange={handleModelChange}
+            disabled={content.isRunning}
           >
             <option value="">Choose a model</option>
             {DEFAULT_MODELS.map(model => (
@@ -115,6 +116,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             type="datetime-local"
             value={`${content.startDate}T00:00`}
             onChange={e => content.setStartDate(e.target.value.split("T")[0])}
+            disabled={content.isRunning}
           />
         </div>
         <div className="field">
@@ -125,6 +127,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             type="datetime-local"
             value={`${content.endDate}T00:00`}
             onChange={e => content.setEndDate(e.target.value.split("T")[0])}
+            disabled={content.isRunning}
           />
         </div>
       </div>

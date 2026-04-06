@@ -22,10 +22,8 @@ import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
 
 const LoadDataButton = observer(function LoadDataButton({ name }: IToolbarButtonComponentProps) {
   const content = useWaveRunnerContent();
-  const disabled = true;
-  // const disabled = !content.station || content.isLoading || content.hasData;
   return (
-    <TileToolbarButton name={name} title="Load Data" onClick={() => content.loadData()} disabled={disabled}>
+    <TileToolbarButton name={name} title="Load Data" onClick={() => content.loadData()} disabled={true}>
       <LoadDataIcon/>
     </TileToolbarButton>
   );
@@ -82,7 +80,6 @@ const TimelineButton = observer(function TimelineButton({ name }: IToolbarButton
   const addTilesContext = useContext(AddTilesContext);
   const content = useWaveRunnerContent();
   const disabled = !content.sharedSeismogram?.station;
-  // const disabled = !content.hasData;
 
   function handleClick() {
     if (!tileModel || !addTilesContext) return;
@@ -95,7 +92,6 @@ const TimelineButton = observer(function TimelineButton({ name }: IToolbarButton
       startTimeISO: sharedSeismogram.startTimeISO,
       endTimeISO: sharedSeismogram.endTimeISO,
     });
-    // copy.setSeismogram(sharedSeismogram.seismogram);
     const sharedModels = sharedDataSet ? [sharedDataSet, copy] : [copy];
     addTilesContext.addTileAfter(kTimelineTileType, tileModel, sharedModels);
   }
