@@ -1,6 +1,6 @@
 import { ToggleGroup } from "@concord-consortium/react-components";
 import { observer } from "mobx-react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { IBaseProps } from "../../components/base";
 import { ClassMenuContainer } from "../../components/class-menu-container";
@@ -8,6 +8,7 @@ import { GroupManagementModal } from "../../components/group/group-management-mo
 import { NetworkStatus } from "../../components/network-status";
 import { ProblemMenuContainer } from "../../components/problem-menu-container";
 import { StudentMenuContainer } from "../../components/student-menu-container";
+import { useClueAccessibility } from "../../hooks/use-clue-accessibility";
 import { useStores } from "../../hooks/use-stores";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { upperWords } from "../../utilities/string-utils";
@@ -33,6 +34,16 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
   const [isGroupManagementModalOpen, setIsGroupManagementModalOpen] = useState(false);
   const [isStudentGroupModalOpen, setIsStudentGroupModalOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  useClueAccessibility({
+    type: "region",
+    navigation: {
+      containerRef: headerRef,
+      itemSelector: "button, .custom-select .header[role='button']",
+      orientation: "horizontal",
+    },
+  });
 
   const handleOpenGroupManagementModal = useCallback(() => {
     setIsGroupManagementModalOpen(true);
@@ -118,9 +129,10 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     if (userIndex > -1) {
       groupUsers.unshift(groupUsers.splice(userIndex, 1)[0]);
     }
+    const groupLabel = `${upperWords(translate("studentGroup"))} ${group.id}`;
     return (
-      <div onClick={handleOpenStudentGroupModal} className="group">
-        <div className="name" data-test="group-name">{`${upperWords(translate("studentGroup"))} ${group.id}`}</div>
+      <button type="button" onClick={handleOpenStudentGroupModal} className="group" aria-label={groupLabel}>
+        <div className="name" data-test="group-name">{groupLabel}</div>
         <div className="group-center"/>
         <div className="members" data-test="group-members">
           <div className="row">
@@ -132,7 +144,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
             {renderGroupUser(groupUsers, 2, "se")}
           </div>
         </div>
-      </div>
+      </button>
     );
   };
 
@@ -144,13 +156,15 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     }
 
     const groupUser = groupUsers[index];
-    const className = `member ${groupUser.connected ? "connected" : "disconnected"}`;
-    const title = `${groupUser.name}: ${groupUser.connected ? "connected" : "disconnected"}`;
+    const memberClass = `member ${groupUser.connected ? "connected" : "disconnected"}`;
+    const memberLabel = `${groupUser.name}: ${groupUser.connected ? "connected" : "disconnected"}`;
     return (
       <div
         key={groupUser.id}
-        className={`${className} ${direction}`}
-        title={title}
+        className={`${memberClass} ${direction}`}
+        role="img"
+        aria-label={memberLabel}
+        title={memberLabel}
       >
         <div className="initials">{groupUser.initials}</div>
       </div>
@@ -160,7 +174,13 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const renderStudentGroupsButton = () => {
     const buttonClass = `student-groups-button${isGroupManagementModalOpen ? " selected" : ""}`;
     return (
-      <div className={buttonClass} role="button" onClick={handleOpenGroupManagementModal}>
+      <button
+        type="button"
+        className={buttonClass}
+        aria-label="Student Groups"
+        aria-pressed={isGroupManagementModalOpen}
+        onClick={handleOpenGroupManagementModal}
+      >
         <div className="student-groups-label">
           <span className="student-groups-text">Student</span>
           <span className="student-groups-text">Groups</span>
@@ -175,13 +195,13 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
             <div className="student-icon" />
           </div>
         </div>
-      </div>
+      </button>
     );
   };
 
   const renderNonStudentHeader = ({showProblemMenu}: {showProblemMenu: boolean}) => {
     return (
-      <header className="app-header">
+      <header ref={headerRef} className="app-header" aria-label="CLUE Header">
         <div className="left">
           <div className="unit" data-test="investigation-title">
             <div className="title">
@@ -262,7 +282,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const showUnitInfo = unit.title !== "Null Unit";
 
   return (
-      <header className="app-header">
+      <header ref={headerRef} className="app-header" aria-label="CLUE Header">
         <div className="left">
           {showUnitInfo &&
           <>

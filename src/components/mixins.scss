@@ -39,6 +39,18 @@
   }
 }
 
+// Keyboard focus ring for interactive elements.
+// Mirrors @concord-consortium/accessibility-tools' a11y-focus-ring mixin
+// with CLUE's default color. The .keyboard-focused class fallback handles
+// SVG elements where :focus-visible support is inconsistent.
+@mixin focus-ring($offset: -2px) {
+  &:focus-visible,
+  &.keyboard-focused {
+    outline: 2px solid vars.$workspace-teal-dark-1;
+    outline-offset: $offset;
+  }
+}
+
 // tile toolbar
 @mixin tile-toolbar {
   position: absolute;
