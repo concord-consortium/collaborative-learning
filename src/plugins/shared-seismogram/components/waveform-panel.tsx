@@ -65,6 +65,8 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     : null;
 
   // Create/update uPlot
+  // TODO This recreates uPlot whenever the queryResult or pixelWidth changes.
+  // It would be more efficient to update the existing uPlot in most situations.
   useEffect(() => {
     if (!containerRef.current || !queryResult) return;
 
