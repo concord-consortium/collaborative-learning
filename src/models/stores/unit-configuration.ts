@@ -116,4 +116,6 @@ export interface UnitConfiguration extends ProblemConfiguration {
   sortWorkConfig?: ISortWorkConfig;
   // term overrides for UI text (e.g., "Group" -> "Team")
   termOverrides?: Record<string, string>;
+  // whether student documents (problem, personal, learning log) are shared by default
+  defaultSharedDocuments?: boolean;
 }

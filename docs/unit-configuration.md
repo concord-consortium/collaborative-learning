@@ -342,6 +342,21 @@ Additionally these buttons are supported and can be added to the toolbar if the 
 - `insert-variable`
 - `edit-variable`
 
+#### Wave Runner
+
+Common toolbar framework; default buttons:
+
+- `load-data`
+- `play`
+- `restart`
+- `reset`
+- `timeline`
+
+Additional settings:
+
+- `stations`: array of station objects, each with `network`, `station`, `channel`, and `label` properties. These define the seismograph stations available in the station picker dropdown.
+- `defaultStation`: index into the `stations` array specifying which station is selected by default.
+
 ## Problem Sections
 
 There are 2 active parts of the unit configuration involved in the definition of problem sections:

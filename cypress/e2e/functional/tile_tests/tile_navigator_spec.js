@@ -69,16 +69,18 @@ context("Tile Navigator", () => {
       clueCanvas.clickToolbarButton(tileType, "navigator");
       clueCanvas.getToolbarButtonToolTipText(tileType, "navigator").should("eq", "Show Navigator");
       tileNavigator.getTileNavigator().should(presenceTestString);
-      cy.get("@log")
-        .should("have.been.been.calledWith", logEventName, Cypress.sinon.match.object)
-        .its("lastCall.args.1").should("deep.include", { operation: "hideNavigator" });
+      cy.get("@log").should("have.been.calledWith", logEventName, Cypress.sinon.match.object).then(stub => {
+        const call = stub.getCalls().reverse().find(c => c.args[0] === logEventName);
+        expect(call.args[1]).to.deep.include({ operation: "hideNavigator" });
+      });
 
       clueCanvas.clickToolbarButton(tileType, "navigator");
       clueCanvas.getToolbarButtonToolTipText(tileType, "navigator").should("eq", "Hide Navigator");
       tileNavigator.getTileNavigator().should("exist");
-      cy.get("@log")
-        .should("have.been.been.calledWith", logEventName, Cypress.sinon.match.object)
-        .its("lastCall.args.1").should("deep.include", { operation: "showNavigator" });
+      cy.get("@log").should("have.been.calledWith", logEventName, Cypress.sinon.match.object).then(stub => {
+        const call = stub.getCalls().reverse().find(c => c.args[0] === logEventName);
+        expect(call.args[1]).to.deep.include({ operation: "showNavigator" });
+      });
       clueCanvas.deleteTile(tileType);
     }
   });

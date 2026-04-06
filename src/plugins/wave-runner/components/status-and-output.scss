@@ -44,6 +44,9 @@
       }
 
       .status-count-box {
+        align-items: center;
+        display: flex;
+        justify-content: center;
         width: 34px;
         height: 26px;
         background-color: white;

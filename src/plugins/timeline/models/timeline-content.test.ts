@@ -33,7 +33,7 @@ describe("zoom functionality", () => {
 
     mockedGetSharedModelManager.mockReturnValue({
       isReady: true,
-      findFirstSharedModelByType: () => mockSharedSeismogram,
+      getTileSharedModelsByType: () => [mockSharedSeismogram],
     } as any);
 
     content = TimelineContentModel.create();
