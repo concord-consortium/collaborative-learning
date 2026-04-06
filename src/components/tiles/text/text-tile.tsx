@@ -190,7 +190,8 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   // --- Accessibility bridge helpers ---
 
   private getSlateContentElement = (): HTMLElement | undefined => {
-    return this.textTileDiv?.querySelector("[data-slate-editor]") as HTMLElement | undefined;
+    const el = this.textTileDiv?.querySelector("[data-slate-editor]");
+    return el instanceof HTMLElement ? el : undefined;
   };
 
   private focusSlateContent = (): boolean => {

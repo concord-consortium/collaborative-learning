@@ -83,10 +83,16 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
     if (opts.type !== "tile") return;
 
     const { focusTrap: config } = opts;
-    const strategy = createClueTileStrategy(config);
 
+    // Delegate through optionsRef so the registered API always uses the latest
+    // callbacks/refs even if the component re-renders after mount.
+    // Spread additionalApi first so getFocusableElements below always wins
     const tileApi: ITileApi = {
+      ...config.additionalApi,
       getFocusableElements: () => {
+        const currentOpts = optionsRef.current;
+        if (currentOpts.type !== "tile") return undefined;
+        const strategy = createClueTileStrategy(currentOpts.focusTrap);
         const elements = strategy.getElements();
         return {
           contentElement: elements.content,
@@ -94,7 +100,6 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
           focusContent: strategy.focusContent,
         };
       },
-      ...config.additionalApi,
     };
 
     config.onRegisterTileApi(tileApi);
