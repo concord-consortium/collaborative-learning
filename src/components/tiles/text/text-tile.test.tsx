@@ -27,7 +27,7 @@ describe("TextToolComponent", () => {
   it("renders its toolbar", () => {
     specTextTile({});
     userEvent.click(screen.getByTestId("ccrte-editor"));
-    expect(screen.getAllByRole("button")).toHaveLength(9);
+    expect(screen.getAllByRole("button")).toHaveLength(11);
   });
 
   it("renders a heading button in the toolbar", () => {

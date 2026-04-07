@@ -476,6 +476,7 @@
           "underline",
           "highlight",
           "subscript",
+          "heading",
           "superscript",
           "list-ol",
           "list-ul",
