@@ -27,6 +27,10 @@ const toggleSupSub =
 const toggleElement =
   (editor: Editor, format: EFormat) => editor.toggleElement(format);
 
+// EFormat.heading2 is not exported by @concord-consortium/slate-editor, but the
+// Slate editor matches on the string value "heading2" internally (see slate-renderers.tsx).
+const kHeading2Format = "heading2" as EFormat;
+
 interface IGenericTextToolbarButtonProps {
   name: string;
   title: string;
@@ -79,7 +83,7 @@ function SubscriptToolbarButton({name}: IToolbarButtonComponentProps) {
 function HeadingToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
     name={name} title="Heading" Icon={HeadingToolIcon}
-    slateType={"heading2" as EFormat} toggleFunc={toggleElement}/>;
+    slateType={kHeading2Format} toggleFunc={toggleElement}/>;
 }
 
 function SuperscriptToolbarButton({name}: IToolbarButtonComponentProps) {
