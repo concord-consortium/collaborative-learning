@@ -48,6 +48,19 @@ describe("DynamicScrollbar", () => {
     expect(container.querySelector(".dynamic-scrollbar-thumb")).toBeInTheDocument();
   });
 
+  it("thumb has correct ARIA attributes", () => {
+    const viewStart = dataStart.plus({ seconds: 25 });
+    const viewEnd = dataStart.plus({ seconds: 75 });
+    const { container } = renderScrollbar(viewStart, viewEnd);
+    const thumb = container.querySelector(".dynamic-scrollbar-thumb") as HTMLElement;
+    expect(thumb).toHaveAttribute("role", "slider");
+    expect(thumb).toHaveAttribute("aria-label", "Scroll position");
+    expect(thumb).toHaveAttribute("aria-valuemin", "0");
+    expect(thumb).toHaveAttribute("aria-valuemax", "100");
+    expect(thumb).toHaveAttribute("aria-valuenow", "50");
+    expect(thumb).toHaveAttribute("tabindex", "0");
+  });
+
   it("thumb fills full width when view equals data range", () => {
     const { container } = renderScrollbar();
     const thumb = container.querySelector(".dynamic-scrollbar-thumb") as HTMLElement;
@@ -151,6 +164,76 @@ describe("DynamicScrollbar", () => {
 
     fireEvent.pointerMove(thumb, { clientX: 200 });
     expect(onViewChange).not.toHaveBeenCalled();
+  });
+
+  it("ArrowRight moves view forward by 5% of data range", () => {
+    const viewStart = dataStart.plus({ seconds: 25 });
+    const viewEnd = dataStart.plus({ seconds: 75 });
+    const onViewChange = jest.fn();
+    const { container } = renderScrollbar(viewStart, viewEnd, onViewChange);
+    const thumb = container.querySelector(".dynamic-scrollbar-thumb") as HTMLElement;
+
+    fireEvent.keyDown(thumb, { key: "ArrowRight" });
+    expect(onViewChange).toHaveBeenCalledTimes(1);
+    const [newStart, newEnd] = onViewChange.mock.calls[0];
+    // 5% of 100s = 5s shift right, so start=30, end=80
+    expect(newStart.diff(dataStart, "seconds").seconds).toBeCloseTo(30);
+    expect(newEnd.diff(dataStart, "seconds").seconds).toBeCloseTo(80);
+  });
+
+  it("ArrowLeft moves view backward by 5% of data range", () => {
+    const viewStart = dataStart.plus({ seconds: 25 });
+    const viewEnd = dataStart.plus({ seconds: 75 });
+    const onViewChange = jest.fn();
+    const { container } = renderScrollbar(viewStart, viewEnd, onViewChange);
+    const thumb = container.querySelector(".dynamic-scrollbar-thumb") as HTMLElement;
+
+    fireEvent.keyDown(thumb, { key: "ArrowLeft" });
+    expect(onViewChange).toHaveBeenCalledTimes(1);
+    const [newStart] = onViewChange.mock.calls[0];
+    // 5% of 100s = 5s shift left, so start=20
+    expect(newStart.diff(dataStart, "seconds").seconds).toBeCloseTo(20);
+  });
+
+  it("Home moves view to the start", () => {
+    const viewStart = dataStart.plus({ seconds: 40 });
+    const viewEnd = dataStart.plus({ seconds: 90 });
+    const onViewChange = jest.fn();
+    const { container } = renderScrollbar(viewStart, viewEnd, onViewChange);
+    const thumb = container.querySelector(".dynamic-scrollbar-thumb") as HTMLElement;
+
+    fireEvent.keyDown(thumb, { key: "Home" });
+    expect(onViewChange).toHaveBeenCalledTimes(1);
+    const [newStart] = onViewChange.mock.calls[0];
+    expect(newStart.diff(dataStart, "seconds").seconds).toBeCloseTo(0);
+  });
+
+  it("End moves view to the end", () => {
+    const viewStart = dataStart.plus({ seconds: 10 });
+    const viewEnd = dataStart.plus({ seconds: 60 });
+    const onViewChange = jest.fn();
+    const { container } = renderScrollbar(viewStart, viewEnd, onViewChange);
+    const thumb = container.querySelector(".dynamic-scrollbar-thumb") as HTMLElement;
+
+    fireEvent.keyDown(thumb, { key: "End" });
+    expect(onViewChange).toHaveBeenCalledTimes(1);
+    const [newStart, newEnd] = onViewChange.mock.calls[0];
+    expect(newEnd.diff(dataStart, "seconds").seconds).toBeCloseTo(100);
+    expect(newStart.diff(dataStart, "seconds").seconds).toBeCloseTo(50);
+  });
+
+  it("keyboard clamps at data boundaries", () => {
+    // View near the start, ArrowLeft should clamp to 0
+    const viewStart = dataStart.plus({ seconds: 2 });
+    const viewEnd = dataStart.plus({ seconds: 52 });
+    const onViewChange = jest.fn();
+    const { container } = renderScrollbar(viewStart, viewEnd, onViewChange);
+    const thumb = container.querySelector(".dynamic-scrollbar-thumb") as HTMLElement;
+
+    fireEvent.keyDown(thumb, { key: "ArrowLeft" });
+    expect(onViewChange).toHaveBeenCalledTimes(1);
+    const [newStart] = onViewChange.mock.calls[0];
+    expect(newStart.diff(dataStart, "seconds").seconds).toBeCloseTo(0);
   });
 
   it("stops dragging on pointerUp", () => {

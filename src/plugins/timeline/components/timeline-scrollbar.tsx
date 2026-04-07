@@ -14,6 +14,7 @@ export const TimelineScrollbar = observer(function TimelineScrollbar() {
 
   return (
     <DynamicScrollbar
+      thumbAriaLabel="Timeline scroll position"
       dataStartTime={dataStartTime}
       dataEndTime={dataEndTime}
       viewStartTime={viewStartTime}
