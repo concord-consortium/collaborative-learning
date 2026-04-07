@@ -18,6 +18,13 @@
     }
   }
 
+  .text-tool h2 {
+    font-size: 20px;
+    font-weight: normal;
+    color: #3f3f3f;
+    margin: 5px 0;
+  }
+
   .tool-tile.fixed & {
     background-color: $workspace-teal-light-7;
   }
