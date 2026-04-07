@@ -82,12 +82,15 @@ export const useCustomModal = <IContentProps,>({
   }, []);
   handleCloseRef.current = handleClose;
 
+  const titleId = `custom-modal-title-${dataTestId || className || "default"}`;
+
   const [showModal, hideModal] = useModal(() => {
     // NOTE: the data-testid attribute is not passed to the modal element
     // because it is not a valid attribute for ReactModal and instead
     // is passed to the modal header and content elements to allow for testing
     return (
       <Modal className={`custom-modal ${className || ""}`} isOpen
+              aria={{ labelledby: titleId, modal: true }}
               shouldCloseOnEsc={canCancel}
               shouldCloseOnOverlayClick={false}
               onAfterOpen={handleAfterOpen as any}
@@ -96,9 +99,9 @@ export const useCustomModal = <IContentProps,>({
           <div className="modal-icon">
             {Icon && <Icon/>}
           </div>
-          <div className="modal-title">{title}</div>
+          <div className="modal-title" id={titleId}>{title}</div>
           {canCancel !== false &&
-            <button type="button" className="modal-close" onClick={handleClose}>
+            <button type="button" className="modal-close" aria-label="Close" onClick={handleClose}>
               <CloseIconSvg />
             </button>}
         </div>
