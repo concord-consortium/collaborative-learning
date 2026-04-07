@@ -276,7 +276,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
                               handleTileDragStart={this.handleTileDragStart}
                               triggerResizeHandler={this.triggerResizeHandler}
                               />;
-    const tileHeight = this.props.height || kDefaultTileHeight;
+    const tileHeight = this.props.height ?? kDefaultTileHeight;
     const resizeTileButton = isUserResizable &&
                               <ResizeTileButton divRef={elt => this.resizeElement = elt}
                                 hovered={hoverTile}
