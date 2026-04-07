@@ -20,7 +20,7 @@ describe("StarterToolComponent", () => {
     docId: "",
     documentContent: null,
     isUserResizable: true,
-    onResizeRow: (e: React.DragEvent<HTMLDivElement>): void => {
+    onResizeRow: (e: React.DragEvent<HTMLElement>): void => {
       throw new Error("Function not implemented.");
     },
     onSetCanAcceptDrop: (tileId?: string): void => {

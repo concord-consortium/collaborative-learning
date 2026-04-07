@@ -11,6 +11,8 @@ import { ITileModel } from "../../models/tiles/tile-model";
 import { isQuestionModel } from "../../models/tiles/question/question-content";
 import { BaseComponent } from "../base";
 import PlaceholderTileComponent from "./placeholder/placeholder-tile";
+import { useKeyboardResize } from "@concord-consortium/accessibility-tools/hooks";
+import { kDefaultTileHeight } from "../constants";
 import {
   ITileApi, TileResizeEntry, TileApiInterfaceContext, TileModelContext, RegisterToolbarContext
 } from "./tile-api";
@@ -74,7 +76,7 @@ interface ITileBaseProps {
   indexInRow?: number;
   model: ITileModel;
   readOnly?: boolean;
-  onResizeRow: (e: React.DragEvent<HTMLDivElement>) => void;
+  onResizeRow: (e: React.DragEvent<HTMLElement>) => void;
   onSetCanAcceptDrop: (tileId?: string) => void;
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
@@ -122,24 +124,44 @@ const DragTileButton = (
 };
 
 interface IResizeTileButtonProps {
-  divRef: (instance: HTMLDivElement | null) => void;
+  buttonRef: (instance: HTMLButtonElement | null) => void;
   hovered: boolean;
   selected: boolean;
-  onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
+  height: number;
+  onDragStart: (e: React.DragEvent<HTMLButtonElement>) => void;
+  onResize: (newHeight: number) => void;
 }
 
 const ResizeTileButton =
-  ({ divRef, hovered, selected, onDragStart }: IResizeTileButtonProps) => {
+  ({ buttonRef, hovered, selected, height, onDragStart, onResize }: IResizeTileButtonProps) => {
   const classes = classNames("tool-tile-resize-handle", { hovered, selected });
+
+  const resize = useKeyboardResize({
+    orientation: "vertical",
+    value: height,
+    step: 10,
+    largeStep: 50,
+    onResize,
+    label: "Resize tile height",
+  });
+
+  // Destructure to omit role (button provides its own semantics).
+  // Keep tabIndex from the hook but override to -1 so the button doesn't
+  // appear in natural Tab order — the focus trap cycles to it explicitly.
+  const { role: _role, ...keyboardProps } = resize?.resizeHandleProps ?? {};
+
   return (
-    <div className={`tool-tile-resize-handle-wrapper`}
-      ref={divRef}
+    <button
+      type="button"
+      className="tool-tile-resize-handle-wrapper"
+      ref={buttonRef}
       draggable={true}
       onDragStart={onDragStart}
-      aria-label="Drag to resize tile"
+      {...keyboardProps}
+      tabIndex={-1}
     >
       <TileResizeHandle className={classes} />
-    </div>
+    </button>
   );
 };
 
@@ -165,7 +187,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   private liveRegion: HTMLSpanElement | null = null;
   private liveRegionTimer: ReturnType<typeof setTimeout> | null = null;
   private dragElement: HTMLDivElement | null;
-  private resizeElement: HTMLDivElement | null;
+  private resizeElement: HTMLElement | null;
   private wasSelected = false;
 
   state = {
@@ -262,11 +284,14 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
                               handleTileDragStart={this.handleTileDragStart}
                               triggerResizeHandler={this.triggerResizeHandler}
                               />;
+    const tileHeight = this.props.height ?? kDefaultTileHeight;
     const resizeTileButton = isUserResizable &&
-                              <ResizeTileButton divRef={elt => this.resizeElement = elt}
+                              <ResizeTileButton buttonRef={elt => this.resizeElement = elt}
                                 hovered={hoverTile}
                                 selected={isTileSelected}
-                                onDragStart={e => this.props.onResizeRow(e)} />;
+                                height={tileHeight}
+                                onDragStart={e => this.props.onResizeRow(e)}
+                                onResize={h => this.props.onRequestRowHeight(model.id, h)} />;
 
     const style: React.CSSProperties = {};
     if (widthPct) {
@@ -438,6 +463,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       activeToolbarButton,
       contentElement: focusable?.contentElement || null,
       focusContent: focusable?.focusContent || null,
+      resizeHandle: this.resizeElement,
     };
   }
 
@@ -472,11 +498,14 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     e: { preventDefault: () => void; stopPropagation: () => void },
     reverse = false
   ): boolean {
-    const { titleElement, activeToolbarButton, contentElement, focusContent } = this.getFocusTrapElements();
+    const { titleElement, activeToolbarButton, contentElement, focusContent, resizeHandle }
+      = this.getFocusTrapElements();
 
     let focused: boolean;
     if (reverse) {
-      focused = this.focusContent(contentElement, focusContent)
+      // Reverse: resize → content → toolbar → title
+      focused = this.focusFirstAvailable(resizeHandle)
+        || this.focusContent(contentElement, focusContent)
         || this.focusFirstAvailable(activeToolbarButton, titleElement);
     } else {
       focused = this.focusFirstAvailable(titleElement, activeToolbarButton)
@@ -537,21 +566,34 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     if (isInsideTile) {
       // Cycling within focus trap from elements inside the tile DOM.
       // (Toolbar handles its own Tab events since it's in FloatingPortal.)
-      const { titleElement, activeToolbarButton, contentElement, focusContent } = this.getFocusTrapElements();
+      // Cycle order: title → toolbar → content → resize → (wrap to title)
+      const { titleElement, activeToolbarButton, contentElement, focusContent, resizeHandle }
+        = this.getFocusTrapElements();
       const isOnContent = activeElement === contentElement || contentElement?.contains(activeElement);
       const isOnTitle = activeElement === titleElement;
+      const isOnResize = activeElement === resizeHandle || resizeHandle?.contains(activeElement);
 
       if (e.shiftKey) {
         // Shift+Tab: go backward
         if (isOnContent) {
-          // Content → toolbar (or title, skipping non-focusable elements)
+          // Content → toolbar (or title)
           this.focusFirstAvailable(activeToolbarButton, titleElement);
           e.preventDefault();
           e.stopPropagation();
           return;
         } else if (isOnTitle) {
-          // Title → wrap to content (last element)
-          this.focusContent(contentElement, focusContent);
+          // Title → wrap to resize (or content)
+          if (!this.focusFirstAvailable(resizeHandle)) {
+            this.focusContent(contentElement, focusContent);
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        } else if (isOnResize) {
+          // Resize → content (or toolbar, or title)
+          if (!this.focusContent(contentElement, focusContent)) {
+            this.focusFirstAvailable(activeToolbarButton, titleElement);
+          }
           e.preventDefault();
           e.stopPropagation();
           return;
@@ -559,14 +601,24 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       } else {
         // Tab: go forward
         if (isOnContent) {
-          // Content → wrap to title (or toolbar, skipping non-focusable elements)
-          this.focusFirstAvailable(titleElement, activeToolbarButton);
+          // Content → resize (or wrap to title/toolbar)
+          if (!this.focusFirstAvailable(resizeHandle)) {
+            this.focusFirstAvailable(titleElement, activeToolbarButton);
+          }
           e.preventDefault();
           e.stopPropagation();
           return;
         } else if (isOnTitle) {
-          // Title → toolbar (or content, skipping non-focusable elements)
+          // Title → toolbar (or content)
           if (!this.focusFirstAvailable(activeToolbarButton)) {
+            this.focusContent(contentElement, focusContent);
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        } else if (isOnResize) {
+          // Resize → wrap to title (or toolbar, or content)
+          if (!this.focusFirstAvailable(titleElement, activeToolbarButton)) {
             this.focusContent(contentElement, focusContent);
           }
           e.preventDefault();
@@ -642,11 +694,13 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
 
     // ArrowUp from a non-editable element exits the focus trap.
     // Editable elements (input, textarea, contenteditable/Slate) keep normal ArrowUp behavior.
+    // The resize handle uses ArrowUp/Down for resizing, so it's excluded.
     if (e.key === "ArrowUp" && isInsideTile) {
+      const isOnResize = this.resizeElement?.contains(activeElement);
       const isEditable = activeElement.tagName === "INPUT" ||
                          activeElement.tagName === "TEXTAREA" ||
                          activeElement.isContentEditable;
-      if (!isEditable) {
+      if (!isEditable && !isOnResize) {
         this.domElement?.focus();
         e.preventDefault();
         e.stopPropagation();
