@@ -110,6 +110,9 @@ export const TileToolbar = observer(
           const contentElement = focusable?.contentElement;
           const titleElement = focusable?.titleElement;
           const focusContentFn = focusable?.focusContent;
+          const resizeHandle = tileElement.querySelector(
+            ".tool-tile-resize-handle-wrapper"
+          ) as HTMLElement | null;
 
           // Helper to focus content, preferring tile's custom focus method (e.g., Slate)
           const tryFocusContent = () => {
@@ -121,19 +124,29 @@ export const TileToolbar = observer(
             return false;
           };
 
-          // Try candidates in order, skipping any that can't actually receive focus
-          // (e.g., a plain div title element without tabindex).
+          const tryFocusResize = () => {
+            if (resizeHandle) {
+              resizeHandle.focus();
+              return document.activeElement === resizeHandle;
+            }
+            return false;
+          };
+
+          // Cycle: title → toolbar → content → resize → (wrap)
+          // Try candidates in order, skipping any that can't actually receive focus.
           if (e.shiftKey) {
-            // Shift+Tab: toolbar → title → content → tile
+            // Shift+Tab: toolbar → title → resize → content → tile
             if (titleElement) { titleElement.focus(); }
             if (document.activeElement !== titleElement) {
-              if (!tryFocusContent()) { tileElement.focus(); }
+              if (!tryFocusResize() && !tryFocusContent()) { tileElement.focus(); }
             }
           } else {
-            // Tab: toolbar → content → title → tile
+            // Tab: toolbar → content → resize → title → tile
             if (!tryFocusContent()) {
-              if (titleElement) { titleElement.focus(); }
-              if (document.activeElement !== titleElement) { tileElement.focus(); }
+              if (!tryFocusResize()) {
+                if (titleElement) { titleElement.focus(); }
+                if (document.activeElement !== titleElement) { tileElement.focus(); }
+              }
             }
           }
           e.preventDefault();
