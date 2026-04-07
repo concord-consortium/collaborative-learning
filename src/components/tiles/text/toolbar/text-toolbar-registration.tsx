@@ -127,12 +127,12 @@ registerTileToolbarButtons('text',
     component: SubscriptToolbarButton,
   },
   {
-    name: 'heading',
-    component: HeadingToolbarButton,
-  },
-  {
     name: 'superscript',
     component: SuperscriptToolbarButton,
+  },
+  {
+    name: 'heading',
+    component: HeadingToolbarButton,
   },
   {
     name: 'list-ol',

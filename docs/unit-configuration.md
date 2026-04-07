@@ -332,8 +332,8 @@ Common toolbar framework; default buttons:
 - `underline`
 - `highlight`
 - `subscript`
-- `heading`
 - `superscript`
+- `heading`
 - `list-ol`
 - `list-ul`
 - `link`
