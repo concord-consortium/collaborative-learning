@@ -27,7 +27,13 @@ describe("TextToolComponent", () => {
   it("renders its toolbar", () => {
     specTextTile({});
     userEvent.click(screen.getByTestId("ccrte-editor"));
-    expect(screen.getAllByRole("button")).toHaveLength(8);
+    expect(screen.getAllByRole("button")).toHaveLength(9);
+  });
+
+  it("renders a heading button in the toolbar", () => {
+    specTextTile({});
+    userEvent.click(screen.getByTestId("ccrte-editor"));
+    expect(screen.getByRole("button", { name: "Heading" })).toBeInTheDocument();
   });
 
 });

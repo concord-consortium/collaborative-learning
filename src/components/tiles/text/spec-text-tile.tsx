@@ -28,6 +28,7 @@ export function specTextTile(options: ISpecTextTileOptions) {
               "italic",
               "underline",
               "subscript",
+              "heading",
               "superscript",
               "list-ol",
               "list-ul",
