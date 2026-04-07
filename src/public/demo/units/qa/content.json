@@ -66,6 +66,9 @@
         "defaultSimulation": "EMG_and_claw",
         "maxTiles": 1
       },
+      "text": {
+        "tools": ["bold", "italic", "underline", "subscript", "heading", "superscript", "list-ol", "list-ul", "link"]
+      },
       "iframeInteractive": {
         "maxTiles": 1,
         "url": "https://models-resources.concord.org/hurricane-model/branch/master/index.html?topBarVisible=false",
