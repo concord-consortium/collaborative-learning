@@ -342,6 +342,10 @@ Additionally these buttons are supported and can be added to the toolbar if the 
 - `insert-variable`
 - `edit-variable`
 
+Additionally, the following button is supported and can be added to the toolbar:
+
+- `heading`: applies heading (H2) block formatting to the current block; toggles back to paragraph when pressed again
+
 #### Wave Runner
 
 Common toolbar framework; default buttons:
