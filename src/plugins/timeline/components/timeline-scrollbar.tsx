@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
 import { observer } from "mobx-react-lite";
 import { TileModelContext } from "../../../components/tiles/tile-api";
+import { DynamicScrollbar } from "../../../components/ui/dynamic-scrollbar";
 import { isTimelineContentModel } from "../models/timeline-content";
-import { DynamicScrollbar } from "./dynamic-scrollbar";
 
 export const TimelineScrollbar = observer(function TimelineScrollbar() {
   const rawContent = useContext(TileModelContext)?.content;
@@ -15,8 +15,8 @@ export const TimelineScrollbar = observer(function TimelineScrollbar() {
   return (
     <DynamicScrollbar
       thumbAriaLabel="Timeline scroll position"
-      dataStartTime={dataStartTime}
-      dataEndTime={dataEndTime}
+      totalStartTime={dataStartTime}
+      totalEndTime={dataEndTime}
       viewStartTime={viewStartTime}
       viewEndTime={viewEndTime}
       onViewChange={setViewRange}

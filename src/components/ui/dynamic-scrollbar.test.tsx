@@ -32,8 +32,8 @@ describe("DynamicScrollbar", () => {
       onViewChange,
       ...render(
         <DynamicScrollbar
-          dataStartTime={dataStart}
-          dataEndTime={dataEnd}
+          totalStartTime={dataStart}
+          totalEndTime={dataEnd}
           viewStartTime={viewStart}
           viewEndTime={viewEnd}
           onViewChange={onViewChange}
