@@ -1,68 +1,24 @@
-import React, { useCallback, useRef } from "react";
-import { DateTime } from "luxon";
-import { kMinViewRangeSeconds } from "../models/timeline-content";
+import React, { useContext } from "react";
+import { observer } from "mobx-react-lite";
+import { TileModelContext } from "../../../components/tiles/tile-api";
+import { isTimelineContentModel } from "../models/timeline-content";
+import { DynamicScrollbar } from "./dynamic-scrollbar";
 
-import "./timeline-scrollbar.scss";
+export const TimelineScrollbar = observer(function TimelineScrollbar() {
+  const rawContent = useContext(TileModelContext)?.content;
+  const model = isTimelineContentModel(rawContent) ? rawContent : undefined;
+  if (!model) return null;
 
-interface IProps {
-  dataStartTime: DateTime;
-  dataEndTime: DateTime;
-  viewStartTime: DateTime;
-  viewEndTime: DateTime;
-  onViewChange: (start: DateTime, end: DateTime) => void;
-}
-
-export const TimelineScrollbar: React.FC<IProps> = ({
-  dataStartTime, dataEndTime, viewStartTime, viewEndTime, onViewChange
-}) => {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const dragStartRef = useRef<{ mouseX: number; viewStartSeconds: number } | null>(null);
-
-  const dataRangeSeconds = Math.max(dataEndTime.diff(dataStartTime, "seconds").seconds, kMinViewRangeSeconds);
-  const viewStartOffset = viewStartTime.diff(dataStartTime, "seconds").seconds;
-  const viewRangeSeconds = viewEndTime.diff(viewStartTime, "seconds").seconds;
-
-  const leftPercent = (viewStartOffset / dataRangeSeconds) * 100;
-  const widthPercent = (viewRangeSeconds / dataRangeSeconds) * 100;
-
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    e.preventDefault();
-    const target = e.currentTarget as HTMLElement;
-    target.setPointerCapture(e.pointerId);
-    dragStartRef.current = {
-      mouseX: e.clientX,
-      viewStartSeconds: viewStartOffset
-    };
-  }, [viewStartOffset]);
-
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!dragStartRef.current || !trackRef.current) return;
-    const trackWidth = trackRef.current.getBoundingClientRect().width;
-    const deltaX = e.clientX - dragStartRef.current.mouseX;
-    const deltaSeconds = (deltaX / trackWidth) * dataRangeSeconds;
-
-    let newStartSeconds = dragStartRef.current.viewStartSeconds + deltaSeconds;
-    // Clamp so the view stays within data bounds
-    newStartSeconds = Math.max(0, Math.min(newStartSeconds, dataRangeSeconds - viewRangeSeconds));
-
-    const newStart = dataStartTime.plus({ seconds: newStartSeconds });
-    const newEnd = newStart.plus({ seconds: viewRangeSeconds });
-    onViewChange(newStart, newEnd);
-  }, [dataStartTime, dataRangeSeconds, viewRangeSeconds, onViewChange]);
-
-  const handlePointerUp = useCallback(() => {
-    dragStartRef.current = null;
-  }, []);
+  const { dataStartTime, dataEndTime, viewStartTime, viewEndTime, setViewRange } = model;
+  if (dataStartTime == null || dataEndTime == null || viewStartTime == null || viewEndTime == null) return null;
 
   return (
-    <div className="timeline-scrollbar" ref={trackRef}>
-      <div
-        className="timeline-scrollbar-thumb"
-        style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-      />
-    </div>
+    <DynamicScrollbar
+      dataStartTime={dataStartTime}
+      dataEndTime={dataEndTime}
+      viewStartTime={viewStartTime}
+      viewEndTime={viewEndTime}
+      onViewChange={setViewRange}
+    />
   );
-};
+});
