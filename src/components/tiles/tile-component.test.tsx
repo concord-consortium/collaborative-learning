@@ -777,14 +777,13 @@ describe("TileComponent focus trap", () => {
       };
     }
 
-    it("resize handle renders with role=separator and ARIA attributes", () => {
+    it("resize handle renders as button with aria-label", () => {
       const { resizeHandle } = renderResizableTile();
       expect(resizeHandle).toBeTruthy();
-      expect(resizeHandle.getAttribute("role")).toBe("separator");
-      expect(resizeHandle.getAttribute("aria-orientation")).toBe("vertical");
-      expect(resizeHandle.getAttribute("aria-valuenow")).toBe("250");
+      expect(resizeHandle.tagName).toBe("BUTTON");
       expect(resizeHandle.getAttribute("aria-label")).toBe("Resize tile height");
-      expect(resizeHandle.getAttribute("tabindex")).toBe("0");
+      // No separator role - this is a standalone resize button, not a divider
+      expect(resizeHandle.getAttribute("role")).toBeNull();
     });
 
     it("ArrowDown increases tile height", () => {

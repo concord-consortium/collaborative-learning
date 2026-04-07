@@ -76,7 +76,7 @@ interface ITileBaseProps {
   indexInRow?: number;
   model: ITileModel;
   readOnly?: boolean;
-  onResizeRow: (e: React.DragEvent<HTMLDivElement>) => void;
+  onResizeRow: (e: React.DragEvent<HTMLElement>) => void;
   onSetCanAcceptDrop: (tileId?: string) => void;
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
@@ -124,16 +124,16 @@ const DragTileButton = (
 };
 
 interface IResizeTileButtonProps {
-  divRef: (instance: HTMLDivElement | null) => void;
+  buttonRef: (instance: HTMLButtonElement | null) => void;
   hovered: boolean;
   selected: boolean;
   height: number;
-  onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragStart: (e: React.DragEvent<HTMLButtonElement>) => void;
   onResize: (newHeight: number) => void;
 }
 
 const ResizeTileButton =
-  ({ divRef, hovered, selected, height, onDragStart, onResize }: IResizeTileButtonProps) => {
+  ({ buttonRef, hovered, selected, height, onDragStart, onResize }: IResizeTileButtonProps) => {
   const classes = classNames("tool-tile-resize-handle", { hovered, selected });
 
   const resize = useKeyboardResize({
@@ -145,15 +145,23 @@ const ResizeTileButton =
     label: "Resize tile height",
   });
 
+  // Destructure to omit role (button provides its own semantics).
+  // Keep tabIndex from the hook but override to -1 so the button doesn't
+  // appear in natural Tab order — the focus trap cycles to it explicitly.
+  const { role: _role, ...keyboardProps } = resize?.resizeHandleProps ?? {};
+
   return (
-    <div className="tool-tile-resize-handle-wrapper"
-      ref={divRef}
+    <button
+      type="button"
+      className="tool-tile-resize-handle-wrapper"
+      ref={buttonRef}
       draggable={true}
       onDragStart={onDragStart}
-      {...(resize?.resizeHandleProps ?? {})}
+      {...keyboardProps}
+      tabIndex={-1}
     >
       <TileResizeHandle className={classes} />
-    </div>
+    </button>
   );
 };
 
@@ -179,7 +187,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   private liveRegion: HTMLSpanElement | null = null;
   private liveRegionTimer: ReturnType<typeof setTimeout> | null = null;
   private dragElement: HTMLDivElement | null;
-  private resizeElement: HTMLDivElement | null;
+  private resizeElement: HTMLElement | null;
   private wasSelected = false;
 
   state = {
@@ -278,7 +286,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
                               />;
     const tileHeight = this.props.height ?? kDefaultTileHeight;
     const resizeTileButton = isUserResizable &&
-                              <ResizeTileButton divRef={elt => this.resizeElement = elt}
+                              <ResizeTileButton buttonRef={elt => this.resizeElement = elt}
                                 hovered={hoverTile}
                                 selected={isTileSelected}
                                 height={tileHeight}
