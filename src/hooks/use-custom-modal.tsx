@@ -82,7 +82,7 @@ export const useCustomModal = <IContentProps,>({
   }, []);
   handleCloseRef.current = handleClose;
 
-  const titleId = `custom-modal-title-${dataTestId || className || "default"}`;
+  const titleId = `custom-modal-title-${(dataTestId || className || "default").replace(/\s+/g, "-")}`;
 
   const [showModal, hideModal] = useModal(() => {
     // NOTE: the data-testid attribute is not passed to the modal element
