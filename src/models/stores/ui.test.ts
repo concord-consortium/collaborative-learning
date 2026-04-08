@@ -1,3 +1,4 @@
+import { getSnapshot } from "mobx-state-tree";
 import { UIModel, UIModelType, UIDialogModelType } from "./ui";
 import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui/persistent-ui";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
@@ -139,6 +140,45 @@ describe("ui model", () => {
     ui.pickUpTile("tile-2", "doc-2");
     expect(ui.pickedUpTileId).toBe("tile-2");
     expect(ui.pickedUpDocId).toBe("doc-2");
+  });
+
+  it("pickUpTile stores optional type and position", () => {
+    ui.pickUpTile("t1", "d1", "Text", 100, 200);
+    expect(ui.pickedUpTileType).toBe("Text");
+    expect(ui.pickedUpX).toBe(100);
+    expect(ui.pickedUpY).toBe(200);
+  });
+
+  it("clearPickedUpTile resets type and position", () => {
+    ui.pickUpTile("t1", "d1", "Text", 100, 200);
+    ui.clearPickedUpTile();
+    expect(ui.pickedUpTileType).toBeUndefined();
+    expect(ui.pickedUpX).toBeUndefined();
+    expect(ui.pickedUpY).toBeUndefined();
+  });
+
+  it("setFocusedDropZoneIndex sets and clears", () => {
+    ui.setFocusedDropZoneIndex(3);
+    expect(ui.focusedDropZoneIndex).toBe(3);
+    ui.setFocusedDropZoneIndex(undefined);
+    expect(ui.focusedDropZoneIndex).toBeUndefined();
+  });
+
+  it("clearPickedUpTile also clears focusedDropZoneIndex", () => {
+    ui.pickUpTile("t1", "d1");
+    ui.setFocusedDropZoneIndex(2);
+    ui.clearPickedUpTile();
+    expect(ui.focusedDropZoneIndex).toBeUndefined();
+  });
+
+  it("pick-up state does not appear in snapshots", () => {
+    ui.pickUpTile("t1", "d1", "Text", 100, 200);
+    const snapshot = getSnapshot(ui);
+    expect(snapshot).not.toHaveProperty("pickedUpTileId");
+    expect(snapshot).not.toHaveProperty("pickedUpDocId");
+    expect(snapshot).not.toHaveProperty("pickedUpTileType");
+    expect(snapshot).not.toHaveProperty("pickedUpX");
+    expect(snapshot).not.toHaveProperty("pickedUpY");
   });
 
   it("allows prompt dialogs", () => {
