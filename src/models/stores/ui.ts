@@ -57,17 +57,17 @@ export const UIModel = types
     dialog: types.maybe(UIDialogModel),
     learningLogWorkspace: WorkspaceModel,
     dragId: types.maybe(types.string), // The id of the object being dragged. Used with dnd-kit dragging.
+    pickedUpTileId: types.maybe(types.string),
+    pickedUpDocId: types.maybe(types.string),
+    pickedUpTileType: types.maybe(types.string),
+    pickedUpX: types.maybe(types.number),
+    pickedUpY: types.maybe(types.number),
+    focusedDropZoneIndex: types.maybe(types.number)
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
     standalone: false,
     errorContent: undefined as React.FC<any> | undefined,
-    pickedUpTileId: undefined as string | undefined,
-    pickedUpDocId: undefined as string | undefined,
-    pickedUpTileType: undefined as string | undefined,
-    pickedUpX: undefined as number | undefined,
-    pickedUpY: undefined as number | undefined,
-    focusedDropZoneIndex: undefined as number | undefined,
   }))
   .views((self) => ({
     isSelectedTile(tile: ITileModel) {

@@ -171,14 +171,14 @@ describe("ui model", () => {
     expect(ui.focusedDropZoneIndex).toBeUndefined();
   });
 
-  it("pick-up state does not appear in snapshots", () => {
+  it("pick-up state appears in snapshots as MST properties", () => {
     ui.pickUpTile("t1", "d1", "Text", 100, 200);
     const snapshot = getSnapshot(ui);
-    expect(snapshot).not.toHaveProperty("pickedUpTileId");
-    expect(snapshot).not.toHaveProperty("pickedUpDocId");
-    expect(snapshot).not.toHaveProperty("pickedUpTileType");
-    expect(snapshot).not.toHaveProperty("pickedUpX");
-    expect(snapshot).not.toHaveProperty("pickedUpY");
+    expect(snapshot).toHaveProperty("pickedUpTileId", "t1");
+    expect(snapshot).toHaveProperty("pickedUpDocId", "d1");
+    expect(snapshot).toHaveProperty("pickedUpTileType", "Text");
+    expect(snapshot).toHaveProperty("pickedUpX", 100);
+    expect(snapshot).toHaveProperty("pickedUpY", 200);
   });
 
   it("allows prompt dialogs", () => {
