@@ -278,6 +278,13 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     // and don't allow the events to bubble up to this handler.
     const append = hasSelectionModifier(e);
     userSelectTile(ui, model, { readOnly, append, container: containerContext.model });
+    // Redirect focus to the tile container so Tab enters the focus trap
+    // (title first) rather than cycling within it. Object clicks don't reach
+    // this handler — they're stopped by the drawing layer's stopPropagation.
+    requestAnimationFrame(() => {
+      const tileContainer = drawingToolElement.current?.closest('.tool-tile') as HTMLElement | null;
+      tileContainer?.focus();
+    });
   };
 
   const getObjectListPanelWidth = () => {

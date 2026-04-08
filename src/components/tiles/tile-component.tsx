@@ -782,11 +782,6 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     // Select the tile if the tool doesn't handle the selection itself
     if (!getTileComponentInfo(model.content.type)?.tileHandlesOwnSelection) {
       this.selectTileHandler(e);
-    } else {
-      // Tiles that handle their own selection may have inner focusable elements
-      // that grab focus on click. Redirect focus to the tile container so Tab
-      // navigates between tiles rather than entering the focus trap.
-      requestAnimationFrame(() => this.domElement?.focus());
     }
   };
 
