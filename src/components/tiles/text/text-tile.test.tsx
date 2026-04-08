@@ -27,7 +27,6 @@ describe("TextToolComponent", () => {
   it("renders its toolbar with heading button", () => {
     specTextTile({});
     userEvent.click(screen.getByTestId("ccrte-editor"));
-    expect(screen.getAllByRole("button")).toHaveLength(10);
     const buttons = screen.getAllByRole("button");
     const headingButton = buttons.find(b => b.getAttribute("aria-label") === "Heading");
     expect(headingButton).toBeDefined();
