@@ -1,3 +1,4 @@
+import { getSnapshot } from "mobx-state-tree";
 import { ProblemModel } from "../curriculum/problem";
 import { SectionModel } from "../curriculum/section";
 import { createDocumentModel } from "../document/document";
@@ -46,7 +47,7 @@ describe("Stores.findContentOfTile", () => {
     });
     const section = SectionModel.create({
       type: "introduction",
-      content: sectionContent
+      content: getSnapshot(sectionContent)
     });
     const problem = ProblemModel.create({ ordinal: 1, title: "Test Problem" });
     problem.sections.push(section);
@@ -72,7 +73,7 @@ describe("Stores.findContentOfTile", () => {
     });
     const section = SectionModel.create({
       type: "introduction",
-      content: sectionContent
+      content: getSnapshot(sectionContent)
     });
     const problem = ProblemModel.create({ ordinal: 1, title: "Test Problem" });
     problem.sections.push(section);
