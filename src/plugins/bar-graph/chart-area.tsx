@@ -39,13 +39,13 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
   const primary = model?.primaryAttribute || "";
   const secondary = model?.secondaryAttribute;
   const svgRef = useRef<SVGSVGElement>(null);
-  const [announcement, setAnnouncement] = useState<{ text: string; key: number }>({ text: "", key: 0 });
+  const [announcement, setAnnouncement] = useState("");
 
   const announce = useCallback((text: string) => {
     // Clear first so repeating the same text is detected as a DOM change by screen readers
-    setAnnouncement({ text: "", key: 0 });
+    setAnnouncement("");
     requestAnimationFrame(() => {
-      setAnnouncement(prev => ({ text, key: prev.key + 1 }));
+      setAnnouncement(text);
     });
   }, []);
 
@@ -276,7 +276,7 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
         height={30}
       />
       <foreignObject x={0} y={0} width={1} height={1} overflow="hidden">
-        <div aria-live="polite" className="visually-hidden">{announcement.text}</div>
+        <div aria-live="polite" className="visually-hidden">{announcement}</div>
       </foreignObject>
     </svg>
   );

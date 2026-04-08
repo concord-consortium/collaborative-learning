@@ -416,6 +416,73 @@ describe("TileComponent focus trap", () => {
     });
   });
 
+  // --- Tab within content (multiple focusable children) ---
+
+  describe("Tab cycles through focusable children within content", () => {
+    // These tests use native dispatchEvent because the Tab handler is a capture-phase listener.
+    // React's fireEvent dispatches in bubble phase and won't trigger capture listeners.
+    // jsdom returns zero-size bounding rects, so mock checkVisibility on test inputs
+    function makeVisible(el: HTMLElement) {
+      (el as any).checkVisibility = () => true;
+    }
+
+    it("Tab moves from first to second focusable child in content", () => {
+      const { contentElement } = renderFocusTrapTile();
+      const input1 = document.createElement("input");
+      const input2 = document.createElement("input");
+      makeVisible(input1);
+      makeVisible(input2);
+      contentElement!.appendChild(input1);
+      contentElement!.appendChild(input2);
+      act(() => { input1.focus(); });
+      input1.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+      expect(document.activeElement).toBe(input2);
+      contentElement!.removeChild(input1);
+      contentElement!.removeChild(input2);
+    });
+
+    it("Shift+Tab moves from second to first focusable child in content", () => {
+      const { contentElement } = renderFocusTrapTile();
+      const input1 = document.createElement("input");
+      const input2 = document.createElement("input");
+      makeVisible(input1);
+      makeVisible(input2);
+      contentElement!.appendChild(input1);
+      contentElement!.appendChild(input2);
+      act(() => { input2.focus(); });
+      input2.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true }));
+      expect(document.activeElement).toBe(input1);
+      contentElement!.removeChild(input1);
+      contentElement!.removeChild(input2);
+    });
+
+    it("Tab from last focusable child exits content to toolbar", () => {
+      const { contentElement, toolbarButtons } = renderFocusTrapTile();
+      const input1 = document.createElement("input");
+      const input2 = document.createElement("input");
+      contentElement!.appendChild(input1);
+      contentElement!.appendChild(input2);
+      act(() => { input2.focus(); });
+      input2.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+      expect(document.activeElement).toBe(toolbarButtons[0]);
+      contentElement!.removeChild(input1);
+      contentElement!.removeChild(input2);
+    });
+
+    it("Shift+Tab from first focusable child exits content to title", () => {
+      const { contentElement, titleElement } = renderFocusTrapTile();
+      const input1 = document.createElement("input");
+      const input2 = document.createElement("input");
+      contentElement!.appendChild(input1);
+      contentElement!.appendChild(input2);
+      act(() => { input1.focus(); });
+      input1.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true }));
+      expect(document.activeElement).toBe(titleElement);
+      contentElement!.removeChild(input1);
+      contentElement!.removeChild(input2);
+    });
+  });
+
   // --- Escape ---
 
   describe("Escape exits focus trap", () => {

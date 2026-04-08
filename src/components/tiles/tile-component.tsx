@@ -496,17 +496,25 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   // Returns true if focus was moved, false if already at the boundary (first/last element).
   // Note: DOM query + visibility check on each Tab press. Acceptable for typical tile sizes (<100 elements).
   private tabWithinContent(contentElement: HTMLElement, activeElement: HTMLElement, reverse: boolean): boolean {
+    const focusableSelector = [
+      'a[href]', 'button:not([disabled])', 'input:not([disabled]):not([type="hidden"])',
+      'select:not([disabled])', 'textarea:not([disabled])', '[contenteditable]:not([contenteditable="false"])',
+      '[tabindex]:not([tabindex="-1"])'
+    ].join(", ");
+
     const focusables = Array.from(
-      contentElement.querySelectorAll<HTMLElement>(
-        '[tabindex="0"], button:not([disabled]), [role="button"][tabindex="0"]'
-      )
+      contentElement.querySelectorAll<HTMLElement>(focusableSelector)
     ).filter(el => {
-      // checkVisibility handles SVG elements, hidden menus, and opacity — available in all modern browsers
+      if (el.getAttribute("aria-hidden") === "true") return false;
+      // For SVG <g> elements, checkVisibility returns false (no own rendering), so use bounding rect.
+      if (el instanceof SVGElement) {
+        const svgRect = el.getBoundingClientRect();
+        return svgRect.width > 0 && svgRect.height > 0;
+      }
       const check = (el as any).checkVisibility;
       if (typeof check === "function") {
         return check.call(el, { checkOpacity: true, checkVisibilityCSS: true });
       }
-      // Fallback: non-zero bounding rect
       const rect = el.getBoundingClientRect();
       return rect.width > 0 && rect.height > 0;
     });
