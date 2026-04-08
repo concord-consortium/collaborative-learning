@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import Modal from "react-modal";
 import {
@@ -13,6 +13,8 @@ import { isStudentCardDragData, StudentCard } from "./student-card";
 import CloseIconSvg from "../../assets/icons/close/close.svg";
 
 import "./group-management-modal.scss";
+
+let nextTitleId = 0;
 
 interface IProps {
   allowCancel?: boolean;
@@ -84,8 +86,11 @@ export const GroupManagementModal: React.FC<IProps> = observer(
       onClose();
     };
 
+    const titleId = useRef(`group-management-modal-title-${++nextTitleId}`).current;
+
     return (
       <Modal
+        aria={{ labelledby: titleId, modal: true }}
         className="group-management-modal"
         isOpen={isOpen}
         onRequestClose={allowCancel ? handleCancel : undefined}
@@ -105,11 +110,13 @@ export const GroupManagementModal: React.FC<IProps> = observer(
               <div className="group-management-modal__icon-person" />
             </div>
           </div>
-          <div className="group-management-modal__title" data-testid="group-management-modal-title">
+          <div className="group-management-modal__title" id={titleId}
+            data-testid="group-management-modal-title">
             {groupManagementState.modalTitle}
           </div>
           {allowCancel && (
             <button
+              aria-label="Close"
               className="group-management-modal__close"
               data-testid="group-management-modal-close-button"
               type="button"
