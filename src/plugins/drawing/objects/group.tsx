@@ -27,6 +27,9 @@ export const GroupObject = SizedObject.named("GroupObject")
     get label() {
       return "Group";
     },
+    get ariaLabel() {
+      return `Group of ${self.objects.length} objects`;
+    },
     get icon() {
       return (<GroupObjectsIcon viewBox={ObjectTypeIconViewBox}/>);
     },
@@ -202,14 +205,15 @@ function renderChildDrawingObjects(group: GroupObjectType, readOnly: boolean) {
 }
 
 export const GroupComponent = observer(function GroupComponent(
-    {model, handleHover, handleDrag} : IDrawingComponentProps) {
+    {model, handleHover, handleDrag, a11yProps} : IDrawingComponentProps) {
   const readOnly = useReadOnlyContext();
   if (!isGroupObject(model)) return null;
   const group = model as GroupObjectType;
   const {id, currentDims} = group;
 
   return (
-    <Transformable type="group" key={id} transform={group.transform} setAnimating={group.setAnimating}>
+    <Transformable type="group" key={id} transform={group.transform} setAnimating={group.setAnimating}
+      {...a11yProps}>
       <DrawingScaleProvider scale={{ scaleX: currentDims.width, scaleY: currentDims.height }}>
         <g className="group"
            transform={`scale(${currentDims.width}, ${currentDims.height})`}>

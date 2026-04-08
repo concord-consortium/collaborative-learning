@@ -506,6 +506,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       contentElement.querySelectorAll<HTMLElement>(focusableSelector)
     ).filter(el => {
       if (el.getAttribute("aria-hidden") === "true") return false;
+      // checkVisibility handles hidden menus, opacity, etc. — available in all modern browsers.
       // For SVG <g> elements, checkVisibility returns false (no own rendering), so use bounding rect.
       if (el instanceof SVGElement) {
         const svgRect = el.getBoundingClientRect();
@@ -803,6 +804,11 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     // Select the tile if the tool doesn't handle the selection itself
     if (!getTileComponentInfo(model.content.type)?.tileHandlesOwnSelection) {
       this.selectTileHandler(e);
+    } else {
+      // Tiles that handle their own selection may have inner focusable elements
+      // that grab focus on click. Redirect focus to the tile container so Tab
+      // navigates between tiles rather than entering the focus trap.
+      requestAnimationFrame(() => this.domElement?.focus());
     }
   };
 
