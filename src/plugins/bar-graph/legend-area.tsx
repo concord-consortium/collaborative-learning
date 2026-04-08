@@ -60,9 +60,9 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
       <div className="inner-container" ref={legendRef}>
         <div className="dataset-header">
           <div className="dataset-icon">
-            <a onClick={unlinkDataset} aria-label={`Unlink ${dataSetName}`}>
+            <button type="button" onClick={unlinkDataset} aria-label={`Unlink ${dataSetName}`} disabled={readOnly}>
               <RemoveDataIcon />
-            </a>
+            </button>
           </div>
           <div className="dataset-label">
             <span className="dataset-label-text">Data from:</span>

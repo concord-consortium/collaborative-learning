@@ -92,7 +92,18 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
       {isEditing
         ? <TileLabelInput value={editingTitle} style={inputStyle}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onBlur={() => handleClose(true)} />
-        : <div className="editable-tile-title-text">{title}</div>}
+        : <div className="editable-tile-title-text" tabIndex={0}
+            role={readOnly ? undefined : "button"}
+            aria-label={readOnly ? title : `Edit title: ${title}`}
+            onKeyDown={readOnly ? undefined : (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleClick();
+              }
+            }}
+          >
+            {title}
+          </div>}
     </div>
   );
 });

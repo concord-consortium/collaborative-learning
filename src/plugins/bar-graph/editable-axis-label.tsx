@@ -75,11 +75,19 @@ const EditableAxisLabel: React.FC<IProps> = observer(function EditableAxisLabel(
     );
   }
 
+  const handleLabelKeyDown = (e: React.KeyboardEvent<SVGRectElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleStartEdit();
+    }
+  };
+
   return (
     <g>
       {boundingBox &&
         <rect
           data-testid="axis-label-button"
+          className="editable-axis-label-button"
           x={boundingBox.x - paddingX}
           y={boundingBox.y - paddingY}
           width={boundingBox.width + 2*paddingX}
@@ -91,6 +99,10 @@ const EditableAxisLabel: React.FC<IProps> = observer(function EditableAxisLabel(
           fill="none"
           pointerEvents={editing ? "none" : "all"}
           onClick={handleStartEdit}
+          onKeyDown={readOnly ? undefined : handleLabelKeyDown}
+          tabIndex={readOnly ? -1 : 0}
+          role={readOnly ? undefined : "button"}
+          aria-label={readOnly ? displayText : `Edit Y-axis label: ${displayText}`}
         />}
       <g ref={textRef}>
         <Text

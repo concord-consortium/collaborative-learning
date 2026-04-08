@@ -1,4 +1,5 @@
 @import "../../components/vars";
+@import "../../components/mixins";
 
 $color-button-hover: rgba(20, 244, 158, .25); // 25% #14f49e
 $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
@@ -21,6 +22,23 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
     .visx-bar {
       stroke: black;
       stroke-width: 1px;
+
+      &:focus-visible,
+      &.keyboard-focused {
+        outline: 2px solid $focus-ring-color;
+        outline-offset: 2px;
+      }
+    }
+
+    .editable-axis-label-button {
+      &:focus {
+        outline: none;
+      }
+      &:focus-visible,
+      &.keyboard-focused {
+        stroke: $focus-ring-color;
+        stroke-width: 3px;
+      }
     }
 
     foreignObject {
@@ -51,7 +69,15 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
       .dataset-icon {
         margin-right: 7px;
 
-        &:hover {
+        button {
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          @include focus-ring;
+        }
+
+        &:hover:not(:has(button:disabled)) {
           background-color: $workspace-teal-light-6;
         }
       }
@@ -103,6 +129,7 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
         border-radius: 5px;
         border: solid 1.5px $charcoal-light-1;
         pointer-events: auto;
+        @include focus-ring;
 
         &:hover {
           background: $color-button-hover;
@@ -212,6 +239,7 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
     border: 1.5px solid #949494;
     border-radius: 5px;
     padding: 5px;
+    @include focus-ring;
 
     .button-content {
       display: flex;

@@ -11,6 +11,7 @@ import { BarGraphModelContext } from "./bar-graph-content-context";
 import { isBarGraphModel } from "./bar-graph-content";
 import { TileToolbar } from "../../components/toolbar/tile-toolbar";
 import { useUIStore } from "../../hooks/use-stores";
+import { useClueAccessibility } from "../../hooks/use-clue-accessibility";
 
 import "./bar-graph.scss";
 
@@ -19,7 +20,7 @@ import "./bar-graph-toolbar";
 const legendWidth = 190;
 
 export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITileProps) => {
-  const { model, readOnly, onRequestRowHeight } = props;
+  const { model, readOnly, onRequestRowHeight, onRegisterTileApi, onUnregisterTileApi } = props;
   const ui = useUIStore();
   const content = isBarGraphModel(model.content) ? model.content : null;
 
@@ -50,6 +51,34 @@ export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITilePro
     refreshRate: 500,
     skipOnMount: false,
     onResize
+  });
+
+  useClueAccessibility({
+    type: "tile",
+    focusTrap: {
+      onRegisterTileApi,
+      onUnregisterTileApi,
+      tileType: "bar-graph",
+      getTitleElement: () => {
+        // Find the title text element within this tile's DOM
+        const tile = containerRef.current?.closest('.tool-tile');
+        return tile?.querySelector('.editable-tile-title-text') as HTMLElement | undefined;
+      },
+      getContentElement: () => containerRef.current ?? undefined,
+      focusContent: () => {
+        const container = containerRef.current;
+        if (!container) return false;
+        // Focus the first bar, or fall back to the first focusable element in the content area
+        const firstFocusable = container.querySelector(
+          '.visx-bar[tabindex], [role="button"][tabindex], button, [tabindex="0"]'
+        ) as HTMLElement | null;
+        if (firstFocusable) {
+          firstFocusable.focus();
+          return document.activeElement === firstFocusable;
+        }
+        return false;
+      },
+    },
   });
 
   let svgWidth = 10, svgHeight = 10;

@@ -26,7 +26,7 @@ export function createClueTileStrategy(config: ClueFocusTrapConfig): FocusTrapSt
       toolbar: getToolbar(),
     }),
     focusContent: config.focusContent,
-    cycleOrder: ["title", "toolbar", "content"],
+    cycleOrder: ["title", "content", "toolbar"],
     announceEnter: ariaLabels.announce.editingTile(config.tileType),
     announceExit: ariaLabels.announce.exitedTile(config.tileType),
     getExternalElements: () => {
