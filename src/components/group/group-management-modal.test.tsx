@@ -117,7 +117,7 @@ describe("GroupManagementModal accessibility", () => {
   it("Escape closes the modal when allowCancel is true", async () => {
     const onClose = jest.fn();
     renderModal({ allowCancel: true, onClose });
-    const dialog = screen.getByRole("dialog");
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
 
     await userEvent.keyboard("{Escape}");
     expect(onClose).toHaveBeenCalled();
@@ -126,7 +126,7 @@ describe("GroupManagementModal accessibility", () => {
   it("Escape does not close the modal when allowCancel is false", async () => {
     const onClose = jest.fn();
     renderModal({ allowCancel: false, onClose });
-    screen.getByRole("dialog");
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
 
     await userEvent.keyboard("{Escape}");
     expect(onClose).not.toHaveBeenCalled();
