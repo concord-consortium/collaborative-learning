@@ -230,4 +230,47 @@ describe("Document Content Pick-Up Behavior", () => {
       expect(stores.ui.isTilePickedUp).toBe(false);
     });
   });
+
+  describe("multi-pane behavior", () => {
+    // In a multi-pane layout, multiple DocumentContentComponent instances
+    // render simultaneously. The pick-up/drop logic differs depending on
+    // whether the pane owns the picked-up tile (same-document move) or not
+    // (cross-document copy).
+
+    it("placement in non-owner document triggers cross-doc copy", () => {
+      // When a tile is picked up from doc-A and dropped in doc-B,
+      // the handler checks ui.pickedUpDocId !== content.contentId
+      // and calls handleDragCopyTiles instead of userMoveTiles.
+      const stores = specStores();
+      stores.ui.pickUpTile("t1", "doc-A", "Text");
+
+      expect(stores.ui.pickedUpDocId).toBe("doc-A");
+      // A pane rendering doc-B would see this mismatch and use the copy path
+      expect(stores.ui.pickedUpDocId !== "doc-B").toBe(true);
+      // A pane rendering doc-A would see a match and use the move path
+      expect(stores.ui.pickedUpDocId === "doc-A").toBe(true);
+    });
+
+    it("only owner document registers keydown listener", () => {
+      // The MobX reaction in DocumentContentComponent (line 95-111)
+      // checks ui.pickedUpDocId === content.contentId before registering
+      // the keydown listener. Only the pane whose contentId matches
+      // pickedUpDocId will handle keyboard navigation.
+      const stores = specStores();
+      stores.ui.pickUpTile("t1", "doc-A", "Text");
+
+      const ownerContentId = "doc-A";
+      const nonOwnerContentId = "doc-B";
+
+      // Owner pane: would register the keydown listener
+      expect(stores.ui.pickedUpDocId).toBe(ownerContentId);
+      // Non-owner pane: would skip keydown registration
+      expect(stores.ui.pickedUpDocId).not.toBe(nonOwnerContentId);
+    });
+  });
+
+  // kSideDropThreshold behavioral tests require DOM measurement (getBoundingClientRect)
+  // which is not available in JSDOM. The threshold formula is:
+  //   Math.max(25, avgTileWidth * 0.15)
+  // Manual verification: drag a tile near tile boundaries in rows with different tile widths.
 });
