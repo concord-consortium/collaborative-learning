@@ -2,7 +2,7 @@
  * Returns all visible, focusable elements within a container, in DOM order.
  * Handles SVG <g> elements (which fail checkVisibility) via bounding rect fallback.
  */
-export function getVisibleFocusables(container: HTMLElement): HTMLElement[] {
+export function getVisibleFocusables(container: HTMLElement | Element): (HTMLElement | SVGElement)[] {
   const selector = [
     'a[href]', 'button:not([disabled])', 'input:not([disabled]):not([type="hidden"])',
     'select:not([disabled])', 'textarea:not([disabled])', '[contenteditable]:not([contenteditable="false"])',
@@ -10,7 +10,7 @@ export function getVisibleFocusables(container: HTMLElement): HTMLElement[] {
   ].join(", ");
 
   return Array.from(
-    container.querySelectorAll<HTMLElement>(selector)
+    container.querySelectorAll<HTMLElement | SVGElement>(selector)
   ).filter(el => {
     if (el.getAttribute("aria-hidden") === "true") return false;
     if (el instanceof SVGElement) {

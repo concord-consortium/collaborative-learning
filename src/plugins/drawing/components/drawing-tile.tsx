@@ -169,6 +169,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       );
       if (!editableSibling) {
         onRegisterTileApi(tileAdditionalApi);
+        return () => onUnregisterTileApi();
       }
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -356,8 +357,8 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
           const focusedObjectId = focusedEl?.closest('.transformable[data-object-id]')
             ?.getAttribute('data-object-id');
 
-          // Enter on a focused object: select it (or edit if text and already selected)
-          if (e.key === "Enter" && focusedObjectId && !readOnly) {
+          // Enter/Space on a focused object: select it (or edit if text and already selected)
+          if ((e.key === "Enter" || e.key === " ") && focusedObjectId && !readOnly) {
             e.preventDefault();
             const obj = contentModel.objectMap[focusedObjectId];
             if (obj) {
