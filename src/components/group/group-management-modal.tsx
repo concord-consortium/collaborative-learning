@@ -88,11 +88,23 @@ export const GroupManagementModal: React.FC<IProps> = observer(
 
     const titleId = useRef(`group-management-modal-title-${++nextTitleId}`).current;
 
+    const handleAfterOpen = () => {
+      // Focus the current user's group card so they can immediately Tab to a different group.
+      const currentGroupId = groupManagementState.currentUserGroupId;
+      if (currentGroupId) {
+        const groupCard = document.querySelector(
+          `[data-testid="group-card-${currentGroupId}"]`
+        ) as HTMLElement | null;
+        groupCard?.focus({ focusVisible: true } as FocusOptions);
+      }
+    };
+
     return (
       <Modal
         aria={{ labelledby: titleId, modal: true }}
         className="group-management-modal"
         isOpen={isOpen}
+        onAfterOpen={handleAfterOpen}
         onRequestClose={allowCancel ? handleCancel : undefined}
         overlayClassName="group-management-modal__overlay"
         shouldCloseOnEsc={allowCancel}

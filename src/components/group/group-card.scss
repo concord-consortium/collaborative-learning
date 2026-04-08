@@ -12,7 +12,8 @@ $group-card-empty-height: 38px;
   overflow: hidden;
 
   &:focus-visible {
-    outline: solid 1.5px $workspace-teal;
+    outline: 2px solid $focus-ring-color;
+    outline-offset: 2px;
   }
 
   &.clickable {
@@ -21,7 +22,8 @@ $group-card-empty-height: 38px;
     outline: solid 1.5px $charcoal-light-1;
 
     &:focus-visible {
-      outline: solid 1.5px $workspace-teal;
+      outline: 2px solid $focus-ring-color;
+      outline-offset: 2px;
     }
 
     &:hover {

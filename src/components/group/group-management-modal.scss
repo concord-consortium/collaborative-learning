@@ -106,8 +106,8 @@ $groups-grid-columns: 5;
     &:focus-visible {
       background-color: $charcoal-light-4;
       box-shadow:
-        -2px 0 0 0 $workspace-teal, // left
-        0 2px 0 0 $workspace-teal; // bottom
+        -2px 0 0 0 $focus-ring-color, // left
+        0 2px 0 0 $focus-ring-color; // bottom
     }
 
     &:active {
@@ -263,7 +263,8 @@ $groups-grid-columns: 5;
     transition: background-color 0.15s ease;
 
     &:focus-visible {
-      outline: solid 1.5px $workspace-teal;
+      outline: 2px solid $focus-ring-color;
+      outline-offset: 1px;
     }
 
     &.cancel {
