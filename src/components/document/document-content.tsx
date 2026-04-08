@@ -659,7 +659,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       case "Tab": {
         // Move focus to the delete button
         e.preventDefault();
-        const deleteButton = document.querySelector<HTMLElement>(".delete-button");
+        const deleteButton = this.domElement?.closest(".problem-panel")?.querySelector<HTMLElement>(".delete-button");
         if (deleteButton) {
           deleteButton.focus();
         }
