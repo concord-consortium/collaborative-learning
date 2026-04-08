@@ -304,7 +304,7 @@ exports[`Drawing Layer Components Group creates a group 1`] = `
     <g
       aria-label="Group of 2 objects"
       class="transformable transformable-group"
-      data-object-id="QFJ-x5rkPV9b2VYg"
+      data-object-id="test-id-1"
       role="button"
       tabindex="0"
       transform="translate(20,20) rotate(0) translate(-20,-20) scale(1,1)"
@@ -453,7 +453,7 @@ exports[`Drawing Layer Components Group flips a group horizontally 1`] = `
     <g
       aria-label="Group of 2 objects"
       class="transformable transformable-group"
-      data-object-id="RyZwB6gU3IAHjl-z"
+      data-object-id="test-id-1"
       role="button"
       tabindex="0"
       transform="translate(50,20) rotate(0) translate(0,-20) scale(-1,1)"
@@ -590,7 +590,7 @@ exports[`Drawing Layer Components Group flips a group vertically 1`] = `
     <g
       aria-label="Group of 2 objects"
       class="transformable transformable-group"
-      data-object-id="PjwvYDIW6dpLPaT6"
+      data-object-id="test-id-1"
       role="button"
       tabindex="0"
       transform="translate(20,50) rotate(0) translate(-20,0) scale(1,-1)"
@@ -727,7 +727,7 @@ exports[`Drawing Layer Components Group moves a group 1`] = `
     <g
       aria-label="Group of 2 objects"
       class="transformable transformable-group"
-      data-object-id="oTl4zDjWUtaBY9oU"
+      data-object-id="test-id-1"
       role="button"
       tabindex="0"
       transform="translate(25,25) rotate(0) translate(-20,-20) scale(1,1)"
