@@ -34,6 +34,7 @@ import { VoiceTypingOverlay } from "../../../utilities/voice-typing-overlay";
 import { useContainerContext } from "../../../components/document/container-context";
 import { calculateFitContent } from "../model/drawing-utils";
 import { useClueAccessibility } from "../../../hooks/use-clue-accessibility";
+import { getVisibleFocusables } from "../../../utilities/dom-utils";
 
 import "./drawing-tile.scss";
 
@@ -148,15 +149,10 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       focusContent: () => {
         const container = drawingToolElement.current;
         if (!container) return false;
-        // Focus the first visible focusable element in the content area.
-        // For drawing objects this is the first in DOM order (backmost in z-order).
-        // Tab then moves forward through all objects before exiting to toolbar.
-        const firstFocusable = container.querySelector(
-          '.transformable[tabindex="0"], button[tabindex="0"]'
-        ) as HTMLElement | null;
-        if (firstFocusable) {
-          firstFocusable.focus();
-          return document.activeElement === firstFocusable;
+        const focusables = getVisibleFocusables(container);
+        if (focusables.length > 0) {
+          focusables[0].focus();
+          return document.activeElement === focusables[0];
         }
         return false;
       },
