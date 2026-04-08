@@ -67,7 +67,7 @@
         "maxTiles": 1
       },
       "text": {
-        "tools": ["bold", "italic", "underline", "subscript", "superscript", "heading", "list-ol", "list-ul", "link"]
+        "tools": ["bold", "italic", "underline", "highlight", "subscript", "superscript", "heading", "list-ol", "list-ul", "link"]
       },
       "iframeInteractive": {
         "maxTiles": 1,
