@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
-import React, { useContext } from "react";
-import { TileModelContext } from "../../../components/tiles/tile-api";
-import { isTimelineContentModel, TimelineEvent } from "../models/timeline-content";
+import React from "react";
+import { useTimelineContent } from "../hooks/use-timeline-content";
+import { TimelineEvent } from "../models/timeline-content";
 import { kEventColorMap, EventColorWord } from "../timeline-event-colors";
 
 import "./event-overlay.scss";
@@ -14,14 +14,12 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 export const EventOverlay = observer(function EventOverlay() {
-  const rawContent = useContext(TileModelContext)?.content;
-  const model = isTimelineContentModel(rawContent) ? rawContent : undefined;
-  if (!model) return null;
+  const content = useTimelineContent();
 
-  const startTime = model.viewStartTime;
-  const endTime = model.viewEndTime;
-  const visibleEvents = model.visibleEvents;
-  const colorWords = model.eventTypeColorWords;
+  const startTime = content.viewStartTime;
+  const endTime = content.viewEndTime;
+  const visibleEvents = content.visibleEvents;
+  const colorWords = content.eventTypeColorWords;
 
   function getEventPosition(event: TimelineEvent) {
     if (!startTime || !endTime) return null;
@@ -53,7 +51,7 @@ export const EventOverlay = observer(function EventOverlay() {
                 width: `${pos.widthPct}%`,
                 backgroundColor: hexToRgba(color, 0.5),
               }}
-              onClick={() => model.selectEvent(event.index)}
+              onClick={() => content.selectEvent(event.index)}
             />
             <button
               className="event-label-button"
@@ -61,7 +59,7 @@ export const EventOverlay = observer(function EventOverlay() {
                 left: `${pos.leftPct + pos.widthPct / 2}%`,
                 backgroundColor: color,
               }}
-              onClick={() => model.selectEvent(event.index)}
+              onClick={() => content.selectEvent(event.index)}
             >
               {event.index + 1}
             </button>
