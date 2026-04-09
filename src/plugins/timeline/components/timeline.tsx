@@ -5,6 +5,7 @@ import { TileModelContext } from "../../../components/tiles/tile-api";
 import { isValidDateTime } from "../../../utilities/luxon-utils";
 import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
 import { isTimelineContentModel } from "../models/timeline-content";
+import { EventOverlay } from "./event-overlay";
 
 import "./timeline.scss";
 
@@ -43,12 +44,15 @@ export const Timeline = observer(function Timeline() {
     <div className="timeline-area">
       {sharedSeismogram && isValidDateTime(startTime) && isValidDateTime(endTime) ? (
         <>
-          <WaveformPanel
-            label="Full waveform"
-            sharedSeismogram={sharedSeismogram}
-            startTime={startTime}
-            endTime={endTime}
-          />
+          <div className="waveform-wrapper">
+            <WaveformPanel
+              label="Full waveform"
+              sharedSeismogram={sharedSeismogram}
+              startTime={startTime}
+              endTime={endTime}
+            />
+            <EventOverlay />
+          </div>
           <div className="timeline-range-row">
             <div className="range-date range-start">
               <div>{startTime.toUTC().toLocaleString()}</div>
