@@ -27,6 +27,7 @@ export const TimelineContentModel = TileContentModel
     type: types.optional(types.literal(kTimelineTileType), kTimelineTileType),
     viewStartTimeISO: types.maybe(types.string),
     viewEndTimeISO: types.maybe(types.string),
+    selectedEventIndex: types.optional(types.number, 0),
   })
   .views(self => ({
     get isUserResizable() {
@@ -141,6 +142,22 @@ export const TimelineContentModel = TileContentModel
       return self.events.filter(e =>
         e.windowEnd > self.viewStartTime! && e.windowStart < self.viewEndTime!
       );
+    },
+    get selectedEvent(): TimelineEvent | undefined {
+      const events = self.events;
+      if (events.length === 0) return undefined;
+      const idx = Math.max(0, Math.min(self.selectedEventIndex, events.length - 1));
+      return events[idx];
+    },
+    get canSelectPrev() {
+      return self.events.length > 0 && self.selectedEventIndex > 0;
+    },
+    get canSelectNext() {
+      return self.selectedEventIndex < self.events.length - 1;
+    },
+    get selectedEventLabel() {
+      if (self.events.length === 0) return "Event";
+      return `Event ${self.selectedEventIndex + 1}`;
     }
   }))
   .actions(self => ({
@@ -197,6 +214,45 @@ export const TimelineContentModel = TileContentModel
       const newStartTime = newEndTime.minus({ seconds: self.viewRangeSeconds });
 
       self.setViewRange(newStartTime, newEndTime);
+    }
+  }))
+  .actions(self => ({
+    focusEvent() {
+      const event = self.selectedEvent;
+      if (!event) return;
+      // Adjust view to show the event with 25% padding
+      const durationSeconds = event.windowEnd.diff(event.windowStart, "seconds").seconds;
+      const paddingSeconds = durationSeconds * 0.25;
+      let newStart = event.windowStart.minus({ seconds: paddingSeconds });
+      let newEnd = event.windowEnd.plus({ seconds: paddingSeconds });
+      // Clamp to data bounds
+      if (self.dataStartTime && newStart < self.dataStartTime) {
+        newStart = self.dataStartTime;
+      }
+      if (self.dataEndTime && newEnd > self.dataEndTime) {
+        newEnd = self.dataEndTime;
+      }
+      self.setViewRange(newStart, newEnd);
+    }
+  }))
+  .actions(self => ({
+    selectEvent(index: number) {
+      const events = self.events;
+      if (events.length === 0) return;
+      self.selectedEventIndex = Math.max(0, Math.min(index, events.length - 1));
+      self.focusEvent();
+    }
+  }))
+  .actions(self => ({
+    selectNextEvent() {
+      if (self.canSelectNext) {
+        self.selectEvent(self.selectedEventIndex + 1);
+      }
+    },
+    selectPrevEvent() {
+      if (self.canSelectPrev) {
+        self.selectEvent(self.selectedEventIndex - 1);
+      }
     }
   }));
 
