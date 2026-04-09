@@ -3,10 +3,19 @@ import { DateTime } from "luxon";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { isValidDateTime } from "../../../utilities/luxon-utils";
+import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
 import { kTimelineTileType } from "../timeline-types";
+import { kEventColorWords } from "../timeline-event-colors";
 
 export const kMinViewRangeSeconds = 2;
+
+export interface TimelineEvent {
+  index: number;
+  windowStart: DateTime;
+  windowEnd: DateTime;
+  eventType: string;
+}
 
 export function defaultTimelineContent(): TimelineContentModelType {
   return TimelineContentModel.create();
@@ -26,6 +35,10 @@ export const TimelineContentModel = TileContentModel
     get sharedSeismogram() {
       const smm = getSharedModelManager(self);
       return smm?.getTileSharedModelsByType(self, SharedSeismogram)[0] as SharedSeismogramType | undefined;
+    },
+    get sharedDataSet() {
+      const smm = getSharedModelManager(self);
+      return smm?.getTileSharedModelsByType(self, SharedDataSet)[0] as SharedDataSetType | undefined;
     },
     get viewStartTime() {
       if (!self.viewStartTimeISO) return undefined;
@@ -74,6 +87,60 @@ export const TimelineContentModel = TileContentModel
   .views(self => ({
     get canFitToData() {
       return self.canZoomOut;
+    }
+  }))
+  .views(self => ({
+    get events(): TimelineEvent[] {
+      const ds = self.sharedDataSet?.dataSet;
+      if (!ds) return [];
+      const windowStartAttr = ds.attrFromName("windowStart");
+      const windowEndAttr = ds.attrFromName("windowEnd");
+      const eventTypeAttr = ds.attrFromName("eventType");
+      if (!windowStartAttr || !windowEndAttr || !eventTypeAttr) {
+        console.warn("Timeline: SharedDataSet missing required attribute(s)",
+          { windowStart: !!windowStartAttr, windowEnd: !!windowEndAttr, eventType: !!eventTypeAttr });
+        return [];
+      }
+
+      const events: TimelineEvent[] = [];
+      for (const c of ds.cases) {
+        const startStr = ds.getStrValue(c.__id__, windowStartAttr.id);
+        const endStr = ds.getStrValue(c.__id__, windowEndAttr.id);
+        const eventType = ds.getStrValue(c.__id__, eventTypeAttr.id);
+        const windowStart = DateTime.fromISO(startStr);
+        const windowEnd = DateTime.fromISO(endStr);
+        if (windowStart.isValid && windowEnd.isValid && eventType) {
+          events.push({ index: 0, windowStart, windowEnd, eventType });
+        }
+      }
+      events.sort((a, b) => a.windowStart.toMillis() - b.windowStart.toMillis());
+      events.forEach((e, i) => e.index = i);
+      return events;
+    },
+    get eventTypeColorWords(): Map<string, string> {
+      const ds = self.sharedDataSet?.dataSet;
+      if (!ds) return new Map();
+      const eventTypeAttr = ds.attrFromName("eventType");
+      if (!eventTypeAttr) return new Map();
+
+      const colorMap = new Map<string, string>();
+      let colorIndex = 0;
+      for (const c of ds.cases) {
+        const eventType = ds.getStrValue(c.__id__, eventTypeAttr.id);
+        if (eventType && !colorMap.has(eventType) && colorIndex < kEventColorWords.length) {
+          colorMap.set(eventType, kEventColorWords[colorIndex]);
+          colorIndex++;
+        }
+      }
+      return colorMap;
+    }
+  }))
+  .views(self => ({
+    get visibleEvents(): TimelineEvent[] {
+      if (!self.viewStartTime || !self.viewEndTime) return [];
+      return self.events.filter(e =>
+        e.windowEnd > self.viewStartTime! && e.windowStart < self.viewEndTime!
+      );
     }
   }))
   .actions(self => ({

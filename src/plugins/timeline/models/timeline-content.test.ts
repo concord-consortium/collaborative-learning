@@ -1,6 +1,9 @@
 import { DateTime } from "luxon";
 import { TimelineContentModel, kMinViewRangeSeconds } from "./timeline-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
+import { SharedDataSet } from "../../../models/shared/shared-data-set";
+import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
+import { DataSet, addAttributeToDataSet, addCasesToDataSet } from "../../../models/data/data-set";
 
 // Mock getSharedModelManager to return a fake shared model manager
 jest.mock("../../../models/tiles/tile-environment", () => ({
@@ -8,6 +11,17 @@ jest.mock("../../../models/tiles/tile-environment", () => ({
 }));
 
 const mockedGetSharedModelManager = getSharedModelManager as jest.MockedFunction<typeof getSharedModelManager>;
+
+// Helper to create a SharedDataSet with events
+function createEventsDataSet(events: Array<{ windowStart: string; windowEnd: string; eventType: string }>) {
+  const dataSet = DataSet.create();
+  addAttributeToDataSet(dataSet, { name: "windowStart" });
+  addAttributeToDataSet(dataSet, { name: "windowEnd" });
+  addAttributeToDataSet(dataSet, { name: "eventType" });
+  addAttributeToDataSet(dataSet, { name: "confidence" });
+  addCasesToDataSet(dataSet, events.map(e => ({ ...e, confidence: "0.9" })));
+  return SharedDataSet.create({ dataSet });
+}
 
 describe("TimelineContent", () => {
   it("is always user resizable", () => {
@@ -33,7 +47,10 @@ describe("zoom functionality", () => {
 
     mockedGetSharedModelManager.mockReturnValue({
       isReady: true,
-      getTileSharedModelsByType: () => [mockSharedSeismogram],
+      getTileSharedModelsByType: (_self: any, type: any) => {
+        if (type === SharedSeismogram) return [mockSharedSeismogram];
+        return [];
+      },
     } as any);
 
     content = TimelineContentModel.create();
@@ -158,5 +175,85 @@ describe("zoom functionality", () => {
     // View range should remain unchanged
     expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
     expect(content.viewEndTime?.toISO()).toBe(dataEnd.toISO());
+  });
+});
+
+describe("event views", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+
+  let content: ReturnType<typeof TimelineContentModel.create>;
+  let mockSharedDataSet: any;
+
+  beforeEach(() => {
+    const mockSharedSeismogram = {
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
+      startTime: dataStart,
+      endTime: dataEnd,
+    };
+    mockSharedDataSet = undefined;
+
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) => {
+        if (type === SharedSeismogram) return [mockSharedSeismogram];
+        if (type === SharedDataSet) return mockSharedDataSet ? [mockSharedDataSet] : [];
+        return [];
+      },
+    } as any);
+
+    content = TimelineContentModel.create();
+  });
+
+  afterEach(() => {
+    mockedGetSharedModelManager.mockReset();
+  });
+
+  it("returns empty events when no shared dataset", () => {
+    expect(content.events).toEqual([]);
+  });
+
+  it("parses events from shared dataset sorted by windowStart", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
+      { windowStart: "2026-01-30T12:00:00.000Z", windowEnd: "2026-01-30T13:00:00.000Z", eventType: "Noise" },
+    ]);
+    const events = content.events;
+    expect(events).toHaveLength(2);
+    // Should be sorted by windowStart
+    expect(events[0].eventType).toBe("Noise");
+    expect(events[1].eventType).toBe("Earthquake");
+  });
+
+  it("assigns color words by order of first appearance in dataset", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-30T12:00:00.000Z", windowEnd: "2026-01-30T13:00:00.000Z", eventType: "Earthquake" },
+      { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Noise" },
+      { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Earthquake" },
+    ]);
+    const colors = content.eventTypeColorWords;
+    expect(colors.get("Earthquake")).toBe("blue");
+    expect(colors.get("Noise")).toBe("orange");
+  });
+
+  it("returns visible events that overlap the view window", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-30T06:00:00.000Z", windowEnd: "2026-01-30T07:00:00.000Z", eventType: "Earthquake" },
+      { windowStart: "2026-02-01T23:00:00.000Z", windowEnd: "2026-02-02T01:00:00.000Z", eventType: "Noise" },
+      { windowStart: "2026-02-03T00:00:00.000Z", windowEnd: "2026-02-03T01:00:00.000Z", eventType: "Earthquake" },
+      { windowStart: "2026-02-03T23:00:00.000Z", windowEnd: "2026-02-04T01:00:00.000Z", eventType: "Noise" },
+      { windowStart: "2026-02-05T00:00:00.000Z", windowEnd: "2026-02-05T01:00:00.000Z", eventType: "Earthquake" },
+    ]);
+    // Set view to middle of data range
+    content.setViewRange(
+      DateTime.fromISO("2026-02-02T00:00:00.000Z"),
+      DateTime.fromISO("2026-02-04T00:00:00.000Z")
+    );
+    const visible = content.visibleEvents;
+    // Should include: event overlapping start edge, fully contained event, event overlapping end edge
+    expect(visible).toHaveLength(3);
+    expect(visible[0].windowStart.toUTC().toISO()).toBe("2026-02-01T23:00:00.000Z");
+    expect(visible[1].windowStart.toUTC().toISO()).toBe("2026-02-03T00:00:00.000Z");
+    expect(visible[2].windowStart.toUTC().toISO()).toBe("2026-02-03T23:00:00.000Z");
   });
 });
