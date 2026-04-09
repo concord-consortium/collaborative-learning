@@ -338,11 +338,10 @@
           "timeline"
         ],
         "stations": [
-          { "network": "", "station": "", "channel": "", "label": "Choose a station" },
           { "network": "AK", "station": "RC01", "channel": "BHZ", "label": "Rabbit Creek, AK" },
           { "network": "AK", "station": "FIRE", "channel": "BHZ", "label": "Fire Island, AK" }
         ],
-        "defaultStation": 0
+        "defaultStation": null
       },
       "dataset": {
         "cellsSelectCases": false

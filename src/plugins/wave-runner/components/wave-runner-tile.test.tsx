@@ -127,16 +127,25 @@ describe("WaveRunnerComponent", () => {
   it("renders station dropdown with options from config", () => {
     renderWithStores();
     const stationSelect = screen.getByLabelText("Station") as HTMLSelectElement;
-    const options = Array.from(stationSelect.options);
-    expect(options).toHaveLength(2);
-    expect(options[0].text).toBe("Anchorage Airport");
-    expect(options[1].text).toBe("Dexter Display Mine");
+    const stationOptions = Array.from(stationSelect.options).filter(o => o.value !== "");
+    expect(stationOptions).toHaveLength(2);
+    expect(stationOptions[0].text).toBe("Anchorage Airport");
+    expect(stationOptions[1].text).toBe("Dexter Display Mine");
   });
 
   it("auto-selects the default station on mount", () => {
-    renderWithStores();
-    const stationSelect = screen.getByLabelText("Station") as HTMLSelectElement;
-    expect(stationSelect.value).toBe("AK_K204__HNZ");
+    const model2 = TileModel.create({ content: defaultWaveRunnerContent() });
+    stores.ui.setSelectedTileId(model2.id);
+    render(
+      <Provider stores={stores}>
+        <TileModelContext.Provider value={model2}>
+          <WaveRunnerComponent {...defaultProps} {...{model: model2}} />
+        </TileModelContext.Provider>
+      </Provider>
+    );
+    const tileContent = model2.content as any;
+    expect(tileContent.station?.network).toBe("AK");
+    expect(tileContent.station?.station).toBe("K204");
   });
 
   it("renders all toolbar buttons", () => {
