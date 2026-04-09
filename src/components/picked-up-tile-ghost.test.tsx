@@ -1,4 +1,4 @@
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { Provider } from "mobx-react";
 import React from "react";
 import { specStores } from "../models/stores/spec-stores";
@@ -80,5 +80,57 @@ describe("PickedUpTileGhost", () => {
       stores.ui.clearPickedUpTile();
     });
     expect(document.body.classList.contains("tile-picked-up")).toBe(false);
+  });
+
+  it("initializes position from focused element on keyboard pick-up (no x/y)", () => {
+    const stores = specStores();
+    // Create a focusable element to act as the drag handle
+    const handle = document.createElement("div");
+    handle.className = "tool-tile-drag-handle-wrapper";
+    handle.setAttribute("tabindex", "0");
+    document.body.appendChild(handle);
+    handle.getBoundingClientRect = () => ({
+      left: 50, top: 80, width: 40, height: 20,
+      right: 90, bottom: 100, x: 50, y: 80, toJSON: () => ""
+    });
+    handle.focus();
+
+    render(
+      <Provider stores={stores}>
+        <PickedUpTileGhost />
+      </Provider>
+    );
+    // Pick up without x/y to trigger keyboard path
+    act(() => {
+      stores.ui.pickUpTile("t1", "d1", "Text");
+    });
+    const ghost = document.body.querySelector<HTMLElement>("[style*='position: fixed']");
+    expect(ghost).not.toBeNull();
+    // Position should be center of handle (50+20=70, 80+10=90) plus offsets (-80, -4)
+    expect(ghost!.style.left).toBe("-10px");
+    expect(ghost!.style.top).toBe("86px");
+
+    document.body.removeChild(handle);
+  });
+
+  it("updates ghost position on mouse move", () => {
+    const stores = specStores();
+    render(
+      <Provider stores={stores}>
+        <PickedUpTileGhost />
+      </Provider>
+    );
+    act(() => {
+      stores.ui.pickUpTile("t1", "d1", "Text", 100, 200);
+    });
+
+    act(() => {
+      fireEvent.mouseMove(document, { clientX: 300, clientY: 400 });
+    });
+    const ghost = document.body.querySelector<HTMLElement>("[style*='position: fixed']");
+    expect(ghost).not.toBeNull();
+    // 300 + (-80) = 220, 400 + (-4) = 396
+    expect(ghost!.style.left).toBe("220px");
+    expect(ghost!.style.top).toBe("396px");
   });
 });
