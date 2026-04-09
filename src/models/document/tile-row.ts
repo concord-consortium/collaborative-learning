@@ -9,6 +9,7 @@ export interface IDropRowInfo {
   rowInsertIndex: number;
   rowDropId?: string;
   rowDropLocation?: string;
+  tileInsertIndex?: number; // position within the row to insert at (for side drops)
   updateTimestamp?: number;
 }
 

@@ -3,39 +3,53 @@ import { NO_DATA_SENTINEL } from "./envelope-config";
 import type { EnvelopeTileData } from "./seismic-types";
 
 /**
- * Compute envelope (min/max pairs) from raw samples.
+ * Compute envelope (min/max pairs) from raw samples using grid-aligned windows.
+ *
+ * Windows are aligned to the global grid (multiples of windowSeconds from Unix epoch 0)
+ * rather than using a fixed sample count. This prevents cumulative drift when
+ * sampleRate * windowSeconds is not an exact integer.
  *
  * @param samples - Raw sample values in physical units
  * @param sampleRate - Samples per second
  * @param windowSeconds - Duration of each envelope window in seconds
- * @returns Arrays of min and max values, one per window
+ * @param startTime - Unix timestamp (seconds) of the first sample
+ * @returns Arrays of min/max values and their grid-aligned times
  */
 export function computeEnvelopesFromRaw(
   samples: Float64Array,
   sampleRate: number,
-  windowSeconds: number
-): { mins: number[]; maxs: number[] } {
-  if (samples.length === 0) return { mins: [], maxs: [] };
+  windowSeconds: number,
+  startTime: number
+): { mins: number[]; maxs: number[]; times: number[] } {
+  if (samples.length === 0) return { mins: [], maxs: [], times: [] };
 
-  const samplesPerWindow = Math.round(sampleRate * windowSeconds);
-  const numWindows = Math.ceil(samples.length / samplesPerWindow);
   const mins: number[] = [];
   const maxs: number[] = [];
+  const times: number[] = [];
 
-  for (let w = 0; w < numWindows; w++) {
-    const start = w * samplesPerWindow;
-    const end = Math.min(start + samplesPerWindow, samples.length);
-    let min = samples[start];
-    let max = samples[start];
-    for (let i = start + 1; i < end; i++) {
+  // Find the first grid-aligned window boundary at or before startTime
+  const firstGridTime = Math.floor(startTime / windowSeconds) * windowSeconds;
+  const endTime = startTime + samples.length / sampleRate;
+
+  for (let gridTime = firstGridTime; gridTime < endTime; gridTime += windowSeconds) {
+    const windowEnd = gridTime + windowSeconds;
+    // Convert grid window boundaries to sample indices
+    const sampleStart = Math.max(0, Math.round((gridTime - startTime) * sampleRate));
+    const sampleEnd = Math.min(samples.length, Math.round((windowEnd - startTime) * sampleRate));
+    if (sampleStart >= sampleEnd) continue;
+
+    let min = samples[sampleStart];
+    let max = samples[sampleStart];
+    for (let i = sampleStart + 1; i < sampleEnd; i++) {
       if (samples[i] < min) min = samples[i];
       if (samples[i] > max) max = samples[i];
     }
     mins.push(min);
     maxs.push(max);
+    times.push(gridTime);
   }
 
-  return { mins, maxs };
+  return { mins, maxs, times };
 }
 
 /**

@@ -9,7 +9,7 @@ import "./data-setup.scss";
 export const DataSetup: React.FC = observer(function DataSetup() {
   const content = useWaveRunnerContent();
   const stationConfigs = useSettingFromStores("stations", "wave-runner") as StationConfig[] | undefined;
-  const defaultStationIndex = (useSettingFromStores("defaultStation", "wave-runner") as number) ?? 0;
+  const defaultStationIndex = useSettingFromStores("defaultStation", "wave-runner") as number | undefined;
 
   // Build the options list from config stations
   const stationOptions = useMemo(() => {
@@ -40,15 +40,17 @@ export const DataSetup: React.FC = observer(function DataSetup() {
 
   // Auto-set default station on mount
   useEffect(() => {
-    if (!content.station && stationConfigs?.length) {
-      const defaultConfig = stationConfigs[defaultStationIndex] ?? stationConfigs[0];
-      content.setStation({
-        network: defaultConfig.network,
-        station: defaultConfig.station,
-        location: defaultConfig.location ?? "",
-        channel: defaultConfig.channel,
-        label: defaultConfig.label,
-      });
+    if (!content.station && stationConfigs?.length && defaultStationIndex != null) {
+      const defaultConfig = stationConfigs[defaultStationIndex];
+      if (defaultConfig) {
+        content.setStation({
+          network: defaultConfig.network,
+          station: defaultConfig.station,
+          location: defaultConfig.location ?? "",
+          channel: defaultConfig.channel,
+          label: defaultConfig.label,
+        });
+      }
     }
   }, [content, stationConfigs, defaultStationIndex]);
 
@@ -56,13 +58,9 @@ export const DataSetup: React.FC = observer(function DataSetup() {
     const selectedId = e.target.value;
     const match = dropdownOptions.find(opt => opt.id === selectedId);
     if (match) {
-      content.setStation({
-        network: match.config.network,
-        station: match.config.station,
-        location: match.config.location ?? "",
-        channel: match.config.channel,
-        label: match.config.label,
-      });
+      const { network, station, channel, label } = match.config;
+      const location = match.config.location ?? "";
+      content.setStation({ network, station, location, channel, label });
     }
   };
 
@@ -86,9 +84,10 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             className="dropdown"
             value={currentStationId ?? ""}
             onChange={handleStationChange}
-            disabled={!hasStations || content.isLoading}
+            disabled={!hasStations || content.isRunning}
           >
             {!hasStations && <option value="">No stations configured</option>}
+            {hasStations && !currentStationId && <option value="">Choose a station</option>}
             {dropdownOptions.map(opt => (
               <option key={opt.id} value={opt.id}>{opt.config.label}</option>
             ))}
@@ -100,7 +99,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             className="dropdown"
             value={content.selectedModelUrl ?? ""}
             onChange={handleModelChange}
-            disabled={content.isLoading}
+            disabled={content.isRunning}
           >
             <option value="">Choose a model</option>
             {DEFAULT_MODELS.map(model => (
@@ -120,7 +119,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             type="datetime-local"
             value={`${content.startDate}T00:00`}
             onChange={e => content.setStartDate(e.target.value.split("T")[0])}
-            disabled={content.isLoading}
+            disabled={content.isRunning}
           />
         </div>
         <div className="field">
@@ -131,7 +130,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             type="datetime-local"
             value={`${content.endDate}T00:00`}
             onChange={e => content.setEndDate(e.target.value.split("T")[0])}
-            disabled={content.isLoading}
+            disabled={content.isRunning}
           />
         </div>
       </div>

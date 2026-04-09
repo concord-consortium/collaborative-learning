@@ -130,6 +130,21 @@
   }
 }
 
+// Shrink tiles during drag/pick-up so drop zone indicators show *around* them
+// instead of overlaid on top. Uses body-level classes (rather than per-tile component
+// classes) so all tiles shrink simultaneously — including tiles in the resources pane,
+// nested question tiles, etc. — without each component needing to observe drag state.
+// body.tile-picked-up is set by PickedUpTileGhost; body.tile-dragging is set by
+// TileComponent.handleTileDragStart / handleDragEnd.
+body.tile-picked-up,
+body.tile-dragging {
+  .tool-tile {
+    transition: transform 0.2s ease-out;
+    transform: scale(0.95);
+    transform-origin: center center;
+  }
+}
+
 // Only show the teacher styling when the tile is inside of the
 // problem panel or when it is inside of the CMS (iframe-control)
 .problem-panel, .iframe-control {

@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { observer } from "mobx-react-lite";
 import React, { useContext, useEffect } from "react";
 import { TileModelContext } from "../../../components/tiles/tile-api";
@@ -10,14 +11,14 @@ import "./timeline.scss";
 export const Timeline = observer(function Timeline() {
   const rawContent = useContext(TileModelContext)?.content;
   const model = isTimelineContentModel(rawContent) ? rawContent : undefined;
-  const seismogram = model?.seismogram;
 
+  const sharedSeismogram = model?.sharedSeismogram;
   const dataStartTime = model?.dataStartTime;
   const dataEndTime = model?.dataEndTime;
   const startTime = model?.viewStartTime;
   const endTime = model?.viewEndTime;
 
-  // Initialize view range when seismogram data becomes available,
+  // Initialize view range when data becomes available,
   // and clamp view to stay within bounds if data range changes.
   useEffect(() => {
     if (!model || !dataStartTime || !dataEndTime) return;
@@ -40,13 +41,26 @@ export const Timeline = observer(function Timeline() {
 
   return (
     <div className="timeline-area">
-      {seismogram && isValidDateTime(startTime) && isValidDateTime(endTime) ? (
-        <WaveformPanel
-          label="Full waveform"
-          startTime={startTime}
-          durationSeconds={endTime.diff(startTime, "seconds").seconds}
-          seismogram={seismogram}
-        />
+      {sharedSeismogram && isValidDateTime(startTime) && isValidDateTime(endTime) ? (
+        <>
+          <WaveformPanel
+            label="Full waveform"
+            sharedSeismogram={sharedSeismogram}
+            startTime={startTime}
+            endTime={endTime}
+          />
+          <div className="timeline-range-row">
+            <div className="range-date range-start">
+              <div>{startTime.toUTC().toLocaleString()}</div>
+              <div>{startTime.toUTC().toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
+            </div>
+            <div className="range-duration">{model.viewRangeSeconds} seconds</div>
+            <div className="range-date range-end">
+              <div>{endTime.toUTC().toLocaleString()}</div>
+              <div>{endTime.toUTC().toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
+            </div>
+          </div>
+        </>
       ) : <div className="waveform" />}
     </div>
   );

@@ -14,6 +14,13 @@
     &.playback-spacer {
       height: 350px;
     }
+
+    &.empty-drop-target {
+      background-color: $color7;
+      opacity: 0.15;
+      border: 1px dashed $color7-4;
+      margin: 8px;
+    }
   }
 
   .playback-spacer {
