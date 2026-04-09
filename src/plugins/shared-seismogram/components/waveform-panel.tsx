@@ -13,14 +13,14 @@ const DEFAULT_CHART_HEIGHT = 150;
 const AMPLITUDE_RANGE_SCALAR = 1.2;
 
 interface WaveformPanelProps {
-  label: string;
+  mode?: "waveform" | "timeline";
   sharedSeismogram: SharedSeismogramType;
   startTime: DateTime;
   endTime: DateTime;
 }
 
 export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function WaveformPanel({
-  label, sharedSeismogram, startTime, endTime,
+  mode = "waveform", sharedSeismogram, startTime, endTime,
 }) {
   const { seismicQueryService } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -117,10 +117,12 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     };
   }, [queryResult, pixelWidth]);
 
+  const style = mode === "waveform"
+    ? { height: "60px"}
+    : { height: "100px" };
   return (
     <div className="waveform-panel">
-      <div className="waveform-panel-label">{label}</div>
-      <div ref={containerRef} className="waveform-panel-display" />
+      <div ref={containerRef} className="waveform-panel-display" style={style} />
     </div>
   );
 });

@@ -46,9 +46,10 @@ export const EventOverlay = observer(function EventOverlay() {
             <div
               className="event-overlay"
               style={{
+                backgroundColor: hexToRgba(color, 0.5),
+                border: `1px solid ${color}`,
                 left: `${pos.leftPct}%`,
                 width: `${pos.widthPct}%`,
-                backgroundColor: hexToRgba(color, 0.5),
               }}
               onClick={() => content.selectEvent(event.index)}
             />

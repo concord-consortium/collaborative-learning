@@ -40,7 +40,7 @@ export const Timeline = observer(function Timeline() {
         <>
           <div className="waveform-wrapper">
             <WaveformPanel
-              label="Full waveform"
+              mode="timeline"
               sharedSeismogram={sharedSeismogram}
               startTime={viewStartTime}
               endTime={viewEndTime}
