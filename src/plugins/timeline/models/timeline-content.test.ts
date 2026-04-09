@@ -26,9 +26,9 @@ describe("zoom functionality", () => {
 
   beforeEach(() => {
     const mockSharedSeismogram = {
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
       startTime: dataStart,
       endTime: dataEnd,
-      seismogram: {},
     };
 
     mockedGetSharedModelManager.mockReturnValue({

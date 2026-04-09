@@ -13,9 +13,9 @@ import {
 } from "@aws-sdk/client-s3";
 import { miniseed } from "seisplotjs/nodeonly";
 import {
-  LEVEL_SPACINGS, NUM_LEVELS, AMPLITUDE_RANGES
+  LEVEL_SPACINGS, NUM_LEVELS, AMPLITUDE_RANGES, S3_BUCKET, S3_PREFIX
 } from "../../shared/seismic/envelope-config.js";
-import { getS3Root, getTileS3Key } from "../../shared/seismic/tile-addressing.js";
+import { getS3Root, getStationChannelPrefix, getTileS3Key } from "../../shared/seismic/tile-addressing.js";
 import { encodeEnvelopeTile, quantize } from "../../shared/seismic/envelope-codec.js";
 import { computeEnvelopesFromRaw } from "../../shared/seismic/envelope-compute.js";
 import { fetchStationMetadata } from "../../shared/seismic/earthscope-client.js";
@@ -26,8 +26,6 @@ import type { ChannelMetadata, EnvelopeTileData } from "../../shared/seismic/sei
 
 // ---- Configuration ----
 
-const DEFAULT_S3_BUCKET = "models-resources";
-const DEFAULT_S3_PREFIX = "collaborative-learning/envelopes/";
 const DEFAULT_AWS_REGION = "us-east-1";
 
 interface ScriptConfig {
@@ -56,8 +54,8 @@ interface ScriptConfig {
 function parseArgs(): ScriptConfig {
   const args = process.argv.slice(2);
   const config: Partial<ScriptConfig> = {
-    s3Bucket: DEFAULT_S3_BUCKET,
-    s3Prefix: DEFAULT_S3_PREFIX,
+    s3Bucket: S3_BUCKET,
+    s3Prefix: S3_PREFIX,
     awsRegion: DEFAULT_AWS_REGION,
     localOnly: false,
     maxFiles: 0,
@@ -196,10 +194,11 @@ async function wipeExistingTiles(
   s3: S3Client,
   bucket: string,
   prefix: string,
+  network: string,
   station: string,
   channel: string
 ): Promise<void> {
-  const keyPrefix = `${getS3Root(prefix)}${station}/${channel}/`;
+  const keyPrefix = `${getS3Root(prefix)}${getStationChannelPrefix({ network, station, channel })}`;
   console.log(`Wiping existing tiles under ${keyPrefix}...`);
 
   let continuationToken: string | undefined;
@@ -227,6 +226,7 @@ async function wipeExistingTiles(
 // ---- Tile Output ----
 
 function makeFlushTile(
+  network: string,
   station: string,
   channel: string,
   config: ScriptConfig,
@@ -235,7 +235,7 @@ function makeFlushTile(
 ): FlushTileFn {
   let flushedCount = 0;
   return (level: number, tileIndex: number, tileData: EnvelopeTileData) => {
-    const tileKey = getTileS3Key(station, channel, level, tileIndex);
+    const tileKey = getTileS3Key({ network, station, channel }, level, tileIndex);
     const body = encodeEnvelopeTile(tileData.mins, tileData.maxs);
     const bodyBytes = new Uint8Array(body);
 
@@ -319,13 +319,13 @@ async function main() {
 
     // Wipe existing tiles (S3 mode only)
     if (s3) {
-      await wipeExistingTiles(s3, config.s3Bucket, config.s3Prefix, config.station, channel);
+      await wipeExistingTiles(s3, config.s3Bucket, config.s3Prefix, config.network, config.station, channel);
     }
 
     // Initialize pipeline state
     const state = createPipelineState();
     const pendingUploads: Promise<PutObjectCommandOutput>[] = [];
-    const flushTile = makeFlushTile(config.station, channel, config, s3, pendingUploads);
+    const flushTile = makeFlushTile(config.network, config.station, channel, config, s3, pendingUploads);
     const finestLevel = NUM_LEVELS - 1;
 
     // Stream-process each file
@@ -346,15 +346,14 @@ async function main() {
           physicalSamples[i] = trace.samples[i] / scale;
         }
 
-        const { mins, maxs } = computeEnvelopesFromRaw(
-          physicalSamples, trace.sampleRate, LEVEL_SPACINGS[finestLevel]
+        const { mins, maxs, times } = computeEnvelopesFromRaw(
+          physicalSamples, trace.sampleRate, LEVEL_SPACINGS[finestLevel], trace.startTime
         );
 
         for (let i = 0; i < mins.length; i++) {
-          const time = trace.startTime + i * LEVEL_SPACINGS[finestLevel];
           const qMin = quantize(mins[i], rangeMax);
           const qMax = quantize(maxs[i], rangeMax);
-          processL2Point(state, time, qMin, qMax);
+          processL2Point(state, times[i], qMin, qMax);
         }
       }
 

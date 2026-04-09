@@ -39,8 +39,8 @@ export const TimelineContentModel = TileContentModel
     }
   }))
   .views(self => ({
-    get seismogram() {
-      return self.sharedSeismogram?.seismogram;
+    get hasStationData() {
+      return !!self.sharedSeismogram?.station;
     },
     get dataStartTime(): DateTime | undefined {
       return self.sharedSeismogram?.startTime;
@@ -110,6 +110,26 @@ export const TimelineContentModel = TileContentModel
       }
 
       self.setViewRange(newStart, newEnd);
+    },
+    panLeft() {
+      if (!self.viewStartTime || self.viewRangeSeconds == null) return;
+      if (!self.dataStartTime || !self.dataEndTime || self.dataRangeSeconds == null) return;
+
+      let newStartTime = self.viewStartTime.minus({ seconds: self.viewRangeSeconds / 4 });
+      if (newStartTime < self.dataStartTime) newStartTime = self.dataStartTime;
+      const newEndTime = newStartTime.plus({ seconds: self.viewRangeSeconds });
+
+      self.setViewRange(newStartTime, newEndTime);
+    },
+    panRight() {
+      if (!self.viewStartTime || !self.viewEndTime || self.viewRangeSeconds == null) return;
+      if (!self.dataStartTime || !self.dataEndTime || self.dataRangeSeconds == null) return;
+
+      let newEndTime = self.viewEndTime.plus({ seconds: self.viewRangeSeconds / 4 });
+      if (newEndTime > self.dataEndTime) newEndTime = self.dataEndTime;
+      const newStartTime = newEndTime.minus({ seconds: self.viewRangeSeconds });
+
+      self.setViewRange(newStartTime, newEndTime);
     }
   }));
 

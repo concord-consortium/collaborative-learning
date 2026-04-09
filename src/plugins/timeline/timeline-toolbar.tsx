@@ -13,6 +13,7 @@ import BarGraphItIcon from "./assets/toolbar/bar-graph-it-icon.svg";
 import ZoomInIcon from "./assets/toolbar/zoom-in-icon.svg";
 import ZoomOutIcon from "./assets/toolbar/zoom-out-icon.svg";
 import ZoomToFitIcon from "./assets/toolbar/zoom-to-fit-icon.svg";
+import ScrollArrowIcon from "../../assets/scroll-arrow-small-icon.svg";
 
 function TableItButton({ name }: IToolbarButtonComponentProps) {
   return (
@@ -98,6 +99,36 @@ const ViewAllButton = observer(function ViewAllButton({ name }: IToolbarButtonCo
   );
 });
 
+function PanLeftButton({ name }: IToolbarButtonComponentProps) {
+  const model = useContext(TileModelContext);
+  const content = isTimelineContentModel(model?.content) ? model?.content : undefined;
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Pan Left"
+      onClick={() => content?.panLeft()}
+      disabled={false}
+    >
+      <ScrollArrowIcon/>
+    </TileToolbarButton>
+  );
+}
+
+function PanRightButton({ name }: IToolbarButtonComponentProps) {
+  const model = useContext(TileModelContext);
+  const content = isTimelineContentModel(model?.content) ? model?.content : undefined;
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Pan Right"
+      onClick={() => content?.panRight()}
+      disabled={false}
+    >
+      <ScrollArrowIcon style={{ transform: "rotate(180deg)" }}/>
+    </TileToolbarButton>
+  );
+}
+
 registerTileToolbarButtons("timeline",
 [
   { name: "table-it", component: TableItButton },
@@ -105,5 +136,7 @@ registerTileToolbarButtons("timeline",
   { name: "bar-graph-it", component: BarGraphItButton },
   { name: "zoom-in", component: ZoomInButton },
   { name: "zoom-out", component: ZoomOutButton },
-  { name: "view-all", component: ViewAllButton }
+  { name: "view-all", component: ViewAllButton },
+  { name: "pan-left", component: PanLeftButton },
+  { name: "pan-right", component: PanRightButton }
 ]);

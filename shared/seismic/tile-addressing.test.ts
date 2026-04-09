@@ -78,8 +78,8 @@ describe("tile-addressing", () => {
 
   describe("getTileS3Key", () => {
     it("constructs the expected key format", () => {
-      const key = getTileS3Key("K204", "BHZ", 2, 42);
-      expect(key).toBe("K204/BHZ/L2/42");
+      const key = getTileS3Key({ network: "AK", station: "K204", channel: "BHZ" }, 2, 42);
+      expect(key).toBe("AK_K204/BHZ/L2/42");
     });
   });
 });
