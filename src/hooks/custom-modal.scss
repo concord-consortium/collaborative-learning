@@ -102,13 +102,14 @@ $modal-footer-height: 45px;
       border: $modal-control-border;
       border-radius: $modal-control-border-radius;
       outline: none;
+      font-family: Lato, sans-serif;
 
       &.disabled {
         opacity: 35%;
       }
 
       &.default:not(.disabled) {
-        background-color: $charcoal-light-6;
+        background-color: $workspace-teal-light-4;
       }
 
       &:hover:not(.disabled), &:focus:not(.disabled) {

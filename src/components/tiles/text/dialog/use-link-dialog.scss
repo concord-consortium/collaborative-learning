@@ -1,11 +1,44 @@
+.link-editor-modal {
+  width: 300px;
+  height: 300px;
+}
+
 .link-dialog-content {
   margin: 10px 0;
+  font-family: Lato, sans-serif;
 
-  input {
+  input[type="url"] {
     width: 100%;
 
     &:invalid {
       outline-color: red;
+    }
+  }
+
+  .display-as-fieldset {
+    border: none;
+    padding: 10px 0 0 0;
+    margin: 0;
+
+    legend {
+      padding: 0;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .radio-button-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+
+      input[type="radio"] {
+        margin: 0 6px 0 0;
+        height: auto;
+      }
+
+      label {
+        cursor: pointer;
+      }
     }
   }
 }
