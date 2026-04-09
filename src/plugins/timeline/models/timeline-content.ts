@@ -54,36 +54,11 @@ export const TimelineContentModel = TileContentModel
     },
     get dataEndTime(): DateTime | undefined {
       return self.sharedSeismogram?.endTime;
-    }
-  }))
-  .views(self => ({
+    },
     get viewRangeSeconds() {
       if (!self.viewStartTime || !self.viewEndTime) return undefined;
       return self.viewEndTime.diff(self.viewStartTime, "seconds").seconds;
     },
-    get dataRangeSeconds() {
-      if (!self.dataStartTime || !self.dataEndTime) return undefined;
-      return self.dataEndTime.diff(self.dataStartTime, "seconds").seconds;
-    }
-  }))
-  .views(self => ({
-    get canZoomIn() {
-      const range = self.viewRangeSeconds;
-      return range !== undefined && range > kMinViewRangeSeconds;
-    },
-    get canZoomOut() {
-      const viewRange = self.viewRangeSeconds;
-      const dataRange = self.dataRangeSeconds;
-      if (viewRange === undefined || dataRange === undefined) return false;
-      return viewRange < dataRange;
-    }
-  }))
-  .views(self => ({
-    get canFitToData() {
-      return self.canZoomOut;
-    }
-  }))
-  .views(self => ({
     get events(): TimelineEvent[] {
       const ds = self.sharedDataSet?.dataSet;
       if (!ds) return [];
@@ -130,6 +105,14 @@ export const TimelineContentModel = TileContentModel
     }
   }))
   .views(self => ({
+    get dataRangeSeconds() {
+      if (!self.dataStartTime || !self.dataEndTime) return undefined;
+      return self.dataEndTime.diff(self.dataStartTime, "seconds").seconds;
+    },
+    get canZoomIn() {
+      const range = self.viewRangeSeconds;
+      return range !== undefined && range > kMinViewRangeSeconds;
+    },
     get visibleEvents(): TimelineEvent[] {
       if (!self.viewStartTime || !self.viewEndTime) return [];
       return self.events.filter(e =>
@@ -151,6 +134,19 @@ export const TimelineContentModel = TileContentModel
     get selectedEventLabel() {
       if (self.events.length === 0) return "Event";
       return `Event ${self.selectedEventIndex + 1}`;
+    }
+  }))
+  .views(self => ({
+    get canZoomOut() {
+      const viewRange = self.viewRangeSeconds;
+      const dataRange = self.dataRangeSeconds;
+      if (viewRange === undefined || dataRange === undefined) return false;
+      return viewRange < dataRange;
+    }
+  }))
+  .views(self => ({
+    get canFitToData() {
+      return self.canZoomOut;
     }
   }))
   .actions(self => ({
@@ -207,9 +203,7 @@ export const TimelineContentModel = TileContentModel
       const newStartTime = newEndTime.minus({ seconds: self.viewRangeSeconds });
 
       self.setViewRange(newStartTime, newEndTime);
-    }
-  }))
-  .actions(self => ({
+    },
     focusEvent() {
       const event = self.selectedEvent;
       if (!event) return;
