@@ -249,6 +249,7 @@ export const WaveRunnerContentModel = TileContentModel
           // Fetch raw data for this day — skip days with no data
           let response: Response;
           try {
+            // TODO: Use the SeismicQueryService to access raw data, so we take advantage of the rawCache.
             response = yield fetchRawSeismicData(
               network, station, location, channel,
               chunkStart.toISOString(), chunkEnd.toISOString()

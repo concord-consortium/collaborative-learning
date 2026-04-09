@@ -33,6 +33,7 @@ export class SeismicQueryService {
   envelopeCache: Map<string, EnvelopeCacheEntry> = observable.map();
 
   /** Raw data cache keyed by "{network}_{station}/{channel}/raw/{chunkIndex}" */
+  // TODO: Come up with a mechanism for clearing out old entries when the cache gets too large.
   rawCache: Map<string, RawCacheEntry> = observable.map();
 
   /** Station metadata cache keyed by "{network}_{station}" */
