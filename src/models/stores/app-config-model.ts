@@ -137,7 +137,7 @@ export const AppConfigModel = types
      */
     getSetting(key: string, group?: string) {
       const groupSettings = group ? self.settings?.[group] as SnapshotIn<typeof SettingsGroupMstType> : undefined;
-      return groupSettings?.[key] || self.settings?.[key];
+      return groupSettings?.[key] ?? self.settings?.[key];
     }
   }))
   .views(self => ({

@@ -51,3 +51,12 @@ export const AMPLITUDE_RANGES: Record<string, number> = {
 
 /** Sentinel value for "no data" in Int16 envelope arrays. */
 export const NO_DATA_SENTINEL = -32768;
+
+/** S3 bucket where envelope tiles are stored. */
+export const S3_BUCKET = "models-resources";
+
+/** S3 key prefix for envelope tiles. */
+export const S3_PREFIX = "collaborative-learning/envelopes/";
+
+/** Duration of each raw data fetch chunk in seconds. */
+export const RAW_CHUNK_DURATION = 7200; // 2 hours

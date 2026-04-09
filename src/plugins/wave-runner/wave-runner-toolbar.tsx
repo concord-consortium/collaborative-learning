@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import { getSnapshot } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { AddTilesContext, TileModelContext } from "../../components/tiles/tile-api";
 import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button";
@@ -21,9 +22,8 @@ import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
 
 const LoadDataButton = observer(function LoadDataButton({ name }: IToolbarButtonComponentProps) {
   const content = useWaveRunnerContent();
-  const disabled = !content.station || content.isLoading || content.hasData;
   return (
-    <TileToolbarButton name={name} title="Load Data" onClick={() => content.loadData()} disabled={disabled}>
+    <TileToolbarButton name={name} title="Load Data" onClick={() => content.loadData()} disabled={true}>
       <LoadDataIcon/>
     </TileToolbarButton>
   );
@@ -79,19 +79,19 @@ const TimelineButton = observer(function TimelineButton({ name }: IToolbarButton
   const tileModel = useContext(TileModelContext);
   const addTilesContext = useContext(AddTilesContext);
   const content = useWaveRunnerContent();
-  const disabled = !content.hasData;
+  const disabled = !content.sharedSeismogram?.station;
 
   function handleClick() {
     if (!tileModel || !addTilesContext) return;
     const sharedDataSet = content.getOrCreateEventsDataSet();
     const sharedSeismogram = content.sharedSeismogram;
-    if (!sharedSeismogram?.seismogram) return;
+    if (!sharedSeismogram?.station) return;
     // Create a copy so the Timeline keeps its data when Wave Runner reloads.
     const copy = SharedSeismogram.create({
+      station: getSnapshot(sharedSeismogram.station),
       startTimeISO: sharedSeismogram.startTimeISO,
       endTimeISO: sharedSeismogram.endTimeISO,
     });
-    copy.setSeismogram(sharedSeismogram.seismogram);
     const sharedModels = sharedDataSet ? [sharedDataSet, copy] : [copy];
     addTilesContext.addTileAfter(kTimelineTileType, tileModel, sharedModels);
   }

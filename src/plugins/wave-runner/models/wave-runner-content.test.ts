@@ -23,8 +23,8 @@ describe("WaveRunnerContent", () => {
 
   it("has default start and end dates covering the mock data range", () => {
     const content = WaveRunnerContentModel.create();
-    expect(content.startDate).toBe("2026-01-30");
-    expect(content.endDate).toBe("2026-02-06");
+    expect(content.startDate).toBe("2025-01-01");
+    expect(content.endDate).toBe("2025-12-31");
   });
 
   it("allows setting start and end dates", () => {
