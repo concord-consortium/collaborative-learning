@@ -1,8 +1,8 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { useTimelineContent } from "../hooks/use-timeline-content";
-import { TimelineEvent } from "../models/timeline-content";
-import { kEventColorMap, EventColorWord } from "../timeline-event-colors";
+import { getEventColorGroup } from "../timeline-event-colors";
+import { TimelineEvent } from "../timeline-types";
 
 import "./event-overlay.scss";
 
@@ -15,7 +15,6 @@ function hexToRgba(hex: string, alpha: number): string {
 
 export const EventOverlay = observer(function EventOverlay() {
   const content = useTimelineContent();
-
   const startTime = content.viewStartTime;
   const endTime = content.viewEndTime;
   const visibleEvents = content.visibleEvents;
@@ -40,8 +39,8 @@ export const EventOverlay = observer(function EventOverlay() {
       {visibleEvents.map((event, i) => {
         const pos = getEventPosition(event);
         if (!pos) return null;
-        const colorWord = colorWords.get(event.eventType) as EventColorWord | undefined;
-        const color = colorWord ? kEventColorMap[colorWord].default : "#aad7ff";
+        const colorWord = colorWords.get(event.eventType);
+        const color = getEventColorGroup(colorWord ?? "").default;
         return (
           <React.Fragment key={i}>
             <div

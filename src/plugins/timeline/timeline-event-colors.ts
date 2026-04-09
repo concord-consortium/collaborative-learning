@@ -14,3 +14,11 @@ export const kEventColorMap: Record<EventColorWord, ColorGroup> = {
   magenta: { default: "#eea3ff" },
   purple:  { default: "#cbb1ff" },
 };
+
+export const defaultEventColorGroup: ColorGroup = {
+  default: "#dfdfdf"
+};
+
+export function getEventColorGroup(colorWord: string): ColorGroup {
+  return kEventColorMap[colorWord as EventColorWord] ?? defaultEventColorGroup;
+}
