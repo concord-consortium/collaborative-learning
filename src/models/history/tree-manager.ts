@@ -1,5 +1,5 @@
 import {
-  types, Instance, flow, IJsonPatch, detach, destroy, toGenerator
+  applyPatch, types, Instance, flow, IJsonPatch, detach, destroy, toGenerator
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
@@ -8,10 +8,48 @@ import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation,
   ICreateHistoryEntry} from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
+import { PatchApplicationError } from "./tree";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../stores/user-context-provider";
 import { getLastHistoryEntry } from "./history-firestore";
+
+export interface HistoryPlaybackFailure {
+  historyEntry: Instance<typeof HistoryEntry>;
+  historyIndex: number;
+  direction: "undo" | "redo";
+  errorMessage: string;
+}
+
+/**
+ * Tracks how patches in a batched array map back to their history entries.
+ * Each segment records a history entry index and the number of patches
+ * from that entry that were added to the batch.
+ */
+interface PatchSegment {
+  historyIndex: number;
+  patchCount: number;
+}
+
+/**
+ * Given the number of patches that were successfully applied and the
+ * segment mapping, returns the history entry index that contains the
+ * patch that failed, and the number of patches from that entry that
+ * were successfully applied before the failure.
+ */
+function findFailedSegment(numApplied: number, segments: PatchSegment[]) {
+  let remaining = numApplied;
+  for (const segment of segments) {
+    if (remaining < segment.patchCount) {
+      return { historyIndex: segment.historyIndex, appliedInEntry: remaining };
+    }
+    remaining -= segment.patchCount;
+  }
+  // This shouldn't happen — numApplied should be less than total patches
+  // if we're in an error path. Return the last segment as a fallback.
+  const last = segments[segments.length - 1];
+  return { historyIndex: last.historyIndex, appliedInEntry: last.patchCount };
+}
 
 /**
  * Helper method to print objects in template strings
@@ -85,7 +123,12 @@ export const TreeManager = types
    * History manager to be notified when new history entries are completed.
    * Consumers can check for specific types (e.g., FirestoreHistoryManagerConcurrent).
    */
-  historyManager: undefined as IHistoryManager | undefined
+  historyManager: undefined as IHistoryManager | undefined,
+  /**
+   * History entries whose patches could not be applied. A patch may fail
+   * in one direction but not the other, so entries include the direction.
+   */
+  historyPlaybackFailures: [] as HistoryPlaybackFailure[]
 }))
 .views((self) => ({
   get undoManager() : IUndoManager {
@@ -178,6 +221,48 @@ export const TreeManager = types
 
   setNumHistoryEntriesApplied(value: number) {
     self.numHistoryEventsApplied = value;
+  },
+
+  /**
+   * Inject a synthetic history entry with a patch that will always fail
+   * when replayed (references a non-existent tile). Useful for testing
+   * playback failure handling.
+   */
+  injectFailingHistoryEntry() {
+    if (!self.mainDocument) {
+      console.warn("Cannot inject failing entry: no main document");
+      return;
+    }
+    const entryId = nanoid();
+    const treeId = self.mainDocument.key;
+    const entry = HistoryEntry.create({
+      id: entryId,
+      tree: treeId,
+      model: "TestFailure",
+      action: "/injectFailingHistoryEntry",
+      undoable: true,
+      state: "complete",
+      records: [{
+        tree: treeId,
+        action: "/injectFailingHistoryEntry",
+        patches: [{
+          op: "replace",
+          path: "/content/tileMap/NONEXISTENT_TILE/content/value",
+          value: "this patch will fail"
+        }],
+        inversePatches: [{
+          op: "replace",
+          path: "/content/tileMap/NONEXISTENT_TILE/content/value",
+          value: "original"
+        }]
+      }]
+    });
+    const newLocalIndex = self.document.history.length;
+    self.document.history.push(entry);
+    self.numHistoryEventsApplied = self.document.history.length;
+    self.revisionId = entryId;
+    self.undoStore.addHistoryEntry(entry);
+    self.historyManager?.onHistoryEntryCompleted(self.document, entry, newLocalIndex);
   },
 
   putTree(treeId: string, tree: TreeAPI) {
@@ -423,13 +508,19 @@ export const TreeManager = types
     yield Promise.all(startPromises);
 
     const treePatches: Record<string, IJsonPatch[] | undefined> = {};
-    Object.keys(self.trees).forEach(treeId => treePatches[treeId] = []);
+    // Track which history entry each patch came from, per tree.
+    const treePatchSegments: Record<string, PatchSegment[]> = {};
+    Object.keys(self.trees).forEach(treeId => {
+      treePatches[treeId] = [];
+      treePatchSegments[treeId] = [];
+    });
 
     // direction tells us which direction to go
     // startingIndex and endingIndex are so we don't add the currentHistoryEvent into patches
     // because we are going to assume that it has already been played, and we don't want to play it
     // again if we are going forward.
     const direction = newHistoryPosition > self.numHistoryEventsApplied ? 1 : -1;
+    const opType = direction === 1 ? HistoryOperation.Redo : HistoryOperation.Undo;
     const startingIndex = direction === 1 ? self.numHistoryEventsApplied : self.numHistoryEventsApplied - 1;
     const endingIndex = direction === 1 ? newHistoryPosition : newHistoryPosition - 1;
     for (let i=startingIndex; i !== endingIndex; i=i+direction) {
@@ -440,18 +531,70 @@ export const TreeManager = types
       }
       for (const entryRecord of records) {
         const patches = treePatches[entryRecord.tree];
-        if (newHistoryPosition > self.numHistoryEventsApplied) {
-          patches?.push(...entryRecord.getPatches(HistoryOperation.Redo));
-        } else {
-          patches?.push(...entryRecord.getPatches(HistoryOperation.Undo));
+        const entryPatches = entryRecord.getPatches(opType);
+        if (patches && entryPatches.length > 0) {
+          patches.push(...entryPatches);
+          treePatchSegments[entryRecord.tree].push({
+            historyIndex: i,
+            patchCount: entryPatches.length
+          });
         }
       }
     }
 
-    const applyPromises = Object.entries(treePatches).map(([treeId, patches]) => {
-      if (patches && patches.length > 0) {
-        const tree = self.trees[treeId];
-        return tree?.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
+    // Apply the batched patches to each tree. If any tree fails, roll back
+    // the partially applied patches, mark the offending history entry as
+    // failed, and set the position to the last fully applied entry.
+    //
+    // TODO: Because trees are applied in parallel, if one tree fails at
+    // history entry N, other trees may have already applied patches past N.
+    // This leaves the trees out of sync. Currently CLUE only has one tree
+    // so this isn't a practical issue, but if multiple trees are used in
+    // the future we'll need to roll back the other trees to the same
+    // position (e.g., by tracking per-tree segments and reversing patches
+    // past the failed entry on all trees).
+    let failedEntryIndex: number | undefined;
+
+    const applyPromises = Object.entries(treePatches).map(async ([treeId, patches]) => {
+      if (!patches || patches.length === 0) return;
+      const tree = self.trees[treeId];
+      try {
+        await tree?.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
+      } catch (e) {
+        if (e instanceof PatchApplicationError) {
+          const segments = treePatchSegments[treeId];
+          const { historyIndex, appliedInEntry } = findFailedSegment(e.numApplied, segments);
+
+          // Roll back the partially applied patches from the failed entry
+          if (e.inversePatches.length > 0) {
+            // The inverse patches for the failed entry start at the end of the
+            // successfully applied patches from prior entries.
+            const priorApplied = e.numApplied - appliedInEntry;
+            const partialInverse = e.inversePatches.slice(priorApplied).reverse();
+            if (partialInverse.length > 0) {
+              applyPatch(tree as any, partialInverse);
+            }
+          }
+
+          failedEntryIndex = historyIndex;
+          const directionStr = opType === HistoryOperation.Redo ? "redo" : "undo";
+          const historyEntry = self.document.history.at(historyIndex);
+          if (historyEntry) {
+            self.historyPlaybackFailures.push({
+              historyEntry,
+              historyIndex,
+              direction: directionStr,
+              errorMessage: e.message
+            });
+          }
+
+          // eslint-disable-next-line no-console
+          console.warn(
+            `History entry ${historyIndex} failed to ${directionStr}: ${e.message}`
+          );
+        } else {
+          throw e;
+        }
       }
     });
     yield Promise.all(applyPromises);
@@ -474,7 +617,17 @@ export const TreeManager = types
     // and print a warning to the console.
     // One way might be using unique history_entry_ids that we mark as closed
     // after the finish call.
-    self.numHistoryEventsApplied = newHistoryPosition;
+    if (failedEntryIndex !== undefined) {
+      // Set position to just before the failed entry (when going forward)
+      // or just after it (when going backward).
+      if (direction === 1) {
+        self.numHistoryEventsApplied = failedEntryIndex;
+      } else {
+        self.numHistoryEventsApplied = failedEntryIndex + 1;
+      }
+    } else {
+      self.numHistoryEventsApplied = newHistoryPosition;
+    }
   }),
 }))
 .views(self => ({

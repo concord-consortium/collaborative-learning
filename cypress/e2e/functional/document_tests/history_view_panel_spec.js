@@ -17,6 +17,49 @@ function beforeTest(params) {
 }
 
 context('History View Panel', () => {
+  it('playback stops at injected failing history entry', function () {
+    const teacherParams = `${Cypress.config("qaUnitTeacher6")}`;
+    cy.visit(teacherParams, {
+      onBeforeLoad(win) {
+        win.localStorage.setItem("debug", "historyView");
+      }
+    });
+    cy.waitForLoad();
+
+    cy.log('create some history by adding a text tile');
+    clueCanvas.addTile('text');
+    textToolTile.enterText('Some content');
+
+    cy.log('open history view and inject a failing entry');
+    cy.get('.primary-workspace .toolbar .tool.historyview').click();
+    cy.get('.history-view-panel').should('be.visible');
+    cy.get('.inject-failing-entry').click();
+    cy.get('.history-view-close').click();
+
+    cy.log('open my-work tab and open the document to get playback controls');
+    cy.wait(4000); // wait for firestore to record history
+    clueCanvas.getInvestigationCanvasTitle().text().then((investigationTitle) => {
+      cy.openTopTab('my-work');
+      cy.openDocumentThumbnail('my-work', 'workspaces', investigationTitle);
+    });
+
+    cy.log('open playback controls');
+    cy.get('.toolbar .tool.toggleplayback').click();
+    cy.get('[data-testid="playback-slider"]').should('be.visible');
+
+    cy.log('scrub to beginning — should be blocked by failing entry');
+    cy.get('.rc-slider-horizontal').then($slider => {
+      const width = $slider.width();
+      cy.wrap($slider).click(width * 0.05, 0);
+    });
+
+    cy.log('verify failure marker appears and is clickable');
+    cy.get('.playback-failure-marker').should('exist');
+    cy.get('.playback-failure-marker').click();
+    cy.get('[data-testid="playback-failure-detail"]').should('be.visible');
+    cy.get('.playback-failure-detail-body').should('contain', 'NONEXISTENT_TILE');
+  });
+
   it('opens panel and shows local and remote history', function () {
     beforeTest(queryParams);
 

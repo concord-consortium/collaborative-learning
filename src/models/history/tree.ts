@@ -1,5 +1,5 @@
 import {
-  applyPatch, flow, getSnapshot, IJsonPatch, isAlive, resolvePath, resolveIdentifier, types
+  applyPatch, flow, getSnapshot, IJsonPatch, isAlive, onPatch, resolvePath, resolveIdentifier, types
 } from "mobx-state-tree";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentContentModelType } from "../document/document-content";
@@ -7,6 +7,25 @@ import { SharedModelMapSnapshotOutType } from "../document/shared-model-entry";
 import { SharedModelType } from "../shared/shared-model";
 import { ITileModel, TileModel } from "../tiles/tile-model";
 import { TreeManagerAPI } from "./tree-manager-api";
+
+/**
+ * Error thrown when applyPatch fails partway through a batch.
+ * Includes the number of patches that were successfully applied and their
+ * inverse patches (captured via onPatch), so callers can undo partial
+ * application and identify which input patch caused the failure.
+ */
+export class PatchApplicationError extends Error {
+  numApplied: number;
+  inversePatches: IJsonPatch[];
+
+  constructor(numApplied: number, inversePatches: IJsonPatch[], originalError: unknown) {
+    const message = originalError instanceof Error ? originalError.message : String(originalError);
+    super(`Patch application failed after ${numApplied} patches: ${message}`);
+    this.name = "PatchApplicationError";
+    this.numApplied = numApplied;
+    this.inversePatches = inversePatches;
+  }
+}
 
 export const Tree = types.model("Tree", {
 })
@@ -139,9 +158,36 @@ export const Tree = types.model("Tree", {
     },
 
     // Actually apply the patches.
-    // It might be called multiple times after startApplyingPatchesFromManager
+    // It might be called multiple times after startApplyingPatchesFromManager.
+    //
+    // Uses onPatch to count how many patches were successfully applied. If an
+    // error occurs, throws a PatchApplicationError containing the count and
+    // inverse patches so callers can roll back the partial application.
+    //
+    // Patches without a path are treated as snapshots, which would produce
+    // multiple onPatch calls and break our counting. We reject them upfront
+    // since history patches should always have paths.
     applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
-      applyPatch(self, patchesToApply);
+      for (const patch of patchesToApply) {
+        if (!patch.path) {
+          throw new Error("History patches must have a path. Pathless (snapshot) patches are not supported.");
+        }
+      }
+
+      let numApplied = 0;
+      const inversePatches: IJsonPatch[] = [];
+      const disposer = onPatch(self, (_patch, reversePatch) => {
+        numApplied++;
+        inversePatches.push(reversePatch);
+      });
+      try {
+        applyPatch(self, patchesToApply);
+      } catch (e) {
+        throw new PatchApplicationError(numApplied, inversePatches, e);
+      } finally {
+        disposer();
+      }
+
       // We return a promise because the API is async
       // The action itself doesn't do anything asynchronous though
       // so it isn't necessary to use a flow
