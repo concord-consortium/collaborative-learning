@@ -1,7 +1,44 @@
+@import "./timeline-event-colors.scss";
+
 .event-overlay {
   height: 100%;
   position: absolute;
   top: 0;
+
+  &.blue-event {
+    background-color: $blue-transparent;
+    border-color: $blue-base;
+  }
+
+  &.orange-event {
+    background-color: $orange-transparent;
+    border-color: $orange-base;
+  }
+
+  &.red-event {
+    background-color: $red-transparent;
+    border-color: $red-base;
+  }
+
+  &.yellow-event {
+    background-color: $yellow-transparent;
+    border-color: $yellow-base;
+  }
+
+  &.magenta-event {
+    background-color: $magenta-transparent;
+    border-color: $magenta-base;
+  }
+
+  &.purple-event {
+    background-color: $purple-transparent;
+    border-color: $purple-base;
+  }
+
+  &.default-event {
+    background-color: $default-transparent;
+    border-color: $default-base;
+  }
 }
 
 .event-label-button {
@@ -20,4 +57,32 @@
   top: -24px;
   transform: translateX(-50%);
   width: 24px;
+
+  &.blue-event {
+    background-color: $blue-base;
+  }
+
+  &.orange-event {
+    background-color: $orange-base;
+  }
+
+  &.red-event {
+    background-color: $red-base;
+  }
+
+  &.yellow-event {
+    background-color: $yellow-base;
+  }
+
+  &.magenta-event {
+    background-color: $magenta-base;
+  }
+
+  &.purple-event {
+    background-color: $purple-base;
+  }
+
+  &.default-event {
+    background-color: $default-base;
+  }
 }

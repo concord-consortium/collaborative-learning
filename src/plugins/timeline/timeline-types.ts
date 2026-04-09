@@ -10,3 +10,11 @@ export interface TimelineEvent {
   windowEnd: DateTime;
   eventType: string;
 }
+
+export const kEventColorWords = ["blue", "orange", "red", "yellow", "magenta", "purple"];
+const allColorWords = new Set(kEventColorWords);
+
+export function getEventColorClass(colorWord?: string): string {
+  const word = colorWord && allColorWords.has(colorWord) ? colorWord : "default";
+  return `${word}-event`;
+}

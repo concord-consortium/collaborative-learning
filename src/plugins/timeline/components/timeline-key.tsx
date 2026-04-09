@@ -1,7 +1,8 @@
+import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { useTimelineContent } from "../hooks/use-timeline-content";
-import { getEventColorGroup } from "../timeline-event-colors";
+import { getEventColorClass } from "../timeline-types";
 
 import "./timeline-key.scss";
 
@@ -12,17 +13,15 @@ export const TimelineKey = observer(function TimelineKey() {
   return (
     <div className="timeline-key">
       <div className="key-title">Event Key</div>
-      <div className="event-types">
-        {Array.from(colorWords.entries()).map(([eventType, colorWord]) => {
-          const color = getEventColorGroup(colorWord).default;
-          return (
-            <div key={eventType} className="event-type-entry">
-              <div className="color-swatch" style={{ backgroundColor: color }} />
-              <span className="event-type-label">{eventType}</span>
-            </div>
-          );
-        })}
-      </div>
+      {Array.from(colorWords.entries()).map(([eventType, colorWord]) => {
+        const colorClass = getEventColorClass(colorWord);
+        return (
+          <div key={eventType} className="event-type-entry">
+            <div className={clsx("color-swatch", colorClass)} />
+            <span className="event-type-label">{eventType}</span>
+          </div>
+        );
+      })}
     </div>
   );
 });

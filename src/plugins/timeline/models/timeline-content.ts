@@ -5,8 +5,7 @@ import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { isValidDateTime } from "../../../utilities/luxon-utils";
 import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
-import { TimelineEvent, kTimelineTileType } from "../timeline-types";
-import { kEventColorWords } from "../timeline-event-colors";
+import { TimelineEvent, kEventColorWords, kTimelineTileType } from "../timeline-types";
 
 export const kMinViewRangeSeconds = 2;
 
