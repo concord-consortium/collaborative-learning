@@ -11,6 +11,7 @@ import { GroupManagementModal } from "./group/group-management-modal";
 import { IStores } from "../models/stores/stores";
 import ErrorAlert from "./utilities/error-alert";
 import { getCurrentLoadingMessage, removeLoadingMessage, showLoadingMessage } from "../utilities/loading-utils";
+import { PickedUpTileGhost } from "./picked-up-tile-ghost";
 import { LogMonitor } from "@concord-consortium/log-monitor";
 
 // used for tooltips in various parts of the application
@@ -247,6 +248,7 @@ export class AppComponent extends BaseComponent<IProps> {
       <>
         <div className="app">
           {children}
+          <PickedUpTileGhost />
         </div>
         {urlParams.logMonitor && <LogMonitor logFilePrefix="clue-log-events" />}
       </>

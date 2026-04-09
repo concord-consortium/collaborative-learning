@@ -514,6 +514,129 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
     });
   });
 
+  describe("tileInsertIndex", () => {
+    it("moveTile with tileInsertIndex places tile at exact position in target row", () => {
+      // Move textTool1 into initialChallengeRow2 (which has [graphTool, textTool2, drawingTool2])
+      // at tileInsertIndex 1, so it should land at index 1
+      const dragTiles = getDocumentDragTileItems(["textTool1"]);
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "initialChallengeRow2",
+        rowDropLocation: "left",
+        tileInsertIndex: 1
+      };
+      documentContent.moveTiles(dragTiles, dropRowInfo);
+      expect(getRowLayout()).toEqual({
+        introductionRowHeader: [],
+        introductionRow2: [ "drawingTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow1: [ "tableTool", "imageTool" ],
+        initialChallengeRow2: [ "graphTool", "textTool1", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+      });
+    });
+
+    it("moveTile 'left' without tileInsertIndex puts tile at start of row", () => {
+      // Move textTool1 to the left of initialChallengeRow1 (which has [tableTool, imageTool])
+      // without tileInsertIndex, so it should go to position 0
+      const dragTiles = getDocumentDragTileItems(["textTool1"]);
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "initialChallengeRow1",
+        rowDropLocation: "left"
+      };
+      documentContent.moveTiles(dragTiles, dropRowInfo);
+      expect(getRowLayout()).toEqual({
+        introductionRowHeader: [],
+        introductionRow2: [ "drawingTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow1: [ "textTool1", "tableTool", "imageTool" ],
+        initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+      });
+    });
+
+    it("moveTile 'right' without tileInsertIndex appends tile to end of row", () => {
+      // Move textTool1 to the right of initialChallengeRow1 (which has [tableTool, imageTool])
+      // without tileInsertIndex, so it should append at the end
+      const dragTiles = getDocumentDragTileItems(["textTool1"]);
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "initialChallengeRow1",
+        rowDropLocation: "right"
+      };
+      documentContent.moveTiles(dragTiles, dropRowInfo);
+      expect(getRowLayout()).toEqual({
+        introductionRowHeader: [],
+        introductionRow2: [ "drawingTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow1: [ "tableTool", "imageTool", "textTool1" ],
+        initialChallengeRow2: [ "graphTool", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+      });
+    });
+
+    it("copyTilesIntoExistingRow with tileInsertIndex places tiles at sequential positions", () => {
+      // Copy tableTool and imageTool into initialChallengeRow2 (which has [graphTool, textTool2, drawingTool2])
+      // with tileInsertIndex: 0, so they should end up at indices 0 and 1
+      const dragTiles = getDocumentDragTileItems(["tableTool", "imageTool"])
+                          .map(tile => ({ ...tile, newTileId: mockUniqueId() }));
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "initialChallengeRow2",
+        rowDropLocation: "left",
+        tileInsertIndex: 0
+      };
+      documentContent.copyTilesIntoExistingRow(dragTiles, dropRowInfo, true);
+      expect(getRowLayout()).toEqual({
+        introductionRowHeader: [],
+        introductionRow1: [ "textTool1" ],
+        introductionRow2: [ "drawingTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow1: [ "tableTool", "imageTool" ],
+        initialChallengeRow2: [ "NEW_TABLE_TILE_1", "NEW_IMAGE_TILE_2", "graphTool", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+      });
+    });
+
+    it("mergeRow with tileInsertIndex places tiles at specified position", () => {
+      // Merge initialChallengeRow1 (which has [tableTool, imageTool]) into initialChallengeRow2
+      // (which has [graphTool, textTool2, drawingTool2]) at tileInsertIndex: 1
+      // so tiles should end up at indices 1 and 2
+      const srcRow = documentContent.getRow("initialChallengeRow1")!;
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "initialChallengeRow2",
+        rowDropLocation: "left",
+        tileInsertIndex: 1
+      };
+      documentContent.mergeRow(srcRow, dropRowInfo);
+      expect(getRowLayout()).toEqual({
+        introductionRowHeader: [],
+        introductionRow1: [ "textTool1" ],
+        introductionRow2: [ "drawingTool1" ],
+        initialChallengeRowHeader: [],
+        initialChallengeRow2: [ "graphTool", "tableTool", "imageTool", "textTool2", "drawingTool2" ],
+        whatIfRowHeader: [],
+        whatIfRow1: [ "whatIfPlaceholder" ],
+        nowWhatDoYouKnowRowHeader: [],
+        nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
+      });
+    });
+  });
+
   describe("single tile copies", () => {
     it("can copy a tile before another row", () => {
       // copy drawingTile1 to new row before introductionRow1

@@ -28,10 +28,11 @@ export const RowListComponent = observer((props: IProps) => {
     <>
       {rowOrder.map((rowId, index) => {
         const row = rowMap.get(rowId);
-        const dropHighlight = dropRowInfo && (dropRowInfo.rowDropId === rowId) &&
-                            dropRowInfo.rowDropLocation
+        const isDropTarget = dropRowInfo && (dropRowInfo.rowDropId === rowId);
+        const dropHighlight = isDropTarget && dropRowInfo.rowDropLocation
                               ? dropRowInfo.rowDropLocation
                               : undefined;
+        const dropTileInsertIndex = isDropTarget ? dropRowInfo.tileInsertIndex : undefined;
 
         return row
                 ? <TileRowComponent
@@ -42,6 +43,7 @@ export const RowListComponent = observer((props: IProps) => {
                     documentContent={documentContent}
                     rowIndex={index}
                     dropHighlight={dropHighlight}
+                    dropTileInsertIndex={dropTileInsertIndex}
                     context={context}
                     typeClass={typeClass}
                     scale={scale}
