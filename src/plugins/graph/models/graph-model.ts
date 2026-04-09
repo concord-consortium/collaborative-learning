@@ -741,6 +741,7 @@ export const GraphModel = TileContentModel
           }
         });
       }
+
     },
     afterAttach() {
       // Some shared model references may need to be updated. We can't update them until the SharedModelManager

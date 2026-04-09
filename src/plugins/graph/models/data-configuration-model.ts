@@ -1,6 +1,6 @@
-import { observable } from "mobx";
+import { observable, reaction } from "mobx";
 import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
-import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
 import { ICase } from "../../../models/data/data-set-types";
 import { DataSet, IDataSet } from "../../../models/data/data-set";
@@ -850,6 +850,19 @@ export const DataConfigurationModel = types
     },
     afterCreate() {
       this.onAction(this.handleDatasetRemoveAttributeAction);
+
+      // Keep filteredCases in sync with MST state regardless of how it changed
+      // (applySnapshot, applyPatch, undo/redo, etc.)
+      addDisposer(self, reaction(
+        () => ({
+          dataset: self.dataset,
+          yAttrCount: self.yAttributeDescriptions.length
+        }),
+        () => {
+          this.syncFilteredCasesCount(true);
+        },
+        { fireImmediately: true }
+      ));
     },
     /**
      * Respond to an attribute being removed from the underlying dataset.

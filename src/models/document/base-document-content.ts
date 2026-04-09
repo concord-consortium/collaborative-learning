@@ -54,7 +54,11 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     // ID of the row to highlight as the drop location for newly-created or duplicated tiles.
     highlightPendingDropLocation: undefined as string | undefined,
     // IDs of top-level rows that are currently visible on the screen
-    visibleRows: [] as string[]
+    visibleRows: [] as string[],
+    // ID of a tile the UI should scroll into view in response to a history playback patch.
+    // Incremented token is appended so that re-selecting the same tile still triggers a reaction.
+    historyScrollTileId: undefined as string | undefined,
+    historyScrollToken: 0
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -709,6 +713,10 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     },
     showPendingInsertHighlight(show: boolean, rowId?: string) {
       self.highlightPendingDropLocation = show ? rowId ?? self.defaultInsertRowId : undefined;
+    },
+    setHistoryScrollTileId(tileId: string | undefined) {
+      self.historyScrollTileId = tileId;
+      self.historyScrollToken++;
     }
   }))
   .actions((self) => ({
