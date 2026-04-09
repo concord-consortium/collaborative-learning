@@ -78,9 +78,9 @@ let mockSharedDataSet: any;
 
 beforeEach(() => {
   const mockSharedSeismogram = {
+    station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
     startTime: dataStart,
     endTime: dataEnd,
-    seismogram: {},
   };
   mockSharedDataSet = undefined;
 
@@ -109,9 +109,9 @@ describe("event views", () => {
 
   beforeEach(() => {
     const mockSharedSeismogram = {
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
       startTime: dataStart,
       endTime: dataEnd,
-      seismogram: {},
     };
     mockSharedDataSet = undefined;
 
@@ -514,91 +514,7 @@ git commit -m "feat: add selectedEventIndex and navigation actions to TimelineCo
 
 ---
 
-### Task 4: Rename timeline-container to timeline-content, add new timeline-container wrapper
-
-**Files:**
-- Modify: `src/plugins/timeline/components/timeline-tile.tsx`
-- Modify: `src/plugins/timeline/components/timeline-tile.scss`
-
-**Step 1: Update the component**
-
-In `src/plugins/timeline/components/timeline-tile.tsx`, rename `.timeline-container` to `.timeline-content` and wrap `<Timeline />` in a new `.timeline-container` div:
-
-```tsx
-export const TimelineComponent: React.FC<ITileProps> = observer(function TimelineComponent({ readOnly, tileElt }) {
-  return (
-    <div className="tile-content timeline-tile">
-      <BasicEditableTileTitle />
-      <TileToolbar tileType="timeline" readOnly={!!readOnly} tileElement={tileElt} />
-      <div className="timeline-content">
-        <div className="event-row">
-          <button disabled={true}>Prev</button>
-          <button disabled={true}>Next</button>
-          <div className="event-label">Event</div>
-        </div>
-        <div className="timeline-container">
-          <Timeline />
-        </div>
-        <TimelineKey />
-      </div>
-    </div>
-  );
-});
-```
-
-**Step 2: Update SCSS**
-
-In `src/plugins/timeline/components/timeline-tile.scss`, rename `.timeline-container` to `.timeline-content` and add `.timeline-container` as a positioned wrapper:
-
-```scss
-.timeline-tile {
-  width: 100%;
-  height: 100%;
-  text-align: left;
-  overflow: auto;
-
-  .timeline-content {
-    display: flex;
-    flex-direction: column;
-    margin: 46px 17px 15px;
-
-    .event-row {
-      align-items: center;
-      display: flex;
-      justify-content: center;
-      position: relative;
-
-      button + button {
-        margin-left: 76px;
-      }
-
-      .event-label {
-        position: absolute;
-      }
-    }
-
-    .timeline-container {
-      position: relative;
-    }
-  }
-}
-```
-
-**Step 3: Run existing tests to ensure nothing broke**
-
-Run: `npx jest --no-watchman src/plugins/timeline/ --no-coverage`
-Expected: PASS
-
-**Step 4: Commit**
-
-```bash
-git add src/plugins/timeline/components/timeline-tile.tsx src/plugins/timeline/components/timeline-tile.scss
-git commit -m "refactor: rename timeline-container to timeline-content, add new timeline-container wrapper"
-```
-
----
-
-### Task 5: Wire up Prev/Next buttons and event label
+### Task 4: Wire up Prev/Next buttons and event label
 
 **Files:**
 - Modify: `src/plugins/timeline/components/timeline-tile.tsx`
@@ -682,12 +598,15 @@ git commit -m "feat: wire up Prev/Next buttons and event label to model"
 
 ---
 
-### Task 6: Create EventOverlay component
+### Task 5: Create EventOverlay component
 
 **Files:**
 - Create: `src/plugins/timeline/components/event-overlay.tsx`
 - Create: `src/plugins/timeline/components/event-overlay.scss`
-- Modify: `src/plugins/timeline/components/timeline-tile.tsx` (add `<EventOverlay />` inside `.timeline-container`)
+- Modify: `src/plugins/timeline/components/timeline.tsx` (render `<EventOverlay />` inside the waveform area)
+- Modify: `src/plugins/timeline/components/timeline.scss` (add a positioned wrapper around `<WaveformPanel>` so the overlay covers only the waveform, not the range row)
+
+**Background:** `Timeline.tsx` currently renders a `<WaveformPanel>` and a `<div className="timeline-range-row">` as siblings inside `.timeline-area`. `EventOverlay` should overlay only the waveform, not the range row. To achieve this, wrap `<WaveformPanel>` in a new `.waveform-wrapper` div with `position: relative`, and render `<EventOverlay />` as a sibling inside that wrapper.
 
 **Step 1: Create the hexToRgba helper and EventOverlay component**
 
@@ -798,36 +717,64 @@ Create `src/plugins/timeline/components/event-overlay.scss`:
 }
 ```
 
-**Step 3: Add EventOverlay to timeline-tile.tsx**
+**Step 3: Add EventOverlay to Timeline.tsx**
 
-In `src/plugins/timeline/components/timeline-tile.tsx`, import and render `<EventOverlay />` inside `.timeline-container` after `<Timeline />`:
+In `src/plugins/timeline/components/timeline.tsx`, import `EventOverlay` and wrap `<WaveformPanel>` in a `.waveform-wrapper` div, with `<EventOverlay />` as a sibling:
 
 ```tsx
 import { EventOverlay } from "./event-overlay";
 ```
 
+Replace the waveform/range-row block inside the conditional with:
+
 ```tsx
-<div className="timeline-container">
-  <Timeline />
-  <EventOverlay />
-</div>
+{sharedSeismogram && isValidDateTime(startTime) && isValidDateTime(endTime) ? (
+  <>
+    <div className="waveform-wrapper">
+      <WaveformPanel
+        label="Full waveform"
+        sharedSeismogram={sharedSeismogram}
+        startTime={startTime}
+        endTime={endTime}
+      />
+      <EventOverlay />
+    </div>
+    <div className="timeline-range-row">
+      {/* ...existing range row content unchanged... */}
+    </div>
+  </>
+) : <div className="waveform" />}
 ```
 
-**Step 4: Run tests**
+**Step 4: Update timeline.scss**
+
+Add `.waveform-wrapper` as a positioned wrapper inside `.timeline-area`:
+
+```scss
+.timeline-area {
+  // ...existing rules...
+
+  .waveform-wrapper {
+    position: relative;
+  }
+}
+```
+
+**Step 5: Run tests**
 
 Run: `npx jest --no-watchman src/plugins/timeline/ --no-coverage`
 Expected: PASS
 
-**Step 5: Commit**
+**Step 6: Commit**
 
 ```bash
-git add src/plugins/timeline/components/event-overlay.tsx src/plugins/timeline/components/event-overlay.scss src/plugins/timeline/components/timeline-tile.tsx
+git add src/plugins/timeline/components/event-overlay.tsx src/plugins/timeline/components/event-overlay.scss src/plugins/timeline/components/timeline.tsx src/plugins/timeline/components/timeline.scss
 git commit -m "feat: add EventOverlay component to render event rectangles with label buttons"
 ```
 
 ---
 
-### Task 7: Update TimelineKey to show event types
+### Task 6: Update TimelineKey to show event types
 
 **Files:**
 - Modify: `src/plugins/timeline/components/timeline-key.tsx`
@@ -916,7 +863,7 @@ git commit -m "feat: display event type legend in TimelineKey component"
 
 ---
 
-### Task 8: Final integration test and type check
+### Task 7: Final integration test and type check
 
 **Step 1: Run full timeline test suite**
 
