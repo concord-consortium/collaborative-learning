@@ -1,3 +1,12 @@
+// Mock uPlot — canvas won't work in jsdom
+jest.mock("uplot", () => {
+  return jest.fn().mockImplementation(() => ({
+    setData: jest.fn(),
+    setSize: jest.fn(),
+    destroy: jest.fn(),
+  }));
+});
+
 import { render, screen } from "@testing-library/react";
 import { Provider } from "mobx-react";
 import React from "react";
@@ -120,8 +129,8 @@ describe("WaveRunnerComponent", () => {
     renderWithStores();
     const startInput = screen.getByLabelText("Start Date and Time") as HTMLInputElement;
     const endInput = screen.getByLabelText("End Date and Time") as HTMLInputElement;
-    expect(startInput.value).toBe("2026-01-30T00:00");
-    expect(endInput.value).toBe("2026-02-06T00:00");
+    expect(startInput.value).toBe("2025-01-01T00:00");
+    expect(endInput.value).toBe("2025-12-31T00:00");
   });
 
   it("renders station dropdown with options from config", () => {

@@ -8,4 +8,25 @@
     height: 100px;
     width: 100%;
   }
+
+  .timeline-range-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 3px;
+    width: 100%;
+
+    .range-date {
+      display: flex;
+      flex-direction: column;
+
+      &.range-start {
+        align-items: flex-start;
+      }
+
+      &.range-end {
+        align-items: flex-end;
+      }
+    }
+  }
 }
