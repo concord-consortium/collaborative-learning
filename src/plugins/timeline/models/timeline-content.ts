@@ -5,17 +5,10 @@ import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { isValidDateTime } from "../../../utilities/luxon-utils";
 import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
-import { kTimelineTileType } from "../timeline-types";
+import { TimelineEvent, kTimelineTileType } from "../timeline-types";
 import { kEventColorWords } from "../timeline-event-colors";
 
 export const kMinViewRangeSeconds = 2;
-
-export interface TimelineEvent {
-  index: number;
-  windowStart: DateTime;
-  windowEnd: DateTime;
-  eventType: string;
-}
 
 export function defaultTimelineContent(): TimelineContentModelType {
   return TimelineContentModel.create();
