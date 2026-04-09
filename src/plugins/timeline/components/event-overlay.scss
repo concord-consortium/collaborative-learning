@@ -1,22 +1,24 @@
 .event-overlay {
+  cursor: pointer;
+  height: 100%;
   position: absolute;
   top: 0;
-  height: 100%;
-  cursor: pointer;
 }
 
 .event-label-button {
+  align-items: center;
+  border: none;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1.5px #949494, 0 0 0 2px white;
+  color: #121212;
+  cursor: pointer;
+  display: flex;
+  font-size: 12px;
+  height: 20px;
+  justify-content: center;
+  padding: 0;
   position: absolute;
   top: -24px;
   transform: translateX(-50%);
   width: 24px;
-  height: 20px;
-  border: none;
-  cursor: pointer;
-  color: #121212;
-  font-size: 12px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
