@@ -1,30 +1,24 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { DateTime } from "luxon";
 import { useWaveRunnerContent } from "../hooks/use-wave-runner-content";
 import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
 import "./status-and-output.scss";
 
 export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
   const model = useWaveRunnerContent();
-  const seismogram = model.sharedSeismogram?.seismogram;
+  const { hasStationData, sharedSeismogram, startDateISO, endDateISO } = model;
 
   return (
     <div className="section status-and-output">
       <div className="section-title">Status and Output</div>
       <div className="waveform-container">
-        {model.isLoading && <div className="waveform-loading">Loading seismic data...</div>}
-        {model.loadError && <div className="waveform-error">{model.loadError}</div>}
-        {seismogram && (
+        {sharedSeismogram && hasStationData && (
           <WaveformPanel
             key={`${model.startDate}-${model.endDate}`}
             label={`${model.startDate} – ${model.endDate}`}
-            startTime={DateTime.fromISO(`${model.startDate}T00:00:00Z`, { zone: "utc" })}
-            durationSeconds={
-              (new Date(`${model.endDate}T00:00:00Z`).getTime()
-               - new Date(`${model.startDate}T00:00:00Z`).getTime()) / 1000
-            }
-            seismogram={seismogram}
+            sharedSeismogram={sharedSeismogram}
+            startTime={startDateISO}
+            endTime={endDateISO}
           />
         )}
       </div>
