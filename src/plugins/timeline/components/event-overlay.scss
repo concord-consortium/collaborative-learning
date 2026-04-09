@@ -60,29 +60,78 @@
 
   &.blue-event {
     background-color: $blue-base;
+
+    &:hover {
+      background-color: $blue-hover;
+    }
+    &:active {
+      background-color: $blue-select;
+    }
   }
 
   &.orange-event {
     background-color: $orange-base;
+
+    &:hover {
+      background-color: $orange-hover;
+    }
+    &:active {
+      background-color: $orange-select;
+    }
   }
 
   &.red-event {
     background-color: $red-base;
+
+    &:hover {
+      background-color: $red-hover;
+    }
+    &:active {
+      background-color: $red-select;
+    }
   }
 
   &.yellow-event {
     background-color: $yellow-base;
+
+    &:hover {
+      background-color: $yellow-hover;
+    }
+    &:active {
+      background-color: $yellow-select;
+    }
   }
 
   &.magenta-event {
     background-color: $magenta-base;
+
+    &:hover {
+      background-color: $magenta-hover;
+    }
+    &:active {
+      background-color: $magenta-select;
+    }
   }
 
   &.purple-event {
     background-color: $purple-base;
+
+    &:hover {
+      background-color: $purple-hover;
+    }
+    &:active {
+      background-color: $purple-select;
+    }
   }
 
   &.default-event {
     background-color: $default-base;
+
+    &:hover {
+      background-color: $default-hover;
+    }
+    &:active {
+      background-color: $default-select;
+    }
   }
 }
