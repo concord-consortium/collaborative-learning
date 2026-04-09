@@ -9,7 +9,7 @@ import "./data-setup.scss";
 export const DataSetup: React.FC = observer(function DataSetup() {
   const content = useWaveRunnerContent();
   const stationConfigs = useSettingFromStores("stations", "wave-runner") as StationConfig[] | undefined;
-  const defaultStationIndex = (useSettingFromStores("defaultStation", "wave-runner") as number) ?? 0;
+  const defaultStationIndex = useSettingFromStores("defaultStation", "wave-runner") as number | undefined;
 
   // Build the options list from config stations
   const stationOptions = useMemo(() => {
@@ -40,15 +40,17 @@ export const DataSetup: React.FC = observer(function DataSetup() {
 
   // Auto-set default station on mount
   useEffect(() => {
-    if (!content.station && stationConfigs?.length) {
-      const defaultConfig = stationConfigs[defaultStationIndex] ?? stationConfigs[0];
-      content.setStation({
-        network: defaultConfig.network,
-        station: defaultConfig.station,
-        location: defaultConfig.location ?? "",
-        channel: defaultConfig.channel,
-        label: defaultConfig.label,
-      });
+    if (!content.station && stationConfigs?.length && defaultStationIndex != null) {
+      const defaultConfig = stationConfigs[defaultStationIndex];
+      if (defaultConfig) {
+        content.setStation({
+          network: defaultConfig.network,
+          station: defaultConfig.station,
+          location: defaultConfig.location ?? "",
+          channel: defaultConfig.channel,
+          label: defaultConfig.label,
+        });
+      }
     }
   }, [content, stationConfigs, defaultStationIndex]);
 
@@ -85,6 +87,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             disabled={!hasStations || content.isRunning}
           >
             {!hasStations && <option value="">No stations configured</option>}
+            {hasStations && !currentStationId && <option value="">Choose a station</option>}
             {dropdownOptions.map(opt => (
               <option key={opt.id} value={opt.id}>{opt.config.label}</option>
             ))}
