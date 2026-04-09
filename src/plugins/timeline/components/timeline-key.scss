@@ -8,5 +8,18 @@
 
   .event-types {
     display: flex;
+    gap: 10px;
+
+    .event-type-entry {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .color-swatch {
+        width: 16px;
+        height: 16px;
+        border-radius: 2px;
+      }
+    }
   }
 }
