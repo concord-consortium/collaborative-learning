@@ -27,8 +27,8 @@ export const EventOverlay = observer(function EventOverlay() {
     const viewDuration = viewEndMs - viewStartMs;
     if (viewDuration <= 0) return null;
 
-    const leftPct = ((event.windowStart.toMillis() - viewStartMs) / viewDuration) * 100;
-    const rightPct = ((event.windowEnd.toMillis() - viewStartMs) / viewDuration) * 100;
+    const leftPct = (Math.max(event.windowStart.toMillis(), viewStartMs) - viewStartMs) / viewDuration * 100;
+    const rightPct = (Math.min(event.windowEnd.toMillis(), viewEndMs) - viewStartMs) / viewDuration * 100;
     const widthPct = rightPct - leftPct;
 
     return { leftPct, widthPct };
@@ -39,28 +39,25 @@ export const EventOverlay = observer(function EventOverlay() {
       {visibleEvents.map((event, i) => {
         const pos = getEventPosition(event);
         if (!pos) return null;
+
         const colorWord = colorWords.get(event.eventType);
         const color = getEventColorGroup(colorWord ?? "").default;
+        const overlayStyle = {
+          backgroundColor: hexToRgba(color, 0.5),
+          border: `1px solid ${color}`,
+          left: `${pos.leftPct}%`,
+          width: `${pos.widthPct}%`,
+        };
+        const labelStyle = {
+          backgroundColor: color,
+          left: `${pos.leftPct + pos.widthPct / 2}%`,
+        };
+        const onLabelClick = () => content.selectEvent(event.index);
+
         return (
           <React.Fragment key={i}>
-            <div
-              className="event-overlay"
-              style={{
-                backgroundColor: hexToRgba(color, 0.5),
-                border: `1px solid ${color}`,
-                left: `${pos.leftPct}%`,
-                width: `${pos.widthPct}%`,
-              }}
-              onClick={() => content.selectEvent(event.index)}
-            />
-            <button
-              className="event-label-button"
-              style={{
-                left: `${pos.leftPct + pos.widthPct / 2}%`,
-                backgroundColor: color,
-              }}
-              onClick={() => content.selectEvent(event.index)}
-            >
+            <div className="event-overlay" style={overlayStyle} />
+            <button className="event-label-button" style={labelStyle} onClick={onLabelClick}>
               {event.index + 1}
             </button>
           </React.Fragment>
