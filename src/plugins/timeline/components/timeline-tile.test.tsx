@@ -87,9 +87,9 @@ describe("TimelineComponent", () => {
   });
 
   it("Prev and Next buttons are disabled when no events exist", () => {
-    renderWithStores();
-    const prevButton = screen.getByText("Prev");
-    const nextButton = screen.getByText("Next");
+    const { container } = renderWithStores();
+    const prevButton = container.querySelector(".prev-button");
+    const nextButton = container.querySelector(".next-button");
     expect(prevButton).toBeDisabled();
     expect(nextButton).toBeDisabled();
   });
