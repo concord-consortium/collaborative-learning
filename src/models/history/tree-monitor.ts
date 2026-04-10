@@ -8,7 +8,8 @@ import { TreeManagerAPI } from "./tree-manager-api";
 import { TreePatchRecordSnapshot } from "./history";
 import { Tree } from "./tree";
 import {
-  CallEnv, getActionModelName, getActionPath, isActionFromManager, isValidCallEnv, runningCalls,
+  CallEnv, getActionModelName, getActionPath, isActionFromManager, isActionHandlingOwnErrors,
+  isValidCallEnv, runningCalls,
   SharedModelModifications
 } from "./tree-types";
 import { createActionTrackingMiddleware3, IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
@@ -161,6 +162,11 @@ export class TreeMonitor {
         if (error === undefined) {
           // recordAction is async
           self.recordAction(call, env);
+        } else if (isActionHandlingOwnErrors(call)) {
+          // This action takes responsibility for its own partial-failure
+          // recovery. Don't revert its patches automatically — the caller
+          // (e.g. TreeManager.goToHistoryEntry) needs the already-applied
+          // patches to remain so it can decide what to roll back.
         } else {
           // TODO: This is a new feature that is being added to the tree:
           // any errors that happen during an action will cause the tree to revert back to

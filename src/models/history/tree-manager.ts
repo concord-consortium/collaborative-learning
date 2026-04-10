@@ -1,5 +1,5 @@
 import {
-  applyPatch, types, Instance, flow, IJsonPatch, detach, destroy, toGenerator
+  types, Instance, flow, IJsonPatch, detach, destroy, toGenerator
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
@@ -529,16 +529,23 @@ export const TreeManager = types
       if (direction === -1) {
         records = records.reverse();
       }
+      // A history entry may contain multiple records for the same tree
+      // (e.g. tile update + shared-model update). Track the per-tree
+      // patch count for this history entry so we can push a single
+      // segment per tree that covers the whole entry — that way rollback
+      // on failure covers all records in the entry, not just one.
+      const entryPatchCountByTree: Record<string, number> = {};
       for (const entryRecord of records) {
         const patches = treePatches[entryRecord.tree];
         const entryPatches = entryRecord.getPatches(opType);
         if (patches && entryPatches.length > 0) {
           patches.push(...entryPatches);
-          treePatchSegments[entryRecord.tree].push({
-            historyIndex: i,
-            patchCount: entryPatches.length
-          });
+          entryPatchCountByTree[entryRecord.tree] =
+            (entryPatchCountByTree[entryRecord.tree] ?? 0) + entryPatches.length;
         }
+      }
+      for (const [treeId, patchCount] of Object.entries(entryPatchCountByTree)) {
+        treePatchSegments[treeId].push({ historyIndex: i, patchCount });
       }
     }
 
@@ -558,21 +565,28 @@ export const TreeManager = types
     const applyPromises = Object.entries(treePatches).map(async ([treeId, patches]) => {
       if (!patches || patches.length === 0) return;
       const tree = self.trees[treeId];
+      if (!tree) return;
       try {
-        await tree?.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
+        await tree.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
       } catch (e) {
         if (e instanceof PatchApplicationError) {
           const segments = treePatchSegments[treeId];
           const { historyIndex, appliedInEntry } = findFailedSegment(e.numApplied, segments);
 
           // Roll back the partially applied patches from the failed entry
+          // by sending their reversed inverse patches back through
+          // applyPatchesFromManager. That action is in the list of actions
+          // the TreeMonitor middleware treats as coming from the manager,
+          // so the rollback patches won't be recorded as a new user
+          // history entry. Using the TreeAPI also keeps the abstraction
+          // intact for trees that might run in iframes/workers.
           if (e.inversePatches.length > 0) {
             // The inverse patches for the failed entry start at the end of the
             // successfully applied patches from prior entries.
             const priorApplied = e.numApplied - appliedInEntry;
             const partialInverse = e.inversePatches.slice(priorApplied).reverse();
             if (partialInverse.length > 0) {
-              applyPatch(tree as any, partialInverse);
+              await tree.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, partialInverse);
             }
           }
 
