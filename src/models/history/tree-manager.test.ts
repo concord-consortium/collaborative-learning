@@ -580,6 +580,49 @@ describe("history playback failure handling", () => {
     expect(manager.numHistoryEventsApplied).toBe(1);
     expect(manager.historyPlaybackFailures.length).toBe(1);
   });
+
+  // A history entry containing a patch with an empty `path` (which MST
+  // interprets as a whole-tree snapshot replacement). Tree rejects
+  // pathless patches up front; we want that rejection to flow through
+  // the recoverable playback-failure path just like any other patch
+  // application failure.
+  const pathlessPatchEntry = {
+    model: "TestTile",
+    action: "/pathlessEntry",
+    created: expect.any(Number),
+    id: expect.any(String),
+    records: [
+      { action: "/pathlessEntry",
+        inversePatches: [
+          { op: "replace", path: "", value: {} }
+        ],
+        patches: [
+          { op: "replace", path: "", value: {} }
+        ],
+        tree: "test"
+      },
+    ],
+    state: "complete",
+    tree: "test",
+    undoable: true
+  };
+
+  it("handles a pathless patch as a recoverable playback failure", async () => {
+    const { manager } = setupDocument();
+    seedHistory(manager, [makeRealHistoryEntry(pathlessPatchEntry)], 0);
+
+    await jestSpyConsole("warn", async () => {
+      await manager.goToHistoryEntry(1);
+    });
+
+    // Pathless patches must not escape as an unhandled error — they
+    // should be recorded as a playback failure and leave the position
+    // just before the bad entry.
+    expect(manager.numHistoryEventsApplied).toBe(0);
+    expect(manager.historyPlaybackFailures.length).toBe(1);
+    expect(manager.historyPlaybackFailures[0].historyIndex).toBe(0);
+    expect(manager.historyPlaybackFailures[0].direction).toBe("redo");
+  });
 });
 
 it("records tile model changes in response to shared model changes", async () => {

@@ -157,10 +157,15 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     // slider to the last fully applied position and show a warning.
     const actual = treeManager.numHistoryEventsApplied;
     if (actual !== undefined && actual !== newHistoryEntryIndex) {
-      // Find the slider entry that corresponds to the actual history position
-      const actualSliderIndex = sliderEntries.findIndex(
-        e => e.kind === "history" && e.index === actual
-      );
+      // Find the slider entry that corresponds to the actual history
+      // position. The end-of-history position is represented by
+      // sliderEntries.length (one past the last index), not by any
+      // entry inside sliderEntries, so findIndex can't locate it.
+      const actualSliderIndex = actual === history.length
+        ? sliderEntries.length
+        : sliderEntries.findIndex(
+          e => e.kind === "history" && e.index === actual
+        );
       setSliderValue(actualSliderIndex >= 0 ? actualSliderIndex : value);
       setPlaybackFailureWarning("History playback could not apply some changes and was stopped.");
     } else {

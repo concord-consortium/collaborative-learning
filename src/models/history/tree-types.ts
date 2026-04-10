@@ -49,17 +49,3 @@ export function isActionFromManager(call: IActionTrackingMiddleware3Call<CallEnv
   const actionName = call.actionCall.name;
   return actionsFromManager.includes(actionName);
 }
-
-// Actions that manage their own partial-failure recovery and should NOT
-// have the TreeMonitor middleware auto-revert their patches when they
-// throw. By default the middleware calls recorder.undo() in its onFinish
-// error path, which would undo patches that we want to keep (e.g. patches
-// from earlier history entries in a batched goToHistoryEntry replay).
-export const actionsHandlingOwnErrors = [
-  "applyPatchesFromManager"
-];
-
-export function isActionHandlingOwnErrors(call: IActionTrackingMiddleware3Call<CallEnv>) {
-  const actionName = call.actionCall.name;
-  return actionsHandlingOwnErrors.includes(actionName);
-}

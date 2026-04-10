@@ -184,8 +184,17 @@ export const Tree = types.model("Tree", {
     applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
       for (const patch of patchesToApply) {
         if (!patch.path) {
-          throw new Error(
-            "History patches must have a non-empty path. Pathless or root-snapshot patches are not supported."
+          // Throw PatchApplicationError (with numApplied=0) so this
+          // case flows through the playback-failure handling path in
+          // TreeManager.goToHistoryEntry, rather than escaping as an
+          // unhandled error that bypasses rollback and failure
+          // recording.
+          throw new PatchApplicationError(
+            0,
+            new Error(
+              "History patches must have a non-empty path. " +
+              "Pathless or root-snapshot patches are not supported."
+            )
           );
         }
       }

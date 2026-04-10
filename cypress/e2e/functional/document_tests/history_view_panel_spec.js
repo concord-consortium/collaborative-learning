@@ -69,6 +69,21 @@ context('History View Panel', () => {
     cy.get('.playback-failure-marker').click();
     cy.get('[data-testid="playback-failure-detail"]').should('be.visible');
     cy.get('.playback-failure-detail-body').should('contain', 'NONEXISTENT_TILE');
+
+    // The slider opens at the end-of-history position. The backward
+    // scrub above fails immediately on the last history entry (the
+    // injected failing one), so no backward progress is made and
+    // numHistoryEventsApplied stays at history.length. The slider
+    // handle should stay at the end position — not snap back to the
+    // user-clicked target near the start. Regression coverage for
+    // Copilot review comment #4 on CLUE-494.
+    cy.log('verify slider stays at end when failure blocks all backward progress');
+    cy.get('[data-testid="playback-slider"] .rc-slider-handle')
+      .should($handle => {
+        const now = Number($handle.attr('aria-valuenow'));
+        const max = Number($handle.attr('aria-valuemax'));
+        expect(now).to.equal(max);
+      });
   });
 
   it('opens panel and shows local and remote history', function () {
