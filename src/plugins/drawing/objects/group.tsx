@@ -28,7 +28,8 @@ export const GroupObject = SizedObject.named("GroupObject")
       return "Group";
     },
     get ariaLabel() {
-      return `Group of ${self.objects.length} objects`;
+      const count = self.objects.length;
+      return `Group of ${count} ${count === 1 ? "object" : "objects"}`;
     },
     get icon() {
       return (<GroupObjectsIcon viewBox={ObjectTypeIconViewBox}/>);

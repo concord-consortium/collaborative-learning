@@ -12,7 +12,7 @@ export function getVisibleFocusables(container: HTMLElement | Element): (HTMLEle
   return Array.from(
     container.querySelectorAll<HTMLElement | SVGElement>(selector)
   ).filter(el => {
-    if (el.getAttribute("aria-hidden") === "true") return false;
+    if (el.closest('[aria-hidden="true"]')) return false;
     if (el instanceof SVGElement) {
       const svgRect = el.getBoundingClientRect();
       return svgRect.width > 0 && svgRect.height > 0;
