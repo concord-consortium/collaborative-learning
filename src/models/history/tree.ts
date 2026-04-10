@@ -10,20 +10,19 @@ import { TreeManagerAPI } from "./tree-manager-api";
 
 /**
  * Error thrown when applyPatch fails partway through a batch.
- * Includes the number of patches that were successfully applied and their
- * inverse patches (captured via onPatch), so callers can undo partial
- * application and identify which input patch caused the failure.
+ * Includes the number of patches that were successfully applied so callers
+ * can identify which input patch caused the failure. The caller is
+ * responsible for rolling back the partial application using the inverse
+ * patches it already has access to (e.g. from history entry records).
  */
 export class PatchApplicationError extends Error {
   numApplied: number;
-  inversePatches: IJsonPatch[];
 
-  constructor(numApplied: number, inversePatches: IJsonPatch[], originalError: unknown) {
+  constructor(numApplied: number, originalError: unknown) {
     const message = originalError instanceof Error ? originalError.message : String(originalError);
     super(`Patch application failed after ${numApplied} patches: ${message}`);
     this.name = "PatchApplicationError";
     this.numApplied = numApplied;
-    this.inversePatches = inversePatches;
   }
 }
 
@@ -168,10 +167,12 @@ export const Tree = types.model("Tree", {
     //
     // However, batch applyPatch doesn't tell us which patch failed if an
     // error occurs partway through. To work around this, we register an
-    // onPatch listener that counts successfully applied patches and collects
-    // their inverse patches. On failure, we throw a PatchApplicationError
-    // containing the count and inverse patches so callers can roll back the
-    // partial application and identify which input patch caused the failure.
+    // onPatch listener that counts successfully applied patches. On
+    // failure, we throw a PatchApplicationError containing the count so
+    // the caller can identify which input patch caused the failure. The
+    // caller is responsible for rolling back the partial application
+    // using the inverse patches it already has (e.g. from the history
+    // entry records that produced the batch).
     //
     // MST treats a patch with an empty or missing path as a whole-tree
     // snapshot replacement. Applying such a patch produces multiple onPatch
@@ -190,15 +191,13 @@ export const Tree = types.model("Tree", {
       }
 
       let numApplied = 0;
-      const inversePatches: IJsonPatch[] = [];
-      const disposer = onPatch(self, (_patch, reversePatch) => {
+      const disposer = onPatch(self, () => {
         numApplied++;
-        inversePatches.push(reversePatch);
       });
       try {
         applyPatch(self, patchesToApply);
       } catch (e) {
-        throw new PatchApplicationError(numApplied, inversePatches, e);
+        throw new PatchApplicationError(numApplied, e);
       } finally {
         disposer();
       }

@@ -32,6 +32,30 @@ interface PatchSegment {
 }
 
 /**
+ * Build the list of patches for a single history entry that a tree
+ * would receive in a given direction, in the same order and record
+ * ordering that goToHistoryEntry uses when batching. Used to
+ * reconstruct patches without needing the onPatch-collected inverses.
+ */
+function getEntryPatchesForTree(
+  historyEntry: Instance<typeof HistoryEntry>,
+  treeId: string,
+  opType: HistoryOperation
+): IJsonPatch[] {
+  let records = [...historyEntry.records];
+  if (opType === HistoryOperation.Undo) {
+    records = records.reverse();
+  }
+  const result: IJsonPatch[] = [];
+  for (const entryRecord of records) {
+    if (entryRecord.tree === treeId) {
+      result.push(...entryRecord.getPatches(opType));
+    }
+  }
+  return result;
+}
+
+/**
  * Given the number of patches that were successfully applied and the
  * segment mapping, returns the history entry index that contains the
  * patch that failed, and the number of patches from that entry that
@@ -523,29 +547,22 @@ export const TreeManager = types
     const opType = direction === 1 ? HistoryOperation.Redo : HistoryOperation.Undo;
     const startingIndex = direction === 1 ? self.numHistoryEventsApplied : self.numHistoryEventsApplied - 1;
     const endingIndex = direction === 1 ? newHistoryPosition : newHistoryPosition - 1;
+    // A history entry may contain multiple records for the same tree
+    // (e.g. tile update + shared-model update). getEntryPatchesForTree
+    // aggregates them into one ordered list per tree so we can push a
+    // single segment per tree per history entry — that way rollback on
+    // failure covers all records in the entry, not just one.
+    // Using the same helper for both the initial batching and the
+    // rollback ensures the two paths produce matching orderings.
     for (let i=startingIndex; i !== endingIndex; i=i+direction) {
       const historyEntry = self.document.history.at(i);
-      let records = historyEntry ? [ ...historyEntry.records] : [];
-      if (direction === -1) {
-        records = records.reverse();
-      }
-      // A history entry may contain multiple records for the same tree
-      // (e.g. tile update + shared-model update). Track the per-tree
-      // patch count for this history entry so we can push a single
-      // segment per tree that covers the whole entry — that way rollback
-      // on failure covers all records in the entry, not just one.
-      const entryPatchCountByTree: Record<string, number> = {};
-      for (const entryRecord of records) {
-        const patches = treePatches[entryRecord.tree];
-        const entryPatches = entryRecord.getPatches(opType);
-        if (patches && entryPatches.length > 0) {
-          patches.push(...entryPatches);
-          entryPatchCountByTree[entryRecord.tree] =
-            (entryPatchCountByTree[entryRecord.tree] ?? 0) + entryPatches.length;
+      if (!historyEntry) continue;
+      for (const treeId of Object.keys(self.trees)) {
+        const entryPatches = getEntryPatchesForTree(historyEntry, treeId, opType);
+        if (entryPatches.length > 0) {
+          treePatches[treeId]!.push(...entryPatches);
+          treePatchSegments[treeId].push({ historyIndex: i, patchCount: entryPatches.length });
         }
-      }
-      for (const [treeId, patchCount] of Object.entries(entryPatchCountByTree)) {
-        treePatchSegments[treeId].push({ historyIndex: i, patchCount });
       }
     }
 
@@ -574,19 +591,32 @@ export const TreeManager = types
           const { historyIndex, appliedInEntry } = findFailedSegment(e.numApplied, segments);
 
           // Roll back the partially applied patches from the failed entry
-          // by sending their reversed inverse patches back through
-          // applyPatchesFromManager. That action is in the list of actions
-          // the TreeMonitor middleware treats as coming from the manager,
-          // so the rollback patches won't be recorded as a new user
-          // history entry. Using the TreeAPI also keeps the abstraction
-          // intact for trees that might run in iframes/workers.
-          if (e.inversePatches.length > 0) {
-            // The inverse patches for the failed entry start at the end of the
-            // successfully applied patches from prior entries.
-            const priorApplied = e.numApplied - appliedInEntry;
-            const partialInverse = e.inversePatches.slice(priorApplied).reverse();
-            if (partialInverse.length > 0) {
-              await tree.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, partialInverse);
+          // by sending the opposite-direction patches for that entry back
+          // through applyPatchesFromManager. That action is in the list of
+          // actions the TreeMonitor middleware treats as coming from the
+          // manager, so the rollback patches won't be recorded as a new
+          // user history entry. Using the TreeAPI also keeps the
+          // abstraction intact for trees that might run in iframes/workers.
+          //
+          // Derivation of the slice: in the opposite direction, an entry's
+          // batched patches list is the reverse of the forward direction's
+          // list. The first `appliedInEntry` patches of the forward list
+          // correspond to the last `appliedInEntry` patches of the opposite
+          // list — so .slice(length - appliedInEntry) gives us the patches
+          // we need (already in the correct order to undo the partial
+          // application).
+          if (appliedInEntry > 0) {
+            const failedEntry = self.document.history.at(historyIndex);
+            if (failedEntry) {
+              const oppositeOp = opType === HistoryOperation.Redo
+                ? HistoryOperation.Undo
+                : HistoryOperation.Redo;
+              const oppositePatches = getEntryPatchesForTree(failedEntry, treeId, oppositeOp);
+              const rollbackPatches = oppositePatches.slice(oppositePatches.length - appliedInEntry);
+              if (rollbackPatches.length > 0) {
+                await tree.applyPatchesFromManager(
+                  FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, rollbackPatches);
+              }
             }
           }
 
