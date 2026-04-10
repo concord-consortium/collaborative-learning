@@ -143,7 +143,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       tileType: "drawing",
       getTitleElement: () => {
         const tile = drawingToolElement.current?.closest('.tool-tile');
-        return tile?.querySelector('.editable-tile-title-text') as HTMLElement | undefined;
+        return tile?.querySelector('.editable-tile-title') as HTMLElement | undefined;
       },
       getContentElement: () => drawingToolElement.current ?? undefined,
       focusContent: () => {

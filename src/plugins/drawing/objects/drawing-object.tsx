@@ -311,6 +311,7 @@ export interface IDrawingComponentProps {
     role?: string;
     ariaLabel?: string;
     onKeyDown?: (e: React.KeyboardEvent<SVGGElement>) => void;
+    onBlur?: () => void;
   };
 }
 

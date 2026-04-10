@@ -2,6 +2,7 @@ import { RefObject, useEffect, useRef } from "react";
 import {
   AccessibilityResult,
   AnnouncementsConfig,
+  FocusTrapResult,
   NavigationConfig,
   ResizableConfig,
   useAccessibility,
@@ -18,6 +19,10 @@ export interface ClueFocusTrapConfig {
   onUnregisterTileApi: (facet?: string) => void;
   tileType: string;
 
+  // Container element — the .tool-tile wrapper that the focus trap attaches to
+  containerRef?: RefObject<HTMLElement | null>;
+  getContainerElement?: () => HTMLElement | undefined;
+
   // Content element — provide a ref (function components) or getter (class components)
   contentRef?: RefObject<HTMLElement | null>;
   getContentElement?: () => HTMLElement | undefined;
@@ -33,8 +38,15 @@ export interface ClueFocusTrapConfig {
   toolbarRef?: RefObject<HTMLElement | null>;
   getToolbarElement?: () => HTMLElement | undefined;
 
+  // Resize handle element
+  resizeRef?: RefObject<HTMLElement | null>;
+  getResizeElement?: () => HTMLElement | undefined;
+
   // Non-focus ITileApi methods (exportContentAsTileJson, handleTileResize, etc.)
   additionalApi?: Partial<ITileApi>;
+
+  // Called when Tab is pressed but the trap is not active (for inter-tile navigation)
+  onTabWhenInactive?: (e: KeyboardEvent, reverse: boolean) => boolean;
 }
 
 interface ClueTileOptions {
@@ -61,21 +73,35 @@ export type ClueAccessibilityOptions = ClueTileOptions | ClueRegionOptions;
 /**
  * CLUE-specific wrapper around useAccessibility from @concord-consortium/accessibility-tools.
  *
- * For `type: "tile"`: builds a FocusTrapStrategy from CLUE tile concepts and registers
- * the tile API (including getFocusableElements) on mount.
+ * For `type: "tile"`: builds a FocusTrapStrategy from CLUE tile concepts, registers
+ * the tile API, and wires useFocusTrap for keyboard Tab/Enter/Escape handling.
  *
  * For `type: "region"`: passes through navigation/announcements/resize config without
  * any focus trap registration.
- *
- * Note: the focus trap keyboard handling (Enter/Escape/Tab cycling) currently remains
- * in tile-component.tsx. This hook handles tile API registration and strategy creation.
- * The package's useFocusTrap will take over keyboard mechanics when tile-component
- * is migrated in a future story.
  */
 export function useClueAccessibility(options: ClueAccessibilityOptions): AccessibilityResult {
   // Capture latest options in a ref so the mount-only effect always sees current values
   const optionsRef = useRef(options);
   optionsRef.current = options;
+
+  // Build a stable containerRef for the focus trap
+  const containerRef = useRef<HTMLElement | null>(null);
+  if (options.type === "tile") {
+    const config = options.focusTrap;
+    if (config.containerRef) {
+      containerRef.current = config.containerRef.current;
+    } else if (config.getContainerElement) {
+      containerRef.current = config.getContainerElement() ?? null;
+    }
+  }
+
+  // Build strategy ref that always returns fresh element references
+  const strategyRef = useRef(
+    options.type === "tile" ? createClueTileStrategy(options.focusTrap) : undefined
+  );
+  if (options.type === "tile") {
+    strategyRef.current = createClueTileStrategy(options.focusTrap);
+  }
 
   // Register tile API on mount, unregister on unmount
   useEffect(() => {
@@ -107,13 +133,18 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // mount/unmount lifecycle matches componentDidMount/componentWillUnmount
 
-  // Delegate to generic useAccessibility.
-  // focusTrap is deliberately NOT passed — tile-component.tsx handles keyboard mechanics.
-  return useAccessibility({
+  // Delegate to generic useAccessibility with focus trap wired.
+  const result = useAccessibility({
+    focusTrap: options.type === "tile" && strategyRef.current ? {
+      containerRef,
+      strategy: strategyRef.current,
+    } : undefined,
     navigation: options.navigation,
     announcements: options.announcements,
     resize: options.resize,
   });
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -124,20 +155,24 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
  * Renderless bridge that lets class components use useClueAccessibility.
  * Render as a child — it returns null and only runs the hook.
  *
- * Usage in a class component's render():
- *   <ClueTileAccessibilityBridge
- *     onRegisterTileApi={this.props.onRegisterTileApi}
- *     onUnregisterTileApi={this.props.onUnregisterTileApi}
- *     tileType="text"
- *     getContentElement={() => this.editorDiv}
- *     focusContent={() => { ... }}
- *     additionalApi={{ exportContentAsTileJson: () => ... }}
- *   />
+ * The onFocusTrapReady callback provides imperative control (enterTrap/exitTrap)
+ * so the class component can wire Enter/Escape to trap activation.
  */
-export function ClueTileAccessibilityBridge(props: ClueFocusTrapConfig) {
-  useClueAccessibility({
+export function ClueTileAccessibilityBridge(props: ClueFocusTrapConfig & {
+  onFocusTrapReady?: (trap: FocusTrapResult) => void;
+}) {
+  const { onFocusTrapReady, ...focusTrapConfig } = props;
+  const result = useClueAccessibility({
     type: "tile",
-    focusTrap: props,
+    focusTrap: focusTrapConfig,
   });
+
+  // Expose the trap controller to the class component
+  useEffect(() => {
+    if (result.focusTrap && onFocusTrapReady) {
+      onFocusTrapReady(result.focusTrap);
+    }
+  }, [result.focusTrap, onFocusTrapReady]);
+
   return null;
 }

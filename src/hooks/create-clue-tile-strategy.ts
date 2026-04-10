@@ -16,6 +16,8 @@ export function createClueTileStrategy(config: ClueFocusTrapConfig): FocusTrapSt
     ?? (() => config.titleRef?.current ?? undefined);
   const getToolbar = config.getToolbarElement
     ?? (() => config.toolbarRef?.current ?? undefined);
+  const getResize = config.getResizeElement
+    ?? (() => config.resizeRef?.current ?? undefined);
 
   const ariaLabels = getAriaLabels();
 
@@ -24,14 +26,17 @@ export function createClueTileStrategy(config: ClueFocusTrapConfig): FocusTrapSt
       content: getContent(),
       title: getTitle(),
       toolbar: getToolbar(),
+      resize: getResize(),
     }),
     focusContent: config.focusContent,
-    cycleOrder: ["title", "content", "toolbar"],
+    cycleOrder: ["title", "content", "toolbar", "resize"],
+    tabWithinSlots: ["content"],
     announceEnter: ariaLabels.announce.editingTile(config.tileType),
     announceExit: ariaLabels.announce.exitedTile(config.tileType),
     getExternalElements: () => {
       const toolbar = getToolbar();
       return toolbar ? [toolbar] : [];
     },
+    onTabWhenInactive: config.onTabWhenInactive,
   };
 }

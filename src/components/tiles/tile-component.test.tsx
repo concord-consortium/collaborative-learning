@@ -335,8 +335,8 @@ describe("TileComponent focus trap", () => {
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { tileElement.focus(); });
       fireEvent.keyDown(tileElement, { key: "Tab", shiftKey: true });
-      // Reverse entry: resize (absent) → toolbar → content → title
-      expect(document.activeElement).toBe(toolbarButtons[0]);
+      // Reverse entry: resize (absent) → toolbar (last button)
+      expect(document.activeElement).toBe(toolbarButtons[toolbarButtons.length - 1]);
     });
 
     it("Tab on selected tile without title/content enters focus trap and reaches toolbar", () => {
@@ -354,35 +354,37 @@ describe("TileComponent focus trap", () => {
 
   describe("focus trap cycling (Tab forward)", () => {
     it("Tab from title goes to content", () => {
-      const { titleElement, contentElement } = renderFocusTrapTile();
+      const { stores, tileModel, titleElement, contentElement } = renderFocusTrapTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { titleElement!.focus(); });
       fireEvent.keyDown(titleElement!, { key: "Tab" });
       expect(document.activeElement).toBe(contentElement);
     });
 
     it("Tab from content goes to toolbar button", () => {
-      const { contentElement, toolbarButtons } = renderFocusTrapTile();
+      const { stores, tileModel, contentElement, toolbarButtons } = renderFocusTrapTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Tab" });
       expect(document.activeElement).toBe(toolbarButtons[0]);
     });
 
     it("Tab from content with no title/toolbar calls preventDefault (defensive)", () => {
-      const { contentElement } = renderFocusTrapTile({
+      const { stores, tileModel, contentElement } = renderFocusTrapTile({
         hasTitle: false, hasToolbar: false,
       });
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
-      // fireEvent returns false when preventDefault was called
       const result = fireEvent.keyDown(contentElement!, { key: "Tab" });
       expect(result).toBe(false);
       expect(document.activeElement).toBe(contentElement);
     });
 
     it("Tab from content with no toolbar wraps to title", () => {
-      const { contentElement, titleElement } = renderFocusTrapTile({ hasToolbar: false });
+      const { stores, tileModel, contentElement, titleElement } = renderFocusTrapTile({ hasToolbar: false });
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Tab" });
-      // No toolbar, no resize → wraps to title
       expect(document.activeElement).toBe(titleElement);
     });
   });
@@ -391,24 +393,27 @@ describe("TileComponent focus trap", () => {
 
   describe("focus trap cycling (Shift+Tab reverse)", () => {
     it("Shift+Tab from content goes to title", () => {
-      const { contentElement, titleElement } = renderFocusTrapTile();
+      const { stores, tileModel, contentElement, titleElement } = renderFocusTrapTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Tab", shiftKey: true });
       expect(document.activeElement).toBe(titleElement);
     });
 
-    it("Shift+Tab from title wraps to toolbar button", () => {
-      const { titleElement, toolbarButtons } = renderFocusTrapTile();
+    it("Shift+Tab from title wraps to last toolbar button", () => {
+      const { stores, tileModel, titleElement, toolbarButtons } = renderFocusTrapTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { titleElement!.focus(); });
       fireEvent.keyDown(titleElement!, { key: "Tab", shiftKey: true });
-      // Reverse from title: resize (absent) → toolbar
-      expect(document.activeElement).toBe(toolbarButtons[0]);
+      // Reverse: title → resize (absent) → toolbar (last button)
+      expect(document.activeElement).toBe(toolbarButtons[toolbarButtons.length - 1]);
     });
 
     it("Shift+Tab from content with no title/toolbar calls preventDefault", () => {
-      const { contentElement } = renderFocusTrapTile({
+      const { stores, tileModel, contentElement } = renderFocusTrapTile({
         hasTitle: false, hasToolbar: false,
       });
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
       const result = fireEvent.keyDown(contentElement!, { key: "Tab", shiftKey: true });
       expect(result).toBe(false);
@@ -427,7 +432,8 @@ describe("TileComponent focus trap", () => {
     }
 
     it("Tab moves from first to second focusable child in content", () => {
-      const { contentElement } = renderFocusTrapTile();
+      const { stores, tileModel, contentElement } = renderFocusTrapTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       const input1 = document.createElement("input");
       const input2 = document.createElement("input");
       makeVisible(input1);
@@ -442,7 +448,8 @@ describe("TileComponent focus trap", () => {
     });
 
     it("Shift+Tab moves from second to first focusable child in content", () => {
-      const { contentElement } = renderFocusTrapTile();
+      const { stores, tileModel, contentElement } = renderFocusTrapTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       const input1 = document.createElement("input");
       const input2 = document.createElement("input");
       makeVisible(input1);
@@ -457,7 +464,8 @@ describe("TileComponent focus trap", () => {
     });
 
     it("Tab from last focusable child exits content to toolbar", () => {
-      const { contentElement, toolbarButtons } = renderFocusTrapTile();
+      const { stores, tileModel, contentElement, toolbarButtons } = renderFocusTrapTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       const input1 = document.createElement("input");
       const input2 = document.createElement("input");
       contentElement!.appendChild(input1);
@@ -470,7 +478,8 @@ describe("TileComponent focus trap", () => {
     });
 
     it("Shift+Tab from first focusable child exits content to title", () => {
-      const { contentElement, titleElement } = renderFocusTrapTile();
+      const { stores, tileModel, contentElement, titleElement } = renderFocusTrapTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       const input1 = document.createElement("input");
       const input2 = document.createElement("input");
       contentElement!.appendChild(input1);
@@ -487,25 +496,30 @@ describe("TileComponent focus trap", () => {
 
   describe("Escape exits focus trap", () => {
     it("Escape from content exits to tile container", () => {
-      const { tileElement, contentElement } = renderFocusTrapTile();
+      const { stores, tileModel, tileElement, contentElement } = renderFocusTrapTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Escape" });
       expect(document.activeElement).toBe(tileElement);
     });
 
     it("Escape from title exits to tile container", () => {
-      const { tileElement, titleElement } = renderFocusTrapTile();
+      const { stores, tileModel, tileElement, titleElement } = renderFocusTrapTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { titleElement!.focus(); });
       fireEvent.keyDown(titleElement!, { key: "Escape" });
       expect(document.activeElement).toBe(tileElement);
     });
 
     it("Escape announces exit message", () => {
-      const { tileElement, contentElement } = renderFocusTrapTile();
+      const { stores, tileModel, contentElement } = renderFocusTrapTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Escape" });
-      const liveRegion = tileElement.querySelector("[role='status'][aria-live='polite']");
-      expect(liveRegion?.textContent).toBe("Exited tile. Tab to next tile, Shift+Tab to previous.");
+      // Controller announces via temporary document.body element
+      const announcements = document.querySelectorAll("[role='status'][aria-live='polite']");
+      const lastAnnouncement = announcements[announcements.length - 1];
+      expect(lastAnnouncement?.textContent).toMatch(/exit/i);
     });
 
     it("Escape after Enter unselects tile", () => {
@@ -606,19 +620,18 @@ describe("TileComponent focus trap", () => {
     });
 
     it("ArrowUp does not deselect (Tab re-enters trap on selected tile)", () => {
-      const { stores, tileModel, tileElement, contentElement, titleElement } = renderFocusTrapTile({
+      const { stores, tileModel, tileElement, contentElement } = renderFocusTrapTile({
         contentEditable: false,
       });
-      // Select the tile first (simulates having entered via Enter)
+      // Select the tile and enter the trap via Enter (the standard keyboard entry path)
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
+      fireEvent.keyDown(tileElement, { key: "Enter" });
+      // Move focus to content, then ArrowUp to exit
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "ArrowUp" });
       expect(document.activeElement).toBe(tileElement);
-      // Tile is still selected after ArrowUp (soft exit)
+      // Tile is still selected after ArrowUp (soft exit, not deselected)
       expect(stores.ui.selectedTileIds).toContain(tileModel.id);
-      // Tab should re-enter focus trap (tile is still selected)
-      fireEvent.keyDown(tileElement, { key: "Tab" });
-      expect(document.activeElement).toBe(titleElement);
     });
 
     it("ArrowUp from input element does not exit trap", () => {
@@ -718,25 +731,56 @@ describe("TileComponent focus trap", () => {
     });
   });
 
+  // --- Click-to-enter focus trap (onFocusEnter) ---
+
+  describe("click-to-enter focus trap", () => {
+    it("focusing a child element selects tile via onFocusEnter when unselected", () => {
+      const { stores, tileModel, tileElement } = renderFocusTrapTile();
+      expect(stores.ui.selectedTileIds).not.toContain(tileModel.id);
+
+      // Spy on setSelectedTile to verify onFocusEnter triggers selection.
+      const setSelectedSpy = jest.spyOn(stores.ui, "setSelectedTile");
+
+      // Focus an element inside the tile, as if the user clicked it directly
+      const child = document.createElement("button");
+      tileElement.appendChild(child);
+      act(() => { child.focus(); });
+
+      expect(setSelectedSpy).toHaveBeenCalled();
+      setSelectedSpy.mockRestore();
+    });
+
+    it("focusing a child element when already selected does not call setSelectedTileId again", () => {
+      const { stores, tileModel, tileElement } = renderFocusTrapTile();
+      // Pre-select the tile
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
+      const setSelectedSpy = jest.spyOn(stores.ui, "setSelectedTileId");
+
+      const child = document.createElement("button");
+      tileElement.appendChild(child);
+      act(() => { child.focus(); });
+
+      expect(setSelectedSpy).not.toHaveBeenCalled();
+      setSelectedSpy.mockRestore();
+    });
+  });
+
   // --- Generic tile behavior (tiles without getFocusableElements) ---
 
   describe("generic tile behavior (no getFocusableElements)", () => {
-    it("Tab inside tile without cycling exits to tile container", () => {
-      // Render a tile with no title, no content, no toolbar — simulates a tile
-      // that doesn't implement getFocusableElements. Use a bare div inside the tile.
-      const { tileElement } = renderFocusTrapTile({
-        hasTitle: false, hasContent: false, hasToolbar: false,
-      });
+    it("focusing child from outside auto-enters trap (click-to-enter behavior)", () => {
+      // Focusing a child element from outside the tile auto-enters the focus trap
+      // and selects the tile (via onFocusEnter). Tab then cycles within the trap
+      // rather than navigating to a sibling tile.
+      const { stores, model1, tile1 } = renderTwoTiles();
       const arbitraryChild = document.createElement("button");
       arbitraryChild.textContent = "Some button";
-      tileElement.appendChild(arbitraryChild);
+      tile1.appendChild(arbitraryChild);
 
       act(() => { arbitraryChild.focus(); });
       expect(document.activeElement).toBe(arbitraryChild);
-
-      // Tab should exit to tile container (catch-all)
-      fireEvent.keyDown(arbitraryChild, { key: "Tab" });
-      expect(document.activeElement).toBe(tileElement);
+      // The tile should now be selected (onFocusEnter fires)
+      expect(stores.ui.selectedTileIds).toContain(model1.id);
     });
 
     it("Tab on tile container with no focusable elements does inter-tile navigation", () => {

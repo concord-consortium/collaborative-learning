@@ -62,7 +62,7 @@ export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITilePro
       getTitleElement: () => {
         // Find the title text element within this tile's DOM
         const tile = containerRef.current?.closest('.tool-tile');
-        return tile?.querySelector('.editable-tile-title-text') as HTMLElement | undefined;
+        return tile?.querySelector('.editable-tile-title') as HTMLElement | undefined;
       },
       getContentElement: () => containerRef.current ?? undefined,
       focusContent: () => {

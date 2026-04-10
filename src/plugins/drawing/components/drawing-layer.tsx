@@ -465,6 +465,7 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
       tabIndex: 0,
       role: "button" as const,
       ariaLabel: object.ariaLabel,
+      onBlur: () => this.getContent().setSelectedIds([]),
     } : undefined;
     return renderDrawingObject(object, this.props.readOnly, hoverAction, pointerDownAction, a11yProps);
   }
