@@ -330,11 +330,14 @@ Common toolbar framework; default buttons:
 - `bold`
 - `italic`
 - `underline`
+- `highlight`
 - `subscript`
 - `superscript`
+- `heading`
 - `list-ol`
 - `list-ul`
 - `link`
+- `voice-typing`
 
 Additionally these buttons are supported and can be added to the toolbar if the configuration makes use of shared variables:
 

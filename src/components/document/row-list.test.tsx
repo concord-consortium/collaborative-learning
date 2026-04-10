@@ -163,8 +163,7 @@ describe("RowListComponent", () => {
     const topDropFeedback = container.querySelector(".drop-feedback.show.top");
     expect(topDropFeedback).toBeInTheDocument();
     expect(container.querySelector(".drop-feedback.show.bottom")).not.toBeInTheDocument();
-    expect(container.querySelector(".drop-feedback.show.left")).not.toBeInTheDocument();
-    expect(container.querySelector(".drop-feedback.show.right")).not.toBeInTheDocument();
+    expect(container.querySelector(".drop-feedback.show.tile-boundary")).not.toBeInTheDocument();
 
     // Test bottom highlight
     rerender(
@@ -193,16 +192,16 @@ describe("RowListComponent", () => {
     const bottomDropFeedback = container.querySelector(".drop-feedback.show.bottom");
     expect(bottomDropFeedback).toBeInTheDocument();
     expect(container.querySelector(".drop-feedback.show.top")).not.toBeInTheDocument();
-    expect(container.querySelector(".drop-feedback.show.left")).not.toBeInTheDocument();
-    expect(container.querySelector(".drop-feedback.show.right")).not.toBeInTheDocument();
+    expect(container.querySelector(".drop-feedback.show.tile-boundary")).not.toBeInTheDocument();
 
-    // Test left highlight
+    // Test side drop (tile-boundary) highlight — uses "left" with tileInsertIndex
     rerender(
       <Provider stores={stores}>
         <TileApiInterfaceContext.Provider value={mockTileApiInterface}>
           <DropRowContext.Provider value={{
             rowDropId: "row1",
             rowDropLocation: "left",
+            tileInsertIndex: 0,
             rowInsertIndex: 0
           }}>
             <RowRefsContext.Provider value={{ addRowRef: () => {} }}>
@@ -219,42 +218,11 @@ describe("RowListComponent", () => {
       </Provider>
     );
 
-    // Verify left highlight is present and others are not
-    const leftDropFeedback = container.querySelector(".drop-feedback.show.left");
-    expect(leftDropFeedback).toBeInTheDocument();
+    // Verify tile-boundary highlight is present and others are not
+    const tileBoundaryFeedback = container.querySelector(".drop-feedback.show.tile-boundary");
+    expect(tileBoundaryFeedback).toBeInTheDocument();
     expect(container.querySelector(".drop-feedback.show.top")).not.toBeInTheDocument();
     expect(container.querySelector(".drop-feedback.show.bottom")).not.toBeInTheDocument();
-    expect(container.querySelector(".drop-feedback.show.right")).not.toBeInTheDocument();
-
-    // Test right highlight
-    rerender(
-      <Provider stores={stores}>
-        <TileApiInterfaceContext.Provider value={mockTileApiInterface}>
-          <DropRowContext.Provider value={{
-            rowDropId: "row1",
-            rowDropLocation: "right",
-            rowInsertIndex: 0
-          }}>
-            <RowRefsContext.Provider value={{ addRowRef: () => {} }}>
-              <RowListComponent
-                rowListModel={documentContent}
-                documentContent={documentContent}
-                context="test"
-                documentId="test-doc"
-                docId={documentContent.contentId}
-              />
-            </RowRefsContext.Provider>
-          </DropRowContext.Provider>
-        </TileApiInterfaceContext.Provider>
-      </Provider>
-    );
-
-    // Verify right highlight is present and others are not
-    const rightDropFeedback = container.querySelector(".drop-feedback.show.right");
-    expect(rightDropFeedback).toBeInTheDocument();
-    expect(container.querySelector(".drop-feedback.show.top")).not.toBeInTheDocument();
-    expect(container.querySelector(".drop-feedback.show.bottom")).not.toBeInTheDocument();
-    expect(container.querySelector(".drop-feedback.show.left")).not.toBeInTheDocument();
   });
 });
 

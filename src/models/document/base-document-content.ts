@@ -689,7 +689,9 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       }
       const row = o.rowId ? rowList.getRow(o.rowId) : rowList.getRowByIndex(o.rowIndex);
       if (row) {
-        const indexInRow = o.locationInRow === "left" ? 0 : undefined;
+        const indexInRow = o.tileInsertIndex !== undefined
+          ? o.tileInsertIndex
+          : (o.locationInRow === "left" ? 0 : undefined);
         const tileModel = self.addToTileMap(snapshot);
         row.insertTileInRow(tileModel, indexInRow);
         self.removePlaceholderTilesFromRow(row);
@@ -715,9 +717,12 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     copyTilesIntoExistingRow(tiles: IDropTileItem[], rowInfo: IDropRowInfo, makeTitlesUnique: boolean) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
-        // If inserting to the left, reverse the order of the tiles so that
-        // the first tile is the one that ends up at the beginning of the row.
-        const orderedTiles = rowInfo.rowDropLocation === "left" ? tiles.reverse() : tiles;
+        // If inserting to the left without a specific tileInsertIndex, reverse the order of the tiles
+        // so that the first tile is the one that ends up at the beginning of the row.
+        const hasTileInsertIndex = rowInfo.tileInsertIndex !== undefined;
+        const orderedTiles = (rowInfo.rowDropLocation === "left" && !hasTileInsertIndex)
+          ? tiles.reverse() : tiles;
+        let insertOffset = 0;
         orderedTiles.forEach(tile => {
           let result: INewRowTile | undefined;
           const parsedContent = safeJsonParse<ITileModelSnapshotIn>(tile.tileContent);
@@ -734,6 +739,10 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
                 rowId: rowInfo.rowDropId,
                 locationInRow: rowInfo.rowDropLocation
               };
+              if (hasTileInsertIndex) {
+                rowOptions.tileInsertIndex = rowInfo.tileInsertIndex! + insertOffset;
+                insertOffset++;
+              }
               if (tile.rowHeight) {
                 rowOptions.rowHeight = tile.rowHeight;
               }
@@ -970,13 +979,12 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         const srcRowId = self.findRowIdContainingTile(tileId);
         if (!srcRowId) return;
 
-        const { rowDropId, rowDropLocation } = rowInfo;
-        if (rowDropId && (rowDropLocation === "left")) {
-          self.moveTileToRow(tileId, rowDropId, tileIndex);
-          return;
-        }
-        if (rowDropId && (rowDropLocation === "right")) {
-          self.moveTileToRow(tileId, rowDropId);
+        const { rowDropId, rowDropLocation, tileInsertIndex } = rowInfo;
+        if (rowDropId && (rowDropLocation === "left" || rowDropLocation === "right")) {
+          const insertIndex = tileInsertIndex !== undefined
+            ? tileInsertIndex + tileIndex
+            : (rowDropLocation === "left" ? tileIndex : undefined);
+          self.moveTileToRow(tileId, rowDropId, insertIndex);
           return;
         }
         if (rowDropLocation === "top" || rowDropLocation === "bottom") {
