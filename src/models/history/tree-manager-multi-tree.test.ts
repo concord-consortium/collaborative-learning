@@ -332,19 +332,11 @@ describe("TreeManager multi-tree support", () => {
       expect(treeA.value).toBe("A1");
     });
 
-    // This test characterizes a *known gap* in the multi-tree rollback
-    // logic that tree-manager.ts:573-579 calls out with a TODO. When a
-    // scrub spans an entry that has records for multiple trees, the
-    // trees apply their batches in parallel. If one tree's record fails,
-    // only that tree's partial application is rolled back — the other
-    // trees' fully-applied records in the same entry are NOT rolled
-    // back, even though numHistoryEventsApplied is rewound to before
-    // that entry. This leaves the other trees' state inconsistent with
-    // what numHistoryEventsApplied claims.
-    //
-    // If/when this is fixed, this test should be updated to assert the
-    // corrected (consistent) behavior.
-    it("KNOWN GAP: does not roll back other trees when one tree fails mid-entry", async () => {
+    // When a single history entry has records for multiple trees and
+    // one tree's record fails, all trees must roll back to a consistent
+    // position. In the single-entry case, that means every tree that
+    // applied anything for the entry has it rolled back.
+    it("rolls back other trees when one tree fails mid-entry", async () => {
       const { manager, treeA, treeB } = setupManager();
       const history = [
         makeEntry([
@@ -359,18 +351,156 @@ describe("TreeManager multi-tree support", () => {
         await manager.goToHistoryEntry(1);
       });
 
-      // The manager thinks entry 0 has NOT been applied (it rewound to
-      // before the failing entry).
+      // Position stops at the failing entry.
       expect(manager.numHistoryEventsApplied).toBe(0);
       expect(manager.historyPlaybackFailures.length).toBe(1);
       expect(manager.historyPlaybackFailures[0].historyIndex).toBe(0);
 
-      // But treeA has in fact been mutated, exposing the inconsistency:
-      // manager position says "nothing applied", treeA says "A1".
-      expect(treeA.value).toBe("A1");
-      // treeB's partial application (of zero good patches) was rolled
-      // back, so it is still in the initial state.
+      // Both trees are consistent with position 0.
+      expect(treeA.value).toBeUndefined();
       expect(treeB.value).toBeUndefined();
+    });
+
+    // Tree A succeeds through all entries, including entries past the
+    // one where tree B fails. Tree A's state past the failing entry
+    // must be rolled back so both trees are consistent with the
+    // stop position.
+    it("rolls back other trees that succeeded past the failing entry (forward)", async () => {
+      const { manager, treeA, treeB } = setupManager();
+      const history = [
+        makeEntry([setValueRecord("treeA", undefined, "A1")]),    // 0
+        makeEntry([setValueRecord("treeA", "A1", "A2")]),         // 1
+        makeEntry([setValueRecord("treeB", undefined, "B1")]),    // 2
+        makeEntry([failingRecord("treeB")]),                       // 3
+        makeEntry([setValueRecord("treeA", "A2", "A3")]),         // 4
+      ];
+      manager.setChangeDocument({ history } as any);
+      manager.setNumHistoryEntriesApplied(0);
+
+      await jestSpyConsole("warn", async () => {
+        await manager.goToHistoryEntry(5);
+      });
+
+      // Scrub stops at the earliest failing entry (index 3).
+      expect(manager.numHistoryEventsApplied).toBe(3);
+      // treeA would have applied entry 4 past the failure point —
+      // that must be rolled back so treeA reflects state at position 3
+      // (entries 0 and 1 applied, entry 4 not).
+      expect(treeA.value).toBe("A2");
+      expect(treeB.value).toBe("B1");
+      expect(manager.historyPlaybackFailures.length).toBe(1);
+      expect(manager.historyPlaybackFailures[0].historyIndex).toBe(3);
+      expect(manager.historyPlaybackFailures[0].direction).toBe("redo");
+    });
+
+    // Backward equivalent. Tree B successfully undoes an entry whose
+    // index is before the earliest (= max, for backward) failing
+    // entry — that undo must be re-applied forward so tree B reflects
+    // the stop position.
+    it("re-applies other trees that succeeded past the failing entry (backward)", async () => {
+      const { manager, treeA, treeB } = setupManager();
+      const history = [
+        makeEntry([setValueRecord("treeB", undefined, "B1")]),    // 0
+        makeEntry([setValueRecord("treeA", undefined, "A1")]),    // 1
+        makeEntry([setValueRecord("treeA", "A1", "A2")]),         // 2
+        makeEntry([failingRecord("treeA")]),                       // 3
+        makeEntry([setValueRecord("treeA", "A2", "A3")]),         // 4
+      ];
+      // Seed state matching "all 5 entries applied".
+      treeA.setValue("A3");
+      treeB.setValue("B1");
+      manager.setChangeDocument({ history } as any);
+      manager.setNumHistoryEntriesApplied(5);
+
+      await jestSpyConsole("warn", async () => {
+        await manager.goToHistoryEntry(0);
+      });
+
+      // Scrub stops at position just-after the failing entry going
+      // backward (failedEntryIndex + 1 = 4).
+      expect(manager.numHistoryEventsApplied).toBe(4);
+      // State at position 4: entries 0..3 applied, entry 4 not.
+      // treeA = A2 (entry 1 → A1, entry 2 → A2, entry 3 is broken and
+      // doesn't affect /value, entry 4 not applied).
+      expect(treeA.value).toBe("A2");
+      // treeB successfully undid entry 0 during the backward batch;
+      // that must be re-applied since entry 0 is < stop position 4.
+      expect(treeB.value).toBe("B1");
+      expect(manager.historyPlaybackFailures.length).toBe(1);
+      expect(manager.historyPlaybackFailures[0].historyIndex).toBe(3);
+      expect(manager.historyPlaybackFailures[0].direction).toBe("undo");
+    });
+
+    // When multiple trees fail, use the earliest (min) index forward.
+    it("uses the earliest failing index when multiple trees fail (forward)", async () => {
+      const { manager, treeA, treeB } = setupManager();
+      const history = [
+        makeEntry([setValueRecord("treeA", undefined, "A1")]),    // 0
+        makeEntry([setValueRecord("treeB", undefined, "B1")]),    // 1
+        makeEntry([failingRecord("treeA")]),                       // 2
+        makeEntry([setValueRecord("treeB", "B1", "B2")]),         // 3
+        makeEntry([failingRecord("treeB")]),                       // 4
+        makeEntry([setValueRecord("treeA", "A1", "A2")]),         // 5
+      ];
+      manager.setChangeDocument({ history } as any);
+      manager.setNumHistoryEntriesApplied(0);
+
+      await jestSpyConsole("warn", async () => {
+        await manager.goToHistoryEntry(6);
+      });
+
+      // Earliest (min) failing index forward is treeA's at 2.
+      expect(manager.numHistoryEventsApplied).toBe(2);
+      // Position 2: entries 0 and 1 applied.
+      expect(treeA.value).toBe("A1");
+      // treeB applied entry 3 past the stop position and must have it
+      // rolled back to B1.
+      expect(treeB.value).toBe("B1");
+      // Both failures should be recorded.
+      expect(manager.historyPlaybackFailures.length).toBe(2);
+      const indices = manager.historyPlaybackFailures.map(f => f.historyIndex).sort();
+      expect(indices).toEqual([2, 4]);
+      manager.historyPlaybackFailures.forEach(f => {
+        expect(f.direction).toBe("redo");
+      });
+    });
+
+    // When multiple trees fail backward, use the latest (max) index.
+    it("uses the latest failing index when multiple trees fail (backward)", async () => {
+      const { manager, treeA, treeB } = setupManager();
+      const history = [
+        makeEntry([setValueRecord("treeA", undefined, "A1")]),    // 0
+        makeEntry([setValueRecord("treeB", undefined, "B1")]),    // 1
+        makeEntry([failingRecord("treeA")]),                       // 2
+        makeEntry([setValueRecord("treeB", "B1", "B2")]),         // 3
+        makeEntry([failingRecord("treeB")]),                       // 4
+        makeEntry([setValueRecord("treeA", "A1", "A2")]),         // 5
+      ];
+      // Seed at position 6 (all applied). Entries 2 and 4 are broken
+      // and don't modify any value; treeA ends at A2, treeB ends at B2.
+      treeA.setValue("A2");
+      treeB.setValue("B2");
+      manager.setChangeDocument({ history } as any);
+      manager.setNumHistoryEntriesApplied(6);
+
+      await jestSpyConsole("warn", async () => {
+        await manager.goToHistoryEntry(0);
+      });
+
+      // Latest (max) failing index backward is treeB's at 4;
+      // numHistoryEventsApplied = 4 + 1 = 5.
+      expect(manager.numHistoryEventsApplied).toBe(5);
+      // Position 5: entries 0..4 applied, entry 5 not.
+      // treeA = A1 (entry 0 → A1; entry 5 not applied).
+      expect(treeA.value).toBe("A1");
+      // treeB = B2 (entries 1 → B1 and 3 → B2).
+      expect(treeB.value).toBe("B2");
+      expect(manager.historyPlaybackFailures.length).toBe(2);
+      const indices = manager.historyPlaybackFailures.map(f => f.historyIndex).sort();
+      expect(indices).toEqual([2, 4]);
+      manager.historyPlaybackFailures.forEach(f => {
+        expect(f.direction).toBe("undo");
+      });
     });
   });
 
