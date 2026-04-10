@@ -77,7 +77,9 @@ export const StudentCard: React.FC<IProps> = ({
   });
 
   const isClickable = !!onStudentSelect && !!studentId;
-  const isFocusable = (isClickable || isDraggable) && !excludeFromTabOrder;
+  // Only focusable if the card has a keyboard-accessible action (click to select).
+  // Drag-only cards (student mode) are not focusable since keyboard users select groups directly.
+  const isFocusable = isClickable && !excludeFromTabOrder;
 
   return (
     <div

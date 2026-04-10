@@ -87,16 +87,38 @@ export const GroupManagementModal: React.FC<IProps> = observer(
     };
 
     const titleId = useRef(`group-management-modal-title-${++nextTitleId}`).current;
+    const modalRef = useRef<HTMLDivElement | null>(null);
+
+    const handleAfterOpen = () => {
+      // Focus the current user's group card so they can immediately Tab to a different group.
+      const currentGroupId = groupManagementState.currentUserGroupId;
+      if (currentGroupId && modalRef.current) {
+        const groupCard = modalRef.current.querySelector(
+          `.group-card[data-testid="group-card-${CSS.escape(currentGroupId)}"]`
+        ) as HTMLElement | null;
+        if (groupCard) {
+          // Add .keyboard-focused class since programmatic focus doesn't trigger :focus-visible.
+          // Remove it on the first blur so subsequent mouse interactions don't show the ring.
+          groupCard.classList.add("keyboard-focused");
+          groupCard.addEventListener("blur", () => {
+            groupCard.classList.remove("keyboard-focused");
+          }, { once: true });
+          groupCard.focus();
+        }
+      }
+    };
 
     return (
       <Modal
         aria={{ labelledby: titleId, modal: true }}
         className="group-management-modal"
         isOpen={isOpen}
+        onAfterOpen={handleAfterOpen}
         onRequestClose={allowCancel ? handleCancel : undefined}
         overlayClassName="group-management-modal__overlay"
         shouldCloseOnEsc={allowCancel}
         shouldCloseOnOverlayClick={false}
+        contentRef={node => { modalRef.current = node as HTMLDivElement | null; }}
         testId="group-management-modal"
       >
         <div className="group-management-modal__header">

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Modal from "react-modal";
 import { GroupManagementModal } from "./group-management-modal";
@@ -165,5 +165,15 @@ describe("GroupManagementModal accessibility", () => {
     renderModal();
     const dialog = screen.getByRole("dialog");
     expect(within(dialog).queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("auto-focuses current user's group card on open with keyboard-focused class", async () => {
+    renderModal();
+    const groupCard = screen.getByTestId("group-card-1");
+    // onAfterOpen may fire asynchronously — wait for focus to land on the group card
+    await waitFor(() => {
+      expect(document.activeElement).toBe(groupCard);
+    });
+    expect(groupCard).toHaveClass("keyboard-focused");
   });
 });
