@@ -48,6 +48,10 @@ const TestTree = types.model("TestTree", {
   applyingManagerPatches: false,
   startCount: 0,
   finishCount: 0,
+  // When set, the next applyPatchesFromManager call throws this error
+  // instead of applying patches. Used to exercise the unexpected-error
+  // code path in goToHistoryEntry.
+  unexpectedErrorOnNextApply: undefined as unknown,
 }))
 .views(self => ({
   get treeId(): string { return self.myId; }
@@ -55,6 +59,9 @@ const TestTree = types.model("TestTree", {
 .actions(self => ({
   setValue(v: string | undefined) { self.value = v; },
   setCounter(c: number) { self.counter = c; },
+  setUnexpectedErrorOnNextApply(error: unknown) {
+    self.unexpectedErrorOnNextApply = error;
+  },
 
   // --- TreeAPI ---
 
@@ -67,6 +74,11 @@ const TestTree = types.model("TestTree", {
   applyPatchesFromManager(
     _historyEntryId: string, _exchangeId: string, patchesToApply: readonly IJsonPatch[]
   ) {
+    if (self.unexpectedErrorOnNextApply !== undefined) {
+      const err = self.unexpectedErrorOnNextApply;
+      self.unexpectedErrorOnNextApply = undefined;
+      throw err;
+    }
     for (const patch of patchesToApply) {
       if (!patch.path) {
         throw new Error("History patches must have a non-empty path.");
@@ -501,6 +513,99 @@ describe("TreeManager multi-tree support", () => {
       manager.historyPlaybackFailures.forEach(f => {
         expect(f.direction).toBe("undo");
       });
+    });
+  });
+
+  describe("unexpected errors during apply", () => {
+    // Any error other than PatchApplicationError is, by construction,
+    // a bug — applyPatchesFromManager wraps patch-apply failures in
+    // PatchApplicationError, and there is no IO or network path that
+    // could produce a transient failure. Even so, we don't want these
+    // bugs to escape as unhandled promise rejections (which are
+    // invisible to users and easy for developers to miss). They should
+    // flow through the same playback-failure machinery as recoverable
+    // errors: record a failure, log the original stack with
+    // console.error, let finish run so shared-model syncing is
+    // re-enabled, and do not advance the history position.
+
+    it("does not throw when a tree's apply throws a non-PatchApplicationError", async () => {
+      const { manager, treeA } = setupManager();
+      treeA.setUnexpectedErrorOnNextApply(new Error("unexpected boom"));
+      const history = [
+        makeEntry([setValueRecord("treeA", undefined, "A1")]),
+      ];
+      manager.setChangeDocument({ history } as any);
+      manager.setNumHistoryEntriesApplied(0);
+
+      // The await should resolve, not reject.
+      await jestSpyConsole("error", async () => {
+        await manager.goToHistoryEntry(1);
+      });
+    });
+
+    it("records a playback failure and leaves the position unchanged", async () => {
+      const { manager, treeA } = setupManager();
+      treeA.setUnexpectedErrorOnNextApply(new Error("unexpected boom"));
+      const history = [
+        makeEntry([setValueRecord("treeA", undefined, "A1")]),
+        makeEntry([setValueRecord("treeA", "A1", "A2")]),
+      ];
+      manager.setChangeDocument({ history } as any);
+      manager.setNumHistoryEntriesApplied(0);
+
+      await jestSpyConsole("error", async () => {
+        await manager.goToHistoryEntry(2);
+      });
+
+      // Position stays where it started — we don't know how far the
+      // failing tree got, so the safest thing is no advance.
+      expect(manager.numHistoryEventsApplied).toBe(0);
+      expect(manager.historyPlaybackFailures.length).toBe(1);
+      expect(manager.historyPlaybackFailures[0].direction).toBe("redo");
+      expect(manager.historyPlaybackFailures[0].errorMessage).toContain("unexpected boom");
+    });
+
+    it("runs the finish phase after an unexpected error (shared-model syncing re-enabled)", async () => {
+      const { manager, treeA, treeB } = setupManager();
+      treeA.setUnexpectedErrorOnNextApply(new Error("unexpected boom"));
+      const history = [
+        makeEntry([setValueRecord("treeA", undefined, "A1")]),
+      ];
+      manager.setChangeDocument({ history } as any);
+      manager.setNumHistoryEntriesApplied(0);
+
+      await jestSpyConsole("error", async () => {
+        await manager.goToHistoryEntry(1);
+      });
+
+      // Both trees should be un-stuck.
+      expect(treeA.applyingManagerPatches).toBe(false);
+      expect(treeB.applyingManagerPatches).toBe(false);
+      expect(treeA.finishCount).toBe(1);
+      expect(treeB.finishCount).toBe(1);
+    });
+
+    it("rolls back other trees that successfully applied patches", async () => {
+      const { manager, treeA, treeB } = setupManager();
+      // treeB will fail unexpectedly; treeA's apply should be rolled
+      // back to the initial (start) position even though treeA itself
+      // succeeded.
+      treeB.setUnexpectedErrorOnNextApply(new Error("unexpected boom"));
+      const history = [
+        makeEntry([setValueRecord("treeA", undefined, "A1")]),
+        makeEntry([setValueRecord("treeB", undefined, "B1")]),
+      ];
+      manager.setChangeDocument({ history } as any);
+      manager.setNumHistoryEntriesApplied(0);
+
+      await jestSpyConsole("error", async () => {
+        await manager.goToHistoryEntry(2);
+      });
+
+      // treeA's successful apply of entry 0 must be rolled back so the
+      // session state matches the unchanged position.
+      expect(manager.numHistoryEventsApplied).toBe(0);
+      expect(treeA.value).toBeUndefined();
     });
   });
 

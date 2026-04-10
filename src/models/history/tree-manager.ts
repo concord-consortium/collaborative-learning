@@ -521,6 +521,9 @@ export const TreeManager = types
 
     if (newHistoryPosition === self.numHistoryEventsApplied) return;
     if (self.numHistoryEventsApplied === undefined) return;
+    // Capture the starting position so unexpected-error handling can
+    // anchor its failure recording and rollback to a known-safe point.
+    const initialPosition = self.numHistoryEventsApplied;
     // Disable shared model syncing on all of the trees. This is
     // different than when the undo store applies patches because in
     // this case we are going to apply lots of history entries all at
@@ -566,26 +569,44 @@ export const TreeManager = types
       }
     }
 
-    // Apply the batched patches to each tree in parallel. If any tree
-    // fails, we pick an "earliest" failing history index across all
-    // trees and roll every tree back so their state is consistent with
-    // that stop position:
-    //   - Forward (Redo): stopPosition = min(failedIndices)
-    //   - Backward (Undo): stopPosition = max(failedIndices) + 1
-    // Trees that succeeded past the stop position have those entries
-    // rolled back; trees that failed have their own partial rollback
-    // plus any entries they applied past the stop position.
+    // Apply the batched patches to each tree in parallel. Two kinds of
+    // failure can happen during the apply phase:
+    //
+    // 1. PatchApplicationError — a recoverable patch-apply failure.
+    //    We pick an earliest failing history index across all trees
+    //    that had one:
+    //      - Forward (Redo): stopPosition = min(failedIndices)
+    //      - Backward (Undo): stopPosition = max(failedIndices) + 1
+    //    Trees that succeeded past the stop position have those
+    //    entries rolled back; trees that failed have their own partial
+    //    rollback plus any entries they applied past the stop position.
+    //
+    // 2. Any other error — a bug, by construction: applyPatchesFromManager
+    //    wraps patch-apply failures as PatchApplicationError, and there
+    //    is no IO/network path that could produce a transient failure.
+    //    We refuse to advance at all (stopPosition = initialPosition),
+    //    roll back any tree that succeeded in the batch, leave the
+    //    failing tree alone (we don't know how far it got), record a
+    //    playback-failure marker so the user sees the existing UI
+    //    banner, and console.error the original stack so a developer
+    //    can find the bug. This replaces the old behavior of letting
+    //    the error escape as an unhandled promise rejection (which was
+    //    invisible in the UI and easy to miss in logs).
     interface TreeApplyFailure {
       error: PatchApplicationError;
       historyIndex: number;
       appliedInEntry: number;
       failingSegIdx: number;
     }
+    interface TreeApplyUnexpected {
+      error: unknown;
+    }
     interface TreeApplyResult {
       treeId: string;
       tree: TreeAPI;
       segments: PatchSegment[];
       failure?: TreeApplyFailure;
+      unexpected?: TreeApplyUnexpected;
     }
     const results: TreeApplyResult[] = [];
 
@@ -608,22 +629,34 @@ export const TreeManager = types
             failure: { error: e, historyIndex, appliedInEntry, failingSegIdx }
           });
         } else {
-          throw e;
+          // Do NOT rethrow: route this through the playback-failure
+          // handling below so the user and developer both see it.
+          results.push({ treeId, tree, segments, unexpected: { error: e } });
         }
       }
     });
     yield Promise.all(applyPromises);
 
     const failedResults = results.filter(r => r.failure);
+    const unexpectedResults = results.filter(r => r.unexpected);
+    const hasAnyFailure = failedResults.length > 0 || unexpectedResults.length > 0;
     let stopPosition: number | undefined;
-    if (failedResults.length > 0) {
-      const failedIndices = failedResults.map(r => r.failure!.historyIndex);
-      const earliestFailedIndex = direction === 1
-        ? Math.min(...failedIndices)
-        : Math.max(...failedIndices);
-      stopPosition = direction === 1
-        ? earliestFailedIndex
-        : earliestFailedIndex + 1;
+
+    if (hasAnyFailure) {
+      if (unexpectedResults.length > 0) {
+        // Conservative: refuse to advance. We don't know how far the
+        // failing tree got, so we re-anchor all trees to where we
+        // started and don't touch the failing tree at all.
+        stopPosition = initialPosition;
+      } else {
+        const failedIndices = failedResults.map(r => r.failure!.historyIndex);
+        const earliestFailedIndex = direction === 1
+          ? Math.min(...failedIndices)
+          : Math.max(...failedIndices);
+        stopPosition = direction === 1
+          ? earliestFailedIndex
+          : earliestFailedIndex + 1;
+      }
 
       // For forward, entries with historyIndex >= stopPosition must
       // not be "applied" at the stop position. For backward, entries
@@ -637,6 +670,7 @@ export const TreeManager = types
       const oppositeOp = opType === HistoryOperation.Redo
         ? HistoryOperation.Undo
         : HistoryOperation.Redo;
+      const directionStr = direction === 1 ? "redo" : "undo";
 
       // Build and apply per-tree rollback batches.
       //
@@ -652,7 +686,13 @@ export const TreeManager = types
       // of the opposite list — so .slice(length - appliedInEntry)
       // gives us the patches we need (already in the correct order
       // to undo the partial application).
+      //
+      // Trees that failed unexpectedly are skipped entirely: we don't
+      // have a trustworthy numApplied count and can't safely roll back
+      // their state. We leave them as-is and rely on the recorded
+      // playback-failure + console.error to surface the bug.
       const rollbackPromises = results.map(async (r) => {
+        if (r.unexpected) return;
         const rollbackPatches: IJsonPatch[] = [];
 
         if (r.failure) {
@@ -703,7 +743,6 @@ export const TreeManager = types
       yield Promise.all(rollbackPromises);
 
       // Record one failure per (historyIndex, direction) pair, deduped.
-      const directionStr = direction === 1 ? "redo" : "undo";
       for (const r of failedResults) {
         const { historyIndex, error } = r.failure!;
         const historyEntry = self.document.history.at(historyIndex);
@@ -722,6 +761,42 @@ export const TreeManager = types
         // eslint-disable-next-line no-console
         console.warn(
           `History entry ${historyIndex} failed to ${directionStr}: ${error.message}`
+        );
+      }
+
+      // Record unexpected-error failures. We anchor the failure marker
+      // to the first entry the batch was about to touch, since we don't
+      // know where within the batch the error originated:
+      //   - Forward: initialPosition (next entry to apply)
+      //   - Backward: initialPosition - 1 (first entry to undo)
+      // If that index isn't a valid history position, skip the marker
+      // but still console.error so the bug is visible to developers.
+      const unexpectedIndex = direction === 1 ? initialPosition : initialPosition - 1;
+      const unexpectedEntry =
+        unexpectedIndex >= 0 && unexpectedIndex < self.document.history.length
+          ? self.document.history.at(unexpectedIndex)
+          : undefined;
+      for (const r of unexpectedResults) {
+        const err = r.unexpected!.error;
+        const errMessage = err instanceof Error ? err.message : String(err);
+        if (unexpectedEntry) {
+          const alreadyRecorded = self.historyPlaybackFailures.some(
+            f => f.historyIndex === unexpectedIndex && f.direction === directionStr
+          );
+          if (!alreadyRecorded) {
+            self.historyPlaybackFailures.push({
+              historyEntry: unexpectedEntry,
+              historyIndex: unexpectedIndex,
+              direction: directionStr,
+              errorMessage: `Unexpected error during playback: ${errMessage}`
+            });
+          }
+        }
+        // eslint-disable-next-line no-console
+        console.error(
+          `Unexpected error playing back tree '${r.treeId}' ` +
+          `at history position ${unexpectedIndex}:`,
+          err
         );
       }
     }
