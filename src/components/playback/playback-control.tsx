@@ -368,22 +368,33 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
           const location = Math.max(0, Math.min(100, 100 * (sliderIndex / sliderEntries.length)));
           const isSelected = selectedFailure?.historyIndex === failure.historyIndex;
           return (
-            <div
+            <button
               key={`corrupt-${failure.historyIndex}`}
+              type="button"
               className="playback-failure-marker"
               style={{ left: `calc(${location}% - 5px)` }}
+              aria-label={`History playback failure at entry ${failure.historyIndex}`}
+              aria-expanded={isSelected}
               onClick={() => setSelectedFailure(isSelected ? null : failure)}
             >
               <div className="playback-failure-marker-line" />
               <div className="playback-failure-marker-icon">!</div>
-            </div>
+            </button>
           );
         })}
         {selectedFailure && (
-          <div className="playback-failure-detail" data-testid="playback-failure-detail">
+          <div className="playback-failure-detail" data-testid="playback-failure-detail" role="dialog"
+              aria-label="History playback failure details">
             <div className="playback-failure-detail-header">
               <span>History Playback Failure</span>
-              <button className="playback-failure-detail-close" onClick={() => setSelectedFailure(null)}>×</button>
+              <button
+                type="button"
+                className="playback-failure-detail-close"
+                aria-label="Close failure details"
+                onClick={() => setSelectedFailure(null)}
+              >
+                ×
+              </button>
             </div>
             <div className="playback-failure-detail-body">
               <div><strong>Entry:</strong> {selectedFailure.historyIndex}</div>

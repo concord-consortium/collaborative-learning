@@ -173,13 +173,19 @@ export const Tree = types.model("Tree", {
     // containing the count and inverse patches so callers can roll back the
     // partial application and identify which input patch caused the failure.
     //
-    // Patches without a path are treated as snapshots, which would produce
-    // multiple onPatch calls and break our counting. We reject them upfront
-    // since history patches should always have paths.
+    // MST treats a patch with an empty or missing path as a whole-tree
+    // snapshot replacement. Applying such a patch produces multiple onPatch
+    // calls (one per field in the resulting snapshot) which would break our
+    // 1:1 mapping between input patches and onPatch events. We reject both
+    // the undefined/missing case AND the empty-string case upfront because
+    // neither form should appear in recorded history patches, and either
+    // would silently corrupt the numApplied counter.
     applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
       for (const patch of patchesToApply) {
         if (!patch.path) {
-          throw new Error("History patches must have a path. Pathless (snapshot) patches are not supported.");
+          throw new Error(
+            "History patches must have a non-empty path. Pathless or root-snapshot patches are not supported."
+          );
         }
       }
 

@@ -491,6 +491,10 @@ $border-radius-base: 6px;
 .playback-failure-marker {
   position: absolute;
   top: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
 
   .playback-failure-marker-line {
     position: absolute;
@@ -513,7 +517,6 @@ $border-radius-base: 6px;
     color: white;
     font-size: 12px;
     font-weight: bold;
-    cursor: default;
   }
 }
 
