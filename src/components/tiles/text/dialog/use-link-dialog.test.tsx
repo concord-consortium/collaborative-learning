@@ -90,25 +90,16 @@ describe("LinkDialogContent", () => {
   });
 });
 
-// CLUE-477 Step 4-6: These tests assert the old behavior where displayMode was
-// stored on the Slate link element. After this refactor, displayMode lives on
-// TextContentModel (keyed by linkId) and the hook now requires a textContent
-// prop. These tests are temporarily skipped and will be rewritten in Step 7.
-describe.skip("useLinkDialog hook", () => {
+describe("useLinkDialog hook", () => {
   const mockLogTileChangeEvent = logTileChangeEvent as jest.Mock;
   const mockSetNodes = Transforms.setNodes as jest.Mock;
   const mockWrapNodes = Transforms.wrapNodes as jest.Mock;
   const mockUnwrapNodes = Transforms.unwrapNodes as jest.Mock;
 
-  interface ITestWrapperProps {
-    tileId?: string;
-    selectedLink?: any;
-  }
-  const TestWrapper: React.FC<ITestWrapperProps> = ({ tileId, selectedLink }) => {
-    const editor = {} as any;
-    const [showModal] = useLinkDialog({ editor, selectedLink, text: "example text", tileId });
-    React.useEffect(() => { (showModal as () => void)(); }, [showModal]);
-    return <div className="app" />;
+  const mockTextContent = {
+    getLinkDisplayMode: jest.fn(),
+    setLinkDisplayMode: jest.fn(),
+    removeLinkDisplayMode: jest.fn(),
   };
 
   beforeAll(() => {
@@ -117,16 +108,28 @@ describe.skip("useLinkDialog hook", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockTextContent.getLinkDisplayMode.mockReturnValue("link");
   });
 
-  it("logs TEXT_LINK_DISPLAY_CHANGE when displayMode changes via radio (with tileId)", () => {
-    render(
-      <ModalProvider>
-        <TestWrapper tileId="test-tile-id" />
-      </ModalProvider>
-    );
-    const buttonRadio = screen.getByLabelText("Button");
-    fireEvent.click(buttonRadio);
+  interface ITestWrapperProps {
+    tileId?: string;
+    selectedLink?: any;
+    textContent?: any;
+  }
+  const TestWrapper: React.FC<ITestWrapperProps> = ({
+    tileId, selectedLink, textContent = mockTextContent
+  }) => {
+    const editor = {} as any;
+    const [showModal] = useLinkDialog({
+      editor, selectedLink, text: "test", tileId, textContent
+    });
+    React.useEffect(() => { (showModal as () => void)(); }, [showModal]);
+    return <div className="app" />;
+  };
+
+  it("logs TEXT_LINK_DISPLAY_CHANGE when Button radio is clicked (with tileId)", () => {
+    render(<ModalProvider><TestWrapper tileId="test-tile-id" /></ModalProvider>);
+    fireEvent.click(screen.getByLabelText("Button"));
     expect(mockLogTileChangeEvent).toHaveBeenCalledWith(
       LogEventName.TEXT_LINK_DISPLAY_CHANGE,
       expect.objectContaining({
@@ -138,58 +141,97 @@ describe.skip("useLinkDialog hook", () => {
   });
 
   it("does NOT log when tileId is undefined", () => {
-    render(
-      <ModalProvider>
-        <TestWrapper />
-      </ModalProvider>
-    );
-    const buttonRadio = screen.getByLabelText("Button");
-    fireEvent.click(buttonRadio);
+    render(<ModalProvider><TestWrapper /></ModalProvider>);
+    fireEvent.click(screen.getByLabelText("Button"));
     expect(mockLogTileChangeEvent).not.toHaveBeenCalled();
   });
 
-  it("Save handler calls Transforms.wrapNodes with displayMode for new link", () => {
-    render(
-      <ModalProvider>
-        <TestWrapper tileId="t1" />
-      </ModalProvider>
-    );
+  it("Save for a new link calls wrapNodes with linkId and no displayMode", () => {
+    render(<ModalProvider><TestWrapper tileId="t1" /></ModalProvider>);
     const urlInput = screen.getByPlaceholderText("URL");
     fireEvent.change(urlInput, { target: { value: "https://example.com" } });
     fireEvent.click(screen.getByLabelText("Button"));
     fireEvent.click(screen.getByText("Save"));
 
-    expect(mockWrapNodes).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        type: "link",
-        href: "https://example.com",
-        displayMode: "button"
-      }),
-      expect.anything()
+    expect(mockWrapNodes).toHaveBeenCalled();
+    const wrapNodesCall = mockWrapNodes.mock.calls[0];
+    const element = wrapNodesCall[1];
+    expect(element).toEqual(expect.objectContaining({
+      type: "link",
+      href: "https://example.com",
+      linkId: expect.any(String)
+    }));
+    expect(element).not.toHaveProperty("displayMode");
+    expect(element.linkId.length).toBeGreaterThan(0);
+
+    expect(mockTextContent.setLinkDisplayMode).toHaveBeenCalledWith(
+      element.linkId,
+      "button"
     );
-    expect(mockSetNodes).not.toHaveBeenCalled();
   });
 
-  it("Save handler calls Transforms.setNodes with displayMode when editing existing link", () => {
-    const existingLink = { type: "link", href: "https://old.com", displayMode: "link" };
-    render(
-      <ModalProvider>
-        <TestWrapper tileId="t1" selectedLink={existingLink} />
-      </ModalProvider>
+  it("Save for a new link with 'link' mode still generates linkId and calls setLinkDisplayMode", () => {
+    render(<ModalProvider><TestWrapper tileId="t1" /></ModalProvider>);
+    fireEvent.change(screen.getByPlaceholderText("URL"), { target: { value: "https://x.com" } });
+    fireEvent.click(screen.getByText("Save"));
+
+    expect(mockWrapNodes).toHaveBeenCalled();
+    const element = mockWrapNodes.mock.calls[0][1];
+    expect(element).not.toHaveProperty("displayMode");
+    expect(mockTextContent.setLinkDisplayMode).toHaveBeenCalledWith(
+      element.linkId,
+      "link"
     );
+  });
+
+  it("Save for an existing link preserves linkId and writes displayMode to model", () => {
+    const existingLink = { type: "link", href: "https://old.com", linkId: "fixed-id" };
+    render(<ModalProvider><TestWrapper tileId="t1" selectedLink={existingLink} /></ModalProvider>);
     fireEvent.click(screen.getByLabelText("Button"));
     fireEvent.click(screen.getByText("Save"));
 
-    expect(mockSetNodes).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        href: "https://old.com",
-        displayMode: "button"
-      }),
-      expect.anything()
-    );
+    expect(mockSetNodes).toHaveBeenCalled();
+    const setNodesElement = mockSetNodes.mock.calls[0][1];
+    expect(setNodesElement).toEqual(expect.objectContaining({
+      href: "https://old.com",
+      linkId: "fixed-id"
+    }));
+    expect(setNodesElement).not.toHaveProperty("displayMode");
+    expect(mockTextContent.setLinkDisplayMode).toHaveBeenCalledWith("fixed-id", "button");
     expect(mockWrapNodes).not.toHaveBeenCalled();
-    expect(mockUnwrapNodes).not.toHaveBeenCalled();
+  });
+
+  it("Save for an existing link strips legacy displayMode field from slate payload", () => {
+    const legacyLink = {
+      type: "link",
+      href: "https://old.com",
+      linkId: "legacy-id",
+      displayMode: "button"
+    };
+    render(<ModalProvider><TestWrapper tileId="t1" selectedLink={legacyLink} /></ModalProvider>);
+    fireEvent.click(screen.getByText("Save"));
+
+    const setNodesElement = mockSetNodes.mock.calls[0][1];
+    expect(setNodesElement).not.toHaveProperty("displayMode");
+  });
+
+  it("Save with empty URL unwraps the link and removes display mode entry", () => {
+    const existingLink = { type: "link", href: "https://old.com", linkId: "to-delete" };
+    render(<ModalProvider><TestWrapper tileId="t1" selectedLink={existingLink} /></ModalProvider>);
+    fireEvent.change(screen.getByPlaceholderText("URL"), { target: { value: "" } });
+    fireEvent.click(screen.getByText("Save"));
+
+    expect(mockUnwrapNodes).toHaveBeenCalled();
+    expect(mockTextContent.removeLinkDisplayMode).toHaveBeenCalledWith("to-delete");
+    expect(mockSetNodes).not.toHaveBeenCalled();
+  });
+
+  it("initial displayMode state reads from textContent.getLinkDisplayMode", () => {
+    const existingLink = { type: "link", href: "https://x.com", linkId: "pre-button-id" };
+    mockTextContent.getLinkDisplayMode.mockReturnValue("button");
+    render(<ModalProvider><TestWrapper tileId="t1" selectedLink={existingLink} /></ModalProvider>);
+    expect(mockTextContent.getLinkDisplayMode).toHaveBeenCalledWith("pre-button-id");
+    const buttonRadio = screen.getByLabelText("Button") as HTMLInputElement;
+    expect(buttonRadio.checked).toBe(true);
   });
 });

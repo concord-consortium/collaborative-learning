@@ -1,3 +1,4 @@
+import { getSnapshot } from "mobx-state-tree";
 import { EditorValue, slateToText } from "@concord-consortium/slate-editor";
 import { TextContentModel, kTextTileType } from "./text-content";
 import { registerTextPluginInfo } from "./text-plugin-info";
@@ -80,5 +81,52 @@ describe("TextContentModel", () => {
     const model = TextContentModel.create({ text: "foo" });
     model.updateAfterSharedModelChanges(undefined);
     expect(testTextPluginInfoWithUpdate.updateTextContentAfterSharedModelChanges).toHaveBeenCalled();
+  });
+
+  describe("linkDisplayModes", () => {
+    it("returns 'link' by default when the linkId has no entry", () => {
+      const content = TextContentModel.create();
+      expect(content.getLinkDisplayMode("missing")).toBe("link");
+    });
+
+    it("returns 'link' when linkId is undefined", () => {
+      const content = TextContentModel.create();
+      expect(content.getLinkDisplayMode(undefined)).toBe("link");
+    });
+
+    it("stores 'button' mode", () => {
+      const content = TextContentModel.create();
+      content.setLinkDisplayMode("abc", "button");
+      expect(content.getLinkDisplayMode("abc")).toBe("button");
+      expect(content.linkDisplayModes.has("abc")).toBe(true);
+    });
+
+    it("deletes the map entry when setting mode back to 'link'", () => {
+      const content = TextContentModel.create();
+      content.setLinkDisplayMode("abc", "button");
+      expect(content.linkDisplayModes.has("abc")).toBe(true);
+      content.setLinkDisplayMode("abc", "link");
+      expect(content.linkDisplayModes.has("abc")).toBe(false);
+      expect(content.getLinkDisplayMode("abc")).toBe("link");
+    });
+
+    it("removeLinkDisplayMode clears the entry", () => {
+      const content = TextContentModel.create();
+      content.setLinkDisplayMode("abc", "button");
+      content.removeLinkDisplayMode("abc");
+      expect(content.linkDisplayModes.has("abc")).toBe(false);
+      expect(content.getLinkDisplayMode("abc")).toBe("link");
+    });
+
+    it("survives snapshot round-trip", () => {
+      const original = TextContentModel.create();
+      original.setLinkDisplayMode("a", "button");
+      original.setLinkDisplayMode("b", "button");
+      const snapshot = getSnapshot(original);
+      const restored = TextContentModel.create(snapshot);
+      expect(restored.getLinkDisplayMode("a")).toBe("button");
+      expect(restored.getLinkDisplayMode("b")).toBe("button");
+      expect(restored.getLinkDisplayMode("missing")).toBe("link");
+    });
   });
 });
