@@ -1,13 +1,15 @@
 import { observer } from "mobx-react";
 import React from "react";
+import ScrollArrowIcon from "../../../assets/scroll-arrow-small-icon.svg";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
+import { useTimelineContent } from "../hooks/use-timeline-content";
 import { Timeline } from "./timeline";
+import { TimelineButton } from "./timeline-button";
 import { TimelineKey } from "./timeline-key";
 import "../timeline-toolbar";
 import "./timeline-tile.scss";
-import { useTimelineContent } from "../hooks/use-timeline-content";
 
 export const TimelineComponent: React.FC<ITileProps> = observer(function TimelineComponent({ readOnly, tileElt }) {
   const content = useTimelineContent();
@@ -18,8 +20,20 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
       <TileToolbar tileType="timeline" readOnly={!!readOnly} tileElement={tileElt} />
       <div className="timeline-container">
         <div className="event-row">
-          <button disabled={!content.canSelectPrev} onClick={() => content.selectPrevEvent()}>Prev</button>
-          <button disabled={!content.canSelectNext} onClick={() => content.selectNextEvent()}>Next</button>
+          <TimelineButton
+            className="prev-button"
+            disabled={!content.canSelectPrev}
+            onClick={() => content.selectPrevEvent()}
+          >
+            <ScrollArrowIcon /><span>Prev</span>
+          </TimelineButton>
+          <TimelineButton
+            className="next-button"
+            disabled={!content.canSelectNext}
+            onClick={() => content.selectNextEvent()}
+          >
+            <span>Next</span><ScrollArrowIcon style={{ transform: "rotate(180deg)" }} />
+          </TimelineButton>
           <div className="event-label">{content.selectedEventLabel}</div>
         </div>
         <Timeline />
