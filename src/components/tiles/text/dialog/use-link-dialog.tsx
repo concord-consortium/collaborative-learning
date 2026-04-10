@@ -8,10 +8,12 @@ import { LogEventName } from "../../../../lib/logger-types";
 import LinkIcon from "../../../../assets/icons/text/link-text-icon.svg";
 import './use-link-dialog.scss';
 
+type DisplayMode = "link" | "button";
+
 interface IContentProps {
   setUrl: React.Dispatch<React.SetStateAction<string>>;
-  displayMode: string;
-  setDisplayMode: (mode: string) => void;
+  displayMode: DisplayMode;
+  setDisplayMode: (mode: DisplayMode) => void;
   text: string;
   url: string;
 }
@@ -35,7 +37,7 @@ export const LinkDialogContent = ({ setUrl, displayMode, setDisplayMode, text, u
             name="displayMode"
             value="link"
             checked={displayMode === "link"}
-            onChange={e => { if (e.target.checked) setDisplayMode(e.target.value); }}
+            onChange={e => { if (e.target.checked) setDisplayMode("link"); }}
           />
           <label htmlFor="display-link">Link</label>
         </div>
@@ -46,7 +48,7 @@ export const LinkDialogContent = ({ setUrl, displayMode, setDisplayMode, text, u
             name="displayMode"
             value="button"
             checked={displayMode === "button"}
-            onChange={e => { if (e.target.checked) setDisplayMode(e.target.value); }}
+            onChange={e => { if (e.target.checked) setDisplayMode("button"); }}
           />
           <label htmlFor="display-button">Button</label>
         </div>
