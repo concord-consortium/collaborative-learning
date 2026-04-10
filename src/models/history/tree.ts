@@ -160,9 +160,18 @@ export const Tree = types.model("Tree", {
     // Actually apply the patches.
     // It might be called multiple times after startApplyingPatchesFromManager.
     //
-    // Uses onPatch to count how many patches were successfully applied. If an
-    // error occurs, throws a PatchApplicationError containing the count and
-    // inverse patches so callers can roll back the partial application.
+    // Patches are applied as a single batch for performance. MST's applyPatch
+    // wraps the array in one action, which means middlewares (like the
+    // TreeMonitor) fire once for the whole batch instead of once per patch.
+    // With hundreds or thousands of patches during history playback, applying
+    // them one at a time would be significantly slower.
+    //
+    // However, batch applyPatch doesn't tell us which patch failed if an
+    // error occurs partway through. To work around this, we register an
+    // onPatch listener that counts successfully applied patches and collects
+    // their inverse patches. On failure, we throw a PatchApplicationError
+    // containing the count and inverse patches so callers can roll back the
+    // partial application and identify which input patch caused the failure.
     //
     // Patches without a path are treated as snapshots, which would produce
     // multiple onPatch calls and break our counting. We reject them upfront
