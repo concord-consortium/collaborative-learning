@@ -331,11 +331,12 @@ describe("TileComponent focus trap", () => {
     });
 
     it("Shift+Tab on selected tile enters focus trap backward", () => {
-      const { stores, tileModel, tileElement, contentElement } = renderFocusTrapTile();
+      const { stores, tileModel, tileElement, toolbarButtons } = renderFocusTrapTile();
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { tileElement.focus(); });
       fireEvent.keyDown(tileElement, { key: "Tab", shiftKey: true });
-      expect(document.activeElement).toBe(contentElement);
+      // Reverse entry: resize (absent) → toolbar → content → title
+      expect(document.activeElement).toBe(toolbarButtons[0]);
     });
 
     it("Tab on selected tile without title/content enters focus trap and reaches toolbar", () => {
@@ -352,18 +353,18 @@ describe("TileComponent focus trap", () => {
   // --- Focus Trap Cycling (Tab forward) ---
 
   describe("focus trap cycling (Tab forward)", () => {
-    it("Tab from title goes to toolbar button", () => {
-      const { titleElement, toolbarButtons } = renderFocusTrapTile();
+    it("Tab from title goes to content", () => {
+      const { titleElement, contentElement } = renderFocusTrapTile();
       act(() => { titleElement!.focus(); });
       fireEvent.keyDown(titleElement!, { key: "Tab" });
-      expect(document.activeElement).toBe(toolbarButtons[0]);
+      expect(document.activeElement).toBe(contentElement);
     });
 
-    it("Tab from content wraps to title", () => {
-      const { contentElement, titleElement } = renderFocusTrapTile();
+    it("Tab from content goes to toolbar button", () => {
+      const { contentElement, toolbarButtons } = renderFocusTrapTile();
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Tab" });
-      expect(document.activeElement).toBe(titleElement);
+      expect(document.activeElement).toBe(toolbarButtons[0]);
     });
 
     it("Tab from content with no title/toolbar calls preventDefault (defensive)", () => {
@@ -377,34 +378,31 @@ describe("TileComponent focus trap", () => {
       expect(document.activeElement).toBe(contentElement);
     });
 
-    it("Tab from content skips non-focusable title and wraps to toolbar", () => {
-      const { tileElement, contentElement, toolbarButtons } = renderFocusTrapTile({ hasTitle: false });
-      const nonFocusableTitle = document.createElement("div");
-      nonFocusableTitle.textContent = "Title";
-      tileElement.appendChild(nonFocusableTitle);
-      mockTitleElement = nonFocusableTitle as unknown as HTMLInputElement;
+    it("Tab from content with no toolbar wraps to title", () => {
+      const { contentElement, titleElement } = renderFocusTrapTile({ hasToolbar: false });
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Tab" });
-      // Should skip the non-focusable title and go to toolbar instead
-      expect(document.activeElement).toBe(toolbarButtons[0]);
+      // No toolbar, no resize → wraps to title
+      expect(document.activeElement).toBe(titleElement);
     });
   });
 
   // --- Focus Trap Cycling (Shift+Tab reverse) ---
 
   describe("focus trap cycling (Shift+Tab reverse)", () => {
-    it("Shift+Tab from content goes to toolbar button", () => {
-      const { contentElement, toolbarButtons } = renderFocusTrapTile();
+    it("Shift+Tab from content goes to title", () => {
+      const { contentElement, titleElement } = renderFocusTrapTile();
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Tab", shiftKey: true });
-      expect(document.activeElement).toBe(toolbarButtons[0]);
+      expect(document.activeElement).toBe(titleElement);
     });
 
-    it("Shift+Tab from title wraps to content", () => {
-      const { titleElement, contentElement } = renderFocusTrapTile();
+    it("Shift+Tab from title wraps to toolbar button", () => {
+      const { titleElement, toolbarButtons } = renderFocusTrapTile();
       act(() => { titleElement!.focus(); });
       fireEvent.keyDown(titleElement!, { key: "Tab", shiftKey: true });
-      expect(document.activeElement).toBe(contentElement);
+      // Reverse from title: resize (absent) → toolbar
+      expect(document.activeElement).toBe(toolbarButtons[0]);
     });
 
     it("Shift+Tab from content with no title/toolbar calls preventDefault", () => {
@@ -415,6 +413,73 @@ describe("TileComponent focus trap", () => {
       const result = fireEvent.keyDown(contentElement!, { key: "Tab", shiftKey: true });
       expect(result).toBe(false);
       expect(document.activeElement).toBe(contentElement);
+    });
+  });
+
+  // --- Tab within content (multiple focusable children) ---
+
+  describe("Tab cycles through focusable children within content", () => {
+    // These tests use native dispatchEvent because the Tab handler is a capture-phase listener.
+    // React's fireEvent dispatches in bubble phase and won't trigger capture listeners.
+    // jsdom returns zero-size bounding rects, so mock checkVisibility on test inputs
+    function makeVisible(el: HTMLElement) {
+      (el as any).checkVisibility = () => true;
+    }
+
+    it("Tab moves from first to second focusable child in content", () => {
+      const { contentElement } = renderFocusTrapTile();
+      const input1 = document.createElement("input");
+      const input2 = document.createElement("input");
+      makeVisible(input1);
+      makeVisible(input2);
+      contentElement!.appendChild(input1);
+      contentElement!.appendChild(input2);
+      act(() => { input1.focus(); });
+      input1.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+      expect(document.activeElement).toBe(input2);
+      contentElement!.removeChild(input1);
+      contentElement!.removeChild(input2);
+    });
+
+    it("Shift+Tab moves from second to first focusable child in content", () => {
+      const { contentElement } = renderFocusTrapTile();
+      const input1 = document.createElement("input");
+      const input2 = document.createElement("input");
+      makeVisible(input1);
+      makeVisible(input2);
+      contentElement!.appendChild(input1);
+      contentElement!.appendChild(input2);
+      act(() => { input2.focus(); });
+      input2.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true }));
+      expect(document.activeElement).toBe(input1);
+      contentElement!.removeChild(input1);
+      contentElement!.removeChild(input2);
+    });
+
+    it("Tab from last focusable child exits content to toolbar", () => {
+      const { contentElement, toolbarButtons } = renderFocusTrapTile();
+      const input1 = document.createElement("input");
+      const input2 = document.createElement("input");
+      contentElement!.appendChild(input1);
+      contentElement!.appendChild(input2);
+      act(() => { input2.focus(); });
+      input2.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+      expect(document.activeElement).toBe(toolbarButtons[0]);
+      contentElement!.removeChild(input1);
+      contentElement!.removeChild(input2);
+    });
+
+    it("Shift+Tab from first focusable child exits content to title", () => {
+      const { contentElement, titleElement } = renderFocusTrapTile();
+      const input1 = document.createElement("input");
+      const input2 = document.createElement("input");
+      contentElement!.appendChild(input1);
+      contentElement!.appendChild(input2);
+      act(() => { input1.focus(); });
+      input1.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true }));
+      expect(document.activeElement).toBe(titleElement);
+      contentElement!.removeChild(input1);
+      contentElement!.removeChild(input2);
     });
   });
 

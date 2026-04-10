@@ -132,20 +132,22 @@ export const TileToolbar = observer(
             return false;
           };
 
-          // Cycle: title → toolbar → content → resize → (wrap)
+          // Cycle: title → content → toolbar → resize → (wrap)
           // Try candidates in order, skipping any that can't actually receive focus.
           if (e.shiftKey) {
-            // Shift+Tab: toolbar → title → resize → content → tile
-            if (titleElement) { titleElement.focus(); }
-            if (document.activeElement !== titleElement) {
-              if (!tryFocusResize() && !tryFocusContent()) { tileElement.focus(); }
+            // Shift+Tab: toolbar → content → title → resize → tile
+            if (!tryFocusContent()) {
+              if (titleElement) { titleElement.focus(); }
+              if (document.activeElement !== titleElement) {
+                if (!tryFocusResize()) { tileElement.focus(); }
+              }
             }
           } else {
-            // Tab: toolbar → content → resize → title → tile
-            if (!tryFocusContent()) {
-              if (!tryFocusResize()) {
-                if (titleElement) { titleElement.focus(); }
-                if (document.activeElement !== titleElement) { tileElement.focus(); }
+            // Tab: toolbar → resize → title → content → tile
+            if (!tryFocusResize()) {
+              if (titleElement) { titleElement.focus(); }
+              if (document.activeElement !== titleElement) {
+                if (!tryFocusContent()) { tileElement.focus(); }
               }
             }
           }

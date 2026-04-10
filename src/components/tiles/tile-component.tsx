@@ -492,6 +492,48 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     return false;
   }
 
+  // Moves focus to the next (or previous) focusable element within the content area.
+  // Returns true if focus was moved, false if already at the boundary (first/last element).
+  // Note: DOM query + visibility check on each Tab press. Acceptable for typical tile sizes (<100 elements).
+  private tabWithinContent(contentElement: HTMLElement, activeElement: HTMLElement, reverse: boolean): boolean {
+    const focusableSelector = [
+      'a[href]', 'button:not([disabled])', 'input:not([disabled]):not([type="hidden"])',
+      'select:not([disabled])', 'textarea:not([disabled])', '[contenteditable]:not([contenteditable="false"])',
+      '[tabindex]:not([tabindex="-1"])'
+    ].join(", ");
+
+    const focusables = Array.from(
+      contentElement.querySelectorAll<HTMLElement>(focusableSelector)
+    ).filter(el => {
+      if (el.getAttribute("aria-hidden") === "true") return false;
+      // For SVG <g> elements, checkVisibility returns false (no own rendering), so use bounding rect.
+      if (el instanceof SVGElement) {
+        const svgRect = el.getBoundingClientRect();
+        return svgRect.width > 0 && svgRect.height > 0;
+      }
+      const check = (el as any).checkVisibility;
+      if (typeof check === "function") {
+        return check.call(el, { checkOpacity: true, checkVisibilityCSS: true });
+      }
+      const rect = el.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
+
+    if (focusables.length === 0) return false;
+
+    const currentIndex = focusables.indexOf(activeElement);
+    if (currentIndex === -1) return false;
+
+    if (reverse) {
+      if (currentIndex === 0) return false; // at first element, let focus trap handle it
+      focusables[currentIndex - 1].focus();
+    } else {
+      if (currentIndex === focusables.length - 1) return false; // at last element
+      focusables[currentIndex + 1].focus();
+    }
+    return true;
+  }
+
   // Enters the focus trap, focusing the first (or last if reverse) element.
   // Returns true if focus was moved, false if no focusable elements exist.
   private enterFocusTrap(
@@ -501,15 +543,17 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     const { titleElement, activeToolbarButton, contentElement, focusContent, resizeHandle }
       = this.getFocusTrapElements();
 
+    // Cycle order: title → content → toolbar → resize
     let focused: boolean;
     if (reverse) {
-      // Reverse: resize → content → toolbar → title
       focused = this.focusFirstAvailable(resizeHandle)
+        || this.focusFirstAvailable(activeToolbarButton)
         || this.focusContent(contentElement, focusContent)
-        || this.focusFirstAvailable(activeToolbarButton, titleElement);
+        || this.focusFirstAvailable(titleElement);
     } else {
-      focused = this.focusFirstAvailable(titleElement, activeToolbarButton)
-        || this.focusContent(contentElement, focusContent);
+      focused = this.focusFirstAvailable(titleElement)
+        || this.focusContent(contentElement, focusContent)
+        || this.focusFirstAvailable(activeToolbarButton);
     }
 
     if (focused) {
@@ -566,33 +610,45 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     if (isInsideTile) {
       // Cycling within focus trap from elements inside the tile DOM.
       // (Toolbar handles its own Tab events since it's in FloatingPortal.)
-      // Cycle order: title → toolbar → content → resize → (wrap to title)
+      // Cycle order: title → content → toolbar → resize → (wrap to title)
       const { titleElement, activeToolbarButton, contentElement, focusContent, resizeHandle }
         = this.getFocusTrapElements();
       const isOnContent = activeElement === contentElement || contentElement?.contains(activeElement);
       const isOnTitle = activeElement === titleElement;
       const isOnResize = activeElement === resizeHandle || resizeHandle?.contains(activeElement);
 
+      // Cycle order: title → content → toolbar → resize → (wrap to title)
       if (e.shiftKey) {
         // Shift+Tab: go backward
         if (isOnContent) {
-          // Content → toolbar (or title)
-          this.focusFirstAvailable(activeToolbarButton, titleElement);
+          if (contentElement && this.tabWithinContent(contentElement, activeElement, true)) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+          // Content → title (or wrap to resize)
+          if (!this.focusFirstAvailable(titleElement)) {
+            this.focusFirstAvailable(resizeHandle);
+          }
           e.preventDefault();
           e.stopPropagation();
           return;
         } else if (isOnTitle) {
-          // Title → wrap to resize (or content)
+          // Title → wrap to resize (or toolbar, or content)
           if (!this.focusFirstAvailable(resizeHandle)) {
-            this.focusContent(contentElement, focusContent);
+            if (!this.focusFirstAvailable(activeToolbarButton)) {
+              this.focusContent(contentElement, focusContent);
+            }
           }
           e.preventDefault();
           e.stopPropagation();
           return;
         } else if (isOnResize) {
-          // Resize → content (or toolbar, or title)
-          if (!this.focusContent(contentElement, focusContent)) {
-            this.focusFirstAvailable(activeToolbarButton, titleElement);
+          // Resize → toolbar (or content, or title)
+          if (!this.focusFirstAvailable(activeToolbarButton)) {
+            if (!this.focusContent(contentElement, focusContent)) {
+              this.focusFirstAvailable(titleElement);
+            }
           }
           e.preventDefault();
           e.stopPropagation();
@@ -601,25 +657,35 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       } else {
         // Tab: go forward
         if (isOnContent) {
-          // Content → resize (or wrap to title/toolbar)
-          if (!this.focusFirstAvailable(resizeHandle)) {
-            this.focusFirstAvailable(titleElement, activeToolbarButton);
+          if (contentElement && this.tabWithinContent(contentElement, activeElement, false)) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+          // Content → toolbar (or resize, or wrap to title)
+          // Toolbar is in FloatingPortal — focusFirstAvailable works across DOM boundaries
+          if (!this.focusFirstAvailable(activeToolbarButton)) {
+            if (!this.focusFirstAvailable(resizeHandle)) {
+              this.focusFirstAvailable(titleElement);
+            }
           }
           e.preventDefault();
           e.stopPropagation();
           return;
         } else if (isOnTitle) {
-          // Title → toolbar (or content)
-          if (!this.focusFirstAvailable(activeToolbarButton)) {
-            this.focusContent(contentElement, focusContent);
+          // Title → content (or toolbar)
+          if (!this.focusContent(contentElement, focusContent)) {
+            this.focusFirstAvailable(activeToolbarButton);
           }
           e.preventDefault();
           e.stopPropagation();
           return;
         } else if (isOnResize) {
-          // Resize → wrap to title (or toolbar, or content)
-          if (!this.focusFirstAvailable(titleElement, activeToolbarButton)) {
-            this.focusContent(contentElement, focusContent);
+          // Resize → wrap to title (or content, or toolbar)
+          if (!this.focusFirstAvailable(titleElement)) {
+            if (!this.focusContent(contentElement, focusContent)) {
+              this.focusFirstAvailable(activeToolbarButton);
+            }
           }
           e.preventDefault();
           e.stopPropagation();
