@@ -102,7 +102,7 @@ const EditableAxisLabel: React.FC<IProps> = observer(function EditableAxisLabel(
           onKeyDown={readOnly ? undefined : handleLabelKeyDown}
           tabIndex={readOnly ? -1 : 0}
           role={readOnly ? undefined : "button"}
-          aria-label={readOnly ? displayText : `Edit Y-axis label: ${displayText}`}
+          aria-label={readOnly ? displayText : `Y-axis: ${displayText}, editable label`}
         />}
       <g ref={textRef}>
         <Text

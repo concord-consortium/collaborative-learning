@@ -22,12 +22,7 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
     .visx-bar {
       stroke: black;
       stroke-width: 1px;
-
-      &:focus-visible,
-      &.keyboard-focused {
-        outline: 2px solid $focus-ring-color;
-        outline-offset: 2px;
-      }
+      @include focus-ring(2px);
     }
 
     .editable-axis-label-button {

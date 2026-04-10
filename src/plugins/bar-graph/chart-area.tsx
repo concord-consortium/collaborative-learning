@@ -232,53 +232,53 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
   const svgAriaLabel = primaryAttrName ? `Bar graph of ${primaryAttrName}` : "Bar graph";
 
   return (
-    <svg ref={svgRef} width={width} height={height} className="bar-graph-svg" data-testid="bar-graph-svg"
-      role="group" aria-roledescription="bar chart" aria-label={svgAriaLabel}>
-      <Group top={margin.top} left={margin.left}>
-        <GridRows
-          scale={countScale}
+    <>
+      <svg ref={svgRef} width={width} height={height} className="bar-graph-svg" data-testid="bar-graph-svg"
+        role="group" aria-roledescription="bar chart" aria-label={svgAriaLabel}>
+        <Group top={margin.top} left={margin.left}>
+          <GridRows
+            scale={countScale}
+            width={xMax}
+            numTicks={ticks}
+            stroke="#bfbfbf"
+            strokeWidth={1.5}
+          />
+          <AxisBottom
+            top={countScale(0)}
+            scale={primaryScale}
+            strokeWidth={2}
+            stroke="#707070"
+            tickLineProps={{ stroke: '#bfbfbf', strokeWidth: 1.5, height: 5 }}
+            tickLabelProps={{ dy: -7, fontSize: 14, fontFamily: 'Lato', fill: '#3f3f3f',
+              verticalAnchor: "start", width: labelWidth}}
+            tickFormat={(key) => displayValue(key)}
+          />
+          <AxisLeft
+            left={0}
+            scale={countScale}
+            strokeWidth={2}
+            stroke="#707070"
+            numTicks={ticks}
+            tickLineProps={{ stroke: '#bfbfbf', strokeWidth: 1.5, width: 5 }}
+            tickLabelProps={{ dx: -5, fontSize: 14, fontFamily: 'Lato', fill: '#3f3f3f' }}
+            tickFormat={(value) => Number(value).toFixed(0)}
+          />
+          { secondary ? groupedBars() : simpleBars() }
+        </Group>
+        <EditableAxisLabel
+          x={20}
+          y={margin.top + yMax/2}
+        />
+        <CategoryPulldown
+          setCategory={setPrimaryAttribute}
+          x={margin.left}
+          y={height-35}
           width={xMax}
-          numTicks={ticks}
-          stroke="#bfbfbf"
-          strokeWidth={1.5}
+          height={30}
         />
-        <AxisBottom
-          top={countScale(0)}
-          scale={primaryScale}
-          strokeWidth={2}
-          stroke="#707070"
-          tickLineProps={{ stroke: '#bfbfbf', strokeWidth: 1.5, height: 5 }}
-          tickLabelProps={{ dy: -7, fontSize: 14, fontFamily: 'Lato', fill: '#3f3f3f',
-            verticalAnchor: "start", width: labelWidth}}
-          tickFormat={(key) => displayValue(key)}
-        />
-        <AxisLeft
-          left={0}
-          scale={countScale}
-          strokeWidth={2}
-          stroke="#707070"
-          numTicks={ticks}
-          tickLineProps={{ stroke: '#bfbfbf', strokeWidth: 1.5, width: 5 }}
-          tickLabelProps={{ dx: -5, fontSize: 14, fontFamily: 'Lato', fill: '#3f3f3f' }}
-          tickFormat={(value) => Number(value).toFixed(0)}
-        />
-        { secondary ? groupedBars() : simpleBars() }
-      </Group>
-      <EditableAxisLabel
-        x={20}
-        y={margin.top + yMax/2}
-      />
-      <CategoryPulldown
-        setCategory={setPrimaryAttribute}
-        x={margin.left}
-        y={height-35}
-        width={xMax}
-        height={30}
-      />
-      <foreignObject x={0} y={0} width={1} height={1} overflow="hidden">
-        <div aria-live="polite" className="visually-hidden">{announcement}</div>
-      </foreignObject>
-    </svg>
+      </svg>
+      <div aria-live="polite" className="visually-hidden">{announcement}</div>
+    </>
   );
 });
 
