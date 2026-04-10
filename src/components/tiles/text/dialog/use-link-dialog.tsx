@@ -119,7 +119,7 @@ export const useLinkDialog = ({ editor, onClose, selectedLink, text, tileId }: I
       }
     ],
     onClose
-  }, [selectedLink, text, url, displayMode]);
+  }, [selectedLink, text, url, displayMode, tileId]);
 
   return [showModal, hideModal];
 };
