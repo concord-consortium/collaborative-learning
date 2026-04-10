@@ -200,8 +200,8 @@ $groups-grid-columns: 5;
       }
 
       &:focus-visible {
-        border-color: $workspace-teal;
-        outline: 1px solid $workspace-teal;
+        border-color: $focus-ring-color;
+        outline: 1px solid $focus-ring-color;
         outline-offset: 1px;
       }
 
