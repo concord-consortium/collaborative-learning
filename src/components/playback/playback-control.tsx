@@ -121,7 +121,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   // After goToHistoryEntry runs, numHistoryEventsApplied may differ from
   // what we requested if a failed entry blocked the move. We detect this
   // and show a warning.
-  const [playbackFailureWarning, setCorruptWarning] = useState<string | null>(null);
+  const [playbackFailureWarning, setPlaybackFailureWarning] = useState<string | null>(null);
 
   const goToSliderValue = useCallback(async (value: number) => {
     // the slider max is sliderEntries.length, which is one more than the last index
@@ -162,11 +162,10 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
         e => e.kind === "history" && e.index === actual
       );
       setSliderValue(actualSliderIndex >= 0 ? actualSliderIndex : value);
-      setCorruptWarning("History playback could not apply some changes and was stopped.");
-      console.log("Slider Entries", sliderEntries);
+      setPlaybackFailureWarning("History playback could not apply some changes and was stopped.");
     } else {
       setSliderValue(value);
-      setCorruptWarning(null);
+      setPlaybackFailureWarning(null);
     }
   }, [treeManager, history, sliderEntries, setPlaybackTime]);
 

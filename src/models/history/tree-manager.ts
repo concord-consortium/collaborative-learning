@@ -594,12 +594,19 @@ export const TreeManager = types
           const directionStr = opType === HistoryOperation.Redo ? "redo" : "undo";
           const historyEntry = self.document.history.at(historyIndex);
           if (historyEntry) {
-            self.historyPlaybackFailures.push({
-              historyEntry,
-              historyIndex,
-              direction: directionStr,
-              errorMessage: e.message
-            });
+            // Skip if we already recorded a failure for this entry and
+            // direction (user may scrub past the same entry repeatedly).
+            const alreadyRecorded = self.historyPlaybackFailures.some(
+              f => f.historyIndex === historyIndex && f.direction === directionStr
+            );
+            if (!alreadyRecorded) {
+              self.historyPlaybackFailures.push({
+                historyEntry,
+                historyIndex,
+                direction: directionStr,
+                errorMessage: e.message
+              });
+            }
           }
 
           // eslint-disable-next-line no-console

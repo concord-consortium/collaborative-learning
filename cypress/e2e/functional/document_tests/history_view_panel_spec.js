@@ -34,10 +34,21 @@ context('History View Panel', () => {
     cy.get('.primary-workspace .toolbar .tool.historyview').click();
     cy.get('.history-view-panel').should('be.visible');
     cy.get('.inject-failing-entry').click();
+
+    cy.log('wait for the injected entry to appear in remote (Firestore) history');
+    // Turn on remote history and wait for the injectFailingHistoryEntry
+    // action to show up there. This is deterministic — it confirms the
+    // injected entry has been persisted to Firestore before the teacher
+    // opens the document from My Work (which loads history from Firestore).
+    cy.get('.history-view-toggle input[type="checkbox"]').click();
+    cy.get('.history-view-section').last().within(() => {
+      cy.get('.history-entry-item', { timeout: 4000 })
+        .contains('injectFailingHistoryEntry')
+        .should('exist');
+    });
     cy.get('.history-view-close').click();
 
     cy.log('open my-work tab and open the document to get playback controls');
-    cy.wait(4000); // wait for firestore to record history
     clueCanvas.getInvestigationCanvasTitle().text().then((investigationTitle) => {
       cy.openTopTab('my-work');
       cy.openDocumentThumbnail('my-work', 'workspaces', investigationTitle);
@@ -48,7 +59,7 @@ context('History View Panel', () => {
     cy.get('[data-testid="playback-slider"]').should('be.visible');
 
     cy.log('scrub to beginning — should be blocked by failing entry');
-    cy.get('.rc-slider-horizontal').then($slider => {
+    cy.get('[data-testid="playback-slider"] .rc-slider-horizontal').then($slider => {
       const width = $slider.width();
       cy.wrap($slider).click(width * 0.05, 0);
     });
