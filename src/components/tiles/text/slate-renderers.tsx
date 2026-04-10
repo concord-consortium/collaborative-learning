@@ -75,9 +75,14 @@ export function renderSlateBlock(blockName: string, attributes: any, children: a
     case "image":  // TODO: This is broken.
       // return (<img src={src} title={title} />);
       // fall through
-    case "link":   // TODO: This is broken.
-      // return (<a href={href} {...attributes}>{children}</a>);
-      // fall through
+    case "link":
+      // Note: this legacy HTML-export serializer only receives `attributes`,
+      // not the full Slate element, so href is not directly available here.
+      // The interactive editor uses `registerElementComponent` (a separate
+      // pipeline) for rendering links with hrefs. HTML export is presentation
+      // neutral: displayMode (link/button) lives on TextContentModel and is
+      // intentionally not consulted here.
+      return (<a {...attributes}>{children}</a>);
     default:
       return null;
   }
