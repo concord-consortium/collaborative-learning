@@ -15,6 +15,8 @@ import { IHighlightBox } from "../../../plugins/text/highlight-registry-context"
 
 export const kTextTileType = "Text";
 
+export type LinkDisplayMode = "link" | "button";
+
 export function defaultTextContent() {
   return TextContentModel.create();
 }
@@ -26,7 +28,8 @@ export const TextContentModel = TileContentModel
     text: types.optional(types.union(types.string, types.array(types.string)), ""),
     // e.g. "html", "markdown", "slate", "quill", empty => plain text
     format: types.maybe(types.string),
-    highlightedText: types.optional(types.array(types.model({id: types.identifier, text: types.string})), [])
+    highlightedText: types.optional(types.array(types.model({id: types.identifier, text: types.string})), []),
+    linkDisplayModes: types.map(types.enumeration<LinkDisplayMode>("LinkDisplayMode", ["link", "button"]))
   })
   .volatile(self => ({
     editor:  undefined as CustomEditor | undefined,
@@ -38,6 +41,10 @@ export const TextContentModel = TileContentModel
       return Array.isArray(self.text)
               ? self.text as string[]
               : self.text as string;
+    },
+    getLinkDisplayMode(linkId: string | undefined): LinkDisplayMode {
+      if (!linkId) return "link";
+      return self.linkDisplayModes.get(linkId) ?? "link";
     }
   }))
   .views(self => ({
@@ -154,6 +161,16 @@ export const TextContentModel = TileContentModel
       } else {
         self.highlightBoxesCache.delete(id);
       }
+    },
+    setLinkDisplayMode(linkId: string, mode: LinkDisplayMode) {
+      if (mode === "link") {
+        self.linkDisplayModes.delete(linkId);
+      } else {
+        self.linkDisplayModes.set(linkId, mode);
+      }
+    },
+    removeLinkDisplayMode(linkId: string) {
+      self.linkDisplayModes.delete(linkId);
     }
   }))
   .actions(self => ({
