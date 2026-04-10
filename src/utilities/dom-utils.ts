@@ -1,4 +1,30 @@
-export {};  // isolatedModules compatibility
+/**
+ * Returns all visible, focusable elements within a container, in DOM order.
+ * Handles SVG <g> elements (which fail checkVisibility) via bounding rect fallback.
+ */
+export function getVisibleFocusables(container: HTMLElement | Element): (HTMLElement | SVGElement)[] {
+  const selector = [
+    'a[href]', 'button:not([disabled])', 'input:not([disabled]):not([type="hidden"])',
+    'select:not([disabled])', 'textarea:not([disabled])', '[contenteditable]:not([contenteditable="false"])',
+    '[tabindex]:not([tabindex="-1"])'
+  ].join(", ");
+
+  return Array.from(
+    container.querySelectorAll<HTMLElement | SVGElement>(selector)
+  ).filter(el => {
+    if (el.closest('[aria-hidden="true"]')) return false;
+    if (el instanceof SVGElement) {
+      const svgRect = el.getBoundingClientRect();
+      return svgRect.width > 0 && svgRect.height > 0;
+    }
+    const check = (el as any).checkVisibility;
+    if (typeof check === "function") {
+      return check.call(el, { checkOpacity: true, checkVisibilityCSS: true });
+    }
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  });
+}
 
 // cf. https://developer.mozilla.org/en-US/docs/Web/API/Element/matches#Polyfill
 if (!Element.prototype.matches) {

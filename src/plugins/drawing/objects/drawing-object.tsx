@@ -100,6 +100,11 @@ export const DrawingObject = types.model("DrawingObject", {
     return [90, 270].includes(normalizeRotation(self.rotation));
   }
 }))
+.views(self => ({
+  get ariaLabel(): string {
+    return self.label;
+  }
+}))
 .actions(self => ({
   /** Update object's temporary size/position with new values, that have already been adjusted for rotation. */
   setUnrotatedDragBounds(bounds: BoundingBoxSides) {
@@ -299,6 +304,14 @@ export interface IDrawingComponentProps {
   readOnly?: boolean,
   handleHover?: HandleObjectHover;
   handleDrag?: HandleObjectDrag;
+  // Accessibility props passed through to Transformable
+  a11yProps?: {
+    objectId?: string;
+    tabIndex?: number;
+    role?: string;
+    ariaLabel?: string;
+    onKeyDown?: (e: React.KeyboardEvent<SVGGElement>) => void;
+  };
 }
 
 export type DrawingComponentType = React.ComponentType<IDrawingComponentProps>;

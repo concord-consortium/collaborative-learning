@@ -460,7 +460,13 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
     // Objects that are members of a group do not individually respond to pointer events.
     const hoverAction = inGroup ? undefined : this.handleObjectHover;
     const pointerDownAction = inGroup ? undefined : this.handleSelectedObjectPointerDown;
-    return renderDrawingObject(object, this.props.readOnly, hoverAction, pointerDownAction);
+    const a11yProps = !inGroup && !this.props.readOnly ? {
+      objectId: object.id,
+      tabIndex: 0,
+      role: "button" as const,
+      ariaLabel: object.ariaLabel,
+    } : undefined;
+    return renderDrawingObject(object, this.props.readOnly, hoverAction, pointerDownAction, a11yProps);
   }
 
   public renderObjects() {
