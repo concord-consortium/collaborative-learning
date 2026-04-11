@@ -270,6 +270,22 @@ describe("DataConfigurationModel", () => {
     expect(config.categoryArrayForAttrRole("y")).toEqual(["__main__"]);
   });
 
+  it("ensurePersistentCategorySetForRole returns the persistent category set", () => {
+    const config = tree.config;
+    config.setDataset(tree.data, tree.metadata);
+    config.setAttributeForRole("x", { attributeID: "nId", type: "categorical" });
+
+    expect(tree.metadata.categories.size).toBe(0);
+    const cs = config.ensurePersistentCategorySetForRole("x");
+    expect(cs).toBeDefined();
+    expect(tree.metadata.categories.size).toBe(1);
+    expect(tree.metadata.categories.get("nId")).toBe(cs);
+
+    // Second call is idempotent.
+    const cs2 = config.ensurePersistentCategorySetForRole("x");
+    expect(cs2).toBe(cs);
+  });
+
   it("returns an array of cases in a plot", () => {
     const config = tree.config;
     config.setDataset(tree.data, tree.metadata);

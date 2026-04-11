@@ -5,6 +5,7 @@ import {AttributeType, attributeTypes} from "../../../models/data/attribute";
 import { ICase } from "../../../models/data/data-set-types";
 import { DataSet, IDataSet } from "../../../models/data/data-set";
 import {getCategorySet, ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
+import { ICategorySet } from "../../../models/data/category-set";
 import {isRemoveAttributeAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtered-cases";
 import {typedId, uniqueId} from "../../../utilities/js-utils";
@@ -593,6 +594,17 @@ export const DataConfigurationModel = types
   .actions(self => ({
     beforeDestroy() {
       self.actionHandlerDisposer?.();
+    },
+    /**
+     * Obtain a persistent CategorySet for the given role, promoting any
+     * existing provisional entry in the process. Use this at every call site
+     * that is about to mutate a CategorySet.
+     */
+    ensurePersistentCategorySetForRole(role: GraphAttrRole): ICategorySet | undefined {
+      if (!self.metadata) return undefined;
+      const attrId = self.attributeID(role);
+      if (!attrId) return undefined;
+      return self.metadata.ensurePersistentCategorySet(attrId);
     },
     /**
      * This is called when the user swaps categories in the legend, but not when the user swaps categories
