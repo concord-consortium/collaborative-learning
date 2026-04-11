@@ -1,5 +1,6 @@
 import React, {useCallback, useContext, useEffect, useRef} from "react";
 import {autorun, reaction} from "mobx";
+import {isAlive} from "mobx-state-tree";
 import { isAddCasesAction, isRemoveAttributeAction, isRemoveCasesAction, isSetCaseValuesAction }
   from "../../../models/data/data-set-actions";
 import {IDotsRef, GraphAttrRoles} from "../graph-types";
@@ -62,6 +63,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     return reaction(
       () => { return layer.dotsElt; },
       (dotsElt) => {
+        if (!isAlive(dataConfiguration)) return;
         matchCirclesToData({
           dataConfiguration,
           pointRadius: graphModel.getPointRadius(),
@@ -245,11 +247,47 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   }, [controller, dataset, dataConfiguration, enableAnimation, graphModel,
     callRefreshPointPositions, dotsRef, instanceId, callRescaleIfNeeded]);
 
+  // respond to case count changes from any source (including history playback patches).
+  // The onAction handler above only fires for interactive actions, not for applyPatch.
+  // We track dataset.cases.length for normal case additions, and also a structural
+  // signature of filteredCases to detect rebuilds during history playback. Without tracking
+  // filteredCases, linked table data wouldn't trigger circle creation because the table's
+  // dataset.cases.length doesn't change — only the graph's filteredCases are rebuilt.
+  useEffect(function respondToCaseCountChanges() {
+    return reaction(
+      () => {
+        if (!isAlive(dataConfiguration)) return undefined;
+        const casesLen = dataConfiguration?.dataset?.cases.length ?? 0;
+        // Track per-entry caseIds lengths so rebuilds that keep the total the same
+        // still trigger this reaction when the grouping or identity changes.
+        const filteredSignature = dataConfiguration?.filteredCases
+          ? dataConfiguration.filteredCases.map(fc => fc.caseIds.length).join(",")
+          : "none";
+        return `${casesLen}-${filteredSignature}`;
+      },
+      () => {
+        if (!isAlive(dataConfiguration)) return;
+        matchCirclesToData({
+          dataConfiguration,
+          pointRadius: graphModel.getPointRadius(),
+          pointColor: graphModel.pointColor,
+          pointStrokeColor: graphModel.pointStrokeColor,
+          dotsElement: dotsRef.current,
+          enableAnimation, instanceId
+        });
+        callRefreshPointPositions(false);
+      },
+      { fireImmediately: true, name: "usePlot.caseCount reaction" }
+    );
+  }, [dataConfiguration, enableAnimation, graphModel, instanceId,
+      dotsRef, callRefreshPointPositions]);
+
   // respond to pointsNeedUpdating becoming false; that is when the points have been updated
   // Happens when the number of plots has changed for now. Possibly other situations in the future.
   useEffect(() => {
     return autorun(
       () => {
+        if (!isAlive(dataConfiguration)) return;
         !dataConfiguration?.pointsNeedUpdating && callRefreshPointPositions(false);
       });
   }, [dataConfiguration, callRefreshPointPositions]);
