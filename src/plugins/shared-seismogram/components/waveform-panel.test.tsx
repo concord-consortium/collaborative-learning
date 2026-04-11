@@ -44,16 +44,14 @@ describe("WaveformPanel", () => {
     mockLoadViewport.mockClear();
   });
 
-  it("renders the label and container div", () => {
-    const { container, getByText } = render(
+  it("renders the container div", () => {
+    const { container } = render(
       <WaveformPanel
-        label="1 day"
         sharedSeismogram={sharedSeismogram}
         startTime={START}
         endTime={END}
       />
     );
-    expect(getByText("1 day")).toBeInTheDocument();
     expect(container.querySelector(".waveform-panel")).toBeInTheDocument();
     expect(container.querySelector(".waveform-panel-display")).toBeInTheDocument();
   });
@@ -61,7 +59,6 @@ describe("WaveformPanel", () => {
   it("does not call query when pixelWidth is 0 (no container size yet)", () => {
     render(
       <WaveformPanel
-        label="test"
         sharedSeismogram={sharedSeismogram}
         startTime={START}
         endTime={END}

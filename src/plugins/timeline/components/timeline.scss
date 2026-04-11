@@ -1,7 +1,11 @@
 .timeline-area {
-  height: 208px;
-  margin: 10px 0 10px 12px;
+  margin: 10px 0 12px 12px;
   position: relative;
+
+  .waveform-wrapper {
+    margin-top: 24px;
+    position: relative;
+  }
 
   .waveform {
     background-color: black;

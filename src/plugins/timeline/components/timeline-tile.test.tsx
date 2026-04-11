@@ -81,6 +81,19 @@ describe("TimelineComponent", () => {
     expect(viewAllButton).toHaveAttribute("aria-disabled", "true");
   });
 
+  it("displays the selected event label", () => {
+    renderWithStores();
+    expect(screen.getByText("Event")).toBeInTheDocument();
+  });
+
+  it("Prev and Next buttons are disabled when no events exist", () => {
+    const { container } = renderWithStores();
+    const prevButton = container.querySelector(".prev-button");
+    const nextButton = container.querySelector(".next-button");
+    expect(prevButton).toBeDisabled();
+    expect(nextButton).toBeDisabled();
+  });
+
   it("renders all toolbar buttons", () => {
     renderWithStores();
     const toolbar = screen.getByTestId("tile-toolbar");
