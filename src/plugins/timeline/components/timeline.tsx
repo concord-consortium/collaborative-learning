@@ -5,6 +5,7 @@ import { isValidDateTime } from "../../../utilities/luxon-utils";
 import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { EventOverlay } from "./event-overlay";
+import { TimelineScrollbar } from "./timeline-scrollbar";
 
 import "./timeline.scss";
 
@@ -58,6 +59,7 @@ export const Timeline = observer(function Timeline() {
               <div>{viewEndTime.toUTC().toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
             </div>
           </div>
+          <TimelineScrollbar />
         </>
       ) : <div className="waveform" />}
     </div>

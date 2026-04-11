@@ -7,7 +7,6 @@ import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { Timeline } from "./timeline";
 import { TimelineKey } from "./timeline-key";
-import { TimelineScrollbar } from "./timeline-scrollbar";
 import "../timeline-toolbar";
 import "./timeline-tile.scss";
 
@@ -37,7 +36,6 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
           <div className="event-label">{content.selectedEventLabel}</div>
         </div>
         <Timeline />
-        <TimelineScrollbar />
         <TimelineKey />
       </div>
     </div>
