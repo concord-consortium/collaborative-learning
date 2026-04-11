@@ -1,4 +1,4 @@
-import { getSnapshot, Instance, types } from "mobx-state-tree";
+import { getSnapshot, Instance, onAction, types } from "mobx-state-tree";
 import { DataSet } from "../data/data-set";
 import { getCategorySet, isSharedCaseMetadata, SharedCaseMetadata } from "./shared-case-metadata";
 import { SharedModel } from "./shared-model";
@@ -104,22 +104,109 @@ describe("SharedCaseMetadata", () => {
   //   expect(tree.metadata.collections.get(collection.id)?.collapsed.size).toBe(0);
   // });
 
-  it("supports CategorySets", () => {
+  it("getCategorySet is a pure view that does not create entries", () => {
     expect(tree.metadata.categories.size).toBe(0);
-    expect(tree.metadata.categories.get("aId")).toBeUndefined();
-    const set1 = getCategorySet(tree.metadata, "aId");
-    expect(tree.metadata.categories.size).toBe(1);
-    expect(tree.metadata.categories.get("aId")).toBe(set1);
-    const set2 = getCategorySet(tree.metadata, "aId");
-    expect(tree.metadata.categories.size).toBe(1);
-    expect(tree.metadata.categories.get("aId")).toBe(set1);
-    expect(set1).toBe(set2);
-    const noSet = getCategorySet(tree.metadata, "zId");
-    expect(noSet).toBeUndefined();
-    expect(tree.metadata.categories.size).toBe(1);
-    expect(tree.metadata.categories.get("zId")).toBeUndefined();
-    // removes set from map when its attribute is invalidated
-    tree.data.removeAttribute("aId");
+    // Reading via the view should not create anything.
+    const result = tree.metadata.getCategorySet("aId");
+    expect(result).toBeUndefined();
     expect(tree.metadata.categories.size).toBe(0);
+  });
+
+  describe("CategorySet lifecycle", () => {
+    it("ensureProvisionalCategorySet creates a provisional and is idempotent", () => {
+      expect(tree.metadata.categories.size).toBe(0);
+      expect(tree.metadata.provisionalCategories.size).toBe(0);
+
+      const cs1 = tree.metadata.ensureProvisionalCategorySet("aId");
+      expect(cs1).toBeDefined();
+      expect(tree.metadata.provisionalCategories.size).toBe(1);
+      expect(tree.metadata.provisionalCategories.get("aId")).toBe(cs1);
+      expect(tree.metadata.categories.size).toBe(0);
+
+      const cs2 = tree.metadata.ensureProvisionalCategorySet("aId");
+      expect(cs2).toBe(cs1);
+      expect(tree.metadata.provisionalCategories.size).toBe(1);
+    });
+
+    it("ensureProvisionalCategorySet returns undefined for unknown attributes", () => {
+      const cs = tree.metadata.ensureProvisionalCategorySet("zId");
+      expect(cs).toBeUndefined();
+      expect(tree.metadata.provisionalCategories.size).toBe(0);
+    });
+
+    it("ensurePersistentCategorySet creates a persistent and destroys the previous provisional", () => {
+      const provisional = tree.metadata.ensureProvisionalCategorySet("aId");
+      expect(provisional).toBeDefined();
+
+      const persistent = tree.metadata.ensurePersistentCategorySet("aId");
+      expect(persistent).toBeDefined();
+      expect(tree.metadata.categories.size).toBe(1);
+      expect(tree.metadata.categories.get("aId")).toBe(persistent);
+      expect(tree.metadata.provisionalCategories.size).toBe(0);
+
+      // The stale provisional reference is dead — any read throws.
+      expect(() => (provisional as any).values).toThrow();
+    });
+
+    it("ensurePersistentCategorySet is idempotent", () => {
+      const p1 = tree.metadata.ensurePersistentCategorySet("aId");
+      const p2 = tree.metadata.ensurePersistentCategorySet("aId");
+      expect(p1).toBe(p2);
+      expect(tree.metadata.categories.size).toBe(1);
+    });
+
+    it("destroys the provisional when the underlying attribute is removed", () => {
+      const provisional = tree.metadata.ensureProvisionalCategorySet("aId");
+      expect(provisional).toBeDefined();
+      expect(tree.metadata.provisionalCategories.size).toBe(1);
+
+      tree.data.removeAttribute("aId");
+
+      expect(tree.metadata.provisionalCategories.size).toBe(0);
+      expect(() => (provisional as any).values).toThrow();
+    });
+
+    it("removes the persistent entry when the underlying attribute is removed", () => {
+      tree.metadata.ensurePersistentCategorySet("aId");
+      expect(tree.metadata.categories.size).toBe(1);
+      tree.data.removeAttribute("aId");
+      expect(tree.metadata.categories.size).toBe(0);
+    });
+
+    it("removeAttribute destroys a persistent entry without a separate top-level action", () => {
+      tree.metadata.ensurePersistentCategorySet("aId");
+      expect(tree.metadata.categories.size).toBe(1);
+
+      const topLevelActions: string[] = [];
+      const dispose = onAction(tree, (call) => {
+        topLevelActions.push(call.name);
+      });
+      try {
+        tree.data.removeAttribute("aId");
+      } finally {
+        dispose();
+      }
+
+      expect(topLevelActions).toEqual(["removeAttribute"]);
+      expect(tree.metadata.categories.size).toBe(0);
+    });
+
+    it("removeAttribute destroys a provisional entry without a separate top-level action", () => {
+      tree.metadata.ensureProvisionalCategorySet("aId");
+      expect(tree.metadata.provisionalCategories.size).toBe(1);
+
+      const topLevelActions: string[] = [];
+      const dispose = onAction(tree, (call) => {
+        topLevelActions.push(call.name);
+      });
+      try {
+        tree.data.removeAttribute("aId");
+      } finally {
+        dispose();
+      }
+
+      expect(topLevelActions).toEqual(["removeAttribute"]);
+      expect(tree.metadata.provisionalCategories.size).toBe(0);
+    });
   });
 });
