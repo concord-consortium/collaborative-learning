@@ -1,13 +1,17 @@
 import React, { useContext } from "react";
 import { observer } from "mobx-react-lite";
-import { TileModelContext } from "../../components/tiles/tile-api";
+import { AddTilesContext, TileModelContext } from "../../components/tiles/tile-api";
+import { BadgedIcon } from "../../components/toolbar/badged-icon";
 import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button";
 import {
   IToolbarButtonComponentProps, registerTileToolbarButtons
 } from "../../components/toolbar/toolbar-button-manager";
+import { kTableTileType } from "../../models/tiles/table/table-content";
+import { useTimelineContent } from "./hooks/use-timeline-content";
 import { isTimelineContentModel } from "./models/timeline-content";
 
-import TableItIcon from "./assets/toolbar/table-it-icon.svg";
+import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
+import TableIcon from "../../clue/assets/icons/table-tool.svg";
 import DataCardItIcon from "./assets/toolbar/data-card-it-icon.svg";
 import BarGraphItIcon from "./assets/toolbar/bar-graph-it-icon.svg";
 import ZoomInIcon from "./assets/toolbar/zoom-in-icon.svg";
@@ -15,18 +19,25 @@ import ZoomOutIcon from "./assets/toolbar/zoom-out-icon.svg";
 import ZoomToFitIcon from "./assets/toolbar/zoom-to-fit-icon.svg";
 import ScrollArrowIcon from "../../assets/scroll-arrow-small-icon.svg";
 
-function TableItButton({ name }: IToolbarButtonComponentProps) {
+const TableItButton = observer(function TableItButton({ name }: IToolbarButtonComponentProps) {
+  const tileModel = useContext(TileModelContext);
+  const addTilesContext = useContext(AddTilesContext);
+  const content = useTimelineContent();
+  const disabled = !content.sharedDataSet;
+
+  function handleClick() {
+    if (!tileModel || !addTilesContext) return;
+    const sharedDataSet = content.sharedDataSet;
+    const sharedModels = sharedDataSet ? [sharedDataSet] : undefined;
+    addTilesContext.addTileAfter(kTableTileType, tileModel, sharedModels);
+  }
+
   return (
-    <TileToolbarButton
-      name={name}
-      title="Table It!"
-      onClick={() => undefined}
-      disabled={true}
-    >
-      <TableItIcon/>
+    <TileToolbarButton name={name} title="Table It!" onClick={handleClick} disabled={disabled}>
+      <BadgedIcon Icon={TableIcon} Badge={ViewBadgeIcon}/>
     </TileToolbarButton>
   );
-}
+});
 
 function DataCardItButton({ name }: IToolbarButtonComponentProps) {
   return (
@@ -55,8 +66,8 @@ function BarGraphItButton({ name }: IToolbarButtonComponentProps) {
 }
 
 const ZoomInButton = observer(function ZoomInButton({ name }: IToolbarButtonComponentProps) {
-  const model = useContext(TileModelContext);
-  const content = isTimelineContentModel(model?.content) ? model?.content : undefined;
+  const content = useTimelineContent();
+
   return (
     <TileToolbarButton
       name={name}
@@ -70,8 +81,8 @@ const ZoomInButton = observer(function ZoomInButton({ name }: IToolbarButtonComp
 });
 
 const ZoomOutButton = observer(function ZoomOutButton({ name }: IToolbarButtonComponentProps) {
-  const model = useContext(TileModelContext);
-  const content = isTimelineContentModel(model?.content) ? model?.content : undefined;
+  const content = useTimelineContent();
+
   return (
     <TileToolbarButton
       name={name}
@@ -85,8 +96,8 @@ const ZoomOutButton = observer(function ZoomOutButton({ name }: IToolbarButtonCo
 });
 
 const ViewAllButton = observer(function ViewAllButton({ name }: IToolbarButtonComponentProps) {
-  const model = useContext(TileModelContext);
-  const content = isTimelineContentModel(model?.content) ? model?.content : undefined;
+  const content = useTimelineContent();
+
   return (
     <TileToolbarButton
       name={name}
@@ -99,6 +110,7 @@ const ViewAllButton = observer(function ViewAllButton({ name }: IToolbarButtonCo
   );
 });
 
+// Note: Not switching to useTimelineContent here because these buttons will be removed in another branch soon.
 function PanLeftButton({ name }: IToolbarButtonComponentProps) {
   const model = useContext(TileModelContext);
   const content = isTimelineContentModel(model?.content) ? model?.content : undefined;

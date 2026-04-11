@@ -16,6 +16,7 @@ import SuperscriptToolIcon from "../../../../assets/icons/text/superscript-text-
 import SubscriptToolIcon from "../../../../assets/icons/text/subscript-text-icon.svg";
 import NumberedListToolIcon from "../../../../assets/icons/text/numbered-list-text-icon.svg";
 import BulletedListToolIcon from "../../../../assets/icons/text/bulleted-list-text-icon.svg";
+import HeadingToolIcon from "../../../../assets/icons/text/heading-text-icon.svg";
 
 const kShortcutPrefix = isMac() ? "Cmd-" : "Ctrl-";
 
@@ -25,6 +26,10 @@ const toggleSupSub =
   (editor: Editor, format: EFormat) => editor.toggleSuperSubscript(format as EFormat.subscript | EFormat.superscript);
 const toggleElement =
   (editor: Editor, format: EFormat) => editor.toggleElement(format);
+
+// EFormat.heading2 is not exported by @concord-consortium/slate-editor, but the
+// Slate editor matches on the string value "heading2" internally (see slate-renderers.tsx).
+const kHeading2Format = "heading2" as EFormat;
 
 interface IGenericTextToolbarButtonProps {
   name: string;
@@ -75,6 +80,12 @@ function SubscriptToolbarButton({name}: IToolbarButtonComponentProps) {
     name={name} title="Subscript" Icon={SubscriptToolIcon} slateType={EFormat.subscript} toggleFunc={toggleSupSub}/>;
 }
 
+function HeadingToolbarButton({name}: IToolbarButtonComponentProps) {
+  return <GenericTextToolbarButton
+    name={name} title="Heading" Icon={HeadingToolIcon}
+    slateType={kHeading2Format} toggleFunc={toggleElement}/>;
+}
+
 function SuperscriptToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
     name={name} title="Superscript" Icon={SuperscriptToolIcon}
@@ -118,6 +129,10 @@ registerTileToolbarButtons('text',
   {
     name: 'superscript',
     component: SuperscriptToolbarButton,
+  },
+  {
+    name: 'heading',
+    component: HeadingToolbarButton,
   },
   {
     name: 'list-ol',

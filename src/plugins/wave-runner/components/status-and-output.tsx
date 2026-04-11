@@ -15,7 +15,6 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
         {sharedSeismogram && hasStationData && (
           <WaveformPanel
             key={`${model.startDate}-${model.endDate}`}
-            label={`${model.startDate} – ${model.endDate}`}
             sharedSeismogram={sharedSeismogram}
             startTime={startDateISO}
             endTime={endDateISO}
