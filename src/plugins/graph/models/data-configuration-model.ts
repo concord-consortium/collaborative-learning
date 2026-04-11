@@ -1,4 +1,4 @@
-import { observable, reaction } from "mobx";
+import { comparer, observable, reaction } from "mobx";
 import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
 import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
@@ -11,8 +11,9 @@ import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtere
 import {typedId, uniqueId} from "../../../utilities/js-utils";
 import {missingColor} from "../../../utilities/color-utils";
 import {onAnyAction} from "../../../utilities/mst-utils";
+import {mstReaction} from "../../../utilities/mst-reaction";
 import {CaseData} from "../d3-types";
-import {GraphAttrRole, graphPlaceToAttrRole, PrimaryAttrRoles, TipAttrRoles} from "../graph-types";
+import {GraphAttrRole, GraphAttrRoles, graphPlaceToAttrRole, PrimaryAttrRoles, TipAttrRoles} from "../graph-types";
 import {AxisPlace} from "../imports/components/axis/axis-types";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 
@@ -592,6 +593,34 @@ export const DataConfigurationModel = types
       }
     }))
   .actions(self => ({
+    afterAttach() {
+      // Maintain the invariant: a provisional CategorySet exists for every
+      // attribute currently assigned to a graph role as categorical. This
+      // reaction replaces the old on-demand creation inside getCategorySet,
+      // so that no MST action fires from inside a view/reaction code path.
+      mstReaction(
+        () => {
+          if (!self.metadata) return [];
+          const ids: string[] = [];
+          GraphAttrRoles.forEach(role => {
+            const attrId = self.attributeID(role);
+            if (attrId && self.attributeType(role) === "categorical") {
+              ids.push(attrId);
+            }
+          });
+          return ids;
+        },
+        (categoricalAttrIds) => {
+          categoricalAttrIds.forEach(id => self.metadata?.ensureProvisionalCategorySet(id));
+        },
+        {
+          name: "DataConfigurationModel.ensureProvisionalCategorySets",
+          fireImmediately: true,
+          equals: comparer.structural
+        },
+        self
+      );
+    },
     beforeDestroy() {
       self.actionHandlerDisposer?.();
     },
