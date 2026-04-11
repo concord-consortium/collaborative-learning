@@ -194,6 +194,10 @@ export const CategorySet = types.model("CategorySet", {
     }
   },
   move(value: string, beforeValue?: string) {
+    if (self.isProvisional) {
+      throw new Error("CategorySet.move called on a provisional instance. " +
+        "Call metadata.ensurePersistentCategorySet(attrId) first.");
+    }
     const fromIndex = self.index(value);
     if (fromIndex == null) return;
     const toIndex = (beforeValue != null) ? self.index(beforeValue) ?? self.values.length - 1 : self.values.length - 1;
@@ -218,17 +222,29 @@ export const CategorySet = types.model("CategorySet", {
     self.invalidate();
   },
   setColorForCategory(value: string, color: string) {
+    if (self.isProvisional) {
+      throw new Error("CategorySet.setColorForCategory called on a provisional instance. " +
+        "Call metadata.ensurePersistentCategorySet(attrId) first.");
+    }
     if (self.index(value)) {
       self.colors.set(value, color);
     }
   },
   storeCurrentColorForCategory(value: string) {
+    if (self.isProvisional) {
+      throw new Error("CategorySet.storeCurrentColorForCategory called on a provisional instance. " +
+        "Call metadata.ensurePersistentCategorySet(attrId) first.");
+    }
     const color = self.colorForCategory(value);
     if (color) {
       self.colors.set(value, color);
     }
   },
   storeAllCurrentColors() {
+    if (self.isProvisional) {
+      throw new Error("CategorySet.storeAllCurrentColors called on a provisional instance. " +
+        "Call metadata.ensurePersistentCategorySet(attrId) first.");
+    }
     self.values.forEach(value => {
       if (!self.colors.get(value)) {
         this.storeCurrentColorForCategory(value);

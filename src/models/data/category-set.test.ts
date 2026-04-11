@@ -135,4 +135,23 @@ describe("CategorySet", () => {
     expect(cs.attr.id).toBe("aId");
     expect(cs.values).toEqual(["x", "y"]);
   });
+
+  it("throws when mutation actions are called on a provisional instance", () => {
+    const data = DataSet.create();
+    data.addAttributeWithID({ id: "aId", name: "a" });
+    data.addCasesWithIDs([
+      { __id__: "c1", a: "x" },
+      { __id__: "c2", a: "y" }
+    ]);
+    const cs = createProvisionalCategorySet(data, "aId");
+
+    // Reads work fine.
+    expect(cs.values).toEqual(["x", "y"]);
+
+    // Mutations throw.
+    expect(() => cs.move("y", "x")).toThrow(/provisional/);
+    expect(() => cs.setColorForCategory("x", "#ff0000")).toThrow(/provisional/);
+    expect(() => cs.storeCurrentColorForCategory("x")).toThrow(/provisional/);
+    expect(() => cs.storeAllCurrentColors()).toThrow(/provisional/);
+  });
 });
