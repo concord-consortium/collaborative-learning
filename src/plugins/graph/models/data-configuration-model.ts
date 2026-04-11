@@ -612,24 +612,25 @@ export const DataConfigurationModel = types
      * @param role
      */
     storeAllCurrentColorsForAttrRole(role: GraphAttrRole) {
-      const categorySet = self.categorySetForAttrRole(role);
-      if (categorySet) {
-        categorySet.storeAllCurrentColors();
-      }
+      const persistent = this.ensurePersistentCategorySetForRole(role);
+      persistent?.storeAllCurrentColors();
     },
     swapCategoriesForAttrRole(role: GraphAttrRole, catIndex1: number, catIndex2: number) {
       const categoryArray = self.categoryArrayForAttrRole(role),
-        numCategories = categoryArray.length,
-        categorySet = self.categorySetForAttrRole(role);
+        numCategories = categoryArray.length;
       if (catIndex2 < catIndex1) {
         const temp = catIndex1;
         catIndex1 = catIndex2;
         catIndex2 = temp;
       }
-      if (categorySet && numCategories > catIndex1 && numCategories > catIndex2) {
+      if (numCategories > catIndex1 && numCategories > catIndex2) {
         const cat1 = categoryArray[catIndex1],
           beforeCat = catIndex2 < numCategories - 1 ? categoryArray[catIndex2 + 1] : undefined;
-        categorySet.move(cat1, beforeCat);
+        // Read-side categoryArray uses whatever getCategorySet returns
+        // (provisional or persistent). The mutation must go through a
+        // guaranteed-persistent instance.
+        const persistent = this.ensurePersistentCategorySetForRole(role);
+        persistent?.move(cat1, beforeCat);
       }
     },
     handleAction(actionCall: ISerializedActionCall) {
