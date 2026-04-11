@@ -1,7 +1,8 @@
 import { types } from "mobx-state-tree";
 import { kellyColors } from "../../utilities/color-utils";
 import { Attribute, IAttribute } from "./attribute";
-import { CategorySet } from "./category-set";
+import { CategorySet, createProvisionalCategorySet } from "./category-set";
+import { DataSet } from "./data-set";
 
 describe("CategorySet", () => {
   const Tree = types.model("Tree", {
@@ -118,5 +119,20 @@ describe("CategorySet", () => {
     cTree.setAttribute(Attribute.create({ name: "d" }));
     expect(handleAttributeInvalidated).toHaveBeenCalledTimes(1);
     expect(handleAttributeInvalidated).toHaveBeenCalledWith(cId);
+  });
+
+  it("createProvisionalCategorySet builds a detached instance backed by a volatile attribute pointer", () => {
+    const data = DataSet.create();
+    data.addAttributeWithID({ id: "aId", name: "a" });
+    data.addCasesWithIDs([
+      { __id__: "c1", a: "x" },
+      { __id__: "c2", a: "y" },
+      { __id__: "c3", a: "x" }
+    ]);
+
+    const cs = createProvisionalCategorySet(data, "aId");
+    expect(cs.isProvisional).toBe(true);
+    expect(cs.attr.id).toBe("aId");
+    expect(cs.values).toEqual(["x", "y"]);
   });
 });
