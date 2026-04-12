@@ -102,8 +102,8 @@ export const WaveRunnerContentModel = TileContentModel
         smm.addTileSharedModel(self, sharedSeismogram, true);
       }
 
-      const { network, station, location, channel } = self.station;
-      sharedSeismogram.setStation({ network, station, location, channel });
+      const { network, station, label, location, channel } = self.station;
+      sharedSeismogram.setStation({ network, station, label, location, channel });
       sharedSeismogram.setTimeRange(
         `${self.startDate}T00:00:00Z`,
         `${self.endDate}T00:00:00Z`
@@ -141,16 +141,20 @@ export const WaveRunnerContentModel = TileContentModel
       const smm = getSharedModelManager(self);
       if (!smm?.isReady) return undefined;
 
+      const modelLabel = DEFAULT_MODELS.find(m => m.metadataUrl === self.selectedModelUrl)?.label ?? "";
+
       const dataSet = DataSet.create();
       addAttributeToDataSet(dataSet, { name: "eventType" });
       addAttributeToDataSet(dataSet, { name: "windowStart" });
       addAttributeToDataSet(dataSet, { name: "windowEnd" });
       addAttributeToDataSet(dataSet, { name: "confidence" });
+      addAttributeToDataSet(dataSet, { name: "modelLabel" });
       addCasesToDataSet(dataSet, self.detectedEvents.map(evt => ({
         windowStart: new Date(evt.windowStart).toISOString(),
         windowEnd: new Date(evt.windowEnd).toISOString(),
         eventType: evt.eventType,
         confidence: evt.confidence,
+        modelLabel,
       })));
 
       const sharedDataSet = SharedDataSet.create({ dataSet });

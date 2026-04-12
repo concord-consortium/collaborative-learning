@@ -85,6 +85,13 @@ export const TimelineContentModel = TileContentModel
       events.forEach((e, i) => e.index = i);
       return events;
     },
+    get modelLabel(): string {
+      const ds = self.sharedDataSet?.dataSet;
+      if (!ds) return "";
+      const attr = ds.attrFromName("modelLabel");
+      if (!attr || ds.cases.length === 0) return "";
+      return ds.getStrValue(ds.cases[0].__id__, attr.id) ?? "";
+    },
     get eventTypeColorWords(): Map<string, string> {
       const ds = self.sharedDataSet?.dataSet;
       if (!ds) return new Map();
