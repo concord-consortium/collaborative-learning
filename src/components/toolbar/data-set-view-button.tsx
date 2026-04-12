@@ -21,6 +21,7 @@ interface IProps {
 export function DataSetViewButton({name, args}: IProps) {
   const addTilesContext = useContext(AddTilesContext);
   const tile = useContext(TileModelContext);
+  const dataSet = tile?.content.tileEnv?.sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tile.id);
 
   if (args?.length !== 2 || args[0] !== "data-set-view") {
     console.error("Unknown args", args);
@@ -29,29 +30,21 @@ export function DataSetViewButton({name, args}: IProps) {
 
   const newTileType = args[1];
   const tooltip = getTileCreateActionName(newTileType);
-
-  // TODO: if the document or tile are undefined then disable the button
-
-  function handleClick () {
-    const tileId = tile?.id;
-    if (!tileId || !addTilesContext) return;
-
-    // Find the first shared dataset of the target tile
-    const content = tile.content;
-    const dataSet = content.tileEnv?.sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileId);
-    const sharedModels = dataSet ? [dataSet] : undefined;
-
-    addTilesContext.addTileAfter(newTileType, tile, sharedModels);
-  }
-
   const newTileInfo = getTileComponentInfo(newTileType);
   const Icon = newTileInfo?.Icon;
 
+  function handleClick () {
+    if (!tile || !dataSet || !addTilesContext) return;
+
+    addTilesContext.addTileAfter(newTileType, tile, [dataSet]);
+  }
+
   return (
     <TileToolbarButton
-        name={name}
-        title={tooltip}
-        onClick={handleClick}
+      disabled={!dataSet}
+      name={name}
+      title={tooltip}
+      onClick={handleClick}
     >
       {Icon ? <BadgedIcon Icon={Icon} Badge={ViewBadgeIcon}/> : "??"}
     </TileToolbarButton>
