@@ -7,6 +7,7 @@ import {useAxisLayoutContext} from "../models/axis-layout-context";
 import {IAxisModel, isCategoricalAxisModel, isNumericAxisModel} from "../models/axis-model";
 import {isVertical} from "../../axis-graph-shared";
 import {
+  axisPlaceToAttrRole,
   kAxisStrokeWidth, kAxisTickLength, kAxisTickPadding, kTickAndGridColor, kTickFontColor, transitionDuration
 } from "../../../../graph-types";
 import {DragInfo, collisionExists, computeBestNumberOfTicks,
@@ -217,6 +218,8 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
       // Fill out dragInfo for use in drag callbacks
       const dI = dragInfo.current;
       dI.categorySet = categorySet;
+      dI.dataConfiguration = graphModel.config;
+      dI.attrRole = axisPlaceToAttrRole[place];
       dI.categories = categories;
       dI.bandwidth = bandWidth;
       dI.axisOrientation = axisIsVertical ? 'vertical' : 'horizontal';
@@ -299,7 +302,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         break;
     }
   }, [subAxisElt, layout, showScatterPlotGridLines, enableAnimation, centerCategoryLabels,
-      axisModel, subAxisIndex, graphModel.isLinkedToDataSet]);
+      axisModel, subAxisIndex, graphModel.isLinkedToDataSet, graphModel.config]);
 
   const onDragStart = useCallback((event: any) => {
     const dI = dragInfo.current;
@@ -338,7 +341,10 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
             ? (newCatIndex === numCategories - 1 ? '' : dI.categories[newCatIndex + 1])
             : dI.categories[newCatIndex];
         dI.indexOfCategory = newCatIndex;
-        dI.categorySet?.move(dI.catName, catToMoveBefore);
+        const persistent = dI.dataConfiguration && dI.attrRole
+          ? dI.dataConfiguration.ensurePersistentCategorySetForRole(dI.attrRole)
+          : undefined;
+        persistent?.move(dI.catName, catToMoveBefore);
       } else {
         renderSubAxis();
       }
