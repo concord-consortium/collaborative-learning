@@ -142,9 +142,9 @@ export const WaveRunnerContentModel = TileContentModel
       if (!smm?.isReady) return undefined;
 
       const dataSet = DataSet.create();
+      addAttributeToDataSet(dataSet, { name: "eventType" });
       addAttributeToDataSet(dataSet, { name: "windowStart" });
       addAttributeToDataSet(dataSet, { name: "windowEnd" });
-      addAttributeToDataSet(dataSet, { name: "eventType" });
       addAttributeToDataSet(dataSet, { name: "confidence" });
       addCasesToDataSet(dataSet, self.detectedEvents.map(evt => ({
         windowStart: new Date(evt.windowStart).toISOString(),

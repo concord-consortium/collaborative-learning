@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import { observer } from "mobx-react-lite";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { SharedDataSet } from "../../models/shared/shared-data-set";
 import { AddTilesContext, TileModelContext } from "../tiles/tile-api";
@@ -18,7 +19,7 @@ interface IProps {
  * The type of tile is defined by an argument to the button.
  * So it is used in the toolbar config like `[data-set-view Table]`.
  */
-export function DataSetViewButton({name, args}: IProps) {
+export const DataSetViewButton = observer(function DataSetViewButton({name, args}: IProps) {
   const addTilesContext = useContext(AddTilesContext);
   const tile = useContext(TileModelContext);
   const dataSet = tile?.content.tileEnv?.sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tile.id);
@@ -49,4 +50,4 @@ export function DataSetViewButton({name, args}: IProps) {
       {Icon ? <BadgedIcon Icon={Icon} Badge={ViewBadgeIcon}/> : "??"}
     </TileToolbarButton>
   );
-}
+});
