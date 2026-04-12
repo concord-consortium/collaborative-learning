@@ -64,21 +64,33 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
       })
     : null;
 
-  // Create/update uPlot
-  // TODO This recreates uPlot whenever the queryResult or pixelWidth changes.
-  // It would be more efficient to update the existing uPlot in most situations.
+  // Track whether the chart is in envelope mode so we can detect structural changes
+  const isEnvelopeRef = useRef<boolean | null>(null);
+  // Store the current amplitude range in a ref so the uPlot range callback can read it
+  const amplitudeRangeRef = useRef(0);
+
+  // Create uPlot when needed (structural changes)
   useEffect(() => {
     if (!containerRef.current || !queryResult) return;
 
+    const isEnvelope = queryResult.level !== "raw";
+    amplitudeRangeRef.current = queryResult.amplitudeRange * AMPLITUDE_RANGE_SCALAR;
     const data = queryResult.data as uPlot.AlignedData;
 
-    if (uplotRef.current) {
+    // If the series structure hasn't changed, update in place
+    if (uplotRef.current && isEnvelopeRef.current === isEnvelope) {
       uplotRef.current.setData(data);
       return;
     }
 
-    const isEnvelope = queryResult.level !== "raw";
-    const amplitudeRange = queryResult.amplitudeRange * AMPLITUDE_RANGE_SCALAR;
+    // First render or structural change (envelope <-> raw) — recreate
+    if (uplotRef.current) {
+      uplotRef.current.destroy();
+      uplotRef.current = null;
+    }
+
+    isEnvelopeRef.current = isEnvelope;
+
     const opts: uPlot.Options = {
       width: pixelWidth,
       height: containerRef.current.clientHeight || DEFAULT_CHART_HEIGHT,
@@ -87,7 +99,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
       scales: {
         x: { time: true },
         y: {
-          range: [-amplitudeRange, amplitudeRange],
+          range: () => [-amplitudeRangeRef.current, amplitudeRangeRef.current],
         },
       },
       axes: [
@@ -110,12 +122,24 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     };
 
     uplotRef.current = new uPlot(opts, data, containerRef.current);
+  }, [queryResult, pixelWidth]);
 
+  // Destroy uPlot on unmount
+  useEffect(() => {
     return () => {
       uplotRef.current?.destroy();
       uplotRef.current = null;
     };
-  }, [queryResult, pixelWidth]);
+  }, []);
+
+  // Resize uPlot when the container width changes
+  useEffect(() => {
+    if (!uplotRef.current || !containerRef.current || pixelWidth === 0) return;
+    uplotRef.current.setSize({
+      width: pixelWidth,
+      height: containerRef.current.clientHeight || DEFAULT_CHART_HEIGHT,
+    });
+  }, [pixelWidth]);
 
   const style = mode === "waveform"
     ? { height: "60px"}
