@@ -285,6 +285,8 @@ export const WaveRunnerContentModel = TileContentModel
           );
           self.updateChunkProgress(day + 1, totalDays);
         }
+
+        self.getOrCreateEventsDataSet();
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         self.runError = `Error running model: ${message}`;
