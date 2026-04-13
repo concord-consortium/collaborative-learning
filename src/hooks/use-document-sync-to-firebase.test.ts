@@ -636,6 +636,23 @@ describe("useDocumentSyncToFirebase hook", () => {
     });
   });
 
+  it("sets saveState to saving on snapshot, saved on success", async () => {
+    const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
+    expect(document.saveState).toBe("idle");
+
+    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
+    expect(document.saveState).toBe("idle");
+
+    // Trigger a content change — onSnapshot fires synchronously
+    document.content?.addTile("text");
+    expect(document.saveState).toBe("saving");
+
+    // The mock useMutation calls onSuccess after promise resolves
+    await waitFor(() => {
+      expect(document.saveState).toBe("saved");
+    });
+  });
+
   it("sets window.currentDocument when DOCUMENT_DEBUG is true", () => {
     libDebug.DEBUG_DOCUMENT = true;
     const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");

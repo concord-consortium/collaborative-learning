@@ -212,9 +212,11 @@ export function useDocumentSyncToFirebase(
     // but clients may override the defaults
     onSuccess: (data: any, snapshot: DocumentContentSnapshotType) => {
       debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
+      document.setSaveState("saved");
     },
     onError: (err: any, properties: DocumentContentSnapshotType) => {
       console.warn(`ERROR: Failed to update document content for ${type} document ${key}:`, document.changeCount);
+      document.setSaveState("retrying");
     }
   };
   const transform = (snapshot: DocumentContentSnapshotType) =>
@@ -264,6 +266,7 @@ export function useDocumentSyncToFirebase(
   useEffect(() => {
     const cleanup = enabled
             ? onSnapshot<DocumentContentSnapshotType>(document.content!, snapshot => {
+                document.setSaveState("saving");
                 // reset (e.g. stop retrying and restart) when value changes
                 mutation.isError && mutation.reset();
                 throttledMutate(snapshot);
