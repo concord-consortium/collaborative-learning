@@ -139,6 +139,9 @@ function setupTestBrain(studentIndex) {
   cy.get('.primary-workspace .graph-wrapper .editable-tile-title-text').first().click();
   cy.get('.primary-workspace .graph-wrapper .editable-tile-title').first().type(title + '{enter}');
   cy.get('.primary-workspace .graph-wrapper .editable-tile-title-text').should("contain", title);
+
+  // Wait for all changes to be saved before navigating away
+  cy.get('[data-testid="save-indicator"]').should('contain', 'Saved');
 }
 
 context('Test 4-up and 1-up views tiles read only functionalities', function () {
