@@ -26,6 +26,11 @@ export const StationModel = types
     get id() {
       return stationId(self);
     },
+    equals(station: StationConfig) {
+      return self.network === station.network && self.station === station.station
+        && self.location === station.location && self.channel === station.network
+        && self.label === station.label;
+    }
   }));
 
 export interface StationModelType extends Instance<typeof StationModel> {}

@@ -64,7 +64,6 @@ export const WaveRunnerContentModel = TileContentModel
     eventsFound: 0,
     runError: null as string | null,
     detectedEvents: [] as SeismicEvent[],
-    cachedEventsDataSet: undefined as SharedDataSetType | undefined,
     selectedModelMetadata: null as ModelMetadata | null,
     modelLoadError: null as string | null,
   }))
@@ -82,6 +81,11 @@ export const WaveRunnerContentModel = TileContentModel
     },
     get endDateISO() {
       return DateTime.fromISO(`${self.endDate}T00:00:00Z`, { zone: "utc" });
+    },
+    get eventsDataSet(): SharedDataSetType | undefined {
+      const smm = getSharedModelManager(self);
+      if (!smm?.isReady) return;
+      return smm.getTileSharedModelsByType(self, SharedDataSet)[0] as SharedDataSetType | undefined;
     }
   }))
   .views(self => ({
@@ -108,20 +112,38 @@ export const WaveRunnerContentModel = TileContentModel
         `${self.startDate}T00:00:00Z`,
         `${self.endDate}T00:00:00Z`
       );
+    },
+    clearEventsDataSet() {
+      if (!self.eventsDataSet) return;
+
+      const smm = getSharedModelManager(self);
+      if (smm?.isReady) smm.removeTileSharedModel(self, self.eventsDataSet);
+
+      self.eventsFound = 0;
+      self.detectedEvents = [];
     }
   }))
   .actions(self => ({
     setStartDate(date: string) {
+      if (self.startDate === date) return;
+
       self.startDate = date;
       self.loadData();
+      self.clearEventsDataSet();
     },
     setEndDate(date: string) {
+      if (self.endDate === date) return;
+
       self.endDate = date;
       self.loadData();
+      self.clearEventsDataSet();
     },
     setStation(station: StationSnapshot) {
+      if (!self.station?.equals(station)) return;
+
       self.station = cast(station);
       self.loadData();
+      self.clearEventsDataSet();
     },
     updateChunkProgress(done: number, total: number) {
       self.chunksProcessed = done;
@@ -131,12 +153,8 @@ export const WaveRunnerContentModel = TileContentModel
       self.detectedEvents = [...self.detectedEvents, ...events];
       self.eventsFound = self.detectedEvents.length;
     },
-    clearCachedEventsDataSet() {
-      self.cachedEventsDataSet = undefined;
-    },
     getOrCreateEventsDataSet(): SharedDataSetType | undefined {
-      if (self.detectedEvents.length === 0) return undefined;
-      if (self.cachedEventsDataSet) return self.cachedEventsDataSet;
+      if (self.eventsDataSet) return self.eventsDataSet;
 
       const smm = getSharedModelManager(self);
       if (!smm?.isReady) return undefined;
@@ -159,7 +177,6 @@ export const WaveRunnerContentModel = TileContentModel
 
       const sharedDataSet = SharedDataSet.create({ dataSet });
       smm.addTileSharedModel(self, sharedDataSet);
-      self.cachedEventsDataSet = sharedDataSet;
       return sharedDataSet;
     },
     ensureModelMetadata: flow(function* (metadataUrl: string) {
@@ -169,6 +186,7 @@ export const WaveRunnerContentModel = TileContentModel
       self.selectedModelUrl = metadataUrl;
       self.selectedModelMetadata = null;
       self.modelLoadError = null;
+      self.clearEventsDataSet();
 
       // Placeholder model — use hardcoded metadata, no fetch needed
       if (metadataUrl === PLACEHOLDER_MODEL_URL) {
@@ -217,11 +235,9 @@ export const WaveRunnerContentModel = TileContentModel
         return;
       }
 
-      self.isRunning = true;
+      self.clearEventsDataSet();
       self.runError = null;
-      self.eventsFound = 0;
-      self.detectedEvents = [];
-      self.cachedEventsDataSet = undefined;
+      self.isRunning = true;
 
       const metadata = self.selectedModelMetadata;
       const { network, station, location, channel } = self.station;
