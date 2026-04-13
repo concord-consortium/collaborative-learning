@@ -1,5 +1,9 @@
 import React from "react";
 import { render, fireEvent, act } from "@testing-library/react";
+import { ReactEditor } from "@concord-consortium/slate-editor";
+import { LinkComponent } from "./link-plugin";
+import { TextContentModel } from "../../models/tiles/text/text-content";
+import { TextContentModelContext } from "../../components/tiles/text/text-content-context";
 
 jest.mock("@concord-consortium/slate-editor", () => {
   const actual = jest.requireActual("@concord-consortium/slate-editor");
@@ -14,15 +18,6 @@ jest.mock("@concord-consortium/slate-editor", () => {
     },
   };
 });
-
-// eslint-disable-next-line import/first
-import { ReactEditor } from "@concord-consortium/slate-editor";
-// eslint-disable-next-line import/first
-import { LinkComponent } from "./link-plugin";
-// eslint-disable-next-line import/first
-import { TextContentModel } from "../../models/tiles/text/text-content";
-// eslint-disable-next-line import/first
-import { TextContentModelContext } from "../../components/tiles/text/text-content-context";
 
 describe("LinkComponent", () => {
   const originalOpen = window.open;
