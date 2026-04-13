@@ -1,7 +1,7 @@
 import { registerPlugins } from "@concord-consortium/slate-editor";
 import TextToolComponent from "../../../components/tiles/text/text-tile";
 import { HighlightsPlugin, kHighlightTextPluginName } from "../../../plugins/text/highlights-plugin";
-import "../../../plugins/text/link-plugin";
+import { registerLinkComponent } from "../../../plugins/text/link-plugin";
 import { registerTileComponentInfo } from "../tile-component-info";
 import { registerTileContentInfo } from "../tile-content-info";
 import { kTextTileType, TextContentModel, defaultTextContent } from "./text-content";
@@ -23,6 +23,10 @@ registerTextPluginInfo({
 });
 
 registerPlugins();
+
+// Register link component AFTER registerPlugins() so it overrides the
+// built-in registerLinkInline() from the slate-editor library.
+registerLinkComponent();
 
 registerTileComponentInfo({
   type: kTextTileType,

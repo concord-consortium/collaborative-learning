@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import Modal from "react-modal";
 import { ModalProvider } from "react-modal-hook";
 import { LinkDialogContent, useLinkDialog } from "./use-link-dialog";
+import type { LinkDisplayMode } from "../../../../models/tiles/text/text-content";
 import { logTileChangeEvent } from "../../../../models/tiles/log/log-tile-change-event";
 import { LogEventName } from "../../../../lib/logger-types";
 import { Transforms } from "@concord-consortium/slate-editor";
@@ -31,7 +32,7 @@ jest.mock("@concord-consortium/slate-editor", () => {
 describe("LinkDialogContent", () => {
   const defaultProps = {
     setUrl: jest.fn(),
-    displayMode: "link",
+    displayMode: "link" as LinkDisplayMode,
     setDisplayMode: jest.fn(),
     text: "example text",
     url: "https://example.com"
