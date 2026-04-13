@@ -11,6 +11,7 @@ import { ResizablePanel } from "./resizable-panel";
 import { HotKeys } from "../../utilities/hot-keys";
 import { StandAloneAuthComponent } from "../standalone/auth";
 import { getAriaLabels } from "../../hooks/use-aria-labels";
+import { SaveIndicatorPortalContext } from "../document/save-indicator-portal-context";
 
 import "./workspace.scss";
 
@@ -25,6 +26,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
           ui: { standalone }
         } = stores;
   const hotKeys = useRef(new HotKeys());
+  const saveIndicatorPortalRef = useRef<HTMLDivElement>(null);
   const { showLeftPanel, showRightPanel } = usePanelVisibility();
   const ariaLabels = getAriaLabels();
   const problemTitle = stores.isProblemLoaded
@@ -75,14 +77,17 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
         </>
       }
       {showRightPanel &&
-        <ResizablePanel
-          collapsed={!workspaceShown}
-          id="workspace-panel"
-          headingLabel={ariaLabels.workspacePane}
-          tabIndex={-1}
-        >
-          {standalone ? <StandAloneAuthComponent /> : <DocumentWorkspaceComponent />}
-        </ResizablePanel>
+        <SaveIndicatorPortalContext.Provider value={saveIndicatorPortalRef}>
+          <ResizablePanel
+            collapsed={!workspaceShown}
+            id="workspace-panel"
+            headingLabel={ariaLabels.workspacePane}
+            headingExtra={<div ref={saveIndicatorPortalRef} className="save-indicator-portal" />}
+            tabIndex={-1}
+          >
+            {standalone ? <StandAloneAuthComponent /> : <DocumentWorkspaceComponent />}
+          </ResizablePanel>
+        </SaveIndicatorPortalContext.Provider>
       }
     </main>
   );

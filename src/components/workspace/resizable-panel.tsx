@@ -7,6 +7,7 @@ interface IProps {
   collapsed: boolean;
   id?: string;
   headingLabel?: string;
+  headingExtra?: React.ReactNode;
   tabIndex?: number;
 }
 
@@ -19,7 +20,7 @@ interface IProps {
 // documents shown on the left sided just by collapsing it.
 // There is now a hotkey cmd-shit-f which makes the right side take
 // the full width and does not render the left side at all.
-export const ResizablePanel: React.FC<IProps> = ({collapsed, id, headingLabel, tabIndex, children }) => {
+export const ResizablePanel: React.FC<IProps> = ({collapsed, id, headingLabel, headingExtra, tabIndex, children }) => {
   const headingId = id ? `${id}-heading` : undefined;
   const hasHeading = !!(id && headingLabel);
 
@@ -33,6 +34,7 @@ export const ResizablePanel: React.FC<IProps> = ({collapsed, id, headingLabel, t
       {hasHeading && (
         <h2 id={headingId} className={classNames("section-heading", id)}>
           {headingLabel}
+          {headingExtra}
         </h2>
       )}
       {children}

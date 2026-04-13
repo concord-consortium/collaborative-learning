@@ -24,7 +24,6 @@ import { DocumentAnnotationToolbar } from "./document-annotation-toolbar";
 import { DocumentFileMenu } from "./document-file-menu";
 import { HistoryViewPanel } from "./history-view-panel";
 import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
-import { SaveIndicator } from "./save-indicator";
 
 import IdeaIcon from "../../assets/idea-icon.svg";
 
@@ -294,7 +293,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="title" data-test="document-title">
           {title} {this.renderStickyNotes()}
         </div>
-        {!this.props.readOnly && <SaveIndicator document={document} />}
         {!hideButtons &&
           <div className="actions right" data-test="document-titlebar-actions">
             {downloadButton}

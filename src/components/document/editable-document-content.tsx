@@ -16,6 +16,7 @@ import { EditableTileApiInterfaceRef, EditableTileApiInterfaceRefContext } from 
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
 import { DocumentToolbar } from "./document-toolbar";
+import { SaveIndicator } from "./save-indicator";
 
 import "./editable-document-content.scss";
 
@@ -114,7 +115,10 @@ export function EditableDocumentContent({
     {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
 
   useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly);
+  const showSaveIndicator = !readOnly;
   return (
+    <>
+    {showSaveIndicator && <SaveIndicator document={document} />}
     <DocumentContextReact.Provider value={documentContext}>
       <EditableTileApiInterfaceRefContext.Provider value={editableTileApiInterfaceRef}>
         <div key="editable-document" className={editableDocContentClass}
@@ -129,5 +133,6 @@ export function EditableDocumentContent({
         </div>
       </EditableTileApiInterfaceRefContext.Provider>
     </DocumentContextReact.Provider>
+    </>
   );
 }
