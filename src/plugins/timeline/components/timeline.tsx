@@ -53,7 +53,7 @@ export const Timeline = observer(function Timeline() {
               <div>{viewStartTime.toUTC().toLocaleString()}</div>
               <div>{viewStartTime.toUTC().toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
             </div>
-            <div className="range-duration">{content.viewRangeSeconds} seconds</div>
+            <div className="range-duration">{content.viewRangeDurationText ?? ""}</div>
             <div className="range-date range-end">
               <div>{viewEndTime.toUTC().toLocaleString()}</div>
               <div>{viewEndTime.toUTC().toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
