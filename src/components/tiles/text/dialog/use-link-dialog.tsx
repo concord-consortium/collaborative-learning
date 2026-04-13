@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { CustomElement, Editor, EFormat, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
+import { Editor, EFormat, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
+import { ClueLinkElement } from "../../../../plugins/text/link-plugin";
 
 import { useCustomModal } from "../../../../hooks/use-custom-modal";
 import { logTileChangeEvent } from "../../../../models/tiles/log/log-tile-change-event";
@@ -113,12 +114,13 @@ export const useLinkDialog = ({ editor, onClose, selectedLink, text, tileId, tex
     } else {
       // Create a new link with a fresh linkId
       const linkId = uuid();
-      const element = {
-        type: EFormat.link,
+      const element: ClueLinkElement = {
+        type: EFormat.link as ClueLinkElement["type"],
         href: url,
-        linkId
-      } as CustomElement;
-      Transforms.wrapNodes(editor, element, { split: true });
+        linkId,
+        children: []
+      };
+      Transforms.wrapNodes(editor, element as any, { split: true });
       Transforms.collapse(editor, { edge: "end" });
       textContent.setLinkDisplayMode(linkId, displayMode);
     }

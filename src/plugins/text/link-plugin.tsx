@@ -1,17 +1,21 @@
 import React, { useContext } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import { CustomElement, ReactEditor, registerElementComponent, RenderElementProps, useSelected, useSlate }
+import { ReactEditor, registerElementComponent, RenderElementProps, useSelected, useSerializing, useSlate }
   from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "../../components/tiles/text/text-content-context";
 import "./link-plugin.scss";
 
 export const kLinkFormat = "link";
 
-interface ClueLinkElement extends CustomElement {
+// Type for link elements with CLUE's linkId extension.
+// Declared as a standalone interface (not extending CustomElement, which is a
+// union type that can't be extended via `extends`).
+export interface ClueLinkElement {
   type: typeof kLinkFormat;
   href: string;
   linkId?: string;
+  children: any[];
 }
 
 const isLinkElement = (element: any): element is ClueLinkElement =>
@@ -20,6 +24,7 @@ const isLinkElement = (element: any): element is ClueLinkElement =>
 export const LinkComponent = observer(function LinkComponent(
   { attributes, children, element }: RenderElementProps
 ) {
+  const isSerializing = useSerializing();
   const textContent = useContext(TextContentModelContext);
   const isSelected = useSelected();
   const editor = useSlate();
@@ -30,6 +35,14 @@ export const LinkComponent = observer(function LinkComponent(
   }
 
   const { href, linkId } = element;
+
+  // During HTML export (serialization), render a plain <a> tag with no
+  // interactive behavior, classes, or displayMode styling. This keeps
+  // the exported HTML presentation-neutral.
+  if (isSerializing) {
+    return <a href={href} {...attributes}>{children}</a>;
+  }
+
   const displayMode = textContent?.getLinkDisplayMode(linkId) ?? "link";
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -72,5 +85,3 @@ export function registerLinkComponent() {
   registerElementComponent(kLinkFormat, props => <LinkComponent {...props}/>);
   isRegistered = true;
 }
-
-registerLinkComponent();

@@ -76,12 +76,10 @@ export function renderSlateBlock(blockName: string, attributes: any, children: a
       // return (<img src={src} title={title} />);
       // fall through
     case "link":
-      // Note: this legacy HTML-export serializer only receives `attributes`,
-      // not the full Slate element, so href is not directly available here.
-      // The interactive editor uses `registerElementComponent` (a separate
-      // pipeline) for rendering links with hrefs. HTML export is presentation
-      // neutral: displayMode (link/button) lives on TextContentModel and is
-      // intentionally not consulted here.
+      // Link rendering (both interactive and HTML export) is handled by
+      // LinkComponent registered via registerElementComponent in link-plugin.tsx.
+      // During HTML export, LinkComponent detects serialization via useSerializing()
+      // and renders a plain <a href>. This case is a fallback only.
       return (<a {...attributes}>{children}</a>);
     default:
       return null;
