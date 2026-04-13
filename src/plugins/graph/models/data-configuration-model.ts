@@ -7,7 +7,7 @@ import { DataSet, IDataSet } from "../../../models/data/data-set";
 import {getCategorySet, ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
 import {isRemoveAttributeAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtered-cases";
-import {typedId, uniqueId} from "../../../utilities/js-utils";
+import {hashStringSets, typedId, uniqueId} from "../../../utilities/js-utils";
 import {missingColor} from "../../../utilities/color-utils";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import {CaseData} from "../d3-types";
@@ -331,6 +331,13 @@ export const DataConfigurationModel = types
     },
     get numberOfPlots() {
       return self.filteredCases.length ?? 0;  // filteredCases is an array of CaseArrays
+    },
+    /**
+     * A hash of the case IDs in each filtered case set. Changes whenever the identity
+     * of filtered cases changes, even if the counts stay the same.
+     */
+    get caseDataHash() {
+      return hashStringSets(self.filteredCases.map(fc => fc.caseIds));
     },
     get hasY2Attribute() {
       return !!self.attributeID('rightNumeric');
@@ -856,7 +863,7 @@ export const DataConfigurationModel = types
       addDisposer(self, reaction(
         () => ({
           dataset: self.dataset,
-          yAttrCount: self.yAttributeDescriptions.length
+          yAttrIds: self.yAttributeDescriptions.map(d => d.attributeID).join(",")
         }),
         () => {
           this.syncFilteredCasesCount(true);

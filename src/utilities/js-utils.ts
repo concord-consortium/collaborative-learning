@@ -188,3 +188,37 @@ export function getPixelWidthFromCSSStyle(style: string): number | undefined {
     return undefined;
   }
 }
+
+/**
+ * Returns a 32-bit hash value for a string using the DJB2 algorithm.
+ */
+export function hashString(str: string) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    // eslint-disable-next-line no-bitwise
+    hash = (hash * 33) ^ str.charCodeAt(i);
+  }
+  // eslint-disable-next-line no-bitwise
+  return hash >>> 0;
+}
+
+/**
+ * Returns an order-invariant hash value for an array of strings (e.g. case IDs).
+ */
+export function hashStringSet(strings: string[]) {
+  return strings
+    .map(hashString)
+    // eslint-disable-next-line no-bitwise
+    .reduce((acc, hash) => acc ^ hash, 0);
+}
+
+/**
+ * Returns a hash value for an array of string arrays, where each sub-array
+ * is hashed in an order-invariant way but the position of each sub-array matters.
+ */
+export function hashStringSets(stringSets: Array<string[]>) {
+  return stringSets
+    .map(hashStringSet)
+    // eslint-disable-next-line no-bitwise
+    .reduce((acc, hash, index) => acc ^ (hash * (index + 1)), 0x9e3779b9);
+}
