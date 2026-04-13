@@ -82,6 +82,7 @@ export const DocumentModel = Tree.named("Document")
     contentErrorMessage: undefined as string | undefined,
     showPlaybackControls: false,
     commentsManager: undefined as DocumentCommentsManager | undefined,
+    saveState: "idle" as "idle" | "saving" | "saved" | "retrying",
   }))
   .views(self => ({
     // This is needed for the tree monitor and manager
@@ -234,6 +235,10 @@ export const DocumentModel = Tree.named("Document")
 
     incChangeCount() {
       return ++self.changeCount;
+    },
+
+    setSaveState(state: "idle" | "saving" | "saved" | "retrying") {
+      self.saveState = state;
     },
 
     setGroupId(groupId?: string) {

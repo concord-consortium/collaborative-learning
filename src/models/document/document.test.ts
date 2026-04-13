@@ -181,6 +181,18 @@ describe("document model", () => {
     expect(document.changeCount).toBe(1);
   });
 
+  it("can set save state", () => {
+    expect(document.saveState).toBe("idle");
+    document.setSaveState("saving");
+    expect(document.saveState).toBe("saving");
+    document.setSaveState("saved");
+    expect(document.saveState).toBe("saved");
+    document.setSaveState("retrying");
+    expect(document.saveState).toBe("retrying");
+    document.setSaveState("idle");
+    expect(document.saveState).toBe("idle");
+  });
+
   it("allows the tools to be added", () => {
     expect(document.content!.tileMap.size).toBe(0);
     document.addTile("text");
