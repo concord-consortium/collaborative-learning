@@ -297,6 +297,7 @@ describe("authed logger", () => {
           type: "Text",
           text: "",
           highlightedText: [],
+          linkDisplayModes: {},
         });
         expect(request.parameters.documentKey).toBe("source-document");
         expect(request.parameters.documentType).toBe("problem");
@@ -341,6 +342,7 @@ describe("authed logger", () => {
           type: "Text",
           text: "test",
           highlightedText: [],
+          linkDisplayModes: {},
         });
         expect(request.parameters.documentKey).toBe("destination-document");
         expect(request.parameters.documentType).toBe("problem");
