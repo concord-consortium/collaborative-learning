@@ -488,9 +488,9 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     // Use setSelectedTile directly (not the debounced userSelectTile) since focus entry is
     // a single committed user action, not a burst of rapid click events.
     strategy.onFocusEnter = () => {
-      const { model, readOnly, containerContext } = this.props;
       const { ui } = this.stores;
       if (!ui.isSelectedTile(model)) {
+        const { readOnly, containerContext } = this.props;
         const effectiveModel = (readOnly && containerContext?.model) ? containerContext.model : model;
         ui.setSelectedTile(effectiveModel, { append: false });
       }

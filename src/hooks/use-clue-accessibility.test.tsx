@@ -54,7 +54,7 @@ describe("createClueTileStrategy", () => {
       tileType: "text",
     });
 
-    expect(strategy.cycleOrder).toEqual(["title", "content", "toolbar"]);
+    expect(strategy.cycleOrder).toEqual(["title", "content", "toolbar", "resize"]);
   });
 
   it("sets announcement text from tile type", () => {
