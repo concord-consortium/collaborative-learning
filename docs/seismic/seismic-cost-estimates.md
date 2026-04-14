@@ -222,7 +222,7 @@ GPU is 5–27× cheaper than CPU Lambda and ~130× cheaper than running the same
 We considered a daily scheduled job (EventBridge + AWS Batch) that fetches new data for "live" stations, runs ML on it, and updates tiles and event docs. Cost was ~$0.78–$0.90/month (dominated by GPU cold-start, ~7 min per daily launch), plus negligible S3 PUTs.
 
 **Why we didn't go this route:**
-- Our current use case is classroom exploration of past events, not live monitoring. Students aren't asking "what happened last night" — they're asking "what happened during the 2018 Anchorage earthquake."
+- Our current use case is classroom exploration of past events, not live monitoring. Students aren't asking "what happened last night" — they're asking "what happened during the last year."
 - An on-demand generation workflow (a student or author picks a station-year, we run the pipeline once) matches actual usage better.
 - Removes another piece of always-on infrastructure to maintain.
 
