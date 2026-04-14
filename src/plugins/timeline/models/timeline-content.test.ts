@@ -28,6 +28,23 @@ describe("TimelineContent", () => {
     const content = TimelineContentModel.create();
     expect(content.isUserResizable).toBe(true);
   });
+
+  it("exports a JSON string including persisted fields", () => {
+    const content = TimelineContentModel.create({
+      viewStartTimeISO: "2026-02-01T00:00:00.000Z",
+      viewEndTimeISO: "2026-02-02T00:00:00.000Z",
+      selectedEventIndex: 3
+    });
+    const json = content.exportJson();
+    expect(typeof json).toBe("string");
+    expect(json.length).toBeGreaterThan(0);
+    expect(JSON.parse(json)).toEqual({
+      type: "Timeline",
+      viewStartTimeISO: "2026-02-01T00:00:00.000Z",
+      viewEndTimeISO: "2026-02-02T00:00:00.000Z",
+      selectedEventIndex: 3
+    });
+  });
 });
 
 describe("zoom functionality", () => {

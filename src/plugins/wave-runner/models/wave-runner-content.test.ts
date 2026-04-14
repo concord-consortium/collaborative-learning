@@ -69,6 +69,24 @@ describe("WaveRunnerContent", () => {
     expect(content.selectedModelMetadata).toBeNull();
   });
 
+  it("exports a JSON string including persisted fields", () => {
+    const content = WaveRunnerContentModel.create({
+      startDate: "2026-02-01",
+      endDate: "2026-02-03",
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ", label: "Anchorage Airport" },
+      selectedModelUrl: "https://example.com/model/metadata.json"
+    });
+    const json = content.exportJson();
+    expect(typeof json).toBe("string");
+    expect(json.length).toBeGreaterThan(0);
+    const parsed = JSON.parse(json);
+    expect(parsed.type).toBe("WaveRunner");
+    expect(parsed.startDate).toBe("2026-02-01");
+    expect(parsed.endDate).toBe("2026-02-03");
+    expect(parsed.station).toMatchObject({ network: "AK", station: "K204", channel: "HNZ" });
+    expect(parsed.selectedModelUrl).toBe("https://example.com/model/metadata.json");
+  });
+
   it("DEFAULT_MODELS contains at least the compact model", () => {
     expect(DEFAULT_MODELS.length).toBeGreaterThanOrEqual(1);
     expect(DEFAULT_MODELS[0].label).toBe("Compact Model");
