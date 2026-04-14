@@ -226,7 +226,7 @@ export const CategorySet = types.model("CategorySet", {
       throw new Error("CategorySet.setColorForCategory called on a provisional instance. " +
         "Call metadata.ensurePersistentCategorySet(attrId) first.");
     }
-    if (self.index(value)) {
+    if (self.index(value) != null) {
       self.colors.set(value, color);
     }
   },

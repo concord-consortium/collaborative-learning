@@ -295,10 +295,14 @@ describe('GraphModel', () => {
           }
           lastLength = entries.length;
         }
+        throw new Error("waitForQuiescence: history did not settle within timeout");
       }
 
       await waitForQuiescence();
-      const baselineHistory = manager.document.history.length;
+      const entriesAtBaseline = manager.document.history;
+      const lastBaselineEntry = entriesAtBaseline[entriesAtBaseline.length - 1];
+      expect(!lastBaselineEntry || lastBaselineEntry.state === "complete").toBe(true);
+      const baselineHistory = entriesAtBaseline.length;
 
       graphModel.createEditableLayer();
 

@@ -48,9 +48,12 @@ export const SharedCaseMetadata = SharedModel
       return self.hidden.get(attrId) ?? false;
     },
     getCategorySet(attrId: string): ICategorySet | undefined {
-      // Persistent has priority. Reads inside other MobX computations establish
-      // dependencies on both maps so either mutation triggers re-evaluation.
-      return self.categories.get(attrId) ?? self.provisionalCategories.get(attrId);
+      // Persistent has priority. Read both maps unconditionally so MobX tracks
+      // dependencies on both — otherwise `??` would short-circuit and skip
+      // tracking provisionalCategories whenever a persistent entry exists.
+      const persistent = self.categories.get(attrId);
+      const provisional = self.provisionalCategories.get(attrId);
+      return persistent ?? provisional;
     }
   }))
   .actions(self => ({

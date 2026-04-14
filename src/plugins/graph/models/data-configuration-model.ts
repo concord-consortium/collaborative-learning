@@ -602,9 +602,11 @@ export const DataConfigurationModel = types
         () => {
           if (!self.metadata) return [];
           const ids: string[] = [];
+          const seen = new Set<string>();
           GraphAttrRoles.forEach(role => {
             const attrId = self.attributeID(role);
-            if (attrId && self.attributeType(role) === "categorical") {
+            if (attrId && !seen.has(attrId) && self.attributeType(role) === "categorical") {
+              seen.add(attrId);
               ids.push(attrId);
             }
           });
