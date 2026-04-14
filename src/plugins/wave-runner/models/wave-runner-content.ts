@@ -139,7 +139,7 @@ export const WaveRunnerContentModel = TileContentModel
       self.clearEventsDataSet();
     },
     setStation(station: StationSnapshot) {
-      if (!self.station?.equals(station)) return;
+      if (self.station?.equals(station)) return;
 
       self.station = cast(station);
       self.loadData();
