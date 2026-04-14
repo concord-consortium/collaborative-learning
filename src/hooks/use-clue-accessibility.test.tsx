@@ -47,7 +47,7 @@ describe("createClueTileStrategy", () => {
     expect(elements.toolbar).toBeUndefined();
   });
 
-  it("sets cycle order to title/content/toolbar", () => {
+  it("sets cycle order to title/content/toolbar/resize", () => {
     const strategy = createClueTileStrategy({
       onRegisterTileApi: jest.fn(),
       onUnregisterTileApi: jest.fn(),

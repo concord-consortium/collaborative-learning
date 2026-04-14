@@ -17,7 +17,7 @@ export interface TransformableProps {
   role?: string;
   ariaLabel?: string;
   onKeyDown?: (e: React.KeyboardEvent<SVGGElement>) => void;
-  onBlur?: () => void;
+  onBlur?: React.FocusEventHandler<SVGGElement>;
 }
 
 /** Renders an SVG group with an optional translate and scale transform.

@@ -465,7 +465,11 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
       tabIndex: 0,
       role: "button" as const,
       ariaLabel: object.ariaLabel,
-      onBlur: () => this.getContent().setSelectedIds([]),
+      onBlur: (e: React.FocusEvent<SVGGElement>) => {
+        // Only clear selection when focus leaves this object entirely (not to a descendant)
+        if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget as Node)) return;
+        this.getContent().setSelectedIds([]);
+      },
     } : undefined;
     return renderDrawingObject(object, this.props.readOnly, hoverAction, pointerDownAction, a11yProps);
   }
