@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 import { observer } from "mobx-react-lite";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useStores } from "../../../hooks/use-stores";
 import { isValidDateTime } from "../../../utilities/luxon-utils";
 import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
 import { useTimelineContent } from "../hooks/use-timeline-content";
@@ -10,9 +11,13 @@ import { TimelineScrollbar } from "./timeline-scrollbar";
 import "./timeline.scss";
 
 export const Timeline = observer(function Timeline() {
+  const { seismicQueryService } = useStores();
   const content = useTimelineContent();
+  const [scaleUnits, setScaleUnits] = useState("");
 
   const { sharedSeismogram, dataStartTime, dataEndTime, viewStartTime, viewEndTime } = content;
+  const stationData = sharedSeismogram?.station;
+  const viewStartSeconds = (viewStartTime?.toMillis() ?? 0) * 1000;
 
   // Initialize view range when data becomes available,
   // and clamp view to stay within bounds if data range changes.
@@ -35,11 +40,22 @@ export const Timeline = observer(function Timeline() {
     }
   }, [content, dataStartTime, dataEndTime]);
 
+  // Find scale units from station metadata
+  useEffect(() => {
+    if (!stationData) return;
+
+    const { network, station, channel } = stationData;
+    seismicQueryService.getMetadata({ network, station, channel }, viewStartSeconds).then(metadata => {
+      setScaleUnits(metadata?.scaleUnits ?? "");
+    });
+  }, [seismicQueryService, stationData, viewStartSeconds]);
+
   return (
     <div className="timeline-area">
       {sharedSeismogram && isValidDateTime(viewStartTime) && isValidDateTime(viewEndTime) ? (
         <>
           <div className="waveform-wrapper">
+            <div className="scale-unit">{scaleUnits}</div>
             <WaveformPanel
               mode="timeline"
               sharedSeismogram={sharedSeismogram}

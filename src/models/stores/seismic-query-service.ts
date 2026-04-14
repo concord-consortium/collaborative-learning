@@ -90,6 +90,14 @@ export class SeismicQueryService {
     this.loadData(callerId, params, level);
   }
 
+  /**
+   * Returns the metadata for the station at the specified time.
+   */
+  async getMetadata({ network, station, channel }: StationData, timeSec: number): Promise<ChannelMetadata | undefined> {
+    const allMetadata = await this.getAllMetadata(network, station);
+    return this.getMetadataForChannel(allMetadata, channel, timeSec);
+  }
+
   // --- Private helpers (general) ---
 
   private addNull(time: number, timestamps: NullableNumberArray, v1: NullableNumberArray, v2?: NullableNumberArray) {
@@ -179,7 +187,7 @@ export class SeismicQueryService {
 
     if (toFetch.length === 0) return;
 
-    const metadata = raw ? await this.getMetadata(stationData.network, stationData.station) : [];
+    const metadata = raw ? await this.getAllMetadata(stationData.network, stationData.station) : [];
 
     // Fetch missing tiles
     for (const index of toFetch) {
@@ -359,7 +367,7 @@ export class SeismicQueryService {
     return { level: "raw", data: [timestamps, values], amplitudeRange: autoRange, isLoading };
   }
 
-  private async getMetadata(network: string, station: string): Promise<ChannelMetadata[]> {
+  private async getAllMetadata(network: string, station: string): Promise<ChannelMetadata[]> {
     const metaKey = `${network}_${station}`;
     let metadata = this.metadataCache.get(metaKey);
     if (!metadata) {
@@ -369,16 +377,15 @@ export class SeismicQueryService {
     return metadata;
   }
 
-  private findSensitivity(metadata: ChannelMetadata[], channel: string, timeSec: number): number {
+  private getMetadataForChannel(
+    metadata: ChannelMetadata[], channel: string, timeSec: number
+  ): ChannelMetadata | undefined {
     const matching = metadata.filter(m => m.channel === channel);
-    if (matching.length === 0) return 1;
     for (const m of matching) {
       const start = new Date(m.startTime).getTime() / 1000;
       const end = m.endTime === "" ? Infinity : new Date(m.endTime).getTime() / 1000;
-      if (timeSec >= start && timeSec < end) return m.scale;
+      if (timeSec >= start && timeSec < end) return m;
     }
-    // No time match — use the latest entry
-    return matching[matching.length - 1].scale;
   }
 
   private async fetchAndParseRaw(
@@ -397,7 +404,7 @@ export class SeismicQueryService {
     if (seismogram && seismogram.segments) {
       for (const seg of seismogram.segments) {
         const segStartTime = seg.startTime.toSeconds();
-        const sensitivity = this.findSensitivity(metadata, channel, segStartTime);
+        const sensitivity = this.getMetadataForChannel(metadata, channel, segStartTime)?.scale ?? 1;
         const sampleRate = seg.sampleRate;
         const y = seg.y;
         const samples = new Float64Array(y.length);
