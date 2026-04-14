@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
-import { cast, flow, types, Instance } from "mobx-state-tree";
+import stringify from "json-stringify-pretty-compact";
+import { cast, flow, getSnapshot, types, Instance } from "mobx-state-tree";
 import { miniseed } from "seisplotjs";
 import { fetchRawSeismicData } from "../../../../shared/seismic/earthscope-client";
 import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
@@ -7,6 +8,7 @@ import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
+import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
 import { StationModel, StationSnapshot } from "../../shared-seismogram/station-model";
@@ -71,6 +73,9 @@ export const WaveRunnerContentModel = TileContentModel
   .views(self => ({
     get isUserResizable() {
       return true;
+    },
+    exportJson(options?: ITileExportOptions) {
+      return stringify(getSnapshot(self), {maxLength: 200});
     },
     get sharedSeismogram(): SharedSeismogramType | undefined {
       const smm = getSharedModelManager(self);

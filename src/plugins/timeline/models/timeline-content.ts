@@ -1,6 +1,8 @@
-import { types, Instance } from "mobx-state-tree";
+import { getSnapshot, types, Instance } from "mobx-state-tree";
 import { DateTime } from "luxon";
+import stringify from "json-stringify-pretty-compact";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
+import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { isValidDateTime } from "../../../utilities/luxon-utils";
 import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
@@ -24,6 +26,9 @@ export const TimelineContentModel = TileContentModel
   .views(self => ({
     get isUserResizable() {
       return true;
+    },
+    exportJson(options?: ITileExportOptions) {
+      return stringify(getSnapshot(self), {maxLength: 200});
     },
     get sharedSeismogram() {
       const smm = getSharedModelManager(self);
