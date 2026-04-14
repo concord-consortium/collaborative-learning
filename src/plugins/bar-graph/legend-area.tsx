@@ -82,7 +82,7 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
               </span>
             </MenuButton>
             <Portal>
-              <MenuList>
+              <MenuList className="bar-graph-category-menu-list">
                 <MenuItem
                   isDisabled={readOnly || !currentSecondary}
                   onClick={() => setSecondaryAttribute(undefined)}

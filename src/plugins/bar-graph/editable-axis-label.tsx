@@ -65,6 +65,8 @@ const EditableAxisLabel: React.FC<IProps> = observer(function EditableAxisLabel(
         <input
           type="text"
           className="focusable"
+          // autoFocus so keyboard users can start typing immediately after pressing Enter
+          autoFocus
           value={editText}
           size={editText.length + 5}
           onKeyDown={handleKeyDown}

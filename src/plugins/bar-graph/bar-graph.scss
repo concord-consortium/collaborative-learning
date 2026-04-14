@@ -150,6 +150,9 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
           padding: 0;
           width: 24px;
 
+          // Visible focus ring for keyboard navigation through color choices
+          @include focus-ring(-2px);
+
           .color-button {
             background: white;
             border: none;
@@ -257,6 +260,15 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
       }
     }
 
+  }
+}
+
+// Styles for the category pulldown's portaled menu list. Must be top-level
+// (not scoped under .bar-graph-tile) because Chakra's <Portal> renders the
+// menu outside the tile DOM tree.
+.bar-graph-category-menu-list {
+  .chakra-menu__menuitem {
+    @include focus-ring(-2px);
   }
 }
 

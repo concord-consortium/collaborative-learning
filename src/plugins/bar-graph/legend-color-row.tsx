@@ -16,9 +16,11 @@ export const LegendColorRow = observer(function LegendColorRow ({attrValue}: IPr
 
   const missingData = isMissingData(attrValue);
   const display = displayValue(attrValue);
-  const backgroundColor = model.secondaryAttribute
-    ? clueDataColorInfo[model.colorForSecondaryKey(attrValue)].color
-    : clueDataColorInfo[model.colorForPrimaryKey(attrValue)].color;
+  const currentColorIndex = model.secondaryAttribute
+    ? model.colorForSecondaryKey(attrValue)
+    : model.colorForPrimaryKey(attrValue);
+  const currentColor = clueDataColorInfo[currentColorIndex];
+  const backgroundColor = currentColor.color;
 
   const handleColorSelect = (colorIndex: number) => {
     if (model.secondaryAttribute) {
@@ -31,7 +33,12 @@ export const LegendColorRow = observer(function LegendColorRow ({attrValue}: IPr
   return (
     <div key={attrValue} className="attribute-value">
       <Menu placement="auto">
-        <MenuButton as={Button} unstyle="true" data-testid="color-menu-button">
+        <MenuButton
+          as={Button}
+          unstyle="true"
+          data-testid="color-menu-button"
+          aria-label={`Color for ${display}: ${currentColor.name}. Press Enter or Arrow to choose a color.`}
+        >
           <div className="color-button">
             <div className="color-swatch" style={{ backgroundColor }} />
           </div>
@@ -48,15 +55,16 @@ export const LegendColorRow = observer(function LegendColorRow ({attrValue}: IPr
           gridTemplateColumns="repeat(2, 1fr)"
           zIndex={1}
         >
-          {Object.entries(clueDataColorInfo).map(([key, value], index) => (
+          {clueDataColorInfo.map((colorInfo, index) => (
             <MenuItem
               className="color-menu-list-item"
               data-testid="color-menu-list-item"
-              key={key}
+              key={colorInfo.name}
+              aria-label={colorInfo.name}
               onClick={() => handleColorSelect(index)}
             >
               <div className="color-button">
-                <div className="color-swatch" style={{ backgroundColor: value.color }} />
+                <div className="color-swatch" style={{ backgroundColor: colorInfo.color }} />
               </div>
             </MenuItem>
           ))}
