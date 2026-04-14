@@ -43,7 +43,7 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
         </div>
         <div className="status-count">
           <label className="status-count-label">Event Categories</label>
-          <div className="status-count-box"/>
+          <div className="status-count-box">-</div>
         </div>
       </div>
     </div>

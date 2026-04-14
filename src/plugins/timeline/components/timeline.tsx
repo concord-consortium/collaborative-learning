@@ -44,8 +44,7 @@ export const Timeline = observer(function Timeline() {
   useEffect(() => {
     if (!stationData) return;
 
-    const { network, station, channel } = stationData;
-    seismicQueryService.getMetadata({ network, station, channel }, viewStartSeconds).then(metadata => {
+    seismicQueryService.getMetadata(stationData, viewStartSeconds).then(metadata => {
       setScaleUnits(metadata?.scaleUnits ?? "");
     });
   }, [seismicQueryService, stationData, viewStartSeconds]);
