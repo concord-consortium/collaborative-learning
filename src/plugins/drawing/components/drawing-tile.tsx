@@ -143,7 +143,9 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       tileType: "drawing",
       getTitleElement: () => {
         const tile = drawingToolElement.current?.closest('.tool-tile');
-        return tile?.querySelector('.editable-tile-title') as HTMLElement | undefined;
+        const wrapper = tile?.querySelector('.editable-tile-title');
+        // Return the focusable element inside the wrapper: input (edit mode) or title-text (view mode)
+        return wrapper?.querySelector('input, .editable-tile-title-text') as HTMLElement | undefined;
       },
       getContentElement: () => drawingToolElement.current ?? undefined,
       focusContent: () => {
