@@ -86,6 +86,9 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
 
   // Build a stable containerRef for the focus trap.
   // Updated on each render so it reflects the latest DOM element.
+  // Note: current function-component tiles (bar-graph, drawing, etc.) don't pass containerRef
+  // or getContainerElement because tile-component.tsx's FocusTrapController handles their
+  // focus trap. This wiring exists for future tiles that manage their own trap.
   const containerRef = useRef<HTMLElement | null>(null);
   if (options.type === "tile") {
     const config = options.focusTrap;
@@ -120,6 +123,9 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
       getFocusableElements: () => {
         const currentOpts = optionsRef.current;
         if (currentOpts.type !== "tile") return undefined;
+        // Create a fresh strategy from the latest options so element getters
+        // reflect the current render (not stale closures from mount time).
+        // This is separate from strategyRef which stays stable for useFocusTrap.
         const strategy = createClueTileStrategy(currentOpts.focusTrap);
         const elements = strategy.getElements();
         return {

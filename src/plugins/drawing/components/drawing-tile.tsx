@@ -34,7 +34,7 @@ import { VoiceTypingOverlay } from "../../../utilities/voice-typing-overlay";
 import { useContainerContext } from "../../../components/document/container-context";
 import { calculateFitContent } from "../model/drawing-utils";
 import { useClueAccessibility } from "../../../hooks/use-clue-accessibility";
-import { getVisibleFocusables } from "../../../utilities/dom-utils";
+import { getEditableTitleElement, getVisibleFocusables } from "../../../utilities/dom-utils";
 
 import "./drawing-tile.scss";
 
@@ -142,10 +142,8 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       onUnregisterTileApi,
       tileType: "drawing",
       getTitleElement: () => {
-        const tile = drawingToolElement.current?.closest('.tool-tile');
-        const wrapper = tile?.querySelector('.editable-tile-title');
-        // Return the focusable element inside the wrapper: input (edit mode) or title-text (view mode)
-        return wrapper?.querySelector('input, .editable-tile-title-text') as HTMLElement | undefined;
+        const tile = drawingToolElement.current?.closest('.tool-tile') as HTMLElement | null;
+        return getEditableTitleElement(tile);
       },
       getContentElement: () => drawingToolElement.current ?? undefined,
       focusContent: () => {
