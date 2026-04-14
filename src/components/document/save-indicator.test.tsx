@@ -8,8 +8,12 @@ import { ProblemDocument } from "../../models/document/document-types";
 import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(["Text"]);
 
-jest.mock("../../assets/icons/cloud-check.svg", () => () => <svg data-testid="cloud-check-icon" />);
-jest.mock("../../assets/icons/sync-arrows.svg", () => () => <svg data-testid="sync-arrows-icon" />);
+jest.mock("../../assets/icons/cloud-check.svg", () => function CloudCheckIconMock() {
+  return <svg data-testid="cloud-check-icon" />;
+});
+jest.mock("../../assets/icons/sync-arrows.svg", () => function SyncArrowsIconMock() {
+  return <svg data-testid="sync-arrows-icon" />;
+});
 
 function createTestDoc() {
   return createDocumentModel({

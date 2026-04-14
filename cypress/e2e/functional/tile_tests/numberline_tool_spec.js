@@ -56,7 +56,7 @@ context('Numberline Tile', function () {
     numberlineToolTile.hasNoPoints();
 
     //Numberline tile restore upon page reload
-    cy.wait(2000);
+    cy.waitForSave();
     cy.reload();
     cy.waitForLoad();
     numberlineToolTile.getNumberlineTileTitleText().should("contain", newName);

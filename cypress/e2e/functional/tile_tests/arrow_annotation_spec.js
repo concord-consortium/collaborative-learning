@@ -248,6 +248,7 @@ context('Arrow Annotations (Sparrows)', function () {
 
     cy.log("Arrows persist on reload");
     aa.getAnnotationArrows().should("exist");
+    cy.waitForSave();
     cy.reload();
     aa.getAnnotationArrows().should("exist");
 

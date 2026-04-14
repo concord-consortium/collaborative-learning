@@ -70,7 +70,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getXYPlotTitle().should('contain', title);
 
       //XY Plot tile title restore upon page reload
-      cy.wait(2000);
+      cy.waitForSave();
       cy.reload();
       cy.get('.editable-document-content', { timeout: 60000 });
       xyTile.getTile().click();
@@ -207,7 +207,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().eq(0).find('.inner-circle').should('have.attr', 'style').and('contain', hexToRgb(clueDataColors[1]));
 
       //XY Plot tile restore upon page reload
-      cy.wait(2000);
+      cy.waitForSave();
       cy.reload();
       cy.get('.editable-document-content', { timeout: 60000 });
       xyTile.getTile().click();
