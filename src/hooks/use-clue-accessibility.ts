@@ -84,7 +84,8 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
-  // Build a stable containerRef for the focus trap
+  // Build a stable containerRef for the focus trap.
+  // Updated on each render so it reflects the latest DOM element.
   const containerRef = useRef<HTMLElement | null>(null);
   if (options.type === "tile") {
     const config = options.focusTrap;
@@ -95,11 +96,12 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
     }
   }
 
-  // Build strategy ref that always returns fresh element references
-  const strategyRef = useRef(
-    options.type === "tile" ? createClueTileStrategy(options.focusTrap) : undefined
-  );
-  if (options.type === "tile") {
+  // Build the strategy once and keep it stable across renders.
+  // The strategy's getElements/focusContent use getter functions that read
+  // live values through optionsRef, so element references stay fresh without
+  // recreating the strategy object (which would churn useFocusTrap's effect).
+  const strategyRef = useRef<ReturnType<typeof createClueTileStrategy> | undefined>(undefined);
+  if (options.type === "tile" && !strategyRef.current) {
     strategyRef.current = createClueTileStrategy(options.focusTrap);
   }
 
@@ -134,8 +136,11 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
   }, []); // mount/unmount lifecycle matches componentDidMount/componentWillUnmount
 
   // Delegate to generic useAccessibility with focus trap wired.
+  // Only pass focusTrap when a container element exists — without one, useFocusTrap
+  // can't attach listeners and would just allocate no-op hooks on every render.
+  const hasFocusTrapContainer = options.type === "tile" && containerRef.current != null;
   const result = useAccessibility({
-    focusTrap: options.type === "tile" && strategyRef.current ? {
+    focusTrap: hasFocusTrapContainer && strategyRef.current ? {
       containerRef,
       strategy: strategyRef.current,
     } : undefined,
