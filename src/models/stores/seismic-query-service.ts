@@ -386,6 +386,7 @@ export class SeismicQueryService {
       const end = m.endTime === "" ? Infinity : new Date(m.endTime).getTime() / 1000;
       if (timeSec >= start && timeSec < end) return m;
     }
+    return matching[matching.length - 1];
   }
 
   private async fetchAndParseRaw(

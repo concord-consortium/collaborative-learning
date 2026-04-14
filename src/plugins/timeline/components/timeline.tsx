@@ -17,7 +17,7 @@ export const Timeline = observer(function Timeline() {
 
   const { sharedSeismogram, dataStartTime, dataEndTime, viewStartTime, viewEndTime } = content;
   const stationData = sharedSeismogram?.station;
-  const viewStartSeconds = (viewStartTime?.toMillis() ?? 0) * 1000;
+  const viewStartSeconds = (viewStartTime?.toSeconds() ?? 0);
 
   // Initialize view range when data becomes available,
   // and clamp view to stay within bounds if data range changes.

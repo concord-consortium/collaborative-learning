@@ -28,8 +28,8 @@ export const StationModel = types
     },
     equals(station: StationConfig) {
       return self.network === station.network && self.station === station.station
-        && self.location === station.location && self.channel === station.network
-        && self.label === station.label;
+        && self.location === (station.location ?? "") && self.channel === station.channel
+        && self.label === (station.label ?? "");
     }
   }));
 

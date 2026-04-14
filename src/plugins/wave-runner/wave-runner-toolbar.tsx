@@ -62,7 +62,7 @@ const TimelineButton = observer(function TimelineButton({ name }: IToolbarButton
 
   function handleClick() {
     if (!tileModel || !addTilesContext) return;
-    const sharedDataSet = content.getOrCreateEventsDataSet();
+    const sharedDataSet = content.eventsDataSet;
     const sharedSeismogram = content.sharedSeismogram;
     if (!sharedSeismogram?.station) return;
     // Create a copy so the Timeline keeps its data when Wave Runner reloads.

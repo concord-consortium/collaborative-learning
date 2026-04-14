@@ -38,7 +38,7 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
         <div className="status-count">
           <label className="status-count-label">Events Identified</label>
           <div className="status-count-box">
-            {isRunning || eventsDataSet ? model.eventsFound ?? "" : "-"}
+            {model.eventsFound ?? "-"}
           </div>
         </div>
         <div className="status-count">
