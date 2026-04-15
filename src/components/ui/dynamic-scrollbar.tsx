@@ -1,44 +1,44 @@
 import React, { useCallback, useRef } from "react";
-import { DateTime } from "luxon";
-import { kMinViewRangeSeconds } from "../../plugins/timeline/models/timeline-content";
 
 import "./dynamic-scrollbar.scss";
 
 // Keyboard step as a fraction of the data range
 const kKeyboardStepFraction = 0.05;
 const kKeyboardLargeStepFraction = 0.2;
+const kDefaultMinViewRange = 100;
 
 interface IDynamicScrollbarProps {
   thumbAriaLabel?: string;
-  totalStartTime: DateTime;
-  totalEndTime: DateTime;
-  viewStartTime: DateTime;
-  viewEndTime: DateTime;
-  onViewChange: (start: DateTime, end: DateTime) => void;
+  totalStart: number;
+  totalEnd: number;
+  viewStart: number;
+  viewEnd: number;
+  minViewRange?: number;
+  onViewChange: (start: number, end: number) => void;
 }
 
 export const DynamicScrollbar: React.FC<IDynamicScrollbarProps> = ({
-  thumbAriaLabel, totalStartTime, totalEndTime, viewStartTime, viewEndTime, onViewChange
+  thumbAriaLabel, totalStart, totalEnd, viewStart, viewEnd, minViewRange = kDefaultMinViewRange, onViewChange
 }) => {
   const trackRef = useRef<HTMLDivElement>(null);
-  const dragStartRef = useRef<{ mouseX: number; viewStartSeconds: number } | null>(null);
+  const dragStartRef = useRef<{ mouseX: number; viewStartOffset: number } | null>(null);
 
-  const totalRangeSeconds = Math.max(totalEndTime.diff(totalStartTime, "seconds").seconds, kMinViewRangeSeconds);
-  const viewStartOffset = viewStartTime.diff(totalStartTime, "seconds").seconds;
-  const viewRangeSeconds = viewEndTime.diff(viewStartTime, "seconds").seconds;
+  const totalRange = Math.max(totalEnd - totalStart, minViewRange);
+  const viewStartOffset = viewStart - totalStart;
+  const viewRange = viewEnd - viewStart;
 
-  const leftPercent = (viewStartOffset / totalRangeSeconds) * 100;
-  const widthPercent = (viewRangeSeconds / totalRangeSeconds) * 100;
-  const maxOffset = totalRangeSeconds - viewRangeSeconds;
+  const leftPercent = (viewStartOffset / totalRange) * 100;
+  const widthPercent = (viewRange / totalRange) * 100;
+  const maxOffset = totalRange - viewRange;
   const valueNow = maxOffset > 0 ? Math.round((viewStartOffset / maxOffset) * 100) : 0;
 
-  const shiftView = useCallback((deltaSeconds: number) => {
-    let newStartSeconds = viewStartOffset + deltaSeconds;
-    newStartSeconds = Math.max(0, Math.min(newStartSeconds, totalRangeSeconds - viewRangeSeconds));
-    const newStart = totalStartTime.plus({ seconds: newStartSeconds });
-    const newEnd = newStart.plus({ seconds: viewRangeSeconds });
+  const shiftView = useCallback((delta: number) => {
+    let newStartOffset = viewStartOffset + delta;
+    newStartOffset = Math.max(0, Math.min(newStartOffset, totalRange - viewRange));
+    const newStart = totalStart + newStartOffset;
+    const newEnd = newStart + viewRange;
     onViewChange(newStart, newEnd);
-  }, [totalStartTime, totalRangeSeconds, viewRangeSeconds, viewStartOffset, onViewChange]);
+  }, [totalStart, totalRange, viewRange, viewStartOffset, onViewChange]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
@@ -46,7 +46,7 @@ export const DynamicScrollbar: React.FC<IDynamicScrollbarProps> = ({
     target.setPointerCapture(e.pointerId);
     dragStartRef.current = {
       mouseX: e.clientX,
-      viewStartSeconds: viewStartOffset
+      viewStartOffset
     };
   }, [viewStartOffset]);
 
@@ -54,15 +54,15 @@ export const DynamicScrollbar: React.FC<IDynamicScrollbarProps> = ({
     if (!dragStartRef.current || !trackRef.current) return;
     const trackWidth = trackRef.current.getBoundingClientRect().width;
     const deltaX = e.clientX - dragStartRef.current.mouseX;
-    const deltaSeconds = (deltaX / trackWidth) * totalRangeSeconds;
+    const delta = (deltaX / trackWidth) * totalRange;
 
-    let newStartSeconds = dragStartRef.current.viewStartSeconds + deltaSeconds;
-    newStartSeconds = Math.max(0, Math.min(newStartSeconds, totalRangeSeconds - viewRangeSeconds));
+    let newStartOffset = dragStartRef.current.viewStartOffset + delta;
+    newStartOffset = Math.max(0, Math.min(newStartOffset, totalRange - viewRange));
 
-    const newStart = totalStartTime.plus({ seconds: newStartSeconds });
-    const newEnd = newStart.plus({ seconds: viewRangeSeconds });
+    const newStart = totalStart + newStartOffset;
+    const newEnd = newStart + viewRange;
     onViewChange(newStart, newEnd);
-  }, [totalStartTime, totalRangeSeconds, viewRangeSeconds, onViewChange]);
+  }, [totalStart, totalRange, viewRange, onViewChange]);
 
   const handlePointerUp = useCallback(() => {
     dragStartRef.current = null;
@@ -73,20 +73,20 @@ export const DynamicScrollbar: React.FC<IDynamicScrollbarProps> = ({
       case "ArrowLeft":
       case "ArrowDown":
         e.preventDefault();
-        shiftView(-totalRangeSeconds * kKeyboardStepFraction);
+        shiftView(-totalRange * kKeyboardStepFraction);
         break;
       case "PageDown":
         e.preventDefault();
-        shiftView(-totalRangeSeconds * kKeyboardLargeStepFraction);
+        shiftView(-totalRange * kKeyboardLargeStepFraction);
         break;
       case "ArrowRight":
       case "ArrowUp":
         e.preventDefault();
-        shiftView(totalRangeSeconds * kKeyboardStepFraction);
+        shiftView(totalRange * kKeyboardStepFraction);
         break;
       case "PageUp":
         e.preventDefault();
-        shiftView(totalRangeSeconds * kKeyboardLargeStepFraction);
+        shiftView(totalRange * kKeyboardLargeStepFraction);
         break;
       case "Home":
         e.preventDefault();
@@ -94,10 +94,10 @@ export const DynamicScrollbar: React.FC<IDynamicScrollbarProps> = ({
         break;
       case "End":
         e.preventDefault();
-        shiftView(totalRangeSeconds - viewRangeSeconds - viewStartOffset);
+        shiftView(totalRange - viewRange - viewStartOffset);
         break;
     }
-  }, [totalRangeSeconds, viewRangeSeconds, viewStartOffset, shiftView]);
+  }, [totalRange, viewRange, viewStartOffset, shiftView]);
 
   return (
     <div className="dynamic-scrollbar" ref={trackRef}>

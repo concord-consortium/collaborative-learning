@@ -48,8 +48,8 @@ describe("TimelineComponent", () => {
           "timeline": {
             tools: [
               ["data-set-view", "Table"],
-              ["data-set-view", "Data Card"],
-              ["data-set-view", "Bar Graph"],
+              ["data-set-view", "DataCard"],
+              ["data-set-view", "BarGraph"],
               "|", "zoom-in", "zoom-out", "view-all"
             ]
           }
