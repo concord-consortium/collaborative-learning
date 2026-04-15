@@ -1,5 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { isValidDateTime } from "../../../utilities/luxon-utils";
@@ -85,6 +85,13 @@ export const TimelineContentModel = TileContentModel
       events.forEach((e, i) => e.index = i);
       return events;
     },
+    get modelLabel(): string {
+      const ds = self.sharedDataSet?.dataSet;
+      if (!ds) return "";
+      const attr = ds.attrFromName("modelLabel");
+      if (!attr || ds.cases.length === 0) return "";
+      return ds.getStrValue(ds.cases[0].__id__, attr.id) ?? "";
+    },
     get eventTypeColorWords(): Map<string, string> {
       const ds = self.sharedDataSet?.dataSet;
       if (!ds) return new Map();
@@ -107,6 +114,13 @@ export const TimelineContentModel = TileContentModel
     get dataRangeSeconds() {
       if (!self.dataStartTime || !self.dataEndTime) return undefined;
       return self.dataEndTime.diff(self.dataStartTime, "seconds").seconds;
+    },
+    get viewRangeDurationText() {
+      const totalSeconds = self.viewRangeSeconds;
+      if (totalSeconds == null) return undefined;
+      return Duration.fromObject({ seconds: totalSeconds })
+        .shiftTo("weeks", "days", "hours", "minutes", "seconds")
+        .toHuman({ showZeros: false });
     },
     get canZoomIn() {
       const range = self.viewRangeSeconds;

@@ -10,6 +10,7 @@ jest.mock("uplot", () => {
 import { render, screen } from "@testing-library/react";
 import { Provider } from "mobx-react";
 import React from "react";
+import "../../../models/tiles/table/table-registration";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { specStores } from "../../../models/stores/spec-stores";
@@ -48,7 +49,7 @@ describe("WaveRunnerComponent", () => {
       config: {
         settings: {
           "wave-runner": {
-            tools: ["load-data", "|", "play", "restart", "reset", "|", "table-it", "timeline"],
+            tools: ["load-data", "|", "play", "restart", "reset", "|", ["data-set-view", "Table"], "timeline"],
           stations: [
             { network: "AK", station: "K204", channel: "HNZ", label: "Anchorage Airport" },
             { network: "AK", station: "DDM", location: "01", channel: "HNZ", label: "Dexter Display Mine" }

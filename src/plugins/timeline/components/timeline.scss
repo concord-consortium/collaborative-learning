@@ -5,6 +5,13 @@
   .waveform-wrapper {
     margin-top: 24px;
     position: relative;
+
+    .scale-unit {
+      left: -24px;
+      position: absolute;
+      top: 50%;
+      transform: rotate(270deg) translateX(50%);
+    }
   }
 
   .waveform {
@@ -17,7 +24,7 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    margin-top: 3px;
+    margin: 3px 0;
     width: 100%;
 
     .range-date {
