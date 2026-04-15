@@ -37,7 +37,7 @@ fs.readdir(sourceDirectory, async (_error, files) => {
     console.error(_error);
     return;
   }
-  console.log("File,Category,Key Indicators,Discussion,Prompt Tokens,Completion Tokens");
+  console.log("File,Category,Your Work Shows,Discussion,Prompt Tokens,Completion Tokens");
   for (const file of files) {
     const fullFile = `${sourceDirectory}/${file}`;
     const response = await categorizeDocument(fullFile, apiKey);
