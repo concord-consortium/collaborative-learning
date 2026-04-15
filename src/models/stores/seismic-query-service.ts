@@ -479,7 +479,8 @@ export class SeismicQueryService {
         if (this.envelopeCache.get(key) === "loading") {
           this.envelopeCache.delete(key);
         }
-        if (this.getRawCache(key) === "loading") {
+        // We use rawCache.get rather than getRawCache here to avoid changing when the key was last accessed
+        if (this.rawCache.get(key) === "loading") {
           this.deleteRawCache(key);
         }
       }
