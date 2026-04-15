@@ -120,6 +120,8 @@ export const WaveRunnerContentModel = TileContentModel
 
       const smm = getSharedModelManager(self);
       if (smm?.isReady) smm.removeTileSharedModel(self, self.eventsDataSet);
+
+      // TODO: Delete the shared dataset if it's orphaned
     }
   }))
   .actions(self => ({
