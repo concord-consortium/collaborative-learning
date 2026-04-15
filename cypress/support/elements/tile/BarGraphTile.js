@@ -84,8 +84,11 @@ class BarGraphTile {
     return this.getLegendArea(workspaceClass, tileIndex).find(`[data-testid="color-menu-button"]`);
   }
 
+  // The color picker MenuList is rendered via Chakra's <Portal> into document.body,
+  // so it is no longer inside the tile's legend area. Filter by :visible to pick the
+  // currently-open menu (closed menus are visibility:hidden).
   getBarColorMenu(workspaceClass, tileIndex = 0, menuIndex = 0) {
-    return this.getLegendArea(workspaceClass, tileIndex).find(`[data-testid="color-menu-list"]`).eq(menuIndex);
+    return cy.get(`body [data-testid="color-menu-list"]:visible`).eq(menuIndex);
   }
 
   getBarColorMenuButtons(workspaceClass, tileIndex = 0, menuIndex = 0) {

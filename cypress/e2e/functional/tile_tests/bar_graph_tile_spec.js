@@ -522,7 +522,20 @@ context('Bar Graph Tile', function () {
     barGraph.getBarColorButton().should('have.length', 2);
     barGraph.getBarColorButton().eq(0).click();
     barGraph.getBarColorMenu(workspace, tileIndex, 0).should('be.visible');
+    // Color menu is portaled out of the tile so our tile focus trap doesn't include
+    // its items in the parent Tab cycle. Verify the Portal placement and that the
+    // top-level .color-menu-list styles still apply (24x24 items with focus ring).
+    barGraph.getBarColorMenu(workspace, tileIndex, 0)
+      .should('have.class', 'color-menu-list')
+      .closest('.chakra-portal')
+      .should('exist');
+    barGraph.getBarColorMenu(workspace, tileIndex, 0)
+      .closest('.bar-graph-tile')
+      .should('not.exist');
     barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).should('have.length', 12);
+    barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).first()
+      .should('have.css', 'width', '24px')
+      .and('have.css', 'height', '24px');
     barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).eq(1).click({force: true});
     barGraph.getBarColorMenu(workspace, tileIndex, 0).should('not.be.visible');
     barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[1]);
