@@ -61,10 +61,8 @@ export const WaveRunnerContentModel = TileContentModel
     isRunning: false,
     chunksProcessed: 0,
     chunksTotal: 0,
-    eventsFound: 0,
     runError: null as string | null,
     detectedEvents: [] as SeismicEvent[],
-    cachedEventsDataSet: undefined as SharedDataSetType | undefined,
     selectedModelMetadata: null as ModelMetadata | null,
     modelLoadError: null as string | null,
   }))
@@ -82,12 +80,20 @@ export const WaveRunnerContentModel = TileContentModel
     },
     get endDateISO() {
       return DateTime.fromISO(`${self.endDate}T00:00:00Z`, { zone: "utc" });
+    },
+    get eventsDataSet(): SharedDataSetType | undefined {
+      const smm = getSharedModelManager(self);
+      if (!smm?.isReady) return;
+      return smm.getTileSharedModelsByType(self, SharedDataSet)[0] as SharedDataSetType | undefined;
     }
   }))
   .views(self => ({
     get hasStationData() {
       return !!self.sharedSeismogram?.station;
     },
+    get eventsFound() {
+      return self.isRunning ? self.detectedEvents.length : self.eventsDataSet?.dataSet.cases.length;
+    }
   }))
   .actions(self => ({
     async loadData() {
@@ -108,40 +114,48 @@ export const WaveRunnerContentModel = TileContentModel
         `${self.startDate}T00:00:00Z`,
         `${self.endDate}T00:00:00Z`
       );
+    },
+    clearEventsDataSet() {
+      if (!self.eventsDataSet) return;
+
+      const smm = getSharedModelManager(self);
+      if (smm?.isReady) smm.removeTileSharedModel(self, self.eventsDataSet);
     }
   }))
   .actions(self => ({
     setStartDate(date: string) {
+      if (self.startDate === date) return;
+
       self.startDate = date;
       self.loadData();
+      self.clearEventsDataSet();
     },
     setEndDate(date: string) {
+      if (self.endDate === date) return;
+
       self.endDate = date;
       self.loadData();
+      self.clearEventsDataSet();
     },
     setStation(station: StationSnapshot) {
+      if (self.station?.equals(station)) return;
+
       self.station = cast(station);
       self.loadData();
+      self.clearEventsDataSet();
     },
     updateChunkProgress(done: number, total: number) {
       self.chunksProcessed = done;
       self.chunksTotal = total;
     },
-    addEvents(events: SeismicEvent[]) {
+    addDetectedEvents(events: SeismicEvent[]) {
       self.detectedEvents = [...self.detectedEvents, ...events];
-      self.eventsFound = self.detectedEvents.length;
-    },
-    clearCachedEventsDataSet() {
-      self.cachedEventsDataSet = undefined;
     },
     getOrCreateEventsDataSet(): SharedDataSetType | undefined {
-      if (self.detectedEvents.length === 0) return undefined;
-      if (self.cachedEventsDataSet) return self.cachedEventsDataSet;
+      if (self.eventsDataSet) return self.eventsDataSet;
 
       const smm = getSharedModelManager(self);
       if (!smm?.isReady) return undefined;
-
-      const modelLabel = DEFAULT_MODELS.find(m => m.metadataUrl === self.selectedModelUrl)?.label ?? "";
 
       const dataSet = DataSet.create();
       addAttributeToDataSet(dataSet, { name: "eventType" });
@@ -149,17 +163,9 @@ export const WaveRunnerContentModel = TileContentModel
       addAttributeToDataSet(dataSet, { name: "windowEnd" });
       addAttributeToDataSet(dataSet, { name: "confidence" });
       addAttributeToDataSet(dataSet, { name: "modelLabel" });
-      addCasesToDataSet(dataSet, self.detectedEvents.map(evt => ({
-        windowStart: new Date(evt.windowStart).toISOString(),
-        windowEnd: new Date(evt.windowEnd).toISOString(),
-        eventType: evt.eventType,
-        confidence: evt.confidence,
-        modelLabel,
-      })));
 
       const sharedDataSet = SharedDataSet.create({ dataSet });
       smm.addTileSharedModel(self, sharedDataSet);
-      self.cachedEventsDataSet = sharedDataSet;
       return sharedDataSet;
     },
     ensureModelMetadata: flow(function* (metadataUrl: string) {
@@ -169,6 +175,7 @@ export const WaveRunnerContentModel = TileContentModel
       self.selectedModelUrl = metadataUrl;
       self.selectedModelMetadata = null;
       self.modelLoadError = null;
+      self.clearEventsDataSet();
 
       // Placeholder model — use hardcoded metadata, no fetch needed
       if (metadataUrl === PLACEHOLDER_MODEL_URL) {
@@ -217,11 +224,9 @@ export const WaveRunnerContentModel = TileContentModel
         return;
       }
 
-      self.isRunning = true;
+      self.clearEventsDataSet();
       self.runError = null;
-      self.eventsFound = 0;
-      self.detectedEvents = [];
-      self.cachedEventsDataSet = undefined;
+      self.isRunning = true;
 
       const metadata = self.selectedModelMetadata;
       const { network, station, location, channel } = self.station;
@@ -278,7 +283,7 @@ export const WaveRunnerContentModel = TileContentModel
             {
               onProgress: () => {},
               onEvents: (events: SeismicEvent[]) => {
-                self.addEvents(events);
+                self.addDetectedEvents(events);
               },
             },
             detectionThreshold,
@@ -286,7 +291,19 @@ export const WaveRunnerContentModel = TileContentModel
           self.updateChunkProgress(day + 1, totalDays);
         }
 
-        self.getOrCreateEventsDataSet();
+        const dataSet = self.getOrCreateEventsDataSet()?.dataSet;
+        if (dataSet) {
+          const modelLabel = DEFAULT_MODELS.find(m => m.metadataUrl === self.selectedModelUrl)?.label ?? "";
+          addCasesToDataSet(dataSet, self.detectedEvents.map(evt => ({
+            windowStart: new Date(evt.windowStart).toISOString(),
+            windowEnd: new Date(evt.windowEnd).toISOString(),
+            eventType: evt.eventType,
+            confidence: evt.confidence,
+            modelLabel,
+          })));
+        }
+
+        self.detectedEvents = [];
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         self.runError = `Error running model: ${message}`;

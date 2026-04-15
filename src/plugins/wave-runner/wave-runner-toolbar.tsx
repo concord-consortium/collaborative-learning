@@ -30,7 +30,7 @@ const LoadDataButton = observer(function LoadDataButton({ name }: IToolbarButton
 
 const PlayButton = observer(function PlayButton({ name }: IToolbarButtonComponentProps) {
   const content = useWaveRunnerContent();
-  const disabled = content.isRunning || !content.selectedModelUrl;
+  const disabled = content.isRunning || !content.selectedModelUrl || !!content.eventsDataSet;
   return (
     <TileToolbarButton name={name} title="Run Model" onClick={() => content.runModel()} disabled={disabled}>
       <RunIcon/>
@@ -62,7 +62,7 @@ const TimelineButton = observer(function TimelineButton({ name }: IToolbarButton
 
   function handleClick() {
     if (!tileModel || !addTilesContext) return;
-    const sharedDataSet = content.getOrCreateEventsDataSet();
+    const sharedDataSet = content.eventsDataSet;
     const sharedSeismogram = content.sharedSeismogram;
     if (!sharedSeismogram?.station) return;
     // Create a copy so the Timeline keeps its data when Wave Runner reloads.
