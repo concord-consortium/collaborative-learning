@@ -386,6 +386,7 @@ export class SeismicQueryService {
       const end = m.endTime === "" ? Infinity : new Date(m.endTime).getTime() / 1000;
       if (timeSec >= start && timeSec < end) return m;
     }
+    // When no time matches, return the last metadata (or undefined if there aren't any)
     return matching[matching.length - 1];
   }
 
