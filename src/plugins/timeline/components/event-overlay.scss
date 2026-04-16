@@ -1,6 +1,7 @@
 @import "./timeline-event-colors.scss";
 
 .event-overlay {
+  border: 1px solid;
   height: 100%;
   position: absolute;
   top: 0;

@@ -76,7 +76,7 @@ export const onAnalysisDocumentImaged =
         }
         tags = reply.parsed.category && reply.parsed.category !== "unknown" ? [reply.parsed.category] : [];
         const indicators = reply.parsed.keyIndicators && reply.parsed.keyIndicators.length ?
-          ` Key Indicators: ${reply.parsed.keyIndicators.join(", ")}` : "";
+          ` Your work shows: ${reply.parsed.keyIndicators.join(", ")}` : "";
         message = (reply.parsed.discussion || "") + indicators;
         fullResponse = JSON.stringify(completion);
       } else {

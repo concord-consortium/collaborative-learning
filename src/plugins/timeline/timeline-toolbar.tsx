@@ -1,69 +1,18 @@
 import React, { useContext } from "react";
 import { observer } from "mobx-react-lite";
-import { AddTilesContext, TileModelContext } from "../../components/tiles/tile-api";
-import { BadgedIcon } from "../../components/toolbar/badged-icon";
+import { TileModelContext } from "../../components/tiles/tile-api";
+import { DataSetViewButton } from "../../components/toolbar/data-set-view-button";
 import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button";
 import {
   IToolbarButtonComponentProps, registerTileToolbarButtons
 } from "../../components/toolbar/toolbar-button-manager";
-import { kTableTileType } from "../../models/tiles/table/table-content";
 import { useTimelineContent } from "./hooks/use-timeline-content";
 import { isTimelineContentModel } from "./models/timeline-content";
 
-import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
-import TableIcon from "../../clue/assets/icons/table-tool.svg";
-import DataCardItIcon from "./assets/toolbar/data-card-it-icon.svg";
-import BarGraphItIcon from "./assets/toolbar/bar-graph-it-icon.svg";
 import ZoomInIcon from "./assets/toolbar/zoom-in-icon.svg";
 import ZoomOutIcon from "./assets/toolbar/zoom-out-icon.svg";
 import ZoomToFitIcon from "./assets/toolbar/zoom-to-fit-icon.svg";
 import ScrollArrowIcon from "../../assets/scroll-arrow-small-icon.svg";
-
-const TableItButton = observer(function TableItButton({ name }: IToolbarButtonComponentProps) {
-  const tileModel = useContext(TileModelContext);
-  const addTilesContext = useContext(AddTilesContext);
-  const content = useTimelineContent();
-  const disabled = !content.sharedDataSet;
-
-  function handleClick() {
-    if (!tileModel || !addTilesContext) return;
-    const sharedDataSet = content.sharedDataSet;
-    const sharedModels = sharedDataSet ? [sharedDataSet] : undefined;
-    addTilesContext.addTileAfter(kTableTileType, tileModel, sharedModels);
-  }
-
-  return (
-    <TileToolbarButton name={name} title="Table It!" onClick={handleClick} disabled={disabled}>
-      <BadgedIcon Icon={TableIcon} Badge={ViewBadgeIcon}/>
-    </TileToolbarButton>
-  );
-});
-
-function DataCardItButton({ name }: IToolbarButtonComponentProps) {
-  return (
-    <TileToolbarButton
-      name={name}
-      title="Data Card It!"
-      onClick={() => undefined}
-      disabled={true}
-    >
-      <DataCardItIcon/>
-    </TileToolbarButton>
-  );
-}
-
-function BarGraphItButton({ name }: IToolbarButtonComponentProps) {
-  return (
-    <TileToolbarButton
-      name={name}
-      title="Bar Graph It!"
-      onClick={() => undefined}
-      disabled={true}
-    >
-      <BarGraphItIcon/>
-    </TileToolbarButton>
-  );
-}
 
 const ZoomInButton = observer(function ZoomInButton({ name }: IToolbarButtonComponentProps) {
   const content = useTimelineContent();
@@ -143,9 +92,11 @@ function PanRightButton({ name }: IToolbarButtonComponentProps) {
 
 registerTileToolbarButtons("timeline",
 [
-  { name: "table-it", component: TableItButton },
-  { name: "data-card-it", component: DataCardItButton },
-  { name: "bar-graph-it", component: BarGraphItButton },
+  {
+    // This button takes an argument saying what kind of tile it should create.
+    name: "data-set-view",
+    component: DataSetViewButton
+  },
   { name: "zoom-in", component: ZoomInButton },
   { name: "zoom-out", component: ZoomOutButton },
   { name: "view-all", component: ViewAllButton },

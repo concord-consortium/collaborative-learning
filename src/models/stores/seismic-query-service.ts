@@ -16,7 +16,7 @@ import {
 type EnvelopeCacheEntry = EnvelopeTileData | "loading" | "missing";
 type RawCacheEntry = RawSegment[] | "loading" | "missing";
 
-const valueScalar = 1;
+const MAX_RAW_CACHE_ENTRIES = 100;
 
 export function envelopeCacheKey(stationData: StationData, level: number, tileIndex: number) {
   const { network, station, channel } = stationData;
@@ -33,8 +33,10 @@ export class SeismicQueryService {
   envelopeCache: Map<string, EnvelopeCacheEntry> = observable.map();
 
   /** Raw data cache keyed by "{network}_{station}/{channel}/raw/{chunkIndex}" */
-  // TODO: Come up with a mechanism for clearing out old entries when the cache gets too large.
   rawCache: Map<string, RawCacheEntry> = observable.map();
+
+  /** Tracks access order for rawCache LRU eviction (plain Map, not observable) */
+  private rawCacheOrder: Map<string, true> = new Map();
 
   /** Station metadata cache keyed by "{network}_{station}" */
   metadataCache: Map<string, ChannelMetadata[]> = observable.map();
@@ -88,6 +90,14 @@ export class SeismicQueryService {
     this.loadData(callerId, params, level);
   }
 
+  /**
+   * Returns the metadata for the station at the specified time.
+   */
+  async getMetadata({ network, station, channel }: StationData, timeSec: number): Promise<ChannelMetadata | undefined> {
+    const allMetadata = await this.getAllMetadata(network, station);
+    return this.getMetadataForChannel(allMetadata, channel, timeSec);
+  }
+
   // --- Private helpers (general) ---
 
   private addNull(time: number, timestamps: NullableNumberArray, v1: NullableNumberArray, v2?: NullableNumberArray) {
@@ -135,8 +145,8 @@ export class SeismicQueryService {
           this.addNull(t, timestamps, mins, maxs);
         } else {
           timestamps.push(t);
-          mins.push(dequantize(entry.mins[i], amplitudeRange) * valueScalar);
-          maxs.push(dequantize(entry.maxs[i], amplitudeRange) * valueScalar);
+          mins.push(dequantize(entry.mins[i], amplitudeRange));
+          maxs.push(dequantize(entry.maxs[i], amplitudeRange));
         }
       }
     }
@@ -162,12 +172,12 @@ export class SeismicQueryService {
 
     const toFetch: number[] = [];
     const neededKeys = new Set<string>();
-    const cache = raw ? this.rawCache : this.envelopeCache;
     const getKey = (i: number) => raw ? rawCacheKey(stationData, i) : envelopeCacheKey(stationData, level, i);
     for (const index of indices) {
       const key = getKey(index);
       neededKeys.add(key);
-      if (!cache.has(key)) {
+      const inCache = raw ? this.hasRawCache(key) : this.envelopeCache.has(key);
+      if (!inCache) {
         toFetch.push(index);
       }
     }
@@ -177,7 +187,7 @@ export class SeismicQueryService {
 
     if (toFetch.length === 0) return;
 
-    const metadata = raw ? await this.getMetadata(stationData.network, stationData.station) : [];
+    const metadata = raw ? await this.getAllMetadata(stationData.network, stationData.station) : [];
 
     // Fetch missing tiles
     for (const index of toFetch) {
@@ -185,11 +195,19 @@ export class SeismicQueryService {
       const controller = new AbortController();
       this.registerInflight(callerId, key, controller);
 
-      runInAction(() => { cache.set(key, "loading"); });
+      if (raw) {
+        runInAction(() => { this.setRawCache(key, "loading"); });
+      } else {
+        runInAction(() => { this.envelopeCache.set(key, "loading"); });
+      }
 
       const catchFunction = (err: any) => {
         if (err.name !== "AbortError") {
-          runInAction(() => { cache.set(key, "missing"); });
+          if (raw) {
+            runInAction(() => { this.setRawCache(key, "missing"); });
+          } else {
+            runInAction(() => { this.envelopeCache.set(key, "missing"); });
+          }
         }
       };
       const finallyFunction = () => {
@@ -204,7 +222,7 @@ export class SeismicQueryService {
         this.fetchAndParseRaw(stationData, location, chunkStartISO, chunkEndISO, metadata, controller.signal)
           .then(segments => {
             runInAction(() => {
-              this.rawCache.set(key, segments.length > 0 ? segments : "missing");
+              this.setRawCache(key, segments.length > 0 ? segments : "missing");
             });
           }).catch(catchFunction).finally(finallyFunction);
       } else {
@@ -268,8 +286,8 @@ export class SeismicQueryService {
           this.addNull(t, timestamps, mins, maxs);
         } else {
           timestamps.push(t);
-          mins.push(dequantize(entry.mins[i], amplitudeRange) * valueScalar);
-          maxs.push(dequantize(entry.maxs[i], amplitudeRange) * valueScalar);
+          mins.push(dequantize(entry.mins[i], amplitudeRange));
+          maxs.push(dequantize(entry.maxs[i], amplitudeRange));
         }
       }
     }
@@ -306,7 +324,7 @@ export class SeismicQueryService {
 
     for (let ci = firstChunk; ci <= lastChunk; ci++) {
       const key = rawCacheKey(stationData, ci);
-      const entry = this.rawCache.get(key);
+      const entry = this.getRawCache(key);
 
       if (entry === "loading" || entry === undefined) {
         isLoading = true;
@@ -349,7 +367,7 @@ export class SeismicQueryService {
     return { level: "raw", data: [timestamps, values], amplitudeRange: autoRange, isLoading };
   }
 
-  private async getMetadata(network: string, station: string): Promise<ChannelMetadata[]> {
+  private async getAllMetadata(network: string, station: string): Promise<ChannelMetadata[]> {
     const metaKey = `${network}_${station}`;
     let metadata = this.metadataCache.get(metaKey);
     if (!metadata) {
@@ -359,16 +377,17 @@ export class SeismicQueryService {
     return metadata;
   }
 
-  private findSensitivity(metadata: ChannelMetadata[], channel: string, timeSec: number): number {
+  private getMetadataForChannel(
+    metadata: ChannelMetadata[], channel: string, timeSec: number
+  ): ChannelMetadata | undefined {
     const matching = metadata.filter(m => m.channel === channel);
-    if (matching.length === 0) return 1;
     for (const m of matching) {
       const start = new Date(m.startTime).getTime() / 1000;
       const end = m.endTime === "" ? Infinity : new Date(m.endTime).getTime() / 1000;
-      if (timeSec >= start && timeSec < end) return m.scale;
+      if (timeSec >= start && timeSec < end) return m;
     }
-    // No time match — use the latest entry
-    return matching[matching.length - 1].scale;
+    // When no time matches, return the last metadata (or undefined if there aren't any)
+    return matching[matching.length - 1];
   }
 
   private async fetchAndParseRaw(
@@ -387,17 +406,63 @@ export class SeismicQueryService {
     if (seismogram && seismogram.segments) {
       for (const seg of seismogram.segments) {
         const segStartTime = seg.startTime.toSeconds();
-        const sensitivity = this.findSensitivity(metadata, channel, segStartTime);
+        const sensitivity = this.getMetadataForChannel(metadata, channel, segStartTime)?.scale ?? 1;
         const sampleRate = seg.sampleRate;
         const y = seg.y;
         const samples = new Float64Array(y.length);
         for (let i = 0; i < y.length; i++) {
-          samples[i] = y[i] / sensitivity * valueScalar;
+          samples[i] = y[i] / sensitivity;
         }
         segments.push({ startTime: segStartTime, sampleRate, samples });
       }
     }
     return segments;
+  }
+
+  // --- Raw cache LRU helpers ---
+
+  private getRawCache(key: string): RawCacheEntry | undefined {
+    const value = this.rawCache.get(key);
+    if (value !== undefined) {
+      this.rawCacheOrder.delete(key);
+      this.rawCacheOrder.set(key, true);
+    }
+    return value;
+  }
+
+  private setRawCache(key: string, value: RawCacheEntry): void {
+    this.rawCache.set(key, value);
+    this.rawCacheOrder.delete(key);
+    this.rawCacheOrder.set(key, true);
+    this.evictRawCache();
+  }
+
+  private hasRawCache(key: string): boolean {
+    return this.rawCache.has(key);
+  }
+
+  private deleteRawCache(key: string): void {
+    this.rawCache.delete(key);
+    this.rawCacheOrder.delete(key);
+  }
+
+  private evictRawCache(): void {
+    let checked = 0;
+    const total = this.rawCacheOrder.size;
+    while (this.rawCacheOrder.size > MAX_RAW_CACHE_ENTRIES && checked < total) {
+      const oldest = this.rawCacheOrder.keys().next().value;
+      if (oldest === undefined) break;
+      checked++;
+      // Don't evict entries that are still loading
+      if (this.rawCache.get(oldest) === "loading") {
+        // Move to end so we check the next oldest
+        this.rawCacheOrder.delete(oldest);
+        this.rawCacheOrder.set(oldest, true);
+        continue;
+      }
+      this.rawCache.delete(oldest);
+      this.rawCacheOrder.delete(oldest);
+    }
   }
 
   // --- Cancellation helpers ---
@@ -414,8 +479,9 @@ export class SeismicQueryService {
         if (this.envelopeCache.get(key) === "loading") {
           this.envelopeCache.delete(key);
         }
+        // We use rawCache.get rather than getRawCache here to avoid changing when the key was last accessed
         if (this.rawCache.get(key) === "loading") {
-          this.rawCache.delete(key);
+          this.deleteRawCache(key);
         }
       }
     }

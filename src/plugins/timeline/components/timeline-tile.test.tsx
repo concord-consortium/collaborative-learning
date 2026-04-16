@@ -14,6 +14,9 @@ import { TileModel } from "../../../models/tiles/tile-model";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { specStores } from "../../../models/stores/spec-stores";
 import { specAppConfig } from "../../../models/stores/spec-app-config";
+import "../../../models/tiles/table/table-registration";
+import "../../bar-graph/bar-graph-registration";
+import "../../data-card/data-card-registration";
 import { defaultTimelineContent } from "../models/timeline-content";
 import { TimelineComponent } from "./timeline-tile";
 
@@ -43,7 +46,12 @@ describe("TimelineComponent", () => {
       config: {
         settings: {
           "timeline": {
-            tools: ["table-it", "data-card-it", "bar-graph-it", "|", "zoom-in", "zoom-out", "view-all"]
+            tools: [
+              ["data-set-view", "Table"],
+              ["data-set-view", "DataCard"],
+              ["data-set-view", "BarGraph"],
+              "|", "zoom-in", "zoom-out", "view-all"
+            ]
           }
         }
       }

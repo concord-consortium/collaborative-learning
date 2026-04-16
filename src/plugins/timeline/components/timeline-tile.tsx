@@ -17,6 +17,12 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
     <div className="tile-content timeline-tile">
       <BasicEditableTileTitle />
       <TileToolbar tileType="timeline" readOnly={!!readOnly} tileElement={tileElt} />
+      <div className="metadata-display">
+        <div>{content.sharedSeismogram?.station?.label ?? ""}</div>
+        <div>{content.modelLabel}</div>
+        <div>{content.dataStartTime?.toUTC().toLocaleString() ?? ""}</div>
+        <div>{content.dataEndTime?.toUTC().toLocaleString() ?? ""}</div>
+      </div>
       <div className="timeline-container">
         <div className="event-row">
           <button
