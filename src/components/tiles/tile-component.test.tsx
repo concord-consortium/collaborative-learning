@@ -754,7 +754,8 @@ describe("TileComponent focus trap", () => {
       const { stores, tileModel, tileElement } = renderFocusTrapTile();
       // Pre-select the tile
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
-      const setSelectedSpy = jest.spyOn(stores.ui, "setSelectedTileId");
+      // onFocusEnter calls ui.setSelectedTile directly, so spy on that specific method.
+      const setSelectedSpy = jest.spyOn(stores.ui, "setSelectedTile");
 
       const child = document.createElement("button");
       tileElement.appendChild(child);

@@ -31,7 +31,7 @@ export const LegendColorRow = observer(function LegendColorRow ({attrValue}: IPr
   };
 
   const menuButtonAriaLabel =
-    `Color for ${display}: ${currentColor.name}. Press Enter or Arrow to choose a color.`;
+    `Color for ${display}: ${currentColor.name}. Press Enter or Arrow keys to choose a color.`;
 
   return (
     <div key={attrValue} className="attribute-value">

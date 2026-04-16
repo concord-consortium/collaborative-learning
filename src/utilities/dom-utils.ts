@@ -28,7 +28,7 @@ export function getVisibleFocusables(container: HTMLElement | Element): (HTMLEle
 
 /**
  * Returns the focusable title element inside an .editable-tile-title wrapper.
- * In view mode this is .editable-tile-title-text (tabindex=-1, programmatically focusable).
+ * In view mode this is .editable-tile-title-text (tabindex=0, keyboard focusable).
  * In edit mode this is the <input> that replaces the text element.
  */
 export function getEditableTitleElement(tileElement: HTMLElement | null | undefined): HTMLElement | undefined {

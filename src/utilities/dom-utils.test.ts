@@ -16,7 +16,7 @@ describe("getEditableTitleElement", () => {
     const tile = document.createElement("div");
     tile.innerHTML = `
       <div class="editable-tile-title">
-        <div class="editable-tile-title-text" tabindex="-1" role="button">My Title</div>
+        <div class="editable-tile-title-text" tabindex="0" role="button">My Title</div>
       </div>
     `;
     const result = getEditableTitleElement(tile);
@@ -39,7 +39,7 @@ describe("getEditableTitleElement", () => {
     tile.innerHTML = `
       <div class="editable-tile-title">
         <input type="text" value="Editing" />
-        <div class="editable-tile-title-text" tabindex="-1">View Text</div>
+        <div class="editable-tile-title-text" tabindex="0">View Text</div>
       </div>
     `;
     const result = getEditableTitleElement(tile);

@@ -463,6 +463,15 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     this.srAnnounce("Exited tile. Tab to next tile, Shift+Tab to previous.");
   };
 
+  // Returns the model that should be selected/deselected on behalf of this tile.
+  // For read-only tiles inside a container (e.g. problem document with linked
+  // workspace tiles), selection operates on the container model, not the inner
+  // tile — matching userSelectTile / handlePointerDown behavior.
+  private getEffectiveSelectionModel() {
+    const { model, readOnly, containerContext } = this.props;
+    return (readOnly && containerContext?.model) ? containerContext.model : model;
+  }
+
   // Builds a FocusTrapStrategy from the current tile's elements.
   private buildFocusTrapStrategy() {
     const { model } = this.props;
@@ -480,7 +489,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     // Deselect the tile when the controller exits (Escape, setEnabled(false))
     strategy.onExit = () => {
       const { ui } = this.stores;
-      ui.removeTileIdFromSelection(this.props.model.id);
+      ui.removeTileIdFromSelection(this.getEffectiveSelectionModel().id);
     };
     // Select the tile when focus enters via mouse click (handles tileHandlesOwnSelection tiles
     // where the title click doesn't go through handlePointerDown's selectTileHandler).
@@ -490,9 +499,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     strategy.onFocusEnter = () => {
       const { ui } = this.stores;
       if (!ui.isSelectedTile(model)) {
-        const { readOnly, containerContext } = this.props;
-        const effectiveModel = (readOnly && containerContext?.model) ? containerContext.model : model;
-        ui.setSelectedTile(effectiveModel, { append: false });
+        ui.setSelectedTile(this.getEffectiveSelectionModel(), { append: false });
       }
     };
     return strategy;
@@ -574,7 +581,9 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       const { ui } = this.stores;
       const { model } = this.props;
       const wasAlreadySelected = ui.isSelectedTile(model);
-      ui.setSelectedTileId(model.id, { append: false });
+      // Match userSelectTile / onFocusEnter: select the container model for read-only
+      // tiles inside a container so all entry paths agree on which tile is selected.
+      ui.setSelectedTileId(this.getEffectiveSelectionModel().id, { append: false });
       if (!wasAlreadySelected) {
         // First Enter: select + enable + enter trap
         this.focusTrapController?.setEnabled(true);
