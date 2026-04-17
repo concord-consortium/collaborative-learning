@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { DocumentModelType } from "../../models/document/document";
+import { DocumentModelType, SaveState } from "../../models/document/document";
 import { useSaveIndicatorPortal } from "./save-indicator-portal-context";
 import CloudCheckIcon from "../../assets/icons/cloud-check.svg";
 import SyncArrowsIcon from "../../assets/icons/sync-arrows.svg";
@@ -19,9 +19,9 @@ export const SaveIndicator = observer(({ document }: IProps) => {
   const portalRef = useSaveIndicatorPortal();
 
   useEffect(() => {
-    if (saveState === "saved") {
+    if (saveState === SaveState.Saved) {
       timerRef.current = window.setTimeout(() => {
-        document.setSaveState("idle");
+        document.setSaveState(SaveState.Idle);
       }, SAVED_DISPLAY_DURATION);
     }
     return () => {
@@ -32,11 +32,11 @@ export const SaveIndicator = observer(({ document }: IProps) => {
     };
   }, [document, saveState]);
 
-  const isSyncing = saveState === "saving" || saveState === "retrying";
+  const isSyncing = saveState === SaveState.Saving || saveState === SaveState.Retrying;
   const Icon = isSyncing ? SyncArrowsIcon : CloudCheckIcon;
-  const text = saveState === "saving" ? "Saving..."
-    : saveState === "retrying" ? "Retrying..."
-    : saveState === "saved" ? "Saved"
+  const text = saveState === SaveState.Saving ? "Saving..."
+    : saveState === SaveState.Retrying ? "Retrying..."
+    : saveState === SaveState.Saved ? "Saved"
     : undefined;
 
   const content = (

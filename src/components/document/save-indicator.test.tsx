@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, act } from "@testing-library/react";
 import { SaveIndicator } from "./save-indicator";
-import { createDocumentModel } from "../../models/document/document";
+import { createDocumentModel, SaveState } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 
 // This is needed so MST can deserialize snapshots referring to tools
@@ -44,14 +44,14 @@ describe("SaveIndicator", () => {
   it("shows 'Saving...' when saving", () => {
     const doc = createTestDoc();
     render(<SaveIndicator document={doc} />);
-    act(() => { doc.setSaveState("saving"); });
+    act(() => { doc.setSaveState(SaveState.Saving); });
     expect(screen.getByTestId("save-indicator")).toHaveTextContent("Saving...");
   });
 
   it("shows 'Saved' when saved, then hides after timeout", () => {
     const doc = createTestDoc();
     render(<SaveIndicator document={doc} />);
-    act(() => { doc.setSaveState("saved"); });
+    act(() => { doc.setSaveState(SaveState.Saved); });
     expect(screen.getByTestId("save-indicator")).toHaveTextContent("Saved");
 
     act(() => { jest.advanceTimersByTime(3000); });
@@ -61,18 +61,18 @@ describe("SaveIndicator", () => {
   it("shows 'Retrying...' when retrying", () => {
     const doc = createTestDoc();
     render(<SaveIndicator document={doc} />);
-    act(() => { doc.setSaveState("retrying"); });
+    act(() => { doc.setSaveState(SaveState.Retrying); });
     expect(screen.getByTestId("save-indicator")).toHaveTextContent("Retrying...");
   });
 
   it("cancels saved timeout when new save starts", () => {
     const doc = createTestDoc();
     render(<SaveIndicator document={doc} />);
-    act(() => { doc.setSaveState("saved"); });
+    act(() => { doc.setSaveState(SaveState.Saved); });
     expect(screen.getByTestId("save-indicator")).toHaveTextContent("Saved");
 
     // New change before timeout fires
-    act(() => { doc.setSaveState("saving"); });
+    act(() => { doc.setSaveState(SaveState.Saving); });
     expect(screen.getByTestId("save-indicator")).toHaveTextContent("Saving...");
 
     // Original timeout fires — should NOT revert to idle since we're saving

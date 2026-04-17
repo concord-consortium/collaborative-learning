@@ -6,7 +6,7 @@ import { UseMutationOptions } from "react-query";
 import firebase from "firebase/app";
 import { Firebase } from "../lib/firebase";
 import { Firestore } from "../lib/firestore";
-import { DocumentModel, createDocumentModel } from "../models/document/document";
+import { DocumentModel, createDocumentModel, SaveState } from "../models/document/document";
 import {
   LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
@@ -638,18 +638,18 @@ describe("useDocumentSyncToFirebase hook", () => {
 
   it("sets saveState to saving on snapshot, saved on success", async () => {
     const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
-    expect(document.saveState).toBe("idle");
+    expect(document.saveState).toBe(SaveState.Idle);
 
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
-    expect(document.saveState).toBe("idle");
+    expect(document.saveState).toBe(SaveState.Idle);
 
     // Trigger a content change — onSnapshot fires synchronously
     document.content?.addTile("text");
-    expect(document.saveState).toBe("saving");
+    expect(document.saveState).toBe(SaveState.Saving);
 
     // The mock useMutation calls onSuccess after promise resolves
     await waitFor(() => {
-      expect(document.saveState).toBe("saved");
+      expect(document.saveState).toBe(SaveState.Saved);
     });
   });
 

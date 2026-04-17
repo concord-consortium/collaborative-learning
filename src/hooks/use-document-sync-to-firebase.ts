@@ -6,7 +6,7 @@ import { useSyncMstNodeToFirebase } from "./use-sync-mst-node-to-firebase";
 import { useSyncMstPropToFirebase } from "./use-sync-mst-prop-to-firebase";
 import { DEBUG_DOCUMENT, DEBUG_SAVE } from "../lib/debug";
 import { Firebase } from "../lib/firebase";
-import { ContentStatus, DocumentModelType } from "../models/document/document";
+import { ContentStatus, DocumentModelType, SaveState } from "../models/document/document";
 import { isPublishedType, LearningLogDocument, LearningLogPublication, PersonalDocument,
          PersonalPublication, ProblemDocument, ProblemPublication, SupportPublication
         } from "../models/document/document-types";
@@ -219,11 +219,11 @@ export function useDocumentSyncToFirebase(
     // the broader refactor that removes this class of race by construction.
     onSuccess: (data: any, snapshot: DocumentContentSnapshotType) => {
       debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
-      document.setSaveState("saved");
+      document.setSaveState(SaveState.Saved);
     },
     onError: (err: any, properties: DocumentContentSnapshotType) => {
       console.warn(`ERROR: Failed to update document content for ${type} document ${key}:`, document.changeCount);
-      document.setSaveState("retrying");
+      document.setSaveState(SaveState.Retrying);
     }
   };
   const transform = (snapshot: DocumentContentSnapshotType) =>
@@ -273,7 +273,7 @@ export function useDocumentSyncToFirebase(
   useEffect(() => {
     const cleanup = enabled
             ? onSnapshot<DocumentContentSnapshotType>(document.content!, snapshot => {
-                document.setSaveState("saving");
+                document.setSaveState(SaveState.Saving);
                 // reset (e.g. stop retrying and restart) when value changes
                 mutation.isError && mutation.reset();
                 throttledMutate(snapshot);
@@ -282,7 +282,7 @@ export function useDocumentSyncToFirebase(
     return () => {
       cleanup?.();
     };
-  }, [enabled, document.content, mutation, throttledMutate]);
+  }, [enabled, document, document.content, mutation, throttledMutate]);
 
   useEffect(() => {
     DEBUG_SAVE && !readOnly &&
