@@ -1,52 +1,49 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { DateTime } from "luxon";
 import { useWaveRunnerContent } from "../hooks/use-wave-runner-content";
 import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
 import "./status-and-output.scss";
 
 export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
   const model = useWaveRunnerContent();
-  const seismogram = model.sharedSeismogram?.seismogram;
+  const {
+    hasStationData, sharedSeismogram, startDateISO, endDateISO, isRunning, eventsDataSet, runError
+  } = model;
 
   return (
     <div className="section status-and-output">
       <div className="section-title">Status and Output</div>
       <div className="waveform-container">
-        {model.isLoading && <div className="waveform-loading">Loading seismic data...</div>}
-        {model.loadError && <div className="waveform-error">{model.loadError}</div>}
-        {seismogram && (
+        {sharedSeismogram && hasStationData && (
           <WaveformPanel
             key={`${model.startDate}-${model.endDate}`}
-            label={`${model.startDate} – ${model.endDate}`}
-            startTime={DateTime.fromISO(`${model.startDate}T00:00:00Z`, { zone: "utc" })}
-            durationSeconds={
-              (new Date(`${model.endDate}T00:00:00Z`).getTime()
-               - new Date(`${model.startDate}T00:00:00Z`).getTime()) / 1000
-            }
-            seismogram={seismogram}
+            sharedSeismogram={sharedSeismogram}
+            startTime={startDateISO}
+            endTime={endDateISO}
           />
         )}
       </div>
       <div className="download-status-container">
-        {model.isRunning && <div>Running model...</div>}
-        {model.runError && <div className="waveform-error">{model.runError}</div>}
+        {isRunning && <div>Running model...</div>}
+        {runError && <div className="waveform-error">{runError}</div>}
       </div>
       <div className="estimated-time">
-        {model.isRunning
+        {isRunning
           ? `Processing day ${model.chunksProcessed + 1} of ${model.chunksTotal || "?"}...`
-          : model.eventsFound
+          : eventsDataSet
             ? "Run complete."
             : "Estimated time to complete run:"}
       </div>
       <div className="status-counts-row">
         <div className="status-count">
           <label className="status-count-label">Events Identified</label>
-          <div className="status-count-box">{model.eventsFound ?? ""}</div>
+          <div className="status-count-box">
+            {model.eventsFound ?? "-"}
+          </div>
         </div>
         <div className="status-count">
           <label className="status-count-label">Event Categories</label>
-          <div className="status-count-box" />
+          <div className="status-count-box">-</div>
         </div>
       </div>
     </div>

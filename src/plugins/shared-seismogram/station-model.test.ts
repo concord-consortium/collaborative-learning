@@ -32,6 +32,45 @@ describe("StationModel", () => {
     });
     expect(station.id).toBe("AK_DDM_01_HNZ");
   });
+
+  describe("equals", () => {
+    const base = { network: "AK", station: "K204", location: "", channel: "HNZ", label: "Anchorage Airport" };
+
+    it("returns true for an identical config", () => {
+      const station = StationModel.create(base);
+      expect(station.equals(base)).toBe(true);
+    });
+
+    it("returns true when config omits optional fields that default to empty", () => {
+      const station = StationModel.create({ network: "AK", station: "K204", channel: "HNZ" });
+      expect(station.equals({ network: "AK", station: "K204", channel: "HNZ" })).toBe(true);
+    });
+
+    it("returns false when network differs", () => {
+      const station = StationModel.create(base);
+      expect(station.equals({ ...base, network: "US" })).toBe(false);
+    });
+
+    it("returns false when station differs", () => {
+      const station = StationModel.create(base);
+      expect(station.equals({ ...base, station: "DDM" })).toBe(false);
+    });
+
+    it("returns false when location differs", () => {
+      const station = StationModel.create(base);
+      expect(station.equals({ ...base, location: "01" })).toBe(false);
+    });
+
+    it("returns false when channel differs", () => {
+      const station = StationModel.create(base);
+      expect(station.equals({ ...base, channel: "BHZ" })).toBe(false);
+    });
+
+    it("returns false when label differs", () => {
+      const station = StationModel.create(base);
+      expect(station.equals({ ...base, label: "Different Label" })).toBe(false);
+    });
+  });
 });
 
 describe("stationId", () => {

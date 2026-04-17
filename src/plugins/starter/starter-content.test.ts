@@ -16,4 +16,15 @@ describe("StarterContent", () => {
     const content = StarterContentModel.create();
     expect(content.isUserResizable).toBe(true);
   });
+
+  it("exports a JSON string including the persisted fields", () => {
+    const content = StarterContentModel.create({ text: "Greeting" });
+    const json = content.exportJson();
+    expect(typeof json).toBe("string");
+    expect(json.length).toBeGreaterThan(0);
+    expect(JSON.parse(json)).toEqual({
+      type: "Starter",
+      text: "Greeting"
+    });
+  });
 });

@@ -27,11 +27,14 @@ export function specTextTile(options: ISpecTextTileOptions) {
               "bold",
               "italic",
               "underline",
+              "highlight",
               "subscript",
               "superscript",
+              "heading",
               "list-ol",
               "list-ul",
-              "link"
+              "link",
+              "voice-typing"
             ]
           }
         }

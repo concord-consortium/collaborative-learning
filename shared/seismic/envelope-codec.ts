@@ -45,7 +45,15 @@ export function encodeEnvelopeTile(mins: Int16Array, maxs: Int16Array): ArrayBuf
  * Infers point count from the decompressed buffer size.
  */
 export function decodeEnvelopeTile(buffer: ArrayBuffer): EnvelopeTileData {
-  const decompressed = pako.ungzip(new Uint8Array(buffer));
+  // Envelope files are stored zipped, so we try to unzip them.
+  // But they might get unzipped automatically, so if the unzip fails we just use the raw data.
+  let decompressed: Uint8Array;
+  try {
+    decompressed = pako.ungzip(new Uint8Array(buffer));
+  } catch {
+    decompressed = new Uint8Array(buffer);
+  }
+
   // Each point has 2 Int16 values (min + max) = 4 bytes
   const pointCount = decompressed.byteLength / 4;
   const view = new Int16Array(decompressed.buffer, decompressed.byteOffset, pointCount * 2);

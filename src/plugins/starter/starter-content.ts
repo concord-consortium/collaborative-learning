@@ -1,5 +1,7 @@
-import { types, Instance } from "mobx-state-tree";
+import { getSnapshot, types, Instance } from "mobx-state-tree";
+import stringify from "json-stringify-pretty-compact";
 import { TileContentModel } from "../../models/tiles/tile-content";
+import { ITileExportOptions } from "../../models/tiles/tile-content-info";
 import { kStarterTileType } from "./starter-types";
 
 export function defaultStarterContent(): StarterContentModelType {
@@ -16,6 +18,9 @@ export const StarterContentModel = TileContentModel
   .views(self => ({
     get isUserResizable() {
       return true;
+    },
+    exportJson(options?: ITileExportOptions) {
+      return stringify(getSnapshot(self), {maxLength: 200});
     }
   }))
   .actions(self => ({

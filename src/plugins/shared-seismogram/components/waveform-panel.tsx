@@ -1,66 +1,152 @@
-import React, { useEffect, useRef } from "react";
-import { DateTime, Interval } from "luxon";
-import { seismograph, seismographconfig, seismogram as seismogramModule } from "seisplotjs";
-type Seismogram = seismogramModule.Seismogram;
+import React, { useEffect, useRef, useState } from "react";
+import { observer } from "mobx-react-lite";
+import { DateTime } from "luxon";
+import uPlot from "uplot";
+import "uplot/dist/uPlot.min.css";
+import { useStores } from "../../../hooks/use-stores";
+import { SharedSeismogramType } from "../shared-seismogram";
+import { nanoid } from "nanoid";
 import "./waveform-panel.scss";
 
+const LOAD_VIEWPORT_DEBOUNCE_MS = 150;
+const DEFAULT_CHART_HEIGHT = 150;
+const AMPLITUDE_RANGE_SCALAR = 1.2;
+
 interface WaveformPanelProps {
-  label: string;
+  mode?: "waveform" | "timeline";
+  sharedSeismogram: SharedSeismogramType;
   startTime: DateTime;
-  durationSeconds: number;
-  seismogram: Seismogram;
+  endTime: DateTime;
 }
 
-export const WaveformPanel: React.FC<WaveformPanelProps> = ({
-  label,
-  startTime,
-  durationSeconds,
-  seismogram,
-}) => {
-  const divRef = useRef<HTMLDivElement>(null);
+export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function WaveformPanel({
+  mode = "waveform", sharedSeismogram, startTime, endTime,
+}) {
+  const { seismicQueryService } = useStores();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const uplotRef = useRef<uPlot | null>(null);
+  const callerIdRef = useRef(nanoid());
+  const [pixelWidth, setPixelWidth] = useState(0);
 
-  // Plot the seismogram
+  const stationInfo = sharedSeismogram.station;
+
+  // Measure container width
   useEffect(() => {
-    if (!divRef.current || !seismogram) return;
+    if (!containerRef.current) return;
+    const resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setPixelWidth(entry.contentRect.width);
+      }
+    });
+    resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
 
-    const div = divRef.current;
-    let spElement: HTMLElement | null = null;
+  // Debounce loadViewport
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!stationInfo || pixelWidth === 0) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const { network, station, location, channel } = stationInfo;
+      const stationData = { network, station, channel };
+      seismicQueryService.loadViewport(callerIdRef.current, { stationData, location, startTime, endTime, pixelWidth });
+    }, LOAD_VIEWPORT_DEBOUNCE_MS);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [stationInfo, startTime, endTime, pixelWidth, seismicQueryService]);
 
-    // FIXME: This blocks program execution
-    const endTime = startTime.plus({ seconds: durationSeconds });
-    const sdd = seismogramModule.SeismogramDisplayData.fromSeismogram(seismogram);
-    const interval = Interval.fromDateTimes(startTime, endTime);
-    sdd.timeRange = interval;
+  // Query and render
+  const queryResult = (stationInfo && pixelWidth > 0)
+    ? seismicQueryService.query({
+        stationData: stationInfo, location: stationInfo.location, startTime, endTime, pixelWidth
+      })
+    : null;
 
-    const config = new seismographconfig.SeismographConfig();
-    config.fixedTimeScale = interval;
-    config.isYAxis = false;
-    config.isXAxis = false;
-    config.showTitle = false;
-    config.yLabel = null;
-    config.ySublabel = null;
-    config.xLabel = null;
-    config.lineColors = ["white"];
-    config.margin = { top: 0, right: 0, bottom: 0, left: 0 };
+  // Track whether the chart is in envelope mode so we can detect structural changes
+  const isEnvelopeRef = useRef<boolean | null>(null);
+  // Store the current amplitude range in a ref so the uPlot range callback can read it
+  const amplitudeRangeRef = useRef(0);
 
-    try {
-      spElement = new seismograph.Seismograph([sdd], config) as unknown as HTMLElement;
-      div.appendChild(spElement);
-    } catch (e) {
-      // Seismograph custom element may not render in all environments
+  // Create uPlot when needed (structural changes)
+  useEffect(() => {
+    if (!containerRef.current || !queryResult) return;
+
+    const isEnvelope = queryResult.level !== "raw";
+    amplitudeRangeRef.current = queryResult.amplitudeRange * AMPLITUDE_RANGE_SCALAR;
+    const data = queryResult.data as uPlot.AlignedData;
+
+    // If the series structure hasn't changed, update in place
+    if (uplotRef.current && isEnvelopeRef.current === isEnvelope) {
+      uplotRef.current.setData(data);
+      return;
     }
 
-    return () => {
-      if (spElement && div && div.contains(spElement)) {
-        div.removeChild(spElement);
-      }
-    };
-  }, [seismogram, startTime, durationSeconds]);
+    // First render or structural change (envelope <-> raw) — recreate
+    if (uplotRef.current) {
+      uplotRef.current.destroy();
+      uplotRef.current = null;
+    }
 
+    isEnvelopeRef.current = isEnvelope;
+
+    const opts: uPlot.Options = {
+      width: pixelWidth,
+      height: containerRef.current.clientHeight || DEFAULT_CHART_HEIGHT,
+      cursor: { show: false },
+      legend: { show: false },
+      scales: {
+        x: { time: true },
+        y: {
+          range: () => [-amplitudeRangeRef.current, amplitudeRangeRef.current],
+        },
+      },
+      axes: [
+        { show: false },
+        { show: false },
+      ],
+      series: isEnvelope
+        ? [
+            {},
+            { label: "Min", stroke: "white", width: 1 },
+            { label: "Max", stroke: "white", width: 1 },
+          ]
+        : [
+            {},
+            { label: "Value", stroke: "white", width: 1 },
+          ],
+      bands: isEnvelope
+        ? [{ series: [2, 1], fill: "rgba(255, 255, 255, 0.6)" }]
+        : undefined,
+    };
+
+    uplotRef.current = new uPlot(opts, data, containerRef.current);
+  }, [queryResult, pixelWidth]);
+
+  // Destroy uPlot on unmount
+  useEffect(() => {
+    return () => {
+      uplotRef.current?.destroy();
+      uplotRef.current = null;
+    };
+  }, []);
+
+  // Resize uPlot when the container width changes
+  useEffect(() => {
+    if (!uplotRef.current || !containerRef.current || pixelWidth === 0) return;
+    uplotRef.current.setSize({
+      width: pixelWidth,
+      height: containerRef.current.clientHeight || DEFAULT_CHART_HEIGHT,
+    });
+  }, [pixelWidth]);
+
+  const style = mode === "waveform"
+    ? { height: "60px"}
+    : { height: "100px" };
   return (
     <div className="waveform-panel">
-      <div className="waveform-panel-label">{label}</div>
-      <div ref={divRef} className="waveform-panel-display" />
+      <div ref={containerRef} className="waveform-panel-display" style={style} />
     </div>
   );
-};
+});

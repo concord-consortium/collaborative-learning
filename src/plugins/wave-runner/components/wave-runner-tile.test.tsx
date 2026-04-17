@@ -1,6 +1,16 @@
+// Mock uPlot — canvas won't work in jsdom
+jest.mock("uplot", () => {
+  return jest.fn().mockImplementation(() => ({
+    setData: jest.fn(),
+    setSize: jest.fn(),
+    destroy: jest.fn(),
+  }));
+});
+
 import { render, screen } from "@testing-library/react";
 import { Provider } from "mobx-react";
 import React from "react";
+import "../../../models/tiles/table/table-registration";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { specStores } from "../../../models/stores/spec-stores";
@@ -39,7 +49,7 @@ describe("WaveRunnerComponent", () => {
       config: {
         settings: {
           "wave-runner": {
-            tools: ["load-data", "|", "play", "restart", "reset", "|", "table-it", "timeline"],
+            tools: ["load-data", "|", "play", "restart", "reset", "|", ["data-set-view", "Table"], "timeline"],
           stations: [
             { network: "AK", station: "K204", channel: "HNZ", label: "Anchorage Airport" },
             { network: "AK", station: "DDM", location: "01", channel: "HNZ", label: "Dexter Display Mine" }
@@ -120,23 +130,32 @@ describe("WaveRunnerComponent", () => {
     renderWithStores();
     const startInput = screen.getByLabelText("Start Date and Time") as HTMLInputElement;
     const endInput = screen.getByLabelText("End Date and Time") as HTMLInputElement;
-    expect(startInput.value).toBe("2026-01-30T00:00");
-    expect(endInput.value).toBe("2026-02-06T00:00");
+    expect(startInput.value).toBe("2025-01-01T00:00");
+    expect(endInput.value).toBe("2025-12-31T00:00");
   });
 
   it("renders station dropdown with options from config", () => {
     renderWithStores();
     const stationSelect = screen.getByLabelText("Station") as HTMLSelectElement;
-    const options = Array.from(stationSelect.options);
-    expect(options).toHaveLength(2);
-    expect(options[0].text).toBe("Anchorage Airport");
-    expect(options[1].text).toBe("Dexter Display Mine");
+    const stationOptions = Array.from(stationSelect.options).filter(o => o.value !== "");
+    expect(stationOptions).toHaveLength(2);
+    expect(stationOptions[0].text).toBe("Anchorage Airport");
+    expect(stationOptions[1].text).toBe("Dexter Display Mine");
   });
 
   it("auto-selects the default station on mount", () => {
-    renderWithStores();
-    const stationSelect = screen.getByLabelText("Station") as HTMLSelectElement;
-    expect(stationSelect.value).toBe("AK_K204__HNZ");
+    const model2 = TileModel.create({ content: defaultWaveRunnerContent() });
+    stores.ui.setSelectedTileId(model2.id);
+    render(
+      <Provider stores={stores}>
+        <TileModelContext.Provider value={model2}>
+          <WaveRunnerComponent {...defaultProps} {...{model: model2}} />
+        </TileModelContext.Provider>
+      </Provider>
+    );
+    const tileContent = model2.content as any;
+    expect(tileContent.station?.network).toBe("AK");
+    expect(tileContent.station?.station).toBe("K204");
   });
 
   it("renders all toolbar buttons", () => {

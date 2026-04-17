@@ -152,3 +152,7 @@ export function useUIStore(): UIModelType {
 export function useUserStore(): UserModelType {
   return useStores().user;
 }
+
+export function useSeismicQueryService() {
+  return useStores().seismicQueryService;
+}
