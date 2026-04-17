@@ -561,9 +561,13 @@ export const TreeManager = types
       const historyEntry = self.document.history.at(i);
       if (!historyEntry) continue;
       for (const treeId of Object.keys(self.trees)) {
+        const patches = treePatches[treeId];
+        if (!patches) {
+          throw new Error(`treePatches missing entry for known tree '${treeId}'`);
+        }
         const entryPatches = getEntryPatchesForTree(historyEntry, treeId, opType);
         if (entryPatches.length > 0) {
-          treePatches[treeId]!.push(...entryPatches);
+          patches.push(...entryPatches);
           treePatchSegments[treeId].push({ historyIndex: i, patchCount: entryPatches.length });
         }
       }
@@ -608,7 +612,12 @@ export const TreeManager = types
       failure?: TreeApplyFailure;
       unexpected?: TreeApplyUnexpected;
     }
+    type FailedResult = TreeApplyResult & { failure: TreeApplyFailure };
+    type UnexpectedResult = TreeApplyResult & { unexpected: TreeApplyUnexpected };
+
     const results: TreeApplyResult[] = [];
+    const failedResults: FailedResult[] = [];
+    const unexpectedResults: UnexpectedResult[] = [];
 
     const applyPromises = Object.entries(treePatches).map(async ([treeId, patches]) => {
       if (!patches || patches.length === 0) return;
@@ -624,23 +633,30 @@ export const TreeManager = types
           // Each segment has a unique historyIndex because
           // getEntryPatchesForTree aggregates per-entry.
           const failingSegIdx = segments.findIndex(s => s.historyIndex === historyIndex);
-          results.push({
+          const failedResult: FailedResult = {
             treeId, tree, segments,
             failure: { error: e, historyIndex, appliedInEntry, failingSegIdx }
-          });
+          };
+          results.push(failedResult);
+          failedResults.push(failedResult);
         } else {
           // Do NOT rethrow: route this through the playback-failure
           // handling below so the user and developer both see it.
-          results.push({ treeId, tree, segments, unexpected: { error: e } });
+          const unexpectedResult: UnexpectedResult = {
+            treeId, tree, segments, unexpected: { error: e }
+          };
+          results.push(unexpectedResult);
+          unexpectedResults.push(unexpectedResult);
         }
       }
     });
     yield Promise.all(applyPromises);
 
-    const failedResults = results.filter(r => r.failure);
-    const unexpectedResults = results.filter(r => r.unexpected);
     const hasAnyFailure = failedResults.length > 0 || unexpectedResults.length > 0;
-    let stopPosition: number | undefined;
+    // Default to the requested target; the failure branch below may change
+    // it to a previous position depending on the direction we are moving in
+    // if some patches couldn't be applied.
+    let stopPosition: number = newHistoryPosition;
 
     if (hasAnyFailure) {
       if (unexpectedResults.length > 0) {
@@ -649,13 +665,17 @@ export const TreeManager = types
         // started and don't touch the failing tree at all.
         stopPosition = initialPosition;
       } else {
-        const failedIndices = failedResults.map(r => r.failure!.historyIndex);
-        const earliestFailedIndex = direction === 1
-          ? Math.min(...failedIndices)
-          : Math.max(...failedIndices);
+        const failedIndices = failedResults.map(r => r.failure.historyIndex);
+        // stopPosition is the new numHistoryEventsApplied.
+        // When going forward the entry at index numHistoryEventsApplied hasn't
+        // been applied yet. So we can apply events until
+        // numHistoryEventsApplied equals the first failing entry.
+        // When going backward the entry at index numHistoryEventsApplied has
+        // had its "undo" patches applied. So we have to stop just before
+        // numHistoryEventsApplied equals this failing entry.
         stopPosition = direction === 1
-          ? earliestFailedIndex
-          : earliestFailedIndex + 1;
+          ? Math.min(...failedIndices)
+          : Math.max(...failedIndices) + 1;
       }
 
       // For forward, entries with historyIndex >= stopPosition must
@@ -663,8 +683,8 @@ export const TreeManager = types
       // with historyIndex < stopPosition must be "applied".
       const needsRollback = (historyIndex: number): boolean => {
         return direction === 1
-          ? historyIndex >= stopPosition!
-          : historyIndex < stopPosition!;
+          ? historyIndex >= stopPosition
+          : historyIndex < stopPosition;
       };
 
       const oppositeOp = opType === HistoryOperation.Redo
@@ -732,7 +752,6 @@ export const TreeManager = types
             // we can't recover automatically. Log and continue.
             // TODO: consider surfacing this as a distinct catastrophic
             // failure signal for the UI.
-            // eslint-disable-next-line no-console
             console.warn(
               `Rollback of tree '${r.treeId}' failed: ${(rollbackError as Error).message}. ` +
               `Trees may be in an inconsistent state.`
@@ -742,15 +761,23 @@ export const TreeManager = types
       });
       yield Promise.all(rollbackPromises);
 
+      // Track which (historyIndex, direction) pairs have been recorded so
+      // we can dedupe in O(1) instead of scanning historyPlaybackFailures
+      // on every push. directionStr is constant for this call, so keying
+      // on historyIndex alone is sufficient.
+      const recordedIndices = new Set<number>(
+        self.historyPlaybackFailures
+          .filter(f => f.direction === directionStr)
+          .map(f => f.historyIndex)
+      );
+
       // Record one failure per (historyIndex, direction) pair, deduped.
       for (const r of failedResults) {
-        const { historyIndex, error } = r.failure!;
+        const { historyIndex, error } = r.failure;
         const historyEntry = self.document.history.at(historyIndex);
         if (!historyEntry) continue;
-        const alreadyRecorded = self.historyPlaybackFailures.some(
-          f => f.historyIndex === historyIndex && f.direction === directionStr
-        );
-        if (!alreadyRecorded) {
+        if (!recordedIndices.has(historyIndex)) {
+          recordedIndices.add(historyIndex);
           self.historyPlaybackFailures.push({
             historyEntry,
             historyIndex,
@@ -758,7 +785,6 @@ export const TreeManager = types
             errorMessage: error.message
           });
         }
-        // eslint-disable-next-line no-console
         console.warn(
           `History entry ${historyIndex} failed to ${directionStr}: ${error.message}`
         );
@@ -777,22 +803,17 @@ export const TreeManager = types
           ? self.document.history.at(unexpectedIndex)
           : undefined;
       for (const r of unexpectedResults) {
-        const err = r.unexpected!.error;
+        const err = r.unexpected.error;
         const errMessage = err instanceof Error ? err.message : String(err);
-        if (unexpectedEntry) {
-          const alreadyRecorded = self.historyPlaybackFailures.some(
-            f => f.historyIndex === unexpectedIndex && f.direction === directionStr
-          );
-          if (!alreadyRecorded) {
-            self.historyPlaybackFailures.push({
-              historyEntry: unexpectedEntry,
-              historyIndex: unexpectedIndex,
-              direction: directionStr,
-              errorMessage: `Unexpected error during playback: ${errMessage}`
-            });
-          }
+        if (unexpectedEntry && !recordedIndices.has(unexpectedIndex)) {
+          recordedIndices.add(unexpectedIndex);
+          self.historyPlaybackFailures.push({
+            historyEntry: unexpectedEntry,
+            historyIndex: unexpectedIndex,
+            direction: directionStr,
+            errorMessage: `Unexpected error during playback: ${errMessage}`
+          });
         }
-        // eslint-disable-next-line no-console
         console.error(
           `Unexpected error playing back tree '${r.treeId}' ` +
           `at history position ${unexpectedIndex}:`,
@@ -819,11 +840,7 @@ export const TreeManager = types
     // and print a warning to the console.
     // One way might be using unique history_entry_ids that we mark as closed
     // after the finish call.
-    if (stopPosition !== undefined) {
-      self.numHistoryEventsApplied = stopPosition;
-    } else {
-      self.numHistoryEventsApplied = newHistoryPosition;
-    }
+    self.numHistoryEventsApplied = stopPosition;
   }),
 }))
 .views(self => ({
