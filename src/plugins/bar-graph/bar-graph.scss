@@ -142,39 +142,6 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
         }
       }
 
-      .color-menu-list {
-        .color-menu-list-item {
-          background: white;
-          height: 24px;
-          margin: 0;
-          padding: 0;
-          width: 24px;
-
-          .color-button {
-            background: white;
-            border: none;
-            border-radius: 0;
-            height: 24px;
-            margin: 0;
-            padding: 0;
-            width: 24px;
-
-            .color-swatch {
-              height: 12px;
-              margin: 6px;
-              width: 12px;
-            }
-
-            &:hover {
-              background: $color-button-hover;
-            }
-            &:active, &:focus {
-              background: $color-button-active;
-            }
-          }
-        }
-      }
-
       .attribute-value-name.missing {
         font-style: italic;
       }
@@ -257,6 +224,52 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
       }
     }
 
+  }
+}
+
+// Styles for the category pulldown's portaled menu list. Must be top-level
+// (not scoped under .bar-graph-tile) because Chakra's <Portal> renders the
+// menu outside the tile DOM tree.
+.bar-graph-category-menu-list {
+  .chakra-menu__menuitem {
+    @include focus-ring(-2px);
+  }
+}
+
+// Styles for the legend color picker's portaled menu list. Must be top-level
+// for the same reason as above.
+.color-menu-list {
+  .color-menu-list-item {
+    background: white;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    width: 24px;
+
+    @include focus-ring(-2px);
+
+    .color-button {
+      background: white;
+      border: none;
+      border-radius: 0;
+      height: 24px;
+      margin: 0;
+      padding: 0;
+      width: 24px;
+
+      .color-swatch {
+        height: 12px;
+        margin: 6px;
+        width: 12px;
+      }
+
+      &:hover {
+        background: $color-button-hover;
+      }
+      &:active, &:focus {
+        background: $color-button-active;
+      }
+    }
   }
 }
 

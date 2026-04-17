@@ -12,6 +12,7 @@ import { isBarGraphModel } from "./bar-graph-content";
 import { TileToolbar } from "../../components/toolbar/tile-toolbar";
 import { useUIStore } from "../../hooks/use-stores";
 import { useClueAccessibility } from "../../hooks/use-clue-accessibility";
+import { getEditableTitleElement } from "../../utilities/dom-utils";
 
 import "./bar-graph.scss";
 
@@ -60,9 +61,8 @@ export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITilePro
       onUnregisterTileApi,
       tileType: "bar-graph",
       getTitleElement: () => {
-        // Find the title text element within this tile's DOM
-        const tile = containerRef.current?.closest('.tool-tile');
-        return tile?.querySelector('.editable-tile-title-text') as HTMLElement | undefined;
+        const tile = containerRef.current?.closest('.tool-tile') as HTMLElement | null;
+        return getEditableTitleElement(tile);
       },
       getContentElement: () => containerRef.current ?? undefined,
       focusContent: () => {

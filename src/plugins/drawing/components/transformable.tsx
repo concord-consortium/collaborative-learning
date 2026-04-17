@@ -17,6 +17,7 @@ export interface TransformableProps {
   role?: string;
   ariaLabel?: string;
   onKeyDown?: (e: React.KeyboardEvent<SVGGElement>) => void;
+  onBlur?: React.FocusEventHandler<SVGGElement>;
 }
 
 /** Renders an SVG group with an optional translate and scale transform.
@@ -28,7 +29,7 @@ export interface TransformableProps {
  * @param children - The children to render inside the group.
  */
 export const Transformable: React.FC<TransformableProps> = ({
-  type, transform, setAnimating, children, objectId, tabIndex, role, ariaLabel, onKeyDown
+  type, transform, setAnimating, children, objectId, tabIndex, role, ariaLabel, onKeyDown, onBlur
 }) => {
   const prevTransform = React.useRef(transform);
   const [animated, setAnimated] = React.useState(transform);
@@ -108,6 +109,7 @@ export const Transformable: React.FC<TransformableProps> = ({
       role={role}
       aria-label={ariaLabel}
       onKeyDown={onKeyDown}
+      onBlur={onBlur}
     >
       {children}
     </g>

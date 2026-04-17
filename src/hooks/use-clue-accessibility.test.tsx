@@ -47,14 +47,14 @@ describe("createClueTileStrategy", () => {
     expect(elements.toolbar).toBeUndefined();
   });
 
-  it("sets cycle order to title/content/toolbar", () => {
+  it("sets cycle order to title/content/toolbar/resize", () => {
     const strategy = createClueTileStrategy({
       onRegisterTileApi: jest.fn(),
       onUnregisterTileApi: jest.fn(),
       tileType: "text",
     });
 
-    expect(strategy.cycleOrder).toEqual(["title", "content", "toolbar"]);
+    expect(strategy.cycleOrder).toEqual(["title", "content", "toolbar", "resize"]);
   });
 
   it("sets announcement text from tile type", () => {

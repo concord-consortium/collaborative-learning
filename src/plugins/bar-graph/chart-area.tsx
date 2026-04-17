@@ -128,6 +128,13 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
     }
   }, []);
 
+  const handleBarBlur = useCallback((e: React.FocusEvent) => {
+    // Only clear selection if focus is leaving the bar graph entirely (not moving between bars).
+    if (!svgRef.current?.contains(e.relatedTarget as Node | null)) {
+      model?.sharedModel?.dataSet.setSelectedCases([]);
+    }
+  }, [model]);
+
   if (xMax <= 0 || yMax <= 0) return <span>Tile too small to show graph ({width}x{height})</span>;
 
   const ticks = data.length > 0
@@ -168,7 +175,8 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
             <BarWithHighlight key={key} x={x} y={y} width={w} height={h} color={barColor(key)} selected={info.selected}
               ariaLabel={label} onKeyDown={handleBarKeyDown}
               onActivate={makeActivateHandler(key, label, info.selected)}
-              onClick={() => handleClick(key)} />
+              onClick={() => handleClick(key)}
+              onBlur={handleBarBlur} />
           );
         })}
       </Group>
@@ -216,7 +224,8 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
                           selected={val.selected}
                           ariaLabel={label} onKeyDown={handleBarKeyDown}
                           onActivate={makeActivateHandler(primaryValue, label, val.selected, bar.key)}
-                          onClick={() => handleClick(primaryValue, bar.key)} />;
+                          onClick={() => handleClick(primaryValue, bar.key)}
+                          onBlur={handleBarBlur} />;
                       })}
                     </Group>
                   );
@@ -313,9 +322,11 @@ interface IBarWithHighlightProps {
   ariaLabel?: string;
   onKeyDown?: (e: React.KeyboardEvent<SVGRectElement>) => void;
   onActivate?: () => void;
+  onBlur?: (e: React.FocusEvent) => void;
 }
 
-function BarWithHighlight({ x, y, width, height, color, selected, onClick, ariaLabel, onKeyDown, onActivate
+function BarWithHighlight({ x, y, width, height, color, selected, onClick, ariaLabel, onKeyDown, onActivate,
+    onBlur
 }: IBarWithHighlightProps) {
   const handleKeyDown = (e: React.KeyboardEvent<SVGRectElement>) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -328,8 +339,8 @@ function BarWithHighlight({ x, y, width, height, color, selected, onClick, ariaL
   return (
     <Group>
       {selected && <BarHighlight x={x} y={y} width={width} height={height} />}
-      <Bar onClick={onClick} onKeyDown={handleKeyDown} x={x} y={y} width={width} height={height} fill={color}
-        tabIndex={0} role="button" aria-label={ariaLabel} />
+      <Bar onClick={onClick} onKeyDown={handleKeyDown} onBlur={onBlur} x={x} y={y} width={width} height={height}
+        fill={color} tabIndex={0} role="button" aria-label={ariaLabel} />
     </Group>
   );
 }

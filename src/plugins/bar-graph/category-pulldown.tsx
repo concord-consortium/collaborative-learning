@@ -34,7 +34,7 @@ export const CategoryPulldown = observer(function CategoryPulldown({setCategory,
           </span>
         </MenuButton>
         <Portal>
-          <MenuList>
+          <MenuList className="bar-graph-category-menu-list">
             {attributes.map((a) => (
               <MenuItem isDisabled={readOnly} key={a.id} onClick={() => setCategory(a.id)}>{a.name}</MenuItem>
             ))}

@@ -26,6 +26,16 @@ export function getVisibleFocusables(container: HTMLElement | Element): (HTMLEle
   });
 }
 
+/**
+ * Returns the focusable title element inside an .editable-tile-title wrapper.
+ * In view mode this is .editable-tile-title-text (tabindex=0, keyboard focusable).
+ * In edit mode this is the <input> that replaces the text element.
+ */
+export function getEditableTitleElement(tileElement: HTMLElement | null | undefined): HTMLElement | undefined {
+  const wrapper = tileElement?.querySelector('.editable-tile-title');
+  return wrapper?.querySelector('input, .editable-tile-title-text') as HTMLElement | undefined;
+}
+
 // cf. https://developer.mozilla.org/en-US/docs/Web/API/Element/matches#Polyfill
 if (!Element.prototype.matches) {
   Element.prototype.matches = (Element.prototype as any).msMatchesSelector ||
