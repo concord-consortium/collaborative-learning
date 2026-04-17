@@ -205,7 +205,13 @@ export class DocumentGroup {
 
   get byName(): DocumentGroup[] {
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
+    const groupDocuments: IDocumentMetadataModel[] = [];
     this.documents.forEach((doc) => {
+      if (doc.type === GroupDocument) {
+        groupDocuments.push(doc);
+        return;
+      }
+
       const user = this.stores.class.getUserById(doc.uid);
       const sectionLabel = user ? `${user.lastName}, ${user.firstName}` : "Unknown";
       if (!documentMap.has(sectionLabel)) {
@@ -213,6 +219,11 @@ export class DocumentGroup {
       }
       documentMap.get(sectionLabel)?.push(doc);
     });
+
+    // All group documents are included in every user's collection
+    for (const doc of documentMap.values()) {
+      doc.push(...groupDocuments);
+    }
 
     const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
     return this.buildDocumentCollection({sortedSectionLabels, sortType: "Name", docMap: documentMap});
