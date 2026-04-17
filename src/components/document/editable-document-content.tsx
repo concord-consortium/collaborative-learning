@@ -120,21 +120,21 @@ export function EditableDocumentContent({
   const showSaveIndicator = !isReadOnly && !(window as any).DISABLE_FIREBASE_SYNC;
   return (
     <>
-    {showSaveIndicator && <SaveIndicator document={document} />}
-    <DocumentContextReact.Provider value={documentContext}>
-      <EditableTileApiInterfaceRefContext.Provider value={editableTileApiInterfaceRef}>
-        <div key="editable-document" className={editableDocContentClass}
-              data-focus-document={document.key} >
-          {isShowingToolbar && modifiedToolbar &&
-            <DocumentToolbar document={document} toolbar={modifiedToolbar} pane={pane} />}
-          {isShowingToolbar && <div className="canvas-separator"/>}
-          <DocumentCanvas
-            readOnly={isReadOnly}
-            {...{mode, isPrimary, document, showPlayback}}
-          />
-        </div>
-      </EditableTileApiInterfaceRefContext.Provider>
-    </DocumentContextReact.Provider>
+      {showSaveIndicator && <SaveIndicator document={document} />}
+      <DocumentContextReact.Provider value={documentContext}>
+        <EditableTileApiInterfaceRefContext.Provider value={editableTileApiInterfaceRef}>
+          <div key="editable-document" className={editableDocContentClass}
+                data-focus-document={document.key} >
+            {isShowingToolbar && modifiedToolbar &&
+              <DocumentToolbar document={document} toolbar={modifiedToolbar} pane={pane} />}
+            {isShowingToolbar && <div className="canvas-separator"/>}
+            <DocumentCanvas
+              readOnly={isReadOnly}
+              {...{mode, isPrimary, document, showPlayback}}
+            />
+          </div>
+        </EditableTileApiInterfaceRefContext.Provider>
+      </DocumentContextReact.Provider>
     </>
   );
 }
