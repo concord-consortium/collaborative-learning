@@ -19,10 +19,11 @@ import "../models/tiles/text/text-registration";
 const mockUseMutation = jest.fn((callback: (vars: any) => Promise<any>, options?: UseMutationOptions) => {
   return {
     mutate: (vars: any) => {
+      const context = options?.onMutate?.(vars) ?? {};
       callback(vars)
-        .then(data => { options?.onSuccess?.(data, vars, {}); })
+        .then(data => { options?.onSuccess?.(data, vars, context); })
         .catch(err => {
-          options?.onError?.(err, vars, {});
+          options?.onError?.(err, vars, context);
           if (((typeof options?.retry === "boolean") && options.retry) ||
               ((typeof options?.retry === "function") && options.retry(1, "error"))) {
             const delay = ((typeof options?.retryDelay === "number") && options.retryDelay) ||
@@ -648,6 +649,42 @@ describe("useDocumentSyncToFirebase hook", () => {
     expect(document.saveState).toBe(SaveState.Saving);
 
     // The mock useMutation calls onSuccess after promise resolves
+    await waitFor(() => {
+      expect(document.saveState).toBe(SaveState.Saved);
+    });
+  });
+
+  it("keeps saveState at saving when a newer change arrives before an in-flight save completes", async () => {
+    // The scenario this exercises: throttledMutate's leading call for change 1 fires and starts
+    // a mutation. Before that mutation's onSuccess runs, change 2 happens; its mutate is
+    // throttled (trailing). When change 1's onSuccess fires, saveState must stay "saving" because
+    // change 2 is still pending. Only when change 2 is eventually saved should it flip to "saved".
+    // Before the seq-tracking fix, the indicator would briefly show "saved" after change 1,
+    // causing cy.waitForSave() to pass prematurely and tests to reload before change 2 persisted.
+    let resolveFirstMutation: (() => void) | undefined;
+    // Hold the first mutation's firebase update until we manually resolve it so we can
+    // interleave a second change before the first mutation succeeds.
+    mockRef.mockImplementationOnce(() => ({
+      update: () => new Promise<void>(resolve => { resolveFirstMutation = resolve; })
+    }));
+    const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
+    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
+
+    document.content?.addTile("text");
+    expect(document.saveState).toBe(SaveState.Saving);
+    // Second change while the first mutation is still in flight (and before its trailing call
+    // would fire). dirtySeq is now ahead of what the first mutation will report on success.
+    document.content?.addTile("text");
+    expect(document.saveState).toBe(SaveState.Saving);
+
+    // First mutation succeeds. Its captured seq is behind dirtySeq → must NOT flip to "saved".
+    resolveFirstMutation!();
+    await Promise.resolve();
+    expect(document.saveState).toBe(SaveState.Saving);
+
+    // Trailing call fires for the second change → second mutation succeeds (default mockRef
+    // resolves immediately) → dirtySeq now matches savedSeq → saveState flips to "saved".
+    jest.runAllTimers();
     await waitFor(() => {
       expect(document.saveState).toBe(SaveState.Saved);
     });

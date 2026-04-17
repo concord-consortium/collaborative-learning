@@ -205,23 +205,40 @@ export function useDocumentSyncToFirebase(
 
   // sync content for editable document types
   const enabled = commonSyncEnabled && !readOnly && !!document.content && !isPublishedType(type);
-  const options: Omit<UseMutationOptions<unknown, unknown, SnapshotOut<DocumentContentSnapshotType>>, 'mutationFn'> = {
+
+  // Track a monotonically increasing sequence number for content changes. dirtySeqRef is bumped
+  // on every onSnapshot; savedSeqRef tracks the highest seq we've confirmed persisted. saveState
+  // only flips to "saved" when a mutation's captured seq catches up to dirtySeqRef — i.e. the
+  // most recent change is on the server. This makes the save indicator (and cy.waitForSave) a
+  // reliable "latest change is persisted" signal rather than "a save recently completed", which
+  // would otherwise race when throttled mutations have a trailing call still in flight.
+  //
+  // This does NOT address the data-integrity risk where a failed-then-retried older mutation
+  // overwrites newer server content; that requires the broader refactor tracked in the
+  // "Simplify useDocumentSyncToFirebase / drop react-query" plan.
+  const dirtySeqRef = useRef(0);
+  const savedSeqRef = useRef(0);
+
+  interface SyncContext { seq: number }
+  type SyncMutationOptions =
+    Omit<UseMutationOptions<unknown, unknown, SnapshotOut<DocumentContentSnapshotType>, SyncContext>, 'mutationFn'>;
+  const options: SyncMutationOptions = {
     // default is to retry with linear back-off to a maximum
     retry: true,
     retryDelay: (attempt) => Math.min(attempt * 5, 30),
-    // but clients may override the defaults
-    // Known issue: because throttledMutate can launch independent in-flight mutations and
-    // react-query retries fire on their own timer, these callbacks can resolve out of order
-    // relative to the snapshots that triggered them. A stale onSuccess after a newer onError
-    // could briefly flip saveState back to "saved" while a later save is still retrying, and
-    // worse, a stale retry can re-write older content over newer content. Not worth addressing
-    // in isolation — see the "Simplify useDocumentSyncToFirebase / drop react-query" plan for
-    // the broader refactor that removes this class of race by construction.
-    onSuccess: (data: any, snapshot: DocumentContentSnapshotType) => {
+    // Capture the latest dirty seq at the moment this mutation actually starts (for leading
+    // throttle this is when the change happens; for trailing it's when the throttle fires).
+    onMutate: () => ({ seq: dirtySeqRef.current }),
+    onSuccess: (data, snapshot, context) => {
       debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
-      document.setSaveState(SaveState.Saved);
+      const seq = context?.seq ?? 0;
+      if (seq > savedSeqRef.current) savedSeqRef.current = seq;
+      // Only signal "saved" when no newer changes are pending.
+      if (savedSeqRef.current === dirtySeqRef.current) {
+        document.setSaveState(SaveState.Saved);
+      }
     },
-    onError: (err: any, properties: DocumentContentSnapshotType) => {
+    onError: (err, snapshot, context) => {
       console.warn(`ERROR: Failed to update document content for ${type} document ${key}:`, document.changeCount);
       document.setSaveState(SaveState.Retrying);
     }
@@ -273,6 +290,7 @@ export function useDocumentSyncToFirebase(
   useEffect(() => {
     const cleanup = enabled
             ? onSnapshot<DocumentContentSnapshotType>(document.content!, snapshot => {
+                dirtySeqRef.current++;
                 document.setSaveState(SaveState.Saving);
                 // reset (e.g. stop retrying and restart) when value changes
                 mutation.isError && mutation.reset();
