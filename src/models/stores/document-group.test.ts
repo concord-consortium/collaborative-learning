@@ -6,7 +6,7 @@ import { SnapshotIn } from "mobx-state-tree";
 import { clearTermOverrides, setTermOverrides } from "../../utilities/translation/translate";
 import { createDocumentModel, DocumentModelSnapshotType, DocumentModelType } from "../document/document";
 import { DocumentContentSnapshotType } from "../document/document-content";
-import { ProblemDocument } from '../document/document-types';
+import { GroupDocument, ProblemDocument } from '../document/document-types';
 import { ClassModel, ClassModelType, ClassUserModel } from "./class";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from "./groups";
 import { ISortedDocumentsStores, MetadataDocMapModel, SortedDocuments } from "./sorted-documents";
@@ -31,6 +31,14 @@ const mockDocumentsData: DocumentModelSnapshotType[] = [
   },
   { uid: "4", //Kirk
     type: ProblemDocument, key:"Student 4 Problem Doc Group 3", groupId: "3", createdAt: 4,
+    content: { tiles: [] } as DocumentContentSnapshotType
+  },
+  { uid: "2", //Scott (group doc for group 3)
+    type: GroupDocument, key:"Group 3 Group Doc", groupId: "3", createdAt: 5,
+    content: { tiles: [] } as DocumentContentSnapshotType
+  },
+  { uid: "1", //Joe (group doc for group 5)
+    type: GroupDocument, key:"Group 5 Group Doc", groupId: "5", createdAt: 6,
     content: { tiles: [] } as DocumentContentSnapshotType
   }
 ];
@@ -67,6 +75,22 @@ const mockMetadataDocuments: SnapshotIn<typeof MetadataDocMapModel> = {
     strategies: ["bar"],
     investigation: "1",
     problem: "2"
+  },
+  "Group 3 Group Doc": {
+    uid: "2",
+    type: GroupDocument, key:"Group 3 Group Doc", createdAt: 5,
+    tools: [],
+    groupId: "3",
+    investigation: "1",
+    problem: "2"
+  },
+  "Group 5 Group Doc": {
+    uid: "1",
+    type: GroupDocument, key:"Group 5 Group Doc", createdAt: 6,
+    tools: [],
+    groupId: "5",
+    investigation: "1",
+    problem: "1"
   }
 };
 
@@ -201,20 +225,24 @@ describe('DocumentGroup Model', () => {
       });
 
       const documentsByGroup = sortedDocuments.sortBy("Group");
+
+      // Group 3: Scott (bookmarked), Kirk (not), Group 3 group doc (not)
       const documentCollection = documentsByGroup[0].byBookmarked;
       expect(documentCollection.length).toBe(2);
       expect(documentCollection[0].label).toBe("Bookmarked");
       expect(documentCollection[0].documents.length).toBe(1);
       expect(documentCollection[1].label).toBe("Not Bookmarked");
-      expect(documentCollection[1].documents.length).toBe(1);
+      expect(documentCollection[1].documents.length).toBe(2);
 
+      // Group 5: Joe (bookmarked), Group 5 group doc (not)
       const documentCollection2 = documentsByGroup[1].byBookmarked;
       expect(documentCollection2.length).toBe(2);
       expect(documentCollection2[0].label).toBe("Bookmarked");
       expect(documentCollection2[0].documents.length).toBe(1);
       expect(documentCollection2[1].label).toBe("Not Bookmarked");
-      expect(documentCollection2[1].documents.length).toBe(0);
+      expect(documentCollection2[1].documents.length).toBe(1);
 
+      // Group 9: Dennis (not bookmarked)
       const documentCollection3 = documentsByGroup[2].byBookmarked;
       expect(documentCollection3.length).toBe(2);
       expect(documentCollection3[0].label).toBe("Bookmarked");
@@ -230,39 +258,61 @@ describe('DocumentGroup Model', () => {
     });
 
     it('should return a document collection sorted by group names and with the correct documents per group', () => {
-      const expectedGroups = [
-        { label: "Group 5", index: 0 },
-        { label: "Group 9", index: 1 },
-        { label: "Group 3", index: 2 },
-        { label: "Group 3", index: 3 }
-      ];
       const byNameGroups = sortedDocuments.sortBy("Name");
-      expectedGroups.forEach(({ label, index }) => {
-        const documentGroup = byNameGroups[index];
-        const documentCollection = documentGroup.byGroup;
-        expect(documentCollection.length).toBe(1);
-        expect(documentCollection[0].label).toBe(label);
-        expect(documentCollection[0].documents.length).toBe(1);
-      });
+
+      // Bacal, Joe: 1 personal doc + 1 Group 5 group doc, all in Group 5
+      const collection0 = byNameGroups[0].byGroup;
+      expect(collection0.length).toBe(1);
+      expect(collection0[0].label).toBe("Group 5");
+      expect(collection0[0].documents.length).toBe(2);
+
+      // Cao, Dennis: 1 personal doc in Group 9
+      const collection1 = byNameGroups[1].byGroup;
+      expect(collection1.length).toBe(1);
+      expect(collection1[0].label).toBe("Group 9");
+      expect(collection1[0].documents.length).toBe(1);
+
+      // Cytacki, Scott: 1 personal doc + 1 Group 3 group doc, all in Group 3
+      const collection2 = byNameGroups[2].byGroup;
+      expect(collection2.length).toBe(1);
+      expect(collection2[0].label).toBe("Group 3");
+      expect(collection2[0].documents.length).toBe(2);
+
+      // Swenson, Kirk: 1 personal doc + 1 Group 3 group doc, all in Group 3
+      const collection3 = byNameGroups[3].byGroup;
+      expect(collection3.length).toBe(1);
+      expect(collection3[0].label).toBe("Group 3");
+      expect(collection3[0].documents.length).toBe(2);
     });
 
     it('should use custom group term when term override is set', () => {
       setTermOverrides({ studentGroup: "Team" });
 
       const byNameGroups = sortedDocuments.sortBy("Name");
-      const expectedGroups = [
-        { label: "Team 5", index: 0 },
-        { label: "Team 9", index: 1 },
-        { label: "Team 3", index: 2 },
-        { label: "Team 3", index: 3 }
-      ];
-      expectedGroups.forEach(({ label, index }) => {
-        const documentGroup = byNameGroups[index];
-        const documentCollection = documentGroup.byGroup;
-        expect(documentCollection.length).toBe(1);
-        expect(documentCollection[0].label).toBe(label);
-        expect(documentCollection[0].documents.length).toBe(1);
-      });
+
+      // Bacal, Joe: Group 5
+      const collection0 = byNameGroups[0].byGroup;
+      expect(collection0.length).toBe(1);
+      expect(collection0[0].label).toBe("Team 5");
+      expect(collection0[0].documents.length).toBe(2);
+
+      // Cao, Dennis: Group 9
+      const collection1 = byNameGroups[1].byGroup;
+      expect(collection1.length).toBe(1);
+      expect(collection1[0].label).toBe("Team 9");
+      expect(collection1[0].documents.length).toBe(1);
+
+      // Cytacki, Scott: Group 3
+      const collection2 = byNameGroups[2].byGroup;
+      expect(collection2.length).toBe(1);
+      expect(collection2[0].label).toBe("Team 3");
+      expect(collection2[0].documents.length).toBe(2);
+
+      // Swenson, Kirk: Group 3
+      const collection3 = byNameGroups[3].byGroup;
+      expect(collection3.length).toBe(1);
+      expect(collection3[0].label).toBe("Team 3");
+      expect(collection3[0].documents.length).toBe(2);
     });
 
   });
@@ -270,43 +320,88 @@ describe('DocumentGroup Model', () => {
   describe("byName Function", () => {
     it ('should return a document collection alphabetized by last name with the correct documents per user', () => {
       const byGroupDocs = sortedDocuments.sortBy("Group");
+      // Group 3: Scott, Kirk, and Group 3 group doc
       const documentGroup = byGroupDocs[0];
       const documentCollection = documentGroup.byName;
       expect(documentCollection.length).toBe(2);
       expect(documentCollection[0].label).toBe("Cytacki, Scott");
-      expect(documentCollection[0].documents.length).toBe(1);
+      // Scott gets his own doc + the Group 3 group doc
+      expect(documentCollection[0].documents.length).toBe(2);
       expect(documentCollection[1].label).toBe("Swenson, Kirk");
-      expect(documentCollection[1].documents.length).toBe(1);
+      // Kirk gets his own doc + the Group 3 group doc
+      expect(documentCollection[1].documents.length).toBe(2);
 
+      // Group 5: Joe and Group 5 group doc
       const documentGroup2 = byGroupDocs[1];
       const documentCollection2 = documentGroup2.byName;
       expect(documentCollection2.length).toBe(1);
       expect(documentCollection2[0].label).toBe("Bacal, Joe");
-      expect(documentCollection2[0].documents.length).toBe(1);
+      // Joe gets his own doc + the Group 5 group doc
+      expect(documentCollection2[0].documents.length).toBe(2);
 
+      // Group 9: Dennis (no group doc for group 9)
       const documentGroup3 = byGroupDocs[2];
       const documentCollection3 = documentGroup3.byName;
       expect(documentCollection3.length).toBe(1);
       expect(documentCollection3[0].label).toBe("Cao, Dennis");
       expect(documentCollection3[0].documents.length).toBe(1);
     });
+
+    it('should include group documents under each member of the group', () => {
+      // Sort directly by Name to test the top-level byName behavior
+      const byNameDocs = sortedDocuments.sortBy("Name");
+      // Should have 4 name sections (alphabetical): Bacal, Cao, Cytacki, Swenson
+      expect(byNameDocs.length).toBe(4);
+
+      // Bacal, Joe (Group 5) - own doc + Group 5 group doc
+      expect(byNameDocs[0].label).toBe("Bacal, Joe");
+      expect(byNameDocs[0].documents.length).toBe(2);
+      expect(byNameDocs[0].documents.some(d => d.key === "Student 1 Problem Doc Group 5")).toBe(true);
+      expect(byNameDocs[0].documents.some(d => d.key === "Group 5 Group Doc")).toBe(true);
+
+      // Cao, Dennis (Group 9) - own doc only (no group doc for group 9)
+      expect(byNameDocs[1].label).toBe("Cao, Dennis");
+      expect(byNameDocs[1].documents.length).toBe(1);
+      expect(byNameDocs[1].documents[0].key).toBe("Student 3 Problem Doc Group 9");
+
+      // Cytacki, Scott (Group 3) - own doc + Group 3 group doc
+      expect(byNameDocs[2].label).toBe("Cytacki, Scott");
+      expect(byNameDocs[2].documents.length).toBe(2);
+      expect(byNameDocs[2].documents.some(d => d.key === "Student 2 Problem Doc Group 3")).toBe(true);
+      expect(byNameDocs[2].documents.some(d => d.key === "Group 3 Group Doc")).toBe(true);
+
+      // Swenson, Kirk (Group 3) - own doc + Group 3 group doc
+      expect(byNameDocs[3].label).toBe("Swenson, Kirk");
+      expect(byNameDocs[3].documents.length).toBe(2);
+      expect(byNameDocs[3].documents.some(d => d.key === "Student 4 Problem Doc Group 3")).toBe(true);
+      expect(byNameDocs[3].documents.some(d => d.key === "Group 3 Group Doc")).toBe(true);
+    });
+
+    it('should not create a separate name section for group documents', () => {
+      const byNameDocs = sortedDocuments.sortBy("Name");
+      // Group documents should not appear as their own name entry
+      const labels = byNameDocs.map(d => d.label);
+      expect(labels).not.toContain("Unknown");
+      expect(labels).toEqual(["Bacal, Joe", "Cao, Dennis", "Cytacki, Scott", "Swenson, Kirk"]);
+    });
   });
 
   describe("byStrategy Function", () => {
     it('should return a document collection sorted by strategy with the correct documents per strategy', () => {
       const byNameGroups = sortedDocuments.sortBy("Name");
-      const documentGroup = byNameGroups[0];
-      const documentCollection = documentGroup.byStrategy;
+
+      // Bacal, Joe: problem doc has ["foo", "bar"], group doc has none
+      const documentCollection = byNameGroups[0].byStrategy;
       expect(documentCollection.length).toBe(3); // 'Not Tagged' is added by default to the list of strategies
       expect(documentCollection[0].label).toBe("foo");
       expect(documentCollection[0].documents.length).toBe(1);
       expect(documentCollection[1].label).toBe("bar");
       expect(documentCollection[1].documents.length).toBe(1);
       expect(documentCollection[2].label).toBe("Not Tagged");
-      expect(documentCollection[2].documents.length).toBe(0);
+      expect(documentCollection[2].documents.length).toBe(1); // Group 5 group doc
 
-      const documentGroup2 = byNameGroups[1];
-      const documentCollection2 = documentGroup2.byStrategy;
+      // Cao, Dennis: 1 problem doc with no strategies
+      const documentCollection2 = byNameGroups[1].byStrategy;
       expect(documentCollection2.length).toBe(3);
       expect(documentCollection2[0].label).toBe("foo");
       expect(documentCollection2[0].documents.length).toBe(0);
@@ -315,47 +410,48 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection2[2].label).toBe("Not Tagged");
       expect(documentCollection2[2].documents.length).toBe(1);
 
-      const documentGroup3 = byNameGroups[2];
-      const documentCollection3 = documentGroup3.byStrategy;
+      // Cytacki, Scott: problem doc with no strategies + Group 3 group doc with no strategies
+      const documentCollection3 = byNameGroups[2].byStrategy;
       expect(documentCollection3.length).toBe(3);
       expect(documentCollection3[0].label).toBe("foo");
       expect(documentCollection3[0].documents.length).toBe(0);
       expect(documentCollection3[1].label).toBe("bar");
       expect(documentCollection3[1].documents.length).toBe(0);
       expect(documentCollection3[2].label).toBe("Not Tagged");
-      expect(documentCollection3[2].documents.length).toBe(1);
+      expect(documentCollection3[2].documents.length).toBe(2);
 
-      const documentGroup4 = byNameGroups[3];
-      const documentCollection4 = documentGroup4.byStrategy;
+      // Swenson, Kirk: problem doc has ["bar"] + Group 3 group doc with no strategies
+      const documentCollection4 = byNameGroups[3].byStrategy;
       expect(documentCollection4.length).toBe(3);
       expect(documentCollection4[0].label).toBe("foo");
       expect(documentCollection4[0].documents.length).toBe(0);
       expect(documentCollection4[1].label).toBe("bar");
       expect(documentCollection4[1].documents.length).toBe(1);
       expect(documentCollection4[2].label).toBe("Not Tagged");
-      expect(documentCollection4[2].documents.length).toBe(0);
+      expect(documentCollection4[2].documents.length).toBe(1); // Group 3 group doc
     });
   });
 
   describe("byTools Function", () => {
     it ('should return a document collection sorted by tool with the correct documents per tool', () => {
       const byGroupDocs = sortedDocuments.sortBy("Group");
-      const documentGroup = byGroupDocs[0];
-      const documentCollection = documentGroup.byTools;
+
+      // Group 3: Scott (Text), Kirk (no tools), Group 3 group doc (no tools)
+      const documentCollection = byGroupDocs[0].byTools;
       expect(documentCollection.length).toBe(2);
       expect(documentCollection[0].label).toBe("Text");
       expect(documentCollection[0].documents.length).toBe(1);
       expect(documentCollection[1].label).toBe("No Tools");
-      expect(documentCollection[1].documents.length).toBe(1);
+      expect(documentCollection[1].documents.length).toBe(2);
 
-      const documentGroup2 = byGroupDocs[1];
-      const documentCollection2 = documentGroup2.byTools;
+      // Group 5: Joe (no tools), Group 5 group doc (no tools)
+      const documentCollection2 = byGroupDocs[1].byTools;
       expect(documentCollection2.length).toBe(1);
       expect(documentCollection2[0].label).toBe("No Tools");
-      expect(documentCollection2[0].documents.length).toBe(1);
+      expect(documentCollection2[0].documents.length).toBe(2);
 
-      const documentGroup3 = byGroupDocs[2];
-      const documentCollection3 = documentGroup3.byTools;
+      // Group 9: Dennis (Drawing)
+      const documentCollection3 = byGroupDocs[2].byTools;
       expect(documentCollection3.length).toBe(1);
       expect(documentCollection3[0].label).toBe("Drawing");
       expect(documentCollection3[0].documents.length).toBe(1);
@@ -367,37 +463,33 @@ describe('DocumentGroup Model', () => {
       // Primary sort by Group, then secondary sort by Problem
       const byGroupDocs = sortedDocuments.sortBy("Group");
 
-      // Group 3 has Scott (1.2) and Kirk (1.2) - both in Problem 1.2
-      const documentGroup = byGroupDocs[0]; // Group 3
-      const documentCollection = documentGroup.byProblem;
+      // Group 3: Scott (1.2), Kirk (1.2), Group 3 group doc (1.2)
+      const documentCollection = byGroupDocs[0].byProblem;
       expect(documentCollection.length).toBe(1);
       expect(documentCollection[0].label).toBe("Problem 1.2");
-      expect(documentCollection[0].documents.length).toBe(2);
+      expect(documentCollection[0].documents.length).toBe(3);
 
-      // Group 5 has Joe (1.1) - in Problem 1.1
-      const documentGroup2 = byGroupDocs[1]; // Group 5
-      const documentCollection2 = documentGroup2.byProblem;
+      // Group 5: Joe (1.1), Group 5 group doc (1.1)
+      const documentCollection2 = byGroupDocs[1].byProblem;
       expect(documentCollection2.length).toBe(1);
       expect(documentCollection2[0].label).toBe("Problem 1.1");
-      expect(documentCollection2[0].documents.length).toBe(1);
+      expect(documentCollection2[0].documents.length).toBe(2);
 
-      // Group 9 has Dennis (2.1) - in Problem 2.1
-      const documentGroup3 = byGroupDocs[2]; // Group 9
-      const documentCollection3 = documentGroup3.byProblem;
+      // Group 9: Dennis (2.1)
+      const documentCollection3 = byGroupDocs[2].byProblem;
       expect(documentCollection3.length).toBe(1);
       expect(documentCollection3[0].label).toBe("Problem 2.1");
       expect(documentCollection3[0].documents.length).toBe(1);
     });
 
     it('should sort problems in correct order (by investigation then problem)', () => {
-      // Primary sort by Problem to test the problem sorting directly
       const byProblemDocs = sortedDocuments.sortBy("Problem");
       expect(byProblemDocs.length).toBe(3);
       // Should be sorted: 1.1, 1.2, 2.1
       expect(byProblemDocs[0].label).toBe("Problem 1.1");
-      expect(byProblemDocs[0].documents.length).toBe(1);
+      expect(byProblemDocs[0].documents.length).toBe(2); // Joe + Group 5 group doc
       expect(byProblemDocs[1].label).toBe("Problem 1.2");
-      expect(byProblemDocs[1].documents.length).toBe(2);
+      expect(byProblemDocs[1].documents.length).toBe(3); // Scott + Kirk + Group 3 group doc
       expect(byProblemDocs[2].label).toBe("Problem 2.1");
       expect(byProblemDocs[2].documents.length).toBe(1);
     });
@@ -415,13 +507,15 @@ describe('DocumentGroup Model', () => {
       sortedDocuments.metadataDocsFiltered = MetadataDocMapModel.create(metadataWithNoProblem);
 
       const byProblemDocs = sortedDocuments.sortBy("Problem");
-      expect(byProblemDocs.length).toBe(3);
-      expect(byProblemDocs[0].label).toBe("Problem 1.2");
-      expect(byProblemDocs[0].documents.length).toBe(2);
-      expect(byProblemDocs[1].label).toBe("Problem 2.1");
-      expect(byProblemDocs[1].documents.length).toBe(1);
-      expect(byProblemDocs[2].label).toBe("No Problem");
+      expect(byProblemDocs.length).toBe(4);
+      expect(byProblemDocs[0].label).toBe("Problem 1.1");
+      expect(byProblemDocs[0].documents.length).toBe(1); // Group 5 group doc
+      expect(byProblemDocs[1].label).toBe("Problem 1.2");
+      expect(byProblemDocs[1].documents.length).toBe(3); // Scott + Kirk + Group 3 group doc
+      expect(byProblemDocs[2].label).toBe("Problem 2.1");
       expect(byProblemDocs[2].documents.length).toBe(1);
+      expect(byProblemDocs[3].label).toBe("No Problem");
+      expect(byProblemDocs[3].documents.length).toBe(1);
     });
   });
 
