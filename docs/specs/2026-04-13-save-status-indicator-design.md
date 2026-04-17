@@ -46,7 +46,7 @@ The `useDocumentSyncToFirebase` hook sets the state:
 
 `SaveIndicator` — a small MobX observer component rendering icon + optional text.
 
-**Placement:** Inside `renderGenericTitleBar()` in `document.tsx`, between the center `.title` div and the right `.actions` div. Only rendered for editable documents (not read-only).
+**Placement:** Rendered by `EditableDocumentContent` for editable documents (not read-only) and portaled into a target in the workspace panel heading. The workspace provides the portal target via `SaveIndicatorPortalContext` so the indicator appears in the shared heading bar above the document rather than inside the document's own title bar. This keeps the indicator visible across documents and avoids per-document-type titlebar changes.
 
 **Icons:** Two new inline SVG icons in `src/assets/icons/`:
 - `cloud-check.svg` — small cloud with checkmark (used in `idle` and `saved` states)
@@ -62,9 +62,13 @@ The `useDocumentSyncToFirebase` hook sets the state:
 |------|--------|
 | `src/models/document/document.ts` | Add volatile `saveState`, action `setSaveState` |
 | `src/hooks/use-document-sync-to-firebase.ts` | Call `setSaveState` in onSnapshot, onSuccess, onError |
-| `src/components/document/save-indicator.tsx` | New component |
+| `src/components/document/save-indicator.tsx` | New component, portals into workspace heading via context |
 | `src/components/document/save-indicator.scss` | New styles |
-| `src/components/document/document.tsx` | Render `SaveIndicator` in titlebar |
+| `src/components/document/save-indicator-portal-context.tsx` | New React context providing the portal target ref |
+| `src/components/document/editable-document-content.tsx` | Render `SaveIndicator` for editable, sync-enabled documents |
+| `src/components/workspace/workspace.tsx` | Create portal target ref; provide via context; pass to `ResizablePanel` via `headingExtra` |
+| `src/components/workspace/resizable-panel.tsx` | Accept `headingExtra` prop and render it in the panel heading |
+| `src/components/workspace/resizable-panel.scss` | Layout updates for heading to host the portal target |
 | `src/assets/icons/cloud-check.svg` | New icon |
 | `src/assets/icons/sync-arrows.svg` | New icon |
 

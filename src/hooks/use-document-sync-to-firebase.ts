@@ -210,6 +210,13 @@ export function useDocumentSyncToFirebase(
     retry: true,
     retryDelay: (attempt) => Math.min(attempt * 5, 30),
     // but clients may override the defaults
+    // Known issue: because throttledMutate can launch independent in-flight mutations and
+    // react-query retries fire on their own timer, these callbacks can resolve out of order
+    // relative to the snapshots that triggered them. A stale onSuccess after a newer onError
+    // could briefly flip saveState back to "saved" while a later save is still retrying, and
+    // worse, a stale retry can re-write older content over newer content. Not worth addressing
+    // in isolation — see the "Simplify useDocumentSyncToFirebase / drop react-query" plan for
+    // the broader refactor that removes this class of race by construction.
     onSuccess: (data: any, snapshot: DocumentContentSnapshotType) => {
       debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
       document.setSaveState("saved");

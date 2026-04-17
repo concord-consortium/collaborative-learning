@@ -115,9 +115,9 @@ export function EditableDocumentContent({
     {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
 
   useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly);
-  // Skip the save indicator when Firebase sync is disabled (doc-editor, iframe, authoring);
-  // those contexts have their own storage mechanisms.
-  const showSaveIndicator = !readOnly && !(window as any).DISABLE_FIREBASE_SYNC;
+  // Skip the save indicator for non-editable documents and when Firebase sync is disabled
+  // (doc-editor, iframe, authoring); those contexts have their own storage mechanisms.
+  const showSaveIndicator = !isReadOnly && !(window as any).DISABLE_FIREBASE_SYNC;
   return (
     <>
     {showSaveIndicator && <SaveIndicator document={document} />}

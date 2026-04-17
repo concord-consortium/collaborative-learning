@@ -32,10 +32,12 @@ export const ResizablePanel: React.FC<IProps> = ({collapsed, id, headingLabel, h
       tabIndex={tabIndex}
     >
       {hasHeading && (
-        <h2 id={headingId} className={classNames("section-heading", id)}>
-          {headingLabel}
+        <div className={classNames("section-heading-row", id)}>
+          <h2 id={headingId} className={classNames("section-heading", id)}>
+            {headingLabel}
+          </h2>
           {headingExtra}
-        </h2>
+        </div>
       )}
       {children}
     </section>

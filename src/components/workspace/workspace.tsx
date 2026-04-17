@@ -82,7 +82,9 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
             collapsed={!workspaceShown}
             id="workspace-panel"
             headingLabel={ariaLabels.workspacePane}
-            headingExtra={<div ref={saveIndicatorPortalRef} className="save-indicator-portal" />}
+            headingExtra={
+              <div ref={saveIndicatorPortalRef} className="save-indicator-portal" aria-hidden="true" />
+            }
             tabIndex={-1}
           >
             {standalone ? <StandAloneAuthComponent /> : <DocumentWorkspaceComponent />}

@@ -13,8 +13,8 @@
   display: flex;
   flex-direction: column;
 
-  // Content after the h2 should fill remaining height
-  > *:not(.section-heading) {
+  // Content after the heading row should fill remaining height
+  > *:not(.section-heading-row) {
     flex: 1;
 
     // Allow flex items to shrink below their content's minimum height
@@ -55,26 +55,30 @@
     }
   }
 
-  h2.section-heading {
+  .section-heading-row {
     align-items: center;
     background: $problem-orange-light-7;
     border-top-right-radius: 8px;
-    color: $charcoal-dark-2;
     display: flex;
-    font-size: 14px;
-    font-weight: 700;
     height: 34px;
     justify-content: center;
-    line-height: 1;
     margin: 0 0 2px;
-    padding: 0;
     position: relative;
-    text-align: center;
 
     &.workspace-panel {
       background: $workspace-teal-light-4;
       border-top-left-radius: 8px;
       border-top-right-radius: 0;
     }
+  }
+
+  h2.section-heading {
+    color: $charcoal-dark-2;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+    text-align: center;
   }
 }
