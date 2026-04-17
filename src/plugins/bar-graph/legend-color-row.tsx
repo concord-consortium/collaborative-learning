@@ -38,7 +38,6 @@ export const LegendColorRow = observer(function LegendColorRow ({attrValue}: IPr
       <Menu placement="auto">
         <MenuButton
           as={Button}
-          unstyle="true"
           data-testid="color-menu-button"
           aria-label={menuButtonAriaLabel}
         >

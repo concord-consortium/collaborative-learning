@@ -100,9 +100,10 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
   }
 
   // Build the strategy once and keep it stable across renders.
-  // The strategy's getElements/focusContent use getter functions that read
-  // live values through optionsRef, so element references stay fresh without
-  // recreating the strategy object (which would churn useFocusTrap's effect).
+  // The strategy captures getter functions from the initial options.focusTrap,
+  // but those getters read from stable React refs (contentRef, titleRef, etc.)
+  // or close over stable refs, so .current always yields the live element.
+  // Keeping the strategy object itself stable avoids churning useFocusTrap's effect.
   const strategyRef = useRef<ReturnType<typeof createClueTileStrategy> | undefined>(undefined);
   if (options.type === "tile" && !strategyRef.current) {
     strategyRef.current = createClueTileStrategy(options.focusTrap);
