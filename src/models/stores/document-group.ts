@@ -205,24 +205,44 @@ export class DocumentGroup {
 
   get byName(): DocumentGroup[] {
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
-    const groupDocuments: IDocumentMetadataModel[] = [];
+    const groupDocuments: Map<string, IDocumentMetadataModel[]> = new Map();
+    const groupMembers: Map<string, Set<string>> = new Map();
     this.documents.forEach((doc) => {
+      // Keep track of group documents, which will be added to each member of the group below
       if (doc.type === GroupDocument) {
-        groupDocuments.push(doc);
+        const groupId = doc.groupId ?? "unknownGroup";
+        if (!groupDocuments.has(groupId)) {
+          groupDocuments.set(groupId, []);
+        }
+        groupDocuments.get(groupId)?.push(doc);
         return;
       }
 
       const user = this.stores.class.getUserById(doc.uid);
+
       const sectionLabel = user ? `${user.lastName}, ${user.firstName}` : "Unknown";
       if (!documentMap.has(sectionLabel)) {
         documentMap.set(sectionLabel, []);
       }
       documentMap.get(sectionLabel)?.push(doc);
+
+      // Keep track of which group each user is in
+      const group = this.stores.groups.groupForUser(user?.id ?? "");
+      if (group) {
+        if (!groupMembers.has(group.id)) {
+          groupMembers.set(group.id, new Set());
+        }
+        groupMembers.get(group.id)?.add(sectionLabel);
+      }
     });
 
-    // All group documents are included in every user's collection
-    for (const doc of documentMap.values()) {
-      doc.push(...groupDocuments);
+    // Add each group document to each member of the group
+    for (const groupId of groupDocuments.keys()) {
+      groupMembers.get(groupId)?.forEach(member => {
+        groupDocuments.get(groupId)?.forEach(doc => {
+          documentMap.get(member)?.push(doc);
+        });
+      });
     }
 
     const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
