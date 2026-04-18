@@ -99,6 +99,14 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(funct
         <div className="history-view-section-header">
           <h4>Local History (Current Session)</h4>
           <span className="history-view-count">{localHistoryEntries.length} entries</span>
+          {treeManager && (
+            <button
+              className="inject-failing-entry"
+              onClick={() => treeManager.injectFailingHistoryEntry()}
+            >
+              Inject Failing Entry
+            </button>
+          )}
         </div>
         <div className="history-view-list">
           {localHistoryEntries.length === 0 ? (

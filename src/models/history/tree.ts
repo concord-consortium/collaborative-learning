@@ -1,5 +1,5 @@
 import {
-  applyPatch, flow, getSnapshot, IJsonPatch, isAlive, resolvePath, resolveIdentifier, types
+  applyPatch, flow, getSnapshot, IJsonPatch, isAlive, onPatch, resolvePath, resolveIdentifier, types
 } from "mobx-state-tree";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentContentModelType } from "../document/document-content";
@@ -7,6 +7,24 @@ import { SharedModelMapSnapshotOutType } from "../document/shared-model-entry";
 import { SharedModelType } from "../shared/shared-model";
 import { ITileModel, TileModel } from "../tiles/tile-model";
 import { TreeManagerAPI } from "./tree-manager-api";
+
+/**
+ * Error thrown when applyPatch fails partway through a batch.
+ * Includes the number of patches that were successfully applied so callers
+ * can identify which input patch caused the failure. The caller is
+ * responsible for rolling back the partial application using the inverse
+ * patches it already has access to (e.g. from history entry records).
+ */
+export class PatchApplicationError extends Error {
+  numApplied: number;
+
+  constructor(numApplied: number, originalError: unknown) {
+    const message = originalError instanceof Error ? originalError.message : String(originalError);
+    super(`Patch application failed after ${numApplied} patches: ${message}`);
+    this.name = "PatchApplicationError";
+    this.numApplied = numApplied;
+  }
+}
 
 export const Tree = types.model("Tree", {
 })
@@ -139,9 +157,60 @@ export const Tree = types.model("Tree", {
     },
 
     // Actually apply the patches.
-    // It might be called multiple times after startApplyingPatchesFromManager
+    // It might be called multiple times after startApplyingPatchesFromManager.
+    //
+    // Patches are applied as a single batch for performance. MST's applyPatch
+    // wraps the array in one action, which means middlewares (like the
+    // TreeMonitor) fire once for the whole batch instead of once per patch.
+    // With hundreds or thousands of patches during history playback, applying
+    // them one at a time would be significantly slower.
+    //
+    // However, batch applyPatch doesn't tell us which patch failed if an
+    // error occurs partway through. To work around this, we register an
+    // onPatch listener that counts successfully applied patches. On
+    // failure, we throw a PatchApplicationError containing the count so
+    // the caller can identify which input patch caused the failure. The
+    // caller is responsible for rolling back the partial application
+    // using the inverse patches it already has (e.g. from the history
+    // entry records that produced the batch).
+    //
+    // MST treats a patch with an empty or missing path as a whole-tree
+    // snapshot replacement. Applying such a patch produces multiple onPatch
+    // calls (one per field in the resulting snapshot) which would break our
+    // 1:1 mapping between input patches and onPatch events. We reject both
+    // the undefined/missing case AND the empty-string case upfront because
+    // neither form should appear in recorded history patches, and either
+    // would silently corrupt the numApplied counter.
     applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
-      applyPatch(self, patchesToApply);
+      for (const patch of patchesToApply) {
+        if (!patch.path) {
+          // Throw PatchApplicationError (with numApplied=0) so this
+          // case flows through the playback-failure handling path in
+          // TreeManager.goToHistoryEntry, rather than escaping as an
+          // unhandled error that bypasses rollback and failure
+          // recording.
+          throw new PatchApplicationError(
+            0,
+            new Error(
+              "History patches must have a non-empty path. " +
+              "Pathless or root-snapshot patches are not supported."
+            )
+          );
+        }
+      }
+
+      let numApplied = 0;
+      const disposer = onPatch(self, () => {
+        numApplied++;
+      });
+      try {
+        applyPatch(self, patchesToApply);
+      } catch (e) {
+        throw new PatchApplicationError(numApplied, e);
+      } finally {
+        disposer();
+      }
+
       // We return a promise because the API is async
       // The action itself doesn't do anything asynchronous though
       // so it isn't necessary to use a flow

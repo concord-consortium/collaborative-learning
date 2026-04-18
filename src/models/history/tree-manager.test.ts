@@ -349,6 +349,282 @@ it("can replay the history entries", async () => {
   expect(getSnapshot(manager.document.history)).toEqual(history);
 });
 
+// A history entry containing a patch that references a non-existent tile.
+// Both the forward patch and the inverse patch target the missing path,
+// so replaying this entry fails in either direction.
+const failingEntry = {
+  model: "TestTile",
+  action: "/injectedFailingEntry",
+  created: expect.any(Number),
+  id: expect.any(String),
+  records: [
+    { action: "/injectedFailingEntry",
+      inversePatches: [
+        { op: "replace", path: "/content/tileMap/NONEXISTENT/content/flag", value: false}
+      ],
+      patches: [
+        { op: "replace", path: "/content/tileMap/NONEXISTENT/content/flag", value: true}
+      ],
+      tree: "test"
+    },
+  ],
+  state: "complete",
+  tree: "test",
+  undoable: true
+};
+
+// An entry with three records for the same tree. The bad record is
+// sandwiched between two good records so that in either direction, at
+// least one good record's patches are applied before the bad record
+// fails — exercising the rollback logic in both directions.
+const mixedEntry = {
+  model: "TestTile",
+  action: "/mixedEntry",
+  created: expect.any(Number),
+  id: expect.any(String),
+  records: [
+    { action: "/mixedEntry",
+      inversePatches: [
+        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "initial"}
+      ],
+      patches: [
+        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "good first"}
+      ],
+      tree: "test"
+    },
+    { action: "/mixedEntry",
+      inversePatches: [
+        { op: "replace", path: "/content/tileMap/NONEXISTENT/content/flag", value: false}
+      ],
+      patches: [
+        { op: "replace", path: "/content/tileMap/NONEXISTENT/content/flag", value: true}
+      ],
+      tree: "test"
+    },
+    { action: "/mixedEntry",
+      inversePatches: [
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined}
+      ],
+      patches: [
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: true}
+      ],
+      tree: "test"
+    }
+  ],
+  state: "complete",
+  tree: "test",
+  undoable: true
+};
+
+// An entry with a single record containing three patches: a good patch,
+// a bad patch (non-existent tile), and another good patch. Sandwiching
+// the bad patch ensures that in either direction at least one good
+// patch is applied before the bad patch fails.
+const mixedPatchesEntry = {
+  model: "TestTile",
+  action: "/mixedPatchesEntry",
+  created: expect.any(Number),
+  id: expect.any(String),
+  records: [
+    { action: "/mixedPatchesEntry",
+      inversePatches: [
+        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "initial"},
+        { op: "replace", path: "/content/tileMap/NONEXISTENT/content/flag", value: false},
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined}
+      ],
+      patches: [
+        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "good patch first"},
+        { op: "replace", path: "/content/tileMap/NONEXISTENT/content/flag", value: true},
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: true}
+      ],
+      tree: "test"
+    }
+  ],
+  state: "complete",
+  tree: "test",
+  undoable: true
+};
+
+/**
+ * Seed the manager with a given history and corresponding tree state,
+ * positioned at a given numHistoryEventsApplied. The `setState` callback
+ * can make any tile state changes needed to match the "already applied"
+ * position. The callback's actions will be recorded by the middleware
+ * temporarily, but we reset the change document afterwards to clear
+ * that recording.
+ */
+function seedHistory(
+  manager: Instance<typeof TreeManager>,
+  history: HistoryEntrySnapshot[],
+  numApplied: number,
+  setState?: () => void
+) {
+  setState?.();
+  manager.setChangeDocument(CDocument.create({history}));
+  manager.setNumHistoryEntriesApplied(numApplied);
+}
+
+describe("history playback failure handling", () => {
+  // History: [action1, failingEntry, action2]. Scrubbing forward across
+  // failingEntry from position 1 should stop at position 1 and record
+  // a redo failure. Scrubbing backward across failingEntry from position
+  // 3 should stop at position 2 and record an undo failure.
+  const historyWithFailingEntry = [
+    makeRealHistoryEntry(action1),
+    makeRealHistoryEntry(failingEntry),
+    makeRealHistoryEntry(action2),
+  ];
+
+  it("records a failure and stops replay when scrubbing forward past a failing entry", async () => {
+    const {tileContent, manager} = setupDocument();
+    seedHistory(manager, historyWithFailingEntry, 1, () => tileContent.setActionText("action 1"));
+
+    // Scrub forward past the failing entry
+    await manager.goToHistoryEntry(3);
+
+    // Should have stopped at the failing entry without applying action2
+    expect(manager.numHistoryEventsApplied).toBe(1);
+    expect(tileContent.actionText).toBe("action 1");
+    expect(manager.historyPlaybackFailures.length).toBe(1);
+    expect(manager.historyPlaybackFailures[0].historyIndex).toBe(1);
+    expect(manager.historyPlaybackFailures[0].direction).toBe("redo");
+  });
+
+  it("records a failure and stops replay when scrubbing backward past a failing entry", async () => {
+    const {tileContent, manager} = setupDocument();
+    // Seed at position 3 (all entries applied) with actionText = "action 2"
+    // so the tree state matches what it would be if the history had been
+    // played forward successfully.
+    seedHistory(manager, historyWithFailingEntry, 3, () => tileContent.setActionText("action 2"));
+
+    // Scrub backward past the failing entry
+    await manager.goToHistoryEntry(0);
+
+    // Entry 2 (action2) should have been undone successfully, then entry 1
+    // (failingEntry) failed to undo. Rollback position is failedEntryIndex + 1 = 2,
+    // so entries 0 and 1 are still "applied". tileContent should reflect
+    // action1's value because action2's undo ran before the failure.
+    expect(manager.numHistoryEventsApplied).toBe(2);
+    expect(tileContent.actionText).toBe("action 1");
+    expect(manager.historyPlaybackFailures.length).toBe(1);
+    expect(manager.historyPlaybackFailures[0].historyIndex).toBe(1);
+    expect(manager.historyPlaybackFailures[0].direction).toBe("undo");
+  });
+
+  it("rolls back good records from the failing entry when scrubbing forward", async () => {
+    const {tileContent, manager} = setupDocument();
+    // mixedEntry records in forward order: good-1 (actionText), bad, good-3 (flag).
+    // Applying forward: good-1 succeeds → bad fails. Rollback should undo good-1.
+    seedHistory(manager, [makeRealHistoryEntry(mixedEntry)], 0,
+      () => tileContent.setActionText("initial"));
+
+    await manager.goToHistoryEntry(1);
+
+    expect(tileContent.actionText).toBe("initial");
+    expect(tileContent.flag).toBeUndefined();
+    expect(manager.numHistoryEventsApplied).toBe(0);
+    expect(manager.historyPlaybackFailures.length).toBe(1);
+  });
+
+  it("rolls back good records from the failing entry when scrubbing backward", async () => {
+    const {tileContent, manager} = setupDocument();
+    // Seed at position 1 as if mixedEntry had been played forward. State:
+    // actionText = "good first", flag = true.
+    // Scrubbing backward processes records in reverse: good-3's undo (flag → undefined)
+    // succeeds, then the bad record's undo fails. Rollback should re-apply the flag patch.
+    seedHistory(manager, [makeRealHistoryEntry(mixedEntry)], 1, () => {
+      tileContent.setActionText("good first");
+      tileContent.setFlag(true);
+    });
+
+    await manager.goToHistoryEntry(0);
+
+    expect(tileContent.flag).toBe(true);
+    expect(tileContent.actionText).toBe("good first");
+    expect(manager.numHistoryEventsApplied).toBe(1);
+    expect(manager.historyPlaybackFailures.length).toBe(1);
+  });
+
+  it("rolls back good patches from the failing record when scrubbing forward", async () => {
+    const {tileContent, manager} = setupDocument();
+    // mixedPatchesEntry's record has patches in order: good (actionText),
+    // bad, good (flag). Forward: good-1 succeeds → bad fails. Rollback
+    // should undo good-1.
+    seedHistory(manager, [makeRealHistoryEntry(mixedPatchesEntry)], 0,
+      () => tileContent.setActionText("initial"));
+
+    await manager.goToHistoryEntry(1);
+
+    expect(tileContent.actionText).toBe("initial");
+    expect(tileContent.flag).toBeUndefined();
+    expect(manager.numHistoryEventsApplied).toBe(0);
+    expect(manager.historyPlaybackFailures.length).toBe(1);
+  });
+
+  it("rolls back good patches from the failing record when scrubbing backward", async () => {
+    const {tileContent, manager} = setupDocument();
+    // Seed at position 1 as if mixedPatchesEntry had been played forward.
+    // State: actionText = "good patch first", flag = true.
+    // Scrubbing backward applies inversePatches in reverse: good-3 inverse
+    // (flag → undefined) succeeds, then bad inverse fails. Rollback should
+    // re-apply the flag patch.
+    seedHistory(manager, [makeRealHistoryEntry(mixedPatchesEntry)], 1, () => {
+      tileContent.setActionText("good patch first");
+      tileContent.setFlag(true);
+    });
+
+    await manager.goToHistoryEntry(0);
+
+    expect(tileContent.flag).toBe(true);
+    expect(tileContent.actionText).toBe("good patch first");
+    expect(manager.numHistoryEventsApplied).toBe(1);
+    expect(manager.historyPlaybackFailures.length).toBe(1);
+  });
+
+  // A history entry containing a patch with an empty `path` (which MST
+  // interprets as a whole-tree snapshot replacement). Tree rejects
+  // pathless patches up front; we want that rejection to flow through
+  // the recoverable playback-failure path just like any other patch
+  // application failure.
+  const pathlessPatchEntry = {
+    model: "TestTile",
+    action: "/pathlessEntry",
+    created: expect.any(Number),
+    id: expect.any(String),
+    records: [
+      { action: "/pathlessEntry",
+        inversePatches: [
+          { op: "replace", path: "", value: {} }
+        ],
+        patches: [
+          { op: "replace", path: "", value: {} }
+        ],
+        tree: "test"
+      },
+    ],
+    state: "complete",
+    tree: "test",
+    undoable: true
+  };
+
+  it("handles a pathless patch as a recoverable playback failure", async () => {
+    const { manager } = setupDocument();
+    seedHistory(manager, [makeRealHistoryEntry(pathlessPatchEntry)], 0);
+
+    await jestSpyConsole("warn", async () => {
+      await manager.goToHistoryEntry(1);
+    });
+
+    // Pathless patches must not escape as an unhandled error — they
+    // should be recorded as a playback failure and leave the position
+    // just before the bad entry.
+    expect(manager.numHistoryEventsApplied).toBe(0);
+    expect(manager.historyPlaybackFailures.length).toBe(1);
+    expect(manager.historyPlaybackFailures[0].historyIndex).toBe(0);
+    expect(manager.historyPlaybackFailures[0].direction).toBe("redo");
+  });
+});
+
 it("records tile model changes in response to shared model changes", async () => {
   const {tileContent, manager, sharedModel} = setupDocument();
   sharedModel.setValue("shared value");
