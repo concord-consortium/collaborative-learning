@@ -11,7 +11,7 @@ import {IGenerateAiSummaryUnionParams, isWarmUpParams} from "../../shared/shared
 // for ease of development and testing.
 
 // update this when deploying updates to this function
-const version = "1.0.0";
+const version = "1.0.1";
 
 export const generateClassData = onCall(
   {
@@ -21,11 +21,16 @@ export const generateClassData = onCall(
   async (request: CallableRequest<IGenerateAiSummaryUnionParams>) => {
     const params = request.data;
     if (isWarmUpParams(params)) return {version};
-    const {context: userContext, portal, demo, unit} = params || {};
+    const {context: userContext, unit} = params || {};
 
     const validatedUserContext = validateUserContext(userContext, request.auth);
     const {isValid, uid} = validatedUserContext;
-    const classHash = userContext.classHash;
+    const classHash = userContext?.classHash;
+    // Derive the realm from the validated user context rather than trusting the
+    // client-provided top-level `portal`/`demo` fields: a stale localStorage
+    // demoName can otherwise route an authed session into the wrong realm.
+    const portal = userContext?.appMode === "authed" ? userContext.portal : undefined;
+    const demo = userContext?.appMode === "demo" ? userContext.demoName : undefined;
     if (!isValid || !classHash || !uid || !unit || (!portal && !demo)) {
       throw new HttpsError("invalid-argument", "The provided arguments are not valid.");
     }
