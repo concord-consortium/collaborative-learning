@@ -26,7 +26,7 @@ function beforeTest(params) {
 }
 
 context('Graph History Playback', () => {
-  it('verify linked table data appears in graph during history playback', function () {
+  it('verify linked table data and axis labels restore during history playback', function () {
     beforeTest(queryParams);
 
     cy.log('create a table and enter data');
@@ -54,8 +54,10 @@ context('Graph History Playback', () => {
     xyTile.linkTable("Table Data 1");
     cy.wait(1000); // extra time for legend resizing
 
-    cy.log('verify dots appear in primary workspace');
+    cy.log('verify dots and legend attribute labels in primary workspace');
     xyTile.getGraphDot().should('have.length', 2);
+    xyTile.getXAttributesLabel().should('contain.text', 'x');
+    xyTile.getYAttributesLabel().should('contain.text', 'y');
 
     cy.log('wait for history to be recorded');
     cy.wait(4000);
@@ -64,59 +66,23 @@ context('Graph History Playback', () => {
     cy.get('.toolbar .tool.toggleplayback').click();
     cy.get('[data-testid="playback-slider"]').should('be.visible');
 
-    cy.log('verify graph with dots appears in playback document at end of history');
+    cy.log('verify graph with dots and legend labels appears in playback document at end of history');
     xyTile.getTile(playbackWS).should('be.visible');
     xyTile.getGraphDot(playbackWS).should('have.length', 2);
+    xyTile.getXAttributesLabel(playbackWS).should('contain.text', 'x');
+    xyTile.getYAttributesLabel(playbackWS).should('contain.text', 'y');
 
     cy.log('scrub to beginning of history - graph tile should not exist');
     moveSliderTo(5);
     cy.get(`${playbackWS} .canvas .document-content .graph-tool-tile`).should('not.exist');
 
-    cy.log('scrub back to end - dots should reappear');
+    cy.log('scrub back to end - dots and legend labels should reappear');
     moveSliderTo(98);
     xyTile.getGraphDot(playbackWS).should('have.length', 2);
+    xyTile.getXAttributesLabel(playbackWS).should('contain.text', 'x');
+    xyTile.getYAttributesLabel(playbackWS).should('contain.text', 'y');
 
     cy.log('verify primary workspace is unaffected during playback');
     xyTile.getGraphDot().should('have.length', 2);
-  });
-
-  it('verify graph axis attribute labels restore during history playback', function () {
-    beforeTest(queryParams);
-
-    cy.log('create table, enter data, create graph, and link them');
-    clueCanvas.addTile('table');
-    tableToolTile.getTableTile().should('be.visible');
-    cy.get(".primary-workspace").within(() => {
-      tableToolTile.typeInTableCell(1, '5');
-      tableToolTile.typeInTableCell(2, '10');
-    });
-
-    clueCanvas.addTile('graph');
-    xyTile.getTile().should('be.visible');
-    clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
-    xyTile.linkTable("Table Data 1");
-    cy.wait(1000);
-
-    cy.log('verify legend attribute labels in primary workspace');
-    xyTile.getXAttributesLabel().should('contain.text', 'x');
-    xyTile.getYAttributesLabel().should('contain.text', 'y');
-
-    cy.log('wait for history to be recorded');
-    cy.wait(4000);
-
-    cy.log('open playback and verify legend attribute labels in playback document');
-    cy.get('.toolbar .tool.toggleplayback').click();
-    cy.get('[data-testid="playback-slider"]').should('be.visible');
-    xyTile.getXAttributesLabel(playbackWS).should('contain.text', 'x');
-    xyTile.getYAttributesLabel(playbackWS).should('contain.text', 'y');
-
-    cy.log('scrub to beginning - graph and legend should not exist');
-    moveSliderTo(5);
-    cy.get(`${playbackWS} .canvas .document-content .graph-tool-tile`).should('not.exist');
-
-    cy.log('scrub back to end - legend attribute labels should be restored');
-    moveSliderTo(98);
-    xyTile.getXAttributesLabel(playbackWS).should('contain.text', 'x');
-    xyTile.getYAttributesLabel(playbackWS).should('contain.text', 'y');
   });
 });

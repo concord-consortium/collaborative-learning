@@ -110,6 +110,18 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     };
   }, []);
 
+  const callMatchCirclesToData = useCallback(() => {
+    matchCirclesToData({
+      dataConfiguration,
+      pointRadius: graphModel.getPointRadius(),
+      pointColor: graphModel.pointColor,
+      pointStrokeColor: graphModel.pointStrokeColor,
+      dotsElement: dotsRef.current,
+      enableAnimation,
+      instanceId
+    });
+  }, [dataConfiguration, graphModel, dotsRef, enableAnimation, instanceId]);
+
   const callRescaleIfNeeded = useCallback((growOnly: boolean = false) => {
     const currentLayer = graphModel.layerForDataConfigurationId(dataConfiguration.id);
     if (graphSettings.scalePlotOnValueChange &&
@@ -230,22 +242,14 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
           || isRemoveAttributeAction(action)
           || ['addCases', 'removeCases', 'setAttributeType'].includes(action.name)) {
 
-        matchCirclesToData({
-          dataConfiguration,
-          pointRadius: graphModel.getPointRadius(),
-          pointColor: graphModel.pointColor,
-          pointStrokeColor: graphModel.pointStrokeColor,
-          dotsElement: dotsRef.current,
-          enableAnimation, instanceId
-        });
+        callMatchCirclesToData();
         const growOnly = isAddCasesAction(action);
         callRescaleIfNeeded(growOnly);
         callRefreshPointPositions(false);
       }
     }) || (() => true);
     return () => disposer();
-  }, [controller, dataset, dataConfiguration, enableAnimation, graphModel,
-    callRefreshPointPositions, dotsRef, instanceId, callRescaleIfNeeded]);
+  }, [dataConfiguration, callMatchCirclesToData, callRefreshPointPositions, callRescaleIfNeeded]);
 
   // respond to case changes from any source (including history playback patches).
   // The onAction handler above only fires for interactive actions, not for applyPatch.
@@ -260,20 +264,12 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       },
       () => {
         if (!isAlive(dataConfiguration)) return;
-        matchCirclesToData({
-          dataConfiguration,
-          pointRadius: graphModel.getPointRadius(),
-          pointColor: graphModel.pointColor,
-          pointStrokeColor: graphModel.pointStrokeColor,
-          dotsElement: dotsRef.current,
-          enableAnimation, instanceId
-        });
+        callMatchCirclesToData();
         callRefreshPointPositions(false);
       },
       { fireImmediately: true, name: "usePlot.caseCount reaction" }
     );
-  }, [dataConfiguration, enableAnimation, graphModel, instanceId,
-      dotsRef, callRefreshPointPositions]);
+  }, [dataConfiguration, callMatchCirclesToData, callRefreshPointPositions]);
 
   // respond to pointsNeedUpdating becoming false; that is when the points have been updated
   // Happens when the number of plots has changed for now. Possibly other situations in the future.
