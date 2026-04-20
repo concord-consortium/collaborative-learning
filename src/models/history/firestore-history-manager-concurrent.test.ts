@@ -63,13 +63,34 @@ const ArrayTestTree = types.model("ArrayTestTree", {
   },
 }));
 
-function makeFirestoreMock(): Firestore {
-  const docRef = () => {
-    const ref: any = { path: "mock/path" };
+interface FirestoreMockOptions {
+  // Value returned for metadata.lastHistoryEntry inside the transaction.
+  txMetadataLastHistoryEntry?: { id: string; index: number } | null;
+}
+
+interface FirestoreMockCapture {
+  transactionSetCalls: Array<{ ref: any; data: any }>;
+  transactionUpdateCalls: Array<{ ref: any; data: any }>;
+}
+
+function makeFirestoreMock(opts: FirestoreMockOptions = {}): {
+  firestore: Firestore;
+  capture: FirestoreMockCapture;
+} {
+  const capture: FirestoreMockCapture = {
+    transactionSetCalls: [],
+    transactionUpdateCalls: [],
+  };
+  const makeDocRef = (...parts: string[]): any => {
+    const ref: any = { path: parts.join("/") };
+    // The manager chains .withConverter(...) off documentRef before
+    // passing to transaction.get; return the same ref so subsequent
+    // calls keep the identity and the mock transaction.get can read
+    // from it.
     ref.withConverter = () => ref;
     return ref;
   };
-  return {
+  const firestore = {
     doc: jest.fn(() => ({
       get: jest.fn(async () => ({ exists: true })),
       onSnapshot: jest.fn((callback: (doc: { exists: boolean }) => void) => {
@@ -78,8 +99,27 @@ function makeFirestoreMock(): Firestore {
       }),
     })),
     getFullPath: jest.fn((path: string) => path),
-    documentRef: jest.fn(() => docRef()),
+    documentRef: jest.fn((...parts: string[]) => makeDocRef(...parts)),
+    timestamp: jest.fn(() => new Date()),
+    runTransaction: jest.fn(async (fn: (tx: any) => Promise<void>) => {
+      const tx = {
+        get: jest.fn(async () => ({
+          exists: true,
+          data: () => ({
+            lastHistoryEntry: opts.txMetadataLastHistoryEntry ?? null,
+          }),
+        })),
+        set: jest.fn((ref: any, data: any) => {
+          capture.transactionSetCalls.push({ ref, data });
+        }),
+        update: jest.fn((ref: any, data: any) => {
+          capture.transactionUpdateCalls.push({ ref, data });
+        }),
+      };
+      await fn(tx);
+    }),
   } as unknown as Firestore;
+  return { firestore, capture };
 }
 
 function makeUserContextProviderMock(): UserContextProvider {
@@ -92,7 +132,7 @@ function makeUserContextProviderMock(): UserContextProvider {
 // waitUntilEnvironmentAndMetadataDocReady and an initial
 // last-history-entry load (which writes to expectedRemoteHead). We
 // await both here so each test starts in a deterministic state.
-async function setupManager() {
+async function setupManager(firestoreOpts: FirestoreMockOptions = {}) {
   const treeId = "main";
   const manager = TreeManager.create({ document: {}, undoStore: {} });
   const tree = ArrayTestTree.create({ key: treeId, uid: "test-user" });
@@ -100,18 +140,20 @@ async function setupManager() {
   // not need a separate putTree call.
   manager.setMainDocument(tree as any);
 
+  const { firestore, capture } = makeFirestoreMock(firestoreOpts);
+
   const historyManager = new FirestoreHistoryManagerConcurrent({
-    firestore: makeFirestoreMock(),
+    firestore,
     userContextProvider: makeUserContextProviderMock(),
     treeManager: manager,
-    uploadLocalHistory: false,
+    uploadLocalHistory: true,
     syncRemoteHistory: false,
   });
 
   await historyManager.environmentAndMetadataDocReadyPromise;
   await historyManager.getInitialLastHistoryEntry();
 
-  return { manager, tree, historyManager, treeId };
+  return { manager, tree, historyManager, treeId, firestoreCapture: capture };
 }
 
 // Build a HistoryEntrySnapshot with a single record on the given tree.
@@ -241,6 +283,49 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(manager.document.history.map(e => e.id)).toEqual(["R1"]);
       expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual([]);
       expect(historyManager.expectedRemoteHead).toBe("R1");
+    });
+  });
+
+  describe("uploadQueuedHistoryEntries — send-side fork", () => {
+    it("aborts the upload transaction when metadata.lastHistoryEntry.id doesn't match expectedRemoteHead", async () => {
+      // Simulate: our client believes the remote head is "r0", but
+      // between queueing L1 and running the transaction, client B has
+      // already uploaded R1 (so the metadata now reports R1 as head).
+      getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
+      const { manager, historyManager, firestoreCapture } = await setupManager({
+        txMetadataLastHistoryEntry: { id: "R1", index: 1 },
+      });
+      expect(historyManager.expectedRemoteHead).toBe("r0");
+
+      // Queue a local entry L1.
+      const l1Snapshot = makeEntrySnapshot(
+        "L1",
+        "main",
+        [{ op: "replace", path: "/items/1/color", value: "red" }],
+        [{ op: "replace", path: "/items/1/color", value: "white" }],
+      );
+      const l1Entry = HistoryEntry.create(l1Snapshot);
+      manager.addHistoryEntryAfterApplying(l1Entry);
+      historyManager.completedHistoryEntryQueue.push(l1Entry);
+
+      // Make environmentAndMetadataDocReadyPromise resolve immediately
+      // so the transaction body actually runs.
+      historyManager.environmentAndMetadataDocReadyPromise = Promise.resolve();
+
+      // Invoke upload. Should detect the mismatch and NOT write the entry.
+      await historyManager.uploadQueuedHistoryEntries();
+
+      // Transaction.set should NOT have been called for L1 — the
+      // upload is aborted because remote head differs from expected.
+      expect(firestoreCapture.transactionSetCalls).toEqual([]);
+
+      // L1 stays in the queue (receive-side rollback will remove it
+      // when the listener eventually delivers R1).
+      expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual(["L1"]);
+
+      // expectedRemoteHead is unchanged — only a successful upload
+      // advances it on the send side.
+      expect(historyManager.expectedRemoteHead).toBe("r0");
     });
   });
 });

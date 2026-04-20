@@ -7,6 +7,21 @@ import { CDocumentType, FAKE_EXCHANGE_ID, FAKE_HISTORY_ENTRY_ID } from "./tree-m
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType, HistoryOperation } from "./history";
 import { FirestoreHistoryManager, IFirestoreHistoryManagerArgs } from "./firestore-history-manager";
 
+/**
+ * Thrown inside the upload transaction when the remote chain's head
+ * has advanced past what we expected — meaning another client has
+ * committed entries we don't yet know about. Aborts the transaction
+ * so the pending uploads don't chain off a stale head. The receive
+ * side will pick up the unknown remote entries via the Firestore
+ * listener and trigger the shared rollback path.
+ */
+export class RemoteHeadChangedError extends Error {
+  constructor(public expected: string | null, public actual: string | null) {
+    super(`Remote head changed: expected ${expected}, actual ${actual}`);
+    this.name = "RemoteHeadChangedError";
+  }
+}
+
 export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
 
   completedHistoryEntryQueue: Array<HistoryEntryType> = [];
@@ -155,6 +170,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       return;
     }
     this.uploadInProgress = true;
+    let uploadAborted = false;
 
     try {
       // The parent Firestore metadata document might not be ready yet so we need to wait for that.
@@ -192,72 +208,96 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
         // Nothing to do
         return;
       }
-      await firestore.runTransaction(async (transaction) => {
+      try {
+        await firestore.runTransaction(async (transaction) => {
 
-        const converter = typeConverter<IDocumentMetadata>();
-        const metadataDoc = await transaction.get(firestore.documentRef(metadataPath).withConverter(converter));
+          const converter = typeConverter<IDocumentMetadata>();
+          const metadataDoc = await transaction.get(firestore.documentRef(metadataPath).withConverter(converter));
 
-        if (!metadataDoc.exists) {
-          // The metadata document must exist because we waited for it above
-          throw new Error("Could not get metadata document in history transaction");
-        }
-
-        const metadata = metadataDoc.data();
-        if (!metadata) {
-          throw new Error("Could not get metadata document data in history transaction");
-        }
-
-        const lastEntry = metadata.lastHistoryEntry;
-        let lastEntryIndex = lastEntry?.index ?? -1;
-        let lastEntryId = lastEntry?.id ?? null;
-
-        // TODO: if we want to migrate existing documents to this approach then if there is no lastHistoryEntry
-        // we need to look through the existing history entries. We can't do that in a transaction
-        // though. So we would need to do that before starting the transaction.
-        // This migration would not be safe if there are multiple clients writing history at the same time.
-        // The plan is to just use this for new group documents, so if there is some lost history
-        // for existing group documents that is OK.
-
-        entriesToUpload.forEach(entry => {
-          const newEntryIndex = lastEntryIndex + 1;
-
-          const docRef = firestore.documentRef(historyEntriesPath, entry.id);
-          const snapshot = getSnapshot(entry);
-
-          transaction.set(docRef, {
-            index: newEntryIndex,
-            created: firestore.timestamp(),
-            previousEntryId: lastEntryId,
-            entry: JSON.stringify(snapshot)
-          });
-          lastEntryIndex = newEntryIndex;
-          lastEntryId = entry.id;
-        });
-
-        transaction.update(firestore.documentRef(metadataPath), {
-          lastHistoryEntry: {
-            index: lastEntryIndex,
-            id: lastEntryId
+          if (!metadataDoc.exists) {
+            // The metadata document must exist because we waited for it above
+            throw new Error("Could not get metadata document in history transaction");
           }
+
+          const metadata = metadataDoc.data();
+          if (!metadata) {
+            throw new Error("Could not get metadata document data in history transaction");
+          }
+
+          const lastEntry = metadata.lastHistoryEntry;
+          let lastEntryIndex = lastEntry?.index ?? -1;
+          let lastEntryId = lastEntry?.id ?? null;
+
+          // Send-side fork check: if metadata's last-entry id differs
+          // from what we expect, another client has advanced the remote
+          // chain. Abort the transaction so we don't chain our local
+          // entries onto a stale head. The receive side will handle
+          // the rollback when the listener delivers the unknown entries.
+          if (lastEntryId !== this.expectedRemoteHead) {
+            throw new RemoteHeadChangedError(this.expectedRemoteHead, lastEntryId);
+          }
+
+          // TODO: if we want to migrate existing documents to this approach then if there is no lastHistoryEntry
+          // we need to look through the existing history entries. We can't do that in a transaction
+          // though. So we would need to do that before starting the transaction.
+          // This migration would not be safe if there are multiple clients writing history at the same time.
+          // The plan is to just use this for new group documents, so if there is some lost history
+          // for existing group documents that is OK.
+
+          entriesToUpload.forEach(entry => {
+            const newEntryIndex = lastEntryIndex + 1;
+
+            const docRef = firestore.documentRef(historyEntriesPath, entry.id);
+            const snapshot = getSnapshot(entry);
+
+            transaction.set(docRef, {
+              index: newEntryIndex,
+              created: firestore.timestamp(),
+              previousEntryId: lastEntryId,
+              entry: JSON.stringify(snapshot)
+            });
+            lastEntryIndex = newEntryIndex;
+            lastEntryId = entry.id;
+          });
+
+          transaction.update(firestore.documentRef(metadataPath), {
+            lastHistoryEntry: {
+              index: lastEntryIndex,
+              id: lastEntryId
+            }
+          });
         });
-      });
+      } catch (error) {
+        if (error instanceof RemoteHeadChangedError) {
+          // Expected: another client wrote between our read and this
+          // transaction. Leave the queue intact; the receive side
+          // will drain it after resolving the fork.
+          uploadAborted = true;
+        } else {
+          throw error;
+        }
+      }
 
-      // If we made it here then the transaction succeeded so we can remove the entriesToUpload
-      // from the queue.
-      this.completedHistoryEntryQueue.splice(0, entriesToUpload.length);
+      if (!uploadAborted) {
+        // Transaction succeeded: remove uploaded entries from the queue.
+        this.completedHistoryEntryQueue.splice(0, entriesToUpload.length);
 
-      // Advance expectedRemoteHead: our uploaded entries are now on the
-      // remote chain, so our last-uploaded id is the new head.
-      const lastUploaded = entriesToUpload[entriesToUpload.length - 1];
-      if (lastUploaded) {
-        this.setExpectedRemoteHead(lastUploaded.id);
+        // Advance expectedRemoteHead: our uploaded entries are now on the
+        // remote chain, so our last-uploaded id is the new head.
+        const lastUploaded = entriesToUpload[entriesToUpload.length - 1];
+        if (lastUploaded) {
+          this.setExpectedRemoteHead(lastUploaded.id);
+        }
       }
     } finally {
       this.uploadInProgress = false;
     }
 
-    // If there are more entries to upload, do that now
-    if (this.completedHistoryEntryQueue.length > 0) {
+    // If there are more entries to upload, do that now.
+    // But don't retry if we aborted due to a remote-head mismatch —
+    // the receive-side listener will re-trigger uploads after the fork
+    // is resolved.
+    if (!uploadAborted && this.completedHistoryEntryQueue.length > 0) {
       this.uploadQueuedHistoryEntries();
     }
   }
