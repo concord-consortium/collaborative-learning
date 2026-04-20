@@ -45,6 +45,15 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
    */
   paused = false;
 
+  /**
+   * Serialization chain for applyHistoryEntries. Each call awaits the
+   * previous promise before doing work so that concurrent listener
+   * firings don't cause interleaved mutations of document.history and
+   * the upload queue. Rejection-safe: the chain continues even after
+   * a prior call throws.
+   */
+  applyInProgress: Promise<void> = Promise.resolve();
+
   initialLastHistoryPromise: Promise<LastHistoryEntry> | undefined;
 
   constructor(args: IFirestoreHistoryManagerArgs) {
@@ -379,8 +388,25 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     await this.rollbackLocalEntries(localUncommittedCount);
   }
 
+  /**
+   * Public entry point. Serializes concurrent callers by chaining
+   * through applyInProgress. Each call waits for the previous to
+   * finish (even if the previous rejected) before doing work.
+   */
+  async applyHistoryEntries(wrapperDocs: IFirestoreHistoryEntryDoc[]): Promise<void> {
+    const previous = this.applyInProgress;
+    const run = (async () => {
+      try { await previous; } catch { /* prior call failed — still run */ }
+      return this.doApplyHistoryEntries(wrapperDocs);
+    })();
+    // Record a rejection-safe handle so future callers don't inherit
+    // a rejected promise (which would then re-throw on every await).
+    this.applyInProgress = run.then(() => undefined, () => undefined);
+    return run;
+  }
+
   // The second half of this method is very similar to gotoHistoryEntry in TreeManager
-  async applyHistoryEntries(wrapperDocs: IFirestoreHistoryEntryDoc[]) {
+  private async doApplyHistoryEntries(wrapperDocs: IFirestoreHistoryEntryDoc[]) {
     const { treeManager } = this;
 
     // Carry the wrapper shape through the method so previousEntryId stays

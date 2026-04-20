@@ -328,4 +328,92 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(historyManager.expectedRemoteHead).toBe("r0");
     });
   });
+
+  describe("applyHistoryEntries — serialization", () => {
+    it("waits for a prior applyHistoryEntries call to finish before starting the next", async () => {
+      const { tree, historyManager } = await setupManager();
+      tree.setItems([Item.create({ id: "a" })]);
+
+      // Intercept tree.applyPatchesFromManager so we can block the
+      // first invocation and observe when the second one would start.
+      const patchCalls: number[] = [];
+      let releaseFirstApply!: () => void;
+      const firstApplyGate = new Promise<void>(resolve => {
+        releaseFirstApply = resolve;
+      });
+      const originalApply = tree.applyPatchesFromManager;
+      tree.applyPatchesFromManager = jest.fn(async (h, e, patches) => {
+        const callIndex = patchCalls.length;
+        patchCalls.push(callIndex);
+        if (callIndex === 0) {
+          await firstApplyGate;
+        }
+        return originalApply.call(tree, h, e, patches);
+      }) as any;
+
+      const e1 = makeEntrySnapshot(
+        "E1", "main",
+        [{ op: "replace", path: "/items/0/color", value: "red" }],
+        [{ op: "replace", path: "/items/0/color", value: "white" }],
+      );
+      const e2 = makeEntrySnapshot(
+        "E2", "main",
+        [{ op: "replace", path: "/items/0/color", value: "blue" }],
+        [{ op: "replace", path: "/items/0/color", value: "red" }],
+      );
+
+      // Kick off two applies concurrently.
+      const p1 = historyManager.applyHistoryEntries([makeWrapperDoc(0, undefined, e1)]);
+      const p2 = historyManager.applyHistoryEntries([makeWrapperDoc(1, "E1", e2)]);
+
+      // Flush a few microtasks so p1 has a chance to reach applyPatchesFromManager.
+      for (let i = 0; i < 10; i++) await Promise.resolve();
+
+      // Only the first apply should have reached the tree.
+      expect(patchCalls).toEqual([0]);
+
+      // Release p1 — p2 should then start.
+      releaseFirstApply();
+      await p1;
+      await p2;
+
+      expect(patchCalls).toEqual([0, 1]);
+      expect(tree.items[0].color).toBe("blue");
+    });
+
+    it("does not stall subsequent apply calls when a prior one rejects", async () => {
+      const { tree, historyManager } = await setupManager();
+      tree.setItems([Item.create({ id: "a" })]);
+
+      let shouldFail = true;
+      const originalApply = tree.applyPatchesFromManager;
+      tree.applyPatchesFromManager = jest.fn(async (h, e, patches) => {
+        if (shouldFail) {
+          shouldFail = false;
+          throw new Error("boom");
+        }
+        return originalApply.call(tree, h, e, patches);
+      }) as any;
+
+      const e1 = makeEntrySnapshot(
+        "E1", "main",
+        [{ op: "replace", path: "/items/0/color", value: "red" }],
+        [{ op: "replace", path: "/items/0/color", value: "white" }],
+      );
+      const e2 = makeEntrySnapshot(
+        "E2", "main",
+        [{ op: "replace", path: "/items/0/color", value: "green" }],
+        [{ op: "replace", path: "/items/0/color", value: "white" }],
+      );
+
+      // First call rejects.
+      await expect(
+        historyManager.applyHistoryEntries([makeWrapperDoc(0, undefined, e1)])
+      ).rejects.toThrow("boom");
+
+      // Second call should still run and succeed.
+      await historyManager.applyHistoryEntries([makeWrapperDoc(1, undefined, e2)]);
+      expect(tree.items[0].color).toBe("green");
+    });
+  });
 });
