@@ -34,3 +34,7 @@ jobs:
       - name: Run Tests with Firebase Emulators
         working-directory: ./functions-v2
         run: npx firebase emulators:exec --only firestore,database --project demo-test "npm test"
+        env:
+          # on-analysis-document-imaged.test.ts mocks the OpenAI call, but
+          # firebase-functions warns if this secret is unset. Any value works.
+          OPENAI_API_KEY: dummy
