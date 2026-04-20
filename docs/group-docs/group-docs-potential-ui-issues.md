@@ -103,7 +103,7 @@ This has been confirmed in the current group document. The root cause is that th
 - **Within the 5-second window**: switch to User B and place the cursor in the middle of a paragraph
 - User A's change arrives and triggers a Slate re-sync
 - **Expected Result**: User B's cursor position may be reset or become invalid when the Slate editor re-syncs with the model. The `normalizeSelection` call may move the cursor.
-- **Actual Result**: If the text is added before User B's cursor then the user user B cursor jumps to back the number of characters that were added. If the cursor is before the text being added, then it looks fine.
+- **Actual Result**: If the text is added before User B's cursor then the user B cursor jumps to back the number of characters that were added. If the cursor is before the text being added, then it looks fine.
 
 ### ❌ Text typed during remote update lost **[requires active interaction]**
 
