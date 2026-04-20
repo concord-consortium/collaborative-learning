@@ -30,7 +30,6 @@ export const TextContentModel = TileContentModel
   })
   .volatile(self => ({
     editor:  undefined as CustomEditor | undefined,
-    highlightBoxesCache: new ObservableMap<string, IHighlightBox>(),
   }))
   .views(self => ({
     // guarantees string (not readonly string) types
@@ -146,13 +145,6 @@ export const TextContentModel = TileContentModel
       const index = self.highlightedText.findIndex(ht => ht.id === id);
       if (index >= 0) {
         self.highlightedText.splice(index, 1);
-      }
-    },
-    setHighlightBoxesCache(id: string, box: IHighlightBox) {
-      if (box) {
-        self.highlightBoxesCache.set(id, box);
-      } else {
-        self.highlightBoxesCache.delete(id);
       }
     }
   }))
