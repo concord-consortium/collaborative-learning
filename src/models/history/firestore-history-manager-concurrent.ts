@@ -46,6 +46,18 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   paused = false;
 
   /**
+   * Stop processing remote history entries delivered by the Firestore
+   * listener. Only used manually from the history-view panel to set up
+   * fork scenarios deterministically — specifically, to drive the
+   * send-side RemoteHeadChangedError path, which otherwise races the
+   * listener. loadHistory delivers the full remote state on each
+   * snapshot, so we simply buffer the latest delivery and replay it on
+   * resume.
+   */
+  pausedDownloads = false;
+  pendingDownloadBuffer: IFirestoreHistoryEntryDoc[] | undefined;
+
+  /**
    * Serialization chain for applyHistoryEntries. Each call awaits the
    * previous promise before doing work so that concurrent listener
    * firings don't cause interleaved mutations of document.history and
@@ -84,9 +96,12 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // an action so MobX batches its mutation.
     makeObservable<this, "setExpectedRemoteHead">(this, {
       paused: observable,
+      pausedDownloads: observable,
       expectedRemoteHead: observable,
       pauseUploads: action,
       resumeUploadsAfterDelay: action,
+      pauseDownloads: action,
+      resumeDownloads: action,
       setExpectedRemoteHead: action,
     });
   }
@@ -122,6 +137,19 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     }, delayMs);
   }
 
+  pauseDownloads() {
+    this.pausedDownloads = true;
+  }
+
+  resumeDownloads() {
+    this.pausedDownloads = false;
+    const buffered = this.pendingDownloadBuffer;
+    this.pendingDownloadBuffer = undefined;
+    if (buffered) {
+      this.applyHistoryEntries(buffered);
+    }
+  }
+
   private setExpectedRemoteHead(id: string | null) {
     this.expectedRemoteHead = id;
   }
@@ -138,6 +166,14 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       throw new Error("syncRemoteFirestoreHistory: no change document exists yet");
       // If we need to create the change document here, we can use this code:
       // treeManager.setChangeDocument(CDocument.create({history: []}));
+    }
+
+    if (this.pausedDownloads) {
+      // Buffer the latest delivery; loadHistory sends the full remote
+      // state on every snapshot, so later deliveries supersede earlier
+      // ones. resumeDownloads replays the latest buffered state.
+      this.pendingDownloadBuffer = historyEntryDocs;
+      return;
     }
 
     // Pass the wrapper docs through so applyHistoryEntries retains

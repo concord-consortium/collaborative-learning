@@ -152,6 +152,14 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(funct
                 >
                   Resume After 5s
                 </button>
+                <button
+                  className={concurrentManager.pausedDownloads ? "paused" : ""}
+                  onClick={() => concurrentManager.pausedDownloads
+                    ? concurrentManager.resumeDownloads()
+                    : concurrentManager.pauseDownloads()}
+                >
+                  {concurrentManager.pausedDownloads ? "Resume Downloads" : "Pause Downloads"}
+                </button>
               </div>
             )}
           </div>
