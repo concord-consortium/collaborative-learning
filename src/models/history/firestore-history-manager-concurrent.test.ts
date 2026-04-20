@@ -226,7 +226,7 @@ describe("FirestoreHistoryManagerConcurrent", () => {
   });
 
   describe("applyHistoryEntries — receive-side fork", () => {
-    it("rolls back local uncommitted entries when a remote entry arrives with a mismatched previousEntryId", async () => {
+    it("rolls back local uncommitted entries on mismatched previousEntryId", async () => {
       // Mock so the manager's initial-last-history-entry load
       // seeds expectedRemoteHead to "r0".
       getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
