@@ -47,7 +47,7 @@ const niceDate = (timestamp: number) => {
 
 const AISummaryContent: React.FC = () => {
   const { firestore } = useDBStore();
-  const { unit, portal, demo } = useStores();
+  const { unit } = useStores();
   const userContext = useUserContext();
   const generateClassData = useFirebaseFunction("generateClassData_v2");
   const [summaryData, setSummaryData] = useState<SummaryData>({});
@@ -55,15 +55,11 @@ const AISummaryContent: React.FC = () => {
   const lastSummaryCreatedAtRef = useRef<CreatedAt|undefined>();
 
   const summarize = useCallback(() => {
-    const portalHost = portal.portalHost;
-    const demoName = demo.name;
     generateClassData({
       context: userContext,
-      portal: portalHost,
-      demo: demoName,
       unit: unit.code,
     });
-  }, [portal, unit.code, userContext, demo.name, generateClassData]);
+  }, [unit.code, userContext, generateClassData]);
 
   const handleSummarizeAgain = useCallback(() => {
     setStatus("regenerating");
