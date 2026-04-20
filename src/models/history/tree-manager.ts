@@ -243,7 +243,7 @@ export const TreeManager = types
    * "Failed to resolve reference" — which was the root cause of the
    * fork-rollback + local-edit crash that prevented change uploads.
    */
-  removeTailHistoryEntries(count: number) {
+  removeLastHistoryEntries(count: number) {
     if (count <= 0) return;
     const start = Math.max(0, self.document.history.length - count);
 

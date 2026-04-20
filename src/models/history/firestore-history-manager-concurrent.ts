@@ -388,7 +388,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID)));
 
     // Remove the rolled-back entries from local history and upload queue.
-    treeManager.removeTailHistoryEntries(count);
+    treeManager.removeLastHistoryEntries(count);
     this.completedHistoryEntryQueue =
       this.completedHistoryEntryQueue.filter(e => !rolledBackIds.has(e.id));
   }

@@ -940,7 +940,7 @@ async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number
   return expect(updateCalledTimes).resolves.toBeUndefined();
 }
 
-describe("removeTailHistoryEntries cleans up undoStore", () => {
+describe("removeLastHistoryEntries cleans up undoStore", () => {
   it("removes the corresponding undoStore references", async () => {
     const {tileContent, manager, undoStore} = setupDocument();
 
@@ -953,7 +953,7 @@ describe("removeTailHistoryEntries cleans up undoStore", () => {
     expect(undoStore.history.length).toBe(2);
     expect(undoStore.undoIdx).toBe(2);
 
-    manager.removeTailHistoryEntries(1);
+    manager.removeLastHistoryEntries(1);
 
     expect(manager.document.history.length).toBe(1);
     expect(undoStore.history.length).toBe(1);
@@ -962,11 +962,11 @@ describe("removeTailHistoryEntries cleans up undoStore", () => {
 
   it("allows a new undoable action after a rollback without MST reference errors", async () => {
     // This reproduces the exact crash that motivated the fix: after
-    // removeTailHistoryEntries, the next undoStore.addHistoryEntry call
+    // removeLastHistoryEntries, the next undoStore.addHistoryEntry call
     // used to throw "Failed to resolve reference" because the entry it
     // pointed at had been destroyed in document.history.
     //
-    // Note: removeTailHistoryEntries drops history entries but does NOT
+    // Note: removeLastHistoryEntries drops history entries but does NOT
     // revert the tree state — the fork-rollback path in
     // FirestoreHistoryManagerConcurrent applies inverse patches
     // separately. So flag is still true after the removal, and we flip
@@ -976,7 +976,7 @@ describe("removeTailHistoryEntries cleans up undoStore", () => {
     tileContent.setFlag(true);
     await expectEntryToBeComplete(manager, 1);
 
-    manager.removeTailHistoryEntries(1);
+    manager.removeLastHistoryEntries(1);
     expect(undoStore.history.length).toBe(0);
 
     // If the fix is working this completes without throwing.
@@ -999,7 +999,7 @@ describe("removeTailHistoryEntries cleans up undoStore", () => {
     expect(undoStore.history.length).toBe(2);
     expect(undoStore.undoIdx).toBe(2);
 
-    manager.removeTailHistoryEntries(2);
+    manager.removeLastHistoryEntries(2);
 
     expect(undoStore.history.length).toBe(0);
     // Both removals were at index < undoIdx, so undoIdx should have
