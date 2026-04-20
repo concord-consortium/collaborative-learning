@@ -231,6 +231,17 @@ export const TreeManager = types
     self.document.history.push(entry);
   },
 
+  /**
+   * Remove the last `count` entries from the local history. Used by
+   * FirestoreHistoryManagerConcurrent when it rolls back uncommitted
+   * local entries after detecting a fork with the remote chain.
+   */
+  removeTailHistoryEntries(count: number) {
+    if (count <= 0) return;
+    const start = Math.max(0, self.document.history.length - count);
+    self.document.history.splice(start, self.document.history.length - start);
+  },
+
   setChangeDocument(cDoc: CDocumentType) {
     self.document = cDoc;
   },
