@@ -5,7 +5,7 @@
 ## Story Info/Status
 
 Story: https://concord-consortium.atlassian.net/browse/CLUE-504
-Status: *Hot fix deployed to production on 2026-04-18; repo sync + follow-ups in progress*
+Status: *Hot fix deployed to production on 2026-04-18; repo sync (a6aeab287) and follow-ups complete*
 
 ## Overview
 
@@ -107,11 +107,11 @@ The scheduled bulk path (`updateClassDataDocsForRealm` → hardcoded `portals`/`
 
 ## Remaining Work
 
-### 1. Commit the Firestore rule (this PR)
+### 1. Commit the Firestore rule (completed: a6aeab287)
 
 Add the `aicontent` rule block to [firestore.rules](../../firestore.rules) inside `match /authed/{portal}`. Deploying reconciles prod, staging, and master for this file.
 
-### 2. Regression tests for `generateClassData_v2`
+### 2. Regression tests for `generateClassData_v2` (completed: 82ec09eb7)
 
 There are currently **no tests** for the callable — the bug shipped uncaught because the only test file ([functions-v2/test/update-class-data-docs.test.ts](../../functions-v2/test/update-class-data-docs.test.ts)) covers the scheduled bulk path `updateClassDataDocs` and exercises only the demo realm.
 
@@ -120,13 +120,13 @@ Following the template of [post-document-comment-mocked.test.ts](../../functions
 - A mocked or emulator test invoking `generateClassData` with `context.appMode === "authed"`, a valid portal, and a stray `context.demoName`. Assert the Firestore query that runs targets `authed/<portal>/documents`, not `demo/<demoName>/documents`.
 - An emulator test for the demo case to ensure that path wasn't regressed.
 
-### 3. Empty-query guard in `updateSingleClassDataDoc`
+### 3. Empty-query guard in `updateSingleClassDataDoc` (completed: 2f8622615)
 
 Classes that legitimately have zero documents for a unit still crash with the same `TypeError`. The fix is in [shared/update-class-data-docs.ts](../../shared/update-class-data-docs.ts), around `updateSingleClassDataDoc` and `updateClassDataDoc`. When `classData[contextId]` is undefined, write a placeholder summary doc with `userCount: 0, documentCount: 0, studentContent: "", teacherContent: "", summary: null, summaryCreatedAt: <now>` so the client renders a clear empty state rather than spinning on "Generating summary…".
 
 The client currently renders "No teacher summary available" / "No student summary available" when the respective strings are falsy; verify that path is reached, or add an explicit empty-state message.
 
-### 4. Remove dead client-side fields
+### 4. Remove dead client-side fields (completed: 64a807a9f)
 
 In [src/components/navigation/ai-summary.tsx](../../src/components/navigation/ai-summary.tsx) `summarize()` currently sends `{ context, portal, demo, unit }`. Since the server now ignores `portal` and `demo`, drop them — the callable payload becomes `{ context, unit }`, consistent with `getAiContent_v2` and other callables.
 
