@@ -83,10 +83,10 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       // treeManager.setChangeDocument(CDocument.create({history: []}));
     }
 
-    // Not the most efficient but lets get the history entries from the historyEntryDocs
-    // If we unify on loadFirestoreHistory we can have it do this parsing for us
-    const incomingHistory: HistoryEntrySnapshot[] = historyEntryDocs.map(doc => doc.entry);
-
+    // Pass the wrapper docs through so applyHistoryEntries retains
+    // previousEntryId for fork detection. The snapshots themselves are
+    // unwrapped inside applyHistoryEntries when they're actually applied.
+    //
     // We do not use applySnapshot here because it would replace the entire history with
     // the remote history. Sometimes there will be local history entries that have not
     // yet been uploaded, so we can't just overwrite those.
@@ -95,7 +95,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // than on other clients. That's because those other clients wouldn't have our local
     // entries yet.
     // This problem is being punted for now.
-    this.applyHistoryEntries(incomingHistory);
+    this.applyHistoryEntries(historyEntryDocs);
   }
 
   async onHistoryEntryCompleted(
@@ -223,8 +223,13 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   }
 
   // The second half of this method is very similar to gotoHistoryEntry in TreeManager
-  async applyHistoryEntries(incomingHistory: HistoryEntrySnapshot[]) {
+  async applyHistoryEntries(wrapperDocs: IFirestoreHistoryEntryDoc[]) {
     const { treeManager } = this;
+
+    // Carry the wrapper shape through the method so previousEntryId stays
+    // available for fork-detection in later steps. The snapshots themselves
+    // are what get applied to the tree.
+    const incomingHistory: HistoryEntrySnapshot[] = wrapperDocs.map(doc => doc.entry);
 
     // This should be the last entry that was applied to the document when it was first loaded.
     const lastEntry = await this.getInitialLastHistoryEntry();
