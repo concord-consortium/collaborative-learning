@@ -11,7 +11,7 @@ Status: *Hot fix deployed to production on 2026-04-18; repo sync (a6aeab287) and
 
 The Class Summary feature on the Sort Work tab ([CLUE-296](https://concord-consortium.atlassian.net/browse/CLUE-296)) was built and tested for demo classes only. A teacher-report link from `learn.concord.org` exposed two latent bugs that together prevented any portal-authenticated teacher from ever seeing a summary.
 
-Both bugs were fixed live on the deployed environment to so a conference presentation could demo them. This document describes what was broken, what the hot fix changed, and what remaining work is needed to bring the repository back into sync with the deployed state and finish related improvements.
+Both bugs were fixed live on the deployed environment so that a conference presentation could demo them. This document describes what was broken, what the hot fix changed, and what remaining work is needed to bring the repository back into sync with the deployed state and finish related improvements.
 
 ## The Original Bugs
 

@@ -26,9 +26,10 @@ export const generateClassData = onCall(
     const validatedUserContext = validateUserContext(userContext, request.auth);
     const {isValid, uid} = validatedUserContext;
     const classHash = userContext?.classHash;
-    // Derive the realm from the validated user context rather than trusting the
-    // client-provided top-level `portal`/`demo` fields: a stale localStorage
-    // demoName can otherwise route an authed session into the wrong realm.
+    // Pick portal vs. demo by the context's appMode so a stale localStorage
+    // demoName can't route an authed session into the demo realm. For authed
+    // mode, `validateUserContext` requires the portal claim to match
+    // `userContext.portal`, so reading it here is safe once `isValid` holds.
     const portal = userContext?.appMode === "authed" ? userContext.portal : undefined;
     const demo = userContext?.appMode === "demo" ? userContext.demoName : undefined;
     if (!isValid || !classHash || !uid || !unit || (!portal && !demo)) {
