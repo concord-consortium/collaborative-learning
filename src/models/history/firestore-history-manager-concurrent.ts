@@ -24,6 +24,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
    * upload.
    */
   expectedRemoteHead: string | null = null;
+
   /**
    * Stop uploading history entries from Firestore temporarily.
    */
@@ -52,8 +53,11 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // history entries that are not in this list.
     this.getInitialLastHistoryEntry();
 
-    // Make paused observable so UI can react to changes
-    makeObservable(this, {
+    // Make paused observable so UI can react to changes.
+    // Cast to `any` is required because TypeScript's AnnotationsMap only
+    // exposes public members; `setExpectedRemoteHead` is private but must
+    // still be wrapped as an action so MobX batches its mutation.
+    makeObservable<this, "setExpectedRemoteHead">(this, {
       paused: observable,
       expectedRemoteHead: observable,
       pauseUploads: action,
@@ -69,9 +73,10 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       this.initialLastHistoryPromise = getLastHistoryEntry(firestore, documentPath).then(entry => {
         // Seed expectedRemoteHead from the initial load exactly once.
         // Later updates come from applyHistoryEntries / uploadQueuedHistoryEntries.
-        // setExpectedRemoteHead is registered as a MobX action via
-        // makeObservable, so this assignment is wrapped in an action
-        // context automatically.
+        // Calling setExpectedRemoteHead here is safe: the method is
+        // registered as a MobX action via makeObservable, so it creates
+        // its own action batch for the mutation even though the .then
+        // callback itself is not an action context.
         this.setExpectedRemoteHead(entry?.id ?? null);
         return entry;
       });
@@ -92,7 +97,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     }, delayMs);
   }
 
-  setExpectedRemoteHead(id: string | null) {
+  private setExpectedRemoteHead(id: string | null) {
     this.expectedRemoteHead = id;
   }
 
@@ -348,13 +353,13 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     });
     await Promise.all(finishPromises);
 
-    // Advance expectedRemoteHead to the last wrapper we just applied.
-    // Use the wrapper docs (not entries) so we're tracking the
-    // remote-chain id, not a local-uncommitted id. If nothing was
-    // applied (e.g. all were filtered by dedup), leave it alone.
-    const lastApplied = wrapperDocs[wrapperDocs.length - 1];
-    if (lastApplied) {
-      this.setExpectedRemoteHead(lastApplied.entry.id);
+    // Advance expectedRemoteHead to the id of the last wrapper we
+    // received. These came from the remote listener, so they're on the
+    // remote chain even if local history already contains some of them.
+    // If no wrappers were delivered, leave the head alone.
+    const lastWrapper = wrapperDocs[wrapperDocs.length - 1];
+    if (lastWrapper) {
+      this.setExpectedRemoteHead(lastWrapper.entry.id);
     }
   }
 }
