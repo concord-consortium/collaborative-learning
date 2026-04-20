@@ -262,6 +262,83 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     }
   }
 
+  /**
+   * Roll back the last `count` entries of the local history by applying
+   * their inverse patches (in reverse order). Also drops the
+   * corresponding entries from the upload queue by id.
+   *
+   * Used after fork detection on the receive side. The caller has
+   * verified these trailing entries are local-uncommitted (they live
+   * in document.history after expectedRemoteHead) before invoking.
+   */
+  async rollbackLocalEntries(count: number): Promise<void> {
+    if (count <= 0) return;
+    const { treeManager } = this;
+    const history = treeManager.document.history;
+    const entriesToRollback = history.slice(history.length - count).reverse();
+    const rolledBackIds = new Set(entriesToRollback.map(e => e.id));
+
+    const trees = Object.values(treeManager.trees);
+    await Promise.all(trees.map(tree =>
+      tree.startApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID)));
+
+    // Each entry's inverse patches, grouped by tree, applied newest-first.
+    const treePatches: Record<string, IJsonPatch[]> = {};
+    Object.keys(treeManager.trees).forEach(treeId => { treePatches[treeId] = []; });
+    for (const entry of entriesToRollback) {
+      const records = [...entry.records].reverse();
+      for (const record of records) {
+        const patches = treePatches[record.tree];
+        if (patches) patches.push(...record.getPatches(HistoryOperation.Undo));
+      }
+    }
+
+    await Promise.all(Object.entries(treePatches).map(([treeId, patches]) => {
+      if (patches.length === 0) return undefined;
+      const tree = treeManager.trees[treeId];
+      return tree?.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
+    }));
+
+    await Promise.all(trees.map(tree =>
+      tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID)));
+
+    // Remove the rolled-back entries from local history and upload queue.
+    treeManager.removeTailHistoryEntries(count);
+    this.completedHistoryEntryQueue =
+      this.completedHistoryEntryQueue.filter(e => !rolledBackIds.has(e.id));
+  }
+
+  /**
+   * Check whether the incoming remote entries continue from our local
+   * head. If not, we've forked: roll back local uncommitted entries
+   * (those living after expectedRemoteHead in document.history) and
+   * then fall through to normal application.
+   *
+   * This is the single place fork resolution happens on the receive
+   * side. GD-9/GD-10 will extend this to merge non-conflicting
+   * changes instead of rolling them all back.
+   */
+  async detectAndResolveFork(newWrapperDocs: IFirestoreHistoryEntryDoc[]): Promise<void> {
+    if (newWrapperDocs.length === 0) return;
+
+    const history = this.treeManager.document.history;
+    const localHeadId = history.length > 0 ? history[history.length - 1].id : null;
+    const firstIncomingPrev = newWrapperDocs[0].previousEntryId ?? null;
+
+    if (firstIncomingPrev === localHeadId) {
+      // Not forked — the incoming stream continues from our head.
+      return;
+    }
+
+    // Forked. Everything after expectedRemoteHead in our local history
+    // is local-uncommitted and must be rolled back.
+    const headIndex = this.expectedRemoteHead
+      ? history.findIndex(e => e.id === this.expectedRemoteHead)
+      : -1;
+    const localUncommittedCount = history.length - (headIndex + 1);
+    await this.rollbackLocalEntries(localUncommittedCount);
+  }
+
   // The second half of this method is very similar to gotoHistoryEntry in TreeManager
   async applyHistoryEntries(wrapperDocs: IFirestoreHistoryEntryDoc[]) {
     const { treeManager } = this;
@@ -299,11 +376,22 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // above.
     const existingIds = new Set(existingHistory.map(e => e.id));
     const entrySnapshots: HistoryEntrySnapshot[] = [];
-    for (const entry of unappliedHistory) {
+    const newWrapperDocs: IFirestoreHistoryEntryDoc[] = [];
+    for (let i = 0; i < unappliedHistory.length; i++) {
+      const entry = unappliedHistory[i];
       if (!existingIds.has(entry.id)) {
         entrySnapshots.push(entry);
+        // wrapperDocs and unappliedHistory may be offset if some
+        // initial entries were filtered by getInitialLastHistoryEntry.
+        // Find the wrapper for this entry by id.
+        const wrap = wrapperDocs.find(w => w.entry.id === entry.id);
+        if (wrap) newWrapperDocs.push(wrap);
       }
     }
+
+    // Fork detection: if the first new entry doesn't continue from our
+    // local head, roll back local uncommitted entries first.
+    await this.detectAndResolveFork(newWrapperDocs);
 
     const trees = Object.values(treeManager.trees);
 

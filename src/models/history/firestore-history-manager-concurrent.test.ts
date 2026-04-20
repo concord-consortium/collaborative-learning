@@ -182,4 +182,65 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(historyManager.expectedRemoteHead).toBe("R1");
     });
   });
+
+  describe("applyHistoryEntries — receive-side fork", () => {
+    it("rolls back local uncommitted entries when a remote entry arrives with a mismatched previousEntryId", async () => {
+      // Mock so the manager's initial-last-history-entry load
+      // seeds expectedRemoteHead to "r0".
+      getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
+      const { manager, tree, historyManager } = await setupManager();
+      expect(historyManager.expectedRemoteHead).toBe("r0");
+
+      // Baseline: 3 items. A prior remote entry r0 is the last known
+      // remote-chain tail.
+      tree.setItems([
+        Item.create({ id: "a" }),
+        Item.create({ id: "b" }),
+        Item.create({ id: "c" }),
+      ]);
+
+      // Simulate local user A: made a local edit L1 that set
+      // items[1].color = "red". The patch has already been applied
+      // locally, and L1 is in local history and in the upload queue.
+      const l1Snapshot = makeEntrySnapshot(
+        "L1",
+        "main",
+        [{ op: "replace", path: "/items/1/color", value: "red" }],
+        [{ op: "replace", path: "/items/1/color", value: "white" }],
+      );
+      applyPatch(tree, l1Snapshot.records![0]!.patches as IJsonPatch[]);
+      const l1Entry = HistoryEntry.create(l1Snapshot);
+      manager.addHistoryEntryAfterApplying(l1Entry);
+      historyManager.completedHistoryEntryQueue.push(l1Entry);
+
+      // Sanity: local state currently reflects A's edit.
+      expect(tree.items[1].color).toBe("red");
+
+      // Incoming remote entry R1 from user B: remove items[0].
+      // previousEntryId = "r0", which matches expectedRemoteHead but
+      // NOT our local head (which is L1) — that's the fork.
+      const r1Snapshot = makeEntrySnapshot(
+        "R1",
+        "main",
+        [{ op: "remove", path: "/items/0" }],
+        [{ op: "add", path: "/items/0", value: { id: "a", color: "white" } }],
+      );
+      const r1wrap = makeWrapperDoc(1, "r0", r1Snapshot);
+
+      await historyManager.applyHistoryEntries([r1wrap]);
+
+      // Post-fix expectations:
+      // 1. L1 is rolled back (items[1].color back to white).
+      // 2. R1 applied (items[0] "a" removed).
+      // 3. L1 removed from local history; R1 added.
+      // 4. L1 removed from upload queue.
+      // 5. expectedRemoteHead advances to R1.
+      expect(tree.items.map(i => i.id)).toEqual(["b", "c"]);
+      expect(tree.items[0].color).toBe("white");
+      expect(tree.items[1].color).toBe("white");
+      expect(manager.document.history.map(e => e.id)).toEqual(["R1"]);
+      expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual([]);
+      expect(historyManager.expectedRemoteHead).toBe("R1");
+    });
+  });
 });
