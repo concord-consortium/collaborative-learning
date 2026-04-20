@@ -244,13 +244,10 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       // Simulate local user A: made a local edit L1 that set
       // items[1].color = "red". The patch has already been applied
       // locally, and L1 is in local history and in the upload queue.
-      const l1Snapshot = makeEntrySnapshot(
-        "L1",
-        "main",
-        [{ op: "replace", path: "/items/1/color", value: "red" }],
-        [{ op: "replace", path: "/items/1/color", value: "white" }],
-      );
-      applyPatch(tree, l1Snapshot.records![0]!.patches as IJsonPatch[]);
+      const l1Patches: IJsonPatch[] = [{ op: "replace", path: "/items/1/color", value: "red" }];
+      const l1InversePatches: IJsonPatch[] = [{ op: "replace", path: "/items/1/color", value: "white" }];
+      const l1Snapshot = makeEntrySnapshot("L1", "main", l1Patches, l1InversePatches);
+      applyPatch(tree, l1Patches);
       const l1Entry = HistoryEntry.create(l1Snapshot);
       manager.addHistoryEntryAfterApplying(l1Entry);
       historyManager.completedHistoryEntryQueue.push(l1Entry);

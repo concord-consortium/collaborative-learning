@@ -176,9 +176,10 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       return;
     }
 
-    // Pass the wrapper docs through so applyHistoryEntries retains
-    // previousEntryId for fork detection. The snapshots themselves are
-    // unwrapped inside applyHistoryEntries when they're actually applied.
+    // Pass the wrapper docs through so fork detection can see
+    // previousEntryId on each entry. Entries are unwrapped to
+    // HistoryEntrySnapshot inside doApplyHistoryEntries where they're
+    // actually applied to the tree.
     //
     // We do not use applySnapshot here because it would replace the entire history with
     // the remote history. Sometimes there will be local history entries that have not
@@ -477,16 +478,17 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // TODO: this could be more efficient by combining it with the incomingHistory.findIndex()
     // above.
     const existingIds = new Set(existingHistory.map(e => e.id));
+    // Index wrappers by entry id for O(1) lookup below. unappliedHistory
+    // is a subset of incomingHistory (= wrapperDocs.map(doc => doc.entry)),
+    // so every entry we keep has a corresponding wrapper here by
+    // construction.
+    const wrapperById = new Map(wrapperDocs.map(w => [w.entry.id, w]));
     const entrySnapshots: HistoryEntrySnapshot[] = [];
     const newWrapperDocs: IFirestoreHistoryEntryDoc[] = [];
-    for (let i = 0; i < unappliedHistory.length; i++) {
-      const entry = unappliedHistory[i];
+    for (const entry of unappliedHistory) {
       if (!existingIds.has(entry.id)) {
         entrySnapshots.push(entry);
-        // wrapperDocs and unappliedHistory may be offset if some
-        // initial entries were filtered by getInitialLastHistoryEntry.
-        // Find the wrapper for this entry by id.
-        const wrap = wrapperDocs.find(w => w.entry.id === entry.id);
+        const wrap = wrapperById.get(entry.id);
         if (wrap) newWrapperDocs.push(wrap);
       }
     }
