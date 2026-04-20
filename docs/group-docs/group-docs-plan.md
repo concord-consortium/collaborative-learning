@@ -45,9 +45,17 @@ Fix cases where model changes via patch application don't update the tile UI. Th
 
 ### GD-6: Corruption Prevention
 
-The transaction infrastructure is in place (`lastHistoryEntry` metadata, `previousEntryId` chaining, Firestore transactions in `uploadQueuedHistoryEntries()`). What remains is client-side fork detection and rollback: when a remote entry arrives whose `previousEntryId` doesn't match the local head, the client should reverse its local uncommitted entries (using their undo patches) back to the fork point, then apply the remote entries.
+The transaction infrastructure is in place (`lastHistoryEntry` metadata, `previousEntryId` chaining, Firestore transactions in `uploadQueuedHistoryEntries()`). What remains is client-side fork detection and rollback, which is needed in two places that share a single codepath:
+
+**Receive-side fork detection.** When a remote entry arrives whose `previousEntryId` doesn't match the local head, the client should reverse its local uncommitted entries (using their undo patches) back to the fork point, drop them from the upload queue, and apply the remote entries.
+
+**Send-side fork detection.** The upload transaction in `uploadQueuedHistoryEntries()` reads `metadata.lastHistoryEntry` on each attempt. If that id doesn't match what the client expected (i.e., another client has committed entries this one doesn't yet know about), the transaction must abort rather than chaining the queued local entries onto a stale head. Without this, the upload code happily chains local entries off whatever remote head it finds, even though those local entries were derived from a different base — effectively committing a lie to the remote chain. Once the transaction is aborted, the Firestore listener will deliver the unknown remote entries and the receive-side handler will drain the queue via the shared rollback path.
+
+**Shared codepath.** Both entry points — listener-delivered remote entries and aborted-then-recovered uploads — route through a single rollback method. This is the extension point GD-9 and GD-10 use: those stories insert per-tile and per-shared-model merging exceptions inside this method, and because both sides go through it, the exceptions apply symmetrically whether a fork is detected on receive or on send.
 
 After this step, the document and history should never be corrupted by concurrent edits. However, any conflict will roll back all of one user's local changes, which may be disruptive.
+
+Note: the original GD-5 brainstorm (see `group-docs-brainstorm.md`) described both sides of the rollback. When GD-5 was split into CLUE-376 (transaction infrastructure, done) and GD-6 (this story), the send-side detail was elided. GD-6 restores it.
 
 ### GD-9: Document-Level Merging
 

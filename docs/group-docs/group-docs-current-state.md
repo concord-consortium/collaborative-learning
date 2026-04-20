@@ -95,7 +95,13 @@ So far all the issues that have been explored above, could be addressed by a glo
 
 Some of the infrastructure for this is already in place. `FirestoreHistoryManagerConcurrent.uploadQueuedHistoryEntries()` uses Firestore transactions to atomically write history entries and update a `lastHistoryEntry` field (index and id) on the metadata document. Each uploaded entry includes a `previousEntryId` linking it to the prior entry. This means conflicting writes are serialized on the server side — two clients can't both claim the same `previousEntryId`. However, the client does not yet detect when its local history has forked from the remote history, and does not roll back local changes when that happens. Currently, remote entries are just appended to local history regardless of whether they conflict (see `syncRemoteFirestoreHistory()`), which can result in the inconsistencies described above.
 
-What remains to be implemented is the fork detection and rollback: when a remote entry arrives whose `previousEntryId` doesn't match the local head, the client should reverse its local uncommitted entries (using their undo patches) back to the fork point, then apply the remote entries.
+What remains to be implemented is fork detection + rollback in two places, both routing through a single rollback codepath:
+
+1. **Receive side.** When a remote entry arrives via the Firestore listener (`syncRemoteFirestoreHistory()`) whose `previousEntryId` doesn't match the local head, reverse the local uncommitted entries (via their undo patches) back to the fork point, drop them from the upload queue, and apply the remote entries.
+
+2. **Send side.** Inside the upload transaction in `uploadQueuedHistoryEntries()`, compare the `metadata.lastHistoryEntry.id` read from Firestore to the locally-tracked expected remote head. If they differ, another client has committed entries this one doesn't know about yet. Abort the transaction. Without this, the current code blindly chains the queued local entries off whatever head it finds, even though those local entries were derived from a different base — the resulting remote records then claim a chain position they were not actually derived from. Once aborted, the Firestore listener will deliver the unknown entries and the receive-side handler drains the queue.
+
+Both paths share a single rollback method. GD-9 and GD-10 extend that method with per-tile / per-shared-model merging exceptions; routing both sides through it ensures those exceptions apply symmetrically.
 
 This approach will mean any conflicting changes will be lost by one of the users. If the users do not edit the same tile at the same time these conflicting changes should be minimal.
 
