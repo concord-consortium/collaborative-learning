@@ -82,6 +82,12 @@ export const DocumentModel = Tree.named("Document")
     contentErrorMessage: undefined as string | undefined,
     showPlaybackControls: false,
     commentsManager: undefined as DocumentCommentsManager | undefined,
+    // Value of envelope.lastHistoryEntryId loaded from RTDB — the id of the
+    // last history entry that had been applied when this content snapshot
+    // was saved. Used once at history-load time to detect drift between the
+    // loaded content and the Firestore history chain. Undefined for pre-
+    // feature saves or fresh docs with no prior history.
+    savedLastHistoryEntryId: undefined as string | undefined,
   }))
   .views(self => ({
     // This is needed for the tree monitor and manager
@@ -286,6 +292,10 @@ export const DocumentModel = Tree.named("Document")
       self.contentStatus = ContentStatus.Error;
       self.invalidContent = content;
       self.contentErrorMessage = message;
+    },
+
+    setSavedLastHistoryEntryId(id: string | undefined) {
+      self.savedLastHistoryEntryId = id;
     }
   }))
   .actions(self => ({

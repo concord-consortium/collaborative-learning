@@ -16,6 +16,7 @@ import { useMutation, UseMutationOptions } from "react-query";
 import { ITileMapEntry } from "../../shared/shared";
 import { DocumentContentSnapshotType } from "src/models/document/document-content";
 import { IArrowAnnotation } from "src/models/annotations/arrow-annotation";
+import { TreeManagerType } from "../models/history/tree-manager";
 
 function debugLog(...args: any[]) {
   // eslint-disable-next-line no-console
@@ -217,8 +218,22 @@ export function useDocumentSyncToFirebase(
       console.warn(`ERROR: Failed to update document content for ${type} document ${key}:`, document.changeCount);
     }
   };
-  const transform = (snapshot: DocumentContentSnapshotType) =>
-    ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) });
+  const transform = (snapshot: DocumentContentSnapshotType) => {
+    // Record the id of the last history entry that had been applied when
+    // this content snapshot was captured. The drift check on document load
+    // compares this to the Firestore history — if the id isn't present in
+    // the history, the content reflects edits that never made it to the
+    // history chain.
+    const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
+    const lastHistoryEntryId = treeManager?.latestDocumentHistoryEntry?.id;
+    const base = {
+      changeCount: document.incChangeCount(),
+      content: JSON.stringify(snapshot)
+    };
+    return lastHistoryEntryId
+      ? { ...base, lastHistoryEntryId }
+      : base;
+  };
 
   const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
     if (!disconnectHandlers.current && commonSyncEnabled) {

@@ -262,7 +262,8 @@ export const DocumentsModel = types
           userContextProvider,
           treeManager,
           uploadLocalHistory: true,
-          syncRemoteHistory: false
+          syncRemoteHistory: false,
+          savedLastHistoryEntryId: document.savedLastHistoryEntryId
         };
         if (document.type === GroupDocument) {
           historyManagerArgs.syncRemoteHistory = true;
