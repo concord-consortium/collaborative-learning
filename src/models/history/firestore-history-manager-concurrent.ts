@@ -54,9 +54,10 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     this.getInitialLastHistoryEntry();
 
     // Make paused observable so UI can react to changes.
-    // Cast to `any` is required because TypeScript's AnnotationsMap only
-    // exposes public members; `setExpectedRemoteHead` is private but must
-    // still be wrapped as an action so MobX batches its mutation.
+    // The <this, "setExpectedRemoteHead"> type parameter widens
+    // AnnotationsMap to include the private setter, which otherwise
+    // wouldn't be assignable. The method still needs to be wrapped as
+    // an action so MobX batches its mutation.
     makeObservable<this, "setExpectedRemoteHead">(this, {
       paused: observable,
       expectedRemoteHead: observable,
