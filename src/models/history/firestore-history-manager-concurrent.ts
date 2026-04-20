@@ -12,6 +12,19 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   completedHistoryEntryQueue: Array<HistoryEntryType> = [];
   uploadInProgress = false;
   /**
+   * The id of the entry we believe is currently the last entry on the
+   * remote chain. `null` means "no remote entries yet." Used for
+   * fork detection:
+   *   - Receive side: if an incoming remote entry's previousEntryId
+   *     differs from the local head (after dedup), we've forked.
+   *   - Send side: if metadata.lastHistoryEntry.id differs from this
+   *     during the upload transaction, someone else committed entries
+   *     we don't know about; we abort the upload.
+   * Updated after successful remote application and after successful
+   * upload.
+   */
+  expectedRemoteHead: string | null = null;
+  /**
    * Stop uploading history entries from Firestore temporarily.
    */
   paused = false;
@@ -42,8 +55,10 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // Make paused observable so UI can react to changes
     makeObservable(this, {
       paused: observable,
+      expectedRemoteHead: observable,
       pauseUploads: action,
       resumeUploadsAfterDelay: action,
+      setExpectedRemoteHead: action,
     });
   }
 
@@ -51,7 +66,15 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     if (!this.initialLastHistoryPromise) {
       await this.environmentAndMetadataDocReadyPromise;
       const { firestore, documentPath } = this;
-      this.initialLastHistoryPromise = getLastHistoryEntry(firestore, documentPath);
+      this.initialLastHistoryPromise = getLastHistoryEntry(firestore, documentPath).then(entry => {
+        // Seed expectedRemoteHead from the initial load exactly once.
+        // Later updates come from applyHistoryEntries / uploadQueuedHistoryEntries.
+        // setExpectedRemoteHead is registered as a MobX action via
+        // makeObservable, so this assignment is wrapped in an action
+        // context automatically.
+        this.setExpectedRemoteHead(entry?.id ?? null);
+        return entry;
+      });
     }
     return this.initialLastHistoryPromise;
   }
@@ -67,6 +90,10 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       });
       this.uploadQueuedHistoryEntries();
     }, delayMs);
+  }
+
+  setExpectedRemoteHead(id: string | null) {
+    this.expectedRemoteHead = id;
   }
 
   syncRemoteFirestoreHistory(historyEntryDocs: IFirestoreHistoryEntryDoc[]): void {
@@ -212,6 +239,13 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       // If we made it here then the transaction succeeded so we can remove the entriesToUpload
       // from the queue.
       this.completedHistoryEntryQueue.splice(0, entriesToUpload.length);
+
+      // Advance expectedRemoteHead: our uploaded entries are now on the
+      // remote chain, so our last-uploaded id is the new head.
+      const lastUploaded = entriesToUpload[entriesToUpload.length - 1];
+      if (lastUploaded) {
+        this.setExpectedRemoteHead(lastUploaded.id);
+      }
     } finally {
       this.uploadInProgress = false;
     }
@@ -313,5 +347,14 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       return tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
     });
     await Promise.all(finishPromises);
+
+    // Advance expectedRemoteHead to the last wrapper we just applied.
+    // Use the wrapper docs (not entries) so we're tracking the
+    // remote-chain id, not a local-uncommitted id. If nothing was
+    // applied (e.g. all were filtered by dedup), leave it alone.
+    const lastApplied = wrapperDocs[wrapperDocs.length - 1];
+    if (lastApplied) {
+      this.setExpectedRemoteHead(lastApplied.entry.id);
+    }
   }
 }
