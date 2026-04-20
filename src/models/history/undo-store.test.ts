@@ -939,3 +939,96 @@ async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number
   const updateCalledTimes = when(() => testTile.updateCount === times, {timeout: 100});
   return expect(updateCalledTimes).resolves.toBeUndefined();
 }
+
+describe("removeTailHistoryEntries cleans up undoStore", () => {
+  it("removes the corresponding undoStore references", async () => {
+    const {tileContent, manager, undoStore} = setupDocument();
+
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+    tileContent.setFlag(false);
+    await expectEntryToBeComplete(manager, 2);
+
+    expect(manager.document.history.length).toBe(2);
+    expect(undoStore.history.length).toBe(2);
+    expect(undoStore.undoIdx).toBe(2);
+
+    manager.removeTailHistoryEntries(1);
+
+    expect(manager.document.history.length).toBe(1);
+    expect(undoStore.history.length).toBe(1);
+    expect(undoStore.undoIdx).toBe(1);
+  });
+
+  it("allows a new undoable action after a rollback without MST reference errors", async () => {
+    // This reproduces the exact crash that motivated the fix: after
+    // removeTailHistoryEntries, the next undoStore.addHistoryEntry call
+    // used to throw "Failed to resolve reference" because the entry it
+    // pointed at had been destroyed in document.history.
+    //
+    // Note: removeTailHistoryEntries drops history entries but does NOT
+    // revert the tree state — the fork-rollback path in
+    // FirestoreHistoryManagerConcurrent applies inverse patches
+    // separately. So flag is still true after the removal, and we flip
+    // it to false to trigger a new patch.
+    const {tileContent, manager, undoStore} = setupDocument();
+
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+
+    manager.removeTailHistoryEntries(1);
+    expect(undoStore.history.length).toBe(0);
+
+    // If the fix is working this completes without throwing.
+    tileContent.setFlag(false);
+    await expectEntryToBeComplete(manager, 1);
+
+    expect(undoStore.history.length).toBe(1);
+    expect(undoStore.canUndo).toBe(true);
+  });
+
+  it("decrements undoIdx when removing entries that were still 'done'", async () => {
+    const {tileContent, manager, undoStore} = setupDocument();
+
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+    tileContent.setFlag(false);
+    await expectEntryToBeComplete(manager, 2);
+
+    // Two undoable entries; cursor at the end.
+    expect(undoStore.history.length).toBe(2);
+    expect(undoStore.undoIdx).toBe(2);
+
+    manager.removeTailHistoryEntries(2);
+
+    expect(undoStore.history.length).toBe(0);
+    // Both removals were at index < undoIdx, so undoIdx should have
+    // decremented twice, landing at 0.
+    expect(undoStore.undoIdx).toBe(0);
+    expect(undoStore.canUndo).toBe(false);
+  });
+});
+
+describe("UndoStore.removeHistoryEntries", () => {
+  it("no-ops when given an empty id set", async () => {
+    const {tileContent, manager, undoStore} = setupDocument();
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+
+    undoStore.removeHistoryEntries(new Set());
+
+    expect(undoStore.history.length).toBe(1);
+    expect(undoStore.undoIdx).toBe(1);
+  });
+
+  it("ignores ids not present in the undo history", async () => {
+    const {tileContent, manager, undoStore} = setupDocument();
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+
+    undoStore.removeHistoryEntries(new Set(["does-not-exist"]));
+
+    expect(undoStore.history.length).toBe(1);
+    expect(undoStore.undoIdx).toBe(1);
+  });
+});

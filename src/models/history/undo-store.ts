@@ -167,6 +167,29 @@ export const UndoStore = types
       self.undoIdx = self.history.length;
     },
 
+    /**
+     * Remove any entries whose id is in `ids` from the undo stack. Used by
+     * TreeManager.removeTailHistoryEntries when a fork rollback removes
+     * entries from document.history: those entries are the resolution
+     * targets of references held here, so they must be dropped from this
+     * array before the referenced entries are destroyed — otherwise MST
+     * throws "Failed to resolve reference" on the next access.
+     *
+     * Iterates in reverse so indices stay stable for subsequent splices.
+     * Decrements undoIdx for each removal at index < undoIdx so the
+     * done/redoable boundary tracks the same logical position.
+     */
+    removeHistoryEntries(ids: Set<string>) {
+      for (let i = self.history.length - 1; i >= 0; i--) {
+        if (ids.has(self.history[i].id)) {
+          self.history.splice(i, 1);
+          if (i < self.undoIdx) {
+            self.undoIdx--;
+          }
+        }
+      }
+    },
+
     // TODO: The MST undo manager that this code is based on, used atomic
     // operations for this. That way if the was an error applying the patch, then
     // the whole set of changes would be aborted. We do not currently take this
