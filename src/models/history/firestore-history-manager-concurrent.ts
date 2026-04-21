@@ -181,14 +181,21 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // HistoryEntrySnapshot inside doApplyHistoryEntries where they're
     // actually applied to the tree.
     //
-    // We do not use applySnapshot here because it would replace the entire history with
-    // the remote history. Sometimes there will be local history entries that have not
-    // yet been uploaded, so we can't just overwrite those.
-    // Instead we just add the new history entries that aren't in our local history yet.
-    // This means that the history entries on this client will be in a different order
-    // than on other clients. That's because those other clients wouldn't have our local
-    // entries yet.
-    // This problem is being punted for now.
+    // We do not use applySnapshot here because it would replace the entire
+    // history with the remote history, discarding any local entries that
+    // haven't been uploaded yet. Instead doApplyHistoryEntries skips entries
+    // already in local history, and — via detectAndResolveFork →
+    // rollbackLocalEntries — rolls back local-uncommitted entries first when
+    // the incoming stream has forked away from expectedRemoteHead. After
+    // that, local history order matches remote order.
+    //
+    // FIXME: applyHistoryEntries is fire-and-forget here. It can reject
+    // (e.g., patch application or rollback failures) and those rejections
+    // surface as unhandled promise errors — see the similar pattern note in
+    // firestore-history-manager.ts around the metadata-doc timeout. We
+    // should route failures into setHistoryError / logging so they're
+    // handled deterministically. The same applies to the call in
+    // resumeDownloads below.
     this.applyHistoryEntries(historyEntryDocs);
   }
 
@@ -226,6 +233,16 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       // 1. Track when this has failed and stop retrying
       // 2. Show the user that sync is broken
       await this.environmentAndMetadataDocReadyPromise;
+
+      // Also wait for the initial last-history-entry fetch to seed
+      // expectedRemoteHead. Without this, a local edit queued before the
+      // seed resolves would hit the send-side fork check below with
+      // expectedRemoteHead still at its default null, spuriously throwing
+      // RemoteHeadChangedError for any document that already has remote
+      // history. After the first seed completes, subsequent uploads take
+      // the cached promise, so the extra await is effectively free.
+      await this.getInitialLastHistoryEntry();
+
       const { firestore } = this;
 
       // add a new document for this history entry

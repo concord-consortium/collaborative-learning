@@ -324,6 +324,63 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       // advances it on the send side.
       expect(historyManager.expectedRemoteHead).toBe("r0");
     });
+
+    it("waits for getInitialLastHistoryEntry to seed expectedRemoteHead before the fork check", async () => {
+      // Regression: if an upload is triggered before
+      // getInitialLastHistoryEntry resolves, expectedRemoteHead is
+      // still null, and any document with existing remote history
+      // would spuriously throw RemoteHeadChangedError inside the
+      // transaction.
+      let resolveInit!: (v: any) => void;
+      getLastHistoryEntry.mockImplementation(
+        () => new Promise<any>(resolve => { resolveInit = resolve; })
+      );
+
+      // Inline setup — setupManager awaits init, which we specifically
+      // want to leave pending here.
+      const treeId = "main";
+      const manager = TreeManager.create({ document: {}, undoStore: {} });
+      const tree = ArrayTestTree.create({ key: treeId, uid: "test-user" });
+      manager.setMainDocument(tree as any);
+      const { firestore, capture } = makeFirestoreMock({
+        txMetadataLastHistoryEntry: { id: "r0", index: 0 },
+      });
+      const historyManager = new FirestoreHistoryManagerConcurrent({
+        firestore,
+        userContextProvider: makeUserContextProviderMock(),
+        treeManager: manager,
+        uploadLocalHistory: true,
+        syncRemoteHistory: false,
+      });
+      await historyManager.environmentAndMetadataDocReadyPromise;
+      expect(historyManager.expectedRemoteHead).toBeNull();
+
+      // Queue L1 and kick off the upload while init is still pending.
+      const l1Snapshot = makeEntrySnapshot(
+        "L1", "main",
+        [{ op: "replace", path: "/items/0/color", value: "red" }],
+        [{ op: "replace", path: "/items/0/color", value: "white" }],
+      );
+      const l1Entry = HistoryEntry.create(l1Snapshot);
+      manager.addHistoryEntryAfterApplying(l1Entry);
+      historyManager.completedHistoryEntryQueue.push(l1Entry);
+
+      const uploadPromise = historyManager.uploadQueuedHistoryEntries();
+
+      // Flush microtasks: the transaction must NOT have run yet.
+      for (let i = 0; i < 10; i++) await Promise.resolve();
+      expect(capture.transactionSetCalls).toEqual([]);
+      expect(historyManager.expectedRemoteHead).toBeNull();
+
+      // Resolve init — expectedRemoteHead seeds to "r0", matching the
+      // mocked metadata head, so the transaction proceeds.
+      resolveInit({ id: "r0", index: 0 });
+      await uploadPromise;
+
+      expect(capture.transactionSetCalls.length).toBe(1);
+      expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual([]);
+      expect(historyManager.expectedRemoteHead).toBe("L1");
+    });
   });
 
   describe("applyHistoryEntries — serialization", () => {
