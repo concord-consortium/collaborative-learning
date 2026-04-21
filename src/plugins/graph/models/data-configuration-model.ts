@@ -4,7 +4,7 @@ import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, 
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
 import { ICase } from "../../../models/data/data-set-types";
 import { DataSet, IDataSet } from "../../../models/data/data-set";
-import {getCategorySet, ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
+import {ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
 import { ICategorySet } from "../../../models/data/category-set";
 import {isRemoveAttributeAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtered-cases";
@@ -380,7 +380,7 @@ export const DataConfigurationModel = types
       categorySetForAttrRole(role: GraphAttrRole) {
         if (self.metadata) {
           const attributeID = self.attributeID(role) || '';
-          return getCategorySet(self.metadata, attributeID);
+          return self.metadata.getCategorySet(attributeID);
         }
       },
       /**
@@ -393,7 +393,7 @@ export const DataConfigurationModel = types
         let categoryArray: string[] = [];
         if (self.metadata) {
           const attributeID = self.attributeID(role) || '',
-            categorySet = getCategorySet(self.metadata, attributeID),
+            categorySet = self.metadata.getCategorySet(attributeID),
             validValues: Set<string> = new Set(this.valuesForAttrRole(role));
           categoryArray = (categorySet?.values || emptyCategoryArray)
                             .filter((aValue: string) => validValues.has(aValue));
@@ -558,7 +558,7 @@ export const DataConfigurationModel = types
       categorySetForPlace(place: AxisPlace) {
         if (self.metadata) {
           const role = graphPlaceToAttrRole[place];
-          return getCategorySet(self.metadata, self.attributeID(role) ?? '');
+          return self.metadata.getCategorySet(self.attributeID(role) ?? '');
         }
       },
       /**

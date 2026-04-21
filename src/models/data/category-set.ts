@@ -15,18 +15,13 @@ interface ICategoryMove {
 }
 
 export const CategorySet = types.model("CategorySet", {
-  attribute: types.reference(Attribute, {
-    onInvalidated: ({ parent: self, invalidId }) => {
-      self.handleAttributeInvalidated?.(invalidId);
-    }
-  }),
+  attribute: types.reference(Attribute),
   // user color assignments
   colors: types.map(types.string),
   // user category re-orderings
   moves: types.array(types.frozen<ICategoryMove>())
 })
 .volatile(self => ({
-  handleAttributeInvalidated: undefined as ((attrId: string) => void) | undefined,
   // Set on provisional instances only. When set, `self.attr` reads this pointer
   // instead of the MST `attribute` reference (which does not resolve on a
   // detached instance). See createProvisionalCategorySet below and the
@@ -35,9 +30,6 @@ export const CategorySet = types.model("CategorySet", {
   _provisionalAttribute: undefined as IAttribute | undefined
 }))
 .actions(self => ({
-  onAttributeInvalidated(handler: (attrId: string) => void) {
-    self.handleAttributeInvalidated = handler;
-  },
   setProvisionalAttribute(attribute: IAttribute) {
     self._provisionalAttribute = attribute;
   }

@@ -102,25 +102,6 @@ describe("CategorySet", () => {
     expect(categories.lastMove?.fromIndex).toBe(originalFromIndex);
   });
 
-  it("supports callback on invalidation of attribute", () => {
-    const handleAttributeInvalidated = jest.fn();
-
-    // can destroy attribute without having set an invalidation handler
-    const a = Attribute.create({ name: "a" });
-    const aTree = Tree.create({ attribute: a, categories: { attribute: a.id } });
-    aTree.setAttribute(Attribute.create({ name: "b" }));
-    expect(handleAttributeInvalidated).not.toHaveBeenCalled();
-
-    // handler is called on attribute destruction if one has been specified
-    const c = Attribute.create({ name: "c" });
-    const cId = c.id;
-    const cTree = Tree.create({ attribute: c, categories: { attribute: cId } });
-    cTree.categories.onAttributeInvalidated((attrId: string) => handleAttributeInvalidated(attrId));
-    cTree.setAttribute(Attribute.create({ name: "d" }));
-    expect(handleAttributeInvalidated).toHaveBeenCalledTimes(1);
-    expect(handleAttributeInvalidated).toHaveBeenCalledWith(cId);
-  });
-
   it("createProvisionalCategorySet builds a detached instance backed by a volatile attribute pointer", () => {
     const data = DataSet.create();
     data.addAttributeWithID({ id: "aId", name: "a" });

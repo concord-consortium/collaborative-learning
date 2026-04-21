@@ -1,8 +1,10 @@
-import { observable } from "mobx";
-import { addDisposer, destroy, getType, Instance, ISerializedActionCall, types } from "mobx-state-tree";
+import { comparer, observable } from "mobx";
+import { addDisposer, destroy, getType, Instance, isAlive, ISerializedActionCall, types } from "mobx-state-tree";
+import { IAttribute } from "../data/attribute";
 import { CategorySet, createProvisionalCategorySet, ICategorySet } from "../data/category-set";
 import { DataSet, IDataSet } from "../data/data-set";
 import { SharedModelType, SharedModel } from "./shared-model";
+import { mstReaction } from "../../utilities/mst-reaction";
 
 export const kSharedCaseMetadataType = "SharedCaseMetadata";
 
@@ -32,7 +34,10 @@ export const SharedCaseMetadata = SharedModel
     // created automatically before any user modification live here as
     // "provisional" sets and are promoted to the persistent `categories` map when
     // the user first modifies one. This keeps them from cluttering up history.
-    provisionalCategories: observable.map<string, ICategorySet>()
+    provisionalCategories: observable.map<string, ICategorySet>(),
+    // Tracks attrIds that already have a cleanup disposer installed on their
+    // Attribute, so the attribute-watching reaction doesn't re-register.
+    _attrsWithCleanupDisposer: new Set<string>()
   }))
   .views(self => ({
     columnWidth(attrId: string) {
@@ -102,9 +107,64 @@ export const SharedCaseMetadata = SharedModel
     }
   }))
   .actions(self => ({
+    _cleanupAttribute(attrId: string) {
+      // Remove any attribute-keyed state left behind when an Attribute is
+      // destroyed. Add more here (e.g. columnWidths, hidden) as needed —
+      // anything keyed by attrId should be cleaned up in one place.
+      //
+      // Persistent: delegate to the action so MST's action protection permits
+      // the map mutation even when this runs inside a DataSet action context.
+      if (self.categories.has(attrId)) self.removeCategorySet(attrId);
+      // Provisional: volatile map, not protected.
+      const provisional = self.provisionalCategories.get(attrId);
+      if (provisional) {
+        self.provisionalCategories.delete(attrId);
+        destroy(provisional);
+      }
+      self._attrsWithCleanupDisposer.delete(attrId);
+    }
+  }))
+  .actions(self => ({
+    _ensureAttributeCleanupDisposer(attribute: IAttribute) {
+      if (self._attrsWithCleanupDisposer.has(attribute.id)) return;
+      self._attrsWithCleanupDisposer.add(attribute.id);
+      // Single disposer per Attribute. When the Attribute is destroyed —
+      // via removeAttribute, moveAttribute, DataSet destruction, or patch
+      // playback — this disposer removes any CategorySet (provisional OR
+      // persistent) keyed by that attribute's id. Keying cleanup off the
+      // Attribute lifecycle (not the CategorySet's) means cleanup works
+      // regardless of when or how the CategorySet came into existence:
+      // fresh inserts, snapshot rehydration, and patch-added entries are
+      // all handled uniformly.
+      addDisposer(attribute, () => {
+        // Guard against SharedCaseMetadata having been destroyed before the
+        // Attribute. MST's addDisposer has no way to unregister a disposer
+        // from a foreign node when `self` dies first, so the disposer can
+        // outlive us. Calling an action on a dead tree would throw.
+        if (!isAlive(self)) return;
+        self._cleanupAttribute(attribute.id);
+      });
+    }
+  }))
+  .actions(self => ({
+    afterAttach() {
+      // Install a cleanup disposer for every attribute in the associated
+      // DataSet, reactively as attributes are added. Runs immediately for
+      // attributes already present at rehydration time. The reaction is
+      // tied to this model's lifecycle by mstReaction.
+      mstReaction(
+        () => self.data?.attributes.map(a => a.id) ?? [],
+        () => self.data?.attributes.forEach(a => self._ensureAttributeCleanupDisposer(a)),
+        { name: "SharedCaseMetadata.ensureAttributeCleanupDisposers",
+          fireImmediately: true, equals: comparer.structural },
+        self
+      );
+    }
+  }))
+  .actions(self => ({
     ensureProvisionalCategorySet(attrId: string): ICategorySet | undefined {
       // Idempotent: return any existing instance unchanged.
-      const existing = self.categories.get(attrId) ?? self.provisionalCategories.get(attrId);
+      const existing = self.getCategorySet(attrId);
       if (existing) return existing;
 
       const attribute = self.data?.attrFromID(attrId);
@@ -113,35 +173,11 @@ export const SharedCaseMetadata = SharedModel
       const categorySet = createProvisionalCategorySet(self.data, attrId);
       self.provisionalCategories.set(attrId, categorySet);
 
-      // Clean up the provisional when the underlying Attribute node is
-      // destroyed. We use `addDisposer(attribute, ...)` rather than watching
-      // the DataSet's `removeAttribute` action by name because:
-      //
-      //   1. Attributes can be destroyed by many paths — removeAttribute,
-      //      moveAttribute (which splices the instance out and recreates it),
-      //      DataSet destruction, applySnapshot/applyPatch during history
-      //      playback. `addDisposer(attribute, ...)` fires on all of them.
-      //   2. MST fires disposers synchronously, inside the destruction call
-      //      stack. That means this cleanup runs INSIDE the outer action that
-      //      triggered the destruction (e.g. removeAttribute), and the tree
-      //      monitor's action-tracking middleware groups it under that single
-      //      top-level action — producing one history entry, not two.
-      //
-      // This is the provisional counterpart to the persistent path's
-      // `onInvalidated` callback on the `types.reference(Attribute, ...)`
-      // below in ensurePersistentCategorySet. Both mechanisms are synchronous
-      // and same-action by MST's guarantees; both exist so that cleanup never
-      // produces a stray history entry. Do not convert either to a MobX
-      // reaction — reactions fire after the action completes, which would
-      // create a second top-level action and a second history entry.
-      addDisposer(attribute, () => {
-        const stale = self.provisionalCategories.get(attrId);
-        if (stale) {
-          self.provisionalCategories.delete(attrId);
-          destroy(stale);
-        }
-      });
-
+      // Cleanup on attribute destruction is handled by the per-attribute
+      // disposer installed by `_ensureAttributeCleanupDisposer` from the
+      // afterAttach reaction above. That disposer removes any CategorySet
+      // (provisional or persistent) keyed by this attribute's id, keying
+      // cleanup off the Attribute lifecycle rather than per ensure-call.
       return categorySet;
     },
     ensurePersistentCategorySet(attrId: string): ICategorySet | undefined {
@@ -164,17 +200,10 @@ export const SharedCaseMetadata = SharedModel
         destroy(provisional);
       }
 
-      // Persistent instances rely on MST's native `onInvalidated` callback on
-      // the `types.reference(Attribute, ...)` prop in CategorySet. MST fires
-      // that callback synchronously from inside the reference-resolution
-      // pipeline when the referenced Attribute node is destroyed. We route it
-      // through `removeCategorySet` here, same as the old `addCategorySet`
-      // action used to. This is the persistent counterpart to the
-      // `addDisposer(attribute, ...)` hook above in ensureProvisionalCategorySet
-      // — see that comment for the full rationale about synchronous cleanup.
-      persistent?.onAttributeInvalidated((invalidAttrId: string) => {
-        self.removeCategorySet(invalidAttrId);
-      });
+      // Cleanup on Attribute destruction is handled by a disposer installed
+      // from CategorySet.afterAttach, which fires for every attach path
+      // (fresh insert, snapshot rehydration, patch-materialized entries).
+      // The disposer calls removeCategorySet on this model.
       return persistent;
     }
   }));
@@ -191,10 +220,4 @@ export interface SetIsCollapsedAction extends ISerializedActionCall {
 
 export function isSetIsCollapsedAction(action: ISerializedActionCall): action is SetIsCollapsedAction {
   return action.name === "setIsCollapsed";
-}
-
-// Thin wrapper for backward compatibility. Use metadata.getCategorySet directly
-// in new code.
-export function getCategorySet(metadata: ISharedCaseMetadata, attrId: string): ICategorySet | undefined {
-  return metadata.getCategorySet(attrId);
 }

@@ -1,6 +1,6 @@
-import { getSnapshot, Instance, onAction, types } from "mobx-state-tree";
+import { applyPatch, getSnapshot, Instance, onAction, types } from "mobx-state-tree";
 import { DataSet } from "../data/data-set";
-import { getCategorySet, isSharedCaseMetadata, SharedCaseMetadata } from "./shared-case-metadata";
+import { isSharedCaseMetadata, SharedCaseMetadata } from "./shared-case-metadata";
 import { SharedModel } from "./shared-model";
 
 // eslint-disable-next-line no-var
@@ -80,7 +80,7 @@ describe("SharedCaseMetadata", () => {
     tree.metadata.setIsCollapsed("foo", true);
     expect(tree.metadata.isCollapsed("foo")).toBe(false);
     // ignores category set calls before DataSet is associated
-    const categories = getCategorySet(tree.metadata, "foo");
+    const categories = tree.metadata.getCategorySet("foo");
     expect(categories).toBeUndefined();
   });
 
@@ -207,6 +207,42 @@ describe("SharedCaseMetadata", () => {
 
       expect(topLevelActions).toEqual(["removeAttribute"]);
       expect(tree.metadata.provisionalCategories.size).toBe(0);
+    });
+
+    it("removes a rehydrated persistent entry when its attribute is removed after reload", () => {
+      // Create a persistent category set, then rehydrate from snapshots as
+      // happens on document reopen. The per-attribute cleanup disposer must
+      // be installed for rehydrated entries so attribute removal still
+      // cleans them up.
+      tree.metadata.ensurePersistentCategorySet("aId");
+      expect(tree.metadata.categories.size).toBe(1);
+
+      const dataSnap = getSnapshot(tree.data);
+      const metaSnap = getSnapshot(tree.metadata);
+      const rehydrated = TreeModel.create({ data: dataSnap, metadata: metaSnap });
+      rehydrated.metadata.setData(rehydrated.data);
+      expect(rehydrated.metadata.categories.size).toBe(1);
+
+      rehydrated.data.removeAttribute("aId");
+      expect(rehydrated.metadata.categories.size).toBe(0);
+    });
+
+    it("removes a patch-added persistent entry when its attribute is removed", () => {
+      // A patch that inserts a persistent CategorySet directly into the map
+      // (e.g. history replay / applyPatch) must still be cleaned up when
+      // the underlying attribute is removed. Since the unified disposer
+      // keys off the Attribute lifecycle, this works regardless of how the
+      // CategorySet came into existence.
+      expect(tree.metadata.categories.size).toBe(0);
+      applyPatch(tree.metadata, {
+        op: "add",
+        path: "/categories/aId",
+        value: { attribute: "aId", colors: {}, moves: [] }
+      });
+      expect(tree.metadata.categories.size).toBe(1);
+
+      tree.data.removeAttribute("aId");
+      expect(tree.metadata.categories.size).toBe(0);
     });
   });
 });
