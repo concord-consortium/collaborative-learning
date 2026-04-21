@@ -6,7 +6,7 @@ import { SnapshotIn } from "mobx-state-tree";
 import { clearTermOverrides, setTermOverrides } from "../../utilities/translation/translate";
 import { createDocumentModel, DocumentModelSnapshotType, DocumentModelType } from "../document/document";
 import { DocumentContentSnapshotType } from "../document/document-content";
-import { GroupDocument, ProblemDocument } from '../document/document-types';
+import { GroupDocument, ProblemDocument } from "../document/document-types";
 import { ClassModel, ClassModelType, ClassUserModel } from "./class";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from "./groups";
 import { ISortedDocumentsStores, MetadataDocMapModel, SortedDocuments } from "./sorted-documents";
@@ -144,7 +144,7 @@ const createMockGroupUsers = (groupUsersData: GroupUserData[]) => {
   );
 };
 
-const createMockGroups = () => {
+const createMockGroups = (mockClass?: ClassModelType) => {
   const group3UsersData = [
     { id: "2", connectedTimestamp: 2 },
     { id: "4", connectedTimestamp: 4 },
@@ -160,13 +160,14 @@ const createMockGroups = () => {
   const group5Users = createMockGroupUsers(group5UsersData);
   const group9Users = createMockGroupUsers(group9UsersData);
 
+  const env = mockClass ? { class: mockClass } : undefined;
   const mockGroups = GroupsModel.create({
     groupsMap: {
       3: GroupModel.create({ id: "3", users: group3Users }),
       5: GroupModel.create({ id: "5", users: group5Users }),
       9: GroupModel.create({ id: "9", users: group9Users }),
     }
-  });
+  }, env);
   return mockGroups;
 };
 
@@ -190,8 +191,8 @@ describe('DocumentGroup Model', () => {
 
   beforeEach(() => {
     mockDocuments = createMockDocuments();
-    mockGroups = createMockGroups();
     mockClass = createMockClassWithUsers();
+    mockGroups = createMockGroups(mockClass);
     const db = mock(DB);
     Object.setPrototypeOf(db, DB);
     bookmarks = new Bookmarks({db});

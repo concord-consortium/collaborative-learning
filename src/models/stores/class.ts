@@ -21,6 +21,8 @@ export const ClassUserModel = types
     };
   });
 
+export type ClassUserModelType = typeof ClassUserModel.Type;
+
 export const ClassModel = types
   .model("Class", {
     name: types.string,

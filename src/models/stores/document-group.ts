@@ -13,7 +13,7 @@ import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
-import { ClassModelType } from "./class";
+import { ClassModelType, ClassUserModelType } from "./class";
 import { GroupsModelType } from "./groups";
 import { SecondarySortType, SortType } from "./ui-types";
 
@@ -205,45 +205,26 @@ export class DocumentGroup {
 
   get byName(): DocumentGroup[] {
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
-    const groupDocuments: Map<string, IDocumentMetadataModel[]> = new Map();
-    const groupMembers: Map<string, Set<string>> = new Map();
-    this.documents.forEach((doc) => {
-      // Keep track of group documents, which will be added to each member of the group below
-      if (doc.type === GroupDocument) {
-        const groupId = doc.groupId ?? "unknownGroup";
-        if (!groupDocuments.has(groupId)) {
-          groupDocuments.set(groupId, []);
-        }
-        groupDocuments.get(groupId)?.push(doc);
-        return;
-      }
-
-      const user = this.stores.class.getUserById(doc.uid);
-
+    const addDocForUser = (doc: IDocumentMetadataModel, user: ClassUserModelType | undefined) => {
       const sectionLabel = user ? `${user.lastName}, ${user.firstName}` : "Unknown";
       if (!documentMap.has(sectionLabel)) {
         documentMap.set(sectionLabel, []);
       }
       documentMap.get(sectionLabel)?.push(doc);
+    };
 
-      // Keep track of which group each user is in
-      const group = this.stores.groups.groupForUser(user?.id ?? "");
-      if (group) {
-        if (!groupMembers.has(group.id)) {
-          groupMembers.set(group.id, new Set());
-        }
-        groupMembers.get(group.id)?.add(sectionLabel);
+    this.documents.forEach((doc) => {
+      if (doc.type === GroupDocument) {
+        // Add group documents to each user in the group
+        const groupId = doc.groupId ?? "unknownGroup";
+        const group = this.stores.groups.getGroupById(groupId);
+        group?.users.forEach(user => {
+          addDocForUser(doc, user.classUser);
+        });
+      } else {
+        addDocForUser(doc, this.stores.class.getUserById(doc.uid));
       }
     });
-
-    // Add each group document to each member of the group
-    for (const groupId of groupDocuments.keys()) {
-      groupMembers.get(groupId)?.forEach(member => {
-        groupDocuments.get(groupId)?.forEach(doc => {
-          documentMap.get(member)?.push(doc);
-        });
-      });
-    }
 
     const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
     return this.buildDocumentCollection({sortedSectionLabels, sortType: "Name", docMap: documentMap});

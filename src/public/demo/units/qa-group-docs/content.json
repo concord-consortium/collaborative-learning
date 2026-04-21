@@ -1,8 +1,8 @@
 {
-  "code": "qa-config-subtabs",
-  "abbrevTitle": "QA2",
-  "title": "QA Curriculum Configured SubTabs",
-  "subtitle": "Some Subtabs",
+  "code": "qa-group-docs",
+  "abbrevTitle": "QAGD",
+  "title": "QA Curriculum with Group Documents",
+  "subtitle": "Now with more group documents!",
   "placeholderText": "Type in me!",
   "config": {
     "placeholderText": "This is where users can type text",
