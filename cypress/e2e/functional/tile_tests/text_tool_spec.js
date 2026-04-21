@@ -82,7 +82,7 @@ context('Text tool tile functionalities', function () {
     textToolTile.getTextEditor().last().should('have.descendants', 'ul');
 
     // Text tile restore upon page reload
-    cy.wait(1000);
+    cy.waitForSave();
     cy.reload();
     cy.waitForLoad();
     textToolTile.getTextTile().last().should('exist').and('contain', 'Hello World');

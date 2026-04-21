@@ -236,7 +236,7 @@ context('Draw Tool Tile', function () {
     drawToolTile.drawRectangle(250, 50, -150, 100);
 
     cy.log("verify Draw tile restore upon page reload");
-    cy.wait(2000);
+    cy.waitForSave();
     cy.reload();
     cy.waitForLoad();
 

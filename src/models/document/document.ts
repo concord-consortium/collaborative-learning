@@ -41,6 +41,13 @@ export enum ContentStatus {
   Error
 }
 
+export enum SaveState {
+  Idle = "idle",
+  Saving = "saving",
+  Saved = "saved",
+  Retrying = "retrying"
+}
+
 export type IExemplarVisibilityProvider = {
   isExemplarVisible: (id: string) => boolean;
 };
@@ -82,6 +89,7 @@ export const DocumentModel = Tree.named("Document")
     contentErrorMessage: undefined as string | undefined,
     showPlaybackControls: false,
     commentsManager: undefined as DocumentCommentsManager | undefined,
+    saveState: SaveState.Idle as SaveState,
   }))
   .views(self => ({
     // This is needed for the tree monitor and manager
@@ -234,6 +242,10 @@ export const DocumentModel = Tree.named("Document")
 
     incChangeCount() {
       return ++self.changeCount;
+    },
+
+    setSaveState(state: SaveState) {
+      self.saveState = state;
     },
 
     setGroupId(groupId?: string) {
