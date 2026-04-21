@@ -8,7 +8,7 @@ Note: The original GD-5 (from `group-docs-brainstorm.md`) included both the tran
 
 | Label | Name | Description |
 |---|---|---|
-| **GD-6** | Corruption Prevention | Client-side fork detection and rollback to prevent document corruption |
+| **GD-6** | Corruption Prevention | Client-side fork detection and rollback to prevent document corruption. **Status: code complete, in review (PR #2835 / CLUE-485).** |
 | **GD-7** | Undo Bugs | Fix cases where patch-applied model changes don't update the tile UI |
 | **GD-8** | Tile Locking | Lock tiles so only one user can edit at a time (Plan B only) |
 | **GD-9** | Document-Level Merging | Merge non-conflicting changes at the document/tile level instead of rolling back |
@@ -47,7 +47,9 @@ Fix cases where model changes via patch application don't update the tile UI. Th
 
 ### GD-6: Corruption Prevention
 
-The transaction infrastructure is in place (`lastHistoryEntry` metadata, `previousEntryId` chaining, Firestore transactions in `uploadQueuedHistoryEntries()`). What remains is client-side fork detection and rollback, which is needed in two places that share a single codepath:
+**Status: code complete, in review (PR #2835 / CLUE-485).** The section below describes the design; the implementation follows it. The shared rollback method, `detectAndResolveFork`, is the extension point GD-9 and GD-10 will plug into.
+
+The transaction infrastructure is in place (`lastHistoryEntry` metadata, `previousEntryId` chaining, Firestore transactions in `uploadQueuedHistoryEntries()`). What GD-6 adds is client-side fork detection and rollback in two places that share a single codepath:
 
 **Receive-side fork detection.** When a remote entry arrives whose `previousEntryId` doesn't match the local head, the client should reverse its local uncommitted entries (using their undo patches) back to the fork point, drop them from the upload queue, and apply the remote entries.
 
@@ -176,10 +178,11 @@ These areas can be worked on alongside either plan:
 
 Hardening the existing infrastructure to prevent silent failures and data loss in edge cases. These are documented as Implementation TODOs in `group-docs-current-state.md`:
 
-- Race condition in initial history load
+- Race condition in initial history load (explicitly deferred by GD-6)
 - Error handling when metadata promise rejects (silent infinite failure loop)
-- Document drift detection (no checkpointing between full document content and history)
 - Unhandled promise in recursive upload
+
+Document drift detection between full document content and history was addressed by GD-6 via the RTDB envelope's `lastHistoryEntryId` field.
 
 ### DataFlow Simulation
 
