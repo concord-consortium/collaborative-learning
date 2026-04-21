@@ -142,6 +142,12 @@ If a new column is added then User B sees the new attribute name.
 
 I don't know the exact steps yet, but I found that when a graph is connected to a table only one of the documents actually shows the points on the graph.
 
+## Duplicate Group Documents
+
+Two users in the same group ended up working on completely separate group documents rather than a shared one. The suspicion is that two group documents got created — possibly due to a race during document provisioning — and each user opened a different one.
+
+Not yet investigated. Unknowns: steps to reproduce, the provisioning code path involved, whether this happens reliably, and whether it's recoverable once it has occurred.
+
 # Implementation TODOs
 
 These are unfinished items identified in the code:

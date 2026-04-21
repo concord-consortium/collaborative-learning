@@ -14,6 +14,8 @@ Note: The original GD-5 (from `group-docs-brainstorm.md`) included both the tran
 | **GD-9** | Document-Level Merging | Merge non-conflicting changes at the document/tile level instead of rolling back |
 | **GD-10** | Shared Model Merging | Merge non-conflicting changes within shared models |
 | **GD-11** | Tile Hardening | Per-tile fixes to preserve transient UI state across remote updates |
+| **GD-12** | Debug Re-render Controls | Hotkeys to force-recreate components for a tile or the whole document to isolate render bugs from model bugs |
+| **GD-13** | Auto-Revert Stress Mode | Dev mode that automatically reverts the last change (sync, fixed delay, or random delay) to surface race conditions without needing a second user |
 
 ## Immediate: UI Disruption Testing
 
@@ -64,6 +66,8 @@ After GD-6, any conflict rolls back all local changes. Smarter merging would red
 - **Document level**: Changes to different tiles (that don't share a model) can be merged instead of rolling back. For example, adding a new tile shouldn't affect someone editing an existing tile.
 - **Tile + shared model level**: If two tiles are being changed and they don't share a model, merge the changes.
 
+Note: the merging/conflict-detection code introduced here is expected to be reused for undo/redo once that is picked up again. See "Deferred: Undo/Redo" below.
+
 ### GD-10: Shared Model Merging
 
 Support concurrent changes to shared models when they don't actually conflict. For example:
@@ -72,6 +76,8 @@ Support concurrent changes to shared models when they don't actually conflict. F
 - One user rescaling a graph while another edits data in the linked table
 
 True conflicts (e.g., one user deleting an object another user is referencing) still need to be detected and one side rolled back.
+
+Note: the merging/conflict-detection code introduced here is expected to be reused for undo/redo once that is picked up again. See "Deferred: Undo/Redo" below.
 
 ### GD-11: Tile Hardening (as needed)
 
@@ -178,3 +184,36 @@ Hardening the existing infrastructure to prevent silent failures and data loss i
 ### DataFlow Simulation
 
 DataFlow generates history entries on every simulation tick. Two users with DataFlow running will produce constant conflicting entries. This needs a fundamentally different approach — likely excluding simulation tick state from history, or batching/throttling it. This is a blocker for using group documents with DataFlow tiles.
+
+## Supporting Dev Tooling
+
+Small, targeted dev tools that make debugging and testing the group-doc work easier. Can be done in parallel with either plan.
+
+### GD-12: Debug Re-render Controls
+
+Add hotkeys (or toolbar buttons) to re-render a single tile and to re-render the whole document. "Re-render" here means recreating all React components for that scope so they drop any component state.
+
+**Why**: when something looks broken, it's hard to tell whether the problem is in the document/model state or in how the component is rendering it. If a forced re-render makes the problem go away, the model state is fine and the bug is in the component. Volatile state in the model and global state are deliberately left alone — keeping them intact helps isolate the component layer from the data layer.
+
+### GD-13: Auto-Revert Stress Mode
+
+A dev mode that, whenever a change is committed locally, automatically reverts the most recent change. This simulates the race conditions that come up when two users' edits land on top of each other, without requiring a second human to test with.
+
+**Why**: while testing GD-6, the text tile showed problems when edits were rapidly reverted. The symptoms suggest race conditions in either the model-level rollback or the way the tile keeps its internal state sync'd with the model state. Reproducing these today requires two people, which slows iteration. Many tiles likely have similar problems.
+
+Reversion timing should be configurable:
+- Synchronous (as close as possible)
+- Fixed ms delay
+- Random ms delay
+
+Each timing mode exposes different race windows.
+
+## Deferred: Undo/Redo
+
+Undo/redo in group documents was deliberately punted when this work was proposed, and for now that's still the right call. But it should be kept in mind as we design GD-9 and GD-10; more progress may change the call later.
+
+Today, undo/redo assumes each patch is being applied to the document state it was recorded against. In a collaborative world that assumption breaks: the document can be changed by someone else between when an entry is recorded and when the local user undoes or redoes it, and those remote changes aren't in the local undo/redo stack.
+
+Making undo/redo correct in this world requires the same judgment GD-9 and GD-10 need for rollback: given an entry's patches and action, can we safely apply them against the current document state, or do they conflict with changes from other users? When we eventually pick up undo/redo, we should be able to reuse the merging and conflict-detection code introduced by GD-9 and GD-10 rather than build a second implementation.
+
+**Design implication**: keep the GD-9 and GD-10 merge exceptions factored so they can be reused by a future undo/redo implementation — the decision of whether a given patch set can be safely applied should not be entangled with the rollback-specific code path.
