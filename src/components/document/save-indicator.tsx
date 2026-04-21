@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
@@ -42,7 +43,7 @@ export const SaveIndicator = observer(({ document }: IProps) => {
   const content = (
     <div className="save-indicator" data-testid="save-indicator">
       {text && <span className="save-indicator-text">{text}</span>}
-      <Icon className={`save-indicator-icon${isSyncing ? " syncing" : ""}`} />
+      <Icon className={classNames("save-indicator-icon", { syncing: isSyncing })} />
     </div>
   );
 
