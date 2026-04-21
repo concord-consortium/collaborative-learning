@@ -1,16 +1,20 @@
 # Seismic ML Infrastructure Cost Estimates
 
-## Decisions and current deployment
+## Decisions and chosen architecture
 
 We have settled on **client-side ML with an L0–L2 envelope tile cache**. Raw seismic data is fetched on demand from EarthScope (via a CloudFront CORS proxy) for zoomed-in views below L2's range, and the ML model runs in the student's browser.
 
-**What this means for infrastructure:**
+**Current state vs. planned work.** This document describes the chosen architecture and its cost profile. Not all pieces are in place yet:
 
-- Only S3 (tile cache) + CloudFront (tile serving and CORS proxy) + Firestore (ML event database) are needed.
-- No AWS Batch / GPU / Lambda ML pipeline, no server-side ML processing, and no scheduled automatic updates. Tile generation is a one-time per-station-year operation run as needed.
+- **Deployed today:** S3 tile cache (2 stations × 1 year, BHZ), CloudFront serving + CORS proxy, and a local tile-generation script ([scripts/seismic/generate-envelopes.ts](../../scripts/seismic/generate-envelopes.ts)) run on a developer/author machine.
+- **Planned, not yet built:** the Firestore event database (see [event-database-design.md](event-database-design.md)) for sharing ML-detected events between students, and a self-service envelope-generation path so students/teachers can pick an arbitrary station-year and have tiles produced without running a script locally (likely via Lambda — see [Future option: running generation in Lambda](#future-option-running-generation-in-lambda)).
+
+**What the chosen architecture does *not* need:**
+
+- No AWS Batch / GPU / Lambda ML pipeline, no server-side ML processing, and no scheduled automatic updates. Tile generation is a one-time per-station-year operation.
 - There is no L3 envelope level. We originally considered L3 as an intermediate tier between coarse envelopes and raw data; the L0–L2 design (with on-demand raw fetches below L2) made L3 unnecessary.
 
-The cost sections below describe the chosen architecture. The [Alternatives considered](#alternatives-considered) appendix summarizes the options we looked at and why we rejected them — the cost numbers there are the justification for the decision, not a description of current infrastructure.
+The cost sections below describe the chosen architecture (both deployed and planned pieces). The [Alternatives considered](#alternatives-considered) appendix summarizes the options we looked at and why we rejected them — the cost numbers there are the justification for the decision, not a description of current or planned infrastructure.
 
 ## Deployed tile sizes (measured)
 
@@ -100,7 +104,7 @@ Assuming moderate classroom usage — 100 active students, each viewing ~5 stati
 
 EarthScope's data server does not support CORS, so browser access to raw seismic data goes through our CloudFront proxy. Two usage patterns:
 
-1. **Client-side ML processing (one-time per station-year).** A student processes the raw data for a station-year and uploads ML event results to Firestore for other students. Each station-year is ~7.3 GB of raw data.
+1. **Client-side ML processing (one-time per station-year, planned).** Once the Firestore event database is in place, a student processes the raw data for a station-year and uploads ML event results to Firestore so other students don't have to redo the work. Each station-year is ~7.3 GB of raw data.
 2. **Exploration at raw zoom level.** Below L2 (~2.6-minute viewport), the client fetches raw 200 Hz data for the visible time range. Raw is ~1.4 MB/hour, so even active exploration by 100 students stays well within the free tier.
 
 | Station-years processed via proxy | Data through proxy | CloudFront cost |
@@ -121,9 +125,9 @@ Download time matters as much as cost. 7.3 GB (one station-year) takes:
 
 On shared school networks, per-student throughput may be well below the school's total bandwidth. This is the main practical limit on client-side ML for long time ranges, not the cloud bill.
 
-## Ongoing cost: Firestore event database
+## Ongoing cost: Firestore event database (planned)
 
-ML-detected events and coverage bitmaps are stored in Firestore. See [event-database-design.md](event-database-design.md) for the schema. Assumes 5% event rate with 60-second model windows (~26K events per station-year) and 10-minute coverage bitmaps (13 docs/year).
+The event database is not yet built. Once it is, ML-detected events and coverage bitmaps will be stored in Firestore. See [event-database-design.md](event-database-design.md) for the schema. Assumes 5% event rate with 60-second model windows (~26K events per station-year) and 10-minute coverage bitmaps (13 docs/year).
 
 **Storage** (at $0.18/GB/month):
 
@@ -161,7 +165,7 @@ Envelope tile generation is currently run as a local script ([scripts/seismic/ge
 
 ### Future option: running generation in Lambda
 
-If manual local generation becomes a bottleneck — for example, if we need to bulk-process many stations or let authors kick off generation without running a local script — the natural next step is to wrap the generation script in AWS Lambda. The workload fits Lambda well: each invocation processes one monthly chunk for one station (~600 MB raw data, ~10 s including download, well under the 15-minute limit and within memory/ephemeral-storage limits).
+Longer-term we want students and teachers to be able to pick an arbitrary station-year from within the app and have envelope tiles produced on the fly, without anyone running a local script. Wrapping the generation script in AWS Lambda is the natural path there, and also helps if we need to bulk-process many stations. The workload fits Lambda well: each invocation processes one monthly chunk for one station (~600 MB raw data, ~10 s including download, well under the 15-minute limit and within memory/ephemeral-storage limits).
 
 Estimated cost in addition to the S3 PUTs above:
 
