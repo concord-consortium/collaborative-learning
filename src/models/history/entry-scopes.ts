@@ -1,3 +1,5 @@
+import { HistoryEntrySnapshot } from "./history";
+
 export type EntryScope =
   | { kind: "tile"; id: string }
   | { kind: "shared"; id: string }
@@ -14,4 +16,20 @@ export function scopeKeyForPatchPath(path: string): EntryScopeKey {
   const sharedMatch = SHARED_MAP_RE.exec(path);
   if (sharedMatch) return `shared:${sharedMatch[1]}`;
   return "doc";
+}
+
+export function getEntryScopeKeys(entry: HistoryEntrySnapshot): Set<EntryScopeKey> {
+  const scopes = new Set<EntryScopeKey>();
+  const records = entry.records ?? [];
+  for (const record of records) {
+    const patches = record.patches ?? [];
+    for (const patch of patches) {
+      scopes.add(scopeKeyForPatchPath(patch.path));
+    }
+    const inversePatches = record.inversePatches ?? [];
+    for (const patch of inversePatches) {
+      scopes.add(scopeKeyForPatchPath(patch.path));
+    }
+  }
+  return scopes;
 }
