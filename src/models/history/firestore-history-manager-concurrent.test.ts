@@ -63,6 +63,77 @@ const ArrayTestTree = types.model("ArrayTestTree", {
   },
 }));
 
+// A second test tree that matches the shape CLUE's document-content
+// uses, so we can drive patches with paths like
+// /content/tileMap/<id>/content/value and exercise the scope-based
+// merge logic in detectAndResolveFork. ArrayTestTree stays in place
+// for the earlier tests that predate the merge work.
+const DocMergeTile = types.model("DocMergeTile", {
+  id: types.identifier,
+  content: types.model({
+    value: types.optional(types.string, "initial"),
+  }),
+});
+const DocMergeShared = types.model("DocMergeShared", {
+  id: types.identifier,
+  value: types.optional(types.string, "initial"),
+});
+const DocMergeTestTree = types.model("DocMergeTestTree", {
+  key: types.string,
+  uid: types.string,
+  content: types.model({
+    tileMap: types.map(DocMergeTile),
+    sharedModelMap: types.map(DocMergeShared),
+    docName: types.optional(types.string, ""),
+  }),
+})
+.volatile(self => ({
+  applyingManagerPatches: false,
+  metadata: {} as any,
+}))
+.views(self => ({
+  get treeId(): string { return self.key; },
+}))
+.actions(self => ({
+  startApplyingPatchesFromManager(_h: string, _e: string) {
+    self.applyingManagerPatches = true;
+    return Promise.resolve();
+  },
+  applyPatchesFromManager(_h: string, _e: string, patchesToApply: readonly IJsonPatch[]) {
+    applyPatch(self, patchesToApply as IJsonPatch[]);
+    return Promise.resolve();
+  },
+  finishApplyingPatchesFromManager(_h: string, _e: string) {
+    self.applyingManagerPatches = false;
+    return Promise.resolve();
+  },
+  applySharedModelSnapshotFromManager(_h: string, _e: string, _s: any) {
+    return Promise.resolve();
+  },
+}));
+
+async function setupDocMergeManager(firestoreOpts: FirestoreMockOptions = {}) {
+  const treeId = "main";
+  const manager = TreeManager.create({ document: {}, undoStore: {} });
+  const tree = DocMergeTestTree.create({
+    key: treeId,
+    uid: "test-user",
+    content: { tileMap: {}, sharedModelMap: {}, docName: "" },
+  });
+  manager.setMainDocument(tree as any);
+  const { firestore, capture } = makeFirestoreMock(firestoreOpts);
+  const historyManager = new FirestoreHistoryManagerConcurrent({
+    firestore,
+    userContextProvider: makeUserContextProviderMock(),
+    treeManager: manager,
+    uploadLocalHistory: true,
+    syncRemoteHistory: false,
+  });
+  await historyManager.environmentAndMetadataDocReadyPromise;
+  await historyManager.getInitialLastHistoryEntry();
+  return { manager, tree, historyManager, treeId, firestoreCapture: capture };
+}
+
 interface FirestoreMockOptions {
   // Value returned for metadata.lastHistoryEntry inside the transaction.
   txMetadataLastHistoryEntry?: { id: string; index: number } | null;
@@ -380,6 +451,57 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(capture.transactionSetCalls.length).toBe(1);
       expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual([]);
       expect(historyManager.expectedRemoteHead).toBe("L1");
+    });
+  });
+
+  describe("applyHistoryEntries — receive-side merge", () => {
+    it("keeps a local entry when its scope is disjoint from the incoming remote entry's scope", async () => {
+      // Seed expectedRemoteHead to "r0".
+      getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
+      const { manager, tree, historyManager } = await setupDocMergeManager();
+      expect(historyManager.expectedRemoteHead).toBe("r0");
+
+      // Prepare the tree with tiles A and B (these were presumed to
+      // exist at the fork point "r0").
+      applyPatch(tree, [
+        { op: "add", path: "/content/tileMap/A", value: { id: "A", content: { value: "initial" } } },
+        { op: "add", path: "/content/tileMap/B", value: { id: "B", content: { value: "initial" } } },
+      ]);
+
+      // Local entry L1: user A set tile A's value to "alpha".
+      const l1Patches: IJsonPatch[] = [{ op: "replace", path: "/content/tileMap/A/content/value", value: "alpha" }];
+      const l1Inverse: IJsonPatch[] = [{ op: "replace", path: "/content/tileMap/A/content/value", value: "initial" }];
+      applyPatch(tree, l1Patches);
+      const l1Snapshot = makeEntrySnapshot("L1", "main", l1Patches, l1Inverse);
+      const l1Entry = HistoryEntry.create(l1Snapshot);
+      manager.addHistoryEntryAfterApplying(l1Entry);
+      historyManager.completedHistoryEntryQueue.push(l1Entry);
+
+      expect(tree.content.tileMap.get("A")?.content.value).toBe("alpha");
+
+      // Remote entry R1 from user B: set tile B's value to "beta".
+      // previousEntryId = "r0", which matches expectedRemoteHead but
+      // NOT our local head (L1) — forked.
+      const r1Patches: IJsonPatch[] = [{ op: "replace", path: "/content/tileMap/B/content/value", value: "beta" }];
+      const r1Inverse: IJsonPatch[] = [{ op: "replace", path: "/content/tileMap/B/content/value", value: "initial" }];
+      const r1Snapshot = makeEntrySnapshot("R1", "main", r1Patches, r1Inverse);
+      const r1wrap = makeWrapperDoc(1, "r0", r1Snapshot);
+
+      await historyManager.applyHistoryEntries([r1wrap]);
+
+      // Post-merge expectations:
+      // 1. L1 NOT rolled back — tile A still holds "alpha".
+      // 2. R1 applied on top — tile B now holds "beta".
+      // 3. Local history order preserved: L1 stays in place, R1
+      //    appended after it (spec section "History ordering").
+      // 4. L1 remains in the upload queue — it still needs to be
+      //    committed, now chaining off R1.
+      // 5. expectedRemoteHead advanced to R1.
+      expect(tree.content.tileMap.get("A")?.content.value).toBe("alpha");
+      expect(tree.content.tileMap.get("B")?.content.value).toBe("beta");
+      expect(manager.document.history.map(e => e.id)).toEqual(["L1", "R1"]);
+      expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual(["L1"]);
+      expect(historyManager.expectedRemoteHead).toBe("R1");
     });
   });
 

@@ -6,6 +6,7 @@ import { getLastHistoryEntry, IFirestoreHistoryEntryDoc, LastHistoryEntry } from
 import { CDocumentType, FAKE_EXCHANGE_ID, FAKE_HISTORY_ENTRY_ID } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType, HistoryOperation } from "./history";
 import { FirestoreHistoryManager, IFirestoreHistoryManagerArgs } from "./firestore-history-manager";
+import { partitionLocalEntriesForMerge } from "./entry-scopes";
 
 /**
  * Thrown inside the upload transaction when the remote chain's head
@@ -433,13 +434,23 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       return;
     }
 
-    // Forked. Everything after expectedRemoteHead in our local history
-    // is local-uncommitted and must be rolled back.
+    // Forked. Everything after expectedRemoteHead in our local
+    // history is local-uncommitted. Decide which of those entries
+    // can be kept alongside the incoming remote entries based on
+    // scope disjointness, and which must be rolled back.
     const headIndex = this.expectedRemoteHead
       ? history.findIndex(e => e.id === this.expectedRemoteHead)
       : -1;
-    const localUncommittedCount = history.length - (headIndex + 1);
-    await this.rollbackLocalEntries(localUncommittedCount);
+    const localUncommitted = history.slice(headIndex + 1);
+    const localSnapshots = localUncommitted.map(e => getSnapshot(e));
+    const incomingSnapshots = newWrapperDocs.map(w => w.entry);
+
+    const { rollbackCount } =
+      partitionLocalEntriesForMerge(localSnapshots, incomingSnapshots);
+
+    if (rollbackCount > 0) {
+      await this.rollbackLocalEntries(rollbackCount);
+    }
   }
 
   /**
