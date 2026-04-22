@@ -44,3 +44,23 @@ export function scopeSetsConflict(
   }
   return false;
 }
+
+export function partitionLocalEntriesForMerge(
+  localEntries: HistoryEntrySnapshot[],
+  remoteEntries: HistoryEntrySnapshot[]
+): { keepCount: number; rollbackCount: number } {
+  const remoteScopes = new Set<EntryScopeKey>();
+  for (const entry of remoteEntries) {
+    for (const key of getEntryScopeKeys(entry)) {
+      remoteScopes.add(key);
+    }
+  }
+
+  for (let i = 0; i < localEntries.length; i++) {
+    const localScopes = getEntryScopeKeys(localEntries[i]);
+    if (scopeSetsConflict(localScopes, remoteScopes)) {
+      return { keepCount: i, rollbackCount: localEntries.length - i };
+    }
+  }
+  return { keepCount: localEntries.length, rollbackCount: 0 };
+}

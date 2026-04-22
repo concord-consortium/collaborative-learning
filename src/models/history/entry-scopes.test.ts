@@ -1,4 +1,9 @@
-import { getEntryScopeKeys, scopeKeyForPatchPath, scopeSetsConflict } from "./entry-scopes";
+import {
+  getEntryScopeKeys,
+  partitionLocalEntriesForMerge,
+  scopeKeyForPatchPath,
+  scopeSetsConflict,
+} from "./entry-scopes";
 import { HistoryEntrySnapshot } from "./history";
 import { IJsonPatch } from "mobx-state-tree";
 
@@ -162,5 +167,73 @@ describe("scopeSetsConflict", () => {
     const small = new Set(["tile:t500"]);
     expect(scopeSetsConflict(big, small)).toBe(true);
     expect(scopeSetsConflict(small, big)).toBe(true);
+  });
+});
+
+function entryOnTile(tileId: string): HistoryEntrySnapshot {
+  return makeEntry([{
+    patches: [{ op: "replace", path: `/content/tileMap/${tileId}/content/value`, value: 1 }],
+    inversePatches: [{ op: "replace", path: `/content/tileMap/${tileId}/content/value`, value: 0 }],
+  }]);
+}
+
+function entryOnDoc(): HistoryEntrySnapshot {
+  return makeEntry([{
+    patches: [{ op: "replace", path: "/content/rowMap/r1/height", value: 200 }],
+    inversePatches: [{ op: "replace", path: "/content/rowMap/r1/height", value: 100 }],
+  }]);
+}
+
+describe("partitionLocalEntriesForMerge", () => {
+  it("keeps all local entries when scopes are fully disjoint", () => {
+    const local = [entryOnTile("A"), entryOnTile("B")];
+    const remote = [entryOnTile("C")];
+    expect(partitionLocalEntriesForMerge(local, remote))
+      .toEqual({ keepCount: 2, rollbackCount: 0 });
+  });
+
+  it("rolls back all local entries when the very first one conflicts", () => {
+    const local = [entryOnTile("A"), entryOnTile("B")];
+    const remote = [entryOnTile("A")];
+    expect(partitionLocalEntriesForMerge(local, remote))
+      .toEqual({ keepCount: 0, rollbackCount: 2 });
+  });
+
+  it("keeps entries before the first conflict and rolls back everything after", () => {
+    // L1 tile A, L2 tile B, L3 tile A. Remote touches tile B.
+    // L1 keeps (disjoint), L2 conflicts (tile B intersects), so
+    // L2 and L3 roll back — even though L3 alone (tile A) wouldn't
+    // conflict with remote.
+    const local = [entryOnTile("A"), entryOnTile("B"), entryOnTile("A")];
+    const remote = [entryOnTile("B")];
+    expect(partitionLocalEntriesForMerge(local, remote))
+      .toEqual({ keepCount: 1, rollbackCount: 2 });
+  });
+
+  it("unions scopes across all remote entries", () => {
+    // Remote has two entries touching tile B and tile C respectively.
+    // Local L1 on tile A is fine. L2 on tile C conflicts.
+    const local = [entryOnTile("A"), entryOnTile("C")];
+    const remote = [entryOnTile("B"), entryOnTile("C")];
+    expect(partitionLocalEntriesForMerge(local, remote))
+      .toEqual({ keepCount: 1, rollbackCount: 1 });
+  });
+
+  it("treats doc-scope overlap as a conflict", () => {
+    const local = [entryOnDoc()];
+    const remote = [entryOnDoc()];
+    expect(partitionLocalEntriesForMerge(local, remote))
+      .toEqual({ keepCount: 0, rollbackCount: 1 });
+  });
+
+  it("returns zero counts for empty local", () => {
+    expect(partitionLocalEntriesForMerge([], [entryOnTile("A")]))
+      .toEqual({ keepCount: 0, rollbackCount: 0 });
+  });
+
+  it("keeps all local when remote is empty (no conflict possible)", () => {
+    const local = [entryOnTile("A"), entryOnTile("B")];
+    expect(partitionLocalEntriesForMerge(local, []))
+      .toEqual({ keepCount: 2, rollbackCount: 0 });
   });
 });
