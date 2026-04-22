@@ -152,7 +152,7 @@ context('Table Tool Tile', function () {
     tableToolTile.typeInTableCell(1, '5');
 
     // Table tile restore upon page reload
-    cy.wait(2000);
+    cy.waitForSave();
     cy.reload();
     cy.waitForLoad();
 

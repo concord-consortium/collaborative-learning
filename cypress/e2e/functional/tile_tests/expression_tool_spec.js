@@ -46,10 +46,9 @@ context('Expression Tool Tile', function () {
     exp.getMathField().eq(0).dblclick({ force: true });
     exp.getMathField().eq(0).type("hi", { force: true });
     exp.getMathField().eq(0).should("have.value", "hi");
-    cy.wait(2000);
 
     //Expression tile restore upon page reload
-    cy.wait(2000);
+    cy.waitForSave();
     cy.reload();
     cy.waitForLoad();
     exp.getTileTitle().should("contain", "(new title)");

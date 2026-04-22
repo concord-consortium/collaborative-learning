@@ -41,6 +41,13 @@ export enum ContentStatus {
   Error
 }
 
+export enum SaveState {
+  Idle = "idle",
+  Saving = "saving",
+  Saved = "saved",
+  Retrying = "retrying"
+}
+
 export type IExemplarVisibilityProvider = {
   isExemplarVisible: (id: string) => boolean;
 };
@@ -88,6 +95,7 @@ export const DocumentModel = Tree.named("Document")
     // loaded content and the Firestore history chain. Undefined for pre-
     // feature saves or fresh docs with no prior history.
     savedLastHistoryEntryId: undefined as string | undefined,
+    saveState: SaveState.Idle as SaveState,
   }))
   .views(self => ({
     // This is needed for the tree monitor and manager
@@ -240,6 +248,10 @@ export const DocumentModel = Tree.named("Document")
 
     incChangeCount() {
       return ++self.changeCount;
+    },
+
+    setSaveState(state: SaveState) {
+      self.saveState = state;
     },
 
     setGroupId(groupId?: string) {

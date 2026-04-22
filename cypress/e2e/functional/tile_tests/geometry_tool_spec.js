@@ -101,7 +101,7 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphTileTitle().first().click();
     geometryToolTile.getGraphTileTitle().first().type(newName + '{enter}');
     geometryToolTile.getGraphTitle().should("contain", newName);
-    cy.wait(2000);
+    cy.waitForSave();
 
     cy.log("verify geometry tile restore upon page reload");
     cy.reload();

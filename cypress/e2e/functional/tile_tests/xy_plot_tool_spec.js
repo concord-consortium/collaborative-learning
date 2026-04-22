@@ -70,7 +70,8 @@ context('XYPlot Tool Tile', function () {
       xyTile.getXYPlotTitle().should('contain', title);
 
       //XY Plot tile title restore upon page reload
-      cy.wait(2000);
+      // The /editor/ route saves to sessionStorage synchronously on each MST snapshot,
+      // so no wait is needed before reload.
       cy.reload();
       cy.get('.editable-document-content', { timeout: 60000 });
       xyTile.getTile().click();
@@ -207,7 +208,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().eq(0).find('.inner-circle').should('have.attr', 'style').and('contain', hexToRgb(clueDataColors[1]));
 
       //XY Plot tile restore upon page reload
-      cy.wait(2000);
+      // /editor/ route: sessionStorage save is synchronous, no wait needed.
       cy.reload();
       cy.get('.editable-document-content', { timeout: 60000 });
       xyTile.getTile().click();

@@ -1,370 +1,251 @@
 # Seismic ML Infrastructure Cost Estimates
 
-## Variations
+## Decisions and chosen architecture
 
-Two independent architectural choices create four combinations:
+We have settled on **client-side ML with an L0–L2 envelope tile cache**. Raw seismic data is fetched on demand from EarthScope (via a CloudFront CORS proxy) for zoomed-in views below L2's range, and the ML model runs in the student's browser.
 
-| | Client-side ML | AWS ML |
-|---|---|---|
-| **Without L3 cache** | A: Minimal infrastructure | B: Server ML only |
-| **With L3 cache** | C: Cache only | D: Full server-side |
+**Current state vs. planned work.** This document describes the chosen architecture and its cost profile. Not all pieces are in place yet:
 
-Three data scales:
+- **Deployed today:** S3 tile cache (2 stations × 1 year, BHZ), CloudFront serving + CORS proxy, and a local tile-generation script ([scripts/seismic/generate-envelopes.ts](../../scripts/seismic/generate-envelopes.ts)) run on a developer/author machine.
+- **Planned, not yet built:** the Firestore event database (see [event-database-design.md](event-database-design.md)) for sharing ML-detected events between students, and a self-service envelope-generation path so students/teachers can pick an arbitrary station-year and have tiles produced without running a script locally (likely via Lambda — see [Future option: running generation in Lambda](#future-option-running-generation-in-lambda)).
 
-| Scale | Stations | Years each | Station-years |
-|---|---|---|---|
-| Small | 5 | 1 | 5 |
-| Medium | 10 | 10 | 100 |
-| Large | 100 | 10 | 1,000 |
+**What the chosen architecture does *not* need:**
 
-## Key data sizes (per station-year)
+- No AWS Batch / GPU / Lambda ML pipeline, no server-side ML processing, and no scheduled automatic updates. Tile generation is a one-time per-station-year operation.
+- There is no L3 envelope level. We originally considered L3 as an intermediate tier between coarse envelopes and raw data; the L0–L2 design (with on-demand raw fetches below L2) made L3 unnecessary.
 
-From the [envelope tile cache design](envelope-tile-cache-design.md):
+The cost sections below describe the chosen architecture (both deployed and planned pieces). The [Alternatives considered](#alternatives-considered) appendix summarizes the options we looked at and why we rejected them — the cost numbers there are the justification for the decision, not a description of current or planned infrastructure.
 
-| Data | Size | Object/doc count | Storage |
-|---|---|---|---|
-| L0-L2 envelope tiles | ~3 MB (gzipped) | ~1,000 | S3 |
-| L3 envelope tiles (~9hr tiles) | ~250 MB (gzipped) | ~977 | S3 |
-| Event database (5% event rate, 60s windows) | ~5.2 MB | ~26,000 docs | Firestore |
-| Coverage bitmaps (10-min windows, 30-day chunks) | ~7 KB | 13 docs | Firestore |
-| Raw seismic data (from provider) | ~7.3 GB | not stored | — |
+## Deployed tile sizes (measured)
 
-L3 is 99% of the tile cache storage. With ~9-hour tiles, L3 object count is comparable to L0–L2. Event and coverage data is stored in Firestore — see [event-database-design.md](event-database-design.md) for details.
+We have deployed 1 year of envelope tiles for 2 stations (BHZ channel) to S3 at `s3://models-resources/collaborative-learning/envelopes/v1/`. These are real measurements, not estimates:
 
-## ML model processing time
-
-The ML model's speed depends heavily on whether GPU acceleration is available:
-
-| Environment | Time per day of data | Time per station-year | Speedup vs browser JS |
-|---|---|---|---|
-| CPU-only JavaScript (browser) | ~2 min | ~730 min (~12 hours) | 1x |
-| CPU ONNX Runtime (est.) | ~2–12s | ~12–73 min | 10–50x |
-| M2 MacBook WebGPU (browser) | ~0.5s | ~3 min | ~240x |
-| AWS GPU (CUDA, e.g., g4dn T4) | ~0.5s (est.) | ~3 min (est.) | ~240x |
-
-Running on CPU in the browser (JavaScript/WASM) is ~240x slower than GPU. Using a native CPU runtime like ONNX Runtime in Lambda could be 10–50x faster than browser JS (native SIMD, oneDNN optimizations, operator fusion), but this range is uncertain — a benchmark is needed.
-
-An AWS T4 GPU should perform comparably to an M2 MacBook's WebGPU — likely similar or faster due to native CUDA vs WebGPU overhead.
-
-## AWS compute options for ML processing
-
-### CPU-only options (Lambda, Fargate)
-
-Lambda and Fargate have **no GPU support**. Two CPU runtime options:
-
-**Browser-equivalent JS/WASM (~2 min/day):**
-- Lambda (15-min limit): can process ~7 days per invocation → 52 invocations per station-year
-- Cost per station-year at 2 GB: **$1.46**
-- 1,000 station-years: **$1,460** — expensive
-
-**ONNX Runtime in Lambda container (~2–12s/day, estimated):**
-
-ONNX Runtime uses native SIMD (AVX2), oneDNN, and graph-level optimizations (operator fusion, constant folding) that could be 10–50x faster than browser JS on the same CPU. This range is uncertain — it depends on the specific model's operations. A benchmark is needed.
-
-| Scale | Conservative (12s/day, 4 GB) | Optimistic (2s/day, 4 GB) |
-|---|---|---|
-| 5 station-years | $1.46 | $0.29 |
-| 100 station-years | $29 | $5.84 |
-| 1,000 station-years | **$292** | **$58** |
-
-Still more expensive than GPU at scale, but potentially viable for small deployments where avoiding GPU infrastructure complexity is worth the cost.
-
-### GPU options
-
-| Service | GPU | On-demand | Spot | Scales to zero | Startup time | Extra charge |
-|---|---|---|---|---|---|---|
-| **AWS Batch + EC2** | g4dn.xlarge (T4) | $0.526/hr | **$0.219/hr** | Yes (queue idles) | 6–7 min cold | None |
-| **EC2 directly** | g4dn.xlarge (T4) | $0.526/hr | $0.219/hr | Yes (terminate) | 1–3 min | None |
-| **SageMaker Processing** | ml.g4dn.xlarge | $0.736/hr | No spot | Yes (per job) | 3–8 min | ~40% markup |
-| **Fargate** | — | — | — | — | — | No GPU support |
-| **Lambda** | — | — | — | — | — | No GPU support |
-
-The g4dn.xlarge (NVIDIA T4, 16 GB VRAM) is the cheapest AWS GPU instance at **$0.219/hr spot**. All options bill per-second with a 60-second minimum.
-
-**Recommendation: AWS Batch with g4dn.xlarge spot instances.**
-
-AWS Batch manages a job queue, launches GPU instances on demand, handles spot interruptions with automatic retries, and scales to zero when idle. No charge beyond the underlying EC2 spot price. You'd package the ML model as a Docker container with CUDA/TensorFlow or ONNX Runtime.
-
-For batch processing, one instance processes many station-years sequentially — the 6–7 min cold start is amortized across the batch. For periodic daily updates, the startup cost dominates for small numbers of stations.
-
-## Cost breakdown by component
-
-### S3 storage (monthly)
-
-| Scale | Without L3 | With L3 |
-|---|---|---|
-| 5 station-years | $0.0003 | $0.03 |
-| 100 station-years | $0.007 | $0.58 |
-| 1,000 station-years | $0.07 | **$5.82** |
-
-Rate: $0.023/GB/month.
-
-### Firestore: event database (monthly)
-
-ML-detected events and coverage bitmaps are stored in Firestore. See [event-database-design.md](event-database-design.md) for the schema.
-
-**Storage** (at $0.18/GB/month):
-
-| Scale | Event docs | Coverage docs | Event storage | Coverage storage | **Monthly total** |
+| Station | L0 tiles | L1 tiles | L2 tiles | Total tiles | Total size (gzipped) |
 |---|---|---|---|---|---|
-| 5 station-years | ~130K | 65 | ~26 MB | ~35 KB | **~$0.005** |
-| 100 station-years | ~2.6M | 1,300 | ~520 MB | ~700 KB | **~$0.09** |
-| 1,000 station-years | ~26M | 13,000 | ~5.2 GB | ~7 MB | **~$0.94** |
+| AK_FIRE / BHZ | 3 (3.5 KB) | 201 (135 KB) | 999 (12.1 MB) | 1,203 | **~12.2 MB** |
+| AK_RC01 / BHZ | 3 (3.1 KB) | 201 (59 KB) | 987 (3.3 MB) | 1,191 | **~3.3 MB** |
 
-Assumes 5% event rate with 60-second model windows (~26K events per station-year). Coverage uses bitmap encoding (540 bytes per 30-day chunk, 13 chunks per year).
+Per-tile averages (gzipped Int16):
 
-**Writes** (one-time, at $0.18/100K writes):
+| Level | Tile duration | Points/tile | AK_FIRE avg | AK_RC01 avg |
+|---|---|---|---|---|
+| L0 | ~182 days | 1,000 | ~1.2 KB | ~1.1 KB |
+| L1 | ~1.8 days | 1,000 | ~690 B | ~300 B |
+| L2 | ~8.75 hours | 20,000 | ~12.7 KB | ~3.5 KB |
 
-| Scale | Event writes | Coverage writes | **Write cost** |
+**Observations:**
+
+- **L2 dominates** (~99% of total storage) as expected from the design.
+- **Per-station size varies substantially with signal content.** AK_FIRE is ~3.7× larger than AK_RC01 on the same time range and channel. This is because gzip is much more effective on quiet/sparse envelope data: AK_RC01 appears to have more missing-data sentinel runs and smoother amplitude patterns. The design doc's ~4–6 MB/station-year estimate (extrapolated from a 7-day sample of K204/HNZ) is a reasonable average but individual stations can be well above or below.
+- **Tile counts match design.** ~2 L0 + ~200 L1 + ~1,000 L2 per station-year per channel, as specified in [envelope-tile-cache-design.md](envelope-tile-cache-design.md).
+
+For planning purposes, we use **~10 MB/station-year/channel** as a conservative upper bound, and ~5 MB as a typical value.
+
+## Tile level configuration — why L0–L2 with these spacings
+
+The level configuration in [envelope-config.ts](../../shared/seismic/envelope-config.ts) sets L0 spacing to 15,750 s (~6 months of data across a 1,000-point L0 tile) with a scale factor of K=100 between levels, and 20,000 points per L2 tile.
+
+### Why 3 levels and not 4
+
+A 4th envelope level (finer than L2) would have hundreds of millions of points per station-year — hundreds of MB or more of storage. At the L2→raw transition, the viewport is ~2.6 minutes, and fetching raw data for that range from EarthScope is tens to hundreds of KB (fast enough to skip the 4th level).
+
+### Why L0 targets ~6 months (not 3 months or 1 year)
+
+The trade-off at L0 is between L2 storage cost and how far in you can zoom before needing raw data:
+
+| L0 target | L2 point spacing | Raw data needed below… | L2 storage/station-year (est.) |
 |---|---|---|---|
-| 5 station-years | ~130K | 65 | **~$0.23** |
-| 100 station-years | ~2.6M | 1,300 | **~$4.68** |
-| 1,000 station-years | ~26M | 13,000 | **~$46.80** |
+| 3 months | ~0.79 s | ~1.3 min view | ~8–12 MB |
+| **6 months (chosen)** | **~1.575 s** | **~2.6 min view** | **~4–12 MB (measured)** |
+| 1 year | ~3.15 s | ~5 min view | ~2–3 MB |
 
-**Reads** (per query, at $0.06/100K reads):
+6 months balances storage against raw-fetch frequency. 1 year would halve storage but push the raw-fetch boundary out to ~5-minute views, which feels too coarse for interactive exploration near the event scale. 3 months doubles storage without a meaningful UX win.
 
-| Query | Docs read | Cost |
-|---|---|---|
-| Load events for 1 station+model+year | ~26K | $0.016 |
-| Check coverage for 1 station+model+year | 13 | negligible |
+### Why L2 tiles are ~8.75 hours (20,000 points), not shorter or longer
 
-### S3 PUT requests (one-time, for tile generation)
+L2 has ~20M points/station-year. The tile-size choice trades S3 object count (fewer larger tiles = fewer PUTs, easier management) against per-fetch size (smaller tiles = faster initial load, less over-fetch, smaller conflict window for concurrent writers).
 
-| Scale | Without L3 | With L3 (~5 min tiles) | With L3 (~9 hour tiles) |
+| L2 tile duration | Points/tile | Tile size (gzipped, est.) | Tiles/station-year |
 |---|---|---|---|
-| 5 station-years | $0.02 | $2.47 | $0.05 |
-| 100 station-years | $0.49 | $49 | $1.00 |
-| 1,000 station-years | $4.94 | **$494** | $9.88 |
+| ~1.6 min | 1,000 | ~200–600 B | ~320,000 |
+| ~26 min | 1,000 × 16 | ~3–10 KB | ~20,000 |
+| **~8.75 hr (chosen)** | **20,000** | **~3–13 KB (measured)** | **~1,000** |
+| ~1 day | ~55,000 | ~10–35 KB | ~365 |
 
-Rate: $0.005 per 1,000 PUT requests. With small L3 tiles (~5 min, 1024 points), the ~97,700 tiles per station-year make PUT costs expensive at scale. **Using larger L3 tiles reduces PUT costs dramatically.** See [L3 tile duration options](#l3-tile-duration-options) below for details.
+~1,000 tiles/station-year is a comfortable object count for S3, and a single tile fetch (~3–13 KB) is small enough not to feel slow even on school networks. Larger tiles (1 day+) would reduce tile count further but make partial-tile updates (for conflict resolution during incremental fills) larger.
 
-#### L3 tile duration options
+See [envelope-tile-cache-design.md](envelope-tile-cache-design.md) for the full addressing and concurrent-write design.
 
-L3 has ~100 million envelope points per station-year. The tile duration determines the trade-off between S3 PUT costs (fewer larger tiles = cheaper), fetch size for slow networks (smaller tiles = faster initial load), and conflict window for concurrent writers (smaller tiles = fewer conflicts, see [envelope tile cache design](envelope-tile-cache-design.md#concurrent-writes-and-conflict-handling)).
+## Ongoing cost: S3 storage
 
-| L3 tile duration | Points per tile | Tile size (gzipped Int16) | Tiles per station-year | PUTs at 1,000 station-years | PUT cost |
-|---|---|---|---|---|---|
-| ~5.4 min (1,024 pts) | 1,024 | ~2 KB | 97,700 | 97.7M | **$489** |
-| 1 hour (~11,400 pts) | ~11,400 | ~22 KB | ~8,770 | 8.77M | $44 |
-| ~9 hours (~100K pts) | ~100,000 | ~200 KB | ~977 | 977K | $4.89 |
-| 1 day (~274K pts) | ~274,000 | ~540 KB | 365 | 365K | **$1.83** |
+At $0.023/GB/month:
 
-A duration in the **1–9 hour range** is recommended, balancing cost, fetch size, and concurrency. The rest of this document uses ~9-hour tiles (~977 tiles per station-year) for cost estimates.
-
-**How the client uses L3 tiles:**
-
-1. User zooms into L3 range (viewing ~5–50 minutes of data).
-2. Client determines which tile(s) the viewport spans.
-3. Client fetches the tile(s) — typically 1, occasionally 2 at a tile boundary.
-4. Client decompresses (~200 KB → ~400 KB) and indexes directly into the point array.
-5. The decompressed tile is cached in memory. Subsequent panning within the same tile requires no additional fetches.
-
-**Updating tiles:** When new data arrives, only tiles covering the affected time range need to be re-uploaded using conditional writes (`If-Match` ETag). Previous tiles for completed time ranges are immutable.
-
-### CloudFront serving (monthly)
-
-Assuming moderate classroom usage: 100 active students, each viewing ~5 stations across 2-3 zoom levels, 2 sessions/month.
-
-| | Without L3 | With L3 |
+| Scale | Storage (~10 MB/station-year/channel) | Monthly cost |
 |---|---|---|
-| Tile fetches/month | ~40,000 | ~120,000 |
-| Data transferred | ~80 MB | ~240 MB |
-| Request cost | $0.04 | $0.12 |
-| Data transfer cost | $0.007 | $0.02 |
-| **Total/month** | **~$0.05** | **~$0.14** |
+| 5 station-years | ~50 MB | <$0.01 |
+| 100 station-years | ~1 GB | ~$0.02 |
+| 1,000 station-years | ~10 GB | ~$0.23 |
 
-**CloudFront free tier covers tile serving entirely**: 1 TB/month data transfer + 10M requests/month (always free, not just first 12 months). Even 50x the above tile usage stays within the free tier.
+Storage is effectively free at any plausible project scale.
 
-Note: S3-to-CloudFront data transfer is free.
+## Ongoing cost: CloudFront serving
 
-#### CloudFront as CORS proxy for EarthScope data
+Assuming moderate classroom usage — 100 active students, each viewing ~5 stations across 2–3 zoom levels, 2 sessions/month:
 
-EarthScope's data server does not support CORS, so browser-based access to raw seismic data requires proxying through CloudFront. This applies in two situations:
+| Metric | Estimate |
+|---|---|
+| Tile fetches/month | ~120,000 |
+| Data transferred | ~240 MB |
+| Cost | ~$0.14/month |
 
-**1. Client-side ML processing (one-time per station-year):** One student processes the raw data for a station-year and uploads the ML results to S3 for other students to access. Each station-year is ~7.3 GB of raw data.
+**CloudFront's always-free tier (1 TB/month + 10M requests/month) covers this many times over.** Tile serving is effectively free.
 
-| Station-years processed | Data through proxy | CloudFront cost |
+### CloudFront as CORS proxy for EarthScope data
+
+EarthScope's data server does not support CORS, so browser access to raw seismic data goes through our CloudFront proxy. Two usage patterns:
+
+1. **Client-side ML processing (one-time per station-year, planned).** Once the Firestore event database is in place, a student processes the raw data for a station-year and uploads ML event results to Firestore so other students don't have to redo the work. Each station-year is ~7.3 GB of raw data.
+2. **Exploration at raw zoom level.** Below L2 (~2.6-minute viewport), the client fetches raw 200 Hz data for the visible time range. Raw is ~1.4 MB/hour, so even active exploration by 100 students stays well within the free tier.
+
+| Station-years processed via proxy | Data through proxy | CloudFront cost |
 |---|---|---|
 | 5 | 36.5 GB | free tier |
 | 100 | 730 GB | free tier |
-| 1,000 | 7.3 TB | **~$536** |
+| 1,000 | 7.3 TB | ~$536 (one-time) |
 
-This is a one-time cost, not monthly. CloudFront caching helps if multiple students attempt to process the same station — the data is served from edge cache rather than re-fetching from EarthScope.
+Rate: first 1 TB/month free, then $0.085/GB. CloudFront edge caching reduces this if multiple students process the same station.
 
-Download time for 7.3 GB (one station-year) depends on the student's effective bandwidth:
+Download time matters as much as cost. 7.3 GB (one station-year) takes:
 
 | Effective bandwidth | Time for 7.3 GB |
 |---|---|
-| 1 Mbps | ~16 hours |
 | 5 Mbps | ~3.2 hours |
-| 10 Mbps | ~1.6 hours |
 | 25 Mbps | ~39 min |
 | 50 Mbps | ~19 min |
 
-On shared school networks, per-student throughput may be well below the school's total bandwidth.
+On shared school networks, per-student throughput may be well below the school's total bandwidth. This is the main practical limit on client-side ML for long time ranges, not the cloud bill.
 
-**2. Exploration at raw zoom level:** When students zoom past the finest cached level (L3 or L2 depending on configuration), the client fetches raw 200 Hz data for the visible time range. Raw data is ~1.4 MB per hour of seismic data, so a student viewing a few minutes at raw zoom downloads only a few hundred KB. Even heavy exploration by 100 students would likely stay well within the free tier.
+## Ongoing cost: Firestore event database (planned)
 
-Rate: first 1 TB/month free, then $0.085/GB.
+The event database is not yet built. Once it is, ML-detected events and coverage bitmaps will be stored in Firestore. See [event-database-design.md](event-database-design.md) for the schema. Assumes 5% event rate with 60-second model windows (~26K events per station-year) and 10-minute coverage bitmaps (13 docs/year).
 
-This proxy is needed for all four scenarios (A–D) for raw-zoom exploration, but the ML processing cost only applies to client-side ML (A and C). With server-side ML (B and D), the ML model runs on AWS infrastructure that can fetch from EarthScope directly without CloudFront.
+**Storage** (at $0.18/GB/month):
 
-### Compute for tile cache generation (one-time + periodic)
+| Scale | Event docs | Event storage | **Monthly total** |
+|---|---|---|---|
+| 5 station-years | ~130K | ~26 MB | **~$0.005** |
+| 100 station-years | ~2.6M | ~520 MB | **~$0.09** |
+| 1,000 station-years | ~26M | ~5.2 GB | **~$0.94** |
 
-Generating envelope tiles requires downloading raw data from EarthScope and computing min/max envelopes. Envelope computation is trivially fast — the bottleneck is download time.
+**Writes** (one-time as students process data, at $0.18/100K writes):
 
-Using Lambda (monthly chunks per station, ~10s per invocation including download):
-
-| Scale | Raw data to download | Lambda compute cost |
+| Scale | Event writes | **Write cost** |
 |---|---|---|
-| 5 station-years | 36.5 GB | $0.02 |
-| 100 station-years | 730 GB | $0.40 |
-| 1,000 station-years | 7.3 TB | $4.00 |
+| 5 station-years | ~130K | ~$0.23 |
+| 100 station-years | ~2.6M | ~$4.68 |
+| 1,000 station-years | ~26M | ~$46.80 |
 
-EarthScope data is free to download. Lambda outside a VPC has free internet access. Lambda-to-S3 transfers are within AWS (free).
+**Reads** per query (at $0.06/100K reads): loading events for 1 station+model+year reads ~26K docs = ~$0.016/query.
 
-### Compute for ML model (AWS ML option only)
+## One-time cost: tile generation
 
-**GPU (AWS Batch + g4dn.xlarge spot at $0.219/hr):**
+Envelope tile generation is currently run as a local script ([scripts/seismic/generate-envelopes.ts](../../scripts/seismic/generate-envelopes.ts)) on a developer or author machine, on-demand when a new station-year is needed. Per station-year, the work is:
 
-At ~3 min per station-year on GPU, the compute is modest. The 6–7 min cold start for AWS Batch is significant for small jobs but amortized across larger batches.
+- Download ~7.3 GB raw data from EarthScope (free; EarthScope doesn't charge, and the script runs outside the browser so no CORS proxy is needed).
+- Compute L0–L2 envelopes (trivially fast — dominated by download).
+- Upload ~1,200 tiles to S3. At $0.005/1,000 PUTs, this is ~$0.006/station-year.
 
-| Scale | GPU compute time | Total time (incl. startup) | Spot cost |
-|---|---|---|---|
-| 5 station-years | ~15 min | ~22 min | **$0.08** |
-| 100 station-years | ~5 hours | ~5.1 hours | **$1.12** |
-| 1,000 station-years | ~50 hours | ~50 hours | **$10.95** |
+**The only cloud cost is the S3 PUTs**, which is negligible:
 
-**CPU comparison (see [CPU-only options](#cpu-only-options-lambda-fargate)):**
+| Scale | S3 PUTs | **Total cloud cost** |
+|---|---|---|
+| 5 station-years | ~6,000 | **~$0.03** |
+| 100 station-years | ~120,000 | **~$0.60** |
+| 1,000 station-years | ~1.2M | **~$6** |
 
-| Scale | Browser JS Lambda | ONNX Runtime Lambda (est.) | GPU spot |
-|---|---|---|---|
-| 5 station-years | $7.30 | $0.29–$1.46 | **$0.08** |
-| 100 station-years | $146 | $5.84–$29 | **$1.12** |
-| 1,000 station-years | $1,460 | $58–$292 | **$10.95** |
+### Future option: running generation in Lambda
 
-GPU is 5–27x cheaper than even the optimistic ONNX Runtime estimate, and ~130x cheaper than browser JS on Lambda.
+Longer-term we want students and teachers to be able to pick an arbitrary station-year from within the app and have envelope tiles produced on the fly, without anyone running a local script. Wrapping the generation script in AWS Lambda is the natural path there, and also helps if we need to bulk-process many stations. The workload fits Lambda well: each invocation processes one monthly chunk for one station (~600 MB raw data, ~10 s including download, well under the 15-minute limit and within memory/ephemeral-storage limits).
 
-If tile cache generation is also running on the GPU instance, the ML model can share the same instance with negligible additional cost (the raw data is already downloaded, and envelope computation is trivially fast).
+Estimated cost in addition to the S3 PUTs above:
 
-### Periodic updates (monthly, for keeping current data fresh)
+| Scale | Lambda invocations | Lambda compute |
+|---|---|---|
+| 5 station-years | ~60 | ~$0.02 |
+| 100 station-years | ~1,200 | ~$0.40 |
+| 1,000 station-years | ~12,000 | ~$4 |
 
-For live/recent stations, new data arrives daily (~20 MB/station/day).
+At these scales the Lambda cost is also negligible — on the same order as the S3 PUTs. The decision to move to Lambda would be driven by workflow (automation, self-service generation) rather than cost.
 
-**GPU compute for daily ML updates:**
+## Summary: total ongoing monthly cost
 
-Each day of data takes ~0.5s per station on GPU, so startup time still dominates for small station counts. A single g4dn instance processes all stations then terminates.
-
-| Stations kept current | GPU time/day | Startup overhead | Total time/day | Monthly GPU spot cost |
+| Scale | S3 | CloudFront serving | Firestore events | **Total/month** |
 |---|---|---|---|---|
-| 5 | ~2.5s | ~7 min | ~7 min | $0.78 |
-| 10 | ~5s | ~7 min | ~7 min | $0.78 |
-| 100 | ~50s | ~7 min | ~8 min | $0.88 |
+| 5 × 1 yr | <$0.01 | ~$0.14 | ~$0.005 | **~$0.15** |
+| 10 × 10 yr | ~$0.02 | ~$0.14 | ~$0.09 | **~$0.25** |
+| 100 × 10 yr | ~$0.23 | ~$0.14 | ~$0.94 | **~$1.31** |
 
-Cost is ~$0.78–$0.88/month — one instance launch per day at $0.219/hr spot.
-
-**S3 PUTs for daily L3 tile cache updates:**
-
-| Stations kept current | Daily PUTs | Monthly PUTs | Monthly PUT cost |
-|---|---|---|---|
-| 5 | 5 | ~150 | $0.001 |
-| 10 | 10 | ~300 | $0.002 |
-| 100 | 100 | ~3,000 | $0.015 |
-
-With multi-hour L3 tiles, each station's daily update is a single PUT (one tile covers the new data). PUT costs are negligible.
-
-**Combined monthly update costs (GPU + L3 PUTs):**
-
-| Stations kept current | Monthly cost |
-|---|---|
-| 5 | ~$0.78 |
-| 10 | ~$0.78 |
-| 100 | ~$0.90 |
-
-## Summary: total monthly cost by combination
-
-Assumes the tile cache and event data are pre-generated (one-time cost amortized over time), plus ongoing storage and serving. Periodic update costs are included for scenarios where stations have current data.
-
-### A: No L3 cache + Client-side ML (minimal infrastructure)
-
-| Scale | S3 storage | Firestore (events) | Serving | Updates | **Monthly total** |
-|---|---|---|---|---|---|
-| 5 × 1yr | $0.00 | $0.005 | $0.05 | — | **~$0.06** |
-| 10 × 10yr | $0.01 | $0.09 | $0.05 | — | **~$0.15** |
-| 100 × 10yr | $0.07 | $0.94 | $0.05 | — | **~$1.06** |
-
-One-time setup: L0-L2 tile generation ($0.02–$5) + S3/CloudFront configuration. Plus one-time CORS proxy cost for ML processing (free for ≤100 station-years, ~$536 at 1,000 — see [CORS proxy](#cloudfront-as-cors-proxy-for-earthscope-data)).
-
-**Trade-off**: Students must download raw data through the CORS proxy to zoom deeply or run the ML model. A year of data is ~7.3 GB per station — only practical for short time ranges (days to weeks) in the browser. ML results are uploaded to S3 after processing so each station-year only needs to be processed once. No smooth zoom across long time ranges.
-
-### B: No L3 cache + AWS ML
-
-| Scale | S3 storage | Firestore (events) | Serving | ML updates (GPU) | **Monthly total** |
-|---|---|---|---|---|---|
-| 5 × 1yr | $0.00 | $0.005 | $0.05 | $0.78 | **~$0.84** |
-| 10 × 10yr | $0.01 | $0.09 | $0.05 | $0.78 | **~$0.93** |
-| 100 × 10yr | $0.07 | $0.94 | $0.05 | $0.90 | **~$1.96** |
-
-One-time setup: L0-L2 tile generation + AWS Batch with g4dn GPU instances for ML pipeline.
-
-**Trade-off**: Pre-computed events mean students don't need to wait for ML processing. Still no smooth deep zoom. GPU instance startup (~7 min/day) dominates the cost. Adds server infrastructure to maintain.
-
-### C: L3 cache + Client-side ML
-
-The tile cache still needs server-side generation (downloading 7.3 GB/station-year and computing envelopes is impractical in a browser). This can run on the same GPU instance or on CPU Lambda — envelope computation is lightweight, so CPU is fine for cache-only.
-
-| Scale | S3 storage | Firestore (events) | Serving | Cache updates (Lambda) | **Monthly total** |
-|---|---|---|---|---|---|
-| 5 × 1yr | $0.03 | $0.005 | $0.14 | $0.02 | **~$0.20** |
-| 10 × 10yr | $0.58 | $0.09 | $0.14 | $0.02 | **~$0.83** |
-| 100 × 10yr | $5.82 | $0.94 | $0.14 | $0.05 | **~$6.95** |
-
-One-time setup: Full tile cache generation ($0.05–$10) + Lambda pipeline for cache + S3/CloudFront. Plus one-time CORS proxy cost for ML processing (free for ≤100 station-years, ~$536 at 1,000 — see [CORS proxy](#cloudfront-as-cors-proxy-for-earthscope-data)).
-
-**Trade-off**: Smooth zoom experience without downloading raw data for browsing. Students still run ML in browser (slow for long time ranges on Chromebooks — ~2 min per day of data on CPU), downloading raw data through the CORS proxy. ML results are uploaded to S3 so each station-year only needs to be processed once. Server infrastructure needed for tile cache regardless.
-
-### D: L3 cache + AWS ML (full server-side)
-
-Since the GPU instance is already running for ML, tile cache generation runs alongside it at no additional compute cost.
-
-| Scale | S3 storage | Firestore (events) | Serving | GPU updates (cache + ML) | **Monthly total** |
-|---|---|---|---|---|---|
-| 5 × 1yr | $0.03 | $0.005 | $0.14 | $0.78 | **~$0.96** |
-| 10 × 10yr | $0.58 | $0.09 | $0.14 | $0.78 | **~$1.59** |
-| 100 × 10yr | $5.82 | $0.94 | $0.14 | $0.90 | **~$7.80** |
-
-One-time setup: Full tile cache generation + ML pipeline on AWS Batch + S3/CloudFront.
-
-**Trade-off**: Best user experience — smooth zoom and instant event data. The GPU instance handles both ML and cache generation in one daily run. Most infrastructure to build and maintain, but the marginal cost of adding ML to the cache pipeline is near zero.
-
-## One-time generation costs
-
-For the initial data population (not monthly). Uses GPU (g4dn spot) for ML:
-
-| Scale | L0-L2 tile PUTs | L3 tile PUTs (~9hr tiles) | Firestore writes (events + coverage) | GPU compute (ML + cache) | **Total one-time** |
-|---|---|---|---|---|---|
-| 5 × 1yr | $0.02 | $0.01 | $0.23 | $0.08 | **~$0.34** |
-| 10 × 10yr | $0.49 | $0.18 | $4.68 | $1.12 | **~$6.47** |
-| 100 × 10yr | $4.94 | $1.83 | $46.80 | $10.95 | **~$64.52** |
-
-(Includes GPU spot compute + S3 PUTs. Raw data download from EarthScope is free for server-side processing. For client-side ML, add CORS proxy cost — see [CORS proxy](#cloudfront-as-cors-proxy-for-earthscope-data).)
+**The infrastructure bill is negligible at any plausible scale.** The real costs are engineering time to build and maintain the pipeline, and (for client-side ML) the student-time cost of downloading 7.3 GB per station-year for ML processing.
 
 ## Key takeaways
 
-1. **Infrastructure costs are low.** Even the largest scenario (1,000 station-years with full L3 cache + AWS ML) costs ~$8/month ongoing. Firestore event storage adds ~$0.94/month at that scale. The one-time Firestore write cost (~$47 at 1,000 station-years) is the largest new expense. The infrastructure cost is dominated by engineering time to build and maintain the pipeline, not cloud bills.
+1. **Cloud costs are not a constraint on this project.** Ongoing costs are ~$1/month even at 100 × 10-year scale. Engineering time dominates.
+2. **Deployed L2 size varies ~4× between stations.** AK_FIRE/BHZ is ~12 MB/year; AK_RC01/BHZ is ~3 MB/year. Gzip compresses quiet/sparse envelope data far more effectively than noisy data. Plan for ~10 MB/station-year/channel as a conservative upper bound.
+3. **Client-side ML's real cost is student download time, not cloud bills.** 7.3 GB per station-year through the browser is the binding constraint for long time ranges on school networks.
+4. **Free tiers cover serving entirely.** CloudFront's always-free 1 TB/month + 10M requests/month covers tile serving and the CORS proxy for small-to-moderate deployments. At 1,000 station-years processed via proxy, ~$536 one-time becomes visible — that's the only scale at which CloudFront appears on the bill.
 
-2. **GPU is dramatically cheaper than CPU for ML.** At 1,000 station-years: GPU spot = $10.95, ONNX Runtime on CPU Lambda = $58–$292, browser JS on Lambda = $1,460. GPU is 5–27x cheaper than the best CPU option and ~130x cheaper than browser JS.
+---
 
-3. **GPU startup time dominates for daily updates.** A g4dn spot instance takes ~7 min to cold start. The actual ML processing is ~0.5s per station per day. For daily updates, you pay ~$0.78–$0.88/month mostly for instance launches — nearly flat regardless of station count.
+## Alternatives considered
 
-4. **ONNX Runtime on CPU Lambda could work for small scale.** If GPU infrastructure is too complex, ONNX Runtime in a Lambda container might be 10–50x faster than browser JS (a benchmark is needed). At 5 stations this could be $0.29–$1.46 one-time — reasonable if you're avoiding GPU setup.
+We evaluated several architectures before settling on client-side ML + L0–L2 tile cache. This section summarizes what we considered and why we rejected each. The cost numbers here are historical context — they justify why we chose the current architecture, not something we plan to build.
 
-5. **L3 tile duration matters.** With small (~5 min) L3 tiles, PUT costs reach ~$500 for 1,000 station-years. Using larger tiles (~9 hours) reduces this to ~$5. See [L3 tile duration options](#l3-tile-duration-options).
+### Server-side ML on AWS (rejected)
 
-6. **CloudFront free tier covers tile serving but not necessarily ML data.** 1 TB/month (always free) easily covers tile serving. However, CloudFront is also needed as a CORS proxy for EarthScope data. For client-side ML, raw data downloads are one-time per station-year (~7.3 GB each) — free at moderate scale but ~$536 at 1,000 station-years. Exploration at raw zoom uses minimal data.
+We considered running the ML model on AWS (Lambda CPU, Fargate CPU, or AWS Batch with GPU) and pre-computing events for all stations/years the students would see.
 
-7. **Adding ML to a cache pipeline is nearly free.** If you're already running a GPU instance for tile cache generation, running the ML model in the same job adds negligible cost. This makes combination D (full server-side) only marginally more expensive than C (cache-only), with a much better student experience.
+**Cost snapshot at 1,000 station-years (one-time ML compute):**
 
-8. **Client-side ML performance varies by hardware.** No server cost, but students need to download raw data. On CPU it's ~2 min per day of data — only practical for short time ranges. Chromebooks do support WebGPU, which dramatically improves performance (24 hours of data in ~0.5–10s depending on the device). The bottleneck for client-side ML is data download size, not model execution — see [seismic-tiles-plan.md](seismic-tiles-plan.md).
+| Compute option | Cost | Notes |
+|---|---|---|
+| AWS Batch + g4dn spot GPU | ~$11 | Cheapest. ~3 min/station-year on T4 GPU. |
+| ONNX Runtime on Lambda CPU (est.) | $58–$292 | Uncertain 10–50× speedup over browser JS from SIMD / oneDNN. Benchmark was never run. |
+| Browser-equivalent JS/WASM on Lambda | ~$1,460 | ~2 min per day of data. |
 
-9. **The real cost is engineering time.** Building the AWS Batch pipeline, Docker container with CUDA/TensorFlow, tile generation logic, S3/CloudFront setup, and EventBridge scheduling is likely weeks of engineering work regardless of the AWS bill.
+GPU is 5–27× cheaper than CPU Lambda and ~130× cheaper than running the same JS model on Lambda.
+
+**Why we didn't go this route:**
+- Ongoing GPU startup cost (~$0.78–$0.88/month) was small but nonzero, and required AWS Batch / Docker / CUDA pipeline engineering to build and maintain.
+- Client-side ML was already viable: WebGPU runs the model in ~0.5–10 s/day on modern devices (including Chromebooks), and CPU fallback is ~2 min/day (acceptable for short ranges).
+- Eliminating server-side ML removes an entire infrastructure layer (AWS Batch, container builds, scheduled jobs, monitoring) — a significant reduction in what we have to build and keep working.
+- Server-side ML *would* avoid the ~7.3 GB per station-year raw-data download that client-side ML currently requires (the server would fetch from EarthScope directly, no CORS proxy, no student bandwidth). This is a real trade-off we accepted: with client-side ML, processing a new station-year is slow on school networks, but each station-year only needs to be processed once and the results are shared via Firestore — so the pain is amortized across a class rather than repeated per student.
+- **We want to support any station, globally.** There are thousands of seismic stations worldwide, and we can't pre-process all of them. A server-side pipeline would need to handle on-demand requests for arbitrary stations that a classroom picks. AWS Batch scales to zero when idle, so *compute* cost would still be near zero when no classrooms are active, but keeping such a pipeline responsive and maintained (container images, model updates, EarthScope auth, error handling, monitoring) is a nontrivial ongoing engineering cost — probably more than the cloud bill. Client-side ML puts the "on-demand for any station" capability directly in the browser with no always-on infrastructure to maintain. *(The cost framing here is a judgment call, not a computed number; the engineering-overhead argument is the stronger one.)*
+
+### Periodic automatic updates (rejected)
+
+We considered a daily scheduled job (EventBridge + AWS Batch) that fetches new data for "live" stations, runs ML on it, and updates tiles and event docs. Cost was ~$0.78–$0.90/month (dominated by GPU cold-start, ~7 min per daily launch), plus negligible S3 PUTs.
+
+**Why we didn't go this route:**
+- Our current use case is classroom exploration of past events, not live monitoring. Students aren't asking "what happened last night" — they're asking "what happened during the last year."
+- An on-demand generation workflow (a student or author picks a station-year, we run the pipeline once) matches actual usage better.
+- Removes another piece of always-on infrastructure to maintain.
+
+### L3 envelope level / server-side tile cache layer (rejected)
+
+An earlier version of this design included an L3 level between L2 and raw data (~100M points/station-year, ~250 MB gzipped, fetched as multi-hour tiles from S3). Cost impact at 1,000 station-years was ~$6/month storage + ~$5 one-time PUTs with ~9-hour tiles.
+
+**Why we didn't go this route:**
+- At the L2→raw transition, fetching raw data directly from EarthScope (via the CORS proxy that we already need for client-side ML) is fast enough for interactive use — tens to hundreds of KB for a ~2.6-minute view.
+- L3 would have multiplied the tile cache's storage by ~50× for a modest UX improvement.
+- Keeps the cache architecture simpler: three levels, one consistent format.
+
+### The full four-scenario matrix (historical)
+
+Earlier exploration sketched four combinations of {L3 cache or not} × {client-side or AWS ML}:
+
+| | Client-side ML | AWS ML |
+|---|---|---|
+| Without L3 | **A: chosen (client-side + L0–L2 cache)** | B: Server ML only |
+| With L3 | C: Cache only | D: Full server-side |
+
+At 100 × 10-year scale, monthly costs ranged from ~$1 (A) to ~$8 (D). Cost was never the deciding factor — engineering complexity and the realization that client-side ML is fast enough on WebGPU were what steered us to the simplest option (A).
