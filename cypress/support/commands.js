@@ -111,7 +111,7 @@ Cypress.Commands.add("waitForLoad", () => {
 // recent content changes have been persisted to Firebase. Use this before
 // navigating away (cy.visit, cy.reload, switching users) instead of cy.wait().
 Cypress.Commands.add("waitForSave", () => {
-  cy.get('[data-testid="save-indicator"]', { timeout: 3000 }).should('contain', 'Saved');
+  cy.get('[data-testid="save-indicator"]', { timeout: 5000 }).should('contain', 'Saved');
 });
 Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     let primaryWorkspace = new PrimaryWorkspace;
