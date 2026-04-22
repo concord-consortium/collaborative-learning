@@ -505,6 +505,7 @@ context('Table Tool Tile', function () {
     tableToolTile.getTableCellWithRowColIndex(2, 2).should('contain', 'Row 3 Data');
 
     cy.log('reload page and verify row order persists');
+    cy.waitForSave();
     cy.reload();
     cy.waitForLoad();
 
