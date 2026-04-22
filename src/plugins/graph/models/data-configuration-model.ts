@@ -1,17 +1,19 @@
-import { observable, reaction } from "mobx";
+import { comparer, observable, reaction } from "mobx";
 import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
 import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
 import { ICase } from "../../../models/data/data-set-types";
 import { DataSet, IDataSet } from "../../../models/data/data-set";
-import {getCategorySet, ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
+import {ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
+import { ICategorySet } from "../../../models/data/category-set";
 import {isRemoveAttributeAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtered-cases";
 import {hashStringSets, typedId, uniqueId} from "../../../utilities/js-utils";
 import {missingColor} from "../../../utilities/color-utils";
 import {onAnyAction} from "../../../utilities/mst-utils";
+import {mstReaction} from "../../../utilities/mst-reaction";
 import {CaseData} from "../d3-types";
-import {GraphAttrRole, graphPlaceToAttrRole, PrimaryAttrRoles, TipAttrRoles} from "../graph-types";
+import {GraphAttrRole, GraphAttrRoles, graphPlaceToAttrRole, PrimaryAttrRoles, TipAttrRoles} from "../graph-types";
 import {AxisPlace} from "../imports/components/axis/axis-types";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 
@@ -385,7 +387,7 @@ export const DataConfigurationModel = types
       categorySetForAttrRole(role: GraphAttrRole) {
         if (self.metadata) {
           const attributeID = self.attributeID(role) || '';
-          return getCategorySet(self.metadata, attributeID);
+          return self.metadata.getCategorySet(attributeID);
         }
       },
       /**
@@ -398,7 +400,7 @@ export const DataConfigurationModel = types
         let categoryArray: string[] = [];
         if (self.metadata) {
           const attributeID = self.attributeID(role) || '',
-            categorySet = getCategorySet(self.metadata, attributeID),
+            categorySet = self.metadata.getCategorySet(attributeID),
             validValues: Set<string> = new Set(this.valuesForAttrRole(role));
           categoryArray = (categorySet?.values || emptyCategoryArray)
                             .filter((aValue: string) => validValues.has(aValue));
@@ -563,7 +565,7 @@ export const DataConfigurationModel = types
       categorySetForPlace(place: AxisPlace) {
         if (self.metadata) {
           const role = graphPlaceToAttrRole[place];
-          return getCategorySet(self.metadata, self.attributeID(role) ?? '');
+          return self.metadata.getCategorySet(self.attributeID(role) ?? '');
         }
       },
       /**
@@ -598,8 +600,49 @@ export const DataConfigurationModel = types
       }
     }))
   .actions(self => ({
+    afterAttach() {
+      // Maintain the invariant: a provisional CategorySet exists for every
+      // attribute currently assigned to a graph role as categorical. This
+      // reaction replaces the old on-demand creation inside getCategorySet,
+      // so that no MST action fires from inside a view/reaction code path.
+      mstReaction(
+        () => {
+          if (!self.metadata) return [];
+          const ids: string[] = [];
+          const seen = new Set<string>();
+          GraphAttrRoles.forEach(role => {
+            const attrId = self.attributeID(role);
+            if (attrId && !seen.has(attrId) && self.attributeType(role) === "categorical") {
+              seen.add(attrId);
+              ids.push(attrId);
+            }
+          });
+          return ids;
+        },
+        (categoricalAttrIds) => {
+          categoricalAttrIds.forEach(id => self.metadata?.ensureProvisionalCategorySet(id));
+        },
+        {
+          name: "DataConfigurationModel.ensureProvisionalCategorySets",
+          fireImmediately: true,
+          equals: comparer.structural
+        },
+        self
+      );
+    },
     beforeDestroy() {
       self.actionHandlerDisposer?.();
+    },
+    /**
+     * Obtain a persistent CategorySet for the given role, promoting any
+     * existing provisional entry in the process. Use this at every call site
+     * that is about to mutate a CategorySet.
+     */
+    ensurePersistentCategorySetForRole(role: GraphAttrRole): ICategorySet | undefined {
+      if (!self.metadata) return undefined;
+      const attrId = self.attributeID(role);
+      if (!attrId) return undefined;
+      return self.metadata.ensurePersistentCategorySet(attrId);
     },
     /**
      * This is called when the user swaps categories in the legend, but not when the user swaps categories
@@ -607,24 +650,25 @@ export const DataConfigurationModel = types
      * @param role
      */
     storeAllCurrentColorsForAttrRole(role: GraphAttrRole) {
-      const categorySet = self.categorySetForAttrRole(role);
-      if (categorySet) {
-        categorySet.storeAllCurrentColors();
-      }
+      const persistent = this.ensurePersistentCategorySetForRole(role);
+      persistent?.storeAllCurrentColors();
     },
     swapCategoriesForAttrRole(role: GraphAttrRole, catIndex1: number, catIndex2: number) {
       const categoryArray = self.categoryArrayForAttrRole(role),
-        numCategories = categoryArray.length,
-        categorySet = self.categorySetForAttrRole(role);
+        numCategories = categoryArray.length;
       if (catIndex2 < catIndex1) {
         const temp = catIndex1;
         catIndex1 = catIndex2;
         catIndex2 = temp;
       }
-      if (categorySet && numCategories > catIndex1 && numCategories > catIndex2) {
+      if (numCategories > catIndex1 && numCategories > catIndex2) {
         const cat1 = categoryArray[catIndex1],
           beforeCat = catIndex2 < numCategories - 1 ? categoryArray[catIndex2 + 1] : undefined;
-        categorySet.move(cat1, beforeCat);
+        // Read-side categoryArray uses whatever getCategorySet returns
+        // (provisional or persistent). The mutation must go through a
+        // guaranteed-persistent instance.
+        const persistent = this.ensurePersistentCategorySetForRole(role);
+        persistent?.move(cat1, beforeCat);
       }
     },
     handleAction(actionCall: ISerializedActionCall) {

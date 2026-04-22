@@ -267,6 +267,65 @@ describe('GraphModel', () => {
     });
   });
 
+  describe('history entries for createEditableLayer (CLUE-496 regression)', () => {
+    it('records exactly one history entry for one createEditableLayer call', async () => {
+      const document = createDocumentModel({
+        type: "problem", uid: "user-1", key: "document-ce", content: {}
+      });
+      document.treeMonitor!.enableMonitoring();
+
+      const { tileId } = document.content?.addTileContentInNewRow(
+        getSnapshot(GraphModel.create())) || {};
+      const graphModel = document.content?.getTile(tileId!)?.content as IGraphModel;
+      if (!graphModel) fail('No graph model');
+
+      const manager = document.treeManagerAPI as any;
+
+      // Wait for any setup-related history entries (e.g. addTileContentInNewRow)
+      // to settle before capturing the baseline.
+      async function waitForQuiescence() {
+        let lastLength = -1;
+        for (let i = 0; i < 50; i++) {
+          await new Promise(r => setTimeout(r, 20));
+          const entries = manager.document.history;
+          const lastEntry = entries[entries.length - 1];
+          if (entries.length === lastLength &&
+              (!lastEntry || lastEntry.state === "complete")) {
+            return;
+          }
+          lastLength = entries.length;
+        }
+        throw new Error("waitForQuiescence: history did not settle within timeout");
+      }
+
+      await waitForQuiescence();
+      const entriesAtBaseline = manager.document.history;
+      const lastBaselineEntry = entriesAtBaseline[entriesAtBaseline.length - 1];
+      expect(!lastBaselineEntry || lastBaselineEntry.state === "complete").toBe(true);
+      const baselineHistory = entriesAtBaseline.length;
+
+      graphModel.createEditableLayer();
+
+      // Wait for the action (and any pending reactions) to finish recording.
+      const deadline = Date.now() + 2000;
+      while (Date.now() < deadline) {
+        const entries = manager.document.history;
+        if (entries.length > baselineHistory &&
+            entries[entries.length - 1].state === "complete") {
+          break;
+        }
+        await new Promise(r => setTimeout(r, 10));
+      }
+      // Give any follow-up reactions a chance to record additional entries.
+      await new Promise(r => setTimeout(r, 100));
+
+      const newEntries = manager.document.history.length - baselineHistory;
+      expect(newEntries).toBe(1);
+      const entry = manager.document.history[manager.document.history.length - 1];
+      expect(entry.action).toContain("createEditableLayer");
+    });
+  });
+
   afterAll(() => {
     createElementSpy.mockRestore();
   });
