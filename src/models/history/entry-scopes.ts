@@ -33,3 +33,14 @@ export function getEntryScopeKeys(entry: HistoryEntrySnapshot): Set<EntryScopeKe
   }
   return scopes;
 }
+
+export function scopeSetsConflict(
+  a: Set<EntryScopeKey>,
+  b: Set<EntryScopeKey>
+): boolean {
+  const [smaller, larger] = a.size <= b.size ? [a, b] : [b, a];
+  for (const key of smaller) {
+    if (larger.has(key)) return true;
+  }
+  return false;
+}

@@ -1,4 +1,4 @@
-import { getEntryScopeKeys, scopeKeyForPatchPath } from "./entry-scopes";
+import { getEntryScopeKeys, scopeKeyForPatchPath, scopeSetsConflict } from "./entry-scopes";
 import { HistoryEntrySnapshot } from "./history";
 import { IJsonPatch } from "mobx-state-tree";
 
@@ -128,5 +128,39 @@ describe("getEntryScopeKeys", () => {
     }]);
     const scopes = getEntryScopeKeys(entry);
     expect(Array.from(scopes).sort()).toEqual(["tile:A", "tile:B"]);
+  });
+});
+
+describe("scopeSetsConflict", () => {
+  it("returns false for two disjoint sets", () => {
+    const a = new Set(["tile:A"]);
+    const b = new Set(["tile:B", "shared:S"]);
+    expect(scopeSetsConflict(a, b)).toBe(false);
+  });
+
+  it("returns true when the sets share a tile scope", () => {
+    const a = new Set(["tile:A", "doc"]);
+    const b = new Set(["tile:A"]);
+    expect(scopeSetsConflict(a, b)).toBe(true);
+  });
+
+  it("returns true when the sets share the doc scope", () => {
+    const a = new Set(["tile:A", "doc"]);
+    const b = new Set(["tile:B", "doc"]);
+    expect(scopeSetsConflict(a, b)).toBe(true);
+  });
+
+  it("returns false when either set is empty", () => {
+    expect(scopeSetsConflict(new Set(), new Set(["tile:A"]))).toBe(false);
+    expect(scopeSetsConflict(new Set(["tile:A"]), new Set())).toBe(false);
+    expect(scopeSetsConflict(new Set(), new Set())).toBe(false);
+  });
+
+  it("iterates the smaller set for efficiency", () => {
+    // Behavioral check only: large and small sets with known overlap.
+    const big = new Set(Array.from({ length: 1000 }, (_, i) => `tile:t${i}`));
+    const small = new Set(["tile:t500"]);
+    expect(scopeSetsConflict(big, small)).toBe(true);
+    expect(scopeSetsConflict(small, big)).toBe(true);
   });
 });
