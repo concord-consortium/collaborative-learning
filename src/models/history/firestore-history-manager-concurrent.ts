@@ -583,5 +583,13 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     if (lastWrapper) {
       this.setExpectedRemoteHead(lastWrapper.entry.id);
     }
+
+    // If any local entries survived as uncommitted queue items, they
+    // now need to be re-uploaded with the newly advanced remote head
+    // as their previousEntryId. Full-rollback cases cleared the
+    // queue, so this is a no-op in the non-merge path.
+    if (this.completedHistoryEntryQueue.length > 0) {
+      this.uploadQueuedHistoryEntries();
+    }
   }
 }

@@ -505,6 +505,56 @@ describe("FirestoreHistoryManagerConcurrent", () => {
     });
   });
 
+  describe("applyHistoryEntries — upload retrigger after merge", () => {
+    it("uploads the surviving local entry with the new remote head as previousEntryId", async () => {
+      getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
+      const { manager, tree, historyManager, firestoreCapture } = await setupDocMergeManager({
+        // The transaction sees R1 as the head, matching expectedRemoteHead
+        // after the merge advances it.
+        txMetadataLastHistoryEntry: { id: "R1", index: 1 },
+      });
+
+      applyPatch(tree, [
+        { op: "add", path: "/content/tileMap/A", value: { id: "A", content: { value: "initial" } } },
+        { op: "add", path: "/content/tileMap/B", value: { id: "B", content: { value: "initial" } } },
+      ]);
+
+      // Queue local L1 on tile A.
+      const l1Patches: IJsonPatch[] = [{ op: "replace", path: "/content/tileMap/A/content/value", value: "alpha" }];
+      const l1Inverse: IJsonPatch[] = [{ op: "replace", path: "/content/tileMap/A/content/value", value: "initial" }];
+      applyPatch(tree, l1Patches);
+      const l1Snapshot = makeEntrySnapshot("L1", "main", l1Patches, l1Inverse);
+      const l1Entry = HistoryEntry.create(l1Snapshot);
+      manager.addHistoryEntryAfterApplying(l1Entry);
+      historyManager.completedHistoryEntryQueue.push(l1Entry);
+
+      // Make environmentAndMetadataDocReadyPromise resolve immediately
+      // so the transaction body actually runs inside the retrigger.
+      historyManager.environmentAndMetadataDocReadyPromise = Promise.resolve();
+
+      // Incoming R1 on tile B, forked off "r0".
+      const r1Snapshot = makeEntrySnapshot(
+        "R1", "main",
+        [{ op: "replace", path: "/content/tileMap/B/content/value", value: "beta" }],
+        [{ op: "replace", path: "/content/tileMap/B/content/value", value: "initial" }],
+      );
+      const r1wrap = makeWrapperDoc(1, "r0", r1Snapshot);
+
+      await historyManager.applyHistoryEntries([r1wrap]);
+      // Flush microtasks so the retriggered upload can run.
+      for (let i = 0; i < 10; i++) await Promise.resolve();
+
+      // L1 was uploaded by the retrigger:
+      // - its transaction.set call carries previousEntryId = "R1"
+      // - completedHistoryEntryQueue is drained
+      // - expectedRemoteHead is now L1
+      expect(firestoreCapture.transactionSetCalls.length).toBe(1);
+      expect(firestoreCapture.transactionSetCalls[0].data.previousEntryId).toBe("R1");
+      expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual([]);
+      expect(historyManager.expectedRemoteHead).toBe("L1");
+    });
+  });
+
   describe("applyHistoryEntries — serialization", () => {
     it("waits for a prior applyHistoryEntries call to finish before starting the next", async () => {
       const { tree, historyManager } = await setupManager();
