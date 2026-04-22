@@ -414,13 +414,14 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
 
   /**
    * Check whether the incoming remote entries continue from our local
-   * head. If not, we've forked: roll back local uncommitted entries
-   * (those living after expectedRemoteHead in document.history) and
-   * then fall through to normal application.
+   * head. If not, we've forked: use scope-based partitioning to decide
+   * which local uncommitted entries can be kept alongside the incoming
+   * remote entries, and roll back only the conflicting suffix. The
+   * surviving entries then coexist with the remote entries, which are
+   * applied on top during normal application.
    *
    * This is the single place fork resolution happens on the receive
-   * side. GD-9/GD-10 will extend this to merge non-conflicting
-   * changes instead of rolling them all back.
+   * side.
    */
   async detectAndResolveFork(newWrapperDocs: IFirestoreHistoryEntryDoc[]): Promise<void> {
     if (newWrapperDocs.length === 0) return;
