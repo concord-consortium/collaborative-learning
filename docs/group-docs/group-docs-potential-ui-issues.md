@@ -58,16 +58,18 @@ This has been confirmed in the current group document. The root cause is that th
 
 Jira story: https://concord-consortium.atlassian.net/browse/CLUE-505
 
-### Column width lost on remote column deletion **[undo-testable]**
+### ❌ Column width lost on remote column deletion **[undo-testable]**
 
 - Start with a table with 3+ columns where User B has resized some columns
 - Pause User A's uploads
 - User A deletes a column
 - Resume User A's uploads
 - **Expected Result**: User B's `columnWidths` map retains an entry keyed by the deleted attribute's ID (orphaned data). If a new column is later added and happens to reuse an ID, it could inherit the wrong width. Minor issue.
-- **Actual Result**:
+- **Actual Result**: This is a very poorly written test (why pause then unpause uploads? What are the odds we reuse an id?). But playing around with this did show that when A changes a column width, B does not see that change in the column, only in the table title bar width.
 - **Undo test**: Create a table with 3 columns. Resize column 2 to be noticeably wider. Delete column 2. Undo the deletion. Check whether column 2 comes back with its custom width or reverts to default width.
 - **Undo Result**: The column comes back the correct size. However, undoing a column width change action does not revert the width of the column. In this case, the table title bar width does change correctly.
+
+Jira story: https://concord-consortium.atlassian.net/browse/CLUE-510
 
 ### Row drag interrupted **[requires active interaction]**
 
