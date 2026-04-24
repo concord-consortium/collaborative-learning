@@ -12,7 +12,7 @@ import { createDocumentModel } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
 import { when } from "mobx";
 import { CDocument, TreeManager } from "./tree-manager";
-import { HistoryEntrySnapshot } from "./history";
+import { HistoryEntry, HistoryEntrySnapshot } from "./history";
 import { withoutUndo } from "./without-undo";
 import { expectEntryToBeComplete } from "./undo-store-test-utils";
 // way to get a writable reference to libDebug
@@ -1063,5 +1063,42 @@ describe("UndoStore.removeHistoryEntries", () => {
 
     expect(undoStore.history.length).toBe(1);
     expect(undoStore.undoIdx).toBe(1);
+  });
+});
+
+describe("TreeManager.addRevertEntryAfterApplying", () => {
+  it("appends the revert entry to document.history and does not register it with undoStore", async () => {
+    const {tileContent, manager, undoStore} = setupDocument();
+
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+    expect(manager.document.history.length).toBe(1);
+    expect(undoStore.history.length).toBe(1);
+
+    // Build a revert entry directly (the full rollback flow lives in
+    // the concurrent firestore manager; this test just exercises the
+    // tree-manager side).
+    const original = manager.document.history[0];
+    const revert = HistoryEntry.create({
+      id: "revert-of-" + original.id,
+      tree: original.tree,
+      model: original.model,
+      action: original.action,
+      undoable: false,
+      state: "complete",
+      isRevert: true,
+      revertsEntryId: original.id,
+      triggeringBatchIds: ["R1"],
+      records: [],
+    });
+
+    manager.addRevertEntryAfterApplying(revert);
+
+    expect(manager.document.history.length).toBe(2);
+    expect(manager.document.history[1].id).toBe(revert.id);
+    expect(manager.document.history[1].isRevert).toBe(true);
+    // Revert entry NOT added to undoStore.
+    expect(undoStore.history.length).toBe(1);
+    expect(undoStore.history.map(e => e.id)).not.toContain(revert.id);
   });
 });

@@ -232,6 +232,20 @@ export const TreeManager = types
   },
 
   /**
+   * Append a revert entry to local history after its forward patches
+   * have been applied by the rollback flow in
+   * FirestoreHistoryManagerConcurrent. Revert entries record a
+   * scope-conflict rollback in-place rather than splicing the rolled-back
+   * originals out of history.
+   *
+   * Does not register the entry with the undo store (reverts are never
+   * user-undoable) and does not enqueue for upload (reverts are local-only).
+   */
+  addRevertEntryAfterApplying(entry: Instance<typeof HistoryEntry>) {
+    self.document.history.push(entry);
+  },
+
+  /**
    * Remove the last `count` entries from the local history. Used by
    * FirestoreHistoryManagerConcurrent when it rolls back uncommitted
    * local entries after detecting a fork with the remote chain.
