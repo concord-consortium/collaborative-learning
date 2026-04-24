@@ -322,9 +322,11 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       const l1Entry = HistoryEntry.create(l1Snapshot);
       manager.addHistoryEntryAfterApplying(l1Entry);
       historyManager.completedHistoryEntryQueue.push(l1Entry);
+      manager.undoStore.addHistoryEntry(l1Entry);
 
       // Sanity: local state currently reflects A's edit.
       expect(tree.items[1].color).toBe("red");
+      expect(manager.undoStore.history.map(e => e.id)).toEqual(["L1"]);
 
       // Incoming remote entry R1 from user B: remove items[0].
       // previousEntryId = "r0", which matches expectedRemoteHead but
@@ -533,6 +535,7 @@ describe("FirestoreHistoryManagerConcurrent", () => {
         const entry = HistoryEntry.create(snapshot);
         manager.addHistoryEntryAfterApplying(entry);
         historyManager.completedHistoryEntryQueue.push(entry);
+        manager.undoStore.addHistoryEntry(entry);
         return entry;
       };
 
@@ -542,6 +545,7 @@ describe("FirestoreHistoryManagerConcurrent", () => {
 
       expect(tree.content.tileMap.get("A")?.content.value).toBe("alpha2");
       expect(tree.content.tileMap.get("B")?.content.value).toBe("beta-local");
+      expect(manager.undoStore.history.map(e => e.id)).toEqual(["L1", "L2", "L3"]);
 
       const r1Snapshot = makeEntrySnapshot(
         "R1", "main",
@@ -572,6 +576,7 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual(["L1"]);
       expect(historyManager.expectedRemoteHead).toBe("R1");
       const undoIds = manager.undoStore.history.map(e => e.id);
+      expect(undoIds).toContain("L1");
       expect(undoIds).not.toContain("L2");
       expect(undoIds).not.toContain("L3");
     });
@@ -588,6 +593,9 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       const l1Entry = HistoryEntry.create(l1Snapshot);
       manager.addHistoryEntryAfterApplying(l1Entry);
       historyManager.completedHistoryEntryQueue.push(l1Entry);
+      manager.undoStore.addHistoryEntry(l1Entry);
+
+      expect(manager.undoStore.history.map(e => e.id)).toEqual(["L1"]);
 
       // Remote R1 also touches doc-level state (different field still
       // maps to doc scope).
