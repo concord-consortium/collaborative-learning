@@ -96,7 +96,11 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
               </div>
             : <ThumbnailPlaceHolderIcon />
         }
-        {group && <div className="group-doc-badge"><GroupIcon color="#fff" /></div>}
+        {group && (
+          <div className="group-doc-badge">
+            <GroupIcon color="#fff" aria-hidden={true} focusable={false} />
+          </div>
+        )}
       </div>
       {
         onDocumentStarClick &&
