@@ -358,6 +358,7 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(revert.triggeringBatchIds.slice()).toEqual(["R1"]);
       expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual([]);
       expect(historyManager.expectedRemoteHead).toBe("R1");
+      expect(manager.undoStore.history.map(e => e.id)).not.toContain("L1");
     });
   });
 
@@ -570,6 +571,9 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(reverts[1].triggeringBatchIds.slice()).toEqual(["R1"]);
       expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual(["L1"]);
       expect(historyManager.expectedRemoteHead).toBe("R1");
+      const undoIds = manager.undoStore.history.map(e => e.id);
+      expect(undoIds).not.toContain("L2");
+      expect(undoIds).not.toContain("L3");
     });
 
     it("falls back to full rollback when local and remote both touch the doc scope", async () => {
@@ -606,6 +610,7 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(manager.document.history[1].revertsEntryId).toBe("L1");
       expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual([]);
       expect(historyManager.expectedRemoteHead).toBe("R1");
+      expect(manager.undoStore.history.map(e => e.id)).not.toContain("L1");
     });
 
     it("runs fork detection on a subsequent batch when the queue is non-empty", async () => {
@@ -675,6 +680,39 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(revert.isRevert).toBe(true);
       expect(revert.revertsEntryId).toBe("L1");
       expect(revert.triggeringBatchIds.slice()).toEqual(["R2"]);
+    });
+
+    it("does not rollback when the upload queue is empty, even if previousEntryId mismatches", async () => {
+      // The empty-queue guard in detectAndResolveFork short-circuits before
+      // partitionLocalEntriesForMerge runs. Even though R1's previousEntryId
+      // does not match expectedRemoteHead ("r0"), there are no pending local
+      // entries to roll back, so the remote entry is applied normally.
+      getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
+      const { manager, tree, historyManager } = await setupDocMergeManager();
+      expect(historyManager.expectedRemoteHead).toBe("r0");
+
+      applyPatch(tree, [
+        { op: "add", path: "/content/tileMap/A", value: { id: "A", content: { value: "initial" } } },
+      ]);
+
+      // Queue is empty — no pending local entries.
+      expect(historyManager.completedHistoryEntryQueue.length).toBe(0);
+
+      // Incoming batch references a previousEntryId that does NOT match expectedRemoteHead.
+      // ("some-other-id" !== "r0"). With no queue entries the empty-queue guard fires and
+      // no rollback is attempted.
+      const rSnapshot = makeEntrySnapshot(
+        "R1", "main",
+        [{ op: "replace", path: "/content/tileMap/A/content/value", value: "remote-A" }],
+        [{ op: "replace", path: "/content/tileMap/A/content/value", value: "initial" }],
+      );
+      await historyManager.applyHistoryEntries([makeWrapperDoc(1, "some-other-id", rSnapshot)]);
+
+      // Remote applied normally. No revert entries appended.
+      expect(tree.content.tileMap.get("A")?.content.value).toBe("remote-A");
+      expect(manager.document.history.map(e => e.id)).toEqual(["R1"]);
+      expect(manager.document.history.filter(e => e.isRevert)).toEqual([]);
+      expect(historyManager.expectedRemoteHead).toBe("R1");
     });
   });
 
