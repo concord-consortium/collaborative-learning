@@ -169,7 +169,7 @@ export const UndoStore = types
 
     /**
      * Remove any entries whose id is in `ids` from the undo stack. Used by
-     * TreeManager.removeLastHistoryEntries when a fork rollback removes
+     * FirestoreHistoryManagerConcurrent.rollbackLocalEntries when a fork rollback removes
      * entries from document.history: those entries are the resolution
      * targets of references held here, so they must be dropped from this
      * array before the referenced entries are destroyed — otherwise MST
