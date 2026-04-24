@@ -101,6 +101,25 @@ at render time, so the failure mode is a console warning, not a crash.
 - Drawing: [src/plugins/shared-variables/drawing/variable-object.tsx:24-28](../../src/plugins/shared-variables/drawing/variable-object.tsx#L24-L28) —
   `VariableChipObject` declares `variableId: types.string`.
 
+**Recovery on reload:** Reloading either client clears the visible error. The
+saved document contains no variables in the shared model and no diagram node
+referencing the deleted variable, so the load is clean. The remote history,
+however, still contains user B's `DQRoot.insertNode` entry — likely because
+the MST crash prevented user B's post-merge state from being persisted, while
+the history entry had already been uploaded independently.
+
+**Implications:**
+- **Good for users:** reload recovers. The bad state is ephemeral from the
+  end-user's perspective.
+- **Bad for history replay:** the history scrubber will hit the same
+  unresolved-reference crash when it reaches the orphaned `insertNode`
+  entry.
+- **Content/history drift:** the saved document's `lastHistoryEntryId`
+  points at the second-to-last remote entry (the pre-insertNode state),
+  not the entry that followed. CLUE-485's drift detection does not flag
+  this — it only errors when the saved id is absent from the history
+  entirely; here the id is still present, just not at the tail.
+
 ## 3. Cross-scope reference drift (graph → dataset attribute)
 
 **Setup:** Group document with a table tile and a linked graph tile.
