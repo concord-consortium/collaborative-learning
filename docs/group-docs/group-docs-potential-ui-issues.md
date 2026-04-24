@@ -43,17 +43,20 @@ Steps below say "Within the 5-second window" or "Before User A's change arrives"
 
 *Already documented in group-docs-current-state.md.*
 
-### Attribute name change not visible **[undo-testable]**
+### ❌ Attribute name change not visible **[undo-testable]**
 
 - User A and User B open the same group document with a table
 - User A renames a column header (attribute name)
 - **Expected Result**: User B does not see the renamed column.
-- **Actual Result**:
+- **Actual Result**: As expected.
 - **Undo test**: Rename a column, then undo. The column header should revert to the old name but doesn't.
+- **Undo Result**: As expected.
 
 This has been confirmed in the current group document. The root cause is that the table's column definitions are cached in a `useMemo` whose dependencies don't include attribute names. The `onSnapshot` handler calls `triggerRowChange()` instead of `triggerColumnChange()`, so attribute name changes never rebuild the columns. This affects all views (edit and read-only) equally — the apparent update in same-instance read-only testing was a coincidence caused by shared selection state invalidating the memo. Undoing an attribute rename in single-user mode has the same problem.
 
 *Root cause documented in group-docs-current-state.md.*
+
+Jira story: https://concord-consortium.atlassian.net/browse/CLUE-505
 
 ### Column width lost on remote column deletion **[undo-testable]**
 
@@ -64,6 +67,7 @@ This has been confirmed in the current group document. The root cause is that th
 - **Expected Result**: User B's `columnWidths` map retains an entry keyed by the deleted attribute's ID (orphaned data). If a new column is later added and happens to reuse an ID, it could inherit the wrong width. Minor issue.
 - **Actual Result**:
 - **Undo test**: Create a table with 3 columns. Resize column 2 to be noticeably wider. Delete column 2. Undo the deletion. Check whether column 2 comes back with its custom width or reverts to default width.
+- **Undo Result**: The column comes back the correct size. However, undoing a column width change action does not revert the width of the column. In this case, the table title bar width does change correctly.
 
 ### Row drag interrupted **[requires active interaction]**
 
@@ -78,17 +82,20 @@ This has been confirmed in the current group document. The root cause is that th
   - when the row being dragged is the one that was deleted then when it is dropped it just disappears.
   - when it is a different row it seems to work fine.
 
-### Cell editing in deleted column **[undo-testable]**
+### ❌ Cell editing in deleted column **[undo-testable]**
 
 - Pause User A's uploads
 - User A types a value into a cell in column 2
 - User B deletes column 2
 - Resume User A's uploads
 - **Expected Result**: User A's patch targets column 2 by array index. Since column 2 was deleted, the value may land in what is now column 2 (previously column 3). Both users see different data.
-- **Actual Result**:
+- **Actual Result**: As expected, A's change goes to the wrong column for B.
 - **Undo test**: Create a table with 3 columns (A, B, C) with data in each. Delete column A. Check whether the data in columns B and C is still correct and in the right columns. Then undo the deletion. Check whether all three columns have their original data. This tests whether array-index-based patches correctly handle column insertion/deletion.
+- **Undo results**: This is working correctly.
 
 *This is the array-index problem documented in group-docs-current-state.md.*
+
+Jira story: https://concord-consortium.atlassian.net/browse/CLUE-506
 
 ---
 
@@ -153,7 +160,7 @@ This has been confirmed in the current group document. The root cause is that th
 - **Expected Result**: The drawing re-renders, potentially resetting the object's position mid-drag or ending the drag operation.
 - **Actual Result**: Just changing the properties of an object being dragged works fine. Or changing the properties of other objects. If the object being dragged is deleted then it actually deletes underneath the cursor. Lots of warnings are printed in the console but it doesn't seem to break.
 
-### Color applied to wrong object **[undo-testable]**
+### ❌ Color applied to wrong object **[undo-testable]**
 
 - Start with a drawing with 3 objects
 - Pause User A's uploads
@@ -161,10 +168,13 @@ This has been confirmed in the current group document. The root cause is that th
 - User B deletes object 1
 - Resume User A's uploads
 - **Expected Result**: User A's color change patch targets object index 1 (previously object 2). It gets applied to what is now object 2 (previously object 3). Users see different colors on objects.
-- **Actual Result**:
+- **Actual Result**: As expected, it colors the wrong object for user B. Additionally, the undo stack gets messed up.
 - **Undo test**: Create a drawing with 3 objects, each with a different fill color. Delete the first object. Change the fill color of one of the remaining objects. Undo the color change. Check whether the correct object reverts to its original color. Then undo the deletion. Check whether the restored object has the right color and the other objects haven't changed. This tests whether array-index-based patches correctly handle object insertion/deletion.
+- **Undo Result**: Works fine.
 
 *Documented in group-docs-current-state.md. Root cause is array-indexed storage of objects.*
+
+Jira story: https://concord-consortium.atlassian.net/browse/CLUE-507
 
 ### Voice typing text lost **[requires active interaction]**
 
@@ -181,13 +191,14 @@ This has been confirmed in the current group document. The root cause is that th
 
 ## Geometry (JSXGraph)
 
-### Selected object becomes stale **[undo-testable]**
+### 🤷 Selected object becomes stale **[undo-testable]**
 
 - User B selects a geometry object (point, segment, polygon) to label or modify it
 - User A deletes that object
 - **Expected Result**: User B's `selectedComment` or `selectedLine` reference points to a deleted JSXGraph board object. Attempting to modify it may error or silently fail.
-- **Actual Result**:
+- **Actual Result**: This seems to work fine.
 - **Undo test**: Create a geometry tile with several points and a segment. Select a point. Delete the segment (or another point). Undo the deletion. Check whether the geometry board renders correctly and the previously selected point is still usable. Then try: create two points, select point A, delete point A, undo. Does point A reappear and is the board in a consistent state?
+- **Undo Result**: Seems to work fine.
 
 ### ❌ Dialog input lost **[requires active interaction]**
 
@@ -211,13 +222,17 @@ This has been confirmed in the current group document. The root cause is that th
 - **Expected Result**: The `forceSharedModelUpdate()` call (used in `updateAfterSharedModelChanges`) does a hard reset of the board, which would interrupt User B's drag operation and reset the board state.
 - **Actual Result**: Yes the drag gets canceled and the shape being dragged snaps back to where it was.
 
-### Redo stack becomes invalid **[undo-testable]**
+### 🤷 Redo stack becomes invalid **[undo-testable]**
 
 - User B has some undo history and performs an undo
 - User A makes a change
 - **Expected Result**: User B's `redoStack` contains references to board states that no longer match the current document. Performing a redo could produce unexpected or broken geometry.
-- **Actual Result**:
+- **Actual Result**: Vague instructions.
+I was able to get into a weird state by adding a point as B, deleting that point as A, then undoing/redoing as B.
 - **Undo test**: In a geometry tile, create point A, then create point B, then create a segment between them. Undo (removes segment). Now make a different change — e.g., move point A. Redo (tries to restore the segment). Check whether the segment is drawn correctly between the points in their current positions, or whether it references stale coordinates/objects.
+- **Undo Result**: You can’t redo after making another action. The test doesn't make sense.
+
+Jira story: https://concord-consortium.atlassian.net/browse/CLUE-508
 
 ---
 
@@ -261,13 +276,17 @@ This has been confirmed in the current group document. The root cause is that th
 - **Expected Result**: If the Rete editor re-renders, the drag operation may be interrupted and the node may snap back to its pre-drag position.
 - **Actual Result**:
 
-### Playback index becomes invalid **[undo-testable]**
+### ❌ Playback index becomes invalid **[undo-testable]**
 
 - User B is playing back recorded data at index N
 - User A modifies the program (adds/removes nodes) which changes what data was recorded
 - **Expected Result**: `playBackIndex` may now be out of bounds for the new data, or point to a different moment in the recording than intended.
-- **Actual Result**:
+- **Actual Result**: You can’t delete a node when a dataflow tile has recorded data, so the test is invalid.
+However, this showed another problem: A can’t see nodes added by B without some other refresh. There seem to be other more serious issues with dataflow tiles sharing data, too.
 - **Undo test**: In a dataflow tile, create a program with a few nodes. Record some data. Start playback and navigate to a specific index. Then undo a node addition (which changes the program structure). Check whether the playback UI handles the changed program gracefully — does it show an error, reset to index 0, or display incorrect data?
+- **Undo Result**: Undoing after recording undoes the addition of cases to the dataset, so you have to undo the entire recording before you can undo adding a node. Definitely bad behavior, but very different from what is suggested here.
+
+I'm not making a Jira story for this one. Since the Dataflow tile is likely to face a major refactor very soon, it seems worth revisiting this afterwards.
 
 ### Connection being drawn is lost **[requires active interaction]**
 
@@ -284,33 +303,41 @@ This has been confirmed in the current group document. The root cause is that th
 
 ## Data Card
 
-### Edit context for deleted attribute **[undo-testable]**
+### 🤷 Edit context for deleted attribute **[undo-testable]**
 
 - User B is editing a cell for attribute X
 - User A deletes attribute X
 - **Expected Result**: `currEditAttrId` still references the deleted attribute's ID. The editing UI may show a blank or error state.
-- **Actual Result**:
+- **Actual Result**: Seems to work fine, doesn’t throw any errors.
 - **Undo test**: In a data card tile linked to a table, click on a field to view/edit it. Then go to the table and delete the column for that attribute. Check whether the data card shows an error or handles the missing attribute. Then undo the column deletion. Check whether the data card recovers and shows the attribute's data again.
+- **Undo Result**: Seems fine. When you switch to the table you stop editing in the data card.
 
-### Case navigation desync **[undo-testable]**
+### ❌ Case navigation desync **[undo-testable]**
 
 - User B is viewing case 5 of 10
 - User A deletes several cases
 - **Expected Result**: `caseIndex` may now be out of bounds. The `updateAfterSharedModelChanges` implementation does handle this (clamps to range), but there may be a brief flash of invalid state.
-- **Actual Result**:
+- **Actual Result**: Selection is mostly shared between users. When A views card 1, B also sees card 1. This isn’t true for the table—if A has case 1 selected and B selects case 3, A’s table still has 1 selected, even though data cards for both users show case 3. In this way it’s possible for A to delete a case using the table, and when that happens the visible card shifts (it now shows the former 4th card which is now the 3rd card). The data card clamps to the last card if the index is illegal.
+I'm not sure if sharing the data card selection across users should be considered a bug or intended behavior.
 - **Undo test**: In a data card linked to a table with 10 rows, navigate to case 8. Go to the table and delete the last 5 rows. Check whether the data card clamps to a valid case. Then undo the deletion. Check whether the data card returns to showing case 8 or at least a valid case with the correct data.
+- **Undo Result**: You can’t delete a case in the table without selecting it, which changes the card displayed in the data card. Undoing/redoing adding cases results in different cases being shown in the data card (undo switches to the first card, redo switches to the most recently added card). Always showed a valid card.
+
+Jira story for multiuser case: https://concord-consortium.atlassian.net/browse/CLUE-509
+
+I didn't add a jira story for the undo/redo issue, which seems very minor.
 
 ---
 
 ## Numberline
 
-### Selected point deleted **[undo-testable]**
+### 🤷 Selected point deleted **[undo-testable]**
 
 - User B selects a point on the numberline
 - User A deletes that point
 - **Expected Result**: `_selectedPointId` references a deleted point. UI may show selection highlight on nothing, or error when trying to modify the selected point.
-- **Actual Result**:
+- **Actual Result**: Seems fine.
 - **Undo test**: Create a numberline with 3 points. Select the middle point. Delete it. Check whether the numberline renders correctly without the point. Undo the deletion. Check whether the point reappears in the correct position and the numberline is in a consistent state.
+- **Undo test**: Seems fine. Seems to lose selection when undoing a delete, which is confusing because there is no visual feedback about a point being selected :\
 
 ### Point drag lands on wrong value **[requires active interaction]**
 
@@ -370,13 +397,30 @@ This has been confirmed in the current group document. The root cause is that th
 
 ## General issues (all tiles)
 
-### Tile deletion while editing **[undo-testable]**
+### ❌ Tile deletion while editing **[undo-testable]**
 
 - User B is actively editing any tile
 - User A deletes that tile from the document
 - **Expected Result**: User B's tile disappears. Any uncommitted work in progress is lost. After GD-5 rollback is implemented, User B's recent changes to the tile would also be rolled back.
-- **Actual Result**:
+- **Actual Result**: When a tile is deleted, its content is gone for both users. Testing this I found another bug (at least for the text and drawing tiles, probably most tiles):
+B adds a tile, then adds some content to the tile
+A deletes the tile
+B presses undo
+Result: Console errors like: `Uncaught (in promise) PatchApplicationError: Patch application failed after 0 patches: [mobx-state-tree] Not a child MrGcYrikGP3EsusG`
 - **Undo test**: For each tile type: create the tile, add some content to it, then delete the tile. Undo the deletion. Check whether the tile reappears with all its content intact. This tests basic tile lifecycle through the patch/undo path. Try with tiles that have shared model connections (e.g., a table linked to a graph) to verify the shared model link is restored.
+- **Undo Result**: Works fine for all tiles tested:
+Text
+Table
+Data Card
+Drawing
+Diagram
+Equation
+Graph
+Geometry
+Number Line
+Dataflow
+
+I haven't created a Jira story for the multi-user issues. The issue described in the doc seems like expected behavior to me--I don't know what else should happen when one user deletes a tile being edited by another user. For the undo-after-delete issue, this seems like a pretty fundamental problem, and I'm not sure if some planned infrastructure change will fix it?
 
 ### Layout change during interaction **[requires active interaction]**
 
