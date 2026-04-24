@@ -317,13 +317,16 @@
       },
       "timeline": {
         "tools": [
-          "table-it",
-          "data-card-it",
-          "bar-graph-it",
+          ["data-set-view", "Table"],
+          ["data-set-view", "DataCard"],
+          ["data-set-view", "BarGraph"],
           "|",
           "zoom-in",
           "zoom-out",
-          "view-all"
+          "view-all",
+          "|",
+          "pan-left",
+          "pan-right"
         ]
       },
       "wave-runner": {
@@ -334,8 +337,14 @@
           "restart",
           "reset",
           "|",
+          ["data-set-view", "Table"],
           "timeline"
-        ]
+        ],
+        "stations": [
+          { "network": "AK", "station": "RC01", "channel": "BHZ", "label": "Rabbit Creek, AK" },
+          { "network": "AK", "station": "FIRE", "channel": "BHZ", "label": "Fire Island, AK" }
+        ],
+        "defaultStation": null
       },
       "dataset": {
         "cellsSelectCases": false
@@ -470,6 +479,7 @@
           "highlight",
           "subscript",
           "superscript",
+          "heading",
           "list-ol",
           "list-ul",
           "link",

@@ -12,6 +12,7 @@ export interface IDocumentAddTileOptions {
 export interface INewTileOptions {
   rowList?: RowListType;
   locationInRow?: string;
+  tileInsertIndex?: number; // position within the row to insert at
   rowHeight?: number;
   rowId?: string; // The id of the row to add the tile to
   rowIndex?: number; // The position to add a new row

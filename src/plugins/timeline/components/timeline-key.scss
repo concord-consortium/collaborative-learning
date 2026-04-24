@@ -1,12 +1,52 @@
+@import "./timeline-event-colors.scss";
+
 .timeline-key {
   display: flex;
+  gap: 12px;
+  justify-content: center;
 
   .key-title {
     font-weight: bold;
     margin-right: 5px;
   }
 
-  .event-types {
+  .event-type-entry {
+    align-items: center;
     display: flex;
+    gap: 6px;
+
+    .color-swatch {
+      border: 1px solid #121212;
+      height: 16px;
+      width: 16px;
+
+      &.blue-event {
+        background-color: $blue-base;
+      }
+
+      &.orange-event {
+        background-color: $orange-base;
+      }
+
+      &.red-event {
+        background-color: $red-base;
+      }
+
+      &.yellow-event {
+        background-color: $yellow-base;
+      }
+
+      &.magenta-event {
+        background-color: $magenta-base;
+      }
+
+      &.purple-event {
+        background-color: $purple-base;
+      }
+
+      &.default-event {
+        background-color: $default-base;
+      }
+    }
   }
 }

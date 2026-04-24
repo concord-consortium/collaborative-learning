@@ -62,6 +62,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private rowRefs: Array<TileRowHandle>;
   private mutationObserver: MutationObserver;
   private scrollDisposer: IReactionDisposer;
+  private pickUpReactionDisposer: IReactionDisposer;
 
   constructor(props: IProps) {
     super(props);
@@ -88,6 +89,27 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       // property. So when there are lots of thumbnails then each of them will react to a
       // change of this global. It could be a volatile prop on the document model. Or the ui
       // store could have a scrollToMap with keys of the docId and values of the tileId
+      // Enable mousemove-based drop zone highlighting and keyboard navigation when a tile is picked up.
+      // Only the DocumentContentComponent that owns the picked-up tile registers the global keydown
+      // listener. This prevents duplicate key processing in multi-pane views (2-up, 4-up).
+      this.pickUpReactionDisposer = reaction(
+        () => this.stores.ui.pickedUpTileId,
+        (pickedUpTileId) => {
+          const isOwner = pickedUpTileId
+            && this.stores.ui.pickedUpDocId === this.props.content?.contentId;
+          if (isOwner) {
+            this.domElement?.addEventListener("mousemove", this.handlePickUpMouseMove);
+            this.domElement?.addEventListener("mouseleave", this.handlePickUpMouseLeave);
+            document.addEventListener("keydown", this.handlePickUpKeyDown);
+          } else {
+            this.domElement?.removeEventListener("mousemove", this.handlePickUpMouseMove);
+            this.domElement?.removeEventListener("mouseleave", this.handlePickUpMouseLeave);
+            document.removeEventListener("keydown", this.handlePickUpKeyDown);
+            this.clearDropRowInfo();
+          }
+        }
+      );
+
       this.scrollDisposer = reaction(
         () => {
           const docId = this.stores.ui.scrollTo?.docId;
@@ -118,6 +140,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   public componentWillUnmount() {
     this.scrollDisposer?.();
+    this.pickUpReactionDisposer?.();
+    document.removeEventListener("keydown", this.handlePickUpKeyDown);
+    this.domElement?.removeEventListener("mousemove", this.handlePickUpMouseMove);
+    this.domElement?.removeEventListener("mouseleave", this.handlePickUpMouseLeave);
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -250,7 +276,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderSpacer = () => {
-    const spacerClass = classNames({"spacer" : !this.props.readOnly, "playback-spacer": this.props.showPlaybackSpacer});
+    const { ui } = this.stores;
+    const { content, readOnly } = this.props;
+    const isEmptyDropTarget = !readOnly && ui.isTilePickedUp && content && content.rowOrder.length === 0;
+    const spacerClass = classNames(
+      {"spacer" : !readOnly, "playback-spacer": this.props.showPlaybackSpacer},
+      {"empty-drop-target": isEmptyDropTarget}
+    );
     return <div className={spacerClass} onClick={this.handleClick} />;
   };
 
@@ -275,6 +307,22 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;
+
+    // Handle click-to-place when a tile is picked up
+    if (ui.pickedUpTileId && !this.props.readOnly) {
+      const dropRowInfo = this.getDropRowInfoFromPoint(e.clientX, e.clientY);
+      const isEmptyDocument = this.props.content && this.props.content.rowOrder.length === 0;
+      if (dropRowInfo?.rowDropId || (isEmptyDocument && dropRowInfo)) {
+        this.handlePickUpPlace(dropRowInfo);
+        e.stopPropagation();
+        return;
+      }
+      // Click was in document but not on a valid drop zone — cancel
+      ui.clearPickedUpTile();
+      this.clearDropRowInfo();
+      return;
+    }
+
     // deselect tiles on click on document background
     // click must be on DocumentContent itself, not bubble up from child
     if (e.target === e.currentTarget) {
@@ -351,8 +399,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return { rowDropId: row.id, rowInsertIndex: rowIndex };
   }
 
-  // Determine whether the drag event is over a drop zone, and if so, which one
-  private getDropRowInfo = (e: React.DragEvent<HTMLDivElement>) => {
+  // Determine whether a point is over a drop zone, and if so, which one
+  private getDropRowInfoFromPoint = (clientX: number, clientY: number): IDropRowInfo | undefined => {
     const { content } = this.props;
     if (!this.domElement || !content) {
       return { rowInsertIndex: content ? content.rowOrder.length : 0 };
@@ -376,9 +424,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     for (let i = 0; i < rowElements.length; ++i) {
       const rowElt = rowElements[i];
       const rowBounds = rowElt.getBoundingClientRect();
-      if (this.isPointInRect(e.clientX, e.clientY, rowBounds) ||
+      if (this.isPointInRect(clientX, clientY, rowBounds) ||
           // below the last row - pretend we are in the last row
-          ((i === lastRowIndex) && (e.clientY > rowBounds.bottom))) {
+          ((i === lastRowIndex) && (clientY > rowBounds.bottom))) {
         dropInfo = this.getDropInfoForGlobalRowIndex(i);
         if (!dropInfo.rowDropId) return;
         const row = content?.getRowRecursive(dropInfo.rowDropId);
@@ -387,26 +435,58 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           dropInfo.rowDropLocation = "bottom";
           dropInfo.rowInsertIndex = i + 1;
         } else {
-          const dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
-          const dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
-          const dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
-          const dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
+          const dropOffsetTop = Math.abs(clientY - rowBounds.top);
+          const dropOffsetBottom = Math.abs(rowBounds.bottom - clientY);
 
-          const kSideDropThreshold = rowBounds.width * 0.25;
-          if ((dropOffsetLeft < kSideDropThreshold) &&
-              (dropOffsetLeft < dropOffsetRight)) {
-            dropInfo.rowDropLocation = "left";
+          // Uniform tile-boundary detection for all rows with tiles.
+          // For N tiles there are N+1 boundaries: left edge, between each pair, right edge.
+          // If the cursor is near any boundary, it's a side drop with a tileInsertIndex.
+          const tileElements = rowElt.querySelectorAll(':scope > .tool-tile');
+          let sideDropDetected = false;
+
+          if (tileElements.length > 0) {
+            // Scale threshold with tile size: 15% of average tile width, minimum 25px
+            const avgTileWidth = (tileElements[tileElements.length - 1].getBoundingClientRect().right
+              - tileElements[0].getBoundingClientRect().left) / tileElements.length;
+            const kSideDropThreshold = Math.max(25, avgTileWidth * 0.15);
+            const boundaries: number[] = [];
+            // First boundary: left edge of the first tile
+            boundaries.push(tileElements[0].getBoundingClientRect().left);
+            // Interior boundaries: midpoint between adjacent tiles
+            for (let t = 0; t < tileElements.length - 1; t++) {
+              const leftRight = tileElements[t].getBoundingClientRect().right;
+              const rightLeft = tileElements[t + 1].getBoundingClientRect().left;
+              boundaries.push((leftRight + rightLeft) / 2);
+            }
+            // Last boundary: right edge of the last tile
+            boundaries.push(tileElements[tileElements.length - 1].getBoundingClientRect().right);
+
+            // Find the nearest boundary
+            let nearestIndex = 0;
+            let nearestDist = Infinity;
+            for (let b = 0; b < boundaries.length; b++) {
+              const dist = Math.abs(clientX - boundaries[b]);
+              if (dist < nearestDist) {
+                nearestDist = dist;
+                nearestIndex = b;
+              }
+            }
+
+            if (nearestDist < kSideDropThreshold) {
+              dropInfo.rowDropLocation = "left";
+              dropInfo.tileInsertIndex = nearestIndex;
+              sideDropDetected = true;
+            }
           }
-          else if ((dropOffsetRight < kSideDropThreshold) &&
-                  (dropOffsetRight <= dropOffsetLeft)) {
-            dropInfo.rowDropLocation = "right";
-          }
-          else if (dropOffsetTop < dropOffsetBottom) {
-            dropInfo.rowDropLocation = "top";
-          }
-          else {
-            dropInfo.rowDropLocation = "bottom";
-            dropInfo.rowInsertIndex = i + 1;
+
+          if (!sideDropDetected) {
+            if (dropOffsetTop < dropOffsetBottom) {
+              dropInfo.rowDropLocation = "top";
+            }
+            else {
+              dropInfo.rowDropLocation = "bottom";
+              dropInfo.rowInsertIndex = i + 1;
+            }
           }
         }
       }
@@ -415,11 +495,221 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return dropInfo;
   };
 
+  // Wrapper for drag events
+  private getDropRowInfo = (e: React.DragEvent<HTMLDivElement>) => {
+    return this.getDropRowInfoFromPoint(e.clientX, e.clientY);
+  };
+
   private clearDropRowInfo() {
     if (this.state.dropRowInfo) {
       this.setState({ dropRowInfo: undefined });
     }
   }
+
+  // --- Click-to-pick: mousemove/keyboard highlights drop zones, click/Enter places the tile ---
+
+  private handlePickUpMouseLeave = () => {
+    this.clearDropRowInfo();
+  };
+
+  // When the mouse moves during pick-up, clear keyboard focus so mouse takes over
+  private handlePickUpMouseMove = (e: MouseEvent) => {
+    const { ui } = this.stores;
+    if (ui.focusedDropZoneIndex !== undefined) {
+      ui.setFocusedDropZoneIndex(undefined);
+    }
+    const { dropRowInfo } = this.state;
+    const lastUpdate = dropRowInfo?.updateTimestamp ?? 0;
+    const now = Date.now();
+    if (now - lastUpdate > kDragUpdateInterval) {
+      const nextDropRowInfo = this.getDropRowInfoFromPoint(e.clientX, e.clientY);
+      this.setState({ dropRowInfo: nextDropRowInfo });
+    }
+  };
+
+  // --- Keyboard navigation of drop zones during pick-up ---
+
+  // Compute an ordered list of valid drop zones from the document's rows.
+  // Each zone has a location (top/left/right/bottom), the rowId, and an IDropRowInfo for placement.
+  private getDropZoneList() {
+    const { content } = this.props;
+    if (!content) return [];
+
+    // "right" is used by internal callers (e.g. userAddTile) but not by the UI's
+    // getDropRowInfoFromPoint, which uses "left" with tileInsertIndex for all side drops.
+    type DropZoneLocation = "top" | "left" | "bottom";
+    interface IDropZone {
+      rowIndex: number;
+      rowId: string;
+      location: DropZoneLocation;
+      dropRowInfo: IDropRowInfo;
+    }
+
+    const zones: IDropZone[] = [];
+    const allRows = content.allRows;
+
+    allRows.forEach((row, i) => {
+      // Use getDropInfoForGlobalRowIndex to get the correct local rowInsertIndex
+      // within the containing RowList (not the global allRows index).
+      const baseInfo = this.getDropInfoForGlobalRowIndex(i);
+      if (!baseInfo.rowDropId) return;
+
+      const isSectionHeader = row.isSectionHeader;
+      const isFixed = row.isFixedPositionRow(content.tileMap);
+
+      if (isFixed) {
+        // Fixed position rows only allow insertion below
+        zones.push({
+          rowIndex: i, rowId: row.id, location: "bottom",
+          dropRowInfo: { ...baseInfo, rowDropLocation: "bottom", rowInsertIndex: baseInfo.rowInsertIndex + 1 }
+        });
+        return;
+      }
+
+      // Top zone: available unless it's a section header at the very first row
+      if (!isSectionHeader || i > 0) {
+        zones.push({
+          rowIndex: i, rowId: row.id, location: "top",
+          dropRowInfo: { ...baseInfo, rowDropLocation: "top" }
+        });
+      }
+
+      // Tile-boundary side zones: N+1 zones for N tiles in the row.
+      // Filter to renderable tiles to match what tile-row.tsx renders.
+      if (!isSectionHeader && row.tileCount > 0) {
+        const renderableTileCount = row.tiles.filter(t => {
+          const tile = content.tileMap.get(t.tileId);
+          return tile && (!tile.display || this.stores.isShowingTeacherContent);
+        }).length;
+        for (let t = 0; t <= renderableTileCount; t++) {
+          zones.push({
+            rowIndex: i, rowId: row.id, location: "left",
+            dropRowInfo: { ...baseInfo, rowDropLocation: "left", tileInsertIndex: t }
+          });
+        }
+      }
+
+      // Bottom zone: always available
+      zones.push({
+        rowIndex: i, rowId: row.id, location: "bottom",
+        dropRowInfo: { ...baseInfo, rowDropLocation: "bottom", rowInsertIndex: baseInfo.rowInsertIndex + 1 }
+      });
+    });
+
+    return zones;
+  }
+
+  private setFocusedZone(zones: ReturnType<typeof this.getDropZoneList>, index: number) {
+    const { ui } = this.stores;
+    ui.setFocusedDropZoneIndex(index);
+    this.setState({ dropRowInfo: zones[index].dropRowInfo });
+  }
+
+  private handlePickUpKeyDown = (e: KeyboardEvent) => {
+    const { ui } = this.stores;
+    if (!ui.pickedUpTileId) return;
+
+    // Don't intercept keys when focus is on interactive elements (e.g. the delete button)
+    const active = document.activeElement as HTMLElement | null;
+    if (active?.closest(".delete-button, button, input, select, textarea")) return;
+
+    const zones = this.getDropZoneList();
+    const { content } = this.props;
+    const isEmptyDocument = content && content.rowOrder.length === 0;
+
+    // Empty document: Enter places the tile at index 0, arrow keys are no-ops
+    if (zones.length === 0) {
+      if (isEmptyDocument && e.key === "Enter") {
+        e.preventDefault();
+        this.handlePickUpPlace({ rowInsertIndex: 0 });
+      }
+      return;
+    }
+
+    const currentIndex = ui.focusedDropZoneIndex;
+
+    switch (e.key) {
+      case "ArrowDown":
+      case "ArrowRight": {
+        e.preventDefault();
+        if (currentIndex === undefined) {
+          this.setFocusedZone(zones, 0);
+        } else if (currentIndex < zones.length - 1) {
+          this.setFocusedZone(zones, currentIndex + 1);
+        }
+        break;
+      }
+      case "ArrowUp":
+      case "ArrowLeft": {
+        e.preventDefault();
+        if (currentIndex === undefined) {
+          this.setFocusedZone(zones, zones.length - 1);
+        } else if (currentIndex > 0) {
+          this.setFocusedZone(zones, currentIndex - 1);
+        }
+        break;
+      }
+      case "Enter": {
+        e.preventDefault();
+        if (currentIndex !== undefined && currentIndex < zones.length) {
+          this.handlePickUpPlace(zones[currentIndex].dropRowInfo);
+        }
+        break;
+      }
+      case "Tab": {
+        // Move focus to the delete button
+        e.preventDefault();
+        const deleteButton = this.domElement?.closest(".problem-panel")?.querySelector<HTMLElement>(".delete-button");
+        if (deleteButton) {
+          deleteButton.focus();
+        }
+        break;
+      }
+      case "Escape": {
+        e.preventDefault();
+        ui.clearPickedUpTile();
+        break;
+      }
+    }
+  };
+
+  private findContentOfTile(tileId: string) {
+    return this.stores.findContentOfTile(tileId);
+  }
+
+  private handlePickUpPlace = (dropRowInfo: IDropRowInfo) => {
+    const { content } = this.props;
+    const { ui } = this.stores;
+    const tileId = ui.pickedUpTileId;
+
+    if (!content || !tileId) return;
+
+    // Check local document first: template tile IDs (e.g. TemplateTextTileQ1_1) are reused across
+    // documents, so a global search may find the wrong document. If the tile is in the local
+    // document's tileMap, it's a same-document move.
+    const isLocalTile = content.tileMap.has(tileId);
+    const sourceContent = isLocalTile ? content : this.findContentOfTile(tileId);
+    if (!sourceContent) {
+      ui.clearPickedUpTile();
+      return;
+    }
+
+    const isSameDocument = isLocalTile || sourceContent.contentId === content.contentId;
+
+    if (isSameDocument) {
+      // Move within the same document
+      const dragTileItems = sourceContent.getDragTileItems([tileId]);
+      const tilesToMove = sourceContent.removeEmbeddedTilesFromDragTiles(dragTileItems);
+      content.userMoveTiles(tilesToMove, dropRowInfo);
+    } else {
+      // Copy from another document (e.g. resources pane → workspace)
+      const dragTiles = sourceContent.getDragTiles([tileId]);
+      content.handleDragCopyTiles(dragTiles, dropRowInfo);
+    }
+
+    ui.clearPickedUpTile();
+    this.clearDropRowInfo();
+  };
 
   private handleRowResizeDrop = (e: React.DragEvent<HTMLDivElement>) => {
     const { content } = this.props;

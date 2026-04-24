@@ -1,3 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="34" viewBox="0 0 36 34">
-    <text text-anchor="middle" x="50%" y="25">Tl</text>
+    <g stroke="none" fill="none">
+        <rect x="0" y="0" width="36" height="34"></rect>
+        <rect x="6" y="6" width="24" height="22" rx="2" fill="none" stroke="#545454" stroke-width="2"></rect>
+        <rect fill="#545454" opacity="0.2" x="11" y="9" width="2" height="16"></rect>
+        <rect fill="#545454" opacity="0.2" x="15" y="9" width="2" height="16"></rect>
+        <rect fill="#545454" opacity="0.2" x="18" y="9" width="2" height="16"></rect>
+        <rect fill="#545454" opacity="0.2" x="23" y="9" width="2" height="16"></rect>
+        <polyline stroke="#707070" stroke-width="1" stroke-linejoin="round" points="9 17 11.25 17 11.75 14 12.25 20 12.75 17 15.5 17 15.75 10.5 16.25 23.5 17 17 18.25 17 18.75 12.5 19.5 22.25 20 17 23 17 23.5 14.75 24 19.75 24.75 17 27 17"></polyline>
+    </g>
 </svg>

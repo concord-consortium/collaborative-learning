@@ -24,10 +24,12 @@ describe("TextToolComponent", () => {
     expect(content.editor).toBeDefined();
   });
 
-  it("renders its toolbar", () => {
+  it("renders its toolbar with heading button", () => {
     specTextTile({});
     userEvent.click(screen.getByTestId("ccrte-editor"));
-    expect(screen.getAllByRole("button")).toHaveLength(8);
+    const buttons = screen.getAllByRole("button");
+    const headingButton = buttons.find(b => b.getAttribute("aria-label") === "Heading");
+    expect(headingButton).toBeDefined();
   });
 
 });

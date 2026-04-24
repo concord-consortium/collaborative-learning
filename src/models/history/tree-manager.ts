@@ -8,10 +8,72 @@ import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation,
   ICreateHistoryEntry} from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
+import { PatchApplicationError } from "./tree";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../stores/user-context-provider";
 import { getLastHistoryEntry } from "./history-firestore";
+
+export interface HistoryPlaybackFailure {
+  historyEntry: Instance<typeof HistoryEntry>;
+  historyIndex: number;
+  direction: "undo" | "redo";
+  errorMessage: string;
+}
+
+/**
+ * Tracks how patches in a batched array map back to their history entries.
+ * Each segment records a history entry index and the number of patches
+ * from that entry that were added to the batch.
+ */
+interface PatchSegment {
+  historyIndex: number;
+  patchCount: number;
+}
+
+/**
+ * Build the list of patches for a single history entry that a tree
+ * would receive in a given direction, in the same order and record
+ * ordering that goToHistoryEntry uses when batching. Used to
+ * reconstruct patches without needing the onPatch-collected inverses.
+ */
+function getEntryPatchesForTree(
+  historyEntry: Instance<typeof HistoryEntry>,
+  treeId: string,
+  opType: HistoryOperation
+): IJsonPatch[] {
+  let records = [...historyEntry.records];
+  if (opType === HistoryOperation.Undo) {
+    records = records.reverse();
+  }
+  const result: IJsonPatch[] = [];
+  for (const entryRecord of records) {
+    if (entryRecord.tree === treeId) {
+      result.push(...entryRecord.getPatches(opType));
+    }
+  }
+  return result;
+}
+
+/**
+ * Given the number of patches that were successfully applied and the
+ * segment mapping, returns the history entry index that contains the
+ * patch that failed, and the number of patches from that entry that
+ * were successfully applied before the failure.
+ */
+function findFailedSegment(numApplied: number, segments: PatchSegment[]) {
+  let remaining = numApplied;
+  for (const segment of segments) {
+    if (remaining < segment.patchCount) {
+      return { historyIndex: segment.historyIndex, appliedInEntry: remaining };
+    }
+    remaining -= segment.patchCount;
+  }
+  // This shouldn't happen — numApplied should be less than total patches
+  // if we're in an error path. Return the last segment as a fallback.
+  const last = segments[segments.length - 1];
+  return { historyIndex: last.historyIndex, appliedInEntry: last.patchCount };
+}
 
 /**
  * Helper method to print objects in template strings
@@ -85,7 +147,12 @@ export const TreeManager = types
    * History manager to be notified when new history entries are completed.
    * Consumers can check for specific types (e.g., FirestoreHistoryManagerConcurrent).
    */
-  historyManager: undefined as IHistoryManager | undefined
+  historyManager: undefined as IHistoryManager | undefined,
+  /**
+   * History entries whose patches could not be applied. A patch may fail
+   * in one direction but not the other, so entries include the direction.
+   */
+  historyPlaybackFailures: [] as HistoryPlaybackFailure[]
 }))
 .views((self) => ({
   get undoManager() : IUndoManager {
@@ -178,6 +245,48 @@ export const TreeManager = types
 
   setNumHistoryEntriesApplied(value: number) {
     self.numHistoryEventsApplied = value;
+  },
+
+  /**
+   * Inject a synthetic history entry with a patch that will always fail
+   * when replayed (references a non-existent tile). Useful for testing
+   * playback failure handling.
+   */
+  injectFailingHistoryEntry() {
+    if (!self.mainDocument) {
+      console.warn("Cannot inject failing entry: no main document");
+      return;
+    }
+    const entryId = nanoid();
+    const treeId = self.mainDocument.key;
+    const entry = HistoryEntry.create({
+      id: entryId,
+      tree: treeId,
+      model: "TestFailure",
+      action: "/injectFailingHistoryEntry",
+      undoable: true,
+      state: "complete",
+      records: [{
+        tree: treeId,
+        action: "/injectFailingHistoryEntry",
+        patches: [{
+          op: "replace",
+          path: "/content/tileMap/NONEXISTENT_TILE/content/value",
+          value: "this patch will fail"
+        }],
+        inversePatches: [{
+          op: "replace",
+          path: "/content/tileMap/NONEXISTENT_TILE/content/value",
+          value: "original"
+        }]
+      }]
+    });
+    const newLocalIndex = self.document.history.length;
+    self.document.history.push(entry);
+    self.numHistoryEventsApplied = self.document.history.length;
+    self.revisionId = entryId;
+    self.undoStore.addHistoryEntry(entry);
+    self.historyManager?.onHistoryEntryCompleted(self.document, entry, newLocalIndex);
   },
 
   putTree(treeId: string, tree: TreeAPI) {
@@ -412,6 +521,9 @@ export const TreeManager = types
 
     if (newHistoryPosition === self.numHistoryEventsApplied) return;
     if (self.numHistoryEventsApplied === undefined) return;
+    // Capture the starting position so unexpected-error handling can
+    // anchor its failure recording and rollback to a known-safe point.
+    const initialPosition = self.numHistoryEventsApplied;
     // Disable shared model syncing on all of the trees. This is
     // different than when the undo store applies patches because in
     // this case we are going to apply lots of history entries all at
@@ -423,38 +535,292 @@ export const TreeManager = types
     yield Promise.all(startPromises);
 
     const treePatches: Record<string, IJsonPatch[] | undefined> = {};
-    Object.keys(self.trees).forEach(treeId => treePatches[treeId] = []);
+    // Track which history entry each patch came from, per tree.
+    const treePatchSegments: Record<string, PatchSegment[]> = {};
+    Object.keys(self.trees).forEach(treeId => {
+      treePatches[treeId] = [];
+      treePatchSegments[treeId] = [];
+    });
 
     // direction tells us which direction to go
     // startingIndex and endingIndex are so we don't add the currentHistoryEvent into patches
     // because we are going to assume that it has already been played, and we don't want to play it
     // again if we are going forward.
     const direction = newHistoryPosition > self.numHistoryEventsApplied ? 1 : -1;
+    const opType = direction === 1 ? HistoryOperation.Redo : HistoryOperation.Undo;
     const startingIndex = direction === 1 ? self.numHistoryEventsApplied : self.numHistoryEventsApplied - 1;
     const endingIndex = direction === 1 ? newHistoryPosition : newHistoryPosition - 1;
+    // A history entry may contain multiple records for the same tree
+    // (e.g. tile update + shared-model update). getEntryPatchesForTree
+    // aggregates them into one ordered list per tree so we can push a
+    // single segment per tree per history entry — that way rollback on
+    // failure covers all records in the entry, not just one.
+    // Using the same helper for both the initial batching and the
+    // rollback ensures the two paths produce matching orderings.
     for (let i=startingIndex; i !== endingIndex; i=i+direction) {
       const historyEntry = self.document.history.at(i);
-      let records = historyEntry ? [ ...historyEntry.records] : [];
-      if (direction === -1) {
-        records = records.reverse();
-      }
-      for (const entryRecord of records) {
-        const patches = treePatches[entryRecord.tree];
-        if (newHistoryPosition > self.numHistoryEventsApplied) {
-          patches?.push(...entryRecord.getPatches(HistoryOperation.Redo));
-        } else {
-          patches?.push(...entryRecord.getPatches(HistoryOperation.Undo));
+      if (!historyEntry) continue;
+      for (const treeId of Object.keys(self.trees)) {
+        const patches = treePatches[treeId];
+        if (!patches) {
+          throw new Error(`treePatches missing entry for known tree '${treeId}'`);
+        }
+        const entryPatches = getEntryPatchesForTree(historyEntry, treeId, opType);
+        if (entryPatches.length > 0) {
+          patches.push(...entryPatches);
+          treePatchSegments[treeId].push({ historyIndex: i, patchCount: entryPatches.length });
         }
       }
     }
 
-    const applyPromises = Object.entries(treePatches).map(([treeId, patches]) => {
-      if (patches && patches.length > 0) {
-        const tree = self.trees[treeId];
-        return tree?.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
+    // Apply the batched patches to each tree in parallel. Two kinds of
+    // failure can happen during the apply phase:
+    //
+    // 1. PatchApplicationError — a recoverable patch-apply failure.
+    //    We pick an earliest failing history index across all trees
+    //    that had one:
+    //      - Forward (Redo): stopPosition = min(failedIndices)
+    //      - Backward (Undo): stopPosition = max(failedIndices) + 1
+    //    Trees that succeeded past the stop position have those
+    //    entries rolled back; trees that failed have their own partial
+    //    rollback plus any entries they applied past the stop position.
+    //
+    // 2. Any other error — a bug, by construction: applyPatchesFromManager
+    //    wraps patch-apply failures as PatchApplicationError, and there
+    //    is no IO/network path that could produce a transient failure.
+    //    We refuse to advance at all (stopPosition = initialPosition),
+    //    roll back any tree that succeeded in the batch, leave the
+    //    failing tree alone (we don't know how far it got), record a
+    //    playback-failure marker so the user sees the existing UI
+    //    banner, and console.error the original stack so a developer
+    //    can find the bug. This replaces the old behavior of letting
+    //    the error escape as an unhandled promise rejection (which was
+    //    invisible in the UI and easy to miss in logs).
+    interface TreeApplyFailure {
+      error: PatchApplicationError;
+      historyIndex: number;
+      appliedInEntry: number;
+      failingSegIdx: number;
+    }
+    interface TreeApplyUnexpected {
+      error: unknown;
+    }
+    interface TreeApplyResult {
+      treeId: string;
+      tree: TreeAPI;
+      segments: PatchSegment[];
+      failure?: TreeApplyFailure;
+      unexpected?: TreeApplyUnexpected;
+    }
+    type FailedResult = TreeApplyResult & { failure: TreeApplyFailure };
+    type UnexpectedResult = TreeApplyResult & { unexpected: TreeApplyUnexpected };
+
+    const results: TreeApplyResult[] = [];
+    const failedResults: FailedResult[] = [];
+    const unexpectedResults: UnexpectedResult[] = [];
+
+    const applyPromises = Object.entries(treePatches).map(async ([treeId, patches]) => {
+      if (!patches || patches.length === 0) return;
+      const tree = self.trees[treeId];
+      if (!tree) return;
+      const segments = treePatchSegments[treeId];
+      try {
+        await tree.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
+        results.push({ treeId, tree, segments });
+      } catch (e) {
+        if (e instanceof PatchApplicationError) {
+          const { historyIndex, appliedInEntry } = findFailedSegment(e.numApplied, segments);
+          // Each segment has a unique historyIndex because
+          // getEntryPatchesForTree aggregates per-entry.
+          const failingSegIdx = segments.findIndex(s => s.historyIndex === historyIndex);
+          const failedResult: FailedResult = {
+            treeId, tree, segments,
+            failure: { error: e, historyIndex, appliedInEntry, failingSegIdx }
+          };
+          results.push(failedResult);
+          failedResults.push(failedResult);
+        } else {
+          // Do NOT rethrow: route this through the playback-failure
+          // handling below so the user and developer both see it.
+          const unexpectedResult: UnexpectedResult = {
+            treeId, tree, segments, unexpected: { error: e }
+          };
+          results.push(unexpectedResult);
+          unexpectedResults.push(unexpectedResult);
+        }
       }
     });
     yield Promise.all(applyPromises);
+
+    const hasAnyFailure = failedResults.length > 0 || unexpectedResults.length > 0;
+    // Default to the requested target; the failure branch below may change
+    // it to a previous position depending on the direction we are moving in
+    // if some patches couldn't be applied.
+    let stopPosition: number = newHistoryPosition;
+
+    if (hasAnyFailure) {
+      if (unexpectedResults.length > 0) {
+        // Conservative: refuse to advance. We don't know how far the
+        // failing tree got, so we re-anchor all trees to where we
+        // started and don't touch the failing tree at all.
+        stopPosition = initialPosition;
+      } else {
+        const failedIndices = failedResults.map(r => r.failure.historyIndex);
+        // stopPosition is the new numHistoryEventsApplied.
+        // When going forward the entry at index numHistoryEventsApplied hasn't
+        // been applied yet. So we can apply events until
+        // numHistoryEventsApplied equals the first failing entry.
+        // When going backward the entry at index numHistoryEventsApplied has
+        // had its "undo" patches applied. So we have to stop just before
+        // numHistoryEventsApplied equals this failing entry.
+        stopPosition = direction === 1
+          ? Math.min(...failedIndices)
+          : Math.max(...failedIndices) + 1;
+      }
+
+      // For forward, entries with historyIndex >= stopPosition must
+      // not be "applied" at the stop position. For backward, entries
+      // with historyIndex < stopPosition must be "applied".
+      const needsRollback = (historyIndex: number): boolean => {
+        return direction === 1
+          ? historyIndex >= stopPosition
+          : historyIndex < stopPosition;
+      };
+
+      const oppositeOp = opType === HistoryOperation.Redo
+        ? HistoryOperation.Undo
+        : HistoryOperation.Redo;
+      const directionStr = direction === 1 ? "redo" : "undo";
+
+      // Build and apply per-tree rollback batches.
+      //
+      // Rollback ordering: patches need to be applied in reverse of the
+      // order they were applied in the forward batch. The failing
+      // entry's partial was applied last, so it rolls back first; then
+      // fully-applied segments roll back in reverse segment order.
+      //
+      // Partial slice derivation: in the opposite direction, an
+      // entry's batched patches list is the reverse of the forward
+      // direction's list. The first `appliedInEntry` patches of the
+      // forward list correspond to the last `appliedInEntry` patches
+      // of the opposite list — so .slice(length - appliedInEntry)
+      // gives us the patches we need (already in the correct order
+      // to undo the partial application).
+      //
+      // Trees that failed unexpectedly are skipped entirely: we don't
+      // have a trustworthy numApplied count and can't safely roll back
+      // their state. We leave them as-is and rely on the recorded
+      // playback-failure + console.error to surface the bug.
+      const rollbackPromises = results.map(async (r) => {
+        if (r.unexpected) return;
+        const rollbackPatches: IJsonPatch[] = [];
+
+        if (r.failure) {
+          const { historyIndex, appliedInEntry } = r.failure;
+          if (appliedInEntry > 0) {
+            const failedEntry = self.document.history.at(historyIndex);
+            if (failedEntry) {
+              const oppositePatches = getEntryPatchesForTree(failedEntry, r.treeId, oppositeOp);
+              rollbackPatches.push(
+                ...oppositePatches.slice(oppositePatches.length - appliedInEntry)
+              );
+            }
+          }
+        }
+
+        // Fully-applied segments (those before the failing segment, or
+        // all segments if this tree didn't fail), in reverse application
+        // order. Only those "past" the stop position need rollback.
+        const failingSegIdx = r.failure ? r.failure.failingSegIdx : r.segments.length;
+        for (let i = failingSegIdx - 1; i >= 0; i--) {
+          const seg = r.segments[i];
+          if (needsRollback(seg.historyIndex)) {
+            const entry = self.document.history.at(seg.historyIndex);
+            if (entry) {
+              const oppositePatches = getEntryPatchesForTree(entry, r.treeId, oppositeOp);
+              rollbackPatches.push(...oppositePatches);
+            }
+          }
+        }
+
+        if (rollbackPatches.length > 0) {
+          try {
+            await r.tree.applyPatchesFromManager(
+              FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, rollbackPatches);
+          } catch (rollbackError) {
+            // Rollback itself failed — trees are now out of sync and
+            // we can't recover automatically. Log and continue.
+            // TODO: consider surfacing this as a distinct catastrophic
+            // failure signal for the UI.
+            console.warn(
+              `Rollback of tree '${r.treeId}' failed: ${(rollbackError as Error).message}. ` +
+              `Trees may be in an inconsistent state.`
+            );
+          }
+        }
+      });
+      yield Promise.all(rollbackPromises);
+
+      // Track which (historyIndex, direction) pairs have been recorded so
+      // we can dedupe in O(1) instead of scanning historyPlaybackFailures
+      // on every push. directionStr is constant for this call, so keying
+      // on historyIndex alone is sufficient.
+      const recordedIndices = new Set<number>(
+        self.historyPlaybackFailures
+          .filter(f => f.direction === directionStr)
+          .map(f => f.historyIndex)
+      );
+
+      // Record one failure per (historyIndex, direction) pair, deduped.
+      for (const r of failedResults) {
+        const { historyIndex, error } = r.failure;
+        const historyEntry = self.document.history.at(historyIndex);
+        if (!historyEntry) continue;
+        if (!recordedIndices.has(historyIndex)) {
+          recordedIndices.add(historyIndex);
+          self.historyPlaybackFailures.push({
+            historyEntry,
+            historyIndex,
+            direction: directionStr,
+            errorMessage: error.message
+          });
+        }
+        console.warn(
+          `History entry ${historyIndex} failed to ${directionStr}: ${error.message}`
+        );
+      }
+
+      // Record unexpected-error failures. We anchor the failure marker
+      // to the first entry the batch was about to touch, since we don't
+      // know where within the batch the error originated:
+      //   - Forward: initialPosition (next entry to apply)
+      //   - Backward: initialPosition - 1 (first entry to undo)
+      // If that index isn't a valid history position, skip the marker
+      // but still console.error so the bug is visible to developers.
+      const unexpectedIndex = direction === 1 ? initialPosition : initialPosition - 1;
+      const unexpectedEntry =
+        unexpectedIndex >= 0 && unexpectedIndex < self.document.history.length
+          ? self.document.history.at(unexpectedIndex)
+          : undefined;
+      for (const r of unexpectedResults) {
+        const err = r.unexpected.error;
+        const errMessage = err instanceof Error ? err.message : String(err);
+        if (unexpectedEntry && !recordedIndices.has(unexpectedIndex)) {
+          recordedIndices.add(unexpectedIndex);
+          self.historyPlaybackFailures.push({
+            historyEntry: unexpectedEntry,
+            historyIndex: unexpectedIndex,
+            direction: directionStr,
+            errorMessage: `Unexpected error during playback: ${errMessage}`
+          });
+        }
+        console.error(
+          `Unexpected error playing back tree '${r.treeId}' ` +
+          `at history position ${unexpectedIndex}:`,
+          err
+        );
+      }
+    }
 
     // finish the patch application
     // Need to tell all of the tiles to re-enable the sync and run the sync
@@ -474,7 +840,7 @@ export const TreeManager = types
     // and print a warning to the console.
     // One way might be using unique history_entry_ids that we mark as closed
     // after the finish call.
-    self.numHistoryEventsApplied = newHistoryPosition;
+    self.numHistoryEventsApplied = stopPosition;
   }),
 }))
 .views(self => ({

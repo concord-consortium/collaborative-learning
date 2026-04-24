@@ -1,6 +1,9 @@
 import { DateTime } from "luxon";
 import { TimelineContentModel, kMinViewRangeSeconds } from "./timeline-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
+import { SharedDataSet } from "../../../models/shared/shared-data-set";
+import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
+import { DataSet, addAttributeToDataSet, addCasesToDataSet } from "../../../models/data/data-set";
 
 // Mock getSharedModelManager to return a fake shared model manager
 jest.mock("../../../models/tiles/tile-environment", () => ({
@@ -9,10 +12,38 @@ jest.mock("../../../models/tiles/tile-environment", () => ({
 
 const mockedGetSharedModelManager = getSharedModelManager as jest.MockedFunction<typeof getSharedModelManager>;
 
+// Helper to create a SharedDataSet with events
+function createEventsDataSet(events: Array<{ windowStart: string; windowEnd: string; eventType: string }>) {
+  const dataSet = DataSet.create();
+  addAttributeToDataSet(dataSet, { name: "windowStart" });
+  addAttributeToDataSet(dataSet, { name: "windowEnd" });
+  addAttributeToDataSet(dataSet, { name: "eventType" });
+  addAttributeToDataSet(dataSet, { name: "confidence" });
+  addCasesToDataSet(dataSet, events.map(e => ({ ...e, confidence: "0.9" })));
+  return SharedDataSet.create({ dataSet });
+}
+
 describe("TimelineContent", () => {
   it("is always user resizable", () => {
     const content = TimelineContentModel.create();
     expect(content.isUserResizable).toBe(true);
+  });
+
+  it("exports a JSON string including persisted fields", () => {
+    const content = TimelineContentModel.create({
+      viewStartTimeISO: "2026-02-01T00:00:00.000Z",
+      viewEndTimeISO: "2026-02-02T00:00:00.000Z",
+      selectedEventIndex: 3
+    });
+    const json = content.exportJson();
+    expect(typeof json).toBe("string");
+    expect(json.length).toBeGreaterThan(0);
+    expect(JSON.parse(json)).toEqual({
+      type: "Timeline",
+      viewStartTimeISO: "2026-02-01T00:00:00.000Z",
+      viewEndTimeISO: "2026-02-02T00:00:00.000Z",
+      selectedEventIndex: 3
+    });
   });
 });
 
@@ -26,14 +57,17 @@ describe("zoom functionality", () => {
 
   beforeEach(() => {
     const mockSharedSeismogram = {
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
       startTime: dataStart,
       endTime: dataEnd,
-      seismogram: {},
     };
 
     mockedGetSharedModelManager.mockReturnValue({
       isReady: true,
-      findFirstSharedModelByType: () => mockSharedSeismogram,
+      getTileSharedModelsByType: (_self: any, type: any) => {
+        if (type === SharedSeismogram) return [mockSharedSeismogram];
+        return [];
+      },
     } as any);
 
     content = TimelineContentModel.create();
@@ -158,5 +192,183 @@ describe("zoom functionality", () => {
     // View range should remain unchanged
     expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
     expect(content.viewEndTime?.toISO()).toBe(dataEnd.toISO());
+  });
+});
+
+describe("event views", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+
+  let content: ReturnType<typeof TimelineContentModel.create>;
+  let mockSharedDataSet: any;
+
+  beforeEach(() => {
+    const mockSharedSeismogram = {
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
+      startTime: dataStart,
+      endTime: dataEnd,
+    };
+    mockSharedDataSet = undefined;
+
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) => {
+        if (type === SharedSeismogram) return [mockSharedSeismogram];
+        if (type === SharedDataSet) return mockSharedDataSet ? [mockSharedDataSet] : [];
+        return [];
+      },
+    } as any);
+
+    content = TimelineContentModel.create();
+  });
+
+  afterEach(() => {
+    mockedGetSharedModelManager.mockReset();
+  });
+
+  it("returns empty events when no shared dataset", () => {
+    expect(content.events).toEqual([]);
+  });
+
+  it("parses events from shared dataset sorted by windowStart", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
+      { windowStart: "2026-01-30T12:00:00.000Z", windowEnd: "2026-01-30T13:00:00.000Z", eventType: "Noise" },
+    ]);
+    const events = content.events;
+    expect(events).toHaveLength(2);
+    // Should be sorted by windowStart
+    expect(events[0].eventType).toBe("Noise");
+    expect(events[1].eventType).toBe("Earthquake");
+  });
+
+  it("assigns color words by order of first appearance in dataset", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-30T12:00:00.000Z", windowEnd: "2026-01-30T13:00:00.000Z", eventType: "Earthquake" },
+      { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Noise" },
+      { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Earthquake" },
+    ]);
+    const colors = content.eventTypeColorWords;
+    expect(colors.get("Earthquake")).toBe("blue");
+    expect(colors.get("Noise")).toBe("orange");
+  });
+
+  it("selectedEventIndex defaults to 0", () => {
+    expect(content.selectedEventIndex).toBe(0);
+  });
+
+  it("selectedEventLabel shows 'Event' when no events", () => {
+    expect(content.selectedEventLabel).toBe("Event");
+  });
+
+  it("selectedEventLabel shows 'Event 1' when events exist", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
+    ]);
+    expect(content.selectedEventLabel).toBe("Event 1");
+  });
+
+  it("canSelectPrev is false when at first event", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
+    ]);
+    expect(content.canSelectPrev).toBe(false);
+  });
+
+  it("canSelectNext is true when more events exist", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
+      { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Noise" },
+    ]);
+    expect(content.canSelectNext).toBe(true);
+  });
+
+  it("selectNextEvent increments selectedEventIndex", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
+      { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Noise" },
+    ]);
+    content.fitToData();
+    content.selectNextEvent();
+    expect(content.selectedEventIndex).toBe(1);
+    expect(content.selectedEventLabel).toBe("Event 2");
+  });
+
+  it("selectPrevEvent decrements selectedEventIndex", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
+      { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Noise" },
+    ]);
+    content.fitToData();
+    content.selectNextEvent();
+    content.selectPrevEvent();
+    expect(content.selectedEventIndex).toBe(0);
+  });
+
+  it("selectEvent adjusts view to show event with 25% padding", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Earthquake" },
+    ]);
+    content.fitToData();
+    content.selectEvent(0);
+    // Event is 1 hour = 3600 seconds. Padding = 900 seconds on each side.
+    // View should be 3600 + 900 + 900 = 5400 seconds
+    expect(content.viewRangeSeconds).toBeCloseTo(5400, 0);
+  });
+
+  it("selectNextEvent adjusts view to show selected event", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
+      { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Noise" },
+    ]);
+    content.fitToData();
+    content.selectNextEvent();
+    // Should adjust view to second event with padding
+    const event = content.events[1];
+    const duration = event.windowEnd.diff(event.windowStart, "seconds").seconds;
+    const padding = duration * 0.25;
+    expect(content.viewRangeSeconds).toBeCloseTo(duration + padding * 2, 0);
+  });
+
+  it("selectEvent clamps view to data bounds", () => {
+    mockSharedDataSet = createEventsDataSet([
+      // Event near the very start of data
+      { windowStart: "2026-01-30T00:00:00.000Z", windowEnd: "2026-01-30T00:10:00.000Z", eventType: "Earthquake" },
+    ]);
+    content.fitToData();
+    content.selectEvent(0);
+    // Padding would push viewStart before dataStart — should clamp
+    expect(content.viewStartTime!.toMillis()).toBeGreaterThanOrEqual(dataStart.toMillis());
+  });
+
+  it("selectEvent clamps index to valid range", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
+    ]);
+    content.selectEvent(5);
+    expect(content.selectedEventIndex).toBe(0);
+    content.selectEvent(-1);
+    expect(content.selectedEventIndex).toBe(0);
+  });
+
+  it("returns visible events that overlap the view window", () => {
+    mockSharedDataSet = createEventsDataSet([
+      { windowStart: "2026-01-30T06:00:00.000Z", windowEnd: "2026-01-30T07:00:00.000Z", eventType: "Earthquake" },
+      { windowStart: "2026-02-01T23:00:00.000Z", windowEnd: "2026-02-02T01:00:00.000Z", eventType: "Noise" },
+      { windowStart: "2026-02-03T00:00:00.000Z", windowEnd: "2026-02-03T01:00:00.000Z", eventType: "Earthquake" },
+      { windowStart: "2026-02-03T23:00:00.000Z", windowEnd: "2026-02-04T01:00:00.000Z", eventType: "Noise" },
+      { windowStart: "2026-02-05T00:00:00.000Z", windowEnd: "2026-02-05T01:00:00.000Z", eventType: "Earthquake" },
+    ]);
+    // Set view to middle of data range
+    content.setViewRange(
+      DateTime.fromISO("2026-02-02T00:00:00.000Z"),
+      DateTime.fromISO("2026-02-04T00:00:00.000Z")
+    );
+    const visible = content.visibleEvents;
+    // Should include: event overlapping start edge, fully contained event, event overlapping end edge
+    expect(visible).toHaveLength(3);
+    expect(visible[0].windowStart.toUTC().toISO()).toBe("2026-02-01T23:00:00.000Z");
+    expect(visible[1].windowStart.toUTC().toISO()).toBe("2026-02-03T00:00:00.000Z");
+    expect(visible[2].windowStart.toUTC().toISO()).toBe("2026-02-03T23:00:00.000Z");
   });
 });

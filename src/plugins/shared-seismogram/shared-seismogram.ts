@@ -1,63 +1,34 @@
-import { flow, getType, Instance, types } from "mobx-state-tree";
-import { miniseed, seismogram as seismogramNS } from "seisplotjs";
-type Seismogram = seismogramNS.Seismogram;
+import { getType, Instance, types } from "mobx-state-tree";
+import { DateTime } from "luxon";
 import { SharedModel, SharedModelType } from "../../models/shared/shared-model";
+import { StationModel, StationSnapshot } from "./station-model";
 
 export const kSharedSeismogramType = "SharedSeismogram";
-
-// TODO: Remove hardcoded data. Fetch data based on station, start time, and end time props.
-const S3_BASE = "https://models-resources.s3.amazonaws.com/collaborative-learning/datasets";
-const MSEED_URLS = [
-  `${S3_BASE}/2026_01_30_00_00_00-2026_01_31_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_01_31_00_00_00-2026_02_01_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_01_00_00_00-2026_02_02_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_02_00_00_00-2026_02_03_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_03_00_00_00-2026_02_04_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_04_00_00_00-2026_02_05_00_00_00_anchorage_airport.mseed`,
-  `${S3_BASE}/2026_02_05_00_00_00-2026_02_06_00_00_00_anchorage_airport.mseed`,
-];
 
 export const SharedSeismogram = SharedModel
   .named("SharedSeismogram")
   .props({
     type: types.optional(types.literal(kSharedSeismogramType), kSharedSeismogramType),
+    station: types.maybe(StationModel),
+    startTimeISO: types.maybe(types.string),
+    endTimeISO: types.maybe(types.string),
   })
-  .volatile(() => ({
-    seismogram: undefined as Seismogram | undefined,
-    isLoading: false,
-    loadError: null as string | null,
-  }))
   .views(self => ({
-    get hasData() {
-      return self.seismogram !== undefined;
-    },
     get startTime() {
-      return self.seismogram?.startTime;
+      return self.startTimeISO ? DateTime.fromISO(self.startTimeISO, { zone: "utc" }) : undefined;
     },
     get endTime() {
-      return self.seismogram?.endTime;
-    }
+      return self.endTimeISO ? DateTime.fromISO(self.endTimeISO, { zone: "utc" }) : undefined;
+    },
   }))
   .actions(self => ({
-    setSeismogram(s: Seismogram | undefined) {
-      self.seismogram = s;
+    setStation(station: StationSnapshot) {
+      self.station = StationModel.create(station);
     },
-    loadData: flow(function* () {
-      self.isLoading = true;
-      self.loadError = null;
-      try {
-        const buffers: ArrayBuffer[] = yield Promise.all(
-          MSEED_URLS.map((url: string) => fetch(url).then((res: Response) => res.arrayBuffer()))
-        );
-        const allRecords = buffers.flatMap((buf: ArrayBuffer) => miniseed.parseDataRecords(buf));
-        self.seismogram = miniseed.merge(allRecords);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        self.loadError = `Error loading seismic data: ${message}`;
-      } finally {
-        self.isLoading = false;
-      }
-    })
+    setTimeRange(startTimeISO: string, endTimeISO: string) {
+      self.startTimeISO = startTimeISO;
+      self.endTimeISO = endTimeISO;
+    },
   }));
 
 export interface SharedSeismogramType extends Instance<typeof SharedSeismogram> {}

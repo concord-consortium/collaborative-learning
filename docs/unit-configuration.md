@@ -330,17 +330,35 @@ Common toolbar framework; default buttons:
 - `bold`
 - `italic`
 - `underline`
+- `highlight`
 - `subscript`
 - `superscript`
+- `heading`
 - `list-ol`
 - `list-ul`
 - `link`
+- `voice-typing`
 
 Additionally these buttons are supported and can be added to the toolbar if the configuration makes use of shared variables:
 
 - `new-variable`
 - `insert-variable`
 - `edit-variable`
+
+#### Wave Runner
+
+Common toolbar framework; default buttons:
+
+- `load-data`
+- `play`
+- `restart`
+- `reset`
+- `timeline`
+
+Additional settings:
+
+- `stations`: array of station objects, each with `network`, `station`, `channel`, and `label` properties. These define the seismograph stations available in the station picker dropdown.
+- `defaultStation`: index into the `stations` array specifying which station is selected by default.
 
 ## Problem Sections
 

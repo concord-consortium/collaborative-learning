@@ -1,7 +1,8 @@
 import { types } from "mobx-state-tree";
 import { kellyColors } from "../../utilities/color-utils";
 import { Attribute, IAttribute } from "./attribute";
-import { CategorySet } from "./category-set";
+import { CategorySet, createProvisionalCategorySet } from "./category-set";
+import { DataSet } from "./data-set";
 
 describe("CategorySet", () => {
   const Tree = types.model("Tree", {
@@ -101,22 +102,37 @@ describe("CategorySet", () => {
     expect(categories.lastMove?.fromIndex).toBe(originalFromIndex);
   });
 
-  it("supports callback on invalidation of attribute", () => {
-    const handleAttributeInvalidated = jest.fn();
+  it("createProvisionalCategorySet builds a detached instance backed by a volatile attribute pointer", () => {
+    const data = DataSet.create();
+    data.addAttributeWithID({ id: "aId", name: "a" });
+    data.addCasesWithIDs([
+      { __id__: "c1", a: "x" },
+      { __id__: "c2", a: "y" },
+      { __id__: "c3", a: "x" }
+    ]);
 
-    // can destroy attribute without having set an invalidation handler
-    const a = Attribute.create({ name: "a" });
-    const aTree = Tree.create({ attribute: a, categories: { attribute: a.id } });
-    aTree.setAttribute(Attribute.create({ name: "b" }));
-    expect(handleAttributeInvalidated).not.toHaveBeenCalled();
+    const cs = createProvisionalCategorySet(data, "aId");
+    expect(cs.isProvisional).toBe(true);
+    expect(cs.attr.id).toBe("aId");
+    expect(cs.values).toEqual(["x", "y"]);
+  });
 
-    // handler is called on attribute destruction if one has been specified
-    const c = Attribute.create({ name: "c" });
-    const cId = c.id;
-    const cTree = Tree.create({ attribute: c, categories: { attribute: cId } });
-    cTree.categories.onAttributeInvalidated((attrId: string) => handleAttributeInvalidated(attrId));
-    cTree.setAttribute(Attribute.create({ name: "d" }));
-    expect(handleAttributeInvalidated).toHaveBeenCalledTimes(1);
-    expect(handleAttributeInvalidated).toHaveBeenCalledWith(cId);
+  it("throws when mutation actions are called on a provisional instance", () => {
+    const data = DataSet.create();
+    data.addAttributeWithID({ id: "aId", name: "a" });
+    data.addCasesWithIDs([
+      { __id__: "c1", a: "x" },
+      { __id__: "c2", a: "y" }
+    ]);
+    const cs = createProvisionalCategorySet(data, "aId");
+
+    // Reads work fine.
+    expect(cs.values).toEqual(["x", "y"]);
+
+    // Mutations throw.
+    expect(() => cs.move("y", "x")).toThrow(/provisional/);
+    expect(() => cs.setColorForCategory("x", "#ff0000")).toThrow(/provisional/);
+    expect(() => cs.storeCurrentColorForCategory("x")).toThrow(/provisional/);
+    expect(() => cs.storeAllCurrentColors()).toThrow(/provisional/);
   });
 });

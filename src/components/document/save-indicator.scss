@@ -1,0 +1,36 @@
+.save-indicator-portal {
+  position: absolute;
+  right: 8px;
+  top: 2px;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+}
+
+.save-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+
+  .save-indicator-icon {
+    width: 21px;
+    height: 21px;
+    color: #666;
+    flex-shrink: 0;
+
+    &.syncing {
+      animation: spin 1.5s linear infinite;
+    }
+  }
+
+  .save-indicator-text {
+    font-size: 12px;
+    color: #666;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

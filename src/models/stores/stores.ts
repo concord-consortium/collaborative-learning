@@ -36,6 +36,7 @@ import { gImageMap } from "../image-map";
 import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar-controller";
 import { SectionDocuments } from "./section-docs-store";
 import { Portal } from "./portal";
+import { SeismicQueryService } from "./seismic-query-service";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -58,6 +59,8 @@ export interface IStores extends IBaseStores {
   exemplarController: ExemplarControllerModelType;
   portal: Portal;
   gitInfo: IGitInfo;
+  findContentOfTile(tileId: string): any;
+  seismicQueryService: SeismicQueryService;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -104,6 +107,7 @@ class Stores implements IStores{
   startedLoadingUnitAndProblem: boolean;
   exemplarController: ExemplarControllerModelType;
   portal: Portal;
+  seismicQueryService: SeismicQueryService;
 
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
@@ -113,6 +117,7 @@ class Stores implements IStores{
     // will do with async functions, but whatever it
     // does seems to work without warnings.
     makeAutoObservable(this);
+    this.seismicQueryService = new SeismicQueryService();
     this.appMode = params?.appMode || "dev";
     this.appVersion = params?.appVersion || "unknown";
     this.gitInfo = params?.gitInfo || {};
@@ -235,6 +240,23 @@ class Stores implements IStores{
   get isShowingTeacherContent() {
     const { persistentUI: { showTeacherContent }, user: { isTeacherOrResearcher } } = this;
     return isTeacherOrResearcher && showTeacherContent;
+  }
+
+  /**
+   * Find the DocumentContentModel that contains the given tile.
+   * Searches user documents first, then curriculum problem sections and teacher guide sections.
+   */
+  findContentOfTile(tileId: string) {
+    const { documents, problem, teacherGuide } = this;
+    const doc = documents.findDocumentOfTile(tileId);
+    if (doc?.content) return doc.content;
+    for (const section of problem.sections) {
+      if (section.content?.tileMap.has(tileId)) return section.content;
+    }
+    for (const section of teacherGuide?.sections || []) {
+      if (section.content?.tileMap.has(tileId)) return section.content;
+    }
+    return undefined;
   }
 
   /**
