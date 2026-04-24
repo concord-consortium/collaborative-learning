@@ -100,6 +100,10 @@ $section-padding: 6px;
       background-color: white;
       padding: 1px;
 
+      &.group {
+        border-color: $classwork-purple;
+      }
+
       .scaled-list-item {
         transform: scale(.1);
         transform-origin: 0 0;

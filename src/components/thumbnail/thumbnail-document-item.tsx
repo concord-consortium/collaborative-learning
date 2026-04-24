@@ -2,6 +2,7 @@ import React from "react";
 import { observer } from "mobx-react";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentModelType } from "../../models/document/document";
+import { GroupDocument } from "../../models/document/document-types";
 import { DocumentCaption } from "./document-caption";
 import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
@@ -29,7 +30,6 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
     dataTestName, canvasContext, document, scale, captionText, isSelected, isSecondarySelected,
     onDocumentClick, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
   } = props;
-  const selectedClass = isSelected ? "selected" : "";
   const appMode = useAppMode();
   const { bookmarks, user, documents } = useStores();
   const classStore = useClassStore();
@@ -64,17 +64,24 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
 
   const label = DEBUG_BOOKMARKS ? bookmarks.getBookmarkLabel(document.key, user.id, classStore) : "";
 
+  const group = document.type === GroupDocument;
   const isPrivate = !document.isAccessibleToUser(user, documents);
-  const privateClass = isPrivate ? "private" : "";
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;
 
+  const className = classNames("list-item", {
+    private: isPrivate, selected: isSelected, secondary: isSecondarySelected
+  });
   return (
-    <div className={classNames("list-item", selectedClass, privateClass, {"secondary": isSecondarySelected})}
+    <div className={className}
       data-test={dataTestName} key={document.key} data-document-key={document.key}
-      title={documentTitle} onClick={isPrivate ? undefined : handleDocumentClick}>
-      <div className="scaled-list-item-container" onDragStart={handleDocumentDragStart}
-        draggable={!!onDocumentDragStart && !isPrivate}>
+      title={documentTitle} onClick={isPrivate ? undefined : handleDocumentClick}
+    >
+      <div
+        className={classNames("scaled-list-item-container", { group })}
+        onDragStart={handleDocumentDragStart}
+        draggable={!!onDocumentDragStart && !isPrivate}
+      >
         { isPrivate
           ? <ThumbnailPrivateIcon />
           : document.content
@@ -123,5 +130,3 @@ const DocumentBookmark = (props: IDocumentStarProps) => {
     </div>
     );
 };
-
-
