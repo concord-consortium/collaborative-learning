@@ -8,6 +8,7 @@ import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
 import { useAppMode, useClassStore, useStores } from "../../hooks/use-stores";
 import ThumbnailBookmark from "../../assets/thumbnail-bookmark-icon.svg";
+import GroupIcon from "../../assets/icons/document-thumbnail/student-group-icon.svg";
 import classNames from "classnames";
 import { DEBUG_BOOKMARKS } from "../../lib/debug";
 
@@ -95,6 +96,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
               </div>
             : <ThumbnailPlaceHolderIcon />
         }
+        {group && <div className="group-doc-badge"><GroupIcon color="#fff" /></div>}
       </div>
       {
         onDocumentStarClick &&

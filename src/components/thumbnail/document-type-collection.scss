@@ -74,6 +74,7 @@ $section-padding: 6px;
     overflow-x: auto;
     overflow-y: hidden;
   }
+
   .list-item {
     position: relative;
     min-height: 120px;
@@ -93,12 +94,13 @@ $section-padding: 6px;
     }
 
     .scaled-list-item-container {
-      border-radius: 5px;
-      border: solid 1.5px $charcoal-light-1;
-      width: $list-item-width * $list-item-scale;
-      height: $list-item-height * $list-item-scale;
       background-color: white;
+      border: solid 1.5px $charcoal-light-1;
+      border-radius: 5px;
+      height: $list-item-height * $list-item-scale;
       padding: 1px;
+      position: relative;
+      width: $list-item-width * $list-item-scale;
 
       &.group {
         border-color: $classwork-purple;
@@ -111,6 +113,20 @@ $section-padding: 6px;
         width: $list-item-width;
         pointer-events: none;
       }
+
+      .group-doc-badge {
+        align-items: center;
+        background-color: $classwork-purple;
+        border-top-right-radius: 5px;
+        bottom: 0;
+        display: flex;
+        left: 0;
+        justify-content: center;
+        opacity: .75;
+        padding: 3px;
+        position: absolute;
+      }
+
       &.new-document-button {
         position: relative;
 
@@ -133,6 +149,7 @@ $section-padding: 6px;
         }
       }
     }
+
     .icon-holder {
       position: absolute;
       top: 5px;
@@ -153,6 +170,7 @@ $section-padding: 6px;
           fill: $problem-orange;
         }
       }
+
       &:hover .icon-star {
         fill: $problem-orange;
         opacity: 0.35;
@@ -165,6 +183,7 @@ $section-padding: 6px;
         opacity: .75;
         fill: $problem-orange;
       }
+
       .bookmark-label {
         position: absolute;
         top: -2px;
@@ -173,12 +192,14 @@ $section-padding: 6px;
         font-size: 5pt;
       }
     }
+
     .info {
       margin-top: $half-margin;
       text-align: center;
       font-size: 10px;
       width: 90px;
     }
+
     .footer {
       display: flex;
       align-items: center;
@@ -195,12 +216,14 @@ $section-padding: 6px;
           fill: rgba($charcoal, .6);
         }
       }
+
       .icon-delete-document:hover {
         background-color: rgba($charcoal, .25);
         path {
           fill: $charcoal;
         }
       }
+
       .icon-delete-document:active,
       .icon-delete-document.selected {
         background-color: rgba($charcoal, .45);
