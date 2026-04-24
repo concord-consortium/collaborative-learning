@@ -38,7 +38,7 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
         </span>
         <span className="history-entry-index">#{index}</span>
         <span className="history-entry-action" title={entry.action}>
-          {entry.modelActionKey}
+          {entry.isRevert ? "~" : ""}{entry.modelActionKey}
         </span>
         <span className="history-entry-patches" title="Number of patches">
           {patchCount}p
@@ -54,6 +54,12 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
           <div><strong>Model:</strong> {entry.model}</div>
           <div><strong>Action:</strong> {entry.action}</div>
           <div><strong>Previous Entry ID:</strong> {previousEntryId}</div>
+          {entry.isRevert && (
+            <>
+              <div><strong>Revert of:</strong> {entry.revertsEntryId}</div>
+              <div><strong>Triggering Batch:</strong> {entry.triggeringBatchIds.join(", ")}</div>
+            </>
+          )}
           <div><strong>Undoable:</strong> {entry.undoable ? "Yes" : "No"}</div>
           <div><strong>State:</strong> {entry.state}</div>
           <div><strong>Records:</strong> {entry.records.length}</div>
