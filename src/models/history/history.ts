@@ -39,7 +39,12 @@ export const HistoryEntry = types.model("HistoryEntry", {
   created: types.optional(types.Date, () => new Date()),
   records: types.array(TreePatchRecord),
   // History entries are marked as recording, until all records have been added
-  state: types.optional(types.enumeration("HistoryEntryState", ["recording", "complete"]), "recording")
+  state: types.optional(types.enumeration("HistoryEntryState", ["recording", "complete"]), "recording"),
+  // Revert-entry fields. Present (truthy / non-empty) only on entries
+  // created by rollbackLocalEntries to record a scope-conflict rollback.
+  isRevert: types.maybe(types.boolean),
+  revertsEntryId: types.maybe(types.string),
+  triggeringBatchIds: types.array(types.string)
 })
 .volatile(self => ({
   // The value of the map should be the name of the exchange. This is useful

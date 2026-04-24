@@ -209,7 +209,10 @@ const setFlagTrueEntry = {
   ],
   state: "complete",
   tree: "test",
-  undoable: true
+  undoable: true,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 it("records a tile change as one history event with one TreeRecordEntry", async () => {
@@ -257,7 +260,10 @@ const undoEntry = {
   ],
   state: "complete",
   tree: "manager",
-  undoable: false
+  undoable: false,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 it("can undo a tile change", async () => {
@@ -305,7 +311,10 @@ const redoEntry = {
   ],
   state: "complete",
   tree: "manager",
-  undoable: false
+  undoable: false,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 it("can redo a tile change", async () => {
@@ -366,7 +375,10 @@ it("records a async tile change as one history event with one TreeRecordEntry", 
       ],
       state: "complete",
       tree: "test",
-      undoable: true
+      undoable: true,
+      isRevert: undefined,
+      revertsEntryId: undefined,
+      triggeringBatchIds: []
     }
   ]);
 });
@@ -406,7 +418,10 @@ it("records an async tile change and an interleaved history event with 2 entries
       ],
       state: "complete",
       tree: "test",
-      undoable: true
+      undoable: true,
+      isRevert: undefined,
+      revertsEntryId: undefined,
+      triggeringBatchIds: []
     }
   ]);
 });
@@ -550,7 +565,10 @@ it("will print a warning and still add the action to the undo list if any child 
       ],
       state: "complete",
       tree: "test",
-      undoable: true
+      undoable: true,
+      isRevert: undefined,
+      revertsEntryId: undefined,
+      triggeringBatchIds: []
     }
   ]);
 });
@@ -622,7 +640,10 @@ it("records undoable actions that happen in the middle async actions which are n
       ],
       state: "complete",
       tree: "test",
-      undoable: false
+      undoable: false,
+      isRevert: undefined,
+      revertsEntryId: undefined,
+      triggeringBatchIds: []
     }
   ]);
 
@@ -692,7 +713,10 @@ const initialSharedModelUpdateEntry = {
   ],
   state: "complete",
   tree: "test",
-  undoable: true
+  undoable: true,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 it("records a shared model change as one history event with two TreeRecordEntries", async () => {
@@ -736,7 +760,10 @@ const undoSharedModelEntry = {
   ],
   state: "complete",
   tree: "manager",
-  undoable: false
+  undoable: false,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 it("can undo a shared model change", async () => {
@@ -792,7 +819,10 @@ const redoSharedModelEntry = {
   ],
   state: "complete",
   tree: "manager",
-  undoable: false
+  undoable: false,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 it("can redo a shared model change", async () => {
@@ -930,7 +960,10 @@ it("can track the addition of a new shared model", async () => {
       ],
       state: "complete",
       tree: "test",
-      undoable: true
+      undoable: true,
+      isRevert: undefined,
+      revertsEntryId: undefined,
+      triggeringBatchIds: []
     }
   ]);
 });
