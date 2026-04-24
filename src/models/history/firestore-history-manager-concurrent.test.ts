@@ -339,16 +339,23 @@ describe("FirestoreHistoryManagerConcurrent", () => {
 
       await historyManager.applyHistoryEntries([r1wrap]);
 
-      // Post-fix expectations:
-      // 1. L1 is rolled back (items[1].color back to white).
+      // Post-change expectations:
+      // 1. L1's forward patches are reverted (items[1].color back to white).
       // 2. R1 applied (items[0] "a" removed).
-      // 3. L1 removed from local history; R1 added.
+      // 3. L1 stays in local history; a revert entry is appended; then R1.
       // 4. L1 removed from upload queue.
       // 5. expectedRemoteHead advances to R1.
       expect(tree.items.map(i => i.id)).toEqual(["b", "c"]);
       expect(tree.items[0].color).toBe("white");
       expect(tree.items[1].color).toBe("white");
-      expect(manager.document.history.map(e => e.id)).toEqual(["R1"]);
+      const ids = manager.document.history.map(e => e.id);
+      expect(ids[0]).toBe("L1");
+      expect(ids[ids.length - 1]).toBe("R1");
+      expect(ids.length).toBe(3);
+      const revert = manager.document.history[1];
+      expect(revert.isRevert).toBe(true);
+      expect(revert.revertsEntryId).toBe("L1");
+      expect(revert.triggeringBatchIds.slice()).toEqual(["R1"]);
       expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual([]);
       expect(historyManager.expectedRemoteHead).toBe("R1");
     });
@@ -549,7 +556,18 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       // to "beta-remote".
       expect(tree.content.tileMap.get("A")?.content.value).toBe("alpha");
       expect(tree.content.tileMap.get("B")?.content.value).toBe("beta-remote");
-      expect(manager.document.history.map(e => e.id)).toEqual(["L1", "R1"]);
+      // History: [L1, L2, L3, revert(L3), revert(L2), R1] — originals stay
+      // in place, reverts appear in newest-first order, then R1.
+      const ids = manager.document.history.map(e => e.id);
+      expect(ids[0]).toBe("L1");
+      expect(ids[1]).toBe("L2");
+      expect(ids[2]).toBe("L3");
+      expect(ids[ids.length - 1]).toBe("R1");
+      expect(ids.length).toBe(6);
+      const reverts = manager.document.history.filter(e => e.isRevert);
+      expect(reverts.map(e => e.revertsEntryId)).toEqual(["L3", "L2"]);
+      expect(reverts[0].triggeringBatchIds.slice()).toEqual(["R1"]);
+      expect(reverts[1].triggeringBatchIds.slice()).toEqual(["R1"]);
       expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual(["L1"]);
       expect(historyManager.expectedRemoteHead).toBe("R1");
     });
@@ -578,9 +596,14 @@ describe("FirestoreHistoryManagerConcurrent", () => {
 
       await historyManager.applyHistoryEntries([r1wrap]);
 
-      // L1 rolled back; R1 applied.
+      // L1 rolled back; R1 applied. History: [L1, revert(L1), R1].
       expect(tree.content.docName).toBe("remote-name");
-      expect(manager.document.history.map(e => e.id)).toEqual(["R1"]);
+      const ids = manager.document.history.map(e => e.id);
+      expect(ids[0]).toBe("L1");
+      expect(ids[ids.length - 1]).toBe("R1");
+      expect(ids.length).toBe(3);
+      expect(manager.document.history[1].isRevert).toBe(true);
+      expect(manager.document.history[1].revertsEntryId).toBe("L1");
       expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual([]);
       expect(historyManager.expectedRemoteHead).toBe("R1");
     });

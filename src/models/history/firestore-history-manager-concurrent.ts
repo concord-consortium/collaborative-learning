@@ -7,6 +7,7 @@ import { CDocumentType, FAKE_EXCHANGE_ID, FAKE_HISTORY_ENTRY_ID } from "./tree-m
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType, HistoryOperation } from "./history";
 import { FirestoreHistoryManager, IFirestoreHistoryManagerArgs } from "./firestore-history-manager";
 import { partitionLocalEntriesForMerge } from "./entry-scopes";
+import { buildRevertEntrySnapshot } from "./revert-entry";
 
 /**
  * Thrown inside the upload transaction when the remote chain's head
@@ -367,29 +368,37 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   }
 
   /**
-   * Roll back the last `count` entries of the local history by applying
-   * their inverse patches (in reverse order). Also drops the
-   * corresponding entries from the upload queue by id.
+   * Build and apply revert entries for the last `count` entries in the
+   * upload queue. The originals stay in `document.history`; revert
+   * entries are appended in newest-first order. Originals are removed
+   * from the upload queue and from the undo store (their effects have
+   * been reverted, so they are no longer user-undoable).
    *
-   * Used after fork detection on the receive side. The caller has
-   * verified these trailing entries are local-uncommitted (they live
-   * in document.history after expectedRemoteHead) before invoking.
+   * Safe under the current scope-disjoint merge rule: the originals'
+   * inverse patches do not touch paths modified by entries applied
+   * after them (verified by the batch-1 scope check for remote entries
+   * between original-apply and rollback). Phase 2 will rebuild records
+   * via live MST recording to drop that assumption.
    */
-  async rollbackLocalEntries(count: number): Promise<void> {
+  async rollbackLocalEntries(count: number, triggeringBatchIds: string[]): Promise<void> {
     if (count <= 0) return;
     const { treeManager } = this;
-    const history = treeManager.document.history;
-    const entriesToRollback = history.slice(history.length - count).reverse();
-    const rolledBackIds = new Set(entriesToRollback.map(e => e.id));
+
+    const queue = this.completedHistoryEntryQueue;
+    const originals = queue.slice(queue.length - count);
+    const originalIds = new Set(originals.map(e => e.id));
+
+    // Newest-first for both the aggregate inverse-patch application
+    // and the order of revert entries appended to history.
+    const originalsNewestFirst = [...originals].reverse();
 
     const trees = Object.values(treeManager.trees);
     await Promise.all(trees.map(tree =>
       tree.startApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID)));
 
-    // Each entry's inverse patches, grouped by tree, applied newest-first.
     const treePatches: Record<string, IJsonPatch[]> = {};
     Object.keys(treeManager.trees).forEach(treeId => { treePatches[treeId] = []; });
-    for (const entry of entriesToRollback) {
+    for (const entry of originalsNewestFirst) {
       const records = [...entry.records].reverse();
       for (const record of records) {
         const patches = treePatches[record.tree];
@@ -406,51 +415,44 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     await Promise.all(trees.map(tree =>
       tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID)));
 
-    // Remove the rolled-back entries from local history and upload queue.
-    treeManager.removeLastHistoryEntries(count);
-    this.completedHistoryEntryQueue =
-      this.completedHistoryEntryQueue.filter(e => !rolledBackIds.has(e.id));
+    // Append one revert entry per original in newest-first order.
+    for (const original of originalsNewestFirst) {
+      const revertSnapshot = buildRevertEntrySnapshot(getSnapshot(original), triggeringBatchIds);
+      const revertEntry = HistoryEntry.create(revertSnapshot);
+      treeManager.addRevertEntryAfterApplying(revertEntry);
+    }
+
+    // Remove originals from the upload queue and undo store. Originals
+    // stay in document.history.
+    this.completedHistoryEntryQueue = queue.filter(e => !originalIds.has(e.id));
+    treeManager.undoStore.removeHistoryEntries(originalIds);
   }
 
   /**
-   * Check whether the incoming remote entries continue from our local
-   * head. If not, we've forked: use scope-based partitioning to decide
-   * which local uncommitted entries can be kept alongside the incoming
-   * remote entries, and roll back only the conflicting suffix. The
-   * surviving entries then coexist with the remote entries, which are
-   * applied on top during normal application.
+   * Decide whether any pending local entries conflict with an incoming
+   * batch of remote entries. Local-uncommitted means "in the upload
+   * queue," not "after expectedRemoteHead in history" — after a partial
+   * fork resolution, remote entries can be interleaved with pending
+   * locals in application order, so the queue is the reliable source.
    *
-   * This is the single place fork resolution happens on the receive
-   * side.
+   * If the queue is empty there is nothing to check. Otherwise run
+   * `partitionLocalEntriesForMerge` against the queue; if any local
+   * entry conflicts, rollback from that entry onward and record the
+   * rollback with the incoming batch's ids.
    */
   async detectAndResolveFork(newWrapperDocs: IFirestoreHistoryEntryDoc[]): Promise<void> {
     if (newWrapperDocs.length === 0) return;
+    if (this.completedHistoryEntryQueue.length === 0) return;
 
-    const history = this.treeManager.document.history;
-    const localHeadId = history.length > 0 ? history[history.length - 1].id : null;
-    const firstIncomingPrev = newWrapperDocs[0].previousEntryId ?? null;
-
-    if (firstIncomingPrev === localHeadId) {
-      // Not forked — the incoming stream continues from our head.
-      return;
-    }
-
-    // Forked. Everything after expectedRemoteHead in our local
-    // history is local-uncommitted. Decide which of those entries
-    // can be kept alongside the incoming remote entries based on
-    // scope disjointness, and which must be rolled back.
-    const headIndex = this.expectedRemoteHead
-      ? history.findIndex(e => e.id === this.expectedRemoteHead)
-      : -1;
-    const localUncommitted = history.slice(headIndex + 1);
-    const localSnapshots = localUncommitted.map(e => getSnapshot(e));
+    const localSnapshots = this.completedHistoryEntryQueue.map(e => getSnapshot(e));
     const incomingSnapshots = newWrapperDocs.map(w => w.entry);
+    const incomingIds = newWrapperDocs.map(w => w.entry.id);
 
     const { rollbackCount } =
       partitionLocalEntriesForMerge(localSnapshots, incomingSnapshots);
 
     if (rollbackCount > 0) {
-      await this.rollbackLocalEntries(rollbackCount);
+      await this.rollbackLocalEntries(rollbackCount, incomingIds);
     }
   }
 
