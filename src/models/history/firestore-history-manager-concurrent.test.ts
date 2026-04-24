@@ -607,6 +607,75 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual([]);
       expect(historyManager.expectedRemoteHead).toBe("R1");
     });
+
+    it("runs fork detection on a subsequent batch when the queue is non-empty", async () => {
+      // Script-5 regression. Under the old early-return, a non-conflicting
+      // batch 1 would update the local head to the remote tail, and then
+      // batch 2 would short-circuit the fork check — missing a scope
+      // conflict with pending local entries.
+      getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
+      const { manager, tree, historyManager } = await setupDocMergeManager();
+
+      applyPatch(tree, [
+        { op: "add", path: "/content/tileMap/A", value: { id: "A", content: { value: "initial" } } },
+        { op: "add", path: "/content/tileMap/B", value: { id: "B", content: { value: "initial" } } },
+      ]);
+
+      // Local L1 edits tile A (scope tile:A).
+      const l1Patches: IJsonPatch[] = [
+        { op: "replace", path: "/content/tileMap/A/content/value", value: "local-A" }
+      ];
+      const l1Inverse: IJsonPatch[] = [
+        { op: "replace", path: "/content/tileMap/A/content/value", value: "initial" }
+      ];
+      applyPatch(tree, l1Patches);
+      const l1Entry = HistoryEntry.create(makeEntrySnapshot("L1", "main", l1Patches, l1Inverse));
+      manager.addHistoryEntryAfterApplying(l1Entry);
+      historyManager.completedHistoryEntryQueue.push(l1Entry);
+
+      // Batch 1: remote R1 on tile B (disjoint from L1).
+      const r1Snapshot = makeEntrySnapshot(
+        "R1", "main",
+        [{ op: "replace", path: "/content/tileMap/B/content/value", value: "remote-B" }],
+        [{ op: "replace", path: "/content/tileMap/B/content/value", value: "initial" }],
+      );
+      await historyManager.applyHistoryEntries([makeWrapperDoc(1, "r0", r1Snapshot)]);
+
+      // Sanity check batch 1 state.
+      expect(historyManager.expectedRemoteHead).toBe("R1");
+      expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual(["L1"]);
+      expect(manager.document.history.map(e => e.id)).toEqual(["L1", "R1"]);
+
+      // Batch 2: remote R2 on tile A (CONFLICTS with pending L1).
+      // Its previousEntryId is R1 — matches local head — so the old
+      // implementation would short-circuit fork detection here.
+      const r2Snapshot = makeEntrySnapshot(
+        "R2", "main",
+        [{ op: "replace", path: "/content/tileMap/A/content/value", value: "remote-A" }],
+        [{ op: "replace", path: "/content/tileMap/A/content/value", value: "local-A" }],
+      );
+      await historyManager.applyHistoryEntries([makeWrapperDoc(2, "R1", r2Snapshot)]);
+
+      // L1 must now be rolled back. Tree reflects remote-A (not local-A).
+      expect(tree.content.tileMap.get("A")?.content.value).toBe("remote-A");
+      expect(tree.content.tileMap.get("B")?.content.value).toBe("remote-B");
+
+      // Queue drained; expectedRemoteHead at R2.
+      expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual([]);
+      expect(historyManager.expectedRemoteHead).toBe("R2");
+
+      // History: [L1, R1, revert(L1), R2]. L1 still present; revert
+      // entry references L1 and carries R2 as the triggering id.
+      const ids = manager.document.history.map(e => e.id);
+      expect(ids[0]).toBe("L1");
+      expect(ids[1]).toBe("R1");
+      expect(ids[ids.length - 1]).toBe("R2");
+      expect(ids.length).toBe(4);
+      const revert = manager.document.history[2];
+      expect(revert.isRevert).toBe(true);
+      expect(revert.revertsEntryId).toBe("L1");
+      expect(revert.triggeringBatchIds.slice()).toEqual(["R2"]);
+    });
   });
 
   describe("applyHistoryEntries — upload retrigger after merge", () => {
