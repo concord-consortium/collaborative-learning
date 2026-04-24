@@ -12,23 +12,96 @@ merged state is inconsistent — this is what we're watching for.
 
 ## 1. Cross-scope reference drift (drawing → variable)
 
-**Setup:** Group document with a drawing tile and a text tile that share variables
-(shared variables shared model). Text tile has a variable V1. Drawing tile is empty.
+**Setup:** Group document. Both users in the same group, same document.
+
+**Note on variable deletion:** CLUE's UI has no direct path to destroy a variable
+from SharedVariables. However, when a drawing tile or diagram tile **undoes** a
+new-variable action, the variable IS removed from the shared model. (The text
+tile's new-variable undo does NOT remove the variable — only drawing and diagram
+do.) This script uses that undo as a proxy for true deletion.
 
 **Script:**
-1. Pause user A's uploads.
-2. User A: in the drawing tile, insert a reference to variable V1.
-3. User B: in the text tile, delete variable V1.
-4. Resume user A's uploads.
+1. User A: add a diagram tile and a drawing tile, then create variable V1 via
+   the diagram tile's new-variable button. V1 is now in the SharedVariables
+   shared model and both users see it.
+2. Pause user B's uploads.
+3. User B: in the drawing tile, insert a reference to V1 (drawing tile's
+   insert-variable button).
+4. User A: undo the last action (the new-variable creation). This destroys V1
+   from the shared model.
+5. Resume user B's uploads.
 
-**Expected outcome (merge):** Drawing tile's reference addition is preserved (it
-touches `tile:<drawing>`), text tile's variable deletion is preserved (it touches
-`shared:<SharedVariables>` and `tile:<text>`). Scopes are disjoint.
+**Expected outcome (merge):** User A's destruction of V1 touches
+`shared:<SharedVariables>`. User B's insertion of the drawing chip touches
+`tile:<drawing>`. Scopes are disjoint, so the merge keeps both changes.
 
 **Bad-state signal:** Drawing tile throws when rendering (unresolved reference),
 or shows an empty/placeholder variable that should not exist.
 
-## 2. Cross-scope reference drift (graph → dataset attribute)
+**Observed results (2026-04-24):**
+
+- **User B, before resume:** User B receives and applies user A's variable-delete
+  entry while user B's drawing still holds a chip referencing V1. From the UI the
+  document looks fine. The browser console shows MST warnings about dangling
+  references.
+- **User B, at resume:** User B's queued history entry (adding the chip to the
+  drawing) uploads successfully — scopes were disjoint from user A's delete, so
+  the merge allowed it to survive.
+- **User A, after user B resumes:** User A receives and applies user B's chip-add
+  entry. The drawing does not show the variable (V1 no longer exists). Similar
+  MST warnings appear in user A's console.
+
+So the bad-state signal is visible only via console MST warnings, not in the UI.
+In principle, `updateAfterSharedModelChanges` on the drawing tile could detect
+the dangling reference and prune its chip — but it currently does not.
+
+## 2. Cross-scope reference drift (diagram → variable)
+
+**Setup:** Group document. Both users in the same group, same document. Note: a
+document can only have one diagram tile, so this script uses the drawing tile's
+new-variable + undo as the destroy-V1 mechanism (same proxy as script 1).
+
+**Script:**
+1. User A: add a diagram tile and a drawing tile, then create variable V1 via
+   the drawing tile's new-variable button. V1 is now in the SharedVariables
+   shared model and both users see it.
+2. Pause user B's uploads.
+3. User B: in the diagram tile, insert V1 (diagram tile's insert-variable
+   button, which adds a diagram node whose `variable` field references V1).
+4. User A: undo the last action (the drawing tile's new-variable). This
+   destroys V1 from the shared model.
+5. Resume user B's uploads.
+
+**Expected outcome (merge):** User A's destruction of V1 touches
+`shared:<SharedVariables>`. User B's insertion of the diagram node touches
+`tile:<diagram>`. Scopes are disjoint, so the merge keeps both changes.
+
+**Bad-state signal:** Diagram tile fails to render because the node's variable
+reference no longer resolves, crashing the tile or the document.
+
+**Observed results (2026-04-24):**
+
+Reproduced. User B's document crashed with an MST unresolved-reference error:
+
+```
+[mobx-state-tree] Failed to resolve reference 'JhgtQZfARKuPI5re' to type
+'Variable' (from node: /content/tileMap/apJHGfxcrTY1t-jQ/content/root/nodes/
+Wxse_90_H0If0WNG/variable)
+```
+
+Unlike the drawing tile (script 1), the diagram tile models the variable
+association as a real `types.reference`. MST resolves strict references at
+property-access time; if the target `Variable` node is absent, resolution
+throws. In the drawing tile it's just a string id that gets looked up lazily
+at render time, so the failure mode is a console warning, not a crash.
+
+- Diagram: `node_modules/@concord-consortium/diagram-view/dist/esm/diagram/models/dq-node.js:10-14` —
+  `DQNode` declares `variable: types.reference(Variable)` (no `safeReference`,
+  no `maybe`).
+- Drawing: [src/plugins/shared-variables/drawing/variable-object.tsx:24-28](../../src/plugins/shared-variables/drawing/variable-object.tsx#L24-L28) —
+  `VariableChipObject` declares `variableId: types.string`.
+
+## 3. Cross-scope reference drift (graph → dataset attribute)
 
 **Setup:** Group document with a table tile and a linked graph tile.
 
@@ -45,7 +118,7 @@ disjoint scopes (`tile:<graph>` vs `shared:<dataset>`). Merge proceeds.
 **Bad-state signal:** Graph throws an exception rendering an axis bound to a
 missing attribute id, or silently draws nothing.
 
-## 3. Schema-assumption drift (table column type)
+## 4. Schema-assumption drift (table column type)
 
 **Setup:** Group document with a table tile; one column currently typed as number.
 
@@ -62,7 +135,7 @@ type change (`shared:<dataset>`) are disjoint. Merge proceeds.
 **Bad-state signal:** Table renders cells with the numeric formatting applied to
 string values, or throws when formatting.
 
-## 4. Computed-state drift (graph axis bounds vs dataset rows)
+## 5. Computed-state drift (graph axis bounds vs dataset rows)
 
 **Setup:** Group document with a table tile and a linked graph tile.
 
@@ -79,7 +152,7 @@ change (`shared:<dataset>`) are disjoint. Merge proceeds.
 more of a "stale state" than a crash — note whether it confuses users rather than
 breaks the app.
 
-## 5. Stale shared-model snapshot in tile state (data card selection)
+## 6. Stale shared-model snapshot in tile state (data card selection)
 
 **Setup:** Group document with a data-card tile.
 
@@ -105,3 +178,42 @@ For each script, record in the PR or follow-up ticket:
 Scripts where the bad-state signal appears are candidates for GD-10 or GD-11
 follow-up work. Scripts where nothing bad happens in practice validate that the
 scope-based merge is safe enough for this feature.
+
+## Future idea: opt-in coupled scopes per tile / shared-model type
+
+The scripts above show that a tile can end up in an inconsistent state when a
+shared model it depends on is mutated by another user. The current scope-based
+merge treats these as disjoint because the patches don't touch the same path.
+
+**Idea:** Add a per-(tile type, shared-model type) coupling setting. If the
+pair (tile X, shared-model Y) is declared coupled, every history entry
+produced by a tile of type X gets an additional `shared:<smId>` scope for
+each shared model of type Y the tile is attached to (or, more conservatively,
+every shared model of type Y in the document).
+
+**Effect on script 1:** A local drawing edit carries `tile:<drawing>` *plus*
+the extra `shared:<SV>`. The remote destroy-V1 carries `shared:<SV>`. Scopes
+now overlap → conflict → the drawing edit rolls back instead of landing on
+top of a destroyed variable.
+
+**Why this shape:** it's targeted. Only the known-risky tile ↔ shared-model
+pairs expand the conflict surface; everything else keeps the benefit of
+disjoint-scope merge. Users keep most of their concurrent work — only the
+edits genuinely at risk of producing inconsistent state get reverted.
+
+**Candidate couplings (from the scripts above):**
+- (Drawing, SharedVariables) — script 1
+- (Diagram, SharedVariables) — script 2
+- (Graph, SharedDataSet) — scripts 3, 5
+- (Table, SharedDataSet) — script 4
+- (DataCard, SharedDataSet) — script 6
+
+**Open questions:**
+- Scope computation today is a pure path→string map. Adding coupling means
+  passing the tile type and the document's shared-model registry into
+  `getEntryScopeKeys` (or a sibling function).
+- Tight version: only shared models in the tile's own `sharedModels()` list.
+  Looser version: every shared model of the matching type in the document.
+  The looser version catches more cases but reverts more aggressively.
+- Declarative placement: the coupling could live in tile-plugin registration
+  (the same place toolbar buttons and shared-model types are registered).
