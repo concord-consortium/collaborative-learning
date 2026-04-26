@@ -368,17 +368,20 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   }
 
   /**
-   * Build and apply revert entries for the last `count` entries in the
-   * upload queue. The originals stay in `document.history`; revert
-   * entries are appended in newest-first order. Originals are removed
-   * from the upload queue and from the undo store (their effects have
-   * been reverted, so they are no longer user-undoable).
+   * Roll back the last `count` entries in the upload queue. Their
+   * inverse patches are aggregated into a single tree-apply call to
+   * mutate document state. Then one revert entry is appended to
+   * `document.history` per original, in newest-first order, as a
+   * record of the rollback — these revert entries are currently for
+   * debugging only and are not themselves applied to the document.
+   * The originals stay in history and are removed from the upload
+   * queue and the undo store (their effects have been reverted, so
+   * they are no longer user-undoable).
    *
    * Safe under the current scope-disjoint merge rule: the originals'
    * inverse patches do not touch paths modified by entries applied
    * after them (verified by the batch-1 scope check for remote entries
-   * between original-apply and rollback). Phase 2 will rebuild records
-   * via live MST recording to drop that assumption.
+   * between original-apply and rollback).
    */
   async rollbackLocalEntries(count: number, triggeringBatchIds: string[]): Promise<void> {
     if (count <= 0) return;
