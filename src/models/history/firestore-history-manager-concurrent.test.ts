@@ -691,10 +691,13 @@ describe("FirestoreHistoryManagerConcurrent", () => {
     });
 
     it("does not rollback when the upload queue is empty, even if previousEntryId mismatches", async () => {
-      // The empty-queue guard in detectAndResolveFork short-circuits before
-      // partitionLocalEntriesForMerge runs. Even though R1's previousEntryId
-      // does not match expectedRemoteHead ("r0"), there are no pending local
-      // entries to roll back, so the remote entry is applied normally.
+      // Documents the empty-queue end state for detectAndResolveFork: when
+      // there are no pending local entries, an incoming batch is applied
+      // normally regardless of previousEntryId. NOTE: this test does not
+      // uniquely verify the early-return guard itself — partitionLocalEntriesForMerge
+      // also returns rollbackCount: 0 for an empty local array, so removing
+      // the guard would not break this test. The guard is an optimization;
+      // this test pins the behavior the guard exists to enable.
       getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
       const { manager, tree, historyManager } = await setupDocMergeManager();
       expect(historyManager.expectedRemoteHead).toBe("r0");
