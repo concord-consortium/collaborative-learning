@@ -38,7 +38,7 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
         </span>
         <span className="history-entry-index">#{index}</span>
         <span className="history-entry-action" title={entry.action}>
-          {entry.isRevert ? "~" : ""}{entry.modelActionKey}
+          {entry.isRevert ? "~ " : ""}{entry.modelActionKey}
         </span>
         <span className="history-entry-patches" title="Number of patches">
           {patchCount}p
