@@ -523,7 +523,19 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       if (!existingIds.has(entry.id)) {
         entrySnapshots.push(entry);
         const wrap = wrapperById.get(entry.id);
-        if (wrap) newWrapperDocs.push(wrap);
+        if (wrap) {
+          newWrapperDocs.push(wrap);
+        } else {
+          // Invariant violation. Fork detection will miss this entry's
+          // scope contribution and triggeringBatchIds, so any conflict
+          // it would have surfaced is silently lost. We still apply the
+          // entry's patches via entrySnapshots above.
+          console.warn(
+            `[FirestoreHistoryManagerConcurrent] no wrapper for entry ${entry.id}; ` +
+            `fork detection will not see it. wrapperDocs ids: ` +
+            `${wrapperDocs.map(w => w.entry.id).join(", ")}`
+          );
+        }
       }
     }
 
