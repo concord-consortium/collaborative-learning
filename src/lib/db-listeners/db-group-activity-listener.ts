@@ -35,6 +35,7 @@ export class DBGroupActivityListener extends BaseListener {
 
   private handleUsers = (snapshot: firebase.database.DataSnapshot) => {
     const { groupActivity } = this.db.stores;
+    this.debugLogSnapshot("#handleUsers", snapshot);
     const value = snapshot.val() || {};
     const seen = new Set<string>();
     Object.keys(value).forEach(userId => {
