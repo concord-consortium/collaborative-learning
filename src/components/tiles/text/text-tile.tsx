@@ -140,7 +140,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private isHandlingUserChange = false;
   private highlightBoxesCache: Map<string, IHighlightBox> = new Map();
   private variableBoxesCache: Map<string, IHighlightBox> = new Map();
-  private highlightBoxesCacheTick = observable({ count: 0 });
+  private chipBoxesCacheTick = observable({ count: 0 });
   private previousVariableIds: Set<string> = new Set();
 
   static contextType = ContainerContext;
@@ -226,7 +226,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
         // Track the tick so MobX observers re-run when the cache is written.
         // eslint-disable-next-line unused-imports/no-unused-vars
-        const _tick = this.highlightBoxesCacheTick.count;
+        const _tick = this.chipBoxesCacheTick.count;
         if (objectType === kHighlightFormat) {
           const box = this.highlightBoxesCache.get(objectId);
           if (box) return box;
@@ -241,7 +241,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         // and then offset should be the center of the edge closes to the target
         // Track the tick so MobX observers re-run when the cache is written.
         // eslint-disable-next-line unused-imports/no-unused-vars
-        const _tick = this.highlightBoxesCacheTick.count;
+        const _tick = this.chipBoxesCacheTick.count;
         const offsets = OffsetModel.create({});
         const box = objectType === kHighlightFormat ? this.highlightBoxesCache.get(objectId)
                   : objectType === kVariableFormat ? this.variableBoxesCache.get(objectId)
@@ -489,7 +489,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       if (!existing) return;
       cache.delete(id);
     }
-    runInAction(() => { this.highlightBoxesCacheTick.count++; });
+    runInAction(() => { this.chipBoxesCacheTick.count++; });
   }
 
   private handleUpdateHighlightBoxCache = (id: string, box: IHighlightBox) => {

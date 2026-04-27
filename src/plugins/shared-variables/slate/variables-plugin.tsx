@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useRef } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import classNames from "classnames/dedupe";
 
 import {
@@ -152,7 +152,10 @@ export const VariableComponent = observer(function({ attributes, children, eleme
   const isHighlighted = useSelected();
   const isSerializing = useSerializing();
   const registryFn = useContext(VariableRegistryContext);
-  const chipRef = useRef<HTMLSpanElement>(null);
+  // useState + callback ref so the effect in useChipMeasurement re-runs when the chip
+  // element appears — the chip is conditionally rendered (only when the variable
+  // resolves), and a useRef wouldn't trigger a re-run when `.current` changes.
+  const [chipEl, setChipEl] = useState<HTMLSpanElement | null>(null);
 
   const reference = isVariableElement(element) ? element.reference : undefined;
 
@@ -160,13 +163,12 @@ export const VariableComponent = observer(function({ attributes, children, eleme
   // measurements so the registry only sees real layout. useChipMeasurement handles
   // the retry/observer scaffolding.
   const measure = useCallback(() => {
-    const el = chipRef.current;
-    if (!el || !registryFn || !reference) return;
-    const box = getChipBoxInWrapperCoords(el, kVariableChipOffset);
+    if (!chipEl || !registryFn || !reference) return;
+    const box = getChipBoxInWrapperCoords(chipEl, kVariableChipOffset);
     if (box) registryFn(reference, box);
-  }, [reference, registryFn]);
+  }, [chipEl, reference, registryFn]);
 
-  useChipMeasurement(chipRef, measure);
+  useChipMeasurement(chipEl, measure);
 
   if (!isVariableElement(element)) return null;
 
@@ -178,7 +180,7 @@ export const VariableComponent = observer(function({ attributes, children, eleme
     <span className={classes} {...attributes} contentEditable={false}>
       {children}
       { variable ?
-        <span ref={chipRef} className="variable-chip-measure-wrapper">
+        <span ref={setChipEl} className="variable-chip-measure-wrapper">
           <VariableChip variable={variable} className={selectedClass} />
         </span> :
         `invalid reference: ${element.reference}`

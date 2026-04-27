@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useRef } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import classNames from "classnames/dedupe";
 import { BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
   RenderElementProps, useSelected } from "@concord-consortium/slate-editor";
@@ -58,7 +58,9 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
   const highlightPlugin = plugins[kHighlightTextPluginName] as HighlightsPlugin|undefined;
   const isSelected = useSelected();
   const highlightRegistryContextFn = useContext(HighlightRegistryContext);
-  const chipRef = useRef<HTMLSpanElement>(null);
+  // useState + callback ref so the effect in useChipMeasurement re-runs when the chip
+  // element actually appears (a useRef wouldn't, since the ref object is stable).
+  const [chipEl, setChipEl] = useState<HTMLSpanElement | null>(null);
   const editorRevisionContext = useContext(HighlightRevisionContext);
 
   const { highlightId } = element as HighlightElement;
@@ -67,13 +69,12 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
 
   // Memoize getHighlightChipBoundingBox so it can be used in the dependency array
   const getHighlightChipBoundingBox = useCallback(() => {
-    const el = chipRef.current;
-    if (!el || !highlightRegistryContextFn) return;
-    const box = getChipBoxInWrapperCoords(el, kHighlightOffset);
+    if (!chipEl || !highlightRegistryContextFn) return;
+    const box = getChipBoxInWrapperCoords(chipEl, kHighlightOffset);
     if (box) highlightRegistryContextFn(highlightId, box);
-  }, [highlightId, highlightRegistryContextFn]);
+  }, [chipEl, highlightId, highlightRegistryContextFn]);
 
-  useChipMeasurement(chipRef, getHighlightChipBoundingBox, editorRevisionContext);
+  useChipMeasurement(chipEl, getHighlightChipBoundingBox, editorRevisionContext);
 
   if (!isHighlightElement(element)) return null;
 
@@ -81,7 +82,7 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
 
   return (
     <span className={classes} {...attributes} contentEditable={false}>
-      <span ref={chipRef} className={classNames("highlight-chip", {"slate-selected": highlightEntry && isSelected})} >
+      <span ref={setChipEl} className={classNames("highlight-chip", {"slate-selected": highlightEntry && isSelected})} >
         {children}
         {textToHighlight}
       </span>
