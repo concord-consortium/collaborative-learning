@@ -31,7 +31,7 @@ export const GroupActivityModel = types
   }))
   .actions(self => ({
     setActivity(snapshot: GroupUserActivitySnapshot) {
-      self.activities.set(snapshot.userId, GroupUserActivity.create(snapshot));
+      self.activities.set(snapshot.userId, snapshot);
     },
     removeActivity(userId: string) {
       self.activities.delete(userId);
