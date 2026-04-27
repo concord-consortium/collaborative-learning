@@ -30,13 +30,13 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   uploadInProgress = false;
   /**
    * The id of the entry we believe is currently the last entry on the
-   * remote chain. `null` means "no remote entries yet." Used for
-   * fork detection:
-   *   - Receive side: if an incoming remote entry's previousEntryId
-   *     differs from the local head (after dedup), we've forked.
-   *   - Send side: if metadata.lastHistoryEntry.id differs from this
-   *     during the upload transaction, someone else committed entries
-   *     we don't know about; we abort the upload.
+   * remote chain. `null` means "no remote entries yet." Used on the
+   * send side for fork detection: if metadata.lastHistoryEntry.id
+   * differs from this during the upload transaction, someone else
+   * committed entries we don't know about; we abort the upload.
+   * Receive-side fork detection uses the upload queue (see
+   * `detectAndResolveFork`); this value is advanced after each
+   * successful apply but not consulted there.
    * Updated after successful remote application and after successful
    * upload.
    */
@@ -187,9 +187,11 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // history with the remote history, discarding any local entries that
     // haven't been uploaded yet. Instead doApplyHistoryEntries skips entries
     // already in local history, and — via detectAndResolveFork →
-    // rollbackLocalEntries — rolls back local-uncommitted entries first when
-    // the incoming stream has forked away from expectedRemoteHead. After
-    // that, local history order matches remote order.
+    // rollbackLocalEntries — rolls back local-uncommitted entries whose
+    // scope conflicts with the incoming batch. Surviving local entries
+    // stay in place; remote entries (and any revert entries from the
+    // rollback) are appended in application order, which may diverge
+    // from the eventual Firestore chain order.
     //
     // FIXME: applyHistoryEntries is fire-and-forget here. It can reject
     // (e.g., patch application or rollback failures) and those rejections
@@ -576,10 +578,10 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       this.setExpectedRemoteHead(lastIncoming.id);
     }
 
-    // If any local entries survived as uncommitted queue items, they
-    // now need to be re-uploaded with the newly advanced remote head
-    // as their previousEntryId. Full-rollback cases cleared the
-    // queue, so this is a no-op in the non-merge path.
+    // Surviving uncommitted entries (none rolled back, or only some
+    // rolled back) need to chain off the new head as their
+    // previousEntryId. When all locals were rolled back, the queue is
+    // empty and this is a no-op.
     if (this.completedHistoryEntryQueue.length > 0) {
       this.uploadQueuedHistoryEntries();
     }
