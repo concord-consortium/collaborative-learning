@@ -342,6 +342,10 @@ export class Firebase {
     return `${this.getGroupPath(user, groupId)}/users/${userId || user.id}`;
   }
 
+  public getGroupUserActivityPath(user: UserModelType, groupId: string, userId?: string) {
+    return `${this.getGroupUserPath(user, groupId, userId)}/activity`;
+  }
+
   // Published section [deprecated] and problem document metadata
   public getProblemPublicationsPath(user: UserModelType) {
     return `${this.getOfferingPath(user)}/publications`;

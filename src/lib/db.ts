@@ -390,6 +390,38 @@ export class DB {
     }
   }
 
+  public setGroupUserActivity(activity: { documentKey: string; focus?: { tileIds: string[] } }) {
+    const { user } = this.stores;
+    if (!user.currentGroupId) return Promise.resolve();
+    const ref = this.firebase.ref(
+      this.firebase.getGroupUserActivityPath(user, user.currentGroupId)
+    );
+    return ref.set({
+      ...activity,
+      updatedAt: firebase.database.ServerValue.TIMESTAMP
+    });
+  }
+
+  public clearGroupUserActivity() {
+    const { user } = this.stores;
+    if (!user.currentGroupId) return Promise.resolve();
+    const ref = this.firebase.ref(
+      this.firebase.getGroupUserActivityPath(user, user.currentGroupId)
+    );
+    return ref.remove();
+  }
+
+  public setGroupUserActivityOnDisconnect() {
+    const { user } = this.stores;
+    if (!user.currentGroupId) return null;
+    const ref = this.firebase.ref(
+      this.firebase.getGroupUserActivityPath(user, user.currentGroupId)
+    );
+    const handler = ref.onDisconnect();
+    handler.remove();
+    return handler;
+  }
+
   public async guaranteeOpenDefaultDocument(documentType: typeof ProblemDocument | typeof PersonalDocument,
                                             defaultContent?: DocumentContentModelType) {
     const {documents} = this.stores;
