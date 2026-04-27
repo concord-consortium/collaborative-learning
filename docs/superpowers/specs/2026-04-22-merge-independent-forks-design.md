@@ -170,6 +170,32 @@ Extend existing fork-detection patterns. The current test at `firestore-history-
 
 A new doc `docs/group-docs/clue-316-manual-test-scripts.md` (in this branch, not the planning worktree) capturing pause/resume scripts for each of the inconsistency-risk cases. Format per script: setup steps, action sequence using the history-view debug panel, expected mergeable outcome, what "bad state" would look like. These scripts are inputs for triage — they tell us which of the theoretical cases actually misbehave in practice.
 
+## Coupling to CLUE document layout
+
+The `entry-scopes` module derives scope keys by pattern-matching JSON-patch
+paths against `/content/tileMap/<id>` and `/content/sharedModelMap/<id>`
+([entry-scopes.ts:10-11](../../../src/models/history/entry-scopes.ts#L10-L11)).
+This makes the merge logic dependent on CLUE's specific document structure —
+any other MST-based host that wanted to reuse the history system would need
+a different `scopeKeyForPatchPath` implementation matched to its own paths.
+
+This is new coupling introduced by this work, but the history system was
+already partially CLUE-coupled before this branch:
+
+- [tree-monitor.ts:118](../../../src/models/history/tree-monitor.ts#L118)
+  pattern-matches `/content/sharedModelMap/[^/]+/` to recognize
+  shared-model patches when computing per-tile updates.
+- [tree.ts:66,90](../../../src/models/history/tree.ts#L66) accesses
+  `document.sharedModelMap` directly for the same purpose.
+
+The new coupling is concentrated in one file (`entry-scopes.ts`) and is
+intentional for now: scope-based merging needs *some* understanding of
+"what owns this part of the document," and CLUE-shaped paths are the
+shape we have. If decoupling becomes a goal later, the natural change is
+to make `scopeKeyForPatchPath` (or an equivalent strategy object)
+pluggable from the host application — same pattern would clean up the
+existing tree-monitor coupling at the same time.
+
 ## Follow-up Work
 
 - **Automated E2E tests** for both the CLUE-316 scripts and the pre-existing GD-6 pause/resume scripts. Cypress is already wired up, but running concurrent-editing scenarios deterministically needs: reliable Firebase-emulator setup for group docs, two browser contexts (or driving pause/resume from Cypress), and per-tile rendering assertions. Per-tile rendering is really GD-11 territory, so a single follow-up story covering E2E automation for the full group-doc scenario set seems right.
