@@ -37,11 +37,13 @@ A user broadcasts `{documentKey, focus: {tileIds}}` regardless of which document
 
 ### Storage: Firebase Realtime Database, indexed by user
 
-Path: `classes/{classHash}/groups/{groupId}/users/{userId}/activity`
+Path: `classes/{classHash}/offerings/{offeringId}/groups/{groupId}/users/{userId}/activity`
+
+This is a child of the existing per-user group node (already used for connection-status timestamps); we re-use `firebase.getGroupUserPath(user, groupId)` and append `/activity`.
 
 A single record per user, mutated in place as they navigate / select. `onDisconnect().remove()` registered once on the user's own activity node.
 
-*Alternative considered:* Index by document — `groups/{groupId}/activity/{documentKey}/{userId}`. This would let a doc viewer subscribe to exactly the records relevant to that doc, avoiding a client-side filter. Rejected because at typical group sizes (~4 users) the read-side filter is one trivial line, while the doc-indexed layout requires a "switch documents" routine that atomically removes the old path, writes the new, and re-arms `onDisconnect` on the new path. The user-indexed layout is harder to corrupt.
+*Alternative considered:* Index by document — `.../groups/{groupId}/activity/{documentKey}/{userId}`. This would let a doc viewer subscribe to exactly the records relevant to that doc, avoiding a client-side filter. Rejected because at typical group sizes (~4 users) the read-side filter is one trivial line, while the doc-indexed layout requires a "switch documents" routine that atomically removes the old path, writes the new, and re-arms `onDisconnect` on the new path. The user-indexed layout is harder to corrupt.
 
 ### Lifecycle: clear on empty selection, doc close, or disconnect
 
@@ -67,7 +69,7 @@ A new `GroupActivityModel` store holds the mirrored RTDB activity records. It is
 ## Data Schema
 
 ```ts
-// Persisted at: classes/{classHash}/groups/{groupId}/users/{userId}/activity
+// Persisted at: classes/{classHash}/offerings/{offeringId}/groups/{groupId}/users/{userId}/activity
 interface UserActivity {
   documentKey: string;       // which doc the activity is in
   focus?: {
@@ -115,7 +117,7 @@ Registered in the root `stores` model alongside `groups`.
 *Location:* `src/lib/db-listeners/db-group-activity-listener.ts`
 
 Pattern follows existing `db-groups-listener.ts`:
-- `start()` subscribes to `classes/{classHash}/groups/{groupId}/users` with `.on("value")` and reads each user's `activity` child.
+- `start()` subscribes to `classes/{classHash}/offerings/{offeringId}/groups/{groupId}/users` (via `firebase.ref(firebase.getGroupPath(user, groupId) + "/users")`) with `.on("value")` and reads each user's `activity` child.
 - Pushes diffs into `GroupActivityModel` (set/update/remove).
 - `stop()` detaches the listener; called when `currentGroupId` changes.
 
