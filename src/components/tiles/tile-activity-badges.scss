@@ -1,0 +1,35 @@
+@import "../vars";
+
+$badge-width: 22px;
+$badge-height: 16px;
+$badge-gap: 2px;
+$drag-handle-clearance: 36px;
+
+.tile-activity-badges {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  gap: $badge-gap;
+  z-index: 50;
+  pointer-events: auto;
+  transition: right 0.2s;
+
+  &.drag-handle-visible {
+    right: $drag-handle-clearance;
+  }
+
+  .badge {
+    width: $badge-width;
+    height: $badge-height;
+    border-radius: 2px;
+    // $charcoal-medium-light is not defined in vars.scss; using $charcoal-light-1
+    // as the closest neutral mid-grey. Refine during manual visual review.
+    background-color: $charcoal-light-1;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    line-height: $badge-height;
+    text-align: center;
+  }
+}
