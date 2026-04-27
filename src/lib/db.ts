@@ -39,6 +39,7 @@ import { safeJsonParse } from "../utilities/js-utils";
 import { typeConverter } from "../utilities/db-utils";
 import { initializeApp } from "./firebase-config";
 import { UserModelType } from "../models/stores/user";
+import { GroupUserActivitySnapshot } from "../models/stores/group-activity";
 import { logExemplarDocumentEvent } from "../models/document/log-exemplar-document-event";
 import { AppMode } from "../models/stores/store-types";
 import { DEBUG_FIRESTORE } from "./debug";
@@ -390,7 +391,7 @@ export class DB {
     }
   }
 
-  public setGroupUserActivity(activity: { documentKey: string; focus?: { tileIds: string[] } }) {
+  public setGroupUserActivity(activity: Omit<GroupUserActivitySnapshot, "userId" | "updatedAt">) {
     const { user } = this.stores;
     if (!user.currentGroupId) return Promise.resolve();
     const ref = this.firebase.ref(
