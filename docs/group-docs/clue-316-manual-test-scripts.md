@@ -55,6 +55,8 @@ So the bad-state signal is visible only via console MST warnings, not in the UI.
 In principle, `updateAfterSharedModelChanges` on the drawing tile could detect
 the dangling reference and prune its chip — but it currently does not.
 
+**Tracked in:** [CLUE-513](https://concord-consortium.atlassian.net/browse/CLUE-513) (nice to have).
+
 ## 2. Cross-scope reference drift (diagram → variable)
 
 **Setup:** Group document. Both users in the same group, same document. Note: a
@@ -120,6 +122,8 @@ the history entry had already been uploaded independently.
   this — it only errors when the saved id is absent from the history
   entirely; here the id is still present, just not at the tail.
 
+**Tracked in:** [CLUE-512](https://concord-consortium.atlassian.net/browse/CLUE-512) (required to fix).
+
 ## 3. Cross-scope reference drift (graph → dataset attribute)
 
 **Setup:** Group document with a table tile and a linked graph tile.
@@ -165,6 +169,8 @@ A pruning handler exists but does not fire for this merge case:
   Remote attribute deletes arrive as applied patches through the tree-patch
   manager, not as action calls, so the handler never runs and the stale id
   persists in the saved document.
+
+**Tracked in:** [CLUE-514](https://concord-consortium.atlassian.net/browse/CLUE-514) (nice to have).
 
 ## 4. Schema-assumption drift (table column type)
 
