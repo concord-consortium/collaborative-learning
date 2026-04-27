@@ -13,6 +13,7 @@ import { ITileApi, TileModelContext } from "../tile-api";
 
 export interface ISpecTextTileOptions {
   tileModel?: ITileModel,
+  readOnly?: boolean,
   onRegisterTileApi?: (tileApi: ITileApi, facet?: string) => void
 }
 
@@ -53,7 +54,7 @@ export function specTextTile(options: ISpecTextTileOptions) {
     docId: "",
     documentContent,
     isUserResizable: true,
-    readOnly: false,
+    readOnly: options.readOnly ?? false,
     onResizeRow: (e) => {
       throw new Error("Function not implemented.");
     },

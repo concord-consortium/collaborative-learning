@@ -827,13 +827,6 @@ context('Arrow Annotations (Sparrows)', function () {
       assertHandleNearChip({ handleIndex: 0, chipIndex: 0, workspaceClass: navPanel, tolerance: 100 });
       assertHandleNearChip({ handleIndex: 1, chipIndex: 1, workspaceClass: navPanel, tolerance: 100 });
     });
-
-    // Pending stubs — these views need Cypress scaffolding the repo doesn't yet have:
-    // a helper to open the same doc in `.reference-workspace` (two-up same-doc), and
-    // helpers to locate and inspect a thumbnail's annotation SVG.
-    it("renders sparrow on chip correctly in the right-side (read-only local) view when the same doc is open on both sides");
-    it("renders sparrow on chip correctly in a My Work thumbnail");
-    it("renders sparrow on chip correctly after opening the doc from a My Work thumbnail (no drift)");
   });
 
   it("Can add annotations to tiles nested within a question tile", () => {

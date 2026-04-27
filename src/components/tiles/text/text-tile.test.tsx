@@ -39,7 +39,7 @@ describe("TextToolComponent", () => {
 
 describe("TextToolComponent highlight bbox cache", () => {
 
-  it("reports bbox only for highlights that have been registered", () => {
+  it("reports the registered bbox for a known highlight id", () => {
     let tileApi: ITileApi | undefined;
     const { textTile } = specTextTile({
       onRegisterTileApi: (api) => { tileApi = api; }
@@ -57,16 +57,18 @@ describe("TextToolComponent highlight bbox cache", () => {
     expect(tileApi?.getObjectBoundingBox?.("unknown-id", kHighlightFormat)).toBeUndefined();
   });
 
-  it("two TextToolComponent instances backed by the same model have independent caches", () => {
+  it("editable and read-only views of the same tile have independent bbox caches", () => {
+    // Models a problem doc open on both sides of the app rendering two Text tile instances, one editable, one
+    // read-only. A bbox written by the editable view must not appear in the read-only view's cache.
     const tileModel = TileModel.create({ content: defaultTextContent() });
-    let apiA: ITileApi | undefined;
-    let apiB: ITileApi | undefined;
-    const a = specTextTile({ tileModel, onRegisterTileApi: (api) => { apiA = api; } });
-    specTextTile({ tileModel, onRegisterTileApi: (api) => { apiB = api; } });
+    let editableApi: ITileApi | undefined;
+    let readOnlyApi: ITileApi | undefined;
+    const editable = specTextTile({ tileModel, onRegisterTileApi: (api) => { editableApi = api; } });
+    specTextTile({ tileModel, readOnly: true, onRegisterTileApi: (api) => { readOnlyApi = api; } });
     const box = { left: 1, top: 2, width: 3, height: 4 };
-    (a.textTile as any).handleUpdateHighlightBoxCache("shared-id", box);
-    expect(apiA?.getObjectBoundingBox?.("shared-id", kHighlightFormat)).toEqual(box);
-    expect(apiB?.getObjectBoundingBox?.("shared-id", kHighlightFormat)).toBeUndefined();
+    (editable.textTile as any).handleUpdateHighlightBoxCache("shared-id", box);
+    expect(editableApi?.getObjectBoundingBox?.("shared-id", kHighlightFormat)).toEqual(box);
+    expect(readOnlyApi?.getObjectBoundingBox?.("shared-id", kHighlightFormat)).toBeUndefined();
   });
 
   it("bumps the observable tick when a bbox is written", () => {
