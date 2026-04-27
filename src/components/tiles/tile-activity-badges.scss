@@ -23,8 +23,10 @@ $drag-handle-clearance: 36px;
     width: $badge-width;
     height: $badge-height;
     border-radius: 2px;
-    // $charcoal-medium-light is not defined in vars.scss; using $charcoal-light-1
-    // as the closest neutral mid-grey. Refine during manual visual review.
+    // Placeholder neutral. The design doc said to mirror the group-button
+    // initials styling, but the existing group button uses per-position
+    // colors (blue/orange/green/purple), not a single neutral — defer to
+    // manual visual review during multi-client testing.
     background-color: $charcoal-light-1;
     color: white;
     font-size: 10px;

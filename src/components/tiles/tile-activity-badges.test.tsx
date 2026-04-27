@@ -8,6 +8,7 @@ import { DocumentsModel } from "../../models/stores/documents";
 import { GroupActivityModel } from "../../models/stores/group-activity";
 import { GroupModel, GroupsModel, GroupUserModel } from "../../models/stores/groups";
 import { specStores } from "../../models/stores/spec-stores";
+import { UserModel } from "../../models/stores/user";
 import { TileActivityBadges } from "./tile-activity-badges";
 
 const kDocKey = "doc-1";
@@ -64,7 +65,10 @@ function buildStores({ documentType = GroupDocument, numFocused = 0 }: IBuildSto
     });
   }
 
-  return specStores({ class: clazz, groups, documents, groupActivity });
+  // The local user must be a member of the group so the component can
+  // resolve names/initials through groups.groupForUser(user.id).
+  const user = UserModel.create({ id: userIds[0] });
+  return specStores({ user, class: clazz, groups, documents, groupActivity });
 }
 
 describe("TileActivityBadges", () => {
