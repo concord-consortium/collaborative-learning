@@ -58,6 +58,16 @@ async detectAndResolveFork(newWrapperDocs: IFirestoreHistoryEntryDoc[]): Promise
 }
 ```
 
+> **Post-implementation note (2026-04-27):** the `newWrapperDocs` argument
+> was simplified during code review to `newEntrySnapshots: HistoryEntrySnapshot[]`.
+> The function reads only `w.entry` and `w.entry.id` from each wrapper, so
+> the wrapper layer was unnecessary inside this function. The wrapper shape
+> is still used by `applyHistoryEntries` (matching what the Firestore listener
+> delivers); `doApplyHistoryEntries` extracts entries once and passes
+> snapshots to `detectAndResolveFork` from there on. The defensive
+> `console.warn` for missing wrappers became unreachable after this and
+> was removed.
+
 The `firstIncomingPrev === localHeadId` early-return is removed entirely. It was a proxy for "nothing forked" that broke once remote entries landed on top of local ones. Replacing it with "queue is empty" fixes bug 1 directly.
 
 `expectedRemoteHead` and `localHead` are no longer consulted here. The queue is enough.

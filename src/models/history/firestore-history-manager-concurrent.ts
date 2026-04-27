@@ -443,16 +443,15 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
    * entry conflicts, rollback from that entry onward and record the
    * rollback with the incoming batch's ids.
    */
-  async detectAndResolveFork(newWrapperDocs: IFirestoreHistoryEntryDoc[]): Promise<void> {
-    if (newWrapperDocs.length === 0) return;
+  async detectAndResolveFork(newEntrySnapshots: HistoryEntrySnapshot[]): Promise<void> {
+    if (newEntrySnapshots.length === 0) return;
     if (this.completedHistoryEntryQueue.length === 0) return;
 
     const localSnapshots = this.completedHistoryEntryQueue.map(e => getSnapshot(e));
-    const incomingSnapshots = newWrapperDocs.map(w => w.entry);
-    const incomingIds = newWrapperDocs.map(w => w.entry.id);
+    const incomingIds = newEntrySnapshots.map(e => e.id);
 
     const { rollbackCount } =
-      partitionLocalEntriesForMerge(localSnapshots, incomingSnapshots);
+      partitionLocalEntriesForMerge(localSnapshots, newEntrySnapshots);
 
     if (rollbackCount > 0) {
       await this.rollbackLocalEntries(rollbackCount, incomingIds);
@@ -480,9 +479,8 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   private async doApplyHistoryEntries(wrapperDocs: IFirestoreHistoryEntryDoc[]) {
     const { treeManager } = this;
 
-    // Carry the wrapper shape through the method so previousEntryId stays
-    // available for fork-detection in later steps. The snapshots themselves
-    // are what get applied to the tree.
+    // The wrappers' index/previousEntryId aren't consulted on the receive
+    // side; only the entry snapshots are needed from here on.
     const incomingHistory: HistoryEntrySnapshot[] = wrapperDocs.map(doc => doc.entry);
 
     // This should be the last entry that was applied to the document when it was first loaded.
@@ -512,36 +510,13 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // TODO: this could be more efficient by combining it with the incomingHistory.findIndex()
     // above.
     const existingIds = new Set(existingHistory.map(e => e.id));
-    // Index wrappers by entry id for O(1) lookup below. unappliedHistory
-    // is a subset of incomingHistory (= wrapperDocs.map(doc => doc.entry)),
-    // so every entry we keep has a corresponding wrapper here by
-    // construction.
-    const wrapperById = new Map(wrapperDocs.map(w => [w.entry.id, w]));
-    const entrySnapshots: HistoryEntrySnapshot[] = [];
-    const newWrapperDocs: IFirestoreHistoryEntryDoc[] = [];
-    for (const entry of unappliedHistory) {
-      if (!existingIds.has(entry.id)) {
-        entrySnapshots.push(entry);
-        const wrap = wrapperById.get(entry.id);
-        if (wrap) {
-          newWrapperDocs.push(wrap);
-        } else {
-          // Invariant violation. Fork detection will miss this entry's
-          // scope contribution and triggeringBatchIds, so any conflict
-          // it would have surfaced is silently lost. We still apply the
-          // entry's patches via entrySnapshots above.
-          console.warn(
-            `[FirestoreHistoryManagerConcurrent] no wrapper for entry ${entry.id}; ` +
-            `fork detection will not see it. wrapperDocs ids: ` +
-            `${wrapperDocs.map(w => w.entry.id).join(", ")}`
-          );
-        }
-      }
-    }
+    const entrySnapshots: HistoryEntrySnapshot[] = unappliedHistory
+      .filter(entry => !existingIds.has(entry.id));
 
-    // Fork detection: if the first new entry doesn't continue from our
-    // local head, roll back local uncommitted entries first.
-    await this.detectAndResolveFork(newWrapperDocs);
+    // Fork detection: if any pending local entry's scope conflicts with
+    // the incoming batch, roll back from that entry onward and append
+    // revert entries.
+    await this.detectAndResolveFork(entrySnapshots);
 
     const trees = Object.values(treeManager.trees);
 
@@ -592,13 +567,13 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     });
     await Promise.all(finishPromises);
 
-    // Advance expectedRemoteHead to the id of the last wrapper we
-    // received. These came from the remote listener, so they're on the
-    // remote chain even if local history already contains some of them.
-    // If no wrappers were delivered, leave the head alone.
-    const lastWrapper = wrapperDocs[wrapperDocs.length - 1];
-    if (lastWrapper) {
-      this.setExpectedRemoteHead(lastWrapper.entry.id);
+    // Advance expectedRemoteHead to the id of the last incoming entry.
+    // These came from the remote listener, so they're on the remote chain
+    // even if local history already contains some of them. If no entries
+    // were delivered, leave the head alone.
+    const lastIncoming = incomingHistory[incomingHistory.length - 1];
+    if (lastIncoming) {
+      this.setExpectedRemoteHead(lastIncoming.id);
     }
 
     // If any local entries survived as uncommitted queue items, they
