@@ -21,7 +21,7 @@ describe("DBGroupActivityListener", () => {
       capturedHandler = cb;
     });
     offMock = jest.fn();
-    usersRef = { on: onMock, off: offMock };
+    usersRef = { on: onMock, off: offMock, toString: () => `${groupPath}/users` } as any;
     refMock = jest.fn(() => usersRef);
     getGroupPathMock = jest.fn(() => groupPath);
 
@@ -37,7 +37,7 @@ describe("DBGroupActivityListener", () => {
     };
   });
 
-  const makeSnapshot = (value: any) => ({ val: () => value });
+  const makeSnapshot = (value: any) => ({ val: () => value, ref: usersRef });
 
   it("populates groupActivity store from a snapshot", async () => {
     const listener = new DBGroupActivityListener(db);
