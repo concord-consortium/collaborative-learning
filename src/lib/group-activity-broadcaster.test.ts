@@ -157,4 +157,24 @@ describe("GroupActivityBroadcaster", () => {
     jest.advanceTimersByTime(kActivityDebounceDelay);
     expect(setGroupUserActivity).not.toHaveBeenCalled();
   });
+
+  it("rotates onDisconnect handler when the group changes", () => {
+    broadcaster.start();
+
+    runInAction(() => {
+      persistentUI.problemWorkspace.primaryDocumentKey = "doc-1";
+      ui.setSelectedTileId("tile-a");
+    });
+    jest.advanceTimersByTime(kActivityDebounceDelay);
+    expect(setGroupUserActivityOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(onDisconnectCancel).not.toHaveBeenCalled();
+
+    runInAction(() => {
+      user.currentGroupId = "group-2";
+    });
+    jest.advanceTimersByTime(kActivityDebounceDelay);
+
+    expect(onDisconnectCancel).toHaveBeenCalledTimes(1);
+    expect(setGroupUserActivityOnDisconnect).toHaveBeenCalledTimes(2);
+  });
 });

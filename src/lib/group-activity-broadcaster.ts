@@ -9,6 +9,7 @@ export class GroupActivityBroadcaster {
   private db: DB;
   private disposer: IReactionDisposer | null = null;
   private onDisconnectHandler: firebase.database.OnDisconnect | null = null;
+  private onDisconnectGroupId: string | undefined;
   private flush: ReturnType<typeof debounce>;
 
   constructor(db: DB) {
@@ -34,6 +35,7 @@ export class GroupActivityBroadcaster {
     this.disposer = null;
     this.onDisconnectHandler?.cancel();
     this.onDisconnectHandler = null;
+    this.onDisconnectGroupId = undefined;
   }
 
   private flushNow = async () => {
@@ -49,8 +51,10 @@ export class GroupActivityBroadcaster {
       return;
     }
 
-    if (!this.onDisconnectHandler) {
+    if (this.onDisconnectGroupId !== groupId) {
+      this.onDisconnectHandler?.cancel();
       this.onDisconnectHandler = this.db.setGroupUserActivityOnDisconnect();
+      this.onDisconnectGroupId = groupId;
     }
 
     await this.db.setGroupUserActivity({
