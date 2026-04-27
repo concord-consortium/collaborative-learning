@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useCallback, useContext, useRef } from "react";
 import classNames from "classnames/dedupe";
 
 import {
@@ -12,13 +12,22 @@ import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { TextPluginsContext } from "../../../components/tiles/text/text-plugins-context";
+import { IHighlightBox } from "../../text/highlight-registry-context";
+import { getChipBoxInWrapperCoords, useChipMeasurement } from "../../text/use-chip-measurement";
 
 import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 
 const kVariableClass = "slate-variable-chip";
+const kVariableChipOffset = 2;
 export const kVariableFormat = "m2s-variable";
 export const kVariableTextPluginName = "variables";
+
+// The owning TextToolComponent provides this callback; each chip invokes it post-mount
+// and on layout changes to publish its bounding box (in `.text-tool-wrapper` coords) so
+// the annotation layer can attach sparrows to the chip.
+export type VariableRegistryFn = (id: string, box: IHighlightBox) => void;
+export const VariableRegistryContext = React.createContext<VariableRegistryFn | null>(null);
 
 export class VariablesPlugin implements ITextPlugin {
   public textContent;
@@ -142,21 +151,37 @@ export const VariableComponent = observer(function({ attributes, children, eleme
   const variablesPlugin = plugins[kVariableTextPluginName] as VariablesPlugin|undefined;
   const isHighlighted = useSelected();
   const isSerializing = useSerializing();
+  const registryFn = useContext(VariableRegistryContext);
+  const chipRef = useRef<HTMLSpanElement>(null);
+
+  const reference = isVariableElement(element) ? element.reference : undefined;
+
+  // Publish the chip's bbox in `.text-tool-wrapper` coordinates. Skips zero-sized
+  // measurements so the registry only sees real layout. useChipMeasurement handles
+  // the retry/observer scaffolding.
+  const measure = useCallback(() => {
+    const el = chipRef.current;
+    if (!el || !registryFn || !reference) return;
+    const box = getChipBoxInWrapperCoords(el, kVariableChipOffset);
+    if (box) registryFn(reference, box);
+  }, [reference, registryFn]);
+
+  useChipMeasurement(chipRef, measure);
 
   if (!isVariableElement(element)) return null;
 
-  const {reference} = element;
-
   const classes = classNames(kSlateVoidClass, kVariableClass);
   const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;
-  const variable = variablesPlugin?.variables.find(v => v.id === reference);
+  const variable = variablesPlugin?.variables.find(v => v.id === element.reference);
   // FIXME: HTML serialization/deserialization. This will serialize the VariableChip too.
   return (
     <span className={classes} {...attributes} contentEditable={false}>
       {children}
       { variable ?
-        <VariableChip variable={variable} className={selectedClass} /> :
-        `invalid reference: ${reference}`
+        <span ref={chipRef} className="variable-chip-measure-wrapper">
+          <VariableChip variable={variable} className={selectedClass} />
+        </span> :
+        `invalid reference: ${element.reference}`
       }
     </span>
   );

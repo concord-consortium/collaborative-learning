@@ -1,4 +1,3 @@
-import { ObservableMap } from "mobx";
 import { types, Instance, SnapshotIn, cast } from "mobx-state-tree";
 import {
   convertDocument, CustomEditor, Editor, EditorValue, htmlToSlate, serializeValue, slateToHtml, textToSlate, slateToText
@@ -11,7 +10,7 @@ import { escapeBackslashes, escapeDoubleQuotes, removeNewlines, removeTabs } fro
 import { tileContentAPIViews } from "../tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
-import { IHighlightBox } from "../../../plugins/text/highlight-registry-context";
+import { kVariableFormat } from "../../../plugins/shared-variables/slate/variables-plugin";
 
 export const kTextTileType = "Text";
 
@@ -30,7 +29,10 @@ export const TextContentModel = TileContentModel
   })
   .volatile(self => ({
     editor:  undefined as CustomEditor | undefined,
-    highlightBoxesCache: new ObservableMap<string, IHighlightBox>(),
+    // Bumped when variable chips are added to or removed from the Slate editor. Read by
+    // `annotatableObjects` so the view participates in MobX reactivity for variable
+    // chips — Slate's editor state isn't otherwise observable.
+    variableChipsRevision: 0
   }))
   .views(self => ({
     // guarantees string (not readonly string) types
@@ -148,12 +150,8 @@ export const TextContentModel = TileContentModel
         self.highlightedText.splice(index, 1);
       }
     },
-    setHighlightBoxesCache(id: string, box: IHighlightBox) {
-      if (box) {
-        self.highlightBoxesCache.set(id, box);
-      } else {
-        self.highlightBoxesCache.delete(id);
-      }
+    bumpVariableChipsRevision() {
+      self.variableChipsRevision++;
     }
   }))
   .actions(self => ({
@@ -166,10 +164,23 @@ export const TextContentModel = TileContentModel
   .views(self => tileContentAPIViews({
     get annotatableObjects(): IClueTileObject[] {
       const objects: IClueTileObject[] = [];
-      const objectType = kHighlightFormat;
       self.highlightedText.forEach(highlight => {
-        objects.push({objectId: highlight.id, objectType});
+        objects.push({objectId: highlight.id, objectType: kHighlightFormat});
       });
+      // Variable chips live only in the Slate tree (no MST mirror), so enumerate them
+      // by walking the editor. Read variableChipsRevision so MobX re-evaluates this
+      // view when text-tile's handleChange detects a variable chip add or remove.
+      // eslint-disable-next-line unused-imports/no-unused-vars
+      const _revision = self.variableChipsRevision;
+      const editor = self.editor;
+      if (editor) {
+        for (const [node] of Editor.nodes(editor, { at: [], mode: "all" })) {
+          const anyNode = node as any;
+          if (anyNode?.type === kVariableFormat && typeof anyNode.reference === "string") {
+            objects.push({ objectId: anyNode.reference, objectType: kVariableFormat });
+          }
+        }
+      }
       return objects;
     },
   }));

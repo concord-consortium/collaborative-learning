@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, { useCallback, useContext, useRef } from "react";
 import classNames from "classnames/dedupe";
 import { BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
   RenderElementProps, useSelected } from "@concord-consortium/slate-editor";
@@ -7,6 +7,7 @@ import { TextContentModelType } from "../../models/tiles/text/text-content";
 import { ITextPlugin } from "../../models/tiles/text/text-plugin-info";
 import { TextPluginsContext } from "../../components/tiles/text/text-plugins-context";
 import { HighlightRegistryContext, HighlightRevisionContext } from "./highlight-registry-context";
+import { getChipBoxInWrapperCoords, useChipMeasurement } from "./use-chip-measurement";
 
 export const kHighlightFormat = "highlight";
 export const kHighlightTextPluginName = "highlights";
@@ -67,23 +68,12 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
   // Memoize getHighlightChipBoundingBox so it can be used in the dependency array
   const getHighlightChipBoundingBox = useCallback(() => {
     const el = chipRef.current;
-    if (!el) return;
-    const highlightRect = el.getBoundingClientRect();
-    const textBoxRect = el.closest('.primary-workspace .text-tool-wrapper')?.getBoundingClientRect();
-    if (highlightRect && textBoxRect && highlightRect.width > 0 && highlightRect.height > 0
-          && highlightRegistryContextFn) {
-      highlightRegistryContextFn(highlightId, {
-        left: highlightRect.left - textBoxRect.left,
-        top: highlightRect.top - textBoxRect.top,
-        width: highlightRect.width - kHighlightOffset,
-        height: highlightRect.height - kHighlightOffset
-      });
-    }
+    if (!el || !highlightRegistryContextFn) return;
+    const box = getChipBoxInWrapperCoords(el, kHighlightOffset);
+    if (box) highlightRegistryContextFn(highlightId, box);
   }, [highlightId, highlightRegistryContextFn]);
 
-  useEffect(() => {
-    getHighlightChipBoundingBox();
-  }, [editorRevisionContext, getHighlightChipBoundingBox]);
+  useChipMeasurement(chipRef, getHighlightChipBoundingBox, editorRevisionContext);
 
   if (!isHighlightElement(element)) return null;
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { Provider } from "mobx-react";
 import { ModalProvider } from "@concord-consortium/react-modal-hook";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 
 import { defaultTextContent } from "../../../models/tiles/text/text-content";
 import { ITileModel, TileModel } from "../../../models/tiles/tile-model";
@@ -9,10 +9,11 @@ import { specStores } from "../../../models/stores/spec-stores";
 import { specAppConfig } from "../../../models/stores/spec-app-config";
 import TextToolComponent from "./text-tile";
 import { ITileProps } from "../tile-component";
-import { TileModelContext } from "../tile-api";
+import { ITileApi, TileModelContext } from "../tile-api";
 
 export interface ISpecTextTileOptions {
-  tileModel?: ITileModel
+  tileModel?: ITileModel,
+  onRegisterTileApi?: (tileApi: ITileApi, facet?: string) => void
 }
 
 export function specTextTile(options: ISpecTextTileOptions) {
@@ -41,8 +42,9 @@ export function specTextTile(options: ISpecTextTileOptions) {
       }
       })
     });
-  render(<div className="document-content" data-testid="document-content"/>);
-  const documentContent = screen.getByTestId("document-content");
+  // Tests don't read from this element. `null` (allowed by the prop type) avoids
+  // collisions when multiple specTextTile() calls share the same test root.
+  const documentContent = null;
 
   const defaultProps: ITileProps = {
     model,
@@ -62,7 +64,7 @@ export function specTextTile(options: ISpecTextTileOptions) {
       throw new Error("Function not implemented.");
     },
     onRegisterTileApi: (tileApi, facet) => {
-      // throw new Error("Function not implemented.");
+      options.onRegisterTileApi?.(tileApi, facet);
     },
     onUnregisterTileApi: (facet) => {
       // throw new Error("Function not implemented.");
