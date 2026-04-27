@@ -9,6 +9,7 @@ import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui/persis
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
+import { GroupActivityModel, GroupActivityModelType } from "./group-activity";
 import { ClassModel, ClassModelType } from "./class";
 import { DB } from "../../lib/db";
 import { UserContextProvider } from "./user-context-provider";
@@ -88,6 +89,7 @@ class Stores implements IStores{
   persistentUI: PersistentUIModelType;
   ui: UIModelType;
   groups: GroupsModelType;
+  groupActivity: GroupActivityModelType;
   class: ClassModelType;
   documents: DocumentsModelType;
   networkDocuments: DocumentsModelType;
@@ -145,6 +147,7 @@ class Stores implements IStores{
     this.groups = params?.groups
       ? clone(params.groups, this)
       : GroupsModel.create({}, this);
+    this.groupActivity = params?.groupActivity ?? GroupActivityModel.create({});
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);

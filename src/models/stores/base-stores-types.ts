@@ -6,6 +6,7 @@ import { UIModelType } from "./ui";
 import { PersistentUIModelType } from "./persistent-ui/persistent-ui";
 import { UserModelType } from "./user";
 import { GroupsModelType } from "./groups";
+import { GroupActivityModelType } from "./group-activity";
 import { ClassModelType } from "./class";
 import { DB } from "../../lib/db";
 import { DemoModelType } from "./demo";
@@ -39,6 +40,7 @@ export interface IBaseStores {
   persistentUI: PersistentUIModelType;
   ui: UIModelType;
   groups: GroupsModelType;
+  groupActivity: GroupActivityModelType;
   class: ClassModelType;
   documents: DocumentsModelType;
   networkDocuments: DocumentsModelType;
