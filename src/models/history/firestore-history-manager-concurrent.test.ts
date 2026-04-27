@@ -725,6 +725,94 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(manager.document.history.filter(e => e.isRevert)).toEqual([]);
       expect(historyManager.expectedRemoteHead).toBe("R1");
     });
+
+    it("scope-checks the union of a multi-wrapper batch against pending local entries", async () => {
+      // Single batch with two wrappers where only the second wrapper conflicts
+      // with a pending local entry. Verifies that partitionLocalEntriesForMerge
+      // is fed the full incoming batch (so the scope union picks up the
+      // conflict) and that triggeringBatchIds carries every id in the batch.
+      // entry-scopes.test.ts covers the union logic in isolation; this test
+      // pins the integration through detectAndResolveFork.
+      getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
+      const { manager, tree, historyManager } = await setupDocMergeManager();
+
+      applyPatch(tree, [
+        { op: "add", path: "/content/tileMap/A", value: { id: "A", content: { value: "initial" } } },
+        { op: "add", path: "/content/tileMap/B", value: { id: "B", content: { value: "initial" } } },
+        { op: "add", path: "/content/tileMap/C", value: { id: "C", content: { value: "initial" } } },
+      ]);
+
+      // Local L1 on tile A, L2 on tile B. Both queued, both in undo store.
+      const mkLocal = (id: string, tileId: string, value: string) => {
+        const patches: IJsonPatch[] = [
+          { op: "replace", path: `/content/tileMap/${tileId}/content/value`, value }
+        ];
+        const inverse: IJsonPatch[] = [
+          { op: "replace", path: `/content/tileMap/${tileId}/content/value`, value: "initial" }
+        ];
+        applyPatch(tree, patches);
+        const entry = HistoryEntry.create(makeEntrySnapshot(id, "main", patches, inverse));
+        manager.addHistoryEntryAfterApplying(entry);
+        historyManager.completedHistoryEntryQueue.push(entry);
+        manager.undoStore.addHistoryEntry(entry);
+        return entry;
+      };
+
+      mkLocal("L1", "A", "local-A");
+      mkLocal("L2", "B", "local-B");
+
+      expect(manager.undoStore.history.map(e => e.id)).toEqual(["L1", "L2"]);
+
+      // Single incoming batch: [R1 on tile C (disjoint), R2 on tile A (conflicts with L1)].
+      // R1.previousEntryId = "r0"; R2.previousEntryId = "R1". Scope union of the
+      // batch is { tile:C, tile:A }, so L1 should conflict and trigger rollback
+      // of L1 and L2.
+      const r1Snapshot = makeEntrySnapshot(
+        "R1", "main",
+        [{ op: "replace", path: "/content/tileMap/C/content/value", value: "remote-C" }],
+        [{ op: "replace", path: "/content/tileMap/C/content/value", value: "initial" }],
+      );
+      const r2Snapshot = makeEntrySnapshot(
+        "R2", "main",
+        [{ op: "replace", path: "/content/tileMap/A/content/value", value: "remote-A" }],
+        [{ op: "replace", path: "/content/tileMap/A/content/value", value: "local-A" }],
+      );
+
+      await historyManager.applyHistoryEntries([
+        makeWrapperDoc(1, "r0", r1Snapshot),
+        makeWrapperDoc(2, "R1", r2Snapshot),
+      ]);
+
+      // Tree state: L1 and L2 reverted, both remote entries applied.
+      expect(tree.content.tileMap.get("A")?.content.value).toBe("remote-A");
+      expect(tree.content.tileMap.get("B")?.content.value).toBe("initial");
+      expect(tree.content.tileMap.get("C")?.content.value).toBe("remote-C");
+
+      // History: [L1, L2, revert(L2), revert(L1), R1, R2].
+      const history = manager.document.history;
+      expect(history.map(e => e.id)).toHaveLength(6);
+      expect(history[0].id).toBe("L1");
+      expect(history[1].id).toBe("L2");
+      expect(history[2].isRevert).toBe(true);
+      expect(history[2].revertsEntryId).toBe("L2");
+      expect(history[3].isRevert).toBe(true);
+      expect(history[3].revertsEntryId).toBe("L1");
+      expect(history[4].id).toBe("R1");
+      expect(history[5].id).toBe("R2");
+
+      // Both wrappers in the batch should appear in triggeringBatchIds on
+      // each revert.
+      expect(history[2].triggeringBatchIds.slice()).toEqual(["R1", "R2"]);
+      expect(history[3].triggeringBatchIds.slice()).toEqual(["R1", "R2"]);
+
+      // Queue and undo store cleaned of the rolled-back originals.
+      expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual([]);
+      expect(manager.undoStore.history.map(e => e.id)).not.toContain("L1");
+      expect(manager.undoStore.history.map(e => e.id)).not.toContain("L2");
+
+      // expectedRemoteHead advances to the last wrapper in the batch.
+      expect(historyManager.expectedRemoteHead).toBe("R2");
+    });
   });
 
   describe("applyHistoryEntries — upload retrigger after merge", () => {
