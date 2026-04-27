@@ -147,7 +147,7 @@ class Stores implements IStores{
     this.groups = params?.groups
       ? clone(params.groups, this)
       : GroupsModel.create({}, this);
-    this.groupActivity = params?.groupActivity ?? GroupActivityModel.create({});
+    this.groupActivity = params?.groupActivity || GroupActivityModel.create({});
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);
