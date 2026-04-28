@@ -744,16 +744,16 @@ No code changes; this validates the runtime behavior the unit tests can't.
 - URL params: `?appMode=qa&firebase=emulator&firestore=emulator&unit=...&problem=...`.
 
 **Verify (use as a checklist):**
-- [ ] User A selects tile T → user B sees a badge with A's initials in T's top-right within ~1s.
-- [ ] User A deselects → badge disappears.
-- [ ] User A selects multiple tiles → multiple badges appear simultaneously.
-- [ ] Both A and B select tile T → both see the other's badge (each sees one).
-- [ ] Hovering tile T shows a tooltip with the other user's full name.
-- [ ] Hovering causes drag handle to appear; badges shift left to clear it.
-- [ ] User A closes the browser tab → A's badge disappears for B within a few seconds (`onDisconnect`).
-- [ ] User A switches to a personal doc → A's badge disappears from B's view of the group doc.
-- [ ] With 5+ simulated users (use a script or many tabs) → first 4 badges + `+N` rendered.
-- [ ] Badges do NOT appear in personal docs (gated by `document.type === "group"`).
+- [X] User A selects tile T → user B sees a badge with A's initials in T's top-right within ~1s.
+- [X] User A deselects → badge disappears.
+- [X] User A selects multiple tiles → multiple badges appear simultaneously.
+- [X] Both A and B select tile T → both see the other's badge (each sees one).
+- [X] Hovering tile T shows a tooltip with the other user's full name.
+- [X] Hovering causes drag handle to appear; badges shift left to clear it.
+- [X] User A closes the browser tab → A's badge disappears for B within a few seconds (`onDisconnect`).
+- [X] User A switches to a personal doc → A's badge disappears from B's view of the group doc.
+- [X] With 5+ simulated users (use a script or many tabs) → first 4 badges + `+N` rendered.
+- [X] Badges do NOT appear in personal docs (gated by `document.type === "group"`).
 
 **Cleanup:** none (no commits).
 

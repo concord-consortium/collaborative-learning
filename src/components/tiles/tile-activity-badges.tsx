@@ -8,6 +8,36 @@ import { GroupDocument } from "../../models/document/document-types";
 
 import "./tile-activity-badges.scss";
 
+interface UserInfo {
+  userId: string;
+  initials: string;
+  name: string;
+}
+
+const MAX_VISIBLE = 4;
+
+interface ITileActivityBadge {
+  users: UserInfo[];
+}
+
+function TileActivityBadge({ users }: ITileActivityBadge) {
+  const tooltipOptions = useTooltipOptions({ distance: 6 });
+
+  if (users.length <= 0) return null;
+
+  const text = users.length === 1 ? users[0].initials : `+${users.length}`;
+  const tooltipText = users.map(u => u.name).join(", ");
+  const classes = classNames("badge", { overflow: users.length > 1 });
+
+  return (
+    <Tooltip title={tooltipText} {...tooltipOptions}>
+      <div className={classes} data-testid="activity-badge">
+        {text}
+      </div>
+    </Tooltip>
+  );
+}
+
 interface IProps {
   documentKey: string;
   tileId: string;
@@ -15,13 +45,10 @@ interface IProps {
   selected: boolean;
 }
 
-const MAX_VISIBLE = 4;
-
 export const TileActivityBadges = observer(function TileActivityBadges({
   documentKey, tileId, hovered, selected
 }: IProps) {
   const { groupActivity, groups, documents, user } = useStores();
-  const tooltipOptions = useTooltipOptions({ distance: 6 });
 
   const document = documents.getDocument(documentKey);
   if (document?.type !== GroupDocument) return null;
@@ -38,7 +65,7 @@ export const TileActivityBadges = observer(function TileActivityBadges({
   // shares the local user's group; resolve names/initials through that group.
   const group = groups.groupForUser(user.id);
   const groupUsers = group?.users ?? [];
-  const usersWithIdentity = focused
+  const usersWithIdentity: UserInfo[] = focused
     .map(activity => {
       const u = groupUsers.find(gu => gu.id === activity.userId);
       if (!u) return null;
@@ -48,28 +75,16 @@ export const TileActivityBadges = observer(function TileActivityBadges({
   if (usersWithIdentity.length === 0) return null;
 
   const visible = usersWithIdentity.slice(0, MAX_VISIBLE);
-  const overflow = usersWithIdentity.length - MAX_VISIBLE;
-
-  const tooltipText = usersWithIdentity.map(u => u.name).join("\n");
+  const overflow = usersWithIdentity.slice(MAX_VISIBLE);
 
   const className = classNames("tile-activity-badges", {
     "drag-handle-visible": hovered || selected
   });
 
   return (
-    <Tooltip title={tooltipText} {...tooltipOptions}>
-      <div className={className} data-testid="tile-activity-badges">
-        {visible.map(u => (
-          <div key={u.userId} className="badge" data-testid="activity-badge">
-            {u.initials}
-          </div>
-        ))}
-        {overflow > 0 && (
-          <div className="badge overflow" data-testid="activity-badge-overflow">
-            +{overflow}
-          </div>
-        )}
-      </div>
-    </Tooltip>
+    <div className={className} data-testid="tile-activity-badges">
+      {visible.map(u => <TileActivityBadge key={u.userId} users={[u]} />)}
+      {overflow.length > 0 && <TileActivityBadge users={overflow} />}
+    </div>
   );
 });
