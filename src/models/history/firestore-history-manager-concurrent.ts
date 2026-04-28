@@ -7,14 +7,64 @@ import { CDocumentType, FAKE_EXCHANGE_ID, FAKE_HISTORY_ENTRY_ID } from "./tree-m
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType, HistoryOperation } from "./history";
 import { FirestoreHistoryManager, IFirestoreHistoryManagerArgs } from "./firestore-history-manager";
 
+/**
+ * Thrown inside the upload transaction when the remote chain's head
+ * has advanced past what we expected — meaning another client has
+ * committed entries we don't yet know about. Aborts the transaction
+ * so the pending uploads don't chain off a stale head. The receive
+ * side will pick up the unknown remote entries via the Firestore
+ * listener and trigger the shared rollback path.
+ */
+export class RemoteHeadChangedError extends Error {
+  constructor(public expected: string | null, public actual: string | null) {
+    super(`Remote head changed: expected ${expected}, actual ${actual}`);
+    this.name = "RemoteHeadChangedError";
+  }
+}
+
 export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
 
   completedHistoryEntryQueue: Array<HistoryEntryType> = [];
   uploadInProgress = false;
   /**
+   * The id of the entry we believe is currently the last entry on the
+   * remote chain. `null` means "no remote entries yet." Used for
+   * fork detection:
+   *   - Receive side: if an incoming remote entry's previousEntryId
+   *     differs from the local head (after dedup), we've forked.
+   *   - Send side: if metadata.lastHistoryEntry.id differs from this
+   *     during the upload transaction, someone else committed entries
+   *     we don't know about; we abort the upload.
+   * Updated after successful remote application and after successful
+   * upload.
+   */
+  expectedRemoteHead: string | null = null;
+
+  /**
    * Stop uploading history entries from Firestore temporarily.
    */
   paused = false;
+
+  /**
+   * Stop processing remote history entries delivered by the Firestore
+   * listener. Only used manually from the history-view panel to set up
+   * fork scenarios deterministically — specifically, to drive the
+   * send-side RemoteHeadChangedError path, which otherwise races the
+   * listener. loadHistory delivers the full remote state on each
+   * snapshot, so we simply buffer the latest delivery and replay it on
+   * resume.
+   */
+  pausedDownloads = false;
+  pendingDownloadBuffer: IFirestoreHistoryEntryDoc[] | undefined;
+
+  /**
+   * Serialization chain for applyHistoryEntries. Each call awaits the
+   * previous promise before doing work so that concurrent listener
+   * firings don't cause interleaved mutations of document.history and
+   * the upload queue. Rejection-safe: the chain continues even after
+   * a prior call throws.
+   */
+  applyInProgress: Promise<void> = Promise.resolve();
 
   initialLastHistoryPromise: Promise<LastHistoryEntry> | undefined;
 
@@ -39,11 +89,20 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // history entries that are not in this list.
     this.getInitialLastHistoryEntry();
 
-    // Make paused observable so UI can react to changes
-    makeObservable(this, {
+    // Make paused observable so UI can react to changes.
+    // The <this, "setExpectedRemoteHead"> type parameter widens
+    // AnnotationsMap to include the private setter, which otherwise
+    // wouldn't be assignable. The method still needs to be wrapped as
+    // an action so MobX batches its mutation.
+    makeObservable<this, "setExpectedRemoteHead">(this, {
       paused: observable,
+      pausedDownloads: observable,
+      expectedRemoteHead: observable,
       pauseUploads: action,
       resumeUploadsAfterDelay: action,
+      pauseDownloads: action,
+      resumeDownloads: action,
+      setExpectedRemoteHead: action,
     });
   }
 
@@ -51,7 +110,16 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     if (!this.initialLastHistoryPromise) {
       await this.environmentAndMetadataDocReadyPromise;
       const { firestore, documentPath } = this;
-      this.initialLastHistoryPromise = getLastHistoryEntry(firestore, documentPath);
+      this.initialLastHistoryPromise = getLastHistoryEntry(firestore, documentPath).then(entry => {
+        // Seed expectedRemoteHead from the initial load exactly once.
+        // Later updates come from applyHistoryEntries / uploadQueuedHistoryEntries.
+        // Calling setExpectedRemoteHead here is safe: the method is
+        // registered as a MobX action via makeObservable, so it creates
+        // its own action batch for the mutation even though the .then
+        // callback itself is not an action context.
+        this.setExpectedRemoteHead(entry?.id ?? null);
+        return entry;
+      });
     }
     return this.initialLastHistoryPromise;
   }
@@ -69,6 +137,23 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     }, delayMs);
   }
 
+  pauseDownloads() {
+    this.pausedDownloads = true;
+  }
+
+  resumeDownloads() {
+    this.pausedDownloads = false;
+    const buffered = this.pendingDownloadBuffer;
+    this.pendingDownloadBuffer = undefined;
+    if (buffered) {
+      this.applyHistoryEntries(buffered);
+    }
+  }
+
+  private setExpectedRemoteHead(id: string | null) {
+    this.expectedRemoteHead = id;
+  }
+
   syncRemoteFirestoreHistory(historyEntryDocs: IFirestoreHistoryEntryDoc[]): void {
     const { treeManager } = this;
 
@@ -83,19 +168,35 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       // treeManager.setChangeDocument(CDocument.create({history: []}));
     }
 
-    // Not the most efficient but lets get the history entries from the historyEntryDocs
-    // If we unify on loadFirestoreHistory we can have it do this parsing for us
-    const incomingHistory: HistoryEntrySnapshot[] = historyEntryDocs.map(doc => doc.entry);
+    if (this.pausedDownloads) {
+      // Buffer the latest delivery; loadHistory sends the full remote
+      // state on every snapshot, so later deliveries supersede earlier
+      // ones. resumeDownloads replays the latest buffered state.
+      this.pendingDownloadBuffer = historyEntryDocs;
+      return;
+    }
 
-    // We do not use applySnapshot here because it would replace the entire history with
-    // the remote history. Sometimes there will be local history entries that have not
-    // yet been uploaded, so we can't just overwrite those.
-    // Instead we just add the new history entries that aren't in our local history yet.
-    // This means that the history entries on this client will be in a different order
-    // than on other clients. That's because those other clients wouldn't have our local
-    // entries yet.
-    // This problem is being punted for now.
-    this.applyHistoryEntries(incomingHistory);
+    // Pass the wrapper docs through so fork detection can see
+    // previousEntryId on each entry. Entries are unwrapped to
+    // HistoryEntrySnapshot inside doApplyHistoryEntries where they're
+    // actually applied to the tree.
+    //
+    // We do not use applySnapshot here because it would replace the entire
+    // history with the remote history, discarding any local entries that
+    // haven't been uploaded yet. Instead doApplyHistoryEntries skips entries
+    // already in local history, and — via detectAndResolveFork →
+    // rollbackLocalEntries — rolls back local-uncommitted entries first when
+    // the incoming stream has forked away from expectedRemoteHead. After
+    // that, local history order matches remote order.
+    //
+    // FIXME: applyHistoryEntries is fire-and-forget here. It can reject
+    // (e.g., patch application or rollback failures) and those rejections
+    // surface as unhandled promise errors — see the similar pattern note in
+    // firestore-history-manager.ts around the metadata-doc timeout. We
+    // should route failures into setHistoryError / logging so they're
+    // handled deterministically. The same applies to the call in
+    // resumeDownloads below.
+    this.applyHistoryEntries(historyEntryDocs);
   }
 
   async onHistoryEntryCompleted(
@@ -122,6 +223,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       return;
     }
     this.uploadInProgress = true;
+    let uploadAborted = false;
 
     try {
       // The parent Firestore metadata document might not be ready yet so we need to wait for that.
@@ -131,6 +233,16 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       // 1. Track when this has failed and stop retrying
       // 2. Show the user that sync is broken
       await this.environmentAndMetadataDocReadyPromise;
+
+      // Also wait for the initial last-history-entry fetch to seed
+      // expectedRemoteHead. Without this, a local edit queued before the
+      // seed resolves would hit the send-side fork check below with
+      // expectedRemoteHead still at its default null, spuriously throwing
+      // RemoteHeadChangedError for any document that already has remote
+      // history. After the first seed completes, subsequent uploads take
+      // the cached promise, so the extra await is effectively free.
+      await this.getInitialLastHistoryEntry();
+
       const { firestore } = this;
 
       // add a new document for this history entry
@@ -159,72 +271,202 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
         // Nothing to do
         return;
       }
-      await firestore.runTransaction(async (transaction) => {
+      try {
+        await firestore.runTransaction(async (transaction) => {
 
-        const converter = typeConverter<IDocumentMetadata>();
-        const metadataDoc = await transaction.get(firestore.documentRef(metadataPath).withConverter(converter));
+          const converter = typeConverter<IDocumentMetadata>();
+          const metadataDoc = await transaction.get(firestore.documentRef(metadataPath).withConverter(converter));
 
-        if (!metadataDoc.exists) {
-          // The metadata document must exist because we waited for it above
-          throw new Error("Could not get metadata document in history transaction");
-        }
-
-        const metadata = metadataDoc.data();
-        if (!metadata) {
-          throw new Error("Could not get metadata document data in history transaction");
-        }
-
-        const lastEntry = metadata.lastHistoryEntry;
-        let lastEntryIndex = lastEntry?.index ?? -1;
-        let lastEntryId = lastEntry?.id ?? null;
-
-        // TODO: if we want to migrate existing documents to this approach then if there is no lastHistoryEntry
-        // we need to look through the existing history entries. We can't do that in a transaction
-        // though. So we would need to do that before starting the transaction.
-        // This migration would not be safe if there are multiple clients writing history at the same time.
-        // The plan is to just use this for new group documents, so if there is some lost history
-        // for existing group documents that is OK.
-
-        entriesToUpload.forEach(entry => {
-          const newEntryIndex = lastEntryIndex + 1;
-
-          const docRef = firestore.documentRef(historyEntriesPath, entry.id);
-          const snapshot = getSnapshot(entry);
-
-          transaction.set(docRef, {
-            index: newEntryIndex,
-            created: firestore.timestamp(),
-            previousEntryId: lastEntryId,
-            entry: JSON.stringify(snapshot)
-          });
-          lastEntryIndex = newEntryIndex;
-          lastEntryId = entry.id;
-        });
-
-        transaction.update(firestore.documentRef(metadataPath), {
-          lastHistoryEntry: {
-            index: lastEntryIndex,
-            id: lastEntryId
+          if (!metadataDoc.exists) {
+            // The metadata document must exist because we waited for it above
+            throw new Error("Could not get metadata document in history transaction");
           }
-        });
-      });
 
-      // If we made it here then the transaction succeeded so we can remove the entriesToUpload
-      // from the queue.
-      this.completedHistoryEntryQueue.splice(0, entriesToUpload.length);
+          const metadata = metadataDoc.data();
+          if (!metadata) {
+            throw new Error("Could not get metadata document data in history transaction");
+          }
+
+          const lastEntry = metadata.lastHistoryEntry;
+          let lastEntryIndex = lastEntry?.index ?? -1;
+          let lastEntryId = lastEntry?.id ?? null;
+
+          // Send-side fork check: if metadata's last-entry id differs
+          // from what we expect, another client has advanced the remote
+          // chain. Abort the transaction so we don't chain our local
+          // entries onto a stale head. The receive side will handle
+          // the rollback when the listener delivers the unknown entries.
+          if (lastEntryId !== this.expectedRemoteHead) {
+            throw new RemoteHeadChangedError(this.expectedRemoteHead, lastEntryId);
+          }
+
+          // TODO: if we want to migrate existing documents to this approach then if there is no lastHistoryEntry
+          // we need to look through the existing history entries. We can't do that in a transaction
+          // though. So we would need to do that before starting the transaction.
+          // This migration would not be safe if there are multiple clients writing history at the same time.
+          // The plan is to just use this for new group documents, so if there is some lost history
+          // for existing group documents that is OK.
+
+          entriesToUpload.forEach(entry => {
+            const newEntryIndex = lastEntryIndex + 1;
+
+            const docRef = firestore.documentRef(historyEntriesPath, entry.id);
+            const snapshot = getSnapshot(entry);
+
+            transaction.set(docRef, {
+              index: newEntryIndex,
+              created: firestore.timestamp(),
+              previousEntryId: lastEntryId,
+              entry: JSON.stringify(snapshot)
+            });
+            lastEntryIndex = newEntryIndex;
+            lastEntryId = entry.id;
+          });
+
+          transaction.update(firestore.documentRef(metadataPath), {
+            lastHistoryEntry: {
+              index: lastEntryIndex,
+              id: lastEntryId
+            }
+          });
+        });
+      } catch (error) {
+        if (error instanceof RemoteHeadChangedError) {
+          // Expected: another client wrote between our read and this
+          // transaction. Leave the queue intact; the receive side
+          // will drain it after resolving the fork.
+          uploadAborted = true;
+        } else {
+          throw error;
+        }
+      }
+
+      if (!uploadAborted) {
+        // Transaction succeeded: remove uploaded entries from the queue.
+        this.completedHistoryEntryQueue.splice(0, entriesToUpload.length);
+
+        // Advance expectedRemoteHead: our uploaded entries are now on the
+        // remote chain, so our last-uploaded id is the new head.
+        const lastUploaded = entriesToUpload[entriesToUpload.length - 1];
+        if (lastUploaded) {
+          this.setExpectedRemoteHead(lastUploaded.id);
+        }
+      }
     } finally {
       this.uploadInProgress = false;
     }
 
-    // If there are more entries to upload, do that now
-    if (this.completedHistoryEntryQueue.length > 0) {
+    // If there are more entries to upload, do that now.
+    // But don't retry if we aborted due to a remote-head mismatch —
+    // the receive-side listener will re-trigger uploads after the fork
+    // is resolved.
+    if (!uploadAborted && this.completedHistoryEntryQueue.length > 0) {
       this.uploadQueuedHistoryEntries();
     }
   }
 
-  // The second half of this method is very similar to gotoHistoryEntry in TreeManager
-  async applyHistoryEntries(incomingHistory: HistoryEntrySnapshot[]) {
+  /**
+   * Roll back the last `count` entries of the local history by applying
+   * their inverse patches (in reverse order). Also drops the
+   * corresponding entries from the upload queue by id.
+   *
+   * Used after fork detection on the receive side. The caller has
+   * verified these trailing entries are local-uncommitted (they live
+   * in document.history after expectedRemoteHead) before invoking.
+   */
+  async rollbackLocalEntries(count: number): Promise<void> {
+    if (count <= 0) return;
     const { treeManager } = this;
+    const history = treeManager.document.history;
+    const entriesToRollback = history.slice(history.length - count).reverse();
+    const rolledBackIds = new Set(entriesToRollback.map(e => e.id));
+
+    const trees = Object.values(treeManager.trees);
+    await Promise.all(trees.map(tree =>
+      tree.startApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID)));
+
+    // Each entry's inverse patches, grouped by tree, applied newest-first.
+    const treePatches: Record<string, IJsonPatch[]> = {};
+    Object.keys(treeManager.trees).forEach(treeId => { treePatches[treeId] = []; });
+    for (const entry of entriesToRollback) {
+      const records = [...entry.records].reverse();
+      for (const record of records) {
+        const patches = treePatches[record.tree];
+        if (patches) patches.push(...record.getPatches(HistoryOperation.Undo));
+      }
+    }
+
+    await Promise.all(Object.entries(treePatches).map(([treeId, patches]) => {
+      if (patches.length === 0) return undefined;
+      const tree = treeManager.trees[treeId];
+      return tree?.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
+    }));
+
+    await Promise.all(trees.map(tree =>
+      tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID)));
+
+    // Remove the rolled-back entries from local history and upload queue.
+    treeManager.removeLastHistoryEntries(count);
+    this.completedHistoryEntryQueue =
+      this.completedHistoryEntryQueue.filter(e => !rolledBackIds.has(e.id));
+  }
+
+  /**
+   * Check whether the incoming remote entries continue from our local
+   * head. If not, we've forked: roll back local uncommitted entries
+   * (those living after expectedRemoteHead in document.history) and
+   * then fall through to normal application.
+   *
+   * This is the single place fork resolution happens on the receive
+   * side. GD-9/GD-10 will extend this to merge non-conflicting
+   * changes instead of rolling them all back.
+   */
+  async detectAndResolveFork(newWrapperDocs: IFirestoreHistoryEntryDoc[]): Promise<void> {
+    if (newWrapperDocs.length === 0) return;
+
+    const history = this.treeManager.document.history;
+    const localHeadId = history.length > 0 ? history[history.length - 1].id : null;
+    const firstIncomingPrev = newWrapperDocs[0].previousEntryId ?? null;
+
+    if (firstIncomingPrev === localHeadId) {
+      // Not forked — the incoming stream continues from our head.
+      return;
+    }
+
+    // Forked. Everything after expectedRemoteHead in our local history
+    // is local-uncommitted and must be rolled back.
+    const headIndex = this.expectedRemoteHead
+      ? history.findIndex(e => e.id === this.expectedRemoteHead)
+      : -1;
+    const localUncommittedCount = history.length - (headIndex + 1);
+    await this.rollbackLocalEntries(localUncommittedCount);
+  }
+
+  /**
+   * Public entry point. Serializes concurrent callers by chaining
+   * through applyInProgress. Each call waits for the previous to
+   * finish (even if the previous rejected) before doing work.
+   */
+  async applyHistoryEntries(wrapperDocs: IFirestoreHistoryEntryDoc[]): Promise<void> {
+    const previous = this.applyInProgress;
+    const run = (async () => {
+      try { await previous; } catch { /* prior call failed — still run */ }
+      return this.doApplyHistoryEntries(wrapperDocs);
+    })();
+    // Record a rejection-safe handle so future callers don't inherit
+    // a rejected promise (which would then re-throw on every await).
+    this.applyInProgress = run.then(() => undefined, () => undefined);
+    return run;
+  }
+
+  // The second half of this method is very similar to gotoHistoryEntry in TreeManager
+  private async doApplyHistoryEntries(wrapperDocs: IFirestoreHistoryEntryDoc[]) {
+    const { treeManager } = this;
+
+    // Carry the wrapper shape through the method so previousEntryId stays
+    // available for fork-detection in later steps. The snapshots themselves
+    // are what get applied to the tree.
+    const incomingHistory: HistoryEntrySnapshot[] = wrapperDocs.map(doc => doc.entry);
 
     // This should be the last entry that was applied to the document when it was first loaded.
     const lastEntry = await this.getInitialLastHistoryEntry();
@@ -253,12 +495,24 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // TODO: this could be more efficient by combining it with the incomingHistory.findIndex()
     // above.
     const existingIds = new Set(existingHistory.map(e => e.id));
+    // Index wrappers by entry id for O(1) lookup below. unappliedHistory
+    // is a subset of incomingHistory (= wrapperDocs.map(doc => doc.entry)),
+    // so every entry we keep has a corresponding wrapper here by
+    // construction.
+    const wrapperById = new Map(wrapperDocs.map(w => [w.entry.id, w]));
     const entrySnapshots: HistoryEntrySnapshot[] = [];
+    const newWrapperDocs: IFirestoreHistoryEntryDoc[] = [];
     for (const entry of unappliedHistory) {
       if (!existingIds.has(entry.id)) {
         entrySnapshots.push(entry);
+        const wrap = wrapperById.get(entry.id);
+        if (wrap) newWrapperDocs.push(wrap);
       }
     }
+
+    // Fork detection: if the first new entry doesn't continue from our
+    // local head, roll back local uncommitted entries first.
+    await this.detectAndResolveFork(newWrapperDocs);
 
     const trees = Object.values(treeManager.trees);
 
@@ -308,5 +562,14 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       return tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
     });
     await Promise.all(finishPromises);
+
+    // Advance expectedRemoteHead to the id of the last wrapper we
+    // received. These came from the remote listener, so they're on the
+    // remote chain even if local history already contains some of them.
+    // If no wrappers were delivered, leave the head alone.
+    const lastWrapper = wrapperDocs[wrapperDocs.length - 1];
+    if (lastWrapper) {
+      this.setExpectedRemoteHead(lastWrapper.entry.id);
+    }
   }
 }
