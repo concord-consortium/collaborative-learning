@@ -26,7 +26,12 @@ export const TileActivityBadges = observer(function TileActivityBadges({
   const document = documents.getDocument(documentKey);
   if (document?.type !== GroupDocument) return null;
 
-  const focused = groupActivity.usersFocusedOnTile(documentKey, tileId);
+  // Don't render a badge for the local user's own focus — they already see
+  // their selection highlighted in the UI; badges show what *other* group
+  // members are doing.
+  const focused = groupActivity
+    .usersFocusedOnTile(documentKey, tileId)
+    .filter(activity => activity.userId !== user.id);
   if (focused.length === 0) return null;
 
   // The activity listener is scoped to a single group, so every focused user

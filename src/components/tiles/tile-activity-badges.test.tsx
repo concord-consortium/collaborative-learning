@@ -17,12 +17,20 @@ const kTileId = "tile-1";
 interface IBuildStoresOptions {
   documentType?: string;
   numFocused?: number;
+  includeLocalUserFocus?: boolean;
 }
 
-function buildStores({ documentType = GroupDocument, numFocused = 0 }: IBuildStoresOptions = {}) {
-  const userIds = ["1", "2", "3", "4", "5", "6"];
+const kLocalUserId = "local";
+
+function buildStores({
+  documentType = GroupDocument,
+  numFocused = 0,
+  includeLocalUserFocus = false
+}: IBuildStoresOptions = {}) {
+  const otherUserIds = ["1", "2", "3", "4", "5", "6"];
+  const allUserIds = [kLocalUserId, ...otherUserIds];
   const classUsers: Record<string, any> = {};
-  userIds.forEach((id, idx) => {
+  allUserIds.forEach((id, idx) => {
     classUsers[id] = {
       type: "student",
       id,
@@ -41,7 +49,7 @@ function buildStores({ documentType = GroupDocument, numFocused = 0 }: IBuildSto
 
   const group = GroupModel.create({
     id: "g1",
-    users: userIds.map(id => GroupUserModel.create({ id, connectedTimestamp: 2 }))
+    users: allUserIds.map(id => GroupUserModel.create({ id, connectedTimestamp: 2 }))
   });
   const groups = GroupsModel.create({ groupsMap: { g1: group } });
 
@@ -56,18 +64,28 @@ function buildStores({ documentType = GroupDocument, numFocused = 0 }: IBuildSto
   documents.add(document);
 
   const groupActivity = GroupActivityModel.create({});
+  // numFocused refers to OTHER users focused on the tile; the local user
+  // is added separately when includeLocalUserFocus is set.
   for (let i = 0; i < numFocused; i++) {
     groupActivity.setActivity({
-      userId: userIds[i],
+      userId: otherUserIds[i],
       documentKey: kDocKey,
       focus: { tileIds: [kTileId] },
       updatedAt: 100 + i
     });
   }
+  if (includeLocalUserFocus) {
+    groupActivity.setActivity({
+      userId: kLocalUserId,
+      documentKey: kDocKey,
+      focus: { tileIds: [kTileId] },
+      updatedAt: 99
+    });
+  }
 
   // The local user must be a member of the group so the component can
   // resolve names/initials through groups.groupForUser(user.id).
-  const user = UserModel.create({ id: userIds[0] });
+  const user = UserModel.create({ id: kLocalUserId });
   return specStores({ user, class: clazz, groups, documents, groupActivity });
 }
 
@@ -115,6 +133,28 @@ describe("TileActivityBadges", () => {
     expect(overflow.textContent).toBe("+2");
   });
 
+  it("filters out the local user's own focus", () => {
+    // Only the local user is focused on the tile — nothing should render.
+    const stores = buildStores({ numFocused: 0, includeLocalUserFocus: true });
+    const { container } = render(
+      <Provider stores={stores}>
+        <TileActivityBadges documentKey={kDocKey} tileId={kTileId} hovered={false} selected={false} />
+      </Provider>
+    );
+    expect(container.querySelector(".tile-activity-badges")).toBeNull();
+  });
+
+  it("renders only other users when local user is also focused", () => {
+    // 2 other users + local user — render 2 badges, not 3.
+    const stores = buildStores({ numFocused: 2, includeLocalUserFocus: true });
+    render(
+      <Provider stores={stores}>
+        <TileActivityBadges documentKey={kDocKey} tileId={kTileId} hovered={false} selected={false} />
+      </Provider>
+    );
+    expect(screen.getAllByTestId("activity-badge")).toHaveLength(2);
+  });
+
   it("tooltip lists all focused users' full names", () => {
     const stores = buildStores({ numFocused: 3 });
     const { container } = render(
@@ -124,7 +164,9 @@ describe("TileActivityBadges", () => {
     );
     // react-tippy attaches the original title to data-original-title on its wrapper after mount.
     // Look for any element whose title attribute (or data-original-title) contains the names.
-    const expectedNames = ["First Last1", "First Last2", "First Last3"];
+    // The fixture's other users start at allUserIds index 1, so their
+    // lastNames are Last2..Last7. With numFocused=3 we expect 1..3 of those.
+    const expectedNames = ["First Last2", "First Last3", "First Last4"];
     const candidates = Array.from(container.querySelectorAll("*")) as HTMLElement[];
     const match = candidates.find(el => {
       const t = el.getAttribute("title") || el.getAttribute("data-original-title") || "";
