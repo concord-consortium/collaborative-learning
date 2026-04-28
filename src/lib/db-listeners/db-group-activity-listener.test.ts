@@ -1,3 +1,4 @@
+import { observable, runInAction } from "mobx";
 import { GroupActivityModel } from "../../models/stores/group-activity";
 import { DBGroupActivityListener } from "./db-group-activity-listener";
 
@@ -12,6 +13,7 @@ describe("DBGroupActivityListener", () => {
   let getGroupPathMock: jest.Mock;
   let usersRef: { on: jest.Mock; off: jest.Mock };
   let capturedHandler: ((snapshot: { val: () => any }) => void) | null;
+  let user: { currentGroupId: string | undefined; id: string };
   let db: any;
 
   beforeEach(() => {
@@ -25,9 +27,13 @@ describe("DBGroupActivityListener", () => {
     refMock = jest.fn(() => usersRef);
     getGroupPathMock = jest.fn(() => groupPath);
 
+    // user must be observable so the listener's reaction sees currentGroupId
+    // mutations (e.g. when a fresh student is assigned to a group after boot).
+    user = observable({ currentGroupId: "group-1" as string | undefined, id: fakeUser.id });
+
     db = {
       stores: {
-        user: { currentGroupId: "group-1", id: fakeUser.id },
+        user,
         groupActivity
       },
       firebase: {
@@ -127,11 +133,41 @@ describe("DBGroupActivityListener", () => {
   });
 
   it("does nothing on start when there is no current group", async () => {
-    db.stores.user.currentGroupId = undefined;
+    runInAction(() => { user.currentGroupId = undefined; });
     const listener = new DBGroupActivityListener(db);
     await listener.start();
 
     expect(refMock).not.toHaveBeenCalled();
     expect(onMock).not.toHaveBeenCalled();
+  });
+
+  it("subscribes when currentGroupId becomes set after start", async () => {
+    runInAction(() => { user.currentGroupId = undefined; });
+    const listener = new DBGroupActivityListener(db);
+    await listener.start();
+    expect(onMock).not.toHaveBeenCalled();
+
+    runInAction(() => { user.currentGroupId = "group-1"; });
+
+    expect(getGroupPathMock).toHaveBeenCalledWith(user, "group-1");
+    expect(refMock).toHaveBeenCalledWith(`${groupPath}/users`);
+    expect(onMock).toHaveBeenCalledWith("value", expect.any(Function));
+  });
+
+  it("re-subscribes when currentGroupId changes to a different group", async () => {
+    const listener = new DBGroupActivityListener(db);
+    await listener.start();
+
+    capturedHandler!(makeSnapshot({
+      "user-1": { activity: { documentKey: "doc-1", updatedAt: 1 } }
+    }));
+    expect(groupActivity.activities.size).toBe(1);
+    expect(onMock).toHaveBeenCalledTimes(1);
+
+    runInAction(() => { user.currentGroupId = "group-2"; });
+
+    expect(offMock).toHaveBeenCalledWith("value", expect.any(Function));
+    expect(onMock).toHaveBeenCalledTimes(2);
+    expect(groupActivity.activities.size).toBe(0);
   });
 });
