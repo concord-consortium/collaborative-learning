@@ -6,6 +6,8 @@ import { useStores } from "../../hooks/use-stores";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { GroupDocument } from "../../models/document/document-types";
 
+import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
+
 import "./tile-activity-badges.scss";
 
 interface UserInfo {
@@ -17,22 +19,25 @@ interface UserInfo {
 const MAX_VISIBLE = 4;
 
 interface ITileActivityBadge {
+  overflow?: boolean;
   users: UserInfo[];
 }
 
-function TileActivityBadge({ users }: ITileActivityBadge) {
+function TileActivityBadge({ overflow, users }: ITileActivityBadge) {
   const tooltipOptions = useTooltipOptions({ distance: 6 });
 
   if (users.length <= 0) return null;
 
-  const text = users.length === 1 ? users[0].initials : `+${users.length}`;
+  const isOverflow = overflow || users.length > 1;
+  const text = isOverflow ? `+${users.length}` : users[0].initials;
   const tooltipText = users.map(u => u.name).join(", ");
-  const classes = classNames("badge", { overflow: users.length > 1 });
+  const classes = classNames("badge", { overflow: isOverflow });
 
   return (
     <Tooltip title={tooltipText} {...tooltipOptions}>
       <div className={classes} data-testid="activity-badge">
-        {text}
+        <UserIcon className="user-icon" />
+        <span>{text}</span>
       </div>
     </Tooltip>
   );
@@ -74,8 +79,8 @@ export const TileActivityBadges = observer(function TileActivityBadges({
     .filter((u): u is NonNullable<typeof u> => u !== null);
   if (usersWithIdentity.length === 0) return null;
 
-  const visible = usersWithIdentity.slice(0, MAX_VISIBLE);
-  const overflow = usersWithIdentity.slice(MAX_VISIBLE);
+  const visibleUsers = usersWithIdentity.slice(0, MAX_VISIBLE);
+  const overflowUsers = usersWithIdentity.slice(MAX_VISIBLE);
 
   const className = classNames("tile-activity-badges", {
     "drag-handle-visible": hovered || selected
@@ -83,8 +88,8 @@ export const TileActivityBadges = observer(function TileActivityBadges({
 
   return (
     <div className={className} data-testid="tile-activity-badges">
-      {visible.map(u => <TileActivityBadge key={u.userId} users={[u]} />)}
-      {overflow.length > 0 && <TileActivityBadge users={overflow} />}
+      {visibleUsers.map(u => <TileActivityBadge key={u.userId} users={[u]} />)}
+      <TileActivityBadge overflow={true} users={overflowUsers} />
     </div>
   );
 });

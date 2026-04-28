@@ -1,14 +1,12 @@
 @import "../vars";
 
-$badge-width: 22px;
-$badge-height: 16px;
+$badge-height: 18px;
 $badge-gap: 2px;
-$drag-handle-clearance: 36px;
 
 .tile-activity-badges {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: -1px;
+  right: -1px;
   display: flex;
   gap: $badge-gap;
   z-index: 50;
@@ -16,22 +14,28 @@ $drag-handle-clearance: 36px;
   transition: right 0.2s;
 
   &.drag-handle-visible {
-    right: $drag-handle-clearance;
+    right: $drag-handle-hit-size;
   }
 
   .badge {
-    width: $badge-width;
-    height: $badge-height;
+    align-items: center;
+    border: 1px solid $connected-green-dark;
     border-radius: 2px;
-    // Placeholder neutral. The design doc said to mirror the group-button
-    // initials styling, but the existing group button uses per-position
-    // colors (blue/orange/green/purple), not a single neutral — defer to
-    // manual visual review during multi-client testing.
-    background-color: $charcoal-light-1;
-    color: white;
-    font-size: 10px;
-    font-weight: bold;
+    background-color: #8cff8c;
+    color: $charcoal-dark-2;
+    display: flex;
+    font-size: 12px;
+    gap: 3px;
+    height: $badge-height;
+    justify-content: center;
     line-height: $badge-height;
+    padding: 0 4px;
     text-align: center;
+
+    .user-icon {
+      filter: invert(29%) sepia(39%) saturate(5278%) hue-rotate(173deg) brightness(92%) contrast(97%);
+      height: 10px;
+      width: 10px;
+    }
   }
 }
