@@ -10,28 +10,28 @@ import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 
 import "./tile-activity-badges.scss";
 
+const MAX_VISIBLE = 4;
+
 interface UserInfo {
   userId: string;
   initials: string;
   name: string;
 }
 
-const MAX_VISIBLE = 4;
-
 interface ITileActivityBadge {
-  overflow?: boolean;
+  forceOverflow?: boolean;
   users: UserInfo[];
 }
 
-function TileActivityBadge({ overflow, users }: ITileActivityBadge) {
+function TileActivityBadge({ forceOverflow, users }: ITileActivityBadge) {
   const tooltipOptions = useTooltipOptions({ distance: 6 });
 
   if (users.length <= 0) return null;
 
-  const isOverflow = overflow || users.length > 1;
-  const text = isOverflow ? `+${users.length}` : users[0].initials;
+  const overflow = forceOverflow || users.length > 1;
+  const text = overflow ? `+${users.length}` : users[0].initials;
   const tooltipText = users.map(u => u.name).join(", ");
-  const classes = classNames("badge", { overflow: isOverflow });
+  const classes = classNames("badge", { overflow });
 
   return (
     <Tooltip title={tooltipText} {...tooltipOptions}>
@@ -58,12 +58,7 @@ export const TileActivityBadges = observer(function TileActivityBadges({
   const document = documents.getDocument(documentKey);
   if (document?.type !== GroupDocument) return null;
 
-  // Don't render a badge for the local user's own focus — they already see
-  // their selection highlighted in the UI; badges show what *other* group
-  // members are doing.
-  const focused = groupActivity
-    .usersFocusedOnTile(documentKey, tileId)
-    .filter(activity => activity.userId !== user.id);
+  const focused = groupActivity.usersFocusedOnTile(documentKey, tileId, user.id);
   if (focused.length === 0) return null;
 
   // The activity listener is scoped to a single group, so every focused user
@@ -89,7 +84,7 @@ export const TileActivityBadges = observer(function TileActivityBadges({
   return (
     <div className={className} data-testid="tile-activity-badges">
       {visibleUsers.map(u => <TileActivityBadge key={u.userId} users={[u]} />)}
-      <TileActivityBadge overflow={true} users={overflowUsers} />
+      <TileActivityBadge forceOverflow={true} users={overflowUsers} />
     </div>
   );
 });

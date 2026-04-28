@@ -18,11 +18,13 @@ export const GroupActivityModel = types
     activities: types.map(GroupUserActivity)
   })
   .views(self => ({
-    usersFocusedOnTile(documentKey: string, tileId: string): GroupUserActivityType[] {
+    usersFocusedOnTile(documentKey: string, tileId: string, skipUserId?: string): GroupUserActivityType[] {
       const result: GroupUserActivityType[] = [];
       self.activities.forEach(activity => {
-        if (activity.documentKey === documentKey
-            && activity.focus?.tileIds.includes(tileId)) {
+        if (
+          activity.documentKey === documentKey && activity.focus?.tileIds.includes(tileId) &&
+          activity.userId !== skipUserId
+        ) {
           result.push(activity);
         }
       });
