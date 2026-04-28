@@ -30,12 +30,12 @@ function TileActivityBadge({ forceOverflow, users }: ITileActivityBadge) {
 
   const overflow = forceOverflow || users.length > 1;
   const text = overflow ? `+${users.length}` : users[0].initials;
+  const testId = overflow ? "activity-badge-overflow" : "activity-badge";
   const tooltipText = users.map(u => u.name).join(", ");
-  const classes = classNames("badge", { overflow });
 
   return (
     <Tooltip title={tooltipText} {...tooltipOptions}>
-      <div className={classes} data-testid="activity-badge">
+      <div className={classNames("badge", { overflow })} data-testid={testId}>
         <UserIcon className="user-icon" />
         <span>{text}</span>
       </div>

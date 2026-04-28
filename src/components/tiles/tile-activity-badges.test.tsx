@@ -168,11 +168,11 @@ describe("TileActivityBadges", () => {
     // lastNames are Last2..Last7. With numFocused=3 we expect 1..3 of those.
     const expectedNames = ["First Last2", "First Last3", "First Last4"];
     const candidates = Array.from(container.querySelectorAll("*")) as HTMLElement[];
-    const match = candidates.find(el => {
+    const match = candidates.filter(el => {
       const t = el.getAttribute("title") || el.getAttribute("data-original-title") || "";
-      return expectedNames.every(name => t.includes(name));
+      return expectedNames.some(name => t.includes(name));
     });
-    expect(match).toBeTruthy();
+    expect(match.length).toBe(3);
   });
 
   it("applies left-shift class when hovered or selected", () => {
