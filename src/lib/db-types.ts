@@ -119,6 +119,12 @@ export interface DBDocument {
   };
   content?: string;
   changeCount?: number;
+  // Id of the last history entry that had been applied when this content
+  // snapshot was saved. Used to detect drift between RTDB content and the
+  // Firestore history chain on load. Duplicates a value that also lives in
+  // Firestore (metadata.lastHistoryEntry) because we need it co-located with
+  // the content in RTDB — we can't transact across RTDB and Firestore.
+  lastHistoryEntryId?: string;
   type: DBDocumentType;
 }
 
