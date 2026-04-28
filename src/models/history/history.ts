@@ -40,8 +40,10 @@ export const HistoryEntry = types.model("HistoryEntry", {
   records: types.array(TreePatchRecord),
   // History entries are marked as recording, until all records have been added
   state: types.optional(types.enumeration("HistoryEntryState", ["recording", "complete"]), "recording"),
-  // Revert-entry fields. Present (truthy / non-empty) only on entries
-  // created by rollbackLocalEntries to record a scope-conflict rollback.
+  // Revert-entry metadata. `isRevert` and `revertsEntryId` are absent on
+  // non-revert entries and set on entries created by rollbackLocalEntries.
+  // `triggeringBatchIds` is always present as an array — empty on non-revert
+  // entries, populated with the incoming batch's entry ids on reverts.
   isRevert: types.maybe(types.boolean),
   revertsEntryId: types.maybe(types.string),
   triggeringBatchIds: types.array(types.string)
