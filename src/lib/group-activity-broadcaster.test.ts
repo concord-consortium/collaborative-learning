@@ -137,7 +137,7 @@ describe("GroupActivityBroadcaster", () => {
     expect(setGroupUserActivityOnDisconnect).toHaveBeenCalledTimes(1);
   });
 
-  it("dispose() tears down reactions and onDisconnect", () => {
+  it("dispose() tears down reactions and onDisconnect", async () => {
     broadcaster.start();
 
     runInAction(() => {
@@ -147,8 +147,9 @@ describe("GroupActivityBroadcaster", () => {
     jest.advanceTimersByTime(kActivityDebounceDelay);
     expect(setGroupUserActivityOnDisconnect).toHaveBeenCalledTimes(1);
 
-    broadcaster.stop();
+    await broadcaster.stop();
 
+    expect(clearGroupUserActivity).toHaveBeenCalledTimes(1);
     expect(onDisconnectCancel).toHaveBeenCalledTimes(1);
 
     // After stop, further mutations should not trigger writes.

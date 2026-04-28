@@ -25,17 +25,28 @@ export class GroupActivityBroadcaster {
         documentKey: persistentUI.problemWorkspace.primaryDocumentKey,
         tileIds: ui.selectedTileIds.slice()
       }),
-      () => this.flush()
+      () => this.flush(),
+      { fireImmediately: true }
     );
   }
 
-  public stop() {
+  public stop(): Promise<void> {
     this.flush.cancel();
     this.disposer?.();
     this.disposer = null;
-    this.onDisconnectHandler?.cancel();
+
+    const onDisconnectHandler = this.onDisconnectHandler;
+    const onDisconnectGroupId = this.onDisconnectGroupId;
     this.onDisconnectHandler = null;
     this.onDisconnectGroupId = undefined;
+
+    const clearActivity = onDisconnectGroupId
+      ? this.db.clearGroupUserActivity().catch(() => undefined)
+      : Promise.resolve();
+
+    return clearActivity.finally(() => {
+      void onDisconnectHandler?.cancel();
+    });
   }
 
   private flushNow = async () => {
