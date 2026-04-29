@@ -17,6 +17,7 @@ import { ITileMapEntry } from "../../shared/shared";
 import { DocumentContentSnapshotType } from "src/models/document/document-content";
 import { IArrowAnnotation } from "src/models/annotations/arrow-annotation";
 import { TreeManagerType } from "../models/history/tree-manager";
+import { isOwnGroupDocument } from "../models/document/document-utils";
 
 function debugLog(...args: any[]) {
   // eslint-disable-next-line no-console
@@ -58,7 +59,11 @@ export function useDocumentSyncToFirebase(
   // The current hacky approach is to use a window level property to disable the firebase syncing
   const disableFirebaseSync = (window as any).DISABLE_FIREBASE_SYNC;
 
-  !disableFirebaseSync && !readOnly && (user.id !== uid) &&
+  // Group documents have a synthetic uid (`group_<offering>_<group>`) rather
+  // than any real user's id, so `user.id !== uid` is always true for them.
+  // Suppress the warning when the user belongs to the group; if not, fall
+  // through so the warning still fires for the genuine anomaly.
+  !disableFirebaseSync && !readOnly && !isOwnGroupDocument(document, user) && (user.id !== uid) &&
     console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
   const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
