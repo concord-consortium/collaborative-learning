@@ -114,8 +114,8 @@ export const useColumnsFromDataSet = ({
   }, [attributes, attributes.length, rowHeight, RowLabelHeader, RowLabelFormatter, readOnly, columnChanges,
       ColumnHeaderCell, controlsColumn, cellClasses, measureColumnWidth, content, lookupImage, showRowLabels]);
   // attributes.length has been included above so the columns are recreated when columns are added or removed
-  // from external means (such as undo/redo). It would be better to make this hook observe changes to the model,
-  // but I'm not sure how to do that.
+  // from external means (such as undo/redo). Attribute name changes are picked up via a separate mobx reaction
+  // in table-tile.tsx that bumps columnChanges, since the array reference and length don't change in that case.
 
   return { columns, controlsColumn, columnEditingName, handleSetColumnEditingName };
 };

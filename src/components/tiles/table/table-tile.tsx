@@ -1,5 +1,6 @@
 import { observer } from "mobx-react";
 import classNames from "classnames";
+import { comparer, reaction } from "mobx";
 import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
@@ -342,6 +343,17 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     });
     return () => disposer();
   });
+
+  // Recompute columns when an attribute's name changes (e.g. via undo/redo), since
+  // the columns useMemo doesn't observe individual attribute name properties.
+  useEffect(() => {
+    const disposer = reaction(
+      () => dataSet.attributes.map(attr => attr.name),
+      () => triggerColumnChange(),
+      { equals: comparer.structural }
+    );
+    return () => disposer();
+  }, [dataSet, triggerColumnChange]);
 
   useEffect(() => {
     const disposer = onSnapshot(content.columnWidths, () => {
