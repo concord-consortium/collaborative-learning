@@ -86,6 +86,14 @@ Phase 1 applies the reverts for efficiency by aggregating the forward patches in
 
 Originals are **not** removed from `document.history`. They stay where they are, followed later by their matching revert entries.
 
+> **Post-implementation note (2026-04-29):** the proposed
+> `addRevertEntryAfterApplying` action turned out to be byte-identical to
+> the existing `addHistoryEntryAfterApplying`. Since `addHistoryEntryAfterApplying`
+> already had the right semantics (push to history; no undoStore registration;
+> no upload enqueue) and the call site's variable name already conveys "this
+> is a revert," we kept just `addHistoryEntryAfterApplying` and dropped the
+> new action. Its docstring was expanded to cover both call sites.
+
 ### Revert entry shape
 
 Extend `HistoryEntry` with optional fields:

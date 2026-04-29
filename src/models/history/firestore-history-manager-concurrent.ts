@@ -424,7 +424,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     for (const original of originalsNewestFirst) {
       const revertSnapshot = buildRevertEntrySnapshot(getSnapshot(original), triggeringBatchIds);
       const revertEntry = HistoryEntry.create(revertSnapshot);
-      treeManager.addRevertEntryAfterApplying(revertEntry);
+      treeManager.addHistoryEntryAfterApplying(revertEntry);
     }
 
     // Remove originals from the upload queue and undo store. Originals

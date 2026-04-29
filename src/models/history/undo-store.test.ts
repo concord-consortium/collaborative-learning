@@ -997,8 +997,8 @@ describe("UndoStore.removeHistoryEntries", () => {
   });
 });
 
-describe("TreeManager.addRevertEntryAfterApplying", () => {
-  it("appends the revert entry to document.history and does not register it with undoStore", async () => {
+describe("TreeManager.addHistoryEntryAfterApplying with a revert entry", () => {
+  it("appends the entry to document.history and does not register it with undoStore", async () => {
     const {tileContent, manager, undoStore} = setupDocument();
 
     tileContent.setFlag(true);
@@ -1023,7 +1023,7 @@ describe("TreeManager.addRevertEntryAfterApplying", () => {
       records: [],
     });
 
-    manager.addRevertEntryAfterApplying(revert);
+    manager.addHistoryEntryAfterApplying(revert);
 
     expect(manager.document.history.length).toBe(2);
     expect(manager.document.history[1].id).toBe(revert.id);
