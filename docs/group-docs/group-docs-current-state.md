@@ -2,6 +2,8 @@
 
 CLUE has some work in progress support for group documents that can be edited by multiple users at the same time. While this works in some cases when changes do not overlap, there are several cases that can break it. Below is a list of a few.
 
+GD-6 (PR #2835 / CLUE-485, merged) introduces fork detection and rollback that should prevent the Model Inconsistency scenarios below. Those scenarios need to be retested. Confirmed fixes will be moved to a separate "fixed issues" document; anything still broken stays here.
+
 ## How It Works
 
 Group documents use `FirestoreHistoryManagerConcurrent` (in `src/models/history/firestore-history-manager-concurrent.ts`) which extends `FirestoreHistoryManager`. The key differences are:
@@ -89,26 +91,6 @@ If I remember right graph annotations have types which determine their shape. Pe
 The result seems to be same as if the tile is deleted by a single user after they made the sparrow connection. The sparrow shows up as a loop pointing to the same object.
 
 
-# Global Fix
-
-So far all the issues that have been explored above, could be addressed by a global change. When a change in the remote history is downloaded by a client, it can check if it has a local fork from this history. That would be a history entry that has the same previousEntryId as a different remote history entry. In this case the client should reverse its history until this fork point and then apply the remote history.
-
-Some of the infrastructure for this is already in place. `FirestoreHistoryManagerConcurrent.uploadQueuedHistoryEntries()` uses Firestore transactions to atomically write history entries and update a `lastHistoryEntry` field (index and id) on the metadata document. Each uploaded entry includes a `previousEntryId` linking it to the prior entry. This means conflicting writes are serialized on the server side — two clients can't both claim the same `previousEntryId`. However, the client does not yet detect when its local history has forked from the remote history, and does not roll back local changes when that happens. Currently, remote entries are just appended to local history regardless of whether they conflict (see `syncRemoteFirestoreHistory()`), which can result in the inconsistencies described above.
-
-What remains to be implemented is fork detection + rollback in two places, both routing through a single rollback codepath:
-
-1. **Receive side.** When a remote entry arrives via the Firestore listener (`syncRemoteFirestoreHistory()`) whose `previousEntryId` doesn't match the local head, reverse the local uncommitted entries (via their undo patches) back to the fork point, drop them from the upload queue, and apply the remote entries.
-
-2. **Send side.** Inside the upload transaction in `uploadQueuedHistoryEntries()`, compare the `metadata.lastHistoryEntry.id` read from Firestore to the locally-tracked expected remote head. If they differ, another client has committed entries this one doesn't know about yet. Abort the transaction. Without this, the current code blindly chains the queued local entries off whatever head it finds, even though those local entries were derived from a different base — the resulting remote records then claim a chain position they were not actually derived from. Once aborted, the Firestore listener will deliver the unknown entries and the receive-side handler drains the queue.
-
-Both paths share a single rollback method. GD-9 and GD-10 extend that method with per-tile / per-shared-model merging exceptions; routing both sides through it ensures those exceptions apply symmetrically.
-
-This approach will mean any conflicting changes will be lost by one of the users. If the users do not edit the same tile at the same time these conflicting changes should be minimal.
-
-This approach should guarantee that the document state and history state are valid, and that all users' documents show the same thing.
-
-In the future we can add special handling for certain cases so we can accept some changes even when there is a local fork. These would be changes that we know will not conflict with each other.
-
 # UI Issues
 
 ## Table Cell Editing
@@ -141,6 +123,12 @@ If a new column is added then User B sees the new attribute name.
 ## Table with graph
 
 I don't know the exact steps yet, but I found that when a graph is connected to a table only one of the documents actually shows the points on the graph.
+
+## Duplicate Group Documents
+
+Two users in the same group ended up working on completely separate group documents rather than a shared one. The suspicion is that two group documents got created — possibly due to a race during document provisioning — and each user opened a different one.
+
+Not yet investigated. Unknowns: steps to reproduce, the provisioning code path involved, whether this happens reliably, and whether it's recoverable once it has occurred.
 
 # Implementation TODOs
 
