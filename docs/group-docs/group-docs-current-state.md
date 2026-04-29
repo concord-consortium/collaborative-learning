@@ -2,7 +2,7 @@
 
 CLUE has some work in progress support for group documents that can be edited by multiple users at the same time. While this works in some cases when changes do not overlap, there are several cases that can break it. Below is a list of a few.
 
-GD-6 (PR #2835 / CLUE-485) introduces fork detection and rollback that should prevent the Model Inconsistency scenarios below. Those scenarios need to be retested once GD-6 lands. Confirmed fixes will be moved to a separate "fixed issues" document; anything still broken stays here.
+GD-6 (PR #2835 / CLUE-485, merged) introduces fork detection and rollback that should prevent the Model Inconsistency scenarios below. Those scenarios need to be retested. Confirmed fixes will be moved to a separate "fixed issues" document; anything still broken stays here.
 
 ## How It Works
 

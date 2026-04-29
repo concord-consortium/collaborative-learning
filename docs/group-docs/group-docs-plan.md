@@ -8,7 +8,7 @@ Note: The original GD-5 (from `group-docs-brainstorm.md`) included both the tran
 
 | Label | Name | Description |
 |---|---|---|
-| **GD-6** | Corruption Prevention | Client-side fork detection and rollback to prevent document corruption. **Status: code complete, in review (PR #2835 / CLUE-485).** |
+| **GD-6** | Corruption Prevention | Client-side fork detection and rollback to prevent document corruption. **Status: merged (PR #2835 / CLUE-485).** |
 | **GD-7** | Undo Bugs | Fix cases where patch-applied model changes don't update the tile UI |
 | **GD-8** | Tile Locking | Lock tiles so only one user can edit at a time (Plan B only) |
 | **GD-9** | Document-Level Merging | Merge non-conflicting changes at the document/tile level instead of rolling back |
@@ -47,7 +47,7 @@ Fix cases where model changes via patch application don't update the tile UI. Th
 
 ### GD-6: Corruption Prevention
 
-**Status: code complete, in review (PR #2835 / CLUE-485).** The section below describes the design; the implementation follows it. The shared rollback method, `detectAndResolveFork`, is the extension point GD-9 and GD-10 will plug into.
+**Status: merged (PR #2835 / CLUE-485).** The section below describes the design; the implementation follows it. The shared rollback method, `detectAndResolveFork`, is the extension point GD-9 and GD-10 will plug into.
 
 The transaction infrastructure is in place (`lastHistoryEntry` metadata, `previousEntryId` chaining, Firestore transactions in `uploadQueuedHistoryEntries()`). What GD-6 adds is client-side fork detection and rollback in two places that share a single codepath:
 
