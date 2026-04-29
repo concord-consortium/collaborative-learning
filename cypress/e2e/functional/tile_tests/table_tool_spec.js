@@ -54,6 +54,16 @@ context('Table Tool Tile', function () {
       tableToolTile.getColumnHeaderText().then((text) => {
         expect(text[0]).to.be.eq(headerX);
       });
+
+      cy.log("undo and redo affect column name changes");
+      clueCanvas.getUndoTool().click();
+      tableToolTile.getColumnHeaderText().then((text) => {
+        expect(text[0]).to.be.eq('x');
+      });
+      clueCanvas.getRedoTool().click();
+      tableToolTile.getColumnHeaderText().then((text) => {
+        expect(text[0]).to.be.eq(headerX);
+      });
     });
 
     cy.log('will change column y name');
