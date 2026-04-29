@@ -139,19 +139,22 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(funct
             <span className="history-view-count">{remoteHistoryEntries.length} entries</span>
             {concurrentManager && (
               <div className="history-manager-controls">
-                <button
-                  className={concurrentManager.paused ? "paused" : ""}
-                  onClick={() => concurrentManager.pauseUploads()}
-                  disabled={concurrentManager.paused}
-                >
-                  {concurrentManager.paused ? "Paused" : "Pause Uploads"}
-                </button>
-                <button
-                  onClick={() => concurrentManager.resumeUploadsAfterDelay(5000)}
-                  disabled={!concurrentManager.paused}
-                >
-                  Resume After 5s
-                </button>
+                {concurrentManager.resumeCountdownSeconds !== null ? (
+                  <>
+                    <button disabled>Pause Uploads</button>
+                    <span className="history-manager-status">
+                      Resuming in {concurrentManager.resumeCountdownSeconds}s…
+                    </span>
+                  </>
+                ) : concurrentManager.paused ? (
+                  <button onClick={() => concurrentManager.resumeUploadsAfterDelay(5000)}>
+                    Resume After 5s
+                  </button>
+                ) : (
+                  <button onClick={() => concurrentManager.pauseUploads()}>
+                    Pause Uploads
+                  </button>
+                )}
                 <button
                   className={concurrentManager.pausedDownloads ? "paused" : ""}
                   onClick={() => concurrentManager.pausedDownloads
