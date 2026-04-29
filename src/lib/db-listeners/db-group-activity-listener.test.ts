@@ -11,7 +11,7 @@ describe("DBGroupActivityListener", () => {
   let offMock: jest.Mock;
   let refMock: jest.Mock;
   let getGroupPathMock: jest.Mock;
-  let usersRef: { on: jest.Mock; off: jest.Mock };
+  let usersRef: { on: jest.Mock; off: jest.Mock; toString: () => string };
   let capturedHandler: ((snapshot: { val: () => any }) => void) | null;
   let user: { currentGroupId: string | undefined; id: string };
   let db: any;
@@ -23,7 +23,7 @@ describe("DBGroupActivityListener", () => {
       capturedHandler = cb;
     });
     offMock = jest.fn();
-    usersRef = { on: onMock, off: offMock, toString: () => `${groupPath}/users` } as any;
+    usersRef = { on: onMock, off: offMock, toString: () => `${groupPath}/users` };
     refMock = jest.fn(() => usersRef);
     getGroupPathMock = jest.fn(() => groupPath);
 
@@ -158,9 +158,7 @@ describe("DBGroupActivityListener", () => {
     const listener = new DBGroupActivityListener(db);
     await listener.start();
 
-    capturedHandler!(makeSnapshot({
-      "user-1": { activity: { documentKey: "doc-1", updatedAt: 1 } }
-    }));
+    capturedHandler!(makeSnapshot({ "user-1": { activity: { documentKey: "doc-1", updatedAt: 1 } } }));
     expect(groupActivity.activities.size).toBe(1);
     expect(onMock).toHaveBeenCalledTimes(1);
 

@@ -1,15 +1,12 @@
 @import "../vars";
 
-$badge-height: 18px;
-$badge-gap: 2px;
-
 .tile-activity-badges {
   position: absolute;
   top: -1px;
   right: -1px;
   display: flex;
-  gap: $badge-gap;
-  z-index: 50;
+  gap: 2px;
+  z-index: 99;
   pointer-events: auto;
   transition: right 0.2s;
 
@@ -26,13 +23,13 @@ $badge-gap: 2px;
     display: flex;
     font-size: 12px;
     gap: 3px;
-    height: $badge-height;
+    height: 18px;
     justify-content: center;
-    line-height: $badge-height;
     padding: 0 4px;
     text-align: center;
 
     .user-icon {
+      // Makes the icon svg appear as $workspace-teal-dark-1
       filter: invert(29%) sepia(39%) saturate(5278%) hue-rotate(173deg) brightness(92%) contrast(97%);
       height: 10px;
       width: 10px;

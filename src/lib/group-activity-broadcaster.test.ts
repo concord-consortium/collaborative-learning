@@ -1,9 +1,9 @@
 import { observable, runInAction } from "mobx";
-import { UIModel } from "../models/stores/ui";
+import { UIModel, UIModelType } from "../models/stores/ui";
 import { GroupActivityBroadcaster, kActivityDebounceDelay } from "./group-activity-broadcaster";
 
 describe("GroupActivityBroadcaster", () => {
-  let ui: ReturnType<typeof UIModel.create>;
+  let ui: UIModelType;
   let persistentUI: { problemWorkspace: { primaryDocumentKey: string | undefined } };
   let user: { currentGroupId: string | undefined };
   let setGroupUserActivity: jest.Mock;

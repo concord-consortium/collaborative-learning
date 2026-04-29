@@ -3,7 +3,7 @@ import { Provider } from "mobx-react";
 import React from "react";
 import { ClassModel } from "../../models/stores/class";
 import { createDocumentModel } from "../../models/document/document";
-import { GroupDocument, ProblemDocument } from "../../models/document/document-types";
+import { DocumentType, GroupDocument, ProblemDocument } from "../../models/document/document-types";
 import { DocumentsModel } from "../../models/stores/documents";
 import { GroupActivityModel } from "../../models/stores/group-activity";
 import { GroupModel, GroupsModel, GroupUserModel } from "../../models/stores/groups";
@@ -15,7 +15,7 @@ const kDocKey = "doc-1";
 const kTileId = "tile-1";
 
 interface IBuildStoresOptions {
-  documentType?: string;
+  documentType?: DocumentType;
   numFocused?: number;
   includeLocalUserFocus?: boolean;
 }
@@ -55,7 +55,7 @@ function buildStores({
 
   const documents = DocumentsModel.create({});
   const document = createDocumentModel({
-    type: documentType as any,
+    type: documentType,
     uid: "1",
     key: kDocKey,
     createdAt: 1,
@@ -163,7 +163,7 @@ describe("TileActivityBadges", () => {
       </Provider>
     );
     // react-tippy attaches the original title to data-original-title on its wrapper after mount.
-    // Look for any element whose title attribute (or data-original-title) contains the names.
+    // Look for any element whose title attribute (or data-original-title) contains a name.
     // The fixture's other users start at allUserIds index 1, so their
     // lastNames are Last2..Last7. With numFocused=3 we expect 1..3 of those.
     const expectedNames = ["First Last2", "First Last3", "First Last4"];

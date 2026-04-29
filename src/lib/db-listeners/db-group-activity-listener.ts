@@ -5,7 +5,7 @@ import { BaseListener } from "./base-listener";
 
 export class DBGroupActivityListener extends BaseListener {
   private db: DB;
-  private usersRef: firebase.database.Reference | null = null;
+  private usersPathRef: firebase.database.Reference | null = null;
   private disposer: IReactionDisposer | null = null;
 
   constructor(db: DB) {
@@ -15,9 +15,6 @@ export class DBGroupActivityListener extends BaseListener {
 
   public start() {
     return new Promise<void>((resolve) => {
-      // React to currentGroupId so the subscription re-arms when a user
-      // joins a group after boot (e.g., a fresh student who starts on a
-      // personal doc and is assigned to a group asynchronously).
       this.disposer = reaction(
         () => this.db.stores.user.currentGroupId,
         groupId => this.subscribeToGroup(groupId),
@@ -37,17 +34,16 @@ export class DBGroupActivityListener extends BaseListener {
     this.unsubscribeFromCurrentGroup();
     if (!groupId) return;
     const { user } = this.db.stores;
-    const path = `${this.db.firebase.getGroupPath(user, groupId)}/users`;
-    this.usersRef = this.db.firebase.ref(path);
-    this.debugLogHandler("#subscribeToGroup", "adding", "on value", this.usersRef);
-    this.usersRef.on("value", this.handleUsers);
+    this.usersPathRef = this.db.firebase.ref(this.db.firebase.getGroupUsersPath(user, groupId));
+    this.debugLogHandler("#subscribeToGroup", "adding", "on value", this.usersPathRef);
+    this.usersPathRef.on("value", this.handleUsers);
   }
 
   private unsubscribeFromCurrentGroup() {
-    if (this.usersRef) {
-      this.debugLogHandler("#unsubscribeFromCurrentGroup", "removing", "on value", this.usersRef);
-      this.usersRef.off("value", this.handleUsers);
-      this.usersRef = null;
+    if (this.usersPathRef) {
+      this.debugLogHandler("#unsubscribeFromCurrentGroup", "removing", "on value", this.usersPathRef);
+      this.usersPathRef.off("value", this.handleUsers);
+      this.usersPathRef = null;
     }
     this.db.stores.groupActivity.clear();
   }

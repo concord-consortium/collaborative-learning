@@ -13,9 +13,9 @@ import "./tile-activity-badges.scss";
 const MAX_VISIBLE = 4;
 
 interface UserInfo {
-  userId: string;
   initials: string;
   name: string;
+  userId: string;
 }
 
 interface ITileActivityBadge {
@@ -55,6 +55,7 @@ export const TileActivityBadges = observer(function TileActivityBadges({
 }: IProps) {
   const { groupActivity, groups, documents, user } = useStores();
 
+  // Only render for group documents
   const document = documents.getDocument(documentKey);
   if (document?.type !== GroupDocument) return null;
 
@@ -77,9 +78,7 @@ export const TileActivityBadges = observer(function TileActivityBadges({
   const visibleUsers = usersWithIdentity.slice(0, MAX_VISIBLE);
   const overflowUsers = usersWithIdentity.slice(MAX_VISIBLE);
 
-  const className = classNames("tile-activity-badges", {
-    "drag-handle-visible": hovered || selected
-  });
+  const className = classNames("tile-activity-badges", { "drag-handle-visible": hovered || selected });
 
   return (
     <div className={className} data-testid="tile-activity-badges">

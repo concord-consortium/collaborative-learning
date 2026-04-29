@@ -21,10 +21,8 @@ export const GroupActivityModel = types
     usersFocusedOnTile(documentKey: string, tileId: string, skipUserId?: string): GroupUserActivityType[] {
       const result: GroupUserActivityType[] = [];
       self.activities.forEach(activity => {
-        if (
-          activity.documentKey === documentKey && activity.focus?.tileIds.includes(tileId) &&
-          activity.userId !== skipUserId
-        ) {
+        const includeUser = !skipUserId || activity.userId !== skipUserId;
+        if (includeUser && activity.documentKey === documentKey && activity.focus?.tileIds.includes(tileId)) {
           result.push(activity);
         }
       });

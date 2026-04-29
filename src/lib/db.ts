@@ -391,33 +391,31 @@ export class DB {
     }
   }
 
-  public setGroupUserActivity(activity: Omit<GroupUserActivitySnapshot, "userId" | "updatedAt">) {
+  private getGroupUserActivityPath(): firebase.database.Reference | undefined {
     const { user } = this.stores;
-    if (!user.currentGroupId) return Promise.resolve();
-    const ref = this.firebase.ref(
-      this.firebase.getGroupUserActivityPath(user, user.currentGroupId)
-    );
-    return ref.set({
-      ...activity,
-      updatedAt: firebase.database.ServerValue.TIMESTAMP
-    });
+    const { currentGroupId } = user;
+    if (currentGroupId) return this.firebase.ref(this.firebase.getGroupUserActivityPath(user, currentGroupId));
+  }
+
+  public setGroupUserActivity(activity: Omit<GroupUserActivitySnapshot, "userId" | "updatedAt">) {
+    const ref = this.getGroupUserActivityPath();
+    return ref
+      ? ref.set({
+          ...activity,
+          updatedAt: firebase.database.ServerValue.TIMESTAMP
+        })
+      : Promise.resolve();
   }
 
   public clearGroupUserActivity() {
-    const { user } = this.stores;
-    if (!user.currentGroupId) return Promise.resolve();
-    const ref = this.firebase.ref(
-      this.firebase.getGroupUserActivityPath(user, user.currentGroupId)
-    );
-    return ref.remove();
+    const ref = this.getGroupUserActivityPath();
+    return ref ? ref.remove() : Promise.resolve();
   }
 
   public setGroupUserActivityOnDisconnect() {
-    const { user } = this.stores;
-    if (!user.currentGroupId) return null;
-    const ref = this.firebase.ref(
-      this.firebase.getGroupUserActivityPath(user, user.currentGroupId)
-    );
+    const ref = this.getGroupUserActivityPath();
+    if (!ref) return null;
+
     const handler = ref.onDisconnect();
     handler.remove();
     return handler;
