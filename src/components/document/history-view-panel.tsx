@@ -113,7 +113,13 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(funct
             <div className="history-view-empty">No local history entries</div>
           ) : (
             localHistoryEntries.map((entry, index) => (
-              <HistoryEntryItem key={entry.id} entry={entry} index={index} section="local" />
+              <HistoryEntryItem
+                key={entry.id}
+                entry={entry}
+                index={index}
+                section="local"
+                undoStore={treeManager?.undoStore}
+              />
             ))
           )}
         </div>

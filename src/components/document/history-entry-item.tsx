@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
+import { Instance } from "mobx-state-tree";
 import { HistoryEntryType } from "../../models/history/history";
+import { UndoStore } from "../../models/history/undo-store";
 import { useStores } from "../../hooks/use-stores";
 
 import "./history-entry-item.scss";
@@ -17,6 +19,12 @@ interface IHistoryEntryItemProps {
    * remote section, a missing uid indicates a legacy pre-feature entry.
    */
   section?: "local" | "remote";
+  /**
+   * UndoStore for the document, passed only in the local section. Used to
+   * decorate entries that are currently on the undo stack and to highlight
+   * the entry that the undo pointer is at.
+   */
+  undoStore?: Instance<typeof UndoStore>;
 }
 
 export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
@@ -24,6 +32,7 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
   index,
   previousEntryId,
   section = "local",
+  undoStore,
 }) => {
   const { class: classStore, user } = useStores();
   const [expanded, setExpanded] = useState(false);
@@ -68,6 +77,24 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
   // accent there would just be noise.
   const sourceClass = section === "local" ? `source-${entry.source}` : "";
 
+  // Undo-stack decoration. undoStore is passed only in the local section.
+  // Entries currently on the stack get a shaded background; the entry the
+  // undo pointer would undo next gets a more prominent highlight.
+  const onUndoStack = undoStore?.findHistoryEntry(entry.id) !== undefined;
+  const isUndoPointer = undoStore?.undoEntry?.id === entry.id;
+  const undoStackClass = isUndoPointer
+    ? "is-undo-pointer"
+    : onUndoStack
+      ? "on-undo-stack"
+      : "";
+  const undoableTitle = !entry.undoable
+    ? "Not undoable"
+    : isUndoPointer
+      ? "Undoable — next undo target"
+      : onUndoStack
+        ? "Undoable — on undo stack"
+        : "Undoable";
+
   return (
     <div className={`history-entry-item ${sourceClass} ${expanded ? "expanded" : ""}`}>
       <button className="history-entry-summary" onClick={toggleExpanded}>
@@ -82,10 +109,12 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
           {patchCount}p
         </span>
         <span
-          className={`history-entry-undoable ${entry.undoable ? "undoable" : "not-undoable"}`}
-          title={entry.undoable ? "Undoable" : "Not undoable"}
+          className={
+            `history-entry-undoable ${entry.undoable ? "undoable" : "not-undoable"} ${undoStackClass}`
+          }
+          title={undoableTitle}
         >
-          {entry.undoable ? "↩" : "✕"}
+          <span className="glyph">{entry.undoable ? "↩" : "✕"}</span>
         </span>
         <span className="history-entry-author" title={author.fullName ?? "Author"}>{author.initials}</span>
         <span className="history-entry-time">{formatTimestamp(entry.created)}</span>
