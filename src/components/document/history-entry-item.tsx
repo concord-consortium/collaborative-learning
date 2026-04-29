@@ -95,7 +95,10 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
           <div><strong>ID:</strong> {entry.id}</div>
           <div><strong>Model:</strong> {entry.model}</div>
           <div><strong>Action:</strong> {entry.action}</div>
-          <div><strong>Author:</strong> {authorDetail}{entry.uid ? ` — ${entry.uid}` : ""}</div>
+          <div>
+            <strong>Author:</strong> {authorDetail}
+            {entry.uid && authorDetail !== entry.uid ? ` — ${entry.uid}` : ""}
+          </div>
           {section === "local" && (
             <div>
               <strong>Source:</strong>{" "}
