@@ -144,7 +144,10 @@ const updateFlag = {
   ],
   state: "complete",
   tree: "test",
-  undoable: true
+  undoable: true,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 const action1 =   {
@@ -165,7 +168,10 @@ const action1 =   {
   ],
   state: "complete",
   tree: "test",
-  undoable: true
+  undoable: true,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 const action2 =   {
@@ -186,7 +192,10 @@ const action2 =   {
   ],
   state: "complete",
   tree: "test",
-  undoable: true
+  undoable: true,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 const action3 = {
@@ -207,7 +216,10 @@ const action3 = {
   ],
   state: "complete",
   tree: "test",
-  undoable: true
+  undoable: true,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 const action4 = {
@@ -228,7 +240,10 @@ const action4 = {
   ],
   state: "complete",
   tree: "test",
-  undoable: true
+  undoable: true,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 const sharedModelChange = {
@@ -276,6 +291,9 @@ const sharedModelChange = {
   "state": "complete",
   "tree": "test",
   "undoable": true,
+  "isRevert": undefined,
+  "revertsEntryId": undefined,
+  "triggeringBatchIds": [],
 };
 
 
@@ -370,7 +388,10 @@ const failingEntry = {
   ],
   state: "complete",
   tree: "test",
-  undoable: true
+  undoable: true,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 // An entry with three records for the same tree. The bad record is
@@ -413,7 +434,10 @@ const mixedEntry = {
   ],
   state: "complete",
   tree: "test",
-  undoable: true
+  undoable: true,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 // An entry with a single record containing three patches: a good patch,
@@ -442,7 +466,10 @@ const mixedPatchesEntry = {
   ],
   state: "complete",
   tree: "test",
-  undoable: true
+  undoable: true,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 /**
@@ -604,7 +631,10 @@ describe("history playback failure handling", () => {
     ],
     state: "complete",
     tree: "test",
-    undoable: true
+    undoable: true,
+    isRevert: undefined,
+    revertsEntryId: undefined,
+    triggeringBatchIds: []
   };
 
   it("handles a pathless patch as a recoverable playback failure", async () => {

@@ -26,7 +26,8 @@ npm run test:cypress           # Run Cypress E2E tests headless
 npm run test:cypress:open      # Open Cypress interactive UI
 
 # Code Quality
-npm run lint                   # ESLint check
+npm run lint                   # ESLint check (use during development)
+npm run lint:build             # Stricter check that also flags unnecessarily disabled rules — run before committing
 npm run lint:fix               # ESLint with auto-fix
 npm run check:types            # TypeScript type checking
 

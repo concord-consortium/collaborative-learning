@@ -865,7 +865,7 @@ export class DB {
 
           const content = this.parseDocumentContent(document);
           try {
-            return createDocumentModel({
+            const docModel = createDocumentModel({
               type,
               title,
               properties: { ...properties, ...metadata.properties },
@@ -882,6 +882,13 @@ export class DB {
               investigation,
               unit
             });
+            // Stash the envelope's lastHistoryEntryId for the drift check that
+            // runs once the Firestore history loads. Skipped (undefined) for
+            // pre-feature saves and fresh docs with no prior history.
+            if (typeof document.lastHistoryEntryId === "string") {
+              docModel.setSavedLastHistoryEntryId(document.lastHistoryEntryId);
+            }
+            return docModel;
           } catch (e) {
             const msg = "Could not open " +
                         `document '${documentKey}' of type '${type}' for user '${userId}'.` +

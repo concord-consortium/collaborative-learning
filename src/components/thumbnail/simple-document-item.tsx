@@ -21,7 +21,7 @@ export const SimpleDocumentItem = observer(function SimpleDocumentItem(
   const title = getDocumentDisplayTitle(unit, document, appConfig);
   const titleWithUser = `${userName}: ${title}`;
   const isPrivate = !isDocumentAccessibleToUser(document, user, documents);
-  const isSelected = ui.highlightedSortWorkDocument === document.key;
+  const selected = ui.highlightedSortWorkDocument === document.key;
 
   const handleClick = () => {
     onSelectDocument(document);
@@ -29,7 +29,7 @@ export const SimpleDocumentItem = observer(function SimpleDocumentItem(
 
   return (
     <div
-      className={classNames("simple-document-item", { selected: isSelected, private: isPrivate })}
+      className={classNames("simple-document-item", { selected, private: isPrivate })}
       data-test="simple-document-item"
       title={titleWithUser}
       onClick={!isPrivate ? handleClick : undefined}
