@@ -13,7 +13,7 @@ import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
-import { ClassModelType } from "./class";
+import { ClassModelType, ClassUserModelType } from "./class";
 import { GroupsModelType } from "./groups";
 import { SecondarySortType, SortType } from "./ui-types";
 
@@ -205,13 +205,25 @@ export class DocumentGroup {
 
   get byName(): DocumentGroup[] {
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
-    this.documents.forEach((doc) => {
-      const user = this.stores.class.getUserById(doc.uid);
+    const addDocForUser = (doc: IDocumentMetadataModel, user: ClassUserModelType | undefined) => {
       const sectionLabel = user ? `${user.lastName}, ${user.firstName}` : "Unknown";
       if (!documentMap.has(sectionLabel)) {
         documentMap.set(sectionLabel, []);
       }
       documentMap.get(sectionLabel)?.push(doc);
+    };
+
+    this.documents.forEach((doc) => {
+      if (doc.type === GroupDocument) {
+        // Add group documents to each user in the group
+        const groupId = doc.groupId ?? "unknownGroup";
+        const group = this.stores.groups.getGroupById(groupId);
+        group?.users.forEach(user => {
+          addDocForUser(doc, user.classUser);
+        });
+      } else {
+        addDocForUser(doc, this.stores.class.getUserById(doc.uid));
+      }
     });
 
     const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
