@@ -10,7 +10,7 @@ describe("DBGroupActivityListener", () => {
   let onMock: jest.Mock;
   let offMock: jest.Mock;
   let refMock: jest.Mock;
-  let getGroupPathMock: jest.Mock;
+  let getGroupUsersPathMock: jest.Mock;
   let usersRef: { on: jest.Mock; off: jest.Mock; toString: () => string };
   let capturedHandler: ((snapshot: { val: () => any }) => void) | null;
   let user: { currentGroupId: string | undefined; id: string };
@@ -25,7 +25,7 @@ describe("DBGroupActivityListener", () => {
     offMock = jest.fn();
     usersRef = { on: onMock, off: offMock, toString: () => `${groupPath}/users` };
     refMock = jest.fn(() => usersRef);
-    getGroupPathMock = jest.fn(() => groupPath);
+    getGroupUsersPathMock = jest.fn(() => `${groupPath}/users`);
 
     // user must be observable so the listener's reaction sees currentGroupId
     // mutations (e.g. when a fresh student is assigned to a group after boot).
@@ -38,7 +38,7 @@ describe("DBGroupActivityListener", () => {
       },
       firebase: {
         ref: refMock,
-        getGroupPath: getGroupPathMock
+        getGroupUsersPath: getGroupUsersPathMock
       }
     };
   });
@@ -49,7 +49,7 @@ describe("DBGroupActivityListener", () => {
     const listener = new DBGroupActivityListener(db);
     await listener.start();
 
-    expect(getGroupPathMock).toHaveBeenCalledWith(db.stores.user, "group-1");
+    expect(getGroupUsersPathMock).toHaveBeenCalledWith(db.stores.user, "group-1");
     expect(refMock).toHaveBeenCalledWith(`${groupPath}/users`);
     expect(onMock).toHaveBeenCalledWith("value", expect.any(Function));
     expect(capturedHandler).toBeTruthy();
@@ -149,7 +149,7 @@ describe("DBGroupActivityListener", () => {
 
     runInAction(() => { user.currentGroupId = "group-1"; });
 
-    expect(getGroupPathMock).toHaveBeenCalledWith(user, "group-1");
+    expect(getGroupUsersPathMock).toHaveBeenCalledWith(user, "group-1");
     expect(refMock).toHaveBeenCalledWith(`${groupPath}/users`);
     expect(onMock).toHaveBeenCalledWith("value", expect.any(Function));
   });
