@@ -39,7 +39,14 @@ export const HistoryEntry = types.model("HistoryEntry", {
   created: types.optional(types.Date, () => new Date()),
   records: types.array(TreePatchRecord),
   // History entries are marked as recording, until all records have been added
-  state: types.optional(types.enumeration("HistoryEntryState", ["recording", "complete"]), "recording")
+  state: types.optional(types.enumeration("HistoryEntryState", ["recording", "complete"]), "recording"),
+  // Revert-entry metadata. `isRevert` and `revertsEntryId` are absent on
+  // non-revert entries and set on entries created by rollbackLocalEntries.
+  // `triggeringBatchIds` is always present as an array — empty on non-revert
+  // entries, populated with the incoming batch's entry ids on reverts.
+  isRevert: types.maybe(types.boolean),
+  revertsEntryId: types.maybe(types.string),
+  triggeringBatchIds: types.array(types.string)
 })
 .volatile(self => ({
   // The value of the map should be the name of the exchange. This is useful

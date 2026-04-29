@@ -225,38 +225,19 @@ export const TreeManager = types
 })
 .actions((self) => ({
   /**
-   * This is used when applying a remote history entry that was loaded
+   * Append a history entry whose patches have already been applied by
+   * the caller. Two callers today:
+   *   - The Firestore listener side, after applying an incoming remote
+   *     entry's patches.
+   *   - The fork-rollback flow, after applying the aggregate inverse
+   *     patches that revert one or more local entries (the appended
+   *     entry is a revert entry — see `revert-entry.ts`).
+   *
+   * Does not register the entry with the undo store (the caller owns
+   * that decision) and does not enqueue for upload.
    */
   addHistoryEntryAfterApplying(entry: Instance<typeof HistoryEntry>) {
     self.document.history.push(entry);
-  },
-
-  /**
-   * Remove the last `count` entries from the local history. Used by
-   * FirestoreHistoryManagerConcurrent when it rolls back uncommitted
-   * local entries after detecting a fork with the remote chain.
-   *
-   * Also removes the corresponding entries from undoStore.history. The
-   * undo store holds MST references to HistoryEntry instances in
-   * document.history; if we spliced document.history first, those
-   * references would dangle and the next undoStore access would throw
-   * "Failed to resolve reference" — which was the root cause of the
-   * fork-rollback + local-edit crash that prevented change uploads.
-   */
-  removeLastHistoryEntries(count: number) {
-    if (count <= 0) return;
-    const start = Math.max(0, self.document.history.length - count);
-
-    // Collect ids while references in undoStore still resolve.
-    const removedIds = new Set<string>();
-    for (let i = start; i < self.document.history.length; i++) {
-      removedIds.add(self.document.history[i].id);
-    }
-
-    // Clean undoStore BEFORE removing entries from document.history.
-    self.undoStore.removeHistoryEntries(removedIds);
-
-    self.document.history.splice(start, self.document.history.length - start);
   },
 
   setChangeDocument(cDoc: CDocumentType) {
