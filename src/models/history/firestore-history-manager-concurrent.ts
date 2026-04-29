@@ -332,11 +332,17 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
           // The plan is to just use this for new group documents, so if there is some lost history
           // for existing group documents that is OK.
 
+          // Stamp the uploading client's uid into each entry so other
+          // clients can attribute remote entries to their author. We don't
+          // mutate the in-memory entry — the local copy stays uid-less,
+          // which the history view treats as "this client's entry."
+          const uploaderUid = this.userContextProvider?.userContext?.uid;
+
           entriesToUpload.forEach(entry => {
             const newEntryIndex = lastEntryIndex + 1;
 
             const docRef = firestore.documentRef(historyEntriesPath, entry.id);
-            const snapshot = getSnapshot(entry);
+            const snapshot = { ...getSnapshot(entry), uid: uploaderUid };
 
             transaction.set(docRef, {
               index: newEntryIndex,
@@ -445,6 +451,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     for (const original of originalsNewestFirst) {
       const revertSnapshot = buildRevertEntrySnapshot(getSnapshot(original), triggeringBatchIds);
       const revertEntry = HistoryEntry.create(revertSnapshot);
+      revertEntry.setSource("revert");
       treeManager.addHistoryEntryAfterApplying(revertEntry);
     }
 
@@ -556,7 +563,11 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     const treePatches: Record<string, IJsonPatch[] | undefined> = {};
     Object.keys(treeManager.trees).forEach(treeId => treePatches[treeId] = []);
 
-    const entries: HistoryEntryType[] = entrySnapshots.map(snapshot => HistoryEntry.create(snapshot));
+    const entries: HistoryEntryType[] = entrySnapshots.map(snapshot => {
+      const entry = HistoryEntry.create(snapshot);
+      entry.setSource("remote");
+      return entry;
+    });
 
     for (const historyEntry of entries) {
       const records = historyEntry ? [ ...historyEntry.records] : [];

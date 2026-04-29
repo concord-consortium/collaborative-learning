@@ -113,7 +113,7 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(funct
             <div className="history-view-empty">No local history entries</div>
           ) : (
             localHistoryEntries.map((entry, index) => (
-              <HistoryEntryItem key={entry.id} entry={entry} index={index} />
+              <HistoryEntryItem key={entry.id} entry={entry} index={index} section="local" />
             ))
           )}
         </div>
@@ -178,6 +178,7 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(funct
                   entry={entryWithMeta.entry}
                   index={entryWithMeta.index}
                   previousEntryId={entryWithMeta.previousEntryId}
+                  section="remote"
                 />
               ))
             )}
