@@ -42,7 +42,7 @@ export function isUnpublishedType(type: string) {
           .indexOf(type) >= 0;
 }
 export function isPublishedType(type: string) {
-  return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication]
+  return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication, GroupDocument]
           .indexOf(type) >= 0;
 }
 export function isSortableType(type: string){

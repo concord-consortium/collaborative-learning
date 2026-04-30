@@ -90,20 +90,15 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
   }
 }
 
-// TODO: handle the visibility of group documents. The request in upcoming work is for group documents
-// to be visible to everyone in the class by default. So either we just say anything that is a group
-// document is visible to everyone in the class. Or we set the visibility property on group documents
-// to "public" when they are created.
 export const isDocumentAccessibleToUser = (
   doc: IDocumentMetadataBase, user: UserModelType, documentStore: IExemplarVisibilityProvider
 ) => {
   const ownDocument = doc.uid === user.id;
-  const ownGroupDocument = doc.type === GroupDocument && doc.groupId && user.currentGroupId === doc.groupId;
   const isShared = doc.visibility === "public";
   const isPublished = isPublishedType(doc.type);
   if (user.isTeacherOrResearcher) return true;
   if (user.isStudent) {
-    return ownDocument || ownGroupDocument || isShared || isPublished
+    return ownDocument || isShared || isPublished
            || (isExemplarType(doc.type) && documentStore.isExemplarVisible(doc.key));
   }
   return false;
