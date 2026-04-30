@@ -227,7 +227,7 @@
               ]
             },
             {
-              "title": "Learning Logs",
+              "title": "Learning Log",
               "type": "learning-logs",
               "dataTestHeader": "learning-log-section",
               "documentTypes": [

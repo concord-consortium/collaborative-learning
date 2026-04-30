@@ -53,13 +53,13 @@ context('single student functional test', () => {
     cy.get('[data-test=my-work-section-investigations-documents]').should('be.visible');
 
     cy.log('will verify clicking on subtab opens panel to subtab section');
-    const section = "learning-logs";
+    const section = "learning-log";
     cy.openSection('my-work', section);
-    cy.get('[data-test=subtab-learning-logs]').should('be.visible');
+    cy.get('[data-test=subtab-learning-log]').should('be.visible');
     cy.get('.documents-list.' + section + ' [data-test=' + section + '-list-items] .footer').should('contain', "My First Learning Log");
 
     cy.log('verify click on document thumbnail opens document in nav panel');
-    cy.openDocumentWithTitle('my-work', 'learning-logs', 'My First Learning Log');
+    cy.openDocumentWithTitle('my-work', 'learning-log', 'My First Learning Log');
     cy.get('.editable-document-content [data-test=canvas]').should('be.visible');
     cy.get('.document-header.learning-log').should('be.visible');
 
