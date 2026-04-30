@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import { comparer, reaction } from "mobx";
+import { comparer } from "mobx";
 import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
@@ -39,6 +39,7 @@ import { useFormulaModal } from "./use-formula-modal";
 
 import "./table-tile.scss";
 import "./table-toolbar-registration";
+import { mstReaction } from "../../../utilities/mst-reaction";
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
@@ -347,10 +348,11 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // Recompute columns when an attribute's name changes (e.g. via undo/redo), since
   // the columns useMemo doesn't observe individual attribute name properties.
   useEffect(() => {
-    const disposer = reaction(
+    const disposer = mstReaction(
       () => dataSet.attributes.map(attr => attr.name),
       () => triggerColumnChange(),
-      { equals: comparer.structural }
+      { equals: comparer.structural, name: `TableToolComponent.attributeNameReaction` },
+      dataSet
     );
     return () => disposer();
   }, [dataSet, triggerColumnChange]);
