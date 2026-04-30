@@ -1,15 +1,17 @@
 import { makeObservable, observable, runInAction } from "mobx";
 import { onSnapshot } from "mobx-state-tree";
 
+import { DocumentModelType } from "../../models/document/document";
+import { LearningLogDocument, PersonalDocument } from "../../models/document/document-types";
 import { DB } from "../db";
+import { DatabaseType } from "../db-types";
+import { GroupActivityBroadcaster } from "../group-activity-broadcaster";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
 import { DBGroupsListener } from "./db-groups-listener";
+import { DBGroupActivityListener } from "./db-group-activity-listener";
 import { DBOtherDocumentsListener } from "./db-other-docs-listener";
 import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
-import { DocumentModelType } from "../../models/document/document";
-import { LearningLogDocument, PersonalDocument } from "../../models/document/document-types";
-import { DatabaseType } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";
 import { DBBookmarksListener } from "./db-bookmarks-listener";
@@ -24,6 +26,7 @@ export class DBListeners extends BaseListener {
 
   private latestGroupIdListener: DBLatestGroupIdListener;
   private groupsListener: DBGroupsListener;
+  private groupActivityListener: DBGroupActivityListener;
   private problemDocumentsListener: DBProblemDocumentsListener;
   private personalDocumentsListener: DBOtherDocumentsListener;
   private learningLogsListener: DBOtherDocumentsListener;
@@ -34,6 +37,7 @@ export class DBListeners extends BaseListener {
   private bookmarksListener: DBBookmarksListener;
   private documentsContentListener: DBDocumentsContentListener;
   private exemplarsListener: DBExemplarsListener;
+  private groupActivityBroadcaster: GroupActivityBroadcaster;
 
   constructor(db: DB) {
     super("DBListeners");
@@ -41,6 +45,7 @@ export class DBListeners extends BaseListener {
     this.db = db;
     this.latestGroupIdListener = new DBLatestGroupIdListener(db);
     this.groupsListener = new DBGroupsListener(db);
+    this.groupActivityListener = new DBGroupActivityListener(db);
     this.problemDocumentsListener = new DBProblemDocumentsListener(db);
     this.personalDocumentsListener = new DBOtherDocumentsListener(db, PersonalDocument);
     this.learningLogsListener = new DBOtherDocumentsListener(db, LearningLogDocument);
@@ -51,6 +56,7 @@ export class DBListeners extends BaseListener {
     this.bookmarksListener = new DBBookmarksListener(db);
     this.documentsContentListener = new DBDocumentsContentListener(db);
     this.exemplarsListener = new DBExemplarsListener(db);
+    this.groupActivityBroadcaster = new GroupActivityBroadcaster(db);
   }
 
   public async start() {
@@ -66,6 +72,9 @@ export class DBListeners extends BaseListener {
       this.studentPersonalDocsListener.start(),
       this.supportsListener.start()
     ]);
+    // start group activity listener after groups listener so currentGroupId is set
+    await this.groupActivityListener.start();
+    this.groupActivityBroadcaster.start();
     // start listeners that depend on documents
     await Promise.all([
       this.commentsListener.start(),
@@ -89,6 +98,8 @@ export class DBListeners extends BaseListener {
     this.learningLogsListener.stop();
     this.personalDocumentsListener.stop();
     this.problemDocumentsListener.stop();
+    this.groupActivityBroadcaster.stop();
+    this.groupActivityListener.stop();
     this.groupsListener.stop();
     this.latestGroupIdListener.stop();
     this.exemplarsListener.stop();

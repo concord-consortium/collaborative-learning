@@ -39,6 +39,7 @@ import { safeJsonParse } from "../utilities/js-utils";
 import { typeConverter } from "../utilities/db-utils";
 import { initializeApp } from "./firebase-config";
 import { UserModelType } from "../models/stores/user";
+import { GroupUserActivitySnapshot } from "../models/stores/group-activity";
 import { logExemplarDocumentEvent } from "../models/document/log-exemplar-document-event";
 import { AppMode } from "../models/stores/store-types";
 import { DEBUG_FIRESTORE } from "./debug";
@@ -388,6 +389,36 @@ export class DB {
         await this.firebase.setConnectionHandlers(userRef);
       }
     }
+  }
+
+  private getGroupUserActivityPath(): firebase.database.Reference | undefined {
+    const { user } = this.stores;
+    const { currentGroupId } = user;
+    if (currentGroupId) return this.firebase.ref(this.firebase.getGroupUserActivityPath(user, currentGroupId));
+  }
+
+  public setGroupUserActivity(activity: Omit<GroupUserActivitySnapshot, "userId" | "updatedAt">) {
+    const ref = this.getGroupUserActivityPath();
+    return ref
+      ? ref.set({
+          ...activity,
+          updatedAt: firebase.database.ServerValue.TIMESTAMP
+        })
+      : Promise.resolve();
+  }
+
+  public clearGroupUserActivity() {
+    const ref = this.getGroupUserActivityPath();
+    return ref ? ref.remove() : Promise.resolve();
+  }
+
+  public setGroupUserActivityOnDisconnect() {
+    const ref = this.getGroupUserActivityPath();
+    if (!ref) return null;
+
+    const handler = ref.onDisconnect();
+    handler.remove();
+    return handler;
   }
 
   public async guaranteeOpenDefaultDocument(documentType: typeof ProblemDocument | typeof PersonalDocument,
