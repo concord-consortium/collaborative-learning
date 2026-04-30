@@ -357,10 +357,10 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   useEffect(() => {
     const disposer = onSnapshot(content.columnWidths, () => {
-      triggerRowChange();
+      triggerColumnChange();
     });
     return () => disposer();
-  });
+  }, [content, triggerColumnChange]);
 
   // Currently this is recreated on each render, so the ToolbarContext is changed
   // on each render. deleteSelected is changed on each render, so a useMemo
