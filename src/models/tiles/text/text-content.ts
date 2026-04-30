@@ -10,7 +10,6 @@ import { escapeBackslashes, escapeDoubleQuotes, removeNewlines, removeTabs } fro
 import { tileContentAPIViews } from "../tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
-import { kVariableFormat } from "../../../plugins/shared-variables/slate/variables-plugin";
 
 export const kTextTileType = "Text";
 
@@ -29,10 +28,6 @@ export const TextContentModel = TileContentModel
   })
   .volatile(self => ({
     editor:  undefined as CustomEditor | undefined,
-    // Bumped when variable chips are added to or removed from the Slate editor. Read by
-    // `annotatableObjects` so the view participates in MobX reactivity for variable
-    // chips — Slate's editor state isn't otherwise observable.
-    variableChipsRevision: 0
   }))
   .views(self => ({
     // guarantees string (not readonly string) types
@@ -149,9 +144,6 @@ export const TextContentModel = TileContentModel
       if (index >= 0) {
         self.highlightedText.splice(index, 1);
       }
-    },
-    bumpVariableChipsRevision() {
-      self.variableChipsRevision++;
     }
   }))
   .actions(self => ({
@@ -167,20 +159,14 @@ export const TextContentModel = TileContentModel
       self.highlightedText.forEach(highlight => {
         objects.push({objectId: highlight.id, objectType: kHighlightFormat});
       });
-      // Variable chips live only in the Slate tree (no MST mirror), so enumerate them
-      // by walking the editor. Read variableChipsRevision so MobX re-evaluates this
-      // view when text-tile's handleChange detects a variable chip add or remove.
-      // eslint-disable-next-line unused-imports/no-unused-vars
-      const _revision = self.variableChipsRevision;
-      const editor = self.editor;
-      if (editor) {
-        for (const [node] of Editor.nodes(editor, { at: [], mode: "all" })) {
-          const anyNode = node as any;
-          if (anyNode?.type === kVariableFormat && typeof anyNode.reference === "string") {
-            objects.push({ objectId: anyNode.reference, objectType: kVariableFormat });
-          }
+      // Each text plugin contributes its own annotatable objects (e.g. variable chips
+      // from the shared-variables plugin) and is responsible for its own MobX
+      // reactivity — Slate's editor state isn't otherwise observable.
+      getAllTextPluginInfos().forEach(info => {
+        if (info?.getAnnotatableObjects) {
+          objects.push(...info.getAnnotatableObjects(self));
         }
-      }
+      });
       return objects;
     },
   }));

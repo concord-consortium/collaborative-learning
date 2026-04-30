@@ -13,7 +13,7 @@
  * browser session below the renderer-crash memory threshold in CI.
  */
 
-const queryParamsStudent = `${Cypress.config("qaUnitStudent5")}`;
+const queryParamsStudent = Cypress.config("qaUnitStudent5");
 
 function beforeTest(params) {
   cy.visit(params);

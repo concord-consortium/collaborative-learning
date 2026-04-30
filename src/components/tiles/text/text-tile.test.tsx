@@ -54,6 +54,7 @@ describe("TextToolComponent highlight bbox cache", () => {
     specTextTile({
       onRegisterTileApi: (api) => { tileApi = api; }
     });
+    expect(tileApi).toBeDefined();
     expect(tileApi?.getObjectBoundingBox?.("unknown-id", kHighlightFormat)).toBeUndefined();
   });
 

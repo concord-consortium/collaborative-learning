@@ -15,8 +15,6 @@ import { HighlightRegistryContext, HighlightRevisionContext, IHighlightBox }
     from "../../../plugins/text/highlight-registry-context";
 import { removeAnnotationsForChip } from "../../../plugins/text/chip-annotation-cleanup";
 import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
-import { kVariableFormat, VariableRegistryContext }
-    from "../../../plugins/shared-variables/slate/variables-plugin";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
@@ -45,21 +43,6 @@ function collectHighlightIds(value: EditorValue): Set<string> {
   };
   walk(value as any);
   return ids;
-}
-
-// Returns the references of all variable chip elements in a Slate value.
-function collectVariableReferences(value: EditorValue): Set<string> {
-  const refs = new Set<string>();
-  const walk = (nodes: readonly any[]) => {
-    for (const node of nodes) {
-      if (node?.type === kVariableFormat && typeof node.reference === "string") {
-        refs.add(node.reference);
-      }
-      if (Array.isArray(node?.children)) walk(node.children);
-    }
-  };
-  walk(value as any);
-  return refs;
 }
 
 /*
@@ -139,9 +122,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private textOnFocus: string | string [] | undefined;
   private isHandlingUserChange = false;
   private highlightBoxesCache: Map<string, IHighlightBox> = new Map();
-  private variableBoxesCache: Map<string, IHighlightBox> = new Map();
   private chipBoxesCacheTick = observable({ count: 0 });
-  private previousVariableIds: Set<string> = new Set();
 
   static contextType = ContainerContext;
   declare context: React.ContextType<typeof ContainerContext>;
@@ -180,7 +161,12 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.getContent().setEditor(this.editor);
     const initialValue = this.getContent().asSlate();
     this.setState({ initialValue });
-    this.previousVariableIds = collectVariableReferences(initialValue);
+    // Give plugins access to stores + tileId (for cleanup hooks) and let them seed any
+    // initial-value state (e.g., the variables plugin's `previousVariableIds` baseline).
+    for (const plugin of Object.values(this.plugins)) {
+      plugin?.setTileContext?.(this.stores, this.props.model.id);
+      plugin?.initializeFromValue?.(initialValue);
+    }
 
     this.disposers = [];
     // Synchronize slate with model changes. e.g. changes to any text in another tile is refelected here.
@@ -228,13 +214,14 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         // eslint-disable-next-line unused-imports/no-unused-vars
         const _tick = this.chipBoxesCacheTick.count;
         if (objectType === kHighlightFormat) {
-          const box = this.highlightBoxesCache.get(objectId);
+          return this.highlightBoxesCache.get(objectId);
+        }
+        // Other chip kinds (e.g., variable chips) live in their plugin's bbox cache.
+        for (const plugin of Object.values(this.plugins)) {
+          const box = plugin?.getObjectBoundingBox?.(objectId, objectType);
           if (box) return box;
         }
-        if (objectType === kVariableFormat) {
-          const box = this.variableBoxesCache.get(objectId);
-          if (box) return box;
-        }
+        return undefined;
       },
       getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
         // offset the annotation arrows to the right top corner of the bounding box until connected to a target,
@@ -242,16 +229,20 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         // Track the tick so MobX observers re-run when the cache is written.
         // eslint-disable-next-line unused-imports/no-unused-vars
         const _tick = this.chipBoxesCacheTick.count;
-        const offsets = OffsetModel.create({});
-        const box = objectType === kHighlightFormat ? this.highlightBoxesCache.get(objectId)
-                  : objectType === kVariableFormat ? this.variableBoxesCache.get(objectId)
-                  : undefined;
-        if (box) {
-          const { width, height } = box;
-          offsets.setDx(width / 2);
-          offsets.setDy(- height / 2);
+        if (objectType === kHighlightFormat) {
+          const offsets = OffsetModel.create({});
+          const box = this.highlightBoxesCache.get(objectId);
+          if (box) {
+            offsets.setDx(box.width / 2);
+            offsets.setDy(-box.height / 2);
+          }
+          return offsets;
         }
-        return offsets;
+        for (const plugin of Object.values(this.plugins)) {
+          const offsets = plugin?.getObjectDefaultOffsets?.(objectId, objectType);
+          if (offsets) return offsets;
+        }
+        return OffsetModel.create({});
       },
       // Return focusable elements for focus trap navigation
       getFocusableElements: () => {
@@ -314,34 +305,32 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
           <TextPluginsContext.Provider value={this.plugins} >
             <HighlightRevisionContext.Provider value={this.state.revision}>
               <HighlightRegistryContext.Provider value={this.handleUpdateHighlightBoxCache}>
-                <VariableRegistryContext.Provider value={this.handleUpdateVariableBoxCache}>
-                  <div
-                    className={containerClasses}
-                    data-testid="text-tool-wrapper"
-                    ref={elt => this.textTileDiv = elt}
-                    onMouseDown={this.handleMouseDownInWrapper}
+                <div
+                  className={containerClasses}
+                  data-testid="text-tool-wrapper"
+                  ref={elt => this.textTileDiv = elt}
+                  onMouseDown={this.handleMouseDownInWrapper}
+                >
+                  <Slate
+                    editor={this.editor as ReactEditor}
+                    initialValue={this.state.initialValue}
+                    onChange={this.handleChange}
                   >
-                    <Slate
-                      editor={this.editor as ReactEditor}
-                      initialValue={this.state.initialValue}
-                      onChange={this.handleChange}
-                    >
-                      <SlateEditor
-                        placeholder={placeholderText}
-                        hotkeyMap={defaultHotkeyMap}
-                        readOnly={readOnly}
-                        onFocus={this.handleFocus}
-                        onBlur={this.handleBlur}
-                        className={`ccrte-editor slate-editor ${slateClasses || ""}`}
-                      />
-                      <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
-                    </Slate>
-                    <VoiceTypingOverlay
-                      text={this.state.interimText || ""}
-                      tileElement={this.textTileDiv}
+                    <SlateEditor
+                      placeholder={placeholderText}
+                      hotkeyMap={defaultHotkeyMap}
+                      readOnly={readOnly}
+                      onFocus={this.handleFocus}
+                      onBlur={this.handleBlur}
+                      className={`ccrte-editor slate-editor ${slateClasses || ""}`}
                     />
-                  </div>
-                </VariableRegistryContext.Provider>
+                    <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
+                  </Slate>
+                  <VoiceTypingOverlay
+                    text={this.state.interimText || ""}
+                    tileElement={this.textTileDiv}
+                  />
+                </div>
               </HighlightRegistryContext.Provider>
             </HighlightRevisionContext.Provider>
           </TextPluginsContext.Provider>
@@ -362,20 +351,11 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
     if (!readOnly) {
       this.isHandlingUserChange = true;
-      // Cascade-clean any chip the user edited out: remove sparrows attached to it and
-      // clear its bbox cache. For highlights, also prune the highlightedText MST entry.
-      // The two chip kinds track previous state differently: highlights are mirrored in
-      // content.highlightedText, while variables live only in the Slate tree, so we keep
-      // a parallel previousVariableIds snapshot on the component instance.
+      // Cascade-clean any highlight chip the user edited out: remove sparrows attached
+      // to it, prune the highlightedText MST entry, and clear its bbox cache.
       const previousHighlightIds = content.highlightedText.map(h => h.id);
       const currentHighlightIds = collectHighlightIds(value);
       const removedHighlightIds = previousHighlightIds.filter(id => !currentHighlightIds.has(id));
-
-      const currentVariableIds = collectVariableReferences(value);
-      const removedVariableIds = [...this.previousVariableIds].filter(id => !currentVariableIds.has(id));
-      const variableChipsChanged = removedVariableIds.length > 0
-        || currentVariableIds.size !== this.previousVariableIds.size;
-      this.previousVariableIds = currentVariableIds;
 
       // Update content model when user changes slate
       content.setSlate(value);
@@ -385,14 +365,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         content.removeHighlight(id);
         this.updateBoxCache(this.highlightBoxesCache, id, undefined);
       }
-      for (const id of removedVariableIds) {
-        removeAnnotationsForChip(this.stores, model.id, id, kVariableFormat);
-        this.updateBoxCache(this.variableBoxesCache, id, undefined);
-      }
-      // Notify annotatableObjects observers (e.g. AnnotationLayer) that the set of
-      // variable chips has changed, since Slate's editor state isn't observable.
-      if (variableChipsChanged) {
-        content.bumpVariableChipsRevision();
+      // Other chip kinds (e.g., variable chips) handle their own diff/cleanup inside
+      // their plugin's handleSlateValueChange hook.
+      for (const plugin of Object.values(this.plugins)) {
+        plugin?.handleSlateValueChange?.(value);
       }
 
       this.setState({ revision: this.state.revision + 1 });
@@ -494,9 +470,5 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   private handleUpdateHighlightBoxCache = (id: string, box: IHighlightBox) => {
     this.updateBoxCache(this.highlightBoxesCache, id, box);
-  };
-
-  private handleUpdateVariableBoxCache = (id: string, box: IHighlightBox) => {
-    this.updateBoxCache(this.variableBoxesCache, id, box);
   };
 }

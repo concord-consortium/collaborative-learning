@@ -14,7 +14,7 @@
  * memory threshold in CI.
  */
 
-const queryParamsTeacher = `${Cypress.config("qaUnitTeacher6")}`;
+const queryParamsTeacher = Cypress.config("qaUnitTeacher6");
 
 function beforeTest(params) {
   cy.visit(params);
@@ -124,10 +124,6 @@ context('Skip Links Navigation', function () {
       beforeTest(queryParamsTeacher);
       cy.get('.toggle-button').contains('Dashboard').click();
       cy.get('#main-dashboard .tabbed-area').should('be.visible');
-    });
-
-    it('dashboard element has correct id attribute', function () {
-      cy.get('#main-dashboard').should('exist');
     });
 
     it('dashboard element is focusable', function () {
