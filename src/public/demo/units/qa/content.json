@@ -210,22 +210,6 @@
               "addDocument": true
             },
             {
-              "title": "Workspaces",
-              "type": "learning-logs",
-              "dataTestHeader": "learning-log-section",
-              "documentTypes": [
-                "learningLog"
-              ],
-              "properties": [
-                "!isDeleted"
-              ],
-              "showStars": [
-                "student",
-                "teacher"
-              ],
-              "addDocument": true
-            },
-            {
               "title": "Bookmarks",
               "type": "starred-problem-documents",
               "dataTestHeader": "my-work-section-starred",
@@ -241,6 +225,22 @@
                 "student",
                 "teacher"
               ]
+            },
+            {
+              "title": "Learning Logs",
+              "type": "learning-logs",
+              "dataTestHeader": "learning-log-section",
+              "documentTypes": [
+                "learningLog"
+              ],
+              "properties": [
+                "!isDeleted"
+              ],
+              "showStars": [
+                "student",
+                "teacher"
+              ],
+              "addDocument": true
             }
           ]
         },
