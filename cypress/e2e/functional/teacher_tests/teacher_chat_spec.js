@@ -36,7 +36,7 @@ context('Chat Panel', () => {
 });
 
 context('Commented Document List', () => {
-  it.only('Comment all document list', () => {
+  it('Comment all document list', () => {
     ChatTestHelpers.beforeTest("clueTestqaUnitTeacher6", "Teacher 6");
 
     ChatTestHelpers.testCommentedDocumentList();

@@ -234,17 +234,18 @@ context('Nav Panel', function () {
     cy.focused().should('have.attr', 'aria-selected', 'true');
 
     cy.realPress('ArrowRight');
-    cy.focused().should('have.class', 'tab-my-work');
+    cy.focused().should('have.class', 'tab-sort-work');
     cy.focused().should('have.attr', 'aria-selected', 'true');
 
     cy.realPress('ArrowRight');
-    cy.focused().should('have.class', 'tab-class-work');
+    cy.focused().should('have.class', 'tab-my-work');
     cy.focused().should('have.attr', 'aria-selected', 'true');
 
     cy.log('Arrow left navigates back');
     cy.realPress('ArrowLeft');
-    cy.focused().should('have.class', 'tab-my-work');
+    cy.focused().should('have.class', 'tab-sort-work');
     cy.focused().should('have.attr', 'aria-selected', 'true');
+    cy.realPress('ArrowRight');
 
     cy.log('Tab from top-level tab moves focus to sub-tabs');
     cy.openTopTab("problems");
