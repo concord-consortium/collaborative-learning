@@ -33,7 +33,7 @@ function TileActivityBadge({ forceOverflow, users }: ITileActivityBadge) {
   const testId = overflow ? "activity-badge-overflow" : "activity-badge";
   const tooltipHtml = (
     <div className="badge-tooltip">
-      {users.map(u => (<div key={u.name}>{u.name}</div>))}
+      {users.map(u => (<div key={u.userId}>{u.name}</div>))}
     </div>
   );
 
