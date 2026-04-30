@@ -225,7 +225,16 @@ export const TreeManager = types
 })
 .actions((self) => ({
   /**
-   * This is used when applying a remote history entry that was loaded
+   * Append a history entry whose patches have already been applied by
+   * the caller. Two callers today:
+   *   - The Firestore listener side, after applying an incoming remote
+   *     entry's patches.
+   *   - The fork-rollback flow, after applying the aggregate inverse
+   *     patches that revert one or more local entries (the appended
+   *     entry is a revert entry — see `revert-entry.ts`).
+   *
+   * Does not register the entry with the undo store (the caller owns
+   * that decision) and does not enqueue for upload.
    */
   addHistoryEntryAfterApplying(entry: Instance<typeof HistoryEntry>) {
     self.document.history.push(entry);

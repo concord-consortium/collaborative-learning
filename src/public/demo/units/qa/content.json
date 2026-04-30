@@ -67,7 +67,20 @@
         "maxTiles": 1
       },
       "text": {
-        "tools": ["bold", "italic", "underline", "highlight", "subscript", "superscript", "heading", "list-ol", "list-ul", "link"]
+        "tools": ["bold", "italic", "underline", "highlight", "subscript", "superscript", "heading", "list-ol", "list-ul", "link", "new-variable", "insert-variable", "edit-variable"]
+      },
+      "drawing": {
+        "tools": [
+          "select", "line", "vector", "rectangle", "ellipse", "stamp", "upload", "text",
+          "|",
+          "stroke-color", "fill-color",
+          "|",
+          "new-variable", "insert-variable", "edit-variable",
+          "|",
+          "duplicate", "rotate-right", "flip-horizontal", "flip-vertical", "align", "group", "ungroup",
+          "|",
+          "zoom-in", "zoom-out", "fit-all", "navigator", "delete", "voice-typing"
+        ]
       },
       "iframeInteractive": {
         "maxTiles": 1,

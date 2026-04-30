@@ -12,7 +12,7 @@ import { createDocumentModel } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
 import { when } from "mobx";
 import { CDocument, TreeManager } from "./tree-manager";
-import { HistoryEntrySnapshot } from "./history";
+import { HistoryEntry, HistoryEntrySnapshot } from "./history";
 import { withoutUndo } from "./without-undo";
 import { expectEntryToBeComplete } from "./undo-store-test-utils";
 // way to get a writable reference to libDebug
@@ -209,7 +209,10 @@ const setFlagTrueEntry = {
   ],
   state: "complete",
   tree: "test",
-  undoable: true
+  undoable: true,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 it("records a tile change as one history event with one TreeRecordEntry", async () => {
@@ -257,7 +260,10 @@ const undoEntry = {
   ],
   state: "complete",
   tree: "manager",
-  undoable: false
+  undoable: false,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 it("can undo a tile change", async () => {
@@ -305,7 +311,10 @@ const redoEntry = {
   ],
   state: "complete",
   tree: "manager",
-  undoable: false
+  undoable: false,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 it("can redo a tile change", async () => {
@@ -366,7 +375,10 @@ it("records a async tile change as one history event with one TreeRecordEntry", 
       ],
       state: "complete",
       tree: "test",
-      undoable: true
+      undoable: true,
+      isRevert: undefined,
+      revertsEntryId: undefined,
+      triggeringBatchIds: []
     }
   ]);
 });
@@ -406,7 +418,10 @@ it("records an async tile change and an interleaved history event with 2 entries
       ],
       state: "complete",
       tree: "test",
-      undoable: true
+      undoable: true,
+      isRevert: undefined,
+      revertsEntryId: undefined,
+      triggeringBatchIds: []
     }
   ]);
 });
@@ -550,7 +565,10 @@ it("will print a warning and still add the action to the undo list if any child 
       ],
       state: "complete",
       tree: "test",
-      undoable: true
+      undoable: true,
+      isRevert: undefined,
+      revertsEntryId: undefined,
+      triggeringBatchIds: []
     }
   ]);
 });
@@ -622,7 +640,10 @@ it("records undoable actions that happen in the middle async actions which are n
       ],
       state: "complete",
       tree: "test",
-      undoable: false
+      undoable: false,
+      isRevert: undefined,
+      revertsEntryId: undefined,
+      triggeringBatchIds: []
     }
   ]);
 
@@ -692,7 +713,10 @@ const initialSharedModelUpdateEntry = {
   ],
   state: "complete",
   tree: "test",
-  undoable: true
+  undoable: true,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 it("records a shared model change as one history event with two TreeRecordEntries", async () => {
@@ -736,7 +760,10 @@ const undoSharedModelEntry = {
   ],
   state: "complete",
   tree: "manager",
-  undoable: false
+  undoable: false,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 it("can undo a shared model change", async () => {
@@ -792,7 +819,10 @@ const redoSharedModelEntry = {
   ],
   state: "complete",
   tree: "manager",
-  undoable: false
+  undoable: false,
+  isRevert: undefined,
+  revertsEntryId: undefined,
+  triggeringBatchIds: []
 };
 
 it("can redo a shared model change", async () => {
@@ -930,7 +960,10 @@ it("can track the addition of a new shared model", async () => {
       ],
       state: "complete",
       tree: "test",
-      undoable: true
+      undoable: true,
+      isRevert: undefined,
+      revertsEntryId: undefined,
+      triggeringBatchIds: []
     }
   ]);
 });
@@ -939,3 +972,64 @@ async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number
   const updateCalledTimes = when(() => testTile.updateCount === times, {timeout: 100});
   return expect(updateCalledTimes).resolves.toBeUndefined();
 }
+
+describe("UndoStore.removeHistoryEntries", () => {
+  it("no-ops when given an empty id set", async () => {
+    const {tileContent, manager, undoStore} = setupDocument();
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+
+    undoStore.removeHistoryEntries(new Set());
+
+    expect(undoStore.history.length).toBe(1);
+    expect(undoStore.undoIdx).toBe(1);
+  });
+
+  it("ignores ids not present in the undo history", async () => {
+    const {tileContent, manager, undoStore} = setupDocument();
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+
+    undoStore.removeHistoryEntries(new Set(["does-not-exist"]));
+
+    expect(undoStore.history.length).toBe(1);
+    expect(undoStore.undoIdx).toBe(1);
+  });
+});
+
+describe("TreeManager.addHistoryEntryAfterApplying with a revert entry", () => {
+  it("appends the entry to document.history and does not register it with undoStore", async () => {
+    const {tileContent, manager, undoStore} = setupDocument();
+
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+    expect(manager.document.history.length).toBe(1);
+    expect(undoStore.history.length).toBe(1);
+
+    // Build a revert entry directly (the full rollback flow lives in
+    // the concurrent firestore manager; this test just exercises the
+    // tree-manager side).
+    const original = manager.document.history[0];
+    const revert = HistoryEntry.create({
+      id: "revert-of-" + original.id,
+      tree: original.tree,
+      model: original.model,
+      action: original.action,
+      undoable: false,
+      state: "complete",
+      isRevert: true,
+      revertsEntryId: original.id,
+      triggeringBatchIds: ["R1"],
+      records: [],
+    });
+
+    manager.addHistoryEntryAfterApplying(revert);
+
+    expect(manager.document.history.length).toBe(2);
+    expect(manager.document.history[1].id).toBe(revert.id);
+    expect(manager.document.history[1].isRevert).toBe(true);
+    // Revert entry NOT added to undoStore.
+    expect(undoStore.history.length).toBe(1);
+    expect(undoStore.history.map(e => e.id)).not.toContain(revert.id);
+  });
+});

@@ -28,6 +28,16 @@ export interface IFirestoreHistoryManagerArgs {
   treeManager: TreeManagerType;
   uploadLocalHistory: boolean;
   syncRemoteHistory: boolean;
+  // Id recorded alongside the document content at save time (from the RTDB
+  // envelope). When the Firestore history first loads, we verify this id is
+  // present in the history. If not, the content reflects entries that never
+  // made it to the history chain — drift. Undefined skips the check.
+  savedLastHistoryEntryId?: string;
+  // Invoked once if the loaded Firestore history doesn't contain
+  // savedLastHistoryEntryId. The owner decides how to react — typically by
+  // setting the document content into an error state. Keeping this as a
+  // callback avoids the history layer having to import DocumentModel.
+  onContentDrift?: (message: string) => void;
 }
 
 /**
@@ -45,18 +55,25 @@ export class FirestoreHistoryManager {
   historyError = undefined as firebase.firestore.FirestoreError | undefined;
   environmentAndMetadataDocReadyPromise: Promise<void> | undefined;
   firestoreHistoryInfoPromise: Promise<IFirestoreHistoryInfo> | undefined;
+  savedLastHistoryEntryId: string | undefined;
+  onContentDrift: ((message: string) => void) | undefined;
+  driftChecked = false;
 
   constructor({
     firestore,
     userContextProvider,
     treeManager,
     uploadLocalHistory,
-    syncRemoteHistory
+    syncRemoteHistory,
+    savedLastHistoryEntryId,
+    onContentDrift
   }: IFirestoreHistoryManagerArgs) {
     this.firestore = firestore;
     this.userContextProvider = userContextProvider;
     this.treeManager = treeManager;
     this.uploadLocalHistory = uploadLocalHistory;
+    this.savedLastHistoryEntryId = savedLastHistoryEntryId;
+    this.onContentDrift = onContentDrift;
 
     if (syncRemoteHistory) {
       this.subscribeToFirestoreHistory();
@@ -282,6 +299,41 @@ export class FirestoreHistoryManager {
   }
 
   /**
+   * Compare the envelope's saved lastHistoryEntryId against the loaded
+   * Firestore history. If the saved id isn't found in the history, the
+   * loaded content reflects edits that never made it to the history chain —
+   * drift. On mismatch, invoke onContentDrift so the owner can surface
+   * the DocumentError UI instead of leaving potentially-corrupted content
+   * visible to the user.
+   *
+   * Skipped when no saved id is available (pre-feature envelopes, fresh
+   * documents with no prior history).
+   *
+   * This only runs when subscribeToFirestoreHistory is actually invoked,
+   * which today is gated by syncRemoteHistory=true in the manager args.
+   * In practice that means group documents (see documents.ts) and the
+   * playback path (see canvas.tsx). Playback doesn't pass
+   * savedLastHistoryEntryId so the check is a no-op there. Other document
+   * types never subscribe, so the drift check does not run for them.
+   */
+  checkContentDriftAgainstHistory(history: IFirestoreHistoryEntryDoc[]) {
+    const savedId = this.savedLastHistoryEntryId;
+    if (!savedId) return;
+    const found = history.some(doc => doc.entry?.id === savedId);
+    if (found) return;
+
+    const tailId = history.length > 0 ? history[history.length - 1].entry?.id : undefined;
+    const message =
+      `History drift detected: content was saved with lastHistoryEntryId="${savedId}" ` +
+      `but that id is not present in the Firestore history ` +
+      `(history length=${history.length}, tail id=${tailId ?? "none"}). ` +
+      `The content may reflect edits that never made it to the history chain.`;
+    console.error("CLUE history drift:", message);
+
+    this.onContentDrift?.(message);
+  }
+
+  /**
    * This is called each time the remote history changes in Firestore
    */
   syncRemoteFirestoreHistory(historyDocs: IFirestoreHistoryEntryDoc[]) {
@@ -326,6 +378,13 @@ export class FirestoreHistoryManager {
         if (error) {
           this.setHistoryError(error);
         } else {
+          // Run the drift check once, on the first successful load. Subsequent
+          // snapshots are delta updates and don't represent the "as loaded"
+          // state the content was saved against.
+          if (!this.driftChecked) {
+            this.driftChecked = true;
+            this.checkContentDriftAgainstHistory(history);
+          }
           // FIXME: this is being called twice for a single change in the document.
           // I've confirmed there are not multiple listeners being created.
           // TODO: confirm this comment
