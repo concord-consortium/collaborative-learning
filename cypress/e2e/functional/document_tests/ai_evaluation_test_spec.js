@@ -25,7 +25,9 @@ context('AI Evaluation', function () {
     canvas.getIdeasButton().should("be.visible").click();
 
     // The left side should be changed to show the user's document and the comments pane
+    resourcesPanel.getPrimaryWorkspaceTab("my-work").click();
     resourcesPanel.getPrimaryWorkspaceTab("my-work").should("have.class", "selected");
+    cy.openDocumentThumbnail("my-work", "workspaces", "QA 1.1");
     resourcesPanel.getFocusDocument().should("be.visible");
     resourcesPanel.getFocusDocumentTitle().should("contain.text", studentDocumentName);
 

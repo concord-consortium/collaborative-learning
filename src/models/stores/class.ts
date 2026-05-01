@@ -1,4 +1,4 @@
-import { applySnapshot, SnapshotIn, types } from "mobx-state-tree";
+import { applySnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { ClassInfo } from "./portal";
 import { kAnalyzerUserParams, kExemplarUserParams } from "../../../shared/shared";
 
@@ -20,6 +20,8 @@ export const ClassUserModel = types
       }
     };
   });
+
+export type ClassUserModelType = Instance<typeof ClassUserModel>;
 
 export const ClassModel = types
   .model("Class", {
@@ -77,4 +79,4 @@ export const ClassModel = types
     };
   });
 
-export type ClassModelType = typeof ClassModel.Type;
+export type ClassModelType = Instance<typeof ClassModel>;

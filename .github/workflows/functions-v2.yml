@@ -1,0 +1,40 @@
+name: CI Functions v2
+
+on:
+  push:
+    paths:
+      - 'functions-v2/**'
+      - 'shared/**'
+      - '.github/workflows/functions-v2.yml'
+
+jobs:
+  functions-v2:
+    name: Lint, Build, and Test functions-v2
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: functions-v2/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Install Dependencies
+        working-directory: ./functions-v2
+        run: npm ci
+      - name: Lint
+        working-directory: ./functions-v2
+        run: npm run lint
+      - name: Build
+        working-directory: ./functions-v2
+        run: npm run build
+      - name: Run Tests with Firebase Emulators
+        working-directory: ./functions-v2
+        run: npx firebase emulators:exec --only firestore,database --project demo-test "npm test"
+        env:
+          # on-analysis-document-imaged.test.ts mocks the OpenAI call, but
+          # firebase-functions warns if this secret is unset. Any value works.
+          OPENAI_API_KEY: dummy

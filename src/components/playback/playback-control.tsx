@@ -5,7 +5,7 @@ import { Instance } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { usePersistentUIStore, useStores } from "../../hooks/use-stores";
 import { logCurrentHistoryEvent } from "../../models/history/log-history-event";
-import { TreeManager } from "../../models/history/tree-manager";
+import { HistoryPlaybackFailure, TreeManager } from "../../models/history/tree-manager";
 import Marker from "../../clue/assets/icons/playback/marker.svg";
 import PlayButton from "../../clue/assets/icons/playback/play-button.svg";
 import PauseButton from "../../clue/assets/icons/playback/pause-button.svg";
@@ -72,12 +72,34 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   // numHistoryEventsApplied can be 0 or undefined, the event is undefined in both cases
 
   const sliderEntries = useMemo(() => {
-    let entries: ISliderEntry[] = history
-      .map((entry, index) => ({kind: "history", entry, created: entry.created, index}));
-    entries = entries.concat(allComments.map((comment) => (
-      {kind: "comment", entry: comment, created: comment.createdAt}))
+    // History entries must stay in index order (their position in the array),
+    // not sorted by created time. Created times can be out of order when
+    // sub-actions complete before their parent action.
+    const historyEntries: ISliderEntry[] = history
+      .map((entry, index) => ({kind: "history" as const, entry, created: entry.created, index}));
+
+    // Insert comments at the correct position among history entries based
+    // on the comment's created time. Each comment goes after the last
+    // history entry whose created time is <= the comment's created time.
+    const sortedComments = [...allComments].sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
     );
-    entries.sort((a, b) => a.created.getTime() - b.created.getTime());
+    const entries: ISliderEntry[] = [];
+    let commentIdx = 0;
+    for (const historyEntry of historyEntries) {
+      while (commentIdx < sortedComments.length &&
+             sortedComments[commentIdx].createdAt.getTime() < historyEntry.created.getTime()) {
+        const comment = sortedComments[commentIdx];
+        entries.push({kind: "comment", entry: comment, created: comment.createdAt});
+        commentIdx++;
+      }
+      entries.push(historyEntry);
+    }
+    while (commentIdx < sortedComments.length) {
+      const comment = sortedComments[commentIdx];
+      entries.push({kind: "comment", entry: comment, created: comment.createdAt});
+      commentIdx++;
+    }
     return entries;
   }, [history, allComments]);
 
@@ -96,7 +118,12 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     setSliderPlaying(playStatus);
   }, [sliderPlaying, treeManager]);
 
-  const goToSliderValue = useCallback((value: number) => {
+  // After goToHistoryEntry runs, numHistoryEventsApplied may differ from
+  // what we requested if a failed entry blocked the move. We detect this
+  // and show a warning.
+  const [playbackFailureWarning, setPlaybackFailureWarning] = useState<string | null>(null);
+
+  const goToSliderValue = useCallback(async (value: number) => {
     // the slider max is sliderEntries.length, which is one more than the last index
     // in sliderEntries. This value indicates going to the end of the history.
     const sliderEntry = sliderEntries[value];
@@ -124,9 +151,27 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
       // go to the final history entry when at the end of the slider
       newHistoryEntryIndex = history.length;
     }
-    treeManager.goToHistoryEntry(newHistoryEntryIndex);
+    await treeManager.goToHistoryEntry(newHistoryEntryIndex);
 
-    setSliderValue(value);
+    // Check if the move was blocked by a failed entry. If so, snap the
+    // slider to the last fully applied position and show a warning.
+    const actual = treeManager.numHistoryEventsApplied;
+    if (actual !== undefined && actual !== newHistoryEntryIndex) {
+      // Find the slider entry that corresponds to the actual history
+      // position. The end-of-history position is represented by
+      // sliderEntries.length (one past the last index), not by any
+      // entry inside sliderEntries, so findIndex can't locate it.
+      const actualSliderIndex = actual === history.length
+        ? sliderEntries.length
+        : sliderEntries.findIndex(
+          e => e.kind === "history" && e.index === actual
+        );
+      setSliderValue(actualSliderIndex >= 0 ? actualSliderIndex : value);
+      setPlaybackFailureWarning("History playback could not apply some changes and was stopped.");
+    } else {
+      setSliderValue(value);
+      setPlaybackFailureWarning(null);
+    }
   }, [treeManager, history, sliderEntries, setPlaybackTime]);
 
   const goToComment = useCallback((comment: WithId<CommentDocument>) => {
@@ -138,6 +183,11 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
 
   useEffect(() => {
     if (sliderPlaying) {
+      // Stop auto-play if we hit a playback failure
+      if (playbackFailureWarning) {
+        handlePlayPauseToggle(false);
+        return;
+      }
       const slider = setTimeout(()=>{
         if (sliderValue < sliderEntries.length) {
           goToSliderValue(sliderValue + 1);
@@ -147,7 +197,8 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
       }, 500);
       return () => clearTimeout(slider);
     }
-  }, [handlePlayPauseToggle, sliderEntries.length, sliderPlaying, sliderValue, goToSliderValue]);
+  }, [handlePlayPauseToggle, sliderEntries.length, sliderPlaying, sliderValue,
+      goToSliderValue, playbackFailureWarning]);
 
   //TODO: need to add a modal that warns users about max number of markers. Currently, a generic alert is shown
   //TODO: Currently, if add marker is on and user moves the time handle, a marker is added where the user
@@ -199,10 +250,13 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     const minutesStr = minutes < 10 ? "0" + minutes : minutes;
     const strTime = date ? hours + ":" + minutesStr + " " + ampm : "";
 
+    const entry = sliderEntries[sliderValue];
+    const historyIndex = entry?.kind === "history" ? entry.index : undefined;
+
     return (
       <div className={"time-info"} data-testid="playback-time-info">
         <div className={"date-info"}>{monthStr} {dateDay}, {year}</div>
-        <div className={"time-info"}>{strTime}</div>
+        <div className={"time-info"}>{strTime} {historyIndex !== undefined && `(${historyIndex})`}</div>
       </div>
     );
   };
@@ -294,6 +348,71 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     );
   };
 
+  const [selectedFailure, setSelectedFailure] = useState<HistoryPlaybackFailure | null>(null);
+
+  const renderPlaybackFailureMarkers = () => {
+    const failures = treeManager.historyPlaybackFailures;
+    if (failures.length === 0 || sliderEntries.length === 0) return null;
+
+    // Deduplicate by history index for marker placement
+    const seenIndices = new Set<number>();
+    const uniqueFailures = failures.filter(f => {
+      if (seenIndices.has(f.historyIndex)) return false;
+      seenIndices.add(f.historyIndex);
+      return true;
+    });
+
+    return (
+      <div className="playback-failure-markers-container" data-testid="playback-failure-markers">
+        {uniqueFailures.map(failure => {
+          const sliderIndex = sliderEntries.findIndex(
+            e => e.kind === "history" && e.index === failure.historyIndex
+          );
+          if (sliderIndex < 0) return null;
+          const location = Math.max(0, Math.min(100, 100 * (sliderIndex / sliderEntries.length)));
+          const isSelected = selectedFailure?.historyIndex === failure.historyIndex;
+          return (
+            <button
+              key={`corrupt-${failure.historyIndex}`}
+              type="button"
+              className="playback-failure-marker"
+              style={{ left: `calc(${location}% - 5px)` }}
+              aria-label={`History playback failure at entry ${failure.historyIndex}`}
+              aria-expanded={isSelected}
+              onClick={() => setSelectedFailure(isSelected ? null : failure)}
+            >
+              <div className="playback-failure-marker-line" />
+              <div className="playback-failure-marker-icon">!</div>
+            </button>
+          );
+        })}
+        {selectedFailure && (
+          <div className="playback-failure-detail" data-testid="playback-failure-detail" role="dialog"
+              aria-label="History playback failure details">
+            <div className="playback-failure-detail-header">
+              <span>History Playback Failure</span>
+              <button
+                type="button"
+                className="playback-failure-detail-close"
+                aria-label="Close failure details"
+                onClick={() => setSelectedFailure(null)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="playback-failure-detail-body">
+              <div><strong>Entry:</strong> {selectedFailure.historyIndex}</div>
+              <div><strong>Direction:</strong> {selectedFailure.direction}</div>
+              <div><strong>Model:</strong> {selectedFailure.historyEntry.model ?? "unknown"}</div>
+              <div><strong>Action:</strong> {selectedFailure.historyEntry.action ?? "unknown"}</div>
+              <div><strong>Error:</strong> {selectedFailure.errorMessage}</div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const playbackControlsClass = classNames("playback-controls", activeNavTab, {"disabled" : false});
   const sliderComponentClass = classNames(`slider-component ${activeNavTab}`);
 
@@ -305,9 +424,15 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
       <div className={sliderComponentClass}>
         {renderMarkerComponent()}
         {renderCommentMarkers()}
+        {renderPlaybackFailureMarkers()}
         {renderSliderContainer()}
       </div>
       {renderTimeInfo()}
+      {playbackFailureWarning && !selectedFailure &&
+        <div className="playback-failure-warning" data-testid="playback-failure-warning">
+          {playbackFailureWarning}
+        </div>
+      }
     </div>
   );
 });

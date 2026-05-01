@@ -471,6 +471,13 @@ service cloud.firestore {
         // teachers and students in appropriate classes can read supports
         allow read: if userIsResourceUser() || classInResourceClasses();
       }
+
+      match /aicontent/{unit}/classes/{classId} {
+        // portal-authenticated teachers can read ai summaries in their own class
+        allow read: if isAuthedTeacher() &&
+          (request.auth.token.class_hash == classId || teacherIsInClass(classId));
+        allow write: if false;  // only cloud functions write here
+      }
     }
 
     //

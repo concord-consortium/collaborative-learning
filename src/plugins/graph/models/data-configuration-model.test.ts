@@ -259,8 +259,11 @@ describe("DataConfigurationModel", () => {
     expect(config.valuesForAttrRole("x")).toEqual(["1", "1", "6", "6"]);
     expect(config.valuesForAttrRole("y")).toEqual(["1", "1", "1", "6"]);
     expect(config.valuesForAttrRole("caption")).toEqual(["n1", "n1", "n1"]);
-    expect(config.categoryArrayForAttrRole("x")).toEqual(["1", "6"]);
-    expect(config.categoryArrayForAttrRole("y")).toEqual(["1", "6"]);
+    // x and y are numeric, so no CategorySet is created for them; their
+    // categoryArray falls back to the empty default.
+    expect(config.categoryArrayForAttrRole("x")).toEqual(["__main__"]);
+    expect(config.categoryArrayForAttrRole("y")).toEqual(["__main__"]);
+    // caption (nId) is categorical, so it has a CategorySet.
     expect(config.categoryArrayForAttrRole("caption")).toEqual(["n1"]);
     expect(config.numericValuesForAttrRole("x")).toEqual([1, 1, 6, 6]);
     expect(config.numericValuesForAttrRole("caption")).toEqual([]);
@@ -268,6 +271,22 @@ describe("DataConfigurationModel", () => {
     config.setAttributeForRole("y");
     expect(config.valuesForAttrRole("y")).toEqual([]);
     expect(config.categoryArrayForAttrRole("y")).toEqual(["__main__"]);
+  });
+
+  it("ensurePersistentCategorySetForRole returns the persistent category set", () => {
+    const config = tree.config;
+    config.setDataset(tree.data, tree.metadata);
+    config.setAttributeForRole("x", { attributeID: "nId", type: "categorical" });
+
+    expect(tree.metadata.categories.size).toBe(0);
+    const cs = config.ensurePersistentCategorySetForRole("x");
+    expect(cs).toBeDefined();
+    expect(tree.metadata.categories.size).toBe(1);
+    expect(tree.metadata.categories.get("nId")).toBe(cs);
+
+    // Second call is idempotent.
+    const cs2 = config.ensurePersistentCategorySetForRole("x");
+    expect(cs2).toBe(cs);
   });
 
   it("returns an array of cases in a plot", () => {
@@ -278,6 +297,72 @@ describe("DataConfigurationModel", () => {
       {"__id__": "c2", "xId": 2},
       {"__id__": "c3", "nId": "n3", "yId": 3}
     ]);
+  });
+
+  describe("ensure-provisional-category-sets reaction", () => {
+    // Note: after setDataset, the "caption" role defaults to the first attribute
+    // (nId) with type categorical, so the reaction eagerly creates a provisional
+    // CategorySet for "nId". Tests here account for that baseline.
+
+    it("creates a provisional when a categorical attribute is assigned", () => {
+      const config = tree.config;
+      config.setDataset(tree.data, tree.metadata);
+
+      // The default caption role picks up nId (categorical) automatically.
+      expect(tree.metadata.provisionalCategories.size).toBe(1);
+      expect(tree.metadata.provisionalCategories.get("nId")).toBeDefined();
+
+      config.setAttributeForRole("x", { attributeID: "nId", type: "categorical" });
+      // Still only nId (same attribute used for both roles).
+      expect(tree.metadata.provisionalCategories.size).toBe(1);
+      expect(tree.metadata.provisionalCategories.get("nId")).toBeDefined();
+      expect(tree.metadata.categories.size).toBe(0);
+    });
+
+    it("does not create a provisional for a numeric attribute", () => {
+      const config = tree.config;
+      config.setDataset(tree.data, tree.metadata);
+
+      // Baseline: one provisional for the default caption (nId).
+      expect(tree.metadata.provisionalCategories.size).toBe(1);
+
+      config.setAttributeForRole("x", { attributeID: "xId", type: "numeric" });
+      // Numeric assignment should not add a new provisional for xId.
+      expect(tree.metadata.provisionalCategories.size).toBe(1);
+      expect(tree.metadata.provisionalCategories.get("xId")).toBeUndefined();
+      expect(tree.metadata.categories.size).toBe(0);
+    });
+
+    it("creates a provisional when an already-assigned attribute is flipped to categorical", () => {
+      const config = tree.config;
+      config.setDataset(tree.data, tree.metadata);
+
+      config.setAttributeForRole("x", { attributeID: "xId", type: "numeric" });
+      expect(tree.metadata.provisionalCategories.get("xId")).toBeUndefined();
+
+      config.setAttributeType("x", "categorical");
+      expect(tree.metadata.provisionalCategories.get("xId")).toBeDefined();
+    });
+
+    it("does not overwrite an existing persistent entry on re-fire", () => {
+      const config = tree.config;
+      config.setDataset(tree.data, tree.metadata);
+
+      config.setAttributeForRole("x", { attributeID: "nId", type: "categorical" });
+      const provisional = tree.metadata.provisionalCategories.get("nId");
+      expect(provisional).toBeDefined();
+
+      const persistent = config.ensurePersistentCategorySetForRole("x");
+      expect(tree.metadata.categories.size).toBe(1);
+      expect(tree.metadata.provisionalCategories.get("nId")).toBeUndefined();
+
+      config.setAttributeForRole("y", { attributeID: "yId", type: "numeric" });
+
+      // The persistent entry for nId should survive the re-fire, and no
+      // new provisional should be created for nId (since it's still persistent).
+      expect(tree.metadata.categories.get("nId")).toBe(persistent);
+      expect(tree.metadata.provisionalCategories.get("nId")).toBeUndefined();
+    });
   });
 
 });

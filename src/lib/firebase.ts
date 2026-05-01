@@ -338,8 +338,16 @@ export class Firebase {
     return `${this.getGroupsPath(user)}/${groupId}`;
   }
 
+  public getGroupUsersPath(user: UserModelType, groupId: string) {
+    return `${this.getGroupPath(user, groupId)}/users`;
+  }
+
   public getGroupUserPath(user: UserModelType, groupId: string, userId?: string) {
-    return `${this.getGroupPath(user, groupId)}/users/${userId || user.id}`;
+    return `${this.getGroupUsersPath(user, groupId)}/${userId || user.id}`;
+  }
+
+  public getGroupUserActivityPath(user: UserModelType, groupId: string, userId?: string) {
+    return `${this.getGroupUserPath(user, groupId, userId)}/activity`;
   }
 
   // Published section [deprecated] and problem document metadata
