@@ -4,6 +4,11 @@ This document analyzes each CLUE tile for how well it would handle remote model 
 
 The goal is to identify which tiles are most at risk and help prioritize work on tile locking, shared model conflict resolution, and per-tile resilience hardening.
 
+## Related docs
+
+- [group-docs-plan.md § GD-11: Tile Hardening](group-docs-plan.md#gd-11-tile-hardening-as-needed) — the plan slot this analysis informs.
+- [test-scripts/](test-scripts/) — manual reproduction scripts that validate (or refute) the per-tile risk assessments below with concrete cases.
+
 ## Read-only vs edit mode: not a factor for rendering
 
 All CLUE tiles render model changes regardless of whether they are in read-only or edit mode. Every tile uses MobX `observer()` and reacts to MST model changes in both modes. The `readOnly` prop only controls whether interactive controls (buttons, inputs, drag handles) are enabled — it does not stop the tile from rendering updates.
@@ -35,7 +40,7 @@ Given that all tiles already render remote changes, the vulnerabilities are spec
 - **Object references**: Local state that stores IDs or references to model objects (selected point, editing attribute). If those objects are deleted remotely, the references become stale.
 - **Independent editing surfaces**: Libraries like Slate, MathLive, JSXGraph, and Rete maintain their own internal state. Syncing between MST and these editors requires careful coordination to avoid overwriting user input.
 
-See `group-docs-potential-ui-issues.md` for concrete examples with reproduction steps.
+See [test-scripts/](test-scripts/) for concrete examples with reproduction steps.
 
 ## Risk summary
 
@@ -190,7 +195,7 @@ Single-user undo testing can efficiently validate whether tiles correctly re-ren
 - Uncommitted input being overwritten (draft text is already committed or abandoned before undo)
 - Multi-user specific issues (simulation state divergence, debounce race conditions)
 
-See `group-docs-potential-ui-issues.md` for which specific issues can be tested via undo.
+See [test-scripts/](test-scripts/) for which specific issues can be tested via undo.
 
 ## Observations
 
