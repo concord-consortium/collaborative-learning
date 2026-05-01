@@ -332,12 +332,9 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
                               <ResizeTileButton buttonRef={elt => this.resizeElement = elt}
                                 hovered={hoverTile}
                                 selected={isTileSelected}
-<<<<<<< HEAD
                                 height={tileHeight}
                                 onDragStart={e => this.props.onResizeRow(e)}
                                 onResize={h => this.props.onRequestRowHeight(model.id, h)} />;
-=======
-                                onDragStart={e => this.props.onResizeRow(e)} />;
     const activityBadges = (
       <TileActivityBadges
         documentKey={this.props.documentId ?? ""}
@@ -346,7 +343,6 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
         selected={isTileSelected}
       />
     );
->>>>>>> master
 
     const style: React.CSSProperties = {};
     if (widthPct) {
