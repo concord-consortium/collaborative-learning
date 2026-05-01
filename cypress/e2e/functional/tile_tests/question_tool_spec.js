@@ -24,7 +24,7 @@ context('Question tool tile functionalities', function () {
     questionToolTile.getQuestionTile().should('exist');
 
     // Question tile restore upon page reload
-    cy.wait(1000);
+    cy.waitForSave();
     cy.reload();
     cy.waitForLoad();
     questionToolTile.getQuestionTile().should('exist');

@@ -264,10 +264,7 @@ export interface IAiContentParams extends IFirebaseFunctionBaseParams {
 export type IAiContentUnionParams = IAiContentParams | IFirebaseFunctionWarmUpParams;
 
 export interface IGenerateAiSummaryParams extends IFirebaseFunctionBaseParams {
-  portal: string;
-  demo: string;
   unit: string;
-  classHash: string;
 }
 
 export type IGenerateAiSummaryUnionParams = IGenerateAiSummaryParams | IFirebaseFunctionWarmUpParams;

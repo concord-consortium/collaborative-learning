@@ -1,5 +1,5 @@
 import { getSnapshot, Instance } from "mobx-state-tree";
-import { createDocumentModel, DocumentModelType } from "./document";
+import { createDocumentModel, DocumentModelType, SaveState } from "./document";
 import { ExemplarDocument, PersonalDocument, ProblemDocument } from "./document-types";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tiles/text/text-content";
@@ -179,6 +179,18 @@ describe("document model", () => {
     expect(document.changeCount).toBe(0);
     document.incChangeCount();
     expect(document.changeCount).toBe(1);
+  });
+
+  it("can set save state", () => {
+    expect(document.saveState).toBe(SaveState.Idle);
+    document.setSaveState(SaveState.Saving);
+    expect(document.saveState).toBe(SaveState.Saving);
+    document.setSaveState(SaveState.Saved);
+    expect(document.saveState).toBe(SaveState.Saved);
+    document.setSaveState(SaveState.Retrying);
+    expect(document.saveState).toBe(SaveState.Retrying);
+    document.setSaveState(SaveState.Idle);
+    expect(document.saveState).toBe(SaveState.Idle);
   });
 
   it("allows the tools to be added", () => {

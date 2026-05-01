@@ -1,5 +1,6 @@
 import { observer } from "mobx-react";
 import classNames from "classnames";
+import { comparer } from "mobx";
 import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
@@ -38,6 +39,7 @@ import { useFormulaModal } from "./use-formula-modal";
 
 import "./table-tile.scss";
 import "./table-toolbar-registration";
+import { mstReaction } from "../../../utilities/mst-reaction";
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
@@ -343,12 +345,24 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     return () => disposer();
   });
 
+  // Recompute columns when an attribute's name changes (e.g. via undo/redo), since
+  // the columns useMemo doesn't observe individual attribute name properties.
+  useEffect(() => {
+    const disposer = mstReaction(
+      () => dataSet.attributes.map(attr => attr.name),
+      () => triggerColumnChange(),
+      { equals: comparer.structural, name: `TableToolComponent.attributeNameReaction` },
+      dataSet
+    );
+    return () => disposer();
+  }, [dataSet, triggerColumnChange]);
+
   useEffect(() => {
     const disposer = onSnapshot(content.columnWidths, () => {
-      triggerRowChange();
+      triggerColumnChange();
     });
     return () => disposer();
-  });
+  }, [content, triggerColumnChange]);
 
   // Currently this is recreated on each render, so the ToolbarContext is changed
   // on each render. deleteSelected is changed on each render, so a useMemo

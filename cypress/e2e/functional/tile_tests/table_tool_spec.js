@@ -54,6 +54,16 @@ context('Table Tool Tile', function () {
       tableToolTile.getColumnHeaderText().then((text) => {
         expect(text[0]).to.be.eq(headerX);
       });
+
+      cy.log("undo and redo affect column name changes");
+      clueCanvas.getUndoTool().click();
+      tableToolTile.getColumnHeaderText().then((text) => {
+        expect(text[0]).to.be.eq('x');
+      });
+      clueCanvas.getRedoTool().click();
+      tableToolTile.getColumnHeaderText().then((text) => {
+        expect(text[0]).to.be.eq(headerX);
+      });
     });
 
     cy.log('will change column y name');
@@ -152,7 +162,7 @@ context('Table Tool Tile', function () {
     tableToolTile.typeInTableCell(1, '5');
 
     // Table tile restore upon page reload
-    cy.wait(2000);
+    cy.waitForSave();
     cy.reload();
     cy.waitForLoad();
 
@@ -505,6 +515,7 @@ context('Table Tool Tile', function () {
     tableToolTile.getTableCellWithRowColIndex(2, 2).should('contain', 'Row 3 Data');
 
     cy.log('reload page and verify row order persists');
+    cy.waitForSave();
     cy.reload();
     cy.waitForLoad();
 

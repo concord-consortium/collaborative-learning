@@ -2,8 +2,9 @@ import {ScaleLinear} from "d3";
 import {MutableRefObject} from "react";
 import {AxisPlace} from "./axis-types";
 import {measureText, measureTextExtent} from "../../../../../components/tiles/hooks/use-measure-text";
-import {kAxisGap, kAxisTickLength, kAxisTickPadding, kGraphFont} from "../../../graph-types";
+import {GraphAttrRole, kAxisGap, kAxisTickLength, kAxisTickPadding, kGraphFont} from "../../../graph-types";
 import {ICategorySet} from "../../../../../models/data/category-set";
+import {IDataConfigurationModel} from "../../../models/data-configuration-model";
 
 export const getStringBounds = (s = 'Wy', font = kGraphFont) => {
   return measureTextExtent(s, font);
@@ -102,6 +103,11 @@ export interface DragInfo {
   currentOffset: number
   currentDragPosition: number
   categorySet?: ICategorySet
+  /** DataConfigurationModel for the layer the dragged axis belongs to.
+   *  Used to promote the provisional CategorySet to persistent at drag time. */
+  dataConfiguration?: IDataConfigurationModel
+  /** Graph role for the dragged axis (e.g. "x", "y", "topSplit"). */
+  attrRole?: GraphAttrRole
   categories: string[]
   bandwidth: number
   axisOrientation: 'horizontal' | 'vertical'
