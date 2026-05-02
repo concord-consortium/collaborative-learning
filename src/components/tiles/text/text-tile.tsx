@@ -1,6 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import { IReactionDisposer, reaction } from "mobx";
+import { IReactionDisposer, observable, reaction, runInAction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
   createEditor, defaultHotkeyMap, Editor, EditorValue, normalizeSelection, ReactEditor, Slate, SlateEditor
@@ -13,6 +13,7 @@ import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-ev
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { HighlightRegistryContext, HighlightRevisionContext, IHighlightBox }
     from "../../../plugins/text/highlight-registry-context";
+import { removeAnnotationsForChip } from "../../../plugins/text/chip-annotation-cleanup";
 import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
@@ -28,6 +29,21 @@ import { VoiceTypingOverlay } from "../../../utilities/voice-typing-overlay";
 
 import "./toolbar/text-toolbar-registration";
 import "./text-tile.scss";
+
+// Returns the ids of all highlight chip elements in a Slate value.
+function collectHighlightIds(value: EditorValue): Set<string> {
+  const ids = new Set<string>();
+  const walk = (nodes: readonly any[]) => {
+    for (const node of nodes) {
+      if (node?.type === kHighlightFormat && typeof node.highlightId === "string") {
+        ids.add(node.highlightId);
+      }
+      if (Array.isArray(node?.children)) walk(node.children);
+    }
+  };
+  walk(value as any);
+  return ids;
+}
 
 /*
   The Slate internal data model uses, among other things, "marks" and "blocks"
@@ -102,10 +118,11 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private disposers: IReactionDisposer[];
   private textTileDiv: HTMLElement | null;
   private editor: Editor | undefined;
-  private tileContentRect: DOMRectReadOnly;
   private toolbarTileApi: ITileApi | undefined;
   private textOnFocus: string | string [] | undefined;
   private isHandlingUserChange = false;
+  private highlightBoxesCache: Map<string, IHighlightBox> = new Map();
+  private chipBoxesCacheTick = observable({ count: 0 });
 
   static contextType = ContainerContext;
   declare context: React.ContextType<typeof ContainerContext>;
@@ -142,7 +159,14 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     options.history = false;
     this.editor = createEditor(options);
     this.getContent().setEditor(this.editor);
-    this.setState({ initialValue: this.getContent().asSlate() });
+    const initialValue = this.getContent().asSlate();
+    this.setState({ initialValue });
+    // Give plugins access to stores + tileId (for cleanup hooks) and let them seed any
+    // initial-value state (e.g., the variables plugin's `previousVariableIds` baseline).
+    for (const plugin of Object.values(this.plugins)) {
+      plugin?.setTileContext?.(this.stores, this.props.model.id);
+      plugin?.initializeFromValue?.(initialValue);
+    }
 
     this.disposers = [];
     // Synchronize slate with model changes. e.g. changes to any text in another tile is refelected here.
@@ -183,29 +207,42 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         this.toolbarTileApi?.handleDocumentScroll?.(x, y);
       },
       handleTileResize: (entry: TileResizeEntry) => {
-        const { x, y, width, height, top, left, bottom, right } = entry.contentRect;
-        this.tileContentRect = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
         this.toolbarTileApi?.handleTileResize?.(entry);
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
+        // Track the tick so MobX observers re-run when the cache is written.
+        // eslint-disable-next-line unused-imports/no-unused-vars
+        const _tick = this.chipBoxesCacheTick.count;
         if (objectType === kHighlightFormat) {
-          const box = this.getContent().highlightBoxesCache.get(objectId);
+          return this.highlightBoxesCache.get(objectId);
+        }
+        // Other chip kinds (e.g., variable chips) live in their plugin's bbox cache.
+        for (const plugin of Object.values(this.plugins)) {
+          const box = plugin?.getObjectBoundingBox?.(objectId, objectType);
           if (box) return box;
         }
+        return undefined;
       },
       getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
         // offset the annotation arrows to the right top corner of the bounding box until connected to a target,
         // and then offset should be the center of the edge closes to the target
-        const offsets = OffsetModel.create({});
+        // Track the tick so MobX observers re-run when the cache is written.
+        // eslint-disable-next-line unused-imports/no-unused-vars
+        const _tick = this.chipBoxesCacheTick.count;
         if (objectType === kHighlightFormat) {
-          const box = this.getContent().highlightBoxesCache.get(objectId);
+          const offsets = OffsetModel.create({});
+          const box = this.highlightBoxesCache.get(objectId);
           if (box) {
-            const { width, height } = box;
-            offsets.setDx(width / 2);
-            offsets.setDy(- height / 2);
+            offsets.setDx(box.width / 2);
+            offsets.setDy(-box.height / 2);
           }
+          return offsets;
         }
-        return offsets;
+        for (const plugin of Object.values(this.plugins)) {
+          const offsets = plugin?.getObjectDefaultOffsets?.(objectId, objectType);
+          if (offsets) return offsets;
+        }
+        return OffsetModel.create({});
       },
       // Return focusable elements for focus trap navigation
       getFocusableElements: () => {
@@ -314,8 +351,26 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
     if (!readOnly) {
       this.isHandlingUserChange = true;
+      // Cascade-clean any highlight chip the user edited out: remove sparrows attached
+      // to it, prune the highlightedText MST entry, and clear its bbox cache.
+      const previousHighlightIds = content.highlightedText.map(h => h.id);
+      const currentHighlightIds = collectHighlightIds(value);
+      const removedHighlightIds = previousHighlightIds.filter(id => !currentHighlightIds.has(id));
+
       // Update content model when user changes slate
       content.setSlate(value);
+
+      for (const id of removedHighlightIds) {
+        removeAnnotationsForChip(this.stores, model.id, id, kHighlightFormat);
+        content.removeHighlight(id);
+        this.updateBoxCache(this.highlightBoxesCache, id, undefined);
+      }
+      // Other chip kinds (e.g., variable chips) handle their own diff/cleanup inside
+      // their plugin's handleSlateValueChange hook.
+      for (const plugin of Object.values(this.plugins)) {
+        plugin?.handleSlateValueChange?.(value);
+      }
+
       this.setState({ revision: this.state.revision + 1 });
       this.isHandlingUserChange = false;
     }
@@ -398,7 +453,22 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.setState({ revision: this.state.revision + 1 }); // Force a rerender
   };
 
+  // Skips the tick bump if the value hasn't actually changed, so a no-op ResizeObserver
+  // fire doesn't wake up downstream observers (e.g. AnnotationLayer's render).
+  private updateBoxCache(cache: Map<string, IHighlightBox>, id: string, box: IHighlightBox | undefined) {
+    const existing = cache.get(id);
+    if (box) {
+      if (existing && existing.left === box.left && existing.top === box.top
+          && existing.width === box.width && existing.height === box.height) return;
+      cache.set(id, box);
+    } else {
+      if (!existing) return;
+      cache.delete(id);
+    }
+    runInAction(() => { this.chipBoxesCacheTick.count++; });
+  }
+
   private handleUpdateHighlightBoxCache = (id: string, box: IHighlightBox) => {
-    this.getContent().setHighlightBoxesCache(id, box);
+    this.updateBoxCache(this.highlightBoxesCache, id, box);
   };
 }
