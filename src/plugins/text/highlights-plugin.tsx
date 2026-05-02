@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import classNames from "classnames/dedupe";
 import { BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
   RenderElementProps, useSelected } from "@concord-consortium/slate-editor";
@@ -7,6 +7,7 @@ import { TextContentModelType } from "../../models/tiles/text/text-content";
 import { ITextPlugin } from "../../models/tiles/text/text-plugin-info";
 import { TextPluginsContext } from "../../components/tiles/text/text-plugins-context";
 import { HighlightRegistryContext, HighlightRevisionContext } from "./highlight-registry-context";
+import { getChipBoxInWrapperCoords, useChipMeasurement } from "./use-chip-measurement";
 
 export const kHighlightFormat = "highlight";
 export const kHighlightTextPluginName = "highlights";
@@ -57,7 +58,9 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
   const highlightPlugin = plugins[kHighlightTextPluginName] as HighlightsPlugin|undefined;
   const isSelected = useSelected();
   const highlightRegistryContextFn = useContext(HighlightRegistryContext);
-  const chipRef = useRef<HTMLSpanElement>(null);
+  // useState + callback ref so the effect in useChipMeasurement re-runs when the chip
+  // element actually appears (a useRef wouldn't, since the ref object is stable).
+  const [chipEl, setChipEl] = useState<HTMLSpanElement | null>(null);
   const editorRevisionContext = useContext(HighlightRevisionContext);
 
   const { highlightId } = element as HighlightElement;
@@ -66,24 +69,12 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
 
   // Memoize getHighlightChipBoundingBox so it can be used in the dependency array
   const getHighlightChipBoundingBox = useCallback(() => {
-    const el = chipRef.current;
-    if (!el) return;
-    const highlightRect = el.getBoundingClientRect();
-    const textBoxRect = el.closest('.primary-workspace .text-tool-wrapper')?.getBoundingClientRect();
-    if (highlightRect && textBoxRect && highlightRect.width > 0 && highlightRect.height > 0
-          && highlightRegistryContextFn) {
-      highlightRegistryContextFn(highlightId, {
-        left: highlightRect.left - textBoxRect.left,
-        top: highlightRect.top - textBoxRect.top,
-        width: highlightRect.width - kHighlightOffset,
-        height: highlightRect.height - kHighlightOffset
-      });
-    }
-  }, [highlightId, highlightRegistryContextFn]);
+    if (!chipEl || !highlightRegistryContextFn) return;
+    const box = getChipBoxInWrapperCoords(chipEl, kHighlightOffset);
+    if (box) highlightRegistryContextFn(highlightId, box);
+  }, [chipEl, highlightId, highlightRegistryContextFn]);
 
-  useEffect(() => {
-    getHighlightChipBoundingBox();
-  }, [editorRevisionContext, getHighlightChipBoundingBox]);
+  useChipMeasurement(chipEl, getHighlightChipBoundingBox, editorRevisionContext);
 
   if (!isHighlightElement(element)) return null;
 
@@ -91,7 +82,7 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
 
   return (
     <span className={classes} {...attributes} contentEditable={false}>
-      <span ref={chipRef} className={classNames("highlight-chip", {"slate-selected": highlightEntry && isSelected})} >
+      <span ref={setChipEl} className={classNames("highlight-chip", {"slate-selected": highlightEntry && isSelected})} >
         {children}
         {textToHighlight}
       </span>

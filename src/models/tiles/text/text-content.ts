@@ -1,4 +1,3 @@
-import { ObservableMap } from "mobx";
 import { types, Instance, SnapshotIn, cast } from "mobx-state-tree";
 import {
   convertDocument, CustomEditor, Editor, EditorValue, htmlToSlate, serializeValue, slateToHtml, textToSlate, slateToText
@@ -11,7 +10,6 @@ import { escapeBackslashes, escapeDoubleQuotes, removeNewlines, removeTabs } fro
 import { tileContentAPIViews } from "../tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
-import { IHighlightBox } from "../../../plugins/text/highlight-registry-context";
 
 export const kTextTileType = "Text";
 
@@ -30,7 +28,6 @@ export const TextContentModel = TileContentModel
   })
   .volatile(self => ({
     editor:  undefined as CustomEditor | undefined,
-    highlightBoxesCache: new ObservableMap<string, IHighlightBox>(),
   }))
   .views(self => ({
     // guarantees string (not readonly string) types
@@ -147,13 +144,6 @@ export const TextContentModel = TileContentModel
       if (index >= 0) {
         self.highlightedText.splice(index, 1);
       }
-    },
-    setHighlightBoxesCache(id: string, box: IHighlightBox) {
-      if (box) {
-        self.highlightBoxesCache.set(id, box);
-      } else {
-        self.highlightBoxesCache.delete(id);
-      }
     }
   }))
   .actions(self => ({
@@ -166,9 +156,16 @@ export const TextContentModel = TileContentModel
   .views(self => tileContentAPIViews({
     get annotatableObjects(): IClueTileObject[] {
       const objects: IClueTileObject[] = [];
-      const objectType = kHighlightFormat;
       self.highlightedText.forEach(highlight => {
-        objects.push({objectId: highlight.id, objectType});
+        objects.push({objectId: highlight.id, objectType: kHighlightFormat});
+      });
+      // Each text plugin contributes its own annotatable objects (e.g. variable chips
+      // from the shared-variables plugin) and is responsible for its own MobX
+      // reactivity — Slate's editor state isn't otherwise observable.
+      getAllTextPluginInfos().forEach(info => {
+        if (info?.getAnnotatableObjects) {
+          objects.push(...info.getAnnotatableObjects(self));
+        }
       });
       return objects;
     },

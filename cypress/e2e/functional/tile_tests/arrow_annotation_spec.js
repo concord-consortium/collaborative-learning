@@ -7,6 +7,7 @@ import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
 import NumberlineToolTile from '../../../support/elements/tile/NumberlineToolTile';
 import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
+import TextToolTile from '../../../support/elements/tile/TextToolTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
 
 const aa = new ArrowAnnotation;
@@ -18,10 +19,12 @@ const geometryToolTile = new GeometryToolTile;
 const numberlineToolTile = new NumberlineToolTile;
 const simulatorTile = new SimulatorTile;
 const tableToolTile = new TableToolTile;
+const textToolTile = new TextToolTile;
 const xyTile = new XYPlotToolTile;
 
 const queryParams = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 const queryParamsQa = `${Cypress.config("qaUnitStudent7Investigation3")}`;
+const queryParamsGroup = `${Cypress.config("qaUnitGroup")}&fakeUser=student:15`;
 
 // Note copied from drawing tile test
 // NOTE: For some reason cypress+chrome thinks that the SVG elements are in a
@@ -622,6 +625,208 @@ context('Arrow Annotations (Sparrows)', function () {
     dataflowTile.getClearDataWarningClear().click();
     dataflowTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
     aa.getAnnotationArrows().should("have.length", 2);
+  });
+
+  context('Sparrows on text chips', function () {
+
+    // Adds two text tiles, each with a highlight chip on its full text, and connects them
+    // with a sparrow. `before` runs after the chips are created but before sparrow mode is
+    // entered — used by callers that need to switch to straight-arrow mode first.
+    function setupTwoChipsAndSparrow({ before } = {}) {
+      const text1 = 'Alpha chip.';
+      const text2 = 'Beta chip.';
+
+      clueCanvas.addTile('text');
+      textToolTile.verifyTextTileIsEditable();
+      textToolTile.enterText(text1);
+      textToolTile.getTextEditor().last().type('{selectall}');
+      textToolTile.verifyHighlightToolbarButtonEnabled();
+      textToolTile.getHighlightButton().click();
+      textToolTile.getTextEditor().last().find('.highlight-chip').should('exist');
+
+      clueCanvas.addTile('text');
+      textToolTile.getTextEditor().last().click();
+      textToolTile.verifyTextTileIsEditable();
+      textToolTile.enterText(text2);
+      textToolTile.getTextEditor().last().type('{selectall}');
+      textToolTile.verifyHighlightToolbarButtonEnabled();
+      textToolTile.getHighlightButton().click();
+      textToolTile.getTextEditor().last().find('.highlight-chip').should('exist');
+
+      if (before) before();
+
+      aa.getAnnotationModeButton().click();
+      aa.getAnnotationButtons().should('have.length', 2);
+      aa.getAnnotationArrows().should('not.exist');
+      aa.getAnnotationButtons().eq(0).click();
+      aa.getAnnotationButtons().eq(1).click();
+      aa.getAnnotationArrows().should('have.length', 1);
+      aa.getAnnotationModeButton().click();
+    }
+
+    // Asserts the `handleIndex`-th sparrow drag handle's center is within `tolerance` of
+    // the `chipIndex`-th chip matching `chipSelector` (default `.highlight-chip`; pass
+    // `.variable-chip` for variable chips). The tolerance is loose because the default
+    // offsets in getObjectDefaultOffsets pull endpoints toward the chip's edge.
+    function assertHandleNearChip({ handleIndex, chipIndex, workspaceClass = '.primary-workspace',
+                                    chipSelector = '.highlight-chip', tolerance = 60 } = {}) {
+      cy.get(`${workspaceClass} ${chipSelector}`).eq(chipIndex).then($chip => {
+        const chipRect = $chip[0].getBoundingClientRect();
+        aa.getAnnotationArrowDragHandles(workspaceClass).eq(handleIndex).then($handle => {
+          const handleRect = $handle[0].getBoundingClientRect();
+          const hx = handleRect.left + handleRect.width / 2;
+          const hy = handleRect.top + handleRect.height / 2;
+          expect(hx, `handle[${handleIndex}].x near chip[${chipIndex}].x`)
+            .to.be.within(chipRect.left - tolerance, chipRect.right + tolerance);
+          expect(hy, `handle[${handleIndex}].y near chip[${chipIndex}].y`)
+            .to.be.within(chipRect.top - tolerance, chipRect.bottom + tolerance);
+        });
+      });
+    }
+
+    it("renders sparrow on chip correctly in the main (editable) view", () => {
+      beforeTest(queryParams);
+      setupTwoChipsAndSparrow();
+      aa.getAnnotationArrowDragHandles().should('have.length', 2);
+      assertHandleNearChip({ handleIndex: 0, chipIndex: 0 });
+      assertHandleNearChip({ handleIndex: 1, chipIndex: 1 });
+    });
+
+    it("supports straight-line sparrows with a text-chip endpoint", () => {
+      beforeTest(queryParams);
+      setupTwoChipsAndSparrow({
+        before: () => {
+          aa.getAnnotationModeButton().click();
+          aa.getAnnotationMenuExpander().click();
+          aa.getStraightArrowToolbarButton().click();
+          aa.getAnnotationModeButton().should('have.attr', 'title', 'Sparrow: straight');
+          aa.getAnnotationModeButton().click();
+        }
+      });
+      aa.getAnnotationArrowDragHandles().should('have.length', 2);
+      assertHandleNearChip({ handleIndex: 0, chipIndex: 0 });
+      assertHandleNearChip({ handleIndex: 1, chipIndex: 1 });
+    });
+
+    it("removes sparrows when the chip is unhighlighted", () => {
+      beforeTest(queryParams);
+      setupTwoChipsAndSparrow();
+      // Click the first chip to select it, then click the highlight button to unhighlight.
+      textToolTile.getTextEditor().first().find('.highlight-chip').click();
+      textToolTile.getHighlightButton().click();
+      aa.getAnnotationArrows().should('have.length', 0);
+    });
+
+    it("removes sparrows when the text containing the chip is deleted", () => {
+      beforeTest(queryParams);
+      setupTwoChipsAndSparrow();
+      // Remove the chip by mutating editor.children directly + firing onChange.
+      // Cypress can't drive this via keyboard: focusing a Slate editor whose only
+      // content is a void chip trips a Slate + Chrome DOMException that throws
+      // inside Cypress's command execution and can't be suppressed.
+      cy.window().then((win) => {
+        const stores = win.stores;
+        const docKey = stores.persistentUI.problemWorkspace.primaryDocumentKey;
+        const doc = stores.documents.getDocument(docKey);
+        let firstTextContent = null;
+        doc.content.tileMap.forEach((tile) => {
+          if (tile.content.type === 'Text' && !firstTextContent) {
+            firstTextContent = tile.content;
+          }
+        });
+        const editor = firstTextContent.editor;
+        editor.children = [{ type: 'paragraph', children: [{ text: 'cleared' }] }];
+        editor.onChange();
+      });
+      textToolTile.getTextEditor().first().find('.highlight-chip').should('not.exist');
+      aa.getAnnotationArrows().should('have.length', 0);
+    });
+
+    it("renders sparrow on chip correctly in 4-up view", () => {
+      cy.visit(queryParamsGroup);
+      cy.waitForLoad();
+      clueCanvas.shareCanvas();
+      cy.wait(3000);
+      setupTwoChipsAndSparrow();
+      // Sanity check in primary view before switching to 4-up.
+      aa.getAnnotationArrows().should('have.length', 1);
+      clueCanvas.openFourUpView();
+      clueCanvas.getFourUpView().should('be.visible');
+      // The student's own work renders in the NW quadrant.
+      const nw = '.primary-workspace .north-west';
+      cy.get(`${nw} .highlight-chip`, { timeout: 10000 }).should('have.length', 2);
+      aa.getAnnotationArrows(nw).should('have.length', 1);
+      aa.getAnnotationArrowDragHandles(nw).should('have.length', 2);
+      assertHandleNearChip({ handleIndex: 0, chipIndex: 0, workspaceClass: nw, tolerance: 100 });
+      assertHandleNearChip({ handleIndex: 1, chipIndex: 1, workspaceClass: nw, tolerance: 100 });
+    });
+
+    it("renders sparrow on variable chip correctly in the main (editable) view", () => {
+      // qa-variables is the only QA unit with `new-variable` in the text toolbar plus
+      // `annotations: all`. The diagram tile initializes the shared-variables model.
+      cy.visit(`${Cypress.config("qaVariablesUnitStudent5")}`);
+      cy.waitForLoad();
+      cy.showOnlyDocumentWorkspace();
+
+      clueCanvas.addTile('text');
+      clueCanvas.addTile('diagram');
+
+      const createVariableChip = (name, value) => {
+        clueCanvas.clickToolbarButton('text', 'new-variable');
+        cy.get('.custom-modal').should('exist');
+        cy.get('#evd-name').type(name);
+        cy.get('#evd-value').type(value);
+        cy.get('.modal-button').last().click();
+      };
+
+      textToolTile.getTextEditor().first().click();
+      createVariableChip('alpha', '1');
+      cy.get('.primary-workspace .variable-chip').should('have.length', 1);
+
+      clueCanvas.addTile('text');
+      textToolTile.getTextEditor().last().click();
+      createVariableChip('beta', '2');
+      cy.get('.primary-workspace .variable-chip').should('have.length', 2);
+
+      aa.getAnnotationModeButton().click();
+      aa.getAnnotationButtons().should('have.length', 2);
+      aa.getAnnotationArrows().should('not.exist');
+      aa.getAnnotationButtons().eq(0).click();
+      aa.getAnnotationButtons().eq(1).click();
+      aa.getAnnotationArrows().should('have.length', 1);
+      aa.getAnnotationModeButton().click();
+      aa.getAnnotationArrowDragHandles().should('have.length', 2);
+
+      // Assert handle endpoints land within tolerance of the variable chips' bounding boxes.
+      assertHandleNearChip({ handleIndex: 0, chipIndex: 0, chipSelector: '.variable-chip' });
+      assertHandleNearChip({ handleIndex: 1, chipIndex: 1, chipSelector: '.variable-chip' });
+    });
+
+    it("renders sparrow on chip correctly in the Lessons & Documents panel (read-only)", () => {
+      // Opens the same document in the editable Workspace panel and the read-only
+      // Lessons & Documents nav panel — two React trees rendering the same MST doc.
+      // Uses qaUnitStudent5 because it has `highlight` in the text toolbar,
+      // `annotations: all`, and a known workspace title for the thumbnail click.
+      cy.visit(`${Cypress.config("qaUnitStudent5")}`);
+      cy.waitForLoad();
+      const studentWorkspace = 'QA 1.1 Solving a Mystery with Proportional Reasoning';
+
+      setupTwoChipsAndSparrow();
+      aa.getAnnotationArrows().should('have.length', 1);
+
+      // Open the workspace doc as a read-only thumbnail view in the nav panel.
+      cy.openTopTab('my-work');
+      cy.openSection('my-work', 'workspaces');
+      cy.openDocumentThumbnail('my-work', 'workspaces', studentWorkspace);
+
+      const navPanel = '.nav-tab-panel';
+      cy.get(`${navPanel} .highlight-chip`, { timeout: 10000 }).should('have.length', 2);
+      aa.getAnnotationArrows(navPanel).should('have.length', 1);
+      aa.getAnnotationArrowDragHandles(navPanel).should('have.length', 2);
+      // Wider tolerance for the scaled layout.
+      assertHandleNearChip({ handleIndex: 0, chipIndex: 0, workspaceClass: navPanel, tolerance: 100 });
+      assertHandleNearChip({ handleIndex: 1, chipIndex: 1, workspaceClass: navPanel, tolerance: 100 });
+    });
   });
 
   it("Can add annotations to tiles nested within a question tile", () => {

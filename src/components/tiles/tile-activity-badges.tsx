@@ -31,10 +31,14 @@ function TileActivityBadge({ forceOverflow, users }: ITileActivityBadge) {
   const overflow = forceOverflow || users.length > 1;
   const text = overflow ? `+${users.length}` : users[0].initials;
   const testId = overflow ? "activity-badge-overflow" : "activity-badge";
-  const tooltipText = users.map(u => u.name).join(", ");
+  const tooltipHtml = (
+    <div className="badge-tooltip">
+      {users.map(u => (<div key={u.userId}>{u.name}</div>))}
+    </div>
+  );
 
   return (
-    <Tooltip title={tooltipText} {...tooltipOptions}>
+    <Tooltip html={tooltipHtml} {...tooltipOptions}>
       <div className={classNames("badge", { overflow })} data-testid={testId}>
         <UserIcon className="user-icon" />
         <span>{text}</span>
