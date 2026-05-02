@@ -96,9 +96,10 @@ export const isDocumentAccessibleToUser = (
   const ownDocument = doc.uid === user.id;
   const isShared = doc.visibility === "public";
   const isPublished = isPublishedType(doc.type);
+  const isGroupDoc = doc.type === GroupDocument; // Group documents are accessible to everyone
   if (user.isTeacherOrResearcher) return true;
   if (user.isStudent) {
-    return ownDocument || isShared || isPublished
+    return ownDocument || isShared || isPublished || isGroupDoc
            || (isExemplarType(doc.type) && documentStore.isExemplarVisible(doc.key));
   }
   return false;
