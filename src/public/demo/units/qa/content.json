@@ -122,6 +122,17 @@
     "termOverrides": {
       "strategy": "Select QA Strategy"
     },
+    "sortWorkConfig": {
+      "sortOptions": [
+        "Group",
+        "Name",
+        "Strategy",
+        "Bookmarked",
+        "Tools",
+        "Date",
+        "Problem"
+      ]
+    },
     "commentTags": {
       "diverging": "Diverging Designs",
       "converging": "Converging Designs",
@@ -131,7 +142,146 @@
       "function": "What's it do?"
     },
     "aiEvaluation": "mock",
-    "groupDocumentsEnabled": true
+    "groupDocumentsEnabled": true,
+    "navTabs": {
+      "lazyLoadTabContents": true,
+      "showNavPanel": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Problem",
+          "sections": []
+        },
+        {
+          "tab": "teacher-guide",
+          "label": "Teacher Guide",
+          "teacherOnly": true,
+          "sections": []
+        },
+        {
+          "tab": "student-work",
+          "label": "Student Workspaces",
+          "teacherOnly": true,
+          "groupsDisplay": true,
+          "sections": [
+            {
+              "title": "Group Workspaces",
+              "type": "problem-documents",
+              "dataTestHeader": "group-workspaces",
+              "dataTestItem": "group-list-items",
+              "showGroupWorkspaces": true
+            }
+          ]
+        },
+        {
+          "tab": "sort-work",
+          "label": "Sort Work",
+          "teacherOnly": false
+        },
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-investigations",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem", "planning"],
+              "order": "original",
+              "showStars": ["student", "teacher"]
+            },
+            {
+              "title": "Workspaces",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "showStars": ["student", "teacher"],
+              "addDocument": true
+            },
+            {
+              "title": "Bookmarks",
+              "type": "starred-problem-documents",
+              "dataTestHeader": "my-work-section-starred",
+              "documentTypes": ["personal", "problem"],
+              "properties": ["starred", "!isDeleted"],
+              "showStars": ["student", "teacher"]
+            },
+            {
+              "title": "Learning Log",
+              "type": "learning-logs",
+              "dataTestHeader": "learning-log-section",
+              "documentTypes": ["learningLog"],
+              "properties": ["!isDeleted"],
+              "addDocument": true
+            }
+          ]
+        },
+        {
+          "tab": "class-work",
+          "label": "Class Work",
+          "sections": [
+            {
+              "className": "section problem published",
+              "title": "Workspaces",
+              "type": "published-problem-documents",
+              "dataTestHeader": "class-work-section-published",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["publication"],
+              "showStars": ["teacher"],
+              "properties": ["!isTeacherDocument", "!isDeleted"]
+            },
+            {
+              "className": "section personal published",
+              "title": "Workspaces",
+              "type": "published-personal-documents",
+              "dataTestHeader": "class-work-section-personal",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["personalPublication"],
+              "properties": ["!isTeacherDocument", "!isDeleted"]
+            },
+            {
+              "className": "section teacher published-documents",
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["publication", "personalPublication"],
+              "properties": ["isTeacherDocument", "!isDeleted"]
+            },
+            {
+              "className": "section teacher supports",
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["supportPublication"],
+              "properties": ["teacherSupport", "!isDeleted"]
+            },
+            {
+              "className": "section learning-log published",
+              "title": "Learning Logs",
+              "type": "published-learning-logs",
+              "dataTestHeader": "class-work-section-learning-log",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["learningLogPublication"],
+              "properties": ["!isDeleted"]
+            },
+            {
+              "className": "section problem starred",
+              "title": "Bookmarks",
+              "type": "starred-problem-documents",
+              "dataTestHeader": "class-work-section-starred",
+              "documentTypes": ["publication"],
+              "properties": ["starred", "!isDeleted"],
+              "showStars": ["teacher"]
+            }
+          ]
+        }
+      ]
+    }
   },
   "sections": {
     "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},

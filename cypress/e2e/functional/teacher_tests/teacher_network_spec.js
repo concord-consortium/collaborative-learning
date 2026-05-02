@@ -26,7 +26,7 @@ describe('Networked dividers for networked teacher', () => {
     teacherNetwork.verifyDividerLabel('workspaces', 'my-classes');
     teacherNetwork.verifyDividerLabel('workspaces', 'my-network');
 
-    cy.openSection('my-work', 'learning-log');
+    cy.openSection('my-work', 'learning-logs');
     teacherNetwork.verifyDividerLabel('learning-log', 'my-classes');
     teacherNetwork.verifyDividerLabel('learning-log', 'my-network');
 
@@ -41,7 +41,7 @@ describe('Networked dividers for networked teacher', () => {
     teacherNetwork.verifyDividerLabel('workspaces', 'my-network');
 
     cy.openSection('class-work', 'learning-logs');
-    teacherNetwork.verifyDividerLabel('learning-logs', 'my-classes');
-    teacherNetwork.verifyDividerLabel('learning-logs', 'my-network');
+    teacherNetwork.verifyDividerLabel('learning-log', 'my-classes');
+    teacherNetwork.verifyDividerLabel('learning-log', 'my-network');
   });
 });

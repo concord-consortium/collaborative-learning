@@ -14,6 +14,19 @@ import { TileActivityBadges } from "./tile-activity-badges";
 const kDocKey = "doc-1";
 const kTileId = "tile-1";
 
+// react-tippy renders the `html`/`title` content into a portal that only mounts
+// when the tooltip is shown — invisible to RTL queries. Replace it with a
+// passthrough that renders the tooltip content alongside the trigger so tests
+// can assert on it.
+jest.mock("react-tippy", () => ({
+  Tooltip: ({ html, title, children }: any) => (
+    <>
+      {children}
+      {(html ?? title) != null && <div data-testid="tippy-content">{html ?? title}</div>}
+    </>
+  )
+}));
+
 interface IBuildStoresOptions {
   documentType?: DocumentType;
   numFocused?: number;
@@ -162,17 +175,12 @@ describe("TileActivityBadges", () => {
         <TileActivityBadges documentKey={kDocKey} tileId={kTileId} hovered={false} selected={false} />
       </Provider>
     );
-    // react-tippy attaches the original title to data-original-title on its wrapper after mount.
-    // Look for any element whose title attribute (or data-original-title) contains a name.
-    // The fixture's other users start at allUserIds index 1, so their
-    // lastNames are Last2..Last7. With numFocused=3 we expect 1..3 of those.
-    const expectedNames = ["First Last2", "First Last3", "First Last4"];
-    const candidates = Array.from(container.querySelectorAll("*")) as HTMLElement[];
-    const match = candidates.filter(el => {
-      const t = el.getAttribute("title") || el.getAttribute("data-original-title") || "";
-      return expectedNames.some(name => t.includes(name));
-    });
-    expect(match.length).toBe(3);
+
+    // Other users start at allUserIds index 1, so lastNames are Last2..Last7;
+    // numFocused=3 expects Last2..Last4.
+    const names = Array.from(container.querySelectorAll(".badge-tooltip > div"))
+      .map(d => d.textContent);
+    expect(names).toEqual(["First Last2", "First Last3", "First Last4"]);
   });
 
   it("applies left-shift class when hovered or selected", () => {
