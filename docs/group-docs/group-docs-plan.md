@@ -137,26 +137,11 @@ Depends on GD-19.
 
 ### GD-21: Collaborative Text-Tile Editing
 
-The text tile currently stores its content as a single serialized string field. Every keystroke batch generates a JSON patch that replaces the whole field, with three downstream costs:
+Replace the text tile's single serialized string field with a fine-grained representation, and apply remote patches directly to Slate's editor state so the local user's cursor and selection are preserved. Today's whole-string patches inflate history, make merging impossible, and force a full Slate re-sync on every remote update.
 
-- **History inflates** — every keystroke records the full text rather than the delta.
-- **Merging is impossible** — any concurrent edit looks like a whole-content conflict, so GD-14 for the text tile is gated on this.
-- **Remote updates disrupt the local user's UI** — when a remote change arrives, Slate re-syncs from the regenerated MST string, which resets cursor position, drops in-progress selection, and overwrites uncommitted keystrokes. Reproduction cases in [test-scripts/text-tile.md](test-scripts/text-tile.md).
+Design and approach trade-offs: [collaborative-text-tile-editing-design.md](collaborative-text-tile-editing-design.md). Status: no concrete design yet.
 
-The third point shapes the implementation: it's not enough to update MST and let Slate re-derive. We need the remote user's intention (insert at offset N, delete range [M, N], etc.) so we can apply the change to Slate's editor state directly without disturbing the local user's cursor and selection. Whichever fine-grained representation we land on has to carry enough intent for a Slate-aware applier to translate it into a Slate operation.
-
-Two approaches under consideration, both with tradeoffs:
-
-- **MST-ify Slate's structure.** Turn paragraphs and spans into MST nodes so JSON patches naturally target the changed node. Keeps the existing patch format (JSON Patch); the history scrubber, replay tools, and any future external tooling don't need to know anything special. Cost: non-trivial mapping between Slate's document model and an MST tree, possible per-keystroke MST overhead at scale. Patches still need a Slate-aware applier on top to preserve cursor/selection.
-- **Custom text-specific patches.** Insert/delete operations with offsets (and possibly context markers), matching what the user actually did. Smallest representational overhead, ideal for collaborative-edit semantics, and the patch format already encodes the intent the Slate applier needs. Cost: any consumer that applies patches needs to know the custom format. Acceptable only if the format is documented and stable. CODAP uses custom patches in places but doesn't serialize history, so it doesn't face this constraint; CLUE does, so this is a real cost.
-
-A third option, noted for awareness: OT/CRDT libraries (Yjs `Y.Text`, Automerge) provide collaborative-text semantics out of the box. Retrofitting one onto the Slate + MST stack is the heaviest path — flagged here as known territory, not a recommendation.
-
-This work pays off before any collaboration lands: single-user history size shrinks and undo entries get cheaper. For collaborative text editing it's a sibling enabler of GD-17 — GD-17 is the mechanism for tile-specific merge logic; without GD-21 the text tile has no useful sub-paths to merge over, so GD-14 for the text tile is gated on this.
-
-The patch-size and merging benefits likely apply elsewhere that embedded text is stored in serialized form (e.g., Drawing tile text-on-object, Question tile prompts, Geometry labels) — worth a quick survey when this lands. The cursor-preservation work is text-tile specific (Slate); other consumers would get only the patch-size and merging wins.
-
-Independent of the merging chain. Can be done anytime.
+Independent of the merging chain. Can be done anytime. Sibling enabler of GD-17 — without GD-21 the text tile has no useful sub-paths to merge over, so GD-14 for the text tile is gated on this.
 
 ### GD-24: Opt-in coupled scopes (held in reserve)
 

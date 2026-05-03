@@ -21,6 +21,7 @@ Detailed designs for individual plan items.
 - [settled-state-doc-saves-design.md](settled-state-doc-saves-design.md) — Design for [GD-18](group-docs-plan.md#gd-18-settled-state-document-saves). Save the doc only when the receive-side state machine is settled. Status: design complete.
 - [transaction-free-history-design.md](transaction-free-history-design.md) — Design for [GD-19](group-docs-plan.md#gd-19-transaction-free-history). Replace the per-document Firestore transaction with a multi-parent DAG. Status: early draft.
 - [background-entries-design.md](background-entries-design.md) — Design for [GD-20](group-docs-plan.md#gd-20-background-entries-dataflow). Make tick-rate dataflow changes ordinary history entries with a `background` flag. Status: draft for review.
+- [collaborative-text-tile-editing-design.md](collaborative-text-tile-editing-design.md) — Design notes for [GD-21](group-docs-plan.md#gd-21-collaborative-text-tile-editing). Fine-grained text patches plus a Slate-aware applier that preserves cursor and selection on remote updates. Status: no concrete design yet.
 - [group-docs-coupled-scopes.md](group-docs-coupled-scopes.md) — Design for [GD-24](group-docs-plan.md#gd-24-opt-in-coupled-scopes-held-in-reserve). Opt-in coupling between tile and shared-model scopes. Held in reserve as an alternative to GD-11's tolerate-stale-references approach.
 
 ## Research and empirical
