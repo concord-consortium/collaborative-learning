@@ -466,8 +466,21 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
       role: "button" as const,
       ariaLabel: object.ariaLabel,
       onBlur: (e: React.FocusEvent<SVGGElement>) => {
-        // Only clear selection when focus leaves this object entirely (not to a descendant)
-        if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget as Node)) return;
+        // Only clear selection when focus truly leaves the drawing tile.
+        // Preserve selection if focus is lost to nothing (related is null — e.g.,
+        // mouse click on a non-focusable button), is moving within the SVG
+        // (sibling objects, shift-click multi-select), is within the .tool-tile
+        // container, or is within the tile's toolbar (rendered in a FloatingPortal
+        // outside .tool-tile but tagged with data-tile-id).
+        const related = e.relatedTarget as Element | null;
+        if (!related) return;
+        if (e.currentTarget.contains(related)) return;
+        const svg = this.svgRef?.current as Element | null;
+        if (svg?.contains(related)) return;
+        const tile = (e.currentTarget as Element).closest('.tool-tile');
+        if (tile?.contains(related)) return;
+        const tileId = this.props.model.id;
+        if (tileId && related.closest?.(`[data-tile-id="${CSS.escape(tileId)}"]`)) return;
         this.getContent().setSelectedIds([]);
       },
     } : undefined;

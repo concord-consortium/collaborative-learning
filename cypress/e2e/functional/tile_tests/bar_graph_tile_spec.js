@@ -518,31 +518,33 @@ context('Bar Graph Tile', function () {
 
     cy.log('Check color change when there is no secondary attribute');
     barGraph.getBar().should('have.length', 2).should('have.attr', 'fill', clueDataColors[0]);
-    barGraph.getBarColorMenu().should('not.be.visible');
+    // The portaled menu uses visibility:hidden when closed, and the helper filters by
+    // `:visible`, so the closed state matches no elements. Assert absence directly.
+    cy.get(`body [data-testid="color-menu-list"]:visible`).should('not.exist');
     barGraph.getBarColorButton().should('have.length', 2);
-    barGraph.getBarColorButton().eq(0).click();
-    barGraph.getBarColorMenu(workspace, tileIndex, 0).should('be.visible');
+    barGraph.getBarColorButton().eq(0).click({force: true});
+    barGraph.getBarColorMenu(workspace, tileIndex).should('be.visible');
     // Color menu is portaled out of the tile so our tile focus trap doesn't include
     // its items in the parent Tab cycle. Verify the Portal placement and that the
     // top-level .color-menu-list styles still apply (24x24 items with focus ring).
-    barGraph.getBarColorMenu(workspace, tileIndex, 0)
+    barGraph.getBarColorMenu(workspace, tileIndex)
       .should('have.class', 'color-menu-list')
       .closest('.chakra-portal')
       .should('exist');
-    barGraph.getBarColorMenu(workspace, tileIndex, 0)
+    barGraph.getBarColorMenu(workspace, tileIndex)
       .closest('.bar-graph-tile')
       .should('not.exist');
-    barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).should('have.length', 12);
-    barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).first()
+    barGraph.getBarColorMenuButtons(workspace, tileIndex).should('have.length', 12);
+    barGraph.getBarColorMenuButtons(workspace, tileIndex).first()
       .should('have.css', 'width', '24px')
       .and('have.css', 'height', '24px');
-    barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).eq(1).click({force: true});
-    barGraph.getBarColorMenu(workspace, tileIndex, 0).should('not.be.visible');
+    barGraph.getBarColorMenuButtons(workspace, tileIndex).eq(1).click({force: true});
+    cy.get(`body [data-testid="color-menu-list"]:visible`).should('not.exist');
     barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[1]);
     barGraph.getBar().eq(1).should('have.attr', 'fill', clueDataColors[0]);
-    barGraph.getBarColorButton().eq(1).click();
-    barGraph.getBarColorMenu(workspace, tileIndex, 1).should('be.visible');
-    barGraph.getBarColorMenuButtons(workspace, tileIndex, 1).eq(2).click({force: true});
+    barGraph.getBarColorButton().eq(1).click({force: true});
+    barGraph.getBarColorMenu(workspace, tileIndex).should('be.visible');
+    barGraph.getBarColorMenuButtons(workspace, tileIndex).eq(2).click({force: true});
     barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[1]);
     barGraph.getBar().eq(1).should('have.attr', 'fill', clueDataColors[2]);
 
@@ -554,17 +556,17 @@ context('Bar Graph Tile', function () {
     barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[0]);
     barGraph.getBar().eq(1).should('have.attr', 'fill', clueDataColors[1]);
     barGraph.getBar().eq(2).should('have.attr', 'fill', clueDataColors[2]);
-    barGraph.getBarColorButton().eq(0).click();
-    barGraph.getBarColorMenu(workspace, tileIndex, 0).should('be.visible');
-    barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).eq(1).click({force: true});
+    barGraph.getBarColorButton().eq(0).click({force: true});
+    barGraph.getBarColorMenu(workspace, tileIndex).should('be.visible');
+    barGraph.getBarColorMenuButtons(workspace, tileIndex).eq(1).click({force: true});
     barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[1]);
-    barGraph.getBarColorButton().eq(1).click();
-    barGraph.getBarColorMenu(workspace, tileIndex, 1).should('be.visible');
-    barGraph.getBarColorMenuButtons(workspace, tileIndex, 1).eq(2).click({force: true});
+    barGraph.getBarColorButton().eq(1).click({force: true});
+    barGraph.getBarColorMenu(workspace, tileIndex).should('be.visible');
+    barGraph.getBarColorMenuButtons(workspace, tileIndex).eq(2).click({force: true});
     barGraph.getBar().eq(1).should('have.attr', 'fill', clueDataColors[2]);
-    barGraph.getBarColorButton().eq(2).click();
-    barGraph.getBarColorMenu(workspace, tileIndex, 2).should('be.visible');
-    barGraph.getBarColorMenuButtons(workspace, tileIndex, 2).eq(3).click({force: true});
+    barGraph.getBarColorButton().eq(2).click({force: true});
+    barGraph.getBarColorMenu(workspace, tileIndex).should('be.visible');
+    barGraph.getBarColorMenuButtons(workspace, tileIndex).eq(3).click({force: true});
     barGraph.getBar().eq(2).should('have.attr', 'fill', clueDataColors[3]);
 
     cy.log('Check undo/redo of color changes.');

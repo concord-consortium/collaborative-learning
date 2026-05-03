@@ -70,7 +70,15 @@ const EditableAxisLabel: React.FC<IProps> = observer(function EditableAxisLabel(
           value={editText}
           size={editText.length + 5}
           onKeyDown={handleKeyDown}
-          onBlur={() => handleEndEdit(true)}
+          onBlur={(e) => {
+            // The tile's FocusTrapController intercepts Escape at document/capture phase and
+            // calls stopPropagation, so the input's onKeyDown never sees Escape. exitTrap then
+            // focuses the .tool-tile container, which blurs the input. Detect this case via
+            // the blur's relatedTarget and cancel rather than commit.
+            const target = e.relatedTarget as HTMLElement | null;
+            const cancelled = !!target?.classList.contains("tool-tile");
+            handleEndEdit(!cancelled);
+          }}
           onChange={(e) => setEditText(e.target.value)}
         />
       </foreignObject>
