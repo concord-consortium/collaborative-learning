@@ -1,17 +1,19 @@
 /**
- * Skip Links Accessibility Tests
+ * Skip Links Accessibility Tests — Student View
  *
  * Tests the skip links navigation feature that allows keyboard users
  * to bypass repetitive navigation and jump directly to main content areas.
  *
- * Skip links tested:
+ * Skip links tested in this file (student persona):
  * - "Skip to Lessons and Documents" → #resources-panel
  * - "Skip to Workspace" → #workspace-panel
- * - "Skip to Dashboard" → #main-dashboard (teacher only)
+ *
+ * Teacher-specific cases (including the dashboard skip link) live in
+ * skip_links_teacher_spec.js. The two files were split to keep each spec's
+ * browser session below the renderer-crash memory threshold in CI.
  */
 
-const queryParamsStudent = `${Cypress.config("qaUnitStudent5")}`;
-const queryParamsTeacher = `${Cypress.config("qaUnitTeacher6")}`;
+const queryParamsStudent = Cypress.config("qaUnitStudent5");
 
 function beforeTest(params) {
   cy.visit(params);
@@ -116,6 +118,7 @@ context('Skip Links Navigation', function () {
     });
   });
 
+<<<<<<< HEAD:cypress/e2e/functional/document_tests/skip_links_spec.js
   describe('Teacher View', function () {
 
     beforeEach(function () {
@@ -210,6 +213,8 @@ context('Skip Links Navigation', function () {
     });
   });
 
+=======
+>>>>>>> master:cypress/e2e/functional/document_tests/skip_links_student_spec.js
   describe('Panel Target Elements', function () {
 
     beforeEach(function () {
@@ -230,23 +235,6 @@ context('Skip Links Navigation', function () {
 
       cy.log('Workspace panel should be focusable');
       cy.get('#workspace-panel').should('have.attr', 'tabindex', '-1');
-    });
-  });
-
-  describe('Teacher Dashboard Target Element', function () {
-
-    beforeEach(function () {
-      beforeTest(queryParamsTeacher);
-      cy.get('.toggle-button').contains('Dashboard').click();
-      cy.get('#main-dashboard .tabbed-area').should('be.visible');
-    });
-
-    it('dashboard element has correct id attribute', function () {
-      cy.get('#main-dashboard').should('exist');
-    });
-
-    it('dashboard element is focusable', function () {
-      cy.get('#main-dashboard').should('have.attr', 'tabindex', '-1');
     });
   });
 

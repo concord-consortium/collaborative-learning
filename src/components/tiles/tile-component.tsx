@@ -17,6 +17,7 @@ import {
   ITileApi, TileResizeEntry, TileApiInterfaceContext, TileModelContext, RegisterToolbarContext
 } from "./tile-api";
 import { HotKeys } from "../../utilities/hot-keys";
+import { TileActivityBadges } from "./tile-activity-badges";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
 import { hasSelectionModifier } from "../../utilities/event-utils";
@@ -343,9 +344,21 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
                               <ResizeTileButton buttonRef={elt => this.resizeElement = elt}
                                 hovered={hoverTile}
                                 selected={isTileSelected}
+<<<<<<< HEAD
                                 height={tileHeight}
                                 onDragStart={e => this.props.onResizeRow(e)}
                                 onResize={h => this.props.onRequestRowHeight(model.id, h)} />;
+=======
+                                onDragStart={e => this.props.onResizeRow(e)} />;
+    const activityBadges = (
+      <TileActivityBadges
+        documentKey={this.props.documentId ?? ""}
+        tileId={model.id}
+        hovered={hoverTile}
+        selected={isTileSelected}
+      />
+    );
+>>>>>>> master
 
     const style: React.CSSProperties = {};
     if (widthPct) {
@@ -370,6 +383,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
           >
             {this.renderLinkIndicators()}
             {dragTileButton}
+            {activityBadges}
             {resizeTileButton}
             {this.renderTile(Component)}
             {this.renderTileComments()}

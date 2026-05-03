@@ -220,6 +220,7 @@ export const authWithTeacherClaims = specAuth({token: {user_type: "teacher"}});
 // Creates both Firestore document metadata and Firebase Realtime Database document metadata
 export const setupTestDocuments = async (options: {
   demo?: string;
+  portal?: string;
   unit?: string;
   documentId?: string;
   classId?: string;
@@ -227,16 +228,23 @@ export const setupTestDocuments = async (options: {
   lastEditedAt?: number;
 }) => {
   const {
-    demo = "AITEST",
+    portal,
     unit = "qa-config-subtabs",
     documentId = kDocumentKey,
     classId = kClassHash,
     uid = kUserId,
     lastEditedAt = new Date().getDate(),
   } = options;
+  // Demo realm is the default; callers opt into authed by passing `portal`.
+  const demo = portal ? undefined : options.demo ?? "AITEST";
+  const canonicalPortal = portal ? portal.replace(/\./g, "_") : undefined;
+  const firestoreBase = portal ? `authed/${canonicalPortal}` : `demo/${demo}`;
+  const firebaseBase = portal ?
+    `/authed/portals/${canonicalPortal}` :
+    `/demo/${demo}/portals/demo`;
 
   // Set up Firestore document metadata
-  const firestoreMetadataPath = `demo/${demo}/documents/${documentId}`;
+  const firestoreMetadataPath = `${firestoreBase}/documents/${documentId}`;
   await getFirestore().doc(firestoreMetadataPath).set({
     unit,
     context_id: classId,
@@ -246,19 +254,20 @@ export const setupTestDocuments = async (options: {
 
   // Set up Firebase Realtime Database document metadata
   const firebaseMetadataPath =
-    `/demo/${demo}/portals/demo/classes/${classId}/users/${uid}/documentMetadata/${documentId}`;
+    `${firebaseBase}/classes/${classId}/users/${uid}/documentMetadata/${documentId}`;
   await getDatabase().ref(firebaseMetadataPath).set({
     lastEditedAt,
   });
 
   const firebaseDocPath =
-    `/demo/${demo}/portals/demo/classes/${classId}/users/${uid}/documents/${documentId}`;
+    `${firebaseBase}/classes/${classId}/users/${uid}/documents/${documentId}`;
   await getDatabase().ref(firebaseDocPath).set({
     content: JSON.stringify(specDocumentContent()),
   });
 
   return {
     demo,
+    portal,
     unit,
     documentId,
     classId,

@@ -1,6 +1,5 @@
 {
   "standard.enable": false,
-  "typescript.tsdk": "./node_modules/typescript/lib",
   "search.exclude": {
     "**/coverage": true,
     "**/dist": true
@@ -48,5 +47,6 @@
   },
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
-  "files.trimTrailingWhitespace": true
+  "files.trimTrailingWhitespace": true,
+  "js/ts.tsdk.path": "./node_modules/typescript/lib"
 }

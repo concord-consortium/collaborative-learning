@@ -139,6 +139,16 @@ function setupTestBrain(studentIndex) {
   cy.get('.primary-workspace .graph-wrapper .editable-tile-title-text').first().click();
   cy.get('.primary-workspace .graph-wrapper .editable-tile-title').first().type(title + '{enter}');
   cy.get('.primary-workspace .graph-wrapper .editable-tile-title-text').should("contain", title);
+
+  // Wait for all changes to be saved before navigating away.
+  // We can't use cy.waitForSave() here because this document contains a dataflow tile, which
+  // continuously mutates its MST state each tick. That keeps the save indicator from ever
+  // reaching "saved" (the latest change is never fully persisted before another one arrives),
+  // so waitForSave would time out. A longer-term fix is to move dataflow's per-tick transient
+  // state out of the persisted document model (e.g. into a separate store or volatile state
+  // that isn't snapshotted), at which point the document's save state can settle and
+  // waitForSave can be used here again.
+  cy.wait(4000);
 }
 
 context('Test 4-up and 1-up views tiles read only functionalities', function () {

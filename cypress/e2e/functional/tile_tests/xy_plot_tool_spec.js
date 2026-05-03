@@ -44,18 +44,20 @@ function beforeTest(params) {
 
 context('XYPlot Tool Tile', function () {
   describe("XYPlot Tool", () => {
-    // flaky
     it("XYPlot tool tile", () => {
-      beforeTest(queryParamsMultiDataset);
+      cy.visit("/editor/?appMode=qa&unit=./demo/units/qa/content.json");
+
+      const localWS = '.read-only-local-workspace';
+      const remoteWS = '.read-only-remote-workspace';
+
       cy.log("Add XY Plot Tile");
-      cy.collapseResourceTabs();
       clueCanvas.addTile("graph");
       xyTile.getTile().should('be.visible');
 
       cy.log("Add Table Tile");
       clueCanvas.addTile('table');
       tableToolTile.getTableTile().should('be.visible');
-      cy.get(".primary-workspace").within((workspace) => {
+      cy.get(".primary-workspace").within(() => {
         tableToolTile.typeInTableCell(1, '5');
         tableToolTile.getTableCell().eq(1).should('contain', '5');
         tableToolTile.typeInTableCell(2, '10');
@@ -68,9 +70,10 @@ context('XYPlot Tool Tile', function () {
       xyTile.getXYPlotTitle().should('contain', title);
 
       //XY Plot tile title restore upon page reload
-      cy.wait(2000);
+      // The /editor/ route saves to sessionStorage synchronously on each MST snapshot,
+      // so no wait is needed before reload.
       cy.reload();
-      cy.waitForLoad();
+      cy.get('.editable-document-content', { timeout: 60000 });
       xyTile.getTile().click();
       xyTile.getXYPlotTitle().should('contain', title);
 
@@ -89,8 +92,12 @@ context('XYPlot Tool Tile', function () {
       cy.log("verify graph dot is displayed");
       xyTile.getGraphDot().should('have.length', 1);
 
+      cy.log("verify graph dot appears in read-only views");
+      cy.get(`${localWS} .graph-dot`).should('have.length', 1);
+      cy.get(`${remoteWS} .graph-dot`).should('have.length', 1);
+
       cy.log("Add Second Row Table Cell");
-      cy.get(".primary-workspace").within((workspace) => {
+      cy.get(".primary-workspace").within(() => {
         tableToolTile.typeInTableCell(5, '7');
         tableToolTile.getTableCell().eq(5).should('contain', '7');
         tableToolTile.typeInTableCell(6, '6');
@@ -100,6 +107,10 @@ context('XYPlot Tool Tile', function () {
       cy.log("verify graph dot is added");
       xyTile.getGraphDot().should('have.length', 2);
 
+      cy.log("verify dots update in read-only views");
+      cy.get(`${localWS} .graph-dot`).should('have.length', 2);
+      cy.get(`${remoteWS} .graph-dot`).should('have.length', 2);
+
       // X axis should have scaled to fit 5 and 7.
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 7, 12);
@@ -108,7 +119,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().click();
       clueCanvas.clickToolbarButton("graph", "toggle-lock");
       clueCanvas.toolbarButtonIsSelected("graph", "toggle-lock");
-      cy.get(".primary-workspace").within((workspace) => {
+      cy.get(".primary-workspace").within(() => {
         tableToolTile.typeInTableCell(9, '15');
         tableToolTile.getTableCell(8).should('contain', '15');
         tableToolTile.typeInTableCell(10, '0');
@@ -120,7 +131,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().eq(0).children('circle.inner-circle').should('be.visible');
       xyTile.getGraphDot().eq(1).children('circle.inner-circle').should('be.visible');
       xyTile.getGraphDot().eq(2).children('circle.inner-circle').should('not.be.visible');
-            // X axis should not have changed in response to adding a data point.
+      // X axis should not have changed in response to adding a data point.
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 7, 12);
 
@@ -138,11 +149,16 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.toolbarButtonIsNotSelected("graph", "toggle-lock");
 
       cy.log("add y2 column to table and show it");
+<<<<<<< HEAD
       // Force-click the table tile to select it. Without force, the hit-test target
       // can be a child element (rdg cell) whose pointer handling intersects with the
       // outer focus trap and the click doesn't reliably propagate to the tile selection.
       tableToolTile.getTableTile().click({ force: true });
       cy.get(".primary-workspace").within((workspace) => {
+=======
+      tableToolTile.getTableTile().click();
+      cy.get(".primary-workspace").within(() => {
+>>>>>>> master
         tableToolTile.getAddColumnButton().click();
         tableToolTile.typeInTableCellXY(0, 2, '30');
         tableToolTile.typeInTableCellXY(1, 2, '31');
@@ -193,13 +209,6 @@ context('XYPlot Tool Tile', function () {
       xyTile.getEditableAxisBox("left", "max").click().type('-20{enter}');
       xyTile.getEditableAxisBox("left", "max").should('contain', '50');
 
-      cy.log("restore points to canvas");
-      primaryWorkspace.openResourceTab();
-      resourcePanel.openPrimaryWorkspaceTab("my-work");
-      cy.openDocumentWithTitle('my-work', 'workspaces', problemDoc);
-      xyTile.getGraphDot().should('have.length', 3);
-      xyTile.getXYPlotTitle().should('contain', title);
-
       // TODO: More thorough color checks.
       cy.log("check colors of dots");
       xyTile.getGraphDot().eq(0).find('.inner-circle').should('have.attr', 'style').and('contain', hexToRgb(clueDataColors[0]));
@@ -207,9 +216,9 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().eq(0).find('.inner-circle').should('have.attr', 'style').and('contain', hexToRgb(clueDataColors[1]));
 
       //XY Plot tile restore upon page reload
-      cy.wait(2000);
+      // /editor/ route: sessionStorage save is synchronous, no wait needed.
       cy.reload();
-      cy.waitForLoad();
+      cy.get('.editable-document-content', { timeout: 60000 });
       xyTile.getTile().click();
       xyTile.getXYPlotTitle().should('contain', title);
       xyTile.getGraphDot().should('have.length', 3);

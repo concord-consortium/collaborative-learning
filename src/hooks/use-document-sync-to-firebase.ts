@@ -6,7 +6,7 @@ import { useSyncMstNodeToFirebase } from "./use-sync-mst-node-to-firebase";
 import { useSyncMstPropToFirebase } from "./use-sync-mst-prop-to-firebase";
 import { DEBUG_DOCUMENT, DEBUG_SAVE } from "../lib/debug";
 import { Firebase } from "../lib/firebase";
-import { ContentStatus, DocumentModelType } from "../models/document/document";
+import { ContentStatus, DocumentModelType, SaveState } from "../models/document/document";
 import { isPublishedType, LearningLogDocument, LearningLogPublication, PersonalDocument,
          PersonalPublication, ProblemDocument, ProblemPublication, SupportPublication
         } from "../models/document/document-types";
@@ -16,6 +16,7 @@ import { useMutation, UseMutationOptions } from "react-query";
 import { ITileMapEntry } from "../../shared/shared";
 import { DocumentContentSnapshotType } from "src/models/document/document-content";
 import { IArrowAnnotation } from "src/models/annotations/arrow-annotation";
+import { TreeManagerType } from "../models/history/tree-manager";
 
 function debugLog(...args: any[]) {
   // eslint-disable-next-line no-console
@@ -205,20 +206,60 @@ export function useDocumentSyncToFirebase(
 
   // sync content for editable document types
   const enabled = commonSyncEnabled && !readOnly && !!document.content && !isPublishedType(type);
-  const options: Omit<UseMutationOptions<unknown, unknown, SnapshotOut<DocumentContentSnapshotType>>, 'mutationFn'> = {
+
+  // Track a monotonically increasing sequence number for content changes. dirtySeqRef is bumped
+  // on every onSnapshot; savedSeqRef tracks the highest seq we've confirmed persisted. saveState
+  // only flips to "saved" when a mutation's captured seq catches up to dirtySeqRef — i.e. the
+  // most recent change is on the server. This makes the save indicator (and cy.waitForSave) a
+  // reliable "latest change is persisted" signal rather than "a save recently completed", which
+  // would otherwise race when throttled mutations have a trailing call still in flight.
+  //
+  // This does NOT address the data-integrity risk where a failed-then-retried older mutation
+  // overwrites newer server content; that requires the broader refactor tracked in the
+  // "Simplify useDocumentSyncToFirebase / drop react-query" plan.
+  const dirtySeqRef = useRef(0);
+  const savedSeqRef = useRef(0);
+
+  interface SyncContext { seq: number }
+  type SyncMutationOptions =
+    Omit<UseMutationOptions<unknown, unknown, SnapshotOut<DocumentContentSnapshotType>, SyncContext>, 'mutationFn'>;
+  const options: SyncMutationOptions = {
     // default is to retry with linear back-off to a maximum
     retry: true,
     retryDelay: (attempt) => Math.min(attempt * 5, 30),
-    // but clients may override the defaults
-    onSuccess: (data: any, snapshot: DocumentContentSnapshotType) => {
+    // Capture the latest dirty seq at the moment this mutation actually starts (for leading
+    // throttle this is when the change happens; for trailing it's when the throttle fires).
+    onMutate: () => ({ seq: dirtySeqRef.current }),
+    onSuccess: (data, snapshot, context) => {
       debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
+      const seq = context?.seq ?? 0;
+      if (seq > savedSeqRef.current) savedSeqRef.current = seq;
+      // Only signal "saved" when no newer changes are pending.
+      if (savedSeqRef.current === dirtySeqRef.current) {
+        document.setSaveState(SaveState.Saved);
+      }
     },
-    onError: (err: any, properties: DocumentContentSnapshotType) => {
+    onError: (err, snapshot, context) => {
       console.warn(`ERROR: Failed to update document content for ${type} document ${key}:`, document.changeCount);
+      document.setSaveState(SaveState.Retrying);
     }
   };
-  const transform = (snapshot: DocumentContentSnapshotType) =>
-    ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) });
+  const transform = (snapshot: DocumentContentSnapshotType) => {
+    // Record the id of the last history entry that had been applied when
+    // this content snapshot was captured. The drift check on document load
+    // compares this to the Firestore history — if the id isn't present in
+    // the history, the content reflects edits that never made it to the
+    // history chain.
+    const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
+    const lastHistoryEntryId = treeManager?.latestDocumentHistoryEntry?.id;
+    const base = {
+      changeCount: document.incChangeCount(),
+      content: JSON.stringify(snapshot)
+    };
+    return lastHistoryEntryId
+      ? { ...base, lastHistoryEntryId }
+      : base;
+  };
 
   const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
     if (!disconnectHandlers.current && commonSyncEnabled) {
@@ -264,6 +305,8 @@ export function useDocumentSyncToFirebase(
   useEffect(() => {
     const cleanup = enabled
             ? onSnapshot<DocumentContentSnapshotType>(document.content!, snapshot => {
+                dirtySeqRef.current++;
+                document.setSaveState(SaveState.Saving);
                 // reset (e.g. stop retrying and restart) when value changes
                 mutation.isError && mutation.reset();
                 throttledMutate(snapshot);
@@ -272,7 +315,7 @@ export function useDocumentSyncToFirebase(
     return () => {
       cleanup?.();
     };
-  }, [enabled, document.content, mutation, throttledMutate]);
+  }, [enabled, document, document.content, mutation, throttledMutate]);
 
   useEffect(() => {
     DEBUG_SAVE && !readOnly &&

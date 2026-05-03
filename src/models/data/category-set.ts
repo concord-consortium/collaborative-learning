@@ -2,7 +2,8 @@ import { observable, runInAction } from "mobx";
 import { addDisposer, Instance, isValidReference, types } from "mobx-state-tree";
 import { kellyColors } from "../../utilities/color-utils";
 import { onAnyAction } from "../../utilities/mst-utils";
-import { Attribute } from "./attribute";
+import { Attribute, IAttribute } from "./attribute";
+import { IDataSet } from "./data-set";
 
 interface ICategoryMove {
   value: string     // category value
@@ -14,22 +15,38 @@ interface ICategoryMove {
 }
 
 export const CategorySet = types.model("CategorySet", {
-  attribute: types.reference(Attribute, {
-    onInvalidated: ({ parent: self, invalidId }) => {
-      self.handleAttributeInvalidated?.(invalidId);
-    }
-  }),
+  attribute: types.reference(Attribute),
   // user color assignments
   colors: types.map(types.string),
   // user category re-orderings
   moves: types.array(types.frozen<ICategoryMove>())
 })
 .volatile(self => ({
-  handleAttributeInvalidated: undefined as ((attrId: string) => void) | undefined
+  // Set on provisional instances only. When set, `self.attr` reads this pointer
+  // instead of the MST `attribute` reference (which does not resolve on a
+  // detached instance). See createProvisionalCategorySet below and the
+  // persistent/provisional design discussion in
+  // docs/superpowers/specs/2026-04-11-category-set-provisional-design.md.
+  _provisionalAttribute: undefined as IAttribute | undefined
 }))
 .actions(self => ({
-  onAttributeInvalidated(handler: (attrId: string) => void) {
-    self.handleAttributeInvalidated = handler;
+  setProvisionalAttribute(attribute: IAttribute) {
+    self._provisionalAttribute = attribute;
+  }
+}))
+.views(self => ({
+  /**
+   * Returns the attribute this CategorySet describes. For persistent
+   * instances this reads the MST reference. For provisional instances
+   * (created via createProvisionalCategorySet) this reads a volatile
+   * pointer because the instance is not attached to a state tree and
+   * the MST reference cannot be resolved.
+   */
+  get attr(): IAttribute {
+    return self._provisionalAttribute ?? self.attribute;
+  },
+  get isProvisional(): boolean {
+    return self._provisionalAttribute != null;
   }
 }))
 .extend(self => {
@@ -66,7 +83,7 @@ export const CategorySet = types.model("CategorySet", {
 
       // build default category set order (order of occurrence)
       // could default to alphameric sort order if desired instead
-      self.attribute.strValues.forEach(value => {
+      self.attr.strValues.forEach(value => {
         if (value !== '' && _indexMap.get(value) == null) {
           _indexMap.set(value, _values.length);
           _values.push(value);
@@ -169,6 +186,10 @@ export const CategorySet = types.model("CategorySet", {
     }
   },
   move(value: string, beforeValue?: string) {
+    if (self.isProvisional) {
+      throw new Error("CategorySet.move called on a provisional instance. " +
+        "Call metadata.ensurePersistentCategorySet(attrId) first.");
+    }
     const fromIndex = self.index(value);
     if (fromIndex == null) return;
     const toIndex = (beforeValue != null) ? self.index(beforeValue) ?? self.values.length - 1 : self.values.length - 1;
@@ -193,17 +214,29 @@ export const CategorySet = types.model("CategorySet", {
     self.invalidate();
   },
   setColorForCategory(value: string, color: string) {
-    if (self.index(value)) {
+    if (self.isProvisional) {
+      throw new Error("CategorySet.setColorForCategory called on a provisional instance. " +
+        "Call metadata.ensurePersistentCategorySet(attrId) first.");
+    }
+    if (self.index(value) != null) {
       self.colors.set(value, color);
     }
   },
   storeCurrentColorForCategory(value: string) {
+    if (self.isProvisional) {
+      throw new Error("CategorySet.storeCurrentColorForCategory called on a provisional instance. " +
+        "Call metadata.ensurePersistentCategorySet(attrId) first.");
+    }
     const color = self.colorForCategory(value);
     if (color) {
       self.colors.set(value, color);
     }
   },
   storeAllCurrentColors() {
+    if (self.isProvisional) {
+      throw new Error("CategorySet.storeAllCurrentColors called on a provisional instance. " +
+        "Call metadata.ensurePersistentCategorySet(attrId) first.");
+    }
     self.values.forEach(value => {
       if (!self.colors.get(value)) {
         this.storeCurrentColorForCategory(value);
@@ -211,4 +244,24 @@ export const CategorySet = types.model("CategorySet", {
     });
   }
 }));
+/**
+ * Create a detached (not attached to any state tree) CategorySet that reads
+ * its attribute via a volatile pointer. The caller is responsible for wiring
+ * cleanup via `addDisposer(attribute, ...)` — see
+ * SharedCaseMetadata.ensureProvisionalCategorySet for the canonical wiring.
+ *
+ * The MST `attribute` reference is still set for snapshot/serialization shape
+ * consistency, but on a detached instance it will not resolve. All reads must
+ * go through `self.attr`, never `self.attribute` directly.
+ */
+export function createProvisionalCategorySet(data: IDataSet, attrId: string): ICategorySet {
+  const attribute = data.attrFromID(attrId);
+  if (!attribute) {
+    throw new Error(`createProvisionalCategorySet: attribute '${attrId}' not found in dataset`);
+  }
+  const cs = CategorySet.create({ attribute: attrId });
+  cs.setProvisionalAttribute(attribute);
+  return cs;
+}
+
 export interface ICategorySet extends Instance<typeof CategorySet> {}
