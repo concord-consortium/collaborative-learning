@@ -72,14 +72,13 @@ context('Skip Links Navigation', function () {
       cy.get('.toggle-button').contains('Dashboard').click();
       cy.get('#main-dashboard .tabbed-area').should('be.visible');
 
-      cy.log('Focus and activate the dashboard skip link');
-      // Focus directly rather than Tab-walking — after clicking the Dashboard
-      // toggle button, focus is on that button, so Tab would move forward from
-      // there rather than landing on the skip link at the top of tab order.
+      cy.log('Click the dashboard skip link');
+      cy.get('body').realPress('Tab');
+      // The skip link is positioned off-screen until focused (sr-only style); force the
+      // click since the auto-actionability check can race with the focus-driven reveal.
       cy.get('nav.skip-links a.skip-link')
         .contains('Skip to Dashboard')
-        .focus()
-        .realPress('Enter');
+        .click({ force: true });
 
       cy.log('Verify dashboard receives focus');
       cy.focused().should('have.id', 'main-dashboard');

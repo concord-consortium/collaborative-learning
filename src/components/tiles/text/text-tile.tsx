@@ -200,80 +200,8 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       }
     ));
 
-<<<<<<< HEAD
     // Tile API registration (including getFocusableElements) is now handled
     // by the ClueTileAccessibilityBridge rendered in render().
-=======
-    this.props.onRegisterTileApi({
-      exportContentAsTileJson: () => {
-        return this.getContent().exportJson();
-      },
-      handleDocumentScroll: (x: number, y: number) => {
-        this.toolbarTileApi?.handleDocumentScroll?.(x, y);
-      },
-      handleTileResize: (entry: TileResizeEntry) => {
-        this.toolbarTileApi?.handleTileResize?.(entry);
-      },
-      getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        // Track the tick so MobX observers re-run when the cache is written.
-        // eslint-disable-next-line unused-imports/no-unused-vars
-        const _tick = this.chipBoxesCacheTick.count;
-        if (objectType === kHighlightFormat) {
-          return this.highlightBoxesCache.get(objectId);
-        }
-        // Other chip kinds (e.g., variable chips) live in their plugin's bbox cache.
-        for (const plugin of Object.values(this.plugins)) {
-          const box = plugin?.getObjectBoundingBox?.(objectId, objectType);
-          if (box) return box;
-        }
-        return undefined;
-      },
-      getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
-        // offset the annotation arrows to the right top corner of the bounding box until connected to a target,
-        // and then offset should be the center of the edge closes to the target
-        // Track the tick so MobX observers re-run when the cache is written.
-        // eslint-disable-next-line unused-imports/no-unused-vars
-        const _tick = this.chipBoxesCacheTick.count;
-        if (objectType === kHighlightFormat) {
-          const offsets = OffsetModel.create({});
-          const box = this.highlightBoxesCache.get(objectId);
-          if (box) {
-            offsets.setDx(box.width / 2);
-            offsets.setDy(-box.height / 2);
-          }
-          return offsets;
-        }
-        for (const plugin of Object.values(this.plugins)) {
-          const offsets = plugin?.getObjectDefaultOffsets?.(objectId, objectType);
-          if (offsets) return offsets;
-        }
-        return OffsetModel.create({});
-      },
-      // Return focusable elements for focus trap navigation
-      getFocusableElements: () => {
-        const contentElement: HTMLElement | null | undefined = this.textTileDiv?.querySelector("[data-slate-editor]");
-        // Use Slate's ReactEditor.focus to properly activate the editor (sets selection/cursor).
-        // Native .focus() on the contenteditable div doesn't initialize Slate's internal state.
-        const focusContent = () => {
-          if (this.editor) {
-            ReactEditor.focus(this.editor);
-            // ReactEditor.focus doesn't create a selection if the editor never had one.
-            // Without a selection, keyboard input has no insertion point and is silently ignored.
-            if (!this.editor.selection) {
-              const end = Editor.end(this.editor, []);
-              this.editor.selection = { anchor: end, focus: end };
-            }
-            return document.activeElement === contentElement;
-          }
-          return false;
-        };
-        return {
-          contentElement: contentElement || undefined,
-          focusContent
-        };
-      }
-    });
->>>>>>> master
   }
 
   public componentWillUnmount() {
@@ -313,27 +241,42 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       this.toolbarTileApi?.handleDocumentScroll?.(x, y);
     },
     handleTileResize: (entry: TileResizeEntry) => {
-      const { x, y, width, height, top, left, bottom, right } = entry.contentRect;
-      this.tileContentRect = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
       this.toolbarTileApi?.handleTileResize?.(entry);
     },
     getObjectBoundingBox: (objectId: string, objectType?: string) => {
+      // Track the tick so MobX observers re-run when the cache is written.
+      // eslint-disable-next-line unused-imports/no-unused-vars
+      const _tick = this.chipBoxesCacheTick.count;
       if (objectType === kHighlightFormat) {
-        const box = this.getContent().highlightBoxesCache.get(objectId);
+        return this.highlightBoxesCache.get(objectId);
+      }
+      // Other chip kinds (e.g., variable chips) live in their plugin's bbox cache.
+      for (const plugin of Object.values(this.plugins)) {
+        const box = plugin?.getObjectBoundingBox?.(objectId, objectType);
         if (box) return box;
       }
+      return undefined;
     },
     getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
-      const offsets = OffsetModel.create({});
+      // offset the annotation arrows to the right top corner of the bounding box until connected to a target,
+      // and then offset should be the center of the edge closes to the target
+      // Track the tick so MobX observers re-run when the cache is written.
+      // eslint-disable-next-line unused-imports/no-unused-vars
+      const _tick = this.chipBoxesCacheTick.count;
       if (objectType === kHighlightFormat) {
-        const box = this.getContent().highlightBoxesCache.get(objectId);
+        const offsets = OffsetModel.create({});
+        const box = this.highlightBoxesCache.get(objectId);
         if (box) {
-          const { width, height } = box;
-          offsets.setDx(width / 2);
-          offsets.setDy(-height / 2);
+          offsets.setDx(box.width / 2);
+          offsets.setDy(-box.height / 2);
         }
+        return offsets;
       }
-      return offsets;
+      for (const plugin of Object.values(this.plugins)) {
+        const offsets = plugin?.getObjectDefaultOffsets?.(objectId, objectType);
+        if (offsets) return offsets;
+      }
+      return OffsetModel.create({});
     },
   };
 
