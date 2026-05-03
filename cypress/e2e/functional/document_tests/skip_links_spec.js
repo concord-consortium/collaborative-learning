@@ -167,9 +167,11 @@ context('Skip Links Navigation', function () {
 
       cy.log('Click the dashboard skip link');
       cy.get('body').realPress('Tab');
+      // The skip link is positioned off-screen until focused (sr-only style); force the
+      // click since the auto-actionability check can race with the focus-driven reveal.
       cy.get('nav.skip-links a.skip-link')
         .contains('Skip to Dashboard')
-        .click();
+        .click({ force: true });
 
       cy.log('Verify dashboard receives focus');
       cy.focused().should('have.id', 'main-dashboard');

@@ -69,7 +69,7 @@ class BarGraphTile {
   }
 
   getDatasetUnlinkButton(workspaceClass, tileIndex = 0) {
-    return this.getLegendArea(workspaceClass, tileIndex).find(`.dataset-header .dataset-icon a`);
+    return this.getLegendArea(workspaceClass, tileIndex).find(`.dataset-header .dataset-icon button`);
   }
 
   getSortByMenuButton(workspaceClass, tileIndex = 0) {
@@ -85,14 +85,14 @@ class BarGraphTile {
   }
 
   // The color picker MenuList is rendered via Chakra's <Portal> into document.body,
-  // so it is no longer inside the tile's legend area. Filter by :visible to pick the
-  // currently-open menu (closed menus are visibility:hidden).
-  getBarColorMenu(workspaceClass, tileIndex = 0, menuIndex = 0) {
-    return cy.get(`body [data-testid="color-menu-list"]:visible`).eq(menuIndex);
+  // so it is no longer inside the tile's legend area. Only one menu is open at a
+  // time; closed menus are visibility:hidden, so :visible picks the open one.
+  getBarColorMenu(workspaceClass, tileIndex = 0) {
+    return cy.get(`body [data-testid="color-menu-list"]:visible`);
   }
 
-  getBarColorMenuButtons(workspaceClass, tileIndex = 0, menuIndex = 0) {
-    return this.getBarColorMenu(workspaceClass, tileIndex, menuIndex).find(`[data-testid="color-menu-list-item"]`);
+  getBarColorMenuButtons(workspaceClass, tileIndex = 0) {
+    return this.getBarColorMenu(workspaceClass, tileIndex).find(`[data-testid="color-menu-list-item"]`);
   }
 
 }

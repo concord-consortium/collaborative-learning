@@ -207,6 +207,9 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   private focusTrapController: FocusTrapController | null = null;
   private didDrag = false;
   private wasSelected = false;
+  // Tracks whether the most recent pointerdown had a selection modifier (shift/cmd).
+  // Used by onFocusEnter to honor multi-tile shift-click — focus events alone don't carry the modifier.
+  private lastPointerDownHadModifier = false;
 
   state = {
     hoverTile: false,
@@ -231,6 +234,13 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     const options = { capture: true, passive: true };
     this.domElement?.addEventListener("touchstart", this.handlePointerDown, options);
     this.domElement?.addEventListener("mousedown", this.handlePointerDown, options);
+    // Record lastPointerDown* state at document-capture so it precedes React's
+    // delegated capture handlers (which run at the React root). Without this,
+    // useTileSelectionPointerEvents focuses the tile and triggers focusin →
+    // strategy.onFocusEnter before lastPointerDown* gets recorded, and the
+    // shift-click selection ends up with append:false (selection replaced).
+    document.addEventListener("mousedown", this.recordPointerDownState, true);
+    document.addEventListener("touchstart", this.recordPointerDownState, true);
     this.domElement?.addEventListener("toolbar-escape", this.handleToolbarEscape);
 
     // Create focus trap controller — handles Tab cycling, Enter/Escape, external elements
@@ -289,6 +299,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     const options = { capture: true, passive: true };
     this.domElement?.removeEventListener("mousedown", this.handlePointerDown, options);
     this.domElement?.removeEventListener("touchstart", this.handlePointerDown, options);
+    document.removeEventListener("mousedown", this.recordPointerDownState, true);
+    document.removeEventListener("touchstart", this.recordPointerDownState, true);
     this.domElement?.removeEventListener("toolbar-escape", this.handleToolbarEscape);
     this.focusTrapController?.destroy();
   }
@@ -517,14 +529,28 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       ui.removeTileIdFromSelection(this.getEffectiveSelectionModel().id);
     };
     // Select the tile when focus enters via mouse click (handles tileHandlesOwnSelection tiles
-    // where the title click doesn't go through handlePointerDown's selectTileHandler).
-    // Guard against double-selection for tiles that already call selectTileHandler on click.
+    // where the title sits outside .tile-content and no tile-level handler runs — e.g. drawing).
+    // Skip when the click landed inside .tile-content: the tile's own click handler will
+    // select with the correct append behavior, and a fallback here races ahead and gets toggled
+    // off by the later append:true call (canvas_test_spec shift-click scenario).
     // Use setSelectedTile directly (not the debounced userSelectTile) since focus entry is
     // a single committed user action, not a burst of rapid click events.
     strategy.onFocusEnter = () => {
+      // Skip when focus landed inside .tile-content: the tile's own click handler
+      // (e.g. useTileSelectionPointerEvents for geometry) will handle selection
+      // with the correct append behavior. Use document.activeElement rather than
+      // a pointerdown-recorded flag because React's delegated capture handlers
+      // may run before our pointerdown listener — by the time onFocusEnter fires
+      // (synchronously inside useTileSelectionPointerEvents.focus()), the focused
+      // element is correct but the pointerdown bookkeeping may still be stale.
+      const active = document.activeElement as HTMLElement | null;
+      if (active && this.domElement?.contains(active) && active.closest('.tile-content')) {
+        return;
+      }
       const { ui } = this.stores;
       if (!ui.isSelectedTile(model)) {
-        ui.setSelectedTile(this.getEffectiveSelectionModel(), { append: false });
+        ui.setSelectedTile(this.getEffectiveSelectionModel(),
+          { append: this.lastPointerDownHadModifier });
       }
     };
     return strategy;
@@ -665,6 +691,16 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
 
   private selectTileHandler = (e: React.PointerEvent<HTMLDivElement> | MouseEvent | TouchEvent) => {
     this.selectTile(hasSelectionModifier(e));
+  };
+
+  // Document-level capture handler: records lastPointerDownHadModifier before
+  // React's delegated capture handlers (and any synchronous focusin → onFocusEnter
+  // they trigger) can read it. Only updates when the event target is inside this
+  // tile's domElement so siblings don't clobber each other.
+  private recordPointerDownState = (e: MouseEvent | TouchEvent) => {
+    const target = e.target as HTMLElement | null;
+    if (!target || !this.domElement?.contains(target)) return;
+    this.lastPointerDownHadModifier = hasSelectionModifier(e);
   };
 
   private handlePointerDown = (e: MouseEvent | TouchEvent) => {
