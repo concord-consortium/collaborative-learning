@@ -50,7 +50,7 @@ context('Image Tile', function () {
     imageToolTile.getImageTileTitle().first().click();
     imageToolTile.getImageTileTitle().first().type(newName + '{enter}');
     imageToolTile.getTileTitle().should("contain", newName);
-    cy.wait(2000);
+    cy.waitForSave();
 
     cy.reload();
     cy.waitForLoad();

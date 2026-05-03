@@ -17,6 +17,7 @@
       }
     ],
     "placeholderText": "Enter notes here",
+    "annotations": "all",
     "defaultDocumentType": "personal",
     "defaultDocumentTitle": "Untitled",
     "documentLabels": {

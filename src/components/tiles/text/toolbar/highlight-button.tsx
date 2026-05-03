@@ -4,6 +4,7 @@ import { Path, Text } from "slate";
 import { ReactEditor, Editor, Range, Transforms, useSlate } from "@concord-consortium/slate-editor";
 import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat, HighlightElement }
   from "../../../../plugins/text/highlights-plugin";
+import { removeAnnotationsForChip } from "../../../../plugins/text/chip-annotation-cleanup";
 import { useStores } from "../../../../hooks/use-stores";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../toolbar/toolbar-button-manager";
@@ -89,29 +90,6 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
       if (!selectedChips || selectedChips.length === 0) return;
       const chipReferences = selectedChips.map(([chipNode]) => chipNode.highlightId);
 
-      const removeAnnotationsForHighlight = (highlightId: string) => {
-        if (!stores?.documents || !model?.id) return;
-        const document = stores.documents.findDocumentOfTile(model.id);
-        if (!document?.content) return;
-        const annotationsToRemove: string[] = [];
-        document.content.annotations.forEach((annotation) => {
-          // Check if the annotation's source or target object references this highlight
-          if (annotation.sourceObject?.objectId === highlightId &&
-                annotation.sourceObject?.objectType === kHighlightFormat) {
-            annotationsToRemove.push(annotation.id);
-          }
-          if (annotation.targetObject?.objectId === highlightId &&
-                annotation.targetObject?.objectType === kHighlightFormat) {
-            annotationsToRemove.push(annotation.id);
-          }
-        });
-        annotationsToRemove.forEach(annotationId => {
-          if (document.content) {
-            document.content.deleteAnnotation(annotationId);
-          }
-        });
-      };
-
       chipReferences.forEach(ref => {
         const [chipEntry] = Array.from(Editor.nodes(editor, {
           match: n => (n as any).type === kHighlightFormat && (n as any).highlightId === ref,
@@ -121,7 +99,7 @@ export const HighlightButton = ({name}: IToolbarButtonComponentProps) => {
           const chipReference = chipEntry[0].highlightId;
           highlightsPlugin?.removeHighlight(ref);
           unHighlightChip(chipEntry);
-          removeAnnotationsForHighlight(chipReference);
+          removeAnnotationsForChip(stores, model?.id, chipReference, kHighlightFormat);
         }
       });
       Transforms.deselect(editor);

@@ -16,6 +16,7 @@ import { EditableTileApiInterfaceRef, EditableTileApiInterfaceRefContext } from 
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
 import { DocumentToolbar } from "./document-toolbar";
+import { SaveIndicator } from "./save-indicator";
 
 import "./editable-document-content.scss";
 
@@ -114,20 +115,26 @@ export function EditableDocumentContent({
     {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
 
   useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly);
+  // Skip the save indicator for non-editable documents and when Firebase sync is disabled
+  // (doc-editor, iframe, authoring); those contexts have their own storage mechanisms.
+  const showSaveIndicator = !isReadOnly && !(window as any).DISABLE_FIREBASE_SYNC;
   return (
-    <DocumentContextReact.Provider value={documentContext}>
-      <EditableTileApiInterfaceRefContext.Provider value={editableTileApiInterfaceRef}>
-        <div key="editable-document" className={editableDocContentClass}
-              data-focus-document={document.key} >
-          {isShowingToolbar && modifiedToolbar &&
-            <DocumentToolbar document={document} toolbar={modifiedToolbar} pane={pane} />}
-          {isShowingToolbar && <div className="canvas-separator"/>}
-          <DocumentCanvas
-            readOnly={isReadOnly}
-            {...{mode, isPrimary, document, showPlayback}}
-          />
-        </div>
-      </EditableTileApiInterfaceRefContext.Provider>
-    </DocumentContextReact.Provider>
+    <>
+      {showSaveIndicator && <SaveIndicator document={document} />}
+      <DocumentContextReact.Provider value={documentContext}>
+        <EditableTileApiInterfaceRefContext.Provider value={editableTileApiInterfaceRef}>
+          <div key="editable-document" className={editableDocContentClass}
+                data-focus-document={document.key} >
+            {isShowingToolbar && modifiedToolbar &&
+              <DocumentToolbar document={document} toolbar={modifiedToolbar} pane={pane} />}
+            {isShowingToolbar && <div className="canvas-separator"/>}
+            <DocumentCanvas
+              readOnly={isReadOnly}
+              {...{mode, isPrimary, document, showPlayback}}
+            />
+          </div>
+        </EditableTileApiInterfaceRefContext.Provider>
+      </DocumentContextReact.Provider>
+    </>
   );
 }

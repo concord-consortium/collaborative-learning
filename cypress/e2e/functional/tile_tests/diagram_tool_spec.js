@@ -74,7 +74,7 @@ context('Diagram Tool Tile', function () {
     diagramTile.getVariableCardField("name").should("have.value", name);
 
     // Diagram tile restore upon page reload
-    cy.wait(2000);
+    cy.waitForSave();
     cy.reload();
     cy.waitForLoad();
     cy.showOnlyDocumentWorkspace();

@@ -1,5 +1,5 @@
 import { forEach } from "lodash";
-import { types } from "mobx-state-tree";
+import { getSnapshot, types } from "mobx-state-tree";
 import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
 import { DocumentModelType } from "../document/document";
@@ -262,7 +262,13 @@ export const DocumentsModel = types
           userContextProvider,
           treeManager,
           uploadLocalHistory: true,
-          syncRemoteHistory: false
+          syncRemoteHistory: false,
+          savedLastHistoryEntryId: document.savedLastHistoryEntryId,
+          onContentDrift: (message) => {
+            const content = document.content;
+            const snapshot = content && getSnapshot(content);
+            document.setContentError(snapshot ?? {}, message);
+          }
         };
         if (document.type === GroupDocument) {
           historyManagerArgs.syncRemoteHistory = true;

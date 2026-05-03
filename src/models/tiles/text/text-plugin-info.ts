@@ -1,10 +1,20 @@
-import { Editor} from "@concord-consortium/slate-editor";
+import { Editor, EditorValue } from "@concord-consortium/slate-editor";
+import { IClueTileObject, IOffsetModel, ObjectBoundingBox } from "../../annotations/clue-object";
 import { SharedModelType } from "../../shared/shared-model";
+import { IStores } from "../../stores/stores";
 import { TextContentModelType } from "./text-content";
 
 export interface ITextPlugin {
   onInitEditor?: (editor: Editor) => Editor;
   dispose?: () => void;
+  getObjectBoundingBox?: (id: string, type?: string) => ObjectBoundingBox | undefined;
+  getObjectDefaultOffsets?: (id: string, type?: string) => IOffsetModel | undefined;
+  handleSlateValueChange?: (value: EditorValue) => void;
+  initializeFromValue?: (value: EditorValue) => void;
+  // Optional post-construction setter for plugins that need access to application
+  // stores and the owning tile id (e.g., to clean up annotations attached to chips
+  // the user edited out). createSlatePlugin(textContent) doesn't expose either.
+  setTileContext?: (stores: IStores, tileId: string) => void;
 }
 
 export interface IButtonDefProps {
@@ -19,6 +29,7 @@ export interface ITextPluginInfo {
     (textContent: TextContentModelType) => ITextPlugin;
   updateTextContentAfterSharedModelChanges?:
     (textContent: TextContentModelType, sharedModel?: SharedModelType) => void;
+  getAnnotatableObjects?: (textContent: TextContentModelType) => IClueTileObject[];
 }
 
 const gTextPluginInfoMap: Record<string, ITextPluginInfo | undefined> = {};
