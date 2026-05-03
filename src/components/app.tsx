@@ -11,7 +11,6 @@ import { GroupManagementModal } from "./group/group-management-modal";
 import { IStores } from "../models/stores/stores";
 import ErrorAlert from "./utilities/error-alert";
 import { getCurrentLoadingMessage, removeLoadingMessage, showLoadingMessage } from "../utilities/loading-utils";
-import { AccessibilityDebugSidebar } from "@concord-consortium/accessibility-tools/debug";
 import { PickedUpTileGhost } from "./picked-up-tile-ghost";
 import { LogMonitor } from "@concord-consortium/log-monitor";
 
@@ -251,7 +250,6 @@ export class AppComponent extends BaseComponent<IProps> {
           {children}
           <PickedUpTileGhost />
         </div>
-        {urlParams.debugA11y && <AccessibilityDebugSidebar />}
         {urlParams.logMonitor && <LogMonitor logFilePrefix="clue-log-events" />}
       </>
     );
