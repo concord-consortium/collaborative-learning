@@ -12,7 +12,7 @@ import { DocumentAnnotationToolbar } from "../components/document/document-annot
 import { urlParams } from "../utilities/url-params";
 import { CanvasComponent } from "../components/document/canvas";
 
-import "../../cms/src/custom-control.scss";
+import "./iframe-document-editor.scss";
 
 (window as any).DISABLE_FIREBASE_SYNC = true;
 
