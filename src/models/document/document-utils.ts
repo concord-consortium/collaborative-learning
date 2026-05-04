@@ -92,9 +92,6 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
 
 /**
  * True when `doc` is a group document and `user` is currently in that group.
- * Group documents use a synthetic uid (`group_<offering>_<group>`) rather than
- * any real user's id, so `doc.uid === user.id` never holds for them; group
- * membership is the right authorization check.
  */
 export function isOwnGroupDocument(
   doc: Pick<IDocumentMetadataBase, "type" | "groupId">,
