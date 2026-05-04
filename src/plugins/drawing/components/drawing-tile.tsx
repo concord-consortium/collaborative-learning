@@ -33,6 +33,8 @@ import { userSelectTile } from "../../../models/stores/ui";
 import { VoiceTypingOverlay } from "../../../utilities/voice-typing-overlay";
 import { useContainerContext } from "../../../components/document/container-context";
 import { calculateFitContent } from "../model/drawing-utils";
+import { useClueAccessibility } from "../../../hooks/use-clue-accessibility";
+import { getEditableTitleElement, getVisibleFocusables } from "../../../utilities/dom-utils";
 
 import "./drawing-tile.scss";
 
@@ -41,7 +43,8 @@ export interface IDrawingTileProps extends ITileProps {
 }
 
 const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function DrawingToolComponent(props) {
-  const { tileElt, model, readOnly, onRegisterTileApi, navigatorAllowed = true, overflowVisible } = props;
+  const { tileElt, model, readOnly, onRegisterTileApi, onUnregisterTileApi,
+    navigatorAllowed = true, overflowVisible } = props;
   const contentModel = model.content as DrawingContentModelType;
   const contentRef = useCurrent(contentModel);
   const containerContext = useContainerContext();
@@ -81,82 +84,105 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   };
 
 
+  const tileAdditionalApi = useMemo(() => ({
+    exportContentAsTileJson: (options?: ITileExportOptions) => {
+      return contentRef.current.exportJson(options);
+    },
+    getViewTransform: () => {
+      if (readOnly) {
+        const canvasSize = getVisibleCanvasSize();
+        const contentBoundingBox = contentRef.current.objectsBoundingBox;
+        if (canvasSize && contentBoundingBox) {
+          const fitResult = calculateFitContent({
+            canvasSize, contentBoundingBox, minZoom: 0.1, maxZoom: 1
+          });
+          return { offsetX: fitResult.offsetX, offsetY: fitResult.offsetY, zoom: fitResult.zoom };
+        }
+      }
+      return undefined;
+    },
+    getObjectBoundingBox(objectId: string, _objectType?: string): ObjectBoundingBox | undefined {
+      const bbPadding = 5;
+      const bb = contentRef.current.getObjectBoundingBox(objectId);
+      if (bb) {
+        const baseHeight = bb.se.y - bb.nw.y + bbPadding * 2;
+        const baseWidth = bb.se.x - bb.nw.x + bbPadding * 2;
+        const baseLeft = bb.nw.x - bbPadding;
+        const baseTop = bb.nw.y - bbPadding;
+        let height, width, left, top;
+        if (readOnly) {
+          height = baseHeight; width = baseWidth; left = baseLeft; top = baseTop;
+        } else {
+          const zoom = contentRef.current.zoom;
+          const oX = contentRef.current.offsetX;
+          const oY = contentRef.current.offsetY;
+          height = baseHeight * zoom; width = baseWidth * zoom;
+          left = baseLeft * zoom + oX + getObjectListPanelWidth();
+          top = baseTop * zoom + oY;
+        }
+        return { height, left, top, width };
+      }
+      return undefined;
+    },
+    getTileDimensions: () => {
+      if (drawingToolElement.current) {
+        const { width, height } = drawingToolElement.current.getBoundingClientRect();
+        return { width, height };
+      }
+      return { width: 0, height: 0 };
+    },
+  }), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useClueAccessibility(readOnly ? {
+    type: "region",
+  } : {
+    type: "tile",
+    focusTrap: {
+      onRegisterTileApi,
+      onUnregisterTileApi,
+      tileType: "drawing",
+      getTitleElement: () => {
+        const tile = drawingToolElement.current?.closest('.tool-tile') as HTMLElement | null;
+        return getEditableTitleElement(tile);
+      },
+      getContentElement: () => drawingToolElement.current ?? undefined,
+      focusContent: () => {
+        const container = drawingToolElement.current;
+        if (!container) return false;
+        const focusables = getVisibleFocusables(container);
+        if (focusables.length > 0) {
+          focusables[0].focus();
+          return document.activeElement === focusables[0];
+        }
+        return false;
+      },
+      additionalApi: tileAdditionalApi,
+    },
+  });
+
+  // Read-only instances register API for export/bounding box, but only when no editable
+  // sibling exists (to avoid clobbering the editable instance's focus trap registration).
+  useEffect(() => {
+    if (readOnly) {
+      const editableSibling = document.querySelector(
+        `.tool-tile.drawing-tool-tile:not(.readonly)[data-tool-id="${model.id}"]`
+      );
+      if (!editableSibling) {
+        onRegisterTileApi(tileAdditionalApi);
+        return () => onUnregisterTileApi();
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!readOnly) {
       contentRef.current.reset();
     }
-
-    onRegisterTileApi({
-      exportContentAsTileJson: (options?: ITileExportOptions) => {
-        return contentRef.current.exportJson(options);
-      },
-      getViewTransform: () => {
-        // For read-only instances, calculate the fit-to-view transform.
-        if (readOnly) {
-          const canvasSize = getVisibleCanvasSize();
-          const contentBoundingBox = contentRef.current.objectsBoundingBox;
-          if (canvasSize && contentBoundingBox) {
-            const fitResult = calculateFitContent({
-              canvasSize,
-              contentBoundingBox,
-              minZoom: 0.1,
-              maxZoom: 1
-            });
-            return {
-              offsetX: fitResult.offsetX,
-              offsetY: fitResult.offsetY,
-              zoom: fitResult.zoom
-            };
-          }
-        }
-
-        return undefined;
-      },
-      getObjectBoundingBox(objectId, objectType): ObjectBoundingBox | undefined {
-        const bbPadding = 5;
-        const bb = contentRef.current.getObjectBoundingBox(objectId);
-
-        if (bb) {
-          const baseHeight = bb.se.y - bb.nw.y + bbPadding * 2;
-          const baseWidth = bb.se.x - bb.nw.x + bbPadding * 2;
-          const baseLeft = bb.nw.x - bbPadding;
-          const baseTop = bb.nw.y - bbPadding;
-
-          let height, width, left, top;
-
-          if (readOnly) {
-            // Since read-only tiles are always fit-to-view, return untransformed coordinates.
-            height = baseHeight;
-            width = baseWidth;
-            left = baseLeft;
-            top = baseTop;
-          } else {
-            const zoom = contentRef.current.zoom;
-            const offsetX = contentRef.current.offsetX;
-            const offsetY = contentRef.current.offsetY;
-            height = baseHeight * zoom;
-            width = baseWidth * zoom;
-            left = baseLeft * zoom + offsetX + getObjectListPanelWidth();
-            top = baseTop * zoom + offsetY;
-          }
-
-          return { height, left, top, width };
-        }
-        return undefined;
-      },
-      getTileDimensions: () => {
-        if (drawingToolElement.current) {
-          const { width, height } = drawingToolElement.current.getBoundingClientRect();
-          return { width, height };
-        }
-        return { width: 0, height: 0 };
-      },
-    });
     if (!readOnly) {
       hotKeys.current.register({
-        "cmd-c": handleCopy, //allows user to copy image with cmd+c
-        "cmd-v": handlePaste, //allows user to paste image with cmd+v
-        "delete": handleDelete, // I'm not sure if this will handle "Del" IE 9 and Edge
+        "cmd-c": handleCopy,
+        "cmd-v": handlePaste,
+        "delete": handleDelete,
         "backspace": handleDelete,
         "cmd-g": handleGroup,
         "cmd-shift-g": handleUngroup
@@ -253,6 +279,13 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     // and don't allow the events to bubble up to this handler.
     const append = hasSelectionModifier(e);
     userSelectTile(ui, model, { readOnly, append, container: containerContext.model });
+    // Redirect focus to the tile container so Tab enters the focus trap
+    // (title first) rather than cycling within it. Object clicks don't reach
+    // this handler — they're stopped by the drawing layer's stopPropagation.
+    requestAnimationFrame(() => {
+      const tileContainer = drawingToolElement.current?.closest('.tool-tile') as HTMLElement | null;
+      tileContainer?.focus();
+    });
   };
 
   const getObjectListPanelWidth = () => {
@@ -318,8 +351,28 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
           "overflow-visible": overflowVisible
         })}
         data-testid="drawing-tool"
-        tabIndex={0}
-        onKeyDown={(e) => hotKeys.current.dispatch(e)}
+        tabIndex={-1}
+        onKeyDown={(e) => {
+          const focusedEl = document.activeElement as HTMLElement;
+          const focusedObjectId = focusedEl?.closest('.transformable[data-object-id]')
+            ?.getAttribute('data-object-id');
+
+          // Enter/Space on a focused object: select it (or edit if text and already selected)
+          if ((e.key === "Enter" || e.key === " ") && focusedObjectId && !readOnly) {
+            e.preventDefault();
+            const obj = contentModel.objectMap[focusedObjectId];
+            if (obj) {
+              if (contentModel.isIdSelected(focusedObjectId) && obj.type === "text") {
+                (obj as any).setEditing?.(true);
+              } else {
+                contentModel.setSelectedIds([focusedObjectId]);
+              }
+            }
+            return;
+          }
+
+          hotKeys.current.dispatch(e);
+        }}
         onMouseDown={handlePointerDown}
       >
         <DrawingAreaContext.Provider

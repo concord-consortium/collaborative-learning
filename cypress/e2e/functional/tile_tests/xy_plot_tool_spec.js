@@ -149,7 +149,10 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.toolbarButtonIsNotSelected("graph", "toggle-lock");
 
       cy.log("add y2 column to table and show it");
-      tableToolTile.getTableTile().click();
+      // Force-click the table tile to select it. Without force, the hit-test target
+      // can be a child element (rdg cell) whose pointer handling intersects with the
+      // outer focus trap and the click doesn't reliably propagate to the tile selection.
+      tableToolTile.getTableTile().click({ force: true });
       cy.get(".primary-workspace").within(() => {
         tableToolTile.getAddColumnButton().click();
         tableToolTile.typeInTableCellXY(0, 2, '30');

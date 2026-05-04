@@ -25,6 +25,10 @@ export const TextObject = types.compose("TextObject", EditableObject, SizedObjec
     get label() {
       return "Text";
     },
+    get ariaLabel() {
+      const preview = self.text.length > 30 ? `${self.text.substring(0, 30)}…` : self.text;
+      return preview ? `Text: ${preview}` : "Text (empty)";
+    },
     get icon() {
       return (<TextToolIcon viewBox={ObjectTypeIconViewBox} fill={self.stroke} />);
     }
@@ -145,7 +149,7 @@ const TextContent: React.FC<IContentProps> = observer(({
 });
 
 export const TextComponent = observer(
-    function TextComponent({model, readOnly, handleHover, handleDrag} : IDrawingComponentProps) {
+    function TextComponent({model, readOnly, handleHover, handleDrag, a11yProps} : IDrawingComponentProps) {
   // Unlike other drawing elements, the text itself never changes size.
   // Get the current drawing scale, so that we can counter-transform to undo the scaling.
   const scale = useDrawingScale();
@@ -163,7 +167,8 @@ export const TextComponent = observer(
   };
 
   return (
-    <Transformable type="text" transform={transform} setAnimating={textobj.setAnimating}>
+    <Transformable type="text" transform={transform} setAnimating={textobj.setAnimating}
+      {...a11yProps}>
       <g transform={`scale(${inverseScale.scaleX}, ${inverseScale.scaleY})`}
         key={id}
         className="text"

@@ -51,10 +51,12 @@ context('Draw Tool Tile', function () {
     drawToolTile.drawRectangle(100, 50, 150, 100);
     drawToolTile.drawEllipse(300, 50, 100, 100);
     clueCanvas.toolbarButtonIsEnabled("drawing", "fit-all");
-    // Unselect all
-    drawToolTile.getDrawTile()
-      .trigger("pointerdown", 50, 50, { isPrimary: true })
-      .trigger("pointerup", 50, 50, { isPrimary: true });
+    // Unselect all by clicking empty space on the drawing layer.
+    // Target .drawing-layer directly (not the outer .tool-tile) so the click
+    // reliably reaches the SelectionDrawingTool's pointerdown handler.
+    drawToolTile.getDrawTileComponent().find('.drawing-layer')
+      .trigger("pointerdown", 20, 20, { isPrimary: true })
+      .trigger("pointerup", 20, 20, { isPrimary: true });
     drawToolTile.getSelectionBox().should("not.exist");
 
     // Open panel
@@ -506,15 +508,20 @@ context('Draw Tool Tile', function () {
       drawToolTile.getRectangleDrawing().first().click({ force: true });
       drawToolTile.getDrawToolDelete().click();
     }
-    // Delete with backspace key
+    // Delete with backspace key.
+    // After clicking the rect, selection is on it but focus may be on the tile container
+    // (the drawing tile redirects focus on pointer events for the focus trap). Trigger the
+    // keydown directly on the drawing-layer so it reaches the React onKeyDown handler.
     drawToolTile.getDrawToolSelect().click();
     drawToolTile.getRectangleDrawing().first().click({ force: true });
-    drawToolTile.getDrawTileComponent().type("{backspace}");
+    drawToolTile.getDrawTileComponent().find('.drawing-layer')
+      .trigger("keydown", { key: "Backspace", keyCode: 8, which: 8, force: true });
 
     // Delete with delete key
     drawToolTile.getDrawToolSelect().click();
     drawToolTile.getRectangleDrawing().first().click({ force: true });
-    drawToolTile.getDrawTileComponent().type("{del}");
+    drawToolTile.getDrawTileComponent().find('.drawing-layer')
+      .trigger("keydown", { key: "Delete", keyCode: 46, which: 46, force: true });
 
     drawToolTile.getRectangleDrawing().should("not.exist");
 

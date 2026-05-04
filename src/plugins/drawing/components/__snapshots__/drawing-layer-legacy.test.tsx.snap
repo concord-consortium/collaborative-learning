@@ -10,7 +10,11 @@ exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      aria-label="Circle"
       class="transformable transformable-ellipse"
+      data-object-id="456"
+      role="button"
+      tabindex="0"
       transform="translate(20,20) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <ellipse
@@ -52,7 +56,11 @@ exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      aria-label="Circle"
       class="transformable transformable-ellipse"
+      data-object-id="456"
+      role="button"
+      tabindex="0"
       transform="translate(15,15) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <ellipse
@@ -82,7 +90,11 @@ exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      aria-label="Freehand"
       class="transformable transformable-line"
+      data-object-id="123"
+      role="button"
+      tabindex="0"
       transform="translate(13,13) rotate(0) translate(-3,-3) scale(1,1)"
     >
       <path
@@ -123,7 +135,11 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      aria-label="Freehand"
       class="transformable transformable-line"
+      data-object-id="123"
+      role="button"
+      tabindex="0"
       transform="translate(8,8) rotate(0) translate(-3,-3) scale(1,1)"
     >
       <path
@@ -152,7 +168,11 @@ exports[`Drawing Layer Components Image adds an image 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      aria-label="Image"
       class="transformable transformable-image"
+      data-object-id="567"
+      role="button"
+      tabindex="0"
       transform="translate(20,20) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <image
@@ -191,7 +211,11 @@ exports[`Drawing Layer Components Image moves a image 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      aria-label="Image"
       class="transformable transformable-image"
+      data-object-id="567"
+      role="button"
+      tabindex="0"
       transform="translate(15,15) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <image
@@ -218,7 +242,11 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      aria-label="Square"
       class="transformable transformable-rectangle"
+      data-object-id="345"
+      role="button"
+      tabindex="0"
       transform="translate(20,20) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <rect
@@ -260,7 +288,11 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      aria-label="Square"
       class="transformable transformable-rectangle"
+      data-object-id="345"
+      role="button"
+      tabindex="0"
       transform="translate(15,15) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <rect
@@ -290,7 +322,11 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      aria-label="Line"
       class="transformable transformable-vector"
+      data-object-id="234"
+      role="button"
+      tabindex="0"
       transform="translate(20,20) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <g
@@ -336,7 +372,11 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
     transform="translate(0, 0) scale(1)"
   >
     <g
+      aria-label="Line"
       class="transformable transformable-vector"
+      data-object-id="234"
+      role="button"
+      tabindex="0"
       transform="translate(15,15) rotate(0) translate(-10,-10) scale(1,1)"
     >
       <g

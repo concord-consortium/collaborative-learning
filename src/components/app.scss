@@ -24,7 +24,7 @@ body.tile-picked-up {
   align-items: center;
   justify-content: center;
   color: #242424;
-  &:has(.log-monitor) {
+  &:has(.log-monitor), &:has(.a11y-debug-sidebar) {
     overflow: hidden;
 
     > .app {

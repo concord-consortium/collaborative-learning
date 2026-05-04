@@ -90,7 +90,7 @@ export function isVectorObject(model: DrawingObjectType): model is VectorObjectT
   return model.type === "vector";
 }
 export const VectorComponent = observer(function VectorComponent({model, handleHover,
-  handleDrag} : IDrawingComponentProps) {
+  handleDrag, a11yProps} : IDrawingComponentProps) {
   if (!isVectorObject(model)) return null;
   const vector = model as VectorObjectType;
   const { headShape, tailShape, stroke, strokeWidth, strokeDashArray } = vector;
@@ -109,7 +109,8 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
     const tail = tailShape ? placeEndShape(tailShape, 0, 0, angle+180) : null; // tail points backwards
     // Set fill to stroke since arrowheads should be drawn in stroke color
   return (
-    <Transformable type="vector" transform={model.transform} setAnimating={model.setAnimating}>
+    <Transformable type="vector" transform={model.transform} setAnimating={model.setAnimating}
+      {...a11yProps}>
       <g
         className="vector"
         stroke={stroke}

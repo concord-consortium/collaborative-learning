@@ -1,4 +1,5 @@
 @import "../../components/vars";
+@import "../../components/mixins";
 
 $color-button-hover: rgba(20, 244, 158, .25); // 25% #14f49e
 $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
@@ -21,6 +22,18 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
     .visx-bar {
       stroke: black;
       stroke-width: 1px;
+      @include focus-ring(2px);
+    }
+
+    .editable-axis-label-button {
+      &:focus {
+        outline: none;
+      }
+      &:focus-visible,
+      &.keyboard-focused {
+        stroke: $focus-ring-color;
+        stroke-width: 3px;
+      }
     }
 
     foreignObject {
@@ -51,7 +64,15 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
       .dataset-icon {
         margin-right: 7px;
 
-        &:hover {
+        button {
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          @include focus-ring;
+        }
+
+        &:hover:not(:has(button:disabled)) {
           background-color: $workspace-teal-light-6;
         }
       }
@@ -103,6 +124,7 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
         border-radius: 5px;
         border: solid 1.5px $charcoal-light-1;
         pointer-events: auto;
+        @include focus-ring;
 
         &:hover {
           background: $color-button-hover;
@@ -117,39 +139,6 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
           width: 100%;
           height: 100%;
           margin: 0;
-        }
-      }
-
-      .color-menu-list {
-        .color-menu-list-item {
-          background: white;
-          height: 24px;
-          margin: 0;
-          padding: 0;
-          width: 24px;
-
-          .color-button {
-            background: white;
-            border: none;
-            border-radius: 0;
-            height: 24px;
-            margin: 0;
-            padding: 0;
-            width: 24px;
-
-            .color-swatch {
-              height: 12px;
-              margin: 6px;
-              width: 12px;
-            }
-
-            &:hover {
-              background: $color-button-hover;
-            }
-            &:active, &:focus {
-              background: $color-button-active;
-            }
-          }
         }
       }
 
@@ -212,6 +201,7 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
     border: 1.5px solid #949494;
     border-radius: 5px;
     padding: 5px;
+    @include focus-ring;
 
     .button-content {
       display: flex;
@@ -234,6 +224,52 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
       }
     }
 
+  }
+}
+
+// Styles for the category pulldown's portaled menu list. Must be top-level
+// (not scoped under .bar-graph-tile) because Chakra's <Portal> renders the
+// menu outside the tile DOM tree.
+.bar-graph-category-menu-list {
+  .chakra-menu__menuitem {
+    @include focus-ring(-2px);
+  }
+}
+
+// Styles for the legend color picker's portaled menu list. Must be top-level
+// for the same reason as above.
+.color-menu-list {
+  .color-menu-list-item {
+    background: white;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    width: 24px;
+
+    @include focus-ring(-2px);
+
+    .color-button {
+      background: white;
+      border: none;
+      border-radius: 0;
+      height: 24px;
+      margin: 0;
+      padding: 0;
+      width: 24px;
+
+      .color-swatch {
+        height: 12px;
+        margin: 6px;
+        width: 12px;
+      }
+
+      &:hover {
+        background: $color-button-hover;
+      }
+      &:active, &:focus {
+        background: $color-button-active;
+      }
+    }
   }
 }
 
