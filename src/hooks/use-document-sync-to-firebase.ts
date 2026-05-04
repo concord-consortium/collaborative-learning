@@ -58,7 +58,12 @@ export function useDocumentSyncToFirebase(
   // The current hacky approach is to use a window level property to disable the firebase syncing
   const disableFirebaseSync = (window as any).DISABLE_FIREBASE_SYNC;
 
-  !disableFirebaseSync && !readOnly && (user.id !== uid) &&
+  // The warning's concern is writing to another user's user-namespaced path.
+  // Group documents are exempt: they have a synthetic uid (`group_<offering>_<group>`),
+  // not a user id, so any real user satisfies `user.id !== uid`. Wrong-group anomalies
+  // are caught separately by the workspace's group-change reaction, which closes such
+  // docs rather than just logging.
+  !disableFirebaseSync && !readOnly && !document.isGroup && (user.id !== uid) &&
     console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
   const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
