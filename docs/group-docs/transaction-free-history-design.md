@@ -11,7 +11,7 @@
 
 The current group-document upload path (`firestore-history-manager-concurrent.ts`) wraps every history entry write in a Firestore transaction that reads, validates, and updates a single `metadata.lastHistoryEntry` field. This is a write-rate choke point: every concurrent writer competes on the same metadata document. Even one user typing fast can starve other users' uploads. DataFlow at 1–20 Hz makes this untenable, and the background-entries design ([2026-04-27](background-entries-design.md)) flags "transaction hogging on the user channel" as an explicit unresolved dependency.
 
-This document proposes replacing the transaction-based linear chain with a **multi-parent DAG** of history entries. Entries are appended to Firestore without per-document coordination; concurrent writers don't compete; conflict detection and resolution move entirely to the client. The model is similar in spirit to Git: each entry records the set of "tips" the writer's view contained at write time; canonical order is determined globally by `(serverTimestamp, id)`; conflicts are detected by scope overlap between an entry and the canonical entries its writer didn't see.
+This document proposes replacing the transaction-based linear chain with a **multi-parent Directed Acyclic Graph (DAG)** of history entries. Entries are appended to Firestore without per-document coordination; concurrent writers don't compete; conflict detection and resolution move entirely to the client. The model is similar in spirit to Git: each entry records the set of "tips" the writer's view contained at write time; canonical order is determined globally by `(serverTimestamp, id)`; conflicts are detected by scope overlap between an entry and the canonical entries its writer didn't see.
 
 This is a draft. The big shape is settled (multi-parent + canonical timestamp + scope-based conflict detection + `reverted` flag on losers), but several pieces are sketched, not fully designed. See § Open questions.
 
@@ -273,12 +273,12 @@ The receive-side state machine assumes `seenByWriter(e)` is computable when `e` 
 
 The residual concern is **timestamp ties**. Two writes that commit within `serverTimestamp`'s resolution window — possible at high write rates from a single client, or unavoidable if the future batching optimization is introduced and a batch shares one timestamp — fall back to the `(timestamp, id)` tiebreaker. With client-generated UUIDs as ids, that tiebreaker has no relationship to authoring order, so a writer's later entry could end up ordered before its earlier one, even when the earlier one is in the later one's `parents`.
 
-Two paths to fix when this becomes practical:
+Two paths to fix when this becomes practical (both mentioned above in § Per-client upload serialization as the batching solution):
 
 - **Sortable ids** (ULID / KSUID): the id encodes authoring order; canonical order stays `(serverTimestamp, id)` and the tiebreak preserves intent.
 - **Per-session sequence field**: extend canonical order to `(serverTimestamp, sessionId, sequenceNumber)`; same effect, different shape.
 
-Both are mentioned in § Per-client upload serialization as the batching solution. The same fix applies to plain timestamp-resolution ties at the client-session level if measurement shows them. Not required at MVP; flagged here so the implementation plan can decide whether to land sortable ids early as a precaution.
+The same fix would apply to plain timestamp-resolution ties at the client-session level if measurement shows them. Not required at MVP; flagged here so the implementation plan can decide whether to land sortable ids early as a precaution.
 
 ### Frontier maintenance details
 
