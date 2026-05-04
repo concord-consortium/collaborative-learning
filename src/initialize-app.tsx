@@ -36,10 +36,10 @@ import "./index.scss";
 const kEnableLivelinessChecking = false;
 
 /**
- * This function is used by the 3 different entry points supported
+ * This function is used by the different entry points supported
  * by CLUE:
  * - runtime (index.tsx)
- * - authoring (cms/document-editor.tsx)
+ * - authoring iframe (iframe/iframe.tsx)
  * - standalone doc editor (doc-editor.tsx)
  *
  * It is intended to only be called one time.

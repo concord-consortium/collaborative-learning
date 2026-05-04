@@ -66,7 +66,7 @@ export class IframeDocumentEditor extends React.Component<IProps, IState>  {
           // part of the exported JSON. One example is when the row height is adjusted
           // this is saved into the document but not exported and the value of this
           // row height could change based on the window width.
-          // So we start with the initial JSON and then only call the CMS onChange
+          // So we start with the initial JSON and then only call the parent's onChange
           // when the exported value changes from the last exported value.
           //
           // Note: when loading manually authored content there will often be an
@@ -75,10 +75,9 @@ export class IframeDocumentEditor extends React.Component<IProps, IState>  {
           // as a single string.
           if (stringifiedJson !== lastState) {
             lastState = stringifiedJson;
-            // Looking at the CMS code it seems safer to pass an immutable object here
-            // not a plain JS object. The plain JS object does get saved correctly,
-            // but it also gets returned in the value property so it means sometimes the value
-            // is a immutable object and sometimes it is a plain JS object.
+            // Wrap in an immutable Map. Historically (when this iframe embedded inside
+            // the Decap CMS) the parent expected an immutable object; the current
+            // authoring iframe simply JSON.stringifies whatever is passed.
             const immutableValue = Map(parsedJson);
             this.props.handleUpdateContent(immutableValue);
             if (DEBUG_IFRAME) {

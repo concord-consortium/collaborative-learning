@@ -11,8 +11,7 @@ MSU Inscriptions project.
 
 1. Clone this repo and `cd` into it
 2. Run `npm install` to pull dependencies
-3. `cd` into the `cms` subdirectory and run `npm install` to pull authoring dependencies (This is currently required even if you will not need to author content.)
-4. `cd` back to the repo's root directory, then run `npm start` to run `webpack-dev-server` in development mode with hot module replacement
+3. Run `npm start` to run `webpack-dev-server` in development mode with hot module replacement
 
 ### Building
 
@@ -99,7 +98,7 @@ To enable per component debugging set the "debug" localstorage key with one or m
 
 - `bookmarks` this will show a tiny text status above the bookmark indicating which users have bookmarked this document. It will also print information about the document bookmarks each time a bookmark is toggled.
 - `canvas` this will show the document key over the canvas, useful for looking up documents in Firebase
-- `iframe` this will print info to the console as document changes are sent from the iframe'd CLUE to the parent frame. This iframe'd CLUE is used by the CMS.
+- `iframe` this will print info to the console as document changes are sent from the iframe'd CLUE to the parent frame.
 - `docList` - this will print a table of information about a list of documents
 - `document` this will add the active document as `window.currentDocument`, you can use MST's hidden toJSON() like `currentDocument.toJSON()` to views its content.
 - `drop` console log the dataTransfer object from drop events on the document.
