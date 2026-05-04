@@ -11,8 +11,10 @@ $group-card-empty-height: 38px;
   min-width: $group-card-min-width;
   overflow: hidden;
 
-  &:focus-visible {
-    outline: solid 1.5px $workspace-teal;
+  &:focus-visible,
+  &.keyboard-focused {
+    outline: 2px solid $focus-ring-color;
+    outline-offset: 2px;
   }
 
   &.clickable {
@@ -20,8 +22,10 @@ $group-card-empty-height: 38px;
     cursor: pointer;
     outline: solid 1.5px $charcoal-light-1;
 
-    &:focus-visible {
-      outline: solid 1.5px $workspace-teal;
+    &:focus-visible,
+    &.keyboard-focused {
+      outline: 2px solid $focus-ring-color;
+      outline-offset: 2px;
     }
 
     &:hover {

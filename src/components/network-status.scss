@@ -1,4 +1,5 @@
 @import './vars';
+@import './mixins';
 
 .network-status {
   height: 100%;
@@ -7,6 +8,10 @@
   align-items: center;
 
   .status {
+    appearance: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
     width: 70px;
     height: 20px;
     border-radius: 5px;
@@ -17,6 +22,8 @@
     color: white;
     font-weight: bold;
     font-size: 13px;
+
+    @include focus-ring(2px);
 
     &.connected {
       background-color: $connected-green;

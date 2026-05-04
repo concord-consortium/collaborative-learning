@@ -372,7 +372,10 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().should("not.exist");
 
     aa.getAnnotationModeButton().click(); // sparrow mode off
-    geometryToolTile.getGeometryTile().click(); // select tile
+    // Don't pre-select the tile: the drag-handle puts the tile in pick-up mode
+    // (next click would place it instead of reaching JSXGraph), and clicking
+    // .geometry-tool routes to JSXGraph (creating an unwanted vertex). The
+    // first clickGraphPosition selects the tile via JSXGraph and creates vertex 1.
     geometryToolTile.clickGraphPosition(10, 5);
     geometryToolTile.clickGraphPosition(15, 10);
     geometryToolTile.clickGraphPosition(20, 5);

@@ -17,6 +17,7 @@ import { removeAnnotationsForChip } from "../../../plugins/text/chip-annotation-
 import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
+import { ClueTileAccessibilityBridge } from "../../../hooks/use-clue-accessibility";
 import { ITileProps } from "../tile-component";
 import { createTextPluginInstances, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { LogEventName } from "../../../lib/logger-types";
@@ -199,75 +200,8 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       }
     ));
 
-    this.props.onRegisterTileApi({
-      exportContentAsTileJson: () => {
-        return this.getContent().exportJson();
-      },
-      handleDocumentScroll: (x: number, y: number) => {
-        this.toolbarTileApi?.handleDocumentScroll?.(x, y);
-      },
-      handleTileResize: (entry: TileResizeEntry) => {
-        this.toolbarTileApi?.handleTileResize?.(entry);
-      },
-      getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        // Track the tick so MobX observers re-run when the cache is written.
-        // eslint-disable-next-line unused-imports/no-unused-vars
-        const _tick = this.chipBoxesCacheTick.count;
-        if (objectType === kHighlightFormat) {
-          return this.highlightBoxesCache.get(objectId);
-        }
-        // Other chip kinds (e.g., variable chips) live in their plugin's bbox cache.
-        for (const plugin of Object.values(this.plugins)) {
-          const box = plugin?.getObjectBoundingBox?.(objectId, objectType);
-          if (box) return box;
-        }
-        return undefined;
-      },
-      getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
-        // offset the annotation arrows to the right top corner of the bounding box until connected to a target,
-        // and then offset should be the center of the edge closes to the target
-        // Track the tick so MobX observers re-run when the cache is written.
-        // eslint-disable-next-line unused-imports/no-unused-vars
-        const _tick = this.chipBoxesCacheTick.count;
-        if (objectType === kHighlightFormat) {
-          const offsets = OffsetModel.create({});
-          const box = this.highlightBoxesCache.get(objectId);
-          if (box) {
-            offsets.setDx(box.width / 2);
-            offsets.setDy(-box.height / 2);
-          }
-          return offsets;
-        }
-        for (const plugin of Object.values(this.plugins)) {
-          const offsets = plugin?.getObjectDefaultOffsets?.(objectId, objectType);
-          if (offsets) return offsets;
-        }
-        return OffsetModel.create({});
-      },
-      // Return focusable elements for focus trap navigation
-      getFocusableElements: () => {
-        const contentElement: HTMLElement | null | undefined = this.textTileDiv?.querySelector("[data-slate-editor]");
-        // Use Slate's ReactEditor.focus to properly activate the editor (sets selection/cursor).
-        // Native .focus() on the contenteditable div doesn't initialize Slate's internal state.
-        const focusContent = () => {
-          if (this.editor) {
-            ReactEditor.focus(this.editor);
-            // ReactEditor.focus doesn't create a selection if the editor never had one.
-            // Without a selection, keyboard input has no insertion point and is silently ignored.
-            if (!this.editor.selection) {
-              const end = Editor.end(this.editor, []);
-              this.editor.selection = { anchor: end, focus: end };
-            }
-            return document.activeElement === contentElement;
-          }
-          return false;
-        };
-        return {
-          contentElement: contentElement || undefined,
-          focusContent
-        };
-      }
-    });
+    // Tile API registration (including getFocusableElements) is now handled
+    // by the ClueTileAccessibilityBridge rendered in render().
   }
 
   public componentWillUnmount() {
@@ -276,6 +210,75 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       plugin?.dispose?.();
     }
   }
+
+  // --- Accessibility bridge helpers ---
+
+  private getSlateContentElement = (): HTMLElement | undefined => {
+    const el = this.textTileDiv?.querySelector("[data-slate-editor]");
+    return el instanceof HTMLElement ? el : undefined;
+  };
+
+  private focusSlateContent = (): boolean => {
+    if (this.editor) {
+      const contentElement = this.getSlateContentElement();
+      ReactEditor.focus(this.editor);
+      // ReactEditor.focus doesn't create a selection if the editor never had one.
+      // Without a selection, keyboard input has no insertion point and is silently ignored.
+      if (!this.editor.selection) {
+        const end = Editor.end(this.editor, []);
+        this.editor.selection = { anchor: end, focus: end };
+      }
+      return document.activeElement === contentElement;
+    }
+    return false;
+  };
+
+  private additionalTileApi: Partial<ITileApi> = {
+    exportContentAsTileJson: () => {
+      return this.getContent().exportJson();
+    },
+    handleDocumentScroll: (x: number, y: number) => {
+      this.toolbarTileApi?.handleDocumentScroll?.(x, y);
+    },
+    handleTileResize: (entry: TileResizeEntry) => {
+      this.toolbarTileApi?.handleTileResize?.(entry);
+    },
+    getObjectBoundingBox: (objectId: string, objectType?: string) => {
+      // Track the tick so MobX observers re-run when the cache is written.
+      // eslint-disable-next-line unused-imports/no-unused-vars
+      const _tick = this.chipBoxesCacheTick.count;
+      if (objectType === kHighlightFormat) {
+        return this.highlightBoxesCache.get(objectId);
+      }
+      // Other chip kinds (e.g., variable chips) live in their plugin's bbox cache.
+      for (const plugin of Object.values(this.plugins)) {
+        const box = plugin?.getObjectBoundingBox?.(objectId, objectType);
+        if (box) return box;
+      }
+      return undefined;
+    },
+    getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
+      // offset the annotation arrows to the right top corner of the bounding box until connected to a target,
+      // and then offset should be the center of the edge closes to the target
+      // Track the tick so MobX observers re-run when the cache is written.
+      // eslint-disable-next-line unused-imports/no-unused-vars
+      const _tick = this.chipBoxesCacheTick.count;
+      if (objectType === kHighlightFormat) {
+        const offsets = OffsetModel.create({});
+        const box = this.highlightBoxesCache.get(objectId);
+        if (box) {
+          offsets.setDx(box.width / 2);
+          offsets.setDy(-box.height / 2);
+        }
+        return offsets;
+      }
+      for (const plugin of Object.values(this.plugins)) {
+        const offsets = plugin?.getObjectDefaultOffsets?.(objectId, objectType);
+        if (offsets) return offsets;
+      }
+      return OffsetModel.create({});
+    },
+  };
 
   public render() {
     const { appConfig: { placeholderText } } = this.stores;
@@ -311,6 +314,14 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                   ref={elt => this.textTileDiv = elt}
                   onMouseDown={this.handleMouseDownInWrapper}
                 >
+                  <ClueTileAccessibilityBridge
+                    onRegisterTileApi={this.props.onRegisterTileApi}
+                    onUnregisterTileApi={this.props.onUnregisterTileApi}
+                    tileType="text"
+                    getContentElement={this.getSlateContentElement}
+                    focusContent={this.focusSlateContent}
+                    additionalApi={this.additionalTileApi}
+                  />
                   <Slate
                     editor={this.editor as ReactEditor}
                     initialValue={this.state.initialValue}

@@ -10,6 +10,7 @@ import { JSONValue } from "../../models/stores/settings";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { useCanvasMethodsContext } from "../document/canvas-methods-context";
 import { getPixelWidthFromCSSStyle } from "../../utilities/js-utils";
+import { getVisibleFocusables } from "../../utilities/dom-utils";
 import { useRovingTabindex } from "../../hooks/use-roving-tabindex";
 import styles from "../vars.scss";
 
@@ -110,6 +111,9 @@ export const TileToolbar = observer(
           const contentElement = focusable?.contentElement;
           const titleElement = focusable?.titleElement;
           const focusContentFn = focusable?.focusContent;
+          const resizeHandle = tileElement.querySelector(
+            ".tool-tile-resize-handle-wrapper"
+          ) as HTMLElement | null;
 
           // Helper to focus content, preferring tile's custom focus method (e.g., Slate)
           const tryFocusContent = () => {
@@ -121,19 +125,42 @@ export const TileToolbar = observer(
             return false;
           };
 
-          // Try candidates in order, skipping any that can't actually receive focus
-          // (e.g., a plain div title element without tabindex).
+          const tryFocusResize = () => {
+            if (resizeHandle) {
+              resizeHandle.focus();
+              return document.activeElement === resizeHandle;
+            }
+            return false;
+          };
+
+          // Cycle: title → content → toolbar → resize → (wrap)
+          // Try candidates in order, skipping any that can't actually receive focus.
           if (e.shiftKey) {
-            // Shift+Tab: toolbar → title → content → tile
-            if (titleElement) { titleElement.focus(); }
-            if (document.activeElement !== titleElement) {
-              if (!tryFocusContent()) { tileElement.focus(); }
+            // Shift+Tab: toolbar → last content child → title → resize → tile
+            const focusedLastChild = (() => {
+              if (!contentElement) return false;
+              const focusables = getVisibleFocusables(contentElement);
+              if (focusables.length > 0) {
+                focusables[focusables.length - 1].focus();
+                return document.activeElement === focusables[focusables.length - 1];
+              }
+              return false;
+            })();
+            if (!focusedLastChild) {
+              if (!tryFocusContent()) {
+                if (titleElement) { titleElement.focus(); }
+                if (document.activeElement !== titleElement) {
+                  if (!tryFocusResize()) { tileElement.focus(); }
+                }
+              }
             }
           } else {
-            // Tab: toolbar → content → title → tile
-            if (!tryFocusContent()) {
+            // Tab: toolbar → resize → title → content → tile
+            if (!tryFocusResize()) {
               if (titleElement) { titleElement.focus(); }
-              if (document.activeElement !== titleElement) { tileElement.focus(); }
+              if (document.activeElement !== titleElement) {
+                if (!tryFocusContent()) { tileElement.focus(); }
+              }
             }
           }
           e.preventDefault();
