@@ -39,7 +39,7 @@ Single-user proxy for the case above.
 
 Jira story: https://concord-consortium.atlassian.net/browse/CLUE-505 (in code review)
 
-## ❌ Column width lost on remote column deletion
+## ❌ Column width change not visible
 
 - Start with a table with 3+ columns where User B has resized some columns
 - User A changes a column width
@@ -69,7 +69,7 @@ Jira story: https://concord-consortium.atlassian.net/browse/CLUE-510
 - **Expected Result**: User B's change will store a columnWidth for the column with an attribute id. User A's change will delete the attribute but might not change the table state. So now the `columnWidths` map will refer to missing attribute.
 - **Actual Result**:
 
-Note: currently when a attribute is deleted from the table the "updateHash" property on the table is recorded as a change. So it is likely this won't cause a problem, because the user A's change will be considered a conflict and will be reverted. However if we remove the "updateHash" properties this could become a problem, so it is good to keep this test in case it regresses.
+Note: currently when a attribute is deleted from the table the "updateHash" property on the table is recorded as a change. So it is likely this won't cause a problem, because user A's change will be considered a conflict and will be reverted. However if we remove the "updateHash" properties this could become a problem, so it is good to keep this test in case it regresses.
 
 ## ✅ Column width lost on redo (single-user undo)
 
