@@ -4,6 +4,7 @@ import PreviewPlotIcon from "../../assets/icons/preview-plot.svg";
 import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./custom-hooks";
 import { IBaseNode } from "../base-node";
+import { handleBlockChildKeyDown } from "../dataflow-node";
 
 interface PlottableModel {
   plot: boolean;
@@ -23,6 +24,7 @@ export class PlotButtonControl extends ClassicPreset.Control
   }
 
   togglePlot = () => {
+    if (this.node.readOnly) return;
     this.model.setPlot(!this.model.plot);
 
     const toggleStr = this.model.plot ? "on" : "off";
@@ -46,7 +48,19 @@ export const PlotButtonControlComponent = observer(
       <div
         ref={divRef}
         className={`graph-button main-color ${showGraph ? "active" : ""}`}
-        onClick={control.togglePlot}>
+        role="button"
+        tabIndex={-1}
+        aria-label={showGraph ? "Hide block value graph" : "Show block value graph"}
+        aria-pressed={showGraph}
+        onClick={control.togglePlot}
+        onKeyDown={e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            control.togglePlot();
+            return;
+          }
+          handleBlockChildKeyDown(e);
+        }}>
         <svg className="icon">
           <PreviewPlotIcon />
         </svg>

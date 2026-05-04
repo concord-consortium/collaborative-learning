@@ -21,6 +21,14 @@ export interface ITileFocusableElements {
   contentElement?: HTMLElement;  // main content area (editor, grid, canvas, etc.)
   titleElement?: HTMLElement;    // tile title input if visible
   focusContent?: () => boolean;  // custom focus method for content (e.g., Slate's ReactEditor.focus)
+  // Optional secondary controls bar above the main content (e.g. dataflow's
+  // Sampling Rate / Record area). Visited as its own slot between title and
+  // content. Walked focusable-by-focusable like content (in tabWithinSlots).
+  topbarElement?: HTMLElement;
+  // Optional inline secondary toolbar (e.g. dataflow's Add-Block palette). Visited
+  // as its own slot in the trap cycle, between content and the standard floating
+  // toolbar, so its internal roving-tabindex is a single tab stop with arrow nav.
+  paletteElement?: HTMLElement;
 }
 
 export interface ITileApi {

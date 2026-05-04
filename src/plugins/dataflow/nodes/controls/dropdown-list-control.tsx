@@ -1,10 +1,11 @@
-import React, { FunctionComponent, SVGProps, useCallback, useRef, useState } from "react";
+import React, { FunctionComponent, SVGProps, useEffect, useRef, useState } from "react";
 import { action, computed, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react";
 import { ClassicPreset } from "rete";
 import classNames from "classnames";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import { IBaseNode, IBaseNodeModel } from "../base-node";
+import { handleBlockChildKeyDown } from "../dataflow-node";
 
 import DropdownCaretIcon from "../../../../assets/dropdown-caret.svg";
 
@@ -182,6 +183,7 @@ export class DropdownListControl<
 
 export interface IDropdownListControl {
   id: string;
+  node: IBaseNode;
   model: IBaseNodeModel;
   modelKey: string;
   options: ListOption[];
@@ -218,44 +220,127 @@ export const DropdownList: React.FC<{
   const title = control.tooltip;
   const { options, placeholder } = control;
   const divRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   useStopEventPropagation(divRef, "pointerdown");
   useStopEventPropagation(divRef, "wheel");
-  const listRef = useRef<HTMLDivElement>(null);
 
   const [showList, setShowList] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
 
-  // This will reset the listeners on every render because internally it has a useEffect depending
-  // on the two callbacks
   useCloseDropdownOnOutsideEvent(listRef, () => showList, () => {
     setShowList(false);
   });
 
+  // Focus the listbox when it opens so subsequent key events route to handleListKeyDown.
+  // (React's autoFocus prop is only valid on form elements, not on <div>.)
+  useEffect(() => {
+    if (showList) listRef.current?.focus();
+  }, [showList]);
+
   const val = control.getValue();
   const option = options.find((opt) => optionValue(opt) === val);
+  const currentIndex = options.findIndex(opt => optionValue(opt) === val);
   const activeHub = option?.active !== false;
   const liveNode = control.model.type.substring(0,4) === "Live";
   const disableSelected = control.modelKey === "hubSelect" && liveNode && !activeHub;
   const labelClasses = classNames("item top", { disabled: disableSelected, missing: option?.missing });
+  const listboxId = `dropdown-listbox-${control.id}`;
 
-  const onItemClick = useCallback((v: any) => {
+  const isOptionDisabled = (opt: ListOption) =>
+    opt.active === false || control.disabledFunction?.(opt) === true;
+
+  const moveHighlight = (delta: 1 | -1) => {
+    let i = highlightedIndex;
+    for (let step = 0; step < options.length; step++) {
+      i = (i + delta + options.length) % options.length;
+      if (!isOptionDisabled(options[i])) {
+        setHighlightedIndex(i);
+        return;
+      }
+    }
+  };
+
+  const findFirstEnabledIndex = (start: number, dir: 1 | -1): number => {
+    let i = start;
+    for (let step = 0; step < options.length; step++) {
+      if (!isOptionDisabled(options[i])) return i;
+      i = (i + dir + options.length) % options.length;
+    }
+    return start;
+  };
+
+  const open = () => {
     control.selectNode();
-    setShowList(value => !value);
-
+    setShowList(true);
+    const startIndex = currentIndex >= 0 && !isOptionDisabled(options[currentIndex])
+      ? currentIndex
+      : findFirstEnabledIndex(0, 1);
+    setHighlightedIndex(startIndex);
     control.logEvent("nodedropdownclick");
-  }, [control]);
+  };
 
-  // Generate a handler for each list item
-  const onListClick = useCallback((v: string) => () => {
+  const close = () => {
+    setShowList(false);
+  };
+
+  const commit = (i: number) => {
+    if (isOptionDisabled(options[i])) return;
     control.selectNode();
-    setShowList(value => !value);
-    control.setValue(v);
-
+    control.setValue(optionValue(options[i]));
+    setShowList(false);
     control.logEvent("nodedropdownselection");
-  }, [control]);
+    triggerRef.current?.focus();
+  };
+
+  const handleTriggerClick = () => {
+    if (showList) {
+      close();
+    } else {
+      open();
+    }
+  };
+
+  const handleTriggerKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      open();
+      return;
+    }
+    // ArrowDown used to open the listbox, but the in-block roving cycle now owns
+    // the arrow keys; Enter/Space is the canonical "open" gesture.
+    handleBlockChildKeyDown(e);
+  };
+
+  const handleListKeyDown = (e: React.KeyboardEvent) => {
+    switch (e.key) {
+      case "ArrowDown": e.preventDefault(); moveHighlight(1); break;
+      case "ArrowUp":   e.preventDefault(); moveHighlight(-1); break;
+      case "Home":      e.preventDefault(); setHighlightedIndex(findFirstEnabledIndex(0, 1)); break;
+      case "End":       e.preventDefault();
+                        setHighlightedIndex(findFirstEnabledIndex(options.length - 1, -1)); break;
+      case "Enter":
+      case " ":         e.preventDefault(); commit(highlightedIndex); break;
+      case "Escape":    e.preventDefault(); close(); triggerRef.current?.focus(); break;
+      case "Tab":       close(); break; // let Tab proceed
+    }
+  };
 
   return (
     <div className={`node-select ${listClass}`} ref={divRef} title={title}>
-      <div className={labelClasses} onMouseDown={onItemClick}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className={labelClasses}
+        tabIndex={-1}
+        disabled={control.node.readOnly}
+        aria-haspopup="listbox"
+        aria-expanded={showList}
+        aria-controls={listboxId}
+        aria-label={`${title}: ${option?.displayName ?? option?.name ?? placeholder}`}
+        onMouseDown={handleTriggerClick}
+        onKeyDown={handleTriggerKeyDown}
+      >
         { option
           ? <ListOptionComponent option={option}/>
           : <div className="label unselected">{placeholder}</div>
@@ -263,30 +348,42 @@ export const DropdownList: React.FC<{
         <svg className="icon dropdown-caret">
           <DropdownCaretIcon />
         </svg>
-      </div>
-      {showList ?
-      <div className={`option-list ${listClass}`} ref={listRef}>
-        {options.map((ops, i) => {
-          const disabled = ops.active === false || control.disabledFunction?.(ops);
-          const missing = ops.missing;
-          const className = classNames("item", listClass, {
-            disabled,
-            selectable: !disabled,
-            selected: optionValue(ops) === val,
-            missing
-          });
-          return (
-            <div
-              className={className}
-              key={i}
-              onMouseDown={!disabled ? onListClick(optionValue(ops)) : undefined}
-            >
-              <ListOptionComponent option={ops} />
-            </div>
-          );
-        })}
-      </div>
-      : null }
+      </button>
+      {showList && (
+        <div
+          id={listboxId}
+          ref={listRef}
+          className={`option-list ${listClass}`}
+          role="listbox"
+          tabIndex={-1}
+          aria-activedescendant={`${listboxId}-opt-${highlightedIndex}`}
+          onKeyDown={handleListKeyDown}
+        >
+          {options.map((ops, i) => {
+            const disabled = isOptionDisabled(ops);
+            const className = classNames("item", listClass, {
+              disabled,
+              selectable: !disabled,
+              selected: optionValue(ops) === val,
+              highlighted: i === highlightedIndex,
+              missing: ops.missing
+            });
+            return (
+              <div
+                id={`${listboxId}-opt-${i}`}
+                role="option"
+                aria-selected={optionValue(ops) === val}
+                aria-disabled={disabled}
+                className={className}
+                key={i}
+                onMouseDown={!disabled ? () => commit(i) : undefined}
+              >
+                <ListOptionComponent option={ops} />
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 });

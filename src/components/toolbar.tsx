@@ -46,7 +46,7 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
   const stores = useStores();
   const ariaLabels = useAriaLabels();
   const toolbarRef = useRef<HTMLDivElement>(null);
-  const { handleKeyDown: handleToolbarKeyDown } = useRovingTabindex(toolbarRef);
+  const { handleKeyDown: handleToolbarKeyDown } = useRovingTabindex(toolbarRef, "vertical");
 
   const [defaultTool, setDefaultTool] = useState<IToolbarButtonModel | undefined>();
   const [activeTool, setActiveTool] = useState<IToolbarButtonModel | undefined>();

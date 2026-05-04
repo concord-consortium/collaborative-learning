@@ -3,7 +3,7 @@ import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
 import classNames from "classnames";
 
-import { DataflowProgram } from "./dataflow-program";
+import { DataflowProgram, IDataflowProgramApi } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { ITileProps } from "../../../components/tiles/tile-component";
@@ -15,6 +15,10 @@ import { TileTitleArea } from "../../../components/tiles/tile-title-area";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 import { ReteManager } from "../nodes/rete-manager";
 import { DataflowReteManagerContext } from "./dataflow-rete-manager-context";
+import { ClueTileAccessibilityBridge } from "../../../hooks/use-clue-accessibility";
+import { getEditableTitleElement } from "../../../utilities/dom-utils";
+import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { ITileApi } from "../../../components/tiles/tile-api";
 
 import "../dataflow-toolbar-registration";
 import "./dataflow-tile.scss";
@@ -39,6 +43,9 @@ interface IDataflowTileState {
 export default class DataflowToolComponent extends BaseComponent<IProps, IDataflowTileState> {
   public static tileHandlesSelection = true;
 
+  private programContainerEl: HTMLElement | null = null;
+  private programApi: IDataflowProgramApi | null = null;
+
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -51,9 +58,35 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     };
   }
 
+  // Read-only tiles don't render <ClueTileAccessibilityBridge> (which only sets
+  // up the editable focus trap), so they need to register the additional tile
+  // API (exportContentAsTileJson, getObjectBoundingBox) directly. componentDidMount
+  // runs after children's componentDidMount, so the program API ref is already set.
+  public componentDidMount() {
+    if (this.props.readOnly) {
+      this.props.onRegisterTileApi(this.getAdditionalApi());
+    }
+  }
+
+  public componentWillUnmount() {
+    if (this.props.readOnly) {
+      this.props.onUnregisterTileApi();
+    }
+  }
+
   private handleReteManagerCreated = (reteManager: ReteManager | undefined) => {
     this.setState({ reteManager });
   };
+
+  private getAdditionalApi = (): ITileApi => ({
+    exportContentAsTileJson: (options?: ITileExportOptions) => {
+      return this.getContent().exportJson(options);
+    },
+    getObjectBoundingBox: (objectId, objectType) => {
+      return this.programApi?.getObjectBoundingBox(objectId, objectType);
+    },
+  });
+
   public render() {
     const { readOnly, height, model, onRegisterTileApi, tileElt } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
@@ -86,12 +119,31 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   tileElt={tileElt}
                   onRegisterTileApi={onRegisterTileApi}
                   onReteManagerCreated={this.handleReteManagerCreated}
+                  onProgramContainerRef={el => this.programContainerEl = el}
+                  onProgramApiRef={api => this.programApi = api}
                 />
               );
             }}
           </SizeMe>
           <TileToolbar tileType="dataflow" readOnly={!!readOnly} tileElement={this.props.tileElt} />
         </div>
+        {!readOnly && (
+          <ClueTileAccessibilityBridge
+            tileType="dataflow"
+            onRegisterTileApi={this.props.onRegisterTileApi}
+            onUnregisterTileApi={this.props.onUnregisterTileApi}
+            getTitleElement={() => getEditableTitleElement(this.props.tileElt ?? undefined)}
+            getContentElement={() =>
+              this.programContainerEl?.querySelector<HTMLElement>(".dataflow-program-content")
+              ?? undefined}
+            getTopbarElement={() =>
+              this.programContainerEl?.querySelector<HTMLElement>(".program-editor-topbar")
+              ?? undefined}
+            getPaletteElement={() =>
+              this.programContainerEl?.querySelector<HTMLElement>(".program-toolbar") ?? undefined}
+            additionalApi={this.getAdditionalApi()}
+          />
+        )}
         </>
       </DataflowReteManagerContext.Provider>
     );

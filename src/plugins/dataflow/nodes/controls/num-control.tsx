@@ -3,6 +3,7 @@ import { ClassicPreset } from "rete";
 import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./custom-hooks";
 import { IBaseNode } from "../base-node";
+import { handleBlockChildKeyDown } from "../dataflow-node";
 
 // This generics design isn't very user friendly if a caller
 // tries to construct the NumberControl with a key that doesn't
@@ -97,10 +98,12 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = observ
     }
   }, [control]);
 
-  const handleKeyPress = useCallback((e: any) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.currentTarget.blur();
+      return;
     }
+    handleBlockChildKeyDown(e);
   }, []);
 
   // FIXME: in readOnly mode there is a lot of stuff in this component that is
@@ -121,9 +124,11 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = observ
       }
       <input className={`number-input`}
         ref={inputRef}
+        tabIndex={-1}
         type={"text"}
         value={possiblyReadOnlyInputValue}
-        onKeyPress={handleKeyPress}
+        disabled={control.node.readOnly}
+        onKeyDown={handleKeyDown}
         onChange={handleChange}
         onBlur={handleBlur}
       />

@@ -62,7 +62,7 @@ export const TileToolbar = observer(
     // Roving tabindex for keyboard navigation within toolbar
     const toolbarContainerRef = useRef<HTMLDivElement | null>(null);
     const [toolbarContainer, setToolbarContainer] = useState<HTMLDivElement | null>(null);
-    const { handleKeyDown: handleRovingKeyDown } = useRovingTabindex(toolbarContainerRef);
+    const { handleKeyDown: handleRovingKeyDown } = useRovingTabindex(toolbarContainerRef, "horizontal");
 
     // Combine floating ref with our container ref
     const setToolbarRef = useCallback((el: HTMLDivElement | null) => {
@@ -111,6 +111,7 @@ export const TileToolbar = observer(
           const contentElement = focusable?.contentElement;
           const titleElement = focusable?.titleElement;
           const focusContentFn = focusable?.focusContent;
+          const paletteElement = focusable?.paletteElement;
           const resizeHandle = tileElement.querySelector(
             ".tool-tile-resize-handle-wrapper"
           ) as HTMLElement | null;
@@ -133,24 +134,39 @@ export const TileToolbar = observer(
             return false;
           };
 
-          // Cycle: title → content → toolbar → resize → (wrap)
+          // Focuses the palette slot's active item (preferred), otherwise its
+          // first focusable. Returns true if focus moved into the palette.
+          const tryFocusPalette = () => {
+            if (!paletteElement) return false;
+            const focusables = getVisibleFocusables(paletteElement);
+            if (focusables.length === 0) return false;
+            const rovingTarget = focusables.find(el => el.getAttribute("tabindex") === "0");
+            const target = rovingTarget ?? focusables[0];
+            target.focus();
+            return document.activeElement === target;
+          };
+
+          // Cycle (matches the focus-trap controller's cycleOrder):
+          //   title → topbar → content → palette → toolbar → resize → (wrap)
           // Try candidates in order, skipping any that can't actually receive focus.
           if (e.shiftKey) {
-            // Shift+Tab: toolbar → last content child → title → resize → tile
-            const focusedLastChild = (() => {
-              if (!contentElement) return false;
-              const focusables = getVisibleFocusables(contentElement);
-              if (focusables.length > 0) {
-                focusables[focusables.length - 1].focus();
-                return document.activeElement === focusables[focusables.length - 1];
-              }
-              return false;
-            })();
-            if (!focusedLastChild) {
-              if (!tryFocusContent()) {
-                if (titleElement) { titleElement.focus(); }
-                if (document.activeElement !== titleElement) {
-                  if (!tryFocusResize()) { tileElement.focus(); }
+            // Shift+Tab: toolbar → palette → last content child → title → resize → tile
+            if (!tryFocusPalette()) {
+              const focusedLastChild = (() => {
+                if (!contentElement) return false;
+                const focusables = getVisibleFocusables(contentElement);
+                if (focusables.length > 0) {
+                  focusables[focusables.length - 1].focus();
+                  return document.activeElement === focusables[focusables.length - 1];
+                }
+                return false;
+              })();
+              if (!focusedLastChild) {
+                if (!tryFocusContent()) {
+                  if (titleElement) { titleElement.focus(); }
+                  if (document.activeElement !== titleElement) {
+                    if (!tryFocusResize()) { tileElement.focus(); }
+                  }
                 }
               }
             }
