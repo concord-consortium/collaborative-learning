@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "dist",
-    "sourceMap": true,
+    "inlineSourceMap": true,
     "target": "ES2015",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
