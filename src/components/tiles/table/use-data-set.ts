@@ -174,9 +174,8 @@ export const useDataSet = ({
   };
 
   const handleColumnResize = useCallback((idx: number, width: number, complete?: boolean) => {
-    const returnVal = onColumnResize(idx, width, complete || false);
+    onColumnResize(idx, width, complete || false);
     triggerColumnChange();
-    return returnVal;
   }, [onColumnResize, triggerColumnChange]);
 
   return { onColumnResize: handleColumnResize, onRowsChange, deleteSelected, onSelectedCellChange};
