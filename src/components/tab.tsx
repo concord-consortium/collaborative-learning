@@ -8,6 +8,7 @@ interface IProps {
   active?: boolean;
   title?: string;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  children?: React.ReactNode;
 }
 
 interface IState {
