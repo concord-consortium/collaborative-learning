@@ -4,9 +4,9 @@ import React, { useState } from "react";
 // I'm afraid if I change that typescript configuration lots of things
 // will break, but I'm going to try...
 import { FormulaEditorContext, useFormulaEditorState
-} from "@concord-consortium/codap-formulas-react17/components/common/formula-editor-context";
-import { FormulaEditor } from "@concord-consortium/codap-formulas-react17/components/common/formula-editor";
-import { getFormulaManager } from "@concord-consortium/codap-formulas-react17/models/formula/formula";
+} from "@concord-consortium/codap-formulas/components/common/formula-editor-context";
+import { FormulaEditor } from "@concord-consortium/codap-formulas/components/common/formula-editor";
+import { getFormulaManager } from "@concord-consortium/codap-formulas/models/formula/formula";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
