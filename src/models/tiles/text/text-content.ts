@@ -104,15 +104,23 @@ export const TextContentModel = TileContentModel
       const exportHtml = html.split("\n")
         .map((line, i, arr) =>
           `    "${processLine(line)}"${i < arr.length - 1 ? "," : ""}`);
-      return [
+      // Highlight chips in the slate value reference entries by id in highlightedText;
+      // without exporting the array, every chip resolves to "invalid reference" on reload.
+      // Omit when empty to keep diffs clean for tiles that have no highlights.
+      const hasHighlights = self.highlightedText.length > 0;
+      const lines = [
         `{`,
         `  "type": "Text",`,
         `  "format": "html",`,
         `  "text": [`,
         ...exportHtml,
-        `  ]`,
-        `}`
-      ].join("\n");
+        hasHighlights ? `  ],` : `  ]`,
+      ];
+      if (hasHighlights) {
+        lines.push(`  "highlightedText": ${JSON.stringify(self.highlightedText)}`);
+      }
+      lines.push(`}`);
+      return lines.join("\n");
     }
   }))
   .actions(self => ({
