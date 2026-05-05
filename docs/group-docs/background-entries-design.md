@@ -76,7 +76,7 @@ The transaction-free history design provides:
 - Scope-overlap conflict detection against the `concurrent(e)` set.
 - Loser entries marked with `reverted: true`; winners apply.
 
-A background entry is just a history entry with `background: true`. It uses the same DAG, the same canonical ordering, the same conflict detection, and the same Firestore collection. The flag triggers four behavioral differences:
+A background entry is just a history entry with `background: true`. It uses the same DAG, the same canonical ordering, the same conflict detection, and the same Firestore collection. The flag triggers five behavioral differences:
 
 | | User entry | Background entry |
 |---|---|---|
