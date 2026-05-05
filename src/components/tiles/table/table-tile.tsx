@@ -147,6 +147,22 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     ...rowLabelProps, showRowLabels, measureColumnWidth, lookupImage, onSort,
   });
 
+  // Map of attrId -> width to drive react-data-grid via its `columnWidths` prop.
+  // CODAP's rdg patch consults this before its internal resize cache, so CLUE
+  // remains the source of truth for column widths.
+  const columnWidths = useMemo(() => {
+    rowChanges; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    const widths = new Map<string, number>();
+    dataSet.attributes.forEach(attr => {
+      widths.set(attr.id, measureColumnWidth(attr));
+    });
+    return widths;
+  // dataSet.attributes.length triggers recomputes on attribute add/remove
+  // (the MST array reference is stable). The rule below considers .length
+  // redundant given `dataSet`, but doesn't model MobX-array semantics.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataSet, dataSet.attributes.length, measureColumnWidth, rowChanges]);
+
   // The size of the title bar
   const { titleCellWidth, getTitleHeight } =
     useTitleSize({ readOnly, columns, measureColumnWidth, dataSet, rowChanges });
@@ -407,8 +423,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
             onEndEdit={onEndTitleEdit} />
           <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
             <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
-              headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
-              {...dataGridProps} {...rowProps} />
+              headerRowHeight={headerRowHeight()} columns={columns} columnWidths={columnWidths}
+              {...gridProps} {...gridModelProps} {...dataGridProps} {...rowProps} />
             <DragOverlay>
               {activeRow ? (
                 <RowDragOverlay row={activeRow} columns={columns} rowHeight={rowHeight} showRowLabels={showRowLabels}/>
