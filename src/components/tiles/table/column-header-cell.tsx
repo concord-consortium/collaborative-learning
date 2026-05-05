@@ -75,10 +75,9 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
                   isColumnSelected={gridContext?.isColumnSelected(column.key) ?? false}/>
               }
               <EditableHeaderCell
+                {...props}
                 height={height}
                 column={column as any}
-                allRowsSelected={props.allRowsSelected}
-                onAllRowsSelectionChange={props.onAllRowsSelectionChange}
               />
               {hasData &&
                 <div className={classNames("column-button sort-column-button", { "ascending": direction === "ASC",

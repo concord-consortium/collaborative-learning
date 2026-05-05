@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { DataGridHandle } from "react-data-grid";
+import { CellSelectArgs, DataGridHandle } from "react-data-grid";
 import { ICase, IDataSet } from "../../../models/data/data-set";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -50,7 +50,10 @@ export const useDataSet = ({
     }
     return selectedCellIndices;
   }
-  const onSelectedCellChange = (position: TPosition) => {
+  const onSelectedCellChange = (args: CellSelectArgs<TRow>) => {
+    // beta.44 changed the signature from TPosition to CellSelectArgs; we still operate on
+    // a `{ rowIdx, idx }` position internally.
+    const position: TPosition = { rowIdx: args.rowIdx, idx: args.column.idx };
     selectedCell.current = position;
     // We don't update the position while adding a new row so we can move to the new row if necessary.
     if (addingNewRow.current) return;

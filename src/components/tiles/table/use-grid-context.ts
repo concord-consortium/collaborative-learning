@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef } from "react";
-import { CellNavigationMode, DataGridHandle } from "react-data-grid";
+import { DataGridHandle } from "react-data-grid";
 import { useSharedSelectionStore } from "../../../hooks/use-stores";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -104,8 +104,9 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
     dataSet.setSelectedCases(rowArray);
   }, [clearSelection, dataSet]);
 
-  const cellNavigationMode: CellNavigationMode = "CHANGE_ROW";
+  // beta.44 dropped the cellNavigationMode prop; the only remaining mode is the previous "NONE"
+  // and "CHANGE_ROW" / "LOOP_OVER_ROW" no longer exist as configurable options.
   return {
-    ref: gridRef, cellNavigationMode, inputRowId, getSelectedRows, gridContext, onSelectedRowsChange
+    ref: gridRef, inputRowId, getSelectedRows, gridContext, onSelectedRowsChange
   };
 };

@@ -89,11 +89,12 @@ module.exports = (env, argv) => {
           loader: require.resolve('string-replace-loader'),
           options: {
             multiple: [
-              { // react-data-grid doesn't currently provide a means of clearing cell selection
-                search: /if \(!isCellWithinBounds\(position\)\) return;/g,
+              { // react-data-grid doesn't currently provide a means of clearing cell selection.
+                // beta.44 renamed isCellWithinBounds → isCellWithinSelectionBounds.
+                search: /if \(!isCellWithinSelectionBounds\(position\)\) return;/g,
                 replace:
                   "// [CC] (string-replace-loader) allow clearing the selection\n" +
-                  "    if (!(position.idx === -1 && position.rowIdx === -1) && !isCellWithinBounds(position)) return;",
+                  "    if (!(position.idx === -1 && position.rowIdx === -1) && !isCellWithinSelectionBounds(position)) return;",
                 strict: true  // fail build if replacement not performed
               }
             ]

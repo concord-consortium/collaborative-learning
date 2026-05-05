@@ -422,7 +422,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
             onBeginEdit={onBeginTitleEdit}
             onEndEdit={onEndTitleEdit} />
           <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-            <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
+            <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows}
+              rowHeight={(row) => rowHeight({ row, type: "ROW" })}
               headerRowHeight={headerRowHeight()} columns={columns} columnWidths={columnWidths}
               {...gridProps} {...gridModelProps} {...dataGridProps} {...rowProps} />
             <DragOverlay>
