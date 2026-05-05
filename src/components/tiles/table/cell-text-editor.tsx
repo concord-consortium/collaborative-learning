@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState, KeyboardEvent, useContext } from "react";
-import { EditorProps } from "react-data-grid";
-import { Portal } from "@chakra-ui/react";
+import { RenderEditCellProps } from "react-data-grid";
 import TextareaAutosize from "react-textarea-autosize";
 import { TColumn } from "./table-types";
 import { TableContext } from "../hooks/table-context";
@@ -32,8 +31,8 @@ export const RDG_INTERNAL_TEXT_EDITOR_CLASS = "t16y9g8l700-canary46";
 // patterned after TextEditor from "react-data-grid"
 // extended to call our onBeginBodyCellEdit()/onEndBodyCellEdit() functions
 export default function CellTextEditor<TRow, TSummaryRow = unknown>({
-  row, column, top, left, onRowChange, onClose
-}: EditorProps<TRow, TSummaryRow>) {
+  row, column, onRowChange, onClose
+}: RenderEditCellProps<TRow, TSummaryRow>) {
   const _column: TColumn = column as unknown as TColumn;
   const origValueRef = useRef(row[column.key as keyof TRow] as unknown as string);
   const valueRef = useRef(origValueRef.current);
@@ -82,44 +81,37 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // beta.44 renders editors inline within the cell (no Portal, no absolute positioning).
   return (
-    <Portal>
-      <div className={`rdg-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`}>
-        <TextareaAutosize
-          value={value}
-          className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
-          // The background, display, and position styles are included here instead of in table-tile.scss because
-          // they will not otherwise be applied consistently in all environments. It's not clear why, but it's
-          // possibly related to the editor being rendered in a portal.
-          style={{
-            background: "white",
-            display: "block",
-            left,
-            position: "absolute",
-            top,
-            width: column.width
-          }}
-          autoFocus={true}
-          onChange={handleChange}
-          onFocus={event => {
-            event.target.select();
-          }}
-          onBlur={event => {
-            finishAndSave(true);
-          }}
-          onKeyDown={(event: KeyboardEvent) => {
-            const { key } = event;
-            switch (key) {
-              case 'Escape':
-                finishAndSave(false);
-                break;
-              case 'Enter':
-                finishAndSave(true);
-                break;
-            }
-          }}
-        />
-      </div>
-    </Portal>
+    <div className={`rdg-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`}>
+      <TextareaAutosize
+        value={value}
+        className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
+        style={{
+          background: "white",
+          display: "block",
+          width: column.width
+        }}
+        autoFocus={true}
+        onChange={handleChange}
+        onFocus={event => {
+          event.target.select();
+        }}
+        onBlur={event => {
+          finishAndSave(true);
+        }}
+        onKeyDown={(event: KeyboardEvent) => {
+          const { key } = event;
+          switch (key) {
+            case 'Escape':
+              finishAndSave(false);
+              break;
+            case 'Enter':
+              finishAndSave(true);
+              break;
+          }
+        }}
+      />
+    </div>
   );
 }

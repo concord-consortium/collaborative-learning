@@ -6,6 +6,9 @@ interface IProps extends THeaderRendererProps {
   height: number;
 }
 export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }) => {
+  // _column is a CalculatedColumn (rdg-supplied, width is non-Maybe); the cast to TColumn
+  // is only needed to read our extension `appData`.
+  const calcColumn = _column;
   const column = _column as unknown as TColumn;
   const { name, appData } = column;
   const {
@@ -40,7 +43,7 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }
     onEndHeaderCellEdit?.(accept ? nameValue : undefined);
   };
   const ehcStyle: React.CSSProperties = { height: height-2 };
-  const style: React.CSSProperties = { width: column.width, ...ehcStyle };
+  const style: React.CSSProperties = { width: calcColumn.width, ...ehcStyle };
   // ReactDataGrid's styling of the cell editor relies on an interesting interplay between the container
   // (.rdg-editor-container), which has `{ display: "contents" }` in its CSS, which according to MDN means:
   //

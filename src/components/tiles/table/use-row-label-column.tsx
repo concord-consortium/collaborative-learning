@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { useRowSelection } from "react-data-grid";
 import { Tooltip } from "react-tippy";
 import { createPortal } from "react-dom";
 import { useDraggable } from "@dnd-kit/core";
@@ -42,12 +43,15 @@ export const useRowLabelColumn = ({inputRowId, hoveredRowId, showRowLabels, setS
   RowLabelHeader.displayName = "RowLabelHeader";
 
   const RowLabelFormatter: React.FC<TFormatterProps> = useCallback(({
-    row, isRowSelected, onRowSelectionChange
+    row
   }: TFormatterProps) => {
     const { __id__, __index__, __context__ } = row;
     const rowHeightValue = rowHeight({ row, type: "ROW" });
 
     const DraggableRowLabel: React.FC = () => {
+      // beta.44 removed isRowSelected/onRowSelectionChange from RenderCellProps; call
+      // useRowSelection() inside the cell renderer to access the same values.
+      const [isRowSelected, onRowSelectionChange] = useRowSelection();
       const { attributes, listeners, setNodeRef: setDragRef } = useDraggable({ id: __id__ });
       const isInputRow = __id__ === inputRowId;
       const rowTop = __index__ ? (__index__ - 1) * rowHeight({ row, type: "ROW" }) + kHeaderRowHeight : 0;
@@ -59,7 +63,7 @@ export const useRowLabelColumn = ({inputRowId, hoveredRowId, showRowLabels, setS
         if (e.button === 0) {
           if (selected !== isRowSelected) {
             if (hasModifier) {
-              onRowSelectionChange(selected, e.shiftKey);
+              onRowSelectionChange({ type: "ROW", row, checked: selected, isShiftClick: e.shiftKey });
             }
             else if (__id__ === inputRowId) {
               __context__.onClearSelection({ cell: false });
