@@ -158,7 +158,7 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
     (newHeight != null) && setRowHeightWithoutUndo(newHeight);
   }, [model]);
 
-  const handleStartResizeRow = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleStartResizeRow = useCallback((e: React.DragEvent<HTMLElement>) => {
     const { docId } = props;
     const { id } = model;
 

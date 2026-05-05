@@ -48,6 +48,13 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   paused = false;
 
   /**
+   * Seconds remaining on the active resume-after-delay countdown, or
+   * null when no resume is pending. Drives the history-view button's
+   * "Resuming in Ns…" feedback while paused waits for the timer to fire.
+   */
+  resumeCountdownSeconds: number | null = null;
+
+  /**
    * Stop processing remote history entries delivered by the Firestore
    * listener. Only used manually from the history-view panel to set up
    * fork scenarios deterministically — specifically, to drive the
@@ -99,6 +106,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     makeObservable<this, "setExpectedRemoteHead">(this, {
       paused: observable,
       pausedDownloads: observable,
+      resumeCountdownSeconds: observable,
       expectedRemoteHead: observable,
       pauseUploads: action,
       resumeUploadsAfterDelay: action,
@@ -131,12 +139,25 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   }
 
   resumeUploadsAfterDelay(delayMs: number) {
-    setTimeout(() => {
+    // Ignore re-entry while a countdown is already running.
+    if (this.resumeCountdownSeconds !== null) return;
+
+    this.resumeCountdownSeconds = Math.max(1, Math.ceil(delayMs / 1000));
+
+    const tick = () => {
       runInAction(() => {
-        this.paused = false;
+        const remaining = (this.resumeCountdownSeconds ?? 0) - 1;
+        if (remaining > 0) {
+          this.resumeCountdownSeconds = remaining;
+          setTimeout(tick, 1000);
+        } else {
+          this.resumeCountdownSeconds = null;
+          this.paused = false;
+          this.uploadQueuedHistoryEntries();
+        }
       });
-      this.uploadQueuedHistoryEntries();
-    }, delayMs);
+    };
+    setTimeout(tick, 1000);
   }
 
   pauseDownloads() {
@@ -311,11 +332,17 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
           // The plan is to just use this for new group documents, so if there is some lost history
           // for existing group documents that is OK.
 
+          // Stamp the uploading client's uid into each entry so other
+          // clients can attribute remote entries to their author. We don't
+          // mutate the in-memory entry — the local copy stays uid-less,
+          // which the history view treats as "this client's entry."
+          const uploaderUid = this.userContextProvider?.userContext?.uid;
+
           entriesToUpload.forEach(entry => {
             const newEntryIndex = lastEntryIndex + 1;
 
             const docRef = firestore.documentRef(historyEntriesPath, entry.id);
-            const snapshot = getSnapshot(entry);
+            const snapshot = { ...getSnapshot(entry), uid: uploaderUid };
 
             transaction.set(docRef, {
               index: newEntryIndex,
@@ -424,6 +451,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     for (const original of originalsNewestFirst) {
       const revertSnapshot = buildRevertEntrySnapshot(getSnapshot(original), triggeringBatchIds);
       const revertEntry = HistoryEntry.create(revertSnapshot);
+      revertEntry.setSource("revert");
       treeManager.addHistoryEntryAfterApplying(revertEntry);
     }
 
@@ -535,7 +563,11 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     const treePatches: Record<string, IJsonPatch[] | undefined> = {};
     Object.keys(treeManager.trees).forEach(treeId => treePatches[treeId] = []);
 
-    const entries: HistoryEntryType[] = entrySnapshots.map(snapshot => HistoryEntry.create(snapshot));
+    const entries: HistoryEntryType[] = entrySnapshots.map(snapshot => {
+      const entry = HistoryEntry.create(snapshot);
+      entry.setSource("remote");
+      return entry;
+    });
 
     for (const historyEntry of entries) {
       const records = historyEntry ? [ ...historyEntry.records] : [];

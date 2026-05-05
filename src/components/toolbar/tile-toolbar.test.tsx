@@ -283,19 +283,22 @@ describe("Tile toolbar ARIA and keyboard", () => {
 
   // --- Tab/Escape from toolbar ---
 
-  it("Tab from toolbar button moves focus to content element", () => {
-    const { buttons, contentElement, cleanup } = renderToolbarWithApi();
+  it("Tab from toolbar button moves focus to title element", () => {
+    // Cycle: title → content → toolbar → resize → title
+    // Tab from toolbar: resize (absent) → title
+    const { buttons, titleElement, cleanup } = renderToolbarWithApi();
     (buttons[0] as HTMLElement).focus();
     fireEvent.keyDown(buttons[0], { key: "Tab" });
-    expect(document.activeElement).toBe(contentElement);
+    expect(document.activeElement).toBe(titleElement);
     cleanup();
   });
 
-  it("Shift+Tab from toolbar button moves focus to title element", () => {
-    const { buttons, titleElement, cleanup } = renderToolbarWithApi();
+  it("Shift+Tab from toolbar button moves focus to content element", () => {
+    // Shift+Tab from toolbar: → content
+    const { buttons, contentElement, cleanup } = renderToolbarWithApi();
     (buttons[0] as HTMLElement).focus();
     fireEvent.keyDown(buttons[0], { key: "Tab", shiftKey: true });
-    expect(document.activeElement).toBe(titleElement);
+    expect(document.activeElement).toBe(contentElement);
     cleanup();
   });
 

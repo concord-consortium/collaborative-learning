@@ -67,12 +67,17 @@ export const NetworkStatus = observer(({ user }: IProps) => {
     return null;
   }
 
+  const statusText = isFirebaseConnected ? "Online" : "Offline!";
   return (
     <div className="network-status" data-testid="network-status">
-      <div className={classNames("firebase status", { connected: isFirebaseConnected })}
-            onClick={handleClick}>
-        {isFirebaseConnected ? "Online" : "Offline!"}
-      </div>
+      <button
+        type="button"
+        className={classNames("firebase status", { connected: isFirebaseConnected })}
+        onClick={handleClick}
+        aria-label={`Network status: ${statusText}. Click to refresh.`}
+      >
+        {statusText}
+      </button>
     </div>
   );
 });

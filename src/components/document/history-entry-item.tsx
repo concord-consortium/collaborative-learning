@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
+import { Instance } from "mobx-state-tree";
 import { HistoryEntryType } from "../../models/history/history";
+import { UndoStore } from "../../models/history/undo-store";
+import { useStores } from "../../hooks/use-stores";
 
 import "./history-entry-item.scss";
 
@@ -8,13 +11,30 @@ interface IHistoryEntryItemProps {
   entry: HistoryEntryType;
   index: number;
   previousEntryId?: string;
+  /**
+   * Which section of the history view this entry is being rendered in.
+   * Drives attribution: in the local section, an entry without a uid is
+   * by definition this user's (entries from other clients arrive via the
+   * remote listener, which stamps them with their uploader's uid). In the
+   * remote section, a missing uid indicates a legacy pre-feature entry.
+   */
+  section?: "local" | "remote";
+  /**
+   * UndoStore for the document, passed only in the local section. Used to
+   * decorate entries that are currently on the undo stack and to highlight
+   * the entry that the undo pointer is at.
+   */
+  undoStore?: Instance<typeof UndoStore>;
 }
 
 export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
   entry,
   index,
   previousEntryId,
+  section = "local",
+  undoStore,
 }) => {
+  const { class: classStore, user } = useStores();
   const [expanded, setExpanded] = useState(false);
 
   const toggleExpanded = () => setExpanded(!expanded);
@@ -30,8 +50,53 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
 
   const patchCount = entry.records.reduce((total, record) => total + record.patches.length, 0);
 
+  const author = (() => {
+    if (entry.uid) {
+      const classUser = classStore.getUserById(entry.uid);
+      return {
+        initials: classUser?.initials ?? entry.uid,
+        fullName: classUser?.displayName,
+      };
+    }
+    // No uid on the entry.
+    if (section === "remote") return { initials: "?", fullName: undefined };
+    // Local section. Source distinguishes how the entry got here.
+    if (entry.source === "remote") {
+      // remote-applied but legacy entry without uid
+      return { initials: "?", fullName: undefined };
+    }
+    // "local" or "revert" — created on this client
+    return { initials: user.initials, fullName: user.name };
+  })();
+  const authorDetail = author.fullName
+    ? `${author.fullName} (${author.initials})`
+    : author.initials;
+
+  // Color the entry by its arrival source, but only in the local section —
+  // the remote section is uniformly "remote" by construction, so a per-entry
+  // accent there would just be noise.
+  const sourceClass = section === "local" ? `source-${entry.source}` : "";
+
+  // Undo-stack decoration. undoStore is passed only in the local section.
+  // Entries currently on the stack get a shaded background; the entry the
+  // undo pointer would undo next gets a more prominent highlight.
+  const onUndoStack = undoStore?.findHistoryEntry(entry.id) !== undefined;
+  const isUndoPointer = undoStore?.undoEntry?.id === entry.id;
+  const undoStackClass = isUndoPointer
+    ? "is-undo-pointer"
+    : onUndoStack
+      ? "on-undo-stack"
+      : "";
+  const undoableTitle = !entry.undoable
+    ? "Not undoable"
+    : isUndoPointer
+      ? "Undoable — next undo target"
+      : onUndoStack
+        ? "Undoable — on undo stack"
+        : "Undoable";
+
   return (
-    <div className={`history-entry-item ${expanded ? "expanded" : ""}`}>
+    <div className={`history-entry-item ${sourceClass} ${expanded ? "expanded" : ""}`}>
       <button className="history-entry-summary" onClick={toggleExpanded}>
         <span className="history-entry-expand">
           {expanded ? "▼" : "▶"}
@@ -43,9 +108,15 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
         <span className="history-entry-patches" title="Number of patches">
           {patchCount}p
         </span>
-        {entry.undoable && (
-          <span className="history-entry-undoable" title="Undoable">↩</span>
-        )}
+        <span
+          className={
+            `history-entry-undoable ${entry.undoable ? "undoable" : "not-undoable"} ${undoStackClass}`
+          }
+          title={undoableTitle}
+        >
+          <span className="glyph">{entry.undoable ? "↩" : "✕"}</span>
+        </span>
+        <span className="history-entry-author" title={author.fullName ?? "Author"}>{author.initials}</span>
         <span className="history-entry-time">{formatTimestamp(entry.created)}</span>
       </button>
       {expanded && (
@@ -53,6 +124,17 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
           <div><strong>ID:</strong> {entry.id}</div>
           <div><strong>Model:</strong> {entry.model}</div>
           <div><strong>Action:</strong> {entry.action}</div>
+          <div>
+            <strong>Author:</strong> {authorDetail}
+            {entry.uid && authorDetail !== entry.uid ? ` — ${entry.uid}` : ""}
+          </div>
+          {section === "local" && (
+            <div>
+              <strong>Source:</strong>{" "}
+              <span className={`history-entry-source-swatch source-${entry.source}`} />
+              {entry.source}
+            </div>
+          )}
           <div><strong>Previous Entry ID:</strong> {previousEntryId}</div>
           {entry.isRevert && (
             <>

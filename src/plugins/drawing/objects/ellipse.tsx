@@ -73,13 +73,14 @@ export function isEllipseObject(model: DrawingObjectType): model is EllipseObjec
 }
 
 export const EllipseComponent = observer(function EllipseComponent({model, handleHover,
-  handleDrag} : IDrawingComponentProps) {
+  handleDrag, a11yProps} : IDrawingComponentProps) {
   if (!isEllipseObject(model)) return null;
   const { id, stroke, strokeWidth, strokeDashArray, fill } = model;
   const rx = model.dragRx ?? model.rx;
   const ry = model.dragRy ?? model.ry;
   return (
-    <Transformable type="ellipse" key={id} transform={model.transform} setAnimating={model.setAnimating}>
+    <Transformable type="ellipse" key={id} transform={model.transform} setAnimating={model.setAnimating}
+      {...a11yProps}>
       <ellipse
         className="drawing-object"
         cx={0}

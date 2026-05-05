@@ -1,3 +1,4 @@
+import { comparer, reaction, IReactionDisposer } from "mobx";
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../../components/base";
@@ -28,6 +29,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private imageDragDrop: ImageDragDrop;
   private primaryDocument?: DocumentModelType;
   private primaryDocumentLoaded = false;
+  private groupChangeDisposer?: IReactionDisposer;
 
   constructor(props: IProps) {
     super(props);
@@ -40,6 +42,35 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   public componentDidMount() {
     this.guaranteeInitialDocuments();
+
+    // Watch the primary doc's group id alongside the user's current group
+    // id. When the user is in a group AND the primary is a group doc for a
+    // different group, fall back to the default doc. Skipping when
+    // currentGroupId is undefined avoids closing during bootstrap before
+    // the groups listener has set the user's group. Tracking both values
+    // also handles the stale-doc case where the persisted primary group
+    // doc loads before or after currentGroupId resolves on next session.
+    this.groupChangeDisposer = reaction(
+      () => {
+        const { persistentUI: { problemWorkspace }, user } = this.stores;
+        const primary = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
+        return {
+          primaryDocGroupId: primary?.isGroup ? primary.groupId : undefined,
+          currentGroupId: user.currentGroupId,
+        };
+      },
+      ({ primaryDocGroupId, currentGroupId }) => {
+        if (!currentGroupId) return;
+        if (!primaryDocGroupId) return;
+        if (primaryDocGroupId === currentGroupId) return;
+        this.loadDefaultPrimaryDocument();
+      },
+      { equals: comparer.shallow }
+    );
+  }
+
+  public componentWillUnmount() {
+    this.groupChangeDisposer?.();
   }
 
   public componentDidUpdate(): void {
@@ -145,19 +176,24 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     return defaultContent;
   }
 
+  private async loadDefaultPrimaryDocument() {
+    const { db, persistentUI: { problemWorkspace }, sectionsLoadedPromise } = this.stores;
+    const { type, content } = this.getDefaultDocumentContentSpec();
+    await sectionsLoadedPromise;
+    const documentContent = this.getDefaultSectionedDocumentContent(type, content);
+    const defaultDocument = await db.guaranteeOpenDefaultDocument(type, documentContent);
+    if (defaultDocument) {
+      problemWorkspace.setPrimaryDocument(defaultDocument);
+    }
+  }
+
   private async guaranteeInitialDocuments() {
     const { appConfig: { defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle,
               groupDocumentsEnabled },
-            db, persistentUI: { problemWorkspace }, sectionsLoadedPromise,
+            db, persistentUI: { problemWorkspace },
             unit: { planningDocument }, user: { type: role } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
-      const { type, content } = this.getDefaultDocumentContentSpec();
-      await sectionsLoadedPromise;
-      const documentContent = this.getDefaultSectionedDocumentContent(type, content);
-      const defaultDocument = await db.guaranteeOpenDefaultDocument(type, documentContent);
-      if (defaultDocument) {
-        problemWorkspace.setPrimaryDocument(defaultDocument);
-      }
+      await this.loadDefaultPrimaryDocument();
     } else if (groupDocumentsEnabled) {
       // If the primary document is a group document, make sure it is opened properly.
       // This is because group documents are not loaded automatically like other documents.
@@ -351,7 +387,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     .then((confirmDelete: boolean) => {
       if (confirmDelete) {
         document.setProperty("isDeleted", "true");
-        this.handleDeleteOpenPrimaryDocument();
+        // Replace the now-tombstoned primary with the default doc.
+        this.loadDefaultPrimaryDocument();
       }
     });
   };
@@ -369,15 +406,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         window.location.reload();
       }
     });
-  };
-
-  private handleDeleteOpenPrimaryDocument = async () => {
-    const { db, persistentUI: { problemWorkspace } } = this.stores;
-    const { type, content } = this.getDefaultDocumentContentSpec();
-    const defaultDocument = await db.guaranteeOpenDefaultDocument(type, content);
-    if (defaultDocument) {
-      problemWorkspace.setPrimaryDocument(defaultDocument);
-    }
   };
 
   private getPrimaryDocument(documentKey?: string) {

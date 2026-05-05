@@ -952,4 +952,82 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(tree.items[0].color).toBe("green");
     });
   });
+
+  describe("uploadQueuedHistoryEntries — uid stamping", () => {
+    it("stamps the uploading user's uid into each entry's serialized snapshot", async () => {
+      const { manager, historyManager, firestoreCapture } = await setupManager();
+
+      const entrySnapshot = makeEntrySnapshot(
+        "L1",
+        "main",
+        [{ op: "replace", path: "/items/0/color", value: "red" }],
+        [{ op: "replace", path: "/items/0/color", value: "white" }],
+      );
+      const entry = HistoryEntry.create(entrySnapshot);
+      manager.addHistoryEntryAfterApplying(entry);
+      historyManager.completedHistoryEntryQueue.push(entry);
+      historyManager.environmentAndMetadataDocReadyPromise = Promise.resolve();
+
+      await historyManager.uploadQueuedHistoryEntries();
+
+      expect(firestoreCapture.transactionSetCalls).toHaveLength(1);
+      const writtenEntry = JSON.parse(firestoreCapture.transactionSetCalls[0].data.entry);
+      expect(writtenEntry.uid).toBe("test-user");
+      expect(writtenEntry.id).toBe("L1");
+    });
+  });
+
+  describe("resumeUploadsAfterDelay — countdown", () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    it("ticks the countdown once per second and resumes when it reaches zero", async () => {
+      const { historyManager } = await setupManager();
+      // Clear the orphan 5s metadata-doc fallback timer scheduled in
+      // FirestoreHistoryManager.waitForMetadataDocument; the synchronous
+      // onSnapshot mock resolves the wait but doesn't clear the timer.
+      jest.clearAllTimers();
+
+      historyManager.pauseUploads();
+      expect(historyManager.paused).toBe(true);
+      expect(historyManager.resumeCountdownSeconds).toBe(null);
+
+      historyManager.resumeUploadsAfterDelay(5000);
+      expect(historyManager.resumeCountdownSeconds).toBe(5);
+      expect(historyManager.paused).toBe(true);
+
+      jest.advanceTimersByTime(1000);
+      expect(historyManager.resumeCountdownSeconds).toBe(4);
+      expect(historyManager.paused).toBe(true);
+
+      jest.advanceTimersByTime(2000);
+      expect(historyManager.resumeCountdownSeconds).toBe(2);
+      expect(historyManager.paused).toBe(true);
+
+      jest.advanceTimersByTime(2000);
+      expect(historyManager.resumeCountdownSeconds).toBe(null);
+      expect(historyManager.paused).toBe(false);
+
+      // No further ticks scheduled — countdown is one-shot.
+      const sentinelBefore = historyManager.resumeCountdownSeconds;
+      jest.advanceTimersByTime(5000);
+      expect(historyManager.resumeCountdownSeconds).toBe(sentinelBefore);
+    });
+
+    it("ignores re-entrant calls while a countdown is in progress", async () => {
+      const { historyManager } = await setupManager();
+      jest.clearAllTimers();
+
+      historyManager.pauseUploads();
+      historyManager.resumeUploadsAfterDelay(5000);
+      expect(historyManager.resumeCountdownSeconds).toBe(5);
+
+      jest.advanceTimersByTime(1000);
+      expect(historyManager.resumeCountdownSeconds).toBe(4);
+
+      // Re-call mid-countdown — should be a no-op, not restart the timer.
+      historyManager.resumeUploadsAfterDelay(10000);
+      expect(historyManager.resumeCountdownSeconds).toBe(4);
+    });
+  });
 });

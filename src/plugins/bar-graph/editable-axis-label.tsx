@@ -65,21 +65,39 @@ const EditableAxisLabel: React.FC<IProps> = observer(function EditableAxisLabel(
         <input
           type="text"
           className="focusable"
+          // autoFocus so keyboard users can start typing immediately after pressing Enter
+          autoFocus
           value={editText}
           size={editText.length + 5}
           onKeyDown={handleKeyDown}
-          onBlur={() => handleEndEdit(true)}
+          onBlur={(e) => {
+            // The tile's FocusTrapController intercepts Escape at document/capture phase and
+            // calls stopPropagation, so the input's onKeyDown never sees Escape. exitTrap then
+            // focuses the .tool-tile container, which blurs the input. Detect this case via
+            // the blur's relatedTarget and cancel rather than commit.
+            const target = e.relatedTarget as HTMLElement | null;
+            const cancelled = !!target?.classList.contains("tool-tile");
+            handleEndEdit(!cancelled);
+          }}
           onChange={(e) => setEditText(e.target.value)}
         />
       </foreignObject>
     );
   }
 
+  const handleLabelKeyDown = (e: React.KeyboardEvent<SVGRectElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleStartEdit();
+    }
+  };
+
   return (
     <g>
       {boundingBox &&
         <rect
           data-testid="axis-label-button"
+          className="editable-axis-label-button"
           x={boundingBox.x - paddingX}
           y={boundingBox.y - paddingY}
           width={boundingBox.width + 2*paddingX}
@@ -91,6 +109,10 @@ const EditableAxisLabel: React.FC<IProps> = observer(function EditableAxisLabel(
           fill="none"
           pointerEvents={editing ? "none" : "all"}
           onClick={handleStartEdit}
+          onKeyDown={readOnly ? undefined : handleLabelKeyDown}
+          tabIndex={readOnly ? -1 : 0}
+          role={readOnly ? undefined : "button"}
+          aria-label={readOnly ? displayText : `Y-axis: ${displayText}, editable label`}
         />}
       <g ref={textRef}>
         <Text

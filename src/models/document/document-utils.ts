@@ -90,9 +90,9 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
   }
 }
 
-export const isDocumentAccessibleToUser = (
+export function isDocumentAccessibleToUser (
   doc: IDocumentMetadataBase, user: UserModelType, documentStore: IExemplarVisibilityProvider
-) => {
+): boolean {
   const ownDocument = doc.uid === user.id;
   const isShared = doc.visibility === "public";
   const isPublished = isPublishedType(doc.type);
@@ -103,4 +103,4 @@ export const isDocumentAccessibleToUser = (
            || (isExemplarType(doc.type) && documentStore.isExemplarVisible(doc.key));
   }
   return false;
-};
+}
