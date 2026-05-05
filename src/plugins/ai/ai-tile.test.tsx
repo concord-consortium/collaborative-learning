@@ -15,7 +15,7 @@ jest.mock("../../hooks/use-stores", () => ({
   })
 }));
 
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import React from "react";
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
@@ -94,7 +94,9 @@ describe("AIComponent", () => {
       render(<AIComponent  {...defaultProps} {...{model}}></AIComponent>);
     expect(getByText("Hello World")).toBeInTheDocument();
 
-    content.setPrompt("New Text");
+    act(() => {
+      content.setPrompt("New Text");
+    });
     expect(getByText("New Text")).toBeInTheDocument();
     expect(queryByText("Hello World")).not.toBeInTheDocument();
   });

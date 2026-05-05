@@ -33,7 +33,7 @@ const createElementSpy = jest.spyOn(document, "createElement")
 });
 
 import React from "react";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import { ITileApi, TileModelContext } from "../../../components/tiles/tile-api";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { Provider } from "mobx-react";
@@ -144,11 +144,11 @@ describe("DrawingToolComponent", () => {
     expect(screen.getByTestId("drawing-tool")).toContainHTML("Open show/sort panel");
     expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Close show/sort panel");
 
-    screen.getByLabelText("Open show/sort panel").click();
+    act(() => screen.getByLabelText("Open show/sort panel").click());
     expect(screen.getByTestId("drawing-tool")).toContainHTML("Close show/sort panel");
     expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Open show/sort panel");
 
-    screen.getByLabelText("Close show/sort panel").click();
+    act(() => screen.getByLabelText("Close show/sort panel").click());
     expect(screen.getByTestId("drawing-tool")).toContainHTML("Open show/sort panel");
     expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Close show/sort panel");
   });
@@ -163,8 +163,10 @@ describe("DrawingToolComponent", () => {
     );
 
     expect(screen.getByTestId("object-list-view")).not.toContainHTML("Square");
-    content.addAndSelectObject(squareSnapshot);
-    screen.getByLabelText("Open show/sort panel").click();
+    act(() => {
+      content.addAndSelectObject(squareSnapshot);
+    });
+    act(() => screen.getByLabelText("Open show/sort panel").click());
     expect(screen.getByTestId("object-list-view")).toContainHTML("Square");
   });
 
@@ -178,7 +180,9 @@ describe("DrawingToolComponent", () => {
     );
 
     // Content already has a square in it from previous test.
-    content.addAndSelectObject(rectangleSnapshot);
+    act(() => {
+      content.addAndSelectObject(rectangleSnapshot);
+    });
     let items = within(screen.getByTestId("object-list-view")).getAllByRole("listitem");
     expect(items).toHaveLength(2);
     expect(items[0]).toContainHTML("Rectangle");
@@ -186,7 +190,9 @@ describe("DrawingToolComponent", () => {
 
     // Move square to top.
     if (content.objects.length >= 2) {
-      content.changeZOrder(content.objects[1].id, content.objects[0].id);
+      act(() => {
+        content.changeZOrder(content.objects[1].id, content.objects[0].id);
+      });
     }
     items = within(screen.getByTestId("object-list-view")).getAllByRole("listitem");
     expect(items).toHaveLength(2);
