@@ -35,7 +35,7 @@ describe("StudentMenuContainer", () => {
     expect(screen.getByTestId("user-list")).toBeInTheDocument();
     expect(screen.getByTestId("list-item-log-out")).toBeInTheDocument();
 
-    // In Jest 30/jsdom 25, window.location is non-configurable so we cannot
+    // In Jest 30/jsdom, window.location is non-configurable so we cannot
     // mock location.assign directly. The call to location.assign triggers a
     // jsdom "not implemented" error which we suppress here.
     await jestSpyConsole("error", async () => {
