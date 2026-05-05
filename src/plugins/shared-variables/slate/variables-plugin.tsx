@@ -3,7 +3,7 @@ import classNames from "classnames/dedupe";
 
 import {
   BaseElement, CustomEditor, CustomElement, Editor, EditorValue, isCustomElement, kSlateVoidClass,
-  registerElementComponent, RenderElementProps, useSelected, useSerializing
+  registerElementComponent, registerElementDeserializer, RenderElementProps, useSelected, useSerializing
 } from "@concord-consortium/slate-editor";
 import { action, autorun, computed, IReactionDisposer, makeObservable, observable, runInAction } from "mobx";
 import { getType } from "mobx-state-tree";
@@ -250,7 +250,14 @@ export const isVariableElement = (element: CustomElement): element is VariableEl
   return element.type === kVariableFormat;
 };
 
-export const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
+// Marker attributes used to round-trip the variable chip through HTML. The serialized
+// form is a self-contained <span> tag. The variable's display value is intentionally
+// not embedded, since the runtime re-renders it from the SharedVariables shared model
+// on load using `data-slate-reference` to look up the variable.
+const kVariableChipDataTypeAttr = "data-slate-type";
+const kVariableChipReferenceAttr = "data-slate-reference";
+
+const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
   const plugins = useContext(TextPluginsContext);
   const variablesPlugin = plugins[kVariableTextPluginName] as VariablesPlugin|undefined;
   const isHighlighted = useSelected();
@@ -275,10 +282,20 @@ export const VariableComponent = observer(function({ attributes, children, eleme
 
   if (!isVariableElement(element)) return null;
 
+  // When serializing to HTML (slateToHtml), emit only the marker span so the round-trip
+  // back via htmlToSlate can reconstruct the chip element. Without this, the rendered
+  // VariableChip below would serialize as plain text and lose the reference id.
+  if (isSerializing) {
+    const serializeAttrs = {
+      [kVariableChipDataTypeAttr]: kVariableFormat,
+      [kVariableChipReferenceAttr]: element.reference,
+    };
+    return <span {...attributes} {...serializeAttrs}>{children}</span>;
+  }
+
   const classes = classNames(kSlateVoidClass, kVariableClass);
-  const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;
+  const selectedClass = isHighlighted ? "slate-selected" : undefined;
   const variable = variablesPlugin?.variables.find(v => v.id === element.reference);
-  // FIXME: HTML serialization/deserialization. This will serialize the VariableChip too.
   return (
     <span className={classes} {...attributes} contentEditable={false}>
       {children}
@@ -299,7 +316,16 @@ export function registerVariables() {
 
   registerElementComponent(kVariableFormat, props => <VariableComponent {...props}/>);
 
-  // TODO: register deserializer
+  // Pair to the serialization above: when htmlToSlate sees a span with our marker
+  // data-slate-type attribute, reconstruct the variable chip element.
+  registerElementDeserializer("span", {
+    test: (el: HTMLElement) => el.getAttribute(kVariableChipDataTypeAttr) === kVariableFormat,
+    deserialize: (el: HTMLElement): VariableElement => ({
+      type: kVariableFormat,
+      reference: el.getAttribute(kVariableChipReferenceAttr) ?? "",
+      children: [{ text: "" }]
+    } as VariableElement)
+  });
 
   isRegistered = true;
 }

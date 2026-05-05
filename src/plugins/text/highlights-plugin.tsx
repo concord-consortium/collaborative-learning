@@ -1,7 +1,8 @@
 import React, { useCallback, useContext, useState } from "react";
 import classNames from "classnames/dedupe";
 import { BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
-  RenderElementProps, useSelected } from "@concord-consortium/slate-editor";
+  registerElementDeserializer, RenderElementProps, useSelected, useSerializing
+} from "@concord-consortium/slate-editor";
 import { action, makeObservable, observable } from "mobx";
 import { TextContentModelType } from "../../models/tiles/text/text-content";
 import { ITextPlugin } from "../../models/tiles/text/text-plugin-info";
@@ -53,10 +54,18 @@ export const isHighlightElement = (element: CustomElement): element is Highlight
   return element.type === kHighlightFormat;
 };
 
-export const HighlightComponent = ({ attributes, children, element }: RenderElementProps) => {
+// Marker attributes used to round-trip the highlight chip through HTML. Like the
+// variable chip, the displayed text is intentionally not embedded in the serialized
+// HTML — it lives on textContent.highlightedText and is looked up by highlightId on
+// load.
+const kHighlightChipDataTypeAttr = "data-slate-type";
+const kHighlightChipIdAttr = "data-slate-highlight-id";
+
+const HighlightComponent = ({ attributes, children, element }: RenderElementProps) => {
   const plugins = useContext(TextPluginsContext);
   const highlightPlugin = plugins[kHighlightTextPluginName] as HighlightsPlugin|undefined;
   const isSelected = useSelected();
+  const isSerializing = useSerializing();
   const highlightRegistryContextFn = useContext(HighlightRegistryContext);
   // useState + callback ref so the effect in useChipMeasurement re-runs when the chip
   // element actually appears (a useRef wouldn't, since the ref object is stable).
@@ -78,6 +87,17 @@ export const HighlightComponent = ({ attributes, children, element }: RenderElem
 
   if (!isHighlightElement(element)) return null;
 
+  // When serializing to HTML (slateToHtml), emit only the marker span so the round-trip
+  // back via htmlToSlate can reconstruct the chip. The displayed text is regenerated
+  // on load from textContent.highlightedText.
+  if (isSerializing) {
+    const serializeAttrs = {
+      [kHighlightChipDataTypeAttr]: kHighlightFormat,
+      [kHighlightChipIdAttr]: highlightId,
+    };
+    return <span {...attributes} {...serializeAttrs}>{children}</span>;
+  }
+
   const classes = classNames(kSlateVoidClass, "slate-highlight-chip");
 
   return (
@@ -96,12 +116,28 @@ export function registerHighlight() {
   if (isRegistered) return;
 
   registerElementComponent(kHighlightFormat, props => <HighlightComponent {...props}/>);
+
+  // Pair to the serialization above: when htmlToSlate sees a span with our marker
+  // data-slate-type attribute, reconstruct the highlight chip element.
+  registerElementDeserializer("span", {
+    test: (el: HTMLElement) => el.getAttribute(kHighlightChipDataTypeAttr) === kHighlightFormat,
+    deserialize: (el: HTMLElement): HighlightElement => ({
+      type: kHighlightFormat,
+      highlightId: el.getAttribute(kHighlightChipIdAttr) ?? "",
+      children: [{ text: "" }]
+    } as HighlightElement)
+  });
+
   isRegistered = true;
 }
 
-registerHighlight();
+function withHighlights(editor: Editor) {
+  // Register here instead of at module load so the deserializer is added AFTER slate-editor's
+  // own catch-all <span> deserializer that registerPlugins() installs from createEditor().
+  // The most-recently-registered span deserializer is tried first, so a module-load
+  // registration would always be shadowed by the catch-all.
+  registerHighlight();
 
-export function withHighlights(editor: Editor) {
   const { isInline, isVoid } = editor;
   editor.isInline = element => element.type === kHighlightFormat || isInline(element);
   editor.isVoid = element => element.type === kHighlightFormat || isVoid(element);
