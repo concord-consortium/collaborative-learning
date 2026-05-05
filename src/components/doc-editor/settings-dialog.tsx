@@ -1,5 +1,5 @@
 import React from "react";
-import { Checkbox, CheckboxGroup } from "@chakra-ui/checkbox";
+import { Checkbox, CheckboxGroup } from "@chakra-ui/react";
 import { observer } from "mobx-react";
 import { IDocEditorSettings } from "./doc-editor-settings";
 
