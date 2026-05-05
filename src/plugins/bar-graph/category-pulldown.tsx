@@ -27,6 +27,7 @@ export const CategoryPulldown = observer(function CategoryPulldown({setCategory,
   return (
     <foreignObject data-testid="category-pulldown" x={x} y={y} width={width} height={height}>
       <Menu boundary="scrollParent">
+        {/* @ts-expect-error TS 5 finds Chakra v1's MenuButton union type too complex; resolves on Chakra v2 upgrade. */}
         <MenuButton className="dropdown-menu-button">
           <span className="button-content">
             <span className="button-text">{current}</span>

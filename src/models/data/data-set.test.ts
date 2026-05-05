@@ -340,7 +340,7 @@ test("Derived DataSet functionality", () => {
 
   const filter = (aCase: ICase) => {
           const num = aCase && aCase.num;
-          return (num != null) && (num >= 3) ? aCase : undefined;
+          return (typeof num === "number") && (num >= 3) ? aCase : undefined;
         },
         derived3 = dataset.derive("derived3", { filter });
   expect(derived3.name).toBe("derived3");

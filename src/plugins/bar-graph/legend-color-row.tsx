@@ -31,6 +31,7 @@ export const LegendColorRow = observer(function LegendColorRow ({attrValue}: IPr
   return (
     <div key={attrValue} className="attribute-value">
       <Menu placement="auto">
+        {/* @ts-expect-error TS 5 finds Chakra v1's MenuButton union type too complex; resolves on Chakra v2 upgrade. */}
         <MenuButton as={Button} unstyle="true" data-testid="color-menu-button">
           <div className="color-button">
             <div className="color-swatch" style={{ backgroundColor }} />

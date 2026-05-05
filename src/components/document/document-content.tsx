@@ -10,7 +10,7 @@ import { kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
-import { IDropRowInfo } from "../../models/document/tile-row";
+import { IDropRowInfo, TileRowModelType } from "../../models/document/tile-row";
 import { logDataTransfer } from "../../models/document/drag-tiles";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tiles/tile-component";
@@ -429,7 +429,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           ((i === lastRowIndex) && (clientY > rowBounds.bottom))) {
         dropInfo = this.getDropInfoForGlobalRowIndex(i);
         if (!dropInfo.rowDropId) return;
-        const row = content?.getRowRecursive(dropInfo.rowDropId);
+        const row: TileRowModelType | undefined = content?.getRowRecursive(dropInfo.rowDropId);
         if (row?.isFixedPositionRow(content?.tileMap)) {
           // Cannot drop alongside or above a fixed position row
           dropInfo.rowDropLocation = "bottom";

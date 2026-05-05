@@ -283,7 +283,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       },
       getAllTileIds(includeTeacherContent: boolean) {
         // returns all non-placeholder tile ids in document order filtered by includeTeacherContent
-        return this.allTiles.filter((tile: ITileModel) => {
+        return this.allTiles.filter((tile: ITileModel): boolean => {
           const { display } = tile;
           return !isPlaceholderTile(tile) && (display !== "teacher" || includeTeacherContent);
         }).map(tile => tile.id);

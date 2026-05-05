@@ -28,9 +28,9 @@ describe("getClipboardContent", () => {
   it("returns a text item when the clipboard contains a text item", async () => {
     const mockReturnValue = {
       types: ["text/plain"], getType: jest.fn().mockResolvedValue(mockBlob)
-    };
+    } as unknown as ClipboardItem;
     jest.spyOn(navigator.clipboard, "read").mockResolvedValue([mockReturnValue]);
-    jest.spyOn(global, "Blob").mockImplementation(() => mockBlob);
+    jest.spyOn(global, "Blob").mockImplementation(() => mockBlob as unknown as Blob);
     const clipboardContent = await getClipboardContent();
     expect(clipboardContent.image).toBe(null);
     expect(clipboardContent.text).not.toBe(null);
@@ -38,7 +38,7 @@ describe("getClipboardContent", () => {
   it("returns an image item when the clipboard contains an image item", async () => {
     const mockReturnValue = {
       types: ["image/png"], getType: jest.fn()
-    };
+    } as unknown as ClipboardItem;
     jest.spyOn(navigator.clipboard, "read").mockResolvedValue([mockReturnValue]);
     const clipboardContent = await getClipboardContent();
     expect(clipboardContent.image).not.toBe(null);
@@ -87,7 +87,7 @@ describe("pasteClipboardImage", () => {
     expect(mockConsoleError).toHaveBeenCalledWith("ERROR: unknown clipboard content type(s): text/html");
   });
   it ("calls addFileImage when the clipboard contains an image item", () => {
-    const image = { image: mockImageFile, text: null, types: ["image/png"] };
+    const image = { image: mockImageFile as unknown as File, text: null, types: ["image/png"] };
     pasteClipboardImage(image, onComplete);
     expect(gImageMap.addFileImage).toHaveBeenCalled();
   });

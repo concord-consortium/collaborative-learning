@@ -1,7 +1,7 @@
 import { Instance, types, detach, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { StringBuilder, comma } from "../../utilities/string-builder";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
-import { ITileModel } from "../tiles/tile-model";
+import { ITileMapLookup, ITileModel } from "../tiles/tile-model";
 import { TileLayoutModelType, TileRowModel, TileRowModelType } from "./tile-row";
 
 /**
@@ -64,7 +64,7 @@ export const RowList = types
       }, {});
       return JSON.stringify(rowLayouts);
     },
-    rowHeightToExport(row: TileRowModelType, tileId: string, tileMap: Map<string|number, ITileModel>) {
+    rowHeightToExport(row: TileRowModelType, tileId: string, tileMap: ITileMapLookup) {
       if (!row?.height) return;
       // we only export heights for specific tiles configured to do so
       const tileType = tileMap.get(tileId)?.content.type;
@@ -74,7 +74,7 @@ export const RowList = types
       const defaultHeight = tileContentInfo.defaultHeight;
       return defaultHeight && (row.height !== defaultHeight) ? row.height : undefined;
     },
-    exportTileAsJson(tileInfo: TileLayoutModelType, tileMap: Map<string|number, ITileModel>,
+    exportTileAsJson(tileInfo: TileLayoutModelType, tileMap: ITileMapLookup,
         options?: IDocumentExportOptions) {
       const { includeTileIds, ...otherOptions } = options || {};
       const tileOptions = { includeId: includeTileIds, ...otherOptions};
@@ -84,14 +84,14 @@ export const RowList = types
         return json;
       }
     },
-    exportableRows(tileMap: Map<string|number, ITileModel>) {
+    exportableRows(tileMap: ITileMapLookup) {
       // identify rows with exportable tiles
       return self.rowOrder.map(rowId => {
         const row = this.getRow(rowId);
         return row && !row.isSectionHeader && !row.isEmpty && !row.isPlaceholderRow(tileMap) ? row : undefined;
       }).filter(row => !!row);
     },
-    exportRowsAsJson(rows: (TileRowModelType | undefined)[], tileMap: Map<string|number, ITileModel>,
+    exportRowsAsJson(rows: (TileRowModelType | undefined)[], tileMap: ITileMapLookup,
         options?: IDocumentExportOptions) {
       const builder = new StringBuilder();
       builder.pushLine(`"tiles": [`);
@@ -127,7 +127,7 @@ export const RowList = types
     },
     // Returns a string that describes the row list and its contents.
     // For testing/debugging purposes only, but may be useful to keep.
-    debugDescribeThis(tileMap: Map<string|number, ITileModel>, indent: string): string {
+    debugDescribeThis(tileMap: ITileMapLookup, indent: string): string {
       return self.rowOrder.map(rowId => {
         const row = self.rowMap.get(rowId);
         const embedded: RowListType[] = [];
