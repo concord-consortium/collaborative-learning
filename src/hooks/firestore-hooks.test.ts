@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook } from "@testing-library/react";
 import { useCollectionOrderedRealTimeQuery, useDeleteDocument, useFirestoreTeacher } from "./firestore-hooks";
 
 const mockData = [

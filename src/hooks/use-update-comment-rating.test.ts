@@ -22,7 +22,7 @@ jest.mock("./use-user-context", () => ({
   useUserContext: () => ({ uid: "user1" })
 }));
 
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, act } from "@testing-library/react";
 import { useUpdateCommentRating } from "./use-update-comment-rating";
 
 describe("useUpdateCommentRating", () => {
