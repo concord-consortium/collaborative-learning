@@ -32,7 +32,7 @@ Without automated tests for the collaborative scenarios we're fixing, regression
 The manual counterpart already exists: [test-scripts/](test-scripts/) is a folder of by-hand reproduction scripts for these scenarios, organized per tile and per shared model. As GD-16 lands we should replace as many of those scripts as possible with automated Playwright tests; the manual scripts remain useful for cases the automation can't cover yet (or for one-off debugging).
 
 The test-scripts folder also gives us a first pass at useful tagging and labeling of cases:
-- **Status emoji** — confirmed-bug-severe (❌), confirmed-bug-minor (🐛), inconclusive (🤷), visually OK (✅💻 / ✅), not yet tested (🚧), CODAP-only (📈). Modifiers cover console warnings (⚠️), unverified console behavior (💻), zombie references (🧟), and multi-user undo (👥↩️). See [test-scripts/README.md § Status emoji](test-scripts/README.md#status-emoji).
+- **Status emoji** — confirmed-bug-severe (❌), confirmed-bug-minor (🐛), inconclusive (🤷), visually OK (✅), not yet tested (🚧), CODAP-only (📈). Modifiers cover console warnings (⚠️), unverified console behavior (💻), zombie references (🧟), and multi-user undo (👥↩️). See [test-scripts/README.md § Status emoji](test-scripts/README.md#status-emoji).
 - **Interaction requirement** — `[requires active interaction]` vs `[undo-testable]`, indicating whether the case can only be triggered while the user is actively interacting with the tile.
 - **File organization** — by tile (text, table, drawing, …) and by shared model (SharedDataSet, SharedVariables), with cross-cutting cases (tile lifecycle, sparrows) in their own files.
 

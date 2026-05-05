@@ -16,7 +16,6 @@ The two test-script docs catalog every observed issue, including minor and untes
 - **Color applied to wrong drawing object after concurrent object delete.** [drawing-tile.md § Color applied to wrong object](test-scripts/drawing-tile.md) — [CLUE-507](https://concord-consortium.atlassian.net/browse/CLUE-507)
 - **Cell value lands in wrong table column after concurrent column delete.** [table-tile.md § Cell editing in deleted column](test-scripts/table-tile.md) — [CLUE-506](https://concord-consortium.atlassian.net/browse/CLUE-506)
 - **Graph series blanks silently on concurrent attribute delete.** [shared-dataset.md § Cross-scope reference drift](test-scripts/shared-dataset.md) — [CLUE-514](https://concord-consortium.atlassian.net/browse/CLUE-514)
-- **Attribute name change not visible to other users.** [table-tile.md § Attribute name change not visible](test-scripts/table-tile.md) — [CLUE-505](https://concord-consortium.atlassian.net/browse/CLUE-505) (in code review)
 
 ### Data loss in active edits
 
