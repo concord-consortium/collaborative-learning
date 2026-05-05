@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook } from "@testing-library/react";
 import { getPanelVisibility, usePanelVisibility } from "./use-panel-visibility";
 import { IStores } from "../models/stores/stores";
 

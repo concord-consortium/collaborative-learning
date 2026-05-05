@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook } from "@testing-library/react";
 import { INetworkResourceClassResponse } from "../../shared/shared";
 import { useNetworkResources } from "./network-resources";
 

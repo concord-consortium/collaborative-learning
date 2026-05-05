@@ -158,6 +158,7 @@
     "@svgr/webpack": "^6.3.1",
     "@talabes/json5-jest": "^2.0.0",
     "@testing-library/cypress": "^10.0.1",
+    "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
