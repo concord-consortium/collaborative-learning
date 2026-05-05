@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { ToolbarButtonModel } from "../models/tiles/toolbar-button";
@@ -52,7 +52,8 @@ describe("ToolButtonComponent", () => {
     expect(onSetToolActive).not.toHaveBeenCalled();
   });
 
-  it("does not call click handler on disabled tool", () => {
+  it("does not call click handler on disabled tool", async () => {
+    const user = userEvent.setup();
     const toolButton = ToolbarButtonModel.create({
       id: "delete",
       title: "Delete",
@@ -73,13 +74,12 @@ describe("ToolButtonComponent", () => {
         />
     );
     expect(screen.getByTestId("tool-delete")).toBeInTheDocument();
-    act(() => {
-      userEvent.click(screen.getByTestId("tool-delete"));
-    });
+    await user.click(screen.getByTestId("tool-delete"));
     expect(onClick).toHaveBeenCalledTimes(0);
   });
 
-  it("renders enabled text tool", () => {
+  it("renders enabled text tool", async () => {
+    const user = userEvent.setup();
     const toolButton = ToolbarButtonModel.create({
       id: "Text",
       isDefault: false,
@@ -105,15 +105,11 @@ describe("ToolButtonComponent", () => {
     expect(element).toHaveAttribute("title", "Text");
     expect(element).toHaveAttribute("aria-label", "Text");
     expect(element).not.toHaveAttribute("aria-disabled");
-    act(() => {
-      userEvent.click(screen.getByTestId("tool-text"));
-    });
+    await user.click(screen.getByTestId("tool-text"));
     expect(onSetToolActive).toHaveBeenCalledTimes(2);
     expect(onClick).toHaveBeenCalledTimes(1);
-    act(() => {
-      fireEvent.dragStart(screen.getByTestId("tool-text"));
-      fireEvent.dragEnd(screen.getByTestId("tool-text"));
-    });
+    fireEvent.dragStart(screen.getByTestId("tool-text"));
+    fireEvent.dragEnd(screen.getByTestId("tool-text"));
     expect(onDragStart).toHaveBeenCalledTimes(1);
   });
 

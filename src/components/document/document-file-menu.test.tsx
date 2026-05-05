@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { Provider } from "mobx-react";
@@ -76,12 +76,11 @@ describe("DocumentFileMenu", () => {
       expect(screen.getByText("File")).toBeInTheDocument();
     });
 
-    it("shows menu items when clicked", () => {
+    it("shows menu items when clicked", async () => {
+      const user = userEvent.setup();
       renderFileMenu();
 
-      act(() => {
-        userEvent.click(screen.getByTestId("document-file-menu-header"));
-      });
+      await user.click(screen.getByTestId("document-file-menu-header"));
 
       expect(screen.getByTestId("document-file-menu-list")).toBeInTheDocument();
       expect(screen.getByTestId("list-item-icon-new-workspace")).toBeInTheDocument();
@@ -90,82 +89,64 @@ describe("DocumentFileMenu", () => {
       expect(screen.getByTestId("list-item-icon-delete-workspace")).toBeInTheDocument();
     });
 
-    it("calls onNewDocument when New menu item is clicked", () => {
+    it("calls onNewDocument when New menu item is clicked", async () => {
+      const user = userEvent.setup();
       renderFileMenu();
 
-      act(() => {
-        userEvent.click(screen.getByTestId("document-file-menu-header"));
-      });
-
-      act(() => {
-        userEvent.click(screen.getByTestId("list-item-icon-new-workspace"));
-      });
+      await user.click(screen.getByTestId("document-file-menu-header"));
+      await user.click(screen.getByTestId("list-item-icon-new-workspace"));
 
       expect(onNewDocument).toHaveBeenCalledTimes(1);
     });
 
-    it("calls onOpenDocument when Open menu item is clicked", () => {
+    it("calls onOpenDocument when Open menu item is clicked", async () => {
+      const user = userEvent.setup();
       renderFileMenu();
 
-      act(() => {
-        userEvent.click(screen.getByTestId("document-file-menu-header"));
-      });
-
-      act(() => {
-        userEvent.click(screen.getByTestId("list-item-icon-open-workspace"));
-      });
+      await user.click(screen.getByTestId("document-file-menu-header"));
+      await user.click(screen.getByTestId("list-item-icon-open-workspace"));
 
       expect(onOpenDocument).toHaveBeenCalledTimes(1);
       expect(onOpenDocument).toHaveBeenCalledWith(document);
     });
 
-    it("calls onCopyDocument when Make a copy menu item is clicked", () => {
+    it("calls onCopyDocument when Make a copy menu item is clicked", async () => {
+      const user = userEvent.setup();
       renderFileMenu();
 
-      act(() => {
-        userEvent.click(screen.getByTestId("document-file-menu-header"));
-      });
-
-      act(() => {
-        userEvent.click(screen.getByTestId("list-item-icon-copy-workspace"));
-      });
+      await user.click(screen.getByTestId("document-file-menu-header"));
+      await user.click(screen.getByTestId("list-item-icon-copy-workspace"));
 
       expect(onCopyDocument).toHaveBeenCalledTimes(1);
       expect(onCopyDocument).toHaveBeenCalledWith(document);
     });
 
-    it("calls onDeleteDocument when Delete menu item is clicked", () => {
+    it("calls onDeleteDocument when Delete menu item is clicked", async () => {
+      const user = userEvent.setup();
       renderFileMenu();
 
-      act(() => {
-        userEvent.click(screen.getByTestId("document-file-menu-header"));
-      });
-
-      act(() => {
-        userEvent.click(screen.getByTestId("list-item-icon-delete-workspace"));
-      });
+      await user.click(screen.getByTestId("document-file-menu-header"));
+      await user.click(screen.getByTestId("list-item-icon-delete-workspace"));
 
       expect(onDeleteDocument).toHaveBeenCalledTimes(1);
       expect(onDeleteDocument).toHaveBeenCalledWith(document);
     });
 
-    it("disables New menu item when onNewDocument is not provided", () => {
+    it("disables New menu item when onNewDocument is not provided", async () => {
+      const user = userEvent.setup();
       renderFileMenu({ onNewDocument: undefined });
 
-      act(() => {
-        userEvent.click(screen.getByTestId("document-file-menu-header"));
-      });
+      await user.click(screen.getByTestId("document-file-menu-header"));
 
       const newItem = screen.getByTestId("list-item-icon-new-workspace");
       expect(newItem).toHaveClass("disabled");
     });
 
-    it("disables Delete menu item when isDeleteDisabled is true", () => {
+    it("disables Delete menu item when isDeleteDisabled is true", async () => {
+      const user = userEvent.setup();
       renderFileMenu({ isDeleteDisabled: true });
 
-      act(() => {
-        userEvent.click(screen.getByTestId("document-file-menu-header"));
-      });
+      await user.click(screen.getByTestId("document-file-menu-header"));
 
       const deleteItem = screen.getByTestId("list-item-icon-delete-workspace");
       expect(deleteItem).toHaveClass("disabled");
@@ -221,71 +202,75 @@ describe("DocumentFileMenu", () => {
       return { stores, document };
     };
 
-    const openMenu = async () => {
-      await act(async () => {
-        userEvent.click(screen.getByTestId("document-file-menu-header"));
-      });
+    const openMenu = async (user: ReturnType<typeof userEvent.setup>) => {
+      await user.click(screen.getByTestId("document-file-menu-header"));
     };
 
     it("does not show Group Doc when groupDocumentsEnabled is false", async () => {
+      const user = userEvent.setup();
       renderDocumentFileMenu({
         autoAssignStudentsToIndividualGroups: false,
         groupDocumentsEnabled: false,
         currentGroupId: "group-1"
       });
 
-      await openMenu();
+      await openMenu(user);
 
       expect(screen.queryByTestId("list-item-icon-open-group-doc")).not.toBeInTheDocument();
     });
 
     it("does not show Group Doc when groupDocumentsEnabled is undefined", async () => {
+      const user = userEvent.setup();
       renderDocumentFileMenu({
         autoAssignStudentsToIndividualGroups: false,
         currentGroupId: "group-1"
       });
 
-      await openMenu();
+      await openMenu(user);
 
       expect(screen.queryByTestId("list-item-icon-open-group-doc")).not.toBeInTheDocument();
     });
 
     it("does not show Group Doc when groups are not permitted", async () => {
+      const user = userEvent.setup();
       renderDocumentFileMenu({
         autoAssignStudentsToIndividualGroups: true,
         currentGroupId: "group-1",
         groupDocumentsEnabled: true
       });
 
-      await openMenu();
+      await openMenu(user);
 
       expect(screen.queryByTestId("list-item-icon-open-group-doc")).not.toBeInTheDocument();
     });
 
     it("does not show Group Doc when user is not in a group", async () => {
+      const user = userEvent.setup();
       renderDocumentFileMenu({
         autoAssignStudentsToIndividualGroups: false,
         groupDocumentsEnabled: true
       });
 
-      await openMenu();
+      await openMenu(user);
 
       expect(screen.queryByTestId("list-item-icon-open-group-doc")).not.toBeInTheDocument();
     });
 
     it("shows Group Doc when all conditions are met", async () => {
+      const user = userEvent.setup();
       renderDocumentFileMenu({
         autoAssignStudentsToIndividualGroups: false,
         currentGroupId: "group-1",
         groupDocumentsEnabled: true
       });
 
-      await openMenu();
+      await openMenu(user);
 
       expect(screen.getByTestId("list-item-icon-open-group-doc")).toBeInTheDocument();
     });
 
     it("calls onOpenGroupDocument when Group Doc is clicked", async () => {
+      const user = userEvent.setup();
       const onOpenGroupDocument = jest.fn();
       const { document } = renderDocumentFileMenu({
         autoAssignStudentsToIndividualGroups: false,
@@ -294,11 +279,9 @@ describe("DocumentFileMenu", () => {
         onOpenGroupDocument
       });
 
-      await openMenu();
+      await openMenu(user);
 
-      await act(async () => {
-        userEvent.click(screen.getByTestId("list-item-icon-open-group-doc"));
-      });
+      await user.click(screen.getByTestId("list-item-icon-open-group-doc"));
 
       expect(onOpenGroupDocument).toHaveBeenCalledWith(document);
     });

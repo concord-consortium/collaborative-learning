@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { ModalProvider } from "react-modal-hook";
@@ -131,7 +131,8 @@ jest.mock("../../hooks/use-stores", () => ({
 
 describe("ChatPanel", () => {
 
-  it("should render successfully", () => {
+  it("should render successfully", async () => {
+    const user = userEvent.setup();
     const mockCloseChatPanel = jest.fn();
     render((
       <ModalProvider>
@@ -141,9 +142,7 @@ describe("ChatPanel", () => {
     expect(screen.getByTestId("chat-panel")).toBeInTheDocument();
     expect(screen.getByTestId("chat-panel-header")).toBeInTheDocument();
 
-    act(() => {
-      userEvent.click(screen.getByTestId("chat-close-button"));
-    });
+    await user.click(screen.getByTestId("chat-close-button"));
     expect(mockCloseChatPanel).toHaveBeenCalled();
   });
   it("should show select document message if document has not been selected", () => {

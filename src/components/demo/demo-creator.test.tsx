@@ -1,4 +1,4 @@
-import { act, configure, render, screen } from "@testing-library/react";
+import { configure, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { DemoCreatorComponent, passThroughQueryItemsFromUrl } from "./demo-creator";
@@ -99,22 +99,19 @@ describe("DemoCreator Component", () => {
     expect(screen.getAllByRole("heading")[0]).toHaveTextContent("Demo Creator");
   });
 
-  it("can change classes and problems", () => {
+  it("can change classes and problems", async () => {
+    const user = userEvent.setup();
     render(<DemoCreatorComponent stores={stores} />);
 
     // test changing classes
     expect(screen.getAllByRole("link")[0])
       .toHaveAttribute("href", "?appMode=demo&fakeClass=1&fakeUser=student:1&problem=1.1");
-    act(() => {
-      userEvent.selectOptions(screen.getByTestId("class-select"), "2");
-    });
+    await user.selectOptions(screen.getByTestId("class-select"), "2");
     expect(screen.getAllByRole("link")[0])
       .toHaveAttribute("href", "?appMode=demo&fakeClass=2&fakeUser=student:1&problem=1.1");
 
     // test changing problems
-    act(() => {
-      userEvent.selectOptions(screen.getByTestId("problem-select"), "1.2");
-    });
+    await user.selectOptions(screen.getByTestId("problem-select"), "1.2");
     expect(screen.getAllByRole("link")[0])
       .toHaveAttribute("href", "?appMode=demo&fakeClass=2&fakeUser=student:1&problem=1.2");
   });

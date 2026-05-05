@@ -82,7 +82,8 @@ describe("Four Up Component", () => {
     expect(container.querySelectorAll(".member")).toHaveLength(1);
   });
 
-  it("renders group members", () => {
+  it("renders group members", async () => {
+    const ue = userEvent.setup();
     const user = UserModel.create({
       id: "3",
       name: "User 3"
@@ -174,8 +175,8 @@ describe("Four Up Component", () => {
     expect(memberList[2].textContent).toBe("**");
 
     // TODO: figure out how to add coverage for window mouse events setup by the splitter handlers
-    userEvent.click(screen.getByTestId("4up-horizontal-splitter"));
-    userEvent.click(screen.getByTestId("4up-vertical-splitter"));
-    userEvent.click(screen.getByTestId("4up-center"));
+    await ue.click(screen.getByTestId("4up-horizontal-splitter"));
+    await ue.click(screen.getByTestId("4up-vertical-splitter"));
+    await ue.click(screen.getByTestId("4up-center"));
   });
 });

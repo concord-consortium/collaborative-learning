@@ -39,7 +39,7 @@ describe.skip("Graph", () => {
   });
 
   it.skip("can switch to dot plot", async () => {
-    const user = userEvent;
+    const user = userEvent.setup();
     const data = DataSet.create();
     data.addAttributeWithID({ name: "xVariable" });
     data.addAttributeWithID({ name: "yVariable" });
