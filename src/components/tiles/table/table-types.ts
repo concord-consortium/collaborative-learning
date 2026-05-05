@@ -1,4 +1,4 @@
-import { Column, FormatterProps, HeaderRendererProps } from "react-data-grid";
+import { Column, RenderCellProps, RenderHeaderCellProps } from "react-data-grid";
 
 export const kIndexColumnWidth = 34;
 export const kIndexColumnWidthWithLabel = kIndexColumnWidth + 7;
@@ -54,8 +54,8 @@ export interface TColumn extends Column<TRow> {
   appData?: TColumnAppData;
 }
 export interface TPosition { idx: number, rowIdx: number }
-export type TFormatterProps = FormatterProps<TRow>;
-export type THeaderRendererProps = HeaderRendererProps<TRow>;
+export type TFormatterProps = RenderCellProps<TRow>;
+export type THeaderRendererProps = RenderHeaderCellProps<TRow>;
 export type OnRowSelectionChangeFn = (checked: boolean, isShiftClick: boolean) => void;
 
 export const isDataColumn = (column: TColumn) => {
