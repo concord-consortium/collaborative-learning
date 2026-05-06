@@ -324,6 +324,7 @@
     "rete-connection-plugin": "^2.0.1",
     "rete-engine": "^2.0.1",
     "rete-react-plugin": "^2.0.5",
+    "rete-render-utils": "^2.0.3",
     "rete-structures": "^2.0.1",
     "rollbar": "^2.26.4",
     "rtree": "^1.4.2",
