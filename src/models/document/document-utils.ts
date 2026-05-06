@@ -90,29 +90,16 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
   }
 }
 
-/**
- * True when `doc` is a group document and `user` is currently in that group.
- */
-export function isOwnGroupDocument(
-  doc: Pick<IDocumentMetadataBase, "type" | "groupId">,
-  user: UserModelType
-): boolean {
-  return doc.type === GroupDocument && !!doc.groupId && user.currentGroupId === doc.groupId;
-}
-
-// TODO: handle the visibility of group documents — see CLUE-380 ("Group documents autoshared").
-// Group docs should be visible to everyone in the class by default. Either treat any group document
-// as class-visible here, or set visibility to "public" when group docs are created.
-export function isDocumentAccessibleToUser(
+export function isDocumentAccessibleToUser (
   doc: IDocumentMetadataBase, user: UserModelType, documentStore: IExemplarVisibilityProvider
 ): boolean {
   const ownDocument = doc.uid === user.id;
-  const ownGroupDocument = isOwnGroupDocument(doc, user);
   const isShared = doc.visibility === "public";
   const isPublished = isPublishedType(doc.type);
+  const isGroupDoc = doc.type === GroupDocument; // Group documents are accessible to everyone
   if (user.isTeacherOrResearcher) return true;
   if (user.isStudent) {
-    return ownDocument || ownGroupDocument || isShared || isPublished
+    return ownDocument || isShared || isPublished || isGroupDoc
            || (isExemplarType(doc.type) && documentStore.isExemplarVisible(doc.key));
   }
   return false;
