@@ -40,7 +40,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   yScaleRef.current = layout.getAxisScale("left") as ScaleNumericBaseType;
 
   const
-    onDragStart = useCallback((event: D3DragEvent<SVGGElement,CaseData,Point>, datum) => {
+    onDragStart = useCallback((event: D3DragEvent<SVGGElement,CaseData,Point>, datum: CaseData) => {
       const targetDot = event.sourceEvent.target && inGraphDot(event.sourceEvent.target as SVGSVGElement);
       if (!targetDot) return;
       target.current = select(targetDot as SVGSVGElement);

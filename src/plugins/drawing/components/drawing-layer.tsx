@@ -94,6 +94,7 @@ export const DrawingLayerView = observer((props: DrawingLayerViewProps) => {
 export class InternalDrawingLayerView extends React.Component<InternalDrawingLayerViewProps, DrawingLayerViewState>
     implements IDrawingLayer {
   static contextType = MobXProviderContext;
+  declare context: React.ContextType<typeof MobXProviderContext>;
   public tools: DrawingToolMap;
   public viewRef: React.RefObject<HTMLDivElement>;
   private svgRef: React.RefObject<any>|null;
