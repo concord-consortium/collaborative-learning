@@ -33,7 +33,17 @@ export const useRowLabelColumn = ({inputRowId, hoveredRowId, showRowLabels, setS
     return (
       <Tooltip {...tooltipOptions}>
         <div className={`show-hide-row-labels-button ${showRowLabels ? "shown" : "hidden"}`}
-              onClick={() => setShowRowLabels(!showRowLabels)}>
+              onMouseDown={(e) => {
+                // preventDefault on mousedown stops the browser from focusing rdg's
+                // HeaderCell. Without this, rdg's handleFocus runs selectCell (when
+                // shouldFocusGrid is true for the first column), which sets
+                // selectedPosition to the index header and locks the focus ring there.
+                e.preventDefault();
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowRowLabels(!showRowLabels);
+              }}>
           <RowLabelsShownSvg className="hide-row-labels-icon"/>
           <RowLabelsHiddenSvg className="show-row-labels-icon"/>
         </div>

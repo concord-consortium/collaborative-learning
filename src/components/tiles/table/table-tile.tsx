@@ -37,6 +37,7 @@ import { RowDragOverlay } from "./row-drag-overlay";
 import { TRow } from "./table-types";
 import { useFormulaModal } from "./use-formula-modal";
 
+import "react-data-grid/lib/styles.css";
 import "./table-tile.scss";
 import "./table-toolbar-registration";
 import { mstReaction } from "../../../utilities/mst-reaction";

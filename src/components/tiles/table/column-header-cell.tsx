@@ -48,8 +48,11 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
         });
       };
       const handleHeaderClick = (e: React.MouseEvent) => {
+        // Always stop propagation: react-data-grid 7.0.0-beta.44's HeaderCell now has its
+        // own onClick that calls selectCell({idx, rowIdx: -1}), which interferes with our
+        // column selection handling. canary.46 had no such onClick.
+        e.stopPropagation();
         if (!gridContext?.isColumnSelected(column.key)) {
-          e.stopPropagation();
           gridContext?.onSelectColumn(column.key);
         }
       };
