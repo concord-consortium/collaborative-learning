@@ -132,8 +132,14 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const onSort = useCallback((columnKey: string, direction: TSortDirection) => {
     if (dataSet) {
       dataSet.sortCases(columnKey, direction);
+      // Force columns to regenerate so the sort indicator re-renders. Without this,
+      // the columns useMemo deps don't change (sort state isn't tracked there), so
+      // ReactDataGrid sees the same columns prop and React.memo on rdg's HeaderRow
+      // bails the cascade — the sort icon stays on the old direction until something
+      // else (e.g. deselecting the column) regenerates columns.
+      triggerColumnChange();
     }
-  }, [dataSet]);
+  }, [dataSet, triggerColumnChange]);
 
   // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({

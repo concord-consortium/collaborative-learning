@@ -106,13 +106,18 @@ const FormulaDataSetProxy = types.model("FormulaDataSetProxy", {
     // This approach of updating a hash based on the values is in-efficient,
     // but in CLUE the number of items and attributes is relatively small.
     const stringsOfDataSet: string[] = [];
+    const caseIds: string[] = [];
     self.dataSet.cases?.forEach(({ __id__ }) => {
       stringsOfDataSet.push(__id__);
+      caseIds.push(__id__);
     });
+    // Key per-value entries by case id (not index) so that reordering the
+    // cases (e.g. via DataSet.sortCases) doesn't change the string set and
+    // wrongly trigger formula re-evaluation, which would call back into
+    // setCanonicalCaseValues and reset sort state.
     self.dataSet.attributes.forEach(attr => {
       attr.strValues.forEach((value, index) => {
-        // We use the attribute ID and the index to create a unique string for each value
-        stringsOfDataSet.push(`${attr.id}-${index}-${value}`);
+        stringsOfDataSet.push(`${attr.id}-${caseIds[index]}-${value}`);
       });
     });
 
