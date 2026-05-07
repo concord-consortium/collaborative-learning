@@ -133,6 +133,7 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
   }, []);
 
   const handleBlur = useCallback((e: any) => {
+    if (control.node.readOnly) return;
     const v = e.target.value;
     // Note that "" and " " are considered finite. This is because they are converted to 0.
     if (isFinite(v)) {
@@ -157,6 +158,7 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
   }, []);
 
   const handleSelectChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+    if (control.node.readOnly) return;
     const oldValue = control.getValueForUser();
 
     control.setCurrentUnits(event.target.value);
@@ -195,7 +197,7 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
         tabIndex={-1}
         type={"text"}
         value={possiblyReadOnlyInputValue}
-        disabled={control.node.readOnly}
+        readOnly={control.node.readOnly}
         onKeyDown={handleKeyDown}
         onChange={handleChange}
         onBlur={handleBlur}
@@ -208,7 +210,7 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
             <div className="type-options">
               <select onChange={handleSelectChange}
                 value={control.getCurrentUnits()}
-                disabled={control.node.readOnly}
+                aria-disabled={control.node.readOnly}
                 tabIndex={-1}
               >
                 { control.units.map((unit, index) => (

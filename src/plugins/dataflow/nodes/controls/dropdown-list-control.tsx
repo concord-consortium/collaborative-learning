@@ -294,6 +294,7 @@ export const DropdownList: React.FC<{
   };
 
   const handleTriggerClick = () => {
+    if (control.node.readOnly) return;
     if (showList) {
       close();
     } else {
@@ -304,7 +305,7 @@ export const DropdownList: React.FC<{
   const handleTriggerKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      open();
+      if (!control.node.readOnly) open();
       return;
     }
     // ArrowDown used to open the listbox, but the in-block roving cycle now owns
@@ -333,7 +334,7 @@ export const DropdownList: React.FC<{
         type="button"
         className={labelClasses}
         tabIndex={-1}
-        disabled={control.node.readOnly}
+        aria-disabled={control.node.readOnly}
         aria-haspopup="listbox"
         aria-expanded={showList}
         aria-controls={listboxId}

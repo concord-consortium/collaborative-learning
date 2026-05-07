@@ -86,6 +86,7 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = observ
   }, []);
 
   const handleBlur = useCallback((e: any) => {
+    if (control.node.readOnly) return;
     const v = e.target.value;
     if (isFinite(v)) {
       const newValue = Number(v);
@@ -127,7 +128,7 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = observ
         tabIndex={-1}
         type={"text"}
         value={possiblyReadOnlyInputValue}
-        disabled={control.node.readOnly}
+        readOnly={control.node.readOnly}
         onKeyDown={handleKeyDown}
         onChange={handleChange}
         onBlur={handleBlur}

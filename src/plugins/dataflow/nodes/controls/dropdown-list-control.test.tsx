@@ -241,15 +241,22 @@ describe("DropdownList commit and dismiss (CLUE-455)", () => {
 });
 
 describe("DropdownList read-only behavior (CLUE-455)", () => {
-  it("disables the trigger button when the node is read-only", () => {
+  it("marks the trigger button aria-disabled when the node is read-only", () => {
     const control = makeFakeControl({ options: threeOptions, readOnly: true });
     const { container } = renderDropdown(control);
-    expect(getTrigger(container).disabled).toBe(true);
+    expect(getTrigger(container).getAttribute("aria-disabled")).toBe("true");
   });
 
-  it("does not disable the trigger button when the node is editable", () => {
+  it("does not mark the trigger button aria-disabled when the node is editable", () => {
     const control = makeFakeControl({ options: threeOptions, readOnly: false });
     const { container } = renderDropdown(control);
-    expect(getTrigger(container).disabled).toBe(false);
+    expect(getTrigger(container).getAttribute("aria-disabled")).toBe("false");
+  });
+
+  it("does not open the listbox on Enter when the node is read-only", () => {
+    const control = makeFakeControl({ options: threeOptions, readOnly: true });
+    const { container } = renderDropdown(control);
+    fireEvent.keyDown(getTrigger(container), { key: "Enter" });
+    expect(container.querySelector('[role="listbox"]')).toBeNull();
   });
 });

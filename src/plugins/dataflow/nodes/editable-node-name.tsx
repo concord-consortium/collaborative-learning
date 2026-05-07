@@ -37,7 +37,7 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
     }
 
     function saveNodeName() {
-      if (discardingRef.current) return;
+      if (discardingRef.current || node.readOnly) return;
       nodeName && node.model.setOrderedDisplayName(nodeName);
     }
 
@@ -52,7 +52,7 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
           value={valueString}
           onChange={handleInputChange}
           onBlur={saveNodeName}
-          disabled={node.readOnly}
+          readOnly={node.readOnly}
           onKeyDown={handleKeyDown}
         />
       </div>
