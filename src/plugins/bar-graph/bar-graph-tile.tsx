@@ -27,7 +27,7 @@ export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITilePro
 
   const requestedHeight = useRef<number|undefined>(undefined);
 
-  const onResize = (width: number|undefined, height: number|undefined) => {
+  const onResize = ({ height }: { width: number | null; height: number | null }) => {
     let desiredTileHeight;
     if (height) {
       if (legendBelow) {
