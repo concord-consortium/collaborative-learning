@@ -152,7 +152,6 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
 
     config.onRegisterTileApi(tileApi);
     return () => config.onUnregisterTileApi();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // mount/unmount lifecycle matches componentDidMount/componentWillUnmount
 
   // Delegate to generic useAccessibility with focus trap wired.

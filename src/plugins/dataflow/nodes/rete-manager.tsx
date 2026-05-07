@@ -520,7 +520,6 @@ export class ReteManager implements INodeServices {
     candidateIndex: number;
   } | null = null;
 
-  // eslint-disable-next-line eqeqeq -- loose equality treats undefined as idle for prototype-only test stubs
   public get isConnecting() { return this.connecting != null; }
 
   /**
