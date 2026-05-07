@@ -1,29 +1,21 @@
 import { ReteManager } from "./rete-manager";
 
 interface IFakeNode { id: string; }
-interface IFakeNodeView {
-  position: { x: number; y: number };
-  element?: { getBoundingClientRect: () => { height: number; width: number } };
-}
+interface IFakeNodeView { position: { x: number; y: number }; }
 
 /**
  * Builds a stub object with just enough surface area for the reading-order helpers.
- * `getNodeIdsInReadingOrder` reads `this.editor.getNodes()`, the position from
- * `this.area.nodeViews.get(id)?.position`, and the rendered height from
- * `view.element?.getBoundingClientRect()`. Pass `h` per node to simulate
- * variable-height nodes (e.g. plot-open); omit to fall back to the default 90.
+ * `getNodeIdsInReadingOrder` reads `this.editor.getNodes()` and the position
+ * from `this.mstProgram?.nodes?.get(id)` (with `this.area.nodeViews.get(id)?.position`
+ * as a fallback for tests that don't supply an MST model). Rows are banded
+ * with a fixed y-tolerance — measured node heights are intentionally not used.
  */
 function makeManagerStub(
-  nodes: Array<{ id: string; x: number; y: number; h?: number }>
+  nodes: Array<{ id: string; x: number; y: number }>
 ): ReteManager {
   const fakeNodes: IFakeNode[] = nodes.map(({ id }) => ({ id }));
   const fakeViews = new Map<string, IFakeNodeView>(
-    nodes.map(({ id, x, y, h }) => [id, {
-      position: { x, y },
-      element: h !== undefined
-        ? { getBoundingClientRect: () => ({ height: h, width: 176 }) }
-        : undefined,
-    }])
+    nodes.map(({ id, x, y }) => [id, { position: { x, y } }])
   );
   const stub = Object.create(ReteManager.prototype);
   stub.editor = { getNodes: () => fakeNodes };
@@ -74,35 +66,15 @@ describe("ReteManager.getNodeIdsInReadingOrder (CLUE-455)", () => {
     expect(manager.getNodeIdsInReadingOrder()).toEqual(["no-view", "positioned"]);
   });
 
-  it("groups a tall node and a node within its vertical extent into the same row", () => {
-    // Plot-open node: top=0, height=300, so it extends to y=300.
-    // Sibling at y=150 visually sits inside the tall node's footprint.
+  it("bands nodes into the same row when their y-coordinates are within tolerance", () => {
+    // 45px tolerance against the first node's y. y=0 and y=30 are within
+    // tolerance and band together; y=200 is well outside and starts a new row.
     const manager = makeManagerStub([
-      { id: "tall-left", x: 0, y: 0, h: 300 },
-      { id: "short-right", x: 200, y: 150, h: 90 },
+      { id: "left",  x: 0,   y: 0   },
+      { id: "right", x: 100, y: 30  },
+      { id: "below", x: 50,  y: 200 },
     ]);
-    expect(manager.getNodeIdsInReadingOrder()).toEqual(["tall-left", "short-right"]);
-  });
-
-  it("starts a new row when a node sits below the previous row's bottom", () => {
-    // Top row's bottom is at y=90. The next node at y=200 is clearly below it.
-    const manager = makeManagerStub([
-      { id: "top-left", x: 0, y: 0, h: 90 },
-      { id: "top-right", x: 200, y: 0, h: 90 },
-      { id: "below-row", x: 100, y: 200, h: 90 },
-    ]);
-    expect(manager.getNodeIdsInReadingOrder()).toEqual(["top-left", "top-right", "below-row"]);
-  });
-
-  it("extends the current row when a later node's measured height pushes the row's bottom down", () => {
-    // First node short, second node taller and slightly offset down: its bottom
-    // becomes the row's bottom and absorbs a third node that would otherwise land below.
-    const manager = makeManagerStub([
-      { id: "a", x: 0,   y: 0,  h: 50 },
-      { id: "b", x: 100, y: 30, h: 250 },
-      { id: "c", x: 200, y: 200, h: 50 },
-    ]);
-    expect(manager.getNodeIdsInReadingOrder()).toEqual(["a", "b", "c"]);
+    expect(manager.getNodeIdsInReadingOrder()).toEqual(["left", "right", "below"]);
   });
 });
 
