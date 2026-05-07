@@ -72,6 +72,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private lastIntervalTime: number;
   private reteManager: ReteManager | undefined;
   private playbackReteManager: ReteManager | undefined;
+  private programContainerEl: HTMLElement | null = null;
   private updateObservable = observable({updateCount: 0});
 
   constructor(props: IProps) {
@@ -110,7 +111,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return (
       <div
         className="dataflow-program-container"
-        ref={el => this.props.onProgramContainerRef?.(el)}
+        ref={el => {
+          this.programContainerEl = el;
+          this.props.onProgramContainerRef?.(el);
+        }}
       >
         <DataflowProgramTopbar
           onSerialRefreshDevices={this.serialDeviceRefresh}
@@ -197,6 +201,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private handleConnectingKeyDown = (e: KeyboardEvent) => {
     const reteManager = this.reteManager;
     if (!reteManager?.isConnecting) return;
+
+    // Only intercept when the keydown originates inside this tile's program
+    // container. Otherwise — e.g. the user mouse-clicked outside the tile while
+    // connecting mode was still active — the document-level capture would
+    // hijack Arrow/Escape from elsewhere on the page. Cancel the in-flight
+    // connection and bail so subsequent keys aren't trapped either.
+    const container = this.programContainerEl;
+    const target = e.target as Node | null;
+    if (!container || !target || !container.contains(target)) {
+      reteManager.cancelConnecting();
+      return;
+    }
+
     switch (e.key) {
       case "ArrowRight":
       case "ArrowDown":
