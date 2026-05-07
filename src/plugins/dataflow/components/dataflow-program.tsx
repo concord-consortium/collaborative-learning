@@ -2,8 +2,6 @@ import React from "react";
 import { observable, runInAction } from "mobx";
 import { getSnapshot } from "mobx-state-tree";
 import { inject, observer } from "mobx-react";
-import { SizeMeProps } from "react-sizeme";
-
 import { BaseComponent } from "../../../components/base";
 import { DataflowContentModel, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
@@ -37,7 +35,7 @@ export interface IDataflowProgramApi {
   getObjectBoundingBox: (objectId: string, objectType?: string) => ObjectBoundingBox | undefined;
 }
 
-interface IProps extends SizeMeProps {
+interface IProps {
   documentProperties?: { [key: string]: string };
   tileId?: string;
   program?: DataflowProgramModelType;

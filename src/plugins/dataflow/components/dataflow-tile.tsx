@@ -1,5 +1,4 @@
 import React from "react";
-import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
 import classNames from "classnames";
 
@@ -104,27 +103,20 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
           {this.renderTitle()}
         </TileTitleArea>
         <div className={classes}>
-          <SizeMe monitorHeight={true}>
-            {({ size }: SizeMeProps) => {
-              return (
-                <DataflowProgram
-                  documentProperties={this.getDocumentProperties()}
-                  tileId={model.id}
-                  program={program}
-                  programDataRate={programDataRate}
-                  readOnly={readOnly}
-                  size={size}
-                  tileHeight={height}
-                  tileContent={tileContent}
-                  tileElt={tileElt}
-                  onRegisterTileApi={onRegisterTileApi}
-                  onReteManagerCreated={this.handleReteManagerCreated}
-                  onProgramContainerRef={el => this.programContainerEl = el}
-                  onProgramApiRef={api => this.programApi = api}
-                />
-              );
-            }}
-          </SizeMe>
+          <DataflowProgram
+            documentProperties={this.getDocumentProperties()}
+            tileId={model.id}
+            program={program}
+            programDataRate={programDataRate}
+            readOnly={readOnly}
+            tileHeight={height}
+            tileContent={tileContent}
+            tileElt={tileElt}
+            onRegisterTileApi={onRegisterTileApi}
+            onReteManagerCreated={this.handleReteManagerCreated}
+            onProgramContainerRef={el => this.programContainerEl = el}
+            onProgramApiRef={api => this.programApi = api}
+          />
           <TileToolbar tileType="dataflow" readOnly={!!readOnly} tileElement={this.props.tileElt} />
         </div>
         {!readOnly && (
