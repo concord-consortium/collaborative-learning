@@ -7,7 +7,7 @@ interface IProps {
   dataTest?: string;
   value: boolean;
   onChange: (value: boolean) => void;
-  title?: string;
+  title: string;
 }
 
 const ToggleControl: React.FC<IProps> = ({ className, dataTest, value, onChange, title }) => {
@@ -19,10 +19,19 @@ const ToggleControl: React.FC<IProps> = ({ className, dataTest, value, onChange,
   const onClass = value ? "toggle-on" : "";
 
   return (
-    <div className={`toggle-control ${className}`} data-test={dataTest} title={title} onClick={handleClick}>
-      <div className={`track ${onClass}`}/>
-      <div className={`ball ${onClass}`}/>
-    </div>
+    <button
+      aria-checked={value}
+      aria-label={title}
+      className={`toggle-control ${className ?? ""}`}
+      data-test={dataTest}
+      role="switch"
+      title={title}
+      type="button"
+      onClick={handleClick}
+    >
+      <span className={`track ${onClass}`} aria-hidden="true" />
+      <span className={`ball ${onClass}`} aria-hidden="true" />
+    </button>
   );
 };
 

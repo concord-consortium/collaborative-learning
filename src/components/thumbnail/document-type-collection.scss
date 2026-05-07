@@ -1,4 +1,5 @@
 @import "../vars";
+@import "../mixins";
 
 $list-item-height: 660px;
 $list-item-width: 880px;
@@ -75,6 +76,62 @@ $section-padding: 6px;
     overflow-y: hidden;
   }
 
+  .list-item-container {
+    position: relative;
+    flex-grow: 0;
+    flex-shrink: 0;
+
+    > .icon-holder {
+      appearance: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      position: absolute;
+      right: 78px;
+      top: 4px;
+      @include focus-ring(2px);
+
+      &[aria-disabled="true"] {
+        cursor: default;
+      }
+
+      .icon-star {
+        height: 24px;
+        width: 24px;
+        fill: $charcoal;
+        opacity: .25;
+        display: block;
+
+        &.starred {
+          opacity: .75;
+          fill: $problem-orange;
+        }
+      }
+
+      &:hover .icon-star {
+        fill: $problem-orange;
+        opacity: 0.35;
+      }
+      &:active .icon-star {
+        opacity: .75;
+        fill: $problem-orange;
+      }
+      &:active .icon-star.starred {
+        opacity: .75;
+        fill: $problem-orange;
+      }
+
+      .bookmark-label {
+        position: absolute;
+        top: -2px;
+        right: -4px;
+        margin: 0;
+        font-size: 5pt;
+      }
+    }
+  }
+
   .list-item {
     position: relative;
     min-height: 120px;
@@ -83,11 +140,10 @@ $section-padding: 6px;
     padding: $padding 0;
     display: flex;
     flex-direction: column;
-    flex-grow: 0;
-    flex-shrink: 0;
     align-items: center;
     overflow: hidden;
     cursor: pointer;
+    @include focus-ring(-2px);
 
     &.selected {
       background-color: $classwork-purple-light-6;
@@ -147,49 +203,6 @@ $section-padding: 6px;
             margin-top: 8px;
           }
         }
-      }
-    }
-
-    .icon-holder {
-      position: absolute;
-      top: 5px;
-      right: 12px;
-      cursor: pointer;
-
-      .icon-star {
-        height: 24px;
-        width: 24px;
-        fill: $charcoal;
-        opacity: .25;
-        position: relative;
-        right: 66px;
-        top: -1px;
-
-        &.starred {
-          opacity: .75;
-          fill: $problem-orange;
-        }
-      }
-
-      &:hover .icon-star {
-        fill: $problem-orange;
-        opacity: 0.35;
-      }
-      &:active .icon-star {
-        opacity: .75;
-        fill: $problem-orange;
-      }
-      &:active .icon-star.starred {
-        opacity: .75;
-        fill: $problem-orange;
-      }
-
-      .bookmark-label {
-        position: absolute;
-        top: -2px;
-        right: -4px;
-        margin: 0;
-        font-size: 5pt;
       }
     }
 
