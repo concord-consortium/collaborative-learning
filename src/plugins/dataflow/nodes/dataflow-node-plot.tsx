@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { Line } from "react-chartjs-2";
-import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
+import { ChartOptions, ChartData, ChartDataset } from "chart.js";
+import "chart.js/auto";
 import { kMaxNodeValues, NodePlotColor } from "../model/utilities/node";
 
 import "./dataflow-node.scss";
@@ -70,15 +71,14 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
         <Line
           data={lineData(model, recordedTicks)}
           options={lineOptions(model)}
-          redraw={true}
         />
       </div>
     </div>
   );
 });
 
-function lineData(model: IBaseNodeModel, recordedTicks: string[]) {
-  const chartDataSets: ChartDataSets[] = [];
+function lineData(model: IBaseNodeModel, recordedTicks: string[]): ChartData<"line", number[], number> {
+  const chartDataSets: ChartDataset<"line", number[]>[] = [];
   const recordedEntries = model.getTickEntries(recordedTicks);
   Object.keys(model.watchedValues).forEach((valueKey: string) => {
     const recentValues = recordedEntries.map(entry => {
@@ -93,13 +93,14 @@ function lineData(model: IBaseNodeModel, recordedTicks: string[]) {
     });
     if (recentValues !== undefined) {
       const customOptions = model.watchedValues?.[valueKey] || {};
-      const dataset: ChartDataSets = {
+      const dataset: ChartDataset<"line", number[]> = {
         backgroundColor: NodePlotColor,
         borderColor: NodePlotColor,
         borderWidth: 2,
         pointRadius: 2,
         data: [0],
         fill: false,
+        clip: false,
         // The watchedValues value can be used to customize the minigraph
         ...customOptions
       };
@@ -122,59 +123,59 @@ function lineData(model: IBaseNodeModel, recordedTicks: string[]) {
 
   stepY = (maxY(model) - minY(model)) / 2;
 
-  const chartData: ChartData = {
-    labels: new Array(kMaxNodeValues).fill(undefined).map((val,idx) => idx),
+  return {
+    labels: new Array(kMaxNodeValues).fill(undefined).map((val, idx) => idx),
     datasets: chartDataSets
   };
-
-  return chartData;
 }
 
-function lineOptions(model: IBaseNodeModel) {
+function lineOptions(model: IBaseNodeModel): ChartOptions<"line"> {
   const max = maxY(model);
   const min = minY(model);
 
-  const options: ChartOptions = {
+  return {
     animation: {
       duration: 0
     },
-    legend: {
-      display: false,
-      position: "bottom",
+    plugins: {
+      legend: {
+        display: false,
+        position: "bottom",
+      },
     },
     maintainAspectRatio: true,
     scales: {
-      yAxes: [{
-        id: "y-axis-0",
+      y: {
         type: "linear",
+        max: (max === min) ? max + 1 : max,
+        min: (max === min) ? min - 1 : min,
         ticks: {
-          fontSize: 9,
+          font: { size: 9 },
           display: true,
           stepSize: stepY,
-          max: (max === min) ? max + 1 : max,
-          min: (max === min) ? min - 1 : min,
           maxTicksLimit: 3,
           minRotation: 0,
           maxRotation: 0,
-          callback: (value: number) => {
-            return Number(value.toFixed(1));
-          }
+          callback: (value) => Number(Number(value).toFixed(1))
         },
-        gridLines: {
+        grid: {
+          display: false,
+        },
+        border: {
           display: false,
         }
-      }],
-      xAxes: [{
-        id: "x-axis-0",
+      },
+      x: {
         ticks: {
           display: false,
         },
-        gridLines: {
+        grid: {
           display: false
+        },
+        border: {
+          display: false,
         }
-      }]
+      }
     },
   };
-
-  return options;
 }
