@@ -10,7 +10,10 @@ import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
  *   horizontal to Left/Right).
  * - Home/End move to first/last button (regardless of orientation).
  * - Does not wrap around
- * - Disabled buttons are focusable (not skipped)
+ * - The cycle includes every <button> descendant without filtering on disabled
+ *   state, so SR users can still discover and announce a "disabled-looking"
+ *   button. For that to actually deliver focus, those buttons must use
+ *   `aria-disabled` rather than the HTML `disabled` attribute.
  *
  * The hook queries buttons from the DOM at navigation time so it stays correct
  * when buttons dynamically change or when the toolbar configuration varies.

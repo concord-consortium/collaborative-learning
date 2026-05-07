@@ -193,7 +193,7 @@ export const CustomDataflowNode = observer(
       aria-label={`${model.type} block: ${model.orderedDisplayName}`}
       onKeyDown={e => handleNodeKeyDown(e, node, reteManager)}
     >
-      <div className="top-bar" onClick={() => console.log("top-bar click")}>
+      <div className="top-bar">
         {!node.readOnly && <Delete reteManager={reteManager} nodeId={id}/>}
       </div>
 
