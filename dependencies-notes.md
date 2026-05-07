@@ -2,6 +2,10 @@
 
 Notes on dependencies, particularly reasons for not updating to their latest versions.
 
+## Node / npm Engine Spec
+
+`package.json` declares `"node": "^20.19.0 || ^22.13.0 || >=24"`. Combined with `engine-strict=true` in `.npmrc`, contributors on older Node versions will get a hard `npm install` failure. The constraint is driven by transitive dev dependencies pulled in by the TypeScript 5 / typescript-eslint 8 upgrade — notably `eslint-plugin-jest@29` (requires `^20.12.0 || ^22.0.0 || >=24.0.0`) and `eslint-visitor-keys@5` (requires `^20.19.0 || ^22.13.0 || >=24`). When updating these or related ESLint packages, re-check their `engines` fields and bump this spec to match the strictest transitive requirement.
+
 ## Development Dependencies
 
 |Dependency                  |Current Version|Latest Version|Notes                                                                        |

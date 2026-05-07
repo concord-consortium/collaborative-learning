@@ -4,8 +4,8 @@
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "engines": {
-    "node": ">= 16",
-    "npm": ">= 8"
+    "node": "^20.19.0 || ^22.13.0 || >=24",
+    "npm": ">= 10"
   },
   "config": {
     "pageTitle": "CLUE",

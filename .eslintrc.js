@@ -54,7 +54,7 @@ module.exports = {
       "no-shadow": "off", // superseded by @typescript-eslint/no-shadow
       "no-tabs": "error",
       "no-unneeded-ternary": "error",
-      "no-unused-expressions": ["error", { allowShortCircuit: true }],
+      "no-unused-expressions": "off",  // superseded by @typescript-eslint/no-unused-expressions
       "no-unused-vars": "off",  // superseded by @typescript-eslint/no-unused-vars
       "no-useless-call": "error",
       "no-useless-concat": "error",
