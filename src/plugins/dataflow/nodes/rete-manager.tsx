@@ -1,4 +1,5 @@
 import React from "react";
+import { createRoot } from "react-dom/client";
 import { structures } from "rete-structures";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { Presets, ReactPlugin } from "rete-react-plugin";
@@ -181,7 +182,7 @@ export class ReteManager implements INodeServices {
     // });
 
     const connectionPlugin = new ConnectionPlugin<Schemes, AreaExtra>();
-    const render = new ReactPlugin<Schemes, AreaExtra>();
+    const render = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
 
     // render.addPipe((context) => {
     //   if (!["pointermove", "nodetranslate", "nodetranslated"].includes(context?.type as any)) {
