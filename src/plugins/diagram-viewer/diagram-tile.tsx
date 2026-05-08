@@ -1,10 +1,11 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useCallback, useRef, useState } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import { DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
-import { Diagram, DiagramHelper, Variable, VariableType } from "@concord-consortium/diagram-view";
+import { useResizeDetector } from "react-resize-detector";
+import { Diagram, DiagramHelper, Variable, VariableType, version } from "@concord-consortium/diagram-view";
 import { DiagramContentModelType } from "./diagram-content";
-import { kDiagramDroppableId, kNewVariableButtonDraggableId, kQPVersion } from "./diagram-types";
+import { kDiagramDroppableId, kNewVariableButtonDraggableId } from "./diagram-types";
 import { variableBuckets } from "../shared-variables/shared-variables-utils";
 import { useEditVariableDialog } from "../shared-variables/dialog/use-edit-variable-dialog";
 import { useInsertVariableDialog } from "../shared-variables/dialog/use-insert-variable-dialog";
@@ -135,6 +136,18 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
 
   const droppableId = `${kDiagramDroppableId}-${model.id}`;
   const { isOver, setNodeRef } = useDroppable({ id: droppableId });
+  const dropTargetRef = useRef<HTMLDivElement | null>(null);
+  const { width, height } = useResizeDetector<HTMLDivElement>({ targetRef: dropTargetRef });
+  // Don't mount <Diagram> until the container has real dimensions.
+  // diagram-view adds an onError handler for React Flow, so warnings about this
+  // are caught and ignored. However, it's not possible to install this handler soon
+  // enough to catch the first render.
+  // This happens for diagram thumbnails in non-visible tabs.
+  const isMeasurable = (width ?? 0) > 0 && (height ?? 0) > 0;
+  const setDropTargetRef = useCallback((el: HTMLDivElement | null) => {
+    setNodeRef(el);
+    dropTargetRef.current = el;
+  }, [setNodeRef]);
   const dropTargetStyle = {
     backgroundColor: isOver ? "#eef8ff" : undefined
   };
@@ -168,19 +181,21 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
         <div className={classes}>
           <BasicEditableTileTitle />
           <TileToolbar tileType="diagram" readOnly={!!readOnly} tileElement={tileElt} />
-          <div className="drop-target" ref={setNodeRef} style={dropTargetStyle}>
-            <Diagram
-              dqRoot={content.root}
-              hideControls={true}
-              hideNavigator={!!content.hideNavigator || !isTileSelected}
-              hideNewVariableButton={true}
-              interactionLocked={interactionLocked || readOnly}
-              preventKeyboardDelete={preventKeyboardDelete}
-              readOnly={readOnly}
-              setDiagramHelper={setDiagramHelper}
-            />
+          <div className="drop-target" ref={setDropTargetRef} style={dropTargetStyle}>
+            {isMeasurable && (
+              <Diagram
+                dqRoot={content.root}
+                hideControls={true}
+                hideNavigator={!!content.hideNavigator || !isTileSelected}
+                hideNewVariableButton={true}
+                interactionLocked={interactionLocked || readOnly}
+                preventKeyboardDelete={preventKeyboardDelete}
+                readOnly={readOnly}
+                setDiagramHelper={setDiagramHelper}
+              />
+            )}
           </div>
-          <div className="qp-version">{`version: ${kQPVersion}`}</div>
+          <div className="qp-version">{`version: ${version}`}</div>
         </div>
       </DiagramTileMethodsContext.Provider>
     </DiagramHelperContext.Provider>
