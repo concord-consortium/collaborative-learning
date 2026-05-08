@@ -5,6 +5,7 @@ import { NodePeriodUnits } from "../../model/utilities/node";
 import { IBaseNode } from "../base-node";
 import { observer } from "mobx-react";
 import classNames from "classnames";
+import { handleBlockChildKeyDown } from "../dataflow-node";
 
 export class NumberUnitsControl <
   ModelType extends
@@ -132,6 +133,7 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
   }, []);
 
   const handleBlur = useCallback((e: any) => {
+    if (control.node.readOnly) return;
     const v = e.target.value;
     // Note that "" and " " are considered finite. This is because they are converted to 0.
     if (isFinite(v)) {
@@ -147,13 +149,16 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
     }
   }, [control]);
 
-  const handleKeyPress = useCallback((e: any) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.currentTarget.blur();
+      return;
     }
+    handleBlockChildKeyDown(e);
   }, []);
 
   const handleSelectChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+    if (control.node.readOnly) return;
     const oldValue = control.getValueForUser();
 
     control.setCurrentUnits(event.target.value);
@@ -189,9 +194,11 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
       }
       <input className={`number-input units ${unitsCountClass}`}
         ref={inputRef}
+        tabIndex={-1}
         type={"text"}
         value={possiblyReadOnlyInputValue}
-        onKeyPress={handleKeyPress}
+        readOnly={control.node.readOnly}
+        onKeyDown={handleKeyDown}
         onChange={handleChange}
         onBlur={handleBlur}
       />
@@ -203,6 +210,8 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
             <div className="type-options">
               <select onChange={handleSelectChange}
                 value={control.getCurrentUnits()}
+                aria-disabled={control.node.readOnly}
+                tabIndex={-1}
               >
                 { control.units.map((unit, index) => (
                     <option key={index} value={unit}>{unit}</option>

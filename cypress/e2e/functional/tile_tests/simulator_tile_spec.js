@@ -252,6 +252,9 @@ context('Simulator Tile', function () {
     // collect initial position of servo arm
     const initialPos = simulatorTile.getServoArm().invoke('offset').its('top');
     simulatorTile.getVariableDisplayedValue().eq(2).should("contain.text", "0 deg");
+    // Select dataflow tile so its toolbar (with add-*-button) is rendered.
+    // The pot-slider drag above may have moved selection away from the dataflow tile.
+    dataflowTile.getDataflowTile().click();
     dataflowTile.getCreateNodeButton("number").click();
     dataflowTile.getNumberField().type("90{enter}");
     dataflowTile.getCreateNodeButton("live-output").click();
@@ -297,6 +300,9 @@ context('Simulator Tile', function () {
     });
 
     cy.log("when there are more than five mini-nodes in a family, the extra nodes count is displayed");
+    // Re-select the dataflow tile so its toolbar (with add-*-button) is rendered.
+    // The pot-slider drag above may have moved selection away from the dataflow tile.
+    dataflowTile.getDataflowTile().click();
     const buttons = ["number", "number", "number", "sensor", "sensor"];
     buttons.forEach(button => {
       dataflowTile.getCreateNodeButton(button).click();

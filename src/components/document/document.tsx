@@ -319,8 +319,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderGroupDocumentTitleBar(hideButtons?: boolean) {
-    const { user: { currentGroupId } } = this.stores;
-    const title = `Group ${currentGroupId} Document`;
+    const { document } = this.props;
+    const title = `Group ${document.groupId} Document`;
     return this.renderGenericTitleBar({
       title,
       hideButtons,

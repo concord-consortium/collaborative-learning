@@ -11,6 +11,14 @@ import { EllipseObject, EllipseObjectType } from "../objects/ellipse";
 import { ImageObject, ImageObjectType } from "../objects/image";
 import { TileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 
+// Mock uniqueId so auto-generated IDs (e.g., for groups) are deterministic in snapshots
+let mockIdCounter = 0;
+jest.mock("../../../utilities/js-utils", () => {
+  const actual = jest.requireActual("../../../utilities/js-utils");
+  return { ...actual, uniqueId: () => `test-id-${++mockIdCounter}` };
+});
+beforeEach(() => { mockIdCounter = 0; });
+
 // The drawing tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
 import "../drawing-registration";

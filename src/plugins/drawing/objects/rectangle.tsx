@@ -59,13 +59,14 @@ export interface RectangleObjectSnapshot extends SnapshotIn<typeof RectangleObje
 export interface RectangleObjectSnapshotForAdd extends SnapshotIn<typeof RectangleObject> {type: string}
 
 export const RectangleComponent = observer(function RectangleComponent({model, handleHover,
-  handleDrag} : IDrawingComponentProps) {
+  handleDrag, a11yProps} : IDrawingComponentProps) {
   if (model.type !== "rectangle") return null;
   const rect = model as RectangleObjectType;
   const { id, stroke, strokeWidth, strokeDashArray, fill } = rect;
   const { width, height } = rect.currentDims;
   return (
-    <Transformable type="rectangle" key={id} transform={rect.transform} setAnimating={rect.setAnimating}>
+    <Transformable type="rectangle" key={id} transform={rect.transform} setAnimating={rect.setAnimating}
+      {...a11yProps}>
       <rect
         className="drawing-object rectangle"
         x={0}

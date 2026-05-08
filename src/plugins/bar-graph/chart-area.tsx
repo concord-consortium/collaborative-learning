@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useRef, useMemo, useState } from "react";
 import { observer } from "mobx-react";
 import { AxisBottom, AxisLeft } from "@visx/axis";
 import { GridRows } from "@visx/grid";
@@ -38,6 +38,16 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
   const model = useBarGraphModelContext();
   const primary = model?.primaryAttribute || "";
   const secondary = model?.secondaryAttribute;
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [announcement, setAnnouncement] = useState("");
+
+  const announce = useCallback((text: string) => {
+    // Clear first so repeating the same text is detected as a DOM change by screen readers
+    setAnnouncement("");
+    requestAnimationFrame(() => {
+      setAnnouncement(text);
+    });
+  }, []);
 
   const xMax = width - margin.left - margin.right;
   const yMax = height - margin.top - margin.bottom;
@@ -91,6 +101,40 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
     }),
     [yMax, maxValue]);
 
+  const handleBarKeyDown = useCallback((e: React.KeyboardEvent<SVGRectElement>) => {
+    const bars = svgRef.current?.querySelectorAll<SVGRectElement>('.visx-bar[tabindex]');
+    if (!bars) return;
+    const barArray = Array.from(bars);
+    const currentIndex = barArray.indexOf(e.currentTarget);
+
+    switch (e.key) {
+      case "ArrowRight":
+        e.preventDefault();
+        barArray[(currentIndex + 1) % barArray.length]?.focus();
+        break;
+      case "ArrowLeft":
+        e.preventDefault();
+        barArray[(currentIndex - 1 + barArray.length) % barArray.length]?.focus();
+        break;
+      case "Home":
+        e.preventDefault();
+        barArray[0]?.focus();
+        break;
+      case "End":
+        e.preventDefault();
+        barArray[barArray.length - 1]?.focus();
+        break;
+      // Enter/Space handled by BarWithHighlight's onActivate
+    }
+  }, []);
+
+  const handleBarBlur = useCallback((e: React.FocusEvent) => {
+    // Only clear selection if focus is leaving the bar graph entirely (not moving between bars).
+    if (!svgRef.current?.contains(e.relatedTarget as Node | null)) {
+      model?.sharedModel?.dataSet.setSelectedCases([]);
+    }
+  }, [model]);
+
   if (xMax <= 0 || yMax <= 0) return <span>Tile too small to show graph ({width}x{height})</span>;
 
   const ticks = data.length > 0
@@ -109,6 +153,13 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
     });
   }
 
+  function makeActivateHandler(primaryValue: string, label: string, isSelected: boolean, secondaryValue?: string) {
+    return () => {
+      handleClick(primaryValue, secondaryValue);
+      announce(`${isSelected ? "Deselected" : "Selected"} ${label}`);
+    };
+  }
+
   function simpleBars() {
     return (
       <Group>
@@ -119,9 +170,13 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
           const y = countScale(info.count);
           const w = primaryScale.bandwidth();
           const h = yMax - countScale(info.count);
+          const label = `${displayValue(key)}: ${info.count}`;
           return (
             <BarWithHighlight key={key} x={x} y={y} width={w} height={h} color={barColor(key)} selected={info.selected}
-              onClick={() => handleClick(key)} />
+              ariaLabel={label} onKeyDown={handleBarKeyDown}
+              onActivate={makeActivateHandler(key, label, info.selected)}
+              onClick={() => handleClick(key)}
+              onBlur={handleBarBlur} />
           );
         })}
       </Group>
@@ -158,6 +213,7 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
                         // BarGroup really expects the values to be pure numeric, but we're using objects.
                         // Alternatively, we could drop BarGroup and build the bars manually.
                         const val = bar.value as unknown as BarInfo;
+                        const label = `${displayValue(primaryValue)}, ${displayValue(bar.key)}: ${val.count}`;
                         return <BarWithHighlight
                           key={`bar-group-bar-${barGroup.index}-${bar.index}`}
                           x={bar.x}
@@ -166,7 +222,10 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
                           height={bar.height}
                           color={bar.color}
                           selected={val.selected}
-                          onClick={() => handleClick(primaryValue, bar.key)} />;
+                          ariaLabel={label} onKeyDown={handleBarKeyDown}
+                          onActivate={makeActivateHandler(primaryValue, label, val.selected, bar.key)}
+                          onClick={() => handleClick(primaryValue, bar.key)}
+                          onBlur={handleBarBlur} />;
                       })}
                     </Group>
                   );
@@ -178,50 +237,57 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
     );
   }
 
+  const primaryAttrName = model?.sharedModel?.dataSet?.attrFromID(primary)?.name || "";
+  const svgAriaLabel = primaryAttrName ? `Bar graph of ${primaryAttrName}` : "Bar graph";
+
   return (
-    <svg width={width} height={height} className="bar-graph-svg" data-testid="bar-graph-svg">
-      <Group top={margin.top} left={margin.left}>
-        <GridRows
-          scale={countScale}
+    <>
+      <svg ref={svgRef} width={width} height={height} className="bar-graph-svg" data-testid="bar-graph-svg"
+        role="group" aria-roledescription="bar chart" aria-label={svgAriaLabel}>
+        <Group top={margin.top} left={margin.left}>
+          <GridRows
+            scale={countScale}
+            width={xMax}
+            numTicks={ticks}
+            stroke="#bfbfbf"
+            strokeWidth={1.5}
+          />
+          <AxisBottom
+            top={countScale(0)}
+            scale={primaryScale}
+            strokeWidth={2}
+            stroke="#707070"
+            tickLineProps={{ stroke: '#bfbfbf', strokeWidth: 1.5, height: 5 }}
+            tickLabelProps={{ dy: -7, fontSize: 14, fontFamily: 'Lato', fill: '#3f3f3f',
+              verticalAnchor: "start", width: labelWidth}}
+            tickFormat={(key) => displayValue(key)}
+          />
+          <AxisLeft
+            left={0}
+            scale={countScale}
+            strokeWidth={2}
+            stroke="#707070"
+            numTicks={ticks}
+            tickLineProps={{ stroke: '#bfbfbf', strokeWidth: 1.5, width: 5 }}
+            tickLabelProps={{ dx: -5, fontSize: 14, fontFamily: 'Lato', fill: '#3f3f3f' }}
+            tickFormat={(value) => Number(value).toFixed(0)}
+          />
+          { secondary ? groupedBars() : simpleBars() }
+        </Group>
+        <EditableAxisLabel
+          x={20}
+          y={margin.top + yMax/2}
+        />
+        <CategoryPulldown
+          setCategory={setPrimaryAttribute}
+          x={margin.left}
+          y={height-35}
           width={xMax}
-          numTicks={ticks}
-          stroke="#bfbfbf"
-          strokeWidth={1.5}
+          height={30}
         />
-        <AxisBottom
-          top={countScale(0)}
-          scale={primaryScale}
-          strokeWidth={2}
-          stroke="#707070"
-          tickLineProps={{ stroke: '#bfbfbf', strokeWidth: 1.5, height: 5 }}
-          tickLabelProps={{ dy: -7, fontSize: 14, fontFamily: 'Lato', fill: '#3f3f3f',
-            verticalAnchor: "start", width: labelWidth}}
-          tickFormat={(key) => displayValue(key)}
-        />
-        <AxisLeft
-          left={0}
-          scale={countScale}
-          strokeWidth={2}
-          stroke="#707070"
-          numTicks={ticks}
-          tickLineProps={{ stroke: '#bfbfbf', strokeWidth: 1.5, width: 5 }}
-          tickLabelProps={{ dx: -5, fontSize: 14, fontFamily: 'Lato', fill: '#3f3f3f' }}
-          tickFormat={(value) => Number(value).toFixed(0)}
-        />
-        { secondary ? groupedBars() : simpleBars() }
-      </Group>
-      <EditableAxisLabel
-        x={20}
-        y={margin.top + yMax/2}
-      />
-      <CategoryPulldown
-        setCategory={setPrimaryAttribute}
-        x={margin.left}
-        y={height-35}
-        width={xMax}
-        height={30}
-      />
-    </svg>
+      </svg>
+      <div aria-live="polite" className="visually-hidden">{announcement}</div>
+    </>
   );
 });
 
@@ -253,13 +319,28 @@ interface IBarWithHighlightProps {
   color: string;
   selected: boolean;
   onClick: () => void;
+  ariaLabel?: string;
+  onKeyDown?: (e: React.KeyboardEvent<SVGRectElement>) => void;
+  onActivate?: () => void;
+  onBlur?: (e: React.FocusEvent) => void;
 }
 
-function BarWithHighlight({ x, y, width, height, color, selected, onClick }: IBarWithHighlightProps) {
+function BarWithHighlight({ x, y, width, height, color, selected, onClick, ariaLabel, onKeyDown, onActivate,
+    onBlur
+}: IBarWithHighlightProps) {
+  const handleKeyDown = (e: React.KeyboardEvent<SVGRectElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onActivate?.();
+      return;
+    }
+    onKeyDown?.(e);
+  };
   return (
     <Group>
       {selected && <BarHighlight x={x} y={y} width={width} height={height} />}
-      <Bar onClick={onClick} x={x} y={y} width={width} height={height} fill={color} />
+      <Bar onClick={onClick} onKeyDown={handleKeyDown} onBlur={onBlur} x={x} y={y} width={width} height={height}
+        fill={color} tabIndex={0} role="button" aria-label={ariaLabel} />
     </Group>
   );
 }

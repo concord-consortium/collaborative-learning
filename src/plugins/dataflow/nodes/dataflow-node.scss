@@ -1,4 +1,5 @@
 @import "../../../components/vars";
+@import "../../../components/mixins";
 @import "../components/dataflow-vars";
 
 $node-width: 176px;
@@ -26,6 +27,8 @@ $top-space: 18px;
     box-shadow: 0 0 0 3px $charcoal-light-1;
   }
 
+  @include focus-ring(2px);
+
   .top-bar {
     display: flex;
     width: $node-inner-width;
@@ -38,11 +41,17 @@ $top-space: 18px;
       top: 1px;
       width: $top-space;
       height: $top-space;
+      // Reset native button chrome so it visually matches the prior <div>.
+      background: transparent;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
       svg {
         width: 8px;
         height: 8px;
         z-index: 1;
       }
+      @include focus-ring(-2px);
     }
   }
   .node-type-letter {
@@ -71,10 +80,38 @@ $top-space: 18px;
       border-radius:4px;
       transform: translateX(9px);
       width: 123px;
+      @include focus-ring(-2px);
     }
   }
   .input {
     height: 2px;
+    // The wrapper is the focus target (so screen readers hit it on Tab) but
+    // it's often only 2px tall and is positioned away from the visible socket
+    // dot (esp. on demo-output / live-output nodes). Forward focus and
+    // connection-mode indicators onto the inner .input-socket so each ring
+    // surrounds the dot the user actually sees.
+    //
+    // Only one outline can be drawn per element, so the rules below are
+    // ordered by specificity: the most specific (focused candidate) wins.
+    &:focus { outline: none; }
+    // Plain keyboard focus (no connection mode in progress).
+    &:focus-visible .input-socket,
+    &.keyboard-focused .input-socket {
+      outline: 2px solid $focus-ring-color;
+      outline-offset: 2px;
+    }
+    // Candidate, not currently focused: dashed ring marks "you can land here".
+    &.connection-candidate .input-socket {
+      outline: 2px dashed $focus-ring-color;
+      outline-offset: 4px;
+    }
+    // Currently-focused candidate: solid ring (replaces the dashed one).
+    // Higher specificity than both rules above so this wins.
+    &.connection-candidate:focus-visible .input-socket,
+    &.connection-candidate.keyboard-focused .input-socket {
+      outline: 2px solid $focus-ring-color;
+      outline-offset: 4px;
+    }
     .input-socket {
       position: absolute;
       left: -20px;
@@ -87,6 +124,18 @@ $top-space: 18px;
   .output {
     position: absolute;
     right: -21px;
+    // Same reasoning as .input — visual indicators go on the dot, not the wrapper.
+    // Order matters for cascade resolution: source ring wins over focus ring.
+    &:focus { outline: none; }
+    &:focus-visible .output-socket,
+    &.keyboard-focused .output-socket {
+      outline: 2px solid $focus-ring-color;
+      outline-offset: 2px;
+    }
+    &.connection-source .output-socket {
+      outline: 2px solid $focus-ring-color;
+      outline-offset: 4px;
+    }
     .output-title {
       display: none;
     }
@@ -98,6 +147,7 @@ $top-space: 18px;
     .node-select .item {
       height: $std-height;
       font-size: 13px;
+      @include focus-ring(-2px);
     }
   }
   .node-graph-toggle-button {
@@ -118,6 +168,7 @@ $top-space: 18px;
       border-radius: 1px;
       border: 2px solid white;
       background-color: white;
+      @include focus-ring(-2px);
       svg {
         width: 14px;
         height: 14px;
@@ -153,6 +204,7 @@ $top-space: 18px;
         border-radius: 1px;
         margin-left: 1px;
         border:0px;
+        @include focus-ring(-2px);
 
         &.plus {
           font-size: 14px;
@@ -248,7 +300,16 @@ $top-space: 18px;
       flex:1;
       border-radius:3px;
       height: $std-height;
+      @include focus-ring(-2px);
     }
+  }
+}
+
+.node {
+  // Catch-all focus rings for inner buttons that may sit outside the more specific
+  // selectors above (e.g. <button> children of demo-output-value-container).
+  .demo-output-value-container button {
+    @include focus-ring(-2px);
   }
 }
 
@@ -569,4 +630,3 @@ $top-space: 18px;
     top: 125px;
   }
 }
-

@@ -15,9 +15,9 @@ import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { ProgramDataRates } from "../model/utilities/node";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { ITileProps } from "../../../components/tiles/tile-component";
-import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ProgramMode } from "./types/dataflow-tile-types";
 import { IDataSet } from "../../../models/data/data-set";
+import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
 
 import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
@@ -33,6 +33,10 @@ export interface IStartProgramParams {
   title: string;
 }
 
+export interface IDataflowProgramApi {
+  getObjectBoundingBox: (objectId: string, objectType?: string) => ObjectBoundingBox | undefined;
+}
+
 interface IProps extends SizeMeProps {
   documentProperties?: { [key: string]: string };
   tileId?: string;
@@ -44,6 +48,8 @@ interface IProps extends SizeMeProps {
   tileElt: HTMLElement | null;
   onRegisterTileApi: ITileProps["onRegisterTileApi"];
   onReteManagerCreated?: (reteManager: ReteManager | undefined) => void;
+  onProgramContainerRef?: (el: HTMLElement | null) => void;
+  onProgramApiRef?: (api: IDataflowProgramApi | null) => void;
 }
 
 interface IState {
@@ -66,6 +72,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private lastIntervalTime: number;
   private reteManager: ReteManager | undefined;
   private playbackReteManager: ReteManager | undefined;
+  private programContainerEl: HTMLElement | null = null;
   private updateObservable = observable({updateCount: 0});
 
   constructor(props: IProps) {
@@ -92,15 +99,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
-    const toolbarEditorContainerClass = `toolbar-editor-container`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
     const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
     const showZoomControl = !documentProperties?.dfHasData;
     const disableToolBarModes = programMode === ProgramMode.Recording || programMode === ProgramMode.Done;
     const showProgramToolbar = showZoomControl && !disableToolBarModes;
 
+    // The palette must be a sibling of content (not a descendant) so the focus
+    // trap can treat it as its own single-tab-stop slot without nested-slot
+    // patches; `.dataflow-program-body` holds them as flex siblings.
     return (
-      <div className="dataflow-program-container">
+      <div
+        className="dataflow-program-container"
+        ref={el => {
+          this.programContainerEl = el;
+          this.props.onProgramContainerRef?.(el);
+        }}
+      >
         <DataflowProgramTopbar
           onSerialRefreshDevices={this.serialDeviceRefresh}
           programDataRates={ProgramDataRates}
@@ -117,7 +132,51 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           tileContent={tileContent}
           handleChangeOfProgramMode={this.handleChangeOfProgramMode}
         />
-        <div className={toolbarEditorContainerClass}>
+        <div className="dataflow-program-body">
+          <div className="dataflow-program-content">
+            <DataflowDropZone
+              addNode={this.addNode}
+              className="editor-graph-container"
+              reteManager={this.reteManager}
+              readOnly={readOnly}
+              style={this.getEditorStyle}
+              tileId={this.tileId}
+            >
+              <div
+                className={editorClass}
+              >
+                {
+                  // the main flow-tool div is just hidden so its reteManager doesn't have
+                  // to be disposed and recreated each time the recording finishes
+                }
+                <div
+                  className={`flow-tool ${programMode === ProgramMode.Done ? "hidden" : ""}`}
+                  ref={elt => this.toolDiv = elt}
+                />
+                { programMode === ProgramMode.Done &&
+                  <div
+                    className="flow-tool"
+                    ref={elt => this.playbackToolDiv = elt}
+                  />
+                }
+                { this.shouldShowProgramCover() &&
+                  <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
+                {showZoomControl && this.reteManager &&
+                  <DataflowProgramZoom
+                    onZoomInClick={this.handleZoomIn}
+                    onZoomOutClick={this.handleZoomOut}
+                    disabled={false}
+                  /> }
+              </div>
+            </DataflowDropZone>
+            <div
+              aria-live="polite"
+              className="visually-hidden"
+              data-testid="dataflow-announcer"
+            >
+              {this.reteManager?.announcement.value ?? ""}
+            </div>
+          </div>
           { showProgramToolbar && <DataflowProgramToolbar
             disabled={!!readOnly}
             isTesting={isTesting}
@@ -125,45 +184,60 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onNodeCreateClick={this.addNode}
             tileId={this.tileId}
           /> }
-          <DataflowDropZone
-            addNode={this.addNode}
-            className="editor-graph-container"
-            reteManager={this.reteManager}
-            readOnly={readOnly}
-            style={this.getEditorStyle}
-            tileId={this.tileId}
-          >
-            <div
-              className={editorClass}
-            >
-              {
-                // the main flow-tool div is just hidden so its reteManager doesn't have
-                // to be disposed and recreated each time the recording finishes
-              }
-              <div
-                className={`flow-tool ${programMode === ProgramMode.Done ? "hidden" : ""}`}
-                ref={elt => this.toolDiv = elt}
-              />
-              { programMode === ProgramMode.Done &&
-                <div
-                  className="flow-tool"
-                  ref={elt => this.playbackToolDiv = elt}
-                />
-              }
-              { this.shouldShowProgramCover() &&
-                <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
-              {showZoomControl && this.reteManager &&
-                <DataflowProgramZoom
-                  onZoomInClick={this.handleZoomIn}
-                  onZoomOutClick={this.handleZoomOut}
-                  disabled={false}
-                /> }
-            </div>
-          </DataflowDropZone>
         </div>
       </div>
     );
   }
+
+  // Routes ArrowKey / Escape / Tab to the rete manager's connection-mode state machine.
+  // Registered as a document capture-phase listener (rather than a React onKeyDown
+  // on the program container) because the focus trap's own document capture-phase
+  // listener calls `stopPropagation` for Escape — that swallows the event before it
+  // reaches React's bubble-phase handlers and exits the trap instead of cancelling
+  // the in-flight connection. Children mount before parents, so this listener is
+  // registered before the trap's (which lives on the parent TileComponent) and
+  // fires first in capture order. We `stopPropagation` so the trap never sees these
+  // keys while a connection is in flight.
+  private handleConnectingKeyDown = (e: KeyboardEvent) => {
+    const reteManager = this.reteManager;
+    if (!reteManager?.isConnecting) return;
+
+    // Only intercept when the keydown originates inside this tile's program
+    // container. Otherwise — e.g. the user mouse-clicked outside the tile while
+    // connecting mode was still active — the document-level capture would
+    // hijack Arrow/Escape from elsewhere on the page. Cancel the in-flight
+    // connection and bail so subsequent keys aren't trapped either.
+    const container = this.programContainerEl;
+    const target = e.target as Node | null;
+    if (!container || !target || !container.contains(target)) {
+      reteManager.cancelConnecting();
+      return;
+    }
+
+    switch (e.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        e.preventDefault();
+        e.stopPropagation();
+        reteManager.moveConnectingCandidate(1);
+        break;
+      case "ArrowLeft":
+      case "ArrowUp":
+        e.preventDefault();
+        e.stopPropagation();
+        reteManager.moveConnectingCandidate(-1);
+        break;
+      case "Escape":
+        e.preventDefault();
+        e.stopPropagation();
+        reteManager.cancelConnecting();
+        break;
+      case "Tab":
+        // Cancel and let Tab proceed so the trap controller can move focus on.
+        reteManager.cancelConnecting();
+        break;
+    }
+  };
 
   private handleZoomIn = () => {
     const zoomManager = this.playbackReteManager || this.reteManager;
@@ -183,71 +257,67 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.reteManager.setupComplete.then(() => this.reteManager?.fitContent());
     }
 
-    this.props.onRegisterTileApi({
-      exportContentAsTileJson: (options?: ITileExportOptions) => {
-        return this.props.tileContent.exportJson(options);
-      },
-      // Note: when the component mounts it is likely that the tileElt will be undefined.
-      // So we use an arrow function so we can access `this` and look up the tileElt from
-      // props when it is needed.
-      getObjectBoundingBox: (objectId, objectType) => {
-        // The annotation layer adds the tile border when computing the position of the
-        // tile in the document. So basically it is figuring out the "inside" top left
-        // corner of the tile. This makes sense, since internally in the tile its elements
-        // are positioned inside of this border.
-        // However tileElt.getBoundClientRect gives the position include the width of the
-        // border. So this is the position of the "outside" of the tile element. Thus when
-        // we provide our bounding boxes we also need to subtract off the tile border width
-        // so they will line up when the annotation layer re-adds this border width.
-        const tileBorder = 2;
-        const padding = 5;
+    this.props.onProgramApiRef?.({ getObjectBoundingBox: this.getObjectBoundingBox });
 
-        const nodeModel = this.props.program?.nodes.get(objectId);
-
-        const reteManager = this.playbackReteManager || this.reteManager;
-        const nodeView = reteManager?.area.nodeViews.get(objectId);
-        const { tileElt } = this.props;
-        if (!nodeModel || !nodeView || !tileElt) return undefined;
-
-
-        // Observe the updateCount so every time the component is updated
-        // we recompute the bounding boxes. This is mainly important so changes
-        // to the recording state are taken into account.
-        // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe
-        const {updateCount} = this.updateObservable;
-
-        // Observe node position changes. We use liveX and liveY so we update during
-        // the drag.
-        // eslint-disable-next-line unused-imports/no-unused-vars
-        const {liveX, liveY} = nodeModel;
-
-        // Observe program canvas changes like translation and zooming.
-        // eslint-disable-next-line unused-imports/no-unused-vars
-        const {dx, dy, scale: programScale} = this.props.tileContent.liveProgramZoom;
-
-        const tileRect = tileElt.getBoundingClientRect();
-        const scale = tileElt.offsetWidth / tileRect.width;
-        const nodeRect = nodeView.element.getBoundingClientRect();
-
-        return {
-          left: (nodeRect.left-tileRect.left) * scale - tileBorder - padding,
-          top:  (nodeRect.top-tileRect.top) * scale - tileBorder - padding,
-          width: nodeRect.width * scale + padding*2,
-          height: nodeRect.height * scale + padding*2
-        };
-      }
-    });
-
+    document.addEventListener("keydown", this.handleConnectingKeyDown, true);
   }
 
   public componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleConnectingKeyDown, true);
     clearInterval(this.intervalHandle);
     this.reteManager?.dispose();
     this.reteManager = undefined;
     this.playbackReteManager?.dispose();
     this.playbackReteManager = undefined;
     this.props.onReteManagerCreated?.(undefined);
+    this.props.onProgramApiRef?.(null);
   }
+
+  public getObjectBoundingBox = (objectId: string, _objectType?: string): ObjectBoundingBox | undefined => {
+    // The annotation layer adds the tile border when computing the position of the
+    // tile in the document. So basically it is figuring out the "inside" top left
+    // corner of the tile. This makes sense, since internally in the tile its elements
+    // are positioned inside of this border.
+    // However tileElt.getBoundClientRect gives the position include the width of the
+    // border. So this is the position of the "outside" of the tile element. Thus when
+    // we provide our bounding boxes we also need to subtract off the tile border width
+    // so they will line up when the annotation layer re-adds this border width.
+    const tileBorder = 2;
+    const padding = 5;
+
+    const nodeModel = this.props.program?.nodes.get(objectId);
+
+    const reteManager = this.playbackReteManager || this.reteManager;
+    const nodeView = reteManager?.area.nodeViews.get(objectId);
+    const { tileElt } = this.props;
+    if (!nodeModel || !nodeView || !tileElt) return undefined;
+
+    // Observe the updateCount so every time the component is updated
+    // we recompute the bounding boxes. This is mainly important so changes
+    // to the recording state are taken into account.
+    // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe
+    const {updateCount} = this.updateObservable;
+
+    // Observe node position changes. We use liveX and liveY so we update during
+    // the drag.
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    const {liveX, liveY} = nodeModel;
+
+    // Observe program canvas changes like translation and zooming.
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    const {dx, dy, scale: programScale} = this.props.tileContent.liveProgramZoom;
+
+    const tileRect = tileElt.getBoundingClientRect();
+    const scale = tileElt.offsetWidth / tileRect.width;
+    const nodeRect = nodeView.element.getBoundingClientRect();
+
+    return {
+      left: (nodeRect.left-tileRect.left) * scale - tileBorder - padding,
+      top:  (nodeRect.top-tileRect.top) * scale - tileBorder - padding,
+      width: nodeRect.width * scale + padding*2,
+      height: nodeRect.height * scale + padding*2
+    };
+  };
 
   public componentDidUpdate(prevProps: IProps) {
     this.initReteManagersIfNeeded();

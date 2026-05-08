@@ -1,4 +1,5 @@
 @import "../../components/vars";
+@import "../../components/mixins";
 
 $member-size: 18px;
 
@@ -96,16 +97,21 @@ $member-size: 18px;
 
     .student-groups-button {
       align-items: center;
+      appearance: none;
       background-color: $workspace-teal-light-5;
       border: solid 1.5px $charcoal-light-1;
       border-radius: 5px;
       box-sizing: border-box;
+      color: inherit;
       cursor: pointer;
       display: flex;
       flex-direction: row;
+      font: inherit;
       gap: 8px;
       height: 40px;
       padding: 0 0 0 8px;
+
+      @include focus-ring;
 
       &:hover {
         background-color: $workspace-teal-light-3;
@@ -196,6 +202,10 @@ $member-size: 18px;
     }
 
     .group {
+      appearance: none;
+      background: none;
+      color: inherit;
+      font: inherit;
       height: 40px;
       min-width: 109px;
       max-width: 124px;
@@ -211,6 +221,8 @@ $member-size: 18px;
       border-radius: 5px;
       border: solid 1.5px $charcoal-light-1;
       cursor: pointer;
+
+      @include focus-ring;
 
       &:hover {
         background-color: $workspace-teal-light-3;

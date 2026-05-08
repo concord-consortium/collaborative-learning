@@ -2,6 +2,7 @@ import React, { useCallback, useRef } from "react";
 import DeleteNodeIcon from "../assets/icons/delete-node.svg";
 import { useStopEventPropagation } from "./controls/custom-hooks";
 import { ReteManager } from "./rete-manager";
+import { handleBlockChildKeyDown } from "./dataflow-node";
 
 
 interface IProps {
@@ -15,15 +16,22 @@ export const Delete = ({reteManager, nodeId}: IProps) => {
     reteManager.removeNodeAndConnections(nodeId);
   }, [reteManager, nodeId]);
 
-  const divRef = useRef<HTMLDivElement>(null);
-  useStopEventPropagation(divRef, "pointerdown");
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  useStopEventPropagation(buttonRef, "pointerdown");
   return (
-    <div className="close-node-button control-color control-color-hoverable"
-      ref={divRef}
-      onClick={handleClick} title={"Delete Block"}>
+    <button
+      type="button"
+      className="close-node-button control-color control-color-hoverable"
+      ref={buttonRef}
+      tabIndex={-1}
+      onClick={handleClick}
+      onKeyDown={handleBlockChildKeyDown}
+      aria-label="Delete Block"
+      title="Delete Block"
+    >
       <svg className="icon">
         <DeleteNodeIcon />
       </svg>
-    </div>
+    </button>
   );
 };

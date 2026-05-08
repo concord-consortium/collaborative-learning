@@ -1,4 +1,5 @@
 @import "../../../../components/vars";
+@import "../../../../components/mixins";
 @import "../dataflow-vars";
 
 $duration-label-back: $gray-mid;
@@ -68,10 +69,7 @@ $duration-label-back: $gray-mid;
         touch-action: pan-x;
         z-index: 2;
 
-        &:focus {
-          outline: none;
-          box-shadow: none;
-        }
+        @include focus-ring(2px);
 
         &:active {
           cursor: grabbing;
@@ -143,7 +141,10 @@ $duration-label-back: $gray-mid;
     border-radius: 12px;
     background-color: #ffffff;
     font-size: 11px;
-    outline: 0;
+    // Suppress the browser's default focus outline (it overlaps the rounded chrome
+    // awkwardly), then layer the canonical focus ring on keyboard focus only.
+    &:focus { outline: none; }
+    @include focus-ring(2px);
     &:disabled {
       cursor: default;
     }

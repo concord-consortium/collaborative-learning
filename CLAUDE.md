@@ -88,6 +88,8 @@ See [tiles.md](tiles.md) for detailed tile documentation.
 - `doc-editor.tsx` - Standalone document editor (`/editor/`)
 - `authoring/` - Custom authoring system
 
+**className construction**: When a JSX element has any conditional or computed class, use the `classnames` helper (`import classNames from "classnames"`) rather than template literals or string concatenation. Pass static classes as bare strings, conditional classes via the object form, and any precomputed class variable as another argument. Example: `classNames("history-entry-item", sourceClass, { expanded, "not-undoable": !undoable })`. A plain string literal is fine only when there are no conditions or interpolations at all.
+
 ### URL Parameters for Testing
 
 | Parameter | Values | Purpose |

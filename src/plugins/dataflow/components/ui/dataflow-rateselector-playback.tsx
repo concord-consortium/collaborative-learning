@@ -44,6 +44,10 @@ export const RateSelectorOrPlayBack = observer(function RateSelectorOrPlayBack(p
     onRateSelectClick(Number(event.target.value));
   };
 
+  const sliderAriaLabel = isRecording ? "Recording duration" : "Playback position";
+  const sliderValueTextFormatter = (value: number) =>
+    `${formatTime(value)} of ${formatTime(sliderMaxValue)}`;
+
   return (
     <>
       <div className="topbar-sampleratetext-or-timeslider">
@@ -56,6 +60,8 @@ export const RateSelectorOrPlayBack = observer(function RateSelectorOrPlayBack(p
               step={1}
               value={sliderSec}
               ref={railRef}
+              ariaLabelForHandle={sliderAriaLabel}
+              ariaValueTextFormatterForHandle={sliderValueTextFormatter}
             />
           </div>
           :
@@ -71,6 +77,7 @@ export const RateSelectorOrPlayBack = observer(function RateSelectorOrPlayBack(p
               disabled={readOnly}
               value={dataRate.toString()}
               id="rate-select" // TODO: The id needs to be unique to the particular DF tile
+              data-testid="rate-select"
             >
               {
                 rateOptions.map((rate: ProgramDataRate) => (

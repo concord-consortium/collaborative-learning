@@ -61,7 +61,7 @@ export function isImageObjectSnapshot(object: DrawingObjectSnapshot): object is 
 }
 
 export const ImageComponent: React.FC<IDrawingComponentProps> = observer(function ImageComponent({model, handleHover,
-  handleDrag}){
+  handleDrag, a11yProps}){
   if (model.type !== "image") return null;
   const image = model as ImageObjectType;
   const { id, displayUrl } = image;
@@ -69,7 +69,8 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
   const height = image.dragHeight ?? image.height;
 
   return (
-    <Transformable type="image" key={id} transform={image.transform} setAnimating={image.setAnimating}>
+    <Transformable type="image" key={id} transform={image.transform} setAnimating={image.setAnimating}
+      {...a11yProps}>
       <image
         href={displayUrl}
         x={0}

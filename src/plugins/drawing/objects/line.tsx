@@ -162,7 +162,7 @@ export const LineObject = types.compose("LineObject", StrokedObject, FilledObjec
 export interface LineObjectType extends Instance<typeof LineObject> {}
 export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 
-export const LineComponent = observer(function LineComponent({model, handleHover, handleDrag}
+export const LineComponent = observer(function LineComponent({model, handleHover, handleDrag, a11yProps}
   : IDrawingComponentProps) {
   if (model.type !== "line") return null;
   const line = model as LineObjectType;
@@ -172,7 +172,8 @@ export const LineComponent = observer(function LineComponent({model, handleHover
   const commands = `M 0 0 ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
 
   return (
-    <Transformable type="line" key={id} transform={line.transform} setAnimating={line.setAnimating}>
+    <Transformable type="line" key={id} transform={line.transform} setAnimating={line.setAnimating}
+      {...a11yProps}>
       <path
         data-object-id={id}
         className="drawing-object"
