@@ -1,6 +1,5 @@
 import React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import Modal from "react-modal";
 import { GroupManagementModal } from "./group-management-modal";
 import { GroupsModelType } from "../../models/stores/groups";
@@ -117,18 +116,26 @@ describe("GroupManagementModal accessibility", () => {
   it("Escape closes the modal when allowCancel is true", async () => {
     const onClose = jest.fn();
     renderModal({ allowCancel: true, onClose });
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    const groupCard = screen.getByTestId("group-card-1");
+    await waitFor(() => {
+      expect(document.activeElement).toBe(groupCard);
+    });
 
-    await userEvent.keyboard("{Escape}");
+    // Use fireEvent with an explicit keyCode: react-modal v3 checks event.keyCode === 27,
+    // but @testing-library/user-event v14 dispatches KeyboardEvents without setting keyCode.
+    fireEvent.keyDown(groupCard, { key: "Escape", code: "Escape", keyCode: 27 });
     expect(onClose).toHaveBeenCalled();
   });
 
   it("Escape does not close the modal when allowCancel is false", async () => {
     const onClose = jest.fn();
     renderModal({ allowCancel: false, onClose });
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    const groupCard = screen.getByTestId("group-card-1");
+    await waitFor(() => {
+      expect(document.activeElement).toBe(groupCard);
+    });
 
-    await userEvent.keyboard("{Escape}");
+    fireEvent.keyDown(groupCard, { key: "Escape", code: "Escape", keyCode: 27 });
     expect(onClose).not.toHaveBeenCalled();
   });
 
