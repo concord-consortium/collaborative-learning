@@ -1246,8 +1246,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       // the system clipboard. That's perfectly fine for typical CLUE usage, but for authoring we
       // also add the content to the system clipboard. We do so to better keep track of what the
       // author intends to paste in. For example, an author may have copied an image URL from the
-      // CMS that they want to paste into the geometry tile for a background image. We use a custom
-      // MIME type for easier identification of geometry tile content in the handlePaste function.
+      // authoring system that they want to paste into the geometry tile for a background image.
+      // We use a custom MIME type for easier identification of geometry tile content in the
+      // handlePaste function.
       if (navigator.clipboard.write) {
         const type = "web text/clue-geometry-tile-content";
         const blob = new Blob([JSON.stringify(content)], { type });
@@ -1279,8 +1280,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handlePaste = async () => {
     // For authoring, we support the pasting of an image URL to set the background image of
     // the geometry tile. So before pasting in the CLUE clipboard contents, we check if the
-    // system clipboard contains a text/plain value matching the expected pattern for an
-    // image URL in the CMS. If so, we paste that image URL into the geometry tile. See
+    // system clipboard contains a text/plain value matching the expected pattern for a
+    // curriculum image URL. If so, we paste that image URL into the geometry tile. See
     // comment about system clipboard in the handleCopy function for more details.
     const osClipboardContents = await getClipboardContent();
     if (osClipboardContents?.text) {

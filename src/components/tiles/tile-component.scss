@@ -162,7 +162,7 @@ body.tile-dragging {
 }
 
 // Only show the teacher styling when the tile is inside of the
-// problem panel or when it is inside of the CMS (iframe-control)
+// problem panel or when it is inside of the authoring iframe (iframe-control)
 .problem-panel, .iframe-control {
   .tool-tile {
     &.readonly {

@@ -83,12 +83,11 @@
     "report-dir": "coverage-cypress"
   },
   "scripts": {
-    "build": "npm-run-all lint:build clean build:version build:webpack build:cms",
+    "build": "npm-run-all lint:build clean build:version build:webpack",
     "build-and-serve": "npm-run-all build serve",
     "build:debug": "npm-run-all lint clean build:webpack",
     "build:webpack": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --mode production",
-    "build:cms": "cd cms && webpack --mode production && cd .. && mkdir -p dist && cp -r cms/dist/ dist/cms/ && mv dist/cms/admin.html dist/",
-    "build:for-deploy": "npm-run-all clean build:webpack build:cms",
+    "build:for-deploy": "npm-run-all clean build:webpack",
     "check:types": "tsc --noEmit",
     "clean": "rimraf dist",
     "deploy:database:rules": "firebase deploy --only database",

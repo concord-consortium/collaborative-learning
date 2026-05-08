@@ -125,7 +125,7 @@ describe('SortWorkView Tests', () => {
     sortWork.checkDocumentInGroup("Idea, Ivan", exemplarDocs[0]);
     sortWork.checkDocumentInGroup("1, Student", studentProblemDocs[0]);
 
-    cy.log("check that exemplar document is displayed in strategy tag sourced from CMS");
+    cy.log("check that exemplar document is displayed in strategy tag sourced from curriculum");
     sortWork.getPrimarySortByMenu().click();
     cy.wait(1000);
     sortWork.getPrimarySortByTagOption().click();
@@ -155,7 +155,7 @@ describe('SortWorkView Tests', () => {
     visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
 
-    cy.log("check that exemplar document is still displayed in strategy tag sourced from CMS but not in teacher added tag");
+    cy.log("check that exemplar document is still displayed in strategy tag sourced from curriculum but not in teacher added tag");
     sortWork.getPrimarySortByMenu().click();
     sortWork.getPrimarySortByTagOption().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections

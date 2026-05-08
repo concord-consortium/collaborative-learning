@@ -10,12 +10,12 @@ CLUE (Collaborative Learning User Environment) is an educational platform built 
 
 ```bash
 # Development
-npm install                    # Install dependencies (also run in /cms subdirectory)
+npm install                    # Install dependencies
 npm start                      # Start dev server with hot module replacement
 npm run start:secure           # Start with HTTPS (requires local SSL certs)
 
 # Building
-npm run build                  # Full production build (lint + webpack + cms)
+npm run build                  # Full production build (lint + webpack)
 npm run build:webpack          # Webpack bundling only
 
 # Testing
@@ -56,7 +56,8 @@ npm run deploy:database:rules  # Deploy realtime database rules
 - `src/lib/` - Core services (db.ts, firestore.ts, auth.ts, logger.ts)
 - `src/utilities/` - Helper functions
 - `functions-v2/` - Google Cloud Functions (actively maintained)
-- `cms/` - Content Management System for authoring
+- `src/authoring/` - Custom authoring system frontend
+- `authoring-api/` - Authoring system backend API
 
 ### Plugin/Tile System
 
@@ -85,7 +86,7 @@ See [tiles.md](tiles.md) for detailed tile documentation.
 **Multi-Entry Points**: Webpack builds multiple entry points:
 - `index.tsx` - Main CLUE application
 - `doc-editor.tsx` - Standalone document editor (`/editor/`)
-- `authoring/` - CMS authoring system
+- `authoring/` - Custom authoring system
 
 **className construction**: When a JSX element has any conditional or computed class, use the `classnames` helper (`import classNames from "classnames"`) rather than template literals or string concatenation. Pass static classes as bare strings, conditional classes via the object form, and any precomputed class variable as another argument. Example: `classNames("history-entry-item", sourceClass, { expanded, "not-undoable": !undoable })`. A plain string literal is fine only when there are no conditions or interpolations at all.
 
@@ -111,7 +112,7 @@ Set `debug` in localStorage to enable features:
 ## Dependency Notes
 
 Some dependencies are locked to specific versions:
-- **React 17**: Cannot upgrade due to netlify-cms-app dependency
+- **React 17**: Upgrading to 18 requires updating several other dependencies (see dependencies-notes.md)
 - **Firebase 8**: v9 requires substantial migration work
 - **mobx-state-tree**: Uses Concord's custom fork with bug fixes
 - **nanoid 3**: v4 is ESM-only and breaks dependencies
