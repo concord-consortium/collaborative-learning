@@ -31,12 +31,23 @@
     box-sizing: border-box;
     background-color: white;
     padding: 0 0 0 4px;
+    // Reset native button chrome on the trigger element so it visually matches
+    // the option rows (which remain divs) and the prior <div> trigger.
+    border: 0;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+    color: inherit;
     &.top {
       padding: 0 6px 0 6px;
       border-radius: 3px;
       &.missing {
         background-color: pink;
       }
+    }
+    &.highlighted {
+      background-color: rgba(0, 0, 0, 0.08);
     }
     &.selectable {
       &.missing {

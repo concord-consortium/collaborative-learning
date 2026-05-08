@@ -1,4 +1,5 @@
 @import "../../../../components/vars";
+@import "../../../../components/mixins";
 @import "../dataflow-vars";
 
 $toolbar-width: 83px;
@@ -30,6 +31,10 @@ $button-label-text: $gray-text;
   border: solid 2px white;
   border-radius: 0 $half-border-radius 0 0;
   background-color: $gray-light;
+  // Render visually first inside .dataflow-program-body even though the DOM
+  // puts the palette after content (CLUE-455 requires SR linear order to match
+  // tab order: content before palette). The trap's cycleOrder enforces tab order.
+  order: -1;
 
   button {
     text-align: center;
@@ -38,8 +43,11 @@ $button-label-text: $gray-text;
     height: 40px;
     background-color: $toolbar-background;
     border: 0;
-    outline: 0;
     cursor: pointer;
+    // Bar-graph pattern: suppress non-keyboard focus outline, then layer the
+    // canonical focus ring on keyboard focus only.
+    &:focus { outline: none; }
+    @include focus-ring(-2px);
     &:hover:not([disabled]) {
       background-color: $button-hover;
     }

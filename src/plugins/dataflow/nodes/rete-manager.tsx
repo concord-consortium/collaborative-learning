@@ -148,6 +148,9 @@ export class ReteManager implements INodeServices {
         if (event === "nodedragged") {
           // We are done dragging the node, so save the position for real
           nodeModel.setPosition(nodeView.position);
+          // Drag changes the reading order; re-sync DOM so tab order matches.
+          // Deferred so Rete finishes its own DOM updates first.
+          queueMicrotask(() => this.syncNodeDomOrder());
         } else {
           // We are currently translating the node, only save it in volatile
           nodeModel.setLivePosition(nodeView.position);
@@ -290,6 +293,30 @@ export class ReteManager implements INodeServices {
     // Need to do an initial process after all of the nodes are create so their inputs are correct
     this.processAfterProgramChange();
     this.updateSharedProgramData();
+
+    // After the initial node DOM is mounted, sort children to match reading order
+    // so tab cycle / SR linear nav follow the visual layout. Subsequent changes are
+    // handled by the editor and area pipes below.
+    queueMicrotask(() => this.syncNodeDomOrder());
+
+    // Keep DOM order in sync with reading order on add/remove. Runs in both editable
+    // and read-only modes — the read-only tile still presents tabbable nodes for SR users.
+    editor.addPipe(context => {
+      if (context.type === "nodecreated" || context.type === "noderemoved") {
+        queueMicrotask(() => this.syncNodeDomOrder());
+      }
+      return context;
+    });
+
+    // If a node is removed while the user is in keyboard connection mode, recompute
+    // candidates so the cached socket-element references don't point at detached DOM.
+    // queueMicrotask defers until React has flushed the unmount.
+    editor.addPipe(context => {
+      if (context.type === "noderemoved" && this.isConnecting) {
+        queueMicrotask(() => this.refreshConnectingCandidates({ refocus: true }));
+      }
+      return context;
+    });
 
     if (!this.readOnly) {
       editor.addPipe(context => {
@@ -457,6 +484,330 @@ export class ReteManager implements INodeServices {
   public selectNode = (nodeId: string) => {
     this.area.emit({ type: "nodepicked", data: { id: nodeId } });
   };
+
+  /**
+   * Focus the node's keyboard-focusable `.node` div.
+   *
+   * `area.nodeViews.get(id).element` is Rete's positioning wrapper (no tabindex),
+   * with the React-rendered `.node` div nested inside. Calling `.focus()` on the
+   * wrapper does nothing, so callers that move focus by node id must reach down
+   * to the inner `.node` element instead.
+   */
+  public focusNode(nodeId: string) {
+    const view = this.area.nodeViews.get(nodeId);
+    view?.element?.querySelector<HTMLElement>('.node')?.focus();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Keyboard-driven connection mode
+  //
+  // Public surface:
+  //   beginConnectingFrom(sourceNodeId, sourceKey)  Enter on output socket
+  //   moveConnectingCandidate(direction)            Arrow keys cycle candidates
+  //   commitConnectingTo(targetNodeId, targetKey)   Enter on candidate input
+  //   cancelConnecting()                            Escape (and Tab via program)
+  //   isConnecting                                  read-only flag for handlers
+  //
+  // The state is a plain field — render code does not read it; the visual cue
+  // comes from a `connection-candidate` DOM class on each candidate socket and
+  // from focus moves between candidates.
+  // ---------------------------------------------------------------------------
+
+  private connecting: {
+    sourceNodeId: string;
+    sourceKey: string;
+    candidates: Array<{ nodeId: string; inputKey: string; socketEl: HTMLElement }>;
+    candidateIndex: number;
+  } | null = null;
+
+  public get isConnecting() { return this.connecting != null; }
+
+  /**
+   * Walks every node other than the source, every input socket on each, and
+   * collects the rendered socket-wrapper elements (those carrying
+   * `data-socket-side="input"` and `data-socket-key`). Sorted by node reading
+   * order so arrow-cycling matches what a sighted user expects.
+   */
+  public getCompatibleTargets(sourceNodeId: string, sourceOutputKey: string): Array<{
+    nodeId: string;
+    inputKey: string;
+    socketEl: HTMLElement;
+  }> {
+    const sourceNode = this.editor.getNode(sourceNodeId);
+    if (!sourceNode || !sourceNode.outputs?.[sourceOutputKey]) return [];
+    const candidates: Array<{ nodeId: string; inputKey: string; socketEl: HTMLElement }> = [];
+    for (const node of this.editor.getNodes()) {
+      if (node.id === sourceNodeId) continue;
+      const view = this.area.nodeViews.get(node.id);
+      if (!view?.element) continue;
+      for (const inputKey of Object.keys(node.inputs)) {
+        if (!node.inputs[inputKey]) continue;
+        const socketEl = view.element.querySelector<HTMLElement>(
+          `[data-socket-side="input"][data-socket-key="${inputKey}"]`
+        );
+        if (socketEl) candidates.push({ nodeId: node.id, inputKey, socketEl });
+      }
+    }
+    const order = this.getNodeIdsInReadingOrder();
+    const orderIndex = new Map(order.map((id, i) => [id, i]));
+    candidates.sort((a, b) => (orderIndex.get(a.nodeId) ?? 0) - (orderIndex.get(b.nodeId) ?? 0));
+    return candidates;
+  }
+
+  /**
+   * Programmatically create a connection. The connection plugin's drag flow
+   * routes through the same `editor.addConnection` underneath, so the MST
+   * model, processing, and event listeners all fire identically. Replaces any
+   * existing connection on the target input first to mirror the drag UX.
+   */
+  public async connect(
+    sourceNodeId: string, sourceOutputKey: string,
+    targetNodeId: string, targetInputKey: string
+  ) {
+    this.removeInputConnection(targetNodeId, targetInputKey);
+    await this.editor.addConnection({
+      id: uniqueId(),
+      source: sourceNodeId,
+      sourceOutput: sourceOutputKey,
+      target: targetNodeId,
+      targetInput: targetInputKey,
+    } as any);
+  }
+
+  public beginConnectingFrom(sourceNodeId: string, sourceKey: string) {
+    if (this.readOnly) return;
+    const candidates = this.getCompatibleTargets(sourceNodeId, sourceKey);
+    if (candidates.length === 0) {
+      this.announce("No compatible target sockets");
+      return;
+    }
+    this.connecting = { sourceNodeId, sourceKey, candidates, candidateIndex: 0 };
+    candidates.forEach(c => c.socketEl.classList.add("connection-candidate"));
+    // Mark the source so users can still see where the in-flight connection starts.
+    this.getOutputSocketEl(sourceNodeId, sourceKey)?.classList.add("connection-source");
+    candidates[0].socketEl.focus();
+    const sourceNode = this.editor.getNode(sourceNodeId);
+    this.announce(
+      `Connecting from ${sourceNode?.label} ${sourceKey}. ` +
+      `Use arrow keys to choose target. Enter to connect, Escape to cancel.`
+    );
+  }
+
+  public moveConnectingCandidate(direction: 1 | -1) {
+    if (!this.connecting) return;
+    // If the cached candidate's DOM element is detached (e.g. its node was
+    // removed mid-connection), recompute against the live editor before moving.
+    const current = this.connecting.candidates[this.connecting.candidateIndex];
+    if (!current?.socketEl.isConnected && !this.refreshConnectingCandidates({ refocus: false })) {
+      return;
+    }
+    const n = this.connecting.candidates.length;
+    this.connecting.candidateIndex = (this.connecting.candidateIndex + direction + n) % n;
+    this.connecting.candidates[this.connecting.candidateIndex].socketEl.focus();
+  }
+
+  public async commitConnectingTo(targetNodeId: string, targetInputKey: string) {
+    if (!this.connecting) return;
+    const { sourceNodeId, sourceKey, candidates } = this.connecting;
+    const matched = candidates.some(c => c.nodeId === targetNodeId && c.inputKey === targetInputKey);
+    if (!matched) return;
+    await this.connect(sourceNodeId, sourceKey, targetNodeId, targetInputKey);
+    this.cleanupConnectingHighlights();
+    const sourceNode = this.editor.getNode(sourceNodeId);
+    const targetNode = this.editor.getNode(targetNodeId);
+    this.connecting = null;
+    this.announce(`Connected ${sourceNode?.label} to ${targetNode?.label}`);
+    this.focusNode(targetNodeId);
+  }
+
+  public cancelConnecting() {
+    if (!this.connecting) return;
+    const { sourceNodeId, sourceKey } = this.connecting;
+    this.cleanupConnectingHighlights();
+    this.connecting = null;
+    this.announce("Cancelled connection");
+    // Don't try to focus a detached socket — its node may have been removed.
+    const sourceEl = this.getOutputSocketEl(sourceNodeId, sourceKey);
+    if (sourceEl?.isConnected) sourceEl.focus();
+  }
+
+  /**
+   * Recompute the connecting candidate list from the live editor and DOM,
+   * preserving the active candidate's focus when possible. Used when a node
+   * removal mid-connection invalidates cached `socketEl` references.
+   *
+   * Returns `true` if connecting mode can continue; `false` if the source
+   * node is gone or no candidates remain, in which case state is reset and
+   * a "Cancelled connection" announcement fires.
+   */
+  private refreshConnectingCandidates({ refocus }: { refocus: boolean }): boolean {
+    if (!this.connecting) return false;
+    const { sourceNodeId, sourceKey, candidates, candidateIndex } = this.connecting;
+
+    const sourceNode = this.editor.getNode(sourceNodeId);
+    if (!sourceNode) {
+      // Source node was removed — nothing to connect from.
+      candidates.forEach(c => c.socketEl.classList.remove("connection-candidate"));
+      this.connecting = null;
+      this.announce("Cancelled connection");
+      return false;
+    }
+
+    const fresh = this.getCompatibleTargets(sourceNodeId, sourceKey);
+    if (fresh.length === 0) {
+      this.cleanupConnectingHighlights();
+      this.connecting = null;
+      this.announce("Cancelled connection");
+      return false;
+    }
+
+    // Try to keep the previously-active candidate; otherwise clamp to a valid index.
+    const prev = candidates[candidateIndex];
+    let nextIndex = prev
+      ? fresh.findIndex(c => c.nodeId === prev.nodeId && c.inputKey === prev.inputKey)
+      : -1;
+    if (nextIndex === -1) nextIndex = Math.min(candidateIndex, fresh.length - 1);
+
+    // Clear stale highlights, apply to the new set.
+    candidates.forEach(c => c.socketEl.classList.remove("connection-candidate"));
+    fresh.forEach(c => c.socketEl.classList.add("connection-candidate"));
+
+    this.connecting = { sourceNodeId, sourceKey, candidates: fresh, candidateIndex: nextIndex };
+    if (refocus) fresh[nextIndex].socketEl.focus();
+    return true;
+  }
+
+  private cleanupConnectingHighlights() {
+    if (!this.connecting) return;
+    this.connecting.candidates.forEach(c => c.socketEl.classList.remove("connection-candidate"));
+    this.getOutputSocketEl(
+      this.connecting.sourceNodeId, this.connecting.sourceKey
+    )?.classList.remove("connection-source");
+  }
+
+  private getOutputSocketEl(nodeId: string, socketKey: string): HTMLElement | undefined {
+    const view = this.area.nodeViews.get(nodeId);
+    return view?.element?.querySelector<HTMLElement>(
+      `[data-socket-side="output"][data-socket-key="${socketKey}"]`
+    ) ?? undefined;
+  }
+
+  public announcement = observable({ value: "" });
+  private announceTimeoutId: number | null = null;
+
+  /**
+   * Pushes a string into the live region for screen reader announcements.
+   * Clears the region, then sets the message after a delay long enough for
+   * SR pollers (~100-150ms) to observe the cleared state — so identical
+   * back-to-back messages are still re-announced. rAF (~16ms) is too short.
+   */
+  public announce(message: string) {
+    if (this.announceTimeoutId !== null) {
+      window.clearTimeout(this.announceTimeoutId);
+    }
+    runInAction(() => {
+      this.announcement.value = "";
+    });
+    this.announceTimeoutId = window.setTimeout(() => {
+      this.announceTimeoutId = null;
+      runInAction(() => {
+        this.announcement.value = message;
+      });
+    }, 150);
+  }
+
+  /**
+   * Returns node ids in left-to-right, top-to-bottom reading order.
+   *
+   * Groups nodes into rows by Y position with a tolerance of half the placement
+   * grid's row height (`kRowHeight` in `getNewNodePosition`). A node joins the
+   * current row when its Y is within that tolerance of the row's first entry;
+   * otherwise it starts a new row. Within a row, sorts by X. Breaks exact-position
+   * ties by id (creation-order-stable).
+   *
+   * Using a fixed tolerance instead of measured-height overlap avoids merging
+   * vertically-stacked nodes whose rendered heights exceed the 90px grid spacing
+   * (e.g. plot-open or Live Output nodes), which would otherwise put every
+   * node in column 0 into the same "row" and let the id tiebreaker decide order.
+   */
+  public getNodeIdsInReadingOrder(): string[] {
+    const ROW_TOLERANCE = 45;
+    interface Entry { id: string; x: number; y: number; }
+    const entries: Entry[] = this.editor.getNodes().map(n => {
+      // Prefer the MST model's persisted position over the area-plugin's
+      // view.position. `area.translate(...)` is async (it awaits guards before
+      // assigning to view.position), so a node created and translated in the
+      // same task still has view.position = {0, 0} at this point — that would
+      // collapse every just-created node into the same y-band and let the id
+      // tiebreaker decide order. The MST model gets x/y from `addNodeSnapshot`
+      // synchronously, so reading from there avoids the race. Fall back to the
+      // view position when the MST model isn't available (e.g., unit-test stubs).
+      const model = this.mstProgram?.nodes?.get(n.id);
+      if (model && Number.isFinite(model.x) && Number.isFinite(model.y)) {
+        return { id: n.id, x: model.x, y: model.y };
+      }
+      const view = this.area.nodeViews.get(n.id);
+      const pos = view?.position ?? { x: 0, y: 0 };
+      return { id: n.id, x: pos.x, y: pos.y };
+    });
+    entries.sort((a, b) => a.y - b.y);
+
+    const rows: Entry[][] = [];
+    for (const e of entries) {
+      const lastRow = rows[rows.length - 1];
+      if (lastRow && Math.abs(e.y - lastRow[0].y) < ROW_TOLERANCE) {
+        lastRow.push(e);
+      } else {
+        rows.push([e]);
+      }
+    }
+    for (const row of rows) {
+      row.sort((a, b) => a.x !== b.x ? a.x - b.x : a.id.localeCompare(b.id));
+    }
+    return rows.flatMap(row => row.map(e => e.id));
+  }
+
+  /**
+   * Re-sorts the Rete area container's node DOM children to match
+   * `getNodeIdsInReadingOrder()`. Rete positions nodes via CSS `transform`
+   * (independent of DOM order), so moving children around is visually a no-op,
+   * but it makes Tab order, screen-reader linear navigation, and the DevTools
+   * Elements panel all match the visual reading order. Without this, tab-cycle
+   * follows Rete's creation order which can leave a left-side node visited
+   * after a right-side node.
+   *
+   * Safe to call any time. No-op when there are fewer than 2 nodes or when no
+   * node has been attached to a parent yet.
+   */
+  public syncNodeDomOrder = () => {
+    const order = this.getNodeIdsInReadingOrder();
+    if (order.length < 2) return;
+    const firstView = this.area.nodeViews.get(order[0]);
+    const container = firstView?.element?.parentElement;
+    if (!container) return;
+    // appendChild moves an already-attached node to the end of children, so
+    // walking in reading order leaves the children in that exact order.
+    for (const id of order) {
+      const view = this.area.nodeViews.get(id);
+      if (view?.element) container.appendChild(view.element);
+    }
+  };
+
+  public nextNodeIdInReadingOrder(currentId: string, key: string): string | undefined {
+    const order = this.getNodeIdsInReadingOrder();
+    if (order.length === 0) return undefined;
+    const i = order.indexOf(currentId);
+    if (i < 0) return order[0];
+    switch (key) {
+      case "ArrowRight":
+      case "ArrowDown": return order[(i + 1) % order.length];
+      case "ArrowLeft":
+      case "ArrowUp":   return order[(i - 1 + order.length) % order.length];
+      case "Home":      return order[0];
+      case "End":       return order[order.length - 1];
+      default:          return undefined;
+    }
+  }
 
   private syncSelection() {
     // The selector stores entities with compound keys like "node_<id>".
@@ -724,6 +1075,10 @@ export class ReteManager implements INodeServices {
     if (this.fitTimeout) {
       clearTimeout(this.fitTimeout);
       this.fitTimeout = undefined;
+    }
+    if (this.announceTimeoutId !== null) {
+      window.clearTimeout(this.announceTimeoutId);
+      this.announceTimeoutId = null;
     }
 
     const {area, editor} = this;

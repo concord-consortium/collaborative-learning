@@ -330,13 +330,14 @@ describe("TileComponent focus trap", () => {
       expect(document.activeElement).toBe(titleElement);
     });
 
-    it("Shift+Tab on selected tile enters focus trap backward", () => {
+    it("Shift+Tab on selected tile enters focus trap on the toolbar's active item", () => {
       const { stores, tileModel, tileElement, toolbarButtons } = renderFocusTrapTile();
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { tileElement.focus(); });
       fireEvent.keyDown(tileElement, { key: "Tab", shiftKey: true });
-      // Reverse entry: resize (absent) → toolbar (last button)
-      expect(document.activeElement).toBe(toolbarButtons[toolbarButtons.length - 1]);
+      // Reverse entry: resize (absent) → toolbar; lands on the roving-active
+      // button (the one with tabindex="0"), which is the first button by default.
+      expect(document.activeElement).toBe(toolbarButtons[0]);
     });
 
     it("Tab on selected tile without title/content enters focus trap and reaches toolbar", () => {
@@ -400,13 +401,14 @@ describe("TileComponent focus trap", () => {
       expect(document.activeElement).toBe(titleElement);
     });
 
-    it("Shift+Tab from title wraps to last toolbar button", () => {
+    it("Shift+Tab from title wraps backward to the toolbar's active item", () => {
       const { stores, tileModel, titleElement, toolbarButtons } = renderFocusTrapTile();
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { titleElement!.focus(); });
       fireEvent.keyDown(titleElement!, { key: "Tab", shiftKey: true });
-      // Reverse: title → resize (absent) → toolbar (last button)
-      expect(document.activeElement).toBe(toolbarButtons[toolbarButtons.length - 1]);
+      // Reverse: title → resize (absent) → toolbar; lands on the roving-active
+      // button (the one with tabindex="0"), which is the first button by default.
+      expect(document.activeElement).toBe(toolbarButtons[0]);
     });
 
     it("Shift+Tab from content with no title/toolbar calls preventDefault", () => {

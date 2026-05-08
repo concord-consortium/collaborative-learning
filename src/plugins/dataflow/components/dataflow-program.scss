@@ -21,7 +21,11 @@ $dataflow-toolbar-height: 364px;
   min-height: 300px;
   height: 100%;
 
-  .toolbar-editor-container {
+  // CLUE-455: palette is a sibling of content (not a descendant) so the focus
+  // trap can treat it as its own slot. The body is a flex row containing
+  // (content, palette); palette uses order:-1 to render visually on the left
+  // while staying after content in DOM (so SR linear order matches tab order).
+  .dataflow-program-body {
     display: flex;
     flex-direction: row;
     width: 100%;
@@ -30,6 +34,13 @@ $dataflow-toolbar-height: 364px;
     &.complete {
       height: 100%;
     }
+  }
+
+  .dataflow-program-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
   }
 
   .editor-graph-container {

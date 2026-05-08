@@ -132,6 +132,8 @@ const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
         className="record-data-btn"
         onClick={onClickHandler}
         disabled={disabled}
+        aria-label={Mode[programMode]}
+        data-testid="record-data-button"
       >
         <div className="record-data-icon">
           {iconArr[programMode]}
@@ -160,6 +162,7 @@ const PlaybackButton = (props: IPlaybackProps) => {
         className="playback-data-btn"
         disabled={programMode === ProgramMode.Recording}
         onClick={handleChangeIsPlaying}
+        aria-label={isPlaying ? "Pause" : "Play"} // Added aria-label for screen readers
       >
         <div className="playback-data-icon">
           {isPlaying ? <PauseIcon/> : <PlayIcon/>}
