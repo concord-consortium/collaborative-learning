@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { act } from "react-dom/test-utils";
 import { CommentTextBox } from "./comment-textbox";
 
 jest.mock("../../hooks/use-stores", () => ({
@@ -23,7 +22,8 @@ describe("Comment Textbox", () => {
     expect(screen.getByTestId("comment-post-button")).toHaveClass(activeNavTab);
   });
 
-  it("should allow user to type text in the textarea and enable Post button", () => {
+  it("should allow user to type text in the textarea and enable Post button", async () => {
+    const user = userEvent.setup();
     const { rerender } = render((
       <CommentTextBox numPostedComments={5}/>
     ));
@@ -31,21 +31,18 @@ describe("Comment Textbox", () => {
     const textarea = screen.getByTestId("comment-textarea") as HTMLTextAreaElement;
     const text = "X"; //testing library issue when typing in more than one character
     expect(postButton).toHaveClass("disabled");
-    act(() =>{
-      userEvent.type(textarea, text);
-    });
+    await user.type(textarea, text);
     rerender(
       <CommentTextBox numPostedComments={5} />
     );
     expect(textarea.value).toBe(text);
     expect(postButton).not.toHaveClass("disabled");
-    act(() => {
-      userEvent.click(screen.getByTestId("comment-cancel-button"));
-    });
+    await user.click(screen.getByTestId("comment-cancel-button"));
     expect(textarea.value).toBe("");
     expect(postButton).toHaveClass("disabled");
   });
-  it("should allow user to type text in the textarea and enable Post button", () => {
+  it("should call onPostComment when Post button is clicked", async () => {
+    const user = userEvent.setup();
     const onPostComment = jest.fn();
     window.alert = jest.fn();
     const { rerender } = render((
@@ -55,17 +52,13 @@ describe("Comment Textbox", () => {
     const textarea = screen.getByTestId("comment-textarea") as HTMLTextAreaElement;
     const text = "X"; //testing library issue when typing in more than one character
     expect(postButton).toHaveClass("disabled");
-    act(() =>{
-      userEvent.type(textarea, text);
-    });
+    await user.type(textarea, text);
     rerender(
       <CommentTextBox numPostedComments={5} onPostComment={onPostComment} />
     );
     expect(textarea.value).toBe(text);
     expect(postButton).not.toHaveClass("disabled");
-    act(() => {
-      userEvent.click(postButton);
-    });
+    await user.click(postButton);
     expect(textarea.value).toBe("");
     expect(postButton).toHaveClass("disabled");
     expect(onPostComment).toHaveBeenCalled();
