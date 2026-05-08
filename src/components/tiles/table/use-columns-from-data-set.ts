@@ -43,7 +43,7 @@ export const useColumnsFromDataSet = ({
       linked: isLinked,
       "selected-column": gridContext.isColumnSelected(attrId)
     };
-    dataSet.selectedAttributeIds; // eslint-disable-line no-unused-expressions, @typescript-eslint/no-unused-expressions
+    dataSet.selectedAttributeIds; // eslint-disable-line @typescript-eslint/no-unused-expressions
     return {
       cellClass: classNames(`column-${attrId}`,
                             { "has-expression": content?.hasExpression(attrId), ...selectedColumnClass }),
@@ -108,7 +108,7 @@ export const useColumnsFromDataSet = ({
     if (controlsColumn) {
       cols.push(controlsColumn);
     }
-    columnChanges;  // eslint-disable-line no-unused-expressions, @typescript-eslint/no-unused-expressions
+    columnChanges;  // eslint-disable-line @typescript-eslint/no-unused-expressions
     return cols;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attributes, attributes.length, rowHeight, RowLabelHeader, RowLabelFormatter, readOnly, columnChanges,

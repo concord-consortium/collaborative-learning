@@ -47,7 +47,7 @@ export const useRowsFromDataSet = ({
                           __context__: context,
                           ..._case } as TRow));
     !readOnly && rows.push(canonicalize(dataSet, { __id__: inputRowId, __context__: context }));
-    rowChanges; // eslint-disable-line no-unused-expressions, @typescript-eslint/no-unused-expressions
+    rowChanges; // eslint-disable-line @typescript-eslint/no-unused-expressions
     return { rows, rowKeyGetter, rowClass };
   }, [context, dataSet, inputRowId, isLinked, readOnly, rowChanges, selectedCaseIds]);
 };
