@@ -38,6 +38,17 @@ export interface ClueFocusTrapConfig {
   toolbarRef?: RefObject<HTMLElement | null>;
   getToolbarElement?: () => HTMLElement | undefined;
 
+  // Optional secondary controls bar element (e.g. dataflow's Sampling Rate / Record bar).
+  // Visited as its own slot between `title` and `content`; walked focusable-by-focusable.
+  topbarRef?: RefObject<HTMLElement | null>;
+  getTopbarElement?: () => HTMLElement | undefined;
+
+  // Optional inline secondary toolbar element (e.g. dataflow's Add-Block palette).
+  // Visited as its own slot between `content` and `toolbar` (single tab stop with
+  // arrow-key roving inside).
+  paletteRef?: RefObject<HTMLElement | null>;
+  getPaletteElement?: () => HTMLElement | undefined;
+
   // Resize handle element
   resizeRef?: RefObject<HTMLElement | null>;
   getResizeElement?: () => HTMLElement | undefined;
@@ -133,13 +144,14 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
           contentElement: elements.content,
           titleElement: elements.title,
           focusContent: strategy.focusContent,
+          topbarElement: elements.topbar,
+          paletteElement: elements.palette,
         };
       },
     };
 
     config.onRegisterTileApi(tileApi);
     return () => config.onUnregisterTileApi();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // mount/unmount lifecycle matches componentDidMount/componentWillUnmount
 
   // Delegate to generic useAccessibility with focus trap wired.

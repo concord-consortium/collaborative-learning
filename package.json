@@ -83,12 +83,11 @@
     "report-dir": "coverage-cypress"
   },
   "scripts": {
-    "build": "npm-run-all lint:build clean build:version build:webpack build:cms",
+    "build": "npm-run-all lint:build clean build:version build:webpack",
     "build-and-serve": "npm-run-all build serve",
     "build:debug": "npm-run-all lint clean build:webpack",
     "build:webpack": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --mode production",
-    "build:cms": "cd cms && webpack --mode production && cd .. && mkdir -p dist && cp -r cms/dist/ dist/cms/ && mv dist/cms/admin.html dist/",
-    "build:for-deploy": "npm-run-all clean build:webpack build:cms",
+    "build:for-deploy": "npm-run-all clean build:webpack",
     "check:types": "tsc --noEmit",
     "clean": "rimraf dist",
     "deploy:database:rules": "firebase deploy --only database",
@@ -162,7 +161,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^12.1.5",
     "@testing-library/react-hooks": "^8.0.1",
-    "@testing-library/user-event": "^13.5.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/chart.js": "^2.9.37",
     "@types/color-string": "^1.5.2",
     "@types/common-tags": "^1.8.1",
@@ -251,7 +250,7 @@
   "dependencies": {
     "@chakra-ui/react": "^1.8.9",
     "@codemirror/lang-json": "^6.0.2",
-    "@concord-consortium/accessibility-tools": "0.0.1-pre.0",
+    "@concord-consortium/accessibility-tools": "0.0.1-pre.1",
     "@concord-consortium/codap-formulas-react17": "^1.1.0",
     "@concord-consortium/compute-engine": "^0.12.3-cc.2",
     "@concord-consortium/diagram-view": "1.0.2",

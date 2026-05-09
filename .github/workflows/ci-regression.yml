@@ -70,15 +70,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            cms/package-lock.json
-      - name: Install CMS Dependencies
-        working-directory: ./cms
-        run: npm ci
       - uses: cypress-io/github-action@v4
         with:
           start: npm start
           wait-on: 'http://localhost:8080'
-          # wait 10 minutes to start the addition of the CMS required this increase
           wait-on-timeout: 600
           # only record the results to dashboard.cypress.io if CYPRESS_RECORD_KEY is set
           record: ${{ !!secrets.CYPRESS_RECORD_KEY }}

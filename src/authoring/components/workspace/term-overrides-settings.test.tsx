@@ -58,19 +58,21 @@ describe("TermOverridesSettings", () => {
   });
 
   it("allows entering custom override values", async () => {
+    const user = userEvent.setup();
     render(<TermOverridesSettings />);
 
     const groupInput = screen.getByLabelText("group") as HTMLInputElement;
-    await userEvent.type(groupInput, "Team");
+    await user.type(groupInput, "Team");
 
     expect(groupInput.value).toBe("Team");
   });
 
   it("calls setUnitConfig with custom terms on save", async () => {
+    const user = userEvent.setup();
     render(<TermOverridesSettings />);
 
     const groupInput = screen.getByLabelText("group") as HTMLInputElement;
-    await userEvent.type(groupInput, "Team");
+    await user.type(groupInput, "Team");
 
     const saveButton = screen.getByRole("button", { name: /Save/i });
     fireEvent.click(saveButton);
@@ -94,10 +96,11 @@ describe("TermOverridesSettings", () => {
   });
 
   it("does not save terms that match the default value", async () => {
+    const user = userEvent.setup();
     render(<TermOverridesSettings />);
 
     const groupInput = screen.getByLabelText("group") as HTMLInputElement;
-    userEvent.type(groupInput, "group");
+    await user.type(groupInput, "group");
 
     const saveButton = screen.getByRole("button", { name: /Save/i });
     fireEvent.click(saveButton);

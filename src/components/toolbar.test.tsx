@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "mobx-react";
 import React from "react";
@@ -47,7 +47,8 @@ describe("ToolbarComponent", () => {
     }
   ];
 
-  it("renders successfully", () => {
+  it("renders successfully", async () => {
+    const user = userEvent.setup();
     render(
       <ModalProvider>
         <Provider stores={stores}>
@@ -57,11 +58,9 @@ describe("ToolbarComponent", () => {
     );
     expect(screen.getByTestId("toolbar")).toBeInTheDocument();
 
-    act(() => {
-      userEvent.click(screen.getByTestId("tool-select"));
-      userEvent.click(screen.getByTestId("tool-text"));
-      userEvent.click(screen.getByTestId("delete-button"));
-    });
+    await user.click(screen.getByTestId("tool-select"));
+    await user.click(screen.getByTestId("tool-text"));
+    await user.click(screen.getByTestId("delete-button"));
 
     // act(() => {
     //   fireEvent.dragStart(screen.getByTestId("tool-text"), new DragEvent('dragstart'));

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { Instance } from "mobx-state-tree";
+import classNames from "classnames";
 import { HistoryEntryType } from "../../models/history/history";
 import { UndoStore } from "../../models/history/undo-store";
 import { useStores } from "../../hooks/use-stores";
@@ -50,6 +51,7 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
 
   const patchCount = entry.records.reduce((total, record) => total + record.patches.length, 0);
 
+  const unknownUser = { initials: "?", fullName: undefined };
   const author = (() => {
     if (entry.uid) {
       const classUser = classStore.getUserById(entry.uid);
@@ -58,23 +60,17 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
         fullName: classUser?.displayName,
       };
     }
-    // No uid on the entry.
-    if (section === "remote") return { initials: "?", fullName: undefined };
-    // Local section. Source distinguishes how the entry got here.
-    if (entry.source === "remote") {
-      // remote-applied but legacy entry without uid
-      return { initials: "?", fullName: undefined };
-    }
-    // "local" or "revert" — created on this client
+    // No uid on the entry. In the remote section, or in the local section when the
+    // entry was applied from a remote source, this is a legacy pre-feature entry.
+    if (section === "remote" || entry.source === "remote") return unknownUser;
+    // Local section, source is "local" or "revert" — created on this client.
     return { initials: user.initials, fullName: user.name };
   })();
   const authorDetail = author.fullName
     ? `${author.fullName} (${author.initials})`
     : author.initials;
 
-  // Color the entry by its arrival source, but only in the local section —
-  // the remote section is uniformly "remote" by construction, so a per-entry
-  // accent there would just be noise.
+  // Color the entry by its arrival source, but only in the local section.
   const sourceClass = section === "local" ? `source-${entry.source}` : "";
 
   // Undo-stack decoration. undoStore is passed only in the local section.
@@ -87,7 +83,8 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
     : onUndoStack
       ? "on-undo-stack"
       : "";
-  const undoableTitle = !entry.undoable
+  const undoable = entry.undoable;
+  const undoableTitle = !undoable
     ? "Not undoable"
     : isUndoPointer
       ? "Undoable — next undo target"
@@ -96,7 +93,7 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
         : "Undoable";
 
   return (
-    <div className={`history-entry-item ${sourceClass} ${expanded ? "expanded" : ""}`}>
+    <div className={classNames("history-entry-item", sourceClass, { expanded })}>
       <button className="history-entry-summary" onClick={toggleExpanded}>
         <span className="history-entry-expand">
           {expanded ? "▼" : "▶"}
@@ -109,12 +106,10 @@ export const HistoryEntryItem: React.FC<IHistoryEntryItemProps> = observer(({
           {patchCount}p
         </span>
         <span
-          className={
-            `history-entry-undoable ${entry.undoable ? "undoable" : "not-undoable"} ${undoStackClass}`
-          }
+          className={classNames("history-entry-undoable", undoStackClass, { undoable, "not-undoable": !undoable })}
           title={undoableTitle}
         >
-          <span className="glyph">{entry.undoable ? "↩" : "✕"}</span>
+          <span className="glyph">{undoable ? "↩" : "✕"}</span>
         </span>
         <span className="history-entry-author" title={author.fullName ?? "Author"}>{author.initials}</span>
         <span className="history-entry-time">{formatTimestamp(entry.created)}</span>

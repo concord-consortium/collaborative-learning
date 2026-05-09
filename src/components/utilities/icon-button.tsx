@@ -24,6 +24,7 @@ export const IconButton = (props: IconButtonProps) => {
       className={`icon-button ${props.className}`}
       onClick={props.onClickButton}
       data-test={props.dataTestName || `${props.icon}-icon`}
+      data-testid={props.dataTestName || `${props.icon}-icon`}
       disabled={props.disabled}
     >
       <div

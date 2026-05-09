@@ -4,15 +4,24 @@ import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
  * Manages roving tabindex for toolbar keyboard navigation.
  * - Only one button has tabIndex=0 at a time (the roving target)
  * - All other buttons have tabIndex=-1
- * - All four arrow keys move focus between buttons
- * - Home/End move to first/last button
+ * - Arrow keys on the toolbar's primary axis move focus between buttons; the
+ *   off-axis arrows are intentionally ignored so they don't conflict with the
+ *   declared `aria-orientation` (vertical toolbars only respond to Up/Down,
+ *   horizontal to Left/Right).
+ * - Home/End move to first/last button (regardless of orientation).
  * - Does not wrap around
- * - Disabled buttons are focusable (not skipped)
+ * - The cycle includes every <button> descendant without filtering on disabled
+ *   state, so SR users can still discover and announce a "disabled-looking"
+ *   button. For that to actually deliver focus, those buttons must use
+ *   `aria-disabled` rather than the HTML `disabled` attribute.
  *
  * The hook queries buttons from the DOM at navigation time so it stays correct
  * when buttons dynamically change or when the toolbar configuration varies.
  */
-export function useRovingTabindex(containerRef: React.RefObject<HTMLElement | null>) {
+export function useRovingTabindex(
+  containerRef: React.RefObject<HTMLElement | null>,
+  orientation: "horizontal" | "vertical"
+) {
   const currentIndexRef = useRef(0);
 
   const getButtons = useCallback((): HTMLElement[] => {
@@ -61,16 +70,16 @@ export function useRovingTabindex(containerRef: React.RefObject<HTMLElement | nu
     const buttons = getButtons();
     if (buttons.length === 0) return;
 
+    const forwardKey = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
+    const backwardKey = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
     const currentIndex = currentIndexRef.current;
     let newIndex: number;
 
     switch (e.key) {
-      case "ArrowDown":
-      case "ArrowRight":
+      case forwardKey:
         newIndex = Math.min(currentIndex + 1, buttons.length - 1);
         break;
-      case "ArrowUp":
-      case "ArrowLeft":
+      case backwardKey:
         newIndex = Math.max(currentIndex - 1, 0);
         break;
       case "Home":
@@ -80,10 +89,17 @@ export function useRovingTabindex(containerRef: React.RefObject<HTMLElement | nu
         newIndex = buttons.length - 1;
         break;
       default:
-        return; // Don't preventDefault for other keys (Enter, Space, Tab, etc.)
+        return; // Don't preventDefault for other keys (Enter, Space, Tab, off-axis arrows, etc.)
     }
 
     e.preventDefault();
+    // Also stop propagation so the event doesn't bubble to ancestors that handle
+    // the same keys for unrelated reasons. Specifically, tile-component.tsx has an
+    // ArrowUp "soft-exit" handler that pops focus back to the tile container; without
+    // stopPropagation here, ArrowUp on a roving toolbar inside the tile would exit
+    // the toolbar instead of moving the active item. Safe for floating toolbars
+    // (rendered in a portal) because portal events don't bubble to .tool-tile.
+    e.stopPropagation();
 
     if (newIndex !== currentIndex) {
       buttons[currentIndex].setAttribute("tabindex", "-1");
@@ -91,7 +107,7 @@ export function useRovingTabindex(containerRef: React.RefObject<HTMLElement | nu
       buttons[newIndex].focus();
       currentIndexRef.current = newIndex;
     }
-  }, [getButtons]);
+  }, [getButtons, orientation]);
 
   return { handleKeyDown };
 }

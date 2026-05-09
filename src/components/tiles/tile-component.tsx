@@ -529,6 +529,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       getContentElement: () => this.getFocusTrapElements().contentElement ?? undefined,
       getTitleElement: () => this.getFocusTrapElements().titleElement ?? undefined,
       getToolbarElement: () => this.toolbarElement ?? undefined,
+      getTopbarElement: () => this.getFocusTrapElements().topbarElement ?? undefined,
+      getPaletteElement: () => this.getFocusTrapElements().paletteElement ?? undefined,
       getResizeElement: () => this.resizeElement ?? undefined,
       focusContent: () => this.getFocusTrapElements().focusContent?.() ?? false,
       onTabWhenInactive: (e, reverse) => this.navigateToSiblingTile(e, reverse),
@@ -583,6 +585,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       activeToolbarButton,
       contentElement: focusable?.contentElement || null,
       focusContent: focusable?.focusContent || null,
+      topbarElement: focusable?.topbarElement || null,
+      paletteElement: focusable?.paletteElement || null,
       resizeHandle: this.resizeElement,
     };
   }

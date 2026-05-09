@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import { HistoryEntryItem } from "./history-entry-item";
+import { HistoryManagerControls } from "./history-manager-controls";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { TreeManagerType } from "../../models/history/tree-manager";
@@ -143,34 +144,7 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(funct
           <div className="history-view-section-header">
             <h4>Remote History (Firestore)</h4>
             <span className="history-view-count">{remoteHistoryEntries.length} entries</span>
-            {concurrentManager && (
-              <div className="history-manager-controls">
-                {concurrentManager.resumeCountdownSeconds !== null ? (
-                  <>
-                    <button disabled>Pause Uploads</button>
-                    <span className="history-manager-status">
-                      Resuming in {concurrentManager.resumeCountdownSeconds}s…
-                    </span>
-                  </>
-                ) : concurrentManager.paused ? (
-                  <button onClick={() => concurrentManager.resumeUploadsAfterDelay(5000)}>
-                    Resume After 5s
-                  </button>
-                ) : (
-                  <button onClick={() => concurrentManager.pauseUploads()}>
-                    Pause Uploads
-                  </button>
-                )}
-                <button
-                  className={concurrentManager.pausedDownloads ? "paused" : ""}
-                  onClick={() => concurrentManager.pausedDownloads
-                    ? concurrentManager.resumeDownloads()
-                    : concurrentManager.pauseDownloads()}
-                >
-                  {concurrentManager.pausedDownloads ? "Resume Downloads" : "Pause Downloads"}
-                </button>
-              </div>
-            )}
+            {concurrentManager && <HistoryManagerControls manager={concurrentManager} />}
           </div>
           <div className="history-view-list">
             {remoteHistoryError ? (
