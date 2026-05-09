@@ -130,7 +130,7 @@ export const initializeApp = ({authoring, standalone, authDomain}: IInitializeAp
   let inCypress = false;
   try {
     inCypress = aWindow.Cypress || aWindow.parent?.Cypress;
-  } catch (e) {
+  } catch {
     // If we are running in a cross origin iframe this will throw an exception
   }
 

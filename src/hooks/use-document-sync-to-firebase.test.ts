@@ -33,7 +33,7 @@ const mockUseMutation = jest.fn((callback: (vars: any) => Promise<any>, options?
               try {
                 callback(vars);
               }
-              catch(e) {
+              catch {
                 // ignore any errors on retry
               }
             }, delay || 0);
