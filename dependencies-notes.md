@@ -11,7 +11,6 @@ Notes on dependencies, particularly reasons for not updating to their latest ver
 |Dependency                  |Current Version|Latest Version|Notes                                                                        |
 |----------------------------|---------------|--------------|-----------------------------------------------------------------------------|
 |@testing-library/react      |12.1.5         |13.3.0        |React 18                                                                     |
-|@testing-library/user-event |13.5.0         |14.4.3        |Version 14 broke tests; did not investigate further.                         |
 |@types/react                |17.0.48        |18.0.17       |React 18                                                                     |
 |@types/react-dom            |17.0.17        |18.0.6        |React 18                                                                     |
 |@types/react-tabs           |2.3.4          |5.0.5         |Versions 3 and 4 were never published(?); Version 5 requires React 18        |
