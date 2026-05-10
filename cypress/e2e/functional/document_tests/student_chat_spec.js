@@ -22,7 +22,7 @@ context("Chat Panel", () => {
     cy.wait(1000);
 
     // click on a document
-    cy.get(".scaled-list-item-container").first().click();
+    cy.get(".documents-list .list-item").first().click();
 
     ChatTestHelpers.verifyChatPanelBasics();
     // This check will fail because commenting on curriculum is not currently supported,

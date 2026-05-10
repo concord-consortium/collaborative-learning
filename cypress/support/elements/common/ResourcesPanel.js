@@ -36,11 +36,11 @@ class ResourcesPanel{
     }
 
     starCanvasItem(tab, section,title){
-        cy.get('.documents-list.'+section+' .list-item[data-test='+section+'-list-items]').contains('.footer', title).siblings('.icon-holder').find('.icon-star').click();
+        cy.get('.documents-list.'+section+' .list-item[data-test='+section+'-list-items]').contains('.footer', title).closest('.list-item-container').children('.icon-holder').find('.icon-star').click();
     }
 
     getCanvasStarIcon(tab,section,title){
-        return this.getCanvasItemTitle(tab, section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star');
+        return this.getCanvasItemTitle(tab, section).contains(title).closest('.list-item-container').children('.icon-holder').find('.icon-star');
     }
 
     getDocumentCloseButton() {

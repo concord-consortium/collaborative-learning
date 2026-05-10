@@ -24,16 +24,19 @@ export const SimpleDocumentItem = observer(function SimpleDocumentItem(
   const selected = ui.highlightedSortWorkDocument === document.key;
 
   const handleClick = () => {
-    onSelectDocument(document);
+    if (!isPrivate) onSelectDocument(document);
   };
 
   return (
-    <div
+    <button
+      aria-current={selected ? "true" : undefined}
+      aria-disabled={isPrivate || undefined}
+      aria-label={titleWithUser}
       className={classNames("simple-document-item", { selected, private: isPrivate })}
       data-test="simple-document-item"
       title={titleWithUser}
-      onClick={!isPrivate ? handleClick : undefined}
-    >
-    </div>
+      type="button"
+      onClick={handleClick}
+    />
   );
 });

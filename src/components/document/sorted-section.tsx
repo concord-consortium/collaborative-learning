@@ -1,6 +1,7 @@
 import React from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
+import { kebabCase } from "lodash";
 
 import { useStores } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
@@ -120,6 +121,8 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
   };
 
   const sectionClasses = classNames("sorted-sections", {"show-documents": showDocuments});
+  const documentsListId = `documents-list-${kebabCase(documentGroup.label)}-${idx}`;
+  const toggleLabel = `Toggle ${documentGroup.label} documents`;
 
   return (
     <div className={sectionClasses} key={`documentGroup-${idx}`}>
@@ -130,10 +133,19 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
         </div>
         <div className="section-header-right">
           <div>Total {translate("workspaces")}: {documentCount}</div>
-          <ArrowIcon
-            className={classNames("section-header-arrow", {up: showDocuments})}
+          <button
+            aria-controls={documentsListId}
+            aria-expanded={showDocuments}
+            aria-label={toggleLabel}
+            className="section-header-arrow-button"
+            type="button"
             onClick={handleToggleShowDocuments}
-          />
+          >
+            <ArrowIcon
+              className={classNames("section-header-arrow", {up: showDocuments})}
+              aria-hidden="true"
+            />
+          </button>
         </div>
         </div>
       </div>
@@ -142,7 +154,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
           {secondarySort}
         </div>
       }
-      <div className="documents-list" data-testid="section-document-list">
+      <div id={documentsListId} className="documents-list" data-testid="section-document-list">
         {showDocuments && renderList()}
       </div>
     </div>
