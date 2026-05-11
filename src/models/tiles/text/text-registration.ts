@@ -1,7 +1,7 @@
 import { registerPlugins } from "@concord-consortium/slate-editor";
 import TextToolComponent from "../../../components/tiles/text/text-tile";
-import { HighlightsPlugin, kHighlightTextPluginName } from "../../../plugins/text/highlights-plugin";
-import { registerLinkComponent } from "../../../plugins/text/link-plugin";
+import { HighlightsPlugin, kHighlightTextPluginName } from "../../../components/tiles/text/plugins/highlights-plugin";
+import { registerLinkComponent } from "../../../components/tiles/text/plugins/link-plugin";
 import { registerTileComponentInfo } from "../tile-component-info";
 import { registerTileContentInfo } from "../tile-content-info";
 import { kTextTileType, TextContentModel, defaultTextContent } from "./text-content";

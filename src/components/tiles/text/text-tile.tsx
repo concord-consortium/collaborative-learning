@@ -12,8 +12,8 @@ import { userSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { HighlightRegistryContext, HighlightRevisionContext, IHighlightBox }
-    from "../../../plugins/text/highlight-registry-context";
-import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
+    from "./plugins/highlight-registry-context";
+import { kHighlightFormat } from "./plugins/highlights-plugin";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";

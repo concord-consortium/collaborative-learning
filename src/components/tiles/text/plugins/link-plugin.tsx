@@ -3,8 +3,8 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import { BaseElement, ReactEditor, registerElementComponent, RenderElementProps, useSelected, useSerializing,
   useSlate } from "@concord-consortium/slate-editor";
-import { TextContentModelContext } from "../../components/tiles/text/text-content-context";
-import { kDefaultLinkDisplayMode } from "../../models/tiles/text/text-content";
+import { TextContentModelContext } from "../text-content-context";
+import { kDefaultLinkDisplayMode } from "../../../../models/tiles/text/text-content";
 import "./link-plugin.scss";
 
 export const kLinkFormat = "link";

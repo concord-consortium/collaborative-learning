@@ -10,8 +10,8 @@ import { getAllTextPluginInfos } from "./text-plugin-info";
 import { escapeBackslashes, escapeDoubleQuotes, removeNewlines, removeTabs } from "../../../utilities/string-utils";
 import { tileContentAPIViews } from "../tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
-import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
-import { IHighlightBox } from "../../../plugins/text/highlight-registry-context";
+import { kHighlightFormat } from "../../../components/tiles/text/plugins/highlights-plugin";
+import { IHighlightBox } from "../../../components/tiles/text/plugins/highlight-registry-context";
 
 export const kTextTileType = "Text";
 

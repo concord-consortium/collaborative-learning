@@ -1,5 +1,5 @@
 import { HighlightsPlugin } from "./highlights-plugin";
-import { TextContentModel, TextContentModelType } from "../../models/tiles/text/text-content";
+import { TextContentModel, TextContentModelType } from "../../../../models/tiles/text/text-content";
 
 describe("HighlightsPlugin", () => {
   let model: TextContentModelType;

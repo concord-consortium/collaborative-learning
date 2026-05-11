@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { Editor, EFormat, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
-import { ClueLinkElement } from "../../../../plugins/text/link-plugin";
+import { ClueLinkElement } from "../plugins/link-plugin";
 
 import { useCustomModal } from "../../../../hooks/use-custom-modal";
 import { logTileChangeEvent } from "../../../../models/tiles/log/log-tile-change-event";

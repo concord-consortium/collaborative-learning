@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 import { Path, Text } from "slate";
 import { ReactEditor, Editor, Range, Transforms, useSlate } from "@concord-consortium/slate-editor";
 import { HighlightsPlugin, kHighlightTextPluginName, kHighlightFormat, HighlightElement }
-  from "../../../../plugins/text/highlights-plugin";
+  from "../plugins/highlights-plugin";
 import { useStores } from "../../../../hooks/use-stores";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../toolbar/toolbar-button-manager";

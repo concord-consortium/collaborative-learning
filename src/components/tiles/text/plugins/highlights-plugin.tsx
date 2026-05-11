@@ -3,9 +3,9 @@ import classNames from "classnames/dedupe";
 import { BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
   RenderElementProps, useSelected } from "@concord-consortium/slate-editor";
 import { action, makeObservable, observable } from "mobx";
-import { TextContentModelType } from "../../models/tiles/text/text-content";
-import { ITextPlugin } from "../../models/tiles/text/text-plugin-info";
-import { TextPluginsContext } from "../../components/tiles/text/text-plugins-context";
+import { TextContentModelType } from "../../../../models/tiles/text/text-content";
+import { ITextPlugin } from "../../../../models/tiles/text/text-plugin-info";
+import { TextPluginsContext } from "../text-plugins-context";
 import { HighlightRegistryContext, HighlightRevisionContext } from "./highlight-registry-context";
 
 export const kHighlightFormat = "highlight";

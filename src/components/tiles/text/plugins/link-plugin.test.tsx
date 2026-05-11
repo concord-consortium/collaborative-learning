@@ -2,8 +2,8 @@ import React from "react";
 import { render, fireEvent, act } from "@testing-library/react";
 import { ReactEditor } from "@concord-consortium/slate-editor";
 import { LinkComponent } from "./link-plugin";
-import { TextContentModel } from "../../models/tiles/text/text-content";
-import { TextContentModelContext } from "../../components/tiles/text/text-content-context";
+import { TextContentModel } from "../../../../models/tiles/text/text-content";
+import { TextContentModelContext } from "../text-content-context";
 
 jest.mock("@concord-consortium/slate-editor", () => {
   const actual = jest.requireActual("@concord-consortium/slate-editor");
