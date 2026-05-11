@@ -1,12 +1,20 @@
 @import "../vars";
+@import "../mixins";
 
 .toggle-control {
+  background: none;
+  border: none;
+  appearance: none;
+  padding: 0;
+  font: inherit;
   box-sizing: content-box;
   width: 34px;
   height: 14px;
   cursor: pointer;
+  @include focus-ring(2px);
 
   .track {
+    display: block;
     width: 34px;
     height: 14px;
     border-radius: 7px;
@@ -18,6 +26,7 @@
   }
 
   .ball {
+    display: block;
     position: relative;
     top: -17px;
     width: 17px;
