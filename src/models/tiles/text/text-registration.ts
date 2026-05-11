@@ -26,6 +26,9 @@ registerPlugins();
 
 // Register link component AFTER registerPlugins() so it overrides the
 // built-in registerLinkInline() from the slate-editor library.
+// Note: link-plugin does not use registerTextPluginInfo because it doesn't
+// need onInitEditor (links are already inline in Slate) or shared model
+// change handling. It only registers a custom element renderer.
 registerLinkComponent();
 
 registerTileComponentInfo({

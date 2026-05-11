@@ -1,21 +1,21 @@
 import React, { useContext } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import { ReactEditor, registerElementComponent, RenderElementProps, useSelected, useSerializing, useSlate }
-  from "@concord-consortium/slate-editor";
+import { BaseElement, ReactEditor, registerElementComponent, RenderElementProps, useSelected, useSerializing,
+  useSlate } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "../../components/tiles/text/text-content-context";
+import { kDefaultLinkDisplayMode } from "../../models/tiles/text/text-content";
 import "./link-plugin.scss";
 
 export const kLinkFormat = "link";
 
 // Type for link elements with CLUE's linkId extension.
-// Declared as a standalone interface (not extending CustomElement, which is a
-// union type that can't be extended via `extends`).
-export interface ClueLinkElement {
+// Extends BaseElement (which provides children: Descendant[]) so it's
+// assignable to Slate's Element type without casting.
+export interface ClueLinkElement extends BaseElement {
   type: typeof kLinkFormat;
   href: string;
   linkId?: string;
-  children: any[];
 }
 
 const isLinkElement = (element: any): element is ClueLinkElement =>
@@ -43,12 +43,12 @@ export const LinkComponent = observer(function LinkComponent(
     return <a href={href} {...attributes}>{children}</a>;
   }
 
-  const displayMode = textContent?.getLinkDisplayMode(linkId) ?? "link";
+  const displayMode = textContent?.getLinkDisplayMode(linkId) ?? kDefaultLinkDisplayMode;
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     // In editable mode + link display, let Slate handle clicks for cursor
     // placement unless the user holds cmd/ctrl (standard editor convention).
-    if (!readOnly && displayMode === "link" && !(e.metaKey || e.ctrlKey)) {
+    if (!readOnly && displayMode === kDefaultLinkDisplayMode && !(e.metaKey || e.ctrlKey)) {
       return;
     }
     e.preventDefault();

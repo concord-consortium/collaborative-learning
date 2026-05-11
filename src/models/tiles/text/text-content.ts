@@ -16,6 +16,7 @@ import { IHighlightBox } from "../../../plugins/text/highlight-registry-context"
 export const kTextTileType = "Text";
 
 export type LinkDisplayMode = "link" | "button";
+export const kDefaultLinkDisplayMode: LinkDisplayMode = "link";
 
 export function defaultTextContent() {
   return TextContentModel.create();
@@ -43,8 +44,8 @@ export const TextContentModel = TileContentModel
               : self.text as string;
     },
     getLinkDisplayMode(linkId: string | undefined): LinkDisplayMode {
-      if (!linkId) return "link";
-      return self.linkDisplayModes.get(linkId) ?? "link";
+      if (!linkId) return kDefaultLinkDisplayMode;
+      return self.linkDisplayModes.get(linkId) ?? kDefaultLinkDisplayMode;
     }
   }))
   .views(self => ({
@@ -163,7 +164,7 @@ export const TextContentModel = TileContentModel
       }
     },
     setLinkDisplayMode(linkId: string, mode: LinkDisplayMode) {
-      if (mode === "link") {
+      if (mode === kDefaultLinkDisplayMode) {
         self.linkDisplayModes.delete(linkId);
       } else {
         self.linkDisplayModes.set(linkId, mode);

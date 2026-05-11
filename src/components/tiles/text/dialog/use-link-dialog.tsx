@@ -120,7 +120,7 @@ export const useLinkDialog = ({ editor, onClose, selectedLink, text, tileId, tex
         linkId,
         children: []
       };
-      Transforms.wrapNodes(editor, element as any, { split: true });
+      Transforms.wrapNodes(editor, element, { split: true });
       Transforms.collapse(editor, { edge: "end" });
       textContent.setLinkDisplayMode(linkId, displayMode);
     }
