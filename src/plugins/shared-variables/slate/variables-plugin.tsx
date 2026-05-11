@@ -16,6 +16,7 @@ import { IOffsetModel, ObjectBoundingBox, OffsetModel } from "../../../models/an
 import { IStores } from "../../../models/stores/stores";
 import { removeAnnotationsForChip } from "../../text/chip-annotation-cleanup";
 import { getChipBoxInWrapperCoords, useChipMeasurement } from "../../text/use-chip-measurement";
+import { kSlateChipTypeAttr, kVariableChipReferenceAttr } from "../../text/chip-serialization";
 
 import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
@@ -250,13 +251,6 @@ export const isVariableElement = (element: CustomElement): element is VariableEl
   return element.type === kVariableFormat;
 };
 
-// Marker attributes used to round-trip the variable chip through HTML. The serialized
-// form is a self-contained <span> tag. The variable's display value is intentionally
-// not embedded, since the runtime re-renders it from the SharedVariables shared model
-// on load using `data-slate-reference` to look up the variable.
-const kVariableChipDataTypeAttr = "data-slate-type";
-const kVariableChipReferenceAttr = "data-slate-reference";
-
 const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
   const plugins = useContext(TextPluginsContext);
   const variablesPlugin = plugins[kVariableTextPluginName] as VariablesPlugin|undefined;
@@ -287,7 +281,7 @@ const VariableComponent = observer(function({ attributes, children, element }: R
   // VariableChip below would serialize as plain text and lose the reference id.
   if (isSerializing) {
     const serializeAttrs = {
-      [kVariableChipDataTypeAttr]: kVariableFormat,
+      [kSlateChipTypeAttr]: kVariableFormat,
       [kVariableChipReferenceAttr]: element.reference,
     };
     return <span {...attributes} {...serializeAttrs}>{children}</span>;
@@ -319,7 +313,7 @@ export function registerVariables() {
   // Pair to the serialization above: when htmlToSlate sees a span with our marker
   // data-slate-type attribute, reconstruct the variable chip element.
   registerElementDeserializer("span", {
-    test: (el: HTMLElement) => el.getAttribute(kVariableChipDataTypeAttr) === kVariableFormat,
+    test: (el: HTMLElement) => el.getAttribute(kSlateChipTypeAttr) === kVariableFormat,
     deserialize: (el: HTMLElement): VariableElement => ({
       type: kVariableFormat,
       reference: el.getAttribute(kVariableChipReferenceAttr) ?? "",

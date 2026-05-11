@@ -9,6 +9,7 @@ import { ITextPlugin } from "../../models/tiles/text/text-plugin-info";
 import { TextPluginsContext } from "../../components/tiles/text/text-plugins-context";
 import { HighlightRegistryContext, HighlightRevisionContext } from "./highlight-registry-context";
 import { getChipBoxInWrapperCoords, useChipMeasurement } from "./use-chip-measurement";
+import { kHighlightChipIdAttr, kSlateChipTypeAttr } from "./chip-serialization";
 
 export const kHighlightFormat = "highlight";
 export const kHighlightTextPluginName = "highlights";
@@ -54,13 +55,6 @@ export const isHighlightElement = (element: CustomElement): element is Highlight
   return element.type === kHighlightFormat;
 };
 
-// Marker attributes used to round-trip the highlight chip through HTML. Like the
-// variable chip, the displayed text is intentionally not embedded in the serialized
-// HTML — it lives on textContent.highlightedText and is looked up by highlightId on
-// load.
-const kHighlightChipDataTypeAttr = "data-slate-type";
-const kHighlightChipIdAttr = "data-slate-highlight-id";
-
 const HighlightComponent = ({ attributes, children, element }: RenderElementProps) => {
   const plugins = useContext(TextPluginsContext);
   const highlightPlugin = plugins[kHighlightTextPluginName] as HighlightsPlugin|undefined;
@@ -92,7 +86,7 @@ const HighlightComponent = ({ attributes, children, element }: RenderElementProp
   // on load from textContent.highlightedText.
   if (isSerializing) {
     const serializeAttrs = {
-      [kHighlightChipDataTypeAttr]: kHighlightFormat,
+      [kSlateChipTypeAttr]: kHighlightFormat,
       [kHighlightChipIdAttr]: highlightId,
     };
     return <span {...attributes} {...serializeAttrs}>{children}</span>;
@@ -120,7 +114,7 @@ export function registerHighlight() {
   // Pair to the serialization above: when htmlToSlate sees a span with our marker
   // data-slate-type attribute, reconstruct the highlight chip element.
   registerElementDeserializer("span", {
-    test: (el: HTMLElement) => el.getAttribute(kHighlightChipDataTypeAttr) === kHighlightFormat,
+    test: (el: HTMLElement) => el.getAttribute(kSlateChipTypeAttr) === kHighlightFormat,
     deserialize: (el: HTMLElement): HighlightElement => ({
       type: kHighlightFormat,
       highlightId: el.getAttribute(kHighlightChipIdAttr) ?? "",
