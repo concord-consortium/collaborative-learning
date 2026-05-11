@@ -12,6 +12,12 @@ export interface TransformableProps {
   transform: Transform;
   setAnimating: (animating: boolean) => void;
   children: React.ReactNode;
+  objectId?: string;
+  tabIndex?: number;
+  role?: string;
+  ariaLabel?: string;
+  onKeyDown?: (e: React.KeyboardEvent<SVGGElement>) => void;
+  onBlur?: React.FocusEventHandler<SVGGElement>;
 }
 
 /** Renders an SVG group with an optional translate and scale transform.
@@ -22,7 +28,9 @@ export interface TransformableProps {
  * @param setAnimating - A function to set the animating state.
  * @param children - The children to render inside the group.
  */
-export const Transformable: React.FC<TransformableProps> = ({ type, transform, setAnimating, children }) => {
+export const Transformable: React.FC<TransformableProps> = ({
+  type, transform, setAnimating, children, objectId, tabIndex, role, ariaLabel, onKeyDown, onBlur
+}) => {
   const prevTransform = React.useRef(transform);
   const [animated, setAnimated] = React.useState(transform);
 
@@ -96,6 +104,12 @@ export const Transformable: React.FC<TransformableProps> = ({ type, transform, s
       className={`transformable transformable-${type}`}
       transform={`translate(${animated.corner.x},${animated.corner.y}) rotate(${animated.rotation}) `
        + `translate(${toPosition.x},${toPosition.y}) scale(${animated.scale.x},${animated.scale.y})`}
+      data-object-id={objectId}
+      tabIndex={tabIndex}
+      role={role}
+      aria-label={ariaLabel}
+      onKeyDown={onKeyDown}
+      onBlur={onBlur}
     >
       {children}
     </g>

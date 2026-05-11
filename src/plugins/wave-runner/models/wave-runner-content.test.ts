@@ -1,4 +1,18 @@
-import { WaveRunnerContentModel, DEFAULT_MODELS } from "./wave-runner-content";
+import { DocumentContentModel } from "../../../models/document/document-content";
+import { createDocumentModel } from "../../../models/document/document";
+import { ProblemDocument } from "../../../models/document/document-types";
+import "../../../models/shared/shared-data-set-registration";
+import "../../shared-seismogram/shared-seismogram-registration";
+import { registerTileContentInfo } from "../../../models/tiles/tile-content-info";
+import { kWaveRunnerTileType } from "../wave-runner-types";
+import { WaveRunnerContentModel, DEFAULT_MODELS, defaultWaveRunnerContent } from "./wave-runner-content";
+
+registerTileContentInfo({
+  type: kWaveRunnerTileType,
+  displayName: "Wave Runner",
+  modelClass: WaveRunnerContentModel,
+  defaultContent: defaultWaveRunnerContent,
+});
 
 const mockCompactMetadata = {
   $schema: "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
@@ -16,6 +30,23 @@ describe("WaveRunnerContent", () => {
     jest.restoreAllMocks();
   });
 
+  function setupTileInDocument() {
+    const docContent = DocumentContentModel.create({
+      tileMap: {
+        "tile1": {
+          id: "tile1",
+          content: { type: kWaveRunnerTileType },
+        }
+      }
+    });
+    const docModel = createDocumentModel({
+      uid: "1", type: ProblemDocument, key: "test", content: docContent as any
+    });
+    docModel.treeMonitor!.enableMonitoring();
+
+    return docContent.tileMap.get("tile1")!.content as any;
+  }
+
   it("is always user resizable", () => {
     const content = WaveRunnerContentModel.create();
     expect(content.isUserResizable).toBe(true);
@@ -28,11 +59,14 @@ describe("WaveRunnerContent", () => {
   });
 
   it("allows setting start and end dates", () => {
-    const content = WaveRunnerContentModel.create();
+    const content = setupTileInDocument();
+    content.getOrCreateEventsDataSet();
+    expect(content.eventsDataSet).toBeTruthy();
     content.setStartDate("2026-02-01");
     content.setEndDate("2026-02-03");
     expect(content.startDate).toBe("2026-02-01");
     expect(content.endDate).toBe("2026-02-03");
+    expect(content.eventsDataSet).toBeFalsy();
   });
 
   it("starts with no station", () => {
@@ -52,21 +86,42 @@ describe("WaveRunnerContent", () => {
   });
 
   it("replaces station when setStation is called again", () => {
-    const content = WaveRunnerContentModel.create();
+    const content = setupTileInDocument();
     content.setStation({
       network: "AK", station: "K204", location: "", channel: "HNZ", label: "Anchorage Airport"
     });
+    content.getOrCreateEventsDataSet();
+    expect(content.eventsDataSet).toBeTruthy();
     content.setStation({
       network: "AK", station: "DDM", location: "01", channel: "HNZ", label: "Dexter Display Mine"
     });
     expect(content.station?.station).toBe("DDM");
     expect(content.station?.location).toBe("01");
+    expect(content.eventsDataSet).toBeFalsy();
   });
 
   it("has no model selected initially", () => {
     const content = WaveRunnerContentModel.create();
     expect(content.selectedModelUrl).toBeUndefined();
     expect(content.selectedModelMetadata).toBeNull();
+  });
+
+  it("exports a JSON string including persisted fields", () => {
+    const content = WaveRunnerContentModel.create({
+      startDate: "2026-02-01",
+      endDate: "2026-02-03",
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ", label: "Anchorage Airport" },
+      selectedModelUrl: "https://example.com/model/metadata.json"
+    });
+    const json = content.exportJson();
+    expect(typeof json).toBe("string");
+    expect(json.length).toBeGreaterThan(0);
+    const parsed = JSON.parse(json);
+    expect(parsed.type).toBe("WaveRunner");
+    expect(parsed.startDate).toBe("2026-02-01");
+    expect(parsed.endDate).toBe("2026-02-03");
+    expect(parsed.station).toMatchObject({ network: "AK", station: "K204", channel: "HNZ" });
+    expect(parsed.selectedModelUrl).toBe("https://example.com/model/metadata.json");
   });
 
   it("DEFAULT_MODELS contains at least the compact model", () => {

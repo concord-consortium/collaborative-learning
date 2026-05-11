@@ -20,7 +20,7 @@ describe("StarterToolComponent", () => {
     docId: "",
     documentContent: null,
     isUserResizable: true,
-    onResizeRow: (e: React.DragEvent<HTMLDivElement>): void => {
+    onResizeRow: (e: React.DragEvent<HTMLElement>): void => {
       throw new Error("Function not implemented.");
     },
     onSetCanAcceptDrop: (tileId?: string): void => {
@@ -59,13 +59,15 @@ describe("StarterToolComponent", () => {
     expect(await findByText("New Text")).toBeInTheDocument();
   });
 
-  it("updates the model when the user types", () => {
+  it("updates the model when the user types", async () => {
+    const user = userEvent.setup();
     const {getByRole, getByText} =
       render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
     expect(getByText("New Text")).toBeInTheDocument();
 
     const textBox = getByRole("textbox");
-    userEvent.type(textBox, "{selectall}{del}Typed Text");
+    await user.clear(textBox);
+    await user.type(textBox, "Typed Text");
 
     expect(textBox).toHaveValue("Typed Text");
     expect(content.text).toBe("Typed Text");

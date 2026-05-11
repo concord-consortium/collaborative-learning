@@ -48,7 +48,7 @@ CLUE is a sophisticated web-based collaborative learning platform developed by T
 ├── shared/         # Shared components and utilities
 ├── functions-v1/   # Legacy Firebase Cloud Functions
 ├── functions-v2/   # Current Firebase Cloud Functions
-├── cms/           # Content Management System
+├── authoring-api/ # Authoring system backend API
 ├── cypress/       # End-to-end tests
 ├── docs/          # Project documentation
 ├── scripts/       # Build and deployment scripts
@@ -170,6 +170,5 @@ CLUE is distributed under the MIT License, Copyright 2018 by the Concord Consort
 - [Deployment Guide](deploy.md)
 - [Firebase Schema](firebase-schema.md)
 - [Firestore Schema](firestore-schema.md)
-- [CMS Documentation](cms.md)
 - [Document Types](document-types.md)
 - [Testing Coverage](cypress-coverage.md)

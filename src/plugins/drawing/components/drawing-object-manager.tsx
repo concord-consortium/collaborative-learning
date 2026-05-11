@@ -2,7 +2,7 @@ import React from "react";
 import { types } from "mobx-state-tree";
 import { DrawingComponentType, DrawingObject, DrawingObjectType,
   DrawingTool, HandleObjectHover, HandleObjectDrag,
-  IDrawingLayer } from "../objects/drawing-object";
+  IDrawingComponentProps, IDrawingLayer } from "../objects/drawing-object";
 import { EllipseComponent, EllipseDrawingTool, EllipseObject } from "../objects/ellipse";
 import { ImageComponent, ImageObject, StampDrawingTool } from "../objects/image";
 import { LineComponent, LineDrawingTool, LineObject } from "../objects/line";
@@ -116,11 +116,12 @@ export function registerDrawingToolInfo(drawingToolInfo: IDrawingToolInfo) {
 }
 
 export function renderDrawingObject(drawingObject: DrawingObjectType, readOnly=false,
-                                    handleHover?: HandleObjectHover, handleDrag?: HandleObjectDrag) {
+                                    handleHover?: HandleObjectHover, handleDrag?: HandleObjectDrag,
+                                    a11yProps?: IDrawingComponentProps["a11yProps"]) {
   const DrawingObjectComponent = getDrawingObjectComponent(drawingObject);
   if (!DrawingObjectComponent) return null;
   const element = (<DrawingObjectComponent key={drawingObject.id} model={drawingObject} readOnly={readOnly}
-                    handleHover={handleHover} handleDrag={handleDrag}/>);
+                    handleHover={handleHover} handleDrag={handleDrag} a11yProps={a11yProps}/>);
   if (drawingObject.visible) {
     return element;
   } else {

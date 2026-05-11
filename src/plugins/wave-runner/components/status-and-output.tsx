@@ -6,7 +6,9 @@ import "./status-and-output.scss";
 
 export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
   const model = useWaveRunnerContent();
-  const { hasStationData, sharedSeismogram, startDateISO, endDateISO } = model;
+  const {
+    hasStationData, sharedSeismogram, startDateISO, endDateISO, isRunning, eventsDataSet, runError
+  } = model;
 
   return (
     <div className="section status-and-output">
@@ -15,7 +17,6 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
         {sharedSeismogram && hasStationData && (
           <WaveformPanel
             key={`${model.startDate}-${model.endDate}`}
-            label={`${model.startDate} – ${model.endDate}`}
             sharedSeismogram={sharedSeismogram}
             startTime={startDateISO}
             endTime={endDateISO}
@@ -23,24 +24,26 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
         )}
       </div>
       <div className="download-status-container">
-        {model.isRunning && <div>Running model...</div>}
-        {model.runError && <div className="waveform-error">{model.runError}</div>}
+        {isRunning && <div>Running model...</div>}
+        {runError && <div className="waveform-error">{runError}</div>}
       </div>
       <div className="estimated-time">
-        {model.isRunning
+        {isRunning
           ? `Processing day ${model.chunksProcessed + 1} of ${model.chunksTotal || "?"}...`
-          : model.eventsFound
+          : eventsDataSet
             ? "Run complete."
             : "Estimated time to complete run:"}
       </div>
       <div className="status-counts-row">
         <div className="status-count">
           <label className="status-count-label">Events Identified</label>
-          <div className="status-count-box">{model.eventsFound ?? ""}</div>
+          <div className="status-count-box">
+            {model.eventsFound ?? "-"}
+          </div>
         </div>
         <div className="status-count">
           <label className="status-count-label">Event Categories</label>
-          <div className="status-count-box" />
+          <div className="status-count-box">-</div>
         </div>
       </div>
     </div>

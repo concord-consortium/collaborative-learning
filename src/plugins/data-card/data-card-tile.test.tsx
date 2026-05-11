@@ -30,7 +30,7 @@ describe("DataCardToolComponent", () => {
     documentContent: null,
     isUserResizable: true,
     readOnly: false,
-    onResizeRow: (e: React.DragEvent<HTMLDivElement>): void => {
+    onResizeRow: (e: React.DragEvent<HTMLElement>): void => {
       throw new Error("Function not implemented.");
     },
     onSetCanAcceptDrop: (tileId?: string): void => {

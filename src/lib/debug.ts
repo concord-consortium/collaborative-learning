@@ -4,7 +4,8 @@ if (debug.length > 0) {
   console.info("DEBUG:", debug);
 }
 
-const debugContains = (key: string) => debug.indexOf(key) !== -1;
+const debugTokens = debug.split(/[\s,]+/).filter(Boolean);
+const debugContains = (key: string) => debugTokens.includes(key);
 
 /**
  * Format and print a message to the browser console if its debug key is set.

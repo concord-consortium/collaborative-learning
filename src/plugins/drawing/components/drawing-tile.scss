@@ -2,6 +2,13 @@
 @import "../../../utilities/voice-typing-overlay";
 
 .drawing-tool-tile {
+  .transformable[tabindex="0"] {
+    &:focus-visible,
+    &.keyboard-focused {
+      outline: 2px solid $focus-ring-color;
+      outline-offset: 2px;
+    }
+  }
   .editable-tile-title.voice-typing-active {
     .clue-editor-input {
       background-color: $workspace-teal-light-7;

@@ -1,4 +1,6 @@
 @import "../../../../components/vars";
+@import "../../../../components/mixins";
+@import "../dataflow-vars";
 
 .program-editor-zoom {
   position: absolute;
@@ -12,41 +14,48 @@
   button {
     width: 26px;
     height: 26px;
-    line-height: 17px;
     padding: 0;
-    font-size: 30px;
-    color: #969696;
-    background-color: #FEFEFE;
-    border: 2px solid #bcbcbc;
+    font-size: 22px;
+    color: $gray-mid-click;
+    background-color: $gray-light-2;
+    border: 2px solid $gray-mid;
     border-radius: 3px 3px 0 0;
     cursor: pointer;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    position: relative;
 
     &:nth-child(1) {
       border-radius: 3px 3px 0 0;
-      border-bottom-width: 1px;
+      border-bottom-width: 0;
     }
 
     &:nth-child(2) {
       border-radius: 0 0 3px 3px;
       border-top-width: 1px;
-    }
 
-    &::before { /** hack for vertical text alignment */
-      content: "";
-      vertical-align: middle;
-      line-height: 20px;
+      span {
+        transform: translateY(-1px) scaleX(0.85);
+      }
     }
 
     &:hover {
-      border-color: #a8a8a8;
-      color: #838383;
+      border-color: $gray-mid-hover;
+      color: $gray-mid-select;
     }
     &:active {
-      border-color: #838383;
-      color: #838383;
+      border-color: $gray-mid-select;
+      color: $gray-mid-select;
     }
-    &:focus {
-      outline: none;
+    // Bar-graph pattern: suppress non-keyboard focus outline, then layer the
+    // canonical focus ring on keyboard focus only.
+    &:focus { outline: none; }
+    @include focus-ring(2px);
+    &:focus-visible { z-index: 1; }
+
+    span {
+      display: inline-block;
     }
   }
 }

@@ -3,9 +3,15 @@ import React, { useRef } from "react";
 import { useRovingTabindex } from "./use-roving-tabindex";
 
 // Toolbar with one group of buttons
-function TestToolbar({ buttonLabels }: { buttonLabels: string[] }) {
+function TestToolbar({
+  buttonLabels,
+  orientation = "vertical",
+}: {
+  buttonLabels: string[];
+  orientation?: "horizontal" | "vertical";
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { handleKeyDown } = useRovingTabindex(containerRef);
+  const { handleKeyDown } = useRovingTabindex(containerRef, orientation);
 
   return (
     <div ref={containerRef} data-testid="toolbar" role="toolbar" onKeyDown={handleKeyDown}>
@@ -19,7 +25,7 @@ function TestToolbar({ buttonLabels }: { buttonLabels: string[] }) {
 // Toolbar with multiple groups of buttons (mimics upper/lower toolbar sections)
 function GroupedTestToolbar() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { handleKeyDown } = useRovingTabindex(containerRef);
+  const { handleKeyDown } = useRovingTabindex(containerRef, "vertical");
 
   return (
     <div ref={containerRef} data-testid="toolbar" role="toolbar" onKeyDown={handleKeyDown}>
@@ -63,14 +69,6 @@ describe("useRovingTabindex", () => {
     expect(btnB).toHaveAttribute("tabindex", "-1");
     expect(btnC).toHaveAttribute("tabindex", "-1");
 
-    // ArrowRight also moves forward
-    fireEvent.keyDown(toolbar, { key: "ArrowRight" });
-    expect(document.activeElement).toBe(btnB);
-
-    // ArrowLeft also moves backward
-    fireEvent.keyDown(toolbar, { key: "ArrowLeft" });
-    expect(document.activeElement).toBe(btnA);
-
     // Does not wrap at the beginning
     fireEvent.keyDown(toolbar, { key: "ArrowUp" });
     expect(document.activeElement).toBe(btnA);
@@ -91,6 +89,61 @@ describe("useRovingTabindex", () => {
     fireEvent.keyDown(toolbar, { key: "Home" });
     expect(document.activeElement).toBe(btnA);
     expect(btnA).toHaveAttribute("tabindex", "0");
+  });
+
+  it("ignores off-axis arrow keys for vertical orientation", () => {
+    render(<TestToolbar buttonLabels={["A", "B", "C"]} orientation="vertical" />);
+    const toolbar = screen.getByTestId("toolbar");
+    const btnA = screen.getByTestId("btn-A");
+
+    btnA.focus();
+
+    // ArrowRight/ArrowLeft must not move focus on a vertical toolbar
+    fireEvent.keyDown(toolbar, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(btnA);
+
+    fireEvent.keyDown(toolbar, { key: "ArrowLeft" });
+    expect(document.activeElement).toBe(btnA);
+  });
+
+  it("navigates with ArrowLeft/ArrowRight for horizontal orientation", () => {
+    render(<TestToolbar buttonLabels={["A", "B", "C"]} orientation="horizontal" />);
+    const toolbar = screen.getByTestId("toolbar");
+    const btnA = screen.getByTestId("btn-A");
+    const btnB = screen.getByTestId("btn-B");
+    const btnC = screen.getByTestId("btn-C");
+
+    btnA.focus();
+
+    // ArrowRight moves forward
+    fireEvent.keyDown(toolbar, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(btnB);
+
+    // ArrowLeft moves backward
+    fireEvent.keyDown(toolbar, { key: "ArrowLeft" });
+    expect(document.activeElement).toBe(btnA);
+
+    // Home/End still work regardless of orientation
+    fireEvent.keyDown(toolbar, { key: "End" });
+    expect(document.activeElement).toBe(btnC);
+
+    fireEvent.keyDown(toolbar, { key: "Home" });
+    expect(document.activeElement).toBe(btnA);
+  });
+
+  it("ignores off-axis arrow keys for horizontal orientation", () => {
+    render(<TestToolbar buttonLabels={["A", "B", "C"]} orientation="horizontal" />);
+    const toolbar = screen.getByTestId("toolbar");
+    const btnA = screen.getByTestId("btn-A");
+
+    btnA.focus();
+
+    // ArrowDown/ArrowUp must not move focus on a horizontal toolbar
+    fireEvent.keyDown(toolbar, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(btnA);
+
+    fireEvent.keyDown(toolbar, { key: "ArrowUp" });
+    expect(document.activeElement).toBe(btnA);
   });
 
   it("does not preventDefault for keys the hook does not handle", () => {

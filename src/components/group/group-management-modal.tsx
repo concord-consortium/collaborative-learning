@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import Modal from "react-modal";
 import {
@@ -13,6 +13,8 @@ import { isStudentCardDragData, StudentCard } from "./student-card";
 import CloseIconSvg from "../../assets/icons/close/close.svg";
 
 import "./group-management-modal.scss";
+
+let nextTitleId = 0;
 
 interface IProps {
   allowCancel?: boolean;
@@ -84,14 +86,39 @@ export const GroupManagementModal: React.FC<IProps> = observer(
       onClose();
     };
 
+    const titleId = useRef(`group-management-modal-title-${++nextTitleId}`).current;
+    const modalRef = useRef<HTMLDivElement | null>(null);
+
+    const handleAfterOpen = () => {
+      // Focus the current user's group card so they can immediately Tab to a different group.
+      const currentGroupId = groupManagementState.currentUserGroupId;
+      if (currentGroupId && modalRef.current) {
+        const groupCard = modalRef.current.querySelector(
+          `.group-card[data-testid="group-card-${CSS.escape(currentGroupId)}"]`
+        ) as HTMLElement | null;
+        if (groupCard) {
+          // Add .keyboard-focused class since programmatic focus doesn't trigger :focus-visible.
+          // Remove it on the first blur so subsequent mouse interactions don't show the ring.
+          groupCard.classList.add("keyboard-focused");
+          groupCard.addEventListener("blur", () => {
+            groupCard.classList.remove("keyboard-focused");
+          }, { once: true });
+          groupCard.focus();
+        }
+      }
+    };
+
     return (
       <Modal
+        aria={{ labelledby: titleId, modal: true }}
         className="group-management-modal"
         isOpen={isOpen}
+        onAfterOpen={handleAfterOpen}
         onRequestClose={allowCancel ? handleCancel : undefined}
         overlayClassName="group-management-modal__overlay"
         shouldCloseOnEsc={allowCancel}
         shouldCloseOnOverlayClick={false}
+        contentRef={node => { modalRef.current = node as HTMLDivElement | null; }}
         testId="group-management-modal"
       >
         <div className="group-management-modal__header">
@@ -105,11 +132,13 @@ export const GroupManagementModal: React.FC<IProps> = observer(
               <div className="group-management-modal__icon-person" />
             </div>
           </div>
-          <div className="group-management-modal__title" data-testid="group-management-modal-title">
+          <div className="group-management-modal__title" id={titleId}
+            data-testid="group-management-modal-title">
             {groupManagementState.modalTitle}
           </div>
           {allowCancel && (
             <button
+              aria-label="Close"
               className="group-management-modal__close"
               data-testid="group-management-modal-close-button"
               type="button"

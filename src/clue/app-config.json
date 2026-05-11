@@ -317,9 +317,9 @@
       },
       "timeline": {
         "tools": [
-          "table-it",
-          "data-card-it",
-          "bar-graph-it",
+          ["data-set-view", "Table"],
+          ["data-set-view", "DataCard"],
+          ["data-set-view", "BarGraph"],
           "|",
           "zoom-in",
           "zoom-out",
@@ -337,7 +337,7 @@
           "restart",
           "reset",
           "|",
-          "table-it",
+          ["data-set-view", "Table"],
           "timeline"
         ],
         "stations": [

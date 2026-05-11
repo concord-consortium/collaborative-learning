@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import { HistoryEntryItem } from "./history-entry-item";
+import { HistoryManagerControls } from "./history-manager-controls";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { TreeManagerType } from "../../models/history/tree-manager";
@@ -99,13 +100,27 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(funct
         <div className="history-view-section-header">
           <h4>Local History (Current Session)</h4>
           <span className="history-view-count">{localHistoryEntries.length} entries</span>
+          {treeManager && (
+            <button
+              className="inject-failing-entry"
+              onClick={() => treeManager.injectFailingHistoryEntry()}
+            >
+              Inject Failing Entry
+            </button>
+          )}
         </div>
         <div className="history-view-list">
           {localHistoryEntries.length === 0 ? (
             <div className="history-view-empty">No local history entries</div>
           ) : (
             localHistoryEntries.map((entry, index) => (
-              <HistoryEntryItem key={entry.id} entry={entry} index={index} />
+              <HistoryEntryItem
+                key={entry.id}
+                entry={entry}
+                index={index}
+                section="local"
+                undoStore={treeManager?.undoStore}
+              />
             ))
           )}
         </div>
@@ -129,23 +144,7 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(funct
           <div className="history-view-section-header">
             <h4>Remote History (Firestore)</h4>
             <span className="history-view-count">{remoteHistoryEntries.length} entries</span>
-            {concurrentManager && (
-              <div className="history-manager-controls">
-                <button
-                  className={concurrentManager.paused ? "paused" : ""}
-                  onClick={() => concurrentManager.pauseUploads()}
-                  disabled={concurrentManager.paused}
-                >
-                  {concurrentManager.paused ? "Paused" : "Pause Uploads"}
-                </button>
-                <button
-                  onClick={() => concurrentManager.resumeUploadsAfterDelay(5000)}
-                  disabled={!concurrentManager.paused}
-                >
-                  Resume After 5s
-                </button>
-              </div>
-            )}
+            {concurrentManager && <HistoryManagerControls manager={concurrentManager} />}
           </div>
           <div className="history-view-list">
             {remoteHistoryError ? (
@@ -159,6 +158,7 @@ export const HistoryViewPanel: React.FC<IHistoryViewPanelProps> = observer(funct
                   entry={entryWithMeta.entry}
                   index={entryWithMeta.index}
                   previousEntryId={entryWithMeta.previousEntryId}
+                  section="remote"
                 />
               ))
             )}

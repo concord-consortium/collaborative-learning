@@ -1,4 +1,5 @@
 @import "../vars";
+@import "../mixins";
 
 $list-item-height: 660px;
 $list-item-width: 880px;
@@ -74,6 +75,63 @@ $section-padding: 6px;
     overflow-x: auto;
     overflow-y: hidden;
   }
+
+  .list-item-container {
+    position: relative;
+    flex-grow: 0;
+    flex-shrink: 0;
+
+    > .icon-holder {
+      appearance: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      position: absolute;
+      right: 78px;
+      top: 4px;
+      @include focus-ring(2px);
+
+      &[aria-disabled="true"] {
+        cursor: default;
+      }
+
+      .icon-star {
+        height: 24px;
+        width: 24px;
+        fill: $charcoal;
+        opacity: .25;
+        display: block;
+
+        &.starred {
+          opacity: .75;
+          fill: $problem-orange;
+        }
+      }
+
+      &:hover .icon-star {
+        fill: $problem-orange;
+        opacity: 0.35;
+      }
+      &:active .icon-star {
+        opacity: .75;
+        fill: $problem-orange;
+      }
+      &:active .icon-star.starred {
+        opacity: .75;
+        fill: $problem-orange;
+      }
+
+      .bookmark-label {
+        position: absolute;
+        top: -2px;
+        right: -4px;
+        margin: 0;
+        font-size: 5pt;
+      }
+    }
+  }
+
   .list-item {
     position: relative;
     min-height: 120px;
@@ -82,23 +140,27 @@ $section-padding: 6px;
     padding: $padding 0;
     display: flex;
     flex-direction: column;
-    flex-grow: 0;
-    flex-shrink: 0;
     align-items: center;
     overflow: hidden;
     cursor: pointer;
+    @include focus-ring(-2px);
 
     &.selected {
       background-color: $classwork-purple-light-6;
     }
 
     .scaled-list-item-container {
-      border-radius: 5px;
-      border: solid 1.5px $charcoal-light-1;
-      width: $list-item-width * $list-item-scale;
-      height: $list-item-height * $list-item-scale;
       background-color: white;
+      border: solid 1.5px $charcoal-light-1;
+      border-radius: 5px;
+      height: $list-item-height * $list-item-scale;
       padding: 1px;
+      position: relative;
+      width: $list-item-width * $list-item-scale;
+
+      &.group {
+        border-color: $classwork-purple;
+      }
 
       .scaled-list-item {
         transform: scale(.1);
@@ -107,6 +169,20 @@ $section-padding: 6px;
         width: $list-item-width;
         pointer-events: none;
       }
+
+      .group-doc-badge {
+        align-items: center;
+        background-color: $classwork-purple;
+        border-top-right-radius: 5px;
+        bottom: 0;
+        display: flex;
+        left: 0;
+        justify-content: center;
+        opacity: .75;
+        padding: 3px;
+        position: absolute;
+      }
+
       &.new-document-button {
         position: relative;
 
@@ -129,52 +205,14 @@ $section-padding: 6px;
         }
       }
     }
-    .icon-holder {
-      position: absolute;
-      top: 5px;
-      right: 12px;
-      cursor: pointer;
 
-      .icon-star {
-        height: 24px;
-        width: 24px;
-        fill: $charcoal;
-        opacity: .25;
-        position: relative;
-        right: 66px;
-        top: -1px;
-
-        &.starred {
-          opacity: .75;
-          fill: $problem-orange;
-        }
-      }
-      &:hover .icon-star {
-        fill: $problem-orange;
-        opacity: 0.35;
-      }
-      &:active .icon-star {
-        opacity: .75;
-        fill: $problem-orange;
-      }
-      &:active .icon-star.starred {
-        opacity: .75;
-        fill: $problem-orange;
-      }
-      .bookmark-label {
-        position: absolute;
-        top: -2px;
-        right: -4px;
-        margin: 0;
-        font-size: 5pt;
-      }
-    }
     .info {
       margin-top: $half-margin;
       text-align: center;
       font-size: 10px;
       width: 90px;
     }
+
     .footer {
       display: flex;
       align-items: center;
@@ -191,12 +229,14 @@ $section-padding: 6px;
           fill: rgba($charcoal, .6);
         }
       }
+
       .icon-delete-document:hover {
         background-color: rgba($charcoal, .25);
         path {
           fill: $charcoal;
         }
       }
+
       .icon-delete-document:active,
       .icon-delete-document.selected {
         background-color: rgba($charcoal, .45);

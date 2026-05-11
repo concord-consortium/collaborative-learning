@@ -1,6 +1,7 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { VisuallyHidden } from "@chakra-ui/react";
 import { IDropdownItem } from "@concord-consortium/react-components";
+import { useDropdown } from "@concord-consortium/accessibility-tools/hooks";
 import classNames from "classnames";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
@@ -31,154 +32,120 @@ interface IProps {
   titleVisuallyHidden?: boolean;
 }
 
-interface IState {
-  selected: string;
-  showList: boolean;
-}
+export const CustomSelect: React.FC<IProps> = (props) => {
+  const {
+    className, isDisabled, items, showItemChecks, showItemIcons,
+    title, titlePrefix, titleIcon, titleVisuallyHidden,
+    dataTest, dataTestId,
+  } = props;
 
-export class CustomSelect extends React.PureComponent<IProps, IState> {
-  private divRef = React.createRef<HTMLDivElement>();
-  constructor(props: IProps) {
-    super(props);
-    this.state = {
-      selected: props.items.find(item => item.selected)?.text ||
-                (props.items.length > 0 ? props.items[0].text : ""),
-      showList: false
-    };
-  }
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
-  public componentDidMount() {
-    document.addEventListener("mousedown", this.handleDown, true);
-    document.addEventListener("touchstart", this.handleDown, true);
-  }
+  const [selected, setSelected] = useState(() =>
+    items.find(item => item.selected)?.text || (items.length > 0 ? items[0].text : "")
+  );
 
-  public componentWillUnmount() {
-    document.removeEventListener("mousedown", this.handleDown, true);
-    document.removeEventListener("touchstart", this.handleDown, true);
-  }
-
-  public componentDidUpdate(prevProps: IProps) {
-    if (prevProps.items !== this.props.items) {
-      const selectedItem = this.props.items.find(i => i.selected);
-      this.setState((prevState) => {
-        return {
-          selected: selectedItem ? selectedItem.text : prevState.selected
-        };
-      });
+  // Sync selected state when items change externally
+  useEffect(() => {
+    const newSelected = items.find(i => i.selected);
+    if (newSelected) {
+      setSelected(newSelected.text);
     }
-  }
+  }, [items]);
 
-  public render() {
-    const { className, isDisabled, items } = this.props;
-    return (
-      <div className={`custom-select ${className || ""}`}
-          data-test={this.getDataTest()}
-          data-testid={this.getDataTestId()}
-          ref={this.divRef}>
-        { this.renderHeader() }
-        { (!isDisabled && items.length > 0) && this.renderList() }
-      </div>
-    );
-  }
+  const handleSelect = useCallback((_element: HTMLElement, index: number) => {
+    const item = items[index];
+    if (!item || item.disabled) return;
+    item.onClick?.(item);
+    setSelected(item.text);
+  }, [items]);
 
-  private getDataTest(suffix?: string) {
-    const { dataTest } = this.props;
+  const dropdown = useDropdown({
+    triggerRef,
+    listRef,
+    itemSelector: ".list-item",
+    onSelect: handleSelect,
+    disabled: isDisabled || items.length === 0,
+    label: title || titlePrefix,
+  });
+
+  const getDataTest = (suffix?: string) => {
     return `${dataTest || "custom-select"}${suffix ? "-" + suffix : ""}`;
-  }
+  };
 
-  private getDataTestId(suffix?: string) {
-    const { dataTestId, dataTest } = this.props;
+  const getDataTestIdValue = (suffix?: string) => {
     return `${dataTestId || dataTest || "custom-select"}${suffix ? "-" + suffix : ""}`;
-  }
+  };
 
-  private renderHeader = () => {
-    const { items, isDisabled, title, titlePrefix, titleIcon, titleVisuallyHidden } = this.props;
-    const selectedItem = items.find(i => i.text === this.state.selected);
-    const titleText = title || selectedItem?.text;
-    const showListClass = this.state.showList ? "show-list" : "";
-    const disabled = isDisabled || items.length === 0 ? "disabled" : "";
-    const titleMarkup =
-      titleVisuallyHidden
-        ? <VisuallyHidden>{titlePrefix} {titleText}</VisuallyHidden>
-        : titlePrefix
-          ? <div className="title-container">
-              <div className="title-prefix" data-test={this.getDataTest("title-prefix")}>{titlePrefix}</div>
-              <div className="title" data-test={this.getDataTest("title")}>{titleText}</div>
-            </div>
-          : <div className="item line-clamp">{titleText}</div>;
+  const selectedItem = items.find(i => i.text === selected);
+  const titleText = title || selectedItem?.text;
+  const showListClass = dropdown?.isOpen ? "show-list" : "";
+  const disabledClass = isDisabled || items.length === 0 ? "disabled" : "";
 
-    return (
-      <div className={`header ${showListClass} ${disabled}`}
-        data-test={this.getDataTest("header")}
-        data-testid={this.getDataTestId("header")}
-        onClick={this.handleHeaderClick}>
+  const titleMarkup =
+    titleVisuallyHidden
+      ? <VisuallyHidden>{titlePrefix} {titleText}</VisuallyHidden>
+      : titlePrefix
+        ? <div className="title-container">
+            <div className="title-prefix" data-test={getDataTest("title-prefix")}>{titlePrefix}</div>
+            <div className="title" data-test={getDataTest("title")}>{titleText}</div>
+          </div>
+        : <div className="item line-clamp">{titleText}</div>;
+
+  return (
+    <div className={`custom-select ${className || ""}`}
+        data-test={getDataTest()}
+        data-testid={getDataTestIdValue()}>
+      <div
+        ref={triggerRef}
+        className={`header ${showListClass} ${disabledClass}`}
+        data-test={getDataTest("header")}
+        data-testid={getDataTestIdValue("header")}
+        {...(dropdown?.triggerProps ?? {})}
+      >
         {titleIcon && <div className="title-icon">{titleIcon}</div>}
         {titleMarkup}
-        <ArrowIcon className={`arrow ${showListClass} ${disabled}`} />
+        <ArrowIcon className={`arrow ${showListClass} ${disabledClass}`} />
       </div>
-    );
-  };
-
-  private renderItemIcon = (item: ICustomDropdownItem) => {
-    const { showItemIcons } = this.props;
-    const { itemIcon } = item;
-
-    return showItemIcons && (
-      <div className={`item-icon ${getItemId(item)}`}>
-        {itemIcon}
-      </div>
-    );
-  };
-
-  private renderList = () => {
-    const { items, showItemChecks } = this.props;
-    return (
-      <div className={`list ${(this.state.showList ? "show" : "")}`}
-          data-test={this.getDataTest("list")}
-          data-testid={this.getDataTestId("list")} >
-        { items?.map((item, i) => {
-          const disabledClass = item.disabled ? "disabled" : "enabled";
-          const selectedClass = this.state.selected === item.text ? "selected" : "";
-          const itemId = getItemId(item);
-          return (
-            <div
-              key={`item-${i}-${itemId}`}
-              className={classNames(`list-item ${disabledClass} ${selectedClass}`, {bottomBorder: item.bottomBorder })}
-              onClick={this.handleListClick(item)}
-              data-test={`list-item-${itemId}`}
-              data-testid={`list-item-${itemId}`}
-            >
-              {(showItemChecks !== false) &&
-                <div className={classNames("check", selectedClass, {
-                  "hidden-item-check": item.hideItemCheck})}
-                />}
-              {this.renderItemIcon(item)}
-              <div className="item">{item.text}</div>
-            </div>
-          );
-        }) }
-      </div>
-    );
-  };
-
-  private handleDown = (e: MouseEvent | TouchEvent) => {
-    if (this.divRef.current && e.target && !this.divRef.current.contains(e.target as Node)) {
-      this.setState({
-        showList: false
-      });
-    }
-  };
-
-  private handleHeaderClick = () => {
-    this.setState(state => ({ showList: !state.showList }));
-  };
-
-  private handleListClick = (item: IDropdownItem) => () => {
-    const { onClick } = item;
-    onClick && onClick(item);
-    this.setState({
-      selected: item.text,
-      showList: false
-    });
-  };
-}
+      {(!isDisabled && items.length > 0) && (
+        <div
+          ref={listRef}
+          className={`list ${dropdown?.isOpen ? "show" : ""}`}
+          data-test={getDataTest("list")}
+          data-testid={getDataTestIdValue("list")}
+          {...(dropdown?.listProps ?? {})}
+        >
+          {items.map((item, i) => {
+            const itemDisabledClass = item.disabled ? "disabled" : "enabled";
+            const selectedClass = selected === item.text ? "selected" : "";
+            const itemId = getItemId(item);
+            const itemProps = dropdown?.getItemProps(i) ?? {};
+            return (
+              <div
+                key={`item-${i}-${itemId}`}
+                className={classNames(`list-item ${itemDisabledClass} ${selectedClass}`,
+                  { bottomBorder: item.bottomBorder })}
+                data-test={`list-item-${itemId}`}
+                data-testid={`list-item-${itemId}`}
+                aria-disabled={item.disabled ? true : undefined}
+                {...itemProps}
+              >
+                {(showItemChecks !== false) &&
+                  <div className={classNames("check", selectedClass, {
+                    "hidden-item-check": item.hideItemCheck})}
+                  />}
+                {showItemIcons && (
+                  <div className={`item-icon ${itemId}`}>
+                    {item.itemIcon}
+                  </div>
+                )}
+                <div className="item">{item.text}</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};

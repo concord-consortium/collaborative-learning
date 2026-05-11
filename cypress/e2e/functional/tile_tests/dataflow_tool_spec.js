@@ -579,7 +579,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNodeTitle().invoke("val").should("include", "Timer (on/off) 1");
     dataflowToolTile.getCreateNodeButton(nodes[1]).click();
     dataflowToolTile.getNode(nodes[1]).should("exist");
-    dataflowToolTile.getNode("demo-output").click(50, 10)
+    dataflowToolTile.getNode("timer").click(50, 10)
       .trigger("pointerdown", 50, 10)
       .trigger("pointermove", dragXDestination, dragYDestination, { force: true })
       .trigger("pointerup", dragXDestination, dragYDestination, { force: true });

@@ -1,4 +1,5 @@
 @import "../../components/vars";
+@import "../../components/mixins";
 
 .custom-select {
   user-select: none;
@@ -18,9 +19,11 @@
     color: $charcoal-dark-2;
     cursor: pointer;
 
-    &:hover {
+    &:hover, &:focus-visible {
       background-color: $workspace-teal-light-3;
     }
+
+    @include focus-ring;
 
     &.disabled {
       pointer-events: none;
@@ -117,9 +120,11 @@
         margin-right: 10px;
       }
 
-      &:hover {
+      &:hover, &:focus-visible {
         background-color: $workspace-teal-light-3;
       }
+
+      @include focus-ring;
 
       &:active {
         background-color: $workspace-teal-dark-1;

@@ -14,11 +14,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            cms/package-lock.json
       - name: Install Dependencies
-        run: npm ci
-      - name: Install CMS Dependencies
-        working-directory: ./cms
         run: npm ci
       - uses: concord-consortium/s3-deploy-action/deploy-path@v1
         id: s3-deploy-path
@@ -30,10 +26,6 @@ jobs:
         run: npm run build:version
       - name: Build Main App
         run: npm run build:webpack
-        env:
-          DEPLOY_PATH: ${{ steps.s3-deploy-path.outputs.deployPath }}
-      - name: Build CMS
-        run: npm run build:cms
         env:
           DEPLOY_PATH: ${{ steps.s3-deploy-path.outputs.deployPath }}
       - uses: actions/upload-artifact@v4
@@ -51,12 +43,8 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            cms/package-lock.json
             authoring-api/package-lock.json
       - name: Install Dependencies
-        run: npm ci
-      - name: Install CMS Dependencies
-        working-directory: ./cms
         run: npm ci
       - name: Install Authoring API Dependencies
         working-directory: ./authoring-api
@@ -104,16 +92,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            cms/package-lock.json
-      - name: Install CMS Dependencies
-        # Cypress will install the main folder dependencies automatically, but not the ones in cms
-        working-directory: ./cms
-        run: npm ci
       - uses: cypress-io/github-action@v4
         with:
           start: npm start
           wait-on: 'http://localhost:8080'
-          # wait 10 minutes to start the addition of the CMS required this increase
           wait-on-timeout: 600
           # only record the results to dashboard.cypress.io if CYPRESS_RECORD_KEY is set
           record: ${{ !!secrets.CYPRESS_RECORD_KEY }}

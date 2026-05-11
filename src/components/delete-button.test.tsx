@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "mobx-react";
 import React from "react";
@@ -36,7 +36,8 @@ describe("DeleteButton", () => {
         };
   const toolButton = ToolbarButtonModel.create(buttonConfig);
 
-  it("renders when disabled", () => {
+  it("renders when disabled", async () => {
+    const user = userEvent.setup();
     render(
       <Provider stores={stores}>
         <div className="app"/>
@@ -58,16 +59,15 @@ describe("DeleteButton", () => {
     expect(button).toHaveAttribute("aria-label", "Delete");
     expect(button).toHaveAttribute("aria-disabled", "true");
 
-    act(() => {
-      Modal.setAppElement(".app");
-      userEvent.click(button);
-    });
+    Modal.setAppElement(".app");
+    await user.click(button);
     expect(onSetToolActive).not.toHaveBeenCalled();
     expect(onClick).not.toHaveBeenCalled();
     expect(onSetShowDeleteTilesConfirmationAlert).toHaveBeenCalledTimes(1);
   });
 
-  it("renders when enabled", () => {
+  it("renders when enabled", async () => {
+    const user = userEvent.setup();
     render(
       <Provider stores={stores}>
         <div className="app"/>
@@ -87,16 +87,15 @@ describe("DeleteButton", () => {
     expect(button).toBeInTheDocument();
     expect(button).not.toHaveAttribute("aria-disabled");
 
-    act(() => {
-      Modal.setAppElement(".app");
-      userEvent.click(button);
-    });
+    Modal.setAppElement(".app");
+    await user.click(button);
     expect(onSetToolActive).toHaveBeenCalledTimes(1);
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(onSetShowDeleteTilesConfirmationAlert).toHaveBeenCalledTimes(1);
   });
 
-  it("deletes picked-up tile on click", () => {
+  it("deletes picked-up tile on click", async () => {
+    const user = userEvent.setup();
     const testStores = specStores();
     testStores.ui.pickUpTile("tile-1", "doc-1", "Text");
 
@@ -116,21 +115,18 @@ describe("DeleteButton", () => {
       </Provider>
     );
 
-    act(() => {
-      Modal.setAppElement(".app");
-      userEvent.click(screen.getByTestId("delete-button"));
-    });
+    Modal.setAppElement(".app");
+    await user.click(screen.getByTestId("delete-button"));
     // Pick-up should be cleared
     expect(testStores.ui.pickedUpTileId).toBeUndefined();
     // Confirmation modal should appear
-    act(() => {
-      userEvent.click(screen.getByText("Delete Tile", { selector: "button" }));
-    });
+    await user.click(screen.getByText("Delete Tile", { selector: "button" }));
     expect(onDeleteTile).toHaveBeenCalledWith("tile-1");
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it("deletes tile on drag-and-drop", () => {
+  it("deletes tile on drag-and-drop", async () => {
+    const user = userEvent.setup();
     render(
       <Provider stores={stores}>
         <div className="app"/>
@@ -159,18 +155,15 @@ describe("DeleteButton", () => {
       preventDefault: jest.fn(),
     };
 
-    act(() => {
-      Modal.setAppElement(".app");
-      fireEvent.drop(button, { dataTransfer });
-    });
+    Modal.setAppElement(".app");
+    fireEvent.drop(button, { dataTransfer });
     // Confirmation modal should appear
-    act(() => {
-      userEvent.click(screen.getByText("Delete Tile", { selector: "button" }));
-    });
+    await user.click(screen.getByText("Delete Tile", { selector: "button" }));
     expect(onDeleteTile).toHaveBeenCalledWith("tile-2");
   });
 
-  it("shows confirmation alert when requested", () => {
+  it("shows confirmation alert when requested", async () => {
+    const user = userEvent.setup();
     let showAlert: () => void;
 
     function setShowAlert(show: () => void) {
@@ -198,13 +191,9 @@ describe("DeleteButton", () => {
     );
     expect(screen.getByTestId("delete-button")).toBeInTheDocument();
 
-    act(() => {
-      Modal.setAppElement(".app");
-      userEvent.click(screen.getByTestId("delete-button"));
-    });
-    act(() => {
-      userEvent.click(screen.getByText("Delete Tiles", { selector: "button" }));
-    });
+    Modal.setAppElement(".app");
+    await user.click(screen.getByTestId("delete-button"));
+    await user.click(screen.getByText("Delete Tiles", { selector: "button" }));
     expect(onDeleteSelectedTiles).toHaveBeenCalledTimes(1);
   });
 });

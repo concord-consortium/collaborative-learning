@@ -14,6 +14,9 @@ import { TileModel } from "../../../models/tiles/tile-model";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { specStores } from "../../../models/stores/spec-stores";
 import { specAppConfig } from "../../../models/stores/spec-app-config";
+import "../../../models/tiles/table/table-registration";
+import "../../bar-graph/bar-graph-registration";
+import "../../data-card/data-card-registration";
 import { defaultTimelineContent } from "../models/timeline-content";
 import { TimelineComponent } from "./timeline-tile";
 
@@ -43,7 +46,12 @@ describe("TimelineComponent", () => {
       config: {
         settings: {
           "timeline": {
-            tools: ["table-it", "data-card-it", "bar-graph-it", "|", "zoom-in", "zoom-out", "view-all"]
+            tools: [
+              ["data-set-view", "Table"],
+              ["data-set-view", "DataCard"],
+              ["data-set-view", "BarGraph"],
+              "|", "zoom-in", "zoom-out", "view-all"
+            ]
           }
         }
       }
@@ -79,6 +87,19 @@ describe("TimelineComponent", () => {
     expect(zoomInButton).toHaveAttribute("aria-disabled", "true");
     expect(zoomOutButton).toHaveAttribute("aria-disabled", "true");
     expect(viewAllButton).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("displays the selected event label", () => {
+    renderWithStores();
+    expect(screen.getByText("Event")).toBeInTheDocument();
+  });
+
+  it("Prev and Next buttons are disabled when no events exist", () => {
+    const { container } = renderWithStores();
+    const prevButton = container.querySelector(".prev-button");
+    const nextButton = container.querySelector(".next-button");
+    expect(prevButton).toBeDisabled();
+    expect(nextButton).toBeDisabled();
   });
 
   it("renders all toolbar buttons", () => {

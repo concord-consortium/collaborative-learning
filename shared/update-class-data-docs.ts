@@ -1,5 +1,5 @@
 import { getDatabase } from "firebase-admin/database";
-import { getFirestore } from "firebase-admin/firestore";
+import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { documentSummarizer } from "./ai-summarizer/ai-summarizer";
 
 // Finds classes that have updated documents for selected units,
@@ -189,6 +189,22 @@ export async function updateSingleClassDataDoc(portal: string|undefined, demo: s
     contextId: string, logger: Logger) {
   const classData = await getClassDocumentData(portal, demo, unit, logger, contextId);
   const data = classData[contextId];
+  if (!data) {
+    // Empty-class guard: write an empty placeholder so the client shows
+    // "No teacher/student summary available" instead of spinning on
+    // "Generating summary...". teacherSummary/studentSummary stay undefined;
+    // the client's ?? fallback handles rendering.
+    logger.info(`No documents found for ${unit} ${contextId}; writing empty placeholder class data doc`);
+    await getClassDataDoc(portal, demo, unit, contextId).set({
+      userCount: 0,
+      documentCount: 0,
+      teacherContent: "",
+      studentContent: "",
+      summary: null,
+      summaryCreatedAt: FieldValue.serverTimestamp(),
+    });
+    return;
+  }
   await updateClassDataDoc(portal, demo, unit, contextId, data, logger);
 }
 

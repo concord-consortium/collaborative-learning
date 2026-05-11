@@ -1,4 +1,3 @@
-import { ObservableMap } from "mobx";
 import { types, Instance, SnapshotIn, cast } from "mobx-state-tree";
 import {
   convertDocument, CustomEditor, Editor, EditorValue, htmlToSlate, serializeValue, slateToHtml, textToSlate, slateToText
@@ -11,7 +10,6 @@ import { escapeBackslashes, escapeDoubleQuotes, removeNewlines, removeTabs } fro
 import { tileContentAPIViews } from "../tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { kHighlightFormat } from "../../../components/tiles/text/plugins/highlights-plugin";
-import { IHighlightBox } from "../../../components/tiles/text/plugins/highlight-registry-context";
 
 export const kTextTileType = "Text";
 
@@ -34,7 +32,6 @@ export const TextContentModel = TileContentModel
   })
   .volatile(self => ({
     editor:  undefined as CustomEditor | undefined,
-    highlightBoxesCache: new ObservableMap<string, IHighlightBox>(),
   }))
   .views(self => ({
     // guarantees string (not readonly string) types
@@ -115,15 +112,23 @@ export const TextContentModel = TileContentModel
       const exportHtml = html.split("\n")
         .map((line, i, arr) =>
           `    "${processLine(line)}"${i < arr.length - 1 ? "," : ""}`);
-      return [
+      // Highlight chips reference entries by ID in highlightedText. Without exporting the array,
+      // every chip resolves to "invalid reference" on reload. Omit when empty to keep diffs clean
+      // for tiles that have no highlights.
+      const hasHighlights = self.highlightedText.length > 0;
+      const lines = [
         `{`,
         `  "type": "Text",`,
         `  "format": "html",`,
         `  "text": [`,
         ...exportHtml,
-        `  ]`,
-        `}`
-      ].join("\n");
+        hasHighlights ? `  ],` : `  ]`,
+      ];
+      if (hasHighlights) {
+        lines.push(`  "highlightedText": ${JSON.stringify(self.highlightedText)}`);
+      }
+      lines.push(`}`);
+      return lines.join("\n");
     }
   }))
   .actions(self => ({
@@ -156,13 +161,6 @@ export const TextContentModel = TileContentModel
         self.highlightedText.splice(index, 1);
       }
     },
-    setHighlightBoxesCache(id: string, box: IHighlightBox) {
-      if (box) {
-        self.highlightBoxesCache.set(id, box);
-      } else {
-        self.highlightBoxesCache.delete(id);
-      }
-    },
     setLinkDisplayMode(linkId: string, mode: LinkDisplayMode) {
       if (mode === kDefaultLinkDisplayMode) {
         self.linkDisplayModes.delete(linkId);
@@ -184,9 +182,16 @@ export const TextContentModel = TileContentModel
   .views(self => tileContentAPIViews({
     get annotatableObjects(): IClueTileObject[] {
       const objects: IClueTileObject[] = [];
-      const objectType = kHighlightFormat;
       self.highlightedText.forEach(highlight => {
-        objects.push({objectId: highlight.id, objectType});
+        objects.push({objectId: highlight.id, objectType: kHighlightFormat});
+      });
+      // Each text plugin contributes its own annotatable objects (e.g. variable chips
+      // from the shared-variables plugin) and is responsible for its own MobX
+      // reactivity — Slate's editor state isn't otherwise observable.
+      getAllTextPluginInfos().forEach(info => {
+        if (info?.getAnnotatableObjects) {
+          objects.push(...info.getAnnotatableObjects(self));
+        }
       });
       return objects;
     },

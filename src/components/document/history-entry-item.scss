@@ -1,5 +1,6 @@
 .history-entry-item {
   border: 1px solid #e0e0e0;
+  border-left-width: 4px;
   border-radius: 4px;
   margin-bottom: 4px;
   background: white;
@@ -7,6 +8,20 @@
   &.expanded {
     border-color: #bbb;
   }
+
+  // Source accent (Okabe-Ito colorblind-safe palette). Applied only in the
+  // local history section; in the remote section every entry is remote and
+  // a per-row accent would be noise.
+  &.source-local {
+    border-left-color: #009e73; // bluish green
+  }
+  &.source-remote {
+    border-left-color: #0072b2; // blue
+  }
+  &.source-revert {
+    border-left-color: #d55e00; // vermillion
+  }
+
 
   .history-entry-summary {
     display: flex;
@@ -57,9 +72,45 @@
     }
 
     .history-entry-undoable {
-      color: #4a9;
       font-size: 12px;
       flex-shrink: 0;
+      padding: 0 4px;
+      border-radius: 3px;
+
+      &.undoable {
+        color: #4a9;
+
+        // The ↩ glyph sits high above its baseline; nudge the inner span
+        // down so it visually centers without moving the outer box.
+        .glyph {
+          display: inline-block;
+          transform: translateY(1px);
+        }
+      }
+
+      &.not-undoable {
+        color: #bbb;
+      }
+
+      // Undo-stack decoration. on-undo-stack shades the icon when the entry
+      // is currently on the undo stack; is-undo-pointer is a more prominent
+      // highlight on the entry that the next undo would target.
+      &.on-undo-stack {
+        background: #e0e0e0;
+      }
+      &.is-undo-pointer {
+        background: #b8dcff;
+      }
+    }
+
+    .history-entry-author {
+      color: #555;
+      font-size: 11px;
+      flex-shrink: 0;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .history-entry-time {
@@ -78,6 +129,19 @@
 
     > div {
       margin-bottom: 4px;
+    }
+
+    .history-entry-source-swatch {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 4px;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      vertical-align: middle;
+
+      &.source-local { background: #009e73; }
+      &.source-remote { background: #0072b2; }
+      &.source-revert { background: #d55e00; }
     }
 
     .history-entry-record {
