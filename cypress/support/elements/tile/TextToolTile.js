@@ -18,7 +18,11 @@ class TextToolTile {
 
         this.getTextTile().last().focus();
         this.getTextEditor().last().click();
-        this.getTextEditor().last().type(text);
+        // slate-react listens for native `beforeinput` events (via addEventListener, not React
+        // synthetic props), and `cy.type()` doesn't dispatch those, so typed characters never
+        // reach the editor. `cy.realType()` from cypress-real-events uses CDP to dispatch real
+        // keyboard input.
+        cy.realType(text);
         // This doesn't guarantee the text has been saved to firebase. It would be best
         // if there was a way to tell if it has been saved perhaps by some saving indicator
         // in the UI. Or reaching into app to find some saving state.
@@ -27,7 +31,10 @@ class TextToolTile {
     }
     enterAdditionalText(text){
         this.getTextTile().last().focus();
-        this.getTextEditor().last().type('{moveToEnd}'+text);
+        // `{moveToEnd}` is a Cypress meta-key, so it has to go through `type`. The text itself
+        // needs `realType` so slate-react's native `beforeinput` listener actually fires.
+        this.getTextEditor().last().type('{moveToEnd}');
+        cy.realType(text);
         cy.wait(300);
     }
 
