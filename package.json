@@ -231,7 +231,6 @@
     "sass": "^1.54.5",
     "sass-loader": "^13.0.2",
     "script-loader": "^0.7.2",
-    "slate-dom": "^0.117.4",
     "string-replace-loader": "^3.1.0",
     "style-loader": "^3.3.1",
     "terser": "^5.46.0",
