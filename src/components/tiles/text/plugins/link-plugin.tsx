@@ -45,16 +45,32 @@ export const LinkComponent = observer(function LinkComponent(
 
   const displayMode = textContent?.getLinkDisplayMode(linkId) ?? kDefaultLinkDisplayMode;
 
+  const isButtonMode = displayMode === "button";
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     // In editable mode + link display, let Slate handle clicks for cursor
     // placement unless the user holds cmd/ctrl (standard editor convention).
-    if (!readOnly && displayMode === kDefaultLinkDisplayMode && !(e.metaKey || e.ctrlKey)) {
+    if (!readOnly && !isButtonMode && !(e.metaKey || e.ctrlKey)) {
       return;
     }
     e.preventDefault();
     e.stopPropagation();
     if (href) {
       window.open(href, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    // Prevent drag-selection from pulling button content into the editor
+    if (isButtonMode) {
+      e.preventDefault();
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // In button mode, prevent Slate from starting a selection inside the button
+    if (isButtonMode && !readOnly) {
+      e.preventDefault();
     }
   };
 
@@ -68,8 +84,11 @@ export const LinkComponent = observer(function LinkComponent(
       {...attributes}
       href={href}
       className={className}
-      contentEditable={displayMode === "button" ? false : undefined}
+      contentEditable={isButtonMode ? false : undefined}
+      draggable={isButtonMode ? false : undefined}
       onClick={handleClick}
+      onDragStart={handleDragStart}
+      onMouseDown={isButtonMode ? handleMouseDown : undefined}
       target="_blank"
       rel="noopener noreferrer"
     >
