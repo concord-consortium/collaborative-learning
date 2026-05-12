@@ -1,4 +1,5 @@
 @import "../vars";
+@import "../mixins";
 
 .simple-document-item {
   background: $classwork-purple-light-7;
@@ -10,7 +11,9 @@
   flex-shrink: 0;
   height: 16px;
   margin: 0;
+  padding: 0;
   width: 16px;
+  @include focus-ring(-2px);
 
   &:hover {
     background: $classwork-purple-light-4;
@@ -19,16 +22,13 @@
     background: $classwork-purple-light-2;
   }
 
-  &.private {
+  &[aria-disabled="true"] {
     background: $charcoal-light-7;
     border: dotted 1px $charcoal;
     cursor: not-allowed;
 
     &:hover {
       background: $charcoal-light-4;
-    }
-    &:active {
-      background: $color3;
     }
   }
 }

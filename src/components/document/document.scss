@@ -1,4 +1,5 @@
 @import "../vars";
+@import "../mixins";
 
 .document {
   position: absolute;
@@ -242,6 +243,11 @@
           &:active {
             background-color: $workspace-teal-light-2;
           }
+        }
+        &.icon-publish,
+        &.icon-up1,
+        &.icon-up4 {
+          @include focus-ring(-2px);
         }
       }
       .icon-new {
