@@ -24,6 +24,13 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
   const hasSubTabs = subTabs.length > 1;
   const navTabClass = navTabSpec?.tab;
 
+  // Only forward selectedIndex when the caller actually controls it. react-tabs
+  // v6 treats `selectedIndex={undefined}` as a controlled-mode "no tab selected"
+  // signal (its default-prop `null` is overridden by the explicit undefined),
+  // which leaves every panel display:none. Spreading the prop conditionally
+  // lets uncontrolled callers (e.g. MyWorkDocumentOrBrowser) keep react-tabs'
+  // default selection on tab 0.
+  const controlledProps = typeof selectedIndex === "number" ? { selectedIndex } : {};
   return (
     <div className="document-tab-content">
       <Tabs
@@ -31,7 +38,7 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
         forceRenderTabPanel={true}
         selectedTabClassName="selected"
         onSelect={onSelect}
-        selectedIndex={selectedIndex}
+        {...controlledProps}
       >
         <TabList className={classNames("tab-list", navTabClass)}>
           {subTabs.map((subTab) => {
