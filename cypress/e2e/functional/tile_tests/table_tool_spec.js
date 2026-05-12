@@ -570,9 +570,12 @@ context('Table Tool Tile', function () {
     tableToolTile.getTableTile().should('be.visible');
     cy.get(".primary-workspace").within((workspace) => {
       tableToolTile.renameColumn('x', 'Mammal');
-      cy.get('.rdg-cell[aria-colindex=2]').last().type('Dog{enter}');
-      cy.get('.rdg-cell[aria-colindex=2]').last().type('Cat{enter}');
-      cy.get('.rdg-cell[aria-colindex=2]').last().type('Fish{enter}');
+      // rdg beta.44 only enters EDIT mode on dblclick or an Enter keypress against
+      // the focused cell — typing directly on `.rdg-cell` no longer opens the
+      // editor. Use typeInTableCellXY which dblclicks the target cell first.
+      tableToolTile.typeInTableCellXY(0, 0, 'Dog');
+      tableToolTile.typeInTableCellXY(1, 0, 'Cat');
+      tableToolTile.typeInTableCellXY(2, 0, 'Fish');
     });
 
     tableToolTile.getImportDataButton().click();
