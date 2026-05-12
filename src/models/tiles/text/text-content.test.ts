@@ -1,16 +1,16 @@
-import { EditorValue, htmlToSlate, registerPlugins, slateToHtml, slateToText
+import { createEditor, EditorValue, htmlToSlate, slateToHtml, slateToText
 } from "@concord-consortium/slate-editor";
 import { TextContentModel, kTextTileType } from "./text-content";
 import { registerTextPluginInfo } from "./text-plugin-info";
 import { registerVariables, kVariableFormat } from "../../../plugins/shared-variables/slate/variables-plugin";
 import { kHighlightFormat, registerHighlight } from "../../../plugins/text/highlights-plugin";
 
-// slate-editor's core element renderers (paragraph, inline, etc.) are registered by
-// registerPlugins(). In production this happens via createEditor() when the text tile
-// boots. The test never instantiates an editor, so we register them here. Chip
-// deserializers must be registered AFTER registerPlugins() so they take precedence
-// over slate-editor's catch-all <span> deserializer (most-recent wins).
-registerPlugins();
+// slate-editor v0.12 dropped registerPlugins(); its built-in element/mark
+// renderers are now registered as a side effect of createEditor() (via
+// withCoreMarks/withCoreBlocks). Call it once to trigger registration. Chip
+// deserializers must be registered AFTER, so they take precedence over
+// slate-editor's catch-all <span> deserializer (most-recent wins).
+createEditor();
 registerVariables();
 registerHighlight();
 
