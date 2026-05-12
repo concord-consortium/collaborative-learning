@@ -18,11 +18,7 @@ class TextToolTile {
 
         this.getTextTile().last().focus();
         this.getTextEditor().last().click();
-        // slate-react listens for native `beforeinput` events (via addEventListener, not React
-        // synthetic props), and `cy.type()` doesn't dispatch those, so typed characters never
-        // reach the editor. `cy.realType()` from cypress-real-events uses CDP to dispatch real
-        // keyboard input.
-        cy.realType(text);
+        this._dispatchKeystrokes(text);
         // This doesn't guarantee the text has been saved to firebase. It would be best
         // if there was a way to tell if it has been saved perhaps by some saving indicator
         // in the UI. Or reaching into app to find some saving state.
@@ -31,11 +27,40 @@ class TextToolTile {
     }
     enterAdditionalText(text){
         this.getTextTile().last().focus();
-        // `{moveToEnd}` is a Cypress meta-key, so it has to go through `type`. The text itself
-        // needs `realType` so slate-react's native `beforeinput` listener actually fires.
-        this.getTextEditor().last().type('{moveToEnd}');
-        cy.realType(text);
+        this._dispatchKeystrokes('{moveToEnd}' + text);
         cy.wait(300);
+    }
+    // slate-react listens for native `beforeinput` events (via addEventListener, not React
+    // synthetic props); `cy.type()` doesn't dispatch those, so typed characters never reach
+    // the editor. We split each input into literal-text chunks (dispatched with
+    // `cy.realType`, which uses CDP to fire real keyboard input) and `{metaKey}` chunks
+    // (dispatched with `cy.realPress`). Only the meta-keys actually used in our specs are
+    // mapped — adding more is a one-line edit.
+    _dispatchKeystrokes(text){
+        const META_KEY_MAP = {
+          movetostart: 'Home',
+          movetoend: 'End',
+          enter: 'Enter',
+          end: 'End',
+          home: 'Home',
+          esc: 'Escape',
+          escape: 'Escape',
+          backspace: 'Backspace',
+          del: 'Delete',
+          delete: 'Delete',
+          tab: 'Tab',
+        };
+        const re = /\{([a-zA-Z]+)\}/g;
+        let last = 0;
+        let m;
+        while ((m = re.exec(text)) !== null) {
+          if (m.index > last) cy.realType(text.slice(last, m.index));
+          const key = META_KEY_MAP[m[1].toLowerCase()];
+          if (!key) throw new Error(`Unknown meta-key {${m[1]}} in TextToolTile keystroke dispatcher`);
+          cy.realPress(key);
+          last = m.index + m[0].length;
+        }
+        if (last < text.length) cy.realType(text.slice(last));
     }
 
     deleteText(text){
