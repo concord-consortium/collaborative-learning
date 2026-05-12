@@ -34,7 +34,7 @@ context('Table Tool Tile', function () {
 
     cy.log('verify table title can be edited');
     const title = "table test";
-    tableToolTile.getTableTitle().click().type(title + '{enter}');
+    tableToolTile.enterTableTitle(title);
     tableToolTile.getTableTitle().should('contain', title);
 
     cy.log('will verify there are only two columns x & y');
