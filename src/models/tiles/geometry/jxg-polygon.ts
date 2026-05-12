@@ -281,6 +281,25 @@ function segmentNameLengthFn(this: JXG.Line) {
   return JXG.toFixed(this.L(), 1);
 }
 
+function segmentNameEquationFn(this: JXG.Line) {
+  const slope = this.getSlope();
+  const p1 = this.point1;
+  if (!isFinite(slope)) {
+    return `x = ${JXG.toFixed(p1.X(), 2)}`;
+  }
+  const intercept = p1.Y() - slope * p1.X();
+  if (slope === 0) {
+    return `y = ${JXG.toFixed(intercept, 2)}`;
+  }
+  const slopeStr = JXG.toFixed(slope, 2);
+  const sign = intercept >= 0 ? " + " : " − ";
+  const absIntercept = JXG.toFixed(Math.abs(intercept), 2);
+  if (Math.abs(intercept) < 0.005) {
+    return `y = ${slopeStr}x`;
+  }
+  return `y = ${slopeStr}x${sign}${absIntercept}`;
+}
+
 function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
   const segment = getPolygonEdge(board, change.targetID as string, change.parents as string[]);
   if (segment) {
@@ -297,7 +316,9 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
       ? nameOption
       : labelOption === "length"
         ? segmentNameLengthFn
-        : "";
+        : labelOption === "equation"
+          ? segmentNameEquationFn
+          : "";
 
     segment.setAttribute({ name, withLabel: labelOption !== ELabelOption.kNone });
   }
