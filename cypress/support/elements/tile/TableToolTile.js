@@ -121,7 +121,22 @@ class TableToolTile{
         // return cy.get('.rdg-row .rdg-cell[aria-colindex=\"' + colIndex + '\"]');
     }
     getTableCellWithRowColIndex(rowIndex, colIndex){
-      return cy.get('.rdg-row').eq(rowIndex).find('.rdg-cell[aria-colindex="' + colIndex + '"]');
+      // rdg beta.44 virtualizes off-screen rows, so a row past the visible window
+      // isn't in the DOM and `.eq(rowIndex)` won't find it. Scroll the grid so the
+      // target row index will be inside the rendered window, then query by the
+      // absolute `aria-rowindex` instead of `.eq` (which is relative to whatever
+      // rows happen to be rendered right now). aria-rowindex matches the data
+      // row index +2 (header occupies rowindex 1).
+      cy.get('.rdg').then($rdg => {
+        const grid = $rdg[0];
+        // Use the actual rendered row height when available; fall back to a sensible
+        // default. Centering the target in the viewport gives rdg's buffer room on
+        // both sides so the row is rendered after the scroll.
+        const sample = grid.querySelector('.rdg-row');
+        const rowHeight = (sample && sample.getBoundingClientRect().height) || 30;
+        grid.scrollTop = Math.max(0, rowIndex * rowHeight - grid.clientHeight / 2);
+      });
+      return cy.get(`.rdg-row[aria-rowindex=${rowIndex + 2}] .rdg-cell[aria-colindex="${colIndex}"]`);
     }
     enterData(cell, num){
         this.getTableCell().eq(cell).type(num+'{enter}');
