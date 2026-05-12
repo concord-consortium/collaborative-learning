@@ -10,8 +10,8 @@ const defaultLineProps = Object.freeze({
   strokeOpacity: 1,      highlightStrokeOpacity: 0.99,
   straightFirst: true,
   straightLast: true,
-  firstArrow: true,
-  lastArrow: true,
+  firstArrow: { type: 1, size: 6 },
+  lastArrow: { type: 1, size: 6 },
 });
 
 const selectedLineProps = Object.freeze({

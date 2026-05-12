@@ -66,8 +66,8 @@ const sharedProps = {
 const lineSpecificProps = {
   highlightStrokeOpacity: .5,
   highlightStrokeColor: kMovableLineDefaults.strokeColor,
-  firstArrow: true,
-  lastArrow: true,
+  firstArrow: { type: 1, size: 6 },
+  lastArrow: { type: 1, size: 6 },
 };
 
 const pointSpecificProps = {
