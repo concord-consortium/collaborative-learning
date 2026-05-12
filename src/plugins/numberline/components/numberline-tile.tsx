@@ -197,8 +197,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   const handleMouseClick = (e: Event, optionClicked: CreatePointType) => {
     if (!readOnly){
-      if (hoverPointId) {
-        const hoverPoint = content.getPoint(hoverPointId);
+      // Recompute the hovered point against the click's actual position rather
+      // than trusting the stale hoverPointId from the last mousemove. Without
+      // this, two rapid clicks at different ticks (no mousemove between them —
+      // touchpad taps, cypress synthetic clicks) both target the point created
+      // by the first click, so the second click never creates a new point.
+      const hoveredId = findHoverPoint(e as MouseEvent);
+      if (hoveredId) {
+        const hoverPoint = content.getPoint(hoveredId);
         if (hoverPoint) {
           content.setSelectedPoint(hoverPoint);
           setSelectedPointId(hoverPoint.id);
