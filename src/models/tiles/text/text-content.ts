@@ -9,9 +9,12 @@ import { getAllTextPluginInfos } from "./text-plugin-info";
 import { escapeBackslashes, escapeDoubleQuotes, removeNewlines, removeTabs } from "../../../utilities/string-utils";
 import { tileContentAPIViews } from "../tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
-import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
+import { kHighlightFormat } from "../../../components/tiles/text/plugins/highlights-plugin";
 
 export const kTextTileType = "Text";
+
+export type LinkDisplayMode = "link" | "button";
+export const kDefaultLinkDisplayMode: LinkDisplayMode = "link";
 
 export function defaultTextContent() {
   return TextContentModel.create();
@@ -24,7 +27,8 @@ export const TextContentModel = TileContentModel
     text: types.optional(types.union(types.string, types.array(types.string)), ""),
     // e.g. "html", "markdown", "slate", "quill", empty => plain text
     format: types.maybe(types.string),
-    highlightedText: types.optional(types.array(types.model({id: types.identifier, text: types.string})), [])
+    highlightedText: types.optional(types.array(types.model({id: types.identifier, text: types.string})), []),
+    linkDisplayModes: types.map(types.enumeration<LinkDisplayMode>("LinkDisplayMode", ["link", "button"]))
   })
   .volatile(self => ({
     editor:  undefined as CustomEditor | undefined,
@@ -35,6 +39,10 @@ export const TextContentModel = TileContentModel
       return Array.isArray(self.text)
               ? self.text as string[]
               : self.text as string;
+    },
+    getLinkDisplayMode(linkId: string | undefined): LinkDisplayMode {
+      if (!linkId) return kDefaultLinkDisplayMode;
+      return self.linkDisplayModes.get(linkId) ?? kDefaultLinkDisplayMode;
     }
   }))
   .views(self => ({
@@ -152,6 +160,16 @@ export const TextContentModel = TileContentModel
       if (index >= 0) {
         self.highlightedText.splice(index, 1);
       }
+    },
+    setLinkDisplayMode(linkId: string, mode: LinkDisplayMode) {
+      if (mode === kDefaultLinkDisplayMode) {
+        self.linkDisplayModes.delete(linkId);
+      } else {
+        self.linkDisplayModes.set(linkId, mode);
+      }
+    },
+    removeLinkDisplayMode(linkId: string) {
+      self.linkDisplayModes.delete(linkId);
     }
   }))
   .actions(self => ({

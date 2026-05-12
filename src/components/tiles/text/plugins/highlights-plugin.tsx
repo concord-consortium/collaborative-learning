@@ -4,9 +4,9 @@ import { BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, regi
   registerElementDeserializer, RenderElementProps, useSelected, useSerializing
 } from "@concord-consortium/slate-editor";
 import { action, makeObservable, observable } from "mobx";
-import { TextContentModelType } from "../../models/tiles/text/text-content";
-import { ITextPlugin } from "../../models/tiles/text/text-plugin-info";
-import { TextPluginsContext } from "../../components/tiles/text/text-plugins-context";
+import { TextContentModelType } from "../../../../models/tiles/text/text-content";
+import { ITextPlugin } from "../../../../models/tiles/text/text-plugin-info";
+import { TextPluginsContext } from "../text-plugins-context";
 import { HighlightRegistryContext, HighlightRevisionContext } from "./highlight-registry-context";
 import { getChipBoxInWrapperCoords, useChipMeasurement } from "./use-chip-measurement";
 import { kHighlightChipIdAttr, kSlateChipTypeAttr } from "./chip-serialization";

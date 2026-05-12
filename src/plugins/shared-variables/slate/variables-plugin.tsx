@@ -14,9 +14,9 @@ import { ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { TextPluginsContext } from "../../../components/tiles/text/text-plugins-context";
 import { IOffsetModel, ObjectBoundingBox, OffsetModel } from "../../../models/annotations/clue-object";
 import { IStores } from "../../../models/stores/stores";
-import { removeAnnotationsForChip } from "../../text/chip-annotation-cleanup";
-import { getChipBoxInWrapperCoords, useChipMeasurement } from "../../text/use-chip-measurement";
-import { kSlateChipTypeAttr, kVariableChipReferenceAttr } from "../../text/chip-serialization";
+import { removeAnnotationsForChip } from "../../../components/tiles/text/plugins/chip-annotation-cleanup";
+import { getChipBoxInWrapperCoords, useChipMeasurement } from "../../../components/tiles/text/plugins/use-chip-measurement";
+import { kSlateChipTypeAttr, kVariableChipReferenceAttr } from "../../../components/tiles/text/plugins/chip-serialization";
 
 import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
