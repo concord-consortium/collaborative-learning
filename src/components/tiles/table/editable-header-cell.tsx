@@ -64,7 +64,22 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }
       {isEditing
         ? <HeaderCellInput style={style} inputStyle={inputStyle} value={nameValue}
             onKeyDown={handleKeyDown} onChange={handleChange} onClose={handleClose} />
-        : <div className="header-name">{name}</div>}
+        : (
+          <div
+            className="header-name"
+            role="button"
+            tabIndex={0}
+            aria-label={`Column ${name}, press Enter to rename`}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === "F2") {
+                e.preventDefault();
+                onBeginHeaderCellEdit?.();
+              }
+            }}
+          >
+            {name}
+          </div>
+        )}
     </div>
   );
 };

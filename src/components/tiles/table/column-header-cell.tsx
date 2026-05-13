@@ -83,20 +83,24 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
                 column={column as any}
               />
               {hasData &&
-                <div className={classNames("column-button sort-column-button", { "ascending": direction === "ASC",
-                                      "descending": direction === "DESC" })} onClick={handleSort}>
+                <button
+                  type="button"
+                  className={classNames("column-button sort-column-button", { "ascending": direction === "ASC",
+                                      "descending": direction === "DESC" })}
+                  aria-label={
+                    direction === "ASC"
+                      ? "Sorted ascending"
+                      : direction === "DESC"
+                      ? "Sorted descending"
+                      : "Not sorted"
+                  }
+                  onClick={handleSort}
+                >
                   <SortIcon
                     className={classNames("column-icon sort-column-icon")}
                     data-testid={`sort-indicator-${column.key}`}
-                    aria-label={
-                      direction === "ASC"
-                        ? "Sorted ascending"
-                        : direction === "DESC"
-                        ? "Sorted descending"
-                        : "Not sorted"
-                    }
                   />
-                </div>
+                </button>
               }
             </div>
             {showExpressions && <ExpressionCell readOnly={readOnly} column={column} />}
@@ -133,9 +137,14 @@ const RemoveColumnButton: React.FC<IRemoveColumnButtonProps> =
     }
   };
   return (
-    <div className="column-button remove-column-button" onClick={handleClick}>
+    <button
+      type="button"
+      className="column-button remove-column-button"
+      aria-label={`Remove column ${colName}`}
+      onClick={handleClick}
+    >
       <RemoveColumnSvg className="column-icon remove-column-icon"/>
-    </div>
+    </button>
   );
 };
 RemoveColumnButton.displayName = "RemoveColumnButton";
