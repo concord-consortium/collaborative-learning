@@ -1,4 +1,4 @@
-import { isCellEditing, getHeaderFocusables, createBodyTabHandler, createBodyEscapeHandler, createBodyFocusContent, createHeaderTabHandler, type CellPosition } from "./keyboard-nav";
+import { isCellEditing, getHeaderFocusables, createBodyTabHandler, createBodyEscapeHandler, createBodyFocusContent, createHeaderTabHandler, createHeaderEscapeHandler, type CellPosition } from "./keyboard-nav";
 
 describe("isCellEditing", () => {
   beforeEach(() => {
@@ -266,5 +266,30 @@ describe("createHeaderTabHandler", () => {
     const handler = createHeaderTabHandler({ getTopbarElement: () => undefined });
     const event = makeEvent();
     expect(handler(event, false)).toBe("exit");
+  });
+});
+
+describe("createHeaderEscapeHandler", () => {
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  it("returns 'handled' when an input inside .editable-header-cell is focused", () => {
+    const cell = document.createElement("div");
+    cell.className = "editable-header-cell";
+    const input = document.createElement("input");
+    cell.appendChild(input);
+    document.body.appendChild(cell);
+    input.focus();
+    const handler = createHeaderEscapeHandler();
+    expect(handler(new KeyboardEvent("keydown"))).toBe("handled");
+  });
+
+  it("returns 'exit' when no rename input is focused", () => {
+    const btn = document.createElement("button");
+    document.body.appendChild(btn);
+    btn.focus();
+    const handler = createHeaderEscapeHandler();
+    expect(handler(new KeyboardEvent("keydown"))).toBe("exit");
   });
 });

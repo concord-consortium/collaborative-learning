@@ -138,6 +138,20 @@ export function createHeaderTabHandler(deps: {
   };
 }
 
+export function createHeaderEscapeHandler() {
+  return (_event: KeyboardEvent): "handled" | "exit" => {
+    const active = document.activeElement;
+    if (
+      active instanceof HTMLInputElement &&
+      active.closest(".editable-header-cell")
+    ) {
+      // Let HeaderCellInput handle Escape (calls onClose with cancel).
+      return "handled";
+    }
+    return "exit";
+  };
+}
+
 export function setGridActivePosition(
   gridRef: RefObject<DataGridHandle | null>,
   position: CellPosition
