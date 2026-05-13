@@ -40,6 +40,7 @@ import { Provider } from "mobx-react";
 import { specStores } from "../../../models/stores/spec-stores";
 import { ModalProvider } from "react-modal-hook";
 import { createDrawingContent } from "../model/drawing-content";
+import { kClosedObjectListPanelWidth } from "../model/drawing-types";
 import DrawingToolComponent from "./drawing-tile";
 import { RectangleObjectSnapshotForAdd } from "../objects/rectangle";
 
@@ -87,6 +88,10 @@ describe("DrawingToolComponent", () => {
   model.setTitle('A Title for Testing');
   render(<div className="document-content" data-testid="document-content"/>);
   const documentContent = screen.getByTestId("document-content");
+
+  beforeEach(() => {
+    stores.ui.setSelectedTile(model);
+  });
 
   const defaultProps = {
     tileElt: null,
@@ -346,6 +351,77 @@ describe("DrawingToolComponent", () => {
       // Left will include the object list panel width, so we just verify it's transformed.
       expect(bbox!.left).toBeGreaterThan(expectedLeft);
       expect(bbox!.top).toBeCloseTo(expectedTop, 1);
+    });
+  });
+
+  describe("when tile is not selected", () => {
+    const unselectedContent = createDrawingContent();
+    const unselectedModel = TileModel.create({content: unselectedContent});
+
+    it("does not show object list panel", () => {
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
+            <DrawingToolComponent {...defaultProps} model={unselectedModel} />
+          </Provider>
+        </ModalProvider>
+      );
+      expect(screen.queryByTestId("object-list-view")).not.toBeInTheDocument();
+    });
+
+    it("renders an object-list-spacer in place of the panel", () => {
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
+            <DrawingToolComponent {...defaultProps} model={unselectedModel} />
+          </Provider>
+        </ModalProvider>
+      );
+      // The spacer reserves the closed-panel width so the drawing layer
+      // stays in place when the tile is deselected (CLUE-206).
+      expect(screen.queryByTestId("object-list-spacer")).toBeInTheDocument();
+    });
+
+    it("getObjectBoundingBox stays offset by closed panel width", () => {
+      // Sparrows must remain anchored to the drawing when the tile is unselected.
+      // The panel is replaced by a same-width spacer, so getObjectBoundingBox
+      // must still report that left offset.
+      let capturedApi: ITileApi | undefined;
+      const onRegisterTileApi = (tileApi: ITileApi) => {
+        capturedApi = tileApi;
+      };
+
+      const testContent = createDrawingContent();
+      const testRect: RectangleObjectSnapshotForAdd = {
+        type: "rectangle",
+        x: 100,
+        y: 50,
+        width: 40,
+        height: 30,
+        ...mockSettings,
+      };
+      testContent.addObject(testRect);
+      const testModel = TileModel.create({content: testContent});
+
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
+            <DrawingToolComponent
+              {...defaultProps}
+              model={testModel}
+              readOnly={false}
+              onRegisterTileApi={onRegisterTileApi}
+            />
+          </Provider>
+        </ModalProvider>
+      );
+
+      const objectId = testContent.objects[0]?.id;
+      const bbox = capturedApi?.getObjectBoundingBox?.(objectId!);
+      expect(bbox).toBeDefined();
+      const bbPadding = 5;
+      const expectedLeft = (testRect.x - bbPadding) + kClosedObjectListPanelWidth;
+      expect(bbox!.left).toBeCloseTo(expectedLeft, 1);
     });
   });
 });

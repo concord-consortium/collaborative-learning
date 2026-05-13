@@ -55,6 +55,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
   const stores = useStores();
   const { clipboard, ui } = stores;
+  const showObjectListView = !readOnly && ui.isSelectedTile(model);
   const showNavigator = ui.isSelectedTile(model) &&
                         navigatorAllowed &&
                         contentRef.current.isNavigatorVisible;
@@ -82,7 +83,6 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       setTileVisibleBoundingBox(bb);
     }
   };
-
 
   const tileAdditionalApi = useMemo(() => ({
     exportContentAsTileJson: (options?: ITileExportOptions) => {
@@ -290,6 +290,9 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
 
   const getObjectListPanelWidth = () => {
     if (readOnly) return 0;
+    // When unselected, the panel is replaced by a same-width spacer so the drawing
+    // layer's left edge doesn't shift. Report that width so sparrows stay anchored.
+    if (!showObjectListView) return kClosedObjectListPanelWidth;
     return contentRef.current.listViewOpen ? kOpenObjectListPanelWidth : kClosedObjectListPanelWidth;
   };
 
@@ -382,7 +385,10 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             <TileToolbar tileType="drawing" readOnly={!!readOnly} tileElement={tileElt} />
           </div>
           <div className="drawing-container">
-            {!readOnly && <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />}
+            {showObjectListView
+              ? <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />
+              : !readOnly && <div className="object-list-spacer" aria-hidden="true" data-testid="object-list-spacer" />
+            }
             <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: updateTileVisibleBoundingBox }}>
               <DrawingLayerView
                 {...props}
