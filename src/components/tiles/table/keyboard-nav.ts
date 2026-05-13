@@ -1,0 +1,60 @@
+/**
+ * Keyboard navigation helpers for the table tile. Centralizes all logic
+ * that depends on RDG beta.44 APIs so Phase 2 (React 19 / RDG main) is
+ * a mechanical rename. See specs/CLUE-453-table-keyboard-navigation.md
+ * §6.1 for the migration story.
+ */
+
+import type { RefObject } from "react";
+import type { DataGridHandle } from "react-data-grid";
+
+export type CellPosition = { idx: number; rowIdx: number };
+
+/** Returns true if document.activeElement is a text input inside an RDG cell. */
+export function isCellEditing(): boolean {
+  const active = document.activeElement;
+  if (!(active instanceof HTMLElement)) return false;
+  const isEditable =
+    active.matches("input, textarea") ||
+    active.getAttribute("contenteditable") === "true";
+  if (!isEditable) return false;
+  return active.closest('[role="gridcell"]') !== null;
+}
+
+/**
+ * Returns all focusable header controls in DOM order. Includes elements with
+ * tabindex="-1" because the header uses roving tabindex — only one focusable
+ * has tabindex="0" at a time, but the others are still in the navigation
+ * cycle for our custom Tab handler.
+ */
+export function getHeaderFocusables(headerEl: HTMLElement): HTMLElement[] {
+  const candidates = Array.from(
+    headerEl.querySelectorAll<HTMLElement>(
+      'button, [contenteditable="true"], [tabindex]'
+    )
+  );
+  return candidates.filter((el) => {
+    if (el.getAttribute("aria-hidden") === "true") return false;
+    return true;
+  });
+}
+
+/**
+ * Wraps `gridRef.current.selectCell` and opts into the patched
+ * `shouldFocusCell=true` third argument (added in
+ * patches/react-data-grid+7.0.0-beta.44.patch, commit f71c4eb0f). We need
+ * focus to land on the cell when entering the content slot via focusContent.
+ *
+ * Phase 2 will swap to setActivePosition(position, { shouldFocus: true })
+ * once we upgrade past React 18.
+ */
+export function setGridActivePosition(
+  gridRef: RefObject<DataGridHandle | null>,
+  position: CellPosition
+): void {
+  // The public DataGridHandle type doesn't yet expose the third arg, but the
+  // patched implementation accepts it. Cast to call.
+  (gridRef.current as unknown as {
+    selectCell: (pos: CellPosition, enableEditor?: boolean, shouldFocusCell?: boolean) => void;
+  } | null)?.selectCell(position, undefined, true);
+}
