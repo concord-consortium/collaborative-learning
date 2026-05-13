@@ -84,6 +84,32 @@ export function createBodyEscapeHandler() {
   };
 }
 
+export function createBodyFocusContent(deps: BodyDeps) {
+  return (context: { reverse: boolean }): boolean => {
+    const grid = deps.gridRef.current;
+    if (!grid?.element) return false;
+    if (!context.reverse) {
+      setGridActivePosition(deps.gridRef, { idx: 0, rowIdx: 0 });
+      return true;
+    }
+    // Reverse entry — use RDG's tabindex=0 cell as the memory cursor.
+    // Exclude header row (aria-rowindex="1").
+    const cell = grid.element.querySelector<HTMLElement>(
+      '[role="row"]:not([aria-rowindex="1"]) [role="gridcell"][tabindex="0"]'
+    );
+    if (cell) {
+      cell.focus();
+      return true;
+    }
+    // Memory missing (virtualized out, or first entry without prior nav) —
+    // fall back to bottom-right.
+    const lastCol = deps.columnsRef.current.length - 1;
+    const lastRow = deps.rowsRef.current.length - 1;
+    setGridActivePosition(deps.gridRef, { idx: lastCol, rowIdx: lastRow });
+    return true;
+  };
+}
+
 export function setGridActivePosition(
   gridRef: RefObject<DataGridHandle | null>,
   position: CellPosition
