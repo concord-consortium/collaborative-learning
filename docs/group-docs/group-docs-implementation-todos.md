@@ -2,7 +2,7 @@
 
 Internal code issues identified in CLUE's group-document infrastructure — primarily in [src/models/history/firestore-history-manager-concurrent.ts](../../src/models/history/firestore-history-manager-concurrent.ts). Each item lists its location and a proposed fix.
 
-**Caveat: most of these are likely subsumed by [GD-19: Transaction-Free History](group-docs-plan.md#gd-19-transaction-free-history)**, which substantially replaces this manager. Worth fixing in the legacy code only if a concrete user-visible failure forces our hand before GD-19 lands. This file is referenced from [GD-22: Reliability and Robustness](group-docs-plan.md#gd-22-reliability-and-robustness) in the plan.
+**Caveat: [GD-19: Transaction-Free History](group-docs-plan.md#gd-19-transaction-free-history) will substantially rewrite this manager.** Don't try to map these TODOs one-by-one to whether GD-19 fixes them — the rewrite reshapes enough of the surrounding code that some issues will disappear, some will land in a different place, and new ones will emerge. The right time to re-examine each item is during GD-19 implementation. Until then, fix in the legacy code only if a concrete user-visible failure forces our hand. This file is referenced from [GD-22: Reliability and Robustness](group-docs-plan.md#gd-22-reliability-and-robustness) in the plan.
 
 ## Race Condition in Initial History Load
 
@@ -13,12 +13,6 @@ When loading a group document, the system fetches the `lastHistoryEntry` to dete
 - Network delays might cause the document fetch to happen after the history entry fetch
 
 **Proposed fix**: Include all applied history entry IDs in the document content written to Firebase Realtime Database, then only apply history entries not in this list.
-
-## Local history doesn't include previous remote entries
-
-Location: `firestore-history-manager-concurrent.ts:applyHistoryEntries()`
-
-When the document is first opened, remote history entries that have already been applied to the loaded document, are not re-applied. When this is skipped, we also skip putting these remote entries in the local history. So the local history does not contain the full history of the document. This is the same behavior as non group documents, and it seems to work fine. However it is confusing that the full history isn't available locally.
 
 ## Error Handling for Metadata Document
 

@@ -1,6 +1,6 @@
 # Collaborative Text-Tile Editing Design
 
-**Status**: No concrete design yet
+**Status**: Approach selected (Yjs + slate-yjs in an MST field — see Approach 3 below). Implementation design partial — see [Decisions still pending](#decisions-still-pending).
 **Date**: 2026-05-02
 **Author**: Scott Cytacki (with Claude)
 **Related**: [group-docs-plan.md § GD-21](group-docs-plan.md#gd-21-collaborative-text-tile-editing), [test-scripts/text-tile.md](test-scripts/text-tile.md)
@@ -61,6 +61,20 @@ Capturing the inverse at write time is probably the safest default; the others a
 ### Note on other CRDT/OT libraries
 
 Yjs is one specific way to integrate a CRDT into the Slate + MST stack. Other libraries (Automerge, ShareDB) could be considered if Yjs proves unworkable. They would face similar tradeoffs to Approach 3.
+
+## Decisions still pending
+
+The Yjs approach is chosen, but several decisions need to be made before implementation can start. Each shapes the patch format or the Y.Doc lifecycle and should be settled together rather than discovered during implementation.
+
+1. **MST type for the Y.Doc field.** MST snapshots are JSON; the Yjs binary blob needs an encoding. Candidates: a base64-encoded `types.string`, `types.frozen<Uint8Array>` (verify MST handles the frozen binary correctly through snapshot/onPatch), or a custom MST type that exposes the live Y.Doc for views/actions while serializing as binary. The choice affects the snapshot format and how the rollback patch references the field.
+
+2. **Patch shape on the wire.** Decide what a Yjs-changeset patch looks like inside a history entry. A natural shape: a JSON-Patch-like envelope `{ op: "y-update", path: "/content/Y", value: "<base64>" }` that the entry-scopes module can recognize and treat as a tile-scoped patch. This decision controls how scope detection sees Y patches, how old clients react when they see the entry, and how the history scrubber displays it.
+
+3. **Rollback strategy.** Pick one of the three options under "Rollback and inverses." Capture-at-write-time (using Yjs's UndoManager) is recommended as the default, but committing to it now lets the patch shape from #2 reserve a slot for the inverse update (`{ op: "y-update", path, value, inverseValue }` or similar).
+
+4. **Migration of existing text tiles.** Today's text tiles store Slate JSON in a string field. The migration path needs a decision: lazy (one-shot conversion to an initial Y.Doc on document load, written back on next save) or eager (rewrite the snapshot at migration time). Lazy is simpler but means old-format snapshots can persist indefinitely in unsaved documents. Eager requires a one-time pass over existing documents.
+
+5. **Outside-MST-action behavior — enumeration.** The "throw an error" rule covers the common case but specific situations need handling: Y.Doc construction from blob during document load (constructor, not an MST action), Yjs's GC transactions (fire at end-of-transaction cleanup), Yjs awareness/presence writes if we use them, and any programmatic Yjs ops from non-Slate code. List each and decide allow / synthetic-action-wrap / error.
 
 ## Payoff and applicability
 

@@ -35,6 +35,8 @@ Three plan items in dependency order:
 
 This track is significant work and adds system complexity. The intent is to land the test framework first (GD-16, in the General track) so this work has automated regression coverage from day one.
 
+**Prep work to schedule early.** A small client-side schema-version check needs to ship and be broadly deployed *before* GD-19 starts. Without it, old clients would silently corrupt migrated documents instead of failing loudly. This is small in code but has lead time, so worth picking up well ahead of the rest of this track. Detail: [transaction-free-history-design.md § Pre-deploy](transaction-free-history-design.md#pre-deploy-schema-version-check-prerequisite).
+
 A concrete design is mostly done for this. The GD-20 design has the most open questions, and there isn't a specific design for how the DataFlow tile UI will handle conflicts. 1 week of Scott's time for implementation time might be enough for a initial version. That will probably result in unexpected issues. So 3 weeks would be a better estimate for this work. The second 2 weeks could be a different developer.
 
 ## Collaborative text-tile editing

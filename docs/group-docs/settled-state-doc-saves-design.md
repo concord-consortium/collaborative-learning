@@ -287,20 +287,30 @@ Setup: editor A produces `e1`. Observers B, C, D all idle. `saved=h0`.
 
 **Validates:** random jitter spreads timers across the listener-delivery latency window. Duplicates can still happen when timers fall within that window, but the duplicate write is identical canonical content (last-write-wins is a no-op). Cost of a collision is one extra RTDB write, not divergence.
 
-### 6. Long typing burst
+### 6. Single editor, no observers — pause-driven saves
 
-Setup: A typing fast (>10 keystrokes/sec). B is idle.
+Setup: A typing fast (>10 keystrokes/sec). No observers (or all observers offline). The "A unsettled, observer absorbs the saves" mechanism from case 2 doesn't apply here because there's no observer.
 
-- A's queue accumulates entries faster than transactions clear them; A is rarely settled.
-- Each transaction commits a batch (up to 20 entries). The listener fires on B for each batch.
-- B settles after each batch, schedules jitter, saves canonical state at the batch's last entry.
-- B's saves capture canonical state at every batch boundary (typically every 100–500ms).
+- A's queue accumulates entries faster than transactions clear them; A is unsettled throughout the burst.
+- With no observer present, no save happens during the burst — A is the only candidate and A is never settled.
+- When A pauses (between sentences, etc.), the queue drains, A settles, A saves at the current canonical head.
 
-If A is the only client (no observers), A's queue may rarely empty during the burst. A is rarely settled. Saves don't happen during the burst. When A pauses (between sentences, etc.), the queue drains, A settles, A saves.
+**Validates:** the design degrades gracefully to "save at pause boundaries" when no observer is present. Pathological bursts skip saves during the burst itself but settle (and save) afterward — load cost for a late-comer grows briefly but state stays correct.
 
-**Validates:** the design relies on observers and pauses to absorb save cadence; both are abundant in normal use. Pathological bursts skip saves during the burst itself but settle afterward — load cost grows briefly but state stays correct.
+### 7. Two editors, both bursting — saved-doc lag
 
-### 7. Solo editor, never-settles
+Setup: A and B both typing fast simultaneously. No idle observer.
+
+- Both A's and B's queues accumulate entries faster than transactions clear them; neither settles during the burst.
+- Each editor's listener delivers the other's entries; both apply them to local state. Both users see each other's edits in real time via the history channel.
+- Because neither is settled, neither saves. The RTDB envelope's `content` and `lastHistoryEntryId` stay at whatever they were before the burst started.
+- When A or B finally pauses, that one settles and saves the current canonical state.
+
+The interesting consequence: anything reading the saved document directly from RTDB (without subscribing to the Firestore history) sees stale content for the duration of the burst. A late-comer doing a full document load is unaffected — load combines saved content + history-since-`h_save` and arrives at the live state. The lag only matters for consumers that read the saved doc *without* replaying history.
+
+**Validates:** the design's choice to save only at settled state preserves the canonical-state invariant at the cost of save cadence. The cadence cost is invisible to in-document collaborators (they see live state via history) and to late-comers loading via the standard path, but visible to saved-doc-only readers. The "Read-only viewer history replay" follow-up below addresses the same gap for read-only viewers like teachers.
+
+### 8. Solo editor, never-settles
 
 Setup: pathological — A is the sole client and produces entries continuously, queue never empties.
 
@@ -318,7 +328,7 @@ This design makes saves less frequent, which lengthens the latency between a rem
 
 ## Relation to other work
 
-- **Transaction-free-history**: this design is a prerequisite. Land save-when-settled first; then transaction-free-history can rely on the canonical-state invariant.
+- **Transaction-free-history**: this design is a prerequisite. Land save-when-settled first; then transaction-free-history can rely on the canonical-state invariant. Note: transaction-free-history also requires a pre-deployed schema-version check on the client (see [its migration section](transaction-free-history-design.md#pre-deploy-schema-version-check-prerequisite)) — small but has lead time, worth scheduling early so it's broadly deployed before that migration begins.
 - **GD-9 / GD-10 (Document and Shared Model Merging)**: orthogonal. Most of GD-9 has merged to master; this design works with whatever the receive-side machine produces.
 - **GD-11 (Tile Hardening)**: orthogonal.
 - **GD-12 (Debug Re-render Controls)**: useful for shaking out bugs in this work.

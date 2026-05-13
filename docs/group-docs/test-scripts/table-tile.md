@@ -15,7 +15,7 @@ Cross-scope cases involving table + SharedDataSet (cell value lands in wrong col
 - **Expected Result**: User B's cell focus and uncommitted text are lost. The re-render triggered by the remote change resets the grid's editing state.
 - **Actual Result**: Confirmed. User B's uncommitted edits are lost — focus and cursor reset when the table re-renders to show User A's change, even though the two users were editing different cells.
 
-## ❌ Attribute name change not visible
+## ✅ Attribute name change not visible
 
 - User A and User B open the same group document with a table
 - User A renames a column header (attribute name)
@@ -28,7 +28,7 @@ Jira story: https://concord-consortium.atlassian.net/browse/CLUE-505 (in code re
 
 This case should behave the same with a single user undoing. See below for that quicker test.
 
-## ❌ Attribute name change not visible (single-user undo)
+## ✅ Attribute name change not visible (single-user undo)
 
 Single-user proxy for the case above.
 
@@ -39,7 +39,7 @@ Single-user proxy for the case above.
 
 Jira story: https://concord-consortium.atlassian.net/browse/CLUE-505 (in code review)
 
-## ❌ Column width change not visible
+## ✅ Column width change not visible
 
 - Start with a table with 3+ columns where User B has resized some columns
 - User A changes a column width
@@ -50,7 +50,7 @@ Jira story: https://concord-consortium.atlassian.net/browse/CLUE-510
 
 This case should behave the same with a single user undoing. See below for that quicker test.
 
-## 🐛 Column width change not reverted by undo (single-user undo)
+## ✅ Column width change not reverted by undo (single-user undo)
 
 - Resize a column.
 - Undo the resize.

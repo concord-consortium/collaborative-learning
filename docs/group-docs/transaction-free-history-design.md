@@ -63,7 +63,7 @@ A DAG model frames the new shape directly: entries can branch and merge; the can
 | Server enforcement | Transaction validates head, atomic chain update | None — append-only collection |
 | Canonical order | Implicit via `previousEntryId` chain | Explicit via `(serverTimestamp, id)` |
 | Send-side fork detection | `expectedRemoteHead` mismatch aborts transaction | None — concurrent writes succeed |
-| Receive-side concurrent set | Local upload queue | Applied entries (canonical + uncommitted local) minus e's seen-set |
+| Receive-side concurrent set | Local upload queue | Applied entries (canonical + uncommitted local) minus the remote entry's seen-set |
 | Uncommitted local entries | Local upload queue | Local entries without a serverTimestamp. `pendingLocal` |
 | In-flight remote held | N/A — transaction prevents overlap | `pendingDecision` until canonical position of locals is known |
 | Loser handling | Local rollback (entry never reached server) | Local rollback + `reverted` flag written to loser entry |
@@ -191,9 +191,10 @@ The receive side maintains:
 (All conflicts involving `l` were caught when remotes arrived in event 2 and parked in `pendingDecision`. If `T_l` reorders `l` ahead of non-conflicting remotes already applied, no `appliedState` change is needed — non-conflicting patches commute, so the apply order doesn't affect state.)
 
 **4. Cascade — a previously-applied entry `x` becomes a loser**
-- Revert `x.patches` from `appliedState` (no-op if `x` is already reverted).
-- Walk forward through canonical: any entry whose `parents` transitively include `x` AND whose scope overlaps `x.scope` may also be invalidated. Revert those too (recursively).
-- Entries that depended on `x` only by canonical-order adjacency but whose scope doesn't overlap stay valid (they commute with `x`).
+- **Identify the cascade set.** Walk forward through canonical from `x`. Add any entry whose scope overlaps the cascade's accumulated scope (initially `x.scope`); each addition extends the accumulated scope. Repeat until no further entries are added. This is the transitive closure of "scope overlaps something already in the set."
+- **Revert in reverse-canonical order.** Revert each entry in the cascade set most-recent-first, then revert `x`. Order matters: each entry's inverse patches assume the state that was present when its forward patches applied, which may include later cascaded entries' effects. Reverting most-recent-first preserves that invariant.
+- Entries already reverted are skipped (idempotent).
+- Entries that don't overlap any cascaded scope stay valid — their patches commute with the reverted ones.
 
 #### Idempotency
 
@@ -318,10 +319,21 @@ If a cascade revert produces an invalid MST tree (e.g., a reference points at a 
 
 ### Migration from existing group documents
 
-Existing documents have `previousEntryId` chains and `metadata.lastHistoryEntry`. New documents would use `parents` and not need the metadata field. Mixed coexistence is awkward. Probably:
-- Existing documents stay on the transaction model; users migrate by creating new documents.
-- A flag in document metadata indicates which model applies.
-- Long-term, a one-time migration converts existing chains to multi-parent (`parents = [previousEntryId]`).
+Existing documents have `previousEntryId` chains and `metadata.lastHistoryEntry`. The new model uses `parents` and ignores the metadata field. We can keep the in-memory model unified rather than carrying both for the long term:
+
+- **Deserialization adapter at the read layer.** Map legacy `previousEntryId` to `parents: [previousEntryId]`. A linear chain is a degenerate-but-valid DAG, so the new state machine handles it without special cases. Missing `previousEntryId` (root entry) becomes `parents: []`. Missing `reverted` defaults to `false`.
+- **No re-write of historical entries required.** The migration writes new entries in the new shape (with `parents`) and stops updating `metadata.lastHistoryEntry`. Existing entries stay as they are; the adapter handles them on read.
+
+#### Pre-deploy: schema-version check (prerequisite)
+
+Group documents are experimental, so it's acceptable that older clients can't read migrated documents — but the failure must be loud rather than silent corruption. Before this migration starts, ship a release that:
+
+- Reads a `metadata.documentSchemaVersion` (or equivalent) field on document open.
+- Throws a clear "this document requires a newer client" error if the version is anything other than the current value.
+
+Once that release is broadly deployed, the migration can begin and set a new `documentSchemaVersion` on each migrated document. Old clients running the pre-deploy release fail loudly with a recognizable error; clients without the pre-deploy would corrupt silently, so the pre-deploy is a hard prerequisite.
+
+This prep is small but has lead time — it must be **deployed and broadly adopted** (not just merged) before this migration starts. It's called out from the [classroom-readiness doc](group-docs-classroom-readiness.md), the [settled-state-doc-saves design](settled-state-doc-saves-design.md), and the [GD-19 plan section](group-docs-plan.md#gd-19-transaction-free-history) so it can be scheduled early.
 
 ### Interaction with the background channel
 
