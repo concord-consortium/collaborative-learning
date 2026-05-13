@@ -267,12 +267,9 @@ context('Diagram Tool Tile', function () {
     const eName = "vn3";
     const eValue = "2.5";
     const eUnit = "meter";
-    diagramTile.getVariableCardField("name").clear();
-    diagramTile.getVariableCardField("name").type(eName);
-    diagramTile.getVariableCardField("value").clear();
-    diagramTile.getVariableCardField("value").type(eValue);
-    diagramTile.getVariableCardField("unit").clear();
-    diagramTile.getVariableCardField("unit").type(eUnit);
+    diagramTile.getVariableCardField("name").focus().clear().type(eName);
+    diagramTile.getVariableCardField("value").focus().clear().type(eValue);
+    diagramTile.getVariableCardField("unit").focus().clear().type(eUnit);
     diagramTile.getVariableCardField("name").should("have.value", eName);
     diagramTile.getVariableCardField("value").should("have.value", eValue);
     diagramTile.getVariableCardField("unit").should("have.value", eUnit);
