@@ -1,4 +1,4 @@
-import { isCellEditing, getHeaderFocusables } from "./keyboard-nav";
+import { isCellEditing, getHeaderFocusables, createBodyTabHandler, type CellPosition } from "./keyboard-nav";
 
 describe("isCellEditing", () => {
   beforeEach(() => {
@@ -56,5 +56,59 @@ describe("getHeaderFocusables", () => {
     header.appendChild(b2);
     document.body.appendChild(header);
     expect(getHeaderFocusables(header)).toEqual([b1]);
+  });
+});
+
+describe("createBodyTabHandler", () => {
+  function makeDeps(opts: {
+    pos: CellPosition | null;
+    cols: number;
+    rows: number;
+  }) {
+    return {
+      selectedCellRef: { current: opts.pos },
+      columnsRef: { current: new Array(opts.cols).fill({}) },
+      rowsRef: { current: new Array(opts.rows).fill({}) },
+    };
+  }
+
+  function makeEvent() {
+    const event = new KeyboardEvent("keydown", { key: "Tab" });
+    Object.defineProperty(event, "preventDefault", { value: jest.fn() });
+    return event;
+  }
+
+  it("returns 'handled' (without preventDefault) when not at edge, forward", () => {
+    const handler = createBodyTabHandler(makeDeps({ pos: { idx: 0, rowIdx: 0 }, cols: 3, rows: 3 }));
+    const event = makeEvent();
+    expect(handler(event, false)).toBe("handled");
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("returns 'exit' (with preventDefault) on forward tab at last cell", () => {
+    const handler = createBodyTabHandler(makeDeps({ pos: { idx: 2, rowIdx: 2 }, cols: 3, rows: 3 }));
+    const event = makeEvent();
+    expect(handler(event, false)).toBe("exit");
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("returns 'exit' on reverse tab at first cell", () => {
+    const handler = createBodyTabHandler(makeDeps({ pos: { idx: 0, rowIdx: 0 }, cols: 3, rows: 3 }));
+    const event = makeEvent();
+    expect(handler(event, true)).toBe("exit");
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("returns 'handled' on reverse tab when not at first cell", () => {
+    const handler = createBodyTabHandler(makeDeps({ pos: { idx: 1, rowIdx: 0 }, cols: 3, rows: 3 }));
+    const event = makeEvent();
+    expect(handler(event, true)).toBe("handled");
+  });
+
+  it("returns 'exit' (with preventDefault) when no active cell", () => {
+    const handler = createBodyTabHandler(makeDeps({ pos: null, cols: 3, rows: 3 }));
+    const event = makeEvent();
+    expect(handler(event, false)).toBe("exit");
+    expect(event.preventDefault).toHaveBeenCalled();
   });
 });
