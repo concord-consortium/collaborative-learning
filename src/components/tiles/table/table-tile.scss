@@ -176,6 +176,12 @@ $controls-hover-background: #c0dfe7;
         border: none;
         padding: 0;
         .add-column-button {
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          font: inherit;
+          color: inherit;
           width: $controls-column-width;
           height: $row-height;
           display: none;  // overridden when tile is selected

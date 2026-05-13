@@ -58,9 +58,14 @@ interface IAddColumnButtonProps {
 }
 const AddColumnButton: React.FC<IAddColumnButtonProps> = ({ onAddColumn }) => {
   return (
-    <div className="add-column-button" onClick={() => onAddColumn?.()}>
+    <button
+      type="button"
+      className="add-column-button"
+      aria-label="Add column"
+      onClick={() => onAddColumn?.()}
+    >
       <AddColumnSvg className="add-column-icon"/>
-    </div>
+    </button>
   );
 };
 AddColumnButton.displayName = "AddColumnButton";

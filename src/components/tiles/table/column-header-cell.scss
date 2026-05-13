@@ -46,6 +46,12 @@
     }
 
     .column-button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
       position: absolute;
       width: 36px;
       height: 34px;
