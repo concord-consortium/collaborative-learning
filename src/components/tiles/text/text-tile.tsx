@@ -325,7 +325,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                   <Slate
                     editor={this.editor as ReactEditor}
                     initialValue={this.state.initialValue}
-                    onChange={this.handleChange}
+                    onValueChange={this.handleChange}
                   >
                     <SlateEditor
                       placeholder={placeholderText}
