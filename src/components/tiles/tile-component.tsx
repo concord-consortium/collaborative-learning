@@ -532,7 +532,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       getTopbarElement: () => this.getFocusTrapElements().topbarElement ?? undefined,
       getPaletteElement: () => this.getFocusTrapElements().paletteElement ?? undefined,
       getResizeElement: () => this.resizeElement ?? undefined,
-      focusContent: () => this.getFocusTrapElements().focusContent?.() ?? false,
+      focusContent: (context) => this.getFocusTrapElements().focusContent?.(context) ?? false,
       onTabWhenInactive: (e, reverse) => this.navigateToSiblingTile(e, reverse),
     });
     // Deselect the tile when the controller exits (Escape, setEnabled(false))

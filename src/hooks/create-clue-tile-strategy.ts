@@ -35,6 +35,8 @@ export function createClueTileStrategy(config: ClueFocusTrapConfig): FocusTrapSt
       resize: getResize(),
     }),
     focusContent: config.focusContent,
+    tabHandlers: config.tabHandlers,
+    escapeHandlers: config.escapeHandlers,
     // topbar sits between title and content — for tiles that have a secondary
     // controls strip above the editor (e.g. dataflow). palette sits between
     // content and toolbar so an inline secondary toolbar is a single tab stop

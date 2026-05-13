@@ -28,7 +28,11 @@ export interface ClueFocusTrapConfig {
   getContentElement?: () => HTMLElement | undefined;
 
   // Custom focus function for complex editors (Slate, CodeMirror, etc.)
-  focusContent?: () => boolean;
+  focusContent?: (context: { reverse: boolean }) => boolean;
+
+  // Per-slot custom Tab/Escape handlers forwarded to FocusTrapStrategy
+  tabHandlers?: Record<string, (event: KeyboardEvent, reverse: boolean) => "handled" | "exit">;
+  escapeHandlers?: Record<string, (event: KeyboardEvent) => "handled" | "exit">;
 
   // Title element
   titleRef?: RefObject<HTMLElement | null>;

@@ -118,7 +118,7 @@ export const TileToolbar = observer(
 
           // Helper to focus content, preferring tile's custom focus method (e.g., Slate)
           const tryFocusContent = () => {
-            if (focusContentFn?.()) return true;
+            if (focusContentFn?.({ reverse: false })) return true;
             if (contentElement) {
               contentElement.focus();
               return document.activeElement === contentElement;
