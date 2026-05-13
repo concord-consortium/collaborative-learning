@@ -123,3 +123,26 @@ Some dependencies are locked to specific versions:
 - Some tests target production database (qa/test partitions) - prefer emulator
 - Cypress tests may require portal credentials in `cypress.env.json`
 - See `.cursor/rules/testing.mdc` for test runner commands
+
+### Cypress dev-server port (worktrees / non-default port)
+
+The default cypress base URL is `http://localhost:8080/`, hard-coded in
+`cypress/config/cypress.local.json`. The `setupNodeEvents` function in
+[cypress.config.ts](cypress.config.ts) merges that file LAST
+(`{ ...config, ...envConfig }`), so it overrides both the `baseUrl` field in
+`cypress.config.ts` and any `CYPRESS_BASE_URL` env var or `--config baseUrl=...`
+CLI flag. The merge happens because `npm run test:cypress` passes
+`--env testEnv=local`.
+
+To run cypress against a dev server on a different port (e.g. when running
+multiple worktrees with their own `npm start` instances), invoke cypress
+directly without `--env testEnv=local`:
+
+```bash
+npx cypress run --spec 'cypress/e2e/...' --config baseUrl=http://localhost:8083/
+```
+
+Symptom of getting this wrong: tests pass/fail against an unrelated repo's dev
+server, the cypress config log prints the desired baseUrl but
+`cy.window().then(w => w.location.href)` shows the default port. Verify by
+having a test print `window.location.href`.
