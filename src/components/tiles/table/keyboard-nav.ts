@@ -5,7 +5,7 @@
  * §6.1 for the migration story.
  */
 
-import type { RefObject } from "react";
+import type { MutableRefObject, RefObject } from "react";
 import type { DataGridHandle } from "react-data-grid";
 
 export type CellPosition = { idx: number; rowIdx: number };
@@ -48,6 +48,32 @@ export function getHeaderFocusables(headerEl: HTMLElement): HTMLElement[] {
  * Phase 2 will swap to setActivePosition(position, { shouldFocus: true })
  * once we upgrade past React 18.
  */
+export type BodyDeps = {
+  gridRef: RefObject<DataGridHandle | null>;
+  selectedCellRef: MutableRefObject<CellPosition | null>;
+  columnsRef: MutableRefObject<Array<unknown>>;
+  rowsRef: MutableRefObject<Array<unknown>>;
+};
+
+export function createBodyTabHandler(deps: Omit<BodyDeps, "gridRef">) {
+  return (event: KeyboardEvent, reverse: boolean): "handled" | "exit" => {
+    const pos = deps.selectedCellRef.current;
+    if (!pos) {
+      event.preventDefault();
+      return "exit";
+    }
+    const lastCol = deps.columnsRef.current.length - 1;
+    const lastRow = deps.rowsRef.current.length - 1;
+    const atFirst = pos.idx === 0 && pos.rowIdx === 0;
+    const atLast = pos.idx === lastCol && pos.rowIdx === lastRow;
+    if (reverse ? atFirst : atLast) {
+      event.preventDefault();
+      return "exit";
+    }
+    return "handled";
+  };
+}
+
 export function setGridActivePosition(
   gridRef: RefObject<DataGridHandle | null>,
   position: CellPosition
