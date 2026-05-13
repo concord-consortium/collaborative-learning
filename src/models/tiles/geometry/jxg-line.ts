@@ -10,8 +10,8 @@ const defaultLineProps = Object.freeze({
   strokeOpacity: 1,      highlightStrokeOpacity: 0.99,
   straightFirst: true,
   straightLast: true,
-  firstArrow: { type: 1, size: 6 },
-  lastArrow: { type: 1, size: 6 },
+  firstArrow: { type: 1 as const, size: 6 },
+  lastArrow: { type: 1 as const, size: 6 },
 });
 
 const selectedLineProps = Object.freeze({
@@ -33,9 +33,14 @@ export function getInfiniteLine(board: JXG.Board, id: string): JXG.Line | undefi
 }
 
 // Formats a line equation as "y = mx + b", "y = b", or "x = c" for vertical lines.
+// The geometry tile uses fixed x/y axis labels, so variable names are hardcoded.
 function lineEquationString(line: JXG.Line): string {
   const slope = line.getSlope();
   const p1 = line.point1;
+  if (isNaN(slope)) {
+    // Coincident points — line is undefined
+    return "";
+  }
   if (!isFinite(slope)) {
     // Vertical line: x = c
     return `x = ${JXG.toFixed(p1.X(), 2)}`;

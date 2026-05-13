@@ -281,9 +281,13 @@ function segmentNameLengthFn(this: JXG.Line) {
   return JXG.toFixed(this.L(), 1);
 }
 
+// The geometry tile uses fixed x/y axis labels, so variable names are hardcoded.
 function segmentNameEquationFn(this: JXG.Line) {
   const slope = this.getSlope();
   const p1 = this.point1;
+  if (isNaN(slope)) {
+    return "";
+  }
   if (!isFinite(slope)) {
     return `x = ${JXG.toFixed(p1.X(), 2)}`;
   }

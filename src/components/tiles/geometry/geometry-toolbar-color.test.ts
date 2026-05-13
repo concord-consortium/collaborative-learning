@@ -1,3 +1,4 @@
+import path from "path";
 import { clueBasicDataColorInfo } from "../../../utilities/color-utils";
 
 // Tests the color class resolution logic used by geometry toolbar buttons
@@ -17,19 +18,16 @@ describe("geometry toolbar button color class", () => {
   });
 
   it("all color entries have a name for the CSS class", () => {
-    clueBasicDataColorInfo.forEach((info, index) => {
+    clueBasicDataColorInfo.forEach((info) => {
       expect(info.name).toBeTruthy();
       expect(typeof info.name).toBe("string");
     });
   });
 
   it("line icon SVG has reactive-to-color-change class on colored elements", () => {
-    // This test verifies the SVG was correctly updated.
-    // SVGR converts SVGs to React components, but we can check the raw file.
     const fs = require("fs");
-    const svg = fs.readFileSync(
-      "src/clue/assets/icons/geometry/line-icon.svg", "utf8"
-    );
+    const svgPath = path.resolve(__dirname, "../../../clue/assets/icons/geometry/line-icon.svg");
+    const svg = fs.readFileSync(svgPath, "utf8");
     // The line path and point ring paths should have the reactive class
     const matches = svg.match(/class="reactive-to-color-change"/g);
     expect(matches).not.toBeNull();
