@@ -1,4 +1,4 @@
-import { isCellEditing, getHeaderFocusables, createBodyTabHandler, type CellPosition } from "./keyboard-nav";
+import { isCellEditing, getHeaderFocusables, createBodyTabHandler, createBodyEscapeHandler, type CellPosition } from "./keyboard-nav";
 
 describe("isCellEditing", () => {
   beforeEach(() => {
@@ -110,5 +110,27 @@ describe("createBodyTabHandler", () => {
     const event = makeEvent();
     expect(handler(event, false)).toBe("exit");
     expect(event.preventDefault).toHaveBeenCalled();
+  });
+});
+
+describe("createBodyEscapeHandler", () => {
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  it("returns 'handled' when a cell editor is focused", () => {
+    const cell = document.createElement("div");
+    cell.setAttribute("role", "gridcell");
+    const input = document.createElement("input");
+    cell.appendChild(input);
+    document.body.appendChild(cell);
+    input.focus();
+    const handler = createBodyEscapeHandler();
+    expect(handler(new KeyboardEvent("keydown"))).toBe("handled");
+  });
+
+  it("returns 'exit' in select mode (no editor focused)", () => {
+    const handler = createBodyEscapeHandler();
+    expect(handler(new KeyboardEvent("keydown"))).toBe("exit");
   });
 });
