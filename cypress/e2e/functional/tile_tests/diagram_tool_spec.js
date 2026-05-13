@@ -166,7 +166,9 @@ context('Diagram Tool Tile', function () {
     draggable().then((button) => {
       const rect = button[0].getBoundingClientRect();
       draggable().trigger('mousedown', { force: true });
+      cy.wait(50);
       draggable().trigger('mousemove', { force: true, clientX: rect.left+50, clientY: rect.top-200});
+      cy.wait(50);
       draggable().trigger('mouseup', { force: true });
       cy.wait(300); // wait for the variable card to be fully created, otherwise undo fails
     });
