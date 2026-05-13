@@ -36,6 +36,14 @@ import { useUIStore } from "../../../hooks/use-stores";
 import { RowDragOverlay } from "./row-drag-overlay";
 import { TRow } from "./table-types";
 import { useFormulaModal } from "./use-formula-modal";
+import { useClueAccessibility } from "../../../hooks/use-clue-accessibility";
+import {
+  createBodyTabHandler,
+  createBodyEscapeHandler,
+  createBodyFocusContent,
+  createHeaderTabHandler,
+  createHeaderEscapeHandler,
+} from "./keyboard-nav";
 
 import "react-data-grid/lib/styles.css";
 import "./table-tile.scss";
@@ -148,6 +156,13 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     ...rowLabelProps, showRowLabels, measureColumnWidth, lookupImage, onSort,
   });
 
+  // Keep columns/rows accessible to keyboard-nav handlers without triggering re-renders.
+  // selectedCellRef is sourced from useDataSet (destructured below as selectedCell).
+  const columnsRef = useRef(columns);
+  const rowsRef = useRef(rows);
+  useEffect(() => { columnsRef.current = columns; }, [columns]);
+  useEffect(() => { rowsRef.current = rows; }, [rows]);
+
   // Map of attrId -> width to drive react-data-grid via its `columnWidths` prop.
   // CODAP's rdg patch consults this before its internal resize cache, so CLUE
   // remains the source of truth for column widths.
@@ -233,12 +248,13 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // deleteSelected is a function that clears the value of the currently selected cell
   // dataGridProps contains callbacks to pass to ReactDataGrid
-  // hasLinkableRows is used to determine if the table can meaningfully be linked to a geometry tile
-  const { deleteSelected, ...dataGridProps } = useDataSet({
+  // selectedCell tracks the currently selected cell position (used by keyboard-nav)
+  const { deleteSelected, selectedCell: selectedCellRef, ...dataGridProps } = useDataSet({
     gridRef, model, dataSet, triggerColumnChange, rows, rowChanges, triggerRowChange,
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, inputRowId, lookupImage });
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // clear any selection on background click
     (e.target === containerRef.current) && gridContext.onClearSelection();
@@ -341,11 +357,46 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     setHoveredRowId(null);
   };
 
-  // Define and submit functions for general tool tile API
+  // Compute the tile API for table-specific functionality (height, export, annotations).
+  // Passed as additionalApi to useClueAccessibility so it is part of the unified registration.
   const padding = 10 + (modelRef.current.display === "teacher" ? 20 : 0);
-  useToolApi({
+  const tableApi = useToolApi({
     columns, content: getContent(), dataSet, getTitleHeight, headerHeight,
-    measureColumnWidth, onRegisterTileApi, onUnregisterTileApi, padding, readOnly, rowHeight, rows
+    measureColumnWidth, padding, readOnly, rowHeight, rows
+  });
+
+  // Keyboard-nav helpers for the focus trap topbar (RDG header row) and content slots.
+  const getTopbarElement = useCallback((): HTMLElement | undefined => {
+    return gridRef.current?.element
+      ?.querySelector<HTMLElement>('[role="row"][aria-rowindex="1"]') ?? undefined;
+  }, []);
+
+  const bodyDeps = { gridRef, selectedCellRef, columnsRef, rowsRef };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const bodyTabHandler = useMemo(() => createBodyTabHandler(bodyDeps), []);
+  const headerTabHandler = useMemo(
+    () => createHeaderTabHandler({ getTopbarElement }), [getTopbarElement]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const bodyEscapeHandler = useMemo(() => createBodyEscapeHandler(), []);
+  const headerEscapeHandler = useMemo(() => createHeaderEscapeHandler(), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const bodyFocusContent = useMemo(() => createBodyFocusContent(bodyDeps), []);
+
+  // Register the tile API and wire the focus trap via a single useClueAccessibility call.
+  useClueAccessibility({
+    type: "tile",
+    focusTrap: {
+      onRegisterTileApi,
+      onUnregisterTileApi,
+      tileType: "table",
+      titleRef,
+      getTopbarElement,
+      getContentElement: () => gridRef.current?.element ?? undefined,
+      focusContent: bodyFocusContent,
+      tabHandlers: { topbar: headerTabHandler, content: bodyTabHandler },
+      escapeHandlers: { topbar: headerEscapeHandler, content: bodyEscapeHandler },
+      additionalApi: tableApi,
+    },
   });
 
   useEffect(() => {
@@ -408,14 +459,16 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       </TableToolbarContext.Provider>
       <TableContext.Provider value={tableContextValue}>
         <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
-          <EditableTableTitle
-            model={model}
-            className={`table-title ${showRowLabels ? "show-row-labels" : ""}`}
-            readOnly={readOnly}
-            titleCellWidth={titleCellWidth}
-            titleCellHeight={getTitleHeight()}
-            onBeginEdit={onBeginTitleEdit}
-            onEndEdit={onEndTitleEdit} />
+          <div ref={titleRef} style={{ display: "contents" }}>
+            <EditableTableTitle
+              model={model}
+              className={`table-title ${showRowLabels ? "show-row-labels" : ""}`}
+              readOnly={readOnly}
+              titleCellWidth={titleCellWidth}
+              titleCellHeight={getTitleHeight()}
+              onBeginEdit={onBeginTitleEdit}
+              onEndEdit={onEndTitleEdit} />
+          </div>
           <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
             <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows}
               rowHeight={(row) => rowHeight({ row, type: "ROW" })}

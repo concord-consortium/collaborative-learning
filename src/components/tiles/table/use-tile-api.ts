@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { RowHeightArgs } from "react-data-grid";
 
 import { TColumn, TRow } from "./table-types";
@@ -25,17 +25,15 @@ interface IProps {
   getTitleHeight: () => number;
   headerHeight: () => number;
   measureColumnWidth: (attribute: IAttribute) => number;
-  onRegisterTileApi: (tileApi: ITileApi, facet?: string | undefined) => void;
-  onUnregisterTileApi: (facet?: string | undefined) => void;
   padding?: number;
   readOnly?: boolean;
   rowHeight: (args: RowHeightArgs<TRow>) => number;
   rows: TRow[];
 }
 export const useToolApi = ({
-  columns, content, dataSet, getTitleHeight, headerHeight, measureColumnWidth, onRegisterTileApi,
-  onUnregisterTileApi, padding, readOnly, rowHeight, rows
-}: IProps) => {
+  columns, content, dataSet, getTitleHeight, headerHeight, measureColumnWidth,
+  padding, readOnly, rowHeight, rows
+}: IProps): ITileApi => {
   const contentRef = useCurrent(content);
   const hasExpressions = content.hasExpressions;
 
@@ -95,7 +93,7 @@ export const useToolApi = ({
     return offsets;
   }, [getObjectBoundingBox]);
 
-  const tileApi = useMemo<ITileApi>(() => ({
+  return useMemo<ITileApi>(() => ({
     getContentHeight,
     exportContentAsTileJson,
     isLinked: () => {
@@ -104,9 +102,4 @@ export const useToolApi = ({
     getObjectBoundingBox,
     getObjectDefaultOffsets
   }), [exportContentAsTileJson, getContentHeight, contentRef, getObjectBoundingBox, getObjectDefaultOffsets]);
-
-  useEffect(() => {
-    onRegisterTileApi(tileApi);
-    return () => onUnregisterTileApi();
-  }, [onRegisterTileApi, onUnregisterTileApi, tileApi]);
 };

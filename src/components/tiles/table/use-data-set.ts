@@ -35,7 +35,7 @@ export const useDataSet = ({
   // Used to prevent moving the selected position while actively adding a new row
   const addingNewRow = useRef(false);
   // RDG's concept of which cell is selected.
-  const selectedCell = useRef<TPosition|null>();
+  const selectedCell = useRef<TPosition|null>(null);
 
   const { onAddRows, onUpdateRow } = changeHandlers;
 
@@ -183,5 +183,5 @@ export const useDataSet = ({
     triggerColumnChange();
   }, [onColumnResize, triggerColumnChange]);
 
-  return { onColumnResize: handleColumnResize, onRowsChange, deleteSelected, onSelectedCellChange};
+  return { onColumnResize: handleColumnResize, onRowsChange, deleteSelected, onSelectedCellChange, selectedCell};
 };
