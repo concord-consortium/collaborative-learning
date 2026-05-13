@@ -89,10 +89,6 @@ describe("DrawingToolComponent", () => {
   render(<div className="document-content" data-testid="document-content"/>);
   const documentContent = screen.getByTestId("document-content");
 
-  beforeEach(() => {
-    stores.ui.setSelectedTile(model);
-  });
-
   const defaultProps = {
     tileElt: null,
     context: "",
@@ -122,83 +118,160 @@ describe("DrawingToolComponent", () => {
     createElementSpy.mockRestore();
   });
 
-  it("renders successfully", () => {
-    render(
-      <ModalProvider>
-        <Provider stores={stores}>
-          <TileModelContext.Provider value={model}>
+  describe("when tile is selected", () => {
+    beforeAll(() => {
+      stores.ui.setSelectedTile(model);
+    });
+
+    it("renders successfully", () => {
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
+            <TileModelContext.Provider value={model}>
+              <DrawingToolComponent {...defaultProps} {...{model}} />
+            </TileModelContext.Provider>
+          </Provider>
+        </ModalProvider>
+      );
+      expect(screen.getByTestId("drawing-tool")).toBeInTheDocument();
+      expect(screen.getByTestId("drawing-toolbar")).toBeInTheDocument();
+      expect(screen.getByLabelText("Open show/sort panel")).toBeInTheDocument();
+      expect(screen.getByText("A Title for Testing")).toBeInTheDocument();
+    });
+
+    it("can open and close show/sort panel", () => {
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
             <DrawingToolComponent {...defaultProps} {...{model}} />
-          </TileModelContext.Provider>
-        </Provider>
-      </ModalProvider>
-    );
-    expect(screen.getByTestId("drawing-tool")).toBeInTheDocument();
-    expect(screen.getByTestId("drawing-toolbar")).toBeInTheDocument();
-    expect(screen.getByLabelText("Open show/sort panel")).toBeInTheDocument();
-    expect(screen.getByText("A Title for Testing")).toBeInTheDocument();
+          </Provider>
+        </ModalProvider>
+      );
+      expect(screen.getByTestId("drawing-tool")).toContainHTML("Open show/sort panel");
+      expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Close show/sort panel");
+
+      screen.getByLabelText("Open show/sort panel").click();
+      expect(screen.getByTestId("drawing-tool")).toContainHTML("Close show/sort panel");
+      expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Open show/sort panel");
+
+      screen.getByLabelText("Close show/sort panel").click();
+      expect(screen.getByTestId("drawing-tool")).toContainHTML("Open show/sort panel");
+      expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Close show/sort panel");
+    });
+
+    it("shows objects in show/sort panel", () => {
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
+            <DrawingToolComponent {...defaultProps} {...{model}} />
+          </Provider>
+        </ModalProvider>
+      );
+
+      expect(screen.getByTestId("object-list-view")).not.toContainHTML("Square");
+      content.addAndSelectObject(squareSnapshot);
+      screen.getByLabelText("Open show/sort panel").click();
+      expect(screen.getByTestId("object-list-view")).toContainHTML("Square");
+    });
+
+    it("shows correct order of objects in show/sort panel", () => {
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
+            <DrawingToolComponent {...defaultProps} {...{model}} />
+          </Provider>
+        </ModalProvider>
+      );
+
+      // Content already has a square in it from previous test.
+      content.addAndSelectObject(rectangleSnapshot);
+      let items = within(screen.getByTestId("object-list-view")).getAllByRole("listitem");
+      expect(items).toHaveLength(2);
+      expect(items[0]).toContainHTML("Rectangle");
+      expect(items[1]).toContainHTML("Square");
+
+      // Move square to top.
+      if (content.objects.length >= 2) {
+        content.changeZOrder(content.objects[1].id, content.objects[0].id);
+      }
+      items = within(screen.getByTestId("object-list-view")).getAllByRole("listitem");
+      expect(items).toHaveLength(2);
+
+      expect(items[0]).toContainHTML("Square");
+      expect(items[1]).toContainHTML("Rectangle");
+
+    });
   });
 
-  it("can open and close show/sort panel", () => {
-    render(
-      <ModalProvider>
-        <Provider stores={stores}>
-          <DrawingToolComponent {...defaultProps} {...{model}} />
-        </Provider>
-      </ModalProvider>
-    );
-    expect(screen.getByTestId("drawing-tool")).toContainHTML("Open show/sort panel");
-    expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Close show/sort panel");
+  describe("when tile is not selected", () => {
+    const unselectedContent = createDrawingContent();
+    const unselectedModel = TileModel.create({content: unselectedContent});
 
-    screen.getByLabelText("Open show/sort panel").click();
-    expect(screen.getByTestId("drawing-tool")).toContainHTML("Close show/sort panel");
-    expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Open show/sort panel");
+    it("does not show object list panel", () => {
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
+            <DrawingToolComponent {...defaultProps} model={unselectedModel} />
+          </Provider>
+        </ModalProvider>
+      );
+      expect(screen.queryByTestId("object-list-view")).not.toBeInTheDocument();
+    });
 
-    screen.getByLabelText("Close show/sort panel").click();
-    expect(screen.getByTestId("drawing-tool")).toContainHTML("Open show/sort panel");
-    expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Close show/sort panel");
-  });
+    it("renders an object-list-spacer in place of the panel", () => {
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
+            <DrawingToolComponent {...defaultProps} model={unselectedModel} />
+          </Provider>
+        </ModalProvider>
+      );
+      // The spacer reserves the closed-panel width so the drawing layer
+      // stays in place when the tile is deselected (CLUE-206).
+      expect(screen.queryByTestId("object-list-spacer")).toBeInTheDocument();
+    });
 
-  it("shows objects in show/sort panel", () => {
-    render(
-      <ModalProvider>
-        <Provider stores={stores}>
-          <DrawingToolComponent {...defaultProps} {...{model}} />
-        </Provider>
-      </ModalProvider>
-    );
+    it("getObjectBoundingBox stays offset by closed panel width", () => {
+      // Sparrows must remain anchored to the drawing when the tile is unselected.
+      // The panel is replaced by a same-width spacer, so getObjectBoundingBox
+      // must still report that left offset.
+      let capturedApi: ITileApi | undefined;
+      const onRegisterTileApi = (tileApi: ITileApi) => {
+        capturedApi = tileApi;
+      };
 
-    expect(screen.getByTestId("object-list-view")).not.toContainHTML("Square");
-    content.addAndSelectObject(squareSnapshot);
-    screen.getByLabelText("Open show/sort panel").click();
-    expect(screen.getByTestId("object-list-view")).toContainHTML("Square");
-  });
+      const testContent = createDrawingContent();
+      const testRect: RectangleObjectSnapshotForAdd = {
+        type: "rectangle",
+        x: 100,
+        y: 50,
+        width: 40,
+        height: 30,
+        ...mockSettings,
+      };
+      testContent.addObject(testRect);
+      const testModel = TileModel.create({content: testContent});
 
-  it("shows correct order of objects in show/sort panel", () => {
-    render(
-      <ModalProvider>
-        <Provider stores={stores}>
-          <DrawingToolComponent {...defaultProps} {...{model}} />
-        </Provider>
-      </ModalProvider>
-    );
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
+            <DrawingToolComponent
+              {...defaultProps}
+              model={testModel}
+              readOnly={false}
+              onRegisterTileApi={onRegisterTileApi}
+            />
+          </Provider>
+        </ModalProvider>
+      );
 
-    // Content already has a square in it from previous test.
-    content.addAndSelectObject(rectangleSnapshot);
-    let items = within(screen.getByTestId("object-list-view")).getAllByRole("listitem");
-    expect(items).toHaveLength(2);
-    expect(items[0]).toContainHTML("Rectangle");
-    expect(items[1]).toContainHTML("Square");
-
-    // Move square to top.
-    if (content.objects.length >= 2) {
-      content.changeZOrder(content.objects[1].id, content.objects[0].id);
-    }
-    items = within(screen.getByTestId("object-list-view")).getAllByRole("listitem");
-    expect(items).toHaveLength(2);
-
-    expect(items[0]).toContainHTML("Square");
-    expect(items[1]).toContainHTML("Rectangle");
-
+      const objectId = testContent.objects[0]?.id;
+      const bbox = capturedApi?.getObjectBoundingBox?.(objectId!);
+      expect(bbox).toBeDefined();
+      const bbPadding = 5;
+      const expectedLeft = (testRect.x - bbPadding) + kClosedObjectListPanelWidth;
+      expect(bbox!.left).toBeCloseTo(expectedLeft, 1);
+    });
   });
 
   describe("read-only mode", () => {
@@ -351,77 +424,6 @@ describe("DrawingToolComponent", () => {
       // Left will include the object list panel width, so we just verify it's transformed.
       expect(bbox!.left).toBeGreaterThan(expectedLeft);
       expect(bbox!.top).toBeCloseTo(expectedTop, 1);
-    });
-  });
-
-  describe("when tile is not selected", () => {
-    const unselectedContent = createDrawingContent();
-    const unselectedModel = TileModel.create({content: unselectedContent});
-
-    it("does not show object list panel", () => {
-      render(
-        <ModalProvider>
-          <Provider stores={stores}>
-            <DrawingToolComponent {...defaultProps} model={unselectedModel} />
-          </Provider>
-        </ModalProvider>
-      );
-      expect(screen.queryByTestId("object-list-view")).not.toBeInTheDocument();
-    });
-
-    it("renders an object-list-spacer in place of the panel", () => {
-      render(
-        <ModalProvider>
-          <Provider stores={stores}>
-            <DrawingToolComponent {...defaultProps} model={unselectedModel} />
-          </Provider>
-        </ModalProvider>
-      );
-      // The spacer reserves the closed-panel width so the drawing layer
-      // stays in place when the tile is deselected (CLUE-206).
-      expect(screen.queryByTestId("object-list-spacer")).toBeInTheDocument();
-    });
-
-    it("getObjectBoundingBox stays offset by closed panel width", () => {
-      // Sparrows must remain anchored to the drawing when the tile is unselected.
-      // The panel is replaced by a same-width spacer, so getObjectBoundingBox
-      // must still report that left offset.
-      let capturedApi: ITileApi | undefined;
-      const onRegisterTileApi = (tileApi: ITileApi) => {
-        capturedApi = tileApi;
-      };
-
-      const testContent = createDrawingContent();
-      const testRect: RectangleObjectSnapshotForAdd = {
-        type: "rectangle",
-        x: 100,
-        y: 50,
-        width: 40,
-        height: 30,
-        ...mockSettings,
-      };
-      testContent.addObject(testRect);
-      const testModel = TileModel.create({content: testContent});
-
-      render(
-        <ModalProvider>
-          <Provider stores={stores}>
-            <DrawingToolComponent
-              {...defaultProps}
-              model={testModel}
-              readOnly={false}
-              onRegisterTileApi={onRegisterTileApi}
-            />
-          </Provider>
-        </ModalProvider>
-      );
-
-      const objectId = testContent.objects[0]?.id;
-      const bbox = capturedApi?.getObjectBoundingBox?.(objectId!);
-      expect(bbox).toBeDefined();
-      const bbPadding = 5;
-      const expectedLeft = (testRect.x - bbPadding) + kClosedObjectListPanelWidth;
-      expect(bbox!.left).toBeCloseTo(expectedLeft, 1);
     });
   });
 });

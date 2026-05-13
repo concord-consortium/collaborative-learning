@@ -290,8 +290,9 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   const getObjectListPanelWidth = () => {
     if (readOnly) return 0;
 
-    // When unselected, the panel is replaced by a same-width spacer so the drawing
-    // layer's left edge doesn't shift. Report that width so sparrows stay anchored.
+    // When the tile is not selected, the panel is not shown and a same-width spacer
+    // is rendered in its place so the drawing layer's left edge doesn't shift.
+    // Report that width so sparrows stay anchored.
     if (!ui.isSelectedTile(model)) return kClosedObjectListPanelWidth;
 
     return contentRef.current.listViewOpen ? kOpenObjectListPanelWidth : kClosedObjectListPanelWidth;
