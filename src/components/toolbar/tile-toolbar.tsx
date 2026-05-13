@@ -117,8 +117,8 @@ export const TileToolbar = observer(
           ) as HTMLElement | null;
 
           // Helper to focus content, preferring tile's custom focus method (e.g., Slate)
-          const tryFocusContent = () => {
-            if (focusContentFn?.({ reverse: false })) return true;
+          const tryFocusContent = (reverse: boolean) => {
+            if (focusContentFn?.({ reverse })) return true;
             if (contentElement) {
               contentElement.focus();
               return document.activeElement === contentElement;
@@ -162,7 +162,7 @@ export const TileToolbar = observer(
                 return false;
               })();
               if (!focusedLastChild) {
-                if (!tryFocusContent()) {
+                if (!tryFocusContent(true)) {
                   if (titleElement) { titleElement.focus(); }
                   if (document.activeElement !== titleElement) {
                     if (!tryFocusResize()) { tileElement.focus(); }
@@ -175,7 +175,7 @@ export const TileToolbar = observer(
             if (!tryFocusResize()) {
               if (titleElement) { titleElement.focus(); }
               if (document.activeElement !== titleElement) {
-                if (!tryFocusContent()) { tileElement.focus(); }
+                if (!tryFocusContent(false)) { tileElement.focus(); }
               }
             }
           }
