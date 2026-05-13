@@ -56,6 +56,11 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
           gridContext?.onSelectColumn(column.key);
         }
       };
+      const handleHeaderFocus = () => {
+        if (!gridContext?.isColumnSelected(column.key)) {
+          gridContext?.onSelectColumn(column.key);
+        }
+      };
 
       const handleSort = (e: React.MouseEvent) => {
         if (gridContext?.isColumnSelected(column.key)) {
@@ -69,8 +74,13 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
       };
 
       return (
-        <div className={classes} onMouseOver={handleColumnHeaderCellMouseOver}
-              onMouseLeave={handleColumnHeaderCellMouseLeave} onClick={handleHeaderClick}>
+        <div
+          className={classes}
+          onMouseOver={handleColumnHeaderCellMouseOver}
+          onMouseLeave={handleColumnHeaderCellMouseLeave}
+          onClick={handleHeaderClick}
+          onFocus={handleHeaderFocus}
+        >
           <div className="flex-container">
             <div className={classNames("header-cell-container", {"show-expression": showExpressions})}>
               {!isEditing && isRemovable &&
