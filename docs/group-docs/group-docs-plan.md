@@ -1,74 +1,76 @@
 # Group Documents Plan
 
-This document outlines the remaining work areas for group documents after the initial implementation (GD-1 through GD-4, plus partial GD-5). See `group-docs-current-state.md` for where things stand today.
-
-Note: The original GD-5 (from `group-docs-brainstorm.md`) included both the transaction infrastructure and the fork detection/rollback logic. The transaction infrastructure is done (CLUE-376). The remaining rollback work is now GD-6, and the conflict merging aspects originally envisioned as part of GD-5's future work are now GD-9 and GD-10.
+Forward-looking plan for group documents. For completed work (GD-1 through GD-6, GD-9), see [group-docs-completed-work.md](group-docs-completed-work.md). For where things stand today as a user or tester, see [group-docs-current-state.md](group-docs-current-state.md).
 
 ## Work Areas
 
 | Label | Name | Description |
 |---|---|---|
-| **GD-6** | Corruption Prevention | Client-side fork detection and rollback to prevent document corruption. **Status: merged (PR #2835 / CLUE-485).** |
-| **GD-7** | Undo Bugs | Fix cases where patch-applied model changes don't update the tile UI |
-| **GD-8** | Tile Locking | Lock tiles so only one user can edit at a time (Plan B only) |
-| **GD-9** | Document-Level Merging | Merge non-conflicting changes at the document/tile level instead of rolling back |
+| **GD-7** | Undo Bugs | Discovery complete (CLUE-484); individual fixes tracked as CLUE-505, 506, 507, 508, 510 |
+| **GD-8** | Tile Locking | Lock tiles so only one user can edit at a time (held in reserve; not on the current path) |
 | **GD-10** | Shared Model Merging | Merge non-conflicting changes within shared models |
-| **GD-11** | Tile Hardening | Per-tile fixes to preserve transient UI state across remote updates |
+| **GD-11** | Tile Hardening | Per-tile fixes to preserve transient UI state and tolerate stale shared-model references after remote updates |
 | **GD-12** | Debug Re-render Controls | Hotkeys to force-recreate components for a tile or the whole document to isolate render bugs from model bugs |
 | **GD-13** | Auto-Revert Stress Mode | Dev mode that automatically reverts the last change (sync, fixed delay, or random delay) to surface race conditions without needing a second user |
+| **GD-14** | Intra-Tile Merging | Merge concurrent changes within a single tile's non-shared content when they touch disjoint sub-paths (analog of GD-10 for tile content rather than shared models) |
+| **GD-15** | Finer-grained `doc` scope | Split GD-9's single `doc` scope bucket so concurrent tile-adds and unrelated layout edits don't conflict |
+| **GD-16** | E2E Test Framework | Add Playwright support so tests can drive two browser windows with independent focus state, enabling automated tests for concurrent-editing UI issues |
+| **GD-17** | Type-Aware Merge Delegation | Common mechanism for tiles, shared models, and the document level to register conflict-detection / merge functions. Foundation for GD-10, GD-14, GD-15 |
+| **GD-18** | Settled-State Document Saves | Save the doc only when the receive-side state machine is settled, so saved content reflects canonical state at a known position. Reduces multi-writer save thrash. Prerequisite for GD-19 |
+| **GD-19** | Transaction-Free History | Replace the per-document Firestore transaction with a multi-parent DAG of history entries, removing the write-rate choke point and moving conflict detection client-side |
+| **GD-20** | Background Entries (DataFlow) | Make tick-rate producer changes (dataflow) ordinary history entries with a `background` flag plus runner lock, asymmetric conflict resolution, producer notification, and skip-by-default scrubber/undo. Unblocks DataFlow in group docs |
+| **GD-21** | Collaborative Text-Tile Editing | Replace the text tile's single serialized string field with a fine-grained representation so edits produce small targeted patches instead of full-text replacements. Reduces history size today; prerequisite for text-tile collaborative merging via GD-14/GD-17; carries enough intent for a Slate-aware applier to preserve cursor/selection on remote updates |
+| **GD-22** | Reliability and Robustness | Fix silent-failure / unhandled-rejection edge cases in `firestore-history-manager-concurrent.ts`. Likely subsumed by GD-19; only fix in legacy code if forced |
+| **GD-23** | Tile shared-model hash decoupling | Explore removing the `updateHash`/`createHash` properties on tiles that change when their shared models change — they create implicit cross-scope conflicts we previously decided not to add. Best after GD-16 (automated tests) |
+| **GD-24** | Opt-in coupled scopes (held in reserve) | Per-(tile type, shared-model type) coupling that adds an extra `shared:<id>` scope to tile entries — turns currently-disjoint cross-scope edits into conflicts for known-risky pairs. Alternative to GD-11's tolerate-stale-refs approach. Speculative |
+| **CLUE-517** | Undo/Redo | Make undo/redo work correctly in collaborative documents (deferred). First concrete symptom: undo errors silently when remote changes invalidate local entries |
 
-## Immediate: UI Disruption Testing
+## UI Disruption Testing
 
-This can start now, before any other work is done. The goal is to determine whether the transient UI disruptions from concurrent editing are tolerable in practice.
+Initial pass complete — see [completed-work § CLUE-483](group-docs-completed-work.md#clue-483-ui-disruption-testing). Findings drive GD-11 prioritization; GD-8 stays in reserve.
 
-The current group document implementation already applies remote changes to tiles in edit mode. Two users editing the same group document can use the pause/resume debug tools (GD-3) to force conflicts and observe the impact. The key question: when a remote change arrives while a user is actively interacting with a tile, is the disruption (lost focus, reset selection, interrupted drag) something users can live with, or is it a blocker?
+## Order of Work
 
-See `group-docs-potential-ui-issues.md` for specific issues to test, each marked with whether it requires active interaction or can be tested with single-user undo.
-
-**The outcome of this testing determines which plan to follow:**
-
----
-
-## Plan A: Disruptions Are Tolerable
-
-If testing shows that transient UI disruptions are acceptable for most tiles, the path is simpler — no tile locking needed.
-
-Plan A proceeds through these work areas. Items at the same level can be done in parallel or in either order. Indented items depend on the item above them.
+Items at the same level can be done in parallel or in either order. Indented items depend on the item above them.
 
 1. **GD-7: Undo Bugs** — independent, can be done anytime
-2. **GD-6: Corruption Prevention**
-   - **GD-9: Document-Level Merging** — depends on GD-6
-     - **GD-10: Shared Model Merging** — depends on GD-9
-3. **GD-11: Tile Hardening** (as needed, after the merging work areas)
+2. **GD-16: E2E Test Framework** — independent, can be done anytime; recommended early so subsequent work has automated regression coverage from day one
+3. **GD-17: Type-Aware Merge Delegation** — builds on the merged GD-9
+   - **GD-10: Shared Model Merging** — depends on GD-17
+     - **GD-14: Intra-Tile Merging** — depends on GD-10 (text tile additionally requires GD-21)
+   - **GD-15: Finer-grained `doc` scope** — uses GD-17 for cases beyond simple per-id splits (only if practical pain emerges)
+4. **GD-11: Tile Hardening** (as needed, after the merging work areas)
+5. **GD-18: Settled-State Document Saves** — independent prerequisite chain for DataFlow support
+   - **GD-19: Transaction-Free History** — depends on GD-18
+     - **GD-20: Background Entries (DataFlow)** — depends on GD-19
+6. **GD-21: Collaborative Text-Tile Editing** — independent; sibling enabler for text-tile collaborative editing alongside GD-14/GD-17
+7. **GD-22: Reliability and Robustness** — independent; likely subsumed by GD-19, only land in legacy code if forced before then
+8. **GD-23: Tile shared-model hash decoupling** — independent; best after GD-16 lands so regressions can be caught automatically
 
 ### GD-7: Undo Bugs
 
-Fix cases where model changes via patch application don't update the tile UI. These are bugs that affect both single-user undo and group documents. They're typically low effort to fix (e.g., the table attribute name issue is a one-line change from `triggerRowChange()` to `triggerColumnChange()`). See `group-docs-potential-ui-issues.md` for undo-testable issues.
+Bugs where model changes via patch application don't update the tile UI. These affect both single-user undo and group documents. Discovery and decomposition done under [CLUE-484](https://concord-consortium.atlassian.net/browse/CLUE-484); individual bugs are now tracked as separate stories. See [group-docs-jira-mapping.md § GD-7](group-docs-jira-mapping.md#gd-7-undo-bugs) for the current list and status.
 
-### GD-6: Corruption Prevention
+### GD-17: Type-Aware Merge Delegation
 
-**Status: merged (PR #2835 / CLUE-485).** The section below describes the design; the implementation follows it. The shared rollback method, `detectAndResolveFork`, is the extension point GD-9 and GD-10 will plug into.
+GD-9 detects conflicts using static scope rules (path prefix → scope kind). GD-10, GD-14, and GD-15 each need finer-grained, type-aware decisions at their respective levels — shared models, tile non-shared content, and the document bucket. A list of allowed sub-paths is unlikely to be expressive enough for the cases each one needs to handle.
 
-The transaction infrastructure is in place (`lastHistoryEntry` metadata, `previousEntryId` chaining, Firestore transactions in `uploadQueuedHistoryEntries()`). What GD-6 adds is client-side fork detection and rollback in two places that share a single codepath:
+The shape we expect: tiles, shared model types, and the document level register one or more functions the merge codepath calls when scopes look like they'd conflict. Each function decides whether the local and remote patches actually conflict, and if not, specifies how to merge them. Types that don't register stay on the default scope rule (no behavior change).
 
-**Receive-side fork detection.** When a remote entry arrives whose `previousEntryId` doesn't match the local head, the client should reverse its local uncommitted entries (using their undo patches) back to the fork point, drop them from the upload queue, and apply the remote entries.
+Design TBD. This GD slot exists so GD-10, GD-14, and GD-15 can refer to a single name for the shared mechanism rather than each one redesigning it.
 
-**Send-side fork detection.** The upload transaction in `uploadQueuedHistoryEntries()` reads `metadata.lastHistoryEntry` on each attempt. If that id doesn't match what the client expected (i.e., another client has committed entries this one doesn't yet know about), the transaction must abort rather than chaining the queued local entries onto a stale head. Without this, the upload code happily chains local entries off whatever remote head it finds, even though those local entries were derived from a different base — effectively committing a lie to the remote chain. Once the transaction is aborted, the Firestore listener will deliver the unknown remote entries and the receive-side handler will drain the queue via the shared rollback path.
+Depends on GD-9.
 
-**Shared codepath.** Both entry points — listener-delivered remote entries and aborted-then-recovered uploads — route through a single rollback method. This is the extension point GD-9 and GD-10 use: those stories insert per-tile and per-shared-model merging exceptions inside this method, and because both sides go through it, the exceptions apply symmetrically whether a fork is detected on receive or on send.
+#### Built-in policy: path-prefix fine-grained merge (opt-in)
 
-After this step, the document and history should never be corrupted by concurrent edits. However, any conflict will roll back all of one user's local changes, which may be disruptive.
+A natural built-in policy for map-shaped scopes: compare JSON-patch paths directly. Two patches conflict iff one path equals or is a prefix of the other; otherwise they merge cleanly. Types register their scope as using this policy and get fine-grained merge for free, without writing custom merge code.
 
-Note: the original GD-5 brainstorm (see `group-docs-brainstorm.md`) described both sides of the rollback. When GD-5 was split into CLUE-376 (transaction infrastructure, done) and GD-6 (this story), the send-side detail was elided. GD-6 restores it.
+**Constraints for opting in:**
 
-### GD-9: Document-Level Merging
+- **No arrays in the scope's interior.** Array-index paths shift on insert/delete, so paths can look disjoint when they aren't. Map-shaped sub-trees (per-id) are safe.
+- **References must tolerate missing targets.** Two concurrent edits — one creating a reference, one deleting the target — both land cleanly under the path-prefix rule, leaving a dangling reference. `types.safeReference` makes reads return `undefined` for missing targets, but the dead id stays in the serialized snapshot. Plain-string ids (e.g., drawing's `variableId`) have no read-side guard at all.
 
-After GD-6, any conflict rolls back all local changes. Smarter merging would reduce how much work gets "clobbered":
-
-- **Document level**: Changes to different tiles (that don't share a model) can be merged instead of rolling back. For example, adding a new tile shouldn't affect someone editing an existing tile.
-- **Tile + shared model level**: If two tiles are being changed and they don't share a model, merge the changes.
-
-Note: the merging/conflict-detection code introduced here is expected to be reused for undo/redo once that is picked up again. See "Deferred: Undo/Redo" below.
+**Open question: dead-reference cleanup.** Cleaning up dangling references is deferred. Discovering where references live in arbitrary scopes is itself non-trivial — `safeReference` fields are walkable from MST type info, but plain-string ids are scope-specific knowledge. The natural cleanup hook for tiles would be `updateAfterSharedModelChanges`, but that fires for non-user changes (remote entries) too, so cleanup actions could be generated by multiple clients at once and become history entries themselves. For the initial fine-grained-merge work, scopes that opt in accept that dead references accumulate; designing a cleanup mechanism is tracked as future work.
 
 ### GD-10: Shared Model Merging
 
@@ -79,36 +81,115 @@ Support concurrent changes to shared models when they don't actually conflict. F
 
 True conflicts (e.g., one user deleting an object another user is referencing) still need to be detected and one side rolled back.
 
-Note: the merging/conflict-detection code introduced here is expected to be reused for undo/redo once that is picked up again. See "Deferred: Undo/Redo" below.
+Builds on GD-17: each shared model type registers its conflict-detection / merge function with the framework.
+
+**Limitation until [GD-23](#gd-23-tile-shared-model-hash-decoupling) lands.** GD-10 by itself doesn't unblock the obvious case of "two users editing different cells in the same table at the same time." Each cell edit produces a `tile:<table>` patch (via the table's `updateHash`) on top of the shared-dataset patch, so concurrent cell edits collide on the tile scope and one side gets rolled back. GD-23 removes that incidental tile-hash patch; with GD-10 + GD-23 together the disjoint-cell case actually merges.
+
+Note: the merging/conflict-detection code introduced here is expected to be reused for undo/redo once that is picked up again. See "CLUE-517: Undo/Redo (deferred)" below.
+
+### GD-14: Intra-Tile Merging
+
+Today, two users editing the same tile at the same time will revert each other's changes — even when the edits touch disjoint sub-paths and could merge cleanly. GD-9 treats each tile as a single `tile:<id>` scope, so two users adding different objects to the same drawing tile, or one user editing one node while another tweaks an unrelated node in the same dataflow tile, both lose work to this rule.
+
+GD-10 does the analogous work for shared models. GD-14 applies GD-17's delegation mechanism at the tile level: each tile type that wants intra-tile merging registers a conflict-detection / merge function — e.g., a drawing tile declaring "object-property edits in different objects don't conflict." Tiles that don't register stay on the default per-tile scope rule (no behavior change).
+
+Secondary case: this is also the prerequisite for cross-client split-producer dataflow deployments described in the [background-entries design](background-entries-design.md) (sensor on client A, engine on client B, both writing to the same tile at disjoint sub-paths). That scenario is unlikely to drive prioritization on its own, but it shares the same machinery. Single-client split-producer doesn't need GD-14 — both producers run in the same MST process and don't have concurrent-write overlap.
+
+Depends on GD-10 (and transitively on GD-17, which provides the delegation framework).
+
+### GD-15: Finer-grained `doc` scope
+
+GD-9 treats all changes outside `tileMap`/`sharedModelMap` as a single `doc` scope: `rowMap`, `rowOrder`, `annotations`, document name, metadata. Two concurrent tile-adds, or a tile-add concurrent with a row-reorder, or two concurrent annotation (sparrow) adds, all conflict and one side gets rolled back even though the changes are independent.
+
+There are two ways to address this. Option B subsumes Option A — anything Option A handles, Option B handles too — but Option A is cheaper to land if GD-17 isn't ready.
+
+#### Option A: per-id scope splits (extends GD-9 only)
+
+Add new scope kinds to GD-9's static path-prefix rule. Natural candidates:
+- `annotation:<id>` — the `annotations` map has the same per-id structure as `tileMap` and `sharedModelMap`, so adding it as its own scope kind is a small mechanical extension.
+- Per-row keys in `rowMap`, individual metadata keys — same shape, similar mechanical extension if needed.
+
+**Pros:** Small, isolated change. Depends only on GD-9; no GD-17 mechanism needed. Each split can land independently as concrete pain emerges.
+
+**Cons:** Strictly weaker than Option B. Only resolves conflicts where patches touch *different* ids — two patches at disjoint sub-paths *within* the same annotation/row still conflict. `rowOrder` is array-shaped, so per-index splitting doesn't fit a static path-prefix rule (would need a custom rule).
+
+#### Option B: path-prefix fine-grained merge via GD-17
+
+Apply [GD-17's path-prefix fine-grained merge policy](#built-in-policy-path-prefix-fine-grained-merge-opt-in) to the doc scope. Two patches at disjoint paths merge cleanly — covers both "different ids" and "disjoint sub-paths within the same id" in one rule.
+
+For the policy to apply uniformly across the doc bucket:
+- **Drop `rowOrder` as a serialized array.** Encode row order as a fractional sort-key field on each row entry in `rowMap`. The path-prefix policy can't handle arrays; this change makes the doc bucket fully map-shaped.
+- **Tolerant references** in the doc bucket (see GD-17's reference-cleanup discussion).
+
+**Pros:** Single uniform mechanism. Strictly more permissive than Option A — any merge Option A enables, Option B also enables, plus disjoint sub-paths within the same id. No per-scope-kind code to maintain.
+
+**Cons:** Depends on GD-17 (heavier prerequisite). Requires the `rowOrder` data-model change. Inherits GD-17's open question about dead-reference cleanup.
+
+#### Choosing between them
+
+If GD-17 is on the path anyway, Option B subsumes Option A and the simple per-id splits aren't worth doing as their own work. If GD-17 is delayed or risky and there's concrete pain from one of the per-id cases (most likely annotations), Option A is cheap insurance and can ship in the meantime — but the work gets superseded later. The merge-independent-forks design intentionally left finer-grained `doc` work out until concrete examples justified the complexity.
 
 ### GD-11: Tile Hardening (as needed)
 
-For specific tiles where testing showed the disruption is too frequent or severe, harden those tiles to preserve transient state across remote updates. This is done per-tile, only where needed. Options include saving/restoring focus, deferring updates during active interaction, or other tile-specific solutions. See `group-docs-tile-resilience-research.md` for per-tile risk analysis and `group-docs-potential-ui-issues.md` for concrete issues.
+Per-tile work in two categories. Both are done only where testing finds it matters.
 
----
+**Transient UI state.** For tiles where remote updates disrupt the user's in-progress interaction too frequently or severely, preserve transient state across those updates. Options include saving/restoring focus, deferring updates during active interaction, or other tile-specific solutions. See `group-docs-tile-resilience-research.md` for per-tile risk analysis and [test-scripts/](test-scripts/) for concrete issues.
 
-## Plan B: Disruptions Are Not Tolerable
+**Stale shared-model references.** GD-9's scope-based merge intentionally allows a tile-side change and a shared-model change to merge cleanly even when the tile references something the shared-model change just deleted. (Adding shared-model dependency tracking to the conflict check would prevent the drift but cost more rollback than the drift is worth — see [GD-24](#gd-24-opt-in-coupled-scopes-held-in-reserve) for an alternative narrow-scope version of that tradeoff held in reserve.) Instead, tiles need to tolerate stale references at read time. The recipe depends on the MST type the tile uses:
 
-If testing shows that transient UI disruptions make group documents unusable for key tiles, tile locking is needed as an intermediate step.
+- **`types.reference`** (e.g., the diagram tile's `DQNode.variable`): the next read throws and crashes the tile. Switch to `types.safeReference` or `types.maybe(types.reference)` so reads return `undefined`, then handle that gracefully (prune, fallback, blank). See [CLUE-512](https://concord-consortium.atlassian.net/browse/CLUE-512).
+- **`types.string` holding an id** (e.g., drawing's `variableId`, graph's `attributeID`): MST never resolves these, so the failure mode is whatever the tile's lookup code does with a missing id. Audit each lookup site and ensure missing-id handling is well-defined. See [CLUE-513](https://concord-consortium.atlassian.net/browse/CLUE-513) and [CLUE-514](https://concord-consortium.atlassian.net/browse/CLUE-514).
+- **`types.safeReference` / `types.maybe(types.reference)`**: already returns `undefined` at read time; the remaining work is confirming the tile handles `undefined` correctly downstream.
 
-Plan B proceeds through these work areas. Items at the same level can be done in parallel or in either order. Indented items depend on the item above them.
+Reproduction scripts and observed behavior for each case live in [test-scripts/shared-variables.md](test-scripts/shared-variables.md) and [test-scripts/shared-dataset.md](test-scripts/shared-dataset.md).
 
-1. **GD-7: Undo Bugs** — independent, can be done anytime
-2. **GD-6: Corruption Prevention**
-   - **GD-8: Tile Locking** — depends on GD-6
-   - **GD-9: Document-Level Merging** — depends on GD-6
-     - **GD-10: Shared Model Merging** — depends on GD-9
-3. **GD-11: Tile Hardening** + remove locks incrementally (after the merging work areas)
+### GD-18: Settled-State Document Saves
 
-### GD-7: Undo Bugs
+Today every CLUE client saves the full document state to RTDB on every local change *and* on remote changes that get applied. That produces multi-writer save thrash (N editors → ~N RTDB writes per edit) and lets the saved doc briefly reflect non-canonical state during fork-rollback. GD-18 changes the save trigger to "settled state" — no pending local entries, no pending conflict decisions, all visible canonical entries processed — so the saved doc always reflects canonical state at a known canonical position.
 
-Same as Plan A.
+Design: [settled-state-doc-saves-design.md](settled-state-doc-saves-design.md). Status: design complete, ready for implementation plan.
 
-### GD-6: Corruption Prevention
+Independent of the merging work; can be done in parallel. Prerequisite for GD-19.
 
-Same as Plan A.
+### GD-19: Transaction-Free History
 
-### GD-8: Tile Locking
+Replace the current Firestore-transaction-based history append with a multi-parent DAG. Today every history entry write wraps a transaction that competes for `metadata.lastHistoryEntry`, which is a write-rate choke point even for ordinary edits and untenable for tick-rate producers. The DAG model lets concurrent writers append without per-document coordination; canonical order is determined globally by `(serverTimestamp, id)`; conflict detection and resolution move entirely to the client.
+
+Design: [transaction-free-history-design.md](transaction-free-history-design.md). Status: early draft — partial design, several open questions remain.
+
+Depends on GD-18 (the design assumes saved-doc-reflects-canonical-state). Prerequisite for GD-20.
+
+**Pre-deploy prerequisite.** Before this work ships, a small client-side schema-version check needs to be deployed and broadly adopted so older clients fail loudly when they encounter migrated documents instead of silently corrupting them. Small in code but has lead time; worth scheduling early. Detail: [transaction-free-history-design.md § Pre-deploy](transaction-free-history-design.md#pre-deploy-schema-version-check-prerequisite).
+
+### GD-20: Background Entries (DataFlow)
+
+Make group documents containing a dataflow tile usable while the tile is running. Tick-rate producer changes become ordinary history entries with a `background: true` flag, plus a producer-side runner lock (one runner per producer source), asymmetric conflict resolution favoring user entries, a producer notification hook on revert, skip-by-default scrubber/undo behavior, and a separate `producedAt` timestamp for replay fidelity. Dataflow is the first consumer; landing it together gives a concrete case to test the framework against.
+
+Design: [background-entries-design.md](background-entries-design.md). Status: draft for review.
+
+Depends on GD-19.
+
+### GD-21: Collaborative Text-Tile Editing
+
+Replace the text tile's single serialized string field with a fine-grained representation, and apply remote patches directly to Slate's editor state so the local user's cursor and selection are preserved. Today's whole-string patches inflate history, make merging impossible, and force a full Slate re-sync on every remote update.
+
+Design and approach trade-offs: [collaborative-text-tile-editing-design.md](collaborative-text-tile-editing-design.md). Status: no concrete design yet.
+
+Independent of the merging chain. Can be done anytime. Sibling enabler of GD-17 — without GD-21 the text tile has no useful sub-paths to merge over, so GD-14 for the text tile is gated on this.
+
+### GD-24: Opt-in coupled scopes (held in reserve)
+
+Alternative architectural approach to the same tile-references-shared-model problem GD-11's "Stale shared-model references" addresses. Where GD-11 says "let stale references happen and have tiles tolerate them," this proposal says "for known-risky tile↔shared-model pairs, declare them coupled so concurrent shared-model deletes conflict with tile edits and one side rolls back."
+
+Full design and motivating examples: [group-docs-coupled-scopes.md](group-docs-coupled-scopes.md).
+
+We previously chose GD-11's tolerance approach because the rollback cost of dependency tracking was too high in the general case. GD-24 narrows that cost by scoping the coupling to just the known-risky type pairs, which preserves clean merge for everything else. Worth keeping as a fallback if tile-side tolerance proves too painful in practice.
+
+Builds on [GD-17](#gd-17-type-aware-merge-delegation). Unlikely to ship; here as design history and a possible future direction.
+
+### GD-8: Tile Locking (held in reserve)
+
+Not on the current path. UI disruption testing has not surfaced enough cases to justify the implementation cost; per-tile hardening (GD-11) is the lighter-weight first response. This is the design we'd return to if disruptions ever prove too severe to absorb tile-by-tile.
 
 Add the ability to "lock" a tile so only one user can edit it at a time. Other users see a read-only view of the tile that updates as the editing user makes changes. This prevents concurrent edits to a tile's own state and avoids the transient UI disruptions.
 
@@ -125,20 +206,6 @@ Tile locking prevents concurrent edits to a tile's own state, but shared model c
 - **Lock the shared model too**: Broad — locking SharedVariables would disable variable editing across many tiles.
 - **Defer shared model updates in locked tiles**: Queue updates and apply when the user finishes editing.
 - **Per-tile hardening**: Preserve transient state across shared model updates for specific tiles.
-
-### GD-9: Document-Level Merging
-
-Same as Plan A, but with tile locking in place, most tile-level conflicts are prevented. The remaining merging work is primarily at the document level.
-
-### GD-10: Shared Model Merging
-
-Same as Plan A.
-
-### GD-11: Tile Hardening + Remove Locks
-
-For tiles where we want to allow true concurrent editing without locks, harden those tiles to handle remote updates gracefully. This allows removing locks on specific tiles incrementally.
-
----
 
 ## Shared Models Reference
 
@@ -170,13 +237,24 @@ Drawing has a variable toolbar button and a stub `updateAfterSharedModelChanges`
 
 **SharedDataSet** and **SharedVariables** are the most problematic because they thread across many tiles. SharedVariables is especially tricky: variables can be added to text, diagram, and drawing tiles at any time, and then edited from any of those tiles. SharedCaseMetadata is tightly coupled with Graph and SharedDataSet so it can likely be handled alongside SharedDataSet.
 
-## Parallel Tracks
+### GD-23: Tile shared-model hash decoupling
 
-These areas can be worked on alongside either plan:
+Some tiles store `updateHash` / `createHash` properties that change as the user edits the tile or its shared models. These were introduced under [CLUE-235](https://concord-consortium.atlassian.net/browse/CLUE-235) to support **research analytics** — researchers needed a way to tell whether a tile had been edited (vs. just copied from curriculum or another user's document). The shared-model handling specifically: editing a cell in a table marks the table itself as "edited," because from a research perspective that tile *was* edited even though the underlying patch lands on the shared dataset.
 
-### Reliability and Robustness
+In a group document the side effect is significant: a remote shared-model edit produces a patch on the tile used to edit the shared model (via its hash), so what *would* be a clean disjoint-scope merge (`shared:<X>` vs an unrelated `tile:<Y>` edit) becomes a `tile:<Y>` overlap and one user's pending entries roll back. This is a partial implementation of the tile↔shared-model dependency-tracking conflict surface we explicitly chose not to add in GD-11's "Stale shared-model references" section — except we got it accidentally via these hashes, with some of the extra rollback cost that decision avoided.
 
-Hardening the existing infrastructure to prevent silent failures and data loss in edge cases. These are documented as Implementation TODOs in `group-docs-current-state.md`:
+Independent of the conflict surface, the hashes also add noise to patches and history — every shared-model edit produces an extra tile-hash patch alongside the actual content change.
+
+Plan:
+1. **Explore.** Remove the hash updates and see what breaks. The hashes were added to solve a real research-analytics need, so any replacement has to preserve the ability to tell whether a tile (including via its shared-model edits) has been touched.
+2. **If safe to drop entirely**, remove them.
+3. **If we need to preserve the analytics signal**, find an equivalent that doesn't show up as a tile-scope patch in history. Options include computing edit-status from history rather than storing it on the tile, storing it in a non-MST or non-patched location, or recording it in a separate analytics document.
+
+Best done after [GD-16: E2E Test Framework](#gd-16-e2e-test-framework) lands so we can verify regression coverage automatically.
+
+### GD-22: Reliability and Robustness
+
+Hardening the existing infrastructure to prevent silent failures and data loss in edge cases. Specific items, locations, and proposed fixes live in [group-docs-implementation-todos.md](group-docs-implementation-todos.md). Highlights:
 
 - Race condition in initial history load (explicitly deferred by GD-6)
 - Error handling when metadata promise rejects (silent infinite failure loop)
@@ -184,13 +262,11 @@ Hardening the existing infrastructure to prevent silent failures and data loss i
 
 Document drift detection between full document content and history was addressed by GD-6 via the RTDB envelope's `lastHistoryEntryId` field.
 
-### DataFlow Simulation
-
-DataFlow generates history entries on every simulation tick. Two users with DataFlow running will produce constant conflicting entries. This needs a fundamentally different approach — likely excluding simulation tick state from history, or batching/throttling it. This is a blocker for using group documents with DataFlow tiles.
+**Caveat: likely subsumed by GD-19.** All items live in `firestore-history-manager-concurrent.ts`, which the transaction-free history rewrite substantially replaces. Worth fixing in the legacy code only if a concrete user-visible failure forces our hand before GD-19 lands.
 
 ## Supporting Dev Tooling
 
-Small, targeted dev tools that make debugging and testing the group-doc work easier. Can be done in parallel with either plan.
+Small, targeted dev tools that make debugging and testing the group-doc work easier. Can be done in parallel.
 
 ### GD-12: Debug Re-render Controls
 
@@ -211,12 +287,22 @@ Reversion timing should be configurable:
 
 Each timing mode exposes different race windows.
 
-## Deferred: Undo/Redo
+### GD-16: E2E Test Framework
 
-Undo/redo in group documents was deliberately punted when this work was proposed, and for now that's still the right call. But it should be kept in mind as we design GD-9 and GD-10; more progress may change the call later.
+Group-doc bugs frequently involve focus, cursor, and typing-state interactions across two windows. Cypress runs one window at a time, which makes deterministic two-user scenarios hard. Playwright supports multiple browser contexts in a single test, each with its own focus state, so tests can drive both clients simultaneously and assert on per-window UI state.
 
-Today, undo/redo assumes each patch is being applied to the document state it was recorded against. In a collaborative world that assumption breaks: the document can be changed by someone else between when an entry is recorded and when the local user undoes or redoes it, and those remote changes aren't in the local undo/redo stack.
+Once the framework is in place, the manual reproduction scripts in [test-scripts/](test-scripts/) and the GD-3 pause/resume scripts can be automated. Many of those scripts need active interaction in one window while a remote change arrives, which is exactly what multi-context Playwright testing enables.
 
-Making undo/redo correct in this world requires the same judgment GD-9 and GD-10 need for rollback: given an entry's patches and action, can we safely apply them against the current document state, or do they conflict with changes from other users? When we eventually pick up undo/redo, we should be able to reuse the merging and conflict-detection code introduced by GD-9 and GD-10 rather than build a second implementation.
+Independent of the merging work; can be done in parallel.
 
-**Design implication**: keep the GD-9 and GD-10 merge exceptions factored so they can be reused by a future undo/redo implementation — the decision of whether a given patch set can be safely applied should not be entangled with the rollback-specific code path.
+## CLUE-517: Undo/Redo (deferred)
+
+Tracked as [CLUE-517](https://concord-consortium.atlassian.net/browse/CLUE-517). Undo/redo in group documents was deliberately punted when this work was proposed, and for now that's still the right call. But it should be kept in mind as we design GD-10, GD-14, GD-15, and GD-17; more progress may change the call later.
+
+Today, undo/redo assumes each patch is being applied to the document state it was recorded against. In a collaborative world that assumption breaks: the document can be changed by someone else between when an entry is recorded and when the local user undoes or redoes it, and those remote changes aren't in the local undo/redo stack. CLUE-517's first concrete symptom: user A edits a text tile, user B deletes the tile, user A's undo button silently errors.
+
+A pragmatic interim approach (CLUE-517's framing): invalidate the user's undo entries when a remote change touches the same scope, rather than trying to apply drifted patches.
+
+A more complete version requires the same judgment GD-10 and GD-17 need for rollback: given an entry's patches and action, can we safely apply them against the current document state, or do they conflict with changes from other users? When we pick that up, we should be able to reuse the merging and conflict-detection code from the merged GD-9 and from GD-10, GD-17 rather than build a second implementation.
+
+**Design implication**: keep the merge code introduced by GD-10 and GD-17 factored so it can be reused by a future undo/redo implementation — the decision of whether a given patch set can be safely applied should not be entangled with the rollback-specific code path.
