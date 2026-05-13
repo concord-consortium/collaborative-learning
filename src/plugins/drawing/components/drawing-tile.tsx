@@ -55,7 +55,6 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
   const stores = useStores();
   const { clipboard, ui } = stores;
-  const showObjectListView = !readOnly && ui.isSelectedTile(model);
   const showNavigator = ui.isSelectedTile(model) &&
                         navigatorAllowed &&
                         contentRef.current.isNavigatorVisible;
@@ -290,9 +289,11 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
 
   const getObjectListPanelWidth = () => {
     if (readOnly) return 0;
+
     // When unselected, the panel is replaced by a same-width spacer so the drawing
     // layer's left edge doesn't shift. Report that width so sparrows stay anchored.
-    if (!showObjectListView) return kClosedObjectListPanelWidth;
+    if (!ui.isSelectedTile(model)) return kClosedObjectListPanelWidth;
+
     return contentRef.current.listViewOpen ? kOpenObjectListPanelWidth : kClosedObjectListPanelWidth;
   };
 
@@ -304,6 +305,14 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       x: drawingToolElement.current.clientWidth-getObjectListPanelWidth(),
       y: drawingToolElement.current.clientHeight
     };
+  };
+
+  const renderObjectListView = () => {
+    if (readOnly) return null;
+    if (ui.isSelectedTile(model)) {
+      return <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />;
+    }
+    return <div className="object-list-spacer" aria-hidden="true" data-testid="object-list-spacer" />;
   };
 
   const handleNavigatorPan = (direction: NavigatorDirection) => {
@@ -385,10 +394,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             <TileToolbar tileType="drawing" readOnly={!!readOnly} tileElement={tileElt} />
           </div>
           <div className="drawing-container">
-            {showObjectListView
-              ? <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />
-              : !readOnly && <div className="object-list-spacer" aria-hidden="true" data-testid="object-list-spacer" />
-            }
+            {renderObjectListView()}
             <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: updateTileVisibleBoundingBox }}>
               <DrawingLayerView
                 {...props}
