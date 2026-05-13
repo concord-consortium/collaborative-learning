@@ -21,10 +21,30 @@ export interface ClueLinkElement extends BaseElement {
 const isLinkElement = (element: any): element is ClueLinkElement =>
   element?.type === kLinkFormat;
 
-export const LinkComponent = observer(function LinkComponent(
+// Slate element components are invoked both interactively (inside a <Slate>
+// provider) and during HTML serialization (slateToHtml statically renders
+// elements with only a SerializingContext). Editor-bound hooks like useSlate
+// are only valid on the interactive path, so this component is split into two
+// children with useSerializing() picking which to render.
+export const LinkComponent = (props: RenderElementProps) => {
+  const isSerializing = useSerializing();
+  if (isSerializing) return <LinkSerializing {...props} />;
+  return <LinkInteractive {...props} />;
+};
+
+const LinkSerializing = ({ attributes, children, element }: RenderElementProps) => {
+  if (!isLinkElement(element)) {
+    return <span {...attributes}>{children}</span>;
+  }
+
+  // Render a plain <a> tag with no interactive behavior, classes, or displayMode styling.
+  // This keeps the exported HTML presentation-neutral.
+  return <a href={element.href} {...attributes}>{children}</a>;
+};
+
+const LinkInteractive = observer(function LinkInteractive(
   { attributes, children, element }: RenderElementProps
 ) {
-  const isSerializing = useSerializing();
   const textContent = useContext(TextContentModelContext);
   const isSelected = useSelected();
   const editor = useSlate();
@@ -35,13 +55,6 @@ export const LinkComponent = observer(function LinkComponent(
   }
 
   const { href, linkId } = element;
-
-  // During HTML export (serialization), render a plain <a> tag with no
-  // interactive behavior, classes, or displayMode styling. This keeps
-  // the exported HTML presentation-neutral.
-  if (isSerializing) {
-    return <a href={href} {...attributes}>{children}</a>;
-  }
 
   const displayMode = textContent?.getLinkDisplayMode(linkId) ?? kDefaultLinkDisplayMode;
 

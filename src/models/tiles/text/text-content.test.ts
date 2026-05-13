@@ -5,6 +5,7 @@ import { TextContentModel, kTextTileType } from "./text-content";
 import { registerTextPluginInfo } from "./text-plugin-info";
 import { registerVariables, kVariableFormat } from "../../../plugins/shared-variables/slate/variables-plugin";
 import { kHighlightFormat, registerHighlight } from "../../../components/tiles/text/plugins/highlights-plugin";
+import { kLinkFormat, registerLinkComponent } from "../../../components/tiles/text/plugins/link-plugin";
 
 // slate-editor's core element renderers (paragraph, inline, etc.) are registered by
 // registerPlugins(). In production this happens via createEditor() when the text tile
@@ -14,6 +15,7 @@ import { kHighlightFormat, registerHighlight } from "../../../components/tiles/t
 registerPlugins();
 registerVariables();
 registerHighlight();
+registerLinkComponent();
 
 const empty: EditorValue = [
   {
@@ -252,5 +254,54 @@ describe("TextContentModel chip serialization round-trips", () => {
     expect(reloaded.highlightedText.length).toBe(1);
     expect(reloaded.highlightedText[0].id).toBe(highlightId);
     expect(reloaded.highlightedText[0].text).toBe("notice");
+  });
+});
+
+describe("TextContentModel link round-trip", () => {
+  // Link elements come from <a> tags in authored HTML. The slate-editor library
+  // ships a built-in <a> deserializer; CLUE registers its own LinkComponent as
+  // the renderer for this format.
+  const linkHref = "https://example.com/page";
+  const valueWithLink: EditorValue = [{
+    type: "paragraph",
+    children: [
+      { text: "see " },
+      { type: kLinkFormat, href: linkHref, children: [{ text: "link text" }] } as any,
+      { text: " here" }
+    ]
+  }];
+
+  it("does not throw when serializing a Slate value with a link element to HTML", () => {
+    expect(() => slateToHtml(valueWithLink)).not.toThrow();
+  });
+
+  it("preserves link element type through slateToHtml -> htmlToSlate", () => {
+    const reloaded = htmlToSlate(slateToHtml(valueWithLink));
+    expect(findElementByType(reloaded as any[], kLinkFormat)).toBeDefined();
+  });
+
+  it("preserves link href through slateToHtml -> htmlToSlate", () => {
+    const reloaded = htmlToSlate(slateToHtml(valueWithLink));
+    const link = findElementByType(reloaded as any[], kLinkFormat);
+    expect(link?.href).toBe(linkHref);
+  });
+
+  it("preserves link element type through TextContent export -> reimport", () => {
+    const reloaded = roundTripThroughAuthoringExport(valueWithLink);
+    expect(findElementByType(reloaded as any[], kLinkFormat)).toBeDefined();
+  });
+
+  it("preserves link href through TextContent export -> reimport", () => {
+    const reloaded = roundTripThroughAuthoringExport(valueWithLink);
+    const link = findElementByType(reloaded as any[], kLinkFormat);
+    expect(link?.href).toBe(linkHref);
+  });
+
+  it("exports HTML text containing an <a> tag without throwing", () => {
+    const model = TextContentModel.create({
+      format: "html",
+      text: [`<p>see <a href="${linkHref}">link text</a> here</p>`]
+    });
+    expect(() => model.exportJson()).not.toThrow();
   });
 });
