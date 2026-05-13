@@ -74,6 +74,16 @@ export function createBodyTabHandler(deps: Omit<BodyDeps, "gridRef">) {
   };
 }
 
+export function createBodyEscapeHandler() {
+  return (_event: KeyboardEvent): "handled" | "exit" => {
+    if (isCellEditing()) {
+      // Let RDG cancel the edit; don't preventDefault, don't exit trap.
+      return "handled";
+    }
+    return "exit";
+  };
+}
+
 export function setGridActivePosition(
   gridRef: RefObject<DataGridHandle | null>,
   position: CellPosition
