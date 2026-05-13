@@ -129,8 +129,11 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
   }, []);
 
   const handleBarBlur = useCallback((e: React.FocusEvent) => {
-    // Only clear selection if focus is leaving the bar graph entirely (not moving between bars).
-    if (!svgRef.current?.contains(e.relatedTarget as Node | null)) {
+    // Don't clear case selection when focus is moving to another tile (e.g. the linked
+    // table) — that tile's click handler is about to read the current selection and would
+    // see an empty set, mis-toggling its row state. Only clear when focus is leaving for
+    // an unrelated, non-focusable target (relatedTarget=null).
+    if (e.relatedTarget == null) {
       model?.sharedModel?.dataSet.setSelectedCases([]);
     }
   }, [model]);
