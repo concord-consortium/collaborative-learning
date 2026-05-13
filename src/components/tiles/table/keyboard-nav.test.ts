@@ -1,4 +1,4 @@
-import { isCellEditing, getHeaderFocusables, createBodyTabHandler, createBodyEscapeHandler, type CellPosition } from "./keyboard-nav";
+import { isCellEditing, getHeaderFocusables, createBodyTabHandler, createBodyEscapeHandler, createBodyFocusContent, type CellPosition } from "./keyboard-nav";
 
 describe("isCellEditing", () => {
   beforeEach(() => {
@@ -132,5 +132,68 @@ describe("createBodyEscapeHandler", () => {
   it("returns 'exit' in select mode (no editor focused)", () => {
     const handler = createBodyEscapeHandler();
     expect(handler(new KeyboardEvent("keydown"))).toBe("exit");
+  });
+});
+
+describe("createBodyFocusContent", () => {
+  function makeGridStub(rowsHtml: string) {
+    const element = document.createElement("div");
+    element.innerHTML = rowsHtml;
+    document.body.appendChild(element);
+    const selectCell = jest.fn();
+    return {
+      gridRef: { current: { element, selectCell } as any },
+      element,
+      selectCell,
+    };
+  }
+
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  it("resets to (0,0) on forward entry", () => {
+    const { gridRef, selectCell } = makeGridStub("");
+    const focusContent = createBodyFocusContent({
+      gridRef,
+      selectedCellRef: { current: null },
+      columnsRef: { current: [{}, {}, {}] },
+      rowsRef: { current: [{}, {}, {}] },
+    });
+    expect(focusContent({ reverse: false })).toBe(true);
+    expect(selectCell).toHaveBeenCalledWith({ idx: 0, rowIdx: 0 }, undefined, true);
+  });
+
+  it("focuses the memory cell on reverse entry", () => {
+    const { gridRef, element } = makeGridStub(`
+      <div role="row" aria-rowindex="1"><div role="gridcell" tabindex="0">header</div></div>
+      <div role="row" aria-rowindex="2"><div role="gridcell" tabindex="-1">A</div></div>
+      <div role="row" aria-rowindex="3"><div role="gridcell" tabindex="0" id="memory-cell">B</div></div>
+    `);
+    const memoryCell = element.querySelector<HTMLElement>("#memory-cell")!;
+    jest.spyOn(memoryCell, "focus");
+
+    const focusContent = createBodyFocusContent({
+      gridRef,
+      selectedCellRef: { current: null },
+      columnsRef: { current: [{}] },
+      rowsRef: { current: [{}, {}] },
+    });
+    expect(focusContent({ reverse: true })).toBe(true);
+    expect(memoryCell.focus).toHaveBeenCalled();
+  });
+
+  it("falls back to (last col, last row) on reverse entry when no memory cell", () => {
+    const { gridRef, selectCell } = makeGridStub(`
+      <div role="row" aria-rowindex="1"><div role="gridcell">header</div></div>
+    `);
+    const focusContent = createBodyFocusContent({
+      gridRef,
+      selectedCellRef: { current: null },
+      columnsRef: { current: [{}, {}, {}] },
+      rowsRef: { current: [{}, {}, {}] },
+    });
+    expect(focusContent({ reverse: true })).toBe(true);
+    expect(selectCell).toHaveBeenCalledWith({ idx: 2, rowIdx: 2 }, undefined, true);
   });
 });
