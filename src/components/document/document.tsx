@@ -64,13 +64,6 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
   );
 };
 
-const EditButton = ({ onClick }: { onClick: () => void }) => {
-  return (
-    <IconButton icon="edit" key="edit" className="action icon-edit"
-                onClickButton={onClick} title={`Rename ${upperWords(translate("workspace"))}`} />
-  );
-};
-
 const OneUpButton = ({ onClick, selected }: { onClick: () => void, selected: boolean }) => {
   const selectedClass = selected ? "selected" : "";
   return (
@@ -113,11 +106,25 @@ const ViewModeButton = ({ onClick, icon, title }: { onClick: () => void, icon: s
   );
 };
 
-const TitleInfo = ({ docTitle, onClick }: { docTitle: string, onClick?: () => void }) => {
+const TitleInfo = (
+  { docTitle, onClick, canEdit }: { docTitle: string, onClick: () => void, canEdit: boolean }
+) => {
+  if (!canEdit) {
+    return <span className="title-text" id="titlebar-title">{docTitle}</span>;
+  }
+
   return (
-    <span onClick={onClick} className="title-info" id="titlebar-title">
-      {docTitle}
-    </span>
+    <button
+      aria-label={`Rename: ${docTitle}`}
+      className="title-with-edit"
+      data-test="doc-rename-button"
+      title={`Rename ${upperWords(translate("workspace"))}`}
+      type="button"
+      onClick={onClick}
+    >
+      <span className="title-text" id="titlebar-title">{docTitle}</span>
+      <span className="edit-icon" aria-hidden="true" />
+    </button>
   );
 };
 
@@ -489,15 +496,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
           ? <div className="title" data-test="learning-log-title">
-              <TitleInfo docTitle={`Learning Log: ${document.title}`} onClick={this.handleDocumentRename} />
-              { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
+              <TitleInfo
+                canEdit={!hideButtons}
+                docTitle={`Learning Log: ${document.title}`}
+                onClick={this.handleDocumentRename} />
               {this.renderStickyNotes()}
             </div>
           : <div className="title" data-test="personal-doc-title">
               <TitleInfo
+                canEdit={!hideButtons}
                 docTitle={`${getDocumentTitleWithTimestamp(document, appConfig)}`}
                 onClick={this.handleDocumentRename} />
-              { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
               {this.renderStickyNotes()}
             </div>
         }

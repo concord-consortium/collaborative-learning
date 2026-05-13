@@ -18,18 +18,34 @@ interface IProps extends IBaseProps {
 @observer
 export class DialogComponent extends BaseComponent<IProps> {
   private input: HTMLInputElement | HTMLTextAreaElement | null;
+  private previouslyFocusedElement: HTMLElement | null = null;
 
   public componentDidMount() {
-    window.addEventListener("keyup", this.handleWindowKeyUp);
+    window.addEventListener("keydown", this.handleWindowKeyDown);
   }
 
   public componentWillUnmount() {
-    window.removeEventListener("keyup", this.handleWindowKeyUp);
+    window.removeEventListener("keydown", this.handleWindowKeyDown);
   }
 
   public componentDidUpdate() {
-    if (this.input) {
-      this.input.focus();
+    if (this.stores.ui.dialog) {
+      if (!this.previouslyFocusedElement) {
+        // Caveat: dialogs that auto-focus a child (e.g., getCopyToDocument) capture the wrong element here.
+        const active = document.activeElement;
+        if (active instanceof HTMLElement) {
+          this.previouslyFocusedElement = active;
+        }
+      }
+      if (this.input) {
+        this.input.focus();
+      }
+    } else if (this.previouslyFocusedElement) {
+      const toRestore = this.previouslyFocusedElement;
+      this.previouslyFocusedElement = null;
+      if (document.contains(toRestore)) {
+        toRestore.focus();
+      }
     }
   }
 
@@ -151,7 +167,7 @@ export class DialogComponent extends BaseComponent<IProps> {
           data-test="dialog-text-input"
           value={dialog.promptValue}
           onChange={this.handlePromptValueChanged}
-          onKeyUp={this.handlePromptKeyUp}
+          onKeyDown={this.handlePromptKeyDown}
           ref={(el) => this.input = el}
         />
       : <input
@@ -159,7 +175,7 @@ export class DialogComponent extends BaseComponent<IProps> {
           type="text"
           value={dialog.promptValue}
           onChange={this.handlePromptValueChanged}
-          onKeyUp={this.handlePromptKeyUp}
+          onKeyDown={this.handlePromptKeyDown}
           ref={(el) => this.input = el}
         />;
     return (
@@ -190,9 +206,11 @@ export class DialogComponent extends BaseComponent<IProps> {
     }
   };
 
-  private handlePromptKeyUp = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    // listen for enter key
-    if (e.keyCode === 13) {
+  private handlePromptKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    // Use keydown (not keyup) so a stray keyup from the Enter that opened the dialog
+    // — which the browser dispatches on the now-focused input — doesn't auto-submit.
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       this.handlePromptDialogOk();
     }
   };
@@ -212,9 +230,9 @@ export class DialogComponent extends BaseComponent<IProps> {
     this.stores.ui.closeDialog();
   };
 
-  private handleWindowKeyUp = (e: KeyboardEvent) => {
+  private handleWindowKeyDown = (e: KeyboardEvent) => {
     // listen for escape key when dialog is visible
-    if (this.stores.ui.dialog && (e.keyCode === 27)) {
+    if (this.stores.ui.dialog && e.key === "Escape") {
       this.handleCancelDialog();
     }
   };
