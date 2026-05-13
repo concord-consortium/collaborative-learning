@@ -110,6 +110,34 @@ export function createBodyFocusContent(deps: BodyDeps) {
   };
 }
 
+export function createHeaderTabHandler(deps: {
+  getTopbarElement: () => HTMLElement | undefined;
+}) {
+  return (event: KeyboardEvent, reverse: boolean): "handled" | "exit" => {
+    const headerEl = deps.getTopbarElement();
+    if (!headerEl) {
+      event.preventDefault();
+      return "exit";
+    }
+    const focusables = getHeaderFocusables(headerEl);
+    const currentIdx = focusables.indexOf(document.activeElement as HTMLElement);
+    if (currentIdx === -1) {
+      event.preventDefault();
+      return "exit";
+    }
+    const nextIdx = reverse ? currentIdx - 1 : currentIdx + 1;
+    if (nextIdx < 0 || nextIdx >= focusables.length) {
+      event.preventDefault();
+      return "exit";
+    }
+    event.preventDefault();
+    focusables[currentIdx].setAttribute("tabindex", "-1");
+    focusables[nextIdx].setAttribute("tabindex", "0");
+    focusables[nextIdx].focus();
+    return "handled";
+  };
+}
+
 export function setGridActivePosition(
   gridRef: RefObject<DataGridHandle | null>,
   position: CellPosition

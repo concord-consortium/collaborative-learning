@@ -1,4 +1,4 @@
-import { isCellEditing, getHeaderFocusables, createBodyTabHandler, createBodyEscapeHandler, createBodyFocusContent, type CellPosition } from "./keyboard-nav";
+import { isCellEditing, getHeaderFocusables, createBodyTabHandler, createBodyEscapeHandler, createBodyFocusContent, createHeaderTabHandler, type CellPosition } from "./keyboard-nav";
 
 describe("isCellEditing", () => {
   beforeEach(() => {
@@ -195,5 +195,76 @@ describe("createBodyFocusContent", () => {
     });
     expect(focusContent({ reverse: true })).toBe(true);
     expect(selectCell).toHaveBeenCalledWith({ idx: 2, rowIdx: 2 }, undefined, true);
+  });
+});
+
+describe("createHeaderTabHandler", () => {
+  function makeHeader(numButtons: number, activeIdx: number) {
+    const header = document.createElement("div");
+    const buttons: HTMLButtonElement[] = [];
+    for (let i = 0; i < numButtons; i++) {
+      const btn = document.createElement("button");
+      btn.setAttribute("tabindex", i === activeIdx ? "0" : "-1");
+      jest.spyOn(btn, "focus");
+      header.appendChild(btn);
+      buttons.push(btn);
+    }
+    document.body.appendChild(header);
+    buttons[activeIdx]?.focus();
+    return { header, buttons };
+  }
+
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  function makeEvent() {
+    const event = new KeyboardEvent("keydown");
+    Object.defineProperty(event, "preventDefault", { value: jest.fn() });
+    return event;
+  }
+
+  it("advances tabindex and focuses next control, returns 'handled'", () => {
+    const { header, buttons } = makeHeader(3, 0);
+    const handler = createHeaderTabHandler({ getTopbarElement: () => header });
+    const event = makeEvent();
+    expect(handler(event, false)).toBe("handled");
+    expect(buttons[0].getAttribute("tabindex")).toBe("-1");
+    expect(buttons[1].getAttribute("tabindex")).toBe("0");
+    expect(buttons[1].focus).toHaveBeenCalled();
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("returns 'exit' when forward Tab is past the last control", () => {
+    const { header, buttons } = makeHeader(3, 2);
+    const handler = createHeaderTabHandler({ getTopbarElement: () => header });
+    const event = makeEvent();
+    expect(handler(event, false)).toBe("exit");
+    expect(event.preventDefault).toHaveBeenCalled();
+    // Roving target unchanged on exit.
+    expect(buttons[2].getAttribute("tabindex")).toBe("0");
+  });
+
+  it("retreats and focuses previous control on reverse, returns 'handled'", () => {
+    const { header, buttons } = makeHeader(3, 2);
+    const handler = createHeaderTabHandler({ getTopbarElement: () => header });
+    const event = makeEvent();
+    expect(handler(event, true)).toBe("handled");
+    expect(buttons[2].getAttribute("tabindex")).toBe("-1");
+    expect(buttons[1].getAttribute("tabindex")).toBe("0");
+    expect(buttons[1].focus).toHaveBeenCalled();
+  });
+
+  it("returns 'exit' on reverse at the first control", () => {
+    const { header } = makeHeader(3, 0);
+    const handler = createHeaderTabHandler({ getTopbarElement: () => header });
+    const event = makeEvent();
+    expect(handler(event, true)).toBe("exit");
+  });
+
+  it("returns 'exit' when topbar element is not available", () => {
+    const handler = createHeaderTabHandler({ getTopbarElement: () => undefined });
+    const event = makeEvent();
+    expect(handler(event, false)).toBe("exit");
   });
 });
