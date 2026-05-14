@@ -522,6 +522,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   // Builds a FocusTrapStrategy from the current tile's elements.
   private buildFocusTrapStrategy() {
     const { model } = this.props;
+    const tabWithinSlots = this.getFocusTrapElements().tabWithinSlots;
     const strategy = createClueTileStrategy({
       onRegisterTileApi: () => {}, // Not used here — individual tiles handle registration
       onUnregisterTileApi: () => {},
@@ -532,8 +533,14 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       getTopbarElement: () => this.getFocusTrapElements().topbarElement ?? undefined,
       getPaletteElement: () => this.getFocusTrapElements().paletteElement ?? undefined,
       getResizeElement: () => this.resizeElement ?? undefined,
-      focusContent: () => this.getFocusTrapElements().focusContent?.() ?? false,
+      focusContent: (context) => this.getFocusTrapElements().focusContent?.(context) ?? false,
       onTabWhenInactive: (e, reverse) => this.navigateToSiblingTile(e, reverse),
+      tabWithinSlots,
+      // Dynamic forward: the inner tile may register/unregister content-slot
+      // Escape interceptors between strategy builds, so resolve at call time.
+      escapeHandlers: {
+        content: (e) => this.getFocusTrapElements().escapeHandlers?.content?.(e) ?? "exit",
+      },
     });
     // Deselect the tile when the controller exits (Escape, setEnabled(false))
     strategy.onExit = () => {
@@ -587,6 +594,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       focusContent: focusable?.focusContent || null,
       topbarElement: focusable?.topbarElement || null,
       paletteElement: focusable?.paletteElement || null,
+      tabWithinSlots: focusable?.tabWithinSlots,
+      escapeHandlers: focusable?.escapeHandlers,
       resizeHandle: this.resizeElement,
     };
   }

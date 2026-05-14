@@ -1,4 +1,5 @@
 @import "../../../../components/vars";
+@import "../../../../components/mixins";
 @import "./legend-vars";
 
 .multi-legend {
@@ -55,6 +56,8 @@
     padding: 1px;
     width: 27px;
 
+    @include focus-ring(2px);
+
     &:hover {
       background-color: $workspace-teal-light-6;
     }
@@ -95,7 +98,10 @@
     padding: 0 8px 0 0;
     text-align: left;
 
+    @include focus-ring(2px);
+
     &.disabled {
+      cursor: not-allowed;
       opacity: .3;
 
       &:hover {
@@ -179,6 +185,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  @include focus-ring(2px);
 
   &.highlighted {
     background-color: $highlight-linked-header;

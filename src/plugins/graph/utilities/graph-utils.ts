@@ -156,6 +156,91 @@ export function getPointTipText(caseID: string, attributeIDs: (string|undefined)
   return Array.from(new Set(attrArray)).filter(anEntry => anEntry !== '').join('<br>');
 }
 
+/**
+ * Builds an accessible label for a single data point. Form:
+ *   "Point: X=<x>, Y=<y>[, Series: <yAttributeName>][, Color: <legendValueName>][, Selected]"
+ *
+ * The series suffix is included only when more than one Y attribute is mapped, so
+ * single-series scatter plots don't include redundant noise. The color suffix is
+ * included only when a legend attribute is mapped (CODAP-legend mode); it carries
+ * the case's legend-category value so SR users can correlate dot colors with the
+ * legend without relying on visual color perception.
+ *
+ * @param caseData The CaseData bound to the dot's `<g>` via D3.
+ * @param dataConfiguration Layer data configuration for attribute lookup.
+ */
+export function buildDotAriaLabel(
+  caseData: CaseData,
+  dataConfiguration: IDataConfigurationModel | undefined
+): string {
+  if (!dataConfiguration) return "Point";
+  const dataset = dataConfiguration.dataset;
+  const caseID = caseData.caseID;
+  const xAttrID = dataConfiguration.attributeID("x") || "";
+  const yAttrIDs = dataConfiguration.yAttributeIDs || [];
+  const yAttrID = yAttrIDs[caseData.plotNum] || "";
+
+  const xValue = dataset?.getNumeric(caseID, xAttrID);
+  const yValue = dataset?.getNumeric(caseID, yAttrID);
+
+  let label = "Point";
+  if (xValue !== undefined && isFinite(xValue)) label += `: X=${xValue}`;
+  else label += ":";
+  if (yValue !== undefined && isFinite(yValue)) label += `, Y=${yValue}`;
+
+  if (yAttrIDs.length > 1) {
+    const seriesName = dataset?.attrFromID(yAttrID)?.name;
+    if (seriesName) label += `, Series: ${seriesName}`;
+  }
+
+  const legendAttrID = dataConfiguration.attributeID("legend");
+  if (legendAttrID) {
+    const legendValue = dataset?.getValue(caseID, legendAttrID);
+    if (legendValue) label += `, Color: ${legendValue}`;
+  }
+
+  if (isCircleSelected(caseData, dataConfiguration)) {
+    label += ", Selected";
+  }
+  return label;
+}
+
+/**
+ * Applies the selection action for a keyboard-activated data point. Mirrors
+ * the case-toggling branch of {@link handleClickOnDot} so Enter / Space on a
+ * focused dot produces the same selection behaviour as a click:
+ *  - Plain activation on an unselected dot makes it the sole selection.
+ *  - Shift-activation on an unselected dot adds it to the selection.
+ *  - Shift-activation on an already-selected dot removes it from the selection.
+ *  - Plain activation on an already-selected dot is a no-op (matches click).
+ *
+ * @param caseData The CaseData bound to the focused dot.
+ * @param dataConfiguration Layer data configuration owning the dataset.
+ * @param extendSelection When true (e.g. Shift+Enter), the dot is added to or
+ *   removed from the existing selection. When false, the dot becomes the sole
+ *   selected case.
+ */
+export function activateDotSelection(
+  caseData: CaseData,
+  dataConfiguration: IDataConfigurationModel | undefined,
+  extendSelection = false
+) {
+  if (!dataConfiguration) return;
+  const dataset = dataConfiguration.dataset;
+  const yAttributeId = dataConfiguration.yAttributeID(caseData.plotNum);
+  const yCell = { attributeId: yAttributeId, caseId: caseData.caseID };
+  const cellIsSelected = dataset?.isCellSelected(yCell);
+  if (!cellIsSelected) {
+    if (extendSelection) {
+      dataset?.selectCells([yCell]);
+    } else {
+      dataset?.setSelectedCells([yCell]);
+    }
+  } else if (extendSelection) {
+    dataset?.selectCells([yCell], false);
+  }
+}
+
 export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConfiguration?: IDataConfigurationModel) {
   if (!dataConfiguration) return;
   event.stopPropagation();
@@ -628,6 +713,19 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   const outerCircles = selectOuterCircles(dotsRef.current);
   if (outerCircles) applySelectedClassToCircles(outerCircles, dataConfiguration);
   styleOuterCircles(outerCircles, dataConfiguration);
+
+  // Apply keyboard-accessibility attributes to each dot. tabindex=-1 keeps dots
+  // out of the natural Tab cycle (the dots-group surrogate is the single tab stop)
+  // while letting `useGraphDotsKeyboard` programmatically focus them via arrow keys.
+  // aria-label/aria-pressed are re-applied on every refresh so they stay in sync
+  // with current data values and selection state.
+  if (graphDots) {
+    graphDots
+      .attr("tabindex", -1)
+      .attr("role", "button")
+      .attr("aria-label", (d: CaseData) => buildDotAriaLabel(d, dataConfiguration))
+      .attr("aria-pressed", (d: CaseData) => isCircleSelected(d, dataConfiguration) ? "true" : "false");
+  }
 }
 
 /**

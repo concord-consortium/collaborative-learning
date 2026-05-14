@@ -1,3 +1,6 @@
+@import "../../../components/vars";
+@import "../../../components/mixins";
+
 .axis-label {
   align-items: center;
   background-color: white;
@@ -9,6 +12,8 @@
   // Match kAxisLabelHorizontalVerticalPadding and kAxisLabelVerticalPadding in graph-types.ts
   padding: 5px 10px;
   position: absolute;
+
+  @include focus-ring(-2px);
 
   &.vertical.editing {
     justify-content: flex-start;

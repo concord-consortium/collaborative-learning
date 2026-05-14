@@ -94,15 +94,27 @@ export const AxisOrLegendAttributeMenu = ({
     });
   }, [attribute?.name, data?.attributes, dataConfig, labelText, setLabelText, attrId]);
 
+  const legendAriaLabel = attribute?.name
+    ? `Attribute: ${attribute.name}, press Enter for options`
+    : "Choose attribute, press Enter for options";
+
   const getButtonPart = (isOpen: boolean) => {
     return target
-    ? <MenuButton style={buttonStyle}>{attribute?.name}</MenuButton>
+    ? <MenuButton
+        style={buttonStyle}
+        data-axis-menu-place={place}
+        aria-disabled={readOnly || undefined}
+      >
+        {attribute?.name}
+      </MenuButton>
     : (
       <MenuButton
+        aria-label={legendAriaLabel}
         className={classNames(
           "graph-legend-label normal-dropdown-label simple-attribute-label",
           {"target-open": isOpen, "target-closed": !isOpen}
         )}
+        aria-disabled={readOnly || undefined}
       >
         <div className={classNames("styled-button", { highlighted })}>
           <div className="symbol-title">
@@ -163,9 +175,20 @@ export const AxisOrLegendAttributeMenu = ({
     </>
   );
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const handleMenuOpen = () => {
+    if (!readOnly) setMenuOpen(true);
+  };
+  const handleMenuClose = () => setMenuOpen(false);
+
   return (
     <div className={`axis-legend-attribute-menu ${place}`} >
-      <Menu boundary="scrollParent">
+      <Menu
+        boundary="scrollParent"
+        isOpen={menuOpen}
+        onOpen={handleMenuOpen}
+        onClose={handleMenuClose}
+      >
         {({ onClose, isOpen }) => {
           onCloseRef.current = onClose;
           const menuButtonAndPortal = getMenuButtonAndPortal(isOpen);
