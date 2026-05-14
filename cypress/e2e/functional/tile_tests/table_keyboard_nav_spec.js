@@ -57,6 +57,23 @@ context('Table Tile Keyboard Navigation', function () {
     });
 
     // -------------------------------------------------------------------------
+    // Enter on the focus-ringed tile container selects the tile and moves
+    // focus to the editable title. Title is a non-button div with tabIndex=0
+    // + role=button (see editable-table-title.tsx) so the trap's
+    // pickSlotEntryTarget finds it as the first focusable in the title slot.
+    // -------------------------------------------------------------------------
+    cy.log('Enter on focused tile: selects tile and focuses the title');
+    // Escape exits the trap, deselects the tile, and returns focus to the
+    // tile container — putting us in the focus-ringed-but-unselected state.
+    cy.realPress('Escape');
+    cy.get('.primary-workspace .tool-tile.table-tool-tile')
+      .should('not.have.class', 'selected')
+      .should('be.focused');
+    cy.realPress('Enter');
+    cy.get('.primary-workspace .editable-table-title-text').should('be.focused');
+    cy.get('.primary-workspace .tool-tile.table-tool-tile').should('have.class', 'selected');
+
+    // -------------------------------------------------------------------------
     // Activate the tile so the focus trap is enabled for the header tests.
     // -------------------------------------------------------------------------
     tableToolTile.getTableTile().click();

@@ -59,7 +59,18 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
       {isEditing
         ? <HeaderCellInput style={style} value={editingTitle || ""}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onClose={handleClose} />
-        : title}
+        : <div className="editable-table-title-text" tabIndex={0}
+            role={readOnly ? undefined : "button"}
+            aria-label={readOnly ? title : `${title}, editable title`}
+            onKeyDown={readOnly ? undefined : (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleClick();
+              }
+            }}
+          >
+            {title}
+          </div>}
     </div>
   );
 });
