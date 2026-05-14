@@ -127,7 +127,9 @@ class TableToolTile{
       // absolute `aria-rowindex` instead of `.eq` (which is relative to whatever
       // rows happen to be rendered right now). aria-rowindex matches the data
       // row index +2 (header occupies rowindex 1).
-      cy.get('.rdg').then($rdg => {
+      // Scope to `.primary-workspace` so the doc-editor's read-only mirror panes
+      // (which render the same grid) don't get picked up alongside the primary.
+      cy.get('.primary-workspace .rdg').then($rdg => {
         const grid = $rdg[0];
         // Use the actual rendered row height when available; fall back to a sensible
         // default. Centering the target in the viewport gives rdg's buffer room on
@@ -136,7 +138,7 @@ class TableToolTile{
         const rowHeight = (sample && sample.getBoundingClientRect().height) || 30;
         grid.scrollTop = Math.max(0, rowIndex * rowHeight - grid.clientHeight / 2);
       });
-      return cy.get(`.rdg-row[aria-rowindex=${rowIndex + 2}] .rdg-cell[aria-colindex="${colIndex}"]`);
+      return cy.get(`.primary-workspace .rdg-row[aria-rowindex=${rowIndex + 2}] .rdg-cell[aria-colindex="${colIndex}"]`);
     }
     enterData(cell, num){
         this.getTableCell().eq(cell).type(num+'{enter}');
