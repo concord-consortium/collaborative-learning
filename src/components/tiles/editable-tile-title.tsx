@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import React, { useContext, useRef, useState } from "react";
 import { useReadOnlyContext } from "../document/read-only-context";
 import { TileModelContext } from "../tiles/tile-api";
+import { EditableTitleButton } from "./editable-title-button";
 import { TileLabelInput } from "./tile-label-input";
 
 /** Callback to programmatically set title text. */
@@ -92,18 +93,8 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
       {isEditing
         ? <TileLabelInput value={editingTitle} style={inputStyle}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onBlur={() => handleClose(true)} />
-        : <div className="editable-tile-title-text" tabIndex={0}
-            role={readOnly ? undefined : "button"}
-            aria-label={readOnly ? title : `${title}, editable title`}
-            onKeyDown={readOnly ? undefined : (e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleClick();
-              }
-            }}
-          >
-            {title}
-          </div>}
+        : <EditableTitleButton className="editable-tile-title-text"
+            title={title} readOnly={readOnly} onActivate={handleClick} />}
     </div>
   );
 });
