@@ -160,7 +160,13 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().should("have.length", 3); // doesn't change number of buttons
     // Ungroup the two rectangles
     aa.getAnnotationModeButton().click(); // sparrow mode off
-    drawToolTile.getDrawTile().click();
+    // Deselect by clicking empty drawing-layer space — target .drawing-layer
+    // directly (not the outer .tool-tile) so the click reaches the
+    // SelectionDrawingTool's pointerdown handler. See drawing_tool_spec.js for
+    // the same pattern.
+    drawToolTile.getDrawTileComponent().find('.drawing-layer')
+      .trigger("pointerdown", 20, 20, { isPrimary: true })
+      .trigger("pointerup", 20, 20, { isPrimary: true });
     drawToolTile.getGroupDrawing().eq(0).find("rect.group-rect").eq(0).click();
     clueCanvas.clickToolbarButton('drawing', 'ungroup');
     aa.getAnnotationModeButton().click(); // sparrow mode on
