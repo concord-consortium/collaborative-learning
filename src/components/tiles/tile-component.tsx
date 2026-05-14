@@ -522,6 +522,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   // Builds a FocusTrapStrategy from the current tile's elements.
   private buildFocusTrapStrategy() {
     const { model } = this.props;
+    const elements = this.getFocusTrapElements();
     const strategy = createClueTileStrategy({
       onRegisterTileApi: () => {}, // Not used here — individual tiles handle registration
       onUnregisterTileApi: () => {},
@@ -533,6 +534,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       getPaletteElement: () => this.getFocusTrapElements().paletteElement ?? undefined,
       getResizeElement: () => this.resizeElement ?? undefined,
       focusContent: (context) => this.getFocusTrapElements().focusContent?.(context) ?? false,
+      tabHandlers: elements.tabHandlers,
+      escapeHandlers: elements.escapeHandlers,
       onTabWhenInactive: (e, reverse) => this.navigateToSiblingTile(e, reverse),
     });
     // Deselect the tile when the controller exits (Escape, setEnabled(false))
@@ -587,6 +590,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       focusContent: focusable?.focusContent || null,
       topbarElement: focusable?.topbarElement || null,
       paletteElement: focusable?.paletteElement || null,
+      tabHandlers: focusable?.tabHandlers,
+      escapeHandlers: focusable?.escapeHandlers,
       resizeHandle: this.resizeElement,
     };
   }

@@ -29,6 +29,11 @@ export interface ITileFocusableElements {
   // as its own slot in the trap cycle, between content and the standard floating
   // toolbar, so its internal roving-tabindex is a single tab stop with arrow nav.
   paletteElement?: HTMLElement;
+  // Per-slot Tab/Escape handlers forwarded to the parent's FocusTrapStrategy.
+  // A slot in tabHandlers is also treated as managing its own tabindex — the
+  // trap will not mutate tabindex on the slot's element or descendants.
+  tabHandlers?: Record<string, (event: KeyboardEvent, reverse: boolean) => "handled" | "exit">;
+  escapeHandlers?: Record<string, (event: KeyboardEvent) => "handled" | "exit">;
 }
 
 export interface ITileApi {
