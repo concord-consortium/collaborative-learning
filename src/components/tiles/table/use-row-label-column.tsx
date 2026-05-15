@@ -32,12 +32,17 @@ export const useRowLabelColumn = ({inputRowId, hoveredRowId, showRowLabels, setS
   const RowLabelHeader: React.FC = useCallback(() => {
     return (
       <Tooltip {...tooltipOptions}>
-        <div className={`show-hide-row-labels-button ${showRowLabels ? "shown" : "hidden"}`}
+        <button type="button"
+              className={`show-hide-row-labels-button ${showRowLabels ? "shown" : "hidden"}`}
+              aria-label={title}
+              aria-pressed={showRowLabels}
               onMouseDown={(e) => {
                 // preventDefault on mousedown stops the browser from focusing rdg's
                 // HeaderCell. Without this, rdg's handleFocus runs selectCell (when
                 // shouldFocusGrid is true for the first column), which sets
                 // selectedPosition to the index header and locks the focus ring there.
+                // Side effect: clicking doesn't focus the button either, so the focus
+                // ring only appears via keyboard nav (which matches the preferred UX).
                 e.preventDefault();
               }}
               onClick={(e) => {
@@ -46,10 +51,10 @@ export const useRowLabelColumn = ({inputRowId, hoveredRowId, showRowLabels, setS
               }}>
           <RowLabelsShownSvg className="hide-row-labels-icon"/>
           <RowLabelsHiddenSvg className="show-row-labels-icon"/>
-        </div>
+        </button>
       </Tooltip>
     );
-  }, [setShowRowLabels, showRowLabels, tooltipOptions]);
+  }, [setShowRowLabels, showRowLabels, title, tooltipOptions]);
   RowLabelHeader.displayName = "RowLabelHeader";
 
   const RowLabelFormatter: React.FC<TFormatterProps> = useCallback(({
