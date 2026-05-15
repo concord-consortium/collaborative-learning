@@ -82,21 +82,6 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
           cell.classList.remove("hovered-column");
         });
       };
-      const handleHeaderClick = (e: React.MouseEvent) => {
-        // Always stop propagation: react-data-grid 7.0.0-beta.44's HeaderCell now has its
-        // own onClick that calls selectCell({idx, rowIdx: -1}), which interferes with our
-        // column selection handling. canary.46 had no such onClick.
-        e.stopPropagation();
-        if (!gridContext?.isColumnSelected(column.key)) {
-          gridContext?.onSelectColumn(column.key);
-        }
-      };
-      const handleHeaderFocus = () => {
-        if (!gridContext?.isColumnSelected(column.key)) {
-          gridContext?.onSelectColumn(column.key);
-        }
-      };
-
       const handleSort = (e: React.MouseEvent) => {
         if (gridContext?.isColumnSelected(column.key)) {
           let newDirection: TSortDirection;
@@ -113,8 +98,6 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
           className={classes}
           onMouseOver={handleColumnHeaderCellMouseOver}
           onMouseLeave={handleColumnHeaderCellMouseLeave}
-          onClick={handleHeaderClick}
-          onFocus={handleHeaderFocus}
           onKeyDown={handleArrow}
         >
           <div className="flex-container">
