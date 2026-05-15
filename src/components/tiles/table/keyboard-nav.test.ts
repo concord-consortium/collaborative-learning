@@ -3,8 +3,6 @@ import {
   createBodyTabHandler,
   createBodyEscapeHandler,
   createBodyFocusContent,
-  createHeaderTabHandler,
-  createHeaderEscapeHandler,
   type CellPosition,
 } from "./keyboard-nav";
 
@@ -30,6 +28,16 @@ describe("isCellEditing", () => {
   it("returns true when an input inside a role=gridcell is focused", () => {
     const cell = document.createElement("div");
     cell.setAttribute("role", "gridcell");
+    const input = document.createElement("input");
+    cell.appendChild(input);
+    document.body.appendChild(cell);
+    input.focus();
+    expect(isCellEditing()).toBe(true);
+  });
+
+  it("returns true when an input inside a role=columnheader is focused (header rename)", () => {
+    const cell = document.createElement("div");
+    cell.setAttribute("role", "columnheader");
     const input = document.createElement("input");
     cell.appendChild(input);
     document.body.appendChild(cell);
@@ -65,18 +73,30 @@ describe("createBodyTabHandler", () => {
     expect(event.preventDefault).not.toHaveBeenCalled();
   });
 
-  it("returns 'exit' (with preventDefault) on forward tab at last cell", () => {
+  it("returns 'exit' (with preventDefault) on forward tab at last body cell", () => {
     const handler = createBodyTabHandler(makeDeps({ pos: { idx: 2, rowIdx: 2 }, cols: 3, rows: 3 }));
     const event = makeEvent();
     expect(handler(event, false)).toBe("exit");
     expect(event.preventDefault).toHaveBeenCalled();
   });
 
-  it("returns 'exit' on reverse tab at first cell", () => {
-    const handler = createBodyTabHandler(makeDeps({ pos: { idx: 0, rowIdx: 0 }, cols: 3, rows: 3 }));
+  it("returns 'exit' on reverse tab at first header cell (rowIdx === -1, idx === 0)", () => {
+    const handler = createBodyTabHandler(makeDeps({ pos: { idx: 0, rowIdx: -1 }, cols: 3, rows: 3 }));
     const event = makeEvent();
     expect(handler(event, true)).toBe("exit");
     expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("returns 'handled' on reverse tab from first body cell (RDG navigates to last header cell)", () => {
+    const handler = createBodyTabHandler(makeDeps({ pos: { idx: 0, rowIdx: 0 }, cols: 3, rows: 3 }));
+    const event = makeEvent();
+    expect(handler(event, true)).toBe("handled");
+  });
+
+  it("returns 'handled' on forward tab at last header cell (RDG navigates to first body cell)", () => {
+    const handler = createBodyTabHandler(makeDeps({ pos: { idx: 2, rowIdx: -1 }, cols: 3, rows: 3 }));
+    const event = makeEvent();
+    expect(handler(event, false)).toBe("handled");
   });
 
   it("returns 'handled' on reverse tab when not at first cell", () => {
@@ -98,9 +118,20 @@ describe("createBodyEscapeHandler", () => {
     document.body.innerHTML = "";
   });
 
-  it("returns 'handled' when a cell editor is focused", () => {
+  it("returns 'handled' when a body cell editor is focused", () => {
     const cell = document.createElement("div");
     cell.setAttribute("role", "gridcell");
+    const input = document.createElement("input");
+    cell.appendChild(input);
+    document.body.appendChild(cell);
+    input.focus();
+    const handler = createBodyEscapeHandler();
+    expect(handler(new KeyboardEvent("keydown"))).toBe("handled");
+  });
+
+  it("returns 'handled' when a header rename editor is focused", () => {
+    const cell = document.createElement("div");
+    cell.setAttribute("role", "columnheader");
     const input = document.createElement("input");
     cell.appendChild(input);
     document.body.appendChild(cell);
@@ -132,7 +163,7 @@ describe("createBodyFocusContent", () => {
     document.body.innerHTML = "";
   });
 
-  it("resets to (0,0) on forward entry", () => {
+  it("targets the first header cell on forward entry", () => {
     const { gridRef, selectCell } = makeGridStub("");
     const focusContent = createBodyFocusContent({
       gridRef,
@@ -141,7 +172,7 @@ describe("createBodyFocusContent", () => {
       rowsRef: { current: [{}, {}, {}] },
     });
     expect(focusContent({ reverse: false })).toBe(true);
-    expect(selectCell).toHaveBeenCalledWith({ idx: 0, rowIdx: 0 }, undefined, true);
+    expect(selectCell).toHaveBeenCalledWith({ idx: 0, rowIdx: -1 }, undefined, true);
   });
 
   it("focuses the memory cell on reverse entry", () => {
@@ -178,119 +209,3 @@ describe("createBodyFocusContent", () => {
   });
 });
 
-describe("createHeaderTabHandler", () => {
-  function makeHeader(numCells: number) {
-    const header = document.createElement("div");
-    const cells: HTMLElement[] = [];
-    for (let i = 0; i < numCells; i++) {
-      const cell = document.createElement("div");
-      cell.setAttribute("role", "columnheader");
-      // Make cell focusable so activeElement tracking works
-      cell.setAttribute("tabindex", "0");
-      header.appendChild(cell);
-      cells.push(cell);
-    }
-    document.body.appendChild(header);
-    return { header, cells };
-  }
-
-  beforeEach(() => {
-    document.body.innerHTML = "";
-  });
-
-  function makeEvent() {
-    const event = new KeyboardEvent("keydown");
-    Object.defineProperty(event, "preventDefault", { value: jest.fn() });
-    return event;
-  }
-
-  it("returns 'handled' (without preventDefault) when not at boundary, forward", () => {
-    const { header, cells } = makeHeader(3);
-    cells[1].focus();
-    const handler = createHeaderTabHandler({ getTopbarElement: () => header });
-    const event = makeEvent();
-    expect(handler(event, false)).toBe("handled");
-    expect(event.preventDefault).not.toHaveBeenCalled();
-  });
-
-  it("returns 'exit' (with preventDefault) when forward Tab is at last cell", () => {
-    const { header, cells } = makeHeader(3);
-    cells[2].focus();
-    const handler = createHeaderTabHandler({ getTopbarElement: () => header });
-    const event = makeEvent();
-    expect(handler(event, false)).toBe("exit");
-    expect(event.preventDefault).toHaveBeenCalled();
-  });
-
-  it("returns 'handled' (without preventDefault) when not at boundary, reverse", () => {
-    const { header, cells } = makeHeader(3);
-    cells[1].focus();
-    const handler = createHeaderTabHandler({ getTopbarElement: () => header });
-    const event = makeEvent();
-    expect(handler(event, true)).toBe("handled");
-    expect(event.preventDefault).not.toHaveBeenCalled();
-  });
-
-  it("returns 'exit' (with preventDefault) on reverse Tab at first cell", () => {
-    const { header, cells } = makeHeader(3);
-    cells[0].focus();
-    const handler = createHeaderTabHandler({ getTopbarElement: () => header });
-    const event = makeEvent();
-    expect(handler(event, true)).toBe("exit");
-    expect(event.preventDefault).toHaveBeenCalled();
-  });
-
-  it("returns 'exit' when header element is not available", () => {
-    const handler = createHeaderTabHandler({ getTopbarElement: () => undefined });
-    const event = makeEvent();
-    expect(handler(event, false)).toBe("exit");
-    expect(event.preventDefault).toHaveBeenCalled();
-  });
-
-  it("returns 'exit' when active element is not inside the header", () => {
-    const { header } = makeHeader(3);
-    const outsideDiv = document.createElement("div");
-    document.body.appendChild(outsideDiv);
-    outsideDiv.focus();
-    const handler = createHeaderTabHandler({ getTopbarElement: () => header });
-    const event = makeEvent();
-    expect(handler(event, false)).toBe("exit");
-    expect(event.preventDefault).toHaveBeenCalled();
-  });
-
-  it("returns 'exit' when active element is not inside a columnheader cell", () => {
-    const { header } = makeHeader(3);
-    const button = document.createElement("button");
-    header.appendChild(button);
-    button.focus();
-    const handler = createHeaderTabHandler({ getTopbarElement: () => header });
-    const event = makeEvent();
-    expect(handler(event, false)).toBe("exit");
-    expect(event.preventDefault).toHaveBeenCalled();
-  });
-});
-
-describe("createHeaderEscapeHandler", () => {
-  beforeEach(() => {
-    document.body.innerHTML = "";
-  });
-
-  it("returns 'handled' when an input inside .editable-header-cell is focused", () => {
-    const cell = document.createElement("div");
-    cell.className = "editable-header-cell";
-    const input = document.createElement("input");
-    cell.appendChild(input);
-    document.body.appendChild(cell);
-    input.focus();
-    const handler = createHeaderEscapeHandler();
-    expect(handler(new KeyboardEvent("keydown"))).toBe("handled");
-  });
-
-  it("returns 'exit' when no rename input is focused", () => {
-    const btn = document.createElement("button");
-    document.body.appendChild(btn);
-    btn.focus();
-    const handler = createHeaderEscapeHandler();
-    expect(handler(new KeyboardEvent("keydown"))).toBe("exit");
-  });
-});

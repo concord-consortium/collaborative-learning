@@ -41,8 +41,6 @@ import {
   createBodyTabHandler,
   createBodyEscapeHandler,
   createBodyFocusContent,
-  createHeaderTabHandler,
-  createHeaderEscapeHandler,
 } from "./keyboard-nav";
 
 import "react-data-grid/lib/styles.css";
@@ -365,20 +363,14 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     measureColumnWidth, padding, readOnly, rowHeight, rows
   });
 
-  // Keyboard-nav helpers for the focus trap topbar (RDG header row) and content slots.
-  const getTopbarElement = useCallback((): HTMLElement | undefined => {
-    return gridRef.current?.element
-      ?.querySelector<HTMLElement>('[role="row"][aria-rowindex="1"]') ?? undefined;
-  }, []);
-
+  // Keyboard-nav helpers for the focus trap content slot. The grid covers the
+  // header row and body rows in one slot; RDG's navigate() handles header↔body
+  // transitions and the trap only intercepts at the very edges of the grid.
   const bodyDeps = { gridRef, selectedCellRef, columnsRef, rowsRef };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const bodyTabHandler = useMemo(() => createBodyTabHandler(bodyDeps), []);
-  const headerTabHandler = useMemo(
-    () => createHeaderTabHandler({ getTopbarElement }), [getTopbarElement]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const bodyEscapeHandler = useMemo(() => createBodyEscapeHandler(), []);
-  const headerEscapeHandler = useMemo(() => createHeaderEscapeHandler(), []);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const bodyFocusContent = useMemo(() => createBodyFocusContent(bodyDeps), []);
 
@@ -390,11 +382,10 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       onUnregisterTileApi,
       tileType: "table",
       titleRef,
-      getTopbarElement,
       getContentElement: () => gridRef.current?.element ?? undefined,
       focusContent: bodyFocusContent,
-      tabHandlers: { topbar: headerTabHandler, content: bodyTabHandler },
-      escapeHandlers: { topbar: headerEscapeHandler, content: bodyEscapeHandler },
+      tabHandlers: { content: bodyTabHandler },
+      escapeHandlers: { content: bodyEscapeHandler },
       additionalApi: tableApi,
     },
   });
