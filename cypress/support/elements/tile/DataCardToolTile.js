@@ -172,6 +172,7 @@ class DataCardToolTile {
     .trigger("mousedown", {force:true});
     this.getDropZone(dropStack)
     .trigger('mousemove', {force:true })
+    .wait(50)
     .trigger("mouseup", {force:true })
     .wait(1000);
   }
