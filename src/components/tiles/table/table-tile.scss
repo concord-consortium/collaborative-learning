@@ -121,30 +121,36 @@ $controls-hover-background: #c0dfe7;
         border-left: $border-style;
         border-top-left-radius: $border-radius;
         .show-hide-row-labels-button {
-          width: $index-column-width;
-          height: $row-height;
-          position: relative;
-          .hide-row-labels-icon, .show-row-labels-icon {
-            position: absolute;
-            left: 4px;
-            top: 4px;
-          }
+          // Fixed 28x28 with 2px margin: leaves room for the focus ring inside
+          // the 34px cell and keeps the button a consistent size when the cell
+          // widens to ~41px once row labels are shown.
+          // Native <button> reset so the toggle looks like the previous div;
+          // padding-top: 2px positions the icon at its previous visual offset.
+          background: transparent;
+          padding: 2px 0 0 0;
+          font: inherit;
+          color: inherit;
+          cursor: pointer;
+          border: none;
+          margin: 2px;
+          width: 28px;
+          height: 28px;
           &.shown {
             .hide-row-labels-icon { opacity: 35% }
-            .show-row-labels-icon { opacity: 0% }
+            .show-row-labels-icon { display: none }
           }
           &.hidden {
-            .hide-row-labels-icon { opacity: 0% }
+            .hide-row-labels-icon { display: none }
             .show-row-labels-icon { opacity: 35% }
           }
           &:hover {
             &.shown {
-              .hide-row-labels-icon { opacity: 0% }
-              .show-row-labels-icon { opacity: 100% }
+              .hide-row-labels-icon { display: none }
+              .show-row-labels-icon { display: inline; opacity: 100% }
             }
             &.hidden {
-              .hide-row-labels-icon { opacity: 100% }
-              .show-row-labels-icon { opacity: 0% }
+              .hide-row-labels-icon { display: inline; opacity: 100% }
+              .show-row-labels-icon { display: none }
             }
           }
         }
