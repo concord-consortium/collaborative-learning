@@ -31,7 +31,11 @@ export class DialogComponent extends BaseComponent<IProps> {
   public componentDidUpdate() {
     if (this.stores.ui.dialog) {
       if (!this.previouslyFocusedElement) {
-        // Caveat: dialogs that auto-focus a child (e.g., getCopyToDocument) capture the wrong element here.
+        // TODO (follow-up): focus capture happens in componentDidUpdate, which runs AFTER React's autoFocus on
+        // child elements. Dialogs with an auto-focused child (e.g., getCopyToDocument's <select>) capture that
+        // child instead of the element the user activated to open the dialog, so focus restoration silently
+        // no-ops on close. Proper fix: capture focus when the dialog opens (e.g., in ui.prompt/confirm/etc.)
+        // rather than after render.
         const active = document.activeElement;
         if (active instanceof HTMLElement) {
           this.previouslyFocusedElement = active;
@@ -207,8 +211,6 @@ export class DialogComponent extends BaseComponent<IProps> {
   };
 
   private handlePromptKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    // Use keydown (not keyup) so a stray keyup from the Enter that opened the dialog
-    // — which the browser dispatches on the now-focused input — doesn't auto-submit.
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       this.handlePromptDialogOk();
