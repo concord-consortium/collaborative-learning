@@ -291,7 +291,7 @@ context('Arrow Annotations (Sparrows)', function () {
     drawToolTile.getEllipseDrawing().find("ellipse").click({ force: true, scrollBehavior: false });
     clueCanvas.clickToolbarButton('drawing', 'delete'); // delete the object under the second end; arrow should remain since it was not attached.
     aa.getAnnotationArrows().should("have.length", 1);
-    drawToolTile.getRectangleDrawing().eq(0).click({ force: true, scrollBehavior: false });
+    drawToolTile.getRectangleDrawing().eq(0).find("rect").click({ force: true, scrollBehavior: false });
     clueCanvas.clickToolbarButton('drawing', 'delete'); // delete the object under the first end; arrow should be deleted.
     aa.getAnnotationArrows().should("have.length", 0);
 
