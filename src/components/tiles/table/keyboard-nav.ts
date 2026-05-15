@@ -22,21 +22,16 @@ export function isCellEditing(): boolean {
 }
 
 /**
- * Returns all focusable header controls in DOM order. Includes elements with
- * tabindex="-1" because the header uses roving tabindex — only one focusable
- * has tabindex="0" at a time, but the others are still in the navigation
- * cycle for our custom Tab handler.
+ * Returns the list of column-header cell elements in DOM order within the
+ * given header row. Used for boundary detection only: the trap exits to the
+ * adjacent slot when Tab/Shift+Tab would cross the first/last header cell.
+ * Within-row Tab is handled by RDG's native navigate() (see fix (e) design
+ * doc 2026-05-14-rdg-title-edit-focus-race-design.md).
  */
-export function getHeaderFocusables(headerEl: HTMLElement): HTMLElement[] {
-  const candidates = Array.from(
-    headerEl.querySelectorAll<HTMLElement>(
-      'button, [contenteditable="true"], [tabindex]'
-    )
+function getHeaderCells(headerEl: HTMLElement): HTMLElement[] {
+  return Array.from(
+    headerEl.querySelectorAll<HTMLElement>('[role="columnheader"]')
   );
-  return candidates.filter((el) => {
-    if (el.getAttribute("aria-hidden") === "true") return false;
-    return true;
-  });
 }
 
 /**
@@ -119,21 +114,35 @@ export function createHeaderTabHandler(deps: {
       event.preventDefault();
       return "exit";
     }
-    const focusables = getHeaderFocusables(headerEl);
-    const currentIdx = focusables.indexOf(document.activeElement as HTMLElement);
-    if (currentIdx === -1) {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement) || !headerEl.contains(active)) {
       event.preventDefault();
       return "exit";
     }
-    const nextIdx = reverse ? currentIdx - 1 : currentIdx + 1;
-    if (nextIdx < 0 || nextIdx >= focusables.length) {
+    const cell = active.closest('[role="columnheader"]') as HTMLElement | null;
+    if (!cell) {
+      // Active focus isn't inside a header cell — let the trap advance slots.
       event.preventDefault();
       return "exit";
     }
-    event.preventDefault();
-    focusables[currentIdx].setAttribute("tabindex", "-1");
-    focusables[nextIdx].setAttribute("tabindex", "0");
-    focusables[nextIdx].focus();
+    const cells = getHeaderCells(headerEl);
+    const cellIdx = cells.indexOf(cell);
+    if (cellIdx === -1) {
+      event.preventDefault();
+      return "exit";
+    }
+    const atFirstCell = cellIdx === 0;
+    const atLastCell = cellIdx === cells.length - 1;
+    if (reverse ? atFirstCell : atLastCell) {
+      event.preventDefault();
+      return "exit";
+    }
+    // Mid-row: let the event bubble to RDG's grid onKeyDown, which will
+    // call navigate() → selectCell() → focusCellOrCellContent() to focus
+    // the next cell's [tabindex="0"] inner element. We must NOT call
+    // preventDefault here, or RDG's handler will run but the browser's
+    // default Tab will already be cancelled (no observable difference, but
+    // also no harm). The "handled" return tells the trap to stop processing.
     return "handled";
   };
 }
