@@ -40,7 +40,7 @@ class DiagramToolTile {
     return cy.get('.color-editor-dialog');
   }
   getColorPicker() {
-    return cy.get('.color-editor-dialog span span');
+    return cy.get('.color-editor-dialog .w-color-circle-point');
   }
   getDiagramTileTitle(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);

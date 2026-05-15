@@ -1,6 +1,18 @@
-import { EditorValue, slateToText } from "@concord-consortium/slate-editor";
+import { createEditor, EditorValue, htmlToSlate, slateToHtml, slateToText
+} from "@concord-consortium/slate-editor";
 import { TextContentModel, kTextTileType } from "./text-content";
 import { registerTextPluginInfo } from "./text-plugin-info";
+import { registerVariables, kVariableFormat } from "../../../plugins/shared-variables/slate/variables-plugin";
+import { kHighlightFormat, registerHighlight } from "../../../plugins/text/highlights-plugin";
+
+// slate-editor v0.12 dropped registerPlugins(); its built-in element/mark
+// renderers are now registered as a side effect of createEditor() (via
+// withCoreMarks/withCoreBlocks). Call it once to trigger registration. Chip
+// deserializers must be registered AFTER, so they take precedence over
+// slate-editor's catch-all <span> deserializer (most-recent wins).
+createEditor();
+registerVariables();
+registerHighlight();
 
 const empty: EditorValue = [
   {
@@ -80,5 +92,117 @@ describe("TextContentModel", () => {
     const model = TextContentModel.create({ text: "foo" });
     model.updateAfterSharedModelChanges(undefined);
     expect(testTextPluginInfoWithUpdate.updateTextContentAfterSharedModelChanges).toHaveBeenCalled();
+  });
+});
+
+/**
+ * Walk a Slate value and return the first inline element matching `type`, or undefined.
+ */
+function findElementByType(value: any[], type: string): any | undefined {
+  for (const node of value) {
+    if (node?.type === type) return node;
+    if (Array.isArray(node?.children)) {
+      const found = findElementByType(node.children, type);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Round-trip a Slate value through the same path the authoring "save" performs:
+ * setSlate → exportJson → re-create TextContent from the exported JSON → asSlate.
+ */
+function roundTripThroughAuthoringExport(value: EditorValue): EditorValue {
+  const source = TextContentModel.create();
+  source.setSlate(value);
+  const exported = JSON.parse(source.exportJson());
+  const reloaded = TextContentModel.create({ format: exported.format, text: exported.text });
+  return reloaded.asSlate();
+}
+
+describe("TextContentModel chip serialization round-trips", () => {
+  const variableReference = "test-variable-reference-id";
+  const highlightId = "test-highlight-id";
+
+  // Variable chips are void inlines: children is a single empty text node, the chip
+  // identity is on the `reference` field. See VariablesPlugin.insertTextVariable.
+  const valueWithVariableChip: EditorValue = [{
+    type: "paragraph",
+    children: [
+      { text: "before " },
+      { type: kVariableFormat, reference: variableReference, children: [{ text: "" }] } as any,
+      { text: " after" }
+    ]
+  }];
+
+  // Highlight chips are also void inlines and use `highlightId` (not `reference`).
+  // The displayed text lives separately on textContent.highlightedText.
+  const valueWithHighlightChip: EditorValue = [{
+    type: "paragraph",
+    children: [
+      { text: "before " },
+      { type: kHighlightFormat, highlightId, children: [{ text: "" }] } as any,
+      { text: " after" }
+    ]
+  }];
+
+  it("preserves variable chip element type through slateToHtml -> htmlToSlate", () => {
+    const reloaded = htmlToSlate(slateToHtml(valueWithVariableChip));
+    expect(findElementByType(reloaded as any[], kVariableFormat)).toBeDefined();
+  });
+
+  it("preserves variable chip reference id through slateToHtml -> htmlToSlate", () => {
+    const reloaded = htmlToSlate(slateToHtml(valueWithVariableChip));
+    const chip = findElementByType(reloaded as any[], kVariableFormat);
+    expect(chip?.reference).toBe(variableReference);
+  });
+
+  it("preserves highlight chip element type through slateToHtml -> htmlToSlate", () => {
+    const reloaded = htmlToSlate(slateToHtml(valueWithHighlightChip));
+    expect(findElementByType(reloaded as any[], kHighlightFormat)).toBeDefined();
+  });
+
+  it("preserves highlight chip id through slateToHtml -> htmlToSlate", () => {
+    const reloaded = htmlToSlate(slateToHtml(valueWithHighlightChip));
+    const chip = findElementByType(reloaded as any[], kHighlightFormat);
+    expect(chip?.highlightId).toBe(highlightId);
+  });
+
+  it("preserves variable chip element type through TextContent export -> reimport", () => {
+    const reloaded = roundTripThroughAuthoringExport(valueWithVariableChip);
+    expect(findElementByType(reloaded as any[], kVariableFormat)).toBeDefined();
+  });
+
+  it("preserves variable chip reference id through TextContent export -> reimport", () => {
+    const reloaded = roundTripThroughAuthoringExport(valueWithVariableChip);
+    const chip = findElementByType(reloaded as any[], kVariableFormat);
+    expect(chip?.reference).toBe(variableReference);
+  });
+
+  it("preserves highlight chip element type through TextContent export -> reimport", () => {
+    const reloaded = roundTripThroughAuthoringExport(valueWithHighlightChip);
+    expect(findElementByType(reloaded as any[], kHighlightFormat)).toBeDefined();
+  });
+
+  it("preserves highlight chip id through TextContent export -> reimport", () => {
+    const reloaded = roundTripThroughAuthoringExport(valueWithHighlightChip);
+    const chip = findElementByType(reloaded as any[], kHighlightFormat);
+    expect(chip?.highlightId).toBe(highlightId);
+  });
+
+  it("preserves textContent.highlightedText entries through export -> reimport", () => {
+    const source = TextContentModel.create();
+    source.setSlate(valueWithHighlightChip);
+    source.addHighlight(highlightId, "notice");
+    const exported = JSON.parse(source.exportJson());
+    const reloaded = TextContentModel.create({
+      format: exported.format,
+      text: exported.text,
+      highlightedText: exported.highlightedText,
+    });
+    expect(reloaded.highlightedText.length).toBe(1);
+    expect(reloaded.highlightedText[0].id).toBe(highlightId);
+    expect(reloaded.highlightedText[0].text).toBe("notice");
   });
 });

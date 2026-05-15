@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import { AppProvider, initializeApp } from "./initialize-app";
 import { AppComponent } from "./components/app";
@@ -14,11 +14,11 @@ if (!redirectingToAuthDomain) {
   const stores = initializeApp();
   stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
 
-  ReactDOM.render(
+  const root = createRoot(document.getElementById("app")!);
+  root.render(
     <AppProvider stores={stores} modalAppElement="#app">
       <AppComponent />
-    </AppProvider>,
-    document.getElementById("app")
+    </AppProvider>
   );
   removeLoadingMessage("Initializing");
 }

@@ -1,0 +1,449 @@
+diff --git a/node_modules/react-data-grid/lib/bundle.cjs b/node_modules/react-data-grid/lib/bundle.cjs
+index 43bf414..df7fbb7 100644
+--- a/node_modules/react-data-grid/lib/bundle.cjs
++++ b/node_modules/react-data-grid/lib/bundle.cjs
+@@ -175,7 +175,7 @@ function getNextSelectedCellPosition({
+   const setHeaderGroupColAndRowSpan = () => {
+     if (moveNext) {
+       const nextColumn = columns[nextIdx];
+-      let parent = nextColumn.parent;
++      let parent = nextColumn?.parent;
+       while (parent !== undefined) {
+         const parentRowIdx = getParentRowIdx(parent);
+         if (nextRowIdx === parentRowIdx) {
+@@ -186,7 +186,7 @@ function getNextSelectedCellPosition({
+       }
+     } else if (moveUp) {
+       const nextColumn = columns[nextIdx];
+-      let parent = nextColumn.parent;
++      let parent = nextColumn?.parent;
+       let found = false;
+       while (parent !== undefined) {
+         const parentRowIdx = getParentRowIdx(parent);
+@@ -230,7 +230,7 @@ function getNextSelectedCellPosition({
+   }
+   if (nextRowIdx < mainHeaderRowIdx) {
+     const nextColumn = columns[nextIdx];
+-    let parent = nextColumn.parent;
++    let parent = nextColumn?.parent;
+     const nextParentRowIdx = nextRowIdx;
+     nextRowIdx = mainHeaderRowIdx;
+     while (parent !== undefined) {
+@@ -764,7 +764,7 @@ function useColumnWidths(columns, viewportColumns, templateColumns, gridRef, gri
+       return hasChanges ? newMeasuredColumnWidths : measuredColumnWidths;
+     });
+   }
+-  function handleColumnResize(column, nextWidth) {
++  function handleColumnResize(column, nextWidth, isComplete = false) {
+     const {
+       key: resizingKey
+     } = column;
+@@ -793,7 +793,7 @@ function useColumnWidths(columns, viewportColumns, templateColumns, gridRef, gri
+       });
+       updateMeasuredWidths(columnsToMeasure);
+     });
+-    onColumnResize?.(column.idx, measuredWidth);
++    onColumnResize?.(column.idx, measuredWidth, isComplete);
+   }
+   return {
+     gridTemplateColumns,
+@@ -1373,6 +1373,7 @@ function HeaderCell({
+       left
+     } = headerCell.getBoundingClientRect();
+     const offset = isRtl ? event.clientX - left : right - event.clientX;
++    let lastWidth = 0;
+     function onPointerMove(event) {
+       const {
+         right,
+@@ -1380,10 +1381,14 @@ function HeaderCell({
+       } = headerCell.getBoundingClientRect();
+       const width = isRtl ? right + offset - event.clientX : event.clientX + offset - left;
+       if (width > 0) {
+-        onColumnResize(column, clampColumnWidth(width, column));
++        lastWidth = clampColumnWidth(width, column);
++        onColumnResize(column, lastWidth);
+       }
+     }
+     function onLostPointerCapture() {
++      if (lastWidth > 0) {
++        onColumnResize(column, lastWidth, true);
++      }
+       currentTarget.removeEventListener('pointermove', onPointerMove);
+       currentTarget.removeEventListener('lostpointercapture', onLostPointerCapture);
+     }
+@@ -1433,7 +1438,7 @@ function HeaderCell({
+     }
+   }
+   function onDoubleClick() {
+-    onColumnResize(column, 'max-content');
++    onColumnResize(column, 'max-content', true);
+   }
+   function handleFocus(event) {
+     onFocus?.(event);
+@@ -1991,6 +1996,7 @@ function DataGrid(props, ref) {
+     rowHeight: rawRowHeight,
+     headerRowHeight: rawHeaderRowHeight,
+     summaryRowHeight: rawSummaryRowHeight,
++    columnWidths: rawColumnWidths,
+     selectedRows,
+     onSelectedRowsChange,
+     sortColumns,
+@@ -2033,15 +2039,15 @@ function DataGrid(props, ref) {
+   const direction = rawDirection ?? 'ltr';
+   const [scrollTop, setScrollTop] = react.useState(0);
+   const [scrollLeft, setScrollLeft] = react.useState(0);
+-  const [resizedColumnWidths, setResizedColumnWidths] = react.useState(() => new Map());
++  const [resizedColumnWidths, setResizedColumnWidths] = react.useState(() => new Map(rawColumnWidths));
+   const [measuredColumnWidths, setMeasuredColumnWidths] = react.useState(() => new Map());
+   const [copiedCell, setCopiedCell] = react.useState(null);
+   const [isDragging, setDragging] = react.useState(false);
+   const [draggedOverRowIdx, setOverRowIdx] = react.useState(undefined);
+   const [scrollToPosition, setScrollToPosition] = react.useState(null);
+   const getColumnWidth = react.useCallback(column => {
+-    return resizedColumnWidths.get(column.key) ?? measuredColumnWidths.get(column.key) ?? column.width;
+-  }, [measuredColumnWidths, resizedColumnWidths]);
++    return rawColumnWidths?.get(column.key) ?? resizedColumnWidths.get(column.key) ?? measuredColumnWidths.get(column.key) ?? column.width;
++  }, [measuredColumnWidths, rawColumnWidths, resizedColumnWidths]);
+   const [gridRef, gridWidth, gridHeight, horizontalScrollbarHeight] = useGridDimensions();
+   const {
+     columns,
+@@ -2239,7 +2245,7 @@ function DataGrid(props, ref) {
+       mode
+     } = selectedPosition;
+     if (mode === 'EDIT') return;
+-    if (onCellKeyDown && isRowIdxWithinViewportBounds(rowIdx)) {
++    if (onCellKeyDown && (isRowIdxWithinViewportBounds(rowIdx) || rowIdx < 0)) {
+       const row = rows[rowIdx];
+       const cellEvent = createCellEvent(event);
+       onCellKeyDown({
+@@ -2255,6 +2261,7 @@ function DataGrid(props, ref) {
+     const isCellEvent = event.target.closest('.rdg-cell') !== null;
+     const isRowEvent = isTreeGrid && event.target === focusSinkRef.current;
+     if (!isCellEvent && !isRowEvent) return;
++    if (!selectedCellIsWithinSelectionBounds) return;
+     const {
+       keyCode
+     } = event;
+@@ -2413,7 +2420,19 @@ function DataGrid(props, ref) {
+       selectedPosition: position
+     });
+   }
+-  function selectCell(position, enableEditor) {
++  // Patched (forward-port of beta.59 behavior): `shouldFocusCell` is now an
++  // opt-in third argument that defaults to false, rather than the SELECT
++  // branch unconditionally requesting a post-commit `focus()` on the new
++  // cell. Mouse-driven selectCell callers (cell/header onClick, native
++  // HeaderCell.handleFocus) leave it false — the browser's native click-focus
++  // already lands focus on the cell (`tabindex` is set on every cell), and
++  // requesting another `focus()` after the commit is both redundant and
++  // harmful when CLUE has its own editor (e.g. the table title) opening in
++  // the same tick. Keyboard-nav callers below opt in by passing `true`.
++  // Upstream replaced the `shouldFocusCellRef` machinery wholesale after
++  // beta.44 (state-based `shouldFocusCell` in beta.59+, removed entirely by
++  // canary.49); delete this hunk on upgrade.
++  function selectCell(position, enableEditor, shouldFocusCell = false) {
+     if (!isCellWithinSelectionBounds(position)) return;
+     commitEditorChanges();
+     const row = rows[position.rowIdx];
+@@ -2428,7 +2447,7 @@ function DataGrid(props, ref) {
+     } else if (samePosition) {
+       scrollIntoView(getCellToScroll(gridRef.current));
+     } else {
+-      shouldFocusCellRef.current = true;
++      shouldFocusCellRef.current = shouldFocusCell;
+       setSelectedPosition({
+         ...position,
+         mode: 'SELECT'
+@@ -2554,7 +2573,9 @@ function DataGrid(props, ref) {
+       nextPosition,
+       isCellWithinBounds: isCellWithinSelectionBounds
+     });
+-    selectCell(nextSelectedCellPosition);
++    // Patched: keyboard nav needs the post-commit focus call (no mouse event
++    // moved native focus). See `selectCell` definition above.
++    selectCell(nextSelectedCellPosition, undefined, true);
+   }
+   function getDraggedOverCellIdx(currentRowIdx) {
+     if (draggedOverRowIdx === undefined) return;
+@@ -2638,7 +2659,19 @@ function DataGrid(props, ref) {
+         }));
+       }
+     };
+-    if (rows[selectedPosition.rowIdx] !== selectedPosition.originalRow) {
++    // Patched: compare via rowKeyGetter if available so row objects that
++    // legitimately represent the same case (but as a new object reference)
++    // are not treated as stale. Falls back to ref equality when no keyGetter
++    // is set. If the selected row index is now out of bounds, treat it as
++    // stale and close the editor before invoking rowKeyGetter.
++    const currentRow = rows[selectedPosition.rowIdx];
++    const originalRow = selectedPosition.originalRow;
++    const stale = currentRow === undefined
++      ? true
++      : rowKeyGetter
++        ? rowKeyGetter(currentRow) !== rowKeyGetter(originalRow)
++        : currentRow !== originalRow;
++    if (stale) {
+       closeEditor(false);
+     }
+     return /*#__PURE__*/jsxRuntime.jsx(EditCell, {
+@@ -3171,10 +3204,11 @@ function TreeDataGrid({
+       const parentRowAndIndex = getParentRowAndIndex(row);
+       if (parentRowAndIndex !== undefined) {
+         event.preventGridDefault();
++        // Patched: keyboard nav opts into post-commit focus. See selectCell.
+         selectCell({
+           idx,
+           rowIdx: parentRowAndIndex[1]
+-        });
++        }, undefined, true);
+       }
+     }
+     if (isCtrlKeyHeldDown(event) && (event.keyCode === 67 || event.keyCode === 86)) {
+@@ -3322,5 +3356,6 @@ exports.renderSortPriority = renderSortPriority;
+ exports.renderToggleGroup = renderToggleGroup;
+ exports.renderValue = renderValue;
+ exports.textEditor = textEditor;
++exports.textEditorClassname = textEditorClassname;
+ exports.useRowSelection = useRowSelection;
+ //# sourceMappingURL=bundle.cjs.map
+diff --git a/node_modules/react-data-grid/lib/bundle.js b/node_modules/react-data-grid/lib/bundle.js
+index 0214c29..c681da5 100644
+--- a/node_modules/react-data-grid/lib/bundle.js
++++ b/node_modules/react-data-grid/lib/bundle.js
+@@ -171,7 +171,7 @@ function getNextSelectedCellPosition({
+   const setHeaderGroupColAndRowSpan = () => {
+     if (moveNext) {
+       const nextColumn = columns[nextIdx];
+-      let parent = nextColumn.parent;
++      let parent = nextColumn?.parent;
+       while (parent !== undefined) {
+         const parentRowIdx = getParentRowIdx(parent);
+         if (nextRowIdx === parentRowIdx) {
+@@ -182,7 +182,7 @@ function getNextSelectedCellPosition({
+       }
+     } else if (moveUp) {
+       const nextColumn = columns[nextIdx];
+-      let parent = nextColumn.parent;
++      let parent = nextColumn?.parent;
+       let found = false;
+       while (parent !== undefined) {
+         const parentRowIdx = getParentRowIdx(parent);
+@@ -226,7 +226,7 @@ function getNextSelectedCellPosition({
+   }
+   if (nextRowIdx < mainHeaderRowIdx) {
+     const nextColumn = columns[nextIdx];
+-    let parent = nextColumn.parent;
++    let parent = nextColumn?.parent;
+     const nextParentRowIdx = nextRowIdx;
+     nextRowIdx = mainHeaderRowIdx;
+     while (parent !== undefined) {
+@@ -760,7 +760,7 @@ function useColumnWidths(columns, viewportColumns, templateColumns, gridRef, gri
+       return hasChanges ? newMeasuredColumnWidths : measuredColumnWidths;
+     });
+   }
+-  function handleColumnResize(column, nextWidth) {
++  function handleColumnResize(column, nextWidth, isComplete = false) {
+     const {
+       key: resizingKey
+     } = column;
+@@ -789,7 +789,7 @@ function useColumnWidths(columns, viewportColumns, templateColumns, gridRef, gri
+       });
+       updateMeasuredWidths(columnsToMeasure);
+     });
+-    onColumnResize?.(column.idx, measuredWidth);
++    onColumnResize?.(column.idx, measuredWidth, isComplete);
+   }
+   return {
+     gridTemplateColumns,
+@@ -1369,6 +1369,7 @@ function HeaderCell({
+       left
+     } = headerCell.getBoundingClientRect();
+     const offset = isRtl ? event.clientX - left : right - event.clientX;
++    let lastWidth = 0;
+     function onPointerMove(event) {
+       const {
+         right,
+@@ -1376,10 +1377,14 @@ function HeaderCell({
+       } = headerCell.getBoundingClientRect();
+       const width = isRtl ? right + offset - event.clientX : event.clientX + offset - left;
+       if (width > 0) {
+-        onColumnResize(column, clampColumnWidth(width, column));
++        lastWidth = clampColumnWidth(width, column);
++        onColumnResize(column, lastWidth);
+       }
+     }
+     function onLostPointerCapture() {
++      if (lastWidth > 0) {
++        onColumnResize(column, lastWidth, true);
++      }
+       currentTarget.removeEventListener('pointermove', onPointerMove);
+       currentTarget.removeEventListener('lostpointercapture', onLostPointerCapture);
+     }
+@@ -1429,7 +1434,7 @@ function HeaderCell({
+     }
+   }
+   function onDoubleClick() {
+-    onColumnResize(column, 'max-content');
++    onColumnResize(column, 'max-content', true);
+   }
+   function handleFocus(event) {
+     onFocus?.(event);
+@@ -1987,6 +1992,7 @@ function DataGrid(props, ref) {
+     rowHeight: rawRowHeight,
+     headerRowHeight: rawHeaderRowHeight,
+     summaryRowHeight: rawSummaryRowHeight,
++    columnWidths: rawColumnWidths,
+     selectedRows,
+     onSelectedRowsChange,
+     sortColumns,
+@@ -2029,15 +2035,15 @@ function DataGrid(props, ref) {
+   const direction = rawDirection ?? 'ltr';
+   const [scrollTop, setScrollTop] = useState(0);
+   const [scrollLeft, setScrollLeft] = useState(0);
+-  const [resizedColumnWidths, setResizedColumnWidths] = useState(() => new Map());
++  const [resizedColumnWidths, setResizedColumnWidths] = useState(() => new Map(rawColumnWidths));
+   const [measuredColumnWidths, setMeasuredColumnWidths] = useState(() => new Map());
+   const [copiedCell, setCopiedCell] = useState(null);
+   const [isDragging, setDragging] = useState(false);
+   const [draggedOverRowIdx, setOverRowIdx] = useState(undefined);
+   const [scrollToPosition, setScrollToPosition] = useState(null);
+   const getColumnWidth = useCallback(column => {
+-    return resizedColumnWidths.get(column.key) ?? measuredColumnWidths.get(column.key) ?? column.width;
+-  }, [measuredColumnWidths, resizedColumnWidths]);
++    return rawColumnWidths?.get(column.key) ?? resizedColumnWidths.get(column.key) ?? measuredColumnWidths.get(column.key) ?? column.width;
++  }, [measuredColumnWidths, rawColumnWidths, resizedColumnWidths]);
+   const [gridRef, gridWidth, gridHeight, horizontalScrollbarHeight] = useGridDimensions();
+   const {
+     columns,
+@@ -2235,7 +2241,7 @@ function DataGrid(props, ref) {
+       mode
+     } = selectedPosition;
+     if (mode === 'EDIT') return;
+-    if (onCellKeyDown && isRowIdxWithinViewportBounds(rowIdx)) {
++    if (onCellKeyDown && (isRowIdxWithinViewportBounds(rowIdx) || rowIdx < 0)) {
+       const row = rows[rowIdx];
+       const cellEvent = createCellEvent(event);
+       onCellKeyDown({
+@@ -2251,6 +2257,7 @@ function DataGrid(props, ref) {
+     const isCellEvent = event.target.closest('.rdg-cell') !== null;
+     const isRowEvent = isTreeGrid && event.target === focusSinkRef.current;
+     if (!isCellEvent && !isRowEvent) return;
++    if (!selectedCellIsWithinSelectionBounds) return;
+     const {
+       keyCode
+     } = event;
+@@ -2409,7 +2416,19 @@ function DataGrid(props, ref) {
+       selectedPosition: position
+     });
+   }
+-  function selectCell(position, enableEditor) {
++  // Patched (forward-port of beta.59 behavior): `shouldFocusCell` is now an
++  // opt-in third argument that defaults to false, rather than the SELECT
++  // branch unconditionally requesting a post-commit `focus()` on the new
++  // cell. Mouse-driven selectCell callers (cell/header onClick, native
++  // HeaderCell.handleFocus) leave it false — the browser's native click-focus
++  // already lands focus on the cell (`tabindex` is set on every cell), and
++  // requesting another `focus()` after the commit is both redundant and
++  // harmful when CLUE has its own editor (e.g. the table title) opening in
++  // the same tick. Keyboard-nav callers below opt in by passing `true`.
++  // Upstream replaced the `shouldFocusCellRef` machinery wholesale after
++  // beta.44 (state-based `shouldFocusCell` in beta.59+, removed entirely by
++  // canary.49); delete this hunk on upgrade.
++  function selectCell(position, enableEditor, shouldFocusCell = false) {
+     if (!isCellWithinSelectionBounds(position)) return;
+     commitEditorChanges();
+     const row = rows[position.rowIdx];
+@@ -2424,7 +2443,7 @@ function DataGrid(props, ref) {
+     } else if (samePosition) {
+       scrollIntoView(getCellToScroll(gridRef.current));
+     } else {
+-      shouldFocusCellRef.current = true;
++      shouldFocusCellRef.current = shouldFocusCell;
+       setSelectedPosition({
+         ...position,
+         mode: 'SELECT'
+@@ -2550,7 +2569,9 @@ function DataGrid(props, ref) {
+       nextPosition,
+       isCellWithinBounds: isCellWithinSelectionBounds
+     });
+-    selectCell(nextSelectedCellPosition);
++    // Patched: keyboard nav needs the post-commit focus call (no mouse event
++    // moved native focus). See `selectCell` definition above.
++    selectCell(nextSelectedCellPosition, undefined, true);
+   }
+   function getDraggedOverCellIdx(currentRowIdx) {
+     if (draggedOverRowIdx === undefined) return;
+@@ -2634,7 +2655,19 @@ function DataGrid(props, ref) {
+         }));
+       }
+     };
+-    if (rows[selectedPosition.rowIdx] !== selectedPosition.originalRow) {
++    // Patched: compare via rowKeyGetter if available so row objects that
++    // legitimately represent the same case (but as a new object reference)
++    // are not treated as stale. Falls back to ref equality when no keyGetter
++    // is set. If the selected row index is now out of bounds, treat it as
++    // stale and close the editor before invoking rowKeyGetter.
++    const currentRow = rows[selectedPosition.rowIdx];
++    const originalRow = selectedPosition.originalRow;
++    const stale = currentRow === undefined
++      ? true
++      : rowKeyGetter
++        ? rowKeyGetter(currentRow) !== rowKeyGetter(originalRow)
++        : currentRow !== originalRow;
++    if (stale) {
+       closeEditor(false);
+     }
+     return /*#__PURE__*/jsx(EditCell, {
+@@ -3167,10 +3200,11 @@ function TreeDataGrid({
+       const parentRowAndIndex = getParentRowAndIndex(row);
+       if (parentRowAndIndex !== undefined) {
+         event.preventGridDefault();
++        // Patched: keyboard nav opts into post-commit focus. See selectCell.
+         selectCell({
+           idx,
+           rowIdx: parentRowAndIndex[1]
+-        });
++        }, undefined, true);
+       }
+     }
+     if (isCtrlKeyHeldDown(event) && (event.keyCode === 67 || event.keyCode === 86)) {
+@@ -3303,5 +3337,5 @@ function textEditor({
+   });
+ }
+ 
+-export { DataGridDefaultRenderersProvider, RowComponent$1 as Row, SELECT_COLUMN_KEY, SelectCellFormatter, SelectColumn, ToggleGroup, TreeDataGrid$1 as TreeDataGrid, DataGrid$1 as default, renderCheckbox, renderHeaderCell, renderSortIcon, renderSortPriority, renderToggleGroup, renderValue, textEditor, useRowSelection };
++export { DataGridDefaultRenderersProvider, RowComponent$1 as Row, SELECT_COLUMN_KEY, SelectCellFormatter, SelectColumn, ToggleGroup, TreeDataGrid$1 as TreeDataGrid, DataGrid$1 as default, renderCheckbox, renderHeaderCell, renderSortIcon, renderSortPriority, renderToggleGroup, renderValue, textEditor, textEditorClassname, useRowSelection };
+ //# sourceMappingURL=bundle.js.map
+diff --git a/node_modules/react-data-grid/lib/index.d.ts b/node_modules/react-data-grid/lib/index.d.ts
+index 4b927bd..c6ffa4e 100644
+--- a/node_modules/react-data-grid/lib/index.d.ts
++++ b/node_modules/react-data-grid/lib/index.d.ts
+@@ -196,6 +196,10 @@ export declare interface DataGridProps<R, SR = unknown, K extends Key = Key> ext
+      * @default 35
+      */
+     summaryRowHeight?: Maybe<number>;
++    /**
++     * The client-managed width of each column in pixels
++     */
++    columnWidths?: Maybe<ReadonlyMap<string, number>>;
+     /**
+      * Feature props
+      */
+@@ -225,7 +229,7 @@ export declare interface DataGridProps<R, SR = unknown, K extends Key = Key> ext
+     /** Called when the grid is scrolled */
+     onScroll?: Maybe<(event: React.UIEvent<HTMLDivElement>) => void>;
+     /** Called when a column is resized */
+-    onColumnResize?: Maybe<(idx: number, width: number) => void>;
++    onColumnResize?: Maybe<(idx: number, width: number, isComplete?: boolean) => void>;
+     /** Called when a column is reordered */
+     onColumnsReorder?: Maybe<(sourceColumnKey: string, targetColumnKey: string) => void>;
+     /**
+@@ -439,6 +443,8 @@ export declare type SortDirection = 'ASC' | 'DESC';
+ 
+ export declare function textEditor<TRow, TSummaryRow>({ row, column, onRowChange, onClose }: RenderEditCellProps<TRow, TSummaryRow>): JSX_2.Element;
+ 
++export declare const textEditorClassname: string;
++
+ export declare function ToggleGroup<R, SR>({ groupKey, isExpanded, tabIndex, toggleGroup }: RenderGroupCellProps<R, SR>): JSX_2.Element;
+ 
+ export declare const TreeDataGrid: <R, SR = unknown, K extends Key = Key>(props: TreeDataGridProps<R, SR, K> & RefAttributes<DataGridHandle>) => JSX.Element;

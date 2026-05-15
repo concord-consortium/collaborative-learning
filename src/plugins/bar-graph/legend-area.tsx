@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Menu, MenuButton, MenuItem, MenuList, Portal } from '../../components/chakra-menu';
+import { Menu, MenuButton, MenuItem, MenuList, Portal } from '@chakra-ui/react';
 import { useBarGraphModelContext } from './bar-graph-content-context';
 import { LegendColorRow } from './legend-color-row';
 
@@ -14,7 +14,7 @@ import { useTileModelContext } from '../../components/tiles/hooks/use-tile-model
 import { getSharedModelManager } from '../../models/tiles/tile-environment';
 
 interface IProps {
-  legendRef: React.RefObject<HTMLDivElement>;
+  legendRef: React.Ref<HTMLDivElement>;
 }
 
 export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {

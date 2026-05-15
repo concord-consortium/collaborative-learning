@@ -1,4 +1,5 @@
 @import "../vars";
+@import "../mixins";
 
 .doc-group {
   align-items: center;
@@ -62,6 +63,7 @@
   margin: 0;
   padding: 0;
   width: 16px;
+  @include focus-ring(2px);
 
   &.scroll-left {
     margin-right: 10px;

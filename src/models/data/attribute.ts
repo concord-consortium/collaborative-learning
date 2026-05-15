@@ -1,5 +1,5 @@
 import {Instance, SnapshotIn, types} from "mobx-state-tree";
-import { Formula } from "@concord-consortium/codap-formulas-react17/models/formula/formula";
+import { Formula } from "@concord-consortium/codap-formulas/models/formula/formula";
 import { typedId } from "../../utilities/js-utils";
 import { IValueType, ValueType, isDate, isImageUrl, isNumeric, toNumeric } from "./data-types";
 

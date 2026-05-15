@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { mode } from "@chakra-ui/theme-tools";
 import { DocEditorApp } from "./components/doc-editor/doc-editor-app";
@@ -35,13 +35,13 @@ theme.styles.global = undefined;
 
 // Need wait for the unit to be loaded to safely render the components
 stores.unitLoadedPromise.then(() => {
-  ReactDOM.render(
+  const root = createRoot(document.getElementById("app")!);
+  root.render(
     <ChakraProvider theme={theme} resetCSS={false}>
       <AppProvider stores={stores} modalAppElement="#app">
         <DocEditorApp/>
         <DialogComponent/>
       </AppProvider>
-    </ChakraProvider>,
-    document.getElementById("app")
+    </ChakraProvider>
   );
 });

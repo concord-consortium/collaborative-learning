@@ -28,8 +28,10 @@ export const useControlsColumn = ({
   }, [addColumnTooltipOptions, onAddColumn, readOnly]);
 
   const removeRowTooltipOptions = useTooltipOptions({ title: "Remove row", distance: kTooltipDistance });
-  const ControlsRowFormatter: React.FC<TFormatterProps> = useCallback(({ rowIdx, row, isRowSelected }) => {
-    const showRemoveButton = !readOnly && (isRowSelected || row.__context__.isSelectedCellInRow(rowIdx));
+  // beta.44's RenderCellProps no longer includes isRowSelected; the row's own context tracks
+  // selection state for our purposes (a selected row also has a selected cell in it).
+  const ControlsRowFormatter: React.FC<TFormatterProps> = useCallback(({ rowIdx, row }) => {
+    const showRemoveButton = !readOnly && row.__context__.isSelectedCellInRow(rowIdx);
     return showRemoveButton
             ? <Tooltip {...removeRowTooltipOptions}>
                 <RemoveRowButton rowId={row.__id__} onRemoveRow={onRemoveRow} />
@@ -40,8 +42,12 @@ export const useControlsColumn = ({
 
   useEffect(() => {
     if (controlsColumn) {
-      controlsColumn.headerRenderer = ControlsHeaderRenderer;
-      controlsColumn.formatter = ControlsRowFormatter;
+      // beta.44 marked Column.renderHeaderCell / renderCell as readonly. We mutate them here
+      // because controlsColumn is created in a sibling hook before these renderers are known;
+      // the cast preserves the existing initialize-then-attach pattern.
+      const mutableColumn = controlsColumn as { -readonly [K in keyof TColumn]: TColumn[K] };
+      mutableColumn.renderHeaderCell = ControlsHeaderRenderer;
+      mutableColumn.renderCell = ControlsRowFormatter;
       triggerColumnChange();
     }
   }, [controlsColumn, ControlsHeaderRenderer, ControlsRowFormatter, triggerColumnChange]);

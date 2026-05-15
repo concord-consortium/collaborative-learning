@@ -4,7 +4,7 @@ import { IObjectDidChange, observable, observe, reaction, runInAction } from "mo
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
-import { SizeMeProps } from "react-sizeme";
+import { SizeProps } from "../../../utilities/size-props";
 import classNames from "classnames";
 
 import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth, zoomFactor } from "./geometry-constants";
@@ -73,7 +73,7 @@ export interface IGeometryContentProps extends IGeometryProps {
   onSetActionHandlers?: (handlers: IActionHandlers) => void;
   onContentChange?: () => void;
 }
-export interface IProps extends IGeometryContentProps, SizeMeProps {
+export interface IProps extends IGeometryContentProps, SizeProps {
   measureText: (text: string) => number;
   showAllContent?: boolean;
   tileNavigatorContext: ITileNavigatorContext;
@@ -84,7 +84,7 @@ type Mutable<T> = {
   -readonly [P in keyof T]: T[P]
 };
 
-interface IState extends Mutable<SizeMeProps> {
+interface IState extends Mutable<SizeProps> {
   scale?: number;
   board?: JXG.Board;
   content?: GeometryContentModelType;

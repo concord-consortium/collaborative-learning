@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { isAlive } from "mobx-state-tree";
 import escapeStringRegexp from "escape-string-regexp";
@@ -83,6 +83,16 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [textLinesNeeded, setTextLinesNeeded] = useState(measureTextLines(getName(), 120));
   const editingName = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
+  const nameInputRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // When the name textarea enters edit mode, focus it and select its content
+  // so a keypress (or cy.type) replaces the existing name rather than appending.
+  useEffect(() => {
+    if (editingName && nameInputRef.current) {
+      nameInputRef.current.focus();
+      nameInputRef.current.select();
+    }
+  }, [editingName]);
 
   const validCompletions = useCallback((aValues: string[], userString: string) => {
     const values = uniq(aValues).sort();
@@ -350,6 +360,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       <div className={nameAreaClasses} onClick={handleNameClick}>
         { !readOnly && editingName
           ? <textarea
+              ref={nameInputRef}
               className={nameInputClasses}
               value={nameCandidate}
               onChange={handleNameChange}

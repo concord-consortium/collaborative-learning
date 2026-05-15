@@ -39,12 +39,20 @@ export const DrawingMigrator = types.snapshotProcessor(DrawingContentModel, {
         migrated.objects = [];
       }
       migrated.objects.forEach((obj: any) => {
-        if (obj.type === "group") {
-          // We can't determine proper values for height and width until the models are instantiated,
-          // so we set them to 0. The next step happens in `DrawingContentModel.afterCreate`.
+        // Only migrate groups that actually look v1.0.0. The v1.0.0 marker is
+        // `objectExtents` (which the migration drops); a group lacking width/height
+        // is also a v1.0.0 indicator (those properties were introduced in v1.1.0).
+        // Without this guard, an unversioned snapshot from a v1.1.0 export — whose
+        // groups already have valid width/height — would have those zeroed out,
+        // and `GroupObject.afterCreate` would re-derive them from the children's
+        // (now relative) positions, collapsing the group to width=1, height=1.
+        const looksV1 = obj.type === "group" && ("objectExtents" in obj || obj.width == null);
+        if (looksV1) {
           if ("objectExtents" in obj) {
             delete obj.objectExtents;
           }
+          // We can't determine proper values for height and width until the models are instantiated,
+          // so we set them to 0. The next step happens in `DrawingContentModel.afterCreate`.
           obj.width = 0;
           obj.height = 0;
         }

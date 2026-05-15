@@ -1,3 +1,4 @@
+import { createEditor } from "@concord-consortium/slate-editor";
 import { IDocumentExportOptions } from "../../tiles/tile-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType } from "../document-content";
@@ -34,8 +35,10 @@ export { mockUniqueId };
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../../register-tile-types";
 registerTileTypes(["Drawing", "Geometry", "Image", "Table", "Text"]);
-import { registerPlugins } from "@concord-consortium/slate-editor";
-registerPlugins();
+// slate-editor v0.12 dropped registerPlugins(); registrations now happen as side effects
+// of createEditor() (via withCoreMarks/withCoreBlocks/etc.). Trigger them once so tests
+// can serialize Slate values without first instantiating an editor.
+createEditor();
 
 export function prepareTileForMatch(tile: any) {
   if (tile?.content?.type === "Geometry") {

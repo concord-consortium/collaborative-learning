@@ -2,8 +2,6 @@ import React from "react";
 import { observable, runInAction } from "mobx";
 import { getSnapshot } from "mobx-state-tree";
 import { inject, observer } from "mobx-react";
-import { SizeMeProps } from "react-sizeme";
-
 import { BaseComponent } from "../../../components/base";
 import { DataflowContentModel, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
@@ -37,7 +35,7 @@ export interface IDataflowProgramApi {
   getObjectBoundingBox: (objectId: string, objectType?: string) => ObjectBoundingBox | undefined;
 }
 
-interface IProps extends SizeMeProps {
+interface IProps {
   documentProperties?: { [key: string]: string };
   tileId?: string;
   program?: DataflowProgramModelType;
@@ -192,12 +190,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   // Routes ArrowKey / Escape / Tab to the rete manager's connection-mode state machine.
   // Registered as a document capture-phase listener (rather than a React onKeyDown
   // on the program container) because the focus trap's own document capture-phase
-  // listener calls `stopPropagation` for Escape — that swallows the event before it
-  // reaches React's bubble-phase handlers and exits the trap instead of cancelling
-  // the in-flight connection. Children mount before parents, so this listener is
-  // registered before the trap's (which lives on the parent TileComponent) and
-  // fires first in capture order. We `stopPropagation` so the trap never sees these
-  // keys while a connection is in flight.
+  // listener handles Escape by exiting the trap (which refocuses the tile
+  // container) — that would override our refocus to the source socket. Children
+  // mount before parents, so this listener is registered before the trap's (which
+  // lives on the parent TileComponent) and fires first in capture order. We use
+  // `stopImmediatePropagation` for Escape because the trap controller's listener
+  // is a sibling document-capture listener; plain `stopPropagation` would not
+  // prevent it from also seeing the event.
   private handleConnectingKeyDown = (e: KeyboardEvent) => {
     const reteManager = this.reteManager;
     if (!reteManager?.isConnecting) return;
@@ -229,7 +228,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         break;
       case "Escape":
         e.preventDefault();
-        e.stopPropagation();
+        e.stopImmediatePropagation();
         reteManager.cancelConnecting();
         break;
       case "Tab":

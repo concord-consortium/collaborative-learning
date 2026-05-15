@@ -49,7 +49,10 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [sourcePoint, setSourcePoint] = useState<Point | undefined>();
   const [mouseX, setMouseX] = useState<number | undefined>();
   const [mouseY, setMouseY] = useState<number | undefined>();
-  const [isBackgroundClick, setIsBackgroundClick] = useState(false);
+  // Ref (not useState) because mousedown sets this flag and the subsequent click
+  // handler reads it within the same tick — under React 18 createRoot batching, a
+  // useState update from mousedown wouldn't be visible to the click closure.
+  const isBackgroundClickRef = useRef(false);
   // Use `setLayoutTick` to force a post-layout render (e.g., after tiles/rows change).
   const [_layoutTick, setLayoutTick] = useState(0);
   const divRef = useRef<Element|null>(null);
@@ -161,7 +164,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     // followed by a mouseup, a click event is sent to the AnnotationLayer. But we don't want to
     // consider that as a real background click & initiate drawing a sparrow.
     const isBackground = (event.target instanceof SVGElement) && event.target.classList.contains('annotation-svg');
-    setIsBackgroundClick(isBackground);
+    isBackgroundClickRef.current = isBackground;
   };
 
   const handleMouseMove = (event: { clientX: number, clientY: number }) => {
@@ -363,8 +366,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   };
 
   const handleBackgroundClick: MouseEventHandler<HTMLDivElement> = event => {
-    if (!isBackgroundClick) return;
-    setIsBackgroundClick(false); // reset for next time.
+    if (!isBackgroundClickRef.current) return;
+    isBackgroundClickRef.current = false; // reset for next time.
 
     // Update the mouseX and mouseY state based on this new event
     handleMouseMove(event);

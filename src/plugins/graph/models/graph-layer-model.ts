@@ -59,7 +59,9 @@ export const GraphLayerModel = types
       this.updateAdornments(true);
     },
     autoAssignAttributeID(place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string) {
-      this.setAttributeID(role, dataSetID, attrID);
+      // Auto-assignment is system-initiated, so don't mark the attribute as selected.
+      self.config.setAttributeForRole(role, { attributeID: attrID }, false);
+      this.updateAdornments(true);
       self.autoAssignedAttributes.push({ place, role, dataSetID, attrID });
     },
     clearAutoAssignedAttributes() {

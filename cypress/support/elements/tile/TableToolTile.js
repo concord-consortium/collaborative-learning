@@ -9,6 +9,19 @@ class TableToolTile{
     getTableTitle(workspaceClass){
       return cy.get(`${wsclass(workspaceClass)} .canvas .table-title`);
     }
+    getTableTitleInput(workspaceClass){
+      return cy.get(`${wsclass(workspaceClass)} .canvas .table-title input`);
+    }
+    enterTableTitle(title, workspaceClass){
+      // Wait briefly so rdg's mount-time auto-focus finishes before we click —
+      // otherwise the title click can race with rdg's `shouldFocusGrid` self-focus
+      // and edit mode never opens. The chained `.type()` re-queries the input
+      // separately so React 18's state-update batching can't race ahead of the
+      // input mounting.
+      cy.wait(300);
+      this.getTableTitle(workspaceClass).realClick();
+      this.getTableTitleInput(workspaceClass).type(`${title}{enter}`);
+    }
     getAddColumnButton(){
       return cy.get('.add-column-button');
     }
@@ -31,7 +44,14 @@ class TableToolTile{
       return cy.get('.primary-workspace .column-header-cell .editable-header-cell');
     }
     renameColumn(column, title){
-      this.getColumnHeader().contains(column).dblclick();
+      // EditableHeaderCell.handleClick gates edit-mode on the column already being
+      // selected: the first click selects, a subsequent click enters edit. cypress's
+      // `.dblclick()` fires both click events too quickly for React 18 to flush the
+      // selection state between them, so the second click still sees "not selected"
+      // and the editor never opens. Two separate `.click()` invocations give React a
+      // commit between them. (CLUE-521 covers the underlying UX wart in production.)
+      this.getColumnHeader().contains(column).click();
+      this.getColumnHeader().contains(column).click();
       cy.get('.column-header-cell .editable-header-cell input').type(title+'{enter}');
     }
     removeRow(i){
@@ -69,47 +89,24 @@ class TableToolTile{
         return cy.get('.rdg-text-editor');
     }
     typeInTableCellXY(row, col, text) {
-      // Previous versions of this logic have been flakey.
-      // The cell editor sometimes would not open.
-      // A single click after the cell was selected only worked sometimes.
-      // A double click after the cell was selected worked more often, but still
-      // failed sometimes.
-      // Now it is using a `type('{enter}')`, which has always worked so far.
-      // The invoke was added so we'd have a log of whether the cell is selected
-      // or not at this point.
-      this.getTableCellXY(row, col).invoke('attr', 'aria-selected').then(selected => {
-        if (selected !== 'true') {
-          this.getTableCellXY(row, col).click({ scrollBehavior: false });
-          this.getTableCellXY(row, col).should('have.attr', 'aria-selected', 'true');
-          cy.wait(100);
-        }
-        // The .rdg-focus-sink element is how RDG handles typing. It is a single
-        // element for the whole table, and then RDG routes any keyboard events
-        // to the selected cell.
-        // NOTE: because there might be multiple tables in the app, it is often
-        // necessary to wrap the call to typeInTableCellXY in a `within`. Other
-        // cypress actions in this helper don't require this because they filter
-        // non-visible elements. But since the rdg-focus-sink is not visible we
-        // have to use `{ force: true }` so then the `type` action tries to run
-        // on all of the rdg-focus-sink elements.
-        cy.get('.rdg-focus-sink').type('{enter}', { force: true });
-        cy.document().within(() => {
-          this.getTableCellEdit().type(`${text}{enter}`, { scrollBehavior: false });
-        });
+      // In react-data-grid beta.44, a double-click on a cell calls
+      // `selectCellWrapper(true)` which enters EDIT mode. (CODAPv3, which uses
+      // the same rdg version, takes the same approach in its case-table specs.)
+      // The previous focus-sink-based approach no longer applies because beta.44
+      // only renders `.rdg-focus-sink` for tree grids.
+      this.getTableCellXY(row, col).dblclick({ scrollBehavior: false });
+      cy.wait(100); // wait for the editor to mount
+      cy.document().within(() => {
+        this.getTableCellEdit().type(`${text}{enter}`, { scrollBehavior: false });
       });
     }
     typeInTableCell(i, text, confirm=true) {
       const confirmation = confirm ? '{enter}' : '';
-      this.getTableCell().eq(i).then($cell => {
-        if ($cell.attr('aria-selected') !== 'true') {
-          this.getTableCell().eq(i).click({ scrollBehavior: false });
-          this.getTableCell().eq(i).should('have.attr', 'aria-selected', 'true');
-          cy.wait(100);
-        }
-        this.getTableCell().eq(i).click({ scrollBehavior: false });
-        return cy.document().within(() => {
-          this.getTableCellEdit().type(`${text}${confirmation}`, { scrollBehavior: false });
-        });
+      // Same beta.44 dblclick-to-edit pattern as `typeInTableCellXY` above.
+      this.getTableCell().eq(i).dblclick({ scrollBehavior: false });
+      cy.wait(100); // wait for the editor to mount
+      return cy.document().within(() => {
+        this.getTableCellEdit().type(`${text}${confirmation}`, { scrollBehavior: false });
       });
     }
     typeExpressionInDialog(expression) {
@@ -124,7 +121,24 @@ class TableToolTile{
         // return cy.get('.rdg-row .rdg-cell[aria-colindex=\"' + colIndex + '\"]');
     }
     getTableCellWithRowColIndex(rowIndex, colIndex){
-      return cy.get('.rdg-row').eq(rowIndex).find('.rdg-cell[aria-colindex="' + colIndex + '"]');
+      // rdg beta.44 virtualizes off-screen rows, so a row past the visible window
+      // isn't in the DOM and `.eq(rowIndex)` won't find it. Scroll the grid so the
+      // target row index will be inside the rendered window, then query by the
+      // absolute `aria-rowindex` instead of `.eq` (which is relative to whatever
+      // rows happen to be rendered right now). aria-rowindex matches the data
+      // row index +2 (header occupies rowindex 1).
+      // Scope to `.primary-workspace` so the doc-editor's read-only mirror panes
+      // (which render the same grid) don't get picked up alongside the primary.
+      cy.get('.primary-workspace .rdg').then($rdg => {
+        const grid = $rdg[0];
+        // Use the actual rendered row height when available; fall back to a sensible
+        // default. Centering the target in the viewport gives rdg's buffer room on
+        // both sides so the row is rendered after the scroll.
+        const sample = grid.querySelector('.rdg-row');
+        const rowHeight = (sample && sample.getBoundingClientRect().height) || 30;
+        grid.scrollTop = Math.max(0, rowIndex * rowHeight - grid.clientHeight / 2);
+      });
+      return cy.get(`.primary-workspace .rdg-row[aria-rowindex=${rowIndex + 2}] .rdg-cell[aria-colindex="${colIndex}"]`);
     }
     enterData(cell, num){
         this.getTableCell().eq(cell).type(num+'{enter}');

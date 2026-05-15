@@ -87,12 +87,11 @@ $controls-hover-background: #c0dfe7;
   }
 
   .rdg {
-    --color: #{$charcoal-dark-2};
-    --border-color: #{$charcoal-light-1};
-    --header-background-color: #{$header-color};
-    --header-selected-background-color: #{$highlight-blue-50};
-    --row-selected-background-color: #{$highlight-blue-25};
-    --selection-color: #{$highlight-blue};
+    --rdg-color: #{$charcoal-dark-2};
+    --rdg-border-color: #{$charcoal-light-1};
+    --rdg-header-background-color: #{$header-color};
+    --rdg-row-selected-background-color: #{$highlight-blue-25};
+    --rdg-selection-color: #{$highlight-blue};
 
     width: calc(var(--row-width) + #{$platform-scrollbar-width});
     max-width: calc(100% + #{$table-padding});
@@ -110,6 +109,12 @@ $controls-hover-background: #c0dfe7;
     }
 
     .rdg-header-row {
+      // Suppress rdg's aria-selected outline on header cells: CLUE manages column
+      // selection separately (via the .selected-column class), and rdg's outline
+      // appears whenever its internal selectedPosition lands on a header.
+      .rdg-cell[aria-selected='true'] {
+        outline: none;
+      }
       .index-column-header {
         min-width: $index-column-width;
         padding: 0;
@@ -209,7 +214,7 @@ $controls-hover-background: #c0dfe7;
           }
         }
         .has-expression {
-          background-color: var(--row-selected-background-color);
+          background-color: var(--rdg-row-selected-background-color);
         }
         &.input-row {
           .index-column {
@@ -296,7 +301,7 @@ $controls-hover-background: #c0dfe7;
     .index-column {
       min-width: $index-column-width;
       padding: 0;
-      background-color: var(--header-background-color);
+      background-color: var(--rdg-header-background-color);
       font-weight: bold;
       font-style: italic;
       .index-cell-wrapper {
