@@ -19,10 +19,10 @@ export const useControlsColumn = ({
 
   const kTooltipDistance = -35; // required to get tooltip to line up just below the cell
   const addColumnTooltipOptions = useTooltipOptions({ title: "Add column", distance: kTooltipDistance });
-  const ControlsHeaderRenderer: React.FC = useCallback(() => {
+  const ControlsHeaderRenderer: React.FC<{ tabIndex?: number }> = useCallback(({ tabIndex }) => {
     return !readOnly
             ? <Tooltip {...addColumnTooltipOptions}>
-                <AddColumnButton onAddColumn={onAddColumn} />
+                <AddColumnButton onAddColumn={onAddColumn} tabIndex={tabIndex ?? -1} />
               </Tooltip>
             : null;
   }, [addColumnTooltipOptions, onAddColumn, readOnly]);
@@ -55,13 +55,15 @@ export const useControlsColumn = ({
 
 interface IAddColumnButtonProps {
   onAddColumn?: () => void;
+  tabIndex?: number;
 }
-const AddColumnButton: React.FC<IAddColumnButtonProps> = ({ onAddColumn }) => {
+const AddColumnButton: React.FC<IAddColumnButtonProps> = ({ onAddColumn, tabIndex }) => {
   return (
     <button
       type="button"
       className="add-column-button"
       aria-label="Add column"
+      tabIndex={tabIndex ?? -1}
       onClick={() => onAddColumn?.()}
     >
       <AddColumnSvg className="add-column-icon"/>
