@@ -236,15 +236,8 @@ context('Geometry Table Integration', function () {
 
     // Add a new point to the table
     cy.get(".primary-workspace").within((workspace) => {
-      tableToolTile.getTableCell().eq(9).click();
-      cy.wait(500);
-      tableToolTile.getTableCell().eq(9).click().type(x[2] + '{enter}');
-      tableToolTile.getTableCell().eq(10).click();
-      tableToolTile.getTableCell().eq(10).type(y[2] + '{enter}');
-      // The first .type here stopped working, so we have to do it twice.
-      tableToolTile.getTableCell().eq(9).click();
-      tableToolTile.getTableCell().eq(9).type(x[2] + '{enter}');
-      tableToolTile.getTableCell().eq(13).click();
+      tableToolTile.typeInTableCell(9, x[2]);
+      tableToolTile.typeInTableCell(10, y[2]);
     });
 
     // The new point should only appear in the first copied geometry tile, so we now have a total of five
