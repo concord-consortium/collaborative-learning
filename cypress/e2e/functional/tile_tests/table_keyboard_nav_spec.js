@@ -113,16 +113,58 @@ context('Table Tile Keyboard Navigation', function () {
     cy.get('.modal-title').should('not.exist');
 
     // -------------------------------------------------------------------------
-    // Tab cycle smoke test. Run before the rename test — the rename
-    // sequence leaves the trap in a state where the next Tab moves focus
-    // outside the trap entirely (likely a stale slotIndex), so this would
-    // fail if we did it after.
+    // Tab cycle: after fix (e), Tab moves cell-by-cell across the header
+    // (RDG-driven). Each cell's entry focus target is the primary inner
+    // control (.show-hide-row-labels-button for the index cell, .header-name
+    // for data columns, .add-column-button for the controls cell). Arrow
+    // Left/Right rove between siblings within a multi-control cell.
     // -------------------------------------------------------------------------
-    cy.log('Tab cycle: Tab from a focused header control stays in the header row');
+    cy.log('Tab cycle: Tab from .header-name(0) advances to .header-name(1) in col 2');
     cy.get('.primary-workspace .column-header-cell .editable-header-cell .header-name').eq(0).focus();
     cy.focused().closest('[role="row"][aria-rowindex="1"]').should('exist');
     cy.realPress('Tab');
-    cy.focused().closest('[role="row"][aria-rowindex="1"]').should('exist');
+    cy.focused().should('have.class', 'header-name');
+    cy.get('.primary-workspace .column-header-cell .editable-header-cell .header-name').eq(1)
+      .should('be.focused');
+
+    cy.log('Intra-cell roving: Arrow Right moves from .header-name to .remove-column-button');
+    // Col 1 has data → .remove-column-button is rendered when selected.
+    cy.get('.primary-workspace .column-header-cell').eq(1).should('have.class', 'selected-column');
+    cy.realPress('ArrowRight');
+    cy.get('.primary-workspace .column-header-cell').eq(1).find('.remove-column-button')
+      .should('be.focused');
+
+    cy.log('Intra-cell roving: Arrow Right from .remove-column-button moves to .sort-column-button');
+    cy.realPress('ArrowRight');
+    cy.get('.primary-workspace .column-header-cell').eq(1).find('.sort-column-button')
+      .should('be.focused');
+
+    cy.log('Intra-cell roving: Arrow Right at the last sibling stays put');
+    cy.realPress('ArrowRight');
+    cy.get('.primary-workspace .column-header-cell').eq(1).find('.sort-column-button')
+      .should('be.focused');
+
+    cy.log('Intra-cell roving: Arrow Left moves back through siblings');
+    cy.realPress('ArrowLeft');
+    cy.get('.primary-workspace .column-header-cell').eq(1).find('.remove-column-button')
+      .should('be.focused');
+    cy.realPress('ArrowLeft');
+    cy.get('.primary-workspace .column-header-cell').eq(1).find('.header-name')
+      .should('be.focused');
+    cy.realPress('ArrowLeft');
+    cy.get('.primary-workspace .column-header-cell').eq(1).find('.header-name')
+      .should('be.focused');
+
+    cy.log('Tab away then Tab back resets entry to .header-name (no persistent roving state)');
+    cy.realPress('ArrowRight'); // rove to .remove-column-button
+    cy.get('.primary-workspace .column-header-cell').eq(1).find('.remove-column-button')
+      .should('be.focused');
+    cy.realPress(['Shift', 'Tab']); // back to col 0
+    cy.get('.primary-workspace .column-header-cell .editable-header-cell .header-name').eq(0)
+      .should('be.focused');
+    cy.realPress('Tab'); // forward to col 1 again
+    cy.get('.primary-workspace .column-header-cell').eq(1).find('.editable-header-cell .header-name')
+      .should('be.focused'); // .header-name, NOT .remove-column-button — entry always resets.
 
     cy.log('Tab cycle: Shift+Tab from toolbar moves focus into the grid body');
     // Toolbar is portaled to document root. Filter to the enabled (non-
