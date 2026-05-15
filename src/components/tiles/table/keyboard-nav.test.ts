@@ -1,4 +1,12 @@
-import { isCellEditing, getHeaderFocusables, createBodyTabHandler, createBodyEscapeHandler, createBodyFocusContent, createHeaderTabHandler, createHeaderEscapeHandler, type CellPosition } from "./keyboard-nav";
+import {
+  isCellEditing,
+  createBodyTabHandler,
+  createBodyEscapeHandler,
+  createBodyFocusContent,
+  createHeaderTabHandler,
+  createHeaderEscapeHandler,
+  type CellPosition,
+} from "./keyboard-nav";
 
 describe("isCellEditing", () => {
   beforeEach(() => {
@@ -30,34 +38,6 @@ describe("isCellEditing", () => {
   });
 });
 
-describe("getHeaderFocusables", () => {
-  beforeEach(() => {
-    document.body.innerHTML = "";
-  });
-
-  it("includes buttons with tabindex=-1 (roving tabindex)", () => {
-    const header = document.createElement("div");
-    const b1 = document.createElement("button");
-    b1.setAttribute("tabindex", "0");
-    const b2 = document.createElement("button");
-    b2.setAttribute("tabindex", "-1");
-    header.appendChild(b1);
-    header.appendChild(b2);
-    document.body.appendChild(header);
-    expect(getHeaderFocusables(header)).toEqual([b1, b2]);
-  });
-
-  it("skips elements with aria-hidden=true", () => {
-    const header = document.createElement("div");
-    const b1 = document.createElement("button");
-    const b2 = document.createElement("button");
-    b2.setAttribute("aria-hidden", "true");
-    header.appendChild(b1);
-    header.appendChild(b2);
-    document.body.appendChild(header);
-    expect(getHeaderFocusables(header)).toEqual([b1]);
-  });
-});
 
 describe("createBodyTabHandler", () => {
   function makeDeps(opts: {
@@ -199,19 +179,19 @@ describe("createBodyFocusContent", () => {
 });
 
 describe("createHeaderTabHandler", () => {
-  function makeHeader(numButtons: number, activeIdx: number) {
+  function makeHeader(numCells: number) {
     const header = document.createElement("div");
-    const buttons: HTMLButtonElement[] = [];
-    for (let i = 0; i < numButtons; i++) {
-      const btn = document.createElement("button");
-      btn.setAttribute("tabindex", i === activeIdx ? "0" : "-1");
-      jest.spyOn(btn, "focus");
-      header.appendChild(btn);
-      buttons.push(btn);
+    const cells: HTMLElement[] = [];
+    for (let i = 0; i < numCells; i++) {
+      const cell = document.createElement("div");
+      cell.setAttribute("role", "columnheader");
+      // Make cell focusable so activeElement tracking works
+      cell.setAttribute("tabindex", "0");
+      header.appendChild(cell);
+      cells.push(cell);
     }
     document.body.appendChild(header);
-    buttons[activeIdx]?.focus();
-    return { header, buttons };
+    return { header, cells };
   }
 
   beforeEach(() => {
@@ -224,48 +204,69 @@ describe("createHeaderTabHandler", () => {
     return event;
   }
 
-  it("advances tabindex and focuses next control, returns 'handled'", () => {
-    const { header, buttons } = makeHeader(3, 0);
+  it("returns 'handled' (without preventDefault) when not at boundary, forward", () => {
+    const { header, cells } = makeHeader(3);
+    cells[1].focus();
     const handler = createHeaderTabHandler({ getTopbarElement: () => header });
     const event = makeEvent();
     expect(handler(event, false)).toBe("handled");
-    expect(buttons[0].getAttribute("tabindex")).toBe("-1");
-    expect(buttons[1].getAttribute("tabindex")).toBe("0");
-    expect(buttons[1].focus).toHaveBeenCalled();
-    expect(event.preventDefault).toHaveBeenCalled();
+    expect(event.preventDefault).not.toHaveBeenCalled();
   });
 
-  it("returns 'exit' when forward Tab is past the last control", () => {
-    const { header, buttons } = makeHeader(3, 2);
+  it("returns 'exit' (with preventDefault) when forward Tab is at last cell", () => {
+    const { header, cells } = makeHeader(3);
+    cells[2].focus();
     const handler = createHeaderTabHandler({ getTopbarElement: () => header });
     const event = makeEvent();
     expect(handler(event, false)).toBe("exit");
     expect(event.preventDefault).toHaveBeenCalled();
-    // Roving target unchanged on exit.
-    expect(buttons[2].getAttribute("tabindex")).toBe("0");
   });
 
-  it("retreats and focuses previous control on reverse, returns 'handled'", () => {
-    const { header, buttons } = makeHeader(3, 2);
+  it("returns 'handled' (without preventDefault) when not at boundary, reverse", () => {
+    const { header, cells } = makeHeader(3);
+    cells[1].focus();
     const handler = createHeaderTabHandler({ getTopbarElement: () => header });
     const event = makeEvent();
     expect(handler(event, true)).toBe("handled");
-    expect(buttons[2].getAttribute("tabindex")).toBe("-1");
-    expect(buttons[1].getAttribute("tabindex")).toBe("0");
-    expect(buttons[1].focus).toHaveBeenCalled();
+    expect(event.preventDefault).not.toHaveBeenCalled();
   });
 
-  it("returns 'exit' on reverse at the first control", () => {
-    const { header } = makeHeader(3, 0);
+  it("returns 'exit' (with preventDefault) on reverse Tab at first cell", () => {
+    const { header, cells } = makeHeader(3);
+    cells[0].focus();
     const handler = createHeaderTabHandler({ getTopbarElement: () => header });
     const event = makeEvent();
     expect(handler(event, true)).toBe("exit");
+    expect(event.preventDefault).toHaveBeenCalled();
   });
 
-  it("returns 'exit' when topbar element is not available", () => {
+  it("returns 'exit' when header element is not available", () => {
     const handler = createHeaderTabHandler({ getTopbarElement: () => undefined });
     const event = makeEvent();
     expect(handler(event, false)).toBe("exit");
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("returns 'exit' when active element is not inside the header", () => {
+    const { header } = makeHeader(3);
+    const outsideDiv = document.createElement("div");
+    document.body.appendChild(outsideDiv);
+    outsideDiv.focus();
+    const handler = createHeaderTabHandler({ getTopbarElement: () => header });
+    const event = makeEvent();
+    expect(handler(event, false)).toBe("exit");
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("returns 'exit' when active element is not inside a columnheader cell", () => {
+    const { header } = makeHeader(3);
+    const button = document.createElement("button");
+    header.appendChild(button);
+    button.focus();
+    const handler = createHeaderTabHandler({ getTopbarElement: () => header });
+    const event = makeEvent();
+    expect(handler(event, false)).toBe("exit");
+    expect(event.preventDefault).toHaveBeenCalled();
   });
 });
 
