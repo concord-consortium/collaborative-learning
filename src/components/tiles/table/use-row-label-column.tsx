@@ -37,15 +37,6 @@ export const useRowLabelColumn = ({inputRowId, hoveredRowId, showRowLabels, setS
               aria-label={title}
               aria-pressed={showRowLabels}
               tabIndex={tabIndex ?? -1}
-              onMouseDown={(e) => {
-                // preventDefault on mousedown stops the browser from focusing rdg's
-                // HeaderCell. Without this, rdg's handleFocus runs selectCell (when
-                // shouldFocusGrid is true for the first column), which sets
-                // selectedPosition to the index header and locks the focus ring there.
-                // Side effect: clicking doesn't focus the button either, so the focus
-                // ring only appears via keyboard nav (which matches the preferred UX).
-                e.preventDefault();
-              }}
               onClick={(e) => {
                 e.stopPropagation();
                 setShowRowLabels(!showRowLabels);

@@ -67,6 +67,18 @@ export const useDataSet = ({
       return;
     }
 
+    // Header row (rowIdx === -1, idx >= 0): RDG selected a header cell.
+    // Mirror it to dataSet column selection. The RDG idx 0 is the index column
+    // and idx N-1 is the controls column — neither is a data attribute, so
+    // attrIDFromIndex returns undefined for those and we just clear the
+    // dataSet column selection without touching anything else.
+    if (position.rowIdx === -1) {
+      const headerColumnId = dataSet.attrIDFromIndex(position.idx - 1);
+      dataSet.setSelectedAttributes(headerColumnId ? [headerColumnId] : []);
+      triggerRowChange();
+      return;
+    }
+
     // Only modify the selection if a single cell is selected
     if (dataSet.selectedCells.length !== 1) return;
 
