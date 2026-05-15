@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { EditableHeaderCell } from "./editable-header-cell";
 import { kHeaderRowHeight, THeaderRendererProps, TColumn } from "./table-types";
 import { useCautionAlert } from "../../utilities/use-caution-alert";
@@ -19,9 +19,10 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
   // The column is memoized. If the sort order matches the original sort order, it does not re-render.
   // This makes sure we re-render the column header cell when the sort order changes.
   const [, setSortDir] = React.useState<TSortDirection>("NONE");
-  return useMemo(() => {
+  return React.useMemo(() => {
     const ColumnHeaderCell: React.FC<THeaderRendererProps> = (props) => {
       const column = props.column as unknown as TColumn;
+      const cellTabIndex = props.tabIndex;
       const { gridContext, readOnly, isEditing, isRemovable, showExpressions, hasData,
               onRemoveColumn } = column.appData || {};
       const direction = getSortDirection(column.key);
@@ -29,6 +30,40 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
         // Update the sort direction state when the column key changes
         setSortDir(direction);
       }, [column.key, direction]);
+
+      // `.header-name` is the cell's canonical tab stop; the other siblings
+      // always carry tabindex=-1 so RDG's focusCellOrCellContent finds exactly
+      // one [tabindex="0"] (the .header-name in the selected cell).
+      const showRemove = !isEditing && !!isRemovable;
+      const showSort = !!hasData;
+
+      const removeRef = useRef<HTMLButtonElement | null>(null);
+      const nameRef = useRef<HTMLDivElement | null>(null);
+      const sortRef = useRef<HTMLButtonElement | null>(null);
+
+      // Arrow Left/Right rove between visible siblings. No persistent state:
+      // we read the currently-focused element and move to the next visible
+      // sibling via .focus() (which works on tabindex=-1 elements).
+      const handleArrow = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+        const visible: HTMLElement[] = [];
+        if (showRemove && removeRef.current) visible.push(removeRef.current);
+        if (nameRef.current) visible.push(nameRef.current);
+        if (showSort && sortRef.current) visible.push(sortRef.current);
+        const active = document.activeElement as HTMLElement | null;
+        const idx = active ? visible.indexOf(active) : -1;
+        if (idx < 0) return;
+        const nextIdx = e.key === "ArrowRight" ? idx + 1 : idx - 1;
+        if (nextIdx < 0 || nextIdx >= visible.length) {
+          // At first/last sibling: stay put (ARIA composite-widget convention).
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        visible[nextIdx].focus();
+      }, [showRemove, showSort]);
 
       const classes = classNames("column-header-cell",
                         { "show-expression": showExpressions,
@@ -80,21 +115,26 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
           onMouseLeave={handleColumnHeaderCellMouseLeave}
           onClick={handleHeaderClick}
           onFocus={handleHeaderFocus}
+          onKeyDown={handleArrow}
         >
           <div className="flex-container">
             <div className={classNames("header-cell-container", {"show-expression": showExpressions})}>
-              {!isEditing && isRemovable &&
+              {showRemove &&
                 <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}
-                  isColumnSelected={gridContext?.isColumnSelected(column.key) ?? false}/>
+                  isColumnSelected={gridContext?.isColumnSelected(column.key) ?? false}
+                  buttonRef={removeRef}/>
               }
               <EditableHeaderCell
                 {...props}
+                ref={nameRef}
                 height={height}
                 column={column as any}
+                headerNameTabIndex={cellTabIndex}
               />
-              {hasData &&
+              {showSort &&
                 <button
                   type="button"
+                  ref={sortRef}
                   className={classNames("column-button sort-column-button", { "ascending": direction === "ASC",
                                       "descending": direction === "DESC" })}
                   aria-label={
@@ -104,6 +144,7 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
                       ? "Sorted descending"
                       : "Not sorted"
                   }
+                  tabIndex={-1}
                   onClick={handleSort}
                 >
                   <SortIcon
@@ -128,9 +169,10 @@ interface IRemoveColumnButtonProps {
   colName: string;
   isColumnSelected: boolean;
   onRemoveColumn?: (colId: string) => void;
+  buttonRef: React.MutableRefObject<HTMLButtonElement | null>;
 }
 const RemoveColumnButton: React.FC<IRemoveColumnButtonProps> =
-        ({ colId, colName, isColumnSelected, onRemoveColumn }) => {
+        ({ colId, colName, isColumnSelected, onRemoveColumn, buttonRef }) => {
   const AlertContent = () => {
     return <p>Remove column <b>{colName}</b> and its contents from the table?</p>;
   };
@@ -149,8 +191,10 @@ const RemoveColumnButton: React.FC<IRemoveColumnButtonProps> =
   return (
     <button
       type="button"
+      ref={buttonRef}
       className="column-button remove-column-button"
       aria-label={`Remove column ${colName}`}
+      tabIndex={-1}
       onClick={handleClick}
     >
       <RemoveColumnSvg className="column-icon remove-column-icon"/>
