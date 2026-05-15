@@ -29,13 +29,14 @@ export const useRowLabelColumn = ({inputRowId, hoveredRowId, showRowLabels, setS
   const title = showRowLabels ? "Hide labels" : "Show labels";
   const tooltipOptions = useTooltipOptions({ title, distance: -2 });
 
-  const RowLabelHeader: React.FC = useCallback(() => {
+  const RowLabelHeader: React.FC<{ tabIndex?: number }> = useCallback(({ tabIndex }) => {
     return (
       <Tooltip {...tooltipOptions}>
         <button type="button"
               className={`show-hide-row-labels-button ${showRowLabels ? "shown" : "hidden"}`}
               aria-label={title}
               aria-pressed={showRowLabels}
+              tabIndex={tabIndex ?? -1}
               onMouseDown={(e) => {
                 // preventDefault on mousedown stops the browser from focusing rdg's
                 // HeaderCell. Without this, rdg's handleFocus runs selectCell (when
