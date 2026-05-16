@@ -108,13 +108,23 @@ $controls-hover-background: #c0dfe7;
       }
     }
 
+    // RDG's default cell outline (.rdg-cell[aria-selected='true']) tracks its
+    // selectedPosition state, which persists when focus leaves the tile. We
+    // want a true focus ring instead: suppress the aria-selected outline and
+    // re-add it via :focus-visible. Using :focus-visible (not :focus-within)
+    // means the ring shows only when the cell wrapper itself is the keyboard
+    // focus — when a focusable child (e.g. .show-hide-row-labels-button) is
+    // focused, the child carries its own indicator and the wrapper ring is
+    // suppressed.
+    .rdg-cell[aria-selected='true'] {
+      outline: none;
+    }
+    .rdg-cell:focus-visible {
+      outline: 2px solid var(--rdg-selection-color);
+      outline-offset: -2px;
+    }
+
     .rdg-header-row {
-      // Suppress rdg's aria-selected outline on header cells: CLUE manages column
-      // selection separately (via the .selected-column class), and rdg's outline
-      // appears whenever its internal selectedPosition lands on a header.
-      .rdg-cell[aria-selected='true'] {
-        outline: none;
-      }
       .index-column-header {
         min-width: $index-column-width;
         padding: 0;
