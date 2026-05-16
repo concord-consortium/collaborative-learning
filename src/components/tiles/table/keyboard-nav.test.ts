@@ -175,9 +175,9 @@ describe("createBodyFocusContent", () => {
     expect(selectCell).toHaveBeenCalledWith({ idx: 0, rowIdx: -1 }, undefined, true);
   });
 
-  it("focuses the memory cell on reverse entry", () => {
+  it("focuses the memory cell on reverse entry (body cell)", () => {
     const { gridRef, element } = makeGridStub(`
-      <div role="row" aria-rowindex="1"><div role="gridcell" tabindex="0">header</div></div>
+      <div role="row" aria-rowindex="1"><div role="columnheader" tabindex="-1">header</div></div>
       <div role="row" aria-rowindex="2"><div role="gridcell" tabindex="-1">A</div></div>
       <div role="row" aria-rowindex="3"><div role="gridcell" tabindex="0" id="memory-cell">B</div></div>
     `);
@@ -189,6 +189,24 @@ describe("createBodyFocusContent", () => {
       selectedCellRef: { current: null },
       columnsRef: { current: [{}] },
       rowsRef: { current: [{}, {}] },
+    });
+    expect(focusContent({ reverse: true })).toBe(true);
+    expect(memoryCell.focus).toHaveBeenCalled();
+  });
+
+  it("focuses the memory cell on reverse entry (header cell)", () => {
+    const { gridRef, element } = makeGridStub(`
+      <div role="row" aria-rowindex="1"><div role="columnheader" tabindex="0" id="memory-cell">header</div></div>
+      <div role="row" aria-rowindex="2"><div role="gridcell" tabindex="-1">A</div></div>
+    `);
+    const memoryCell = element.querySelector<HTMLElement>("#memory-cell")!;
+    jest.spyOn(memoryCell, "focus");
+
+    const focusContent = createBodyFocusContent({
+      gridRef,
+      selectedCellRef: { current: null },
+      columnsRef: { current: [{}] },
+      rowsRef: { current: [{}] },
     });
     expect(focusContent({ reverse: true })).toBe(true);
     expect(memoryCell.focus).toHaveBeenCalled();

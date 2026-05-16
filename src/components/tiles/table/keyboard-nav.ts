@@ -78,18 +78,30 @@ export function createBodyFocusContent(deps: BodyDeps) {
     const grid = deps.gridRef.current;
     if (!grid?.element) return false;
     if (!context.reverse) {
-      // Forward entry: land on the first header cell. RDG's layout effect
-      // focuses the cell's [tabindex=0] inner (e.g. .show-hide-row-labels-button).
-      setGridActivePosition(deps.gridRef, { idx: 0, rowIdx: -1 });
+      // Forward entry: land on the first header cell at (idx=0, rowIdx=-1).
+      const headerCell = grid.element.querySelector<HTMLElement>(
+        '[role="row"][aria-rowindex="1"] [role="columnheader"][aria-colindex="1"]'
+      );
+      if (headerCell?.getAttribute("aria-selected") === "true") {
+        // Already the active position — RDG's selectCell would skip the focus
+        // side-effect (samePosition), so focus the cell or its entry directly.
+        focusCellOrEntry(headerCell);
+      } else {
+        // Different position — let RDG's layout effect handle focus after
+        // selectCell updates selectedPosition.
+        setGridActivePosition(deps.gridRef, { idx: 0, rowIdx: -1 });
+      }
       return true;
     }
-    // Reverse entry — use RDG's tabindex=0 cell as the memory cursor.
-    // Exclude header row (aria-rowindex="1") so we land in the body.
+    // Reverse entry: use memory if it exists. This can be useful if the user clicks on the
+    // toolbar and then shift+tabs back to get to the last position in the table.
+    // It isn't clear if this memory based reverse behavior is useful.
+    // Regardless it serves as a demonstration of how to use the RDG focus memory.
     const cell = grid.element.querySelector<HTMLElement>(
-      '[role="row"]:not([aria-rowindex="1"]) [role="gridcell"][tabindex="0"]'
+      '[role="row"] [role="gridcell"][tabindex="0"], [role="row"] [role="columnheader"][tabindex="0"]'
     );
     if (cell) {
-      cell.focus();
+      focusCellOrEntry(cell);
       return true;
     }
     // Memory missing (virtualized out, or first entry without prior nav) —
@@ -99,6 +111,13 @@ export function createBodyFocusContent(deps: BodyDeps) {
     setGridActivePosition(deps.gridRef, { idx: lastCol, rowIdx: lastRow });
     return true;
   };
+}
+
+// Mirrors RDG's internal focusCellOrCellContent: focuses the first
+// [tabindex="0"] descendant of the cell, or the cell itself.
+function focusCellOrEntry(cell: HTMLElement): void {
+  const inner = cell.querySelector<HTMLElement>('[tabindex="0"]');
+  (inner ?? cell).focus();
 }
 
 export function setGridActivePosition(

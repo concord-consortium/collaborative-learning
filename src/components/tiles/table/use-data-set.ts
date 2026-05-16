@@ -96,43 +96,11 @@ export const useDataSet = ({
         dataSet.setSelectedCells([{ attributeId: newColumnId, caseId: newRowId }]);
         triggerRowChange();
       }
-    } else {
-      // Update the position if it's not a legal option (if we're in the control or delete column).
-      // Note that rdg will not allow us to move to a row outside of the grid
-      let newPosition = { ...position };
-      const rightColumnIndex = columns.length - (readOnly ? 1 : 2);
-      // Determine if we're moving forwards or backwards
-      const forward = (selectedCellRowIndex < position.rowIdx) ||
-        (selectedCellRowIndex === position.rowIdx && selectedCellColumnIndex < position.idx);
-      if (forward) {
-        if (newPosition.idx > rightColumnIndex) {
-          if (newPosition.rowIdx >= rows.length - 1) {
-            // deselect all cells
-            newPosition = { rowIdx: -1, idx: -1 };
-          } else {
-            // otherwise advance to left cell of next row
-            newPosition.idx = 1;
-            ++newPosition.rowIdx;
-          }
-        }
-      } else {
-        if (newPosition.idx < 1) {
-          if (newPosition.rowIdx <= 0) {
-            // deselect all cells
-            newPosition = { rowIdx: -1, idx: -1 };
-          } else if (newPosition.idx < 1) {
-            // otherwise move to right cell of previous row
-            newPosition.idx = rightColumnIndex;
-            --newPosition.rowIdx;
-          }
-        }
-      }
-
-      // Update rdg if we fixed the position, which will cause this function to be called again
-      if ((newPosition.rowIdx !== position.rowIdx) || (newPosition.idx !== position.idx)) {
-        gridRef.current?.selectCell(newPosition);
-      }
     }
+    // Non-data positions (row label column, controls column) are valid Tab stops
+    // under cooperative roving — leave RDG's selectedPosition alone and don't
+    // mirror them to dataSet. The old fallback that redirected away from these
+    // columns is incompatible with keyboard navigation landing in them.
   };
 
   const getUpdatedRowAndColumn = (_rows?: TRow[], _columns?: TColumn[]) => {
