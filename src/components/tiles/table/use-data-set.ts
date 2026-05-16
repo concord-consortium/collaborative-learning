@@ -79,8 +79,9 @@ export const useDataSet = ({
       return;
     }
 
-    // Only modify the selection if a single cell is selected
-    if (dataSet.selectedCells.length !== 1) return;
+    // Preserve any pre-existing multi-cell selection; otherwise (0 or 1
+    // selected cells) keep the dataSet selection in sync with RDG.
+    if (dataSet.selectedCells.length > 1) return;
 
     const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndices();
 
