@@ -28,11 +28,13 @@ export const useControlsColumn = ({
   }, [addColumnTooltipOptions, onAddColumn, readOnly]);
 
   const removeRowTooltipOptions = useTooltipOptions({ title: "Remove row", distance: kTooltipDistance });
-  const ControlsRowFormatter: React.FC<TFormatterProps> = useCallback(({ rowIdx, row }) => {
+  // beta.44's RenderCellProps no longer includes isRowSelected; the row's own context tracks
+  // selection state for our purposes (a selected row also has a selected cell in it).
+  const ControlsRowFormatter: React.FC<TFormatterProps> = useCallback(({ rowIdx, row, tabIndex }) => {
     const showRemoveButton = !readOnly && row.__context__.isSelectedCellInRow(rowIdx);
     return showRemoveButton
             ? <Tooltip {...removeRowTooltipOptions}>
-                <RemoveRowButton rowId={row.__id__} onRemoveRow={onRemoveRow} />
+                <RemoveRowButton rowId={row.__id__} onRemoveRow={onRemoveRow} tabIndex={tabIndex} />
               </Tooltip>
             : null;
   }, [onRemoveRow, readOnly, removeRowTooltipOptions]);
@@ -75,12 +77,20 @@ AddColumnButton.displayName = "AddColumnButton";
 interface IRemoveRowButtonProps {
   rowId: string;
   onRemoveRow?: (rowId: string) => void;
+  tabIndex?: number;
 }
-const RemoveRowButton: React.FC<IRemoveRowButtonProps> = ({ rowId, onRemoveRow }) => {
+const RemoveRowButton: React.FC<IRemoveRowButtonProps> = ({ rowId, onRemoveRow, tabIndex }) => {
   return (
-    <div className="remove-row-button" onClick={() => onRemoveRow?.(rowId)}  data-test="remove-row-button">
+    <button
+      type="button"
+      className="remove-row-button"
+      aria-label="Remove row"
+      tabIndex={tabIndex ?? -1}
+      onClick={() => onRemoveRow?.(rowId)}
+      data-test="remove-row-button"
+    >
       <RemoveRowSvg className="remove-row-icon"/>
-    </div>
+    </button>
   );
 };
 RemoveRowButton.displayName = "RemoveRowButton";
