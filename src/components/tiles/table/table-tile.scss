@@ -293,11 +293,28 @@ $controls-hover-background: #c0dfe7;
         border: none;
         box-shadow: none;
         padding: 0;
+        // RDG cells default to overflow: clip. Body rows are kRowHeight
+        // (22px) but the icon is 24px and extends 1px past the row edges;
+        // allow it to render — the parent .rdg-row uses overflow: visible.
+        // overflow: visible;
         .remove-row-button {
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          font: inherit;
+          color: inherit;
           width: $controls-column-width;
+          height: 22px;
           display: none;  // overridden when tile is selected
           justify-content: center;
           align-items: center;
+          // Inset focus ring: outline-offset -2px keeps the ring within
+          // the button's bounds (the button height matches the row).
+          &:focus-visible {
+            outline: 2px solid var(--rdg-selection-color);
+            outline-offset: -2px;
+          }
           svg {
             fill: white;
             stroke: $highlight-blue;
