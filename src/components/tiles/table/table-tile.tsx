@@ -91,17 +91,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     } = useGridContext({ content, modelId: model.id, showRowLabels, triggerColumnChange, triggerRowChange });
   const selectedCaseIds = getSelectedRows();
 
-  // Add click handler to clear all selections to mystery div in rdg.
-  // This allows the user to clear the selection by clicking under the table.
-  useEffect(() => {
-    if (gridRef.current?.element?.children) {
-      const rdgDiv = gridRef.current.element.children[2];
-      if (rdgDiv) {
-        rdgDiv.addEventListener("click", () => gridContext.onClearSelection());
-      }
-    }
-  }, [gridContext, gridRef]);
-
   // Maintains the cache of data values that map to image URLs.
   // For use in a synchronous context, returns undefined immediately if an image is not yet cached,
   // and then looks it up in the background, adds to cache, and updates state to force a refresh.
@@ -254,8 +243,13 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // clear any selection on background click
-    (e.target === containerRef.current) && gridContext.onClearSelection();
+    // Clear selection when the click lands on the table-grid-container itself
+    // or on the bare RDG element (the empty area below the last row). Clicks
+    // bubbled up from a cell, row, header, or remove-row button have a
+    // different target and don't trigger this.
+    if (e.target === containerRef.current || e.target === gridRef.current?.element) {
+      gridContext.onClearSelection();
+    }
   };
 
   const importData = (file: File) => {
