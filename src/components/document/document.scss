@@ -50,30 +50,38 @@
       justify-content: center;
       align-items: center;
 
-      .icon-edit {
-        background-color: $color1-3;
-        width: 9.9px;
-        height: 10.1px;
-        cursor: pointer;
+      .title-with-edit {
+        align-items: center;
+        background: transparent;
         border: 0;
+        color: inherit;
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
         padding: 0;
-        margin-left: $half-margin;
-        margin-bottom: $half-margin;
 
-        &:focus {
-          outline: none;
-          outline-offset: 0;
-        }
-        .edit {
+        .edit-icon {
+          background-color: $workspace-teal-light-4;
           background-image: url("../../assets/icons/edit/edit.svg");
+          background-position: center;
           background-repeat: no-repeat;
-          box-sizing: content-box;
-          width: 17.8px;
-          height: 18px;
+          background-size: 15px 15px;
+          border-radius: 2.5px;
+          display: inline-block;
+          height: 16px;
+          margin-left: 2px;
+          width: 16px;
+        }
 
-          &:hover {
-            background-image: url("../../assets/icons/edit/edit-hover.svg");
-          }
+        &:hover .edit-icon {
+          background-color: $workspace-teal-light-3;
+        }
+        &:active .edit-icon {
+          background-color: $workspace-teal-light-2;
+        }
+        @include focus-ring(2px);
+        &:focus-visible {
+          border-radius: 2px;
         }
       }
       .icon-sticky-note {

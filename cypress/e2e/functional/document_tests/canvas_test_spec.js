@@ -41,7 +41,7 @@ context('Test Canvas', function () {
   it('test canvas tools', function () {
     beforeTest(queryParams1);
     cy.log('verify investigation header UI');
-    canvas.getEditTitleIcon().should('not.exist');
+    canvas.getDocRenameButton().should('not.exist');
     canvas.getPublishItem().should('be.visible');
     clueCanvas.getShareButton().should('be.visible');
     clueCanvas.getFourUpViewToggle().should('be.visible');
@@ -51,7 +51,7 @@ context('Test Canvas', function () {
 
     cy.log('verify personal workspace header UI');
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "my-work");
-    canvas.getEditTitleIcon().should('be.visible');
+    canvas.getDocRenameButton().should('be.visible');
     canvas.getPublishItem().should('be.visible');
     clueCanvas.getShareButton().should('be.visible');
     clueCanvas.getFourUpViewToggle().should('not.exist');
@@ -447,7 +447,7 @@ context('Test Canvas', function () {
     cy.log("Share button visible on personal docs, only when sort-work tab is visible");
     beforeTest(queryParams3);
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "my-work");
-    canvas.getEditTitleIcon().should('be.visible');
+    canvas.getDocRenameButton().should('be.visible');
     clueCanvas.getShareButton().should('be.visible');
 
     // This is using an intentionally broken document.
