@@ -19,7 +19,7 @@ import {
 } from "./jxg-types";
 import { TileModel, ITileModel } from "../tile-model";
 import { getPoint, getPolygon, strokePropsForColorScheme } from "./geometry-utils";
-import { getLineVisualProps } from "./jxg-line";
+import { formatLineEquation, getLineVisualProps } from "./jxg-line";
 import { convertModelObjectToChanges } from "./geometry-migrate";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
@@ -763,6 +763,21 @@ describe("GeometryContent", () => {
       labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ELabelOption.kLabel, name: "seg1" },
                { id: segmentIdFromPointIds(["p2", "p3"]), option: ELabelOption.kLength, name: "seg2" }]
     });
+    // Test kEquation option
+    content.updatePolygonSegmentLabel(board, polygon, [p1, p2], ELabelOption.kEquation, undefined);
+    const seg1AfterEq = getPolygonEdge(board, polygonId, ["p1", "p2"]);
+    expect(isText(seg1AfterEq?.label)).toBe(true);
+    expect(typeof seg1AfterEq?.name).toBe("function");
+    expect(content.getObject(polygon.id)).toEqual({
+      id: polygonId,
+      type: "polygon",
+      points: ["p1", "p2", "p3"],
+      colorScheme: 0,
+      labelOption: "none",
+      labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ELabelOption.kEquation },
+               { id: segmentIdFromPointIds(["p2", "p3"]), option: ELabelOption.kLength, name: "seg2" }]
+    });
+
     content.updatePolygonSegmentLabel(board, polygon, [p1, p2], ELabelOption.kNone, undefined);
     expect(content.getObject(polygon.id)).toEqual({
       id: polygonId,
@@ -1841,6 +1856,58 @@ toMatchInlineSnapshot(`
     expect(lineModel?.name).toBe("EF");
 
     destroyContentAndBoard(content, board);
+  });
+
+  it("can persist and restore a line with kEquation label from model", () => {
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "lp1", x: 0, y: 1, colorScheme: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "lp2", x: 2, y: 5, colorScheme: 0 }));
+      _content.addObjectModel(LineModel.create({
+        id: "ln1", point1: "lp1", point2: "lp2", colorScheme: 0,
+        labelOption: ELabelOption.kEquation
+      }));
+    });
+
+    const boardLines = board.objectsList.filter(o => isInfiniteLine(o));
+    expect(boardLines.length).toBe(1);
+    const line = boardLines[0] as JXG.Line;
+    expect(line.getAttribute("clientLabelOption")).toBe(ELabelOption.kEquation);
+    expect(line.getAttribute("withLabel")).toBe(true);
+    expect(typeof line.name).toBe("function");
+
+    const lineModel = content.getLine("ln1");
+    expect(lineModel?.labelOption).toBe(ELabelOption.kEquation);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("formatLineEquation handles all slope/intercept cases", () => {
+    // Mock JXG.Point with X() and Y() methods
+    const mockPoint = (x: number, y: number) => ({ X: () => x, Y: () => y }) as unknown as JXG.Point;
+
+    // Coincident points (NaN slope)
+    expect(formatLineEquation(NaN, mockPoint(1, 1), "x", "y")).toBe("");
+
+    // Vertical line (infinite slope)
+    expect(formatLineEquation(Infinity, mockPoint(3, 0), "x", "y")).toBe("x = 3.00");
+    expect(formatLineEquation(-Infinity, mockPoint(-2, 0), "x", "y")).toBe("x = -2.00");
+
+    // Horizontal line (slope 0)
+    expect(formatLineEquation(0, mockPoint(0, 4), "x", "y")).toBe("y = 4.00");
+    expect(formatLineEquation(0, mockPoint(0, -1.5), "x", "y")).toBe("y = -1.50");
+
+    // Near-zero intercept (|intercept| < 0.005)
+    expect(formatLineEquation(2, mockPoint(0, 0), "x", "y")).toBe("y = 2.00x");
+    expect(formatLineEquation(2, mockPoint(0, 0.004), "x", "y")).toBe("y = 2.00x");
+
+    // General case — positive intercept
+    expect(formatLineEquation(2, mockPoint(0, 3), "x", "y")).toBe("y = 2.00x + 3.00");
+
+    // General case — negative intercept (Unicode minus U+2212)
+    expect(formatLineEquation(2, mockPoint(0, -3), "x", "y")).toBe("y = 2.00x \u2212 3.00");
+
+    // Custom axis labels
+    expect(formatLineEquation(1, mockPoint(0, 2), "t", "d")).toBe("d = 1.00t + 2.00");
   });
 
   it("LineModel setLabelOption and setName actions work correctly", () => {

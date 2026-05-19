@@ -2,7 +2,8 @@ import { LineAttributes, PolygonAttributes } from "jsxgraph";
 import { each, filter, find, merge, remove, uniqueId, values } from "lodash";
 import { notEmpty } from "../../../utilities/js-utils";
 import { fillPropsForColorScheme, getPoint, getPolygon, strokePropsForColorScheme } from "./geometry-utils";
-import { getObjectById } from "./jxg-board";
+import { getBaseAxisLabels, getObjectById } from "./jxg-board";
+import { formatLineEquation } from "./jxg-line";
 import { ELabelOption, JXGChange, JXGChangeAgent, JXGParentType } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
@@ -281,27 +282,9 @@ function segmentNameLengthFn(this: JXG.Line) {
   return JXG.toFixed(this.L(), 1);
 }
 
-// The geometry tile uses fixed x/y axis labels, so variable names are hardcoded.
 function segmentNameEquationFn(this: JXG.Line) {
-  const slope = this.getSlope();
-  const p1 = this.point1;
-  if (isNaN(slope)) {
-    return "";
-  }
-  if (!isFinite(slope)) {
-    return `x = ${JXG.toFixed(p1.X(), 2)}`;
-  }
-  const intercept = p1.Y() - slope * p1.X();
-  if (slope === 0) {
-    return `y = ${JXG.toFixed(intercept, 2)}`;
-  }
-  const slopeStr = JXG.toFixed(slope, 2);
-  const sign = intercept >= 0 ? " + " : " − ";
-  const absIntercept = JXG.toFixed(Math.abs(intercept), 2);
-  if (Math.abs(intercept) < 0.005) {
-    return `y = ${slopeStr}x`;
-  }
-  return `y = ${slopeStr}x${sign}${absIntercept}`;
+  const [xName, yName] = getBaseAxisLabels(this.board);
+  return formatLineEquation(this.getSlope(), this.point1, xName, yName);
 }
 
 function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
@@ -316,11 +299,11 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
     segment._set("clientLabelOption", labelOption);
     segment._set("clientName", nameOption);
 
-    const name = labelOption === "label"
+    const name = labelOption === ELabelOption.kLabel
       ? nameOption
-      : labelOption === "length"
+      : labelOption === ELabelOption.kLength
         ? segmentNameLengthFn
-        : labelOption === "equation"
+        : labelOption === ELabelOption.kEquation
           ? segmentNameEquationFn
           : "";
 

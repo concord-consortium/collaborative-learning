@@ -1,7 +1,7 @@
 import { uniqueId } from "../../../utilities/js-utils";
 import { strokePropsForColorScheme } from "./geometry-utils";
 import { ELabelOption, JXGChangeAgent, JXGProperties } from "./jxg-changes";
-import { getObjectById } from "./jxg-board";
+import { getBaseAxisLabels, getObjectById } from "./jxg-board";
 import { isInfiniteLine, kInfiniteLineType } from "./jxg-types";
 import { objectChangeAgent } from "./jxg-object";
 
@@ -33,29 +33,28 @@ export function getInfiniteLine(board: JXG.Board, id: string): JXG.Line | undefi
 }
 
 // Formats a line equation as "y = mx + b", "y = b", or "x = c" for vertical lines.
-// The geometry tile uses fixed x/y axis labels, so variable names are hardcoded.
-function lineEquationString(line: JXG.Line): string {
-  const slope = line.getSlope();
-  const p1 = line.point1;
+// Uses the provided axis labels (from getBaseAxisLabels) so that equations respect
+// custom axis names configured on the board.
+export function formatLineEquation(slope: number, p1: JXG.Point, xName: string, yName: string): string {
   if (isNaN(slope)) {
     // Coincident points — line is undefined
     return "";
   }
   if (!isFinite(slope)) {
     // Vertical line: x = c
-    return `x = ${JXG.toFixed(p1.X(), 2)}`;
+    return `${xName} = ${JXG.toFixed(p1.X(), 2)}`;
   }
   const intercept = p1.Y() - slope * p1.X();
   if (slope === 0) {
-    return `y = ${JXG.toFixed(intercept, 2)}`;
+    return `${yName} = ${JXG.toFixed(intercept, 2)}`;
   }
   const slopeStr = JXG.toFixed(slope, 2);
-  const sign = intercept >= 0 ? " + " : " − ";
+  const sign = intercept >= 0 ? " + " : " \u2212 ";
   const absIntercept = JXG.toFixed(Math.abs(intercept), 2);
   if (Math.abs(intercept) < 0.005) {
-    return `y = ${slopeStr}x`;
+    return `${yName} = ${slopeStr}${xName}`;
   }
-  return `y = ${slopeStr}x${sign}${absIntercept}`;
+  return `${yName} = ${slopeStr}${xName}${sign}${absIntercept}`;
 }
 
 // Overrides getLabelAnchor so the label appears at the midpoint of the two
@@ -89,7 +88,10 @@ export function setPropertiesForLineLabelOption(line: JXG.Line) {
       setMidpointLabelAnchor(line);
       line.setAttribute({
         withLabel: true,
-        name: () => lineEquationString(line)
+        name: () => {
+          const [xName, yName] = getBaseAxisLabels(line.board);
+          return formatLineEquation(line.getSlope(), line.point1, xName, yName);
+        }
       });
       if (line.label) {
         line.label.setAttribute({ anchorX: "middle", offset: [0, 12] } as any);
