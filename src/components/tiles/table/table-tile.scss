@@ -293,10 +293,6 @@ $controls-hover-background: #c0dfe7;
         border: none;
         box-shadow: none;
         padding: 0;
-        // RDG cells default to overflow: clip. Body rows are kRowHeight
-        // (22px) but the icon is 24px and extends 1px past the row edges;
-        // allow it to render — the parent .rdg-row uses overflow: visible.
-        // overflow: visible;
         .remove-row-button {
           background: none;
           border: none;
@@ -306,7 +302,12 @@ $controls-hover-background: #c0dfe7;
           color: inherit;
           width: $controls-column-width;
           height: 22px;
-          display: none;  // overridden when tile is selected
+          // Per-tile visibility gate: hidden by default, overridden below
+          // when the ancestor tile has `.tool-tile.selected`. There is also a
+          // per-row React gate in use-grid-context.ts (`isSelectedCaseInRow`)
+          // that controls whether the button is rendered at all. Both must
+          // pass for the button to be visible.
+          display: none;
           justify-content: center;
           align-items: center;
           // Inset focus ring: outline-offset -2px keeps the ring within
