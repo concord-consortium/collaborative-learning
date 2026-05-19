@@ -60,13 +60,39 @@ interface IAddColumnButtonProps {
   tabIndex?: number;
 }
 const AddColumnButton: React.FC<IAddColumnButtonProps> = ({ onAddColumn, tabIndex }) => {
+  // Stop propagation so the click doesn't bubble to the RDG cell wrapper. RDG's
+  // cell onClick calls selectCell on whatever cell was clicked; if it ran here
+  // it would select this header cell, then the synchronous onAddColumn would
+  // splice a new column in before the controls column. RDG's selectedPosition
+  // is positional (idx, not key), so the same idx now points to the new data
+  // column — RDG ends up showing aria-selected on it. Keeping the event from
+  // reaching RDG leaves both RDG's selectedPosition and dataSet selection
+  // unchanged, which matches the user intent (add a column, change nothing
+  // about what's selected).
+  //
+  // Two known residual mismatches we accept for now:
+  //
+  // - Mouse click with prior selection: the browser focuses the button, so
+  //   the focused element ends up in the controls cell while RDG's
+  //   selectedPosition stays on the previously-selected cell. Verified
+  //   benign: Tab from this state advances from RDG's selectedPosition (the
+  //   prior cell), which matches what a user navigating the table expects.
+  //
+  // - Keyboard activation (Enter on the focused button): RDG's
+  //   selectedPosition was already on the controls cell before the click
+  //   (that's how the user reached the button via roving). The splice shifts
+  //   the controls cell to a new idx, but RDG's positional selectedPosition
+  //   stays put — so aria-selected lands on the new data column even though
+  //   we never ran selectCell. DataSet selection is correctly empty, so
+  //   the two are out of sync until the next interaction (any click or
+  //   arrow keystroke re-syncs).
   return (
     <button
       type="button"
       className="add-column-button"
       aria-label="Add column"
       tabIndex={tabIndex ?? -1}
-      onClick={() => onAddColumn?.()}
+      onClick={(e) => { e.stopPropagation(); onAddColumn?.(); }}
     >
       <AddColumnSvg className="add-column-icon"/>
     </button>
