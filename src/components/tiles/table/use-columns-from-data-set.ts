@@ -84,7 +84,11 @@ export const useColumnsFromDataSet = ({
         key: attr.id,
         width,
         resizable: !readOnly,
-        sortable: true,
+        // sortable=false suppresses RDG's built-in Space/Enter → onSort handler
+        // (bundle.js:1448-1453), which preventDefault()ed the keydown and
+        // blocked the column-header buttons' native Enter→click. CLUE drives
+        // sort through its own .sort-column-button instead.
+        sortable: false,
         renderHeaderCell: ColumnHeaderCell,
         renderCell: getCellFormatter({ dataSet, isLinked, lookupImage, rowHeight, width }),
         renderEditCell: !readOnly && !content.hasExpression(attr.id) ? CellTextEditor : undefined,

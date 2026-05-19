@@ -41,9 +41,10 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
       const nameRef = useRef<HTMLDivElement | null>(null);
       const sortRef = useRef<HTMLButtonElement | null>(null);
 
-      // Arrow Left/Right rove between visible siblings. No persistent state:
-      // we read the currently-focused element and move to the next visible
-      // sibling via .focus() (which works on tabindex=-1 elements).
+      // Arrow Left/Right rove between visible siblings, wrapping at the
+      // ends. No persistent state: we read the currently-focused element and
+      // move to the next visible sibling via .focus() (which works on
+      // tabindex=-1 elements).
       const handleArrow = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
         const visible: HTMLElement[] = [];
@@ -53,13 +54,8 @@ export const useColumnHeaderCell = ({height, getSortDirection, onSort}: IUseColu
         const active = document.activeElement as HTMLElement | null;
         const idx = active ? visible.indexOf(active) : -1;
         if (idx < 0) return;
-        const nextIdx = e.key === "ArrowRight" ? idx + 1 : idx - 1;
-        if (nextIdx < 0 || nextIdx >= visible.length) {
-          // At first/last sibling: stay put (ARIA composite-widget convention).
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
+        const delta = e.key === "ArrowRight" ? 1 : -1;
+        const nextIdx = (idx + delta + visible.length) % visible.length;
         e.preventDefault();
         e.stopPropagation();
         visible[nextIdx].focus();
