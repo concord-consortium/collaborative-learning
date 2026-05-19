@@ -171,7 +171,7 @@ describe("createBodyFocusContent", () => {
       columnsRef: { current: [{}, {}, {}] },
       rowsRef: { current: [{}, {}, {}] },
     });
-    expect(focusContent({ reverse: false })).toBe(true);
+    expect(focusContent({ entryMode: "forward" })).toBe(true);
     expect(selectCell).toHaveBeenCalledWith({ idx: 0, rowIdx: -1 }, undefined, true);
   });
 
@@ -190,7 +190,7 @@ describe("createBodyFocusContent", () => {
       columnsRef: { current: [{}] },
       rowsRef: { current: [{}, {}] },
     });
-    expect(focusContent({ reverse: true })).toBe(true);
+    expect(focusContent({ entryMode: "reverse" })).toBe(true);
     expect(memoryCell.focus).toHaveBeenCalled();
   });
 
@@ -208,7 +208,7 @@ describe("createBodyFocusContent", () => {
       columnsRef: { current: [{}] },
       rowsRef: { current: [{}] },
     });
-    expect(focusContent({ reverse: true })).toBe(true);
+    expect(focusContent({ entryMode: "reverse" })).toBe(true);
     expect(memoryCell.focus).toHaveBeenCalled();
   });
 
@@ -222,7 +222,7 @@ describe("createBodyFocusContent", () => {
       columnsRef: { current: [{}, {}, {}] },
       rowsRef: { current: [{}, {}, {}] },
     });
-    expect(focusContent({ reverse: true })).toBe(true);
+    expect(focusContent({ entryMode: "reverse" })).toBe(true);
     expect(selectCell).toHaveBeenCalledWith({ idx: 2, rowIdx: 2 }, undefined, true);
   });
 });
