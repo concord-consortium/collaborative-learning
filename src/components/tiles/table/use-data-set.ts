@@ -19,14 +19,13 @@ interface IUseDataSet {
   triggerRowChange: () => void;
   readOnly: boolean;
   inputRowId: React.MutableRefObject<string>;
-  rows: TRow[];
   changeHandlers: IContentChangeHandlers;
   columns: TColumn[];
   onColumnResize: (idx: number, width: number, complete: boolean) => void;
   lookupImage: (value: string) => string|undefined;
 }
 export const useDataSet = ({
-  dataSet, triggerColumnChange, triggerRowChange, readOnly, inputRowId, rows,
+  dataSet, triggerColumnChange, triggerRowChange, readOnly, inputRowId,
   changeHandlers, columns, onColumnResize, lookupImage
 }: IUseDataSet) => {
   // RDG's concept of which cell is selected.
@@ -45,6 +44,21 @@ export const useDataSet = ({
     }
     return selectedCellIndices;
   }
+
+  /**
+   * Given a row index from RDG, return the corresponding case ID, or undefined if the index is out of bounds.
+   * Note that the input row (for adding new cases) is considered in bounds, and maps to inputRowId.current.
+   * This function is used to interpret RDG's selected cell position in terms of the dataSet's cases.
+   *
+   * @param rowIdx
+   * @returns
+   */
+  function getCaseIdFromRowIndex(rowIdx: number) {
+    if (rowIdx < 0) return undefined;
+    if (rowIdx === dataSet.cases.length) return inputRowId.current;
+    return dataSet.caseIDFromIndex(rowIdx);
+  }
+
   const onSelectedCellChange = (args: CellSelectArgs<TRow>) => {
     // beta.44 changed the signature from TPosition to CellSelectArgs; we still operate on
     // a `{ rowIdx, idx }` position internally. args.column can be undefined when rdg passes
@@ -72,17 +86,11 @@ export const useDataSet = ({
       return;
     }
 
-    // Preserve any pre-existing multi-cell selection; otherwise (0 or 1
-    // selected cells) keep the dataSet selection in sync with RDG.
-    if (dataSet.selectedCells.length > 1) return;
-
     const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndices();
 
     if (isCellSelectable(position, columns, readOnly)) {
       // Set the dataSet's selected cell
-      const newRowId = position.rowIdx === dataSet.cases.length
-        ? inputRowId.current
-        : dataSet.caseIDFromIndex(position.rowIdx);
+      const newRowId = getCaseIdFromRowIndex(position.rowIdx);
       const newColumnId = dataSet.attrIDFromIndex(position.idx - 1);
       const differentIndices =
         !(selectedCellColumnIndex === position.idx - 1 && selectedCellRowIndex === position.rowIdx);
@@ -106,29 +114,38 @@ export const useDataSet = ({
     }
   };
 
-  const getUpdatedRowAndColumn = (_rows?: TRow[], _columns?: TColumn[]) => {
-    const rs = _rows ?? rows;
-    const cs = _columns ?? columns;
-    const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndices();
-    const updatedRow = (selectedCellRowIndex != null) && (selectedCellRowIndex >= 0)
-      ? rs[selectedCellRowIndex] : undefined;
-    const updatedColumn = (selectedCellColumnIndex != null) && (selectedCellColumnIndex >= 0)
-      ? cs[selectedCellColumnIndex + 1] : undefined;
-    return { selectedCellRowIndex, selectedCellColumnIndex, updatedRow, updatedColumn };
+  // Identify the row/column the user just acted on using RDG's authoritative
+  // position (selectedCell.current). RDG's idx includes the index column (0)
+  // and we want the attribute index, hence `idx - 1`.
+  const getUpdatedRowAndColumn = () => {
+    const sc = selectedCell.current;
+    const selectedCellRowIndex = sc?.rowIdx ?? -1;
+    const selectedCellColumnIndex = sc ? sc.idx - 1 : -1;
+    const selectedCellCaseId = getCaseIdFromRowIndex(selectedCellRowIndex);
+    const selectedCellAttributeKey = selectedCellColumnIndex >= 0
+      ? dataSet.attrIDFromIndex(selectedCellColumnIndex)
+      : undefined;
+    return {
+      selectedCellRowIndex,
+      selectedCellColumnIndex,
+      selectedCellCaseId,
+      selectedCellAttributeKey
+    };
   };
 
   const formatter = useNumberFormat();
   const onRowsChange = (_rows: TRow[]) => {
     // for now, assume that all changes are single cell edits
-    const { selectedCellRowIndex, updatedRow, updatedColumn } = getUpdatedRowAndColumn(_rows);
-    if (!readOnly && updatedRow && updatedColumn) {
-      const originalValue = dataSet.getValue(updatedRow.__id__, updatedColumn.key);
+    const { selectedCellRowIndex, selectedCellCaseId, selectedCellAttributeKey } = getUpdatedRowAndColumn();
+    if (!readOnly && selectedCellCaseId && selectedCellAttributeKey) {
+      const originalValue = dataSet.getValue(selectedCellCaseId, selectedCellAttributeKey);
       const originalStrValue = formatValue({ formatter, value: originalValue, lookupImage });
       // only make a change if the value has actually changed
-      if (updatedRow[updatedColumn.key] !== originalStrValue) {
+      const updatedRow = _rows[selectedCellRowIndex];
+      if (updatedRow[selectedCellAttributeKey] !== originalStrValue) {
         const updatedCaseValues: ICase = {
-          __id__: updatedRow.__id__,
-          [updatedColumn.key]: updatedRow[updatedColumn.key]
+          __id__: selectedCellCaseId,
+          [selectedCellAttributeKey]: updatedRow[selectedCellAttributeKey]
         };
         const inputRowIndex = _rows.findIndex(row => row.__id__ === inputRowId.current);
         if ((inputRowIndex >= 0) && (selectedCellRowIndex === inputRowIndex)) {
@@ -142,11 +159,11 @@ export const useDataSet = ({
   };
 
   const deleteSelected = () => {
-    const { updatedRow, updatedColumn } = getUpdatedRowAndColumn();
-    if (!readOnly && updatedRow && updatedColumn) {
+    const { selectedCellCaseId, selectedCellAttributeKey } = getUpdatedRowAndColumn();
+    if (!readOnly && selectedCellCaseId && selectedCellAttributeKey) {
       const updatedCaseValues: ICase = {
-        __id__: updatedRow.__id__,
-        [updatedColumn.key]: ""
+        __id__: selectedCellCaseId,
+        [selectedCellAttributeKey]: ""
       };
       onUpdateRow(updatedCaseValues);
     }
