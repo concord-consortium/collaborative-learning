@@ -42,6 +42,12 @@ const Content: React.FC<IContentProps> = (
         checkedLabel={labelOption}
         setLabelOption={setLabelOption}
       />
+      <LabelRadioButton
+        display="Equation"
+        label={ELabelOption.kEquation}
+        checkedLabel={labelOption}
+        setLabelOption={setLabelOption}
+      />
     </fieldset>
   );
 };
