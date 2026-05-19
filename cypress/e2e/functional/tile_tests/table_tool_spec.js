@@ -383,7 +383,7 @@ context('Table Tool Tile', function () {
       tableToolTile.fillTable(tableToolTile.getTableTile(), testData.mixedData);
 
       cy.get('.sort-column-button').each(($btn) => {
-        cy.wrap($btn).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Not sorted');
+        cy.wrap($btn).should('have.attr', 'aria-label', 'Not sorted');
       });
 
       // Test sorting on Name column (text)
@@ -391,13 +391,13 @@ context('Table Tool Tile', function () {
       // Select Name column (index 0) and sort ascending
       tableToolTile.getColumnHeader().eq(0).click();
       cy.get('.sort-column-button').eq(0).click();
-      cy.get('.sort-column-button').eq(0).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Sorted ascending');
+      cy.get('.sort-column-button').eq(0).should('have.attr', 'aria-label', 'Sorted ascending');
       testData.expectedSorts.name.asc.forEach((expectedValue, index) => {
         tableToolTile.getTableCellWithRowColIndex(index, 2).should('contain', expectedValue);
       });
       // Sort descending
       cy.get('.sort-column-button').eq(0).click();
-      cy.get('.sort-column-button').eq(0).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Sorted descending');
+      cy.get('.sort-column-button').eq(0).should('have.attr', 'aria-label', 'Sorted descending');
       testData.expectedSorts.name.desc.forEach((expectedValue, index) => {
         tableToolTile.getTableCellWithRowColIndex(index, 2).should('contain', expectedValue);
       });
@@ -406,13 +406,13 @@ context('Table Tool Tile', function () {
       cy.log('Testing numeric column sorting');
       tableToolTile.getColumnHeader().eq(1).click();
       cy.get('.sort-column-button').eq(1).click();
-      cy.get('.sort-column-button').eq(1).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Sorted ascending');
+      cy.get('.sort-column-button').eq(1).should('have.attr', 'aria-label', 'Sorted ascending');
       testData.expectedSorts.age.asc.forEach((expectedValue, index) => {
         tableToolTile.getTableCellWithRowColIndex(index, 3).should('contain', expectedValue);
       });
       // Sort descending
       cy.get('.sort-column-button').eq(1).click();
-      cy.get('.sort-column-button').eq(1).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Sorted descending');
+      cy.get('.sort-column-button').eq(1).should('have.attr', 'aria-label', 'Sorted descending');
       testData.expectedSorts.age.desc.forEach((expectedValue, index) => {
         tableToolTile.getTableCellWithRowColIndex(index, 3).should('contain', expectedValue);
       });
@@ -421,14 +421,14 @@ context('Table Tool Tile', function () {
       cy.log('Testing decimal column sorting');
       tableToolTile.getColumnHeader().eq(2).click();
       cy.get('.sort-column-button').eq(2).click();
-      cy.get('.sort-column-button').eq(2).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Sorted ascending');
+      cy.get('.sort-column-button').eq(2).should('have.attr', 'aria-label', 'Sorted ascending');
       testData.expectedSorts.score.asc.forEach((expectedValue, index) => {
         tableToolTile.getTableCellWithRowColIndex(index, 4).should('contain', expectedValue);
       });
 
       // Sort descending
       cy.get('.sort-column-button').eq(2).click();
-      cy.get('.sort-column-button').eq(2).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Sorted descending');
+      cy.get('.sort-column-button').eq(2).should('have.attr', 'aria-label', 'Sorted descending');
       testData.expectedSorts.score.desc.forEach((expectedValue, index) => {
         tableToolTile.getTableCellWithRowColIndex(index, 4).should('contain', expectedValue);
       });
@@ -436,11 +436,11 @@ context('Table Tool Tile', function () {
       // Undo descending sort
       // TODO: Uncomment this when CLUE-172 is fixed
       // clueCanvas.getUndoTool().click();
-      // cy.get('.sort-column-button').eq(2).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Not sorted');
+      // cy.get('.sort-column-button').eq(2).should('have.attr', 'aria-label', 'Not sorted');
 
       // // Redo descending sort
       // clueCanvas.getRedoTool().click();
-      // cy.get('.sort-column-button').eq(2).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Sorted descending');
+      // cy.get('.sort-column-button').eq(2).should('have.attr', 'aria-label', 'Sorted descending');
       // testData.expectedSorts.score.desc.forEach((expectedValue, index) => {
       //   tableToolTile.getTableCellWithRowColIndex(index, 4).should('contain', expectedValue);
       // });
@@ -449,13 +449,13 @@ context('Table Tool Tile', function () {
       cy.log('Testing Notes column sorting');
       tableToolTile.getColumnHeader().eq(3).click();
       cy.get('.sort-column-button').eq(3).click();
-      cy.get('.sort-column-button').eq(3).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Sorted ascending');
+      cy.get('.sort-column-button').eq(3).should('have.attr', 'aria-label', 'Sorted ascending');
       testData.expectedSorts.notes.asc.forEach((expectedValue, index) => {
         tableToolTile.getTableCellWithRowColIndex(index, 5).should('contain', expectedValue);
       });
       // Sort descending
       cy.get('.sort-column-button').eq(3).click();
-      cy.get('.sort-column-button').eq(3).find('[data-testid^="sort-indicator-"]').should('have.attr', 'aria-label', 'Sorted descending');
+      cy.get('.sort-column-button').eq(3).should('have.attr', 'aria-label', 'Sorted descending');
       testData.expectedSorts.notes.desc.forEach((expectedValue, index) => {
         tableToolTile.getTableCellWithRowColIndex(index, 5).should('contain', expectedValue);
       });
@@ -464,7 +464,7 @@ context('Table Tool Tile', function () {
       cy.get('body').click(0, 0); // or another selector outside the table
 
       // Assert the sort indicator is still "Sorted descending"
-      cy.get('.sort-column-button').eq(3).find('[data-testid^="sort-indicator-"]')
+      cy.get('.sort-column-button').eq(3)
         .should('have.attr', 'aria-label', 'Sorted descending');
     });
   });
