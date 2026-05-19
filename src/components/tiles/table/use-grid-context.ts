@@ -17,15 +17,22 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
   const inputRowId = useRef(uniqueId());
   const dataSet = content.dataSet;
 
-  const isSelectedCellInRow = useCallback((rowIdx: number) => {
-    const rowId = dataSet.getCaseAtIndex(rowIdx)?.__id__;
-    if (!rowId) return false;
-    let containsSelectedCell = false;
-    dataSet.selectedCells.forEach(cell => {
-      const { caseId } = cell;
-      if (rowId === caseId) containsSelectedCell = true;
-    });
-    return containsSelectedCell;
+  // True iff this row has either a selected cell or a selected case in it.
+  // Used by ControlsRowFormatter to decide whether to render the remove-row
+  // button — so the button appears when keyboard focus lands on the row label
+  // or controls cell (which select the case) as well as on a data cell.
+  //
+  // NOTE: this is only the per-row gate. There is a second, per-tile gate in
+  // table-tile.scss (`.remove-row-button { display: none }` overridden by
+  // `.tool-tile.selected ... { display: flex !important }`). The button is
+  // visible only when BOTH gates pass: this predicate returns true AND the
+  // ancestor tile has the `selected` class. If you're debugging "why doesn't
+  // the button appear," check the CSS too.
+  const isSelectedCaseInRow = useCallback((rowIdx: number) => {
+    const caseId = dataSet.getCaseAtIndex(rowIdx)?.__id__;
+    if (!caseId) return false;
+    if (dataSet.isCaseSelected(caseId)) return true;
+    return dataSet.selectedCells.some(cell => cell.caseId === caseId);
   }, [dataSet]);
   const isColumnSelected = useCallback((columnId: string) => dataSet.isAttributeSelected(columnId),
     [dataSet]);
@@ -89,11 +96,11 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
     showRowLabels,
     isColumnSelected,
     onSelectColumn: selectColumn,
-    isSelectedCellInRow,
+    isSelectedCaseInRow,
     onSelectRowById: selectRowById,
     onSelectOneRow: selectOneRow,
     onClearSelection: clearSelection
-  }), [clearSelection, isColumnSelected, isSelectedCellInRow, selectColumn, selectOneRow, selectRowById,
+  }), [clearSelection, isColumnSelected, isSelectedCaseInRow, selectColumn, selectOneRow, selectRowById,
         showRowLabels]);
 
   // called by ReactDataGrid when selected rows change
