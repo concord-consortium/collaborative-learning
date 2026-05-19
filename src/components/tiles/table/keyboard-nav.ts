@@ -6,6 +6,7 @@
  */
 
 import type { MutableRefObject, RefObject } from "react";
+import type { FocusContentContext } from "@concord-consortium/accessibility-tools/hooks";
 import type { DataGridHandle } from "react-data-grid";
 
 export type CellPosition = { idx: number; rowIdx: number };
@@ -74,10 +75,11 @@ export function createBodyEscapeHandler() {
 }
 
 export function createBodyFocusContent(deps: BodyDeps) {
-  return (context: { reverse: boolean }): boolean => {
+  return (context: FocusContentContext): boolean => {
     const grid = deps.gridRef.current;
     if (!grid?.element) return false;
-    if (!context.reverse) {
+    // Per the FocusContentContext doc, treat unknown modes as forward.
+    if (context.entryMode !== "reverse") {
       // Forward entry: land on the first header cell at (idx=0, rowIdx=-1).
       const headerCell = grid.element.querySelector<HTMLElement>(
         '[role="row"][aria-rowindex="1"] [role="columnheader"][aria-colindex="1"]'

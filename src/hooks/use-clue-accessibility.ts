@@ -2,6 +2,7 @@ import { RefObject, useEffect, useRef } from "react";
 import {
   AccessibilityResult,
   AnnouncementsConfig,
+  FocusContentContext,
   FocusTrapResult,
   NavigationConfig,
   ResizableConfig,
@@ -28,7 +29,7 @@ export interface ClueFocusTrapConfig {
   getContentElement?: () => HTMLElement | undefined;
 
   // Custom focus function for complex editors (Slate, CodeMirror, etc.)
-  focusContent?: (context: { reverse: boolean }) => boolean;
+  focusContent?: (context: FocusContentContext) => boolean;
 
   // Per-slot custom Tab/Escape handlers forwarded to FocusTrapStrategy
   tabHandlers?: Record<string, (event: KeyboardEvent, reverse: boolean) => "handled" | "exit">;
