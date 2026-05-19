@@ -139,17 +139,17 @@ context('Table Tile Keyboard Navigation', function () {
     cy.get('.primary-workspace .column-header-cell').eq(1).find('.sort-column-button')
       .should('be.focused');
 
-    cy.log('Intra-cell roving: Arrow Right at .sort-column-button stays put (last sibling)');
+    cy.log('Intra-cell roving: Arrow Right at .sort-column-button wraps to first sibling');
     cy.realPress('ArrowRight');
-    cy.get('.primary-workspace .column-header-cell').eq(1).find('.sort-column-button')
+    cy.get('.primary-workspace .column-header-cell').eq(1).find('.remove-column-button')
       .should('be.focused');
 
-    cy.log('Intra-cell roving: Arrow Left moves back through siblings');
+    cy.log('Intra-cell roving: Arrow Left wraps and moves back through siblings');
     cy.realPress('ArrowLeft');
-    cy.get('.primary-workspace .column-header-cell').eq(1).find('.header-name')
+    cy.get('.primary-workspace .column-header-cell').eq(1).find('.sort-column-button')
       .should('be.focused');
     cy.realPress('ArrowLeft');
-    cy.get('.primary-workspace .column-header-cell').eq(1).find('.remove-column-button')
+    cy.get('.primary-workspace .column-header-cell').eq(1).find('.header-name')
       .should('be.focused');
     cy.realPress('ArrowLeft');
     cy.get('.primary-workspace .column-header-cell').eq(1).find('.remove-column-button')
