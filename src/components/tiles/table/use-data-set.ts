@@ -1,7 +1,6 @@
 import { useCallback, useRef } from "react";
-import { CellSelectArgs, DataGridHandle } from "react-data-grid";
+import { CellSelectArgs } from "react-data-grid";
 import { ICase, IDataSet } from "../../../models/data/data-set";
-import { ITileModel } from "../../../models/tiles/tile-model";
 import { uniqueId } from "../../../utilities/js-utils";
 import { formatValue } from "./cell-formatter";
 import { TColumn, TPosition, TRow } from "./table-types";
@@ -14,8 +13,6 @@ const isCellSelectable = (position: TPosition, columns: TColumn[], readOnly: boo
 };
 
 interface IUseDataSet {
-  gridRef: React.RefObject<DataGridHandle>;
-  model: ITileModel;
   dataSet: IDataSet;
   triggerColumnChange: () => void;
   rowChanges: number;
@@ -29,11 +26,9 @@ interface IUseDataSet {
   lookupImage: (value: string) => string|undefined;
 }
 export const useDataSet = ({
-  gridRef, model, dataSet, triggerColumnChange, triggerRowChange, readOnly, inputRowId, rows,
+  dataSet, triggerColumnChange, triggerRowChange, readOnly, inputRowId, rows,
   changeHandlers, columns, onColumnResize, lookupImage
 }: IUseDataSet) => {
-  // Used to prevent moving the selected position while actively adding a new row
-  const addingNewRow = useRef(false);
   // RDG's concept of which cell is selected.
   const selectedCell = useRef<TPosition|null>(null);
 
@@ -45,7 +40,7 @@ export const useDataSet = ({
       const _selectedCell = dataSet.selectedCells[0];
       selectedCellIndices.selectedCellColumnIndex = dataSet.attrIndexFromID(_selectedCell.attributeId) ?? -1;
       selectedCellIndices.selectedCellRowIndex = _selectedCell.caseId === inputRowId.current
-        ? rows.length - 1
+        ? dataSet.cases.length
         : dataSet.caseIndexFromID(_selectedCell.caseId);
     }
     return selectedCellIndices;
@@ -57,8 +52,6 @@ export const useDataSet = ({
     // calls selectCell({-1, -1}) and rdg fires the change notification anyway).
     const position: TPosition = { rowIdx: args.rowIdx, idx: args.column?.idx ?? -1 };
     selectedCell.current = position;
-    // We don't update the position while adding a new row so we can move to the new row if necessary.
-    if (addingNewRow.current) return;
 
     // If the new position is (-1, -1), deselect all cells and bail
     if (position.rowIdx === -1 && position.idx === -1) {
@@ -87,7 +80,7 @@ export const useDataSet = ({
 
     if (isCellSelectable(position, columns, readOnly)) {
       // Set the dataSet's selected cell
-      const newRowId = position.rowIdx === rows.length - 1
+      const newRowId = position.rowIdx === dataSet.cases.length
         ? inputRowId.current
         : dataSet.caseIDFromIndex(position.rowIdx);
       const newColumnId = dataSet.attrIDFromIndex(position.idx - 1);
@@ -97,11 +90,20 @@ export const useDataSet = ({
         dataSet.setSelectedCells([{ attributeId: newColumnId, caseId: newRowId }]);
         triggerRowChange();
       }
+    } else if (position.rowIdx < dataSet.cases.length) {
+      // Row label or controls column on a real body row (not the input row).
+      // Select the case so the row highlight + remove-row button appear —
+      // gives keyboard users a way to select rows. setSelectedCases clears
+      // any existing cell/attribute selection, so navigating from a data
+      // cell to a non-data cell correctly drops the cell selection.
+      // No triggerRowChange: dataSet is observable, and the manual trigger
+      // forces columnWidths to recompute mid-keydown, which can remount the
+      // remove-row button and swallow the Enter -> click on that button.
+      const rowId = dataSet.caseIDFromIndex(position.rowIdx);
+      if (rowId && !dataSet.isCaseSelected(rowId)) {
+        dataSet.setSelectedCases([rowId]);
+      }
     }
-    // Non-data positions (row label column, controls column) are valid Tab stops
-    // under cooperative roving — leave RDG's selectedPosition alone and don't
-    // mirror them to dataSet. The old fallback that redirected away from these
-    // columns is incompatible with keyboard navigation landing in them.
   };
 
   const getUpdatedRowAndColumn = (_rows?: TRow[], _columns?: TColumn[]) => {
@@ -130,17 +132,8 @@ export const useDataSet = ({
         };
         const inputRowIndex = _rows.findIndex(row => row.__id__ === inputRowId.current);
         if ((inputRowIndex >= 0) && (selectedCellRowIndex === inputRowIndex)) {
-          // Prevent the selected cell position from updating while adding rows
-          addingNewRow.current = true;
           onAddRows([{ ...updatedCaseValues, __id__: inputRowId.current }]);
           inputRowId.current = uniqueId();
-          // After adding the new rows to the dataSet, actually update the selected cell position
-          setTimeout(() => {
-            addingNewRow.current = false;
-            if (selectedCell.current) {
-              gridRef.current?.selectCell(selectedCell.current);
-            }
-          });
         } else {
           onUpdateRow(updatedCaseValues);
         }
