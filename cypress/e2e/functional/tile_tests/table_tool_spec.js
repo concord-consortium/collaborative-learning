@@ -25,12 +25,7 @@ function beforeTest() {
 }
 
 context('Table Tool Tile', function () {
-  // TODO bug #20 (react18-known-issues.md): the `clickToolbarButton('table',
-  // 'set-expression')` call below fails — the button is in the DOM but not visible.
-  // Skipping the entire block until #20 is investigated; the row-removal assertions
-  // earlier in the block presumably still work but are blocked from running by this
-  // skip.
-  it.skip('Test table functions', function () {
+  it('Test table functions', function () {
     beforeTest();
 
     cy.log('will add a table to canvas');

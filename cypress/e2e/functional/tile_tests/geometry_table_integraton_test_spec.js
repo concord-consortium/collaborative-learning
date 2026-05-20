@@ -86,10 +86,7 @@ context('Geometry Table Integration', function () {
       tableToolTile.typeInTableCellXY(1, 2, '200'); // point is now at (7,200)
     });
     geometryToolTile.getGraphPoint().should('have.length', 6);
-    // TODO bug #16 (react18-known-issues.md): re-edit of the same cell doesn't reach
-    // the dataset on this branch (the `(-1,-1)` selection clear path drops the
-    // commit), so the graph doesn't rescale. Held pending CLUE-453 rdg focus rework.
-    // geometryToolTile.getGraphAxisTickLabels().eq(1).text().should('eq', '50');
+    geometryToolTile.getGraphAxisTickLabels().eq(1).text().should('eq', '50');
 
     cy.log('verify table can be linked to two geometry tiles');
     clueCanvas.addTile('geometry');
