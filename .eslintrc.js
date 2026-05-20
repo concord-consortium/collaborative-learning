@@ -32,10 +32,12 @@ module.exports = {
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-confusing-non-null-assertion": "error",
       "@typescript-eslint/no-empty-interface": "off",
+      "@typescript-eslint/no-empty-object-type": "off",  // typescript-eslint v8 successor of no-empty-interface
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-non-null-assertion": "off",  // 27 as of 2020-09-13
       "@typescript-eslint/no-require-imports": "error",
       "@typescript-eslint/no-shadow": ["error", { builtinGlobals: false, hoist: "all", allow: ["resolve", "reject"] }],
+      "@typescript-eslint/no-unused-expressions": ["error", { allowShortCircuit: true }],
       "@typescript-eslint/no-unused-vars": "off", // moved to unused-imports
       "@typescript-eslint/prefer-optional-chain": "off",  // 300 as of 2020-09-13
       "mocha/no-exclusive-tests": "warn", // error in .eslintrc.build.js
@@ -52,7 +54,7 @@ module.exports = {
       "no-shadow": "off", // superseded by @typescript-eslint/no-shadow
       "no-tabs": "error",
       "no-unneeded-ternary": "error",
-      "no-unused-expressions": ["error", { allowShortCircuit: true }],
+      "no-unused-expressions": "off",  // superseded by @typescript-eslint/no-unused-expressions
       "no-unused-vars": "off",  // superseded by @typescript-eslint/no-unused-vars
       "no-useless-call": "error",
       "no-useless-concat": "error",

@@ -185,7 +185,7 @@ export const GeometryContentModel = GeometryBaseContentModel
   .views(self => ({
     get linkedDataSets(): SharedDataSetType[] {
       // MobX isn't properly monitoring getTileSharedModels, so we're manually forcing an update to this view here
-      // eslint-disable-next-line no-unused-expressions
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       self.updateSharedModels;
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const foundSharedModels = sharedModelManager?.isReady

@@ -33,7 +33,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
     ? problem.title + (problem.subtitle ? `: ${problem.subtitle}` : "")
     : undefined;
 
-  let imageDragDrop: ImageDragDrop;
+  let imageDragDrop: ImageDragDrop | undefined;
 
   // For testing purposes, have cmd-shift-e reset all exemplars to their default state
   const resetAllExemplars = useCallback(() => {

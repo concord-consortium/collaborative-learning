@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Menu, MenuButton, MenuItem, MenuList, Portal } from '@chakra-ui/react';
+import { Menu, MenuButton, MenuItem, MenuList, Portal } from '../../components/chakra-menu';
 import { useBarGraphModelContext } from './bar-graph-content-context';
 import { LegendColorRow } from './legend-color-row';
 

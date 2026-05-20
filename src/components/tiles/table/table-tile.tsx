@@ -67,7 +67,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // Forces the table to rerender when its dataset's selection changes
   useEffect(() => {
     triggerRowChange();
-    dataSet.selectionIdString; // eslint-disable-line no-unused-expressions
+    dataSet.selectionIdString; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }, [dataSet.selectionIdString, triggerRowChange]);
 
   // Set up user specified columns and function to measure a column

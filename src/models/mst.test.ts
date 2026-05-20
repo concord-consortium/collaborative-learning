@@ -748,7 +748,7 @@ describe("mst", () => {
     events.push("-");
 
     // Simple access does a sensible thing
-    // eslint-disable-next-line no-unused-expressions
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     store.parent;
     expect(events).toEqual([
         "-",
@@ -852,7 +852,7 @@ describe("mst", () => {
     const parent = Parent.create({child: {title: "snapshot"}});
 
     log("before child access");
-    // eslint-disable-next-line no-unused-expressions
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     parent.child;
 
     expect(events).toEqual([
@@ -892,7 +892,7 @@ describe("mst", () => {
     log("before Parent.create");
     const parent = Parent.create({child});
     log("before child access");
-    // eslint-disable-next-line no-unused-expressions
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     parent.child;
 
     expect(events).toEqual([

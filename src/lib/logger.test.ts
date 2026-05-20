@@ -56,7 +56,7 @@ describe("uninitialized logger", () => {
   });
 
   it("does not log when not initialized", (done) => {
-    const TEST_LOG_MESSAGE = 999;
+    const TEST_LOG_MESSAGE = 999 as unknown as LogEventName;
     const mockPostHandler = jest.fn((req, res) => {
       expect(mockPostHandler).toHaveBeenCalledTimes(1);
       done();
@@ -107,7 +107,7 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
   });
 
   it("does not log in dev/qa/test modes", (done) => {
-    const TEST_LOG_MESSAGE = 999;
+    const TEST_LOG_MESSAGE = 999 as unknown as LogEventName;
     const mockPostHandler = jest.fn((req, res) => {
       expect(mockPostHandler).toHaveBeenCalledTimes(1);
       done();
@@ -158,7 +158,7 @@ describe("demo logger with DEBUG_LOGGER false", () => {
   });
 
   it("does not log in demo mode", (done) => {
-    const TEST_LOG_MESSAGE = 999;
+    const TEST_LOG_MESSAGE = 999 as unknown as LogEventName;
     const mockPostHandler = jest.fn((req, res) => {
       expect(mockPostHandler).toHaveBeenCalledTimes(1);
       done();

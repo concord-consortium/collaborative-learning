@@ -1,5 +1,5 @@
 import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
-import { ITileModel } from "../tiles/tile-model";
+import { ITileMapLookup, ITileModel } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
 import { withoutUndo } from "../history/without-undo";
 import { isPlaceholderTile } from "../tiles/placeholder/placeholder-content";
@@ -54,7 +54,7 @@ export const TileRowModel = types
     get tileIds() {
       return self.tiles.map(tile => tile.tileId);
     },
-    acceptTileDrop(rowInfo: IDropRowInfo, tileMap: Map<string|number, ITileModel>) {
+    acceptTileDrop(rowInfo: IDropRowInfo, tileMap: ITileMapLookup) {
       const rowDropLocation = rowInfo.rowDropLocation;
       return !self.isSectionHeader
         && !this.isFixedPositionRow(tileMap)
@@ -67,7 +67,7 @@ export const TileRowModel = types
     hasTile(tileId: string) {
       return self.tiles.findIndex(tileRef => tileRef.tileId === tileId) >= 0;
     },
-    isPlaceholderRow(tileMap: Map<string|number, ITileModel>) {
+    isPlaceholderRow(tileMap: ITileMapLookup) {
       return (this.tileCount > 0) &&
         self.tiles.every((entry) => {
           const tile = entry.tileId ? tileMap.get(entry.tileId) : undefined;
@@ -78,7 +78,7 @@ export const TileRowModel = types
     isEmbeddedRow(): boolean {
       return getParentWithTypeName(self, "TileModel") !== undefined;
     },
-    isFixedPositionRow(tileMap: Map<string|number, ITileModel>) {
+    isFixedPositionRow(tileMap: ITileMapLookup) {
       return self.tiles.every(tileRef => tileMap.get(tileRef.tileId)?.isFixedPosition ?? false);
     },
     indexOfTile(tileId: string) {

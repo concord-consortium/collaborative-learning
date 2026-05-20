@@ -113,5 +113,5 @@ declare global {
 global.ResizeObserver = require('resize-observer-polyfill');
 
 // Polyfill TextEncoder/TextDecoder for jsdom environment
-global.TextEncoder = TextEncoder;
+global.TextEncoder = TextEncoder as unknown as typeof global.TextEncoder;
 global.TextDecoder = TextDecoder as typeof global.TextDecoder;

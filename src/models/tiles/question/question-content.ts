@@ -4,7 +4,7 @@ import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info
 import { RowList } from "../../document/row-list";
 import { isPlaceholderContent, kPlaceholderTileType } from "../placeholder/placeholder-content";
 import { StringBuilder } from "../../../utilities/string-builder";
-import { ITileModel } from "../tile-model";
+import { ITileMapLookup } from "../tile-model";
 import { kTextTileType } from "../text/text-content";
 import { generateQuestionId } from "./question-utils";
 import { kQuestionTileType } from "./question-types";
@@ -44,7 +44,7 @@ export const QuestionContentModel = types.compose(
     questionId: types.optional(types.string, () => generateQuestionId()),
   })
   .views(self => ({
-    exportJson(options: ITileExportOptions, tileMap: Map<string, ITileModel>) {
+    exportJson(options: ITileExportOptions, tileMap: ITileMapLookup) {
       const builder = new StringBuilder();
       builder.pushLine("{");
       builder.pushLine(`"type": "${self.type}",`, 2);

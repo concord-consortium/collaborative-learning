@@ -116,7 +116,7 @@ export const TileModel = types
     get isFixedPosition() {
       return self.fixedPosition;
     },
-    exportJson(options?: ITileExportOptions, tileMap?: Map<string|number, ITileModel>): string | undefined {
+    exportJson(options?: ITileExportOptions, tileMap?: ITileMapLookup): string | undefined {
       const { includeId, excludeTitle, ...otherOptions } = options || {};
       let contentJson = (self.content as any).exportJson?.(otherOptions, tileMap);
       if (!contentJson) return;
@@ -245,3 +245,9 @@ export const TileModel = types
 export interface ITileModel extends Instance<typeof TileModel> {}
 export interface ITileModelSnapshotIn extends SnapshotIn<typeof TileModel> {}
 export interface ITileModelSnapshotOut extends SnapshotOut<typeof TileModel> {}
+
+// A narrow read-only view of a tile map. Both `Map<K, V>` and MST's `IMSTMap`
+// satisfy this; the interfaces of `Map` and `ReadonlyMap` themselves diverge in
+// TS 5+ on iterator methods (`MapIterator` vs `IterableIterator`), so neither
+// works as a parameter type that accepts both.
+export type ITileMapLookup = Pick<Map<string | number, ITileModel>, "get">;

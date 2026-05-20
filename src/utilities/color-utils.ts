@@ -23,7 +23,7 @@ export const luminanceColorString = (color: string) => {
 export const isLightColorRequiringContrastOffset = (color?: string) => {
   const kLightLuminanceThreshold = 0.85;
   const luminance = color && luminanceColorString(color);
-  return (luminance != null) && (luminance >= kLightLuminanceThreshold);
+  return (typeof luminance === "number") && (luminance >= kLightLuminanceThreshold);
 };
 
 export interface ClueColor {

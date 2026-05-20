@@ -1,5 +1,6 @@
 import mockXhr from "xhr-mock";
 import { Logger } from "./logger";
+import { LogEventName } from "./logger-types";
 import { InvestigationModel } from "../models/curriculum/investigation";
 import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores, createStores } from "../models/stores/stores";
@@ -44,7 +45,7 @@ describe("dev/qa/test logger with DEBUG_LOGGER true", () => {
   });
 
   it("does not log in dev/qa/test modes", (done) => {
-    const TEST_LOG_MESSAGE = 999;
+    const TEST_LOG_MESSAGE = 999 as unknown as LogEventName;
     const mockPostHandler = jest.fn((req, res) => {
       expect(mockPostHandler).toHaveBeenCalledTimes(1);
       done();

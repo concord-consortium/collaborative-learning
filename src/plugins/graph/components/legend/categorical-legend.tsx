@@ -195,8 +195,8 @@ export const CategoricalLegend = observer(function CategoricalLegend(
         numCategories = categoriesRef.current?.length ?? 0,
         legendBounds = layout?.getComputedBounds('legend'),
         localPt = {
-          x: event.x - legendBounds?.left ?? 0,
-          y: event.y - labelHeight - legendBounds?.top ?? 0
+          x: event.x - (legendBounds?.left ?? 0),
+          y: event.y - labelHeight - (legendBounds?.top ?? 0)
         },
         catIndex = coordinatesToCatIndex(lod, numCategories, localPt),
         keyLocation = catLocation(lod, categoryData.current, catIndex);
