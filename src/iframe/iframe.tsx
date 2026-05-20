@@ -40,13 +40,11 @@ const renderEditor = () => {
     root = createRoot(document.getElementById("app")!);
   }
   root.render(
-    <div id="app">
-      <IframeDocumentEditor
-        initialValue={initialValue}
-        handleUpdateContent={handleUpdateContent}
-        fullHeight={fullHeight}
-        noBorder={noBorder}
-      />
-    </div>
+    <IframeDocumentEditor
+      initialValue={initialValue}
+      handleUpdateContent={handleUpdateContent}
+      fullHeight={fullHeight}
+      noBorder={noBorder}
+    />
   );
 };
