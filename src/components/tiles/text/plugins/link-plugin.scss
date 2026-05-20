@@ -1,0 +1,39 @@
+@import "../../../vars";
+
+.slate-link.link-mode {
+  cursor: pointer;
+  &:hover { text-decoration: underline; }
+  &:focus-visible { outline: 2px solid $workspace-teal; outline-offset: 2px; }
+  &.slate-selected { background-color: rgba($workspace-teal, 0.15); }
+}
+
+.slate-link.button-mode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 6px 0;
+  padding: 8px 16px;
+  background-color: $problem-orange-light-5;
+  color: $charcoal-dark-2;
+  border: 1px solid darken($problem-orange-light-5, 18%);
+  border-radius: 4px;
+  font-family: Lato, sans-serif;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    border: 1px solid $charcoal-light-1;
+  }
+  &:active, &:focus-visible {
+    outline: 2px solid $highlight-blue;
+    outline-offset: 0;
+  }
+  &.slate-selected {
+    outline: 2px solid $highlight-blue;
+    outline-offset: 0;
+  }
+}

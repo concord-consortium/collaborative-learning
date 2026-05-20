@@ -81,6 +81,16 @@ $modal-footer-height: 45px;
       height: $modal-control-height;
       border: $modal-control-border;
       border-radius: $modal-control-border-radius;
+
+      &:hover {
+        border: solid 1.5px $charcoal-light-1;
+        background-color: $workspace-teal-light-6;
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: inset 0 0 0 2px $focus-ring-color, inset 0 0 0 3px #fff;
+      }
     }
   }
 
@@ -102,17 +112,23 @@ $modal-footer-height: 45px;
       border: $modal-control-border;
       border-radius: $modal-control-border-radius;
       outline: none;
+      font-family: Lato, sans-serif;
 
       &.disabled {
         opacity: 35%;
       }
 
       &.default:not(.disabled) {
-        background-color: $charcoal-light-6;
+        background-color: $workspace-teal-light-4;
       }
 
-      &:hover:not(.disabled), &:focus:not(.disabled) {
+      &:hover:not(.disabled) {
         background-color: $workspace-teal-light-4;
+      }
+
+      &:focus:not(.disabled) {
+        background-color: $workspace-teal-light-4;
+        box-shadow: inset 0 0 0 2px $focus-ring-color, inset 0 0 0 3px #fff;
       }
 
       &:active:not(.disabled) {

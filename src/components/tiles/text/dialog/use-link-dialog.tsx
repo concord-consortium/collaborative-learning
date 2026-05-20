@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { CustomElement, Editor, EFormat, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
+import { v4 as uuid } from "uuid";
+import { Editor, EFormat, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
+import { ClueLinkElement } from "../plugins/link-plugin";
 
 import { useCustomModal } from "../../../../hooks/use-custom-modal";
+import { logTileChangeEvent } from "../../../../models/tiles/log/log-tile-change-event";
+import { LogEventName } from "../../../../lib/logger-types";
+import { LinkDisplayMode, TextContentModelType } from "../../../../models/tiles/text/text-content";
 
 import LinkIcon from "../../../../assets/icons/text/link-text-icon.svg";
 import './use-link-dialog.scss';
 
 interface IContentProps {
   setUrl: React.Dispatch<React.SetStateAction<string>>;
+  displayMode: LinkDisplayMode;
+  setDisplayMode: (mode: LinkDisplayMode) => void;
   text: string;
   url: string;
 }
-export const LinkDialogContent = ({ setUrl, text, url }: IContentProps) => {
+export const LinkDialogContent = ({ setUrl, displayMode, setDisplayMode, text, url }: IContentProps) => {
   return (
     <div className="link-dialog-content">
       <p>Link text: {text}</p>
@@ -22,6 +29,31 @@ export const LinkDialogContent = ({ setUrl, text, url }: IContentProps) => {
         type="url"
         value={url}
       />
+      <fieldset className="display-as-fieldset">
+        <legend>Display as:</legend>
+        <div className="radio-button-container">
+          <input
+            type="radio"
+            id="display-link"
+            name="displayMode"
+            value="link"
+            checked={displayMode === "link"}
+            onChange={e => { if (e.target.checked) setDisplayMode("link"); }}
+          />
+          <label htmlFor="display-link">Link</label>
+        </div>
+        <div className="radio-button-container">
+          <input
+            type="radio"
+            id="display-button"
+            name="displayMode"
+            value="button"
+            checked={displayMode === "button"}
+            onChange={e => { if (e.target.checked) setDisplayMode("button"); }}
+          />
+          <label htmlFor="display-button">Button</label>
+        </div>
+      </fieldset>
     </div>
   );
 };
@@ -31,43 +63,75 @@ interface IProps {
   onClose?: () => void;
   selectedLink?: any;
   text: string;
+  tileId?: string;
+  textContent: TextContentModelType;
 }
-export const useLinkDialog = ({ editor, onClose, selectedLink, text }: IProps) => {
-  const [url, setUrl] = useState(selectedLink?.href ?? "");
+export const useLinkDialog = ({ editor, onClose, selectedLink, text, tileId, textContent }: IProps) => {
+  const [url, setUrl] = useState<string>(selectedLink?.href ?? "");
+  const [displayMode, setDisplayMode] = useState<LinkDisplayMode>(
+    textContent.getLinkDisplayMode(selectedLink?.linkId)
+  );
+
   useEffect(() => {
     setUrl(selectedLink?.href ?? "");
-  }, [selectedLink]);
+    setDisplayMode(textContent.getLinkDisplayMode(selectedLink?.linkId));
+  }, [selectedLink, textContent]);
+
+  const handleDisplayModeChange = (mode: LinkDisplayMode) => {
+    setDisplayMode(mode);
+    if (tileId) {
+      logTileChangeEvent(LogEventName.TEXT_LINK_DISPLAY_CHANGE, {
+        operation: "display-mode-change",
+        change: { displayMode: mode },
+        tileId
+      });
+    }
+  };
 
   const handleClick = () => {
     if (selectedLink) {
       const at = ReactEditor.findPath(editor, selectedLink);
       if (url === "") {
-        // Remove link if the url is deleted
+        // Remove link if the url is deleted; also clear its display preference
+        if (selectedLink.linkId) {
+          textContent.removeLinkDisplayMode(selectedLink.linkId);
+        }
         Transforms.unwrapNodes(editor, { at });
       } else {
-        // Update the url
+        // Reuse the existing linkId if present; otherwise generate a new one
+        // so the display mode has a stable key to target.
+        const linkId = selectedLink.linkId ?? uuid();
+        // Strip the legacy CLUE-476 displayMode field if present, so we don't
+        // leave it on the slate element.
+        const { displayMode: _unused, ...rest } = selectedLink;
         Transforms.setNodes(
           editor,
-          { ...selectedLink, href: url },
+          { ...rest, href: url, linkId },
           { at }
         );
+        textContent.setLinkDisplayMode(linkId, displayMode);
       }
     } else {
-      // Create a new link
-      const element = {
-        type: EFormat.link,
-        href: url
-      } as CustomElement;
+      // Create a new link with a fresh linkId
+      const linkId = uuid();
+      const element: ClueLinkElement = {
+        type: EFormat.link as ClueLinkElement["type"],
+        href: url,
+        linkId,
+        children: []
+      };
       Transforms.wrapNodes(editor, element, { split: true });
       Transforms.collapse(editor, { edge: "end" });
+      textContent.setLinkDisplayMode(linkId, displayMode);
     }
   };
 
   const [showModal, hideModal] = useCustomModal({
+    className: "link-editor-modal",
     Icon: LinkIcon,
     title: "Link Editor",
     Content: LinkDialogContent,
-    contentProps: { setUrl, text, url },
+    contentProps: { setUrl, displayMode, setDisplayMode: handleDisplayModeChange, text, url },
     buttons: [
       { label: "Cancel" },
       { label: "Save",
@@ -76,7 +140,7 @@ export const useLinkDialog = ({ editor, onClose, selectedLink, text }: IProps) =
       }
     ],
     onClose
-  }, [selectedLink, text, url]);
+  }, [selectedLink, text, url, displayMode, tileId, textContent]);
 
   return [showModal, hideModal];
 };

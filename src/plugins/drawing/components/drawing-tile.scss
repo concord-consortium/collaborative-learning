@@ -1,6 +1,10 @@
 @import "../../../components/vars";
 @import "../../../utilities/voice-typing-overlay";
 
+$object-list-border-width: 1.5px;
+$closed-object-list-inner-width: 26px;
+$closed-object-list-total-width: $closed-object-list-inner-width + 2 * $object-list-border-width;
+
 .drawing-tool-tile {
   .transformable[tabindex="0"] {
     &:focus-visible,
@@ -30,8 +34,12 @@
     display: flex;
     justify-content: flex-start;
 
+    .object-list-spacer {
+      flex: 0 0 $closed-object-list-total-width;
+    }
+
     .object-list {
-      border: solid 1.5px $charcoal-light-1;
+      border: solid $object-list-border-width $charcoal-light-1;
       border-radius: 0px 3px 3px 0px;
       display: flex;
       flex-direction: column;
@@ -44,8 +52,7 @@
       }
 
       &.closed {
-        // kClosedObjectListPanelWidth is this plus 3px border width
-        flex: 0 0 26px;
+        flex: 0 0 $closed-object-list-inner-width;
 
         button {
           width: 100%;
@@ -229,4 +236,3 @@
     }
   }
 }
-

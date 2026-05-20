@@ -75,9 +75,12 @@ export function renderSlateBlock(blockName: string, attributes: any, children: a
     case "image":  // TODO: This is broken.
       // return (<img src={src} title={title} />);
       // fall through
-    case "link":   // TODO: This is broken.
-      // return (<a href={href} {...attributes}>{children}</a>);
-      // fall through
+    case "link":
+      // Link rendering (both interactive and HTML export) is handled by
+      // LinkComponent registered via registerElementComponent in link-plugin.tsx.
+      // During HTML export, LinkComponent detects serialization via useSerializing()
+      // and renders a plain <a href>. This case is a fallback only.
+      return (<a {...attributes}>{children}</a>);
     default:
       return null;
   }

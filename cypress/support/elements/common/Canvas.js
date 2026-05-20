@@ -50,8 +50,8 @@ class Canvas {
     return cy.get('[data-test=list-item-icon-publish-workspace]');
   }
 
-  getEditTitleIcon() {
-    return cy.get('[data-test=personal-doc-title] [data-test=edit-icon]');
+  getDocRenameButton() {
+    return cy.get('[data-test=personal-doc-title] [data-test=doc-rename-button]');
   }
 
   createNewExtraDocumentFromFileMenu(title, type, {
@@ -114,7 +114,7 @@ class Canvas {
   }
 
   editTitlewithPencil(title) {
-    this.getEditTitleIcon().click()
+    this.getDocRenameButton().click()
       .then(function () {
         dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
         dialog.getDialogTextInput()

@@ -83,7 +83,6 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     }
   };
 
-
   const tileAdditionalApi = useMemo(() => ({
     exportContentAsTileJson: (options?: ITileExportOptions) => {
       return contentRef.current.exportJson(options);
@@ -290,6 +289,12 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
 
   const getObjectListPanelWidth = () => {
     if (readOnly) return 0;
+
+    // When the tile is not selected, the panel is not shown and a same-width spacer
+    // is rendered in its place so the drawing layer's left edge doesn't shift.
+    // Report that width so sparrows stay anchored.
+    if (!ui.isSelectedTile(model)) return kClosedObjectListPanelWidth;
+
     return contentRef.current.listViewOpen ? kOpenObjectListPanelWidth : kClosedObjectListPanelWidth;
   };
 
@@ -301,6 +306,14 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       x: drawingToolElement.current.clientWidth-getObjectListPanelWidth(),
       y: drawingToolElement.current.clientHeight
     };
+  };
+
+  const renderObjectListView = () => {
+    if (readOnly) return null;
+    if (ui.isSelectedTile(model)) {
+      return <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />;
+    }
+    return <div className="object-list-spacer" aria-hidden="true" data-testid="object-list-spacer" />;
   };
 
   const handleNavigatorPan = (direction: NavigatorDirection) => {
@@ -382,7 +395,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             <TileToolbar tileType="drawing" readOnly={!!readOnly} tileElement={tileElt} />
           </div>
           <div className="drawing-container">
-            {!readOnly && <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />}
+            {renderObjectListView()}
             <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: updateTileVisibleBoundingBox }}>
               <DrawingLayerView
                 {...props}

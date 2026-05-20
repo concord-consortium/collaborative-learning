@@ -206,6 +206,29 @@ describe("import drawing", () => {
     expect(importToObjects(inputWithId)[0]).toEqual(groupDataWithId);
   });
 
+  it("preserves group width and height for unversioned snapshots whose groups already have them", () => {
+    const groupData = {
+      type: "group",
+      x: 0, y: 0,
+      width: 60, height: 60,
+      rotation: 0, hFlip: false, vFlip: false, visible: true,
+      objects: [
+        { type: "rectangle", x: 0, y: 0, width: 0.166, height: 0.166,
+          rotation: 0, fill: "#ccc", stroke: "#888", strokeDashArray: "",
+          strokeWidth: 1, hFlip: false, vFlip: false, visible: true },
+        { type: "rectangle", x: 0.833, y: 0.833, width: 0.166, height: 0.166,
+          rotation: 0, fill: "#ccc", stroke: "#888", strokeDashArray: "",
+          strokeWidth: 1, hFlip: false, vFlip: false, visible: true }
+      ]
+    };
+    // No `version` field
+    const input = { type: "Drawing" as const, objects: [groupData] };
+
+    const importedGroup = importToObjects(input)[0] as GroupObjectType;
+    expect(importedGroup.width).toBe(60);
+    expect(importedGroup.height).toBe(60);
+  });
+
   it("should import and update simple v1.0.0 groups", () => {
     const groupData = {
       type: "group",

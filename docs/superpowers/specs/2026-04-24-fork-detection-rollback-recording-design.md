@@ -6,7 +6,7 @@
 
 ## Problem
 
-Two bugs in the scope-based fork-merge implementation, both surfaced by the manual test scripts in [docs/group-docs/clue-316-manual-test-scripts.md](../../group-docs/clue-316-manual-test-scripts.md).
+Two bugs in the scope-based fork-merge implementation, both surfaced by the manual test scripts in [docs/group-docs/test-scripts/](../../group-docs/test-scripts/) (originally drafted as `clue-316-manual-test-scripts.md`).
 
 ### 1. Fork detection skipped on subsequent batches
 

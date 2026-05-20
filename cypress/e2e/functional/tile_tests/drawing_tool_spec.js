@@ -147,13 +147,15 @@ context('Draw Tool Tile', function () {
     cy.log("has a navigator panel to pan drawing");
     drawToolTile.getDrawTileNavigatorPanel().should("exist");
 
-    cy.log("navigator is not shown when tile is not selected");
+    cy.log("navigator and show/sort panel are not shown when tile is not selected");
     const textTile = new TextToolTile;
     clueCanvas.addTile("text");
     textTile.getTextTile().click();
     drawToolTile.getDrawTileNavigatorPanel().should("not.exist");
+    drawToolTile.getDrawTileShowSortPanel().should("not.exist");
     drawToolTile.getDrawTile().click();
     drawToolTile.getDrawTileNavigatorPanel().should("exist");
+    drawToolTile.getDrawTileShowSortPanel().should("exist");
 
     cy.log("can delete objects and close panel");
     // Reset zoom to 100%

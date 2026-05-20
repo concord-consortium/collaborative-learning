@@ -36,6 +36,12 @@ const Content: React.FC<IContentProps> = (
           value={name}
           onChange={(e) => setName(e.target.value)} />
       </LabelRadioButton>
+      <LabelRadioButton
+        display="Equation"
+        label={ELabelOption.kEquation}
+        checkedLabel={labelOption}
+        setLabelOption={setLabelOption}
+      />
     </fieldset>
   );
 };

@@ -20,7 +20,8 @@ export type JXGParentType = string | number | undefined | JXGCoordPair | JXGUnsa
 export enum ELabelOption {
   kNone = "none",
   kLabel = "label", // parents
-  kLength = "length"
+  kLength = "length",
+  kEquation = "equation"
 }
 
 export interface IBoardScale {
