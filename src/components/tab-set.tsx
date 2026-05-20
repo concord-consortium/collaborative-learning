@@ -5,6 +5,7 @@ import "./tab-set.scss";
 
 interface IProps {
   className?: string;
+  children?: React.ReactNode;
 }
 
 @observer

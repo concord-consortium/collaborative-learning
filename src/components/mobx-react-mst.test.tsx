@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { destroy, detach, IAnyStateTreeNode, Instance, types } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { observable } from "mobx";
@@ -115,7 +115,9 @@ describe("behavior of mobx-react with mst objects", () => {
     expect(log).toEqual(initialLog);
     clearLog();
 
-    list.removeFirstItem();
+    act(() => {
+      list.removeFirstItem();
+    });
 
     const itemsAfterRemove = screen.getAllByRole("listitem");
     expect(itemsAfterRemove).toHaveLength(1);
@@ -141,7 +143,9 @@ describe("behavior of mobx-react with mst objects", () => {
     clearLog();
 
     jestSpyConsole("warn", spy => {
-      list.removeFirstDescriptionAndItem();
+      act(() => {
+        list.removeFirstDescriptionAndItem();
+      });
       expect(spy).toHaveBeenCalled();
     });
 
@@ -196,7 +200,9 @@ describe("behavior of mobx-react with mst objects", () => {
     clearLog();
 
     jestSpyConsole("warn", spy => {
-      testList.removeFirstDescriptionAndItem();
+      act(() => {
+        testList.removeFirstDescriptionAndItem();
+      });
       expect(spy).not.toHaveBeenCalled();
     });
 
@@ -224,7 +230,9 @@ describe("behavior of mobx-react with mst objects", () => {
     clearLog();
 
     jestSpyConsole("warn", spy => {
-      testList.removeFirstDescriptionAndItemSoon();
+      act(() => {
+        testList.removeFirstDescriptionAndItemSoon();
+      });
       expect(spy).not.toHaveBeenCalled();
     });
 

@@ -42,6 +42,10 @@ describe("NetworkStatus", () => {
 
     act(() => {
       user.setIsFirebaseConnected(false);
+    });
+    // The first re-render queued the setTimeout (via setTimer); flush it in its
+    // own act so React 18 commits the timer callback's state updates.
+    act(() => {
       jest.runAllTimers();
     });
     rerender(jsx);

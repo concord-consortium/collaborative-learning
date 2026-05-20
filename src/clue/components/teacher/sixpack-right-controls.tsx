@@ -13,6 +13,7 @@ interface IProps {
   selectedSectionId: string | null;
   setDocumentViewMode: (documentViewMode: DocumentViewMode) => void;
   setSelectedSectionId: (sectionId: string) => void;
+  children?: React.ReactNode;
 }
 
 @inject("stores")

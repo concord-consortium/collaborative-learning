@@ -19,7 +19,9 @@ export const useErrorAlert = ({
 }: IErrorAlertProps) => {
 
   const TextContent: React.FC = useCallback(() => {
-    return <p>{content}</p>;
+    // `content` is narrowed to string by the surrounding ternary, but TS can't see through
+    // useCallback so we re-narrow here for the React 18 ReactNode typing.
+    return <p>{typeof content === "string" ? content : null}</p>;
   }, [content]);
   const Content = typeof content === "string"
                     ? TextContent

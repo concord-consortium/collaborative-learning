@@ -120,7 +120,6 @@ export class DialogComponent extends BaseComponent<IProps> {
         <div className="dialog-text" data-testid="dialog-text">{dialog.text}</div>
         <div className="dialog-input">
           <select
-            placeholder="Choose a document"
             defaultValue={dialog.copyToDocumentKey /* set so default option is selected at start */}
             value={dialog.copyToDocumentKey}
             style={hasValue ? normal : italic}

@@ -11,7 +11,7 @@ export const kLeaveModalOpen = true;
 
 export interface IModalButton {
   className?: string;
-  label: string | React.FC<any>;
+  label: string;
   isDefault?: boolean;
   isDisabled?: boolean;
   onClick?: (() => void) | (() => boolean); // close dialog on falsy return value
@@ -24,7 +24,7 @@ const invokeButton = (button: IModalButton, onClose: () => void) => {
 
 interface IProps<IContentProps> {
   className?: string;
-  title: string | React.FC<any>;
+  title: string;
   Icon?: React.FC<any>;
   Content: React.FC<IContentProps>;
   contentProps: IContentProps;

@@ -33,3 +33,4 @@ Notes on dependencies, particularly reasons for not updating to their latest ver
 |react-data-grid     |7.0.0-canary.46|7.0.0-beta.16 |Canary.47 changed the RowFormatter props requiring some additional refactoring. Note that `beta` versions come after `canary` versions. We are patching react-data-grid and our patch only applies to 7.0.0-canary.46|
 |react-dom           |17.0.2         |18.2.0        |React 18                                                                             |
 |react-tabs          |3.2.3          |5.1.0         |Version 4 not attempted; Version 5 requires React 18                                 |
+|react-tippy         |1.4.0          |1.4.0         |Unmaintained since May 2020. Migration target if we move off it is [Floating UI](https://floating-ui.com/) (`@floating-ui/react`).|

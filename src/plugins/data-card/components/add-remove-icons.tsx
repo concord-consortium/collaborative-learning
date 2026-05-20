@@ -8,6 +8,7 @@ import "./add-remove-icons.scss";
 interface IconButtonProps {
   className?: string;
   onClick: React.MouseEventHandler<HTMLDivElement>;
+  children?: React.ReactNode;
 }
 
 export const AddIconButton = (props: IconButtonProps) => {

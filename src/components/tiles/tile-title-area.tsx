@@ -1,6 +1,6 @@
-import React from "react";
+import React, { PropsWithChildren } from "react";
 
-export const TileTitleArea: React.FC = ({ children }) => {
+export const TileTitleArea: React.FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <div className="title-area-wrapper" key="title-area">
       <div className="title-area">

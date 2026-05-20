@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Provider } from "mobx-react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { TileToolbarButton } from "./tile-toolbar-button";
 import { registerTileToolbarButtons } from "./toolbar-button-manager";
 import { TileToolbar } from "./tile-toolbar";
@@ -252,7 +252,9 @@ describe("Tile toolbar button", () => {
   it("clicking disabled button announces screen reader message", () => {
     render(<SampleDisabledButton />);
     const button = screen.getByRole("button");
-    button.click();
+    act(() => {
+      button.click();
+    });
     const announcement = screen.getByRole("status");
     expect(announcement).toHaveTextContent("Select something to enable this action");
   });

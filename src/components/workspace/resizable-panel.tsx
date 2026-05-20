@@ -9,6 +9,7 @@ interface IProps {
   headingLabel?: string;
   headingExtra?: React.ReactNode;
   tabIndex?: number;
+  children?: React.ReactNode;
 }
 
 // Originally this monitored the collapse animation and stopped rendering
