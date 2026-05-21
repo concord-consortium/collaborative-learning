@@ -196,7 +196,7 @@ export function buildDotAriaLabel(
   const legendAttrID = dataConfiguration.attributeID("legend");
   if (legendAttrID) {
     const legendValue = dataset?.getValue(caseID, legendAttrID);
-    if (legendValue) label += `, Color: ${legendValue}`;
+    if (legendValue != null && legendValue !== "") label += `, Color: ${legendValue}`;
   }
 
   if (isCircleSelected(caseData, dataConfiguration)) {
