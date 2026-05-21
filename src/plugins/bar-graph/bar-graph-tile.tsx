@@ -65,18 +65,19 @@ export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITilePro
         return getEditableTitleElement(tile);
       },
       getContentElement: () => containerRef.current ?? undefined,
-      focusContent: () => {
-        const container = containerRef.current;
+      focusContent: ({ entryMode }) => {
+        const container = containerRef.current as HTMLElement | null;
         if (!container) return false;
-        // Focus the first bar, or fall back to the first focusable element in the content area
-        const firstFocusable = container.querySelector(
+        // Focus the first/last bar (or other focusable in the content area) based on direction.
+        const focusables = container.querySelectorAll(
           '.visx-bar[tabindex], [role="button"][tabindex], button, [tabindex="0"]'
-        ) as HTMLElement | null;
-        if (firstFocusable) {
-          firstFocusable.focus();
-          return document.activeElement === firstFocusable;
-        }
-        return false;
+        ) as NodeListOf<HTMLElement>;
+        if (focusables.length === 0) return false;
+        const target = entryMode === "reverse"
+          ? focusables[focusables.length - 1]
+          : focusables[0];
+        target.focus();
+        return document.activeElement === target;
       },
     },
   });

@@ -28,7 +28,13 @@ export const AddSeriesButton = observer(function AddSeriesButton() {
   const disabled = !findUnplottedAttribute();
   const classes = classNames("add-series-button", { disabled });
   return (
-    <button disabled={disabled} onClick={handleClick} className={classes}>
+    <button
+      aria-disabled={disabled}
+      aria-label="Add Y attribute"
+      className={classes}
+      type="button"
+      onClick={disabled ? undefined : handleClick}
+    >
       <div className="legend-icon">
         <AddSeriesIcon/>
       </div>
@@ -38,5 +44,3 @@ export const AddSeriesButton = observer(function AddSeriesButton() {
     </button>
   );
 });
-
-

@@ -1,3 +1,6 @@
+@import "../../../components/vars";
+@import "../../../components/mixins";
+
 $graph-label-font: italic 14px Lato, sans-serif;
 $graph-empty-label-font: 12px Montserrat-Regular, sans-serif;
 $graph-background-fill: #fff;
@@ -85,6 +88,23 @@ $graph-background-fill: #fff;
 
 .graph-dot {
   cursor: pointer;
+
+  &:focus-visible,
+  &.keyboard-focused {
+    outline: none;
+  }
+
+  &:focus-visible .inner-circle,
+  &.keyboard-focused .inner-circle {
+    outline: 2px solid $focus-ring-color;
+    outline-offset: 2px;
+  }
+}
+
+// The dots-group surrogate (one <svg> per layer) is the single tab stop for the
+// layer's points. Arrow keys then rove individual dots.
+[data-graph-dots-group] {
+  @include focus-ring(2px);
 }
 
 .graph-dot line.connector {
