@@ -679,8 +679,7 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawToolSelect().click();
     // Click the inner rect.group-rect — the wrapper g doesn't carry the pointerdown
     // handler, so a force:true click on the wrapper bypasses cypress's hit-testing
-    // and dispatches into dead space. (Same pattern as the rectangle click below,
-    // fixed in 1821f19b5 for that line but missed here.)
+    // and dispatches into dead space.
     drawToolTile.getGroupDrawing().eq(0).find('rect.group-rect').click({ force: true });
     // Shift+click the new rectangle to add it to the selection
     drawToolTile.getRectangleDrawing().eq(1).find("rect").click({ force: true, shiftKey: true });
