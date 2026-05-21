@@ -2,6 +2,7 @@ import { RefObject, useEffect, useRef } from "react";
 import {
   AccessibilityResult,
   AnnouncementsConfig,
+  FocusContentContext,
   FocusTrapResult,
   NavigationConfig,
   ResizableConfig,
@@ -28,7 +29,11 @@ export interface ClueFocusTrapConfig {
   getContentElement?: () => HTMLElement | undefined;
 
   // Custom focus function for complex editors (Slate, CodeMirror, etc.)
-  focusContent?: () => boolean;
+  focusContent?: (context: FocusContentContext) => boolean;
+
+  // Per-slot custom Tab/Escape handlers forwarded to FocusTrapStrategy
+  tabHandlers?: Record<string, (event: KeyboardEvent, reverse: boolean) => "handled" | "exit">;
+  escapeHandlers?: Record<string, (event: KeyboardEvent) => "handled" | "exit">;
 
   // Title element
   titleRef?: RefObject<HTMLElement | null>;
@@ -146,6 +151,8 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
           focusContent: strategy.focusContent,
           topbarElement: elements.topbar,
           paletteElement: elements.palette,
+          tabHandlers: strategy.tabHandlers,
+          escapeHandlers: strategy.escapeHandlers,
         };
       },
     };

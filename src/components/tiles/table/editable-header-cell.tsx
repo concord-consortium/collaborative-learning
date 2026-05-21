@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { forwardRef, useState } from "react";
 import { TColumn, THeaderRendererProps } from "./table-types";
 import { HeaderCellInput } from "./header-cell-input";
 
 interface IProps extends THeaderRendererProps {
   height: number;
+  headerNameTabIndex: number;
 }
-export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }) => {
+export const EditableHeaderCell = forwardRef<HTMLDivElement, IProps>(
+  ({ column: _column, height, headerNameTabIndex }, ref) => {
   // _column is a CalculatedColumn (rdg-supplied, width is non-Maybe); the cast to TColumn
   // is only needed to read our extension `appData`.
   const calcColumn = _column;
@@ -64,7 +66,24 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }
       {isEditing
         ? <HeaderCellInput style={style} inputStyle={inputStyle} value={nameValue}
             onKeyDown={handleKeyDown} onChange={handleChange} onClose={handleClose} />
-        : <div className="header-name">{name}</div>}
+        : (
+          <div
+            ref={ref}
+            className="header-name"
+            role="button"
+            tabIndex={headerNameTabIndex}
+            aria-label={`Column ${name}, press Enter to rename`}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === "F2") {
+                e.preventDefault();
+                onBeginHeaderCellEdit?.();
+              }
+            }}
+          >
+            {name}
+          </div>
+        )}
     </div>
   );
-};
+});
+EditableHeaderCell.displayName = "EditableHeaderCell";

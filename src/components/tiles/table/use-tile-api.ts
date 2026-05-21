@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { RowHeightArgs } from "react-data-grid";
 
 import { TColumn, TRow } from "./table-types";
@@ -25,88 +25,108 @@ interface IProps {
   getTitleHeight: () => number;
   headerHeight: () => number;
   measureColumnWidth: (attribute: IAttribute) => number;
-  onRegisterTileApi: (tileApi: ITileApi, facet?: string | undefined) => void;
-  onUnregisterTileApi: (facet?: string | undefined) => void;
   padding?: number;
   readOnly?: boolean;
   rowHeight: (args: RowHeightArgs<TRow>) => number;
   rows: TRow[];
 }
 export const useToolApi = ({
-  columns, content, dataSet, getTitleHeight, headerHeight, measureColumnWidth, onRegisterTileApi,
-  onUnregisterTileApi, padding, readOnly, rowHeight, rows
-}: IProps) => {
+  columns, content, dataSet, getTitleHeight, headerHeight, measureColumnWidth,
+  padding, readOnly, rowHeight, rows
+}: IProps): ITileApi => {
+  // Live refs — updated synchronously each render so methods always see current values
+  const columnsRef = useCurrent(columns);
   const contentRef = useCurrent(content);
-  const hasExpressions = content.hasExpressions;
+  const dataSetRef = useCurrent(dataSet);
+  const getTitleHeightRef = useCurrent(getTitleHeight);
+  const headerHeightRef = useCurrent(headerHeight);
+  const measureColumnWidthRef = useCurrent(measureColumnWidth);
+  const paddingRef = useCurrent(padding);
+  const readOnlyRef = useCurrent(readOnly);
+  const rowHeightRef = useCurrent(rowHeight);
+  const rowsRef = useCurrent(rows);
 
-  const getContentHeight = useCallback(() => {
-    return getTableContentHeight({
-      readOnly,
-      rows,
-      rowHeight,
-      headerHeight,
-      getTitleHeight,
-      hasExpressions,
-      padding
-    });
-  }, [getTitleHeight, hasExpressions, headerHeight, padding, readOnly, rowHeight, rows]);
-  const exportContentAsTileJson = useCallback(() => {
-    return exportTableContentAsJson(content.metadata, dataSet, content.columnWidth);
-  }, [dataSet, content]);
-
-  const getRowTop = useCallback((rowIndex: number) => {
-    return getTableRowTop({
-      getTitleHeight, hasExpressions, headerHeight, padding, readOnly, rowHeight, rowIndex, rows
-    }) + kCellTopOffset;
-  }, [getTitleHeight, hasExpressions, headerHeight, padding, readOnly, rowHeight, rows]);
-  const getColumnLeft = useCallback((columnIndex: number) => {
-    return getTableColumnLeft({
-      columnIndex, columns, dataSet, measureColumnWidth
-    }) + kCellLeftOffset;
-  }, [columns, dataSet, measureColumnWidth]);
-  const getObjectBoundingBox = useCallback((objectId: string, objectType?: string) => {
-    if (objectType === "cell") {
-      const { attributeId, caseId } = decipherCellId(objectId);
-      if (!attributeId || !caseId) return undefined;
-      const attributeIndex = dataSet.attrIndexFromID(attributeId);
-      if (attributeIndex === undefined) return undefined;
-      const rowIndex = dataSet.caseIndexFromID(caseId);
-
-      const attribute = dataSet.attrFromID(attributeId);
-      const row = rows[rowIndex];
-
-      const boundingBox = {
-        height: rowHeight({ row, type: 'ROW' }) + kCellHeightOffset,
-        left: getColumnLeft(attributeIndex),
-        top: getRowTop(rowIndex),
-        width: measureColumnWidth(attribute) + kCellWidthOffset
-      };
-      return boundingBox;
-    }
-  }, [dataSet, getColumnLeft, getRowTop, measureColumnWidth, rowHeight, rows]);
-  const getObjectDefaultOffsets = useCallback((objectId: string, objectType?: string) => {
-    const offsets = OffsetModel.create({});
-    if (objectType === "cell") {
-      const boundingBox = getObjectBoundingBox(objectId, objectType);
-      if (boundingBox) {
-        offsets.setDy(boundingBox.height * -.5 + 2);
-      }
-    }
-    return offsets;
-  }, [getObjectBoundingBox]);
-
-  const tileApi = useMemo<ITileApi>(() => ({
-    getContentHeight,
-    exportContentAsTileJson,
+  // Stable-identity tileApi; each method reads live values from refs.
+  return useMemo<ITileApi>(() => ({
+    getContentHeight: () => {
+      const _content = contentRef.current;
+      return getTableContentHeight({
+        readOnly: readOnlyRef.current,
+        rows: rowsRef.current,
+        rowHeight: rowHeightRef.current,
+        headerHeight: headerHeightRef.current,
+        getTitleHeight: getTitleHeightRef.current,
+        hasExpressions: _content.hasExpressions,
+        padding: paddingRef.current
+      });
+    },
+    exportContentAsTileJson: () => {
+      const _content = contentRef.current;
+      return exportTableContentAsJson(_content.metadata, dataSetRef.current, _content.columnWidth);
+    },
     isLinked: () => {
       return contentRef.current.isLinked;
     },
-    getObjectBoundingBox,
-    getObjectDefaultOffsets
-  }), [exportContentAsTileJson, getContentHeight, contentRef, getObjectBoundingBox, getObjectDefaultOffsets]);
+    getObjectBoundingBox: (objectId: string, objectType?: string) => {
+      if (objectType === "cell") {
+        const _dataSet = dataSetRef.current;
+        const _rows = rowsRef.current;
+        const _rowHeight = rowHeightRef.current;
+        const _measureColumnWidth = measureColumnWidthRef.current;
+        const _columns = columnsRef.current;
+        const _content = contentRef.current;
 
-  useEffect(() => {
-    onRegisterTileApi(tileApi);
-    return () => onUnregisterTileApi();
-  }, [onRegisterTileApi, onUnregisterTileApi, tileApi]);
+        const { attributeId, caseId } = decipherCellId(objectId);
+        if (!attributeId || !caseId) return undefined;
+        const attributeIndex = _dataSet.attrIndexFromID(attributeId);
+        if (attributeIndex === undefined) return undefined;
+        const rowIndex = _dataSet.caseIndexFromID(caseId);
+
+        const attribute = _dataSet.attrFromID(attributeId);
+        const row = _rows[rowIndex];
+
+        const columnLeft = getTableColumnLeft({
+          columnIndex: attributeIndex, columns: _columns, dataSet: _dataSet,
+          measureColumnWidth: _measureColumnWidth
+        }) + kCellLeftOffset;
+
+        const rowTop = getTableRowTop({
+          getTitleHeight: getTitleHeightRef.current,
+          hasExpressions: _content.hasExpressions,
+          headerHeight: headerHeightRef.current,
+          padding: paddingRef.current,
+          readOnly: readOnlyRef.current,
+          rowHeight: _rowHeight,
+          rowIndex,
+          rows: _rows
+        }) + kCellTopOffset;
+
+        return {
+          height: _rowHeight({ row, type: 'ROW' }) + kCellHeightOffset,
+          left: columnLeft,
+          top: rowTop,
+          width: _measureColumnWidth(attribute) + kCellWidthOffset
+        };
+      }
+    },
+    getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
+      const offsets = OffsetModel.create({});
+      if (objectType === "cell") {
+        // Re-invoke getObjectBoundingBox inline via the stable ref to itself isn't
+        // possible yet, so we inline the bounding-box logic here.
+        const _dataSet = dataSetRef.current;
+        const _rows = rowsRef.current;
+        const _rowHeight = rowHeightRef.current;
+
+        const { attributeId, caseId } = decipherCellId(objectId);
+        if (attributeId && caseId) {
+          const rowIndex = _dataSet.caseIndexFromID(caseId);
+          const row = _rows[rowIndex];
+          const height = _rowHeight({ row, type: 'ROW' }) + kCellHeightOffset;
+          offsets.setDy(height * -.5 + 2);
+        }
+      }
+      return offsets;
+    }
+  }), []); // Empty deps — object identity is stable; refs provide live values.
 };

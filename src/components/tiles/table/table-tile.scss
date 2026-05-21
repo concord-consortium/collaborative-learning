@@ -108,43 +108,59 @@ $controls-hover-background: #c0dfe7;
       }
     }
 
+    // RDG's default cell outline (.rdg-cell[aria-selected='true']) tracks its
+    // selectedPosition state, which persists when focus leaves the tile. We
+    // want a true focus ring instead: suppress the aria-selected outline and
+    // re-add it via :focus-visible. Using :focus-visible (not :focus-within)
+    // means the ring shows only when the cell wrapper itself is the keyboard
+    // focus — when a focusable child (e.g. .show-hide-row-labels-button) is
+    // focused, the child carries its own indicator and the wrapper ring is
+    // suppressed.
+    .rdg-cell[aria-selected='true'] {
+      outline: none;
+    }
+    .rdg-cell:focus-visible {
+      outline: 2px solid var(--rdg-selection-color);
+      outline-offset: -2px;
+    }
+
     .rdg-header-row {
-      // Suppress rdg's aria-selected outline on header cells: CLUE manages column
-      // selection separately (via the .selected-column class), and rdg's outline
-      // appears whenever its internal selectedPosition lands on a header.
-      .rdg-cell[aria-selected='true'] {
-        outline: none;
-      }
       .index-column-header {
         min-width: $index-column-width;
         padding: 0;
         border-left: $border-style;
         border-top-left-radius: $border-radius;
         .show-hide-row-labels-button {
-          width: $index-column-width;
-          height: $row-height;
-          position: relative;
-          .hide-row-labels-icon, .show-row-labels-icon {
-            position: absolute;
-            left: 4px;
-            top: 4px;
-          }
+          // Fixed 28x28 with 2px margin: leaves room for the focus ring inside
+          // the 34px cell and keeps the button a consistent size when the cell
+          // widens to ~41px once row labels are shown.
+          // Native <button> reset so the toggle looks like the previous div;
+          // padding-top: 2px positions the icon at its previous visual offset.
+          background: transparent;
+          padding: 2px 0 0 0;
+          font: inherit;
+          color: inherit;
+          cursor: pointer;
+          border: none;
+          margin: 2px;
+          width: 28px;
+          height: 28px;
           &.shown {
             .hide-row-labels-icon { opacity: 35% }
-            .show-row-labels-icon { opacity: 0% }
+            .show-row-labels-icon { display: none }
           }
           &.hidden {
-            .hide-row-labels-icon { opacity: 0% }
+            .hide-row-labels-icon { display: none }
             .show-row-labels-icon { opacity: 35% }
           }
           &:hover {
             &.shown {
-              .hide-row-labels-icon { opacity: 0% }
-              .show-row-labels-icon { opacity: 100% }
+              .hide-row-labels-icon { display: none }
+              .show-row-labels-icon { display: inline; opacity: 100% }
             }
             &.hidden {
-              .hide-row-labels-icon { opacity: 100% }
-              .show-row-labels-icon { opacity: 0% }
+              .hide-row-labels-icon { display: inline; opacity: 100% }
+              .show-row-labels-icon { display: none }
             }
           }
         }
@@ -176,6 +192,12 @@ $controls-hover-background: #c0dfe7;
         border: none;
         padding: 0;
         .add-column-button {
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          font: inherit;
+          color: inherit;
           width: $controls-column-width;
           height: $row-height;
           display: none;  // overridden when tile is selected
@@ -272,10 +294,28 @@ $controls-hover-background: #c0dfe7;
         box-shadow: none;
         padding: 0;
         .remove-row-button {
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          font: inherit;
+          color: inherit;
           width: $controls-column-width;
-          display: none;  // overridden when tile is selected
+          height: 22px;
+          // Per-tile visibility gate: hidden by default, overridden below
+          // when the ancestor tile has `.tool-tile.selected`. There is also a
+          // per-row React gate in use-grid-context.ts (`isSelectedCaseInRow`)
+          // that controls whether the button is rendered at all. Both must
+          // pass for the button to be visible.
+          display: none;
           justify-content: center;
           align-items: center;
+          // Inset focus ring: outline-offset -2px keeps the ring within
+          // the button's bounds (the button height matches the row).
+          &:focus-visible {
+            outline: 2px solid var(--rdg-selection-color);
+            outline-offset: -2px;
+          }
           svg {
             fill: white;
             stroke: $highlight-blue;

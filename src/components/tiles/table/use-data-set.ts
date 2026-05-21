@@ -1,7 +1,6 @@
 import { useCallback, useRef } from "react";
-import { CellSelectArgs, DataGridHandle } from "react-data-grid";
+import { CellSelectArgs } from "react-data-grid";
 import { ICase, IDataSet } from "../../../models/data/data-set";
-import { ITileModel } from "../../../models/tiles/tile-model";
 import { uniqueId } from "../../../utilities/js-utils";
 import { formatValue } from "./cell-formatter";
 import { TColumn, TPosition, TRow } from "./table-types";
@@ -14,28 +13,23 @@ const isCellSelectable = (position: TPosition, columns: TColumn[], readOnly: boo
 };
 
 interface IUseDataSet {
-  gridRef: React.RefObject<DataGridHandle>;
-  model: ITileModel;
   dataSet: IDataSet;
   triggerColumnChange: () => void;
   rowChanges: number;
   triggerRowChange: () => void;
   readOnly: boolean;
   inputRowId: React.MutableRefObject<string>;
-  rows: TRow[];
   changeHandlers: IContentChangeHandlers;
   columns: TColumn[];
   onColumnResize: (idx: number, width: number, complete: boolean) => void;
   lookupImage: (value: string) => string|undefined;
 }
 export const useDataSet = ({
-  gridRef, model, dataSet, triggerColumnChange, triggerRowChange, readOnly, inputRowId, rows,
+  dataSet, triggerColumnChange, triggerRowChange, readOnly, inputRowId,
   changeHandlers, columns, onColumnResize, lookupImage
 }: IUseDataSet) => {
-  // Used to prevent moving the selected position while actively adding a new row
-  const addingNewRow = useRef(false);
   // RDG's concept of which cell is selected.
-  const selectedCell = useRef<TPosition|null>();
+  const selectedCell = useRef<TPosition|null>(null);
 
   const { onAddRows, onUpdateRow } = changeHandlers;
 
@@ -45,11 +39,26 @@ export const useDataSet = ({
       const _selectedCell = dataSet.selectedCells[0];
       selectedCellIndices.selectedCellColumnIndex = dataSet.attrIndexFromID(_selectedCell.attributeId) ?? -1;
       selectedCellIndices.selectedCellRowIndex = _selectedCell.caseId === inputRowId.current
-        ? rows.length - 1
+        ? dataSet.cases.length
         : dataSet.caseIndexFromID(_selectedCell.caseId);
     }
     return selectedCellIndices;
   }
+
+  /**
+   * Given a row index from RDG, return the corresponding case ID, or undefined if the index is out of bounds.
+   * Note that the input row (for adding new cases) is considered in bounds, and maps to inputRowId.current.
+   * This function is used to interpret RDG's selected cell position in terms of the dataSet's cases.
+   *
+   * @param rowIdx
+   * @returns
+   */
+  function getCaseIdFromRowIndex(rowIdx: number) {
+    if (rowIdx < 0) return undefined;
+    if (rowIdx === dataSet.cases.length) return inputRowId.current;
+    return dataSet.caseIDFromIndex(rowIdx);
+  }
+
   const onSelectedCellChange = (args: CellSelectArgs<TRow>) => {
     // beta.44 changed the signature from TPosition to CellSelectArgs; we still operate on
     // a `{ rowIdx, idx }` position internally. args.column can be undefined when rdg passes
@@ -57,8 +66,6 @@ export const useDataSet = ({
     // calls selectCell({-1, -1}) and rdg fires the change notification anyway).
     const position: TPosition = { rowIdx: args.rowIdx, idx: args.column?.idx ?? -1 };
     selectedCell.current = position;
-    // We don't update the position while adding a new row so we can move to the new row if necessary.
-    if (addingNewRow.current) return;
 
     // If the new position is (-1, -1), deselect all cells and bail
     if (position.rowIdx === -1 && position.idx === -1) {
@@ -67,16 +74,23 @@ export const useDataSet = ({
       return;
     }
 
-    // Only modify the selection if a single cell is selected
-    if (dataSet.selectedCells.length !== 1) return;
+    // Header row (rowIdx === -1, idx >= 0): RDG selected a header cell.
+    // Mirror it to dataSet column selection. The RDG idx 0 is the index column
+    // and idx N-1 is the controls column — neither is a data attribute, so
+    // attrIDFromIndex returns undefined for those and we just clear the
+    // dataSet column selection without touching anything else.
+    if (position.rowIdx === -1) {
+      const headerColumnId = dataSet.attrIDFromIndex(position.idx - 1);
+      dataSet.setSelectedAttributes(headerColumnId ? [headerColumnId] : []);
+      triggerRowChange();
+      return;
+    }
 
     const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndices();
 
     if (isCellSelectable(position, columns, readOnly)) {
       // Set the dataSet's selected cell
-      const newRowId = position.rowIdx === rows.length - 1
-        ? inputRowId.current
-        : dataSet.caseIDFromIndex(position.rowIdx);
+      const newRowId = getCaseIdFromRowIndex(position.rowIdx);
       const newColumnId = dataSet.attrIDFromIndex(position.idx - 1);
       const differentIndices =
         !(selectedCellColumnIndex === position.idx - 1 && selectedCellRowIndex === position.rowIdx);
@@ -84,82 +98,50 @@ export const useDataSet = ({
         dataSet.setSelectedCells([{ attributeId: newColumnId, caseId: newRowId }]);
         triggerRowChange();
       }
-    } else {
-      // Update the position if it's not a legal option (if we're in the control or delete column).
-      // Note that rdg will not allow us to move to a row outside of the grid
-      let newPosition = { ...position };
-      const rightColumnIndex = columns.length - (readOnly ? 1 : 2);
-      // Determine if we're moving forwards or backwards
-      const forward = (selectedCellRowIndex < position.rowIdx) ||
-        (selectedCellRowIndex === position.rowIdx && selectedCellColumnIndex < position.idx);
-      if (forward) {
-        if (newPosition.idx > rightColumnIndex) {
-          if (newPosition.rowIdx >= rows.length - 1) {
-            // deselect all cells
-            newPosition = { rowIdx: -1, idx: -1 };
-          } else {
-            // otherwise advance to left cell of next row
-            newPosition.idx = 1;
-            ++newPosition.rowIdx;
-          }
-        }
-      } else {
-        if (newPosition.idx < 1) {
-          if (newPosition.rowIdx <= 0) {
-            // deselect all cells
-            newPosition = { rowIdx: -1, idx: -1 };
-          } else if (newPosition.idx < 1) {
-            // otherwise move to right cell of previous row
-            newPosition.idx = rightColumnIndex;
-            --newPosition.rowIdx;
-          }
-        }
-      }
-
-      // Update rdg if we fixed the position, which will cause this function to be called again
-      if ((newPosition.rowIdx !== position.rowIdx) || (newPosition.idx !== position.idx)) {
-        gridRef.current?.selectCell(newPosition);
-      }
     }
+    // The row-label (idx 0) and controls (idx N-1) columns are intentionally not
+    // mapped to case selection here. Case selection is owned by the row-label
+    // wrapper's own click/keydown handlers in use-row-label-column.tsx. We don't
+    // have enough info here to know how we should be modifying the case selection.
   };
 
-  const getUpdatedRowAndColumn = (_rows?: TRow[], _columns?: TColumn[]) => {
-    const rs = _rows ?? rows;
-    const cs = _columns ?? columns;
-    const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndices();
-    const updatedRow = (selectedCellRowIndex != null) && (selectedCellRowIndex >= 0)
-      ? rs[selectedCellRowIndex] : undefined;
-    const updatedColumn = (selectedCellColumnIndex != null) && (selectedCellColumnIndex >= 0)
-      ? cs[selectedCellColumnIndex + 1] : undefined;
-    return { selectedCellRowIndex, selectedCellColumnIndex, updatedRow, updatedColumn };
+  // Identify the row/column the user just acted on using RDG's authoritative
+  // position (selectedCell.current). RDG's idx includes the index column (0)
+  // and we want the attribute index, hence `idx - 1`.
+  const getUpdatedRowAndColumn = () => {
+    const sc = selectedCell.current;
+    const selectedCellRowIndex = sc?.rowIdx ?? -1;
+    const selectedCellColumnIndex = sc ? sc.idx - 1 : -1;
+    const selectedCellCaseId = getCaseIdFromRowIndex(selectedCellRowIndex);
+    const selectedCellAttributeKey = selectedCellColumnIndex >= 0
+      ? dataSet.attrIDFromIndex(selectedCellColumnIndex)
+      : undefined;
+    return {
+      selectedCellRowIndex,
+      selectedCellColumnIndex,
+      selectedCellCaseId,
+      selectedCellAttributeKey
+    };
   };
 
   const formatter = useNumberFormat();
   const onRowsChange = (_rows: TRow[]) => {
     // for now, assume that all changes are single cell edits
-    const { selectedCellRowIndex, updatedRow, updatedColumn } = getUpdatedRowAndColumn(_rows);
-    if (!readOnly && updatedRow && updatedColumn) {
-      const originalValue = dataSet.getValue(updatedRow.__id__, updatedColumn.key);
+    const { selectedCellRowIndex, selectedCellCaseId, selectedCellAttributeKey } = getUpdatedRowAndColumn();
+    if (!readOnly && selectedCellCaseId && selectedCellAttributeKey) {
+      const originalValue = dataSet.getValue(selectedCellCaseId, selectedCellAttributeKey);
       const originalStrValue = formatValue({ formatter, value: originalValue, lookupImage });
       // only make a change if the value has actually changed
-      if (updatedRow[updatedColumn.key] !== originalStrValue) {
+      const updatedRow = _rows[selectedCellRowIndex];
+      if (updatedRow[selectedCellAttributeKey] !== originalStrValue) {
         const updatedCaseValues: ICase = {
-          __id__: updatedRow.__id__,
-          [updatedColumn.key]: updatedRow[updatedColumn.key]
+          __id__: selectedCellCaseId,
+          [selectedCellAttributeKey]: updatedRow[selectedCellAttributeKey]
         };
         const inputRowIndex = _rows.findIndex(row => row.__id__ === inputRowId.current);
         if ((inputRowIndex >= 0) && (selectedCellRowIndex === inputRowIndex)) {
-          // Prevent the selected cell position from updating while adding rows
-          addingNewRow.current = true;
           onAddRows([{ ...updatedCaseValues, __id__: inputRowId.current }]);
           inputRowId.current = uniqueId();
-          // After adding the new rows to the dataSet, actually update the selected cell position
-          setTimeout(() => {
-            addingNewRow.current = false;
-            if (selectedCell.current) {
-              gridRef.current?.selectCell(selectedCell.current);
-            }
-          });
         } else {
           onUpdateRow(updatedCaseValues);
         }
@@ -168,11 +150,11 @@ export const useDataSet = ({
   };
 
   const deleteSelected = () => {
-    const { updatedRow, updatedColumn } = getUpdatedRowAndColumn();
-    if (!readOnly && updatedRow && updatedColumn) {
+    const { selectedCellCaseId, selectedCellAttributeKey } = getUpdatedRowAndColumn();
+    if (!readOnly && selectedCellCaseId && selectedCellAttributeKey) {
       const updatedCaseValues: ICase = {
-        __id__: updatedRow.__id__,
-        [updatedColumn.key]: ""
+        __id__: selectedCellCaseId,
+        [selectedCellAttributeKey]: ""
       };
       onUpdateRow(updatedCaseValues);
     }
@@ -183,5 +165,5 @@ export const useDataSet = ({
     triggerColumnChange();
   }, [onColumnResize, triggerColumnChange]);
 
-  return { onColumnResize: handleColumnResize, onRowsChange, deleteSelected, onSelectedCellChange};
+  return { onColumnResize: handleColumnResize, onRowsChange, deleteSelected, onSelectedCellChange, selectedCell};
 };

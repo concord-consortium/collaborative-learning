@@ -197,6 +197,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   // `stopImmediatePropagation` for Escape because the trap controller's listener
   // is a sibling document-capture listener; plain `stopPropagation` would not
   // prevent it from also seeing the event.
+  //
+  // Follow-up: this listener predates the `escapeHandlers` API added to
+  // @concord-consortium/accessibility-tools during CLUE-453. Once that
+  // API is broadly adopted, dataflow should register an `escapeHandler`
+  // on its tile slot rather than installing a sibling document-level
+  // listener. The handler approach is correct by construction (no
+  // stopPropagation/stopImmediatePropagation foot-gun) and slot-scoped
+  // rather than document-global.
   private handleConnectingKeyDown = (e: KeyboardEvent) => {
     const reteManager = this.reteManager;
     if (!reteManager?.isConnecting) return;

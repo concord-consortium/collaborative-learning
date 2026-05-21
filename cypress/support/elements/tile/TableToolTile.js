@@ -55,7 +55,10 @@ class TableToolTile{
       cy.get('.column-header-cell .editable-header-cell input').type(title+'{enter}');
     }
     removeRow(i){
-      this.getTableRow().eq(i).click();
+      // .rdg-row uses display:contents in rdg beta.44, so cypress sees it as 0x0
+      // and refuses to click. Click the row's index-cell-wrapper instead — it has
+      // a real box and still selects the row.
+      this.getIndexCellWrapper().eq(i).click();
       this.getRemoveRowButton().click();
     }
     getTableRow(){

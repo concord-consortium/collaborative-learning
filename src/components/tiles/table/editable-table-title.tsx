@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import React, { useState } from "react";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { verifyAlive } from "../../../utilities/mst-utils";
+import { EditableTitleButton } from "../editable-title-button";
 import { HeaderCellInput } from "./header-cell-input";
 
 interface IProps {
@@ -59,7 +60,8 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
       {isEditing
         ? <HeaderCellInput style={style} value={editingTitle || ""}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onClose={handleClose} />
-        : title}
+        : <EditableTitleButton className="editable-table-title-text"
+            title={title} readOnly={readOnly} onActivate={handleClick} />}
     </div>
   );
 });
