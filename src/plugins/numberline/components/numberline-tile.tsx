@@ -195,14 +195,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     return isBetweenYBounds && isBetweenXBounds;
   };
 
-  const handleMouseClick = (e: Event, optionClicked: CreatePointType) => {
+  const handleMouseClick = (e: MouseEvent, optionClicked: CreatePointType) => {
     if (!readOnly){
       // Recompute the hovered point against the click's actual position rather
       // than trusting the stale hoverPointId from the last mousemove. Without
       // this, two rapid clicks at different ticks (no mousemove between them —
       // touchpad taps, cypress synthetic clicks) both target the point created
       // by the first click, so the second click never creates a new point.
-      const hoveredId = findHoverPoint(e as MouseEvent);
+      const hoveredId = findHoverPoint(e);
       if (hoveredId) {
         const hoverPoint = content.getPoint(hoveredId);
         if (hoverPoint) {
