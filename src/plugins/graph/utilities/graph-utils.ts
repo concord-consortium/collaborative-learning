@@ -360,6 +360,22 @@ function isCircleSelected(aCaseData: CaseData, dataConfiguration?: IDataConfigur
     || dataset.isCellSelected({ attributeId: yAttributeId, caseId: aCaseData.caseID });
 }
 
+/**
+ * Whether the dot's keyboard toggle (Enter / Space, the same action driven by
+ * {@link activateDotSelection}) is currently in its "pressed" state. Narrower
+ * than {@link isCircleSelected}: only the Y cell counts, since that's the
+ * only thing keyboard activation toggles. Used to drive `aria-pressed`, so
+ * the announced state reflects what *this button* controls, not unrelated
+ * selections (attribute header, X cell, broader case selection) that the dot
+ * cannot un-toggle.
+ */
+function isDotKeyActivated(caseData: CaseData, dataConfiguration?: IDataConfigurationModel) {
+  const dataset = dataConfiguration?.dataset;
+  if (!dataset) return false;
+  const yAttributeId = dataConfiguration?.yAttributeID(caseData.plotNum);
+  return dataset.isCellSelected({ attributeId: yAttributeId, caseId: caseData.caseID });
+}
+
 function applySelectedClassToCircles(selection: DotSelection, dataConfiguration?: IDataConfigurationModel){
   selection
     .classed('selected', (aCaseData: CaseData) => isCircleSelected(aCaseData, dataConfiguration));
@@ -568,6 +584,22 @@ export interface ISetPointSelection {
   pointStrokeColor: string
 }
 
+/**
+ * Re-applies the per-dot ARIA attributes whose value depends on the current
+ * selection (aria-label's "Selected" suffix; aria-pressed). Called from both
+ * the data-driven refresh path ({@link setPointCoordinates}) and the
+ * selection-only refresh path ({@link setPointSelection}), so the announced
+ * state stays in sync with the rendered state regardless of which trigger
+ * fired the update.
+ */
+function refreshDotSelectionAria(dotsRef: IDotsRef, dataConfiguration?: IDataConfigurationModel) {
+  const graphDots = selectGraphDots(dotsRef.current);
+  if (!graphDots) return;
+  graphDots
+    .attr("aria-label", (d: CaseData) => buildDotAriaLabel(d, dataConfiguration))
+    .attr("aria-pressed", (d: CaseData) => isDotKeyActivated(d, dataConfiguration) ? "true" : "false");
+}
+
 export function setPointSelection(props: ISetPointSelection) {
   const { dotsRef, dataConfiguration } = props;
   const outerCircles = selectOuterCircles(dotsRef.current);
@@ -575,6 +607,10 @@ export function setPointSelection(props: ISetPointSelection) {
     applySelectedClassToCircles(outerCircles, dataConfiguration);
     styleOuterCircles(outerCircles, dataConfiguration);
   }
+  // Selection-only refresh: also update aria-label / aria-pressed on each dot
+  // so screen readers see the new state (setPointCoordinates won't run on a
+  // pure selection change).
+  refreshDotSelectionAria(dotsRef, dataConfiguration);
 }
 
 export interface ISetPointCoordinates {
@@ -714,18 +750,18 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   if (outerCircles) applySelectedClassToCircles(outerCircles, dataConfiguration);
   styleOuterCircles(outerCircles, dataConfiguration);
 
-  // Apply keyboard-accessibility attributes to each dot. tabindex=-1 keeps dots
-  // out of the natural Tab cycle (the dots-group surrogate is the single tab stop)
-  // while letting `useGraphDotsKeyboard` programmatically focus them via arrow keys.
-  // aria-label/aria-pressed are re-applied on every refresh so they stay in sync
-  // with current data values and selection state.
+  // Apply the static keyboard-accessibility attributes to each dot. tabindex=-1
+  // keeps dots out of the natural Tab cycle (the dots-group surrogate is the
+  // single tab stop) while letting `useGraphDotsKeyboard` programmatically focus
+  // them via arrow keys. Per-dot aria-label / aria-pressed (which depend on the
+  // current selection) are refreshed via the shared helper so the selection-only
+  // path (setPointSelection) stays in sync too.
   if (graphDots) {
     graphDots
       .attr("tabindex", -1)
-      .attr("role", "button")
-      .attr("aria-label", (d: CaseData) => buildDotAriaLabel(d, dataConfiguration))
-      .attr("aria-pressed", (d: CaseData) => isCircleSelected(d, dataConfiguration) ? "true" : "false");
+      .attr("role", "button");
   }
+  refreshDotSelectionAria(dotsRef, dataConfiguration);
 }
 
 /**
