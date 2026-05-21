@@ -32,6 +32,7 @@ export const AddSeriesButton = observer(function AddSeriesButton() {
       aria-disabled={disabled}
       aria-label="Add Y attribute"
       className={classes}
+      type="button"
       onClick={disabled ? undefined : handleClick}
     >
       <div className="legend-icon">
