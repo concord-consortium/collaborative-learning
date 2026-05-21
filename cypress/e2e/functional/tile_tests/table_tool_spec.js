@@ -25,11 +25,11 @@ function beforeTest() {
 }
 
 context('Table Tool Tile', function () {
-  // TODO bug #20 (react18-known-issues.md): `clickToolbarButton('table', 'set-expression')`
-  // around line 201 fails — the button is in the DOM but not visible. Surfaced after
-  // the #7a/#7b fix made the test progress this far. Skipping the entire block until
-  // #20 is investigated; the row-removal assertions before line 200 presumably still
-  // work but are blocked from running by this skip.
+  // TODO bug #20 (react18-known-issues.md): the `clickToolbarButton('table',
+  // 'set-expression')` call below fails — the button is in the DOM but not visible.
+  // Skipping the entire block until #20 is investigated; the row-removal assertions
+  // earlier in the block presumably still work but are blocked from running by this
+  // skip.
   it.skip('Test table functions', function () {
     beforeTest();
 
@@ -579,9 +579,6 @@ context('Table Tool Tile', function () {
     tableToolTile.getTableTile().should('be.visible');
     cy.get(".primary-workspace").within((workspace) => {
       tableToolTile.renameColumn('x', 'Mammal');
-      // rdg beta.44 only enters EDIT mode on dblclick or an Enter keypress against
-      // the focused cell — typing directly on `.rdg-cell` no longer opens the
-      // editor. Use typeInTableCellXY which dblclicks the target cell first.
       tableToolTile.typeInTableCellXY(0, 0, 'Dog');
       tableToolTile.typeInTableCellXY(1, 0, 'Cat');
       tableToolTile.typeInTableCellXY(2, 0, 'Fish');

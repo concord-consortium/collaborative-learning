@@ -158,9 +158,10 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       widths.set(attr.id, measureColumnWidth(attr));
     });
     return widths;
-  // dataSet.attributes.length triggers recomputes on attribute add/remove
-  // (the MST array reference is stable). The rule below considers .length
-  // redundant given `dataSet`, but doesn't model MobX-array semantics.
+  // MST keeps `dataSet.attributes` array-identity stable across add/remove,
+  // so depending on `dataSet` alone won't fire this memo on column changes —
+  // `.length` is the actual mutation signal. react-hooks/exhaustive-deps
+  // doesn't model MST and considers `.length` redundant, hence the disable.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSet, dataSet.attributes.length, measureColumnWidth, rowChanges]);
 

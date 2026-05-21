@@ -49,7 +49,7 @@ class TableToolTile{
       // `.dblclick()` fires both click events too quickly for React 18 to flush the
       // selection state between them, so the second click still sees "not selected"
       // and the editor never opens. Two separate `.click()` invocations give React a
-      // commit between them. (CLUE-521 covers the underlying UX wart in production.)
+      // commit between them.
       this.getColumnHeader().contains(column).click();
       this.getColumnHeader().contains(column).click();
       cy.get('.column-header-cell .editable-header-cell input').type(title+'{enter}');

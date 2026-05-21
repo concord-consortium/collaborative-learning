@@ -5,11 +5,10 @@ import { HeaderCellInput } from "./header-cell-input";
 interface IProps extends THeaderRendererProps {
   height: number;
 }
-export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }) => {
-  // _column is a CalculatedColumn (rdg-supplied, width is non-Maybe); the cast to TColumn
+export const EditableHeaderCell: React.FC<IProps> = ({ column: calcColumn, height }) => {
+  // calcColumn is a CalculatedColumn (rdg-supplied, width is non-Maybe); the cast to TColumn
   // is only needed to read our extension `appData`.
-  const calcColumn = _column;
-  const column = _column as unknown as TColumn;
+  const column = calcColumn as unknown as TColumn;
   const { name, appData } = column;
   const {
     gridContext, editableName, isEditing,
