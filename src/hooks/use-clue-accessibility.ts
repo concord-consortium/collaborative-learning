@@ -119,28 +119,39 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
 
     const { focusTrap: config } = opts;
 
-    // Delegate through optionsRef so the registered API always uses the latest
-    // callbacks/refs even if the component re-renders after mount.
-    // Spread additionalApi first so getFocusableElements below always wins
-    const tileApi: ITileApi = {
-      ...config.additionalApi,
-      getFocusableElements: () => {
+    // Build the tile API once. Every additionalApi method registered here is a
+    // proxy that delegates to the *current* additionalApi at call time, so
+    // dependency-driven updates inside the caller (e.g. XY Plot's `getDotCenter`
+    // becoming usable after a table is linked) are reflected without needing
+    // to re-register the tile API. The mount-only registration matches the
+    // componentDidMount / componentWillUnmount lifecycle the API registry
+    // expects, while preserving reactivity for the methods themselves.
+    const tileApi: ITileApi = {};
+    for (const key of Object.keys(config.additionalApi ?? {}) as Array<keyof ITileApi>) {
+      (tileApi as Record<string, unknown>)[key] = (...args: unknown[]) => {
         const currentOpts = optionsRef.current;
         if (currentOpts.type !== "tile") return undefined;
-        // Create a fresh strategy from the latest options so element getters
-        // reflect the current render (not stale closures from mount time).
-        const strategy = createClueTileStrategy(currentOpts.focusTrap);
-        const elements = strategy.getElements();
-        return {
-          contentElement: elements.content,
-          titleElement: elements.title,
-          focusContent: strategy.focusContent,
-          topbarElement: elements.topbar,
-          paletteElement: elements.palette,
-          tabWithinSlots: strategy.tabWithinSlots,
-          escapeHandlers: strategy.escapeHandlers,
-        };
-      },
+        const fn = (currentOpts.focusTrap.additionalApi as Record<string, unknown> | undefined)?.[key];
+        return typeof fn === "function" ? fn(...args) : undefined;
+      };
+    }
+    // getFocusableElements always wins — overwrite any same-named proxy above.
+    tileApi.getFocusableElements = () => {
+      const currentOpts = optionsRef.current;
+      if (currentOpts.type !== "tile") return undefined;
+      // Create a fresh strategy from the latest options so element getters
+      // reflect the current render (not stale closures from mount time).
+      const strategy = createClueTileStrategy(currentOpts.focusTrap);
+      const elements = strategy.getElements();
+      return {
+        contentElement: elements.content,
+        titleElement: elements.title,
+        focusContent: strategy.focusContent,
+        topbarElement: elements.topbar,
+        paletteElement: elements.palette,
+        tabWithinSlots: strategy.tabWithinSlots,
+        escapeHandlers: strategy.escapeHandlers,
+      };
     };
 
     config.onRegisterTileApi(tileApi);

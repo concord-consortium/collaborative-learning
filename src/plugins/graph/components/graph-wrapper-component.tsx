@@ -293,12 +293,16 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
 
   // Read-only path: register the annotation/export API directly (the region branch of
   // useClueAccessibility above doesn't touch tile API at all). Mirrors drawing-tile.tsx.
+  // Re-register when tileAdditionalApi changes — its closures depend on axis attribute
+  // types (xAttrType / yAttrType), which start undefined and become "numeric" once data
+  // is linked. A mount-only registration would freeze the no-data closures and break
+  // annotation buttons / object lookup once the read-only view becomes data-linked.
   useEffect(() => {
     if (readOnly) {
       onRegisterTileApi?.(tileAdditionalApi);
       return () => onUnregisterTileApi?.();
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [readOnly, tileAdditionalApi, onRegisterTileApi, onUnregisterTileApi]);
 
   // Capture Delete / Backspace on the .tool-tile container. Previously the wrapper
   // div had `tabIndex={0}` + inline `onKeyDown` to receive these keys, but the focus
