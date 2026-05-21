@@ -1,13 +1,13 @@
 import { IAnyType, types, castToSnapshot, getSnapshot } from "mobx-state-tree";
 import {
   FormulaManager
-} from "@concord-consortium/codap-formulas-react17/models/formula/formula-manager";
+} from "@concord-consortium/codap-formulas/models/formula/formula-manager";
 import {
   createFormulaAdapters
-} from "@concord-consortium/codap-formulas-react17/models/formula/formula-adapter-registry";
+} from "@concord-consortium/codap-formulas/models/formula/formula-adapter-registry";
 import {
   AttributeFormulaAdapter
-} from "@concord-consortium/codap-formulas-react17/models/formula/attribute-formula-adapter";
+} from "@concord-consortium/codap-formulas/models/formula/attribute-formula-adapter";
 import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types";
 import { createFormulaDataSetProxy } from "../../../models/data/formula-data-set-proxy";
 import { SharedDataSet, SharedDataSetSnapshotType, SharedDataSetType } from "../../../models/shared/shared-data-set";

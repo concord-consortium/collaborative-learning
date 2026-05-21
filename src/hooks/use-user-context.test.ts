@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook } from "@testing-library/react";
 import { useUserContext } from "./use-user-context";
 
 jest.mock("./use-stores", () => ({
