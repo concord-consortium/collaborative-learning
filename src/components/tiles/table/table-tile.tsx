@@ -25,6 +25,9 @@ import { useToolApi } from "./use-tile-api";
 import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
+import { useContainerContext } from "../../document/container-context";
+import { hasSelectionModifier } from "../../../utilities/event-utils";
+import { userSelectTile } from "../../../models/stores/ui";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { TSortDirection, addCasesToDataSet } from "../../../models/data/data-set";
 import { removeAllAttributes } from "../../../models/data/data-set-utils";
@@ -111,11 +114,60 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     }
   }, [imagePromises, imageUrls]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const isBackgroundPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    return e.target === containerRef.current || e.target === gridRef.current?.element;
+  }, [gridRef, containerRef]);
+
+  const containerContext = useContainerContext();
+  const handleTilePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+
+    const backgroundClick = isBackgroundPointerDown(e);
+
+    // Clear selection when the user presses on the background. We use
+    // `pointerdown` (capture phase) rather than `click` because:
+    //   - The cell's own pointerdown handler may trigger a React re-render that
+    //     replaces the cell DOM, leaving the subsequent `click` event's target
+    //     falling through to `.rdg` — which would look like a background click.
+    //     Pointerdown's target is reliable because it fires before any
+    //     state-update-driven re-render.
+    //   - dnd-kit's PointerSensor (registered on draggable index cells) can
+    //     suppress the natural follow-up `click` event entirely, so a
+    //     click-based handler is unreliable from the other direction too.
+    // Capture phase is used so cell wrappers' `e.stopPropagation()` (on
+    // bubble-phase pointerdown) doesn't prevent this from firing — we want to
+    // see every pointerdown's actual target.
+    if (backgroundClick) {
+      gridContext.onClearSelection();
+    }
+
+    // Tile-selection management.
+    // We manage our own tile selection by setting tileHandlesOwnSelection=true in
+    // the tile registration so we can prevent deselection from click+modifiers.
+    // We only allow tile deselection if the click is on the background of the tile.
+    // Note: `append` actually means "deselect" if the tile is already selected and
+    // a modifier key is pressed.
+    const willDeselectTile = ui.isSelectedTile(model) && hasSelectionModifier(e);
+    if (backgroundClick || !willDeselectTile) {
+      userSelectTile(ui, model, {
+        readOnly,
+        append: hasSelectionModifier(e),
+        container: containerContext.model
+      });
+    }
+  }, [ui, model, readOnly, containerContext.model, isBackgroundPointerDown, gridContext]);
+
   // React components used for the index (left most) column
-  const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+  // setHoveredRowId is kept (called by row-label pointer handlers and drag-end
+  // cleanup) but the value is unused now that drag-indicator visibility is
+  // controlled entirely by CSS `:hover`. Eliminating the state entirely would
+  // require ripping out the pointerover/leave handlers and drag-end cleanups —
+  // left as-is to keep this diff focused on the bug fix.
+  const [, setHoveredRowId] = useState<string | null>(null);
   const [dragOverRowId, setDragOverRowId] = useState<string | null>(null);
   const rowLabelProps = useRowLabelColumn({
-    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels, hoveredRowId, setHoveredRowId, dragOverRowId,
+    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels, setHoveredRowId, dragOverRowId,
     setDragOverRowId, rowHeight, gridElement
   });
 
@@ -240,18 +292,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const { deleteSelected, selectedCell: selectedCellRef, ...dataGridProps } = useDataSet({
     dataSet, triggerColumnChange, rowChanges, triggerRowChange,
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, inputRowId, lookupImage });
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
-  const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Clear selection when the click lands on the table-grid-container itself
-    // or on the bare RDG element (the empty area below the last row). Clicks
-    // bubbled up from a cell, row, header, or remove-row button have a
-    // different target and don't trigger this.
-    if (e.target === containerRef.current || e.target === gridRef.current?.element) {
-      gridContext.onClearSelection();
-    }
-  };
 
   const importData = (file: File) => {
     if (file) {
@@ -435,7 +475,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   });
 
   return (
-    <div className={classes}>
+    <div className={classes} onPointerDownCapture={handleTilePointerDown}>
       <TableToolbarContext.Provider value={toolbarContext}>
         <TileToolbar
           tileType="table"
@@ -444,7 +484,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
         />
       </TableToolbarContext.Provider>
       <TableContext.Provider value={tableContextValue}>
-        <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
+        <div className="table-grid-container" ref={containerRef}>
           <div ref={titleRef} style={{ display: "contents" }}>
             <EditableTableTitle
               model={model}
