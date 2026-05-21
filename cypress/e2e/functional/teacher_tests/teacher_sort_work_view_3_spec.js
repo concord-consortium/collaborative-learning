@@ -41,15 +41,20 @@ describe('SortWorkView Tests', () => {
       cy.wrap($el).find("[data-testid=doc-group]").should("have.length", 1);
       cy.wrap($el).find("[data-testid=doc-group-label]").should("not.exist");
     });
-    cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.eq", 0);
-    cy.get("[data-testid=scroll-button-left]").should("exist").and("be.disabled");
-    cy.get("[data-testid=scroll-button-right]").should("exist").and("not.be.disabled");
-    cy.get("[data-testid=scroll-button-right]").click();
-    cy.get("[data-testid=scroll-button-left]").should("exist").and("not.be.disabled");
-    cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.gt", 0);
-    cy.get("[data-testid=scroll-button-left]").click();
-    cy.get("[data-testid=scroll-button-left]").should("exist").and("be.disabled");
-    cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.eq", 0);
+    // The Investigation layout renders one set of scroll buttons per
+    // section-document-list, so scope the scroll-behavior assertions to a
+    // single section to avoid multi-element subjects on `.click()`.
+    cy.get("[data-testid=section-document-list]").first().within(() => {
+      cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.eq", 0);
+      cy.get("[data-testid=scroll-button-left]").should("exist").and("be.disabled");
+      cy.get("[data-testid=scroll-button-right]").should("exist").and("not.be.disabled");
+      cy.get("[data-testid=scroll-button-right]").click();
+      cy.get("[data-testid=scroll-button-left]").should("exist").and("not.be.disabled");
+      cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.gt", 0);
+      cy.get("[data-testid=scroll-button-left]").click();
+      cy.get("[data-testid=scroll-button-left]").should("exist").and("be.disabled");
+      cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.eq", 0);
+    });
 
     // Apply secondary sort
     sortWork.getSecondarySortByMenu().click();
