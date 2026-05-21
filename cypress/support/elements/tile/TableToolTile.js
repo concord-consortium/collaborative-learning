@@ -83,8 +83,8 @@ class TableToolTile{
     getTableCellContent(cellIndex) {
       return this.getTableCell().eq(cellIndex).find('.cell');
     }
-    // Note, the editor is in a portal at the document level.
-    // This method will not work if you are in a narrower "within" context.
+    // rdg beta.44 renders the cell editor inline within the cell (no Portal),
+    // so this resolves as a descendant of the row/cell it's editing.
     getTableCellEdit(){
         return cy.get('.rdg-text-editor');
     }
@@ -95,18 +95,16 @@ class TableToolTile{
       // The previous focus-sink-based approach no longer applies because beta.44
       // only renders `.rdg-focus-sink` for tree grids.
       this.getTableCellXY(row, col).dblclick({ scrollBehavior: false });
-      cy.wait(100); // wait for the editor to mount
       cy.document().within(() => {
-        this.getTableCellEdit().type(`${text}{enter}`, { scrollBehavior: false });
+        this.getTableCellEdit().should('exist').type(`${text}{enter}`, { scrollBehavior: false });
       });
     }
     typeInTableCell(i, text, confirm=true) {
       const confirmation = confirm ? '{enter}' : '';
       // Same beta.44 dblclick-to-edit pattern as `typeInTableCellXY` above.
       this.getTableCell().eq(i).dblclick({ scrollBehavior: false });
-      cy.wait(100); // wait for the editor to mount
       return cy.document().within(() => {
-        this.getTableCellEdit().type(`${text}${confirmation}`, { scrollBehavior: false });
+        this.getTableCellEdit().should('exist').type(`${text}${confirmation}`, { scrollBehavior: false });
       });
     }
     typeExpressionInDialog(expression) {
