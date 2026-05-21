@@ -5,7 +5,7 @@ import _ from "lodash";
 import { IReactionDisposer, ObservableMap, reaction, runInAction } from "mobx";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import stringify from "json-stringify-pretty-compact";
-import { withResizeDetector } from "react-resize-detector";
+import { useResizeDetector } from "react-resize-detector";
 
 import { AnnotationLayer } from "./annotation-layer";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
@@ -40,7 +40,8 @@ interface IProps {
   selectedSectionId?: string | null;
   showPlayback?: boolean;
   viaTeacherDashboard?: boolean;
-  width: number;
+  width?: number;
+  containerRef?: (el: HTMLDivElement | null) => void;
 }
 
 interface IState {
@@ -140,6 +141,11 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private handleCanvasRef = (el: HTMLDivElement | null) => {
+    this.setCanvasElement(el);
+    this.props.containerRef?.(el);
+  };
+
   private cacheObjectBoundingBox = (tileId: string, objectId: string, boundingBox: ObjectBoundingBox | undefined) => {
     runInAction(() => {
       if (!this.boundingBoxCache.has(tileId)) {
@@ -195,7 +201,7 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
                   className="canvas"
                   data-test="canvas"
                   onKeyDown={this.handleKeyDown}
-                  ref={el => this.setCanvasElement(el)}
+                  ref={this.handleCanvasRef}
                 >
                   {this.renderContent()}
                   {this.renderDebugInfo()}
@@ -429,4 +435,8 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
 }
 
 // Wrapping so that we can monitor & provide our current width as a context.
-export const CanvasComponent = withResizeDetector(_CanvasComponent, { refreshMode: 'throttle' });
+type CanvasComponentProps = Omit<IProps, "width" | "containerRef">;
+export const CanvasComponent: React.FC<CanvasComponentProps> = (props) => {
+  const { width, ref } = useResizeDetector<HTMLDivElement>({ refreshMode: 'throttle' });
+  return <_CanvasComponent {...props} width={width} containerRef={ref} />;
+};

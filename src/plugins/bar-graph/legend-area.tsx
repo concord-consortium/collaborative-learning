@@ -14,7 +14,7 @@ import { useTileModelContext } from '../../components/tiles/hooks/use-tile-model
 import { getSharedModelManager } from '../../models/tiles/tile-environment';
 
 interface IProps {
-  legendRef: React.RefObject<HTMLDivElement>;
+  legendRef: React.Ref<HTMLDivElement>;
 }
 
 export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
