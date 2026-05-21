@@ -33,9 +33,10 @@ class TextToolTile {
     // slate-react listens for native `beforeinput` events (via addEventListener, not React
     // synthetic props); `cy.type()` doesn't dispatch those, so typed characters never reach
     // the editor. We split each input into literal-text chunks (dispatched with
-    // `cy.realType`, which uses CDP to fire real keyboard input) and `{metaKey}` chunks
-    // (dispatched with `cy.realPress`). Only the meta-keys actually used in our specs are
-    // mapped — adding more is a one-line edit.
+    // `cy.realType`, which uses CDP to fire real keyboard input) and Cypress-style `{key}`
+    // tokens — e.g. `{moveToEnd}`, `{backspace}` — dispatched as single key presses via
+    // `cy.realPress`. Modifier combos like `Cmd+Z` aren't handled; only the standalone
+    // keys in META_KEY_MAP are mapped, and adding more is a one-line edit.
     _dispatchKeystrokes(text){
         const META_KEY_MAP = {
           movetostart: 'Home',
