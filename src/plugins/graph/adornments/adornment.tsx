@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { clsx } from "clsx";
 import { observer } from "mobx-react-lite";
 import { IAdornmentModel } from "./adornment-models";
@@ -9,6 +9,7 @@ import { getAdornmentComponentInfo } from "./adornment-component-info";
 import { IDotsRef, transitionDuration } from "../graph-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { useMemoOne } from "use-memo-one";
+import { useFadeTransition } from "./use-fade-transition";
 
 import "./adornment.scss";
 
@@ -30,14 +31,9 @@ export const Adornment = observer(function Adornment(
                      : layout.plotWidth,
     subPlotHeight = rightCats.length > 0
                       ? layout.plotHeight / rightCats.length
-                      : layout.plotHeight,
-    isFadeInComplete = useRef(false),
-    isFadeOutComplete = useRef(false);
+                      : layout.plotHeight;
 
-  useEffect(function fadeInCleanup() {
-    isFadeInComplete.current = adornment.isVisible;
-    isFadeOutComplete.current = !adornment.isVisible;
-  }, [adornment.isVisible]);
+  const fadeState = useFadeTransition(adornment.isVisible, transitionDuration);
 
   const classFromSubPlotKey = adornment.classNameFromKey(subPlotKey);
   // The adornmentKey is a unique value used for React's key prop and for the adornment wrapper's HTML ID.
@@ -57,9 +53,9 @@ export const Adornment = observer(function Adornment(
     `${adornmentKey}-wrapper`,
     `${classFromSubPlotKey}`,
     {
-      'fadeIn': adornment.isVisible && !isFadeInComplete.current,
-      'fadeOut': !adornment.isVisible && !isFadeOutComplete.current,
-      'hidden': !adornment.isVisible && isFadeOutComplete.current
+      'fadeIn': fadeState === 'fadingIn',
+      'fadeOut': fadeState === 'fadingOut',
+      'hidden': fadeState === 'hidden'
     }
   );
 

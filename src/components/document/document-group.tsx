@@ -118,7 +118,10 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
           {documentGroup.icon ? <documentGroup.icon className="tool-icon"/> : null}{documentGroup.label}
         </div>
       }
-      {visibleCount < docCount && renderScrollButton("left", leftArrowDisabled)}
+      {/* Gate on visibleCount > 0: before the ResizeObserver fires, visibleCount is 0
+          and handleScroll's scrollAmount would be 0 — a silent no-op click. Render the
+          buttons only once we have a measurement, so a click always actually scrolls. */}
+      {visibleCount > 0 && visibleCount < docCount && renderScrollButton("left", leftArrowDisabled)}
       <div ref={docListContainerRef} className="doc-group-list simple" data-testid="doc-group-list">
         {sortedGroupDocuments?.map((doc) => {
           return (
@@ -130,7 +133,7 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
           );
         })}
       </div>
-      {visibleCount < docCount && renderScrollButton("right", rightArrowDisabled)}
+      {visibleCount > 0 && visibleCount < docCount && renderScrollButton("right", rightArrowDisabled)}
       {!isUnsorted && <div className="doc-group-count" data-testid="doc-group-count">{docCount}</div>}
     </div>
   );
