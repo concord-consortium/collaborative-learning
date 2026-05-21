@@ -98,20 +98,11 @@ export const useDataSet = ({
         dataSet.setSelectedCells([{ attributeId: newColumnId, caseId: newRowId }]);
         triggerRowChange();
       }
-    } else if (position.rowIdx < dataSet.cases.length) {
-      // Row label or controls column on a real body row (not the input row).
-      // Select the case so the row highlight + remove-row button appear —
-      // gives keyboard users a way to select rows. setSelectedCases clears
-      // any existing cell/attribute selection, so navigating from a data
-      // cell to a non-data cell correctly drops the cell selection.
-      // No triggerRowChange: dataSet is observable, and the manual trigger
-      // forces columnWidths to recompute mid-keydown, which can remount the
-      // remove-row button and swallow the Enter -> click on that button.
-      const rowId = dataSet.caseIDFromIndex(position.rowIdx);
-      if (rowId && !dataSet.isCaseSelected(rowId)) {
-        dataSet.setSelectedCases([rowId]);
-      }
     }
+    // The row-label (idx 0) and controls (idx N-1) columns are intentionally not
+    // mapped to case selection here. Case selection is owned by the row-label
+    // wrapper's own click/keydown handlers in use-row-label-column.tsx. We don't
+    // have enough info here to know how we should be modifying the case selection.
   };
 
   // Identify the row/column the user just acted on using RDG's authoritative

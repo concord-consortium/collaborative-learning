@@ -31,7 +31,9 @@ export const useControlsColumn = ({
   // beta.44's RenderCellProps no longer includes isRowSelected; the row's own context tracks
   // selection state for our purposes (a selected row also has a selected cell in it).
   const ControlsRowFormatter: React.FC<TFormatterProps> = useCallback(({ rowIdx, row, tabIndex }) => {
-    const showRemoveButton = !readOnly && row.__context__.isSelectedCaseInRow(rowIdx);
+    // The visibility of the remove button is also controlled by CSS based on whether the
+    // tile is selected or not.
+    const showRemoveButton = !readOnly && (row.__context__.isSelectedCaseInRow(rowIdx) || tabIndex === 0);
     return showRemoveButton
             ? <Tooltip {...removeRowTooltipOptions}>
                 <RemoveRowButton rowId={row.__id__} onRemoveRow={onRemoveRow} tabIndex={tabIndex} />

@@ -84,7 +84,15 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
   }, [clearSelection, dataSet, triggerRowChange]);
 
   const selectOneRow = useCallback((rowId: string) => {
-    clearSelection();
+    // Don't clear cell selection here. clearCellSelection would call
+    // gridRef.selectCell({-1, -1}), which fires onSelectedCellChange({-1, -1})
+    // and resets RDG's selectedPosition. We want selectedPosition to stay on
+    // whatever cell it was on when selectOneRow was called.
+    // RDG uses the cell selection for keyboard focus and Tab cycling, so
+    // resetting breaks the expected tabbing behavior.
+    // setSelectedCases below clears the dataSet's cellSelection
+    // which keeps the dataSet view consistent.
+    clearSelection({ cell: false });
     dataSet.setSelectedCases([rowId]);
     triggerRowChange();
   }, [clearSelection, dataSet, triggerRowChange]);
@@ -105,7 +113,9 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
 
   // called by ReactDataGrid when selected rows change
   const onSelectedRowsChange = useCallback((_rows: Set<React.Key>) => {
-    clearSelection({ row: false });
+    // We don't clear the RDG cell selection here, for the same reason as in
+    // selectOneRow.
+    clearSelection({ row: false, cell: false });
     _rows.delete(inputRowId.current);
     const rowArray = Array.from(_rows) as string[];
     dataSet.setSelectedCases(rowArray);
