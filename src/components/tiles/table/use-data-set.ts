@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { DataGridHandle } from "react-data-grid";
+import { CellSelectArgs, DataGridHandle } from "react-data-grid";
 import { ICase, IDataSet } from "../../../models/data/data-set";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -50,7 +50,12 @@ export const useDataSet = ({
     }
     return selectedCellIndices;
   }
-  const onSelectedCellChange = (position: TPosition) => {
+  const onSelectedCellChange = (args: CellSelectArgs<TRow>) => {
+    // beta.44 changed the signature from TPosition to CellSelectArgs; we still operate on
+    // a `{ rowIdx, idx }` position internally. args.column can be undefined when rdg passes
+    // `columns[position.idx]` for an out-of-bounds idx (e.g. when CLUE's clearCellSelection
+    // calls selectCell({-1, -1}) and rdg fires the change notification anyway).
+    const position: TPosition = { rowIdx: args.rowIdx, idx: args.column?.idx ?? -1 };
     selectedCell.current = position;
     // We don't update the position while adding a new row so we can move to the new row if necessary.
     if (addingNewRow.current) return;
@@ -174,9 +179,8 @@ export const useDataSet = ({
   };
 
   const handleColumnResize = useCallback((idx: number, width: number, complete?: boolean) => {
-    const returnVal = onColumnResize(idx, width, complete || false);
+    onColumnResize(idx, width, complete || false);
     triggerColumnChange();
-    return returnVal;
   }, [onColumnResize, triggerColumnChange]);
 
   return { onColumnResize: handleColumnResize, onRowsChange, deleteSelected, onSelectedCellChange};

@@ -66,10 +66,10 @@
 
       svg {
         .background {
-          fill: var(--header-background-color);
+          fill: var(--rdg-header-background-color);
         }
         .sort.circle {
-          fill: var(--header-background-color);
+          fill: var(--rdg-header-background-color);
         }
 
       }
@@ -77,10 +77,10 @@
       &.ascending {
         svg {
           .background {
-            fill: var(--header-background-color);
+            fill: var(--rdg-header-background-color);
           }
           .sort.circle {
-            fill: var(--header-background-color);
+            fill: var(--rdg-header-background-color);
           }
           .sort.arrow {
             fill: $workspace-teal-dark-1;
@@ -92,10 +92,10 @@
         transform: rotate(180deg);
         svg {
           .background {
-            fill: var(--header-background-color);
+            fill: var(--rdg-header-background-color);
           }
           .sort.circle {
-            fill: var(--header-background-color);
+            fill: var(--rdg-header-background-color);
           }
           .sort.arrow {
             fill: $workspace-teal-dark-1;
@@ -124,7 +124,7 @@
         display: flex !important;
         svg {
           .background {
-            fill: var(--header-background-color);
+            fill: var(--rdg-header-background-color);
             opacity: 0.35;
           }
           .foreground {
@@ -137,7 +137,7 @@
       &.sort-column-button {
         svg {
           .background {
-            fill: var(--header-background-color);
+            fill: var(--rdg-header-background-color);
             opacity: 0.35;
           }
           .foreground {
@@ -183,7 +183,7 @@
       &.remove-column-button {
         svg {
           .background {
-            fill: var(--header-background-color);
+            fill: var(--rdg-header-background-color);
             opacity: 1;
           }
           .foreground {
@@ -197,7 +197,7 @@
               fill: $workspace-teal-dark-1;
             }
             .foreground {
-              stroke: var(--header-background-color);
+              stroke: var(--rdg-header-background-color);
             }
           }
         }
@@ -205,7 +205,7 @@
       &.sort-column-button {
         svg {
           .background {
-            fill: var(--header-background-color);
+            fill: var(--rdg-header-background-color);
             opacity: 1;
           }
           .foreground {
@@ -224,10 +224,10 @@
               fill: $workspace-teal-dark-1;
             }
             .foreground {
-              fill: var(--header-background-color);
+              fill: var(--rdg-header-background-color);
               opacity: 1;
               &.sort {
-                fill: var(--header-background-color);
+                fill: var(--rdg-header-background-color);
                 opacity: 1;
               }
             }
@@ -236,7 +236,7 @@
             transform: rotate(180deg);
             svg {
               .foreground.arrow {
-                fill: var(--header-background-color);
+                fill: var(--rdg-header-background-color);
                 opacity: 1;
               }
             }
@@ -245,7 +245,7 @@
             transform: rotate(0deg);
             svg {
               .foreground.arrow {
-                fill: var(--header-background-color);
+                fill: var(--rdg-header-background-color);
                 opacity: 0.35;
               }
             }

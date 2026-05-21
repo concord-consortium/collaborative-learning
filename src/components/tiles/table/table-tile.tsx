@@ -37,6 +37,7 @@ import { RowDragOverlay } from "./row-drag-overlay";
 import { TRow } from "./table-types";
 import { useFormulaModal } from "./use-formula-modal";
 
+import "react-data-grid/lib/styles.css";
 import "./table-tile.scss";
 import "./table-toolbar-registration";
 import { mstReaction } from "../../../utilities/mst-reaction";
@@ -146,6 +147,23 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     gridContext, dataSet, isLinked, content, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
     ...rowLabelProps, showRowLabels, measureColumnWidth, lookupImage, onSort,
   });
+
+  // Map of attrId -> width to drive react-data-grid via its `columnWidths` prop.
+  // CODAP's rdg patch consults this before its internal resize cache, so CLUE
+  // remains the source of truth for column widths.
+  const columnWidths = useMemo(() => {
+    rowChanges; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    const widths = new Map<string, number>();
+    dataSet.attributes.forEach(attr => {
+      widths.set(attr.id, measureColumnWidth(attr));
+    });
+    return widths;
+  // MST keeps `dataSet.attributes` array-identity stable across add/remove,
+  // so depending on `dataSet` alone won't fire this memo on column changes —
+  // `.length` is the actual mutation signal. react-hooks/exhaustive-deps
+  // doesn't model MST and considers `.length` redundant, hence the disable.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataSet, dataSet.attributes.length, measureColumnWidth, rowChanges]);
 
   // The size of the title bar
   const { titleCellWidth, getTitleHeight } =
@@ -335,13 +353,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     if (gridRef.current?.element) {
       setGridElement(gridRef.current.element);
     }
-    if (containerRef.current) {
-      // override the CSS variables controlling selection color for linked tables
-      const dataGrid = containerRef.current.getElementsByClassName("rdg")[0] as HTMLDivElement | undefined;
-      dataGrid?.style.setProperty("--header-selected-background-color", "rgba(0,0,0,0)");
-      dataGrid?.style.setProperty("--row-selected-background-color", "rgba(0,0,0,0)");
-    }
-  }, [gridRef, containerRef]);
+  }, [gridRef]);
 
   // Force a rerender whenever the model's attributes change (which contain the individual cells)
   useEffect(() => {
@@ -406,9 +418,10 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
             onBeginEdit={onBeginTitleEdit}
             onEndEdit={onEndTitleEdit} />
           <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-            <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
-              headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
-              {...dataGridProps} {...rowProps} />
+            <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows}
+              rowHeight={(row) => rowHeight({ row, type: "ROW" })}
+              headerRowHeight={headerRowHeight()} columns={columns} columnWidths={columnWidths}
+              {...gridProps} {...gridModelProps} {...dataGridProps} {...rowProps} />
             <DragOverlay>
               {activeRow ? (
                 <RowDragOverlay row={activeRow} columns={columns} rowHeight={rowHeight} showRowLabels={showRowLabels}/>
