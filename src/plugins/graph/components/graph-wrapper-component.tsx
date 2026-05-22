@@ -293,12 +293,10 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     }
   }, [readOnly, tileAdditionalApi, onRegisterTileApi, onUnregisterTileApi]);
 
-  // Capture Delete / Backspace on the .tool-tile container. Previously the wrapper
-  // div had `tabIndex={0}` + inline `onKeyDown` to receive these keys, but the focus
-  // trap requires the wrapper not to be its own tab stop. The .tool-tile element is
-  // the focus-trap root, so attaching the listener there gives us the same coverage
-  // without adding a stray tab stop. Gated on selected + editable, mirroring the
-  // original behavior.
+  // Capture Delete / Backspace on the .tool-tile container. The focus trap
+  // requires the wrapper div not to be its own tab stop, so we attach the
+  // listener to the .tool-tile element (the focus-trap root) and gate it on
+  // selected + editable.
   useEffect(() => {
     if (!tileElt || readOnly) return;
     const handleKeyDown = (e: KeyboardEvent) => {

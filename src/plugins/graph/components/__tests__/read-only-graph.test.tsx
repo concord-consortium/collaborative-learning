@@ -51,7 +51,7 @@ function renderReadOnlyWrapper(overrides: Partial<React.ComponentProps<typeof Gr
   return { ...utils, onRegisterTileApi, onUnregisterTileApi, model };
 }
 
-describe("Read-only XY Plot — Phase 6 wiring (CLUE-502)", () => {
+describe("Read-only XY Plot — focus trap wiring", () => {
   it("does not register a focus trap when readOnly is true", () => {
     const { onRegisterTileApi } = renderReadOnlyWrapper();
     expect(onRegisterTileApi).toHaveBeenCalled();

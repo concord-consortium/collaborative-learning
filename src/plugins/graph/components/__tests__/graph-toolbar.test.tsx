@@ -58,7 +58,7 @@ const expectedLabels: Array<[string, string]> = [
   ["delete",             "Delete"],
 ];
 
-describe("Graph toolbar buttons — aria-label audit (CLUE-502 Phase 5)", () => {
+describe("Graph toolbar buttons — aria-label audit", () => {
   it.each(expectedLabels)("'%s' button exposes aria-label '%s'", (name, expected) => {
     renderToolbarButton(name);
     const button = screen.getByRole("button", { name: expected });
@@ -83,7 +83,7 @@ describe("Graph toolbar buttons — aria-label audit (CLUE-502 Phase 5)", () => 
 
 // --- aria-pressed on toggle-state buttons ---------------------------------------
 
-describe("Graph toolbar — aria-pressed on toggle buttons (CLUE-502 Phase 5)", () => {
+describe("Graph toolbar — aria-pressed on toggle buttons", () => {
   it("toggle-lock starts aria-pressed='false' and flips to 'true' after activation", () => {
     renderToolbarButton("toggle-lock");
     const button = document.querySelector("button.toolbar-button.toggle-lock") as HTMLButtonElement;
@@ -110,7 +110,7 @@ describe("Graph toolbar — aria-pressed on toggle buttons (CLUE-502 Phase 5)", 
 
 // --- aria-disabled (not HTML disabled) per memory rule --------------------------
 
-describe("Graph toolbar — disabled state uses aria-disabled (CLUE-502 Phase 5)", () => {
+describe("Graph toolbar — disabled state uses aria-disabled", () => {
   // The delete button is disabled when nothing is selected. A fresh graph
   // model has no selection, so it's a convenient default-disabled case.
   it("delete button uses aria-disabled='true' and remains focusable (no HTML disabled)", () => {

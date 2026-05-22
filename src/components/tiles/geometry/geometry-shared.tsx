@@ -1,5 +1,6 @@
 import { ITileProps } from "../tile-component";
 import { HotKeyHandler } from "../../../utilities/hot-keys";
+import { GeometryTileMode } from "./geometry-types";
 
 export interface IToolbarActionHandlers {
   handleDuplicate: () => void;
@@ -14,6 +15,8 @@ export interface IToolbarActionHandlers {
   handleFitAll: () => void;
   handleSetShowColorPalette: (showColorPalette: boolean) => void;
   handleColorChange: (color: number) => void;
+  /** Keyboard/SR activation of a mode button seeds a unit-sized shape at (1, 1). */
+  handleSeedShape: (mode: GeometryTileMode) => void;
 }
 export interface IActionHandlers extends IToolbarActionHandlers {
   handleArrows: HotKeyHandler;

@@ -11,7 +11,10 @@ import { ITileModel } from "../../models/tiles/tile-model";
 import { isQuestionModel } from "../../models/tiles/question/question-content";
 import { BaseComponent } from "../base";
 import PlaceholderTileComponent from "./placeholder/placeholder-tile";
-import { useKeyboardResize, FocusTrapController } from "@concord-consortium/accessibility-tools/hooks";
+import {
+  useKeyboardResize, FocusTrapController,
+  type EscapeHandlerResult, type TabHandlerResult,
+} from "@concord-consortium/accessibility-tools/hooks";
 import { kDefaultTileHeight } from "../constants";
 import {
   ITileApi, TileResizeEntry, TileApiInterfaceContext, TileModelContext, RegisterToolbarContext
@@ -522,7 +525,29 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   // Builds a FocusTrapStrategy from the current tile's elements.
   private buildFocusTrapStrategy() {
     const { model } = this.props;
-    const tabWithinSlots = this.getFocusTrapElements().tabWithinSlots;
+    const trapElements = this.getFocusTrapElements();
+    const tabWithinSlots = trapElements.tabWithinSlots;
+    // Forward only the slot-handler keys the inner tile actually claims —
+    // any present tabHandlers entry tells the trap "this slot manages its own
+    // tabindex", which would silently break default within-slot Tab navigation
+    // for slots the tile didn't opt in to. Handlers resolve dynamically so the
+    // inner tile can update its map between strategy builds.
+    const escapeHandlers: Record<string, (e: KeyboardEvent) => EscapeHandlerResult> = {};
+    const tabHandlers: Record<string, (e: KeyboardEvent, reverse: boolean) => TabHandlerResult> = {};
+    const innerEscape = trapElements.escapeHandlers;
+    if (innerEscape) {
+      for (const slot of Object.keys(innerEscape)) {
+        escapeHandlers[slot] = (e) =>
+          this.getFocusTrapElements().escapeHandlers?.[slot]?.(e) ?? "exit";
+      }
+    }
+    const innerTab = trapElements.tabHandlers;
+    if (innerTab) {
+      for (const slot of Object.keys(innerTab)) {
+        tabHandlers[slot] = (e, reverse) =>
+          this.getFocusTrapElements().tabHandlers?.[slot]?.(e, reverse) ?? "exit";
+      }
+    }
     const strategy = createClueTileStrategy({
       onRegisterTileApi: () => {}, // Not used here — individual tiles handle registration
       onUnregisterTileApi: () => {},
@@ -536,11 +561,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       focusContent: (context) => this.getFocusTrapElements().focusContent?.(context) ?? false,
       onTabWhenInactive: (e, reverse) => this.navigateToSiblingTile(e, reverse),
       tabWithinSlots,
-      // Dynamic forward: the inner tile may register/unregister content-slot
-      // Escape interceptors between strategy builds, so resolve at call time.
-      escapeHandlers: {
-        content: (e) => this.getFocusTrapElements().escapeHandlers?.content?.(e) ?? "exit",
-      },
+      escapeHandlers: Object.keys(escapeHandlers).length ? escapeHandlers : undefined,
+      tabHandlers: Object.keys(tabHandlers).length ? tabHandlers : undefined,
     });
     // Deselect the tile when the controller exits (Escape, setEnabled(false))
     strategy.onExit = () => {
@@ -596,6 +618,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       paletteElement: focusable?.paletteElement || null,
       tabWithinSlots: focusable?.tabWithinSlots,
       escapeHandlers: focusable?.escapeHandlers,
+      tabHandlers: focusable?.tabHandlers,
       resizeHandle: this.resizeElement,
     };
   }

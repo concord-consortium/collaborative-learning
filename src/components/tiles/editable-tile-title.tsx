@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useReadOnlyContext } from "../document/read-only-context";
 import { TileModelContext } from "../tiles/tile-api";
 import { TileLabelInput } from "./tile-label-input";
@@ -39,6 +39,18 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
   // after voice typing commits interim text (React 17 batches state updates).
   const editingTitleRef = useRef(editingTitle);
   editingTitleRef.current = editingTitle;
+
+  // On edit-mode exit (commit / cancel / blur) return focus to the title text
+  // so the trap has a stable anchor for the next Tab — otherwise focus is left
+  // on the now-unmounted <input> (typically falls back to body).
+  const titleTextRef = useRef<HTMLDivElement>(null);
+  const prevIsEditingRef = useRef(false);
+  useEffect(() => {
+    if (prevIsEditingRef.current && !isEditing) {
+      titleTextRef.current?.focus();
+    }
+    prevIsEditingRef.current = isEditing;
+  }, [isEditing]);
 
   const handleClick = () => {
     if (!readOnly && !isEditing) {
@@ -93,6 +105,7 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
         ? <TileLabelInput value={editingTitle} style={inputStyle}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onBlur={() => handleClose(true)} />
         : <div className="editable-tile-title-text" tabIndex={0}
+            ref={titleTextRef}
             role={readOnly ? undefined : "button"}
             aria-label={readOnly ? title : `${title}, editable title`}
             onKeyDown={readOnly ? undefined : (e) => {

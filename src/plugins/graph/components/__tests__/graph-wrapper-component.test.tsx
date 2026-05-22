@@ -51,7 +51,7 @@ function renderWrapper(overrides: Partial<React.ComponentProps<typeof GraphWrapp
   return { ...utils, onRegisterTileApi, onUnregisterTileApi, model };
 }
 
-describe("GraphWrapperComponent — focus trap wiring (CLUE-502 Phase 1)", () => {
+describe("GraphWrapperComponent — focus trap wiring", () => {
   it("registers a tile API with getFocusableElements", () => {
     const { onRegisterTileApi } = renderWrapper();
     expect(onRegisterTileApi).toHaveBeenCalled();
