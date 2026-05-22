@@ -100,6 +100,9 @@ class DrawToolTile{
     getRectangleDrawing(){
       return this.getDrawTileComponent().find('.drawing-layer svg .transformable-rectangle');
     }
+    selectFirstRectangle(){
+      return this.getRectangleDrawing().first().click();
+    }
     getEllipseDrawing(){
       return this.getDrawTileComponent().find('.drawing-layer svg .transformable-ellipse');
     }

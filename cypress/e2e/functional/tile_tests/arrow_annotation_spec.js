@@ -152,7 +152,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().should("have.length", 3);
     // Group the two rectangles
     aa.getAnnotationModeButton().click(); // sparrow mode off
-    drawToolTile.getRectangleDrawing().eq(0).click();
+    drawToolTile.selectFirstRectangle();
     drawToolTile.getRectangleDrawing().eq(1).click({ shiftKey: true });
     clueCanvas.clickToolbarButton('drawing', 'group');
     aa.getAnnotationModeButton().click(); // sparrow mode on

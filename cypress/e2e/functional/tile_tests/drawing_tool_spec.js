@@ -401,9 +401,7 @@ context('Draw Tool Tile', function () {
     drawToolTile.getHighlightBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");
 
     // The best way I found to remove the hover was to delete the rectangle.
-    // Drill into the inner rect — force:true on the wrapper g doesn't reach the
-    // pointerdown handler (same pattern as the Group test fix).
-    drawToolTile.getRectangleDrawing().first().find("rect").click({ force: true });
+    drawToolTile.selectFirstRectangle();
     drawToolTile.getDrawToolDelete().click();
     drawToolTile.getHighlightBox().should("not.exist");
 
@@ -507,7 +505,7 @@ context('Draw Tool Tile', function () {
     // delete the first 4 with the toolbar button
     for (let i = 0; i < 4; i++) {
       drawToolTile.getDrawToolSelect().click();
-      drawToolTile.getRectangleDrawing().first().find("rect").click({ force: true });
+      drawToolTile.selectFirstRectangle();
       drawToolTile.getDrawToolDelete().click();
     }
     // Delete with backspace key.
@@ -515,13 +513,13 @@ context('Draw Tool Tile', function () {
     // (the drawing tile redirects focus on pointer events for the focus trap). Trigger the
     // keydown directly on the drawing-layer so it reaches the React onKeyDown handler.
     drawToolTile.getDrawToolSelect().click();
-    drawToolTile.getRectangleDrawing().first().find("rect").click({ force: true });
+    drawToolTile.selectFirstRectangle();
     drawToolTile.getDrawTileComponent().find('.drawing-layer')
       .trigger("keydown", { key: "Backspace", keyCode: 8, which: 8, force: true });
 
     // Delete with delete key
     drawToolTile.getDrawToolSelect().click();
-    drawToolTile.getRectangleDrawing().first().find("rect").click({ force: true });
+    drawToolTile.selectFirstRectangle();
     drawToolTile.getDrawTileComponent().find('.drawing-layer')
       .trigger("keydown", { key: "Delete", keyCode: 46, which: 46, force: true });
 
