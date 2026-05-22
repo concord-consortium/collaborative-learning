@@ -99,13 +99,15 @@ function castToVariablesPlugin(plugin?: ITextPlugin): VariablesPlugin|undefined 
 }
 
 function handleClose(editor: Editor) {
-  // focus the editor after closing the dialog, which is what the user expects and
-  // also required for certain slate selection synchronization mechanisms to work.
-  // focusing twice shouldn't be necessary, but sometimes seems to help ¯\_(ツ)_/¯
-  ReactEditor.focus(editor);
+  // Defer focus restoration until after React has committed any state changes
+  // from the modal's OK handler (e.g. variable chip insertion). Calling
+  // ReactEditor.focus synchronously here races React 18's batched render:
+  // editor.selection points into the newly-inserted node, but slate-react's
+  // KEY_TO_ELEMENT map isn't populated for that node until React commits, so
+  // toDOMRange throws "Cannot resolve a DOM node from Slate node".
   setTimeout(() => {
     ReactEditor.focus(editor);
-  }, 10);
+  }, 0);
 }
 
 export const NewVariableTextButton = observer(

@@ -1,4 +1,4 @@
-import { registerPlugins } from "@concord-consortium/slate-editor";
+import { createEditor } from "@concord-consortium/slate-editor";
 import TextToolComponent from "../../../components/tiles/text/text-tile";
 import { HighlightsPlugin, kHighlightTextPluginName } from "../../../plugins/text/highlights-plugin";
 import { registerTileComponentInfo } from "../tile-component-info";
@@ -9,6 +9,10 @@ import { registerTextPluginInfo } from "./text-plugin-info";
 import Icon from "../../../clue/assets/icons/text-tool.svg";
 import HeaderIcon from "../../../assets/icons/sort-by-tools/text-tile-id.svg";
 
+// createEditor() registers slate-editor's built-in element and mark renderers
+// (via withCoreMarks/withCoreBlocks/etc.) as a side effect. Invoke it at module
+// load so non-editor paths like slateToHtml() find the renderers registered.
+createEditor();
 registerTileContentInfo({
   type: kTextTileType,
   displayName: "Text",
@@ -20,8 +24,6 @@ registerTextPluginInfo({
   pluginName: kHighlightTextPluginName,
   createSlatePlugin: (textContent) => new HighlightsPlugin(textContent)
 });
-
-registerPlugins();
 
 registerTileComponentInfo({
   type: kTextTileType,

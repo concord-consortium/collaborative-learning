@@ -15,7 +15,7 @@ jobs:
           cache-dependency-path: |
             package-lock.json
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       - uses: concord-consortium/s3-deploy-action/deploy-path@v1
         id: s3-deploy-path
       - name: Lint
@@ -45,7 +45,7 @@ jobs:
             package-lock.json
             authoring-api/package-lock.json
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       - name: Install Authoring API Dependencies
         working-directory: ./authoring-api
         run: npm ci
@@ -94,6 +94,7 @@ jobs:
             package-lock.json
       - uses: cypress-io/github-action@v4
         with:
+          install-command: npm ci --legacy-peer-deps
           start: npm start
           wait-on: 'http://localhost:8080'
           wait-on-timeout: 600
