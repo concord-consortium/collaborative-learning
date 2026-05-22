@@ -72,7 +72,6 @@ jobs:
             package-lock.json
       - uses: cypress-io/github-action@v4
         with:
-          install-command: npm ci --legacy-peer-deps
           start: npm start
           wait-on: 'http://localhost:8080'
           wait-on-timeout: 600
