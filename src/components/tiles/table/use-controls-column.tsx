@@ -28,8 +28,8 @@ export const useControlsColumn = ({
   }, [addColumnTooltipOptions, onAddColumn, readOnly]);
 
   const removeRowTooltipOptions = useTooltipOptions({ title: "Remove row", distance: kTooltipDistance });
-  const ControlsRowFormatter: React.FC<TFormatterProps> = useCallback(({ rowIdx, row, isRowSelected }) => {
-    const showRemoveButton = !readOnly && (isRowSelected || row.__context__.isSelectedCellInRow(rowIdx));
+  const ControlsRowFormatter: React.FC<TFormatterProps> = useCallback(({ rowIdx, row }) => {
+    const showRemoveButton = !readOnly && row.__context__.isSelectedCellInRow(rowIdx);
     return showRemoveButton
             ? <Tooltip {...removeRowTooltipOptions}>
                 <RemoveRowButton rowId={row.__id__} onRemoveRow={onRemoveRow} />
@@ -40,8 +40,14 @@ export const useControlsColumn = ({
 
   useEffect(() => {
     if (controlsColumn) {
-      controlsColumn.headerRenderer = ControlsHeaderRenderer;
-      controlsColumn.formatter = ControlsRowFormatter;
+      // Column.renderHeaderCell / renderCell are readonly. We mutate them here
+      // because controlsColumn is created in a sibling hook before these renderers are known.
+      // The cast allows us to use this initialize-then-attach pattern.
+      // If RDG ever enforces the readonly contract (e.g. freezes columns), this would
+      // fail at runtime rather than silently — we'd notice it immediately.
+      const mutableColumn = controlsColumn as { -readonly [K in keyof TColumn]: TColumn[K] };
+      mutableColumn.renderHeaderCell = ControlsHeaderRenderer;
+      mutableColumn.renderCell = ControlsRowFormatter;
       triggerColumnChange();
     }
   }, [controlsColumn, ControlsHeaderRenderer, ControlsRowFormatter, triggerColumnChange]);

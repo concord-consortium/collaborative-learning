@@ -61,6 +61,7 @@ export const useColumnsFromDataSet = ({
       name: "Controls",
       key: kControlsColumnKey,
       width: kControlsColumnWidth,
+      minWidth: kControlsColumnWidth,
       maxWidth: kControlsColumnWidth,
       resizable: false,
       editable: false,
@@ -84,12 +85,9 @@ export const useColumnsFromDataSet = ({
         width,
         resizable: !readOnly,
         sortable: true,
-        headerRenderer: ColumnHeaderCell,
-        formatter: getCellFormatter({ dataSet, isLinked, lookupImage, rowHeight, width }),
-        editor: !readOnly && !content.hasExpression(attr.id) ? CellTextEditor : undefined,
-        editorOptions: {
-          editOnClick: !readOnly
-        }
+        renderHeaderCell: ColumnHeaderCell,
+        renderCell: getCellFormatter({ dataSet, isLinked, lookupImage, rowHeight, width }),
+        renderEditCell: !readOnly && !content.hasExpression(attr.id) ? CellTextEditor : undefined,
       };
     });
     cols.unshift({
@@ -98,12 +96,13 @@ export const useColumnsFromDataSet = ({
       name: "Index",
       key: kIndexColumnKey,
       width: showRowLabels ? kIndexColumnWidthWithLabel : kIndexColumnWidth,
+      minWidth: showRowLabels ? kIndexColumnWidthWithLabel : kIndexColumnWidth,
       maxWidth: showRowLabels ? kIndexColumnWidthWithLabel : kIndexColumnWidth,
       resizable: false,
       editable: false,
       frozen: true,
-      headerRenderer: RowLabelHeader,
-      formatter: RowLabelFormatter
+      renderHeaderCell: RowLabelHeader,
+      renderCell: RowLabelFormatter
     });
     if (controlsColumn) {
       cols.push(controlsColumn);
