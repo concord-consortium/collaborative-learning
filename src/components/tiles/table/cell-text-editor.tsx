@@ -58,7 +58,6 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // beta.44 renders editors inline within the cell (no Portal, no absolute positioning).
   return (
     <div className="rdg-editor-container">
       <TextareaAutosize

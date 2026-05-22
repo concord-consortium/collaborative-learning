@@ -59,8 +59,6 @@ export const useRowLabelColumn = ({inputRowId, hoveredRowId, showRowLabels, setS
     const rowHeightValue = rowHeight({ row, type: "ROW" });
 
     const DraggableRowLabel: React.FC = () => {
-      // beta.44 removed isRowSelected/onRowSelectionChange from RenderCellProps; call
-      // useRowSelection() inside the cell renderer to access the same values.
       const [isRowSelected, onRowSelectionChange] = useRowSelection();
       const { attributes, listeners, setNodeRef: setDragRef } = useDraggable({ id: __id__ });
       const isInputRow = __id__ === inputRowId;

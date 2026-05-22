@@ -83,17 +83,10 @@ class TableToolTile{
     getTableCellContent(cellIndex) {
       return this.getTableCell().eq(cellIndex).find('.cell');
     }
-    // rdg beta.44 renders the cell editor inline within the cell (no Portal),
-    // so this resolves as a descendant of the row/cell it's editing.
     getTableCellEdit(){
         return cy.get('.rdg-text-editor');
     }
     typeInTableCellXY(row, col, text) {
-      // In react-data-grid beta.44, a double-click on a cell calls
-      // `selectCellWrapper(true)` which enters EDIT mode. (CODAPv3, which uses
-      // the same rdg version, takes the same approach in its case-table specs.)
-      // The previous focus-sink-based approach no longer applies because beta.44
-      // only renders `.rdg-focus-sink` for tree grids.
       this.getTableCellXY(row, col).dblclick({ scrollBehavior: false });
       cy.document().within(() => {
         this.getTableCellEdit().should('exist').type(`${text}{enter}`, { scrollBehavior: false });
@@ -101,7 +94,6 @@ class TableToolTile{
     }
     typeInTableCell(i, text, confirm=true) {
       const confirmation = confirm ? '{enter}' : '';
-      // Same beta.44 dblclick-to-edit pattern as `typeInTableCellXY` above.
       this.getTableCell().eq(i).dblclick({ scrollBehavior: false });
       return cy.document().within(() => {
         this.getTableCellEdit().should('exist').type(`${text}${confirmation}`, { scrollBehavior: false });
@@ -118,16 +110,15 @@ class TableToolTile{
         return cy.get('.rdg-row').contains('.rdg-cell[aria-colindex="' + colIndex + '"]', colValue);
         // return cy.get('.rdg-row .rdg-cell[aria-colindex=\"' + colIndex + '\"]');
     }
-    getTableCellWithRowColIndex(rowIndex, colIndex){
+    getTableCellWithRowColIndex(rowIndex, colIndex, workspaceClass){
       // rdg beta.44 virtualizes off-screen rows, so a row past the visible window
       // isn't in the DOM and `.eq(rowIndex)` won't find it. Scroll the grid so the
       // target row index will be inside the rendered window, then query by the
       // absolute `aria-rowindex` instead of `.eq` (which is relative to whatever
       // rows happen to be rendered right now). aria-rowindex matches the data
       // row index +2 (header occupies rowindex 1).
-      // Scope to `.primary-workspace` so the doc-editor's read-only mirror panes
-      // (which render the same grid) don't get picked up alongside the primary.
-      cy.get('.primary-workspace .rdg').then($rdg => {
+      const ws = wsclass(workspaceClass);
+      cy.get(`${ws} .rdg`).then($rdg => {
         const grid = $rdg[0];
         // Use the actual rendered row height when available; fall back to a sensible
         // default. Centering the target in the viewport gives rdg's buffer room on
@@ -136,7 +127,7 @@ class TableToolTile{
         const rowHeight = (sample && sample.getBoundingClientRect().height) || 30;
         grid.scrollTop = Math.max(0, rowIndex * rowHeight - grid.clientHeight / 2);
       });
-      return cy.get(`.primary-workspace .rdg-row[aria-rowindex=${rowIndex + 2}] .rdg-cell[aria-colindex="${colIndex}"]`);
+      return cy.get(`${ws} .rdg-row[aria-rowindex=${rowIndex + 2}] .rdg-cell[aria-colindex="${colIndex}"]`);
     }
     enterData(cell, num){
         this.getTableCell().eq(cell).type(num+'{enter}');

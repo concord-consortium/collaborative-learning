@@ -104,8 +104,6 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
     dataSet.setSelectedCases(rowArray);
   }, [clearSelection, dataSet]);
 
-  // beta.44 dropped the cellNavigationMode prop; the only remaining mode is the previous "NONE"
-  // and "CHANGE_ROW" / "LOOP_OVER_ROW" no longer exist as configurable options.
   return {
     ref: gridRef, inputRowId, getSelectedRows, gridContext, onSelectedRowsChange
   };
