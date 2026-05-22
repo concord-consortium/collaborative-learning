@@ -35,9 +35,9 @@ export { mockUniqueId };
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../../register-tile-types";
 registerTileTypes(["Drawing", "Geometry", "Image", "Table", "Text"]);
-// slate-editor v0.12 dropped registerPlugins(); registrations now happen as side effects
-// of createEditor() (via withCoreMarks/withCoreBlocks/etc.). Trigger them once so tests
-// can serialize Slate values without first instantiating an editor.
+// createEditor() registers slate-editor's built-in element and mark renderers
+// as a side effect. Trigger it at module load so tests can serialize Slate
+// values without first instantiating an editor.
 createEditor();
 
 export function prepareTileForMatch(tile: any) {

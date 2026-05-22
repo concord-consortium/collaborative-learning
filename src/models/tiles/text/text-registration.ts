@@ -9,11 +9,9 @@ import { registerTextPluginInfo } from "./text-plugin-info";
 import Icon from "../../../clue/assets/icons/text-tool.svg";
 import HeaderIcon from "../../../assets/icons/sort-by-tools/text-tile-id.svg";
 
-// slate-editor v0.12 dropped the public registerPlugins() helper. The built-in
-// element components and mark renderers are now registered as side effects of
-// createEditor() (via withCoreMarks/withCoreBlocks/etc.). We invoke it once at
-// module load so paths like slateToHtml() that don't go through SlateEditor
-// still find the renderers registered.
+// createEditor() registers slate-editor's built-in element and mark renderers
+// (via withCoreMarks/withCoreBlocks/etc.) as a side effect. Invoke it at module
+// load so non-editor paths like slateToHtml() find the renderers registered.
 createEditor();
 registerTileContentInfo({
   type: kTextTileType,
