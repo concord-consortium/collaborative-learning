@@ -145,15 +145,16 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
         return getEditableTitleElement(tile);
       },
       getContentElement: () => drawingToolElement.current ?? undefined,
-      focusContent: () => {
+      focusContent: ({ entryMode }) => {
         const container = drawingToolElement.current;
         if (!container) return false;
         const focusables = getVisibleFocusables(container);
-        if (focusables.length > 0) {
-          focusables[0].focus();
-          return document.activeElement === focusables[0];
-        }
-        return false;
+        if (focusables.length === 0) return false;
+        const target = entryMode === "reverse"
+          ? focusables[focusables.length - 1]
+          : focusables[0];
+        target.focus();
+        return document.activeElement === target;
       },
       additionalApi: tileAdditionalApi,
     },

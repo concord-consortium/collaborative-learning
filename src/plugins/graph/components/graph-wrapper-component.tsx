@@ -1,14 +1,17 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import { ScaleLinear } from "d3";
 
 import { kSmallAnnotationNodeRadius } from "../../../components/annotations/annotation-utilities";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
+import { ITileApi } from "../../../components/tiles/tile-api";
 import { ITileProps } from "../../../components/tiles/tile-component";
+import { useClueAccessibility } from "../../../hooks/use-clue-accessibility";
 import { useSettingFromStores, useUIStore } from "../../../hooks/use-stores";
 import { OffsetModel } from "../../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { getEditableTitleElement, getVisibleFocusables } from "../../../utilities/dom-utils";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { Point } from "../graph-types";
 import {
@@ -25,9 +28,37 @@ import "./graph-toolbar-registration";
 
 import "./graph-wrapper-component.scss";
 
+/**
+ * Focuses an entry tab stop inside the graph content area, using the trap's
+ * own visibility filter so the choice matches what tab-within-content sees:
+ *  - Forward: the first visible focusable (the X-axis label in DOM order).
+ *  - Reverse: the last visible focusable (currently the Y-axis maximum bound
+ *    control, since the `.graph-content-area` wrapper brings min/max into the
+ *    content slot after the axis labels and dots-group in DOM order).
+ *
+ * Without this override, the trap's default `pickSlotEntryTarget` would
+ * always return the first element with `tabindex="0"` regardless of
+ * direction, so Shift+Tab into content would land on X-label and skip every
+ * focusable after it.
+ *
+ * @returns True when focus landed somewhere inside content.
+ */
+function focusContentEntry(contentElement: HTMLElement | null, reverse: boolean): boolean {
+  if (!contentElement) return false;
+  const focusables = getVisibleFocusables(contentElement);
+  const target = reverse ? focusables[focusables.length - 1] : focusables[0];
+  if (!target) return false;
+  (target as HTMLElement).focus();
+  // The dots-group surrogate's focus handler (useGraphDotsKeyboard) re-focuses
+  // a child .graph-dot on group focus, so accept any descendant as a
+  // successful landing on the dots-group.
+  const active = document.activeElement;
+  return active === target || (active != null && target.contains(active));
+}
+
 export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(props) {
   const {
-    model, readOnly, tileElt, onRegisterTileApi, onRequestRowHeight
+    model, readOnly, tileElt, onRegisterTileApi, onUnregisterTileApi, onRequestRowHeight
   } = props;
   const instanceId = useNextInstanceId("graph");
   const ui = useUIStore();
@@ -35,6 +66,27 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const graphSettings: IGraphSettings = { ...kDefaultGraphSettings, ...graphSettingsFromStores };
   const content = model.content as IGraphModel;
   const hotKeys = useRef(new HotKeys());
+
+  // Content and palette elements are queried lazily from `tileElt`. Both live
+  // deep inside GraphComponent → Graph (the plot area) / GraphComponent → Graph
+  // → MultiLegend (the legend container); querying via `tileElt` avoids threading
+  // a ref through three layers. The trap controller calls these getters on
+  // every cycle, so they pick up DOM that mounts after the wrapper renders.
+  //
+  // Content points at `.graph-content-area` (a `display: contents` wrapper
+  // around the SVG plus the absolutely-positioned axis min/max border-boxes)
+  // rather than `.graph-plot`, because `.graph-plot` also contains the
+  // `.multi-legend` palette. The trap resolves a focused element's slot by
+  // DOM containment walking `cycleOrder` (title → … → content → palette → …);
+  // if content matched the palette's container, legend controls would all be
+  // attributed to content. Scoping content to `.graph-content-area` keeps the
+  // boundary correct while including the min/max bound controls.
+  const getContentElement = useCallback(() => {
+    return tileElt?.querySelector<HTMLElement>(".graph-content-area") ?? undefined;
+  }, [tileElt]);
+  const getPaletteElement = useCallback(() => {
+    return tileElt?.querySelector<HTMLElement>(".multi-legend") ?? undefined;
+  }, [tileElt]);
 
   const layout = useInitGraphLayout(content);
   const xAttrType = content.config.attributeType("x");
@@ -111,87 +163,154 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     }
   }, [handleDelete, readOnly]);
 
-  useEffect(() => {
-    onRegisterTileApi?.({
-      exportContentAsTileJson: (options?: ITileExportOptions) => {
-        return content.exportJson(options);
-      },
-      getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        let coords;
-        const annotationLocationCache = content.annotationLocationCaches.get(instanceId);
-        const annotationSizesCache = content.annotationSizesCaches.get(instanceId);
-        if (objectType === "dot") {
-          coords = getDotCenter(objectId);
-        // Check location cache
-        } else if (annotationLocationCache && annotationSizesCache && annotationLocationCache.has(objectId)){
-          const location = annotationLocationCache.get(objectId);
-          if (location) {
-            const size = annotationSizesCache.get(objectId);
-            if (size) { // This is a rectangle of defined width & height
-              const bbox = {
-                left: location.x + layout.getComputedBounds("plot").left,
-                top: location.y + layout.getComputedBounds("plot").top,
-                ...size };
-              return bbox;
-            }
-            return boundingBoxForPoint(location);
+  const tileAdditionalApi = useMemo<Partial<ITileApi>>(() => ({
+    exportContentAsTileJson: (options?: ITileExportOptions) => {
+      return content.exportJson(options);
+    },
+    getObjectBoundingBox: (objectId: string, objectType?: string) => {
+      let coords;
+      const annotationLocationCache = content.annotationLocationCaches.get(instanceId);
+      const annotationSizesCache = content.annotationSizesCaches.get(instanceId);
+      if (objectType === "dot") {
+        coords = getDotCenter(objectId);
+      // Check location cache
+      } else if (annotationLocationCache && annotationSizesCache && annotationLocationCache.has(objectId)){
+        const location = annotationLocationCache.get(objectId);
+        if (location) {
+          const size = annotationSizesCache.get(objectId);
+          if (size) { // This is a rectangle of defined width & height
+            const bbox = {
+              left: location.x + layout.getComputedBounds("plot").left,
+              top: location.y + layout.getComputedBounds("plot").top,
+              ...size };
+            return bbox;
           }
-        } else {
-          // Maybe one of our adornments knows about this object
-          const pos = objectType && getPositionFromAdornment(objectType, objectId);
-          coords = pos && getScaledPosition(pos);
+          return boundingBoxForPoint(location);
         }
-        if (coords) {
-          return boundingBoxForPoint(coords);
-        }
-      },
-      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
-        let coords;
-        const annotationLocationCache = content.annotationLocationCaches.get(instanceId);
-        if (objectType === "dot") {
-          // Native graph object
-          coords = getDotCenter(objectId);
-        } else if (content.annotationSizesCaches.get(instanceId)?.has(objectId)) {
-          // Adornment object with rectangle shape; do not return SVG
-          return undefined;
-        } else if (annotationLocationCache?.has(objectId)) {
-          // Adornment object with dot shape
-          coords = annotationLocationCache.get(objectId);
-        } else if (objectType) {
-          const pos = getPositionFromAdornment(objectType, objectId);
-          coords = pos && getScaledPosition(pos);
-        }
-        if (!coords) return;
-        const { x, y } = coords;
-        const cx = x + layout.getComputedBounds("left").width;
-        const radius = content.getPointRadius("hover-drag");
-
-        // Return a circle at the center point
-        return (
-          <circle
-            className={classes}
-            cx={cx}
-            cy={y}
-            onClick={handleClick}
-            r={radius}
-          />
-        );
-      },
-      getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
-        const offsets = OffsetModel.create({});
-        offsets.setDy(-kSmallAnnotationNodeRadius);
-        return offsets;
-      },
-      getObjectNodeRadii: (objectId: string, objectType?: string) => {
-        return {
-          centerRadius: kSmallAnnotationNodeRadius / 2,
-          highlightRadius: kSmallAnnotationNodeRadius
-        };
+      } else {
+        // Maybe one of our adornments knows about this object
+        const pos = objectType && getPositionFromAdornment(objectType, objectId);
+        coords = pos && getScaledPosition(pos);
       }
-    });
-    // xDomain and yDomain are included to force updating the sparrow locations when they change
-  }, [getDotCenter, content, layout, onRegisterTileApi, getPositionFromAdornment,
-    boundingBoxForPoint, getScaledPosition]);
+      if (coords) {
+        return boundingBoxForPoint(coords);
+      }
+    },
+    getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
+      let coords;
+      const annotationLocationCache = content.annotationLocationCaches.get(instanceId);
+      if (objectType === "dot") {
+        // Native graph object
+        coords = getDotCenter(objectId);
+      } else if (content.annotationSizesCaches.get(instanceId)?.has(objectId)) {
+        // Adornment object with rectangle shape; do not return SVG
+        return undefined;
+      } else if (annotationLocationCache?.has(objectId)) {
+        // Adornment object with dot shape
+        coords = annotationLocationCache.get(objectId);
+      } else if (objectType) {
+        const pos = getPositionFromAdornment(objectType, objectId);
+        coords = pos && getScaledPosition(pos);
+      }
+      if (!coords) return;
+      const { x, y } = coords;
+      const cx = x + layout.getComputedBounds("left").width;
+      const radius = content.getPointRadius("hover-drag");
+
+      // Return a circle at the center point
+      return (
+        <circle
+          className={classes}
+          cx={cx}
+          cy={y}
+          onClick={handleClick}
+          r={radius}
+        />
+      );
+    },
+    getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
+      const offsets = OffsetModel.create({});
+      offsets.setDy(-kSmallAnnotationNodeRadius);
+      return offsets;
+    },
+    getObjectNodeRadii: (objectId: string, objectType?: string) => {
+      return {
+        centerRadius: kSmallAnnotationNodeRadius / 2,
+        highlightRadius: kSmallAnnotationNodeRadius
+      };
+    }
+  }), [content, instanceId, layout, getDotCenter, getPositionFromAdornment, boundingBoxForPoint, getScaledPosition]);
+
+  // Editable tiles register the tile API (including focus-trap getFocusableElements)
+  // through useClueAccessibility. Read-only tiles use `type: "region"`, which does
+  // not register a tile API — so we register `tileAdditionalApi` directly below for
+  // read-only graphs so annotation lookup and export still work.
+  useClueAccessibility(readOnly ? { type: "region" } : {
+    type: "tile",
+    focusTrap: {
+      tileType: "graph",
+      onRegisterTileApi,
+      onUnregisterTileApi,
+      getTitleElement: () => getEditableTitleElement(tileElt ?? undefined),
+      getContentElement,
+      getPaletteElement,
+      focusContent: ({ entryMode }) => focusContentEntry(getContentElement() ?? null, entryMode === "reverse"),
+      additionalApi: tileAdditionalApi,
+      // The graph's CLUE-legend palette has many heterogeneous native controls
+      // (unlink button, dataset-name edit pencil, color picker, attribute menu
+      // triggers, add-series button) and users expect Tab to step through them
+      // individually rather than treating the whole legend as one tab stop.
+      // Opt palette into the trap's within-slot Tab routing.
+      tabWithinSlots: ["topbar", "content", "palette"],
+      // While an inline axis-label editor (InputTextbox) is focused, Escape
+      // should cancel the edit and return focus to the trigger — not exit the
+      // trap. Returning "handled" tells the trap not to exit and not to
+      // stopPropagation, so the InputTextbox's React onKeyDown sees the same
+      // Escape during the bubble phase and performs the cancel.
+      escapeHandlers: {
+        content: () => {
+          const active = document.activeElement;
+          if (active instanceof HTMLElement && active.classList.contains("input-textbox")) {
+            return "handled";
+          }
+          return "exit";
+        },
+      },
+    },
+  });
+
+
+  // Read-only path: register the annotation/export API directly (the region branch of
+  // useClueAccessibility above doesn't touch tile API at all). Mirrors drawing-tile.tsx.
+  // Re-register when tileAdditionalApi changes — its closures depend on axis attribute
+  // types (xAttrType / yAttrType), which start undefined and become "numeric" once data
+  // is linked. A mount-only registration would freeze the no-data closures and break
+  // annotation buttons / object lookup once the read-only view becomes data-linked.
+  useEffect(() => {
+    if (readOnly) {
+      onRegisterTileApi?.(tileAdditionalApi);
+      return () => onUnregisterTileApi?.();
+    }
+  }, [readOnly, tileAdditionalApi, onRegisterTileApi, onUnregisterTileApi]);
+
+  // Capture Delete / Backspace on the .tool-tile container. Previously the wrapper
+  // div had `tabIndex={0}` + inline `onKeyDown` to receive these keys, but the focus
+  // trap requires the wrapper not to be its own tab stop. The .tool-tile element is
+  // the focus-trap root, so attaching the listener there gives us the same coverage
+  // without adding a stray tab stop. Gated on selected + editable, mirroring the
+  // original behavior.
+  useEffect(() => {
+    if (!tileElt || readOnly) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!ui.isSelectedTile(model)) return;
+      // HotKeys.dispatch is typed for React.KeyboardEvent but only reads modifier-key
+      // flags, `keyCode`, and the preventDefault/stopPropagation methods — all present
+      // on the native KeyboardEvent. Cast through unknown to satisfy the signature.
+      hotKeys.current.dispatch(e as unknown as React.KeyboardEvent);
+    };
+    tileElt.addEventListener("keydown", handleKeyDown);
+    return () => tileElt.removeEventListener("keydown", handleKeyDown);
+  }, [tileElt, readOnly, ui, model]);
 
   useEffect(function cleanup() {
     return () => {
@@ -208,11 +327,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   return (
     <InstanceIdContext.Provider value={instanceId}>
       <GraphSettingsContext.Provider value={graphSettings}>
-        <div
-          className={wrapperClasses}
-          onKeyDown={(e) => hotKeys.current.dispatch(e)}
-          tabIndex={0} // must be able to take focus so that it can receive keyDown events
-        >
+        <div className={wrapperClasses}>
           <BasicEditableTileTitle />
           <GraphComponent
             layout={layout}
@@ -220,6 +335,13 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
             tileElt={tileElt}
             onRequestRowHeight={onRequestRowHeight}
             readOnly={readOnly}
+          />
+          {/* Aria-live region for dot-selection announcements. Walked up to by
+              useGraphDotsKeyboard via the `data-graph-announcer` marker. */}
+          <div
+            aria-live="polite"
+            className="visually-hidden"
+            data-graph-announcer=""
           />
         </div>
       </GraphSettingsContext.Provider>

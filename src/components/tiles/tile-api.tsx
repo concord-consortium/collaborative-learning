@@ -1,6 +1,7 @@
 import { createContext, ReactElement } from "react";
 import { action, makeObservable, observable } from "mobx";
 import { Optional } from "utility-types";
+import type { EscapeHandlerResult, FocusContentContext } from "@concord-consortium/accessibility-tools/hooks";
 import { IOffsetModel, ObjectBoundingBox } from "../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../models/tiles/tile-content-info";
 import { ITileModel } from "../../models/tiles/tile-model";
@@ -20,7 +21,10 @@ interface IGetObjectButtonSVGParams {
 export interface ITileFocusableElements {
   contentElement?: HTMLElement;  // main content area (editor, grid, canvas, etc.)
   titleElement?: HTMLElement;    // tile title input if visible
-  focusContent?: () => boolean;  // custom focus method for content (e.g., Slate's ReactEditor.focus)
+  // Custom focus method for content (e.g., Slate's ReactEditor.focus). The
+  // FocusContentContext carries entryMode so direction-aware implementations
+  // (e.g. XY Plot's reverse-Tab targeting the dots-group) can pick the right end.
+  focusContent?: (context: FocusContentContext) => boolean;
   // Optional secondary controls bar above the main content (e.g. dataflow's
   // Sampling Rate / Record area). Visited as its own slot between title and
   // content. Walked focusable-by-focusable like content (in tabWithinSlots).
@@ -29,6 +33,17 @@ export interface ITileFocusableElements {
   // as its own slot in the trap cycle, between content and the standard floating
   // toolbar, so its internal roving-tabindex is a single tab stop with arrow nav.
   paletteElement?: HTMLElement;
+  // Optional per-tile override for which slots have Tab routed within them.
+  // The outer FocusTrapController (in tile-component.tsx) reads this back from
+  // the tile's registered API and applies it to its own strategy, so the inner
+  // tile can opt slots into within-slot Tab routing (e.g. XY Plot opts palette in
+  // because its CLUE legend has many heterogeneous controls).
+  tabWithinSlots?: string[];
+  // Optional per-slot Escape interceptors. Return "handled" to suppress the
+  // trap's default exit (e.g. when an inline editor is open and Escape should
+  // cancel the edit rather than exit the trap). Return "exit" or omit to let
+  // the trap exit normally.
+  escapeHandlers?: Record<string, (e: KeyboardEvent) => EscapeHandlerResult>;
 }
 
 export interface ITileApi {
