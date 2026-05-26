@@ -60,10 +60,10 @@ export const useDataSet = ({
   }
 
   const onSelectedCellChange = (args: CellSelectArgs<TRow>) => {
-    // beta.44 changed the signature from TPosition to CellSelectArgs; we still operate on
-    // a `{ rowIdx, idx }` position internally. args.column can be undefined when rdg passes
-    // `columns[position.idx]` for an out-of-bounds idx (e.g. when CLUE's clearCellSelection
-    // calls selectCell({-1, -1}) and rdg fires the change notification anyway).
+    // We project CellSelectArgs onto a `{ rowIdx, idx }` position for internal use.
+    // args.column is undefined when rdg passes `columns[position.idx]` for an out-of-bounds
+    // idx (e.g. when CLUE's clearCellSelection calls selectCell({-1, -1}) and rdg fires
+    // the change notification anyway).
     const position: TPosition = { rowIdx: args.rowIdx, idx: args.column?.idx ?? -1 };
     selectedCell.current = position;
 

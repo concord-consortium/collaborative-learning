@@ -45,8 +45,8 @@ const DraggableRowLabel: React.FC<IDraggableRowLabelProps> = ({
 }) => {
   const { __id__, __index__, __context__ } = row;
   const rowHeightValue = rowHeight({ row, type: "ROW" });
-  // beta.44 removed isRowSelected/onRowSelectionChange from RenderCellProps; call
-  // useRowSelection() inside the cell renderer to access the same values.
+  // RenderCellProps doesn't expose isRowSelected/onRowSelectionChange; useRowSelection()
+  // reads them from row context inside the cell renderer.
   const [isRowSelected, onRowSelectionChange] = useRowSelection();
   const { attributes, listeners, setNodeRef: setDragRef } = useDraggable({ id: __id__ });
   const isInputRow = __id__ === inputRowId;

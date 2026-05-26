@@ -192,8 +192,10 @@ context('Table Tile Keyboard Navigation', function () {
     cy.get('.primary-workspace .rdg-row[aria-rowindex=2] .rdg-cell[aria-colindex=2]').click();
     cy.get('.primary-workspace .column-header-cell .editable-header-cell .header-name').eq(0).then(($el) => {
       const originalName = $el.text().trim();
-      // Use the same select+rename pattern as renameColumn(): two separate
-      // .get().click() invocations so React 18 commits between them.
+      // Two separate .get().click() invocations (matching renameColumn()):
+      // the header needs a React render commit between the selecting click
+      // and the editing click, and chaining them into one .click() doesn't
+      // give cypress that gap — edit mode never opens.
       cy.get('.primary-workspace .column-header-cell .editable-header-cell .header-name').eq(0).click();
       cy.get('.primary-workspace .column-header-cell .editable-header-cell .header-name').eq(0).click();
       cy.get('.primary-workspace .column-header-cell .editable-header-cell input').should('exist').focus();

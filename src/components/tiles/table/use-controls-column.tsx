@@ -28,8 +28,8 @@ export const useControlsColumn = ({
   }, [addColumnTooltipOptions, onAddColumn, readOnly]);
 
   const removeRowTooltipOptions = useTooltipOptions({ title: "Remove row", distance: kTooltipDistance });
-  // beta.44's RenderCellProps no longer includes isRowSelected; the row's own context tracks
-  // selection state for our purposes (a selected row also has a selected cell in it).
+  // RenderCellProps doesn't expose isRowSelected, so we read selection state from the
+  // row's own context (a selected row always has a selected cell in it).
   const ControlsRowFormatter: React.FC<TFormatterProps> = useCallback(({ rowIdx, row, tabIndex }) => {
     // The visibility of the remove button is also controlled by CSS based on whether the
     // tile is selected or not.

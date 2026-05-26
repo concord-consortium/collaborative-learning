@@ -16,7 +16,7 @@ class TableToolTile{
       // Wait briefly so rdg's mount-time auto-focus finishes before we click —
       // otherwise the title click can race with rdg's `shouldFocusGrid` self-focus
       // and edit mode never opens. The chained `.type()` re-queries the input
-      // separately so React 18's state-update batching can't race ahead of the
+      // separately so React's state-update batching can't race ahead of the
       // input mounting.
       cy.wait(300);
       this.getTableTitle(workspaceClass).realClick();
@@ -46,7 +46,7 @@ class TableToolTile{
     renameColumn(column, title){
       // EditableHeaderCell.handleClick gates edit-mode on the column already being
       // selected: the first click selects, a subsequent click enters edit. cypress's
-      // `.dblclick()` fires both click events too quickly for React 18 to flush the
+      // `.dblclick()` fires both click events too quickly for React to flush the
       // selection state between them, so the second click still sees "not selected"
       // and the editor never opens. Two separate `.click()` invocations give React a
       // commit between them.
@@ -55,9 +55,9 @@ class TableToolTile{
       cy.get('.column-header-cell .editable-header-cell input').type(title+'{enter}');
     }
     removeRow(i){
-      // .rdg-row uses display:contents in rdg beta.44, so cypress sees it as 0x0
-      // and refuses to click. Click the row's index-cell-wrapper instead — it has
-      // a real box and still selects the row.
+      // .rdg-row uses `display: contents`, so cypress sees it as 0x0 and refuses
+      // to click. Click the row's index-cell-wrapper instead — it has a real box
+      // and still selects the row.
       this.getIndexCellWrapper().eq(i).click();
       this.getRemoveRowButton().click();
     }
@@ -114,8 +114,8 @@ class TableToolTile{
         // return cy.get('.rdg-row .rdg-cell[aria-colindex=\"' + colIndex + '\"]');
     }
     getTableCellWithRowColIndex(rowIndex, colIndex, workspaceClass){
-      // rdg beta.44 virtualizes off-screen rows, so a row past the visible window
-      // isn't in the DOM and `.eq(rowIndex)` won't find it. Scroll the grid so the
+      // rdg virtualizes off-screen rows, so a row past the visible window isn't
+      // in the DOM and `.eq(rowIndex)` won't find it. Scroll the grid so the
       // target row index will be inside the rendered window, then query by the
       // absolute `aria-rowindex` instead of `.eq` (which is relative to whatever
       // rows happen to be rendered right now). aria-rowindex matches the data

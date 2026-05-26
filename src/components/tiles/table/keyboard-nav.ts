@@ -1,8 +1,7 @@
 /**
- * Keyboard navigation helpers for the table tile. Centralizes all logic
- * that depends on RDG beta.44 APIs so Phase 2 (React 19 / RDG main) is
- * a mechanical rename. See specs/CLUE-453-table-keyboard-navigation.md
- * §6.1 for the migration story.
+ * Keyboard navigation helpers for the table tile. Isolates the places we
+ * reach into RDG's selection/focus API so they're easy to find together
+ * if RDG's API shape changes.
  */
 
 import type { MutableRefObject, RefObject } from "react";
@@ -28,12 +27,10 @@ export function isCellEditing(): boolean {
 
 /**
  * Wraps `gridRef.current.selectCell` and opts into the patched
- * `shouldFocusCell=true` third argument (added in
- * patches/react-data-grid+7.0.0-beta.44.patch, commit f71c4eb0f). We need
- * focus to land on the cell when entering the grid via focusContent.
- *
- * Phase 2 will swap to setActivePosition(position, { shouldFocus: true })
- * once we upgrade past React 18.
+ * `shouldFocusCell=true` third argument from
+ * patches/react-data-grid+7.0.0-beta.44.patch — this is the only way
+ * to enter the grid with focus landing on the selected cell rather than
+ * staying outside.
  */
 export type BodyDeps = {
   gridRef: RefObject<DataGridHandle | null>;
