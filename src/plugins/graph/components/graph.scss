@@ -97,7 +97,7 @@ $graph-background-fill: #fff;
 .graph-dot {
   cursor: pointer;
 
-  &:focus-visible,
+  &:focus,
   &.keyboard-focused {
     outline: none;
   }
