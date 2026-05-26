@@ -48,7 +48,8 @@ function focusContentEntry(contentElement: HTMLElement | null, reverse: boolean)
   if (!contentElement) return false;
 
   if (reverse) {
-    const dotsGroup = contentElement.querySelector<SVGElement>('[data-graph-dots-group]');
+    const dotsGroups = contentElement.querySelectorAll<SVGElement>('[data-graph-dots-group]');
+    const dotsGroup = dotsGroups[dotsGroups.length - 1];
     if (dotsGroup) {
       const { width, height } = dotsGroup.getBoundingClientRect();
       if (width > 0 && height > 0) {
