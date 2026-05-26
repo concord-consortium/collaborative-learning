@@ -42,6 +42,7 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
   const { value, minOrMax, axis, onValueChange, readOnly, showArrow = true, crossAxisZeroPos } = props;
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const borderBoxRef = useRef<HTMLDivElement | null>(null);
   const layout = useAxisLayoutContext();
 
   useEffect(() => {
@@ -151,9 +152,17 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
   };
   const axisExtensionStyle = calculateAxisExtensionStyle();
 
-  const handleClick = () => {
+  const startEditing = () => {
     if (!readOnly && !isEditing) {
       setIsEditing(true);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if ((e.key === "Enter" || e.key === " ") && !readOnly) {
+      e.preventDefault();
+      e.stopPropagation();
+      startEditing();
     }
   };
 
@@ -164,17 +173,32 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
   };
 
   const borderBoxClasses = classNames("editable-border-box", axis);
+  const axisName = (axis === "left" || axis === "rightNumeric") ? "Y-axis" : "X-axis";
+  const boundName = minOrMax === "min" ? "minimum" : "maximum";
+  const ariaLabel = readOnly
+    ? `${axisName} ${boundName}: ${value}`
+    : `${axisName} ${boundName}: ${value}, press Enter to edit`;
   return (
     <>
       {showArrow && axisExtensionStyle && <div className="axis-extension" style={axisExtensionStyle} />}
       {showArrow && <ArrowSVG className="arrow" style={arrowStyle} />}
-      <div style={borderBoxStyles} className={borderBoxClasses} onClick={handleClick}
-        data-testid={`editable-border-box-${axis}-${minOrMax}`}>
+      <div
+        ref={borderBoxRef}
+        style={borderBoxStyles}
+        className={borderBoxClasses}
+        onClick={startEditing}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-label={ariaLabel}
+        data-testid={`editable-border-box-${axis}-${minOrMax}`}
+      >
         { isEditing ?
           <InputTextbox
             defaultValue={value.toString()}
             finishEditing={() => setIsEditing(false)}
             inputRef={inputRef}
+            triggerRef={borderBoxRef}
             updateValue={updateValue}
           /> :
           <div>{value}</div>

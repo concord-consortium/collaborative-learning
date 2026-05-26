@@ -225,6 +225,7 @@ export const Graph = observer(
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>
       <div className={kGraphClass} ref={graphRef} data-testid="graph">
+        <div className="graph-content-area">
         <svg className='graph-svg' ref={svgRef}>
           <Background
             marqueeState={marqueeState}
@@ -258,14 +259,6 @@ export const Graph = observer(
         </svg>
         {!disableAttributeDnD && renderDroppableAddAttributes()}
         <Adornments/>
-        {defaultSeriesLegend &&
-          <MultiLegend
-            onChangeAttribute={handleChangeAttribute}
-            onRemoveAttribute={handleRemoveAttribute}
-            onTreatAttributeAs={handleTreatAttrAs}
-            onRequestRowHeight={onRequestRowHeight}
-          />
-        }
         {
           axes.map((axis: AxisPlace, idx) => {
             const axisModel = graphModel?.getAxis(axis);
@@ -324,6 +317,15 @@ export const Graph = observer(
               );
             }
           })
+        }
+        </div>
+        {defaultSeriesLegend &&
+          <MultiLegend
+            onChangeAttribute={handleChangeAttribute}
+            onRemoveAttribute={handleRemoveAttribute}
+            onTreatAttributeAs={handleTreatAttrAs}
+            onRequestRowHeight={onRequestRowHeight}
+          />
         }
       </div>
     </DataConfigurationContext.Provider>

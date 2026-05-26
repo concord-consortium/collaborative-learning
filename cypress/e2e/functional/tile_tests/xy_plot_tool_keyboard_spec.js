@@ -26,23 +26,29 @@ context('XY Plot keyboard accessibility (CLUE-502)', function () {
   }
 
   // The empty XY-Plot in qa unit (CLUE-legend mode) has this trap cycle:
-  //   title → X-axis → Y-axis → add-series (palette) → toolbar → resize → wrap.
+  //   title → X-label → Y-label → X-min → X-max → Y-min → Y-max
+  //         → add-series (palette) → toolbar → resize → wrap.
   //  - The dots-group surrogate is in the DOM but 0×0 on an empty plot, so the
   //    trap's visibility filter skips it. Once a dataset is linked it becomes
-  //    a real Tab stop (see the "Dots-group navigation (with data)" context).
+  //    a real Tab stop (between the labels and the min/max bound controls).
+  //  - The axis min/max bound controls (`.editable-border-box`) are
+  //    absolutely-positioned HTML divs that live inside the trap's content
+  //    slot via the `.graph-content-area` wrapper.
   //  - The legend palette always renders AddSeriesButton; it's aria-disabled
   //    until a linkable dataset exists but stays focusable, so the trap visits it.
   //  - The toolbar is a single Tab stop with internal arrow-key roving
-  //    (useRovingTabindex), so Tab visits the first toolbar button then jumps
-  //    on to the resize handle.
-  // Direction-agnostic — the toolbar is a single roving tab stop, so forward
-  // Tab into it lands on the first button (link-tile-multiple) while Shift+Tab
-  // from the resize handle lands on the last (toggle-lock). Both still match
-  // the generic `toolbar-button` class. The specific "first button is
-  // link-tile-multiple" assertion lives in the ArrowRight roving section below.
+  //    (useRovingTabindex). Direction-agnostic match: forward Tab lands on
+  //    the first button (link-tile-multiple); reverse from the resize handle
+  //    lands on the last (toggle-lock). Both still match `toolbar-button`.
+  //    The specific "first button is link-tile-multiple" assertion lives in
+  //    the ArrowRight roving section below.
   const emptyFocusOrder = [
     ['class', 'axis-label'],                         // X-axis label (bottom)
     ['class', 'axis-label'],                         // Y-axis label (left)
+    ['class', 'editable-border-box'],                // X-axis min
+    ['class', 'editable-border-box'],                // X-axis max
+    ['class', 'editable-border-box'],                // Y-axis min
+    ['class', 'editable-border-box'],                // Y-axis max
     ['class', 'add-series-button'],                  // legend palette
     ['class', 'toolbar-button'],                     // toolbar (either end of the roving range)
     ['class', 'tool-tile-resize-handle-wrapper'],    // resize handle
@@ -102,6 +108,20 @@ context('XY Plot keyboard accessibility (CLUE-502)', function () {
     xyTile.getXAxisLabel().should('contain.text', 'Width');
     cy.focused().should('have.class', 'axis-label').and('have.class', 'bottom');
 
+    cy.log('Tabbing past the Y-axis label lands on the X-axis min bound control');
+    cy.realPress('Tab'); // → Y-axis label
+    cy.realPress('Tab'); // → X-axis min (first .editable-border-box in DOM order)
+    cy.focused()
+      .should('have.attr', 'data-testid', 'editable-border-box-bottom-min')
+      .invoke('attr', 'aria-label')
+      .should('match', /^X-axis minimum: .*, press Enter to edit$/);
+
+    cy.log('Enter on a focused bound opens its numeric editor; Escape cancels and returns focus');
+    cy.realPress('Enter');
+    cy.get('[data-testid="editable-border-box-bottom-min"] .input-textbox').should('be.visible');
+    cy.realPress('Escape');
+    cy.focused().should('have.attr', 'data-testid', 'editable-border-box-bottom-min');
+
     cy.log('Dots-group surrogate and aria-live announcer scaffolding are present');
     xyTile.getTile()
       .find('[data-graph-dots-group]')
@@ -131,9 +151,12 @@ context('XY Plot keyboard accessibility (CLUE-502)', function () {
       .should('not.have.attr', 'disabled');
 
     cy.log('ArrowRight roves within the toolbar; Enter on fit-all activates without throwing');
-    // Currently inside the trap with focus on axis-label.bottom (from the
-    // Width{enter} commit). Tab forward: Y-axis → add-series → toolbar.
-    cy.realPress('Tab'); // → Y-axis
+    // Currently inside the trap with focus on X-axis min (from the bound-edit
+    // section above). Tab forward through remaining content focusables
+    // (X-max, Y-min, Y-max), then through the palette to the toolbar.
+    cy.realPress('Tab'); // → X-axis max
+    cy.realPress('Tab'); // → Y-axis min
+    cy.realPress('Tab'); // → Y-axis max
     cy.realPress('Tab'); // → add-series (palette)
     cy.realPress('Tab'); // → first toolbar button (link-tile-multiple)
     cy.focused().should('have.class', 'link-tile-multiple');

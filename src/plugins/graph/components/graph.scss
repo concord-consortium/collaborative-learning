@@ -16,6 +16,14 @@ $graph-background-fill: #fff;
   height: 100%;
   background-color: $graph-background-fill;
 
+  // Pure DOM grouping so the focus trap's content slot includes the
+  // absolutely-positioned axis min/max border-boxes which live in DOM after
+  // the SVG, not inside it. (`display: contents` makes the wrapper invisible
+  // to layout.)
+  > .graph-content-area {
+    display: contents;
+  }
+
   .attribute-label {
     fill: blue;
     text-decoration: underline;

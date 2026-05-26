@@ -11,7 +11,7 @@ import { useClueAccessibility } from "../../../hooks/use-clue-accessibility";
 import { useSettingFromStores, useUIStore } from "../../../hooks/use-stores";
 import { OffsetModel } from "../../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { getEditableTitleElement } from "../../../utilities/dom-utils";
+import { getEditableTitleElement, getVisibleFocusables } from "../../../utilities/dom-utils";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { Point } from "../graph-types";
 import {
@@ -29,44 +29,31 @@ import "./graph-toolbar-registration";
 import "./graph-wrapper-component.scss";
 
 /**
- * Focuses an entry tab stop inside the graph content area.
+ * Focuses an entry tab stop inside the graph content area, using the trap's
+ * own visibility filter so the choice matches what tab-within-content sees:
+ *  - Forward: the first visible focusable (the X-axis label in DOM order).
+ *  - Reverse: the last visible focusable (currently the Y-axis maximum bound
+ *    control, since the `.graph-content-area` wrapper brings min/max into the
+ *    content slot after the axis labels and dots-group in DOM order).
  *
- * Forward: first axis-label tab stop (X-axis).
- * Reverse: dots-group surrogate when it's a real tab stop (has non-zero size,
- *   i.e. data is linked), otherwise the last axis-label tab stop (Y-axis).
+ * Without this override, the trap's default `pickSlotEntryTarget` would
+ * always return the first element with `tabindex="0"` regardless of
+ * direction, so Shift+Tab into content would land on X-label and skip every
+ * focusable after it.
  *
- * Why explicit selectors instead of `getVisibleFocusables(content)[last]`: the
- * graph content also renders CODAP-mode legend triggers inside `.graph-svg`,
- * which would otherwise be considered "after" the dots-group in DOM order and
- * steal the reverse-entry target.
- *
- * @param contentElement The content slot element (the plot area), or null.
- * @param reverse When true, picks the *last* content tab stop; otherwise the first.
  * @returns True when focus landed somewhere inside content.
  */
 function focusContentEntry(contentElement: HTMLElement | null, reverse: boolean): boolean {
   if (!contentElement) return false;
-
-  if (reverse) {
-    const dotsGroups = contentElement.querySelectorAll<SVGElement>('[data-graph-dots-group]');
-    const dotsGroup = dotsGroups[dotsGroups.length - 1];
-    if (dotsGroup) {
-      const { width, height } = dotsGroup.getBoundingClientRect();
-      if (width > 0 && height > 0) {
-        dotsGroup.focus();
-        // useGraphDotsKeyboard re-focuses a child dot on group focus, so accept
-        // either the surrogate or a descendant as a successful landing.
-        const active = document.activeElement;
-        if (active && (active === dotsGroup || dotsGroup.contains(active))) return true;
-      }
-    }
-  }
-
-  const labels = contentElement.querySelectorAll<HTMLElement>('.axis-label[tabindex="0"]');
-  if (labels.length === 0) return false;
-  const target = reverse ? labels[labels.length - 1] : labels[0];
-  target.focus();
-  return document.activeElement === target;
+  const focusables = getVisibleFocusables(contentElement);
+  const target = reverse ? focusables[focusables.length - 1] : focusables[0];
+  if (!target) return false;
+  (target as HTMLElement).focus();
+  // The dots-group surrogate's focus handler (useGraphDotsKeyboard) re-focuses
+  // a child .graph-dot on group focus, so accept any descendant as a
+  // successful landing on the dots-group.
+  const active = document.activeElement;
+  return active === target || (active != null && target.contains(active));
 }
 
 export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(props) {
@@ -86,15 +73,16 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   // a ref through three layers. The trap controller calls these getters on
   // every cycle, so they pick up DOM that mounts after the wrapper renders.
   //
-  // Content points at the inner `.graph-svg` rather than the outer `.graph-plot`
-  // div on purpose: `.graph-plot` also contains `.multi-legend` (the palette),
-  // and the trap controller resolves a focused element's slot by DOM containment
-  // walking `cycleOrder` (title → topbar → content → palette → …). If content
-  // matched first, every legend control would be attributed to content (which is
-  // in `tabWithinSlots`), making Tab cycle through legend + content together.
-  // Pointing content at `.graph-svg` keeps the slot boundary correct.
+  // Content points at `.graph-content-area` (a `display: contents` wrapper
+  // around the SVG plus the absolutely-positioned axis min/max border-boxes)
+  // rather than `.graph-plot`, because `.graph-plot` also contains the
+  // `.multi-legend` palette. The trap resolves a focused element's slot by
+  // DOM containment walking `cycleOrder` (title → … → content → palette → …);
+  // if content matched the palette's container, legend controls would all be
+  // attributed to content. Scoping content to `.graph-content-area` keeps the
+  // boundary correct while including the min/max bound controls.
   const getContentElement = useCallback(() => {
-    return tileElt?.querySelector<HTMLElement>(".graph-svg") ?? undefined;
+    return tileElt?.querySelector<HTMLElement>(".graph-content-area") ?? undefined;
   }, [tileElt]);
   const getPaletteElement = useCallback(() => {
     return tileElt?.querySelector<HTMLElement>(".multi-legend") ?? undefined;

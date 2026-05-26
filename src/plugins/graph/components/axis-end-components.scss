@@ -1,4 +1,5 @@
 @import "../../../components/vars";
+@import "../../../components/mixins";
 
 .graph-plot svg.arrow {
   height: 14px;
@@ -28,6 +29,8 @@
   height: 22px; // Keep in sync with kEditableBoxHeight in axis-end-components.tsx
   padding: 0 3px;
   position: absolute;
+
+  @include focus-ring(-2px);
 
   &.bottom {
     justify-content: center;
