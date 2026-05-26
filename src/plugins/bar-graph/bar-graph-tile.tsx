@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import { useResizeDetector } from "react-resize-detector";
+import { ResizePayload, useResizeDetector } from "react-resize-detector";
 
 import { ChartArea } from "./chart-area";
 import { LegendArea } from "./legend-area";
@@ -27,7 +27,7 @@ export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITilePro
 
   const requestedHeight = useRef<number|undefined>(undefined);
 
-  const onResize = (width: number|undefined, height: number|undefined) => {
+  const onResize = ({ height }: ResizePayload) => {
     let desiredTileHeight;
     if (height) {
       if (legendBelow) {
