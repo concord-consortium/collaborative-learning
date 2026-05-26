@@ -159,11 +159,10 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   }, [ui, model, readOnly, containerContext.model, isBackgroundPointerDown, gridContext]);
 
   // React components used for the index (left most) column
-  // setHoveredRowId is kept (called by row-label pointer handlers and drag-end
-  // cleanup) but the value is unused now that drag-indicator visibility is
-  // controlled entirely by CSS `:hover`. Eliminating the state entirely would
-  // require ripping out the pointerover/leave handlers and drag-end cleanups —
-  // left as-is to keep this diff focused on the bug fix.
+  // TODO: drop setHoveredRowId. Its value is unused — drag-indicator visibility
+  // is controlled by CSS `:hover`. The setter is still called by row-label
+  // pointer handlers and drag-end cleanup, so removing it requires removing
+  // those callers at the same time.
   const [, setHoveredRowId] = useState<string | null>(null);
   const [dragOverRowId, setDragOverRowId] = useState<string | null>(null);
   const rowLabelProps = useRowLabelColumn({

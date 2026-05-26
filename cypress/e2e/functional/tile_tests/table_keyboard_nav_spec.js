@@ -11,11 +11,6 @@ const tableToolTile = new TableToolTile;
 // two .read-only-*); selectors like `.column-header-cell` would otherwise match
 // 3 copies. Always scope DOM queries to .primary-workspace so the test
 // exercises the single editable instance where the focus trap is active.
-//
-// IMPORTANT: this spec must run against the dev server bound to this worktree,
-// not the default in cypress/config/cypress.local.json (8080). To override,
-// invoke cypress directly without --env testEnv=local, e.g.:
-//   npx cypress run --spec '...' --config baseUrl=http://localhost:8083/
 function beforeTest() {
   const url = "/editor/?appMode=qa&unit=./demo/units/qa/content.json";
   cy.visit(url);

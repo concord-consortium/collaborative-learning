@@ -112,8 +112,10 @@ export const useToolApi = ({
     getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
       const offsets = OffsetModel.create({});
       if (objectType === "cell") {
-        // Re-invoke getObjectBoundingBox inline via the stable ref to itself isn't
-        // possible yet, so we inline the bounding-box logic here.
+        // Duplicates the height calculation from getObjectBoundingBox above.
+        // We can't delegate to getObjectBoundingBox here because both functions
+        // are being defined together in this useMemo — the api object isn't
+        // available yet.
         const _dataSet = dataSetRef.current;
         const _rows = rowsRef.current;
         const _rowHeight = rowHeightRef.current;

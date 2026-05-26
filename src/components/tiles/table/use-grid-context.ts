@@ -26,8 +26,7 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
   // table-tile.scss (`.remove-row-button { display: none }` overridden by
   // `.tool-tile.selected ... { display: flex !important }`). The button is
   // visible only when BOTH gates pass: this predicate returns true AND the
-  // ancestor tile has the `selected` class. If you're debugging "why doesn't
-  // the button appear," check the CSS too.
+  // ancestor tile has the `selected` class.
   const isSelectedCaseInRow = useCallback((rowIdx: number) => {
     const caseId = dataSet.getCaseAtIndex(rowIdx)?.__id__;
     if (!caseId) return false;
