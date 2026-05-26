@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef } from "react";
+import { ICell } from "../../../models/data/data-types";
 import { CaseData, DotsElt, graphDotSelector } from "../d3-types";
 import { IDataConfigurationModel } from "../models/data-configuration-model";
-import { activateDotSelection, buildDotAriaLabel } from "../utilities/graph-utils";
+import { activateDotSelection, buildDotAriaLabel, isDotKeyActivated } from "../utilities/graph-utils";
 
 interface IUseGraphDotsKeyboardProps {
   dotsRef: React.MutableRefObject<DotsElt>;
@@ -200,7 +201,26 @@ export function useGraphDotsKeyboard(props: IUseGraphDotsKeyboardProps) {
           if (readOnly) break;
           const focusedEntry = currentIndex >= 0 ? entries[currentIndex] : entries[0];
           if (!focusedEntry) break;
-          activateDotSelection(focusedEntry.caseData, dataConfiguration, e.shiftKey);
+          if (!e.shiftKey && isDotKeyActivated(focusedEntry.caseData, dataConfiguration)) {
+            // Toggle off: clear the case + X/Y-cell selections that aria-pressed
+            // tracks, so a single Enter on a pressed dot flips aria-pressed to
+            // false (matching aria toggle-button semantics). Leave attribute
+            // (column-header) selection alone — that's column-wide and can't
+            // be un-toggled by a single dot.
+            const dataset = dataConfiguration?.dataset;
+            const caseId = focusedEntry.caseData.caseID;
+            const xAttributeId = dataConfiguration?.xAttributeID;
+            const yAttributeId = dataConfiguration?.yAttributeID(focusedEntry.caseData.plotNum);
+            const cells: ICell[] = [];
+            if (xAttributeId) cells.push({ attributeId: xAttributeId, caseId });
+            if (yAttributeId) cells.push({ attributeId: yAttributeId, caseId });
+            if (cells.length > 0) dataset?.selectCells(cells, false);
+            dataset?.selectCases([caseId], false);
+          } else {
+            // Otherwise fall through to the click-mirroring activation
+            // (select-if-unselected; Shift+Enter extends).
+            activateDotSelection(focusedEntry.caseData, dataConfiguration, e.shiftKey);
+          }
           // Re-read the aria-label so the announcement reflects the post-activation state.
           const label = buildDotAriaLabel(focusedEntry.caseData, dataConfiguration);
           announce(label);

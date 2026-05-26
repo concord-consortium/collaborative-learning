@@ -248,16 +248,18 @@ context('XY Plot keyboard accessibility (CLUE-502)', function () {
         });
       });
 
-      cy.log('Enter on a focused dot leaves it in the selected state (mirrors handleClickOnDot)');
-      // Enter mirrors handleClickOnDot: select if unselected, no-op if already
-      // selected (Shift+Enter is required to deselect). The click in
-      // selectGraphTile() may pre-select the dot at the tile centre, so we can
-      // only assert the post-Enter state, not a state change.
-      cy.realPress('Enter');
-      cy.focused()
-        .should('have.class', 'graph-dot')
-        .invoke('attr', 'aria-label')
-        .should('match', /, Selected$/);
+      cy.log('Enter on a focused dot toggles its selection state (aria toggle-button semantics)');
+      cy.focused().invoke('attr', 'aria-label').then(beforeLabel => {
+        const wasSelected = /, Selected$/.test(beforeLabel);
+        cy.realPress('Enter');
+        cy.focused()
+          .should('have.class', 'graph-dot')
+          .invoke('attr', 'aria-label')
+          .then(afterLabel => {
+            const isSelected = /, Selected$/.test(afterLabel);
+            expect(isSelected, 'Enter toggled selection state').to.equal(!wasSelected);
+          });
+      });
 
       cy.log('Aria-live announcer text mirrors the focused dot after Enter');
       // The hook re-reads the dot's aria-label and routes it to the announcer

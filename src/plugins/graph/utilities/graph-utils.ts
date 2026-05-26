@@ -361,19 +361,22 @@ function isCircleSelected(aCaseData: CaseData, dataConfiguration?: IDataConfigur
 }
 
 /**
- * Whether the dot's keyboard toggle (Enter / Space, the same action driven by
- * {@link activateDotSelection}) is currently in its "pressed" state. Narrower
- * than {@link isCircleSelected}: only the Y cell counts, since that's the
- * only thing keyboard activation toggles. Used to drive `aria-pressed`, so
- * the announced state reflects what *this button* controls, not unrelated
- * selections (attribute header, X cell, broader case selection) that the dot
- * cannot un-toggle.
+ * Whether the dot's keyboard toggle (Enter / Space) is currently in its
+ * "pressed" state. Narrower than {@link isCircleSelected}: a single keyboard
+ * activation must be able to flip this back to false, so it covers exactly
+ * the selection states the keyboard toggle clears — case, X-cell, and
+ * Y-cell. Attribute (column-header) selection is column-wide and stays out
+ * of scope; if a dot is visually selected only because its attribute is
+ * selected, the keyboard reports aria-pressed=false.
  */
-function isDotKeyActivated(caseData: CaseData, dataConfiguration?: IDataConfigurationModel) {
+export function isDotKeyActivated(caseData: CaseData, dataConfiguration?: IDataConfigurationModel) {
   const dataset = dataConfiguration?.dataset;
   if (!dataset) return false;
+  const xAttributeId = dataConfiguration?.xAttributeID;
   const yAttributeId = dataConfiguration?.yAttributeID(caseData.plotNum);
-  return dataset.isCellSelected({ attributeId: yAttributeId, caseId: caseData.caseID });
+  return dataset.isCaseSelected(caseData.caseID)
+    || (!!xAttributeId && dataset.isCellSelected({ attributeId: xAttributeId, caseId: caseData.caseID }))
+    || (!!yAttributeId && dataset.isCellSelected({ attributeId: yAttributeId, caseId: caseData.caseID }));
 }
 
 function applySelectedClassToCircles(selection: DotSelection, dataConfiguration?: IDataConfigurationModel){
