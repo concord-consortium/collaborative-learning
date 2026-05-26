@@ -290,7 +290,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // dataGridProps contains callbacks to pass to ReactDataGrid
   // selectedCell tracks the currently selected cell position (used by keyboard-nav)
   const { deleteSelected, selectedCell: selectedCellRef, ...dataGridProps } = useDataSet({
-    dataSet, triggerColumnChange, rowChanges, triggerRowChange,
+    dataSet, triggerColumnChange, triggerRowChange,
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, inputRowId, lookupImage });
 
   const importData = (file: File) => {

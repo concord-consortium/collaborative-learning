@@ -15,7 +15,6 @@ const isCellSelectable = (position: TPosition, columns: TColumn[], readOnly: boo
 interface IUseDataSet {
   dataSet: IDataSet;
   triggerColumnChange: () => void;
-  rowChanges: number;
   triggerRowChange: () => void;
   readOnly: boolean;
   inputRowId: React.MutableRefObject<string>;
