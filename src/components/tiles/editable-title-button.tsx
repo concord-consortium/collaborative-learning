@@ -1,4 +1,30 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useEffect, useRef } from "react";
+
+/**
+ * Companion to `EditableTitleButton` for tile titles with an inline editor.
+ *
+ * When the edit-mode <input> unmounts (Enter / Escape), focus falls back to
+ * document.body and the surrounding focus trap loses its anchor for the next
+ * Tab. This hook watches `isEditing` and, on the true → false transition,
+ * refocuses the display-mode title text — but only if focus actually landed
+ * on body, so clicking elsewhere to dismiss the editor leaves focus alone.
+ *
+ * Pass the returned ref to `<EditableTitleButton ref={…} />`.
+ */
+export function useRestoreFocusOnEditExit(isEditing: boolean) {
+  const ref = useRef<HTMLDivElement>(null);
+  const prevIsEditingRef = useRef(false);
+  useEffect(() => {
+    if (prevIsEditingRef.current && !isEditing) {
+      const active = document.activeElement;
+      if (!active || active === document.body) {
+        ref.current?.focus();
+      }
+    }
+    prevIsEditingRef.current = isEditing;
+  }, [isEditing]);
+  return ref;
+}
 
 interface IEditableTitleButtonProps {
   className?: string;
