@@ -23,6 +23,8 @@ export function createClueTileStrategy(config: ClueFocusTrapConfig): FocusTrapSt
     ?? (() => config.paletteRef?.current ?? undefined);
   const getResize = config.getResizeElement
     ?? (() => config.resizeRef?.current ?? undefined);
+  const getDragHandle = config.getDragHandleElement
+    ?? (() => config.dragHandleRef?.current ?? undefined);
 
   const ariaLabels = getAriaLabels();
   // Prefer the user-facing displayName ("Coordinate Grid" for `geometry`); the
@@ -36,17 +38,13 @@ export function createClueTileStrategy(config: ClueFocusTrapConfig): FocusTrapSt
       toolbar: getToolbar(),
       topbar: getTopbar(),
       palette: getPalette(),
+      dragHandle: getDragHandle(),
       resize: getResize(),
     }),
     focusContent: config.focusContent,
-    // topbar: optional controls strip above the editor (e.g. dataflow).
-    // palette: inline secondary toolbar — single tab stop with arrow roving.
-    // Slots with undefined elements are skipped, so tiles without
-    // topbar/palette are unaffected.
-    cycleOrder: ["title", "topbar", "content", "palette", "toolbar", "resize"],
-    // Default within-slot Tab routing covers topbar + content. Tiles can opt
-    // palette in via config when its controls are heterogeneous (XY Plot's
-    // legend), or leave it out for arrow-roved palettes (dataflow's Add-block).
+    // dragHandle sits between toolbar and resize for keyboard tile pick-up.
+    // findNextSlot skips slots whose elements are undefined.
+    cycleOrder: ["title", "topbar", "content", "palette", "toolbar", "dragHandle", "resize"],
     tabWithinSlots: config.tabWithinSlots ?? ["topbar", "content"],
     announceEnter: ariaLabels.announce.editingTile(announceName),
     announceExit: ariaLabels.announce.exitedTile(announceName),
@@ -54,6 +52,7 @@ export function createClueTileStrategy(config: ClueFocusTrapConfig): FocusTrapSt
       const toolbar = getToolbar();
       return toolbar ? [toolbar] : [];
     },
+    externalElementsSlot: "toolbar",
     onTabWhenInactive: config.onTabWhenInactive,
     escapeHandlers: config.escapeHandlers,
     tabHandlers: config.tabHandlers,

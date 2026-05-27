@@ -47,6 +47,8 @@ export interface ITileFocusableElements {
   // Any slot listed here owns its own tabindex — the trap won't touch its
   // descendants' tabindex on mount.
   tabHandlers?: Record<string, (e: KeyboardEvent, reverse: boolean) => TabHandlerResult>;
+  // The tile's drag handle element for keyboard-driven tile pick-up and placement.
+  dragHandleElement?: HTMLElement;
 }
 
 export interface ITileApi {

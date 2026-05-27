@@ -97,15 +97,23 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         (pickedUpTileId) => {
           const isOwner = pickedUpTileId
             && this.stores.ui.pickedUpDocId === this.props.content?.contentId;
+          const isWorkspaceTarget = pickedUpTileId && !isOwner && !this.props.readOnly;
+          // Mouse: owner handles drop zone highlighting
           if (isOwner) {
             this.domElement?.addEventListener("mousemove", this.handlePickUpMouseMove);
             this.domElement?.addEventListener("mouseleave", this.handlePickUpMouseLeave);
-            document.addEventListener("keydown", this.handlePickUpKeyDown);
           } else {
             this.domElement?.removeEventListener("mousemove", this.handlePickUpMouseMove);
             this.domElement?.removeEventListener("mouseleave", this.handlePickUpMouseLeave);
+          }
+          // Keyboard: editable workspace handles arrow keys + Enter for placement.
+          // Read-only documents never register the keydown listener.
+          const shouldHandleKeyboard = (isOwner && !this.props.readOnly) || isWorkspaceTarget;
+          if (shouldHandleKeyboard) {
+            document.addEventListener("keydown", this.handlePickUpKeyDown);
+          } else {
             document.removeEventListener("keydown", this.handlePickUpKeyDown);
-            this.clearDropRowInfo();
+            if (!isOwner) this.clearDropRowInfo();
           }
         }
       );
@@ -709,6 +717,31 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     ui.clearPickedUpTile();
     this.clearDropRowInfo();
+
+    // Focus the placed/copied tile so keyboard users land on it.
+    // Use requestAnimationFrame to let React re-render the new tile first.
+    requestAnimationFrame(() => {
+      if (isSameDocument) {
+        // Same-doc move: tile keeps its ID
+        const tileElt = this.domElement?.querySelector(
+          `.tool-tile[data-tool-id="${tileId}"]`
+        ) as HTMLElement | null;
+        tileElt?.focus();
+      } else {
+        // Cross-doc copy: find the tile at the drop position.
+        // The last tile in the document order at the insert index is the new one.
+        const row = content.getRowByIndex(dropRowInfo.rowInsertIndex);
+        if (row) {
+          const lastTile = row.tiles[row.tiles.length - 1];
+          if (lastTile) {
+            const tileElt = this.domElement?.querySelector(
+              `.tool-tile[data-tool-id="${lastTile.tileId}"]`
+            ) as HTMLElement | null;
+            tileElt?.focus();
+          }
+        }
+      }
+    });
   };
 
   private handleRowResizeDrop = (e: React.DragEvent<HTMLDivElement>) => {

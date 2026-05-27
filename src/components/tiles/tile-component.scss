@@ -25,7 +25,8 @@
     outline: none;
   }
 
-  &:focus-visible:not(.selected) {
+  // Blue focus ring only for editable (non-readonly) tiles
+  &:focus-visible:not(.selected):not(.readonly) {
     box-shadow:
       inset 0 0 0 3px white,
       inset 0 0 0 5px rgb(9, 87, 208);
@@ -101,6 +102,39 @@
     }
   }
 
+  // Show drag handle when its wrapper receives keyboard focus
+  .tool-tile-drag-handle-wrapper:focus-visible .tool-tile-drag-handle {
+    opacity: 1;
+  }
+
+  // Show hover-like styling when the tile container or any child has keyboard
+  // focus. :focus-visible matches the container itself; :has(:focus-visible)
+  // matches when a child (drag handle, title, etc.) has focus.
+  // The &.readonly variants override the readonly border rule (line 17).
+  // Read-only tiles: show hover-like gray border + drag handle when
+  // the tile or any child has keyboard focus. Uses :focus-within since
+  // :focus-visible doesn't reliably fire on div containers.
+  &.readonly:focus-within {
+    border: 1px solid $tool-tile-hover-border-color;
+    .tile-content {
+      border: 1px solid $tool-tile-hover-border-color;
+    }
+    .tool-tile-drag-handle {
+      opacity: 0.5;
+    }
+  }
+
+  // Editable tiles: show hover styling when any child has keyboard focus
+  &:not(.readonly):has(:focus-visible) {
+    border: 1px solid $tool-tile-hover-border-color;
+    .tile-content {
+      border: 1px solid $tool-tile-hover-border-color;
+    }
+    .tool-tile-drag-handle {
+      opacity: 0.5;
+    }
+  }
+
   .tool-tile-resize-handle-wrapper {
     appearance: none;
     background: none;
@@ -172,10 +206,15 @@ body.tile-dragging {
         border: 1px solid $tool-tile-background;
       }
 
-      &.hovered {
+      &.hovered,
+      &:focus-within {
         border: 1px solid rgba(191, 191, 191, 0.5);
-        .tile-content.hovered {
+        .tile-content.hovered,
+        .tile-content {
           border: 1px solid rgba(191, 191, 191, 0.5);
+        }
+        .tool-tile-drag-handle {
+          opacity: 0.5;
         }
       }
 

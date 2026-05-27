@@ -330,14 +330,14 @@ describe("TileComponent focus trap", () => {
       expect(document.activeElement).toBe(titleElement);
     });
 
-    it("Shift+Tab on selected tile enters focus trap on the toolbar's active item", () => {
-      const { stores, tileModel, tileElement, toolbarButtons } = renderFocusTrapTile();
+    it("Shift+Tab on selected tile enters focus trap on the drag handle", () => {
+      const { stores, tileModel, tileElement } = renderFocusTrapTile();
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { tileElement.focus(); });
       fireEvent.keyDown(tileElement, { key: "Tab", shiftKey: true });
-      // Reverse entry: resize (absent) → toolbar; lands on the roving-active
-      // button (the one with tabindex="0"), which is the first button by default.
-      expect(document.activeElement).toBe(toolbarButtons[0]);
+      // Reverse entry: resize (absent) → dragHandle (present); lands on drag handle.
+      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      expect(document.activeElement).toBe(dragHandle);
     });
 
     it("Tab on selected tile without title/content enters focus trap and reaches toolbar", () => {
@@ -370,23 +370,24 @@ describe("TileComponent focus trap", () => {
       expect(document.activeElement).toBe(toolbarButtons[0]);
     });
 
-    it("Tab from content with no title/toolbar calls preventDefault (defensive)", () => {
-      const { stores, tileModel, contentElement } = renderFocusTrapTile({
+    it("Tab from content with no title/toolbar goes to drag handle", () => {
+      const { stores, tileModel, tileElement, contentElement } = renderFocusTrapTile({
         hasTitle: false, hasToolbar: false,
       });
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
-      const result = fireEvent.keyDown(contentElement!, { key: "Tab" });
-      expect(result).toBe(false);
-      expect(document.activeElement).toBe(contentElement);
+      fireEvent.keyDown(contentElement!, { key: "Tab" });
+      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      expect(document.activeElement).toBe(dragHandle);
     });
 
-    it("Tab from content with no toolbar wraps to title", () => {
-      const { stores, tileModel, contentElement, titleElement } = renderFocusTrapTile({ hasToolbar: false });
+    it("Tab from content with no toolbar goes to drag handle", () => {
+      const { stores, tileModel, tileElement, contentElement } = renderFocusTrapTile({ hasToolbar: false });
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Tab" });
-      expect(document.activeElement).toBe(titleElement);
+      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      expect(document.activeElement).toBe(dragHandle);
     });
   });
 
@@ -401,25 +402,26 @@ describe("TileComponent focus trap", () => {
       expect(document.activeElement).toBe(titleElement);
     });
 
-    it("Shift+Tab from title wraps backward to the toolbar's active item", () => {
-      const { stores, tileModel, titleElement, toolbarButtons } = renderFocusTrapTile();
+    it("Shift+Tab from title wraps backward to the drag handle", () => {
+      const { stores, tileModel, tileElement, titleElement } = renderFocusTrapTile();
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { titleElement!.focus(); });
       fireEvent.keyDown(titleElement!, { key: "Tab", shiftKey: true });
-      // Reverse: title → resize (absent) → toolbar; lands on the roving-active
-      // button (the one with tabindex="0"), which is the first button by default.
-      expect(document.activeElement).toBe(toolbarButtons[0]);
+      // Reverse: title → resize (absent) → dragHandle (present); lands on drag handle.
+      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      expect(document.activeElement).toBe(dragHandle);
     });
 
-    it("Shift+Tab from content with no title/toolbar calls preventDefault", () => {
-      const { stores, tileModel, contentElement } = renderFocusTrapTile({
+    it("Shift+Tab from content with no title/toolbar goes to drag handle", () => {
+      const { stores, tileModel, tileElement, contentElement } = renderFocusTrapTile({
         hasTitle: false, hasToolbar: false,
       });
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
-      const result = fireEvent.keyDown(contentElement!, { key: "Tab", shiftKey: true });
-      expect(result).toBe(false);
-      expect(document.activeElement).toBe(contentElement);
+      fireEvent.keyDown(contentElement!, { key: "Tab", shiftKey: true });
+      // Reverse: content → topbar (absent) → title (absent) → resize (absent) → dragHandle (present)
+      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      expect(document.activeElement).toBe(dragHandle);
     });
   });
 
@@ -538,18 +540,18 @@ describe("TileComponent focus trap", () => {
     });
 
     it("Escape on selected tile container deselects (no focusable content case)", () => {
-      // No title, content, or toolbar — simulates sketch/table tile on first frame
-      // (toolbar renders via MobX after setSelectedTileId, so it's not in DOM yet)
+      // No title, content, or toolbar — but drag handle IS present for draggable tiles.
       const { stores, tileModel, tileElement } = renderFocusTrapTile({
         hasTitle: false, hasContent: false, hasToolbar: false,
       });
       act(() => { tileElement.focus(); });
-      // Enter selects but enterFocusTrap fails — focus stays on container
+      // Enter selects and enters trap — focus moves to drag handle (the only focusable slot)
       fireEvent.keyDown(tileElement, { key: "Enter" });
       expect(stores.ui.selectedTileIds).toContain(tileModel.id);
-      expect(document.activeElement).toBe(tileElement);
-      // Escape should still deselect even though focus is on the container
-      fireEvent.keyDown(tileElement, { key: "Escape" });
+      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      expect(document.activeElement).toBe(dragHandle);
+      // Escape should deselect
+      fireEvent.keyDown(dragHandle, { key: "Escape" });
       expect(stores.ui.selectedTileIds).not.toContain(tileModel.id);
       expect(document.activeElement).toBe(tileElement);
     });
@@ -700,19 +702,20 @@ describe("TileComponent focus trap", () => {
       expect(liveRegion?.textContent).toBe("Editing tile. Press Escape to exit.");
     });
 
-    it("Enter on tile without focusable content selects tile, focus stays on container", () => {
+    it("Enter on tile without focusable content selects tile, focus moves to drag handle", () => {
       const { stores, tileModel, tileElement } = renderFocusTrapTile({
         hasTitle: false, hasContent: false, hasToolbar: false,
       });
       act(() => { tileElement.focus(); });
       fireEvent.keyDown(tileElement, { key: "Enter" });
-      // Tile is selected even though enterFocusTrap failed
+      // Tile is selected
       expect(stores.ui.selectedTileIds).toContain(tileModel.id);
-      // Focus stays on container
-      expect(document.activeElement).toBe(tileElement);
-      // Fallback announcement
+      // Focus moves to drag handle (the only focusable slot in the cycle)
+      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      expect(document.activeElement).toBe(dragHandle);
+      // Standard enter announcement (not fallback, since focus trap entry succeeded)
       const liveRegion = tileElement.querySelector("[role='status'][aria-live='polite']");
-      expect(liveRegion?.textContent).toBe("Tile selected. Press Tab to access toolbar, Escape to exit.");
+      expect(liveRegion?.textContent).toBe("Editing tile. Press Escape to exit.");
     });
 
     it("Enter→Escape→Enter round-trip: selection toggles correctly", () => {
