@@ -153,19 +153,22 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
     }
   }, [graphModel.editingLayer]);
 
-  const onClick = useCallback((event: { offsetX: number, offsetY: number, shiftKey: boolean }) => {
-    // If not shifted, clicking on background deselects everything
+  // The drag behavior handles point-adding (via dragEndAddMode) for both real drags
+  // and click-without-movement, since d3-drag always fires its "end" event on mouseup.
+  // This handler runs after drag-end on plain clicks (and is suppressed by d3-drag on
+  // drags with movement), so it should NOT add a point or it would duplicate the one
+  // dragEndAddMode already added.
+  const onClick = useCallback((event: { shiftKey: boolean }) => {
+    // If not shifted, clicking on background deselects everything.
+    // (For left-clicks the drag-start handler already cleared the selection; this
+    // handles ctrl/right-click and other paths where drag doesn't engage.)
     if (!event.shiftKey) {
       graphModel.clearAllSelectedCases();
-    }
-    if (graphModel.editingMode==="add") {
-      const coords = pointCoordinates(event.offsetX, event.offsetY);
-      addAndSelectPoint(coords);
     }
     graphModel.adornments.forEach(adornment => {
       adornment.toggleSelected();
     });
-  }, [addAndSelectPoint, graphModel, pointCoordinates]);
+  }, [graphModel]);
 
   // Define the dragging behaviors for "edit" mode and for "add" mode, then assemble into one "drag" object.
   const

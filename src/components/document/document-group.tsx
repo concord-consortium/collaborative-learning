@@ -28,6 +28,10 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
   const [leftArrowDisabled, setLeftArrowDisabled] = useState(true);
   const [rightArrowDisabled, setRightArrowDisabled] = useState(false);
   const sortedGroupDocuments = sortDocumentsInGroup(documentGroup);
+  // Gate on visibleCount > 0: before the ResizeObserver fires, visibleCount is 0
+  // and handleScroll's scrollAmount would be 0 — a silent no-op click. Render the
+  // buttons only once we have a measurement, so a click always actually scrolls.
+  const showScrollButtons = visibleCount > 0 && visibleCount < docCount;
 
   // Each document in the group is represented by a square box. The group of document boxes is displayed in
   // a single row. If there are more boxes than can fit within the row's width, scroll buttons are added
@@ -118,7 +122,7 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
           {documentGroup.icon ? <documentGroup.icon className="tool-icon"/> : null}{documentGroup.label}
         </div>
       }
-      {visibleCount < docCount && renderScrollButton("left", leftArrowDisabled)}
+      {showScrollButtons && renderScrollButton("left", leftArrowDisabled)}
       <div ref={docListContainerRef} className="doc-group-list simple" data-testid="doc-group-list">
         {sortedGroupDocuments?.map((doc) => {
           return (
@@ -130,7 +134,7 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
           );
         })}
       </div>
-      {visibleCount < docCount && renderScrollButton("right", rightArrowDisabled)}
+      {showScrollButtons && renderScrollButton("right", rightArrowDisabled)}
       {!isUnsorted && <div className="doc-group-count" data-testid="doc-group-count">{docCount}</div>}
     </div>
   );
