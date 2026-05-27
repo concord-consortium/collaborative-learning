@@ -11,7 +11,7 @@ import { ReadOnlyContext } from "../../../../../components/document/read-only-co
 
 // --- AddSeriesButton ------------------------------------------------------------
 
-describe("AddSeriesButton — aria contract (CLUE-502 Phase 4)", () => {
+describe("AddSeriesButton — aria contract", () => {
   function renderAddSeries(hasUnplottedAttribute: boolean) {
     const dataConfig = {
       dataset: hasUnplottedAttribute
@@ -52,7 +52,7 @@ describe("AddSeriesButton — aria contract (CLUE-502 Phase 4)", () => {
 
 // --- SimpleAttributeLabel (uses AxisOrLegendAttributeMenu target=null) ----------
 
-describe("SimpleAttributeLabel — legend-case aria-label (CLUE-502 Phase 4)", () => {
+describe("SimpleAttributeLabel — legend-case aria-label", () => {
   function renderSimpleAttributeLabel(attrName = "Height", readOnly = false) {
     const dataConfig = {
       dataset: {
@@ -112,7 +112,7 @@ describe("SimpleAttributeLabel — legend-case aria-label (CLUE-502 Phase 4)", (
 
 // --- LegendDropdown (color picker) ----------------------------------------------
 
-describe("LegendDropdown — aria contract (CLUE-502 Phase 4)", () => {
+describe("LegendDropdown — aria contract", () => {
   it("MenuButton exposes the buttonAriaLabel as its accessible name", () => {
     render(
       <ReadOnlyContext.Provider value={false}>

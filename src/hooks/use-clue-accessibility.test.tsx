@@ -3,11 +3,23 @@ import React from "react";
 import { ITileApi } from "../components/tiles/tile-api";
 import { ClueTileAccessibilityBridge, useClueAccessibility } from "./use-clue-accessibility";
 import { createClueTileStrategy } from "./create-clue-tile-strategy";
+import { registerTileContentInfo } from "../models/tiles/tile-content-info";
+import { TileContentModel } from "../models/tiles/tile-content";
 
 // Mock useAccessibility to avoid pulling in the full package in unit tests
 jest.mock("@concord-consortium/accessibility-tools/hooks", () => ({
   useAccessibility: () => ({ navigation: null, resizable: null, debug: null }),
 }));
+
+// Register a fake tile type with a displayName so we can verify the strategy
+// resolves the announcement text to a user-facing label rather than the raw
+// internal tile-type id.
+registerTileContentInfo({
+  type: "fake-test-tile-with-display-name",
+  displayName: "Fake Display Name",
+  modelClass: TileContentModel,
+  defaultContent: () => TileContentModel.create({ type: "fake-test-tile-with-display-name" }),
+});
 
 describe("createClueTileStrategy", () => {
   it("uses getter functions when provided", () => {
@@ -62,15 +74,30 @@ describe("createClueTileStrategy", () => {
       ["title", "topbar", "content", "palette", "toolbar", "resize"]);
   });
 
-  it("sets announcement text from tile type", () => {
+  it("falls back to the tile type id in announcements when no displayName is registered", () => {
     const strategy = createClueTileStrategy({
       onRegisterTileApi: jest.fn(),
       onUnregisterTileApi: jest.fn(),
-      tileType: "bar-graph",
+      tileType: "unregistered-fake-tile-type",
     });
 
-    expect(strategy.announceEnter).toContain("bar-graph");
-    expect(strategy.announceExit).toContain("bar-graph");
+    expect(strategy.announceEnter).toBe(
+      "Editing unregistered-fake-tile-type tile. Press Escape to exit.");
+    expect(strategy.announceExit).toBe(
+      "Exited unregistered-fake-tile-type tile. Use arrow keys to navigate.");
+  });
+
+  it("uses the tile registry displayName in announcements when available", () => {
+    const strategy = createClueTileStrategy({
+      onRegisterTileApi: jest.fn(),
+      onUnregisterTileApi: jest.fn(),
+      tileType: "fake-test-tile-with-display-name",
+    });
+
+    expect(strategy.announceEnter).toBe(
+      "Editing Fake Display Name tile. Press Escape to exit.");
+    expect(strategy.announceExit).toBe(
+      "Exited Fake Display Name tile. Use arrow keys to navigate.");
   });
 
   it("passes through focusContent", () => {

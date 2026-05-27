@@ -50,6 +50,12 @@ import { createLinkedPoint, getAllLinkedPoints } from "../../../models/tiles/geo
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tile-component";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { ITileApi } from "../tile-api";
+import {
+  applyBoardA11yAttributes, applyA11yAttributes, refreshA11yAttributes, updateBoardAriaLabel,
+} from "./geometry-aria-utils";
+import { seedShapeForMode } from "./geometry-keyboard-create";
+import { GeometryTileMode } from "./geometry-types";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { notEmpty, safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
@@ -72,6 +78,15 @@ export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard?: (board: JXG.Board) => void;
   onSetActionHandlers?: (handlers: IActionHandlers) => void;
   onContentChange?: () => void;
+  /**
+   * Called from componentDidMount / componentWillUnmount with the geometry-specific
+   * annotation/export API (or an empty object on unmount). The parent
+   * `GeometryToolComponent` captures these implementations into a ref so that
+   * `useClueAccessibility` can register a single tile API per mount — the hook's
+   * `additionalApi` proxy delegates to the latest captured implementations at
+   * call time. See [src/hooks/use-clue-accessibility.ts](../../../hooks/use-clue-accessibility.ts).
+   */
+  onSetAdditionalApi?: (api: Partial<ITileApi>) => void;
 }
 export interface IProps extends IGeometryContentProps, SizeMeProps {
   measureText: (text: string) => number;
@@ -217,11 +232,24 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleZoomOut: this.handleZoomOut,
         handleFitAll: this.handleScaleToFit,
         handleSetShowColorPalette: this.handleSetShowColorPalette,
-        handleColorChange: this.handleColorChange
+        handleColorChange: this.handleColorChange,
+        handleSeedShape: this.handleSeedShape,
       };
       onSetActionHandlers(handlers);
     }
   }
+
+  private handleSeedShape = (mode: GeometryTileMode) => {
+    const { board } = this.state;
+    if (!board || this.props.readOnly) return;
+    this.applyChange(() => {
+      const created = seedShapeForMode(board, this.getContent(), mode);
+      created.forEach(elt => this.handleCreateElements(elt));
+      // closeActivePolygon can replace the polygon's rendNode, leaving the
+      // attrs we just set on a stale node. Re-decorate every live node.
+      refreshA11yAttributes(board, this.getContent(), this.props.readOnly);
+    });
+  };
 
   private getPointScreenCoords(pointId: string) {
     if (!this.state.board) return;
@@ -278,7 +306,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.initializeContent();
 
     if (!this.props.showAllContent) {
-      this.props.onRegisterTileApi({
+      this.props.onSetAdditionalApi?.({
 
         isLinked: () => {
           return this.getContent().isLinked;
@@ -486,6 +514,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           const selected = this.getContent().isSelected(edge.point1.id) && this.getContent().isSelected(edge.point2.id);
           updateVisualProps(_board, edge.id, selected);
         });
+        // Refresh aria-pressed + ", Selected" suffix. Skipped mid-drag
+        // (endDragSelectedPoints does the catch-up).
+        if (!this.isVertexDrag) {
+          this.scheduleA11yRefresh();
+        }
       }
     }));
 
@@ -556,13 +589,21 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   public componentWillUnmount() {
     this.disposers.forEach(disposer => disposer());
+    if (this.a11yRefreshHandle !== null) {
+      cancelAnimationFrame(this.a11yRefreshHandle);
+      this.a11yRefreshHandle = null;
+    }
+    if (this.boardSummaryHandle !== null) {
+      cancelAnimationFrame(this.boardSummaryHandle);
+      this.boardSummaryHandle = null;
+    }
 
     if (this.state.board) {
       // delay so any asynchronous JSXGraph actions have time to complete
       setTimeout(() => this.destroyBoard());
     }
 
-    this.props.onUnregisterTileApi();
+    this.props.onSetAdditionalApi?.({});
 
     this._isMounted = false;
   }
@@ -1501,6 +1542,29 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     });
   };
 
+  // rAF-coalesced refreshes — without these, the per-id selection observer
+  // and per-create handlers would sweep the board N times for one user action.
+  private a11yRefreshHandle: number | null = null;
+  private boardSummaryHandle: number | null = null;
+
+  private scheduleA11yRefresh = () => {
+    if (this.a11yRefreshHandle !== null) return;
+    this.a11yRefreshHandle = requestAnimationFrame(() => {
+      this.a11yRefreshHandle = null;
+      const board = this.state.board;
+      if (board) refreshA11yAttributes(board, this.getContent(), this.props.readOnly);
+    });
+  };
+
+  private refreshBoardSummary = () => {
+    if (this.boardSummaryHandle !== null) return;
+    this.boardSummaryHandle = requestAnimationFrame(() => {
+      this.boardSummaryHandle = null;
+      const board = this.state.board;
+      if (board) updateBoardAriaLabel(board, this.getContent());
+    });
+  };
+
   private applyChange(change: () => void) {
     try {
       ++this.suspendSnapshotResponse;
@@ -1632,6 +1696,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
     this.dragPts = {};
 
+    // One-shot catch-up: the selection-change observer skips refreshes while
+    // isVertexDrag is true.
+    refreshA11yAttributes(board, content, this.props.readOnly);
+
     return didDragPoints;
   }
 
@@ -1759,6 +1827,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       this.props.onSetBoard(board);
     }
 
+    applyBoardA11yAttributes(this.domElement?.querySelector("svg") ?? undefined);
+
     board.on("down", handlePointerDown);
     board.on("up", handlePointerUp);
   };
@@ -1835,6 +1905,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleCreatePoint = (point: JXG.Point) => {
+    applyA11yAttributes(point, this.getContent(), { readOnly: this.props.readOnly });
+    this.refreshBoardSummary();
 
     const handlePointerDown = (evt: Event) => {
       const { board, mode } = this.context;
@@ -1934,6 +2006,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleCreateLine = (line: JXG.Line) => {
+    applyA11yAttributes(line, this.getContent(), { readOnly: this.props.readOnly });
+    this.refreshBoardSummary();
 
     function getVertices() {
       return [line.point1, line.point2];
@@ -2011,6 +2085,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleCreateCircle = (circle: JXG.Circle) => {
+    applyA11yAttributes(circle, this.getContent(), { readOnly: this.props.readOnly });
+    this.refreshBoardSummary();
 
     const isInVertex = (evt: any) => {
       const { scale } = this.props;
@@ -2097,6 +2173,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleCreateInfiniteLine = (line: JXG.Line) => {
+    applyA11yAttributes(line, this.getContent(), { readOnly: this.props.readOnly });
+    this.refreshBoardSummary();
 
     const isInVertex = (evt: any) => {
       const { scale } = this.props;
@@ -2181,6 +2259,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleCreatePolygon = (polygon: JXG.Polygon) => {
+    applyA11yAttributes(polygon, this.getContent(), { readOnly: this.props.readOnly });
+    this.refreshBoardSummary();
 
     const isInVertex = (evt: any) => {
       const { scale } = this.props;
@@ -2271,9 +2351,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleCreateVertexAngle = (angle: JXG.Angle) => {
     updateVertexAngle(angle);
+    applyA11yAttributes(angle, this.getContent(), { readOnly: this.props.readOnly });
   };
 
   private handleCreateText = (text: JXG.Text) => {
+    applyA11yAttributes(text, this.getContent(), { readOnly: this.props.readOnly });
     const handlePointerDown = (evt: any) => {
       const content = this.getContent();
       const { readOnly } = this.props;

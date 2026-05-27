@@ -56,7 +56,7 @@ describe("buildDotAriaLabel", () => {
     expect(buildDotAriaLabel(caseData, undefined)).toBe("Point");
   });
 
-  it("appends Color when a legend attribute is mapped (CLUE-502 Phase 7)", () => {
+  it("appends Color when a legend attribute is mapped", () => {
     // Mimic a CODAP-legend graph where the legend attribute provides category
     // colors. The legend attribute's value for this case is "dog".
     const cfg = makeDataConfig({

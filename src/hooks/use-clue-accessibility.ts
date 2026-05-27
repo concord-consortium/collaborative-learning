@@ -6,6 +6,7 @@ import {
   FocusContentContext,
   NavigationConfig,
   ResizableConfig,
+  TabHandlerResult,
   useAccessibility,
 } from "@concord-consortium/accessibility-tools/hooks";
 import { ITileApi } from "../components/tiles/tile-api";
@@ -59,20 +60,25 @@ export interface ClueFocusTrapConfig {
   onTabWhenInactive?: (e: KeyboardEvent, reverse: boolean) => boolean;
 
   /**
-   * Optional override for which slot names should have Tab routed within the
-   * slot (vs treating the whole slot as a single Tab stop). The default in
-   * `createClueTileStrategy` is `["topbar", "content"]`. Tiles whose palette
-   * contains heterogeneous native focusables (e.g. XY Plot's legend) can opt
-   * the palette in with `["topbar", "content", "palette"]`.
+   * Override for which slots route Tab within them vs treating the whole slot
+   * as one stop. Default: `["topbar", "content"]`. Tiles with heterogeneous
+   * palette focusables (XY Plot's legend) opt the palette in.
    */
   tabWithinSlots?: string[];
 
   /**
-   * Optional per-slot Escape interceptors. Return "handled" to suppress the
-   * trap's default exit (the React keydown handler downstream gets to see the
-   * event during bubble); return "exit" to let the trap exit normally.
+   * Per-slot Escape interceptors. "handled" suppresses the trap's exit (so a
+   * React keydown can still see the event on bubble); "exit" exits normally.
    */
   escapeHandlers?: Record<string, (e: KeyboardEvent) => EscapeHandlerResult>;
+
+  /**
+   * Per-slot Tab interceptors. "handled" — the handler moved focus and called
+   * preventDefault. "exit" — let the trap advance. Any listed slot is treated
+   * as managing its own tabindex (the trap's mount-time
+   * setChildrenNonTabbable skips its descendants).
+   */
+  tabHandlers?: Record<string, (e: KeyboardEvent, reverse: boolean) => TabHandlerResult>;
 }
 
 interface ClueTileOptions {
@@ -151,6 +157,7 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
         paletteElement: elements.palette,
         tabWithinSlots: strategy.tabWithinSlots,
         escapeHandlers: strategy.escapeHandlers,
+        tabHandlers: strategy.tabHandlers,
       };
     };
 

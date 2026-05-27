@@ -40,9 +40,9 @@ function getColorClass (content: GeometryContentModelType | undefined) {
 function ModeButton({name, title, targetMode, Icon, colorClass}:
   { name: string, title: string, targetMode: GeometryTileMode,
     Icon: FunctionComponent<SVGProps<SVGSVGElement>>, colorClass?: string }) {
-  const { board, content, mode, setMode } = useGeometryTileContext();
+  const { board, content, handlers, mode, setMode } = useGeometryTileContext();
 
-  function onClick() {
+  function onClick(e: React.MouseEvent) {
     if (mode !== targetMode) {
       setMode(targetMode);
       if (board) {
@@ -50,6 +50,11 @@ function ModeButton({name, title, targetMode, Icon, colorClass}:
         content?.clearActivePolygon(board);
         content?.clearActiveLine(board);
       }
+    }
+    // detail===0 marks keyboard / SR activation (no pointer count). Mouse
+    // clicks (detail>=1) only flip mode; board clicks then place points.
+    if (e.detail === 0) {
+      handlers?.handleSeedShape(targetMode);
     }
   }
 
@@ -86,10 +91,31 @@ const ColorChangeButton = observer(function ColorChangeButton({name}: IToolbarBu
   const { content, handlers } = useGeometryTileContext();
   const colorClass = getColorClass(content);
 
+  // Escape inside the palette → close + refocus this trigger button.
+  const handleClose = () => {
+    const active = document.activeElement;
+    const button = active?.closest?.(".geometry-toolbar")
+      ?.querySelector<HTMLButtonElement>("button.toolbar-button.color");
+    handlers?.handleSetShowColorPalette(false);
+    button?.focus();
+  };
 
   const handleClick = () => {
     handlers?.handleSetShowColorPalette(!content?.showColorPalette);
   };
+
+  const handleSelectColor = (color: number) => {
+    handlers?.handleColorChange(color);
+    handlers?.handleSetShowColorPalette(false);
+  };
+
+  const palette = content?.showColorPalette
+    ? <ColorPalette
+        selectedColor={content?.selectedColor}
+        onSelectColor={handleSelectColor}
+        onClose={handleClose}
+      />
+    : undefined;
 
   return (
     <TileToolbarButton
@@ -97,16 +123,9 @@ const ColorChangeButton = observer(function ColorChangeButton({name}: IToolbarBu
       title="Color"
       onClick={handleClick}
       colorClass={colorClass}
+      extraContent={palette}
     >
       <ShapesColorIcon/>
-      {content?.showColorPalette &&
-        <div>
-         <ColorPalette
-          selectedColor={content?.selectedColor}
-          onSelectColor={(color) => handlers?.handleColorChange(color)}
-         />
-        </div>
-      }
     </TileToolbarButton>
   );
 });
