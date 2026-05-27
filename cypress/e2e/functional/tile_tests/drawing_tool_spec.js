@@ -1029,22 +1029,13 @@ context('Draw Tool Tile', function () {
     cy.log("verify selection tool rejects non-primary events");
     // First create something to try to select
     drawToolTile.drawRectangle(100, 50, 100, 100);
-    // The new rectangle is auto-selected; clear the selection via the model
-    // before the non-primary drag, so the assertion below measures what the
-    // non-primary drag did rather than the pre-existing auto-selection. A
-    // synthetic click on the tile element doesn't reliably reach the drawing
-    // layer's pointerdown handler.
+    // Clear the rectangle's auto-selection by clicking empty canvas (outside
+    // the rectangle's 100,50→200,150 bounds), so the assertion below measures
+    // what the non-primary drag did rather than the pre-existing selection.
     drawToolTile.getDrawToolSelect().click();
-    cy.window().then((win) => {
-      const docs = win.stores?.documents?.all || [];
-      docs.forEach((d) => {
-        d.content?.tileMap?.forEach?.((t) => {
-          if (t.content?.type === "Drawing" && t.content.setSelectedIds) {
-            t.content.setSelectedIds([]);
-          }
-        });
-      });
-    });
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 50, 30, { isPrimary: true })
+      .trigger("pointerup", 50, 30, { isPrimary: true });
 
     drawToolTile.getSelectionBox().should("not.exist");
     drawToolTile.getDrawTile()
