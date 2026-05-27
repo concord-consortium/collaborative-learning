@@ -152,7 +152,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().should("have.length", 3);
     // Group the two rectangles
     aa.getAnnotationModeButton().click(); // sparrow mode off
-    drawToolTile.getRectangleDrawing().eq(0).click();
+    drawToolTile.selectFirstRectangle();
     drawToolTile.getRectangleDrawing().eq(1).click({ shiftKey: true });
     clueCanvas.clickToolbarButton('drawing', 'group');
     aa.getAnnotationModeButton().click(); // sparrow mode on
@@ -160,7 +160,13 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().should("have.length", 3); // doesn't change number of buttons
     // Ungroup the two rectangles
     aa.getAnnotationModeButton().click(); // sparrow mode off
-    drawToolTile.getDrawTile().click();
+    // Deselect by clicking empty drawing-layer space — target .drawing-layer
+    // directly (not the outer .tool-tile) so the click reaches the
+    // SelectionDrawingTool's pointerdown handler. See drawing_tool_spec.js for
+    // the same pattern.
+    drawToolTile.getDrawTileComponent().find('.drawing-layer')
+      .trigger("pointerdown", 20, 20, { isPrimary: true })
+      .trigger("pointerup", 20, 20, { isPrimary: true });
     drawToolTile.getGroupDrawing().eq(0).find("rect.group-rect").eq(0).click();
     clueCanvas.clickToolbarButton('drawing', 'ungroup');
     aa.getAnnotationModeButton().click(); // sparrow mode on
@@ -285,7 +291,7 @@ context('Arrow Annotations (Sparrows)', function () {
     drawToolTile.getEllipseDrawing().find("ellipse").click({ force: true, scrollBehavior: false });
     clueCanvas.clickToolbarButton('drawing', 'delete'); // delete the object under the second end; arrow should remain since it was not attached.
     aa.getAnnotationArrows().should("have.length", 1);
-    drawToolTile.getRectangleDrawing().eq(0).click({ force: true, scrollBehavior: false });
+    drawToolTile.getRectangleDrawing().eq(0).find("rect").click({ force: true, scrollBehavior: false });
     clueCanvas.clickToolbarButton('drawing', 'delete'); // delete the object under the first end; arrow should be deleted.
     aa.getAnnotationArrows().should("have.length", 0);
 

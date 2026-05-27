@@ -400,8 +400,8 @@ context('Draw Tool Tile', function () {
     // The hover box is rendered as a selection-box with a different color
     drawToolTile.getHighlightBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");
 
-    // The best way I found to remove the hover was to delete the rectangle
-    drawToolTile.getRectangleDrawing().first().click({ force: true });
+    // The best way I found to remove the hover was to delete the rectangle.
+    drawToolTile.selectFirstRectangle();
     drawToolTile.getDrawToolDelete().click();
     drawToolTile.getHighlightBox().should("not.exist");
 
@@ -505,7 +505,7 @@ context('Draw Tool Tile', function () {
     // delete the first 4 with the toolbar button
     for (let i = 0; i < 4; i++) {
       drawToolTile.getDrawToolSelect().click();
-      drawToolTile.getRectangleDrawing().first().click({ force: true });
+      drawToolTile.selectFirstRectangle();
       drawToolTile.getDrawToolDelete().click();
     }
     // Delete with backspace key.
@@ -513,13 +513,13 @@ context('Draw Tool Tile', function () {
     // (the drawing tile redirects focus on pointer events for the focus trap). Trigger the
     // keydown directly on the drawing-layer so it reaches the React onKeyDown handler.
     drawToolTile.getDrawToolSelect().click();
-    drawToolTile.getRectangleDrawing().first().click({ force: true });
+    drawToolTile.selectFirstRectangle();
     drawToolTile.getDrawTileComponent().find('.drawing-layer')
       .trigger("keydown", { key: "Backspace", keyCode: 8, which: 8, force: true });
 
     // Delete with delete key
     drawToolTile.getDrawToolSelect().click();
-    drawToolTile.getRectangleDrawing().first().click({ force: true });
+    drawToolTile.selectFirstRectangle();
     drawToolTile.getDrawTileComponent().find('.drawing-layer')
       .trigger("keydown", { key: "Delete", keyCode: 46, which: 46, force: true });
 
@@ -555,9 +555,11 @@ context('Draw Tool Tile', function () {
     cy.log("deletes ellipse drawing");
     drawToolTile.getDrawTile().click();
     drawToolTile.getDrawToolSelect().click();
-    drawToolTile.getEllipseDrawing().first().click({ force: true });
+    // Drill into the inner ellipse — force:true on the wrapper g doesn't reach
+    // the pointerdown handler (same pattern as the Group test fix).
+    drawToolTile.getEllipseDrawing().first().find("ellipse").click({ force: true });
     drawToolTile.getDrawToolDelete().click();
-    drawToolTile.getEllipseDrawing().first().click({ force: true });
+    drawToolTile.getEllipseDrawing().first().find("ellipse").click({ force: true });
     drawToolTile.getDrawToolDelete().click();
     drawToolTile.getEllipseDrawing().should("not.exist");
 
@@ -600,12 +602,13 @@ context('Draw Tool Tile', function () {
 
     cy.log("deletes stamp drawing");
     drawToolTile.getDrawToolSelect().click();
-    // drawToolTile.getImageDrawing().click({force:true, scrollBehavior: false});
-    drawToolTile.getImageDrawing().eq(0).click({ force: true });
+    // Drill into the inner image — force:true on the wrapper g doesn't reach
+    // the pointerdown handler (same pattern as the Group test fix).
+    drawToolTile.getImageDrawing().eq(0).find("image").click({ force: true });
     drawToolTile.getDrawToolDelete().click();
-    drawToolTile.getImageDrawing().eq(1).click({ force: true });
+    drawToolTile.getImageDrawing().eq(1).find("image").click({ force: true });
     drawToolTile.getDrawToolDelete().click();
-    drawToolTile.getImageDrawing().click({ force: true });
+    drawToolTile.getImageDrawing().find("image").click({ force: true });
     drawToolTile.getDrawToolDelete().click();
     drawToolTile.getImageDrawing().should("not.exist");
   });
@@ -672,7 +675,10 @@ context('Draw Tool Tile', function () {
 
     // Select the group and the new rectangle
     drawToolTile.getDrawToolSelect().click();
-    drawToolTile.getGroupDrawing().eq(0).click({ force: true });
+    // Click the inner rect.group-rect — the wrapper g doesn't carry the pointerdown
+    // handler, so a force:true click on the wrapper bypasses cypress's hit-testing
+    // and dispatches into dead space.
+    drawToolTile.getGroupDrawing().eq(0).find('rect.group-rect').click({ force: true });
     // Shift+click the new rectangle to add it to the selection
     drawToolTile.getRectangleDrawing().eq(1).find("rect").click({ force: true, shiftKey: true });
 
@@ -1023,10 +1029,14 @@ context('Draw Tool Tile', function () {
     cy.log("verify selection tool rejects non-primary events");
     // First create something to try to select
     drawToolTile.drawRectangle(100, 50, 100, 100);
-    // Deselect the rectangle
-    drawToolTile.getDrawTile().click(50, 50);
-
+    // Clear the rectangle's auto-selection by clicking empty canvas (outside
+    // the rectangle's 100,50→200,150 bounds), so the assertion below measures
+    // what the non-primary drag did rather than the pre-existing selection.
     drawToolTile.getDrawToolSelect().click();
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 50, 30, { isPrimary: true })
+      .trigger("pointerup", 50, 30, { isPrimary: true });
+
     drawToolTile.getSelectionBox().should("not.exist");
     drawToolTile.getDrawTile()
       .trigger("pointerdown", 90, 40, { isPrimary: false })
