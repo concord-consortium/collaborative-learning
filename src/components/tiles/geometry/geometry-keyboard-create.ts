@@ -14,7 +14,9 @@ export function seedShapeForMode(
 ): JXG.GeometryElement[] {
   const created: JXG.GeometryElement[] = [];
 
-  if (mode === "select" || mode === "points") {
+  if (mode === "select") return created;
+
+  if (mode === "points") {
     content.addPhantomPoint(board, [1, 1]);
     const { point } = content.realizePhantomPoint(board, [1, 1], "select");
     if (point) created.push(point);

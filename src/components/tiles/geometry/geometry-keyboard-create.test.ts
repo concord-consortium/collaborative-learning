@@ -44,12 +44,10 @@ function pointCoords(p: JXG.Point): [number, number] {
 }
 
 describe("seedShapeForMode — points / select", () => {
-  it("seeds a single free point at user-coords (1, 1) for 'select' mode", () => {
+  it("is a no-op for 'select' mode (navigation only — no point created)", () => {
     const { content, board } = createContentAndBoard();
     const created = seedShapeForMode(board, content, "select");
-    const points = created.filter(isPoint);
-    expect(points).toHaveLength(1);
-    expect(pointCoords(points[0])).toEqual([1, 1]);
+    expect(created).toEqual([]);
     cleanup(content, board);
   });
 
