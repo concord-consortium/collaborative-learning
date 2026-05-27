@@ -1,4 +1,5 @@
 @import "../../vars";
+@import "../../mixins";
 
 $toolbar-width: 44px;
 
@@ -38,6 +39,19 @@ $toolbar-width: 44px;
           &.selected {
             background-color: red;
           }
+        }
+
+        // Use `:focus` rather than `:focus-visible` — the latter doesn't match
+        // reliably on programmatically-focused SVG elements in Safari/WebKit.
+        // JSXGraph never focuses SVG nodes on click, so `:focus` is effectively
+        // a keyboard-focus ring here.
+        svg[role="group"]:focus {
+          outline: 2px solid $focus-ring-color;
+          outline-offset: -2px;
+        }
+        svg [tabindex="0"]:focus {
+          outline: 2px solid $focus-ring-color;
+          outline-offset: 2px;
         }
 
         svg {

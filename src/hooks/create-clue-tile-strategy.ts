@@ -1,5 +1,6 @@
 import { FocusTrapStrategy } from "@concord-consortium/accessibility-tools/hooks";
 import { getAriaLabels } from "./use-aria-labels";
+import { getTileContentInfo } from "../models/tiles/tile-content-info";
 import type { ClueFocusTrapConfig } from "./use-clue-accessibility";
 
 /**
@@ -24,6 +25,9 @@ export function createClueTileStrategy(config: ClueFocusTrapConfig): FocusTrapSt
     ?? (() => config.resizeRef?.current ?? undefined);
 
   const ariaLabels = getAriaLabels();
+  // Prefer the user-facing displayName ("Coordinate Grid" for `geometry`); the
+  // fallback covers unit tests that pass synthetic tile-type strings.
+  const announceName = getTileContentInfo(config.tileType)?.displayName ?? config.tileType;
 
   return {
     getElements: () => ({
@@ -35,25 +39,23 @@ export function createClueTileStrategy(config: ClueFocusTrapConfig): FocusTrapSt
       resize: getResize(),
     }),
     focusContent: config.focusContent,
-    // topbar sits between title and content — for tiles that have a secondary
-    // controls strip above the editor (e.g. dataflow). palette sits between
-    // content and toolbar so an inline secondary toolbar is a single tab stop
-    // with internal arrow nav. findNextSlot skips slots whose elements are
-    // undefined, so tiles that don't provide topbar/palette are unaffected.
+    // topbar: optional controls strip above the editor (e.g. dataflow).
+    // palette: inline secondary toolbar — single tab stop with arrow roving.
+    // Slots with undefined elements are skipped, so tiles without
+    // topbar/palette are unaffected.
     cycleOrder: ["title", "topbar", "content", "palette", "toolbar", "resize"],
-    // Default `tabWithinSlots`: topbar + content. Tiles that want Tab to walk
-    // through each focusable inside their palette (e.g. the XY Plot's legend,
-    // with many native controls) can opt palette in via the config. Tiles that
-    // treat palette as a single tab stop with arrow-roving inside (e.g.
-    // dataflow's Add-block panel) leave it out — the default keeps that working.
+    // Default within-slot Tab routing covers topbar + content. Tiles can opt
+    // palette in via config when its controls are heterogeneous (XY Plot's
+    // legend), or leave it out for arrow-roved palettes (dataflow's Add-block).
     tabWithinSlots: config.tabWithinSlots ?? ["topbar", "content"],
-    announceEnter: ariaLabels.announce.editingTile(config.tileType),
-    announceExit: ariaLabels.announce.exitedTile(config.tileType),
+    announceEnter: ariaLabels.announce.editingTile(announceName),
+    announceExit: ariaLabels.announce.exitedTile(announceName),
     getExternalElements: () => {
       const toolbar = getToolbar();
       return toolbar ? [toolbar] : [];
     },
     onTabWhenInactive: config.onTabWhenInactive,
     escapeHandlers: config.escapeHandlers,
+    tabHandlers: config.tabHandlers,
   };
 }

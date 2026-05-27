@@ -1,7 +1,8 @@
 import { createContext, ReactElement } from "react";
 import { action, makeObservable, observable } from "mobx";
 import { Optional } from "utility-types";
-import type { EscapeHandlerResult, FocusContentContext } from "@concord-consortium/accessibility-tools/hooks";
+import type { EscapeHandlerResult, FocusContentContext, TabHandlerResult }
+  from "@concord-consortium/accessibility-tools/hooks";
 import { IOffsetModel, ObjectBoundingBox } from "../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../models/tiles/tile-content-info";
 import { ITileModel } from "../../models/tiles/tile-model";
@@ -33,17 +34,18 @@ export interface ITileFocusableElements {
   // as its own slot in the trap cycle, between content and the standard floating
   // toolbar, so its internal roving-tabindex is a single tab stop with arrow nav.
   paletteElement?: HTMLElement;
-  // Optional per-tile override for which slots have Tab routed within them.
-  // The outer FocusTrapController (in tile-component.tsx) reads this back from
-  // the tile's registered API and applies it to its own strategy, so the inner
-  // tile can opt slots into within-slot Tab routing (e.g. XY Plot opts palette in
-  // because its CLUE legend has many heterogeneous controls).
+  // Per-tile override for which slots route Tab within them. The outer
+  // FocusTrapController reads this and applies it to its strategy (e.g. XY
+  // Plot opts palette in because its legend has heterogeneous controls).
   tabWithinSlots?: string[];
-  // Optional per-slot Escape interceptors. Return "handled" to suppress the
-  // trap's default exit (e.g. when an inline editor is open and Escape should
-  // cancel the edit rather than exit the trap). Return "exit" or omit to let
-  // the trap exit normally.
+  // Per-slot Escape interceptors. Return "handled" to suppress the trap's
+  // exit (e.g. let an inline editor cancel instead). "exit" / omit → exit.
   escapeHandlers?: Record<string, (e: KeyboardEvent) => EscapeHandlerResult>;
+  // Per-slot Tab interceptors. Return "handled" if the handler moved focus
+  // (caller's responsibility to preventDefault); "exit" advances the slot.
+  // Any slot listed here owns its own tabindex — the trap won't touch its
+  // descendants' tabindex on mount.
+  tabHandlers?: Record<string, (e: KeyboardEvent, reverse: boolean) => TabHandlerResult>;
 }
 
 export interface ITileApi {

@@ -127,7 +127,7 @@ function renderAttributeLabel(opts: IRenderOptions = {}) {
   );
 }
 
-describe("AttributeLabel — keyboard behaviour (CLUE-502 Phase 2)", () => {
+describe("AttributeLabel — keyboard behaviour", () => {
   it("is rendered as a button with aria-label and tabIndex=0", () => {
     renderAttributeLabel({ xAttributeLabel: "Height" });
     const trigger = screen.getByRole("button", { name: /X-axis label: Height/ });

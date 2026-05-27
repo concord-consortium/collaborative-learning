@@ -6,7 +6,7 @@ const clueCanvas = new ClueCanvas;
 const xyTile = new XYPlotToolTile;
 const tableToolTile = new TableToolTile;
 
-context('XY Plot keyboard accessibility (CLUE-502)', function () {
+context('XY Plot keyboard accessibility', function () {
   beforeEach(function () {
     // Use the local qa unit's content.json rather than the bare `unit=qa`
     // shorthand. The shorthand resolves to a remote qa unit in CODAP-legend
