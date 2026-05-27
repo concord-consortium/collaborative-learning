@@ -194,7 +194,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const { context, model, onSetActionHandlers } = props;
 
-    this.elementId = `${context}-${model.id}-${this.instanceId}`;
+    // Prefix with "geo-" so the ID never starts with a digit.
+    // JSXGraph uses CSS.escape() on the container ID when building SVG marker
+    // url(#...) references, but NOT on the marker element's own id attribute.
+    // A leading digit (e.g. "1-up-...") gets CSS-escaped to "\31 -up-...",
+    // creating a mismatch that prevents arrowhead markers from rendering.
+    this.elementId = `geo-${context}-${model.id}-${this.instanceId}`;
 
     if (onSetActionHandlers) {
       const handlers: IActionHandlers = {

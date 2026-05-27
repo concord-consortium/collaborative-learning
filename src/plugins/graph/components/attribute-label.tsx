@@ -22,6 +22,29 @@ import { InputTextbox } from "./input-textbox";
 
 import "./attribute-label.scss";
 
+/**
+ * Builds an accessible label describing an axis-label trigger.
+ *
+ * @param place Axis position. `bottom`/`top` are X-axes, `left`/`rightNumeric` are Y-axes.
+ * @param label The current display text (attribute name when one is assigned; empty/cue text otherwise).
+ * @param readOnly When true, omits the affordance suffix because the trigger can't be activated.
+ * @param hasAttribute When false, the trigger is in the "click to add..." cue state and Enter
+ *   opens the attribute menu rather than starting an inline edit.
+ */
+export function buildAxisAriaLabel(
+  place: GraphPlace, label: string, readOnly: boolean, hasAttribute: boolean
+): string {
+  const axisName = (place === "left" || place === "rightNumeric" || place === "yPlus") ? "Y-axis" : "X-axis";
+  if (!hasAttribute) {
+    return readOnly
+      ? `${axisName}: no attribute selected`
+      : `${axisName}: no attribute selected, press Enter to choose`;
+  }
+  return readOnly
+    ? `${axisName} label: ${label}`
+    : `${axisName} label: ${label}, press Enter to edit`;
+}
+
 interface IAttributeLabelProps {
   place: GraphPlace;
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void;
@@ -40,6 +63,7 @@ export const AttributeLabel = observer(
       useClickHereCue = dataConfiguration?.placeCanShowClickHereCue(place) ?? false,
       [editing, setEditing] = useState(false),
       inputRef = useRef<HTMLInputElement | null>(null),
+      labelDivRef = useRef<HTMLDivElement | null>(null),
       [inputWidth, setInputWidth] = useState(0),
       [labelElt, setLabelElt] = useState<HTMLDivElement | null>(null),
       portalParentElt = labelElt?.closest(kGraphPortalClass) as HTMLDivElement ?? null,
@@ -114,15 +138,60 @@ export const AttributeLabel = observer(
     const readyForPortal = positioningParentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
     const codapLegend = !defaultSeriesLegend;
 
+    // The "click to add..." cue is only visible in CODAP-legend mode. CLUE-legend tiles
+    // always show a customizable label and treat Enter as "start editing", even when
+    // no attribute is mapped.
+    const cueIsShowing = useClickHereCue && codapLegend;
+    const ariaLabel = buildAxisAriaLabel(place, displayText, readOnly, !cueIsShowing);
+
+    /**
+     * When the cue is showing, opening the attribute menu requires triggering Chakra's
+     * MenuButton, which is portaled into the plot container. We tag that button with
+     * `data-axis-menu-place={place}` (see AxisOrLegendAttributeMenu) and find it via DOM
+     * query. Returns true if a button was found and clicked.
+     */
+    const openAttributeMenuForCue = () => {
+      const menuBtn = positioningParentElt?.querySelector<HTMLButtonElement>(
+        `[data-axis-menu-place="${place}"]`
+      );
+      if (menuBtn) {
+        menuBtn.click();
+        return true;
+      }
+      return false;
+    };
+
+    const handleLabelKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (readOnly) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (cueIsShowing) {
+          openAttributeMenuForCue();
+        } else {
+          startEditing?.();
+        }
+      }
+    };
+
+    const setLabelRef = (elt: HTMLDivElement | null) => {
+      labelDivRef.current = elt;
+      setLabelElt(elt);
+    };
+
     const divClassName = classNames("axis-label", place, { vertical, editing });
     return (
       <>
         <foreignObject {...foreignObjectStyle}>
           <div
+            aria-label={ariaLabel}
             className={divClassName}
             onClick={startEditing}
-            ref={(elt) => setLabelElt(elt)}
+            onKeyDown={handleLabelKeyDown}
+            ref={setLabelRef}
+            role="button"
             style={divStyle}
+            tabIndex={0}
           >
             {editing
               ? (
@@ -131,6 +200,7 @@ export const AttributeLabel = observer(
                   finishEditing={() => setEditing(false)}
                   inputRef={inputRef}
                   setWidth={setInputWidth}
+                  triggerRef={labelDivRef}
                   updateValue={updateValue}
                 />
               ) : (

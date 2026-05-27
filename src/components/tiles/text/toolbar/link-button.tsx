@@ -1,14 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Editor, EFormat, Node, Range, selectedNodesOfType, useSlate } from "@concord-consortium/slate-editor";
 
 import { useLinkDialog } from "../dialog/use-link-dialog";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../toolbar/toolbar-button-manager";
+import { TileModelContext } from "../../tile-api";
+import { TextContentModelContext } from "../text-content-context";
 
 import LinkToolIcon from "../../../../assets/icons/text/link-text-icon.svg";
 
 export const LinkButton = ({name}: IToolbarButtonComponentProps) => {
   const editor = useSlate();
+  const model = useContext(TileModelContext);
+  const textContent = useContext(TextContentModelContext);
   const { selection } = editor;
   const isCollapsed = selection ? Range.isCollapsed(selection) : true;
   const selectedLinks = selectedNodesOfType(editor, EFormat.link);
@@ -20,7 +24,7 @@ export const LinkButton = ({name}: IToolbarButtonComponentProps) => {
     : selection
     ? Editor.string(editor, selection)
     : "";
-  const [showModal] = useLinkDialog({ editor, selectedLink, text });
+  const [showModal] = useLinkDialog({ editor, selectedLink, text, tileId: model?.id, textContent });
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     showModal();

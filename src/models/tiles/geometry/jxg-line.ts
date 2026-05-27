@@ -1,7 +1,7 @@
 import { uniqueId } from "../../../utilities/js-utils";
 import { strokePropsForColorScheme } from "./geometry-utils";
 import { ELabelOption, JXGChangeAgent, JXGProperties } from "./jxg-changes";
-import { getObjectById } from "./jxg-board";
+import { getBaseAxisLabels, getObjectById } from "./jxg-board";
 import { isInfiniteLine, kInfiniteLineType } from "./jxg-types";
 import { objectChangeAgent } from "./jxg-object";
 
@@ -10,8 +10,8 @@ const defaultLineProps = Object.freeze({
   strokeOpacity: 1,      highlightStrokeOpacity: 0.99,
   straightFirst: true,
   straightLast: true,
-  firstArrow: true,
-  lastArrow: true,
+  firstArrow: { type: 1 as const, size: 6 },
+  lastArrow: { type: 1 as const, size: 6 },
 });
 
 const selectedLineProps = Object.freeze({
@@ -32,24 +32,66 @@ export function getInfiniteLine(board: JXG.Board, id: string): JXG.Line | undefi
   return isInfiniteLine(obj) ? obj : undefined;
 }
 
+// Formats a line equation as "y = mx + b", "y = b", or "x = c" for vertical lines.
+// Uses the provided axis labels (from getBaseAxisLabels) so that equations respect
+// custom axis names configured on the board.
+export function formatLineEquation(slope: number, p1: JXG.Point, xName: string, yName: string): string {
+  if (isNaN(slope)) {
+    // Coincident points — line is undefined
+    return "";
+  }
+  if (!isFinite(slope)) {
+    // Vertical line: x = c
+    return `${xName} = ${JXG.toFixed(p1.X(), 2)}`;
+  }
+  const intercept = p1.Y() - slope * p1.X();
+  if (slope === 0) {
+    return `${yName} = ${JXG.toFixed(intercept, 2)}`;
+  }
+  const slopeStr = JXG.toFixed(slope, 2);
+  const sign = intercept >= 0 ? " + " : " \u2212 ";
+  const absIntercept = JXG.toFixed(Math.abs(intercept), 2);
+  if (Math.abs(intercept) < 0.005) {
+    return `${yName} = ${slopeStr}${xName}`;
+  }
+  return `${yName} = ${slopeStr}${xName}${sign}${absIntercept}`;
+}
+
+// Overrides getLabelAnchor so the label appears at the midpoint of the two
+// defining points rather than at the board edge (JSXGraph's default for
+// infinite lines, which clips to the bounding box).
+function setMidpointLabelAnchor(line: JXG.Line) {
+  (line as any).getLabelAnchor = function() {
+    const c1 = this.point1.coords.usrCoords;
+    const c2 = this.point2.coords.usrCoords;
+    return new JXG.Coords(JXG.COORDS_BY_USER,
+      [(c1[1] + c2[1]) / 2, (c1[2] + c2[2]) / 2],
+      this.board
+    );
+  };
+}
+
 export function setPropertiesForLineLabelOption(line: JXG.Line) {
   const labelOption = line.getAttribute("clientLabelOption") || ELabelOption.kNone;
   switch (labelOption) {
     case ELabelOption.kLabel:
-      // Override getLabelAnchor so the label appears at the midpoint of the two
-      // defining points rather than at the board edge (JSXGraph's default for
-      // infinite lines, which clips to the bounding box).
-      (line as any).getLabelAnchor = function() {
-        const c1 = this.point1.coords.usrCoords;
-        const c2 = this.point2.coords.usrCoords;
-        return new JXG.Coords(JXG.COORDS_BY_USER,
-          [(c1[1] + c2[1]) / 2, (c1[2] + c2[2]) / 2],
-          this.board
-        );
-      };
+      setMidpointLabelAnchor(line);
       line.setAttribute({
         withLabel: true,
         name: line.getAttribute("clientName")
+      });
+      if (line.label) {
+        line.label.setAttribute({ anchorX: "middle", offset: [0, 12] } as any);
+      }
+      break;
+    case ELabelOption.kEquation:
+      setMidpointLabelAnchor(line);
+      line.setAttribute({
+        withLabel: true,
+        name: () => {
+          const [xName, yName] = getBaseAxisLabels(line.board);
+          return formatLineEquation(line.getSlope(), line.point1, xName, yName);
+        }
       });
       if (line.label) {
         line.label.setAttribute({ anchorX: "middle", offset: [0, 12] } as any);

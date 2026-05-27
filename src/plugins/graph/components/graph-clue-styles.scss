@@ -1,4 +1,5 @@
 @import "../../../components/vars";
+@import "../../../components/mixins";
 @import "./legend/legend-vars";
 
 .graph-plot {
@@ -55,6 +56,7 @@
     cursor: pointer;
     padding: 3px 5px;
 
+    @include focus-ring(-2px);
 
     &:hover {
       background: $workspace-teal-light-6;

@@ -3,7 +3,7 @@ import classNames from "classnames/dedupe";
 
 import {
   BaseElement, CustomEditor, CustomElement, Editor, EditorValue, isCustomElement, kSlateVoidClass,
-  registerElementComponent, RenderElementProps, useSelected, useSerializing
+  registerElementComponent, registerElementDeserializer, RenderElementProps, useSelected, useSerializing
 } from "@concord-consortium/slate-editor";
 import { action, autorun, computed, IReactionDisposer, makeObservable, observable, runInAction } from "mobx";
 import { getType } from "mobx-state-tree";
@@ -14,8 +14,9 @@ import { ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { TextPluginsContext } from "../../../components/tiles/text/text-plugins-context";
 import { IOffsetModel, ObjectBoundingBox, OffsetModel } from "../../../models/annotations/clue-object";
 import { IStores } from "../../../models/stores/stores";
-import { removeAnnotationsForChip } from "../../text/chip-annotation-cleanup";
-import { getChipBoxInWrapperCoords, useChipMeasurement } from "../../text/use-chip-measurement";
+import { removeAnnotationsForChip } from "../../../components/tiles/text/plugins/chip-annotation-cleanup";
+import { getChipBoxInWrapperCoords, useChipMeasurement } from "../../../components/tiles/text/plugins/use-chip-measurement";
+import { kSlateChipTypeAttr, kVariableChipReferenceAttr } from "../../../components/tiles/text/plugins/chip-serialization";
 
 import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
@@ -250,7 +251,7 @@ export const isVariableElement = (element: CustomElement): element is VariableEl
   return element.type === kVariableFormat;
 };
 
-export const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
+const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
   const plugins = useContext(TextPluginsContext);
   const variablesPlugin = plugins[kVariableTextPluginName] as VariablesPlugin|undefined;
   const isHighlighted = useSelected();
@@ -275,10 +276,20 @@ export const VariableComponent = observer(function({ attributes, children, eleme
 
   if (!isVariableElement(element)) return null;
 
+  // When serializing to HTML (slateToHtml), emit only the marker span so the round-trip
+  // back via htmlToSlate can reconstruct the chip element. Without this, the rendered
+  // VariableChip below would serialize as plain text and lose the reference id.
+  if (isSerializing) {
+    const serializeAttrs = {
+      [kSlateChipTypeAttr]: kVariableFormat,
+      [kVariableChipReferenceAttr]: element.reference,
+    };
+    return <span {...attributes} {...serializeAttrs}>{children}</span>;
+  }
+
   const classes = classNames(kSlateVoidClass, kVariableClass);
-  const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;
+  const selectedClass = isHighlighted ? "slate-selected" : undefined;
   const variable = variablesPlugin?.variables.find(v => v.id === element.reference);
-  // FIXME: HTML serialization/deserialization. This will serialize the VariableChip too.
   return (
     <span className={classes} {...attributes} contentEditable={false}>
       {children}
@@ -299,7 +310,16 @@ export function registerVariables() {
 
   registerElementComponent(kVariableFormat, props => <VariableComponent {...props}/>);
 
-  // TODO: register deserializer
+  // Pair to the serialization above: when htmlToSlate sees a span with our marker
+  // data-slate-type attribute, reconstruct the variable chip element.
+  registerElementDeserializer("span", {
+    test: (el: HTMLElement) => el.getAttribute(kSlateChipTypeAttr) === kVariableFormat,
+    deserialize: (el: HTMLElement): VariableElement => ({
+      type: kVariableFormat,
+      reference: el.getAttribute(kVariableChipReferenceAttr) ?? "",
+      children: [{ text: "" }]
+    } as VariableElement)
+  });
 
   isRegistered = true;
 }

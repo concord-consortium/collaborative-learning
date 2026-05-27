@@ -1,14 +1,23 @@
 @import "../vars";
+@import "../mixins";
 
 .chakra-editable {
   .chakra-editable__preview[hidden] {
     display: none;
   }
 
+  // When `enterToEdit` is on, Chakra makes the preview focusable. Give it a
+  // visible focus ring so keyboard users see where focus has landed.
+  .chakra-editable__preview {
+    @include focus-ring(2px);
+  }
+
   button {
     background: inherit;
     border: none;
     cursor: pointer;
+
+    @include focus-ring(2px);
 
     &:hover {
       background-color: $workspace-teal-light-6;

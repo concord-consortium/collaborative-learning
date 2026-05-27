@@ -116,9 +116,11 @@ export const TileToolbar = observer(
             ".tool-tile-resize-handle-wrapper"
           ) as HTMLElement | null;
 
-          // Helper to focus content, preferring tile's custom focus method (e.g., Slate)
-          const tryFocusContent = () => {
-            if (focusContentFn?.()) return true;
+          // Helper to focus content, preferring tile's custom focus method (e.g., Slate).
+          // entryMode propagates Tab direction so direction-aware tiles (e.g. XY Plot's
+          // dots-group on reverse entry) can pick the right end.
+          const tryFocusContent = (entryMode: "forward" | "reverse") => {
+            if (focusContentFn?.({ entryMode })) return true;
             if (contentElement) {
               contentElement.focus();
               return document.activeElement === contentElement;
@@ -162,7 +164,7 @@ export const TileToolbar = observer(
                 return false;
               })();
               if (!focusedLastChild) {
-                if (!tryFocusContent()) {
+                if (!tryFocusContent("reverse")) {
                   if (titleElement) { titleElement.focus(); }
                   if (document.activeElement !== titleElement) {
                     if (!tryFocusResize()) { tileElement.focus(); }
@@ -175,7 +177,7 @@ export const TileToolbar = observer(
             if (!tryFocusResize()) {
               if (titleElement) { titleElement.focus(); }
               if (document.activeElement !== titleElement) {
-                if (!tryFocusContent()) { tileElement.focus(); }
+                if (!tryFocusContent("forward")) { tileElement.focus(); }
               }
             }
           }

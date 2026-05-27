@@ -1,4 +1,4 @@
-import { IStores } from "../../models/stores/stores";
+import { IStores } from "../../../../models/stores/stores";
 
 /**
  * Removes any arrow annotations whose source or target endpoint references the given

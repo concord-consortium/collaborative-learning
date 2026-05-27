@@ -225,8 +225,14 @@ describe("useClueAccessibility", () => {
 
     const registeredApi: ITileApi = onRegister.mock.calls[0][0];
 
-    // additionalApi methods are present
-    expect(registeredApi.exportContentAsTileJson).toBe(exportFn);
+    // additionalApi methods are present and delegate to the caller's impl.
+    // (The registered method is a proxy — calling it must reach exportFn, but
+    // it is intentionally not the same function reference, so the proxy can
+    // pick up later dependency-driven updates to the underlying impl.)
+    expect(registeredApi.exportContentAsTileJson).toBeDefined();
+    const exportResult = registeredApi.exportContentAsTileJson?.();
+    expect(exportFn).toHaveBeenCalled();
+    expect(exportResult).toBe("{}");
 
     // getFocusableElements is NOT the rogue version
     expect(registeredApi.getFocusableElements).not.toBe(rogue);
@@ -234,6 +240,44 @@ describe("useClueAccessibility", () => {
     // Calling it should work (not throw) and not call the rogue
     registeredApi.getFocusableElements?.();
     expect(rogue).not.toHaveBeenCalled();
+  });
+
+  it("additionalApi methods pick up dependency-driven updates without re-registration", () => {
+    // Regression for the graph tile: `getDotCenter` returns undefined until
+    // the graph is data-linked (xAttrType / yAttrType change from undefined to
+    // "numeric"). The annotation system looks up `getObjectBoundingBox` etc.
+    // through the registered tile API at call time, so the registered method
+    // must always reach the *current* underlying impl — not the impl captured
+    // at mount time.
+    const onRegister = jest.fn();
+    const exportV1 = jest.fn(() => "v1");
+    const exportV2 = jest.fn(() => "v2");
+
+    const { rerender } = render(
+      <TileHarness
+        onRegisterTileApi={onRegister}
+        onUnregisterTileApi={jest.fn()}
+        additionalApi={{ exportContentAsTileJson: exportV1 }}
+      />
+    );
+
+    // Re-render with a fresh additionalApi (different inner impl)
+    rerender(
+      <TileHarness
+        onRegisterTileApi={onRegister}
+        onUnregisterTileApi={jest.fn()}
+        additionalApi={{ exportContentAsTileJson: exportV2 }}
+      />
+    );
+
+    // Still only one registration — but calling through the registered proxy
+    // hits the latest impl.
+    expect(onRegister).toHaveBeenCalledTimes(1);
+    const registeredApi: ITileApi = onRegister.mock.calls[0][0];
+    const result = registeredApi.exportContentAsTileJson?.();
+    expect(result).toBe("v2");
+    expect(exportV2).toHaveBeenCalledTimes(1);
+    expect(exportV1).not.toHaveBeenCalled();
   });
 
   it("does not register tile API for region type", () => {

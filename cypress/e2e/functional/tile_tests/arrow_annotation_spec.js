@@ -22,7 +22,8 @@ const tableToolTile = new TableToolTile;
 const textToolTile = new TextToolTile;
 const xyTile = new XYPlotToolTile;
 
-const queryParams = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
+const queryParams = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`
+  .replace("fakeUser=student:5", "fakeUser=student:random");
 const queryParamsQa = `${Cypress.config("qaUnitStudent7Investigation3")}`;
 const queryParamsGroup = `${Cypress.config("qaUnitGroup")}&fakeUser=student:15`;
 

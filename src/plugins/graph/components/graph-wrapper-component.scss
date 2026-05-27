@@ -1,7 +1,14 @@
+@import "../../../components/vars";
+@import "../../../components/mixins";
+
 .graph-wrapper {
   height: 100%;
 
   .graph-size-me {
     height: 100%;
   }
+}
+
+.tile-toolbar.graph-toolbar .toolbar-row button {
+  @include focus-ring(-2px);
 }

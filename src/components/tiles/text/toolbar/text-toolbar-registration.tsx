@@ -1,6 +1,6 @@
 import React from "react";
 import { Editor, EFormat, useSlate } from "@concord-consortium/slate-editor";
-import { isHighlightChipSelected } from "../../../../plugins/text/highlights-plugin";
+import { isHighlightChipSelected } from "../plugins/highlights-plugin";
 import { isMac } from "../../../../utilities/browser";
 import { IToolbarButtonComponentProps, registerTileToolbarButtons }
   from "../../../toolbar/toolbar-button-manager";

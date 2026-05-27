@@ -7,6 +7,10 @@ import { EllipseObjectSnapshot, EllipseObjectType } from "../objects/ellipse";
 import { ImageObjectSnapshot } from "../objects/image";
 import { createDrawingContent, DrawingContentModelType } from "./drawing-content";
 import { DrawingMigrator } from "./drawing-migrator";
+// Importing drawing-registration registers the "group" object type with
+// DrawingObjectMSTUnion. Without this, snapshots whose `type === "group"` fail
+// MST type-checking when added to the model.
+import "../drawing-registration";
 
 function exportDrawing2(drawing: DrawingContentModelType) {
   const exportedString = drawing.exportJson();
@@ -227,6 +231,75 @@ describe("exportDrawingTileSpec", () => {
     ]});
     drawing3.deleteObjects([drawing3.objects[1].id]);
     expect(exportDrawing2(drawing3)).toEqual({ type: "Drawing", objects: [i1Data, i3Data] });
+  });
+
+  describe("groups", () => {
+    const baseRect: RectangleObjectSnapshot = {
+      type: "rectangle",
+      x: 10, y: 10,
+      width: 10, height: 10,
+      rotation: 0,
+      fill: "#cccccc",
+      stroke: "#888888",
+      strokeDashArray: "3,3",
+      strokeWidth: 1,
+      visible: true,
+      hFlip: false,
+      vFlip: false
+    };
+
+    it("preserves a group of two rectangles through an export -> import -> re-export round trip", () => {
+      const r1: RectangleObjectSnapshot = { ...baseRect, id: "r1", x: 0,  y: 0  };
+      const r2: RectangleObjectSnapshot = { ...baseRect, id: "r2", x: 50, y: 50 };
+      const drawing = createDrawingContent({ objects: [r1, r2] });
+      drawing.createGroup(["r1", "r2"]);
+
+      const exported = drawing.exportJson();
+      const imported = DrawingMigrator.create(safeJsonParse(exported));
+      const reExported = imported.exportJson();
+
+      expect(safeJsonParse(reExported)).toEqual(safeJsonParse(exported));
+    });
+
+    it("includes the group in the exported objects list", () => {
+      const r1: RectangleObjectSnapshot = { ...baseRect, id: "r1", x: 0,  y: 0  };
+      const r2: RectangleObjectSnapshot = { ...baseRect, id: "r2", x: 50, y: 50 };
+      const drawing = createDrawingContent({ objects: [r1, r2] });
+      drawing.createGroup(["r1", "r2"]);
+
+      const exported = safeJsonParse(drawing.exportJson());
+      expect(exported.objects).toHaveLength(1);
+      expect(exported.objects[0].type).toBe("group");
+    });
+
+    it("preserves both rectangles as group members in the export", () => {
+      const r1: RectangleObjectSnapshot = { ...baseRect, id: "r1", x: 0,  y: 0  };
+      const r2: RectangleObjectSnapshot = { ...baseRect, id: "r2", x: 50, y: 50 };
+      const drawing = createDrawingContent({ objects: [r1, r2] });
+      drawing.createGroup(["r1", "r2"]);
+
+      const exported = safeJsonParse(drawing.exportJson());
+      const memberIds = exported.objects[0].objects.map((o: any) => o.id);
+      expect(memberIds).toEqual(["r1", "r2"]);
+    });
+
+    it("survives import re-rendering the group with the same member ids and types", () => {
+      const r1: RectangleObjectSnapshot = { ...baseRect, id: "r1", x: 0,  y: 0  };
+      const r2: RectangleObjectSnapshot = { ...baseRect, id: "r2", x: 50, y: 50 };
+      const drawing = createDrawingContent({ objects: [r1, r2] });
+      drawing.createGroup(["r1", "r2"]);
+
+      const exported = safeJsonParse(drawing.exportJson());
+      const imported = DrawingMigrator.create(exported);
+
+      expect(imported.objects).toHaveLength(1);
+      const importedGroup = imported.objects[0];
+      expect(importedGroup.type).toBe("group");
+      const memberIds = (importedGroup as any).objects.map((o: any) => o.id);
+      const memberTypes = (importedGroup as any).objects.map((o: any) => o.type);
+      expect(memberIds).toEqual(["r1", "r2"]);
+      expect(memberTypes).toEqual(["rectangle", "rectangle"]);
+    });
   });
 
   it("should export images with transformed urls when appropriate", () => {

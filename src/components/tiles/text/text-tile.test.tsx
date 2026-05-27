@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { reaction } from "mobx";
 import { defaultTextContent } from "../../../models/tiles/text/text-content";
 import { TileModel } from "../../../models/tiles/tile-model";
-import { kHighlightFormat } from "../../../plugins/text/highlights-plugin";
+import { kHighlightFormat } from "./plugins/highlights-plugin";
 import { ITileApi } from "../tile-api";
 import { specTextTile } from "./spec-text-tile";
 

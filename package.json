@@ -248,7 +248,7 @@
   "dependencies": {
     "@chakra-ui/react": "^2.10.5",
     "@codemirror/lang-json": "^6.0.2",
-    "@concord-consortium/accessibility-tools": "0.0.1-pre.1",
+    "@concord-consortium/accessibility-tools": "0.1.0-pre.1",
     "@concord-consortium/codap-formulas": "1.1.0-pre.2",
     "@concord-consortium/compute-engine": "^0.12.3-cc.2",
     "@concord-consortium/diagram-view": "2.0.0-pre.3",

@@ -39,13 +39,17 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
     onDocumentClick?.(document);
     e.stopPropagation();
   };
+  const handleDocumentKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onDocumentClick?.(document);
+    }
+  };
   const handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     onDocumentDragStart?.(e, document);
   };
-  const handleDocumentStarClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!user.isResearcher) {
-      onDocumentStarClick?.(document);
-    }
+  const handleDocumentStarClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    onDocumentStarClick?.(document);
     e.stopPropagation();
   };
   const handleDocumentDeleteClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -74,42 +78,59 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
     private: isPrivate, selected: isSelected, secondary: isSecondarySelected
   });
   return (
-    <div className={className}
-      data-test={dataTestName} key={document.key} data-document-key={document.key}
-      title={documentTitle} onClick={isPrivate ? undefined : handleDocumentClick}
-    >
-      <div
-        className={classNames("scaled-list-item-container", { group })}
-        onDragStart={handleDocumentDragStart}
+    <div className="list-item-container" key={document.key}>
+      <div className={className}
+        data-test={dataTestName} data-document-key={document.key}
+        title={documentTitle}
+        role="button"
+        tabIndex={0}
+        aria-label={captionText}
+        aria-current={isSelected ? "true" : undefined}
+        aria-disabled={isPrivate || undefined}
+        onClick={isPrivate ? undefined : handleDocumentClick}
+        onKeyDown={isPrivate ? undefined : handleDocumentKeyDown}
+        onDragStart={!isPrivate && onDocumentDragStart ? handleDocumentDragStart : undefined}
         draggable={!!onDocumentDragStart && !isPrivate}
       >
-        { isPrivate
-          ? <ThumbnailPrivateIcon />
-          : document.content
-            ? <div className="scaled-list-item">
-                <CanvasComponent
-                  context={canvasContext}
-                  document={document}
-                  readOnly={true}
-                  scale={scale}
-                />
-              </div>
-            : <ThumbnailPlaceHolderIcon />
-        }
-        {group && (
-          <div className="group-doc-badge">
-            <GroupIcon color="#fff" aria-hidden={true} focusable={false} />
-          </div>
-        )}
+        <div
+          className={classNames("scaled-list-item-container", { group })}
+          aria-hidden={true}
+          // Spread bypasses React 17's type definitions, which lack `inert`.
+          {...{ inert: "" }}
+        >
+          { isPrivate
+            ? <ThumbnailPrivateIcon />
+            : document.content
+              ? <div className="scaled-list-item">
+                  <CanvasComponent
+                    context={canvasContext}
+                    document={document}
+                    readOnly={true}
+                    scale={scale}
+                  />
+                </div>
+              : <ThumbnailPlaceHolderIcon />
+          }
+          {group && (
+            <div className="group-doc-badge">
+              <GroupIcon color="#fff" aria-hidden={true} focusable={false} />
+            </div>
+          )}
+        </div>
+        <DocumentCaption
+          captionText={captionText}
+          onDeleteClick={onDocumentDeleteClick ? handleDocumentDeleteClick : undefined}
+        />
       </div>
       {
         onDocumentStarClick &&
-        <DocumentBookmark isStarred={isStarred} onStarClick={handleDocumentStarClick} label={label}/>
+        <DocumentBookmark
+          isStarred={isStarred}
+          onStarClick={handleDocumentStarClick}
+          label={label}
+          disabled={user.isResearcher}
+        />
       }
-      <DocumentCaption
-        captionText={captionText}
-        onDeleteClick={onDocumentDeleteClick ? handleDocumentDeleteClick : undefined}
-      />
     </div>
   );
 });
@@ -120,19 +141,29 @@ ThumbnailDocumentItem.displayName = "ThumbnailDocumentItem";
  */
 interface IDocumentStarProps {
   isStarred: boolean;
-  onStarClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onStarClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   label: string;
+  disabled?: boolean;
 }
 
 const DocumentBookmark = (props: IDocumentStarProps) => {
-  const { isStarred, onStarClick, label } = props;
+  const { isStarred, onStarClick, label, disabled } = props;
+  const ariaLabel = isStarred ? "Remove bookmark" : "Bookmark document";
 
   return (
-    <div className="icon-holder" onClick={onStarClick}>
-      <svg className={"icon-star " + (isStarred ? "starred" : "")} >
+    <button
+      aria-disabled={disabled || undefined}
+      aria-pressed={isStarred}
+      aria-label={ariaLabel}
+      className="icon-holder"
+      data-testid="bookmark-button"
+      type="button"
+      onClick={disabled ? undefined : onStarClick}
+    >
+      <svg className={"icon-star " + (isStarred ? "starred" : "")} aria-hidden="true">
         <ThumbnailBookmark />
       </svg>
-      {label && <pre className={"bookmark-label"}>{label}</pre> }
-    </div>
+      {label && <span className="bookmark-label">{label}</span>}
+    </button>
     );
 };

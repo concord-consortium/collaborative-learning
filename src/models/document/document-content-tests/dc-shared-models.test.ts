@@ -571,6 +571,7 @@ describe("DocumentContentModel -- shared Models --", () => {
       "content": {
         "format": undefined,
         "highlightedText": [],
+        "linkDisplayModes": {},
         "text": "",
         "type": "Text",
       },

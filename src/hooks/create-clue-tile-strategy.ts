@@ -41,7 +41,12 @@ export function createClueTileStrategy(config: ClueFocusTrapConfig): FocusTrapSt
     // with internal arrow nav. findNextSlot skips slots whose elements are
     // undefined, so tiles that don't provide topbar/palette are unaffected.
     cycleOrder: ["title", "topbar", "content", "palette", "toolbar", "resize"],
-    tabWithinSlots: ["topbar", "content"],
+    // Default `tabWithinSlots`: topbar + content. Tiles that want Tab to walk
+    // through each focusable inside their palette (e.g. the XY Plot's legend,
+    // with many native controls) can opt palette in via the config. Tiles that
+    // treat palette as a single tab stop with arrow-roving inside (e.g.
+    // dataflow's Add-block panel) leave it out — the default keeps that working.
+    tabWithinSlots: config.tabWithinSlots ?? ["topbar", "content"],
     announceEnter: ariaLabels.announce.editingTile(config.tileType),
     announceExit: ariaLabels.announce.exitedTile(config.tileType),
     getExternalElements: () => {
@@ -49,5 +54,6 @@ export function createClueTileStrategy(config: ClueFocusTrapConfig): FocusTrapSt
       return toolbar ? [toolbar] : [];
     },
     onTabWhenInactive: config.onTabWhenInactive,
+    escapeHandlers: config.escapeHandlers,
   };
 }
