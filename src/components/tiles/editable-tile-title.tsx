@@ -40,14 +40,18 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
   const editingTitleRef = useRef(editingTitle);
   editingTitleRef.current = editingTitle;
 
-  // On edit-mode exit (commit / cancel / blur) return focus to the title text
-  // so the trap has a stable anchor for the next Tab — otherwise focus is left
-  // on the now-unmounted <input> (typically falls back to body).
+  // When edit mode exits via keyboard (Enter / Escape), focus falls back to
+  // body because the input unmounts; restore focus to the title text so the
+  // trap has a stable anchor for the next Tab. When edit mode exits because
+  // the user clicked elsewhere, leave focus on whatever they clicked.
   const titleTextRef = useRef<HTMLDivElement>(null);
   const prevIsEditingRef = useRef(false);
   useEffect(() => {
     if (prevIsEditingRef.current && !isEditing) {
-      titleTextRef.current?.focus();
+      const active = document.activeElement;
+      if (!active || active === document.body) {
+        titleTextRef.current?.focus();
+      }
     }
     prevIsEditingRef.current = isEditing;
   }, [isEditing]);
