@@ -8,6 +8,9 @@ import "./editable-label-with-button.scss";
 
 interface IProps {
   defaultValue: string|undefined;
+  enterToEdit?: boolean;
+  ariaLabel?: string;
+  editButtonAriaLabel?: string;
   onSubmit: (value:string) => void;
 }
 
@@ -17,17 +20,19 @@ interface IProps {
  * Differs from stock <Editable> in that there's an explicit edit button rather
  * than invoking edit mode by clicking on the label text itself.
  */
-export const EditableLabelWithButton = observer(function EditableDataSetName({defaultValue, onSubmit}: IProps) {
+export const EditableLabelWithButton = observer(function EditableDataSetName({
+  defaultValue, enterToEdit, ariaLabel, editButtonAriaLabel, onSubmit
+}: IProps) {
 
   return (
     <Editable
       defaultValue={defaultValue}
-      isPreviewFocusable={false}
+      isPreviewFocusable={!!enterToEdit}
       onSubmit={onSubmit}
     >
-      <EditablePreview />
-      <EditableInput onKeyDown={handleKeyDown}/>
-      <EditButton />
+      <EditablePreview aria-label={ariaLabel} />
+      <EditableInput aria-label={ariaLabel} onKeyDown={handleKeyDown}/>
+      <EditButton ariaLabel={editButtonAriaLabel} />
     </Editable>
   );
 });
@@ -39,11 +44,11 @@ function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
   e.stopPropagation();
 }
 
-function EditButton() {
+function EditButton({ ariaLabel }: { ariaLabel?: string }) {
   const { isEditing, getEditButtonProps } = useEditableControls();
   if (!isEditing) {
     return (
-      <button aria-label="Edit name" {...getEditButtonProps()}>
+      <button aria-label={ariaLabel ?? "Edit name"} {...getEditButtonProps()}>
         <EditIcon/>
       </button>
     );

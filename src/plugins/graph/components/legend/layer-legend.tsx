@@ -87,7 +87,12 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
   const layerName =
   <span className="layer-name">
     {layer.editable
-      ? <EditableLabelWithButton defaultValue={dataSetName} onSubmit={handleSetDataSetName}/>
+      ? <EditableLabelWithButton
+          defaultValue={dataSetName}
+          ariaLabel={`Dataset name: ${dataSetName}`}
+          editButtonAriaLabel={`Edit dataset name ${dataSetName}`}
+          onSubmit={handleSetDataSetName}
+        />
       : dataSetName
     }
   </span>;
