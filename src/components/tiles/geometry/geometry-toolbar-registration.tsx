@@ -94,7 +94,8 @@ const ColorChangeButton = observer(function ColorChangeButton({name}: IToolbarBu
   // Escape inside the palette → close + refocus this trigger button.
   const handleClose = () => {
     const active = document.activeElement;
-    const button = active?.closest?.<HTMLButtonElement>("button.toolbar-button.color");
+    const button = active?.closest?.(".geometry-toolbar")
+      ?.querySelector<HTMLButtonElement>("button.toolbar-button.color");
     handlers?.handleSetShowColorPalette(false);
     button?.focus();
   };
@@ -103,23 +104,23 @@ const ColorChangeButton = observer(function ColorChangeButton({name}: IToolbarBu
     handlers?.handleSetShowColorPalette(!content?.showColorPalette);
   };
 
+  const palette = content?.showColorPalette
+    ? <ColorPalette
+        selectedColor={content?.selectedColor}
+        onSelectColor={(color) => handlers?.handleColorChange(color)}
+        onClose={handleClose}
+      />
+    : undefined;
+
   return (
     <TileToolbarButton
       name={name}
       title="Color"
       onClick={handleClick}
       colorClass={colorClass}
+      extraContent={palette}
     >
       <ShapesColorIcon/>
-      {content?.showColorPalette &&
-        <div>
-         <ColorPalette
-          selectedColor={content?.selectedColor}
-          onSelectColor={(color) => handlers?.handleColorChange(color)}
-          onClose={handleClose}
-         />
-        </div>
-      }
     </TileToolbarButton>
   );
 });

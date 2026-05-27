@@ -145,8 +145,8 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
           e.stopPropagation();
           e.preventDefault();
           const active = document.activeElement;
-          const button =
-            (active?.closest?.("button.toolbar-button.color") as HTMLButtonElement | null) ?? null;
+          const button = active?.closest?.(".geometry-toolbar")
+            ?.querySelector<HTMLButtonElement>("button.toolbar-button.color");
           content.setShowColorPalette(false);
           button?.focus();
           return "handled";
