@@ -104,10 +104,15 @@ const ColorChangeButton = observer(function ColorChangeButton({name}: IToolbarBu
     handlers?.handleSetShowColorPalette(!content?.showColorPalette);
   };
 
+  const handleSelectColor = (color: number) => {
+    handlers?.handleColorChange(color);
+    handlers?.handleSetShowColorPalette(false);
+  };
+
   const palette = content?.showColorPalette
     ? <ColorPalette
         selectedColor={content?.selectedColor}
-        onSelectColor={(color) => handlers?.handleColorChange(color)}
+        onSelectColor={handleSelectColor}
         onClose={handleClose}
       />
     : undefined;
