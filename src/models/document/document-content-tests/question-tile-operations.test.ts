@@ -537,4 +537,24 @@ Contents of embedded row list:
 
   });
 
+  describe("Question tile export", () => {
+    function flattenTilesOrRows(tilesOrRows: any[]): any[] {
+      return tilesOrRows.flatMap(t => Array.isArray(t) ? t : [t]);
+    }
+
+    // Tiles inside of question tiles need their ids.
+    // The document-level
+    // sharedModels need to reference the tiles by their ids. Without these ids, tiles like the table will have no data.
+    it("includes the ids of tiles nested inside a Question tile", () => {
+      const exported = JSON.parse(documentContent.exportAsJson({ includeTileIds: true }));
+
+      const exportedQuestion = flattenTilesOrRows(exported.tiles)
+        .find(t => t?.content?.type === "Question");
+      expect(exportedQuestion.id).toBe("question-1");
+
+      const nestedIds = flattenTilesOrRows(exportedQuestion.content.tiles).map(t => t.id);
+      expect(nestedIds).toEqual(expect.arrayContaining(["text-2", "table-2", "sketch-1"]));
+    });
+  });
+
 });

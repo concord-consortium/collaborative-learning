@@ -118,7 +118,12 @@ export const TileModel = types
     },
     exportJson(options?: ITileExportOptions, tileMap?: ITileMapLookup): string | undefined {
       const { includeId, excludeTitle, ...otherOptions } = options || {};
-      let contentJson = (self.content as any).exportJson?.(otherOptions, tileMap);
+      // Container tiles (e.g. Question) export their nested tiles via their content's row
+      // list. Re-propagate the id-inclusion policy as includeTileIds so those nested tiles
+      // keep their ids; otherwise document-level sharedModel/annotation references to them
+      // break when the document is reloaded.
+      const contentOptions = { ...otherOptions, includeTileIds: includeId };
+      let contentJson = (self.content as any).exportJson?.(contentOptions, tileMap);
       if (!contentJson) return;
       if (options?.rowHeight) {
         // add comma before layout/height entry
