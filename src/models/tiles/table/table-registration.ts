@@ -37,5 +37,11 @@ registerTileComponentInfo({
   Component: TableToolComponent,
   tileEltClass: "table-tool-tile",
   Icon,
-  HeaderIcon
+  HeaderIcon,
+  // The table handles its own tile-selection on pointerdown (see table-tile.tsx).
+  // The default tile-component handler treats shift-click on an already-selected
+  // tile as a deselect, which conflicts with the row-label cell's shift-click
+  // gesture (toggle row in/out of multi-row selection) and disables the focus
+  // trap mid-gesture.
+  tileHandlesOwnSelection: true,
 });

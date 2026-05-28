@@ -2,10 +2,10 @@ import { applySnapshot, types, Instance, SnapshotIn, onAction, addDisposer, dest
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { autorun } from "mobx";
-import { FormulaManager } from "@concord-consortium/codap-formulas-react17/models/formula/formula-manager";
+import { FormulaManager } from "@concord-consortium/codap-formulas/models/formula/formula-manager";
 import {
   createFormulaAdapters
-} from "@concord-consortium/codap-formulas-react17/models/formula/formula-adapter-registry";
+} from "@concord-consortium/codap-formulas/models/formula/formula-adapter-registry";
 
 import {
   IDocumentMetadata, IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext

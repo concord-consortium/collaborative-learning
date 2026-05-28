@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot, Root } from "react-dom/client";
 
 import { IframeDocumentEditor } from "./iframe-document-editor";
 import { DocumentModelType } from "../models/document/document";
@@ -32,16 +32,19 @@ const handleUpdateContent = (json: Record<string, any>) => {
   window.parent.postMessage({ type: "updateContent", content: stringifiedJson }, "*");
 };
 
+let root: Root | undefined;
+
 const renderEditor = () => {
-  ReactDOM.render(
-    <div id="app">
-      <IframeDocumentEditor
-        initialValue={initialValue}
-        handleUpdateContent={handleUpdateContent}
-        fullHeight={fullHeight}
-        noBorder={noBorder}
-      />
-    </div>,
-    document.getElementById("app")
+  // createRoot is called once per container; subsequent updates use root.render().
+  if (!root) {
+    root = createRoot(document.getElementById("app")!);
+  }
+  root.render(
+    <IframeDocumentEditor
+      initialValue={initialValue}
+      handleUpdateContent={handleUpdateContent}
+      fullHeight={fullHeight}
+      noBorder={noBorder}
+    />
   );
 };

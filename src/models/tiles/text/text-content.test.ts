@@ -1,5 +1,5 @@
 import { getSnapshot } from "mobx-state-tree";
-import { EditorValue, htmlToSlate, registerPlugins, slateToHtml, slateToText
+import { createEditor, EditorValue, htmlToSlate, slateToHtml, slateToText
 } from "@concord-consortium/slate-editor";
 import { TextContentModel, kTextTileType } from "./text-content";
 import { registerTextPluginInfo } from "./text-plugin-info";
@@ -7,12 +7,12 @@ import { registerVariables, kVariableFormat } from "../../../plugins/shared-vari
 import { kHighlightFormat, registerHighlight } from "../../../components/tiles/text/plugins/highlights-plugin";
 import { kLinkFormat, registerLinkComponent } from "../../../components/tiles/text/plugins/link-plugin";
 
-// slate-editor's core element renderers (paragraph, inline, etc.) are registered by
-// registerPlugins(). In production this happens via createEditor() when the text tile
-// boots. The test never instantiates an editor, so we register them here. Chip
-// deserializers must be registered AFTER registerPlugins() so they take precedence
+// slate-editor's core element renderers (paragraph, inline, etc.) are registered as a
+// side effect of createEditor(). In production this happens when the text tile boots.
+// The test never instantiates an editor, so we invoke createEditor() here. Chip
+// deserializers must be registered AFTER createEditor() so they take precedence
 // over slate-editor's catch-all <span> deserializer (most-recent wins).
-registerPlugins();
+createEditor();
 registerVariables();
 registerHighlight();
 registerLinkComponent();

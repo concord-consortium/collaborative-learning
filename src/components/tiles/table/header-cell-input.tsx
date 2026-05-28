@@ -1,5 +1,4 @@
 import React from "react";
-import { RDG_INTERNAL_EDITOR_CONTAINER_CLASS, RDG_INTERNAL_TEXT_EDITOR_CLASS } from "./cell-text-editor";
 
 function autoFocusAndSelect(input: HTMLInputElement | null) {
   input?.focus();
@@ -15,12 +14,10 @@ interface IProps {
   onClose: (accept: boolean) => void;
 }
 export const HeaderCellInput: React.FC<IProps> = ({ style, inputStyle, value, onKeyDown, onChange, onClose }) => {
-  const containerClasses = `rdg-editor-container clue-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`;
-  const editorClasses = `${RDG_INTERNAL_TEXT_EDITOR_CLASS}`;
   return (
-    <div className={containerClasses} style={style}>
+    <div className="rdg-editor-container clue-editor-container" style={{ ...style, display: "contents" }}>
       <input
-        className={editorClasses} style={inputStyle}
+        style={{ width: "100%", ...inputStyle }}
         ref={autoFocusAndSelect}
         value={value}
         onKeyDown={onKeyDown}

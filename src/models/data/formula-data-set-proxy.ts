@@ -1,17 +1,17 @@
 import {
   IDataSet as IFormulaDataSet
-} from "@concord-consortium/codap-formulas-react17/models/data/data-set";
+} from "@concord-consortium/codap-formulas/models/data/data-set";
 import {
   CaseInfo,
   ICase as IFormulaCase,
   IItem
-} from "@concord-consortium/codap-formulas-react17/models/data/data-set-types";
+} from "@concord-consortium/codap-formulas/models/data/data-set-types";
 import {
   IAttribute as IFormulaAttribute
-} from "@concord-consortium/codap-formulas-react17/models/data/attribute";
+} from "@concord-consortium/codap-formulas/models/data/attribute";
 import {
   ICollection as IFormulaCollection
-} from "@concord-consortium/codap-formulas-react17/models/data/collection";
+} from "@concord-consortium/codap-formulas/models/data/collection";
 import { observable } from "mobx";
 import { types } from "mobx-state-tree";
 import { IAttribute } from "./attribute";

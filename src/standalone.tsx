@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import { AppProvider, initializeApp } from "./initialize-app";
 import { AppComponent } from "./components/app";
@@ -13,11 +13,11 @@ const {redirectingToAuthDomain, authDomain} = initializeAuthorization({standAlon
 if (!redirectingToAuthDomain) {
   const stores = initializeApp({standalone: true, authDomain});
 
-  ReactDOM.render(
+  const root = createRoot(document.getElementById("app")!);
+  root.render(
     <AppProvider stores={stores} modalAppElement="#app">
       <AppComponent />
-    </AppProvider>,
-    document.getElementById("app")
+    </AppProvider>
   );
 
   removeLoadingMessage("Initializing");

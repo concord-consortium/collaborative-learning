@@ -10,27 +10,20 @@ Notes on dependencies, particularly reasons for not updating to their latest ver
 
 |Dependency                  |Current Version|Latest Version|Notes                                                                        |
 |----------------------------|---------------|--------------|-----------------------------------------------------------------------------|
-|@testing-library/react      |12.1.5         |13.3.0        |React 18                                                                     |
-|@types/react                |17.0.48        |18.0.17       |React 18                                                                     |
-|@types/react-dom            |17.0.17        |18.0.6        |React 18                                                                     |
-|@types/react-tabs           |2.3.4          |5.0.5         |Versions 3 and 4 were never published(?); Version 5 requires React 18        |
-|@types/slate-react          |0.22.9         |0.50.1        |Requires slate-editor library update to latest slate                         |
+|@types/react                |18.3.12        |19.2.14       |Tied to `react` upgrade below.                                               |
+|@types/react-dom            |18.3.1         |19.2.3        |Tied to `react` upgrade below.                                               |
 |ts-json-schema-generator    |2.4.0          |2.9.0         |v2.5+ requires Node >= 22; CI runs Node 20.                                  |
 
 ## Runtime Dependencies
 
 |Dependency          |Current Version|Latest Version|Notes                                                                                |
 |--------------------|---------------|--------------|-------------------------------------------------------------------------------------|
-|@concord-consortium/react-hook-form|3.0.0-cc.1|3.0.0|Had to create our own fork to update React `peerDependencies` for npm 8.11. Original appears to have been abandoned.|
-|@chakra-ui/react    |1.8.9          |2.5.5         |Brought in with CODAP's Graph component. CODAP uses v2 but v2 requires React 18      |
-|chart.js            |2.9.4          |3.9.1         |Major version not attempted; only used by Dataflow tile, which doesn't really use it.|
-|firebase            |8.10.1         |9.9.3         |Version 9 requires substantial migration; attempted update with `compat` imports failed.|
-|immutable           |3.8.2          |4.1.0         |Major version update not attempted; only required by legacy slate versions.          |
-|mob-state-tree      |5.1.5-cc.1     |5.1.6         |We are using a concord fork which fixes a bug. Additionally latest version changes TS types for arrays which broke a number of our models.|
-|nanoid              |3.3.4          |4.0.0         |v4 switched to ESM and dependencies such as postcss break with v4                    |
-|react               |17.0.2         |18.2.0        |React 18                                                                             |
-|react-chartjs-2     |2.11.2         |4.3.1         |Major version update not attempted; may not be used any more (was used by Dataflow)  |
-|react-data-grid     |7.0.0-canary.46|7.0.0-beta.16 |Canary.47 changed the RowFormatter props requiring some additional refactoring. Note that `beta` versions come after `canary` versions. We are patching react-data-grid and our patch only applies to 7.0.0-canary.46|
-|react-dom           |17.0.2         |18.2.0        |React 18                                                                             |
-|react-tabs          |3.2.3          |5.1.0         |Version 4 not attempted; Version 5 requires React 18                                 |
+|@chakra-ui/react    |2.10.5         |3.35.0        |Brought in with CODAP's Graph component. CODAP uses v2; v3+ not attempted.           |
+|firebase            |8.10.1         |12.12.1       |Version 9 requires substantial migration; attempted update with `compat` imports failed. Latest is now v12.|
+|immutable           |4.3.0          |5.1.5         |v5 not attempted; only required by legacy slate versions.                            |
+|mobx-state-tree     |6.0.0-cc.1     |7.2.0         |We are using a concord fork which fixes a bug. Latest version changes TS types for arrays which broke a number of our models.|
+|nanoid              |3.3.4          |5.1.11        |v4+ switched to ESM and dependencies such as postcss break with v4.                  |
+|react               |18.3.1         |19.2.5        |React 19 upgrade not yet attempted; would also require updating the React-tied rows above.|
+|react-data-grid     |7.0.0-beta.44  |7.0.0-beta.59 |We patch react-data-grid (CODAPv3's patch); our patch is beta.44-only.               |
+|react-dom           |18.3.1         |19.2.5        |Tied to `react` upgrade above.                                                       |
 |react-tippy         |1.4.0          |1.4.0         |Unmaintained since May 2020. Migration target if we move off it is [Floating UI](https://floating-ui.com/) (`@floating-ui/react`).|

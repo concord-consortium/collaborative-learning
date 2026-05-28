@@ -8,13 +8,13 @@ import { ModalProvider } from "@concord-consortium/react-modal-hook";
 import { QueryClient, QueryClientProvider } from "react-query";
 import {
   registerGlobalValueManagerLookupFunction
-} from "@concord-consortium/codap-formulas-react17/models/global/global-value-manager";
+} from "@concord-consortium/codap-formulas/models/global/global-value-manager";
 import {
   AttributeFormulaAdapter
-} from "@concord-consortium/codap-formulas-react17/models/formula/attribute-formula-adapter";
+} from "@concord-consortium/codap-formulas/models/formula/attribute-formula-adapter";
 import {
   registerMathjsFunction, typedFnRegistry
-} from "@concord-consortium/codap-formulas-react17/models/formula/functions/math";
+} from "@concord-consortium/codap-formulas/models/formula/functions/math";
 
 import { AppMode } from "./models/stores/store-types";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";

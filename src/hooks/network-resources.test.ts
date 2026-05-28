@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook, waitFor } from "@testing-library/react";
 import { INetworkResourceClassResponse } from "../../shared/shared";
 import { useNetworkResources } from "./network-resources";
 
@@ -101,7 +101,7 @@ describe("Network resources hooks", () => {
         });
       });
       jestSpyConsole("warn", async spy => {
-        const { waitFor } = renderHook(() => useNetworkResources());
+        renderHook(() => useNetworkResources());
         await waitFor(() => expect(spy).toHaveBeenCalledTimes(2));
       });
       expect(mockGetNetworkResources).toHaveBeenCalled();

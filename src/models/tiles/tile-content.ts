@@ -1,4 +1,4 @@
-import { IFormulaManager } from "@concord-consortium/codap-formulas-react17/dist/models/formula/formula-manager-types";
+import { IFormulaManager } from "@concord-consortium/codap-formulas/models/formula/formula-manager-types";
 import { getEnv, getSnapshot, hasEnv, Instance, types } from "mobx-state-tree";
 import { SharedModelType } from "../shared/shared-model";
 import { ISharedModelManager } from "../shared/shared-model-manager";

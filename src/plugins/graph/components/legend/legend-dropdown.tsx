@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import React, { ReactElement, useRef, useState } from "react";
-import { Menu, MenuItem, MenuList, MenuButton, Portal } from "../../../../components/chakra-menu";
+import { Menu, MenuItem, MenuList, MenuButton, Portal } from "@chakra-ui/react";
 
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { kGraphPortalClass } from "../../graph-types";

@@ -61,7 +61,10 @@ context('Dataflow Tool Tile', function () {
 
     clueCanvas.clickToolbarButton("dataflow", "data-set-link");
     tableTile.getLinkGraphModalTileMenu().select("New Graph");
-    tableTile.getLinkGraphModalLinkButton().should("contain.text", "Graph It!").click({force: true});
+    tableTile.getLinkGraphModalLinkButton()
+      .should("contain.text", "Graph It!")
+      .should("not.have.class", "disabled")
+      .click({force: true});
     graphTile.getTile().should("exist").contains(graphTitle);
     graphTile.getLayerName().should("contain.text", programTitle);
     graphTile.getXAttributesLabel().should("contain.text", linkedTableAttributes[0]);

@@ -61,6 +61,7 @@ export const useColumnsFromDataSet = ({
       name: "Controls",
       key: kControlsColumnKey,
       width: kControlsColumnWidth,
+      minWidth: kControlsColumnWidth,
       maxWidth: kControlsColumnWidth,
       resizable: false,
       editable: false,
@@ -83,13 +84,14 @@ export const useColumnsFromDataSet = ({
         key: attr.id,
         width,
         resizable: !readOnly,
-        sortable: true,
-        headerRenderer: ColumnHeaderCell,
-        formatter: getCellFormatter({ dataSet, isLinked, lookupImage, rowHeight, width }),
-        editor: !readOnly && !content.hasExpression(attr.id) ? CellTextEditor : undefined,
-        editorOptions: {
-          editOnClick: !readOnly
-        }
+        // sortable=false suppresses RDG's built-in Space/Enter → onSort handler
+        // (bundle.js:1448-1453), which preventDefault()ed the keydown and
+        // blocked the column-header buttons' native Enter→click. CLUE drives
+        // sort through its own .sort-column-button instead.
+        sortable: false,
+        renderHeaderCell: ColumnHeaderCell,
+        renderCell: getCellFormatter({ dataSet, isLinked, lookupImage, rowHeight, width }),
+        renderEditCell: !readOnly && !content.hasExpression(attr.id) ? CellTextEditor : undefined,
       };
     });
     cols.unshift({
@@ -98,12 +100,13 @@ export const useColumnsFromDataSet = ({
       name: "Index",
       key: kIndexColumnKey,
       width: showRowLabels ? kIndexColumnWidthWithLabel : kIndexColumnWidth,
+      minWidth: showRowLabels ? kIndexColumnWidthWithLabel : kIndexColumnWidth,
       maxWidth: showRowLabels ? kIndexColumnWidthWithLabel : kIndexColumnWidth,
       resizable: false,
       editable: false,
       frozen: true,
-      headerRenderer: RowLabelHeader,
-      formatter: RowLabelFormatter
+      renderHeaderCell: RowLabelHeader,
+      renderCell: RowLabelFormatter
     });
     if (controlsColumn) {
       cols.push(controlsColumn);
