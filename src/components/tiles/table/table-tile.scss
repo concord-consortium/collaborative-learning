@@ -120,7 +120,7 @@ $controls-hover-background: #c0dfe7;
       outline: none;
     }
     .rdg-cell:focus-visible {
-      outline: 2px solid var(--rdg-selection-color);
+      outline: 2px solid $focus-ring-color;
       outline-offset: -2px;
     }
 
@@ -313,7 +313,7 @@ $controls-hover-background: #c0dfe7;
           // Inset focus ring: outline-offset -2px keeps the ring within
           // the button's bounds (the button height matches the row).
           &:focus-visible {
-            outline: 2px solid var(--rdg-selection-color);
+            outline: 2px solid $focus-ring-color;
             outline-offset: -2px;
           }
           svg {

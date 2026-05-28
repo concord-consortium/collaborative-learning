@@ -25,13 +25,6 @@ export function isCellEditing(): boolean {
   return active.closest('[role="gridcell"], [role="columnheader"]') !== null;
 }
 
-/**
- * Wraps `gridRef.current.selectCell` and opts into the patched
- * `shouldFocusCell=true` third argument from
- * patches/react-data-grid+7.0.0-beta.44.patch — this is the only way
- * to enter the grid with focus landing on the selected cell rather than
- * staying outside.
- */
 export type BodyDeps = {
   gridRef: RefObject<DataGridHandle | null>;
   selectedCellRef: MutableRefObject<CellPosition | null>;
@@ -119,6 +112,13 @@ function focusCellOrEntry(cell: HTMLElement): void {
   (inner ?? cell).focus();
 }
 
+/**
+ * Wraps `gridRef.current.selectCell` and opts into the patched
+ * `shouldFocusCell=true` third argument from
+ * patches/react-data-grid+7.0.0-beta.44.patch — this is the only way
+ * to enter the grid with focus landing on the selected cell rather than
+ * staying outside.
+ */
 export function setGridActivePosition(
   gridRef: RefObject<DataGridHandle | null>,
   position: CellPosition
@@ -128,4 +128,15 @@ export function setGridActivePosition(
   (gridRef.current as unknown as {
     selectCell: (pos: CellPosition, enableEditor?: boolean, shouldFocusCell?: boolean) => void;
   } | null)?.selectCell(position, undefined, true);
+}
+
+/**
+ * Clears RDG's active cell selection by passing the sentinel
+ * `{ idx: -1, rowIdx: -1 }` to `selectCell`. Kept here so all calls into
+ * RDG's selection API live in one place for the next upgrade.
+ */
+export function clearGridActivePosition(
+  gridRef: RefObject<DataGridHandle | null>
+): void {
+  gridRef.current?.selectCell({ idx: -1, rowIdx: -1 });
 }

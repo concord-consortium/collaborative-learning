@@ -403,7 +403,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const bodyDeps = { gridRef, selectedCellRef, columnsRef, rowsRef };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const bodyTabHandler = useMemo(() => createBodyTabHandler(bodyDeps), []);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const bodyEscapeHandler = useMemo(() => createBodyEscapeHandler(), []);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const bodyFocusContent = useMemo(() => createBodyFocusContent(bodyDeps), []);

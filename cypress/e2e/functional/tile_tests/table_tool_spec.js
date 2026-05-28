@@ -130,7 +130,7 @@ context('Table Tool Tile', function () {
     tableToolTile.typeInTableCell(1, 'third value', false);
     tableToolTile.getTableCell().eq(2).click();
     tableToolTile.getTableCell().eq(1).should('contain', 'third value');
-    cy.log('can cancel cell edit with Escape (CLUE-453: escapeHandlers defer to RDG)');
+    cy.log('can cancel cell edit with Escape');
     tableToolTile.typeInTableCell(1, 'abandon this edit{esc}', false);
     tableToolTile.getTableCell().eq(1).should('contain', 'third value');
     tableToolTile.getTableCell().eq(1).should('not.contain', 'abandon this edit');

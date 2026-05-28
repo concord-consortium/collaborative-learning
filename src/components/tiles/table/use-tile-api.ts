@@ -130,5 +130,6 @@ export const useToolApi = ({
       }
       return offsets;
     }
-  }), []); // Empty deps — object identity is stable; refs provide live values.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- object identity is stable; refs provide live values
+  }), []);
 };
