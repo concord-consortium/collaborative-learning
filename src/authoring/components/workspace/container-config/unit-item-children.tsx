@@ -23,7 +23,7 @@ export const UnitItemChildren: React.FC<UnitItemChildrenProps> = (
           type="number"
           id="firstOrdinal"
           defaultValue={defaultValues?.firstOrdinal}
-          {...register("firstOrdinal", { required: "First Ordinal is required" })}
+          {...register("firstOrdinal", { required: "First Ordinal is required", valueAsNumber: true })}
         />
         {errors.firstOrdinal && <span className="form-error">{errors.firstOrdinal.message}</span>}
       </div>
