@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import stringify from "json-stringify-pretty-compact";
 import { applySnapshot, getSnapshot, onSnapshot } from "mobx-state-tree";
 import { observer } from "mobx-react";
+import { Menu, MenuButton, MenuDivider, MenuItem, MenuList, Portal } from "@chakra-ui/react";
 
 import { defaultDocumentModel, defaultDocumentModelParts } from "./doc-editor-app-defaults";
 import { EditableDocumentContent } from "../document/editable-document-content";
@@ -156,6 +157,24 @@ export const DocEditorApp = observer(function DocEditorApp() {
     setStatus(`file: ${_fileName}`);
   }
 
+  // Always writes the CLUE authoring/export format (each tile generates its own JSON via
+  // exportAsJson), regardless of how the document was loaded. Picks a new file each time and
+  // does not become the current Save file, so export stays independent of the working file.
+  async function handleExport() {
+    if (!document.content) {
+      console.error("Can't export without document.content");
+      return;
+    }
+    const _fileHandle = await (window as any).showSaveFilePicker();
+    if (!_fileHandle) return;
+    const file = await _fileHandle.getFile();
+    const contents = document.content.exportAsJson({ includeTileIds: true });
+    const writable = await _fileHandle.createWritable();
+    await writable.write(contents);
+    await writable.close();
+    setStatus(`exported: ${file.name}`);
+  }
+
   const [showSettings] = useCustomModal({
     title: "Settings",
     Content: SettingsDialog,
@@ -237,11 +256,20 @@ export const DocEditorApp = observer(function DocEditorApp() {
           <div className="document">
             <div className="titlebar">
               <div className="actions left">
-                <button onClick={handleOpen}>open</button>
-                <button onClick={handleSave}>save</button>
+                <Menu>
+                  <MenuButton className="file-menu-button">File ▾</MenuButton>
+                  <Portal>
+                    <MenuList>
+                      <MenuItem onClick={handleOpen}>Open</MenuItem>
+                      <MenuItem onClick={handleSave}>Save</MenuItem>
+                      <MenuItem onClick={handleExport}>Export as Authoring Format...</MenuItem>
+                      <MenuDivider/>
+                      <MenuItem onClick={handleClear}>Reset doc</MenuItem>
+                    </MenuList>
+                  </Portal>
+                </Menu>
                 <span className="status">{status}</span>
                 {showAiSummary && <button onClick={handleToggleAiSummary}>ai summary</button>}
-                <button onClick={handleClear}>reset doc</button>
                 <button onClick={handleSettings}>settings</button>
                 <DocumentAnnotationToolbar/>
               </div>

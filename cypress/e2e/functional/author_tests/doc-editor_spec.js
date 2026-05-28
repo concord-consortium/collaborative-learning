@@ -5,6 +5,12 @@ function beforeTest() {
   cy.visit(url);
   cy.get('.editable-document-content', { timeout: 60000 });
 }
+
+// Open/Save/Export/Reset now live in the "File" menu.
+function clickFileMenuItem(label) {
+  cy.contains("button", "File").click();
+  cy.contains('[role="menuitem"]', label).click();
+}
 context('Doc Editor', () => {
   it('verify doc editor and solution button work', function () {
     beforeTest();
@@ -51,11 +57,24 @@ context('Doc Editor', () => {
       cy.stub(win, 'showSaveFilePicker').as('showSaveFilePicker')
         .returns(fakeFileHandle)
     );
-    cy.contains("button", 'save').click();
+    clickFileMenuItem('Save');
     cy.get('@showSaveFilePicker')
       .should('have.been.calledOnce')
       .invoke('restore');
     cy.get(".status").should("contain", "test.json");
+
+
+    cy.log("test export as authoring format");
+    cy.window().then((win) => {
+      fakeFile.name = "test-export.json";
+      cy.stub(win, 'showSaveFilePicker').as('showSaveFilePickerExport')
+        .returns(fakeFileHandle);
+    });
+    clickFileMenuItem('Export as Authoring Format');
+    cy.get('@showSaveFilePickerExport')
+      .should('have.been.calledOnce')
+      .invoke('restore');
+    cy.get(".status").should("contain", "exported: test-export.json");
 
 
     cy.log("test open an empty document");
@@ -64,7 +83,7 @@ context('Doc Editor', () => {
       cy.stub(win, 'showOpenFilePicker').as('showOpenFilePicker')
         .returns([fakeFileHandle]);
     });
-    cy.contains("button", 'open').click();
+    clickFileMenuItem('Open');
     cy.get('@showOpenFilePicker')
       .should('have.been.calledOnce')
       .invoke('restore');
