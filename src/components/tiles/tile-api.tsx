@@ -11,6 +11,7 @@ import { IDocumentContentAddTileOptions } from "../../models/document/document-c
 
 export type TileResizeEntry = Optional<ResizeObserverEntry,
                                         "borderBoxSize" | "contentBoxSize" | "devicePixelContentBoxSize">;
+
 interface IGetObjectButtonSVGParams {
   classes?: string;
   handleClick: (e: React.MouseEvent) => void;

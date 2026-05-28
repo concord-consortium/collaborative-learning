@@ -156,8 +156,8 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
         topbarElement: elements.topbar,
         paletteElement: elements.palette,
         tabWithinSlots: strategy.tabWithinSlots,
-        escapeHandlers: strategy.escapeHandlers,
         tabHandlers: strategy.tabHandlers,
+        escapeHandlers: strategy.escapeHandlers,
       };
     };
 

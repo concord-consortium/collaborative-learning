@@ -3,6 +3,7 @@ import { DataGridHandle } from "react-data-grid";
 import { useSharedSelectionStore } from "../../../hooks/use-stores";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { uniqueId } from "../../../utilities/js-utils";
+import { clearGridActivePosition } from "./keyboard-nav";
 import { IGridContext } from "./table-types";
 
 interface IProps {
@@ -17,15 +18,21 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
   const inputRowId = useRef(uniqueId());
   const dataSet = content.dataSet;
 
-  const isSelectedCellInRow = useCallback((rowIdx: number) => {
-    const rowId = dataSet.getCaseAtIndex(rowIdx)?.__id__;
-    if (!rowId) return false;
-    let containsSelectedCell = false;
-    dataSet.selectedCells.forEach(cell => {
-      const { caseId } = cell;
-      if (rowId === caseId) containsSelectedCell = true;
-    });
-    return containsSelectedCell;
+  // True iff this row has either a selected cell or a selected case in it.
+  // Used by ControlsRowFormatter to decide whether to render the remove-row
+  // button — so the button appears when keyboard focus lands on the row label
+  // or controls cell (which select the case) as well as on a data cell.
+  //
+  // NOTE: this is only the per-row gate. There is a second, per-tile gate in
+  // table-tile.scss (`.remove-row-button { display: none }` overridden by
+  // `.tool-tile.selected ... { display: flex !important }`). The button is
+  // visible only when BOTH gates pass: this predicate returns true AND the
+  // ancestor tile has the `selected` class.
+  const isSelectedCaseInRow = useCallback((rowIdx: number) => {
+    const caseId = dataSet.getCaseAtIndex(rowIdx)?.__id__;
+    if (!caseId) return false;
+    if (dataSet.isCaseSelected(caseId)) return true;
+    return dataSet.selectedCells.some(cell => cell.caseId === caseId);
   }, [dataSet]);
   const isColumnSelected = useCallback((columnId: string) => dataSet.isAttributeSelected(columnId),
     [dataSet]);
@@ -49,7 +56,7 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
     sharedSelection.clear(modelId);
   }, [dataSet, modelId, sharedSelection]);
   const clearColumnSelection = useCallback(() => dataSet.selectAllAttributes(false), [dataSet]);
-  const clearCellSelection = useCallback(() => gridRef.current?.selectCell({ idx: -1, rowIdx: -1 }), []);
+  const clearCellSelection = useCallback(() => clearGridActivePosition(gridRef), []);
 
   // clears all selection by default; options can be used to preserve particular forms of selection
   const clearSelection = useCallback((options?: { row?: boolean, column?: boolean, cell?: boolean }) => {
@@ -77,7 +84,15 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
   }, [clearSelection, dataSet, triggerRowChange]);
 
   const selectOneRow = useCallback((rowId: string) => {
-    clearSelection();
+    // Don't clear cell selection here. clearCellSelection would call
+    // gridRef.selectCell({-1, -1}), which fires onSelectedCellChange({-1, -1})
+    // and resets RDG's selectedPosition. We want selectedPosition to stay on
+    // whatever cell it was on when selectOneRow was called.
+    // RDG uses the cell selection for keyboard focus and Tab cycling, so
+    // resetting breaks the expected tabbing behavior.
+    // setSelectedCases below clears the dataSet's cellSelection
+    // which keeps the dataSet view consistent.
+    clearSelection({ cell: false });
     dataSet.setSelectedCases([rowId]);
     triggerRowChange();
   }, [clearSelection, dataSet, triggerRowChange]);
@@ -89,16 +104,18 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
     showRowLabels,
     isColumnSelected,
     onSelectColumn: selectColumn,
-    isSelectedCellInRow,
+    isSelectedCaseInRow,
     onSelectRowById: selectRowById,
     onSelectOneRow: selectOneRow,
     onClearSelection: clearSelection
-  }), [clearSelection, isColumnSelected, isSelectedCellInRow, selectColumn, selectOneRow, selectRowById,
+  }), [clearSelection, isColumnSelected, isSelectedCaseInRow, selectColumn, selectOneRow, selectRowById,
         showRowLabels]);
 
   // called by ReactDataGrid when selected rows change
   const onSelectedRowsChange = useCallback((_rows: Set<React.Key>) => {
-    clearSelection({ row: false });
+    // We don't clear the RDG cell selection here, for the same reason as in
+    // selectOneRow.
+    clearSelection({ row: false, cell: false });
     _rows.delete(inputRowId.current);
     const rowArray = Array.from(_rows) as string[];
     dataSet.setSelectedCases(rowArray);

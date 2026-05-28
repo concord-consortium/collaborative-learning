@@ -6,6 +6,10 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  // RDG normally adds cursor:pointer when sortable=true; we set sortable=false
+  // (to suppress its Space/Enter handler) but the cell is still clickable to
+  // select the column, so we restore the affordance.
+  cursor: pointer;
 
   .header-cell-container {
     display: flex;
@@ -46,11 +50,25 @@
     }
 
     .column-button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
       position: absolute;
       width: 36px;
       height: 34px;
       justify-content: center;
       align-items: center;
+      // Inset focus ring matches the .rdg-cell / .remove-row-button pattern.
+      // The button is positioned 4px outside the cell on its protruding side
+      // and the cell has overflow: clip, so we inset further than -2px to
+      // keep the ring fully visible.
+      &:focus-visible {
+        outline: 2px solid $focus-ring-color;
+        outline-offset: -4px;
+      }
     }
 
     .remove-column-button {

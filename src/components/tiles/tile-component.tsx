@@ -617,8 +617,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       topbarElement: focusable?.topbarElement || null,
       paletteElement: focusable?.paletteElement || null,
       tabWithinSlots: focusable?.tabWithinSlots,
-      escapeHandlers: focusable?.escapeHandlers,
       tabHandlers: focusable?.tabHandlers,
+      escapeHandlers: focusable?.escapeHandlers,
       resizeHandle: this.resizeElement,
     };
   }
