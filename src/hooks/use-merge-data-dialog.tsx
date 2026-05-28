@@ -68,6 +68,7 @@ export const useMergeTileDialog = ({ mergableTiles, model, onMergeTile }: IProps
     className: "merge-tile",
     Icon: MergeInIcon,
     title: "Add data from...",
+    focusElement: "select",
     Content,
     contentProps: { model, selectValue, hostTileTitle, mergableTiles, setSelectValue },
     buttons: [

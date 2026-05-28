@@ -328,20 +328,33 @@ context('XY Plot keyboard accessibility', function () {
       tableToolTile.getTableTile().should('be.visible');
     });
 
-    it('Link-tile dialog opens with focus inside and closes on Escape', function () {
+    it('Link-tile dialog: select focused on open, Enter on Cancel does not submit, Escape closes', function () {
       // qa unit's tools array is ['link-tile-multiple', 'fit-all', 'toggle-lock'],
       // so the first toolbar button is link-tile-multiple. Both link-tile and
       // link-tile-multiple call into useProviderTileLinking → showLinkTileDialog
       // and open the same dialog.
-      cy.log('Enter on the link-tile button opens the dialog and moves focus inside');
+      cy.log('Opening with Enter on the link button moves focus straight to the source select');
       xyTile.getTile().click();
       cy.get('button.toolbar-button.link-tile-multiple').focus();
       cy.realPress('Enter');
       xyTile.getCustomModal().should('be.visible');
-      cy.focused().then($el => {
-        expect($el.closest('.custom-modal').length,
-          'focused element is inside the dialog').to.be.greaterThan(0);
-      });
+      cy.focused().should('have.attr', 'data-test', 'link-tile-select');
+
+      cy.log('Choosing a source then pressing Enter on the focused Cancel button closes the dialog');
+      cy.get('[data-test=link-tile-select]').select('Table Data 1');
+      // The select re-focuses itself on a timer after onChange; flush it before
+      // moving focus to Cancel so the timer can't steal focus back to the select.
+      cy.wait(100);
+      xyTile.getCustomModal().find('.modal-button').contains('Cancel').focus();
+      cy.realPress('Enter');
+      xyTile.getCustomModal().should('not.exist');
+
+      cy.log('Re-opening shows the source still under "Link Source" — Cancel did not graph it');
+      xyTile.getTile().click();
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
+      xyTile.getCustomModal().should('be.visible');
+      xyTile.getCustomModal().find('optgroup[label="Unlink Source"]').should('not.exist');
+      xyTile.getCustomModal().find('optgroup[label="Link Source"]').should('exist');
 
       cy.log('Escape closes the dialog');
       cy.realPress('Escape');
