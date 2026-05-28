@@ -49,6 +49,10 @@ export interface ClueFocusTrapConfig {
   paletteRef?: RefObject<HTMLElement | null>;
   getPaletteElement?: () => HTMLElement | undefined;
 
+  // Drag handle element for keyboard tile pick-up
+  dragHandleRef?: RefObject<HTMLElement | null>;
+  getDragHandleElement?: () => HTMLElement | undefined;
+
   // Resize handle element
   resizeRef?: RefObject<HTMLElement | null>;
   getResizeElement?: () => HTMLElement | undefined;
@@ -155,6 +159,7 @@ export function useClueAccessibility(options: ClueAccessibilityOptions): Accessi
         focusContent: strategy.focusContent,
         topbarElement: elements.topbar,
         paletteElement: elements.palette,
+        dragHandleElement: elements.dragHandle,
         tabWithinSlots: strategy.tabWithinSlots,
         tabHandlers: strategy.tabHandlers,
         escapeHandlers: strategy.escapeHandlers,

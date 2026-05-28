@@ -47,6 +47,10 @@ export interface ITileFocusableElements {
   // Any slot listed here owns its own tabindex — the trap won't touch its
   // descendants' tabindex on mount.
   tabHandlers?: Record<string, (e: KeyboardEvent, reverse: boolean) => TabHandlerResult>;
+  // Drag handle element for keyboard tile pick-up. Visited between toolbar and
+  // resize in the focus trap cycle. Uses tabIndex={-1} like resize — the trap
+  // controls when it receives focus.
+  dragHandleElement?: HTMLElement;
 }
 
 export interface ITileApi {
