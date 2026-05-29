@@ -656,9 +656,9 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     const prev = e.relatedTarget as HTMLElement | null;
     const fromOutside = prev && !this.domElement?.contains(prev);
 
-    // For read-only tiles, select on any focus (container or child) so
-    // readaloud targets the focused tile. Check this before the container-only
-    // guard so drag handle focus also triggers selection.
+    // For read-only tiles, select on focus so readaloud targets the
+    // focused tile. Only select when focus arrives from outside the tile
+    // (Tab navigation), not from internal focus moves.
     if (this.props.readOnly && fromOutside) {
       this.selectTile(false);
     }
