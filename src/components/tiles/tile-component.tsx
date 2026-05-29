@@ -653,21 +653,19 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   // Uses relatedTarget to distinguish external focus (Tab from toolbar/sibling) from internal
   // focus moves (Escape/ArrowUp exit to container, programmatic .focus() calls).
   private handleFocus = (e: React.FocusEvent<HTMLDivElement>) => {
+    const prev = e.relatedTarget as HTMLElement | null;
+    const fromOutside = prev && !this.domElement?.contains(prev);
+
     // For read-only tiles, select on any focus (container or child) so
     // readaloud targets the focused tile. Check this before the container-only
     // guard so drag handle focus also triggers selection.
-    if (this.props.readOnly) {
-      const prev = e.relatedTarget as HTMLElement | null;
-      const fromOutside = prev && !this.domElement?.contains(prev);
-      if (fromOutside) {
-        this.selectTile(false);
-      }
+    if (this.props.readOnly && fromOutside) {
+      this.selectTile(false);
     }
     if (e.target !== e.currentTarget) return;
     // Only announce when focus arrives from outside the tile and its toolbar.
     // Skip when: relatedTarget is null (programmatic focus), inside the tile (Escape/ArrowUp exit),
     // or inside the toolbar (FloatingPortal — toolbar Escape has its own announcement).
-    const prev = e.relatedTarget as HTMLElement | null;
     if (!prev || this.domElement?.contains(prev) || this.toolbarElement?.contains(prev)) return;
     // Respect tileHandlesOwnSelection: tiles like placeholders don't need this.
     const { model } = this.props;
