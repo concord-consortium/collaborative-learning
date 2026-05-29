@@ -36,6 +36,7 @@ context('Coordinate Grid keyboard accessibility', function () {
   const emptyFocusOrder = [
     ['css',   '.geometry-content [role="group"]'],  // JSXGraph SVG root
     ['class', 'toolbar-button'],                    // first toolbar button
+    ['class', 'tool-tile-drag-handle-wrapper'],     // drag handle
     ['class', 'tool-tile-resize-handle-wrapper'],   // resize handle
   ];
 

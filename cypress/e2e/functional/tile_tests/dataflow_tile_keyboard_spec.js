@@ -25,6 +25,7 @@ context('Dataflow keyboard accessibility (CLUE-455)', function () {
     ['data-testid', 'zoom-out-button'],
     ['data-testid', 'add-sensor-button'],
     ['class', 'data-set-view'],
+    ['class', 'tool-tile-drag-handle-wrapper'],
     ['class', 'tool-tile-resize-handle-wrapper'],
   ];
 

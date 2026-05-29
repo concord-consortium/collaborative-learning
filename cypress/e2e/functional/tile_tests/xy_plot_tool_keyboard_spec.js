@@ -51,6 +51,7 @@ context('XY Plot keyboard accessibility', function () {
     ['class', 'editable-border-box'],                // Y-axis max
     ['class', 'add-series-button'],                  // legend palette
     ['class', 'toolbar-button'],                     // toolbar (either end of the roving range)
+    ['class', 'tool-tile-drag-handle-wrapper'],      // drag handle
     ['class', 'tool-tile-resize-handle-wrapper'],    // resize handle
   ];
 
