@@ -660,8 +660,10 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     // focused tile. Only select when focus arrives from outside the tile
     // (Tab navigation) and the tile is not already selected. Skip if
     // already selected to avoid disrupting multi-select drag operations.
+    // Use getEffectiveSelectionModel() so container tiles (which select
+    // the container model, not the inner tile) are checked correctly.
     const { ui } = this.stores;
-    if (this.props.readOnly && fromOutside && !ui.isSelectedTile(this.props.model)) {
+    if (this.props.readOnly && fromOutside && !ui.isSelectedTile(this.getEffectiveSelectionModel())) {
       this.selectTile(false);
     }
     if (e.target !== e.currentTarget) return;
@@ -694,6 +696,15 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       // Match userSelectTile / onFocusEnter: select the container model for read-only
       // tiles inside a container so all entry paths agree on which tile is selected.
       ui.setSelectedTileId(this.getEffectiveSelectionModel().id, { append: false });
+      if (this.props.readOnly) {
+        // Read-only tiles have no focus trap — Enter just selects and announces.
+        if (!wasAlreadySelected) {
+          this.srAnnounce("Tile selected. Press Tab to navigate contents.");
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        return;
+      }
       if (!wasAlreadySelected) {
         // First Enter: select + enable + enter trap
         this.focusTrapController?.setEnabled(true);

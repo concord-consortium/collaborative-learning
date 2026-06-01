@@ -90,8 +90,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       // change of this global. It could be a volatile prop on the document model. Or the ui
       // store could have a scrollToMap with keys of the docId and values of the tileId
       // Enable mousemove-based drop zone highlighting and keyboard navigation when a tile is picked up.
-      // Only the DocumentContentComponent that owns the picked-up tile registers the global keydown
-      // listener. This prevents duplicate key processing in multi-pane views (2-up, 4-up).
+      // Mouse: only the owner document registers mousemove/mouseleave listeners.
+      // Keyboard: both the owner document and any non-owner editable workspace register the global
+      // keydown listener so cross-document placement (e.g. resources → workspace) works.
       this.pickUpReactionDisposer = reaction(
         () => this.stores.ui.pickedUpTileId,
         (pickedUpTileId) => {
@@ -729,13 +730,17 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         tileElt?.focus();
       } else {
         // Cross-doc copy: find the tile at the drop position.
-        // The last tile in the document order at the insert index is the new one.
+        // When inserting into the middle of a row (tileInsertIndex), focus the
+        // tile at that index rather than the last tile in the row.
         const row = content.getRowByIndex(dropRowInfo.rowInsertIndex);
         if (row) {
-          const lastTile = row.tiles[row.tiles.length - 1];
-          if (lastTile) {
+          const tileIndex = dropRowInfo.tileInsertIndex != null
+            ? Math.min(dropRowInfo.tileInsertIndex, row.tiles.length - 1)
+            : row.tiles.length - 1;
+          const tile = row.tiles[tileIndex];
+          if (tile) {
             const tileElt = this.domElement?.querySelector(
-              `.tool-tile[data-tool-id="${lastTile.tileId}"]`
+              `.tool-tile[data-tool-id="${tile.tileId}"]`
             ) as HTMLElement | null;
             tileElt?.focus();
           }

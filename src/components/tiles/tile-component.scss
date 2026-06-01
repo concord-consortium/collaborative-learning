@@ -114,7 +114,7 @@
   // Read-only tiles: show hover-like gray border + drag handle when
   // the tile or any child has keyboard focus. Uses :focus-within since
   // :focus-visible doesn't reliably fire on div containers.
-  &.readonly:focus-within {
+  &.readonly:not(.selected):focus-within {
     border: 1px solid $tool-tile-hover-border-color;
     .tile-content {
       border: 1px solid $tool-tile-hover-border-color;
@@ -125,7 +125,7 @@
   }
 
   // Editable tiles: show hover styling when any child has keyboard focus
-  &:not(.readonly):has(:focus-visible) {
+  &:not(.readonly):not(.selected):has(:focus-visible) {
     border: 1px solid $tool-tile-hover-border-color;
     .tile-content {
       border: 1px solid $tool-tile-hover-border-color;
