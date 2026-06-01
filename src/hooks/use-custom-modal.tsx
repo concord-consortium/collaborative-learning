@@ -51,15 +51,34 @@ export const useCustomModal = <IContentProps,>({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && !(e.target instanceof HTMLTextAreaElement)) {
-        const defaultButton = buttons.find(b => b.isDefault);
-        if (defaultButton && !defaultButton.isDisabled) {
-          blurModal();
-          // useRef to avoid circular dependencies
-          invokeButton(defaultButton, handleCloseRef.current);
-          e.stopPropagation();
-          e.preventDefault();
-        }
+      if (e.key !== "Enter") return;
+
+      // Enter on a focused <select> opens its menu rather than submitting the
+      // dialog. Native selects don't reliably open on Enter (esp. macOS), so
+      // open it explicitly. showPicker() may be absent in older browsers, in which
+      // case nothing happens, but the user can still use Space or ArrowDown to
+      // open the menu.
+      if (e.target instanceof HTMLSelectElement) {
+        e.stopPropagation();
+        e.preventDefault();
+        e.target.showPicker?.();
+        return;
+      }
+
+      // Enter in a <textarea> inserts a newline; don't hijack it to submit.
+      if (e.target instanceof HTMLTextAreaElement) return;
+
+      // A focused button handles Enter itself (activating that button); don't
+      // also fire the default button, or Enter on Cancel/Close would still submit.
+      if (e.target instanceof HTMLButtonElement) return;
+
+      const defaultButton = buttons.find(b => b.isDefault);
+      if (defaultButton && !defaultButton.isDisabled) {
+        blurModal();
+        // useRef to avoid circular dependencies
+        invokeButton(defaultButton, handleCloseRef.current);
+        e.stopPropagation();
+        e.preventDefault();
       }
     };
 
