@@ -27,7 +27,7 @@ context('XY Plot keyboard accessibility', function () {
 
   // The empty XY-Plot in qa unit (CLUE-legend mode) has this trap cycle:
   //   title → X-label → Y-label → X-min → X-max → Y-min → Y-max
-  //         → add-series (palette) → toolbar → resize → wrap.
+  //         → add-series (palette) → toolbar → drag handle → resize → wrap.
   //  - The dots-group surrogate is in the DOM but 0×0 on an empty plot, so the
   //    trap's visibility filter skips it. Once a dataset is linked it becomes
   //    a real Tab stop (between the labels and the min/max bound controls).

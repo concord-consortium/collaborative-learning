@@ -839,58 +839,63 @@ describe("TileComponent focus trap", () => {
     });
   });
 
+  // Shared helper: renders a tile with isUserResizable=true so both resize
+  // handle and drag handle are present. Used by resize and drag-handle tests.
+  function renderResizableTile() {
+    mockTitleElement = document.createElement("input");
+    mockContentElement = document.createElement("div");
+    mockContentElement.setAttribute("tabindex", "-1");
+    mockToolbarElement = document.createElement("div");
+    mockToolbarElement.setAttribute("role", "toolbar");
+    const btn = document.createElement("button");
+    btn.textContent = "Tool";
+    btn.setAttribute("tabindex", "0");
+    mockToolbarElement.appendChild(btn);
+    document.body.appendChild(mockToolbarElement);
+
+    const stores = specStores();
+    const tileContent = TestFocusTrapContent.create();
+    const tileModel = TileModel.create({ content: tileContent });
+    const tileApiInterface = new TileApiInterface();
+    const onRequestRowHeight = jest.fn();
+
+    const result = render(
+      <Provider stores={stores}>
+        <TileApiInterfaceContext.Provider value={tileApiInterface}>
+          <div className="document-content">
+            <TileComponent
+              context="context"
+              docId="docId"
+              documentContent={null}
+              isUserResizable={true}
+              height={250}
+              model={tileModel}
+              onResizeRow={jest.fn()}
+              onSetCanAcceptDrop={jest.fn()}
+              onRequestRowHeight={onRequestRowHeight}
+            />
+          </div>
+        </TileApiInterfaceContext.Provider>
+      </Provider>
+    );
+
+    const tileElement = screen.getByTestId("tool-tile");
+    if (mockTitleElement) tileElement.appendChild(mockTitleElement);
+    if (mockContentElement) tileElement.appendChild(mockContentElement);
+
+    const resizeHandle = tileElement.querySelector(
+      ".tool-tile-resize-handle-wrapper"
+    ) as HTMLElement;
+    const dragHandle = tileElement.querySelector(
+      '[data-testid="tool-tile-drag-handle"]'
+    ) as HTMLElement;
+
+    return {
+      stores, tileModel, tileElement, resizeHandle, dragHandle, onRequestRowHeight, ...result,
+    };
+  }
+
   describe("keyboard resize handle", () => {
-    function renderResizableTile() {
-      mockTitleElement = document.createElement("input");
-      mockContentElement = document.createElement("div");
-      mockContentElement.setAttribute("tabindex", "-1");
-      mockToolbarElement = document.createElement("div");
-      mockToolbarElement.setAttribute("role", "toolbar");
-      const btn = document.createElement("button");
-      btn.textContent = "Tool";
-      btn.setAttribute("tabindex", "0");
-      mockToolbarElement.appendChild(btn);
-      document.body.appendChild(mockToolbarElement);
-
-      const stores = specStores();
-      const tileContent = TestFocusTrapContent.create();
-      const tileModel = TileModel.create({ content: tileContent });
-      const tileApiInterface = new TileApiInterface();
-      const onRequestRowHeight = jest.fn();
-
-      const result = render(
-        <Provider stores={stores}>
-          <TileApiInterfaceContext.Provider value={tileApiInterface}>
-            <div className="document-content">
-              <TileComponent
-                context="context"
-                docId="docId"
-                documentContent={null}
-                isUserResizable={true}
-                height={250}
-                model={tileModel}
-                onResizeRow={jest.fn()}
-                onSetCanAcceptDrop={jest.fn()}
-                onRequestRowHeight={onRequestRowHeight}
-              />
-            </div>
-          </TileApiInterfaceContext.Provider>
-        </Provider>
-      );
-
-      const tileElement = screen.getByTestId("tool-tile");
-      if (mockTitleElement) tileElement.appendChild(mockTitleElement);
-      if (mockContentElement) tileElement.appendChild(mockContentElement);
-
-      const resizeHandle = tileElement.querySelector(
-        ".tool-tile-resize-handle-wrapper"
-      ) as HTMLElement;
-
-      return {
-        stores, tileModel, tileElement, resizeHandle, onRequestRowHeight, ...result,
-      };
-    }
-
     it("resize handle renders as button with aria-label", () => {
       const { resizeHandle } = renderResizableTile();
       expect(resizeHandle).toBeTruthy();
@@ -964,50 +969,7 @@ describe("TileComponent focus trap", () => {
     });
 
     it("Tab from drag handle goes to resize", () => {
-      // Use a resizable tile so the resize handle is present
-      mockTitleElement = document.createElement("input");
-      mockContentElement = document.createElement("div");
-      mockContentElement.setAttribute("tabindex", "-1");
-      mockToolbarElement = document.createElement("div");
-      mockToolbarElement.setAttribute("role", "toolbar");
-      const btn = document.createElement("button");
-      btn.textContent = "Tool";
-      btn.setAttribute("tabindex", "0");
-      mockToolbarElement.appendChild(btn);
-      document.body.appendChild(mockToolbarElement);
-
-      const stores = specStores();
-      const tileContent = TestFocusTrapContent.create();
-      const tileModel = TileModel.create({ content: tileContent });
-      const tileApiInterface = new TileApiInterface();
-
-      render(
-        <Provider stores={stores}>
-          <TileApiInterfaceContext.Provider value={tileApiInterface}>
-            <div className="document-content">
-              <TileComponent
-                context="context"
-                docId="docId"
-                documentContent={null}
-                isUserResizable={true}
-                height={250}
-                model={tileModel}
-                onResizeRow={jest.fn()}
-                onSetCanAcceptDrop={jest.fn()}
-                onRequestRowHeight={jest.fn()}
-              />
-            </div>
-          </TileApiInterfaceContext.Provider>
-        </Provider>
-      );
-
-      const tileElement = screen.getByTestId("tool-tile");
-      if (mockTitleElement) tileElement.appendChild(mockTitleElement);
-      if (mockContentElement) tileElement.appendChild(mockContentElement);
-
-      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]') as HTMLElement;
-      const resizeHandle = tileElement.querySelector(".tool-tile-resize-handle-wrapper") as HTMLElement;
-
+      const { stores, tileModel, dragHandle, resizeHandle } = renderResizableTile();
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { dragHandle.focus(); });
       fireEvent.keyDown(dragHandle, { key: "Tab" });
@@ -1015,50 +977,7 @@ describe("TileComponent focus trap", () => {
     });
 
     it("Shift+Tab from resize goes to drag handle", () => {
-      // Use a resizable tile so the resize handle is present
-      mockTitleElement = document.createElement("input");
-      mockContentElement = document.createElement("div");
-      mockContentElement.setAttribute("tabindex", "-1");
-      mockToolbarElement = document.createElement("div");
-      mockToolbarElement.setAttribute("role", "toolbar");
-      const btn = document.createElement("button");
-      btn.textContent = "Tool";
-      btn.setAttribute("tabindex", "0");
-      mockToolbarElement.appendChild(btn);
-      document.body.appendChild(mockToolbarElement);
-
-      const stores = specStores();
-      const tileContent = TestFocusTrapContent.create();
-      const tileModel = TileModel.create({ content: tileContent });
-      const tileApiInterface = new TileApiInterface();
-
-      render(
-        <Provider stores={stores}>
-          <TileApiInterfaceContext.Provider value={tileApiInterface}>
-            <div className="document-content">
-              <TileComponent
-                context="context"
-                docId="docId"
-                documentContent={null}
-                isUserResizable={true}
-                height={250}
-                model={tileModel}
-                onResizeRow={jest.fn()}
-                onSetCanAcceptDrop={jest.fn()}
-                onRequestRowHeight={jest.fn()}
-              />
-            </div>
-          </TileApiInterfaceContext.Provider>
-        </Provider>
-      );
-
-      const tileElement = screen.getByTestId("tool-tile");
-      if (mockTitleElement) tileElement.appendChild(mockTitleElement);
-      if (mockContentElement) tileElement.appendChild(mockContentElement);
-
-      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]') as HTMLElement;
-      const resizeHandle = tileElement.querySelector(".tool-tile-resize-handle-wrapper") as HTMLElement;
-
+      const { stores, tileModel, dragHandle, resizeHandle } = renderResizableTile();
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { resizeHandle.focus(); });
       fireEvent.keyDown(resizeHandle, { key: "Tab", shiftKey: true });
