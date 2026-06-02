@@ -1,6 +1,6 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { ITileContentModel, TileContentModel } from "../tile-content";
-import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
+import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { RowList } from "../../document/row-list";
 import { isPlaceholderContent, kPlaceholderTileType } from "../placeholder/placeholder-content";
 import { StringBuilder } from "../../../utilities/string-builder";
@@ -44,7 +44,7 @@ export const QuestionContentModel = types.compose(
     questionId: types.optional(types.string, () => generateQuestionId()),
   })
   .views(self => ({
-    exportJson(options: ITileExportOptions, tileMap: ITileMapLookup) {
+    exportJson(options: IDocumentExportOptions, tileMap: ITileMapLookup) {
       const builder = new StringBuilder();
       builder.pushLine("{");
       builder.pushLine(`"type": "${self.type}",`, 2);
