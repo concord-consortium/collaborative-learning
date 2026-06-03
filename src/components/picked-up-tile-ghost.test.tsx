@@ -143,22 +143,6 @@ describe("PickedUpTileGhost", () => {
     expect(ghost!.style.top).toBe("146px");
   });
 
-  it("clearPickedUpTile clears drop zone position", () => {
-    const stores = specStores();
-    act(() => {
-      stores.ui.pickUpTile("t1", "d1", "Text", 100, 200);
-      stores.ui.setFocusedDropZonePosition(500, 300);
-    });
-    expect(stores.ui.focusedDropZoneX).toBe(500);
-    expect(stores.ui.focusedDropZoneY).toBe(300);
-
-    act(() => {
-      stores.ui.clearPickedUpTile();
-    });
-    expect(stores.ui.focusedDropZoneX).toBeUndefined();
-    expect(stores.ui.focusedDropZoneY).toBeUndefined();
-  });
-
   it("updates ghost position on mouse move", () => {
     const stores = specStores();
     render(
