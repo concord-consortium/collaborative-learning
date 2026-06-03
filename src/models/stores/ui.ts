@@ -62,7 +62,9 @@ export const UIModel = types
     pickedUpTileType: types.maybe(types.string),
     pickedUpX: types.maybe(types.number),
     pickedUpY: types.maybe(types.number),
-    focusedDropZoneIndex: types.maybe(types.number)
+    focusedDropZoneIndex: types.maybe(types.number),
+    focusedDropZoneX: types.maybe(types.number),
+    focusedDropZoneY: types.maybe(types.number)
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -229,10 +231,17 @@ export const UIModel = types
         self.pickedUpX = undefined;
         self.pickedUpY = undefined;
         self.focusedDropZoneIndex = undefined;
+        self.focusedDropZoneX = undefined;
+        self.focusedDropZoneY = undefined;
       },
 
       setFocusedDropZoneIndex(index?: number) {
         self.focusedDropZoneIndex = index;
+      },
+
+      setFocusedDropZonePosition(x?: number, y?: number) {
+        self.focusedDropZoneX = x;
+        self.focusedDropZoneY = y;
       },
 
       selectAllTiles,

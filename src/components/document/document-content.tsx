@@ -611,8 +611,46 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private setFocusedZone(zones: ReturnType<typeof this.getDropZoneList>, index: number) {
     const { ui } = this.stores;
+    const zone = zones[index];
     ui.setFocusedDropZoneIndex(index);
-    this.setState({ dropRowInfo: zones[index].dropRowInfo });
+    this.setState({ dropRowInfo: zone.dropRowInfo });
+
+    // Position the ghost over the drop zone's DOM location
+    const rowElt = this.domElement?.querySelector(
+      `[data-row-id="${zone.rowId}"]`
+    ) as HTMLElement | null;
+    if (rowElt) {
+      const rowRect = rowElt.getBoundingClientRect();
+      if (zone.location === "left" && zone.dropRowInfo.tileInsertIndex != null) {
+        // Side zone: position at the tile boundary within the row
+        const tiles = rowElt.querySelectorAll(".tool-tile");
+        const insertIdx = zone.dropRowInfo.tileInsertIndex;
+        const y = rowRect.top + rowRect.height / 2;
+        let x: number;
+        if (insertIdx >= tiles.length) {
+          // After the last tile
+          const lastTile = tiles[tiles.length - 1];
+          x = lastTile ? lastTile.getBoundingClientRect().right : rowRect.right;
+        } else if (insertIdx === 0) {
+          // Before the first tile
+          const firstTile = tiles[0];
+          x = firstTile ? firstTile.getBoundingClientRect().left : rowRect.left;
+        } else {
+          // Between two tiles
+          const beforeTile = tiles[insertIdx - 1];
+          const afterTile = tiles[insertIdx];
+          const rightEdge = beforeTile?.getBoundingClientRect().right ?? rowRect.left;
+          const leftEdge = afterTile?.getBoundingClientRect().left ?? rowRect.right;
+          x = (rightEdge + leftEdge) / 2;
+        }
+        ui.setFocusedDropZonePosition(x, y);
+      } else {
+        // Top/bottom zone: center horizontally, at row edge vertically
+        const x = rowRect.left + rowRect.width / 2;
+        const y = zone.location === "bottom" ? rowRect.bottom : rowRect.top;
+        ui.setFocusedDropZonePosition(x, y);
+      }
+    }
   }
 
   private handlePickUpKeyDown = (e: KeyboardEvent) => {

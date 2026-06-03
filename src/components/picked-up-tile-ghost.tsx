@@ -15,6 +15,13 @@ export const PickedUpTileGhost: React.FC = observer(function PickedUpTileGhost()
   const { ui } = useStores();
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
+  // Follow the focused drop zone position during keyboard navigation
+  useEffect(() => {
+    if (ui.focusedDropZoneX != null && ui.focusedDropZoneY != null) {
+      setPosition({ x: ui.focusedDropZoneX, y: ui.focusedDropZoneY });
+    }
+  }, [ui.focusedDropZoneX, ui.focusedDropZoneY]);
+
   useEffect(() => {
     if (!ui.pickedUpTileId) return;
 

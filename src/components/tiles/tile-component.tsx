@@ -108,9 +108,10 @@ interface IDragTileButtonProps {
   handleTileDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
   handleDragEnd: () => void;
   onPickUpClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  readOnly?: boolean;
 }
 const DragTileButton = (
-    { divRef, hovered, selected, isPickedUp,
+    { divRef, hovered, selected, isPickedUp, readOnly,
       handleTileDragStart, handleDragEnd, onPickUpClick }: IDragTileButtonProps) => {
   const classes = classNames("tool-tile-drag-handle", { hovered, selected });
 
@@ -133,7 +134,7 @@ const DragTileButton = (
       onClick={onPickUpClick}
       onKeyDown={handleKeyDown}
       draggable={true}
-      tabIndex={-1}
+      tabIndex={readOnly ? 0 : -1}
       role="button"
       aria-label={isPickedUp ? "Cancel move" : "Move tile"}
       data-testid="tool-tile-drag-handle"
@@ -339,6 +340,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
                               hovered={hoverTile}
                               selected={isTileSelected}
                               isPickedUp={isPickedUp}
+                              readOnly={readOnly}
                               handleTileDragStart={this.handleTileDragStart}
                               handleDragEnd={this.handleDragEnd}
                               onPickUpClick={this.handlePickUpClick}
