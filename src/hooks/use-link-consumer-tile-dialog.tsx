@@ -144,6 +144,7 @@ export const useLinkConsumerTileDialog =
     className: "link-tile",
     Icon,
     title: tileType ? actionName : "Link or Unlink Tile",
+    focusElement: "select",
     Content,
     contentProps: { linkedTiles, selectValue, tileTitle, tileType, unlinkedTiles, setSelectValue },
     buttons

@@ -25,11 +25,19 @@
     outline: none;
   }
 
-  // Blue focus ring only for editable (non-readonly) tiles
-  &:focus-visible:not(.selected):not(.readonly) {
+  // Use a pseudo-element overlay rather than an inset box-shadow on the tile
+  // itself: some tiles (e.g. graph) have opaque-backgrounded descendants that
+  // extend to the tile edges and would paint over an inset shadow.
+  // z-index must beat any positioned descendants — graph uses up to 1000.
+  &:focus-visible:not(.selected)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
     box-shadow:
       inset 0 0 0 3px white,
-      inset 0 0 0 5px rgb(9, 87, 208);
+      inset 0 0 0 5px $focus-ring-color;
   }
 
   &.hovered {
@@ -102,15 +110,12 @@
     }
   }
 
-  // Show drag handle when its wrapper receives keyboard focus
-  .tool-tile-drag-handle-wrapper:focus-visible .tool-tile-drag-handle {
+  // Show drag handle when the focus trap cycles to it (programmatic focus).
+  // Uses :focus (not :focus-visible) because the trap calls .focus() directly.
+  .tool-tile-drag-handle-wrapper:focus .tool-tile-drag-handle {
     opacity: 1;
   }
 
-  // Show hover-like styling when the tile container or any child has keyboard
-  // focus. :focus-visible matches the container itself; :has(:focus-visible)
-  // matches when a child (drag handle, title, etc.) has focus.
-  // The &.readonly variants override the readonly border rule (line 17).
   // Read-only tiles: show hover-like gray border + drag handle when
   // the tile or any child has keyboard focus. Uses :focus-within since
   // :focus-visible doesn't reliably fire on div containers.
@@ -134,6 +139,7 @@
       opacity: 0.5;
     }
   }
+
 
   .tool-tile-resize-handle-wrapper {
     appearance: none;

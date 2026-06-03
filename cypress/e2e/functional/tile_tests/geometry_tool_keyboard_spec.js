@@ -28,7 +28,7 @@ context('Coordinate Grid keyboard accessibility', function () {
   }
 
   // The empty Coordinate Grid tile has this trap cycle:
-  //   title → SVG board (content) → toolbar (single tab stop) → resize → wrap.
+  //   title → SVG board (content) → toolbar (single tab stop) → drag handle → resize → wrap.
   // The SVG board is the JSXGraph root, decorated with role="group" + tabindex="0"
   // in handleCreateBoard so the trap visits it as the sole content tab stop.
   // The toolbar uses the standard CLUE pattern of one tab stop + internal arrow-key

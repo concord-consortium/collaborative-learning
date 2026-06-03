@@ -91,6 +91,7 @@ export const useLinkProviderTileDialog = ({
     className: "link-tile",
     Icon: LinkGraphIcon,
     title: "Add Data and Variables",
+    focusElement: "select",
     Content,
     contentProps: { labelFunction, unlinkedSharedModels, linkedSharedModels,
       selectValue, tileTitle, setSelectValue },

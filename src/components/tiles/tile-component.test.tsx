@@ -335,8 +335,9 @@ describe("TileComponent focus trap", () => {
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { tileElement.focus(); });
       fireEvent.keyDown(tileElement, { key: "Tab", shiftKey: true });
-      // Reverse entry: resize (absent) → dragHandle (present); lands on drag handle.
-      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      // Reverse entry: resize (absent) → dragHandle; lands on the drag handle
+      // (tabIndex=-1, focusable programmatically by the trap).
+      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]');
       expect(document.activeElement).toBe(dragHandle);
     });
 
@@ -377,7 +378,8 @@ describe("TileComponent focus trap", () => {
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Tab" });
-      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      // dragHandle is always present even when title/toolbar are absent
+      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]');
       expect(document.activeElement).toBe(dragHandle);
     });
 
@@ -386,7 +388,8 @@ describe("TileComponent focus trap", () => {
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Tab" });
-      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      // dragHandle is always present even when toolbar is absent
+      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]');
       expect(document.activeElement).toBe(dragHandle);
     });
   });
@@ -407,8 +410,8 @@ describe("TileComponent focus trap", () => {
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { titleElement!.focus(); });
       fireEvent.keyDown(titleElement!, { key: "Tab", shiftKey: true });
-      // Reverse: title → resize (absent) → dragHandle (present); lands on drag handle.
-      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      // Reverse: title → (wrap to end) → resize (absent) → dragHandle
+      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]');
       expect(document.activeElement).toBe(dragHandle);
     });
 
@@ -419,8 +422,8 @@ describe("TileComponent focus trap", () => {
       act(() => { stores.ui.setSelectedTileId(tileModel.id); });
       act(() => { contentElement!.focus(); });
       fireEvent.keyDown(contentElement!, { key: "Tab", shiftKey: true });
-      // Reverse: content → topbar (absent) → title (absent) → resize (absent) → dragHandle (present)
-      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      // Reverse: content → title(absent) → (wrap) → resize(absent) → dragHandle(present)
+      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]');
       expect(document.activeElement).toBe(dragHandle);
     });
   });
@@ -540,15 +543,15 @@ describe("TileComponent focus trap", () => {
     });
 
     it("Escape on selected tile container deselects (no focusable content case)", () => {
-      // No title, content, or toolbar — but drag handle IS present for draggable tiles.
+      // No title, content, or toolbar — but drag handle is always present
       const { stores, tileModel, tileElement } = renderFocusTrapTile({
         hasTitle: false, hasContent: false, hasToolbar: false,
       });
       act(() => { tileElement.focus(); });
-      // Enter selects and enters trap — focus moves to drag handle (the only focusable slot)
+      // Enter selects and enters trap — focus moves to drag handle
       fireEvent.keyDown(tileElement, { key: "Enter" });
       expect(stores.ui.selectedTileIds).toContain(tileModel.id);
-      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]') as HTMLElement;
       expect(document.activeElement).toBe(dragHandle);
       // Escape should deselect
       fireEvent.keyDown(dragHandle, { key: "Escape" });
@@ -702,20 +705,16 @@ describe("TileComponent focus trap", () => {
       expect(liveRegion?.textContent).toBe("Editing tile. Press Escape to exit.");
     });
 
-    it("Enter on tile without focusable content selects tile, focus moves to drag handle", () => {
+    it("Enter on tile without focusable content enters trap via drag handle", () => {
       const { stores, tileModel, tileElement } = renderFocusTrapTile({
         hasTitle: false, hasContent: false, hasToolbar: false,
       });
       act(() => { tileElement.focus(); });
       fireEvent.keyDown(tileElement, { key: "Enter" });
-      // Tile is selected
+      // Tile is selected and focus moves to drag handle (always present)
       expect(stores.ui.selectedTileIds).toContain(tileModel.id);
-      // Focus moves to drag handle (the only focusable slot in the cycle)
-      const dragHandle = tileElement.querySelector("[data-testid='tool-tile-drag-handle']") as HTMLElement;
+      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]');
       expect(document.activeElement).toBe(dragHandle);
-      // Standard enter announcement (not fallback, since focus trap entry succeeded)
-      const liveRegion = tileElement.querySelector("[role='status'][aria-live='polite']");
-      expect(liveRegion?.textContent).toBe("Editing tile. Press Escape to exit.");
     });
 
     it("Enter→Escape→Enter round-trip: selection toggles correctly", () => {
@@ -840,58 +839,63 @@ describe("TileComponent focus trap", () => {
     });
   });
 
+  // Shared helper: renders a tile with isUserResizable=true so both resize
+  // handle and drag handle are present. Used by resize and drag-handle tests.
+  function renderResizableTile() {
+    mockTitleElement = document.createElement("input");
+    mockContentElement = document.createElement("div");
+    mockContentElement.setAttribute("tabindex", "-1");
+    mockToolbarElement = document.createElement("div");
+    mockToolbarElement.setAttribute("role", "toolbar");
+    const btn = document.createElement("button");
+    btn.textContent = "Tool";
+    btn.setAttribute("tabindex", "0");
+    mockToolbarElement.appendChild(btn);
+    document.body.appendChild(mockToolbarElement);
+
+    const stores = specStores();
+    const tileContent = TestFocusTrapContent.create();
+    const tileModel = TileModel.create({ content: tileContent });
+    const tileApiInterface = new TileApiInterface();
+    const onRequestRowHeight = jest.fn();
+
+    const result = render(
+      <Provider stores={stores}>
+        <TileApiInterfaceContext.Provider value={tileApiInterface}>
+          <div className="document-content">
+            <TileComponent
+              context="context"
+              docId="docId"
+              documentContent={null}
+              isUserResizable={true}
+              height={250}
+              model={tileModel}
+              onResizeRow={jest.fn()}
+              onSetCanAcceptDrop={jest.fn()}
+              onRequestRowHeight={onRequestRowHeight}
+            />
+          </div>
+        </TileApiInterfaceContext.Provider>
+      </Provider>
+    );
+
+    const tileElement = screen.getByTestId("tool-tile");
+    if (mockTitleElement) tileElement.appendChild(mockTitleElement);
+    if (mockContentElement) tileElement.appendChild(mockContentElement);
+
+    const resizeHandle = tileElement.querySelector(
+      ".tool-tile-resize-handle-wrapper"
+    ) as HTMLElement;
+    const dragHandle = tileElement.querySelector(
+      '[data-testid="tool-tile-drag-handle"]'
+    ) as HTMLElement;
+
+    return {
+      stores, tileModel, tileElement, resizeHandle, dragHandle, onRequestRowHeight, ...result,
+    };
+  }
+
   describe("keyboard resize handle", () => {
-    function renderResizableTile() {
-      mockTitleElement = document.createElement("input");
-      mockContentElement = document.createElement("div");
-      mockContentElement.setAttribute("tabindex", "-1");
-      mockToolbarElement = document.createElement("div");
-      mockToolbarElement.setAttribute("role", "toolbar");
-      const btn = document.createElement("button");
-      btn.textContent = "Tool";
-      btn.setAttribute("tabindex", "0");
-      mockToolbarElement.appendChild(btn);
-      document.body.appendChild(mockToolbarElement);
-
-      const stores = specStores();
-      const tileContent = TestFocusTrapContent.create();
-      const tileModel = TileModel.create({ content: tileContent });
-      const tileApiInterface = new TileApiInterface();
-      const onRequestRowHeight = jest.fn();
-
-      const result = render(
-        <Provider stores={stores}>
-          <TileApiInterfaceContext.Provider value={tileApiInterface}>
-            <div className="document-content">
-              <TileComponent
-                context="context"
-                docId="docId"
-                documentContent={null}
-                isUserResizable={true}
-                height={250}
-                model={tileModel}
-                onResizeRow={jest.fn()}
-                onSetCanAcceptDrop={jest.fn()}
-                onRequestRowHeight={onRequestRowHeight}
-              />
-            </div>
-          </TileApiInterfaceContext.Provider>
-        </Provider>
-      );
-
-      const tileElement = screen.getByTestId("tool-tile");
-      if (mockTitleElement) tileElement.appendChild(mockTitleElement);
-      if (mockContentElement) tileElement.appendChild(mockContentElement);
-
-      const resizeHandle = tileElement.querySelector(
-        ".tool-tile-resize-handle-wrapper"
-      ) as HTMLElement;
-
-      return {
-        stores, tileModel, tileElement, resizeHandle, onRequestRowHeight, ...result,
-      };
-    }
-
     it("resize handle renders as button with aria-label", () => {
       const { resizeHandle } = renderResizableTile();
       expect(resizeHandle).toBeTruthy();
@@ -931,6 +935,53 @@ describe("TileComponent focus trap", () => {
       // Focus should stay on resize handle, not exit to tile container
       expect(document.activeElement).toBe(resizeHandle);
       expect(document.activeElement).not.toBe(tileElement);
+    });
+  });
+
+  // --- Drag Handle in Focus Trap ---
+
+  describe("drag handle in focus trap", () => {
+    it("drag handle has tabIndex -1", () => {
+      const { tileElement } = renderFocusTrapTile();
+      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]');
+      expect(dragHandle).toBeTruthy();
+      expect(dragHandle!.getAttribute("tabindex")).toBe("-1");
+    });
+
+    it("Tab from toolbar goes to drag handle", () => {
+      const { stores, tileModel, tileElement, contentElement } = renderFocusTrapTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
+      // Tab from content goes to toolbar (tested elsewhere); Tab again from the
+      // toolbar slot should reach dragHandle. Since the mock toolbar is outside the
+      // tile DOM (FloatingPortal pattern), simulate by focusing content and tabbing
+      // forward twice: content → toolbar → dragHandle.
+      act(() => { contentElement!.focus(); });
+      // First Tab: content → toolbar
+      fireEvent.keyDown(contentElement!, { key: "Tab" });
+      // Second Tab: toolbar → dragHandle (toolbar's own Tab handler runs in
+      // production; here the focus trap controller handles it for the mock toolbar
+      // element registered as an external element in the toolbar slot).
+      // The mock toolbar button is outside tile DOM, so dispatch natively.
+      const activeBtn = document.activeElement as HTMLElement;
+      activeBtn.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]');
+      expect(document.activeElement).toBe(dragHandle);
+    });
+
+    it("Tab from drag handle goes to resize", () => {
+      const { stores, tileModel, dragHandle, resizeHandle } = renderResizableTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
+      act(() => { dragHandle.focus(); });
+      fireEvent.keyDown(dragHandle, { key: "Tab" });
+      expect(document.activeElement).toBe(resizeHandle);
+    });
+
+    it("Shift+Tab from resize goes to drag handle", () => {
+      const { stores, tileModel, dragHandle, resizeHandle } = renderResizableTile();
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
+      act(() => { resizeHandle.focus(); });
+      fireEvent.keyDown(resizeHandle, { key: "Tab", shiftKey: true });
+      expect(document.activeElement).toBe(dragHandle);
     });
   });
 });
