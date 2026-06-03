@@ -133,7 +133,7 @@ const DragTileButton = (
       onClick={onPickUpClick}
       onKeyDown={handleKeyDown}
       draggable={true}
-      tabIndex={0}
+      tabIndex={-1}
       role="button"
       aria-label={isPickedUp ? "Cancel move" : "Move tile"}
       data-testid="tool-tile-drag-handle"
@@ -557,6 +557,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       getToolbarElement: () => this.toolbarElement ?? undefined,
       getTopbarElement: () => this.getFocusTrapElements().topbarElement ?? undefined,
       getPaletteElement: () => this.getFocusTrapElements().paletteElement ?? undefined,
+      getDragHandleElement: () => this.dragElement ?? undefined,
       getResizeElement: () => this.resizeElement ?? undefined,
       focusContent: (context) => this.getFocusTrapElements().focusContent?.(context) ?? false,
       onTabWhenInactive: (e, reverse) => this.navigateToSiblingTile(e, reverse),

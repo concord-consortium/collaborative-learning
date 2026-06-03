@@ -112,6 +112,9 @@ export const TileToolbar = observer(
           const titleElement = focusable?.titleElement;
           const focusContentFn = focusable?.focusContent;
           const paletteElement = focusable?.paletteElement;
+          const dragHandle = tileElement.querySelector(
+            ".tool-tile-drag-handle-wrapper"
+          ) as HTMLElement | null;
           const resizeHandle = tileElement.querySelector(
             ".tool-tile-resize-handle-wrapper"
           ) as HTMLElement | null;
@@ -124,6 +127,14 @@ export const TileToolbar = observer(
             if (contentElement) {
               contentElement.focus();
               return document.activeElement === contentElement;
+            }
+            return false;
+          };
+
+          const tryFocusDragHandle = () => {
+            if (dragHandle) {
+              dragHandle.focus();
+              return document.activeElement === dragHandle;
             }
             return false;
           };
@@ -149,10 +160,10 @@ export const TileToolbar = observer(
           };
 
           // Cycle (matches the focus-trap controller's cycleOrder):
-          //   title → topbar → content → palette → toolbar → resize → (wrap)
+          //   title → topbar → content → palette → toolbar → dragHandle → resize → (wrap)
           // Try candidates in order, skipping any that can't actually receive focus.
           if (e.shiftKey) {
-            // Shift+Tab: toolbar → palette → last content child → title → resize → tile
+            // Shift+Tab: toolbar → palette → last content child → title → resize → dragHandle → tile
             if (!tryFocusPalette()) {
               const focusedLastChild = (() => {
                 if (!contentElement) return false;
@@ -167,17 +178,21 @@ export const TileToolbar = observer(
                 if (!tryFocusContent("reverse")) {
                   if (titleElement) { titleElement.focus(); }
                   if (document.activeElement !== titleElement) {
-                    if (!tryFocusResize()) { tileElement.focus(); }
+                    if (!tryFocusResize()) {
+                      if (!tryFocusDragHandle()) { tileElement.focus(); }
+                    }
                   }
                 }
               }
             }
           } else {
-            // Tab: toolbar → resize → title → content → tile
-            if (!tryFocusResize()) {
-              if (titleElement) { titleElement.focus(); }
-              if (document.activeElement !== titleElement) {
-                if (!tryFocusContent("forward")) { tileElement.focus(); }
+            // Tab: toolbar → dragHandle → resize → title → content → tile
+            if (!tryFocusDragHandle()) {
+              if (!tryFocusResize()) {
+                if (titleElement) { titleElement.focus(); }
+                if (document.activeElement !== titleElement) {
+                  if (!tryFocusContent("forward")) { tileElement.focus(); }
+                }
               }
             }
           }

@@ -628,12 +628,27 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     const currentIndex = ui.focusedDropZoneIndex;
 
+    // Find the drop zone nearest the picked-up tile's current position.
+    // Used as the starting point when no zone is focused yet.
+    const findTileZoneIndex = () => {
+      const tileId = ui.pickedUpTileId;
+      if (!tileId || !content) return 0;
+      const rowId = content.findRowIdContainingTile(tileId);
+      if (!rowId) return 0;
+      // Find the first zone whose rowId matches the tile's row
+      const idx = zones.findIndex(z => z.rowId === rowId);
+      return idx >= 0 ? idx : 0;
+    };
+
     switch (e.key) {
       case "ArrowDown":
       case "ArrowRight": {
         e.preventDefault();
         if (currentIndex === undefined) {
-          this.setFocusedZone(zones, 0);
+          // Start from the tile's current position
+          const startIdx = findTileZoneIndex();
+          const nextIdx = Math.min(startIdx + 1, zones.length - 1);
+          this.setFocusedZone(zones, nextIdx);
         } else if (currentIndex < zones.length - 1) {
           this.setFocusedZone(zones, currentIndex + 1);
         }
@@ -643,7 +658,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       case "ArrowLeft": {
         e.preventDefault();
         if (currentIndex === undefined) {
-          this.setFocusedZone(zones, zones.length - 1);
+          // Start from the tile's current position
+          const startIdx = findTileZoneIndex();
+          const prevIdx = Math.max(startIdx - 1, 0);
+          this.setFocusedZone(zones, prevIdx);
         } else if (currentIndex > 0) {
           this.setFocusedZone(zones, currentIndex - 1);
         }

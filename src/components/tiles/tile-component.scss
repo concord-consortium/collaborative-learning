@@ -110,6 +110,12 @@
     }
   }
 
+  // Show drag handle when the focus trap cycles to it (programmatic focus).
+  // Uses :focus (not :focus-visible) because the trap calls .focus() directly.
+  .tool-tile-drag-handle-wrapper:focus .tool-tile-drag-handle {
+    opacity: 1;
+  }
+
   .tool-tile-resize-handle-wrapper {
     appearance: none;
     background: none;
