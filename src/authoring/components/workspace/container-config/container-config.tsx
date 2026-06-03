@@ -87,7 +87,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
       childType: _childType,
       defaultValues: {
         title: item.title,
-        firstOrdinal: firstOrdinal ?? 1,
+        firstOrdinal: Number.isFinite(firstOrdinal) ? firstOrdinal : 1,
         children
       }
     };
