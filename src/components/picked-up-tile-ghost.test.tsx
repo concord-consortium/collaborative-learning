@@ -113,6 +113,36 @@ describe("PickedUpTileGhost", () => {
     document.body.removeChild(handle);
   });
 
+  it("ghost follows focusedDropZone position during keyboard navigation", () => {
+    const stores = specStores();
+    render(
+      <Provider stores={stores}>
+        <PickedUpTileGhost />
+      </Provider>
+    );
+    act(() => {
+      stores.ui.pickUpTile("t1", "d1", "Text", 100, 200);
+    });
+
+    // Simulate keyboard navigation setting drop zone position
+    act(() => {
+      stores.ui.setFocusedDropZonePosition(500, 300);
+    });
+    const ghost = document.body.querySelector<HTMLElement>("[style*='position: fixed']");
+    expect(ghost).not.toBeNull();
+    // 500 + (-80) = 420, 300 + (-4) = 296
+    expect(ghost!.style.left).toBe("420px");
+    expect(ghost!.style.top).toBe("296px");
+
+    // Move to a different drop zone
+    act(() => {
+      stores.ui.setFocusedDropZonePosition(200, 150);
+    });
+    // 200 + (-80) = 120, 150 + (-4) = 146
+    expect(ghost!.style.left).toBe("120px");
+    expect(ghost!.style.top).toBe("146px");
+  });
+
   it("updates ghost position on mouse move", () => {
     const stores = specStores();
     render(

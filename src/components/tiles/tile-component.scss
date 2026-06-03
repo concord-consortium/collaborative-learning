@@ -116,6 +116,31 @@
     opacity: 1;
   }
 
+  // Read-only tiles: show hover-like gray border + drag handle when
+  // the tile or any child has keyboard focus. Uses :focus-within since
+  // :focus-visible doesn't reliably fire on div containers.
+  &.readonly:not(.selected):focus-within {
+    border: 1px solid $tool-tile-hover-border-color;
+    .tile-content {
+      border: 1px solid $tool-tile-hover-border-color;
+    }
+    .tool-tile-drag-handle {
+      opacity: 0.5;
+    }
+  }
+
+  // Editable tiles: show hover styling when any child has keyboard focus
+  &:not(.readonly):not(.selected):has(:focus-visible) {
+    border: 1px solid $tool-tile-hover-border-color;
+    .tile-content {
+      border: 1px solid $tool-tile-hover-border-color;
+    }
+    .tool-tile-drag-handle {
+      opacity: 0.5;
+    }
+  }
+
+
   .tool-tile-resize-handle-wrapper {
     appearance: none;
     background: none;
@@ -187,10 +212,15 @@ body.tile-dragging {
         border: 1px solid $tool-tile-background;
       }
 
-      &.hovered {
+      &.hovered,
+      &:focus-within {
         border: 1px solid rgba(191, 191, 191, 0.5);
-        .tile-content.hovered {
+        .tile-content.hovered,
+        .tile-content {
           border: 1px solid rgba(191, 191, 191, 0.5);
+        }
+        .tool-tile-drag-handle {
+          opacity: 0.5;
         }
       }
 

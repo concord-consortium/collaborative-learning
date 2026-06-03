@@ -66,10 +66,6 @@ describe("createClueTileStrategy", () => {
       tileType: "text",
     });
 
-    // `topbar` (e.g. dataflow's Sampling Rate / Record bar) sits between title and
-    // content; `palette` (e.g. dataflow's Add-Block palette) sits between content
-    // and toolbar so it can be a single tab stop. Tiles that don't provide topbar
-    // or palette elements have those slots skipped by the trap's findNextSlot.
     expect(strategy.cycleOrder).toEqual(
       ["title", "topbar", "content", "palette", "toolbar", "dragHandle", "resize"]);
   });

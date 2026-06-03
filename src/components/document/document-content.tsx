@@ -90,22 +90,32 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       // change of this global. It could be a volatile prop on the document model. Or the ui
       // store could have a scrollToMap with keys of the docId and values of the tileId
       // Enable mousemove-based drop zone highlighting and keyboard navigation when a tile is picked up.
-      // Only the DocumentContentComponent that owns the picked-up tile registers the global keydown
-      // listener. This prevents duplicate key processing in multi-pane views (2-up, 4-up).
+      // The owner pane registers mousemove/mouseleave; the owner and any other editable pane
+      // register the global keydown listener so the user can move the picked-up tile into a
+      // different document. Read-only panes register neither, which prevents duplicate key
+      // processing in multi-pane views (2-up, 4-up).
       this.pickUpReactionDisposer = reaction(
         () => this.stores.ui.pickedUpTileId,
         (pickedUpTileId) => {
           const isOwner = pickedUpTileId
             && this.stores.ui.pickedUpDocId === this.props.content?.contentId;
+          const isWorkspaceTarget = pickedUpTileId && !isOwner && !this.props.readOnly;
+          // Mouse: owner handles drop zone highlighting
           if (isOwner) {
             this.domElement?.addEventListener("mousemove", this.handlePickUpMouseMove);
             this.domElement?.addEventListener("mouseleave", this.handlePickUpMouseLeave);
-            document.addEventListener("keydown", this.handlePickUpKeyDown);
           } else {
             this.domElement?.removeEventListener("mousemove", this.handlePickUpMouseMove);
             this.domElement?.removeEventListener("mouseleave", this.handlePickUpMouseLeave);
+          }
+          // Keyboard: editable workspace handles arrow keys + Enter for placement.
+          // Read-only documents never register the keydown listener.
+          const shouldHandleKeyboard = (isOwner && !this.props.readOnly) || isWorkspaceTarget;
+          if (shouldHandleKeyboard) {
+            document.addEventListener("keydown", this.handlePickUpKeyDown);
+          } else {
             document.removeEventListener("keydown", this.handlePickUpKeyDown);
-            this.clearDropRowInfo();
+            if (!isOwner) this.clearDropRowInfo();
           }
         }
       );
@@ -601,8 +611,46 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private setFocusedZone(zones: ReturnType<typeof this.getDropZoneList>, index: number) {
     const { ui } = this.stores;
+    const zone = zones[index];
     ui.setFocusedDropZoneIndex(index);
-    this.setState({ dropRowInfo: zones[index].dropRowInfo });
+    this.setState({ dropRowInfo: zone.dropRowInfo });
+
+    // Position the ghost over the drop zone's DOM location
+    const rowElt = this.domElement?.querySelector(
+      `[data-row-id="${zone.rowId}"]`
+    ) as HTMLElement | null;
+    if (rowElt) {
+      const rowRect = rowElt.getBoundingClientRect();
+      if (zone.location === "left" && zone.dropRowInfo.tileInsertIndex != null) {
+        // Side zone: position at the tile boundary within the row
+        const tiles = rowElt.querySelectorAll(".tool-tile");
+        const insertIdx = zone.dropRowInfo.tileInsertIndex;
+        const y = rowRect.top + rowRect.height / 2;
+        let x: number;
+        if (insertIdx >= tiles.length) {
+          // After the last tile
+          const lastTile = tiles[tiles.length - 1];
+          x = lastTile ? lastTile.getBoundingClientRect().right : rowRect.right;
+        } else if (insertIdx === 0) {
+          // Before the first tile
+          const firstTile = tiles[0];
+          x = firstTile ? firstTile.getBoundingClientRect().left : rowRect.left;
+        } else {
+          // Between two tiles
+          const beforeTile = tiles[insertIdx - 1];
+          const afterTile = tiles[insertIdx];
+          const rightEdge = beforeTile?.getBoundingClientRect().right ?? rowRect.left;
+          const leftEdge = afterTile?.getBoundingClientRect().left ?? rowRect.right;
+          x = (rightEdge + leftEdge) / 2;
+        }
+        ui.setFocusedDropZonePosition(x, y);
+      } else {
+        // Top/bottom zone: center horizontally, at row edge vertically
+        const x = rowRect.left + rowRect.width / 2;
+        const y = zone.location === "bottom" ? rowRect.bottom : rowRect.top;
+        ui.setFocusedDropZonePosition(x, y);
+      }
+    }
   }
 
   private handlePickUpKeyDown = (e: KeyboardEvent) => {
@@ -727,6 +775,35 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     ui.clearPickedUpTile();
     this.clearDropRowInfo();
+
+    // Focus the placed/copied tile so keyboard users land on it.
+    // Use requestAnimationFrame to let React re-render the new tile first.
+    requestAnimationFrame(() => {
+      if (isSameDocument) {
+        // Same-doc move: tile keeps its ID
+        const tileElt = this.domElement?.querySelector(
+          `.tool-tile[data-tool-id="${tileId}"]`
+        ) as HTMLElement | null;
+        tileElt?.focus();
+      } else {
+        // Cross-doc copy: find the tile at the drop position.
+        // When inserting into the middle of a row (tileInsertIndex), focus the
+        // tile at that index rather than the last tile in the row.
+        const row = content.getRowByIndex(dropRowInfo.rowInsertIndex);
+        if (row) {
+          const tileIndex = dropRowInfo.tileInsertIndex != null
+            ? Math.min(dropRowInfo.tileInsertIndex, row.tiles.length - 1)
+            : row.tiles.length - 1;
+          const tile = row.tiles[tileIndex];
+          if (tile) {
+            const tileElt = this.domElement?.querySelector(
+              `.tool-tile[data-tool-id="${tile.tileId}"]`
+            ) as HTMLElement | null;
+            tileElt?.focus();
+          }
+        }
+      }
+    });
   };
 
   private handleRowResizeDrop = (e: React.DragEvent<HTMLDivElement>) => {

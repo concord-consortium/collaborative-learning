@@ -108,9 +108,10 @@ interface IDragTileButtonProps {
   handleTileDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
   handleDragEnd: () => void;
   onPickUpClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  readOnly?: boolean;
 }
 const DragTileButton = (
-    { divRef, hovered, selected, isPickedUp,
+    { divRef, hovered, selected, isPickedUp, readOnly,
       handleTileDragStart, handleDragEnd, onPickUpClick }: IDragTileButtonProps) => {
   const classes = classNames("tool-tile-drag-handle", { hovered, selected });
 
@@ -133,7 +134,7 @@ const DragTileButton = (
       onClick={onPickUpClick}
       onKeyDown={handleKeyDown}
       draggable={true}
-      tabIndex={-1}
+      tabIndex={readOnly ? 0 : -1}
       role="button"
       aria-label={isPickedUp ? "Cancel move" : "Move tile"}
       data-testid="tool-tile-drag-handle"
@@ -247,8 +248,9 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     document.addEventListener("touchstart", this.recordPointerDownState, true);
     this.domElement?.addEventListener("toolbar-escape", this.handleToolbarEscape);
 
-    // Create focus trap controller — handles Tab cycling, Enter/Escape, external elements
-    if (this.domElement) {
+    // Create focus trap controller — handles Tab cycling, Enter/Escape, external elements.
+    // Read-only tiles don't get a focus trap — Tab flows naturally through their children.
+    if (this.domElement && !this.props.readOnly) {
       this.focusTrapController = new FocusTrapController(
         this.domElement,
         this.buildFocusTrapStrategy()
@@ -338,6 +340,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
                               hovered={hoverTile}
                               selected={isTileSelected}
                               isPickedUp={isPickedUp}
+                              readOnly={readOnly}
                               handleTileDragStart={this.handleTileDragStart}
                               handleDragEnd={this.handleDragEnd}
                               onPickUpClick={this.handlePickUpClick}
@@ -647,20 +650,33 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
   }
 
   // When the tile container receives focus from outside the tile, announce for SR.
-  // Does NOT select the tile or enter the focus trap — Enter is the sole entry mechanism.
+  // For editable tiles: does NOT select the tile — Enter is the sole entry mechanism.
+  // For read-only tiles: selects the tile so readaloud knows which tile is current.
   // Uses relatedTarget to distinguish external focus (Tab from toolbar/sibling) from internal
   // focus moves (Escape/ArrowUp exit to container, programmatic .focus() calls).
   private handleFocus = (e: React.FocusEvent<HTMLDivElement>) => {
+    const prev = e.relatedTarget as HTMLElement | null;
+    const fromOutside = prev && !this.domElement?.contains(prev);
+
+    // For read-only tiles, select on focus so readaloud targets the
+    // focused tile. Only select when focus arrives from outside the tile
+    // (Tab navigation) and the tile is not already selected. Skip if
+    // already selected to avoid disrupting multi-select drag operations.
+    // Use getEffectiveSelectionModel() so container tiles (which select
+    // the container model, not the inner tile) are checked correctly.
+    const { ui } = this.stores;
+    if (this.props.readOnly && fromOutside && !ui.isSelectedTile(this.getEffectiveSelectionModel())) {
+      this.selectTile(false);
+    }
     if (e.target !== e.currentTarget) return;
     // Only announce when focus arrives from outside the tile and its toolbar.
     // Skip when: relatedTarget is null (programmatic focus), inside the tile (Escape/ArrowUp exit),
     // or inside the toolbar (FloatingPortal — toolbar Escape has its own announcement).
-    const prev = e.relatedTarget as HTMLElement | null;
     if (!prev || this.domElement?.contains(prev) || this.toolbarElement?.contains(prev)) return;
-    // Respect tileHandlesOwnSelection: tiles like placeholders don't need this announcement.
+    // Respect tileHandlesOwnSelection: tiles like placeholders don't need this.
     const { model } = this.props;
     if (getTileComponentInfo(model.content.type)?.tileHandlesOwnSelection) return;
-    this.srAnnounce("Tile focused. Press Enter to edit.");
+    this.srAnnounce(this.props.readOnly ? "Tile focused." : "Tile focused. Press Enter to edit.");
   };
 
   // React handler for Enter, Escape, ArrowUp exit, and hotkeys.
@@ -682,6 +698,15 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       // Match userSelectTile / onFocusEnter: select the container model for read-only
       // tiles inside a container so all entry paths agree on which tile is selected.
       ui.setSelectedTileId(this.getEffectiveSelectionModel().id, { append: false });
+      if (this.props.readOnly) {
+        // Read-only tiles have no focus trap — Enter just selects and announces.
+        if (!wasAlreadySelected) {
+          this.srAnnounce("Tile selected. Press Tab to navigate contents.");
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        return;
+      }
       if (!wasAlreadySelected) {
         // First Enter: select + enable + enter trap
         this.focusTrapController?.setEnabled(true);

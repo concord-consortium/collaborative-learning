@@ -171,6 +171,17 @@ describe("ui model", () => {
     expect(ui.focusedDropZoneIndex).toBeUndefined();
   });
 
+  it("clearPickedUpTile clears drop zone position", () => {
+    ui.pickUpTile("t1", "d1", "Text", 100, 200);
+    ui.setFocusedDropZonePosition(500, 300);
+    expect(ui.focusedDropZoneX).toBe(500);
+    expect(ui.focusedDropZoneY).toBe(300);
+
+    ui.clearPickedUpTile();
+    expect(ui.focusedDropZoneX).toBeUndefined();
+    expect(ui.focusedDropZoneY).toBeUndefined();
+  });
+
   it("pick-up state appears in snapshots as MST properties", () => {
     ui.pickUpTile("t1", "d1", "Text", 100, 200);
     const snapshot = getSnapshot(ui);
