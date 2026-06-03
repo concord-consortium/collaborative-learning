@@ -984,4 +984,141 @@ describe("TileComponent focus trap", () => {
       expect(document.activeElement).toBe(dragHandle);
     });
   });
+
+  // --- Read-only tile behavior ---
+
+  describe("read-only tiles", () => {
+    function renderReadOnlyTile(options?: { isUserResizable?: boolean }) {
+      mockTitleElement = document.createElement("input");
+      mockContentElement = document.createElement("div");
+      mockContentElement.setAttribute("tabindex", "-1");
+      mockToolbarElement = null;
+
+      const stores = specStores();
+      const tileContent = TestFocusTrapContent.create();
+      const tileModel = TileModel.create({ content: tileContent });
+      const tileApiInterface = new TileApiInterface();
+
+      const result = render(
+        <Provider stores={stores}>
+          <TileApiInterfaceContext.Provider value={tileApiInterface}>
+            <div className="document-content">
+              <TileComponent
+                context="context"
+                docId="docId"
+                documentContent={null}
+                readOnly={true}
+                isUserResizable={options?.isUserResizable ?? false}
+                model={tileModel}
+                onResizeRow={jest.fn()}
+                onSetCanAcceptDrop={jest.fn()}
+                onRequestRowHeight={jest.fn()}
+              />
+            </div>
+          </TileApiInterfaceContext.Provider>
+        </Provider>
+      );
+
+      const tileElement = screen.getByTestId("tool-tile");
+      if (mockTitleElement) tileElement.appendChild(mockTitleElement);
+      if (mockContentElement) tileElement.appendChild(mockContentElement);
+
+      const dragHandle = tileElement.querySelector(
+        '[data-testid="tool-tile-drag-handle"]'
+      ) as HTMLElement;
+
+      return { stores, tileModel, tileElement, dragHandle, ...result };
+    }
+
+    it("read-only drag handle has tabIndex 0 (reachable via natural Tab order)", () => {
+      const { dragHandle } = renderReadOnlyTile();
+      expect(dragHandle).toBeTruthy();
+      expect(dragHandle.getAttribute("tabindex")).toBe("0");
+    });
+
+    it("editable drag handle has tabIndex -1 (focus trap controlled)", () => {
+      const { tileElement } = renderFocusTrapTile();
+      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]');
+      expect(dragHandle).toBeTruthy();
+      expect(dragHandle!.getAttribute("tabindex")).toBe("-1");
+    });
+
+    it("Enter on read-only tile selects but does not enter focus trap", () => {
+      const { stores, tileModel, tileElement } = renderReadOnlyTile();
+      act(() => { tileElement.focus(); });
+      fireEvent.keyDown(tileElement, { key: "Enter" });
+      // Tile should be selected
+      expect(stores.ui.isSelectedTile(tileModel)).toBe(true);
+      // Focus should stay on the tile container (no trap entry)
+      expect(document.activeElement).toBe(tileElement);
+    });
+
+    it("Enter on read-only tile announces 'Press Tab to navigate contents'", () => {
+      const { tileElement } = renderReadOnlyTile();
+      act(() => { tileElement.focus(); });
+      fireEvent.keyDown(tileElement, { key: "Enter" });
+      const liveRegion = tileElement.querySelector("[role='status'][aria-live='polite']");
+      expect(liveRegion?.textContent).toContain("Press Tab to navigate contents");
+    });
+  });
+
+  // --- Keyboard pick-up across tile configurations ---
+
+  describe("keyboard pick-up on different tile types", () => {
+    it("pick-up works on a tile without resize handle (like text tile)", () => {
+      // Tile with title + content but no resize handle (isUserResizable=false)
+      const { stores, tileModel, tileElement } = renderFocusTrapTile();
+      const dragHandle = tileElement.querySelector(
+        '[data-testid="tool-tile-drag-handle"]'
+      ) as HTMLElement;
+      expect(dragHandle).toBeTruthy();
+
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
+      act(() => { dragHandle.focus(); });
+      fireEvent.keyDown(dragHandle, { key: "Enter" });
+
+      expect(stores.ui.pickedUpTileId).toBe(tileModel.id);
+    });
+
+    it("pick-up works on a tile with resize handle (like drawing tile)", () => {
+      // Tile with title + content + resize handle (isUserResizable=true)
+      const { stores, tileModel, tileElement } = renderResizableTile();
+      const dragHandle = tileElement.querySelector(
+        '[data-testid="tool-tile-drag-handle"]'
+      ) as HTMLElement;
+      expect(dragHandle).toBeTruthy();
+
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
+      act(() => { dragHandle.focus(); });
+      fireEvent.keyDown(dragHandle, { key: "Enter" });
+
+      expect(stores.ui.pickedUpTileId).toBe(tileModel.id);
+    });
+
+    it("pick-up works on a tile without title (no title element)", () => {
+      const { stores, tileModel, tileElement } = renderFocusTrapTile({ hasTitle: false });
+      const dragHandle = tileElement.querySelector(
+        '[data-testid="tool-tile-drag-handle"]'
+      ) as HTMLElement;
+      expect(dragHandle).toBeTruthy();
+
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
+      act(() => { dragHandle.focus(); });
+      fireEvent.keyDown(dragHandle, { key: "Enter" });
+
+      expect(stores.ui.pickedUpTileId).toBe(tileModel.id);
+    });
+
+    it("Space bar also triggers pick-up", () => {
+      const { stores, tileModel, tileElement } = renderFocusTrapTile();
+      const dragHandle = tileElement.querySelector(
+        '[data-testid="tool-tile-drag-handle"]'
+      ) as HTMLElement;
+
+      act(() => { stores.ui.setSelectedTileId(tileModel.id); });
+      act(() => { dragHandle.focus(); });
+      fireEvent.keyDown(dragHandle, { key: " " });
+      expect(stores.ui.pickedUpTileId).toBe(tileModel.id);
+    });
+  });
 });
