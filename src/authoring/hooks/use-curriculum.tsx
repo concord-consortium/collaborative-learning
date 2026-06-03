@@ -60,7 +60,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
   const [unit, _setUnit] = useImmer<string | undefined>(undefined);
   const [path, setPath] = useImmer<string | undefined>(undefined);
   const [unitConfig, _setUnitConfig] = useImmer<IUnit | undefined>(undefined);
-  const [teacherGuideConfig, setTeacherGuideConfig] = useImmer<IUnit | undefined>(undefined);
+  const [teacherGuideConfig, _setTeacherGuideConfig] = useImmer<IUnit | undefined>(undefined);
   const [files, setFiles] = useImmer<IUnitFiles | undefined>(undefined);
   const [error, setError] = useImmer<string | undefined>(undefined);
   const lastUnitRef = useRef<string | undefined>(undefined);
@@ -69,6 +69,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
   const [branchMetadata, setBranchMetadata] = useImmer<BranchMetadata>({});
   const [exemplarFiles, setExemplarFiles] = useImmer<ExemplarFile[]>([]);
   const saveUnitConfigRef = useRef(false);
+  const saveTeacherGuideConfigRef = useRef(false);
   const saveStateClearTimeoutRef = useRef<number>();
 
   const reset = useCallback(() => {
@@ -84,6 +85,11 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
   const setUnitConfig: Updater<IUnit | undefined> = (draft) => {
     saveUnitConfigRef.current = true;
     _setUnitConfig(draft);
+  };
+
+  const setTeacherGuideConfig: Updater<IUnit | undefined> = (draft) => {
+    saveTeacherGuideConfigRef.current = true;
+    _setTeacherGuideConfig(draft);
   };
 
   const setUnit = useCallback(
@@ -209,20 +215,20 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
         .get("/getContent", { branch, unit, path: "teacher-guide/content.json" })
         .then((contentResponse) => {
           if (!contentResponse.success) {
-            setTeacherGuideConfig(undefined);
+            _setTeacherGuideConfig(undefined);
             return;
           }
-          setTeacherGuideConfig(contentResponse.content);
+          _setTeacherGuideConfig(contentResponse.content);
         })
-        .catch((err) => {
-          setTeacherGuideConfig(undefined);
+        .catch(() => {
+          _setTeacherGuideConfig(undefined);
         });
     }
 
     // Note: we don't have a cleanup function to turn off the listener
     // because we want to keep listening for changes until branch or unit changes.
     // The filesRef.current?.off() above is what turns off the previous listener.
-  }, [api, branch, setError, setFiles, _setUnitConfig, setTeacherGuideConfig, unit]);
+  }, [api, branch, setError, setFiles, _setUnitConfig, _setTeacherGuideConfig, unit]);
 
   const saveContent = useCallback(async (contentPath: string, updatedContent: any) => {
     if (!branch || !unit) {
@@ -268,6 +274,14 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
       saveContent("content.json", unitConfig);
     }
   }, [branch, unit, unitConfig, saveContent]);
+
+  useEffect(() => {
+    // save teacher guide config changes
+    if (teacherGuideConfig && saveTeacherGuideConfigRef.current && branch && unit) {
+      saveTeacherGuideConfigRef.current = false;
+      saveContent("teacher-guide/content.json", teacherGuideConfig);
+    }
+  }, [branch, unit, teacherGuideConfig, saveContent]);
 
   useEffect(() => {
     const newExemplarFiles = Object.entries(files || {})

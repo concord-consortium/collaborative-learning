@@ -87,7 +87,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
       childType: _childType,
       defaultValues: {
         title: item.title,
-        firstOrdinal,
+        firstOrdinal: firstOrdinal ?? 1,
         children
       }
     };
@@ -188,8 +188,9 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
       if (!currentItem) return;
 
       currentItem.title = data.title;
-      // The firstOrdinal is required, but just to be safe we default to 1
-      const firstOrdinal = data.firstOrdinal ?? 1;
+      // The firstOrdinal is required, but an empty number input yields NaN
+      // (valueAsNumber: true), and NaN ?? 1 doesn't trigger the fallback.
+      const firstOrdinal = (Number.isFinite(data.firstOrdinal) ? data.firstOrdinal : 1) as number;
 
       if (isUnit(currentItem)) {
         // update investigations
