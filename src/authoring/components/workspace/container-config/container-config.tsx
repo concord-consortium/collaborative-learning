@@ -9,7 +9,7 @@ import {
 import { WritableDraft } from "immer";
 import { IProblemFormInputs, IUnitParentFormInputs, UnitChild } from "./container-config-types";
 import {
-  isUnit, isInvestigation, isProblem, buildProblemSectionsFormData, parseItemPath,
+  isUnit, isInvestigation, isProblem, buildProblemSectionsFormData, parseItemPath, coerceFirstOrdinal,
 } from "./container-config-helpers";
 import { UnitItemChildren } from "./unit-item-children";
 import { ProblemSections } from "./problem-sections";
@@ -87,7 +87,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
       childType: _childType,
       defaultValues: {
         title: item.title,
-        firstOrdinal: Number.isFinite(firstOrdinal) ? firstOrdinal : 1,
+        firstOrdinal: coerceFirstOrdinal(firstOrdinal),
         children
       }
     };
@@ -188,9 +188,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
       if (!currentItem) return;
 
       currentItem.title = data.title;
-      // The firstOrdinal is required, but an empty number input yields NaN
-      // (valueAsNumber: true), and NaN ?? 1 doesn't trigger the fallback.
-      const firstOrdinal = (Number.isFinite(data.firstOrdinal) ? data.firstOrdinal : 1) as number;
+      const firstOrdinal = coerceFirstOrdinal(data.firstOrdinal);
 
       if (isUnit(currentItem)) {
         // update investigations

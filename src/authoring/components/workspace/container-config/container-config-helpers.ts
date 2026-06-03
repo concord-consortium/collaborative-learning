@@ -2,6 +2,15 @@ import { IInvestigation, IProblem, ISection, IUnit } from "../../../types";
 import { CurriculumItem, getSectionTypeFromPath } from "../../../utils/nav-path";
 import { ProblemSectionFormItem } from "./container-config-types";
 
+// The firstOrdinal is required, but an empty number input yields NaN
+// (the field is registered with valueAsNumber: true), and NaN ?? 1 doesn't
+// trigger the fallback. Stale content may also have persisted a NaN ordinal.
+// This guards both the form defaults and the submit handler so the ordinal is
+// always a real number.
+export function coerceFirstOrdinal(value: number | undefined): number {
+  return Number.isFinite(value) ? value as number : 1;
+}
+
 export function isUnit(item: CurriculumItem): item is IUnit {
   return "investigations" in item && Array.isArray(item.investigations);
 }
