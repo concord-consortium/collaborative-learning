@@ -2,6 +2,7 @@ import { defaultIframeInteractiveContent, IframeInteractiveContentModel } from "
 import { kIframeInteractiveTileType } from "./iframe-interactive-tile-types";
 import { AppConfigModel } from "../../models/stores/app-config-model";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
+import { urlParams } from "../../utilities/url-params";
 
 describe("IframeInteractiveContent", () => {
   it("has default empty url and states", () => {
@@ -177,6 +178,28 @@ describe("IframeInteractiveContent", () => {
       expect(content.authoredState).toEqual({});
       expect(content.maxHeight).toBe(0);
       expect(content.enableScroll).toBe(false);
+    });
+  });
+
+  describe("iframeUrl url param", () => {
+    afterEach(() => {
+      delete (urlParams as any).iframeUrl;
+    });
+
+    it("uses the iframeUrl url param even when a url is specified in the config", () => {
+      urlParams.iframeUrl = "https://example.com/from-url-param";
+      const appConfig = AppConfigModel.create({
+        config: {
+          ...unitConfigDefaults,
+          settings: {
+            iframeInteractive: {
+              url: "https://example.com/from-config"
+            }
+          }
+        }
+      });
+      const content = defaultIframeInteractiveContent({ appConfig });
+      expect(content.url).toBe("https://example.com/from-url-param");
     });
   });
 });

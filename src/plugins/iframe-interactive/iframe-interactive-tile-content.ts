@@ -3,11 +3,12 @@ import { TileContentModel } from "../../models/tiles/tile-content";
 import { IDefaultContentOptions } from "../../models/tiles/tile-content-info";
 import { kIframeInteractiveTileType } from "./iframe-interactive-tile-types";
 import stringify from "json-stringify-pretty-compact";
+import { urlParams } from "../../utilities/url-params";
 
 export function defaultIframeInteractiveContent(options?: IDefaultContentOptions): IframeInteractiveContentModelType {
   const settings = options?.appConfig?.getSetting("iframeInteractive") as Record<string, any> | undefined;
   return IframeInteractiveContentModel.create({
-    url: settings?.url ?? "",
+    url: urlParams.iframeUrl ?? settings?.url ?? "",
     interactiveState: settings?.interactiveState ?? {},
     authoredState: settings?.authoredState ?? {},
     maxHeight: settings?.maxHeight ?? 0,

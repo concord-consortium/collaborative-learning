@@ -146,6 +146,8 @@ export interface QueryParams {
 
   // Show the log monitor sidebar
   logMonitor?: boolean;
+  // Url to use for iframe tiles. Supercedes the url specified in config.
+  iframeUrl?: string;
 }
 
 // Make a union of all of the boolean params from the QueryParams
