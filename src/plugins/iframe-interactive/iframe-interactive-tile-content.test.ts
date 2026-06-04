@@ -186,7 +186,7 @@ describe("IframeInteractiveContent", () => {
       delete (urlParams as any).iframeUrl;
     });
 
-    it("uses the iframeUrl url param even when a url is specified in the config", () => {
+    it("uses a legal iframeUrl url param even when a url is specified in the config", () => {
       urlParams.iframeUrl = "https://example.com/from-url-param";
       const appConfig = AppConfigModel.create({
         config: {
@@ -198,8 +198,17 @@ describe("IframeInteractiveContent", () => {
           }
         }
       });
-      const content = defaultIframeInteractiveContent({ appConfig });
+      let content = defaultIframeInteractiveContent({ appConfig });
       expect(content.url).toBe("https://example.com/from-url-param");
+
+      // Does not use illegal urls specified in iframeUrl param
+      urlParams.iframeUrl = "ftp://illegal.com";
+      content = defaultIframeInteractiveContent({ appConfig });
+      expect(content.url).toBe("https://example.com/from-config");
+
+      urlParams.iframeUrl = ["https://legal1.com", "https://legal2.com"] as any;
+      content = defaultIframeInteractiveContent({ appConfig });
+      expect(content.url).toBe("https://example.com/from-config");
     });
   });
 });
