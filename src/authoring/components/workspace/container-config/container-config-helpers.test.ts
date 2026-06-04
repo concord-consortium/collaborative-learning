@@ -6,6 +6,7 @@ import {
   isProblem,
   buildProblemSectionsFormData,
   parseItemPath,
+  coerceFirstOrdinal,
 } from "./container-config-helpers";
 
 const makeProblem = (ordinal: number, title: string, sections: string[] = []): IProblem => ({
@@ -283,5 +284,27 @@ describe("buildProblemSectionsFormData", () => {
     expect(result.every(s => s.type !== "unknownType")).toBe(true);
     expect(result).toHaveLength(3); // just the 3 available sections, all disabled
     expect(result.every(s => !s.enabled)).toBe(true);
+  });
+});
+
+describe("coerceFirstOrdinal", () => {
+  it("returns a finite number unchanged", () => {
+    expect(coerceFirstOrdinal(0)).toBe(0);
+    expect(coerceFirstOrdinal(1)).toBe(1);
+    expect(coerceFirstOrdinal(5)).toBe(5);
+    expect(coerceFirstOrdinal(-2)).toBe(-2);
+  });
+
+  it("defaults to 1 for NaN (e.g. an empty number input via valueAsNumber)", () => {
+    expect(coerceFirstOrdinal(NaN)).toBe(1);
+  });
+
+  it("defaults to 1 for undefined", () => {
+    expect(coerceFirstOrdinal(undefined)).toBe(1);
+  });
+
+  it("defaults to 1 for non-finite values", () => {
+    expect(coerceFirstOrdinal(Infinity)).toBe(1);
+    expect(coerceFirstOrdinal(-Infinity)).toBe(1);
   });
 });
