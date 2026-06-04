@@ -4,11 +4,24 @@ import { IDefaultContentOptions } from "../../models/tiles/tile-content-info";
 import { kIframeInteractiveTileType } from "./iframe-interactive-tile-types";
 import stringify from "json-stringify-pretty-compact";
 import { urlParams } from "../../utilities/url-params";
+import { isValidHttpUrl } from "../../utilities/url-utils";
 
 export function defaultIframeInteractiveContent(options?: IDefaultContentOptions): IframeInteractiveContentModelType {
   const settings = options?.appConfig?.getSetting("iframeInteractive") as Record<string, any> | undefined;
+  let url = settings?.url ?? "";
+
+  // Use legal url from urlParams if possible
+  const { iframeUrl } = urlParams;
+  if (iframeUrl != null) {
+    if (typeof iframeUrl === "string" && isValidHttpUrl(iframeUrl)) {
+      url = iframeUrl;
+    } else {
+      console.warn("Illegal iframeUrl parameter", iframeUrl);
+    }
+  }
+
   return IframeInteractiveContentModel.create({
-    url: urlParams.iframeUrl ?? settings?.url ?? "",
+    url,
     interactiveState: settings?.interactiveState ?? {},
     authoredState: settings?.authoredState ?? {},
     maxHeight: settings?.maxHeight ?? 0,

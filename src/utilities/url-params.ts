@@ -146,7 +146,7 @@ export interface QueryParams {
 
   // Show the log monitor sidebar
   logMonitor?: boolean;
-  // Url to use for iframe tiles. Supercedes the url specified in config.
+  // Url to use for iframe tiles. Supersedes the URL specified in config.
   iframeUrl?: string;
 }
 
