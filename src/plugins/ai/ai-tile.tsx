@@ -4,6 +4,8 @@ import { getParentOfType } from "mobx-state-tree";
 import React, { useEffect, useState } from "react";
 import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
+import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
+import { TileToolbar } from "../../components/toolbar/tile-toolbar";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { useFirebaseFunction } from "../../hooks/use-firebase-function";
 import { useStores } from "../../hooks/use-stores";
@@ -16,7 +18,7 @@ import { changeSlashesToUnderscores } from "./ai-utils";
 import "./ai-tile.scss";
 
 export const AIComponent: React.FC<ITileProps> = observer((props) => {
-  const { documentId, model, onRegisterTileApi } = props;
+  const { documentId, model, tileElt, onRegisterTileApi } = props;
   const content = model.content as AIContentModelType;
   const userContext = useUserContext();
   const readOnly = useReadOnlyContext();
@@ -24,11 +26,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   const { appConfig, documents, networkDocuments, unit } = stores;
   const systemPrompt = appConfig.getSetting("systemPrompt", "ai");
   const getAiContent = userContext.classHash ? useFirebaseFunction("getAiContent_v2") : null;
-  const [updateRequests, setUpdateRequests] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  // note: curriculum documents don't have a documentId property,
-  // so we might need to get the curriculum path to use as an id
   const identifier = getDocumentIdentifier(getParentOfType(model, DocumentContentModel));
 
   useEffect(() => {
@@ -43,7 +42,6 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   // Update the AI response
   // TODO: This triggers multiple undoable actions, but shouldn't really trigger any
   useEffect(() => {
-    // don't attempt to query AI if there is no class hash (i.e. we're in authoring mode)
     if (getAiContent) {
       const queryAI = async () => {
         setIsUpdating(true);
@@ -57,11 +55,9 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           return;
         }
 
-        // Add a summary of the current document to the prompt if possible
         const document = documentId
           ? documents.getDocument(documentId) ?? networkDocuments.getDocument(documentId)
           : undefined;
-        // Clear the text so previous responses do not appear in the document summary
         content.setText("");
         const summary = document ? documentSummarizer(document.content, {}) : "";
         let dynamicContentPrompt = summary
@@ -71,7 +67,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
 
         const response = await getAiContent({
           context: userContext,
-          dynamicContentPrompt, // TODO: could just be "prompt"
+          dynamicContentPrompt,
           systemPrompt,
           unit: unit.code,
           documentId: changeSlashesToUnderscores(identifier),
@@ -90,45 +86,64 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       queryAI();
     }
   }, [
-    updateRequests, content, documentId, documents, getAiContent, identifier, model.id, networkDocuments, userContext,
-    unit.code, systemPrompt
+    content.refreshCount, content, documentId, documents, getAiContent, identifier, model.id, networkDocuments,
+    userContext, unit.code, systemPrompt
   ]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handlePromptChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     content.setPrompt(event.target.value);
   };
 
-  const handleUpdateButton = () => {
-    setUpdateRequests(updateRequests + 1);
+  const handleDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    content.setDescription(event.target.value);
   };
 
   const renderPromptForm = () => {
-    if (readOnly || content.hidePrompt) {
-      return null;
-    }
+    if (readOnly || content.hidePrompt) return null;
     return (
       <div className="prompt-form">
         <h3>Prompt for AI</h3>
-        <textarea value={content.prompt} onChange={handleChange} disabled={isUpdating} />
-        { getAiContent &&
-          <button onClick={handleUpdateButton} className="update-button" disabled={isUpdating}>Update</button>
-        }
+        <textarea value={content.prompt} onChange={handlePromptChange} disabled={isUpdating} />
+      </div>
+    );
+  };
+
+  const renderDescription = () => {
+    if (!readOnly && !content.hidePrompt) {
+      // Author view: editable description
+      return (
+        <div className="ai-description editing">
+          <label>Description (shown to students)</label>
+          <textarea value={content.description} onChange={handleDescriptionChange} />
+        </div>
+      );
+    }
+    // Student/read-only view: show description as static text
+    if (!content.description) return null;
+    return (
+      <div className="ai-description">
+        {content.description}
       </div>
     );
   };
 
   return (
     <div className="tile-content ai-tool">
-      {renderPromptForm()}
-      <div className="ai-output">
-        <div className="last-updated">
-          {lastUpdated ? lastUpdated.toLocaleString("en-US", {dateStyle: "long"}) : "..."}
+      <TileToolbar tileType="AI" readOnly={readOnly} tileElement={tileElt} />
+      <BasicEditableTileTitle />
+      <div className="ai-scrollable-content">
+        {renderPromptForm()}
+        {renderDescription()}
+        <div className="ai-output focusable">
+          <div className="last-updated">
+            {lastUpdated ? lastUpdated.toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"}) : "..."}
+          </div>
+          {isUpdating ? (
+            <p>Loading...</p>
+          ) : (
+            <Markdown>{content.text}</Markdown>
+          )}
         </div>
-        {isUpdating ? (
-          <p>Loading...</p>
-        ) : (
-          <Markdown>{content.text}</Markdown>
-        )}
       </div>
     </div>
   );
