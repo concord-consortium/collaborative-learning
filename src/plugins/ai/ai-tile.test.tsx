@@ -19,7 +19,7 @@ const mockStores = {
 jest.mock("../../hooks/use-stores", () => ({
   useStores: () => mockStores,
   useUIStore: () => mockStores.ui,
-  useSettingFromStores: (key: string, group?: string) => mockStores.appConfig.getSetting(key, group),
+  useSettingFromStores: (key: string, group?: string) => mockStores.appConfig.getSetting(key, group ?? ""),
 }));
 
 import { act, render } from "@testing-library/react";
