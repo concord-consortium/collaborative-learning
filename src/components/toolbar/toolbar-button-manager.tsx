@@ -35,15 +35,6 @@ export function getToolbarButtonInfo(tileType: string, buttonName: string) {
 }
 
 /**
- * Get all registered button names for a tile type, in registration order.
- * Used as a fallback when no unit config specifies tools for this tile type.
- */
-export function getRegisteredToolbarButtonNames(tileType: string): string[] {
-  const tileButtons = toolbarButtonInfos.get(tileType);
-  return tileButtons ? Array.from(tileButtons.keys()) : [];
-}
-
-/**
  * Register one or more buttons for a tile.
  * Generally called by tiles once when the application loads,
  * but this can also be called by plugins or other code that wants to contribute button defs.

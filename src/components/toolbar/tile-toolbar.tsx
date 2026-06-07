@@ -4,7 +4,7 @@ import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
 import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
 import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
-import { getToolbarButtonInfo, getRegisteredToolbarButtonNames } from "./toolbar-button-manager";
+import { getToolbarButtonInfo } from "./toolbar-button-manager";
 import { TileApiInterfaceContext, TileModelContext, RegisterToolbarContext } from "../tiles/tile-api";
 import { JSONValue } from "../../models/stores/settings";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
@@ -240,10 +240,8 @@ export const TileToolbar = observer(
           return undefined;
         }
       }
-      // Fall back to all registered buttons for this tile type when no unit config exists
-      const registered = getRegisteredToolbarButtonNames(tileType);
-      return registered.length > 0 ? registered : undefined;
-    }, [customizedButtons, tileType]);
+      return undefined;
+    }, [customizedButtons]);
 
     // Calculate what fits in the first row.
     useEffect(() => {
