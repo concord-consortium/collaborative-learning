@@ -139,7 +139,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
 
   return (
     <div className="tile-content ai-tool">
-      <TileToolbar tileType="AI" readOnly={readOnly} tileElement={tileElt} />
+      <TileToolbar tileType="ai" readOnly={readOnly} tileElement={tileElt} />
       <BasicEditableTileTitle />
       <div className="ai-scrollable-content">
         {renderPromptForm()}

@@ -6,7 +6,6 @@ import {
   IToolbarButtonComponentProps, registerTileToolbarButtons
 } from "../../components/toolbar/toolbar-button-manager";
 import { AIContentModelType } from "./ai-content";
-import { kAITileType } from "./ai-types";
 
 import RefreshIcon from "../wave-runner/assets/toolbar/clear-and-reset-icon.svg";
 
@@ -29,6 +28,6 @@ const RefreshButton = observer(function RefreshButton({ name }: IToolbarButtonCo
   );
 });
 
-registerTileToolbarButtons(kAITileType, [
+registerTileToolbarButtons("ai", [
   { name: "refresh", component: RefreshButton }
 ]);
