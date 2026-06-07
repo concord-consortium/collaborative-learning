@@ -54,6 +54,7 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
           onBlur={saveNodeName}
           readOnly={node.readOnly}
           onKeyDown={handleKeyDown}
+          onPointerDown={e => e.stopPropagation()}
         />
       </div>
     );

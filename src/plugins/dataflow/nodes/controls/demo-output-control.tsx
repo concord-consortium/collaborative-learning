@@ -59,7 +59,11 @@ export const DemoOutputControlComponent: React.FC<{ data: DemoOutputControl }> =
   });
 
   return (
-    <div className={`demo-output-control ${controlClassName}`}>
+    <div
+      className={`demo-output-control ${controlClassName}`}
+      draggable={false}
+      onDragStart={e => e.preventDefault()}
+    >
       { type === "Light Bulb" &&
         <img
           src={ value1 ? lightBulbOn : lightBulbOff }
