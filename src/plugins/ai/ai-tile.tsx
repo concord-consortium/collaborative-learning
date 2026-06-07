@@ -104,17 +104,27 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
       <div className="prompt-form">
         <h3>Prompt for AI</h3>
         <textarea value={content.prompt} onChange={handlePromptChange} disabled={isUpdating} />
+        <button
+          onClick={() => content.requestRefresh()}
+          className="update-button"
+          disabled={isUpdating}
+        >
+          Update
+        </button>
       </div>
     );
   };
 
   const renderDescription = () => {
     if (!readOnly && !content.hidePrompt) {
-      // Author view: editable description
       return (
         <div className="ai-description editing">
-          <label>Description (shown to students)</label>
-          <textarea value={content.description} onChange={handleDescriptionChange} />
+          <label htmlFor="ai-description-input">Description (shown to students)</label>
+          <textarea
+            id="ai-description-input"
+            value={content.description}
+            onChange={handleDescriptionChange}
+          />
         </div>
       );
     }

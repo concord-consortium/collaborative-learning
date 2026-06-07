@@ -26,7 +26,7 @@ export const AIContentModel = TileContentModel
   }))
   .actions(self => ({
     exportJson() {
-      const snapshot = getSnapshot(self);
+      const { refreshCount: _, ...snapshot } = getSnapshot(self);
       return stringify(snapshot);
     },
     setDescription(desc: string) {
