@@ -6,6 +6,9 @@ import { defaultAIContent, AIContentModel } from "./ai-content";
 
 import Icon from "./ai-icon.svg";
 
+// Register toolbar buttons (side-effect import)
+import "./ai-toolbar-registration";
+
 registerTileContentInfo({
   type: kAITileType,
   displayName: "AI",

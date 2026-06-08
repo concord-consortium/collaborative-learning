@@ -305,7 +305,8 @@
     },
     "settings": {
       "ai": {
-        "systemPrompt": "You are a helpful, collaborative student."
+        "systemPrompt": "You are a helpful, collaborative student.",
+        "tools": ["refresh"]
       },
       "iframeInteractive": {
         "allowedPermissions": "geolocation; microphone; camera; bluetooth"

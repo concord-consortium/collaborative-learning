@@ -1,18 +1,25 @@
 // Mock the useStores hook to provide unit.code and appConfig
+const mockStores = {
+  unit: { code: "test-unit" },
+  appConfig: {
+    getSetting: jest.fn((key: string, category: string) => {
+      if (key === "systemPrompt" && category === "ai") {
+        return "You are a helpful AI assistant.";
+      }
+      return undefined;
+    })
+  },
+  ui: {
+    selectedTileIds: [] as string[],
+    isSelectedTile: () => false,
+  },
+  documents: { getDocument: () => undefined },
+  networkDocuments: { getDocument: () => undefined },
+};
 jest.mock("../../hooks/use-stores", () => ({
-  useStores: () => ({
-    unit: {
-      code: "test-unit"
-    },
-    appConfig: {
-      getSetting: jest.fn((key: string, category: string) => {
-        if (key === "systemPrompt" && category === "ai") {
-          return "You are a helpful AI assistant.";
-        }
-        return "default-value";
-      })
-    }
-  })
+  useStores: () => mockStores,
+  useUIStore: () => mockStores.ui,
+  useSettingFromStores: (key: string, group?: string) => mockStores.appConfig.getSetting(key, group ?? ""),
 }));
 
 import { act, render } from "@testing-library/react";

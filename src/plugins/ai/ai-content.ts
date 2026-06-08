@@ -3,6 +3,8 @@ import { types, Instance, getSnapshot } from "mobx-state-tree";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import { kAITileType } from "./ai-types";
 
+export const kDefaultAIDescription = "Copy this tile into your workspace to get targeted AI help.";
+
 export function defaultAIContent(): AIContentModelType {
   return AIContentModel.create({});
 }
@@ -11,9 +13,11 @@ export const AIContentModel = TileContentModel
   .named("AIContent")
   .props({
     type: types.optional(types.literal(kAITileType), kAITileType),
+    description: types.optional(types.string, kDefaultAIDescription),
     hidePrompt: types.optional(types.boolean, false),
     prompt: "",
-    text: "This is where the dynamically generated AI response will appear."
+    text: "This is where the dynamically generated AI response will appear.",
+    refreshCount: types.optional(types.number, 0)
   })
   .views(self => ({
     get isUserResizable() {
@@ -22,8 +26,11 @@ export const AIContentModel = TileContentModel
   }))
   .actions(self => ({
     exportJson() {
-      const snapshot = getSnapshot(self);
+      const { refreshCount: _, ...snapshot } = getSnapshot(self);
       return stringify(snapshot);
+    },
+    setDescription(desc: string) {
+      self.description = desc;
     },
     setHidePrompt(hide: boolean) {
       self.hidePrompt = hide;
@@ -33,6 +40,9 @@ export const AIContentModel = TileContentModel
     },
     setText(text: string) {
       self.text = text;
+    },
+    requestRefresh() {
+      self.refreshCount++;
     }
   }));
 
