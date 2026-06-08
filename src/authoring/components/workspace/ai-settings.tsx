@@ -16,6 +16,7 @@ interface CommentTag {
 interface AISettingsFormInputs {
   commentTags: CommentTag[];
   enableCommentRoles: CommentRole[];
+  showCommentRating: boolean;
   aiEvaluation?: AIEvaluation | "";
   aiPrompt: {
     systemPrompt: string;
@@ -57,9 +58,12 @@ const AISettings: React.FC = () => {
 
     const aiTileAvailable = unitConfig?.config?.authorTools?.find(tool => isAIAuthorTool(tool)) !== undefined;
 
+    const showCommentRating = unitConfig?.config?.showCommentRating ?? true;
+
     return {
       commentTags: commentTags ?? [],
       enableCommentRoles: enableCommentRoles ?? [],
+      showCommentRating,
       aiEvaluation,
       aiPrompt: {
         systemPrompt: aiPrompt?.systemPrompt ?? "",
@@ -127,6 +131,7 @@ const AISettings: React.FC = () => {
           return obj;
         }, {} as Record<string, string>);
         config.enableCommentRoles = data.enableCommentRoles;
+        config.showCommentRating = data.showCommentRating;
 
         const categories = Object.keys(config.commentTags);
 
@@ -194,6 +199,10 @@ const AISettings: React.FC = () => {
               </label>
             ))}
           </div>
+          <label className="horizontal middle">
+            <input type="checkbox" {...register("showCommentRating")} />
+            <span>Show agree/disagree rating buttons on comments</span>
+          </label>
         </fieldset>
       </div>
       <table>

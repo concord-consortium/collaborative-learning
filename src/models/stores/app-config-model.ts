@@ -79,6 +79,7 @@ export const AppConfigModel = types
     get defaultLearningLogDocument() { return self.configMgr.defaultLearningLogDocument; },
     get autoSectionProblemDocuments() { return self.configMgr.autoSectionProblemDocuments; },
     get showCommentTag() { return self.configMgr.showCommentTag; },
+    get showCommentRating() { return self.configMgr.showCommentRating ?? true; },
     get commentTags() { return self.configMgr.commentTags; },
     get aiEvaluation() { return self.configMgr.aiEvaluation; },
     get aiPrompt() { return self.configMgr.aiPrompt; },

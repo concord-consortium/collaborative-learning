@@ -206,3 +206,77 @@ describe("CommentCard", () => {
     expect(mockUpdateRating).toHaveBeenCalledWith("documents/doc1/comments/c1", "yes");
   });
 });
+
+describe("CommentCard with showCommentRating disabled", () => {
+  const testUser = { id: "0", name: "Test Teacher" } as UserModelType;
+
+  // Override the mock to disable ratings
+  const configWithRatingsDisabled = {
+    ...unitConfigDefaults,
+    showCommentRating: false
+  };
+
+  beforeEach(() => {
+    const useStoresMock = jest.requireMock("../../hooks/use-stores");
+    useStoresMock.useStores = () => ({
+      appConfig: AppConfigModel.create({ config: configWithRatingsDisabled }),
+      class: {
+        getUserById: () => ({ id: "0", type: "student", name: "Test Student" } as UserModelType)
+      }
+    });
+  });
+
+  afterEach(() => {
+    // Restore original mock
+    const useStoresMock = jest.requireMock("../../hooks/use-stores");
+    useStoresMock.useStores = () => ({
+      appConfig: AppConfigModel.create({ config: unitConfigDefaults }),
+      class: {
+        getUserById: () => ({ id: "0", type: "student", name: "Test Student" } as UserModelType)
+      }
+    });
+  });
+
+  it("hides rating buttons when showCommentRating is false", () => {
+    const postedComments: WithId<CommentDocument>[] = [
+      { id: "c1", uid: "1", name: "User1", createdAt: new Date(), content: "hello" }
+    ];
+    render((
+      <ModalProvider>
+        <CommentCard user={testUser} postedComments={postedComments} focusDocument="doc1" />
+      </ModalProvider>
+    ));
+    expect(screen.queryByTestId("comment-rating-buttons")).not.toBeInTheDocument();
+  });
+
+  it("still renders comments when ratings are hidden", () => {
+    const postedComments: WithId<CommentDocument>[] = [
+      { id: "c1", uid: "1", name: "User1", createdAt: new Date(), content: "hello world" }
+    ];
+    render((
+      <ModalProvider>
+        <CommentCard user={testUser} postedComments={postedComments} focusDocument="doc1" />
+      </ModalProvider>
+    ));
+    expect(screen.getByText("hello world")).toBeInTheDocument();
+    expect(screen.queryByTestId("comment-rating-buttons")).not.toBeInTheDocument();
+  });
+
+  it("preserves existing ratings data when buttons are hidden", () => {
+    const postedComments: WithId<CommentDocument>[] = [
+      {
+        id: "c1", uid: "1", name: "User1", createdAt: new Date(), content: "rated comment",
+        ratings: { "u1": "yes", "u2": "no" }
+      }
+    ];
+    render((
+      <ModalProvider>
+        <CommentCard user={testUser} postedComments={postedComments} focusDocument="doc1" />
+      </ModalProvider>
+    ));
+    // Comment renders but ratings UI is hidden — data is preserved in the model
+    expect(screen.getByText("rated comment")).toBeInTheDocument();
+    expect(screen.queryByTestId("comment-rating-buttons")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("rating-yes-button")).not.toBeInTheDocument();
+  });
+});

@@ -43,6 +43,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["showCommentTag"]>("showCommentTag");
   }
 
+  get showCommentRating(){
+    return this.getProp<UC["showCommentRating"]>("showCommentRating");
+  }
+
   get commentTags(){
     return  (this.showCommentTag) ? this.getProp<UC["commentTags"]>("commentTags") : {};
   }
