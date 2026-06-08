@@ -3,6 +3,11 @@
 .demo-output-control {
   position: relative;
 
+  img {
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+
   .demo-output-image {
     position: absolute;
   }
