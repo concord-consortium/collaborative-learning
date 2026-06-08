@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { IBaseNode } from './base-node';
 import { observer } from 'mobx-react';
 import { handleBlockChildKeyDown } from './dataflow-node';
+import { useStopEventPropagation } from './controls/custom-hooks';
 
 interface EditableNodeNameProps {
   node: IBaseNode;
@@ -43,9 +44,14 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
 
     const valueString = node.readOnly ? node.model.orderedDisplayName : nodeName;
 
+    const inputRef = useRef<HTMLInputElement>(null);
+    useStopEventPropagation(inputRef, "pointerdown");
+    useStopEventPropagation(inputRef, "dblclick");
+
     return (
       <div className="node-name">
         <input
+          ref={inputRef}
           className="node-name-input"
           aria-label="Block name"
           tabIndex={-1}
@@ -54,7 +60,6 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
           onBlur={saveNodeName}
           readOnly={node.readOnly}
           onKeyDown={handleKeyDown}
-          onPointerDown={e => e.stopPropagation()}
         />
       </div>
     );
