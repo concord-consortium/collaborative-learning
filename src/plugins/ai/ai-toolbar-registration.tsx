@@ -7,7 +7,7 @@ import {
 } from "../../components/toolbar/toolbar-button-manager";
 import { AIContentModelType } from "./ai-content";
 
-import RefreshIcon from "../wave-runner/assets/toolbar/clear-and-reset-icon.svg";
+import RefreshIcon from "./refresh-icon.svg";
 
 const RefreshButton = observer(function RefreshButton({ name }: IToolbarButtonComponentProps) {
   const model = useContext(TileModelContext);
