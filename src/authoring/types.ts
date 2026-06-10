@@ -44,6 +44,7 @@ export interface IUnitConfig {
   stamps: IStamp[];
   settings: ISettings;
   showCommentTag: boolean;
+  showCommentRating: boolean;
   commentTags: Record<string, string>;
   enableCommentRoles: CommentRole[];
   aiEvaluation?: AIEvaluation;

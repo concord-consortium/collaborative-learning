@@ -133,7 +133,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   const commentContentRef = useRef<string>("");
   const stores = useStores();
   const { appConfig, documents, persistentUI, sortedDocuments } = stores;
-  const { showCommentTag, commentTags } = appConfig;
+  const { showCommentTag, showCommentRating, commentTags } = appConfig;
   const content = useCurriculumOrDocumentContent(focusDocument);
 
   const alertContent = () => {
@@ -192,6 +192,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   ];
 
   const renderRatingButtons = (comment: WithId<CommentDocument>) => {
+    if (!showCommentRating) return null;
     const counts = countRatings(comment.ratings);
     const myRating = user?.id ? comment.ratings?.[user.id] : undefined;
 

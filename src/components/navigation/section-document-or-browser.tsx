@@ -76,6 +76,12 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
       }
       persistentUI.openDocumentGroupPrimaryDocument(tabSpec.tab, selectedSubTab.label, document.key);
       logDocumentViewEvent(document);
+
+      // Auto-open the comment panel when viewing a published document,
+      // if comments are enabled for the current user's role.
+      if (document.isPublished && appConfigStore.showCommentPanelFor(user.type)) {
+        persistentUI.toggleShowChatPanel(true);
+      }
     }
   };
 
