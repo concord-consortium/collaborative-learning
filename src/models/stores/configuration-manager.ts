@@ -211,6 +211,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["groupDocumentsEnabled"]>("groupDocumentsEnabled");
   }
 
+  get drivingQuestionBoardTitle() {
+    return this.getProp<UC["drivingQuestionBoardTitle"]>("drivingQuestionBoardTitle");
+  }
+
   get hide4up() {
     return this.getProp<UC["hide4up"]>("hide4up");
   }

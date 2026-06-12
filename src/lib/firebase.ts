@@ -350,6 +350,18 @@ export class Firebase {
     return `${this.getGroupUserPath(user, groupId, userId)}/activity`;
   }
 
+  // Class-scoped presence channel for the class-wide Driving Question Board. Unlike
+  // group activity, this is shared by every member of the class (not just a group), so
+  // all DQB editors can see each other's tile focus. Records are keyed by user; the
+  // activity payload carries the documentKey, so multiple units' DQBs share this channel.
+  public getDQBActivityUsersPath(user: UserModelType) {
+    return `${this.getClassPath(user)}/dqbActivity/users`;
+  }
+
+  public getDQBUserActivityPath(user: UserModelType, userId?: string) {
+    return `${this.getDQBActivityUsersPath(user)}/${userId || user.id}/activity`;
+  }
+
   // Published section [deprecated] and problem document metadata
   public getProblemPublicationsPath(user: UserModelType) {
     return `${this.getOfferingPath(user)}/publications`;

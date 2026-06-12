@@ -8,7 +8,7 @@ import { DB } from "../../lib/db";
 import { typeConverter } from "../../utilities/db-utils";
 import { IArrowAnnotation } from "../annotations/arrow-annotation";
 import { DocumentMetadataModel, IDocumentMetadataModel } from "../document/document-metadata-model";
-import { isSortableType } from "../document/document-types";
+import { DrivingQuestionBoardDocument, isSortableType } from "../document/document-types";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
 import { ClassModelType } from "./class";
@@ -38,6 +38,10 @@ export class SortedDocuments {
   stores: ISortedDocumentsStores;
   metadataDocsFiltered = MetadataDocMapModel.create();
   metadataDocsWithoutUnit = MetadataDocMapModel.create();
+  // The class-wide Driving Question Board spans the whole unit (no investigation/problem),
+  // so it is fetched by a dedicated always-on listener and merged in regardless of the
+  // current filter scope, ensuring it appears under every lesson.
+  metadataDqbDocs = MetadataDocMapModel.create();
   docsReceived = false;
   // Maps from document ID to the history entry ID that the user requested to view.
   documentHistoryViewRequests: Record<string,string> = {};
@@ -52,6 +56,7 @@ export class SortedDocuments {
     // We only want the serialization support, and MobX observability
     unprotect(this.metadataDocsFiltered);
     unprotect(this.metadataDocsWithoutUnit);
+    unprotect(this.metadataDqbDocs);
     this.rootDocumentGroup = new DocumentGroup({
       stores,
       sortType: "All",
@@ -191,11 +196,28 @@ export class SortedDocuments {
       this.metadataDocsWithoutUnit.clear();
     }
 
-    // A disposing function that calls the two disposers from the
-    // onSnapshot listeners.
+    // The class-wide Driving Question Board has no investigation/problem, so the
+    // Investigation/Problem filters above would exclude it. Always listen for the
+    // unit's DQB (independent of filter) and filter to the current unit's code
+    // variants client-side, so the single board shows under every lesson.
+    const unitVariants = this.curriculumConfig.getUnitCodeVariants(unit);
+    const queryForDqb = baseQuery.where("type", "==", DrivingQuestionBoardDocument);
+    const disposeDqbListener = queryForDqb.onSnapshot(snapshot => {
+      const mstSnapshot = this.getMSTSnapshotFromFBSnapshot(snapshot);
+      Object.keys(mstSnapshot).forEach(key => {
+        const docUnit = mstSnapshot[key].unit;
+        if (!docUnit || !unitVariants.includes(docUnit)) {
+          delete mstSnapshot[key];
+        }
+      });
+      applySnapshot(this.metadataDqbDocs, mstSnapshot);
+    });
+
+    // A disposing function that calls the disposers from the onSnapshot listeners.
     return () => {
       disposeFilteredListener();
       disposeDocsWithoutUnitListener?.();
+      disposeDqbListener();
     };
   }
 
@@ -256,6 +278,13 @@ export class SortedDocuments {
     });
     this.metadataDocsWithoutUnit.forEach(doc => {
       // If there is a duplicate for some reason just ignore the unit-less one
+      if (matchedDocKeys.has(doc.key)) return;
+      docsArray.push(doc);
+      matchedDocKeys.add(doc.key);
+    });
+    this.metadataDqbDocs.forEach(doc => {
+      // The DQB may also be present in the filtered map (under the All/Unit scopes);
+      // dedupe by key so it isn't shown twice.
       if (matchedDocKeys.has(doc.key)) return;
       docsArray.push(doc);
       matchedDocKeys.add(doc.key);

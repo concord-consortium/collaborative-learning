@@ -90,6 +90,8 @@ class Stores implements IStores{
   ui: UIModelType;
   groups: GroupsModelType;
   groupActivity: GroupActivityModelType;
+  // class-wide presence for the Driving Question Board (reuses the activity model shape)
+  dqbActivity: GroupActivityModelType;
   class: ClassModelType;
   documents: DocumentsModelType;
   networkDocuments: DocumentsModelType;
@@ -148,6 +150,7 @@ class Stores implements IStores{
       ? clone(params.groups, this)
       : GroupsModel.create({}, this);
     this.groupActivity = params?.groupActivity || GroupActivityModel.create({});
+    this.dqbActivity = params?.dqbActivity || GroupActivityModel.create({});
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);

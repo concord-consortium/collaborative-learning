@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import { LogEventName } from "../../lib/logger-types";
-import { isExemplarType } from "../../models/document/document-types";
+import { GroupDocument, isDrivingQuestionBoardType, isExemplarType } from "../../models/document/document-types";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { ENavTab } from "../../models/view/nav-tabs";
@@ -55,8 +55,14 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   const openDocument = getOpenDocument();
   const isVisible = openDocument?.isAccessibleToUser(user, documents);
   const showPlayback = user.isResearcher || (user.type && appConfig.enableHistoryRoles.includes(user.type));
-  const showEdit = openDocument?.uid === user.id; //only show if doc is owned by the user who opened it
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
+  // Show the Edit button for any document the current user can edit: their own
+  // documents, the class-wide Driving Question Board (everyone), or their own group's
+  // document. Clicking Edit opens the document in the main workspace for editing.
+  const isDqb = !!openDocument && isDrivingQuestionBoardType(openDocument.type);
+  const isOwnGroupDoc = openDocument?.type === GroupDocument
+    && !!user.currentGroupId && openDocument.groupId === user.currentGroupId;
+  const showEdit = openDocument?.uid === user.id || isDqb || isOwnGroupDoc;
 
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
 

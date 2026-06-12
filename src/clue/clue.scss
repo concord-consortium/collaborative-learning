@@ -111,7 +111,7 @@ body {
 
 .document {
   .titlebar {
-    &.personal, &.personalPublication, &.problem, &.publication {
+    &.personal, &.personalPublication, &.problem, &.publication, &.drivingQuestionBoard {
       background-color: $workspace-teal-light-4;
     }
 

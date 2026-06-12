@@ -250,6 +250,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     if (document.isGroup) {
       return this.renderGroupDocumentTitleBar(hideButtons);
     }
+    if (document.isDrivingQuestionBoard) {
+      return this.renderDrivingQuestionBoardTitleBar(hideButtons);
+    }
     if (document.isPersonal || document.isLearningLog) {
       return this.renderOtherDocumentTitleBar(type, hideButtons);
     }
@@ -332,6 +335,18 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       title,
       hideButtons,
       docType: "group",
+    });
+  }
+
+  private renderDrivingQuestionBoardTitleBar(hideButtons?: boolean) {
+    const { appConfig } = this.stores;
+    const { document } = this.props;
+    // Prefer the live authored title so changes in Document Settings take effect.
+    const title = appConfig.drivingQuestionBoardTitle || document.title || "Driving Question Board";
+    return this.renderGenericTitleBar({
+      title,
+      hideButtons,
+      docType: "drivingQuestionBoard",
     });
   }
 

@@ -191,7 +191,14 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const { appConfig: { defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle,
               groupDocumentsEnabled },
             db, persistentUI: { problemWorkspace },
-            unit: { planningDocument }, user: { type: role } } = this.stores;
+            unit: { planningDocument }, user: { type: role, classHash } } = this.stores;
+    // When group documents are enabled, ensure the class-wide Driving Question Board
+    // exists for this unit. Keyed by unit, so the first user to open any lesson creates
+    // the one shared file; it is accessed only via Sort Work (not opened here).
+    if (groupDocumentsEnabled && classHash) {
+      db.guaranteeDrivingQuestionBoard()
+        .catch(e => console.warn("Failed to ensure Driving Question Board", e));
+    }
     if (!problemWorkspace.primaryDocumentKey) {
       await this.loadDefaultPrimaryDocument();
     } else if (groupDocumentsEnabled) {

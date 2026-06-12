@@ -10,8 +10,8 @@ import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
-import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
-  isPublishedType, isSupportType } from "./document-types";
+import { DrivingQuestionBoardDocument, GroupDocument, isDrivingQuestionBoardType, isExemplarType,
+  isPlanningType, isProblemType, isPublishedType, isSupportType } from "./document-types";
 
 function getProblemFromDoc(unit: UnitModelType, document: DocumentModelType | IDocumentMetadataModel) {
   if (unit.code !== document.unit) {
@@ -66,6 +66,10 @@ export function getDocumentDisplayTitle(
     return getDocumentTitleFromProblem(unit, document);
   } else if (type === GroupDocument) {
     return `Group ${document.groupId} Document`;
+  } else if (isDrivingQuestionBoardType(type)) {
+    // Prefer the live authored title so changes in Document Settings take effect
+    // immediately, falling back to the title persisted at creation.
+    return appConfig.drivingQuestionBoardTitle || document.title || "Driving Question Board";
   } else {
     return getDocumentTitleWithTimestamp(document, appConfig);
   }
@@ -97,9 +101,11 @@ export function isDocumentAccessibleToUser (
   const isShared = doc.visibility === "public";
   const isPublished = isPublishedType(doc.type);
   const isGroupDoc = doc.type === GroupDocument; // Group documents are accessible to everyone
+  // The class-wide Driving Question Board is accessible to (and editable by) everyone.
+  const isDqb = doc.type === DrivingQuestionBoardDocument;
   if (user.isTeacherOrResearcher) return true;
   if (user.isStudent) {
-    return ownDocument || isShared || isPublished || isGroupDoc
+    return ownDocument || isShared || isPublished || isGroupDoc || isDqb
            || (isExemplarType(doc.type) && documentStore.isExemplarVisible(doc.key));
   }
   return false;

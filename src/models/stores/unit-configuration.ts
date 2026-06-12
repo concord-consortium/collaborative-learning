@@ -120,4 +120,7 @@ export interface UnitConfiguration extends ProblemConfiguration {
   termOverrides?: Record<string, string>;
   // whether student documents (problem, personal, learning log) are shared by default
   defaultSharedDocuments?: boolean;
+  // title for the auto-generated class-wide Driving Question Board document
+  // (created once per class per unit when groupDocumentsEnabled is true)
+  drivingQuestionBoardTitle?: string;
 }

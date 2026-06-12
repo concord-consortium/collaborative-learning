@@ -4,7 +4,8 @@ import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
 import { DocumentModelType } from "../document/document";
 import {
-  DocumentType, ExemplarDocument, GroupDocument, LearningLogDocument, LearningLogPublication,
+  DocumentType, DrivingQuestionBoardDocument, ExemplarDocument, GroupDocument,
+  LearningLogDocument, LearningLogPublication,
   OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../document/document-types";
@@ -270,7 +271,10 @@ export const DocumentsModel = types
             document.setContentError(snapshot ?? {}, message);
           }
         };
-        if (document.type === GroupDocument) {
+        // Group documents and the class-wide Driving Question Board are edited
+        // concurrently by multiple users, so they use the concurrent history manager
+        // that keeps local content in sync with remote edits.
+        if (document.type === GroupDocument || document.type === DrivingQuestionBoardDocument) {
           historyManagerArgs.syncRemoteHistory = true;
           const manager = new FirestoreHistoryManagerConcurrent(historyManagerArgs);
           treeManager.setHistoryManager(manager);
