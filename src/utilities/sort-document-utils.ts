@@ -45,7 +45,15 @@ export const sortGroupSectionLabels = (docMapKeys: string[]) => {
   return docMapKeys.sort((a, b) => {
     const numA = parseInt(a.replace(/^\D+/g, ''), 10);
     const numB = parseInt(b.replace(/^\D+/g, ''), 10);
-    return numA - numB;
+    const aIsNum = !isNaN(numA);
+    const bIsNum = !isNaN(numB);
+    // Numeric group labels ("Group 1", "Group 2", …) sort first, ascending. Non-numeric
+    // labels like "No Group" (NaN) have no number to compare, so place them last in a
+    // deterministic (alphabetical) order rather than producing NaN sort keys.
+    if (aIsNum && bIsNum) return numA - numB;
+    if (aIsNum) return -1;
+    if (bIsNum) return 1;
+    return a.localeCompare(b);
   });
 };
 

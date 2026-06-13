@@ -818,14 +818,12 @@ export class DB {
     return result;
   }
 
-  // Finds (or lazily creates) the one shared Driving Question Board for the current
-  // (class, unit). Keyed by unit rather than offering so a single board spans every
-  // lesson in the unit.
-  public async getOrCreateDrivingQuestionBoard() {
+  // Returns the Firestore metadata for the current (class, unit) Driving Question Board,
+  // or undefined if none exists yet. Keyed by unit rather than offering so a single board
+  // spans every lesson in the unit.
+  public async findDrivingQuestionBoardMetadata(): Promise<IDocumentMetadata | undefined> {
     const { user, unit, curriculumConfig } = this.stores;
-    if (!user.classHash || !unit.code) {
-      return Promise.reject("Cannot create Driving Question Board without a class and unit.");
-    }
+    if (!user.classHash || !unit.code) return undefined;
 
     const converter = typeConverter<IDocumentMetadata>();
     // Query by type + class, then filter to the current unit (handling renamed unit
@@ -843,25 +841,21 @@ export class DB {
       // If more than one exists (creation race), reuse the earliest-created board.
       .sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
 
-    let firestoreMetadata: IDocumentMetadata | undefined;
-
-    // FIXME: like getOrCreateGroupDocument, this find-then-create is not transactional,
-    // so two simultaneous first-openers could create duplicate boards. We mitigate by
-    // always reusing the earliest board above.
-    if (existing.length === 0) {
-      const result = await this.createDrivingQuestionBoardDocument();
-      firestoreMetadata = result.firestoreMetadata;
-    } else {
-      firestoreMetadata = existing[0];
-    }
-
-    return await this.openDocumentFromFirestoreMetadata(firestoreMetadata);
+    return existing[0];
   }
 
-  // Ensures the unit's Driving Question Board exists (creating it on first open of any
-  // lesson). Does not open it as the primary document — access is only via Sort Work.
+  // Ensures the unit's Driving Question Board exists, creating it if missing. Does NOT
+  // open the document — it appears in Sort Work via the Firestore metadata listener, and
+  // its content/history listeners start only when a user actually opens it. This keeps
+  // every user from spinning up DQB content/history listeners on workspace mount.
+  // FIXME: like getOrCreateGroupDocument, this find-then-create is not transactional,
+  // so two simultaneous first-openers could create duplicate boards. We mitigate by
+  // always reusing the earliest board (see findDrivingQuestionBoardMetadata).
   public async guaranteeDrivingQuestionBoard() {
-    await this.getOrCreateDrivingQuestionBoard();
+    const existing = await this.findDrivingQuestionBoardMetadata();
+    if (!existing) {
+      await this.createDrivingQuestionBoardDocument();
+    }
   }
 
   public publishProblemDocument(documentModel: DocumentModelType) {
