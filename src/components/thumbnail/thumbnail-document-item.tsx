@@ -2,7 +2,7 @@ import React from "react";
 import { observer } from "mobx-react";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentModelType } from "../../models/document/document";
-import { GroupDocument } from "../../models/document/document-types";
+import { DrivingQuestionBoardDocument, GroupDocument } from "../../models/document/document-types";
 import { DocumentCaption } from "./document-caption";
 import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
@@ -69,7 +69,9 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
 
   const label = DEBUG_BOOKMARKS ? bookmarks.getBookmarkLabel(document.key, user.id, classStore) : "";
 
-  const group = document.type === GroupDocument;
+  // The class-wide Driving Question Board reuses the group document thumbnail styling
+  // (purple border + corner icon badge).
+  const group = document.type === GroupDocument || document.type === DrivingQuestionBoardDocument;
   const isPrivate = !document.isAccessibleToUser(user, documents);
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;
