@@ -95,5 +95,16 @@ class BarGraphTile {
     return this.getBarColorMenu(workspaceClass, tileIndex).find(`[data-testid="color-menu-list-item"]`);
   }
 
+  // Selecting a color closes the portaled Chakra menu, but the menu has an exit
+  // transition that keeps it `:visible` briefly. Wait for it to fully close before
+  // opening the next color menu; otherwise two menus are momentarily open and
+  // getBarColorMenuButtons() indexes color swatches across both of them.
+  selectBarColor(barIndex, colorIndex, workspaceClass, tileIndex = 0) {
+    this.getBarColorButton(workspaceClass, tileIndex).eq(barIndex).click({ force: true });
+    this.getBarColorMenu(workspaceClass, tileIndex).should('be.visible');
+    this.getBarColorMenuButtons(workspaceClass, tileIndex).eq(colorIndex).click({ force: true });
+    this.getBarColorMenu(workspaceClass, tileIndex).should('not.exist');
+  }
+
 }
 export default BarGraphTile;
