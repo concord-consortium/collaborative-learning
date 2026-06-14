@@ -101,7 +101,10 @@ class BarGraphTile {
   // getBarColorMenuButtons() indexes color swatches across both of them.
   selectBarColor(barIndex, colorIndex, workspaceClass, tileIndex = 0) {
     this.getBarColorButton(workspaceClass, tileIndex).eq(barIndex).click({ force: true });
-    this.getBarColorMenu(workspaceClass, tileIndex).should('be.visible');
+    // Require exactly one open menu before indexing swatches: `:visible` can briefly
+    // match more than one menu during a Chakra exit transition, and eq() would then
+    // index across both.
+    this.getBarColorMenu(workspaceClass, tileIndex).should('have.length', 1).and('be.visible');
     this.getBarColorMenuButtons(workspaceClass, tileIndex).eq(colorIndex).click({ force: true });
     this.getBarColorMenu(workspaceClass, tileIndex).should('not.exist');
   }
