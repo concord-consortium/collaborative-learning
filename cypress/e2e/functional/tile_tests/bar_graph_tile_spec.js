@@ -542,9 +542,7 @@ context('Bar Graph Tile', function () {
     cy.get(`body [data-testid="color-menu-list"]:visible`).should('not.exist');
     barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[1]);
     barGraph.getBar().eq(1).should('have.attr', 'fill', clueDataColors[0]);
-    barGraph.getBarColorButton().eq(1).click({force: true});
-    barGraph.getBarColorMenu(workspace, tileIndex).should('be.visible');
-    barGraph.getBarColorMenuButtons(workspace, tileIndex).eq(2).click({force: true});
+    barGraph.selectBarColor(1, 2, workspace, tileIndex);
     barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[1]);
     barGraph.getBar().eq(1).should('have.attr', 'fill', clueDataColors[2]);
 
@@ -556,17 +554,11 @@ context('Bar Graph Tile', function () {
     barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[0]);
     barGraph.getBar().eq(1).should('have.attr', 'fill', clueDataColors[1]);
     barGraph.getBar().eq(2).should('have.attr', 'fill', clueDataColors[2]);
-    barGraph.getBarColorButton().eq(0).click({force: true});
-    barGraph.getBarColorMenu(workspace, tileIndex).should('be.visible');
-    barGraph.getBarColorMenuButtons(workspace, tileIndex).eq(1).click({force: true});
+    barGraph.selectBarColor(0, 1, workspace, tileIndex);
     barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[1]);
-    barGraph.getBarColorButton().eq(1).click({force: true});
-    barGraph.getBarColorMenu(workspace, tileIndex).should('be.visible');
-    barGraph.getBarColorMenuButtons(workspace, tileIndex).eq(2).click({force: true});
+    barGraph.selectBarColor(1, 2, workspace, tileIndex);
     barGraph.getBar().eq(1).should('have.attr', 'fill', clueDataColors[2]);
-    barGraph.getBarColorButton().eq(2).click({force: true});
-    barGraph.getBarColorMenu(workspace, tileIndex).should('be.visible');
-    barGraph.getBarColorMenuButtons(workspace, tileIndex).eq(3).click({force: true});
+    barGraph.selectBarColor(2, 3, workspace, tileIndex);
     barGraph.getBar().eq(2).should('have.attr', 'fill', clueDataColors[3]);
 
     cy.log('Check undo/redo of color changes.');
