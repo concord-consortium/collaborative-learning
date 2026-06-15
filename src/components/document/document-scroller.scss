@@ -92,6 +92,22 @@ $footer-height: 12px;
       }
     }
 
+    // The bookmark button (.icon-holder) is a child of .list-item-container, a sibling of
+    // .list-item. (My Work positions it via a `.documents-list`-scoped rule that doesn't
+    // apply here, so in the scroller it otherwise falls into normal flow.) Make the
+    // container a positioning context and overlay the bookmark in the top-right corner,
+    // nudged in a few px. Applies to both small and large thumbnails.
+    .list-item-container {
+      position: relative;
+
+      > .icon-holder {
+        left: auto;
+        position: absolute;
+        right: 6px;
+        top: 2px;
+      }
+    }
+
     .list-item {
       height: 126px;
       min-height: auto;
@@ -110,17 +126,6 @@ $footer-height: 12px;
           height: 738px;
           width: 958px;
         }
-      }
-
-      .icon-holder {
-        left: 2px;
-        right: auto;
-        top: -5px;
-        width: 24px;
-      }
-      .icon-star {
-        right: 0;
-        top: 0;
       }
 
       .footer {
