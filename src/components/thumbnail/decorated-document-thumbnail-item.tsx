@@ -21,12 +21,14 @@ interface IProps {
   selectedSecondaryDocument?: string;
   allowDelete: boolean;
   tab: string;
+  // true for large/"big" thumbnails that should be scrollable (see ThumbnailDocumentItem)
+  scrollable?: boolean;
 }
 
 // observes teacher names via useDocumentCaption()
 export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
   document, tab, scale, selectedDocument, selectedSecondaryDocument, allowDelete,
-  onSelectDocument, shouldHandleStarClick,
+  onSelectDocument, shouldHandleStarClick, scrollable,
 }: IProps) => {
     const { user, db: dbStore, bookmarks, ui } = useStores();
     const tabName = tab.toLowerCase().replace(' ', '-');
@@ -75,6 +77,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
         canvasContext={tab}
         document={document}
         scale={scale}
+        scrollable={scrollable}
         isSelected={document.key === selectedDocument}
         isSecondarySelected={document.key === selectedSecondaryDocument}
         captionText={caption}

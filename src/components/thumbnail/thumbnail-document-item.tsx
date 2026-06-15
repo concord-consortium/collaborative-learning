@@ -24,12 +24,16 @@ interface IProps {
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
   scale: number;
+  // When true (large/"big" thumbnails), the document is meant to be scrollable within
+  // the thumbnail. We omit the `inert`/`aria-hidden` that the small nav thumbnails use,
+  // because `inert` disables all interaction on its subtree — including scrolling.
+  scrollable?: boolean;
 }
 
 export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) => {
   const {
     dataTestName, canvasContext, document, scale, captionText, isSelected, isSecondarySelected,
-    onDocumentClick, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
+    onDocumentClick, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick, scrollable
   } = props;
   const appMode = useAppMode();
   const { bookmarks, user, documents } = useStores();
@@ -94,9 +98,13 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
       >
         <div
           className={classNames("scaled-list-item-container", { group })}
-          aria-hidden={true}
+          // Small nav thumbnails are non-interactive: hide their tile content from the
+          // a11y tree and remove it from the tab order via `inert`. Large/scrollable
+          // thumbnails must remain interactive so the document can be scrolled, so we
+          // skip both there (inert would block scrolling).
+          aria-hidden={scrollable ? undefined : true}
           // Spread bypasses React 17's type definitions, which lack `inert`.
-          {...{ inert: "" }}
+          {...(scrollable ? {} : { inert: "" })}
         >
           { isPrivate
             ? <ThumbnailPrivateIcon />

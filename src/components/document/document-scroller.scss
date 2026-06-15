@@ -25,6 +25,16 @@ $footer-height: 12px;
         aspect-ratio: 8/7;
         height: auto;
         width: 50%;
+
+        // The thumbnail item wraps its content in a .list-item-container. As a plain
+        // block it fills the parent's width but defaults to content height, which breaks
+        // the percentage-height chain below (.list-item height:100%, etc.). Without an
+        // explicit height the full document renders instead of being clipped/scrolled
+        // within the fixed-aspect-ratio thumbnail.
+        .list-item-container {
+          height: 100%;
+          width: 100%;
+        }
       }
 
       .list-item {
