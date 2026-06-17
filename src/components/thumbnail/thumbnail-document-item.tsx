@@ -54,6 +54,11 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
     const handleWheel = (e: WheelEvent) => {
       const content = el.querySelector<HTMLElement>(".document-content");
       if (!content) return;
+      // When the inner document is already scrolled to its top/bottom edge, let the wheel
+      // event through so the parent document grid (which holds many thumbnails) can scroll.
+      const atTop = content.scrollTop <= 0;
+      const atBottom = content.scrollTop + content.clientHeight >= content.scrollHeight;
+      if ((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBottom)) return;
       content.scrollTop += e.deltaY;
       e.preventDefault();
     };
