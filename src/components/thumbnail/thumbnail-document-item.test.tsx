@@ -22,6 +22,7 @@ interface IRenderOptions {
   onDocumentClick?: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
+  scrollable?: boolean;
 }
 
 function renderItem(options: IRenderOptions = {}) {
@@ -33,6 +34,7 @@ function renderItem(options: IRenderOptions = {}) {
     onDocumentClick = jest.fn(),
     onDocumentDragStart,
     onDocumentStarClick,
+    scrollable,
   } = options;
   const ownerId = isPrivate ? "other-user" : "test-student";
   const user = UserModel.create({ id: "test-student", type: userType, name: "Test Student" });
@@ -61,6 +63,7 @@ function renderItem(options: IRenderOptions = {}) {
         onDocumentDragStart={onDocumentDragStart}
         onDocumentStarClick={onDocumentStarClick}
         scale={0.1}
+        scrollable={scrollable}
       />
     </Provider>
   );
@@ -107,6 +110,16 @@ describe("ThumbnailDocumentItem", () => {
       const { container } = renderItem();
       const canvasContainer = container.querySelector(".scaled-list-item-container");
       expect(canvasContainer).toHaveAttribute("inert");
+    });
+
+    // Even scrollable (large) thumbnails keep inert + aria-hidden so the document stays
+    // out of the tab order and the a11y tree; scrolling is handled via a wheel handler
+    // rather than by making the subtree interactive. See CLUE-548.
+    it("keeps the canvas container inert/aria-hidden when scrollable", () => {
+      const { container } = renderItem({ scrollable: true });
+      const canvasContainer = container.querySelector(".scaled-list-item-container");
+      expect(canvasContainer).toHaveAttribute("inert");
+      expect(canvasContainer).toHaveAttribute("aria-hidden", "true");
     });
 
     it("sets aria-current='true' when the document is selected", () => {
