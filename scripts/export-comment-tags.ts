@@ -378,7 +378,16 @@ async function processComment(
 
   const documentData = documentSnapshot.data() ?? {};
   const classInfo = await getClassInfo(documentData.context_id);
-  const tags: string[] = (comment.tags ?? []).filter((tag: string) => !!tag);
+  // Malformed comment docs with non-array `tags` have been observed in production
+  // (see functions-v2/src/on-document-tagged.ts), so guard against them rather
+  // than aborting the entire export.
+  let tags: string[] = [];
+  const rawTags = comment.tags;
+  if (Array.isArray(rawTags)) {
+    tags = rawTags.map((tag: unknown) => String(tag).trim()).filter(tag => tag.length > 0);
+  } else if (rawTags != null) {
+    console.warn(`    Skipping invalid tags on ${documentSnapshot.ref.path}/comments/${commentId}:`, rawTags);
+  }
   if (!tags.length) {
     untaggedComments++;
     if (!args.includeUntagged) return;
