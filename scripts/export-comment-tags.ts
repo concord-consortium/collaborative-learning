@@ -182,6 +182,18 @@ function csvEscape(value: string) {
   return value;
 }
 
+/**
+ * Prevent CSV/spreadsheet formula injection. A cell whose first character is
+ * =, +, -, @, tab, or CR can be interpreted as a formula by Excel/Sheets (e.g.
+ * =HYPERLINK(...)). This export carries free-text, student/teacher-authored
+ * fields, so prefix any such value with a single quote to force a literal.
+ * Safe to neutralize a leading "-" because this export has no numeric columns;
+ * revisit if a numeric column is ever added.
+ */
+function neutralizeCsvInjection(value: string) {
+  return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+}
+
 function toIsoString(timestamp: any) {
   if (!timestamp) return "";
   if (typeof timestamp.toDate === "function") return timestamp.toDate().toISOString();
@@ -501,7 +513,8 @@ if (!args.contextIds.length && !args.documentKeys.length) {
 
 // --- Output ---
 
-const csvLines = [header, ...rows].map(row => row.map(value => csvEscape(String(value))).join(","));
+const csvLines = [header, ...rows].map(row =>
+  row.map(value => csvEscape(neutralizeCsvInjection(String(value)))).join(","));
 fs.writeFileSync(args.out, `${csvLines.join("\n")}\n`);
 
 const endTime = Date.now();
