@@ -460,7 +460,11 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       }
     });
 
-    return updatedTiles;
+    // Remove old tiles for any types with a maximum.
+    self.evictTilesOverLimit(updatedTiles.map(t => t.newTileId));
+
+    // Return the updated tiles (excluding any that were removed due to a type maximum).
+    return updatedTiles.filter(t => t.newTileId && self.getTile(t.newTileId));
   }
 }))
 .actions(self => ({
