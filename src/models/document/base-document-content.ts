@@ -1276,7 +1276,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
      * We don't track a tile's age, so we do our best to approximate oldest:
      * - Pre-existing tiles are removed before any newly added tile.
      * - Tiles further up in the document are removed before tiles lower in the document.
-     * Only top-level tiles are considered, not nested tiles.
+     * Note that both top level and nested tiles are considered here.
      */
     evictTilesOverLimit(newTileIds: string[]) {
       const newIdSet = new Set(newTileIds);
