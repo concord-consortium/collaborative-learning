@@ -5,6 +5,8 @@ import { DocumentContentModel, DocumentContentModelType, DocumentContentSnapshot
 import { TableContentModelType } from "../../tiles/table/table-content";
 import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types";
 import { isPlaceholderContent } from "../../../models/tiles/placeholder/placeholder-content";
+import { specAppConfig } from "../../stores/spec-app-config";
+import { UnitConfiguration } from "../../stores/unit-configuration";
 
 import placeholderImage from "../../assets/image_placeholder.png";
 
@@ -117,8 +119,15 @@ export function getRowLayout(documentContent: DocumentContentModelType) {
   return rowLayout;
 }
 
-export function setupDocumentContent(srcContent: DocumentContentSnapshotType) {
-  const documentContent = DocumentContentModel.create(srcContent);
+export function setupDocumentContent(
+  srcContent: DocumentContentSnapshotType,
+  settings?: UnitConfiguration["settings"]
+) {
+  // Only attach an environment when settings are supplied, so callers that don't
+  // need an appConfig keep the previous no-environment behavior.
+  const documentContent = settings
+    ? DocumentContentModel.create(srcContent, { appConfig: specAppConfig({ config: { settings } }) })
+    : DocumentContentModel.create(srcContent);
 
   return {
     documentContent,
