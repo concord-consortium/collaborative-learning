@@ -136,7 +136,7 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
   };
 
   const isButtonDisabled = (toolButton: IToolbarButtonModel) => {
-    const { persistentUI: {problemWorkspace: { primaryDocumentKey } } } = stores;
+    const { persistentUI: { problemWorkspace: { primaryDocumentKey } } } = stores;
 
     const selectedTileIds = getSelectedTileIdsInDocument();
 

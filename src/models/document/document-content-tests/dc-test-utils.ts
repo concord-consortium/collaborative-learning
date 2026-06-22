@@ -123,8 +123,7 @@ export function setupDocumentContent(
   srcContent: DocumentContentSnapshotType,
   settings?: UnitConfiguration["settings"]
 ) {
-  // Only attach an environment when settings are supplied, so callers that don't
-  // need an appConfig keep the previous no-environment behavior.
+  // Only attach an environment when settings are supplied.
   const documentContent = settings
     ? DocumentContentModel.create(srcContent, { appConfig: specAppConfig({ config: { settings } }) })
     : DocumentContentModel.create(srcContent);
@@ -176,4 +175,3 @@ export function getAllRows(doc: DocumentContentModelType) {
   });
 
 }
-

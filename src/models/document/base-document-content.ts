@@ -1275,16 +1275,13 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
      * maxTiles for that type, delete the "oldest" tiles until the count equals maxTiles.
      * We don't track a tile's age, so we do our best to approximate oldest:
      * - Pre-existing tiles are removed before any newly added tile.
-     * - Tiles further up in the document are removed before documents lower in the document.
+     * - Tiles further up in the document are removed before tiles lower in the document.
      * Only top-level tiles are considered, not nested tiles.
      */
     evictTilesOverLimit(newTileIds: string[]) {
       const newIdSet = new Set(newTileIds);
-      // Determine the distinct types of the newly added tiles.
       const newTypes = new Set(
-        newTileIds
-          .map(id => self.getTile(id)?.content.type)
-          .filter((t): t is string => !!t)
+        newTileIds.map(id => self.getTile(id)?.content.type).filter((t): t is string => !!t)
       );
 
       newTypes.forEach(type => {
