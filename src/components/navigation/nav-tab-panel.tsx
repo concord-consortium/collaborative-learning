@@ -49,7 +49,10 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const { persistentUI: { activeNavTab, focusDocument, showChatPanel }, ui: { selectedTileIds },
             user, appConfig } = this.stores;
     const tabs = this.stores.tabsToDisplay;
-    const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
+    const foundIndex = tabs?.findIndex(t => t.tab === activeNavTab);
+    // An activeNavTab not in the displayed tabs gives findIndex === -1,
+    // which renders a blank panel; fall back to the first displayed tab.
+    const selectedTabIndex = foundIndex === -1 && tabs && tabs.length > 0 ? 0 : foundIndex;
     const isChatEnabled = appConfig.showCommentPanelFor(user.type) &&
       !this.shouldHideChat(selectedTabIndex, user.type);
     const openChatPanel = isChatEnabled && showChatPanel;

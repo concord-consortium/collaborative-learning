@@ -270,7 +270,11 @@ export const PersistentUIModelV2 = types
       let navTab = "";
 
       if (opts?.fromUrlStudentDocument) {
-        navTab = ENavTab.kStudentWork;
+        // Report links land on Sort Work (ensured by setRequireSortWorkTab);
+        // activating kStudentWork can select a tab absent from tabsToDisplay -> blank panel.
+        if (availableTabs.includes(ENavTab.kSortWork)) {
+          navTab = ENavTab.kSortWork;
+        }
       } else if (aiEvaluation) {
         if (availableTabs.includes(ENavTab.kSortWork)) {
           navTab = ENavTab.kSortWork;
@@ -315,7 +319,7 @@ export const PersistentUIModelV2 = types
           self.setSecondarySortBy("None");
         } else {
           if (sortedDocuments) {
-            if (aiEvaluation) {
+            if (aiEvaluation || opts?.fromUrlStudentDocument) {
               self.setPrimarySortBy("Name");
             }
             const primarySortBy: PrimarySortType =

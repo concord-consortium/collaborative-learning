@@ -392,9 +392,11 @@ describe("PersistentUI", () => {
     });
 
     describe("URL student document handling", () => {
-      it("opens student-work tab when `fromUrlStudentDocument` is true", () => {
+      it("routes a report link to Sort Work (not student-work) when available, sorted by Name", () => {
+        // aiEvaluation is intentionally undefined to prove the Sort Work routing and
+        // the Name sort come from the report-link path itself, not from aiEvaluation.
         mockAppConfig = {
-          aiEvaluation: "mock",
+          aiEvaluation: undefined,
           navTabs: {
             tabSpecs: [
               { tab: "sort-work", label: "Sort Work" },
@@ -412,7 +414,32 @@ describe("PersistentUI", () => {
           { fromUrlStudentDocument: true }
         );
 
-        expect(persistentUI.activeNavTab).toBe("student-work");
+        // Previously this activated "student-work", which can be hidden/absent from
+        // tabsToDisplay and leave the content panel blank.
+        expect(persistentUI.activeNavTab).toBe(ENavTab.kSortWork);
+        expect(persistentUI.primarySortBy).toBe("Name");
+      });
+
+      it("does not force student-work when Sort Work is unavailable (uses the doc's natural tab)", () => {
+        mockAppConfig = {
+          aiEvaluation: undefined,
+          navTabs: {
+            tabSpecs: [
+              { tab: "my-work", label: "My Work" }
+            ]
+          }
+        };
+        // With Sort Work absent, the report-link flag no longer hard-codes
+        // student-work; the doc routes to its natural tab (a problem doc -> my-work).
+        persistentUI.openResourceDocument(
+          mockDoc,
+          mockAppConfig,
+          mockUser,
+          mockSortedDocuments,
+          { fromUrlStudentDocument: true }
+        );
+
+        expect(persistentUI.activeNavTab).toBe(ENavTab.kMyWork);
       });
     });
   });
