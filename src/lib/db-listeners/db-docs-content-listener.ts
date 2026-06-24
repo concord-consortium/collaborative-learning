@@ -1,7 +1,7 @@
 import firebase from "firebase/app";
 import { autorun, IReactionDisposer } from "mobx";
 import { DocumentModelType } from "../../models/document/document";
-import { ProblemDocument } from "../../models/document/document-types";
+import { PersonalDocument, ProblemDocument } from "../../models/document/document-types";
 import { DB } from "../db";
 import { DBDocument } from "../db-types";
 import { BaseListener } from "./base-listener";
@@ -53,7 +53,7 @@ export class DBDocumentsContentListener extends BaseListener {
 
   public start() {
     this.disposer = autorun(() => {
-      const {documents, groups, user} = this.db.stores;
+      const {documents, groups, persistentUI, user} = this.db.stores;
 
       const documentsToMonitor: DocumentModelType[] = [];
 
@@ -75,6 +75,14 @@ export class DBDocumentsContentListener extends BaseListener {
         if (user.isTeacher || document.groupId === user.currentGroupId) {
           documentsToMonitor.push(document);
         }
+      });
+
+      // Monitor personal documents, except the document currently open for editing in the workspace.
+      const { primaryDocumentKey, comparisonDocumentKey } = persistentUI.problemWorkspace;
+      const editableKeys = new Set([primaryDocumentKey, comparisonDocumentKey]);
+      documents.byType(PersonalDocument).forEach((document) => {
+        if (editableKeys.has(document.key)) return;
+        documentsToMonitor.push(document);
       });
 
       // Stop monitoring any documents we shouldn't be
