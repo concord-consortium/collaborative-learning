@@ -1,25 +1,17 @@
-import { observable, runInAction } from "mobx";
+import { IObservableArray, observable, runInAction } from "mobx";
 import { PersonalDocument } from "../../models/document/document-types";
 import { DBDocumentsContentListener } from "./db-docs-content-listener";
 
-// These tests exercise the personal-document monitoring added so that personal
-// document thumbnails (sort view, navigation tabs, teacher viewing student work)
-// update live when their content changes in Firebase. The store/firebase
-// dependencies are mocked with lightweight observables so the listener's autorun
-// reacts the same way it would against the real MST stores.
 describe("DBDocumentsContentListener (personal documents)", () => {
   const documentPath = (uid: string, key: string) => `users/${uid}/documents/${key}`;
 
-  let docs: any[];
+  let docs: IObservableArray;
   let problemWorkspace: { primaryDocumentKey?: string; comparisonDocumentKey?: string };
   let user: { id: string; isTeacher: boolean; currentGroupId?: string };
   let refsByPath: Record<string, { on: jest.Mock; off: jest.Mock; toString: () => string }>;
   let handlersByPath: Record<string, (snapshot: { val: () => any }) => void>;
   let db: any;
 
-  // Plain (non-observable) objects: only array membership needs to be reactive,
-  // and wrapping in observable() would convert setContent into an action and
-  // defeat the jest spy.
   const makeDoc = (key: string, uid: string, type: string = PersonalDocument) =>
     ({ key, uid, type, setGroupId: jest.fn(), setContent: jest.fn() });
 
@@ -37,7 +29,7 @@ describe("DBDocumentsContentListener (personal documents)", () => {
   };
 
   beforeEach(() => {
-    docs = observable.array([], { deep: false }) as unknown as any[];
+    docs = observable.array([], { deep: false });
     problemWorkspace = observable({ primaryDocumentKey: undefined, comparisonDocumentKey: undefined });
     user = observable({ id: "teacher-1", isTeacher: true, currentGroupId: undefined });
     refsByPath = {};
