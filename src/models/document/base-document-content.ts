@@ -382,6 +382,19 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         .filter(tile => tile.content.type.toLowerCase() === lcType)
         .map(tile => tile.id);
     },
+    // Returns the configured limit on the number of tiles of the given type that
+    // may exist in the document, or undefined if no limit is set.
+    getMaxTilesOfType(type: string) {
+      const appConfig = getAppConfig(self);
+      if (!appConfig) return undefined;
+      // "IframeInteractive" → "iframeinteractive"
+      const lowerCaseId = type.toLowerCase();
+      // "IframeInteractive" → "iframeInteractive" (camelCase settings keys)
+      const camelCaseId = type.charAt(0).toLowerCase() + type.slice(1);
+      const maxTiles = appConfig.getSetting("maxTiles", lowerCaseId)
+        ?? appConfig.getSetting("maxTiles", camelCaseId);
+      return typeof maxTiles === "number" ? maxTiles : undefined;
+    },
     getAllTilesByType() {
       const tilesByType: Record<string, string[]> = {};
       self.tileMap.forEach(tile => {
@@ -1256,6 +1269,40 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           self.deleteTile(tileId);
         });
       }
+    },
+    /**
+     * For each tile type among newTileIds, if the document now exceeds the configured
+     * maxTiles for that type, delete the "oldest" tiles until the count equals maxTiles.
+     * We don't track a tile's age, so we do our best to approximate oldest:
+     * - Pre-existing tiles are removed before any newly added tile.
+     * - Tiles further up in the document are removed before tiles lower in the document.
+     * Note that both top level and nested tiles are considered here.
+     */
+    evictTilesOverLimit(newTileIds: string[]) {
+      const newIdSet = new Set(newTileIds);
+      const newTypes = new Set(
+        newTileIds.map(id => self.getTile(id)?.content.type).filter((t): t is string => !!t)
+      );
+
+      newTypes.forEach(type => {
+        const max = self.getMaxTilesOfType(type);
+        if (max == null) return;
+
+        // getTilesOfType is document-ordered.
+        // Evict pre-existing tiles before any newly added tile.
+        const candidates = self.getTilesOfType(type);
+        const existing = candidates.filter(id => !newIdSet.has(id));
+        const added = candidates.filter(id => newIdSet.has(id));
+        const eviction = [...existing, ...added];
+
+        let overflow = candidates.length - max;
+        let i = 0;
+        while (overflow > 0 && i < eviction.length) {
+          self.deleteTile(eviction[i]);
+          i++;
+          overflow--;
+        }
+      });
     },
     userMoveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       // Get the container of each tile before it is moved.

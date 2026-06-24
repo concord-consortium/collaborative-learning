@@ -136,10 +136,7 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
   };
 
   const isButtonDisabled = (toolButton: IToolbarButtonModel) => {
-    const {
-      appConfig: { settings },
-      persistentUI: {problemWorkspace: { primaryDocumentKey } }
-    } = stores;
+    const { persistentUI: { problemWorkspace: { primaryDocumentKey } } } = stores;
 
     const selectedTileIds = getSelectedTileIdsInDocument();
 
@@ -159,17 +156,15 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
       return true;
     }
 
-    if (toolButton.isTileTool && settings) {
+    if (toolButton.isTileTool) {
       // If a limit on the number of tiles of a certain type has been specified in settings,
       // disable the related tile button when that limit is reached.
-      const tilesOfTypeCount = document?.content?.getTilesOfType(toolButton.id).length || 0;
-      // "Diagram" → "diagram", "IframeInteractive" → "iframeinteractive"
-      const lowerCaseId = toolButton.id.toLowerCase();
-      // "IframeInteractive" → "iframeInteractive" (works for multi-word types where settings use camelCase keys)
-      const camelCaseId = toolButton.id.charAt(0).toLowerCase() + toolButton.id.slice(1);
-      const tileSettings = (settings[lowerCaseId] || settings[camelCaseId]) as Record<string, any>;
-      const maxTilesOfType = tileSettings ? tileSettings.maxTiles : undefined;
-      if (maxTilesOfType && tilesOfTypeCount >= maxTilesOfType) return true;
+      const content = document?.content;
+      const maxTilesOfType = content?.getMaxTilesOfType(toolButton.id);
+      if (maxTilesOfType != null) {
+        const tilesOfTypeCount = content?.getTilesOfType(toolButton.id).length || 0;
+        if (tilesOfTypeCount >= maxTilesOfType) return true;
+      }
     }
 
     if (disabledToolIds?.includes(toolButton.id)) {
