@@ -1,5 +1,5 @@
 import { IObservableArray, observable, runInAction } from "mobx";
-import { PersonalDocument } from "../../models/document/document-types";
+import { LearningLogDocument, PersonalDocument } from "../../models/document/document-types";
 import { DBDocumentsContentListener } from "./db-docs-content-listener";
 
 describe("DBDocumentsContentListener (personal documents)", () => {
@@ -89,6 +89,19 @@ describe("DBDocumentsContentListener (personal documents)", () => {
     runInAction(() => docs.push(ownDoc));
 
     expect(refsByPath[documentPath("teacher-1", "own")]?.on).toHaveBeenCalled();
+
+    listener.stop();
+  });
+
+  it("monitors learning log documents", () => {
+    const listener = new DBDocumentsContentListener(db);
+    listener.start();
+
+    const doc = makeDoc("ll1", "student-1", LearningLogDocument);
+    runInAction(() => docs.push(doc));
+
+    const path = documentPath("student-1", "ll1");
+    expect(refsByPath[path]?.on).toHaveBeenCalledWith("value", expect.any(Function));
 
     listener.stop();
   });
