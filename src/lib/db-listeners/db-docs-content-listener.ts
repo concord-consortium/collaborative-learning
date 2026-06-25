@@ -53,7 +53,7 @@ export class DBDocumentsContentListener extends BaseListener {
 
   public start() {
     this.disposer = autorun(() => {
-      const {documents, groups, persistentUI, user} = this.db.stores;
+      const { documents, groups, persistentUI, user } = this.db.stores;
 
       const documentsToMonitor: DocumentModelType[] = [];
 
