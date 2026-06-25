@@ -41,15 +41,22 @@ export const sortDateSectionLabels = (
   });
 };
 
+// Section label for the class-wide Driving Question Board in the "by Group" sort. It is
+// not a student group, so it gets its own section that sorts ahead of the numbered groups.
+export const kWholeClassSectionLabel = "Whole Class";
+
 export const sortGroupSectionLabels = (docMapKeys: string[]) => {
   return docMapKeys.sort((a, b) => {
+    // The whole-class section (Driving Question Board) sorts first, above the groups.
+    if (a === kWholeClassSectionLabel) return -1;
+    if (b === kWholeClassSectionLabel) return 1;
     const numA = parseInt(a.replace(/^\D+/g, ''), 10);
     const numB = parseInt(b.replace(/^\D+/g, ''), 10);
     const aIsNum = !isNaN(numA);
     const bIsNum = !isNaN(numB);
-    // Numeric group labels ("Group 1", "Group 2", …) sort first, ascending. Non-numeric
-    // labels like "No Group" (NaN) have no number to compare, so place them last in a
-    // deterministic (alphabetical) order rather than producing NaN sort keys.
+    // Numeric group labels ("Group 1", "Group 2", …) sort next, ascending. Other
+    // non-numeric labels like "No Group" (NaN) have no number to compare, so place them
+    // last in a deterministic (alphabetical) order rather than producing NaN sort keys.
     if (aIsNum && bIsNum) return numA - numB;
     if (aIsNum) return -1;
     if (bIsNum) return 1;

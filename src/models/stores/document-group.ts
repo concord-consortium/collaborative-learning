@@ -2,7 +2,7 @@ import { FC, SVGProps } from "react";
 import { makeAutoObservable } from "mobx";
 
 import {
-  createDocMapByBookmarks, createTileTypeToDocumentsMap, getTagsWithDocs,
+  createDocMapByBookmarks, createTileTypeToDocumentsMap, getTagsWithDocs, kWholeClassSectionLabel,
   sortDateSectionLabels, sortGroupSectionLabels, sortNameSectionLabels, sortProblemSectionLabels
 } from "../../utilities/sort-document-utils";
 import { upperWords } from "../../utilities/string-utils";
@@ -186,9 +186,10 @@ export class DocumentGroup {
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
     this.documents.forEach((doc) => {
       const sectionLabel = (() => {
-        // The class-wide Driving Question Board belongs to no group.
+        // The class-wide Driving Question Board gets its own "Whole Class" section
+        // (rather than sharing the "No Group" bucket with ungrouped students' docs).
         if (doc.type === DrivingQuestionBoardDocument) {
-          return `No ${groupTerm}`;
+          return kWholeClassSectionLabel;
         }
         if (doc.type === GroupDocument) {
           return `${groupTerm} ${doc.groupId}`;

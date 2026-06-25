@@ -389,7 +389,7 @@ describe('DocumentGroup Model', () => {
 
   describe("Driving Question Board sorting", () => {
     // The class-wide Driving Question Board has no group and no author, so it should
-    // land in the "No Group" section (by Group) and the "No Name" section (by Name).
+    // land in its own "Whole Class" section (by Group) and the "No Name" section (by Name).
     beforeEach(() => {
       const metadataWithDQB: SnapshotIn<typeof MetadataDocMapModel> = {
         ...mockMetadataDocuments,
@@ -405,13 +405,13 @@ describe('DocumentGroup Model', () => {
       sortedDocuments.metadataDocsFiltered = MetadataDocMapModel.create(metadataWithDQB);
     });
 
-    it('places the DQB under "No Group" when sorting by Group', () => {
+    it('places the DQB in a "Whole Class" section that sorts first when sorting by Group', () => {
       const byGroupDocs = sortedDocuments.sortBy("Group");
       const labels = byGroupDocs.map(d => d.label);
-      // numeric groups first, "No Group" last (deterministic)
-      expect(labels).toEqual(["Group 3", "Group 5", "Group 9", "No Group"]);
-      const noGroup = byGroupDocs.find(d => d.label === "No Group");
-      expect(noGroup?.documents.some(d => d.key === "DQB Doc")).toBe(true);
+      // "Whole Class" sorts ahead of the numbered groups.
+      expect(labels).toEqual(["Whole Class", "Group 3", "Group 5", "Group 9"]);
+      const wholeClass = byGroupDocs.find(d => d.label === "Whole Class");
+      expect(wholeClass?.documents.some(d => d.key === "DQB Doc")).toBe(true);
     });
 
     it('places the DQB under "No Name" when sorting by Name', () => {
