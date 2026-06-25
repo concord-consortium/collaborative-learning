@@ -46,18 +46,13 @@ export class NavTabPanel extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { persistentUI: { activeNavTab, focusDocument, showChatPanel }, ui: { selectedTileIds },
+    const { persistentUI: { focusDocument, showChatPanel }, ui: { selectedTileIds },
             user, appConfig } = this.stores;
     const tabs = this.stores.tabsToDisplay;
-    const foundIndex = tabs?.findIndex(t => t.tab === activeNavTab);
-    // An activeNavTab not in the displayed tabs gives findIndex === -1, which
-    // renders a blank panel; fall back to the first displayed tab.
-    const selectedTabIndex = foundIndex === -1 && tabs && tabs.length > 0 ? 0 : foundIndex;
-    // Use the actually-selected tab (not the stored activeNavTab) for theming and
-    // the chat panel, so they stay consistent when the fallback above kicks in.
-    const selectedNavTab = tabs && selectedTabIndex != null && selectedTabIndex >= 0
-      ? tabs[selectedTabIndex].tab
-      : activeNavTab;
+    // Resolve the active tab against the displayed tabs so an activeNavTab that
+    // isn't shown (e.g. a hidden tab) doesn't blank the panel or mis-theme it.
+    const selectedNavTab = this.stores.displayedActiveNavTab;
+    const selectedTabIndex = tabs?.findIndex(t => t.tab === selectedNavTab);
     const isChatEnabled = appConfig.showCommentPanelFor(user.type) &&
       !this.shouldHideChat(selectedTabIndex, user.type);
     const openChatPanel = isChatEnabled && showChatPanel;

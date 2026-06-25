@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Instance } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import { usePersistentUIStore } from "../../hooks/use-stores";
+import { useStores } from "../../hooks/use-stores";
 import { TreeManager } from "../../models/history/tree-manager";
 import { FirestoreHistoryManager, HistoryStatus } from "../../models/history/firestore-history-manager";
 import { DocumentModelType } from "../../models/document/document";
@@ -18,7 +18,7 @@ interface IProps {
 
 export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   const { document, historyManager } = props;
-  const { activeNavTab } = usePersistentUIStore();
+  const { displayedActiveNavTab: activeNavTab } = useStores();
   const treeManager = document?.treeManagerAPI as Instance<typeof TreeManager>;
 
   useEffect(() => {
