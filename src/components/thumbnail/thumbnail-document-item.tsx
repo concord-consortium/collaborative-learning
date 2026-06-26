@@ -104,11 +104,10 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
   const label = DEBUG_BOOKMARKS ? bookmarks.getBookmarkLabel(document.key, user.id, classStore) : "";
 
   const group = document.type === GroupDocument;
-  // The firestore document metadata updates dynamically, but it is not up to date for all documents
-  const dynamicAccessible = !!documentMetadata && isDocumentAccessibleToUser(documentMetadata, user, documents);
-  // The loaded document metadata doesn't update dynamically, but it can be more up to date than the firestore metadata
-  const staticAccessible = isDocumentAccessibleToUser(document.metadata, user, documents);
-  const isPrivate = !(staticAccessible || dynamicAccessible);
+  // If the firestore metadata has a defined visibility, use it. It's prefered because it's reactive to remote changes.
+  // However, sometimes its visibility is not defined, in which case use the static loaded document's metadata.
+  const metadata = documentMetadata?.visibility != null ? documentMetadata : document.metadata;
+  const isPrivate = !isDocumentAccessibleToUser(metadata, user, documents);
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;
 
