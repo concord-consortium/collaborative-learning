@@ -1,9 +1,12 @@
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { Provider } from "mobx-react";
+import { runInAction } from "mobx";
+import { unprotect } from "mobx-state-tree";
 import React from "react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { createDocumentModel, DocumentModelType } from "../../models/document/document";
-import { ProblemDocument } from "../../models/document/document-types";
+import { DocumentMetadataModel } from "../../models/document/document-metadata-model";
+import { PersonalDocument, ProblemDocument } from "../../models/document/document-types";
 import { specStores } from "../../models/stores/spec-stores";
 import { UserModel } from "../../models/stores/user";
 import { Bookmark } from "../../models/stores/bookmarks";
@@ -212,6 +215,59 @@ describe("ThumbnailDocumentItem", () => {
       const bookmark = container.querySelector(".icon-holder") as HTMLElement;
       fireEvent.click(bookmark);
       expect(onDocumentStarClick).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("documentMetadata prop (reactive shared status)", () => {
+    function renderWithMetadata(visibility: "public" | "private") {
+      const user = UserModel.create({ id: "test-student", type: "student", name: "Test Student" });
+      const stores = specStores({ user });
+      // A peer-owned doc whose own visibility stays "private" (the stale field); the
+      // metadata prop is what should drive accessibility.
+      const document = createDocumentModel({
+        type: PersonalDocument, title: "Peer Doc", uid: "other-user",
+        key: "peer-doc-1", createdAt: 1, visibility: "private"
+      });
+      const metadata = DocumentMetadataModel.create({
+        uid: "other-user", type: PersonalDocument, key: "peer-doc-1", visibility
+      });
+      unprotect(metadata);
+      const result = render(
+        <Provider stores={stores}>
+          <ThumbnailDocumentItem
+            canvasContext="test"
+            captionText={captionText}
+            dataTestName="sort-work-list-items"
+            document={document}
+            documentMetadata={metadata}
+            onDocumentClick={jest.fn()}
+            scale={0.1}
+          />
+        </Provider>
+      );
+      const listItem = () => result.container.querySelector(".list-item") as HTMLElement;
+      return { ...result, listItem, metadata };
+    }
+
+    it("renders private when metadata.visibility is private", () => {
+      const { listItem } = renderWithMetadata("private");
+      expect(listItem()).toHaveAttribute("aria-disabled", "true");
+    });
+
+    it("renders accessible when metadata.visibility is public, despite the document's own private visibility", () => {
+      const { listItem } = renderWithMetadata("public");
+      expect(listItem()).not.toHaveAttribute("aria-disabled");
+      expect(listItem()).toHaveAttribute("role", "button");
+    });
+
+    it("reactively flips from private to accessible when metadata.visibility changes", () => {
+      const { listItem, metadata } = renderWithMetadata("private");
+      expect(listItem()).toHaveAttribute("aria-disabled", "true");
+
+      act(() => { runInAction(() => { metadata.visibility = "public"; }); });
+
+      expect(listItem()).not.toHaveAttribute("aria-disabled");
+      expect(listItem()).toHaveAttribute("role", "button");
     });
   });
 

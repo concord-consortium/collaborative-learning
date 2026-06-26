@@ -5,6 +5,7 @@ import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 import { DocumentModelType } from "../../models/document/document";
+import { IDocumentMetadataModel } from "../../models/document/document-metadata-model";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { logDocumentEvent } from "../../models/document/log-document-event";
@@ -17,6 +18,7 @@ interface IProps {
   onSelectDocument?: (document: DocumentModelType) => void;
   scale: number;
   document: DocumentModelType;
+  documentMetadata?: IDocumentMetadataModel;
   selectedDocument?: string;
   selectedSecondaryDocument?: string;
   allowDelete: boolean;
@@ -27,7 +29,7 @@ interface IProps {
 
 // observes teacher names via useDocumentCaption()
 export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
-  document, tab, scale, selectedDocument, selectedSecondaryDocument, allowDelete,
+  document, documentMetadata, tab, scale, selectedDocument, selectedSecondaryDocument, allowDelete,
   onSelectDocument, shouldHandleStarClick, scrollable,
 }: IProps) => {
     const { user, db: dbStore, bookmarks, ui } = useStores();
@@ -76,6 +78,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
         dataTestName={`${tabName}-list-items`}
         canvasContext={tab}
         document={document}
+        documentMetadata={documentMetadata}
         scale={scale}
         scrollable={scrollable}
         isSelected={document.key === selectedDocument}
