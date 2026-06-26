@@ -14,6 +14,9 @@ import getPulledUnits from "./routes/get-pulled-units";
 import getPulledFiles from "./routes/get-pulled-files";
 import putContent from "./routes/put-content";
 import putImage from "./routes/put-image";
+import getImageUsages from "./routes/get-image-usages";
+import deleteImage from "./routes/delete-image";
+import renameImage from "./routes/rename-image";
 import getRawContent from "./routes/get-raw-content";
 import deleteUnit from "./routes/delete-unit";
 import pushUnit from "./routes/push-unit";
@@ -197,6 +200,9 @@ app.get("/getContent", getContent);
 app.post("/putContent", putContent);
 
 app.post("/putImage", putImage);
+app.get("/getImageUsages", getImageUsages);
+app.post("/deleteImage", deleteImage);
+app.post("/renameImage", renameImage);
 
 app.get("/getRemoteBranches", getRemoteBranches);
 app.get("/getRemoteUnits", getRemoteUnits);

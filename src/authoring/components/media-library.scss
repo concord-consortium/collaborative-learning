@@ -148,6 +148,7 @@
       }
 
       .media-library-image-thumb {
+        position: relative;
         border: 2px solid transparent;
         border-radius: 6px;
         padding: 2px;
@@ -172,6 +173,25 @@
         border-radius: 4px;
         display: block;
       }
+
+      .media-library-thumb-badge {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        background: $workspace-teal;
+        color: #fff;
+        font-size: 0.7em;
+        line-height: 16px;
+        text-align: center;
+        &.unused {
+          background: $charcoal-light-2;
+        }
+      }
     }
 
     .media-library-preview {
@@ -179,21 +199,31 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       background: #fff;
       overflow: auto;
       padding: 10px;
 
+      // Controls live above the image so they remain visible for tall images.
+      .media-library-preview-controls {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #eee;
+      }
+
       .media-library-preview-img {
         max-width: 100%;
-        max-height: 100%;
         object-fit: contain;
         border-radius: 4px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       }
 
       .media-library-preview-filename {
-        margin-top: 10px;
         color: #888;
         font-size: 0.95em;
         text-align: center;
@@ -201,7 +231,6 @@
       }
 
       .media-library-select-btn {
-        margin-top: 16px;
         padding: 6px 18px;
         background: $color7;
         color: #fff;
@@ -218,6 +247,124 @@
       .media-library-no-preview {
         color: #aaa;
         font-size: 1.1em;
+      }
+
+      .media-library-usage {
+        font-size: 0.9em;
+        text-align: center;
+
+        .media-library-usage-text {
+          color: $charcoal-dark-2;
+          font-weight: 600;
+        }
+
+        .media-library-usage-toggle {
+          background: none;
+          border: none;
+          color: $color7;
+          cursor: pointer;
+          font-size: 1em;
+          padding: 2px 4px;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+
+          .disclosure-caret {
+            border: solid currentColor;
+            border-width: 0 2px 2px 0;
+            display: inline-block;
+            padding: 2px;
+            transform: rotate(-45deg);
+            transition: transform 0.15s;
+          }
+          &.expanded .disclosure-caret {
+            transform: rotate(45deg);
+          }
+        }
+
+        .media-library-usage-list {
+          list-style: none;
+          margin: 4px 0 0 0;
+          padding: 4px 8px;
+          max-height: 140px;
+          overflow-y: auto;
+          text-align: left;
+          background: #fafbfc;
+          border: 1px solid #eee;
+          border-radius: 4px;
+
+          li {
+            font-size: 0.9em;
+            color: $charcoal-dark-2;
+            padding: 2px 0;
+          }
+        }
+      }
+
+      .media-library-image-actions {
+        text-align: center;
+
+        .media-library-action-buttons {
+          display: flex;
+          gap: 8px;
+          justify-content: center;
+        }
+
+        .media-library-rename-btn,
+        .media-library-delete-btn {
+          padding: 5px 14px;
+          border: 1px solid $charcoal-light-2;
+          border-radius: 4px;
+          background: $charcoal-light-5;
+          color: $charcoal-dark-2;
+          cursor: pointer;
+          transition: background 0.2s;
+          &:hover {
+            background: $workspace-teal-light-6;
+          }
+        }
+
+        .media-library-delete-btn {
+          color: #c00;
+          border-color: #e0b4b4;
+          background: #fcf3f3;
+          &:hover {
+            background: #f7e2e2;
+          }
+          &:disabled {
+            color: #bbb;
+            border-color: #eee;
+            background: #f7f7f7;
+            cursor: not-allowed;
+          }
+        }
+
+        .media-library-rename {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+
+          .media-library-rename-input {
+            padding: 5px;
+            width: 220px;
+            box-sizing: border-box;
+          }
+          .media-library-rename-buttons {
+            display: flex;
+            gap: 8px;
+          }
+          .media-library-rename-error {
+            color: #c00;
+            font-size: 0.85em;
+          }
+        }
+
+        .media-library-action-message {
+          margin-top: 8px;
+          font-size: 0.85em;
+          color: #666;
+        }
       }
     }
   }

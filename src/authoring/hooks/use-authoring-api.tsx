@@ -9,13 +9,16 @@ export type GetEndPoint =
   | "/getRemoteUnits"
   | "/getPulledBranches"
   | "/getPulledUnits"
-  | "/getPulledFiles";
+  | "/getPulledFiles"
+  | "/getImageUsages";
 
 export type PostEndPoint =
   | "/pullUnit"
   | "/pushUnit"
   | "/putContent"
   | "/putImage"
+  | "/deleteImage"
+  | "/renameImage"
   | "/deleteUnit";
 
 export type EndPoint = GetEndPoint | PostEndPoint;
