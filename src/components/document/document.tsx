@@ -227,15 +227,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private showFileMenu() {
-    const { appConfig: { aiEvaluation, navTabs }, documents } = this.stores;
-    const hasIdeas = aiEvaluation || documents.invisibleExemplarDocuments.length > 0;
-    // Show the File menu if my work navigation is enabled, or if we have Ideas since in that
-    // case students may need to make more documents and publishing should be available
-    // independently of showing a MyWork tab.
-    return !!navTabs.getNavTabSpec(ENavTab.kMyWork) || hasIdeas;
-  }
-
   private showPersonalShareToggle() {
     const tabNames = this.stores.appConfig.navTabs.tabSpecs.map(tab => tab.tab);
     return tabNames.includes(ENavTab.kSortWork);
@@ -277,7 +268,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const { appMode, clipboard } = this.stores;
     const { document } = this.props;
     const isShared = document.visibility === "public";
-    const showFileMenu = this.showFileMenu();
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
@@ -285,14 +275,13 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       <div className={`titlebar ${docType}`}>
         {!hideButtons &&
           <div className="actions left">
-            {showFileMenu &&
-              <DocumentFileMenu document={document}
-                onNewDocument={this.handleNewDocumentFromMenu}
-                onOpenDocument={this.handleOpenDocumentClick}
-                onOpenGroupDocument={this.handleOpenGroupDocumentClick}
-                onCopyDocument={this.handleCopyDocumentClick}
-                isDeleteDisabled={true}
-                onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
+            <DocumentFileMenu document={document}
+              onNewDocument={this.handleNewDocumentFromMenu}
+              onOpenDocument={this.handleOpenDocumentClick}
+              onOpenGroupDocument={this.handleOpenGroupDocumentClick}
+              onCopyDocument={this.handleCopyDocumentClick}
+              isDeleteDisabled={true}
+              onAdminDestroyDocument={this.handleAdminDestroyDocument} />
             <DocumentAnnotationToolbar />
             {this.renderIdeasButton()}
           </div>
@@ -474,12 +463,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const isPrimary = this.isPrimary();
     const displayId = document.getDisplayId(appConfig);
     const hasDisplayId = !!displayId;
-    const showFileMenu = this.showFileMenu();
     const showPersonalShareToggle = this.showPersonalShareToggle();
     return (
       <div className={`titlebar ${type}`}>
         <div className="actions">
-          { !hideButtons && showFileMenu &&
+          { !hideButtons &&
               <DocumentFileMenu document={document}
                 onNewDocument={this.handleNewDocumentFromMenu}
                 onOpenDocument={this.handleOpenDocumentClick}
