@@ -1,7 +1,7 @@
 import { DocumentModelType, createDocumentModel, DocumentModelSnapshotType } from "../document/document";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from './groups';
 import { ClassModel, ClassModelType, ClassUserModel } from './class';
-import { ProblemDocument } from '../document/document-types';
+import { ExemplarDocument, ProblemDocument } from '../document/document-types';
 import { ISortedDocumentsStores, MetadataDocMapModel, SortedDocuments } from "./sorted-documents";
 import { DeepPartial } from "utility-types";
 import { DocumentContentSnapshotType } from "../document/document-content";
@@ -174,6 +174,27 @@ describe('Sorted Documents Model', () => {
       //Verify "Group 3" comes before "Group 5" and before "Group 9"
       const sortedSectionLabels = sortedDocuments.sortBy("Group").map(group => group.label);
       expect(sortedSectionLabels).toEqual(['Group 3', 'Group 5', 'Group 9']);
+    });
+  });
+
+  describe('exemplarMetadataDocs', () => {
+    it('carries the exemplar document visibility so public exemplars render as shared, not private', () => {
+      const exemplarDoc = createDocumentModel({
+        uid: "ivan",
+        type: ExemplarDocument,
+        key: "exemplar-1",
+        createdAt: 1,
+        title: "First Exemplar",
+        visibility: "public",
+        content: { tiles: [] } as DocumentContentSnapshotType
+      });
+      const stores: DeepPartial<ISortedDocumentsStores> = {
+        documents: { all: [], exemplarDocuments: [exemplarDoc] },
+        groups: mockGroups,
+        class: mockClass,
+      };
+      const sd = new SortedDocuments(stores as ISortedDocumentsStores);
+      expect(sd.exemplarMetadataDocs.get("exemplar-1")?.visibility).toBe("public");
     });
   });
 
