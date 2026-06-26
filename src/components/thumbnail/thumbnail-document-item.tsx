@@ -104,9 +104,11 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
   const label = DEBUG_BOOKMARKS ? bookmarks.getBookmarkLabel(document.key, user.id, classStore) : "";
 
   const group = document.type === GroupDocument;
-  // Prefer the reactive Firestore documentMetadata so a peer's share flips this thumbnail.
-  const effectiveMetadata = documentMetadata ?? document.metadata;
-  const isPrivate = !isDocumentAccessibleToUser(effectiveMetadata, user, documents);
+  // The firestore document metadata updates dynamically, but it is not up to date for all documents
+  const dynamicAccessible = !!documentMetadata && isDocumentAccessibleToUser(documentMetadata, user, documents);
+  // The loaded document metadata doesn't update dynamically, but it can be more up to date than the firestore metadata
+  const staticAccessible = isDocumentAccessibleToUser(document.metadata, user, documents);
+  const isPrivate = !(staticAccessible || dynamicAccessible);
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;
 

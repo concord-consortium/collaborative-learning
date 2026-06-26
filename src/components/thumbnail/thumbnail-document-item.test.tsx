@@ -219,17 +219,20 @@ describe("ThumbnailDocumentItem", () => {
   });
 
   describe("documentMetadata prop (reactive shared status)", () => {
-    function renderWithMetadata(visibility: "public" | "private") {
+    function renderWithMetadata(
+      metadataVisibility: "public" | "private" | null,
+      docVisibility: "public" | "private" = "private"
+    ) {
       const user = UserModel.create({ id: "test-student", type: "student", name: "Test Student" });
       const stores = specStores({ user });
-      // A peer-owned doc whose own visibility stays "private" (the stale field); the
-      // metadata prop is what should drive accessibility.
+      // A peer-owned doc; `docVisibility` is the loaded document's (authoritative) visibility
+      // and `metadataVisibility` is the (possibly stale/missing) Firestore metadata visibility.
       const document = createDocumentModel({
         type: PersonalDocument, title: "Peer Doc", uid: "other-user",
-        key: "peer-doc-1", createdAt: 1, visibility: "private"
+        key: "peer-doc-1", createdAt: 1, visibility: docVisibility
       });
       const metadata = DocumentMetadataModel.create({
-        uid: "other-user", type: PersonalDocument, key: "peer-doc-1", visibility
+        uid: "other-user", type: PersonalDocument, key: "peer-doc-1", visibility: metadataVisibility
       });
       unprotect(metadata);
       const result = render(
@@ -266,6 +269,14 @@ describe("ThumbnailDocumentItem", () => {
 
       act(() => { runInAction(() => { metadata.visibility = "public"; }); });
 
+      expect(listItem()).not.toHaveAttribute("aria-disabled");
+      expect(listItem()).toHaveAttribute("role", "button");
+    });
+
+    it("stays accessible when the loaded document is public even if the metadata visibility is stale/missing", () => {
+      // Reported regression: a shared problem doc whose Firestore metadata visibility is null
+      // while the loaded document's visibility is "public". The document is authoritative here.
+      const { listItem } = renderWithMetadata(null, "public");
       expect(listItem()).not.toHaveAttribute("aria-disabled");
       expect(listItem()).toHaveAttribute("role", "button");
     });
