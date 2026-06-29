@@ -105,4 +105,23 @@ describe("MediaLibrary rename flow", () => {
       expect(screen.getByRole("alert")).toHaveTextContent("already exists");
     });
   });
+
+  it("badges only images the usage scan covered (a missing key is unknown, not 0/unused)", async () => {
+    const originalFiles = mockCurriculumValue.files;
+    mockCurriculumValue.files = {
+      "images/old.png": { sha: "abc" },
+      "images/just-uploaded.png": { sha: "def" },
+    };
+    try {
+      // The mount usage load (beforeEach) covers only old.png; just-uploaded.png is absent from the
+      // map, so it must render no badge rather than a misleading "0".
+      const { container } = render(<MediaLibrary onClose={jest.fn()} />);
+      await screen.findByText("Not used in the curriculum");
+      const badges = container.querySelectorAll(".media-library-thumb-badge");
+      expect(badges).toHaveLength(1);
+      expect(badges[0]).toHaveTextContent("0");
+    } finally {
+      mockCurriculumValue.files = originalFiles;
+    }
+  });
 });

@@ -117,7 +117,38 @@ const renameImage = async (req: Request, res: Response) => {
       updates[getUnitUpdatesPath(branch, unit, escapedPath)] = rewritten;
       updates[getUnitMetadataUpdatesPath(branch, unit, escapedPath)] = admin.database.ServerValue.TIMESTAMP;
     });
-    await db.ref().update(updates);
+    try {
+      await db.ref().update(updates);
+    } catch (dbError) {
+      // The GitHub blob already moved but Firebase didn't record it, so the unit is half-renamed
+      // (blob only at the new path, files-map still pointing at the old one). Best-effort revert the
+      // commit to restore consistency; if even the revert fails, a unit re-pull resyncs from GitHub.
+      console.error("Firebase update failed after the GitHub rename; reverting the commit.", dbError);
+      try {
+        const revertTree = await octokit.rest.git.createTree({
+          owner,
+          repo,
+          base_tree: commit.data.tree.sha,
+          tree: [
+            {path: `curriculum/${unit}/images/${fromFileName}`, mode: "100644", type: "blob", sha: blobSha},
+            {path: `curriculum/${unit}/images/${toFileName}`, mode: "100644", type: "blob", sha: null},
+          ],
+        });
+        const revertCommit = await octokit.rest.git.createCommit({
+          owner,
+          repo,
+          message: `Revert rename of ${fromFileName} (could not persist in Firebase)`,
+          tree: revertTree.data.sha,
+          parents: [commit.data.sha],
+        });
+        await octokit.rest.git.updateRef({
+          owner, repo, ref: `heads/${branch}`, sha: revertCommit.data.sha, force: false,
+        });
+      } catch (revertError) {
+        console.error("Revert also failed; unit may be inconsistent until re-pulled.", revertError);
+      }
+      throw dbError;
+    }
 
     return sendSuccessResponse(res, {updatedFileCount: rewrites.length});
   } catch (error) {

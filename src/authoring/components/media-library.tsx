@@ -52,7 +52,8 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
         setUsages(response.usages ?? {});
       }
     } catch (error) {
-      // Leave any prior usages in place; the manual refresh control can retry.
+      // Leave any prior usages in place; reopening the library, switching units, or a rename/delete
+      // re-runs this fetch.
       console.error("Failed to load image usages:", error);
     } finally {
       setUsagesLoading(false);
@@ -421,13 +422,16 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
                     loading="lazy"
                     className="media-library-thumb-img"
                   />
-                  {usages && (
+                  {/* Only badge images the usage scan actually covered. A key missing from `usages`
+                      (e.g. a just-uploaded image not yet in a refreshed map) is unknown, not 0 —
+                      defaulting to 0 would wrongly mark it "unused". */}
+                  {usages?.[key] !== undefined && (
                     <span
                       className={classNames("media-library-thumb-badge",
-                        { unused: (usages[key]?.length ?? 0) === 0 })}
-                      title={`Used ${usages[key]?.length ?? 0}×`}
+                        { unused: usages[key].length === 0 })}
+                      title={`Used ${usages[key].length}×`}
                     >
-                      {usages[key]?.length ?? 0}
+                      {usages[key].length}
                     </span>
                   )}
                 </div>
