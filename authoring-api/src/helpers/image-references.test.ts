@@ -1,4 +1,7 @@
-import {buildUsageMap, extractImageKeys, rewriteImageReference} from "./image-references";
+import {
+  buildUsageMap, extractImageKeys, isPathSafeImageFileName, isValidImageFileName, isValidUnitCode,
+  rewriteImageReference,
+} from "./image-references";
 
 const contentWith = (...refs: string[]) =>
   JSON.stringify({
@@ -41,6 +44,12 @@ describe("extractImageKeys", () => {
 
   it("returns nothing when there are no image references", () => {
     expect(extractImageKeys("sas", JSON.stringify({tiles: []}))).toEqual([]);
+  });
+
+  it("detects legacy names containing '&' (which the runtime can reference) and stops at the quote", () => {
+    // "C&S_1-1.png" is a real referenceable image; the scanner must count it, not truncate at "&".
+    const text = contentWith("sas/images/C&S_1-1.png");
+    expect(extractImageKeys("sas", text)).toEqual(["images/C&S_1-1.png"]);
   });
 });
 
@@ -97,5 +106,68 @@ describe("rewriteImageReference", () => {
     const text = JSON.stringify({url: "sas/images/something-else.png"});
     const {changed} = rewriteImageReference("sas", text, "old.png", "new.png");
     expect(changed).toBe(false);
+  });
+
+  it("rewrites a legacy '&' name to a clean one", () => {
+    const text = JSON.stringify({url: "sas/images/C&S_1-1.png", filename: "sas/images/C&S_1-1.png"});
+    const {text: out, changed} = rewriteImageReference("sas", text, "C&S_1-1.png", "cs_1-1.png");
+    expect(changed).toBe(true);
+    expect(out).toContain("sas/images/cs_1-1.png");
+    expect(out).not.toContain("C&S_1-1.png");
+  });
+});
+
+describe("isValidImageFileName", () => {
+  it("accepts alphanumerics, dot, dash, and underscore", () => {
+    expect(isValidImageFileName("diagram-1.png")).toBe(true);
+    expect(isValidImageFileName("My_Image.2.JPG")).toBe(true);
+  });
+
+  it("rejects path separators, traversal, and empty names", () => {
+    expect(isValidImageFileName("")).toBe(false);
+    expect(isValidImageFileName("../secret.png")).toBe(false);
+    expect(isValidImageFileName("sub/dir/x.png")).toBe(false);
+    expect(isValidImageFileName("a b.png")).toBe(false);
+    expect(isValidImageFileName("x%2F..%2Fy.png")).toBe(false);
+  });
+
+  it("still rejects '&' — the naming policy stays strict even though the scanner now detects it", () => {
+    expect(isValidImageFileName("C&S_1-1.png")).toBe(false);
+  });
+});
+
+describe("isValidUnitCode", () => {
+  it("accepts simple unit slugs", () => {
+    expect(isValidUnitCode("sas")).toBe(true);
+    expect(isValidUnitCode("moving-straight-ahead")).toBe(true);
+  });
+
+  it("rejects slashes and traversal", () => {
+    expect(isValidUnitCode("")).toBe(false);
+    expect(isValidUnitCode("../other")).toBe(false);
+    expect(isValidUnitCode("a/b")).toBe(false);
+  });
+});
+
+describe("isPathSafeImageFileName", () => {
+  const backslash = String.fromCharCode(92);
+  const tab = String.fromCharCode(9);
+
+  it("accepts messy legacy names that the strict allowlist would reject", () => {
+    // These are exactly the names rename needs to operate on to clean them up.
+    expect(isPathSafeImageFileName("spaghetti plot.png")).toBe(true);
+    expect(isPathSafeImageFileName("C&S_1-1_LimasGroup.png")).toBe(true);
+    expect(isPathSafeImageFileName("screenshot at 8.24.34 am.png")).toBe(true);
+    // and ordinary clean names too
+    expect(isPathSafeImageFileName("diagram-1.png")).toBe(true);
+  });
+
+  it("rejects anything that could escape the images/ directory", () => {
+    expect(isPathSafeImageFileName("")).toBe(false);
+    expect(isPathSafeImageFileName(".")).toBe(false);
+    expect(isPathSafeImageFileName("..")).toBe(false);
+    expect(isPathSafeImageFileName("sub/dir/x.png")).toBe(false);
+    expect(isPathSafeImageFileName(`a${backslash}b.png`)).toBe(false);
+    expect(isPathSafeImageFileName(`a${tab}b.png`)).toBe(false);
   });
 });

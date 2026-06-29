@@ -2,9 +2,10 @@ import {Request, Response} from "express";
 import {Octokit} from "@octokit/rest";
 
 import {AuthorizedRequest, sendErrorResponse, sendSuccessResponse} from "../helpers/express";
-import {owner, repo} from "../helpers/github";
+import {describeGitHubError, owner, repo} from "../helpers/github";
 import {escapeFirebaseKey, getDb, getUnitFilesPath} from "../helpers/db";
 import {computeImageUsages} from "../helpers/unit-content";
+import {isValidImageFileName, isValidUnitCode} from "../helpers/image-references";
 
 // Deletes a library image from GitHub and the Firebase files map. Only permitted when the image is
 // unused in the current unit + teacher guide (re-verified here so a stale client can't force it).
@@ -14,6 +15,9 @@ const deleteImage = async (req: Request, res: Response) => {
   if (!unit || !branch) {
     return sendErrorResponse(res, "Missing required parameters: unit or branch.", 400);
   }
+  if (!isValidUnitCode(unit)) {
+    return sendErrorResponse(res, "Invalid unit code.", 400);
+  }
   if (branch === "main") {
     return sendErrorResponse(res, "Cannot delete images on the main branch.", 400);
   }
@@ -22,7 +26,7 @@ const deleteImage = async (req: Request, res: Response) => {
   if (!fileName) {
     return sendErrorResponse(res, "Missing required body parameter: fileName.", 400);
   }
-  if (!/^[a-zA-Z0-9._-]+$/.test(fileName)) {
+  if (!isValidImageFileName(fileName)) {
     return sendErrorResponse(res, "Invalid fileName: only alphanumeric, dash, underscore, and dot are allowed.", 400);
   }
 
@@ -62,7 +66,8 @@ const deleteImage = async (req: Request, res: Response) => {
     return sendSuccessResponse(res, {});
   } catch (error) {
     console.error("Failed to delete image:", error);
-    return sendErrorResponse(res, "An error occurred while deleting the image.", 500);
+    const {message, statusCode} = describeGitHubError(error, "An error occurred while deleting the image.");
+    return sendErrorResponse(res, message, statusCode);
   }
 };
 

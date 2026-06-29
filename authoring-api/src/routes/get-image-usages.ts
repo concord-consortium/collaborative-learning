@@ -2,6 +2,7 @@ import {Request, Response} from "express";
 
 import {sendErrorResponse, sendSuccessResponse} from "../helpers/express";
 import {computeImageUsages} from "../helpers/unit-content";
+import {isValidUnitCode} from "../helpers/image-references";
 
 // Returns, per library image key ("images/{file}"), the list of content-file paths (relative to
 // curriculum/{unit}/) that reference it. Count = list length; unused images map to []. Scoped to
@@ -11,6 +12,9 @@ const getImageUsages = async (req: Request, res: Response) => {
   const branch = req.query.branch?.toString();
   if (!unit || !branch) {
     return sendErrorResponse(res, "Missing required parameters: unit or branch.", 400);
+  }
+  if (!isValidUnitCode(unit)) {
+    return sendErrorResponse(res, "Invalid unit code.", 400);
   }
 
   try {

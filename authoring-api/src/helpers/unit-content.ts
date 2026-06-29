@@ -2,7 +2,8 @@
 //
 // The pulled `files` map (populated by pull-unit) lists every file path with its current git blob
 // `sha`. We use that to enumerate content.json files cheaply (no git-tree walk at scan time) and to
-// key a per-blob image-reference cache so repeated scans only re-read files whose content changed.
+// key a per-(unit, blob) image-reference cache so repeated scans only re-read files whose content
+// changed.
 
 import {getRawUrl} from "./github";
 import {
@@ -11,7 +12,9 @@ import {
 } from "./db";
 import {buildUsageMap, extractImageKeys} from "./image-references";
 
-const getImageRefIndexPath = (sha: string) => `${authoringPath}/imageRefIndex/${sha}`;
+// Keyed by both unit and blob sha: extractImageKeys is unit-dependent (references embed the unit
+// code), so a blob shared across units must not reuse another unit's extracted keys.
+const getImageRefIndexPath = (unit: string, sha: string) => `${authoringPath}/imageRefIndex/${unit}/${sha}`;
 
 const isContentFile = (path: string) => path.endsWith("content.json");
 const isImageFile = (path: string) => path.startsWith("images/");
@@ -63,7 +66,8 @@ export async function getUnitContent(branch: string, unit: string): Promise<Unit
 }
 
 // Resolve the effective content text for a file: pending update wins, then the cached blob, then
-// GitHub raw (the same precedence get-content.ts uses).
+// GitHub raw. (get-content.ts uses the same update-then-GitHub precedence; we add the blob-cache
+// tier in between to avoid re-fetching unchanged committed files during a scan.)
 async function readEffectiveContentText(branch: string, unit: string, file: UnitContentFile): Promise<string> {
   if (file.updateText != null) {
     return file.updateText;
@@ -89,7 +93,7 @@ async function extractKeysForFile(branch: string, unit: string, file: UnitConten
   const cacheable = file.sha != null && file.updateText == null;
   const db = getDb();
   if (cacheable) {
-    const cachedSnap = await db.ref(getImageRefIndexPath(file.sha!)).get();
+    const cachedSnap = await db.ref(getImageRefIndexPath(unit, file.sha!)).get();
     const cached = cachedSnap.val();
     if (Array.isArray(cached)) {
       return cached;
@@ -99,7 +103,7 @@ async function extractKeysForFile(branch: string, unit: string, file: UnitConten
   const keys = extractImageKeys(unit, text);
   if (cacheable) {
     // Firebase drops empty arrays; that's fine — a miss simply recomputes (cheaply) next time.
-    await db.ref(getImageRefIndexPath(file.sha!)).set(keys);
+    await db.ref(getImageRefIndexPath(unit, file.sha!)).set(keys);
   }
   return keys;
 }
@@ -111,15 +115,6 @@ export async function computeImageUsages(branch: string, unit: string): Promise<
     contentFiles.map(async (file) => ({path: file.path, keys: await extractKeysForFile(branch, unit, file)}))
   );
   return buildUsageMap(imageKeys, perFile);
-}
-
-// Stage a content-file edit as an unpushed "update" (same shape put-content writes), so reference
-// rewrites flow through the normal preview + push pipeline.
-export async function stageContentUpdate(
-  branch: string, unit: string, escapedPath: string, content: string
-): Promise<void> {
-  const db = getDb();
-  await db.ref(getUnitUpdatesPath(branch, unit, escapedPath)).set(content);
 }
 
 export {readEffectiveContentText};

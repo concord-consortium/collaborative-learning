@@ -3,12 +3,14 @@ import admin from "firebase-admin";
 import {Octokit} from "@octokit/rest";
 
 import {AuthorizedRequest, sendErrorResponse, sendSuccessResponse} from "../helpers/express";
-import {owner, repo} from "../helpers/github";
+import {describeGitHubError, owner, repo} from "../helpers/github";
 import {
-  escapeFirebaseKey, getDb, getUnitFilesPath, getUnitMetadataUpdatesPath,
+  escapeFirebaseKey, getDb, getUnitFilesPath, getUnitMetadataUpdatesPath, getUnitUpdatesPath,
 } from "../helpers/db";
-import {getUnitContent, readEffectiveContentText, stageContentUpdate} from "../helpers/unit-content";
-import {rewriteImageReference} from "../helpers/image-references";
+import {getUnitContent, readEffectiveContentText} from "../helpers/unit-content";
+import {
+  isPathSafeImageFileName, isValidImageFileName, isValidUnitCode, rewriteImageReference,
+} from "../helpers/image-references";
 
 // Renames a library image and rewrites every reference to it (current unit + teacher guide) so
 // used images can be renamed without breaking content.
@@ -22,6 +24,9 @@ const renameImage = async (req: Request, res: Response) => {
   if (!unit || !branch) {
     return sendErrorResponse(res, "Missing required parameters: unit or branch.", 400);
   }
+  if (!isValidUnitCode(unit)) {
+    return sendErrorResponse(res, "Invalid unit code.", 400);
+  }
   if (branch === "main") {
     return sendErrorResponse(res, "Cannot rename images on the main branch.", 400);
   }
@@ -34,7 +39,13 @@ const renameImage = async (req: Request, res: Response) => {
   if (fromFileName === toFileName) {
     return sendErrorResponse(res, "The new name matches the current name.", 400);
   }
-  if (!/^[a-zA-Z0-9._-]+$/.test(toFileName)) {
+  // The source need only be safe to interpolate as a path (no separators/traversal) — this lets
+  // authors rename messy legacy names (spaces, "&", etc.) toward clean ones. The destination is held
+  // to the strict allowlist so every rename moves toward a clean name.
+  if (!isPathSafeImageFileName(fromFileName)) {
+    return sendErrorResponse(res, "Invalid current name: it must not contain slashes or control characters.", 400);
+  }
+  if (!isValidImageFileName(toFileName)) {
     return sendErrorResponse(res, "Invalid name: only alphanumeric, dash, underscore, and dot are allowed.", 400);
   }
 
@@ -60,8 +71,18 @@ const renameImage = async (req: Request, res: Response) => {
     const fileData = fromSnap.val();
     const blobSha: string = fileData.sha;
 
+    // Compute all reference rewrites BEFORE mutating anything, so a read failure here leaves the
+    // unit completely untouched rather than half-renamed.
+    const {contentFiles} = await getUnitContent(branch, unit);
+    const rewrites = (await Promise.all(contentFiles.map(async (file) => {
+      const text = await readEffectiveContentText(branch, unit, file);
+      const {text: rewritten, changed} = rewriteImageReference(unit, text, fromFileName, toFileName);
+      return changed ? {escapedPath: file.escapedPath, rewritten} : null;
+    }))).filter((r): r is {escapedPath: string; rewritten: string} => r !== null);
+
     // Move the blob in GitHub as a single commit: add new path (reusing the existing blob sha),
-    // remove the old path. Follows the tree/commit pattern in push-unit.ts.
+    // remove the old path. Follows the tree/commit pattern in push-unit.ts. This is the only
+    // irreversible step, so it runs first — if it fails, nothing in Firebase has changed yet.
     const octokit = new Octokit({auth: (req as AuthorizedRequest).gitHubToken});
     const ref = await octokit.rest.git.getRef({owner, repo, ref: `heads/${branch}`});
     const latestCommitSha = ref.data.object.sha;
@@ -84,28 +105,25 @@ const renameImage = async (req: Request, res: Response) => {
     });
     await octokit.rest.git.updateRef({owner, repo, ref: `heads/${branch}`, sha: commit.data.sha, force: false});
 
-    // Update the files map: drop the old key, add the new one (same blob, so same sha).
-    await filesRef.child(escapedFrom).remove();
-    await filesRef.child(escapedTo).set(fileData);
+    // Apply every Firebase change in a single atomic multi-location update so the files-map swap and
+    // the staged reference rewrites can't land partially: the old image key is dropped and the new
+    // one added (same blob, so same sha), and each rewritten content file is staged as an unpushed
+    // update with a metadata timestamp (the same updates + metadata shape put-content writes).
+    const updates: Record<string, unknown> = {
+      [getUnitFilesPath(branch, unit, escapedFrom)]: null,
+      [getUnitFilesPath(branch, unit, escapedTo)]: fileData,
+    };
+    rewrites.forEach(({escapedPath, rewritten}) => {
+      updates[getUnitUpdatesPath(branch, unit, escapedPath)] = rewritten;
+      updates[getUnitMetadataUpdatesPath(branch, unit, escapedPath)] = admin.database.ServerValue.TIMESTAMP;
+    });
+    await db.ref().update(updates);
 
-    // Rewrite references across the unit's content and stage them as unpushed updates.
-    const {contentFiles} = await getUnitContent(branch, unit);
-    let updatedFileCount = 0;
-    await Promise.all(contentFiles.map(async (file) => {
-      const text = await readEffectiveContentText(branch, unit, file);
-      const {text: rewritten, changed} = rewriteImageReference(unit, text, fromFileName, toFileName);
-      if (changed) {
-        updatedFileCount++;
-        await stageContentUpdate(branch, unit, file.escapedPath, rewritten);
-        await db.ref(getUnitMetadataUpdatesPath(branch, unit, file.escapedPath))
-          .set(admin.database.ServerValue.TIMESTAMP);
-      }
-    }));
-
-    return sendSuccessResponse(res, {updatedFileCount});
+    return sendSuccessResponse(res, {updatedFileCount: rewrites.length});
   } catch (error) {
     console.error("Failed to rename image:", error);
-    return sendErrorResponse(res, "An error occurred while renaming the image.", 500);
+    const {message, statusCode} = describeGitHubError(error, "An error occurred while renaming the image.");
+    return sendErrorResponse(res, message, statusCode);
   }
 };
 

@@ -69,3 +69,19 @@ export function describeUsagePath(
     sectionType
   };
 }
+
+/**
+ * Renders a UsageLocation as a single human-readable line. When investigation/problem titles
+ * resolve, it appends the section type (e.g. "Investigation / Problem · introduction"). When no
+ * titles resolve it falls back to the raw path alone — the section type is already embedded there,
+ * so appending it again would be redundant.
+ */
+export function formatLocation(loc: UsageLocation): string {
+  const parts: string[] = [];
+  if (loc.isTeacherGuide) parts.push("Teacher Guide");
+  if (loc.investigationTitle) parts.push(loc.investigationTitle);
+  if (loc.problemTitle) parts.push(loc.problemTitle);
+  if (parts.length === 0) return loc.path;
+  const label = parts.join(" / ");
+  return loc.sectionType ? `${label} · ${loc.sectionType}` : label;
+}
