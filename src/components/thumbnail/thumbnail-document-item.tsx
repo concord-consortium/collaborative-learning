@@ -2,7 +2,9 @@ import React, { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentModelType } from "../../models/document/document";
+import { IDocumentMetadataModel } from "../../models/document/document-metadata-model";
 import { GroupDocument } from "../../models/document/document-types";
+import { isDocumentAccessibleToUser } from "../../models/document/document-utils";
 import { DocumentCaption } from "./document-caption";
 import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
@@ -17,6 +19,7 @@ interface IProps {
   captionText: string;
   dataTestName: string;
   document: DocumentModelType;
+  documentMetadata?: IDocumentMetadataModel;
   isSecondarySelected?: boolean;
   isSelected?: boolean;
   onDocumentClick: (document: DocumentModelType) => void;
@@ -34,7 +37,7 @@ interface IProps {
 
 export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) => {
   const {
-    dataTestName, canvasContext, document, scale, captionText, isSelected, isSecondarySelected,
+    dataTestName, canvasContext, document, documentMetadata, scale, captionText, isSelected, isSecondarySelected,
     onDocumentClick, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick, scrollable
   } = props;
   const appMode = useAppMode();
@@ -101,7 +104,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
   const label = DEBUG_BOOKMARKS ? bookmarks.getBookmarkLabel(document.key, user.id, classStore) : "";
 
   const group = document.type === GroupDocument;
-  const isPrivate = !document.isAccessibleToUser(user, documents);
+  const isPrivate = !isDocumentAccessibleToUser({ document, documentMetadata, user, documents });
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;
 

@@ -5,6 +5,7 @@ import classNames from "classnames";
 import { useAppConfig, useLocalDocuments, useStores,
   usePersistentUIStore } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
+import { isDocumentAccessibleToUser } from "../../models/document/document-utils";
 import { ISubTabModel, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { DocumentType } from "../../models/document/document-types";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
@@ -34,6 +35,7 @@ function getFirstDocumentKey(subTab: ISubTabModel, sectionDocuments: SectionDocu
 export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IProps) {
   const persistentUI = usePersistentUIStore();
   const store = useStores();
+  const { user } = store;
   const appConfigStore = useAppConfig();
   const context = useUserContext();
   const queryClient = useQueryClient();
@@ -53,8 +55,8 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const isStarredTab = subTab.label === kBookmarksTabTitle;
   const noValidDocument = !openDocument || openDocument.getProperty("isDeleted");
   const noSecondaryDocument = !openSecondaryDocument || openSecondaryDocument.getProperty("isDeleted");
-  const isPrimaryAccessible = openDocument?.isAccessibleToUser(store.user, documents) ?? false;
-  const isSecondaryAccessible = openSecondaryDocument?.isAccessibleToUser(store.user, documents) ?? false;
+  const isPrimaryAccessible = isDocumentAccessibleToUser({ document: openDocument, user, documents });
+  const isSecondaryAccessible = isDocumentAccessibleToUser({ document: openSecondaryDocument, user, documents });
 
   const documentTypes: DocumentType[] = tabSpec.tab === "class-work"
                                           ? ["publication"]

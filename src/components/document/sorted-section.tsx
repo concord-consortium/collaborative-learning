@@ -93,6 +93,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
              key={doc.key}
              scale={0.1}
              document={fullDocument}
+             documentMetadata={doc}
              tab={ENavTab.kSortWork}
              shouldHandleStarClick
              allowDelete={false}

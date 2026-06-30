@@ -90,17 +90,30 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
   }
 }
 
-export function isDocumentAccessibleToUser (
-  doc: IDocumentMetadataBase, user: UserModelType, documentStore: IExemplarVisibilityProvider
-): boolean {
-  const ownDocument = doc.uid === user.id;
-  const isShared = doc.visibility === "public";
-  const isPublished = isPublishedType(doc.type);
-  const isGroupDoc = doc.type === GroupDocument; // Group documents are accessible to everyone
+interface IIsDocumentAccessibleToUserParams {
+  document?: DocumentModelType;
+  documentMetadata?: IDocumentMetadataBase;
+  documents: IExemplarVisibilityProvider;
+  user: UserModelType;
+}
+export function isDocumentAccessibleToUser ({
+  document, documentMetadata, documents, user
+}: IIsDocumentAccessibleToUserParams): boolean {
+  const metadata = documentMetadata ?? document?.metadata;
+  if (!metadata) return false;
+
+  // If the firestore metadata has a defined visibility, use it. It's prefered because it's reactive to remote changes.
+  // However, sometimes its visibility is not defined, in which case use the static loaded document's metadata.
+  const visibilityMetadata = documentMetadata?.visibility != null ? documentMetadata : document?.metadata;
+  const isShared = visibilityMetadata?.visibility === "public";
+
+  const ownDocument = metadata.uid === user.id;
+  const isPublished = isPublishedType(metadata.type);
+  const isGroupDoc = metadata.type === GroupDocument; // Group documents are accessible to everyone
   if (user.isTeacherOrResearcher) return true;
   if (user.isStudent) {
     return ownDocument || isShared || isPublished || isGroupDoc
-           || (isExemplarType(doc.type) && documentStore.isExemplarVisible(doc.key));
+           || (isExemplarType(metadata.type) && documents.isExemplarVisible(metadata.key));
   }
   return false;
 }

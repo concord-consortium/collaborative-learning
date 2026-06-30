@@ -228,6 +228,7 @@ export class SortedDocuments {
         key: doc.key,
         createdAt: doc.createdAt,
         title: doc.title,
+        visibility: doc.visibility,
         properties: undefined,
         tools,
         strategies: exemplarStrategy ? [exemplarStrategy] : [],
