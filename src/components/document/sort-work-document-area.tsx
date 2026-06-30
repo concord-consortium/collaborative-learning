@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import { useMemo } from "use-memo-one";
 import { useStores } from "../../hooks/use-stores";
 import { LogEventName } from "../../lib/logger-types";
 import { isExemplarType } from "../../models/document/document-types";
