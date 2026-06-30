@@ -34,7 +34,8 @@ export type DBDocumentType = "section" |  // section documents are deprecated
                               "personal" | "personalPublication" |
                               "learningLog" | "learningLogPublication" |
                               "supportPublication" |
-                              "group";
+                              "group" |
+                              "drivingQuestionBoard";
 export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBProblemDocumentMetadata |
                                  DBPersonalDocumentMetadata |
@@ -44,7 +45,8 @@ export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBPersonalPublicationMetadata |
                                  DBLearningLogPublicationMetadata |
                                  DBSupportPublicationMetadata |
-                                 DBGroupDocMetadata;
+                                 DBGroupDocMetadata |
+                                 DBDrivingQuestionBoardMetadata;
 
 // metadata written to {classHash}/users/{userId}/documentMetadata for all document types
 export interface DBBaseDocumentMetadata {
@@ -103,6 +105,14 @@ export interface DBSupportPublicationMetadata extends DBBaseProblemDocumentMetad
 
 export interface DBGroupDocMetadata extends DBBaseProblemDocumentMetadata {
   type: "group";
+}
+
+// The class-wide Driving Question Board is keyed by unit (not offering) and has no
+// group, so it carries a unit but no offeringId.
+export interface DBDrivingQuestionBoardMetadata extends DBBaseDocumentMetadata {
+  type: "drivingQuestionBoard";
+  classHash: string;
+  unit?: string;
 }
 
 export interface DBGroupUserConnections {

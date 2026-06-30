@@ -6,7 +6,7 @@ import { SnapshotIn } from "mobx-state-tree";
 import { clearTermOverrides, setTermOverrides } from "../../utilities/translation/translate";
 import { createDocumentModel, DocumentModelSnapshotType, DocumentModelType } from "../document/document";
 import { DocumentContentSnapshotType } from "../document/document-content";
-import { GroupDocument, ProblemDocument } from "../document/document-types";
+import { DrivingQuestionBoardDocument, GroupDocument, ProblemDocument } from "../document/document-types";
 import { ClassModel, ClassModelType, ClassUserModel } from "./class";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from "./groups";
 import { ISortedDocumentsStores, MetadataDocMapModel, SortedDocuments } from "./sorted-documents";
@@ -384,6 +384,44 @@ describe('DocumentGroup Model', () => {
       const labels = byNameDocs.map(d => d.label);
       expect(labels).not.toContain("Unknown");
       expect(labels).toEqual(["Bacal, Joe", "Cao, Dennis", "Cytacki, Scott", "Swenson, Kirk"]);
+    });
+  });
+
+  describe("Driving Question Board sorting", () => {
+    // The class-wide Driving Question Board has no group and no author, so it should
+    // land in its own "Whole Class" section (by Group) and the "No Name" section (by Name).
+    beforeEach(() => {
+      const metadataWithDQB: SnapshotIn<typeof MetadataDocMapModel> = {
+        ...mockMetadataDocuments,
+        "DQB Doc": {
+          uid: "dqb_test",
+          type: DrivingQuestionBoardDocument,
+          key: "DQB Doc",
+          createdAt: 7,
+          tools: [],
+          unit: "test"
+        }
+      };
+      sortedDocuments.metadataDocsFiltered = MetadataDocMapModel.create(metadataWithDQB);
+    });
+
+    it('places the DQB in a "Whole Class" section that sorts first when sorting by Group', () => {
+      const byGroupDocs = sortedDocuments.sortBy("Group");
+      const labels = byGroupDocs.map(d => d.label);
+      // "Whole Class" sorts ahead of the numbered groups.
+      expect(labels).toEqual(["Whole Class", "Group 3", "Group 5", "Group 9"]);
+      const wholeClass = byGroupDocs.find(d => d.label === "Whole Class");
+      expect(wholeClass?.documents.some(d => d.key === "DQB Doc")).toBe(true);
+    });
+
+    it('places the DQB under "No Name" when sorting by Name', () => {
+      const byNameDocs = sortedDocuments.sortBy("Name");
+      const labels = byNameDocs.map(d => d.label);
+      expect(labels).toContain("No Name");
+      const noName = byNameDocs.find(d => d.label === "No Name");
+      expect(noName?.documents.some(d => d.key === "DQB Doc")).toBe(true);
+      // The DQB should not be filed under a real student name or "Unknown".
+      expect(labels).not.toContain("Unknown");
     });
   });
 

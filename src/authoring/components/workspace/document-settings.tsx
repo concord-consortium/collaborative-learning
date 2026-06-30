@@ -2,8 +2,11 @@ import React, { useEffect, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useCurriculum } from "../../hooks/use-curriculum";
 
+const kDefaultDrivingQuestionBoardTitle = "Driving Question Board";
+
 interface DocumentSettingsFormInputs {
   defaultSharedDocuments: boolean;
+  drivingQuestionBoardTitle: string;
 }
 
 const DocumentSettings: React.FC = () => {
@@ -12,6 +15,8 @@ const DocumentSettings: React.FC = () => {
   const formDefaults: DocumentSettingsFormInputs = useMemo(() => {
     return {
       defaultSharedDocuments: unitConfig?.config?.defaultSharedDocuments ?? false,
+      drivingQuestionBoardTitle:
+        unitConfig?.config?.drivingQuestionBoardTitle ?? kDefaultDrivingQuestionBoardTitle,
     };
   }, [unitConfig]);
 
@@ -30,6 +35,12 @@ const DocumentSettings: React.FC = () => {
         draft.config.defaultSharedDocuments = true;
       } else {
         delete draft.config.defaultSharedDocuments;
+      }
+      const dqbTitle = data.drivingQuestionBoardTitle?.trim();
+      if (dqbTitle && dqbTitle !== kDefaultDrivingQuestionBoardTitle) {
+        draft.config.drivingQuestionBoardTitle = dqbTitle;
+      } else {
+        delete draft.config.drivingQuestionBoardTitle;
       }
     });
   };
@@ -53,6 +64,23 @@ const DocumentSettings: React.FC = () => {
         <p className="muted small">
           When enabled, new student documents (problem, personal, and learning log)
           will be shared with classmates by default instead of being private.
+        </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Driving Question Board</legend>
+        <label className="vertical">
+          <span>Title</span>
+          <input
+            type="text"
+            placeholder={kDefaultDrivingQuestionBoardTitle}
+            {...register("drivingQuestionBoardTitle")}
+          />
+        </label>
+        <p className="muted small">
+          When group documents are enabled, a single class-wide board is created per unit
+          for the whole class to contribute to (driving questions, word walls, and other
+          shared artifacts). This sets its title.
         </p>
       </fieldset>
 

@@ -41,6 +41,8 @@ export interface IBaseStores {
   ui: UIModelType;
   groups: GroupsModelType;
   groupActivity: GroupActivityModelType;
+  // class-wide presence for the Driving Question Board (reuses the activity model shape)
+  dqbActivity: GroupActivityModelType;
   class: ClassModelType;
   documents: DocumentsModelType;
   networkDocuments: DocumentsModelType;

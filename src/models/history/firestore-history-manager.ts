@@ -319,6 +319,14 @@ export class FirestoreHistoryManager {
   checkContentDriftAgainstHistory(history: IFirestoreHistoryEntryDoc[]) {
     const savedId = this.savedLastHistoryEntryId;
     if (!savedId) return;
+    // An empty remote history has nothing for the content to be inconsistent with:
+    // it means history hasn't synced yet (or this session's uploads never landed,
+    // e.g. the metadata doc wasn't ready in time). The content is still coherent —
+    // there is no partial/forked chain to contradict it — so we surface it rather
+    // than hard-failing the document. The document self-heals once a later edit
+    // uploads history. Genuine corruption shows up as a NON-empty chain that is
+    // missing the saved id, which is still caught below.
+    if (history.length === 0) return;
     const found = history.some(doc => doc.entry?.id === savedId);
     if (found) return;
 

@@ -30,3 +30,6 @@ cypress.env.json
 
 # playwright mcp artifacts
 .playwright-mcp
+
+# Local demo copy of OSEMagnets — the real unit lives in the clue-curriculum repo
+src/public/demo/units/OSEMagnets/

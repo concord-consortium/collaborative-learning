@@ -13,6 +13,7 @@ export const PersonalPublication = "personalPublication";
 export const LearningLogPublication = "learningLogPublication";
 export const SupportPublication = "supportPublication";
 export const GroupDocument = "group";
+export const DrivingQuestionBoardDocument = "drivingQuestionBoard";
 
 export function isProblemType(type: string) {
   return [ProblemDocument, ProblemPublication].indexOf(type) >= 0;
@@ -31,6 +32,9 @@ export function isSupportType(type: string) {
 }
 export function isExemplarType(type: string) {
   return type === ExemplarDocument;
+}
+export function isDrivingQuestionBoardType(type: string) {
+  return type === DrivingQuestionBoardDocument;
 }
 // is this type of document associated with the offering (i.e. with a particular problem)
 export function isOfferingType(type: string) {
@@ -51,7 +55,8 @@ export function isSortableType(type: string){
     PersonalDocument,
     LearningLogDocument,
     ExemplarDocument,
-    GroupDocument
+    GroupDocument,
+    DrivingQuestionBoardDocument
   ].indexOf(type) >= 0;
 }
 // This function uses a bit of a hack to determine if a document is curriculum or not:
@@ -65,7 +70,7 @@ export function isCurriculumDocument(documentId?: string) {
 const DocumentTypeEnumValues = [SectionDocumentDEPRECATED,
                 ProblemDocument, PersonalDocument, PlanningDocument, LearningLogDocument, ExemplarDocument,
                 ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication,
-                GroupDocument];
+                GroupDocument, DrivingQuestionBoardDocument];
 export const DocumentTypeEnum = types.enumeration("type", DocumentTypeEnumValues);
 export type DocumentType = Instance<typeof DocumentTypeEnum>;
 export function isDocumentType(value: string): value is DocumentType {

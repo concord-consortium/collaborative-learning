@@ -6,9 +6,11 @@ import { LearningLogDocument, PersonalDocument } from "../../models/document/doc
 import { DB } from "../db";
 import { DatabaseType } from "../db-types";
 import { GroupActivityBroadcaster } from "../group-activity-broadcaster";
+import { DrivingQuestionBoardActivityBroadcaster } from "../driving-question-board-activity-broadcaster";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
 import { DBGroupsListener } from "./db-groups-listener";
 import { DBGroupActivityListener } from "./db-group-activity-listener";
+import { DBDrivingQuestionBoardActivityListener } from "./db-driving-question-board-activity-listener";
 import { DBOtherDocumentsListener } from "./db-other-docs-listener";
 import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
@@ -27,6 +29,7 @@ export class DBListeners extends BaseListener {
   private latestGroupIdListener: DBLatestGroupIdListener;
   private groupsListener: DBGroupsListener;
   private groupActivityListener: DBGroupActivityListener;
+  private dqbActivityListener: DBDrivingQuestionBoardActivityListener;
   private problemDocumentsListener: DBProblemDocumentsListener;
   private personalDocumentsListener: DBOtherDocumentsListener;
   private learningLogsListener: DBOtherDocumentsListener;
@@ -38,6 +41,7 @@ export class DBListeners extends BaseListener {
   private documentsContentListener: DBDocumentsContentListener;
   private exemplarsListener: DBExemplarsListener;
   private groupActivityBroadcaster: GroupActivityBroadcaster;
+  private dqbActivityBroadcaster: DrivingQuestionBoardActivityBroadcaster;
 
   constructor(db: DB) {
     super("DBListeners");
@@ -46,6 +50,7 @@ export class DBListeners extends BaseListener {
     this.latestGroupIdListener = new DBLatestGroupIdListener(db);
     this.groupsListener = new DBGroupsListener(db);
     this.groupActivityListener = new DBGroupActivityListener(db);
+    this.dqbActivityListener = new DBDrivingQuestionBoardActivityListener(db);
     this.problemDocumentsListener = new DBProblemDocumentsListener(db);
     this.personalDocumentsListener = new DBOtherDocumentsListener(db, PersonalDocument);
     this.learningLogsListener = new DBOtherDocumentsListener(db, LearningLogDocument);
@@ -57,6 +62,7 @@ export class DBListeners extends BaseListener {
     this.documentsContentListener = new DBDocumentsContentListener(db);
     this.exemplarsListener = new DBExemplarsListener(db);
     this.groupActivityBroadcaster = new GroupActivityBroadcaster(db);
+    this.dqbActivityBroadcaster = new DrivingQuestionBoardActivityBroadcaster(db);
   }
 
   public async start() {
@@ -75,6 +81,9 @@ export class DBListeners extends BaseListener {
     // start group activity listener after groups listener so currentGroupId is set
     await this.groupActivityListener.start();
     this.groupActivityBroadcaster.start();
+    // class-wide presence for the Driving Question Board (independent of group membership)
+    await this.dqbActivityListener.start();
+    this.dqbActivityBroadcaster.start();
     // start listeners that depend on documents
     await Promise.all([
       this.commentsListener.start(),
@@ -100,6 +109,8 @@ export class DBListeners extends BaseListener {
     this.problemDocumentsListener.stop();
     this.groupActivityBroadcaster.stop();
     this.groupActivityListener.stop();
+    this.dqbActivityBroadcaster.stop();
+    this.dqbActivityListener.stop();
     this.groupsListener.stop();
     this.latestGroupIdListener.stop();
     this.exemplarsListener.stop();

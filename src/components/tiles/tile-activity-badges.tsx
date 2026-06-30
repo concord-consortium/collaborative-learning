@@ -4,7 +4,7 @@ import React from "react";
 import { Tooltip } from "react-tippy";
 import { useStores } from "../../hooks/use-stores";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
-import { GroupDocument } from "../../models/document/document-types";
+import { DrivingQuestionBoardDocument, GroupDocument } from "../../models/document/document-types";
 
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 
@@ -57,24 +57,31 @@ interface IProps {
 export const TileActivityBadges = observer(function TileActivityBadges({
   documentKey, tileId, hovered, selected
 }: IProps) {
-  const { groupActivity, groups, documents, user } = useStores();
+  const { groupActivity, dqbActivity, groups, class: classStore, documents, user } = useStores();
 
-  // Only render for group documents
+  // Render for group documents (group-scoped presence) and the class-wide Driving
+  // Question Board (class-scoped presence).
   const document = documents.getDocument(documentKey);
-  if (document?.type !== GroupDocument) return null;
+  const isGroupDoc = document?.type === GroupDocument;
+  const isDQB = document?.type === DrivingQuestionBoardDocument;
+  if (!isGroupDoc && !isDQB) return null;
 
-  const focused = groupActivity.usersFocusedOnTile(documentKey, tileId, user.id);
+  const activity = isDQB ? dqbActivity : groupActivity;
+  const focused = activity.usersFocusedOnTile(documentKey, tileId, user.id);
   if (focused.length === 0) return null;
 
-  // The activity listener is scoped to a single group, so every focused user
-  // shares the local user's group; resolve names/initials through that group.
+  // Resolve names/initials. Group docs resolve through the local user's group; the DQB
+  // resolves through the whole class, since its presence spans every class member.
   const group = groups.groupForUser(user.id);
   const groupUsers = group?.users ?? [];
   const usersWithIdentity: UserInfo[] = focused
-    .map(activity => {
-      const u = groupUsers.find(gu => gu.id === activity.userId);
-      if (!u) return null;
-      return { userId: activity.userId, initials: u.initials, name: u.name };
+    .map(a => {
+      if (isDQB) {
+        const u = classStore.getUserById(a.userId);
+        return u ? { userId: a.userId, initials: u.initials, name: u.fullName } : null;
+      }
+      const gu = groupUsers.find(member => member.id === a.userId);
+      return gu ? { userId: a.userId, initials: gu.initials, name: gu.name } : null;
     })
     .filter((u): u is NonNullable<typeof u> => u !== null);
   if (usersWithIdentity.length === 0) return null;

@@ -29,6 +29,17 @@
     &.planning {
       background-color: $workspace-teal-light-4;
     }
+    &.drivingQuestionBoard .title {
+      // Center the title across the full bar width rather than in the space left
+      // over after the (asymmetric) action groups. pointer-events: none so the
+      // File menu underneath stays clickable.
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      pointer-events: none;
+    }
     .display-id {
       flex-grow: 1;
       text-align: center;

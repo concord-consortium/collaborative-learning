@@ -2,13 +2,13 @@ import { FC, SVGProps } from "react";
 import { makeAutoObservable } from "mobx";
 
 import {
-  createDocMapByBookmarks, createTileTypeToDocumentsMap, getTagsWithDocs,
+  createDocMapByBookmarks, createTileTypeToDocumentsMap, getTagsWithDocs, kWholeClassSectionLabel,
   sortDateSectionLabels, sortGroupSectionLabels, sortNameSectionLabels, sortProblemSectionLabels
 } from "../../utilities/sort-document-utils";
 import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
-import { GroupDocument } from "../document/document-types";
+import { DrivingQuestionBoardDocument, GroupDocument } from "../document/document-types";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { AppConfigModelType } from "./app-config-model";
@@ -186,6 +186,11 @@ export class DocumentGroup {
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
     this.documents.forEach((doc) => {
       const sectionLabel = (() => {
+        // The class-wide Driving Question Board gets its own "Whole Class" section
+        // (rather than sharing the "No Group" bucket with ungrouped students' docs).
+        if (doc.type === DrivingQuestionBoardDocument) {
+          return kWholeClassSectionLabel;
+        }
         if (doc.type === GroupDocument) {
           return `${groupTerm} ${doc.groupId}`;
         }
@@ -205,16 +210,21 @@ export class DocumentGroup {
 
   get byName(): DocumentGroup[] {
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
-    const addDocForUser = (doc: IDocumentMetadataModel, user: ClassUserModelType | undefined) => {
-      const sectionLabel = user ? `${user.lastName}, ${user.firstName}` : "Unknown";
+    const addDocToSection = (doc: IDocumentMetadataModel, sectionLabel: string) => {
       if (!documentMap.has(sectionLabel)) {
         documentMap.set(sectionLabel, []);
       }
       documentMap.get(sectionLabel)?.push(doc);
     };
+    const addDocForUser = (doc: IDocumentMetadataModel, user: ClassUserModelType | undefined) => {
+      addDocToSection(doc, user ? `${user.lastName}, ${user.firstName}` : "Unknown");
+    };
 
     this.documents.forEach((doc) => {
-      if (doc.type === GroupDocument) {
+      if (doc.type === DrivingQuestionBoardDocument) {
+        // The class-wide Driving Question Board has no author.
+        addDocToSection(doc, "No Name");
+      } else if (doc.type === GroupDocument) {
         // Add group documents to each user in the group
         const groupId = doc.groupId ?? "unknownGroup";
         const group = this.stores.groups.getGroupById(groupId);

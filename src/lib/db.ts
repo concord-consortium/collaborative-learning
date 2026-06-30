@@ -15,7 +15,7 @@ import { DocumentModelType, createDocumentModel, isVisibilityType } from "../mod
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
-  ProblemPublication, SupportPublication, GroupDocument, isDocumentType
+  ProblemPublication, SupportPublication, GroupDocument, DrivingQuestionBoardDocument, isDocumentType
 } from "../models/document/document-types";
 import { SectionModelType } from "../models/curriculum/section";
 import { SupportModelType } from "../models/curriculum/support";
@@ -421,6 +421,42 @@ export class DB {
     return handler;
   }
 
+  // --- Driving Question Board (class-wide) presence ---
+  // Mirrors the group activity methods above, but on a class-scoped path so all class
+  // members editing the shared board can see each other's tile focus.
+  private getDQBUserActivityPath(): firebase.database.Reference | undefined {
+    const { user } = this.stores;
+    // Guard on isConnected so set/clear/onDisconnect become no-ops during teardown
+    // (the broadcaster's stop() runs after the db has already disconnected).
+    if (this.firebase.isConnected && user.classHash) {
+      return this.firebase.ref(this.firebase.getDQBUserActivityPath(user));
+    }
+  }
+
+  public setDQBUserActivity(activity: Omit<GroupUserActivitySnapshot, "userId" | "updatedAt">) {
+    const ref = this.getDQBUserActivityPath();
+    return ref
+      ? ref.set({
+          ...activity,
+          updatedAt: firebase.database.ServerValue.TIMESTAMP
+        })
+      : Promise.resolve();
+  }
+
+  public clearDQBUserActivity() {
+    const ref = this.getDQBUserActivityPath();
+    return ref ? ref.remove() : Promise.resolve();
+  }
+
+  public setDQBUserActivityOnDisconnect() {
+    const ref = this.getDQBUserActivityPath();
+    if (!ref) return null;
+
+    const handler = ref.onDisconnect();
+    handler.remove();
+    return handler;
+  }
+
   public async guaranteeOpenDefaultDocument(documentType: typeof ProblemDocument | typeof PersonalDocument,
                                             defaultContent?: DocumentContentModelType) {
     const {documents} = this.stores;
@@ -556,12 +592,18 @@ export class DB {
       const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
 
       let problemInfo: {unit:string|null, investigation?: string, problem?: string} = {unit: null};
-      if ("offeringId" in metadata && metadata.offeringId != null) {
+      if (metadata.type === DrivingQuestionBoardDocument) {
+        // The DQB spans the whole unit, so it is stamped with the unit but no
+        // investigation/problem (it must appear under every lesson).
+        problemInfo = { unit: this.stores.unit.code };
+      } else if ("offeringId" in metadata && metadata.offeringId != null) {
         problemInfo = this.currentProblemInfo;
       }
 
-      // Group documents don't use a real uid, but instead a fake one based on the group id.
-      const uid = metadata.type === GroupDocument ? metadata.self.uid : userContext.uid;
+      // Group and Driving Question Board documents don't use a real uid, but instead a
+      // synthetic one (based on the group id, or the unit code for the DQB).
+      const uid = (metadata.type === GroupDocument || metadata.type === DrivingQuestionBoardDocument)
+        ? metadata.self.uid : userContext.uid;
 
       // Add the groupId for group documents to make then easier to query.
       // groupInfo is used so that the resulting firestoreMetadata can't have a `groupId: undefined` property.
@@ -605,6 +647,12 @@ export class DB {
     };
   }
 
+  // Class-scoped synthetic storage uid for the unit's Driving Question Board.
+  // One shared file per (class, unit); the class scope comes from the storage path.
+  private get userIdForDrivingQuestionBoard() {
+    return `dqb_${this.stores.unit.code}`;
+  }
+
   public async createDocument(params: { type: DBDocumentType, content?: string, title?: string }) {
     const { type, content, title } = params;
     const { user } = this.stores;
@@ -614,7 +662,10 @@ export class DB {
       metadata: DBDocumentMetadata,
       firestoreMetadata: IDocumentMetadata
     }>((resolve, reject) => {
-      let groupUserId: string | undefined;
+      // syntheticUserId is a class-scoped storage uid used by documents that are
+      // shared across users (group docs, the class-wide Driving Question Board)
+      // instead of the creating user's own id.
+      let syntheticUserId: string | undefined;
       let groupId: string | undefined;
       if (type === GroupDocument) {
         if (!user.currentGroupId) {
@@ -625,21 +676,25 @@ export class DB {
         // could become invalid.
         groupId = user.currentGroupId;
         // Group documents have a special user id based on the offering and group id
-        groupUserId = user.userIdForGroupDocuments;
+        syntheticUserId = user.userIdForGroupDocuments;
+      } else if (type === DrivingQuestionBoardDocument) {
+        // The Driving Question Board is one shared file per (class, unit), so it uses
+        // a class-scoped synthetic uid based on the unit code (no group, no offering).
+        syntheticUserId = this.userIdForDrivingQuestionBoard;
       }
 
-      // If this is group document use a group user id instead of the current user id
-      const documentPath = this.firebase.getUserDocumentPath(user, undefined, groupUserId);
+      // If this is a shared document use the synthetic user id instead of the current user id
+      const documentPath = this.firebase.getUserDocumentPath(user, undefined, syntheticUserId);
       const documentRef = this.firebase.ref(documentPath).push();
       const documentKey = documentRef.key!;
-      const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, groupUserId);
+      const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, syntheticUserId);
       const metadataRef = this.firebase.ref(metadataPath);
       const version = "1.0";
       const createdAt = firebase.database.ServerValue.TIMESTAMP as number;
       const {classHash, offeringId} = user;
 
       const self = {
-        uid: groupUserId ?? user.id,
+        uid: syntheticUserId ?? user.id,
         documentKey,
         classHash
       };
@@ -659,6 +714,10 @@ export class DB {
         case SupportPublication:
         case GroupDocument:
           metadata = {version, self, createdAt, type, classHash, offeringId};
+          break;
+        case DrivingQuestionBoardDocument:
+          // Keyed by unit, not offering; carries a title but no offeringId/groupId.
+          metadata = {version, self, createdAt, type, classHash, title};
           break;
       }
 
@@ -750,6 +809,53 @@ export class DB {
     }
 
     return await this.openDocumentFromFirestoreMetadata(firestoreMetadata);
+  }
+
+  public async createDrivingQuestionBoardDocument() {
+    const title = this.stores.appConfig.drivingQuestionBoardTitle || "Driving Question Board";
+    const result = await this.createDocument({ type: DrivingQuestionBoardDocument, title });
+    Logger.log(LogEventName.CREATE_DRIVING_QUESTION_BOARD);
+    return result;
+  }
+
+  // Returns the Firestore metadata for the current (class, unit) Driving Question Board,
+  // or undefined if none exists yet. Keyed by unit rather than offering so a single board
+  // spans every lesson in the unit.
+  public async findDrivingQuestionBoardMetadata(): Promise<IDocumentMetadata | undefined> {
+    const { user, unit, curriculumConfig } = this.stores;
+    if (!user.classHash || !unit.code) return undefined;
+
+    const converter = typeConverter<IDocumentMetadata>();
+    // Query by type + class, then filter to the current unit (handling renamed unit
+    // codes) client-side. This avoids needing a composite Firestore index.
+    const findBoards = this.firestore.collection("documents")
+      .withConverter(converter)
+      .where("context_id", "==", user.classHash)
+      .where("type", "==", DrivingQuestionBoardDocument);
+
+    const maybeBoards = await findBoards.get();
+    const unitVariants = curriculumConfig.getUnitCodeVariants(unit.code);
+    const existing = maybeBoards.docs
+      .map(doc => doc.data())
+      .filter((data): data is IDocumentMetadata => !!data && !!data.unit && unitVariants.includes(data.unit))
+      // If more than one exists (creation race), reuse the earliest-created board.
+      .sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
+
+    return existing[0];
+  }
+
+  // Ensures the unit's Driving Question Board exists, creating it if missing. Does NOT
+  // open the document — it appears in Sort Work via the Firestore metadata listener, and
+  // its content/history listeners start only when a user actually opens it. This keeps
+  // every user from spinning up DQB content/history listeners on workspace mount.
+  // FIXME: like getOrCreateGroupDocument, this find-then-create is not transactional,
+  // so two simultaneous first-openers could create duplicate boards. We mitigate by
+  // always reusing the earliest board (see findDrivingQuestionBoardMetadata).
+  public async guaranteeDrivingQuestionBoard() {
+    const existing = await this.findDrivingQuestionBoardMetadata();
+    if (!existing) {
+      await this.createDrivingQuestionBoardDocument();
+    }
   }
 
   public publishProblemDocument(documentModel: DocumentModelType) {

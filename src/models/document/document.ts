@@ -30,8 +30,8 @@ import { IDocumentLogEvent, logDocumentEvent } from "./log-document-event";
 import { ISharedModelDocumentManager, SharedModelDocumentManager } from "./shared-model-document-manager";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import { IDocumentAddTileOptions } from "./document-content-types";
-import { DocumentTypeEnum, GroupDocument, IDocumentContext, ISetProperties, isPublishedType,
-  LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
+import { DocumentTypeEnum, DrivingQuestionBoardDocument, GroupDocument, IDocumentContext, ISetProperties,
+  isPublishedType, LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
 import { DocumentCommentsManager } from "./document-comments-manager";
@@ -107,6 +107,9 @@ export const DocumentModel = Tree.named("Document")
     },
     get isGroup() {
       return (self.type === GroupDocument);
+    },
+    get isDrivingQuestionBoard() {
+      return (self.type === DrivingQuestionBoardDocument);
     },
     get isPlanning() {
       return (self.type === PlanningDocument);
