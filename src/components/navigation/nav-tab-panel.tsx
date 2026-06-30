@@ -15,6 +15,7 @@ import ChatIcon from "../../assets/chat-icon.svg";
 import { SortWorkView } from "../document/sort-work-view";
 import { NavTabPanelInfoProvider } from "../../hooks/use-nav-tab-panel-info";
 import { getAriaLabels } from "../../hooks/use-aria-labels";
+import { shouldHideChat } from "./should-hide-chat";
 
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.scss";
@@ -51,7 +52,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const tabs = this.stores.tabsToDisplay;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const isChatEnabled = appConfig.showCommentPanelFor(user.type) &&
-      !this.shouldHideChat(selectedTabIndex, user.type);
+      !shouldHideChat(activeNavTab, user.type);
     const openChatPanel = isChatEnabled && showChatPanel;
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
     const ariaLabels = getAriaLabels();
@@ -216,12 +217,4 @@ export class NavTabPanel extends BaseComponent<IProps> {
     persistentUI.setDividerPosition(kDividerMin);
   };
 
-  private hideChatRules: Array<(tabIndex: number, userType: string) => boolean> = [
-    // Hide chat for students on the problems tab
-    (tabIndex, userType) => userType === "student" && tabIndex === 0
-  ];
-
-  private shouldHideChat = (tabIndex: number, userType?: string) => {
-    return userType && this.hideChatRules.some(rule => rule(tabIndex, userType));
-  };
 }
