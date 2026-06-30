@@ -1,9 +1,10 @@
 import { SortTypeIds } from "../authoring/types";
 import { OverrideableDocFilterTypeIds } from "../models/stores/ui-types";
 import {
-  escapeKeyForForm, FILTER_TYPE_TO_TRANSLATION_KEY, getFilterTypeTranslationKey,
+  escapeKeyForForm, FILTER_TYPE_TO_TRANSLATION_KEY, getFilterTypeDisplayLabel, getFilterTypeTranslationKey,
   getSortTypeTranslationKey, isValidSortTypeId, SORT_TYPE_TO_TRANSLATION_KEY
 } from "./sort-utils";
+import { clearTermOverrides, setTermOverrides } from "./translation/translate";
 
 describe("sort-utils", () => {
   describe("FILTER_TYPE_TO_TRANSLATION_KEY", () => {
@@ -29,6 +30,26 @@ describe("sort-utils", () => {
 
     it("should return the filter type itself for non-overrideable types", () => {
       expect(getFilterTypeTranslationKey("All")).toBe("All");
+    });
+  });
+
+  describe("getFilterTypeDisplayLabel", () => {
+    afterEach(() => clearTermOverrides());
+
+    it("returns the upper-worded default label when there is no term override", () => {
+      clearTermOverrides();
+      expect(getFilterTypeDisplayLabel("Problem")).toBe("Problem");
+    });
+
+    // CLUE-563: the label must reflect the unit's term override for the problem scope.
+    it("applies the unit term override for the problem scope", () => {
+      setTermOverrides({ "contentLevel.problem": "Model" });
+      expect(getFilterTypeDisplayLabel("Problem")).toBe("Model");
+    });
+
+    it("returns non-overrideable scopes (e.g. All) unchanged", () => {
+      setTermOverrides({ "contentLevel.problem": "Model" });
+      expect(getFilterTypeDisplayLabel("All")).toBe("All");
     });
   });
 
