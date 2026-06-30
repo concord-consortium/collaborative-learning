@@ -34,6 +34,13 @@ $footer-height: 12px;
         .list-item-container {
           height: 100%;
           width: 100%;
+
+          // Large thumbnails fill the box edge-to-edge (no centering gutter), so only the
+          // horizontal anchor needs overriding to a flush 4px; they keep the list-item top
+          // padding, so the base `top: calc($padding + 4px)` already lands on the corner.
+          > .icon-holder {
+            left: 4px;
+          }
         }
       }
 
@@ -92,22 +99,6 @@ $footer-height: 12px;
       }
     }
 
-    // The bookmark button (.icon-holder) is a child of .list-item-container, a sibling of
-    // .list-item. (My Work positions it via a `.documents-list`-scoped rule that doesn't
-    // apply here, so in the scroller it otherwise falls into normal flow.) Make the
-    // container a positioning context and overlay the bookmark in the top-right corner,
-    // nudged in a few px. Applies to both small and large thumbnails.
-    .list-item-container {
-      position: relative;
-
-      > .icon-holder {
-        left: auto;
-        position: absolute;
-        right: 6px;
-        top: 2px;
-      }
-    }
-
     .list-item {
       height: 126px;
       min-height: auto;
@@ -136,6 +127,14 @@ $footer-height: 12px;
           width: 96px;
         }
       }
+    }
+
+    // Small scroller thumbnails size the box edge-to-edge (width 96px == list-item) and remove
+    // the list-item top padding, so the box's top-left corner IS the container's corner.
+    // Anchor the bookmark a uniform 4px inset there, overriding the page-view centering/padding.
+    .list-item-container > .icon-holder {
+      left: 4px;
+      top: 0;
     }
   }
 
