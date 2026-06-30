@@ -22,10 +22,8 @@ import { TreeMonitor } from "../history/tree-monitor";
 import { ITileEnvironment } from "../tiles/tile-content";
 import { TreeManager } from "../history/tree-manager";
 import { ESupportType } from "../curriculum/support";
-import { UserModelType } from "../stores/user";
 import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../shared/shared-data-set";
 import { createFormulaDataSetProxy } from "../data/formula-data-set-proxy";
-import { isDocumentAccessibleToUser } from "./document-utils";
 import { IDocumentLogEvent, logDocumentEvent } from "./log-document-event";
 import { ISharedModelDocumentManager, SharedModelDocumentManager } from "./shared-model-document-manager";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
@@ -183,9 +181,6 @@ export const DocumentModel = Tree.named("Document")
      */
     getUniqueTitleForType(tileType: string) {
       return self.content?.getUniqueTitleForType(tileType);
-    },
-    isAccessibleToUser(user: UserModelType, documentStore: IExemplarVisibilityProvider) {
-      return isDocumentAccessibleToUser(self.metadata, user, documentStore);
     }
   }))
   .actions((self) => ({

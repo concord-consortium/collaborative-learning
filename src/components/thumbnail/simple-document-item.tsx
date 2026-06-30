@@ -20,7 +20,7 @@ export const SimpleDocumentItem = observer(function SimpleDocumentItem(
   const userName = classStore.getUserById(uid)?.displayName;
   const title = getDocumentDisplayTitle(unit, document, appConfig);
   const titleWithUser = `${userName}: ${title}`;
-  const isPrivate = !isDocumentAccessibleToUser(document, user, documents);
+  const isPrivate = !isDocumentAccessibleToUser({ documentMetadata: document, user, documents });
   const selected = ui.highlightedSortWorkDocument === document.key;
 
   const handleClick = () => {

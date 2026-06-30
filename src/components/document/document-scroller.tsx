@@ -6,6 +6,7 @@ import { clamp } from "lodash";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
+import { IDocumentMetadataModel } from "../../models/document/document-metadata-model";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
@@ -64,17 +65,19 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
     sortedDocuments.fetchFullDocument(docKey);
   };
 
-  const renderThumbnail = (docKey: string) => {
-    const fullDocument = getDocument(docKey);
-    const thumbnailClass = classNames("document-thumbnail", { selected: docKey === openDocumentKey });
+  const renderThumbnail = (documentMetadata: IDocumentMetadataModel) => {
+    const { key } = documentMetadata;
+    const fullDocument = getDocument(key);
+    const thumbnailClass = classNames("document-thumbnail", { selected: key === openDocumentKey });
     return (
       fullDocument &&
-        <div key={docKey} className={thumbnailClass} data-testid="document-thumbnail">
+        <div key={key} className={thumbnailClass} data-testid="document-thumbnail">
           <DecoratedDocumentThumbnailItem
-            key={docKey}
+            key={key}
             scale={largeThumbnails ? 0.5 : 0.1}
             scrollable={largeThumbnails}
             document={fullDocument}
+            documentMetadata={documentMetadata}
             tab={ENavTab.kSortWork}
             shouldHandleStarClick
             allowDelete={false}
@@ -121,7 +124,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
         }
         <div ref={documentListRef} className="document-thumbnail-list documents-list">
           {documentGroup?.documents.map((doc) => (
-            renderThumbnail(doc.key)
+            renderThumbnail(doc)
           ))}
         </div>
         {!largeThumbnails && scrollToLocation < maxScrollTo &&
