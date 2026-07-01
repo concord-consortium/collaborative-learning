@@ -35,3 +35,12 @@ export function sanitizeFileName(fileName: string): string {
   // Strip trailing dots from final result (problematic on Windows and in URLs)
   return result.replace(/\.+$/, "") || "image";
 }
+
+/**
+ * Whether a filename ends in a real image extension (dot + 3+ letters). Mirrors the CLUE runtime
+ * resolver (localAssetsImagesHandler.match in src/models/image-map.ts) so a name that would fail to
+ * render everywhere it's used can be rejected before it's saved.
+ */
+export function hasValidImageExtension(fileName: string): boolean {
+  return /\.[a-z]{3,}$/i.test(fileName);
+}

@@ -1,4 +1,4 @@
-import { sanitizeFileName } from "./sanitize-filename";
+import { hasValidImageExtension, sanitizeFileName } from "./sanitize-filename";
 
 describe("sanitizeFileName", () => {
   it("replaces spaces with hyphens", () => {
@@ -63,5 +63,19 @@ describe("sanitizeFileName", () => {
 
   it("strips leading dots from basename with extension", () => {
     expect(sanitizeFileName(".foo.png")).toBe("foo.png");
+  });
+});
+
+describe("hasValidImageExtension", () => {
+  it("accepts a dot followed by 3+ letters, any case", () => {
+    expect(hasValidImageExtension("diagram.png")).toBe(true);
+    expect(hasValidImageExtension("photo.JPEG")).toBe(true);
+    expect(hasValidImageExtension("my.image.file.svg")).toBe(true);
+  });
+
+  it("rejects a missing or too-short extension", () => {
+    expect(hasValidImageExtension("diagram-v2")).toBe(false);
+    expect(hasValidImageExtension("foo.x")).toBe(false);
+    expect(hasValidImageExtension("foo.")).toBe(false);
   });
 });
