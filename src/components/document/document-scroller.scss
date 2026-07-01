@@ -35,9 +35,9 @@ $footer-height: 12px;
           height: 100%;
           width: 100%;
 
-          // Large thumbnails fill the box edge-to-edge (no centering gutter), so only the
-          // horizontal anchor needs overriding to a flush 4px; they keep the list-item top
-          // padding, so the base `top: calc($padding + 4px)` already lands on the corner.
+          // Large thumbnails fill the width (no centering gutter), so override the base's
+          // centered-left calc to a flush 4px inset. The flush top (top: 0) comes from the
+          // shared scroller rule below, which also matches this large-thumbnails list.
           > .icon-holder {
             left: 4px;
           }
@@ -129,9 +129,12 @@ $footer-height: 12px;
       }
     }
 
-    // Small scroller thumbnails size the box edge-to-edge (width 96px == list-item) and remove
-    // the list-item top padding, so the box's top-left corner IS the container's corner.
-    // Anchor the bookmark a uniform 4px inset there, overriding the page-view centering/padding.
+    // The scroller lays the thumbnail box flush in its container (width 96px == list-item,
+    // list-item padding removed), so the box's top-left corner IS the container's corner:
+    // anchor the bookmark flush at the top (top: 0) with a 4px left inset, overriding the
+    // page-view centering/padding calc above.
+    // NOTE: this selector also matches the .large-thumbnails list (same class) — intentional,
+    // since large thumbnails want the same flush top placement.
     .list-item-container > .icon-holder {
       left: 4px;
       top: 0;

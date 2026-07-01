@@ -88,15 +88,15 @@ $section-padding: 6px;
       cursor: pointer;
       padding: 0;
       position: absolute;
-      // Pin the bookmark a few px inside the TOP-LEFT CORNER OF THE VISIBLE THUMBNAIL BOX
+      // Anchor the bookmark to the TOP-LEFT CORNER OF THE VISIBLE THUMBNAIL BOX
       // (.scaled-list-item-container) — not the outer .list-item-container it is positioned
       // against. In these page views (My Work / Class Work / sort-work) the box is centered
       // inside a wider .list-item (min-width) and pushed down by the list-item's vertical
-      // padding ($padding), so the box's corner is inset from the container by:
-      //   left = half the horizontal leftover (the centering gutter) + 4px
-      //   top  = the list-item's top padding + 4px
+      // padding ($padding), so the box's top-left corner sits at:
+      //   left = half the horizontal leftover (the centering gutter), plus a 4px inset
+      //   top  = the list-item's top padding (bookmark sits flush with the box's top edge)
       // Both are derived from the same vars that size the box, so they stay correct if those
-      // change. The scroller sizes the box edge-to-edge with no top padding and overrides these.
+      // change. The scroller lays the box flush in its container and overrides these below.
       // The bookmark overlays the document content (z-index) with a white halo (drop-shadow
       // below) so it stays legible without a boxy background.
       left: calc((100% - #{$list-item-width * $list-item-scale}) / 2 + 4px);
