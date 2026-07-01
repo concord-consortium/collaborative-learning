@@ -5,7 +5,7 @@ import {AuthorizedRequest, sendErrorResponse, sendSuccessResponse} from "../help
 import {describeGitHubError, owner, repo} from "../helpers/github";
 import {escapeFirebaseKey, getDb, getUnitFilesPath} from "../helpers/db";
 import {computeImageUsages} from "../helpers/unit-content";
-import {isValidImageFileName, isValidUnitCode} from "../helpers/image-references";
+import {isPathSafeImageFileName, isValidUnitCode} from "../helpers/image-references";
 
 // Deletes a library image from GitHub and the Firebase files map. Only permitted when the image is
 // unused in the current unit + teacher guide (re-verified here so a stale client can't force it).
@@ -26,8 +26,12 @@ const deleteImage = async (req: Request, res: Response) => {
   if (!fileName) {
     return sendErrorResponse(res, "Missing required body parameter: fileName.", 400);
   }
-  if (!isValidImageFileName(fileName)) {
-    return sendErrorResponse(res, "Invalid fileName: only alphanumeric, dash, underscore, and dot are allowed.", 400);
+  // Delete removes an EXISTING file rather than introducing a new name, so it accepts any path-safe
+  // name — including messy legacy ones (spaces, "&", etc.) that the strict allowlist rejects. Those
+  // are exactly the unused images an author needs to be able to clean up; the strict check is only
+  // for names we create (upload / rename destination).
+  if (!isPathSafeImageFileName(fileName)) {
+    return sendErrorResponse(res, "Invalid fileName: it must not contain slashes or control characters.", 400);
   }
 
   const imageKey = `images/${fileName}`;

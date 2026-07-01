@@ -3,27 +3,39 @@
 // `{unit}/images/{file}` (see localAssetsImagesHandler in src/models/image-map.ts). These are pure
 // string functions so they can be unit-tested without Firebase/GitHub.
 
-// Two distinct character sets, deliberately separate:
+// Two deliberately separate concerns: the naming POLICY for a clean destination name, and the
+// character set that can appear in an EXISTING reference already sitting in content.
 //
-// safeNameChars — the naming POLICY for a clean library filename / unit code, enforced on every new
+// safeNameChars — the naming policy for a clean library filename / unit code, enforced on every new
 // or renamed (destination) name. Strict on purpose: no spaces, no "&", no path separators.
 //
-// refTokenChars — the set that can appear in an EXISTING reference token already in content. Wider,
-// because the CLUE runtime (localAssetsImagesHandler.match in src/models/image-map.ts) resolves any
-// "{unit}/images/{file}" url that contains no space/colon and ends in an extension. So a legacy name
-// like "C&S_1-1.png" is a real, referenceable image the scanner must recognize to count it. (Spaces
-// can't be referenced at all — match() rejects them — so they're correctly absent here.) Keeping
-// these separate means widening detection never loosens the naming policy.
+// refToken — one character of a reference token as it appears in content. Authored content is JSON,
+// so a "{unit}/images/{file}" reference is always the value of a string field and is terminated by
+// the string delimiter. It matches the CLUE runtime (localAssetsImagesHandler.match in
+// src/models/image-map.ts), which resolves any such url that contains no space/colon and ends in an
+// extension: the only characters that can't be part of the filename are the JSON string delimiter,
+// whitespace, ":" and "/" (the runtime rejects spaces/colons, and a library filename is a single
+// path segment), and "\\" (a JSON escape). Everything else the runtime accepts — legacy punctuation
+// like ( ) % + ' , & and non-ASCII — is part of the name, so the scanner counts/rewrites it
+// correctly. Keeping this separate from safeNameChars means detecting a messy name never loosens
+// the policy for creating one.
 const safeNameChars = "A-Za-z0-9._-";
-const refTokenChars = "A-Za-z0-9._&-";
+const refToken = "[^\\x22\\s:/\\\\]"; // \x22 is the JSON string delimiter (")
 
 const safeNameRegExp = new RegExp(`^[${safeNameChars}]+$`);
 
-// Library image filenames are restricted to a safe character set (no path separators) so they can
-// be interpolated into GitHub paths and Firebase keys without traversal risk. Shared by the
-// upload/delete/rename routes so the allowlist (and its rejection) stays consistent.
+// A library image filename must end in a real extension (dot + 3+ letters) so it resolves through
+// the runtime matcher (localAssetsImagesHandler.match, /\.[a-z]{3,}$/i). Without this an author
+// could rename an image to an extension-less name that passes the charset check but then fails to
+// render everywhere it's used.
+const imageExtensionRegExp = /\.[a-z]{3,}$/i;
+
+// Library image filenames are restricted to a safe character set (no path separators) and must carry
+// a valid image extension, so they can be interpolated into GitHub paths / Firebase keys without
+// traversal risk and always resolve at runtime. Shared by the upload/delete/rename routes so the
+// allowlist (and its rejection) stays consistent.
 export function isValidImageFileName(name: string): boolean {
-  return safeNameRegExp.test(name);
+  return safeNameRegExp.test(name) && imageExtensionRegExp.test(name);
 }
 
 // Unit codes are single path segments under curriculum/{unit}/; restrict them to the same safe set
@@ -53,10 +65,10 @@ function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// Matches `{unit}/images/{file}`, requiring a non-identifier boundary before the unit so that a
-// unit code which is merely a suffix of a longer token (e.g. "xsas" vs "sas") is not matched.
+// Matches `{unit}/images/{file}`, requiring a non-token boundary before the unit so that a unit
+// code which is merely a suffix of a longer token (e.g. "xsas" vs "sas") is not matched.
 function imageRefRegExp(unit: string, flags = "g"): RegExp {
-  return new RegExp(`(?<![${refTokenChars}])${escapeRegExp(unit)}/images/([${refTokenChars}]+)`, flags);
+  return new RegExp(`(?<!${refToken})${escapeRegExp(unit)}/images/(${refToken}+)`, flags);
 }
 
 // Returns the de-duplicated list of library image keys (`images/{file}`) referenced by the given
@@ -103,7 +115,7 @@ export function rewriteImageReference(
   toFile: string
 ): {text: string; changed: boolean} {
   const re = new RegExp(
-    `(?<![${refTokenChars}])${escapeRegExp(unit)}/images/${escapeRegExp(fromFile)}(?![${refTokenChars}])`,
+    `(?<!${refToken})${escapeRegExp(unit)}/images/${escapeRegExp(fromFile)}(?!${refToken})`,
     "g"
   );
   let changed = false;

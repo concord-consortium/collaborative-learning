@@ -4,7 +4,7 @@ import Modal from "./modal";
 import { useCurriculum } from "../hooks/use-curriculum";
 import { useAuthoringApi } from "../hooks/use-authoring-api";
 import { useAuthoringPreview } from "../hooks/use-authoring-preview";
-import { sanitizeFileName } from "../utils/sanitize-filename";
+import { hasValidImageExtension, sanitizeFileName } from "../utils/sanitize-filename";
 import { describeUsagePath, formatLocation } from "../utils/image-usage-locations";
 
 import "./media-library.scss";
@@ -242,6 +242,10 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
     const sanitized = sanitizeFileName(renameValue.trim());
     if (!sanitized || sanitized === selectedFileName) {
       setRenameError("Enter a different, valid filename.");
+      return;
+    }
+    if (!hasValidImageExtension(sanitized)) {
+      setRenameError("Include a file extension (e.g. .png) so the image can be displayed.");
       return;
     }
     const targetKey = `images/${sanitized}`;

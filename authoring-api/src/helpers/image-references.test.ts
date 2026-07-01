@@ -51,6 +51,20 @@ describe("extractImageKeys", () => {
     const text = contentWith("sas/images/C&S_1-1.png");
     expect(extractImageKeys("sas", text)).toEqual(["images/C&S_1-1.png"]);
   });
+
+  it("detects legacy names with other punctuation the runtime accepts (not truncated)", () => {
+    // ( ) % + ' , and non-ASCII are all part of a real referenceable name; capturing only up to the
+    // JSON string delimiter keeps their usage counts correct (previously these were truncated).
+    const text = contentWith(
+      "sas/images/photo(2).png", "sas/images/100%.png", "sas/images/a+b's,c.png", "sas/images/café.png",
+    );
+    expect(extractImageKeys("sas", text).sort()).toEqual([
+      "images/100%.png",
+      "images/a+b's,c.png",
+      "images/café.png",
+      "images/photo(2).png",
+    ]);
+  });
 });
 
 describe("buildUsageMap", () => {
@@ -115,6 +129,14 @@ describe("rewriteImageReference", () => {
     expect(out).toContain("sas/images/cs_1-1.png");
     expect(out).not.toContain("C&S_1-1.png");
   });
+
+  it("rewrites a legacy name with parentheses (which regex-escaping must handle)", () => {
+    const text = JSON.stringify({url: "sas/images/photo(2).png"});
+    const {text: out, changed} = rewriteImageReference("sas", text, "photo(2).png", "photo-2.png");
+    expect(changed).toBe(true);
+    expect(out).toContain("sas/images/photo-2.png");
+    expect(out).not.toContain("photo(2).png");
+  });
 });
 
 describe("isValidImageFileName", () => {
@@ -133,6 +155,14 @@ describe("isValidImageFileName", () => {
 
   it("still rejects '&' — the naming policy stays strict even though the scanner now detects it", () => {
     expect(isValidImageFileName("C&S_1-1.png")).toBe(false);
+  });
+
+  it("requires a real image extension so the renamed file still resolves at runtime", () => {
+    // The runtime resolver needs a dot + 3-letter extension; an otherwise-safe name without one
+    // would move the blob and rewrite references to a token that renders nowhere.
+    expect(isValidImageFileName("diagram-v2")).toBe(false);
+    expect(isValidImageFileName("foo.x")).toBe(false);
+    expect(isValidImageFileName("diagram-v2.png")).toBe(true);
   });
 });
 
