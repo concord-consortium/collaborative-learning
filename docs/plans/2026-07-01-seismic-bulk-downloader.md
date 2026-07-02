@@ -164,8 +164,10 @@ describe("fetchAvailability", () => {
     history.replaceState(null, "", "?seismicProxy");
     fetchMock.mockResponseOnce(AVAILABILITY_TEXT);
 
-    const ranges = await fetchAvailability("AK", "K204", "--", "HNZ",
-      "2026-01-30T00:00:00.000Z", "2026-02-05T00:00:00.000Z");
+    const ranges = await fetchAvailability({
+      network: "AK", station: "K204", location: "--", channel: "HNZ",
+      startTime: "2026-01-30T00:00:00.000Z", endTime: "2026-02-05T00:00:00.000Z",
+    });
 
     expect(ranges).toEqual([
       { startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 2, 1) },
@@ -175,8 +177,10 @@ describe("fetchAvailability", () => {
   });
 
   it("falls back to the full requested range when not in proxy mode", async () => {
-    const ranges = await fetchAvailability("AK", "K204", "--", "HNZ",
-      "2026-01-30T00:00:00.000Z", "2026-02-05T00:00:00.000Z");
+    const ranges = await fetchAvailability({
+      network: "AK", station: "K204", location: "--", channel: "HNZ",
+      startTime: "2026-01-30T00:00:00.000Z", endTime: "2026-02-05T00:00:00.000Z",
+    });
     expect(ranges).toEqual([
       { startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 2, 5) },
     ]);
@@ -196,6 +200,9 @@ First, DRY up the existing date helper: at the top of `earthscope-client.ts` add
 `import { utcDay } from "./seismic-day";` and delete the local `function utcDay(...)`
 (currently `earthscope-client.ts:41-43`). `MOCK_FILES` keeps calling `utcDay(...)`, now
 resolved from the import.
+
+Also add `StationISOTimeRange` to the existing seismic-types import (the line becomes
+`import { ChannelMetadata, StationISOTimeRange } from "./seismic-types.js";`).
 
 Then append the availability API:
 
@@ -220,10 +227,10 @@ export interface AvailabilityRange {
  * day; the mock dataselect returns "no data" for days it doesn't cover.
  */
 export async function fetchAvailability(
-  network: string, station: string, location: string, channel: string,
-  startTime: string, endTime: string,
+  query: StationISOTimeRange,
   options?: { baseUrl?: string; signal?: AbortSignal }
 ): Promise<AvailabilityRange[]> {
+  const { network, station, location, channel, startTime, endTime } = query;
   if (!isProxyEnabled()) {
     return [{
       startSec: new Date(startTime).getTime() / 1000,
@@ -343,21 +350,22 @@ export class FakeDirHandle {
 import { createOpfsCache } from "./opfs-seismic-cache";
 import { FakeDirHandle } from "./fake-opfs";
 import { dayIndex, utcDay } from "./seismic-day";
-const STA = { network: "AK", station: "K204" };
+import { StationData } from "./seismic-types";
+const STA: StationData = { network: "AK", station: "K204", channel: "HNZ" };
 const bytes = (n: number) => new Uint8Array([n, n, n]).buffer;
 
 describe("opfs-seismic-cache", () => {
   it("writes then reads back a day chunk", async () => {
     const cache = createOpfsCache(async () => new FakeDirHandle() as any);
     const day = dayIndex(utcDay(2026, 1, 30));
-    await cache.writeDayChunk(STA, "HNZ", day, bytes(7));
-    const read = await cache.readDayChunk(STA, "HNZ", day);
+    await cache.writeDayChunk(STA, day, bytes(7));
+    const read = await cache.readDayChunk(STA, day);
     expect(read && new Uint8Array(read)).toEqual(new Uint8Array([7, 7, 7]));
   });
 
   it("returns null for a day that was never written", async () => {
     const cache = createOpfsCache(async () => new FakeDirHandle() as any);
-    expect(await cache.readDayChunk(STA, "HNZ", dayIndex(utcDay(2026, 1, 30)))).toBeNull();
+    expect(await cache.readDayChunk(STA, dayIndex(utcDay(2026, 1, 30)))).toBeNull();
   });
 
   it("scans only the cached days within a range", async () => {
@@ -365,9 +373,9 @@ describe("opfs-seismic-cache", () => {
     const d30 = dayIndex(utcDay(2026, 1, 30));
     const d31 = dayIndex(utcDay(2026, 1, 31));
     const d1 = dayIndex(utcDay(2026, 2, 1));
-    await cache.writeDayChunk(STA, "HNZ", d30, bytes(1));
-    await cache.writeDayChunk(STA, "HNZ", d1, bytes(1));
-    const cached = await cache.scanCachedDays(STA, "HNZ", d30, d1);
+    await cache.writeDayChunk(STA, d30, bytes(1));
+    await cache.writeDayChunk(STA, d1, bytes(1));
+    const cached = await cache.scanCachedDays(STA, d30, d1);
     expect(cached).toEqual(new Set([d30, d1]));
     expect(cached.has(d31)).toBe(false);
   });
@@ -384,13 +392,12 @@ Expected: FAIL (module not found).
 ```ts
 // shared/seismic/opfs-seismic-cache.ts
 import { dayToYearDoy } from "./seismic-day";
-
-export interface StationId { network: string; station: string; }
+import { StationId, StationData } from "./seismic-types";
 
 export interface SeismicCache {
-  writeDayChunk(station: StationId, channel: string, day: number, bytes: ArrayBuffer | Uint8Array): Promise<void>;
-  readDayChunk(station: StationId, channel: string, day: number): Promise<ArrayBuffer | null>;
-  scanCachedDays(station: StationId, channel: string, startDay: number, endDay: number): Promise<Set<number>>;
+  writeDayChunk(station: StationData, day: number, bytes: ArrayBuffer | Uint8Array): Promise<void>;
+  readDayChunk(station: StationData, day: number): Promise<ArrayBuffer | null>;
+  scanCachedDays(station: StationData, startDay: number, endDay: number): Promise<Set<number>>;
   deleteStation(station: StationId): Promise<void>;
 }
 
@@ -415,10 +422,10 @@ export function createOpfsCache(
   getRoot: () => Promise<FileSystemDirectoryHandle> = () => navigator.storage.getDirectory()
 ): SeismicCache {
 
-  async function channelYearDir(station: StationId, channel: string, day: number, create: boolean) {
+  async function channelYearDir(station: StationData, day: number, create: boolean) {
     const { year } = dayToYearDoy(day);
     let dir = await getRoot();
-    for (const name of [ROOT_DIR, stationDir(station), channel, String(year)]) {
+    for (const name of [ROOT_DIR, stationDir(station), station.channel, String(year)]) {
       dir = await dir.getDirectoryHandle(name, { create });
     }
     return dir;
@@ -429,17 +436,17 @@ export function createOpfsCache(
   }
 
   return {
-    async writeDayChunk(station, channel, day, data) {
-      const dir = await channelYearDir(station, channel, day, true);
+    async writeDayChunk(station, day, data) {
+      const dir = await channelYearDir(station, day, true);
       const handle = await dir.getFileHandle(fileName(day), { create: true });
       const writable = await handle.createWritable();
       await writable.write(data instanceof Uint8Array ? data : new Uint8Array(data));
       await writable.close();
     },
 
-    async readDayChunk(station, channel, day) {
+    async readDayChunk(station, day) {
       try {
-        const dir = await channelYearDir(station, channel, day, false);
+        const dir = await channelYearDir(station, day, false);
         const handle = await dir.getFileHandle(fileName(day), { create: false });
         const file = await handle.getFile();
         return await file.arrayBuffer();
@@ -449,11 +456,11 @@ export function createOpfsCache(
       }
     },
 
-    async scanCachedDays(station, channel, startDay, endDay) {
+    async scanCachedDays(station, startDay, endDay) {
       const cached = new Set<number>();
       for (let day = startDay; day <= endDay; day++) {
         try {
-          const dir = await channelYearDir(station, channel, day, false);
+          const dir = await channelYearDir(station, day, false);
           await dir.getFileHandle(fileName(day), { create: false });
           cached.add(day);
         } catch (err) {
@@ -518,7 +525,7 @@ function makeDeps(overrides: Partial<DownloaderDeps> = {}): DownloaderDeps {
     fetchRaw: async () => new Uint8Array([1]).buffer,
     cache: {
       scanCachedDays: async () => new Set<number>(),
-      writeDayChunk: async (_s, _c, day) => { written.add(day); },
+      writeDayChunk: async (_s, day) => { written.add(day); },
     },
     ...overrides,
   } as DownloaderDeps;
@@ -618,26 +625,19 @@ Expected: FAIL (module not found).
 ```ts
 // shared/seismic/seismic-downloader.ts
 import { AvailabilityRange } from "./earthscope-client";
-import { StationId } from "./opfs-seismic-cache";
+import { StationData, StationLocation, StationISOTimeRange } from "./seismic-types";
 import { daysInRange, dayIndex, dayToISORange } from "./seismic-day";
 
 export interface DownloaderDeps {
-  fetchAvailability(
-    network: string, station: string, location: string, channel: string,
-    startISO: string, endISO: string, signal?: AbortSignal
-  ): Promise<AvailabilityRange[]>;
-  fetchRaw(
-    network: string, station: string, location: string, channel: string,
-    startISO: string, endISO: string, signal?: AbortSignal
-  ): Promise<ArrayBuffer>;
+  fetchAvailability(query: StationISOTimeRange, signal?: AbortSignal): Promise<AvailabilityRange[]>;
+  fetchRaw(query: StationISOTimeRange, signal?: AbortSignal): Promise<ArrayBuffer>;
   cache: {
-    scanCachedDays(station: StationId, channel: string, startDay: number, endDay: number): Promise<Set<number>>;
-    writeDayChunk(station: StationId, channel: string, day: number, bytes: ArrayBuffer): Promise<void>;
+    scanCachedDays(station: StationData, startDay: number, endDay: number): Promise<Set<number>>;
+    writeDayChunk(station: StationData, day: number, bytes: ArrayBuffer): Promise<void>;
   };
 }
 
-export interface DownloadParams {
-  network: string; station: string; location: string; channel: string;
+export interface DownloadParams extends StationLocation {
   startSec: number; endSec: number;
   concurrency?: number; maxRetries?: number; signal?: AbortSignal;
 }
@@ -672,14 +672,17 @@ export async function downloadRange(
   onEvent: (event: DownloadEvent) => void
 ): Promise<void> {
   const { network, station, location, channel, startSec, endSec } = params;
-  const stationId: StationId = { network, station };
+  const stationLocation: StationLocation = { network, station, location, channel };
   const concurrency = params.concurrency ?? DEFAULT_CONCURRENCY;
   const maxRetries = params.maxRetries ?? DEFAULT_MAX_RETRIES;
 
   try {
-    const { startISO, endISO } = { startISO: new Date(startSec * 1000).toISOString(),
-                                   endISO: new Date(endSec * 1000).toISOString() };
-    const ranges = await deps.fetchAvailability(network, station, location, channel, startISO, endISO, params.signal);
+    const ranges = await deps.fetchAvailability(
+      { ...stationLocation,
+        startTime: new Date(startSec * 1000).toISOString(),
+        endTime: new Date(endSec * 1000).toISOString() },
+      params.signal
+    );
 
     const allDays = daysInRange(startSec, endSec);
     const availableDays = allDays.filter(d => dayIsAvailable(d, ranges));
@@ -689,7 +692,7 @@ export async function downloadRange(
     const firstDay = availableDays[0];
     const lastDay = availableDays[availableDays.length - 1];
     const cached = availableDays.length
-      ? await deps.cache.scanCachedDays(stationId, channel, firstDay, lastDay)
+      ? await deps.cache.scanCachedDays(stationLocation, firstDay, lastDay)
       : new Set<number>();
 
     const total = availableDays.length;
@@ -713,8 +716,10 @@ export async function downloadRange(
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         if (params.signal?.aborted) return;
         try {
-          const bytes = await deps.fetchRaw(network, station, location, channel, dStart, dEnd, params.signal);
-          await deps.cache.writeDayChunk(stationId, channel, day, bytes);
+          const bytes = await deps.fetchRaw(
+            { ...stationLocation, startTime: dStart, endTime: dEnd }, params.signal
+          );
+          await deps.cache.writeDayChunk(stationLocation, day, bytes);
           completed++;
           onEvent({ type: "dayWritten", day });
           emitProgress();
@@ -792,10 +797,11 @@ const ctx = self as unknown as DedicatedWorkerGlobalScope;
 let abort: AbortController | null = null;
 
 const deps: DownloaderDeps = {
-  fetchAvailability: (net, sta, loc, cha, start, end, signal) =>
-    fetchAvailability(net, sta, loc, cha, start, end, { signal }),
-  fetchRaw: async (net, sta, loc, cha, start, end, signal) => {
-    const response = await fetchRawSeismicData(net, sta, loc, cha, start, end, { signal });
+  fetchAvailability: (q, signal) => fetchAvailability(q, { signal }),
+  fetchRaw: async (q, signal) => {
+    const response = await fetchRawSeismicData(
+      q.network, q.station, q.location, q.channel, q.startTime, q.endTime, { signal }
+    );
     return response.arrayBuffer();
   },
   cache: createOpfsCache(),
@@ -1075,7 +1081,7 @@ Expected: FAIL (injection seam / new loop not present).
 
         const downloadService = downloadServiceFactory();
         const cache = seismicCacheFactory();
-        const stationId = { network, station };
+        const stationData = { network, station, channel };
 
         downloadService.ensureRange({
           network, station, location, channel,
@@ -1087,7 +1093,7 @@ Expected: FAIL (injection seam / new loop not present).
           const day: number | typeof DONE = yield downloadService.nextReadyDay();
           if (day === DONE) break;
 
-          const buffer: ArrayBuffer | null = yield cache.readDayChunk(stationId, channel, day);
+          const buffer: ArrayBuffer | null = yield cache.readDayChunk(stationData, day);
           if (!buffer) { continue; }
 
           const records = miniseed.parseDataRecords(buffer);

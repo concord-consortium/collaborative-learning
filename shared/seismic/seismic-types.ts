@@ -1,18 +1,30 @@
 // shared/seismic/seismic-types.ts
 import { DateTime } from "luxon";
 
-/** Basic station data */
-export interface StationData {
+/** A network + station identifier (no channel). */
+export interface StationId {
   network: string;
   station: string;
+}
+
+/** Basic station data: a station plus a specific channel. */
+export interface StationData extends StationId {
   channel: string;
 }
 
-/** Channel metadata from EarthScope FDSN Station service. */
-export interface ChannelMetadata extends StationData {
+/** A station channel plus its location code. */
+export interface StationLocation extends StationData {
   location: string;
+}
+
+/** A station/channel/location plus an ISO time range (e.g. a metadata epoch). */
+export interface StationISOTimeRange extends StationLocation {
   startTime: string;
   endTime: string;
+}
+
+/** Channel metadata from EarthScope FDSN Station service. */
+export interface ChannelMetadata extends StationISOTimeRange {
   /** Overall sensitivity in counts per physical unit. */
   scale: number;
   scaleFreq: number;
