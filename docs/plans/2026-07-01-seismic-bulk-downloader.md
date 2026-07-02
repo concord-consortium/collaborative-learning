@@ -836,7 +836,7 @@ git commit -m "Add seismic download Web Worker shell"
 
 ### Task 6: MobX download service (`seismic-download-service.ts`)
 
-Main-thread client: spawns the worker, exposes observable progress/resume state for a future UI, and offers `ensureRange` + a `nextReadyDay()` queue so the wave-runner's MST flow can `yield` day-by-day. A `runner` function is injectable so tests bypass the real Worker by driving events directly.
+Main-thread client: spawns the worker, exposes observable progress/resume state for a future UI, and offers `ensureRange` + a `nextReadyDay()` queue plus `readDay(day)` (reads the downloaded day back from OPFS on the main thread, using the station stashed from `ensureRange`) so the wave-runner's MST flow can `yield` day-by-day. The `runner` is injectable so tests bypass the real Worker; `readDay` reads through an internal OPFS cache.
 
 **Files:**
 - Create: `src/models/stores/seismic-download-service.ts`
@@ -908,6 +908,8 @@ Expected: FAIL (module not found).
 // src/models/stores/seismic-download-service.ts
 import { makeAutoObservable, runInAction } from "mobx";
 import { DownloadEvent, DownloadParams } from "../../../shared/seismic/seismic-downloader";
+import { createOpfsCache } from "../../../shared/seismic/opfs-seismic-cache";
+import { StationData } from "../../../shared/seismic/seismic-types";
 
 export const DONE = Symbol("download-done");
 export type ReadyDay = number | typeof DONE;
@@ -944,13 +946,18 @@ export class SeismicDownloadService {
   private waiters: Array<(day: ReadyDay) => void> = [];
   private finished = false;
   private cancelFn: (() => void) | null = null;
+  private station: StationData | null = null;
+  private cache = createOpfsCache();
 
   constructor(private runner: DownloadRunner = defaultRunner()) {
-    makeAutoObservable(this, { erroredDays: false, emptyDays: false }, { autoBind: true });
+    makeAutoObservable(this,
+      { erroredDays: false, emptyDays: false, cache: false },
+      { autoBind: true });
   }
 
   ensureRange(params: DownloadParams): void {
     this.reset();
+    this.station = { network: params.network, station: params.station, channel: params.channel };
     this.isDownloading = true;
     this.runner(params, this.handleEvent, { onCancel: fn => { this.cancelFn = fn; } });
   }
@@ -960,6 +967,12 @@ export class SeismicDownloadService {
     if (this.readyQueue.length) return Promise.resolve(this.readyQueue.shift() as number);
     if (this.finished) return Promise.resolve(DONE);
     return new Promise<ReadyDay>(resolve => { this.waiters.push(resolve); });
+  }
+
+  /** Read a downloaded day's raw miniSEED bytes from OPFS. Null if not present. */
+  readDay(day: number): Promise<ArrayBuffer | null> {
+    if (!this.station) return Promise.resolve(null);
+    return this.cache.readDayChunk(this.station, day);
   }
 
   cancel(): void {
@@ -1012,7 +1025,7 @@ Expected: PASS (2 tests).
 ```bash
 npm run check:types
 git add src/models/stores/seismic-download-service.ts src/models/stores/seismic-download-service.test.ts
-git commit -m "Add MobX seismic download service with per-day ready queue"
+git commit -m "Add MobX seismic download service with per-day ready queue and readDay"
 ```
 
 ---
@@ -1027,27 +1040,23 @@ Replace the inline per-day `fetchRawSeismicData` loop with the download service 
 
 **Step 1: Write the failing test**
 
-Add a test that injects a fake download service + fake cache and asserts the model runs on each ready day. Because the content model constructs its own service today, first make the service injectable:
-
-- Add a module-level default and an override setter, mirroring existing plugin patterns. At the top of `wave-runner-content.ts`:
+The model just constructs its own service (`new SeismicDownloadService()`); the test
+substitutes a fake with `jest.mock`. No DI scaffolding in the model. Add the import near
+the top of `wave-runner-content.ts`:
 
 ```ts
 import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
-import { createOpfsCache } from "../../../../shared/seismic/opfs-seismic-cache";
-
-// Injection seam for tests.
-let downloadServiceFactory = () => new SeismicDownloadService();
-let seismicCacheFactory = () => createOpfsCache();
-export function __setSeismicDownloadDepsForTests(
-  service: () => SeismicDownloadService, cache: () => ReturnType<typeof createOpfsCache>
-) { downloadServiceFactory = service; seismicCacheFactory = cache; }
 ```
 
-Test (sketch — adapt to existing test setup/model construction in the file):
+Test — mock the service module. Spreading `requireActual` preserves the real `DONE` symbol,
+so the production `day === DONE` comparison still matches:
 
 ```ts
-import { __setSeismicDownloadDepsForTests } from "./wave-runner-content";
-import { DONE } from "../../../models/stores/seismic-download-service";
+jest.mock("../../../models/stores/seismic-download-service", () => ({
+  ...jest.requireActual("../../../models/stores/seismic-download-service"),
+  SeismicDownloadService: jest.fn(),
+}));
+import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
 
 it("runs the model on each downloaded day", async () => {
   const days = [100, 101];
@@ -1055,15 +1064,15 @@ it("runs the model on each downloaded day", async () => {
   const fakeService = {
     ensureRange: jest.fn(),
     nextReadyDay: jest.fn(async () => (i < days.length ? days[i++] : DONE)),
+    readDay: jest.fn(async () => new Uint8Array([/* valid miniSEED */]).buffer),
     cancel: jest.fn(),
   };
-  const fakeCache = { readDayChunk: jest.fn(async () => new Uint8Array([/* valid miniSEED */]).buffer) };
-  __setSeismicDownloadDepsForTests(() => fakeService as any, () => fakeCache as any);
+  (SeismicDownloadService as jest.Mock).mockImplementation(() => fakeService);
 
-  // ...construct a wave-runner content model with a placeholder model + a station + date range,
-  // call runModel(), await it, and assert fakeCache.readDayChunk was called twice and
-  // updateChunkProgress reached completion. Mock miniseed.parseDataRecords/merge and
-  // runner.processChunk as needed to avoid needing real miniSEED bytes.
+  // ...construct a wave-runner content model (mirror existing tests), set a placeholder model
+  // + station + date range, call runModel(), await it, and assert fakeService.readDay was
+  // called twice and updateChunkProgress reached completion. Mock miniseed.parseDataRecords/
+  // merge and runner.processChunk to avoid needing real miniSEED bytes.
 });
 ```
 
@@ -1079,9 +1088,7 @@ Expected: FAIL (injection seam / new loop not present).
         const totalDays = Math.ceil((endMs - startMs) / msPerDay);
         self.updateChunkProgress(0, totalDays);
 
-        const downloadService = downloadServiceFactory();
-        const cache = seismicCacheFactory();
-        const stationData = { network, station, channel };
+        const downloadService = new SeismicDownloadService();
 
         downloadService.ensureRange({
           network, station, location, channel,
@@ -1093,7 +1100,7 @@ Expected: FAIL (injection seam / new loop not present).
           const day: number | typeof DONE = yield downloadService.nextReadyDay();
           if (day === DONE) break;
 
-          const buffer: ArrayBuffer | null = yield cache.readDayChunk(stationData, day);
+          const buffer: ArrayBuffer | null = yield downloadService.readDay(day);
           if (!buffer) { continue; }
 
           const records = miniseed.parseDataRecords(buffer);
