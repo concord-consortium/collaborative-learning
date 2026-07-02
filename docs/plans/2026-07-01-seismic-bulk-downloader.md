@@ -85,9 +85,7 @@ Expected: FAIL (module not found).
 /** Seconds in a UTC day. Day identity for the bulk cache is the UTC calendar day. */
 export const SECONDS_PER_DAY = 86400;
 
-/**
- * UTC calendar date (1-based month) → Unix seconds.
- */
+/** UTC calendar date (1-based month) → Unix seconds. */
 export function utcDay(year: number, month: number, day: number): number {
   return Date.UTC(year, month - 1, day) / 1000;
 }
