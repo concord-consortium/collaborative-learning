@@ -191,9 +191,20 @@ class Stores implements IStores{
       const docPromise = this.sortedDocuments.fetchFullDocument(docToDisplay);
       docPromise.then((doc) => {
         if (doc) {
-          this.persistentUI.openResourceDocument(
-            doc, this.appConfig, this.user, this.sortedDocuments,
-            { fromUrlStudentDocument: true }
+          // Student Work is group-keyed and its group content loads asynchronously.
+          // Wait until either the doc's group is available or the DB listeners have
+          // finished their initial load (so we know it isn't coming — e.g. a researcher
+          // reaching the doc by key, who doesn't have its class/offering groups), then
+          // route: Student Work when the group is present, otherwise Sort Work.
+          when(
+            () => !!this.groups.getGroupById(doc.groupId) || this.db.listeners.isListening,
+            () => {
+              const hasStudentWorkGroup = !!doc.groupId && !!this.groups.getGroupById(doc.groupId);
+              this.persistentUI.openResourceDocument(
+                doc, this.appConfig, this.user, this.sortedDocuments,
+                { fromUrlStudentDocument: true, hasStudentWorkGroup }
+              );
+            }
           );
         } else {
           console.warn("Display document not found: ", params.documentToDisplay);

@@ -55,7 +55,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const selectedNavTab = this.stores.displayedActiveNavTab;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === selectedNavTab);
     const isChatEnabled = appConfig.showCommentPanelFor(user.type) &&
-      !shouldHideChat(activeNavTab, user.type);
+      !shouldHideChat(selectedNavTab, user.type);
     const openChatPanel = isChatEnabled && showChatPanel;
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
     const ariaLabels = getAriaLabels();

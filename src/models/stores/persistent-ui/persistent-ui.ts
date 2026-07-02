@@ -263,16 +263,20 @@ export const PersistentUIModelV2 = types
       appConfig: AppConfigModelType,
       user?: UserModelType,
       sortedDocuments?: SortedDocuments,
-      opts?: { fromUrlStudentDocument?: boolean }
+      opts?: { fromUrlStudentDocument?: boolean, hasStudentWorkGroup?: boolean }
     ) {
       const { aiEvaluation, navTabs } = appConfig || {};
       const availableTabs = navTabs?.tabSpecs.map(tab => tab.tab) ?? [];
       let navTab = "";
 
       if (opts?.fromUrlStudentDocument) {
-        // Report links land on Sort Work (ensured by setRequireSortWorkTab);
-        // activating kStudentWork can select a tab absent from tabsToDisplay -> blank panel.
-        if (availableTabs.includes(ENavTab.kSortWork)) {
+        // Student Work is group-keyed and loads its group's documents asynchronously,
+        // so activating it without the doc's group available leaves a blank panel.
+        // Use it only when the viewer's group is available; otherwise fall back to
+        // Sort Work, which needs no group.
+        if (opts.hasStudentWorkGroup && availableTabs.includes(ENavTab.kStudentWork)) {
+          navTab = ENavTab.kStudentWork;
+        } else if (availableTabs.includes(ENavTab.kSortWork)) {
           navTab = ENavTab.kSortWork;
         }
       } else if (aiEvaluation) {
