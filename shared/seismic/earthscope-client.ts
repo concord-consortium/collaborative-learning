@@ -1,5 +1,6 @@
 // shared/seismic/earthscope-client.ts
-import { ChannelMetadata } from "./seismic-types.js";
+import { utcDay } from "./seismic-day";
+import { ChannelMetadata, StationISOTimeRange, TimeRange } from "./seismic-types";
 
 /**
  * Low-level fetchers for EarthScope's FDSN web services.
@@ -36,10 +37,6 @@ interface MockFile {
   startSec: number;
   /** Exclusive end, seconds since epoch */
   endSec: number;
-}
-
-function utcDay(y: number, m: number, d: number): number {
-  return Date.UTC(y, m - 1, d) / 1000;
 }
 
 const MOCK_FILES: MockFile[] = [
@@ -217,4 +214,53 @@ function parseStationText(text: string): ChannelMetadata[] {
   }
 
   return channels;
+}
+
+const AVAILABILITY_PATH = "/earthscope/cached/availability/1/query";
+
+/**
+ * Fetch the time ranges for which data actually exists for a station/channel.
+ *
+ * Proxy mode (`?seismicProxy`): queries the FDSN availability service through
+ * CloudFront and parses its pipe-delimited text response.
+ *
+ * Mock/local mode: the availability service is not mocked, so we assume the
+ * entire requested range is available (one range). Callers then attempt every
+ * day; the mock dataselect returns "no data" for days it doesn't cover.
+ */
+export async function fetchAvailability(
+  query: StationISOTimeRange,
+  options?: { baseUrl?: string; signal?: AbortSignal }
+): Promise<TimeRange[]> {
+  const { network, station, location, channel, startTime, endTime } = query;
+  if (!isProxyEnabled()) {
+    return [{
+      start: new Date(startTime).getTime() / 1000,
+      end: new Date(endTime).getTime() / 1000,
+    }];
+  }
+  const base = options?.baseUrl ?? CLOUDFRONT_PROXY_URL;
+  const params = new URLSearchParams({
+    net: network, sta: station, cha: channel, loc: location || "--",
+    start: startTime, end: endTime, format: "text",
+  });
+  const response = await fetch(`${base}${AVAILABILITY_PATH}?${params}`, { signal: options?.signal });
+  if (!response.ok) {
+    throw new Error(`availability ${response.status}: ${response.statusText}`);
+  }
+
+  // Parse the pipe-delimited FDSN availability text into [startSec, endSec) ranges.
+  const text = await response.text();
+  const ranges: TimeRange[] = [];
+  for (const line of text.trim().split("\n")) {
+    if (!line || line.startsWith("#")) continue;
+    const fields = line.split("|");
+    if (fields.length < 8) continue;
+    const start = new Date(fields[6]).getTime() / 1000;
+    const end = new Date(fields[7]).getTime() / 1000;
+    if (Number.isFinite(start) && Number.isFinite(end) && end > start) {
+      ranges.push({ start, end });
+    }
+  }
+  return ranges;
 }

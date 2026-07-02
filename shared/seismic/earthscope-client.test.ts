@@ -1,5 +1,6 @@
 // shared/seismic/earthscope-client.test.ts
-import { fetchRawSeismicData, fetchStationMetadata } from "./earthscope-client";
+import { fetchRawSeismicData, fetchStationMetadata, fetchAvailability } from "./earthscope-client";
+import { utcDay } from "./seismic-day";
 import fetchMock from "jest-fetch-mock";
 
 // Example response from EarthScope FDSN Station service (pipe-delimited text)
@@ -110,5 +111,43 @@ describe("fetchRawSeismicData", () => {
 
     const calledUrl = fetchMock.mock.calls[0][0] as string;
     expect(calledUrl).toContain("loc=01");
+  });
+});
+
+describe("fetchAvailability", () => {
+  const setUrl = (url: string) => (global as any).jsdom.reconfigure({ url });
+
+  // EarthScope availability text: Net|Sta|Loc|Chan|Quality|SampleRate|Earliest|Latest
+  const AVAILABILITY_TEXT = `#Network|Station|Location|Channel|Quality|SampleRate|Earliest|Latest
+AK|K204|--|HNZ|M|100.0|2026-01-30T00:00:00.000000Z|2026-02-01T00:00:00.000000Z
+AK|K204|--|HNZ|M|100.0|2026-02-03T00:00:00.000000Z|2026-02-04T00:00:00.000000Z`;
+  const stationTimeRange = {
+      network: "AK", station: "K204", location: "--", channel: "HNZ",
+      startTime: "2026-01-30T00:00:00.000Z", endTime: "2026-02-05T00:00:00.000Z",
+    };
+
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    setUrl("http://localhost/");
+  });
+
+  it("parses availability ranges into [startSec, endSec) pairs (proxy mode)", async () => {
+    setUrl("http://localhost/?seismicProxy");
+    fetchMock.mockResponseOnce(AVAILABILITY_TEXT);
+
+    const ranges = await fetchAvailability(stationTimeRange);
+
+    expect(ranges).toEqual([
+      { start: utcDay(2026, 1, 30), end: utcDay(2026, 2, 1) },
+      { start: utcDay(2026, 2, 3), end: utcDay(2026, 2, 4) },
+    ]);
+  });
+
+  it("falls back to the full requested range when not in proxy mode", async () => {
+    const ranges = await fetchAvailability(stationTimeRange);
+    expect(ranges).toEqual([
+      { start: utcDay(2026, 1, 30), end: utcDay(2026, 2, 5) },
+    ]);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

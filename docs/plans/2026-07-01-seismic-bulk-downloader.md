@@ -170,8 +170,8 @@ describe("fetchAvailability", () => {
     });
 
     expect(ranges).toEqual([
-      { startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 2, 1) },
-      { startSec: utcDay(2026, 2, 3), endSec: utcDay(2026, 2, 4) },
+      { start: utcDay(2026, 1, 30), end: utcDay(2026, 2, 1) },
+      { start: utcDay(2026, 2, 3), end: utcDay(2026, 2, 4) },
     ]);
     history.replaceState(null, "", search);
   });
@@ -182,7 +182,7 @@ describe("fetchAvailability", () => {
       startTime: "2026-01-30T00:00:00.000Z", endTime: "2026-02-05T00:00:00.000Z",
     });
     expect(ranges).toEqual([
-      { startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 2, 5) },
+      { start: utcDay(2026, 1, 30), end: utcDay(2026, 2, 5) },
     ]);
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -201,20 +201,13 @@ First, DRY up the existing date helper: at the top of `earthscope-client.ts` add
 (currently `earthscope-client.ts:41-43`). `MOCK_FILES` keeps calling `utcDay(...)`, now
 resolved from the import.
 
-Also add `StationISOTimeRange` to the existing seismic-types import (the line becomes
-`import { ChannelMetadata, StationISOTimeRange } from "./seismic-types.js";`).
+Also add `StationISOTimeRange` and `TimeRange` to the existing seismic-types import (the line
+becomes `import { ChannelMetadata, StationISOTimeRange, TimeRange } from "./seismic-types";`).
 
 Then append the availability API:
 
 ```ts
 const AVAILABILITY_PATH = "/earthscope/cached/availability/1/query";
-
-export interface AvailabilityRange {
-  /** Inclusive start, seconds since epoch */
-  startSec: number;
-  /** Exclusive end, seconds since epoch */
-  endSec: number;
-}
 
 /**
  * Fetch the time ranges for which data actually exists for a station/channel.
@@ -229,12 +222,12 @@ export interface AvailabilityRange {
 export async function fetchAvailability(
   query: StationISOTimeRange,
   options?: { baseUrl?: string; signal?: AbortSignal }
-): Promise<AvailabilityRange[]> {
+): Promise<TimeRange[]> {
   const { network, station, location, channel, startTime, endTime } = query;
   if (!isProxyEnabled()) {
     return [{
-      startSec: new Date(startTime).getTime() / 1000,
-      endSec: new Date(endTime).getTime() / 1000,
+      start: new Date(startTime).getTime() / 1000,
+      end: new Date(endTime).getTime() / 1000,
     }];
   }
   const base = options?.baseUrl ?? CLOUDFRONT_PROXY_URL;
@@ -246,20 +239,18 @@ export async function fetchAvailability(
   if (!response.ok) {
     throw new Error(`availability ${response.status}: ${response.statusText}`);
   }
-  return parseAvailabilityText(await response.text());
-}
 
-/** Parse the pipe-delimited FDSN availability text into [startSec, endSec) ranges. */
-function parseAvailabilityText(text: string): AvailabilityRange[] {
-  const ranges: AvailabilityRange[] = [];
+  // Parse the pipe-delimited FDSN availability text into [start, end) ranges.
+  const text = await response.text();
+  const ranges: TimeRange[] = [];
   for (const line of text.trim().split("\n")) {
     if (!line || line.startsWith("#")) continue;
     const fields = line.split("|");
     if (fields.length < 8) continue;
-    const startSec = new Date(fields[6]).getTime() / 1000;
-    const endSec = new Date(fields[7]).getTime() / 1000;
-    if (Number.isFinite(startSec) && Number.isFinite(endSec) && endSec > startSec) {
-      ranges.push({ startSec, endSec });
+    const start = new Date(fields[6]).getTime() / 1000;
+    const end = new Date(fields[7]).getTime() / 1000;
+    if (Number.isFinite(start) && Number.isFinite(end) && end > start) {
+      ranges.push({ start, end });
     }
   }
   return ranges;
@@ -521,7 +512,7 @@ function collect() {
 function makeDeps(overrides: Partial<DownloaderDeps> = {}): DownloaderDeps {
   const written = new Set<number>();
   return {
-    fetchAvailability: async () => [{ startSec: RANGE.startSec, endSec: RANGE.endSec }],
+    fetchAvailability: async () => [{ start: RANGE.startSec, end: RANGE.endSec }],
     fetchRaw: async () => new Uint8Array([1]).buffer,
     cache: {
       scanCachedDays: async () => new Set<number>(),
@@ -567,8 +558,8 @@ describe("downloadRange", () => {
       fetchRaw,
       // Available only for the 30th and the 1st–2nd; the 31st is a gap
       fetchAvailability: async () => [
-        { startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 1, 31) },
-        { startSec: utcDay(2026, 2, 1), endSec: utcDay(2026, 2, 3) },
+        { start: utcDay(2026, 1, 30), end: utcDay(2026, 1, 31) },
+        { start: utcDay(2026, 2, 1), end: utcDay(2026, 2, 3) },
       ],
     });
     const { events, onEvent } = collect();
@@ -583,7 +574,7 @@ describe("downloadRange", () => {
     const fetchRaw = jest.fn(async () => { calls++; throw new Error("boom"); });
     const deps = makeDeps({
       fetchRaw,
-      fetchAvailability: async () => [{ startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 1, 31) }],
+      fetchAvailability: async () => [{ start: utcDay(2026, 1, 30), end: utcDay(2026, 1, 31) }],
     });
     const { events, onEvent } = collect();
     await downloadRange(deps, { ...RANGE, maxRetries: 3 }, onEvent);
@@ -624,12 +615,11 @@ Expected: FAIL (module not found).
 
 ```ts
 // shared/seismic/seismic-downloader.ts
-import { AvailabilityRange } from "./earthscope-client";
-import { StationData, StationLocation, StationISOTimeRange } from "./seismic-types";
+import { StationData, StationLocation, StationISOTimeRange, TimeRange } from "./seismic-types";
 import { daysInRange, dayIndex, dayToISORange } from "./seismic-day";
 
 export interface DownloaderDeps {
-  fetchAvailability(query: StationISOTimeRange, signal?: AbortSignal): Promise<AvailabilityRange[]>;
+  fetchAvailability(query: StationISOTimeRange, signal?: AbortSignal): Promise<TimeRange[]>;
   fetchRaw(query: StationISOTimeRange, signal?: AbortSignal): Promise<ArrayBuffer>;
   cache: {
     scanCachedDays(station: StationData, startDay: number, endDay: number): Promise<Set<number>>;
@@ -654,11 +644,11 @@ const DEFAULT_CONCURRENCY = 5;
 const DEFAULT_MAX_RETRIES = 3;
 
 /** True if any availability range overlaps the given UTC day. */
-function dayIsAvailable(day: number, ranges: AvailabilityRange[]): boolean {
+function dayIsAvailable(day: number, ranges: TimeRange[]): boolean {
   const { startISO, endISO } = dayToISORange(day);
   const startSec = new Date(startISO).getTime() / 1000;
   const endSec = new Date(endISO).getTime() / 1000;
-  return ranges.some(r => r.startSec < endSec && r.endSec > startSec);
+  return ranges.some(r => r.start < endSec && r.end > startSec);
 }
 
 /**
