@@ -191,9 +191,12 @@ class Stores implements IStores{
       const docPromise = this.sortedDocuments.fetchFullDocument(docToDisplay);
       docPromise.then((doc) => {
         if (doc) {
+          // Student Work can only display the doc when the viewer has its group
+          // loaded; otherwise openResourceDocument falls back to Sort Work.
+          const hasStudentWorkGroup = !!doc.groupId && !!this.groups.getGroupById(doc.groupId);
           this.persistentUI.openResourceDocument(
             doc, this.appConfig, this.user, this.sortedDocuments,
-            { fromUrlStudentDocument: true }
+            { fromUrlStudentDocument: true, hasStudentWorkGroup }
           );
         } else {
           console.warn("Display document not found: ", params.documentToDisplay);
