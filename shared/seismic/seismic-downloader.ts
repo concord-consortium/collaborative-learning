@@ -59,9 +59,14 @@ export async function downloadRange(
     );
 
     const allDays = daysInRange(startSec, endSec);
-    const availableDays = allDays.filter(d => dayIsAvailable(d, ranges));
-    const emptyDays = allDays.filter(d => !dayIsAvailable(d, ranges));
-    for (const day of emptyDays) onEvent({ type: "dayEmpty", day });
+    const availableDays: number[] = [];
+    allDays.forEach(day => {
+      if (dayIsAvailable(day, ranges)) {
+        availableDays.push(day);
+      } else {
+        onEvent({ type: "dayEmpty", day });
+      }
+    });
 
     const firstDay = availableDays[0];
     const lastDay = availableDays[availableDays.length - 1];
@@ -73,16 +78,18 @@ export async function downloadRange(
     let completed = 0;
     const emitProgress = () => onEvent({ type: "progress", completed, total });
 
-    // Already-cached days are ready immediately.
+    const gaps: number[] = [];
     for (const day of availableDays) {
       if (cached.has(day)) {
+        // Already-cached days are ready immediately.
         completed++;
         onEvent({ type: "dayWritten", day });
+      } else {
+        // Stash days that need to be cached
+        gaps.push(day);
       }
     }
     if (cached.size) emitProgress();
-
-    const gaps = availableDays.filter(d => !cached.has(d));
 
     const downloadDay = async (day: number) => {
       const { startISO: dStart, endISO: dEnd } = dayToISORange(day);

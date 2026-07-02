@@ -19,7 +19,7 @@ function makeDeps(overrides: Partial<DownloaderDeps> = {}): DownloaderDeps {
       writeDayChunk: async (_s, day) => { written.add(day); },
     },
     ...overrides,
-  } as DownloaderDeps;
+  };
 }
 
 describe("downloadRange", () => {
