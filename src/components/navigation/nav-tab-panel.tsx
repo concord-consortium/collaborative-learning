@@ -47,10 +47,13 @@ export class NavTabPanel extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { persistentUI: { activeNavTab, focusDocument, showChatPanel }, ui: { selectedTileIds },
+    const { persistentUI: { focusDocument, showChatPanel }, ui: { selectedTileIds },
             user, appConfig } = this.stores;
     const tabs = this.stores.tabsToDisplay;
-    const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
+    // Resolve the active tab against the displayed tabs so an activeNavTab that
+    // isn't shown (e.g. a hidden tab) doesn't blank the panel or mis-theme it.
+    const selectedNavTab = this.stores.displayedActiveNavTab;
+    const selectedTabIndex = tabs?.findIndex(t => t.tab === selectedNavTab);
     const isChatEnabled = appConfig.showCommentPanelFor(user.type) &&
       !shouldHideChat(activeNavTab, user.type);
     const openChatPanel = isChatEnabled && showChatPanel;
@@ -100,11 +103,11 @@ export class NavTabPanel extends BaseComponent<IProps> {
                 ? !openChatPanel &&
                   <button
                     aria-label={ariaLabels.openChatPanel}
-                    className={`chat-panel-toggle themed ${activeNavTab}`}
+                    className={`chat-panel-toggle themed ${selectedNavTab}`}
                     onClick={this.handleShowChatColumn}
                     type="button"
                   >
-                    <ChatIcon className={`chat-button ${activeNavTab}`} />
+                    <ChatIcon className={`chat-button ${selectedNavTab}`} />
                   </button>
                 : <button
                     aria-label={ariaLabels.closeResourcesPanel}
@@ -113,9 +116,9 @@ export class NavTabPanel extends BaseComponent<IProps> {
                     type="button"
                   />
             }
-            {showChatPanel && activeNavTab &&
-              <ChatPanel user={user} activeNavTab={activeNavTab} focusDocument={focusDocument} focusTileId={focusTileId}
-                          onCloseChatPanel={this.handleShowChatColumn} />}
+            {showChatPanel && selectedNavTab &&
+              <ChatPanel user={user} activeNavTab={selectedNavTab} focusDocument={focusDocument}
+                          focusTileId={focusTileId} onCloseChatPanel={this.handleShowChatColumn} />}
           </div>
         </div>
       </NavTabPanelInfoProvider>

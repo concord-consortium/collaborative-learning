@@ -44,6 +44,7 @@ export interface IStores extends IBaseStores {
   problemOrdinal: string;
   userContextProvider: UserContextProvider;
   tabsToDisplay: NavTabModelType[];
+  displayedActiveNavTab: string | undefined;
   documentToDisplay?: string;
   documentHistoryId?: string;
   isShowingTeacherContent: boolean;
@@ -225,6 +226,17 @@ class Stores implements IStores{
     return removeNonCurriculumTabs
       ? tabs.filter(t => t.tab === "problems" || t.tab === "teacher-guide")
       : tabs;
+  }
+
+  // activeNavTab resolved against the displayed tabs: if the stored tab isn't
+  // shown (e.g. hidden/stale), fall back to the first displayed tab so the UI
+  // never keys off a tab that isn't on screen.
+  get displayedActiveNavTab() {
+    const { activeNavTab } = this.persistentUI;
+    const tabs = this.tabsToDisplay;
+    return tabs && tabs.length > 0 && !tabs.some(t => t.tab === activeNavTab)
+      ? tabs[0].tab
+      : activeNavTab;
   }
 
   get isProblemLoaded() {

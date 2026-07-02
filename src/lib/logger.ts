@@ -142,8 +142,8 @@ export class Logger {
   ): LogMessage {
     const {
       appConfig: { appName }, appMode, problemPath,
-      studentWorkTabSelectedGroupId,
-      persistentUI: { activeNavTab, navTabContentShown, problemWorkspace, teacherPanelKey },
+      studentWorkTabSelectedGroupId, displayedActiveNavTab,
+      persistentUI: { navTabContentShown, problemWorkspace, teacherPanelKey },
       user: { activityUrl, classHash, id, isStudent, isTeacher, portal, type, currentGroupId,
               loggingRemoteEndpoint, firebaseDisconnects, loggingDisconnects, networkStatusAlerts
       },
@@ -167,7 +167,7 @@ export class Logger {
       ...this.appContext,
       problemPath,
       navTabsOpen: navTabContentShown,
-      selectedNavTab: activeNavTab,
+      selectedNavTab: displayedActiveNavTab,
       time,
       tzOffset: timeZoneOffsetString(),
       event,
@@ -186,7 +186,7 @@ export class Logger {
     }
     if (isTeacher) {
       logMessage.teacherPanel = teacherPanelKey;
-      if (activeNavTab === ENavTab.kStudentWork) {
+      if (displayedActiveNavTab === ENavTab.kStudentWork) {
         logMessage.selectedGroupId = studentWorkTabSelectedGroupId;
       }
     }
