@@ -30,36 +30,41 @@ Pure functions mapping Unix seconds ↔ UTC calendar day, plus day→ISO range a
 
 ```ts
 // shared/seismic/seismic-day.test.ts
-import { SECONDS_PER_DAY, dayIndex, dayToYearDoy, dayToISORange, daysInRange } from "./seismic-day";
-
-const utc = (y: number, m: number, d: number) => Date.UTC(y, m - 1, d) / 1000;
+import {
+  SECONDS_PER_DAY, utcDay, dayIndex, dayToYearDoy, dayToISORange, daysInRange,
+} from "./seismic-day";
 
 describe("seismic-day", () => {
+  it("converts a UTC calendar date to unix seconds", () => {
+    expect(utcDay(1970, 1, 1)).toBe(0);
+    expect(utcDay(2026, 1, 30)).toBe(Date.UTC(2026, 0, 30) / 1000);
+  });
+
   it("computes the UTC day index from unix seconds", () => {
-    expect(dayIndex(utc(1970, 1, 1))).toBe(0);
-    expect(dayIndex(utc(1970, 1, 2))).toBe(1);
-    expect(dayIndex(utc(2026, 1, 30))).toBe(Math.floor(utc(2026, 1, 30) / SECONDS_PER_DAY));
+    expect(dayIndex(utcDay(1970, 1, 1))).toBe(0);
+    expect(dayIndex(utcDay(1970, 1, 2))).toBe(1);
+    expect(dayIndex(utcDay(2026, 1, 30))).toBe(Math.floor(utcDay(2026, 1, 30) / SECONDS_PER_DAY));
     // Any instant within a day maps to the same index
-    expect(dayIndex(utc(2026, 1, 30) + 3600)).toBe(dayIndex(utc(2026, 1, 30)));
+    expect(dayIndex(utcDay(2026, 1, 30) + 3600)).toBe(dayIndex(utcDay(2026, 1, 30)));
   });
 
   it("converts a day index to UTC year and day-of-year", () => {
-    expect(dayToYearDoy(dayIndex(utc(2026, 1, 1)))).toEqual({ year: 2026, doy: 1 });
-    expect(dayToYearDoy(dayIndex(utc(2026, 2, 1)))).toEqual({ year: 2026, doy: 32 });
-    expect(dayToYearDoy(dayIndex(utc(2024, 12, 31)))).toEqual({ year: 2024, doy: 366 }); // leap year
+    expect(dayToYearDoy(dayIndex(utcDay(2026, 1, 1)))).toEqual({ year: 2026, doy: 1 });
+    expect(dayToYearDoy(dayIndex(utcDay(2026, 2, 1)))).toEqual({ year: 2026, doy: 32 });
+    expect(dayToYearDoy(dayIndex(utcDay(2024, 12, 31)))).toEqual({ year: 2024, doy: 366 }); // leap year
   });
 
   it("produces a day-aligned ISO range for a day index", () => {
-    const { startISO, endISO } = dayToISORange(dayIndex(utc(2026, 1, 30)));
+    const { startISO, endISO } = dayToISORange(dayIndex(utcDay(2026, 1, 30)));
     expect(startISO).toBe("2026-01-30T00:00:00.000Z");
     expect(endISO).toBe("2026-01-31T00:00:00.000Z");
   });
 
   it("lists the day indices overlapping a [startSec, endSec) range", () => {
-    const start = utc(2026, 1, 30);
-    const end = utc(2026, 2, 2); // exclusive
+    const start = utcDay(2026, 1, 30);
+    const end = utcDay(2026, 2, 2); // exclusive
     expect(daysInRange(start, end)).toEqual([
-      dayIndex(utc(2026, 1, 30)), dayIndex(utc(2026, 1, 31)), dayIndex(utc(2026, 2, 1)),
+      dayIndex(utcDay(2026, 1, 30)), dayIndex(utcDay(2026, 1, 31)), dayIndex(utcDay(2026, 2, 1)),
     ]);
     // A partial final day is still included
     expect(daysInRange(start, end - 1).length).toBe(3);
@@ -79,6 +84,13 @@ Expected: FAIL (module not found).
 
 /** Seconds in a UTC day. Day identity for the bulk cache is the UTC calendar day. */
 export const SECONDS_PER_DAY = 86400;
+
+/**
+ * UTC calendar date (1-based month) → Unix seconds.
+ */
+export function utcDay(year: number, month: number, day: number): number {
+  return Date.UTC(year, month - 1, day) / 1000;
+}
 
 /** Unix seconds → UTC day index (days since the Unix epoch). */
 export function dayIndex(unixSec: number): number {
@@ -131,13 +143,14 @@ git commit -m "Add UTC day helpers for seismic bulk downloader"
 Add availability querying to the existing client. In proxy mode it hits the FDSN availability service through CloudFront and parses the pipe-delimited text into `[startSec, endSec)` ranges. In mock/local mode (no `seismicProxy`) it falls back to "assume the whole requested range is available" so dev/test keeps working.
 
 **Files:**
-- Modify: `shared/seismic/earthscope-client.ts` (append new exports; do not disturb existing functions)
+- Modify: `shared/seismic/earthscope-client.ts` (append `fetchAvailability`; also replace the private `utcDay` with an import from `./seismic-day` — see Step 3)
 - Test: `shared/seismic/earthscope-client.test.ts` (add a `describe("fetchAvailability")` block)
 
 **Step 1: Write the failing test** (append to the existing test file)
 
 ```ts
 import { fetchRawSeismicData, fetchStationMetadata, fetchAvailability } from "./earthscope-client";
+import { utcDay } from "./seismic-day";
 
 // EarthScope availability text: Net|Sta|Loc|Chan|Quality|SampleRate|Earliest|Latest
 const AVAILABILITY_TEXT = `#Network|Station|Location|Channel|Quality|SampleRate|Earliest|Latest
@@ -157,8 +170,8 @@ describe("fetchAvailability", () => {
       "2026-01-30T00:00:00.000Z", "2026-02-05T00:00:00.000Z");
 
     expect(ranges).toEqual([
-      { startSec: Date.UTC(2026, 0, 30) / 1000, endSec: Date.UTC(2026, 1, 1) / 1000 },
-      { startSec: Date.UTC(2026, 1, 3) / 1000, endSec: Date.UTC(2026, 1, 4) / 1000 },
+      { startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 2, 1) },
+      { startSec: utcDay(2026, 2, 3), endSec: utcDay(2026, 2, 4) },
     ]);
     history.replaceState(null, "", search);
   });
@@ -167,7 +180,7 @@ describe("fetchAvailability", () => {
     const ranges = await fetchAvailability("AK", "K204", "--", "HNZ",
       "2026-01-30T00:00:00.000Z", "2026-02-05T00:00:00.000Z");
     expect(ranges).toEqual([
-      { startSec: Date.UTC(2026, 0, 30) / 1000, endSec: Date.UTC(2026, 1, 5) / 1000 },
+      { startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 2, 5) },
     ]);
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -179,7 +192,14 @@ describe("fetchAvailability", () => {
 Run: `npm test -- --no-watchman shared/seismic/earthscope-client.test.ts`
 Expected: FAIL (`fetchAvailability` not exported).
 
-**Step 3: Write the implementation** (append to `earthscope-client.ts`)
+**Step 3: Write the implementation**
+
+First, DRY up the existing date helper: at the top of `earthscope-client.ts` add
+`import { utcDay } from "./seismic-day";` and delete the local `function utcDay(...)`
+(currently `earthscope-client.ts:41-43`). `MOCK_FILES` keeps calling `utcDay(...)`, now
+resolved from the import.
+
+Then append the availability API:
 
 ```ts
 const AVAILABILITY_PATH = "/earthscope/cached/availability/1/query";
@@ -324,16 +344,14 @@ export class FakeDirHandle {
 // shared/seismic/opfs-seismic-cache.test.ts
 import { createOpfsCache } from "./opfs-seismic-cache";
 import { FakeDirHandle } from "./fake-opfs";
-import { dayIndex } from "./seismic-day";
-
-const utc = (y: number, m: number, d: number) => Date.UTC(y, m - 1, d) / 1000;
+import { dayIndex, utcDay } from "./seismic-day";
 const STA = { network: "AK", station: "K204" };
 const bytes = (n: number) => new Uint8Array([n, n, n]).buffer;
 
 describe("opfs-seismic-cache", () => {
   it("writes then reads back a day chunk", async () => {
     const cache = createOpfsCache(async () => new FakeDirHandle() as any);
-    const day = dayIndex(utc(2026, 1, 30));
+    const day = dayIndex(utcDay(2026, 1, 30));
     await cache.writeDayChunk(STA, "HNZ", day, bytes(7));
     const read = await cache.readDayChunk(STA, "HNZ", day);
     expect(read && new Uint8Array(read)).toEqual(new Uint8Array([7, 7, 7]));
@@ -341,14 +359,14 @@ describe("opfs-seismic-cache", () => {
 
   it("returns null for a day that was never written", async () => {
     const cache = createOpfsCache(async () => new FakeDirHandle() as any);
-    expect(await cache.readDayChunk(STA, "HNZ", dayIndex(utc(2026, 1, 30)))).toBeNull();
+    expect(await cache.readDayChunk(STA, "HNZ", dayIndex(utcDay(2026, 1, 30)))).toBeNull();
   });
 
   it("scans only the cached days within a range", async () => {
     const cache = createOpfsCache(async () => new FakeDirHandle() as any);
-    const d30 = dayIndex(utc(2026, 1, 30));
-    const d31 = dayIndex(utc(2026, 1, 31));
-    const d1 = dayIndex(utc(2026, 2, 1));
+    const d30 = dayIndex(utcDay(2026, 1, 30));
+    const d31 = dayIndex(utcDay(2026, 1, 31));
+    const d1 = dayIndex(utcDay(2026, 2, 1));
     await cache.writeDayChunk(STA, "HNZ", d30, bytes(1));
     await cache.writeDayChunk(STA, "HNZ", d1, bytes(1));
     const cached = await cache.scanCachedDays(STA, "HNZ", d30, d1);
@@ -486,11 +504,9 @@ The heart of the system: availability → gaps → concurrent retrying fetch →
 ```ts
 // shared/seismic/seismic-downloader.test.ts
 import { downloadRange, DownloadEvent, DownloaderDeps } from "./seismic-downloader";
-import { dayIndex } from "./seismic-day";
-
-const utc = (y: number, m: number, d: number) => Date.UTC(y, m - 1, d) / 1000;
+import { dayIndex, utcDay } from "./seismic-day";
 const RANGE = { network: "AK", station: "K204", location: "--", channel: "HNZ",
-  startSec: utc(2026, 1, 30), endSec: utc(2026, 2, 3) }; // 4 days: 30,31,1,2
+  startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 2, 3) }; // 4 days: 30,31,1,2
 
 function collect() {
   const events: DownloadEvent[] = [];
@@ -518,14 +534,14 @@ describe("downloadRange", () => {
 
     const written = events.filter(e => e.type === "dayWritten").map(e => (e as any).day).sort();
     expect(written).toEqual([
-      dayIndex(utc(2026, 1, 30)), dayIndex(utc(2026, 1, 31)),
-      dayIndex(utc(2026, 2, 1)), dayIndex(utc(2026, 2, 2)),
+      dayIndex(utcDay(2026, 1, 30)), dayIndex(utcDay(2026, 1, 31)),
+      dayIndex(utcDay(2026, 2, 1)), dayIndex(utcDay(2026, 2, 2)),
     ]);
     expect(events.at(-1)).toEqual({ type: "done" });
   });
 
   it("skips already-cached days but still reports them as ready", async () => {
-    const d30 = dayIndex(utc(2026, 1, 30));
+    const d30 = dayIndex(utcDay(2026, 1, 30));
     const fetchRaw = jest.fn(async () => new Uint8Array([1]).buffer);
     const deps = makeDeps({
       fetchRaw,
@@ -540,14 +556,14 @@ describe("downloadRange", () => {
   });
 
   it("emits dayEmpty for days with no availability and never fetches them", async () => {
-    const d31 = dayIndex(utc(2026, 1, 31));
+    const d31 = dayIndex(utcDay(2026, 1, 31));
     const fetchRaw = jest.fn(async () => new Uint8Array([1]).buffer);
     const deps = makeDeps({
       fetchRaw,
       // Available only for the 30th and the 1st–2nd; the 31st is a gap
       fetchAvailability: async () => [
-        { startSec: utc(2026, 1, 30), endSec: utc(2026, 1, 31) },
-        { startSec: utc(2026, 2, 1), endSec: utc(2026, 2, 3) },
+        { startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 1, 31) },
+        { startSec: utcDay(2026, 2, 1), endSec: utcDay(2026, 2, 3) },
       ],
     });
     const { events, onEvent } = collect();
@@ -562,7 +578,7 @@ describe("downloadRange", () => {
     const fetchRaw = jest.fn(async () => { calls++; throw new Error("boom"); });
     const deps = makeDeps({
       fetchRaw,
-      fetchAvailability: async () => [{ startSec: utc(2026, 1, 30), endSec: utc(2026, 1, 31) }],
+      fetchAvailability: async () => [{ startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 1, 31) }],
     });
     const { events, onEvent } = collect();
     await downloadRange(deps, { ...RANGE, maxRetries: 3 }, onEvent);
