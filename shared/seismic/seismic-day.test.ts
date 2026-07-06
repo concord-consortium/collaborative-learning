@@ -11,6 +11,7 @@ describe("seismic-day", () => {
   it("computes the UTC day index from unix seconds", () => {
     expect(dayIndex(utcDay(1970, 1, 1))).toBe(0);
     expect(dayIndex(utcDay(1970, 1, 2))).toBe(1);
+    expect(dayIndex(utcDay(1970, 1, 2) - 1)).toBe(0);
     expect(dayIndex(utcDay(2026, 1, 30))).toBe(Math.floor(utcDay(2026, 1, 30) / SECONDS_PER_DAY));
     // Any instant within a day maps to the same index
     expect(dayIndex(utcDay(2026, 1, 30) + 3600)).toBe(dayIndex(utcDay(2026, 1, 30)));
