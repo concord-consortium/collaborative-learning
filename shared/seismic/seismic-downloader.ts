@@ -1,5 +1,6 @@
 // shared/seismic/seismic-downloader.ts
 import { StationData, StationLocation, StationISOTimeRange, TimeRange } from "./seismic-types";
+import { EarthscopeOptions } from "./earthscope-client";
 import { daysInRange, dayToISORange } from "./seismic-day";
 
 export interface DownloaderDeps {
@@ -11,10 +12,18 @@ export interface DownloaderDeps {
   };
 }
 
-export interface DownloadParams extends StationLocation {
+export interface DownloadParams extends StationLocation, EarthscopeOptions {
   startSec: number; endSec: number;
-  concurrency?: number; maxRetries?: number; signal?: AbortSignal;
+  concurrency?: number; maxRetries?: number;
 }
+
+/** Drives a download and forwards events. The default runner uses the Web Worker;
+ *  tests inject a runner that replays scripted events. */
+export type DownloadRunner = (
+  params: DownloadParams,
+  onEvent: (event: DownloadEvent) => void,
+  cancel: { onCancel: (fn: () => void) => void }
+) => void;
 
 export type DownloadEvent =
   | { type: "dayWritten"; day: number }
@@ -85,7 +94,7 @@ export async function downloadRange(
         completed++;
         onEvent({ type: "dayWritten", day });
       } else {
-        // Stash days that need to be cached
+        // Stash days that need to be downloaded and cached.
         gaps.push(day);
       }
     }

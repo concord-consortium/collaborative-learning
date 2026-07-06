@@ -1,18 +1,10 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { DownloadEvent, DownloadParams } from "../../../shared/seismic/seismic-downloader";
+import { DownloadEvent, DownloadParams, DownloadRunner } from "../../../shared/seismic/seismic-downloader";
 import { createOpfsCache } from "../../../shared/seismic/opfs-seismic-cache";
 import { StationData } from "../../../shared/seismic/seismic-types";
 
 export const DONE = Symbol("download-done");
 export type ReadyDay = number | typeof DONE;
-
-/** Drives a download and forwards events. The default runner uses the Web Worker;
- *  tests inject a runner that replays scripted events. */
-export type DownloadRunner = (
-  params: DownloadParams,
-  onEvent: (event: DownloadEvent) => void,
-  cancel: { onCancel: (fn: () => void) => void }
-) => void;
 
 function defaultRunner(): DownloadRunner {
   return (params, onEvent, cancel) => {
@@ -81,8 +73,15 @@ export class SeismicDownloadService {
         case "progress": this.completed = event.completed; this.total = event.total; break;
         case "dayWritten": this.pushReady(event.day); break;
         case "dayEmpty": this.emptyDays.push(event.day); break;
-        case "dayError": this.erroredDays.push(event.day); break;
-        case "error": this.error = event.error; this.finish(); break;
+        case "dayError":
+          console.warn(`[seismic-download] day ${event.day} failed: ${event.error}`);
+          this.erroredDays.push(event.day);
+          break;
+        case "error":
+          console.error(`[seismic-download] download failed: ${event.error}`);
+          this.error = event.error;
+          this.finish();
+          break;
         case "done": this.finish(); break;
       }
     });

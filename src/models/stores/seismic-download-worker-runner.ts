@@ -2,8 +2,8 @@
 // CommonJS loader cannot parse) never ends up in a module Jest loads eagerly. The
 // service reaches this only through a dynamic import from its default runner, and tests
 // inject their own runner, so Jest never loads this file.
-import { DownloadEvent } from "../../../shared/seismic/seismic-downloader";
-import type { DownloadRunner } from "./seismic-download-service";
+import { DownloadEvent, DownloadRunner } from "../../../shared/seismic/seismic-downloader";
+import { getLocalBaseUrl, isProxyEnabled } from "../../../shared/seismic/earthscope-client";
 
 /** Default runner: spawns the download Web Worker and forwards its events. */
 export const workerRunner: DownloadRunner = (params, onEvent, cancel) => {
@@ -13,5 +13,6 @@ export const workerRunner: DownloadRunner = (params, onEvent, cancel) => {
     if (e.data.type === "done" || e.data.type === "error") worker.terminate();
   };
   cancel.onCancel(() => { worker.postMessage({ type: "cancel" }); worker.terminate(); });
-  worker.postMessage({ type: "download", params });
+  // The worker has no `window`, so include the proxy status and base url, which are defined in url params.
+  worker.postMessage({ type: "download", params: { ...params, proxy: isProxyEnabled(), baseUrl: getLocalBaseUrl() } });
 };

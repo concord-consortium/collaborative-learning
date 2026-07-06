@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import { fetchAvailability, fetchRawSeismicData } from "../../shared/seismic/earthscope-client";
+import { fetchAvailability, fetchRawSeismicData, EarthscopeOptions } from "../../shared/seismic/earthscope-client";
 import { createOpfsCache } from "../../shared/seismic/opfs-seismic-cache";
 import { downloadRange, DownloadParams, DownloaderDeps } from "../../shared/seismic/seismic-downloader";
 
@@ -10,17 +10,20 @@ export type WorkerRequest = DownloadRequest | CancelRequest;
 const ctx = self as unknown as DedicatedWorkerGlobalScope;
 
 let abort: AbortController | null = null;
+const cache = createOpfsCache();
 
-const deps: DownloaderDeps = {
-  fetchAvailability: (q, signal) => fetchAvailability(q, { signal }),
-  fetchRaw: async (q, signal) => {
-    const response = await fetchRawSeismicData(
-      q.network, q.station, q.location, q.channel, q.startTime, q.endTime, { signal }
-    );
-    return response.arrayBuffer();
-  },
-  cache: createOpfsCache(),
-};
+function makeDeps(options: EarthscopeOptions): DownloaderDeps {
+  return {
+    fetchAvailability: (q, signal) => fetchAvailability(q, { ...options, signal }),
+    fetchRaw: async (q, signal) => {
+      const response = await fetchRawSeismicData(
+        q.network, q.station, q.location, q.channel, q.startTime, q.endTime, { ...options, signal }
+      );
+      return response.arrayBuffer();
+    },
+    cache,
+  };
+}
 
 ctx.onmessage = async (event: MessageEvent<WorkerRequest>) => {
   const msg = event.data;
@@ -30,6 +33,6 @@ ctx.onmessage = async (event: MessageEvent<WorkerRequest>) => {
   }
   if (msg.type === "download") {
     abort = new AbortController();
-    await downloadRange(deps, { ...msg.params, signal: abort.signal }, e => ctx.postMessage(e));
+    await downloadRange(makeDeps(msg.params), { ...msg.params, signal: abort.signal }, e => ctx.postMessage(e));
   }
 };

@@ -23,12 +23,18 @@ function getUrlParam(name: string): string | null {
   return new URLSearchParams(window.location.search).get(name);
 }
 
-function isProxyEnabled(): boolean {
+export function isProxyEnabled(): boolean {
   return getUrlParam("seismicProxy") !== null;
 }
 
-function getLocalBaseUrl(): string | null {
+export function getLocalBaseUrl(): string | null {
   return getUrlParam("seismicLocal");
+}
+
+export interface EarthscopeOptions {
+  baseUrl?: string | null;
+  proxy?: boolean;
+  signal?: AbortSignal;
 }
 
 interface MockFile {
@@ -83,16 +89,14 @@ export async function fetchRawSeismicData(
   channel: string,
   startTime: string,
   endTime: string,
-  options?: {
-    baseUrl?: string;
-    signal?: AbortSignal;
-  }
+  options?: EarthscopeOptions
 ): Promise<Response> {
-  const localBase = getLocalBaseUrl();
+  const localBase = options?.baseUrl ?? getLocalBaseUrl();
   if (localBase) {
     return fetchFromLocal(localBase, network, station, startTime, endTime, options);
   }
-  if (isProxyEnabled()) {
+  const proxy = options?.proxy ?? isProxyEnabled();
+  if (proxy) {
     return fetchFromProxy(network, station, location, channel, startTime, endTime, options);
   }
   return fetchFromMock(startTime, endTime, options);
@@ -109,7 +113,7 @@ async function fetchFromLocal(
   station: string,
   startTime: string,
   _endTime: string,
-  options?: { signal?: AbortSignal }
+  options?: EarthscopeOptions
 ): Promise<Response> {
   const startDate = new Date(startTime);
   const year = startDate.getUTCFullYear();
@@ -131,7 +135,7 @@ async function fetchFromProxy(
   channel: string,
   startTime: string,
   endTime: string,
-  options?: { baseUrl?: string; signal?: AbortSignal }
+  options?: EarthscopeOptions
 ): Promise<Response> {
   const base = options?.baseUrl ?? CLOUDFRONT_PROXY_URL;
   const params = new URLSearchParams({
@@ -149,7 +153,7 @@ async function fetchFromProxy(
 async function fetchFromMock(
   startTime: string,
   endTime: string,
-  options?: { signal?: AbortSignal }
+  options?: EarthscopeOptions
 ): Promise<Response> {
   const startSec = new Date(startTime).getTime() / 1000;
   const endSec = new Date(endTime).getTime() / 1000;
@@ -230,10 +234,11 @@ const AVAILABILITY_PATH = "/earthscope/cached/availability/1/query";
  */
 export async function fetchAvailability(
   query: StationISOTimeRange,
-  options?: { baseUrl?: string; signal?: AbortSignal }
+  options?: EarthscopeOptions
 ): Promise<TimeRange[]> {
   const { network, station, location, channel, startTime, endTime } = query;
-  if (!isProxyEnabled()) {
+  const proxy = options?.proxy ?? isProxyEnabled();
+  if (!proxy) {
     return [{
       start: new Date(startTime).getTime() / 1000,
       end: new Date(endTime).getTime() / 1000,
@@ -249,12 +254,13 @@ export async function fetchAvailability(
     throw new Error(`availability ${response.status}: ${response.statusText}`);
   }
 
-  // Parse the pipe-delimited FDSN availability text into [startSec, endSec) ranges.
+  // Parse the whitespace-delimited FDSN availability text into [start, end) ranges.
+  // Columns: Network Station Location Channel Quality SampleRate Earliest Latest
   const text = await response.text();
   const ranges: TimeRange[] = [];
   for (const line of text.trim().split("\n")) {
     if (!line || line.startsWith("#")) continue;
-    const fields = line.split("|");
+    const fields = line.trim().split(/\s+/);
     if (fields.length < 8) continue;
     const start = new Date(fields[6]).getTime() / 1000;
     const end = new Date(fields[7]).getTime() / 1000;
