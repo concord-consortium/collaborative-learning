@@ -1,6 +1,6 @@
 // shared/seismic/earthscope-client.ts
 import { utcDay } from "./seismic-day";
-import { ChannelMetadata, StationISOTimeRange, TimeRange } from "./seismic-types";
+import { ChannelMetadata, StationId, StationISOTimeRange, TimeRange } from "./seismic-types";
 
 /**
  * Low-level fetchers for EarthScope's FDSN web services.
@@ -83,23 +83,18 @@ const MOCK_FILES: MockFile[] = [
  *   underlying fetch returns a non-2xx HTTP response.
  */
 export async function fetchRawSeismicData(
-  network: string,
-  station: string,
-  location: string,
-  channel: string,
-  startTime: string,
-  endTime: string,
+  query: StationISOTimeRange,
   options?: EarthscopeOptions
 ): Promise<Response> {
   const localBase = options?.baseUrl ?? getLocalBaseUrl();
   if (localBase) {
-    return fetchFromLocal(localBase, network, station, startTime, endTime, options);
+    return fetchFromLocal(localBase, query, options);
   }
   const proxy = options?.proxy ?? isProxyEnabled();
   if (proxy) {
-    return fetchFromProxy(network, station, location, channel, startTime, endTime, options);
+    return fetchFromProxy(query, options);
   }
-  return fetchFromMock(startTime, endTime, options);
+  return fetchFromMock(query.startTime, query.endTime, options);
 }
 
 /**
@@ -109,12 +104,10 @@ export async function fetchRawSeismicData(
  */
 async function fetchFromLocal(
   baseUrl: string,
-  network: string,
-  station: string,
-  startTime: string,
-  _endTime: string,
+  query: StationISOTimeRange,
   options?: EarthscopeOptions
 ): Promise<Response> {
+  const { network, startTime, station } = query;
   const startDate = new Date(startTime);
   const year = startDate.getUTCFullYear();
   const startOfYear = Date.UTC(year, 0, 1);
@@ -129,14 +122,10 @@ async function fetchFromLocal(
 }
 
 async function fetchFromProxy(
-  network: string,
-  station: string,
-  location: string,
-  channel: string,
-  startTime: string,
-  endTime: string,
+  query: StationISOTimeRange,
   options?: EarthscopeOptions
 ): Promise<Response> {
+  const { channel, endTime, location, network, startTime, station } = query;
   const base = options?.baseUrl ?? CLOUDFRONT_PROXY_URL;
   const params = new URLSearchParams({
     net: network, sta: station, cha: channel, loc: location || "--",
@@ -179,7 +168,8 @@ async function fetchFromMock(
  * Fetch channel metadata (including sensitivity) for a station from EarthScope.
  * Returns one entry per channel, each with its own Scale, time range, and sample rate.
  */
-export async function fetchStationMetadata(network: string, station: string): Promise<ChannelMetadata[]> {
+export async function fetchStationMetadata(stationId: StationId): Promise<ChannelMetadata[]> {
+  const { network, station } = stationId;
   const url = `${STATION_SERVICE_URL}?net=${network}&sta=${station}&level=channel&format=text`;
   const response = await fetch(url);
   if (!response.ok) {

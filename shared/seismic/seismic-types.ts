@@ -75,8 +75,7 @@ export interface FetchEnvelopeTileParams {
 
 /** Viewport parameters for seismic data queries. */
 export interface SeismicViewportParams {
-  stationData: StationData;
-  location: string;
+  stationLocation: StationLocation;
   startTime: DateTime;
   endTime: DateTime;
   pixelWidth: number;

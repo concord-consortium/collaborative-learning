@@ -90,10 +90,10 @@ async function main() {
 
     process.stdout.write(`Day ${day + 1}/${totalDays} (${label}): fetching...`);
 
-    const response = await fetchRawSeismicData(
-      network, station, "", channel,
-      chunkStart.toISOString(), chunkEnd.toISOString()
-    );
+    const response = await fetchRawSeismicData({
+      network, station, location: "", channel,
+      startTime: chunkStart.toISOString(), endTime: chunkEnd.toISOString()
+    });
     const buffer = await response.arrayBuffer();
     const records = miniseed.parseDataRecords(buffer);
     const seismogram = miniseed.merge(records);

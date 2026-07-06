@@ -16,9 +16,7 @@ function makeDeps(options: EarthscopeOptions): DownloaderDeps {
   return {
     fetchAvailability: (q, signal) => fetchAvailability(q, { ...options, signal }),
     fetchRaw: async (q, signal) => {
-      const response = await fetchRawSeismicData(
-        q.network, q.station, q.location, q.channel, q.startTime, q.endTime, { ...options, signal }
-      );
+      const response = await fetchRawSeismicData(q, { ...options, signal });
       return response.arrayBuffer();
     },
     cache,
