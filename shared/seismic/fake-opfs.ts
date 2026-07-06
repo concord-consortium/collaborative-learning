@@ -1,4 +1,3 @@
-// shared/seismic/fake-opfs.ts
 // Minimal in-memory implementation of the OPFS subset used by opfs-seismic-cache.
 
 class FakeFileHandle {

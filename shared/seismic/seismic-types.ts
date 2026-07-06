@@ -1,4 +1,3 @@
-// shared/seismic/seismic-types.ts
 import { DateTime } from "luxon";
 
 /** A network + station identifier (no channel). */

@@ -1,4 +1,3 @@
-// shared/seismic/tile-addressing.ts
 import { ENVELOPE_LAYOUT_VERSION, LEVEL_SPACINGS, POINTS_PER_TILE } from "./envelope-config";
 import type { StationData, StationId, TimeRange } from "./seismic-types";
 

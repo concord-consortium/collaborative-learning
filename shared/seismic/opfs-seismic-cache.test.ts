@@ -1,4 +1,3 @@
-// shared/seismic/opfs-seismic-cache.test.ts
 import { createOpfsCache } from "./opfs-seismic-cache";
 import { FakeDirHandle } from "./fake-opfs";
 import { dayIndex, utcDay } from "./seismic-day";

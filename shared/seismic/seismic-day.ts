@@ -1,5 +1,3 @@
-// shared/seismic/seismic-day.ts
-
 /** Seconds in a UTC day. Day identity for the bulk cache is the UTC calendar day. */
 export const SECONDS_PER_DAY = 86400;
 

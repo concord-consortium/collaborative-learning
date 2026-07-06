@@ -1,4 +1,3 @@
-// shared/seismic/seismic-downloader.test.ts
 import { downloadRange, DownloadEvent, DownloaderDeps } from "./seismic-downloader";
 import { dayIndex, utcDay } from "./seismic-day";
 const RANGE = { network: "AK", station: "K204", location: "--", channel: "HNZ",

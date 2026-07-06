@@ -1,4 +1,3 @@
-// shared/seismic/seismic-downloader.ts
 import { StationData, StationLocation, StationISOTimeRange, TimeRange } from "./seismic-types";
 import { EarthscopeOptions } from "./earthscope-client";
 import { daysInRange, dayToISORange } from "./seismic-day";

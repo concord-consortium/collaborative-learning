@@ -1,4 +1,3 @@
-// shared/seismic/earthscope-client.ts
 import { utcDay } from "./seismic-day";
 import { ChannelMetadata, StationId, StationISOTimeRange, TimeRange } from "./seismic-types";
 

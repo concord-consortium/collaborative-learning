@@ -1,4 +1,3 @@
-// shared/seismic/earthscope-client.test.ts
 import {
   fetchRawSeismicData, fetchStationMetadata, fetchAvailability, isProxyEnabled, getLocalBaseUrl
 } from "./earthscope-client";
