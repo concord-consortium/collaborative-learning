@@ -264,6 +264,11 @@ export const WaveRunnerContentModel = TileContentModel
         downloadService.ensureRange({ ...self.station, startSec: startMs / 1000, endSec: endMs / 1000 });
 
         let processed = 0;
+        const updateProgress = () => {
+          const progress = processed + downloadService.erroredDays.length + downloadService.emptyDays.length;
+          self.updateChunkProgress(progress, totalDays);
+        };
+
         while (true) {
           const day: number | typeof DONE = yield downloadService.nextReadyDay();
           if (day === DONE) break;
@@ -287,8 +292,11 @@ export const WaveRunnerContentModel = TileContentModel
             detectionThreshold,
           );
           processed++;
-          self.updateChunkProgress(processed, totalDays);
+          updateProgress();
         }
+
+        // Ensure progress is accurate after loop finishes
+        updateProgress();
 
         const dataSet = self.getOrCreateEventsDataSet()?.dataSet;
         if (dataSet) {

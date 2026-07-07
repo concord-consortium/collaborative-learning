@@ -85,7 +85,7 @@ export async function fetchRawSeismicData(
   query: StationQuery,
   options?: EarthscopeOptions
 ): Promise<Response> {
-  const localBase = options?.baseUrl ?? getLocalBaseUrl();
+  const localBase = options?.baseUrl !== undefined ? options.baseUrl : getLocalBaseUrl();
   if (localBase) {
     return fetchFromLocal(localBase, query, options);
   }

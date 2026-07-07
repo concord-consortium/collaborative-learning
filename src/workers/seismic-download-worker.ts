@@ -30,6 +30,7 @@ ctx.onmessage = async (event: MessageEvent<WorkerRequest>) => {
     return;
   }
   if (msg.type === "download") {
+    abort?.abort();
     abort = new AbortController();
     await downloadRange(makeDeps(msg.params), { ...msg.params, signal: abort.signal }, e => ctx.postMessage(e));
   }
