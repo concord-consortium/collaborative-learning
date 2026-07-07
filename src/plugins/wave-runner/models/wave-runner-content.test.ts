@@ -257,6 +257,8 @@ describe("WaveRunnerContent", () => {
         nextReadyDay: jest.fn(async () => (i < days.length ? days[i++] : DONE)),
         readDay: jest.fn(async () => new ArrayBuffer(8)),
         cancel: jest.fn(),
+        erroredDays: [],
+        emptyDays: [],
       };
       (SeismicDownloadService as jest.Mock).mockImplementation(() => fakeService);
       jest.spyOn(SeismicModelRunner.prototype, "loadModel").mockResolvedValue(undefined);
