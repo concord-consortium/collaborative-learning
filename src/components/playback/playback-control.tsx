@@ -42,8 +42,8 @@ interface IProps {
 
 export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProps) => {
   const { treeManager } = props;
-  const { activeNavTab, focusDocument } = usePersistentUIStore();
-  const { user } = useStores();
+  const { focusDocument } = usePersistentUIStore();
+  const { user, displayedActiveNavTab: activeNavTab } = useStores();
   const [sliderPlaying, setSliderPlaying] = useState(false);
   const sliderContainerRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);

@@ -263,14 +263,22 @@ export const PersistentUIModelV2 = types
       appConfig: AppConfigModelType,
       user?: UserModelType,
       sortedDocuments?: SortedDocuments,
-      opts?: { fromUrlStudentDocument?: boolean }
+      opts?: { fromUrlStudentDocument?: boolean, hasStudentWorkGroup?: boolean }
     ) {
       const { aiEvaluation, navTabs } = appConfig || {};
       const availableTabs = navTabs?.tabSpecs.map(tab => tab.tab) ?? [];
       let navTab = "";
 
       if (opts?.fromUrlStudentDocument) {
-        navTab = ENavTab.kStudentWork;
+        // Student Work is group-keyed and loads its group's documents asynchronously,
+        // so activating it without the doc's group available leaves a blank panel.
+        // Use it only when the viewer's group is available; otherwise fall back to
+        // Sort Work, which needs no group.
+        if (opts.hasStudentWorkGroup && availableTabs.includes(ENavTab.kStudentWork)) {
+          navTab = ENavTab.kStudentWork;
+        } else if (availableTabs.includes(ENavTab.kSortWork)) {
+          navTab = ENavTab.kSortWork;
+        }
       } else if (aiEvaluation) {
         if (availableTabs.includes(ENavTab.kSortWork)) {
           navTab = ENavTab.kSortWork;
@@ -315,7 +323,7 @@ export const PersistentUIModelV2 = types
           self.setSecondarySortBy("None");
         } else {
           if (sortedDocuments) {
-            if (aiEvaluation) {
+            if (aiEvaluation || opts?.fromUrlStudentDocument) {
               self.setPrimarySortBy("Name");
             }
             const primarySortBy: PrimarySortType =

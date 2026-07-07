@@ -44,6 +44,7 @@ export interface IStores extends IBaseStores {
   problemOrdinal: string;
   userContextProvider: UserContextProvider;
   tabsToDisplay: NavTabModelType[];
+  displayedActiveNavTab: string | undefined;
   documentToDisplay?: string;
   documentHistoryId?: string;
   isShowingTeacherContent: boolean;
@@ -190,9 +191,20 @@ class Stores implements IStores{
       const docPromise = this.sortedDocuments.fetchFullDocument(docToDisplay);
       docPromise.then((doc) => {
         if (doc) {
-          this.persistentUI.openResourceDocument(
-            doc, this.appConfig, this.user, this.sortedDocuments,
-            { fromUrlStudentDocument: true }
+          // Student Work is group-keyed and its group content loads asynchronously.
+          // Wait until either the doc's group is available or the DB listeners have
+          // finished their initial load (so we know it isn't coming — e.g. a researcher
+          // reaching the doc by key, who doesn't have its class/offering groups), then
+          // route: Student Work when the group is present, otherwise Sort Work.
+          when(
+            () => !!this.groups.getGroupById(doc.groupId) || this.db.listeners.isListening,
+            () => {
+              const hasStudentWorkGroup = !!doc.groupId && !!this.groups.getGroupById(doc.groupId);
+              this.persistentUI.openResourceDocument(
+                doc, this.appConfig, this.user, this.sortedDocuments,
+                { fromUrlStudentDocument: true, hasStudentWorkGroup }
+              );
+            }
           );
         } else {
           console.warn("Display document not found: ", params.documentToDisplay);
@@ -225,6 +237,17 @@ class Stores implements IStores{
     return removeNonCurriculumTabs
       ? tabs.filter(t => t.tab === "problems" || t.tab === "teacher-guide")
       : tabs;
+  }
+
+  // activeNavTab resolved against the displayed tabs: if the stored tab isn't
+  // shown (e.g. hidden/stale), fall back to the first displayed tab so the UI
+  // never keys off a tab that isn't on screen.
+  get displayedActiveNavTab() {
+    const { activeNavTab } = this.persistentUI;
+    const tabs = this.tabsToDisplay;
+    return tabs && tabs.length > 0 && !tabs.some(t => t.tab === activeNavTab)
+      ? tabs[0].tab
+      : activeNavTab;
   }
 
   get isProblemLoaded() {

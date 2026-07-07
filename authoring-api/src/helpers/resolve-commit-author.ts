@@ -5,10 +5,8 @@ interface CommitAuthor {
   email: string;
 }
 
-/**
- * Resolve the Git commit author from a Firebase decoded token, falling back to the GitHub API
- * when the token is missing name or email (which depends on the user's GitHub profile settings).
- */
+// Resolve the Git commit author from a Firebase decoded token, falling back to the GitHub API when
+// the token is missing name or email (which depends on the user's GitHub profile settings).
 export async function resolveCommitAuthor(
   decodedToken: { name?: string; email?: string } | undefined,
   octokit: Octokit

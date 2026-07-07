@@ -43,9 +43,16 @@ export const getUnitMetadataUpdatesPath = (branch: string, unit: string, path: s
 export const getBlobCachePath = (sha?: string) =>
   `${authoringPath}/blobs${sha ? `/${sha}` : ""}`;
 
+// "%" must be escaped first (it is the escape character itself). Escaping it to "%25" keeps the
+// mapping injective — without it a literal "data%231.png" and the escaped form of "data#1.png"
+// would collide on the same key. A single left-to-right replace handles this correctly: "%25" is
+// emitted for a literal "%", and the sequences we emit for other characters ("%2E", "%23", …) are
+// never re-scanned.
 export function escapeFirebaseKey(key: string): string {
-  return key.replace(/[.#$[\]/]/g, (char) => {
+  return key.replace(/[%.#$[\]/]/g, (char) => {
     switch (char) {
+    case "%":
+      return "%25";
     case ".":
       return "%2E";
     case "#":
@@ -65,8 +72,10 @@ export function escapeFirebaseKey(key: string): string {
 }
 
 export function unescapeFirebaseKey(escapedKey: string): string {
-  return escapedKey.replace(/%2E|%23|%24|%5B|%5D|%2F/g, (escapedChar) => {
+  return escapedKey.replace(/%2E|%23|%24|%5B|%5D|%2F|%25/g, (escapedChar) => {
     switch (escapedChar) {
+    case "%25":
+      return "%";
     case "%2E":
       return ".";
     case "%23":

@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import classNames from "classnames";
 import Modal from "./modal";
 import { useCurriculum } from "../hooks/use-curriculum";
 import { useAuthoringApi } from "../hooks/use-authoring-api";
 import { useAuthoringPreview } from "../hooks/use-authoring-preview";
-import { sanitizeFileName } from "../utils/sanitize-filename";
+import { hasValidImageExtension, sanitizeFileName } from "../utils/sanitize-filename";
+import { describeUsagePath, formatLocation } from "../utils/image-usage-locations";
 
 import "./media-library.scss";
 
@@ -11,8 +13,10 @@ interface IProps {
   onClose: () => void;
 }
 
+const fileNameFromKey = (key: string) => key.replace(/^images\//, "");
+
 const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
-  const { files, branch, unit } = useCurriculum();
+  const { files, branch, unit, unitConfig, teacherGuideConfig } = useCurriculum();
   const api = useAuthoringApi();
   const authoringPreview = useAuthoringPreview();
   const [filter, setFilter] = useState("");
@@ -24,9 +28,42 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sanitizedName, setSanitizedName] = useState<string | null>(null);
 
+  // Image usage map: image key ("images/{file}") -> referencing content-file paths.
+  const [usages, setUsages] = useState<Record<string, string[]> | null>(null);
+  const [usagesLoading, setUsagesLoading] = useState(false);
+  const [usageExpanded, setUsageExpanded] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState("");
+  const [renameError, setRenameError] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  // True while a rename/delete request is in flight, to guard against double-submits.
+  const [actionPending, setActionPending] = useState(false);
+
   const imageFileKeys = useMemo(() => {
-    return Object.keys(files ?? {}).filter(key => key.startsWith("images"));
+    return Object.keys(files ?? {}).filter(key => key.startsWith("images/"));
   }, [files]);
+
+  const refreshUsages = useCallback(async () => {
+    if (!branch || !unit) return;
+    setUsagesLoading(true);
+    try {
+      const response = await api.get("/getImageUsages", { branch, unit });
+      if (response.success) {
+        setUsages(response.usages ?? {});
+      }
+    } catch (error) {
+      // Leave any prior usages in place; reopening the library, switching units, or a rename/delete
+      // re-runs this fetch.
+      console.error("Failed to load image usages:", error);
+    } finally {
+      setUsagesLoading(false);
+    }
+  }, [api, branch, unit]);
+
+  // Load usages when the library opens (and whenever the unit changes).
+  useEffect(() => {
+    refreshUsages();
+  }, [refreshUsages]);
 
   const filteredFileKeys = useMemo(() => {
     if (!filter) return imageFileKeys;
@@ -148,6 +185,207 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
     resetUpload();
   };
 
+  const selectedFileName = selectedKey ? fileNameFromKey(selectedKey) : undefined;
+  const selectedRefs = selectedKey && usages ? usages[selectedKey] : undefined;
+  const selectedUsageCount = selectedRefs?.length;
+
+  // Reset per-image UI state whenever the selection changes. (The action message is intentionally
+  // left alone here: a successful rename re-points the selection to the new key, and clearing it on
+  // that change would swallow the "Renamed to…" confirmation. Manual selection clears it instead.)
+  useEffect(() => {
+    setUsageExpanded(false);
+    setRenaming(false);
+    setRenameError(null);
+  }, [selectedKey]);
+
+  // User-initiated selection (clicking a thumbnail): clear any lingering action message.
+  const handleSelectKey = (key: string) => {
+    setActionMessage(null);
+    setSelectedKey(key);
+  };
+
+  const handleDeleteImage = async () => {
+    if (actionPending) return;
+    if (!branch || !unit || !selectedFileName || selectedUsageCount !== 0) return;
+    const confirmed = window.confirm(
+      `Delete "${selectedFileName}"? It is unused, but this removes it from the unit and cannot be undone.`
+    );
+    if (!confirmed) return;
+    setActionPending(true);
+    try {
+      const response = await api.post("/deleteImage", { branch, unit }, { fileName: selectedFileName });
+      if (response.success) {
+        // The files listener will drop the thumbnail; clear selection and refresh usages.
+        setSelectedKey(undefined);
+        setActionMessage(`Deleted ${selectedFileName}.`);
+        await refreshUsages();
+        authoringPreview.reloadAllPreviews();
+      } else {
+        setActionMessage(response.error ?? "Delete failed.");
+      }
+    } catch (error) {
+      setActionMessage(error instanceof Error ? error.message : "Delete failed.");
+    } finally {
+      setActionPending(false);
+    }
+  };
+
+  const handleStartRename = () => {
+    setRenameValue(selectedFileName ?? "");
+    setRenameError(null);
+    setRenaming(true);
+  };
+
+  const handleRenameSubmit = async () => {
+    if (actionPending) return;
+    if (!branch || !unit || !selectedFileName) return;
+    const sanitized = sanitizeFileName(renameValue.trim());
+    if (!sanitized || sanitized === selectedFileName) {
+      setRenameError("Enter a different, valid filename.");
+      return;
+    }
+    if (!hasValidImageExtension(sanitized)) {
+      setRenameError("Include a file extension (e.g. .png) so the image can be displayed.");
+      return;
+    }
+    const targetKey = `images/${sanitized}`;
+    if (imageFileKeys.includes(targetKey)) {
+      setRenameError(`An image named "${sanitized}" already exists.`);
+      return;
+    }
+    setActionPending(true);
+    try {
+      const response = await api.post(
+        "/renameImage", { branch, unit }, { fromFileName: selectedFileName, toFileName: sanitized });
+      if (response.success) {
+        setRenaming(false);
+        setSelectedKey(targetKey);
+        const count = response.updatedFileCount ?? 0;
+        setActionMessage(`Renamed to ${sanitized}. Updated ${count} reference${count === 1 ? "" : "s"}.`);
+        await refreshUsages();
+        authoringPreview.reloadAllPreviews();
+      } else {
+        setRenameError(response.error ?? "Rename failed.");
+      }
+    } catch (error) {
+      setRenameError(error instanceof Error ? error.message : "Rename failed.");
+    } finally {
+      setActionPending(false);
+    }
+  };
+
+  const renderUsageInfo = () => {
+    // A plain text line stating the usage count, always visible above the image. When the count
+    // can't be determined (e.g. the usage API is unavailable) we say so rather than leaving the
+    // Delete button mysteriously disabled.
+    let usageText: string;
+    if (selectedUsageCount === undefined) {
+      usageText = usagesLoading ? "Checking usage…" : "Usage: not available";
+    } else if (selectedUsageCount === 0) {
+      usageText = "Not used in the curriculum";
+    } else {
+      usageText = `Used ${selectedUsageCount} time${selectedUsageCount === 1 ? "" : "s"} in the curriculum`;
+    }
+
+    const hasLocations = selectedUsageCount !== undefined && selectedUsageCount > 0;
+    return (
+      <div className="media-library-usage">
+        <div className="media-library-usage-text">{usageText}</div>
+        {hasLocations && (
+          <button
+            type="button"
+            className={classNames("media-library-usage-toggle", { expanded: usageExpanded })}
+            aria-expanded={usageExpanded}
+            onClick={() => setUsageExpanded(v => !v)}
+          >
+            <span className="disclosure-caret" aria-hidden="true" />
+            {usageExpanded ? "Hide locations" : "Show locations"}
+          </button>
+        )}
+        {hasLocations && usageExpanded && (
+          <ul className="media-library-usage-list">
+            {(selectedRefs ?? []).map(path => (
+              <li key={path} title={path}>
+                {formatLocation(describeUsagePath(path, unitConfig, teacherGuideConfig))}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  };
+
+  const renderImageActions = () => {
+    if (!selectedKey) return null;
+    // Preview the name the rename will actually use: invalid characters (spaces, &, etc.) are
+    // silently rewritten by sanitizeFileName, so show the result when it differs from what's typed
+    // rather than letting the author guess. handleRenameSubmit sanitizes the same way.
+    const trimmedRename = renameValue.trim();
+    const renamePreview = trimmedRename ? sanitizeFileName(trimmedRename) : "";
+    const showRenamePreview = !!renamePreview && renamePreview !== trimmedRename;
+    const renameDescribedBy = renameError
+      ? "media-library-rename-error"
+      : (showRenamePreview ? "media-library-rename-preview" : undefined);
+    return (
+      <div className="media-library-image-actions">
+        {renaming ? (
+          <div className="media-library-rename">
+            <input
+              type="text"
+              className="media-library-rename-input"
+              aria-label="New image filename"
+              aria-invalid={renameError ? true : undefined}
+              aria-describedby={renameDescribedBy}
+              value={renameValue}
+              autoFocus
+              disabled={actionPending}
+              onChange={e => setRenameValue(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Enter") handleRenameSubmit();
+                if (e.key === "Escape") setRenaming(false);
+              }}
+            />
+            {showRenamePreview &&
+              <div id="media-library-rename-preview" className="media-library-rename-preview">
+                Will be saved as: {renamePreview}
+              </div>}
+            <div className="media-library-rename-buttons">
+              <button type="button" onClick={handleRenameSubmit} disabled={actionPending}>Save</button>
+              <button type="button" onClick={() => setRenaming(false)} disabled={actionPending}>Cancel</button>
+            </div>
+            {renameError &&
+              <div id="media-library-rename-error" className="media-library-rename-error" role="alert">
+                {renameError}
+              </div>}
+          </div>
+        ) : (
+          <div className="media-library-action-buttons">
+            <button
+              type="button"
+              className="media-library-rename-btn"
+              onClick={handleStartRename}
+              disabled={actionPending}
+            >
+              Rename
+            </button>
+            <button
+              type="button"
+              className="media-library-delete-btn"
+              onClick={handleDeleteImage}
+              disabled={actionPending || selectedUsageCount !== 0}
+              title={selectedUsageCount === 0
+                ? "Delete this unused image"
+                : "Only unused images can be deleted"}
+            >
+              Delete
+            </button>
+          </div>
+        )}
+        {actionMessage && <div className="media-library-action-message" role="status">{actionMessage}</div>}
+      </div>
+    );
+  };
+
   const renderImageListTabContent = () => {
     return (
       <div className="media-library-image-list">
@@ -178,8 +416,8 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
               {filteredFileKeys.map(key => (
                 <div
                   key={key}
-                  className={"media-library-image-thumb" + (key === selectedKey ? " selected" : "")}
-                  onClick={() => setSelectedKey(key)}
+                  className={classNames("media-library-image-thumb", { selected: key === selectedKey })}
+                  onClick={() => handleSelectKey(key)}
                   title={key}
                 >
                   <img
@@ -188,6 +426,18 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
                     loading="lazy"
                     className="media-library-thumb-img"
                   />
+                  {/* Only badge images the usage scan actually covered. A key missing from `usages`
+                      (e.g. a just-uploaded image not yet in a refreshed map) is unknown, not 0 —
+                      defaulting to 0 would wrongly mark it "unused". */}
+                  {usages?.[key] !== undefined && (
+                    <span
+                      className={classNames("media-library-thumb-badge",
+                        { unused: usages[key].length === 0 })}
+                      title={`Used ${usages[key].length}×`}
+                    >
+                      {usages[key].length}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -199,23 +449,28 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
         <div className="media-library-preview">
           {imageUrl ? (
             <>
-              <img src={imageUrl} alt={selectedKey} className="media-library-preview-img" />
-              <div className="media-library-preview-filename">{selectedKey}</div>
-              <button
-                className="media-library-select-btn"
-                onClick={() => {
-                  if (selectedKey) {
-                    try {
-                      navigator.clipboard.writeText(`curriculum/${unit}/${selectedKey}`);
-                    } catch (e) {
-                      alert(`Failed to copy to clipboard: ${e}`);
+              {/* Controls go above the image so they stay visible even for tall images. */}
+              <div className="media-library-preview-controls">
+                <div className="media-library-preview-filename">{selectedKey}</div>
+                {renderUsageInfo()}
+                {renderImageActions()}
+                <button
+                  className="media-library-select-btn"
+                  onClick={() => {
+                    if (selectedKey) {
+                      try {
+                        navigator.clipboard.writeText(`curriculum/${unit}/${selectedKey}`);
+                      } catch (e) {
+                        alert(`Failed to copy to clipboard: ${e}`);
+                      }
+                      onClose();
                     }
-                    onClose();
-                  }
-                }}
-              >
-                Select
-              </button>
+                  }}
+                >
+                  Select
+                </button>
+              </div>
+              <img src={imageUrl} alt={selectedKey} className="media-library-preview-img" />
             </>
           ) : (
             <div className="media-library-no-preview">No preview available</div>
@@ -303,13 +558,13 @@ const MediaLibrary: React.FC<IProps> = ({ onClose }) => {
       <div className="media-library-content">
         <div className="media-library-tabs">
           <button
-            className={"media-library-tab" + (activeTab === "images" ? " active" : "")}
+            className={classNames("media-library-tab", { active: activeTab === "images" })}
             onClick={() => setActiveTab("images")}
           >
             Existing Images
           </button>
           <button
-            className={"media-library-tab" + (activeTab === "upload" ? " active" : "")}
+            className={classNames("media-library-tab", { active: activeTab === "upload" })}
             onClick={() => setActiveTab("upload")}
           >
             Upload New Image
