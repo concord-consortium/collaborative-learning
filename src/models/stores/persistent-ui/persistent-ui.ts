@@ -266,7 +266,11 @@ export const PersistentUIModelV2 = types
       opts?: { fromUrlStudentDocument?: boolean, hasStudentWorkGroup?: boolean }
     ) {
       const { aiEvaluation, navTabs } = appConfig || {};
-      const availableTabs = navTabs?.tabSpecs.map(tab => tab.tab) ?? [];
+      // Only route to tabs that are actually displayed. A unit can hide a tab it
+      // defines (e.g. mods hides student-work and exposes sort-work as "Class Work");
+      // routing the active tab to a hidden tab leaves displayedActiveNavTab falling
+      // back to the first tab, so the document never appears.
+      const availableTabs = navTabs?.tabSpecs.filter(tab => !tab.hidden).map(tab => tab.tab) ?? [];
       let navTab = "";
 
       if (opts?.fromUrlStudentDocument) {
