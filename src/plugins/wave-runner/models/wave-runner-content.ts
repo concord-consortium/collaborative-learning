@@ -237,7 +237,6 @@ export const WaveRunnerContentModel = TileContentModel
       self.isRunning = true;
 
       const metadata = self.selectedModelMetadata;
-      const { network, station, location, channel } = self.station;
 
       const runner = new SeismicModelRunner();
       try {
@@ -258,14 +257,11 @@ export const WaveRunnerContentModel = TileContentModel
         const totalDays = Math.ceil((endMs - startMs) / MILLISECONDS_PER_DAY);
         self.updateChunkProgress(0, totalDays);
 
-        // Bulk-download the range into OPFS, then run the model on each day as it lands.
+        // Bulk-download the range into OPFS, running the model on each day as it lands.
         // Days may arrive out of order; detection is per-window independent, so that's fine.
         // No-data days come as `dayEmpty` and are simply never yielded.
         const downloadService = new SeismicDownloadService();
-        downloadService.ensureRange({
-          network, station, location, channel,
-          startSec: startMs / 1000, endSec: endMs / 1000,
-        });
+        downloadService.ensureRange({ ...self.station, startSec: startMs / 1000, endSec: endMs / 1000 });
 
         let processed = 0;
         while (true) {

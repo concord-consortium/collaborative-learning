@@ -70,9 +70,16 @@ export class SeismicDownloadService {
   private handleEvent(event: DownloadEvent): void {
     runInAction(() => {
       switch (event.type) {
-        case "progress": this.completed = event.completed; this.total = event.total; break;
-        case "dayWritten": this.pushReady(event.day); break;
-        case "dayEmpty": this.emptyDays.push(event.day); break;
+        case "progress":
+          this.completed = event.completed;
+          this.total = event.total;
+          break;
+        case "dayWritten":
+          this.pushReady(event.day);
+          break;
+        case "dayEmpty":
+          this.emptyDays.push(event.day);
+          break;
         case "dayError":
           console.warn(`[seismic-download] day ${event.day} failed: ${event.error}`);
           this.erroredDays.push(event.day);
@@ -82,7 +89,9 @@ export class SeismicDownloadService {
           this.error = event.error;
           this.finish();
           break;
-        case "done": this.finish(); break;
+        case "done":
+          this.finish();
+          break;
       }
     });
   }
@@ -101,8 +110,13 @@ export class SeismicDownloadService {
   }
 
   private reset(): void {
-    this.total = 0; this.completed = 0; this.error = null; this.finished = false;
-    this.readyQueue = []; this.waiters = [];
-    this.erroredDays.length = 0; this.emptyDays.length = 0;
+    this.total = 0;
+    this.completed = 0;
+    this.error = null;
+    this.finished = false;
+    this.readyQueue = [];
+    this.waiters = [];
+    this.erroredDays.length = 0;
+    this.emptyDays.length = 0;
   }
 }
