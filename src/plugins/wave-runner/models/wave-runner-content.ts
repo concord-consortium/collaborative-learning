@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 import stringify from "json-stringify-pretty-compact";
 import { cast, flow, getSnapshot, types, Instance } from "mobx-state-tree";
 import { miniseed } from "seisplotjs";
+import { MILLISECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
 import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
 import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
@@ -254,8 +255,7 @@ export const WaveRunnerContentModel = TileContentModel
           return;
         }
 
-        const msPerDay = 86400000;
-        const totalDays = Math.ceil((endMs - startMs) / msPerDay);
+        const totalDays = Math.ceil((endMs - startMs) / MILLISECONDS_PER_DAY);
         self.updateChunkProgress(0, totalDays);
 
         // Bulk-download the range into OPFS, then run the model on each day as it lands.

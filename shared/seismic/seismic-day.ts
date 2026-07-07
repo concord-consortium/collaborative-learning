@@ -1,5 +1,6 @@
 /** Seconds in a UTC day. Day identity for the bulk cache is the UTC calendar day. */
 export const SECONDS_PER_DAY = 86400;
+export const MILLISECONDS_PER_DAY = SECONDS_PER_DAY * 1000;
 
 /** UTC calendar date (1-based month) → Unix seconds. */
 export function utcDay(year: number, month: number, day: number): number {
@@ -18,18 +19,18 @@ export function lastDayIndex(unixSec: number): number {
 
 /** Day index → UTC calendar year and day-of-year (1-based), for OPFS paths. */
 export function dayToYearDoy(day: number): { year: number; doy: number } {
-  const startMs = day * SECONDS_PER_DAY * 1000;
+  const startMs = day * MILLISECONDS_PER_DAY;
   const d = new Date(startMs);
   const year = d.getUTCFullYear();
   const yearStartMs = Date.UTC(year, 0, 1);
-  const doy = Math.floor((startMs - yearStartMs) / (SECONDS_PER_DAY * 1000)) + 1;
+  const doy = Math.floor((startMs - yearStartMs) / MILLISECONDS_PER_DAY) + 1;
   return { year, doy };
 }
 
 /** Day index → day-aligned ISO start/end (end exclusive), for dataselect requests. */
 export function dayToISORange(day: number): { startISO: string; endISO: string } {
-  const startISO = new Date(day * SECONDS_PER_DAY * 1000).toISOString();
-  const endISO = new Date((day + 1) * SECONDS_PER_DAY * 1000).toISOString();
+  const startISO = new Date(day * MILLISECONDS_PER_DAY).toISOString();
+  const endISO = new Date((day + 1) * MILLISECONDS_PER_DAY).toISOString();
   return { startISO, endISO };
 }
 

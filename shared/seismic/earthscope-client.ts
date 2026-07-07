@@ -1,4 +1,4 @@
-import { utcDay } from "./seismic-day";
+import { MILLISECONDS_PER_DAY, utcDay } from "./seismic-day";
 import { ChannelMetadata, StationId, StationISOTimeRange, TimeRange } from "./seismic-types";
 
 /**
@@ -110,7 +110,7 @@ async function fetchFromLocal(
   const startDate = new Date(startTime);
   const year = startDate.getUTCFullYear();
   const startOfYear = Date.UTC(year, 0, 1);
-  const doy = String(Math.floor((startDate.getTime() - startOfYear) / 86400000) + 1).padStart(3, "0");
+  const doy = String(Math.floor((startDate.getTime() - startOfYear) / MILLISECONDS_PER_DAY) + 1).padStart(3, "0");
 
   const url = `${baseUrl}/data/${network}/${year}/${doy}/${station}.${network}.${year}.${doy}`;
   const response = await fetch(url, { signal: options?.signal });
