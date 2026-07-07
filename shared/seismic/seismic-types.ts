@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 
-/** A network + station identifier (no channel). */
+/** A network + station identifier. */
 export interface StationId {
   network: string;
   station: string;

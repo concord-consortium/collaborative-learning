@@ -12,8 +12,10 @@ export interface DownloaderDeps {
 }
 
 export interface DownloadParams extends StationLocation, EarthscopeOptions {
-  startSec: number; endSec: number;
-  concurrency?: number; maxRetries?: number;
+  concurrency?: number;
+  endSec: number;
+  maxRetries?: number;
+  startSec: number;
 }
 
 /** Drives a download and forwards events. The default runner uses the Web Worker;
@@ -24,8 +26,7 @@ export type DownloadRunner = (
   cancel: { onCancel: (fn: () => void) => void }
 ) => void;
 
-export type DownloadEvent =
-  | { type: "dayWritten"; day: number }
+export type DownloadEvent = { type: "dayWritten"; day: number }
   | { type: "dayEmpty"; day: number }
   | { type: "dayError"; day: number; error: string }
   | { type: "progress"; completed: number; total: number }
@@ -59,12 +60,11 @@ export async function downloadRange(
   const maxRetries = params.maxRetries ?? DEFAULT_MAX_RETRIES;
 
   try {
-    const ranges = await deps.fetchAvailability(
-      { ...stationLocation,
-        startTime: new Date(startSec * 1000).toISOString(),
-        endTime: new Date(endSec * 1000).toISOString() },
-      params.signal
-    );
+    const ranges = await deps.fetchAvailability({
+      ...stationLocation,
+      startTime: new Date(startSec * 1000).toISOString(),
+      endTime: new Date(endSec * 1000).toISOString()
+    }, params.signal);
 
     const allDays = daysInRange(startSec, endSec);
     const availableDays: number[] = [];

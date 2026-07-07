@@ -4,7 +4,9 @@ import {
   LEVEL_SPACINGS, AMPLITUDE_RANGES, NO_DATA_SENTINEL, RAW_CHUNK_DURATION
 } from "../../../shared/seismic/envelope-config";
 import { dequantize } from "../../../shared/seismic/envelope-codec";
-import { getTileIndicesForViewport, getTileTimeRange } from "../../../shared/seismic/tile-addressing";
+import {
+  getStationChannelPrefix, getStationPrefix, getTileIndicesForViewport, getTileTimeRange
+} from "../../../shared/seismic/tile-addressing";
 import { fetchEnvelopeTile } from "../../../shared/seismic/envelope-fetcher";
 import { fetchRawSeismicData, fetchStationMetadata } from "../../../shared/seismic/earthscope-client";
 import { miniseed } from "seisplotjs";
@@ -19,13 +21,11 @@ type RawCacheEntry = RawSegment[] | "loading" | "missing";
 const MAX_RAW_CACHE_ENTRIES = 100;
 
 export function envelopeCacheKey(stationData: StationData, level: number, tileIndex: number) {
-  const { network, station, channel } = stationData;
-  return `${network}_${station}/${channel}/L${level}/${tileIndex}`;
+  return `${getStationChannelPrefix(stationData)}/L${level}/${tileIndex}`;
 }
 
 export function rawCacheKey(stationData: StationData, chunkIndex: number) {
-  const { network, station, channel } = stationData;
-  return `${network}_${station}/${channel}/raw/${chunkIndex}`;
+  return `${getStationChannelPrefix(stationData)}/raw/${chunkIndex}`;
 }
 
 export class SeismicQueryService {
@@ -369,8 +369,7 @@ export class SeismicQueryService {
   }
 
   private async getAllMetadata(stationId: StationId): Promise<ChannelMetadata[]> {
-    const { network, station } = stationId;
-    const metaKey = `${network}_${station}`;
+    const metaKey = getStationPrefix(stationId);
     let metadata = this.metadataCache.get(metaKey);
     if (!metadata) {
       metadata = await fetchStationMetadata(stationId);
