@@ -295,6 +295,14 @@ export const PersistentUIModelV2 = types
         navTab = getNavTabOfDocument(doc, user) || "";
       }
 
+      // getNavTabOfDocument can pick a tab the unit hides (e.g. a teacher/researcher
+      // opening another student's problem doc resolves to student-work, which mods
+      // hides). Routing there leaves displayedActiveNavTab falling back to the first
+      // tab, so substitute the always-visible Sort Work tab when it's available.
+      if (navTab && !availableTabs.includes(navTab as ENavTab) && availableTabs.includes(ENavTab.kSortWork)) {
+        navTab = ENavTab.kSortWork;
+      }
+
       let docGroupId = "";
       if (navTab === ENavTab.kClassWork) {
         if (doc.type === LearningLogPublication) {

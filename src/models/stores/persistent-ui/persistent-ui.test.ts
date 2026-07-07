@@ -492,6 +492,28 @@ describe("PersistentUI", () => {
 
         expect(persistentUI.activeNavTab).toBe(ENavTab.kMyWork);
       });
+
+      it("substitutes Sort Work on the doc-based path when the natural tab is hidden", () => {
+        // No fromUrlStudentDocument flag: a teacher/researcher opening another
+        // student's problem doc (e.g. from a comment) resolves to student-work via
+        // getNavTabOfDocument. When that tab is hidden (mods), route to the visible
+        // Sort Work tab instead of the hidden one.
+        mockUser = { id: "teacher1", isTeacherOrResearcher: true };
+        mockAppConfig = {
+          aiEvaluation: undefined,
+          navTabs: {
+            tabSpecs: [
+              { tab: "sort-work", label: "Class Work" },
+              { tab: "my-work", label: "My Work" },
+              { tab: "student-work", label: "Student Work", hidden: true }
+            ]
+          }
+        };
+
+        persistentUI.openResourceDocument(mockDoc, mockAppConfig, mockUser, mockSortedDocuments);
+
+        expect(persistentUI.activeNavTab).toBe(ENavTab.kSortWork);
+      });
     });
   });
 
