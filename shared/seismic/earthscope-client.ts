@@ -1,5 +1,5 @@
 import { MILLISECONDS_PER_DAY, utcDay } from "./seismic-day";
-import { ChannelMetadata, StationId, StationISOTimeRange, TimeRange } from "./seismic-types";
+import { ChannelMetadata, StationId, StationQuery, TimeRange } from "./seismic-types";
 
 /**
  * Low-level fetchers for EarthScope's FDSN web services.
@@ -82,7 +82,7 @@ const MOCK_FILES: MockFile[] = [
  *   underlying fetch returns a non-2xx HTTP response.
  */
 export async function fetchRawSeismicData(
-  query: StationISOTimeRange,
+  query: StationQuery,
   options?: EarthscopeOptions
 ): Promise<Response> {
   const localBase = options?.baseUrl ?? getLocalBaseUrl();
@@ -103,7 +103,7 @@ export async function fetchRawSeismicData(
  */
 async function fetchFromLocal(
   baseUrl: string,
-  query: StationISOTimeRange,
+  query: StationQuery,
   options?: EarthscopeOptions
 ): Promise<Response> {
   const { network, startTime, station } = query;
@@ -121,7 +121,7 @@ async function fetchFromLocal(
 }
 
 async function fetchFromProxy(
-  query: StationISOTimeRange,
+  query: StationQuery,
   options?: EarthscopeOptions
 ): Promise<Response> {
   const { channel, endTime, location, network, startTime, station } = query;
@@ -222,7 +222,7 @@ const AVAILABILITY_PATH = "/earthscope/cached/availability/1/query";
  * day; the mock dataselect returns "no data" for days it doesn't cover.
  */
 export async function fetchAvailability(
-  query: StationISOTimeRange,
+  query: StationQuery,
   options?: EarthscopeOptions
 ): Promise<TimeRange[]> {
   const { network, station, location, channel, startTime, endTime } = query;

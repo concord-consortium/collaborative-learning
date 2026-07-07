@@ -1,10 +1,10 @@
-import { StationData, StationLocation, StationISOTimeRange, TimeRange } from "./seismic-types";
+import { StationData, StationLocation, StationQuery, TimeRange } from "./seismic-types";
 import { EarthscopeOptions } from "./earthscope-client";
 import { daysInRange, dayToISORange } from "./seismic-day";
 
 export interface DownloaderDeps {
-  fetchAvailability(query: StationISOTimeRange, signal?: AbortSignal): Promise<TimeRange[]>;
-  fetchRaw(query: StationISOTimeRange, signal?: AbortSignal): Promise<ArrayBuffer>;
+  fetchAvailability(query: StationQuery, signal?: AbortSignal): Promise<TimeRange[]>;
+  fetchRaw(query: StationQuery, signal?: AbortSignal): Promise<ArrayBuffer>;
   cache: {
     scanCachedDays(station: StationData, startDay: number, endDay: number): Promise<Set<number>>;
     writeDayChunk(station: StationData, day: number, bytes: ArrayBuffer): Promise<void>;

@@ -10,7 +10,7 @@ import { fetchRawSeismicData, fetchStationMetadata } from "../../../shared/seism
 import { miniseed } from "seisplotjs";
 import {
   EnvelopeTileData, ChannelMetadata, NullableNumberArray, SeismicViewportParams, ViewportQueryResult, RawSegment,
-  StationData, StationId, TimeRange, StationISOTimeRange
+  StationData, StationId, TimeRange, StationQuery
 } from "../../../shared/seismic/seismic-types";
 
 type EnvelopeCacheEntry = EnvelopeTileData | "loading" | "missing";
@@ -393,7 +393,7 @@ export class SeismicQueryService {
   }
 
   private async fetchAndParseRaw(
-    query: StationISOTimeRange, metadata: ChannelMetadata[], signal: AbortSignal
+    query: StationQuery, metadata: ChannelMetadata[], signal: AbortSignal
   ): Promise<RawSegment[]> {
     const response = await fetchRawSeismicData(query, { signal });
     const buffer = await response.arrayBuffer();

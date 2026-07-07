@@ -17,13 +17,13 @@ export interface StationLocation extends StationData {
 }
 
 /** A station/channel/location plus an ISO time range (e.g. a metadata epoch). */
-export interface StationISOTimeRange extends StationLocation {
+export interface StationQuery extends StationLocation {
   startTime: string;
   endTime: string;
 }
 
 /** Channel metadata from EarthScope FDSN Station service. */
-export interface ChannelMetadata extends StationISOTimeRange {
+export interface ChannelMetadata extends StationQuery {
   /** Overall sensitivity in counts per physical unit. */
   scale: number;
   scaleFreq: number;
