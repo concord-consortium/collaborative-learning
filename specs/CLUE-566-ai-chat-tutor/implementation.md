@@ -3,7 +3,8 @@
 **Jira**: https://concord-consortium.atlassian.net/browse/CLUE-566
 **Requirements Spec**: [requirements.md](requirements.md)
 **Verification Notes**: [verification-notes.md](verification-notes.md)
-**Status**: **In Development**
+**Status**: **Implemented** (all 10 steps landed on `CLUE-566-add-ai-chat`, 2026-07-08; deployment
+preconditions below remain operational gates)
 
 ## Preface — how to read this plan
 
@@ -156,9 +157,11 @@ deleted flips dirty but hashes identically). LEFT is attached **while the parent
 `problemInstalled` flag is unset** (the first message in practice — see `decideContext` below,
 MST-1). Context is never attached to a forwarded-log doc (no logs in the spike, ER-5).
 
-**Ownership + re-subscription (FE-C)**: pin the conversation-scoped `lastSentHash` (and the RIGHT
-`seq` mirror) on the **per-conversation `FirestoreTransport` instance**; keep the dirty boolean in a
-ref inside the hook, **keyed on `primaryDocumentKey`**. Because the conversation re-keys on document
+**Ownership + re-subscription (FE-C)**: pin the conversation-scoped `lastSentHash` on the
+**per-conversation `FirestoreTransport` instance**; keep the dirty boolean in a ref inside the hook,
+**keyed on `primaryDocumentKey`**. (An earlier draft also put a RIGHT `seq` mirror on the transport;
+BE-2 made `seq` entirely server-owned — the client neither reads nor writes it — so no client mirror
+exists.) Because the conversation re-keys on document
 switch, the `onPatch` disposer must **tear down and re-attach** to the new `document.content` (which
 is `types.maybe` — may be undefined at switch) via a dispose/re-subscribe effect on key change.
 

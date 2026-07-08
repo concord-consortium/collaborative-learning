@@ -4,7 +4,8 @@
 **Repo**: https://github.com/concord-consortium/collaborative-learning
 **Implementation Spec**: [implementation.md](implementation.md)
 **Verification Notes**: [verification-notes.md](verification-notes.md)
-**Status**: **In Development**
+**Status**: **Implemented** (see [implementation.md](implementation.md); deployment preconditions
+remain operational gates)
 
 ## Overview
 
