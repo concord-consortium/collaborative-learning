@@ -245,7 +245,7 @@ describe("seismic-admin-utils", () => {
       { network: "AK", station: "K204", location: "--", channel: "HNZ", label: "Anchorage" },
       { network: "AK", station: "RC01", location: "", channel: "BHZ", label: "Rabbit Creek" },
     ];
-    const merged = mergeStations(opfs, catalog);
+    const merged = [...mergeStations(opfs, catalog).values()];
     // K204 is in both → single entry from the catalog (location + label)
     expect(merged.find(s => s.station === "K204")).toEqual(
       { network: "AK", station: "K204", location: "--", channel: "HNZ", label: "Anchorage" });
@@ -253,7 +253,7 @@ describe("seismic-admin-utils", () => {
   });
 
   it("keeps OPFS-only stations with no location (not downloadable)", () => {
-    const merged = mergeStations([{ network: "AK", station: "XYZ", channel: "HNZ" }], []);
+    const merged = [...mergeStations([{ network: "AK", station: "XYZ", channel: "HNZ" }], []).values()];
     expect(merged[0]).toEqual({ network: "AK", station: "XYZ", channel: "HNZ" });
     expect(merged[0].location).toBeUndefined();
   });
@@ -280,23 +280,23 @@ export function coverageSegments(cached: Set<number>, firstDay: number, lastDay:
   return segs;
 }
 
+/** Missing days in the inclusive range [firstDay, lastDay]. Assumes `cached` holds only
+ *  in-range days (it comes from scanCachedDays over the same range), so total − size works. */
 export function missingDayCount(cached: Set<number>, firstDay: number, lastDay: number): number {
-  let n = 0;
-  for (let day = firstDay; day <= lastDay; day++) if (!cached.has(day)) n++;
-  return n;
+  return (lastDay - firstDay + 1) - cached.size;
 }
 
-/** Union OPFS stations with catalog stations, deduped by (network, station, channel).
- *  Catalog entries win (they carry location + label). An OPFS-only entry has no location,
- *  which the UI treats as "not downloadable". */
-export function mergeStations(opfs: StationData[], catalog: StationConfig[]): StationConfig[] {
+/** Union OPFS stations with catalog stations into a Map keyed by getStationChannelPrefix
+ *  ({network}_{station}/{channel}). Catalog entries win (they carry location + label); an
+ *  OPFS-only entry has no location, which the UI treats as "not downloadable". */
+export function mergeStations(opfs: StationData[], catalog: StationConfig[]): Map<string, StationConfig> {
   const byKey = new Map<string, StationConfig>();
   for (const c of catalog) byKey.set(getStationChannelPrefix(c), c);
   for (const o of opfs) {
     const k = getStationChannelPrefix(o);
     if (!byKey.has(k)) byKey.set(k, { network: o.network, station: o.station, channel: o.channel });
   }
-  return [...byKey.values()];
+  return byKey;
 }
 ```
 
@@ -326,7 +326,6 @@ A MobX store holding date range, merged stations + selection, per-station cache 
 
 ```ts
 import { SeismicAdminStore } from "./seismic-admin-store";
-import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
 import { dayIndex, utcDay } from "../../shared/seismic/seismic-day";
 
 function fakeCache(cached: number[] = []) {
@@ -343,7 +342,7 @@ it("loads stations from OPFS and computes per-station stats for the range", asyn
   const store = new SeismicAdminStore({ cache: fakeCache([d30]) as any });
   store.setRange("2026-01-30", "2026-02-02");   // 3 days: 30, 31, 1 (end exclusive)
   await store.refresh();
-  const key = getStationChannelPrefix(store.stations[0]);
+  const key = [...store.stations.keys()][0];
   expect(store.statsFor(key).cachedDays.has(d30)).toBe(true);
   expect(store.statsFor(key).bytes).toBe(1234);
   expect(store.statsFor(key).missingCount).toBe(2);
@@ -354,7 +353,7 @@ it("deletes a station's days in range via the cache", async () => {
   const store = new SeismicAdminStore({ cache: cache as any });
   store.setRange("2026-01-30", "2026-02-02");
   await store.refresh();
-  await store.deleteRaw(getStationChannelPrefix(store.stations[0]));
+  await store.deleteRaw([...store.stations.keys()][0]);
   expect(cache.deleteDaysInRange).toHaveBeenCalled();
 });
 
@@ -394,12 +393,14 @@ interface StationStats { cachedDays: Set<number>; bytes: number; missingCount: n
 export class SeismicAdminStore {
   startDate = "2026-01-01";
   endDate = "2026-01-31";
-  stations: StationConfig[] = [];
-  selected = new Set<string>();           // getStationChannelPrefix keys
+  stations = new Map<string, StationConfig>();   // keyed by getStationChannelPrefix
+  selected = new Set<string>();                  // same keys
   stats = new Map<string, StationStats>();
   // ...constructor(makeAutoObservable, stash deps; default cache = createOpfsCache())...
 
-  get selectedStations() { return this.stations.filter(s => this.selected.has(getStationChannelPrefix(s))); }
+  get selectedStations() {
+    return [...this.stations].filter(([key]) => this.selected.has(key)).map(([, s]) => s);
+  }
   private daySec(date: string) { const [y, m, d] = date.split("-").map(Number); return utcDay(y, m, d); }
   private get firstDay() { return dayIndex(this.daySec(this.startDate)); }
   private get lastDay()  { return lastDayIndex(this.daySec(this.endDate)); }  // end exclusive
@@ -412,9 +413,9 @@ export class SeismicAdminStore {
     const merged = mergeStations(opfs, this.deps.catalog ?? []);
     runInAction(() => {
       this.stations = merged;
-      if (this.selected.size === 0) merged.forEach(s => this.selected.add(getStationChannelPrefix(s)));
+      if (this.selected.size === 0) for (const key of merged.keys()) this.selected.add(key);
     });
-    for (const s of merged) await this.loadStats(s);
+    for (const s of merged.values()) await this.loadStats(s);
   }
 
   statsFor(key: string) { return this.stats.get(key)!; }
@@ -427,7 +428,7 @@ export class SeismicAdminStore {
   }
 
   async deleteRaw(key: string) {
-    const s = this.stations.find(x => getStationChannelPrefix(x) === key)!;
+    const s = this.stations.get(key)!;
     await this.cache.deleteDaysInRange(s, this.firstDay, this.lastDay);
     await this.loadStats(s);
   }
@@ -495,7 +496,7 @@ git commit -m "Add /seismic-admin webpack entry and app shell"
 - Create: `src/seismic-admin/components/admin-header.tsx`, `.scss`
 - Test: `src/seismic-admin/components/admin-header.test.tsx`
 
-Component: fixed-position header with station checkboxes (from `store.stations`, checked = selected), two date inputs (bound to draft state), and an **Apply** button that commits the draft range (`store.setRange`) and triggers `store.refresh()`. Component test (React Testing Library): renders checkboxes for stations, toggling a checkbox and clicking Apply calls the store; use an observable store or a stub with jest.fn actions.
+Component: fixed-position header with station checkboxes — iterate `store.stations` (a `Map` of `key → StationConfig`); each checkbox uses the map key for `checked = store.selected.has(key)` and `onChange = store.toggle(key)`, and the station's label/id for display. Plus two date inputs (bound to draft state) and an **Apply** button that commits the draft range (`store.setRange`) and triggers `store.refresh()`. Component test (React Testing Library): renders checkboxes for stations, toggling a checkbox and clicking Apply calls the store; use an observable store or a stub with jest.fn actions.
 
 Commit: `"Add seismic-admin fixed header (filter + date range + apply)"`
 
