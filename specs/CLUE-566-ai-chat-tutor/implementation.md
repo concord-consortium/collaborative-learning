@@ -419,18 +419,31 @@ pinned `openai@4.64` (**[verified D]**). Bump and typecheck.
 **Files affected**:
 - `functions-v2/package.json` — `openai` `^4.64` → `^6.x` (match report-service's `^6.45`).
 - `functions-v2/package-lock.json` — regenerated.
+- `functions-v2/lib/src/ai-categorize-document.ts` — v6 API fixups (see below).
 
-**Estimated diff size**: dependency bump + lockfile.
+**Estimated diff size**: dependency bump + lockfile + ~15 lines of fixups.
 
 **Safety (verified D)**: `functions-v2` pins **`@langchain/openai@^0.6.7`**, which lists `openai`
 under its own regular `dependencies` (spec `^5.12.1`) and therefore carries a **nested**
 `openai@5.12.2` (BE-7 label fix — the `^5.12.1` is the spec *inside* langchain, not the langchain
 version). `^5`/`^6` cannot npm-dedupe, so the LangChain path (`get-ai-content.ts`,
-`on-class-data-doc-written.ts`) is untouched. No `functions-v2/src` file imports the raw `openai`
-SDK, so the top-level bump touches no existing runtime code. Do **not** pair the bump with a
-Node-engine change (`openai@6` declares no `engines`, is CommonJS, Node-20-compatible).
+`on-class-data-doc-written.ts`) is untouched. Do **not** pair the bump with a Node-engine change
+(`openai@6` declares no `engines`, is CommonJS, Node-20-compatible).
+
+**Correction found during implementation (supersedes verification D's "no runtime code touched")**:
+the earlier check grepped only `functions-v2/src`, but **`functions-v2/lib/src/ai-categorize-document.ts`**
+(a source directory compiled by the same `tsc` project, despite the `lib` name) imports the raw
+`openai` SDK. Two v6 fixups were required: (1) `openai.beta.chat.completions.parse` →
+`openai.chat.completions.parse` (the parse helper left the beta namespace); (2)
+`zodResponseFormat(z.object(dynamicSchema), …)` now infers the parsed type through a zod v3/v4
+conditional that recurses infinitely (TS2589) on a dynamically-built `Record<string, z.ZodType>`
+schema — bypassed with a small typed wrapper returning
+`AutoParseableResponseFormat<Record<string, any>>` (runtime behavior unchanged; callers already
+consumed `parsed` loosely).
 
 **Acceptance**: `functions-v2` `tsc` build + existing LangChain tests pass after the bump.
+(Verified: full `functions-v2` jest suite 73/73 green against the emulator with `OPENAI_API_KEY`
+provided; 3 tests fail without a secret value in the environment, unrelated to the bump.)
 
 ---
 

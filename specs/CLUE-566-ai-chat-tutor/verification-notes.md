@@ -121,6 +121,12 @@ the risk is breaking the existing LangChain path.
 not a claim needing re-verification. No `functions-v2/src` file imports the raw `openai` SDK, so
 the top-level bump touches no existing runtime code.
 
+**Correction (found during implementation):** the grep above covered only `functions-v2/src` —
+`functions-v2/lib/src/ai-categorize-document.ts` (compiled by the same tsc project) imports the raw
+SDK and needed two v6 fixups (`beta.chat.completions.parse` → `chat.completions.parse`, and a typed
+wrapper around `zodResponseFormat` to avoid a TS2589 type recursion on its dynamic schema). See the
+impl spec's openai-bump step for details.
+
 ---
 
 ## E — `createdAt` value-type ordering (CORR-1, Phase-3 re-review)
