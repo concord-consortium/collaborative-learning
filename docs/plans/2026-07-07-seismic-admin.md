@@ -195,17 +195,38 @@ git commit -m "Add parseStationPrefix + OPFS admin reads (listStations, range by
 Pure functions the store and UI use — fully testable, no OPFS/React.
 
 **Files:**
+- Modify: `shared/seismic/seismic-types.ts` (add `StationConfig`)
+- Modify: `src/plugins/shared-seismogram/station-model.ts` (re-export `StationConfig`)
 - Create: `src/seismic-admin/seismic-admin-utils.ts`
 - Test: `src/seismic-admin/seismic-admin-utils.test.ts`
 
-**Step 1: Write the failing tests**
+**Step 1: Move `StationConfig` to seismic-types.ts**
+
+`StationConfig` currently lives in `station-model.ts`; move it to `shared/seismic/seismic-types.ts`
+so shared/seismic code (and the admin) can use it without importing from a plugin. Add, next to
+`StationData`:
+```ts
+/** A station entry in unit configuration: identity plus optional location and label. */
+export interface StationConfig extends StationData {
+  location?: string;
+  label?: string;
+}
+```
+Delete the `StationConfig` interface from `station-model.ts` and re-export it so existing
+importers (e.g. `data-setup.tsx`) keep working unchanged:
+```ts
+export type { StationConfig } from "../../../shared/seismic/seismic-types";
+```
+Run: `npm run check:types` → clean.
+
+**Step 2: Write the failing tests**
 
 ```ts
-import { coverageSegments, missingDayCount, mergeStations } from "./seismic-admin-utils";
+import { coverageSegments, missingDayCount, mergeStations, stationKey } from "./seismic-admin-utils";
+import { StationConfig } from "../../shared/seismic/seismic-types";
 
 describe("seismic-admin-utils", () => {
   it("builds run-length coverage segments over [firstDay, lastDay]", () => {
-    // days 10..13, cached {10, 12, 13}
     const segs = coverageSegments(new Set([10, 12, 13]), 10, 13);
     expect(segs).toEqual([
       { startDay: 10, endDay: 10, cached: true },
@@ -218,49 +239,38 @@ describe("seismic-admin-utils", () => {
     expect(missingDayCount(new Set([10, 12]), 10, 13)).toBe(2); // 11, 13 missing
   });
 
-  it("merges OPFS + catalog stations by (network, station, channel)", () => {
+  it("merges by (network, station, channel); catalog supplies location + label", () => {
     const opfs = [{ network: "AK", station: "K204", channel: "HNZ" }];
-    const catalog = [
+    const catalog: StationConfig[] = [
       { network: "AK", station: "K204", location: "--", channel: "HNZ", label: "Anchorage" },
       { network: "AK", station: "RC01", location: "", channel: "BHZ", label: "Rabbit Creek" },
     ];
     const merged = mergeStations(opfs, catalog);
-    // K204 is in both → single entry, catalog supplies label + location, not orphan
-    const k204 = merged.find(s => s.station === "K204")!;
-    expect(k204).toMatchObject({ network: "AK", station: "K204", channel: "HNZ", location: "--", label: "Anchorage", orphan: false });
-    // RC01 is catalog-only → included, not orphan (has location, downloadable)
-    expect(merged.find(s => s.station === "RC01")).toMatchObject({ location: "", label: "Rabbit Creek", orphan: false });
+    // K204 is in both → single entry from the catalog (location + label)
+    expect(merged.find(s => s.station === "K204")).toEqual(
+      { network: "AK", station: "K204", location: "--", channel: "HNZ", label: "Anchorage" });
+    expect(merged.find(s => s.station === "RC01")?.label).toBe("Rabbit Creek");
   });
 
-  it("marks OPFS-only stations (no catalog match) as orphans", () => {
+  it("keeps OPFS-only stations with no location (not downloadable)", () => {
     const merged = mergeStations([{ network: "AK", station: "XYZ", channel: "HNZ" }], []);
-    expect(merged[0]).toMatchObject({ station: "XYZ", orphan: true, location: undefined });
+    expect(merged[0]).toEqual({ network: "AK", station: "XYZ", channel: "HNZ" });
+    expect(merged[0].location).toBeUndefined();
   });
 });
 ```
 
-**Step 2: Run to verify failure** → FAIL (module not found).
+**Step 3: Run to verify failure** → FAIL (module not found).
 
-**Step 3: Implement `seismic-admin-utils.ts`**
+**Step 4: Implement `seismic-admin-utils.ts`**
 
 ```ts
-import { StationData } from "../../shared/seismic/seismic-types";
+import { StationData, StationConfig } from "../../shared/seismic/seismic-types";
 
-export interface StationConfigLite {
-  network: string; station: string; location?: string; channel: string; label?: string;
+/** Stable key for a station by identity (network, station, channel) — ignores location. */
+export function stationKey(s: StationData): string {
+  return `${s.network}_${s.station}_${s.channel}`;
 }
-
-/** A station shown in the admin: identity + optional catalog-provided location/label. */
-export interface AdminStation {
-  network: string; station: string; channel: string;
-  location?: string;   // from catalog; undefined for OPFS-only orphans
-  label?: string;
-  orphan: boolean;     // true when OPFS-only (no catalog match) → download disabled
-  id: string;          // `${network}_${station}_${channel}`
-}
-
-const key = (s: { network: string; station: string; channel: string }) =>
-  `${s.network}_${s.station}_${s.channel}`;
 
 /** Run-length spans of cached/uncached days across [firstDay, lastDay]. */
 export function coverageSegments(cached: Set<number>, firstDay: number, lastDay: number) {
@@ -280,30 +290,30 @@ export function missingDayCount(cached: Set<number>, firstDay: number, lastDay: 
   return n;
 }
 
-/** Union OPFS stations with catalog stations, deduped by (network, station, channel). */
-export function mergeStations(opfs: StationData[], catalog: StationConfigLite[]): AdminStation[] {
-  const byKey = new Map<string, AdminStation>();
-  for (const c of catalog) {
-    byKey.set(key(c), {
-      network: c.network, station: c.station, channel: c.channel,
-      location: c.location ?? "", label: c.label, orphan: false, id: key(c),
-    });
-  }
+/** Union OPFS stations with catalog stations, deduped by (network, station, channel).
+ *  Catalog entries win (they carry location + label). An OPFS-only entry has no location,
+ *  which the UI treats as "not downloadable". */
+export function mergeStations(opfs: StationData[], catalog: StationConfig[]): StationConfig[] {
+  const byKey = new Map<string, StationConfig>();
+  for (const c of catalog) byKey.set(stationKey(c), c);
   for (const o of opfs) {
-    const k = key(o);
-    if (!byKey.has(k)) {
-      byKey.set(k, { network: o.network, station: o.station, channel: o.channel, orphan: true, id: k });
-    }
+    const k = stationKey(o);
+    if (!byKey.has(k)) byKey.set(k, { network: o.network, station: o.station, channel: o.channel });
   }
   return [...byKey.values()];
 }
 ```
 
-**Step 4: Run tests → PASS. Step 5: Commit**
+**Step 5: Run tests → PASS.**
+
+Run: `npm test -- --no-watchman src/seismic-admin/seismic-admin-utils.test.ts` → PASS.
+
+**Step 6: Commit**
 
 ```bash
-git add src/seismic-admin/seismic-admin-utils.ts src/seismic-admin/seismic-admin-utils.test.ts
-git commit -m "Add pure seismic-admin utils: coverage, missing counts, station merge"
+git add shared/seismic/seismic-types.ts src/plugins/shared-seismogram/station-model.ts \
+  src/seismic-admin/seismic-admin-utils.ts src/seismic-admin/seismic-admin-utils.test.ts
+git commit -m "Move StationConfig to seismic-types; add pure seismic-admin utils"
 ```
 
 ---
@@ -320,6 +330,7 @@ A MobX store holding date range, merged stations + selection, per-station cache 
 
 ```ts
 import { SeismicAdminStore } from "./seismic-admin-store";
+import { stationKey } from "./seismic-admin-utils";
 import { dayIndex, utcDay } from "../../shared/seismic/seismic-day";
 
 function fakeCache(cached: number[] = []) {
@@ -334,12 +345,12 @@ function fakeCache(cached: number[] = []) {
 it("loads stations from OPFS and computes per-station stats for the range", async () => {
   const d30 = dayIndex(utcDay(2026, 1, 30));
   const store = new SeismicAdminStore({ cache: fakeCache([d30]) as any });
-  store.setRange("2026-01-30", "2026-02-02");   // 3 days: 30, 31, 1
+  store.setRange("2026-01-30", "2026-02-02");   // 3 days: 30, 31, 1 (end exclusive)
   await store.refresh();
-  const s = store.stations[0];
-  expect(store.statsFor(s.id).cachedDays.has(d30)).toBe(true);
-  expect(store.statsFor(s.id).bytes).toBe(1234);
-  expect(store.statsFor(s.id).missingCount).toBe(2);
+  const key = stationKey(store.stations[0]);
+  expect(store.statsFor(key).cachedDays.has(d30)).toBe(true);
+  expect(store.statsFor(key).bytes).toBe(1234);
+  expect(store.statsFor(key).missingCount).toBe(2);
 });
 
 it("deletes a station's days in range via the cache", async () => {
@@ -347,19 +358,19 @@ it("deletes a station's days in range via the cache", async () => {
   const store = new SeismicAdminStore({ cache: cache as any });
   store.setRange("2026-01-30", "2026-02-02");
   await store.refresh();
-  await store.deleteRaw(store.stations[0].id);
+  await store.deleteRaw(stationKey(store.stations[0]));
   expect(cache.deleteDaysInRange).toHaveBeenCalled();
 });
 
-it("runs downloads sequentially across selected stations", async () => {
-  // Inject a download-runner that records order and resolves immediately.
-  const order: string[] = [];
-  const runner = jest.fn(async (station) => { order.push(station.station); });
-  const store = new SeismicAdminStore({ cache: fakeCache() as any, downloadStation: runner });
+it("downloads selected downloadable stations sequentially (skips ones with no location)", async () => {
+  const runner = jest.fn(async () => {});
+  // A catalog entry gives K204 a location → downloadable.
+  const catalog = [{ network: "AK", station: "K204", location: "--", channel: "HNZ", label: "x" }];
+  const store = new SeismicAdminStore({ cache: fakeCache() as any, catalog, downloadStation: runner });
   store.setRange("2026-01-30", "2026-02-02");
   await store.refresh();
   await store.downloadAllSelected();
-  expect(runner).toHaveBeenCalledTimes(store.selectedStations.length);
+  expect(runner).toHaveBeenCalledTimes(1);
 });
 ```
 
@@ -369,15 +380,16 @@ Key shape:
 ```ts
 import { makeAutoObservable, runInAction } from "mobx";
 import { createOpfsCache, SeismicCache } from "../../shared/seismic/opfs-seismic-cache";
-import { daysInRange, dayIndex, lastDayIndex, utcDay } from "../../shared/seismic/seismic-day";
+import { dayIndex, lastDayIndex } from "../../shared/seismic/seismic-day";
+import { StationConfig } from "../../shared/seismic/seismic-types";
 import { SeismicDownloadService } from "../models/stores/seismic-download-service";
-import { AdminStation, mergeStations, missingDayCount, StationConfigLite } from "./seismic-admin-utils";
+import { mergeStations, missingDayCount, stationKey } from "./seismic-admin-utils";
 
 interface Deps {
   cache?: Pick<SeismicCache, "listStations" | "scanCachedDays" | "stationRawBytes" | "deleteDaysInRange">;
-  catalog?: StationConfigLite[];
+  catalog?: StationConfig[];
   // one-station download; default uses SeismicDownloadService.ensureRange and awaits completion
-  downloadStation?: (station: AdminStation, startSec: number, endSec: number) => Promise<void>;
+  downloadStation?: (station: StationConfig, startSec: number, endSec: number) => Promise<void>;
 }
 
 interface StationStats { cachedDays: Set<number>; bytes: number; missingCount: number; }
@@ -385,49 +397,54 @@ interface StationStats { cachedDays: Set<number>; bytes: number; missingCount: n
 export class SeismicAdminStore {
   startDate = "2026-01-01";
   endDate = "2026-01-31";
-  stations: AdminStation[] = [];
-  selected = new Set<string>();           // station ids
+  stations: StationConfig[] = [];
+  selected = new Set<string>();           // stationKey values
   stats = new Map<string, StationStats>();
-  // ...constructor(makeAutoObservable, stash deps)...
+  // ...constructor(makeAutoObservable, stash deps; default cache = createOpfsCache())...
 
-  get selectedStations() { return this.stations.filter(s => this.selected.has(s.id)); }
-  private get firstDay() { return dayIndex(utcDay(...parse startDate...)); }
-  private get lastDay()  { return lastDayIndex(...parse endDate...); }
+  get selectedStations() { return this.stations.filter(s => this.selected.has(stationKey(s))); }
+  private toSec(date: string) { return new Date(`${date}T00:00:00Z`).getTime() / 1000; }
+  private get firstDay() { return dayIndex(this.toSec(this.startDate)); }
+  private get lastDay()  { return lastDayIndex(this.toSec(this.endDate)); }  // end exclusive
 
   setRange(start: string, end: string) { this.startDate = start; this.endDate = end; }
-  toggle(id: string) { this.selected.has(id) ? this.selected.delete(id) : this.selected.add(id); }
+  toggle(key: string) { this.selected.has(key) ? this.selected.delete(key) : this.selected.add(key); }
 
   async refresh() {
     const opfs = await this.cache.listStations();
     const merged = mergeStations(opfs, this.deps.catalog ?? []);
-    runInAction(() => { this.stations = merged; if (this.selected.size === 0) merged.forEach(s => this.selected.add(s.id)); });
+    runInAction(() => {
+      this.stations = merged;
+      if (this.selected.size === 0) merged.forEach(s => this.selected.add(stationKey(s)));
+    });
     for (const s of merged) await this.loadStats(s);
   }
 
-  statsFor(id: string) { return this.stats.get(id)!; }
+  statsFor(key: string) { return this.stats.get(key)!; }
 
-  private async loadStats(s: AdminStation) {
+  private async loadStats(s: StationConfig) {   // StationConfig extends StationData → OK for cache calls
     const cachedDays = await this.cache.scanCachedDays(s, this.firstDay, this.lastDay);
     const bytes = await this.cache.stationRawBytes(s, this.firstDay, this.lastDay);
-    runInAction(() => this.stats.set(s.id, { cachedDays, bytes, missingCount: missingDayCount(cachedDays, this.firstDay, this.lastDay) }));
+    runInAction(() => this.stats.set(stationKey(s),
+      { cachedDays, bytes, missingCount: missingDayCount(cachedDays, this.firstDay, this.lastDay) }));
   }
 
-  async deleteRaw(id: string) {
-    const s = this.stations.find(x => x.id === id)!;
+  async deleteRaw(key: string) {
+    const s = this.stations.find(x => stationKey(x) === key)!;
     await this.cache.deleteDaysInRange(s, this.firstDay, this.lastDay);
     await this.loadStats(s);
   }
 
   async downloadAllSelected() {
     for (const s of this.selectedStations) {         // sequential
-      if (s.orphan) continue;                          // no location → skip
+      if (s.location === undefined) continue;          // OPFS-only, unknown location → skip
       await this.download(s);
     }
   }
-  private async download(s: AdminStation) { /* downloadStation dep, then loadStats */ }
+  private async download(s: StationConfig) { /* downloadStation dep, then loadStats */ }
 }
 ```
-The default `downloadStation` builds a `SeismicDownloadService`, calls `ensureRange({network, station, location, channel, startSec, endSec})`, and awaits completion (drain `nextReadyDay()` until `DONE`, or expose a completion promise). Keep it injectable so tests bypass the worker.
+The default `downloadStation` builds a `SeismicDownloadService`, calls `ensureRange({ ...station, startSec, endSec })`, and awaits completion (drain `nextReadyDay()` until `DONE`, or expose a completion promise); the default `cache` is `createOpfsCache()`. Keep both injectable so tests bypass the worker and OPFS.
 
 **Step 4: Run tests → PASS. Step 5: Commit**
 
@@ -494,7 +511,7 @@ Commit: `"Add seismic-admin fixed header (filter + date range + apply)"`
 - Test: `src/seismic-admin/components/station-section.test.tsx`, `raw-timeline.test.tsx`
 
 - `raw-timeline.tsx`: renders `coverageSegments(stats.cachedDays, firstDay, lastDay)` as proportional filled/empty spans. Test: given a cached set, the filled spans cover the right fraction.
-- `station-section.tsx`: station header; left = raw timeline + "N / M days" + formatted disk usage (`stationRawBytes`); envelope timeline **placeholder** ("unavailable") + "—" counts; right = Fill-envelope (disabled), Download-missing-raw (disabled when `orphan`), Delete (opens confirm modal → `store.deleteRaw`). Test: orphan → download disabled; delete flow calls the store after confirm.
+- `station-section.tsx`: station header; left = raw timeline + "N / M days" + formatted disk usage (`stationRawBytes`); envelope timeline **placeholder** ("unavailable") + "—" counts; right = Fill-envelope (disabled), Download-missing-raw (disabled when the station has **no `location`** — i.e. OPFS-only, not in the catalog), Delete (opens confirm modal → `store.deleteRaw`). Test: a no-location station → download disabled; delete flow calls the store after confirm.
 - `all-stations-section.tsx`: aggregate missing-raw-days across selected + stubbed envelope count; Download-all (→ `store.downloadAllSelected`) and Delete-all (one confirm → per-station delete).
 - `confirm-modal.tsx`: minimal modal ("Delete raw data for … from … to …?", Cancel/Confirm). Reuse the app's modal infra if convenient, else a small self-contained overlay.
 
@@ -509,7 +526,7 @@ Commit: `"Add seismic-admin station sections, raw timeline, and confirm modal"`
 - Create: `src/seismic-admin/load-catalog.ts` + test
 
 - `app.tsx`: fixed `<AdminHeader/>` + scrollable body (`<AllStationsSection/>` then `store.selectedStations.map(<StationSection/>)`), wrapped in `observer`. Construct the store once; `store.refresh()` on mount.
-- `load-catalog.ts`: read `?unit=` from `window.location.search`; if present, fetch the unit config JSON and extract the `stations` list (see `data-setup.tsx` / `useSettingFromStores("stations", "wave-runner")` for where stations live in unit config — confirm the exact path). Return `StationConfigLite[]`; on any failure, return `[]` (graceful degrade). Pass into the store's deps. Unit-test the parse with a sample config object; mock `fetch`.
+- `load-catalog.ts`: read `?unit=` from `window.location.search`; if present, fetch the unit config JSON and extract the `stations` list (see `data-setup.tsx` / `useSettingFromStores("stations", "wave-runner")` for where stations live in unit config — confirm the exact path). Return `StationConfig[]`; on any failure, return `[]` (graceful degrade). Pass into the store's deps. Unit-test the parse with a sample config object; mock `fetch`.
 
 Commit: `"Compose seismic-admin app and load optional unit station catalog"`
 
