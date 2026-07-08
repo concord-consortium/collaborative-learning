@@ -700,6 +700,18 @@ reviewed deliverable** (Risks) — not a copy.
   `context_id`/`problemPath` on every message because the server's `pickOwnerFields` reads them off
   the message doc — COH-1; `leftContext`/`rightContext` optional; names must match exactly what
   `FirestoreTransport` writes). No `text`/`content` ambiguity — the field is `text`.
+  **(f) Conversation-ownership pin (SEC-7, added during implementation)**: the five checks above pin
+  the message's `uid` to the *caller* but not the caller to the *conversation path* — without more, a
+  learner could write a valid owner-pinned `user` doc into a **classmate's** conversation
+  (`conversationId` is constructible from a classmate's uid + document key + problemPath, all visible
+  within a class), and the trigger would answer it **inside the victim's OpenAI conversation** (which
+  carries the victim's LEFT/RIGHT context), stamping the reply with the attacker's uid — a
+  cross-student exposure of private workspace content. The message create therefore additionally
+  requires `ownsConversation()`: the parent doc doesn't exist yet (first send — the server creates it
+  stamped with this sender), **or** `get(parent).data.uid == string(request.auth.token.platform_user_id)`
+  (one `exists`/`get` per message create; creates are user-send-rate, so the read cost is negligible).
+  **Accepted residual (spike)**: a malicious classmate could pre-seed a victim's conversation path
+  before the victim's first send, denying the victim that conversation — a denial, not an exposure.
 - **Parent create is defensive only (D-1)**: the parent conversation doc is **created server-side** by
   `acquireLock` (admin SDK, bypasses rules), so no client parent-create is exercised. Still author a
   `chatParentCreate`-style rule as defense-in-depth — `isStudentClaim() && userIsRequestUser()` +
@@ -748,7 +760,9 @@ the global helpers. (All exercised in Step 10.)
   owner-only + student-only read; forged `kind:'assistant'` rejected; missing/non-orderable `createdAt`
   rejected; extra/server-owned field rejected; a `context_id` that doesn't match the token's
   `class_hash` rejected (COH-1); a teacher/researcher (learner-claim absent) cannot
-  create; the parent-create defensive rule (owner pin + whitelist); **and (REL-1) a read of a
+  create; the parent-create defensive rule (owner pin + whitelist); **(SEC-7) a learner cannot write a
+  message into a conversation whose existing parent carries a different uid** (and can write while the
+  parent is absent — the first-send case); **and (REL-1) a read of a
   non-existent parent doc under the learner claim is denied** (confirms the transport's benign
   `permission-denied` handling is exercising a real rule outcome, not a phantom).
 - `src/components/chat-tutor/left-context.test.ts` (**QA-2** — replaces the ER-2/ER-3 coverage lost

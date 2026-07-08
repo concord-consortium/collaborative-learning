@@ -478,6 +478,80 @@ service cloud.firestore {
           (request.auth.token.class_hash == classId || teacherIsInClass(classId));
         allow write: if false;  // only cloud functions write here
       }
+
+      // AI chat tutor (spike): a self-contained top-level collection so all chat data can be
+      // deleted wholesale when the spike ends. A parent conversation doc (server-created by the
+      // chatTutorOnWrite trigger via the admin SDK) with a messages subcollection the client
+      // writes `user` docs into. This is a discrete leaf match: the portal-level
+      // teacher/researcher grant above does not cascade here under rules_version 2, so the
+      // students-only stance below holds.
+      match /chatTutor/{conversationId} {
+        // The real Firebase claim students carry is user_type "learner" (the app-model
+        // "student" value is a client-side remap the rules never see).
+        function isStudentClaim() {
+          return hasRole("learner");
+        }
+
+        // Owner-only + student-only: reads trust resource.data.uid, which the create rules pin
+        // to the caller's token and the trigger stamps (admin SDK) on server-written docs. No
+        // teacher/researcher branch — evaluators inspect via the Firestore console/emulator.
+        // Deliberately NOT the documents rule's class-wide resourceInUserClass() branch, which
+        // would expose a student's transcript to classmates.
+        allow read: if userIsResourceUser() && isStudentClaim();
+
+        // Defense-in-depth only: the parent is created server-side, so no client parent-create
+        // is exercised — but if a client attempted one it could not forge an owner or inject
+        // server-owned state (status/lock/cursor/conversationId/problemInstalled/seq).
+        allow create: if isStudentClaim() &&
+          userIsRequestUser() &&
+          classIsRequestContextId() &&
+          request.resource.data.keys().hasOnly(['uid', 'context_id', 'problemPath']);
+        allow update, delete: if false;
+
+        match /messages/{messageId} {
+          // A student may write messages only into their OWN conversation: either the parent
+          // doesn't exist yet (the first send — the trigger creates it stamped with this
+          // sender's uid), or the existing parent carries the caller's uid. Without this, a
+          // classmate could inject owner-pinned messages into another student's conversation
+          // and read replies derived from that student's private workspace context. Residual
+          // (accepted for the spike): a malicious classmate could pre-create traffic on a
+          // victim's conversation path before their first send, denying the victim that
+          // conversation — a denial, not an exposure.
+          function ownsConversation() {
+            return !exists(/databases/$(database)/documents/authed/$(portal)/chatTutor/$(conversationId)) ||
+              get(/databases/$(database)/documents/authed/$(portal)/chatTutor/$(conversationId)).data.uid ==
+                string(request.auth.token.platform_user_id);
+          }
+
+          // Five load-bearing checks:
+          // (a) hasOnly blocks extra/server-owned fields;
+          // (b) the kind VALUE check — not hasOnly — is what blocks a forged 'assistant';
+          // (c) createdAt presence + orderable type, so the drain's ordering can't wedge on a
+          //     missing/null/string createdAt. The int/float tolerance is defense-in-depth only:
+          //     the client writes a serverTimestamp() Timestamp — a numeric createdAt would sort
+          //     before every server Timestamp and scramble the transcript and drain cursor;
+          // (d) the owner pin (userIsRequestUser) + the learner-claim gate, so students-only is
+          //     rules-enforced — otherwise a teacher/researcher could write a user doc directly
+          //     and fire the paid OpenAI trigger;
+          // (e) context_id pinned to the token's class_hash, so a student can't stamp another
+          //     class's context onto the conversation.
+          function chatMessageCreate() {
+            let data = request.resource.data;
+            return isStudentClaim() &&
+              userIsRequestUser() &&
+              classIsRequestContextId() &&
+              data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
+                                   'problemPath', 'leftContext', 'rightContext']) &&
+              data.kind == 'user' &&
+              'createdAt' in data &&
+              (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float);
+          }
+
+          allow read: if userIsResourceUser() && isStudentClaim();
+          allow create: if chatMessageCreate() && ownsConversation();
+          allow update, delete: if false;
+        }
+      }
     }
 
     //
