@@ -1,11 +1,17 @@
 import {
-  SECONDS_PER_DAY, utcDay, dayIndex, dayToYearDoy, dayToISORange, daysInRange, lastDayIndex,
+  SECONDS_PER_DAY, utcDay, utcDayFromString, dayIndex, dayToYearDoy, dayToISORange, daysInRange, lastDayIndex,
 } from "./seismic-day";
 
 describe("seismic-day", () => {
   it("converts a UTC calendar date to unix seconds", () => {
     expect(utcDay(1970, 1, 1)).toBe(0);
     expect(utcDay(2026, 1, 30)).toBe(Date.UTC(2026, 0, 30) / 1000);
+  });
+
+  it("parses a YYYY-MM-DD string to the day-start seconds", () => {
+    expect(utcDayFromString("2026-01-30")).toBe(utcDay(2026, 1, 30));
+    expect(utcDayFromString("2024-12-31")).toBe(utcDay(2024, 12, 31));
+    expect(utcDayFromString("not a date")).toBeUndefined();
   });
 
   it("computes the UTC day index from unix seconds", () => {

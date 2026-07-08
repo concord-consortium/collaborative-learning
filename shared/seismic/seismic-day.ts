@@ -7,6 +7,17 @@ export function utcDay(year: number, month: number, day: number): number {
   return Date.UTC(year, month - 1, day) / 1000;
 }
 
+/** Date in string format → Unix seconds. */
+export function utcDayFromString(dateString: string): number | undefined {
+  const date = new Date(dateString);
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
+  if (!(isNaN(year) || isNaN(month) || isNaN(day))) {
+    return utcDay(year, month + 1, day);
+  }
+}
+
 /** Unix seconds → UTC day index (days since the Unix epoch). */
 export function dayIndex(unixSec: number): number {
   return Math.floor(unixSec / SECONDS_PER_DAY);
