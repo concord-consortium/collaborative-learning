@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import { IAnyStateTreeNode } from "mobx-state-tree";
 import { ProblemModelType } from "../../models/curriculum/problem";
 import { Chat } from "./chat";
@@ -7,6 +7,7 @@ import { ChatTransport } from "./transport";
 import { DebugTransport } from "./debug-transport";
 import { buildLeftContext, problemSectionsLoaded } from "./left-context";
 import { useRightDirty } from "./use-right-dirty";
+import { useTutorDrawerTrap } from "./use-tutor-drawer-trap";
 
 import "./chat-sidebar.scss";
 
@@ -25,6 +26,10 @@ interface IProps {
 // switching documents or problems while open swaps the conversation.
 export const ChatTutorSidebar: React.FC<IProps> = (props) => {
   const { documentKey, documentTitle, problemPath, problem, content, onClose } = props;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  useTutorDrawerTrap({ containerRef, bodyRef, onEscape: onClose });
 
   const getRightSummary = useRightDirty(documentKey, content);
 
@@ -45,12 +50,17 @@ export const ChatTutorSidebar: React.FC<IProps> = (props) => {
 
   return (
     <div
+      ref={containerRef}
+      tabIndex={-1}
+      id="chat-tutor-sidebar"
       className="chat-tutor-sidebar"
       role="complementary"
       aria-label={`Tutor chat: ${header}`}
       data-testid="chat-tutor-sidebar"
     >
-      <Chat chat={chat} onClose={onClose} closeLabel="Close tutor chat" transcriptTitle={header} />
+      <div ref={bodyRef} className="chat-tutor-sidebar-body">
+        <Chat chat={chat} onClose={onClose} closeLabel="Close tutor chat" transcriptTitle={header} />
+      </div>
     </div>
   );
 };
