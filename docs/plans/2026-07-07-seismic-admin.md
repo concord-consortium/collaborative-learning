@@ -222,7 +222,7 @@ Run: `npm run check:types` → clean.
 **Step 2: Write the failing tests**
 
 ```ts
-import { coverageSegments, missingDayCount, mergeStations, stationKey } from "./seismic-admin-utils";
+import { coverageSegments, missingDayCount, mergeStations } from "./seismic-admin-utils";
 import { StationConfig } from "../../shared/seismic/seismic-types";
 
 describe("seismic-admin-utils", () => {
@@ -266,11 +266,7 @@ describe("seismic-admin-utils", () => {
 
 ```ts
 import { StationData, StationConfig } from "../../shared/seismic/seismic-types";
-
-/** Stable key for a station by identity (network, station, channel) — ignores location. */
-export function stationKey(s: StationData): string {
-  return `${s.network}_${s.station}_${s.channel}`;
-}
+import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
 
 /** Run-length spans of cached/uncached days across [firstDay, lastDay]. */
 export function coverageSegments(cached: Set<number>, firstDay: number, lastDay: number) {
@@ -295,9 +291,9 @@ export function missingDayCount(cached: Set<number>, firstDay: number, lastDay: 
  *  which the UI treats as "not downloadable". */
 export function mergeStations(opfs: StationData[], catalog: StationConfig[]): StationConfig[] {
   const byKey = new Map<string, StationConfig>();
-  for (const c of catalog) byKey.set(stationKey(c), c);
+  for (const c of catalog) byKey.set(getStationChannelPrefix(c), c);
   for (const o of opfs) {
-    const k = stationKey(o);
+    const k = getStationChannelPrefix(o);
     if (!byKey.has(k)) byKey.set(k, { network: o.network, station: o.station, channel: o.channel });
   }
   return [...byKey.values()];
@@ -330,7 +326,7 @@ A MobX store holding date range, merged stations + selection, per-station cache 
 
 ```ts
 import { SeismicAdminStore } from "./seismic-admin-store";
-import { stationKey } from "./seismic-admin-utils";
+import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
 import { dayIndex, utcDay } from "../../shared/seismic/seismic-day";
 
 function fakeCache(cached: number[] = []) {
@@ -347,7 +343,7 @@ it("loads stations from OPFS and computes per-station stats for the range", asyn
   const store = new SeismicAdminStore({ cache: fakeCache([d30]) as any });
   store.setRange("2026-01-30", "2026-02-02");   // 3 days: 30, 31, 1 (end exclusive)
   await store.refresh();
-  const key = stationKey(store.stations[0]);
+  const key = getStationChannelPrefix(store.stations[0]);
   expect(store.statsFor(key).cachedDays.has(d30)).toBe(true);
   expect(store.statsFor(key).bytes).toBe(1234);
   expect(store.statsFor(key).missingCount).toBe(2);
@@ -358,7 +354,7 @@ it("deletes a station's days in range via the cache", async () => {
   const store = new SeismicAdminStore({ cache: cache as any });
   store.setRange("2026-01-30", "2026-02-02");
   await store.refresh();
-  await store.deleteRaw(stationKey(store.stations[0]));
+  await store.deleteRaw(getStationChannelPrefix(store.stations[0]));
   expect(cache.deleteDaysInRange).toHaveBeenCalled();
 });
 
@@ -380,10 +376,11 @@ Key shape:
 ```ts
 import { makeAutoObservable, runInAction } from "mobx";
 import { createOpfsCache, SeismicCache } from "../../shared/seismic/opfs-seismic-cache";
-import { dayIndex, lastDayIndex } from "../../shared/seismic/seismic-day";
+import { dayIndex, lastDayIndex, utcDay } from "../../shared/seismic/seismic-day";
 import { StationConfig } from "../../shared/seismic/seismic-types";
 import { SeismicDownloadService } from "../models/stores/seismic-download-service";
-import { mergeStations, missingDayCount, stationKey } from "./seismic-admin-utils";
+import { mergeStations, missingDayCount } from "./seismic-admin-utils";
+import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
 
 interface Deps {
   cache?: Pick<SeismicCache, "listStations" | "scanCachedDays" | "stationRawBytes" | "deleteDaysInRange">;
@@ -398,14 +395,14 @@ export class SeismicAdminStore {
   startDate = "2026-01-01";
   endDate = "2026-01-31";
   stations: StationConfig[] = [];
-  selected = new Set<string>();           // stationKey values
+  selected = new Set<string>();           // getStationChannelPrefix keys
   stats = new Map<string, StationStats>();
   // ...constructor(makeAutoObservable, stash deps; default cache = createOpfsCache())...
 
-  get selectedStations() { return this.stations.filter(s => this.selected.has(stationKey(s))); }
-  private toSec(date: string) { return new Date(`${date}T00:00:00Z`).getTime() / 1000; }
-  private get firstDay() { return dayIndex(this.toSec(this.startDate)); }
-  private get lastDay()  { return lastDayIndex(this.toSec(this.endDate)); }  // end exclusive
+  get selectedStations() { return this.stations.filter(s => this.selected.has(getStationChannelPrefix(s))); }
+  private daySec(date: string) { const [y, m, d] = date.split("-").map(Number); return utcDay(y, m, d); }
+  private get firstDay() { return dayIndex(this.daySec(this.startDate)); }
+  private get lastDay()  { return lastDayIndex(this.daySec(this.endDate)); }  // end exclusive
 
   setRange(start: string, end: string) { this.startDate = start; this.endDate = end; }
   toggle(key: string) { this.selected.has(key) ? this.selected.delete(key) : this.selected.add(key); }
@@ -415,7 +412,7 @@ export class SeismicAdminStore {
     const merged = mergeStations(opfs, this.deps.catalog ?? []);
     runInAction(() => {
       this.stations = merged;
-      if (this.selected.size === 0) merged.forEach(s => this.selected.add(stationKey(s)));
+      if (this.selected.size === 0) merged.forEach(s => this.selected.add(getStationChannelPrefix(s)));
     });
     for (const s of merged) await this.loadStats(s);
   }
@@ -425,12 +422,12 @@ export class SeismicAdminStore {
   private async loadStats(s: StationConfig) {   // StationConfig extends StationData → OK for cache calls
     const cachedDays = await this.cache.scanCachedDays(s, this.firstDay, this.lastDay);
     const bytes = await this.cache.stationRawBytes(s, this.firstDay, this.lastDay);
-    runInAction(() => this.stats.set(stationKey(s),
+    runInAction(() => this.stats.set(getStationChannelPrefix(s),
       { cachedDays, bytes, missingCount: missingDayCount(cachedDays, this.firstDay, this.lastDay) }));
   }
 
   async deleteRaw(key: string) {
-    const s = this.stations.find(x => stationKey(x) === key)!;
+    const s = this.stations.find(x => getStationChannelPrefix(x) === key)!;
     await this.cache.deleteDaysInRange(s, this.firstDay, this.lastDay);
     await this.loadStats(s);
   }
