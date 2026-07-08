@@ -1,10 +1,14 @@
 import React, { useMemo, useRef } from "react";
 import { IAnyStateTreeNode } from "mobx-state-tree";
+import { useStores } from "../../hooks/use-stores";
 import { ProblemModelType } from "../../models/curriculum/problem";
+import { urlParams } from "../../utilities/url-params";
 import { Chat } from "./chat";
 import { useChat } from "./use-chat";
 import { ChatTransport } from "./transport";
+import { conversationDocId } from "./conversation-key";
 import { DebugTransport } from "./debug-transport";
+import { FirestoreTransport } from "./firestore-transport";
 import { buildLeftContext, problemSectionsLoaded } from "./left-context";
 import { useRightDirty } from "./use-right-dirty";
 import { useTutorDrawerTrap } from "./use-tutor-drawer-trap";
@@ -26,6 +30,7 @@ interface IProps {
 // switching documents or problems while open swaps the conversation.
 export const ChatTutorSidebar: React.FC<IProps> = (props) => {
   const { documentKey, documentTitle, problemPath, problem, content, onClose } = props;
+  const { db, user } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -33,15 +38,23 @@ export const ChatTutorSidebar: React.FC<IProps> = (props) => {
 
   const getRightSummary = useRightDirty(documentKey, content);
 
+  // chatDebug selects the backend-free debug transport; otherwise the live Firestore
+  // path. Rebuilding on documentKey/problemPath change is the hard conversation swap.
   const transport: ChatTransport = useMemo(() => {
-    return new DebugTransport({
-      getLeftContext: () => problemSectionsLoaded(problem) ? buildLeftContext(problem) : undefined,
+    const getLeftContext = () => problemSectionsLoaded(problem) ? buildLeftContext(problem) : undefined;
+    if (urlParams.chatDebug) {
+      return new DebugTransport({ getLeftContext, getRightSummary });
+    }
+    return new FirestoreTransport({
+      firestore: db.firestore,
+      conversationId: conversationDocId(user.id, documentKey, user.network, problemPath),
+      uid: user.id,
+      contextId: user.classHash,
+      problemPath,
+      getLeftContext,
       getRightSummary,
     });
-    // documentKey + problemPath are intentional re-key deps: a new document or problem
-    // is a hard conversation swap even though the transport reads them only via closures.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [documentKey, problemPath, problem, getRightSummary]);
+  }, [documentKey, problemPath, problem, getRightSummary, db, user]);
 
   // The drawer header makes the conversation scope legible: this conversation is bound
   // to one workspace document within one problem, and swaps when either changes.
