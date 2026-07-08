@@ -53,20 +53,28 @@ export class SeismicAdminStore {
     return selectedStations;
   }
 
-  private get firstTime() {
+  private get firstSec() {
     return utcDayFromString(this.startDate);
   }
 
-  private get firstDay() {
-    if (this.firstTime) return dayIndex(this.firstTime);
+  get firstDay() {
+    if (this.firstSec) return dayIndex(this.firstSec);
   }
 
-  private get lastTime() {
+  private get lastSec() {
     return utcDayFromString(this.endDate);
   }
 
-  private get lastDay() {
-    if (this.lastTime) return lastDayIndex(this.lastTime);
+  get lastDay() {
+    if (this.lastSec) return lastDayIndex(this.lastSec);
+  }
+
+  get selectedMissingRawDays() {
+    let total = 0;
+    this.selected.forEach(key => {
+      total += this.stats.get(key)?.missingCount ?? 0;
+    });
+    return total;
   }
 
   setRange(start: string, end: string) {
@@ -115,6 +123,15 @@ export class SeismicAdminStore {
     await this.loadStats(s);
   }
 
+  async downloadStation(key: string) {
+    const s = this.stations.get(key);
+    if (s) await this.download(s);
+  }
+
+  async deleteAllSelected() {
+    for (const key of this.selected) await this.deleteRaw(key);
+  }
+
   async downloadAllSelected() {
     // Download stations sequentially to ensure shared-proxy limit is respected
     for (const s of this.selectedStations) {
@@ -125,10 +142,10 @@ export class SeismicAdminStore {
   }
 
   private async download(s: StationConfig) {
-    if (this.firstTime === undefined || this.lastTime === undefined) return;
+    if (this.firstSec === undefined || this.lastSec === undefined) return;
 
     const run = this.deps.downloadStation ?? defaultDownloadStation;
-    await run(s, this.firstTime, this.lastTime);
+    await run(s, this.firstSec, this.lastSec);
     await this.loadStats(s);
   }
 }

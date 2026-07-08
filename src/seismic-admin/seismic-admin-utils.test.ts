@@ -1,4 +1,4 @@
-import { coverageSegments, missingDayCount, mergeStations } from "./seismic-admin-utils";
+import { coverageSegments, missingDayCount, mergeStations, formatBytes } from "./seismic-admin-utils";
 import { StationConfig } from "../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
 
@@ -27,6 +27,13 @@ describe("seismic-admin-utils", () => {
     expect(merged.get(getStationChannelPrefix(k204))).toEqual(
       { network: "AK", station: "K204", location: "--", channel: "HNZ", label: "Anchorage" });
     expect(merged.get(getStationChannelPrefix(rc01))?.label).toBe("Rabbit Creek");
+  });
+
+  it("formats byte sizes", () => {
+    expect(formatBytes(0)).toBe("0 B");
+    expect(formatBytes(512)).toBe("512 B");
+    expect(formatBytes(1536)).toBe("1.5 KB");
+    expect(formatBytes(5 * 1024 * 1024)).toBe("5.0 MB");
   });
 
   it("keeps OPFS-only stations with no location (not downloadable)", () => {

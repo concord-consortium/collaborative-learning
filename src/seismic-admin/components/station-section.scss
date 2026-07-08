@@ -1,0 +1,55 @@
+.station-section {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+
+  .station-name {
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  .station-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+
+    .data-column {
+      flex: 1;
+      min-width: 0;
+
+      .data-kind {
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #888;
+        margin-bottom: 4px;
+      }
+
+      .timeline-placeholder {
+        height: 16px;
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        font-style: italic;
+        color: #aaa;
+      }
+
+      .data-stats {
+        margin-top: 4px;
+        font-size: 13px;
+        color: #444;
+      }
+    }
+
+    .station-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      .danger {
+        color: #fff;
+        background: #c0392b;
+      }
+    }
+  }
+}
