@@ -23,11 +23,42 @@
 Add admin-facing reads to the OPFS cache, and extend the in-memory fake with directory iteration + file `size`.
 
 **Files:**
+- Modify: `shared/seismic/tile-addressing.ts` (add `parseStationPrefix`)
 - Modify: `shared/seismic/fake-opfs.ts`
 - Modify: `shared/seismic/opfs-seismic-cache.ts`
-- Test: `shared/seismic/opfs-seismic-cache.test.ts` (add cases)
+- Test: `shared/seismic/tile-addressing.test.ts`, `shared/seismic/opfs-seismic-cache.test.ts`
 
-**Step 1: Extend the fake with `entries()` iteration and file `size`**
+**Step 1: Add `parseStationPrefix` to tile-addressing.ts (TDD)**
+
+`parseStationPrefix` is the inverse of `getStationPrefix` — it splits `"{network}_{station}"`
+back into `{ network, station }`. `listStations` uses it to recover station identity from the
+OPFS directory names.
+
+Failing test (append to `shared/seismic/tile-addressing.test.ts`):
+```ts
+import { getStationPrefix, parseStationPrefix } from "./tile-addressing";
+
+it("parseStationPrefix is the inverse of getStationPrefix", () => {
+  expect(parseStationPrefix("AK_K204")).toEqual({ network: "AK", station: "K204" });
+  const s = { network: "AK", station: "RC01" };
+  expect(parseStationPrefix(getStationPrefix(s))).toEqual(s);
+});
+```
+Run: `npm test -- --no-watchman shared/seismic/tile-addressing.test.ts` → FAIL.
+
+Implement in `shared/seismic/tile-addressing.ts`, next to `getStationPrefix` (`StationId` is
+already imported there):
+```ts
+/** Inverse of getStationPrefix: "{network}_{station}" → { network, station }.
+ *  Splits on the first "_" (SEED network/station codes contain no underscore). */
+export function parseStationPrefix(prefix: string): StationId {
+  const sep = prefix.indexOf("_");
+  return { network: prefix.slice(0, sep), station: prefix.slice(sep + 1) };
+}
+```
+Run the test → PASS.
+
+**Step 2: Extend the fake with `entries()` iteration and file `size`**
 
 In `fake-opfs.ts`, give `FakeFileHandle.getFile()` a `size`, and add an async `entries()`/`values()` to `FakeDirHandle` that yields child dirs and files. Sketch:
 
@@ -47,20 +78,19 @@ async *values() { for await (const [, h] of this.entries()) yield h; }
 ```
 (`FakeDirHandle` needs a `kind: "directory"` and `FakeFileHandle` a `kind: "file"` so callers can distinguish; real OPFS handles have `.kind`.)
 
-**Step 2: Write the failing tests** (append to `opfs-seismic-cache.test.ts`)
+**Step 3: Write the failing tests** (append to `opfs-seismic-cache.test.ts`)
 
 ```ts
 import { daysInRange, dayIndex, utcDay } from "./seismic-day";
 
-const utc = (y: number, m: number, d: number) => Date.UTC(y, m - 1, d) / 1000;
 const STA2: StationData = { network: "AK", station: "K204", channel: "HNZ" };
 
 describe("opfs-seismic-cache admin reads", () => {
   it("lists the stations present in the cache", async () => {
     const root = new FakeDirHandle();
     const cache = createOpfsCache(async () => root as any);
-    await cache.writeDayChunk(STA, dayIndex(utc(2026, 1, 30)), bytes(1));   // AK/K204/HNZ
-    await cache.writeDayChunk(STA2, dayIndex(utc(2026, 1, 30)), bytes(1));  // same, other channel? use a 2nd station instead
+    await cache.writeDayChunk(STA, dayIndex(utcDay(2026, 1, 30)), bytes(1));   // AK/K204/HNZ
+    await cache.writeDayChunk(STA2, dayIndex(utcDay(2026, 1, 30)), bytes(1));  // same, other channel? use a 2nd station instead
     const stations = await cache.listStations();
     expect(stations).toContainEqual({ network: "AK", station: "K204", channel: "HNZ" });
   });
@@ -68,8 +98,8 @@ describe("opfs-seismic-cache admin reads", () => {
   it("sums bytes only for cached days within the range", async () => {
     const root = new FakeDirHandle();
     const cache = createOpfsCache(async () => root as any);
-    const d30 = dayIndex(utc(2026, 1, 30));
-    const d1 = dayIndex(utc(2026, 2, 1));
+    const d30 = dayIndex(utcDay(2026, 1, 30));
+    const d1 = dayIndex(utcDay(2026, 2, 1));
     await cache.writeDayChunk(STA, d30, new Uint8Array([1, 2, 3]).buffer);   // 3 bytes, in range
     await cache.writeDayChunk(STA, d1, new Uint8Array([1, 2, 3, 4]).buffer); // 4 bytes, out of range
     expect(await cache.stationRawBytes(STA, d30, d30)).toBe(3);
@@ -78,8 +108,8 @@ describe("opfs-seismic-cache admin reads", () => {
   it("deletes only day files within the range", async () => {
     const root = new FakeDirHandle();
     const cache = createOpfsCache(async () => root as any);
-    const d30 = dayIndex(utc(2026, 1, 30));
-    const d1 = dayIndex(utc(2026, 2, 1));
+    const d30 = dayIndex(utcDay(2026, 1, 30));
+    const d1 = dayIndex(utcDay(2026, 2, 1));
     await cache.writeDayChunk(STA, d30, bytes(1));
     await cache.writeDayChunk(STA, d1, bytes(1));
     await cache.deleteDaysInRange(STA, d30, d30);
@@ -90,14 +120,15 @@ describe("opfs-seismic-cache admin reads", () => {
 ```
 (Adjust the first test to use two distinct stations rather than reusing STA2 as shown; the intent is that `listStations` returns each `(network, station, channel)` present.)
 
-**Step 3: Run to verify failure**
+**Step 4: Run to verify failure**
 
 Run: `npm test -- --no-watchman shared/seismic/opfs-seismic-cache.test.ts`
 Expected: FAIL (methods undefined).
 
-**Step 4: Implement the three methods** in `opfs-seismic-cache.ts`
+**Step 5: Implement the three methods** in `opfs-seismic-cache.ts`
 
-Add to the `SeismicCache` interface and the returned object. Reference implementations:
+Add to the `SeismicCache` interface and the returned object (add `parseStationPrefix` to the
+existing `tile-addressing` import). Reference implementations:
 
 ```ts
 // interface additions
@@ -114,9 +145,7 @@ async listStations() {
   } catch (err) { if (isNotFound(err)) return out; throw err; }
   for await (const [dirName, stationHandle] of (seismicRoot as any).entries()) {
     if ((stationHandle as any).kind !== "directory") continue;
-    const sep = dirName.indexOf("_");              // "{network}_{station}"; neither contains "_"
-    if (sep < 0) continue;
-    const network = dirName.slice(0, sep), station = dirName.slice(sep + 1);
+    const { network, station } = parseStationPrefix(dirName);   // "{network}_{station}"
     for await (const [channel, channelHandle] of (stationHandle as any).entries()) {
       if ((channelHandle as any).kind === "directory") out.push({ network, station, channel });
     }
@@ -146,16 +175,17 @@ async deleteDaysInRange(station, startDay, endDay) {
 }
 ```
 
-**Step 5: Run tests + typecheck**
+**Step 6: Run tests + typecheck**
 
-Run: `npm test -- --no-watchman shared/seismic/opfs-seismic-cache.test.ts` → PASS.
+Run: `npm test -- --no-watchman shared/seismic/tile-addressing.test.ts shared/seismic/opfs-seismic-cache.test.ts` → PASS.
 Run: `npm run check:types` → clean.
 
-**Step 6: Commit**
+**Step 7: Commit**
 
 ```bash
-git add shared/seismic/opfs-seismic-cache.ts shared/seismic/fake-opfs.ts shared/seismic/opfs-seismic-cache.test.ts
-git commit -m "Add OPFS admin reads: listStations, range disk usage, range delete"
+git add shared/seismic/tile-addressing.ts shared/seismic/tile-addressing.test.ts \
+  shared/seismic/opfs-seismic-cache.ts shared/seismic/fake-opfs.ts shared/seismic/opfs-seismic-cache.test.ts
+git commit -m "Add parseStationPrefix + OPFS admin reads (listStations, range bytes, range delete)"
 ```
 
 ---
