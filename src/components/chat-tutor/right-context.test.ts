@@ -1,4 +1,17 @@
-import { decideContext, hashString } from "./right-context";
+import "../../models/tiles/text/text-registration";
+import { DocumentContentModel } from "../../models/document/document-content";
+import { decideContext, hashString, summarizeRight } from "./right-context";
+
+describe("summarizeRight", () => {
+  it("summarizes a live content node to markdown with a stable hash", () => {
+    const content = DocumentContentModel.create({
+      tiles: [{ id: "text-1", content: { type: "Text", format: "html", text: ["Intro content"] } }]
+    } as any);
+    const summary = summarizeRight(content);
+    expect(summary.markdown).toContain("Intro content");
+    expect(summary.hash).toBe(hashString(summary.markdown));
+  });
+});
 
 describe("hashString", () => {
   it("is deterministic and distinguishes different strings", () => {
