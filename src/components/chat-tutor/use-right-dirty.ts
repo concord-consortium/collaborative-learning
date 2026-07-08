@@ -30,11 +30,12 @@ export function useRightDirty(documentKey: string | undefined, content: IAnyStat
   // the previous document's summary.
   return useCallback((): RightSummary | undefined => {
     if (!content) return undefined;
-    const cached = cachedRef.current;
+    let cached = cachedRef.current;
     if (dirtyRef.current || !cached || cached.node !== content) {
-      cachedRef.current = { node: content, summary: summarizeRight(content) };
+      cached = { node: content, summary: summarizeRight(content) };
+      cachedRef.current = cached;
       dirtyRef.current = false;
     }
-    return cachedRef.current.summary;
+    return cached.summary;
   }, [content]);
 }

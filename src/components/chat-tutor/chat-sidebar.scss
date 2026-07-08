@@ -1,0 +1,25 @@
+@import "../vars";
+
+$chat-tutor-width: 25vw;
+$chat-tutor-min-width: 320px;
+$chat-tutor-max-width: 420px;
+
+// Right-edge overlay drawer, below the app header so the header launcher stays visible.
+.chat-tutor-sidebar {
+  position: fixed;
+  top: $header-height;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  width: $chat-tutor-width;
+  min-width: $chat-tutor-min-width;
+  max-width: $chat-tutor-max-width;
+  background: white;
+  box-sizing: border-box;
+  border-left: 1px solid $charcoal-light-2;
+  box-shadow: -3px 0 15px rgba(0, 0, 0, 0.2);
+
+  &:focus-visible { outline: none; }
+
+  .chat-tutor { height: 100%; }
+}
