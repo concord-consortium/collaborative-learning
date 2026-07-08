@@ -5,8 +5,9 @@
 import * as admin from "firebase-admin";
 
 import {
-  createOpenAIClient, createConversation, installDeveloperPrompt, createTutorResponse, TutorInputMessage,
+  createOpenAIClient, createConversation, installDeveloperPrompt, createTutorResponse,
 } from "./openai";
+import {assembleTurnContext} from "./context-assembly";
 
 // reclaim a lock whose owner crashed mid-drain, so a conversation can't wedge forever.
 // INVARIANT: STALE_LOCK_MS must exceed the function's configured timeout (default 60s, no
@@ -50,7 +51,7 @@ export function pickOwnerFields(data: admin.firestore.DocumentData | undefined):
 interface UnitResult {
   // written even for a userText:null reply so the client's "awaiting" indicator clears
   assistant: Record<string, unknown>;
-  // parent-doc fields to persist this turn (conversationId + problemInstalled, once earned)
+  // parent-doc fields to persist this turn (conversationId/problemInstalled/seq, once earned)
   parentUpdate: Record<string, unknown>;
 }
 
@@ -63,7 +64,8 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
   const data = doc.data();
   const ownerFields = pickOwnerFields(data);
 
-  // Per-conversation state is read fresh each turn (no in-memory state).
+  // Per-conversation state is read fresh each turn (no in-memory state). The lock serializes
+  // turns, so the seq increment below can't race across invocations.
   const parent = (await parentRef.get()).data() ?? {};
   let conversationId: string | undefined = parent.conversationId;
   if (!conversationId) {
@@ -71,22 +73,31 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
     conversationId = await createConversation(openai);
   }
   // "install once" is gated on problemInstalled (not on conversationId existing), so a crash
-  // mid-setup re-writes the developer items next turn instead of running context-blind.
-  const needsInstall = !parent.problemInstalled;
-  if (needsInstall) {
-    await installDeveloperPrompt(openai, conversationId, ctx.genericText);
+  // mid-setup re-writes the developer items next turn instead of running context-blind. An
+  // empty LEFT leaves the flag unset (see context-assembly), keeping the recovery path open.
+  const turn = assembleTurnContext({
+    genericText: ctx.genericText,
+    problemInstalled: !!parent.problemInstalled,
+    parentSeq: parent.seq,
+    message: data,
+  });
+  for (const item of turn.installItems) {
+    await installDeveloperPrompt(openai, conversationId, item);
   }
 
-  const input: TutorInputMessage[] = [{role: "user", content: String(data.text ?? "")}];
+  const {userText} = await createTutorResponse(openai, {model, conversationId, input: turn.input});
 
-  const {userText} = await createTutorResponse(openai, {model, conversationId, input});
-
-  // only NOW (developer items written + response succeeded) is conversationId + problemInstalled
-  // earned; the caller persists them (batched with the cursor) so they commit atomically.
+  // only NOW (developer items written + response succeeded) is conversationId/problemInstalled/
+  // seq earned; the caller persists them (batched with the cursor) so they commit atomically.
   const parentUpdate: Record<string, unknown> = {};
-  if (needsInstall || !parent.conversationId) {
+  if (!parent.conversationId) {
     parentUpdate.conversationId = conversationId;
+  }
+  if (turn.markProblemInstalled) {
     parentUpdate.problemInstalled = true;
+  }
+  if (turn.seq !== undefined) {
+    parentUpdate.seq = turn.seq;
   }
 
   // Stamp owner fields so the client's owner-only onSnapshot can read the reply; write even a
