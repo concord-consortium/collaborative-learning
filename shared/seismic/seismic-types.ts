@@ -16,6 +16,12 @@ export interface StationLocation extends StationData {
   location: string;
 }
 
+/** A station entry in unit configuration: identity plus optional location and label. */
+export interface StationConfig extends StationData {
+  location?: string;
+  label?: string;
+}
+
 /** A station/channel/location plus an ISO time range (e.g. a metadata epoch). */
 export interface StationQuery extends StationLocation {
   startTime: string;

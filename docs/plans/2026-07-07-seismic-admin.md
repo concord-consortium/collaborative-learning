@@ -424,7 +424,7 @@ export class SeismicAdminStore {
     const cachedDays = await this.cache.scanCachedDays(s, this.firstDay, this.lastDay);
     const bytes = await this.cache.stationRawBytes(s, this.firstDay, this.lastDay);
     runInAction(() => this.stats.set(getStationChannelPrefix(s),
-      { cachedDays, bytes, missingCount: missingDayCount(cachedDays, this.firstDay, this.lastDay) }));
+      { cachedDays, bytes, missingCount: missingDayCount(cachedDays.size, this.firstDay, this.lastDay) }));
   }
 
   async deleteRaw(key: string) {
