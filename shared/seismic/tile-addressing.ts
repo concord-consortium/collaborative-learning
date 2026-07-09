@@ -63,6 +63,8 @@ export function getStationPrefix(station: StationId): string {
  */
 export function parseStationPrefix(prefix: string): StationId | undefined {
   const sep = prefix.indexOf("_");
+  if (sep < 0) return undefined;
+
   const network = prefix.slice(0, sep);
   const station = prefix.slice(sep + 1);
 
