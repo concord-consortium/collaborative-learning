@@ -134,11 +134,7 @@ export class SeismicAdminStore {
 
   async downloadAllSelected() {
     // Download stations sequentially to ensure shared-proxy limit is respected
-    for (const s of this.selectedStations) {
-      // Skip stations without locations
-      if (s.location === undefined) continue;
-      await this.download(s);
-    }
+    for (const s of this.selectedStations) await this.download(s);
   }
 
   private async download(s: StationConfig) {

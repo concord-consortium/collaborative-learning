@@ -23,7 +23,6 @@ export const StationSection = observer(function StationSection({ stationKey }: I
   const hasRange = firstDay !== undefined && lastDay !== undefined;
   const totalDays = hasRange ? lastDay - firstDay + 1 : 0;
   const label = station.label || `${station.network} ${station.station} ${station.channel}`;
-  const noLocation = station.location === undefined;
 
   return (
     <div className="station-section">
@@ -45,14 +44,7 @@ export const StationSection = observer(function StationSection({ stationKey }: I
         </div>
         <div className="station-actions">
           <button disabled>Fill envelope</button>
-          <button
-            aria-label="Download missing raw"
-            disabled={noLocation}
-            title={noLocation ? "Not in catalog — no location to download" : undefined}
-            onClick={() => void store.downloadStation(stationKey)}
-          >
-            Download missing raw
-          </button>
+          <button onClick={() => void store.downloadStation(stationKey)}>Download missing raw</button>
           <button className="danger" onClick={() => setConfirming(true)}>Delete raw</button>
         </div>
       </div>

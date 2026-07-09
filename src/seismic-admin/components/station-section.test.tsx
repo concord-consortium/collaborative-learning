@@ -28,12 +28,12 @@ function renderSection(store: SeismicAdminStore, stationKey: string) {
 }
 
 describe("StationSection", () => {
-  it("disables Download missing raw for an OPFS-only station with no location", async () => {
+  it("enables Download missing raw for a station with no location", async () => {
     const { store } = makeStore();
     await store.refresh();
     renderSection(store, getStationChannelPrefix(opfsStation));
 
-    expect(screen.getByRole("button", { name: /download missing raw/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /download missing raw/i })).toBeEnabled();
   });
 
   it("deletes raw data after the confirm modal is accepted", async () => {
