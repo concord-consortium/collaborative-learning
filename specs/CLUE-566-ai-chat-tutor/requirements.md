@@ -285,7 +285,8 @@ from AP's:
   Pass 2).
 - **Generic tutor prompt (server-owned).** Port `CHAT_GENERIC_PROMPT` (the tutoring stance,
   never-reveal-answers rule, and science-reasoning lens), adapting AP/activity wording to CLUE's
-  document/tile context.
+  document/tile context. *Amended (2026-07-09): unit authors can now optionally replace and/or
+  append to this prompt per unit — see [prompt-authoring-plan.md](prompt-authoring-plan.md).*
 - **Security rules.** Add **fresh** CLUE Firestore rules for the tutor chat's **own new collection(s)** —
   it does not reuse or extend the comment rules. Reuse REPORT-73's field-whitelisting **technique** (server-owned
   lock/cursor/conversation fields admin-only; `kind:'user'` + whitelisted payload on messages), but re-express it

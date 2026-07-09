@@ -1,5 +1,5 @@
 import {
-  assembleTurnContext, buildRightEnvelope, isEmptyLeft,
+  assembleTurnContext, buildRightEnvelope, effectiveGenericText, isEmptyLeft,
 } from "../src/chat/context-assembly";
 
 const genericText = "generic tutor prompt";
@@ -12,6 +12,33 @@ describe("isEmptyLeft", () => {
     expect(isEmptyLeft("not json")).toBe(true);
     expect(isEmptyLeft(JSON.stringify({sections: []}))).toBe(true);
     expect(isEmptyLeft(left)).toBe(false);
+  });
+});
+
+describe("effectiveGenericText", () => {
+  it("returns the built-in text when no overrides ride the message", () => {
+    expect(effectiveGenericText(genericText, {text: "hi"})).toBe(genericText);
+  });
+
+  it("replaces the built-in text with a non-empty promptReplace, trimmed", () => {
+    expect(effectiveGenericText(genericText, {promptReplace: "  You are a tutor.  "}))
+      .toBe("You are a tutor.");
+  });
+
+  it("appends a non-empty promptAppend after the generic text", () => {
+    expect(effectiveGenericText(genericText, {promptAppend: "Focus on energy transfer."}))
+      .toBe(`${genericText}\n\nFocus on energy transfer.`);
+  });
+
+  it("applies replace and append together", () => {
+    expect(effectiveGenericText(genericText, {promptReplace: "You are a tutor.", promptAppend: "Be brief."}))
+      .toBe("You are a tutor.\n\nBe brief.");
+  });
+
+  it("ignores whitespace-only and non-string values", () => {
+    expect(effectiveGenericText(genericText, {promptReplace: "   \n", promptAppend: ""})).toBe(genericText);
+    expect(effectiveGenericText(genericText, {promptReplace: 42, promptAppend: {text: "x"}})).toBe(genericText);
+    expect(effectiveGenericText(genericText, {promptReplace: null})).toBe(genericText);
   });
 });
 
@@ -37,6 +64,24 @@ describe("assembleTurnContext", () => {
     expect(turn.markProblemInstalled).toBe(false);
   });
 
+  it("installs the replaced/appended generic text when overrides ride the first message", () => {
+    const turn = assembleTurnContext({
+      genericText, problemInstalled: false, parentSeq: undefined,
+      message: {text: "hi", leftContext: left, promptReplace: "You are a tutor.", promptAppend: "Be brief."},
+    });
+    expect(turn.installItems[0]).toBe("You are a tutor.\n\nBe brief.");
+    expect(turn.markProblemInstalled).toBe(true);
+  });
+
+  it("an empty LEFT with a replacement installs exactly the replaced text, flag unset", () => {
+    const turn = assembleTurnContext({
+      genericText, problemInstalled: false, parentSeq: undefined,
+      message: {text: "hi", leftContext: JSON.stringify({sections: []}), promptReplace: "You are a tutor."},
+    });
+    expect(turn.installItems).toEqual(["You are a tutor."]);
+    expect(turn.markProblemInstalled).toBe(false);
+  });
+
   it("later turns skip the install entirely", () => {
     const turn = assembleTurnContext({
       genericText, problemInstalled: true, parentSeq: 3,
@@ -44,6 +89,14 @@ describe("assembleTurnContext", () => {
     });
     expect(turn.installItems).toEqual([]);
     expect(turn.markProblemInstalled).toBe(false);
+  });
+
+  it("later turns ignore prompt overrides riding the message", () => {
+    const turn = assembleTurnContext({
+      genericText, problemInstalled: true, parentSeq: 3,
+      message: {text: "hi", promptReplace: "You are a tutor."},
+    });
+    expect(turn.installItems).toEqual([]);
   });
 
   it("a RIGHT refresh increments seq and rides as a developer message before the user text", () => {

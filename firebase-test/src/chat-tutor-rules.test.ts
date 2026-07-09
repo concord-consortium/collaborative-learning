@@ -60,6 +60,26 @@ describe("Firestore security rules: chat tutor", () => {
       }));
     });
 
+    it("allows optional promptReplace/promptAppend payloads (unit-authored prompt overrides)", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToSucceed(db, `${kParentPath}/messages/msg-replace`, specMessage({
+        add: { promptReplace: "You are a tutor." }
+      }));
+      await expectWriteToSucceed(db, `${kParentPath}/messages/msg-append`, specMessage({
+        add: { promptAppend: "Focus on energy transfer." }
+      }));
+      await expectWriteToSucceed(db, `${kParentPath}/messages/msg-both`, specMessage({
+        add: { promptReplace: "You are a tutor.", promptAppend: "Focus on energy transfer." }
+      }));
+    });
+
+    it("rejects non-string promptReplace/promptAppend", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToFail(db, kMessagePath, specMessage({ add: { promptReplace: 42 } }));
+      await expectWriteToFail(db, kMessagePath, specMessage({ add: { promptAppend: { text: "x" } } }));
+      await expectWriteToFail(db, kMessagePath, specMessage({ add: { promptReplace: null } }));
+    });
+
     it("rejects a forged kind:'assistant'", async () => {
       db = initFirestore(learnerAuth);
       await expectWriteToFail(db, kMessagePath, specMessage({ add: { kind: "assistant" } }));
@@ -83,6 +103,8 @@ describe("Firestore security rules: chat tutor", () => {
       await expectWriteToFail(db, kMessagePath, specMessage({ add: { conversationId: "conv_x" } }));
       await expectWriteToFail(db, kMessagePath, specMessage({ add: { problemInstalled: true } }));
       await expectWriteToFail(db, kMessagePath, specMessage({ add: { seq: 99 } }));
+      // regression: widening hasOnly for the prompt fields must not admit arbitrary extras
+      await expectWriteToFail(db, kMessagePath, specMessage({ add: { promptExtra: "x" } }));
     });
 
     it("rejects a context_id that doesn't match the token's class_hash", async () => {
@@ -229,6 +251,17 @@ describe("Firestore security rules: chat tutor", () => {
       db = initFirestore(genericAuth);
       await expectWriteToFail(db, kDemoMessage, demoMessage({ remove: ["createdAt"] }));
       await expectWriteToFail(db, kDemoMessage, demoMessage({ add: { createdAt: "now" } }));
+    });
+
+    it("allows string prompt overrides and rejects non-string ones", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, `${kDemoParent}/messages/msg-prompts`, demoMessage({
+        add: { promptReplace: "You are a tutor.", promptAppend: "Focus on energy transfer." }
+      }));
+      await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-replace`,
+        demoMessage({ add: { promptReplace: 42 } }));
+      await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-append`,
+        demoMessage({ add: { promptAppend: ["x"] } }));
     });
 
     it("allows an authed demo user to read messages/parent, and rejects update/delete", async () => {

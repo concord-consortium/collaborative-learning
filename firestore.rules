@@ -535,16 +535,22 @@ service cloud.firestore {
           //     and fire the paid OpenAI trigger;
           // (e) context_id pinned to the token's class_hash, so a student can't stamp another
           //     class's context onto the conversation.
+          // promptReplace/promptAppend carry the unit-authored generic-prompt overrides. Like
+          // leftContext, they are client-supplied text sent to the model at developer authority
+          // (TRUST-1 tier, accepted for the spike) — rules can enforce only shape, not content.
           function chatMessageCreate() {
             let data = request.resource.data;
             return isStudentClaim() &&
               userIsRequestUser() &&
               classIsRequestContextId() &&
               data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
-                                   'problemPath', 'leftContext', 'rightContext']) &&
+                                   'problemPath', 'leftContext', 'rightContext',
+                                   'promptReplace', 'promptAppend']) &&
               data.kind == 'user' &&
               'createdAt' in data &&
-              (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float);
+              (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
+              (!('promptReplace' in data) || data.promptReplace is string) &&
+              (!('promptAppend' in data) || data.promptAppend is string);
           }
 
           allow read: if userIsResourceUser() && isStudentClaim();
@@ -570,10 +576,13 @@ service cloud.firestore {
         let data = request.resource.data;
         return isAuthed() &&
           data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
-                               'problemPath', 'leftContext', 'rightContext']) &&
+                               'problemPath', 'leftContext', 'rightContext',
+                               'promptReplace', 'promptAppend']) &&
           data.kind == 'user' &&
           'createdAt' in data &&
-          (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float);
+          (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
+          (!('promptReplace' in data) || data.promptReplace is string) &&
+          (!('promptAppend' in data) || data.promptAppend is string);
       }
 
       allow read: if isAuthed();

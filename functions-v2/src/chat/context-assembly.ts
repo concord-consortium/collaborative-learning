@@ -21,6 +21,8 @@ export interface TurnMessage {
   text?: unknown;
   leftContext?: unknown;
   rightContext?: unknown;
+  promptReplace?: unknown;
+  promptAppend?: unknown;
 }
 
 // An empty LEFT ({"sections":[]}, missing, or unparseable) must not be installed: LEFT is
@@ -35,6 +37,18 @@ export function isEmptyLeft(leftContext: unknown): boolean {
   } catch {
     return true;
   }
+}
+
+// Unit-authored overrides of the generic prompt, carried on the message doc like leftContext
+// (the client attaches them on install-eligible sends): a non-empty promptReplace swaps out the
+// built-in generic text entirely; a non-empty promptAppend is added after the (possibly
+// replaced) generic text. Non-string or whitespace-only values are ignored — defense in depth
+// beyond the rules' string checks.
+export function effectiveGenericText(genericText: string, message: TurnMessage): string {
+  const str = (v: unknown) => (typeof v === "string" && v.trim().length > 0) ? v.trim() : undefined;
+  const base = str(message.promptReplace) ?? genericText;
+  const append = str(message.promptAppend);
+  return append ? `${base}\n\n${append}` : base;
 }
 
 // Latest-context-wins envelope: RIGHT summaries accumulate in the OpenAI conversation (a new
@@ -60,7 +74,7 @@ export function assembleTurnContext(args: {
   const installItems: string[] = [];
   let markProblemInstalled = false;
   if (!problemInstalled) {
-    installItems.push(genericText);
+    installItems.push(effectiveGenericText(genericText, message));
     if (!isEmptyLeft(message.leftContext)) {
       installItems.push(`THE PROBLEM (the student's assignment, as JSON):\n${message.leftContext as string}`);
       markProblemInstalled = true;

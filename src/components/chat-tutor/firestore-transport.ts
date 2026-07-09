@@ -2,6 +2,7 @@ import firebase from "firebase/app";
 import { Firestore } from "../../lib/firestore";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
 import { decideContext, RightSummary } from "./right-context";
+import { TutorPrompts } from "./tutor-prompts";
 
 // Top-level (per Firestore root) chat collection; a parent conversation doc per
 // conversationId, each with a `messages` subcollection. The parent doc is created
@@ -22,6 +23,9 @@ export interface FirestoreTransportOptions {
   getLeftContext: () => string | undefined;
   // RIGHT workspace summary; undefined until the document content has loaded
   getRightSummary: () => RightSummary | undefined;
+  // unit-authored generic-prompt overrides; static for the page's lifetime (unit
+  // config can't change without a reload, which rebuilds the transport)
+  tutorPrompts?: TutorPrompts;
 }
 
 // Live transport: writes `user` message docs to the conversation's messages
@@ -130,7 +134,7 @@ export class FirestoreTransport implements ChatTransport {
   }
 
   async sendUserMessage(text: string): Promise<void> {
-    const { uid, contextId, problemPath, getLeftContext, getRightSummary } = this.opts;
+    const { uid, contextId, problemPath, getLeftContext, getRightSummary, tutorPrompts } = this.opts;
     const right = getRightSummary();
     const decision = decideContext({
       leftAlreadyInstalled: this.problemInstalled,
@@ -162,6 +166,12 @@ export class FirestoreTransport implements ChatTransport {
     };
     if (leftContext !== undefined) {
       message.leftContext = leftContext;
+    }
+    // Prompt overrides ride the same install-eligible sends as LEFT (the server uses
+    // them only while installing the generic prompt, and ignores them afterwards).
+    if (decision.attachLeft) {
+      if (tutorPrompts?.replace) message.promptReplace = tutorPrompts.replace;
+      if (tutorPrompts?.append) message.promptAppend = tutorPrompts.append;
     }
     if (decision.attachRight && right) {
       message.rightContext = right.markdown;

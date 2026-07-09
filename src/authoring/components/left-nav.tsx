@@ -51,6 +51,10 @@ const LeftNav: React.FC<IProps> = ({ onMediaLibraryClicked }) => {
               label: "AI Settings",
             },
             {
+              id: "chatTutorSettings",
+              label: "Chat Tutor",
+            },
+            {
               id: "sortWorkSettings",
               label: "Sort Work Settings",
             },

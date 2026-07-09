@@ -571,7 +571,9 @@ prompt.
   (ER-5) — but **keep the injection-hygiene principle**, re-scoped to the LEFT/RIGHT **context**
   (the problem JSON and workspace summary are *data about the student's work*, never instructions,
   and can't override the never-reveal rule). The RIGHT-envelope instruction is worded to **trust the
-  highest-`seq` workspace summary and disregard earlier ones**.
+  highest-`seq` workspace summary and disregard earlier ones**. *Amended (2026-07-09): unit-authored
+  `promptReplace`/`promptAppend` message fields can replace and/or extend this prompt at install
+  time — see [prompt-authoring-plan.md](prompt-authoring-plan.md).*
 
   Drafted prompt (author/tune during implementation; the four load-bearing pieces — stance,
   never-reveal, science lens, latest-`seq` — must survive):
