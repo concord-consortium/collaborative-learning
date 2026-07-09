@@ -48,9 +48,9 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     if (!stationInfo || pixelWidth === 0) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      const { network, station, location, channel } = stationInfo;
-      const stationData = { network, station, channel };
-      seismicQueryService.loadViewport(callerIdRef.current, { stationData, location, startTime, endTime, pixelWidth });
+      seismicQueryService.loadViewport(callerIdRef.current, {
+        stationLocation: stationInfo, startTime, endTime, pixelWidth
+      });
     }, LOAD_VIEWPORT_DEBOUNCE_MS);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -60,7 +60,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
   // Query and render
   const queryResult = (stationInfo && pixelWidth > 0)
     ? seismicQueryService.query({
-        stationData: stationInfo, location: stationInfo.location, startTime, endTime, pixelWidth
+        stationLocation: stationInfo, startTime, endTime, pixelWidth
       })
     : null;
 

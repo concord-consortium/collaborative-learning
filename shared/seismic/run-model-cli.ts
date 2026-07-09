@@ -14,6 +14,7 @@
 import { parseArgs } from "node:util";
 import { miniseed } from "seisplotjs";
 import { fetchRawSeismicData } from "./earthscope-client";
+import { MILLISECONDS_PER_DAY } from "./seismic-day";
 import { SeismicModelRunner } from "./seismic-model-runner";
 import { ModelMetadata } from "./seismic-model-types";
 
@@ -50,8 +51,7 @@ async function main() {
   const startDate = new Date(values.start! + (values.start!.includes("T") ? "" : "T00:00:00Z"));
   const endDate = new Date(values.end! + (values.end!.includes("T") ? "" : "T00:00:00Z"));
 
-  const msPerDay = 86400000;
-  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / msPerDay);
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / MILLISECONDS_PER_DAY);
 
   console.log(`Network: ${network}  Station: ${station}  Channel: ${channel}`);
   console.log(`Range: ${startDate.toISOString()} -> ${endDate.toISOString()} (${totalDays} days)`);
@@ -84,16 +84,16 @@ async function main() {
   let totalEvents = 0;
 
   for (let day = 0; day < totalDays; day++) {
-    const chunkStart = new Date(startDate.getTime() + day * msPerDay);
-    const chunkEnd = new Date(chunkStart.getTime() + msPerDay);
+    const chunkStart = new Date(startDate.getTime() + day * MILLISECONDS_PER_DAY);
+    const chunkEnd = new Date(chunkStart.getTime() + MILLISECONDS_PER_DAY);
     const label = chunkStart.toISOString().slice(0, 10);
 
     process.stdout.write(`Day ${day + 1}/${totalDays} (${label}): fetching...`);
 
-    const response = await fetchRawSeismicData(
-      network, station, "", channel,
-      chunkStart.toISOString(), chunkEnd.toISOString()
-    );
+    const response = await fetchRawSeismicData({
+      network, station, location: "", channel,
+      startTime: chunkStart.toISOString(), endTime: chunkEnd.toISOString()
+    });
     const buffer = await response.arrayBuffer();
     const records = miniseed.parseDataRecords(buffer);
     const seismogram = miniseed.merge(records);

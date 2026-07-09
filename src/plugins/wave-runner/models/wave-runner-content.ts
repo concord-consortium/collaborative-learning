@@ -2,7 +2,8 @@ import { DateTime } from "luxon";
 import stringify from "json-stringify-pretty-compact";
 import { cast, flow, getSnapshot, types, Instance } from "mobx-state-tree";
 import { miniseed } from "seisplotjs";
-import { fetchRawSeismicData } from "../../../../shared/seismic/earthscope-client";
+import { MILLISECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
+import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
 import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
 import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
@@ -236,7 +237,6 @@ export const WaveRunnerContentModel = TileContentModel
       self.isRunning = true;
 
       const metadata = self.selectedModelMetadata;
-      const { network, station, location, channel } = self.station;
 
       const runner = new SeismicModelRunner();
       try {
@@ -254,31 +254,27 @@ export const WaveRunnerContentModel = TileContentModel
           return;
         }
 
-        const msPerDay = 86400000;
-        const totalDays = Math.ceil((endMs - startMs) / msPerDay);
+        const totalDays = Math.ceil((endMs - startMs) / MILLISECONDS_PER_DAY);
         self.updateChunkProgress(0, totalDays);
 
-        for (let day = 0; day < totalDays; day++) {
-          const chunkStart = new Date(startDate.getTime() + day * msPerDay);
-          const chunkEnd = new Date(chunkStart.getTime() + msPerDay);
+        // Bulk-download the range into OPFS, running the model on each day as it lands.
+        // Days may arrive out of order; detection is per-window independent, so that's fine.
+        // No-data days come as `dayEmpty` and are simply never yielded.
+        const downloadService = new SeismicDownloadService();
+        downloadService.ensureRange({ ...self.station, startSec: startMs / 1000, endSec: endMs / 1000 });
 
-          // Fetch raw data for this day — skip days with no data
-          let response: Response;
-          try {
-            // TODO: Use the SeismicQueryService to access raw data, so we take advantage of the rawCache.
-            response = yield fetchRawSeismicData(
-              network, station, location, channel,
-              chunkStart.toISOString(), chunkEnd.toISOString()
-            );
-          } catch (err: unknown) {
-            const isNoData = err instanceof Error && /no data|404/i.test(err.message);
-            if (isNoData) {
-              self.updateChunkProgress(day + 1, totalDays);
-              continue;
-            }
-            throw err;
-          }
-          const buffer: ArrayBuffer = yield response.arrayBuffer();
+        let processed = 0;
+        const updateProgress = () => {
+          const progress = processed + downloadService.erroredDays.length + downloadService.emptyDays.length;
+          self.updateChunkProgress(progress, totalDays);
+        };
+
+        while (true) {
+          const day: number | typeof DONE = yield downloadService.nextReadyDay();
+          if (day === DONE) break;
+
+          const buffer: ArrayBuffer | null = yield downloadService.readDay(day);
+          if (!buffer) continue;
 
           // Parse miniSEED → Seismogram
           const records = miniseed.parseDataRecords(buffer);
@@ -295,8 +291,12 @@ export const WaveRunnerContentModel = TileContentModel
             },
             detectionThreshold,
           );
-          self.updateChunkProgress(day + 1, totalDays);
+          processed++;
+          updateProgress();
         }
+
+        // Ensure progress is accurate after loop finishes
+        updateProgress();
 
         const dataSet = self.getOrCreateEventsDataSet()?.dataSet;
         if (dataSet) {

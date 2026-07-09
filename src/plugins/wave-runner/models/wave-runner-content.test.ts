@@ -5,7 +5,27 @@ import "../../../models/shared/shared-data-set-registration";
 import "../../shared-seismogram/shared-seismogram-registration";
 import { registerTileContentInfo } from "../../../models/tiles/tile-content-info";
 import { kWaveRunnerTileType } from "../wave-runner-types";
-import { WaveRunnerContentModel, DEFAULT_MODELS, defaultWaveRunnerContent } from "./wave-runner-content";
+import {
+  WaveRunnerContentModel, DEFAULT_MODELS, defaultWaveRunnerContent, PLACEHOLDER_MODEL_URL
+} from "./wave-runner-content";
+import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
+import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
+
+jest.mock("../../../models/stores/seismic-download-service", () => ({
+  ...jest.requireActual("../../../models/stores/seismic-download-service"),
+  SeismicDownloadService: jest.fn(),
+}));
+jest.mock("seisplotjs", () => {
+  const actual = jest.requireActual("seisplotjs");
+  return {
+    ...actual,
+    miniseed: {
+      ...actual.miniseed,
+      parseDataRecords: jest.fn(() => []),
+      merge: jest.fn(() => ({ segments: [] })),
+    },
+  };
+});
 
 registerTileContentInfo({
   type: kWaveRunnerTileType,
@@ -226,6 +246,36 @@ describe("WaveRunnerContent", () => {
 
       // runModel should have tried to fetch metadata and failed
       expect(content.runError).toContain("Failed to fetch model metadata");
+      expect(content.isRunning).toBe(false);
+    });
+
+    it("downloads each ready day via the service and runs the model on it", async () => {
+      const days = [100, 101];
+      let i = 0;
+      const fakeService = {
+        ensureRange: jest.fn(),
+        nextReadyDay: jest.fn(async () => (i < days.length ? days[i++] : DONE)),
+        readDay: jest.fn(async () => new ArrayBuffer(8)),
+        cancel: jest.fn(),
+        erroredDays: [],
+        emptyDays: [],
+      };
+      (SeismicDownloadService as jest.Mock).mockImplementation(() => fakeService);
+      jest.spyOn(SeismicModelRunner.prototype, "loadModel").mockResolvedValue(undefined);
+      const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+
+      const content = setupTileInDocument();
+      content.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" });
+      content.setStartDate("2026-02-01");
+      content.setEndDate("2026-02-03");
+      await content.ensureModelMetadata(PLACEHOLDER_MODEL_URL);
+
+      await content.runModel();
+
+      expect(fakeService.ensureRange).toHaveBeenCalledTimes(1);
+      expect(fakeService.readDay).toHaveBeenCalledTimes(2);
+      expect(processChunk).toHaveBeenCalledTimes(2);
+      expect(content.runError).toBeNull();
       expect(content.isRunning).toBe(false);
     });
   });
