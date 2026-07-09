@@ -498,7 +498,7 @@ describe('DocumentGroup Model', () => {
     it('labels groups with the problem title when the unit provides one (keeping ordinal order)', () => {
       // Inject a unit that resolves a title for each (investigation, problem) ordinal pair.
       // (rootDocumentGroup holds the raw stores object that byProblem reads.)
-      (sortedDocuments.rootDocumentGroup.stores as unknown as { unit: unknown }).unit = {
+      (sortedDocuments.rootDocumentGroup.stores as any).unit = {
         getInvestigation: (investigationOrdinal: number) => ({
           getProblem: (problemOrdinal: number) => ({ title: `Storm ${investigationOrdinal}-${problemOrdinal}` })
         })

@@ -52,6 +52,10 @@ interface IBuildDocumentCollectionProps {
   docMap: Map<string, IDocumentMetadataModel[]>;
   sortedSectionLabels: string[];
   sortType: SecondarySortType;
+  // Optional per-label display overrides, keyed by the ordinal-based grouping
+  // label. Problem sort uses this to show a problem's title in place of the
+  // generic "Problem 1.1" while still grouping/sorting by the ordinal key.
+  labelMap?: Map<string, string>;
 }
 
 /*
@@ -121,10 +125,10 @@ export class DocumentGroup {
   }
 
   buildDocumentCollection(props: IBuildDocumentCollectionProps): DocumentGroup[] {
-    const { docMap, sortedSectionLabels, sortType } = props;
+    const { docMap, sortedSectionLabels, sortType, labelMap } = props;
     return sortedSectionLabels.map(label => {
       return new DocumentGroup({
-        label,
+        label: labelMap?.get(label) ?? label,
         sortType,
         documents: docMap.get(label) ?? [],
         stores: this.stores
@@ -295,7 +299,7 @@ export class DocumentGroup {
     const docMap: Map<string, IDocumentMetadataModel[]> = new Map();
     // Map the ordinal-based grouping key to the problem's actual title, when available, so the
     // group is displayed with its title (e.g. "Storm Arthur") rather than a generic "Problem 1.1".
-    const titleByLabel: Map<string, string> = new Map();
+    const labelMap: Map<string, string> = new Map();
     const problemTerm = upperWords(translate("contentLevel.problem"));
     this.documents.forEach((doc) => {
       const investigationOrdinal = doc.investigation;
@@ -304,9 +308,9 @@ export class DocumentGroup {
 
       if (investigationOrdinal != null && problemOrdinal != null) {
         sectionLabel = `${problemTerm} ${investigationOrdinal}.${problemOrdinal}`;
-        const title = this.stores.unit
-          ?.getInvestigation(Number(investigationOrdinal))?.getProblem(Number(problemOrdinal))?.title;
-        if (title) titleByLabel.set(sectionLabel, title);
+        const investigation = this.stores.unit?.getInvestigation(Number(investigationOrdinal));
+        const title = investigation?.getProblem(Number(problemOrdinal))?.title;
+        if (title) labelMap.set(sectionLabel, title);
       } else if (problemOrdinal != null) {
         sectionLabel = `${problemTerm} ${problemOrdinal}`;
       }
@@ -319,11 +323,6 @@ export class DocumentGroup {
 
     // Group/sort by the ordinal-based key, but display the resolved problem title (when available).
     const sortedSectionLabels = sortProblemSectionLabels(Array.from(docMap.keys()));
-    return sortedSectionLabels.map(label => new DocumentGroup({
-      label: titleByLabel.get(label) ?? label,
-      sortType: "Problem",
-      documents: docMap.get(label) ?? [],
-      stores: this.stores
-    }));
+    return this.buildDocumentCollection({ docMap, labelMap, sortedSectionLabels, sortType: "Problem" });
   }
 }

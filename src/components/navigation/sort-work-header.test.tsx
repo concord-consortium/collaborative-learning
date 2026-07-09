@@ -7,9 +7,6 @@ function makeItems(texts: string[], selectedIndex = 0) {
 }
 
 describe("SortWorkHeader", () => {
-  // CLUE-563: the "Show for" dropdown must display the selected option's label, which carries any
-  // term override (e.g. "Model" when contentLevel.problem is overridden), rather than the raw
-  // doc-filter id "Problem". Previously the dropdown title was hard-set to the raw filter id.
   it("shows the selected filter's (possibly overridden) label, not the raw filter id", () => {
     render(
       <SortWorkHeader

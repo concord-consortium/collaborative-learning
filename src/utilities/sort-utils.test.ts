@@ -41,7 +41,6 @@ describe("sort-utils", () => {
       expect(getFilterTypeDisplayLabel("Problem")).toBe("Problem");
     });
 
-    // CLUE-563: the label must reflect the unit's term override for the problem scope.
     it("applies the unit term override for the problem scope", () => {
       setTermOverrides({ "contentLevel.problem": "Model" });
       expect(getFilterTypeDisplayLabel("Problem")).toBe("Model");

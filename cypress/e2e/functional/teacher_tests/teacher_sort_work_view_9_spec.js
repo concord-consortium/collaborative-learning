@@ -33,11 +33,13 @@ describe("SortWorkView Problem Sort Tests", () => {
     cy.log("verify documents are organized by problem when Problem sort is applied");
     cy.get(".section-header-arrow").click({multiple: true}); // Open the sections
     cy.get(".section-header-label").should("exist");
-    // Verify that section headers contain problem labels (e.g., "Problem 1.1" or "No Problem")
+    // Section headers show the problem's title when the unit provides one (this unit's titles
+    // begin with the "X.Y" ordinal, e.g. "1.1 Unit Toolbar Configuration"), falling back to
+    // "Problem X.Y", or "No Problem" for ungrouped work.
     cy.get(".section-header-label").then($headers => {
       const headerTexts = Array.from($headers).map(el => el.textContent.trim());
       expect(headerTexts.length).to.be.greaterThan(0);
-      const problemRegex = /(Problem \d+\.\d+|No Problem)/;
+      const problemRegex = /(^\d+\.\d+|Problem \d+\.\d+|No Problem)/;
       headerTexts.forEach(headerText => {
         expect(headerText).to.match(problemRegex);
       });
@@ -55,7 +57,7 @@ describe("SortWorkView Problem Sort Tests", () => {
     sortWork.getPrimarySortByProblemOption().should("have.class", "selected");
   });
 
-  it("auto-switches 'Show for' filter from Problem to Investigation when primary sort is set to Problem", () => {
+  it("keeps the 'Show for' scope (no auto-switch) but disables the Problem scope option when sorting by Problem", () => {
     beforeTest(queryParams1);
 
     cy.log("set 'Show for' filter to Problem");
@@ -66,14 +68,14 @@ describe("SortWorkView Problem Sort Tests", () => {
     cy.log("verify Group is the selected primary sort option");
     sortWork.getPrimarySortByGroupOption().should("have.class", "selected");
 
-    cy.log("switch primary sort to Problem - 'Show for' should auto-switch to Investigation");
+    cy.log("switch primary sort to Problem - 'Show for' scope should NOT auto-switch to Investigation");
     sortWork.getPrimarySortByMenu().click();
     sortWork.getPrimarySortByProblemOption().click();
     sortWork.getPrimarySortByProblemOption().should("have.class", "selected");
 
-    cy.log("verify 'Show for' filter has been automatically changed to Investigation");
-    sortWork.getShowForProblemOption().should("not.have.class", "selected");
-    sortWork.getShowForInvestigationOption().should("have.class", "selected");
+    cy.log("verify 'Show for' scope was retained (Problem), not force-switched to Investigation");
+    sortWork.getShowForProblemOption().should("have.class", "selected");
+    sortWork.getShowForInvestigationOption().should("not.have.class", "selected");
 
     cy.log("verify Problem option in 'Show for' menu is disabled when sorting by Problem");
     sortWork.getShowForMenu().click();
