@@ -1,5 +1,5 @@
-// shared/seismic/earthscope-client.ts
-import { ChannelMetadata } from "./seismic-types.js";
+import { MILLISECONDS_PER_DAY, utcDay } from "./seismic-day";
+import { ChannelMetadata, StationId, StationQuery, TimeRange } from "./seismic-types";
 
 /**
  * Low-level fetchers for EarthScope's FDSN web services.
@@ -22,12 +22,18 @@ function getUrlParam(name: string): string | null {
   return new URLSearchParams(window.location.search).get(name);
 }
 
-function isProxyEnabled(): boolean {
+export function isProxyEnabled(): boolean {
   return getUrlParam("seismicProxy") !== null;
 }
 
-function getLocalBaseUrl(): string | null {
+export function getLocalBaseUrl(): string | null {
   return getUrlParam("seismicLocal");
+}
+
+export interface EarthscopeOptions {
+  baseUrl?: string | null;
+  proxy?: boolean;
+  signal?: AbortSignal;
 }
 
 interface MockFile {
@@ -36,10 +42,6 @@ interface MockFile {
   startSec: number;
   /** Exclusive end, seconds since epoch */
   endSec: number;
-}
-
-function utcDay(y: number, m: number, d: number): number {
-  return Date.UTC(y, m - 1, d) / 1000;
 }
 
 const MOCK_FILES: MockFile[] = [
@@ -80,25 +82,18 @@ const MOCK_FILES: MockFile[] = [
  *   underlying fetch returns a non-2xx HTTP response.
  */
 export async function fetchRawSeismicData(
-  network: string,
-  station: string,
-  location: string,
-  channel: string,
-  startTime: string,
-  endTime: string,
-  options?: {
-    baseUrl?: string;
-    signal?: AbortSignal;
-  }
+  query: StationQuery,
+  options?: EarthscopeOptions
 ): Promise<Response> {
-  const localBase = getLocalBaseUrl();
+  const localBase = options?.baseUrl !== undefined ? options.baseUrl : getLocalBaseUrl();
   if (localBase) {
-    return fetchFromLocal(localBase, network, station, startTime, endTime, options);
+    return fetchFromLocal(localBase, query, options);
   }
-  if (isProxyEnabled()) {
-    return fetchFromProxy(network, station, location, channel, startTime, endTime, options);
+  const proxy = options?.proxy ?? isProxyEnabled();
+  if (proxy) {
+    return fetchFromProxy(query, options);
   }
-  return fetchFromMock(startTime, endTime, options);
+  return fetchFromMock(query.startTime, query.endTime, options);
 }
 
 /**
@@ -108,16 +103,14 @@ export async function fetchRawSeismicData(
  */
 async function fetchFromLocal(
   baseUrl: string,
-  network: string,
-  station: string,
-  startTime: string,
-  _endTime: string,
-  options?: { signal?: AbortSignal }
+  query: StationQuery,
+  options?: EarthscopeOptions
 ): Promise<Response> {
+  const { network, startTime, station } = query;
   const startDate = new Date(startTime);
   const year = startDate.getUTCFullYear();
   const startOfYear = Date.UTC(year, 0, 1);
-  const doy = String(Math.floor((startDate.getTime() - startOfYear) / 86400000) + 1).padStart(3, "0");
+  const doy = String(Math.floor((startDate.getTime() - startOfYear) / MILLISECONDS_PER_DAY) + 1).padStart(3, "0");
 
   const url = `${baseUrl}/data/${network}/${year}/${doy}/${station}.${network}.${year}.${doy}`;
   const response = await fetch(url, { signal: options?.signal });
@@ -128,14 +121,10 @@ async function fetchFromLocal(
 }
 
 async function fetchFromProxy(
-  network: string,
-  station: string,
-  location: string,
-  channel: string,
-  startTime: string,
-  endTime: string,
-  options?: { baseUrl?: string; signal?: AbortSignal }
+  query: StationQuery,
+  options?: EarthscopeOptions
 ): Promise<Response> {
+  const { channel, endTime, location, network, startTime, station } = query;
   const base = options?.baseUrl ?? CLOUDFRONT_PROXY_URL;
   const params = new URLSearchParams({
     net: network, sta: station, cha: channel, loc: location || "--",
@@ -152,7 +141,7 @@ async function fetchFromProxy(
 async function fetchFromMock(
   startTime: string,
   endTime: string,
-  options?: { signal?: AbortSignal }
+  options?: EarthscopeOptions
 ): Promise<Response> {
   const startSec = new Date(startTime).getTime() / 1000;
   const endSec = new Date(endTime).getTime() / 1000;
@@ -178,7 +167,8 @@ async function fetchFromMock(
  * Fetch channel metadata (including sensitivity) for a station from EarthScope.
  * Returns one entry per channel, each with its own Scale, time range, and sample rate.
  */
-export async function fetchStationMetadata(network: string, station: string): Promise<ChannelMetadata[]> {
+export async function fetchStationMetadata(stationId: StationId): Promise<ChannelMetadata[]> {
+  const { network, station } = stationId;
   const url = `${STATION_SERVICE_URL}?net=${network}&sta=${station}&level=channel&format=text`;
   const response = await fetch(url);
   if (!response.ok) {
@@ -217,4 +207,55 @@ function parseStationText(text: string): ChannelMetadata[] {
   }
 
   return channels;
+}
+
+const AVAILABILITY_PATH = "/earthscope/cached/availability/1/query";
+
+/**
+ * Fetch the time ranges for which data actually exists for a station/channel.
+ *
+ * Proxy mode (`?seismicProxy`): queries the FDSN availability service through
+ * CloudFront and parses its pipe-delimited text response.
+ *
+ * Mock/local mode: the availability service is not mocked, so we assume the
+ * entire requested range is available (one range). Callers then attempt every
+ * day; the mock dataselect returns "no data" for days it doesn't cover.
+ */
+export async function fetchAvailability(
+  query: StationQuery,
+  options?: EarthscopeOptions
+): Promise<TimeRange[]> {
+  const { network, station, location, channel, startTime, endTime } = query;
+  const proxy = options?.proxy ?? isProxyEnabled();
+  if (!proxy) {
+    return [{
+      start: new Date(startTime).getTime() / 1000,
+      end: new Date(endTime).getTime() / 1000,
+    }];
+  }
+  const base = options?.baseUrl ?? CLOUDFRONT_PROXY_URL;
+  const params = new URLSearchParams({
+    net: network, sta: station, cha: channel, loc: location || "--",
+    start: startTime, end: endTime, format: "text",
+  });
+  const response = await fetch(`${base}${AVAILABILITY_PATH}?${params}`, { signal: options?.signal });
+  if (!response.ok) {
+    throw new Error(`availability ${response.status}: ${response.statusText}`);
+  }
+
+  // Parse the whitespace-delimited FDSN availability text into [start, end) ranges.
+  // Columns: Network Station Location Channel Quality SampleRate Earliest Latest
+  const text = await response.text();
+  const ranges: TimeRange[] = [];
+  for (const line of text.trim().split("\n")) {
+    if (!line || line.startsWith("#")) continue;
+    const fields = line.trim().split(/\s+/);
+    if (fields.length < 8) continue;
+    const start = new Date(fields[6]).getTime() / 1000;
+    const end = new Date(fields[7]).getTime() / 1000;
+    if (Number.isFinite(start) && Number.isFinite(end) && end > start) {
+      ranges.push({ start, end });
+    }
+  }
+  return ranges;
 }

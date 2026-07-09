@@ -4,13 +4,15 @@ import {
   LEVEL_SPACINGS, AMPLITUDE_RANGES, NO_DATA_SENTINEL, RAW_CHUNK_DURATION
 } from "../../../shared/seismic/envelope-config";
 import { dequantize } from "../../../shared/seismic/envelope-codec";
-import { getTileIndicesForViewport, getTileTimeRange } from "../../../shared/seismic/tile-addressing";
+import {
+  getStationChannelPrefix, getStationPrefix, getTileIndicesForViewport, getTileTimeRange
+} from "../../../shared/seismic/tile-addressing";
 import { fetchEnvelopeTile } from "../../../shared/seismic/envelope-fetcher";
 import { fetchRawSeismicData, fetchStationMetadata } from "../../../shared/seismic/earthscope-client";
 import { miniseed } from "seisplotjs";
 import {
-  EnvelopeTileData, ChannelMetadata, NullableNumberArray,
-  SeismicViewportParams, ViewportQueryResult, RawSegment, StationData, TimeRange
+  EnvelopeTileData, ChannelMetadata, NullableNumberArray, SeismicViewportParams, ViewportQueryResult, RawSegment,
+  StationData, StationId, TimeRange, StationQuery
 } from "../../../shared/seismic/seismic-types";
 
 type EnvelopeCacheEntry = EnvelopeTileData | "loading" | "missing";
@@ -19,13 +21,11 @@ type RawCacheEntry = RawSegment[] | "loading" | "missing";
 const MAX_RAW_CACHE_ENTRIES = 100;
 
 export function envelopeCacheKey(stationData: StationData, level: number, tileIndex: number) {
-  const { network, station, channel } = stationData;
-  return `${network}_${station}/${channel}/L${level}/${tileIndex}`;
+  return `${getStationChannelPrefix(stationData)}/L${level}/${tileIndex}`;
 }
 
 export function rawCacheKey(stationData: StationData, chunkIndex: number) {
-  const { network, station, channel } = stationData;
-  return `${network}_${station}/${channel}/raw/${chunkIndex}`;
+  return `${getStationChannelPrefix(stationData)}/raw/${chunkIndex}`;
 }
 
 export class SeismicQueryService {
@@ -69,9 +69,9 @@ export class SeismicQueryService {
    * Called from MobX observer components so cache reads are tracked.
    */
   query(params: SeismicViewportParams): ViewportQueryResult {
-    const { stationData, startTime, endTime, pixelWidth } = params;
+    const { stationLocation, startTime, endTime, pixelWidth } = params;
     const level = this.selectLevel(startTime, endTime, pixelWidth);
-    const instrumentCode = stationData.channel.charAt(1);
+    const instrumentCode = stationLocation.channel.charAt(1);
     const amplitudeRange = AMPLITUDE_RANGES[instrumentCode] ?? 1;
 
     if (level === "raw") {
@@ -93,9 +93,9 @@ export class SeismicQueryService {
   /**
    * Returns the metadata for the station at the specified time.
    */
-  async getMetadata({ network, station, channel }: StationData, timeSec: number): Promise<ChannelMetadata | undefined> {
-    const allMetadata = await this.getAllMetadata(network, station);
-    return this.getMetadataForChannel(allMetadata, channel, timeSec);
+  async getMetadata(stationData: StationData, timeSec: number): Promise<ChannelMetadata | undefined> {
+    const allMetadata = await this.getAllMetadata(stationData);
+    return this.getMetadataForChannel(allMetadata, stationData.channel, timeSec);
   }
 
   // --- Private helpers (general) ---
@@ -155,7 +155,7 @@ export class SeismicQueryService {
   }
 
   private async loadData(callerId: string, params: SeismicViewportParams, level: number | "raw"): Promise<void> {
-    const { stationData, location, startTime, endTime } = params;
+    const { stationLocation, startTime, endTime } = params;
     const startSec = startTime.toSeconds();
     const endSec = endTime.toSeconds();
     const raw = level === "raw";
@@ -172,7 +172,7 @@ export class SeismicQueryService {
 
     const toFetch: number[] = [];
     const neededKeys = new Set<string>();
-    const getKey = (i: number) => raw ? rawCacheKey(stationData, i) : envelopeCacheKey(stationData, level, i);
+    const getKey = (i: number) => raw ? rawCacheKey(stationLocation, i) : envelopeCacheKey(stationLocation, level, i);
     for (const index of indices) {
       const key = getKey(index);
       neededKeys.add(key);
@@ -187,7 +187,7 @@ export class SeismicQueryService {
 
     if (toFetch.length === 0) return;
 
-    const metadata = raw ? await this.getAllMetadata(stationData.network, stationData.station) : [];
+    const metadata = raw ? await this.getAllMetadata(stationLocation) : [];
 
     // Fetch missing tiles
     for (const index of toFetch) {
@@ -219,14 +219,15 @@ export class SeismicQueryService {
         const chunkEndISO = DateTime.fromSeconds((index + 1) * RAW_CHUNK_DURATION, { zone: "utc" }).toISO();
         if (!chunkStartISO || !chunkEndISO) continue;
 
-        this.fetchAndParseRaw(stationData, location, chunkStartISO, chunkEndISO, metadata, controller.signal)
-          .then(segments => {
-            runInAction(() => {
-              this.setRawCache(key, segments.length > 0 ? segments : "missing");
-            });
-          }).catch(catchFunction).finally(finallyFunction);
+        this.fetchAndParseRaw(
+          { ...stationLocation, startTime: chunkStartISO, endTime: chunkEndISO }, metadata, controller.signal
+        ).then(segments => {
+          runInAction(() => {
+            this.setRawCache(key, segments.length > 0 ? segments : "missing");
+          });
+        }).catch(catchFunction).finally(finallyFunction);
       } else {
-        fetchEnvelopeTile({ stationData, level, tileIndex: index, signal: controller.signal })
+        fetchEnvelopeTile({ stationData: stationLocation, level, tileIndex: index, signal: controller.signal })
           .then(data => {
             runInAction(() => {
               this.envelopeCache.set(key, data ?? "missing");
@@ -239,7 +240,7 @@ export class SeismicQueryService {
   // --- Private helpers (envelope) ---
 
   private queryEnvelope(params: SeismicViewportParams, level: number, amplitudeRange: number): ViewportQueryResult {
-    const { stationData, startTime, endTime } = params;
+    const { stationLocation, startTime, endTime } = params;
     const startSec = startTime.toSeconds();
     const endSec = endTime.toSeconds();
     const tileIndices = getTileIndicesForViewport(startSec, endSec, level);
@@ -251,7 +252,7 @@ export class SeismicQueryService {
     let isLoading = false;
 
     for (const tileIndex of tileIndices) {
-      const key = envelopeCacheKey(stationData, level, tileIndex);
+      const key = envelopeCacheKey(stationLocation, level, tileIndex);
       const entry = this.envelopeCache.get(key);
 
       // Fallback to one level coarser if this level is loading
@@ -260,7 +261,7 @@ export class SeismicQueryService {
         const _range = getTileTimeRange(level, tileIndex);
         const overlapStart = Math.max(_range.start, startSec);
         const overlapEnd = Math.min(_range.end, endSec);
-        const fallbackData = this.getFallbackData(level - 1, stationData, overlapStart, overlapEnd);
+        const fallbackData = this.getFallbackData(level - 1, stationLocation, overlapStart, overlapEnd);
         if (fallbackData) {
           timestamps.push(...fallbackData.timestamps);
           mins.push(...fallbackData.mins);
@@ -312,7 +313,7 @@ export class SeismicQueryService {
   }
 
   private queryRaw(params: SeismicViewportParams, amplitudeRange: number): ViewportQueryResult {
-    const { stationData, startTime, endTime } = params;
+    const { stationLocation, startTime, endTime } = params;
     const startSec = startTime.toSeconds();
     const endSec = endTime.toSeconds();
     const firstChunk = this.rawChunkIndex(startSec);
@@ -323,7 +324,7 @@ export class SeismicQueryService {
     let isLoading = false;
 
     for (let ci = firstChunk; ci <= lastChunk; ci++) {
-      const key = rawCacheKey(stationData, ci);
+      const key = rawCacheKey(stationLocation, ci);
       const entry = this.getRawCache(key);
 
       if (entry === "loading" || entry === undefined) {
@@ -331,7 +332,7 @@ export class SeismicQueryService {
         // Attempt fallback to L2 envelope for this chunk's time range
         const start = Math.max(ci * RAW_CHUNK_DURATION, startSec);
         const end = Math.min((ci + 1) * RAW_CHUNK_DURATION, endSec);
-        const fallback = this.getFallbackData(2, stationData, start, end);
+        const fallback = this.getFallbackData(2, stationLocation, start, end);
         if (fallback) {
           // Envelope fallback — push as interleaved min/max approximation (use midpoint)
           for (let i = 0; i < fallback.timestamps.length; i++) {
@@ -367,11 +368,11 @@ export class SeismicQueryService {
     return { level: "raw", data: [timestamps, values], amplitudeRange: autoRange, isLoading };
   }
 
-  private async getAllMetadata(network: string, station: string): Promise<ChannelMetadata[]> {
-    const metaKey = `${network}_${station}`;
+  private async getAllMetadata(stationId: StationId): Promise<ChannelMetadata[]> {
+    const metaKey = getStationPrefix(stationId);
     let metadata = this.metadataCache.get(metaKey);
     if (!metadata) {
-      metadata = await fetchStationMetadata(network, station);
+      metadata = await fetchStationMetadata(stationId);
       runInAction(() => { this.metadataCache.set(metaKey, metadata!); });
     }
     return metadata;
@@ -391,12 +392,9 @@ export class SeismicQueryService {
   }
 
   private async fetchAndParseRaw(
-    { network, station, channel }: StationData, location: string, startISO: string, endISO: string,
-    metadata: ChannelMetadata[], signal: AbortSignal
+    query: StationQuery, metadata: ChannelMetadata[], signal: AbortSignal
   ): Promise<RawSegment[]> {
-    const response = await fetchRawSeismicData(
-      network, station, location, channel, startISO, endISO, { signal }
-    );
+    const response = await fetchRawSeismicData(query, { signal });
     const buffer = await response.arrayBuffer();
     const records = miniseed.parseDataRecords(buffer);
     const seismogram = miniseed.merge(records);
@@ -406,7 +404,7 @@ export class SeismicQueryService {
     if (seismogram && seismogram.segments) {
       for (const seg of seismogram.segments) {
         const segStartTime = seg.startTime.toSeconds();
-        const sensitivity = this.getMetadataForChannel(metadata, channel, segStartTime)?.scale ?? 1;
+        const sensitivity = this.getMetadataForChannel(metadata, query.channel, segStartTime)?.scale ?? 1;
         const sampleRate = seg.sampleRate;
         const y = seg.y;
         const samples = new Float64Array(y.length);

@@ -115,14 +115,14 @@ describe("ThumbnailDocumentItem", () => {
       expect(canvasContainer).toHaveAttribute("inert");
     });
 
-    // Even scrollable (large) thumbnails keep inert + aria-hidden so the document stays
-    // out of the tab order and the a11y tree; scrolling is handled via a wheel handler
-    // rather than by making the subtree interactive. See CLUE-548.
-    it("keeps the canvas container inert/aria-hidden when scrollable", () => {
+    // CLUE-564: scrollable (large/"big") thumbnails are the 4-up replacement and must stay
+    // interactive so tiles can be selected and borrowed/copied. They are therefore NOT made
+    // inert/aria-hidden (unlike the small preview thumbnails tested above).
+    it("does not make the canvas container inert/aria-hidden when scrollable", () => {
       const { container } = renderItem({ scrollable: true });
       const canvasContainer = container.querySelector(".scaled-list-item-container");
-      expect(canvasContainer).toHaveAttribute("inert");
-      expect(canvasContainer).toHaveAttribute("aria-hidden", "true");
+      expect(canvasContainer).not.toHaveAttribute("inert");
+      expect(canvasContainer).not.toHaveAttribute("aria-hidden");
     });
 
     it("sets aria-current='true' when the document is selected", () => {

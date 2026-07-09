@@ -18,6 +18,7 @@ jest.mock("seisplotjs", () => ({
 }));
 
 const stationData = { network: "AK", station: "K204", channel: "HNZ" };
+const stationLocation = { ...stationData, location: "" };
 
 describe("SeismicQueryService", () => {
   describe("selectLevel", () => {
@@ -58,8 +59,7 @@ describe("SeismicQueryService query", () => {
   let service: SeismicQueryService;
 
   const viewportParams = (overrides?: Partial<SeismicViewportParams>): SeismicViewportParams => ({
-    stationData,
-    location: "",
+    stationLocation,
     startTime: DateTime.fromSeconds(0, { zone: "utc" }),
     endTime: DateTime.fromSeconds(LEVEL_SPACINGS[1] * 1000, { zone: "utc" }),
     pixelWidth: 1000,
@@ -153,8 +153,7 @@ describe("SeismicQueryService loadViewport", () => {
     const level = 1;
     const range = getTileTimeRange(level, 0);
     service.loadViewport("caller1", {
-      stationData,
-      location: "",
+      stationLocation,
       startTime: DateTime.fromSeconds(range.start, { zone: "utc" }),
       endTime: DateTime.fromSeconds(range.start + LEVEL_SPACINGS[level], { zone: "utc" }),
       pixelWidth: 1,
@@ -171,8 +170,7 @@ describe("SeismicQueryService loadViewport", () => {
     const level = 1;
     const range = getTileTimeRange(level, 0);
     service.loadViewport("caller1", {
-      stationData,
-      location: "",
+      stationLocation,
       startTime: DateTime.fromSeconds(range.start, { zone: "utc" }),
       endTime: DateTime.fromSeconds(range.start + LEVEL_SPACINGS[level], { zone: "utc" }),
       pixelWidth: 1,
