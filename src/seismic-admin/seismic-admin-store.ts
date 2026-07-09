@@ -10,12 +10,13 @@ import { mergeStations, missingDayCount } from "./utils/seismic-admin-utils";
 type AdminCache = Pick<SeismicCache, "listStations" | "scanCachedDays" | "stationRawBytes" | "deleteDaysInRange">;
 
 /** Download one station's missing days into OPFS and wait for completion. Production default;
- *  tests inject their own to bypass the Web Worker. */
+ *  tests inject their own to bypass the Web Worker.
+ */
 async function defaultDownloadStation(station: StationConfig, startSec: number, endSec: number) {
   const service = new SeismicDownloadService();
   service.ensureRange({
     network: station.network, station: station.station, channel: station.channel,
-    location: station.location ?? "", startSec, endSec,
+    location: station.location ?? "", startSec, endSec, proxy: true,
   });
   // Drain the ready queue until the download reports done.
   while ((await service.nextReadyDay()) !== DONE) { /* wait */ }

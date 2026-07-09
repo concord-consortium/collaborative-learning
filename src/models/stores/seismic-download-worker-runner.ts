@@ -19,6 +19,8 @@ export const workerRunner: DownloadRunner = (params, onEvent, cancel) => {
     worker.terminate();
   });
 
-  // Include the proxy status and base url, since they are defined by url params but the worker has no `window`.
-  worker.postMessage({ type: "download", params: { ...params, proxy: isProxyEnabled(), baseUrl: getLocalBaseUrl() } });
+  // Resolve the proxy status and base url here, since they default to url params but the worker
+  // has no `window`. A caller that sets them explicitly (e.g. seismic-admin) wins.
+  const { proxy = isProxyEnabled(), baseUrl = getLocalBaseUrl() } = params;
+  worker.postMessage({ type: "download", params: { ...params, proxy, baseUrl } });
 };
