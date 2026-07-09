@@ -1,19 +1,21 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AdminHeader } from "./admin-header";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
 
-function makeStore(listStations = jest.fn(async () => [{ network: "AK", station: "K204", channel: "HNZ" }])) {
+function makeStore() {
+  const listStations = jest.fn(async () => [{ network: "AK", station: "K204", channel: "HNZ" }]);
+  const scanCachedDays = jest.fn(async () => new Set<number>());
   const store = new SeismicAdminStore({
     cache: {
       listStations,
-      scanCachedDays: async () => new Set<number>(),
+      scanCachedDays,
       stationRawBytes: async () => 0,
       deleteDaysInRange: async () => {},
     } as any,
   });
-  return { store, listStations };
+  return { store, listStations, scanCachedDays };
 }
 
 function renderHeader(store: SeismicAdminStore) {
@@ -25,6 +27,8 @@ function renderHeader(store: SeismicAdminStore) {
 }
 
 describe("AdminHeader", () => {
+  beforeEach(() => window.localStorage.clear());
+
   it("renders a checkbox per station (selected by default) and toggles selection", async () => {
     const { store } = makeStore();
     await store.refresh();
@@ -36,22 +40,24 @@ describe("AdminHeader", () => {
     expect(store.selected.size).toBe(0);
   });
 
-  it("keeps Apply disabled until the range changes, then applies + refreshes", async () => {
-    const { store, listStations } = makeStore();
-    // initial load — listStations called once
+  it("applies a date change immediately", async () => {
+    const { store, scanCachedDays } = makeStore();
+    await store.refresh();
+    const scansAfterRefresh = scanCachedDays.mock.calls.length;
+    renderHeader(store);
+
+    fireEvent.change(screen.getByLabelText(/Start/), { target: { value: "2026-02-01" } });
+
+    expect(store.startDate).toBe("2026-02-01");
+    await waitFor(() => expect(scanCachedDays.mock.calls.length).toBeGreaterThan(scansAfterRefresh));
+  });
+
+  it("ignores a cleared date input", async () => {
+    const { store } = makeStore();
     await store.refresh();
     renderHeader(store);
 
-    const apply = screen.getByRole("button", { name: "Apply" });
-    expect(apply).toBeDisabled();
-
-    fireEvent.change(screen.getByLabelText(/Start/), { target: { value: "2026-02-01" } });
-    expect(apply).toBeEnabled();
-
-    fireEvent.click(apply);
-    // setRange applied the draft range
-    expect(store.startDate).toBe("2026-02-01");
-    // refresh ran again (initial + apply)
-    expect(listStations).toHaveBeenCalledTimes(2);
+    fireEvent.change(screen.getByLabelText(/Start/), { target: { value: "" } });
+    expect(store.startDate).toBe("2026-01-01");
   });
 });

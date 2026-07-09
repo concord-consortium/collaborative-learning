@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
 import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
-import { formatBytes } from "../seismic-admin-utils";
+import { formatBytes } from "../utils/seismic-admin-utils";
 import { ConfirmModal } from "./confirm-modal";
 import { RawTimeline } from "./raw-timeline";
 import "./station-section.scss";

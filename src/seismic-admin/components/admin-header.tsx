@@ -1,22 +1,15 @@
 import { observer } from "mobx-react";
-import React, { useState } from "react";
+import React from "react";
 import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
 import "./admin-header.scss";
 
-/** Fixed header: station filter checkboxes + a start/end date range and an Apply button. */
+/** Fixed header: station filter checkboxes and a start/end date range. */
 export const AdminHeader = observer(function AdminHeader() {
   const store = useSeismicAdminStore();
 
-  // Draft date range — applied to the store only when Apply is clicked.
-  const [start, setStart] = useState(store.startDate);
-  const [end, setEnd] = useState(store.endDate);
-
-  const apply = () => {
-    store.setRange(start, end);
-    void store.refresh();
-  };
-
-  const applyDisabled = start === store.startDate && end === store.endDate;
+  // A cleared date input reports "", which isn't a usable range — ignore it.
+  const setStart = (value: string) => { if (value) store.setRange(value, store.endDate); };
+  const setEnd = (value: string) => { if (value) store.setRange(store.startDate, value); };
 
   return (
     <div className="admin-header">
@@ -40,13 +33,10 @@ export const AdminHeader = observer(function AdminHeader() {
         <div className="option-area">
           <div className="option-header">Date Range</div>
           <div className="dates">
-            <label>Start <input type="date" value={start} onChange={e => setStart(e.target.value)} /></label>
-            <label>End <input type="date" value={end} onChange={e => setEnd(e.target.value)} /></label>
+            <label>Start <input type="date" value={store.startDate} onChange={e => setStart(e.target.value)} /></label>
+            <label>End <input type="date" value={store.endDate} onChange={e => setEnd(e.target.value)} /></label>
           </div>
         </div>
-      </div>
-      <div className="controls">
-        <button disabled={applyDisabled} onClick={apply}>Apply</button>
       </div>
     </div>
   );

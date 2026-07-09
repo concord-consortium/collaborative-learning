@@ -1,6 +1,6 @@
 import { coverageSegments, missingDayCount, mergeStations, formatBytes } from "./seismic-admin-utils";
-import { StationConfig } from "../../shared/seismic/seismic-types";
-import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
+import { StationConfig } from "../../../shared/seismic/seismic-types";
+import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
 
 describe("seismic-admin-utils", () => {
   it("builds run-length coverage segments over [firstDay, lastDay]", () => {

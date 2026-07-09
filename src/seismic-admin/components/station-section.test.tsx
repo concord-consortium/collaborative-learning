@@ -41,7 +41,7 @@ describe("StationSection", () => {
     await store.refresh();
     renderSection(store, getStationChannelPrefix(opfsStation));
 
-    fireEvent.click(screen.getByRole("button", { name: "Delete raw" }));
+    fireEvent.click(screen.getByRole("button", { name: "Delete raw data" }));
     // confirm modal appears with its own Delete button
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
 

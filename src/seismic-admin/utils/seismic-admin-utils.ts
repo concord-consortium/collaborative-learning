@@ -1,5 +1,5 @@
-import { StationData, StationConfig } from "../../shared/seismic/seismic-types";
-import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
+import { StationData, StationConfig } from "../../../shared/seismic/seismic-types";
+import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
 
 /** Run-length spans of cached/uncached days across [firstDay, lastDay]. */
 export function coverageSegments(cached: Set<number>, firstDay: number, lastDay: number) {

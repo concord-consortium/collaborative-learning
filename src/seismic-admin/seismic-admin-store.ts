@@ -4,7 +4,8 @@ import { dayIndex, lastDayIndex, utcDayFromString } from "../../shared/seismic/s
 import { StationConfig } from "../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
 import { DONE, SeismicDownloadService } from "../models/stores/seismic-download-service";
-import { mergeStations, missingDayCount } from "./seismic-admin-utils";
+import { loadFilters, saveFilters } from "./utils/admin-persistence";
+import { mergeStations, missingDayCount } from "./utils/seismic-admin-utils";
 
 type AdminCache = Pick<SeismicCache, "listStations" | "scanCachedDays" | "stationRawBytes" | "deleteDaysInRange">;
 
@@ -40,12 +41,27 @@ export class SeismicAdminStore {
   stats = new Map<string, StationStats>();
 
   private cache: AdminCache;
+  /** True once a selection has been persisted, so refresh() won't re-select everything. */
+  private hasSavedSelection = false;
 
   constructor(private deps: SeismicAdminDeps = {}) {
     this.cache = deps.cache ?? createOpfsCache();
+
+    const saved = loadFilters();
+    if (saved.startDate) this.startDate = saved.startDate;
+    if (saved.endDate) this.endDate = saved.endDate;
+    if (saved.selected) {
+      this.selected = new Set(saved.selected);
+      this.hasSavedSelection = true;
+    }
+
     // `deps` and `cache` are injected dependencies, not observable state.
     makeAutoObservable<SeismicAdminStore, "deps" | "cache">(
       this, { deps: false, cache: false }, { autoBind: true });
+  }
+
+  private save() {
+    saveFilters({ startDate: this.startDate, endDate: this.endDate, selected: [...this.selected] });
   }
 
   get selectedStations() {
@@ -89,9 +105,12 @@ export class SeismicAdminStore {
     return total;
   }
 
+  /** Applies a new range immediately: persists it and reloads stats for every station. */
   setRange(start: string, end: string) {
     this.startDate = start;
     this.endDate = end;
+    this.save();
+    void this.loadAllStats();
   }
 
   toggle(key: string) {
@@ -100,6 +119,8 @@ export class SeismicAdminStore {
     } else {
       this.selected.add(key);
     }
+    this.hasSavedSelection = true;
+    this.save();
   }
 
   async refresh() {
@@ -107,11 +128,20 @@ export class SeismicAdminStore {
     const merged = mergeStations(opfs, this.deps.catalog ?? []);
     runInAction(() => {
       this.stations = merged;
-      if (this.selected.size === 0) {
+      // A restored selection may name stations that no longer exist.
+      for (const key of [...this.selected]) {
+        if (!merged.has(key)) this.selected.delete(key);
+      }
+      // Select everything by default, but never override a selection the user saved.
+      if (this.selected.size === 0 && !this.hasSavedSelection) {
         for (const key of merged.keys()) this.selected.add(key);
       }
     });
-    for (const s of merged.values()) await this.loadStats(s);
+    await this.loadAllStats();
+  }
+
+  async loadAllStats() {
+    for (const s of this.stations.values()) await this.loadStats(s);
   }
 
   statsFor(key?: string): StationStats {

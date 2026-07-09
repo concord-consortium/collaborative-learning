@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import React from "react";
-import { coverageSegments } from "../seismic-admin-utils";
+import { coverageSegments } from "../utils/seismic-admin-utils";
 import "./raw-timeline.scss";
 
 interface Props {
