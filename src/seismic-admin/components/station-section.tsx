@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
 import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
-import { formatBytes } from "../utils/seismic-admin-utils";
+import { formatBytes, stationLabel } from "../utils/seismic-admin-utils";
 import { ConfirmModal } from "./confirm-modal";
 import { RawTimeline } from "./raw-timeline";
 import "./station-section.scss";
@@ -24,7 +24,7 @@ export const StationSection = observer(function StationSection({ stationKey }: I
   const hasRange = firstDay !== undefined && lastDay !== undefined;
   const totalDays = hasRange ? lastDay - firstDay + 1 : 0;
   const label = station
-    ? station.label || `${station.network} ${station.station} ${station.channel}`
+    ? stationLabel(station)
     : `All selected stations (${store.selected.size})`;
 
   const cachedDaysMessage = () => {

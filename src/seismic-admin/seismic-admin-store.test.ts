@@ -43,6 +43,52 @@ it("downloads selected stations sequentially", async () => {
   expect(runner).toHaveBeenCalledTimes(1);
 });
 
+describe("download feedback", () => {
+  const catalog = [{ network: "AK", station: "RC01", location: "", channel: "BHZ", label: "Rabbit Creek" }];
+
+  it("reports day progress for a single station, then completion", async () => {
+    const seen: string[] = [];
+    const downloadStation = jest.fn(async (_s: any, _a: number, _b: number, onProgress?: any) => {
+      onProgress?.(0, 3);
+      seen.push(store.feedback);
+      onProgress?.(2, 3);
+      seen.push(store.feedback);
+    });
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, catalog, downloadStation });
+    await store.refresh();
+
+    await store.downloadStation([...store.stations.keys()].find(k => k.includes("RC01"))!);
+    expect(seen).toEqual([
+      "Downloading day 0 of 3 for Rabbit Creek",
+      "Downloading day 2 of 3 for Rabbit Creek",
+    ]);
+    expect(store.feedback).toBe("Finished downloading data for Rabbit Creek.");
+  });
+
+  it("prefixes each station's progress when downloading all selected", async () => {
+    const seen: string[] = [];
+    const downloadStation = jest.fn(async (_s: any, _a: number, _b: number, onProgress?: any) => {
+      onProgress?.(1, 2);
+      seen.push(store.feedback);
+    });
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, catalog, downloadStation });
+    await store.refresh();
+
+    await store.downloadAllSelected();
+    // K204 (from OPFS) and RC01 (from the catalog) are both selected.
+    expect(seen).toEqual([
+      "Station 1 of 2 — Downloading day 1 of 2 for AK K204 HNZ",
+      "Station 2 of 2 — Downloading day 1 of 2 for Rabbit Creek",
+    ]);
+    expect(store.feedback).toBe("Finished downloading data for 2 stations.");
+  });
+
+  it("is idle before any download", () => {
+    const store = new SeismicAdminStore({ cache: fakeCache() as any });
+    expect(store.feedback).toBe("");
+  });
+});
+
 describe("persisted filters", () => {
   it("restores the saved range and selection", async () => {
     saveFilters({ startDate: "2026-01-30", endDate: "2026-02-02", selected: [] });

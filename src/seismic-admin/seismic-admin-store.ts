@@ -5,27 +5,37 @@ import { StationConfig } from "../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
 import { DONE, SeismicDownloadService } from "../models/stores/seismic-download-service";
 import { loadFilters, saveFilters } from "./utils/admin-persistence";
-import { mergeStations, missingDayCount } from "./utils/seismic-admin-utils";
+import { mergeStations, missingDayCount, stationLabel } from "./utils/seismic-admin-utils";
 
 type AdminCache = Pick<SeismicCache, "listStations" | "scanCachedDays" | "stationRawBytes" | "deleteDaysInRange">;
+
+/** Reports how many of a station's days have been downloaded so far. */
+export type DownloadProgress = (completed: number, total: number) => void;
 
 /** Download one station's missing days into OPFS and wait for completion. Production default;
  *  tests inject their own to bypass the Web Worker.
  */
-async function defaultDownloadStation(station: StationConfig, startSec: number, endSec: number) {
+async function defaultDownloadStation(
+  station: StationConfig, startSec: number, endSec: number, onProgress?: DownloadProgress
+) {
   const service = new SeismicDownloadService();
   service.ensureRange({
     network: station.network, station: station.station, channel: station.channel,
     location: station.location ?? "", startSec, endSec, proxy: true,
   });
-  // Drain the ready queue until the download reports done.
-  while ((await service.nextReadyDay()) !== DONE) { /* wait */ }
+  // Drain the ready queue until the download reports done, reporting progress as days land.
+  while ((await service.nextReadyDay()) !== DONE) {
+    onProgress?.(service.completed, service.total);
+  }
+  onProgress?.(service.completed, service.total);
 }
 
 export interface SeismicAdminDeps {
   cache?: AdminCache;
   catalog?: StationConfig[];
-  downloadStation?: (station: StationConfig, startSec: number, endSec: number) => Promise<void>;
+  downloadStation?: (
+    station: StationConfig, startSec: number, endSec: number, onProgress?: DownloadProgress
+  ) => Promise<void>;
 }
 
 interface StationStats {
@@ -40,6 +50,8 @@ export class SeismicAdminStore {
   stations = new Map<string, StationConfig>();   // keyed by getStationChannelPrefix
   selected = new Set<string>();                  // same keys
   stats = new Map<string, StationStats>();
+  /** Human-readable description of the work in progress. Empty when idle. */
+  feedback = "";
 
   private cache: AdminCache;
   /** True once a selection has been persisted, so refresh() won't re-select everything. */
@@ -175,9 +187,16 @@ export class SeismicAdminStore {
     await this.loadStats(s);
   }
 
+  setFeedback(message: string) {
+    this.feedback = message;
+  }
+
   async downloadStation(key: string) {
     const s = this.stations.get(key);
-    if (s) await this.download(s);
+    if (!s) return;
+
+    await this.download(s);
+    this.setFeedback(`Finished downloading data for ${stationLabel(s)}.`);
   }
 
   async deleteAllSelected() {
@@ -186,14 +205,26 @@ export class SeismicAdminStore {
 
   async downloadAllSelected() {
     // Download stations sequentially to ensure shared-proxy limit is respected
-    for (const s of this.selectedStations) await this.download(s);
+    const stations = this.selectedStations;
+    for (let i = 0; i < stations.length; i++) {
+      await this.download(stations[i], `Station ${i + 1} of ${stations.length} — `);
+    }
+    this.setFeedback(`Finished downloading data for ${stations.length} station${stations.length === 1 ? "" : "s"}.`);
   }
 
-  private async download(s: StationConfig) {
+  private async download(s: StationConfig, prefix = "") {
     if (this.firstSec === undefined || this.lastSec === undefined) return;
 
     const run = this.deps.downloadStation ?? defaultDownloadStation;
-    await run(s, this.firstSec, this.lastSec);
+    const name = stationLabel(s);
+    const genericFeedback = `${prefix}Downloading data for ${name}...`;
+    this.setFeedback(genericFeedback);
+    await run(s, this.firstSec, this.lastSec, (completed, total) => {
+      // `total` is 0 until the first progress event arrives.
+      this.setFeedback(total > 0
+        ? `${prefix}Downloading day ${completed} of ${total} for ${name}`
+        : genericFeedback);
+    });
     await this.loadStats(s);
   }
 }

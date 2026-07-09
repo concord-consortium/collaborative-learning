@@ -34,6 +34,11 @@ export function formatBytes(bytes: number): string {
   return `${value.toFixed(1)} ${units[unit]}`;
 }
 
+/** A station's display name: its catalog label, else "{network} {station} {channel}". */
+export function stationLabel(station: StationConfig): string {
+  return station.label || `${station.network} ${station.station} ${station.channel}`;
+}
+
 /** Union OPFS stations with catalog stations into a Map keyed by getStationChannelPrefix. */
 export function mergeStations(opfs: StationData[], catalog: StationConfig[]): Map<string, StationConfig> {
   const byKey = new Map<string, StationConfig>();
