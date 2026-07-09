@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import { observer } from "mobx-react-lite";
 import React from "react";
 import { coverageSegments } from "../utils/seismic-admin-utils";
 import "./raw-timeline.scss";
@@ -10,7 +11,7 @@ interface Props {
 }
 
 /** A proportional bar of cached (filled) / uncached (empty) day spans over [firstDay, lastDay]. */
-export function RawTimeline({ cachedDays, firstDay, lastDay }: Props) {
+export const RawTimeline = observer(function RawTimeline({ cachedDays, firstDay, lastDay }: Props) {
   const totalDays = lastDay - firstDay + 1;
   const segments = coverageSegments(cachedDays, firstDay, lastDay);
   return (
@@ -28,4 +29,4 @@ export function RawTimeline({ cachedDays, firstDay, lastDay }: Props) {
       })}
     </div>
   );
-}
+});

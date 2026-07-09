@@ -33,6 +33,20 @@ describe("SeismicDownloadService", () => {
     expect(got).toEqual([100, 102, DONE]);
   });
 
+  it("records each written day's byte size, defaulting to 0 for already-cached days", async () => {
+    const service = new SeismicDownloadService(scriptedRunner([
+      { type: "dayWritten", day: 100, bytes: 500 },
+      { type: "dayWritten", day: 101 },   // already cached — the downloader sends no size
+      { type: "done" },
+    ]));
+
+    service.ensureRange(PARAMS);
+    while ((await service.nextReadyDay()) !== DONE) { /* drain */ }
+    expect(service.bytesForDay(100)).toBe(500);
+    expect(service.bytesForDay(101)).toBe(0);
+    expect(service.bytesForDay(999)).toBe(0);
+  });
+
   it("tracks observable progress and errored days", async () => {
     const service = new SeismicDownloadService(scriptedRunner([
       { type: "progress", completed: 1, total: 2 },

@@ -9,8 +9,17 @@ import { mergeStations, missingDayCount, stationLabel } from "./utils/seismic-ad
 
 type AdminCache = Pick<SeismicCache, "listStations" | "scanCachedDays" | "stationRawBytes" | "deleteDaysInRange">;
 
-/** Reports how many of a station's days have been downloaded so far. */
-export type DownloadProgress = (completed: number, total: number) => void;
+export interface DownloadUpdate {
+  completed: number;
+  total: number;
+  /** The day that just landed in OPFS, absent on the final summary update. */
+  day?: number;
+  /** Bytes written for that day; 0 when it was already cached. */
+  bytes?: number;
+}
+
+/** Reports a station's download as each day lands. */
+export type DownloadProgress = (update: DownloadUpdate) => void;
 
 /** Download one station's missing days into OPFS and wait for completion. Production default;
  *  tests inject their own to bypass the Web Worker.
@@ -23,11 +32,14 @@ async function defaultDownloadStation(
     network: station.network, station: station.station, channel: station.channel,
     location: station.location ?? "", startSec, endSec, proxy: true,
   });
-  // Drain the ready queue until the download reports done, reporting progress as days land.
-  while ((await service.nextReadyDay()) !== DONE) {
-    onProgress?.(service.completed, service.total);
+  // Drain the ready queue until the download reports done, reporting each day as it lands.
+  let day: number | typeof DONE;
+  while ((day = await service.nextReadyDay()) !== DONE) {
+    onProgress?.({
+      completed: service.completed, total: service.total, day, bytes: service.bytesForDay(day),
+    });
   }
-  onProgress?.(service.completed, service.total);
+  onProgress?.({ completed: service.completed, total: service.total });
 }
 
 export interface SeismicAdminDeps {
@@ -212,19 +224,33 @@ export class SeismicAdminStore {
     this.setFeedback(`Finished downloading data for ${stations.length} station${stations.length === 1 ? "" : "s"}.`);
   }
 
+  /** Fold a freshly-downloaded day into a station's stats so its timeline fills in live. */
+  markDayCached(key: string, day: number, bytes: number) {
+    const stats = this.stats.get(key);
+    // Guard against a repeated day: it would double-count bytes and drive missingCount negative.
+    if (!stats?.cachedDays || stats.cachedDays.has(day)) return;
+
+    stats.cachedDays.add(day);
+    stats.missingCount--;
+    stats.bytes += bytes;
+  }
+
   private async download(s: StationConfig, prefix = "") {
     if (this.firstSec === undefined || this.lastSec === undefined) return;
 
     const run = this.deps.downloadStation ?? defaultDownloadStation;
     const name = stationLabel(s);
+    const key = getStationChannelPrefix(s);
     const genericFeedback = `${prefix}Downloading data for ${name}...`;
     this.setFeedback(genericFeedback);
-    await run(s, this.firstSec, this.lastSec, (completed, total) => {
+    await run(s, this.firstSec, this.lastSec, ({ completed, total, day, bytes }) => {
+      if (day !== undefined) this.markDayCached(key, day, bytes ?? 0);
       // `total` is 0 until the first progress event arrives.
       this.setFeedback(total > 0
         ? `${prefix}Downloading day ${completed} of ${total} for ${name}`
         : genericFeedback);
     });
+    // Reconcile against what's actually on disk; the incremental updates above are an estimate.
     await this.loadStats(s);
   }
 }

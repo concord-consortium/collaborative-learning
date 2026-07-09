@@ -26,7 +26,8 @@ export type DownloadRunner = (
   cancel: { onCancel: (fn: () => void) => void }
 ) => void;
 
-export type DownloadEvent = { type: "dayWritten"; day: number }
+// `bytes` is the size of the chunk just written; absent when the day was already cached.
+export type DownloadEvent = { type: "dayWritten"; day: number; bytes?: number }
   | { type: "dayEmpty"; day: number }
   | { type: "dayError"; day: number; error: string }
   | { type: "progress"; completed: number; total: number }
@@ -105,12 +106,12 @@ export async function downloadRange(
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         if (params.signal?.aborted) return;
         try {
-          const bytes = await deps.fetchRaw(
+          const data = await deps.fetchRaw(
             { ...stationLocation, startTime: dStart, endTime: dEnd }, params.signal
           );
-          await deps.cache.writeDayChunk(stationLocation, day, bytes);
+          await deps.cache.writeDayChunk(stationLocation, day, data);
           completed++;
-          onEvent({ type: "dayWritten", day });
+          onEvent({ type: "dayWritten", day, bytes: data.byteLength });
           emitProgress();
           return;
         } catch (err) {

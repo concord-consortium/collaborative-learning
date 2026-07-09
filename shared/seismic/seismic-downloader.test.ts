@@ -36,6 +36,28 @@ describe("downloadRange", () => {
     expect(events.at(-1)).toEqual({ type: "done" });
   });
 
+  it("reports the byte size of each freshly-written day", async () => {
+    const deps = makeDeps({ fetchRaw: async () => new ArrayBuffer(512) });
+    const { events, onEvent } = collect();
+    await downloadRange(deps, RANGE, onEvent);
+
+    const written = events.filter(e => e.type === "dayWritten");
+    expect(written).toHaveLength(4);
+    expect(written.every(e => (e as any).bytes === 512)).toBe(true);
+  });
+
+  it("omits the byte size for an already-cached day", async () => {
+    const d30 = dayIndex(utcDay(2026, 1, 30));
+    const deps = makeDeps({
+      cache: { scanCachedDays: async () => new Set([d30]), writeDayChunk: async () => {} },
+    });
+    const { events, onEvent } = collect();
+    await downloadRange(deps, RANGE, onEvent);
+
+    const cachedEvent = events.find(e => e.type === "dayWritten" && (e as any).day === d30);
+    expect((cachedEvent as any).bytes).toBeUndefined();
+  });
+
   it("skips already-cached days but still reports them as ready", async () => {
     const d30 = dayIndex(utcDay(2026, 1, 30));
     const fetchRaw = jest.fn(async () => new ArrayBuffer(1));

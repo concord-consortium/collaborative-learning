@@ -49,9 +49,9 @@ describe("download feedback", () => {
   it("reports day progress for a single station, then completion", async () => {
     const seen: string[] = [];
     const downloadStation = jest.fn(async (_s: any, _a: number, _b: number, onProgress?: any) => {
-      onProgress?.(0, 3);
+      onProgress?.({ completed: 0, total: 3 });
       seen.push(store.feedback);
-      onProgress?.(2, 3);
+      onProgress?.({ completed: 2, total: 3 });
       seen.push(store.feedback);
     });
     const store = new SeismicAdminStore({ cache: fakeCache() as any, catalog, downloadStation });
@@ -68,7 +68,7 @@ describe("download feedback", () => {
   it("prefixes each station's progress when downloading all selected", async () => {
     const seen: string[] = [];
     const downloadStation = jest.fn(async (_s: any, _a: number, _b: number, onProgress?: any) => {
-      onProgress?.(1, 2);
+      onProgress?.({ completed: 1, total: 2 });
       seen.push(store.feedback);
     });
     const store = new SeismicAdminStore({ cache: fakeCache() as any, catalog, downloadStation });
@@ -86,6 +86,42 @@ describe("download feedback", () => {
   it("is idle before any download", () => {
     const store = new SeismicAdminStore({ cache: fakeCache() as any });
     expect(store.feedback).toBe("");
+  });
+});
+
+describe("live stats updates", () => {
+  const d30 = dayIndex(utcDay(2026, 1, 30));
+
+  /** Snapshot the mutable stats entry, since it's updated in place. */
+  const snapshot = (store: SeismicAdminStore, key: string) => {
+    const s = store.statsFor(key);
+    return { days: s.cachedDays?.size, bytes: s.bytes, missing: s.missingCount };
+  };
+
+  it("folds each downloaded day into the station's stats as it lands", async () => {
+    const seen: any[] = [];
+    let key = "";
+    const downloadStation = jest.fn(async (_s: any, _a: number, _b: number, onProgress?: any) => {
+      onProgress?.({ completed: 1, total: 3, day: d30, bytes: 500 });
+      seen.push(snapshot(store, key));
+      // A repeated day must not double-count bytes or drive missingCount negative.
+      onProgress?.({ completed: 1, total: 3, day: d30, bytes: 500 });
+      seen.push(snapshot(store, key));
+    });
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, downloadStation });
+    store.setRange("2026-01-30", "2026-02-02");   // 3 days, none cached
+    await store.refresh();
+    key = [...store.stations.keys()][0];
+
+    await store.downloadStation(key);
+    // starts at 0 cached / 1234 bytes / 3 missing, then the one day lands
+    expect(seen[0]).toEqual({ days: 1, bytes: 1734, missing: 2 });
+    expect(seen[1]).toEqual({ days: 1, bytes: 1734, missing: 2 });
+  });
+
+  it("ignores a day for a station with no stats loaded", () => {
+    const store = new SeismicAdminStore({ cache: fakeCache() as any });
+    expect(() => store.markDayCached("AK_NONE/BHZ", d30, 500)).not.toThrow();
   });
 });
 
