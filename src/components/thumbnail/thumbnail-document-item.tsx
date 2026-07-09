@@ -27,11 +27,12 @@ interface IProps {
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
   scale: number;
-  // When true (large/"big" thumbnails), the document can be scrolled within the
-  // thumbnail. The document subtree stays `inert` + `aria-hidden` (kept out of the tab
-  // order and the a11y tree); since `inert` blocks native scrolling, we translate wheel
-  // events into programmatic scrolling instead, keeping the thumbnail "scroll-only"
-  // rather than fully interactive.
+  // When true (large/"big" thumbnails — the 4-up replacement), the document is interactive:
+  // its read-only tiles can be selected and "picked up"/copied into the user's own document,
+  // so the subtree is NOT made `inert`/`aria-hidden`. The document is also scrollable within
+  // the thumbnail; a wheel handler keeps scrolling consistent (and lets the wheel fall through
+  // to the surrounding grid at the document's top/bottom edge). Small thumbnails are inert,
+  // non-interactive previews.
   scrollable?: boolean;
 }
 
@@ -45,11 +46,10 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
   const classStore = useClassStore();
   const listItemRef = useRef<HTMLDivElement>(null);
 
-  // Large/"big" thumbnails are scroll-only: the document subtree is kept `inert` (out of
-  // the tab order) and `aria-hidden`, which also blocks native scrolling. Translate wheel
-  // events on the (non-inert) list item into programmatic scrolling of the inner document
-  // so users can scroll without the tiles becoming focusable/interactive. A non-passive
-  // listener is required so we can preventDefault the page scroll.
+  // Large/"big" thumbnails are interactive and scrollable. Translate wheel events on the list
+  // item into programmatic scrolling of the inner document so the wheel reliably scrolls the
+  // document content (and, at its top/bottom edge, falls through to the surrounding thumbnail
+  // grid). A non-passive listener is required so we can preventDefault the page scroll.
   useEffect(() => {
     if (!scrollable) return;
     const el = listItemRef.current;
@@ -128,13 +128,13 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
       >
         <div
           className={classNames("scaled-list-item-container", { group })}
-          // The rendered document is non-interactive in every thumbnail: hide its tile
-          // content from the a11y tree (aria-hidden) and remove it from the tab order
-          // (inert). Large/scrollable thumbnails are scrolled via a wheel handler on the
-          // list item (see the effect above), since inert blocks native scrolling.
-          aria-hidden={true}
+          // Small thumbnails are non-interactive previews: hide tile content from the a11y
+          // tree (aria-hidden) and remove it from the tab order (inert). Large/scrollable
+          // thumbnails are the 4-up replacement and must stay interactive (tiles selectable
+          // and borrowable), so they are NOT inert/aria-hidden.
+          aria-hidden={scrollable ? undefined : true}
           // Spread bypasses React 17's type definitions, which lack `inert`.
-          {...{ inert: "" }}
+          {...(scrollable ? {} : { inert: "" })}
         >
           { isPrivate
             ? <ThumbnailPrivateIcon />
