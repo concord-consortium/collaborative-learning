@@ -503,6 +503,18 @@ the net-new part.
   per-function deploy scripts (`firebase deploy --only functions:functions-v2:chatTutorOnWrite`), so
   the trigger ships without redeploying the whole codebase (OPS-1).
 
+**Correction found during local emulator testing (firebase-admin API surface)**: the verbatim
+port's `admin.firestore.FieldValue` / `admin.firestore.FieldPath` namespace statics come through
+**undefined inside the functions emulator** (firebase-tools proxies the `firebase-admin` module for
+emulated functions; under CLUE's `firebase-admin@12` the proxy preserves the `admin.firestore()`
+call but drops the statics — the trigger crashed at `acquireLock`'s `serverTimestamp()`). The port
+therefore uses the **modular `firebase-admin/firestore` imports** (`FieldValue`, `FieldPath`,
+`getFirestore`, and the types), which is also `functions-v2`'s existing idiom
+(`on-document-summarized.ts`, `get-ai-content.ts`) and works identically in production. Verified by
+emulator observation: a `user` doc written at the authed path fires the trigger, acquires the lock,
+and reaches the OpenAI call (a dummy key surfaces `status:"error"` with the 401 on the parent doc —
+the designed failure path).
+
 **Config awareness**: keep the trigger **1st-gen** (do **not** modernize to 2nd-gen
 `onDocumentWritten` — at-least-once/Eventarc would reintroduce the infinite re-drain the trigger's
 own comment warns of, which the 1st-gen default no-retry policy prevents). **Region (BE-4)**: a 1st-gen

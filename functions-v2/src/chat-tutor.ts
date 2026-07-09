@@ -16,7 +16,7 @@
 // parsing, and delegates every Firestore/OpenAI step to ./chat/drain.
 import * as functionsV1 from "firebase-functions/v1";
 import {defineSecret, defineString} from "firebase-functions/params";
-import * as admin from "firebase-admin";
+import {getFirestore} from "firebase-admin/firestore";
 
 import {CHAT_GENERIC_PROMPT} from "./chat/generic-prompt";
 import {createOpenAIClient} from "./chat/openai";
@@ -43,7 +43,7 @@ export const chatTutorOnWrite = functionsV1
     // writes (and any other kind).
     if (doc.kind !== "user") return null;
 
-    const db = admin.firestore();
+    const db = getFirestore();
     const {portal, conversationId} = context.params as Record<string, string>;
     const parentRef = db.doc(`authed/${portal}/chatTutor/${conversationId}`);
     const messagesCol = parentRef.collection("messages");

@@ -2,7 +2,14 @@
 // trigger wiring in ../chat-tutor.ts. This module imports firebase-admin (+ the chat helpers),
 // NOT firebase-functions, so the drain/lock logic is testable against the Firestore emulator
 // with a fake OpenAI.
-import * as admin from "firebase-admin";
+//
+// Uses the modular firebase-admin/firestore imports (not admin.firestore.FieldValue etc.): the
+// functions emulator proxies the firebase-admin module and the namespace statics come through
+// undefined there, while the modular entry points work in both the emulator and production.
+import {
+  CollectionReference, DocumentData, DocumentReference, FieldPath as FirestoreFieldPath, FieldValue,
+  Query, QueryDocumentSnapshot, getFirestore,
+} from "firebase-admin/firestore";
 
 import {
   createOpenAIClient, createConversation, installDeveloperPrompt, createTutorResponse,
@@ -23,9 +30,9 @@ const DRAIN_BATCH = 200;
 // Safety valve against a pathological drain loop (see the throw at the end of processAndDrain).
 const MAX_DRAIN_TURNS = 100;
 
-type MsgSnap = admin.firestore.QueryDocumentSnapshot;
-type ParentRef = admin.firestore.DocumentReference;
-type MsgCol = admin.firestore.CollectionReference;
+type MsgSnap = QueryDocumentSnapshot;
+type ParentRef = DocumentReference;
+type MsgCol = CollectionReference;
 
 export interface DrainContext {
   parentRef: ParentRef;
@@ -38,7 +45,7 @@ export interface DrainContext {
 // The owner fields the client's rules require on any doc it reads — copied off the triggering
 // message onto function-written docs (assistant messages, the function-created parent). This is
 // the only channel through which the parent gets its {uid, context_id, problemPath} stamp.
-export function pickOwnerFields(data: admin.firestore.DocumentData | undefined): Record<string, unknown> {
+export function pickOwnerFields(data: DocumentData | undefined): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   if (data?.uid !== undefined) out.uid = data.uid;
   if (data?.context_id !== undefined) out.context_id = data.context_id;
@@ -105,7 +112,7 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
   const assistant = {
     kind: "assistant",
     userText,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdAt: FieldValue.serverTimestamp(),
     ...ownerFields,
   };
 
@@ -114,14 +121,14 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
 
 export async function processAndDrain(ctx: DrainContext): Promise<void> {
   const {parentRef, messagesCol} = ctx;
-  const db = admin.firestore();
-  const FieldPath = admin.firestore.FieldPath;
+  const db = getFirestore();
+  const FieldPath = FirestoreFieldPath;
 
   // order on (createdAt, __name__) so the cursor is deterministic even when messages share a
   // serverTimestamp() millisecond; range-only (no kind filter) so it needs NO composite index —
   // `kind` is filtered in JS below.
   const afterCursorQuery = (cursor: MsgSnap | null) => {
-    let q: admin.firestore.Query = messagesCol
+    let q: Query = messagesCol
       .orderBy("createdAt")
       .orderBy(FieldPath.documentId())
       .limit(DRAIN_BATCH);
@@ -165,7 +172,7 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
         if (stillPending.length > 0) return false;
         tx.set(parentRef, {
           status: "idle",
-          lockedAt: admin.firestore.FieldValue.delete(),
+          lockedAt: FieldValue.delete(),
         }, {merge: true});
         return true;
       });
@@ -204,7 +211,7 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
 export async function acquireLock(
   parentRef: ParentRef, ownerFields: Record<string, unknown>
 ): Promise<boolean> {
-  const db = admin.firestore();
+  const db = getFirestore();
   return db.runTransaction(async (tx) => {
     const p = await tx.get(parentRef);
     const status = p.data()?.status ?? "idle";
@@ -216,7 +223,7 @@ export async function acquireLock(
     const ownerInit = p.exists ? {} : ownerFields;
     tx.set(parentRef, {
       status: "generating",
-      lockedAt: admin.firestore.FieldValue.serverTimestamp(),
+      lockedAt: FieldValue.serverTimestamp(),
       ...ownerInit,
     }, {merge: true});
     return true;
