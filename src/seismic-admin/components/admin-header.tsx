@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import React from "react";
 import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
 import "./admin-header.scss";
+import { FeedbackArea } from "./feedback-area";
 
 /** Fixed header: station filter checkboxes and a start/end date range. */
 export const AdminHeader = observer(function AdminHeader() {
@@ -38,6 +39,7 @@ export const AdminHeader = observer(function AdminHeader() {
           </div>
         </div>
       </div>
+      <FeedbackArea />
     </div>
   );
 });
