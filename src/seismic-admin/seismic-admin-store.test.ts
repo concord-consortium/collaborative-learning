@@ -16,7 +16,7 @@ it("loads stations from OPFS and computes per-station stats for the range", asyn
   store.setRange("2026-01-30", "2026-02-02");   // 3 days: 30, 31, 1 (end exclusive)
   await store.refresh();
   const key = [...store.stations.keys()][0];
-  expect(store.statsFor(key).cachedDays.has(d30)).toBe(true);
+  expect(store.statsFor(key).cachedDays?.has(d30)).toBe(true);
   expect(store.statsFor(key).bytes).toBe(1234);
   expect(store.statsFor(key).missingCount).toBe(2);
 });

@@ -26,7 +26,11 @@ export interface SeismicAdminDeps {
   downloadStation?: (station: StationConfig, startSec: number, endSec: number) => Promise<void>;
 }
 
-interface StationStats { cachedDays: Set<number>; bytes: number; missingCount: number; }
+interface StationStats {
+  bytes: number;
+  cachedDays?: Set<number>;
+  missingCount: number;
+}
 
 export class SeismicAdminStore {
   startDate = "2026-01-01";
@@ -77,6 +81,14 @@ export class SeismicAdminStore {
     return total;
   }
 
+  get selectedBytes() {
+    let total = 0;
+    this.selected.forEach(key => {
+      total += this.stats.get(key)?.bytes ?? 0;
+    });
+    return total;
+  }
+
   setRange(start: string, end: string) {
     this.startDate = start;
     this.endDate = end;
@@ -102,7 +114,16 @@ export class SeismicAdminStore {
     for (const s of merged.values()) await this.loadStats(s);
   }
 
-  statsFor(key: string) { return this.stats.get(key)!; }
+  statsFor(key?: string): StationStats {
+    const stats = key ? this.stats.get(key) : undefined;
+    if (stats) return stats;
+
+    // With no key, return stats for all selected stations
+    return {
+      bytes: this.selectedBytes,
+      missingCount: this.selectedMissingRawDays
+    };
+  }
 
   private async loadStats(s: StationConfig) {
     if (!(this.firstDay && this.lastDay)) return;
