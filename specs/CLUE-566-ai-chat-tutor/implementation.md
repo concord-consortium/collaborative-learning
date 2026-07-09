@@ -6,6 +6,15 @@
 **Status**: **Implemented** (all 10 steps landed on `CLUE-566-add-ai-chat`, 2026-07-08; deployment
 preconditions below remain operational gates)
 
+**Post-implementation UI change (2026-07-09)**: the sidebar no longer *overlays* the workspace (as
+ported from AP-118). It now reserves width and reflows the two-panel layout — the workspace shrinks
+and the drawer sits beside it as a third column. Open state moved from the header's local `useState`
+to an observable `ui.showChatTutor` flag; `.clue-app-content.chat-tutor-open` adds a right margin to
+`.workspace`; the drawer is restyled as a peer column (light-teal section-heading-style header with
+rounded top corners over a gray-bordered chat body). Files touched: `ui.ts`, `clue-app-header.tsx`,
+`clue-app-content.{tsx,scss}`, `chat-tutor/chat-sidebar.scss`, `chat-tutor/chat.{tsx,scss}`,
+`components/vars.scss`. See the "Sidebar overlay" bullet in requirements.md for rationale.
+
 ## Preface — how to read this plan
 
 The requirements spec is exhaustive and every design question is RESOLVED; this plan turns those

@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
@@ -27,7 +28,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appConfig: {autoAssignStudentsToIndividualGroups}, user, persistentUI } = this.stores;
+    const { appConfig: {autoAssignStudentsToIndividualGroups}, user, persistentUI, ui } = this.stores;
 
     const panels: IPanelGroupSpec = [{
                     panelId: EPanelId.workspace,
@@ -58,7 +59,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
     const ariaLabels = getAriaLabels();
 
     return (
-      <div className="clue-app-content">
+      <div className={classNames("clue-app-content", { "chat-tutor-open": ui.showChatTutor })}>
         <nav className="skip-links">
           {showResourcesSkipLink &&
             <a href="#resources-panel" className="skip-link" onClick={this.handleResourcesSkipLink}>

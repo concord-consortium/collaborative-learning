@@ -173,7 +173,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
       <header className="chat-header" data-testid="chat-header">
         <h2 className="chat-header-title">
           <span className="chat-header-icon" aria-hidden="true">💬</span>
-          {header}
+          <span className="chat-header-text" title={header}>{header}</span>
         </h2>
         <span className="chat-header-actions">
           {hasCopyableTurns &&
@@ -206,6 +206,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
         </span>
       </header>
 
+      <div className="chat-body">
       <div className="chat-messages" ref={listRef} data-testid="chat-messages">
         {turns.length === 0 &&
           <div className="chat-empty" data-testid="chat-empty">Ask the tutor about your work.</div>}
@@ -261,6 +262,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
           Send
         </button>
       </form>
+      </div>
     </section>
   );
 };

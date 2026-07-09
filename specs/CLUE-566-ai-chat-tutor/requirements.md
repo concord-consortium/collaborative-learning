@@ -94,6 +94,14 @@ from AP's:
   comment "chat panel" feature — see Technical Notes). **Restyle to CLUE's design
   system** (CLUE SCSS variables/tokens), replacing AP's `vars.scss` colors. Reuse the presentational
   `Chat` component (composer, message list, typing indicator, copy-transcript, error row) largely as-is.
+  - **Post-implementation change (2026-07-09): non-overlaid, inline sidebar.** In AP the drawer
+    *overlays* the activity content; that read poorly in CLUE's denser two-panel layout. The shipped
+    CLUE version instead **reserves width and reflows** — the workspace shrinks and the drawer sits
+    beside it as a third column, never covering content. Mechanics: drawer open state moved from the
+    header's local `useState` to an observable `ui.showChatTutor` flag so the layout can react; the
+    `.chat-tutor-open` class on `.clue-app-content` adds a right margin to `.workspace` equal to the
+    drawer width; the drawer itself is styled as a peer column (light-teal `section-heading-row`-style
+    header with rounded top corners over a gray-bordered chat body) rather than a floating overlay.
 - **Transport abstraction.** Port AP's `ChatTransport` **seam** (the interface) and provide a
   `DebugTransport` (no backend) and a live `FirestoreTransport`, so the UI is demoable before the backend
   lands. Note only the *interface* ports cleanly: AP's concrete transports are bound to AP infra (log-sink

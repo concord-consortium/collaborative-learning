@@ -40,7 +40,9 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
   const [isGroupManagementModalOpen, setIsGroupManagementModalOpen] = useState(false);
   const [isStudentGroupModalOpen, setIsStudentGroupModalOpen] = useState(false);
-  const [isChatTutorOpen, setIsChatTutorOpen] = useState(false);
+  // Drawer open state lives in the ui store (not local useState) so the workspace layout
+  // can reserve space for the drawer and bump its content over instead of being overlaid.
+  const isChatTutorOpen = ui.showChatTutor;
   const headerRef = useRef<HTMLElement>(null);
   const chatTutorLauncherRef = useRef<HTMLButtonElement>(null);
 
@@ -54,17 +56,17 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     !!urlParams.chatTutor && user.isStudent && !!chatTutorDocumentKey && !!chatTutorDocument?.content;
 
   const handleCloseChatTutor = useCallback(() => {
-    setIsChatTutorOpen(false);
+    ui.setShowChatTutor(false);
     chatTutorLauncherRef.current?.focus();
-  }, []);
+  }, [ui]);
 
   // Don't leave the drawer flagged open after its document goes away, or it would
   // pop back open unrequested when a document loads again.
   useEffect(() => {
     if (!showChatTutorLauncher) {
-      setIsChatTutorOpen(false);
+      ui.setShowChatTutor(false);
     }
-  }, [showChatTutorLauncher]);
+  }, [showChatTutorLauncher, ui]);
 
   useClueAccessibility({
     type: "region",
@@ -237,7 +239,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
         className="chat-tutor-launcher"
         aria-expanded={isChatTutorOpen}
         aria-controls="chat-tutor-sidebar"
-        onClick={() => setIsChatTutorOpen(open => !open)}
+        onClick={() => ui.setShowChatTutor(!isChatTutorOpen)}
         data-testid="chat-tutor-launcher"
       >
         <span className="chat-tutor-launcher-icon" aria-hidden="true">💬</span>

@@ -1,10 +1,10 @@
 @import "../vars";
 
-$chat-tutor-width: 25vw;
-$chat-tutor-min-width: 320px;
-$chat-tutor-max-width: 420px;
-
-// Right-edge overlay drawer, below the app header so the header launcher stays visible.
+// Right-edge drawer, below the app header so the header launcher stays visible. It sits
+// at the right edge with a fixed width; the workspace reserves the same width when the
+// drawer is open (see clue-app-content.scss) so content is bumped over, not overlaid.
+// The teal frame lives on the chat body (see chat.scss) so the header sits above it,
+// mirroring the workspace/resources columns; the drawer itself just carries the 4px inset.
 .chat-tutor-sidebar {
   position: fixed;
   top: $header-height;
@@ -12,12 +12,9 @@ $chat-tutor-max-width: 420px;
   bottom: 0;
   z-index: 1000;
   width: $chat-tutor-width;
-  min-width: $chat-tutor-min-width;
-  max-width: $chat-tutor-max-width;
+  margin: 4px;
   background: white;
   box-sizing: border-box;
-  border-left: 1px solid $charcoal-light-2;
-  box-shadow: -3px 0 15px rgba(0, 0, 0, 0.2);
 
   &:focus-visible { outline: none; }
 

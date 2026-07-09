@@ -15,34 +15,60 @@
   color: $charcoal-dark-2;
   box-sizing: border-box;
 
+  // Title bar styled to match the workspace-panel .section-heading-row: light teal,
+  // 34px tall, centered bold charcoal title. Copy/close actions are pinned to the right
+  // over the centered title.
   .chat-header {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 8px;
-    padding: 8px 12px;
-    background: $workspace-teal-dark-2;
-    color: white;
+    height: 34px;
+    padding: 0 12px;
+    margin: 0 0 2px;
+    background: $workspace-teal-light-4;
+    color: $charcoal-dark-2;
     flex: 0 0 auto;
+    overflow: hidden;
+    // Rounded top corners matching the workspace/resources column headers (8px).
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 
     .chat-header-title {
       display: flex;
       align-items: center;
       gap: 6px;
       margin: 0;
-      font-weight: 600;
-      font-size: 13px;
-      line-height: 1.3;
+      min-width: 0;
+      // keep the left-aligned title clear of the right-pinned action buttons
+      max-width: calc(100% - 72px);
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1;
+      color: $charcoal-dark-2;
 
       .chat-header-icon {
         position: relative;
         top: 1px;
         font-size: 15px;
         line-height: 1;
+        flex: 0 0 auto;
+      }
+
+      .chat-header-text {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
 
     .chat-header-actions {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
       display: flex;
       align-items: center;
       gap: 2px;
@@ -55,7 +81,7 @@
       justify-content: center;
       background: transparent;
       border: none;
-      color: white;
+      color: $charcoal-dark-2;
       cursor: pointer;
       padding: 4px;
       border-radius: 4px;
@@ -65,23 +91,35 @@
         line-height: 1;
       }
 
-      &:hover { background: $workspace-teal-dark-1; }
-      &:focus-visible { outline: 2px solid white; outline-offset: 1px; }
+      &:hover { background: rgba(0, 0, 0, 0.08); }
+      &:focus-visible { outline: 2px solid $focus-ring-color; outline-offset: 1px; }
     }
 
     .chat-close {
       background: transparent;
       border: none;
-      color: white;
+      color: $charcoal-dark-2;
       font-size: 20px;
       line-height: 1;
       cursor: pointer;
       padding: 0 4px;
       border-radius: 4px;
 
-      &:hover { background: $workspace-teal-dark-1; }
-      &:focus-visible { outline: 2px solid white; outline-offset: 1px; }
+      &:hover { background: rgba(0, 0, 0, 0.08); }
+      &:focus-visible { outline: 2px solid $focus-ring-color; outline-offset: 1px; }
     }
+  }
+
+  // Frames the conversation + composer with the workspace-document teal border, leaving
+  // the header above it — mirroring the section-heading-row / bordered-document columns.
+  .chat-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    // Neutral gray frame rather than teal, so it reads as distinct from the teal workspace.
+    border: $document-border-width solid $charcoal-light-2;
+    overflow: hidden;
   }
 
   .chat-messages {
