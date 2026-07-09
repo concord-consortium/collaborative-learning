@@ -138,6 +138,15 @@ describe("read-aloud-queue-items", () => {
       expect(buildTileSpeechText(tile)).toBe("My content");
     });
 
+    it("speaks the text-tile title when showTextTitles is enabled", () => {
+      const content = createDocumentContent([
+        { id: "t1", type: "Text", title: "My Title", text: "My content" }
+      ]);
+      const tile = content.getTile("t1")!;
+      // When the unit displays text-tile titles, read-aloud announces the title too
+      expect(buildTileSpeechText(tile, true)).toBe("My Title. My content");
+    });
+
     it("announces tile type and title for non-text tiles", () => {
       const content = createDocumentContent([
         { id: "t1", type: "Geometry", title: "My Shape" }

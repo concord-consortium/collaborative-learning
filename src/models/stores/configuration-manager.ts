@@ -231,6 +231,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["defaultSharedDocuments"]>("defaultSharedDocuments");
   }
 
+  get showTextTitles() {
+    return this.getProp<UC["showTextTitles"]>("showTextTitles");
+  }
+
   get settings(): UC["settings"]  {
     // settings are merged rather than simply returning the closest non-empty value
     // merge is just two levels deep: eg merges items under settings.table, but not elements of settings.table.tools

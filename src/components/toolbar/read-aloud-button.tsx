@@ -69,7 +69,8 @@ export const ReadAloudButton: React.FC<IProps> = observer(function ReadAloudButt
         isDocumentsView: stores.persistentUI.isDocumentsView,
         pane,
         docTitle,
-        commentsOnly: onlyComments
+        commentsOnly: onlyComments,
+        showTextTitles: appConfig.showTextTitles
       });
       service.replaceQueue(items, allPaneTileIds);
     };
@@ -131,7 +132,8 @@ export const ReadAloudButton: React.FC<IProps> = observer(function ReadAloudButt
         isDocumentsView: stores.persistentUI.isDocumentsView,
         pane,
         docTitle,
-        commentsOnly
+        commentsOnly,
+        showTextTitles: appConfig.showTextTitles
       });
       service.start(pane, items, { document: doc, section }, allPaneTileIds, commentMode);
     }

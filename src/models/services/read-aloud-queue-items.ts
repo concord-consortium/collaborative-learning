@@ -130,9 +130,13 @@ function extractSketchText(objects: any[]): string {
   }, "");
 }
 
-export function buildTileSpeechText(tile: ITileModel): string {
+export function buildTileSpeechText(tile: ITileModel, showTextTitles?: boolean): string {
   const tileType = tile.content.type;
-  const title = getTileComponentInfo(tileType)?.hiddenTitle ? "" : tile.computedTitle;
+  // Text tiles register hiddenTitle:true so their title is normally not spoken; when the unit
+  // displays text-tile titles (showTextTitles), announce them like any other visible title.
+  const titleHidden = getTileComponentInfo(tileType)?.hiddenTitle
+    && !(tileType === kTextTileType && showTextTitles);
+  const title = titleHidden ? "" : tile.computedTitle;
   const typeName = getTileTypeName(tileType);
 
   let textContent = "";
@@ -219,6 +223,8 @@ export interface BuildReadAloudQueueOptions {
   docTitle?: string;
   /** When true, read only comments (skip tiles). Set when the comments panel is focused. */
   commentsOnly?: boolean;
+  /** When true, text-tile titles are displayed (unit setting) and so should be spoken. */
+  showTextTitles?: boolean;
 }
 
 export interface BuildReadAloudQueueResult {
@@ -249,14 +255,14 @@ export function buildReadAloudQueue(
   // Build tile items (skip when commentsOnly — comments panel is focused)
   const items: ReadAloudQueueItem[] = [];
   const { commentsManager, comments: directComments, showChatPanel, isDocumentsView, pane, docTitle,
-    commentsOnly } = options ?? {};
+    commentsOnly, showTextTitles } = options ?? {};
   if (!commentsOnly) {
     for (const id of tileIds) {
       const tile = content.getTile(id);
       if (!tile) continue;
       items.push({
         kind: "tile",
-        speechText: buildTileSpeechText(tile),
+        speechText: buildTileSpeechText(tile, showTextTitles),
         associatedTileId: id
       } as TileReadAloudItem);
     }

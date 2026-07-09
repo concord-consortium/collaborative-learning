@@ -14,6 +14,7 @@ import { ITileApi, TileModelContext } from "../tile-api";
 export interface ISpecTextTileOptions {
   tileModel?: ITileModel,
   readOnly?: boolean,
+  showTextTitles?: boolean,
   onRegisterTileApi?: (tileApi: ITileApi, facet?: string) => void
 }
 
@@ -23,6 +24,7 @@ export function specTextTile(options: ISpecTextTileOptions) {
   const stores = specStores({
     appConfig: specAppConfig({
       config: {
+        showTextTitles: options.showTextTitles,
         settings: {
           "text": {
             "tools": [
