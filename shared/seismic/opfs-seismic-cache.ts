@@ -104,11 +104,12 @@ export function createOpfsCache(
     },
 
     async stationRawBytes(station, startDay, endDay) {
+      const options = { create: false };
       let total = 0;
       for (let day = startDay; day <= endDay; day++) {
         try {
-          const dir = await channelYearDir(station, day, false);
-          const handle = await dir.getFileHandle(fileName(day), { create: false });
+          const dir = await channelYearDir(station, day, options);
+          const handle = await dir.getFileHandle(fileName(day), options);
           total += (await handle.getFile()).size;
         } catch (err) {
           if (!isNotFound(err)) throw err;
@@ -120,7 +121,7 @@ export function createOpfsCache(
     async deleteDaysInRange(station, startDay, endDay) {
       for (let day = startDay; day <= endDay; day++) {
         try {
-          const dir = await channelYearDir(station, day, false);
+          const dir = await channelYearDir(station, day, { create: false });
           await dir.removeEntry(fileName(day));
         } catch (err) {
           if (!isNotFound(err)) throw err;
