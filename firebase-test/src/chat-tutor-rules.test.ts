@@ -1,9 +1,9 @@
 import firebase from "firebase";
 import {
   adminWriteDoc, expectDeleteToFail, expectQueryToFail, expectQueryToSucceed, expectReadToFail,
-  expectReadToSucceed, expectUpdateToFail, expectWriteToFail, expectWriteToSucceed, initFirestore,
-  mockTimestamp, otherClass, prepareEachTest, researcherAuth, studentAuth, teacherAuth,
-  tearDownTests, thisClass
+  expectReadToSucceed, expectUpdateToFail, expectWriteToFail, expectWriteToSucceed, genericAuth,
+  initFirestore, mockTimestamp, otherClass, prepareEachTest, researcherAuth, studentAuth,
+  teacherAuth, tearDownTests, thisClass
 } from "./setup-rules-tests";
 
 // The real Firebase token students carry has user_type "learner" (portal-types.ts); the shared
@@ -187,6 +187,81 @@ describe("Firestore security rules: chat tutor", () => {
       db = initFirestore(learnerAuth);
       await expectUpdateToFail(db, kParentPath, { problemInstalled: true });
       await expectDeleteToFail(db, kParentPath);
+    });
+  });
+
+  // Demo mode signs in anonymously (no learner claim / platform_user_id / class_hash), so the
+  // demo chatTutor rules can only enforce message SHAPE, not ownership. genericAuth models that
+  // anonymous demo user (uid only). These also verify the carve-out: the permissive demo catch-all
+  // must NOT grant on the chatTutor path, or the shape checks would be bypassed.
+  describe("demo root (anonymous auth)", () => {
+    const kDemoParent = "demo/demoName/chatTutor/conv-1";
+    const kDemoMessage = `${kDemoParent}/messages/msg-1`;
+    const demoMessage = (options?: ISpecMessage) => {
+      const message: Record<string, unknown> = {
+        uid: "1", kind: "user", createdAt: mockTimestamp(), text: "help me think",
+        context_id: thisClass, problemPath: "abc/1/2"
+      };
+      options?.remove?.forEach(prop => delete message[prop]);
+      return { ...message, ...options?.add };
+    };
+
+    it("allows an anonymous demo user to write a valid user message", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, kDemoMessage, demoMessage());
+    });
+
+    it("rejects an unauthenticated write", async () => {
+      db = initFirestore(); // no auth
+      await expectWriteToFail(db, kDemoMessage, demoMessage());
+    });
+
+    // If the carve-out failed, the permissive catch-all would grant these and the writes would
+    // succeed — so these double as the carve-out verification.
+    it("rejects a forged kind:'assistant' and server-owned fields", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToFail(db, kDemoMessage, demoMessage({ add: { kind: "assistant" } }));
+      await expectWriteToFail(db, kDemoMessage, demoMessage({ add: { status: "idle" } }));
+      await expectWriteToFail(db, kDemoMessage, demoMessage({ add: { conversationId: "conv_x" } }));
+    });
+
+    it("rejects a missing or non-orderable createdAt", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToFail(db, kDemoMessage, demoMessage({ remove: ["createdAt"] }));
+      await expectWriteToFail(db, kDemoMessage, demoMessage({ add: { createdAt: "now" } }));
+    });
+
+    it("allows an authed demo user to read messages/parent, and rejects update/delete", async () => {
+      await adminWriteDoc(kDemoMessage, demoMessage());
+      await adminWriteDoc(kDemoParent, { uid: "1", status: "idle" });
+      db = initFirestore(genericAuth);
+      await expectReadToSucceed(db, kDemoMessage);
+      await expectReadToSucceed(db, kDemoParent);
+      await expectUpdateToFail(db, kDemoMessage, { text: "edited" });
+      await expectDeleteToFail(db, kDemoMessage);
+    });
+
+    it("still allows normal (non-chatTutor) demo writes after the carve-out", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, "demo/demoName/documents/doc-1", { foo: "bar" });
+    });
+
+    // The carve-out must not touch the root doc (recordLaunchTime writes here) — an earlier
+    // attempt used restOfPath.size()/indexing on the recursive wildcard, which errors on the empty
+    // path and denied this write.
+    it("still allows the demo root doc write (recordLaunchTime)", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, "demo/demoName", { lastLaunchTime: mockTimestamp() });
+    });
+
+    // The message listen query is what surfaced the rules-evaluation error live: a rule that
+    // ERRORS (not merely denies) fails the whole request, so this guards that the carve-out stays
+    // a clean string compare.
+    it("allows the message listen query on the demo path", async () => {
+      await adminWriteDoc(kDemoMessage, demoMessage());
+      db = initFirestore(genericAuth);
+      const messages = db.collection(`${kDemoParent}/messages`);
+      await expectQueryToSucceed(db, messages.where("uid", "==", "1").orderBy("createdAt"));
     });
   });
 });

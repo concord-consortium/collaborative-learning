@@ -557,8 +557,48 @@ service cloud.firestore {
     //
     // non-portal-authenticated/dev/demo/qa/test rules
     //
-    match /demo/{demoName}/{restOfPath=**} {
+    // AI chat tutor under the demo (anonymous-auth) root. The chatTutorOnWrite trigger fires on
+    // EVERY root's chatTutor path (its resource is {root}/{rootId}/chatTutor/...), so a deployed
+    // demo build reaches the paid OpenAI trigger too. Demo signs in anonymously — there is no
+    // learner claim / platform_user_id / class_hash — so these rules can only enforce message
+    // SHAPE (field whitelist + kind:"user"), not per-user ownership like the authed block. That
+    // still blocks a client from forging kind:"assistant" replies or injecting server-owned state
+    // (status/lock/cursor/conversationId/...), which would otherwise corrupt the rendered
+    // transcript and the drain cursor. The parent doc is server-created (admin SDK bypasses rules).
+    match /demo/{demoName}/chatTutor/{conversationId} {
+      function demoChatMessageCreate() {
+        let data = request.resource.data;
+        return isAuthed() &&
+          data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
+                               'problemPath', 'leftContext', 'rightContext']) &&
+          data.kind == 'user' &&
+          'createdAt' in data &&
+          (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float);
+      }
+
+      allow read: if isAuthed();
+      allow create, update, delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isAuthed();
+        allow create: if demoChatMessageCreate();
+        allow update, delete: if false;
+      }
+    }
+
+    // Everything else under a demo root stays open to any (anonymous) demo user. chatTutor is
+    // carved out below so the shape checks above are not overridden: rule grants are OR-ed, and a
+    // recursive `allow write: if isAuthed()` here would re-grant a forged assistant/server-owned
+    // doc. The catch-all is split so the exclusion is a plain single-segment string compare
+    // (`first != "chatTutor"`) — the recursive `{path=**}` variable is a `path`, which the rules
+    // engine has no `.size()` for and errors on when indexed empty (a rule that ERRORS denies the
+    // whole request, which would break the chat client), so neither is usable here.
+    match /demo/{demoName} {
+      // the root doc itself (recordLaunchTime writes here; restOfPath below never matches it)
       allow read, write: if isAuthed();
+    }
+    match /demo/{demoName}/{first}/{rest=**} {
+      allow read, write: if isAuthed() && first != "chatTutor";
     }
 
     // In the future, developers might use a random unique key instead of

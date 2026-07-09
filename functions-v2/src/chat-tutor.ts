@@ -4,7 +4,14 @@
 // Eventarc semantics would reintroduce the infinite re-drain the default no-retry policy
 // prevents) on the per-conversation messages subcollection:
 //
-//   /authed/{portal}/chatTutor/{conversationId}/messages/{messageId}
+//   /{root}/{rootId}/chatTutor/{conversationId}/messages/{messageId}
+//
+//   The root is a two-segment wildcard ({root}/{rootId}) rather than a literal authed/{portal}:
+//   the client roots every write under getRootFolder() = /{appMode}/{rootId}/, so an authed build
+//   writes under authed/{portal} but a demo build writes under demo/{demoName}. Pinning the
+//   trigger to authed/{portal} meant it never fired for demo/dev/qa/test — the message sat
+//   unanswered and the client's typing indicator spun forever. The wildcard root matches every
+//   appMode; the actual root segments come back in context.params.
 //
 //   - self-trigger guard: act only on kind:"user" (student message); ignore our own
 //     kind:"assistant" writes and deletes.
@@ -28,7 +35,7 @@ import {DrainContext, acquireLock, processAndDrain, pickOwnerFields} from "./cha
 const openaiKey = defineSecret("OPENAI_API_KEY");
 const openaiModel = defineString("OPENAI_MODEL");
 
-const MESSAGES = "authed/{portal}/chatTutor/{conversationId}/messages/{messageId}";
+const MESSAGES = "{root}/{rootId}/chatTutor/{conversationId}/messages/{messageId}";
 
 // The region must co-locate with the project's Firestore database (where the existing
 // functions-v2 triggers run), or a 1st-gen Firestore trigger won't deploy/fire.
@@ -44,8 +51,8 @@ export const chatTutorOnWrite = functionsV1
     if (doc.kind !== "user") return null;
 
     const db = getFirestore();
-    const {portal, conversationId} = context.params as Record<string, string>;
-    const parentRef = db.doc(`authed/${portal}/chatTutor/${conversationId}`);
+    const {root, rootId, conversationId} = context.params as Record<string, string>;
+    const parentRef = db.doc(`${root}/${rootId}/chatTutor/${conversationId}`);
     const messagesCol = parentRef.collection("messages");
     const ownerFields = pickOwnerFields(doc);
 
