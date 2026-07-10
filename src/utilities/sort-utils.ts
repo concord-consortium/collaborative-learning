@@ -1,7 +1,8 @@
 import {
   DocFilterType, isOverrideableDocFilterTypeId, OverrideableDocFilterTypeId, SortTypeId, SortTypeIds
 } from "../models/stores/ui-types";
-import { TranslationKeyType } from "./translation/translate";
+import { isTranslationKey, translate, TranslationKeyType } from "./translation/translate";
+import { upperWords } from "./string-utils";
 
 /**
  * Maps sort type IDs (used in PrimarySortType) to translation keys.
@@ -35,6 +36,15 @@ export function getFilterTypeTranslationKey(filterType: DocFilterType): Translat
   return isOverrideableDocFilterTypeId(filterType)
     ? FILTER_TYPE_TO_TRANSLATION_KEY[filterType]
     : filterType as TranslationKeyType;
+}
+
+/**
+ * Get the display label for a doc-filter scope, applying any unit term override
+ * (e.g. "Problem" -> "Model"). Non-overrideable scopes like "All" are returned as-is.
+ */
+export function getFilterTypeDisplayLabel(filterType: DocFilterType): string {
+  const key = getFilterTypeTranslationKey(filterType);
+  return isTranslationKey(key) ? upperWords(translate(key)) : filterType;
 }
 
 export function isValidSortTypeId(value: string): value is SortTypeId {
