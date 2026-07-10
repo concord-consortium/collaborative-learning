@@ -19,7 +19,7 @@ export const StationSection = observer(function StationSection({ stationKey }: I
   const allStations = !stationKey;
   const station = stationKey ? store.stations.get(stationKey) : undefined;
 
-  const stats = store.statsFor(stationKey);
+  const stats = allStations ? store.allStats : store.statsFor(stationKey);
   const { firstDay, lastDay } = store;
   const hasRange = firstDay !== undefined && lastDay !== undefined;
   const totalDays = hasRange ? lastDay - firstDay + 1 : 0;
@@ -35,9 +35,9 @@ export const StationSection = observer(function StationSection({ stationKey }: I
   const downloadLabel = `Download ${allStations ? "all " : ""}missing raw data`;
   const downloadRaw = () => {
     if (allStations) {
-      store.downloadAllSelected();
+      void store.downloadAllSelected();
     } else {
-      store.downloadStation(stationKey);
+      void store.downloadStation(stationKey);
     }
   };
 
@@ -45,9 +45,9 @@ export const StationSection = observer(function StationSection({ stationKey }: I
   const deleteRaw = () => {
     setConfirming(false);
     if (allStations) {
-      store.deleteAllSelected();
+      void store.deleteAllSelected();
     } else {
-      store.deleteRaw(stationKey);
+      void store.deleteRaw(stationKey);
     }
   };
 

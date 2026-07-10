@@ -11,7 +11,7 @@ interface Props {
 export function ConfirmModal({ message, confirmLabel = "Confirm", onConfirm, onCancel }: Props) {
   return (
     <div className="confirm-modal-overlay" onClick={onCancel}>
-      <div className="confirm-modal" onClick={e => e.stopPropagation()}>
+      <div aria-modal="true" className="confirm-modal" onClick={e => e.stopPropagation()} role="dialog">
         <div className="confirm-message">{message}</div>
         <div className="confirm-buttons">
           <button onClick={onCancel}>Cancel</button>

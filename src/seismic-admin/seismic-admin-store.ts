@@ -102,7 +102,8 @@ export class SeismicAdminStore {
   }
 
   get firstDay() {
-    if (this.firstSec) return dayIndex(this.firstSec);
+    const { firstSec } = this;
+    if (firstSec !== undefined) return dayIndex(firstSec);
   }
 
   private get lastSec() {
@@ -110,7 +111,8 @@ export class SeismicAdminStore {
   }
 
   get lastDay() {
-    if (this.lastSec) return lastDayIndex(this.lastSec);
+    const { lastSec } = this;
+    if (lastSec) return lastDayIndex(lastSec);
   }
 
   get selectedMissingRawDays() {
@@ -174,30 +176,28 @@ export class SeismicAdminStore {
     };
   }
 
-  statsFor(key?: string): StationStats {
-    const stats = key ? this.stats.get(key) : undefined;
-    if (stats) return stats;
-
-    // With no key, return stats for all selected stations
-    return this.allStats;
+  statsFor(key: string): StationStats {
+    return this.stats.get(key) ?? { bytes: 0, missingCount: 0 };
   }
 
   private async loadStats(s: StationConfig) {
-    if (!(this.firstDay && this.lastDay)) return;
+    const { firstDay, lastDay } = this;
+    if (firstDay === undefined || lastDay === undefined) return;
 
-    const cachedDays = await this.cache.scanCachedDays(s, this.firstDay, this.lastDay);
-    const bytes = await this.cache.stationRawBytes(s, this.firstDay, this.lastDay);
-    const missingCount = missingDayCount(cachedDays.size, this.firstDay, this.lastDay);
+    const cachedDays = await this.cache.scanCachedDays(s, firstDay, lastDay);
+    const bytes = await this.cache.stationRawBytes(s, firstDay, lastDay);
+    const missingCount = missingDayCount(cachedDays.size, firstDay, lastDay);
     runInAction(() => {
       this.stats.set(getStationChannelPrefix(s), { cachedDays, bytes, missingCount });
     });
   }
 
   async deleteRaw(key: string) {
+    const { firstDay, lastDay } = this;
     const s = this.stations.get(key);
-    if (!(s && this.firstDay && this.lastDay)) return;
+    if (!s || firstDay === undefined || lastDay === undefined) return;
 
-    await this.cache.deleteDaysInRange(s, this.firstDay, this.lastDay);
+    await this.cache.deleteDaysInRange(s, firstDay, lastDay);
     await this.loadStats(s);
   }
 
