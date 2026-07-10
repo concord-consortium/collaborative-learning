@@ -18,6 +18,13 @@ export const AdminHeader = observer(function AdminHeader() {
       <h3>Seismic Admin</h3>
       <div className="options">
         <div className="option-area">
+          <div className="option-header">Date Range</div>
+          <div className="dates">
+            <label>Start <input type="date" value={store.startDate} onChange={e => setStart(e.target.value)} /></label>
+            <label>End <input type="date" value={store.endDate} onChange={e => setEnd(e.target.value)} /></label>
+          </div>
+        </div>
+        <div className="option-area">
           <div className="option-header">Stations</div>
           <div className="stations">
             {[...store.stations].map(([key, station]) => (
@@ -30,13 +37,6 @@ export const AdminHeader = observer(function AdminHeader() {
                 {stationLabel(station)}
               </label>
             ))}
-          </div>
-        </div>
-        <div className="option-area">
-          <div className="option-header">Date Range</div>
-          <div className="dates">
-            <label>Start <input type="date" value={store.startDate} onChange={e => setStart(e.target.value)} /></label>
-            <label>End <input type="date" value={store.endDate} onChange={e => setEnd(e.target.value)} /></label>
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@
 
   .options {
     display: flex;
+    flex-direction: column;
     gap: 20px;
 
     .option-area {
@@ -20,7 +21,6 @@
 
       .stations {
         display: flex;
-        flex-direction: column;
         flex-wrap: wrap;
         gap: 8px 16px;
 
