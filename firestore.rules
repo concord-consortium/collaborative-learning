@@ -478,6 +478,13 @@ service cloud.firestore {
           (request.auth.token.class_hash == classId || teacherIsInClass(classId));
         allow write: if false;  // only cloud functions write here
       }
+
+      // Teacher-created custom comment tags, scoped per class + unit. Teachers and researchers can
+      // read+write via the parent /authed/{portal} rule above; this rule additionally grants
+      // students in the class read access so they can see and select custom tags.
+      match /commentTags/{classHash}/units/{unit}/tags/{tagId} {
+        allow read: if isAuthed() && request.auth.token.class_hash == classHash;
+      }
     }
 
     //

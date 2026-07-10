@@ -17,6 +17,7 @@ import { SelectionStoreModelType } from "./selection";
 import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
 import { Bookmarks } from "./bookmarks";
+import { CommentTags } from "./comment-tags";
 import { ICurriculumConfig } from "./curriculum-config";
 
 export interface IGitInfo {
@@ -52,4 +53,5 @@ export interface IBaseStores {
   selection: SelectionStoreModelType;
   serialDevice: SerialDevice;
   bookmarks: Bookmarks;
+  commentTags: CommentTags;
 }

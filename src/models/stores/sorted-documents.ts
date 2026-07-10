@@ -11,6 +11,7 @@ import { DocumentMetadataModel, IDocumentMetadataModel } from "../document/docum
 import { isSortableType } from "../document/document-types";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
+import { CommentTags } from "./comment-tags";
 import { ClassModelType } from "./class";
 import { CurriculumConfigType } from "./curriculum-config";
 import { DocumentGroup } from "./document-group";
@@ -28,6 +29,7 @@ export interface ISortedDocumentsStores {
   db: DB;
   appConfig: AppConfigModelType;
   bookmarks: Bookmarks;
+  commentTags: CommentTags;
   user: UserModelType;
   curriculumConfig: CurriculumConfigType;
 }
@@ -67,7 +69,8 @@ export class SortedDocuments {
     return this.stores.class;
   }
   get commentTags(): Record<string, string> | undefined {
-    return this.stores.appConfig.commentTags;
+    // Effective tag list = unit-config tags plus teacher-added custom tags (synced per class+unit).
+    return this.stores.commentTags.mergedWith(this.stores.appConfig.commentTags);
   }
   get db(): DB {
     return this.stores.db;

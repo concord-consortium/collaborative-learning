@@ -51,6 +51,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return  (this.showCommentTag) ? this.getProp<UC["commentTags"]>("commentTags") : {};
   }
 
+  get allowCustomCommentTags(){
+    return this.showCommentTag ? this.getProp<UC["allowCustomCommentTags"]>("allowCustomCommentTags") : false;
+  }
+
   get aiEvaluation(){
     return this.getProp<UC["aiEvaluation"]>("aiEvaluation");
   }

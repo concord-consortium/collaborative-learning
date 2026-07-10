@@ -19,6 +19,7 @@ import { SortWorkHeader } from "../navigation/sort-work-header";
 import { DocListDebug } from "./doc-list-debug";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { IOpenDocumentsGroupMetadata, SortedSection } from "./sorted-section";
+import { SortWorkAddTag } from "./sort-work-add-tag";
 
 import "../thumbnail/document-type-collection.scss";
 import "./sort-work-view.scss";
@@ -215,6 +216,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
                   );
                 })
               }
+              {validatedPrimarySortBy === "Strategy" && <SortWorkAddTag />}
               {DEBUG_DOC_LIST && <DocListDebug docs={sortedDocuments.filteredDocsByType} />}
             </div>
           </>

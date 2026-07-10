@@ -13,6 +13,7 @@ import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
+import { CommentTags } from "./comment-tags";
 import { ClassModelType, ClassUserModelType } from "./class";
 import { GroupsModelType } from "./groups";
 import { SecondarySortType, SortType } from "./ui-types";
@@ -24,6 +25,7 @@ interface IDocumentGroupStores {
   class: ClassModelType;
   appConfig: AppConfigModelType;
   bookmarks: Bookmarks;
+  commentTags: CommentTags;
 }
 
 export type TagWithDocs = {
@@ -231,7 +233,8 @@ export class DocumentGroup {
   }
 
   get byStrategy(): DocumentGroup[] {
-    const commentTags = this.stores.appConfig.commentTags;
+    // Effective tag list = unit-config tags plus teacher-added custom tags (synced per class+unit).
+    const commentTags = this.stores.commentTags.mergedWith(this.stores.appConfig.commentTags);
     const tagsWithDocs = getTagsWithDocs(this.documents, commentTags);
 
     const sortedDocsArr: DocumentGroup[] = [];

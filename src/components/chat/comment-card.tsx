@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef } from "react";
+import { observer } from "mobx-react";
 import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
 import { CommentTextBox } from "./comment-textbox";
@@ -125,7 +126,7 @@ const CommentItem: React.FC<ICommentItemProps> = ({
   );
 };
 
-export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedComments,
+export const CommentCard: React.FC<IProps> = observer(({ activeNavTab, user, postedComments,
                                                 onPostComment, onDeleteComment,
                                                 focusDocument, focusTileId, isFocused, onSelect,
                                                 readingCommentId, pendingCommentId, onCommentClick }) => {
@@ -133,7 +134,10 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   const commentContentRef = useRef<string>("");
   const stores = useStores();
   const { appConfig, documents, persistentUI, sortedDocuments } = stores;
-  const { showCommentTag, showCommentRating, commentTags } = appConfig;
+  const { showCommentTag, showCommentRating } = appConfig;
+  // Effective tag list = unit-config tags plus teacher-added custom tags (synced per class+unit),
+  // so the picker offers custom tags for selection. Adding tags happens in the Sort Work view.
+  const commentTags = stores.commentTags.mergedWith(appConfig.commentTags);
   const content = useCurriculumOrDocumentContent(focusDocument);
 
   const alertContent = () => {
@@ -317,4 +321,4 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
       </div>
     </div>
   );
-};
+});

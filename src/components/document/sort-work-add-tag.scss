@@ -1,0 +1,63 @@
+@import "../vars";
+
+.sort-work-add-tag {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+
+  .add-tag-button {
+    background: none;
+    border: 1px dashed $classwork-purple;
+    border-radius: 5px;
+    color: $classwork-purple-dark-1;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 6px 12px;
+
+    &:hover {
+      background: $classwork-purple-light-8;
+    }
+  }
+
+  .add-tag-row {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+
+    .add-tag-input {
+      border: 1px solid $charcoal-light-1;
+      border-radius: 4px;
+      font-size: 13px;
+      padding: 5px 8px;
+    }
+
+    button {
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 5px 10px;
+    }
+
+    .add-tag-confirm {
+      background: $classwork-purple;
+      border: none;
+      color: white;
+
+      &:disabled {
+        cursor: default;
+        opacity: 0.5;
+      }
+    }
+
+    .add-tag-cancel {
+      background: none;
+      border: 1px solid $charcoal-light-1;
+      color: $charcoal-dark-1;
+    }
+
+    .add-tag-duplicate {
+      color: $error-red;
+      font-size: 12px;
+    }
+  }
+}
