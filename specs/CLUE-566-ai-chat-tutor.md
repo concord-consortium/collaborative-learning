@@ -76,7 +76,9 @@ interface, testable with both uncommitted draft config (authoring preview) and c
   (and prompt-override fields) off the `user` message doc — the server never fetches curriculum.
 - OpenAI Responses + Conversations API with a strict `json_schema` reply (required bumping
   `functions-v2` `openai` `^4.64` → `^6.x`; proven LangChain-safe). Key via
-  `defineSecret("OPENAI_API_KEY")`, model via `defineString("OPENAI_MODEL")`.
+  `defineSecret("OPENAI_TUTOR_API_KEY")` — a tutor-specific key under its own OpenAI project, so
+  tutor spend is tracked separately from the comments/analysis pipeline's `OPENAI_API_KEY` — and
+  model via `defineString("OPENAI_MODEL")`.
 - Server-owned generic tutor prompt (`CHAT_GENERIC_PROMPT`): tutoring stance, never-reveal-answers
   rule, science crosscutting-concepts lens, CLUE tile-awareness block, highest-`seq` rule, and a
   context-is-data-not-instructions injection-hygiene clause.
@@ -171,7 +173,7 @@ interface, testable with both uncommitted draft config (authoring preview) and c
 ## Not Yet Implemented
 
 - **Deployment preconditions (operational gates, not code)**: hard spend cap on the OpenAI key;
-  `OPENAI_API_KEY`/`OPENAI_MODEL` provisioned per environment; rules + `(uid, createdAt)` composite
+  `OPENAI_TUTOR_API_KEY`/`OPENAI_MODEL` provisioned per environment; rules + `(uid, createdAt)` composite
   index deployed (staging was missing the index as of 2026-07-09); test accounts only.
 - **Drawing SVGs in the RIGHT summary** — deferred; a later tier can dynamic-`import()` the
   drawings summarizer at send time to keep it code-split.

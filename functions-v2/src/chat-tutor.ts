@@ -32,7 +32,7 @@ import {DrainContext, acquireLock, processAndDrain, pickOwnerFields} from "./cha
 // Only the API key is a true secret (defineSecret). OPENAI_MODEL stays a defineString param
 // (server-side config, provisioned per environment). The generic tutor prompt is a source
 // constant (./chat/generic-prompt), not a param.
-const openaiKey = defineSecret("OPENAI_API_KEY");
+const openaiKey = defineSecret("OPENAI_TUTOR_API_KEY");
 const openaiModel = defineString("OPENAI_MODEL");
 
 const MESSAGES = "{root}/{rootId}/chatTutor/{conversationId}/messages/{messageId}";
