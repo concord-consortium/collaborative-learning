@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
 import React, { useState } from "react";
 import { useStores } from "../../hooks/use-stores";
+import { commentTagId } from "../../models/stores/comment-tags";
 
 import "./sort-work-add-tag.scss";
 
@@ -18,9 +19,12 @@ export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
 
   const tags = commentTags.mergedWith(appConfig.commentTags);
   const trimmed = text.trim();
-  // Disallow creating a tag whose name already exists (case-insensitive), for tag hygiene.
+  // Disallow creating a tag that already exists, for tag hygiene: either the same display name
+  // (case-insensitive) or one whose generated id collides with an existing tag key (which would
+  // otherwise override that tag's label in the merged list).
   const isDuplicate = !!trimmed &&
-    Object.values(tags).some(label => label.trim().toLowerCase() === trimmed.toLowerCase());
+    (Object.values(tags).some(label => label.trim().toLowerCase() === trimmed.toLowerCase()) ||
+     Object.keys(tags).includes(commentTagId(trimmed)));
 
   const commit = () => {
     if (!trimmed || isDuplicate) return;
@@ -52,6 +56,7 @@ export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
               className="add-tag-input"
               data-testid="sort-work-add-tag-input"
               placeholder="New tag"
+              aria-label="New tag name"
               value={text}
               autoFocus
               onChange={e => setText(e.target.value)}

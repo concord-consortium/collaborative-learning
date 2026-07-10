@@ -56,4 +56,17 @@ describe("SortWorkAddTag", () => {
     await user.click(screen.getByTestId("sort-work-add-tag-confirm"));
     expect(addTag).not.toHaveBeenCalled();
   });
+
+  it("disables Add when the generated id collides with an existing tag key", async () => {
+    const user = userEvent.setup();
+    // Existing tag key "diverging" (display "Diverging Designs"). Typing "Diverging" generates the
+    // id "diverging", which collides with the key even though the display names differ.
+    setup({ commentTags: { mergedWith: () => ({ diverging: "Diverging Designs" }), addTag } });
+    render(<SortWorkAddTag />);
+    await user.click(screen.getByTestId("sort-work-add-tag-button"));
+    await user.type(screen.getByTestId("sort-work-add-tag-input"), "Diverging");
+    expect(screen.getByTestId("sort-work-add-tag-confirm")).toBeDisabled();
+    await user.click(screen.getByTestId("sort-work-add-tag-confirm"));
+    expect(addTag).not.toHaveBeenCalled();
+  });
 });

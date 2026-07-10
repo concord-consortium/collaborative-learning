@@ -56,7 +56,8 @@ const CommentsSettings: React.FC = () => {
       const config = draft?.config;
       if (!config) return;
       config.showCommentTag = data.showCommentTag;
-      if (data.allowCustomCommentTags) {
+      // Custom tags require tags to be shown; never persist allowCustomCommentTags without it.
+      if (data.showCommentTag && data.allowCustomCommentTags) {
         config.allowCustomCommentTags = true;
       } else {
         delete config.allowCustomCommentTags;
