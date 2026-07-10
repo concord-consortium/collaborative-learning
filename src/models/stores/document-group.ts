@@ -52,9 +52,7 @@ interface IBuildDocumentCollectionProps {
   docMap: Map<string, IDocumentMetadataModel[]>;
   sortedSectionLabels: string[];
   sortType: SecondarySortType;
-  // Optional per-label display overrides, keyed by the ordinal-based grouping
-  // label. Problem sort uses this to show a problem's title in place of the
-  // generic "Problem 1.1" while still grouping/sorting by the ordinal key.
+  // Optional per-label display overrides, keyed by the ordinal-based grouping label.
   labelMap?: Map<string, string>;
 }
 
