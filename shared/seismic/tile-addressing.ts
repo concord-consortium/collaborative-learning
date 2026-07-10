@@ -1,6 +1,5 @@
-// shared/seismic/tile-addressing.ts
 import { ENVELOPE_LAYOUT_VERSION, LEVEL_SPACINGS, POINTS_PER_TILE } from "./envelope-config";
-import type { StationData, TimeRange } from "./seismic-types";
+import type { StationData, StationId, TimeRange } from "./seismic-types";
 
 /** Duration of one tile in seconds at the given level. */
 export function getTileDuration(level: number): number {
@@ -51,12 +50,20 @@ export function getPointIndexInTile(timestamp: number, level: number, tileIndex:
 }
 
 /**
+ * Constructs the S3 key prefix for all tiles of a given station.
+ * Format: {network}_{station}
+ */
+export function getStationPrefix(station: StationId): string {
+  return `${station.network}_${station.station}`;
+}
+
+/**
  * Constructs the S3 key prefix for all tiles of a given station and channel.
- * Format: {network}_{station}/{channel}/
+ * Format: {network}_{station}/{channel}
  */
 export function getStationChannelPrefix(stationData: StationData): string {
-  const { network, station, channel } = stationData;
-  return `${network}_${station}/${channel}/`;
+  const { channel } = stationData;
+  return `${getStationPrefix(stationData)}/${channel}`;
 }
 
 /**
@@ -64,7 +71,7 @@ export function getStationChannelPrefix(stationData: StationData): string {
  * Format: {network}_{station}/{channel}/L{level}/{tileIndex}
  */
 export function getTileS3Key(stationData: StationData, level: number, tileIndex: number): string {
-  return `${getStationChannelPrefix(stationData)}L${level}/${tileIndex}`;
+  return `${getStationChannelPrefix(stationData)}/L${level}/${tileIndex}`;
 }
 
 /**

@@ -1,4 +1,3 @@
-// shared/seismic/tile-addressing.test.ts
 import {
   getTileIndex, getTileTimeRange, getTileIndicesForViewport, getTileS3Key, getTileDuration, getPointIndexInTile
 } from "./tile-addressing";

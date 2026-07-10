@@ -10,6 +10,7 @@ import { useStores } from "../../hooks/use-stores";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { LogEventName } from "../../lib/logger-types";
+import { kDragTiles } from "../tiles/tile-component";
 
 import "./document-type-collection.scss";
 
@@ -40,6 +41,12 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     useDocumentSyncToFirebase(user, dbStore.firebase, dbStore.firestore, document, true);
 
     function handleDocumentDragStart(e: React.DragEvent<HTMLDivElement>) {
+      // A tile drag started inside a scrollable ("big") thumbnail bubbles up to this draggable
+      // list item. The tile's dragstart runs first (bubble phase) and populates kDragTiles, so
+      // when that data is already present this is a tile copy, not a document drag — don't also
+      // tag it with DocumentDragKey, or drop targets outside a document (e.g. the workspace)
+      // would treat the tile copy as a document drag.
+      if (Array.from(e.dataTransfer.types).includes(kDragTiles)) return;
       e.dataTransfer.setData(DocumentDragKey, document.key);
     }
 
