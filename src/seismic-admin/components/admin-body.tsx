@@ -9,7 +9,7 @@ export const AdminBody = observer(function AdminBody() {
 
   return (
     <div className="admin-body">
-      <StationSection />
+      {store.selected.size > 1 && <StationSection />}
       {store.selectedStations.map(station => {
         const key = getStationChannelPrefix(station);
         return <StationSection key={key} stationKey={key} />;

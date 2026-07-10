@@ -27,16 +27,20 @@ export const AdminHeader = observer(function AdminHeader() {
         <div className="option-area">
           <div className="option-header">Stations</div>
           <div className="stations">
-            {[...store.stations].map(([key, station]) => (
-              <label className="station-checkbox" key={key}>
-                <input
-                  type="checkbox"
-                  checked={store.selected.has(key)}
-                  onChange={() => store.toggle(key)}
-                />
-                {stationLabel(station)}
-              </label>
-            ))}
+            {[...store.stations].map(([key, station]) => {
+              const checked = store.selected.has(key);
+              return (
+                <label className="station-checkbox" key={key}>
+                  <input
+                    type="checkbox"
+                    disabled={checked && store.selected.size === 1}
+                    checked={checked}
+                    onChange={() => store.toggle(key)}
+                  />
+                  {stationLabel(station)}
+                </label>
+              );
+            })}
           </div>
         </div>
       </div>
