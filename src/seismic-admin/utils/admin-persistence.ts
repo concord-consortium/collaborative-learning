@@ -3,7 +3,7 @@ const STORAGE_KEY = "seismic-admin-filters";
 export interface AdminFilters {
   startDate?: string;
   endDate?: string;
-  /** Selected station keys (getStationChannelPrefix). Absent means "never chosen". */
+  // Selected station keys (getStationChannelPrefix). Absent means "never chosen".
   selected?: string[];
 }
 

@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
-import { loadCatalog } from "../load-catalog";
+import { loadCatalog } from "../utils/load-catalog";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { AdminBody } from "./admin-body";
 import { AdminHeader } from "./admin-header";

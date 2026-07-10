@@ -12,9 +12,9 @@ type AdminCache = Pick<SeismicCache, "listStations" | "scanCachedDays" | "statio
 export interface DownloadUpdate {
   completed: number;
   total: number;
-  /** The day that just landed in OPFS, absent on the final summary update. */
+  // The day that just landed in OPFS, absent on the final summary update.
   day?: number;
-  /** Bytes written for that day; 0 when it was already cached. */
+  // Bytes written for that day; 0 when it was already cached.
   bytes?: number;
 }
 
@@ -62,11 +62,10 @@ export class SeismicAdminStore {
   stations = new Map<string, StationConfig>();   // keyed by getStationChannelPrefix
   selected = new Set<string>();                  // same keys
   stats = new Map<string, StationStats>();
-  /** Human-readable description of the work in progress. Empty when idle. */
   feedback = "";
 
   private cache: AdminCache;
-  /** True once a selection has been persisted, so refresh() won't re-select everything. */
+  // True once a selection has been persisted, so refresh() won't re-select everything.
   private hasSavedSelection = false;
 
   constructor(private deps: SeismicAdminDeps = {}) {
@@ -130,7 +129,6 @@ export class SeismicAdminStore {
     return total;
   }
 
-  /** Applies a new range immediately: persists it and reloads stats for every station. */
   setRange(start: string, end: string) {
     this.startDate = start;
     this.endDate = end;
@@ -169,15 +167,19 @@ export class SeismicAdminStore {
     for (const s of this.stations.values()) await this.loadStats(s);
   }
 
+  get allStats() {
+    return {
+      bytes: this.selectedBytes,
+      missingCount: this.selectedMissingRawDays
+    };
+  }
+
   statsFor(key?: string): StationStats {
     const stats = key ? this.stats.get(key) : undefined;
     if (stats) return stats;
 
     // With no key, return stats for all selected stations
-    return {
-      bytes: this.selectedBytes,
-      missingCount: this.selectedMissingRawDays
-    };
+    return this.allStats;
   }
 
   private async loadStats(s: StationConfig) {

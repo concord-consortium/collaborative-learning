@@ -1,7 +1,7 @@
-import appConfig from "../clue/app-config.json";
-import curriculumConfig from "../clue/curriculum-config.json";
-import { StationConfig } from "../../shared/seismic/seismic-types";
-import { getUrlFromRelativeOrFullString } from "../utilities/url-utils";
+import appConfig from "../../clue/app-config.json";
+import curriculumConfig from "../../clue/curriculum-config.json";
+import { StationConfig } from "../../../shared/seismic/seismic-types";
+import { getUrlFromRelativeOrFullString } from "../../utilities/url-utils";
 
 /**
  * Resolve a `?unit=` value to a content.json URL, mirroring the main app's
@@ -11,8 +11,10 @@ import { getUrlFromRelativeOrFullString } from "../utilities/url-utils";
  */
 export function unitContentUrl(unitParam: string): string | undefined {
   if (!unitParam) return undefined;
+
   const direct = getUrlFromRelativeOrFullString(unitParam);
   if (direct) return direct.href;
+
   const { curriculumSiteUrl, unitCodeMap } = curriculumConfig as
     { curriculumSiteUrl: string; unitCodeMap: Record<string, string> };
   const unitCode = unitCodeMap[unitParam] || unitParam;
@@ -53,10 +55,13 @@ export async function loadCatalog(search = window.location.search): Promise<Stat
   try {
     const unitParam = new URLSearchParams(search).get("unit");
     if (!unitParam) return base;
+
     const url = unitContentUrl(unitParam);
     if (!url) return base;
+
     const response = await fetch(url);
     if (!response.ok) return base;
+
     return stationsFromUnitConfig(await response.json()) ?? base;
   } catch {
     return base;

@@ -27,14 +27,10 @@ export const StationSection = observer(function StationSection({ stationKey }: I
     ? stationLabel(station)
     : `All selected stations (${store.selected.size})`;
 
-  const cachedDaysMessage = () => {
-    if (allStations) {
-      const allTotalDays = totalDays * store.selected.size;
-      return `${allTotalDays - stats.missingCount} / ${allTotalDays}`;
-    } else {
-      return `${stats.cachedDays?.size ?? 0} / ${totalDays}`;
-    }
-  };
+  const allTotalDays = totalDays * store.selected.size;
+  const cachedDaysMessage = allStations
+    ? `${allTotalDays - stats.missingCount} / ${allTotalDays}`
+    : `${stats.cachedDays?.size ?? 0} / ${totalDays}`;
 
   const downloadLabel = `Download ${allStations ? "all " : ""}missing raw data`;
   const downloadRaw = () => {
@@ -62,7 +58,7 @@ export const StationSection = observer(function StationSection({ stationKey }: I
         <div className="data-section">
           <div className="data-section-header">
             <div className="data-kind">Local Raw Data</div>
-            <div className="data-stats">{`${cachedDaysMessage()} days · ${formatBytes(stats.bytes)}`}</div>
+            <div className="data-stats">{`${cachedDaysMessage} days · ${formatBytes(stats.bytes)}`}</div>
           </div>
           {hasRange && stats?.cachedDays &&
             <RawTimeline highlightedDays={stats.cachedDays} firstDay={firstDay} lastDay={lastDay} />
