@@ -26,7 +26,7 @@ export class SeismicDownloadService {
   readonly emptyDays: number[] = [];
 
   private readyQueue: number[] = [];
-  /** Byte size of each freshly-written day, for callers that report disk usage as it grows. */
+  // Byte size of each freshly-written day, for callers that report disk usage as it grows.
   private bytesByDay = new Map<number, number>();
   private waiters: Array<(day: ReadyDay) => void> = [];
   private finished = false;
@@ -35,9 +35,8 @@ export class SeismicDownloadService {
   private cache = createOpfsCache();
 
   constructor(private runner: DownloadRunner = defaultRunner()) {
-    // `cache` shouldn't be observable. But it's private, and therefore absent from
-    // the public `keyof this` the annotations map is typed against. So it must be
-    // explicitly added to the type below.
+    // `cache` and `bytesByDay` shouldn't be observable. But they're private, and therefore absent from the public
+    // `keyof this` the annotations map is typed against. So they must be explicitly added to the type below.
     makeAutoObservable<SeismicDownloadService, "cache" | "bytesByDay">(this,
       { erroredDays: false, emptyDays: false, cache: false, bytesByDay: false },
       { autoBind: true });

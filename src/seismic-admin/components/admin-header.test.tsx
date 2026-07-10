@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AdminHeader } from "./admin-header";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
+import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
 
 function makeStore() {
   const listStations = jest.fn(async () => [{ network: "AK", station: "K204", channel: "HNZ" }]);
@@ -59,5 +60,32 @@ describe("AdminHeader", () => {
 
     fireEvent.change(screen.getByLabelText(/Start/), { target: { value: "" } });
     expect(store.startDate).toBe("2026-01-01");
+  });
+
+  it("disables the checkbox of the only selected station", async () => {
+    const store = new SeismicAdminStore({
+      cache: {
+        listStations: async () => [
+          { network: "AK", station: "K204", channel: "HNZ" },
+          { network: "AK", station: "M205", channel: "HNZ" },
+        ],
+        scanCachedDays: async () => new Set<number>(),
+        stationRawBytes: async () => 0,
+        deleteDaysInRange: async () => {},
+      } as any,
+    });
+    await store.refresh(); // selects both
+    const dom = renderHeader(store);
+    expect(screen.getByRole("checkbox", { name: "AK K204 HNZ" })).toBeEnabled();
+    expect(screen.getByRole("checkbox", { name: "AK M205 HNZ" })).toBeEnabled();
+
+    store.toggle(getStationChannelPrefix({ network: "AK", station: "M205", channel: "HNZ" }));
+    dom.rerender(
+      <SeismicAdminStoreContext.Provider value={store}>
+        <AdminHeader />
+      </SeismicAdminStoreContext.Provider>
+    );
+    expect(screen.getByRole("checkbox", { name: "AK K204 HNZ" })).toBeDisabled();
+    expect(screen.getByRole("checkbox", { name: "AK M205 HNZ" })).toBeEnabled();
   });
 });

@@ -13,9 +13,9 @@ export function utcDayFromString(dateString: string): number | undefined {
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth();
   const day = date.getUTCDate();
-  if (!(isNaN(year) || isNaN(month) || isNaN(day))) {
-    return utcDay(year, month + 1, day);
-  }
+  if (isNaN(year) || isNaN(month) || isNaN(day)) return undefined;
+
+  return utcDay(year, month + 1, day);
 }
 
 /** Unix seconds → UTC day index (days since the Unix epoch). */

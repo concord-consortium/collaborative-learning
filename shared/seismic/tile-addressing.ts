@@ -59,7 +59,6 @@ export function getStationPrefix(station: StationId): string {
 
 /**
  * Inverse of getStationPrefix: "{network}_{station}" → { network, station }.
- * Splits on the first "_" (SEED network/station codes contain no underscore).
  */
 export function parseStationPrefix(prefix: string): StationId | undefined {
   const sep = prefix.indexOf("_");
@@ -67,7 +66,6 @@ export function parseStationPrefix(prefix: string): StationId | undefined {
 
   const network = prefix.slice(0, sep);
   const station = prefix.slice(sep + 1);
-
   if (!network || ! station) return undefined;
 
   return { network, station };

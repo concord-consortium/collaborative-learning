@@ -65,7 +65,7 @@ export const StationSection = observer(function StationSection({ stationKey }: I
             <div className="data-stats">{`${cachedDaysMessage()} days · ${formatBytes(stats.bytes)}`}</div>
           </div>
           {hasRange && stats?.cachedDays &&
-            <RawTimeline cachedDays={stats.cachedDays} firstDay={firstDay} lastDay={lastDay} />
+            <RawTimeline highlightedDays={stats.cachedDays} firstDay={firstDay} lastDay={lastDay} />
           }
         </div>
         <div className="data-column">

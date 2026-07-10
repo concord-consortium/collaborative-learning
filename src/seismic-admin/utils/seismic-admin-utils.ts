@@ -1,16 +1,22 @@
 import { StationData, StationConfig } from "../../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
 
-/** Run-length spans of cached/uncached days across [firstDay, lastDay]. */
-export function coverageSegments(cached: Set<number>, firstDay: number, lastDay: number) {
-  const segs: { startDay: number; endDay: number; cached: boolean }[] = [];
+interface CoverageSegment {
+  startDay: number;
+  endDay: number;
+  highlighted: boolean;
+}
+
+/** Run-length spans of highlighted/normal days across [firstDay, lastDay]. */
+export function coverageSegments(highlighted: Set<number>, firstDay: number, lastDay: number) {
+  const segs: CoverageSegment[] = [];
   for (let day = firstDay; day <= lastDay; day++) {
-    const isCached = cached.has(day);
+    const isHighlighted = highlighted.has(day);
     const last = segs[segs.length - 1];
-    if (last && last.cached === isCached) {
+    if (last && last.highlighted === isHighlighted) {
       last.endDay = day;
     } else {
-      segs.push({ startDay: day, endDay: day, cached: isCached });
+      segs.push({ startDay: day, endDay: day, highlighted: isHighlighted });
     }
   }
   return segs;

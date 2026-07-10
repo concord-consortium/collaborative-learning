@@ -8,7 +8,6 @@ interface Props {
   onCancel: () => void;
 }
 
-/** Minimal self-contained confirmation overlay. */
 export function ConfirmModal({ message, confirmLabel = "Confirm", onConfirm, onCancel }: Props) {
   return (
     <div className="confirm-modal-overlay" onClick={onCancel}>

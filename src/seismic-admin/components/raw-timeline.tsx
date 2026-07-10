@@ -5,15 +5,15 @@ import { coverageSegments } from "../utils/seismic-admin-utils";
 import "./raw-timeline.scss";
 
 interface Props {
-  cachedDays: Set<number>;
+  highlightedDays: Set<number>;
   firstDay: number;
   lastDay: number;
 }
 
-/** A proportional bar of cached (filled) / uncached (empty) day spans over [firstDay, lastDay]. */
-export const RawTimeline = observer(function RawTimeline({ cachedDays, firstDay, lastDay }: Props) {
+/** A proportional bar of highlighted (filled) / normal (empty) day spans over [firstDay, lastDay]. */
+export const RawTimeline = observer(function RawTimeline({ highlightedDays, firstDay, lastDay }: Props) {
   const totalDays = lastDay - firstDay + 1;
-  const segments = coverageSegments(cachedDays, firstDay, lastDay);
+  const segments = coverageSegments(highlightedDays, firstDay, lastDay);
   return (
     <div className="raw-timeline" role="img" aria-label="raw data coverage">
       {segments.map(seg => {
@@ -22,7 +22,7 @@ export const RawTimeline = observer(function RawTimeline({ cachedDays, firstDay,
         return (
           <div
             key={seg.startDay}
-            className={classNames("segment", seg.cached ? "filled" : "empty")}
+            className={classNames("segment", seg.highlighted ? "filled" : "empty")}
             style={{ width: `${pct}%` }}
           />
         );

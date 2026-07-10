@@ -5,7 +5,6 @@ import { stationLabel } from "../utils/seismic-admin-utils";
 import "./admin-header.scss";
 import { FeedbackArea } from "./feedback-area";
 
-/** Fixed header: station filter checkboxes and a start/end date range. */
 export const AdminHeader = observer(function AdminHeader() {
   const store = useSeismicAdminStore();
 
