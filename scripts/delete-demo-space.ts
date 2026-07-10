@@ -26,22 +26,27 @@ import { getScriptRootFilePath, prettyDuration } from "./lib/script-utils.js";
 
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
-const demoNameArg = process.argv[2];
+const demoName = process.argv[2];
 const dryRun = process.argv.includes("--dry-run");
 
-if (!demoNameArg || demoNameArg.startsWith("--")) {
+if (!demoName || demoName.startsWith("--")) {
   console.error("Usage: npx tsx delete-demo-space.ts <demoName> [--dry-run]");
   process.exit(1);
 }
 
-// The app stores each demo space under escapeKey(demoName) as a single path
-// segment (see escapeKey in src/lib/fire-utils.ts, used by src/lib/root-id.ts),
-// replacing the Firebase-illegal characters . $ [ ] # / with _. We apply the
-// same escaping so we target the real stored root, and so that a "/" in the
-// argument can't act as a path separator and reach unintended data.
-const demoName = demoNameArg.replace(/[.$[\]#/]/g, "_");
-if (demoName !== demoNameArg) {
-  console.log(`Using escaped demo name "${demoName}" (from "${demoNameArg}")`);
+// The demo name must be the exact stored root key, which the app has already
+// escaped when writing it (escapeKey in src/lib/fire-utils.ts, used by
+// src/lib/root-id.ts, replaces the Firebase-illegal characters . $ [ ] # / with
+// _). A dev running this script reads that key directly from Firestore/RTDB, so
+// it should never contain those characters. Reject rather than silently escape:
+// escaping here could point us at a different, unintended root, and a stray "/"
+// would act as a path separator. It's up to the caller to pass the escaped key.
+if (/[.$[\]#/]/.test(demoName)) {
+  console.error(
+    `Invalid demo name "${demoName}": it contains one of . $ [ ] # / which the app escapes to "_".\n` +
+    `Pass the exact escaped root key as it appears in Firestore/RTDB (e.g. "a_b", not "a.b").`
+  );
+  process.exit(1);
 }
 
 const startTime = Date.now();
