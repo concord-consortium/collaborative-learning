@@ -19,35 +19,26 @@
     align-items: flex-start;
     gap: 24px;
 
-    .data-column {
-      flex: 1;
+    .data-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
       width: 100%;
 
-      .data-row {
+      .data-section-header {
         display: flex;
         justify-content: space-between;
-      }
 
-      .data-kind {
-        font-size: 14px;
-        text-transform: uppercase;
-        color: #888;
-        margin-bottom: 4px;
-      }
+        .data-kind {
+          font-size: 14px;
+          text-transform: uppercase;
+          color: #888;
+        }
 
-      .timeline-placeholder {
-        height: 16px;
-        display: flex;
-        align-items: center;
-        font-size: 12px;
-        font-style: italic;
-        color: #aaa;
-      }
-
-      .data-stats {
-        margin-top: 4px;
-        font-size: 13px;
-        color: #444;
+        .data-stats {
+          font-size: 13px;
+          color: #444;
+        }
       }
     }
 
