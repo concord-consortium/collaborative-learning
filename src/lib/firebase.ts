@@ -495,7 +495,9 @@ private updateEvaluation = (targetRef: firebase.database.Reference | firebase.da
   if (aiEvaluation === "custom") {
     if (!aiPrompt) return undefined;
     // Include teacher-added custom tag ids as AI categories so the AI can classify documents with
-    // them (the cloud function builds its category enum from aiPrompt.categories).
+    // them (the cloud function builds its category enum from aiPrompt.categories). NOTE: this only
+    // applies to "custom" evaluation; "categorize-design"/"mock" use categories fixed in the cloud
+    // function, so custom tags are not offered to the AI in those modes.
     const customCategories = Object.keys(this.db.stores.commentTags.customTagRecord);
     const categories = Array.from(new Set([...(aiPrompt.categories ?? []), ...customCategories]));
     const promptWithCustomTags = { ...aiPrompt, categories };

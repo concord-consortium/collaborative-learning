@@ -16,6 +16,10 @@ export class DBCommentTagsListener extends BaseListener {
   }
 
   public start() {
+    // Guard against a double start() (without an intervening stop()) leaking the previous
+    // reaction and Firestore subscription.
+    this.reactionDisposer?.();
+    this.unsubscribe?.();
     const { user, unit } = this.db.stores;
     // (Re)subscribe whenever the class or unit becomes available or changes. A reaction (rather
     // than reading once) handles the unit loading asynchronously after listeners start.

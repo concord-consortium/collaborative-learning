@@ -7,6 +7,9 @@ import { escapeKey } from "../../lib/fire-utils";
 // `commentTags/{classHash}/units/{unit}/tags` so security rules can class-scope reads by the
 // {classHash} path segment. Custom tags are scoped to class + unit (not per problem) so they
 // appear when sorting by tag at the Problem/Investigation/Unit levels.
+// NOTE: the firestore.rules read rule compares the {classHash} path segment against the raw
+// `class_hash` auth token, while this escapes it. Class hashes are alphanumeric so escapeKey is a
+// no-op and they match; if that ever stops holding, the rule would need the same escaping.
 export function customCommentTagsPath(classHash: string, unit: string) {
   return `commentTags/${escapeKey(classHash)}/units/${escapeKey(unit)}/tags`;
 }
