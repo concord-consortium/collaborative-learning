@@ -1,5 +1,5 @@
 import {
-  SECONDS_PER_DAY, utcDay, utcDayFromString, dayIndex, dayToYearDoy, dayToISORange, daysInRange, lastDayIndex,
+  SECONDS_PER_DAY, utcDay, utcDayFromString, dayIndex, dayToYearDoy, dayToISORange, daysInRange,
 } from "./seismic-day";
 
 describe("seismic-day", () => {
@@ -23,10 +23,6 @@ describe("seismic-day", () => {
     expect(dayIndex(utcDay(2026, 1, 30) + 3600)).toBe(dayIndex(utcDay(2026, 1, 30)));
   });
 
-  it("last day index is exclusive", () => {
-    expect(lastDayIndex(utcDay(1970, 1, 2))).toBe(0);
-  });
-
   it("converts a day index to UTC year and day-of-year", () => {
     expect(dayToYearDoy(dayIndex(utcDay(2026, 1, 1)))).toEqual({ year: 2026, doy: 1 });
     expect(dayToYearDoy(dayIndex(utcDay(2026, 2, 1)))).toEqual({ year: 2026, doy: 32 });
@@ -39,13 +35,13 @@ describe("seismic-day", () => {
     expect(endISO).toBe("2026-01-31T00:00:00.000Z");
   });
 
-  it("lists the day indices overlapping a [startSec, endSec) range", () => {
+  it("lists the day indices overlapping a [startSec, endSec] range", () => {
     const start = utcDay(2026, 1, 30);
-    const end = utcDay(2026, 2, 2); // exclusive
+    const end = utcDay(2026, 2, 1);
     expect(daysInRange(start, end)).toEqual([
       dayIndex(utcDay(2026, 1, 30)), dayIndex(utcDay(2026, 1, 31)), dayIndex(utcDay(2026, 2, 1)),
     ]);
-    // Partial start and end days are included
-    expect(daysInRange(start + 7200, end - 1).length).toBe(3);
+    // Any instant within the start and end days includes those whole days
+    expect(daysInRange(start + 7200, end + 7200).length).toBe(3);
   });
 });

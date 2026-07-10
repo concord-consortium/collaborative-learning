@@ -61,13 +61,21 @@ export async function downloadRange(
   const maxRetries = params.maxRetries ?? DEFAULT_MAX_RETRIES;
 
   try {
+    const allDays = daysInRange(startSec, endSec);
+    if (allDays.length === 0) {
+      onEvent({ type: "done" });
+      return;
+    }
+
+    // Query availability across the full day-chunk span. daysInRange includes the day
+    // containing endSec, so the window must reach the end of that final day — otherwise
+    // the last day is reported unavailable and silently skipped.
+    const { startISO } = dayToISORange(allDays[0]);
+    const { endISO } = dayToISORange(allDays[allDays.length - 1]);
     const ranges = await deps.fetchAvailability({
-      ...stationLocation,
-      startTime: new Date(startSec * 1000).toISOString(),
-      endTime: new Date(endSec * 1000).toISOString()
+      ...stationLocation, startTime: startISO, endTime: endISO
     }, params.signal);
 
-    const allDays = daysInRange(startSec, endSec);
     const availableDays: number[] = [];
     allDays.forEach(day => {
       if (dayIsAvailable(day, ranges)) {

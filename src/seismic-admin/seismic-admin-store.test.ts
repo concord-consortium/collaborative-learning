@@ -16,7 +16,7 @@ beforeEach(() => window.localStorage.clear());
 it("loads stations from OPFS and computes per-station stats for the range", async () => {
   const d30 = dayIndex(utcDay(2026, 1, 30));
   const store = new SeismicAdminStore({ cache: fakeCache([d30]) as any });
-  store.setRange("2026-01-30", "2026-02-02");   // 3 days: 30, 31, 1 (end exclusive)
+  store.setRange("2026-01-30", "2026-02-01");   // 3 days: 30, 31, 1
   await store.refresh();
   const key = [...store.stations.keys()][0];
   expect(store.statsFor(key).cachedDays?.has(d30)).toBe(true);
@@ -109,7 +109,7 @@ describe("live stats updates", () => {
       seen.push(snapshot(store, key));
     });
     const store = new SeismicAdminStore({ cache: fakeCache() as any, downloadStation });
-    store.setRange("2026-01-30", "2026-02-02");   // 3 days, none cached
+    store.setRange("2026-01-30", "2026-02-01");   // 3 days, none cached
     await store.refresh();
     key = [...store.stations.keys()][0];
 

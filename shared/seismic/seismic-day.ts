@@ -23,11 +23,6 @@ export function dayIndex(unixSec: number): number {
   return Math.floor(unixSec / SECONDS_PER_DAY);
 }
 
-/** Unix seconds → UTC day index for the final day in a range. */
-export function lastDayIndex(unixSec: number): number {
-  return Math.ceil(unixSec / SECONDS_PER_DAY) - 1;
-}
-
 /** Day index → UTC calendar year and day-of-year (1-based), for OPFS paths. */
 export function dayToYearDoy(day: number): { year: number; doy: number } {
   const startMs = day * MILLISECONDS_PER_DAY;
@@ -45,10 +40,10 @@ export function dayToISORange(day: number): { startISO: string; endISO: string }
   return { startISO, endISO };
 }
 
-/** All UTC day indices overlapping [startSec, endSec). */
+/** All UTC day indices overlapping [startSec, endSec]. */
 export function daysInRange(startSec: number, endSec: number): number[] {
   const first = dayIndex(startSec);
-  const last = lastDayIndex(endSec);
+  const last = dayIndex(endSec);
   const days: number[] = [];
   for (let d = first; d <= last; d++) days.push(d);
   return days;

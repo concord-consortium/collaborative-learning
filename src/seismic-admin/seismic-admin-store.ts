@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { createOpfsCache, SeismicCache } from "../../shared/seismic/opfs-seismic-cache";
-import { dayIndex, lastDayIndex, utcDayFromString } from "../../shared/seismic/seismic-day";
+import { dayIndex, utcDayFromString } from "../../shared/seismic/seismic-day";
 import { StationConfig } from "../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
 import { DONE, SeismicDownloadService } from "../models/stores/seismic-download-service";
@@ -112,7 +112,7 @@ export class SeismicAdminStore {
 
   get lastDay() {
     const { lastSec } = this;
-    if (lastSec) return lastDayIndex(lastSec);
+    if (lastSec) return dayIndex(lastSec);
   }
 
   get selectedMissingRawDays() {

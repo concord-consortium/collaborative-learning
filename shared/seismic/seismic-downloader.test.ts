@@ -2,7 +2,10 @@ import { downloadRange, DownloadEvent, DownloaderDeps } from "./seismic-download
 import { dayIndex, utcDay } from "./seismic-day";
 
 const RANGE = { network: "AK", station: "K204", location: "--", channel: "HNZ",
-  startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 2, 3) }; // 4 days: 30,31,1,2
+  startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 2, 2) }; // 4 days incl: 30, 31, Feb 1, Feb 2
+
+// Availability covering data through the end of the last day (Feb 2 → start of Feb 3).
+const AVAILABLE = [{ start: utcDay(2026, 1, 30), end: utcDay(2026, 2, 3) }];
 
 function collect() {
   const events: DownloadEvent[] = [];
@@ -12,7 +15,7 @@ function collect() {
 function makeDeps(overrides: Partial<DownloaderDeps> = {}): DownloaderDeps {
   const written = new Set<number>();
   return {
-    fetchAvailability: async () => [{ start: RANGE.startSec, end: RANGE.endSec }],
+    fetchAvailability: async () => AVAILABLE,
     fetchRaw: async () => new ArrayBuffer(1),
     cache: {
       scanCachedDays: async () => new Set<number>(),
@@ -89,6 +92,26 @@ describe("downloadRange", () => {
 
     expect(events.some(e => e.type === "dayEmpty" && (e as any).day === d31)).toBe(true);
     expect(fetchRaw).toHaveBeenCalledTimes(3); // not the 31st
+  });
+
+  it("fetches the final day when the range ends on it (availability window must cover the whole day)", async () => {
+    // Mimic the real endpoint: it only reports availability within the requested window.
+    const dataStart = utcDay(2026, 1, 30), dataEnd = utcDay(2026, 2, 3); // station has data through Feb 2
+    const fetchAvailability = jest.fn(async (q: any) => {
+      const qStart = new Date(q.startTime).getTime() / 1000;
+      const qEnd = new Date(q.endTime).getTime() / 1000;
+      const start = Math.max(qStart, dataStart);
+      const end = Math.min(qEnd, dataEnd);
+      return end > start ? [{ start, end }] : [];
+    });
+    const fetchRaw = jest.fn(async () => new ArrayBuffer(1));
+    const { events, onEvent } = collect();
+    // endSec is midnight of the last wanted day (Feb 2), as the admin and tile pass it.
+    await downloadRange(makeDeps({ fetchAvailability, fetchRaw }), { ...RANGE, endSec: utcDay(2026, 2, 2) }, onEvent);
+
+    const feb2 = dayIndex(utcDay(2026, 2, 2));
+    expect(events.some(e => e.type === "dayWritten" && (e as any).day === feb2)).toBe(true);
+    expect(events.some(e => e.type === "dayEmpty" && (e as any).day === feb2)).toBe(false);
   });
 
   it("retries a failing day up to maxRetries, then emits dayError", async () => {
