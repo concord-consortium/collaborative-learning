@@ -6,9 +6,9 @@ describe("seismic-admin-utils", () => {
   it("builds run-length coverage segments over [firstDay, lastDay]", () => {
     const segs = coverageSegments(new Set([10, 12, 13]), 10, 13);
     expect(segs).toEqual([
-      { startDay: 10, endDay: 10, cached: true },
-      { startDay: 11, endDay: 11, cached: false },
-      { startDay: 12, endDay: 13, cached: true },
+      { startDay: 10, endDay: 10, highlighted: true },
+      { startDay: 11, endDay: 11, highlighted: false },
+      { startDay: 12, endDay: 13, highlighted: true },
     ]);
   });
 

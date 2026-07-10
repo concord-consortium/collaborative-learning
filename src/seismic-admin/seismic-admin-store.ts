@@ -167,7 +167,7 @@ export class SeismicAdminStore {
     for (const s of this.stations.values()) await this.loadStats(s);
   }
 
-  get allStats() {
+  get allStats(): StationStats {
     return {
       bytes: this.selectedBytes,
       missingCount: this.selectedMissingRawDays
