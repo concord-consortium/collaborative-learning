@@ -499,9 +499,10 @@ private updateEvaluation = (targetRef: firebase.database.Reference | firebase.da
     // applies to "custom" evaluation; "categorize-design"/"mock" use categories fixed in the cloud
     // function, so custom tags are not offered to the AI in those modes.
     const customCategories = Object.keys(this.db.stores.commentTags.customTagRecord);
-    const categories = Array.from(new Set([...(aiPrompt.categories ?? []), ...customCategories]));
-    const promptWithCustomTags = { ...aiPrompt, categories };
-    return targetRef.set({ aiPrompt: promptWithCustomTags, timestamp: firebase.database.ServerValue.TIMESTAMP });
+    const promptToWrite = customCategories.length > 0
+      ? { ...aiPrompt, categories: Array.from(new Set([...(aiPrompt.categories ?? []), ...customCategories])) }
+      : aiPrompt;
+    return targetRef.set({ aiPrompt: promptToWrite, timestamp: firebase.database.ServerValue.TIMESTAMP });
   }
 
   return targetRef.set({ timestamp: firebase.database.ServerValue.TIMESTAMP });

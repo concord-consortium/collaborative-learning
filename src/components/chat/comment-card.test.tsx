@@ -32,7 +32,8 @@ jest.mock("../../hooks/use-stores", () => ({
     appConfig: AppConfigModel.create({ config: unitConfigDefaults }),
     class: {
       getUserById: () => ({ id: "0", type: "student", name: "Test Student" } as UserModelType)
-    }
+    },
+    commentTags: { mergedWith: (c?: Record<string, string>) => ({ ...(c ?? {}) }) }
   }),
   useCurriculumOrDocumentContent: () => undefined
 }));
@@ -222,7 +223,8 @@ describe("CommentCard with showCommentRating disabled", () => {
       appConfig: AppConfigModel.create({ config: configWithRatingsDisabled }),
       class: {
         getUserById: () => ({ id: "0", type: "student", name: "Test Student" } as UserModelType)
-      }
+      },
+      commentTags: { mergedWith: (c?: Record<string, string>) => ({ ...(c ?? {}) }) }
     });
   });
 
@@ -233,7 +235,8 @@ describe("CommentCard with showCommentRating disabled", () => {
       appConfig: AppConfigModel.create({ config: unitConfigDefaults }),
       class: {
         getUserById: () => ({ id: "0", type: "student", name: "Test Student" } as UserModelType)
-      }
+      },
+      commentTags: { mergedWith: (c?: Record<string, string>) => ({ ...(c ?? {}) }) }
     });
   });
 
