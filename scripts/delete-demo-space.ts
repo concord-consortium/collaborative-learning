@@ -26,12 +26,22 @@ import { getScriptRootFilePath, prettyDuration } from "./lib/script-utils.js";
 
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
-const demoName = process.argv[2];
+const demoNameArg = process.argv[2];
 const dryRun = process.argv.includes("--dry-run");
 
-if (!demoName || demoName.startsWith("--")) {
+if (!demoNameArg || demoNameArg.startsWith("--")) {
   console.error("Usage: npx tsx delete-demo-space.ts <demoName> [--dry-run]");
   process.exit(1);
+}
+
+// The app stores each demo space under escapeKey(demoName) as a single path
+// segment (see escapeKey in src/lib/fire-utils.ts, used by src/lib/root-id.ts),
+// replacing the Firebase-illegal characters . $ [ ] # / with _. We apply the
+// same escaping so we target the real stored root, and so that a "/" in the
+// argument can't act as a path separator and reach unintended data.
+const demoName = demoNameArg.replace(/[.$[\]#/]/g, "_");
+if (demoName !== demoNameArg) {
+  console.log(`Using escaped demo name "${demoName}" (from "${demoNameArg}")`);
 }
 
 const startTime = Date.now();
@@ -117,10 +127,13 @@ async function deleteFirestore(firestore: admin.firestore.Firestore) {
   // front; the delete heartbeat below reports running progress instead.)
   const subcollections = await docRef.listCollections();
   if (subcollections.length === 0) {
-    log(`Firestore: no subcollections under ${docPath}; nothing to delete.`);
-    return;
+    // No subcollections, but the base document itself may still exist with its
+    // own fields (e.g. updatedAt). recursiveDelete below removes the base doc if
+    // present, so we don't return early here.
+    log(`Firestore: no subcollections under ${docPath}; will still delete the base doc if present.`);
+  } else {
+    log(`Firestore: subcollections to delete: ${subcollections.map(s => s.id).join(", ")}`);
   }
-  log(`Firestore: subcollections to delete: ${subcollections.map(s => s.id).join(", ")}`);
 
   if (dryRun) {
     log(`Firestore: dry run, skipping recursiveDelete of ${docPath}.`);
