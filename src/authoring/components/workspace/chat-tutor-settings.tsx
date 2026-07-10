@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { CHAT_GENERIC_PROMPT } from "../../../../shared/chat-tutor-generic-prompt";
 import { useCurriculum } from "../../hooks/use-curriculum";
 
 interface ChatTutorSettingsFormInputs {
@@ -9,6 +10,20 @@ interface ChatTutorSettingsFormInputs {
 
 const ChatTutorSettings: React.FC = () => {
   const { unitConfig, setUnitConfig, saveState } = useCurriculum();
+  const [copied, setCopied] = useState(false);
+  const copiedTimeoutRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    return () => window.clearTimeout(copiedTimeoutRef.current);
+  }, []);
+
+  const handleCopyPrompt = () => {
+    navigator.clipboard.writeText(CHAT_GENERIC_PROMPT).then(() => {
+      setCopied(true);
+      window.clearTimeout(copiedTimeoutRef.current);
+      copiedTimeoutRef.current = window.setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   const formDefaults: ChatTutorSettingsFormInputs = useMemo(() => {
     const chatTutorPrompts = unitConfig?.config?.chatTutorPrompts;
@@ -53,6 +68,19 @@ const ChatTutorSettings: React.FC = () => {
         the <code>chatTutor</code> parameter to this authoring page&apos;s URL before
         opening a student preview (preview links inherit it).
       </p>
+
+      <details className="builtInPrompt">
+        <summary>View built-in tutor prompt</summary>
+        <p className="muted small">
+          This is the prompt the overrides below act on. A replaced prompt is frozen —
+          it won&apos;t pick up future improvements to this built-in text — while an
+          appended prompt inherits them.
+        </p>
+        <button type="button" onClick={handleCopyPrompt}>
+          {copied ? "Copied!" : "Copy to clipboard"}
+        </button>
+        <pre>{CHAT_GENERIC_PROMPT}</pre>
+      </details>
 
       <fieldset>
         <label htmlFor="replaceGenericPrompt">Replace built-in tutor prompt</label>

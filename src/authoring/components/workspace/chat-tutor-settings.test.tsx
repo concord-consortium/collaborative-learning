@@ -4,6 +4,7 @@ import React from "react";
 
 import ChatTutorSettings from "./chat-tutor-settings";
 import { IChatTutorPrompts } from "../../types";
+import { CHAT_GENERIC_PROMPT } from "../../../../shared/chat-tutor-generic-prompt";
 
 const mockSetUnitConfig = jest.fn();
 
@@ -68,6 +69,22 @@ describe("ChatTutorSettings", () => {
     expect(mockDraft.config.chatTutorPrompts).toEqual({
       appendToGenericPrompt: "Focus on energy transfer."
     });
+  });
+
+  it("shows the built-in prompt and copies it to the clipboard", async () => {
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true
+    });
+    render(<ChatTutorSettings />);
+
+    expect(screen.getByText("View built-in tutor prompt")).toBeInTheDocument();
+    expect(screen.getByText(/warm, patient science tutor/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy to clipboard" }));
+    expect(writeText).toHaveBeenCalledWith(CHAT_GENERIC_PROMPT);
+    expect(await screen.findByRole("button", { name: "Copied!" })).toBeInTheDocument();
   });
 
   it("deletes chatTutorPrompts when both fields are blank", async () => {

@@ -25,13 +25,13 @@ import * as functionsV1 from "firebase-functions/v1";
 import {defineSecret, defineString} from "firebase-functions/params";
 import {getFirestore} from "firebase-admin/firestore";
 
-import {CHAT_GENERIC_PROMPT} from "./chat/generic-prompt";
+import {CHAT_GENERIC_PROMPT} from "../../shared/chat-tutor-generic-prompt";
 import {createOpenAIClient} from "./chat/openai";
 import {DrainContext, acquireLock, processAndDrain, pickOwnerFields} from "./chat/drain";
 
 // Only the API key is a true secret (defineSecret). OPENAI_MODEL stays a defineString param
 // (server-side config, provisioned per environment). The generic tutor prompt is a source
-// constant (./chat/generic-prompt), not a param.
+// constant (shared/chat-tutor-generic-prompt), not a param.
 const openaiKey = defineSecret("OPENAI_TUTOR_API_KEY");
 const openaiModel = defineString("OPENAI_MODEL");
 

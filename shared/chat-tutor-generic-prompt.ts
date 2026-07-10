@@ -1,7 +1,9 @@
 // The generic tutor prompt — the server-owned, problem-independent portion of the chat tutor's
-// developer context. It lives in source (not a defineString param): it is server-side either way
-// (the function never ships to the browser), so a param would buy no secrecy — only a split
-// source-of-truth and awkward multi-line .env escaping. As a constant it is type-checked and diffable.
+// developer context. It lives in source (not a defineString param): the repo is public so a param
+// would buy no secrecy — only a split source-of-truth and awkward multi-line .env escaping. As a
+// constant it is type-checked and diffable. It lives in shared/ because two builds consume it:
+// functions-v2 sends it to the model at runtime, and the authoring UI displays it read-only so
+// unit authors can see what their prompt overrides replace or append to.
 //
 // It MUST retain the four load-bearing pieces:
 //   1. the tutoring stance (guide, don't solve),
