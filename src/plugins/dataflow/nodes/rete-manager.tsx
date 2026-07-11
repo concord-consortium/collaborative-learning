@@ -13,6 +13,7 @@ import {
   DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel
 } from "../model/dataflow-program-model";
 import { AreaExtra, Schemes } from "./rete-scheme";
+import { MarqueeSelection, Rect } from "./marquee-selection";
 import { NodeEditorMST } from "./node-editor-mst";
 import { INodeServices } from "./service-types";
 import { LogEventName } from "../../../lib/logger-types";
@@ -107,8 +108,14 @@ export class ReteManager implements INodeServices {
   public engine = new DataflowEngine<Schemes>();
   public area: AreaPlugin<Schemes, AreaExtra>;
   private nodeSelector: ReturnType<typeof AreaExtensions.selector>;
+  private selectable: ReturnType<typeof AreaExtensions.selectableNodes> | undefined;
   private selectionAccumulator: ReturnType<typeof accumulateOnModifier> | undefined;
   private collapsedConnectionsDisposer: (() => void) | undefined;
+  private marquee: MarqueeSelection | undefined;
+  // Left-drag marquee-selects; the arrow keys pan instead. `canvasActive` gates arrow-panning to the
+  // tile the user last interacted with (so arrows don't pan every dataflow tile on the page at once).
+  private canvasActive = false;
+  private arrowPanDisposer: (() => void) | undefined;
   public selectionState = observable({ nodeIds: [] as string[] });
   private snapshotDisposer: () => void | undefined;
   public inTick = false;
@@ -143,9 +150,16 @@ export class ReteManager implements INodeServices {
 
     this.nodeSelector = AreaExtensions.selector();
     this.selectionAccumulator = accumulateOnModifier();
-    AreaExtensions.selectableNodes(area, this.nodeSelector, {
+    this.selectable = AreaExtensions.selectableNodes(area, this.nodeSelector, {
       accumulating: this.selectionAccumulator
     });
+
+    // Left-drag on the empty canvas marquee-selects nodes; the arrow keys pan the view. Read-only
+    // tiles get neither.
+    if (!this.readOnly) {
+      this.setupMarqueeSelection();
+      this.setupArrowKeyPan();
+    }
 
     // Hide connections whose endpoints are in a collapsed group (those nodes are hidden). Member
     // node elements hide declaratively via CustomDataflowNode; wires are hidden imperatively here
@@ -523,6 +537,75 @@ export class ReteManager implements INodeServices {
   public selectNode = (nodeId: string) => {
     this.area.emit({ type: "nodepicked", data: { id: nodeId } });
   };
+
+  // Disable the area's background drag (it panned on left-drag) and wire marquee selection so a
+  // left-drag on the empty canvas rubber-band-selects nodes instead.
+  private setupMarqueeSelection() {
+    const { area } = this;
+    area.area.setDragHandler(null);
+    if (!area.container) return;
+    this.marquee = new MarqueeSelection({
+      container: area.container,
+      isPanGesture: () => false, // panning is on the arrow keys, not the pointer
+      getNodeRects: () => {
+        const rects: Array<{ id: string; rect: Rect }> = [];
+        area.nodeViews.forEach((view, id) => {
+          const el = view.element;
+          if (!el) return;
+          const r = el.getBoundingClientRect();
+          if (r.width === 0 || r.height === 0) return; // skip hidden (e.g. collapsed-group members)
+          rects.push({ id, rect: r });
+        });
+        return rects;
+      },
+      onSelect: (ids, additive) => {
+        if (!additive) this.nodeSelector.unselectAll();
+        ids.forEach(id => this.selectable?.select(id, true));
+        this.syncSelection();
+      },
+    });
+  }
+
+  // Pan the canvas with the arrow keys. Scoped to the tile the user last interacted with, and it
+  // yields to node keyboard-nav / text editing (those handlers stopPropagation before this fires,
+  // and we double-check the focused element).
+  private setupArrowKeyPan() {
+    const container = this.area.container;
+    if (!container) return;
+    const onDocPointerDown = (e: PointerEvent) => {
+      this.canvasActive = e.target instanceof Node && container.contains(e.target);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!this.canvasActive || e.altKey || e.ctrlKey || e.metaKey) return;
+      const step = e.shiftKey ? 120 : 40;
+      let dx = 0, dy = 0;
+      switch (e.key) {
+        case "ArrowLeft":  dx = step;  break;
+        case "ArrowRight": dx = -step; break;
+        case "ArrowUp":    dy = step;  break;
+        case "ArrowDown":  dy = -step; break;
+        default: return;
+      }
+      const active = document.activeElement;
+      if (active instanceof HTMLElement &&
+          (active.closest(".node") || active.tagName === "INPUT" ||
+           active.tagName === "TEXTAREA" || active.isContentEditable)) return;
+      e.preventDefault();
+      void this.pan(dx, dy);
+    };
+    document.addEventListener("pointerdown", onDocPointerDown, true);
+    window.addEventListener("keydown", onKeyDown);
+    this.arrowPanDisposer = () => {
+      document.removeEventListener("pointerdown", onDocPointerDown, true);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }
+
+  // Pan the view by a screen-space delta (positive dx moves content right).
+  public async pan(dx: number, dy: number) {
+    const t = this.area.area.transform;
+    await this.area.area.translate(t.x + dx, t.y + dy);
+  }
 
   /**
    * Focus the node's keyboard-focusable `.node` div.
@@ -1229,6 +1312,8 @@ export class ReteManager implements INodeServices {
     this.snapshotDisposer?.();
     this.selectionAccumulator?.destroy();
     this.collapsedConnectionsDisposer?.();
+    this.marquee?.destroy();
+    this.arrowPanDisposer?.();
     if (this.fitTimeout) {
       clearTimeout(this.fitTimeout);
       this.fitTimeout = undefined;
