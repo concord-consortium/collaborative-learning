@@ -65,12 +65,14 @@ describe("DataflowProgramModel groups", () => {
 
   it("auto-dissolves a group when a member is removed and it drops below 2", () => {
     const program = makeProgram(["a", "b", "c"]);
-    const group = program.createGroup(["a", "b", "c"])!;
+    // Capture the id before the group can be dissolved (reading `group.id` off a
+    // removed MST node would warn).
+    const groupId = program.createGroup(["a", "b", "c"])!.id;
     program.removeNodeAndConnections("a");
-    expect(program.groups.has(group.id)).toBe(true);
+    expect(program.groups.has(groupId)).toBe(true);
     expect([...program.getGroupForNode("b")!.nodeIds]).toEqual(["b", "c"]);
     program.removeNodeAndConnections("b");
-    expect(program.groups.has(group.id)).toBe(false);
+    expect(program.groups.has(groupId)).toBe(false);
   });
 
   it("round-trips groups (label, collapsed, members) through a snapshot", () => {
