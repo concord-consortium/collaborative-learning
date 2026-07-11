@@ -76,11 +76,32 @@ export function getNewIndexedName(existingNames: Array<string | undefined>, base
  return `${baseName} ${nextNum}`;
 }
 
+// Accumulate node selection while Shift, Ctrl, or Cmd is held. Mirrors
+// AreaExtensions.accumulateOnCtrl() but also allows Shift, the more natural multi-select modifier.
+function accumulateOnModifier() {
+  let pressed = false;
+  const isModifierKey = (e: KeyboardEvent) => e.key === "Shift" || e.key === "Control" || e.key === "Meta";
+  const keydown = (e: KeyboardEvent) => {
+    if (isModifierKey(e) || e.shiftKey || e.ctrlKey || e.metaKey) pressed = true;
+  };
+  const keyup = (e: KeyboardEvent) => { if (isModifierKey(e)) pressed = false; };
+  document.addEventListener("keydown", keydown);
+  document.addEventListener("keyup", keyup);
+  return {
+    active: () => pressed,
+    destroy: () => {
+      document.removeEventListener("keydown", keydown);
+      document.removeEventListener("keyup", keyup);
+    }
+  };
+}
+
 export class ReteManager implements INodeServices {
   public editor: NodeEditorMST;
   public engine = new DataflowEngine<Schemes>();
   public area: AreaPlugin<Schemes, AreaExtra>;
   private nodeSelector: ReturnType<typeof AreaExtensions.selector>;
+  private selectionAccumulator: ReturnType<typeof accumulateOnModifier> | undefined;
   public selectionState = observable({ nodeIds: [] as string[] });
   private snapshotDisposer: () => void | undefined;
   public inTick = false;
@@ -114,8 +135,9 @@ export class ReteManager implements INodeServices {
     area.area.setZoomHandler(null);
 
     this.nodeSelector = AreaExtensions.selector();
+    this.selectionAccumulator = accumulateOnModifier();
     AreaExtensions.selectableNodes(area, this.nodeSelector, {
-      accumulating: AreaExtensions.accumulateOnCtrl()
+      accumulating: this.selectionAccumulator
     });
 
     // Sync observable selection state when nodes are picked or the background is clicked.
@@ -877,11 +899,16 @@ export class ReteManager implements INodeServices {
     const { k, x: tx, y: ty } = this.area.area.transform;
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     for (const id of nodeIds) {
-      const view = this.area.nodeViews.get(id);
-      const el = view?.element;
-      if (!view || !el) continue;
-      const left = tx + view.position.x * k;
-      const top = ty + view.position.y * k;
+      const el = this.area.nodeViews.get(id)?.element;
+      const node = this.mstProgram.nodes.get(id);
+      if (!el || !node) continue;
+      // Use the MST position (the source of truth, updated live during drags) for placement, and
+      // the measured element for size. Reading rete's nodeView.position can be stale for a node
+      // that was moved before being grouped.
+      const px = isNaN(node.liveX) ? node.x : node.liveX;
+      const py = isNaN(node.liveY) ? node.y : node.liveY;
+      const left = tx + px * k;
+      const top = ty + py * k;
       minX = Math.min(minX, left);
       minY = Math.min(minY, top);
       maxX = Math.max(maxX, left + el.offsetWidth * k);
@@ -1131,6 +1158,7 @@ export class ReteManager implements INodeServices {
 
   public dispose() {
     this.snapshotDisposer?.();
+    this.selectionAccumulator?.destroy();
     if (this.fitTimeout) {
       clearTimeout(this.fitTimeout);
       this.fitTimeout = undefined;

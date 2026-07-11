@@ -1,11 +1,45 @@
-// Overlay layer that draws labeled boxes around expanded dataflow groups. The layer itself does
-// not capture pointer events (so the canvas stays interactive); only the label bar does.
+// Overlay layer that draws expanded group boxes / collapsed group chips over the dataflow canvas.
+// The layer itself does not capture pointer events (so the canvas stays interactive); only the
+// interactive controls (label + toggle) do.
 .dataflow-groups-overlay {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
   z-index: 5;
+
+  // Shared label + toggle styling.
+  .dataflow-group-toggle {
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1.3;
+    padding: 0 2px;
+  }
+
+  .dataflow-group-label {
+    flex: 1 1 auto;
+    cursor: text;
+    font-size: 12px;
+    line-height: 1.3;
+    text-align: left;
+    // Labels double as code comments: wrap to multiple lines instead of truncating.
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .dataflow-group-label-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 12px;
+    line-height: 1.3;
+    text-align: left;
+    resize: none;
+    overflow: hidden;
+    field-sizing: content; // grow with content where supported
+  }
 
   .dataflow-group-box {
     position: absolute;
@@ -15,41 +49,36 @@
     // Transparent fill so member nodes remain visible/interactive underneath.
     background: rgba(127, 127, 127, 0.04);
 
+    // The label bar floats directly above the box's top edge and grows upward as the label wraps,
+    // so a long comment never overlaps the members.
+    // Spans the box width and grows upward as the label wraps.
     .dataflow-group-label-bar {
       position: absolute;
-      top: 0;
       left: 0;
+      right: 0;
+      bottom: 100%;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 4px;
-      height: 20px;
-      max-width: 100%;
-      padding: 0 4px;
+      padding: 2px 6px;
       background: rgba(127, 127, 127, 0.18);
       border-radius: 6px 6px 0 0;
       pointer-events: auto;
-
-      .dataflow-group-collapse {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 12px;
-        line-height: 1;
-        padding: 0 2px;
-      }
-
-      .dataflow-group-label {
-        cursor: text;
-        font-size: 12px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .dataflow-group-label-input {
-        font-size: 12px;
-        max-width: 140px;
-      }
     }
+  }
+
+  // Collapsed group: a compact labeled chip with an expand toggle.
+  .dataflow-group-chip {
+    position: absolute;
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 4px;
+    max-width: 220px;
+    padding: 3px 8px;
+    border: 1.5px solid #7f7f7f;
+    border-radius: 6px;
+    background: #f2f2f2;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    pointer-events: auto;
   }
 }

@@ -354,7 +354,9 @@
         "tools": [
           ["data-set-view", "Table"],
           ["data-set-link", "Graph"],
-          "delete"
+          "delete",
+          "group",
+          "ungroup"
         ]
       },
       "diagram": {
