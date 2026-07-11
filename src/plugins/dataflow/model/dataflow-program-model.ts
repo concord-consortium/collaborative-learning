@@ -29,6 +29,34 @@ export interface IConnectionModel extends Instance<typeof ConnectionModel> {}
 export interface ConnectionModelSnapshotIn extends SnapshotIn<typeof ConnectionModel> {}
 
 /**
+ * A "super node" grouping: a labeled, collapsible container that references member node ids.
+ * Members stay in the flat `nodes` map (so the rete engine still sees a flat graph); the group is
+ * a parallel organizational layer. Adding this map is backward-compatible — old snapshots without
+ * `groups` load with an empty map, so no version bump is needed.
+ */
+export const GroupModel = types
+  .model("Group", {
+    id: types.identifier,
+    label: types.string,
+    nodeIds: types.array(types.string),
+    collapsed: types.optional(types.boolean, false),
+  })
+  .actions(self => ({
+    setLabel(label: string) {
+      self.label = label;
+    },
+    setCollapsed(collapsed: boolean) {
+      self.collapsed = collapsed;
+    },
+    removeNodeId(nodeId: string) {
+      const idx = self.nodeIds.indexOf(nodeId);
+      if (idx >= 0) self.nodeIds.splice(idx, 1);
+    }
+  }));
+export interface IGroupModel extends Instance<typeof GroupModel> {}
+export interface GroupModelSnapshotIn extends SnapshotIn<typeof GroupModel> {}
+
+/**
  * The ConnectionModelWrapper is needed because Rete keeps references to the
  * connections. After a connection model is removed from the MST tree by an applied
  * snapshot, Rete still tries ot access its id. So we wrap the connection and keep
@@ -120,6 +148,7 @@ export const DataflowProgramModel = types.
     id: STATE_VERSION_CURRENT,
     nodes: types.map(DataflowNodeModel),
     connections: types.map(ConnectionModel),
+    groups: types.map(GroupModel),
     recentTicks: types.array(types.string),
   })
   .volatile(self => ({
@@ -150,6 +179,18 @@ export const DataflowProgramModel = types.
   .views(self => ({
     get connectionWrappers() {
       return [...self.connections.keys()].map(id => self.getConnectionWrapper(id)!);
+    },
+    getGroupForNode(nodeId: string) {
+      return [...self.groups.values()].find(g => g.nodeIds.includes(nodeId));
+    },
+    // Next default group label ("Group 1", "Group 2", ...) based on existing labels.
+    getNextGroupLabel() {
+      let max = 0;
+      self.groups.forEach(g => {
+        const m = /^Group (\d+)$/.exec(g.label);
+        if (m) max = Math.max(max, Number(m[1]));
+      });
+      return `Group ${max + 1}`;
     }
   }))
   .actions(self => ({
@@ -244,6 +285,20 @@ export const DataflowProgramModel = types.
     }
   }))
   .actions(self => ({
+    // Create a "super node" group from the given node ids. Requires ≥2 nodes that exist and are
+    // not already in a group; returns the new group (or undefined if the request is invalid).
+    createGroup(nodeIds: string[], label?: string) {
+      const validIds = nodeIds.filter(nodeId => self.nodes.has(nodeId) && !self.getGroupForNode(nodeId));
+      if (validIds.length < 2) return undefined;
+      const id = uniqueId();
+      self.groups.put({ id, label: label ?? self.getNextGroupLabel(), nodeIds: validIds, collapsed: false });
+      return self.groups.get(id);
+    },
+    ungroupGroups(ids: string[]) {
+      ids.forEach(groupId => self.groups.delete(groupId));
+    }
+  }))
+  .actions(self => ({
     removeNodeAndConnections(nodeId: string) {
       const connections = [...self.connections.values()].filter(c => {
         return c.source === nodeId || c.target === nodeId;
@@ -258,6 +313,13 @@ export const DataflowProgramModel = types.
         self.removeConnection(connection.id);
       }
       self.removeNode(nodeId);
+
+      // Keep group membership consistent; auto-dissolve a group that drops below 2 members.
+      const group = self.getGroupForNode(nodeId);
+      if (group) {
+        group.removeNodeId(nodeId);
+        if (group.nodeIds.length < 2) self.groups.delete(group.id);
+      }
       return removedConnections;
     }
   }));

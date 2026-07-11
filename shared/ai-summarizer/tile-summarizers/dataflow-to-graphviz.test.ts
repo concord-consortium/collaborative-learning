@@ -158,4 +158,34 @@ describe("programToGraphviz", () => {
 
     expect(result).toBe(expected);
   });
+
+  it("wraps grouped nodes in a labeled Graphviz cluster", () => {
+    const program = {
+      id: "dataflow@1",
+      nodes: {
+        n1: { id: "n1", name: "Number", x: 0, y: 0,
+          data: { type: "Number", orderedDisplayName: "Number 1", value: 1 } },
+        n2: { id: "n2", name: "Number", x: 0, y: 0,
+          data: { type: "Number", orderedDisplayName: "Number 2", value: 2 } },
+        n3: { id: "n3", name: "Math", x: 0, y: 0,
+          data: { type: "Math", orderedDisplayName: "Math 1", mathOperator: "Add" } },
+      },
+      connections: {
+        c1: { id: "c1", source: "n1", sourceOutput: "num", target: "n3", targetInput: "num1" },
+      },
+      groups: {
+        g1: { id: "g1", label: "My Group", nodeIds: ["n1", "n2"], collapsed: false },
+      },
+    };
+    const dot = programToGraphviz(program as any);
+    expect(dot).toContain("subgraph cluster_g1 {");
+    expect(dot).toContain('label="My Group";');
+
+    // Grouped members are declared inside the cluster; the ungrouped Math node is at the top level.
+    const clusterStart = dot.indexOf("subgraph cluster_g1");
+    const clusterBlock = dot.slice(clusterStart, dot.indexOf("}", clusterStart));
+    expect(clusterBlock).toContain("Number:Number 1");
+    expect(clusterBlock).toContain("Number:Number 2");
+    expect(clusterBlock).not.toContain("Math:Math 1");
+  });
 });
