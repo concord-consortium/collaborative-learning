@@ -833,6 +833,36 @@ export class ReteManager implements INodeServices {
     this.syncSelection();
   }
 
+  // The group ids that the current node selection belongs to (used to enable/perform Ungroup).
+  public getSelectedGroupIds(): string[] {
+    const groupIds = new Set<string>();
+    this.getSelectedNodeIds().forEach(id => {
+      const group = this.mstProgram.getGroupForNode(id);
+      if (group) groupIds.add(group.id);
+    });
+    return [...groupIds];
+  }
+
+  // True when the current selection can be grouped: >=2 selected nodes, none already in a group.
+  public canGroupSelection(): boolean {
+    const ids = this.getSelectedNodeIds();
+    return ids.length >= 2 && ids.every(id => !this.mstProgram.getGroupForNode(id));
+  }
+
+  // Group the selected nodes into a new "super node" (needs >=2 ungrouped selected nodes).
+  public groupSelectedNodes() {
+    return this.mstProgram.createGroup(this.getSelectedNodeIds());
+  }
+
+  public ungroupSelectedGroups() {
+    this.mstProgram.ungroupGroups(this.getSelectedGroupIds());
+  }
+
+  public toggleGroupCollapsed(groupId: string) {
+    const group = this.mstProgram.groups.get(groupId);
+    group?.setCollapsed(!group.collapsed);
+  }
+
   public update = (type: "node" | "connection" | "socket" | "control", id: string) => {
     this.area.update(type, id);
   };
