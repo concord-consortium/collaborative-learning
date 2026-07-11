@@ -1,0 +1,55 @@
+// Overlay layer that draws labeled boxes around expanded dataflow groups. The layer itself does
+// not capture pointer events (so the canvas stays interactive); only the label bar does.
+.dataflow-groups-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 5;
+
+  .dataflow-group-box {
+    position: absolute;
+    box-sizing: border-box;
+    border: 1.5px dashed #7f7f7f;
+    border-radius: 6px;
+    // Transparent fill so member nodes remain visible/interactive underneath.
+    background: rgba(127, 127, 127, 0.04);
+
+    .dataflow-group-label-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 20px;
+      max-width: 100%;
+      padding: 0 4px;
+      background: rgba(127, 127, 127, 0.18);
+      border-radius: 6px 6px 0 0;
+      pointer-events: auto;
+
+      .dataflow-group-collapse {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 12px;
+        line-height: 1;
+        padding: 0 2px;
+      }
+
+      .dataflow-group-label {
+        cursor: text;
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .dataflow-group-label-input {
+        font-size: 12px;
+        max-width: 140px;
+      }
+    }
+  }
+}

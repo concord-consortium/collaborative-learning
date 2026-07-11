@@ -863,6 +863,34 @@ export class ReteManager implements INodeServices {
     group?.setCollapsed(!group.collapsed);
   }
 
+  // Observable accessors for the groups overlay component.
+  public get groups() {
+    return this.mstProgram.groups;
+  }
+  public get nodes() {
+    return this.mstProgram.nodes;
+  }
+
+  // Screen-space bounding box (in .flow-tool pixels) around the given nodes, using rete's measured
+  // node views + the current area transform. Returns undefined if no member is currently rendered.
+  public getGroupScreenBounds(nodeIds: string[]) {
+    const { k, x: tx, y: ty } = this.area.area.transform;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const id of nodeIds) {
+      const view = this.area.nodeViews.get(id);
+      const el = view?.element;
+      if (!view || !el) continue;
+      const left = tx + view.position.x * k;
+      const top = ty + view.position.y * k;
+      minX = Math.min(minX, left);
+      minY = Math.min(minY, top);
+      maxX = Math.max(maxX, left + el.offsetWidth * k);
+      maxY = Math.max(maxY, top + el.offsetHeight * k);
+    }
+    if (minX === Infinity) return undefined;
+    return { left: minX, top: minY, width: maxX - minX, height: maxY - minY };
+  }
+
   public update = (type: "node" | "connection" | "socket" | "control", id: string) => {
     this.area.update(type, id);
   };
