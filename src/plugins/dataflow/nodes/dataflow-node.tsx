@@ -176,11 +176,17 @@ export const CustomDataflowNode = observer(
   sortByIndex(outputs);
   sortByIndex(controls);
 
+  // Members of a collapsed group are hidden (the group renders as a chip in the overlay). Reading
+  // the observable groups here keeps this reactive to collapse/expand and membership changes.
+  const inCollapsedGroup = !!reteManager
+    && [...reteManager.groups.values()].some(g => g.collapsed && g.nodeIds.includes(id));
+
   const dynamicClasses = classNames({
     "selected": data.selected,
     "gate-active": node instanceof ControlNode && node.model.gateActive,
     "has-flow-in": node instanceof ControlNode && node.hasFlowIn(),
     "plot-open": showPlot,
+    "collapsed-hidden": inCollapsedGroup,
   });
 
   return (

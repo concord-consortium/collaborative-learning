@@ -76,6 +76,12 @@ export function getNewIndexedName(existingNames: Array<string | undefined>, base
  return `${baseName} ${nextNum}`;
 }
 
+// Fallback node dimensions (CSS px) used for group-bounds math when a member element isn't
+// measurable (hidden while collapsed, or not yet laid out just after expanding). Node width is
+// fixed ($node-width = 176); height varies, so this is an estimate refined on the next layout pass.
+const kDefaultNodeWidth = 176;
+const kDefaultNodeHeight = 120;
+
 // Accumulate node selection while Shift, Ctrl, or Cmd is held. Mirrors
 // AreaExtensions.accumulateOnCtrl() but also allows Shift, the more natural multi-select modifier.
 function accumulateOnModifier() {
@@ -102,6 +108,7 @@ export class ReteManager implements INodeServices {
   public area: AreaPlugin<Schemes, AreaExtra>;
   private nodeSelector: ReturnType<typeof AreaExtensions.selector>;
   private selectionAccumulator: ReturnType<typeof accumulateOnModifier> | undefined;
+  private collapsedConnectionsDisposer: (() => void) | undefined;
   public selectionState = observable({ nodeIds: [] as string[] });
   private snapshotDisposer: () => void | undefined;
   public inTick = false;
@@ -139,6 +146,15 @@ export class ReteManager implements INodeServices {
     AreaExtensions.selectableNodes(area, this.nodeSelector, {
       accumulating: this.selectionAccumulator
     });
+
+    // Hide connections whose endpoints are in a collapsed group (those nodes are hidden). Member
+    // node elements hide declaratively via CustomDataflowNode; wires are hidden imperatively here
+    // because the connection renderer isn't reactive to group state.
+    this.collapsedConnectionsDisposer = reaction(
+      () => this.collapsedMemberKey(),
+      () => this.applyCollapsedConnectionVisibility(),
+      { fireImmediately: true }
+    );
 
     // Sync observable selection state when nodes are picked or the background is clicked.
     // This pipe runs after selectableNodes has updated the selector.
@@ -885,6 +901,24 @@ export class ReteManager implements INodeServices {
     group?.setCollapsed(!group.collapsed);
   }
 
+  // Sorted list of node ids that are hidden because their group is collapsed (reaction key).
+  private collapsedMemberKey() {
+    const ids: string[] = [];
+    this.mstProgram.groups.forEach(g => { if (g.collapsed) ids.push(...g.nodeIds); });
+    return ids.sort().join(",");
+  }
+
+  // Hide/show connection views whose source or target node is in a collapsed group.
+  public applyCollapsedConnectionVisibility() {
+    const hidden = new Set<string>();
+    this.mstProgram.groups.forEach(g => { if (g.collapsed) g.nodeIds.forEach(id => hidden.add(id)); });
+    this.area.connectionViews.forEach((view, id) => {
+      const conn = this.mstProgram.connections.get(id);
+      const hide = !!conn && (hidden.has(conn.source) || hidden.has(conn.target));
+      if (view.element) view.element.style.display = hide ? "none" : "";
+    });
+  }
+
   // Observable accessors for the groups overlay component.
   public get groups() {
     return this.mstProgram.groups;
@@ -909,10 +943,14 @@ export class ReteManager implements INodeServices {
       const py = isNaN(node.liveY) ? node.y : node.liveY;
       const left = tx + px * k;
       const top = ty + py * k;
+      // Fall back to default node dimensions when the element isn't measurable (e.g. a member is
+      // hidden while its group is collapsed, or the DOM hasn't laid out yet right after expanding).
+      const w = (el.offsetWidth || kDefaultNodeWidth) * k;
+      const h = (el.offsetHeight || kDefaultNodeHeight) * k;
       minX = Math.min(minX, left);
       minY = Math.min(minY, top);
-      maxX = Math.max(maxX, left + el.offsetWidth * k);
-      maxY = Math.max(maxY, top + el.offsetHeight * k);
+      maxX = Math.max(maxX, left + w);
+      maxY = Math.max(maxY, top + h);
     }
     if (minX === Infinity) return undefined;
     return { left: minX, top: minY, width: maxX - minX, height: maxY - minY };
@@ -1159,6 +1197,7 @@ export class ReteManager implements INodeServices {
   public dispose() {
     this.snapshotDisposer?.();
     this.selectionAccumulator?.destroy();
+    this.collapsedConnectionsDisposer?.();
     if (this.fitTimeout) {
       clearTimeout(this.fitTimeout);
       this.fitTimeout = undefined;
@@ -1256,6 +1295,9 @@ export class ReteManager implements INodeServices {
       this.process();
       this.updateSharedProgramData();
     });
+
+    // Re-apply collapsed-group visibility in case connection views were (re)created above.
+    this.applyCollapsedConnectionVisibility();
   };
 
   public updateSharedProgramData = () => {

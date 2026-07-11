@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ReteManager } from "../../nodes/rete-manager";
 import { IGroupModel } from "../../model/dataflow-program-model";
 
@@ -108,6 +108,18 @@ interface IProps {
 // Draws each group (expanded box or collapsed chip) over the .flow-tool in screen space. Re-renders
 // as the canvas changes by observing the live program zoom and member node positions.
 export const DataflowGroupsOverlay = observer(function DataflowGroupsOverlay({ reteManager, readOnly }: IProps) {
+  const [, forceTick] = useState(0);
+
+  // Recompute one frame after collapse/expand/membership changes, once the browser has laid out the
+  // shown/hidden member nodes, so getGroupScreenBounds reads their real (not transitional) sizes.
+  const collapsedKey = reteManager
+    ? [...reteManager.groups.values()].map(g => `${g.id}:${g.collapsed}:${g.nodeIds.length}`).join("|")
+    : "";
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => forceTick(t => t + 1));
+    return () => cancelAnimationFrame(raf);
+  }, [collapsedKey]);
+
   if (!reteManager) return null;
 
   // Observe pan/zoom so the boxes track the canvas.
