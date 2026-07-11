@@ -67,18 +67,67 @@
     }
   }
 
-  // Collapsed group: a compact labeled chip with an expand toggle.
-  .dataflow-group-chip {
+  // SVG layer for collapsed-group boundary wires. Sits under the nodes; not interactive.
+  .dataflow-group-wires {
     position: absolute;
-    display: inline-flex;
-    align-items: flex-start;
-    gap: 4px;
-    max-width: 220px;
-    padding: 3px 8px;
-    border: 1.5px solid #7f7f7f;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+
+    path {
+      fill: none;
+      stroke: #7f7f7f;
+      stroke-width: 2;
+      // Match the dashed look of the real node connections.
+      stroke-dasharray: 5 3;
+    }
+  }
+
+  // Collapsed group rendered like a node: a fixed-width box that auto-sizes to its (wrapping) label
+  // header, with a socket body below reserving whitespace for the boundary sockets (inputs on the
+  // left edge, outputs on the right edge, one per row).
+  .dataflow-group-node {
+    position: absolute;
+    box-sizing: border-box;
+    border: 2px solid #7f7f7f;
     border-radius: 6px;
     background: #f2f2f2;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
     pointer-events: auto;
+
+    .dataflow-group-node-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      padding: 4px 6px;
+    }
+
+    // Reserved whitespace below the header holding the socket rows.
+    .dataflow-group-node-body {
+      position: relative;
+      padding: 2px 0 6px;
+    }
+
+    .dataflow-group-node-row {
+      position: relative;
+      height: 18px;
+    }
+
+    // Socket markers straddling the node's left/right border, vertically centered in their row.
+    .dataflow-group-socket {
+      position: absolute;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border: 1.5px solid #7f7f7f;
+      border-radius: 50%;
+      background: #fff;
+      transform: translate(-50%, -50%);
+
+      &.input { left: 0; }
+      &.output { left: 100%; }
+    }
   }
 }

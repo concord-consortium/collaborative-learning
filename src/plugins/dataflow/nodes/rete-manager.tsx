@@ -908,6 +908,37 @@ export class ReteManager implements INodeServices {
     return ids.sort().join(",");
   }
 
+  // Boundary connections of a collapsed group: those crossing the group boundary. `inputs` enter
+  // the group (external source -> member), `outputs` leave it (member -> external target). Used to
+  // draw proxy sockets/wires on the collapsed chip.
+  public getGroupBoundaryConnections(nodeIds: string[]) {
+    const members = new Set(nodeIds);
+    const inputs: Array<{ connId: string; externalNodeId: string; externalKey: string }> = [];
+    const outputs: Array<{ connId: string; externalNodeId: string; externalKey: string }> = [];
+    this.mstProgram.connections.forEach(conn => {
+      const sourceIn = members.has(conn.source);
+      const targetIn = members.has(conn.target);
+      if (targetIn && !sourceIn) {
+        inputs.push({ connId: conn.id, externalNodeId: conn.source, externalKey: conn.sourceOutput });
+      } else if (sourceIn && !targetIn) {
+        outputs.push({ connId: conn.id, externalNodeId: conn.target, externalKey: conn.targetInput });
+      }
+    });
+    return { inputs, outputs };
+  }
+
+  // The socket-dot DOM element for a node's socket (used to anchor collapsed-group boundary wires to
+  // external nodes' sockets). The overlay measures it relative to its own element so both wire ends
+  // share an origin. The `[data-socket-side][data-socket-key]` wrapper also contains the socket
+  // label, so we drill into the inner socket dot (`data-testid="<side>-socket"`) — the same element
+  // rete anchors its own connections to — falling back to the wrapper if it isn't found.
+  public getSocketElement(nodeId: string, key: string, side: "input" | "output") {
+    const wrapper = this.area.nodeViews.get(nodeId)?.element?.querySelector<HTMLElement>(
+      `[data-socket-side="${side}"][data-socket-key="${key}"]`
+    );
+    return wrapper?.querySelector<HTMLElement>(`[data-testid="${side}-socket"]`) ?? wrapper ?? undefined;
+  }
+
   // Hide/show connection views whose source or target node is in a collapsed group.
   public applyCollapsedConnectionVisibility() {
     const hidden = new Set<string>();

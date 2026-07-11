@@ -1,13 +1,21 @@
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ReteManager } from "../../nodes/rete-manager";
 import { IGroupModel } from "../../model/dataflow-program-model";
 
 import "./dataflow-groups-overlay.scss";
 
-const kPadding = 10;  // px padding around member nodes
+const kPadding = 10;      // px padding around member nodes (expanded box)
+const kNodeWidth = 140;   // px fixed width of the collapsed "group node"
 
-type Bounds = { left: number; top: number; width: number; height: number };
+type Point = { x: number; y: number };
+type SetSocketRef = (key: string, el: HTMLElement | null) => void;
+
+// Simple horizontal cubic bezier between two points (matches the look of node wires).
+function wirePath(a: Point, b: Point) {
+  const dx = Math.max(30, Math.abs(b.x - a.x) / 2);
+  return `M ${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`;
+}
 
 // Editable, multi-line group label. Labels double as code comments, so they wrap.
 const GroupLabel = observer(function GroupLabel({ group, readOnly }: { group: IGroupModel; readOnly?: boolean }) {
@@ -47,16 +55,12 @@ const GroupLabel = observer(function GroupLabel({ group, readOnly }: { group: IG
   );
 });
 
-interface IGroupProps {
-  group: IGroupModel;
-  bounds: Bounds;
-  reteManager: ReteManager;
-  readOnly?: boolean;
-}
-
-// Expanded: a bordered box around the members with a label bar that floats above it (growing
-// upward as the label wraps) and a collapse toggle.
-const ExpandedGroupBox = observer(function ExpandedGroupBox({ group, bounds, reteManager, readOnly }: IGroupProps) {
+// Expanded: a bordered box around the members with a floating label bar and a collapse toggle.
+const ExpandedGroupBox = observer(function ExpandedGroupBox(
+  { group, bounds, reteManager, readOnly }:
+  { group: IGroupModel; bounds: { left: number; top: number; width: number; height: number };
+    reteManager: ReteManager; readOnly?: boolean }
+) {
   const style: React.CSSProperties = {
     left: bounds.left - kPadding,
     top: bounds.top - kPadding,
@@ -81,21 +85,45 @@ const ExpandedGroupBox = observer(function ExpandedGroupBox({ group, bounds, ret
   );
 });
 
-// Collapsed: a compact labeled chip with an expand toggle, so the group stays visible/reopenable.
-const CollapsedGroupChip = observer(function CollapsedGroupChip({ group, bounds, reteManager, readOnly }: IGroupProps) {
-  const style: React.CSSProperties = { left: bounds.left, top: bounds.top };
+// Collapsed: a node-styled box that auto-sizes to its (wrapping) comment label, with input sockets
+// on the left / output sockets on the right in rows below the header. The overlay measures the
+// socket elements to route boundary wires, so socket positions can follow the label height.
+const CollapsedGroupNode = observer(function CollapsedGroupNode(
+  { group, left, top, inputCount, outputCount, reteManager, readOnly, setSocketRef }:
+  { group: IGroupModel; left: number; top: number; inputCount: number; outputCount: number;
+    reteManager: ReteManager; readOnly?: boolean; setSocketRef: SetSocketRef }
+) {
+  const rows = Math.max(inputCount, outputCount, 1);
   return (
-    <div className="dataflow-group-chip" style={style} data-testid="dataflow-group-chip">
-      <button
-        type="button"
-        className="dataflow-group-toggle"
-        title="Expand group"
-        data-testid="dataflow-group-expand"
-        onClick={() => reteManager.toggleGroupCollapsed(group.id)}
-      >
-        ▸
-      </button>
-      <GroupLabel group={group} readOnly={readOnly} />
+    <div
+      className="dataflow-group-node"
+      style={{ left, top, width: kNodeWidth }}
+      data-testid="dataflow-group-node"
+    >
+      <div className="dataflow-group-node-header">
+        <button
+          type="button"
+          className="dataflow-group-toggle"
+          title="Expand group"
+          data-testid="dataflow-group-expand"
+          onClick={() => reteManager.toggleGroupCollapsed(group.id)}
+        >
+          ▸
+        </button>
+        <GroupLabel group={group} readOnly={readOnly} />
+      </div>
+      <div className="dataflow-group-node-body">
+        {Array.from({ length: rows }, (_, i) => (
+          <div className="dataflow-group-node-row" key={i}>
+            {i < inputCount &&
+              <span className="dataflow-group-socket input"
+                ref={el => setSocketRef(`${group.id}:input:${i}`, el)} />}
+            {i < outputCount &&
+              <span className="dataflow-group-socket output"
+                ref={el => setSocketRef(`${group.id}:output:${i}`, el)} />}
+          </div>
+        ))}
+      </div>
     </div>
   );
 });
@@ -105,51 +133,102 @@ interface IProps {
   readOnly?: boolean;
 }
 
-// Draws each group (expanded box or collapsed chip) over the .flow-tool in screen space. Re-renders
-// as the canvas changes by observing the live program zoom and member node positions.
+// Draws each group (expanded box, or collapsed group-node with routed boundary wires) over the
+// .flow-tool in screen space. Re-renders as the canvas changes by observing zoom + node positions;
+// boundary wires are measured (both ends relative to this overlay) after layout so they align.
 export const DataflowGroupsOverlay = observer(function DataflowGroupsOverlay({ reteManager, readOnly }: IProps) {
-  const [, forceTick] = useState(0);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const socketRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const [wires, setWires] = useState<string[]>([]);
 
-  // Recompute one frame after collapse/expand/membership changes, once the browser has laid out the
-  // shown/hidden member nodes, so getGroupScreenBounds reads their real (not transitional) sizes.
-  const collapsedKey = reteManager
-    ? [...reteManager.groups.values()].map(g => `${g.id}:${g.collapsed}:${g.nodeIds.length}`).join("|")
-    : "";
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => forceTick(t => t + 1));
-    return () => cancelAnimationFrame(raf);
-  }, [collapsedKey]);
+  const setSocketRef: SetSocketRef = (key, el) => {
+    if (el) socketRefs.current.set(key, el); else socketRefs.current.delete(key);
+  };
 
-  if (!reteManager) return null;
-
-  // Observe pan/zoom so the boxes track the canvas.
-  const { scale, dx, dy } = reteManager.mstContent.liveProgramZoom;
+  // Observe pan/zoom + node positions so the measurement effect re-runs on any canvas change.
+  const zoom = reteManager?.mstContent.liveProgramZoom;
+  const scale = zoom?.scale ?? 1, dx = zoom?.dx ?? 0, dy = zoom?.dy ?? 0;
 
   const items: JSX.Element[] = [];
-  reteManager.groups.forEach(group => {
-    // Observe member positions so boxes track node drags (getGroupScreenBounds reads the DOM).
-    const memberPositions = [...group.nodeIds].map(id => {
-      const n = reteManager.nodes.get(id);
-      if (!n) return "";
-      const x = isNaN(n.liveX) ? n.x : n.liveX;
-      const y = isNaN(n.liveY) ? n.y : n.liveY;
-      return `${x},${y}`;
-    }).join("|");
+  const positionKeys: string[] = [];
+  const observePosition = (id: string) => {
+    const n = reteManager?.nodes.get(id);
+    if (n) positionKeys.push(`${isNaN(n.liveX) ? n.x : n.liveX},${isNaN(n.liveY) ? n.y : n.liveY}`);
+  };
+
+  let collapsedKey = "";
+  reteManager?.groups.forEach(group => {
+    collapsedKey += `${group.id}:${group.collapsed}:${group.nodeIds.length};`;
+    group.nodeIds.forEach(observePosition);
     const bounds = reteManager.getGroupScreenBounds([...group.nodeIds]);
     if (!bounds) return;
-    const key = `${group.id}:${memberPositions}`;
-    items.push(group.collapsed
-      ? <CollapsedGroupChip key={key} group={group} bounds={bounds} reteManager={reteManager} readOnly={readOnly} />
-      : <ExpandedGroupBox key={key} group={group} bounds={bounds} reteManager={reteManager} readOnly={readOnly} />
+
+    if (!group.collapsed) {
+      items.push(
+        <ExpandedGroupBox key={group.id} group={group} bounds={bounds} reteManager={reteManager} readOnly={readOnly} />
+      );
+      return;
+    }
+
+    const { inputs, outputs } = reteManager.getGroupBoundaryConnections([...group.nodeIds]);
+    [...inputs, ...outputs].forEach(b => observePosition(b.externalNodeId));
+    items.push(
+      <CollapsedGroupNode
+        key={group.id}
+        group={group}
+        left={bounds.left}
+        top={bounds.top}
+        inputCount={inputs.length}
+        outputCount={outputs.length}
+        reteManager={reteManager}
+        readOnly={readOnly}
+        setSocketRef={setSocketRef}
+      />
     );
   });
+
+  // Signature of everything that can move a wire endpoint; re-measure after layout when it changes.
+  const signature = `${scale}:${dx}:${dy}|${collapsedKey}|${positionKeys.join("|")}`;
+
+  useEffect(() => {
+    const overlayEl = overlayRef.current;
+    if (!reteManager || !overlayEl) { setWires([]); return; }
+    const origin = overlayEl.getBoundingClientRect();
+    const center = (el: HTMLElement): Point => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2 - origin.left, y: r.top + r.height / 2 - origin.top };
+    };
+    const paths: string[] = [];
+    reteManager.groups.forEach(group => {
+      if (!group.collapsed) return;
+      const { inputs, outputs } = reteManager.getGroupBoundaryConnections([...group.nodeIds]);
+      inputs.forEach((b, i) => {
+        const extEl = reteManager.getSocketElement(b.externalNodeId, b.externalKey, "output");
+        const grpEl = socketRefs.current.get(`${group.id}:input:${i}`);
+        if (extEl && grpEl) paths.push(wirePath(center(extEl), center(grpEl)));
+      });
+      outputs.forEach((b, j) => {
+        const extEl = reteManager.getSocketElement(b.externalNodeId, b.externalKey, "input");
+        const grpEl = socketRefs.current.get(`${group.id}:output:${j}`);
+        if (extEl && grpEl) paths.push(wirePath(center(grpEl), center(extEl)));
+      });
+    });
+    setWires(paths);
+  }, [reteManager, signature]);
+
+  if (!reteManager) return null;
 
   return (
     <div
       className="dataflow-groups-overlay"
+      ref={overlayRef}
       data-testid="dataflow-groups-overlay"
-      data-zoom={`${scale}:${dx}:${dy}`}
+      data-signature={signature}
     >
+      {wires.length > 0 &&
+        <svg className="dataflow-group-wires">
+          {wires.map((d, i) => <path key={i} d={d} />)}
+        </svg>}
       {items}
     </div>
   );
