@@ -1,8 +1,8 @@
 import firebase from "firebase";
 import {
   adminWriteDoc, cUnit, expectReadToFail, expectReadToSucceed, expectWriteToFail,
-  expectWriteToSucceed, genericAuth, initFirestore, prepareEachTest, student2Auth, studentAuth,
-  teacher2Auth, teacherId, teacherAuth, tearDownTests, thisClass
+  expectWriteToSucceed, genericAuth, initFirestore, prepareEachTest, researcherAuth, student2Auth,
+  studentAuth, teacher2Auth, teacherId, teacherAuth, tearDownTests, thisClass
 } from "./setup-rules-tests";
 
 describe("Firestore security rules", () => {
@@ -55,6 +55,17 @@ describe("Firestore security rules", () => {
       await adminWriteDoc(kTagPath, validTag());
       db = initFirestore(studentAuth);
       await expectReadToSucceed(db, kTagPath);
+    });
+
+    it("a researcher in the class can read tags (to see/use them when commenting)", async () => {
+      await adminWriteDoc(kTagPath, validTag());
+      db = initFirestore(researcherAuth);
+      await expectReadToSucceed(db, kTagPath);
+    });
+
+    it("a researcher in the class can't write tags", async () => {
+      db = initFirestore(researcherAuth);
+      await expectWriteToFail(db, kTagPath, validTag());
     });
 
     it("a student in the class can't write tags", async () => {

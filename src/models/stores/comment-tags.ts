@@ -2,6 +2,8 @@ import firebase from "firebase/app";
 import { makeAutoObservable, ObservableMap, runInAction } from "mobx";
 import { DB } from "../../lib/db";
 import { escapeKey } from "../../lib/fire-utils";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 
 // Firestore (partial) path for a class's teacher-added comment tags for one unit. Structured
 // `commentTags/{classHash}/units/{unit}/tags` so security rules can class-scope reads by the
@@ -63,5 +65,7 @@ export class CommentTags {
       createdBy: uid,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
+    // Log only after the write succeeds, with the tag's name as a parameter.
+    Logger.log(LogEventName.CREATE_CUSTOM_COMMENT_TAG, { tagName: trimmed, tagId: id, unit, classHash });
   }
 }

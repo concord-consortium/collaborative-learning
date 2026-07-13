@@ -44,6 +44,19 @@ describe("SortWorkAddTag", () => {
     expect(addTag).toHaveBeenCalledWith("X", "teacher-1");
   });
 
+  it("keeps the entered text and shows an error when the write fails", async () => {
+    const user = userEvent.setup();
+    setup();
+    addTag.mockRejectedValueOnce(new Error("permission denied"));
+    render(<SortWorkAddTag />);
+    await user.click(screen.getByTestId("sort-work-add-tag-button"));
+    await user.type(screen.getByTestId("sort-work-add-tag-input"), "X");
+    await user.click(screen.getByTestId("sort-work-add-tag-confirm"));
+    // The row stays open with the entered text and surfaces an error so the teacher can retry.
+    expect(await screen.findByTestId("sort-work-add-tag-error")).toBeInTheDocument();
+    expect(screen.getByTestId("sort-work-add-tag-input")).toHaveValue("X");
+  });
+
   it("disables Add when the entered name matches an existing tag (case-insensitive)", async () => {
     const user = userEvent.setup();
     // Merged tags include the label "Foo"; typing "foo" should be treated as a duplicate.

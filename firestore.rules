@@ -493,9 +493,10 @@ service cloud.firestore {
 
       // Teacher-created custom comment tags, scoped per class + unit. Firestore rules do NOT cascade
       // into subcollections, so access must be granted explicitly here — the parent
-      // /authed/{portal} read+write rule does not apply to this nested path. Teachers of the class
-      // (or their networked classes) may read + write; students in the class may read so they can
-      // see and select custom tags.
+      // /authed/{portal} read+write rule does not apply to this nested path. Write: teachers of the
+      // class or their networked classes. Read: any in-class member (students, teachers, and
+      // researchers all carry class_hash == classHash) plus networked teachers, so everyone
+      // commenting on the class can see and select the custom tags.
       match /commentTags/{classHash}/units/{unit}/tags/{tagId} {
         allow read: if (isAuthed() && request.auth.token.class_hash == classHash) ||
           (isAuthedTeacher() && teacherIsInClass(classHash));
