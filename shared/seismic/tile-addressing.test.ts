@@ -1,6 +1,6 @@
 import {
   getTileIndex, getTileTimeRange, getTileIndicesForViewport, getTileS3Key, getTileDuration, getPointIndexInTile,
-  getStationPrefix, parseStationPrefix
+  getStationPrefix, parseStationPrefix, encodeLocation, decodeLocation, getS3Root
 } from "./tile-addressing";
 import { LEVEL_SPACINGS, POINTS_PER_TILE } from "./envelope-config";
 
@@ -76,10 +76,36 @@ describe("tile-addressing", () => {
     });
   });
 
+  describe("encodeLocation / decodeLocation", () => {
+    it("encodes blank locations as '--'", () => {
+      expect(encodeLocation("")).toBe("--");
+      expect(encodeLocation(undefined)).toBe("--");
+      expect(encodeLocation("00")).toBe("00");
+    });
+
+    it("round-trips through decodeLocation", () => {
+      expect(decodeLocation(encodeLocation(""))).toBe("");
+      expect(decodeLocation(encodeLocation("00"))).toBe("00");
+      // A literal "--" is the path encoding of blank, so it normalizes to "" rather than surviving.
+      expect(decodeLocation(encodeLocation("--"))).toBe("");
+    });
+  });
+
+  describe("getS3Root", () => {
+    it("appends the current layout version", () => {
+      expect(getS3Root("base/")).toBe("base/v2/");
+    });
+  });
+
   describe("getTileS3Key", () => {
     it("constructs the expected key format", () => {
       const key = getTileS3Key({ network: "AK", station: "K204", channel: "BHZ" }, 2, 42);
-      expect(key).toBe("AK_K204/BHZ/L2/42");
+      expect(key).toBe("AK_K204/--/BHZ/L2/42");
+    });
+
+    it("includes a non-blank location code", () => {
+      const key = getTileS3Key({ network: "IU", station: "ANMO", location: "00", channel: "BHZ" }, 2, 42);
+      expect(key).toBe("IU_ANMO/00/BHZ/L2/42");
     });
   });
 

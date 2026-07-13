@@ -29,10 +29,10 @@ export function rawCacheKey(stationData: StationData, chunkIndex: number) {
 }
 
 export class SeismicQueryService {
-  /** Envelope tile cache keyed by "{network}_{station}/{channel}/L{level}/{tileIndex}" */
+  /** Envelope tile cache keyed by "{network}_{station}/{location}/{channel}/L{level}/{tileIndex}" */
   envelopeCache: Map<string, EnvelopeCacheEntry> = observable.map();
 
-  /** Raw data cache keyed by "{network}_{station}/{channel}/raw/{chunkIndex}" */
+  /** Raw data cache keyed by "{network}_{station}/{location}/{channel}/raw/{chunkIndex}" */
   rawCache: Map<string, RawCacheEntry> = observable.map();
 
   /** Tracks access order for rawCache LRU eviction (plain Map, not observable) */
