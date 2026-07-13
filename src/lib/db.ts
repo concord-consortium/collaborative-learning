@@ -44,6 +44,7 @@ import { logExemplarDocumentEvent } from "../models/document/log-exemplar-docume
 import { AppMode } from "../models/stores/store-types";
 import { DEBUG_FIRESTORE } from "./debug";
 import { firebaseRefPath } from "./fire-utils";
+import { getGroupCanonicalPointerPath, ICanonicalPointer } from "./scoped-document-pointers";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
@@ -711,36 +712,98 @@ export class DB {
     if (!groupId) {
       return Promise.reject("Cannot create group document because user is not in a group.");
     }
+    const pointerPath = getGroupCanonicalPointerPath(user.classHash, user.offeringId, groupId, GroupDocument);
+    return this.getOrCreateScopedDocument(pointerPath, GroupDocument, {
+      groupUserId: user.userIdForGroupDocuments,
+      groupId,
+      findLegacy: () => this.findLegacyGroupDocument(groupId)
+    });
+  }
 
+  private async getOrCreateScopedDocument(
+    pointerPath: string,
+    type: DBDocumentType,
+    opts: { groupUserId?: string; groupId?: string; findLegacy?: () => Promise<IDocumentMetadata | undefined> }
+  ) {
+    const { groupUserId, findLegacy } = opts;
+    const pointerRef = this.firestore.doc(pointerPath);
+
+    // 1. Fast path: pointer already exists.
+    const pointerSnap = await pointerRef.get();
+    if (pointerSnap.exists) {
+      return this.openScopedDocumentByKey((pointerSnap.data() as ICanonicalPointer).documentKey);
+    }
+
+    // 2. Legacy fallback: pre-pointer group docs are found by query; backfill a pointer.
+    if (findLegacy) {
+      const legacy = await findLegacy();
+      if (legacy) {
+        await this.firestore.runTransaction(async (txn) => {
+          const s = await txn.get(pointerRef);
+          if (!s.exists) {
+            txn.set(pointerRef, {
+              documentKey: legacy.key, createdAt: this.firestore.timestamp(),
+              createdBy: groupUserId ?? this.stores.user.id
+            });
+            txn.update(this.firestore.doc(getSimpleDocumentPath(legacy.key)), { canonical: true });
+          }
+        }).catch(() => undefined); // best-effort; a concurrent winner is fine
+        return this.openDocumentFromFirestoreMetadata(legacy);
+      }
+    }
+
+    // 3. Create document-first, then claim the pointer atomically.
+    const { user } = this.stores;
+    const documentPath = this.firebase.getUserDocumentPath(user, undefined, groupUserId);
+    const documentKey = this.firebase.ref(documentPath).push().key!;   // client-side id, nothing written yet
+    const { firestoreMetadata } = await this.createDocument({ type, key: documentKey });
+
+    const metadataRef = this.firestore.doc(getSimpleDocumentPath(documentKey));
+    const wonKey = await this.firestore.runTransaction(async (txn) => {
+      const s = await txn.get(pointerRef);
+      if (s.exists) return (s.data() as ICanonicalPointer).documentKey;   // lost the race
+      txn.set(pointerRef, {
+        documentKey, createdAt: this.firestore.timestamp(), createdBy: groupUserId ?? user.id
+      });
+      txn.update(metadataRef, { canonical: true });
+      return documentKey;
+    });
+
+    if (wonKey !== documentKey) {
+      await this.deleteOrphanScopedDocument(documentKey, groupUserId);
+      return this.openScopedDocumentByKey(wonKey);
+    }
+    return this.openDocumentFromFirestoreMetadata(firestoreMetadata);
+  }
+
+  private async findLegacyGroupDocument(groupId: string): Promise<IDocumentMetadata | undefined> {
+    const { user } = this.stores;
     const converter = typeConverter<IDocumentMetadata>();
-    const findCurrentGroupDoc = this.firestore.collection("documents")
+    const query = this.firestore.collection("documents")
       .withConverter(converter)
       .where("context_id", "==", user.classHash)
       .where("offeringId", "==", user.offeringId)
       .where("groupId", "==", groupId);
+    const result = await query.get();
+    return result.empty ? undefined : result.docs[0].data();
+  }
 
-    const maybeGroupDoc = await findCurrentGroupDoc.get();
-
-    let firestoreMetadata: IDocumentMetadata | undefined;
-
-    // FIXME: this should be done in a transaction so if someone else
-    // creates a group document before we won't get two group docs
-    // I'm pretty sure doing this requires the creation of the firestore
-    // metadata document to be done using client side firestore instead
-    // of having a firebase function create it.
-    // And this also means we have to unpack the createDocument method
-    // all of the async calls will mess up the transaction.
-    if (maybeGroupDoc.empty) {
-      const result = await this.createGroupDocument();
-      firestoreMetadata = result.firestoreMetadata;
-    } else {
-      firestoreMetadata = maybeGroupDoc.docs[0].data();
-      if (!firestoreMetadata) {
-        throw new Error("Could not retrieve firestore metadata for existing group document.");
-      }
+  private async openScopedDocumentByKey(documentKey: string) {
+    const metadata = await this.findFirestoreMetadata(documentKey);
+    if (!metadata) {
+      throw new Error(`Canonical document ${documentKey} referenced by a pointer was not found`);
     }
+    return this.openDocumentFromFirestoreMetadata(metadata);
+  }
 
-    return await this.openDocumentFromFirestoreMetadata(firestoreMetadata);
+  // Best-effort cleanup of a document whose pointer claim was lost (a rare orphan).
+  private async deleteOrphanScopedDocument(documentKey: string, groupUserId?: string) {
+    const { user } = this.stores;
+    await Promise.all([
+      this.firebase.ref(this.firebase.getUserDocumentPath(user, documentKey, groupUserId)).remove(),
+      this.firebase.ref(this.firebase.getUserDocumentMetadataPath(user, documentKey, groupUserId)).remove(),
+      this.firestore.doc(getSimpleDocumentPath(documentKey)).delete()
+    ]).catch(() => undefined);
   }
 
   public publishProblemDocument(documentModel: DocumentModelType) {
