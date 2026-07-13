@@ -48,3 +48,33 @@ describe("canonical pointers", () => {
     await assertFails(db.doc(kPointerPath).delete());
   });
 });
+
+const kDocPath = `authed/test-portal/documents/group-doc-1`;
+const groupDoc = (extra: any = {}) => ({
+  uid: `group_${kOffering}_${kGroup}`, type: "group", key: "group-doc-1",
+  createdAt: firebase.firestore.Timestamp.now(), context_id: thisClass, network: null,
+  offeringId: kOffering, groupId: kGroup, ...extra
+});
+
+describe("deleting group documents", () => {
+  it("a class member may delete a non-canonical group document", async () => {
+    const admin = initFirestore(teacherAuth);
+    await admin.doc(kDocPath).set(groupDoc());               // no canonical flag
+    db = initFirestore(studentAuth);
+    await assertSucceeds(db.doc(kDocPath).delete());
+  });
+
+  it("a class member may NOT delete a canonical group document", async () => {
+    const admin = initFirestore(teacherAuth);
+    await admin.doc(kDocPath).set(groupDoc({ canonical: true }));
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kDocPath).delete());
+  });
+
+  it("a user outside the class may not delete the group document", async () => {
+    const admin = initFirestore(teacherAuth);
+    await admin.doc(kDocPath).set(groupDoc());
+    db = initFirestore({ uid: "99", platform_user_id: 99, user_type: "student", class_hash: "other-class" });
+    await assertFails(db.doc(kDocPath).delete());
+  });
+});
