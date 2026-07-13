@@ -144,6 +144,7 @@ service cloud.firestore {
       function isValidDocumentCreateRequest() {
         return
           request.resource.data.keys().hasAll(["uid", "type", "key", "createdAt"]) &&
+          request.resource.data.get("canonical", false) == false &&
           (classIsRequestContextId() || teacherIsInClass(request.resource.data.context_id));
       }
 
@@ -342,10 +343,22 @@ service cloud.firestore {
       }
 
       match /documents/{docId} {
+        function canonicalFieldOk() {
+          let was = resource.data.get("canonical", false);
+          let now = request.resource.data.get("canonical", false);
+          return was == now
+            || (was == false && now == true
+                && getAfter(/databases/$(database)/documents/authed/$(portal)
+                     /classes/$(request.resource.data.context_id)
+                     /offerings/$(request.resource.data.offeringId)
+                     /groups/$(request.resource.data.groupId)
+                     /canonical/$(request.resource.data.type)).data.documentKey == request.resource.data.key);
+        }
+
         // portal-authenticated teachers can create valid documents
         allow create: if isValidDocumentCreateRequest();
         // teachers can only update their own documents and only if they're valid
-        allow update: if isValidDocumentUpdateRequest();
+        allow update: if isValidDocumentUpdateRequest() && canonicalFieldOk();
         // teachers can only delete their own documents
         allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
         // class members can delete non-canonical group documents

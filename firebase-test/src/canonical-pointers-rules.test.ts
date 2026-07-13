@@ -1,6 +1,6 @@
 import firebase from "firebase";
 import {
-  initFirestore, prepareEachTest, studentAuth, teacherAuth, tearDownTests, thisClass
+  adminWriteDoc, initFirestore, prepareEachTest, studentAuth, teacherAuth, tearDownTests, thisClass
 } from "./setup-rules-tests";
 import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 
@@ -65,8 +65,7 @@ describe("deleting group documents", () => {
   });
 
   it("a class member may NOT delete a canonical group document", async () => {
-    const admin = initFirestore(teacherAuth);
-    await admin.doc(kDocPath).set(groupDoc({ canonical: true }));
+    await adminWriteDoc(kDocPath, { ...groupDoc(), canonical: true, createdAt: Date.now() });
     db = initFirestore(studentAuth);
     await assertFails(db.doc(kDocPath).delete());
   });
@@ -76,5 +75,32 @@ describe("deleting group documents", () => {
     await admin.doc(kDocPath).set(groupDoc());
     db = initFirestore({ uid: "99", platform_user_id: 99, user_type: "student", class_hash: "other-class" });
     await assertFails(db.doc(kDocPath).delete());
+  });
+});
+
+describe("canonical flag integrity", () => {
+  it("create is denied if the doc arrives pre-flagged canonical", async () => {
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kDocPath).set(groupDoc({ canonical: true })));
+  });
+
+  it("a normal metadata update (title) that does not touch canonical is allowed", async () => {
+    const admin = initFirestore(teacherAuth);
+    await admin.doc(kDocPath).set(groupDoc());
+    db = initFirestore(studentAuth);
+    await assertSucceeds(db.doc(kDocPath).update({ title: "hello" }));
+  });
+
+  it("clearing an existing canonical flag is denied", async () => {
+    await adminWriteDoc(kDocPath, { ...groupDoc(), canonical: true, createdAt: Date.now() });
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kDocPath).update({ canonical: false }));
+  });
+
+  it("setting canonical true WITHOUT a matching pointer (standalone) is denied", async () => {
+    const admin = initFirestore(teacherAuth);
+    await admin.doc(kDocPath).set(groupDoc());   // no pointer exists
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kDocPath).update({ canonical: true }));
   });
 });
