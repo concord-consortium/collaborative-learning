@@ -56,7 +56,6 @@ export interface IUnitConfig {
   termOverrides?: Record<string, string>;
   defaultPanelLayout?: "split" | "workspace-only" | "resources-only";
   defaultSharedDocuments?: boolean;
-  showTextTitles?: boolean;
 }
 
 export interface IAuthorTool {

@@ -1,4 +1,4 @@
-import { getTileComponentInfo } from "../tiles/tile-component-info";
+import { getAppConfig } from "../tiles/tile-environment";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { kTextTileType, TextContentModelType } from "../tiles/text/text-content";
 import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
@@ -130,12 +130,13 @@ function extractSketchText(objects: any[]): string {
   }, "");
 }
 
-export function buildTileSpeechText(tile: ITileModel, showTextTitles?: boolean): string {
+export function buildTileSpeechText(tile: ITileModel): string {
   const tileType = tile.content.type;
-  // Text tiles register hiddenTitle:true so their title is normally not spoken; when the unit
-  // displays text-tile titles (showTextTitles), announce them like any other visible title.
-  const titleHidden = getTileComponentInfo(tileType)?.hiddenTitle
-    && !(tileType === kTextTileType && showTextTitles);
+  // A tile's title is spoken unless the unit hides it via the generic per-tile `hideTitle` setting
+  // (`settings.<tileType>.hideTitle`, keyed by the camelCased tile type). Text tiles default to
+  // hidden; a unit that displays them (hideTitle: false) then has them announced like any other.
+  const settingsGroup = tileType.charAt(0).toLowerCase() + tileType.slice(1);
+  const titleHidden = getAppConfig(tile)?.getSetting("hideTitle", settingsGroup);
   const title = titleHidden ? "" : tile.computedTitle;
   const typeName = getTileTypeName(tileType);
 
@@ -223,8 +224,6 @@ export interface BuildReadAloudQueueOptions {
   docTitle?: string;
   /** When true, read only comments (skip tiles). Set when the comments panel is focused. */
   commentsOnly?: boolean;
-  /** When true, text-tile titles are displayed (unit setting) and so should be spoken. */
-  showTextTitles?: boolean;
 }
 
 export interface BuildReadAloudQueueResult {
@@ -255,14 +254,14 @@ export function buildReadAloudQueue(
   // Build tile items (skip when commentsOnly — comments panel is focused)
   const items: ReadAloudQueueItem[] = [];
   const { commentsManager, comments: directComments, showChatPanel, isDocumentsView, pane, docTitle,
-    commentsOnly, showTextTitles } = options ?? {};
+    commentsOnly } = options ?? {};
   if (!commentsOnly) {
     for (const id of tileIds) {
       const tile = content.getTile(id);
       if (!tile) continue;
       items.push({
         kind: "tile",
-        speechText: buildTileSpeechText(tile, showTextTitles),
+        speechText: buildTileSpeechText(tile),
         associatedTileId: id
       } as TileReadAloudItem);
     }

@@ -120,7 +120,4 @@ export interface UnitConfiguration extends ProblemConfiguration {
   termOverrides?: Record<string, string>;
   // whether student documents (problem, personal, learning log) are shared by default
   defaultSharedDocuments?: boolean;
-  // whether text tiles display their (auto-numbered) titles; off by default so legacy
-  // units that never authored text-tile titles keep their original appearance
-  showTextTitles?: boolean;
 }

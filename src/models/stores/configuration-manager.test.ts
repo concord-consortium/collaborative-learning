@@ -219,21 +219,4 @@ describe("ConfigurationManager", () => {
     expect(configManager.defaultSharedDocuments).toBe(true);
   });
 
-  it("should return undefined for showTextTitles when not configured", () => {
-    const configManager = new ConfigurationManager(defaults, []);
-    expect(configManager.showTextTitles).toBeUndefined();
-  });
-
-  it("should return true for showTextTitles when set in config", () => {
-    const configWithTitles = { ...defaults, showTextTitles: true };
-    const configManager = new ConfigurationManager(configWithTitles, []);
-    expect(configManager.showTextTitles).toBe(true);
-  });
-
-  it("should return showTextTitles from override config", () => {
-    const overrideWithTitles: Partial<UnitConfiguration> = { showTextTitles: true };
-    const configManager = new ConfigurationManager(defaults, [overrideWithTitles]);
-    expect(configManager.showTextTitles).toBe(true);
-  });
-
 });

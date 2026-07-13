@@ -4,7 +4,6 @@ import { useCurriculum } from "../../hooks/use-curriculum";
 
 interface DocumentSettingsFormInputs {
   defaultSharedDocuments: boolean;
-  showTextTitles: boolean;
 }
 
 const DocumentSettings: React.FC = () => {
@@ -13,7 +12,6 @@ const DocumentSettings: React.FC = () => {
   const formDefaults: DocumentSettingsFormInputs = useMemo(() => {
     return {
       defaultSharedDocuments: unitConfig?.config?.defaultSharedDocuments ?? false,
-      showTextTitles: unitConfig?.config?.showTextTitles ?? false,
     };
   }, [unitConfig]);
 
@@ -32,11 +30,6 @@ const DocumentSettings: React.FC = () => {
         draft.config.defaultSharedDocuments = true;
       } else {
         delete draft.config.defaultSharedDocuments;
-      }
-      if (data.showTextTitles) {
-        draft.config.showTextTitles = true;
-      } else {
-        delete draft.config.showTextTitles;
       }
     });
   };
@@ -60,22 +53,6 @@ const DocumentSettings: React.FC = () => {
         <p className="muted small">
           When enabled, new student documents (problem, personal, and learning log)
           will be shared with classmates by default instead of being private.
-        </p>
-      </fieldset>
-
-      <fieldset>
-        <legend>Text Tile Titles</legend>
-        <label className="horizontal middle">
-          <input
-            type="checkbox"
-            {...register("showTextTitles")}
-          />
-          <span>Show titles on text tiles</span>
-        </label>
-        <p className="muted small">
-          When enabled, text tiles display their (auto-numbered) titles centered at the top,
-          like other tiles, so they can be named and referred to by name. Leave off for legacy
-          units that were not authored with text-tile titles in mind.
         </p>
       </fieldset>
 

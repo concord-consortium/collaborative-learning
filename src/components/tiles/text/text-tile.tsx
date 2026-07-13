@@ -207,6 +207,12 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     // by the ClueTileAccessibilityBridge rendered in render().
   }
 
+  public componentDidUpdate() {
+    // Idempotent: no-ops once the tile has a title, so this only backfills the first time the tile
+    // is both attached to its document and configured to show titles.
+    this.ensureTextTitle();
+  }
+
   public componentWillUnmount() {
     this.disposers.forEach(disposer => disposer());
     for (const plugin of Object.values(this.plugins)) {
@@ -288,7 +294,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const readOnly = this.isReadOnly();
 
     const editableClass = readOnly ? "read-only" : "editable";
-    const showTitle = !!this.stores.appConfig.showTextTitles;
+    const showTitle = !this.textTitleHidden();
     const containerClasses = classNames("tile-content", "text-tool-wrapper", {
       editable: !readOnly,
       hovered: this.props.hovered,
@@ -430,17 +436,26 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     return this.props.model.content as TextContentModelType;
   }
 
+  // Whether this unit hides text-tile titles (the default; a unit opts in to showing them via the
+  // generic per-tile `hideTitle` setting, `settings.text.hideTitle: false`).
+  private textTitleHidden(): boolean {
+    // Settings are grouped by the lowercased tile type (e.g. `settings.text`).
+    return !!this.stores.appConfig.getSetting("hideTitle", kTextTileType.toLowerCase());
+  }
+
   // Text tiles created via addTile already receive an auto-numbered title; this backfills a
   // default for legacy tiles that predate that (or were authored without one) so they display a
   // sensible name when the unit shows text-tile titles. Guarded to editable tiles so we never
-  // mutate read-only/curriculum documents.
+  // mutate read-only/curriculum documents. Runs on mount and update so it also fixes up tiles that
+  // weren't attached to their document yet at mount. The backfill is a housekeeping fixup, not a
+  // user edit, so setDefaultTitle keeps it out of the undo stack.
   private ensureTextTitle() {
-    if (!this.stores.appConfig.showTextTitles) return;
+    if (this.textTitleHidden()) return;
     if (this.isReadOnly()) return;
     const { model } = this.props;
     if (model.title) return;
     const title = getDocumentContentFromNode(model)?.getUniqueTitleForType(kTextTileType);
-    if (title) model.setTitle(title);
+    if (title) model.setDefaultTitle(title);
   }
 
   private isReadOnly(): boolean {
