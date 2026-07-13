@@ -188,4 +188,24 @@ describe("programToGraphviz", () => {
     expect(clusterBlock).toContain("Number:Number 2");
     expect(clusterBlock).not.toContain("Math:Math 1");
   });
+
+  it("escapes newlines and quotes in multi-line group labels", () => {
+    const program = {
+      id: "dataflow@1",
+      nodes: {
+        n1: { id: "n1", name: "Number", x: 0, y: 0,
+          data: { type: "Number", orderedDisplayName: "Number 1", value: 1 } },
+        n2: { id: "n2", name: "Number", x: 0, y: 0,
+          data: { type: "Number", orderedDisplayName: "Number 2", value: 2 } },
+      },
+      connections: {},
+      groups: {
+        g1: { id: "g1", label: 'Line 1\nLine "2"', nodeIds: ["n1", "n2"], collapsed: false },
+      },
+    };
+    const dot = programToGraphviz(program as any);
+    // Newlines become the DOT `\n` escape and quotes are escaped, keeping label="..." on one line.
+    expect(dot).toContain('label="Line 1\\nLine \\"2\\"";');
+    expect(dot).not.toContain("label=\"Line 1\nLine");
+  });
 });

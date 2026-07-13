@@ -1,7 +1,8 @@
 // Marquee (rubber-band) selection over the dataflow canvas. A left-drag starting on the empty
-// canvas draws a rectangle and selects every node it intersects; panning moves to space-drag or
-// middle-mouse (see the drag guard in rete-manager). Node dragging is untouched (each node stops
-// pointerdown propagation, so those drags never reach this controller).
+// canvas draws a rectangle and selects every node it intersects; panning is on the arrow keys
+// (rete-manager disables background drag-pan), so this controller is passed isPanGesture: () =>
+// false. Node dragging is untouched (each node stops pointerdown propagation, so those drags never
+// reach this controller).
 
 export interface Rect { left: number; top: number; right: number; bottom: number; }
 

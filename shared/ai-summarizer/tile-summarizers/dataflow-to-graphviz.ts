@@ -51,7 +51,12 @@ interface Program {
 
 /** Escape a string for use inside a double-quoted Graphviz attribute value. */
 function escapeDotString(text: string): string {
-  return text.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  // Escape backslashes and quotes, then turn newlines into DOT's `\n` line-break escape. Group
+  // labels are multi-line, so a raw newline inside label="..." would render unpredictably.
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\r\n?|\n/g, '\\n');
 }
 
 interface NodeInput {
