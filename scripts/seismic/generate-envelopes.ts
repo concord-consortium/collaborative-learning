@@ -78,7 +78,7 @@ function parseArgs(): ScriptConfig {
       case "--input-dir": config.inputDir = args[i + 1]; i += 2; break;
       case "--network": config.network = args[i + 1]; i += 2; break;
       case "--station": config.station = args[i + 1]; i += 2; break;
-      case "--location": config.location = decodeLocation(args[i + 1].trim()); i += 2; break;
+      case "--location": config.location = decodeLocation((args[i + 1] ?? "").trim()); i += 2; break;
       case "--channel": config.channel = args[i + 1]; i += 2; break;
       case "--output-dir": config.outputDir = args[i + 1]; i += 2; break;
       case "--s3-bucket": config.s3Bucket = args[i + 1]; i += 2; break;
