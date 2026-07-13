@@ -575,6 +575,14 @@ export class DB {
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
       ...cleanedMetadata,
       context_id: classHash,
+      // `network` is read back by firestore.rules (resourceInTeacherNetworks and
+      // userCanAccessDocument/getDocumentNetwork) to let teachers in the same network read and
+      // comment on each other's documents, so teacher documents must keep writing it or that
+      // cross-teacher visibility silently breaks. But it's only a snapshot of the creating user's
+      // single "primary" network captured at creation time, which isn't really safe: a teacher can
+      // belong to multiple networks or switch networks, so this value can later be wrong. We're
+      // preserving the existing behavior, not fixing it here. (Students/group docs have no
+      // network, so this is null.)
       network: userContext.network || null,
       key: documentKey,
       properties: {},
