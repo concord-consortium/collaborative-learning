@@ -2,7 +2,8 @@
 // Seismic data should be downloaded using Rover. See https://github.com/EarthScope/rover.
 // You must be logged in to AWS for the script to upload.
 // Run like:
-// npx tsx seismic/generate-envelopes.ts --input-dir ../../seismic-data/data --network AK --station K204 --channel HNZ
+// npx tsx seismic/generate-envelopes.ts --input-dir ../../seismic-data/data \
+//   --network AK --station K204 --location 00 --channel HNZ
 
 // scripts/seismic/generate-envelopes.ts
 import { readFileSync, readdirSync, statSync, writeFileSync, mkdirSync } from "fs";
@@ -22,7 +23,7 @@ import { fetchStationMetadata } from "../../shared/seismic/earthscope-client.js"
 import {
   createPipelineState, processL2Point, flushTiles, type FlushTileFn
 } from "../../shared/seismic/envelope-pipeline.js";
-import type { ChannelMetadata, EnvelopeTileData } from "../../shared/seismic/seismic-types.js";
+import type { ChannelMetadata, EnvelopeTileData, StationData } from "../../shared/seismic/seismic-types.js";
 
 // ---- Configuration ----
 
@@ -35,6 +36,8 @@ interface ScriptConfig {
   network: string;
   /** SEED station code (e.g., "K204") */
   station: string;
+  /** SEED location code (e.g., "00"). Blank ("") is the blank location. */
+  location: string;
   /** SEED channel code (e.g., "BHZ"). If omitted, processes all channels found. */
   channel?: string;
   /** Optional local output directory for saving tiles as files */
@@ -54,6 +57,7 @@ interface ScriptConfig {
 function parseArgs(): ScriptConfig {
   const args = process.argv.slice(2);
   const config: Partial<ScriptConfig> = {
+    location: "",
     s3Bucket: S3_BUCKET,
     s3Prefix: S3_PREFIX,
     awsRegion: DEFAULT_AWS_REGION,
@@ -72,6 +76,7 @@ function parseArgs(): ScriptConfig {
       case "--input-dir": config.inputDir = args[i + 1]; i += 2; break;
       case "--network": config.network = args[i + 1]; i += 2; break;
       case "--station": config.station = args[i + 1]; i += 2; break;
+      case "--location": config.location = args[i + 1]; i += 2; break;
       case "--channel": config.channel = args[i + 1]; i += 2; break;
       case "--output-dir": config.outputDir = args[i + 1]; i += 2; break;
       case "--s3-bucket": config.s3Bucket = args[i + 1]; i += 2; break;
@@ -87,7 +92,7 @@ function parseArgs(): ScriptConfig {
   if (!config.inputDir || !config.network || !config.station) {
     console.error("Usage: npx tsx scripts/seismic/generate-envelopes.ts \\");
     console.error("  --input-dir <path> --network <net> --station <sta> \\");
-    console.error("  [--channel <chan>] [--output-dir <path>] [--local-only]");
+    console.error("  [--location <loc>] [--channel <chan>] [--output-dir <path>] [--local-only]");
     console.error("  [--s3-bucket <bucket>] [--s3-prefix <prefix>] [--aws-region <region>]");
     process.exit(1);
   }
@@ -104,6 +109,7 @@ function parseArgs(): ScriptConfig {
 
 interface RawTrace {
   channel: string;
+  location: string;
   sampleRate: number;
   /** Start time in seconds since Unix epoch */
   startTime: number;
@@ -152,6 +158,8 @@ function loadMiniSeedFile(filePath: string): RawTrace[] {
     for (const seg of seis.segments) {
       traces.push({
         channel: seis.channelCode,
+        // miniSEED headers pad the blank location with spaces, so trim before defaulting
+        location: (seis.locationCode ?? "").trim(),
         sampleRate: seg.sampleRate,
         startTime: seg.startTime.toSeconds(),
         samples: new Float64Array(seg.y),
@@ -166,12 +174,13 @@ function loadMiniSeedFile(filePath: string): RawTrace[] {
 function findSensitivity(
   metadata: ChannelMetadata[],
   channel: string,
+  location: string,
   timeSec: number
 ): { scale: number; instrumentCode: string } {
   // Find the channel metadata entry that covers this time
-  const matching = metadata.filter(m => m.channel === channel);
+  const matching = metadata.filter(m => m.channel === channel && (m.location ?? "") === location);
   if (matching.length === 0) {
-    throw new Error(`No metadata found for channel ${channel}`);
+    throw new Error(`No metadata found for channel ${channel} location "${location}"`);
   }
 
   for (const m of matching) {
@@ -194,11 +203,9 @@ async function wipeExistingTiles(
   s3: S3Client,
   bucket: string,
   prefix: string,
-  network: string,
-  station: string,
-  channel: string
+  stationData: StationData
 ): Promise<void> {
-  const keyPrefix = `${getS3Root(prefix)}${getStationChannelPrefix({ network, station, channel })}`;
+  const keyPrefix = `${getS3Root(prefix)}${getStationChannelPrefix(stationData)}`;
   console.log(`Wiping existing tiles under ${keyPrefix}...`);
 
   let continuationToken: string | undefined;
@@ -226,16 +233,14 @@ async function wipeExistingTiles(
 // ---- Tile Output ----
 
 function makeFlushTile(
-  network: string,
-  station: string,
-  channel: string,
+  stationData: StationData,
   config: ScriptConfig,
   s3: S3Client | null,
   pendingUploads: Promise<PutObjectCommandOutput>[],
 ): FlushTileFn {
   let flushedCount = 0;
   return (level: number, tileIndex: number, tileData: EnvelopeTileData) => {
-    const tileKey = getTileS3Key({ network, station, channel }, level, tileIndex);
+    const tileKey = getTileS3Key(stationData, level, tileIndex);
     const body = encodeEnvelopeTile(tileData.mins, tileData.maxs);
     const bodyBytes = new Uint8Array(body);
 
@@ -284,12 +289,12 @@ async function main() {
 
   // 2. Fetch station metadata
   console.log(`Fetching station metadata for ${config.network}.${config.station}...`);
-  const metadata = await fetchStationMetadata(config.network, config.station);
+  const metadata = await fetchStationMetadata(config);
   console.log(`  Found ${metadata.length} channel(s)`);
 
   // 3. Discover channels from first file
   const firstFileTraces = loadMiniSeedFile(files[0]);
-  const channelsFound = new Set(firstFileTraces.map(t => t.channel));
+  const channelsFound = new Set(firstFileTraces.filter(t => t.location === config.location).map(t => t.channel));
   const channelsToProcess = config.channel
     ? [config.channel]
     : Array.from(channelsFound);
@@ -302,12 +307,12 @@ async function main() {
     console.log(`\nProcessing channel ${channel}...`);
 
     // Determine instrument type and amplitude range
-    const firstTrace = firstFileTraces.find(t => t.channel === channel);
+    const firstTrace = firstFileTraces.find(t => t.channel === channel && t.location === config.location);
     if (!firstTrace) {
       console.warn(`No traces for channel ${channel}, skipping`);
       continue;
     }
-    const { instrumentCode } = findSensitivity(metadata, channel, firstTrace.startTime);
+    const { instrumentCode } = findSensitivity(metadata, channel, config.location, firstTrace.startTime);
     const rangeMax = AMPLITUDE_RANGES[instrumentCode];
     if (!rangeMax) {
       console.warn(
@@ -317,15 +322,19 @@ async function main() {
     }
     console.log(`  Instrument: ${instrumentCode}, range: ±${rangeMax}`);
 
+    const stationData: StationData = {
+      network: config.network, station: config.station, location: config.location, channel
+    };
+
     // Wipe existing tiles (S3 mode only)
     if (s3) {
-      await wipeExistingTiles(s3, config.s3Bucket, config.s3Prefix, config.network, config.station, channel);
+      await wipeExistingTiles(s3, config.s3Bucket, config.s3Prefix, stationData);
     }
 
     // Initialize pipeline state
     const state = createPipelineState();
     const pendingUploads: Promise<PutObjectCommandOutput>[] = [];
-    const flushTile = makeFlushTile(config.network, config.station, channel, config, s3, pendingUploads);
+    const flushTile = makeFlushTile(stationData, config, s3, pendingUploads);
     const finestLevel = NUM_LEVELS - 1;
 
     // Stream-process each file
@@ -336,11 +345,11 @@ async function main() {
 
       // Filter to target channel and sort by start time
       const channelTraces = traces
-        .filter(t => t.channel === channel)
+        .filter(t => t.channel === channel && t.location === config.location)
         .sort((a, b) => a.startTime - b.startTime);
 
       for (const trace of channelTraces) {
-        const { scale } = findSensitivity(metadata, channel, trace.startTime);
+        const { scale } = findSensitivity(metadata, channel, config.location, trace.startTime);
         const physicalSamples = new Float64Array(trace.samples.length);
         for (let i = 0; i < trace.samples.length; i++) {
           physicalSamples[i] = trace.samples[i] / scale;
