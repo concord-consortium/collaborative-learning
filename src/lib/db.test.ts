@@ -13,6 +13,8 @@ import { TextContentModelType } from "../models/tiles/text/text-content";
 import { ITileModel } from "../models/tiles/tile-model";
 import { createSingleTileContent } from "../utilities/test-utils";
 import * as UrlParams from "../utilities/url-params";
+import { Logger } from "./logger";
+import { LogEventName } from "./logger-types";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../register-tile-types";
@@ -276,6 +278,9 @@ describe("db", () => {
     });
 
     it("create path: mints a doc, wins the transaction, returns the created doc", async () => {
+      const setCalls: any[] = [];
+      const updateCalls: any[] = [];
+      const logSpy = jest.spyOn(Logger, "log").mockImplementation(() => null);
       (db as any).createDocument = jest.fn(async ({ key }: any) => ({ firestoreMetadata: { key } }));
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
@@ -286,11 +291,19 @@ describe("db", () => {
         ref: () => ({ push: () => ({ key: "minted-key" }) })
       }));
       (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
-        fn({ get: async () => ({ exists: false }), set: () => {}, update: () => {} }));
+        fn({
+          get: async () => ({ exists: false }),
+          set: (_r: any, d: any) => setCalls.push(d),
+          update: (_r: any, d: any) => updateCalls.push(d)
+        }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       const result: any = await db.getOrCreateGroupDocument();
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({ type: GroupDocument }));
+      expect(setCalls[0]).toMatchObject({ documentKey: "minted-key", createdBy: expect.any(String) });
+      expect(updateCalls[0]).toEqual({ canonical: true });
+      expect(logSpy).toHaveBeenCalledWith(LogEventName.CREATE_GROUP_DOCUMENT);
       expect(result.opened).toBeDefined();
+      logSpy.mockRestore();
     });
 
     it("legacy fallback: opens a pre-existing random-key group doc and backfills a pointer", async () => {

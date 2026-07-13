@@ -699,13 +699,6 @@ export class DB {
     }
   }
 
-  public async createGroupDocument() {
-    // The document here is a DBDocument not a CLUE DocumentModelType
-    const result = await this.createDocument({ type: GroupDocument });
-    Logger.log(LogEventName.CREATE_GROUP_DOCUMENT);
-    return result;
-  }
-
   public async getOrCreateGroupDocument() {
     const { user } = this.stores;
     const groupId = user.currentGroupId;
@@ -772,6 +765,9 @@ export class DB {
     if (wonKey !== documentKey) {
       await this.deleteOrphanScopedDocument(documentKey, groupUserId);
       return this.openScopedDocumentByKey(wonKey);
+    }
+    if (type === GroupDocument) {
+      Logger.log(LogEventName.CREATE_GROUP_DOCUMENT);
     }
     return this.openDocumentFromFirestoreMetadata(firestoreMetadata);
   }
