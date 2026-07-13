@@ -58,6 +58,15 @@ interface IContentBounds {
   minY: number;
 }
 
+// The far end of a boundary connection (a socket on a node outside the group).
+export interface ExternalEndpoint { connId: string; externalNodeId: string; externalKey: string; }
+// A member input socket exposed on a collapsed group. `external` is set when an outside node feeds
+// it; undefined means the input is open (a proxy dot with no wire).
+export interface GroupInputSocket { nodeId: string; key: string; external?: ExternalEndpoint; }
+// A member output socket exposed on a collapsed group. `externals` lists outside targets it feeds
+// (empty when the output is open).
+export interface GroupOutputSocket { nodeId: string; key: string; externals: ExternalEndpoint[]; }
+
  /**
 * Get an indexed name based on exiting names.
 * If existing names are "MyBase 1" and "MyBase 3" this will return "MyBase 5"
@@ -991,22 +1000,58 @@ export class ReteManager implements INodeServices {
     return ids.sort().join(",");
   }
 
-  // Boundary connections of a collapsed group: those crossing the group boundary. `inputs` enter
-  // the group (external source -> member), `outputs` leave it (member -> external target). Used to
-  // draw proxy sockets/wires on the collapsed chip.
-  public getGroupBoundaryConnections(nodeIds: string[]) {
+  // The external interface a collapsed group exposes: every member socket that isn't consumed
+  // internally. An input is exposed when it isn't fed by another member (open, or fed by an external
+  // node); an output is exposed when it isn't fully consumed by other members (open, or feeding at
+  // least one external node). Open sockets get a proxy dot with no wire; external-facing ones also
+  // route a boundary wire. This makes the collapsed group behave like a node — its free sockets
+  // stay connectable even when nothing is wired to them yet.
+  public getGroupInterface(nodeIds: string[]) {
     const members = new Set(nodeIds);
-    const inputs: Array<{ connId: string; externalNodeId: string; externalKey: string }> = [];
-    const outputs: Array<{ connId: string; externalNodeId: string; externalKey: string }> = [];
+    const key = (nodeId: string, socketKey: string) => `${nodeId} ${socketKey}`;
+    const inputFedByMember = new Set<string>();
+    const inputExternal = new Map<string, ExternalEndpoint>();
+    const outputToMember = new Set<string>();
+    const outputExternals = new Map<string, ExternalEndpoint[]>();
+
     this.mstProgram.connections.forEach(conn => {
       const sourceIn = members.has(conn.source);
       const targetIn = members.has(conn.target);
-      if (targetIn && !sourceIn) {
-        inputs.push({ connId: conn.id, externalNodeId: conn.source, externalKey: conn.sourceOutput });
-      } else if (sourceIn && !targetIn) {
-        outputs.push({ connId: conn.id, externalNodeId: conn.target, externalKey: conn.targetInput });
+      if (targetIn) {
+        const k = key(conn.target, conn.targetInput);
+        if (sourceIn) inputFedByMember.add(k);
+        else inputExternal.set(k, { connId: conn.id, externalNodeId: conn.source, externalKey: conn.sourceOutput });
+      }
+      if (sourceIn) {
+        const k = key(conn.source, conn.sourceOutput);
+        if (targetIn) {outputToMember.add(k);}
+        else {
+          const arr = outputExternals.get(k) ?? [];
+          arr.push({ connId: conn.id, externalNodeId: conn.target, externalKey: conn.targetInput });
+          outputExternals.set(k, arr);
+        }
       }
     });
+
+    const inputs: GroupInputSocket[] = [];
+    const outputs: GroupOutputSocket[] = [];
+    for (const nodeId of nodeIds) {
+      const node = this.editor.getNode(nodeId);
+      if (!node) continue;
+      for (const socketKey of Object.keys(node.inputs ?? {})) {
+        if (!node.inputs?.[socketKey]) continue;
+        const k = key(nodeId, socketKey);
+        if (inputFedByMember.has(k)) continue; // consumed internally
+        inputs.push({ nodeId, key: socketKey, external: inputExternal.get(k) });
+      }
+      for (const socketKey of Object.keys(node.outputs ?? {})) {
+        if (!node.outputs?.[socketKey]) continue;
+        const k = key(nodeId, socketKey);
+        const externals = outputExternals.get(k) ?? [];
+        if (outputToMember.has(k) && externals.length === 0) continue; // consumed internally
+        outputs.push({ nodeId, key: socketKey, externals });
+      }
+    }
     return { inputs, outputs };
   }
 
