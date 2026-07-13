@@ -44,7 +44,9 @@ export class SeismicDownloadService {
 
   ensureRange(params: DownloadParams): void {
     this.reset();
-    this.station = { network: params.network, station: params.station, channel: params.channel };
+    this.station = {
+      network: params.network, station: params.station, location: params.location, channel: params.channel
+    };
     this.isDownloading = true;
     this.runner(params, this.handleEvent, { onCancel: fn => { this.cancelFn = fn; } });
   }

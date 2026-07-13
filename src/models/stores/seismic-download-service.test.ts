@@ -2,7 +2,7 @@ import { SeismicDownloadService, DONE } from "./seismic-download-service";
 import { DownloadEvent, DownloadParams } from "../../../shared/seismic/seismic-downloader";
 
 const PARAMS: DownloadParams = {
-  network: "AK", station: "K204", location: "--", channel: "HNZ",
+  network: "AK", station: "K204", location: "", channel: "HNZ",
   startSec: Date.UTC(2026, 0, 30) / 1000, endSec: Date.UTC(2026, 1, 1) / 1000,
 };
 
