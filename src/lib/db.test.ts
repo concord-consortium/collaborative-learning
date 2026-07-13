@@ -321,7 +321,11 @@ describe("db", () => {
         ref: () => ({ push: () => ({ key: "my-key" }) })
       }));
       (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
-        fn({ get: async () => ({ exists: true, data: () => ({ documentKey: "winner" }) }), set: () => {}, update: () => {} }));
+        fn({
+          get: async () => ({ exists: true, data: () => ({ documentKey: "winner" }) }),
+          set: () => {},
+          update: () => {}
+        }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       const result: any = await db.getOrCreateGroupDocument();
       expect(orphanSpy).toHaveBeenCalled();
@@ -344,7 +348,9 @@ describe("db", () => {
       self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
     };
     const written = await db.createFirestoreMetadataDocument(metadata, "gk", "3");
-    expect(written).toMatchObject({ context_id: "class-h", network: null, key: "gk", uid: "group_off-1_3", groupId: "3" });
+    expect(written).toMatchObject({
+      context_id: "class-h", network: null, key: "gk", uid: "group_off-1_3", groupId: "3"
+    });
     expect(written).not.toHaveProperty("contextId");
     expect(setPayloads[0]).toMatchObject({ context_id: "class-h", network: null });
   });
