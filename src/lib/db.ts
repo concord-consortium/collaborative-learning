@@ -30,7 +30,7 @@ import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
 import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
-import { getSimpleDocumentPath, IFirestoreMetadataDocumentParams, IDocumentMetadata, IGetImageDataParams,
+import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
@@ -552,48 +552,37 @@ export class DB {
     const documentRef = this.firestore.doc(documentPath);
     const docSnapshot = await documentRef.get();
 
-    if (!docSnapshot.exists) {
-      const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
-
-      let problemInfo: {unit:string|null, investigation?: string, problem?: string} = {unit: null};
-      if ("offeringId" in metadata && metadata.offeringId != null) {
-        problemInfo = this.currentProblemInfo;
-      }
-
-      // Group documents don't use a real uid, but instead a fake one based on the group id.
-      const uid = metadata.type === GroupDocument ? metadata.self.uid : userContext.uid;
-
-      // Add the groupId for group documents to make then easier to query.
-      // groupInfo is used so that the resulting firestoreMetadata can't have a `groupId: undefined` property.
-      // `groupId: undefined` means the property actually exists but its value is `undefined`.
-      // A property like that causes Firestore to fail. By starting off the groupInfo with `{}` and only
-      // setting the groupId if it is truthy, prevents this kind of unsupported property.
-      const groupInfo: { groupId?: string } = {};
-      if (groupId) {
-        groupInfo.groupId = groupId;
-      }
-
-      const firestoreMetadata: IDocumentMetadata & { contextId: string } = {
-        ...cleanedMetadata,
-        // The createFirestoreMetadataDocument firebase function currently deployed to production is out of date.
-        // It requires contextId to be defined, but doesn't check its value.
-        contextId: "ignored",
-        key: documentKey,
-        properties: {},
-        uid,
-        ...problemInfo,
-        ...groupInfo
-      };
-      const createFirestoreMetadataDocument =
-        getFirebaseFunction<IFirestoreMetadataDocumentParams>("createFirestoreMetadataDocument_v2");
-      createFirestoreMetadataDocument({context: userContext, document: firestoreMetadata});
-
-      // NOTE: This is returning the firestore metadata that we setup locally,
-      // this is not guaranteed to be the same as what ends up in Firestore.
-      return firestoreMetadata;
-    } else {
+    if (docSnapshot.exists) {
       return docSnapshot.data() as IDocumentMetadata;
     }
+    const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
+
+    let problemInfo: {unit:string|null, investigation?: string, problem?: string} = {unit: null};
+    if ("offeringId" in metadata && metadata.offeringId != null) {
+      problemInfo = this.currentProblemInfo;
+    }
+
+    // Group documents use a fake uid based on the group id; others use the current user.
+    const uid = metadata.type === GroupDocument ? metadata.self.uid : userContext.uid;
+
+    // Only set groupId when truthy so Firestore never sees `groupId: undefined`.
+    const groupInfo: { groupId?: string } = {};
+    if (groupId) {
+      groupInfo.groupId = groupId;
+    }
+
+    const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
+      ...cleanedMetadata,
+      context_id: classHash,
+      network: userContext.network || null,
+      key: documentKey,
+      properties: {},
+      uid,
+      ...problemInfo,
+      ...groupInfo
+    };
+    await documentRef.set(firestoreMetadata);
+    return firestoreMetadata;
   }
 
   private get currentProblemInfo() {
@@ -605,8 +594,8 @@ export class DB {
     };
   }
 
-  public async createDocument(params: { type: DBDocumentType, content?: string, title?: string }) {
-    const { type, content, title } = params;
+  public async createDocument(params: { type: DBDocumentType, content?: string, title?: string, key?: string }) {
+    const { type, content, title, key: providedKey } = params;
     const { user } = this.stores;
 
     return new Promise<{
@@ -630,7 +619,9 @@ export class DB {
 
       // If this is group document use a group user id instead of the current user id
       const documentPath = this.firebase.getUserDocumentPath(user, undefined, groupUserId);
-      const documentRef = this.firebase.ref(documentPath).push();
+      const documentRef = providedKey
+        ? this.firebase.ref(documentPath).child(providedKey)
+        : this.firebase.ref(documentPath).push();
       const documentKey = documentRef.key!;
       const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, groupUserId);
       const metadataRef = this.firebase.ref(metadataPath);

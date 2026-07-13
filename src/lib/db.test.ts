@@ -4,7 +4,7 @@ import { DBDocument } from "./db-types";
 import { createDocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
 import {
-  LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
+  GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
 import { specStores } from "../models/stores/spec-stores";
 import { IStores } from "../models/stores/stores";
@@ -251,6 +251,25 @@ describe("db", () => {
       await db.guaranteeLearningLog();
       expect(spy).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it("writes group-document metadata to Firestore client-side (no contextId)", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    const metadata: any = {
+      version: "1.0", type: GroupDocument, createdAt: 123, classHash: "class-h", offeringId: "off-1",
+      self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
+    };
+    const written = await db.createFirestoreMetadataDocument(metadata, "gk", "3");
+    expect(written).toMatchObject({ context_id: "class-h", network: null, key: "gk", uid: "group_off-1_3", groupId: "3" });
+    expect(written).not.toHaveProperty("contextId");
+    expect(setPayloads[0]).toMatchObject({ context_id: "class-h", network: null });
   });
 
   describe("document visibility with defaultSharedDocuments", () => {
