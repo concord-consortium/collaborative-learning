@@ -499,6 +499,20 @@ describe('DocumentGroup Model', () => {
       expect(byProblemDocs[2].documents.length).toBe(1);
     });
 
+    it('labels groups with the problem title when the unit provides one (keeping ordinal order)', () => {
+      // Inject a unit that resolves a title for each (investigation, problem) ordinal pair.
+      // (rootDocumentGroup holds the raw stores object that byProblem reads.)
+      (sortedDocuments.rootDocumentGroup.stores as any).unit = {
+        getInvestigation: (investigationOrdinal: number) => ({
+          getProblem: (problemOrdinal: number) => ({ title: `Storm ${investigationOrdinal}-${problemOrdinal}` })
+        })
+      };
+      const byProblemDocs = sortedDocuments.sortBy("Problem");
+      expect(byProblemDocs.map(g => g.label)).toEqual(["Storm 1-1", "Storm 1-2", "Storm 2-1"]);
+      // Grouping/ordering is unchanged — only the displayed label differs.
+      expect(byProblemDocs[1].documents.length).toBe(3);
+    });
+
     it('should sort "No Problem" to the end', () => {
       // Modify one document to not have problem info
       const metadataWithNoProblem: SnapshotIn<typeof MetadataDocMapModel> = {

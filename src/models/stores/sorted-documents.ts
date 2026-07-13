@@ -19,6 +19,7 @@ import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
 import { PrimarySortType } from "./ui-types";
 import { UserModelType } from "./user";
+import { UnitModelType } from "../curriculum/unit";
 
 export type SortedDocumentsMap = Record<string, DocumentGroup[]>;
 
@@ -32,6 +33,7 @@ export interface ISortedDocumentsStores {
   commentTags: CommentTags;
   user: UserModelType;
   curriculumConfig: CurriculumConfigType;
+  unit?: UnitModelType;
 }
 
 export const MetadataDocMapModel = types.map(DocumentMetadataModel);

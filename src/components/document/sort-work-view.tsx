@@ -10,9 +10,7 @@ import { LogEventName } from "../../lib/logger-types";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { DocFilterType, DocFilterTypeIds, PrimarySortType, SecondarySortType } from "../../models/stores/ui-types";
 import { ENavTab } from "../../models/view/nav-tabs";
-import { getFilterTypeTranslationKey } from "../../utilities/sort-utils";
-import { upperWords } from "../../utilities/string-utils";
-import { isTranslationKey, translate } from "../../utilities/translation/translate";
+import { getFilterTypeDisplayLabel } from "../../utilities/sort-utils";
 import { urlParams } from "../../utilities/url-params";
 import { AiSummary } from "../navigation/ai-summary";
 import { SortWorkHeader } from "../navigation/sort-work-header";
@@ -73,13 +71,9 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
       persistentUI.setSecondarySortBy("None");
     }
 
-    if (sort === "Problem" && docFilter === "Problem") {
-      persistentUI.setDocFilter("Investigation");
-    }
-
     ui.clearHighlightedSortWorkDocument();
     ui.clearExpandedSortWorkSections();
-  }, [persistentUI, validatedPrimarySortBy, validatedSecondarySortBy, docFilter, ui]);
+  }, [persistentUI, validatedPrimarySortBy, validatedSecondarySortBy, ui]);
 
   const handleSecondarySortBySelection = useCallback((sort: SecondarySortType) => {
     Logger.log(LogEventName.SECOND_SORT_CHANGE, {old: validatedSecondarySortBy, new: sort});
@@ -111,11 +105,10 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
 
   // Disable "Problem" filter option when sorting by Problem
   const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => {
-    const key = getFilterTypeTranslationKey(option);
     return ({
       disabled: option === "Problem" && validatedPrimarySortBy === "Problem",
       selected: option === docFilter,
-      text: isTranslationKey(key) ? upperWords(translate(key)) : option,
+      text: getFilterTypeDisplayLabel(option),
       onClick: () => handleDocFilterSelection(option)
     });
   });
@@ -193,7 +186,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
           <>
             <SortWorkHeader
               key={`sort-work-header-${validatedPrimarySortBy}`}
-              docFilter={docFilter}
               docFilterItems={docFilterOptions}
               primarySortItems={primarySortByOptions}
               secondarySortItems={secondarySortByOptions}
