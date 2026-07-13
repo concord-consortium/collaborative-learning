@@ -1,4 +1,4 @@
-import { StationData, StationLocation, StationQuery, TimeRange } from "./seismic-types";
+import { StationData, StationQuery, TimeRange } from "./seismic-types";
 import { EarthscopeOptions } from "./earthscope-client";
 import { daysInRange, dayToISORange } from "./seismic-day";
 
@@ -11,7 +11,7 @@ export interface DownloaderDeps {
   };
 }
 
-export interface DownloadParams extends StationLocation, EarthscopeOptions {
+export interface DownloadParams extends StationData, EarthscopeOptions {
   concurrency?: number;
   endSec: number;
   maxRetries?: number;
@@ -56,7 +56,7 @@ export async function downloadRange(
   onEvent: (event: DownloadEvent) => void
 ): Promise<void> {
   const { network, station, location, channel, startSec, endSec } = params;
-  const stationLocation: StationLocation = { network, station, location, channel };
+  const stationData: StationData = { network, station, location, channel };
   const concurrency = params.concurrency ?? DEFAULT_CONCURRENCY;
   const maxRetries = params.maxRetries ?? DEFAULT_MAX_RETRIES;
 
@@ -73,7 +73,7 @@ export async function downloadRange(
     const { startISO } = dayToISORange(allDays[0]);
     const { endISO } = dayToISORange(allDays[allDays.length - 1]);
     const ranges = await deps.fetchAvailability({
-      ...stationLocation, startTime: startISO, endTime: endISO
+      ...stationData, startTime: startISO, endTime: endISO
     }, params.signal);
 
     const availableDays: number[] = [];
@@ -88,7 +88,7 @@ export async function downloadRange(
     const firstDay = availableDays[0];
     const lastDay = availableDays[availableDays.length - 1];
     const cached = availableDays.length
-      ? await deps.cache.scanCachedDays(stationLocation, firstDay, lastDay)
+      ? await deps.cache.scanCachedDays(stationData, firstDay, lastDay)
       : new Set<number>();
 
     const total = availableDays.length;
@@ -115,9 +115,9 @@ export async function downloadRange(
         if (params.signal?.aborted) return;
         try {
           const data = await deps.fetchRaw(
-            { ...stationLocation, startTime: dStart, endTime: dEnd }, params.signal
+            { ...stationData, startTime: dStart, endTime: dEnd }, params.signal
           );
-          await deps.cache.writeDayChunk(stationLocation, day, data);
+          await deps.cache.writeDayChunk(stationData, day, data);
           completed++;
           onEvent({ type: "dayWritten", day, bytes: data.byteLength });
           emitProgress();

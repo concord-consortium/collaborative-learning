@@ -69,9 +69,9 @@ export class SeismicQueryService {
    * Called from MobX observer components so cache reads are tracked.
    */
   query(params: SeismicViewportParams): ViewportQueryResult {
-    const { stationLocation, startTime, endTime, pixelWidth } = params;
+    const { stationData, startTime, endTime, pixelWidth } = params;
     const level = this.selectLevel(startTime, endTime, pixelWidth);
-    const instrumentCode = stationLocation.channel.charAt(1);
+    const instrumentCode = stationData.channel.charAt(1);
     const amplitudeRange = AMPLITUDE_RANGES[instrumentCode] ?? 1;
 
     if (level === "raw") {
@@ -155,7 +155,7 @@ export class SeismicQueryService {
   }
 
   private async loadData(callerId: string, params: SeismicViewportParams, level: number | "raw"): Promise<void> {
-    const { stationLocation, startTime, endTime } = params;
+    const { stationData, startTime, endTime } = params;
     const startSec = startTime.toSeconds();
     const endSec = endTime.toSeconds();
     const raw = level === "raw";
@@ -172,7 +172,7 @@ export class SeismicQueryService {
 
     const toFetch: number[] = [];
     const neededKeys = new Set<string>();
-    const getKey = (i: number) => raw ? rawCacheKey(stationLocation, i) : envelopeCacheKey(stationLocation, level, i);
+    const getKey = (i: number) => raw ? rawCacheKey(stationData, i) : envelopeCacheKey(stationData, level, i);
     for (const index of indices) {
       const key = getKey(index);
       neededKeys.add(key);
@@ -187,7 +187,7 @@ export class SeismicQueryService {
 
     if (toFetch.length === 0) return;
 
-    const metadata = raw ? await this.getAllMetadata(stationLocation) : [];
+    const metadata = raw ? await this.getAllMetadata(stationData) : [];
 
     // Fetch missing tiles
     for (const index of toFetch) {
@@ -220,14 +220,14 @@ export class SeismicQueryService {
         if (!chunkStartISO || !chunkEndISO) continue;
 
         this.fetchAndParseRaw(
-          { ...stationLocation, startTime: chunkStartISO, endTime: chunkEndISO }, metadata, controller.signal
+          { ...stationData, startTime: chunkStartISO, endTime: chunkEndISO }, metadata, controller.signal
         ).then(segments => {
           runInAction(() => {
             this.setRawCache(key, segments.length > 0 ? segments : "missing");
           });
         }).catch(catchFunction).finally(finallyFunction);
       } else {
-        fetchEnvelopeTile({ stationData: stationLocation, level, tileIndex: index, signal: controller.signal })
+        fetchEnvelopeTile({ stationData, level, tileIndex: index, signal: controller.signal })
           .then(data => {
             runInAction(() => {
               this.envelopeCache.set(key, data ?? "missing");
@@ -240,7 +240,7 @@ export class SeismicQueryService {
   // --- Private helpers (envelope) ---
 
   private queryEnvelope(params: SeismicViewportParams, level: number, amplitudeRange: number): ViewportQueryResult {
-    const { stationLocation, startTime, endTime } = params;
+    const { stationData, startTime, endTime } = params;
     const startSec = startTime.toSeconds();
     const endSec = endTime.toSeconds();
     const tileIndices = getTileIndicesForViewport(startSec, endSec, level);
@@ -252,7 +252,7 @@ export class SeismicQueryService {
     let isLoading = false;
 
     for (const tileIndex of tileIndices) {
-      const key = envelopeCacheKey(stationLocation, level, tileIndex);
+      const key = envelopeCacheKey(stationData, level, tileIndex);
       const entry = this.envelopeCache.get(key);
 
       // Fallback to one level coarser if this level is loading
@@ -261,7 +261,7 @@ export class SeismicQueryService {
         const _range = getTileTimeRange(level, tileIndex);
         const overlapStart = Math.max(_range.start, startSec);
         const overlapEnd = Math.min(_range.end, endSec);
-        const fallbackData = this.getFallbackData(level - 1, stationLocation, overlapStart, overlapEnd);
+        const fallbackData = this.getFallbackData(level - 1, stationData, overlapStart, overlapEnd);
         if (fallbackData) {
           timestamps.push(...fallbackData.timestamps);
           mins.push(...fallbackData.mins);
@@ -313,7 +313,7 @@ export class SeismicQueryService {
   }
 
   private queryRaw(params: SeismicViewportParams, amplitudeRange: number): ViewportQueryResult {
-    const { stationLocation, startTime, endTime } = params;
+    const { stationData, startTime, endTime } = params;
     const startSec = startTime.toSeconds();
     const endSec = endTime.toSeconds();
     const firstChunk = this.rawChunkIndex(startSec);
@@ -324,7 +324,7 @@ export class SeismicQueryService {
     let isLoading = false;
 
     for (let ci = firstChunk; ci <= lastChunk; ci++) {
-      const key = rawCacheKey(stationLocation, ci);
+      const key = rawCacheKey(stationData, ci);
       const entry = this.getRawCache(key);
 
       if (entry === "loading" || entry === undefined) {
@@ -332,7 +332,7 @@ export class SeismicQueryService {
         // Attempt fallback to L2 envelope for this chunk's time range
         const start = Math.max(ci * RAW_CHUNK_DURATION, startSec);
         const end = Math.min((ci + 1) * RAW_CHUNK_DURATION, endSec);
-        const fallback = this.getFallbackData(2, stationLocation, start, end);
+        const fallback = this.getFallbackData(2, stationData, start, end);
         if (fallback) {
           // Envelope fallback — push as interleaved min/max approximation (use midpoint)
           for (let i = 0; i < fallback.timestamps.length; i++) {
