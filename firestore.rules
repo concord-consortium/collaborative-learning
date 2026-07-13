@@ -478,6 +478,13 @@ service cloud.firestore {
           (request.auth.token.class_hash == classId || teacherIsInClass(classId));
         allow write: if false;  // only cloud functions write here
       }
+
+      match /classes/{classId}/offerings/{offeringId}/groups/{groupId}/canonical/{type} {
+        allow read:   if isAuthed() && request.auth.token.class_hash == classId;
+        allow create: if isAuthed() && request.auth.token.class_hash == classId
+                       && request.resource.data.keys().hasAll(["documentKey", "createdAt", "createdBy"]);
+        allow update, delete: if false;   // pointers are immutable
+      }
     }
 
     //
