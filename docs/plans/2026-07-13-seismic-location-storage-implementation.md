@@ -30,12 +30,15 @@ This is a pure type refactor — no behavior change, so no new failing test. The
 In `shared/seismic/seismic-types.ts`, replace the `StationData` / `StationLocation` / `StationConfig` / `StationQuery` block (lines 9–29) with:
 
 ```ts
-/** Basic station data: a station plus a specific channel and location.
+/** A channel plus its location code.
  *  `location` is the SEED location code; `undefined` and `""` both mean the blank location. */
-export interface StationData extends StationId {
+export interface StationChannel {
   channel: string;
   location?: string;
 }
+
+/** Basic station data: a station plus a specific channel and location. */
+export interface StationData extends StationId, StationChannel {}
 
 /** A station entry in unit configuration: identity plus optional label. */
 export interface StationConfig extends StationData {
@@ -106,6 +109,8 @@ describe("encodeLocation / decodeLocation", () => {
   it("round-trips through decodeLocation", () => {
     expect(decodeLocation(encodeLocation(""))).toBe("");
     expect(decodeLocation(encodeLocation("00"))).toBe("00");
+    // A literal "--" is the path encoding of blank, so it normalizes to "" rather than surviving.
+    expect(decodeLocation(encodeLocation("--"))).toBe("");
   });
 });
 
@@ -325,11 +330,11 @@ Expected: FAIL — `meta00?.scale` is `100` (channel-only matching returns the f
 
 **Step 3: Implement**
 
-In `src/models/stores/seismic-query-service.ts`, change `getMetadataForChannel` to take the station identity and normalize blank on both sides:
+In `src/models/stores/seismic-query-service.ts`, change `getMetadataForChannel` to take a `StationChannel` (add it to the `seismic-types` import) and normalize blank on both sides:
 
 ```ts
   private getMetadataForChannel(
-    metadata: ChannelMetadata[], station: { channel: string; location?: string }, timeSec: number
+    metadata: ChannelMetadata[], station: StationChannel, timeSec: number
   ): ChannelMetadata | undefined {
     const location = station.location ?? "";
     const matching = metadata.filter(m => m.channel === station.channel && (m.location ?? "") === location);
