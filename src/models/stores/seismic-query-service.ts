@@ -5,7 +5,7 @@ import {
 } from "../../../shared/seismic/envelope-config";
 import { dequantize } from "../../../shared/seismic/envelope-codec";
 import {
-  getStationChannelPrefix, getStationPrefix, getTileIndicesForViewport, getTileTimeRange
+  getStationChannelPrefix, getStationPrefix, getTileIndicesForViewport, getTileS3Key, getTileTimeRange
 } from "../../../shared/seismic/tile-addressing";
 import { fetchEnvelopeTile } from "../../../shared/seismic/envelope-fetcher";
 import { fetchRawSeismicData, fetchStationMetadata } from "../../../shared/seismic/earthscope-client";
@@ -21,7 +21,7 @@ type RawCacheEntry = RawSegment[] | "loading" | "missing";
 const MAX_RAW_CACHE_ENTRIES = 100;
 
 export function envelopeCacheKey(stationData: StationData, level: number, tileIndex: number) {
-  return `${getStationChannelPrefix(stationData)}/L${level}/${tileIndex}`;
+  return getTileS3Key(stationData, level, tileIndex);
 }
 
 export function rawCacheKey(stationData: StationData, chunkIndex: number) {
@@ -378,6 +378,10 @@ export class SeismicQueryService {
     return metadata;
   }
 
+  /**
+   * Finds the metadata entry matching the station's channel and location (blank and undefined
+   * location are equivalent) covering timeSec.
+   */
   private getMetadataForChannel(
     metadata: ChannelMetadata[], station: StationChannel, timeSec: number
   ): ChannelMetadata | undefined {

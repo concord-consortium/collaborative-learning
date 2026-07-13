@@ -205,5 +205,8 @@ describe("getMetadata", () => {
 
     const metaBlank = await service.getMetadata(stationData, t);
     expect(metaBlank?.scale).toBe(100);
+
+    const metaMissing = await service.getMetadata({ ...stationData, location: "10" }, t);
+    expect(metaMissing).toBeUndefined();
   });
 });
