@@ -281,14 +281,11 @@ describe("db", () => {
       const setCalls: any[] = [];
       const updateCalls: any[] = [];
       const logSpy = jest.spyOn(Logger, "log").mockImplementation(() => null);
-      (db as any).createDocument = jest.fn(async ({ key }: any) => ({ firestoreMetadata: { key } }));
+      (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "minted-key" } }));
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
         collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
           get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
-      }));
-      mockDatabase.mockImplementation(() => ({
-        ref: () => ({ push: () => ({ key: "minted-key" }) })
       }));
       (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
         fn({
@@ -323,15 +320,12 @@ describe("db", () => {
     });
 
     it("lost race: cleans up the orphan and opens the winner's doc", async () => {
-      (db as any).createDocument = jest.fn(async ({ key }: any) => ({ firestoreMetadata: { key } }));
+      (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "my-key" } }));
       const orphanSpy = jest.spyOn(db as any, "deleteOrphanScopedDocument").mockResolvedValue(undefined);
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }), delete: () => Promise.resolve() }),
         collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
           get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
-      }));
-      mockDatabase.mockImplementation(() => ({
-        ref: () => ({ push: () => ({ key: "my-key" }) })
       }));
       (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
         fn({

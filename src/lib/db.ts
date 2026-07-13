@@ -603,8 +603,8 @@ export class DB {
     };
   }
 
-  public async createDocument(params: { type: DBDocumentType, content?: string, title?: string, key?: string }) {
-    const { type, content, title, key: providedKey } = params;
+  public async createDocument(params: { type: DBDocumentType, content?: string, title?: string }) {
+    const { type, content, title } = params;
     const { user } = this.stores;
 
     return new Promise<{
@@ -628,9 +628,7 @@ export class DB {
 
       // If this is group document use a group user id instead of the current user id
       const documentPath = this.firebase.getUserDocumentPath(user, undefined, groupUserId);
-      const documentRef = providedKey
-        ? this.firebase.ref(documentPath).child(providedKey)
-        : this.firebase.ref(documentPath).push();
+      const documentRef = this.firebase.ref(documentPath).push();
       const documentKey = documentRef.key!;
       const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, groupUserId);
       const metadataRef = this.firebase.ref(metadataPath);
@@ -755,9 +753,8 @@ export class DB {
 
     // 3. Create document-first, then claim the pointer atomically.
     const { user } = this.stores;
-    const documentPath = this.firebase.getUserDocumentPath(user, undefined, groupUserId);
-    const documentKey = this.firebase.ref(documentPath).push().key!;   // client-side id, nothing written yet
-    const { firestoreMetadata } = await this.createDocument({ type, key: documentKey });
+    const { firestoreMetadata } = await this.createDocument({ type });
+    const documentKey = firestoreMetadata.key;
 
     const metadataRef = this.firestore.doc(getSimpleDocumentPath(documentKey));
     const wonKey = await this.firestore.runTransaction(async (txn) => {
