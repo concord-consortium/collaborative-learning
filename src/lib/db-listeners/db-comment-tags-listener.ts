@@ -20,11 +20,12 @@ export class DBCommentTagsListener extends BaseListener {
     // reaction and Firestore subscription.
     this.reactionDisposer?.();
     this.unsubscribe?.();
-    const { user, unit } = this.db.stores;
-    // (Re)subscribe whenever the class or unit becomes available or changes. A reaction (rather
-    // than reading once) handles the unit loading asynchronously after listeners start.
+    // (Re)subscribe whenever the class or unit becomes available or changes. Read `unit`/`user`
+    // through `this.db.stores` (which is makeAutoObservable) rather than capturing the model
+    // instances: Stores.setUnit() replaces the UnitModel wholesale, so a reaction reading `unit.code`
+    // off a captured instance would never re-fire on a unit change.
     this.reactionDisposer = reaction(
-      () => ({ classHash: user.classHash, unit: unit.code }),
+      () => ({ classHash: this.db.stores.user.classHash, unit: this.db.stores.unit.code }),
       ({ classHash, unit: unitCode }) => this.subscribe(classHash, unitCode),
       { fireImmediately: true }
     );

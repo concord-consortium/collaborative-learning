@@ -13,6 +13,8 @@ export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
   const { appConfig, commentTags, user } = useStores();
   const [adding, setAdding] = useState(false);
   const [text, setText] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(false);
 
   const canAdd = !!appConfig.showCommentTag && !!appConfig.allowCustomCommentTags && user.isTeacher;
   if (!canAdd) return null;
@@ -26,15 +28,25 @@ export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
     (Object.values(tags).some(label => label.trim().toLowerCase() === trimmed.toLowerCase()) ||
      Object.keys(tags).includes(commentTagId(trimmed)));
 
-  const commit = () => {
-    if (!trimmed || isDuplicate) return;
-    commentTags.addTag(trimmed, user.id);
-    setText("");
-    setAdding(false);
+  const commit = async () => {
+    if (!trimmed || isDuplicate || saving) return;
+    setSaving(true);
+    setError(false);
+    try {
+      await commentTags.addTag(trimmed, user.id);
+      setText("");
+      setAdding(false);
+    } catch {
+      // Keep the entered text and the row open so the teacher can see it failed and retry.
+      setError(true);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const cancel = () => {
     setText("");
+    setError(false);
     setAdding(false);
   };
 
@@ -59,7 +71,7 @@ export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
               aria-label="New tag name"
               value={text}
               autoFocus
-              onChange={e => setText(e.target.value)}
+              onChange={e => { setText(e.target.value); if (error) setError(false); }}
               onKeyDown={e => {
                 if (e.key === "Enter") { e.preventDefault(); commit(); }
                 else if (e.key === "Escape") { cancel(); }
@@ -72,7 +84,7 @@ export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
               type="button"
               className="add-tag-confirm"
               data-testid="sort-work-add-tag-confirm"
-              disabled={!trimmed || isDuplicate}
+              disabled={!trimmed || isDuplicate || saving}
               onClick={commit}
             >
               Add
@@ -83,6 +95,10 @@ export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
             {isDuplicate &&
               <span className="add-tag-duplicate" data-testid="sort-work-add-tag-duplicate">
                 Tag already exists
+              </span>}
+            {error && !isDuplicate &&
+              <span className="add-tag-error" data-testid="sort-work-add-tag-error">
+                Couldn’t save tag — try again
               </span>}
           </div>
       }

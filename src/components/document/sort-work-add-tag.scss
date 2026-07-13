@@ -55,7 +55,8 @@
       color: $charcoal-dark-1;
     }
 
-    .add-tag-duplicate {
+    .add-tag-duplicate,
+    .add-tag-error {
       color: $error-red;
       font-size: 12px;
     }

@@ -479,11 +479,29 @@ service cloud.firestore {
         allow write: if false;  // only cloud functions write here
       }
 
-      // Teacher-created custom comment tags, scoped per class + unit. Teachers and researchers can
-      // read+write via the parent /authed/{portal} rule above; this rule additionally grants
-      // students in the class read access so they can see and select custom tags.
+      // Validates a custom comment tag write: the document must be self-consistent with its path
+      // (id/classHash/unit), attributed to the requesting teacher (createdBy), and carry a
+      // non-empty label. (createdAt is a server timestamp and isn't constrained here.)
+      function isValidCommentTagRequest(classHash, unit, tagId) {
+        return request.resource.data.id == tagId &&
+          request.resource.data.classHash == classHash &&
+          request.resource.data.unit == unit &&
+          string(request.auth.token.platform_user_id) == request.resource.data.createdBy &&
+          request.resource.data.label is string &&
+          request.resource.data.label.size() > 0;
+      }
+
+      // Teacher-created custom comment tags, scoped per class + unit. Firestore rules do NOT cascade
+      // into subcollections, so access must be granted explicitly here — the parent
+      // /authed/{portal} read+write rule does not apply to this nested path. Teachers of the class
+      // (or their networked classes) may read + write; students in the class may read so they can
+      // see and select custom tags.
       match /commentTags/{classHash}/units/{unit}/tags/{tagId} {
-        allow read: if isAuthed() && request.auth.token.class_hash == classHash;
+        allow read: if (isAuthed() && request.auth.token.class_hash == classHash) ||
+          (isAuthedTeacher() && teacherIsInClass(classHash));
+        allow write: if isAuthedTeacher() &&
+          (request.auth.token.class_hash == classHash || teacherIsInClass(classHash)) &&
+          isValidCommentTagRequest(classHash, unit, tagId);
       }
     }
 
