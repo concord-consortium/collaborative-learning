@@ -1,6 +1,6 @@
 import { defaultCatalog, loadCatalog, stationsFromUnitConfig, unitContentUrl } from "./load-catalog";
 
-const stations = [{ network: "AK", station: "K204", channel: "HNZ", location: "--", label: "Anchorage" }];
+const stations = [{ network: "AK", station: "K204", channel: "HNZ", location: "00", label: "Anchorage" }];
 
 describe("stationsFromUnitConfig", () => {
   it("extracts wave-runner stations from config.settings", () => {
