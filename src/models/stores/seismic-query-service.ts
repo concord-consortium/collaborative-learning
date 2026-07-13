@@ -12,7 +12,7 @@ import { fetchRawSeismicData, fetchStationMetadata } from "../../../shared/seism
 import { miniseed } from "seisplotjs";
 import {
   EnvelopeTileData, ChannelMetadata, NullableNumberArray, SeismicViewportParams, ViewportQueryResult, RawSegment,
-  StationData, StationId, TimeRange, StationQuery
+  StationChannel, StationData, StationId, TimeRange, StationQuery
 } from "../../../shared/seismic/seismic-types";
 
 type EnvelopeCacheEntry = EnvelopeTileData | "loading" | "missing";
@@ -95,7 +95,7 @@ export class SeismicQueryService {
    */
   async getMetadata(stationData: StationData, timeSec: number): Promise<ChannelMetadata | undefined> {
     const allMetadata = await this.getAllMetadata(stationData);
-    return this.getMetadataForChannel(allMetadata, stationData.channel, timeSec);
+    return this.getMetadataForChannel(allMetadata, stationData, timeSec);
   }
 
   // --- Private helpers (general) ---
@@ -379,9 +379,10 @@ export class SeismicQueryService {
   }
 
   private getMetadataForChannel(
-    metadata: ChannelMetadata[], channel: string, timeSec: number
+    metadata: ChannelMetadata[], station: StationChannel, timeSec: number
   ): ChannelMetadata | undefined {
-    const matching = metadata.filter(m => m.channel === channel);
+    const location = station.location ?? "";
+    const matching = metadata.filter(m => m.channel === station.channel && (m.location ?? "") === location);
     for (const m of matching) {
       const start = new Date(m.startTime).getTime() / 1000;
       const end = m.endTime === "" ? Infinity : new Date(m.endTime).getTime() / 1000;
@@ -404,7 +405,7 @@ export class SeismicQueryService {
     if (seismogram && seismogram.segments) {
       for (const seg of seismogram.segments) {
         const segStartTime = seg.startTime.toSeconds();
-        const sensitivity = this.getMetadataForChannel(metadata, query.channel, segStartTime)?.scale ?? 1;
+        const sensitivity = this.getMetadataForChannel(metadata, query, segStartTime)?.scale ?? 1;
         const sampleRate = seg.sampleRate;
         const y = seg.y;
         const samples = new Float64Array(y.length);
