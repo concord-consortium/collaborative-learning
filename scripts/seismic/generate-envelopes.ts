@@ -16,7 +16,9 @@ import { miniseed } from "seisplotjs/nodeonly";
 import {
   LEVEL_SPACINGS, NUM_LEVELS, AMPLITUDE_RANGES, S3_BUCKET, S3_PREFIX
 } from "../../shared/seismic/envelope-config.js";
-import { getS3Root, getStationChannelPrefix, getTileS3Key } from "../../shared/seismic/tile-addressing.js";
+import {
+  decodeLocation, getS3Root, getStationChannelPrefix, getTileS3Key
+} from "../../shared/seismic/tile-addressing.js";
 import { encodeEnvelopeTile, quantize } from "../../shared/seismic/envelope-codec.js";
 import { computeEnvelopesFromRaw } from "../../shared/seismic/envelope-compute.js";
 import { fetchStationMetadata } from "../../shared/seismic/earthscope-client.js";
@@ -76,7 +78,7 @@ function parseArgs(): ScriptConfig {
       case "--input-dir": config.inputDir = args[i + 1]; i += 2; break;
       case "--network": config.network = args[i + 1]; i += 2; break;
       case "--station": config.station = args[i + 1]; i += 2; break;
-      case "--location": config.location = args[i + 1]; i += 2; break;
+      case "--location": config.location = decodeLocation(args[i + 1].trim()); i += 2; break;
       case "--channel": config.channel = args[i + 1]; i += 2; break;
       case "--output-dir": config.outputDir = args[i + 1]; i += 2; break;
       case "--s3-bucket": config.s3Bucket = args[i + 1]; i += 2; break;
@@ -158,7 +160,7 @@ function loadMiniSeedFile(filePath: string): RawTrace[] {
     for (const seg of seis.segments) {
       traces.push({
         channel: seis.channelCode,
-        // miniSEED headers pad the blank location with spaces, so trim before defaulting
+        // trim so a padded blank location can never become a path segment
         location: (seis.locationCode ?? "").trim(),
         sampleRate: seg.sampleRate,
         startTime: seg.startTime.toSeconds(),
@@ -298,18 +300,32 @@ async function main() {
   const channelsToProcess = config.channel
     ? [config.channel]
     : Array.from(channelsFound);
+  if (channelsToProcess.length === 0) {
+    const locationsPresent = Array.from(new Set(firstFileTraces.map(t => t.location)));
+    console.error(
+      `No channels found at location "${config.location}" in the first file. ` +
+      `Locations present in the first file: ${locationsPresent.map(loc => `"${loc}"`).join(", ")}`
+    );
+    process.exit(1);
+  }
 
   // 4. Set up S3 (if not --local-only)
   const s3 = config.localOnly ? null : new S3Client({ region: config.awsRegion });
 
   // 5. Process each channel
   for (const channel of channelsToProcess) {
-    console.log(`\nProcessing channel ${channel}...`);
+    console.log(`\nProcessing channel ${channel} (location "${config.location}")...`);
 
     // Determine instrument type and amplitude range
     const firstTrace = firstFileTraces.find(t => t.channel === channel && t.location === config.location);
     if (!firstTrace) {
-      console.warn(`No traces for channel ${channel}, skipping`);
+      const otherLocations = Array.from(new Set(
+        firstFileTraces.filter(t => t.channel === channel).map(t => t.location)
+      ));
+      const existsAt = otherLocations.length > 0
+        ? ` (${channel} exists at locations: ${otherLocations.map(loc => `"${loc}"`).join(", ")})`
+        : "";
+      console.warn(`No traces for channel ${channel} at location "${config.location}"${existsAt}, skipping`);
       continue;
     }
     const { instrumentCode } = findSensitivity(metadata, channel, config.location, firstTrace.startTime);
