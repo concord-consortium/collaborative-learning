@@ -1,7 +1,7 @@
 import { isDirectory } from "../file-system";
 import { dayToYearDoy } from "./seismic-day";
 import { StationData } from "./seismic-types";
-import { getStationPrefix, parseStationPrefix } from "./tile-addressing";
+import { decodeLocation, encodeLocation, getStationPrefix, parseStationPrefix } from "./tile-addressing";
 
 export interface SeismicCache {
   writeDayChunk(station: StationData, day: number, bytes: ArrayBuffer): Promise<void>;
@@ -12,7 +12,7 @@ export interface SeismicCache {
   deleteDaysInRange(station: StationData, startDay: number, endDay: number): Promise<void>;
 }
 
-const ROOT_DIR = "seismic-cache";
+const ROOT_DIR = "seismic-cache-v2";
 
 function fileName(day: number): string {
   const { doy } = dayToYearDoy(day);
@@ -21,7 +21,7 @@ function fileName(day: number): string {
 
 /**
  * Create a station-first OPFS cache:
- *   /seismic-cache/{network}_{station}/{channel}/{year}/{doy}.mseed
+ *   /seismic-cache-v2/{network}_{station}/{location}/{channel}/{year}/{doy}.mseed
  *
  * `getRoot` returns the root directory handle; defaults to OPFS. Tests inject a fake.
  */
@@ -32,7 +32,9 @@ export function createOpfsCache(
   async function channelYearDir(station: StationData, day: number, options?: FileSystemGetDirectoryOptions) {
     const { year } = dayToYearDoy(day);
     let dir = await getRoot();
-    for (const name of [ROOT_DIR, getStationPrefix(station), station.channel, String(year)]) {
+    for (const name of [
+      ROOT_DIR, getStationPrefix(station), encodeLocation(station.location), station.channel, String(year)
+    ]) {
       dir = await dir.getDirectoryHandle(name, options);
     }
     return dir;
@@ -90,13 +92,17 @@ export function createOpfsCache(
         throw err;
       }
 
-      // Walk /seismic-cache/{network}_{station}/{channel}/…
+      // Walk /seismic-cache-v2/{network}_{station}/{location}/{channel}/…
       for await (const [dirName, stationHandle] of seismicRoot.entries()) {
         if (!isDirectory(stationHandle)) continue;
         const parsed = parseStationPrefix(dirName);
         if (!parsed) continue;
-        for await (const [channel, channelHandle] of stationHandle.entries()) {
-          if (isDirectory(channelHandle)) out.push({ ...parsed, channel });
+        for await (const [locationSeg, locationHandle] of stationHandle.entries()) {
+          if (!isDirectory(locationHandle)) continue;
+          const location = decodeLocation(locationSeg);
+          for await (const [channel, channelHandle] of locationHandle.entries()) {
+            if (isDirectory(channelHandle)) out.push({ ...parsed, location, channel });
+          }
         }
       }
 
