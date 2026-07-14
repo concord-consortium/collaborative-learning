@@ -52,8 +52,6 @@ describe("SortWorkAddTag", () => {
     await user.click(screen.getByTestId("sort-work-add-tag-button"));
     await user.type(screen.getByTestId("sort-work-add-tag-input"), "X");
     await user.click(screen.getByTestId("sort-work-add-tag-confirm"));
-    // The row stays open with the entered text and surfaces an error (announced to screen readers)
-    // so the teacher can retry.
     const errorMsg = await screen.findByTestId("sort-work-add-tag-error");
     expect(errorMsg).toHaveAttribute("role", "alert");
     expect(screen.getByTestId("sort-work-add-tag-input")).toHaveValue("X");
@@ -62,7 +60,6 @@ describe("SortWorkAddTag", () => {
 
   it("disables Add when the entered name matches an existing tag (case-insensitive)", async () => {
     const user = userEvent.setup();
-    // Merged tags include the label "Foo"; typing "foo" should be treated as a duplicate.
     setup({ commentTags: { mergedWith: () => ({ foo: "Foo" }), addTag } });
     render(<SortWorkAddTag />);
     await user.click(screen.getByTestId("sort-work-add-tag-button"));

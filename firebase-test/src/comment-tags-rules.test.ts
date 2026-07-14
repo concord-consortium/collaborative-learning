@@ -20,7 +20,6 @@ describe("Firestore security rules", () => {
   describe("custom comment tags", () => {
     const kTagId = "my-tag";
     const kTagPath = `authed/myPortal/commentTags/${thisClass}/units/${cUnit}/tags/${kTagId}`;
-    // A payload consistent with the path and attributed to the requesting teacher.
     const validTag = () => ({
       id: kTagId, label: "My Tag", classHash: thisClass, unit: cUnit, createdBy: teacherId
     });

@@ -237,7 +237,6 @@ export class DocumentGroup {
   }
 
   get byStrategy(): DocumentGroup[] {
-    // Effective tag list = unit-config tags plus teacher-added custom tags (synced per class+unit).
     const commentTags = this.stores.commentTags.mergedWith(this.stores.appConfig.commentTags);
     const tagsWithDocs = getTagsWithDocs(this.documents, commentTags);
 

@@ -146,7 +146,6 @@ const CommentsSettings: React.FC = () => {
                     })}
                     value={tag.label}
                     onChange={e => {
-                      // Remove spaces as user types
                       const newValue = e.target.value.replace(/\s/g, "");
                       commentTagsFieldArray.update(index, { ...tag, label: newValue });
                     }}

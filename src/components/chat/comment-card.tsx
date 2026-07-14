@@ -135,8 +135,6 @@ export const CommentCard: React.FC<IProps> = observer(({ activeNavTab, user, pos
   const stores = useStores();
   const { appConfig, documents, persistentUI, sortedDocuments } = stores;
   const { showCommentTag, showCommentRating } = appConfig;
-  // Effective tag list = unit-config tags plus teacher-added custom tags (synced per class+unit),
-  // so the picker offers custom tags for selection. Adding tags happens in the Sort Work view.
   const commentTags = stores.commentTags.mergedWith(appConfig.commentTags);
   const content = useCurriculumOrDocumentContent(focusDocument);
 

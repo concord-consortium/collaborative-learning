@@ -5,10 +5,8 @@ import { commentTagId } from "../../models/stores/comment-tags";
 
 import "./sort-work-add-tag.scss";
 
-// Teacher-only "+ Add Tag" control shown below the "Not Tagged" section when documents are sorted
-// by tag (Strategy) in the Sort Work view. Adding a tag writes it to Firestore; it syncs back into
-// the effective tag list, which immediately creates a new (empty) sort section for it. A datalist
-// gives typeahead over existing tag labels so teachers reuse tags rather than creating variants.
+// Teacher-only "+ Add Tag" control in the Sort Work "Not Tagged" section (when sorting by tag). A
+// new tag is written to Firestore and syncs back into the effective tag list as a new sort section.
 export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
   const { appConfig, commentTags, user } = useStores();
   const [adding, setAdding] = useState(false);
@@ -42,7 +40,7 @@ export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
       setText("");
       setAdding(false);
     } catch (e) {
-      // Keep the entered text and the row open so the teacher can see it failed and retry.
+      // Keep the row open with the entered text so the teacher can retry.
       console.error("Failed to add comment tag", e);
       setError(true);
     } finally {

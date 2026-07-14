@@ -39,7 +39,6 @@ export class CommentTags {
     return Object.fromEntries(this.customTags);
   }
 
-  // Effective tag list = unit-config tags plus synced custom tags.
   mergedWith(configTags?: Record<string, string>): Record<string, string> {
     return { ...(configTags ?? {}), ...this.customTagRecord };
   }
@@ -69,7 +68,6 @@ export class CommentTags {
       createdBy: uid,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
-    // Log only after the write succeeds, with the tag's name as a parameter.
     Logger.log(LogEventName.CREATE_CUSTOM_COMMENT_TAG, { tagName: trimmed, tagId: id, unit, classHash });
   }
 }

@@ -71,7 +71,6 @@ export class SortedDocuments {
     return this.stores.class;
   }
   get commentTags(): Record<string, string> | undefined {
-    // Effective tag list = unit-config tags plus teacher-added custom tags (synced per class+unit).
     return this.stores.commentTags.mergedWith(this.stores.appConfig.commentTags);
   }
   get db(): DB {
