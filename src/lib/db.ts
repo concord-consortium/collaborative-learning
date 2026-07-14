@@ -44,7 +44,9 @@ import { logExemplarDocumentEvent } from "../models/document/log-exemplar-docume
 import { AppMode } from "../models/stores/store-types";
 import { DEBUG_FIRESTORE } from "./debug";
 import { firebaseRefPath } from "./fire-utils";
-import { getGroupCanonicalPointerPath, ICanonicalPointer } from "./scoped-document-pointers";
+import {
+  getGroupCanonicalPointerPath, ICanonicalPointer, kDefaultCanonicalDocumentLabel
+} from "./scoped-document-pointers";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
@@ -711,7 +713,10 @@ export class DB {
     if (!groupId) {
       return Promise.reject("Cannot create group document because user is not in a group.");
     }
-    const pointerPath = getGroupCanonicalPointerPath(user.classHash, user.offeringId, groupId, GroupDocument);
+    // The pointer slot is labeled "default" (the group's default canonical document), not by the
+    // document's type — see kDefaultCanonicalDocumentLabel. The document itself is a GroupDocument.
+    const pointerPath =
+      getGroupCanonicalPointerPath(user.classHash, user.offeringId, groupId, kDefaultCanonicalDocumentLabel);
     return this.getOrCreateScopedDocument(pointerPath, GroupDocument, {
       groupUserId: user.userIdForGroupDocuments,
       groupId,

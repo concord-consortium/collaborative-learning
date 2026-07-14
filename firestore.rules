@@ -346,13 +346,16 @@ service cloud.firestore {
         function canonicalFieldOk() {
           let was = resource.data.get("canonical", false);
           let now = request.resource.data.get("canonical", false);
+          // The final segment is the pointer's slot label, not the document's type. Currently the
+          // only slot is "default" (a group's default canonical document); keep this literal in
+          // sync with kDefaultCanonicalDocumentLabel in scoped-document-pointers.ts.
           return was == now
             || (was == false && now == true
                 && getAfter(/databases/$(database)/documents/authed/$(portal)
                      /classes/$(request.resource.data.context_id)
                      /offerings/$(request.resource.data.offeringId)
                      /groups/$(request.resource.data.groupId)
-                     /canonical/$(request.resource.data.type)).data.documentKey == request.resource.data.key);
+                     /canonical/default).data.documentKey == request.resource.data.key);
         }
 
         // portal-authenticated teachers can create valid documents
@@ -497,7 +500,7 @@ service cloud.firestore {
         allow write: if false;  // only cloud functions write here
       }
 
-      match /classes/{classId}/offerings/{offeringId}/groups/{groupId}/canonical/{type} {
+      match /classes/{classId}/offerings/{offeringId}/groups/{groupId}/canonical/{label} {
         allow read:   if isAuthed() && request.auth.token.class_hash == classId;
         allow create: if isAuthed() && request.auth.token.class_hash == classId
                        && request.resource.data.keys().hasAll(["documentKey", "createdAt", "createdBy"]);

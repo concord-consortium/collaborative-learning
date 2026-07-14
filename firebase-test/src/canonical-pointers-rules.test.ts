@@ -6,11 +6,11 @@ import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 
 const kOffering = "offering-1";
 const kGroup = "3";
-const kType = "group";
+const kLabel = "default";
 const kPointerPath =
-  `authed/test-portal/classes/${thisClass}/offerings/${kOffering}/groups/${kGroup}/canonical/${kType}`;
+  `authed/test-portal/classes/${thisClass}/offerings/${kOffering}/groups/${kGroup}/canonical/${kLabel}`;
 const kOtherClassPointerPath =
-  `authed/test-portal/classes/other-class/offerings/${kOffering}/groups/${kGroup}/canonical/${kType}`;
+  `authed/test-portal/classes/other-class/offerings/${kOffering}/groups/${kGroup}/canonical/${kLabel}`;
 const validPointer = () => ({ documentKey: "doc-abc", createdAt: firebase.firestore.Timestamp.now(), createdBy: `group_${kOffering}_${kGroup}` });
 
 let db: firebase.firestore.Firestore;
