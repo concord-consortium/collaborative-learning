@@ -38,7 +38,7 @@ interface ScriptConfig {
   network: string;
   /** SEED station code (e.g., "K204") */
   station: string;
-  /** SEED location code (e.g., "00"). Blank ("") is the blank location. */
+  /** SEED location code (e.g., "00"). Defaults to the blank location. */
   location: string;
   /** SEED channel code (e.g., "BHZ"). If omitted, processes all channels found. */
   channel?: string;
