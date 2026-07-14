@@ -109,6 +109,10 @@ export interface IStamp {
 }
 
 export interface ISettings {
+  // `hideTitle` is a generic per-tile setting (undefined -> title shown).
+  text?: {
+    hideTitle?: boolean;
+  };
   table: {
     numFormat: string;
     tools: (string | [string, string])[];

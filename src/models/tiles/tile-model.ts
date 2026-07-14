@@ -10,6 +10,7 @@ import { DisplayUserType, DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 import { StringBuilder } from "../../utilities/string-builder";
 import { logTileDocumentEvent } from "./log/log-tile-document-event";
+import { withoutUndo } from "../history/without-undo";
 import { LogEventName } from "../../lib/logger-types";
 import { RowListType } from "../document/row-list";
 import { sha256 } from 'js-sha256';
@@ -172,6 +173,14 @@ export const TileModel = types
       // if (title && getTileContentInfo(self.content.type)?.useContentTitle) {
       //   console.warn("possibly bad call to setTitle, setting", title, "on", self.id);
       // }
+      self.title = title;
+    },
+    /**
+     * Backfill a default title (e.g. an auto-numbered name for a tile that predates titles being
+     * shown). This is a housekeeping fixup, not a user edit, so it is kept out of the undo stack.
+     */
+    setDefaultTitle(title: string) {
+      withoutUndo({ unlessChildAction: true });
       self.title = title;
     },
     setDisplay(display: DisplayUserType) {
