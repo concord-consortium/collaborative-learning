@@ -40,4 +40,9 @@ describe("CommentTags store", () => {
   it("scopes the firestore path by class and unit", () => {
     expect(customCommentTagsPath("classABC", "msa")).toBe("commentTags/classABC/units/msa/tags");
   });
+
+  it("addTag throws (rather than silently succeeding) when class or unit is unavailable", async () => {
+    (store as any).db.stores = { user: { classHash: "" }, unit: { code: "" } };
+    await expect(store.addTag("My Tag", "uid-1")).rejects.toThrow(/classHash|unit/);
+  });
 });

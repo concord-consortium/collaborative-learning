@@ -52,9 +52,13 @@ export class CommentTags {
   // syncs it back into `customTags` for every client in the class.
   async addTag(label: string, uid: string) {
     const trimmed = label.trim();
+    if (!trimmed) return;
     const { classHash } = this.db.stores.user;
     const unit = this.db.stores.unit.code;
-    if (!trimmed || !classHash || !unit) return;
+    // Throw (rather than silently succeed) so the caller surfaces its error state.
+    if (!classHash || !unit) {
+      throw new Error(`Cannot add comment tag: missing ${!classHash ? "classHash" : "unit"}`);
+    }
     const id = commentTagId(trimmed);
     const ref = this.db.firestore.collection(customCommentTagsPath(classHash, unit)).doc(id);
     await ref.set({

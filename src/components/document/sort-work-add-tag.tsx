@@ -28,6 +28,11 @@ export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
     (Object.values(tags).some(label => label.trim().toLowerCase() === trimmed.toLowerCase()) ||
      Object.keys(tags).includes(commentTagId(trimmed)));
 
+  const showError = error && !isDuplicate;
+  const messageId = isDuplicate
+    ? "add-tag-duplicate-msg"
+    : showError ? "add-tag-error-msg" : undefined;
+
   const commit = async () => {
     if (!trimmed || isDuplicate || saving) return;
     setSaving(true);
@@ -36,8 +41,9 @@ export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
       await commentTags.addTag(trimmed, user.id);
       setText("");
       setAdding(false);
-    } catch {
+    } catch (e) {
       // Keep the entered text and the row open so the teacher can see it failed and retry.
+      console.error("Failed to add comment tag", e);
       setError(true);
     } finally {
       setSaving(false);
@@ -69,6 +75,8 @@ export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
               data-testid="sort-work-add-tag-input"
               placeholder="New tag"
               aria-label="New tag name"
+              aria-invalid={isDuplicate || showError}
+              aria-describedby={messageId}
               value={text}
               autoFocus
               onChange={e => { setText(e.target.value); if (error) setError(false); }}
@@ -93,11 +101,13 @@ export const SortWorkAddTag: React.FC = observer(function SortWorkAddTag() {
               Cancel
             </button>
             {isDuplicate &&
-              <span className="add-tag-duplicate" data-testid="sort-work-add-tag-duplicate">
+              <span id="add-tag-duplicate-msg" role="alert"
+                className="add-tag-duplicate" data-testid="sort-work-add-tag-duplicate">
                 Tag already exists
               </span>}
-            {error && !isDuplicate &&
-              <span className="add-tag-error" data-testid="sort-work-add-tag-error">
+            {showError &&
+              <span id="add-tag-error-msg" role="alert"
+                className="add-tag-error" data-testid="sort-work-add-tag-error">
                 Couldn’t save tag — try again
               </span>}
           </div>

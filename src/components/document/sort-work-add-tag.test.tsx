@@ -52,9 +52,12 @@ describe("SortWorkAddTag", () => {
     await user.click(screen.getByTestId("sort-work-add-tag-button"));
     await user.type(screen.getByTestId("sort-work-add-tag-input"), "X");
     await user.click(screen.getByTestId("sort-work-add-tag-confirm"));
-    // The row stays open with the entered text and surfaces an error so the teacher can retry.
-    expect(await screen.findByTestId("sort-work-add-tag-error")).toBeInTheDocument();
+    // The row stays open with the entered text and surfaces an error (announced to screen readers)
+    // so the teacher can retry.
+    const errorMsg = await screen.findByTestId("sort-work-add-tag-error");
+    expect(errorMsg).toHaveAttribute("role", "alert");
     expect(screen.getByTestId("sort-work-add-tag-input")).toHaveValue("X");
+    expect(screen.getByTestId("sort-work-add-tag-input")).toHaveAttribute("aria-invalid", "true");
   });
 
   it("disables Add when the entered name matches an existing tag (case-insensitive)", async () => {

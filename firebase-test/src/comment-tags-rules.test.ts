@@ -2,7 +2,7 @@ import firebase from "firebase";
 import {
   adminWriteDoc, cUnit, expectReadToFail, expectReadToSucceed, expectWriteToFail,
   expectWriteToSucceed, genericAuth, initFirestore, prepareEachTest, researcherAuth, student2Auth,
-  studentAuth, teacher2Auth, teacherId, teacherAuth, tearDownTests, thisClass
+  studentAuth, teacher2Auth, teacher2Id, teacherId, teacherAuth, tearDownTests, thisClass
 } from "./setup-rules-tests";
 
 describe("Firestore security rules", () => {
@@ -49,6 +49,26 @@ describe("Firestore security rules", () => {
     it("a teacher of a different class (not in this class) can't write tags here", async () => {
       db = initFirestore(teacher2Auth);
       await expectWriteToFail(db, kTagPath, validTag());
+    });
+
+    // teacher2's own class_hash is otherClass, but they're listed as a teacher of thisClass, so
+    // teacherIsInClass grants access.
+    async function addTeacherToClass(classId: string, tId: string) {
+      await adminWriteDoc(`authed/myPortal/classes/${classId}`,
+        { id: classId, name: "MyClass", context_id: classId, teacher: "Some Teacher", teachers: [tId] });
+    }
+
+    it("a networked teacher (listed in the class) can write tags here", async () => {
+      await addTeacherToClass(thisClass, teacher2Id);
+      db = initFirestore(teacher2Auth);
+      await expectWriteToSucceed(db, kTagPath, { ...validTag(), createdBy: teacher2Id });
+    });
+
+    it("a networked teacher (listed in the class) can read tags here", async () => {
+      await addTeacherToClass(thisClass, teacher2Id);
+      await adminWriteDoc(kTagPath, validTag());
+      db = initFirestore(teacher2Auth);
+      await expectReadToSucceed(db, kTagPath);
     });
 
     it("a student in the class can read tags", async () => {
