@@ -132,11 +132,8 @@ function extractSketchText(objects: any[]): string {
 
 export function buildTileSpeechText(tile: ITileModel): string {
   const tileType = tile.content.type;
-  // A tile's title is spoken unless the unit hides it via the generic per-tile `hideTitle` setting
-  // (`settings.<tileType>.hideTitle`, keyed by the camelCased tile type). Text tiles default to
-  // hidden; a unit that displays them (hideTitle: false) then has them announced like any other.
-  const settingsGroup = tileType.charAt(0).toLowerCase() + tileType.slice(1);
-  const titleHidden = getAppConfig(tile)?.getSetting("hideTitle", settingsGroup);
+  // A tile's title is spoken unless the unit hides it via the generic per-tile `hideTitle` setting.
+  const titleHidden = getAppConfig(tile)?.getSetting("hideTitle", tileType);
   const title = titleHidden ? "" : tile.computedTitle;
   const typeName = getTileTypeName(tileType);
 

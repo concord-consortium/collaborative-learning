@@ -137,8 +137,14 @@ export const AppConfigModel = types
      * the key would be "tools" and group would be "table".
      */
     getSetting(key: string, group?: string) {
-      const groupSettings = group ? self.settings?.[group] as SnapshotIn<typeof SettingsGroupMstType> : undefined;
-      return groupSettings?.[key] ?? self.settings?.[key];
+      if (!group) return self.settings?.[key];
+
+      // Accept a group given as-is, lowercased, or camelCased so callers can pass a tile type
+      // (e.g. "Text", "IframeInteractive") without having to know how the settings key is cased.
+      const lowerCaseGroup = group.toLowerCase();
+      const camelCaseGroup = group.charAt(0).toLowerCase() + group.slice(1);
+      const groupSettings = self.settings?.[group] ?? self.settings?.[lowerCaseGroup] ?? self.settings?.[camelCaseGroup];
+      return (groupSettings as SnapshotIn<typeof SettingsGroupMstType>)?.[key] ?? self.settings?.[key];
     }
   }))
   .views(self => ({

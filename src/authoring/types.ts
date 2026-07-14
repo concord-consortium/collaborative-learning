@@ -109,6 +109,11 @@ export interface IStamp {
 }
 
 export interface ISettings {
+  // `hideTitle` is a generic per-tile setting (undefined -> title shown); text tiles default to
+  // hidden via app-config.json, and a unit shows them by setting text.hideTitle: false.
+  text?: {
+    hideTitle?: boolean;
+  };
   table: {
     numFormat: string;
     tools: (string | [string, string])[];
