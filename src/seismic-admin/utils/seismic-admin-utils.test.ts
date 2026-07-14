@@ -17,12 +17,13 @@ describe("seismic-admin-utils", () => {
     expect(missingDayCount(cachedDays.size, 10, 13)).toBe(2); // 11, 13 missing
   });
 
-  it("merges by (network, station, channel); catalog supplies location + label", () => {
-    const opfs = [{ network: "AK", station: "K204", channel: "HNZ" }];
+  it("merges by (network, station, location, channel); catalog supplies label", () => {
+    const opfs = [{ network: "AK", station: "K204", location: "00", channel: "HNZ" }];
     const k204 = { network: "AK", station: "K204", location: "00", channel: "HNZ", label: "Anchorage" };
     const rc01 = { network: "AK", station: "RC01", location: "", channel: "BHZ", label: "Rabbit Creek" };
     const catalog: StationConfig[] = [k204, rc01];
     const merged = mergeStations(opfs, catalog);
+    expect(merged.size).toBe(2);
     // K204 is in both → single entry from the catalog (location + label)
     expect(merged.get(getStationChannelPrefix(k204))).toEqual(
       { network: "AK", station: "K204", location: "00", channel: "HNZ", label: "Anchorage" });
