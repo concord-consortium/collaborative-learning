@@ -1,28 +1,19 @@
+import { StationConfig } from "../../../shared/seismic/seismic-types";
 import appConfig from "../../clue/app-config.json";
 import curriculumConfigJson from "../../clue/curriculum-config.json";
-import { StationConfig } from "../../../shared/seismic/seismic-types";
 import { getUnitJson } from "../../models/curriculum/unit-utils";
 import { CurriculumConfig } from "../../models/stores/curriculum-config";
 import { urlParams } from "../../utilities/url-params";
 
-function stationsFromSettings(settings: any): StationConfig[] | undefined {
-  const stations = settings?.["wave-runner"]?.stations;
-  return Array.isArray(stations) ? stations as StationConfig[] : undefined;
-}
-
 /**
- * Pull the wave-runner station catalog out of a (fetched) unit config JSON.
+ * Pull the wave-runner station catalog out of a unit config JSON.
  * Stations live under `config.settings["wave-runner"].stations`; older units keep
- * `settings` at the top level. Returns undefined when the unit declares no stations,
- * so the caller can fall back to the base catalog.
+ * `settings` at the top level. Returns undefined when the unit declares no stations.
  */
 export function stationsFromUnitConfig(unitJson: any): StationConfig[] | undefined {
-  return stationsFromSettings(unitJson?.config?.settings ?? unitJson?.settings);
-}
-
-/** The base station catalog from the default app config, used when a unit declares none. */
-export function defaultCatalog(): StationConfig[] {
-  return stationsFromSettings((appConfig as any).config?.settings) ?? [];
+  const settings = unitJson?.config?.settings ?? unitJson?.settings;
+  const stations = settings?.["wave-runner"]?.stations;
+  return Array.isArray(stations) ? stations as StationConfig[] : undefined;
 }
 
 /**
@@ -36,7 +27,7 @@ export function defaultCatalog(): StationConfig[] {
  * `wave-runner.stations` array replaces the base list rather than extending it.
  */
 export async function loadCatalog(): Promise<StationConfig[]> {
-  const base = defaultCatalog();
+  const base = stationsFromUnitConfig(appConfig) ?? [];
   try {
     // Bail out before getUnitJson: getUnitSpec would otherwise fall back to the
     // main app's defaultUnit, which shouldn't affect the admin page.
