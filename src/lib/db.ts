@@ -718,6 +718,7 @@ export class DB {
     const pointerPath =
       getGroupCanonicalPointerPath(user.classHash, user.offeringId, groupId, kDefaultCanonicalDocumentLabel);
     return this.getOrCreateScopedDocument(pointerPath, GroupDocument, {
+      canonicalLabel: kDefaultCanonicalDocumentLabel,
       groupUserId: user.userIdForGroupDocuments,
       groupId,
       findLegacy: () => this.findLegacyGroupDocument(groupId)
@@ -727,9 +728,14 @@ export class DB {
   private async getOrCreateScopedDocument(
     pointerPath: string,
     type: DBDocumentType,
-    opts: { groupUserId?: string; groupId?: string; findLegacy?: () => Promise<IDocumentMetadata | undefined> }
+    // canonicalLabel is the pointer slot's label; it must match the final segment of pointerPath and
+    // is written to the winning document's `canonical` field.
+    opts: {
+      canonicalLabel: string;
+      groupUserId?: string; groupId?: string; findLegacy?: () => Promise<IDocumentMetadata | undefined>;
+    }
   ) {
-    const { groupUserId, findLegacy } = opts;
+    const { canonicalLabel, groupUserId, findLegacy } = opts;
     const pointerRef = this.firestore.doc(pointerPath);
 
     // 1. Fast path: pointer already exists.
@@ -749,7 +755,7 @@ export class DB {
               documentKey: legacy.key, createdAt: this.firestore.timestamp(),
               createdBy: groupUserId ?? this.stores.user.id
             });
-            txn.update(this.firestore.doc(getSimpleDocumentPath(legacy.key)), { canonical: true });
+            txn.update(this.firestore.doc(getSimpleDocumentPath(legacy.key)), { canonical: canonicalLabel });
           }
         }).catch(() => undefined); // best-effort; a concurrent winner is fine
         return this.openDocumentFromFirestoreMetadata(legacy);
@@ -768,7 +774,7 @@ export class DB {
       txn.set(pointerRef, {
         documentKey, createdAt: this.firestore.timestamp(), createdBy: groupUserId ?? user.id
       });
-      txn.update(metadataRef, { canonical: true });
+      txn.update(metadataRef, { canonical: canonicalLabel });
       return documentKey;
     });
 

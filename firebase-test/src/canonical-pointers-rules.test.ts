@@ -65,7 +65,7 @@ describe("deleting group documents", () => {
   });
 
   it("a class member may NOT delete a canonical group document", async () => {
-    await adminWriteDoc(kDocPath, { ...groupDoc(), canonical: true, createdAt: Date.now() });
+    await adminWriteDoc(kDocPath, { ...groupDoc(), canonical: "default", createdAt: Date.now() });
     db = initFirestore(studentAuth);
     await assertFails(db.doc(kDocPath).delete());
   });
@@ -81,7 +81,7 @@ describe("deleting group documents", () => {
 describe("canonical flag integrity", () => {
   it("create is denied if the doc arrives pre-flagged canonical", async () => {
     db = initFirestore(studentAuth);
-    await assertFails(db.doc(kDocPath).set(groupDoc({ canonical: true })));
+    await assertFails(db.doc(kDocPath).set(groupDoc({ canonical: "default" })));
   });
 
   it("a normal metadata update (title) that does not touch canonical is allowed", async () => {
@@ -91,16 +91,32 @@ describe("canonical flag integrity", () => {
     await assertSucceeds(db.doc(kDocPath).update({ title: "hello" }));
   });
 
-  it("clearing an existing canonical flag is denied", async () => {
-    await adminWriteDoc(kDocPath, { ...groupDoc(), canonical: true, createdAt: Date.now() });
+  it("clearing an existing canonical label is denied", async () => {
+    await adminWriteDoc(kDocPath, { ...groupDoc(), canonical: "default", createdAt: Date.now() });
     db = initFirestore(studentAuth);
-    await assertFails(db.doc(kDocPath).update({ canonical: false }));
+    await assertFails(db.doc(kDocPath).update({ canonical: "" }));
   });
 
-  it("setting canonical true WITHOUT a matching pointer (standalone) is denied", async () => {
+  it("changing an existing canonical label is denied", async () => {
+    await adminWriteDoc(kDocPath, { ...groupDoc(), canonical: "default", createdAt: Date.now() });
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kDocPath).update({ canonical: "other" }));
+  });
+
+  it("setting a canonical label WITHOUT a matching pointer (standalone) is denied", async () => {
     const admin = initFirestore(teacherAuth);
     await admin.doc(kDocPath).set(groupDoc());   // no pointer exists
     db = initFirestore(studentAuth);
-    await assertFails(db.doc(kDocPath).update({ canonical: true }));
+    await assertFails(db.doc(kDocPath).update({ canonical: "default" }));
+  });
+
+  it("a document whose scope has no canonical shape (no group association) cannot claim canonical", async () => {
+    // Scope is read from the association fields. Without a group association the document has no
+    // canonical-pointer path (canonicalPointerPath() is null), so the claim is denied before any
+    // pointer is consulted — the update touches only `canonical`, so nothing else can reject it.
+    const { groupId, ...noGroupScope } = groupDoc();
+    await adminWriteDoc(kDocPath, { ...noGroupScope, createdAt: Date.now() });
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kDocPath).update({ canonical: "default" }));
   });
 });

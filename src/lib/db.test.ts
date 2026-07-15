@@ -297,7 +297,7 @@ describe("db", () => {
       const result: any = await db.getOrCreateGroupDocument();
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({ type: GroupDocument }));
       expect(setCalls[0]).toMatchObject({ documentKey: "minted-key", createdBy: expect.any(String) });
-      expect(updateCalls[0]).toEqual({ canonical: true });
+      expect(updateCalls[0]).toEqual({ canonical: "default" });
       expect(logSpy).toHaveBeenCalledWith(LogEventName.CREATE_GROUP_DOCUMENT);
       expect(result.opened).toBeDefined();
       logSpy.mockRestore();

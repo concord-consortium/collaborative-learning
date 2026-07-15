@@ -141,10 +141,19 @@ service cloud.firestore {
                  string(request.auth.token.platform_user_id) in resource.data.teachers);
       }
 
+      // A document is canonical for a slot when `canonical` holds that slot's label — a non-empty
+      // string. Absent, null, or "" all mean non-canonical. `is string` makes this null-safe: a
+      // null value is present, so map.get returns null (not the default), and `null is string` is
+      // false. The label is written to `canonical` only inside the pointer-claim transaction; see
+      // kDefaultCanonicalDocumentLabel in scoped-document-pointers.ts.
+      function isCanonicalValue(value) {
+        return value is string && value != "";
+      }
+
       function isValidDocumentCreateRequest() {
         return
           request.resource.data.keys().hasAll(["uid", "type", "key", "createdAt"]) &&
-          request.resource.data.get("canonical", false) == false &&
+          !isCanonicalValue(request.resource.data.get("canonical", "")) &&
           (classIsRequestContextId() || teacherIsInClass(request.resource.data.context_id));
       }
 
@@ -343,19 +352,40 @@ service cloud.firestore {
       }
 
       match /documents/{docId} {
+        // A document's scope is read from the association fields it carries, not from its `type`.
+        // Group scope = a group-in-offering document (has both an offering and a group).
+        function isGroupScope(data) {
+          return data.get("offeringId", "") != "" && data.get("groupId", "") != "";
+        }
+
+        // The path of the canonical-pointer slot for `data`'s scope, or null if `data`'s scope has
+        // no canonical-pointer shape. This is the single place a scope is turned into a pointer
+        // path: to give another scope canonical documents, add a branch here (and a sibling
+        // `.../canonical/{label}` write-guard match block) — canonicalFieldOk() is untouched. Keep
+        // in lockstep with the per-scope path builders in scoped-document-pointers.ts.
+        function canonicalPointerPath(portal, data, label) {
+          return isGroupScope(data)
+            ? /databases/$(database)/documents/authed/$(portal)
+                /classes/$(data.context_id)
+                /offerings/$(data.offeringId)
+                /groups/$(data.groupId)
+                /canonical/$(label)
+            : null;
+        }
+
         function canonicalFieldOk() {
-          let was = resource.data.get("canonical", false);
-          let now = request.resource.data.get("canonical", false);
-          // The final segment is the pointer's slot label, not the document's type. Currently the
-          // only slot is "default" (a group's default canonical document); keep this literal in
-          // sync with kDefaultCanonicalDocumentLabel in scoped-document-pointers.ts.
+          let was = resource.data.get("canonical", "");
+          let now = request.resource.data.get("canonical", "");
+          let ptr = canonicalPointerPath(portal, request.resource.data, now);
+          // `canonical` holds the pointer slot's label. It may be set once (non-canonical -> label),
+          // and only when that slot's pointer already points at this document in the same commit; it
+          // may not be changed or cleared. A document whose scope has no canonical shape (ptr == null)
+          // cannot claim canonical. The slot label is read from the document via `now`, so no label
+          // is hardcoded here.
           return was == now
-            || (was == false && now == true
-                && getAfter(/databases/$(database)/documents/authed/$(portal)
-                     /classes/$(request.resource.data.context_id)
-                     /offerings/$(request.resource.data.offeringId)
-                     /groups/$(request.resource.data.groupId)
-                     /canonical/default).data.documentKey == request.resource.data.key);
+            || (!isCanonicalValue(was) && isCanonicalValue(now)
+                && ptr != null
+                && getAfter(ptr).data.documentKey == request.resource.data.key);
         }
 
         // portal-authenticated teachers can create valid documents
@@ -368,7 +398,7 @@ service cloud.firestore {
         allow delete: if isAuthed()
           && request.auth.token.class_hash == resource.data.context_id
           && resource.data.type == "group"
-          && resource.data.get('canonical', false) != true;
+          && !isCanonicalValue(resource.data.get('canonical', ""));
         // teachers can read their own documents or other documents in their network
         allow read: if (isAuthed() && (resource == null || userOwnsDocument() || resourceInUserClass())) ||
           (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()));
