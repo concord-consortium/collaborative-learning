@@ -478,6 +478,29 @@ service cloud.firestore {
           (request.auth.token.class_hash == classId || teacherIsInClass(classId));
         allow write: if false;  // only cloud functions write here
       }
+
+      // A tag write must be self-consistent with its path, attributed to the requesting teacher,
+      // and have a non-empty label. (createdAt is a server timestamp, so it isn't constrained here.)
+      function isValidCommentTagRequest(classHash, unit, tagId) {
+        return request.resource.data.id == tagId &&
+          request.resource.data.classHash == classHash &&
+          request.resource.data.unit == unit &&
+          string(request.auth.token.platform_user_id) == request.resource.data.createdBy &&
+          request.resource.data.label is string &&
+          request.resource.data.label.size() > 0;
+      }
+
+      // Teacher-created custom comment tags, scoped per class + unit. Firestore rules do NOT cascade
+      // into subcollections, so this nested path needs its own grants (the parent /authed/{portal}
+      // rule doesn't apply). Teachers of the class (or their networked classes) write; any in-class
+      // member reads (students/teachers/researchers all carry class_hash == classHash).
+      match /commentTags/{classHash}/units/{unit}/tags/{tagId} {
+        allow read: if (isAuthed() && request.auth.token.class_hash == classHash) ||
+          (isAuthedTeacher() && teacherIsInClass(classHash));
+        allow write: if isAuthedTeacher() &&
+          (request.auth.token.class_hash == classHash || teacherIsInClass(classHash)) &&
+          isValidCommentTagRequest(classHash, unit, tagId);
+      }
     }
 
     //

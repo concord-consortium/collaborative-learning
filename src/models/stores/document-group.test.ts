@@ -206,6 +206,10 @@ describe('DocumentGroup Model', () => {
       appConfig: {
         commentTags: {"foo": "foo", "bar": "bar"}
       },
+      commentTags: {
+        customTagRecord: {},
+        mergedWith: (configTags?: Record<string, string>) => ({ ...(configTags ?? {}) })
+      },
       bookmarks
     };
 
