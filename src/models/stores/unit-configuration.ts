@@ -100,6 +100,9 @@ export interface UnitConfiguration extends ProblemConfiguration {
   showCommentRating?: boolean;
   // list of possible values for tagging in comments
   commentTags?: Record<string, string>;
+  // whether teachers may add their own comment tags (in addition to commentTags) for their
+  // class; requires showCommentTag. Default false so legacy units are unaffected.
+  allowCustomCommentTags?: boolean;
   // if set, enable the specified AI evaluation to run after document updates
   aiEvaluation?: "categorize-design" | "mock" | "custom";
   // If aiEvaluation is "custom", this defines the prompt strings to use for the AI evaluation

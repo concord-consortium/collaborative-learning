@@ -42,7 +42,8 @@ jest.mock("../../hooks/use-stores", () => ({
           return { id: "0", type: "student", name: "Test Student" } as UserModelType;
         }
       }
-    }
+    },
+    commentTags: { mergedWith: (c?: Record<string, string>) => ({ ...(c ?? {}) }) }
   }),
   useCurriculumOrDocumentContent: () => undefined
 }));

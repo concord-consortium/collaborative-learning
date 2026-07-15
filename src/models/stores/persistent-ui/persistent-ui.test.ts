@@ -445,6 +445,32 @@ describe("PersistentUI", () => {
         expect(persistentUI.activeNavTab).toBe(ENavTab.kStudentWork);
       });
 
+      it("does not route to student-work when that tab is hidden, even with the group available", () => {
+        // The mods unit hides its student-work tab and exposes sort-work as the
+        // visible "Class Work" tab. Routing to the hidden student-work tab leaves
+        // displayedActiveNavTab falling back to the first tab, so the doc never shows.
+        mockAppConfig = {
+          aiEvaluation: undefined,
+          navTabs: {
+            tabSpecs: [
+              { tab: "sort-work", label: "Class Work" },
+              { tab: "my-work", label: "My Work" },
+              { tab: "student-work", label: "Student Work", hidden: true }
+            ]
+          }
+        };
+
+        persistentUI.openResourceDocument(
+          mockDoc,
+          mockAppConfig,
+          mockUser,
+          mockSortedDocuments,
+          { fromUrlStudentDocument: true, hasStudentWorkGroup: true }
+        );
+
+        expect(persistentUI.activeNavTab).toBe(ENavTab.kSortWork);
+      });
+
       it("does not force student-work when Sort Work is unavailable (uses the doc's natural tab)", () => {
         mockAppConfig = {
           aiEvaluation: undefined,
@@ -465,6 +491,28 @@ describe("PersistentUI", () => {
         );
 
         expect(persistentUI.activeNavTab).toBe(ENavTab.kMyWork);
+      });
+
+      it("substitutes Sort Work on the doc-based path when the natural tab is hidden", () => {
+        // No fromUrlStudentDocument flag: a teacher/researcher opening another
+        // student's problem doc (e.g. from a comment) resolves to student-work via
+        // getNavTabOfDocument. When that tab is hidden (mods), route to the visible
+        // Sort Work tab instead of the hidden one.
+        mockUser = { id: "teacher1", isTeacherOrResearcher: true };
+        mockAppConfig = {
+          aiEvaluation: undefined,
+          navTabs: {
+            tabSpecs: [
+              { tab: "sort-work", label: "Class Work" },
+              { tab: "my-work", label: "My Work" },
+              { tab: "student-work", label: "Student Work", hidden: true }
+            ]
+          }
+        };
+
+        persistentUI.openResourceDocument(mockDoc, mockAppConfig, mockUser, mockSortedDocuments);
+
+        expect(persistentUI.activeNavTab).toBe(ENavTab.kSortWork);
       });
     });
   });
