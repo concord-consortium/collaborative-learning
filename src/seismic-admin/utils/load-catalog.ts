@@ -16,6 +16,10 @@ export function stationsFromUnitConfig(unitJson: any): StationConfig[] | undefin
   return Array.isArray(stations) ? stations as StationConfig[] : undefined;
 }
 
+export function defaultCatalog(): StationConfig[] {
+  return stationsFromUnitConfig(appConfig) ?? [];
+}
+
 /**
  * The station catalog for the page: the app-config defaults, overridden by the
  * `?unit=` unit's stations when it declares any. The unit param is resolved and
@@ -27,7 +31,7 @@ export function stationsFromUnitConfig(unitJson: any): StationConfig[] | undefin
  * `wave-runner.stations` array replaces the base list rather than extending it.
  */
 export async function loadCatalog(): Promise<StationConfig[]> {
-  const base = stationsFromUnitConfig(appConfig) ?? [];
+  const base = defaultCatalog();
   try {
     // Bail out before getUnitJson: getUnitSpec would otherwise fall back to the
     // main app's defaultUnit, which shouldn't affect the admin page.
