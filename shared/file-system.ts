@@ -3,6 +3,7 @@
 // The installed TS DOM lib omits the async-iteration helpers on FileSystemDirectoryHandle;
 // declare them so directory contents can be enumerated without an `any` cast. This is an
 // ambient augmentation — it applies project-wide because this file is part of the build.
+// Supported by Chrome, Edge, Opera, and Firefox v111 and later.
 declare global {
   interface FileSystemDirectoryHandle {
     entries(): AsyncIterableIterator<[string, FileSystemHandle]>;

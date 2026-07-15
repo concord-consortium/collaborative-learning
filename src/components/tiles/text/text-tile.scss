@@ -33,6 +33,34 @@
     background-color: $workspace-teal-light-7;
   }
 
+  // When the unit displays text-tile titles, reserve a single line for the title in normal
+  // flow (instead of the shared absolute overlay) so the editor starts below it and all of
+  // the text stays visible. The band is a consistent single-line height even for short titles.
+  &.show-title {
+    .text-tile-title {
+      width: 100%;
+
+      .title-area-wrapper {
+        position: static;
+        padding-top: 6px;
+      }
+      .title-area {
+        position: static;
+        top: auto;
+        max-width: calc(100% - 12px);
+      }
+      .editable-tile-title {
+        max-width: 100%;
+
+        .editable-tile-title-text {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+
   .highlight-chip {
     background: #f7e58f;
     border: solid 0.8px #3f3f3f;

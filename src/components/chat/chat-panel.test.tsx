@@ -113,6 +113,7 @@ jest.mock("../../hooks/use-stores", () => ({
     class: {
       getUserById: () => ({ id: "0", type: "student", name: "Test Student" } as UserModelType)
     },
+    commentTags: { mergedWith: (c?: Record<string, string>) => ({ ...(c ?? {}) }) },
     persistentUI: {
       isDocumentsView: false,
       setIsDocumentsView: jest.fn()
