@@ -1,25 +1,9 @@
 import appConfig from "../../clue/app-config.json";
-import curriculumConfig from "../../clue/curriculum-config.json";
+import curriculumConfigJson from "../../clue/curriculum-config.json";
 import { StationConfig } from "../../../shared/seismic/seismic-types";
-import { getUrlFromRelativeOrFullString } from "../../utilities/url-utils";
-
-/**
- * Resolve a `?unit=` value to a content.json URL, mirroring the main app's
- * CurriculumConfig.getUnitUrl: a full/`./`-relative URL is used as-is; a bare
- * unit code is mapped through unitCodeMap and appended to the curriculum site
- * (default `main` branch). Returns undefined only if the value is empty.
- */
-export function unitContentUrl(unitParam: string): string | undefined {
-  if (!unitParam) return undefined;
-
-  const direct = getUrlFromRelativeOrFullString(unitParam);
-  if (direct) return direct.href;
-
-  const { curriculumSiteUrl, unitCodeMap } = curriculumConfig as
-    { curriculumSiteUrl: string; unitCodeMap: Record<string, string> };
-  const unitCode = unitCodeMap[unitParam] || unitParam;
-  return `${curriculumSiteUrl}/branch/main/${unitCode}/content.json`;
-}
+import { getUnitJson } from "../../models/curriculum/unit-utils";
+import { CurriculumConfig } from "../../models/stores/curriculum-config";
+import { urlParams } from "../../utilities/url-params";
 
 function stationsFromSettings(settings: any): StationConfig[] | undefined {
   const stations = settings?.["wave-runner"]?.stations;
@@ -43,26 +27,23 @@ export function defaultCatalog(): StationConfig[] {
 
 /**
  * The station catalog for the page: the app-config defaults, overridden by the
- * `?unit=` unit's stations when it declares any. `unit` may be a bare unit code, a
- * full http(s) URL, or a `./`-relative asset path. Any failure (unresolvable URL,
- * network error, bad JSON) degrades to the base catalog.
+ * `?unit=` unit's stations when it declares any. The unit param is resolved and
+ * fetched with the same code the main app uses (CurriculumConfig.getUnitUrl and
+ * getUnitJson), so `curriculumBranch` and `authoringBranch` params work here too.
+ * Any failure (network error, bad JSON, 404) degrades to the base catalog.
  *
  * Settings merge two levels deep (see ConfigurationManager.settings), so a unit's
  * `wave-runner.stations` array replaces the base list rather than extending it.
  */
-export async function loadCatalog(search = window.location.search): Promise<StationConfig[]> {
+export async function loadCatalog(): Promise<StationConfig[]> {
   const base = defaultCatalog();
   try {
-    const unitParam = new URLSearchParams(search).get("unit");
-    if (!unitParam) return base;
+    // Bail out before getUnitJson: getUnitSpec would otherwise fall back to the
+    // main app's defaultUnit, which shouldn't affect the admin page.
+    if (!urlParams.unit) return base;
 
-    const url = unitContentUrl(unitParam);
-    if (!url) return base;
-
-    const response = await fetch(url);
-    if (!response.ok) return base;
-
-    return stationsFromUnitConfig(await response.json()) ?? base;
+    const curriculumConfig = CurriculumConfig.create(curriculumConfigJson, { urlParams });
+    return stationsFromUnitConfig(await getUnitJson(urlParams.unit, curriculumConfig)) ?? base;
   } catch {
     return base;
   }
