@@ -26,6 +26,8 @@ export class SeismicDownloadService {
   readonly emptyDays: number[] = [];
 
   private readyQueue: number[] = [];
+  // Byte size of each freshly-written day, for callers that report disk usage as it grows.
+  private bytesByDay = new Map<number, number>();
   private waiters: Array<(day: ReadyDay) => void> = [];
   private finished = false;
   private cancelFn: (() => void) | null = null;
@@ -33,11 +35,10 @@ export class SeismicDownloadService {
   private cache = createOpfsCache();
 
   constructor(private runner: DownloadRunner = defaultRunner()) {
-    // `cache` shouldn't be observable. But it's private, and therefore absent from
-    // the public `keyof this` the annotations map is typed against. So it must be
-    // explicitly added to the type below.
-    makeAutoObservable<SeismicDownloadService, "cache">(this,
-      { erroredDays: false, emptyDays: false, cache: false },
+    // `cache` and `bytesByDay` shouldn't be observable. But they're private, and therefore absent from the public
+    // `keyof this` the annotations map is typed against. So they must be explicitly added to the type below.
+    makeAutoObservable<SeismicDownloadService, "cache" | "bytesByDay">(this,
+      { erroredDays: false, emptyDays: false, cache: false, bytesByDay: false },
       { autoBind: true });
   }
 
@@ -54,6 +55,11 @@ export class SeismicDownloadService {
     if (next !== undefined) return Promise.resolve(next);
     if (this.finished) return Promise.resolve(DONE);
     return new Promise<ReadyDay>(resolve => { this.waiters.push(resolve); });
+  }
+
+  /** Bytes written for a day during this download. 0 if the day was already cached. */
+  bytesForDay(day: number): number {
+    return this.bytesByDay.get(day) ?? 0;
   }
 
   /** Read a downloaded day's raw miniSEED bytes from OPFS. Null if not present. */
@@ -75,6 +81,8 @@ export class SeismicDownloadService {
           this.total = event.total;
           break;
         case "dayWritten":
+          // Record the size before pushing, since pushReady may resolve a waiter synchronously.
+          if (event.bytes !== undefined) this.bytesByDay.set(event.day, event.bytes);
           this.pushReady(event.day);
           break;
         case "dayEmpty":
@@ -115,6 +123,7 @@ export class SeismicDownloadService {
     this.error = null;
     this.finished = false;
     this.readyQueue = [];
+    this.bytesByDay.clear();
     this.waiters = [];
     this.erroredDays.length = 0;
     this.emptyDays.length = 0;

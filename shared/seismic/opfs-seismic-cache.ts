@@ -1,12 +1,15 @@
+import { isDirectory } from "../file-system";
 import { dayToYearDoy } from "./seismic-day";
-import { StationId, StationData } from "./seismic-types";
-import { getStationPrefix } from "./tile-addressing";
+import { StationData } from "./seismic-types";
+import { getStationPrefix, parseStationPrefix } from "./tile-addressing";
 
 export interface SeismicCache {
   writeDayChunk(station: StationData, day: number, bytes: ArrayBuffer): Promise<void>;
   readDayChunk(station: StationData, day: number): Promise<ArrayBuffer | null>;
   scanCachedDays(station: StationData, startDay: number, endDay: number): Promise<Set<number>>;
-  deleteStation(station: StationId): Promise<void>;
+  listStations(): Promise<StationData[]>;
+  stationRawBytes(station: StationData, startDay: number, endDay: number): Promise<number>;
+  deleteDaysInRange(station: StationData, startDay: number, endDay: number): Promise<void>;
 }
 
 const ROOT_DIR = "seismic-cache";
@@ -76,12 +79,53 @@ export function createOpfsCache(
       return cached;
     },
 
-    async deleteStation(station) {
+    async listStations() {
+      const out: StationData[] = [];
+      let seismicRoot: FileSystemDirectoryHandle;
+
       try {
-        const root = await (await getRoot()).getDirectoryHandle(ROOT_DIR, { create: false });
-        await root.removeEntry(getStationPrefix(station), { recursive: true });
+        seismicRoot = await (await getRoot()).getDirectoryHandle(ROOT_DIR, { create: false });
       } catch (err) {
-        if (!isNotFound(err)) throw err;
+        if (isNotFound(err)) return out;
+        throw err;
+      }
+
+      // Walk /seismic-cache/{network}_{station}/{channel}/…
+      for await (const [dirName, stationHandle] of seismicRoot.entries()) {
+        if (!isDirectory(stationHandle)) continue;
+        const parsed = parseStationPrefix(dirName);
+        if (!parsed) continue;
+        for await (const [channel, channelHandle] of stationHandle.entries()) {
+          if (isDirectory(channelHandle)) out.push({ ...parsed, channel });
+        }
+      }
+
+      return out;
+    },
+
+    async stationRawBytes(station, startDay, endDay) {
+      const options = { create: false };
+      let total = 0;
+      for (let day = startDay; day <= endDay; day++) {
+        try {
+          const dir = await channelYearDir(station, day, options);
+          const handle = await dir.getFileHandle(fileName(day), options);
+          total += (await handle.getFile()).size;
+        } catch (err) {
+          if (!isNotFound(err)) throw err;
+        }
+      }
+      return total;
+    },
+
+    async deleteDaysInRange(station, startDay, endDay) {
+      for (let day = startDay; day <= endDay; day++) {
+        try {
+          const dir = await channelYearDir(station, day, { create: false });
+          await dir.removeEntry(fileName(day));
+        } catch (err) {
+          if (!isNotFound(err)) throw err;
+        }
       }
     },
   };

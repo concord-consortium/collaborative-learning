@@ -26,7 +26,8 @@ export type DownloadRunner = (
   cancel: { onCancel: (fn: () => void) => void }
 ) => void;
 
-export type DownloadEvent = { type: "dayWritten"; day: number }
+// `bytes` is the size of the chunk just written; absent when the day was already cached.
+export type DownloadEvent = { type: "dayWritten"; day: number; bytes?: number }
   | { type: "dayEmpty"; day: number }
   | { type: "dayError"; day: number; error: string }
   | { type: "progress"; completed: number; total: number }
@@ -60,13 +61,21 @@ export async function downloadRange(
   const maxRetries = params.maxRetries ?? DEFAULT_MAX_RETRIES;
 
   try {
+    const allDays = daysInRange(startSec, endSec);
+    if (allDays.length === 0) {
+      onEvent({ type: "done" });
+      return;
+    }
+
+    // Query availability across the full day-chunk span. daysInRange includes the day
+    // containing endSec, so the window must reach the end of that final day — otherwise
+    // the last day is reported unavailable and silently skipped.
+    const { startISO } = dayToISORange(allDays[0]);
+    const { endISO } = dayToISORange(allDays[allDays.length - 1]);
     const ranges = await deps.fetchAvailability({
-      ...stationLocation,
-      startTime: new Date(startSec * 1000).toISOString(),
-      endTime: new Date(endSec * 1000).toISOString()
+      ...stationLocation, startTime: startISO, endTime: endISO
     }, params.signal);
 
-    const allDays = daysInRange(startSec, endSec);
     const availableDays: number[] = [];
     allDays.forEach(day => {
       if (dayIsAvailable(day, ranges)) {
@@ -105,12 +114,12 @@ export async function downloadRange(
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         if (params.signal?.aborted) return;
         try {
-          const bytes = await deps.fetchRaw(
+          const data = await deps.fetchRaw(
             { ...stationLocation, startTime: dStart, endTime: dEnd }, params.signal
           );
-          await deps.cache.writeDayChunk(stationLocation, day, bytes);
+          await deps.cache.writeDayChunk(stationLocation, day, data);
           completed++;
-          onEvent({ type: "dayWritten", day });
+          onEvent({ type: "dayWritten", day, bytes: data.byteLength });
           emitProgress();
           return;
         } catch (err) {

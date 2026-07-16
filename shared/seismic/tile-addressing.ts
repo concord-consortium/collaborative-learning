@@ -58,6 +58,20 @@ export function getStationPrefix(station: StationId): string {
 }
 
 /**
+ * Inverse of getStationPrefix: "{network}_{station}" → { network, station }.
+ */
+export function parseStationPrefix(prefix: string): StationId | undefined {
+  const sep = prefix.indexOf("_");
+  if (sep < 0) return undefined;
+
+  const network = prefix.slice(0, sep);
+  const station = prefix.slice(sep + 1);
+  if (!network || ! station) return undefined;
+
+  return { network, station };
+}
+
+/**
  * Constructs the S3 key prefix for all tiles of a given station and channel.
  * Format: {network}_{station}/{channel}
  */

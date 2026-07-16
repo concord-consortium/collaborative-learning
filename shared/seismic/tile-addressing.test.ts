@@ -1,5 +1,6 @@
 import {
-  getTileIndex, getTileTimeRange, getTileIndicesForViewport, getTileS3Key, getTileDuration, getPointIndexInTile
+  getTileIndex, getTileTimeRange, getTileIndicesForViewport, getTileS3Key, getTileDuration, getPointIndexInTile,
+  getStationPrefix, parseStationPrefix
 } from "./tile-addressing";
 import { LEVEL_SPACINGS, POINTS_PER_TILE } from "./envelope-config";
 
@@ -79,6 +80,20 @@ describe("tile-addressing", () => {
     it("constructs the expected key format", () => {
       const key = getTileS3Key({ network: "AK", station: "K204", channel: "BHZ" }, 2, 42);
       expect(key).toBe("AK_K204/BHZ/L2/42");
+    });
+  });
+
+  describe("parseStationPrefix", () => {
+    it("is the inverse of getStationPrefix", () => {
+      expect(parseStationPrefix("AK_K204")).toEqual({ network: "AK", station: "K204" });
+      const s = { network: "AK", station: "RC01" };
+      expect(parseStationPrefix(getStationPrefix(s))).toEqual(s);
+    });
+
+    it("returns undefined for improper prefixes", () => {
+      expect(parseStationPrefix("prefix")).toBeUndefined();
+      expect(parseStationPrefix("_prefix")).toBeUndefined();
+      expect(parseStationPrefix("prefix_")).toBeUndefined();
     });
   });
 });
