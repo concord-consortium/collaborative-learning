@@ -142,26 +142,25 @@ service cloud.firestore {
       }
 
       // A document is canonical for a slot when `canonical` holds that slot's label — a non-empty
-      // string. Absent, null, or "" all mean non-canonical. `is string` makes this null-safe: a
-      // null value is present, so map.get returns null (not the default), and `null is string` is
-      // false. The label is written to `canonical` only inside the pointer-claim transaction; see
-      // kDefaultCanonicalDocumentLabel in scoped-document-pointers.ts.
+      // string. Absent, null, or "" all mean non-canonical. The label is written to `canonical`
+      // only inside the pointer-claim transaction; see kDefaultCanonicalDocumentLabel in
+      // scoped-document-pointers.ts.
       function isCanonicalValue(value) {
         return value is string && value != "";
       }
 
-      // A blank `canonical` — absent, null, or "" — is the only value a document may arrive with.
-      // The canonical label is granted solely by the pointer-claim transaction (an update), so a
-      // create (or any other write) carrying a non-blank `canonical`, including a non-string like
-      // `true`, is rejected. Default null so an absent field reads as blank.
-      function isBlankCanonical(value) {
-        return value == null || value == "";
+      function isBlankCanonical(data) {
+        let canonical = data.get("canonical", null);
+        return canonical == null || canonical == "";
       }
 
       function isValidDocumentCreateRequest() {
         return
           request.resource.data.keys().hasAll(["uid", "type", "key", "createdAt"]) &&
-          isBlankCanonical(request.resource.data.get("canonical", null)) &&
+          // The canonical label is granted solely by the pointer-claim transaction (an update,
+          // gated by canonicalFieldOk), so a create carrying a non-blank `canonical` — including a
+          // non-string like `true` — is rejected.
+          isBlankCanonical(request.resource.data) &&
           (classIsRequestContextId() || teacherIsInClass(request.resource.data.context_id));
       }
 
@@ -367,10 +366,13 @@ service cloud.firestore {
         }
 
         // The path of the canonical-pointer slot for `data`'s scope, or null if `data`'s scope has
-        // no canonical-pointer shape. This is the single place a scope is turned into a pointer
-        // path: to give another scope canonical documents, add a branch here (and a sibling
-        // `.../canonical/{label}` write-guard match block) — canonicalFieldOk() is untouched. Keep
-        // in lockstep with the per-scope path builders in scoped-document-pointers.ts.
+        // no canonical-pointer shape. Only the group scope has canonical documents today, so this
+        // returns the one fixed path. Once other scopes need them, the natural generalization is to
+        // build the path from field presence — append /offerings/<offeringId> and /groups/<groupId>
+        // only when set (string concat + path(), verified against the emulator) — addressing the
+        // class, offering, and group scopes without a branch per scope, and canonicalFieldOk() stays
+        // untouched. A new scope still needs its own `.../canonical/{label}` write-guard match block.
+        // Keep in lockstep with getGroupCanonicalPointerPath in scoped-document-pointers.ts.
         function canonicalPointerPath(portal, data, label) {
           return isGroupScope(data)
             ? /databases/$(database)/documents/authed/$(portal)

@@ -20,9 +20,13 @@ export const kDefaultCanonicalDocumentLabel = "default";
  * Each scope part is its own bare-id segment; `canonical` is the subcollection and `label` the
  * document id. 6 segments here + the 2-segment root = 8 (even).
  *
- * This is the group-scope member of a per-scope family of path builders: when another scope
- * (e.g. a class-scoped concurrent document) gains canonical documents, add a sibling builder
- * rather than parameterizing this one, and mirror it in firestore.rules `canonicalPointerPath`.
+ * Only the group scope has canonical documents today, so this builds the one fixed path. Once
+ * other scopes need them, the natural generalization is a single builder that appends the
+ * `/offerings/<offeringId>` and `/groups/<groupId>` segments only when those fields are present,
+ * addressing the class, offering, and group scopes from one function. firestore.rules
+ * `canonicalPointerPath` can build the path the same presence-driven way (string concat + `path()`,
+ * verified against the emulator), so the two stay mirrored. Not worth generalizing until a second
+ * scope actually needs it.
  */
 export function getGroupCanonicalPointerPath(
   classHash: string, offeringId: string, groupId: string, label: string
