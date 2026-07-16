@@ -2,7 +2,7 @@ import { SeismicDownloadService, DONE } from "./seismic-download-service";
 import { DownloadEvent, DownloadParams } from "../../../shared/seismic/seismic-downloader";
 
 const PARAMS: DownloadParams = {
-  network: "AK", station: "K204", location: "--", channel: "HNZ",
+  network: "AK", station: "K204", location: "", channel: "HNZ",
   startSec: Date.UTC(2026, 0, 30) / 1000, endSec: Date.UTC(2026, 1, 1) / 1000,
 };
 
@@ -31,6 +31,20 @@ describe("SeismicDownloadService", () => {
       if (d === DONE) break;
     }
     expect(got).toEqual([100, 102, DONE]);
+  });
+
+  it("records each written day's byte size, defaulting to 0 for already-cached days", async () => {
+    const service = new SeismicDownloadService(scriptedRunner([
+      { type: "dayWritten", day: 100, bytes: 500 },
+      { type: "dayWritten", day: 101 },   // already cached — the downloader sends no size
+      { type: "done" },
+    ]));
+
+    service.ensureRange(PARAMS);
+    while ((await service.nextReadyDay()) !== DONE) { /* drain */ }
+    expect(service.bytesForDay(100)).toBe(500);
+    expect(service.bytesForDay(101)).toBe(0);
+    expect(service.bytesForDay(999)).toBe(0);
   });
 
   it("tracks observable progress and errored days", async () => {

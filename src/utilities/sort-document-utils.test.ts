@@ -6,6 +6,7 @@ import { DB } from "../lib/db";
 import {
   createDocMapByBookmarks,
   createTileTypeToDocumentsMap,
+  getTagsWithDocs,
   sortProblemSectionLabels
 } from "./sort-document-utils";
 import { clearTermOverrides, setTermOverrides } from "./translation/translate";
@@ -100,6 +101,30 @@ describe("sort-document-utils", () => {
       expect(result.get("No Tools")?.documents).toHaveLength(2);
       expect(result.has("Placeholder")).toBe(false);
       expect(result.has("Unknown")).toBe(false);
+    });
+  });
+
+  describe("getTagsWithDocs", () => {
+    it("groups documents by configured tags and puts untagged documents in 'Not Tagged'", () => {
+      const commentTags = { foo: "Foo", bar: "Bar" };
+      const tagged = createMockDocument({ key: "d1", strategies: ["foo"] } as any);
+      const untagged = createMockDocument({ key: "d2" });
+      const result = getTagsWithDocs([tagged, untagged], commentTags);
+      expect(result.foo.docKeysFoundWithTag).toContain("d1");
+      expect(result[""].tagValue).toBe("Not Tagged");
+      expect(result[""].docKeysFoundWithTag).toContain("d2");
+    });
+
+    it("creates a group for a strategy not in the tag map (orphan guard), labeled by its id", () => {
+      const commentTags = { foo: "Foo" };
+      // "custom-tag" is on the document but not in the configured tag map (e.g. a custom tag from
+      // a different unit when sorting by tag across the whole unit). It must still form a group so
+      // the document is not orphaned from the tag sort.
+      const doc = createMockDocument({ key: "d1", strategies: ["custom-tag"] } as any);
+      const result = getTagsWithDocs([doc], commentTags);
+      expect(result["custom-tag"]).toBeDefined();
+      expect(result["custom-tag"].tagValue).toBe("custom-tag");
+      expect(result["custom-tag"].docKeysFoundWithTag).toContain("d1");
     });
   });
 
