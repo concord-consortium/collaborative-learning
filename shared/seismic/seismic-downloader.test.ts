@@ -1,7 +1,7 @@
 import { downloadRange, DownloadEvent, DownloaderDeps } from "./seismic-downloader";
 import { dayIndex, utcDay } from "./seismic-day";
 
-const RANGE = { network: "AK", station: "K204", location: "--", channel: "HNZ",
+const RANGE = { network: "AK", station: "K204", location: "", channel: "HNZ",
   startSec: utcDay(2026, 1, 30), endSec: utcDay(2026, 2, 2) }; // 4 days incl: 30, 31, Feb 1, Feb 2
 
 // Availability covering data through the end of the last day (Feb 2 → start of Feb 3).

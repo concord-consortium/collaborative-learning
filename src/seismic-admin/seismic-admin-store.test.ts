@@ -35,7 +35,7 @@ it("deletes a station's days in range via the cache", async () => {
 
 it("downloads selected stations sequentially", async () => {
   const runner = jest.fn(async () => {});
-  const catalog = [{ network: "AK", station: "K204", location: "--", channel: "HNZ", label: "x" }];
+  const catalog = [{ network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" }];
   const store = new SeismicAdminStore({ cache: fakeCache() as any, catalog, downloadStation: runner });
   store.setRange("2026-01-30", "2026-02-02");
   await store.refresh();

@@ -35,15 +35,33 @@ describe("opfs-seismic-cache", () => {
     expect(cached.has(d31)).toBe(false);
   });
 
-  it("lists the (network, station, channel) present in the cache", async () => {
+  it("lists the (network, station, location, channel) present in the cache", async () => {
     const root = new FakeDirHandle();
     const cache = createOpfsCache(async () => root as any);
     const day = dayIndex(utcDay(2026, 1, 30));
-    await cache.writeDayChunk(STA, day, bytes(1));                                     // AK/K204/HNZ
+    await cache.writeDayChunk(STA, day, bytes(1));                                     // AK/K204/--/HNZ
     await cache.writeDayChunk({ network: "AK", station: "RC01", channel: "BHZ" }, day, bytes(1));
     const stations = await cache.listStations();
-    expect(stations).toContainEqual({ network: "AK", station: "K204", channel: "HNZ" });
-    expect(stations).toContainEqual({ network: "AK", station: "RC01", channel: "BHZ" });
+    expect(stations).toContainEqual({ network: "AK", station: "K204", location: "", channel: "HNZ" });
+    expect(stations).toContainEqual({ network: "AK", station: "RC01", location: "", channel: "BHZ" });
+  });
+
+  it("keeps locations at the same station and channel separate", async () => {
+    const root = new FakeDirHandle();
+    const cache = createOpfsCache(async () => root as any);
+    const day = dayIndex(utcDay(2026, 1, 30));
+    const loc00 = { ...STA, location: "00" };
+    await cache.writeDayChunk(STA, day, bytes(1));
+    await cache.writeDayChunk(loc00, day, bytes(2));
+
+    const stations = await cache.listStations();
+    expect(stations).toContainEqual({ ...STA, location: "" });
+    expect(stations).toContainEqual(loc00);
+
+    // Deleting one location's day must not touch the other's.
+    await cache.deleteDaysInRange(loc00, day, day);
+    expect(await cache.readDayChunk(STA, day)).not.toBeNull();
+    expect(await cache.readDayChunk(loc00, day)).toBeNull();
   });
 
   it("sums bytes only for cached days within the range", async () => {

@@ -1,7 +1,7 @@
 import { defaultCatalog, loadCatalog, stationsFromUnitConfig } from "./load-catalog";
 import { reprocessUrlParams } from "../../utilities/url-params";
 
-const stations = [{ network: "AK", station: "K204", channel: "HNZ", location: "--", label: "Anchorage" }];
+const stations = [{ network: "AK", station: "K204", channel: "HNZ", location: "00", label: "Anchorage" }];
 
 // Point the global urlParams (shared with CurriculumConfig and getContent) at a new search string.
 const setSearch = (search: string) => {

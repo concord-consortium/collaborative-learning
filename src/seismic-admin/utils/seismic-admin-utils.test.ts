@@ -1,4 +1,4 @@
-import { coverageSegments, missingDayCount, mergeStations, formatBytes } from "./seismic-admin-utils";
+import { coverageSegments, missingDayCount, mergeStations, formatBytes, stationLabel } from "./seismic-admin-utils";
 import { StationConfig } from "../../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
 
@@ -17,16 +17,23 @@ describe("seismic-admin-utils", () => {
     expect(missingDayCount(cachedDays.size, 10, 13)).toBe(2); // 11, 13 missing
   });
 
-  it("merges by (network, station, channel); catalog supplies location + label", () => {
-    const opfs = [{ network: "AK", station: "K204", channel: "HNZ" }];
-    const k204 = { network: "AK", station: "K204", location: "--", channel: "HNZ", label: "Anchorage" };
+  it("merges by (network, station, location, channel); catalog supplies label", () => {
+    const opfs = [{ network: "AK", station: "K204", location: "00", channel: "HNZ" }];
+    const k204 = { network: "AK", station: "K204", location: "00", channel: "HNZ", label: "Anchorage" };
     const rc01 = { network: "AK", station: "RC01", location: "", channel: "BHZ", label: "Rabbit Creek" };
     const catalog: StationConfig[] = [k204, rc01];
     const merged = mergeStations(opfs, catalog);
+    expect(merged.size).toBe(2);
     // K204 is in both → single entry from the catalog (location + label)
     expect(merged.get(getStationChannelPrefix(k204))).toEqual(
-      { network: "AK", station: "K204", location: "--", channel: "HNZ", label: "Anchorage" });
+      { network: "AK", station: "K204", location: "00", channel: "HNZ", label: "Anchorage" });
     expect(merged.get(getStationChannelPrefix(rc01))?.label).toBe("Rabbit Creek");
+  });
+
+  it("includes the location code in the fallback label when present", () => {
+    expect(stationLabel({ network: "IU", station: "ANMO", location: "00", channel: "BHZ" }))
+      .toBe("IU ANMO 00 BHZ");
+    expect(stationLabel({ network: "AK", station: "K204", channel: "HNZ" })).toBe("AK K204 HNZ");
   });
 
   it("formats byte sizes", () => {

@@ -40,16 +40,17 @@ export function formatBytes(bytes: number): string {
   return `${value.toFixed(1)} ${units[unit]}`;
 }
 
-/** A station's display name: its catalog label, else "{network} {station} {channel}". */
+/** A station's display name: its catalog label, else "{network} {station} {location} {channel}". */
 export function stationLabel(station: StationConfig): string {
-  return station.label || `${station.network} ${station.station} ${station.channel}`;
+  return station.label ||
+    [station.network, station.station, station.location, station.channel].filter(Boolean).join(" ");
 }
 
 /** Union OPFS stations with catalog stations into a Map keyed by getStationChannelPrefix. */
 export function mergeStations(opfs: StationData[], catalog: StationConfig[]): Map<string, StationConfig> {
   const byKey = new Map<string, StationConfig>();
   for (const o of opfs) byKey.set(getStationChannelPrefix(o), o);
-  // Override with entries from catalog when there are collisions, since these have location & label.
+  // Override with entries from catalog when there are collisions, since these have labels.
   for (const c of catalog) byKey.set(getStationChannelPrefix(c), c);
   return byKey;
 }
