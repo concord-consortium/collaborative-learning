@@ -92,7 +92,8 @@ describe("document utils", () => {
         });
         const appConfig = AppConfigModel.create({config: unitConfigDefaults});
         const title = getDocumentDisplayTitle(unit, metadata, appConfig);
-        expect(title).toMatch(/Test Title \(23FEB76-..:..:..\)/);
+        // The specified timestamp can be interpreted as on the 22nd or 23rd, depending on the local time zone.
+        expect(title).toMatch(/Test Title \(2[2|3]FEB76-..:..:..\)/);
       });
     });
 
