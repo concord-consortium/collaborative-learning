@@ -150,10 +150,18 @@ service cloud.firestore {
         return value is string && value != "";
       }
 
+      // A blank `canonical` — absent, null, or "" — is the only value a document may arrive with.
+      // The canonical label is granted solely by the pointer-claim transaction (an update), so a
+      // create (or any other write) carrying a non-blank `canonical`, including a non-string like
+      // `true`, is rejected. Default null so an absent field reads as blank.
+      function isBlankCanonical(value) {
+        return value == null || value == "";
+      }
+
       function isValidDocumentCreateRequest() {
         return
           request.resource.data.keys().hasAll(["uid", "type", "key", "createdAt"]) &&
-          !isCanonicalValue(request.resource.data.get("canonical", "")) &&
+          isBlankCanonical(request.resource.data.get("canonical", null)) &&
           (classIsRequestContextId() || teacherIsInClass(request.resource.data.context_id));
       }
 
@@ -373,19 +381,24 @@ service cloud.firestore {
             : null;
         }
 
+        // Whether the `label` slot's pointer already points at this document in the same commit.
+        // Called only for a valid (non-empty string) label, so the path is never built for a
+        // non-string. A document whose scope has no canonical shape (path == null) cannot claim it.
+        function pointerConfirmsCanonical(portal, data, label) {
+          let ptr = canonicalPointerPath(portal, data, label);
+          return ptr != null && getAfter(ptr).data.documentKey == data.key;
+        }
+
         function canonicalFieldOk() {
           let was = resource.data.get("canonical", "");
           let now = request.resource.data.get("canonical", "");
-          let ptr = canonicalPointerPath(portal, request.resource.data, now);
           // `canonical` holds the pointer slot's label. It may be set once (non-canonical -> label),
           // and only when that slot's pointer already points at this document in the same commit; it
-          // may not be changed or cleared. A document whose scope has no canonical shape (ptr == null)
-          // cannot claim canonical. The slot label is read from the document via `now`, so no label
-          // is hardcoded here.
+          // may not be changed or cleared. The slot label is read from the document via `now`, so no
+          // label is hardcoded here.
           return was == now
             || (!isCanonicalValue(was) && isCanonicalValue(now)
-                && ptr != null
-                && getAfter(ptr).data.documentKey == request.resource.data.key);
+                && pointerConfirmsCanonical(portal, request.resource.data, now));
         }
 
         // portal-authenticated teachers can create valid documents

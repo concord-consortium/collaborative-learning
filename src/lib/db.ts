@@ -576,7 +576,10 @@ export class DB {
 
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
       ...cleanedMetadata,
-      context_id: classHash,
+      // `self` here is metadata.self (destructured above), whose classHash is populated for every
+      // document type. The top-level metadata.classHash exists only on problem/offering-type
+      // metadata, so reading it would be undefined for personal/learning-log documents.
+      context_id: self.classHash,
       // `network` is read back by firestore.rules (resourceInTeacherNetworks and
       // userCanAccessDocument/getDocumentNetwork) to let teachers in the same network read and
       // comment on each other's documents, so teacher documents must keep writing it or that
@@ -717,22 +720,21 @@ export class DB {
     // document's type — see kDefaultCanonicalDocumentLabel. The document itself is a GroupDocument.
     const pointerPath =
       getGroupCanonicalPointerPath(user.classHash, user.offeringId, groupId, kDefaultCanonicalDocumentLabel);
-    return this.getOrCreateScopedDocument(pointerPath, GroupDocument, {
+    return this.getOrCreateCanonicalDocument(pointerPath, GroupDocument, {
       canonicalLabel: kDefaultCanonicalDocumentLabel,
       groupUserId: user.userIdForGroupDocuments,
-      groupId,
       findLegacy: () => this.findLegacyGroupDocument(groupId)
     });
   }
 
-  private async getOrCreateScopedDocument(
+  private async getOrCreateCanonicalDocument(
     pointerPath: string,
     type: DBDocumentType,
     // canonicalLabel is the pointer slot's label; it must match the final segment of pointerPath and
     // is written to the winning document's `canonical` field.
     opts: {
       canonicalLabel: string;
-      groupUserId?: string; groupId?: string; findLegacy?: () => Promise<IDocumentMetadata | undefined>;
+      groupUserId?: string; findLegacy?: () => Promise<IDocumentMetadata | undefined>;
     }
   ) {
     const { canonicalLabel, groupUserId, findLegacy } = opts;
@@ -741,7 +743,7 @@ export class DB {
     // 1. Fast path: pointer already exists.
     const pointerSnap = await pointerRef.get();
     if (pointerSnap.exists) {
-      return this.openScopedDocumentByKey((pointerSnap.data() as ICanonicalPointer).documentKey);
+      return this.openCanonicalDocumentByKey((pointerSnap.data() as ICanonicalPointer).documentKey);
     }
 
     // 2. Legacy fallback: pre-pointer group docs are found by query; backfill a pointer.
@@ -779,8 +781,8 @@ export class DB {
     });
 
     if (wonKey !== documentKey) {
-      await this.deleteOrphanScopedDocument(documentKey, groupUserId);
-      return this.openScopedDocumentByKey(wonKey);
+      await this.deleteOrphanDocument(documentKey, groupUserId);
+      return this.openCanonicalDocumentByKey(wonKey);
     }
     if (type === GroupDocument) {
       Logger.log(LogEventName.CREATE_GROUP_DOCUMENT);
@@ -800,7 +802,7 @@ export class DB {
     return result.empty ? undefined : result.docs[0].data();
   }
 
-  private async openScopedDocumentByKey(documentKey: string) {
+  private async openCanonicalDocumentByKey(documentKey: string) {
     const metadata = await this.findFirestoreMetadata(documentKey);
     if (!metadata) {
       throw new Error(`Canonical document ${documentKey} referenced by a pointer was not found`);
@@ -809,7 +811,7 @@ export class DB {
   }
 
   // Best-effort cleanup of a document whose pointer claim was lost (a rare orphan).
-  private async deleteOrphanScopedDocument(documentKey: string, groupUserId?: string) {
+  private async deleteOrphanDocument(documentKey: string, groupUserId?: string) {
     const { user } = this.stores;
     await Promise.all([
       this.firebase.ref(this.firebase.getUserDocumentPath(user, documentKey, groupUserId)).remove(),

@@ -84,6 +84,12 @@ describe("canonical flag integrity", () => {
     await assertFails(db.doc(kDocPath).set(groupDoc({ canonical: "default" })));
   });
 
+  it("create is denied if the doc arrives with a non-string canonical value", async () => {
+    // Only null/absent/"" may arrive on a create; a boolean (or any non-blank value) is rejected.
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kDocPath).set(groupDoc({ canonical: true })));
+  });
+
   it("a normal metadata update (title) that does not touch canonical is allowed", async () => {
     const admin = initFirestore(teacherAuth);
     await admin.doc(kDocPath).set(groupDoc());

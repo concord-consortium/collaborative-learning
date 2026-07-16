@@ -321,7 +321,7 @@ describe("db", () => {
 
     it("lost race: cleans up the orphan and opens the winner's doc", async () => {
       (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "my-key" } }));
-      const orphanSpy = jest.spyOn(db as any, "deleteOrphanScopedDocument").mockResolvedValue(undefined);
+      const orphanSpy = jest.spyOn(db as any, "deleteOrphanDocument").mockResolvedValue(undefined);
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }), delete: () => Promise.resolve() }),
         collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
@@ -360,6 +360,26 @@ describe("db", () => {
     });
     expect(written).not.toHaveProperty("contextId");
     expect(setPayloads[0]).toMatchObject({ context_id: "class-h", network: null });
+  });
+
+  it("writes context_id from self.classHash for documents with no top-level classHash", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    // Personal/learning-log metadata carries classHash only under `self`, never at the top level,
+    // so context_id must come from self.classHash or it would be written undefined.
+    const metadata: any = {
+      version: "1.0", type: PersonalDocument, createdAt: 123, title: "t",
+      self: { uid: "user-1", documentKey: "pk", classHash: "class-h" }
+    };
+    const written = await db.createFirestoreMetadataDocument(metadata, "pk");
+    expect(written).toMatchObject({ context_id: "class-h", key: "pk" });
+    expect(setPayloads[0]).toMatchObject({ context_id: "class-h" });
   });
 
   describe("document visibility with defaultSharedDocuments", () => {
