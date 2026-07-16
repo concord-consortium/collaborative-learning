@@ -11,6 +11,7 @@ import { useCurriculum } from "../hooks/use-curriculum";
 import NavTabs from "./workspace/nav-tabs";
 import AISettings from "./workspace/ai-settings";
 import ChatTutorSettings from "./workspace/chat-tutor-settings";
+import CommentsSettings from "./workspace/comments-settings";
 import SortWorkSettings from "./workspace/sort-work-settings";
 import { TermOverridesSettings } from "./workspace/term-overrides-settings";
 import DocumentSettings from "./workspace/document-settings";
@@ -146,6 +147,8 @@ const Workspace: React.FC = () => {
         return <AISettings />;
       case "config/chatTutorSettings":
         return <ChatTutorSettings />;
+      case "config/commentsSettings":
+        return <CommentsSettings />;
       case "config/sortWorkSettings":
         return <SortWorkSettings />;
       case "config/termOverrides":

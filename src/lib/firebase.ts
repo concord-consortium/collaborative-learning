@@ -493,9 +493,16 @@ private updateEvaluation = (targetRef: firebase.database.Reference | firebase.da
 
   // If this unit uses "custom" evaluation, read and store the prompt strings if they're defined.
   if (aiEvaluation === "custom") {
-    return aiPrompt
-      ? targetRef.set({ aiPrompt, timestamp: firebase.database.ServerValue.TIMESTAMP })
-      : undefined;
+    if (!aiPrompt) return undefined;
+    // Include teacher-added custom tag ids as AI categories so the AI can classify documents with
+    // them (the cloud function builds its category enum from aiPrompt.categories). NOTE: this only
+    // applies to "custom" evaluation; "categorize-design"/"mock" use categories fixed in the cloud
+    // function, so custom tags are not offered to the AI in those modes.
+    const customCategories = Object.keys(this.db.stores.commentTags.customTagRecord);
+    const promptToWrite = customCategories.length > 0
+      ? { ...aiPrompt, categories: Array.from(new Set([...(aiPrompt.categories ?? []), ...customCategories])) }
+      : aiPrompt;
+    return targetRef.set({ aiPrompt: promptToWrite, timestamp: firebase.database.ServerValue.TIMESTAMP });
   }
 
   return targetRef.set({ timestamp: firebase.database.ServerValue.TIMESTAMP });

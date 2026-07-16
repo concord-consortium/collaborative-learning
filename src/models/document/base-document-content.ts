@@ -387,12 +387,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     getMaxTilesOfType(type: string) {
       const appConfig = getAppConfig(self);
       if (!appConfig) return undefined;
-      // "IframeInteractive" → "iframeinteractive"
-      const lowerCaseId = type.toLowerCase();
-      // "IframeInteractive" → "iframeInteractive" (camelCase settings keys)
-      const camelCaseId = type.charAt(0).toLowerCase() + type.slice(1);
-      const maxTiles = appConfig.getSetting("maxTiles", lowerCaseId)
-        ?? appConfig.getSetting("maxTiles", camelCaseId);
+      const maxTiles = appConfig.getSetting("maxTiles", type);
       return typeof maxTiles === "number" ? maxTiles : undefined;
     },
     getAllTilesByType() {

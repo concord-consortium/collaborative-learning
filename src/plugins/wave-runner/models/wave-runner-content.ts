@@ -254,7 +254,7 @@ export const WaveRunnerContentModel = TileContentModel
           return;
         }
 
-        const totalDays = Math.ceil((endMs - startMs) / MILLISECONDS_PER_DAY);
+        const totalDays = Math.floor((endMs - startMs) / MILLISECONDS_PER_DAY) + 1;
         self.updateChunkProgress(0, totalDays);
 
         // Bulk-download the range into OPFS, running the model on each day as it lands.

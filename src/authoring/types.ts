@@ -46,6 +46,7 @@ export interface IUnitConfig {
   showCommentTag: boolean;
   showCommentRating: boolean;
   commentTags: Record<string, string>;
+  allowCustomCommentTags?: boolean;
   enableCommentRoles: CommentRole[];
   aiEvaluation?: AIEvaluation;
   aiPrompt: IAiPrompt;
@@ -110,6 +111,10 @@ export interface IStamp {
 }
 
 export interface ISettings {
+  // `hideTitle` is a generic per-tile setting (undefined -> title shown).
+  text?: {
+    hideTitle?: boolean;
+  };
   table: {
     numFormat: string;
     tools: (string | [string, string])[];

@@ -11,6 +11,7 @@ import { DocumentMetadataModel, IDocumentMetadataModel } from "../document/docum
 import { isSortableType } from "../document/document-types";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
+import { CommentTags } from "./comment-tags";
 import { ClassModelType } from "./class";
 import { CurriculumConfigType } from "./curriculum-config";
 import { DocumentGroup } from "./document-group";
@@ -18,6 +19,7 @@ import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
 import { PrimarySortType } from "./ui-types";
 import { UserModelType } from "./user";
+import { UnitModelType } from "../curriculum/unit";
 
 export type SortedDocumentsMap = Record<string, DocumentGroup[]>;
 
@@ -28,8 +30,10 @@ export interface ISortedDocumentsStores {
   db: DB;
   appConfig: AppConfigModelType;
   bookmarks: Bookmarks;
+  commentTags: CommentTags;
   user: UserModelType;
   curriculumConfig: CurriculumConfigType;
+  unit?: UnitModelType;
 }
 
 export const MetadataDocMapModel = types.map(DocumentMetadataModel);
@@ -67,7 +71,7 @@ export class SortedDocuments {
     return this.stores.class;
   }
   get commentTags(): Record<string, string> | undefined {
-    return this.stores.appConfig.commentTags;
+    return this.stores.commentTags.mergedWith(this.stores.appConfig.commentTags);
   }
   get db(): DB {
     return this.stores.db;

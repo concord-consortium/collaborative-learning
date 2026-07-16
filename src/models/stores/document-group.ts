@@ -11,8 +11,10 @@ import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { GroupDocument } from "../document/document-types";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
+import { UnitModelType } from "../curriculum/unit";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
+import { CommentTags } from "./comment-tags";
 import { ClassModelType, ClassUserModelType } from "./class";
 import { GroupsModelType } from "./groups";
 import { SecondarySortType, SortType } from "./ui-types";
@@ -24,6 +26,8 @@ interface IDocumentGroupStores {
   class: ClassModelType;
   appConfig: AppConfigModelType;
   bookmarks: Bookmarks;
+  commentTags: CommentTags;
+  unit?: UnitModelType;
 }
 
 export type TagWithDocs = {
@@ -50,6 +54,8 @@ interface IBuildDocumentCollectionProps {
   docMap: Map<string, IDocumentMetadataModel[]>;
   sortedSectionLabels: string[];
   sortType: SecondarySortType;
+  // Optional per-label display overrides, keyed by the ordinal-based grouping label.
+  labelMap?: Map<string, string>;
 }
 
 /*
@@ -119,10 +125,10 @@ export class DocumentGroup {
   }
 
   buildDocumentCollection(props: IBuildDocumentCollectionProps): DocumentGroup[] {
-    const { docMap, sortedSectionLabels, sortType } = props;
+    const { docMap, sortedSectionLabels, sortType, labelMap } = props;
     return sortedSectionLabels.map(label => {
       return new DocumentGroup({
-        label,
+        label: labelMap?.get(label) ?? label,
         sortType,
         documents: docMap.get(label) ?? [],
         stores: this.stores
@@ -231,7 +237,7 @@ export class DocumentGroup {
   }
 
   get byStrategy(): DocumentGroup[] {
-    const commentTags = this.stores.appConfig.commentTags;
+    const commentTags = this.stores.commentTags.mergedWith(this.stores.appConfig.commentTags);
     const tagsWithDocs = getTagsWithDocs(this.documents, commentTags);
 
     const sortedDocsArr: DocumentGroup[] = [];
@@ -291,14 +297,20 @@ export class DocumentGroup {
 
   get byProblem(): DocumentGroup[] {
     const docMap: Map<string, IDocumentMetadataModel[]> = new Map();
+    // Map the ordinal-based grouping key to the problem's actual title, when available, so the
+    // group is displayed with its title (e.g. "Storm Arthur") rather than a generic "Problem 1.1".
+    const labelMap: Map<string, string> = new Map();
+    const problemTerm = upperWords(translate("contentLevel.problem"));
     this.documents.forEach((doc) => {
       const investigationOrdinal = doc.investigation;
       const problemOrdinal = doc.problem;
-      const problemTerm = upperWords(translate("contentLevel.problem"));
       let sectionLabel = `No ${problemTerm}`;
 
       if (investigationOrdinal != null && problemOrdinal != null) {
         sectionLabel = `${problemTerm} ${investigationOrdinal}.${problemOrdinal}`;
+        const investigation = this.stores.unit?.getInvestigation(Number(investigationOrdinal));
+        const title = investigation?.getProblem(Number(problemOrdinal))?.title;
+        if (title) labelMap.set(sectionLabel, title);
       } else if (problemOrdinal != null) {
         sectionLabel = `${problemTerm} ${problemOrdinal}`;
       }
@@ -309,7 +321,8 @@ export class DocumentGroup {
       docMap.get(sectionLabel)?.push(doc);
     });
 
+    // Group/sort by the ordinal-based key, but display the resolved problem title (when available).
     const sortedSectionLabels = sortProblemSectionLabels(Array.from(docMap.keys()));
-    return this.buildDocumentCollection({sortedSectionLabels, sortType: "Problem", docMap});
+    return this.buildDocumentCollection({ docMap, labelMap, sortedSectionLabels, sortType: "Problem" });
   }
 }

@@ -6,7 +6,7 @@ import { useStores } from "../../hooks/use-stores";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { isSortTypeId } from "../../models/stores/ui-types";
-import { getSortTypeTranslationKey } from "../../utilities/sort-utils";
+import { getFilterTypeDisplayLabel, getSortTypeTranslationKey } from "../../utilities/sort-utils";
 import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
 import { IOpenDocumentsGroupMetadata } from "./sorted-section";
@@ -137,7 +137,7 @@ export const DocumentScrollerHeader = observer(function DocumentScrollerHeader({
         </div>
       </div>
       <div className="header-text">
-        Shown for <span>{persistentUI.docFilter}</span>
+        Shown for <span>{getFilterTypeDisplayLabel(persistentUI.docFilter)}</span>
       </div>
     </div>
   );

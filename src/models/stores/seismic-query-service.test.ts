@@ -18,7 +18,6 @@ jest.mock("seisplotjs", () => ({
 }));
 
 const stationData = { network: "AK", station: "K204", channel: "HNZ" };
-const stationLocation = { ...stationData, location: "" };
 
 describe("SeismicQueryService", () => {
   describe("selectLevel", () => {
@@ -59,7 +58,7 @@ describe("SeismicQueryService query", () => {
   let service: SeismicQueryService;
 
   const viewportParams = (overrides?: Partial<SeismicViewportParams>): SeismicViewportParams => ({
-    stationLocation,
+    stationData,
     startTime: DateTime.fromSeconds(0, { zone: "utc" }),
     endTime: DateTime.fromSeconds(LEVEL_SPACINGS[1] * 1000, { zone: "utc" }),
     pixelWidth: 1000,
@@ -153,7 +152,7 @@ describe("SeismicQueryService loadViewport", () => {
     const level = 1;
     const range = getTileTimeRange(level, 0);
     service.loadViewport("caller1", {
-      stationLocation,
+      stationData,
       startTime: DateTime.fromSeconds(range.start, { zone: "utc" }),
       endTime: DateTime.fromSeconds(range.start + LEVEL_SPACINGS[level], { zone: "utc" }),
       pixelWidth: 1,
@@ -170,12 +169,44 @@ describe("SeismicQueryService loadViewport", () => {
     const level = 1;
     const range = getTileTimeRange(level, 0);
     service.loadViewport("caller1", {
-      stationLocation,
+      stationData,
       startTime: DateTime.fromSeconds(range.start, { zone: "utc" }),
       endTime: DateTime.fromSeconds(range.start + LEVEL_SPACINGS[level], { zone: "utc" }),
       pixelWidth: 1,
     });
 
     expect(mockFetch).not.toHaveBeenCalled();
+  });
+});
+
+describe("getMetadata", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
+  function metadataLine(location: string, scale: number) {
+    const fields = new Array(17).fill("");
+    fields[0] = "AK"; fields[1] = "K204"; fields[2] = location; fields[3] = "HNZ";
+    fields[11] = String(scale); fields[12] = "1"; fields[13] = "M/S"; fields[14] = "100";
+    fields[15] = "2020-01-01T00:00:00Z"; fields[16] = "";
+    return fields.join("|");
+  }
+
+  it("matches metadata by channel and location", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      text: async () => [metadataLine("", 100), metadataLine("00", 200)].join("\n"),
+    });
+    const service = new SeismicQueryService();
+    const t = new Date("2021-01-01T00:00:00Z").getTime() / 1000;
+
+    const meta00 = await service.getMetadata({ ...stationData, location: "00" }, t);
+    expect(meta00?.scale).toBe(200);
+
+    const metaBlank = await service.getMetadata(stationData, t);
+    expect(metaBlank?.scale).toBe(100);
+
+    const metaMissing = await service.getMetadata({ ...stationData, location: "10" }, t);
+    expect(metaMissing).toBeUndefined();
   });
 });
