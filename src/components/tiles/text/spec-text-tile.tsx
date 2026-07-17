@@ -14,6 +14,7 @@ import { ITileApi, TileModelContext } from "../tile-api";
 export interface ISpecTextTileOptions {
   tileModel?: ITileModel,
   readOnly?: boolean,
+  showTitle?: boolean,
   onRegisterTileApi?: (tileApi: ITileApi, facet?: string) => void
 }
 
@@ -25,6 +26,8 @@ export function specTextTile(options: ISpecTextTileOptions) {
       config: {
         settings: {
           "text": {
+            // Text titles are hidden by default (matching app-config.json); showTitle opts in.
+            "hideTitle": !options.showTitle,
             "tools": [
               "bold",
               "italic",

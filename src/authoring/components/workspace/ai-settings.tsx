@@ -1,22 +1,13 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useForm, useWatch, SubmitHandler, useFieldArray, useController } from "react-hook-form";
+import { useForm, useWatch, SubmitHandler } from "react-hook-form";
 import { WritableDraft } from "immer";
-import { capitalize } from "lodash";
 
-import { AIEvaluation, CommentRole, commentRoles, IAuthorTool, Summarizer } from "../../types";
+import { AIEvaluation, IAuthorTool, Summarizer } from "../../types";
 import { useCurriculum } from "../../hooks/use-curriculum";
 import { kAITileType } from "../../../plugins/ai/ai-types";
 
-interface CommentTag {
-  label: string;
-  display: string;
-}
-
 interface AISettingsFormInputs {
-  commentTags: CommentTag[];
-  enableCommentRoles: CommentRole[];
-  showCommentRating: boolean;
   aiEvaluation?: AIEvaluation | "";
   aiPrompt: {
     systemPrompt: string;
@@ -39,14 +30,8 @@ const AISettings: React.FC = () => {
   const settings: AISettingsFormInputs = useMemo(() => {
     const {
       aiEvaluation,
-      commentTags: rawCommentTags,
-      enableCommentRoles,
       aiPrompt
     } = unitConfig?.config || {};
-
-    const commentTags: CommentTag[] = !rawCommentTags
-      ? []
-      : Object.entries(rawCommentTags).map(([label, display]) => ({ label, display }));
 
     // To allow for legacy configurations that do not have showIdeasButton set
     // we will continue to use the existing logic based on aiEvaluation
@@ -58,12 +43,7 @@ const AISettings: React.FC = () => {
 
     const aiTileAvailable = unitConfig?.config?.authorTools?.find(tool => isAIAuthorTool(tool)) !== undefined;
 
-    const showCommentRating = unitConfig?.config?.showCommentRating ?? true;
-
     return {
-      commentTags: commentTags ?? [],
-      enableCommentRoles: enableCommentRoles ?? [],
-      showCommentRating,
       aiEvaluation,
       aiPrompt: {
         systemPrompt: aiPrompt?.systemPrompt ?? "",
@@ -82,13 +62,6 @@ const AISettings: React.FC = () => {
     defaultValues: settings,
     mode: "onChange",
   });
-  const commentTagsFieldArray = useFieldArray({ control, name: "commentTags" });
-
-  const { field: { value: selectedCommentRoles = [], onChange: setCommentRoles } } = useController({
-    name: "enableCommentRoles",
-    control
-  });
-
   // listen for changes to aiEvaluation so we can enable/disable related fields
   const currentAiEvaluation = useWatch({ control, name: "aiEvaluation" });
 
@@ -124,16 +97,9 @@ const AISettings: React.FC = () => {
       const config = draft?.config;
       if (config) {
         config.aiEvaluation = data.aiEvaluation === "" ? undefined : data.aiEvaluation;
-        config.commentTags = data.commentTags.reduce((obj, tag) => {
-          if (tag.label && tag.display) {
-            obj[tag.label] = tag.display;
-          }
-          return obj;
-        }, {} as Record<string, string>);
-        config.enableCommentRoles = data.enableCommentRoles;
-        config.showCommentRating = data.showCommentRating;
 
-        const categories = Object.keys(config.commentTags);
+        // commentTags are authored on the Comments page; mirror them into AI categories here.
+        const categories = config.commentTags ? Object.keys(config.commentTags) : [];
 
         if (!config.aiPrompt) {
           config.aiPrompt = { ...data.aiPrompt, categories };
@@ -178,95 +144,6 @@ const AISettings: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
-        <fieldset>
-          <legend>Users that can use the comments panel (Enable Comment Roles)</legend>
-          <div className="horizontalGroup">
-            {commentRoles.map(role => (
-              <label key={role} className="horizontal middle">
-                <input
-                  type="checkbox"
-                  checked={selectedCommentRoles.includes(role)}
-                  onChange={() => {
-                    setCommentRoles(
-                      selectedCommentRoles.includes(role)
-                        ? selectedCommentRoles.filter(r => r !== role)
-                        : [...selectedCommentRoles, role]
-                    );
-                  }}
-                />
-                <span>{capitalize(role)}</span>
-              </label>
-            ))}
-          </div>
-          <label className="horizontal middle">
-            <input type="checkbox" {...register("showCommentRating")} />
-            <span>Show agree/disagree rating buttons on comments</span>
-          </label>
-        </fieldset>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Tag Label</th>
-            <th>Tag Display</th>
-          </tr>
-        </thead>
-        <tbody>
-          {commentTagsFieldArray.fields.map((tag, index) => (
-            <tr key={index}>
-              <td>
-                <div className="vertical left">
-                  <input
-                    type="text"
-                    {...register(`commentTags.${index}.label`, {
-                      required: "Required",
-                      validate: value => !/\s/.test(value) || "No spaces allowed"
-                    })}
-                    value={tag.label}
-                    onChange={e => {
-                      // Remove spaces as user types
-                      const newValue = e.target.value.replace(/\s/g, "");
-                      commentTagsFieldArray.update(index, { ...tag, label: newValue });
-                    }}
-                  />
-                  {errors.commentTags?.[index]?.label &&
-                    <span className="form-error">{errors.commentTags?.[index]?.label?.message}</span>
-                  }
-                </div>
-              </td>
-              <td>
-                <div className="vertical left">
-                  <input
-                    type="text"
-                    {...register(`commentTags.${index}.display`, { required: "Required" })}
-                    defaultValue={tag.display}
-                  />
-                  {errors.commentTags?.[index]?.display &&
-                    <span className="form-error">{errors.commentTags?.[index]?.display?.message}</span>
-                  }
-                </div>
-              </td>
-              <td className="narrow">
-                <button type="button" className="danger" onClick={() => {
-                  if (confirm("Are you sure you want to delete this tag?")) {
-                    commentTagsFieldArray.remove(index);
-                  }
-                }}>
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-          <tr>
-            <td className="left" style={{paddingTop: 10}}>
-              <button type="button" onClick={() => commentTagsFieldArray.append({ label: "", display: "" })}>
-                Add Tag
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
       <div className="horizontalGroup">
         <div>
           <label htmlFor="showIdeasButton">Show Ideas Button</label>

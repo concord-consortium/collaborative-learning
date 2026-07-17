@@ -1,0 +1,56 @@
+.station-section {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  margin: 8px 8px 0;
+
+  &.all {
+    background: #f7f7f7;
+  }
+
+  .station-name {
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  .station-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+
+    .data-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 100%;
+
+      .data-section-header {
+        display: flex;
+        justify-content: space-between;
+
+        .data-kind {
+          font-size: 14px;
+          text-transform: uppercase;
+          color: #888;
+        }
+
+        .data-stats {
+          font-size: 13px;
+          color: #444;
+        }
+      }
+    }
+
+    .station-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      .danger {
+        color: #fff;
+        background: #c0392b;
+      }
+    }
+  }
+}

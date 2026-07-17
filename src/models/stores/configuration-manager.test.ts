@@ -219,4 +219,22 @@ describe("ConfigurationManager", () => {
     expect(configManager.defaultSharedDocuments).toBe(true);
   });
 
+  it("should return false for allowCustomCommentTags when showCommentTag is not set", () => {
+    const config = { ...defaults, allowCustomCommentTags: true };
+    const configManager = new ConfigurationManager(config, []);
+    expect(configManager.allowCustomCommentTags).toBe(false);
+  });
+
+  it("should return true for allowCustomCommentTags when showCommentTag and allowCustomCommentTags are set", () => {
+    const config = { ...defaults, showCommentTag: true, allowCustomCommentTags: true };
+    const configManager = new ConfigurationManager(config, []);
+    expect(configManager.allowCustomCommentTags).toBe(true);
+  });
+
+  it("should return allowCustomCommentTags from override config", () => {
+    const override: Partial<UnitConfiguration> = { showCommentTag: true, allowCustomCommentTags: true };
+    const configManager = new ConfigurationManager(defaults, [override]);
+    expect(configManager.allowCustomCommentTags).toBe(true);
+  });
+
 });

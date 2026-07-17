@@ -473,6 +473,7 @@
         ]
       },
       "text": {
+        "hideTitle": true,
         "tools": [
           "bold",
           "italic",

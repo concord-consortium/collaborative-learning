@@ -1,0 +1,41 @@
+.admin-header {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  padding: 8px 12px;
+  background: #efefef;
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .option-area {
+      display: flex;
+      flex-direction: column;
+
+      .option-header {
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .stations {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+
+        .station-checkbox {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+      }
+
+      .dates {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+      }
+    }
+  }
+}

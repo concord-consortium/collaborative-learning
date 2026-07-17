@@ -7,14 +7,20 @@ export function utcDay(year: number, month: number, day: number): number {
   return Date.UTC(year, month - 1, day) / 1000;
 }
 
+/** Date in string format → Unix seconds. */
+export function utcDayFromString(dateString: string): number | undefined {
+  const date = new Date(dateString);
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
+  if (isNaN(year) || isNaN(month) || isNaN(day)) return undefined;
+
+  return utcDay(year, month + 1, day);
+}
+
 /** Unix seconds → UTC day index (days since the Unix epoch). */
 export function dayIndex(unixSec: number): number {
   return Math.floor(unixSec / SECONDS_PER_DAY);
-}
-
-/** Unix seconds → UTC day index for the final day in a range. */
-export function lastDayIndex(unixSec: number): number {
-  return Math.ceil(unixSec / SECONDS_PER_DAY) - 1;
 }
 
 /** Day index → UTC calendar year and day-of-year (1-based), for OPFS paths. */
@@ -34,10 +40,10 @@ export function dayToISORange(day: number): { startISO: string; endISO: string }
   return { startISO, endISO };
 }
 
-/** All UTC day indices overlapping [startSec, endSec). */
+/** All UTC day indices overlapping [startSec, endSec]. */
 export function daysInRange(startSec: number, endSec: number): number[] {
   const first = dayIndex(startSec);
-  const last = lastDayIndex(endSec);
+  const last = dayIndex(endSec);
   const days: number[] = [];
   for (let d = first; d <= last; d++) days.push(d);
   return days;

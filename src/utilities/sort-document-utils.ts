@@ -91,13 +91,18 @@ export const getTagsWithDocs = (
   // in store to find "Documents with no comments" then place those doc keys to "Not Tagged"
   const uniqueDocKeysWithTags = new Set<string>();
 
-  // Sort documents into their groups
+  // Sort documents into their groups. Also create a group for any strategy found on a document
+  // that isn't in the tag map (e.g. a teacher's custom tag from a different unit when sorting by
+  // tag across the whole unit), using the raw id as its label, so no tagged document is orphaned
+  // from the tag sort.
   documents.forEach(doc => {
     doc.strategies?.forEach(strategy => {
-      if (tagsWithDocs[strategy]) {
-        tagsWithDocs[strategy].docKeysFoundWithTag.push(doc.key);
-        uniqueDocKeysWithTags.add(doc.key);
+      if (!strategy) return;
+      if (!tagsWithDocs[strategy]) {
+        tagsWithDocs[strategy] = { tagKey: strategy, tagValue: strategy, docKeysFoundWithTag: [] };
       }
+      tagsWithDocs[strategy].docKeysFoundWithTag.push(doc.key);
+      uniqueDocKeysWithTags.add(doc.key);
     });
   });
 

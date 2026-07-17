@@ -1,0 +1,14 @@
+body {
+  margin: 0;
+}
+
+.seismic-admin {
+  display: flex;
+  flex-flow: column;
+  font-family: 'Lato', 'Noto Sans Symbols 2', 'Noto Sans Math', sans-serif;
+
+  &.loading {
+    padding: 24px;
+    color: #888;
+  }
+}

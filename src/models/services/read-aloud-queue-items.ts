@@ -1,4 +1,4 @@
-import { getTileComponentInfo } from "../tiles/tile-component-info";
+import { getAppConfig } from "../tiles/tile-environment";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { kTextTileType, TextContentModelType } from "../tiles/text/text-content";
 import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
@@ -132,7 +132,9 @@ function extractSketchText(objects: any[]): string {
 
 export function buildTileSpeechText(tile: ITileModel): string {
   const tileType = tile.content.type;
-  const title = getTileComponentInfo(tileType)?.hiddenTitle ? "" : tile.computedTitle;
+  // A tile's title is spoken unless the unit hides it via the generic per-tile `hideTitle` setting.
+  const titleHidden = getAppConfig(tile)?.getSetting("hideTitle", tileType);
+  const title = titleHidden ? "" : tile.computedTitle;
   const typeName = getTileTypeName(tileType);
 
   let textContent = "";

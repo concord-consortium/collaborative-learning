@@ -23,7 +23,8 @@ const mockStores = {
   appConfig: { aiEvaluation: undefined, aiPrompt: undefined },
   appMode: "authed" as const,
   demo: { name: "demo" },
-  user: { portal: "test-portal" }
+  user: { portal: "test-portal" },
+  commentTags: { customTagRecord: {} }
 };
 const mockDB = {
   stores: mockStores
@@ -270,6 +271,25 @@ describe("Firebase class", () => {
           expect(mockRef.set).toHaveBeenCalledTimes(2); // lastEditedAt + evaluation
           expect(mockRef.set).toHaveBeenCalledWith({
             aiPrompt: "test prompt",
+            timestamp: "server-timestamp"
+          });
+        });
+    });
+
+    it("merges teacher-added custom tag ids into aiPrompt.categories", async () => {
+      const storesWithCustomTags = {
+        ...mockStores,
+        appConfig: { aiEvaluation: "custom", aiPrompt: { categories: ["a"] } },
+        commentTags: { customTagRecord: { "custom-1": "Custom One" } }
+      };
+      const firebaseWithCustom = new Firebase({ stores: storesWithCustomTags } as unknown as DB);
+      const mockRef = { set: jest.fn().mockResolvedValue(undefined) };
+      jest.spyOn(firebaseWithCustom, 'ref').mockReturnValue(mockRef as any);
+
+      return firebaseWithCustom.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId)
+        .then(() => {
+          expect(mockRef.set).toHaveBeenCalledWith({
+            aiPrompt: { categories: ["a", "custom-1"] },
             timestamp: "server-timestamp"
           });
         });
