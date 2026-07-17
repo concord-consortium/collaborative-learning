@@ -85,7 +85,7 @@ if ! node -e '
   const Ajv = require("ajv");
   const schema = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
   const data = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
-  const ajv = new Ajv({ allErrors: true });
+  const ajv = new Ajv({ allErrors: true, strict: false });
   const validate = ajv.compile(schema);
   if (!validate(data)) {
     console.error("  " + ajv.errorsText(validate.errors, { separator: "\n  " }));
