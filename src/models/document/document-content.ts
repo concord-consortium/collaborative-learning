@@ -159,7 +159,13 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     if (hasSharedModels) {
       builder.pushLine(`"sharedModels": [`, 2);
       sharedModels.forEach((sharedModel, index) => {
-        const sharedModelLines = stringify(sharedModel).split("\n");
+        // A shared model can drop transient/runtime fields from its authoring export via
+        // exportJson() (e.g. SharedVariables strips live sim values); otherwise serialize the entry.
+        const nestedModel = sharedModel.sharedModel as any;
+        const serializable = typeof nestedModel?.exportJson === "function"
+          ? { ...getSnapshot(sharedModel), sharedModel: nestedModel.exportJson() }
+          : sharedModel;
+        const sharedModelLines = stringify(serializable).split("\n");
         sharedModelLines.forEach((sharedModelLine, lineIndex) => {
           const lineComma =
             lineIndex === sharedModelLines.length - 1 && index < sharedModels.length - 1

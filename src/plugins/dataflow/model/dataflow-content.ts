@@ -136,13 +136,22 @@ export const DataflowContentModel = TileContentModel
     },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
+      // Strip the transient per-tick buffers: a running program rewrites them every tick, which
+      // would re-serialize the export each tick and continuously reload authoring previews. They
+      // aren't curriculum content. Student saves use getSnapshot (not exportJson), so tick history
+      // there is unaffected.
+      const nodes = Object.fromEntries(
+        Object.entries(snapshot.program.nodes).map(([id, node]) => {
+          const n = node as any;
+          return [id, { ...n, data: { ...n.data, tickEntries: {} } }];
+        })
+      );
+      const program = { ...snapshot.program, recentTicks: [], nodes };
       if (options?.forHash) {
         // We only need the program for hashing
-        const {program} = snapshot;
         return stringify({program}, {maxLength: 120});
       }
-      // We used to strip out the recent values, maybe we should again?
-      return stringify(snapshot, {maxLength: 120});
+      return stringify({...snapshot, program}, {maxLength: 120});
     },
     get isDataSetEmptyCases(){
       //Used when DF linked to a table, then we clear. Different than isEmpty

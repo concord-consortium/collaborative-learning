@@ -1,8 +1,9 @@
-import { destroy, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { destroy, getSnapshot, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { UnitsManager, Variable, VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 import { SharedModel, SharedModelType } from "../../models/shared/shared-model";
 import { withoutUndo } from "../../models/history/without-undo";
 import { getSharedModelManager } from "../../models/tiles/tile-environment";
+import { isInputVariable, isOutputVariable } from "./simulations/simulation-utilities";
 
 export const kSharedVariablesID = "SharedVariables";
 
@@ -64,6 +65,24 @@ export const SharedVariables = SharedModel.named("SharedVariables")
   },
   getVariableById(id: string) {
     return self.variables.find(v => v.id === id);
+  },
+  // Authoring export that drops the live `value` of sim-driven (input/output) variables. A
+  // running simulation overwrites them every step, so keeping them would re-serialize the export
+  // each step and continuously reload authoring previews. Non-sim variables keep their value.
+  exportJson() {
+    const snapshot = getSnapshot(self);
+    return {
+      ...snapshot,
+      variables: snapshot.variables.map((variableSnap, i) => {
+        const variable = self.variables[i];
+        if (variable && (isInputVariable(variable) || isOutputVariable(variable))) {
+          const stripped = { ...variableSnap };
+          delete (stripped as any).value;
+          return stripped;
+        }
+        return variableSnap;
+      })
+    };
   }
 }));
 export interface SharedVariablesType extends Instance<typeof SharedVariables> {}
