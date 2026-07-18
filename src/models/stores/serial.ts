@@ -20,6 +20,11 @@ export class SerialDevice {
   writer: WritableStreamDefaultWriter;
   serialModalShown: boolean | null;
   deviceFamily: string | undefined;
+  // Spiker:bit (WebUSB) transport hooks. When spikerbitWrite is set, writeLine
+  // routes to it instead of the Web Serial writer. This single-store reuse is a
+  // deliberate MVP shortcut; see docs/superpowers/specs/2026-07-17-spikerbit-emg-dataflow-design.md §10.
+  spikerbitWrite: ((line: string) => void) | undefined;
+  private spikerbitConnected: boolean;
 
   constructor() {
     this.localBuffer = "";
@@ -226,7 +231,29 @@ export class SerialDevice {
     this.localBuffer = parseArduinoSerialData(this.localBuffer + value, channels);
   }
 
+  public isConnected(){
+    return this.hasPort() || this.spikerbitConnected === true;
+  }
+
+  public setSpikerbitActive(write: (line: string) => void){
+    this.spikerbitWrite = write;
+    this.spikerbitConnected = true;
+    this.deviceFamily = "arduino";
+    this.updateConnectionInfo(Date.now(), "connect");
+  }
+
+  public clearSpikerbit(){
+    this.spikerbitWrite = undefined;
+    this.spikerbitConnected = false;
+    this.deviceFamily = undefined;
+    this.updateConnectionInfo(Date.now(), "disconnect");
+  }
+
   public writeLine(line: string){
+    if (this.spikerbitWrite){
+      this.spikerbitWrite(line);
+      return;
+    }
     if (this.hasPort()){
       this.writer.write(textEncoder.encode(`${line}\n`));
     } else {
@@ -242,7 +269,7 @@ export class SerialDevice {
 
   public writeToOutForBBGripper(n:number, liveOutputType: string){
     const outputConfig = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
-    if (this.hasPort() && outputConfig?.angleBase !== undefined){
+    if (this.isConnected() && outputConfig?.angleBase !== undefined){
       const percent = n / 100;
       const openTo = Math.round(outputConfig.angleBase - (percent * outputConfig.sweep));
       this.writeLine(openTo.toString());
@@ -251,7 +278,7 @@ export class SerialDevice {
 
   public writeToOutForServo(n:number, liveOutputType: string){
     const outputConfig = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
-    if (this.hasPort() && outputConfig?.angleOffset !== undefined){
+    if (this.isConnected() && outputConfig?.angleOffset !== undefined){
       const scaledAngle = (outputConfig.angleScale * n) + outputConfig.angleOffset;
       const roundedScaled = Math.round(scaledAngle);
       this.writeLine(roundedScaled.toString());
