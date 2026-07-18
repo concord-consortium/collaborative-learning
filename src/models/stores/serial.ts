@@ -1,5 +1,6 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
+import { parseArduinoSerialData } from "./serial-protocol";
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
@@ -222,44 +223,7 @@ export class SerialDevice {
   }
 
   public handleArduinoStreamObj(value: string, channels: Array<NodeChannelInfo>){
-    this.localBuffer += value;
-
-    // Match any alphanumeric channel name, not just known ones,
-    // so unknown channels are still consumed from the buffer.
-    // No 'g' flag since we always search from the start of the modified buffer.
-    // Note this pattern doesn't handle NaN or negative numbers.
-    // We are seeing at least some NAN values from the Arduino. This currently
-    // gets ignored correctly, by the corrupted data fallback.
-    const pattern = /([a-z0-9]+):([0-9.]+)[\r][\n]/;
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const match = pattern.exec(this.localBuffer);
-
-      if (match) {
-        const [fullMatch, channel, numStr] = match;
-        this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
-
-        const targetChannel = channels.find((c: NodeChannelInfo) => {
-          return c.channelId === channel;
-        });
-
-        if (targetChannel){
-          targetChannel.value = Math.round(Number(numStr));
-        }
-      } else {
-        // No valid pattern found - check for corrupted data we can discard
-        const lineEndIndex = this.localBuffer.indexOf("\r\n");
-        if (lineEndIndex !== -1) {
-
-          // Discard everything up to and including the \r\n to recover
-          this.localBuffer = this.localBuffer.substring(lineEndIndex + 2);
-        } else {
-          // No complete line to discard, wait for more data
-          break;
-        }
-      }
-    }
+    this.localBuffer = parseArduinoSerialData(this.localBuffer + value, channels);
   }
 
   public writeLine(line: string){
