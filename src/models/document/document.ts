@@ -78,6 +78,7 @@ export const DocumentModel = Tree.named("Document")
     problem: types.maybe(types.string),
     investigation: types.maybe(types.string),
     unit: types.maybe(types.string),
+    contextId: types.maybe(types.string), // the document's authoritative owning-class (Firestore context_id)
   })
   .volatile(self => ({
     treeMonitor: undefined as TreeMonitor | undefined,

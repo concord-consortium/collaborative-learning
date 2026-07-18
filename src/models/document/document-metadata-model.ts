@@ -12,6 +12,7 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
   type: types.string,
   key: types.identifier,
   createdAt: types.maybe(types.number),
+  context_id: types.maybeNull(types.string),
   /**
    * If the document is a group document this is the id the group that owns the document.
    * If the document is not a group document this should be undefined because the group
