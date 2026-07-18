@@ -692,22 +692,7 @@ export class DB {
   }
 
   public async findFirestoreMetadata(documentKey: string) {
-    const { user } = this.stores;
-
-    const converter = typeConverter<IDocumentMetadata>();
-    const docByKey = this.firestore.collection("documents")
-      .withConverter(converter)
-      .where("context_id", "==", user.classHash)
-      .where("key", "==", documentKey);
-
-    // TODO: I suspect I'll need an new index for this to work
-    const maybeDoc = await docByKey.get();
-
-    if (maybeDoc.empty) {
-      return undefined;
-    } else {
-      return maybeDoc.docs[0].data();
-    }
+    return this.stores.documentMetadata.fetchMetadata(documentKey);
   }
 
   public async getOrCreateGroupDocument() {

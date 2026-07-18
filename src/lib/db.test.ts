@@ -491,4 +491,14 @@ describe("db", () => {
     });
   });
 
+  it("findFirestoreMetadata delegates to the document metadata store", async () => {
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    const fake = { uid: "u1", type: "problem", key: "doc-x", context_id: "class-1" } as any;
+    const spy = jest.spyOn(stores.documentMetadata, "fetchMetadata").mockResolvedValue(fake);
+    const result = await db.findFirestoreMetadata("doc-x");
+    expect(spy).toHaveBeenCalledWith("doc-x");
+    expect(result).toBe(fake);
+    spy.mockRestore();
+  });
+
 });
