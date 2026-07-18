@@ -38,3 +38,24 @@ describe("parseArduinoSerialData", () => {
     expect(remaining).toBe("");
   });
 });
+
+import { detectSpikerbitVersion } from "./serial-protocol";
+
+describe("detectSpikerbitVersion", () => {
+  it("returns the version and strips through the match when present", () => {
+    const { version, remaining } = detectSpikerbitVersion("noise CLUE-SPIKERBIT v1\r\nemg:5\r\n");
+    expect(version).toBe(1);
+    expect(remaining).toBe("emg:5\r\n");
+  });
+
+  it("returns null and the untouched buffer when absent", () => {
+    const { version, remaining } = detectSpikerbitVersion("emg:5\r\n");
+    expect(version).toBeNull();
+    expect(remaining).toBe("emg:5\r\n");
+  });
+
+  it("parses multi-digit versions", () => {
+    const { version } = detectSpikerbitVersion("CLUE-SPIKERBIT v12\r\n");
+    expect(version).toBe(12);
+  });
+});

@@ -27,3 +27,14 @@ export function parseArduinoSerialData(buffer: string, channels: NodeChannelInfo
   }
   return buffer;
 }
+
+// Detects our fixed program's version banner/reply ("CLUE-SPIKERBIT v<N>\r\n").
+// Returns the version and the buffer with the match (and any preceding bytes)
+// removed, so streamed emg: data after the reply is preserved for parsing.
+export function detectSpikerbitVersion(buffer: string): { version: number | null; remaining: string } {
+  const match = /CLUE-SPIKERBIT v(\d+)\r\n/.exec(buffer);
+  if (!match) {
+    return { version: null, remaining: buffer };
+  }
+  return { version: Number(match[1]), remaining: buffer.substring(match.index + match[0].length) };
+}
