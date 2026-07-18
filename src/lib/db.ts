@@ -101,6 +101,14 @@ export interface OpenDocumentOptions {
   unit?: string;
 }
 
+interface IGetOrCreateCanonicalDocumentOpts {
+  // The pointer slot's label. It must match the final segment of pointerPath and is written to the
+  // winning document's `canonical` field.
+  canonicalLabel: string;
+  groupUserId?: string;
+  findLegacy?: () => Promise<IDocumentMetadata | undefined>;
+}
+
 export class DB {
   @observable public groups: GroupUsersMap = {};
   public firebase: Firebase;
@@ -580,14 +588,8 @@ export class DB {
       // document type. The top-level metadata.classHash exists only on problem/offering-type
       // metadata, so reading it would be undefined for personal/learning-log documents.
       context_id: self.classHash,
-      // `network` is read back by firestore.rules (resourceInTeacherNetworks and
-      // userCanAccessDocument/getDocumentNetwork) to let teachers in the same network read and
-      // comment on each other's documents, so teacher documents must keep writing it or that
-      // cross-teacher visibility silently breaks. But it's only a snapshot of the creating user's
-      // single "primary" network captured at creation time, which isn't really safe: a teacher can
-      // belong to multiple networks or switch networks, so this value can later be wrong. We're
-      // preserving the existing behavior, not fixing it here. (Students/group docs have no
-      // network, so this is null.)
+      // A creation-time snapshot that rules read back; storing it here is problematic — see the
+      // "network field is problematic" note in docs/firestore-schema.md. Null for students/group docs.
       network: userContext.network || null,
       key: documentKey,
       properties: {},
@@ -730,12 +732,7 @@ export class DB {
   private async getOrCreateCanonicalDocument(
     pointerPath: string,
     type: DBDocumentType,
-    // canonicalLabel is the pointer slot's label; it must match the final segment of pointerPath and
-    // is written to the winning document's `canonical` field.
-    opts: {
-      canonicalLabel: string;
-      groupUserId?: string; findLegacy?: () => Promise<IDocumentMetadata | undefined>;
-    }
+    opts: IGetOrCreateCanonicalDocumentOpts
   ) {
     const { canonicalLabel, groupUserId, findLegacy } = opts;
     const pointerRef = this.firestore.doc(pointerPath);
@@ -743,6 +740,9 @@ export class DB {
     // 1. Fast path: pointer already exists.
     const pointerSnap = await pointerRef.get();
     if (pointerSnap.exists) {
+      // Every pointer is written with a documentKey by the claim/backfill transactions below, so
+      // it is always present here. If that invariant is ever broken, openCanonicalDocumentByKey
+      // throws (the referenced document won't be found) rather than failing silently.
       return this.openCanonicalDocumentByKey((pointerSnap.data() as ICanonicalPointer).documentKey);
     }
 
@@ -759,7 +759,8 @@ export class DB {
             });
             txn.update(this.firestore.doc(getSimpleDocumentPath(legacy.key)), { canonical: canonicalLabel });
           }
-        }).catch(() => undefined); // best-effort; a concurrent winner is fine
+        }).catch(() => undefined); // If the backfill txn throws (e.g. a concurrent caller already
+        // claimed the pointer), swallow it — we still return the legacy doc below either way.
         return this.openDocumentFromFirestoreMetadata(legacy);
       }
     }
