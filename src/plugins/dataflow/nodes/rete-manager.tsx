@@ -992,7 +992,7 @@ export class ReteManager implements INodeServices {
       this.stores.serialDevice.setSerialNodesCount(0);
     }
 
-    if (serialNodesCt > 0 && !this.stores.serialDevice.hasPort()){
+    if (serialNodesCt > 0 && !this.stores.serialDevice.isConnected()){
       this.postSerialModal();
     }
   }
@@ -1012,7 +1012,7 @@ export class ReteManager implements INodeServices {
 
     // physical connection has been made but user action needed
     if (lastMsg === "connect"
-        && !this.stores.serialDevice.hasPort()
+        && !this.stores.serialDevice.isConnected()
         && this.stores.serialDevice.serialNodesCount > 0
     ){
       alertMessage += btnMsg;
@@ -1046,7 +1046,7 @@ export class ReteManager implements INodeServices {
     // status should trigger updates.
     this.mstContent.channels.filter(c => c.usesSerial).forEach((channel) => {
       const { serialDevice } = this.stores;
-      if (serialDevice.hasPort()){
+      if (serialDevice.isConnected()){
         channel.serialConnected = true;
         const deviceMismatch = serialDevice.deviceFamily !== channel.deviceFamily;
         const timeSinceActive = channel.usesSerial && channel.lastMessageReceivedAt

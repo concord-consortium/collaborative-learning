@@ -63,7 +63,7 @@ export class SpikerbitDevice {
 
     // Route servo writes through this WebUSB connection and mark the shared store connected.
     this.serialDevice.setSpikerbitActive((line: string) => {
-      this.connection.serialWrite(`${line}\n`);
+      this.connection.serialWrite(`${line}\n`).catch((e) => console.warn("Spiker:bit serialWrite failed", e));
     });
   }
 
