@@ -503,7 +503,7 @@ describe("db", () => {
 
   describe("openDocument Firestore metadata sourcing", () => {
     function stubRtdb(metadataVal: any, documentVal: any) {
-      // openDocument calls this.firebase.getUserDocumentPath / getUserDocumentMetadataPath then this.firebase.ref(path).once("value")
+      // openDocument calls getUserDocumentPath / getUserDocumentMetadataPath then ref(path).once("value")
       jest.spyOn(db.firebase, "getUserDocumentPath").mockReturnValue("doc/path");
       jest.spyOn(db.firebase, "getUserDocumentMetadataPath").mockReturnValue("meta/path");
       jest.spyOn(db.firebase, "ref").mockImplementation((path?: string) => ({
@@ -549,7 +549,9 @@ describe("db", () => {
       jest.spyOn(db.firebase, "getUserDocumentPath").mockReturnValue("doc/path");
       jest.spyOn(db.firebase, "getUserDocumentMetadataPath").mockReturnValue("meta/path");
       jest.spyOn(db.firebase, "ref").mockImplementation((path?: string) => ({
-        once: () => Promise.resolve({ val: () => (path === "meta/path" ? { createdAt: 1, properties: {} } : { changeCount: 0 }) })
+        once: () => Promise.resolve({
+          val: () => (path === "meta/path" ? { createdAt: 1, properties: {} } : { changeCount: 0 })
+        })
       }) as any);
       jest.spyOn(stores.documentMetadata, "fetchMetadata")
         .mockResolvedValue({ uid: "u2", type: "personal", key: "pd1", context_id: "class-77" } as any);
