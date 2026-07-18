@@ -1,5 +1,5 @@
 import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel";
-import { parseArduinoSerialData } from "./serial-protocol";
+import { parseArduinoSerialData, detectSpikerbitVersion } from "./serial-protocol";
 
 function emgChannel(): NodeChannelInfo {
   return {
@@ -38,8 +38,6 @@ describe("parseArduinoSerialData", () => {
     expect(remaining).toBe("");
   });
 });
-
-import { detectSpikerbitVersion } from "./serial-protocol";
 
 describe("detectSpikerbitVersion", () => {
   it("returns the version and strips through the match when present", () => {
