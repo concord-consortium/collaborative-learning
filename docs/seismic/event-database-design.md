@@ -15,21 +15,22 @@ Related: [CLUE-463](https://concord-consortium.atlassian.net/browse/CLUE-463)
 One document per detected event, organized by station, channel, and model:
 
 ```
-services/seismic/stations/{station}/channels/{channel}/models/{model}/events/{windowStart}_{eventType}
+services/seismic/stations/{station}/locations/{location}/channels/{channel}/models/{model}/events/{windowStart}_{eventType}
   station: string          // e.g., "AK_K204" — denormalized for collection group queries
+  location: string         // e.g., "00" ("--" for blank) — denormalized for collection group queries
   channel: string          // e.g., "BHZ" — denormalized for collection group queries
   model: string            // e.g., "compact-v1" — denormalized for collection group queries
   windowStart: Timestamp
   windowEnd: Timestamp
   eventType: string        // e.g., "earthquake", "traffic"
   confidence: number       // 0.0–1.0
-  createdBy: string        // user ID
+  createdBy: string        // Firebase auth UID
   createdAt: Timestamp
 ```
 
-The `{station}` key uses the FDSN network+station format: `{network}_{station}` (e.g., `AK_K204`). This is globally unique across data providers — station codes alone are only unique within a network. The `{channel}` is a separate path segment because different channels (e.g., BHZ vs BNZ) have different sample rates and physical units, and the ML model produces different results for each. See [seismic-tiles-plan.md](seismic-tiles-plan.md#station-identification-across-systems) for the full convention.
+The `{station}` key uses the FDSN network+station format: `{network}_{station}` (e.g., `AK_K204`), as produced by `getStationPrefix` in [tile-addressing.ts](../../shared/seismic/tile-addressing.ts). This is globally unique across data providers — station codes alone are only unique within a network. The `{location}` is the SEED location code encoded with `encodeLocation` (blank becomes `--`, since Firestore path segments cannot be empty); it is its own segment because a station can host multiple instruments that share a channel code but differ by location. The `{channel}` is a separate path segment because different channels (e.g., BHZ vs BNZ) have different sample rates and physical units, and the ML model produces different results for each. The station/location/channel ordering matches the envelope tile cache (`getStationChannelPrefix`). See [seismic-tiles-plan.md](seismic-tiles-plan.md#station-identification-across-systems) for the full convention.
 
-The document ID is `{windowStart}_{eventType}` (e.g., `1710720000000_earthquake`). The composite key supports multiple events per window (a multi-class model may detect both traffic and earthquake in the same window) while providing natural deduplication — two users detecting the same event just overwrite with the same data.
+The document ID is `{windowStart}_{eventType}` (e.g., `1710720000000_earthquake`), where `windowStart` is epoch ms, matching `SeismicEvent.windowStart`. The composite key supports multiple events per window (a multi-class model may detect both traffic and earthquake in the same window) while providing natural deduplication — two users detecting the same event just overwrite with the same data.
 
 The primary query pattern is single station + single model + time range. The denormalized `station` and `model` fields exist to support future collection group queries across stations if needed.
 
@@ -38,7 +39,7 @@ The primary query pattern is single station + single model + time range. The den
 Bitmap-based tracking of which time ranges have been processed. Each bit represents a 10-minute coverage window. Documents are chunked into 30-day periods.
 
 ```
-services/seismic/stations/{station}/channels/{channel}/models/{model}/coverage/{chunkIndex}
+services/seismic/stations/{station}/locations/{location}/channels/{channel}/models/{model}/coverage/{chunkIndex}
   bitmap: Bytes            // Uint8Array, 1 bit per 10-min window, 540 bytes per 30-day chunk
   updatedAt: Timestamp
 ```
@@ -73,13 +74,14 @@ Firestore's `arrayUnion` would avoid transactions by storing coverage as an arra
 ## Security Rules
 
 ```javascript
-match /services/seismic/stations/{station}/channels/{channel}/models/{model} {
+match /services/seismic/stations/{station}/locations/{location}/channels/{channel}/models/{model} {
 
   match /events/{eventId} {
     allow read: if request.auth != null;
     allow write: if request.auth != null
                  && request.resource.data.createdBy == request.auth.uid
                  && request.resource.data.station == station
+                 && request.resource.data.location == location
                  && request.resource.data.channel == channel
                  && request.resource.data.model == model;
   }
@@ -93,30 +95,60 @@ match /services/seismic/stations/{station}/channels/{channel}/models/{model} {
 }
 ```
 
-- **Read**: any authenticated CLUE user.
-- **Event writes**: authenticated, `createdBy` must match auth UID, denormalized `station`, `channel`, and `model` fields must match the collection path.
+- **Read**: any authenticated CLUE user (including anonymous Firebase auth).
+- **Event writes**: authenticated, `createdBy` must match the Firebase auth UID, denormalized `station`, `location`, `channel`, and `model` fields must match the collection path.
 - **Coverage writes**: authenticated, validates `bitmap` is bytes and `updatedAt` is a timestamp.
 - **Server-side writes** (future batch pipeline): use the Firebase Admin SDK, which bypasses security rules.
 
-**Privacy note on `createdBy`:** The `createdBy` field stores a portal user ID (a numeric identifier). Since all authenticated CLUE users can read events, this ID is exposed in globally readable data. This is acceptable because portal user IDs are opaque numbers — converting them to a user name requires portal admin access. In theory, someone could cross-reference the same numeric ID across multiple systems to build a footprint for a user, but mitigating that would require maintaining a mapping from random anonymous IDs to actual portal IDs, which adds significant complexity. We've evaluated this tradeoff in other Concord systems and concluded that exposing portal user IDs is acceptable.
+**Privacy note on `createdBy`:** The `createdBy` field stores the Firebase auth UID (`request.auth.uid`). For anonymous users this is a random Firebase-generated ID with no identity attached. For portal-launched users it is the `uid` from the portal-issued Firebase JWT — a portal-derived identifier. Since all authenticated CLUE users can read events, these IDs are exposed in globally readable data. This is acceptable because the IDs are opaque — connecting one to an actual user requires portal admin access. In theory, someone could cross-reference the same ID across multiple systems to build a footprint for a user, but mitigating that would require maintaining a mapping from random anonymous IDs to actual user IDs, which adds significant complexity. We've evaluated this tradeoff in other Concord systems and concluded it is acceptable.
 
 ## Browser Code
 
-### Constants
+Code samples use the Firebase 8 namespaced API (what CLUE is on) and the existing shared seismic types:
 
 ```typescript
-const COVERAGE_EPOCH = Date.UTC(2020, 0, 1); // Jan 1 2020
-const CHUNK_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
-const WINDOW_DURATION_MS = 10 * 60 * 1000; // 10 minutes
-const WINDOWS_PER_CHUNK = 4320;
+import firebase from "firebase/app";
+import { StationData, TimeRange } from "shared/seismic/seismic-types";
+import { SeismicEvent } from "shared/seismic/seismic-model-types";
+import { encodeLocation, getStationPrefix } from "shared/seismic/tile-addressing";
+```
+
+(Import paths shown from the repo root for brevity; the codebase uses relative imports, e.g. `../../../shared/seismic/seismic-types` from `src/models/stores/`.)
+
+**Unit convention:** `TimeRange` is in Unix **seconds** (per its definition in seismic-types.ts), so all coverage math below works in seconds. `SeismicEvent` timestamps are epoch **ms**. Conversion to ms happens only at the Firestore `Timestamp` boundary and in event document IDs.
+
+### Constants and paths
+
+```typescript
+const COVERAGE_EPOCH = Date.UTC(2020, 0, 1) / 1000; // Jan 1 2020, Unix seconds
+const CHUNK_DURATION_S = 30 * 24 * 60 * 60; // 30 days
+const WINDOW_DURATION_S = 10 * 60; // 10 minutes
+const WINDOWS_PER_CHUNK = CHUNK_DURATION_S / WINDOW_DURATION_S; // 4320
 const BYTES_PER_CHUNK = Math.ceil(WINDOWS_PER_CHUNK / 8); // 540
+
+/** Firestore path to a station+location+channel+model container document. */
+function modelPath(stationData: StationData, model: string): string {
+  return `services/seismic/stations/${getStationPrefix(stationData)}` +
+    `/locations/${encodeLocation(stationData.location)}` +
+    `/channels/${stationData.channel}/models/${model}`;
+}
+
+/** Firestore path to a coverage chunk document. */
+function coveragePath(stationData: StationData, model: string, chunkIndex: number): string {
+  return `${modelPath(stationData, model)}/coverage/${chunkIndex}`;
+}
+
+/** Firestore path to a model's events collection. */
+function eventsPath(stationData: StationData, model: string): string {
+  return `${modelPath(stationData, model)}/events`;
+}
 ```
 
 ### Authentication
 
 ```typescript
 function getAuthenticatedUid(): string {
-  const user = auth.currentUser;
+  const user = firebase.auth().currentUser;
   if (!user) {
     throw new Error("User must be authenticated to write events");
   }
@@ -124,38 +156,38 @@ function getAuthenticatedUid(): string {
 }
 ```
 
-**Open question:** CLUE supports anonymous Firebase auth (students using CLUE without a portal login). Anonymous users have a Firebase UID, so they pass the `request.auth != null` security rule. Should anonymous users be allowed to contribute events and coverage to the shared database? If not, the security rules should additionally check for a portal-linked account (e.g., via a custom claim), and the client code should gate the "Run Model" button on portal authentication.
+**Decision:** CLUE supports anonymous Firebase auth (students using CLUE without a portal login). Anonymous users have a Firebase UID, so they pass the `request.auth != null` security rule, and they **are** allowed to contribute events and coverage to the shared database — their `createdBy` is a random Firebase UID. If this is revisited later, the security rules would need to additionally check for a portal-linked account (e.g., via a custom claim such as `request.auth.token.platform_user_id`, the pattern used elsewhere in firestore.rules), and the client code would gate the "Run Model" button on portal authentication.
 
 ### Coverage: index computation
 
 ```typescript
-function getChunkIndex(timestamp: number): number {
-  return Math.floor((timestamp - COVERAGE_EPOCH) / CHUNK_DURATION_MS);
+// All times in Unix seconds, matching TimeRange.
+
+function getChunkIndex(timeSec: number): number {
+  return Math.floor((timeSec - COVERAGE_EPOCH) / CHUNK_DURATION_S);
 }
 
 function getChunkStart(chunkIndex: number): number {
-  return chunkIndex * CHUNK_DURATION_MS + COVERAGE_EPOCH;
+  return chunkIndex * CHUNK_DURATION_S + COVERAGE_EPOCH;
 }
 
 function getChunkEnd(chunkIndex: number): number {
   return getChunkStart(chunkIndex + 1);
 }
 
-function getWindowIndex(timestamp: number): number {
-  const chunkStart = getChunkStart(getChunkIndex(timestamp));
-  return Math.floor((timestamp - chunkStart) / WINDOW_DURATION_MS);
+function getWindowIndex(timeSec: number): number {
+  const chunkStart = getChunkStart(getChunkIndex(timeSec));
+  return Math.floor((timeSec - chunkStart) / WINDOW_DURATION_S);
 }
 ```
 
 ### Coverage: writing (after running the model)
 
 ```typescript
-async function markCovered(
-  station: string, channel: string, model: string, startTime: number, endTime: number
-) {
+async function markCovered(stationData: StationData, model: string, range: TimeRange) {
   // Group windows by chunk
   const chunkUpdates = new Map<number, number[]>();
-  for (let t = startTime; t < endTime; t += WINDOW_DURATION_MS) {
+  for (let t = range.start; t < range.end; t += WINDOW_DURATION_S) {
     const chunk = getChunkIndex(t);
     const window = getWindowIndex(t);
     if (!chunkUpdates.has(chunk)) chunkUpdates.set(chunk, []);
@@ -163,17 +195,21 @@ async function markCovered(
   }
 
   // Transaction per chunk: read bitmap, OR in new bits, write back
+  const firestore = firebase.firestore();
   for (const [chunkIndex, windows] of chunkUpdates) {
-    const docRef = doc(db, "services", "seismic", "stations", station, "channels", channel, "models", model, "coverage", String(chunkIndex));
-    await runTransaction(db, async (txn) => {
+    const docRef = firestore.doc(coveragePath(stationData, model, chunkIndex));
+    await firestore.runTransaction(async (txn) => {
       const snap = await txn.get(docRef);
-      const bitmap = snap.exists()
-        ? snap.data().bitmap.toUint8Array()
+      const bitmap = snap.exists
+        ? (snap.data()!.bitmap as firebase.firestore.Blob).toUint8Array()
         : new Uint8Array(BYTES_PER_CHUNK);
       for (const w of windows) {
         bitmap[Math.floor(w / 8)] |= (1 << (w % 8));
       }
-      txn.set(docRef, { bitmap: Bytes.fromUint8Array(bitmap), updatedAt: serverTimestamp() });
+      txn.set(docRef, {
+        bitmap: firebase.firestore.Blob.fromUint8Array(bitmap),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
     });
   }
 }
@@ -183,25 +219,26 @@ async function markCovered(
 
 ```typescript
 async function getUncoveredRanges(
-  station: string, channel: string, model: string, startTime: number, endTime: number
-): Promise<Array<{ start: number; end: number }>> {
-  const startChunk = getChunkIndex(startTime);
-  const endChunk = getChunkIndex(endTime);
+  stationData: StationData, model: string, range: TimeRange
+): Promise<TimeRange[]> {
+  const firestore = firebase.firestore();
+  const startChunk = getChunkIndex(range.start);
+  const endChunk = getChunkIndex(range.end);
 
-  const gaps: Array<{ start: number; end: number }> = [];
+  const gaps: TimeRange[] = [];
   let currentGapStart: number | null = null;
 
   for (let chunk = startChunk; chunk <= endChunk; chunk++) {
-    const docRef = doc(db, "services", "seismic", "stations", station, "channels", channel, "models", model, "coverage", String(chunk));
-    const snap = await get(docRef);
-    const bitmap = snap.exists()
-      ? snap.data().bitmap.toUint8Array()
+    const docRef = firestore.doc(coveragePath(stationData, model, chunk));
+    const snap = await docRef.get();
+    const bitmap = snap.exists
+      ? (snap.data()!.bitmap as firebase.firestore.Blob).toUint8Array()
       : new Uint8Array(BYTES_PER_CHUNK);
 
     const chunkStart = getChunkStart(chunk);
     for (let w = 0; w < WINDOWS_PER_CHUNK; w++) {
-      const windowTime = chunkStart + w * WINDOW_DURATION_MS;
-      if (windowTime < startTime || windowTime >= endTime) continue;
+      const windowTime = chunkStart + w * WINDOW_DURATION_S;
+      if (windowTime < range.start || windowTime >= range.end) continue;
 
       const covered = (bitmap[Math.floor(w / 8)] & (1 << (w % 8))) !== 0;
       if (!covered && currentGapStart === null) {
@@ -213,7 +250,7 @@ async function getUncoveredRanges(
     }
   }
   if (currentGapStart !== null) {
-    gaps.push({ start: currentGapStart, end: Math.min(endTime, getChunkEnd(endChunk)) });
+    gaps.push({ start: currentGapStart, end: Math.min(range.end, getChunkEnd(endChunk)) });
   }
   return gaps;
 }
@@ -221,36 +258,29 @@ async function getUncoveredRanges(
 
 ### Events: writing (after running the model)
 
-```typescript
-interface SeismicEvent {
-  windowStart: number;
-  windowEnd: number;
-  eventType: string;
-  confidence: number;
-}
+Events use the existing `SeismicEvent` type from [seismic-model-types.ts](../../shared/seismic/seismic-model-types.ts) (`windowStart`/`windowEnd` in epoch ms), which is what the model runner already produces.
 
+```typescript
 function eventDocId(event: SeismicEvent): string {
   return `${event.windowStart}_${event.eventType}`;
 }
 
-async function writeEvents(
-  station: string, channel: string, model: string, events: SeismicEvent[]
-) {
-  const batch = writeBatch(db);
+async function writeEvents(stationData: StationData, model: string, events: SeismicEvent[]) {
+  const firestore = firebase.firestore();
+  const batch = firestore.batch();
   for (const event of events) {
-    const docRef = doc(
-      db, "services", "seismic", "stations", station, "channels", channel, "models", model, "events", eventDocId(event)
-    );
+    const docRef = firestore.collection(eventsPath(stationData, model)).doc(eventDocId(event));
     batch.set(docRef, {
-      station,
-      channel,
+      station: getStationPrefix(stationData),
+      location: encodeLocation(stationData.location),
+      channel: stationData.channel,
       model,
-      windowStart: Timestamp.fromMillis(event.windowStart),
-      windowEnd: Timestamp.fromMillis(event.windowEnd),
+      windowStart: firebase.firestore.Timestamp.fromMillis(event.windowStart),
+      windowEnd: firebase.firestore.Timestamp.fromMillis(event.windowEnd),
       eventType: event.eventType,
       confidence: event.confidence,
       createdBy: getAuthenticatedUid(),
-      createdAt: serverTimestamp(),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
   }
   await batch.commit();
@@ -263,23 +293,20 @@ Firestore batches are limited to 500 writes. If a model run produces more than 5
 
 ```typescript
 async function loadEvents(
-  station: string, channel: string, model: string, startTime: number, endTime: number,
-  pageSize = 500
+  stationData: StationData, model: string, range: TimeRange, pageSize = 500
 ): Promise<SeismicEvent[]> {
-  const eventsRef = collection(db, "services", "seismic", "stations", station, "channels", channel, "models", model, "events");
+  const eventsRef = firebase.firestore().collection(eventsPath(stationData, model));
   const events: SeismicEvent[] = [];
-  let lastDoc: QueryDocumentSnapshot | undefined;
+  let lastDoc: firebase.firestore.QueryDocumentSnapshot | undefined;
 
   while (true) {
-    let q = query(
-      eventsRef,
-      where("windowStart", ">=", Timestamp.fromMillis(startTime)),
-      where("windowStart", "<", Timestamp.fromMillis(endTime)),
-      orderBy("windowStart"),
-      limit(pageSize),
-      ...(lastDoc ? [startAfter(lastDoc)] : [])
-    );
-    const snap = await getDocs(q);
+    let q = eventsRef
+      .where("windowStart", ">=", firebase.firestore.Timestamp.fromMillis(range.start * 1000))
+      .where("windowStart", "<", firebase.firestore.Timestamp.fromMillis(range.end * 1000))
+      .orderBy("windowStart")
+      .limit(pageSize);
+    if (lastDoc) q = q.startAfter(lastDoc);
+    const snap = await q.get();
     for (const d of snap.docs) {
       events.push({
         windowStart: d.data().windowStart.toMillis(),
@@ -297,7 +324,7 @@ async function loadEvents(
 
 ## Typical UI Flow
 
-1. User selects station, channel, model, and time range in the Wave Runner tile.
+1. User selects a station (network + station + location + channel, i.e. a `StationData`), model, and time range in the Wave Runner tile.
 2. UI fetches coverage bitmaps → shows preview of what's been modeled vs. gaps.
 3. User clicks "Load Data" → paged query fetches events → populates SharedDataSet → Timeline tile renders events.
 4. User clicks "Run Model" → model runs on uncovered time ranges → writes events + marks coverage → SharedDataSet updated.
