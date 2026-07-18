@@ -30,7 +30,9 @@
       // This handles the exports section like webpack 5+ does, and also
       // doesn't require extensions on the import paths just like Webpack.
       "@concord-consortium/codap-formulas/*": ["node_modules/@concord-consortium/codap-formulas/dist/*"],
-      "seisplotjs": ["node_modules/seisplotjs/dist/index"]
+      "seisplotjs": ["node_modules/seisplotjs/dist/index"],
+      "@microbit/microbit-connection/usb": ["node_modules/@microbit/microbit-connection/build/esm/usb"],
+      "@microbit/microbit-connection/universal-hex": ["node_modules/@microbit/microbit-connection/build/esm/universal-hex"]
     },
     "types": ["w3c-web-serial", "gtag.js"]
   },

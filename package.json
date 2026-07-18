@@ -263,6 +263,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@emotion/styled": "^11.14.1",
     "@floating-ui/react": "^0.25.4",
+    "@microbit/microbit-connection": "^1.0.0",
     "@tensorflow/tfjs": "^4.22.0",
     "@visx/axis": "3.10.1",
     "@visx/grid": "3.5.0",
