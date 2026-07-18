@@ -99,6 +99,7 @@ export interface OpenDocumentOptions {
   problem?: string;
   investigation?: string;
   unit?: string;
+  firestoreMetadata?: IDocumentMetadata;
 }
 
 interface IGetOrCreateCanonicalDocumentOpts {
@@ -928,10 +929,19 @@ export class DB {
       const documentRef = this.firebase.ref(documentPath);
       const metadataRef = this.firebase.ref(metadataPath);
 
-      return Promise.all([documentRef.once("value"), metadataRef.once("value")])
-        .then(([documentSnapshot, metadataSnapshot]) => {
+      const firestoreMetadataPromise = options.firestoreMetadata
+        ? Promise.resolve<IDocumentMetadata | undefined>(options.firestoreMetadata)
+        : this.stores.documentMetadata.fetchMetadata(documentKey);
+
+      return Promise.all([documentRef.once("value"), metadataRef.once("value"), firestoreMetadataPromise])
+        .then(([documentSnapshot, metadataSnapshot, firestoreMetadata]) => {
           const document: DBDocument|null = documentSnapshot.val();
           const metadata: DBDocumentMetadata|null = metadataSnapshot.val();
+          if (!firestoreMetadata) {
+            throw new Error(
+              `Error retrieving Firestore metadata for document '${documentKey}' of type '${type}' for user '${userId}'`
+            );
+          }
           if (!metadata) {
             // if we have no metadata, there's nothing we can do
             const msg = `Error retrieving metadata for ` +
@@ -948,7 +958,8 @@ export class DB {
             console.warn(msg);
             return createDocumentModel({
                                   type, title, properties, groupId, visibility, uid: userId, originDoc, pubVersion,
-                                  key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0 });
+                                  key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0,
+                                  contextId: firestoreMetadata.context_id ?? undefined });
           }
 
           const content = this.parseDocumentContent(document);
@@ -968,7 +979,8 @@ export class DB {
               pubVersion,
               problem,
               investigation,
-              unit
+              unit,
+              contextId: firestoreMetadata.context_id ?? undefined,
             });
             // Stash the envelope's lastHistoryEntryId for the drift check that
             // runs once the Firestore history loads. Skipped (undefined) for
@@ -1028,6 +1040,7 @@ export class DB {
       ...firestoreMetadata,
       documentKey: firestoreMetadata.key,
       userId: firestoreMetadata.uid,
+      firestoreMetadata,
 
       // The following props are sometimes null in Firestore on the metadata docs.
       // For consistency we make them undefined which is what openDocument

@@ -501,4 +501,46 @@ describe("db", () => {
     spy.mockRestore();
   });
 
+  describe("openDocument Firestore metadata sourcing", () => {
+    function stubRtdb(metadataVal: any, documentVal: any) {
+      // openDocument calls this.firebase.getUserDocumentPath / getUserDocumentMetadataPath then this.firebase.ref(path).once("value")
+      jest.spyOn(db.firebase, "getUserDocumentPath").mockReturnValue("doc/path");
+      jest.spyOn(db.firebase, "getUserDocumentMetadataPath").mockReturnValue("meta/path");
+      jest.spyOn(db.firebase, "ref").mockImplementation((path?: string) => ({
+        once: () => Promise.resolve({ val: () => (path === "meta/path" ? metadataVal : documentVal) })
+      }) as any);
+    }
+
+    beforeEach(async () => {
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    });
+
+    it("applies context_id from passed-in firestoreMetadata to the model", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      const firestoreMetadata = { uid: "u1", type: "problem", key: "d1", context_id: "class-1" } as any;
+      const doc = await db.openDocument({
+        documentKey: "d1", type: "problem", userId: "u1", firestoreMetadata
+      } as any);
+      expect(doc.contextId).toBe("class-1");
+    });
+
+    it("fetches Firestore metadata from the store when none is passed", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      const spy = jest.spyOn(stores.documentMetadata, "fetchMetadata")
+        .mockResolvedValue({ uid: "u1", type: "problem", key: "d2", context_id: "class-9" } as any);
+      const doc = await db.openDocument({ documentKey: "d2", type: "problem", userId: "u1" } as any);
+      expect(spy).toHaveBeenCalledWith("d2");
+      expect(doc.contextId).toBe("class-9");
+      spy.mockRestore();
+    });
+
+    it("rejects when no Firestore metadata is available", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      jest.spyOn(stores.documentMetadata, "fetchMetadata").mockResolvedValue(undefined);
+      await expect(
+        db.openDocument({ documentKey: "d3", type: "problem", userId: "u1" } as any)
+      ).rejects.toThrow(/Firestore metadata/);
+    });
+  });
+
 });
