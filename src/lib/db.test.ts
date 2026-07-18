@@ -515,6 +515,10 @@ describe("db", () => {
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
     });
 
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
     it("applies context_id from passed-in firestoreMetadata to the model", async () => {
       stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
       const firestoreMetadata = { uid: "u1", type: "problem", key: "d1", context_id: "class-1" } as any;
@@ -531,7 +535,6 @@ describe("db", () => {
       const doc = await db.openDocument({ documentKey: "d2", type: "problem", userId: "u1" } as any);
       expect(spy).toHaveBeenCalledWith("d2");
       expect(doc.contextId).toBe("class-9");
-      spy.mockRestore();
     });
 
     it("rejects when no Firestore metadata is available", async () => {
@@ -540,6 +543,21 @@ describe("db", () => {
       await expect(
         db.openDocument({ documentKey: "d3", type: "problem", userId: "u1" } as any)
       ).rejects.toThrow(/Firestore metadata/);
+    });
+
+    it("a listener builder populates contextId via the store fetch", async () => {
+      jest.spyOn(db.firebase, "getUserDocumentPath").mockReturnValue("doc/path");
+      jest.spyOn(db.firebase, "getUserDocumentMetadataPath").mockReturnValue("meta/path");
+      jest.spyOn(db.firebase, "ref").mockImplementation((path?: string) => ({
+        once: () => Promise.resolve({ val: () => (path === "meta/path" ? { createdAt: 1, properties: {} } : { changeCount: 0 }) })
+      }) as any);
+      jest.spyOn(stores.documentMetadata, "fetchMetadata")
+        .mockResolvedValue({ uid: "u2", type: "personal", key: "pd1", context_id: "class-77" } as any);
+      jest.spyOn(stores.groups, "groupForUser").mockReturnValue(undefined as any);
+
+      const dbDocument = { title: "T", properties: {}, self: { uid: "u2", documentKey: "pd1" } } as any;
+      const doc = await db.createDocumentModelFromOtherDocument(dbDocument, "personal" as any);
+      expect(doc.contextId).toBe("class-77");
     });
   });
 
