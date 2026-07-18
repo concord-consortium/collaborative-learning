@@ -3,6 +3,7 @@ import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from './grou
 import { ClassModel, ClassModelType, ClassUserModel } from './class';
 import { ExemplarDocument, ProblemDocument } from '../document/document-types';
 import { ISortedDocumentsStores, MetadataDocMapModel, SortedDocuments } from "./sorted-documents";
+import { DocumentMetadataStore } from "./document-metadata-store";
 import { DeepPartial } from "utility-types";
 import { DocumentContentSnapshotType } from "../document/document-content";
 
@@ -145,16 +146,21 @@ describe('Sorted Documents Model', () => {
     mockClass = createMockClassWithUsers();
 
 
+    const documentMetadata = new DocumentMetadataStore(
+      { db: {}, user: { classHash: "" }, documents: { exemplarDocuments: [] } } as any
+    );
+    documentMetadata.metadataDocsFiltered = MetadataDocMapModel.create(mockMetadataDocuments);
+
     const mockStores: DeepPartial<ISortedDocumentsStores> = {
       //DeepPartial allows us to not need to mock the "dB" and "appConfig" stores
       //as well not needing to type the stores below
       documents: { all: mockDocuments, exemplarDocuments: [] },
       groups: mockGroups,
       class: mockClass,
+      documentMetadata,
     };
 
     sortedDocuments = new SortedDocuments(mockStores as ISortedDocumentsStores);
-    sortedDocuments.metadataDocsFiltered = MetadataDocMapModel.create(mockMetadataDocuments);
   });
 
 
@@ -188,10 +194,14 @@ describe('Sorted Documents Model', () => {
         visibility: "public",
         content: { tiles: [] } as DocumentContentSnapshotType
       });
+      const documentMetadataForExemplar = new DocumentMetadataStore(
+        { db: {}, user: { classHash: "" }, documents: { exemplarDocuments: [exemplarDoc] } } as any
+      );
       const stores: DeepPartial<ISortedDocumentsStores> = {
         documents: { all: [], exemplarDocuments: [exemplarDoc] },
         groups: mockGroups,
         class: mockClass,
+        documentMetadata: documentMetadataForExemplar,
       };
       const sd = new SortedDocuments(stores as ISortedDocumentsStores);
       expect(sd.exemplarMetadataDocs.get("exemplar-1")?.visibility).toBe("public");
