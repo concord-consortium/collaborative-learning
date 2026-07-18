@@ -20,6 +20,8 @@ import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
 import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { ReteManager } from "../nodes/rete-manager";
+import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
+import spikerbitHex from "../firmware/spikerbit-clue-v1.hex";
 
 import "./dataflow-program.scss";
 
@@ -72,6 +74,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private playbackReteManager: ReteManager | undefined;
   private programContainerEl: HTMLElement | null = null;
   private updateObservable = observable({updateCount: 0});
+  private spikerbitDevice: SpikerbitDevice | undefined;
 
   constructor(props: IProps) {
     super(props);
@@ -115,7 +118,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }}
       >
         <DataflowProgramTopbar
-          onSerialRefreshDevices={this.serialDeviceRefresh}
+          onConnectDevice={(deviceType) =>
+            deviceType === "spikerbit" ? this.connectSpikerbit() : this.serialDeviceRefresh()}
           programDataRates={ProgramDataRates}
           dataRate={programDataRate}
           onRateSelectClick={this.handleRateSelectClick}
@@ -443,6 +447,26 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (this.stores.serialDevice.hasPort()){
       // TODO - if necessary
       // https://web.dev/serial/#close-port
+    }
+  };
+
+  // The Spiker:bit library (@microbit/microbit-connection) is ESM-only and not in the
+  // jest transformIgnorePatterns allowlist, so it must never be statically imported here.
+  // Loading it via dynamic import keeps it out of both the Jest module graph and the
+  // initial webpack bundle, only fetching it when the user actually picks Spiker:bit.
+  private connectSpikerbit = async () => {
+    if (this.stores.serialDevice.isConnected()) return;
+    try {
+      const { createSpikerbitConnection, makeSpikerbitFlashDataSource } =
+        await import("../../../models/stores/spikerbit-connection");
+      const connection = createSpikerbitConnection();
+      this.spikerbitDevice = new SpikerbitDevice(this.stores.serialDevice, connection);
+      await this.spikerbitDevice.connectAndStream(
+        this.props.tileContent.channels,
+        makeSpikerbitFlashDataSource(spikerbitHex)
+      );
+    } catch (e) {
+      console.error("Spiker:bit connection failed", e);
     }
   };
 

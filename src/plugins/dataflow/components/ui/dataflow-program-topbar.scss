@@ -19,6 +19,41 @@ $gray-text: #242424;
     display: flex;
     width: 100%;
     justify-content: left;
+    position: relative;
+
+    .serial-device-menu {
+      position: absolute;
+      top: 32px;
+      left: 5px;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+      border: 2px solid #bcbcbc;
+      border-radius: 3px;
+
+      button {
+        padding: 4px 10px;
+        text-align: left;
+        background-color: white;
+        border: none;
+        border-bottom: 1px solid #eee;
+        font-size: 12px;
+        color: var(--gray-text);
+        cursor: pointer;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background-color: $gray-light-hover;
+        }
+        &:active {
+          background-color: $gray-light-click;
+        }
+      }
+    }
 
     .icon-refresh {
       display: flex;

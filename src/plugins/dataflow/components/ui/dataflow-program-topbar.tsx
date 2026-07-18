@@ -18,7 +18,7 @@ interface TopbarProps {
   programDataRates: ProgramDataRate[];
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
-  onSerialRefreshDevices: () => void;
+  onConnectDevice: (deviceType: "serial" | "spikerbit") => void;
   readOnly: boolean;
   showRateUI: boolean;
   lastIntervalDuration: number;
@@ -32,14 +32,14 @@ interface TopbarProps {
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
-  const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
+  const { onConnectDevice, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
           handleChangeOfProgramMode, programMode, playBackIndex, isPlaying,
           handleChangeIsPlaying, tileContent} = props;
 
   return (
     <div className="program-editor-topbar">
         <DataflowSerialConnectButton
-          onSerialRefreshDevices={onSerialRefreshDevices}
+          onConnectDevice={onConnectDevice}
           readOnly={readOnly}
           serialDevice={serialDevice}
         />
