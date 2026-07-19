@@ -13,7 +13,11 @@ import { encodeLocation, getStationPrefix } from "../../../shared/seismic/tile-a
  * Firestore I/O for the seismic event database.
  */
 
-/** Mark a (window-aligned) time range as processed. One transaction per 30-day chunk. */
+/**
+ * Mark a (window-aligned) time range as processed. One transaction per 30-day chunk.
+ * Call this only after the corresponding writeEvents has succeeded: marking coverage
+ * first would permanently skip those windows' events if the event write fails.
+ */
 export async function markCovered(stationData: StationData, model: string, range: TimeRange): Promise<void> {
   const firestore = firebase.firestore();
   for (const [chunkIndex, windows] of groupWindowsByChunk(range)) {
@@ -37,15 +41,21 @@ export async function getUncoveredRanges(
   stationData: StationData, model: string, range: TimeRange
 ): Promise<TimeRange[]> {
   const firestore = firebase.firestore();
-  const bitmaps = new Map<number, Uint8Array>();
   const startChunk = getChunkIndex(range.start);
   const endChunk = getChunkIndex(range.end);
+  const chunks: number[] = [];
   for (let chunk = startChunk; chunk <= endChunk; chunk++) {
-    const snap = await firestore.doc(coveragePath(stationData, model, chunk)).get();
-    if (snap.exists) {
-      bitmaps.set(chunk, (snap.data()!.bitmap as firebase.firestore.Blob).toUint8Array());
-    }
+    chunks.push(chunk);
   }
+  const snaps = await Promise.all(
+    chunks.map(chunk => firestore.doc(coveragePath(stationData, model, chunk)).get())
+  );
+  const bitmaps = new Map<number, Uint8Array>();
+  snaps.forEach((snap, i) => {
+    if (snap.exists) {
+      bitmaps.set(chunks[i], (snap.data()!.bitmap as firebase.firestore.Blob).toUint8Array());
+    }
+  });
   return findUncoveredRanges(bitmaps, range);
 }
 
@@ -94,8 +104,7 @@ export async function loadEvents(
   const events: SeismicEvent[] = [];
   let lastDoc: firebase.firestore.QueryDocumentSnapshot | undefined;
 
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
+  for (;;) {
     let q = eventsRef
       .where("windowStart", ">=", firebase.firestore.Timestamp.fromMillis(range.start * 1000))
       .where("windowStart", "<", firebase.firestore.Timestamp.fromMillis(range.end * 1000))
@@ -112,7 +121,7 @@ export async function loadEvents(
       });
     }
     if (snap.docs.length < pageSize) break;
-    lastDoc = snap.docs[snap.docs.length - 1] as firebase.firestore.QueryDocumentSnapshot;
+    lastDoc = snap.docs[snap.docs.length - 1];
   }
   return events;
 }
