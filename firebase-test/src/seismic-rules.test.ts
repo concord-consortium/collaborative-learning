@@ -65,6 +65,16 @@ describe("Firestore security rules: seismic event database", () => {
       await expectWriteToSucceed(db, kEventPath, validEvent());
       await expectDeleteToFail(db, kEventPath);
     });
+
+    // The design doc dedupes events by deterministic doc id, so a second user re-detecting the
+    // same event overwrites the existing doc — the rules intentionally allow that.
+    it("allows a different authenticated user to overwrite an existing event", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, kEventPath, validEvent());
+      const secondAuth = { uid: "user-generic-2" };
+      db = initFirestore(secondAuth);
+      await expectWriteToSucceed(db, kEventPath, { ...validEvent(), createdBy: secondAuth.uid });
+    });
   });
 
   describe("coverage", () => {
@@ -85,6 +95,12 @@ describe("Firestore security rules: seismic event database", () => {
       await expectWriteToFail(db, kCoveragePath, { ...validCoverage(), bitmap: [1, 2, 3] });
       await expectWriteToFail(db, kCoveragePath, { ...validCoverage(), updatedAt: "not-a-timestamp" });
       await expectWriteToFail(db, kCoveragePath, { bitmap: validCoverage().bitmap });
+    });
+
+    it("does not allow deleting coverage", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, kCoveragePath, validCoverage());
+      await expectDeleteToFail(db, kCoveragePath);
     });
   });
 });

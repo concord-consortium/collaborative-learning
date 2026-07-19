@@ -532,6 +532,8 @@ service cloud.firestore {
     // seismic event database (see docs/seismic/event-database-design.md)
     // Anonymous users are allowed to read and contribute (see design doc Decision).
     //
+    // Note: future collectionGroup("events") queries would additionally need a
+    // `match /{path=**}/events/{eventId}` rule; without one they'll be denied.
     match /services/seismic/stations/{station}/locations/{location}/channels/{channel}/models/{model} {
 
       match /events/{eventId} {
