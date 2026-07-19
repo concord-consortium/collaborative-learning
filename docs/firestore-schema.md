@@ -87,7 +87,7 @@ Fields:
 - contextId: (currently ignored; see `DocumentModel.metadata()`)
 - context_id: (string, uuid, should match context_id of a class)
 - createdAt: (timestamp)
-- network: (string, name of a network)
+- network: (string, name of a network) — _see [The `network` field is problematic](#the-network-field-is-problematic) below_
 - originDoc: (string, if set = key of the original document that created this PublishedDocument)
 - properties: (map, eg { pubCount: 1 })
 - teachers: (array of user IDs) _should be removed_
@@ -96,6 +96,19 @@ Collection:
 
 - comments
 - history
+
+#### The `network` field is problematic
+
+`network` records the creating user's single "primary" network name, captured as a snapshot at
+document-creation time. firestore.rules reads it back (`resourceInTeacherNetworks`,
+`getDocumentNetwork`) to let teachers in the same network read and comment on each other's
+documents, so teacher documents must keep writing it or that cross-teacher visibility silently
+breaks. (Student and group documents have no network, so the field is null for them.)
+
+Storing the network this way is not good. A teacher can belong to multiple networks or switch
+networks, so a value frozen at creation time can later be wrong. The network association really
+belongs to the user (or the class/offering), not to each individual document. This hasn't been
+reworked yet; until it is, new code should be aware the field can be stale.
 
 #### Contents of `documents/{docId}/comments/{commentId}`
 
