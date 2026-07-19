@@ -4,7 +4,7 @@ import { cast, flow, getSnapshot, types, Instance } from "mobx-state-tree";
 import { miniseed } from "seisplotjs";
 import { eventDocId, uncoveredDaySpans } from "../../../../shared/seismic/event-database";
 import { dayRange, SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
-import { TimeRange } from "../../../../shared/seismic/seismic-types";
+import { StationData, TimeRange } from "../../../../shared/seismic/seismic-types";
 import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
 import {
   getUncoveredRanges, loadEvents, markCovered, writeEvents
@@ -43,6 +43,21 @@ export interface ModelListEntry {
 
 export function defaultWaveRunnerContent(): WaveRunnerContentModelType {
   return WaveRunnerContentModel.create();
+}
+
+/**
+ * Best-effort persistence of one processed day's results: a failure here must not
+ * fail the local run. Events are written before coverage is marked, so a failed
+ * event write can't be hidden behind an already-covered day (see markCovered's
+ * ordering contract).
+ */
+async function saveDayResults(station: StationData, modelId: string, day: number, events: SeismicEvent[]) {
+  try {
+    if (events.length) await writeEvents(station, modelId, events);
+    await markCovered(station, modelId, dayRange(day));
+  } catch (err) {
+    console.warn("Failed to save seismic events/coverage:", err);
+  }
 }
 
 export const WaveRunnerContentModel = TileContentModel
@@ -316,14 +331,7 @@ export const WaveRunnerContentModel = TileContentModel
               detectionThreshold,
             );
 
-            // Best-effort persistence: a failure here must not fail the local run.
-            // Events are written before coverage so a failure can't permanently skip them.
-            try {
-              if (dayEvents.length) yield writeEvents(station, modelId, dayEvents);
-              yield markCovered(station, modelId, dayRange(day));
-            } catch (err) {
-              console.warn("Failed to save seismic events/coverage:", err);
-            }
+            yield saveDayResults(station, modelId, day, dayEvents);
 
             processed++;
             updateProgress();
@@ -332,11 +340,7 @@ export const WaveRunnerContentModel = TileContentModel
           // A day with no data is still processed — mark it covered so nobody re-checks it.
           // Errored days are NOT marked covered, so a later run retries them.
           for (const day of downloadService.emptyDays) {
-            try {
-              yield markCovered(station, modelId, dayRange(day));
-            } catch (err) {
-              console.warn("Failed to save seismic coverage:", err);
-            }
+            yield saveDayResults(station, modelId, day, []);
           }
           // Count this span's errored/empty days via the live service arrays first, then fold
           // them into skippedDays so they survive the next span's ensureRange reset.

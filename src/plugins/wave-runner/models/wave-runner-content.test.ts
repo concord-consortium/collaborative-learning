@@ -305,11 +305,15 @@ describe("WaveRunnerContent", () => {
       const feb1Sec = Date.UTC(2026, 1, 1) / 1000;
       const feb1Day = feb1Sec / SECONDS_PER_DAY;
 
+      // Serves only the ready days that fall within the most recent ensureRange call,
+      // then DONE — mirroring the real service's reset-per-ensureRange drain contract.
       function makeFakeService(days: number[]) {
-        let i = 0;
+        let pending: number[] = [];
         const fakeService = {
-          ensureRange: jest.fn(),
-          nextReadyDay: jest.fn(async () => (i < days.length ? days[i++] : DONE)),
+          ensureRange: jest.fn(({ startSec, endSec }: { startSec: number, endSec: number }) => {
+            pending = days.filter(d => d * SECONDS_PER_DAY >= startSec && d * SECONDS_PER_DAY < endSec);
+          }),
+          nextReadyDay: jest.fn(async () => pending.shift() ?? DONE),
           readDay: jest.fn(async () => new ArrayBuffer(8)),
           cancel: jest.fn(),
           erroredDays: [] as number[],
@@ -405,6 +409,58 @@ describe("WaveRunnerContent", () => {
         expect(writeEvents).toHaveBeenCalledWith(expect.anything(), "placeholder-v1", [evt]);
         expect(markCovered).toHaveBeenCalledWith(expect.anything(), "placeholder-v1",
           { start: feb1Day * SECONDS_PER_DAY, end: (feb1Day + 1) * SECONDS_PER_DAY });
+        expect(content.runError).toBeNull();
+      });
+
+      it("marks empty days covered but never errored days", async () => {
+        // Feb 1 has data + events, Feb 2 is empty, Feb 3 errors
+        const fakeService = makeFakeService([feb1Day]);
+        fakeService.emptyDays.push(feb1Day + 1);
+        fakeService.erroredDays.push(feb1Day + 2);
+        const evt = makeEvent(Date.UTC(2026, 1, 1, 1));
+        jest.spyOn(SeismicModelRunner.prototype, "processChunk")
+          .mockImplementation(async (_seismogram: any, callbacks: any) => {
+            callbacks.onEvents([evt]);
+            return [];
+          });
+
+        const content = await setupRunReadyContent();
+        await content.runModel();
+
+        expect(writeEvents).toHaveBeenCalledTimes(1);
+        expect(markCovered).toHaveBeenCalledTimes(2);
+        expect(markCovered).toHaveBeenCalledWith(expect.anything(), "placeholder-v1",
+          { start: feb1Day * SECONDS_PER_DAY, end: (feb1Day + 1) * SECONDS_PER_DAY });
+        expect(markCovered).toHaveBeenCalledWith(expect.anything(), "placeholder-v1",
+          { start: (feb1Day + 1) * SECONDS_PER_DAY, end: (feb1Day + 2) * SECONDS_PER_DAY });
+        expect(markCovered).not.toHaveBeenCalledWith(expect.anything(), "placeholder-v1",
+          { start: (feb1Day + 2) * SECONDS_PER_DAY, end: (feb1Day + 3) * SECONDS_PER_DAY });
+        expect(content.chunksProcessed).toBe(3);
+        expect(content.chunksTotal).toBe(3);
+        expect(content.runError).toBeNull();
+      });
+
+      it("downloads each uncovered span separately", async () => {
+        // Feb 1 and Feb 3 uncovered; Feb 2 covered
+        const feb3Sec = feb1Sec + 2 * SECONDS_PER_DAY;
+        (getUncoveredRanges as jest.Mock).mockResolvedValueOnce([
+          { start: feb1Sec, end: feb1Sec + SECONDS_PER_DAY },
+          { start: feb3Sec, end: feb3Sec + SECONDS_PER_DAY },
+        ]);
+        const fakeService = makeFakeService([feb1Day, feb1Day + 2]);
+        const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+
+        const content = await setupRunReadyContent();
+        await content.runModel();
+
+        expect(fakeService.ensureRange).toHaveBeenCalledTimes(2);
+        expect(fakeService.ensureRange).toHaveBeenNthCalledWith(1,
+          expect.objectContaining({ startSec: feb1Sec, endSec: feb1Sec + SECONDS_PER_DAY }));
+        expect(fakeService.ensureRange).toHaveBeenNthCalledWith(2,
+          expect.objectContaining({ startSec: feb3Sec, endSec: feb3Sec + SECONDS_PER_DAY }));
+        expect(processChunk).toHaveBeenCalledTimes(2);
+        expect(content.chunksProcessed).toBe(2);
+        expect(content.chunksTotal).toBe(2);
         expect(content.runError).toBeNull();
       });
 
