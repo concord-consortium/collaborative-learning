@@ -2,8 +2,9 @@
  * Seismic event database: pure constants, index math, Firestore path builders,
  * and coverage-bitmap helpers.
  */
+import { dayIndex } from "./seismic-day";
 import { SeismicEvent } from "./seismic-model-types";
-import { StationData } from "./seismic-types";
+import { StationData, TimeRange } from "./seismic-types";
 import { encodeLocation, getStationPrefix } from "./tile-addressing";
 
 /** Coverage epoch: Jan 1 2020 UTC. All coverage math is in seconds. */
@@ -50,4 +51,95 @@ export function eventsPath(stationData: StationData, model: string): string {
 /** Event document ID: windowStart (epoch ms) + eventType. Deduplicates re-detections. */
 export function eventDocId(event: SeismicEvent): string {
   return `${event.windowStart}_${event.eventType}`;
+}
+
+/**
+ * Group the 10-minute windows of a time range by coverage chunk.
+ * `range` should be window-aligned (day-aligned ranges always are).
+ */
+export function groupWindowsByChunk(range: TimeRange): Map<number, number[]> {
+  const chunkUpdates = new Map<number, number[]>();
+  for (let t = range.start; t < range.end; t += WINDOW_DURATION_S) {
+    const chunk = getChunkIndex(t);
+    const window = getWindowIndex(t);
+    if (!chunkUpdates.has(chunk)) chunkUpdates.set(chunk, []);
+    chunkUpdates.get(chunk)!.push(window);
+  }
+  return chunkUpdates;
+}
+
+/** OR the given window bits into the bitmap (mutates). Idempotent. */
+export function setWindowBits(bitmap: Uint8Array, windows: number[]): void {
+  for (const w of windows) {
+    // eslint-disable-next-line no-bitwise
+    bitmap[Math.floor(w / 8)] |= (1 << (w % 8));
+  }
+}
+
+export function isWindowCovered(bitmap: Uint8Array, window: number): boolean {
+  // eslint-disable-next-line no-bitwise
+  return (bitmap[Math.floor(window / 8)] & (1 << (window % 8))) !== 0;
+}
+
+/**
+ * Scan pre-fetched coverage bitmaps for uncovered sub-ranges of `range`.
+ * `bitmaps` maps chunkIndex → bitmap; a missing entry means an unwritten
+ * (fully uncovered) chunk. Returns disjoint, sorted gaps.
+ */
+export function findUncoveredRanges(bitmaps: Map<number, Uint8Array>, range: TimeRange): TimeRange[] {
+  const startChunk = getChunkIndex(range.start);
+  const endChunk = getChunkIndex(range.end);
+
+  const gaps: TimeRange[] = [];
+  let currentGapStart: number | null = null;
+
+  for (let chunk = startChunk; chunk <= endChunk; chunk++) {
+    const bitmap = bitmaps.get(chunk);
+    const chunkStart = getChunkStart(chunk);
+    for (let w = 0; w < WINDOWS_PER_CHUNK; w++) {
+      const windowTime = chunkStart + w * WINDOW_DURATION_S;
+      if (windowTime < range.start || windowTime >= range.end) continue;
+
+      const covered = !!bitmap && isWindowCovered(bitmap, w);
+      if (!covered && currentGapStart === null) {
+        currentGapStart = windowTime;
+      } else if (covered && currentGapStart !== null) {
+        gaps.push({ start: currentGapStart, end: windowTime });
+        currentGapStart = null;
+      }
+    }
+  }
+  if (currentGapStart !== null) {
+    gaps.push({ start: currentGapStart, end: Math.min(range.end, getChunkEnd(endChunk)) });
+  }
+  return gaps;
+}
+
+export interface DaySpan {
+  startDay: number; // UTC day index (days since Unix epoch), inclusive
+  endDay: number;   // inclusive
+}
+
+/**
+ * Convert uncovered ranges into merged spans of UTC day indices, clamped to `range`.
+ * The download/model pipeline is day-based, so a day is processed iff it
+ * intersects an uncovered range. Assumes `gaps` are disjoint and sorted
+ * (as returned by findUncoveredRanges).
+ */
+export function uncoveredDaySpans(gaps: TimeRange[], range: TimeRange): DaySpan[] {
+  const spans: DaySpan[] = [];
+  for (const gap of gaps) {
+    const start = Math.max(gap.start, range.start);
+    const end = Math.min(gap.end, range.end);
+    if (end <= start) continue;
+    const startDay = dayIndex(start);
+    const endDay = dayIndex(end - 1); // end is exclusive
+    const last = spans[spans.length - 1];
+    if (last && startDay <= last.endDay + 1) {
+      last.endDay = Math.max(last.endDay, endDay);
+    } else {
+      spans.push({ startDay, endDay });
+    }
+  }
+  return spans;
 }

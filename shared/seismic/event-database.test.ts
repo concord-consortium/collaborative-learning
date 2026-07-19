@@ -1,9 +1,10 @@
 import {
   BYTES_PER_CHUNK, CHUNK_DURATION_S, COVERAGE_EPOCH, WINDOW_DURATION_S, WINDOWS_PER_CHUNK,
-  coveragePath, eventDocId, eventsPath, getChunkEnd, getChunkIndex, getChunkStart, getWindowIndex, modelPath
+  coveragePath, eventDocId, eventsPath, findUncoveredRanges, getChunkEnd, getChunkIndex, getChunkStart,
+  getWindowIndex, groupWindowsByChunk, isWindowCovered, modelPath, setWindowBits, uncoveredDaySpans
 } from "./event-database";
 import { SeismicEvent } from "./seismic-model-types";
-import { StationData } from "./seismic-types";
+import { StationData, TimeRange } from "./seismic-types";
 
 const stationData: StationData = { network: "AK", station: "K204", channel: "BHZ", location: "00" };
 const blankLocation: StationData = { network: "AK", station: "K204", channel: "BHZ" };
@@ -77,5 +78,125 @@ describe("eventDocId", () => {
       windowStart: 1710720000000, windowEnd: 1710720060000, eventType: "earthquake", confidence: 0.9
     };
     expect(eventDocId(event)).toBe("1710720000000_earthquake");
+  });
+});
+
+describe("groupWindowsByChunk", () => {
+  it("groups a range within one chunk", () => {
+    const range: TimeRange = { start: COVERAGE_EPOCH, end: COVERAGE_EPOCH + 3 * WINDOW_DURATION_S };
+    const groups = groupWindowsByChunk(range);
+    expect([...groups.keys()]).toEqual([0]);
+    expect(groups.get(0)).toEqual([0, 1, 2]);
+  });
+
+  it("splits a range that crosses a chunk boundary", () => {
+    const range: TimeRange = {
+      start: COVERAGE_EPOCH + CHUNK_DURATION_S - WINDOW_DURATION_S,
+      end: COVERAGE_EPOCH + CHUNK_DURATION_S + WINDOW_DURATION_S
+    };
+    const groups = groupWindowsByChunk(range);
+    expect(groups.get(0)).toEqual([WINDOWS_PER_CHUNK - 1]);
+    expect(groups.get(1)).toEqual([0]);
+  });
+});
+
+describe("setWindowBits / isWindowCovered", () => {
+  it("sets and reads bits", () => {
+    const bitmap = new Uint8Array(BYTES_PER_CHUNK);
+    setWindowBits(bitmap, [0, 7, 8, 4319]);
+    expect(isWindowCovered(bitmap, 0)).toBe(true);
+    expect(isWindowCovered(bitmap, 7)).toBe(true);
+    expect(isWindowCovered(bitmap, 8)).toBe(true);
+    expect(isWindowCovered(bitmap, 4319)).toBe(true);
+    expect(isWindowCovered(bitmap, 1)).toBe(false);
+    expect(isWindowCovered(bitmap, 4318)).toBe(false);
+  });
+
+  it("is idempotent", () => {
+    const bitmap = new Uint8Array(BYTES_PER_CHUNK);
+    setWindowBits(bitmap, [5]);
+    const copy = new Uint8Array(bitmap);
+    setWindowBits(bitmap, [5]);
+    expect(bitmap).toEqual(copy);
+  });
+});
+
+describe("findUncoveredRanges", () => {
+  const range = (startWindows: number, endWindows: number): TimeRange => ({
+    start: COVERAGE_EPOCH + startWindows * WINDOW_DURATION_S,
+    end: COVERAGE_EPOCH + endWindows * WINDOW_DURATION_S
+  });
+
+  it("returns the whole range when no bitmaps exist", () => {
+    expect(findUncoveredRanges(new Map(), range(0, 6))).toEqual([range(0, 6)]);
+  });
+
+  it("returns nothing when the range is fully covered", () => {
+    const bitmap = new Uint8Array(BYTES_PER_CHUNK);
+    setWindowBits(bitmap, [0, 1, 2, 3, 4, 5]);
+    expect(findUncoveredRanges(new Map([[0, bitmap]]), range(0, 6))).toEqual([]);
+  });
+
+  it("finds an interior gap", () => {
+    const bitmap = new Uint8Array(BYTES_PER_CHUNK);
+    setWindowBits(bitmap, [0, 1, 4, 5]);
+    expect(findUncoveredRanges(new Map([[0, bitmap]]), range(0, 6))).toEqual([range(2, 4)]);
+  });
+
+  it("finds leading and trailing gaps", () => {
+    const bitmap = new Uint8Array(BYTES_PER_CHUNK);
+    setWindowBits(bitmap, [2, 3]);
+    expect(findUncoveredRanges(new Map([[0, bitmap]]), range(0, 6)))
+      .toEqual([range(0, 2), range(4, 6)]);
+  });
+
+  it("merges a gap spanning a chunk boundary", () => {
+    const bitmap0 = new Uint8Array(BYTES_PER_CHUNK);
+    setWindowBits(bitmap0, [WINDOWS_PER_CHUNK - 2]); // covered except the last window
+    const start = COVERAGE_EPOCH + (WINDOWS_PER_CHUNK - 2) * WINDOW_DURATION_S;
+    const end = COVERAGE_EPOCH + CHUNK_DURATION_S + 2 * WINDOW_DURATION_S;
+    // chunk 1 has no bitmap: gap runs from last window of chunk 0 into chunk 1
+    expect(findUncoveredRanges(new Map([[0, bitmap0]]), { start, end }))
+      .toEqual([{ start: COVERAGE_EPOCH + (WINDOWS_PER_CHUNK - 1) * WINDOW_DURATION_S, end }]);
+  });
+});
+
+describe("uncoveredDaySpans", () => {
+  const DAY = 86400;
+  const day0 = COVERAGE_EPOCH; // COVERAGE_EPOCH is midnight UTC, so day-aligned
+  const dayIdx = day0 / DAY;
+
+  it("returns no spans when there are no gaps", () => {
+    expect(uncoveredDaySpans([], { start: day0, end: day0 + 3 * DAY })).toEqual([]);
+  });
+
+  it("maps a sub-day gap to its containing day", () => {
+    const gaps: TimeRange[] = [{ start: day0 + 600, end: day0 + 1200 }];
+    expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * DAY }))
+      .toEqual([{ startDay: dayIdx, endDay: dayIdx }]);
+  });
+
+  it("merges gaps on adjacent days into one span", () => {
+    const gaps: TimeRange[] = [
+      { start: day0 + 600, end: day0 + 1200 },
+      { start: day0 + DAY + 600, end: day0 + DAY + 1200 }
+    ];
+    expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * DAY }))
+      .toEqual([{ startDay: dayIdx, endDay: dayIdx + 1 }]);
+  });
+
+  it("keeps non-adjacent days as separate spans", () => {
+    const gaps: TimeRange[] = [
+      { start: day0, end: day0 + 600 },
+      { start: day0 + 2 * DAY, end: day0 + 2 * DAY + 600 }
+    ];
+    expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * DAY }))
+      .toEqual([{ startDay: dayIdx, endDay: dayIdx }, { startDay: dayIdx + 2, endDay: dayIdx + 2 }]);
+  });
+
+  it("clamps a gap ending exactly on a day boundary to the previous day", () => {
+    const gaps: TimeRange[] = [{ start: day0, end: day0 + DAY }];
+    expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * DAY }))
+      .toEqual([{ startDay: dayIdx, endDay: dayIdx }]);
   });
 });
