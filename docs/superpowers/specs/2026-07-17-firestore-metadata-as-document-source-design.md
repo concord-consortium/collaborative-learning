@@ -2,6 +2,7 @@
 
 > **Status:** design (uncommitted draft for review).
 > **Origin briefing:** [`2026-07-17-firestore-metadata-as-document-source-context.md`](./2026-07-17-firestore-metadata-as-document-source-context.md).
+> **Chore:** CLUE-576 (`DocumentMetadataStore`, §4).
 > **Relates to:** CLUE-524 (client-authoritative Firestore metadata + canonical pointers),
 > CLUE-554 (Sort Work reactive visibility/title).
 
@@ -78,42 +79,90 @@ off the Firestore metadata.* The Stage 1 store (§4) is the shared substrate tho
 the pending peer-title reaction — should sit on. Title and visibility are **already dual-written** (RTDB **and**
 Firestore, via `useSyncMstPropToFirebase`), which makes them the closest future cut-over candidates (roadmap §8).
 
-## 4. Stage 1 — Extract `DocumentMetadataStore`
+## 4. Stage 1 — The `DocumentMetadataStore` (metadata authority)
 
-**Ships first, no behavior change.** Today Sort Work owns the only reactive read of the `documents` collection
+**Ships first, no behavior change.** Sort Work owns the only reactive read of the `documents` collection
 (`watchFirestoreMetaDataDocs` → private `firestoreMetadataDocs` maps in
-[sorted-documents.ts](../../../src/models/stores/sorted-documents.ts)). Promote that into a public, class-scoped
-MST store keyed by document `key`.
+[sorted-documents.ts](../../../src/models/stores/sorted-documents.ts)). Extract the **shared metadata logic** —
+the per-document validate + exemplar-enrich transform, and a validated point read — into a public store keyed by
+document `key`. Every path that admits a metadata document into the system routes through that transform, so the
+store becomes the single authority for *what a valid metadata document is*.
 
-**Contract:**
+### Why the store owns the transform, not the collection
 
-- `getMetadata(key): IDocumentMetadata | undefined` — synchronous cache read.
-- `fetchMetadata(key): Promise<IDocumentMetadata | undefined>` — memoized **cache-hit-else-point-read** (returns
-  a cache hit if the bulk watcher has loaded the doc; otherwise issues one point query and memoizes it).
-- Bulk populate via a reactive `onSnapshot` over `documents` (`context_id == classHash`, plus optional
-  unit/investigation/problem filters), backing `DocumentMetadataModel`s keyed by `key`.
+The obvious alternative was to fold **all** of Sort Work's Firestore reading into the store — a single
+class-scoped filtered map behind a generic by-key API — and delete the equivalent state from
+`SortedDocuments`. We deliberately did **not**, because a single filtered map cannot honestly serve more than
+one consumer:
 
-**A note on how much Sort Work actually loads.** Sort Work's existing watcher is **scoped to its currently-selected
-filter**, not the whole class: `"All"` loads the whole class (`context_id` only), but `"Unit"`/`"Investigation"`/
-`"Problem"` load progressively narrower subsets (the current problem's docs, plus a separate query for unit-less
-personal docs). So a cache populated *by Sort Work* holds only what Sort Work is currently showing.
+- Sort Work's watch is **filter-shaped** (`watchFirestoreMetaDataDocs(filter, unit, investigation, problem)`)
+  and applies each snapshot by **replacing the whole map**. A second consumer that set up a watch with a
+  different filter would clobber the first. A store that presents a generic `getMetadata`/by-key face while
+  actually holding one filtered map *looks* shareable but is not — it works only while Sort Work is the sole
+  watcher.
+- The genuinely shareable thing is the **per-document transform** (validate + exemplar-enrich) and the
+  **point-read API**, not the filtered collection. So the store owns those, and **each consumer owns its own
+  filtered maps and its own filter**, routing its snapshots through the store's transform. Two consumers can
+  never clobber each other, because the shared thing is the transform, not the collection.
 
-**Why the cache helps (and its honest limits).** With only the four DB-listener paths, each doc is opened once
-and parked in the documents store, so a memoization cache would never re-hit. The store's robust, always-true
-value is therefore narrower than "bulk prefetch": it is the **shared point-read API + memoization** that
-de-duplicates reads *across* subsystems when they overlap. On top of that, a bulk watcher opportunistically
-turns some point lookups into cache hits — but only for docs within whatever filter the watcher is currently
-running. Honest limits: (1) a cold, inactive, or out-of-filter watcher means `openDocument` falls back to a
-point read; (2) Sort Work *opening* a full doc already passes its cached metadata into
-`openDocumentFromFirestoreMetadata`, so that path is covered today — the store's *new* value is serving the
-listener paths and `openDocument`'s fallback. If we want the store to *reliably* prefetch for `openDocument`
-(rather than opportunistically), it must own its own query/lifecycle rather than piggyback Sort Work's
-filter-scoped watcher — see §10.
+Promoting the store to a single canonical `metadataById` map — with each filter reduced to a key-set view over
+it — would also fix the clobbering, but it is premature: there is exactly **one** filtered consumer today, so
+there are no duplicate live `DocumentMetadataModel`s to reconcile. That is the natural next step when a second
+filtered consumer appears (see "Deferred store evolution").
 
-**Stage 1 migrations (bounded, low-risk):**
+### Contract
 
-- Move `watchFirestoreMetaDataDocs`'s population into the store; Sort Work reads from the store (parity with
-  today).
+- `metadataFromFirestoreData(data): IDocumentMetadata | undefined` — the single per-document gate:
+  `typecheck` the doc (fail → `console.error` + `undefined`, so an invalid doc is treated as absent), then
+  apply exemplar enrichment when the key matches an authored exemplar.
+- `getMSTSnapshotFromFBSnapshot(snapshot)` — thin batch wrapper over `metadataFromFirestoreData`, used by each
+  consumer's reactive watch to build a `DocumentMetadataModel` map (invalid docs omitted).
+- `fetchMetadata(key): Promise<IDocumentMetadata | undefined>` — a **validated point read** routed through
+  `metadataFromFirestoreData`. Concurrent reads for the same key are **coalesced** into one query; there is **no
+  permanent result cache** (the Firestore SDK caches locally).
+
+The filtered watch state (`metadataDocsFiltered` / `metadataDocsWithoutUnit`, `docsReceived`,
+`watchFirestoreMetaDataDocs`, and the merged `firestoreMetadataDocs` view) lives on `SortedDocuments`, whose
+`onSnapshot` handlers call `store.getMSTSnapshotFromFBSnapshot(snapshot)` and apply the result into their own
+maps.
+
+### Validate-everywhere / fail-fast
+
+Because **every** path runs through `metadataFromFirestoreData`, nothing ever surfaces raw or possibly-corrupt
+metadata: an invalid `documents/<key>` doc is logged and treated as absent. Consequences (intended):
+
+- **`openDocument`** (§5): a missing OR invalid Firestore metadata doc trips error-if-missing — we never build a
+  `DocumentModel` from unvalidated metadata.
+- **`db.findFirestoreMetadata` callers** (canonical/pointer resolution, `document-workspace.tsx`): get
+  `undefined` for an invalid doc where they would previously have gotten malformed data. These call sites
+  already handle the not-found `undefined` case.
+
+### How much Sort Work loads, and why the store is not a bulk cache
+
+Sort Work's watcher is **scoped to its currently-selected filter**, not the whole class: `"All"` loads the whole
+class (`context_id` only), but `"Unit"`/`"Investigation"`/`"Problem"` load progressively narrower subsets (the
+current problem's docs, plus a separate query for unit-less personal docs). Each consumer holds only what *it* is
+currently showing, in its own filtered maps.
+
+So the store's robust, always-true value is **uniform validation/enrichment + coalesced point reads**, not
+cross-subsystem bulk caching. The Firestore SDK is the real network cache; with only the four DB-listener paths
+each doc is opened once and parked in the documents store, so a store-level result cache would rarely re-hit. If
+we later want the store to *reliably* prefetch for `openDocument`, it would own its own query/lifecycle rather
+than piggyback a consumer's filter-scoped watcher — see §10.
+
+### Deferred store evolution
+
+- **Single-model-per-document (canonical identity cache).** When a **second** filtered consumer appears, promote
+  the store to a canonical `metadataById: types.map(DocumentMetadataModel)`, reduce each filter to a
+  key-set/reference view, and have every source upsert into the canonical map (session-scoped, bounded by class
+  size). Building it now — with one consumer and no duplicate live models — is premature.
+- **Permanent point-read result cache.** Deferred; the Firestore SDK already caches locally, so `fetchMetadata`'s
+  in-flight coalescing is enough.
+
+### Stage 1 migrations (bounded, low-risk)
+
+- Extract the shared transform into the store; `SortedDocuments` keeps `watchFirestoreMetaDataDocs` and its own
+  filtered maps, routing each snapshot through the store's transform (parity with today).
 - Make `findFirestoreMetadata` (db.ts) the store's **point-read API** — this immediately also covers the
   workspace group-check ([document-workspace.tsx](../../../src/components/document/document-workspace.tsx)) and
   the canonical/pointer lookups that call it.
@@ -153,8 +202,8 @@ The Aug–Sep 2025 metadata migration ([firestore-migration.md](../../document-m
 documents real hazards in legacy docs: conflicting `context_id` (≈13 cases), merged/duplicate history, and
 `tools` drift. Error-if-missing surfaces a *missing* doc as an explicit, logged error (key + reason) rather than
 silently constructing a model from wrong data. For hazardous-but-present docs, this project reads only the axis
-fields, which the migration did not corrupt; validating `context_id` against the requesting user's class hash is
-recommended but is a store-level concern (Stage 1), not per-open.
+fields, which the migration did not corrupt; the store's point read scopes every query by
+`context_id == classHash` (§4), so cross-class conflicts are excluded at query time rather than per-open.
 
 ## 7. Sequencing
 
@@ -178,19 +227,19 @@ recommended but is a store-level concern (Stage 1), not per-open.
 
 ## 9. Testing
 
-- **Stage 1:** store unit tests — cache hit, point-read fallback, memoization, bulk-populate keying by `key`;
-  Sort Work behavior parity (titles/visibility/sort unchanged).
+- **Stage 1:** store unit tests — validated point read, `undefined` on empty query, `undefined` when the doc
+  fails `typecheck` (fail-fast), concurrent-read coalescing, exemplar enrichment via the shared transform, and
+  the batch transform dropping just the invalid doc; Sort Work behavior parity (titles/visibility/sort unchanged).
 - **Stage 2:** `openDocument` populates axis fields from Firestore for both the pass-in and store-fetch paths;
   errors (error document) when the doc is missing; reactive fields (`visibility`, `title`, `content`) still
   update via their RTDB listeners after open; the four listener paths populate axes.
 
-## 10. Open items for the plan
+## 10. Open items
 
-- **Watcher strategy for the store.** Sort Work's watcher is scoped to its selected filter (§4), so piggybacking
-  it gives only opportunistic, filter-dependent cache hits for `openDocument`. Decide whether the store (a)
-  simply exposes the point-read + memoization API and treats any bulk population as a bonus, or (b) owns its own
-  reactive query — e.g. a whole-class `context_id`-only watcher — to reliably prefetch. Option (b) costs a
-  standing whole-class `onSnapshot`; option (a) is cheaper but leaves per-doc point reads as the common case on
-  the listener paths. Affects cost/warmth, not correctness.
-- Exact `DocumentMetadataStore` placement in the stores tree and `onSnapshot` lifecycle ownership.
-- Whether to validate `context_id` in the store's point-read fallback (hazard mitigation) now or defer.
+- **Prefetch strategy for `openDocument`.** The store exposes only the coalesced point-read API; it does **not**
+  own a bulk watcher, so `openDocument` falls back to a per-doc point read when no consumer has the doc parked.
+  If we later want the store to *reliably* prefetch, it would own its own reactive query — e.g. a whole-class
+  `context_id`-only watcher — at the cost of a standing whole-class `onSnapshot`. Affects cost/warmth, not
+  correctness; deferred until there is a demonstrated need.
+- The store's point read already scopes by `context_id == classHash`, so cross-class hazards (§6) are excluded
+  at query time. Deeper per-field validation of hazardous-but-present docs remains future work.
