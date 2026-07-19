@@ -301,17 +301,18 @@ describe("WaveRunnerContent", () => {
     });
 
     describe("event database integration", () => {
-      // Three full UTC days: Feb 1 00:00Z (inclusive) to Feb 4 00:00Z (exclusive)
+      // startDate 2026-02-01, endDate 2026-02-03 inclusive: three full UTC days (Feb 1–3)
       const feb1Sec = Date.UTC(2026, 1, 1) / 1000;
       const feb1Day = feb1Sec / SECONDS_PER_DAY;
 
       // Serves only the ready days that fall within the most recent ensureRange call,
       // then DONE — mirroring the real service's reset-per-ensureRange drain contract.
+      // Like the real downloader (daysInRange), the day containing endSec is INCLUDED.
       function makeFakeService(days: number[]) {
         let pending: number[] = [];
         const fakeService = {
           ensureRange: jest.fn(({ startSec, endSec }: { startSec: number, endSec: number }) => {
-            pending = days.filter(d => d * SECONDS_PER_DAY >= startSec && d * SECONDS_PER_DAY < endSec);
+            pending = days.filter(d => d * SECONDS_PER_DAY >= startSec && d * SECONDS_PER_DAY <= endSec);
           }),
           nextReadyDay: jest.fn(async () => pending.shift() ?? DONE),
           readDay: jest.fn(async () => new ArrayBuffer(8)),
@@ -328,7 +329,7 @@ describe("WaveRunnerContent", () => {
         const content = setupTileInDocument();
         content.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" });
         content.setStartDate("2026-02-01");
-        content.setEndDate("2026-02-04");
+        content.setEndDate("2026-02-03");
         await content.ensureModelMetadata(PLACEHOLDER_MODEL_URL);
         return content;
       }
@@ -354,6 +355,8 @@ describe("WaveRunnerContent", () => {
         await content.runModel();
 
         expect(loadEvents).toHaveBeenCalledTimes(1);
+        expect(loadEvents).toHaveBeenCalledWith(expect.anything(), "placeholder-v1",
+          { start: feb1Sec, end: feb1Sec + 3 * SECONDS_PER_DAY });
         expect(content.runError).toBeNull();
         expect(content.eventsDataSet?.dataSet.cases).toHaveLength(2);
       });
@@ -371,7 +374,7 @@ describe("WaveRunnerContent", () => {
 
         expect(fakeService.ensureRange).toHaveBeenCalledTimes(1);
         expect(fakeService.ensureRange).toHaveBeenCalledWith(
-          expect.objectContaining({ startSec: feb2Sec, endSec: feb2Sec + SECONDS_PER_DAY }));
+          expect.objectContaining({ startSec: feb2Sec, endSec: feb2Sec }));
         expect(processChunk).toHaveBeenCalledTimes(1);
         expect(content.chunksProcessed).toBe(1);
         expect(content.chunksTotal).toBe(1);
@@ -455,9 +458,9 @@ describe("WaveRunnerContent", () => {
 
         expect(fakeService.ensureRange).toHaveBeenCalledTimes(2);
         expect(fakeService.ensureRange).toHaveBeenNthCalledWith(1,
-          expect.objectContaining({ startSec: feb1Sec, endSec: feb1Sec + SECONDS_PER_DAY }));
+          expect.objectContaining({ startSec: feb1Sec, endSec: feb1Sec }));
         expect(fakeService.ensureRange).toHaveBeenNthCalledWith(2,
-          expect.objectContaining({ startSec: feb3Sec, endSec: feb3Sec + SECONDS_PER_DAY }));
+          expect.objectContaining({ startSec: feb3Sec, endSec: feb3Sec }));
         expect(processChunk).toHaveBeenCalledTimes(2);
         expect(content.chunksProcessed).toBe(2);
         expect(content.chunksTotal).toBe(2);
@@ -475,7 +478,7 @@ describe("WaveRunnerContent", () => {
 
         expect(fakeService.ensureRange).toHaveBeenCalledTimes(1);
         expect(fakeService.ensureRange).toHaveBeenCalledWith(
-          expect.objectContaining({ startSec: feb1Sec, endSec: feb1Sec + 3 * SECONDS_PER_DAY }));
+          expect.objectContaining({ startSec: feb1Sec, endSec: feb1Sec + 2 * SECONDS_PER_DAY }));
         expect(processChunk).toHaveBeenCalledTimes(3);
         expect(content.chunksProcessed).toBe(3);
         expect(content.chunksTotal).toBe(3);

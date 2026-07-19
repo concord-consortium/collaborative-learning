@@ -272,7 +272,8 @@ export const WaveRunnerContentModel = TileContentModel
           return;
         }
 
-        const rangeSec: TimeRange = { start: startMs / 1000, end: endMs / 1000 };
+        // endDate is inclusive: the range extends through the end of that UTC day.
+        const rangeSec: TimeRange = { start: startMs / 1000, end: endMs / 1000 + SECONDS_PER_DAY };
 
         // Load previously stored events and coverage; fall back to a full local run if unavailable.
         let uncovered: TimeRange[] = [rangeSec];
@@ -303,7 +304,7 @@ export const WaveRunnerContentModel = TileContentModel
         for (const span of spans) {
           // ensureRange resets the service, so each span is fully drained before the next starts.
           downloadService.ensureRange({
-            ...station, startSec: span.startDay * SECONDS_PER_DAY, endSec: (span.endDay + 1) * SECONDS_PER_DAY
+            ...station, startSec: span.startDay * SECONDS_PER_DAY, endSec: span.endDay * SECONDS_PER_DAY
           });
 
           while (true) {
