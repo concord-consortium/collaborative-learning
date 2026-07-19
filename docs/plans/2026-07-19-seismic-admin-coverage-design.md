@@ -62,7 +62,9 @@ The "All selected stations" section shows per-model aggregate text (total events
 
 ### Update button
 
-Per station: (1) run the existing download-missing-raw flow for the whole range; (2) for each selected model, run the coverage processor over the range (only uncovered days are processed; already-downloaded days hit the OPFS cache via `ensureRange`). All-selected: stations sequentially (shared-proxy limit). Feedback line reports station/model/day progress; coverage rows refresh after each model. Disabled when unauthenticated or no models are selected. Update never clears coverage.
+Per station: (1) run the existing download-missing-raw flow for the whole range; (2) for each selected model, run the coverage processor over the range (only uncovered days are processed; already-downloaded days hit the OPFS cache via `ensureRange`). All-selected: stations sequentially (shared-proxy limit). Feedback line reports station/model/day progress; coverage rows refresh after each model. Update never clears coverage.
+
+Disabled when: unauthenticated, no models are selected, or **the whole time range is already covered** for the button's scope (per-station: every selected model's coverage for that station is complete over the range; all-selected: complete for every selected station × model). While coverage stats are still pending or errored, the button stays enabled (unknown ≠ covered). Missing raw data alone does not enable Update — generating events is its purpose; the Download button owns raw data.
 
 ### Store changes (`SeismicAdminStore`)
 
