@@ -1,7 +1,12 @@
 import {
   BYTES_PER_CHUNK, CHUNK_DURATION_S, COVERAGE_EPOCH, WINDOW_DURATION_S, WINDOWS_PER_CHUNK,
-  getChunkEnd, getChunkIndex, getChunkStart, getWindowIndex
+  coveragePath, eventDocId, eventsPath, getChunkEnd, getChunkIndex, getChunkStart, getWindowIndex, modelPath
 } from "./event-database";
+import { SeismicEvent } from "./seismic-model-types";
+import { StationData } from "./seismic-types";
+
+const stationData: StationData = { network: "AK", station: "K204", channel: "BHZ", location: "00" };
+const blankLocation: StationData = { network: "AK", station: "K204", channel: "BHZ" };
 
 describe("event-database constants", () => {
   it("has the values from the design doc", () => {
@@ -44,5 +49,33 @@ describe("chunk and window index math", () => {
     expect(getChunkIndex(t)).toBe(expectedChunk);
     expect(getChunkStart(expectedChunk)).toBeLessThanOrEqual(t);
     expect(getChunkEnd(expectedChunk)).toBeGreaterThan(t);
+  });
+});
+
+describe("Firestore path builders", () => {
+  it("builds the model container path", () => {
+    expect(modelPath(stationData, "compact-v1"))
+      .toBe("services/seismic/stations/AK_K204/locations/00/channels/BHZ/models/compact-v1");
+  });
+
+  it("encodes a blank location as --", () => {
+    expect(modelPath(blankLocation, "compact-v1"))
+      .toBe("services/seismic/stations/AK_K204/locations/--/channels/BHZ/models/compact-v1");
+  });
+
+  it("builds coverage and events paths from the model path", () => {
+    expect(coveragePath(stationData, "compact-v1", 76))
+      .toBe(`${modelPath(stationData, "compact-v1")}/coverage/76`);
+    expect(eventsPath(stationData, "compact-v1"))
+      .toBe(`${modelPath(stationData, "compact-v1")}/events`);
+  });
+});
+
+describe("eventDocId", () => {
+  it("combines windowStart (ms) and eventType", () => {
+    const event: SeismicEvent = {
+      windowStart: 1710720000000, windowEnd: 1710720060000, eventType: "earthquake", confidence: 0.9
+    };
+    expect(eventDocId(event)).toBe("1710720000000_earthquake");
   });
 });
