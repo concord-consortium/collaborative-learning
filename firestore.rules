@@ -528,5 +528,29 @@ service cloud.firestore {
       allow write: if matchFirebaseUserId(userId);
     }
 
+    //
+    // seismic event database (see docs/seismic/event-database-design.md)
+    // Anonymous users are allowed to read and contribute (see design doc Decision).
+    //
+    match /services/seismic/stations/{station}/locations/{location}/channels/{channel}/models/{model} {
+
+      match /events/{eventId} {
+        allow read: if isAuthed();
+        allow write: if isAuthed()
+                     && request.resource.data.createdBy == request.auth.uid
+                     && request.resource.data.station == station
+                     && request.resource.data.location == location
+                     && request.resource.data.channel == channel
+                     && request.resource.data.model == model;
+      }
+
+      match /coverage/{chunkId} {
+        allow read: if isAuthed();
+        allow write: if isAuthed()
+                     && request.resource.data.bitmap is bytes
+                     && request.resource.data.updatedAt is timestamp;
+      }
+    }
+
   }
 }
