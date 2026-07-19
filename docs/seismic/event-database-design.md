@@ -51,6 +51,15 @@ epoch = Jan 1 2020 UTC
 chunkIndex = floor((timestamp - epoch) / (30 days))
 ```
 
+Coverage means "processed", independent of whether events were found. Days where the
+station simply has no data (empty days) ARE marked covered — no data is a processed
+result. Days whose download or processing errored are NOT marked covered, so later
+runs retry them.
+
+Write ordering contract: events are written before coverage is marked. A failed event
+write therefore never strands covered-but-eventless windows — the day stays uncovered
+and a later run re-detects and re-writes its events.
+
 #### Why bitmaps
 
 Coverage needs to track "has this time range been processed?" independently of whether events were found — a time range with no detected events must be distinguishable from an unprocessed range. The bitmap approach:
@@ -325,9 +334,9 @@ async function loadEvents(
 ## Typical UI Flow
 
 1. User selects a station (network + station + location + channel, i.e. a `StationData`), model, and time range in the Wave Runner tile.
-2. UI fetches coverage bitmaps → shows preview of what's been modeled vs. gaps.
-3. User clicks "Load Data" → paged query fetches events → populates SharedDataSet → Timeline tile renders events.
-4. User clicks "Run Model" → model runs on uncovered time ranges → writes events + marks coverage → SharedDataSet updated.
+2. User clicks "Run Model" → prior events and coverage are loaded from the database → the model runs only on uncovered days → new events are written and coverage marked per completed day → prior + new events populate the SharedDataSet → Timeline tile renders events.
+
+Future work: a coverage-preview UI (showing what's been modeled vs. gaps before running) and a separate "Load Data" action that fetches stored events without running the model.
 
 ## Cost Estimates
 
