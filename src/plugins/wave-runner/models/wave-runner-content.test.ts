@@ -145,6 +145,15 @@ describe("WaveRunnerContent", () => {
     expect(parsed.selectedModelUrl).toBe("https://example.com/model/metadata.json");
   });
 
+  it("addDetectedEvents drops events duplicating an existing windowStart+eventType", () => {
+    const content = WaveRunnerContentModel.create();
+    const evt = { windowStart: 1710720000000, windowEnd: 1710720060000, eventType: "earthquake", confidence: 0.9 };
+    content.addDetectedEvents([evt]);
+    content.addDetectedEvents([{ ...evt, confidence: 0.8 }, { ...evt, eventType: "traffic" }]);
+    expect(content.detectedEvents).toHaveLength(2);
+    expect(content.detectedEvents.map((e: any) => e.eventType)).toEqual(["earthquake", "traffic"]);
+  });
+
   it("configures the compact model in the wave-runner settings", () => {
     const models = appConfig.config.settings["wave-runner"].models as ModelListEntry[];
     expect(models.length).toBeGreaterThanOrEqual(1);

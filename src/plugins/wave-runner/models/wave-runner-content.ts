@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 import stringify from "json-stringify-pretty-compact";
 import { cast, flow, getSnapshot, types, Instance } from "mobx-state-tree";
 import { miniseed } from "seisplotjs";
+import { eventDocId } from "../../../../shared/seismic/event-database";
 import { MILLISECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
 import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
@@ -146,7 +147,14 @@ export const WaveRunnerContentModel = TileContentModel
       self.chunksTotal = total;
     },
     addDetectedEvents(events: SeismicEvent[]) {
-      self.detectedEvents = [...self.detectedEvents, ...events];
+      const seen = new Set(self.detectedEvents.map(eventDocId));
+      const fresh = events.filter(evt => {
+        const key = eventDocId(evt);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      self.detectedEvents = [...self.detectedEvents, ...fresh];
     },
     getOrCreateEventsDataSet(): SharedDataSetType | undefined {
       if (self.eventsDataSet) return self.eventsDataSet;
