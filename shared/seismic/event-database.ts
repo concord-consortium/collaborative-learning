@@ -2,14 +2,14 @@
  * Seismic event database: pure constants, index math, Firestore path builders,
  * and coverage-bitmap helpers.
  */
-import { dayIndex } from "./seismic-day";
+import { dayIndex, SECONDS_PER_DAY } from "./seismic-day";
 import { SeismicEvent } from "./seismic-model-types";
 import { StationData, TimeRange } from "./seismic-types";
 import { encodeLocation, getStationPrefix } from "./tile-addressing";
 
 /** Coverage epoch: Jan 1 2020 UTC. All coverage math is in seconds. */
 export const COVERAGE_EPOCH = Date.UTC(2020, 0, 1) / 1000;
-export const CHUNK_DURATION_S = 30 * 24 * 60 * 60; // 30 days
+export const CHUNK_DURATION_S = 30 * SECONDS_PER_DAY; // 30 days
 export const WINDOW_DURATION_S = 10 * 60; // 10 minutes
 export const WINDOWS_PER_CHUNK = CHUNK_DURATION_S / WINDOW_DURATION_S; // 4320
 export const BYTES_PER_CHUNK = Math.ceil(WINDOWS_PER_CHUNK / 8); // 540
@@ -58,14 +58,14 @@ export function eventDocId(event: SeismicEvent): string {
  * `range` should be window-aligned (day-aligned ranges always are).
  */
 export function groupWindowsByChunk(range: TimeRange): Map<number, number[]> {
-  const chunkUpdates = new Map<number, number[]>();
+  const windowsByChunk = new Map<number, number[]>();
   for (let t = range.start; t < range.end; t += WINDOW_DURATION_S) {
     const chunk = getChunkIndex(t);
     const window = getWindowIndex(t);
-    if (!chunkUpdates.has(chunk)) chunkUpdates.set(chunk, []);
-    chunkUpdates.get(chunk)!.push(window);
+    if (!windowsByChunk.has(chunk)) windowsByChunk.set(chunk, []);
+    windowsByChunk.get(chunk)!.push(window);
   }
-  return chunkUpdates;
+  return windowsByChunk;
 }
 
 /** OR the given window bits into the bitmap (mutates). Idempotent. */
@@ -85,6 +85,8 @@ export function isWindowCovered(bitmap: Uint8Array, window: number): boolean {
  * Scan pre-fetched coverage bitmaps for uncovered sub-ranges of `range`.
  * `bitmaps` maps chunkIndex → bitmap; a missing entry means an unwritten
  * (fully uncovered) chunk. Returns disjoint, sorted gaps.
+ * `range` should be window-aligned (day-aligned ranges always are); a
+ * mid-window start would silently skip the partial first window.
  */
 export function findUncoveredRanges(bitmaps: Map<number, Uint8Array>, range: TimeRange): TimeRange[] {
   const startChunk = getChunkIndex(range.start);
@@ -110,7 +112,7 @@ export function findUncoveredRanges(bitmaps: Map<number, Uint8Array>, range: Tim
     }
   }
   if (currentGapStart !== null) {
-    gaps.push({ start: currentGapStart, end: Math.min(range.end, getChunkEnd(endChunk)) });
+    gaps.push({ start: currentGapStart, end: range.end });
   }
   return gaps;
 }

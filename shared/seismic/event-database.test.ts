@@ -3,6 +3,7 @@ import {
   coveragePath, eventDocId, eventsPath, findUncoveredRanges, getChunkEnd, getChunkIndex, getChunkStart,
   getWindowIndex, groupWindowsByChunk, isWindowCovered, modelPath, setWindowBits, uncoveredDaySpans
 } from "./event-database";
+import { SECONDS_PER_DAY } from "./seismic-day";
 import { SeismicEvent } from "./seismic-model-types";
 import { StationData, TimeRange } from "./seismic-types";
 
@@ -162,41 +163,40 @@ describe("findUncoveredRanges", () => {
 });
 
 describe("uncoveredDaySpans", () => {
-  const DAY = 86400;
   const day0 = COVERAGE_EPOCH; // COVERAGE_EPOCH is midnight UTC, so day-aligned
-  const dayIdx = day0 / DAY;
+  const dayIdx = day0 / SECONDS_PER_DAY;
 
   it("returns no spans when there are no gaps", () => {
-    expect(uncoveredDaySpans([], { start: day0, end: day0 + 3 * DAY })).toEqual([]);
+    expect(uncoveredDaySpans([], { start: day0, end: day0 + 3 * SECONDS_PER_DAY })).toEqual([]);
   });
 
   it("maps a sub-day gap to its containing day", () => {
     const gaps: TimeRange[] = [{ start: day0 + 600, end: day0 + 1200 }];
-    expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * DAY }))
+    expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * SECONDS_PER_DAY }))
       .toEqual([{ startDay: dayIdx, endDay: dayIdx }]);
   });
 
   it("merges gaps on adjacent days into one span", () => {
     const gaps: TimeRange[] = [
       { start: day0 + 600, end: day0 + 1200 },
-      { start: day0 + DAY + 600, end: day0 + DAY + 1200 }
+      { start: day0 + SECONDS_PER_DAY + 600, end: day0 + SECONDS_PER_DAY + 1200 }
     ];
-    expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * DAY }))
+    expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * SECONDS_PER_DAY }))
       .toEqual([{ startDay: dayIdx, endDay: dayIdx + 1 }]);
   });
 
   it("keeps non-adjacent days as separate spans", () => {
     const gaps: TimeRange[] = [
       { start: day0, end: day0 + 600 },
-      { start: day0 + 2 * DAY, end: day0 + 2 * DAY + 600 }
+      { start: day0 + 2 * SECONDS_PER_DAY, end: day0 + 2 * SECONDS_PER_DAY + 600 }
     ];
-    expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * DAY }))
+    expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * SECONDS_PER_DAY }))
       .toEqual([{ startDay: dayIdx, endDay: dayIdx }, { startDay: dayIdx + 2, endDay: dayIdx + 2 }]);
   });
 
   it("clamps a gap ending exactly on a day boundary to the previous day", () => {
-    const gaps: TimeRange[] = [{ start: day0, end: day0 + DAY }];
-    expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * DAY }))
+    const gaps: TimeRange[] = [{ start: day0, end: day0 + SECONDS_PER_DAY }];
+    expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * SECONDS_PER_DAY }))
       .toEqual([{ startDay: dayIdx, endDay: dayIdx }]);
   });
 });
