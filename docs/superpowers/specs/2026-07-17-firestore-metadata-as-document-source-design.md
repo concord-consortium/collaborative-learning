@@ -1,7 +1,6 @@
 # Design: `DocumentMetadataStore` — a validated authority for Firestore document metadata
 
 > **Status:** design (uncommitted draft for review).
-> **Origin briefing:** [`2026-07-17-firestore-metadata-as-document-source-context.md`](./2026-07-17-firestore-metadata-as-document-source-context.md).
 > **Chore:** CLUE-576.
 > **Relates to:** CLUE-524 (client-authoritative Firestore metadata + canonical pointers),
 > CLUE-554 (Sort Work reactive visibility/title).
