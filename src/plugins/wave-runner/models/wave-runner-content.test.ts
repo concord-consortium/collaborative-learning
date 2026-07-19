@@ -10,11 +10,21 @@ import {
 } from "./wave-runner-content";
 import appConfig from "../../../clue/app-config.json";
 import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
+import {
+  getUncoveredRanges, loadEvents, markCovered, writeEvents
+} from "../../../models/stores/seismic-event-service";
 import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
+import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 
 jest.mock("../../../models/stores/seismic-download-service", () => ({
   ...jest.requireActual("../../../models/stores/seismic-download-service"),
   SeismicDownloadService: jest.fn(),
+}));
+jest.mock("../../../models/stores/seismic-event-service", () => ({
+  loadEvents: jest.fn(async () => []),
+  getUncoveredRanges: jest.fn(async (_s: any, _m: any, range: any) => [range]),
+  writeEvents: jest.fn(async () => {}),
+  markCovered: jest.fn(async () => {}),
 }));
 jest.mock("seisplotjs", () => {
   const actual = jest.requireActual("seisplotjs");
@@ -288,6 +298,134 @@ describe("WaveRunnerContent", () => {
       expect(processChunk).toHaveBeenCalledTimes(2);
       expect(content.runError).toBeNull();
       expect(content.isRunning).toBe(false);
+    });
+
+    describe("event database integration", () => {
+      // Three full UTC days: Feb 1 00:00Z (inclusive) to Feb 4 00:00Z (exclusive)
+      const feb1Sec = Date.UTC(2026, 1, 1) / 1000;
+      const feb1Day = feb1Sec / SECONDS_PER_DAY;
+
+      function makeFakeService(days: number[]) {
+        let i = 0;
+        const fakeService = {
+          ensureRange: jest.fn(),
+          nextReadyDay: jest.fn(async () => (i < days.length ? days[i++] : DONE)),
+          readDay: jest.fn(async () => new ArrayBuffer(8)),
+          cancel: jest.fn(),
+          erroredDays: [] as number[],
+          emptyDays: [] as number[],
+        };
+        (SeismicDownloadService as jest.Mock).mockImplementation(() => fakeService);
+        return fakeService;
+      }
+
+      async function setupRunReadyContent() {
+        jest.spyOn(SeismicModelRunner.prototype, "loadModel").mockResolvedValue(undefined);
+        const content = setupTileInDocument();
+        content.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" });
+        content.setStartDate("2026-02-01");
+        content.setEndDate("2026-02-04");
+        await content.ensureModelMetadata(PLACEHOLDER_MODEL_URL);
+        return content;
+      }
+
+      const makeEvent = (windowStart: number, eventType = "earthquake") => ({
+        windowStart, windowEnd: windowStart + 60000, eventType, confidence: 0.9
+      });
+
+      beforeEach(() => {
+        (loadEvents as jest.Mock).mockClear();
+        (getUncoveredRanges as jest.Mock).mockClear();
+        (writeEvents as jest.Mock).mockClear();
+        (markCovered as jest.Mock).mockClear();
+      });
+
+      it("loads prior events into the dataset even when the model finds nothing", async () => {
+        const prior = [makeEvent(Date.UTC(2026, 1, 1, 1)), makeEvent(Date.UTC(2026, 1, 1, 2), "traffic")];
+        (loadEvents as jest.Mock).mockResolvedValueOnce(prior);
+        makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+        jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+
+        const content = await setupRunReadyContent();
+        await content.runModel();
+
+        expect(loadEvents).toHaveBeenCalledTimes(1);
+        expect(content.runError).toBeNull();
+        expect(content.eventsDataSet?.dataSet.cases).toHaveLength(2);
+      });
+
+      it("only downloads days the event database reports as uncovered", async () => {
+        // Only the middle day (Feb 2) of the three-day range is uncovered
+        const feb2Sec = feb1Sec + SECONDS_PER_DAY;
+        (getUncoveredRanges as jest.Mock).mockResolvedValueOnce(
+          [{ start: feb2Sec, end: feb2Sec + SECONDS_PER_DAY }]);
+        const fakeService = makeFakeService([feb1Day + 1]);
+        const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+
+        const content = await setupRunReadyContent();
+        await content.runModel();
+
+        expect(fakeService.ensureRange).toHaveBeenCalledTimes(1);
+        expect(fakeService.ensureRange).toHaveBeenCalledWith(
+          expect.objectContaining({ startSec: feb2Sec, endSec: feb2Sec + SECONDS_PER_DAY }));
+        expect(processChunk).toHaveBeenCalledTimes(1);
+        expect(content.chunksProcessed).toBe(1);
+        expect(content.chunksTotal).toBe(1);
+        expect(content.runError).toBeNull();
+      });
+
+      it("skips downloading entirely when the range is fully covered", async () => {
+        (loadEvents as jest.Mock).mockResolvedValueOnce([makeEvent(Date.UTC(2026, 1, 1, 1))]);
+        (getUncoveredRanges as jest.Mock).mockResolvedValueOnce([]);
+        const fakeService = makeFakeService([]);
+        const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+
+        const content = await setupRunReadyContent();
+        await content.runModel();
+
+        expect(fakeService.ensureRange).not.toHaveBeenCalled();
+        expect(processChunk).not.toHaveBeenCalled();
+        expect(content.runError).toBeNull();
+        expect(content.eventsDataSet?.dataSet.cases).toHaveLength(1);
+      });
+
+      it("persists each processed day's events and coverage", async () => {
+        makeFakeService([feb1Day]);
+        const evt = makeEvent(Date.UTC(2026, 1, 1, 1));
+        jest.spyOn(SeismicModelRunner.prototype, "processChunk")
+          .mockImplementation(async (_seismogram: any, callbacks: any) => {
+            callbacks.onEvents([evt]);
+            return [];
+          });
+
+        const content = await setupRunReadyContent();
+        await content.runModel();
+
+        expect(writeEvents).toHaveBeenCalledTimes(1);
+        expect(writeEvents).toHaveBeenCalledWith(expect.anything(), "placeholder-v1", [evt]);
+        expect(markCovered).toHaveBeenCalledWith(expect.anything(), "placeholder-v1",
+          { start: feb1Day * SECONDS_PER_DAY, end: (feb1Day + 1) * SECONDS_PER_DAY });
+        expect(content.runError).toBeNull();
+      });
+
+      it("still runs the full range when the event database is unavailable", async () => {
+        (loadEvents as jest.Mock).mockRejectedValueOnce(new Error("offline"));
+        const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+        const fakeService = makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+        const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+
+        const content = await setupRunReadyContent();
+        await content.runModel();
+
+        expect(fakeService.ensureRange).toHaveBeenCalledTimes(1);
+        expect(fakeService.ensureRange).toHaveBeenCalledWith(
+          expect.objectContaining({ startSec: feb1Sec, endSec: feb1Sec + 3 * SECONDS_PER_DAY }));
+        expect(processChunk).toHaveBeenCalledTimes(3);
+        expect(content.chunksProcessed).toBe(3);
+        expect(content.chunksTotal).toBe(3);
+        expect(content.runError).toBeNull();
+        expect(warn).toHaveBeenCalled();
+      });
     });
   });
 });

@@ -2,9 +2,13 @@ import { DateTime } from "luxon";
 import stringify from "json-stringify-pretty-compact";
 import { cast, flow, getSnapshot, types, Instance } from "mobx-state-tree";
 import { miniseed } from "seisplotjs";
-import { eventDocId } from "../../../../shared/seismic/event-database";
-import { MILLISECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
+import { eventDocId, uncoveredDaySpans } from "../../../../shared/seismic/event-database";
+import { dayRange, SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
+import { TimeRange } from "../../../../shared/seismic/seismic-types";
 import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
+import {
+  getUncoveredRanges, loadEvents, markCovered, writeEvents
+} from "../../../models/stores/seismic-event-service";
 import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
 import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
@@ -228,12 +232,14 @@ export const WaveRunnerContentModel = TileContentModel
         self.runError = "No station selected";
         return;
       }
+      const station = self.station;
 
       self.clearEventsDataSet();
       self.runError = null;
       self.isRunning = true;
 
       const metadata = self.selectedModelMetadata;
+      const modelId = metadata.id;
 
       const runner = new SeismicModelRunner();
       try {
@@ -251,49 +257,92 @@ export const WaveRunnerContentModel = TileContentModel
           return;
         }
 
-        const totalDays = Math.floor((endMs - startMs) / MILLISECONDS_PER_DAY) + 1;
+        const rangeSec: TimeRange = { start: startMs / 1000, end: endMs / 1000 };
+
+        // Load previously stored events and coverage; fall back to a full local run if unavailable.
+        let uncovered: TimeRange[] = [rangeSec];
+        try {
+          const prior: SeismicEvent[] = yield loadEvents(station, modelId, rangeSec);
+          self.addDetectedEvents(prior);
+          uncovered = yield getUncoveredRanges(station, modelId, rangeSec);
+        } catch (err) {
+          console.warn("Seismic event database unavailable; processing the full range:", err);
+        }
+        const spans = uncoveredDaySpans(uncovered, rangeSec);
+
+        const totalDays = spans.reduce((sum, s) => sum + (s.endDay - s.startDay + 1), 0);
         self.updateChunkProgress(0, totalDays);
 
-        // Bulk-download the range into OPFS, running the model on each day as it lands.
+        // Bulk-download each uncovered span into OPFS, running the model on each day as it lands.
         // Days may arrive out of order; detection is per-window independent, so that's fine.
         // No-data days come as `dayEmpty` and are simply never yielded.
         const downloadService = new SeismicDownloadService();
-        downloadService.ensureRange({ ...self.station, startSec: startMs / 1000, endSec: endMs / 1000 });
-
         let processed = 0;
+        let skippedDays = 0;
         const updateProgress = () => {
-          const progress = processed + downloadService.erroredDays.length + downloadService.emptyDays.length;
+          const progress = processed + skippedDays
+            + downloadService.erroredDays.length + downloadService.emptyDays.length;
           self.updateChunkProgress(progress, totalDays);
         };
 
-        while (true) {
-          const day: number | typeof DONE = yield downloadService.nextReadyDay();
-          if (day === DONE) break;
+        for (const span of spans) {
+          // ensureRange resets the service, so each span is fully drained before the next starts.
+          downloadService.ensureRange({
+            ...station, startSec: span.startDay * SECONDS_PER_DAY, endSec: (span.endDay + 1) * SECONDS_PER_DAY
+          });
 
-          const buffer: ArrayBuffer | null = yield downloadService.readDay(day);
-          if (!buffer) continue;
+          while (true) {
+            const day: number | typeof DONE = yield downloadService.nextReadyDay();
+            if (day === DONE) break;
 
-          // Parse miniSEED → Seismogram
-          const records = miniseed.parseDataRecords(buffer);
-          const seismogram = miniseed.merge(records);
+            const buffer: ArrayBuffer | null = yield downloadService.readDay(day);
+            if (!buffer) continue;
 
-          // Run model on this chunk
-          yield runner.processChunk(
-            seismogram,
-            {
-              onProgress: () => {},
-              onEvents: (events: SeismicEvent[]) => {
-                self.addDetectedEvents(events);
+            // Parse miniSEED → Seismogram
+            const records = miniseed.parseDataRecords(buffer);
+            const seismogram = miniseed.merge(records);
+
+            // Run model on this chunk
+            const dayEvents: SeismicEvent[] = [];
+            yield runner.processChunk(
+              seismogram,
+              {
+                onProgress: () => {},
+                onEvents: (events: SeismicEvent[]) => {
+                  dayEvents.push(...events);
+                  self.addDetectedEvents(events);
+                },
               },
-            },
-            detectionThreshold,
-          );
-          processed++;
-          updateProgress();
-        }
+              detectionThreshold,
+            );
 
-        // Ensure progress is accurate after loop finishes
-        updateProgress();
+            // Best-effort persistence: a failure here must not fail the local run.
+            // Events are written before coverage so a failure can't permanently skip them.
+            try {
+              if (dayEvents.length) yield writeEvents(station, modelId, dayEvents);
+              yield markCovered(station, modelId, dayRange(day));
+            } catch (err) {
+              console.warn("Failed to save seismic events/coverage:", err);
+            }
+
+            processed++;
+            updateProgress();
+          }
+
+          // A day with no data is still processed — mark it covered so nobody re-checks it.
+          // Errored days are NOT marked covered, so a later run retries them.
+          for (const day of downloadService.emptyDays) {
+            try {
+              yield markCovered(station, modelId, dayRange(day));
+            } catch (err) {
+              console.warn("Failed to save seismic coverage:", err);
+            }
+          }
+          // Count this span's errored/empty days via the live service arrays first, then fold
+          // them into skippedDays so they survive the next span's ensureRange reset.
+          updateProgress();
+          skippedDays += downloadService.erroredDays.length + downloadService.emptyDays.length;
+        }
 
         const dataSet = self.getOrCreateEventsDataSet()?.dataSet;
         if (dataSet) {
