@@ -1,6 +1,7 @@
+import { SeismicEvent } from "../../../shared/seismic/seismic-model-types";
 import { StationData, TimeRange } from "../../../shared/seismic/seismic-types";
 import {
-  BYTES_PER_CHUNK, COVERAGE_EPOCH, WINDOW_DURATION_S, coveragePath, isWindowCovered
+  BYTES_PER_CHUNK, COVERAGE_EPOCH, WINDOW_DURATION_S, coveragePath, eventsPath, isWindowCovered
 } from "../../../shared/seismic/event-database";
 
 // ---- minimal in-memory fake of the firebase v8 slice the service uses ----
@@ -72,7 +73,7 @@ jest.mock("firebase/app", () => {
   return { firestore, auth: () => mockAuthState };
 });
 
-import { getUncoveredRanges, markCovered } from "./seismic-event-service";
+import { getUncoveredRanges, loadEvents, markCovered, writeEvents } from "./seismic-event-service";
 
 const stationData: StationData = { network: "AK", station: "K204", channel: "BHZ", location: "00" };
 const model = "compact-v1";
@@ -107,6 +108,59 @@ describe("markCovered", () => {
     expect(isWindowCovered(bitmap, 0)).toBe(true);
     expect(isWindowCovered(bitmap, 1)).toBe(false);
     expect(isWindowCovered(bitmap, 2)).toBe(true);
+  });
+});
+
+const msRange = (startMs: number, endMs: number): TimeRange => ({ start: startMs / 1000, end: endMs / 1000 });
+
+const makeEvent = (windowStartMs: number, eventType = "earthquake"): SeismicEvent => ({
+  windowStart: windowStartMs, windowEnd: windowStartMs + 60000, eventType, confidence: 0.9
+});
+
+describe("writeEvents", () => {
+  it("writes event docs with denormalized fields and createdBy", async () => {
+    const event = makeEvent(1710720000000);
+    await writeEvents(stationData, model, [event]);
+
+    const doc = mockStore.get(`${eventsPath(stationData, model)}/1710720000000_earthquake`);
+    expect(doc).toMatchObject({
+      station: "AK_K204", location: "00", channel: "BHZ", model,
+      eventType: "earthquake", confidence: 0.9,
+      createdBy: "test-user", createdAt: "SERVER_TIMESTAMP",
+    });
+    expect(doc.windowStart.toMillis()).toBe(1710720000000);
+    expect(doc.windowEnd.toMillis()).toBe(1710720060000);
+  });
+
+  it("splits writes into batches of at most 500", async () => {
+    const events = Array.from({ length: 501 }, (_, i) => makeEvent(1710720000000 + i * 60000));
+    await writeEvents(stationData, model, events);
+    expect(mockCommitSizes).toEqual([500, 1]);
+  });
+
+  it("throws when unauthenticated", async () => {
+    mockAuthState.currentUser = null;
+    await expect(writeEvents(stationData, model, [makeEvent(1710720000000)])).rejects.toThrow();
+  });
+});
+
+describe("loadEvents", () => {
+  it("returns events in the range, ordered by windowStart", async () => {
+    await writeEvents(stationData, model,
+      [makeEvent(1710720120000), makeEvent(1710720000000), makeEvent(1710730000000)]);
+
+    const events = await loadEvents(stationData, model, msRange(1710720000000, 1710725000000));
+    expect(events.map(e => e.windowStart)).toEqual([1710720000000, 1710720120000]);
+    expect(events[0]).toEqual(makeEvent(1710720000000));
+  });
+
+  it("pages through more than pageSize events", async () => {
+    const all = Array.from({ length: 5 }, (_, i) => makeEvent(1710720000000 + i * 60000));
+    await writeEvents(stationData, model, all);
+
+    const events = await loadEvents(stationData, model, msRange(1710720000000, 1710725000000), 2);
+    expect(events).toHaveLength(5);
+    expect(events.map(e => e.windowStart)).toEqual(all.map(e => e.windowStart));
   });
 });
 
