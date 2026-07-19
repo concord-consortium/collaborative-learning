@@ -1,7 +1,10 @@
-import { makeAutoObservable, when } from "mobx";
+import { makeAutoObservable, runInAction, when } from "mobx";
 import { types } from "mobx-state-tree";
+import { applySnapshot, unprotect } from "@concord-consortium/mobx-state-tree";
 
+import { IDocumentMetadata } from "../../../shared/shared";
 import { DB } from "../../lib/db";
+import { typeConverter } from "../../utilities/db-utils";
 import { DocumentMetadataModel, IDocumentMetadataModel } from "../document/document-metadata-model";
 import { isSortableType } from "../document/document-types";
 import { AppConfigModelType } from "./app-config-model";
@@ -43,9 +46,20 @@ export class SortedDocuments {
   // Root document group that serves as the root node for delegating all sorting operations.
   rootDocumentGroup: DocumentGroup;
 
+  // This consumer's own filtered view of the class's Firestore metadata. Each consumer owns its
+  // own maps and filter; the shared thing across consumers is the transform on DocumentMetadataStore,
+  // not the collection. `metadataDocsWithoutUnit` picks up unit-less docs (e.g. personal documents)
+  // when a unit filter is applied.
+  metadataDocsFiltered = MetadataDocMapModel.create();
+  metadataDocsWithoutUnit = MetadataDocMapModel.create();
+  docsReceived = false;
+
   constructor(stores: ISortedDocumentsStores) {
     makeAutoObservable(this);
     this.stores = stores;
+    // We only want MobX observability + MST serialization, not MST actions, on these maps.
+    unprotect(this.metadataDocsFiltered);
+    unprotect(this.metadataDocsWithoutUnit);
     this.rootDocumentGroup = new DocumentGroup({
       stores,
       sortType: "All",
@@ -84,20 +98,88 @@ export class SortedDocuments {
     return this.stores.curriculumConfig;
   }
 
-  get docsReceived() {
-    return this.stores.documentMetadata.docsReceived;
-  }
-
-  get firestoreMetadataDocs() {
-    return this.stores.documentMetadata.firestoreMetadataDocs;
-  }
-
   get exemplarMetadataDocs() {
     return this.stores.documentMetadata.exemplarMetadataDocs;
   }
 
+  // What happens if the visibility changes on a metadata document?
+  // - FS onSnapshot listener is called
+  // - listener applies the snapshot to the map of objects
+  // - the keys of the objects don't change in the map
+  // - MobX should not re-run this view because it is only reading the key
+  //   of each document.
+  get firestoreMetadataDocs() {
+    const matchedDocKeys = new Set<string>();
+    const docsArray: IDocumentMetadataModel[] = [];
+    this.metadataDocsFiltered.forEach(doc => {
+      docsArray.push(doc);
+      matchedDocKeys.add(doc.key);
+    });
+    this.metadataDocsWithoutUnit.forEach(doc => {
+      // If there is a duplicate for some reason just ignore the unit-less one
+      if (matchedDocKeys.has(doc.key)) return;
+      docsArray.push(doc);
+      matchedDocKeys.add(doc.key);
+    });
+    this.exemplarMetadataDocs.forEach(doc => {
+      // If there is a duplicate, it will have been merged with one of the previous
+      // maps by the firestore snapshot listeners. So we ignore the duplicate here.
+      if (matchedDocKeys.has(doc.key)) return;
+      docsArray.push(doc);
+      matchedDocKeys.add(doc.key);
+    });
+
+    return docsArray;
+  }
+
   watchFirestoreMetaDataDocs(filter: string, unit: string, investigation: number, problem: number) {
-    return this.stores.documentMetadata.watchFirestoreMetaDataDocs(filter, unit, investigation, problem);
+    const db = this.stores.db.firestore;
+    const converter = typeConverter<IDocumentMetadata>();
+    const baseQuery = db.collection("documents")
+      .withConverter(converter)
+      .where("context_id", "==", this.stores.user.classHash);
+
+    let filteredQuery = baseQuery;
+
+    if (filter !== "All") {
+      // an "in" query is used here so that we can find any documents that use unit and
+      // any the older renamed unit codes.
+      filteredQuery = filteredQuery.where("unit" , "in", this.stores.curriculumConfig.getUnitCodeVariants(unit));
+    }
+    if (filter === "Investigation" || filter === "Problem") {
+      filteredQuery = filteredQuery.where("investigation", "==", String(investigation));
+    }
+    if (filter === "Problem") {
+      filteredQuery = filteredQuery.where("problem", "==", String(problem));
+    }
+
+    const disposeFilteredListener = filteredQuery.onSnapshot(snapshot => {
+      const mstSnapshot = this.stores.documentMetadata.getMSTSnapshotFromFBSnapshot(snapshot);
+      runInAction(() => {
+        applySnapshot(this.metadataDocsFiltered, mstSnapshot);
+        this.docsReceived = true;
+      });
+    });
+
+    let disposeDocsWithoutUnitListener: () => void | undefined;
+    if (filter !== "All") {
+      // We need to look for the unit-less documents like personal documents
+      const queryForUnitNull = baseQuery.where("unit" , "==", null);
+      disposeDocsWithoutUnitListener = queryForUnitNull.onSnapshot(snapshot => {
+        const mstSnapshot = this.stores.documentMetadata.getMSTSnapshotFromFBSnapshot(snapshot);
+        applySnapshot(this.metadataDocsWithoutUnit, mstSnapshot);
+      });
+    } else {
+      // If the filter is "All" then the metaDocsFiltered will include everything.
+      this.metadataDocsWithoutUnit.clear();
+    }
+
+    // A disposing function that calls the two disposers from the
+    // onSnapshot listeners.
+    return () => {
+      disposeFilteredListener();
+      disposeDocsWithoutUnitListener?.();
+    };
   }
 
   setDocumentHistoryViewRequest(docKey: string, historyId: string) {

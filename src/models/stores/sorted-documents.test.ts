@@ -149,7 +149,6 @@ describe('Sorted Documents Model', () => {
     const documentMetadata = new DocumentMetadataStore(
       { db: {}, user: { classHash: "" }, documents: { exemplarDocuments: [] } } as any
     );
-    documentMetadata.metadataDocsFiltered = MetadataDocMapModel.create(mockMetadataDocuments);
 
     const mockStores: DeepPartial<ISortedDocumentsStores> = {
       //DeepPartial allows us to not need to mock the "dB" and "appConfig" stores
@@ -161,6 +160,7 @@ describe('Sorted Documents Model', () => {
     };
 
     sortedDocuments = new SortedDocuments(mockStores as ISortedDocumentsStores);
+    sortedDocuments.metadataDocsFiltered = MetadataDocMapModel.create(mockMetadataDocuments);
   });
 
 

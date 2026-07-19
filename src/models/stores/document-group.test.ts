@@ -202,7 +202,6 @@ describe('DocumentGroup Model', () => {
     documentMetadata = new DocumentMetadataStore(
       { db: {}, user: { classHash: "" }, documents: { exemplarDocuments: [] } } as any
     );
-    documentMetadata.metadataDocsFiltered = MetadataDocMapModel.create(mockMetadataDocuments);
 
     const mockStores: DeepPartial<ISortedDocumentsStores> = {
       //DeepPartial allows us to not need to mock the "dB" and "appConfig" stores
@@ -222,6 +221,7 @@ describe('DocumentGroup Model', () => {
     };
 
     sortedDocuments = new SortedDocuments(mockStores as ISortedDocumentsStores);
+    sortedDocuments.metadataDocsFiltered = MetadataDocMapModel.create(mockMetadataDocuments);
   });
 
   describe("byBookMarked Function", () => {
@@ -530,7 +530,7 @@ describe('DocumentGroup Model', () => {
           problem: undefined
         }
       };
-      documentMetadata.metadataDocsFiltered = MetadataDocMapModel.create(metadataWithNoProblem);
+      sortedDocuments.metadataDocsFiltered = MetadataDocMapModel.create(metadataWithNoProblem);
 
       const byProblemDocs = sortedDocuments.sortBy("Problem");
       expect(byProblemDocs.length).toBe(4);
