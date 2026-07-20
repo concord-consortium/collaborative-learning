@@ -163,3 +163,10 @@ describe("persisted filters", () => {
     expect(reloaded.selected.has(key)).toBe(false);
   });
 });
+
+it("authReady defaults false and is set by setAuthReady", () => {
+  const store = new SeismicAdminStore({ cache: fakeCache() as any });
+  expect(store.authReady).toBe(false);
+  store.setAuthReady();
+  expect(store.authReady).toBe(true);
+});

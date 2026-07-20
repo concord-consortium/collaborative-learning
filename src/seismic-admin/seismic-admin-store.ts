@@ -63,6 +63,7 @@ export class SeismicAdminStore {
   selected = new Set<string>();                  // same keys
   stats = new Map<string, StationStats>();
   feedback = "";
+  authReady = false;
 
   private cache: AdminCache;
   // True once a selection has been persisted, so refresh() won't re-select everything.
@@ -203,6 +204,10 @@ export class SeismicAdminStore {
 
   setFeedback(message: string) {
     this.feedback = message;
+  }
+
+  setAuthReady(ready = true) {
+    this.authReady = ready;
   }
 
   async downloadStation(key: string) {
