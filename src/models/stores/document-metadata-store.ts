@@ -149,6 +149,8 @@ export class DocumentMetadataStore {
 
   private async pointReadMetadata(key: string): Promise<IDocumentMetadata | undefined> {
     const converter = typeConverter<IDocumentMetadata>();
+    // The context_id is required so the security rules know we aren't trying to get
+    // documents we don't have access to.
     const query = this.stores.db.firestore.collection("documents")
       .withConverter(converter)
       .where("context_id", "==", this.stores.user.classHash)
