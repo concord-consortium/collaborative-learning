@@ -1,7 +1,8 @@
 import {
   BYTES_PER_CHUNK, CHUNK_DURATION_S, COVERAGE_EPOCH, WINDOW_DURATION_S, WINDOWS_PER_CHUNK,
-  coveragePath, eventDocId, eventsPath, findUncoveredRanges, getChunkEnd, getChunkIndex, getChunkStart,
-  getWindowIndex, groupWindowsByChunk, isWindowCovered, modelPath, setWindowBits, uncoveredDaySpans
+  classifyDayCoverage, coveragePath, eventDocId, eventsPath, findUncoveredRanges, getChunkEnd,
+  getChunkIndex, getChunkStart, getWindowIndex, groupWindowsByChunk, isWindowCovered, modelPath,
+  setWindowBits, uncoveredDaySpans
 } from "./event-database";
 import { SECONDS_PER_DAY } from "./seismic-day";
 import { SeismicEvent } from "./seismic-model-types";
@@ -198,5 +199,53 @@ describe("uncoveredDaySpans", () => {
     const gaps: TimeRange[] = [{ start: day0, end: day0 + SECONDS_PER_DAY }];
     expect(uncoveredDaySpans(gaps, { start: day0, end: day0 + 3 * SECONDS_PER_DAY }))
       .toEqual([{ startDay: dayIdx, endDay: dayIdx }]);
+  });
+});
+
+describe("classifyDayCoverage", () => {
+  const day0 = COVERAGE_EPOCH;
+  const dayIdx = day0 / SECONDS_PER_DAY;
+  const threeDays: TimeRange = { start: day0, end: day0 + 3 * SECONDS_PER_DAY };
+
+  it("classifies all days covered when there are no gaps", () => {
+    expect(classifyDayCoverage([], threeDays)).toEqual(new Map([
+      [dayIdx, "covered"], [dayIdx + 1, "covered"], [dayIdx + 2, "covered"],
+    ]));
+  });
+
+  it("classifies all days uncovered when one gap spans the range", () => {
+    expect(classifyDayCoverage([threeDays], threeDays)).toEqual(new Map([
+      [dayIdx, "uncovered"], [dayIdx + 1, "uncovered"], [dayIdx + 2, "uncovered"],
+    ]));
+  });
+
+  it("classifies a day with a sub-day gap as partial", () => {
+    const gaps: TimeRange[] = [{ start: day0 + 600, end: day0 + 1200 }];
+    expect(classifyDayCoverage(gaps, threeDays)).toEqual(new Map([
+      [dayIdx, "partial"], [dayIdx + 1, "covered"], [dayIdx + 2, "covered"],
+    ]));
+  });
+
+  it("classifies a whole-day gap as uncovered", () => {
+    const gaps: TimeRange[] = [{ start: day0 + SECONDS_PER_DAY, end: day0 + 2 * SECONDS_PER_DAY }];
+    expect(classifyDayCoverage(gaps, threeDays)).toEqual(new Map([
+      [dayIdx, "covered"], [dayIdx + 1, "uncovered"], [dayIdx + 2, "covered"],
+    ]));
+  });
+
+  it("classifies a gap straddling a day boundary as partial on both days", () => {
+    const gaps: TimeRange[] = [
+      { start: day0 + SECONDS_PER_DAY - 600, end: day0 + SECONDS_PER_DAY + 600 },
+    ];
+    expect(classifyDayCoverage(gaps, threeDays)).toEqual(new Map([
+      [dayIdx, "partial"], [dayIdx + 1, "partial"], [dayIdx + 2, "covered"],
+    ]));
+  });
+
+  it("marks a day uncovered when a longer gap fully spans it and partial where it doesn't", () => {
+    const gaps: TimeRange[] = [{ start: day0 + 600, end: day0 + 2 * SECONDS_PER_DAY }];
+    expect(classifyDayCoverage(gaps, threeDays)).toEqual(new Map([
+      [dayIdx, "partial"], [dayIdx + 1, "uncovered"], [dayIdx + 2, "covered"],
+    ]));
   });
 });

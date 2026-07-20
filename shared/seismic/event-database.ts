@@ -145,3 +145,30 @@ export function uncoveredDaySpans(gaps: TimeRange[], range: TimeRange): DaySpan[
   }
   return spans;
 }
+
+export type DayCoverageState = "covered" | "partial" | "uncovered";
+
+/**
+ * Classify each UTC day index in [dayIndex(range.start), dayIndex(range.end - 1)]
+ * against uncovered gaps (as returned by findUncoveredRanges): "uncovered" when a
+ * gap fully spans the day, "covered" when no gap intersects it, else "partial".
+ * Two gaps can never jointly span one day — findUncoveredRanges returns maximal
+ * gaps separated by covered windows — so per-gap classification is sufficient.
+ */
+export function classifyDayCoverage(gaps: TimeRange[], range: TimeRange): Map<number, DayCoverageState> {
+  const states = new Map<number, DayCoverageState>();
+  for (let day = dayIndex(range.start); day <= dayIndex(range.end - 1); day++) {
+    states.set(day, "covered");
+  }
+  for (const gap of gaps) {
+    const start = Math.max(gap.start, range.start);
+    const end = Math.min(gap.end, range.end);
+    if (end <= start) continue;
+    for (let day = dayIndex(start); day <= dayIndex(end - 1); day++) {
+      const dayStart = day * SECONDS_PER_DAY;
+      const wholeDay = start <= dayStart && end >= dayStart + SECONDS_PER_DAY;
+      states.set(day, wholeDay ? "uncovered" : "partial");
+    }
+  }
+  return states;
+}
