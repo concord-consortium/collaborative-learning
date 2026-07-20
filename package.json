@@ -185,6 +185,7 @@
     "@types/w3c-web-serial": "^1.0.2",
     "@typescript-eslint/eslint-plugin": "^8.59.2",
     "@typescript-eslint/parser": "^8.59.2",
+    "ajv": "^8.20.0",
     "autoprefixer": "^10.4.8",
     "babel-loader": "^8.2.5",
     "common-tags": "^1.8.2",
