@@ -169,7 +169,7 @@ export class SeismicAdminStore {
     void this.loadAllStats();
   }
 
-  toggle(key: string) {
+  toggleStation(key: string) {
     if (this.selectedStations.has(key)) {
       this.selectedStations.delete(key);
     } else {

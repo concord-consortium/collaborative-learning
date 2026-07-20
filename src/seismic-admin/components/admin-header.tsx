@@ -34,7 +34,7 @@ export const AdminHeader = observer(function AdminHeader() {
                     type="checkbox"
                     disabled={checked && store.selectedStations.size === 1}
                     checked={checked}
-                    onChange={() => store.toggle(key)}
+                    onChange={() => store.toggleStation(key)}
                   />
                   {stationLabel(station)}
                 </label>

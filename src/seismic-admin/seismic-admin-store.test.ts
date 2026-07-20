@@ -155,7 +155,7 @@ describe("persisted filters", () => {
     await store.refresh();
     const key = [...store.stations.keys()][0];
     store.setRange("2026-01-30", "2026-02-02");
-    store.toggle(key);
+    store.toggleStation(key);
 
     // A fresh store reads back what the first one wrote.
     const reloaded = new SeismicAdminStore({ cache: fakeCache() as any });
