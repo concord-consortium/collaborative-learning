@@ -23,9 +23,9 @@ export const App = observer(function App() {
         console.warn("Seismic admin Firebase sign-in failed:", err);
         return `${err?.message ?? err}`;
       });
-    void loadCatalog().then(catalog => {
+    void loadCatalog().then(({ stations, models }) => {
       if (cancelled) return;
-      const created = new SeismicAdminStore({ catalog });
+      const created = new SeismicAdminStore({ stations, models });
       setStore(created);
       void created.refresh();
       void authPromise.then(failure => {

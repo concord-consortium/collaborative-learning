@@ -26,13 +26,17 @@ describe("fetchModelMetadata", () => {
     expect(a).not.toBe(b);
   });
 
-  it("throws on a non-ok response", async () => {
+  it("throws on a non-ok response, naming the URL", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 404 });
-    await expect(fetchModelMetadata("https://x/metadata.json")).rejects.toThrow("404");
+    const promise = fetchModelMetadata("https://x/metadata.json");
+    await expect(promise).rejects.toThrow("404");
+    await expect(promise).rejects.toThrow("from https://x/metadata.json");
   });
 
-  it("throws on an unsupported schema, naming it", async () => {
+  it("throws on an unsupported schema, naming it and the URL", async () => {
     mockFetch.mockResolvedValue({ ok: true, json: async () => ({ ...validMetadata(), $schema: "bogus" }) });
-    await expect(fetchModelMetadata("https://x/metadata.json")).rejects.toThrow('"bogus"');
+    const promise = fetchModelMetadata("https://x/metadata.json");
+    await expect(promise).rejects.toThrow('"bogus"');
+    await expect(promise).rejects.toThrow("(from https://x/metadata.json)");
   });
 });

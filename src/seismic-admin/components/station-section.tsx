@@ -25,9 +25,9 @@ export const StationSection = observer(function StationSection({ stationKey }: I
   const totalDays = hasRange ? lastDay - firstDay + 1 : 0;
   const label = station
     ? stationLabel(station)
-    : `All selected stations (${store.selected.size})`;
+    : `All selected stations (${store.selectedStations.size})`;
 
-  const allTotalDays = totalDays * store.selected.size;
+  const allTotalDays = totalDays * store.selectedStations.size;
   const cachedDaysMessage = allStations
     ? `${allTotalDays - stats.missingCount} / ${allTotalDays}`
     : `${stats.cachedDays?.size ?? 0} / ${totalDays}`;

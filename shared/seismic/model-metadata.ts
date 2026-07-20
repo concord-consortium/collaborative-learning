@@ -33,12 +33,13 @@ export async function fetchModelMetadata(metadataUrl: string): Promise<ModelMeta
 
   const response = await fetch(metadataUrl);
   if (!response.ok) {
-    throw new Error(`Failed to fetch model metadata: ${response.status}`);
+    throw new Error(`Failed to fetch model metadata: ${response.status} from ${metadataUrl}`);
   }
   const metadata: ModelMetadata = await response.json();
   if (metadata.$schema !== SUPPORTED_SCHEMA) {
     throw new Error(
-      `Unsupported model schema: "${metadata.$schema}". This version of CLUE supports "${SUPPORTED_SCHEMA}".`
+      `Unsupported model schema: "${metadata.$schema}". This version of CLUE supports "${SUPPORTED_SCHEMA}".` +
+      ` (from ${metadataUrl})`
     );
   }
   // Resolve weightsUrl relative to the metadata URL

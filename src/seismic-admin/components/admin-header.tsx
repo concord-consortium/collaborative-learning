@@ -27,12 +27,12 @@ export const AdminHeader = observer(function AdminHeader() {
           <div className="option-header">Stations</div>
           <div className="stations">
             {[...store.stations].map(([key, station]) => {
-              const checked = store.selected.has(key);
+              const checked = store.selectedStations.has(key);
               return (
                 <label className="station-checkbox" key={key}>
                   <input
                     type="checkbox"
-                    disabled={checked && store.selected.size === 1}
+                    disabled={checked && store.selectedStations.size === 1}
                     checked={checked}
                     onChange={() => store.toggle(key)}
                   />

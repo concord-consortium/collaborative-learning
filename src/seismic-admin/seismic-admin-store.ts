@@ -1,6 +1,8 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import { fetchModelMetadata, ModelListEntry } from "../../shared/seismic/model-metadata";
 import { createOpfsCache, SeismicCache } from "../../shared/seismic/opfs-seismic-cache";
 import { dayIndex, utcDayFromString } from "../../shared/seismic/seismic-day";
+import { ModelMetadata } from "../../shared/seismic/seismic-model-types";
 import { StationConfig } from "../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
 import { DONE, SeismicDownloadService } from "../models/stores/seismic/seismic-download-service";
@@ -44,7 +46,9 @@ async function defaultDownloadStation(
 
 export interface SeismicAdminDeps {
   cache?: AdminCache;
-  catalog?: StationConfig[];
+  stations?: StationConfig[];
+  models?: ModelListEntry[];
+  fetchMetadata?: (metadataUrl: string) => Promise<ModelMetadata>;
   downloadStation?: (
     station: StationConfig, startSec: number, endSec: number, onProgress?: DownloadProgress
   ) => Promise<void>;
@@ -60,14 +64,18 @@ export class SeismicAdminStore {
   startDate = "2026-01-01";
   endDate = "2026-01-31";
   stations = new Map<string, StationConfig>();   // keyed by getStationChannelPrefix
-  selected = new Set<string>();                  // same keys
+  selectedStations = new Set<string>();                  // same keys
   stats = new Map<string, StationStats>();
+  models = new Map<string, ModelListEntry>();    // keyed by metadataUrl
+  selectedModels = new Set<string>();            // same keys; persisted
+  modelMetadata = new Map<string, ModelMetadata | "error">();
   feedback = "";
   authReady = false;
 
   private cache: AdminCache;
   // True once a selection has been persisted, so refresh() won't re-select everything.
   private hasSavedSelection = false;
+  private hasSavedModelSelection = false;
 
   constructor(private deps: SeismicAdminDeps = {}) {
     this.cache = deps.cache ?? createOpfsCache();
@@ -75,9 +83,19 @@ export class SeismicAdminStore {
     const saved = loadFilters();
     if (saved.startDate) this.startDate = saved.startDate;
     if (saved.endDate) this.endDate = saved.endDate;
-    if (saved.selected) {
-      this.selected = new Set(saved.selected);
+    if (saved.selectedStations) {
+      this.selectedStations = new Set(saved.selectedStations);
       this.hasSavedSelection = true;
+    }
+
+    (deps.models ?? []).forEach(m => this.models.set(m.metadataUrl, m));
+    if (saved.selectedModels) {
+      // A restored selection may name models the catalog no longer declares.
+      this.selectedModels = new Set(saved.selectedModels.filter(url => this.models.has(url)));
+      this.hasSavedModelSelection = true;
+    } else {
+      // Select everything by default, but never override a selection the user saved.
+      for (const url of this.models.keys()) this.selectedModels.add(url);
     }
 
     // `deps` and `cache` are injected dependencies, not observable state.
@@ -86,16 +104,28 @@ export class SeismicAdminStore {
   }
 
   private save() {
-    saveFilters({ startDate: this.startDate, endDate: this.endDate, selected: [...this.selected] });
+    saveFilters({
+      startDate: this.startDate, endDate: this.endDate,
+      selectedStations: [...this.selectedStations], selectedModels: [...this.selectedModels],
+    });
   }
 
-  get selectedStations() {
-    const selectedStations: StationConfig[] = [];
-    this.selected.forEach(key => {
+  get selectedStationList() {
+    const selectedStationList: StationConfig[] = [];
+    this.selectedStations.forEach(key => {
       const station = this.stations.get(key);
-      if (station) selectedStations.push(station);
+      if (station) selectedStationList.push(station);
     });
-    return selectedStations;
+    return selectedStationList;
+  }
+
+  get selectedModelList(): ModelListEntry[] {
+    const list: ModelListEntry[] = [];
+    this.selectedModels.forEach(url => {
+      const model = this.models.get(url);
+      if (model) list.push(model);
+    });
+    return list;
   }
 
   private get firstSec() {
@@ -118,7 +148,7 @@ export class SeismicAdminStore {
 
   get selectedMissingRawDays() {
     let total = 0;
-    this.selected.forEach(key => {
+    this.selectedStations.forEach(key => {
       total += this.stats.get(key)?.missingCount ?? 0;
     });
     return total;
@@ -126,7 +156,7 @@ export class SeismicAdminStore {
 
   get selectedBytes() {
     let total = 0;
-    this.selected.forEach(key => {
+    this.selectedStations.forEach(key => {
       total += this.stats.get(key)?.bytes ?? 0;
     });
     return total;
@@ -140,27 +170,54 @@ export class SeismicAdminStore {
   }
 
   toggle(key: string) {
-    if (this.selected.has(key)) {
-      this.selected.delete(key);
+    if (this.selectedStations.has(key)) {
+      this.selectedStations.delete(key);
     } else {
-      this.selected.add(key);
+      this.selectedStations.add(key);
     }
     this.hasSavedSelection = true;
     this.save();
   }
 
+  toggleModel(url: string) {
+    if (this.selectedModels.has(url)) {
+      this.selectedModels.delete(url);
+    } else {
+      this.selectedModels.add(url);
+    }
+    this.hasSavedModelSelection = true;
+    this.save();
+  }
+
+  /** Resolve (and cache) a model's metadata; undefined when it failed to load. */
+  async ensureModelMetadata(url: string): Promise<ModelMetadata | undefined> {
+    const cached = this.modelMetadata.get(url);
+    if (cached === "error") return undefined;
+    if (cached) return cached;
+    try {
+      const fetcher = this.deps.fetchMetadata ?? fetchModelMetadata;
+      const metadata = await fetcher(url);
+      runInAction(() => this.modelMetadata.set(url, metadata));
+      return metadata;
+    } catch (err) {
+      console.warn("Failed to load model metadata:", url, err);
+      runInAction(() => this.modelMetadata.set(url, "error"));
+      return undefined;
+    }
+  }
+
   async refresh() {
     const opfs = await this.cache.listStations();
-    const merged = mergeStations(opfs, this.deps.catalog ?? []);
+    const merged = mergeStations(opfs, this.deps.stations ?? []);
     runInAction(() => {
       this.stations = merged;
       // A restored selection may name stations that no longer exist.
-      for (const key of [...this.selected]) {
-        if (!merged.has(key)) this.selected.delete(key);
+      for (const key of [...this.selectedStations]) {
+        if (!merged.has(key)) this.selectedStations.delete(key);
       }
       // Select everything by default, but never override a selection the user saved.
-      if (this.selected.size === 0 && !this.hasSavedSelection) {
-        for (const key of merged.keys()) this.selected.add(key);
+      if (this.selectedStations.size === 0 && !this.hasSavedSelection) {
+        for (const key of merged.keys()) this.selectedStations.add(key);
       }
     });
     await this.loadAllStats();
@@ -219,12 +276,12 @@ export class SeismicAdminStore {
   }
 
   async deleteAllSelected() {
-    for (const key of this.selected) await this.deleteRaw(key);
+    for (const key of this.selectedStations) await this.deleteRaw(key);
   }
 
   async downloadAllSelected() {
     // Download stations sequentially to ensure shared-proxy limit is respected
-    const stations = this.selectedStations;
+    const stations = this.selectedStationList;
     for (let i = 0; i < stations.length; i++) {
       await this.download(stations[i], `Station ${i + 1} of ${stations.length} — `);
     }

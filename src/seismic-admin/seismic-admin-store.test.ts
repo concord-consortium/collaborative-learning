@@ -35,8 +35,8 @@ it("deletes a station's days in range via the cache", async () => {
 
 it("downloads selected stations sequentially", async () => {
   const runner = jest.fn(async () => {});
-  const catalog = [{ network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" }];
-  const store = new SeismicAdminStore({ cache: fakeCache() as any, catalog, downloadStation: runner });
+  const stations = [{ network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" }];
+  const store = new SeismicAdminStore({ cache: fakeCache() as any, stations, downloadStation: runner });
   store.setRange("2026-01-30", "2026-02-02");
   await store.refresh();
   await store.downloadAllSelected();
@@ -44,7 +44,7 @@ it("downloads selected stations sequentially", async () => {
 });
 
 describe("download feedback", () => {
-  const catalog = [{ network: "AK", station: "RC01", location: "", channel: "BHZ", label: "Rabbit Creek" }];
+  const stations = [{ network: "AK", station: "RC01", location: "", channel: "BHZ", label: "Rabbit Creek" }];
 
   it("reports day progress for a single station, then completion", async () => {
     const seen: string[] = [];
@@ -54,7 +54,7 @@ describe("download feedback", () => {
       onProgress?.({ completed: 2, total: 3 });
       seen.push(store.feedback);
     });
-    const store = new SeismicAdminStore({ cache: fakeCache() as any, catalog, downloadStation });
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, stations, downloadStation });
     await store.refresh();
 
     await store.downloadStation([...store.stations.keys()].find(k => k.includes("RC01"))!);
@@ -71,7 +71,7 @@ describe("download feedback", () => {
       onProgress?.({ completed: 1, total: 2 });
       seen.push(store.feedback);
     });
-    const store = new SeismicAdminStore({ cache: fakeCache() as any, catalog, downloadStation });
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, stations, downloadStation });
     await store.refresh();
 
     await store.downloadAllSelected();
@@ -127,27 +127,27 @@ describe("live stats updates", () => {
 
 describe("persisted filters", () => {
   it("restores the saved range and selection", async () => {
-    saveFilters({ startDate: "2026-01-30", endDate: "2026-02-02", selected: [] });
+    saveFilters({ startDate: "2026-01-30", endDate: "2026-02-02", selectedStations: [] });
     const store = new SeismicAdminStore({ cache: fakeCache() as any });
     expect(store.startDate).toBe("2026-01-30");
     expect(store.endDate).toBe("2026-02-02");
 
     // An explicitly-empty saved selection must survive refresh's select-all default.
     await store.refresh();
-    expect(store.selected.size).toBe(0);
+    expect(store.selectedStations.size).toBe(0);
   });
 
   it("selects every station when nothing was ever saved", async () => {
     const store = new SeismicAdminStore({ cache: fakeCache() as any });
     await store.refresh();
-    expect(store.selected.size).toBe(1);
+    expect(store.selectedStations.size).toBe(1);
   });
 
   it("drops a saved station that no longer exists", async () => {
-    saveFilters({ selected: ["AK_GONE_BHZ"] });
+    saveFilters({ selectedStations: ["AK_GONE_BHZ"] });
     const store = new SeismicAdminStore({ cache: fakeCache() as any });
     await store.refresh();
-    expect(store.selected.size).toBe(0);
+    expect(store.selectedStations.size).toBe(0);
   });
 
   it("persists the range and selection as they change", async () => {
@@ -160,7 +160,62 @@ describe("persisted filters", () => {
     // A fresh store reads back what the first one wrote.
     const reloaded = new SeismicAdminStore({ cache: fakeCache() as any });
     expect(reloaded.startDate).toBe("2026-01-30");
-    expect(reloaded.selected.has(key)).toBe(false);
+    expect(reloaded.selectedStations.has(key)).toBe(false);
+  });
+});
+
+describe("model selection", () => {
+  const twoModels = [
+    { label: "Compact", metadataUrl: "https://x/compact.json" },
+    { label: "Large", metadataUrl: "https://x/large.json" },
+  ];
+
+  it("selects all models by default and toggles/persists selection", () => {
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, models: twoModels });
+    expect([...store.selectedModels]).toEqual(twoModels.map(m => m.metadataUrl));
+    expect(store.selectedModelList).toEqual(twoModels);
+
+    store.toggleModel(twoModels[0].metadataUrl);
+    expect(store.selectedModels.has(twoModels[0].metadataUrl)).toBe(false);
+    expect(store.selectedModelList).toEqual([twoModels[1]]);
+
+    // A fresh store reads back what the first one wrote.
+    const reloaded = new SeismicAdminStore({ cache: fakeCache() as any, models: twoModels });
+    expect([...reloaded.selectedModels]).toEqual([twoModels[1].metadataUrl]);
+
+    // Toggling back on persists too.
+    store.toggleModel(twoModels[0].metadataUrl);
+    expect(store.selectedModels.has(twoModels[0].metadataUrl)).toBe(true);
+  });
+
+  it("restores a saved model selection, pruning unknown urls, without re-selecting all", () => {
+    saveFilters({ selectedModels: [twoModels[0].metadataUrl, "https://x/gone.json"] });
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, models: twoModels });
+    expect([...store.selectedModels]).toEqual([twoModels[0].metadataUrl]);
+  });
+
+  it("keeps an explicitly-empty saved model selection empty", () => {
+    saveFilters({ selectedModels: [] });
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, models: twoModels });
+    expect(store.selectedModels.size).toBe(0);
+  });
+
+  it("ensureModelMetadata fetches once per url, caches, and records errors", async () => {
+    const metadata = { id: "compact-v1" } as any;
+    const fetchMetadata = jest.fn().mockResolvedValueOnce(metadata);
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, models: twoModels, fetchMetadata });
+
+    // The observable map wraps stored objects, so compare by value; the call
+    // count below is what proves the second read came from the cache.
+    expect(await store.ensureModelMetadata(twoModels[0].metadataUrl)).toEqual(metadata);
+    expect(await store.ensureModelMetadata(twoModels[0].metadataUrl)).toEqual(metadata);
+    expect(fetchMetadata).toHaveBeenCalledTimes(1);
+
+    fetchMetadata.mockRejectedValueOnce(new Error("nope"));
+    expect(await store.ensureModelMetadata(twoModels[1].metadataUrl)).toBeUndefined();
+    // The error is cached: no re-fetch on the second ask.
+    expect(await store.ensureModelMetadata(twoModels[1].metadataUrl)).toBeUndefined();
+    expect(fetchMetadata).toHaveBeenCalledTimes(2);
   });
 });
 

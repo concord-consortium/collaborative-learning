@@ -37,7 +37,7 @@ describe("AdminHeader", () => {
     const checkbox = screen.getByRole("checkbox");
     expect(checkbox).toBeChecked();
     fireEvent.click(checkbox);
-    expect(store.selected.size).toBe(0);
+    expect(store.selectedStations.size).toBe(0);
   });
 
   it("applies a date change immediately", async () => {
