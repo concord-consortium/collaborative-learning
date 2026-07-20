@@ -52,3 +52,13 @@ export const SharedModel = types.model("SharedModel", {
 
 export interface SharedModelType extends Instance<typeof SharedModel> {}
 export type SharedModelSnapshotType = SnapshotIn<typeof SharedModel>;
+
+// A shared model may implement exportJson() to customize its authoring/curriculum export — e.g.
+// to drop transient runtime fields that would otherwise churn the export. When absent, the
+// document serializes the full snapshot.
+export interface ISharedModelWithExportJson {
+  exportJson(): unknown;
+}
+export function sharedModelHasExportJson(model: unknown): model is ISharedModelWithExportJson {
+  return typeof (model as any)?.exportJson === "function";
+}

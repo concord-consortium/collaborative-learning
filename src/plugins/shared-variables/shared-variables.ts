@@ -3,7 +3,7 @@ import { UnitsManager, Variable, VariableSnapshot, VariableType } from "@concord
 import { SharedModel, SharedModelType } from "../../models/shared/shared-model";
 import { withoutUndo } from "../../models/history/without-undo";
 import { getSharedModelManager } from "../../models/tiles/tile-environment";
-import { isInputVariable, isOutputVariable } from "./simulations/simulation-utilities";
+import { isSimulationDrivenVariable } from "./simulations/simulation-utilities";
 
 export const kSharedVariablesID = "SharedVariables";
 
@@ -66,16 +66,17 @@ export const SharedVariables = SharedModel.named("SharedVariables")
   getVariableById(id: string) {
     return self.variables.find(v => v.id === id);
   },
-  // Authoring export that drops the live `value` of sim-driven (input/output) variables. A
-  // running simulation overwrites them every step, so keeping them would re-serialize the export
-  // each step and continuously reload authoring previews. Non-sim variables keep their value.
+  // Authoring export that drops the live `value` of simulation-driven variables (sensor inputs and
+  // live outputs). A running simulation overwrites them every step, so keeping them would
+  // re-serialize the export each step and continuously reload authoring previews. Authored values
+  // (plain variables, user-driven inputs) are preserved.
   exportJson() {
     const snapshot = getSnapshot(self);
     return {
       ...snapshot,
       variables: snapshot.variables.map(variableSnap => {
         const variable = self.variables.find(v => v.id === variableSnap.id);
-        if (variable && (isInputVariable(variable) || isOutputVariable(variable))) {
+        if (variable && isSimulationDrivenVariable(variable)) {
           const { value, ...rest } = variableSnap;
           return rest;
         }
