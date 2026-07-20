@@ -1,12 +1,16 @@
 import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 import { SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
 import { DONE } from "./seismic-download-service";
+// Type-only import: erased at runtime, so requireActual-ing this module inside a
+// jest.mock factory never loads the processor (whose imports may be mid-mock).
+import type { CoverageDownloadService } from "./seismic-coverage-processor";
 
 /**
  * Fake SeismicDownloadService for tests.
  * Serves only the ready days that fall within the most recent ensureRange call,
  * then DONE — mirroring the real service's reset-per-ensureRange drain contract.
  * Like the real downloader (daysInRange), the day containing endSec is INCLUDED.
+ * `satisfies` pins the fake to the real service's API so drift breaks compilation.
  */
 export function makeFakeDownloadService(days: number[]) {
   let pending: number[] = [];
@@ -19,7 +23,7 @@ export function makeFakeDownloadService(days: number[]) {
     cancel: jest.fn(),
     erroredDays: [] as number[],
     emptyDays: [] as number[],
-  };
+  } satisfies CoverageDownloadService;
 }
 
 export type FakeDownloadService = ReturnType<typeof makeFakeDownloadService>;

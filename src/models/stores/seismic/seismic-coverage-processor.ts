@@ -9,10 +9,17 @@ import { getUncoveredRanges, markCovered, writeEvents } from "./seismic-event-se
 
 export const DETECTION_THRESHOLD = 0.7;
 
+/** The subset of SeismicDownloadService the processor uses; tests inject fakes against it. */
+export type CoverageDownloadService = Pick<SeismicDownloadService,
+  "ensureRange" | "nextReadyDay" | "readDay" | "cancel" | "emptyDays" | "erroredDays">;
+
 export interface ProcessCoverageOptions {
   stationData: StationData;
   metadata: ModelMetadata;
-  range: TimeRange; // Unix seconds; caller guarantees day-aligned
+  /** Unix seconds; the caller guarantees day-aligned bounds. A mid-window (non-day-aligned)
+   *  start silently skips the partial first window's events — the same failure mode
+   *  documented on findUncoveredRanges. */
+  range: TimeRange;
   /** Pre-resolved uncovered ranges. When absent the processor calls getUncoveredRanges
    *  itself and lets failures propagate (admin path). Wave Runner passes its
    *  fallback-resolved ranges here. */
@@ -20,7 +27,7 @@ export interface ProcessCoverageOptions {
   onEvents?: (events: SeismicEvent[]) => void;
   onProgress?: (progress: number, total: number) => void;
   /** Test seams; production defaults construct real ones. */
-  downloadService?: SeismicDownloadService;
+  downloadService?: CoverageDownloadService;
   createRunner?: () => SeismicModelRunner;
 }
 
@@ -53,13 +60,16 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
   const totalDays = spans.reduce((sum, s) => sum + (s.endDay - s.startDay + 1), 0);
   onProgress?.(0, totalDays);
 
+  // Fully covered: nothing to do — skip runner creation (and its model-weights download).
+  if (!spans.length) return { processed: 0, skipped: 0, total: 0 };
+
+  // Bulk-download each uncovered span into OPFS, running the model on each day as it lands.
+  // Days may arrive out of order; detection is per-window independent, so that's fine.
+  // No-data days come as `dayEmpty` and are simply never yielded.
+  const downloadService = options.downloadService ?? new SeismicDownloadService();
   const runner = (options.createRunner ?? (() => new SeismicModelRunner()))();
   await runner.loadModel(metadata);
   try {
-    // Bulk-download each uncovered span into OPFS, running the model on each day as it lands.
-    // Days may arrive out of order; detection is per-window independent, so that's fine.
-    // No-data days come as `dayEmpty` and are simply never yielded.
-    const downloadService = options.downloadService ?? new SeismicDownloadService();
     let processed = 0;
     let skippedDays = 0;
     const updateProgress = () => {
@@ -119,6 +129,7 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
 
     return { processed, skipped: skippedDays, total: totalDays };
   } finally {
+    downloadService.cancel();
     runner.dispose();
   }
 }

@@ -4,7 +4,6 @@ import { ModelMetadata } from "../../../../shared/seismic/seismic-model-types";
 import { StationData, TimeRange } from "../../../../shared/seismic/seismic-types";
 import { DETECTION_THRESHOLD, processUncoveredRanges } from "./seismic-coverage-processor";
 import { FakeDownloadService, makeFakeDownloadService, makeFakeModelRunner } from "./seismic-coverage-test-fakes";
-import { SeismicDownloadService } from "./seismic-download-service";
 import { getUncoveredRanges, markCovered, writeEvents } from "./seismic-event-service";
 
 jest.mock("./seismic-event-service", () =>
@@ -49,7 +48,7 @@ describe("processUncoveredRanges", () => {
       stationData: station,
       metadata,
       range: threeDayRange,
-      downloadService: fakeService as unknown as SeismicDownloadService,
+      downloadService: fakeService,
       createRunner: () => runner as unknown as SeismicModelRunner,
     };
   }
@@ -198,6 +197,35 @@ describe("processUncoveredRanges", () => {
 
     expect(runner.loadModel).toHaveBeenCalledWith(metadata);
     expect(runner.dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it("cancels the download service when processChunk throws mid-span", async () => {
+    const fakeService = makeFakeDownloadService([feb1Day]);
+    const runner = makeFakeModelRunner();
+    runner.processChunk.mockRejectedValueOnce(new Error("boom"));
+
+    await expect(processUncoveredRanges({
+      ...makeOptions(fakeService, runner),
+      uncovered: [{ start: feb1Sec, end: feb1Sec + SECONDS_PER_DAY }],
+    })).rejects.toThrow("boom");
+    expect(fakeService.cancel).toHaveBeenCalled();
+  });
+
+  it("returns without creating a runner when there are no uncovered spans", async () => {
+    const fakeService = makeFakeDownloadService([]);
+    const createRunner = jest.fn();
+    const onProgress = jest.fn();
+    const result = await processUncoveredRanges({
+      ...makeOptions(fakeService),
+      uncovered: [],
+      createRunner,
+      onProgress,
+    });
+
+    expect(createRunner).not.toHaveBeenCalled();
+    expect(fakeService.ensureRange).not.toHaveBeenCalled();
+    expect(onProgress).toHaveBeenCalledWith(0, 0);
+    expect(result).toEqual({ processed: 0, skipped: 0, total: 0 });
   });
 
   it("disposes the runner and propagates the error when processChunk throws", async () => {
