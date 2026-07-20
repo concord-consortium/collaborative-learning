@@ -4,6 +4,7 @@ import { applySnapshot, unprotect } from "@concord-consortium/mobx-state-tree";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { DB } from "../../lib/db";
 import { typeConverter } from "../../utilities/db-utils";
+import { UnitModelType } from "../curriculum/unit";
 import { IDocumentMetadataModel, MetadataDocMapModel } from "../document/document-metadata-model";
 import { isSortableType } from "../document/document-types";
 import { AppConfigModelType } from "./app-config-model";
@@ -16,7 +17,6 @@ import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
 import { PrimarySortType } from "./ui-types";
 import { UserModelType } from "./user";
-import { UnitModelType } from "../curriculum/unit";
 import { DocumentMetadataStore } from "./document-metadata-store";
 
 export type SortedDocumentsMap = Record<string, DocumentGroup[]>;
@@ -110,18 +110,18 @@ export class SortedDocuments {
   }
 
   watchFirestoreMetaDataDocs(filter: string, unit: string, investigation: number, problem: number) {
-    const db = this.stores.db.firestore;
+    const db = this.db.firestore;
     const converter = typeConverter<IDocumentMetadata>();
     const baseQuery = db.collection("documents")
       .withConverter(converter)
-      .where("context_id", "==", this.stores.user.classHash);
+      .where("context_id", "==", this.user.classHash);
 
     let filteredQuery = baseQuery;
 
     if (filter !== "All") {
       // an "in" query is used here so that we can find any documents that use unit and
       // any the older renamed unit codes.
-      filteredQuery = filteredQuery.where("unit" , "in", this.stores.curriculumConfig.getUnitCodeVariants(unit));
+      filteredQuery = filteredQuery.where("unit" , "in", this.curriculumConfig.getUnitCodeVariants(unit));
     }
     if (filter === "Investigation" || filter === "Problem") {
       filteredQuery = filteredQuery.where("investigation", "==", String(investigation));
