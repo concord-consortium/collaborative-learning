@@ -36,7 +36,7 @@ metadata — a shared per-document transform (validate + exemplar-enrich) and a 
 
 - **Changing how any `DocumentModel` field is sourced.** Reactive fields (`visibility`, `title`, `properties`,
   `groupId`, `content`) keep their current RTDB initial value **and** their live RTDB listeners, unchanged. The
-  follow-on PR sources the Firestore-only axis fields (`concurrent`, `kind`, …) through this store.
+  follow-on PR sources the Firestore-only `context_id` field through this store.
 - Remote / network documents, teacher supports, history playback, copies, doc-editor snapshots — none of these
   read through this store.
 - Tile **content** — stays in RTDB (content is not metadata).
