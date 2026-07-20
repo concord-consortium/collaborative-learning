@@ -17,15 +17,10 @@ export interface IDocumentMetadataStoreStores {
 }
 
 /**
- * The authority for Firestore `documents/<key>` metadata.
- *
- * This store does NOT own any filtered watch state. Its value is a single, shared
- * per-document transform (`metadataFromFirestoreData`) that validates and exemplar-enriches
- * any metadata document entering the system, plus validated point reads (`fetchMetadata`).
- * Every path — each consumer's reactive watch (via `getMSTSnapshotFromFBSnapshot`) and every
- * point read — routes through the same transform, so nothing surfaces raw/unvalidated data.
- * Fail fast: an invalid document is treated as absent rather than returned as-is.
- * Concurrent point reads for the same key are coalesced.
+ * The validated authority for Firestore `documents/<key>` metadata: a shared per-document
+ * transform (validate + exemplar-enrich) and validated point reads. Each consumer owns its own
+ * filtered watch and routes its snapshots through this transform. Concurrent point reads for
+ * the same key are coalesced into a single query.
  */
 export class DocumentMetadataStore {
   stores: IDocumentMetadataStoreStores;
@@ -38,9 +33,9 @@ export class DocumentMetadataStore {
   }
 
   /**
-   * The single per-document gate. Validates `data` against DocumentMetadataModel; on failure
-   * logs and returns undefined (the doc is treated as absent). On success, applies exemplar
-   * enrichment when the key matches an authored exemplar and returns the validated data.
+   * Validates `data` against DocumentMetadataModel, then applies exemplar enrichment when the
+   * key matches an authored exemplar. Returns the validated data, or undefined if it fails
+   * validation.
    */
   metadataFromFirestoreData(data: IDocumentMetadata): IDocumentMetadata | undefined {
     try {
@@ -137,10 +132,10 @@ export class DocumentMetadataStore {
   }
 
   /**
-   * Validated point read. Queries `documents where context_id == classHash && key == documentKey`,
-   * routes the first result through `metadataFromFirestoreData`, and returns the validated data
-   * (or undefined if the query is empty or the doc fails validation). Concurrent reads for the
-   * same key share one query. No permanent result cache — the Firestore SDK caches locally.
+   * Validated point read of a single document's metadata, scoped to the user's class. Returns
+   * undefined if there is no such document or it fails validation. Concurrent reads for the same
+   * key share one query. Results are not cached here because the Firestore SDK is already caching
+   * the documents locally.
    */
   fetchMetadata(key: string): Promise<IDocumentMetadata | undefined> {
     const inFlight = this.inFlightPointReads.get(key);

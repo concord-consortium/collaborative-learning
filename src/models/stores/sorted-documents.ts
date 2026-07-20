@@ -37,19 +37,16 @@ export interface ISortedDocumentsStores {
 
 export class SortedDocuments {
   stores: ISortedDocumentsStores;
+  metadataDocsFiltered = MetadataDocMapModel.create();
+  // `metadataDocsWithoutUnit` picks up unit-less docs (e.g. personal documents) when a unit
+  // filter is applied.
+  metadataDocsWithoutUnit = MetadataDocMapModel.create();
+  docsReceived = false;
   // Maps from document ID to the history entry ID that the user requested to view.
   documentHistoryViewRequests: Record<string,string> = {};
 
   // Root document group that serves as the root node for delegating all sorting operations.
   rootDocumentGroup: DocumentGroup;
-
-  // This consumer's own filtered view of the class's Firestore metadata. Each consumer owns its
-  // own maps and filter; the shared thing across consumers is the transform on DocumentMetadataStore,
-  // not the collection. `metadataDocsWithoutUnit` picks up unit-less docs (e.g. personal documents)
-  // when a unit filter is applied.
-  metadataDocsFiltered = MetadataDocMapModel.create();
-  metadataDocsWithoutUnit = MetadataDocMapModel.create();
-  docsReceived = false;
 
   constructor(stores: ISortedDocumentsStores) {
     makeAutoObservable(this);
@@ -95,38 +92,21 @@ export class SortedDocuments {
     return this.stores.curriculumConfig;
   }
 
-  get exemplarMetadataDocs() {
-    return this.stores.documentMetadata.exemplarMetadataDocs;
+  setDocumentHistoryViewRequest(docKey: string, historyId: string) {
+    this.documentHistoryViewRequests[docKey] = historyId;
+  }
+  getDocumentHistoryViewRequest(docKey: string) {
+    // We only want to move to this history entry once,
+    // so we delete the request after it has been fulfilled.
+    const historyId = this.documentHistoryViewRequests[docKey];
+    if (historyId) {
+      delete this.documentHistoryViewRequests[docKey];
+    }
+    return historyId;
   }
 
-  // What happens if the visibility changes on a metadata document?
-  // - FS onSnapshot listener is called
-  // - listener applies the snapshot to the map of objects
-  // - the keys of the objects don't change in the map
-  // - MobX should not re-run this view because it is only reading the key
-  //   of each document.
-  get firestoreMetadataDocs() {
-    const matchedDocKeys = new Set<string>();
-    const docsArray: IDocumentMetadataModel[] = [];
-    this.metadataDocsFiltered.forEach(doc => {
-      docsArray.push(doc);
-      matchedDocKeys.add(doc.key);
-    });
-    this.metadataDocsWithoutUnit.forEach(doc => {
-      // If there is a duplicate for some reason just ignore the unit-less one
-      if (matchedDocKeys.has(doc.key)) return;
-      docsArray.push(doc);
-      matchedDocKeys.add(doc.key);
-    });
-    this.exemplarMetadataDocs.forEach(doc => {
-      // If there is a duplicate, it will have been merged with one of the previous
-      // maps by the firestore snapshot listeners. So we ignore the duplicate here.
-      if (matchedDocKeys.has(doc.key)) return;
-      docsArray.push(doc);
-      matchedDocKeys.add(doc.key);
-    });
-
-    return docsArray;
+  sortBy(sortType: PrimarySortType): DocumentGroup[] {
+    return this.rootDocumentGroup.sortBy(sortType);
   }
 
   watchFirestoreMetaDataDocs(filter: string, unit: string, investigation: number, problem: number) {
@@ -179,21 +159,38 @@ export class SortedDocuments {
     };
   }
 
-  setDocumentHistoryViewRequest(docKey: string, historyId: string) {
-    this.documentHistoryViewRequests[docKey] = historyId;
-  }
-  getDocumentHistoryViewRequest(docKey: string) {
-    // We only want to move to this history entry once,
-    // so we delete the request after it has been fulfilled.
-    const historyId = this.documentHistoryViewRequests[docKey];
-    if (historyId) {
-      delete this.documentHistoryViewRequests[docKey];
-    }
-    return historyId;
+  get exemplarMetadataDocs() {
+    return this.stores.documentMetadata.exemplarMetadataDocs;
   }
 
-  sortBy(sortType: PrimarySortType): DocumentGroup[] {
-    return this.rootDocumentGroup.sortBy(sortType);
+  // What happens if the visibility changes on a metadata document?
+  // - FS onSnapshot listener is called
+  // - listener applies the snapshot to the map of objects
+  // - the keys of the objects don't change in the map
+  // - MobX should not re-run this view because it is only reading the key
+  //   of each document.
+  get firestoreMetadataDocs() {
+    const matchedDocKeys = new Set<string>();
+    const docsArray: IDocumentMetadataModel[] = [];
+    this.metadataDocsFiltered.forEach(doc => {
+      docsArray.push(doc);
+      matchedDocKeys.add(doc.key);
+    });
+    this.metadataDocsWithoutUnit.forEach(doc => {
+      // If there is a duplicate for some reason just ignore the unit-less one
+      if (matchedDocKeys.has(doc.key)) return;
+      docsArray.push(doc);
+      matchedDocKeys.add(doc.key);
+    });
+    this.exemplarMetadataDocs.forEach(doc => {
+      // If there is a duplicate, it will have been merged with one of the previous
+      // maps by the firestore snapshot listeners. So we ignore the duplicate here.
+      if (matchedDocKeys.has(doc.key)) return;
+      docsArray.push(doc);
+      matchedDocKeys.add(doc.key);
+    });
+
+    return docsArray;
   }
 
   // This only fetches documents that have metadata that was already pulled down
