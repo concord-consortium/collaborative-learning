@@ -5,10 +5,10 @@ import { miniseed } from "seisplotjs";
 import { eventDocId, uncoveredDaySpans } from "../../../../shared/seismic/event-database";
 import { dayRange, SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 import { StationData, TimeRange } from "../../../../shared/seismic/seismic-types";
-import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
+import { SeismicDownloadService, DONE } from "../../../models/stores/seismic/seismic-download-service";
 import {
   getUncoveredRanges, loadEvents, markCovered, writeEvents
-} from "../../../models/stores/seismic-event-service";
+} from "../../../models/stores/seismic/seismic-event-service";
 import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
 import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";

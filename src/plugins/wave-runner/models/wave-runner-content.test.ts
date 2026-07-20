@@ -9,18 +9,18 @@ import {
   WaveRunnerContentModel, defaultWaveRunnerContent, PLACEHOLDER_MODEL_URL, ModelListEntry
 } from "./wave-runner-content";
 import appConfig from "../../../clue/app-config.json";
-import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
+import { SeismicDownloadService, DONE } from "../../../models/stores/seismic/seismic-download-service";
 import {
   getUncoveredRanges, loadEvents, markCovered, writeEvents
-} from "../../../models/stores/seismic-event-service";
+} from "../../../models/stores/seismic/seismic-event-service";
 import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
 import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 
-jest.mock("../../../models/stores/seismic-download-service", () => ({
-  ...jest.requireActual("../../../models/stores/seismic-download-service"),
+jest.mock("../../../models/stores/seismic/seismic-download-service", () => ({
+  ...jest.requireActual("../../../models/stores/seismic/seismic-download-service"),
   SeismicDownloadService: jest.fn(),
 }));
-jest.mock("../../../models/stores/seismic-event-service", () => ({
+jest.mock("../../../models/stores/seismic/seismic-event-service", () => ({
   loadEvents: jest.fn(async () => []),
   getUncoveredRanges: jest.fn(async (_s: any, _m: any, range: any) => [range]),
   writeEvents: jest.fn(async () => {}),

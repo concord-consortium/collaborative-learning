@@ -1,9 +1,9 @@
-import { SeismicEvent } from "../../../shared/seismic/seismic-model-types";
-import { StationData, TimeRange } from "../../../shared/seismic/seismic-types";
+import { SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
+import { StationData, TimeRange } from "../../../../shared/seismic/seismic-types";
 import {
   BYTES_PER_CHUNK, CHUNK_DURATION_S, COVERAGE_EPOCH, WINDOW_DURATION_S, WINDOWS_PER_CHUNK,
   coveragePath, eventsPath, isWindowCovered
-} from "../../../shared/seismic/event-database";
+} from "../../../../shared/seismic/event-database";
 
 // ---- minimal in-memory fake of the firebase v8 slice the service uses ----
 const mockStore = new Map<string, any>();

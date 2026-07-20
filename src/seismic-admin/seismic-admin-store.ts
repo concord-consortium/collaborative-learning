@@ -3,7 +3,7 @@ import { createOpfsCache, SeismicCache } from "../../shared/seismic/opfs-seismic
 import { dayIndex, utcDayFromString } from "../../shared/seismic/seismic-day";
 import { StationConfig } from "../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
-import { DONE, SeismicDownloadService } from "../models/stores/seismic-download-service";
+import { DONE, SeismicDownloadService } from "../models/stores/seismic/seismic-download-service";
 import { loadFilters, saveFilters } from "./utils/admin-persistence";
 import { mergeStations, missingDayCount, stationLabel } from "./utils/seismic-admin-utils";
 
