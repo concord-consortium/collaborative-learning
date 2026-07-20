@@ -30,7 +30,7 @@ import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
 import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
-import { getSimpleDocumentPath, IFirestoreMetadataDocumentParams, IDocumentMetadata, IGetImageDataParams,
+import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
@@ -44,6 +44,9 @@ import { logExemplarDocumentEvent } from "../models/document/log-exemplar-docume
 import { AppMode } from "../models/stores/store-types";
 import { DEBUG_FIRESTORE } from "./debug";
 import { firebaseRefPath } from "./fire-utils";
+import {
+  getGroupCanonicalPointerPath, ICanonicalPointer, kDefaultCanonicalDocumentLabel
+} from "./scoped-document-pointers";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
@@ -96,6 +99,14 @@ export interface OpenDocumentOptions {
   problem?: string;
   investigation?: string;
   unit?: string;
+}
+
+interface IGetOrCreateCanonicalDocumentOpts {
+  // The pointer slot's label. It must match the final segment of pointerPath and is written to the
+  // winning document's `canonical` field.
+  canonicalLabel: string;
+  groupUserId?: string;
+  findLegacy?: () => Promise<IDocumentMetadata | undefined>;
 }
 
 export class DB {
@@ -552,48 +563,42 @@ export class DB {
     const documentRef = this.firestore.doc(documentPath);
     const docSnapshot = await documentRef.get();
 
-    if (!docSnapshot.exists) {
-      const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
-
-      let problemInfo: {unit:string|null, investigation?: string, problem?: string} = {unit: null};
-      if ("offeringId" in metadata && metadata.offeringId != null) {
-        problemInfo = this.currentProblemInfo;
-      }
-
-      // Group documents don't use a real uid, but instead a fake one based on the group id.
-      const uid = metadata.type === GroupDocument ? metadata.self.uid : userContext.uid;
-
-      // Add the groupId for group documents to make then easier to query.
-      // groupInfo is used so that the resulting firestoreMetadata can't have a `groupId: undefined` property.
-      // `groupId: undefined` means the property actually exists but its value is `undefined`.
-      // A property like that causes Firestore to fail. By starting off the groupInfo with `{}` and only
-      // setting the groupId if it is truthy, prevents this kind of unsupported property.
-      const groupInfo: { groupId?: string } = {};
-      if (groupId) {
-        groupInfo.groupId = groupId;
-      }
-
-      const firestoreMetadata: IDocumentMetadata & { contextId: string } = {
-        ...cleanedMetadata,
-        // The createFirestoreMetadataDocument firebase function currently deployed to production is out of date.
-        // It requires contextId to be defined, but doesn't check its value.
-        contextId: "ignored",
-        key: documentKey,
-        properties: {},
-        uid,
-        ...problemInfo,
-        ...groupInfo
-      };
-      const createFirestoreMetadataDocument =
-        getFirebaseFunction<IFirestoreMetadataDocumentParams>("createFirestoreMetadataDocument_v2");
-      createFirestoreMetadataDocument({context: userContext, document: firestoreMetadata});
-
-      // NOTE: This is returning the firestore metadata that we setup locally,
-      // this is not guaranteed to be the same as what ends up in Firestore.
-      return firestoreMetadata;
-    } else {
+    if (docSnapshot.exists) {
       return docSnapshot.data() as IDocumentMetadata;
     }
+    const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
+
+    let problemInfo: {unit:string|null, investigation?: string, problem?: string} = {unit: null};
+    if ("offeringId" in metadata && metadata.offeringId != null) {
+      problemInfo = this.currentProblemInfo;
+    }
+
+    // Group documents use a fake uid based on the group id; others use the current user.
+    const uid = metadata.type === GroupDocument ? metadata.self.uid : userContext.uid;
+
+    // Only set groupId when truthy so Firestore never sees `groupId: undefined`.
+    const groupInfo: { groupId?: string } = {};
+    if (groupId) {
+      groupInfo.groupId = groupId;
+    }
+
+    const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
+      ...cleanedMetadata,
+      // `self` here is metadata.self (destructured above), whose classHash is populated for every
+      // document type. The top-level metadata.classHash exists only on problem/offering-type
+      // metadata, so reading it would be undefined for personal/learning-log documents.
+      context_id: self.classHash,
+      // A creation-time snapshot that rules read back; storing it here is problematic — see the
+      // "network field is problematic" note in docs/firestore-schema.md. Null for students/group docs.
+      network: userContext.network || null,
+      key: documentKey,
+      properties: {},
+      uid,
+      ...problemInfo,
+      ...groupInfo
+    };
+    await documentRef.set(firestoreMetadata);
+    return firestoreMetadata;
   }
 
   private get currentProblemInfo() {
@@ -707,49 +712,113 @@ export class DB {
     }
   }
 
-  public async createGroupDocument() {
-    // The document here is a DBDocument not a CLUE DocumentModelType
-    const result = await this.createDocument({ type: GroupDocument });
-    Logger.log(LogEventName.CREATE_GROUP_DOCUMENT);
-    return result;
-  }
-
   public async getOrCreateGroupDocument() {
     const { user } = this.stores;
     const groupId = user.currentGroupId;
     if (!groupId) {
       return Promise.reject("Cannot create group document because user is not in a group.");
     }
+    // The pointer slot is labeled "default" (the group's default canonical document), not by the
+    // document's type — see kDefaultCanonicalDocumentLabel. The document itself is a GroupDocument.
+    const pointerPath =
+      getGroupCanonicalPointerPath(user.classHash, user.offeringId, groupId, kDefaultCanonicalDocumentLabel);
+    return this.getOrCreateCanonicalDocument(pointerPath, GroupDocument, {
+      canonicalLabel: kDefaultCanonicalDocumentLabel,
+      groupUserId: user.userIdForGroupDocuments,
+      findLegacy: () => this.findLegacyGroupDocument(groupId)
+    });
+  }
 
+  private async getOrCreateCanonicalDocument(
+    pointerPath: string,
+    type: DBDocumentType,
+    opts: IGetOrCreateCanonicalDocumentOpts
+  ) {
+    const { canonicalLabel, groupUserId, findLegacy } = opts;
+    const pointerRef = this.firestore.doc(pointerPath);
+
+    // 1. Fast path: pointer already exists.
+    const pointerSnap = await pointerRef.get();
+    if (pointerSnap.exists) {
+      // Every pointer is written with a documentKey by the claim/backfill transactions below, so
+      // it is always present here. If that invariant is ever broken, openCanonicalDocumentByKey
+      // throws (the referenced document won't be found) rather than failing silently.
+      return this.openCanonicalDocumentByKey((pointerSnap.data() as ICanonicalPointer).documentKey);
+    }
+
+    // 2. Legacy fallback: pre-pointer group docs are found by query; backfill a pointer.
+    if (findLegacy) {
+      const legacy = await findLegacy();
+      if (legacy) {
+        await this.firestore.runTransaction(async (txn) => {
+          const s = await txn.get(pointerRef);
+          if (!s.exists) {
+            txn.set(pointerRef, {
+              documentKey: legacy.key, createdAt: this.firestore.timestamp(),
+              createdBy: groupUserId ?? this.stores.user.id
+            });
+            txn.update(this.firestore.doc(getSimpleDocumentPath(legacy.key)), { canonical: canonicalLabel });
+          }
+        }).catch(() => undefined); // If the backfill txn throws (e.g. a concurrent caller already
+        // claimed the pointer), swallow it — we still return the legacy doc below either way.
+        return this.openDocumentFromFirestoreMetadata(legacy);
+      }
+    }
+
+    // 3. Create document-first, then claim the pointer atomically.
+    const { user } = this.stores;
+    const { firestoreMetadata } = await this.createDocument({ type });
+    const documentKey = firestoreMetadata.key;
+
+    const metadataRef = this.firestore.doc(getSimpleDocumentPath(documentKey));
+    const wonKey = await this.firestore.runTransaction(async (txn) => {
+      const s = await txn.get(pointerRef);
+      if (s.exists) return (s.data() as ICanonicalPointer).documentKey;   // lost the race
+      txn.set(pointerRef, {
+        documentKey, createdAt: this.firestore.timestamp(), createdBy: groupUserId ?? user.id
+      });
+      txn.update(metadataRef, { canonical: canonicalLabel });
+      return documentKey;
+    });
+
+    if (wonKey !== documentKey) {
+      await this.deleteOrphanDocument(documentKey, groupUserId);
+      return this.openCanonicalDocumentByKey(wonKey);
+    }
+    if (type === GroupDocument) {
+      Logger.log(LogEventName.CREATE_GROUP_DOCUMENT);
+    }
+    return this.openDocumentFromFirestoreMetadata(firestoreMetadata);
+  }
+
+  private async findLegacyGroupDocument(groupId: string): Promise<IDocumentMetadata | undefined> {
+    const { user } = this.stores;
     const converter = typeConverter<IDocumentMetadata>();
-    const findCurrentGroupDoc = this.firestore.collection("documents")
+    const query = this.firestore.collection("documents")
       .withConverter(converter)
       .where("context_id", "==", user.classHash)
       .where("offeringId", "==", user.offeringId)
       .where("groupId", "==", groupId);
+    const result = await query.get();
+    return result.empty ? undefined : result.docs[0].data();
+  }
 
-    const maybeGroupDoc = await findCurrentGroupDoc.get();
-
-    let firestoreMetadata: IDocumentMetadata | undefined;
-
-    // FIXME: this should be done in a transaction so if someone else
-    // creates a group document before we won't get two group docs
-    // I'm pretty sure doing this requires the creation of the firestore
-    // metadata document to be done using client side firestore instead
-    // of having a firebase function create it.
-    // And this also means we have to unpack the createDocument method
-    // all of the async calls will mess up the transaction.
-    if (maybeGroupDoc.empty) {
-      const result = await this.createGroupDocument();
-      firestoreMetadata = result.firestoreMetadata;
-    } else {
-      firestoreMetadata = maybeGroupDoc.docs[0].data();
-      if (!firestoreMetadata) {
-        throw new Error("Could not retrieve firestore metadata for existing group document.");
-      }
+  private async openCanonicalDocumentByKey(documentKey: string) {
+    const metadata = await this.findFirestoreMetadata(documentKey);
+    if (!metadata) {
+      throw new Error(`Canonical document ${documentKey} referenced by a pointer was not found`);
     }
+    return this.openDocumentFromFirestoreMetadata(metadata);
+  }
 
-    return await this.openDocumentFromFirestoreMetadata(firestoreMetadata);
+  // Best-effort cleanup of a document whose pointer claim was lost (a rare orphan).
+  private async deleteOrphanDocument(documentKey: string, groupUserId?: string) {
+    const { user } = this.stores;
+    await Promise.all([
+      this.firebase.ref(this.firebase.getUserDocumentPath(user, documentKey, groupUserId)).remove(),
+      this.firebase.ref(this.firebase.getUserDocumentMetadataPath(user, documentKey, groupUserId)).remove(),
+      this.firestore.doc(getSimpleDocumentPath(documentKey)).delete()
+    ]).catch(() => undefined);
   }
 
   public publishProblemDocument(documentModel: DocumentModelType) {

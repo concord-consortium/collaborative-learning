@@ -4,7 +4,7 @@ import { DBDocument } from "./db-types";
 import { createDocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
 import {
-  LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
+  GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
 import { specStores } from "../models/stores/spec-stores";
 import { IStores } from "../models/stores/stores";
@@ -13,6 +13,8 @@ import { TextContentModelType } from "../models/tiles/text/text-content";
 import { ITileModel } from "../models/tiles/tile-model";
 import { createSingleTileContent } from "../utilities/test-utils";
 import * as UrlParams from "../utilities/url-params";
+import { Logger } from "./logger";
+import { LogEventName } from "./logger-types";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../register-tile-types";
@@ -24,6 +26,10 @@ const mockFunctions = jest.fn();
 const mockAuthStateUnsubscribe = jest.fn();
 
 jest.mock("firebase/app", () => {
+  const mockFirestoreInstance = () => mockFirestore();
+  (mockFirestoreInstance as any).FieldValue = {
+    serverTimestamp: () => ({ _type: "serverTimestamp" })
+  };
   const mockFirebase = {
     apps: [],
     initializeApp: () => null,
@@ -36,7 +42,7 @@ jest.mock("firebase/app", () => {
       setPersistence: (persistence: string) => Promise.resolve()
     }),
     database: () => mockDatabase(),
-    firestore: () => mockFirestore(),
+    firestore: mockFirestoreInstance,
     functions: () => mockFunctions()
   };
   (mockFirebase.auth as any).Auth = { Persistence: { SESSION: "session"}};
@@ -251,6 +257,129 @@ describe("db", () => {
       await db.guaranteeLearningLog();
       expect(spy).toHaveBeenCalledTimes(1);
     });
+  });
+
+  describe("getOrCreateGroupDocument", () => {
+    const openStub = jest.fn(async (m: any) => ({ opened: m.key }));
+    beforeEach(() => {
+      (db as any).openDocumentFromFirestoreMetadata = openStub;
+      (db as any).findFirestoreMetadata = jest.fn(async (k: string) => ({ key: k }));
+      stores.user.setCurrentGroupId("3");
+    });
+
+    it("fast path: opens the pointer's documentKey when the pointer exists", async () => {
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: true, data: () => ({ documentKey: "existing" }) }) })
+      }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const result: any = await db.getOrCreateGroupDocument();
+      expect((db as any).findFirestoreMetadata).toHaveBeenCalledWith("existing");
+      expect(result.opened).toBe("existing");
+    });
+
+    it("create path: mints a doc, wins the transaction, returns the created doc", async () => {
+      const setCalls: any[] = [];
+      const updateCalls: any[] = [];
+      const logSpy = jest.spyOn(Logger, "log").mockImplementation(() => null);
+      (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "minted-key" } }));
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({
+          get: async () => ({ exists: false }),
+          set: (_r: any, d: any) => setCalls.push(d),
+          update: (_r: any, d: any) => updateCalls.push(d)
+        }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const result: any = await db.getOrCreateGroupDocument();
+      expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({ type: GroupDocument }));
+      expect(setCalls[0]).toMatchObject({ documentKey: "minted-key", createdBy: expect.any(String) });
+      expect(updateCalls[0]).toEqual({ canonical: "default" });
+      expect(logSpy).toHaveBeenCalledWith(LogEventName.CREATE_GROUP_DOCUMENT);
+      expect(result.opened).toBeDefined();
+      logSpy.mockRestore();
+    });
+
+    it("legacy fallback: opens a pre-existing random-key group doc and backfills a pointer", async () => {
+      const setCalls: any[] = [];
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: false, docs: [{ data: () => ({ key: "legacy-doc" }) }] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({ get: async () => ({ exists: false }), set: (_r: any, d: any) => setCalls.push(d), update: () => {} }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const result: any = await db.getOrCreateGroupDocument();
+      expect((db as any).openDocumentFromFirestoreMetadata).toHaveBeenCalledWith({ key: "legacy-doc" });
+      expect(setCalls[0]).toMatchObject({ documentKey: "legacy-doc" });   // pointer backfilled
+      expect(result.opened).toBe("legacy-doc");
+    });
+
+    it("lost race: cleans up the orphan and opens the winner's doc", async () => {
+      (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "my-key" } }));
+      const orphanSpy = jest.spyOn(db as any, "deleteOrphanDocument").mockResolvedValue(undefined);
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }), delete: () => Promise.resolve() }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({
+          get: async () => ({ exists: true, data: () => ({ documentKey: "winner" }) }),
+          set: () => {},
+          update: () => {}
+        }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const result: any = await db.getOrCreateGroupDocument();
+      expect(orphanSpy).toHaveBeenCalled();
+      expect((db as any).findFirestoreMetadata).toHaveBeenCalledWith("winner");
+      expect(result.opened).toBe("winner");
+    });
+  });
+
+  it("writes group-document metadata to Firestore client-side (no contextId)", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    const metadata: any = {
+      version: "1.0", type: GroupDocument, createdAt: 123, classHash: "class-h", offeringId: "off-1",
+      self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
+    };
+    const written = await db.createFirestoreMetadataDocument(metadata, "gk", "3");
+    expect(written).toMatchObject({
+      context_id: "class-h", network: null, key: "gk", uid: "group_off-1_3", groupId: "3"
+    });
+    expect(written).not.toHaveProperty("contextId");
+    expect(setPayloads[0]).toMatchObject({ context_id: "class-h", network: null });
+  });
+
+  it("writes context_id from self.classHash for documents with no top-level classHash", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    // Personal/learning-log metadata carries classHash only under `self`, never at the top level,
+    // so context_id must come from self.classHash or it would be written undefined.
+    const metadata: any = {
+      version: "1.0", type: PersonalDocument, createdAt: 123, title: "t",
+      self: { uid: "user-1", documentKey: "pk", classHash: "class-h" }
+    };
+    const written = await db.createFirestoreMetadataDocument(metadata, "pk");
+    expect(written).toMatchObject({ context_id: "class-h", key: "pk" });
+    expect(setPayloads[0]).toMatchObject({ context_id: "class-h" });
   });
 
   describe("document visibility with defaultSharedDocuments", () => {

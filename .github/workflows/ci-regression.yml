@@ -55,6 +55,12 @@ jobs:
       # leaving the Dashboard hanging ...
       # https://github.com/cypress-io/github-action/issues/48
       fail-fast: false
+      # WARNING: use "Re-run all jobs" to retry this workflow, never "Re-run failed jobs".
+      # Each run attempt gets a fresh Cypress Cloud ci-build-id, so a re-run of a single
+      # container starts a new Cloud run where that container is the only machine. With
+      # `parallel: true` it then claims all of the specs instead of its usual share, runs
+      # them serially, and is killed by timeout-minutes below. Retrying that way can never
+      # pass, no matter how many times it is repeated.
       matrix:
         # 15 containers should run all the tests in 6 or 7 minutes. (plus initial compiling overhead)
         container: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15']
@@ -72,6 +78,9 @@ jobs:
             package-lock.json
       - uses: cypress-io/github-action@v4
         with:
+          # retry registry fetches; a bare `npm ci` fails the whole container on a
+          # transient ECONNRESET, which is unrecoverable without a full re-run
+          install-command: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
           start: npm start
           wait-on: 'http://localhost:8080'
           wait-on-timeout: 600
