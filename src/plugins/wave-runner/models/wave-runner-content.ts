@@ -1,16 +1,12 @@
 import { DateTime } from "luxon";
 import stringify from "json-stringify-pretty-compact";
 import { cast, flow, getSnapshot, types, Instance } from "mobx-state-tree";
-import { miniseed } from "seisplotjs";
-import { eventDocId, uncoveredDaySpans } from "../../../../shared/seismic/event-database";
+import { eventDocId } from "../../../../shared/seismic/event-database";
 import { fetchModelMetadata, ModelListEntry } from "../../../../shared/seismic/model-metadata";
-import { dayRange, SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
-import { StationData, TimeRange } from "../../../../shared/seismic/seismic-types";
-import { SeismicDownloadService, DONE } from "../../../models/stores/seismic/seismic-download-service";
-import {
-  getUncoveredRanges, loadEvents, markCovered, writeEvents
-} from "../../../models/stores/seismic/seismic-event-service";
-import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
+import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
+import { TimeRange } from "../../../../shared/seismic/seismic-types";
+import { processUncoveredRanges } from "../../../models/stores/seismic/seismic-coverage-processor";
+import { getUncoveredRanges, loadEvents } from "../../../models/stores/seismic/seismic-event-service";
 import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
@@ -23,21 +19,6 @@ import { kWaveRunnerTileType } from "../wave-runner-types";
 
 export function defaultWaveRunnerContent(): WaveRunnerContentModelType {
   return WaveRunnerContentModel.create();
-}
-
-/**
- * Best-effort persistence of one processed day's results: a failure here must not
- * fail the local run. Events are written before coverage is marked, so a failed
- * event write can't be hidden behind an already-covered day (see markCovered's
- * ordering contract).
- */
-async function saveDayResults(station: StationData, modelId: string, day: number, events: SeismicEvent[]) {
-  try {
-    if (events.length) await writeEvents(station, modelId, events);
-    await markCovered(station, modelId, dayRange(day));
-  } catch (err) {
-    console.warn("Failed to save seismic events/coverage:", err);
-  }
 }
 
 export const WaveRunnerContentModel = TileContentModel
@@ -218,15 +199,11 @@ export const WaveRunnerContentModel = TileContentModel
       const metadata = self.selectedModelMetadata;
       const modelId = metadata.id;
 
-      const runner = new SeismicModelRunner();
       try {
-        yield runner.loadModel(metadata);
-
         const startDate = new Date(`${self.startDate}T00:00:00Z`);
         const endDate = new Date(`${self.endDate}T00:00:00Z`);
         const startMs = startDate.getTime();
         const endMs = endDate.getTime();
-        const detectionThreshold = 0.7;
 
         if (isNaN(startMs) || isNaN(endMs) || endMs <= startMs) {
           self.runError = "Invalid date range. End date must be after start date.";
@@ -246,70 +223,12 @@ export const WaveRunnerContentModel = TileContentModel
         } catch (err) {
           console.warn("Seismic event database unavailable; processing the full range:", err);
         }
-        const spans = uncoveredDaySpans(uncovered, rangeSec);
 
-        const totalDays = spans.reduce((sum, s) => sum + (s.endDay - s.startDay + 1), 0);
-        self.updateChunkProgress(0, totalDays);
-
-        // Bulk-download each uncovered span into OPFS, running the model on each day as it lands.
-        // Days may arrive out of order; detection is per-window independent, so that's fine.
-        // No-data days come as `dayEmpty` and are simply never yielded.
-        const downloadService = new SeismicDownloadService();
-        let processed = 0;
-        let skippedDays = 0;
-        const updateProgress = () => {
-          const progress = processed + skippedDays
-            + downloadService.erroredDays.length + downloadService.emptyDays.length;
-          self.updateChunkProgress(progress, totalDays);
-        };
-
-        for (const span of spans) {
-          // ensureRange resets the service, so each span is fully drained before the next starts.
-          downloadService.ensureRange({
-            ...station, startSec: span.startDay * SECONDS_PER_DAY, endSec: span.endDay * SECONDS_PER_DAY
-          });
-
-          while (true) {
-            const day: number | typeof DONE = yield downloadService.nextReadyDay();
-            if (day === DONE) break;
-
-            const buffer: ArrayBuffer | null = yield downloadService.readDay(day);
-            if (!buffer) continue;
-
-            // Parse miniSEED → Seismogram
-            const records = miniseed.parseDataRecords(buffer);
-            const seismogram = miniseed.merge(records);
-
-            // Run model on this chunk
-            const dayEvents: SeismicEvent[] = [];
-            yield runner.processChunk(
-              seismogram,
-              {
-                onProgress: () => {},
-                onEvents: (events: SeismicEvent[]) => {
-                  dayEvents.push(...events);
-                  self.addDetectedEvents(events);
-                },
-              },
-              detectionThreshold,
-            );
-
-            yield saveDayResults(station, modelId, day, dayEvents);
-
-            processed++;
-            updateProgress();
-          }
-
-          // A day with no data is still processed — mark it covered so nobody re-checks it.
-          // Errored days are NOT marked covered, so a later run retries them.
-          for (const day of downloadService.emptyDays) {
-            yield saveDayResults(station, modelId, day, []);
-          }
-          // Count this span's errored/empty days via the live service arrays first, then fold
-          // them into skippedDays so they survive the next span's ensureRange reset.
-          updateProgress();
-          skippedDays += downloadService.erroredDays.length + downloadService.emptyDays.length;
-        }
+        yield processUncoveredRanges({
+          stationData: station, metadata, range: rangeSec, uncovered,
+          onEvents: events => self.addDetectedEvents(events),
+          onProgress: (progress, total) => self.updateChunkProgress(progress, total),
+        });
 
         const dataSet = self.getOrCreateEventsDataSet()?.dataSet;
         if (dataSet) {
@@ -330,7 +249,6 @@ export const WaveRunnerContentModel = TileContentModel
         self.runError = `Error running model: ${message}`;
         console.error("Wave Runner runModel error:", err);
       } finally {
-        runner.dispose();
         self.isRunning = false;
       }
     })

@@ -14,17 +14,14 @@ import {
 } from "../../../models/stores/seismic/seismic-event-service";
 import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
 import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
+import { makeFakeDownloadService } from "../../../models/stores/seismic/seismic-coverage-test-fakes";
 
 jest.mock("../../../models/stores/seismic/seismic-download-service", () => ({
   ...jest.requireActual("../../../models/stores/seismic/seismic-download-service"),
   SeismicDownloadService: jest.fn(),
 }));
-jest.mock("../../../models/stores/seismic/seismic-event-service", () => ({
-  loadEvents: jest.fn(async () => []),
-  getUncoveredRanges: jest.fn(async (_s: any, _m: any, range: any) => [range]),
-  writeEvents: jest.fn(async () => {}),
-  markCovered: jest.fn(async () => {}),
-}));
+jest.mock("../../../models/stores/seismic/seismic-event-service", () =>
+  jest.requireActual("../../../models/stores/seismic/seismic-coverage-test-fakes").makeEventServiceMock());
 jest.mock("seisplotjs", () => {
   const actual = jest.requireActual("seisplotjs");
   return {
@@ -304,21 +301,10 @@ describe("WaveRunnerContent", () => {
       const feb1Sec = Date.UTC(2026, 1, 1) / 1000;
       const feb1Day = feb1Sec / SECONDS_PER_DAY;
 
-      // Serves only the ready days that fall within the most recent ensureRange call,
-      // then DONE — mirroring the real service's reset-per-ensureRange drain contract.
-      // Like the real downloader (daysInRange), the day containing endSec is INCLUDED.
+      // The shared fake serves only the ready days that fall within the most recent
+      // ensureRange call, then DONE — see makeFakeDownloadService.
       function makeFakeService(days: number[]) {
-        let pending: number[] = [];
-        const fakeService = {
-          ensureRange: jest.fn(({ startSec, endSec }: { startSec: number, endSec: number }) => {
-            pending = days.filter(d => d * SECONDS_PER_DAY >= startSec && d * SECONDS_PER_DAY <= endSec);
-          }),
-          nextReadyDay: jest.fn(async () => pending.shift() ?? DONE),
-          readDay: jest.fn(async () => new ArrayBuffer(8)),
-          cancel: jest.fn(),
-          erroredDays: [] as number[],
-          emptyDays: [] as number[],
-        };
+        const fakeService = makeFakeDownloadService(days);
         (SeismicDownloadService as jest.Mock).mockImplementation(() => fakeService);
         return fakeService;
       }
