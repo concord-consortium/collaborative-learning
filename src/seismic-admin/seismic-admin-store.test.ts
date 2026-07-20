@@ -1,6 +1,7 @@
-import { SeismicAdminStore } from "./seismic-admin-store";
+import { coverageKey, SeismicAdminStore } from "./seismic-admin-store";
 import { saveFilters } from "./utils/admin-persistence";
-import { dayIndex, utcDay } from "../../shared/seismic/seismic-day";
+import { dayIndex, SECONDS_PER_DAY, utcDay } from "../../shared/seismic/seismic-day";
+import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
 
 function fakeCache(cached: number[] = []) {
   return {
@@ -236,6 +237,196 @@ describe("model selection", () => {
     await store.refresh();
     expect(await store.ensureModelMetadata(twoModels[0].metadataUrl)).toEqual(metadata);
     expect(fetchMetadata).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("coverage stats", () => {
+  const rc01 = { network: "AK", station: "RC01", location: "", channel: "BHZ", label: "Rabbit Creek" };
+  const rc02 = { network: "AK", station: "RC02", location: "", channel: "BHZ", label: "Rabbit Creek 2" };
+  const model = { label: "Compact", metadataUrl: "https://x/compact.json" };
+  const metadata = { id: "compact-v1" } as any;
+  const rc01Key = getStationChannelPrefix(rc01);
+  const rc02Key = getStationChannelPrefix(rc02);
+  const day0 = utcDay(2026, 1, 1)!;
+
+  /** A cache with no OPFS stations, so the store's stations come only from deps. */
+  const emptyCache = () => ({
+    listStations: jest.fn(async () => []),
+    scanCachedDays: jest.fn(async () => new Set<number>()),
+    stationRawBytes: jest.fn(async () => 0),
+    deleteDaysInRange: jest.fn(async () => {}),
+  });
+
+  function makeCoverageStore(overrides: any = {}) {
+    const eventService = {
+      getUncoveredRanges: jest.fn(async (_s: any, _m: string, _r: any) =>
+        [] as Array<{ start: number; end: number }>),
+      loadEvents: jest.fn(async (_s: any, _m: string, _r: any) => [] as any[]),
+    };
+    const fetchMetadata = jest.fn(async () => metadata);
+    const store = new SeismicAdminStore({
+      cache: emptyCache() as any, stations: [rc01], models: [model],
+      fetchMetadata, eventService, ...overrides,
+    });
+    return { store, eventService, fetchMetadata };
+  }
+
+  const flush = () => new Promise(resolve => setTimeout(resolve, 0));
+
+  it("loadCoverageStats stores loaded dayStates and eventCount under stationKey|modelUrl", async () => {
+    const { store, eventService } = makeCoverageStore();
+    eventService.loadEvents.mockResolvedValue([{ windowStart: 1 }, { windowStart: 2 }] as any);
+    store.setAuthReady();
+    store.setRange("2026-01-01", "2026-01-03");
+    await store.loadCoverageStats(rc01, model.metadataUrl);
+
+    const stats = store.coverage.get(coverageKey(rc01Key, model.metadataUrl));
+    expect(stats?.state).toBe("loaded");
+    expect(stats?.eventCount).toBe(2);
+    expect(stats?.dayStates?.size).toBe(3);
+    expect([...stats!.dayStates!.values()]).toEqual(["covered", "covered", "covered"]);
+  });
+
+  it("passes the endDate-inclusive range to the event service", async () => {
+    const { store, eventService } = makeCoverageStore();
+    store.setAuthReady();
+    store.setRange("2026-01-01", "2026-01-03");
+    await store.loadCoverageStats(rc01, model.metadataUrl);
+
+    // endDate is inclusive: the range extends through the end of Jan 3 UTC.
+    const range = { start: utcDay(2026, 1, 1), end: utcDay(2026, 1, 4) };
+    expect(eventService.getUncoveredRanges).toHaveBeenCalledWith(rc01, "compact-v1", range);
+    expect(eventService.loadEvents).toHaveBeenCalledWith(rc01, "compact-v1", range);
+  });
+
+  it("records an error state when the event service rejects", async () => {
+    const { store, eventService } = makeCoverageStore();
+    eventService.getUncoveredRanges.mockRejectedValue(new Error("offline"));
+    store.setAuthReady();
+    await store.loadCoverageStats(rc01, model.metadataUrl);
+
+    expect(store.coverage.get(coverageKey(rc01Key, model.metadataUrl))).toEqual({ state: "error" });
+  });
+
+  it("records an error state when metadata fails to load", async () => {
+    const { store, eventService, fetchMetadata } = makeCoverageStore();
+    fetchMetadata.mockRejectedValue(new Error("nope"));
+    store.setAuthReady();
+    await store.loadCoverageStats(rc01, model.metadataUrl);
+
+    expect(store.coverage.get(coverageKey(rc01Key, model.metadataUrl))).toEqual({ state: "error" });
+    expect(eventService.getUncoveredRanges).not.toHaveBeenCalled();
+  });
+
+  it("does nothing before authReady", async () => {
+    const { store, eventService } = makeCoverageStore();
+    await store.loadCoverageStats(rc01, model.metadataUrl);
+
+    expect(store.coverage.size).toBe(0);
+    expect(eventService.getUncoveredRanges).not.toHaveBeenCalled();
+  });
+
+  it("setAuthReady triggers a coverage load for selected station × model pairs", async () => {
+    const { store, eventService } = makeCoverageStore({ stations: [rc01, rc02] });
+    await store.refresh();
+    expect(store.selectedStations.size).toBe(2);
+
+    store.setAuthReady();
+    await flush();
+    expect(eventService.getUncoveredRanges).toHaveBeenCalledTimes(2);
+    expect(store.coverage.get(coverageKey(rc01Key, model.metadataUrl))?.state).toBe("loaded");
+    expect(store.coverage.get(coverageKey(rc02Key, model.metadataUrl))?.state).toBe("loaded");
+
+    // Becoming un-ready must not trigger another load.
+    eventService.getUncoveredRanges.mockClear();
+    store.setAuthReady(false);
+    await flush();
+    expect(eventService.getUncoveredRanges).not.toHaveBeenCalled();
+  });
+
+  it("coverageFor returns pending for unknown keys", () => {
+    const { store } = makeCoverageStore();
+    expect(store.coverageFor("AK_NONE/BHZ", model.metadataUrl)).toEqual({ state: "pending" });
+  });
+
+  describe("isFullyCovered", () => {
+    it("is true when every selected pair is loaded with all days covered", async () => {
+      const { store } = makeCoverageStore();
+      store.setRange("2026-01-01", "2026-01-03");
+      await store.refresh();
+      store.setAuthReady();
+      await flush();
+      expect(store.isFullyCovered()).toBe(true);
+      expect(store.isFullyCovered(rc01Key)).toBe(true);
+    });
+
+    it("is false when any pair is partial, pending, or error", async () => {
+      // partial: a sub-day gap
+      const partial = makeCoverageStore();
+      partial.eventService.getUncoveredRanges.mockResolvedValue([{ start: day0 + 600, end: day0 + 1200 }]);
+      partial.store.setRange("2026-01-01", "2026-01-03");
+      await partial.store.refresh();
+      partial.store.setAuthReady();
+      await flush();
+      expect(partial.store.isFullyCovered()).toBe(false);
+
+      // pending: authReady but nothing loaded yet
+      const pending = makeCoverageStore();
+      await pending.store.refresh();
+      expect(pending.store.isFullyCovered()).toBe(false);
+
+      // error: the event service rejects
+      const errored = makeCoverageStore();
+      errored.eventService.getUncoveredRanges.mockRejectedValue(new Error("offline"));
+      await errored.store.refresh();
+      errored.store.setAuthReady();
+      await flush();
+      expect(errored.store.isFullyCovered()).toBe(false);
+    });
+
+    it("is false when no models are selected", async () => {
+      const { store } = makeCoverageStore({ models: [] });
+      await store.refresh();
+      store.setAuthReady();
+      expect(store.isFullyCovered()).toBe(false);
+    });
+
+    it("is false when no stations are selected", () => {
+      const { store } = makeCoverageStore();
+      store.setAuthReady();
+      expect(store.selectedStations.size).toBe(0);
+      expect(store.isFullyCovered()).toBe(false);
+    });
+
+    it("scopes to one station when a key is given", async () => {
+      const { store, eventService } = makeCoverageStore({ stations: [rc01, rc02] });
+      // rc02 has an uncovered day; rc01 is fully covered.
+      eventService.getUncoveredRanges.mockImplementation(async (s: any) =>
+        s.station === "RC02" ? [{ start: day0, end: day0 + SECONDS_PER_DAY }] : []);
+      store.setRange("2026-01-01", "2026-01-03");
+      await store.refresh();
+      store.setAuthReady();
+      await flush();
+
+      expect(store.isFullyCovered(rc01Key)).toBe(true);
+      expect(store.isFullyCovered(rc02Key)).toBe(false);
+      expect(store.isFullyCovered()).toBe(false);
+    });
+  });
+
+  it("modelAggregate sums event counts and covered days across selected stations", async () => {
+    const { store, eventService } = makeCoverageStore({ stations: [rc01, rc02] });
+    // rc01: all 3 days covered, 2 events; rc02: one whole-day gap → 2 covered days, 1 event.
+    eventService.getUncoveredRanges.mockImplementation(async (s: any) =>
+      s.station === "RC02" ? [{ start: day0, end: day0 + SECONDS_PER_DAY }] : []);
+    eventService.loadEvents.mockImplementation(async (s: any) =>
+      s.station === "RC02" ? [{ windowStart: 1 }] : [{ windowStart: 1 }, { windowStart: 2 }]);
+    store.setRange("2026-01-01", "2026-01-03");
+    await store.refresh();
+    store.setAuthReady();
+    await flush();
+
+    expect(store.modelAggregate(model.metadataUrl)).toEqual({ eventCount: 3, coveredDays: 5, totalDays: 6 });
   });
 });
 

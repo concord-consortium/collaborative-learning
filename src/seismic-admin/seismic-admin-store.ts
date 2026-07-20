@@ -1,11 +1,13 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import { classifyDayCoverage, DayCoverageState } from "../../shared/seismic/event-database";
 import { fetchModelMetadata, ModelListEntry } from "../../shared/seismic/model-metadata";
 import { createOpfsCache, SeismicCache } from "../../shared/seismic/opfs-seismic-cache";
-import { dayIndex, utcDayFromString } from "../../shared/seismic/seismic-day";
-import { ModelMetadata } from "../../shared/seismic/seismic-model-types";
-import { StationConfig } from "../../shared/seismic/seismic-types";
+import { dayIndex, SECONDS_PER_DAY, utcDayFromString } from "../../shared/seismic/seismic-day";
+import { ModelMetadata, SeismicEvent } from "../../shared/seismic/seismic-model-types";
+import { StationConfig, StationData, TimeRange } from "../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
 import { DONE, SeismicDownloadService } from "../models/stores/seismic/seismic-download-service";
+import { getUncoveredRanges, loadEvents } from "../models/stores/seismic/seismic-event-service";
 import { loadFilters, saveFilters } from "./utils/admin-persistence";
 import { mergeStations, missingDayCount, stationLabel } from "./utils/seismic-admin-utils";
 
@@ -22,6 +24,12 @@ export interface DownloadUpdate {
 
 /** Reports a station's download as each day lands. */
 export type DownloadProgress = (update: DownloadUpdate) => void;
+
+export interface ModelAggregate {
+  eventCount: number;
+  coveredDays: number;
+  totalDays: number
+}
 
 /** Download one station's missing days into OPFS and wait for completion. Production default;
  *  tests inject their own to bypass the Web Worker.
@@ -52,6 +60,23 @@ export interface SeismicAdminDeps {
   downloadStation?: (
     station: StationConfig, startSec: number, endSec: number, onProgress?: DownloadProgress
   ) => Promise<void>;
+  eventService?: {
+    getUncoveredRanges: (s: StationData, model: string, range: TimeRange) => Promise<TimeRange[]>;
+    loadEvents: (s: StationData, model: string, range: TimeRange) => Promise<SeismicEvent[]>;
+  };
+}
+
+export type CoverageLoadState = "pending" | "loaded" | "error";
+
+/** One station × model pair's event coverage, as loaded from the event database. */
+export interface CoverageStats {
+  state: CoverageLoadState;
+  dayStates?: Map<number, DayCoverageState>;
+  eventCount?: number;
+}
+
+export function coverageKey(stationKey: string, modelUrl: string) {
+  return `${stationKey}|${modelUrl}`;
 }
 
 interface StationStats {
@@ -69,6 +94,7 @@ export class SeismicAdminStore {
   models = new Map<string, ModelListEntry>();    // keyed by metadataUrl
   selectedModels = new Set<string>();            // same keys; persisted
   modelMetadata = new Map<string, ModelMetadata | "error">();
+  coverage = new Map<string, CoverageStats>();   // keyed by coverageKey(stationKey, modelUrl)
   feedback = "";
   authReady = false;
 
@@ -146,6 +172,13 @@ export class SeismicAdminStore {
     if (lastSec) return dayIndex(lastSec);
   }
 
+  /** endDate is inclusive: the range extends through the end of that UTC day (matches Wave Runner). */
+  private get rangeSec(): TimeRange | undefined {
+    const { firstSec, lastSec } = this;
+    if (firstSec === undefined || lastSec === undefined) return;
+    return { start: firstSec, end: lastSec + SECONDS_PER_DAY };
+  }
+
   get selectedMissingRawDays() {
     let total = 0;
     this.selectedStations.forEach(key => {
@@ -167,6 +200,7 @@ export class SeismicAdminStore {
     this.endDate = end;
     this.save();
     void this.loadAllStats();
+    void this.loadAllCoverageStats();
   }
 
   toggleStation(key: string) {
@@ -177,6 +211,7 @@ export class SeismicAdminStore {
     }
     this.hasSavedStationSelection = true;
     this.save();
+    void this.loadAllCoverageStats();
   }
 
   toggleModel(url: string) {
@@ -187,6 +222,7 @@ export class SeismicAdminStore {
     }
     this.hasSavedModelSelection = true;
     this.save();
+    void this.loadAllCoverageStats();
   }
 
   /** Resolve (and cache) a model's metadata; undefined when it failed to load. */
@@ -204,6 +240,75 @@ export class SeismicAdminStore {
       runInAction(() => this.modelMetadata.set(url, "error"));
       return undefined;
     }
+  }
+
+  async loadCoverageStats(station: StationConfig, modelUrl: string) {
+    const key = coverageKey(getStationChannelPrefix(station), modelUrl);
+    const range = this.rangeSec;
+    if (!this.authReady || !range) return;
+    runInAction(() => this.coverage.set(key, { state: "pending" }));
+
+    const metadata = await this.ensureModelMetadata(modelUrl);
+    if (!metadata) {
+      runInAction(() => this.coverage.set(key, { state: "error" }));
+      return;
+    }
+    try {
+      const svc = this.deps.eventService ?? { getUncoveredRanges, loadEvents };
+      const gaps = await svc.getUncoveredRanges(station, metadata.id, range);
+      const events = await svc.loadEvents(station, metadata.id, range);
+      runInAction(() => this.coverage.set(key, {
+        state: "loaded",
+        dayStates: classifyDayCoverage(gaps, range),
+        eventCount: events.length,
+      }));
+    } catch (err) {
+      console.warn("Failed to load coverage stats:", err);
+      runInAction(() => this.coverage.set(key, { state: "error" }));
+    }
+  }
+
+  /** Sequential on purpose: avoids a request stampede across stations × models. */
+  async loadAllCoverageStats() {
+    for (const station of this.selectedStationList) {
+      for (const url of this.selectedModels) {
+        await this.loadCoverageStats(station, url);
+      }
+    }
+  }
+
+  coverageFor(stationKey: string, modelUrl: string): CoverageStats {
+    return this.coverage.get(coverageKey(stationKey, modelUrl)) ?? { state: "pending" };
+  }
+
+  private pairFullyCovered(stats: CoverageStats | undefined): boolean {
+    return stats?.state === "loaded" && !!stats.dayStates &&
+      [...stats.dayStates.values()].every(s => s === "covered");
+  }
+
+  /** Pending or errored stats are NOT fully covered — unknown ≠ covered. */
+  isFullyCovered(stationKey?: string): boolean {
+    if (this.selectedModels.size === 0) return false;
+    const stationKeys = stationKey ? [stationKey] : [...this.selectedStations];
+    if (stationKeys.length === 0) return false;
+    return stationKeys.every(sk =>
+      [...this.selectedModels].every(url => this.pairFullyCovered(this.coverage.get(coverageKey(sk, url)))));
+  }
+
+  modelAggregate(modelUrl: string): ModelAggregate {
+    let eventCount = 0;
+    let coveredDays = 0;
+    let totalDays = 0;
+    const { firstDay, lastDay } = this;
+    const rangeDays = firstDay !== undefined && lastDay !== undefined ? lastDay - firstDay + 1 : 0;
+    this.selectedStations.forEach(sk => {
+      totalDays += rangeDays;
+      const stats = this.coverage.get(coverageKey(sk, modelUrl));
+      if (stats?.state !== "loaded") return;
+      eventCount += stats.eventCount ?? 0;
+      stats.dayStates?.forEach(state => { if (state === "covered") coveredDays++; });
+    });
+    return { eventCount, coveredDays, totalDays };
   }
 
   async refresh() {
@@ -226,6 +331,7 @@ export class SeismicAdminStore {
       }
     });
     await this.loadAllStats();
+    await this.loadAllCoverageStats();
   }
 
   async loadAllStats() {
@@ -270,6 +376,8 @@ export class SeismicAdminStore {
 
   setAuthReady(ready = true) {
     this.authReady = ready;
+    // Coverage loads are gated on auth; kick them off only when auth becomes ready.
+    if (ready) void this.loadAllCoverageStats();
   }
 
   async downloadStation(key: string) {
