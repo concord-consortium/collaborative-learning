@@ -169,4 +169,6 @@ it("authReady defaults false and is set by setAuthReady", () => {
   expect(store.authReady).toBe(false);
   store.setAuthReady();
   expect(store.authReady).toBe(true);
+  store.setAuthReady(false);
+  expect(store.authReady).toBe(false);
 });

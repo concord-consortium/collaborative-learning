@@ -154,6 +154,9 @@ export type DayCoverageState = "covered" | "partial" | "uncovered";
  * gap fully spans the day, "covered" when no gap intersects it, else "partial".
  * Two gaps can never jointly span one day — findUncoveredRanges returns maximal
  * gaps separated by covered windows — so per-gap classification is sufficient.
+ * For a non-day-aligned range, a boundary day can never classify as "uncovered"
+ * (the whole-day test spans the full calendar day) — `range` should be
+ * day-aligned like this module's sibling helpers expect.
  */
 export function classifyDayCoverage(gaps: TimeRange[], range: TimeRange): Map<number, DayCoverageState> {
   const states = new Map<number, DayCoverageState>();

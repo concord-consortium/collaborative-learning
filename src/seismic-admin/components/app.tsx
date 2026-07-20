@@ -15,18 +15,27 @@ export const App = observer(function App() {
   // (with location + label) merge with whatever is already in OPFS.
   useEffect(() => {
     let cancelled = false;
-    const authPromise = initAdminFirebase();
+    // Convert auth failure at the source so an unmount before the catalog resolves
+    // never leaves an unhandled rejection. Resolves to null on success, else the reason.
+    const authPromise = initAdminFirebase().then(
+      () => null,
+      err => {
+        console.warn("Seismic admin Firebase sign-in failed:", err);
+        return `${err?.message ?? err}`;
+      });
     void loadCatalog().then(catalog => {
       if (cancelled) return;
       const created = new SeismicAdminStore({ catalog });
       setStore(created);
       void created.refresh();
-      authPromise
-        .then(() => { if (!cancelled) created.setAuthReady(); })
-        .catch(err => {
-          console.warn("Seismic admin Firebase sign-in failed:", err);
-          if (!cancelled) created.setFeedback("Event database unavailable (sign-in failed).");
-        });
+      void authPromise.then(failure => {
+        if (cancelled) return;
+        if (failure === null) {
+          created.setAuthReady();
+        } else {
+          created.setFeedback(`Event database unavailable (sign-in failed: ${failure}).`);
+        }
+      });
     });
     return () => { cancelled = true; };
   }, []);
