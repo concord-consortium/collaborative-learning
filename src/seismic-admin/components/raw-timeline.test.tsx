@@ -19,4 +19,19 @@ describe("RawTimeline", () => {
     expect(container.querySelectorAll(".segment.filled").length).toBe(0);
     expect(container.querySelectorAll(".segment.empty").length).toBe(1);
   });
+
+  it("renders a partial segment alongside filled and empty spans when partialDays is given", () => {
+    const { container } = render(
+      <RawTimeline highlightedDays={new Set([1])} partialDays={new Set([2])} firstDay={1} lastDay={4} />
+    );
+    expect(container.querySelectorAll(".segment.filled").length).toBe(1);
+    expect(container.querySelectorAll(".segment.partial").length).toBe(1);
+    expect(container.querySelectorAll(".segment.empty").length).toBe(1);
+  });
+
+  it("renders no partial segments when partialDays is omitted", () => {
+    const { container } = render(<RawTimeline highlightedDays={new Set([1, 2])} firstDay={1} lastDay={4} />);
+    expect(container.querySelectorAll(".segment.partial").length).toBe(0);
+    expect(filledFraction(container)).toBeCloseTo(50);
+  });
 });

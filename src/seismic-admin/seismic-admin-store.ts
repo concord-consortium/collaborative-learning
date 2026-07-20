@@ -25,12 +25,6 @@ export interface DownloadUpdate {
 /** Reports a station's download as each day lands. */
 export type DownloadProgress = (update: DownloadUpdate) => void;
 
-export interface ModelAggregate {
-  eventCount: number;
-  coveredDays: number;
-  totalDays: number
-}
-
 /** Download one station's missing days into OPFS and wait for completion. Production default;
  *  tests inject their own to bypass the Web Worker.
  */
@@ -73,6 +67,15 @@ export interface CoverageStats {
   state: CoverageLoadState;
   dayStates?: Map<number, DayCoverageState>;
   eventCount?: number;
+}
+
+export interface ModelStats {
+  eventCount: number;
+  coveredDays: Map<string, Set<number>>;
+  partialDays: Map<string, Set<number>>;
+  coveredDayCount: number;
+  partialDayCount: number;
+  totalDays: number
 }
 
 export function coverageKey(stationKey: string, modelUrl: string) {
@@ -295,20 +298,46 @@ export class SeismicAdminStore {
       [...this.selectedModels].every(url => this.pairFullyCovered(this.coverage.get(coverageKey(sk, url)))));
   }
 
-  modelAggregate(modelUrl: string): ModelAggregate {
-    let eventCount = 0;
-    let coveredDays = 0;
-    let totalDays = 0;
+  get rangeDays() {
     const { firstDay, lastDay } = this;
-    const rangeDays = firstDay !== undefined && lastDay !== undefined ? lastDay - firstDay + 1 : 0;
-    this.selectedStations.forEach(sk => {
+    return firstDay !== undefined && lastDay !== undefined ? lastDay - firstDay + 1 : 0;
+  }
+
+  /** Coverage stats for a single model. When stationKey is present, the stats are just
+   *  for that station. When it is absent, stats are for all selected stations.
+   */
+  modelStats(modelUrl: string, stationKey?: string): ModelStats {
+    let eventCount = 0;
+    const coveredDays: Map<string, Set<number>> = new Map();
+    const partialDays: Map<string, Set<number>> = new Map();
+    let coveredDayCount = 0;
+    let partialDayCount = 0;
+    let totalDays = 0;
+    const { rangeDays } = this;
+
+    const stations = stationKey ? new Set([stationKey]) : this.selectedStations;
+    stations.forEach(sk => {
       totalDays += rangeDays;
       const stats = this.coverage.get(coverageKey(sk, modelUrl));
       if (stats?.state !== "loaded") return;
+
+      const stationCoveredDays = new Set<number>();
+      coveredDays.set(sk, stationCoveredDays);
+      const stationPartialDays = new Set<number>();
+      partialDays.set(sk, stationPartialDays);
       eventCount += stats.eventCount ?? 0;
-      stats.dayStates?.forEach(state => { if (state === "covered") coveredDays++; });
+      stats.dayStates?.forEach((state, day) => {
+        if (state === "covered") {
+          stationCoveredDays.add(day);
+          coveredDayCount++;
+        } else if (state === "partial") {
+          stationPartialDays.add(day);
+          partialDayCount++;
+        }
+      });
     });
-    return { eventCount, coveredDays, totalDays };
+
+    return { eventCount, coveredDays, partialDays, coveredDayCount, partialDayCount, totalDays };
   }
 
   async refresh() {

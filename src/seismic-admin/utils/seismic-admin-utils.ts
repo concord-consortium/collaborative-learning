@@ -1,22 +1,26 @@
 import { StationData, StationConfig } from "../../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
 
-interface CoverageSegment {
+export type TimelineState = "filled" | "partial" | "empty";
+
+export interface TimelineSegment {
   startDay: number;
   endDay: number;
-  highlighted: boolean;
+  state: TimelineState;
 }
 
-/** Run-length spans of highlighted/normal days across [firstDay, lastDay]. */
-export function coverageSegments(highlighted: Set<number>, firstDay: number, lastDay: number) {
-  const segs: CoverageSegment[] = [];
+/** Runs of equal state over [firstDay, lastDay]: filled ⊃ highlighted, partial ⊃ partialDays, else empty. */
+export function timelineSegments(
+  highlighted: Set<number>, partialDays: Set<number>, firstDay: number, lastDay: number
+): TimelineSegment[] {
+  const segs: TimelineSegment[] = [];
   for (let day = firstDay; day <= lastDay; day++) {
-    const isHighlighted = highlighted.has(day);
+    const state: TimelineState = highlighted.has(day) ? "filled" : partialDays.has(day) ? "partial" : "empty";
     const last = segs[segs.length - 1];
-    if (last && last.highlighted === isHighlighted) {
+    if (last && last.state === state) {
       last.endDay = day;
     } else {
-      segs.push({ startDay: day, endDay: day, highlighted: isHighlighted });
+      segs.push({ startDay: day, endDay: day, state });
     }
   }
   return segs;

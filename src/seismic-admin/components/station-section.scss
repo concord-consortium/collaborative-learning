@@ -19,25 +19,32 @@
     align-items: flex-start;
     gap: 24px;
 
-    .data-section {
+    .data-sections {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 12px;
       width: 100%;
 
-      .data-section-header {
+      .data-section {
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
+        gap: 4px;
+        width: 100%;
 
-        .data-kind {
-          font-size: 14px;
-          text-transform: uppercase;
-          color: #888;
-        }
+        .data-section-header {
+          display: flex;
+          justify-content: space-between;
 
-        .data-stats {
-          font-size: 13px;
-          color: #444;
+          .data-kind {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: #888;
+          }
+
+          .data-stats {
+            font-size: 13px;
+            color: #444;
+          }
         }
       }
     }

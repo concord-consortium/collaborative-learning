@@ -414,7 +414,7 @@ describe("coverage stats", () => {
     });
   });
 
-  it("modelAggregate sums event counts and covered days across selected stations", async () => {
+  it("modelStats sums event counts and covered days across selected stations", async () => {
     const { store, eventService } = makeCoverageStore({ stations: [rc01, rc02] });
     // rc01: all 3 days covered, 2 events; rc02: one whole-day gap → 2 covered days, 1 event.
     eventService.getUncoveredRanges.mockImplementation(async (s: any) =>
@@ -426,7 +426,28 @@ describe("coverage stats", () => {
     store.setAuthReady();
     await flush();
 
-    expect(store.modelAggregate(model.metadataUrl)).toEqual({ eventCount: 3, coveredDays: 5, totalDays: 6 });
+    const stats = store.modelStats(model.metadataUrl);
+    expect(stats).toMatchObject({ eventCount: 3, coveredDayCount: 5, partialDayCount: 0, totalDays: 6 });
+    expect(stats.coveredDays.get(rc01Key)?.size).toBe(3);
+    expect(stats.coveredDays.get(rc02Key)?.size).toBe(2);
+    // A loaded station appears in both maps even when no day reached that state.
+    expect(stats.partialDays.get(rc01Key)?.size).toBe(0);
+  });
+
+  it("modelStats scopes to one station when a key is given", async () => {
+    const { store, eventService } = makeCoverageStore({ stations: [rc01, rc02] });
+    eventService.getUncoveredRanges.mockImplementation(async (s: any) =>
+      s.station === "RC02" ? [{ start: day0 + 600, end: day0 + 1200 }] : []);
+    store.setRange("2026-01-01", "2026-01-03");
+    await store.refresh();
+    store.setAuthReady();
+    await flush();
+
+    const rc02Stats = store.modelStats(model.metadataUrl, rc02Key);
+    expect(rc02Stats).toMatchObject({ eventCount: 0, coveredDayCount: 2, partialDayCount: 1, totalDays: 3 });
+    expect(rc02Stats.coveredDays.get(rc02Key)?.size).toBe(2);
+    expect(rc02Stats.partialDays.get(rc02Key)?.size).toBe(1);
+    expect(rc02Stats.coveredDays.has(rc01Key)).toBe(false);
   });
 });
 

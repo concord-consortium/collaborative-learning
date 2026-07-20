@@ -1,19 +1,20 @@
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { coverageSegments } from "../utils/seismic-admin-utils";
+import { timelineSegments } from "../utils/seismic-admin-utils";
 import "./raw-timeline.scss";
 
 interface Props {
   highlightedDays: Set<number>;
+  partialDays?: Set<number>;
   firstDay: number;
   lastDay: number;
 }
 
-/** A proportional bar of highlighted (filled) / normal (empty) day spans over [firstDay, lastDay]. */
-export const RawTimeline = observer(function RawTimeline({ highlightedDays, firstDay, lastDay }: Props) {
+/** A proportional bar of highlighted (filled) / partial / normal (empty) day spans over [firstDay, lastDay]. */
+export const RawTimeline = observer(function RawTimeline({ highlightedDays, partialDays, firstDay, lastDay }: Props) {
   const totalDays = lastDay - firstDay + 1;
-  const segments = coverageSegments(highlightedDays, firstDay, lastDay);
+  const segments = timelineSegments(highlightedDays, partialDays ?? new Set(), firstDay, lastDay);
   return (
     <div className="raw-timeline" role="img" aria-label="raw data coverage">
       {segments.map(seg => {
@@ -22,7 +23,7 @@ export const RawTimeline = observer(function RawTimeline({ highlightedDays, firs
         return (
           <div
             key={seg.startDay}
-            className={classNames("segment", seg.highlighted ? "filled" : "empty")}
+            className={classNames("segment", seg.state)}
             style={{ width: `${pct}%` }}
           />
         );

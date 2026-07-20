@@ -4,8 +4,12 @@ import { StationSection } from "./station-section";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
 import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
+import { utcDay } from "../../../shared/seismic/seismic-day";
 
 const opfsStation = { network: "AK", station: "K204", channel: "HNZ" };
+
+// The store persists filters (setRange/toggles) to localStorage; isolate the tests.
+beforeEach(() => window.localStorage.clear());
 
 function makeStore(deleteDaysInRange = jest.fn(async () => {})) {
   const store = new SeismicAdminStore({
@@ -46,5 +50,109 @@ describe("StationSection", () => {
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
 
     await waitFor(() => expect(deleteDaysInRange).toHaveBeenCalled());
+  });
+});
+
+describe("StationSection coverage rows", () => {
+  const compact = { label: "Compact", metadataUrl: "https://x/compact.json" };
+  const large = { label: "Large", metadataUrl: "https://x/large.json" };
+  const day0 = utcDay(2026, 1, 1)!;
+  const flush = () => new Promise(resolve => setTimeout(resolve, 0));
+
+  function makeCoverageStore(overrides: any = {}) {
+    const eventService = {
+      getUncoveredRanges: jest.fn(async (_s: any, _m: string, _r: any) =>
+        [] as Array<{ start: number; end: number }>),
+      loadEvents: jest.fn(async (_s: any, _m: string, _r: any) =>
+        [{ windowStart: 1 }, { windowStart: 2 }] as any[]),
+    };
+    const store = new SeismicAdminStore({
+      cache: {
+        listStations: async () => [opfsStation],
+        scanCachedDays: async () => new Set<number>(),
+        stationRawBytes: async () => 0,
+        deleteDaysInRange: jest.fn(async () => {}),
+      } as any,
+      models: [compact],
+      fetchMetadata: jest.fn(async () => ({ id: "compact-v1" } as any)),
+      eventService,
+      ...overrides,
+    });
+    store.setRange("2026-01-01", "2026-01-03");   // 3 days
+    return { store, eventService };
+  }
+
+  it("renders one loaded coverage row per selected model", async () => {
+    const { store } = makeCoverageStore({ models: [compact, large] });
+    await store.refresh();
+    store.setAuthReady();
+    await flush();
+    const { container } = renderSection(store, getStationChannelPrefix(opfsStation));
+
+    expect(container.querySelectorAll(".data-section.coverage").length).toBe(2);
+    expect(screen.getByText("Compact")).toBeInTheDocument();
+    expect(screen.getByText("Large")).toBeInTheDocument();
+    expect(screen.getAllByText("3 / 3 days · 2 events").length).toBe(2);
+    expect(container.querySelectorAll(".data-section.coverage .raw-timeline").length).toBe(2);
+  });
+
+  it("shows a three-state timeline including partial days", async () => {
+    const { store, eventService } = makeCoverageStore();
+    eventService.getUncoveredRanges.mockResolvedValue([{ start: day0 + 600, end: day0 + 1200 }]);
+    await store.refresh();
+    store.setAuthReady();
+    await flush();
+    const { container } = renderSection(store, getStationChannelPrefix(opfsStation));
+
+    expect(screen.getByText("2 / 3 days · 2 events")).toBeInTheDocument();
+    expect(container.querySelectorAll(".data-section.coverage .segment.partial").length).toBe(1);
+  });
+
+  it("shows zero stats and no timeline while a pair's coverage is pending", async () => {
+    const { store } = makeCoverageStore();
+    await store.refresh();   // auth never becomes ready, so coverage stays pending
+    const { container } = renderSection(store, getStationChannelPrefix(opfsStation));
+
+    expect(screen.getByText("0 / 3 days · 0 events")).toBeInTheDocument();
+    expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
+  });
+
+  it("shows zero stats and no timeline when coverage failed to load", async () => {
+    const { store, eventService } = makeCoverageStore();
+    eventService.getUncoveredRanges.mockRejectedValue(new Error("offline"));
+    await store.refresh();
+    store.setAuthReady();
+    await flush();
+    const { container } = renderSection(store, getStationChannelPrefix(opfsStation));
+
+    expect(screen.getByText("0 / 3 days · 0 events")).toBeInTheDocument();
+    expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
+  });
+
+  it("shows per-model aggregate lines with no timeline bars for all stations", async () => {
+    const { store } = makeCoverageStore();
+    await store.refresh();
+    store.setAuthReady();
+    await flush();
+    const { container } = render(
+      <SeismicAdminStoreContext.Provider value={store}>
+        <StationSection />
+      </SeismicAdminStoreContext.Provider>
+    );
+
+    expect(screen.getByText("Compact")).toBeInTheDocument();
+    expect(screen.getByText("3 / 3 days · 2 events")).toBeInTheDocument();
+    expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
+  });
+
+  it("updates a station's coverage row when its stats load after rendering", async () => {
+    const { store } = makeCoverageStore();
+    await store.refresh();
+    renderSection(store, getStationChannelPrefix(opfsStation));
+    expect(screen.getByText("0 / 3 days · 0 events")).toBeInTheDocument();
+
+    // Auth becomes ready after mount; the row must react to the coverage load.
+    store.setAuthReady();
+    await waitFor(() => expect(screen.getByText("3 / 3 days · 2 events")).toBeInTheDocument());
   });
 });
