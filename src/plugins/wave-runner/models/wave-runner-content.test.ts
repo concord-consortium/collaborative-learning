@@ -6,8 +6,9 @@ import "../../shared-seismogram/shared-seismogram-registration";
 import { registerTileContentInfo } from "../../../models/tiles/tile-content-info";
 import { kWaveRunnerTileType } from "../wave-runner-types";
 import {
-  WaveRunnerContentModel, DEFAULT_MODELS, defaultWaveRunnerContent, PLACEHOLDER_MODEL_URL
+  WaveRunnerContentModel, defaultWaveRunnerContent, PLACEHOLDER_MODEL_URL, ModelListEntry
 } from "./wave-runner-content";
+import appConfig from "../../../clue/app-config.json";
 import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
 import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
 
@@ -144,10 +145,11 @@ describe("WaveRunnerContent", () => {
     expect(parsed.selectedModelUrl).toBe("https://example.com/model/metadata.json");
   });
 
-  it("DEFAULT_MODELS contains at least the compact model", () => {
-    expect(DEFAULT_MODELS.length).toBeGreaterThanOrEqual(1);
-    expect(DEFAULT_MODELS[0].label).toBe("Compact Model");
-    expect(DEFAULT_MODELS[0].metadataUrl).toContain("compact-v1");
+  it("configures the compact model in the wave-runner settings", () => {
+    const models = appConfig.config.settings["wave-runner"].models as ModelListEntry[];
+    expect(models.length).toBeGreaterThanOrEqual(1);
+    expect(models[0].label).toBe("Compact Model");
+    expect(models[0].metadataUrl).toContain("compact-v2");
   });
 
   describe("ensureModelMetadata", () => {

@@ -3,7 +3,7 @@ import React, { useEffect, useMemo } from "react";
 import { StationConfig } from "../../../../shared/seismic/seismic-types";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { stationId } from "../../shared-seismogram/station-model";
-import { DEFAULT_MODELS } from "../models/wave-runner-content";
+import { ModelListEntry } from "../models/wave-runner-content";
 import { useWaveRunnerContent } from "../hooks/use-wave-runner-content";
 import "./data-setup.scss";
 
@@ -11,6 +11,8 @@ export const DataSetup: React.FC = observer(function DataSetup() {
   const content = useWaveRunnerContent();
   const stationConfigs = useSettingFromStores("stations", "wave-runner") as StationConfig[] | undefined;
   const defaultStationIndex = useSettingFromStores("defaultStation", "wave-runner") as number | undefined;
+  const modelConfigs = useSettingFromStores("models", "wave-runner") as ModelListEntry[] | undefined;
+  const defaultModelIndex = useSettingFromStores("defaultModel", "wave-runner") as number | undefined;
 
   // Build the options list from config stations
   const stationOptions = useMemo(() => {
@@ -54,6 +56,16 @@ export const DataSetup: React.FC = observer(function DataSetup() {
       }
     }
   }, [content, stationConfigs, defaultStationIndex]);
+
+  // Auto-set default model on mount
+  useEffect(() => {
+    if (!content.selectedModelUrl && modelConfigs?.length && defaultModelIndex != null) {
+      const defaultModel = modelConfigs[defaultModelIndex];
+      if (defaultModel) {
+        content.ensureModelMetadata(defaultModel.metadataUrl);
+      }
+    }
+  }, [content, modelConfigs, defaultModelIndex]);
 
   const handleStationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
@@ -103,7 +115,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             disabled={content.isRunning}
           >
             <option value="">Choose a model</option>
-            {DEFAULT_MODELS.map(model => (
+            {(modelConfigs ?? []).map(model => (
               <option key={model.metadataUrl} value={model.metadataUrl}>
                 {model.label}
               </option>
