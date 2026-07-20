@@ -7,6 +7,7 @@ import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
 import { SelectionButton } from "../../components/ui/selection-button";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
+import { kVolatileVariableLabel } from "../../../shared-variables/variable-labels";
 import {
   arduinoFrames, armFrames, gripperFrames, panFrames, steamFrames, temperatureGripperFrames
 } from "./brainwaves-gripper-assets";
@@ -216,7 +217,7 @@ export const brainwavesGripperSimulation: ISimulation = {
     {
       // This is the target EMG minus a random amount on every frame to simulate imperfect EMG data
       displayName: "EMG",
-      labels: ["input", "sensor:emg-reading", "decimalPlaces:0"],
+      labels: ["input", "sensor:emg-reading", "decimalPlaces:0", kVolatileVariableLabel],
       icon: iconUrl(emgKey),
       name: emgKey,
       value: 40,
@@ -224,7 +225,7 @@ export const brainwavesGripperSimulation: ISimulation = {
     },
     {
       displayName: "Surface Pressure",
-      labels: ["input", "sensor:fsr-reading", "className:long-name", "decimalPlaces:0"],
+      labels: ["input", "sensor:fsr-reading", "className:long-name", "decimalPlaces:0", kVolatileVariableLabel],
       icon: iconUrl(pressureKey),
       name: pressureKey,
       value: 0,
@@ -232,22 +233,23 @@ export const brainwavesGripperSimulation: ISimulation = {
     },
     {
       displayName: "Gripper",
-      labels: ["output", "live-output:Grabber", "live-output:Gripper 2.0", "decimalPlaces:0"],
+      labels: ["output", "live-output:Grabber", "live-output:Gripper 2.0", "decimalPlaces:0", kVolatileVariableLabel],
       icon: iconUrl(gripperKey),
       name: gripperKey,
       value: 0,
       unit: "% closed"
     },
     {
-      // This is the true temperature of the pan
+      // This is the true temperature of the pan; the simulation drives its value every frame.
       displayName: "Pan Temperature",
+      labels: [kVolatileVariableLabel],
       name: panTemperatureKey,
       value: baseTemperature
     },
     {
       // This is the temperature sensed by the gripper's sensors
       displayName: "Temperature",
-      labels: ["input", "sensor:temperature"],
+      labels: ["input", "sensor:temperature", kVolatileVariableLabel],
       icon: iconUrl(temperatureKey),
       name: temperatureKey,
       value: baseTemperature,

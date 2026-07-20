@@ -9,7 +9,7 @@ import {
   ArrowAnnotation, IArrowAnnotationSnapshot, isArrowAnnotationSnapshot, updateArrowAnnotationTileIds
 } from "../annotations/arrow-annotation";
 import { sharedModelFactory, UnknownSharedModel } from "../shared/shared-model-manager";
-import { SharedModelType, sharedModelHasExportJson } from "../shared/shared-model";
+import { SharedModelType, sharedModelHasExportStableSnapshot } from "../shared/shared-model";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { IDragTileItem, IDropTileItem, isContainerTile, ITileModel,
          ITileModelSnapshotIn,
@@ -159,11 +159,11 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     if (hasSharedModels) {
       builder.pushLine(`"sharedModels": [`, 2);
       sharedModels.forEach((sharedModel, index) => {
-        // A shared model can drop transient/runtime fields from its authoring export via
-        // exportJson() (e.g. SharedVariables strips live sim values); otherwise serialize the entry.
+        // A shared model can drop transient/runtime fields from its export via exportStableSnapshot()
+        // (e.g. SharedVariables strips live sim values); otherwise serialize the entry as-is.
         const nestedModel = sharedModel.sharedModel;
-        const serializable = sharedModelHasExportJson(nestedModel)
-          ? { ...getSnapshot(sharedModel), sharedModel: nestedModel.exportJson() }
+        const serializable = sharedModelHasExportStableSnapshot(nestedModel)
+          ? { ...getSnapshot(sharedModel), sharedModel: nestedModel.exportStableSnapshot() }
           : sharedModel;
         const sharedModelLines = stringify(serializable).split("\n");
         sharedModelLines.forEach((sharedModelLine, lineIndex) => {
