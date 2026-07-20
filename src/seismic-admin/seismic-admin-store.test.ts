@@ -217,6 +217,26 @@ describe("model selection", () => {
     expect(await store.ensureModelMetadata(twoModels[1].metadataUrl)).toBeUndefined();
     expect(fetchMetadata).toHaveBeenCalledTimes(2);
   });
+
+  it("refresh clears cached metadata errors so they retry, keeping successes cached", async () => {
+    const metadata = { id: "compact-v1" } as any;
+    const fetchMetadata = jest.fn()
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValue(metadata);
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, models: twoModels, fetchMetadata });
+
+    // A transient failure is cached as an error...
+    expect(await store.ensureModelMetadata(twoModels[0].metadataUrl)).toBeUndefined();
+    // ...until the next refresh, which becomes the retry path.
+    await store.refresh();
+    expect(await store.ensureModelMetadata(twoModels[0].metadataUrl)).toEqual(metadata);
+    expect(fetchMetadata).toHaveBeenCalledTimes(2);
+
+    // A successful entry stays cached across refresh: no third fetch.
+    await store.refresh();
+    expect(await store.ensureModelMetadata(twoModels[0].metadataUrl)).toEqual(metadata);
+    expect(fetchMetadata).toHaveBeenCalledTimes(2);
+  });
 });
 
 it("authReady defaults false and is set by setAuthReady", () => {

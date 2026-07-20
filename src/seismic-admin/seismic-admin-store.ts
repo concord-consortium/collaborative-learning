@@ -64,7 +64,7 @@ export class SeismicAdminStore {
   startDate = "2026-01-01";
   endDate = "2026-01-31";
   stations = new Map<string, StationConfig>();   // keyed by getStationChannelPrefix
-  selectedStations = new Set<string>();                  // same keys
+  selectedStations = new Set<string>();          // same keys
   stats = new Map<string, StationStats>();
   models = new Map<string, ModelListEntry>();    // keyed by metadataUrl
   selectedModels = new Set<string>();            // same keys; persisted
@@ -74,7 +74,7 @@ export class SeismicAdminStore {
 
   private cache: AdminCache;
   // True once a selection has been persisted, so refresh() won't re-select everything.
-  private hasSavedSelection = false;
+  private hasSavedStationSelection = false;
   private hasSavedModelSelection = false;
 
   constructor(private deps: SeismicAdminDeps = {}) {
@@ -85,7 +85,7 @@ export class SeismicAdminStore {
     if (saved.endDate) this.endDate = saved.endDate;
     if (saved.selectedStations) {
       this.selectedStations = new Set(saved.selectedStations);
-      this.hasSavedSelection = true;
+      this.hasSavedStationSelection = true;
     }
 
     (deps.models ?? []).forEach(m => this.models.set(m.metadataUrl, m));
@@ -175,7 +175,7 @@ export class SeismicAdminStore {
     } else {
       this.selectedStations.add(key);
     }
-    this.hasSavedSelection = true;
+    this.hasSavedStationSelection = true;
     this.save();
   }
 
@@ -216,8 +216,13 @@ export class SeismicAdminStore {
         if (!merged.has(key)) this.selectedStations.delete(key);
       }
       // Select everything by default, but never override a selection the user saved.
-      if (this.selectedStations.size === 0 && !this.hasSavedSelection) {
+      if (this.selectedStations.size === 0 && !this.hasSavedStationSelection) {
         for (const key of merged.keys()) this.selectedStations.add(key);
+      }
+      // A cached metadata failure may have been transient; refresh retries it.
+      // Successful entries stay cached.
+      for (const [url, value] of [...this.modelMetadata]) {
+        if (value === "error") this.modelMetadata.delete(url);
       }
     });
     await this.loadAllStats();
