@@ -73,12 +73,11 @@ export const SharedVariables = SharedModel.named("SharedVariables")
     const snapshot = getSnapshot(self);
     return {
       ...snapshot,
-      variables: snapshot.variables.map((variableSnap, i) => {
-        const variable = self.variables[i];
+      variables: snapshot.variables.map(variableSnap => {
+        const variable = self.variables.find(v => v.id === variableSnap.id);
         if (variable && (isInputVariable(variable) || isOutputVariable(variable))) {
-          const stripped = { ...variableSnap };
-          delete (stripped as any).value;
-          return stripped;
+          const { value, ...rest } = variableSnap;
+          return rest;
         }
         return variableSnap;
       })
