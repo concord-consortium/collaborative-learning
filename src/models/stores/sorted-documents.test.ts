@@ -2,7 +2,8 @@ import { DocumentModelType, createDocumentModel, DocumentModelSnapshotType } fro
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from './groups';
 import { ClassModel, ClassModelType, ClassUserModel } from './class';
 import { ExemplarDocument, ProblemDocument } from '../document/document-types';
-import { ISortedDocumentsStores, MetadataDocMapModel, SortedDocuments } from "./sorted-documents";
+import { MetadataDocMapModel } from "../document/document-metadata-model";
+import { ISortedDocumentsStores, SortedDocuments } from "./sorted-documents";
 import { DocumentMetadataStore } from "./document-metadata-store";
 import { DeepPartial } from "utility-types";
 import { DocumentContentSnapshotType } from "../document/document-content";

@@ -57,6 +57,12 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
 
 export interface IDocumentMetadataModel extends Instance<typeof DocumentMetadataModel> {}
 
+/**
+ * A map of metadata documents keyed by document `key`. Consumers that watch a filtered
+ * slice of the `documents` collection each own one of these.
+ */
+export const MetadataDocMapModel = types.map(DocumentMetadataModel);
+
 //
 // Compile-time type checks
 // =========================

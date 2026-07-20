@@ -7,8 +7,7 @@ import { IDocumentMetadata } from "../../../shared/shared";
 import type { DB } from "../../lib/db";
 import { typeConverter } from "../../utilities/db-utils";
 import { IArrowAnnotation } from "../annotations/arrow-annotation";
-import { DocumentMetadataModel } from "../document/document-metadata-model";
-import { MetadataDocMapModel } from "./sorted-documents";
+import { DocumentMetadataModel, MetadataDocMapModel } from "../document/document-metadata-model";
 
 // The subset of the root stores this store needs. The root `Stores` object satisfies it.
 export interface IDocumentMetadataStoreStores {

@@ -1,11 +1,10 @@
 import { makeAutoObservable, runInAction, when } from "mobx";
-import { types } from "mobx-state-tree";
 import { applySnapshot, unprotect } from "@concord-consortium/mobx-state-tree";
 
 import { IDocumentMetadata } from "../../../shared/shared";
 import { DB } from "../../lib/db";
 import { typeConverter } from "../../utilities/db-utils";
-import { DocumentMetadataModel, IDocumentMetadataModel } from "../document/document-metadata-model";
+import { IDocumentMetadataModel, MetadataDocMapModel } from "../document/document-metadata-model";
 import { isSortableType } from "../document/document-types";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
@@ -35,8 +34,6 @@ export interface ISortedDocumentsStores {
   unit?: UnitModelType;
   documentMetadata: DocumentMetadataStore;
 }
-
-export const MetadataDocMapModel = types.map(DocumentMetadataModel);
 
 export class SortedDocuments {
   stores: ISortedDocumentsStores;
