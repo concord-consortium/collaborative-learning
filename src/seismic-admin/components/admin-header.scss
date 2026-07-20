@@ -19,12 +19,12 @@
         margin-bottom: 8px;
       }
 
-      .stations {
+      .checkbox-list {
         display: flex;
         flex-wrap: wrap;
         gap: 8px 16px;
 
-        .station-checkbox {
+        .checkbox {
           display: inline-flex;
           align-items: center;
           gap: 4px;

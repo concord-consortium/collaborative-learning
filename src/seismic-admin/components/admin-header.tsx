@@ -25,11 +25,11 @@ export const AdminHeader = observer(function AdminHeader() {
         </div>
         <div className="option-area">
           <div className="option-header">Stations</div>
-          <div className="stations">
+          <div className="checkbox-list">
             {[...store.stations].map(([key, station]) => {
               const checked = store.selectedStations.has(key);
               return (
-                <label className="station-checkbox" key={key}>
+                <label className="checkbox" key={key}>
                   <input
                     type="checkbox"
                     disabled={checked && store.selectedStations.size === 1}
@@ -40,6 +40,21 @@ export const AdminHeader = observer(function AdminHeader() {
                 </label>
               );
             })}
+          </div>
+        </div>
+        <div className="option-area">
+          <div className="option-header">Models</div>
+          <div className="checkbox-list">
+            {[...store.models].map(([url, model]) => (
+              <label className="checkbox" key={url}>
+                <input
+                  type="checkbox"
+                  checked={store.selectedModels.has(url)}
+                  onChange={() => store.toggleModel(url)}
+                />
+                {model.label}
+              </label>
+            ))}
           </div>
         </div>
       </div>
