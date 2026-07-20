@@ -5,9 +5,8 @@ import "../../../models/shared/shared-data-set-registration";
 import "../../shared-seismogram/shared-seismogram-registration";
 import { registerTileContentInfo } from "../../../models/tiles/tile-content-info";
 import { kWaveRunnerTileType } from "../wave-runner-types";
-import {
-  WaveRunnerContentModel, defaultWaveRunnerContent, PLACEHOLDER_MODEL_URL, ModelListEntry
-} from "./wave-runner-content";
+import { ModelListEntry, PLACEHOLDER_MODEL_URL } from "../../../../shared/seismic/model-metadata";
+import { WaveRunnerContentModel, defaultWaveRunnerContent } from "./wave-runner-content";
 import appConfig from "../../../clue/app-config.json";
 import { SeismicDownloadService, DONE } from "../../../models/stores/seismic/seismic-download-service";
 import {

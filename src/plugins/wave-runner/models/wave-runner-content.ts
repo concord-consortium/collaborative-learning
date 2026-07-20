@@ -3,6 +3,7 @@ import stringify from "json-stringify-pretty-compact";
 import { cast, flow, getSnapshot, types, Instance } from "mobx-state-tree";
 import { miniseed } from "seisplotjs";
 import { eventDocId, uncoveredDaySpans } from "../../../../shared/seismic/event-database";
+import { fetchModelMetadata, ModelListEntry } from "../../../../shared/seismic/model-metadata";
 import { dayRange, SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 import { StationData, TimeRange } from "../../../../shared/seismic/seismic-types";
 import { SeismicDownloadService, DONE } from "../../../models/stores/seismic/seismic-download-service";
@@ -19,27 +20,6 @@ import { getAppConfig, getSharedModelManager } from "../../../models/tiles/tile-
 import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
 import { StationModel, StationSnapshot } from "../../shared-seismogram/station-model";
 import { kWaveRunnerTileType } from "../wave-runner-types";
-
-const SUPPORTED_SCHEMA = "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json";
-
-export const PLACEHOLDER_MODEL_URL = "placeholder:random-weights";
-
-const PLACEHOLDER_METADATA: ModelMetadata = {
-  $schema: SUPPORTED_SCHEMA,
-  id: "placeholder-v1",
-  architecture: "placeholder",
-  class_names: ["Noise", "Earthquake"],
-  sampling_rate: 100,
-  window_duration: 60,
-  instrument_types: ["H", "N", "L"],
-  weightsUrl: "",
-};
-
-// The model list is configured per-unit under settings["wave-runner"].models.
-export interface ModelListEntry {
-  label: string;
-  metadataUrl: string;
-}
 
 export function defaultWaveRunnerContent(): WaveRunnerContentModelType {
   return WaveRunnerContentModel.create();
@@ -201,26 +181,8 @@ export const WaveRunnerContentModel = TileContentModel
       self.modelLoadError = null;
       self.clearEventsDataSet();
 
-      // Placeholder model — use hardcoded metadata, no fetch needed
-      if (metadataUrl === PLACEHOLDER_MODEL_URL) {
-        self.selectedModelMetadata = { ...PLACEHOLDER_METADATA };
-        return;
-      }
-
       try {
-        const response: Response = yield fetch(metadataUrl);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch model metadata: ${response.status}`);
-        }
-        const metadata: ModelMetadata = yield response.json();
-        if (metadata.$schema !== SUPPORTED_SCHEMA) {
-          throw new Error(
-            `Unsupported model schema: "${metadata.$schema}". This version of CLUE supports "${SUPPORTED_SCHEMA}".`
-          );
-        }
-        // Resolve weightsUrl relative to the metadata URL
-        metadata.weightsUrl = new URL(metadata.weightsUrl, metadataUrl).href;
-        self.selectedModelMetadata = metadata;
+        self.selectedModelMetadata = yield fetchModelMetadata(metadataUrl);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         self.modelLoadError = message;

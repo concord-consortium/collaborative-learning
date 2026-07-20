@@ -14,23 +14,13 @@
 import { parseArgs } from "node:util";
 import { miniseed } from "seisplotjs";
 import { fetchRawSeismicData } from "./earthscope-client";
+import { PLACEHOLDER_METADATA } from "./model-metadata";
 import { MILLISECONDS_PER_DAY } from "./seismic-day";
 import { SeismicModelRunner } from "./seismic-model-runner";
 import { ModelMetadata } from "./seismic-model-types";
 
 const COMPACT_METADATA_URL =
   "https://models-resources.concord.org/tiny-cnn-seismicML/models/v1/compact-v1/metadata.json";
-
-const PLACEHOLDER_METADATA: ModelMetadata = {
-  $schema: "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
-  id: "placeholder-v1",
-  architecture: "placeholder",
-  class_names: ["Noise", "Earthquake"],
-  sampling_rate: 100,
-  window_duration: 60,
-  instrument_types: ["H", "N", "L"],
-  weightsUrl: "",
-};
 
 async function main() {
   const { values } = parseArgs({
