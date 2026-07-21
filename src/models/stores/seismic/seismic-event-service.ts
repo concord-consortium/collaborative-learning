@@ -42,7 +42,8 @@ export async function getUncoveredRanges(
 ): Promise<TimeRange[]> {
   const firestore = firebase.firestore();
   const startChunk = getChunkIndex(range.start);
-  const endChunk = getChunkIndex(range.end);
+  // range.end is exclusive, so the last relevant chunk is the one containing end - 1
+  const endChunk = getChunkIndex(range.end - 1);
   const chunks: number[] = [];
   for (let chunk = startChunk; chunk <= endChunk; chunk++) {
     chunks.push(chunk);

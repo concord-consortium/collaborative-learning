@@ -95,7 +95,8 @@ export function isWindowCovered(bitmap: Uint8Array, window: number): boolean {
  */
 export function findUncoveredRanges(bitmaps: Map<number, Uint8Array>, range: TimeRange): TimeRange[] {
   const startChunk = getChunkIndex(range.start);
-  const endChunk = getChunkIndex(range.end);
+  // range.end is exclusive, so the last relevant chunk is the one containing end - 1
+  const endChunk = getChunkIndex(range.end - 1);
 
   const gaps: TimeRange[] = [];
   let currentGapStart: number | null = null;

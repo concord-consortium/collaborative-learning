@@ -161,6 +161,18 @@ describe("findUncoveredRanges", () => {
     expect(findUncoveredRanges(new Map([[0, bitmap0]]), { start, end }))
       .toEqual([{ start: COVERAGE_EPOCH + (WINDOWS_PER_CHUNK - 1) * WINDOW_DURATION_S, end }]);
   });
+
+  it("does not consult the chunk starting exactly at a chunk-aligned exclusive end", () => {
+    const requested: number[] = [];
+    const bitmaps = new Map<number, Uint8Array>();
+    const mapGet = bitmaps.get.bind(bitmaps);
+    bitmaps.get = (chunk: number) => { requested.push(chunk); return mapGet(chunk); };
+
+    const fullChunk: TimeRange = { start: COVERAGE_EPOCH, end: COVERAGE_EPOCH + CHUNK_DURATION_S };
+    expect(findUncoveredRanges(bitmaps, fullChunk)).toEqual([fullChunk]);
+    // range.end is exclusive: chunk 1 (starting at range.end) contains no in-range windows
+    expect(requested).toEqual([0]);
+  });
 });
 
 describe("uncoveredDaySpans", () => {

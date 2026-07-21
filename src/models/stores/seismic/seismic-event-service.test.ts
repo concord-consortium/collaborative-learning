@@ -8,6 +8,7 @@ import {
 // ---- minimal in-memory fake of the firebase v8 slice the service uses ----
 const mockStore = new Map<string, any>();
 const mockCommitSizes: number[] = [];
+const mockDocGets: string[] = [];
 const mockAuthState: { currentUser: { uid: string } | null } = { currentUser: { uid: "test-user" } };
 // Extra times runTransaction reruns its callback, simulating Firestore contention retries.
 const mockTransactionState = { retries: 0 };
@@ -27,7 +28,7 @@ jest.mock("firebase/app", () => {
   const docRef = (path: string): any => ({
     path,
     id: path.split("/").pop(),
-    get: async () => snapFor(path),
+    get: async () => { mockDocGets.push(path); return snapFor(path); },
   });
   const makeQuery = (collectionPath: string, c: any = {}): any => ({
     where: (field: string, op: string, value: any) =>
@@ -98,6 +99,7 @@ const model = "compact-v1";
 beforeEach(() => {
   mockStore.clear();
   mockCommitSizes.length = 0;
+  mockDocGets.length = 0;
   mockAuthState.currentUser = { uid: "test-user" };
   mockTransactionState.retries = 0;
 });
@@ -223,5 +225,12 @@ describe("getUncoveredRanges", () => {
       { start: range.start, end: covered.start },
       { start: covered.end, end: range.end },
     ]);
+  });
+
+  it("fetches only the chunks intersecting a chunk-aligned range", async () => {
+    const range: TimeRange = { start: COVERAGE_EPOCH, end: COVERAGE_EPOCH + CHUNK_DURATION_S };
+    await getUncoveredRanges(stationData, model, range);
+    // range.end is exclusive: the chunk starting at range.end must not be fetched
+    expect(mockDocGets).toEqual([coveragePath(stationData, model, 0)]);
   });
 });
