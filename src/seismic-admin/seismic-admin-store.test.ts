@@ -616,11 +616,11 @@ describe("update (event generation)", () => {
     const processCoverage = jest.fn(async ({ onDayCovered }: any) => {
       onDayCovered(day1);
       await flush();   // the timeline must reflect the day before the model run resolves
-      midRun.push(ctx.store.coverage.get(coverageKey(rc01Key, compact.metadataUrl))?.dayStates?.get(day1));
+      midRun.push(ctx.store.modelCoverage.get(coverageKey(rc01Key, compact.metadataUrl))?.dayStates?.get(day1));
       return { processed: 1, skipped: 0, total: 1 };
     });
     const ctx = await primed({ models: [compact], eventService, processCoverage });
-    expect(ctx.store.coverage.get(coverageKey(rc01Key, compact.metadataUrl))?.dayStates?.get(day1))
+    expect(ctx.store.modelCoverage.get(coverageKey(rc01Key, compact.metadataUrl))?.dayStates?.get(day1))
       .toBe("uncovered");
 
     await ctx.store.updateStation(rc01Key);
@@ -647,7 +647,7 @@ describe("update (event generation)", () => {
     await ctx.store.updateStation(rc01Key);
     expect(callbackTypes).toEqual(["function"]);
     // No dayStates were synthesized for the unloaded pair.
-    expect(ctx.store.coverage.get(coverageKey(rc01Key, compact.metadataUrl))).toEqual({ state: "error" });
+    expect(ctx.store.modelCoverage.get(coverageKey(rc01Key, compact.metadataUrl))).toEqual({ state: "error" });
   });
 
   it("summary counts failed stations", async () => {
