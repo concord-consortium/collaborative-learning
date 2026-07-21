@@ -8,5 +8,8 @@ import { initializeApp } from "../../lib/firebase-config";
  */
 export async function initAdminFirebase(): Promise<void> {
   initializeApp();
-  await firebase.auth().signInAnonymously();
+  const auth = firebase.auth();
+  if (!auth.currentUser) {
+    await auth.signInAnonymously();
+  }
 }
