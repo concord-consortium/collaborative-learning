@@ -11,7 +11,17 @@
 
   .station-name {
     font-weight: bold;
-    margin-bottom: 8px;
+  }
+
+  .station-ready {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+
+    .icon {
+      height: 24px;
+      width: 24px;
+    }
   }
 
   .station-body {
@@ -54,9 +64,17 @@
       flex-direction: column;
       gap: 6px;
 
+      button:enabled {
+        cursor: pointer;
+      }
+
       .danger {
         color: #fff;
         background: #c0392b;
+
+        &:hover {
+          background: #a0190b;
+        }
       }
     }
   }
