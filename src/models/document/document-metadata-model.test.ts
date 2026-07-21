@@ -15,3 +15,19 @@ describe("DocumentMetadataModel context_id", () => {
     expect(metadata.context_id).toBeNull();
   });
 });
+
+describe("DocumentMetadataModel network", () => {
+  it("stores a network from Firestore data", () => {
+    const metadata = DocumentMetadataModel.create({
+      uid: "u1", type: "problem", key: "doc-n1", network: "some-network", tools: []
+    });
+    expect(metadata.network).toBe("some-network");
+  });
+
+  it("defaults a missing network to null", () => {
+    const metadata = DocumentMetadataModel.create({
+      uid: "u1", type: "problem", key: "doc-n2", tools: []
+    });
+    expect(metadata.network).toBeNull();
+  });
+});

@@ -39,7 +39,7 @@ so this table doubles as a migration-progress view.
 | Field | Stores | Applies to | Runtime | Reactive |
 |---|---|---|---|---|
 | `context_id` | Firestore | all | `DocumentModel.contextId`, `DocumentMetadataModel.context_id` | No — immutable |
-| `network` | Firestore | all (null for students) | not surfaced | No |
+| `network` | Firestore | all (null for students) | `DocumentMetadataModel.network` | No |
 | `tools` | Firestore | all editable | `DocumentMetadataModel.tools` | Yes, class-wide |
 | `strategies` | Firestore | commented docs | `DocumentMetadataModel.strategies` | Yes, class-wide |
 | `lastHistoryEntry` | Firestore | concurrent-history docs | not surfaced | No |
@@ -107,7 +107,7 @@ CLUE-524 and is not written today. [firestore-schema.md](../firestore-schema.md)
 - **Stores:** Firestore only
 - **Location:** `documents/{key}.network`
 - **Applies to:** all; `null` for student and group documents
-- **Runtime:** not surfaced on any document model
+- **Runtime:** `DocumentMetadataModel.network` (no `DocumentModel` prop)
 - **Updated by:** nothing — written once at creation from `userContext.network`
   ([db.ts:588](../../src/lib/db.ts#L588))
 - **Reactive:** No
@@ -116,13 +116,13 @@ Not a document property in any real sense — it records the creating user's sin
 captured as a snapshot at document-creation time. [firestore.rules](../../firestore.rules) reads it back
 (`resourceInTeacherNetworks`, `getDocumentNetwork`) to let teachers in the same network read and comment on
 each other's documents, so teacher documents must keep writing it or that cross-teacher visibility silently
-breaks. Student and group documents have no network, so the field is null for them. It is absent from
-`IDocumentMetadata` and is bolted on via an intersection type at the write site.
+breaks. Student and group documents have no network, so the field is null for them. It is declared on
+`IDocumentMetadata` and loaded into `DocumentMetadataModel.network`; no consumer reads it off the model yet.
 
-Because it is undeclared, `network` reaches `DocumentMetadataStore`'s `typecheck(DocumentMetadataModel,
-data)` unfiltered — but MST's `typecheck` ignores properties the model does not declare, so the metadata
-still validates and is not dropped. That behavior is pinned by the `typecheck` tests in
-[mst.test.ts](../../src/models/mst.test.ts).
+Fields such as `offeringId` and `canonical` are written to the Firestore doc but have no
+`DocumentMetadataModel` prop; they reach `DocumentMetadataStore`'s `typecheck(DocumentMetadataModel, data)`
+unfiltered and validate only because MST's `typecheck` ignores properties the model does not declare —
+pinned by the `typecheck` tests in [mst.test.ts](../../src/models/mst.test.ts).
 
 Storing the network this way is not good. A teacher can belong to multiple networks or switch networks, so
 a value frozen at creation time can later be wrong. The network association really belongs to the user (or

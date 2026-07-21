@@ -145,6 +145,7 @@ export interface IDocumentMetadataBase {
 export interface IDocumentMetadata extends IDocumentMetadataBase {
   createdAt?: number;
   context_id?: string|null;
+  network?: string|null;
   originDoc?: string|null;
   properties?: Record<string, string>;
   tools?: string[];
