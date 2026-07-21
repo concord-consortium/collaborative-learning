@@ -36,8 +36,15 @@ const CoverageSection = observer(function CoverageSection({ stationKey, model }:
         <div className="data-stats">{statsMessage}</div>
       </div>
       {hasRange && stationKey && (highlightedDays
-        ? <RawTimeline highlightedDays={highlightedDays} partialDays={midDays} firstDay={firstDay} lastDay={lastDay} />
-        : "Loading..."
+        ? (
+          <RawTimeline
+            ariaLabel={`${model.label} coverage timeline for ${stationLabel}`}
+            highlightedDays={highlightedDays}
+            partialDays={midDays}
+            firstDay={firstDay}
+            lastDay={lastDay}
+          />
+        ) : "Loading..."
       )}
     </div>
   );
@@ -118,9 +125,14 @@ export const StationSection = observer(function StationSection({ stationKey }: I
               <div className="data-kind">Local Raw Data</div>
               <div className="data-stats">{`${cachedDaysMessage} days · ${formatBytes(stats.bytes)}`}</div>
             </div>
-            {hasRange && stats?.cachedDays &&
-              <RawTimeline highlightedDays={stats.cachedDays} firstDay={firstDay} lastDay={lastDay} />
-            }
+            {hasRange && stats?.cachedDays && (
+              <RawTimeline
+                ariaLabel={`local raw data coverage timeline for ${label}`}
+                highlightedDays={stats.cachedDays}
+                firstDay={firstDay}
+                lastDay={lastDay}
+              />
+            )}
           </div>
           {store.selectedModelList.map(model => (
             <CoverageSection key={model.metadataUrl} stationKey={stationKey} model={model} />
