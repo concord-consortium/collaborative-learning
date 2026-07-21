@@ -1,0 +1,21 @@
+.raw-timeline {
+  display: flex;
+  width: 100%;
+  height: 16px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #fff;
+
+  .segment {
+    height: 100%;
+
+    &.filled {
+      background: #4a90d9;
+    }
+
+    &.empty {
+      background: transparent;
+    }
+  }
+}

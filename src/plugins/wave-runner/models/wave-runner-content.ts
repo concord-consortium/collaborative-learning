@@ -10,7 +10,7 @@ import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../mode
 import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { getSharedModelManager } from "../../../models/tiles/tile-environment";
+import { getAppConfig, getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
 import { StationModel, StationSnapshot } from "../../shared-seismogram/station-model";
 import { kWaveRunnerTileType } from "../wave-runner-types";
@@ -30,22 +30,11 @@ const PLACEHOLDER_METADATA: ModelMetadata = {
   weightsUrl: "",
 };
 
+// The model list is configured per-unit under settings["wave-runner"].models.
 export interface ModelListEntry {
   label: string;
   metadataUrl: string;
 }
-
-// Default model list — can be overridden by unit JSON in the future
-export const DEFAULT_MODELS: ModelListEntry[] = [
-  {
-    label: "Compact Model",
-    metadataUrl: "https://models-resources.concord.org/tiny-cnn-seismicML/models/v1/compact-v1/metadata.json"
-  },
-  {
-    label: "Placeholder (random weights)",
-    metadataUrl: PLACEHOLDER_MODEL_URL,
-  },
-];
 
 export function defaultWaveRunnerContent(): WaveRunnerContentModelType {
   return WaveRunnerContentModel.create();
@@ -254,7 +243,7 @@ export const WaveRunnerContentModel = TileContentModel
           return;
         }
 
-        const totalDays = Math.ceil((endMs - startMs) / MILLISECONDS_PER_DAY);
+        const totalDays = Math.floor((endMs - startMs) / MILLISECONDS_PER_DAY) + 1;
         self.updateChunkProgress(0, totalDays);
 
         // Bulk-download the range into OPFS, running the model on each day as it lands.
@@ -300,7 +289,8 @@ export const WaveRunnerContentModel = TileContentModel
 
         const dataSet = self.getOrCreateEventsDataSet()?.dataSet;
         if (dataSet) {
-          const modelLabel = DEFAULT_MODELS.find(m => m.metadataUrl === self.selectedModelUrl)?.label ?? "";
+          const models = getAppConfig(self)?.getSetting("models", "wave-runner") as ModelListEntry[] | undefined;
+          const modelLabel = models?.find(m => m.metadataUrl === self.selectedModelUrl)?.label ?? "";
           addCasesToDataSet(dataSet, self.detectedEvents.map(evt => ({
             windowStart: new Date(evt.windowStart).toISOString(),
             windowEnd: new Date(evt.windowEnd).toISOString(),

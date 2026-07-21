@@ -15,7 +15,7 @@ jobs:
           cache-dependency-path: |
             package-lock.json
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
       - uses: concord-consortium/s3-deploy-action/deploy-path@v1
         id: s3-deploy-path
       - name: Lint
@@ -45,10 +45,10 @@ jobs:
             package-lock.json
             authoring-api/package-lock.json
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
       - name: Install Authoring API Dependencies
         working-directory: ./authoring-api
-        run: npm ci
+        run: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
       - name: Run Authoring API Tests
         working-directory: ./authoring-api
         run: npm test
@@ -94,6 +94,9 @@ jobs:
             package-lock.json
       - uses: cypress-io/github-action@v4
         with:
+          # retry registry fetches; a bare `npm ci` fails the whole container on a
+          # transient ECONNRESET, which is unrecoverable without a full re-run
+          install-command: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
           start: npm start
           wait-on: 'http://localhost:8080'
           wait-on-timeout: 600

@@ -67,6 +67,33 @@
       color: white;
     }
 
+    details.builtInPrompt {
+      background: #eaf3fa;
+      border: 1px solid #b8d4e8;
+      border-radius: 4px;
+      padding: 8px 12px;
+
+      summary {
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      &[open] summary {
+        margin-bottom: 8px;
+      }
+
+      pre {
+        white-space: pre-wrap;
+        background: white;
+        border: 1px solid #b8d4e8;
+        border-radius: 4px;
+        padding: 10px;
+        max-height: 320px;
+        overflow: auto;
+        font-size: 0.85em;
+      }
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;

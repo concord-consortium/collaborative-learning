@@ -50,6 +50,7 @@ export interface IUnitConfig {
   enableCommentRoles: CommentRole[];
   aiEvaluation?: AIEvaluation;
   aiPrompt: IAiPrompt;
+  chatTutorPrompts?: IChatTutorPrompts;
   authorTools?: IAuthorTool[];
   showIdeasButton?: boolean;
   hide4up?: boolean;
@@ -136,6 +137,12 @@ export interface IAiPrompt {
   keyIndicatorsPrompt: string;
   discussionPrompt: string;
   summarizer?: Summarizer;
+}
+
+// Optional per-unit overrides of the AI chat tutor's server-side generic prompt.
+export interface IChatTutorPrompts {
+  replaceGenericPrompt?: string;
+  appendToGenericPrompt?: string;
 }
 
 export interface ISection {

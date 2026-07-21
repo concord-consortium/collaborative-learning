@@ -141,9 +141,26 @@ service cloud.firestore {
                  string(request.auth.token.platform_user_id) in resource.data.teachers);
       }
 
+      // A document is canonical for a slot when `canonical` holds that slot's label — a non-empty
+      // string. Absent, null, or "" all mean non-canonical. The label is written to `canonical`
+      // only inside the pointer-claim transaction; see kDefaultCanonicalDocumentLabel in
+      // scoped-document-pointers.ts.
+      function isCanonicalValue(value) {
+        return value is string && value != "";
+      }
+
+      function isBlankCanonical(data) {
+        let canonical = data.get("canonical", null);
+        return canonical == null || canonical == "";
+      }
+
       function isValidDocumentCreateRequest() {
         return
           request.resource.data.keys().hasAll(["uid", "type", "key", "createdAt"]) &&
+          // The canonical label is granted solely by the pointer-claim transaction (an update,
+          // gated by canonicalFieldOk), so a create carrying a non-blank `canonical` — including a
+          // non-string like `true` — is rejected.
+          isBlankCanonical(request.resource.data) &&
           (classIsRequestContextId() || teacherIsInClass(request.resource.data.context_id));
       }
 
@@ -342,12 +359,61 @@ service cloud.firestore {
       }
 
       match /documents/{docId} {
+        // A document's scope is read from the association fields it carries, not from its `type`.
+        // Group scope = a group-in-offering document (has both an offering and a group).
+        function isGroupScope(data) {
+          return data.get("offeringId", "") != "" && data.get("groupId", "") != "";
+        }
+
+        // The path of the canonical-pointer slot for `data`'s scope, or null if `data`'s scope has
+        // no canonical-pointer shape. Only the group scope has canonical documents today, so this
+        // returns the one fixed path. Once other scopes need them, the natural generalization is to
+        // build the path from field presence — append /offerings/<offeringId> and /groups/<groupId>
+        // only when set (string concat + path(), verified against the emulator) — addressing the
+        // class, offering, and group scopes without a branch per scope, and canonicalFieldOk() stays
+        // untouched. A new scope still needs its own `.../canonical/{label}` write-guard match block.
+        // Keep in lockstep with getGroupCanonicalPointerPath in scoped-document-pointers.ts.
+        function canonicalPointerPath(portal, data, label) {
+          return isGroupScope(data)
+            ? /databases/$(database)/documents/authed/$(portal)
+                /classes/$(data.context_id)
+                /offerings/$(data.offeringId)
+                /groups/$(data.groupId)
+                /canonical/$(label)
+            : null;
+        }
+
+        // Whether the `label` slot's pointer already points at this document in the same commit.
+        // Called only for a valid (non-empty string) label, so the path is never built for a
+        // non-string. A document whose scope has no canonical shape (path == null) cannot claim it.
+        function pointerConfirmsCanonical(portal, data, label) {
+          let ptr = canonicalPointerPath(portal, data, label);
+          return ptr != null && getAfter(ptr).data.documentKey == data.key;
+        }
+
+        function canonicalFieldOk() {
+          let was = resource.data.get("canonical", "");
+          let now = request.resource.data.get("canonical", "");
+          // `canonical` holds the pointer slot's label. It may be set once (non-canonical -> label),
+          // and only when that slot's pointer already points at this document in the same commit; it
+          // may not be changed or cleared. The slot label is read from the document via `now`, so no
+          // label is hardcoded here.
+          return was == now
+            || (!isCanonicalValue(was) && isCanonicalValue(now)
+                && pointerConfirmsCanonical(portal, request.resource.data, now));
+        }
+
         // portal-authenticated teachers can create valid documents
         allow create: if isValidDocumentCreateRequest();
         // teachers can only update their own documents and only if they're valid
-        allow update: if isValidDocumentUpdateRequest();
+        allow update: if isValidDocumentUpdateRequest() && canonicalFieldOk();
         // teachers can only delete their own documents
         allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
+        // class members can delete non-canonical group documents
+        allow delete: if isAuthed()
+          && request.auth.token.class_hash == resource.data.context_id
+          && resource.data.type == "group"
+          && !isCanonicalValue(resource.data.get('canonical', ""));
         // teachers can read their own documents or other documents in their network
         allow read: if (isAuthed() && (resource == null || userOwnsDocument() || resourceInUserClass())) ||
           (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()));
@@ -479,6 +545,93 @@ service cloud.firestore {
         allow write: if false;  // only cloud functions write here
       }
 
+      // AI chat tutor (spike): a self-contained top-level collection so all chat data can be
+      // deleted wholesale when the spike ends. A parent conversation doc (server-created by the
+      // chatTutorOnWrite trigger via the admin SDK) with a messages subcollection the client
+      // writes `user` docs into. This is a discrete leaf match: the portal-level
+      // teacher/researcher grant above does not cascade here under rules_version 2, so the
+      // students-only stance below holds.
+      match /chatTutor/{conversationId} {
+        // The real Firebase claim students carry is user_type "learner" (the app-model
+        // "student" value is a client-side remap the rules never see).
+        function isStudentClaim() {
+          return hasRole("learner");
+        }
+
+        // Owner-only + student-only: reads trust resource.data.uid, which the create rules pin
+        // to the caller's token and the trigger stamps (admin SDK) on server-written docs. No
+        // teacher/researcher branch — evaluators inspect via the Firestore console/emulator.
+        // Deliberately NOT the documents rule's class-wide resourceInUserClass() branch, which
+        // would expose a student's transcript to classmates.
+        allow read: if userIsResourceUser() && isStudentClaim();
+
+        // Defense-in-depth only: the parent is created server-side, so no client parent-create
+        // is exercised — but if a client attempted one it could not forge an owner or inject
+        // server-owned state (status/lock/cursor/conversationId/problemInstalled/seq).
+        allow create: if isStudentClaim() &&
+          userIsRequestUser() &&
+          classIsRequestContextId() &&
+          request.resource.data.keys().hasOnly(['uid', 'context_id', 'problemPath']);
+        allow update, delete: if false;
+
+        match /messages/{messageId} {
+          // A student may write messages only into their OWN conversation: either the parent
+          // doesn't exist yet (the first send — the trigger creates it stamped with this
+          // sender's uid), or the existing parent carries the caller's uid. Without this, a
+          // classmate could inject owner-pinned messages into another student's conversation
+          // and read replies derived from that student's private workspace context. Residual
+          // (accepted for the spike): a malicious classmate could pre-create traffic on a
+          // victim's conversation path before their first send, denying the victim that
+          // conversation — a denial, not an exposure.
+          function ownsConversation() {
+            return !exists(/databases/$(database)/documents/authed/$(portal)/chatTutor/$(conversationId)) ||
+              get(/databases/$(database)/documents/authed/$(portal)/chatTutor/$(conversationId)).data.uid ==
+                string(request.auth.token.platform_user_id);
+          }
+
+          // Five load-bearing checks:
+          // (a) hasOnly blocks extra/server-owned fields;
+          // (b) the kind VALUE check — not hasOnly — is what blocks a forged 'assistant';
+          // (c) createdAt presence + orderable type, so the drain's ordering can't wedge on a
+          //     missing/null/string createdAt. The int/float tolerance is defense-in-depth only:
+          //     the client writes a serverTimestamp() Timestamp — a numeric createdAt would sort
+          //     before every server Timestamp and scramble the transcript and drain cursor;
+          // (d) the owner pin (userIsRequestUser) + the learner-claim gate, so students-only is
+          //     rules-enforced — otherwise a teacher/researcher could write a user doc directly
+          //     and fire the paid OpenAI trigger;
+          // (e) context_id pinned to the token's class_hash, so a student can't stamp another
+          //     class's context onto the conversation.
+          // promptReplace/promptAppend carry the unit-authored generic-prompt overrides. Like
+          // leftContext, they are client-supplied text sent to the model at developer authority
+          // (TRUST-1 tier, accepted for the spike) — rules can enforce only shape, not content.
+          function chatMessageCreate() {
+            let data = request.resource.data;
+            return isStudentClaim() &&
+              userIsRequestUser() &&
+              classIsRequestContextId() &&
+              data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
+                                   'problemPath', 'leftContext', 'rightContext',
+                                   'promptReplace', 'promptAppend']) &&
+              data.kind == 'user' &&
+              'createdAt' in data &&
+              (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
+              (!('promptReplace' in data) || data.promptReplace is string) &&
+              (!('promptAppend' in data) || data.promptAppend is string);
+          }
+
+          allow read: if userIsResourceUser() && isStudentClaim();
+          allow create: if chatMessageCreate() && ownsConversation();
+          allow update, delete: if false;
+        }
+      }
+
+      match /classes/{classId}/offerings/{offeringId}/groups/{groupId}/canonical/{label} {
+        allow read:   if isAuthed() && request.auth.token.class_hash == classId;
+        allow create: if isAuthed() && request.auth.token.class_hash == classId
+                       && request.resource.data.keys().hasAll(["documentKey", "createdAt", "createdBy"]);
+        allow update, delete: if false;   // pointers are immutable
+      }
+
       // A tag write must be self-consistent with its path, attributed to the requesting teacher,
       // and have a non-empty label. (createdAt is a server timestamp, so it isn't constrained here.)
       function isValidCommentTagRequest(classHash, unit, tagId) {
@@ -506,8 +659,51 @@ service cloud.firestore {
     //
     // non-portal-authenticated/dev/demo/qa/test rules
     //
-    match /demo/{demoName}/{restOfPath=**} {
+    // AI chat tutor under the demo (anonymous-auth) root. The chatTutorOnWrite trigger fires on
+    // EVERY root's chatTutor path (its resource is {root}/{rootId}/chatTutor/...), so a deployed
+    // demo build reaches the paid OpenAI trigger too. Demo signs in anonymously — there is no
+    // learner claim / platform_user_id / class_hash — so these rules can only enforce message
+    // SHAPE (field whitelist + kind:"user"), not per-user ownership like the authed block. That
+    // still blocks a client from forging kind:"assistant" replies or injecting server-owned state
+    // (status/lock/cursor/conversationId/...), which would otherwise corrupt the rendered
+    // transcript and the drain cursor. The parent doc is server-created (admin SDK bypasses rules).
+    match /demo/{demoName}/chatTutor/{conversationId} {
+      function demoChatMessageCreate() {
+        let data = request.resource.data;
+        return isAuthed() &&
+          data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
+                               'problemPath', 'leftContext', 'rightContext',
+                               'promptReplace', 'promptAppend']) &&
+          data.kind == 'user' &&
+          'createdAt' in data &&
+          (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
+          (!('promptReplace' in data) || data.promptReplace is string) &&
+          (!('promptAppend' in data) || data.promptAppend is string);
+      }
+
+      allow read: if isAuthed();
+      allow create, update, delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isAuthed();
+        allow create: if demoChatMessageCreate();
+        allow update, delete: if false;
+      }
+    }
+
+    // Everything else under a demo root stays open to any (anonymous) demo user. chatTutor is
+    // carved out below so the shape checks above are not overridden: rule grants are OR-ed, and a
+    // recursive `allow write: if isAuthed()` here would re-grant a forged assistant/server-owned
+    // doc. The catch-all is split so the exclusion is a plain single-segment string compare
+    // (`first != "chatTutor"`) — the recursive `{path=**}` variable is a `path`, which the rules
+    // engine has no `.size()` for and errors on when indexed empty (a rule that ERRORS denies the
+    // whole request, which would break the chat client), so neither is usable here.
+    match /demo/{demoName} {
+      // the root doc itself (recordLaunchTime writes here; restOfPath below never matches it)
       allow read, write: if isAuthed();
+    }
+    match /demo/{demoName}/{first}/{rest=**} {
+      allow read, write: if isAuthed() && first != "chatTutor";
     }
 
     // In the future, developers might use a random unique key instead of
