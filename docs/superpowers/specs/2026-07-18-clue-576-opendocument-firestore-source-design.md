@@ -1,6 +1,6 @@
 # Design: `openDocument` sources Firestore metadata
 
-> **Status:** design (uncommitted draft for review).
+> **Status:** implemented.
 > **Chore:** CLUE-576.
 > **Depends on:** the `DocumentMetadataStore` from
 > [`2026-07-17-firestore-metadata-as-document-source-design.md`](./2026-07-17-firestore-metadata-as-document-source-design.md)
