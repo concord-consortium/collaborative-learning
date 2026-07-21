@@ -37,5 +37,5 @@
     "types": ["w3c-web-serial", "gtag.js"]
   },
   "include": ["src/**/*", "shared/**/*"],
-  "exclude": ["**/node_modules", "**/.*/"]
+  "exclude": ["**/node_modules", "**/.*/", "src/plugins/dataflow/firmware"]
 }
