@@ -37,6 +37,9 @@ doc. Its metadata fields fall into two classes:
 | **Firestore-only, immutable-at-creation** | `context_id` today; future `concurrent`/`kind`/`owner`/`scope`/`access` | not on the model yet — exists only in Firestore | No (never mutates) |
 | **Dual-stored, RTDB-sourced on the model** | `visibility`, `title`, `properties`, `groupId` | **RTDB** (initial value + live listeners) | Yes, via RTDB listeners |
 
+For the full per-field detail behind this summary — every stored field, its locations, what updates it,
+and its reactivity — see [metadata-fields.md](./metadata-fields.md).
+
 The Firestore-only fields have no RTDB representation at all, so they are the natural first move. The
 dual-stored fields are the harder, later work: each is currently kept live by an RTDB listener, so moving one
 means giving it a *reactive* Firestore read before the RTDB listener can be retired (sourcing only its initial

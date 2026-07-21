@@ -590,7 +590,7 @@ export class DB {
       // metadata, so reading it would be undefined for personal/learning-log documents.
       context_id: self.classHash,
       // A creation-time snapshot that rules read back; storing it here is problematic — see the
-      // "network field is problematic" note in docs/firestore-schema.md. Null for students/group docs.
+      // `network` section in docs/document-metadata/metadata-fields.md. Null for students/group docs.
       network: userContext.network || null,
       key: documentKey,
       properties: {},
