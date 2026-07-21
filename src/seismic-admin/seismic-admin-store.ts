@@ -6,6 +6,7 @@ import { dayIndex, SECONDS_PER_DAY, utcDayFromString } from "../../shared/seismi
 import { ModelMetadata, SeismicEvent } from "../../shared/seismic/seismic-model-types";
 import { StationConfig, StationData, TimeRange } from "../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
+import { processUncoveredRanges, ProcessCoverageOptions } from "../models/stores/seismic/seismic-coverage-processor";
 import { DONE, SeismicDownloadService } from "../models/stores/seismic/seismic-download-service";
 import { getUncoveredRanges, loadEvents } from "../models/stores/seismic/seismic-event-service";
 import { loadFilters, saveFilters } from "./utils/admin-persistence";
@@ -58,6 +59,7 @@ export interface SeismicAdminDeps {
     getUncoveredRanges: (s: StationData, model: string, range: TimeRange) => Promise<TimeRange[]>;
     loadEvents: (s: StationData, model: string, range: TimeRange) => Promise<SeismicEvent[]>;
   };
+  processCoverage?: (options: ProcessCoverageOptions) => Promise<{ processed: number; skipped: number; total: number }>;
 }
 
 export type CoverageLoadState = "pending" | "loaded" | "error";
@@ -428,6 +430,63 @@ export class SeismicAdminStore {
       await this.download(stations[i], `Station ${i + 1} of ${stations.length} — `);
     }
     this.setFeedback(`Finished downloading data for ${stations.length} station${stations.length === 1 ? "" : "s"}.`);
+  }
+
+  async updateStation(key: string) {
+    const s = this.stations.get(key);
+    if (!s) return;
+    await this.updateSingleStation(key);
+    this.setFeedback(`Finished updating ${stationLabel(s)}.`);
+  }
+
+  async updateAllSelected() {
+    const stationKeys = [...this.selectedStations];
+    let failures = 0;
+    for (let i = 0; i < stationKeys.length; i++) {
+      const ok = await this.updateSingleStation(stationKeys[i], `Station ${i + 1} of ${stationKeys.length} — `);
+      if (!ok) failures++;
+    }
+    const n = stationKeys.length;
+    this.setFeedback(failures
+      ? `Finished updating ${n} station${n === 1 ? "" : "s"}; ${failures} had failures.`
+      : `Finished updating ${n} station${n === 1 ? "" : "s"}.`);
+  }
+
+  /** Download the whole range, then generate events for each selected model's
+   *  uncovered days. Returns false if any model failed. */
+  private async updateSingleStation(key: string, prefix = ""): Promise<boolean> {
+    const stationData = this.stations.get(key);
+    const range = this.rangeSec;
+    if (!stationData || !range || !this.authReady) return false;
+
+    // 1) Raw data for the whole range (existing flow, reports its own feedback).
+    await this.download(stationData, prefix);
+
+    // 2) Events for uncovered days, model by model.
+    let ok = true;
+    for (const url of this.selectedModels) {
+      const label = this.models.get(url)?.label ?? url;
+      const metadata = await this.ensureModelMetadata(url);
+      if (!metadata) {
+        this.setFeedback(`${prefix}Skipping ${label}: model metadata unavailable.`);
+        ok = false;
+        continue;
+      }
+      try {
+        const run = this.deps.processCoverage ?? processUncoveredRanges;
+        await run({
+          stationData, metadata, range,
+          onProgress: (progress, total) => this.setFeedback(
+            `${prefix}${stationLabel(stationData)} — ${label}: day ${progress} of ${total}`),
+        });
+      } catch (err) {
+        console.warn("Update failed:", err);
+        this.setFeedback(`${prefix}Update failed for ${stationLabel(stationData)} — ${label}.`);
+        ok = false;
+      }
+      await this.loadCoverageStats(stationData, url);
+    }
+    return ok;
   }
 
   /** Fold a freshly-downloaded day into a station's stats so its timeline fills in live. */

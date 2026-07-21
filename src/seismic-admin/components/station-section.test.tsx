@@ -145,6 +145,89 @@ describe("StationSection coverage rows", () => {
     expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
   });
 
+  describe("update button", () => {
+    const key = getStationChannelPrefix(opfsStation);
+    const wholeDayGap = { start: day0, end: day0 + 24 * 60 * 60 };
+
+    it("is disabled before auth is ready", async () => {
+      const { store } = makeCoverageStore();
+      await store.refresh();
+      renderSection(store, key);
+
+      expect(screen.getByRole("button", { name: "Update events" })).toBeDisabled();
+    });
+
+    it("is disabled when no models are selected", async () => {
+      const { store } = makeCoverageStore({ models: [] });
+      await store.refresh();
+      store.setAuthReady();
+      await flush();
+      renderSection(store, key);
+
+      expect(screen.getByRole("button", { name: "Update events" })).toBeDisabled();
+    });
+
+    it("is disabled when the station is fully covered", async () => {
+      const { store } = makeCoverageStore();   // no gaps → fully covered
+      await store.refresh();
+      store.setAuthReady();
+      await flush();
+      renderSection(store, key);
+
+      expect(screen.getByRole("button", { name: "Update events" })).toBeDisabled();
+    });
+
+    it("is enabled when authenticated with a selected model and uncovered days", async () => {
+      const { store, eventService } = makeCoverageStore();
+      eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
+      await store.refresh();
+      store.setAuthReady();
+      await flush();
+      renderSection(store, key);
+
+      expect(screen.getByRole("button", { name: "Update events" })).toBeEnabled();
+    });
+
+    // mobx binds store actions as read-only properties, so the click tests
+    // observe the real actions' effects (deps calls + feedback) instead of spying.
+    const updateDeps = () => ({
+      downloadStation: jest.fn(async () => {}),
+      processCoverage: jest.fn(async () => ({ processed: 0, skipped: 0, total: 0 })),
+    });
+
+    it("dispatches a single-station update on click", async () => {
+      const deps = updateDeps();
+      const { store, eventService } = makeCoverageStore(deps);
+      eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
+      await store.refresh();
+      store.setAuthReady();
+      await flush();
+      renderSection(store, key);
+
+      fireEvent.click(screen.getByRole("button", { name: "Update events" }));
+      await waitFor(() => expect(store.feedback).toBe("Finished updating AK K204 HNZ."));
+      expect(deps.processCoverage).toHaveBeenCalledTimes(1);
+    });
+
+    it("dispatches an all-selected update for the all-stations section on click", async () => {
+      const deps = updateDeps();
+      const { store, eventService } = makeCoverageStore(deps);
+      eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
+      await store.refresh();
+      store.setAuthReady();
+      await flush();
+      render(
+        <SeismicAdminStoreContext.Provider value={store}>
+          <StationSection />
+        </SeismicAdminStoreContext.Provider>
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "Update all events" }));
+      await waitFor(() => expect(store.feedback).toBe("Finished updating 1 station."));
+      expect(deps.processCoverage).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it("updates a station's coverage row when its stats load after rendering", async () => {
     const { store } = makeCoverageStore();
     await store.refresh();

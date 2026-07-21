@@ -3,6 +3,8 @@ import { observer } from "mobx-react";
 import React, { useState } from "react";
 import { ModelListEntry } from "../../../shared/seismic/model-metadata";
 import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
+import CheckIcon from "../../assets/icons/check/check-selected.svg";
+import WarningIcon from "../../assets/icons/caution.svg";
 import { formatBytes, stationLabel } from "../utils/seismic-admin-utils";
 import { ConfirmModal } from "./confirm-modal";
 import { RawTimeline } from "./raw-timeline";
@@ -74,6 +76,19 @@ export const StationSection = observer(function StationSection({ stationKey }: I
     }
   };
 
+  const isFullyCovered = store.isFullyCovered(stationKey);
+  const ReadyIcon = isFullyCovered ? CheckIcon : WarningIcon;
+  const readyLabel = isFullyCovered ? "Ready" : "Not Ready!";
+  const updateDisabled = !store.authReady || store.selectedModels.size === 0 || isFullyCovered;
+  const updateLabel = `Update ${allStations ? "all stations" : "station"}`;
+  const update = () => {
+    if (allStations) {
+      void store.updateAllSelected();
+    } else {
+      void store.updateStation(stationKey);
+    }
+  };
+
   const deleteLabel = `Delete ${allStations ? "all " : ""}raw data`;
   const deleteRaw = () => {
     setConfirming(false);
@@ -86,9 +101,17 @@ export const StationSection = observer(function StationSection({ stationKey }: I
 
   return (
     <div className={classNames("station-section", { all: allStations})}>
-      <div className="station-name">{label}</div>
       <div className="station-body">
         <div className="data-sections">
+          <div className="data-section">
+            <div className="data-section-header">
+              <div className="station-name">{label}</div>
+              <div className="station-ready">
+                {readyLabel}
+                <ReadyIcon className="icon" />
+              </div>
+            </div>
+          </div>
           <div className="data-section">
             <div className="data-section-header">
               <div className="data-kind">Local Raw Data</div>
@@ -103,6 +126,7 @@ export const StationSection = observer(function StationSection({ stationKey }: I
           ))}
         </div>
         <div className="station-actions">
+          <button disabled={updateDisabled} onClick={update}>{updateLabel}</button>
           <button disabled={stats.missingCount === 0} onClick={downloadRaw}>{downloadLabel}</button>
           <button className="danger" onClick={() => setConfirming(true)}>{deleteLabel}</button>
         </div>

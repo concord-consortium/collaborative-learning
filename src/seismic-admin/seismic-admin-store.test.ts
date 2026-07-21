@@ -451,6 +451,157 @@ describe("coverage stats", () => {
   });
 });
 
+describe("update (event generation)", () => {
+  const rc01 = { network: "AK", station: "RC01", location: "", channel: "BHZ", label: "Rabbit Creek" };
+  const rc02 = { network: "AK", station: "RC02", location: "", channel: "BHZ", label: "Rabbit Creek 2" };
+  const compact = { label: "Compact", metadataUrl: "https://x/compact.json" };
+  const large = { label: "Large", metadataUrl: "https://x/large.json" };
+  const rc01Key = getStationChannelPrefix(rc01);
+
+  /** A cache with no OPFS stations, so the store's stations come only from deps. */
+  const emptyCache = () => ({
+    listStations: jest.fn(async () => []),
+    scanCachedDays: jest.fn(async () => new Set<number>()),
+    stationRawBytes: jest.fn(async () => 0),
+    deleteDaysInRange: jest.fn(async () => {}),
+  });
+
+  const flush = () => new Promise(resolve => setTimeout(resolve, 0));
+
+  function makeUpdateStore(overrides: any = {}) {
+    // Records the interleaving of downloads, model runs, and coverage reloads.
+    const calls: string[] = [];
+    const deps = {
+      cache: emptyCache() as any,
+      stations: [rc01],
+      models: [compact, large],
+      eventService: {
+        getUncoveredRanges: jest.fn(async (_s: any, m: string, _r: any) => {
+          calls.push(`coverage:${m}`);
+          return [] as Array<{ start: number; end: number }>;
+        }),
+        loadEvents: jest.fn(async (_s: any, _m: string, _r: any) => [] as any[]),
+      },
+      fetchMetadata: jest.fn(async (url: string) =>
+        ({ id: url.includes("compact") ? "compact-v1" : "large-v1" } as any)),
+      downloadStation: jest.fn(async () => { calls.push("download"); }),
+      processCoverage: jest.fn(async ({ metadata }: any) => {
+        calls.push(`process:${metadata.id}`);
+        return { processed: 0, skipped: 0, total: 0 };
+      }),
+      ...overrides,
+    };
+    const store = new SeismicAdminStore(deps);
+    return { store, calls, ...deps };
+  }
+
+  /** Build, refresh, and authenticate a store, then drop the setup's calls so
+   *  each test observes only what its update triggers. */
+  async function primed(overrides: any = {}) {
+    const ctx = makeUpdateStore(overrides);
+    ctx.store.setRange("2026-01-01", "2026-01-03");   // 3 days
+    await ctx.store.refresh();
+    ctx.store.setAuthReady();
+    await flush();
+    ctx.calls.length = 0;
+    jest.clearAllMocks();
+    return ctx;
+  }
+
+  it("updateStation downloads the whole range first, then processes each selected model in order", async () => {
+    const { store, calls } = await primed();
+    await store.updateStation(rc01Key);
+    expect(calls.filter((c: string) => !c.startsWith("coverage"))).toEqual([
+      "download", "process:compact-v1", "process:large-v1",
+    ]);
+  });
+
+  it("passes the endDate-inclusive range and the station to processCoverage", async () => {
+    const { store, processCoverage } = await primed({ models: [compact] });
+    await store.updateStation(rc01Key);
+
+    expect(processCoverage).toHaveBeenCalledTimes(1);
+    const options = processCoverage.mock.calls[0][0];
+    expect(options.stationData).toEqual(rc01);
+    expect(options.metadata).toEqual({ id: "compact-v1" });
+    // endDate is inclusive: the range extends through the end of Jan 3 UTC.
+    expect(options.range).toEqual({ start: utcDay(2026, 1, 1), end: utcDay(2026, 1, 4) });
+  });
+
+  it("reloads that pair's coverage stats after each model", async () => {
+    const { store, calls } = await primed();
+    await store.updateStation(rc01Key);
+    expect(calls).toEqual([
+      "download",
+      "process:compact-v1", "coverage:compact-v1",
+      "process:large-v1", "coverage:large-v1",
+    ]);
+  });
+
+  it("skips a model whose metadata fails, notes it in feedback, and continues", async () => {
+    const seen: string[] = [];
+    const fetchMetadata = jest.fn(async (url: string) => {
+      if (url.includes("compact")) throw new Error("nope");
+      return { id: "large-v1" } as any;
+    });
+    const processCoverage = jest.fn(async ({ metadata }: any) => {
+      seen.push(`${ctx.store.feedback} -> process:${metadata.id}`);
+      return { processed: 0, skipped: 0, total: 0 };
+    });
+    const ctx = await primed({ fetchMetadata, processCoverage });
+
+    await ctx.store.updateStation(rc01Key);
+    expect(processCoverage).toHaveBeenCalledTimes(1);
+    expect(seen).toEqual(["Skipping Compact: model metadata unavailable. -> process:large-v1"]);
+    expect(ctx.store.feedback).toBe("Finished updating Rabbit Creek.");
+  });
+
+  it("continues past a processCoverage rejection and reports the failure", async () => {
+    const seen: string[] = [];
+    const processCoverage = jest.fn(async ({ metadata }: any) => {
+      if (metadata.id === "compact-v1") throw new Error("boom");
+      seen.push(`${ctx.store.feedback} -> process:${metadata.id}`);
+      return { processed: 0, skipped: 0, total: 0 };
+    });
+    const ctx = await primed({ processCoverage });
+
+    await ctx.store.updateStation(rc01Key);
+    expect(processCoverage).toHaveBeenCalledTimes(2);
+    expect(seen).toEqual(["Update failed for Rabbit Creek — Compact. -> process:large-v1"]);
+    // The failed pair's coverage is still reloaded.
+    expect(ctx.eventService.getUncoveredRanges).toHaveBeenCalledWith(rc01, "compact-v1", expect.anything());
+    expect(ctx.store.feedback).toBe("Finished updating Rabbit Creek.");
+  });
+
+  it("updateAllSelected updates stations sequentially with 'Station i of n' prefixes and a summary", async () => {
+    const seen: string[] = [];
+    const processCoverage = jest.fn(async ({ onProgress }: any) => {
+      onProgress?.(1, 2);
+      seen.push(ctx.store.feedback);
+      return { processed: 2, skipped: 0, total: 2 };
+    });
+    const ctx = await primed({ stations: [rc01, rc02], models: [compact], processCoverage });
+
+    await ctx.store.updateAllSelected();
+    expect(seen).toEqual([
+      "Station 1 of 2 — Rabbit Creek — Compact: day 1 of 2",
+      "Station 2 of 2 — Rabbit Creek 2 — Compact: day 1 of 2",
+    ]);
+    expect(ctx.store.feedback).toBe("Finished updating 2 stations.");
+  });
+
+  it("summary counts failed stations", async () => {
+    const processCoverage = jest.fn(async ({ stationData }: any) => {
+      if (stationData.station === "RC02") throw new Error("boom");
+      return { processed: 0, skipped: 0, total: 0 };
+    });
+    const ctx = await primed({ stations: [rc01, rc02], models: [compact], processCoverage });
+
+    await ctx.store.updateAllSelected();
+    expect(ctx.store.feedback).toBe("Finished updating 2 stations; 1 had failures.");
+  });
+});
+
 it("authReady defaults false and is set by setAuthReady", () => {
   const store = new SeismicAdminStore({ cache: fakeCache() as any });
   expect(store.authReady).toBe(false);
