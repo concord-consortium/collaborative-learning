@@ -28,6 +28,7 @@ const CoverageSection = observer(function CoverageSection({ stationKey, model }:
   const statsMessage = `${coveredDayCount} / ${totalDays} days · ${eventCount} events`;
   const highlightedDays = stationKey ? coveredDays.get(stationKey) : undefined;
   const midDays = stationKey ? partialDays.get(stationKey) : undefined;
+  const coverageState = stationKey ? store.coverageFor(stationKey, model.metadataUrl).state : "loaded";
 
   return (
     <div className="data-section coverage">
@@ -44,7 +45,7 @@ const CoverageSection = observer(function CoverageSection({ stationKey, model }:
             firstDay={firstDay}
             lastDay={lastDay}
           />
-        ) : "Loading..."
+        ) : coverageState === "error" ? "Unable to download coverage" : "Loading..."
       )}
     </div>
   );
