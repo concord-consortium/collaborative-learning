@@ -29,12 +29,13 @@ is not going away, only its duplicate *metadata* is.
 
 ## Current state: two classes of metadata field
 
-The live, editable `DocumentModel` is still built from **RTDB reads + passed-in args**, not from the Firestore
-doc. Its metadata fields fall into two classes:
+The live, editable `DocumentModel` is built mostly from **RTDB reads + passed-in args**. `context_id` is now
+sourced from the Firestore `documents/<key>` doc (this project); every other field still is not. Its metadata
+fields fall into two classes:
 
 | Class | Fields | Source on the live `DocumentModel` today | Reactive today? |
 |---|---|---|---|
-| **Firestore-only, immutable-at-creation** | `context_id` today; future `concurrent`/`kind`/`owner`/`scope`/`access` | not on the model yet — exists only in Firestore | No (never mutates) |
+| **Firestore-only, immutable-at-creation** | `context_id` today; future `concurrent`/`kind`/`owner`/`scope`/`access` | `context_id` sourced from Firestore; the future fields are not on the model yet | No (never mutates) |
 | **Dual-stored, RTDB-sourced on the model** | `visibility`, `title`, `properties`, `groupId` | **RTDB** (initial value + live listeners) | Yes, via RTDB listeners |
 
 For the full per-field detail behind this summary — every stored field, its locations, what updates it,
@@ -49,34 +50,33 @@ value from Firestore while updates still arrive from RTDB would create a split-b
 
 - **A shared, class-scoped `DocumentMetadataStore`** centralizes reads of the `documents` collection (extracted
   from Sort Work's private cache). This is the substrate the next steps build on.
+- **`context_id` is sourced from Firestore on the `DocumentModel`** (as `contextId`), applied at `openDocument`
+  from the `documents/<key>` doc. This is the first field of the Firestore-only class to move, and it
+  establishes the sourcing path so a later Firestore-only field reaches the live model with no RTDB change and
+  no per-site threading.
 
-No `DocumentModel` field changes its source yet: the Firestore-only fields are still absent from the model and
-the dual-stored reactive fields are untouched.
+The dual-stored reactive fields (`visibility`, `title`, `properties`, `groupId`) are untouched — they still
+read their initial value from RTDB and stay live via RTDB listeners.
 
 ## What should happen next
 
-Only the first of these is underway; the rest are unscheduled and the guidance is directional: when working in
-this area, advance these rather than deepening the RTDB-metadata dependency. Together they are what remains
-before RTDB metadata can be removed.
+These are unscheduled and the guidance is directional: when working in this area, advance these rather than
+deepening the RTDB-metadata dependency. Together they are what remains before RTDB metadata can be removed.
 
-1. **Source `context_id` on the `DocumentModel`** (as `contextId`), applied at `openDocument` from the
-   `documents/<key>` doc. This is the first field of the Firestore-only class to move, and it establishes the
-   sourcing path so that a later Firestore-only field reaches the live model with no RTDB change and no
-   per-site threading.
-2. **Source any further Firestore-only fields the same way.** Fields such as `concurrent`, `kind`, `owner`,
+1. **Source any further Firestore-only fields the same way.** Fields such as `concurrent`, `kind`, `owner`,
    `scope`, and `access` have been discussed but do not exist yet — none is written to Firestore or carried on
    the `DocumentModel` today. Whenever one is introduced it should follow the `context_id` path: add it to the
    metadata types and read it at `openDocument`, with no RTDB representation at all.
-3. **Move the dual-stored reactive fields to reactive Firestore reads.** `visibility`, `title`, `properties`,
+2. **Move the dual-stored reactive fields to reactive Firestore reads.** `visibility`, `title`, `properties`,
    `groupId` read their initial value from RTDB and stay live via RTDB listeners. For each: add a reactive
    Firestore read (an `onSnapshot` on `documents/<key>`, hosted on the `DocumentMetadataStore`), switch the
    `DocumentModel` field to read from it, then retire the corresponding RTDB listener and RTDB write.
    `title`/`visibility` are the closest — see the concrete example below.
-4. **Give remote / network documents a Firestore metadata source.** Their metadata currently comes from RTDB via
+3. **Give remote / network documents a Firestore metadata source.** Their metadata currently comes from RTDB via
    the `getNetworkResources` cloud function; the client cannot read another class's Firestore metadata directly,
    but the function can. Moving that function to read Firestore metadata is the biggest structural step and
    removes the last RTDB-metadata reader for remote docs.
-5. **Retire the RTDB metadata.** Once no reader depends on the RTDB metadata envelope / type-specific metadata
+4. **Retire the RTDB metadata.** Once no reader depends on the RTDB metadata envelope / type-specific metadata
    paths, stop writing them and remove them. This is the end state.
 
 ### Concrete example: `title` vs `visibility` (from current code)
@@ -103,8 +103,8 @@ practice:
 | Item | State |
 |---|---|
 | `documents/<key>` is the authoritative metadata store | Done (migration + CLUE-524) |
-| `DocumentMetadataStore` (shared class-scoped read layer) | Done — what this project does now |
-| `context_id` Firestore-sourced on `DocumentModel` | Next — underway |
+| `DocumentMetadataStore` (shared class-scoped read layer) | Done |
+| `context_id` Firestore-sourced on `DocumentModel` | Done |
 | Further Firestore-only fields (`concurrent`, `kind`, …) | Not started — the fields do not exist yet |
 | Dual-stored reactive fields read reactively from Firestore | Next (unscheduled) — start with `title` |
 | Remote/network docs sourced from Firestore metadata | Next (unscheduled) — needs the cloud-function change |

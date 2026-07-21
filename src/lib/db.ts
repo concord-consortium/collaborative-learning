@@ -927,8 +927,8 @@ export class DB {
       const documentRef = this.firebase.ref(documentPath);
       const metadataRef = this.firebase.ref(metadataPath);
 
-      // fetchMetadata throws (with a description of the query it ran) when the Firestore metadata is
-      // missing or invalid; that rejection flows through Promise.all to the catch below.
+      // fetchMetadata throws when the Firestore metadata is missing or invalid; that
+      // rejection flows through Promise.all to the catch below.
       const firestoreMetadataPromise = options.firestoreMetadata
         ? Promise.resolve<IDocumentMetadata>(options.firestoreMetadata)
         : this.stores.documentMetadata.fetchMetadata(documentKey);
