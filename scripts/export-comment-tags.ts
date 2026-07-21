@@ -543,7 +543,7 @@ if (!args.contextIds.length && !args.documentKeys.length) {
 
 const tileTags: Record<string, Set<string>> = {};
 const documentTags: Record<string, Set<string>> = {};
-const tileKeyOf = (row: IPendingRow) => `${row.documentGroupKey} ${row.tileId}`;
+const tileKeyOf = (row: IPendingRow) => `${row.documentGroupKey}\u0000${row.tileId}`;
 
 for (const row of pendingRows) {
   if (!row.tag) continue;  // --include-untagged placeholder
