@@ -79,7 +79,7 @@ export const StationSection = observer(function StationSection({ stationKey }: I
   const isFullyCovered = store.isFullyCovered(stationKey);
   const ReadyIcon = isFullyCovered ? CheckIcon : WarningIcon;
   const readyLabel = isFullyCovered ? "Ready" : "Not Ready!";
-  const updateDisabled = !store.authReady || store.selectedModels.size === 0 || isFullyCovered;
+  const updateDisabled = !store.authReady || store.selectedModels.size === 0 || isFullyCovered || store.isBusy;
   const updateLabel = `Update ${allStations ? "all stations" : "station"}`;
   const update = () => {
     if (allStations) {
@@ -127,8 +127,8 @@ export const StationSection = observer(function StationSection({ stationKey }: I
         </div>
         <div className="station-actions">
           <button disabled={updateDisabled} onClick={update}>{updateLabel}</button>
-          <button disabled={stats.missingCount === 0} onClick={downloadRaw}>{downloadLabel}</button>
-          <button className="danger" onClick={() => setConfirming(true)}>{deleteLabel}</button>
+          <button disabled={stats.missingCount === 0 || store.isBusy} onClick={downloadRaw}>{downloadLabel}</button>
+          <button className="danger" disabled={store.isBusy} onClick={() => setConfirming(true)}>{deleteLabel}</button>
         </div>
       </div>
       {confirming &&

@@ -102,6 +102,8 @@ export class SeismicAdminStore {
   coverage = new Map<string, CoverageStats>();   // keyed by coverageKey(stationKey, modelUrl)
   feedback = "";
   authReady = false;
+  // True while a long-running operation (download/update/delete) is in flight, blocking other actions.
+  isBusy = false;
 
   private cache: AdminCache;
   // True once a selection has been persisted, so refresh() won't re-select everything.
@@ -392,7 +394,22 @@ export class SeismicAdminStore {
     });
   }
 
+  /** Tracks whether a the long-running public operation is underway, blocking additional simultaneous operations. */
+  private async withBusy(operation: () => Promise<void>) {
+    if (this.isBusy) return;
+    this.isBusy = true;
+    try {
+      await operation();
+    } finally {
+      runInAction(() => { this.isBusy = false; });
+    }
+  }
+
   async deleteRaw(key: string) {
+    await this.withBusy(() => this.deleteRawForStation(key));
+  }
+
+  private async deleteRawForStation(key: string) {
     const { firstDay, lastDay } = this;
     const s = this.stations.get(key);
     if (!s || firstDay === undefined || lastDay === undefined) return;
@@ -412,44 +429,54 @@ export class SeismicAdminStore {
   }
 
   async downloadStation(key: string) {
-    const s = this.stations.get(key);
-    if (!s) return;
+    await this.withBusy(async () => {
+      const s = this.stations.get(key);
+      if (!s) return;
 
-    await this.download(s);
-    this.setFeedback(`Finished downloading data for ${stationLabel(s)}.`);
+      await this.download(s);
+      this.setFeedback(`Finished downloading data for ${stationLabel(s)}.`);
+    });
   }
 
   async deleteAllSelected() {
-    for (const key of this.selectedStations) await this.deleteRaw(key);
+    await this.withBusy(async () => {
+      for (const key of this.selectedStations) await this.deleteRawForStation(key);
+    });
   }
 
   async downloadAllSelected() {
-    // Download stations sequentially to ensure shared-proxy limit is respected
-    const stations = this.selectedStationList;
-    for (let i = 0; i < stations.length; i++) {
-      await this.download(stations[i], `Station ${i + 1} of ${stations.length} — `);
-    }
-    this.setFeedback(`Finished downloading data for ${stations.length} station${stations.length === 1 ? "" : "s"}.`);
+    await this.withBusy(async () => {
+      // Download stations sequentially to ensure shared-proxy limit is respected
+      const stations = this.selectedStationList;
+      for (let i = 0; i < stations.length; i++) {
+        await this.download(stations[i], `Station ${i + 1} of ${stations.length} — `);
+      }
+      this.setFeedback(`Finished downloading data for ${stations.length} station${stations.length === 1 ? "" : "s"}.`);
+    });
   }
 
   async updateStation(key: string) {
-    const s = this.stations.get(key);
-    if (!s) return;
-    await this.updateSingleStation(key);
-    this.setFeedback(`Finished updating ${stationLabel(s)}.`);
+    await this.withBusy(async () => {
+      const s = this.stations.get(key);
+      if (!s) return;
+      await this.updateSingleStation(key);
+      this.setFeedback(`Finished updating ${stationLabel(s)}.`);
+    });
   }
 
   async updateAllSelected() {
-    const stationKeys = [...this.selectedStations];
-    let failures = 0;
-    for (let i = 0; i < stationKeys.length; i++) {
-      const ok = await this.updateSingleStation(stationKeys[i], `Station ${i + 1} of ${stationKeys.length} — `);
-      if (!ok) failures++;
-    }
-    const n = stationKeys.length;
-    this.setFeedback(failures
-      ? `Finished updating ${n} station${n === 1 ? "" : "s"}; ${failures} had failures.`
-      : `Finished updating ${n} station${n === 1 ? "" : "s"}.`);
+    await this.withBusy(async () => {
+      const stationKeys = [...this.selectedStations];
+      let failures = 0;
+      for (let i = 0; i < stationKeys.length; i++) {
+        const ok = await this.updateSingleStation(stationKeys[i], `Station ${i + 1} of ${stationKeys.length} — `);
+        if (!ok) failures++;
+      }
+      const n = stationKeys.length;
+      this.setFeedback(failures
+        ? `Finished updating ${n} station${n === 1 ? "" : "s"}; ${failures} had failures.`
+        : `Finished updating ${n} station${n === 1 ? "" : "s"}.`);
+    });
   }
 
   /** Download the whole range, then generate events for each selected model's

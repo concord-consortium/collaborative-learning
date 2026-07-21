@@ -602,6 +602,130 @@ describe("update (event generation)", () => {
   });
 });
 
+describe("busy lockout", () => {
+  const rc01 = { network: "AK", station: "RC01", location: "", channel: "BHZ", label: "Rabbit Creek" };
+  const compact = { label: "Compact", metadataUrl: "https://x/compact.json" };
+  const rc01Key = getStationChannelPrefix(rc01);
+
+  /** A cache with no OPFS stations, so the store's stations come only from deps. */
+  const emptyCache = () => ({
+    listStations: jest.fn(async () => []),
+    scanCachedDays: jest.fn(async () => new Set<number>()),
+    stationRawBytes: jest.fn(async () => 0),
+    deleteDaysInRange: jest.fn(async () => {}),
+  });
+
+  const flush = () => new Promise(resolve => setTimeout(resolve, 0));
+
+  /** A promise the test resolves manually, so an operation can be held in flight. */
+  function deferredRun() {
+    let resolve!: () => void;
+    const promise = new Promise<{ processed: number; skipped: number; total: number }>(res => {
+      resolve = () => res({ processed: 0, skipped: 0, total: 0 });
+    });
+    return { promise, resolve };
+  }
+
+  /** Build, refresh, and authenticate a store, then clear the setup's mock calls. */
+  async function primed(overrides: any = {}) {
+    const deps = {
+      cache: emptyCache() as any,
+      stations: [rc01],
+      models: [compact],
+      eventService: {
+        getUncoveredRanges: jest.fn(async () => [] as Array<{ start: number; end: number }>),
+        loadEvents: jest.fn(async () => [] as any[]),
+      },
+      fetchMetadata: jest.fn(async () => ({ id: "compact-v1" } as any)),
+      downloadStation: jest.fn(async () => {}),
+      processCoverage: jest.fn(async () => ({ processed: 0, skipped: 0, total: 0 })),
+      ...overrides,
+    };
+    const store = new SeismicAdminStore(deps);
+    store.setRange("2026-01-01", "2026-01-03");
+    await store.refresh();
+    store.setAuthReady();
+    await flush();
+    jest.clearAllMocks();
+    return { store, ...deps };
+  }
+
+  it("is busy exactly while an update is in flight, and clears after success", async () => {
+    const gate = deferredRun();
+    const processCoverage = jest.fn(() => gate.promise);
+    const ctx = await primed({ processCoverage });
+
+    expect(ctx.store.isBusy).toBe(false);
+    const update = ctx.store.updateStation(rc01Key);
+    expect(ctx.store.isBusy).toBe(true);
+    gate.resolve();
+    await update;
+    expect(ctx.store.isBusy).toBe(false);
+  });
+
+  it("clears busy after a failed operation", async () => {
+    const downloadStation = jest.fn(async () => { throw new Error("boom"); });
+    const ctx = await primed({ downloadStation });
+
+    await expect(ctx.store.downloadStation(rc01Key)).rejects.toThrow("boom");
+    expect(ctx.store.isBusy).toBe(false);
+  });
+
+  it("ignores a second update while one is already running", async () => {
+    const gate = deferredRun();
+    const processCoverage = jest.fn(() => gate.promise);
+    const ctx = await primed({ processCoverage });
+
+    const first = ctx.store.updateStation(rc01Key);
+    await flush();   // let the first update reach its model run
+    const second = ctx.store.updateStation(rc01Key);
+    gate.resolve();
+    await Promise.all([first, second]);
+
+    expect(processCoverage).toHaveBeenCalledTimes(1);
+    expect(ctx.downloadStation).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores a download while an update is running", async () => {
+    const gate = deferredRun();
+    const processCoverage = jest.fn(() => gate.promise);
+    const ctx = await primed({ processCoverage });
+
+    const update = ctx.store.updateStation(rc01Key);
+    await flush();   // the update's own internal download has already run
+    const download = ctx.store.downloadStation(rc01Key);
+    gate.resolve();
+    await Promise.all([update, download]);
+
+    // Only the update's internal download ran; the second entry point was a no-op.
+    expect(ctx.downloadStation).toHaveBeenCalledTimes(1);
+    expect(ctx.store.feedback).toBe("Finished updating Rabbit Creek.");
+  });
+
+  it("ignores an update while a download is running", async () => {
+    let finishDownload!: () => void;
+    const downloadStation = jest.fn(() => new Promise<void>(res => { finishDownload = res; }));
+    const ctx = await primed({ downloadStation });
+
+    const download = ctx.store.downloadStation(rc01Key);
+    const update = ctx.store.updateStation(rc01Key);
+    finishDownload();
+    await Promise.all([download, update]);
+
+    expect(ctx.processCoverage).not.toHaveBeenCalled();
+    expect(ctx.store.feedback).toBe("Finished downloading data for Rabbit Creek.");
+  });
+
+  it("deleteAllSelected still deletes every selected station under the guard", async () => {
+    const cache = emptyCache();
+    const ctx = await primed({ cache: cache as any });
+
+    await ctx.store.deleteAllSelected();
+    expect(cache.deleteDaysInRange).toHaveBeenCalledTimes(1);
+    expect(ctx.store.isBusy).toBe(false);
+  });
+});
+
 it("authReady defaults false and is set by setAuthReady", () => {
   const store = new SeismicAdminStore({ cache: fakeCache() as any });
   expect(store.authReady).toBe(false);
