@@ -64,9 +64,14 @@ With the store in place:
 
 1. `OpenDocumentOptions` gains an optional `firestoreMetadata?: IDocumentMetadata`.
 2. `openDocument` resolves it: `options.firestoreMetadata ?? await store.fetchMetadata(documentKey)`.
-3. **If absent → throw** — `openDocument` throws (and its `.catch` rejects the promise), consistent with
-   how it already throws when the RTDB metadata envelope is absent. The document is not opened and the failure
-   is logged; there is no `createErrorDocument` for this path (that helper handles content-parse errors only).
+3. **If absent or invalid → throw, from the store.** `fetchMetadata` (the store's point read) throws when
+   there is no such document or it fails validation, and the error describes the query it ran — the collection
+   path (which includes the space, so demo vs production is visible), `context_id`, and `key` — so callers
+   don't reconstruct where we looked. `openDocument` no longer checks for absence itself; it lets that
+   rejection flow through `Promise.all` to its `.catch`, consistent with how it already rejects when the RTDB
+   metadata envelope is absent. The callers (mostly DB listeners) don't handle the rejection, so it surfaces as
+   an unhandled promise rejection that Rollbar captures with a stack trace. There is no `createErrorDocument`
+   for this path (that helper handles content-parse errors only).
 4. Apply **only the axis fields** (`concurrent`, `kind`, …) from the Firestore doc to the model snapshot. RTDB
    content and all reactive fields (§2) are built exactly as today.
 
@@ -88,12 +93,14 @@ directly and **do not traverse `openDocument`**, so they are unaffected.
 
 The Aug–Sep 2025 metadata migration ([firestore-migration.md](../../document-metadata/firestore-migration.md))
 documents real hazards in legacy docs: conflicting `context_id` (≈13 cases), merged/duplicate history, and
-`tools` drift. A missing doc causes `openDocument` to throw and reject the promise — consistent with the existing
-missing-RTDB-metadata handling — so the document is not opened and the failure is logged (key + reason) rather
-than silently constructing a model from wrong data. This is safe because all creation paths write the Firestore
-metadata doc, so the throw path should not occur for migrated or new docs. For hazardous-but-present docs, this
-PR reads only the axis fields, which the migration did not corrupt; the store's point read scopes every query by
-`context_id == classHash`, so cross-class conflicts are excluded at query time rather than per-open.
+`tools` drift. A missing or invalid doc causes the store's `fetchMetadata` to throw and reject the promise —
+consistent with the existing missing-RTDB-metadata handling — so the document is not opened and the rejection
+surfaces to Rollbar (unhandled-rejection capture, with the query that was run: collection path, `context_id`,
+`key`) rather than silently constructing a model from wrong data. This is safe because all creation paths write
+the Firestore metadata doc, so the throw path should not occur for migrated or new docs. For
+hazardous-but-present docs, this PR reads only the axis fields, which the migration did not corrupt; the store's
+point read scopes every query by `context_id == classHash`, so cross-class conflicts are excluded at query time
+rather than per-open.
 
 ## 5. Sequencing & testing
 
@@ -103,8 +110,9 @@ PR reads only the axis fields, which the migration did not corrupt; the store's 
   getter (e.g. from a `kind`/`type` registry) can instead become a **stored prop** populated from the Firestore
   doc at open. Until then, such a getter is a valid bridge; this PR does not require that conversion.
 - **Testing:** `openDocument` populates axis fields from Firestore for both the pass-in and store-fetch paths;
-  throws and rejects (promise rejected, failure logged) when the doc is missing; reactive fields (`visibility`,
-  `title`, `content`) still update via their RTDB listeners after open; the four listener paths populate axes.
+  the store's point read throws (describing its query) when the doc is missing or fails validation, and
+  `openDocument` propagates that rejection; reactive fields (`visibility`, `title`, `content`) still update via
+  their RTDB listeners after open; the four listener paths populate axes.
 
 ## 6. Open items
 

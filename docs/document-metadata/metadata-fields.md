@@ -119,6 +119,11 @@ each other's documents, so teacher documents must keep writing it or that cross-
 breaks. Student and group documents have no network, so the field is null for them. It is absent from
 `IDocumentMetadata` and is bolted on via an intersection type at the write site.
 
+Because it is undeclared, `network` reaches `DocumentMetadataStore`'s `typecheck(DocumentMetadataModel,
+data)` unfiltered — but MST's `typecheck` ignores properties the model does not declare, so the metadata
+still validates and is not dropped. That behavior is pinned by the `typecheck` tests in
+[mst.test.ts](../../src/models/mst.test.ts).
+
 Storing the network this way is not good. A teacher can belong to multiple networks or switch networks, so
 a value frozen at creation time can later be wrong. The network association really belongs to the user (or
 the class/offering), not to each individual document. This hasn't been reworked yet; until it is, new code
@@ -572,8 +577,6 @@ person to work in this area sees them; none has been changed.
 
 ## Not verified
 
-- Whether MST's `typecheck` rejects Firestore documents carrying the undeclared `network` key, which does
-  reach it unfiltered. Worth confirming before relying on the validation behavior.
 - Whether cloud functions write Firestore fields for publications that the client does not — only client
   code and `shared/` were audited in depth.
 - Whether the `groupUserConnections` drop is a deliberate deprecation or a regression.

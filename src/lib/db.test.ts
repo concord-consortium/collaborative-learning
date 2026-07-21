@@ -537,12 +537,16 @@ describe("db", () => {
       expect(doc.contextId).toBe("class-9");
     });
 
-    it("rejects when no Firestore metadata is available", async () => {
+    it("propagates the rejection when the Firestore metadata fetch fails", async () => {
       stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
-      jest.spyOn(stores.documentMetadata, "fetchMetadata").mockResolvedValue(undefined);
+      // fetchMetadata now throws (describing its query) rather than returning undefined; openDocument
+      // lets that rejection flow through Promise.all to its catch. The message content is covered by
+      // the document-metadata-store tests; here we only assert the rejection propagates.
+      jest.spyOn(stores.documentMetadata, "fetchMetadata")
+        .mockRejectedValue(new Error("No Firestore metadata document found: queried 'x' where key == 'd3'"));
       await expect(
         db.openDocument({ documentKey: "d3", type: "problem", userId: "u1" } as any)
-      ).rejects.toThrow(/Firestore metadata/);
+      ).rejects.toThrow(/No Firestore metadata document found/);
     });
 
     it("a listener builder populates contextId via the store fetch", async () => {
