@@ -739,7 +739,12 @@ service cloud.firestore {
                      && request.resource.data.station == station
                      && request.resource.data.location == location
                      && request.resource.data.channel == channel
-                     && request.resource.data.model == model;
+                     && request.resource.data.model == model
+                     && request.resource.data.windowStart is timestamp
+                     && request.resource.data.windowEnd is timestamp
+                     && request.resource.data.eventType is string
+                     && request.resource.data.confidence is number
+                     && request.resource.data.createdAt is timestamp;
       }
 
       match /coverage/{chunkId} {
