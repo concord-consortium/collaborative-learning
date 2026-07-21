@@ -25,7 +25,7 @@ export interface IDocumentMetadataStoreStores {
 export class DocumentMetadataStore {
   stores: IDocumentMetadataStoreStores;
 
-  private inFlightPointReads = new Map<string, Promise<IDocumentMetadata | undefined>>();
+  private inFlightPointReads = new Map<string, Promise<IDocumentMetadata>>();
 
   constructor(stores: IDocumentMetadataStoreStores) {
     makeAutoObservable<DocumentMetadataStore, "inFlightPointReads">(this, { inFlightPointReads: false });
@@ -132,12 +132,13 @@ export class DocumentMetadataStore {
   }
 
   /**
-   * Validated point read of a single document's metadata, scoped to the user's class. Returns
-   * undefined if there is no such document or it fails validation. Concurrent reads for the same
-   * key share one query. Results are not cached here because the Firestore SDK is already caching
-   * the documents locally.
+   * Validated point read of a single document's metadata, scoped to the user's class. Throws if
+   * there is no such document or it fails validation; the error describes the query that was run
+   * (collection path, context_id, key) so a developer can understand why it was rejected.
+   * Concurrent reads for the same key share one query. Results are not cached here because the
+   * Firestore SDK is already caching the documents locally.
    */
-  fetchMetadata(key: string): Promise<IDocumentMetadata | undefined> {
+  fetchMetadata(key: string): Promise<IDocumentMetadata> {
     const inFlight = this.inFlightPointReads.get(key);
     if (inFlight) return inFlight;
 
@@ -147,16 +148,28 @@ export class DocumentMetadataStore {
     return promise;
   }
 
-  private async pointReadMetadata(key: string): Promise<IDocumentMetadata | undefined> {
+  private async pointReadMetadata(key: string): Promise<IDocumentMetadata> {
     const converter = typeConverter<IDocumentMetadata>();
+    const classHash = this.stores.user.classHash;
     // The context_id is required so the security rules know we aren't trying to get
     // documents we don't have access to.
-    const query = this.stores.db.firestore.collection("documents")
+    const documentsCollection = this.stores.db.firestore.collection("documents");
+    const query = documentsCollection
       .withConverter(converter)
-      .where("context_id", "==", this.stores.user.classHash)
+      .where("context_id", "==", classHash)
       .where("key", "==", key);
     const snapshot = await query.get();
-    if (snapshot.empty) return undefined;
-    return this.metadataFromFirestoreData(snapshot.docs[0].data());
+    // Describe the query, not a single doc path: the read is a collection query on context_id + key
+    // (not a get() at documents/{key}), so this is where we actually looked. The collection path
+    // includes the space (e.g. demo/... vs authed/...), which distinguishes demo from production.
+    const where = `'${documentsCollection.path}' where context_id == '${classHash}' and key == '${key}'`;
+    if (snapshot.empty) {
+      throw new Error(`No Firestore metadata document found: queried ${where}`);
+    }
+    const metadata = this.metadataFromFirestoreData(snapshot.docs[0].data());
+    if (!metadata) {
+      throw new Error(`Firestore metadata document failed validation (see logged typecheck error): found by ${where}`);
+    }
+    return metadata;
   }
 }

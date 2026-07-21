@@ -16,6 +16,8 @@ function makeFakeDb(docsByKey: Record<string, any>) {
     );
   });
   const query = {
+    // The store reads collection().path to describe where it looked in its not-found error.
+    path: "test-space/documents",
     withConverter: () => query,
     where: (field: string, _op: string, value: any) => {
       if (field === "key") requestedKey = value;
@@ -70,27 +72,28 @@ describe("DocumentMetadataStore", () => {
       expect(getRequestedContextId()).toBe("class-1");
     });
 
-    it("returns undefined when the query is empty", async () => {
+    it("throws describing the query when the result is empty", async () => {
       const { store } = makeStore({});
-      expect(await store.fetchMetadata("nope")).toBeUndefined();
+      // The error names the collection path (which carries the space) and the key it looked for.
+      await expect(store.fetchMetadata("nope"))
+        .rejects.toThrow(/No Firestore metadata document found.*test-space\/documents.*key == 'nope'/);
     });
 
-    it("returns undefined for a doc in another class (context_id mismatch)", async () => {
+    it("throws for a doc in another class (context_id mismatch)", async () => {
       const { store } = makeStore({
         "doc-x": { uid: "u1", type: "problem", key: "doc-x", context_id: "other-class" }
       });
-      expect(await store.fetchMetadata("doc-x")).toBeUndefined();
+      await expect(store.fetchMetadata("doc-x")).rejects.toThrow(/No Firestore metadata document found/);
     });
 
-    it("returns undefined when the point-read doc fails typecheck (fail-fast)", async () => {
+    it("throws when the point-read doc fails typecheck (fail-fast)", async () => {
       // Missing the required `uid` field -> DocumentMetadataModel typecheck fails.
       const { store, getSpy } = makeStore({
         "bad-1": { type: "problem", key: "bad-1", context_id: "class-1" }
       });
       const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
-      const result = await store.fetchMetadata("bad-1");
-      expect(result).toBeUndefined();
-      // The query still ran; validation (not absence) is what dropped the doc.
+      await expect(store.fetchMetadata("bad-1")).rejects.toThrow(/failed validation/);
+      // The query still ran; validation (not absence) is what rejected the doc.
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(consoleErrorSpy).toHaveBeenCalled();
       consoleErrorSpy.mockRestore();
