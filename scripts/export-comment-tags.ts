@@ -59,6 +59,9 @@
 //   sorted, de-duplicated unions of the tags on that tile/document. The
 //   document-level union is the same value CLUE itself maintains as the
 //   document's `strategies` field (functions-v2/src/on-document-tagged.ts).
+//   `all_tile_tags` is blank for document-level comments (those with no
+//   tileId), which have no tile to aggregate; `all_document_tags` still counts
+//   their tags.
 //
 //   Those unions are computed from the rows in THIS export, so grouping the CSV
 //   by tile/document reproduces them exactly. When --start-date/--end-date/
@@ -547,7 +550,11 @@ const tileKeyOf = (row: IPendingRow) => `${row.documentGroupKey}\u0000${row.tile
 
 for (const row of pendingRows) {
   if (!row.tag) continue;  // --include-untagged placeholder
-  (tileTags[tileKeyOf(row)] ??= new Set()).add(row.tag);
+  // Only tile-attached comments contribute to a tile union. Document-level
+  // comments (empty tileId) would otherwise all collapse into one bucket per
+  // document, making all_tile_tags a union of unrelated comments; they are
+  // still covered by all_document_tags below.
+  if (row.tileId) (tileTags[tileKeyOf(row)] ??= new Set()).add(row.tag);
   (documentTags[row.documentGroupKey] ??= new Set()).add(row.tag);
 }
 
@@ -559,7 +566,7 @@ const rows = pendingRows.map(row => [
   ...row.baseRow,
   row.tag,
   tagLabels[row.tag] ?? "",
-  joinTags(tileTags[tileKeyOf(row)]),
+  row.tileId ? joinTags(tileTags[tileKeyOf(row)]) : "",
   joinTags(documentTags[row.documentGroupKey]),
   ...row.contentColumns
 ]);
