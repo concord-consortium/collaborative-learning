@@ -1,8 +1,9 @@
 import { ToggleGroup } from "@concord-consortium/react-components";
 import { observer } from "mobx-react";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { IBaseProps } from "../../components/base";
+import { ChatTutorSidebar } from "../../components/chat-tutor/chat-sidebar";
 import { ClassMenuContainer } from "../../components/class-menu-container";
 import { GroupManagementModal } from "../../components/group/group-management-modal";
 import { NetworkStatus } from "../../components/network-status";
@@ -10,9 +11,11 @@ import { ProblemMenuContainer } from "../../components/problem-menu-container";
 import { StudentMenuContainer } from "../../components/student-menu-container";
 import { useClueAccessibility } from "../../hooks/use-clue-accessibility";
 import { useStores } from "../../hooks/use-stores";
+import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
+import { urlParams } from "../../utilities/url-params";
 import AppModeIndicator from "./app-mode-indicator";
 import { CustomSelect } from "./custom-select";
 
@@ -30,11 +33,40 @@ interface IProps extends IBaseProps {
 
 export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAppHeaderComponent(props) {
   const { showGroup } = props;
-  const { appConfig, appMode, appVersion, db, user, groups, investigation, ui, unit, problem } = useStores();
+  const {
+    appConfig, appMode, appVersion, db, user, groups, investigation, ui, unit, problem,
+    persistentUI, documents, problemPath
+  } = useStores();
   const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
   const [isGroupManagementModalOpen, setIsGroupManagementModalOpen] = useState(false);
   const [isStudentGroupModalOpen, setIsStudentGroupModalOpen] = useState(false);
+  // Drawer open state lives in the ui store (not local useState) so the workspace layout
+  // can reserve space for the drawer and bump its content over instead of being overlaid.
+  const isChatTutorOpen = ui.showChatTutor;
   const headerRef = useRef<HTMLElement>(null);
+  const chatTutorLauncherRef = useRef<HTMLButtonElement>(null);
+
+  // Read during render (the header is an observer) so the launcher appears/disappears
+  // and the conversation re-keys when the student switches or closes documents. The
+  // gate requires loaded content, not just a restored key: DocumentModel.content is
+  // types.maybe and the workspace summarizer throws on undefined content.
+  const chatTutorDocumentKey = persistentUI.problemWorkspace.primaryDocumentKey;
+  const chatTutorDocument = chatTutorDocumentKey ? documents.getDocument(chatTutorDocumentKey) : undefined;
+  const showChatTutorLauncher =
+    !!urlParams.chatTutor && user.isStudent && !!chatTutorDocumentKey && !!chatTutorDocument?.content;
+
+  const handleCloseChatTutor = useCallback(() => {
+    ui.setShowChatTutor(false);
+    chatTutorLauncherRef.current?.focus();
+  }, [ui]);
+
+  // Don't leave the drawer flagged open after its document goes away, or it would
+  // pop back open unrequested when a document loads again.
+  useEffect(() => {
+    if (!showChatTutorLauncher) {
+      ui.setShowChatTutor(false);
+    }
+  }, [showChatTutorLauncher, ui]);
 
   useClueAccessibility({
     type: "region",
@@ -198,6 +230,40 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     );
   };
 
+  const renderChatTutorLauncher = () => {
+    if (!showChatTutorLauncher) return null;
+    return (
+      <button
+        type="button"
+        ref={chatTutorLauncherRef}
+        className="chat-tutor-launcher"
+        aria-expanded={isChatTutorOpen}
+        aria-controls="chat-tutor-sidebar"
+        onClick={() => ui.setShowChatTutor(!isChatTutorOpen)}
+        data-testid="chat-tutor-launcher"
+      >
+        <span className="chat-tutor-launcher-icon" aria-hidden="true">💬</span>
+        <span>Tutor</span>
+      </button>
+    );
+  };
+
+  const renderChatTutorSidebar = () => {
+    if (!isChatTutorOpen || !showChatTutorLauncher || !chatTutorDocumentKey || !chatTutorDocument?.content) {
+      return null;
+    }
+    return (
+      <ChatTutorSidebar
+        documentKey={chatTutorDocumentKey}
+        documentTitle={getDocumentDisplayTitle(unit, chatTutorDocument, appConfig) || problem.title}
+        problemPath={problemPath}
+        problem={problem}
+        content={chatTutorDocument.content}
+        onClose={handleCloseChatTutor}
+      />
+    );
+  };
+
   const renderNonStudentHeader = ({showProblemMenu}: {showProblemMenu: boolean}) => {
     return (
       <header ref={headerRef} className="app-header" aria-label="CLUE Header">
@@ -281,6 +347,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const showUnitInfo = unit.title !== "Null Unit";
 
   return (
+    <>
       <header ref={headerRef} className="app-header" aria-label="CLUE Header">
         <div className="left">
           {showUnitInfo &&
@@ -302,6 +369,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {renderPanelButtons()}
         </div>
         <div className="right">
+          {renderChatTutorLauncher()}
           {showAppMode && <AppModeIndicator appMode={appMode}/>}
           <div className="network-status-and-version">
             <NetworkStatus user={user}/>
@@ -325,5 +393,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           />
         </div>
       </header>
-    );
+      {renderChatTutorSidebar()}
+    </>
+  );
 });

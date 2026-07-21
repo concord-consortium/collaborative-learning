@@ -377,6 +377,10 @@ $annotation-blue-very-transparent: rgba(21, 0, 255, 0.125);
 $header-height: 55px;
 $tab-section-border-width: 2px;
 
+// Width of the AI chat tutor drawer. Shared so the workspace can reserve the same
+// amount of space it occupies (see clue-app-content.scss) instead of being overlaid.
+$chat-tutor-width: 310px;
+
 $nav-expanded-peek: 12px;
 $half-nav-expanded-peek: 4px;
 $double-nav-expanded-peek: $nav-expanded-peek * 2;
