@@ -77,9 +77,11 @@ filtered consumer appears (see "Deferred store evolution").
   apply exemplar enrichment when the key matches an authored exemplar.
 - `getMSTSnapshotFromFBSnapshot(snapshot)` — thin batch wrapper over `metadataFromFirestoreData`, used by each
   consumer's reactive watch to build a `DocumentMetadataModel` map (invalid docs omitted).
-- `fetchMetadata(key): Promise<IDocumentMetadata | undefined>` — a **validated point read** routed through
-  `metadataFromFirestoreData`. Concurrent reads for the same key are **coalesced** into one query; there is **no
-  permanent result cache** (the Firestore SDK caches locally).
+- `fetchMetadata(key): Promise<IDocumentMetadata>` — a **validated point read** routed through
+  `metadataFromFirestoreData`. It **throws** when the document is missing or fails validation; the error
+  describes the query that was run (collection path — which includes the space — plus `context_id` and `key`).
+  Concurrent reads for the same key are **coalesced** into one query; there is **no permanent result cache** (the
+  Firestore SDK caches locally).
 
 The filtered watch state (`metadataDocsFiltered` / `metadataDocsWithoutUnit`, `docsReceived`,
 `watchFirestoreMetaDataDocs`, and the merged `firestoreMetadataDocs` view) lives on `SortedDocuments`, whose
@@ -89,13 +91,16 @@ maps.
 ### Validate-everywhere / fail-fast
 
 Because **every** path runs through `metadataFromFirestoreData`, nothing ever surfaces raw or possibly-corrupt
-metadata: an invalid `documents/<key>` doc is logged and treated as absent. Consequences (intended):
+metadata: an invalid `documents/<key>` doc is logged (`console.error`) and never returned. The two paths differ
+in how they report absence/invalidity: the **batch** transform (Sort Work's reactive watch) omits the doc from
+its map, while the **point read** (`fetchMetadata`) throws a query-describing error. Consequences (intended):
 
-- **`db.findFirestoreMetadata` callers** (canonical/pointer resolution, `document-workspace.tsx`): get
-  `undefined` for an invalid doc where they would previously have gotten malformed data. These call sites
-  already handle the not-found `undefined` case.
+- **`db.findFirestoreMetadata` callers** (canonical/pointer resolution, `document-workspace.tsx`): a missing or
+  invalid doc now **throws** (`findFirestoreMetadata` delegates to `fetchMetadata`) where they would previously
+  have gotten malformed data. The canonical/pointer resolution lets that rejection propagate;
+  `document-workspace.tsx` already wraps the call in `try/catch`.
 - The follow-on `openDocument` sourcing (roadmap) inherits the same guarantee: a missing or invalid metadata doc
-  is treated as absent and never built into a `DocumentModel`.
+  makes the fetch reject, so the document is never built into a `DocumentModel` from wrong data.
 
 ### How much Sort Work loads, and why the store is not a bulk cache
 
@@ -143,9 +148,10 @@ multi-class teacher analytics `queryUserDocs` (a different, cross-class scope). 
 
 ## 5. Testing
 
-Store unit tests: `fetchMetadata` returns a validated point read; `undefined` on an empty query; `undefined`
-when the doc fails `typecheck` (fail-fast); concurrent-read coalescing; exemplar enrichment via the shared
-transform; and the batch transform dropping just the invalid doc while keeping the valid ones. Sort Work behavior
+Store unit tests: `fetchMetadata` returns a validated point read; **throws** (with a query-describing error) on
+an empty query; **throws** when the doc fails `typecheck` (fail-fast); concurrent-read coalescing; exemplar
+enrichment via the shared transform; and the batch transform dropping just the invalid doc while keeping the
+valid ones. Sort Work behavior
 parity (titles / visibility / sort / exemplar display unchanged).
 
 ## 6. Open items
