@@ -693,8 +693,11 @@ export class DB {
     return this.createOtherDocument(PersonalDocument, params);
   }
 
-  public async findFirestoreMetadata(documentKey: string) {
-    return this.stores.documentMetadata.fetchMetadata(documentKey);
+  public async findFirestoreMetadata(documentKey: string): Promise<IDocumentMetadata | undefined> {
+    // fetchMetadata throws when the document is missing or invalid; catch that so findFirestoreMetadata
+    // keeps its "undefined when absent" contract, which openCanonicalDocumentByKey and document-workspace
+    // handle. Callers that want the strict error can call fetchMetadata directly.
+    return this.stores.documentMetadata.fetchMetadata(documentKey).catch(() => undefined);
   }
 
   public async getOrCreateGroupDocument() {

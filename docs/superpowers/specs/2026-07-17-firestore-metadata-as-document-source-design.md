@@ -95,12 +95,12 @@ metadata: an invalid `documents/<key>` doc is logged (`console.error`) and never
 in how they report absence/invalidity: the **batch** transform (Sort Work's reactive watch) omits the doc from
 its map, while the **point read** (`fetchMetadata`) throws a query-describing error. Consequences (intended):
 
-- **`db.findFirestoreMetadata` callers** (canonical/pointer resolution, `document-workspace.tsx`): a missing or
-  invalid doc now **throws** (`findFirestoreMetadata` delegates to `fetchMetadata`) where they would previously
-  have gotten malformed data. The canonical/pointer resolution lets that rejection propagate;
-  `document-workspace.tsx` already wraps the call in `try/catch`.
-- The follow-on `openDocument` sourcing (roadmap) inherits the same guarantee: a missing or invalid metadata doc
-  makes the fetch reject, so the document is never built into a `DocumentModel` from wrong data.
+- **`db.findFirestoreMetadata`** wraps the point read in `.catch(() => undefined)`, so it keeps its existing
+  "undefined when absent" contract — this extraction is **behavior-preserving** for its callers
+  (`openCanonicalDocumentByKey`, `document-workspace.tsx`), which already handle the not-found `undefined` case.
+  They no longer get raw, possibly-corrupt data (the doc is validated first), but the not-found signal is
+  unchanged. The next PR (`openDocument` sourcing) removes that catch to surface the throw where it is required.
+- Callers that want the strict error today can call `DocumentMetadataStore.fetchMetadata` directly.
 
 ### How much Sort Work loads, and why the store is not a bulk cache
 
