@@ -141,6 +141,56 @@ describe("processUncoveredRanges", () => {
     expect(result).toEqual({ processed: 1, skipped: 2, total: 3 });
   });
 
+  it("notifies onDayCovered for processed and empty days but never errored days", async () => {
+    // Feb 1 has data, Feb 2 is empty, Feb 3 errors
+    const fakeService = makeFakeDownloadService([feb1Day]);
+    fakeService.emptyDays.push(feb1Day + 1);
+    fakeService.erroredDays.push(feb1Day + 2);
+    const onDayCovered = jest.fn();
+    await processUncoveredRanges({
+      ...makeOptions(fakeService),
+      uncovered: [threeDayRange],
+      onDayCovered,
+    });
+
+    expect(onDayCovered.mock.calls.map(c => c[0]).sort()).toEqual([feb1Day, feb1Day + 1]);
+  });
+
+  it("does not notify onDayCovered when marking coverage fails", async () => {
+    (markCovered as jest.Mock).mockRejectedValueOnce(new Error("offline"));
+    const fakeService = makeFakeDownloadService([feb1Day]);
+    const onDayCovered = jest.fn();
+    const result = await processUncoveredRanges({
+      ...makeOptions(fakeService),
+      uncovered: [{ start: feb1Sec, end: feb1Sec + SECONDS_PER_DAY }],
+      onDayCovered,
+    });
+
+    expect(onDayCovered).not.toHaveBeenCalled();
+    // Persistence is best-effort: the run itself still succeeds.
+    expect(result).toEqual({ processed: 1, skipped: 0, total: 1 });
+  });
+
+  it("does not notify onDayCovered when writing events fails", async () => {
+    (writeEvents as jest.Mock).mockRejectedValueOnce(new Error("offline"));
+    const fakeService = makeFakeDownloadService([feb1Day]);
+    const runner = makeFakeModelRunner();
+    runner.processChunk.mockImplementation(async (_seismogram: any, callbacks: any) => {
+      callbacks.onEvents([makeEvent(Date.UTC(2026, 1, 1, 1))]);
+      return [];
+    });
+    const onDayCovered = jest.fn();
+    await processUncoveredRanges({
+      ...makeOptions(fakeService, runner),
+      uncovered: [{ start: feb1Sec, end: feb1Sec + SECONDS_PER_DAY }],
+      onDayCovered,
+    });
+
+    expect(onDayCovered).not.toHaveBeenCalled();
+    // A failed event write must not be hidden behind an already-covered day.
+    expect(markCovered).not.toHaveBeenCalled();
+  });
+
   it("never calls getUncoveredRanges when uncovered ranges are provided", async () => {
     const fakeService = makeFakeDownloadService([feb1Day]);
     await processUncoveredRanges({

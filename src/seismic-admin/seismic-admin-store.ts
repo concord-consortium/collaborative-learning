@@ -394,7 +394,8 @@ export class SeismicAdminStore {
     });
   }
 
-  /** Tracks whether a the long-running public operation is underway, blocking additional simultaneous operations. */
+  /** Tracks whether a the long-running public operation is underway,
+   * blocking additional simultaneous operations via the gui. */
   private async withBusy(operation: () => Promise<void>) {
     if (this.isBusy) return;
     this.isBusy = true;
@@ -505,6 +506,7 @@ export class SeismicAdminStore {
           stationData, metadata, range,
           onProgress: (progress, total) => this.setFeedback(
             `${prefix}${stationLabel(stationData)} — ${label}: day ${progress} of ${total}`),
+          onDayCovered: day => this.markDayCovered(key, url, day),
         });
       } catch (err) {
         console.warn("Update failed:", err);
@@ -514,6 +516,15 @@ export class SeismicAdminStore {
       await this.loadCoverageStats(stationData, url);
     }
     return ok;
+  }
+
+  /** Fold a freshly-covered day into a pair's coverage stats so its timeline fills in live.
+   *  Ignored unless that pair's coverage is already loaded — the post-model reload
+   *  reconciles, and an unloaded pair must not have an entry synthesized for it. */
+  markDayCovered(stationKey: string, modelUrl: string, day: number) {
+    const stats = this.coverage.get(coverageKey(stationKey, modelUrl));
+    if (stats?.state !== "loaded" || !stats.dayStates) return;
+    stats.dayStates.set(day, "covered");
   }
 
   /** Fold a freshly-downloaded day into a station's stats so its timeline fills in live. */

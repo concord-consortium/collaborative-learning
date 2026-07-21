@@ -590,6 +590,52 @@ describe("update (event generation)", () => {
     expect(ctx.store.feedback).toBe("Finished updating 2 stations.");
   });
 
+  it("fills a pair's coverage live as onDayCovered fires, then reconciles with a reload", async () => {
+    const day1Sec = utcDay(2026, 1, 1)!;
+    const day1 = dayIndex(day1Sec);
+    // Day 1 starts uncovered so the live fill is observable.
+    const eventService = {
+      getUncoveredRanges: jest.fn(async () => [{ start: day1Sec, end: day1Sec + SECONDS_PER_DAY }]),
+      loadEvents: jest.fn(async () => [] as any[]),
+    };
+    const midRun: Array<string | undefined> = [];
+    const processCoverage = jest.fn(async ({ onDayCovered }: any) => {
+      onDayCovered(day1);
+      await flush();   // the timeline must reflect the day before the model run resolves
+      midRun.push(ctx.store.coverage.get(coverageKey(rc01Key, compact.metadataUrl))?.dayStates?.get(day1));
+      return { processed: 1, skipped: 0, total: 1 };
+    });
+    const ctx = await primed({ models: [compact], eventService, processCoverage });
+    expect(ctx.store.coverage.get(coverageKey(rc01Key, compact.metadataUrl))?.dayStates?.get(day1))
+      .toBe("uncovered");
+
+    await ctx.store.updateStation(rc01Key);
+    expect(midRun).toEqual(["covered"]);
+    // The post-model reconciliation reload still happens.
+    expect(eventService.getUncoveredRanges).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores onDayCovered for a pair whose coverage isn't loaded", async () => {
+    const day1 = dayIndex(utcDay(2026, 1, 1)!);
+    // Coverage loads fail, so the pair's entry is in the error state throughout.
+    const eventService = {
+      getUncoveredRanges: jest.fn(async () => { throw new Error("offline"); }),
+      loadEvents: jest.fn(async () => [] as any[]),
+    };
+    const callbackTypes: string[] = [];
+    const processCoverage = jest.fn(async ({ onDayCovered }: any) => {
+      callbackTypes.push(typeof onDayCovered);
+      onDayCovered(day1);
+      return { processed: 1, skipped: 0, total: 1 };
+    });
+    const ctx = await primed({ models: [compact], eventService, processCoverage });
+
+    await ctx.store.updateStation(rc01Key);
+    expect(callbackTypes).toEqual(["function"]);
+    // No dayStates were synthesized for the unloaded pair.
+    expect(ctx.store.coverage.get(coverageKey(rc01Key, compact.metadataUrl))).toEqual({ state: "error" });
+  });
+
   it("summary counts failed stations", async () => {
     const processCoverage = jest.fn(async ({ stationData }: any) => {
       if (stationData.station === "RC02") throw new Error("boom");

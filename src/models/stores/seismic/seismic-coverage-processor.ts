@@ -26,6 +26,9 @@ export interface ProcessCoverageOptions {
   uncovered?: TimeRange[];
   onEvents?: (events: SeismicEvent[]) => void;
   onProgress?: (progress: number, total: number) => void;
+  /** Fires after a day's events + coverage are persisted; empty days included,
+   *  errored days and failed persists excluded. */
+  onDayCovered?: (day: number) => void;
   /** Test seams; production defaults construct real ones. */
   downloadService?: CoverageDownloadService;
   createRunner?: () => SeismicModelRunner;
@@ -35,14 +38,18 @@ export interface ProcessCoverageOptions {
  * Best-effort persistence of one processed day's results: a failure here must not
  * fail the local run. Events are written before coverage is marked, so a failed
  * event write can't be hidden behind an already-covered day (see markCovered's
- * ordering contract).
+ * ordering contract). Returns true iff the day's results were fully persisted.
  */
-async function saveDayResults(station: StationData, modelId: string, day: number, events: SeismicEvent[]) {
+async function saveDayResults(
+  station: StationData, modelId: string, day: number, events: SeismicEvent[]
+): Promise<boolean> {
   try {
     if (events.length) await writeEvents(station, modelId, events);
     await markCovered(station, modelId, dayRange(day));
+    return true;
   } catch (err) {
     console.warn("Failed to save seismic events/coverage:", err);
+    return false;
   }
 }
 
@@ -51,7 +58,7 @@ async function saveDayResults(station: StationData, modelId: string, day: number
  *  Owns the runner lifecycle (loadModel/dispose). Returns day counts. */
 export async function processUncoveredRanges(options: ProcessCoverageOptions):
   Promise<{ processed: number; skipped: number; total: number }> {
-  const { stationData, metadata, onEvents, onProgress, range } = options;
+  const { stationData, metadata, onEvents, onProgress, onDayCovered, range } = options;
   const modelId = metadata.id;
 
   const uncovered = options.uncovered ?? await getUncoveredRanges(stationData, modelId, range);
@@ -110,7 +117,7 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
           DETECTION_THRESHOLD,
         );
 
-        await saveDayResults(stationData, modelId, day, dayEvents);
+        if (await saveDayResults(stationData, modelId, day, dayEvents)) onDayCovered?.(day);
 
         processed++;
         updateProgress();
@@ -119,7 +126,7 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
       // A day with no data is still processed — mark it covered so nobody re-checks it.
       // Errored days are NOT marked covered, so a later run retries them.
       for (const day of downloadService.emptyDays) {
-        await saveDayResults(stationData, modelId, day, []);
+        if (await saveDayResults(stationData, modelId, day, [])) onDayCovered?.(day);
       }
       // Count this span's errored/empty days via the live service arrays first, then fold
       // them into skippedDays so they survive the next span's ensureRange reset.
