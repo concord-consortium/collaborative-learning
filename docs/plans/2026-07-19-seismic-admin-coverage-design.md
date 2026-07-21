@@ -32,7 +32,8 @@ Known importers to update: `stores.ts`, `wave-runner-content.ts` (+ test), `seis
 - **Input**: `stationData`, model `metadata` (ModelMetadata), `range` (TimeRange, Unix seconds), optional pre-resolved `uncovered` ranges, callbacks `onEvents(events)` / `onProgress(processed, total)`, optional injected `SeismicDownloadService` (test seam).
 - **Pipeline** (semantics identical to step 1, unchanged): `getUncoveredRanges` (skipped when `uncovered` is provided) → `uncoveredDaySpans` → per-span `ensureRange` with the downloader's **inclusive** end-day convention (`endSec = span.endDay * SECONDS_PER_DAY`) → drain to `DONE` → per day: miniSEED parse → `SeismicModelRunner.processChunk` → best-effort `writeEvents`-then-`markCovered` (`saveDayResults`) → after each span, empty days marked covered, errored days not.
 - Owns the `SeismicModelRunner` lifecycle (load/dispose). Exports the shared detection threshold constant (0.7).
-- **Returns** `{processed, skipped}` day counts.
+- **Returns** `{processed, skipped, total}` day counts.
+- **Live-fill callback** (added during implementation): optional `onDayCovered(day)` fires after a day's events + coverage are successfully persisted (empty days included; errored days and failed persists excluded), letting the admin UI fill timelines day-by-day. Wave Runner doesn't use it.
 
 `runModel` in `wave-runner-content.ts` becomes a thin MST wrapper: validation, prior-event loading with the offline fallback (it resolves `uncovered` itself — falling back to the full range on Firestore failure — and passes it in), dataset population, progress state. The admin does NOT use the fallback: its purpose is writing to the shared DB, so processor-level Firestore errors propagate.
 
@@ -48,13 +49,14 @@ Admin entry point calls `initializeApp()` ([firebase-config.ts](../../src/lib/fi
 
 - Model list from the unit config's wave-runner `models` setting (`{label, metadataUrl}` entries), loaded alongside the station catalog in `load-catalog.ts` (respects `curriculumBranch`/`authoringBranch`).
 - Header checkboxes styled/behaving like station selection; persisted in the same localStorage filters (`admin-persistence.ts`).
-- Metadata JSONs for selected models fetched and cached up front; `metadata.id` is the Firestore `{model}` path key.
+- Metadata JSONs fetched lazily (on first coverage load or update) and cached; a failed fetch is cached as an error and retried on the next `refresh()`. `metadata.id` is the Firestore `{model}` path key.
+- The placeholder model was removed from the default app-config catalog; `PLACEHOLDER_MODEL_URL` support remains in `shared/seismic/model-metadata.ts`.
 
 ### Coverage display
 
 In each station section, under "Local Raw Data": **one row per selected model**:
 
-- Header: `{model label} · N events · X/Y days covered`.
+- Header: model label with stats `X / Y days · N events`, plus a per-section readiness indicator.
 - Day bar reusing the RawTimeline pattern with **three states**: fully covered / partially covered / uncovered, derived from `getUncoveredRanges` gaps by a pure day-classification helper (a day is fully covered if no gap intersects it, uncovered if a gap spans the whole day, else partial).
 - Event counts via `loadEvents` over the range, counted client-side (acceptable at admin scale; a year-long range across many stations costs one read per 500 events — deliberate admin action, noted).
 
@@ -62,20 +64,20 @@ The "All selected stations" section shows per-model aggregate text (total events
 
 ### Update button
 
-Per station: (1) run the existing download-missing-raw flow for the whole range; (2) for each selected model, run the coverage processor over the range (only uncovered days are processed; already-downloaded days hit the OPFS cache via `ensureRange`). All-selected: stations sequentially (shared-proxy limit). Feedback line reports station/model/day progress; coverage rows refresh after each model. Update never clears coverage.
+Labeled "Update station" / "Update all stations". Per station: (1) run the existing download-missing-raw flow for the whole range; (2) for each selected model, run the coverage processor over the range (only uncovered days are processed; already-downloaded days hit the OPFS cache via `ensureRange`). All-selected: stations sequentially (shared-proxy limit). Feedback line reports station/model/day progress; coverage timelines fill live day-by-day via the processor's `onDayCovered` callback and are reconciled by a full stats reload after each model. Update never clears coverage.
 
-Disabled when: unauthenticated, no models are selected, or **the whole time range is already covered** for the button's scope (per-station: every selected model's coverage for that station is complete over the range; all-selected: complete for every selected station × model). While coverage stats are still pending or errored, the button stays enabled (unknown ≠ covered). Missing raw data alone does not enable Update — generating events is its purpose; the Download button owns raw data.
+Disabled when: unauthenticated, no models are selected, no stations are selected (all-stations button), a long-running operation is already in progress (global `isBusy` lockout — which also disables the Download/Delete buttons and the header date/station/model filters), or **the whole time range is already covered** for the button's scope (per-station: every selected model's coverage for that station is complete over the range; all-selected: complete for every selected station × model). While coverage stats are still pending or errored, the button stays enabled (unknown ≠ covered). Missing raw data alone does not enable Update — generating events is its purpose; the Download button owns raw data.
 
 ### Store changes (`SeismicAdminStore`)
 
 - `models: Map<metadataUrl, ModelListEntry>`, `selectedModels: Set<metadataUrl>` (persisted), model metadata cache.
-- Coverage stats per (stationKey, modelId): `{dayStates, eventCount, state: pending|loaded|error}`; loaded on `refresh()`, `setRange()`, and model-selection changes.
+- Coverage stats per (stationKey, metadataUrl): `{dayStates, eventCount, state: pending|loaded|error}`; loaded on `refresh()`, `setRange()`, and selection changes. (`metadata.id` is used only for Firestore paths.)
 - `authReady` flag; `updateStation(key)` / `updateAllSelected()` actions.
 - New injectable deps in `SeismicAdminDeps` for the event service and processor (test seams, matching the existing `downloadStation` pattern).
 
 ## Error handling
 
-- Firestore/auth failures during display → per-row "coverage unavailable" state + feedback message.
+- Firestore/auth failures during display → the row renders the same loading state as pending (no distinct error display; zero stats, no timeline). A sign-in failure surfaces its reason once in the feedback area.
 - Update failures for one station/model → report in feedback, continue with the rest, summary at the end.
 - Deleting raw data never touches coverage or events.
 
