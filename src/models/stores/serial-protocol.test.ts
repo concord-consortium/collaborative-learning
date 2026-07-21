@@ -37,6 +37,15 @@ describe("parseArduinoSerialData", () => {
     expect(channels[0].value).toBe(9);
     expect(remaining).toBe("");
   });
+
+  it("tolerates trailing whitespace between the value and the line ending", () => {
+    // The micro:bit firmware pads each serial line with spaces before \r\n,
+    // e.g. "emg:57                    \r\n". The value must still be parsed.
+    const channels = [emgChannel()];
+    const remaining = parseArduinoSerialData("emg:57                    \r\nemg:42                    \r\n", channels);
+    expect(channels[0].value).toBe(42);
+    expect(remaining).toBe("");
+  });
 });
 
 describe("detectSpikerbitVersion", () => {
@@ -55,5 +64,11 @@ describe("detectSpikerbitVersion", () => {
   it("parses multi-digit versions", () => {
     const { version } = detectSpikerbitVersion("CLUE-SPIKERBIT v12\r\n");
     expect(version).toBe(12);
+  });
+
+  it("tolerates trailing whitespace after the version (micro:bit pads its lines)", () => {
+    const { version, remaining } = detectSpikerbitVersion("CLUE-SPIKERBIT v1              \r\nemg:5\r\n");
+    expect(version).toBe(1);
+    expect(remaining).toBe("emg:5\r\n");
   });
 });
