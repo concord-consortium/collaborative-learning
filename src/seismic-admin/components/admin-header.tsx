@@ -19,8 +19,24 @@ export const AdminHeader = observer(function AdminHeader() {
         <div className="option-area">
           <div className="option-header">Date Range</div>
           <div className="dates">
-            <label>Start <input type="date" value={store.startDate} onChange={e => setStart(e.target.value)} /></label>
-            <label>End <input type="date" value={store.endDate} onChange={e => setEnd(e.target.value)} /></label>
+            <label>
+              Start&nbsp;
+              <input
+                disabled={store.isBusy}
+                type="date"
+                value={store.startDate}
+                onChange={e => setStart(e.target.value)}
+              />
+            </label>
+            <label>
+              End&nbsp;
+              <input
+                disabled={store.isBusy}
+                type="date"
+                value={store.endDate}
+                onChange={e => setEnd(e.target.value)}
+              />
+            </label>
           </div>
         </div>
         <div className="option-area">
@@ -32,7 +48,7 @@ export const AdminHeader = observer(function AdminHeader() {
                 <label className="checkbox" key={key}>
                   <input
                     type="checkbox"
-                    disabled={checked && store.selectedStations.size === 1}
+                    disabled={store.isBusy || (checked && store.selectedStations.size === 1)}
                     checked={checked}
                     onChange={() => store.toggleStation(key)}
                   />
@@ -48,6 +64,7 @@ export const AdminHeader = observer(function AdminHeader() {
             {[...store.models].map(([url, model]) => (
               <label className="checkbox" key={url}>
                 <input
+                  disabled={store.isBusy}
                   type="checkbox"
                   checked={store.selectedModels.has(url)}
                   onChange={() => store.toggleModel(url)}
