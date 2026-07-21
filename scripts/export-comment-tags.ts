@@ -52,6 +52,19 @@
 //   `offering_id`/`document_link` are blank for personal documents and
 //   learning logs (no offering) and for --demo runs.
 //
+//   Each row reports a single tag (`tag_id`), because CLUE only ever stores one
+//   tag per comment -- the tagging UI is a single-select and the AI tagger
+//   writes a one-element array. To see every tag applied to a tile or document,
+//   use the `all_tile_tags` and `all_document_tags` columns: pipe-separated,
+//   sorted, de-duplicated unions of the tags on that tile/document. The
+//   document-level union is the same value CLUE itself maintains as the
+//   document's `strategies` field (functions-v2/src/on-document-tagged.ts).
+//
+//   Those unions are computed from the rows in THIS export, so grouping the CSV
+//   by tile/document reproduces them exactly. When --start-date/--end-date/
+//   --commenter-uids narrow the export, tags on excluded comments are not
+//   counted.
+//
 // Examples:
 //   npx tsx export-comment-tags.ts --context-ids abc123 \
 //     --start-date 2026-03-01 --end-date 2026-05-31
@@ -360,10 +373,21 @@ const header = [
   "document_firestore_id", "document_key", "document_type", "document_title", "document_owner_uid",
   "problem_label", "document_offering_id", "document_link",
   "comment_id", "comment_created_at", "comment_author_uid", "comment_author_name", "comment_network",
-  "tile_id", "tag_id", "tag_label", "all_comment_tags",
+  "tile_id", "tag_id", "tag_label", "all_tile_tags", "all_document_tags",
   ...(args.excludeContent ? [] : ["comment_content"])
 ];
-const rows: string[][] = [];
+
+// Rows are buffered rather than written as they are produced, because the
+// all_tile_tags/all_document_tags columns can only be filled in once every
+// comment has been scanned.
+interface IPendingRow {
+  baseRow: string[];
+  tag: string;
+  contentColumns: string[];
+  documentGroupKey: string;
+  tileId: string;
+}
+const pendingRows: IPendingRow[] = [];
 
 let documentsProcessed = 0;
 let commentsProcessed = 0;
@@ -425,9 +449,13 @@ async function processComment(
     comment.network ?? "", comment.tileId ?? ""
   ];
   const contentColumns = args.excludeContent ? [] : [comment.content ?? ""];
+  // Group by the CLUE document key so that the several Firestore records that
+  // can share one key (e.g. metadata docs) roll up together; fall back to the
+  // Firestore path for documents with no key.
+  const documentGroupKey = documentData.key || documentSnapshot.ref.path;
   const emitTags = tags.length ? tags : [""];
   for (const tag of emitTags) {
-    rows.push([...baseRow, tag, tagLabels[tag] ?? "", tags.join("|"), ...contentColumns]);
+    pendingRows.push({ baseRow, tag, contentColumns, documentGroupKey, tileId: comment.tileId ?? "" });
     tagRowsEmitted++;
   }
 }
@@ -510,6 +538,31 @@ if (args.documentKeys.length) {
 if (!args.contextIds.length && !args.documentKeys.length) {
   await exportByCommenterUids();
 }
+
+// --- Aggregate tag columns ---
+
+const tileTags: Record<string, Set<string>> = {};
+const documentTags: Record<string, Set<string>> = {};
+const tileKeyOf = (row: IPendingRow) => `${row.documentGroupKey} ${row.tileId}`;
+
+for (const row of pendingRows) {
+  if (!row.tag) continue;  // --include-untagged placeholder
+  (tileTags[tileKeyOf(row)] ??= new Set()).add(row.tag);
+  (documentTags[row.documentGroupKey] ??= new Set()).add(row.tag);
+}
+
+// Sorted rather than first-seen, since Firestore returns comments in no
+// meaningful order; this keeps the column stable across runs.
+const joinTags = (tags: Set<string> | undefined) => tags ? [...tags].sort().join("|") : "";
+
+const rows = pendingRows.map(row => [
+  ...row.baseRow,
+  row.tag,
+  tagLabels[row.tag] ?? "",
+  joinTags(tileTags[tileKeyOf(row)]),
+  joinTags(documentTags[row.documentGroupKey]),
+  ...row.contentColumns
+]);
 
 // --- Output ---
 
