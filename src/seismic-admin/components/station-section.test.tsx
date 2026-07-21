@@ -227,6 +227,23 @@ describe("StationSection coverage rows", () => {
       expect(deps.processCoverage).toHaveBeenCalledTimes(1);
     });
 
+    it("disables Update all stations when no stations are selected", async () => {
+      const { store, eventService } = makeCoverageStore();
+      eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
+      await store.refresh();
+      store.setAuthReady();
+      await flush();
+      store.toggleStation(key);   // deselect the only station
+      render(
+        <SeismicAdminStoreContext.Provider value={store}>
+          <StationSection />
+        </SeismicAdminStoreContext.Provider>
+      );
+
+      expect(store.selectedStations.size).toBe(0);
+      expect(screen.getByRole("button", { name: "Update all stations" })).toBeDisabled();
+    });
+
     it("disables all action buttons while an operation is running", async () => {
       let finish!: () => void;
       const processCoverage = jest.fn(() => new Promise(res => {

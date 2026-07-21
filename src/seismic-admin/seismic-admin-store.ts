@@ -394,7 +394,7 @@ export class SeismicAdminStore {
     });
   }
 
-  /** Tracks whether a the long-running public operation is underway,
+  /** Tracks whether a long-running public operation is underway,
    * blocking additional simultaneous operations via the gui. */
   private async withBusy(operation: () => Promise<void>) {
     if (this.isBusy) return;
@@ -441,7 +441,8 @@ export class SeismicAdminStore {
 
   async deleteAllSelected() {
     await this.withBusy(async () => {
-      for (const key of this.selectedStations) await this.deleteRawForStation(key);
+      // Snapshot the live selection: a header toggle mid-run must not change this run's set.
+      for (const key of [...this.selectedStations]) await this.deleteRawForStation(key);
     });
   }
 
@@ -460,8 +461,10 @@ export class SeismicAdminStore {
     await this.withBusy(async () => {
       const s = this.stations.get(key);
       if (!s) return;
-      await this.updateSingleStation(key);
-      this.setFeedback(`Finished updating ${stationLabel(s)}.`);
+      const ok = await this.updateSingleStation(key);
+      this.setFeedback(ok
+        ? `Finished updating ${stationLabel(s)}.`
+        : `Finished updating ${stationLabel(s)} with failures.`);
     });
   }
 
@@ -490,9 +493,10 @@ export class SeismicAdminStore {
     // 1) Raw data for the whole range (existing flow, reports its own feedback).
     await this.download(stationData, prefix);
 
-    // 2) Events for uncovered days, model by model.
+    // 2) Events for uncovered days, model by model. Snapshot the live selection:
+    // a header toggle mid-run must not change this run's set.
     let ok = true;
-    for (const url of this.selectedModels) {
+    for (const url of [...this.selectedModels]) {
       const label = this.models.get(url)?.label ?? url;
       const metadata = await this.ensureModelMetadata(url);
       if (!metadata) {

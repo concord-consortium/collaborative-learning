@@ -79,7 +79,8 @@ export const StationSection = observer(function StationSection({ stationKey }: I
   const isFullyCovered = store.isFullyCovered(stationKey);
   const ReadyIcon = isFullyCovered ? CheckIcon : WarningIcon;
   const readyLabel = isFullyCovered ? "Ready" : "Not Ready!";
-  const updateDisabled = !store.authReady || store.selectedModels.size === 0 || isFullyCovered || store.isBusy;
+  const updateDisabled = !store.authReady || store.selectedModels.size === 0 || isFullyCovered || store.isBusy ||
+    (allStations && selectedStations.size === 0);
   const updateLabel = `Update ${allStations ? "all stations" : "station"}`;
   const update = () => {
     if (allStations) {

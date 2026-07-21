@@ -553,7 +553,7 @@ describe("update (event generation)", () => {
     await ctx.store.updateStation(rc01Key);
     expect(processCoverage).toHaveBeenCalledTimes(1);
     expect(seen).toEqual(["Skipping Compact: model metadata unavailable. -> process:large-v1"]);
-    expect(ctx.store.feedback).toBe("Finished updating Rabbit Creek.");
+    expect(ctx.store.feedback).toBe("Finished updating Rabbit Creek with failures.");
   });
 
   it("continues past a processCoverage rejection and reports the failure", async () => {
@@ -570,7 +570,21 @@ describe("update (event generation)", () => {
     expect(seen).toEqual(["Update failed for Rabbit Creek — Compact. -> process:large-v1"]);
     // The failed pair's coverage is still reloaded.
     expect(ctx.eventService.getUncoveredRanges).toHaveBeenCalledWith(rc01, "compact-v1", expect.anything());
-    expect(ctx.store.feedback).toBe("Finished updating Rabbit Creek.");
+    expect(ctx.store.feedback).toBe("Finished updating Rabbit Creek with failures.");
+  });
+
+  it("processes the models that were selected when the update started, even if toggled mid-run", async () => {
+    const processCoverage = jest.fn(async ({ metadata }: any) => {
+      // While the first model is still running, deselect the second one.
+      if (metadata.id === "compact-v1") ctx.store.toggleModel(large.metadataUrl);
+      return { processed: 0, skipped: 0, total: 0 };
+    });
+    const ctx = await primed({ processCoverage });
+
+    await ctx.store.updateStation(rc01Key);
+    // The run's model set was snapshotted at the start, so both models still ran.
+    expect(processCoverage).toHaveBeenCalledTimes(2);
+    expect(ctx.store.selectedModels.has(large.metadataUrl)).toBe(false);
   });
 
   it("updateAllSelected updates stations sequentially with 'Station i of n' prefixes and a summary", async () => {
