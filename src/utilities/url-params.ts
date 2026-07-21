@@ -148,6 +148,15 @@ export interface QueryParams {
   logMonitor?: boolean;
   // Url to use for iframe tiles. Supersedes the URL specified in config.
   iframeUrl?: string;
+
+  //
+  // AI chat tutor (spike)
+  //
+
+  // Enable the AI chat tutor sidebar
+  chatTutor?: boolean;
+  // With chatTutor on, use the backend-free debug transport instead of Firestore
+  chatDebug?: boolean;
 }
 
 // Make a union of all of the boolean params from the QueryParams
@@ -158,7 +167,8 @@ type BooleanParamNames = Exclude<
 undefined>;
 
 const booleanParams: BooleanParamNames[] =
-  [ "demo", "logMonitor", "mouseSensor", "noPersistentUI", "readOnly", "noStorage", "unwrapped" ];
+  [ "chatDebug", "chatTutor", "demo", "logMonitor", "mouseSensor", "noPersistentUI", "readOnly", "noStorage",
+    "unwrapped" ];
 
 const processBooleanValue = (value: string | (string | null)[] | null | undefined) => {
   if (value === undefined || value === "false") {

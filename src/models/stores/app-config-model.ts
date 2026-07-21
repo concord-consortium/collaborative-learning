@@ -84,6 +84,7 @@ export const AppConfigModel = types
     get allowCustomCommentTags() { return self.configMgr.allowCustomCommentTags; },
     get aiEvaluation() { return self.configMgr.aiEvaluation; },
     get aiPrompt() { return self.configMgr.aiPrompt; },
+    get chatTutorPrompts() { return self.configMgr.chatTutorPrompts; },
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },
     get documentLabels() { return self.configMgr.documentLabels; },
     get disablePublish() { return self.configMgr.disablePublish; },
