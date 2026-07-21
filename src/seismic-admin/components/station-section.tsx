@@ -107,7 +107,7 @@ export const StationSection = observer(function StationSection({ stationKey }: I
           <div className="data-section">
             <div className="data-section-header">
               <div className="station-name">{label}</div>
-              <div className="station-ready">
+              <div className={classNames("station-ready", { "not-ready": !isFullyCovered })}>
                 {readyLabel}
                 <ReadyIcon className="icon" />
               </div>

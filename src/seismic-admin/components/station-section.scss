@@ -17,6 +17,12 @@
     align-items: center;
     display: flex;
     gap: 8px;
+    padding: 4px 4px 4px 8px;
+
+    &.not-ready {
+      background-color: #ffeebb;
+      border-radius: 12px;
+    }
 
     .icon {
       height: 24px;
@@ -42,6 +48,7 @@
         width: 100%;
 
         .data-section-header {
+          align-items: center;
           display: flex;
           justify-content: space-between;
 

@@ -280,7 +280,7 @@ describe("coverage stats", () => {
     store.setRange("2026-01-01", "2026-01-03");
     await store.loadCoverageStats(rc01, model.metadataUrl);
 
-    const stats = store.coverage.get(coverageKey(rc01Key, model.metadataUrl));
+    const stats = store.modelCoverage.get(coverageKey(rc01Key, model.metadataUrl));
     expect(stats?.state).toBe("loaded");
     expect(stats?.eventCount).toBe(2);
     expect(stats?.dayStates?.size).toBe(3);
@@ -305,7 +305,7 @@ describe("coverage stats", () => {
     store.setAuthReady();
     await store.loadCoverageStats(rc01, model.metadataUrl);
 
-    expect(store.coverage.get(coverageKey(rc01Key, model.metadataUrl))).toEqual({ state: "error" });
+    expect(store.modelCoverage.get(coverageKey(rc01Key, model.metadataUrl))).toEqual({ state: "error" });
   });
 
   it("records an error state when metadata fails to load", async () => {
@@ -314,7 +314,7 @@ describe("coverage stats", () => {
     store.setAuthReady();
     await store.loadCoverageStats(rc01, model.metadataUrl);
 
-    expect(store.coverage.get(coverageKey(rc01Key, model.metadataUrl))).toEqual({ state: "error" });
+    expect(store.modelCoverage.get(coverageKey(rc01Key, model.metadataUrl))).toEqual({ state: "error" });
     expect(eventService.getUncoveredRanges).not.toHaveBeenCalled();
   });
 
@@ -322,7 +322,7 @@ describe("coverage stats", () => {
     const { store, eventService } = makeCoverageStore();
     await store.loadCoverageStats(rc01, model.metadataUrl);
 
-    expect(store.coverage.size).toBe(0);
+    expect(store.modelCoverage.size).toBe(0);
     expect(eventService.getUncoveredRanges).not.toHaveBeenCalled();
   });
 
@@ -334,8 +334,8 @@ describe("coverage stats", () => {
     store.setAuthReady();
     await flush();
     expect(eventService.getUncoveredRanges).toHaveBeenCalledTimes(2);
-    expect(store.coverage.get(coverageKey(rc01Key, model.metadataUrl))?.state).toBe("loaded");
-    expect(store.coverage.get(coverageKey(rc02Key, model.metadataUrl))?.state).toBe("loaded");
+    expect(store.modelCoverage.get(coverageKey(rc01Key, model.metadataUrl))?.state).toBe("loaded");
+    expect(store.modelCoverage.get(coverageKey(rc02Key, model.metadataUrl))?.state).toBe("loaded");
 
     // Becoming un-ready must not trigger another load.
     eventService.getUncoveredRanges.mockClear();

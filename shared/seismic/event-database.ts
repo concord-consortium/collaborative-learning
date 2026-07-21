@@ -14,6 +14,11 @@ export const WINDOW_DURATION_S = 10 * 60; // 10 minutes
 export const WINDOWS_PER_CHUNK = CHUNK_DURATION_S / WINDOW_DURATION_S; // 4320
 export const BYTES_PER_CHUNK = Math.ceil(WINDOWS_PER_CHUNK / 8); // 540
 
+export interface DaySpan {
+  startDay: number; // UTC day index (days since Unix epoch), inclusive
+  endDay: number;   // inclusive
+}
+
 export function getChunkIndex(timeSec: number): number {
   return Math.floor((timeSec - COVERAGE_EPOCH) / CHUNK_DURATION_S);
 }
@@ -115,11 +120,6 @@ export function findUncoveredRanges(bitmaps: Map<number, Uint8Array>, range: Tim
     gaps.push({ start: currentGapStart, end: range.end });
   }
   return gaps;
-}
-
-export interface DaySpan {
-  startDay: number; // UTC day index (days since Unix epoch), inclusive
-  endDay: number;   // inclusive
 }
 
 /**

@@ -6,14 +6,19 @@ import { getUnitJson } from "../../models/curriculum/unit-utils";
 import { CurriculumConfig } from "../../models/stores/curriculum-config";
 import { urlParams } from "../../utilities/url-params";
 
+export interface AdminCatalog {
+  stations: StationConfig[];
+  models: ModelListEntry[];
+}
+
+/** Settings live under config, but some older units keep settings at the top level. */
 function settingsFromUnitConfig(unitJson: any) {
   return unitJson?.config?.settings ?? unitJson?.settings;
 }
 
 /**
  * Pull the wave-runner station catalog out of a unit config JSON.
- * Stations live under `config.settings["wave-runner"].stations`; older units keep
- * `settings` at the top level. Returns undefined when the unit declares no stations.
+ * Returns undefined when the unit declares no stations.
  */
 export function stationsFromUnitConfig(unitJson: any): StationConfig[] | undefined {
   const settings = settingsFromUnitConfig(unitJson);
@@ -22,19 +27,13 @@ export function stationsFromUnitConfig(unitJson: any): StationConfig[] | undefin
 }
 
 /**
- * Pull the wave-runner model list out of a unit config JSON. Models live under
- * `config.settings["wave-runner"].models` (or top-level `settings` in older
- * units). Returns undefined when the unit declares no (or malformed) models.
+ * Pull the wave-runner model list out of a unit config JSON.
+ * Returns undefined when the unit declares no (or malformed) models.
  */
 export function modelsFromUnitConfig(unitJson: any): ModelListEntry[] | undefined {
   const settings = settingsFromUnitConfig(unitJson);
   const models = settings?.["wave-runner"]?.models;
   return Array.isArray(models) ? models as ModelListEntry[] : undefined;
-}
-
-export interface AdminCatalog {
-  stations: StationConfig[];
-  models: ModelListEntry[];
 }
 
 export function defaultCatalog(): AdminCatalog {

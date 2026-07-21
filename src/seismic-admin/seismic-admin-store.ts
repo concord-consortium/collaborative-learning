@@ -73,10 +73,10 @@ export interface CoverageStats {
 
 export interface ModelStats {
   eventCount: number;
-  coveredDays: Map<string, Set<number>>;
-  partialDays: Map<string, Set<number>>;
-  coveredDayCount: number;
-  partialDayCount: number;
+  coveredDays: Map<string, Set<number>>; // Days fully covered for each station, keyed by station key
+  partialDays: Map<string, Set<number>>; // Days partially covered for each station, keyed by station key
+  coveredDayCount: number; // Total days fully covered for all stations
+  partialDayCount: number; // Total days partially covered for all stations
   totalDays: number
 }
 
@@ -99,7 +99,7 @@ export class SeismicAdminStore {
   models = new Map<string, ModelListEntry>();    // keyed by metadataUrl
   selectedModels = new Set<string>();            // same keys; persisted
   modelMetadata = new Map<string, ModelMetadata | "error">();
-  coverage = new Map<string, CoverageStats>();   // keyed by coverageKey(stationKey, modelUrl)
+  modelCoverage = new Map<string, CoverageStats>(); // keyed by coverageKey(stationKey, modelUrl)
   feedback = "";
   authReady = false;
   // True while a long-running operation (download/update/delete) is in flight, blocking other actions.
@@ -253,25 +253,25 @@ export class SeismicAdminStore {
     const key = coverageKey(getStationChannelPrefix(station), modelUrl);
     const range = this.rangeSec;
     if (!this.authReady || !range) return;
-    runInAction(() => this.coverage.set(key, { state: "pending" }));
+    runInAction(() => this.modelCoverage.set(key, { state: "pending" }));
 
     const metadata = await this.ensureModelMetadata(modelUrl);
     if (!metadata) {
-      runInAction(() => this.coverage.set(key, { state: "error" }));
+      runInAction(() => this.modelCoverage.set(key, { state: "error" }));
       return;
     }
     try {
       const svc = this.deps.eventService ?? { getUncoveredRanges, loadEvents };
       const gaps = await svc.getUncoveredRanges(station, metadata.id, range);
       const events = await svc.loadEvents(station, metadata.id, range);
-      runInAction(() => this.coverage.set(key, {
+      runInAction(() => this.modelCoverage.set(key, {
         state: "loaded",
         dayStates: classifyDayCoverage(gaps, range),
         eventCount: events.length,
       }));
     } catch (err) {
       console.warn("Failed to load coverage stats:", err);
-      runInAction(() => this.coverage.set(key, { state: "error" }));
+      runInAction(() => this.modelCoverage.set(key, { state: "error" }));
     }
   }
 
@@ -285,7 +285,7 @@ export class SeismicAdminStore {
   }
 
   coverageFor(stationKey: string, modelUrl: string): CoverageStats {
-    return this.coverage.get(coverageKey(stationKey, modelUrl)) ?? { state: "pending" };
+    return this.modelCoverage.get(coverageKey(stationKey, modelUrl)) ?? { state: "pending" };
   }
 
   private pairFullyCovered(stats: CoverageStats | undefined): boolean {
@@ -299,7 +299,7 @@ export class SeismicAdminStore {
     const stationKeys = stationKey ? [stationKey] : [...this.selectedStations];
     if (stationKeys.length === 0) return false;
     return stationKeys.every(sk =>
-      [...this.selectedModels].every(url => this.pairFullyCovered(this.coverage.get(coverageKey(sk, url)))));
+      [...this.selectedModels].every(url => this.pairFullyCovered(this.modelCoverage.get(coverageKey(sk, url)))));
   }
 
   get rangeDays() {
@@ -322,7 +322,7 @@ export class SeismicAdminStore {
     const stations = stationKey ? new Set([stationKey]) : this.selectedStations;
     stations.forEach(sk => {
       totalDays += rangeDays;
-      const stats = this.coverage.get(coverageKey(sk, modelUrl));
+      const stats = this.modelCoverage.get(coverageKey(sk, modelUrl));
       if (stats?.state !== "loaded") return;
 
       const stationCoveredDays = new Set<number>();
@@ -395,7 +395,7 @@ export class SeismicAdminStore {
   }
 
   /** Tracks whether a long-running public operation is underway,
-   * blocking additional simultaneous operations via the gui. */
+   *  blocking additional simultaneous operations via the gui. */
   private async withBusy(operation: () => Promise<void>) {
     if (this.isBusy) return;
     this.isBusy = true;
@@ -526,7 +526,7 @@ export class SeismicAdminStore {
    *  Ignored unless that pair's coverage is already loaded — the post-model reload
    *  reconciles, and an unloaded pair must not have an entry synthesized for it. */
   markDayCovered(stationKey: string, modelUrl: string, day: number) {
-    const stats = this.coverage.get(coverageKey(stationKey, modelUrl));
+    const stats = this.modelCoverage.get(coverageKey(stationKey, modelUrl));
     if (stats?.state !== "loaded" || !stats.dayStates) return;
     stats.dayStates.set(day, "covered");
   }
