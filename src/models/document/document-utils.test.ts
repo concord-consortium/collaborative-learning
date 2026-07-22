@@ -1,8 +1,8 @@
 import { UnitModel } from "../curriculum/unit";
 import { AppConfigModel } from "../stores/app-config-model";
 import { DocumentMetadataModel } from "../document/document-metadata-model";
-import { PersonalDocument, ProblemDocument, SupportPublication } from "./document-types";
-import { getDocumentDisplayTitle } from "./document-utils";
+import { GroupDocument, PersonalDocument, ProblemDocument, SupportPublication } from "./document-types";
+import { getDocumentDisplayTitle, isDocumentAccessibleToUser } from "./document-utils";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
 describe("document utils", () => {
@@ -176,5 +176,27 @@ describe("document utils", () => {
         expect(title).toBe("Test Problem");
       });
     });
+  });
+});
+
+describe("isDocumentAccessibleToUser — concurrent documents", () => {
+  const student: any = { id: "s1", isTeacherOrResearcher: false, isStudent: true };
+  const documents: any = { isExemplarVisible: () => false };
+
+  it("grants a student access to a concurrent document owned by someone else", () => {
+    // Access reads the STORED `concurrent` field (from Firestore metadata / the model's metadata getter),
+    // not the document type.
+    const groupDoc: any = { uid: "other", type: GroupDocument, key: "g1", concurrent: true };
+    expect(isDocumentAccessibleToUser({ documentMetadata: groupDoc, documents, user: student })).toBe(true);
+
+    // A concurrent doc of a NON-group type must also be accessible. Keyed on type === "group" this
+    // fails (its type is "generic"), which is what forces the rebase onto the stored `concurrent`.
+    const dqbLike: any = { uid: "other", type: "generic", key: "g2", concurrent: true };
+    expect(isDocumentAccessibleToUser({ documentMetadata: dqbLike, documents, user: student })).toBe(true);
+  });
+
+  it("denies a student access to a non-shared personal document owned by someone else", () => {
+    const documentMetadata: any = { uid: "other", type: "personal", key: "p1" };  // no concurrent
+    expect(isDocumentAccessibleToUser({ documentMetadata, documents, user: student })).toBe(false);
   });
 });

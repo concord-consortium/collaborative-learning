@@ -109,10 +109,10 @@ export function isDocumentAccessibleToUser ({
 
   const ownDocument = metadata.uid === user.id;
   const isPublished = isPublishedType(metadata.type);
-  const isGroupDoc = metadata.type === GroupDocument; // Group documents are accessible to everyone
+  const isConcurrentDoc = !!metadata.concurrent; // Concurrent documents are accessible to everyone
   if (user.isTeacherOrResearcher) return true;
   if (user.isStudent) {
-    return ownDocument || isShared || isPublished || isGroupDoc
+    return ownDocument || isShared || isPublished || isConcurrentDoc
            || (isExemplarType(metadata.type) && documents.isExemplarVisible(metadata.key));
   }
   return false;
