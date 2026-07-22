@@ -519,13 +519,17 @@ describe("db", () => {
       jest.restoreAllMocks();
     });
 
-    it("applies context_id from passed-in firestoreMetadata to the model", async () => {
+    it("applies context_id/concurrent/kind from passed-in firestoreMetadata to the model", async () => {
       stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
-      const firestoreMetadata = { uid: "u1", type: "problem", key: "d1", context_id: "class-1" } as any;
+      const firestoreMetadata = {
+        uid: "u1", type: "problem", key: "d1", context_id: "class-1", concurrent: true, kind: "group"
+      } as any;
       const doc = await db.openDocument({
         documentKey: "d1", type: "problem", userId: "u1", firestoreMetadata
       } as any);
       expect(doc.contextId).toBe("class-1");
+      expect(doc.concurrent).toBe(true);
+      expect(doc.kind).toBe("group");
     });
 
     it("fetches Firestore metadata from the store when none is passed", async () => {

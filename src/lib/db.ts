@@ -954,7 +954,9 @@ export class DB {
             return createDocumentModel({
                                   type, title, properties, groupId, visibility, uid: userId, originDoc, pubVersion,
                                   key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0,
-                                  contextId: firestoreMetadata.context_id ?? undefined });
+                                  contextId: firestoreMetadata.context_id ?? undefined,
+                                  concurrent: firestoreMetadata.concurrent ?? undefined,
+                                  kind: firestoreMetadata.kind ?? undefined });
           }
 
           const content = this.parseDocumentContent(document);
@@ -976,6 +978,8 @@ export class DB {
               investigation,
               unit,
               contextId: firestoreMetadata.context_id ?? undefined,
+              concurrent: firestoreMetadata.concurrent ?? undefined,
+              kind: firestoreMetadata.kind ?? undefined,
             });
             // Stash the envelope's lastHistoryEntryId for the drift check that
             // runs once the Firestore history loads. Skipped (undefined) for

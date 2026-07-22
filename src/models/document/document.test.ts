@@ -1,6 +1,6 @@
 import { getSnapshot, Instance } from "mobx-state-tree";
 import { createDocumentModel, DocumentModelType, SaveState } from "./document";
-import { ExemplarDocument, PersonalDocument, ProblemDocument } from "./document-types";
+import { ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument } from "./document-types";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tiles/text/text-content";
 import { expectEntryToBeComplete } from "../history/undo-store-test-utils";
@@ -347,5 +347,21 @@ describe("document model", () => {
   it("carries a contextId when provided in the snapshot", () => {
     const doc = createDocumentModel({ uid: "u1", type: "problem", key: "d1", contextId: "class-1" });
     expect(doc.contextId).toBe("class-1");
+  });
+});
+
+describe("DocumentModel concurrent/kind stored props", () => {
+  it("carries concurrent/kind and exposes them on the metadata getter", () => {
+    const doc = createDocumentModel({
+      uid: "u", type: GroupDocument, key: "k1", createdAt: 1, concurrent: true, kind: "group"
+    });
+    expect(doc.concurrent).toBe(true);
+    expect(doc.kind).toBe("group");
+    expect(doc.metadata).toMatchObject({ concurrent: true, kind: "group" });
+  });
+
+  it("defaults concurrent to falsy when absent", () => {
+    const doc = createDocumentModel({ uid: "u", type: "personal", key: "k2", createdAt: 1 });
+    expect(doc.concurrent).toBeFalsy();
   });
 });
