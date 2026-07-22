@@ -1,8 +1,9 @@
-import { destroy, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { destroy, getSnapshot, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { UnitsManager, Variable, VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 import { SharedModel, SharedModelType } from "../../models/shared/shared-model";
 import { withoutUndo } from "../../models/history/without-undo";
 import { getSharedModelManager } from "../../models/tiles/tile-environment";
+import { kVolatileVariableLabel } from "./variable-labels";
 
 export const kSharedVariablesID = "SharedVariables";
 
@@ -64,6 +65,25 @@ export const SharedVariables = SharedModel.named("SharedVariables")
   },
   getVariableById(id: string) {
     return self.variables.find(v => v.id === id);
+  },
+  // Stable export snapshot: drops the live `value` of variables a producer has marked volatile
+  // (kVolatileVariableLabel — sensor inputs, live outputs, and other simulation-driven variables). A
+  // running simulation overwrites those every step, so keeping them would re-serialize the export each
+  // step and continuously reload authoring previews. Authored values (plain variables, user-driven
+  // inputs) are preserved. The student runtime save uses getSnapshot(), not this method, so runtime
+  // history there is unaffected.
+  exportStableSnapshot() {
+    const snapshot = getSnapshot(self);
+    return {
+      ...snapshot,
+      variables: snapshot.variables.map(variableSnap => {
+        if (variableSnap.labels?.includes(kVolatileVariableLabel)) {
+          const { value, ...rest } = variableSnap;
+          return rest;
+        }
+        return variableSnap;
+      })
+    };
   }
 }));
 export interface SharedVariablesType extends Instance<typeof SharedVariables> {}
