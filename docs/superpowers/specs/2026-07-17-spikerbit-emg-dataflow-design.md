@@ -98,8 +98,8 @@ Authored once in the MakeCode online editor and committed as a static asset. Beh
 
 Committed artifacts (under `src/plugins/dataflow/firmware/`):
 
-- `spikerbit-clue-v1.hex` — universal hex (V1+V2), loaded via a webpack asset import.
-- `spikerbit-clue-v1.ts` — the MakeCode source, committed for the record.
+- `spikerbit-clue.hex` — universal hex (V1+V2), loaded via a webpack asset import.
+- `spikerbit-clue.ts` — the MakeCode source, committed for the record.
 - `README.md` — the MakeCode project link and the manual re-export steps.
 
 The version number `<N>` is bumped whenever the flashed program changes, so the tile
